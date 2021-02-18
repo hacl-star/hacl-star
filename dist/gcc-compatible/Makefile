@@ -23,15 +23,6 @@
 # By default, this Makefile relies on the local checkout of kremlib
 KREMLIN_HOME ?= ../kremlin
 
-.PHONY: $(HACL_HOME)/dist/evercrypt-external-headers/Makefile.config
-$(HACL_HOME)/dist/evercrypt-external-headers/Makefile.config:
-
-.PHONY: Makefile.config
-Makefile.config:
-	if [ -f lib_intrinsics.h ]; then cp ../configure . && ./configure; fi;
-#	cp ../configure . && ./configure
-#	./configure
-
 -include Makefile.config
 
 # 1. The usual pseudo auto-configuration
@@ -95,12 +86,17 @@ Hacl_Poly1305_256.o Hacl_Streaming_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Ch
 
 all: libevercrypt.$(SO)
 
-libevercrypt.$(SO): config.h $(OBJS)
-	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)
+# This one and the one below are for people who run "make" without running
+# configure. It's not perfect but perhaps a tiny bit better than nothing.
+Makefile.config:
+	./configure
 
 # If the configure script has not run, create an empty config.h
 config.h:
 	touch $@
+
+libevercrypt.$(SO): config.h $(OBJS)
+	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)
 
 # 4. Compilation of OCaml bindings; conditional on the presence of the lib_gen
 # folder, possibly disabled by configure.

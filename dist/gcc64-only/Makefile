@@ -23,15 +23,6 @@
 # By default, this Makefile relies on the local checkout of kremlib
 KREMLIN_HOME ?= ../kremlin
 
-.PHONY: $(HACL_HOME)/dist/evercrypt-external-headers/Makefile.config
-$(HACL_HOME)/dist/evercrypt-external-headers/Makefile.config:
-
-.PHONY: Makefile.config
-Makefile.config:
-	if [ -f lib_intrinsics.h ]; then cp ../configure . && ./configure; fi;
-#	cp ../configure . && ./configure
-#	./configure
-
 -include Makefile.config
 
 # 1. The usual pseudo auto-configuration
@@ -94,6 +85,9 @@ Hacl_Poly1305_128.o Hacl_Streaming_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Ch
 Hacl_Poly1305_256.o Hacl_Streaming_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_Blake2b_256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_Streaming_Blake2b_256.o: CFLAGS += $(CFLAGS_256)
 
 all: libevercrypt.$(SO)
+
+Makefile.config:
+	./configure
 
 libevercrypt.$(SO): config.h $(OBJS)
 	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)

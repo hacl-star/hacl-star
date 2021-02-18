@@ -1117,6 +1117,7 @@ copy-kremlib:
 
 compile-%: dist/Makefile.tmpl dist/%/Makefile.basic | copy-kremlib
 	cp $< dist/$*/Makefile
+	[ x"$*" = xgcc-compatible ] && cp dist/configure dist/$*/configure
 	$(MAKE) -C dist/$*
 
 
