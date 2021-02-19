@@ -146,7 +146,7 @@ detect_arm () {
   [[ $target_arch == "aarch64" ]]
 }
 
-detect_arm_cc () {
+detect_arm_neon () {
   local file=$(mktemp /tmp/testvec128.XXXXXXX).c
   cat > $file <<EOF
 #include <libintvector.h>
@@ -292,9 +292,7 @@ supports_intrinsics=false
 
 if detect_arm; then
   echo "... detected ARM platform"
-  # TODO: poorly worded; rename detect_arm_cc into detect_neon_compiler or
-  # something
-  if detect_arm_cc; then
+  if detect_arm_neon; then
     echo "... $build_target supports 128-bit NEON"
     supports_128=true
     echo "... $CC $CROSS_CFLAGS can cross-compile to ARM64 with SIMD"
