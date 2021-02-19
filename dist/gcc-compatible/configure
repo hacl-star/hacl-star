@@ -84,8 +84,8 @@ int main() {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.test
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DBROKEN_INTRINSICS -march=native -O3 $file -o $out && $out > $out.ref
+  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DSUPPORTS_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
+  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
   diff $out.test $out.ref
 }
 
@@ -339,9 +339,9 @@ if detect_x86 || detect_x64; then
   fi
 fi
 
-if ! $supports_intrinsics; then
-  echo "$build_target does not support _addcarry_u64, using a C implementation"
-  echo "#define BROKEN_INTRINSICS 1" >> config.h
+if $supports_intrinsics; then
+  echo "$build_target supports _addcarry_u64"
+  echo "#define SUPPORTS_INTRINSICS 1" >> config.h
 fi
 
 if ! $supports_vale; then
@@ -357,8 +357,8 @@ else
   echo "#define SUPPORTS_VALE 1" >> config.h
 fi
 
-if ! $supports_inline_asm; then
-    echo "#define BROKEN_INLINE_ASM 1" >> config.h
+if $supports_inline_asm; then
+    echo "#define SUPPORTS_INLINE_ASM 1" >> config.h
 fi
 
 if ! $supports_128; then

@@ -20,7 +20,7 @@
 #include "config.h"
 #endif
 
-#if defined(__GNUC__) && !defined(BROKEN_INLINE_ASM)
+#if defined(__GNUC__) && defined(SUPPORTS_INLINE_ASM)
 #define EVERCRYPT_TARGETCONFIG_GCC 1
 #endif
 
