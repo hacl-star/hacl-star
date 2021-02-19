@@ -26,7 +26,7 @@ open Hacl.Impl.P256.Math
 open FStar.Math.Lemmas
 open FStar.Mul
 
-open Hacl.Impl.P256.Arithmetics
+open Hacl.Impl.EC.Arithmetics
 open Hacl.Impl.P256.LowLevel .RawCmp
 open Hacl.Spec.P.MontgomeryMultiplication
 friend Hacl.Spec.P.MontgomeryMultiplication

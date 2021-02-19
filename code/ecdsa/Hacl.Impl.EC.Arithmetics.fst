@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Arithmetics
+module Hacl.Impl.EC.Arithmetics
 
 open FStar.HyperStack.All
 open FStar.HyperStack
