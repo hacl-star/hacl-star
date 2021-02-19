@@ -3,7 +3,7 @@
 set -o pipefail
 set -e
 
-if ! [ -f lib_intrinsics.h ]; then
+if ! [ -f libintvector.h ]; then
   echo "This script is intended to be run from dist/foo."
   exit 1
 fi
@@ -44,6 +44,11 @@ detect_ocaml () {
 }
 
 check_no_bug81300 () {
+  # Perform the check only if lib_intrinsics.h is present. In practice,
+  # lib_intrinsics.h is present in all the directories which contain libintvector.h,
+  # but mozilla. If lib_intrinsics.h is not present, assume there is no bug and
+  # return success.
+  if [ -f lib_intrinsics.h ]; then
   local out=$(mktemp /tmp/testbug81300.XXXXXXX)
   local file=${out}.c
   cat > $file <<EOF
@@ -87,6 +92,10 @@ EOF
   $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DSUPPORTS_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
   $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
   diff $out.test $out.ref
+  else
+    echo "... WARNING: lib_intrinsics.h is missing: we can't test whether bug 81300 is present or not and assume it is not."
+    return 0
+  fi
 }
 
 detect_uint128 () {
