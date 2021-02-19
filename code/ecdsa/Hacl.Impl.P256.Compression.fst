@@ -10,7 +10,7 @@ open Lib.Buffer
 open Hacl.Impl.EC.LowLevel 
 
 open Hacl.Impl.P256.Core
-open Hacl.Impl.P256.MM.Exponent
+open Hacl.Impl.EC.Exponent
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Impl.EC.Arithmetics
 

@@ -27,7 +27,7 @@ open Hacl.Spec.P.MontgomeryMultiplication
 
 (* friend Hacl.Spec.P.MontgomeryMultiplication *)
 
-open Hacl.Impl.P256.MontgomeryMultiplication.Exponent
+(* open Hacl.Impl.P256.MontgomeryMultiplication.Exponent *)
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 

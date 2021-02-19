@@ -2171,57 +2171,6 @@ static void montgomery_square_buffer(Spec_P256_curve c, uint64_t *a, uint64_t *r
   }
 }
 
-static void fsquarePowN(uint32_t n, uint64_t *a)
-{
-  for (uint32_t i = (uint32_t)0U; i < n; i++)
-  {
-    montgomery_square_buffer(Spec_P256_P256, a, a);
-  }
-}
-
-static inline void exponent_p256(uint64_t *t, uint64_t *result, uint64_t *tempBuffer)
-{
-  uint64_t *t0 = tempBuffer;
-  uint64_t *t1 = tempBuffer + (uint32_t)4U;
-  uint64_t *t2 = tempBuffer + (uint32_t)8U;
-  uint64_t *t3 = tempBuffer + (uint32_t)12U;
-  uint64_t *t4 = tempBuffer + (uint32_t)16U;
-  uint64_t *t5 = tempBuffer + (uint32_t)20U;
-  uint64_t *t6 = tempBuffer + (uint32_t)24U;
-  uint64_t *t7 = tempBuffer + (uint32_t)28U;
-  montgomery_square_buffer(Spec_P256_P256, t, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t, t2);
-  montgomery_square_buffer(Spec_P256_P256, t2, t0);
-  montgomery_square_buffer(Spec_P256_P256, t0, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t2, t6);
-  montgomery_square_buffer(Spec_P256_P256, t6, t0);
-  fsquarePowN((uint32_t)3U, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t6, t7);
-  montgomery_square_buffer(Spec_P256_P256, t7, t0);
-  montgomery_square_buffer(Spec_P256_P256, t0, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t2, t1);
-  montgomery_square_buffer(Spec_P256_P256, t1, t0);
-  fsquarePowN((uint32_t)9U, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t1, t3);
-  montgomery_square_buffer(Spec_P256_P256, t3, t0);
-  fsquarePowN((uint32_t)9U, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t1, t4);
-  montgomery_square_buffer(Spec_P256_P256, t4, t0);
-  montgomery_square_buffer(Spec_P256_P256, t0, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t2, t5);
-  montgomery_square_buffer(Spec_P256_P256, t5, t0);
-  fsquarePowN((uint32_t)31U, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t, t0);
-  fsquarePowN((uint32_t)128U, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t5, t0);
-  fsquarePowN((uint32_t)32U, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t5, t0);
-  fsquarePowN((uint32_t)30U, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t4, t0);
-  fsquarePowN((uint32_t)2U, t0);
-  montgomery_multiplication_buffer(Spec_P256_P256, t0, t, result);
-}
-
 static inline void cswap(Spec_P256_curve c, uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
@@ -2394,6 +2343,57 @@ montgomery_ladder_power(
       }
   }
   memcpy(result, p, sw * sizeof (uint64_t));
+}
+
+static void fsquarePowN(uint32_t n, uint64_t *a)
+{
+  for (uint32_t i = (uint32_t)0U; i < n; i++)
+  {
+    montgomery_square_buffer(Spec_P256_P256, a, a);
+  }
+}
+
+static inline void exponent_p256(uint64_t *t, uint64_t *result, uint64_t *tempBuffer)
+{
+  uint64_t *t0 = tempBuffer;
+  uint64_t *t1 = tempBuffer + (uint32_t)4U;
+  uint64_t *t2 = tempBuffer + (uint32_t)8U;
+  uint64_t *t3 = tempBuffer + (uint32_t)12U;
+  uint64_t *t4 = tempBuffer + (uint32_t)16U;
+  uint64_t *t5 = tempBuffer + (uint32_t)20U;
+  uint64_t *t6 = tempBuffer + (uint32_t)24U;
+  uint64_t *t7 = tempBuffer + (uint32_t)28U;
+  montgomery_square_buffer(Spec_P256_P256, t, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t, t2);
+  montgomery_square_buffer(Spec_P256_P256, t2, t0);
+  montgomery_square_buffer(Spec_P256_P256, t0, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t2, t6);
+  montgomery_square_buffer(Spec_P256_P256, t6, t0);
+  fsquarePowN((uint32_t)3U, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t6, t7);
+  montgomery_square_buffer(Spec_P256_P256, t7, t0);
+  montgomery_square_buffer(Spec_P256_P256, t0, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t2, t1);
+  montgomery_square_buffer(Spec_P256_P256, t1, t0);
+  fsquarePowN((uint32_t)9U, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t1, t3);
+  montgomery_square_buffer(Spec_P256_P256, t3, t0);
+  fsquarePowN((uint32_t)9U, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t1, t4);
+  montgomery_square_buffer(Spec_P256_P256, t4, t0);
+  montgomery_square_buffer(Spec_P256_P256, t0, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t2, t5);
+  montgomery_square_buffer(Spec_P256_P256, t5, t0);
+  fsquarePowN((uint32_t)31U, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t, t0);
+  fsquarePowN((uint32_t)128U, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t5, t0);
+  fsquarePowN((uint32_t)32U, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t5, t0);
+  fsquarePowN((uint32_t)30U, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t4, t0);
+  fsquarePowN((uint32_t)2U, t0);
+  montgomery_multiplication_buffer(Spec_P256_P256, t0, t, result);
 }
 
 static void exponent(Spec_P256_curve c, uint64_t *a, uint64_t *result, uint64_t *tempBuffer)

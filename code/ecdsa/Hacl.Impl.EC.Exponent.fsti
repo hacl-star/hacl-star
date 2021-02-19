@@ -23,9 +23,9 @@ open Hacl.Impl.EC.LowLevel
 open Lib.Loops
 open Hacl.Spec.P.MontgomeryMultiplication
 
-open Hacl.Impl.P256.MontgomeryMultiplication.Exponent
-open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Impl.P256.MM.Exponent
+(* open Hacl.Impl.P256.MontgomeryMultiplication.Exponent *)
+(* open Hacl.Impl.P256.MontgomeryMultiplication *)
+(* open Hacl.Impl.P256.MM.Exponent *)
 
 open FStar.Mul
 

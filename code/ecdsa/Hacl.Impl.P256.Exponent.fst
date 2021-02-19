@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.MontgomeryMultiplication.Exponent
+module Hacl.Impl.P256.Exponent
 
 open FStar.HyperStack.All
 open FStar.HyperStack
