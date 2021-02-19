@@ -26,7 +26,7 @@ open Hacl.Impl.P256.Compression
 open Spec.Hash.Definitions
 
 open Hacl.Impl.ECDSA.Signature
-open Hacl.Impl.ECDSA.P256.Verification.Agile
+open Hacl.Impl.ECDSA.Verification
 
 (* 
 let ecdsa_sign_p256_sha2 result mLen m privKey k = 

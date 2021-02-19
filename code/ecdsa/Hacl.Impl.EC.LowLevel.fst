@@ -812,7 +812,7 @@ let mod64 #c a =
 
 let shift1 #c t out = 
   admit();
-  let len = getCoordinateLenU64 c *! 2 in 
+  let len = getCoordinateLenU64 c *! 2ul in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
   for 0ul (len -! 1) inv (fun i -> 
     let elem = index t (size 1 +! i) in 

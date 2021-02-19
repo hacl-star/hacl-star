@@ -20,7 +20,7 @@ open Lib.Loops
 
 open Hacl.Impl.P256.MM.Lemmas
 
-open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.EC.MontgomeryMultiplication
 
 
 open Hacl.Spec.P.MontgomeryMultiplication
@@ -73,7 +73,7 @@ val montgomery_multiplication_buffer_: result: felem P256 -> a: felem P256 -> b:
 
 
 let montgomery_multiplication_buffer_ result a b = 
-  Hacl.Impl.P256.MontgomeryMultiplication.montgomery_multiplication_buffer a b result
+  montgomery_multiplication_buffer a b result
 
 
 inline_for_extraction noextract
@@ -87,8 +87,7 @@ val montgomery_square_buffer_: result: felem P256 -> a: felem P256 -> Stack unit
   )
 
 
-let montgomery_square_buffer_ result a = 
-  Hacl.Impl.P256.MontgomeryMultiplication.montgomery_square_buffer #P256 a result
+let montgomery_square_buffer_ result a = montgomery_square_buffer #P256 a result
 
 inline_for_extraction noextract
 val exponent_0: t: felem P256 -> t0: felem P256 -> t1: felem P256 -> t2: felem P256 -> t6: felem P256 -> t7: felem P256 -> 

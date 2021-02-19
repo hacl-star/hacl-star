@@ -1,4 +1,4 @@
-module Hacl.Impl.ECDSA.P256.Verification.Agile
+module Hacl.Impl.ECDSA.Verification
 
 open FStar.HyperStack.All
 open FStar.HyperStack

@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.PointDouble
+module Hacl.Impl.P.PointDouble
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -14,7 +14,7 @@ open Hacl.Spec.P256.Definition
 (* open Hacl.Impl.SolinasReduction *)
 open Hacl.Spec.P.MontgomeryMultiplication
 open Hacl.Impl.EC.LowLevel
-open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.EC.MontgomeryMultiplication
 open Spec.P256
 open Hacl.Impl.P256.Math 
 

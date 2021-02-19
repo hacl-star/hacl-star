@@ -12,13 +12,17 @@ open Hacl.Spec.P256.Definition
 open Spec.P256
 open Hacl.Impl.EC.Reduction
 open Hacl.Impl.EC.LowLevel 
-open Hacl.Impl.P256.MontgomeryMultiplication
-open Hacl.Impl.P256.MM.Exponent
+(* open Hacl.Impl.P256.MontgomeryMultiplication *)
+open Hacl.Impl.EC.Exponent
+
+open Hacl.Impl.EC.MontgomeryMultiplication
+
+
 open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P.PointAdd.Aux
-open Hacl.Impl.P256.PointDouble
+open Hacl.Impl.EC.PointDouble
 
 open FStar.Tactics 
 open FStar.Tactics.Canon

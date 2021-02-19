@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.MontgomeryMultiplication
+module Hacl.Impl.EC.MontgomeryMultiplication
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -7,12 +7,11 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open FStar.Mul
-
+open Hacl.Spec.P.MontgomeryMultiplication
 open Hacl.Spec.P256.Definition
 open Spec.P256
-open Hacl.Spec.P.MontgomeryMultiplication
 
+open FStar.Mul
 
 val montgomery_multiplication_buffer_by_one: #c: curve
   -> a: felem c
@@ -44,12 +43,11 @@ val montgomery_square_buffer: #c: curve -> a: felem c -> result: felem c ->
     (requires (fun h -> live h a /\ felem_eval c h a /\ live h result)) 
     (ensures (fun h0 _ h1 -> 
       (
-	let prime = getPrime c in 
-	modifies (loc result) h0 h1 /\  
-	felem_eval c h1 result /\ 
-	as_nat c h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (getPower c) prime) % prime /\
-	as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) /\
-	as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
-
+  let prime = getPrime c in 
+  modifies (loc result) h0 h1 /\  
+  felem_eval c h1 result /\ 
+  as_nat c h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (getPower c) prime) % prime /\
+  as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) /\
+  as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
 
 

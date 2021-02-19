@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.MM.Exponent
+module Hacl.Impl.MM.Exponent
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -16,7 +16,7 @@ open FStar.Mul
 
 open Lib.Loops
 
-open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Spec.P.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Definition
@@ -25,7 +25,7 @@ open Spec.ECDSA.Lemmas
 open Spec.P256
 open Hacl.Spec.P.MontgomeryMultiplication
 
-friend Hacl.Spec.P.MontgomeryMultiplication
+(* friend Hacl.Spec.P.MontgomeryMultiplication *)
 
 open Hacl.Impl.P256.MontgomeryMultiplication.Exponent
 
@@ -195,79 +195,3 @@ let montgomery_ladder_power #c a scalar result =
   lemmaFromDomainToDomain #c (as_nat c h1 result); 
   pop_frame()  
 
-
-let exponent #c a result tempBuffer = 
-  match c with 
-  |P384 ->
-    recall_contents (prime_inverse_buffer #c) (prime_inverse_seq #c);
-    montgomery_ladder_power #c a prime_inverse_buffer result
-  |P256 -> 
-    exponent_p256 a result tempBuffer
-
-
-inline_for_extraction noextract
-let sqPower_list_p256 : list uint8 =
-  [
-      u8 0;  u8 0;  u8 0;  u8 0;   u8 0;   u8 0;   u8 0;   u8 0;
-      u8 0;  u8 0;  u8 0;  u8 64;  u8 0;   u8 0;   u8 0;   u8 0;
-      u8 0;  u8 0;  u8 0;  u8 0;   u8 0;   u8 0;   u8 0;   u8 64;
-      u8 0;  u8 0;  u8 0;  u8 192; u8 255; u8 255; u8 255; u8 63
-  ]
-
-
-inline_for_extraction noextract
-let sqPower_list_p384 : list uint8 =
-    [ 
-      u8 0;   u8 0;   u8 0;   u8 64;  u8 0;   u8 0;   u8 0;   u8 0; 
-      u8 0;   u8 0;   u8 0;   u8 192; u8 255; u8 255; u8 255; u8 191;
-      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; 
-      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; 
-      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 63
-   ]
-
-
-inline_for_extraction noextract
-let sqPower_list (#c: curve) : list uint8 = 
-  match c with 
-  |P256 -> sqPower_list_p256
-  |P384 -> sqPower_list_p384
-
-
-let sqPower_seq (#c: curve) : s: lseq uint8 (getScalarLenNat c)
-  {
-    Lib.ByteSequence.nat_from_intseq_le s == (getPrime c + 1) / 4 /\
-    Lib.ByteSequence.nat_from_intseq_le s < getPrime c
-  } =
-  let open Lib.ByteSequence in 
-  assert_norm (List.Tot.length (sqPower_list #P256) == 32);
-  assert_norm (List.Tot.length (sqPower_list #P384) == 48);
-  
-  nat_from_intlist_seq_le 32 (sqPower_list #P256);
-  nat_from_intlist_seq_le 48 (sqPower_list #P384); 
-  
-  assert_norm (nat_from_intlist_le (sqPower_list #P256)  == (getPrime P256 + 1) / 4);
-  assert_norm (nat_from_intlist_le (sqPower_list #P384)  == (getPrime P384 + 1) / 4);
-  
-  of_list (sqPower_list #c)
-
-
-inline_for_extraction
-let sqPower_buffer_p256 : x: glbuffer uint8 (getScalarLen P256) {witnessed x sqPower_seq /\ recallable x} = 
-  createL_global sqPower_list_p256
-
-
-inline_for_extraction
-let sqPower_buffer_p384 : x: glbuffer uint8 (getScalarLen P384) {witnessed x sqPower_seq /\ recallable x} = 
-  createL_global sqPower_list_p384
-
-inline_for_extraction
-let sqPower_buffer (#c: curve): (x: glbuffer uint8 (getScalarLen c)) = 
-  match c with
-  |P256 -> sqPower_buffer_p256 
-  |P384 -> sqPower_buffer_p384 
-
-
-let square_root #c a result = 
-  recall_contents (sqPower_buffer #c) (sqPower_seq #c);
-  montgomery_ladder_power a sqPower_buffer result

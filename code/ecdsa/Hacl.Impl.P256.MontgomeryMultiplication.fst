@@ -435,15 +435,6 @@ let montgomery_multiplication_buffer_by_one_ko #c a result =
   lemmaFromDomain #c (as_nat c h0 a)
 
 
-
-let montgomery_multiplication_buffer_by_one #c a result = 
-  match c with 
-  |P256 -> 
-    assume ((getPrime c + 1) % pow2 64 == 0);
-    montgomery_multiplication_buffer_by_one_w_ko a result
-  |P384 -> montgomery_multiplication_buffer_by_one_ko a result
-
-
 val montgomery_multiplication_buffer_w_k0: #c: curve {(getPrime c + 1) % pow2 64 == 0}
   -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
@@ -618,15 +609,6 @@ let montgomery_multiplication_buffer_k0 #c a b result =
   inDomain_mod_is_not_mod #c (fromDomain_ #c a_ * fromDomain_ #c b_)
 
 
-
-let montgomery_multiplication_buffer #c a b result = 
-  match c with 
-  |P256 ->
-    assume ((getPrime c + 1) % pow2 64 == 0);
-    montgomery_multiplication_buffer_w_k0 a b result
-  |P384 -> montgomery_multiplication_buffer_k0 a b result
-
-
 val montgomery_square_buffer_w_k0: #c: curve {(getPrime c + 1) % pow2 64 == 0} -> a: felem c -> result: felem c ->  
   Stack unit
     (requires (fun h -> live h a /\ as_nat c h a < (getPrime c) /\ live h result)) 
@@ -712,9 +694,3 @@ let montgomery_square_buffer_k0 #c a result =
   pop_frame()  
 
 
-let montgomery_square_buffer #c a result = 
-  match c with 
-  |P256 ->
-     assume ((getPrime c + 1) % pow2 64 == 0);
-     montgomery_square_buffer_w_k0 a result
-  |P384 -> montgomery_square_buffer_k0 a result

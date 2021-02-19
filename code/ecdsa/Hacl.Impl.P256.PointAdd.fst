@@ -10,7 +10,7 @@ open Hacl.Impl.P256.Arithmetics
 open Lib.Buffer
 
 open Hacl.Impl.EC.LowLevel
-open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.EC.MontgomeryMultiplication
 open Spec.P256
 
 open FStar.Tactics 

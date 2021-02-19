@@ -17,7 +17,7 @@ open Spec.ECDSA
 open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.EC.LowLevel
-open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Core
