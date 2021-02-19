@@ -51,3 +51,12 @@ val montgomery_square_buffer: #c: curve -> a: felem c -> result: felem c ->
   as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
 
 
+
+
+
+val fsquarePowN: #c: curve -> n: size_t -> a: felem c -> Stack unit 
+  (requires (fun h -> live h a /\ as_nat c h a < getPrime c)) 
+  (ensures (fun h0 _ h1 -> (*
+    let k = fromDomain_ #P256 (as_nat P256 h0 a) in
+    modifies (loc a) h0 h1 /\ as_nat P256 h1 a < prime256 /\ 
+    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n)))*) True))

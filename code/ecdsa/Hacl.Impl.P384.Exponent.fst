@@ -1,3 +1,5 @@
+module Hacl.Impl.P384.Exponent
+
 module Hacl.Impl.P256.Exponent
 
 open FStar.HyperStack.All
@@ -21,47 +23,15 @@ open Lib.Loops
 open Hacl.Impl.P256.MM.Lemmas
 
 open Hacl.Impl.EC.MontgomeryMultiplication
-
-
 open Hacl.Spec.P.MontgomeryMultiplication
+
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
 
-(* 
-val fsquarePowN: n: size_t -> a: felem P256 -> Stack unit 
-  (requires (fun h -> live h a /\ as_nat P256 h a < prime256)) 
-  (ensures (fun h0 _ h1 -> (*
-    let k = fromDomain_ #P256 (as_nat P256 h0 a) in
-    modifies (loc a) h0 h1 /\ as_nat P256 h1 a < prime256 /\ 
-    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n)))*) True))
 
 
-let fsquarePowN n a = 
-  let h0 = ST.get() in  
-  (* lemmaFromDomainToDomain #P256 (as_nat P256 h0 a); *)
-  assert_norm (pow2 0 == 1); 
-  let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = True 
-    let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
-    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 i)) /\
-    as_nat P256 h1 a < prime256 /\ live h1 a /\ modifies1 a h0 h1   in 
 
- (* power_one_2 (fromDomain_ #P256 (as_nat P256 h0 a)); *)
-
-  for (size 0) n (inv h0) (fun x -> 
-    let h0_ = ST.get() in 
-     montgomery_square_buffer a a; 
-     let k = fromDomain_ #P256 (as_nat P256 h0 a) in  
-     inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (as_nat P256 h0_ a) * fromDomain_ #P256 (as_nat P256 h0_ a)); 
-     lemmaFromDomainToDomainModuloPrime #P256 (let k = fromDomain_ #P256 (as_nat P256 h0 a) in pow k (pow2 (v x)));
-
-     (*modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) prime256; 
-     pow_plus k  (pow2 (v x)) (pow2 (v x )); 
-     pow2_double_sum (v x); *)
-     inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1))))
-
-
- *)
 (* Changing argument order *)
 inline_for_extraction noextract
 val montgomery_multiplication_buffer_: result: felem P256 -> a: felem P256 -> b: felem P256 -> Stack unit
@@ -113,7 +83,7 @@ let exponent_0 t t0 t1 t2 t6 t7 =
   montgomery_square_buffer_ t0 t0;
   montgomery_multiplication_buffer_ t6 t0 t2;
   montgomery_square_buffer_ t0 t6;
-  fsquarePowN #P256 (size 3) t0; 
+  fsquarePowN (size 3) t0; 
   montgomery_multiplication_buffer_ t7 t0 t6;
   montgomery_square_buffer_ t0 t7;
   montgomery_square_buffer_ t0 t0;
@@ -186,18 +156,18 @@ val exponent_1: t: felem P256 -> t0: felem P256 -> t1: felem P256 -> t2: felem P
 
 let exponent_1 t t0 t1 t2 t3 t4 t5 = 
     let h0 = ST.get() in 
-  fsquarePowN #P256 (size 9) t0;
+  fsquarePowN (size 9) t0;
   montgomery_multiplication_buffer_ t3 t0 t1;
   montgomery_square_buffer_ t0 t3;
-  fsquarePowN #P256  (size 9) t0;
+  fsquarePowN (size 9) t0;
   montgomery_multiplication_buffer_ t4 t0 t1;
   montgomery_square_buffer_ t0 t4;
   montgomery_square_buffer_ t0 t0;
   montgomery_multiplication_buffer_ t5 t0 t2;
   montgomery_square_buffer_ t0 t5;
-  fsquarePowN #P256  (size 31) t0;
+  fsquarePowN (size 31) t0;
   montgomery_multiplication_buffer_ t0 t0 t;
-  fsquarePowN  #P256 (size 128) t0;
+  fsquarePowN (size 128) t0;
   montgomery_multiplication_buffer_ t0 t0 t5; ()
 (*
   let tD = fromDomain_ (as_nat h0 t) in let t0D = fromDomain_ (as_nat h0 t0) in 
@@ -276,11 +246,11 @@ val exponent_2: t: felem P256 -> t0: felem P256-> t4: felem P256-> t5: felem P25
 
 let exponent_2 t t0 t4 t5 result = 
     let h0 = ST.get() in 
-  fsquarePowN #P256  (size 32) t0;
+  fsquarePowN (size 32) t0;
   montgomery_multiplication_buffer_ t0 t0 t5; 
-  fsquarePowN #P256  (size 30) t0;
+  fsquarePowN (size 30) t0;
   montgomery_multiplication_buffer_ t0 t0 t4;
-  fsquarePowN  #P256 (size 2) t0;
+  fsquarePowN (size 2) t0;
   montgomery_multiplication_buffer_ result t0 t; 
 (*
   let tD =  fromDomain_ (as_nat h0 t) in 

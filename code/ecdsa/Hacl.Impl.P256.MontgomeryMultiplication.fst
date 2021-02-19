@@ -666,7 +666,7 @@ let montgomery_square_buffer_w_k0 #c a result =
 
 val montgomery_square_buffer_k0: #c: curve -> a: felem c -> result: felem c ->  
   Stack unit
-    (requires (fun h -> live h a /\ as_nat c h a < (getPrime c) /\ live h result)) 
+    (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
     (ensures (fun h0 _ h1 -> 
       (
 	let prime = getPrime c in 
@@ -692,5 +692,8 @@ let montgomery_square_buffer_k0 #c a result =
   admit();
    
   pop_frame()  
+
+
+
 
 
