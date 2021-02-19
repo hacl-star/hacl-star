@@ -5,8 +5,8 @@ type feature =
   | SHAEXT
   | AES_NI
   | PCLMULQDQ
-  | AVX
-  | AVX2
+  | VEC128
+  | VEC256
   | BMI2
   | ADX
   | SSE
@@ -17,8 +17,8 @@ let has_feature = function
   | SHAEXT -> everCrypt_AutoConfig2_has_shaext ()
   | AES_NI -> everCrypt_AutoConfig2_has_aesni ()
   | PCLMULQDQ -> everCrypt_AutoConfig2_has_pclmulqdq ()
-  | AVX -> everCrypt_AutoConfig2_has_avx ()
-  | AVX2 -> everCrypt_AutoConfig2_has_avx2 ()
+  | VEC128 -> everCrypt_AutoConfig2_has_avx ()
+  | VEC256 -> everCrypt_AutoConfig2_has_avx2 ()
   | BMI2 -> everCrypt_AutoConfig2_has_bmi2 ()
   | ADX -> everCrypt_AutoConfig2_has_adx ()
   | SSE -> everCrypt_AutoConfig2_has_sse ()

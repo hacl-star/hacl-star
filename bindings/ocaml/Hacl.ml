@@ -350,39 +350,39 @@ module Blake2s_32 : Blake2 =
 #ifdef SUPPORTS_128
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let encrypt = Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_encrypt
     let decrypt = Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_decrypt
   end)
 
 module Poly1305_128 : MAC =
   Make_Poly1305 (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let mac = Hacl_Poly1305_128.hacl_Poly1305_128_poly1305_mac
 end)
 
 module Blake2s_128 : Blake2 =
   Make_Blake2s (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let blake2s = Hacl_Blake2s_128.hacl_Blake2s_128_blake2s
   end)
 #else
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let encrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
     let decrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
   end)
 
 module Poly1305_128 : MAC =
   Make_Poly1305 (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let mac _ _ _ = failwith "Not implemented on this platform"
 end)
 
 module Blake2s_128 : Blake2 =
   Make_Blake2s (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let blake2s _ _ _ = failwith "Not implemented on this platform"
   end)
 #endif
@@ -390,39 +390,39 @@ module Blake2s_128 : Blake2 =
 #ifdef SUPPORTS_256
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let reqs = [AVX2]
+    let reqs = [VEC256]
     let encrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_encrypt
     let decrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_decrypt
   end)
 
 module Poly1305_256 : MAC =
   Make_Poly1305 (struct
-      let reqs = [AVX2]
+      let reqs = [VEC256]
     let mac = Hacl_Poly1305_256.hacl_Poly1305_256_poly1305_mac
 end)
 
 module Blake2b_256 : Blake2 =
   Make_Blake2b (struct
-    let reqs = [AVX2]
+    let reqs = [VEC256]
     let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
   end)
 #else
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-     let reqs = [AVX2]
+     let reqs = [VEC256]
     let encrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
     let decrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
   end)
 
 module Poly1305_256 : MAC =
   Make_Poly1305 (struct
-      let reqs = [AVX2]
+      let reqs = [VEC256]
     let mac _ _ _ = failwith "Not implemented on this platform"
 end)
 
 module Blake2b_256 : Blake2 =
   Make_Blake2b (struct
-    let reqs = [AVX2]
+    let reqs = [VEC256]
     let blake2b _ _ _ = failwith "Not implemented on this platform"
   end)
 #endif
