@@ -1115,10 +1115,10 @@ copy-kremlib:
 	mkdir -p dist/kremlin
 	(cd $(KREMLIN_HOME) && tar cvf - kremlib/dist/minimal include) | (cd dist/kremlin && tar xf -)
 
-compile-%: dist/Makefile.tmpl dist/%/Makefile.basic | copy-kremlib
+compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-kremlib
 	cp $< dist/$*/Makefile
+	(if [ -f dist/$*/libintvector.h ]; then cp dist/configure dist/$*/configure; fi;)
 	$(MAKE) -C dist/$*
-
 
 ###########################
 # C tests (from F* files) #
