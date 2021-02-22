@@ -3,7 +3,7 @@
 set -o pipefail
 set -e
 
-if ! [ -f lib_intrinsics.h ]; then
+if ! [ -f libintvector.h ]; then
   echo "This script is intended to be run from dist/foo."
   exit 1
 fi
@@ -44,6 +44,11 @@ detect_ocaml () {
 }
 
 check_no_bug81300 () {
+  # Perform the check only if lib_intrinsics.h is present. In practice,
+  # lib_intrinsics.h is present in all the directories which contain libintvector.h,
+  # but mozilla. If lib_intrinsics.h is not present, assume there is no bug and
+  # return success.
+  if [ -f lib_intrinsics.h ]; then
   local out=$(mktemp /tmp/testbug81300.XXXXXXX)
   local file=${out}.c
   cat > $file <<EOF
@@ -87,6 +92,10 @@ EOF
   $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DSUPPORTS_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
   $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
   diff $out.test $out.ref
+  else
+    echo "... WARNING: lib_intrinsics.h is missing: we can't test whether bug 81300 is present or not and assume it is not."
+    return 0
+  fi
 }
 
 detect_uint128 () {
@@ -161,6 +170,12 @@ int main () {
 EOF
   $CC $CROSS_CFLAGS -I. -march=armv8-a+simd -c $file -o /dev/null
 }
+
+# We only detect the 64-bit version of the z-architecture (s390x).
+detect_ibmz () {
+  [[ $target_arch == "s390x" ]]
+}
+
 
 # Usage info
 # ----------
@@ -337,6 +352,16 @@ if detect_x86 || detect_x64; then
     supports_intrinsics=true
     echo "... using a non-buggy GCC"
   fi
+fi
+
+if detect_ibmz; then
+  echo "... detected z platform"
+  echo "... $build_target supports 128-bit z VSX"
+  supports_128=true
+  echo "CFLAGS_128 = -m64 -mzarch -mvx" >> Makefile.config
+  # We assume a GCC like compiler - see comment for detect_x64
+  echo "... $build_target supports vale"
+  supports_vale=true
 fi
 
 if $supports_intrinsics; then
