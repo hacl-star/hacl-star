@@ -359,7 +359,7 @@ if detect_ibmz; then
   echo "... $build_target supports 128-bit z VSX"
   supports_128=true
   echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector" >> Makefile.config
-  echo "#include <stdint.h> " >> config.H
+  echo "#include <stdint.h> " >> config.h
   # We assume a GCC like compiler - see comment for detect_x64
   echo "... $build_target supports vale"
   supports_vale=true
