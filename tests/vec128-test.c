@@ -31,7 +31,7 @@ static inline void print_buf(unsigned char *msg, uint8_t *buf) {
 
 static inline void print_vector(unsigned char *msg, vec128 *vec) {
   uint8_t tmp[16];
-  Lib_IntVector_Intrinsics_vec128_store_le(tmp, vec);
+  Lib_IntVector_Intrinsics_vec128_store_le(tmp, *vec);
   print_buf(msg, tmp);
 }
 
@@ -42,10 +42,10 @@ void initialize_buf(uint8_t *buf) {
   }
 }
 
-void initialize_vector(vec128 *vec) {
+vec128 initialize_vector() {
   uint8_t tmp[16];
   initialize_buf(tmp);
-  Lib_IntVector_Intrinsics_vec128_load_le(vec, tmp);
+  return Lib_IntVector_Intrinsics_vec128_load_le(tmp);
 }
 
 void initialize_buf8(uint8_t x0, uint8_t x1, uint8_t x2, uint8_t x3, uint8_t x4,
@@ -62,11 +62,9 @@ vec128 initialize_vector8(uint8_t x0, uint8_t x1, uint8_t x2, uint8_t x3, uint8_
                           uint8_t x5, uint8_t x6, uint8_t x7, uint8_t x8, uint8_t x9,
                           uint8_t x10, uint8_t x11, uint8_t x12, uint8_t x13,
                           uint8_t x14, uint8_t x15) {
-  uint8_t tmp[16]
+  uint8_t tmp[16];
   initialize_buf8(x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,tmp);
-  vec128 vec;
-  Lib_IntVector_Intrinsics_vec128_load_le(&vec, tmp);
-  return vec;
+  return Lib_IntVector_Intrinsics_vec128_load_le(tmp);
 }
 
 void initialize_buf16(uint16_t x0, uint16_t x1, uint16_t x2, uint16_t x3,
@@ -78,11 +76,9 @@ void initialize_buf16(uint16_t x0, uint16_t x1, uint16_t x2, uint16_t x3,
 
 vec128 initialize_vector16(uint16_t x0, uint16_t x1, uint16_t x2, uint16_t x3,
                           uint16_t x4, uint16_t x5, uint16_t x6, uint16_t x7) {
-  uint32_t tmp[8]
+  uint16_t tmp[8];
   initialize_buf16(x0,x1,x2,x3,x4,x5,x6,x7,tmp);
-  vec128 vec;
-  Lib_IntVector_Intrinsics_vec128_load_le(&vec, tmp);
-  return vec;
+  return Lib_IntVector_Intrinsics_vec128_load_le(tmp);
 }
 
 void initialize_buf32(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3,
@@ -91,11 +87,9 @@ void initialize_buf32(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3,
 }
 
 vec128 initialize_vector32(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3) {
-  uint16_t tmp[8]
+  uint32_t tmp[8];
   initialize_buf32(x0,x1,x2,x3,tmp);
-  vec128 vec;
-  Lib_IntVector_Intrinsics_vec128_load_le(&vec, tmp);
-  return vec;
+  return Lib_IntVector_Intrinsics_vec128_load_le(tmp);
 }
 
 static uint8_t bstore_le[16] = {
@@ -346,44 +340,44 @@ int main() {
   compare_and_print_vec("load_le", vec0, bload_le);
   //  print_vector("bload_le", &vec0); */
   
-  initialize_vector(&vec0);
-  initialize_vector(&vec1);
+  vec0 = initialize_vector();
+  vec1 = initialize_vector();
   vec0 = Lib_IntVector_Intrinsics_vec128_add32(vec0, vec1);
   compare_and_print_vec("add32", vec0, badd32);
   //  print_vector("badd32", &vec0);
 
-  initialize_vector(&vec0);
-  initialize_vector(&vec1);
+  vec0 = initialize_vector();
+  vec1 = initialize_vector();
   vec0 = Lib_IntVector_Intrinsics_vec128_add64(vec0, vec1);
   compare_and_print_vec("add64", vec0, badd64);
   //  print_vector("badd64", &vec0);
 
-  initialize_vector(&vec0);
-  initialize_vector(&vec1);
+  vec0 = initialize_vector();
+  vec1 = initialize_vector();
   vec0 = Lib_IntVector_Intrinsics_vec128_and(vec0, vec1);
   compare_and_print_vec("and", vec0, band);
   //  print_vector("band", &vec0);
 
-  initialize_vector(&vec0);
+  vec0 = initialize_vector();
   vec1 = initialize_vector8(0,1,2,3,4,0,6,7,8,9,10,11,12,13,14,15);
   vec0 = Lib_IntVector_Intrinsics_vec128_eq32(vec0, vec1);
   compare_and_print_vec("eq32", vec0, beq32);
   //  print_vector("beq32", &vec0);
 
-  initialize_vector(&vec0);
+  vec0 = initialize_vector();
   vec1 = initialize_vector8(0,1,2,3,4,0,6,7,8,9,10,11,12,13,14,15);
   vec0 = Lib_IntVector_Intrinsics_vec128_eq64(vec0, vec1);
   compare_and_print_vec("eq64", vec0, beq64);
   //  print_vector("beq64", &vec0);
 
-  initialize_vector(&vec0);
+  vec0 = initialize_vector();
   x32 = Lib_IntVector_Intrinsics_vec128_extract32(vec0, 3);
   printf("extract32:\n");
   printf("computed:%08x\n", x32);
   printf("expected:%08x\n", 0x0f0e0d0c);
   if (x32 == 0x0f0e0d0c) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
 
-  initialize_vector(&vec0);
+  vec0 = initialize_vector();
   x64 = Lib_IntVector_Intrinsics_vec128_extract64(vec0, 1);
   printf("extract64:\n");
   printf("computed:%lx\n", x64);
@@ -448,7 +442,7 @@ int main() {
   compare_and_print_vec("load64", vec0, bload64);
   //  print_vector("bload64", &vec0);
 
-  initialize_vector(&vec0);
+  vec0 = initialize_vector();
   vec0 = Lib_IntVector_Intrinsics_vec128_lognot(vec0);
   compare_and_print_vec("lognot", vec0, blognot);
   //  print_vector("blognot", &vec0);
