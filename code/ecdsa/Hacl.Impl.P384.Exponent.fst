@@ -26,38 +26,6 @@ open Hacl.Spec.P.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
-(* 
-(* Changing argument order *)
-inline_for_extraction noextract
-val montgomery_multiplication_buffer: result: felem P384 -> a: felem P384 -> b: felem P384 -> Stack unit
-  (requires (fun h -> live h a /\  as_nat P384 h a < prime256 /\ live h b /\ live h result /\ as_nat P384 h b < prime256)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1) (*/\  
-    as_nat h1 result < prime256 /\
-    as_nat h1 result = (as_nat h0 a * as_nat h0 b * modp_inv2_prime (pow2 256) prime256) % prime256 /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b) % prime256) /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 b))) *)
-  )
-
-
-let montgomery_multiplication_buffer result a b = 
-  montgomery_multiplication_buffer #P384 a b result
-
-
-inline_for_extraction noextract
-val montgomery_square_buffer: result: felem P256 -> a: felem P256 -> Stack unit
-  (requires (fun h -> live h a /\ as_nat P256 h a < prime256 /\ live h result)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 (* /\  
-    as_nat h1 result < prime256 /\ 
-    as_nat h1 result = (as_nat h0 a * as_nat h0 a * modp_inv2_prime (pow2 256) prime256) % prime256 /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a) % prime256) /\
-    as_nat h1 result = toDomain_ (fromDomain_ (as_nat h0 a) * fromDomain_ (as_nat h0 a))*) )
-  )
-
-
-let montgomery_square_buffer result a = montgomery_square_buffer #P384 a result
-
-
- *)
 
 
 [@ CInline]
@@ -73,67 +41,126 @@ val exponent_p384: a: felem P384 -> result: felem P384 ->
 let exponent_p384 t result tempBuffer = 
   let h0 = ST.get () in 
 
-  let x15 = sub tempBuffer (size 0) (size 6) in 
+  let t0 = sub tempBuffer (size 0) (size 6) in 
 
-  let x2 = sub tempBuffer (size 6) (size 6) in 
-  let x3 = sub tempBuffer (size 12) (size 6) in 
-  let x6 = sub tempBuffer (size 18) (size 6) in 
-  let x12 = sub tempBuffer (size 24) (size 6) in 
-  let x30 = sub tempBuffer (size 30) (size 6) in 
-  let x60 = sub tempBuffer (size 36) (size 6) in 
-  let x120 = sub tempBuffer (size 42) (size 6) in 
+  let t1 = sub tempBuffer (size 6) (size 6) in 
+  let t2 = sub tempBuffer (size 12) (size 6) in 
+  let t3 = sub tempBuffer (size 18) (size 6) in 
+  let t4 = sub tempBuffer (size 24) (size 6) in 
+  let t5 = sub tempBuffer (size 30) (size 6) in (* 
+  let t6 = sub tempBuffer (size 24) (size 4) in 
+  let t7 = sub tempBuffer (size 28) (size 4) in 
+ *)
 
-  (* x2   = (nth double 1  `andThen` add x1  ) x1 *)
-  montgomery_square_buffer #P384 t x2;
-  montgomery_multiplication_buffer #P384 x2 t x2;
+(* _10     = sq(t) *)
+(* t0 = _10  *)
+  montgomery_square_buffer #P384 t t0;
 
-  (* x3   = (nth double 1  `andThen` add x1  ) x2 *)
-  montgomery_square_buffer #P384 x2 x3; 
-  montgomery_multiplication_buffer #P384 x3 t x3;
+(* _11     = m(t, _10) *)
+  montgomery_multiplication_buffer #P384 t t0 t0;
+(* t0 = _11*)
+
+(* _110    = sq(_11) *)
+  montgomery_square_buffer #P384 t0 t0;
+(* t0 = _110 *)  
+
+(* _111    = m(t, _110) *)
+  montgomery_multiplication_buffer #P384 t t0 t0;
+(* t0 = _111 *)  
+
+(* _111000 (t1) = n_sq(_111, 3) *)
+  montgomery_square_buffer #P384 t0 t1;
+  fsquarePowN #P384 (size 2) t1;
+(* t1 = sq _111 *)
+(* t1 = n_sq _111 3  *)
+(* t1 = _111000 *)
 
 
-(* x6   = (nth double        3  `andThen` add x3  ) x3 *)
-  montgomery_square_buffer #P384 x3 x6;
-  montgomery_square_buffer #P384 x6 x6;
-  montgomery_square_buffer #P384 x6 x6;
-  montgomery_multiplication_buffer #P384 x6 x3 x6;
+(* _111111 = m(_111,  _111000) *)
+  montgomery_multiplication_buffer #P384 t0 t1 t1;  
+(* t1 = t0 * t1 *)
+(* t1 = _111 * _111000 *)
+(* t1 = _111111 *)
 
-(* x12  = (nth double        6  `andThen` add x6  ) x6 *)
-  montgomery_square_buffer #P384 x6 x12;
-  fsquarePowN #P384 (size 5) x12;
-  montgomery_multiplication_buffer #P384 x12 x6 x12;
 
- (* x15  = (nth double        3  `andThen` add x3  ) x12 *)
-  montgomery_square_buffer #P384 x12 x15;
-  montgomery_square_buffer #P384 x15 x15;
-  montgomery_square_buffer #P384 x15 x15;
-  montgomery_multiplication_buffer #P384 x15 x3 x15;
 
-    (* x30  = (nth double       15  `andThen` add x15 ) x15 *)
-  montgomery_square_buffer #P384 x15 x30;
-  fsquarePowN #P384 (size 14) x30;
-  montgomery_multiplication_buffer #P384 x30 x15 x30;
+(* x12     = m(n_sq(_111111, 6), _111111) *)
+  montgomery_square_buffer #P384 t1 t2;
+  fsquarePowN #P384 (size 5) t2 ;
+  montgomery_multiplication_buffer #P384 t2 t1 t2;
+(* t2 = x12 *)
 
-(* x60  = (nth double       30  `andThen` add x30 ) x30 *)
-  montgomery_square_buffer #P384 x30 x60;
-  fsquarePowN #P384 (size 29) x60;
-  montgomery_multiplication_buffer #P384 x60 x30 x60;
 
-(* x120 = (nth double       60  `andThen` add x60 ) x60 *)
-  montgomery_square_buffer #P384 x60 x120;
-  fsquarePowN #P384 (size 59) x120;
-  montgomery_multiplication_buffer #P384 x120 x60 x120;
 
-  montgomery_square_buffer x120 result;
-  fsquarePowN #P384 (size 119) result;
-  montgomery_multiplication_buffer #P384 result x120 result;
-  fsquarePowN #P384 (size 15) result;
-  montgomery_multiplication_buffer #P384 result x15 result;
-  fsquarePowN #P384 (size 31) result;
-  montgomery_multiplication_buffer #P384 result x30 result;
-  fsquarePowN #P384 (size 2) result;
-  montgomery_multiplication_buffer  #P384 result x2 result;
-  fsquarePowN #P384 (size 94) result;
-  montgomery_multiplication_buffer #P384 result x30 result;
-  fsquarePowN #P384 (size 2) result;
-  montgomery_multiplication_buffer result t result
+(* x24     = m(n_sq(x12 , 12), x12) *)
+  montgomery_square_buffer #P384 t2 t3;
+  fsquarePowN #P384 (size 11) t3 ;
+  montgomery_multiplication_buffer #P384 t2 t3 t2;
+(* t2 = x24*) 
+
+(* x30     = m(n_sq(x24 , 6) , _111111) *)
+  fsquarePowN #P384 (size 6) t2 ;
+  montgomery_multiplication_buffer #P384 t2 t1 t1;  
+(* t1 = x30 *)
+
+
+(* x31     = m(sq(x30), t) *)
+  montgomery_square_buffer #P384 t1 t2;
+  (* fsquarePowN #P384 (size 29) t2 ; *)
+  montgomery_multiplication_buffer #P384 t2 t t2;
+(* t2 = x31 *)
+
+
+ (* x32     = m(sq(x31), t)  *)
+  montgomery_square_buffer #P384 t2 t3;
+  (* fsquarePowN #P384 (size 30) t3 ; *)
+  montgomery_multiplication_buffer #P384 t t3 t3;
+(* t3 = x32*)
+
+
+
+
+(* x63     = m(n_sq(x32, 31) , x31) *)
+  montgomery_square_buffer #P384 t3 t4;
+  fsquarePowN #P384 (size 30) t4 ;
+  montgomery_multiplication_buffer #P384 t4 t2 t4;
+(* t4 = x63 *)
+
+
+
+(* x126    = m(n_sq(x63, 63) , x63) *)
+  montgomery_square_buffer #P384 t4 t5;
+  fsquarePowN #P384 (size 62) t5 ;
+  montgomery_multiplication_buffer #P384 t4 t5 t4;  
+(* t4 = x126*)
+
+
+(* x252    = m(n_sq(x126, 126) , x126) *)
+  montgomery_square_buffer #P384 t4 t5;
+  fsquarePowN #P384 (size 125) t5 ;
+  montgomery_multiplication_buffer #P384 t4 t5 t4;
+(* t4 = x252 *)
+
+
+(* x255    = m(n_sq(x252, 3) , _111) *)
+  fsquarePowN #P384 (size 3) t4 ;
+  montgomery_multiplication_buffer #P384 t4 t0 t4;
+(* t4 = x255 *)
+
+
+(* i0 = m(n_sq(x255, 33), x32) *)
+  fsquarePowN #P384 (size 33) t4 ;
+  montgomery_multiplication_buffer #P384 t4 t3 t4;
+(*t4 = i0 *)
+
+
+(* i1 = m(n_sq(i0, 94), x30) *)
+  fsquarePowN #P384 (size 94) t4 ;
+  montgomery_multiplication_buffer #P384 t4 t1 t4;
+(* t4 = i1 *)
+
+(* i397    = n_sq(i1, 2) *)
+  fsquarePowN #P384  (size 2) t4;
+
+(* r = m(t, i397) *)
+  montgomery_multiplication_buffer #P384 t4 t result

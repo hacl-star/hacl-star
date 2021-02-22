@@ -68,7 +68,7 @@ let fsquarePowN #c n a =
 
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
-     montgomery_square_buffer_k0 #c a a
+     montgomery_square_buffer #c a a
      (* ; 
      let k = fromDomain_ #P256 (as_nat P256 h0 a) in  
      inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (as_nat P256 h0_ a) * fromDomain_ #P256 (as_nat P256 h0_ a)); 
