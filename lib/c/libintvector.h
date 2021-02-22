@@ -612,6 +612,7 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 #elif (defined(__s390__) || defined(__s390x__) || defined(__zarch__) || defined(__SYSC_ZARCH__))
 
 #include <builtins.h>
+#include <vecintrin.h>
 
 // The main vector 128 type
 typedef vector unsigned int Lib_IntVector_Intrinsics_vec128;
