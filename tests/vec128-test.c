@@ -30,7 +30,9 @@ static inline void print_buf(unsigned char *msg, uint8_t *buf) {
 }
 
 static inline void print_vector(unsigned char *msg, vec128 *vec) {
-  print_buf(msg, (uint8_t*) vec);
+  uint8_t tmp[16];
+  Lib_IntVector_Intrinsics_vec128_store_le(tmp, vec);
+  print_buf(msg, tmp);
 }
 
 void initialize_buf(uint8_t *buf) {
@@ -41,7 +43,9 @@ void initialize_buf(uint8_t *buf) {
 }
 
 void initialize_vector(vec128 *vec) {
-  initialize_buf((uint8_t*) vec);
+  uint8_t tmp[16];
+  initialize_buf(tmp);
+  Lib_IntVector_Intrinsics_vec128_load_le(vec, tmp);
 }
 
 void initialize_buf8(uint8_t x0, uint8_t x1, uint8_t x2, uint8_t x3, uint8_t x4,
@@ -58,8 +62,10 @@ vec128 initialize_vector8(uint8_t x0, uint8_t x1, uint8_t x2, uint8_t x3, uint8_
                           uint8_t x5, uint8_t x6, uint8_t x7, uint8_t x8, uint8_t x9,
                           uint8_t x10, uint8_t x11, uint8_t x12, uint8_t x13,
                           uint8_t x14, uint8_t x15) {
+  uint8_t tmp[16]
+  initialize_buf8(x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,tmp);
   vec128 vec;
-  initialize_buf8(x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15, (uint8_t*) &vec);
+  Lib_IntVector_Intrinsics_vec128_load_le(&vec, tmp);
   return vec;
 }
 
@@ -72,8 +78,10 @@ void initialize_buf16(uint16_t x0, uint16_t x1, uint16_t x2, uint16_t x3,
 
 vec128 initialize_vector16(uint16_t x0, uint16_t x1, uint16_t x2, uint16_t x3,
                           uint16_t x4, uint16_t x5, uint16_t x6, uint16_t x7) {
+  uint32_t tmp[8]
+  initialize_buf16(x0,x1,x2,x3,x4,x5,x6,x7,tmp);
   vec128 vec;
-  initialize_buf16(x0,x1,x2,x3,x4,x5,x6,x7, (uint16_t*) &vec);
+  Lib_IntVector_Intrinsics_vec128_load_le(&vec, tmp);
   return vec;
 }
 
@@ -83,8 +91,10 @@ void initialize_buf32(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3,
 }
 
 vec128 initialize_vector32(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3) {
+  uint16_t tmp[8]
+  initialize_buf32(x0,x1,x2,x3,tmp);
   vec128 vec;
-  initialize_buf32(x0,x1,x2,x3, (uint32_t*) &vec);
+  Lib_IntVector_Intrinsics_vec128_load_le(&vec, tmp);
   return vec;
 }
 
@@ -325,7 +335,7 @@ int main() {
   uint64_t x64;
   uint8_t tmp[16];
   
-  initialize_vector(&vec0);
+  /*  initialize_vector(&vec0);
   Lib_IntVector_Intrinsics_vec128_store_le(tmp, vec0);
   printf("store_le:\n");
   ok = ok && compare_and_print(16, tmp, (uint8_t*) &bstore_le);
@@ -334,7 +344,7 @@ int main() {
   initialize_buf(tmp);
   vec0 = Lib_IntVector_Intrinsics_vec128_load_le(tmp);
   compare_and_print_vec("load_le", vec0, bload_le);
-  //  print_vector("bload_le", &vec0);
+  //  print_vector("bload_le", &vec0); */
   
   initialize_vector(&vec0);
   initialize_vector(&vec1);
