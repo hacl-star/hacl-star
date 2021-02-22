@@ -614,14 +614,8 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 #include <vecintrin.h>
 
 // The main vector 128 type
-//typedef vector __attribute__ unsigned int Lib_IntVector_Intrinsics_vec128;
+// TODO: try to use uint8_t, uint32_t, uint64_t
 typedef unsigned int Lib_IntVector_Intrinsics_vec128 __attribute__ ((vector_size(16)));
-
-// Some more types used for the conversions
-//typedef vector unsigned int vector128;
-//typedef vector unsigned char vector128_8;
-//typedef vector unsigned int vector128_32;
-//typedef vector unsigned long long vector128_64;
 
 typedef Lib_IntVector_Intrinsics_vec128 vector128;
 typedef unsigned char vector128_8 __attribute__ ((vector_size(16)));
