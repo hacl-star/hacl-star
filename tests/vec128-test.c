@@ -87,8 +87,18 @@ void initialize_buf32(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3,
 }
 
 vec128 initialize_vector32(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3) {
-  uint32_t tmp[8];
+  uint32_t tmp[4];
   initialize_buf32(x0,x1,x2,x3,tmp);
+  return Lib_IntVector_Intrinsics_vec128_load_le(tmp);
+}
+
+void initialize_buf64(uint64_t x0, uint64_t x1, uint64_t buf[4]) {
+  buf[0] = x0; buf[1] = x1;
+}
+
+vec128 initialize_vector64(uint64_t x0, uint64_t x1) {
+  uint64_t tmp[2];
+  initialize_buf64(x0,x1, tmp);
   return Lib_IntVector_Intrinsics_vec128_load_le(tmp);
 }
 
@@ -370,14 +380,16 @@ int main() {
   compare_and_print_vec("eq64", vec0, beq64);
   //  print_vector("beq64", &vec0);
 
-  vec0 = initialize_vector();
+  //vec0 = initialize_vector();
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
   x32 = Lib_IntVector_Intrinsics_vec128_extract32(vec0, 3);
   printf("extract32:\n");
   printf("computed:%08x\n", x32);
-  printf("expected:%08x\n", 0x0f0e0d0c);
-  if (x32 == 0x0f0e0d0c) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
+  printf("expected:%08x\n", 0x0c0d0e0f);
+  if (x32 == 0x0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
 
-  vec0 = initialize_vector();
+  //vec0 = initialize_vector();
+  vec0 = initialize_vector(0x00010203004050607, 0x08090a0b0c0d0e0f);
   x64 = Lib_IntVector_Intrinsics_vec128_extract64(vec0, 1);
   printf("extract64:\n");
   printf("computed:%lx\n", x64);
