@@ -147,15 +147,14 @@ static uint8_t bgt64[16] = {
   0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU, 0xffU
 };
 
-
 static uint8_t binsert32[16] = {
-  0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U,
-  0x08U, 0x09U, 0x0aU, 0x0bU, 0x11U, 0x00U, 0x00U, 0x00U
+  0x00U, 0x00U, 0x00U, 0x00U, 0x01U, 0x00U, 0x00U, 0x00U,
+  0x02U, 0x00U, 0x00U, 0x00U, 0x04U, 0x00U, 0x00U, 0x00U
 };
 
 static uint8_t binsert64[16] = {
-  0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U,
-  0x17U, 0x17U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U
+  0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U,
+  0x02U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U, 0x00U
 };
 
 static uint8_t binterleave_high32[16] = {
@@ -413,15 +412,17 @@ int main() {
   compare_and_print_vec("gt64", vec0, bgt64);
   // print_vector("bgt64", &vec0);
 
-  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
-  vec0 = Lib_IntVector_Intrinsics_vec128_insert32(vec0, 17, 3);
+  // vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  vec0 = initialize_vector32(0, 1, 2, 3);
+  vec0 = Lib_IntVector_Intrinsics_vec128_insert32(vec0, 4, 3);
   compare_and_print_vec("insert32", vec0, binsert32);
-  //  print_vector("binsert32", &vec0);
+  // print_vector("binsert32", &vec0);
 
-  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
-  vec0 = Lib_IntVector_Intrinsics_vec128_insert64(vec0, 0x1717, 1);
+  // vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  vec0 = initialize_vector64(0, 1);
+  vec0 = Lib_IntVector_Intrinsics_vec128_insert64(vec0, 2, 1);
   compare_and_print_vec("insert64", vec0, binsert64);
-  //  print_vector("binsert64", &vec0);
+  // print_vector("binsert64", &vec0);
 
   vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
