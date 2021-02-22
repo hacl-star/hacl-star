@@ -1,3 +1,9 @@
+#Updates: 
+22.02.2021 - Added implementation of the felem_inv for p384 (dh). 
+Added attempted implementation of the p521 reduction (dh).
+
+
+
 # Non-constant-time functions in this folder
 
 ## These functions are not side-channel resistant

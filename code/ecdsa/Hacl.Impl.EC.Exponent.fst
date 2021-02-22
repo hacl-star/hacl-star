@@ -23,8 +23,11 @@ open Lib.Loops
 open Hacl.Spec.P.MontgomeryMultiplication
 
 open Hacl.Impl.EC.MontgomeryMultiplication
+
 open Hacl.Impl.P256.Exponent
 open Hacl.Impl.P384.Exponent
+open Hacl.Impl.P521.Exponent
+
 open Hacl.Impl.MM.Exponent
 
 
