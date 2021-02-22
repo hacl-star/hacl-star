@@ -389,12 +389,12 @@ int main() {
   if (x32 == 0x0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
 
   //vec0 = initialize_vector();
-  vec0 = initialize_vector(0x00010203004050607, 0x08090a0b0c0d0e0f);
+  vec0 = initialize_vector64(0x00010203004050607, 0x08090a0b0c0d0e0f);
   x64 = Lib_IntVector_Intrinsics_vec128_extract64(vec0, 1);
   printf("extract64:\n");
   printf("computed:%lx\n", x64);
-  printf("expected:%lx\n", 0xf0e0d0c0b0a0908);
-  if (x64 == 0xf0e0d0c0b0a0908) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
+  printf("expected:%lx\n", 0x08090a0b0c0d0e0f);
+  if (x64 == 0x08090a0b0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
 
   vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec1 = initialize_vector8(0,1,2,3,4,6,4,7,8,9,10,11,12,13,14,15);
