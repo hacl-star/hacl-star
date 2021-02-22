@@ -681,7 +681,7 @@ typedef vector unsigned long long vector128_64;
 #define Lib_IntVector_Intrinsics_vec128_load_le(x)              \
   ((vector128)(vec_load_len((unsigned long long*) x, 16)))
 
-#define Lib_IntVector_Intrinsics_vec128_lognot(x0, x1)          \
+#define Lib_IntVector_Intrinsics_vec128_lognot(x0)              \
   ((vector128)(vec_xor(x0, vec_splat_u32(-1)))))
 
 #define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)           \
@@ -707,8 +707,8 @@ typedef vector unsigned long long vector128_64;
   (((x1) == 8? Lib_IntVector_Intrinsics_vec128_rotate_left32_8(x0) :    \
    ((x1) == 16? Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x0) :  \
    ((x1) == 24? Lib_IntVector_Intrinsics_vec128_rotate_left32_24(x0) :  \
-    vec_xor(vec_sll(((vector128_32)x0),vec_splat_u32(24)),
-            vec_sll(((vector128_32)x0),vec_splat_u32(8))))))))
+    vec_xor(vec_sll(((vector128_32)x0),vec_splat_u32(x1)),
+            vec_sll(((vector128_32)x0),vec_splat_u32(32-x1))))))))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, x1)          \
   (Lib_IntVector_Intrinsics_vec128_rotate_left32(x0,32-(x1))
@@ -724,7 +724,7 @@ typedef vector unsigned long long vector128_64;
   ((vector128)(vec_srl(((vector128_64)x0), vec_load_pair(x1, x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1)          \
-  ((vector128)(vec_mule(((vector128_32) x0), vec_splat_u64(1))))
+  ((vector128)(vec_mule(((vector128_32) x0), vec_splat_u64(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_store_le(x0, x1)        \
   (vec_store_len(x1, (unsigned long long*) x0, 16))
