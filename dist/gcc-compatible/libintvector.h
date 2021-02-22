@@ -614,22 +614,22 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 #include <vecintrin.h>
 
 // The main vector 128 type
-typedef vector unsigned int Lib_IntVector_Intrinsics_vec128;
+// TODO: try to use uint8_t, uint32_t, uint64_t
+typedef unsigned int Lib_IntVector_Intrinsics_vec128 __attribute__ ((vector_size(16)));
 
-// Some more types used for the conversions
-typedef vector unsigned int vector128;
-typedef vector unsigned char vector128_8;
-typedef vector unsigned int vector128_32;
-typedef vector unsigned long long vector128_64;
+typedef Lib_IntVector_Intrinsics_vec128 vector128;
+typedef unsigned char vector128_8 __attribute__ ((vector_size(16)));
+typedef vector128 vector128_32;
+typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 
 #define Lib_IntVector_Intrinsics_vec128_add32(x0,x1)            \
-  ((vector128) (vec_add(((vector128_32) x0),((vector128_32) x1))))
+  ((vector128) (((vector128_32) x0) + ((vector128_32) x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_add64(x0, x1)           \
-  ((vector128) (vec_add(((vector128_64) x0),((vector128_64) x1))))
+  ((vector128) (((vector128_64) x0) + ((vector128_64) x1)))
   
 #define Lib_IntVector_Intrinsics_vec128_and(x0, x1)             \
-  ((vector128) (vec_and(((vector128) x0),((vector128) x1))))
+  ((vector128) (vec_and((vector128) x0,(vector128) x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_eq32(x0, x1)            \
   ((vector128) (vec_cmpeq(((vector128_32) x0),((vector128_32) x1))))
@@ -644,46 +644,47 @@ typedef vector unsigned long long vector128_64;
   (((vector128_64)x0)[x1])
 
 #define Lib_IntVector_Intrinsics_vec128_gt32(x0, x1)            \
-  ((vector128) (((vector128_32) x0) > ((vector128_32) x1))
+  ((vector128) (((vector128_32) x0) > ((vector128_32) x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_gt64(x0, x1)            \
-  ((vector128) (((vector128_64) x0) > ((vector128_64) x1))
+  ((vector128) (((vector128_64) x0) > ((vector128_64) x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_insert32(x0, x1, x2)    \
-  ((vector128) vec_insert(((unsigned int) x1), ((vec128_32) x0), x2))
+  ((vector128) vec_insert((unsigned int) x1, (vector128_32) x0, x2))
 
 #define Lib_IntVector_Intrinsics_vec128_insert64(x0, x1, x2)    \
-  ((vector128) vec_insert(((unsigned long long) x1), ((vec128_64) x0), x2))
+  ((vector128) vec_insert((unsigned long long) x1, (vector128_64) x0, x2))
 
 // TODO: I'm not sure if it's low or high
 #define Lib_IntVector_Intrinsics_vec128_interleave_high32(x0, x1)       \
-  ((vector128)(vec_mergel(((vec128_32) x0), ((vec128_32) (x1)))))
+  ((vector128)vec_mergel((vector128_32) x0, (vector128_32) x1))
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_high64(x0, x1)       \
-  ((vector128)(vec_mergel(((vec128_64) x0), ((vec128_64) (x1)))))
+  ((vector128)vec_mergel((vector128_64) x0, (vector128_64) x1))
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_low32(x0, x1)       \
-  ((vector128)(vec_mergeh(((vec128_32) x0), ((vec128_32) (x1)))))
+  ((vector128)vec_mergeh((vector128_32) x0, (vector128_32) x1))
 
 #define Lib_IntVector_Intrinsics_vec128_interleave_low64(x0, x1)       \
-  ((vector128)(vec_mergeh(((vec128_64) x0), ((vec128_64) (x1)))))
+  ((vector128)vec_mergeh((vector128_64) x0, (vector128_64) x1))
 
-#define Lib_IntVector_Intrinsics_vec128_load32(x)               \
-  ((vector128)(vec_splat_u32(x)))
+#define Lib_IntVector_Intrinsics_vec128_load32(x)                      \
+  ((vector128)((vector128_32){(unsigned int) x, (unsigned int) x,      \
+                              (unsigned int) x, (unsigned int) x}))
 
 #define Lib_IntVector_Intrinsics_vec128_load32s(x0, x1, x2, x3) \
-  ((vector128)((vector128_32)({x0, x1, x2, x3})))
+  ((vector128)((vector128_32){x0, x1, x2, x3}))
 
 // TODO: why does the x64 version use _mm_set1_epi64x and not _mm_set1_epi64?
 #define Lib_IntVector_Intrinsics_vec128_load64(x)               \
-  ((vector128)(vec_splat_u64(x)))
+    ((vector128)((vector128_64)vec_load_pair((unsigned long long)x, (unsigned long long)x)))
 
 // TODO: not sure
 #define Lib_IntVector_Intrinsics_vec128_load_le(x)              \
   ((vector128)(vec_load_len((unsigned long long*) x, 16)))
 
 #define Lib_IntVector_Intrinsics_vec128_lognot(x0)              \
-  ((vector128)(vec_xor(x0, vec_splat_u32(-1)))))
+  ((vector128)(vec_xor(x0, vec_splat_u32(-1))))
 
 #define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)           \
   ((vector128)(vec_mule(((vector128_32) x0), ((vector128_32) x1))))
@@ -709,31 +710,32 @@ typedef vector unsigned long long vector128_64;
    ((x1) == 16? Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x0) :  \
    ((x1) == 24? Lib_IntVector_Intrinsics_vec128_rotate_left32_24(x0) :  \
     vec_xor(vec_sll(((vector128_32)x0),vec_splat_u32(x1)),              \
-            vec_sll(((vector128_32)x0),vec_splat_u32(32-x1))))))))
+            vec_sll(((vector128_32)x0),vec_splat_u32((uint32_t) (32-x1)))))))))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, x1)          \
-  (Lib_IntVector_Intrinsics_vec128_rotate_left32(x0,32-(x1))
+  (Lib_IntVector_Intrinsics_vec128_rotate_left32(x0,(uint32_t) (32-(x1))))
 
+// TODO: fix that
 #define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(x0, x1)    \
-  ((vector128) (vec_perm((vector128_32) x0, (vector128_32) {},          \
-                         (vector128_32) {x1%4, (x1+1)%4, (x1+2)%4, (x1+3)%4})))
+  ((vector128) ((vector128_32) (vec_perm((vector128_32) x0, (vector128_32) {}, (vector128_8) {}))))
+//(vector128_32) {x1%4, (x1+1)%4, (x1+2)%4, (x1+3)%4}))))
 
 #define Lib_IntVector_Intrinsics_vec128_shift_left64(x0, x1)          \
-  ((vector128)(vec_sll(((vector128_64)x0), vec_load_pair(x1, x1))))
+  ((vector128)(vec_sll(((vector128_64)x0), (vector128_8)((vector128_64)vec_load_pair((unsigned long long) x1, (unsigned long long) x1)))))
 
 #define Lib_IntVector_Intrinsics_vec128_shift_right64(x0, x1)         \
-  ((vector128)(vec_srl(((vector128_64)x0), vec_load_pair(x1, x1))))
+  ((vector128)((vector128_64) vec_srl(((vector128_64)x0), (vector128_8)((vector128_64)vec_load_pair((unsigned long long) x1, (unsigned long long) x1)))))
 
 #define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1)          \
-  ((vector128)(vec_mule(((vector128_32) x0), vec_splat_u64(x1))))
+  ((vector128)(vec_mule(((vector128_32) x0), ((vector128_32) ((vector128_64) vec_splat_u64(x1))))))
 
 #define Lib_IntVector_Intrinsics_vec128_store_le(x0, x1)        \
-  (vec_store_len(x1, (unsigned long long*) x0, 16))
+  (vec_store_len(x1, (unsigned int*) x0, (uint32_t) 16))
 
 // TODO: couldn't do better than that - there must be simpler and faster
 // Maybe: mask, then sub?
 #define Lib_IntVector_Intrinsics_vec128_sub64(x0, x1)                                   \
-  ((vector) (vec_load_pair((((signed long long) x0[0]) - ((signed long long) x1[0])),   \
+  ((vector128) (vec_load_pair((((signed long long) x0[0]) - ((signed long long) x1[0])),   \
                            (((signed long long) x0[3]) - ((signed long long) x1[3])))))
 
 #define Lib_IntVector_Intrinsics_vec128_xor(x0, x1)  \
