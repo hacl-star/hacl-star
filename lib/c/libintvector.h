@@ -611,7 +611,6 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 // IBM z architecture
 #elif (defined(__s390__) || defined(__s390x__) || defined(__zarch__) || defined(__SYSC_ZARCH__))
 
-#include <builtins.h>
 #include <vecintrin.h>
 
 // The main vector 128 type
@@ -619,6 +618,7 @@ typedef vector unsigned int Lib_IntVector_Intrinsics_vec128;
 
 // Some more types used for the conversions
 typedef vector unsigned int vector128;
+typedef vector unsigned char vector128_8;
 typedef vector unsigned int vector128_32;
 typedef vector unsigned long long vector128_64;
 
@@ -708,7 +708,7 @@ typedef vector unsigned long long vector128_64;
   (((x1) == 8? Lib_IntVector_Intrinsics_vec128_rotate_left32_8(x0) :    \
    ((x1) == 16? Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x0) :  \
    ((x1) == 24? Lib_IntVector_Intrinsics_vec128_rotate_left32_24(x0) :  \
-    vec_xor(vec_sll(((vector128_32)x0),vec_splat_u32(x1)),
+    vec_xor(vec_sll(((vector128_32)x0),vec_splat_u32(x1)),              \
             vec_sll(((vector128_32)x0),vec_splat_u32(32-x1))))))))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, x1)          \
