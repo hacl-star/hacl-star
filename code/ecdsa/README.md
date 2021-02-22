@@ -1,6 +1,7 @@
 #Updates: 
 22.02.2021 - Added implementation of the felem_inv for p384 (dh). 
 Added attempted implementation of the p521 reduction (dh).
+Added attempted implementation of the k256 reduction (dh).
 
 
 
