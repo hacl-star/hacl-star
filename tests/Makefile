@@ -4,6 +4,8 @@
 # export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1d/include/"
 # export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib"
 
+include ../dist/gcc-compatible/Makefile.config
+
 KREMLIN_HOME?=../dist/kremlin
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
