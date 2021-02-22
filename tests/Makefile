@@ -35,6 +35,12 @@ arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test curve255
 
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
+vec128-test.exe: ../lib/c/libintvector.h vec128-test.c
+	cc -I../lib/c -O3 $(CFLAGS) vec128-test.c -o vec128-test.exe
+
+../lib/c/libintvector.h:
+	touch ../lib/c/libintvector.h
+
 %.exe: %.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto
 
