@@ -26,7 +26,6 @@ prepare-raw:
 
 release-hacl-star: prepare-raw
 	cp -r ../bindings/ocaml/* hacl-star
-	# rm -rf hacl-star/archive
 	mv hacl-star/raw/hacl-star-raw.opam hacl-star/
 	sed -i 's/make/make "-C" "raw"/g' hacl-star/hacl-star-raw.opam
 	sed -i 's/"\.\/configure"/"sh" "-exc" "cd raw \&\& \.\/configure"/g' hacl-star/hacl-star-raw.opam
