@@ -198,8 +198,8 @@ static uint8_t blognot[16] = {
 };
 
 static uint8_t bmul64[16] = {
-  0x00U, 0x0fU, 0x2cU, 0x56U, 0x50U, 0x3fU, 0x24U, 0x00U,
-  0x38U, 0x6fU, 0xa4U, 0xd6U, 0x98U, 0x5fU, 0x2cU, 0x00U
+  0x1fU, 0x95U, 0x8fU, 0x96U, 0x74U, 0x21U, 0x28U, 0x00U,
+  0x38U, 0x8eU, 0x24U, 0x83U, 0x4aU, 0x17U, 0x82U, 0x02U
 };
 
 static uint8_t bor[16] = {
@@ -412,7 +412,7 @@ int main() {
   compare_and_print_vec("gt64", vec0, bgt64);
   // print_vector("bgt64", &vec0);
 
-  // vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  /*  // vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec0 = initialize_vector32(0, 1, 2, 3);
   vec0 = Lib_IntVector_Intrinsics_vec128_insert32(vec0, 4, 3);
   compare_and_print_vec("insert32", vec0, binsert32);
@@ -422,7 +422,7 @@ int main() {
   vec0 = initialize_vector64(0, 1);
   vec0 = Lib_IntVector_Intrinsics_vec128_insert64(vec0, 2, 1);
   compare_and_print_vec("insert64", vec0, binsert64);
-  // print_vector("binsert64", &vec0);
+  // print_vector("binsert64", &vec0); */
 
   vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
@@ -448,7 +448,7 @@ int main() {
   compare_and_print_vec("interlave_low64", vec0, binterleave_low64);
   //  print_vector("interleave_low64", &vec0);
 
-  vec0 = Lib_IntVector_Intrinsics_vec128_load32(0x01ffff);
+  /*  vec0 = Lib_IntVector_Intrinsics_vec128_load32(0x01ffff);
   compare_and_print_vec("load32", vec0, bload32);
   //  print_vector("bload32", &vec0);
 
@@ -458,18 +458,21 @@ int main() {
 
   vec0 = Lib_IntVector_Intrinsics_vec128_load64(0x0001020304050607);
   compare_and_print_vec("load64", vec0, bload64);
-  //  print_vector("bload64", &vec0);
+  //  print_vector("bload64", &vec0); */
 
   vec0 = initialize_vector();
   vec0 = Lib_IntVector_Intrinsics_vec128_lognot(vec0);
   compare_and_print_vec("lognot", vec0, blognot);
   //  print_vector("blognot", &vec0);
 
-  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
-  vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
+  // TODO:
+  //  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  //  vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
+  vec0 = initialize_vector32(0x1234567, 0x89abcdf0, 0x12345678, 0x9abcdef0);
+  vec1 = initialize_vector32(0x23456789, 0xabcdef01, 0x23456789, 0xabcdef01);
   vec0 = Lib_IntVector_Intrinsics_vec128_mul64(vec0, vec1);
   compare_and_print_vec("mul64", vec0, bmul64);
-  //  print_vector("bmul64", &vec0);
+  // print_vector("bmul64", &vec0);
 
   vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
