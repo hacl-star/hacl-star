@@ -9,12 +9,15 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "test_helpers.h"
+
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "Hacl_Chacha20Poly1305_128.h"
+#if defined(TEST_VEC256)
 #include "Hacl_Chacha20Poly1305_256.h"
+#endif
 #include "EverCrypt_AutoConfig2.h"
 
-#include "test_helpers.h"
 #include "chacha20poly1305_vectors.h"
 
 #define ROUNDS 100000
@@ -54,7 +57,7 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, int aad_l
   ok = ok && (res == 0);
   ok = ok && print_result(in_len,plaintext,in);
 
-
+#if defined(TEST_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     Hacl_Chacha20Poly1305_256_aead_encrypt(key, nonce, aad_len, aad, in_len, in, ciphertext, mac);
     printf("Chacha20Poly1305 (256-bit) Result (chacha20):\n");
@@ -67,6 +70,7 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, int aad_l
     ok = ok && (res == 0);
     ok = ok && print_result(in_len,plaintext,in);
   }
+#endif
 
   return ok;
 }
