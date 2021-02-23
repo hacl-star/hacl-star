@@ -5,7 +5,6 @@
 
 // Remark: it is possible to debug the trace of the primitives defined in
 // this file by using the DEBUG_VECTOR_TRACE C flag.
-
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
 
 #if defined(__x86_64__) || defined(_M_X64)
