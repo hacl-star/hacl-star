@@ -130,7 +130,7 @@ int main(){
   clock_t tdiff2 = t2 - t1;
   cycles cdiff2 = b - a;
 
-
+#if defined(TEST_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     memset(plain,'P',SIZE);
     memset(aead_key,'K',32);
@@ -149,7 +149,7 @@ int main(){
   }
   clock_t tdiff3 = t2 - t1;
   cycles cdiff3 = b - a;
-
+#endif
 
   int res1 = 0;
   for (int j = 0; j < ROUNDS; j++) {
@@ -188,7 +188,7 @@ int main(){
   clock_t tdiff5 = t2 - t1;
   cycles cdiff5 = b - a;
 
-
+#if defined(TEST_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     res1 = 0;
     for (int j = 0; j < ROUNDS; j++) {
@@ -208,6 +208,7 @@ int main(){
   }
   clock_t tdiff6 = t2 - t1;
   cycles cdiff6 = b - a;
+#endif
 
   // JP: I don't understand what this does since this variable is almost always
   // zeroed-out.
@@ -222,9 +223,11 @@ int main(){
   }
   printf("Chacha20Poly1305 Decrypt (32-bit) PERF:\n");  print_time(count,tdiff4,cdiff4);
   printf("Chacha20Poly1305 Decrypt (128-bit) PERF:\n"); print_time(count,tdiff5,cdiff5);
+#if defined(TEST_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("Chacha20Poly1305 Decrypt (256-bit) PERF:\n"); print_time(count,tdiff6,cdiff6);
   }
+#endif
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
