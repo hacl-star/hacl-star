@@ -743,6 +743,7 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 
 #if defined(DEBUG_VECTOR_TRACE)
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
 
