@@ -641,17 +641,19 @@ int main() {
   compare_and_print_vec32("rotate_left32 (12)", vec0, exp);
   print_vector32("rotate_left32 (12)", vec0);
 
-  /*
   vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 16);
-  compare_and_print_vec("rotate_left32(16)", vec0, brotate_left32_16);
-  //  print_vector("rotate_left32_16", vec0);
+  exp = initialize_vector32(0x01000302,0x05040706,0x09080b0a,0x0d0c0f0e);
+  compare_and_print_vec32("rotate_left32 (16)", vec0, exp);
+  print_vector32("rotate_left32 (16)", vec0);
 
   vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 24);
-  compare_and_print_vec("rotate_left32(24)", vec0, brotate_left32_24);
-  //  print_vector("rotate_left32_24", vec0);
+  exp = initialize_vector32(0x00030201,0x04070605,0x080b0a09,0x0c0f0e0d);
+  compare_and_print_vec32("rotate_left32(24)", vec0, exp);
+  print_vector32("rotate_left32 (24)", vec0);
 
+  /*
   vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 3);
   compare_and_print_vec("rotate_left32(3)", vec0, brotate_left32_3);
