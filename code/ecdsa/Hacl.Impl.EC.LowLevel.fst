@@ -76,11 +76,36 @@ let add_long_bn #c x y result =
   |Default -> bn_add_eq_len len x y result
 
 
+val _add_dep_prime: #c: curve -> x: felem c -> t: uint64{v t == 0 \/ v t == 1} 
+  -> result: felem c ->
+  Stack uint64
+    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
+    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+      if uint_v t = 1 then 
+        as_nat c h1 result + uint_v r * getPower2 c == as_nat c h0 x + getPrime c
+      else
+       as_nat c h1 result  == as_nat c h0 x))  
+
+
+let _add_dep_prime #c x t result = 
+  push_frame();
+    let len = getCoordinateLenU64 c in 
+    let b = create len (u64 0) in 
+  let carry = add_bn (const_to_ilbuffer (prime_buffer #c)) x b in 
+
+  let mask = (u64 0) -. t in 
+  copy_conditional #c result b mask;
+  admit();
+  pop_frame();
+  carry
+
+
 let add_dep_prime #c x t result =
   match c with
-  |P256 -> add_dep_prime_p256 x t result
+  |P256 -> _add_dep_prime x t result
   |P384 -> add_dep_prime_p384 x t result
-  |Default -> ()
+  |Default -> _add_dep_prime x t result
+
 
 let sub_bn #c x y result =
   match c with

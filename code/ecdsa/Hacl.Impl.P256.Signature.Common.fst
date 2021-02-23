@@ -1,3 +1,4 @@
+
 module Hacl.Impl.P256.Signature.Common
 
 open FStar.HyperStack.All
@@ -21,6 +22,8 @@ open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Core
+open Hacl.Impl.EC.Setup
+
 
 open Hacl.Impl.P256.Math 
 open FStar.Math.Lemmas
@@ -280,12 +283,12 @@ val multByOrder: #c: curve -> result: point c ->  p: point c ->
 #push-options "--z3rlimit 100"
 
 let multByOrder #c result p tempBuffer =
-  admit();
-  recall_contents order_buffer (prime_order_seq #c);
+  admit() (*);
+  recall_contents order_buffer (prime_order_seq #c)
   assert (disjoint p order_buffer);
   assert (disjoint result order_buffer);
-  assert (disjoint tempBuffer order_buffer);
-  scalarMultiplication p result order_buffer tempBuffer
+  assert (disjoint tempBuffer order_buffer)
+  scalarMultiplication #c p result (order_buffer #c) tempBuffer *)
 
 #pop-options
 

@@ -25,6 +25,13 @@ p384_prime_list) /\ recallable x /\ felem_seq_as_nat P384 (Lib.Sequence.of_list 
 
 
 inline_for_extraction
+let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {witnessed #uint64 #(getCoordinateLenU64 c) x (Lib.Sequence.of_list (prime_list c)) /\ recallable x /\ felem_seq_as_nat c (Lib.Sequence.of_list (prime_list c)) == getPrime c}) = 
+  match c with
+  | P256 -> prime256_buffer
+  | P384 -> prime384_buffer
+  
+
+inline_for_extraction
 let prime256order_buffer: x: glbuffer uint64 (size 4)  
   {witnessed #uint64 #(size 4) x 
   (Lib.Sequence.of_list p256_order_list) /\ recallable x /\ 

@@ -24,6 +24,24 @@
 
 #include "Hacl_P256.h"
 
+static const
+uint64_t
+prime256_buffer[4U] =
+  {
+    (uint64_t)0xffffffffffffffffU,
+    (uint64_t)0xffffffffU,
+    (uint64_t)0U,
+    (uint64_t)0xffffffff00000001U
+  };
+
+static const
+uint64_t
+prime384_buffer[6U] =
+  {
+    (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+    (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
+  };
+
 static inline uint64_t
 mul_carry_add_u64_st(uint64_t c_in, uint64_t a, uint64_t b, uint64_t *out)
 {
@@ -31,6 +49,35 @@ mul_carry_add_u64_st(uint64_t c_in, uint64_t a, uint64_t b, uint64_t *out)
   uint128_t res = (uint128_t)a * b + (uint128_t)c_in + uu____0;
   out[0U] = (uint64_t)res;
   return (uint64_t)(res >> (uint32_t)64U);
+}
+
+static void copy_conditional(Spec_P256_curve c, uint64_t *out, uint64_t *x, uint64_t mask)
+{
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t x_i = x[i];
+    uint64_t out_i = out[i];
+    uint64_t r_i = out_i ^ (mask & (out_i ^ x_i));
+    out[i] = r_i;
+  }
 }
 
 static void cmovznz4(Spec_P256_curve c, uint64_t cin, uint64_t *x, uint64_t *y, uint64_t *r)
@@ -482,23 +529,6 @@ static uint64_t add8(uint64_t *x, uint64_t *y, uint64_t *result)
   return carry1;
 }
 
-static uint64_t add_dep_prime_p256(uint64_t *x, uint64_t t, uint64_t *result)
-{
-  uint64_t y0 = (uint64_t)0U - t;
-  uint64_t y1 = ((uint64_t)0U - t) >> (uint32_t)32U;
-  uint64_t y2 = (uint64_t)0U;
-  uint64_t y3 = t - (t << (uint32_t)32U);
-  uint64_t *r0 = result;
-  uint64_t *r1 = result + (uint32_t)1U;
-  uint64_t *r2 = result + (uint32_t)2U;
-  uint64_t *r3 = result + (uint32_t)3U;
-  uint64_t cc = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, x[0U], y0, r0);
-  uint64_t cc1 = Lib_IntTypes_Intrinsics_add_carry_u64(cc, x[1U], y1, r1);
-  uint64_t cc2 = Lib_IntTypes_Intrinsics_add_carry_u64(cc1, x[2U], y2, r2);
-  uint64_t cc3 = Lib_IntTypes_Intrinsics_add_carry_u64(cc2, x[3U], y3, r3);
-  return cc3;
-}
-
 static uint64_t sub4_il(uint64_t *x, const uint64_t *y, uint64_t *result)
 {
   uint64_t *r0 = result;
@@ -657,24 +687,6 @@ static void square_p256(uint64_t *f, uint64_t *out)
   uint64_t c33 = c32 + h_3 + c4;
   out[7U] = c33;
 }
-
-static const
-uint64_t
-prime256_buffer[4U] =
-  {
-    (uint64_t)0xffffffffffffffffU,
-    (uint64_t)0xffffffffU,
-    (uint64_t)0U,
-    (uint64_t)0xffffffff00000001U
-  };
-
-static const
-uint64_t
-prime384_buffer[6U] =
-  {
-    (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-    (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-  };
 
 static void uploadZeroImpl(Spec_P256_curve c, uint64_t *f)
 {
@@ -955,21 +967,87 @@ static uint64_t add_long_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_
   }
 }
 
+static uint64_t _add_dep_prime(Spec_P256_curve c, uint64_t *x, uint64_t t, uint64_t *result)
+{
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t b[len];
+  memset(b, 0U, len * sizeof (uint64_t));
+  uint32_t unused;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        unused = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        unused = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        unused = (uint32_t)4U;
+      }
+  }
+  const uint64_t *sw;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        sw = prime256_buffer;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        sw = prime384_buffer;
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  uint64_t carry = add_bn(c, const_to_ilbuffer__uint64_t(sw), x, b);
+  uint64_t mask = (uint64_t)0U - t;
+  copy_conditional(c, result, b, mask);
+  return carry;
+}
+
 static uint64_t add_dep_prime(Spec_P256_curve c, uint64_t *x, uint64_t t, uint64_t *result)
 {
   switch (c)
   {
     case Spec_P256_P256:
       {
-        return (uint64_t)(void *)add_dep_prime_p256(x, t, result);
+        return _add_dep_prime(c, x, t, result);
       }
     case Spec_P256_P384:
       {
-        return (uint64_t)(void *)add_dep_prime_p384(x, t, result);
+        return add_dep_prime_p384(x, t, result);
       }
     case Spec_P256_Default:
       {
-        return (uint64_t)(void *)(uint8_t)0U;
+        return _add_dep_prime(c, x, t, result);
       }
     default:
       {
@@ -1658,7 +1736,7 @@ static uint64_t compare_felem(Spec_P256_curve c, uint64_t *a, uint64_t *b)
   return tmp;
 }
 
-static void copy_conditional(Spec_P256_curve c, uint64_t *out, uint64_t *x, uint64_t mask)
+static void copy_conditional0(Spec_P256_curve c, uint64_t *out, uint64_t *x, uint64_t mask)
 {
   uint32_t len;
   switch (c)
@@ -2578,9 +2656,9 @@ copy_point_conditional(
       }
   }
   uint64_t *p_z = p + (uint32_t)2U * sw;
-  copy_conditional(c, x3_out, p_x, mask);
-  copy_conditional(c, y3_out, p_y, mask);
-  copy_conditional(c, z3_out, p_z, mask);
+  copy_conditional0(c, x3_out, p_x, mask);
+  copy_conditional0(c, y3_out, p_y, mask);
+  copy_conditional0(c, z3_out, p_z, mask);
 }
 
 static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
@@ -4413,7 +4491,7 @@ normalisation_update(
   montgomery_multiplication_buffer_by_one(c, z2x, resultX);
   montgomery_multiplication_buffer_by_one(c, z3y, resultY);
   uploadOneImpl(c, resultZ);
-  copy_conditional(c, resultZ, zeroBuffer, bit);
+  copy_conditional0(c, resultZ, zeroBuffer, bit);
 }
 
 static void norm(Spec_P256_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer)

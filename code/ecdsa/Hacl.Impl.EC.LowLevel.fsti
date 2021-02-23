@@ -116,13 +116,6 @@ val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: fe
       Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
 
 
-inline_for_extraction
-let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {witnessed #uint64 #(getCoordinateLenU64 c) x (Lib.Sequence.of_list (prime_list c)) /\ recallable x /\ felem_seq_as_nat c (Lib.Sequence.of_list (prime_list c)) == getPrime c}) = 
-  match c with
-  | P256 -> prime256_buffer
-  | P384 -> prime384_buffer
-
-
 val reduction_prime_2prime_with_carry: #c: curve -> x: widefelem c -> result: felem c -> 
   Stack unit 
     (requires fun h -> 

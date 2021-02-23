@@ -29,15 +29,6 @@ let add6 x y result =
   bn_add_eq_len (size 6) x y result
 
 
-val add12: x: widefelem P384 -> y: widefelem P384 -> result: widefelem P384 -> Stack uint64 
-  (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
-  (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ 
-    wide_as_nat P384 h1 result + v c * pow2 768 == wide_as_nat P384 h0 x + wide_as_nat P384 h0 y)
-    
-let add12 x y result = 
-  bn_add_eq_len (size 12) x y result
-
-
 (* 
 val lemma_t_computation_p384: t: uint64 {uint_v t == 0 \/ uint_v t == 1} ->
   Lemma
