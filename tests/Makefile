@@ -21,6 +21,18 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 
 arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test curve25519-arm-test.test
 
+build-z15: blake2-test.exe blake2s-32-test-streaming.exe blake2s-128-test-streaming.exe \
+     blake2b-32-test-streaming.exe \
+     chacha20-test.exe chacha20-vec-test.exe \
+     poly1305-test.exe poly1305-32-test-streaming.exe poly1305-128-test-streaming.exe \
+     chacha20poly1305-test.exe
+
+z15: blake2-test.test blake2s-32-test-streaming.test blake2s-128-test-streaming.test \
+     blake2b-32-test-streaming.test \
+     chacha20-test.test chacha20-vec-test.test \
+     poly1305-test.test poly1305-32-test-streaming.test poly1305-128-test-streaming.test \
+     chacha20poly1305-test.test
+
 # Dependency
 
 %.d: %.c
