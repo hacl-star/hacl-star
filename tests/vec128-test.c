@@ -619,18 +619,26 @@ int main() {
   compare_and_print_vec64("mul64 (#1)", vec0, exp);
   //  print_vector64("mul64", vec0);
 
-  /*
   // Rotate left 32
-  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  //  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);  
+  vec0 = initialize_vector32(0x11112222, 0x33334444UL, 0x55556666, 0x77778888UL);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 0);
-  compare_and_print_vec("rotate_left32(0)", vec0, brotate_left32_0);
-  //  print_vector("rotate_left32_0", vec0);
+  //  compare_and_print_vec32("rotate_left32(0)", vec0, brotate_left32_0);
+  print_vector32("rotate_left32 (0)", vec0);
 
-  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  //  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  vec0 = initialize_vector32(0x11112222, 0x33334444UL, 0x55556666, 0x77778888UL);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 8);
-  compare_and_print_vec("rotate_left32(8)", vec0, brotate_left32_8);
-  //  print_vector("rotate_left32_8", vec0);
+  //  compare_and_print_vec32("rotate_left32(8)", vec0, brotate_left32_8);
+  print_vector32("rotate_left32 (8)", vec0);
 
+  //  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  vec0 = initialize_vector32(0x11112222, 0x33334444UL, 0x55556666, 0x77778888UL);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 12);
+  //  compare_and_print_vec32("rotate_left32(8)", vec0, brotate_left32_8);
+  print_vector32("rotate_left32 (12)", vec0);
+
+  /*
   vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 16);
   compare_and_print_vec("rotate_left32(16)", vec0, brotate_left32_16);
