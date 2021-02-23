@@ -705,7 +705,7 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 
 // TODO: fix that
 #define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(x0, x1)    \
-  ((vector128)(vec_perm(x0, (vector128_8){                              \
+  ((vector128)(vec_perm((vector128)x0, (vector128){}, (vector128_8){    \
         (x1%4)+0,(x1%4)+1,(x1%4)+2,(x1%4)+3,                            \
           ((x1+1)%4)+0,((x1+1)%4)+1,((x1+1)%4)+2,((x1+1)%4)+3,          \
           ((x1+2)%4)+0,((x1+2)%4)+1,((x1+2)%4)+2,((x1+2)%4)+3,          \
