@@ -690,7 +690,7 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 // before calling vec_mule
 #define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)           \
   ((vector128)(vec_perm((vector128_8) x0, (vector128_8) {},     \
-                        (vector128_8){4,6,7,0,1,2,3,12,13,14,15,8,9,10,11})))
+                        (vector128_8){4,5,6,7,0,1,2,3,12,13,14,15,8,9,10,11})))
 //((vector128_32) x1))))
 //  ((vector128)(vec_mule(((vector128_32) x0), ((vector128_32) x1))))
 
