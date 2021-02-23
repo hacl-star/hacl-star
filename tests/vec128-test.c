@@ -564,14 +564,14 @@ int main() {
   vec1 = initialize_vector32(0x0c0d0e0f, 0x00010203, 0x04050607, 0x08090a0b);
   vec0 = Lib_IntVector_Intrinsics_vec128_interleave_low32(vec0, vec1);
   exp = initialize_vector32(0x00010203,0x0c0d0e0f,0x04050607,0x00010203);
-  compare_and_print_vec8("interlave_low32", vec0, exp);
+  compare_and_print_vec32("interlave_low32", vec0, exp);
   //  print_vector32("interleave_low32", vec0);
 
   vec0 = initialize_vector64(0x0001020304050607, 0x08090a0b0c0d0e0f);
   vec1 = initialize_vector64(0x0c0d0e0f00010203, 0x0405060708090a0b);
   vec0 = Lib_IntVector_Intrinsics_vec128_interleave_low64(vec0, vec1);
   exp = initialize_vector64(0x1020304050607UL,0xc0d0e0f00010203UL);
-  compare_and_print_vec8("interlave_low64", vec0, exp);
+  compare_and_print_vec64("interlave_low64", vec0, exp);
   //  print_vector64("interleave_low64", vec0);
 
   /*  vec0 = Lib_IntVector_Intrinsics_vec128_load32(0x01ffff);
