@@ -172,7 +172,8 @@ int main() {
   vec0 = Lib_IntVector_Intrinsics_vec128_load_le(tmp);
   exp = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   compare_and_print_vec32("load_le", vec0, exp);
-  //  print_vector32("load_le", vec0);
+  print_vector32("load_le", vec0);
+  print_vector64("load_le", vec0);
   
   vec0 = initialize_vector32(0x0, 0x1, 0x2, 0x3);
   vec1 = initialize_vector32(0x10, 0x11, 0x12, 0x13);
