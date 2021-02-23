@@ -11,9 +11,8 @@ open Lib.Buffer
 open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
-module F56 = Hacl.Impl.Ed25519.Field56
+module F56 = Hacl.Impl.BignumQ.Mul
 module S51 = Hacl.Spec.Curve25519.Field51.Definition
-module S56 = Hacl.Spec.Ed25519.Field56.Definition
 
 module SC = Spec.Curve25519
 
@@ -23,18 +22,13 @@ val gte_q:
   s:lbuffer uint64 5ul ->
   Stack bool
     (requires fun h -> live h s /\
-      (let s = as_seq h s in
-       let op_String_Access = Seq.index in
-       v s.[0] < 0x100000000000000 /\
-       v s.[1] < 0x100000000000000 /\
-       v s.[2] < 0x100000000000000 /\
-       v s.[3] < 0x100000000000000 /\
-       v s.[4] < 0x100000000000000)
+      F56.qelem_fits h s (1, 1, 1, 1, 1)
      )
     (ensures  fun h0 b h1 -> h0 == h1 /\
       (b <==> F56.as_nat h0 s >= Spec.Ed25519.q)
     )
 
+[@CInline]
 let gte_q s =
   let h0 = get() in
   let s0 = s.(0ul) in
@@ -194,6 +188,7 @@ val eq:
       (r <==> F51.fevalh h0 a == F51.fevalh h0 b)
     )
 
+[@CInline]
 let eq a b =
   let a0 = a.(0ul) in
   let a1 = a.(1ul) in
@@ -220,6 +215,8 @@ let eq a b =
    u64_to_UInt64 a3 =^ u64_to_UInt64 b3 &&
    u64_to_UInt64 a4 =^ u64_to_UInt64 b4)
 
+
+inline_for_extraction noextract
 val point_equal_1:
     p:point
   -> q:point
@@ -249,6 +246,8 @@ let point_equal_1 p q tmp =
   reduce qxpz;
   eq pxqz qxpz
 
+
+inline_for_extraction noextract
 val point_equal_2:
     p:point
   -> q:point
@@ -276,6 +275,7 @@ let point_equal_2 p q tmp =
   reduce qypz;
   eq pyqz qypz
 
+
 val point_equal:
     p:point
   -> q:point ->
@@ -286,6 +286,8 @@ val point_equal:
     (ensures  fun h0 z h1 -> modifies0 h0 h1 /\
       (z <==> Spec.Ed25519.point_equal (F51.point_eval h0 p) (F51.point_eval h0 q))
     )
+
+[@CInline]
 let point_equal p q =
   push_frame();
   let tmp = create 20ul (u64 0) in

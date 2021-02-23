@@ -8,7 +8,6 @@ open Lib.IntTypes
 open Lib.ByteSequence
 open Lib.Buffer
 
-open Hacl.Impl.Ed25519.Sign
 open Hacl.Impl.Ed25519.Sign.Steps
 open Hacl.Impl.Ed25519.SecretExpand
 open Hacl.Impl.Ed25519.SecretToPublic
@@ -108,8 +107,8 @@ let sign_ signature ks len msg tmp_bytes tmp_ints =
 
   concat2 32ul rs' 32ul s' signature
 
-inline_for_extraction
-val sign:
+
+val sign_expanded:
     signature:lbuffer uint8 64ul
   -> ks:keys
   -> len:size_t{v len + 64 <= max_size_t}
@@ -123,7 +122,9 @@ val sign:
         (as_seq h0 (gsub ks 64ul 32ul))
         (as_seq h0 msg)
     )
-let sign signature ks msg len =
+
+[@CInline]
+let sign_expanded signature ks msg len =
   push_frame();
   let tmp_bytes = create 352ul (u8 0) in
   let tmp_ints  = create 65ul (u64 0) in
