@@ -718,11 +718,9 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
   (((vector128)((vector128_64)vec_rli((vector128_64)x0, (unsigned long)(64-x1)))) & \
    ((vector128)((vector128_64){0xffffffffffffffff >> x1, 0xffffffffffffffff >> x1})))
 
+// Doesn't work with vec_splat_u64
 #define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1)          \
   ((vector128)(Lib_IntVector_Intrinsics_vec128_mul64(x0,((vector128_64){(unsigned long long)x1,(unsigned long long) x1}))))
-//  ((vector128)(Lib_IntVector_Intrinsics_vec128_mul64(x0,((vector128_64)vec_splat_u64((unsigned long long)x1)))))
-//  ((vector128)(Lib_IntVector_Intrinsics_vec128_mul64(x0,((vector128_32) ((vector128_64) vec_splat_u64((unsigned long long)x1))))))
-//  ((vector128)(vec_mule(((vector128_32) x0), ((vector128_32) ((vector128_64) vec_splat_u64(x1))))))
 
 #define Lib_IntVector_Intrinsics_vec128_store_le(x0, x1)        \
   (vec_store_len(x1, (unsigned int*) x0, (uint32_t) 16))
