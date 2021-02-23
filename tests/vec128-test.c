@@ -806,6 +806,12 @@ int main() {
   print_vector64("smul64 (#2)", vec0);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
+  vec0 = Lib_IntVector_Intrinsics_vec128_smul64(vec0, 0x0011223344556677);
+  exp = initialize_vector64(0x123d7aec6c090b51UL,0x36af4b2bbf0eb289UL);
+  compare_and_print_vec64("smul64 (#3)", vec0, exp);
+  print_vector64("smul64 (#3)", vec0);
+
+  vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec1 = initialize_vector64(0x8899aabbccddeeff, 0x0011223344556677);
   vec0 = Lib_IntVector_Intrinsics_vec128_sub64(vec0, vec1);
   exp = initialize_vector64(0x7777777777777778UL,0x8888888888888888UL);
