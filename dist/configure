@@ -305,6 +305,8 @@ supports_vale=false
 supports_inline_asm=false
 supports_intrinsics=false
 
+echo "CFLAGS ?=" >> Makefile.config
+
 if detect_arm; then
   echo "... detected ARM platform"
   if detect_arm_neon; then
