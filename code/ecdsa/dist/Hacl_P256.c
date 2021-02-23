@@ -69,42 +69,6 @@ static uint64_t add6(uint64_t *x, uint64_t *y, uint64_t *result)
   return c;
 }
 
-static uint64_t add12(uint64_t *x, uint64_t *y, uint64_t *result)
-{
-  uint64_t c = (uint64_t)0U;
-  uint32_t k = (uint32_t)12U;
-  for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-  {
-    uint64_t t1 = x[(uint32_t)4U * i];
-    uint64_t t20 = y[(uint32_t)4U * i];
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t20, result + (uint32_t)4U * i);
-    uint64_t t10 = x[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = y[(uint32_t)4U * i + (uint32_t)1U];
-    c =
-      Lib_IntTypes_Intrinsics_add_carry_u64(c,
-        t10,
-        t21,
-        result + (uint32_t)4U * i + (uint32_t)1U);
-    uint64_t t11 = x[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = y[(uint32_t)4U * i + (uint32_t)2U];
-    c =
-      Lib_IntTypes_Intrinsics_add_carry_u64(c,
-        t11,
-        t22,
-        result + (uint32_t)4U * i + (uint32_t)2U);
-    uint64_t t12 = x[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = y[(uint32_t)4U * i + (uint32_t)3U];
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, result + (uint32_t)4U * i + (uint32_t)3U);
-  }
-  for (uint32_t i = k; i < (uint32_t)12U; i++)
-  {
-    uint64_t t1 = x[i];
-    uint64_t t2 = y[i];
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, result + i);
-  }
-  return c;
-}
-
 static uint64_t add_dep_prime_p384(uint64_t *x, uint64_t t, uint64_t *result)
 {
   uint64_t b[6U] = { 0U };
@@ -699,8 +663,7 @@ static void uploadZeroImpl(Spec_P256_curve c, uint64_t *f)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   for (uint32_t i = (uint32_t)0U; i < len; i++)
@@ -726,8 +689,7 @@ static void uploadZeroPoint(Spec_P256_curve c, uint64_t *p)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   uint64_t *x = p;
@@ -756,8 +718,7 @@ static void cmovznz4(Spec_P256_curve c, uint64_t cin, uint64_t *x, uint64_t *y, 
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   for (uint32_t i = (uint32_t)0U; i < len; i++)
@@ -771,12 +732,34 @@ static void cmovznz4(Spec_P256_curve c, uint64_t cin, uint64_t *x, uint64_t *y, 
 
 static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *result)
 {
+  uint32_t len;
   switch (c)
   {
     case Spec_P256_P256:
       {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        return add4(x, y, result);
+      }
+    case Spec_P256_P384:
+      {
         uint64_t c1 = (uint64_t)0U;
-        uint32_t k = (uint32_t)4U;
+        uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
         for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
         {
           uint64_t t1 = x[(uint32_t)4U * i];
@@ -804,7 +787,7 @@ static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *re
               t2,
               result + (uint32_t)4U * i + (uint32_t)3U);
         }
-        for (uint32_t i = k; i < (uint32_t)4U; i++)
+        for (uint32_t i = k; i < len; i++)
         {
           uint64_t t1 = x[i];
           uint64_t t2 = y[i];
@@ -812,10 +795,10 @@ static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *re
         }
         return c1;
       }
-    case Spec_P256_P384:
+    case Spec_P256_Default:
       {
         uint64_t c1 = (uint64_t)0U;
-        uint32_t k = (uint32_t)4U;
+        uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
         for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
         {
           uint64_t t1 = x[(uint32_t)4U * i];
@@ -843,7 +826,7 @@ static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *re
               t2,
               result + (uint32_t)4U * i + (uint32_t)3U);
         }
-        for (uint32_t i = k; i < (uint32_t)6U; i++)
+        for (uint32_t i = k; i < len; i++)
         {
           uint64_t t1 = x[i];
           uint64_t t2 = y[i];
@@ -861,6 +844,25 @@ static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *re
 
 static uint64_t add_long_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *result)
 {
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)4U;
+      }
+  }
+  uint32_t len = sw * (uint32_t)2U;
   switch (c)
   {
     case Spec_P256_P256:
@@ -869,7 +871,81 @@ static uint64_t add_long_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_
       }
     case Spec_P256_P384:
       {
-        return add12(x, y, result);
+        uint64_t c1 = (uint64_t)0U;
+        uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = x[(uint32_t)4U * i];
+          uint64_t t20 = y[(uint32_t)4U * i];
+          c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, result + (uint32_t)4U * i);
+          uint64_t t10 = x[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t21 = y[(uint32_t)4U * i + (uint32_t)1U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t10,
+              t21,
+              result + (uint32_t)4U * i + (uint32_t)1U);
+          uint64_t t11 = x[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t22 = y[(uint32_t)4U * i + (uint32_t)2U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t11,
+              t22,
+              result + (uint32_t)4U * i + (uint32_t)2U);
+          uint64_t t12 = x[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t2 = y[(uint32_t)4U * i + (uint32_t)3U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t12,
+              t2,
+              result + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < len; i++)
+        {
+          uint64_t t1 = x[i];
+          uint64_t t2 = y[i];
+          c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, result + i);
+        }
+        return c1;
+      }
+    case Spec_P256_Default:
+      {
+        uint64_t c1 = (uint64_t)0U;
+        uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = x[(uint32_t)4U * i];
+          uint64_t t20 = y[(uint32_t)4U * i];
+          c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, result + (uint32_t)4U * i);
+          uint64_t t10 = x[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t21 = y[(uint32_t)4U * i + (uint32_t)1U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t10,
+              t21,
+              result + (uint32_t)4U * i + (uint32_t)1U);
+          uint64_t t11 = x[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t22 = y[(uint32_t)4U * i + (uint32_t)2U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t11,
+              t22,
+              result + (uint32_t)4U * i + (uint32_t)2U);
+          uint64_t t12 = x[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t2 = y[(uint32_t)4U * i + (uint32_t)3U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t12,
+              t2,
+              result + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < len; i++)
+        {
+          uint64_t t1 = x[i];
+          uint64_t t2 = y[i];
+          c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, result + i);
+        }
+        return c1;
       }
     default:
       {
@@ -1026,8 +1102,7 @@ static void uploadOneImpl(Spec_P256_curve c, uint64_t *f)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   for (uint32_t i = (uint32_t)1U; i < len; i++)
@@ -1103,8 +1178,7 @@ static void changeEndian(Spec_P256_curve c, uint64_t *b)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   uint32_t lenByTwo = len >> (uint32_t)1U;
@@ -1253,8 +1327,7 @@ reduction_prime_2prime_with_carry_cin(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
@@ -1307,8 +1380,7 @@ static void reduction_prime_2prime_with_carry(Spec_P256_curve c, uint64_t *x, ui
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   uint64_t cin = x[len];
@@ -1333,8 +1405,7 @@ static void reduction_prime_2prime(Spec_P256_curve c, uint64_t *x, uint64_t *res
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
@@ -1537,8 +1608,7 @@ static uint64_t isZero_uint64_CT(Spec_P256_curve c, uint64_t *f)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   for (uint32_t i = (uint32_t)0U; i < len; i++)
@@ -1570,8 +1640,7 @@ static uint64_t compare_felem(Spec_P256_curve c, uint64_t *a, uint64_t *b)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   for (uint32_t i = (uint32_t)0U; i < len; i++)
@@ -1602,8 +1671,7 @@ static void copy_conditional(Spec_P256_curve c, uint64_t *out, uint64_t *x, uint
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   for (uint32_t i = (uint32_t)0U; i < len; i++)
@@ -1672,8 +1740,7 @@ static void shift1(Spec_P256_curve c, uint64_t *t, uint64_t *out)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint32_t len = sw * (uint32_t)2U;
@@ -1736,8 +1803,7 @@ static void montgomery_multiplication_round(Spec_P256_curve c, uint64_t *t, uint
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -1801,8 +1867,7 @@ montgomery_multiplication_round_k0(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -1831,8 +1896,7 @@ montgomery_multiplication_buffer_by_one_w_ko(Spec_P256_curve c, uint64_t *a, uin
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -1865,8 +1929,7 @@ montgomery_multiplication_buffer_by_one_ko(Spec_P256_curve c, uint64_t *a, uint6
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -1923,8 +1986,7 @@ montgomery_multiplication_buffer_w_k0(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -1961,8 +2023,7 @@ montgomery_multiplication_buffer_k0(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -2012,8 +2073,7 @@ static void montgomery_square_buffer_w_k0(Spec_P256_curve c, uint64_t *a, uint64
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -2044,8 +2104,7 @@ static void montgomery_square_buffer_k0(Spec_P256_curve c, uint64_t *a, uint64_t
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -2315,8 +2374,7 @@ point_double_a_b_g(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        coordinateLen = (uint32_t)4U;
       }
   }
   uint64_t *pX = p;
@@ -2402,8 +2460,7 @@ point_double(Spec_P256_curve c, uint64_t *p, uint64_t *result, uint64_t *tempBuf
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   uint64_t *pY = p + len;
@@ -2473,8 +2530,7 @@ copy_point_conditional(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *z = maskPoint + (uint32_t)2U * sw0;
@@ -2495,8 +2551,7 @@ copy_point_conditional(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *p_y = p + sw1;
@@ -2515,8 +2570,7 @@ copy_point_conditional(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *p_z = p + (uint32_t)2U * sw;
@@ -2543,8 +2597,7 @@ static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *u1 = t12 + (uint32_t)4U * sw0;
@@ -2563,8 +2616,7 @@ static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *u2 = t12 + (uint32_t)5U * sw1;
@@ -2583,8 +2635,7 @@ static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw2 = (uint32_t)4U;
       }
   }
   uint64_t *s1 = t12 + (uint32_t)6U * sw2;
@@ -2603,8 +2654,7 @@ static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw3 = (uint32_t)4U;
       }
   }
   uint64_t *s2 = t12 + (uint32_t)7U * sw3;
@@ -2623,8 +2673,7 @@ static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw4 = (uint32_t)4U;
       }
   }
   uint64_t *h = t12 + (uint32_t)8U * sw4;
@@ -2643,8 +2692,7 @@ static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw5 = (uint32_t)4U;
       }
   }
   uint64_t *r = t12 + (uint32_t)9U * sw5;
@@ -2663,8 +2711,7 @@ static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw6 = (uint32_t)4U;
       }
   }
   uint64_t *uh = t12 + (uint32_t)10U * sw6;
@@ -2683,8 +2730,7 @@ static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *hCube = t12 + (uint32_t)11U * sw;
@@ -2721,8 +2767,7 @@ computex3_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *tempBuffer3 = t4 + sw0;
@@ -2742,8 +2787,7 @@ computex3_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *rH = tempBuffer3 + sw1;
@@ -2762,8 +2806,7 @@ computex3_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *twoUh = tempBuffer3 + (uint32_t)2U * sw;
@@ -2799,8 +2842,7 @@ computeY3_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *y3 = tempBuffer5 + sw0;
@@ -2819,8 +2861,7 @@ computeY3_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *tempBuffer3 = tempBuffer5 + (uint32_t)2U * sw1;
@@ -2840,8 +2881,7 @@ computeY3_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw2 = (uint32_t)4U;
       }
   }
   uint64_t *u1hx3 = tempBuffer3 + sw2;
@@ -2860,8 +2900,7 @@ computeY3_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *ru1hx3 = tempBuffer3 + (uint32_t)2U * sw;
@@ -2896,8 +2935,7 @@ copy_result_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *y3_out = t5 + sw0;
@@ -2916,8 +2954,7 @@ copy_result_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *z3_out = t5 + (uint32_t)2U * sw1;
@@ -2938,8 +2975,7 @@ copy_result_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw2 = (uint32_t)4U;
       }
   }
   memcpy(result, x3_out, sw2 * sizeof (uint64_t));
@@ -2958,8 +2994,7 @@ copy_result_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw3 = (uint32_t)4U;
       }
   }
   uint32_t sw4;
@@ -2977,8 +3012,7 @@ copy_result_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw4 = (uint32_t)4U;
       }
   }
   memcpy(result + sw3, y3_out, sw4 * sizeof (uint64_t));
@@ -2997,8 +3031,7 @@ copy_result_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw5 = (uint32_t)4U;
       }
   }
   uint32_t sw6;
@@ -3016,8 +3049,7 @@ copy_result_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw6 = (uint32_t)4U;
       }
   }
   uint32_t sw;
@@ -3035,8 +3067,7 @@ copy_result_point_add(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   memcpy(result + sw5 + sw6, z3_out, sw * sizeof (uint64_t));
@@ -3085,8 +3116,7 @@ computeXYZ(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *z1 = p + (uint32_t)2U * sw0;
@@ -3105,8 +3135,7 @@ computeXYZ(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *z2 = q + (uint32_t)2U * sw1;
@@ -3125,8 +3154,7 @@ computeXYZ(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw2 = (uint32_t)4U;
       }
   }
   uint64_t *z3 = t5 + (uint32_t)2U * sw2;
@@ -3145,8 +3173,7 @@ computeXYZ(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *t1 = t5 + (uint32_t)3U * sw;
@@ -3202,8 +3229,7 @@ _point_add_if_second_branch_impl(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *u1 = x3y3z3u1u2s1s2 + (uint32_t)4U * sw0;
@@ -3222,8 +3248,7 @@ _point_add_if_second_branch_impl(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *u2 = x3y3z3u1u2s1s2 + (uint32_t)5U * sw1;
@@ -3242,8 +3267,7 @@ _point_add_if_second_branch_impl(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw2 = (uint32_t)4U;
       }
   }
   uint64_t *s1 = x3y3z3u1u2s1s2 + (uint32_t)6U * sw2;
@@ -3262,8 +3286,7 @@ _point_add_if_second_branch_impl(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *s2 = x3y3z3u1u2s1s2 + (uint32_t)7U * sw;
@@ -3297,8 +3320,7 @@ _point_add_if_second_branch_impl0(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *r = rhuhhCube + sw0;
@@ -3317,8 +3339,7 @@ _point_add_if_second_branch_impl0(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *uh = rhuhhCube + (uint32_t)2U * sw1;
@@ -3337,8 +3358,7 @@ _point_add_if_second_branch_impl0(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *hCube = rhuhhCube + (uint32_t)3U * sw;
@@ -3380,8 +3400,7 @@ _point_add_if_second_branch_impl1(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *rhuhhCube = x3hCube + (uint32_t)8U * sw;
@@ -3406,8 +3425,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *u1 = t12 + (uint32_t)4U * sw0;
@@ -3426,8 +3444,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *u2 = t12 + (uint32_t)5U * sw1;
@@ -3446,8 +3463,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw2 = (uint32_t)4U;
       }
   }
   uint64_t *s1 = t12 + (uint32_t)6U * sw2;
@@ -3466,8 +3482,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw3 = (uint32_t)4U;
       }
   }
   uint64_t *s2 = t12 + (uint32_t)7U * sw3;
@@ -3487,8 +3502,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw4 = (uint32_t)4U;
       }
   }
   uint64_t *pY = p + sw4;
@@ -3507,8 +3521,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw5 = (uint32_t)4U;
       }
   }
   uint64_t *pZ = p + (uint32_t)2U * sw5;
@@ -3528,8 +3541,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw6 = (uint32_t)4U;
       }
   }
   uint64_t *qY = q + sw6;
@@ -3548,8 +3560,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw7 = (uint32_t)4U;
       }
   }
   uint64_t *qZ = q + (uint32_t)2U * sw7;
@@ -3569,8 +3580,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw8 = (uint32_t)4U;
       }
   }
   uint64_t *z1Square = t4 + sw8;
@@ -3589,8 +3599,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw9 = (uint32_t)4U;
       }
   }
   uint64_t *z2Cube = t4 + (uint32_t)2U * sw9;
@@ -3609,8 +3618,7 @@ static void _point_add_0(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *z1Cube = t4 + (uint32_t)3U * sw;
@@ -3644,8 +3652,7 @@ point_add(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *result, uint64_
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *t5 = tempBuffer + (uint32_t)12U * sw;
@@ -4229,8 +4236,7 @@ static void pointToDomain(Spec_P256_curve c, uint64_t *p, uint64_t *result)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   uint64_t *p_x = p;
@@ -4254,8 +4260,7 @@ static void pointToDomain(Spec_P256_curve c, uint64_t *p, uint64_t *result)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len1 = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len1);
@@ -4278,8 +4283,7 @@ static void pointToDomain(Spec_P256_curve c, uint64_t *p, uint64_t *result)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len10 = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len10);
@@ -4302,8 +4306,7 @@ static void pointToDomain(Spec_P256_curve c, uint64_t *p, uint64_t *result)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len11 = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len11);
@@ -4330,8 +4333,7 @@ static uint64_t isPointAtInfinityPrivate(Spec_P256_curve c, uint64_t *p)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   uint32_t start = len * (uint32_t)2U;
@@ -4358,8 +4360,7 @@ static inline void cswap(Spec_P256_curve c, uint64_t bit, uint64_t *p1, uint64_t
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint32_t len = sw * (uint32_t)3U;
@@ -4395,8 +4396,7 @@ normalisation_update(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
@@ -4430,8 +4430,7 @@ static void norm(Spec_P256_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw0 = (uint32_t)4U;
       }
   }
   uint64_t *yf = p + sw0;
@@ -4450,8 +4449,7 @@ static void norm(Spec_P256_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw1 = (uint32_t)4U;
       }
   }
   uint64_t *zf = p + (uint32_t)2U * sw1;
@@ -4470,8 +4468,7 @@ static void norm(Spec_P256_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw2 = (uint32_t)4U;
       }
   }
   uint64_t *z2f = tempBuffer + sw2;
@@ -4490,8 +4487,7 @@ static void norm(Spec_P256_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw3 = (uint32_t)4U;
       }
   }
   uint64_t *z3f = tempBuffer + (uint32_t)2U * sw3;
@@ -4510,8 +4506,7 @@ static void norm(Spec_P256_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint64_t *t8 = tempBuffer + (uint32_t)3U * sw;
@@ -4713,8 +4708,7 @@ scalarMultiplicationL(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   uint64_t *q = tempBuffer;
@@ -4793,8 +4787,7 @@ secretToPublic(Spec_P256_curve c, uint64_t *result, uint8_t *scalar, uint64_t *t
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
@@ -4825,8 +4818,7 @@ static void bufferToJac(Spec_P256_curve c, uint64_t *p, uint64_t *result)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = (uint32_t)4U;
       }
   }
   uint32_t lengthXY = sw * (uint32_t)2U;
@@ -4880,8 +4872,7 @@ static bool isPointOnCurvePublic(Spec_P256_curve c, uint64_t *p)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sz = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), sz);
@@ -4907,8 +4898,7 @@ static bool isPointOnCurvePublic(Spec_P256_curve c, uint64_t *p)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len0 = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len0);
@@ -4932,8 +4922,7 @@ static bool isPointOnCurvePublic(Spec_P256_curve c, uint64_t *p)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sz1 = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), sz1);
@@ -4960,8 +4949,7 @@ static bool isPointOnCurvePublic(Spec_P256_curve c, uint64_t *p)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -5021,8 +5009,7 @@ static bool isCoordinateValid(Spec_P256_curve c, uint64_t *p)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
@@ -5107,8 +5094,7 @@ _ecp256dh_r(Spec_P256_curve c, uint64_t *result, uint64_t *pubKey, uint8_t *scal
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)25U * len);

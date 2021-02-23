@@ -28,6 +28,7 @@ let prime384: (a: pos {a > 3 && a < pow2 384}) =
 type curve = 
   |P256
   |P384
+  |Default
 
 
 let invert_state_s (a: curve): Lemma
@@ -42,6 +43,7 @@ let getCoordinateLen curve =
   match curve with 
   |P256 -> 32
   |P384 -> 48
+  |Default -> 32
 
 
 inline_for_extraction
@@ -49,12 +51,14 @@ let getCoordinateLenU curve =
   match curve with 
   |P256 -> 32ul
   |P384 -> 48ul
+  |Default -> 32ul
 
 inline_for_extraction
 let getCoordinateLenU64 curve = 
   match curve with
   |P256 -> 4ul
   |P384 -> 6ul  
+  |_ -> 4ul
 
 inline_for_extraction
 let getPointLen curve = 

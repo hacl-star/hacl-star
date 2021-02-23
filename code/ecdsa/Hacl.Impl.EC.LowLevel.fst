@@ -93,14 +93,20 @@ let cmovznz4 #c  cin x y r =
 
 
 let add_bn #c x y result =
+  let len = getCoordinateLenU64 c in 
   match c with
-  |P256 -> bn_add_eq_len (size 4) x y result
-  |P384 -> bn_add_eq_len (size 6) x y result
+  |P256 -> add4 x y result
+  |P384 -> bn_add_eq_len len x y result
+  |Default -> bn_add_eq_len len x y result
+
 
 let add_long_bn #c x y result = 
-  match c with 
+  let len = getCoordinateLenU64 c *. 2ul in 
+  match c with
   |P256 -> add8 x y result
-  |P384 -> add12 x y result
+  |P384 -> bn_add_eq_len len x y result
+  |Default -> bn_add_eq_len len x y result
+
 
 let add_dep_prime #c x t result =
   match c with
