@@ -601,6 +601,14 @@ int main() {
   compare_and_print_vec64("mul64 (#2)", vec0, exp);
   // print_vector64("mul64 (#2)", vec0);
 
+  vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
+  vec1 = initialize_vector64(0x8899aabbccddeeff, 0x8899aabbccddeeff);
+  vec0 = Lib_IntVector_Intrinsics_vec128_mul64(vec0, vec1);
+  exp = initialize_vector64(0x36af4b2bbf0eb289UL,0xa3f2754ceb652201UL);
+  compare_and_print_vec64("mul64 (#3)", vec0, exp);
+  //  print_vector64("mul64 (#3)", vec0);
+
+
   /** Rotate left 32 ========================================================**/
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 0);
