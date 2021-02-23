@@ -665,7 +665,6 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 #define Lib_IntVector_Intrinsics_vec128_insert64_(x0, x1, x2)    \
   ((vector128) vec_insert((unsigned long long) x1, (vector128_64) x0, x2))
 
-// TODO: I'm not sure if it's low or high
 #define Lib_IntVector_Intrinsics_vec128_interleave_high32_(x0, x1)       \
   ((vector128)vec_mergel((vector128_32) x0, (vector128_32) x1))
 
@@ -777,7 +776,7 @@ static inline void print_debug_uint64_t(const  char *msg, uint64_t x) {
 
 static inline void print_vector128_8(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
   uint8_t tmp[16];
-  Lib_IntVector_Intrinsics_vec128_store_le(tmp, vec);
+  Lib_IntVector_Intrinsics_vec128_store_le_(tmp, vec);
   printf("[> %s: ", msg);
   printf("[0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x]\n",
          tmp[0], tmp[1], tmp[2], tmp[3],
@@ -881,12 +880,53 @@ Lib_IntVector_Intrinsics_vec128_eq64(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-// TODO
-#define Lib_IntVector_Intrinsics_vec128_extract32(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1)
+static inline uint32_t
+Lib_IntVector_Intrinsics_vec128_extract32(Lib_IntVector_Intrinsics_vec128 x0,
+                                          uint32_t x1) {
+  uint32_t res;
+  printf("[> vec128_extract32\n");
+  print_vector128_32("x0", x0);
+  print_debug_uint32_t("x1", x1);
+  // The selector must be a constant
+  switch (x1) {
+  case 0U: res = Lib_IntVector_Intrinsics_vec128_extract32_(x0, 0U); break;
+  case 1U: res = Lib_IntVector_Intrinsics_vec128_extract32_(x0, 1U); break;
+  case 2U: res = Lib_IntVector_Intrinsics_vec128_extract32_(x0, 2U); break;
+  case 3U: res = Lib_IntVector_Intrinsics_vec128_extract32_(x0, 3U); break;
+  default:
+    printf("**ERROR**: libintvector.h: Lib_IntVector_Intrinsics_vec128_extract32: debugging version: 'x1' must be in [0; 3]");
+    abort();
+  }
+  //  uint32_t res = Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1);
+  print_debug_uint32_t("res", res);
+  return res;
+}
 
-#define Lib_IntVector_Intrinsics_vec128_extract64(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_extract64_(x0, x1)
+static inline uint64_t
+Lib_IntVector_Intrinsics_vec128_extract64(Lib_IntVector_Intrinsics_vec128 x0,
+                                          uint32_t x1) {
+  uint64_t res;
+  printf("[> vec128_extract64\n");
+  print_vector128_64("x0", x0);
+  print_debug_uint32_t("x1", x1);
+  // The selector must be a constant
+  switch (x1) {
+  case 0U: res = Lib_IntVector_Intrinsics_vec128_extract64_(x0, 0U); break;
+  case 1U: res = Lib_IntVector_Intrinsics_vec128_extract64_(x0, 1U); break;
+  default:
+    printf("**ERROR**: libintvector.h: Lib_IntVector_Intrinsics_vec128_extract64: debugging version: 'x1' must be in [0; 1]");
+    abort();
+  }
+  //  res = Lib_IntVector_Intrinsics_vec128_extract64_(x0, x1);
+  print_debug_uint64_t("res", res);
+  return res;
+}
+
+//#define Lib_IntVector_Intrinsics_vec128_extract32(x0, x1)     \
+//  Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1)
+
+//#define Lib_IntVector_Intrinsics_vec128_extract64(x0, x1)     \
+//  Lib_IntVector_Intrinsics_vec128_extract64_(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_gt32(Lib_IntVector_Intrinsics_vec128 x0,
@@ -996,15 +1036,48 @@ Lib_IntVector_Intrinsics_vec128_interleave_low64(Lib_IntVector_Intrinsics_vec128
   return x0;
 }
 
-// TODO
-#define Lib_IntVector_Intrinsics_vec128_load32(x)       \
-  Lib_IntVector_Intrinsics_vec128_load32_(x)
+static inline Lib_IntVector_Intrinsics_vec128
+Lib_IntVector_Intrinsics_vec128_load32(uint32_t x0) {
+  Lib_IntVector_Intrinsics_vec128 res;
+  printf("[> vec128_load32\n");
+  print_debug_uint32_t("x0", x0);
+  res = Lib_IntVector_Intrinsics_vec128_load32_(x0);
+  print_vector128_32("res", res);
+  return res;
+}
 
-#define Lib_IntVector_Intrinsics_vec128_load32s(x0, x1, x2, x3) \
-  Lib_IntVector_Intrinsics_vec128_load32s_(x0, x1, x2, x3)
+static inline Lib_IntVector_Intrinsics_vec128
+Lib_IntVector_Intrinsics_vec128_load32s(uint32_t x0, uint32_t x1,
+                                                   uint32_t x2, uint32_t x3) {
+  Lib_IntVector_Intrinsics_vec128 res;
+  printf("[> vec128_load32s\n");
+  print_debug_uint32_t("x0", x0);
+  print_debug_uint32_t("x1", x1);
+  print_debug_uint32_t("x2", x2);
+  print_debug_uint32_t("x3", x3);
+  res = Lib_IntVector_Intrinsics_vec128_load32s_(x0, x1, x2, x3);
+  print_vector128_32("res", res);
+  return res;
+}
 
-#define Lib_IntVector_Intrinsics_vec128_load64(x)       \
-  Lib_IntVector_Intrinsics_vec128_load64_(x)
+static inline Lib_IntVector_Intrinsics_vec128
+Lib_IntVector_Intrinsics_vec128_load64(uint64_t x0) {
+  Lib_IntVector_Intrinsics_vec128 res;
+  printf("[> vec128_load64\n");
+  print_debug_uint64_t("x0", x0);
+  res = Lib_IntVector_Intrinsics_vec128_load64_(x0);
+  print_vector128_64("res", res);
+  return res;
+}
+
+//#define Lib_IntVector_Intrinsics_vec128_load32(x)     \
+//  Lib_IntVector_Intrinsics_vec128_load32_(x)
+
+//#define Lib_IntVector_Intrinsics_vec128_load32s(x0, x1, x2, x3)       \
+//  Lib_IntVector_Intrinsics_vec128_load32s_(x0, x1, x2, x3)
+
+//#define Lib_IntVector_Intrinsics_vec128_load64(x)     \
+//  Lib_IntVector_Intrinsics_vec128_load64_(x)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_lognot(Lib_IntVector_Intrinsics_vec128 x0) {
