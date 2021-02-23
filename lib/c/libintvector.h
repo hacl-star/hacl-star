@@ -3,8 +3,16 @@
 
 #include <sys/types.h>
 
-// Remark: it is possible to debug the trace of the primitives defined in
-// this file by using the DEBUG_VECTOR_TRACE C flag.
+// # DEBUGGING FLAGS
+// =================
+// It is possible to debug the trace of the primitives defined in
+// this file by using the [DEBUG_VECTOR_TRACE] C flag.
+// As we use the same vector types to manipulate blocks of uint32 and blocks
+// of uint64, the log results will vary with the endianess, in particular for
+// some generic operations like [and] or [xor]. By default, the printing is
+// performed as if we were manipulating blocks of uint32. If you want to
+// switch to blocks of uint64, use the flag: [DEBUG_VECTOR_TRACE_ELEMENTS_64]
+
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
 
 #if defined(__x86_64__) || defined(_M_X64)
@@ -789,6 +797,13 @@ static inline void print_vector128_64(const char *msg, Lib_IntVector_Intrinsics_
          (uint64_t) Lib_IntVector_Intrinsics_vec128_extract64(vec,1));
 }
 
+// Sometimes, we don't know which representation to use
+#if defined(DEBUG_VECTOR_TRACE_ELEMENTS_64)
+#define print_vector128_unkwn(msg, vec) print_vector128_64(msg, vec)
+#else
+#define print_vector128_unkwn(msg, vec) print_vector128_32(msg, vec)
+#endif
+
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128 x0,
                                       Lib_IntVector_Intrinsics_vec128 x1) {
@@ -826,10 +841,10 @@ static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128 x0,
                                     Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_and\n");
-  print_vector128_32("x0", x0);
-  print_vector128_32("x1", x1);
+  print_vector128_unkwn("x0", x0);
+  print_vector128_unkwn("x1", x1);
   x0 = Lib_IntVector_Intrinsics_vec128_and_(x0, x1);
-  print_vector128_32("res", x0);
+  print_vector128_unkwn("res", x0);
   return x0;
 }
 
@@ -966,9 +981,9 @@ Lib_IntVector_Intrinsics_vec128_interleave_low64(Lib_IntVector_Intrinsics_vec128
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_lognot(Lib_IntVector_Intrinsics_vec128 x0) {
   printf("[> vec128_lognot\n");
-  print_vector128_32("x0", x0);
+  print_vector128_unkwn("x0", x0);
   x0 = Lib_IntVector_Intrinsics_vec128_lognot_(x0);
-  print_vector128_32("res", x0);
+  print_vector128_unkwn("res", x0);
   return x0;
 }
 
@@ -987,10 +1002,10 @@ static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_or(Lib_IntVector_Intrinsics_vec128 x0,
                                    Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_or\n");
-  print_vector128_32("x0", x0);
-  print_vector128_32("x1", x1);
+  print_vector128_unkwn("x0", x0);
+  print_vector128_unkwn("x1", x1);
   x0 = Lib_IntVector_Intrinsics_vec128_or_(x0, x1);
-  print_vector128_32("res", x0);
+  print_vector128_unkwn("res", x0);
   return x0;
 }
 
