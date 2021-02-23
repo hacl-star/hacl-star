@@ -803,14 +803,14 @@ int main() {
   vec0 = Lib_IntVector_Intrinsics_vec128_sub64(vec0, vec1);
   exp = initialize_vector64(0x7777777777777778UL,0x8888888888888888UL);
   compare_and_print_vec64("sub64", vec0, exp);
-  print_vector64("sub64", vec0);
+  //  print_vector64("sub64", vec0);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec1 = initialize_vector64(0x8899aabbccddeeff, 0x0011223344556677);
   vec0 = Lib_IntVector_Intrinsics_vec128_xor(vec0, vec1);
   exp = initialize_vector64(0x8888888888888888UL,0x8888888888888888UL);
   compare_and_print_vec64("xor", vec0, exp);
-  print_vector64("xor", vec0);
+  //  print_vector64("xor", vec0);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
