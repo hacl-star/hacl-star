@@ -729,7 +729,7 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 // Maybe: mask, then sub?
 #define Lib_IntVector_Intrinsics_vec128_sub64(x0, x1)                                   \
   ((vector128) (vec_load_pair((((signed long long) x0[0]) - ((signed long long) x1[0])),   \
-                           (((signed long long) x0[3]) - ((signed long long) x1[3])))))
+                           (((signed long long) x0[3]) - ((signed long long) x1[0])))))
 
 #define Lib_IntVector_Intrinsics_vec128_xor(x0, x1)  \
   ((vector128)(vec_xor(x0, x1)))
