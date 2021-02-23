@@ -711,7 +711,7 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
           ((x1+3)%4)*4+0,((x1+3)%4)*4+1,((x1+3)%4)*4+2,((x1+3)%4)*4+3})))
 
 #define Lib_IntVector_Intrinsics_vec128_shift_left64(x0, x1)            \
-  (((vector128)(vec_rli((vector128_32)x0, (unsigned long)x1))) &        \
+  (((vector128)((vector128_64)vec_rli((vector128_64)x0, (unsigned long)x1))) & \
    ((vector128)((vector128_64){0xffffffffffffffff << x1, 0xffffffffffffffff << x1})))
 //  ((vector128)(vec_sll(((vector128_64)x0),                            \
 //                       (vector128_8){x1,x1,x1,x1,x1,x1,x1,x1,x1,x1,x1,x1,x1,x1,x1,x1})))
