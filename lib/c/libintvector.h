@@ -747,15 +747,15 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 #include <stdio.h>
 #include <stdint.h>
 
-inline void print_debug_uint32_t(const char *msg, uint32_t x) {
+static inline void print_debug_uint32_t(const char *msg, uint32_t x) {
   printf("[> %s: %x08U\n", msg, x);
 }
 
-inline void print_debug_uint64_t(const  char *msg, uint64_t x) {
+static inline void print_debug_uint64_t(const  char *msg, uint64_t x) {
   printf("[> %s: %lxUL\n", msg, x);
 }
 
-inline void print_vector128_8(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
+static inline void print_vector128_8(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
   uint8_t tmp[16];
   Lib_IntVector_Intrinsics_vec128_store_le(tmp, vec);
   printf("[> %s: ", msg);
@@ -766,7 +766,7 @@ inline void print_vector128_8(const char *msg, Lib_IntVector_Intrinsics_vec128 v
          tmp[12], tmp[13], tmp[14], tmp[15]);
 }
 
-inline void print_vector128_32(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
+static inline void print_vector128_32(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
   printf("[> %s: ", msg);
   printf("[0x%08x,0x%08x,0x%08x,0x%08x]\n",
          Lib_IntVector_Intrinsics_vec128_extract32(vec,0),
@@ -775,15 +775,14 @@ inline void print_vector128_32(const char *msg, Lib_IntVector_Intrinsics_vec128 
          Lib_IntVector_Intrinsics_vec128_extract32(vec,3));
 }
 
-inline void print_vector128_64(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
+static inline void print_vector128_64(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
   printf("[> %s: ", msg);
   printf("[0x%lxUL,0x%lxUL]\n",
          (uint64_t) Lib_IntVector_Intrinsics_vec128_extract64(vec,0),
          (uint64_t) Lib_IntVector_Intrinsics_vec128_extract64(vec,1));
 }
 
-
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128 x0,
                                       Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_add32\n");
@@ -794,7 +793,7 @@ Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_add64(Lib_IntVector_Intrinsics_vec128 x0,
                                       Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_add64\n");
@@ -805,7 +804,7 @@ Lib_IntVector_Intrinsics_vec128_add64(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128 x0,
                                     Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_xor\n");
@@ -816,7 +815,7 @@ Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128 x0,
                                     Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_and\n");
@@ -827,7 +826,7 @@ Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_eq32(Lib_IntVector_Intrinsics_vec128 x0,
                                      Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_eq32\n");
@@ -838,7 +837,7 @@ Lib_IntVector_Intrinsics_vec128_eq32(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_eq64(Lib_IntVector_Intrinsics_vec128 x0,
                                      Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_eq64\n");
@@ -849,7 +848,7 @@ Lib_IntVector_Intrinsics_vec128_eq64(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_gt32(Lib_IntVector_Intrinsics_vec128 x0,
                                      Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_gt32\n");
@@ -860,7 +859,7 @@ Lib_IntVector_Intrinsics_vec128_gt32(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_gt64(Lib_IntVector_Intrinsics_vec128 x0,
                                      Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_gt64\n");
@@ -871,7 +870,7 @@ Lib_IntVector_Intrinsics_vec128_gt64(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_insert32(Lib_IntVector_Intrinsics_vec128 x0,
                                          uint32_t x1,
                                          uint32_t x2) {
@@ -893,7 +892,7 @@ Lib_IntVector_Intrinsics_vec128_insert32(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_insert64(Lib_IntVector_Intrinsics_vec128 x0,
                                          uint64_t x1,
                                          uint32_t x2) {
@@ -913,7 +912,7 @@ Lib_IntVector_Intrinsics_vec128_insert64(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_interleave_high32(Lib_IntVector_Intrinsics_vec128 x0,
                                                   Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_interleave_high32\n");
@@ -924,7 +923,7 @@ Lib_IntVector_Intrinsics_vec128_interleave_high32(Lib_IntVector_Intrinsics_vec12
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_interleave_high64(Lib_IntVector_Intrinsics_vec128 x0,
                                                   Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_interleave_high64\n");
@@ -935,7 +934,7 @@ Lib_IntVector_Intrinsics_vec128_interleave_high64(Lib_IntVector_Intrinsics_vec12
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_interleave_low32(Lib_IntVector_Intrinsics_vec128 x0,
                                                  Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_interleave_low32\n");
@@ -946,7 +945,7 @@ Lib_IntVector_Intrinsics_vec128_interleave_low32(Lib_IntVector_Intrinsics_vec128
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_interleave_low64(Lib_IntVector_Intrinsics_vec128 x0,
                                                  Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_interleave_low64\n");
@@ -957,7 +956,7 @@ Lib_IntVector_Intrinsics_vec128_interleave_low64(Lib_IntVector_Intrinsics_vec128
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_lognot(Lib_IntVector_Intrinsics_vec128 x0) {
   printf("[> vec128_lognot\n");
   print_vector128_32("x0", x0);
@@ -966,7 +965,7 @@ Lib_IntVector_Intrinsics_vec128_lognot(Lib_IntVector_Intrinsics_vec128 x0) {
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_mul64(Lib_IntVector_Intrinsics_vec128 x0,
                                       Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_mul64\n");
@@ -977,7 +976,7 @@ Lib_IntVector_Intrinsics_vec128_mul64(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_or(Lib_IntVector_Intrinsics_vec128 x0,
                                    Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_or\n");
@@ -988,7 +987,7 @@ Lib_IntVector_Intrinsics_vec128_or(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_rotate_left32(Lib_IntVector_Intrinsics_vec128 x0,
                                               uint32_t x1) {
   printf("[> vec128_rotate_left32\n");
@@ -999,7 +998,7 @@ Lib_IntVector_Intrinsics_vec128_rotate_left32(Lib_IntVector_Intrinsics_vec128 x0
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_rotate_right32(Lib_IntVector_Intrinsics_vec128 x0,
                                                uint32_t x1) {
   printf("[> vec128_rotate_right32\n");
@@ -1011,7 +1010,7 @@ Lib_IntVector_Intrinsics_vec128_rotate_right32(Lib_IntVector_Intrinsics_vec128 x
 }
 
 // The shift value must be a constant. In practice, is always 1, 2 or 3
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_fixed(Lib_IntVector_Intrinsics_vec128 x0,
                                                      uint32_t x1) {
   printf("[> vec128_rotate_right_lanes32\n");
@@ -1039,7 +1038,7 @@ Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_fixed(Lib_IntVector_Intrins
    (Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_fixed(x0, x1)) : \
    Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_(x0, x1))
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_shift_left64(Lib_IntVector_Intrinsics_vec128 x0,
                                              uint32_t x1) {
   printf("[> vec128_shift_left64\n");
@@ -1050,7 +1049,7 @@ Lib_IntVector_Intrinsics_vec128_shift_left64(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_shift_right64(Lib_IntVector_Intrinsics_vec128 x0,
                                               uint32_t x1) {
   printf("[> vec128_shift_right64\n");
@@ -1061,7 +1060,7 @@ Lib_IntVector_Intrinsics_vec128_shift_right64(Lib_IntVector_Intrinsics_vec128 x0
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_smul64(Lib_IntVector_Intrinsics_vec128 x0,
                                        uint64_t x1) {
   printf("[> vec128_smul64\n");
@@ -1072,7 +1071,7 @@ Lib_IntVector_Intrinsics_vec128_smul64(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-Lib_IntVector_Intrinsics_vec128
+static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_sub64(Lib_IntVector_Intrinsics_vec128 x0,
                                       Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_sub64\n");
