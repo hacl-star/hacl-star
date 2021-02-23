@@ -167,13 +167,16 @@ int main() {
   ok = ok && compare_and_print(16, tmp, store_le_b);
   //  print_buf8("store_le", tmp);
 
+  // TODO: add cases depending on the kind of element in the vector
   initialize_buf8(0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
                   0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU,tmp);
   vec0 = Lib_IntVector_Intrinsics_vec128_load_le(tmp);
-  exp = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  compare_and_print_vec32("load_le", vec0, exp);
-  print_vector32("load_le", vec0);
-  print_vector64("load_le", vec0);
+  //exp = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
+  exp = initialize_vector64(0x4455667700112233UL,0xccddeeff8899aabbUL);
+  //  compare_and_print_vec32("load_le", vec0, exp);
+  compare_and_print_vec64("load_le", vec0, exp);
+  //  print_vector32("load_le", vec0);
+  //  print_vector64("load_le", vec0);
   
   vec0 = initialize_vector32(0x0, 0x1, 0x2, 0x3);
   vec1 = initialize_vector32(0x10, 0x11, 0x12, 0x13);
