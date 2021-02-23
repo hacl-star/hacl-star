@@ -688,7 +688,6 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 #define Lib_IntVector_Intrinsics_vec128_load_le(x)              \
   ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian( \
    (vec_load_len((unsigned int*) x, 16))))
-//  ((vector128)(vec_load_len((unsigned long long*) x, 16)))
 
 #define Lib_IntVector_Intrinsics_vec128_lognot_(x0)      \
   ((vector128)(vec_xor(x0, vec_splat_u32(-1))))
@@ -734,7 +733,6 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 #define Lib_IntVector_Intrinsics_vec128_store_le(x0, x1)                \
   (vec_store_len((Lib_IntVector_Intrinsics_vec128_load_store_switch_endian(x1)), \
                  (unsigned int*) x0, (uint32_t) 16))
-//  (vec_store_len(x1, (unsigned int*) x0, (uint32_t) 16))
 
 #define Lib_IntVector_Intrinsics_vec128_sub64_(x0, x1)   \
   ((vector128)((vector128_64)x0 - (vector128_64)x1))
