@@ -675,11 +675,9 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 #define Lib_IntVector_Intrinsics_vec128_load32s(x0, x1, x2, x3) \
   ((vector128)((vector128_32){x0, x1, x2, x3}))
 
-// TODO: why does the x64 version use _mm_set1_epi64x and not _mm_set1_epi64?
 #define Lib_IntVector_Intrinsics_vec128_load64(x)               \
     ((vector128)((vector128_64)vec_load_pair((unsigned long long)x, (unsigned long long)x)))
 
-// TODO: not sure
 #define Lib_IntVector_Intrinsics_vec128_load_le(x)              \
   ((vector128)(vec_load_len((unsigned long long*) x, 16)))
 
@@ -689,15 +687,12 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 // We need to permute the low and high components of the uint64
 // before calling vec_mule. The following helper does that.
 #define Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0)                \
-  ((vector128)(vec_perm((vector128_8) x0, (vector128_8) {},                    \
+  ((vector128)(vec_perm((vector128_8) x0, (vector128_8) {},                     \
                         (vector128_8){4,5,6,7,0,1,2,3,12,13,14,15,8,9,10,11})))
 
-#define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)                                            \
+#define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)                                             \
   ((vector128)(vec_mule((vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0),  \
                         (vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x1))))
-  
-//((vector128_32) x1))))
-//  ((vector128)(vec_mule(((vector128_32) x0), ((vector128_32) x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_or(x0, x1)              \
   ((vector128)(vec_or(x0, x1)))
