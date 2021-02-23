@@ -779,29 +779,38 @@ int main() {
   compare_and_print_vec64("shift_right64 (9)", vec0, exp);
   //  print_vector64("shift_right64 (9)", vec0);
 
-/* 
   // Misc remaining
-  vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_smul64(vec0, 0x0001020304050607);
-  //  compare_and_print_vec32("smul64", vec0, bsmul64);
-print_vector32("smul64", vec0);
+  vec0 = initialize_vector64(0x0000000100000002UL, 0x0000000300000004UL);
+  vec0 = Lib_IntVector_Intrinsics_vec128_smul64(vec0, 0x0000000500000006UL);
+  exp = initialize_vector64(0xcUL,0x18UL);
+  compare_and_print_vec64("smul64 (#0)", vec0, exp);
+  print_vector64("smul64 (#0)", vec0);
 
-  vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
+  vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
+  vec0 = Lib_IntVector_Intrinsics_vec128_smul64(vec0, 0x8899aabbccddeeff);
+  exp = initialize_vector64(0x36af4b2bbf0eb289UL,0xa3f2754ceb652201UL);
+  compare_and_print_vec64("smul64 (#1)", vec0, exp);
+  print_vector64("smul64 (#1)", vec0);
+
+  vec0 = initialize_vector64(-1, 0x1);
+  vec0 = Lib_IntVector_Intrinsics_vec128_smul64(vec0, 0x1);
+  exp = initialize_vector64(0xffffffffUL,0x1UL);
+  compare_and_print_vec64("smul64 (#2)", vec0, exp);
+  print_vector64("smul64 (#2)", vec0);
+
+  vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
+  vec1 = initialize_vector64(0x8899aabbccddeeff, 0x0011223344556677);
   vec0 = Lib_IntVector_Intrinsics_vec128_sub64(vec0, vec1);
-  //  compare_and_print_vec32("sub64", vec0, bsub64);
-print_vector32("sub64", vec0);
+  exp = initialize_vector64(0x7777777777777778UL,0x8888888888888888UL);
+  compare_and_print_vec64("sub64", vec0, exp);
+  print_vector64("sub64", vec0);
 
-  vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
+  vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
+  vec1 = initialize_vector64(0x8899aabbccddeeff, 0x0011223344556677);
   vec0 = Lib_IntVector_Intrinsics_vec128_xor(vec0, vec1);
-  //  compare_and_print_vec32("xor", vec0, bxor);
-print_vector32("xor", vec0);
-
-  vec0 = Lib_IntVector_Intrinsics_vec128_zero;
-  //  compare_and_print_vec32("zero", vec0, bvec0);
-print_vector32("vec0", vec0);
-  */
+  exp = initialize_vector64(0x8888888888888888UL,0x8888888888888888UL);
+  compare_and_print_vec64("xor", vec0, exp);
+  print_vector64("xor", vec0);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
