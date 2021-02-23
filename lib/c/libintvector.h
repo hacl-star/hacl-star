@@ -699,8 +699,9 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_left32_8(x0)           \
   ((vector128) (vec_perm((vector128_32) x0, (vector128_32) {},        \
-                         (vector128_8) {0,3,2,1,4,7,6,5,8,11,10,9,12,15,14,13})))
-//7,4,5,6,11,8,9,10,15,12,13,14})))
+                         (vector128_8) {1,2,3,0,5,6,7,4,9,10,11,8,13,14,15,12})))
+//                         (vector128_8) {0,3,2,1,4,7,6,5,8,11,10,9,12,15,14,13})))
+//3,0,1,2,7,4,5,6,11,8,9,10,15,12,13,14})))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x0)          \
   ((vector128) (vec_perm((vector128_32) x0, (vector128_32) {},        \
