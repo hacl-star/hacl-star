@@ -19,6 +19,8 @@ open Hacl.Impl.EC.MontgomeryMultiplication
 open FStar.Tactics
 open FStar.Tactics.Canon 
 
+open Hacl.Impl.EC.Masking
+
 open FStar.Mul
 open Lib.IntTypes.Intrinsics
 

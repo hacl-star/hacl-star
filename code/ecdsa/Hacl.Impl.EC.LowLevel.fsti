@@ -34,17 +34,6 @@ val uploadZeroPoint: #c: curve -> p: point c ->
     as_nat c h1 (gsub p (size 2 *! len) len) == 0) 
 
 
-val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
-  Stack unit
-    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ 
-      eq_or_disjoint y result)
-    (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ (
-      if uint_v cin = 0 then 
-	as_nat c h1 result == as_nat c h0 x 
-      else 
-	as_nat c h1 result == as_nat c h0 y))
-
-
 val add_bn: #c: curve -> x: felem c -> y: felem c -> result: felem c -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)

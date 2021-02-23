@@ -65,18 +65,18 @@ val add_dep_prime_p384: x: felem P384 -> t: uint64 {uint_v t == 0 \/ uint_v t ==
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
     (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ (
       if uint_v t = 1 then 
-  as_nat P384 h1 result + uint_v c * pow2 384 == as_nat P384 h0 x + prime384
+        as_nat P384 h1 result + uint_v c * pow2 384 == as_nat P384 h0 x + prime384
       else
-  as_nat P384 h1 result  == as_nat P384 h0 x))  
+        as_nat P384 h1 result  == as_nat P384 h0 x))  
 
 let add_dep_prime_p384 x t result = 
   push_frame();
-    let b = create (size 6) (u64 0) in 
+  let b = create (size 6) (u64 0) in 
     
-    let t3 = (u64 0) -. t in 
-    let t2 = t3 -. t in 
-    let t1 = t3 <<. (size 32) in 
-    let t0 = ((u64 0) -. t) >>. (size 32) in 
+  let t3 = (u64 0) -. t in 
+  let t2 = t3 -. t in 
+  let t1 = t3 <<. (size 32) in 
+  let t0 = ((u64 0) -. t) >>. (size 32) in 
   
   upd b (size 0) t0;
   upd b (size 1) t1;
@@ -86,8 +86,8 @@ let add_dep_prime_p384 x t result =
   upd b (size 5) t3;
 
   let r = add6 x b result in 
-    pop_frame();
- r
+  pop_frame();
+  r
     
 
 val sub6: x: felem P384 -> y:felem P384 -> result: felem P384 -> 

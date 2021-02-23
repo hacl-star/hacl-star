@@ -21,6 +21,7 @@ open Hacl.Spec.ECDSA.Definition
 open Hacl.Spec.P.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Definition
+open Hacl.Impl.EC.Masking
 
 open FStar.Math.Lemmas
 

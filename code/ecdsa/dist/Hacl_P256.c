@@ -33,6 +33,36 @@ mul_carry_add_u64_st(uint64_t c_in, uint64_t a, uint64_t b, uint64_t *out)
   return (uint64_t)(res >> (uint32_t)64U);
 }
 
+static void cmovznz4(Spec_P256_curve c, uint64_t cin, uint64_t *x, uint64_t *y, uint64_t *r)
+{
+  uint64_t mask = ~FStar_UInt64_eq_mask(cin, (uint64_t)0U);
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t x_i = x[i];
+    uint64_t y_i = y[i];
+    uint64_t r_i = (y_i & mask) | (x_i & ~mask);
+    r[i] = r_i;
+  }
+}
+
 static uint64_t add6(uint64_t *x, uint64_t *y, uint64_t *result)
 {
   uint64_t c = (uint64_t)0U;
@@ -700,36 +730,6 @@ static void uploadZeroPoint(Spec_P256_curve c, uint64_t *p)
   uploadZeroImpl(c, z);
 }
 
-static void cmovznz4(Spec_P256_curve c, uint64_t cin, uint64_t *x, uint64_t *y, uint64_t *r)
-{
-  uint64_t mask = ~FStar_UInt64_eq_mask(cin, (uint64_t)0U);
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint64_t x_i = x[i];
-    uint64_t y_i = y[i];
-    uint64_t r_i = (y_i & mask) | (x_i & ~mask);
-    r[i] = r_i;
-  }
-}
-
 static uint64_t add_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *result)
 {
   uint32_t len;
@@ -961,11 +961,15 @@ static uint64_t add_dep_prime(Spec_P256_curve c, uint64_t *x, uint64_t t, uint64
   {
     case Spec_P256_P256:
       {
-        return add_dep_prime_p256(x, t, result);
+        return (uint64_t)(void *)add_dep_prime_p256(x, t, result);
       }
     case Spec_P256_P384:
       {
-        return add_dep_prime_p384(x, t, result);
+        return (uint64_t)(void *)add_dep_prime_p384(x, t, result);
+      }
+    case Spec_P256_Default:
+      {
+        return (uint64_t)(void *)(uint8_t)0U;
       }
     default:
       {

@@ -21,6 +21,7 @@ open FStar.Tactics.Canon
 
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P384.LowLevel
+open Hacl.Impl.EC.Masking
 
 open Lib.IntTypes.Intrinsics
 
@@ -51,45 +52,12 @@ let uploadZeroPoint #c p =
   
   let x = sub p (size 0) len in 
   let y = sub p len len in 
+
   let z = sub p (size 2 *! len) len in 
   
   uploadZeroImpl #c x;
   uploadZeroImpl #c y;
   uploadZeroImpl #c z
-
-
-let cmovznz4 #c  cin x y r =
-  let h0 = ST.get() in
-  let mask = neq_mask cin (u64 0) in
-  
-  let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
-    live h x /\ live h y /\ modifies (loc r) h0 h /\ 
-    (
-      forall (j: nat {j >= i && j < v (getCoordinateLenU64 c)}).
-      let y_i = Lib.Sequence.index (as_seq h y) j in 
-      let y_0 = Lib.Sequence.index (as_seq h0 y) j in 
-      uint_v y_i == uint_v y_0
-    ) /\
-    
-    (
-      forall (j: nat {j < i}).
-	let x_i = Lib.Sequence.index (as_seq h0 x) j in 
-	let y_i = Lib.Sequence.index (as_seq h0 y) j in 
-	let r_i = Lib.Sequence.index (as_seq h r) j in 
-	if uint_v cin = 0 then 
-	  uint_v r_i == uint_v x_i
-	else
-	  uint_v r_i == uint_v y_i
-    ) in 
-  for 0ul len inv (fun i -> 
-    let h_ = ST.get() in 
-    let x_i = index x i in 
-    let y_i = index y i in 
-    let r_i = logor (logand y_i mask) (logand x_i (lognot mask)) in 
-    upd r i r_i;
-    cmovznz4_lemma cin (Seq.index (as_seq h0 x) (v i)) (Seq.index (as_seq h0 y) (v i))
-  )
 
 
 let add_bn #c x y result =
@@ -112,6 +80,7 @@ let add_dep_prime #c x t result =
   match c with
   |P256 -> add_dep_prime_p256 x t result
   |P384 -> add_dep_prime_p384 x t result
+  |Default -> ()
 
 let sub_bn #c x y result =
   match c with
