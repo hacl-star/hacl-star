@@ -574,24 +574,28 @@ int main() {
   compare_and_print_vec64("interlave_low64", vec0, exp);
   //  print_vector64("interleave_low64", vec0);
 
-  /*  vec0 = Lib_IntVector_Intrinsics_vec128_load32(0x01ffff);
-  compare_and_print_vec("load32", vec0, bload32);
-  //  print_vector("load32", vec0);
+  vec0 = Lib_IntVector_Intrinsics_vec128_load32(0x1);
+  exp = initialize_vector32(0x00000001,0x00000001,0x00000001,0x00000001);
+  compare_and_print_vec32("load32", vec0, exp);
+  //  print_vector32("load32", vec0);
 
-  vec0 = Lib_IntVector_Intrinsics_vec128_load32s(0,1,2,3);
-  compare_and_print_vec("load32s", vec0, bload32s);
-  //  print_vector("load32s", vec0);
+  vec0 = Lib_IntVector_Intrinsics_vec128_load32s(0x0, 0x1, 0x2, 0x3);
+  exp = initialize_vector32(0x00000000,0x00000001,0x00000002,0x00000003);
+  compare_and_print_vec32("load32s", vec0, exp);
+  //  print_vector32("load32s", vec0);
 
   vec0 = Lib_IntVector_Intrinsics_vec128_load64(0x0001020304050607);
-  compare_and_print_vec("load64", vec0, bload64);
-  //  print_vector("load64", vec0); */
+  exp = initialize_vector64(0x1020304050607UL,0x1020304050607UL);
+  compare_and_print_vec64("load64", vec0, exp);
+  //  print_vector64("load64", vec0);
+
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  vec0 = Lib_IntVector_Intrinsics_vec128_lognot(vec0);
+  exp = initialize_vector32(0xfffefdfc,0xfbfaf9f8,0xf7f6f5f4,0xf3f2f1f0);
+  compare_and_print_vec32("lognot", vec0, exp);
+  //  print_vector32("lognot", vec0);
 
   /*
-  vec0 = initialize_vector();
-  vec0 = Lib_IntVector_Intrinsics_vec128_lognot(vec0);
-  compare_and_print_vec("lognot", vec0, blognot);
-  //  print_vector("lognot", vec0);
-
   // TODO:
   //  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   //  vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
