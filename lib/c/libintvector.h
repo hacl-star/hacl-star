@@ -714,8 +714,9 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
   (((x1) == 8? Lib_IntVector_Intrinsics_vec128_rotate_left32_8(x0) :    \
    ((x1) == 16? Lib_IntVector_Intrinsics_vec128_rotate_left32_16(x0) :  \
    ((x1) == 24? Lib_IntVector_Intrinsics_vec128_rotate_left32_24(x0) :  \
-    vec_xor(vec_sll(((vector128_32)x0),vec_splat_u32(x1)),              \
-            vec_sll(((vector128_32)x0),vec_splat_u32((uint32_t) (32-x1)))))))))
+    (vector128)                                                         \
+    vec_xor(vec_sll(((vector128_32)x0),(vector128_8)vec_splat_u8(x1)),  \
+            vec_sll(((vector128_32)x0),(vector128_8)vec_splat_u8((uint8_t) (32-x1)))))))))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, x1)          \
   (Lib_IntVector_Intrinsics_vec128_rotate_left32(x0,(uint32_t) (32-(x1))))
