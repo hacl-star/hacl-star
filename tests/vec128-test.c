@@ -595,24 +595,23 @@ int main() {
   compare_and_print_vec32("lognot", vec0, exp);
   //  print_vector32("lognot", vec0);
 
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  vec1 = initialize_vector32(0x0c0d0e0f, 0x00010203, 0x04050607, 0x08090a0b);
+  vec0 = Lib_IntVector_Intrinsics_vec128_or(vec0, vec1);
+  exp = initialize_vector32(0x0c0d0e0f,0x04050607,0x0c0d0e0f,0x0c0d0e0f);
+  compare_and_print_vec32("or", vec0, exp);
+  //  print_vector32("or", vec0);
+
   /*
-  // TODO:
-  //  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
-  //  vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
+  // TODO
   vec0 = initialize_vector64(0x123456789abcdf0, 0x123456789abcdef0);
   vec1 = initialize_vector64(0x23456789abcdef01, 0x23456789abcdef01);
-  //  vec0 = initialize_vector32(0x1234567, 0x89abcdf0, 0x12345678, 0x9abcdef0);
-  //  vec1 = initialize_vector32(0x23456789, 0xabcdef01, 0x23456789, 0xabcdef01);
-  vec0 = Lib_IntVector_Intrinsics_vec128_mul64(vec0, vec1);
+  //  vec0 = Lib_IntVector_Intrinsics_vec128_mul64(vec0, vec1);
   compare_and_print_vec("mul64", vec0, bmul64);
-  // print_vector("mul64", vec0);
+  print_vector64("mul64", vec0);
+  print_vector64("mul64", vec0);
 
-  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
-  vec1 = initialize_vector8(15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0);
-  vec0 = Lib_IntVector_Intrinsics_vec128_or(vec0, vec1);
-  compare_and_print_vec("or", vec0, bor);
-  //  print_vector("or", vec0);
-
+  /*
   // Rotate left 32
   vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 0);
