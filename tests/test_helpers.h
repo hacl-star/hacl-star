@@ -34,6 +34,9 @@ static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
 }
 
 #if defined(__x86_64__) || defined(_M_X64)
+
+#define TEST_VEC256
+
 typedef uint64_t cycles;
 
 static __inline__ cycles cpucycles_begin(void)
