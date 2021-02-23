@@ -602,13 +602,18 @@ int main() {
   compare_and_print_vec32("or", vec0, exp);
   //  print_vector32("or", vec0);
 
-  /*
   // TODO
-  vec0 = initialize_vector64(0x123456789abcdf0, 0x123456789abcdef0);
-  vec1 = initialize_vector64(0x23456789abcdef01, 0x23456789abcdef01);
-  //  vec0 = Lib_IntVector_Intrinsics_vec128_mul64(vec0, vec1);
-  compare_and_print_vec("mul64", vec0, bmul64);
+  //  vec0 = initialize_vector64(0x1111222233334444UL, 0x5555666677778888UL);
+  //  vec1 = initialize_vector64(0x9999aaaabbbbccccUL, 0xddddeeeeffff0101UL);
+  //  exp = initialize_vector64(0x258c024630ec9630UL,0x7777118866781088UL);
+  vec0 = initialize_vector64(0x0000000100000002UL, 0x0000000300000004UL);
+  vec1 = initialize_vector64(0x0000000500000006UL, 0x0000000700000008UL);
+  print_vector32("mul64", vec0);
   print_vector64("mul64", vec0);
+  vec0 = Lib_IntVector_Intrinsics_vec128_mul64(vec0, vec1);
+  exp = initialize_vector64(0xcUL,0x20UL);
+  compare_and_print_vec64("mul64", vec0, exp);
+  print_vector32("mul64", vec0);
   print_vector64("mul64", vec0);
 
   /*
