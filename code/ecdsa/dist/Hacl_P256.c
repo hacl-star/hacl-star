@@ -1059,6 +1059,24 @@ static uint64_t add_dep_prime(Spec_P256_curve c, uint64_t *x, uint64_t t, uint64
 
 static uint64_t sub_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *result)
 {
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
   switch (c)
   {
     case Spec_P256_P256:
@@ -1068,6 +1086,45 @@ static uint64_t sub_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *re
     case Spec_P256_P384:
       {
         return sub6(x, y, result);
+      }
+    case Spec_P256_Default:
+      {
+        uint64_t c1 = (uint64_t)0U;
+        uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = x[(uint32_t)4U * i];
+          uint64_t t20 = y[(uint32_t)4U * i];
+          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, result + (uint32_t)4U * i);
+          uint64_t t10 = x[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t21 = y[(uint32_t)4U * i + (uint32_t)1U];
+          c1 =
+            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
+              t10,
+              t21,
+              result + (uint32_t)4U * i + (uint32_t)1U);
+          uint64_t t11 = x[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t22 = y[(uint32_t)4U * i + (uint32_t)2U];
+          c1 =
+            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
+              t11,
+              t22,
+              result + (uint32_t)4U * i + (uint32_t)2U);
+          uint64_t t12 = x[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t2 = y[(uint32_t)4U * i + (uint32_t)3U];
+          c1 =
+            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
+              t12,
+              t2,
+              result + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < len; i++)
+        {
+          uint64_t t1 = x[i];
+          uint64_t t2 = y[i];
+          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, result + i);
+        }
+        return c1;
       }
     default:
       {
@@ -1079,6 +1136,25 @@ static uint64_t sub_bn(Spec_P256_curve c, uint64_t *x, uint64_t *y, uint64_t *re
 
 static uint64_t sub_bn_gl(Spec_P256_curve c, uint64_t *x, const uint64_t *y, uint64_t *result)
 {
+  uint32_t unused;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        unused = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        unused = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        unused = (uint32_t)4U;
+      }
+  }
+  uint64_t *y_ = const_to_ilbuffer__uint64_t(y);
   switch (c)
   {
     case Spec_P256_P256:
@@ -1088,6 +1164,10 @@ static uint64_t sub_bn_gl(Spec_P256_curve c, uint64_t *x, const uint64_t *y, uin
     case Spec_P256_P384:
       {
         return sub6_il(x, y, result);
+      }
+    case Spec_P256_Default:
+      {
+        return sub_bn(c, x, y_, result);
       }
     default:
       {

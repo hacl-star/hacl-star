@@ -23,6 +23,12 @@ val uploadZeroImpl: #c: curve -> f: felem c -> Stack unit
   (ensures fun h0 _ h1 -> as_nat c h1 f == 0 /\ modifies (loc f) h0 h1)
 
 
+
+val uploadOneImpl: #c: curve -> f: felem c -> Stack unit
+  (requires fun h -> live h f)
+  (ensures fun h0 _ h1 -> as_nat c h1 f == 1 /\ modifies (loc f) h0 h1)
+
+
 val uploadZeroPoint: #c: curve -> p: point c -> 
   Stack unit
   (requires fun h -> live h p)
@@ -82,17 +88,18 @@ val short_mul_bn: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: 
     as_nat_il c h0 a * uint_v b = wide_as_nat c h1 result /\ 
     wide_as_nat c h1 result < getPower2 c * pow2 64)
 
+val short_mul_prime: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
+  (requires fun h -> live h result /\ wide_as_nat c h result = 0)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    getPrime c * uint_v b = wide_as_nat c h1 result /\ 
+    wide_as_nat c h1 result < getPower2 c * pow2 64)
+
 
 val square_bn: #c: curve -> f: felem c -> out: widefelem c -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
       wide_as_nat c h1 out = as_nat c h0 f * as_nat c h0 f)
       
-
-val uploadOneImpl: #c: curve -> f: felem c -> Stack unit
-  (requires fun h -> live h f)
-  (ensures fun h0 _ h1 -> as_nat c h1 f == 1 /\ modifies (loc f) h0 h1)
-
 
 val toUint8: #c: curve -> i: felem c ->  o: lbuffer uint8 (getScalarLen c) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)

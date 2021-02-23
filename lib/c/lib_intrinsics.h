@@ -21,14 +21,25 @@
 #define Lib_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4) \
   (Hacl_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4))
 
+
+#define Lib_IntTypes_Intrinsics_add_carry_u64_void(x1, x2, x3, x4) \
+  (Hacl_IntTypes_Intrinsics_add_carry_u64_void(x1, x2, x3, x4))
+
+
 #define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4) \
   (Hacl_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4))
+
+#define Lib_IntTypes_Intrinsics_sub_borrow_u64_void(x1, x2, x3, x4) \
+  (Hacl_IntTypes_Intrinsics_sub_borrow_u64_void(x1, x2, x3, x4))
 
 #else
 
 #define Lib_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4) \
   (_addcarry_u64(x1, x2, x3, (long long unsigned int *) x4))
 
+
+#define Lib_IntTypes_Intrinsics_add_carry_u64_void(x1, x2, x3, x4) \
+  (_addcarry_u64(x1, x2, x3, (long long unsigned int *) x4))
 
 /*
    GCC versions prior to 7.2 pass arguments to _subborrow_u{32,64}
@@ -42,10 +53,17 @@
 #define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4) \
   (_subborrow_u64(x1, x3, x2, (long long unsigned int *) x4))
 
+#define Lib_IntTypes_Intrinsics_sub_borrow_u64_void(x1, x2, x3, x4) \
+  (_subborrow_u64(x1, x3, x2, (long long unsigned int *) x4))
+
 #else
 
 #define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4)  \
   (_subborrow_u64(x1, x2, x3, (long long unsigned int *) x4))
+
+#define Lib_IntTypes_Intrinsics_sub_borrow_u64_void(x1, x2, x3, x4)  \
+  (_subborrow_u64(x1, x2, x3, (long long unsigned int *) x4))
+
 
 #endif // GCC < 7.2
 

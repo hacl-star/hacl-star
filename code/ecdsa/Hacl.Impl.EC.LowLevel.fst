@@ -47,6 +47,23 @@ let uploadZeroImpl #c f =
       let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0))
 
 
+let uploadOneImpl #c f =
+  upd f (size 0) (u64 1);
+  let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c in 
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\
+    v (Lib.Sequence.index (as_seq h f) 0) == 1 /\
+    (forall (j: nat {j > 0 /\ j < i}). 
+      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0)
+  in 
+  for 1ul len inv (fun i -> 
+    upd f i (u64 0);
+    let h = ST.get() in 
+        assert(
+      forall (j: nat {j > 0 /\ j < uint_v i}). 
+      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0))
+
+
 let uploadZeroPoint #c p =
   let len = getCoordinateLenU64 c in 
   
@@ -123,32 +140,42 @@ let sub_bn_gl #c x y result =
   |Default ->  sub_bn x y_ result
 
 
+val _shortened_mul: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: uint64 -> result: widefelem c -> Stack unit
+  (requires fun h -> live h a /\ live h result /\ wide_as_nat c h result = 0)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1(* /\ 
+    as_nat_il c h0 a * uint_v b = wide_as_nat P384 h1 result /\ 
+    wide_as_nat P384 h1 result < pow2 384 * pow2 64 *) )
+
+
+let _shortened_mul #c a b result = 
+  push_frame();
+    let bBuffer = create (size 1) b in 
+    let a_ = const_to_ilbuffer a in 
+    bn_mul (getCoordinateLenU64 c)  a_ (size 1) bBuffer result;
+  pop_frame()
+
+
+(* I expect that I use only with prime buffer, so this function will be deleted *)
 let short_mul_bn #c x y result = 
   match c with
   | P256 -> shortened_mul_p256 x y result
   | P384 -> shortened_mul_p384 x y result
+  | Default -> _shortened_mul x y result
+
+
+let short_mul_prime #c b result = 
+  match c with
+  | P256 -> shortened_mul_prime b result
+  | P384 -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
+  | Default -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
+
+
 
 let square_bn #c x result = 
   match c with 
   |P256 -> square_p256 x result
   |P384 -> square_p384 x result
 
-
-let uploadOneImpl #c f =
-  upd f (size 0) (u64 1);
-  let h0 = ST.get() in 
-  let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\
-    v (Lib.Sequence.index (as_seq h f) 0) == 1 /\
-    (forall (j: nat {j > 0 /\ j < i}). 
-      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0)
-  in 
-  for 1ul len inv (fun i -> 
-    upd f i (u64 0);
-    let h = ST.get() in 
-        assert(
-      forall (j: nat {j > 0 /\ j < uint_v i}). 
-      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0))
 
 
 let toUint8 #c i o =
@@ -601,16 +628,6 @@ let compare_felem #c a b =
   pop_frame(); 
   r
 
-
-let copy_conditional #c out x mask =
-  admit();
-  let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
-  for 0ul len inv (fun i -> 
-    let out_i = index out i in 
-    let x_i = index x i in 
-    let r_i = logxor out_i (logand mask (logxor out_i x_i)) in 
-    upd out i r_i)
   (*
   match c with
   |P256 ->
