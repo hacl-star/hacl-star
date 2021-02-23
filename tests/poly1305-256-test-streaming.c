@@ -16,11 +16,9 @@
 // makes it easy to make the whole directory build on all platforms.
 #if defined(TEST_VEC256)
 #include "Hacl_Streaming_Poly1305_256.h"
-#endif
-
-#include "EverCrypt_AutoConfig2.h"
-
 #include "poly1305_vectors.h"
+#include "EverCrypt_AutoConfig2.h"
+#endif
 
 typedef struct Hacl_Streaming_Poly1305_256_poly1305_256_state_s poly1305_state;
 

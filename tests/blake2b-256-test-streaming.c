@@ -10,16 +10,16 @@
 #include <time.h>
 
 #include "test_helpers.h"
-#include "EverCrypt_AutoConfig2.h"
 
 // Of course, it doesn't make sense to compile and run those test on a platform
 // which doesn't support 256-bits vectors, but using macros directly in the files
 // makes it easy to make the whole directory build on all platforms.
 #if defined(TEST_VEC256)
+#include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Streaming_Blake2b_256.h"
+#include "blake2_vectors.h"
 #endif
 
-#include "blake2_vectors.h"
 
 typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_state_s blake2_state;
 
