@@ -744,6 +744,14 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 
 #if defined(DEBUG_VECTOR_TRACE)
 
+inline void print_debug_uint32_t(unsigned char *msg, uint32_t x) {
+  printf("[> %s: %x08U\n", msg, x);
+}
+
+inline void print_debug_uint64_t(unsigned char *msg, uint64_t x) {
+  printf("[> %s: %lxUL\n", msg, x);
+}
+
 inline void print_vector128_8(unsigned char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
   uint8_t tmp[16];
   Lib_IntVector_Intrinsics_vec128_store_le(tmp, vec);
@@ -860,10 +868,13 @@ Lib_IntVector_Intrinsics_vec128_gt64(Lib_IntVector_Intrinsics_vec128 x0,
   return x0;
 }
 
-// The selector must be a constant, and I don't manage to inline the functions
+// The selector must be a constant, and I don't manage to inline the functions.
+// This function is not very problematic anyway.
 #define Lib_IntVector_Intrinsics_vec128_insert32(x0, x1, x2)    \
   Lib_IntVector_Intrinsics_vec128_insert32_(x0, x1, x2)
 
+// The selector must be a constant, and I don't manage to inline the functions.
+// This function is not very problematic anyway.
 #define Lib_IntVector_Intrinsics_vec128_insert64(x0, x1, x2)    \
   Lib_IntVector_Intrinsics_vec128_insert64_(x0, x1, x2)
 
@@ -971,7 +982,7 @@ Lib_IntVector_Intrinsics_vec128_rotate_left32(Lib_IntVector_Intrinsics_vec128 x0
                                               uint32_t x1) {
   printf("[> vec128_rotate_left32\n");
   print_vector128_32("x0", x0);
-  // TODO
+  print_debug_uint32_t("x1", x1);
   x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32_(x0, x1);
   print_vector128_32("res", x0);
   return x0;
@@ -982,7 +993,7 @@ Lib_IntVector_Intrinsics_vec128_rotate_right32(Lib_IntVector_Intrinsics_vec128 x
                                                uint32_t x1) {
   printf("[> vec128_rotate_right32\n");
   print_vector128_32("x0", x0);
-  // TODO
+  print_debug_uint32_t("x1", x1);
   x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32_(x0, x1);
   print_vector128_32("res", x0);
   return x0;
@@ -994,7 +1005,7 @@ Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_fixed(Lib_IntVector_Intrins
                                                      uint32_t x1) {
   printf("[> vec128_rotate_right_lanes32\n");
   print_vector128_32("x0", x0);
-  // TODO
+  print_debug_uint32_t("x1", x1);
   if(x1 == 1U) {
     x0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_(x0, 1U);
   }
@@ -1024,7 +1035,7 @@ Lib_IntVector_Intrinsics_vec128_shift_left64(Lib_IntVector_Intrinsics_vec128 x0,
                                              uint32_t x1) {
   printf("[> vec128_shift_left64\n");
   print_vector128_64("x0", x0);
-  // TODO
+  print_debug_uint32_t("x1", x1);
   x0 = Lib_IntVector_Intrinsics_vec128_shift_left64_(x0, x1);
   print_vector128_64("res", x0);
   return x0;
@@ -1035,7 +1046,7 @@ Lib_IntVector_Intrinsics_vec128_shift_right64(Lib_IntVector_Intrinsics_vec128 x0
                                               uint32_t x1) {
   printf("[> vec128_shift_right64\n");
   print_vector128_64("x0", x0);
-  // TODO
+  print_debug_uint32_t("x1", x1);
   x0 = Lib_IntVector_Intrinsics_vec128_shift_right64_(x0, x1);
   print_vector128_64("res", x0);
   return x0;
@@ -1046,7 +1057,7 @@ Lib_IntVector_Intrinsics_vec128_smul64(Lib_IntVector_Intrinsics_vec128 x0,
                                        uint64_t x1) {
   printf("[> vec128_smul64\n");
   print_vector128_64("x0", x0);
-  // TODO
+  print_debug_uint64_t("x1", x1);
   x0 = Lib_IntVector_Intrinsics_vec128_smul64_(x0, x1);
   print_vector128_64("res", x0);
   return x0;
