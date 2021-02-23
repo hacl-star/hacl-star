@@ -722,62 +722,62 @@ int main() {
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_left64(vec0, 0);
   exp = initialize_vector64(0x11223344556677UL,0x8899aabbccddeeffUL);
   compare_and_print_vec64("shift_left64 (0)", vec0, exp);
-  print_vector64("shift_left64 (0)", vec0);
+  //  print_vector64("shift_left64 (0)", vec0);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_left64(vec0, 8);
   exp = initialize_vector64(0x1122334455667700UL,0x99aabbccddeeff00UL);
   compare_and_print_vec64("shift_left64 (8)", vec0, exp);
-  print_vector64("shift_left64 (8)", vec0);
+  //  print_vector64("shift_left64 (8)", vec0);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_left64(vec0, 16);
   exp = initialize_vector64(0x2233445566770000UL,0xaabbccddeeff0000UL);
   compare_and_print_vec64("shift_left64 (16)", vec0, exp);
-  print_vector64("shift_left64 (16)", vec0);
+  //  print_vector64("shift_left64 (16)", vec0);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_left64(vec0, 48);
   exp = initialize_vector64(0x6677000000000000UL,0xeeff000000000000UL);
   compare_and_print_vec64("shift_left64 (48)", vec0, exp);
-  print_vector64("shift_left64 (48)", vec0);
+  //  print_vector64("shift_left64 (48)", vec0);
   
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_left64(vec0, 9);
   exp = initialize_vector64(0x22446688aaccee00UL,0x33557799bbddfe00UL);
   compare_and_print_vec64("shift_left64 (9)", vec0, exp);
-  print_vector64("shift_left64 (9)", vec0);
+  //  print_vector64("shift_left64 (9)", vec0);
 
   // Shift right
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_right64(vec0, 0);
   exp = initialize_vector64(0x11223344556677UL,0x8899aabbccddeeffUL);
   compare_and_print_vec64("shift_right64 (0)", vec0, exp);
-  print_vector64("shift_right64 (0)", vec0);
+  //  print_vector64("shift_right64 (0)", vec0);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_right64(vec0, 8);
   exp = initialize_vector64(0x112233445566UL,0x8899aabbccddeeUL);
   compare_and_print_vec64("shift_right64 (8)", vec0, exp);
-  print_vector64("shift_right64 (8)", vec0);
+  //  print_vector64("shift_right64 (8)", vec0);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_right64(vec0, 16);
   exp = initialize_vector64(0x1122334455UL,0x8899aabbccddUL);
   compare_and_print_vec64("shift_right64 (16)", vec0, exp);
-  print_vector64("shift_right64 (16)", vec0);
+  //  print_vector64("shift_right64 (16)", vec0);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_right64(vec0, 48);
   exp = initialize_vector64(0x11UL,0x8899UL);
   compare_and_print_vec64("shift_right64 (48)", vec0, exp);
-  print_vector64("shift_right64 (48)", vec0);
+  //  print_vector64("shift_right64 (48)", vec0);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_right64(vec0, 9);
   exp = initialize_vector64(0x89119a22ab3UL,0x444cd55de66ef7UL);
   compare_and_print_vec64("shift_right64 (9)", vec0, exp);
-  print_vector64("shift_right64 (9)", vec0);
+  //  print_vector64("shift_right64 (9)", vec0);
 
 /* 
   // Misc remaining
