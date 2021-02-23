@@ -108,14 +108,20 @@ let add_dep_prime #c x t result =
 
 
 let sub_bn #c x y result =
+  let len = getCoordinateLenU64 c in 
   match c with
   |P256 -> sub4 x y result
   |P384 -> sub6 x y result
+  |Default -> bn_sub_eq_len len x y result
+  
 
 let sub_bn_gl #c x y result =
+  let y_ = const_to_ilbuffer y in 
   match c with
   |P256 -> sub4_il x y result
   |P384 -> sub6_il x y result
+  |Default ->  sub_bn x y_ result
+
 
 let short_mul_bn #c x y result = 
   match c with
