@@ -641,15 +641,15 @@ int main() {
   compare_and_print_vec32("rotate_left32 (12)", vec0, exp);
   print_vector32("rotate_left32 (12)", vec0);
 
-  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 16);
-  exp = initialize_vector32(0x01000302,0x05040706,0x09080b0a,0x0d0c0f0e);
+  exp = initialize_vector32(0x22330011,0x66774455,0xaabb8899,0xeeffccdd);
   compare_and_print_vec32("rotate_left32 (16)", vec0, exp);
   print_vector32("rotate_left32 (16)", vec0);
 
-  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);
+  vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 24);
-  exp = initialize_vector32(0x00030201,0x04070605,0x080b0a09,0x0c0f0e0d);
+  exp = initialize_vector32(0x33001122,0x77445566,0xbb8899aa,0xffccddee);
   compare_and_print_vec32("rotate_left32(24)", vec0, exp);
   print_vector32("rotate_left32 (24)", vec0);
 
