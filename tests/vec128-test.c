@@ -620,8 +620,6 @@ int main() {
   //  print_vector64("mul64", vec0);
 
   // Rotate left 32
-  //  vec0 = initialize_vector8(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15);  
-  //  vec0 = initialize_vector32(0x11112222, 0x33334444UL, 0x55556666, 0x77778888UL);
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 0);
   exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
