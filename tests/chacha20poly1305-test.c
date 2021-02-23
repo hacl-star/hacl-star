@@ -218,9 +218,11 @@ int main(){
   uint64_t count = ROUNDS * SIZE;
   printf("Chacha20Poly1305 Encrypt (32-bit) PERF:\n");  print_time(count,tdiff1,cdiff1);
   printf("Chacha20Poly1305 Encrypt (128-bit) PERF:\n"); print_time(count,tdiff2,cdiff2);
+#if defined(TEST_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("Chacha20Poly1305 Encrypt (256-bit) PERF:\n"); print_time(count,tdiff3,cdiff3);
   }
+#endif
   printf("Chacha20Poly1305 Decrypt (32-bit) PERF:\n");  print_time(count,tdiff4,cdiff4);
   printf("Chacha20Poly1305 Decrypt (128-bit) PERF:\n"); print_time(count,tdiff5,cdiff5);
 #if defined(TEST_VEC256)
