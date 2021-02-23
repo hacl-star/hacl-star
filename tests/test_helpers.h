@@ -33,7 +33,7 @@ static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
   return ok;
 }
 
-#if defined(__x86_64__) || defined(_M_X64) || defined(__s390x__)
+#if defined(__x86_64__) || defined(_M_X64)
 typedef uint64_t cycles;
 
 static __inline__ cycles cpucycles_begin(void)
@@ -48,6 +48,19 @@ static __inline__ cycles cpucycles_end(void)
   uint64_t rax,rdx,aux;
   asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
   return (rdx << 32) + rax;
+}
+#elif defined(__s390x__)
+#include <time.h>
+typedef uint64_t cycles;
+
+static __inline__ cycles cpucycles_begin(void)
+{
+  clock();
+}
+
+static __inline__ cycles cpucycles_end(void)
+{
+  clock();
 }
 #endif
 
