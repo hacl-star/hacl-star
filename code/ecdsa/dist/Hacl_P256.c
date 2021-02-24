@@ -2336,16 +2336,17 @@ montgomery_multiplication_buffer_by_one(Spec_P256_curve c, uint64_t *a, uint64_t
 static void
 montgomery_multiplication_buffer(Spec_P256_curve c, uint64_t *a, uint64_t *b, uint64_t *result)
 {
+  const uint64_t *primeBuffer;
   switch (c)
   {
     case Spec_P256_P256:
       {
-        montgomery_multiplication_buffer_w_k0(c, a, b, result);
+        primeBuffer = prime256_buffer;
         break;
       }
     case Spec_P256_P384:
       {
-        montgomery_multiplication_buffer_k0(c, a, b, result);
+        primeBuffer = prime384_buffer;
         break;
       }
     default:
@@ -2354,20 +2355,28 @@ montgomery_multiplication_buffer(Spec_P256_curve c, uint64_t *a, uint64_t *b, ui
         KRML_HOST_EXIT(253U);
       }
   }
+  uint64_t primeBuffer0 = primeBuffer[0U];
+  if (primeBuffer0 == (uint64_t)0xffffffffffffffffU)
+  {
+    montgomery_multiplication_buffer_w_k0(c, a, b, result);
+    return;
+  }
+  montgomery_multiplication_buffer_k0(c, a, b, result);
 }
 
 static void montgomery_square_buffer(Spec_P256_curve c, uint64_t *a, uint64_t *result)
 {
+  const uint64_t *primeBuffer;
   switch (c)
   {
     case Spec_P256_P256:
       {
-        montgomery_square_buffer_w_k0(c, a, result);
+        primeBuffer = prime256_buffer;
         break;
       }
     case Spec_P256_P384:
       {
-        montgomery_square_buffer_k0(c, a, result);
+        primeBuffer = prime384_buffer;
         break;
       }
     default:
@@ -2376,6 +2385,13 @@ static void montgomery_square_buffer(Spec_P256_curve c, uint64_t *a, uint64_t *r
         KRML_HOST_EXIT(253U);
       }
   }
+  uint64_t primeBuffer0 = primeBuffer[0U];
+  if (primeBuffer0 == (uint64_t)0xffffffffffffffffU)
+  {
+    montgomery_square_buffer_w_k0(c, a, result);
+    return;
+  }
+  montgomery_square_buffer_k0(c, a, result);
 }
 
 static void fsquarePowN(Spec_P256_curve c, uint32_t n, uint64_t *a)
