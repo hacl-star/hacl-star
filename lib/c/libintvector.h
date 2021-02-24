@@ -650,12 +650,12 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 // We can't use uint8_t, uint32_t, uint64_t... instead of unsigned char,
 // unsigned int, unsigned long long: the compiler complains that the parameter
 // combination is invalid.
-typedef unsigned int Lib_IntVector_Intrinsics_vec128 __attribute__ ((vector_size(16)));
-
-typedef Lib_IntVector_Intrinsics_vec128 vector128;
 typedef unsigned char vector128_8 __attribute__ ((vector_size(16)));
-typedef vector128 vector128_32;
+typedef unsigned int vector128_32 __attribute__ ((vector_size(16)));
 typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
+
+typedef vector128_8 Lib_IntVector_Intrinsics_vec128 __attribute__ ((vector_size(16)));
+typedef vector128_8 vector128;
 
 // Small helper to change the endianess of the vector's elements, seen as uint32
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
