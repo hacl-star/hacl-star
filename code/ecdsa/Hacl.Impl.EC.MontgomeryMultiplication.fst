@@ -21,19 +21,31 @@ open Hacl.Impl.EC.LowLevel
 
 open Lib.Loops
 open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Impl.EC.Setup
 
 (* open Hacl.Impl.P256.MontgomeryMultiplication.Exponent *)
 open Hacl.Impl.P256.MontgomeryMultiplication
 (* open Hacl.Impl.P256.MM.Exponent *)
 
+inline_for_extraction
+val supportsReducedMultiplication: #c: curve -> 
+  Stack bool
+    (requires fun h -> True)
+    (ensures fun h0 r h1 -> r <==> (getPrime c + 1) % pow2 64 == 0)
+
+let supportsReducedMultiplication #c = 
+  let primeBuffer = prime_buffer #c in 
+  let primeBuffer0 = index primeBuffer (size 0) in 
+    eq_lemma #U64 primeBuffer0 (u64 0xffffffffffffffff);
+  eq #U64 primeBuffer0 (u64 0xffffffffffffffff)
+
 
 let montgomery_multiplication_buffer_by_one #c a result = 
-  match c with 
-  |P256 -> 
-    assume ((getPrime c + 1) % pow2 64 == 0);
+  match supportsReducedMultiplication #c with 
+  |true -> 
+   (* assume ((getPrime c + 1) % pow2 64 == 0); *)
     montgomery_multiplication_buffer_by_one_w_ko a result
-  |P384 -> montgomery_multiplication_buffer_by_one_ko a result
-
+  |false -> montgomery_multiplication_buffer_by_one_ko a result
 
 
 let montgomery_multiplication_buffer #c a b result = 
