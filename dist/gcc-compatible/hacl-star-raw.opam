@@ -1,6 +1,6 @@
 opam-version: "2.0"
 name: "hacl-star-raw"
-version: "0.3.0"
+version: "0.3.2"
 maintainer: "Victor Dumitrescu <victor.dumitrescu@nomadic-labs.com>"
 authors: [ "Victor Dumitrescu <victor.dumitrescu@nomadic-labs.com>" ]
 homepage: "https://hacl-star.github.io/"
@@ -19,6 +19,14 @@ depends: [
   "ocamlfind" {build}
   "ctypes"
   "ctypes-foreign"
+  "conf-which" {build}
+]
+x-ci-accept-failures: [
+  "centos-7" # Default C compiler is too old
+  "oraclelinux-7" # Default C compiler is too old
+]
+available: [
+  os-family != "bsd"
 ]
 build: [
   ["./configure"]
@@ -26,7 +34,4 @@ build: [
 ]
 install: [
   make "install-hacl-star-raw"
-]
-available: [
-  os-family != "bsd"
 ]

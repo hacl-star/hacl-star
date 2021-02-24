@@ -116,10 +116,16 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
 #define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes64(x0, x1)	\
   (_mm_shuffle_epi32(x0, _MM_SHUFFLE((2*x1+3)%4,(2*x1+2)%4,(2*x1+1)%4,(2*x1)%4)))
 
-#define Lib_IntVector_Intrinsics_vec128_load_le_(x0) \
+#define Lib_IntVector_Intrinsics_vec128_load32_le_(x0) \
   (_mm_loadu_si128((__m128i*)(x0)))
 
-#define Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1) \
+#define Lib_IntVector_Intrinsics_vec128_load64_le_(x0) \
+  (_mm_loadu_si128((__m128i*)(x0)))
+
+#define Lib_IntVector_Intrinsics_vec128_store32_le_(x0, x1) \
+  (_mm_storeu_si128((__m128i*)(x0), x1))
+
+#define Lib_IntVector_Intrinsics_vec128_store64_le_(x0, x1) \
   (_mm_storeu_si128((__m128i*)(x0), x1))
 
 #define Lib_IntVector_Intrinsics_vec128_load_be(x0)		\
@@ -330,7 +336,10 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
 #define Lib_IntVector_Intrinsics_vec256_rotate_right_lanes64(x0, x1)	\
   (_mm256_permute4x64_epi64(x0, _MM_SHUFFLE((x1+3)%4,(x1+2)%4,(x1+1)%4,x1%4)))
 
-#define Lib_IntVector_Intrinsics_vec256_load_le(x0) \
+#define Lib_IntVector_Intrinsics_vec256_load32_le(x0) \
+  (_mm256_loadu_si256((__m256i*)(x0)))
+
+#define Lib_IntVector_Intrinsics_vec256_load64_le(x0) \
   (_mm256_loadu_si256((__m256i*)(x0)))
 
 #define Lib_IntVector_Intrinsics_vec256_load32_be(x0)		\
@@ -340,7 +349,10 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
   (_mm256_shuffle_epi8(_mm256_loadu_si256((__m256i*)(x0)), _mm256_set_epi8(8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0, 1, 2, 3, 4, 5, 6, 7)))
 
 
-#define Lib_IntVector_Intrinsics_vec256_store_le(x0, x1) \
+#define Lib_IntVector_Intrinsics_vec256_store32_le(x0, x1) \
+  (_mm256_storeu_si256((__m256i*)(x0), x1))
+
+#define Lib_IntVector_Intrinsics_vec256_store64_le(x0, x1) \
   (_mm256_storeu_si256((__m256i*)(x0), x1))
 
 #define Lib_IntVector_Intrinsics_vec256_store32_be(x0, x1)	\
@@ -518,11 +530,17 @@ typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
   (_mm_shuffle_epi32(x0, _MM_SHUFFLE(2*x1+1,2*x1,2*x2+1,2*x2)))
 */
 
-#define Lib_IntVector_Intrinsics_vec128_load_le_(x0) \
+#define Lib_IntVector_Intrinsics_vec128_load32_le_(x0) \
   (vld1q_u32((const uint32_t*) (x0)))
 
-#define Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1) \
-  (vst1q_u32(((uint8_t*)(x0)),(x1)))
+#define Lib_IntVector_Intrinsics_vec128_load64_le_(x0) \
+  (vld1q_u32((const uint32_t*) (x0)))
+
+#define Lib_IntVector_Intrinsics_vec128_store32_le_(x0, x1) \
+  (vst1q_u32((uint32_t*)(x0),(x1)))
+
+#define Lib_IntVector_Intrinsics_vec128_store64_le_(x0, x1) \
+  (vst1q_u32((uint32_t*)(x0),(x1)))
 
 /*
 #define Lib_IntVector_Intrinsics_vec128_load_be(x0)		\
@@ -637,6 +655,32 @@ typedef unsigned char vector128_8 __attribute__ ((vector_size(16)));
 typedef vector128 vector128_32;
 typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 
+// Small helper to change the endianess of the vector's elements, seen as uint32
+#define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
+  ((vector128)(vec_perm((vector128_8) x0, (vector128_8) {},             \
+                        (vector128_8){3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12})))
+
+// Small helper to change the endianess of the vector's elements, seen as uint64
+#define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0)      \
+  ((vector128)(vec_perm((vector128_8) x0, (vector128_8) {},             \
+                        (vector128_8){7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8})))
+
+#define Lib_IntVector_Intrinsics_vec128_load32_le_(x)              \
+  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
+   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
+
+#define Lib_IntVector_Intrinsics_vec128_load64_le_(x)              \
+  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64( \
+   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
+
+#define Lib_IntVector_Intrinsics_vec128_store32_le_(x0, x1)                \
+  (vec_store_len(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x1)), \
+                 ((uint8_t*)(x0)), (uint32_t) 16))
+
+#define Lib_IntVector_Intrinsics_vec128_store64_le_(x0, x1)                \
+  (vec_store_len(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x1)), \
+                 ((uint8_t*)(x0)), (uint32_t) 16))
+
 #define Lib_IntVector_Intrinsics_vec128_add32_(x0,x1)            \
   ((vector128) (((vector128_32) x0) + ((vector128_32) x1)))
 
@@ -692,15 +736,6 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 #define Lib_IntVector_Intrinsics_vec128_load64_(x)               \
     ((vector128)((vector128_64)vec_load_pair((unsigned long long)x, (unsigned long long)x)))
 
-// Small helper to change the endianess of the vector's elements, seen as uint64
-#define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0)      \
-  ((vector128)(vec_perm((vector128_8) x0, (vector128_8) {},             \
-                        (vector128_8){7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8})))
-
-#define Lib_IntVector_Intrinsics_vec128_load_le_(x)              \
-  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64( \
-   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
-
 #define Lib_IntVector_Intrinsics_vec128_lognot_(x0)      \
   ((vector128)(vec_xor(x0, vec_splat_u32(-1))))
 
@@ -741,15 +776,6 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 // Doesn't work with vec_splat_u64
 #define Lib_IntVector_Intrinsics_vec128_smul64_(x0, x1)          \
   ((vector128)(Lib_IntVector_Intrinsics_vec128_mul64_(x0,((vector128_64){(unsigned long long)x1,(unsigned long long) x1}))))
-
-// Small helper to change the endianess of the vector's elements, seen as uint32
-#define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
-  ((vector128)(vec_perm((vector128_8) x0, (vector128_8) {},             \
-                        (vector128_8){3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12})))
-
-#define Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1)                \
-  (vec_store_len(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x1)), \
-                 ((uint8_t*)(x0)), (uint32_t) 16))
 
 #define Lib_IntVector_Intrinsics_vec128_sub64_(x0, x1)   \
   ((vector128)((vector128_64)x0 - (vector128_64)x1))
@@ -824,21 +850,40 @@ static inline void print_vector128_64(const char *msg, Lib_IntVector_Intrinsics_
 #endif
 
 static inline Lib_IntVector_Intrinsics_vec128
-Lib_IntVector_Intrinsics_vec128_load_le(const uint8_t *x0) {
+Lib_IntVector_Intrinsics_vec128_load32_le(const uint8_t *x0) {
   Lib_IntVector_Intrinsics_vec128 res;
   printf("[> vec128_load_le\n");
   print_debug_buf8("x0", x0);
-  res = Lib_IntVector_Intrinsics_vec128_load_le_(x0);
+  res = Lib_IntVector_Intrinsics_vec128_load32_le_(x0);
+  print_vector128_32("res", res);
+  return res;
+}
+
+static inline Lib_IntVector_Intrinsics_vec128
+Lib_IntVector_Intrinsics_vec128_load64_le(const uint8_t *x0) {
+  Lib_IntVector_Intrinsics_vec128 res;
+  printf("[> vec128_load_le\n");
+  print_debug_buf8("x0", x0);
+  res = Lib_IntVector_Intrinsics_vec128_load64_le_(x0);
   print_vector128_64("res", res);
   return res;
 }
 
 static inline void
-Lib_IntVector_Intrinsics_vec128_store_le(const uint8_t *x0,
-                                         Lib_IntVector_Intrinsics_vec128 x1) {
+Lib_IntVector_Intrinsics_vec128_store32_le(const uint8_t *x0,
+                                           Lib_IntVector_Intrinsics_vec128 x1) {
   printf("[> vec128_store_le\n");
   print_vector128_32("x1", x1);
-  Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1);
+  Lib_IntVector_Intrinsics_vec128_store32_le_(x0, x1);
+  print_debug_buf8("res", x0);
+}
+
+static inline void
+Lib_IntVector_Intrinsics_vec128_store64_le(const uint8_t *x0,
+                                           Lib_IntVector_Intrinsics_vec128 x1) {
+  printf("[> vec128_store_le\n");
+  print_vector128_64("x1", x1);
+  Lib_IntVector_Intrinsics_vec128_store64_le_(x0, x1);
   print_debug_buf8("res", x0);
 }
 
@@ -1226,11 +1271,17 @@ Lib_IntVector_Intrinsics_vec128_sub64(Lib_IntVector_Intrinsics_vec128 x0,
 
 #else // DEBUG_VECTOR_TRACE
 
-#define Lib_IntVector_Intrinsics_vec128_load_le(x)      \
-  Lib_IntVector_Intrinsics_vec128_load_le_(x)
+#define Lib_IntVector_Intrinsics_vec128_load32_le(x)      \
+  Lib_IntVector_Intrinsics_vec128_load32_le_(x)
 
-#define Lib_IntVector_Intrinsics_vec128_store_le(x0, x1)        \
-  Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1)
+#define Lib_IntVector_Intrinsics_vec128_load64_le(x)      \
+  Lib_IntVector_Intrinsics_vec128_load64_le_(x)
+
+#define Lib_IntVector_Intrinsics_vec128_store32_le(x0, x1)        \
+  Lib_IntVector_Intrinsics_vec128_store32_le_(x0, x1)
+
+#define Lib_IntVector_Intrinsics_vec128_store64_le(x0, x1)        \
+  Lib_IntVector_Intrinsics_vec128_store64_le_(x0, x1)
 
 #define Lib_IntVector_Intrinsics_vec128_add32(x0, x1)    \
   Lib_IntVector_Intrinsics_vec128_add32_(x0, x1)

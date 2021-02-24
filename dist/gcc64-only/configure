@@ -89,14 +89,15 @@ int main() {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DSUPPORTS_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
-  diff $out.test $out.ref
+  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.test
+  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DBROKEN_INTRINSICS -march=native -O3 $file -o $out && $out > $out.ref
+  diff $out.test $out.ref;
   else
     echo "... WARNING: lib_intrinsics.h is missing: we can't test whether bug 81300 is present or not and assume it is not."
     return 0
   fi
 }
+
 detect_uint128 () {
   local file=$(mktemp /tmp/testint128.XXXXXXX).c
   echo "unsigned __int128 x = 0;" > $file
@@ -169,12 +170,6 @@ int main () {
 EOF
   $CC $CROSS_CFLAGS -I. -march=armv8-a+simd -c $file -o /dev/null
 }
-
-# We only detect the 64-bit version of the z-architecture (s390x).
-detect_ibmz () {
-  [[ $target_arch == "s390x" ]]
-}
-
 
 # Usage info
 # ----------
@@ -304,8 +299,6 @@ supports_vale=false
 supports_inline_asm=false
 supports_intrinsics=false
 
-echo "CFLAGS ?=" >> Makefile.config
-
 if detect_arm; then
   echo "... detected ARM platform"
   if detect_arm_neon; then
@@ -355,17 +348,9 @@ if detect_x86 || detect_x64; then
   fi
 fi
 
-if detect_ibmz; then
-  echo "... detected z platform"
-  echo "... $build_target supports 128-bit z VSX"
-  supports_128=true
-  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
-  echo "#include <stdint.h> " >> config.h
-fi
-
-if $supports_intrinsics; then
-  echo "$build_target supports _addcarry_u64"
-  echo "#define SUPPORTS_INTRINSICS 1" >> config.h
+if ! $supports_intrinsics; then
+  echo "$build_target does not support _addcarry_u64, using a C implementation"
+  echo "#define BROKEN_INTRINSICS 1" >> config.h
 fi
 
 if ! $supports_vale; then
@@ -381,8 +366,8 @@ else
   echo "#define SUPPORTS_VALE 1" >> config.h
 fi
 
-if $supports_inline_asm; then
-    echo "#define SUPPORTS_INLINE_ASM 1" >> config.h
+if ! $supports_inline_asm; then
+    echo "#define BROKEN_INLINE_ASM 1" >> config.h
 fi
 
 if ! $supports_128; then
