@@ -24,58 +24,6 @@
 
 #include "Hacl_Poly1305_128.h"
 
-#if !defined(DEBUG_VECTOR_TRACE)
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>
-
-static inline void print_debug_uint32_t(const char *msg, uint32_t x) {
-  printf(">> %s: %x08U\n", msg, x);
-}
-
-static inline void print_debug_uint64_t(const  char *msg, uint64_t x) {
-  printf(">> %s: %lxUL\n", msg, x);
-}
-
-static inline void print_debug_buf8(const char *msg, const uint8_t *buf) {
-  printf(">> %s: ", msg);
-  printf("[0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x]\n",
-         buf[0], buf[1], buf[2], buf[3],
-         buf[4], buf[5], buf[6], buf[7],
-         buf[8], buf[9], buf[10], buf[11],
-         buf[12], buf[13], buf[14], buf[15]);
-}
-
-static inline void print_vector128_8(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
-  uint8_t tmp[16];
-  Lib_IntVector_Intrinsics_vec128_store_le_(tmp, vec);
-  printf(">> %s: ", msg);
-  printf("[0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x]\n",
-         tmp[0], tmp[1], tmp[2], tmp[3],
-         tmp[4], tmp[5], tmp[6], tmp[7],
-         tmp[8], tmp[9], tmp[10], tmp[11],
-         tmp[12], tmp[13], tmp[14], tmp[15]);
-}
-
-static inline void print_vector128_32(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
-  printf(">> %s: ", msg);
-  printf("[0x%08x,0x%08x,0x%08x,0x%08x]\n",
-         Lib_IntVector_Intrinsics_vec128_extract32_(vec,0),
-         Lib_IntVector_Intrinsics_vec128_extract32_(vec,1),
-         Lib_IntVector_Intrinsics_vec128_extract32_(vec,2),
-         Lib_IntVector_Intrinsics_vec128_extract32_(vec,3));
-}
-
-static inline void print_vector128_64(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
-  printf(">> %s: ", msg);
-  printf("[0x%lxUL,0x%lxUL]\n",
-         (uint64_t) Lib_IntVector_Intrinsics_vec128_extract64_(vec,0),
-         (uint64_t) Lib_IntVector_Intrinsics_vec128_extract64_(vec,1));
-}
-
-#endif // DEBUG_VECTOR_TRACE
-
 void
 Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, uint8_t *b)
 {
@@ -86,9 +34,7 @@ Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc,
   Lib_IntVector_Intrinsics_vec128
   b2 = Lib_IntVector_Intrinsics_vec128_load_le(b + (uint32_t)16U);
   Lib_IntVector_Intrinsics_vec128 lo = Lib_IntVector_Intrinsics_vec128_interleave_low64(b1, b2);
-  print_vector128_64("load_acc2 #1", lo);
   Lib_IntVector_Intrinsics_vec128 hi = Lib_IntVector_Intrinsics_vec128_interleave_high64(b1, b2);
-  print_vector128_64("load_acc2 #2", hi);
   Lib_IntVector_Intrinsics_vec128
   f00 =
     Lib_IntVector_Intrinsics_vec128_and(lo,
@@ -161,10 +107,6 @@ Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc,
   acc[2U] = acc21;
   acc[3U] = acc31;
   acc[4U] = acc41;
-  print_vector128_64("load_acc2 #end0", acc[0U]);
-  print_vector128_64("load_acc2 #end1", acc[1U]);
-  print_vector128_64("load_acc2 #end2", acc[2U]);
-  print_vector128_64("load_acc2 #end3", acc[3U]);
 }
 
 void
@@ -860,13 +802,11 @@ Hacl_Poly1305_128_poly1305_update(
     uint32_t nb = len1 / bs;
     for (uint32_t i = (uint32_t)0U; i < nb; i++)
     {
-      printf("[> update loop iteration #%x", i);
       uint8_t *block = text1 + i * bs;
       Lib_IntVector_Intrinsics_vec128 e[5U];
       for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
         e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
       Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load_le(block);
-      print_vector128_64("update #1", b1);
       Lib_IntVector_Intrinsics_vec128
       b2 = Lib_IntVector_Intrinsics_vec128_load_le(block + (uint32_t)16U);
       Lib_IntVector_Intrinsics_vec128 lo = Lib_IntVector_Intrinsics_vec128_interleave_low64(b1, b2);
@@ -1010,7 +950,6 @@ Hacl_Poly1305_128_poly1305_update(
       a44 =
         Lib_IntVector_Intrinsics_vec128_add64(a43,
           Lib_IntVector_Intrinsics_vec128_mul64(r0, f140));
-      print_vector128_64("update #2", a44);
       Lib_IntVector_Intrinsics_vec128 t01 = a04;
       Lib_IntVector_Intrinsics_vec128 t1 = a14;
       Lib_IntVector_Intrinsics_vec128 t2 = a24;
@@ -1079,11 +1018,6 @@ Hacl_Poly1305_128_poly1305_update(
       acc[2U] = o2;
       acc[3U] = o3;
       acc[4U] = o4;
-      print_vector128_64("update #end0", acc[0U]);
-      print_vector128_64("update #end1", acc[1U]);
-      print_vector128_64("update #end2", acc[2U]);
-      print_vector128_64("update #end3", acc[3U]);
-      print_vector128_64("update #end4", acc[4U]);
     }
     Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(acc, pre);
   }
