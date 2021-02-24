@@ -358,8 +358,8 @@ Hacl_Hash_Blake2b_256_finish_blake2b_256(
       Lib_IntVector_Intrinsics_vec256 *row0 = s + (u32)0U * (u32)1U;
       Lib_IntVector_Intrinsics_vec256 *row1 = s + (u32)1U * (u32)1U;
       u8 *final;
-      Lib_IntVector_Intrinsics_vec256_store_le(first, row0[0U]);
-      Lib_IntVector_Intrinsics_vec256_store_le(second, row1[0U]);
+      Lib_IntVector_Intrinsics_vec256_store64_le(first, row0[0U]);
+      Lib_IntVector_Intrinsics_vec256_store64_le(second, row1[0U]);
       final = b;
       memcpy(dst, final, (u32)64U * sizeof (u8));
       Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));
@@ -1215,8 +1215,8 @@ Hacl_Blake2b_256_blake2b_finish(u32 nn, u8 *output, Lib_IntVector_Intrinsics_vec
       Lib_IntVector_Intrinsics_vec256 *row0 = hash + (u32)0U * (u32)1U;
       Lib_IntVector_Intrinsics_vec256 *row1 = hash + (u32)1U * (u32)1U;
       u8 *final;
-      Lib_IntVector_Intrinsics_vec256_store_le(first, row0[0U]);
-      Lib_IntVector_Intrinsics_vec256_store_le(second, row1[0U]);
+      Lib_IntVector_Intrinsics_vec256_store64_le(first, row0[0U]);
+      Lib_IntVector_Intrinsics_vec256_store64_le(second, row1[0U]);
       final = b;
       memcpy(output, final, nn * sizeof (u8));
       Lib_Memzero0_memzero(b, double_row * sizeof (b[0U]));

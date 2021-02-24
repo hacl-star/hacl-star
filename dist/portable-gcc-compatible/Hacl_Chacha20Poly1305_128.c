@@ -52,9 +52,9 @@ poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t 
       Lib_IntVector_Intrinsics_vec128 e[5U];
       for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
         e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-      Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load_le(block);
+      Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load64_le(block);
       Lib_IntVector_Intrinsics_vec128
-      b2 = Lib_IntVector_Intrinsics_vec128_load_le(block + (uint32_t)16U);
+      b2 = Lib_IntVector_Intrinsics_vec128_load64_le(block + (uint32_t)16U);
       Lib_IntVector_Intrinsics_vec128 lo = Lib_IntVector_Intrinsics_vec128_interleave_low64(b1, b2);
       Lib_IntVector_Intrinsics_vec128
       hi = Lib_IntVector_Intrinsics_vec128_interleave_high64(b1, b2);

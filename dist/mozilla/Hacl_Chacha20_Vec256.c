@@ -379,9 +379,9 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
     for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)16U; i0++)
     {
       Lib_IntVector_Intrinsics_vec256
-      x = Lib_IntVector_Intrinsics_vec256_load_le(uu____1 + i0 * (uint32_t)32U);
+      x = Lib_IntVector_Intrinsics_vec256_load32_le(uu____1 + i0 * (uint32_t)32U);
       Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i0]);
-      Lib_IntVector_Intrinsics_vec256_store_le(uu____0 + i0 * (uint32_t)32U, y);
+      Lib_IntVector_Intrinsics_vec256_store32_le(uu____0 + i0 * (uint32_t)32U, y);
     }
   }
   if (rem1 > (uint32_t)0U)
@@ -541,9 +541,9 @@ Hacl_Chacha20_Vec256_chacha20_encrypt_256(
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       Lib_IntVector_Intrinsics_vec256
-      x = Lib_IntVector_Intrinsics_vec256_load_le(plain + i * (uint32_t)32U);
+      x = Lib_IntVector_Intrinsics_vec256_load32_le(plain + i * (uint32_t)32U);
       Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i]);
-      Lib_IntVector_Intrinsics_vec256_store_le(plain + i * (uint32_t)32U, y);
+      Lib_IntVector_Intrinsics_vec256_store32_le(plain + i * (uint32_t)32U, y);
     }
     memcpy(uu____2, plain, rem * sizeof (uint8_t));
   }
@@ -721,9 +721,9 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
     for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)16U; i0++)
     {
       Lib_IntVector_Intrinsics_vec256
-      x = Lib_IntVector_Intrinsics_vec256_load_le(uu____1 + i0 * (uint32_t)32U);
+      x = Lib_IntVector_Intrinsics_vec256_load32_le(uu____1 + i0 * (uint32_t)32U);
       Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i0]);
-      Lib_IntVector_Intrinsics_vec256_store_le(uu____0 + i0 * (uint32_t)32U, y);
+      Lib_IntVector_Intrinsics_vec256_store32_le(uu____0 + i0 * (uint32_t)32U, y);
     }
   }
   if (rem1 > (uint32_t)0U)
@@ -883,9 +883,9 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       Lib_IntVector_Intrinsics_vec256
-      x = Lib_IntVector_Intrinsics_vec256_load_le(plain + i * (uint32_t)32U);
+      x = Lib_IntVector_Intrinsics_vec256_load32_le(plain + i * (uint32_t)32U);
       Lib_IntVector_Intrinsics_vec256 y = Lib_IntVector_Intrinsics_vec256_xor(x, k[i]);
-      Lib_IntVector_Intrinsics_vec256_store_le(plain + i * (uint32_t)32U, y);
+      Lib_IntVector_Intrinsics_vec256_store32_le(plain + i * (uint32_t)32U, y);
     }
     memcpy(uu____2, plain, rem * sizeof (uint8_t));
   }
