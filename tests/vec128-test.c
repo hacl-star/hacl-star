@@ -154,7 +154,7 @@ int main() {
   vec128 exp;
   uint32_t x32;
   uint64_t x64;
-  uint8_t tmp[16];
+  uint8_t tmp[32];
 
   // Load/store
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
@@ -177,6 +177,28 @@ int main() {
   compare_and_print_vec64("load_le", vec0, exp);
   //  print_vector32("load_le", vec0);
   //  print_vector64("load_le", vec0);
+
+  // Those tests come from a real, nasty bug where the addresses were incorrectly
+  // computed because of type inference.
+  uint8_t load_store_buf[32] = {
+    0x00U,0x00U,0x00U,0x00U,0x11U,0x11U,0x11U,0x11U,
+    0x22U,0x22U,0x22U,0x22U,0x33U,0x33U,0x33U,0x33U,
+    0x44U,0x44U,0x44U,0x44U,0x55U,0x55U,0x55U,0x55U,
+    0x66U,0x66U,0x66U,0x66U,0x77U,0x77U,0x77U,0x77U
+  };
+  
+  vec0 = Lib_IntVector_Intrinsics_vec128_load_le(load_store_buf + (uint32_t)16U);
+  exp = initialize_vector64(0x5555555544444444UL,0x7777777766666666UL);
+  compare_and_print_vec64("load_le with offset", vec0, exp);
+  //  print_vector64("load_le with offset", vec0);
+
+  vec0 = initialize_vector64(0x5555555544444444UL,0x7777777766666666UL);
+  Lib_IntVector_Intrinsics_vec128_store_le(tmp + (uint32_t)16U, vec0);
+  printf("store_le with offset:\n");
+  ok = ok && compare_and_print(16, &(tmp[16]), &(load_store_buf[16]));
+  //  print_buf8("store_le with offset", tmp);
+
+  // Arithmetic
   
   vec0 = initialize_vector32(0x0, 0x1, 0x2, 0x3);
   vec1 = initialize_vector32(0x10, 0x11, 0x12, 0x13);
