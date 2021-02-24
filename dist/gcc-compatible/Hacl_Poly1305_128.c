@@ -30,10 +30,14 @@ Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc,
   Lib_IntVector_Intrinsics_vec128 e[5U];
   for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
     e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
+  printf("[> POINT2:x0\n");
   Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load_le(b);
+  printf("[> POINT2:x1\n");
   Lib_IntVector_Intrinsics_vec128
   b2 = Lib_IntVector_Intrinsics_vec128_load_le(b + (uint32_t)16U);
+  printf("[> POINT2\n");
   Lib_IntVector_Intrinsics_vec128 lo = Lib_IntVector_Intrinsics_vec128_interleave_low64(b1, b2);
+  printf("[> POINT2:end\n");
   Lib_IntVector_Intrinsics_vec128 hi = Lib_IntVector_Intrinsics_vec128_interleave_high64(b1, b2);
   Lib_IntVector_Intrinsics_vec128
   f00 =
@@ -132,16 +136,22 @@ Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(
   Lib_IntVector_Intrinsics_vec128 r22 = r2[2U];
   Lib_IntVector_Intrinsics_vec128 r23 = r2[3U];
   Lib_IntVector_Intrinsics_vec128 r24 = r2[4U];
+  printf("[> POINT3\n");
   Lib_IntVector_Intrinsics_vec128
   r201 = Lib_IntVector_Intrinsics_vec128_interleave_low64(r20, r10);
+  printf("[> POINT4\n");
   Lib_IntVector_Intrinsics_vec128
   r211 = Lib_IntVector_Intrinsics_vec128_interleave_low64(r21, r11);
+  printf("[> POINT5\n");
   Lib_IntVector_Intrinsics_vec128
   r221 = Lib_IntVector_Intrinsics_vec128_interleave_low64(r22, r12);
+  printf("[> POINT6\n");
   Lib_IntVector_Intrinsics_vec128
   r231 = Lib_IntVector_Intrinsics_vec128_interleave_low64(r23, r13);
+  printf("[> POINT7\n");
   Lib_IntVector_Intrinsics_vec128
   r241 = Lib_IntVector_Intrinsics_vec128_interleave_low64(r24, r14);
+  printf("[> POINT8\n");
   Lib_IntVector_Intrinsics_vec128
   r251 = Lib_IntVector_Intrinsics_vec128_smul64(r211, (uint64_t)5U);
   Lib_IntVector_Intrinsics_vec128
@@ -792,6 +802,11 @@ Hacl_Poly1305_128_poly1305_update(
   uint32_t sz_block = (uint32_t)32U;
   uint32_t len0 = len / sz_block * sz_block;
   uint8_t *t0 = text;
+  printf("[> text: ");
+  for(int i = 0; i < 32; i++) {
+    printf("%02x", text[i]);
+  }
+  printf("\n");
   if (len0 > (uint32_t)0U)
   {
     uint32_t bs = (uint32_t)32U;
@@ -809,7 +824,9 @@ Hacl_Poly1305_128_poly1305_update(
       Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load_le(block);
       Lib_IntVector_Intrinsics_vec128
       b2 = Lib_IntVector_Intrinsics_vec128_load_le(block + (uint32_t)16U);
+      printf("[> POINT1:beg #%x\n", i);
       Lib_IntVector_Intrinsics_vec128 lo = Lib_IntVector_Intrinsics_vec128_interleave_low64(b1, b2);
+      printf("[> POINT1:end #%x\n", i);
       Lib_IntVector_Intrinsics_vec128
       hi = Lib_IntVector_Intrinsics_vec128_interleave_high64(b1, b2);
       Lib_IntVector_Intrinsics_vec128
