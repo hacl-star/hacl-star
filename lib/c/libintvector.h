@@ -699,10 +699,10 @@ typedef vector128_8 vector128;
   ((vector128)(vec_cmpeq(((vector128_64)(x0)),((vector128_64)(x1)))))
 
 #define Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1)       \
-  (((vector128_32)(x0))[x1])
+  ((unsigned int)(vec_extract((vector128_32)(x0), x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_extract64_(x0, x1)       \
-  (((vector128_64)(x0))[x1])
+  ((unsigned long long)(vec_extract((vector128_64)(x0), x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_gt32_(x0, x1)                   \
   ((vector128)((vector128_32)(((vector128_32)(x0)) > ((vector128_32)(x1)))))
