@@ -781,7 +781,7 @@ static inline void print_debug_uint64_t(const  char *msg, uint64_t x) {
 
 static inline void print_debug_buf8(const char *msg, const uint8_t *buf) {
   printf(">> %s: ", msg);
-  printf("[0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x]\n",
+  printf("[0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x]\n",
          buf[0], buf[1], buf[2], buf[3],
          buf[4], buf[5], buf[6], buf[7],
          buf[8], buf[9], buf[10], buf[11],
@@ -792,7 +792,7 @@ static inline void print_vector128_8(const char *msg, Lib_IntVector_Intrinsics_v
   uint8_t tmp[16];
   Lib_IntVector_Intrinsics_vec128_store_le_(tmp, vec);
   printf(">> %s: ", msg);
-  printf("[0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x]\n",
+  printf("[0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x,0x%02x]\n",
          tmp[0], tmp[1], tmp[2], tmp[3],
          tmp[4], tmp[5], tmp[6], tmp[7],
          tmp[8], tmp[9], tmp[10], tmp[11],
@@ -841,12 +841,6 @@ Lib_IntVector_Intrinsics_vec128_store_le(const uint8_t *x0,
   Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1);
   print_debug_buf8("res", x0);
 }
-
-//#define Lib_IntVector_Intrinsics_vec128_load_le(x)
-//  Lib_IntVector_Intrinsics_vec128_load_le_(x)
-
-//#define Lib_IntVector_Intrinsics_vec128_store_le(x0, x1)
-//  Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128 x0,
