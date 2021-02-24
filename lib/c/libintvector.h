@@ -11,7 +11,12 @@
 // of uint64, the log results will vary with the endianess, in particular for
 // some generic operations like [and] or [xor]. By default, the printing is
 // performed as if we were manipulating blocks of uint32. If you want to
-// switch to blocks of uint64, use the flag: [DEBUG_VECTOR_TRACE_ELEMENTS_64]
+// switch to blocks of uint64, use the flag: [DEBUG_VECTOR_TRACE_ELEMENTS_64].
+// Note that if those flags are activated, it may be necessary to tweak a bit
+// the compilation options to build HACL. More specifically, you may need to
+// always activate the compiler options to use vector support (even for files
+// which actually don't make use of vectors, if they have libintvector.h as
+// a dependency).
 
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
 
@@ -767,17 +772,17 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 #include <stdint.h>
 
 static inline void print_debug_uint32_t(const char *msg, uint32_t x) {
-  printf("[> %s: %x08U\n", msg, x);
+  printf(">> %s: %x08U\n", msg, x);
 }
 
 static inline void print_debug_uint64_t(const  char *msg, uint64_t x) {
-  printf("[> %s: %lxUL\n", msg, x);
+  printf(">> %s: %lxUL\n", msg, x);
 }
 
 static inline void print_vector128_8(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
   uint8_t tmp[16];
   Lib_IntVector_Intrinsics_vec128_store_le_(tmp, vec);
-  printf("[> %s: ", msg);
+  printf(">> %s: ", msg);
   printf("[0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x]\n",
          tmp[0], tmp[1], tmp[2], tmp[3],
          tmp[4], tmp[5], tmp[6], tmp[7],
@@ -786,7 +791,7 @@ static inline void print_vector128_8(const char *msg, Lib_IntVector_Intrinsics_v
 }
 
 static inline void print_vector128_32(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
-  printf("[> %s: ", msg);
+  printf(">> %s: ", msg);
   printf("[0x%08x,0x%08x,0x%08x,0x%08x]\n",
          Lib_IntVector_Intrinsics_vec128_extract32_(vec,0),
          Lib_IntVector_Intrinsics_vec128_extract32_(vec,1),
@@ -795,7 +800,7 @@ static inline void print_vector128_32(const char *msg, Lib_IntVector_Intrinsics_
 }
 
 static inline void print_vector128_64(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
-  printf("[> %s: ", msg);
+  printf(">> %s: ", msg);
   printf("[0x%lxUL,0x%lxUL]\n",
          (uint64_t) Lib_IntVector_Intrinsics_vec128_extract64_(vec,0),
          (uint64_t) Lib_IntVector_Intrinsics_vec128_extract64_(vec,1));
@@ -897,7 +902,6 @@ Lib_IntVector_Intrinsics_vec128_extract32(Lib_IntVector_Intrinsics_vec128 x0,
     printf("**ERROR**: libintvector.h: Lib_IntVector_Intrinsics_vec128_extract32: debugging version: 'x1' must be in [0; 3]");
     abort();
   }
-  //  uint32_t res = Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1);
   print_debug_uint32_t("res", res);
   return res;
 }
@@ -917,16 +921,9 @@ Lib_IntVector_Intrinsics_vec128_extract64(Lib_IntVector_Intrinsics_vec128 x0,
     printf("**ERROR**: libintvector.h: Lib_IntVector_Intrinsics_vec128_extract64: debugging version: 'x1' must be in [0; 1]");
     abort();
   }
-  //  res = Lib_IntVector_Intrinsics_vec128_extract64_(x0, x1);
   print_debug_uint64_t("res", res);
   return res;
 }
-
-//#define Lib_IntVector_Intrinsics_vec128_extract32(x0, x1)     \
-//  Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1)
-
-//#define Lib_IntVector_Intrinsics_vec128_extract64(x0, x1)     \
-//  Lib_IntVector_Intrinsics_vec128_extract64_(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_gt32(Lib_IntVector_Intrinsics_vec128 x0,
@@ -1070,15 +1067,6 @@ Lib_IntVector_Intrinsics_vec128_load64(uint64_t x0) {
   return res;
 }
 
-//#define Lib_IntVector_Intrinsics_vec128_load32(x)     \
-//  Lib_IntVector_Intrinsics_vec128_load32_(x)
-
-//#define Lib_IntVector_Intrinsics_vec128_load32s(x0, x1, x2, x3)       \
-//  Lib_IntVector_Intrinsics_vec128_load32s_(x0, x1, x2, x3)
-
-//#define Lib_IntVector_Intrinsics_vec128_load64(x)     \
-//  Lib_IntVector_Intrinsics_vec128_load64_(x)
-
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_lognot(Lib_IntVector_Intrinsics_vec128 x0) {
   printf("[> vec128_lognot\n");
@@ -1135,12 +1123,20 @@ Lib_IntVector_Intrinsics_vec128_rotate_right32(Lib_IntVector_Intrinsics_vec128 x
 // The shift value must be a constant. In practice, is always 1, 2 or 3
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_fixed(Lib_IntVector_Intrinsics_vec128 x0,
-                                                     uint32_t x1) {
+                                                           uint32_t x1) {
   printf("[> vec128_rotate_right_lanes32\n");
   print_vector128_32("x0", x0);
   print_debug_uint32_t("x1", x1);
-  if(x1 == 1U) {
-    x0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_(x0, 1U);
+  switch (x1) {
+  case 1U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_(x0, 1U); break;
+  case 2U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_(x0, 2U); break;
+  case 3U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_(x0, 3U); break;
+  default:
+    printf("**ERROR**: libintvector.h: Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32: debugging version: 'x1' must be 1, 2 or 3");
+    abort();
+  }
+  /*  if(x1 == 1U) {
+    
   }
   else if (x1 == 2U) {
     x0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_(x0, 2U);
@@ -1151,7 +1147,7 @@ Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_fixed(Lib_IntVector_Intrins
   else {
     printf("**ERROR**: libintvector.h: Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32: debugging version: 'x1' must be 1, 2 or 3");
     abort();
-  }
+    }*/
   print_vector128_32("res", x0);
   return x0;
 }
