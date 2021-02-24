@@ -648,12 +648,12 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 
 // The main vector 128 type
 // TODO: try to use uint8_t, uint32_t, uint64_t
-typedef unsigned int Lib_IntVector_Intrinsics_vec128 __attribute__ ((vector_size(16)));
+typedef uint32_t Lib_IntVector_Intrinsics_vec128 __attribute__ ((vector_size(16)));
 
 typedef Lib_IntVector_Intrinsics_vec128 vector128;
-typedef unsigned char vector128_8 __attribute__ ((vector_size(16)));
+typedef uint8_t vector128_8 __attribute__ ((vector_size(16)));
 typedef vector128 vector128_32;
-typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
+typedef uint64_t vector128_64 __attribute__ ((vector_size(16)));
 
 // Small helper to change the endianess of the vector's elements, seen as uint32
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
@@ -727,8 +727,8 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
   ((vector128)vec_mergeh((vector128_64) x0, (vector128_64) x1))
 
 #define Lib_IntVector_Intrinsics_vec128_load32_(x)                      \
-  ((vector128)((vector128_32){(unsigned int) x, (unsigned int) x,      \
-                              (unsigned int) x, (unsigned int) x}))
+  ((vector128)((vector128_32){(uint32_t)(x), (uint32_t)(x),             \
+        (uint32_t)(x), (uint32_t)(x)}))
 
 #define Lib_IntVector_Intrinsics_vec128_load32s_(x0, x1, x2, x3) \
   ((vector128)((vector128_32){x0, x1, x2, x3}))
@@ -753,7 +753,7 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
   ((vector128)(vec_or(x0, x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_left32_(x0, x1)           \
-  ((vector128)(vec_rli((vector128_32)x0, (unsigned long)x1)))
+  ((vector128)(vec_rli((vector128_32)x0, (uint64_t)x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32_(x0, x1)          \
   (Lib_IntVector_Intrinsics_vec128_rotate_left32_(x0,(uint32_t) (32-(x1))))
@@ -766,16 +766,16 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
           ((x1+3)%4)*4+0,((x1+3)%4)*4+1,((x1+3)%4)*4+2,((x1+3)%4)*4+3})))
 
 #define Lib_IntVector_Intrinsics_vec128_shift_left64_(x0, x1)            \
-  (((vector128)((vector128_64)vec_rli((vector128_64)x0, (unsigned long)x1))) & \
+  (((vector128)((vector128_64)vec_rli((vector128_64)x0, (uint64_t)(x1)))) & \
    ((vector128)((vector128_64){0xffffffffffffffff << x1, 0xffffffffffffffff << x1})))
 
 #define Lib_IntVector_Intrinsics_vec128_shift_right64_(x0, x1)         \
-  (((vector128)((vector128_64)vec_rli((vector128_64)x0, (unsigned long)(64-x1)))) & \
+  (((vector128)((vector128_64)vec_rli((vector128_64)x0, (uint64_t)(64-(x1))))) & \
    ((vector128)((vector128_64){0xffffffffffffffff >> x1, 0xffffffffffffffff >> x1})))
 
 // Doesn't work with vec_splat_u64
 #define Lib_IntVector_Intrinsics_vec128_smul64_(x0, x1)          \
-  ((vector128)(Lib_IntVector_Intrinsics_vec128_mul64_(x0,((vector128_64){(unsigned long long)x1,(unsigned long long) x1}))))
+  ((vector128)(Lib_IntVector_Intrinsics_vec128_mul64_(x0,((vector128_64){(uint64_t)x1,(uint64_t) x1}))))
 
 #define Lib_IntVector_Intrinsics_vec128_sub64_(x0, x1)   \
   ((vector128)((vector128_64)x0 - (vector128_64)x1))
