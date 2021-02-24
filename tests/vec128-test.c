@@ -29,12 +29,6 @@ static inline void print_buf8(unsigned char *msg, uint8_t *buf) {
   printf(");\n");
 }
 
-static inline void print_vector8(unsigned char *msg, vec128 vec) {
-  uint8_t tmp[16];
-  Lib_IntVector_Intrinsics_vec128_store_le(tmp, vec);
-  print_buf8(msg, tmp);
-}
-
 static inline void print_vector32(unsigned char *msg, vec128 vec) {
   printf("[> %s:\n", msg);
   printf("initialize_vector32(0x%08x,0x%08x,0x%08x,0x%08x);\n",
@@ -59,15 +53,6 @@ void initialize_buf8(uint8_t x0, uint8_t x1, uint8_t x2, uint8_t x3, uint8_t x4,
   buf[4] = x4; buf[5] = x5; buf[6] = x6; buf[7] = x7;
   buf[8] = x8; buf[9] = x9; buf[10] = x10; buf[11] = x11;
   buf[12] = x12; buf[13] = x13; buf[14] = x14; buf[15] = x15;
-}
-
-vec128 initialize_vector8(uint8_t x0, uint8_t x1, uint8_t x2, uint8_t x3, uint8_t x4,
-                          uint8_t x5, uint8_t x6, uint8_t x7, uint8_t x8, uint8_t x9,
-                          uint8_t x10, uint8_t x11, uint8_t x12, uint8_t x13,
-                          uint8_t x14, uint8_t x15) {
-  uint8_t tmp[16];
-  initialize_buf8(x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,tmp);
-  return Lib_IntVector_Intrinsics_vec128_load_le(tmp);
 }
 
 vec128 initialize_vector32(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3) {
@@ -154,28 +139,42 @@ int main() {
   vec128 exp;
   uint32_t x32;
   uint64_t x64;
-  uint8_t tmp[32];
+  uint8_t tmp[32] = {
+    0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,
+    0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,
+    0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,
+    0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U
+  };
 
   // Load/store
-  vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  Lib_IntVector_Intrinsics_vec128_store_le(tmp, vec0);
   uint8_t store_le_b[16] = {
       0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
       0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU
   };
-  printf("store_le:\n");
+
+  vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
+  Lib_IntVector_Intrinsics_vec128_store32_le(tmp, vec0);
+  printf("store32_le:\n");
+  ok = ok && compare_and_print(16, tmp, store_le_b);
+  //  print_buf8("store32_le", tmp);
+
+  vec0 = initialize_vector64(0x4455667700112233, 0xccddeeff8899aabb);
+  Lib_IntVector_Intrinsics_vec128_store64_le(tmp, vec0);
+  printf("store64_le:\n");
   ok = ok && compare_and_print(16, tmp, store_le_b);
   //  print_buf8("store_le", tmp);
 
-  // TODO: add cases depending on the kind of element in the vector
   initialize_buf8(0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
                   0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU,tmp);
-  vec0 = Lib_IntVector_Intrinsics_vec128_load_le(tmp);
-  //exp = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
+
+  vec0 = Lib_IntVector_Intrinsics_vec128_load32_le(tmp);
+  exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
+  compare_and_print_vec32("load_le", vec0, exp);
+  //  print_vector32("load32_le", vec0);
+
+  vec0 = Lib_IntVector_Intrinsics_vec128_load64_le(tmp);
   exp = initialize_vector64(0x4455667700112233UL,0xccddeeff8899aabbUL);
-  //  compare_and_print_vec32("load_le", vec0, exp);
-  compare_and_print_vec64("load_le", vec0, exp);
-  //  print_vector32("load_le", vec0);
+  compare_and_print_vec64("load64_le", vec0, exp);
   //  print_vector64("load_le", vec0);
 
   // Those tests come from a real, nasty bug where the addresses were incorrectly
@@ -187,16 +186,10 @@ int main() {
     0x66U,0x66U,0x66U,0x66U,0x77U,0x77U,0x77U,0x77U
   };
   
-  vec0 = Lib_IntVector_Intrinsics_vec128_load_le(load_store_buf + (uint32_t)16U);
+  vec0 = Lib_IntVector_Intrinsics_vec128_load64_le(load_store_buf + (uint32_t)16U);
   exp = initialize_vector64(0x5555555544444444UL,0x7777777766666666UL);
-  compare_and_print_vec64("load_le with offset", vec0, exp);
-  //  print_vector64("load_le with offset", vec0);
-
-  vec0 = initialize_vector32(0x44444444U, 0x55555555U, 0x66666666U, 0x77777777U);
-  Lib_IntVector_Intrinsics_vec128_store_le(tmp + (uint32_t)16U, vec0);
-  printf("store_le with offset:\n");
-  ok = ok && compare_and_print(16, &(tmp[16]), &(load_store_buf[16]));
-  //  print_buf8("store_le with offset", tmp);
+  compare_and_print_vec64("load64_le with offset", vec0, exp);
+  //  print_vector64("load64_le with offset", vec0);
 
   // Arithmetic
   
