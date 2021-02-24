@@ -158,11 +158,6 @@ val mul: #c: curve -> f: felem c -> r: felem c -> out: widefelem c ->
       wide_as_nat c h1 out = as_nat c h0 r * as_nat c h0 f)
 
 
-val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
-
-
-val eq1_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == 0 else uint_v r == pow2 64 - 1})
-
 
 val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
   (requires fun h -> live h f)

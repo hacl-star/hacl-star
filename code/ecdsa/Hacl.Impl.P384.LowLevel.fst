@@ -80,7 +80,7 @@ let add_dep_prime_p384 x t result =
   pop_frame();
   r
     
-
+(* 
 val sub6: x: felem P384 -> y:felem P384 -> result: felem P384 -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
@@ -90,9 +90,9 @@ val sub6: x: felem P384 -> y:felem P384 -> result: felem P384 ->
 let sub6 x y result = 
   bn_sub_eq_len (size 6) x y result
 
+ *)
 
-
-val sub6_il: x: felem P384 -> y: glbuffer uint64 (size 6) -> result: felem P384 -> 
+(* val sub6_il: x: felem P384 -> y: glbuffer uint64 (size 6) -> result: felem P384 -> 
   Stack uint64
   (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint result y)
   (ensures fun h0 c h1 -> modifies (loc result) h0 h1 /\ v c <= 1 /\ (
@@ -107,15 +107,15 @@ let sub6_il x y result =
   let y_ = const_to_ilbuffer y in 
   bn_sub_eq_len (size 6) x y_ result
 
-
-val mul_p384: f: felem P384 -> r: felem P384 -> out: widefelem P384 -> 
+ *)
+(* val mul_p384: f: felem P384 -> r: felem P384 -> out: widefelem P384 -> 
   Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
       wide_as_nat P384 h1 out = as_nat P384 h0 r * as_nat P384 h0 f)
 
 let mul_p384 f r out = 
-  bn_mul (size 6) f (size 6) r out
+  bn_mul (size 6) f (size 6) r out *)
 
 (* val shortened_mul_p384: a: glbuffer uint64 (size 6) -> b: uint64 -> result: widefelem P384 -> Stack unit
   (requires fun h -> live h a /\ live h result /\ wide_as_nat P384 h result = 0)

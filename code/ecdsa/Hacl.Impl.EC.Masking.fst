@@ -110,3 +110,21 @@ let cmovznz4 #c  cin x y r =
     upd r i r_i;
     cmovznz4_lemma cin (Seq.index (as_seq h0 x) (v i)) (Seq.index (as_seq h0 y) (v i))
   )
+
+
+
+val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
+
+
+val eq1_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == 0 else uint_v r == pow2 64 - 1})
+
+
+let eq0_u64 a =
+  eq_mask_lemma a (u64 0);
+  eq_mask a (u64 0)
+
+
+let eq1_u64 a =
+  neq_mask_lemma a (u64 0);
+  neq_mask a (u64 0)
+
