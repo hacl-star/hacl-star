@@ -192,7 +192,7 @@ int main() {
   compare_and_print_vec64("load_le with offset", vec0, exp);
   //  print_vector64("load_le with offset", vec0);
 
-  vec0 = initialize_vector64(0x5555555544444444UL,0x7777777766666666UL);
+  vec0 = initialize_vector32(0x44444444U, 0x55555555U, 0x66666666U, 0x77777777U);
   Lib_IntVector_Intrinsics_vec128_store_le(tmp + (uint32_t)16U, vec0);
   printf("store_le with offset:\n");
   ok = ok && compare_and_print(16, &(tmp[16]), &(load_store_buf[16]));
