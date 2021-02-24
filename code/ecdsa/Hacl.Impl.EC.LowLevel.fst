@@ -397,40 +397,15 @@ let compare_felem #c a b =
 
 
 let shiftLeftWord #c i o =
-  admit();
- (* let len = getCoordinateLenU64 c in 
+  let len = getCoordinateLenU64 c in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
+  
   for 0ul len inv (fun j -> upd o j (u64 0));
-
-  for len (size 2 *! len) inv (fun j -> upd o j i.(j -! len))
-*)
-
-
-  assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  assert_norm(pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
-  match c with
-  |P384 ->
-    upd o (size 0) (u64 0);
-    upd o (size 1) (u64 0);
-    upd o (size 2) (u64 0);
-    upd o (size 3) (u64 0);
-    upd o (size 4) (u64 0);
-    upd o (size 5) (u64 0);
-    upd o (size 6) i.(size 0);
-    upd o (size 7) i.(size 1);
-    upd o (size 8) i.(size 2);
-    upd o (size 9) i.(size 3);
-    upd o (size 10) i.(size 4);
-    upd o (size 11) i.(size 5)
-  |P256 ->
-    upd o (size 0) (u64 0);
-    upd o (size 1) (u64 0);
-    upd o (size 2) (u64 0);
-    upd o (size 3) (u64 0);
-    upd o (size 4) i.(size 0);
-    upd o (size 5) i.(size 1);
-    upd o (size 6) i.(size 2);
-    upd o (size 7) i.(size 3) 
+  
+  for len (size 2 *! len) inv (fun j -> 
+    let i_i = index i (j -. len) in 
+    upd o j i_i
+  )
 
 
 let mod64 #c a =
@@ -443,31 +418,12 @@ let shift1 #c t out =
   admit();
   let len = getCoordinateLenU64 c *! 2ul in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
-  for 0ul (len -! 1) inv (fun i -> 
+  for 0ul (len -! 1ul) inv (fun i -> 
     let elem = index t (size 1 +! i) in 
     upd out i elem);
- upd out (len -! 1) (u64 0)
-  
-(*
+  upd out (len -! 1ul) (u64 0)
 
-  |P256 -> 
-    let t1 = index t (size 1) in 
-    let t2 = index t (size 2) in 
-    let t3 = index t (size 3) in 
-    let t4 = index t (size 4) in 
-    let t5 = index t (size 5) in 
-    let t6 = index t (size 6) in 
-    let t7 = index t (size 7) in 
 
-    upd out (size 0) t1;
-    upd out (size 1) t2;
-    upd out (size 2) t3;
-    upd out (size 3) t4;
-    upd out (size 4) t5;
-    upd out (size 5) t6;
-    upd out (size 6) t7;
-    upd out (size 7) (u64 0)
-*)
 
 let upload_one_montg_form #c b =
   match c with 
@@ -487,6 +443,9 @@ let upload_one_montg_form #c b =
     upd b (size 5) (u64 0);
     lemmaToDomain #P384 1;
     assert_norm(18446744069414584321 + 4294967295 * pow2 64 + 1 * pow2 64 * pow2 64 == pow2 (getPower P384) % getPrime P384)
+  |Default -> 
+    reduction_prime_2prime_with_carry_cin #c (u64 1) b b
+
 
 
 let scalar_bit #c #buf_type s n =

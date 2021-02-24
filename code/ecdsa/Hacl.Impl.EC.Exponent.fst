@@ -28,6 +28,8 @@ open Hacl.Impl.P256.Exponent
 open Hacl.Impl.P384.Exponent
 open Hacl.Impl.P521.Exponent
 
+open Hacl.Impl.EC.Setup
+
 open Hacl.Impl.MM.Exponent
 
 
@@ -36,9 +38,9 @@ let exponent #c a result tempBuffer =
   match c with 
   |P384 ->
       exponent_p384 a result tempBuffer
-    (* 
+      (* 
     recall_contents (prime_inverse_buffer #c) (prime_inverse_seq #c);
-    montgomery_ladder_power #c a prime_inverse_buffer result *)
+    montgomery_ladder_power #c a (prime_inverse_buffer #c) result *)
   |P256 -> 
     exponent_p256 a result tempBuffer
 
