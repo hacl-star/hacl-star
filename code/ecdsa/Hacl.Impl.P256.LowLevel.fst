@@ -1324,13 +1324,13 @@ let shortened_mul_p256 a b result =
    
 
 inline_for_extraction noextract
-val shortened_mul_prime: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
+val shortened_mul_prime256: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
   (requires fun h -> (*live h result /\ wide_as_nat h result < pow2 320) *) True)
   (ensures fun h0 _ h1 -> (* modifies (loc result) h0 h1 /\ 
     wide_as_nat h1 result < pow2 320 *) True
   )
 
-let shortened_mul_prime u result = 
+let shortened_mul_prime256 u result = 
     assert_norm( pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 320);
   let result04 = sub result (size 0) (size 4) in 

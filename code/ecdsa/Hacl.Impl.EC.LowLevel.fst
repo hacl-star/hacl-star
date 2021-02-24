@@ -166,23 +166,23 @@ let _shortened_mul #c a b result =
 let short_mul_bn #c x y result = 
   match c with
   | P256 -> shortened_mul_p256 x y result
-  | P384 -> shortened_mul_p384 x y result
+  | P384 -> _shortened_mul x y result
   | Default -> _shortened_mul x y result
 
 
 let short_mul_prime #c b result = 
   match c with
-  | P256 -> shortened_mul_prime b result
+  | P256 -> shortened_mul_prime256 b result
   | P384 -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
   | Default -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
   
 
 let square_bn #c x result = 
+  let len = getCoordinateLenU64 c in 
   match c with 
   |P256 -> square_p256 x result
-  |P384 -> square_p384 x result
-
-
+  |P384 -> Hacl.Bignum.bn_sqr len x result
+  |Default -> Hacl.Bignum.bn_sqr len x result
 
 
 

@@ -446,50 +446,6 @@ static void mul_p384(uint64_t *f, uint64_t *r, uint64_t *out)
   }
 }
 
-static void shortened_mul_p384(const uint64_t *a, uint64_t b, uint64_t *result)
-{
-  uint64_t bBuffer = b;
-  uint64_t *a_ = const_to_ilbuffer__uint64_t(a);
-  uint32_t resLen = (uint32_t)7U;
-  memset(result, 0U, resLen * sizeof (uint64_t));
-  {
-    uint64_t uu____0 = (&bBuffer)[0U];
-    uint64_t *res_ = result;
-    uint64_t c = (uint64_t)0U;
-    uint32_t k = (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-    {
-      c = mul_carry_add_u64_st(c, a_[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
-      c =
-        mul_carry_add_u64_st(c,
-          a_[(uint32_t)4U * i + (uint32_t)1U],
-          uu____0,
-          res_ + (uint32_t)4U * i + (uint32_t)1U);
-      c =
-        mul_carry_add_u64_st(c,
-          a_[(uint32_t)4U * i + (uint32_t)2U],
-          uu____0,
-          res_ + (uint32_t)4U * i + (uint32_t)2U);
-      c =
-        mul_carry_add_u64_st(c,
-          a_[(uint32_t)4U * i + (uint32_t)3U],
-          uu____0,
-          res_ + (uint32_t)4U * i + (uint32_t)3U);
-    }
-    for (uint32_t i = k; i < (uint32_t)6U; i++)
-    {
-      c = mul_carry_add_u64_st(c, a_[i], uu____0, res_ + i);
-    }
-    uint64_t r = c;
-    result[(uint32_t)6U + (uint32_t)0U] = r;
-  }
-}
-
-static void square_p384(uint64_t *f, uint64_t *out)
-{
-  mul_p384(f, f, out);
-}
-
 static uint64_t add4(uint64_t *x, uint64_t *y, uint64_t *result)
 {
   uint64_t *r0 = result;
@@ -1401,7 +1357,7 @@ static void short_mul_bn(Spec_P256_curve c, const uint64_t *x, uint64_t y, uint6
       }
     case Spec_P256_P384:
       {
-        shortened_mul_p384(x, y, result);
+        _shortened_mul(c, x, y, result);
         break;
       }
     case Spec_P256_Default:
@@ -1419,6 +1375,24 @@ static void short_mul_bn(Spec_P256_curve c, const uint64_t *x, uint64_t y, uint6
 
 static void square_bn(Spec_P256_curve c, uint64_t *x, uint64_t *result)
 {
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
   switch (c)
   {
     case Spec_P256_P256:
@@ -1428,7 +1402,250 @@ static void square_bn(Spec_P256_curve c, uint64_t *x, uint64_t *result)
       }
     case Spec_P256_P384:
       {
-        square_p384(x, result);
+        uint32_t resLen = len + len;
+        memset(result, 0U, resLen * sizeof (uint64_t));
+        for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
+        {
+          uint64_t *uu____0 = x;
+          uint64_t uu____1 = x[i0];
+          uint64_t *res_ = result + i0;
+          uint64_t c1 = (uint64_t)0U;
+          uint32_t k = i0 / (uint32_t)4U * (uint32_t)4U;
+          for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+          {
+            c1 =
+              mul_carry_add_u64_st(c1,
+                uu____0[(uint32_t)4U * i],
+                uu____1,
+                res_ + (uint32_t)4U * i);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                uu____0[(uint32_t)4U * i + (uint32_t)1U],
+                uu____1,
+                res_ + (uint32_t)4U * i + (uint32_t)1U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                uu____0[(uint32_t)4U * i + (uint32_t)2U],
+                uu____1,
+                res_ + (uint32_t)4U * i + (uint32_t)2U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                uu____0[(uint32_t)4U * i + (uint32_t)3U],
+                uu____1,
+                res_ + (uint32_t)4U * i + (uint32_t)3U);
+          }
+          for (uint32_t i = k; i < i0; i++)
+          {
+            c1 = mul_carry_add_u64_st(c1, uu____0[i], uu____1, res_ + i);
+          }
+          uint64_t r = c1;
+          result[i0 + i0] = r;
+        }
+        uint64_t c10 = (uint64_t)0U;
+        uint32_t k0 = resLen / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = result[(uint32_t)4U * i];
+          uint64_t t20 = result[(uint32_t)4U * i];
+          c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t20, result + (uint32_t)4U * i);
+          uint64_t t10 = result[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t21 = result[(uint32_t)4U * i + (uint32_t)1U];
+          c10 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c10,
+              t10,
+              t21,
+              result + (uint32_t)4U * i + (uint32_t)1U);
+          uint64_t t11 = result[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t22 = result[(uint32_t)4U * i + (uint32_t)2U];
+          c10 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c10,
+              t11,
+              t22,
+              result + (uint32_t)4U * i + (uint32_t)2U);
+          uint64_t t12 = result[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t2 = result[(uint32_t)4U * i + (uint32_t)3U];
+          c10 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c10,
+              t12,
+              t2,
+              result + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k0; i < resLen; i++)
+        {
+          uint64_t t1 = result[i];
+          uint64_t t2 = result[i];
+          c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t2, result + i);
+        }
+        uint64_t uu____2 = c10;
+        KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
+        uint64_t tmp[resLen];
+        memset(tmp, 0U, resLen * sizeof (uint64_t));
+        for (uint32_t i = (uint32_t)0U; i < len; i++)
+        {
+          uint128_t a2 = (uint128_t)x[i] * x[i];
+          tmp[(uint32_t)2U * i] = (uint64_t)a2;
+          tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
+        }
+        uint64_t c1 = (uint64_t)0U;
+        uint32_t k = resLen / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = result[(uint32_t)4U * i];
+          uint64_t t20 = tmp[(uint32_t)4U * i];
+          c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, result + (uint32_t)4U * i);
+          uint64_t t10 = result[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t10,
+              t21,
+              result + (uint32_t)4U * i + (uint32_t)1U);
+          uint64_t t11 = result[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t11,
+              t22,
+              result + (uint32_t)4U * i + (uint32_t)2U);
+          uint64_t t12 = result[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t12,
+              t2,
+              result + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < resLen; i++)
+        {
+          uint64_t t1 = result[i];
+          uint64_t t2 = tmp[i];
+          c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, result + i);
+        }
+        uint64_t uu____3 = c1;
+        break;
+      }
+    case Spec_P256_Default:
+      {
+        uint32_t resLen = len + len;
+        memset(result, 0U, resLen * sizeof (uint64_t));
+        for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
+        {
+          uint64_t *uu____4 = x;
+          uint64_t uu____5 = x[i0];
+          uint64_t *res_ = result + i0;
+          uint64_t c1 = (uint64_t)0U;
+          uint32_t k = i0 / (uint32_t)4U * (uint32_t)4U;
+          for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+          {
+            c1 =
+              mul_carry_add_u64_st(c1,
+                uu____4[(uint32_t)4U * i],
+                uu____5,
+                res_ + (uint32_t)4U * i);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                uu____4[(uint32_t)4U * i + (uint32_t)1U],
+                uu____5,
+                res_ + (uint32_t)4U * i + (uint32_t)1U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                uu____4[(uint32_t)4U * i + (uint32_t)2U],
+                uu____5,
+                res_ + (uint32_t)4U * i + (uint32_t)2U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                uu____4[(uint32_t)4U * i + (uint32_t)3U],
+                uu____5,
+                res_ + (uint32_t)4U * i + (uint32_t)3U);
+          }
+          for (uint32_t i = k; i < i0; i++)
+          {
+            c1 = mul_carry_add_u64_st(c1, uu____4[i], uu____5, res_ + i);
+          }
+          uint64_t r = c1;
+          result[i0 + i0] = r;
+        }
+        uint64_t c10 = (uint64_t)0U;
+        uint32_t k0 = resLen / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = result[(uint32_t)4U * i];
+          uint64_t t20 = result[(uint32_t)4U * i];
+          c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t20, result + (uint32_t)4U * i);
+          uint64_t t10 = result[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t21 = result[(uint32_t)4U * i + (uint32_t)1U];
+          c10 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c10,
+              t10,
+              t21,
+              result + (uint32_t)4U * i + (uint32_t)1U);
+          uint64_t t11 = result[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t22 = result[(uint32_t)4U * i + (uint32_t)2U];
+          c10 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c10,
+              t11,
+              t22,
+              result + (uint32_t)4U * i + (uint32_t)2U);
+          uint64_t t12 = result[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t2 = result[(uint32_t)4U * i + (uint32_t)3U];
+          c10 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c10,
+              t12,
+              t2,
+              result + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k0; i < resLen; i++)
+        {
+          uint64_t t1 = result[i];
+          uint64_t t2 = result[i];
+          c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t2, result + i);
+        }
+        uint64_t uu____6 = c10;
+        KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
+        uint64_t tmp[resLen];
+        memset(tmp, 0U, resLen * sizeof (uint64_t));
+        for (uint32_t i = (uint32_t)0U; i < len; i++)
+        {
+          uint128_t a2 = (uint128_t)x[i] * x[i];
+          tmp[(uint32_t)2U * i] = (uint64_t)a2;
+          tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
+        }
+        uint64_t c1 = (uint64_t)0U;
+        uint32_t k = resLen / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = result[(uint32_t)4U * i];
+          uint64_t t20 = tmp[(uint32_t)4U * i];
+          c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, result + (uint32_t)4U * i);
+          uint64_t t10 = result[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t10,
+              t21,
+              result + (uint32_t)4U * i + (uint32_t)1U);
+          uint64_t t11 = result[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t11,
+              t22,
+              result + (uint32_t)4U * i + (uint32_t)2U);
+          uint64_t t12 = result[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
+          c1 =
+            Lib_IntTypes_Intrinsics_add_carry_u64(c1,
+              t12,
+              t2,
+              result + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < resLen; i++)
+        {
+          uint64_t t1 = result[i];
+          uint64_t t2 = tmp[i];
+          c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, result + i);
+        }
+        uint64_t uu____7 = c1;
         break;
       }
     default:

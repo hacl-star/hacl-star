@@ -117,7 +117,7 @@ val mul_p384: f: felem P384 -> r: felem P384 -> out: widefelem P384 ->
 let mul_p384 f r out = 
   bn_mul (size 6) f (size 6) r out
 
-val shortened_mul_p384: a: glbuffer uint64 (size 6) -> b: uint64 -> result: widefelem P384 -> Stack unit
+(* val shortened_mul_p384: a: glbuffer uint64 (size 6) -> b: uint64 -> result: widefelem P384 -> Stack unit
   (requires fun h -> live h a /\ live h result /\ wide_as_nat P384 h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat_il P384 h0 a * uint_v b = wide_as_nat P384 h1 result /\ 
@@ -131,8 +131,8 @@ let shortened_mul_p384 a b result =
     bn_mul (size 6) a_ (size 1) bBuffer result;
   pop_frame()
 
-
-
+ *)
+(* 
 val square_p384: f: felem P384 -> out: widefelem P384 -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
@@ -141,3 +141,4 @@ val square_p384: f: felem P384 -> out: widefelem P384 -> Stack unit
 let square_p384 f out =
   mul_p384 f f out
 
+ *)
