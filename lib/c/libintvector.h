@@ -676,14 +676,12 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
    ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
 
 #define Lib_IntVector_Intrinsics_vec128_store32_le_(x0, x1)             \
-  ((vector128)                                                          \
    (vec_store_len(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x1)), \
-                  ((uint8_t*)(x0)), (uint32_t) 16)))
+                  ((uint8_t*)(x0)), (uint32_t) 16))
 
 #define Lib_IntVector_Intrinsics_vec128_store64_le_(x0, x1)             \
-  ((vector128)                                                          \
    (vec_store_len(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x1)), \
-                  ((uint8_t*)(x0)), (uint32_t) 16)))
+                  ((uint8_t*)(x0)), (uint32_t) 16))
 
 #define Lib_IntVector_Intrinsics_vec128_add32_(x0,x1)            \
   ((vector128)((vector128_32)(((vector128_32)(x0)) + ((vector128_32)(x1)))))
