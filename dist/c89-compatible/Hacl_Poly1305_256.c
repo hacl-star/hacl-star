@@ -34,9 +34,9 @@ Hacl_Impl_Poly1305_Field32xN_256_load_acc4(Lib_IntVector_Intrinsics_vec256 *acc,
       e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
   }
   {
-    Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load_le(b);
+    Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load64_le(b);
     Lib_IntVector_Intrinsics_vec256
-    hi = Lib_IntVector_Intrinsics_vec256_load_le(b + (uint32_t)32U);
+    hi = Lib_IntVector_Intrinsics_vec256_load64_le(b + (uint32_t)32U);
     Lib_IntVector_Intrinsics_vec256
     mask26 = Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU);
     Lib_IntVector_Intrinsics_vec256 m0 = Lib_IntVector_Intrinsics_vec256_interleave_low128(lo, hi);
@@ -1503,9 +1503,9 @@ Hacl_Poly1305_256_poly1305_update(
               e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
           }
           {
-            Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load_le(block);
+            Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load64_le(block);
             Lib_IntVector_Intrinsics_vec256
-            hi = Lib_IntVector_Intrinsics_vec256_load_le(block + (uint32_t)32U);
+            hi = Lib_IntVector_Intrinsics_vec256_load64_le(block + (uint32_t)32U);
             Lib_IntVector_Intrinsics_vec256
             mask260 = Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU);
             Lib_IntVector_Intrinsics_vec256
