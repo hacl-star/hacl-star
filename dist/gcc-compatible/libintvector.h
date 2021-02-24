@@ -779,6 +779,15 @@ static inline void print_debug_uint64_t(const  char *msg, uint64_t x) {
   printf(">> %s: %lxUL\n", msg, x);
 }
 
+static inline void print_debug_buf8(const char *msg, const uint8_t *buf) {
+  printf(">> %s: ", msg);
+  printf("[0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x,0x%08x]\n",
+         buf[0], buf[1], buf[2], buf[3],
+         buf[4], buf[5], buf[6], buf[7],
+         buf[8], buf[9], buf[10], buf[11],
+         buf[12], buf[13], buf[14], buf[15]);
+}
+
 static inline void print_vector128_8(const char *msg, Lib_IntVector_Intrinsics_vec128 vec) {
   uint8_t tmp[16];
   Lib_IntVector_Intrinsics_vec128_store_le_(tmp, vec);
@@ -806,18 +815,38 @@ static inline void print_vector128_64(const char *msg, Lib_IntVector_Intrinsics_
          (uint64_t) Lib_IntVector_Intrinsics_vec128_extract64_(vec,1));
 }
 
-// Sometimes, we don't know which representation to use
+// Sometimes, we don't know which representation to use to display the vectors,
+// so the user may need to indicate it with a flag.
 #if defined(DEBUG_VECTOR_TRACE_ELEMENTS_64)
 #define print_vector128_unkwn(msg, vec) print_vector128_64(msg, vec)
 #else
 #define print_vector128_unkwn(msg, vec) print_vector128_32(msg, vec)
 #endif
 
-#define Lib_IntVector_Intrinsics_vec128_load_le(x)      \
-  Lib_IntVector_Intrinsics_vec128_load_le_(x)
+static inline Lib_IntVector_Intrinsics_vec128
+Lib_IntVector_Intrinsics_vec128_load_le(const uint8_t *x0) {
+  Lib_IntVector_Intrinsics_vec128 res;
+  printf("[> vec128_load_le\n");
+  print_debug_buf8("x0", x0);
+  res = Lib_IntVector_Intrinsics_vec128_load_le_(x0);
+  print_vector128_64("res", res);
+  return res;
+}
 
-#define Lib_IntVector_Intrinsics_vec128_store_le(x0, x1)        \
-  Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1)
+static inline void
+Lib_IntVector_Intrinsics_vec128_store_le(const uint8_t *x0,
+                                         Lib_IntVector_Intrinsics_vec128 x1) {
+  printf("[> vec128_store_le\n");
+  print_vector128_32("x1", x1);
+  Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1);
+  print_debug_buf8("res", x0);
+}
+
+//#define Lib_IntVector_Intrinsics_vec128_load_le(x)
+//  Lib_IntVector_Intrinsics_vec128_load_le_(x)
+
+//#define Lib_IntVector_Intrinsics_vec128_store_le(x0, x1)
+//  Lib_IntVector_Intrinsics_vec128_store_le_(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128 x0,
