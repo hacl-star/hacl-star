@@ -753,7 +753,7 @@ typedef uint64_t vector128_64 __attribute__ ((vector_size(16)));
   ((vector128)(vec_or(x0, x1)))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_left32_(x0, x1)           \
-  ((vector128)(vec_rli((vector128_32)x0, (uint64_t)x1)))
+  ((vector128)(vec_rli((vector128_32)(x0), (uint32_t)(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_rotate_right32_(x0, x1)          \
   (Lib_IntVector_Intrinsics_vec128_rotate_left32_(x0,(uint32_t) (32-(x1))))
