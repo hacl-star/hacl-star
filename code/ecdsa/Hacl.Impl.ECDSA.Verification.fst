@@ -31,6 +31,7 @@ open Hacl.Impl.P256.Signature.Common
 open Lib.ByteSequence
 open Lib.IntVector.Intrinsics
 
+open Hacl.Impl.EC.Intro
 
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
@@ -192,8 +193,8 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
   
   let h1 = ST.get() in 
-    Hacl.Impl.EC.LowLevel.changeEndian #c u1;
-    Hacl.Impl.EC.LowLevel.changeEndian #c u2;
+    changeEndian #c u1;
+    changeEndian #c u2;
     toUint8 #c u1 bufferU1;
     toUint8 #c u2 bufferU2;
   

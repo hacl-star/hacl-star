@@ -714,6 +714,33 @@ static void uploadZeroImpl(Spec_P256_curve c, uint64_t *f)
   }
 }
 
+static void uploadOneImpl(Spec_P256_curve c, uint64_t *f)
+{
+  f[0U] = (uint64_t)1U;
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)1U; i < len; i++)
+  {
+    f[i] = (uint64_t)0U;
+  }
+}
+
 static void uploadZeroPoint(Spec_P256_curve c, uint64_t *p)
 {
   uint32_t len;
@@ -1177,6 +1204,167 @@ static uint64_t sub_bn_gl(Spec_P256_curve c, uint64_t *x, const uint64_t *y, uin
   }
 }
 
+static void _shortened_mul(Spec_P256_curve c, const uint64_t *a, uint64_t b, uint64_t *result)
+{
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  uint64_t bBuffer = b;
+  uint32_t unused;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        unused = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        unused = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        unused = (uint32_t)4U;
+      }
+  }
+  uint64_t *a_ = const_to_ilbuffer__uint64_t(a);
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        uint32_t resLen = len + (uint32_t)1U;
+        memset(result, 0U, resLen * sizeof (uint64_t));
+        {
+          uint64_t uu____0 = (&bBuffer)[0U];
+          uint64_t *res_ = result;
+          uint64_t c1 = (uint64_t)0U;
+          uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
+          for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+          {
+            c1 = mul_carry_add_u64_st(c1, a_[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                a_[(uint32_t)4U * i + (uint32_t)1U],
+                uu____0,
+                res_ + (uint32_t)4U * i + (uint32_t)1U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                a_[(uint32_t)4U * i + (uint32_t)2U],
+                uu____0,
+                res_ + (uint32_t)4U * i + (uint32_t)2U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                a_[(uint32_t)4U * i + (uint32_t)3U],
+                uu____0,
+                res_ + (uint32_t)4U * i + (uint32_t)3U);
+          }
+          for (uint32_t i = k; i < len; i++)
+          {
+            c1 = mul_carry_add_u64_st(c1, a_[i], uu____0, res_ + i);
+          }
+          uint64_t r = c1;
+          result[len + (uint32_t)0U] = r;
+        }
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        uint32_t resLen = len + (uint32_t)1U;
+        memset(result, 0U, resLen * sizeof (uint64_t));
+        {
+          uint64_t uu____1 = (&bBuffer)[0U];
+          uint64_t *res_ = result;
+          uint64_t c1 = (uint64_t)0U;
+          uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
+          for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+          {
+            c1 = mul_carry_add_u64_st(c1, a_[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                a_[(uint32_t)4U * i + (uint32_t)1U],
+                uu____1,
+                res_ + (uint32_t)4U * i + (uint32_t)1U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                a_[(uint32_t)4U * i + (uint32_t)2U],
+                uu____1,
+                res_ + (uint32_t)4U * i + (uint32_t)2U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                a_[(uint32_t)4U * i + (uint32_t)3U],
+                uu____1,
+                res_ + (uint32_t)4U * i + (uint32_t)3U);
+          }
+          for (uint32_t i = k; i < len; i++)
+          {
+            c1 = mul_carry_add_u64_st(c1, a_[i], uu____1, res_ + i);
+          }
+          uint64_t r = c1;
+          result[len + (uint32_t)0U] = r;
+        }
+        break;
+      }
+    case Spec_P256_Default:
+      {
+        uint32_t resLen = len + (uint32_t)1U;
+        memset(result, 0U, resLen * sizeof (uint64_t));
+        {
+          uint64_t uu____2 = (&bBuffer)[0U];
+          uint64_t *res_ = result;
+          uint64_t c1 = (uint64_t)0U;
+          uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
+          for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+          {
+            c1 = mul_carry_add_u64_st(c1, a_[(uint32_t)4U * i], uu____2, res_ + (uint32_t)4U * i);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                a_[(uint32_t)4U * i + (uint32_t)1U],
+                uu____2,
+                res_ + (uint32_t)4U * i + (uint32_t)1U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                a_[(uint32_t)4U * i + (uint32_t)2U],
+                uu____2,
+                res_ + (uint32_t)4U * i + (uint32_t)2U);
+            c1 =
+              mul_carry_add_u64_st(c1,
+                a_[(uint32_t)4U * i + (uint32_t)3U],
+                uu____2,
+                res_ + (uint32_t)4U * i + (uint32_t)3U);
+          }
+          for (uint32_t i = k; i < len; i++)
+          {
+            c1 = mul_carry_add_u64_st(c1, a_[i], uu____2, res_ + i);
+          }
+          uint64_t r = c1;
+          result[len + (uint32_t)0U] = r;
+        }
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
 static void short_mul_bn(Spec_P256_curve c, const uint64_t *x, uint64_t y, uint64_t *result)
 {
   switch (c)
@@ -1216,6 +1404,11 @@ static void short_mul_bn(Spec_P256_curve c, const uint64_t *x, uint64_t y, uint6
         shortened_mul_p384(x, y, result);
         break;
       }
+    case Spec_P256_Default:
+      {
+        _shortened_mul(c, x, y, result);
+        break;
+      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -1236,226 +1429,6 @@ static void square_bn(Spec_P256_curve c, uint64_t *x, uint64_t *result)
     case Spec_P256_P384:
       {
         square_p384(x, result);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
-static void uploadOneImpl(Spec_P256_curve c, uint64_t *f)
-{
-  f[0U] = (uint64_t)1U;
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  for (uint32_t i = (uint32_t)1U; i < len; i++)
-  {
-    f[i] = (uint64_t)0U;
-  }
-}
-
-static void toUint8(Spec_P256_curve c, uint64_t *i, uint8_t *o)
-{
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        {
-          store64_be(o + (uint32_t)0U * (uint32_t)8U, i[0U]);
-        }
-        {
-          store64_be(o + (uint32_t)1U * (uint32_t)8U, i[1U]);
-        }
-        {
-          store64_be(o + (uint32_t)2U * (uint32_t)8U, i[2U]);
-        }
-        {
-          store64_be(o + (uint32_t)3U * (uint32_t)8U, i[3U]);
-        }
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        {
-          store64_be(o + (uint32_t)0U * (uint32_t)8U, i[0U]);
-        }
-        {
-          store64_be(o + (uint32_t)1U * (uint32_t)8U, i[1U]);
-        }
-        {
-          store64_be(o + (uint32_t)2U * (uint32_t)8U, i[2U]);
-        }
-        {
-          store64_be(o + (uint32_t)3U * (uint32_t)8U, i[3U]);
-        }
-        {
-          store64_be(o + (uint32_t)4U * (uint32_t)8U, i[4U]);
-        }
-        {
-          store64_be(o + (uint32_t)5U * (uint32_t)8U, i[5U]);
-        }
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
-static void changeEndian(Spec_P256_curve c, uint64_t *b)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  uint32_t lenByTwo = len >> (uint32_t)1U;
-  for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
-  {
-    uint64_t left = b[i];
-    uint32_t rightIndex = len - (uint32_t)1U - i;
-    uint64_t right = b[rightIndex];
-    b[i] = right;
-    b[rightIndex] = left;
-  }
-}
-
-static void toUint64CEP256(uint8_t *i, uint64_t *o)
-{
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)0U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[0U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)1U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[1U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)2U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[2U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)3U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[3U] = x;
-  }
-  changeEndian(Spec_P256_P256, o);
-}
-
-static void toUint64CEP384(uint8_t *i, uint64_t *o)
-{
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)0U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[0U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)1U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[1U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)2U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[2U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)3U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[3U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)4U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[4U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)5U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[5U] = x;
-  }
-  changeEndian(Spec_P256_P384, o);
-}
-
-static void toUint64ChangeEndian(Spec_P256_curve c, uint8_t *i, uint64_t *o)
-{
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        toUint64CEP256(i, o);
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        toUint64CEP384(i, o);
         break;
       }
     default:
@@ -1814,35 +1787,6 @@ static uint64_t compare_felem(Spec_P256_curve c, uint64_t *a, uint64_t *b)
     tmp = r_i & tmp0;
   }
   return tmp;
-}
-
-static void copy_conditional0(Spec_P256_curve c, uint64_t *out, uint64_t *x, uint64_t mask)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint64_t out_i = out[i];
-    uint64_t x_i = x[i];
-    uint64_t r_i = out_i ^ (mask & (out_i ^ x_i));
-    out[i] = r_i;
-  }
 }
 
 static void shiftLeftWord(Spec_P256_curve c, uint64_t *i, uint64_t *o)
@@ -2486,6 +2430,199 @@ static void exponent(Spec_P256_curve c, uint64_t *a, uint64_t *result, uint64_t 
   }
 }
 
+static void toUint8(Spec_P256_curve c, uint64_t *i, uint8_t *o)
+{
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        {
+          store64_be(o + (uint32_t)0U * (uint32_t)8U, i[0U]);
+        }
+        {
+          store64_be(o + (uint32_t)1U * (uint32_t)8U, i[1U]);
+        }
+        {
+          store64_be(o + (uint32_t)2U * (uint32_t)8U, i[2U]);
+        }
+        {
+          store64_be(o + (uint32_t)3U * (uint32_t)8U, i[3U]);
+        }
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        {
+          store64_be(o + (uint32_t)0U * (uint32_t)8U, i[0U]);
+        }
+        {
+          store64_be(o + (uint32_t)1U * (uint32_t)8U, i[1U]);
+        }
+        {
+          store64_be(o + (uint32_t)2U * (uint32_t)8U, i[2U]);
+        }
+        {
+          store64_be(o + (uint32_t)3U * (uint32_t)8U, i[3U]);
+        }
+        {
+          store64_be(o + (uint32_t)4U * (uint32_t)8U, i[4U]);
+        }
+        {
+          store64_be(o + (uint32_t)5U * (uint32_t)8U, i[5U]);
+        }
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+static void changeEndian(Spec_P256_curve c, uint64_t *b)
+{
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  uint32_t lenByTwo = len >> (uint32_t)1U;
+  for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
+  {
+    uint64_t left = b[i];
+    uint32_t rightIndex = len - (uint32_t)1U - i;
+    uint64_t right = b[rightIndex];
+    b[i] = right;
+    b[rightIndex] = left;
+  }
+}
+
+static void toUint64CEP256(uint8_t *i, uint64_t *o)
+{
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)0U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[0U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)1U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[1U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)2U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[2U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)3U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[3U] = x;
+  }
+  changeEndian(Spec_P256_P256, o);
+}
+
+static void toUint64CEP384(uint8_t *i, uint64_t *o)
+{
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)0U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[0U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)1U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[1U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)2U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[2U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)3U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[3U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)4U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[4U] = x;
+  }
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + (uint32_t)5U * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[5U] = x;
+  }
+  changeEndian(Spec_P256_P384, o);
+}
+
+static void toUint64ChangeEndian(Spec_P256_curve c, uint8_t *i, uint64_t *o)
+{
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        toUint64CEP256(i, o);
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        toUint64CEP384(i, o);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
 static void multByTwo(Spec_P256_curve c, uint64_t *a, uint64_t *out)
 {
   felem_add(c, a, a, out);
@@ -2736,9 +2873,9 @@ copy_point_conditional(
       }
   }
   uint64_t *p_z = p + (uint32_t)2U * sw;
-  copy_conditional0(c, x3_out, p_x, mask);
-  copy_conditional0(c, y3_out, p_y, mask);
-  copy_conditional0(c, z3_out, p_z, mask);
+  copy_conditional(c, x3_out, p_x, mask);
+  copy_conditional(c, y3_out, p_y, mask);
+  copy_conditional(c, z3_out, p_z, mask);
 }
 
 static void compute_common_params_point_add(Spec_P256_curve c, uint64_t *t12)
@@ -4571,7 +4708,7 @@ normalisation_update(
   montgomery_multiplication_buffer_by_one(c, z2x, resultX);
   montgomery_multiplication_buffer_by_one(c, z3y, resultY);
   uploadOneImpl(c, resultZ);
-  copy_conditional0(c, resultZ, zeroBuffer, bit);
+  copy_conditional(c, resultZ, zeroBuffer, bit);
 }
 
 static void norm(Spec_P256_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t *tempBuffer)

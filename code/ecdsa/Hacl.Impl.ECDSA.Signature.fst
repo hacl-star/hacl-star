@@ -38,6 +38,8 @@ module Def = Spec.Hash.Definitions
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
+open Hacl.Impl.EC.Intro
+
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 

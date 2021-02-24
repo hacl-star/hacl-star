@@ -24,6 +24,8 @@ open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P.PointAdd.Aux
 open Hacl.Impl.EC.PointDouble
 
+open Hacl.Impl.EC.Masking
+
 open FStar.Tactics 
 open FStar.Tactics.Canon
 

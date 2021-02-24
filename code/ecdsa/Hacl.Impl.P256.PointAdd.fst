@@ -17,6 +17,7 @@ open FStar.Tactics
 open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
+open Hacl.Impl.EC.Masking
 open  Hacl.Spec.P256.Definition
 
 

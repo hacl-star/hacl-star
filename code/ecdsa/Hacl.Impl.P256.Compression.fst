@@ -23,6 +23,7 @@ open Hacl.Spec.P.MontgomeryMultiplication
 open Hacl.Spec.P256.Definition
 open Hacl.Impl.EC.Masking
 open Hacl.Impl.EC.Setup
+open Hacl.Impl.EC.Intro
 
 open FStar.Math.Lemmas
 
@@ -240,7 +241,8 @@ let decompressionCompressedForm #c b result =
 	  toDomain #c t0 t0;
 	  lemmaToDomain #c (as_nat c h1 t0);
 	    let h2 = ST.get() in 
-	    assert(as_nat c h2 t0 =  (toDomain_ #c (Lib.ByteSequence.nat_from_intseq_le (changeEndian #c (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x))))));
+      (* This is the function from Spec*)
+	    (* assert(as_nat c h2 t0 =  (toDomain_ #c (Lib.ByteSequence.nat_from_intseq_le (changeEndian #c (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x)))))); *)
 
 	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in 
 	  logand_mask compressedIdentifier (u8 1) 1;
@@ -256,10 +258,11 @@ let decompressionCompressedForm #c b result =
 	      else
 		as_nat c h3 t1 = (0 - sqRootWithoutSign) % prime256);
     
-	  Hacl.Impl.EC.LowLevel.changeEndian #c t1;
+	  changeEndian #c t1;
 	  toUint8 #c t1 (sub result (getCoordinateLenU c) (getCoordinateLenU c)); 
 	   let h5 = ST.get() in 
-	   assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian #c (as_seq h3 t1)));
+     (*  This is the function from Spec *)
+	   (* assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian #c (as_seq h3 t1))); *)
 
 	  lemma_core_0 c t1 h3;
 	  

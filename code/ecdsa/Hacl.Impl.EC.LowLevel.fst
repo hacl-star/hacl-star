@@ -149,9 +149,16 @@ val _shortened_mul: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b
 
 let _shortened_mul #c a b result = 
   push_frame();
+    let len = getCoordinateLenU64 c in 
     let bBuffer = create (size 1) b in 
-    let a_ = const_to_ilbuffer a in 
-    bn_mul (getCoordinateLenU64 c)  a_ (size 1) bBuffer result;
+    let a_ = const_to_ilbuffer a in (
+    match c with 
+      |P256 ->   
+	bn_mul len a_ (size 1) bBuffer result
+      |P384 -> 
+	bn_mul len a_ (size 1) bBuffer result
+      |Default -> 
+	bn_mul len a_ (size 1) bBuffer result ); 
   pop_frame()
 
 
@@ -168,8 +175,7 @@ let short_mul_prime #c b result =
   | P256 -> shortened_mul_prime b result
   | P384 -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
   | Default -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
-
-
+  
 
 let square_bn #c x result = 
   match c with 
@@ -178,98 +184,6 @@ let square_bn #c x result =
 
 
 
-let toUint8 #c i o =
-  match c with
-  |P256 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 P256) o i
-  |P384 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 P384) o i
-
-
-open Lib.ByteBuffer
-
-let changeEndian #c b =
-  let h0 = ST.get() in 
-  let len = getCoordinateLenU64 c in 
-  let lenByTwo = shift_right len 1ul in 
-
-  [@inline_let]
-  let spec h0 = Hacl.Spec.P256.Definition.changeEndianStep #c  in 
-  admit();
-   [@inline_let]
-  let acc (h: mem) : GTot (felem_seq c) = as_seq h b in 
-  Lib.LoopCombinators.eq_repeati0 256 (spec h0) (acc h0);
-
-   [@inline_let]
-  let inv h (i: nat { i <= uint_v lenByTwo}) = live h b /\ modifies (loc b) h0 h /\
-    (forall (j: nat {j < i}). 
-      let leftStart = Lib.Sequence.index (as_seq h0 b) j in 
-      let rightIndex = v len - 1 - j in 
-      let rightStart = Lib.Sequence.index (as_seq h0 b) rightIndex in 
-
-      let leftH = Lib.Sequence.index (as_seq h b) j in 
-      let rightH = Lib.Sequence.index (as_seq h b) rightIndex in 
-
-      uint_v leftStart == uint_v rightH /\
-      uint_v rightStart == uint_v leftH) /\
-    (forall (j: nat {j >= i && j < v lenByTwo}).
-      Lib.Sequence.index (as_seq h0 b) j == Lib.Sequence.index (as_seq h b) j) /\
-    (forall (j: nat {j >= v lenByTwo &&  j <= v len - 1 - i}).
-      Lib.Sequence.index (as_seq h0 b) j == Lib.Sequence.index (as_seq h b) j) in 
-  for 0ul lenByTwo inv (fun i -> 
-    let h_0 = ST.get() in 
-    
-    let left = index b i in 
-    let rightIndex = len -. 1ul -. i in 
-    let right = index b rightIndex in 
-    upd b i right;
-    upd b rightIndex left
-    
-    );
-    let h1 = ST.get() in 
-    assert(
-      forall (j: nat {j < v (shift_right len 1ul)}). 
-      
-      let leftStart = Lib.Sequence.index (as_seq h0 b) j in 
-      let rightIndex = v len - 1 - j in 
-      let rightStart = Lib.Sequence.index (as_seq h0 b) rightIndex in 
-
-      let leftH = Lib.Sequence.index (as_seq h1 b) j in 
-      let rightH = Lib.Sequence.index (as_seq h1 b) rightIndex in 
-
-      uint_v leftStart == uint_v rightH /\
-      uint_v rightStart == uint_v leftH);
-      
-  
-    admit()
-  
-
-val toUint64CEP256: i:lbuffer uint8 (getScalarLen P256) -> o: felem P256 -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 ->
-    modifies (loc o) h0 h1  /\
-    as_seq h1 o == Hacl.Spec.P256.Definition.changeEndian (
-      Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
-
-let toUint64CEP256 i o = 
-  Lib.ByteBuffer.uints_from_bytes_be o i;
-  changeEndian o
-
-
-val toUint64CEP384: i:lbuffer uint8 (getScalarLen P384) -> o: felem P384 -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 ->
-    modifies (loc o) h0 h1  /\
-    as_seq h1 o == Hacl.Spec.P256.Definition.changeEndian (
-      Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
-
-let toUint64CEP384 i o = 
-  Lib.ByteBuffer.uints_from_bytes_be o i;
-  changeEndian o
-
-
-let toUint64ChangeEndian #c i o =
-  match c with 
-  |P256 -> toUint64CEP256 i o
-  |P384 -> toUint64CEP384 i o
 
 
 val reduction_prime_2prime_with_carry_cin: #c: curve ->

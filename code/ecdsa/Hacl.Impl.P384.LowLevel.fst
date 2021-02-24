@@ -117,7 +117,6 @@ val mul_p384: f: felem P384 -> r: felem P384 -> out: widefelem P384 ->
 let mul_p384 f r out = 
   bn_mul (size 6) f (size 6) r out
 
-
 val shortened_mul_p384: a: glbuffer uint64 (size 6) -> b: uint64 -> result: widefelem P384 -> Stack unit
   (requires fun h -> live h a /\ live h result /\ wide_as_nat P384 h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 

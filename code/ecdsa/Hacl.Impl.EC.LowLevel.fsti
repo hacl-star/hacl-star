@@ -101,26 +101,6 @@ val square_bn: #c: curve -> f: felem c -> out: widefelem c -> Stack unit
       wide_as_nat c h1 out = as_nat c h0 f * as_nat c h0 f)
       
 
-val toUint8: #c: curve -> i: felem c ->  o: lbuffer uint8 (getScalarLen c) -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 -> 
-    modifies (loc o) h0 h1 /\ 
-      as_seq h1 o == Lib.ByteSequence.uints_to_bytes_be (as_seq h0 i))
-
-
-val changeEndian: #c: curve -> i: felem c -> Stack unit 
-  (requires fun h -> live h i)
-  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
-    as_seq h1 i == Hacl.Spec.P256.Definition.changeEndian (as_seq h0 i) /\
-    as_nat c h1 i < getPower2 c) 
-
-
-val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: felem c -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 ->
-    modifies (loc o) h0 h1  /\
-    as_seq h1 o == Hacl.Spec.P256.Definition.changeEndian (
-      Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
 
 
 val reduction_prime_2prime_with_carry: #c: curve -> x: widefelem c -> result: felem c -> 
@@ -195,12 +175,12 @@ val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
     (if as_nat c h0 a = as_nat c h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
 
-
+(*
 val copy_conditional: #c: curve -> out: felem c -> x: felem c 
   -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x)) 
+    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x))  *)
 
 
 val shiftLeftWord: #c: curve -> i: felem c -> o: lbuffer uint64 (getCoordinateLenU64 c *. 2ul)-> 

@@ -19,6 +19,8 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Signature.Common
 
+open Hacl.Impl.EC.Intro
+
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 let ecp256dh_i c result scalar =
