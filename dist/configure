@@ -171,9 +171,14 @@ EOF
   $CC $CROSS_CFLAGS -I. -march=armv8-a+simd -c $file -o /dev/null
 }
 
-# We only detect the 64-bit version of the z-architecture (s390x).
-detect_ibmz () {
+# We only detect the 64-bit version of the SystemZ architecture (s390x).
+detect_systemz () {
   [[ $target_arch == "s390x" ]]
+}
+
+# We only detect the 64-bit version of the PowerPC architecture
+detect_powerpc () {
+  [[ $target_arch == "ppc64le" ]]
 }
 
 
@@ -356,11 +361,20 @@ if detect_x86 || detect_x64; then
   fi
 fi
 
-if detect_ibmz; then
-  echo "... detected z platform"
+if detect_systemz; then
+  echo "... detected SystemZ platform"
   echo "... $build_target supports 128-bit z VSX"
   supports_128=true
   echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
+  echo "#include <stdint.h> " >> config.h
+fi
+
+if detect_powerpc; then
+  echo "... detected PowerPC platform"
+  echo "... $build_target supports 128-bit z VSX"
+  supports_128=true
+  # TODO: for now, we only support little endian
+  echo "CFLAGS_128 = -m64 -mpowerpc64le" >> Makefile.config #-mvsx -maltivec" >> Makefile.config
   echo "#include <stdint.h> " >> config.h
 fi
 
