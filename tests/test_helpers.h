@@ -56,12 +56,17 @@ typedef uint64_t cycles;
 
 static __inline__ cycles cpucycles_begin(void)
 {
-  clock();
+  uint64_t tsc;
+  asm("\tstck\t%0\n" : "=Q" (tsc) : : "cc");
+  return(tsc);
+  //return clock();
 }
 
 static __inline__ cycles cpucycles_end(void)
 {
-  clock();
+  uint64_t tsc;
+  asm("\tstck\t%0\n" : "=Q" (tsc) : : "cc");
+  return(tsc);
 }
 #endif
 
