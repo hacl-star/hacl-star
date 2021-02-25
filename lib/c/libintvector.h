@@ -792,7 +792,7 @@ typedef vector128_8 vector128;
 
 #elif defined(__powerpc64__) // PowerPC 64 - this flag is for GCC only
 
-#include <vecintrin.h>
+#include <altivec.h>
 
 // The main vector 128 type
 // We can't use uint8_t, uint32_t, uint64_t... instead of unsigned char,
@@ -807,31 +807,38 @@ typedef vector128_8 vector128;
 
 // Small helper to change the endianess of the vector's elements, seen as uint32.
 // Note that we can't use vec_revb.
+// TODO: for now, little endian
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
-  ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
+  ((vector128)(vec_perm((vector128_8) {}, (vector128_8)(x0),            \
                         (vector128_8){3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12})))
+  //  ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},        \
 
 // Small helper to change the endianess of the vector's elements, seen as uint64
 // Note that we can't use vec_revb.
+// TODO: for now, little endian
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0)      \
-  ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
+  ((vector128)(vec_perm((vector128_8) {}, (vector128_8)(x0),            \
                         (vector128_8){7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8})))
 
+// Test
 #define Lib_IntVector_Intrinsics_vec128_load32_le_(x)              \
   ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
-   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
+   ((vector128_8)vec_ld(0, (const uint8_t*)(x)))))
 
+// Test
 #define Lib_IntVector_Intrinsics_vec128_load64_le_(x)              \
   ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64( \
-   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
+   ((vector128_8)vec_ld(0, (const uint8_t*)(x)))))
 
+// Test
 #define Lib_IntVector_Intrinsics_vec128_store32_le_(x0, x1)             \
-   (vec_store_len(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x1)), \
-                  ((uint8_t*)(x0)), (uint32_t) 16))
+  (vec_st(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x1)), \
+          0, ((uint8_t*)(x0))))
 
+// Test
 #define Lib_IntVector_Intrinsics_vec128_store64_le_(x0, x1)             \
-   (vec_store_len(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x1)), \
-                  ((uint8_t*)(x0)), (uint32_t) 16))
+  (vec_st(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x1)), \
+          0, ((uint8_t*)(x0))))
 
 #define Lib_IntVector_Intrinsics_vec128_add32_(x0,x1)            \
   ((vector128)((vector128_32)(((vector128_32)(x0)) + ((vector128_32)(x1)))))
@@ -848,9 +855,11 @@ typedef vector128_8 vector128;
 #define Lib_IntVector_Intrinsics_vec128_eq64_(x0, x1)            \
   ((vector128)(vec_cmpeq(((vector128_64)(x0)),((vector128_64)(x1)))))
 
+// Test - same as SystemZ
 #define Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1)       \
   ((unsigned int)(vec_extract((vector128_32)(x0), x1)))
 
+// Test - same as SystemZ
 #define Lib_IntVector_Intrinsics_vec128_extract64_(x0, x1)       \
   ((unsigned long long)(vec_extract((vector128_64)(x0), x1)))
 
@@ -860,9 +869,11 @@ typedef vector128_8 vector128;
 #define Lib_IntVector_Intrinsics_vec128_gt64_(x0, x1)                   \
   ((vector128)((vector128_64)(((vector128_64)(x0)) > ((vector128_64)(x1)))))
 
+// Test - same as SystemZ
 #define Lib_IntVector_Intrinsics_vec128_insert32_(x0, x1, x2)           \
   ((vector128)((vector128_32)vec_insert((unsigned int)(x1), (vector128_32)(x0), x2)))
 
+// Test - same as SystemZ
 #define Lib_IntVector_Intrinsics_vec128_insert64_(x0, x1, x2)           \
   ((vector128)((vector128_64)vec_insert((unsigned long long)(x1), (vector128_64)(x0), x2)))
 

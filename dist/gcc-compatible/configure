@@ -374,7 +374,7 @@ if detect_powerpc; then
   echo "... $build_target supports 128-bit z VSX"
   supports_128=true
   # TODO: for now, we only support little endian
-  echo "CFLAGS_128 = -m64 -mpowerpc64le" >> Makefile.config #-mvsx -maltivec" >> Makefile.config
+  echo "CFLAGS_128 = -m64 -mpowerpc64le -mabi=altivec" >> Makefile.config #-mvsx -maltivec" >> Makefile.config
   echo "#include <stdint.h> " >> config.h
 fi
 

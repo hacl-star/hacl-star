@@ -14,7 +14,9 @@ TARGETS = $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
-  -O3 -march=native -mtune=native $(CFLAGS) $(USER_CFLAGS)
+  -O3 -mtune=native $(CFLAGS) $(USER_CFLAGS)
+# TODO: -march=native is not supported on PowerPC, we need to use -mcpu=native
+#  -O3 -march=native -mtune=native $(CFLAGS) $(USER_CFLAGS)
 
 all: $(TARGETS)
 
