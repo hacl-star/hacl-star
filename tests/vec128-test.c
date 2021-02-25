@@ -208,7 +208,7 @@ int main() {
   compare_and_print_vec64("load64_le", vec0, exp);
   //  print_vector64("load_le", vec0);
 
-  // Those tests come from a real, nasty bug where the addresses were incorrectly
+  /*  // Those tests come from a real, nasty bug where the addresses were incorrectly
   // computed because of type inference.
   uint8_t load_store_buf[32] = {
     0x00U,0x00U,0x00U,0x00U,0x11U,0x11U,0x11U,0x11U,
@@ -220,7 +220,7 @@ int main() {
   vec0 = Lib_IntVector_Intrinsics_vec128_load64_le(load_store_buf + (uint32_t)16U);
   exp = initialize_vector64(0x5555555544444444UL,0x7777777766666666UL);
   compare_and_print_vec64("load64_le with offset", vec0, exp);
-  //  print_vector64("load64_le with offset", vec0);
+  //  print_vector64("load64_le with offset", vec0); */
 
   /*
   // Arithmetic

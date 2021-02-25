@@ -821,7 +821,7 @@ typedef vector128_8 vector128;
                         (vector128_8){7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8})))
 
 static __inline__ Lib_IntVector_Intrinsics_vec128
-Lib_IntVector_Intrinsics_vec128_load32_le_(Lib_IntVector_Intrinsics_vec128 x) {
+Lib_IntVector_Intrinsics_vec128_load32_le_(uint8_t *x) {
   // vec_ld needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   memcpy(tmp, x, 16);
@@ -830,7 +830,7 @@ Lib_IntVector_Intrinsics_vec128_load32_le_(Lib_IntVector_Intrinsics_vec128 x) {
 }
 
 static __inline__ Lib_IntVector_Intrinsics_vec128
-Lib_IntVector_Intrinsics_vec128_load64_le_(Lib_IntVector_Intrinsics_vec128 x) {
+Lib_IntVector_Intrinsics_vec128_load64_le_(uint8_t *x) {
   // vec_ld needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   memcpy(tmp, x, 16);
