@@ -836,7 +836,7 @@ Lib_IntVector_Intrinsics_vec128_load64_le_(uint8_t *x) {
   return Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(res);
 }
 
-static __inline__ Lib_IntVector_Intrinsics_vec128
+static __inline__ void
 Lib_IntVector_Intrinsics_vec128_store32_le_(uint8_t *x0, Lib_IntVector_Intrinsics_vec128 x1) {
   // vec_st needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
@@ -845,7 +845,7 @@ Lib_IntVector_Intrinsics_vec128_store32_le_(uint8_t *x0, Lib_IntVector_Intrinsic
   memcpy(x0, tmp, 16);
 }
 
-static __inline__ Lib_IntVector_Intrinsics_vec128
+static __inline__ void
 Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsics_vec128 x1) {
   // vec_st needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
@@ -869,11 +869,9 @@ Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsic
 #define Lib_IntVector_Intrinsics_vec128_eq64_(x0, x1)            \
   ((vector128)(vec_cmpeq(((vector128_64)(x0)),((vector128_64)(x1)))))
 
-// Test - same as SystemZ
 #define Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1)       \
   ((unsigned int)(vec_extract((vector128_32)(x0), x1)))
 
-// Test - same as SystemZ
 #define Lib_IntVector_Intrinsics_vec128_extract64_(x0, x1)       \
   ((unsigned long long)(vec_extract((vector128_64)(x0), x1)))
 
@@ -883,7 +881,6 @@ Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsic
 #define Lib_IntVector_Intrinsics_vec128_gt64_(x0, x1)                   \
   ((vector128)((vector128_64)(((vector128_64)(x0)) > ((vector128_64)(x1)))))
 
-// Test - same as SystemZ
 #define Lib_IntVector_Intrinsics_vec128_insert32_(x0, x1, x2)           \
   ((vector128)((vector128_32)vec_insert((unsigned int)(x1), (vector128_32)(x0), x2)))
 
@@ -909,10 +906,8 @@ Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsic
 #define Lib_IntVector_Intrinsics_vec128_load32s_(x0, x1, x2, x3) \
   ((vector128)((vector128_32){(unsigned int)(x0),(unsigned int)(x1),(unsigned int)(x2),(unsigned int)(x3)}))
 
-// Test
 #define Lib_IntVector_Intrinsics_vec128_load64_(x)                      \
   ((vector128)((vector128_64){(unsigned long long)(x),(unsigned long long)(x)}))
-//  ((vector128)((vector128_64)vec_load_pair((unsigned long long)(x),(unsigned long long)(x))))
 
 #define Lib_IntVector_Intrinsics_vec128_lognot_(x0)                     \
   ((vector128)(vec_xor((vector128)(x0), (vector128)vec_splat_u32(-1))))
@@ -921,8 +916,6 @@ Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsic
 // before calling vec_mule. The following helper does that.
 #define Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0)        \
   ((vector128)(x0))
-//  ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},          \
-//                        (vector128_8){4,5,6,7,0,1,2,3,12,13,14,15,8,9,10,11})))
 
 #define Lib_IntVector_Intrinsics_vec128_mul64_(x0, x1)                  \
   ((vector128)(vec_mule((vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0), \
