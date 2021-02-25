@@ -21,15 +21,20 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_SHA2_Generic_H
+#define __Hacl_SHA2_Generic_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __Hacl_SHA2_Generic_H
-#define __Hacl_SHA2_Generic_H
 
 
 
@@ -122,6 +127,10 @@ Hacl_Impl_SHA2_Generic_k384_512[80U] =
     (uint64_t)0x431d67c49c100d4cU, (uint64_t)0x4cc5d4becb3e42b6U, (uint64_t)0x597f299cfc657e2aU,
     (uint64_t)0x5fcb6fab3ad6faecU, (uint64_t)0x6c44198c4a475817U
   };
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_SHA2_Generic_H_DEFINED
 #endif

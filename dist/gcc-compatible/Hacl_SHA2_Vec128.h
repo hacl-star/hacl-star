@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_SHA2_Vec128_H
+#define __Hacl_SHA2_Vec128_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,13 +36,23 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_SHA2_Vec128_H
-#define __Hacl_SHA2_Vec128_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_SHA2_Generic.h"
 #include "Hacl_SHA2_Vec256.h"
 
+void
+Hacl_SHA2_Vec128_sha224_4(
+  uint8_t *r0,
+  uint8_t *r1,
+  uint8_t *r2,
+  uint8_t *r3,
+  uint32_t len,
+  uint8_t *b0,
+  uint8_t *b1,
+  uint8_t *b2,
+  uint8_t *b3
+);
 
 void
 Hacl_SHA2_Vec128_sha256_4(
@@ -48,6 +66,10 @@ Hacl_SHA2_Vec128_sha256_4(
   uint8_t *b2,
   uint8_t *b3
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_SHA2_Vec128_H_DEFINED
 #endif

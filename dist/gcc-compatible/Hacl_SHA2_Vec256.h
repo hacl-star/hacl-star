@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_SHA2_Vec256_H
+#define __Hacl_SHA2_Vec256_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,12 +36,9 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_SHA2_Vec256_H
-#define __Hacl_SHA2_Vec256_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_SHA2_Generic.h"
-
 
 typedef struct K____uint8_t___uint8_t__s
 {
@@ -55,6 +60,27 @@ typedef struct K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
   K____uint8_t__K____uint8_t___uint8_t_ snd;
 }
 K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
+
+void
+Hacl_SHA2_Vec256_sha224_8(
+  uint8_t *r0,
+  uint8_t *r1,
+  uint8_t *r2,
+  uint8_t *r3,
+  uint8_t *r4,
+  uint8_t *r5,
+  uint8_t *r6,
+  uint8_t *r7,
+  uint32_t len,
+  uint8_t *b0,
+  uint8_t *b1,
+  uint8_t *b2,
+  uint8_t *b3,
+  uint8_t *b4,
+  uint8_t *b5,
+  uint8_t *b6,
+  uint8_t *b7
+);
 
 void
 Hacl_SHA2_Vec256_sha256_8(
@@ -86,6 +112,19 @@ K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8
 K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
 
 void
+Hacl_SHA2_Vec256_sha384_4(
+  uint8_t *r0,
+  uint8_t *r1,
+  uint8_t *r2,
+  uint8_t *r3,
+  uint32_t len,
+  uint8_t *b0,
+  uint8_t *b1,
+  uint8_t *b2,
+  uint8_t *b3
+);
+
+void
 Hacl_SHA2_Vec256_sha512_4(
   uint8_t *r0,
   uint8_t *r1,
@@ -97,6 +136,10 @@ Hacl_SHA2_Vec256_sha512_4(
   uint8_t *b2,
   uint8_t *b3
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_SHA2_Vec256_H_DEFINED
 #endif
