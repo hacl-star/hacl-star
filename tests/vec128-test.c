@@ -238,22 +238,6 @@ int main() {
   compare_and_print_vec64("load64_le misaligned", vec0, exp);
   //  print_vector64("load_le", vec0);
 
-
-  /*  // Those tests come from a real, nasty bug where the addresses were incorrectly
-  // computed because of type inference.
-  uint8_t load_store_buf[32] = {
-    0x00U,0x00U,0x00U,0x00U,0x11U,0x11U,0x11U,0x11U,
-    0x22U,0x22U,0x22U,0x22U,0x33U,0x33U,0x33U,0x33U,
-    0x44U,0x44U,0x44U,0x44U,0x55U,0x55U,0x55U,0x55U,
-    0x66U,0x66U,0x66U,0x66U,0x77U,0x77U,0x77U,0x77U
-  };
-  
-  vec0 = Lib_IntVector_Intrinsics_vec128_load64_le(load_store_buf + (uint32_t)16U);
-  exp = initialize_vector64(0x5555555544444444UL,0x7777777766666666UL);
-  compare_and_print_vec64("load64_le with offset", vec0, exp);
-  //  print_vector64("load64_le with offset", vec0); */
-
-  /*
   // Arithmetic
   
   vec0 = initialize_vector32(0x0, 0x1, 0x2, 0x3);
@@ -291,6 +275,7 @@ int main() {
   compare_and_print_vec32("eq64", vec0, exp);
   //  print_vector64("eq64", vec0);
 
+  /*
   vec0 = initialize_vector32(0x0, 0x1, 0x0, 0x3);
   vec1 = initialize_vector32(0x0, 0x0, 0x1, 0x2);
   vec0 = Lib_IntVector_Intrinsics_vec128_gt32(vec0, vec1);
