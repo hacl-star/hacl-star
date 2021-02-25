@@ -10,14 +10,12 @@ open Lib.Buffer
 open Lib.MultiBuffer
 
 open Spec.Hash.Definitions
-open Hacl.Hash.Definitions
 open Hacl.Spec.SHA2.Vec
 open Hacl.Impl.SHA2.Generic
 
 module ST = FStar.HyperStack.ST
 module Spec = Spec.Agile.Hash
 module SpecVec = Hacl.Spec.SHA2.Vec
-
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -29,9 +27,10 @@ let sha224_update1 b hash = update #SHA2_224 #M32 b hash
 
 val sha224: hash:lbuffer uint8 28ul -> len:size_t -> b:lbuffer uint8 len ->
   Stack unit
-  (requires fun h0 -> live h0 b /\ live h0 hash /\ disjoint hash b)
+  (requires fun h0 -> v len <= max_input_length SHA2_224 /\
+    live h0 b /\ live h0 hash /\ disjoint hash b)
   (ensures  fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-    as_seq h1 hash == Spec.hash #SHA2_224 (v len) (as_seq h0 b))
+    as_seq h1 hash == Spec.hash SHA2_224 (as_seq h0 b))
 
 let sha224 h len b =
   let h0 = ST.get() in
@@ -39,7 +38,7 @@ let sha224 h len b =
   let h = ntup1 h in
   hash #SHA2_224 #M32 (sha224_update1 <: update_vec_t SHA2_224 M32) h len b;
   let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_lemma #SHA2_224 #M32 (v len) (as_seq_multi h0 b);
+  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_224 #M32 (v len) (as_seq_multi h0 b);
   let hash0 = tup1 h in
   assert ((as_seq_multi h1 h).(|0|) == as_seq h1 hash0)
 
@@ -76,9 +75,10 @@ let sha384_update1 b hash = update #SHA2_384 #M32 b hash
 
 val sha384: hash:lbuffer uint8 48ul -> len:size_t -> b:lbuffer uint8 len ->
   Stack unit
-  (requires fun h0 -> live h0 b /\ live h0 hash /\ disjoint hash b)
+  (requires fun h0 ->  v len <= max_input_length SHA2_384 /\
+    live h0 b /\ live h0 hash /\ disjoint hash b)
   (ensures  fun h0 _ h1 -> modifies (loc hash) h0 h1 /\
-    as_seq h1 hash == Spec.hash #SHA2_384 (v len) (as_seq h0 b))
+    as_seq h1 hash == Spec.hash SHA2_384 (as_seq h0 b))
 
 let sha384 h len b =
   let h0 = ST.get() in
@@ -86,7 +86,7 @@ let sha384 h len b =
   let h = ntup1 h in
   hash #SHA2_384 #M32 (sha384_update1 <: update_vec_t SHA2_384 M32) h len b;
   let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_lemma #SHA2_384 #M32 (v len) (as_seq_multi h0 b);
+  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_384 #M32 (v len) (as_seq_multi h0 b);
   let hash0 = tup1 h in
   assert ((as_seq_multi h1 h).(|0|) == as_seq h1 hash0)
 

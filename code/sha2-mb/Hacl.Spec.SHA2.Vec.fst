@@ -21,10 +21,9 @@ type m_spec =
   | M32
   | M128
   | M256
-  | M512
 
 inline_for_extraction
-let lanes_t = n:nat{n == 1 \/ n == 2 \/ n == 4 \/ n == 8 \/ n == 16}
+let lanes_t = n:nat{n == 1 \/ n == 2 \/ n == 4 \/ n == 8}
 
 inline_for_extraction
 let lanes (a:sha2_alg) (m:m_spec) : lanes_t =
@@ -33,14 +32,10 @@ let lanes (a:sha2_alg) (m:m_spec) : lanes_t =
   | SHA2_256,M128 -> 4
   | SHA2_224,M256
   | SHA2_256,M256 -> 8
-  | SHA2_224,M512
-  | SHA2_256,M512 -> 16
   | SHA2_384,M128
   | SHA2_512,M128 -> 2
   | SHA2_384,M256
   | SHA2_512,M256 -> 4
-  | SHA2_384,M512
-  | SHA2_512,M512 -> 8
   | _ -> 1
 
 noextract
