@@ -10,24 +10,27 @@ KREMLIN_HOME?=../dist/kremlin
 USER_CFLAGS?=
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
-TARGETS = $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
+TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
+TARGETS_NO_CURVE64 = $(filter-out curve64-%, $(TARGETS))
+
+ifeq ($(TARGET_ARCHITECTURE),SystemZ)
+	TARGETS := TARGETS_NO_CURVE64
+endif
+
 CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
   -O3 -march=native -mtune=native $(CFLAGS) $(USER_CFLAGS)
+
+.PHONY: test1
+test1:
+	echo $(TARGETS)
 
 all: $(TARGETS)
 
 test: $(patsubst %.exe,%.test,$(TARGETS))
 
 arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test curve25519-arm-test.test
-
-# Curve64 doesn't work on all processors
-TARGETS_NO_CURVE64 = $(filter-out curve64-%, $(TARGETS))
-
-all-no-curve64: $(TARGETS_NO_CURVE64)
-
-test-no-curve64: $(patsubst %.exe,%.test,$(TARGETS_NO_CURVE64))
 
 # Dependency
 
