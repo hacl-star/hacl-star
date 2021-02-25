@@ -390,7 +390,7 @@ if ! $supports_128; then
   echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
 else
-  echo "#define SUPPORTS_128 1" >> config.h
+  echo "#define COMPILE_VEC128 1" >> config.h
 fi
 
 if ! $supports_256; then
@@ -398,7 +398,7 @@ if ! $supports_256; then
   echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec256 void *" >> config.h
 else
-  echo "#define SUPPORTS_256 1" >> config.h
+  echo "#define COMPILE_VEC256 1" >> config.h
 fi
 
 if ! detect_uint128; then
