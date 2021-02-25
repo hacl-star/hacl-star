@@ -33,42 +33,45 @@ static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
   return ok;
 }
 
+
+#if defined(__x86_64__) || defined(_M_X64) || defined(__s390x__)
+
+typedef uint64_t cycles;
+
+static __inline__ cycles cpucycles_get(void)
+{
+
 #if defined(__x86_64__) || defined(_M_X64)
 
-typedef uint64_t cycles;
-
-static __inline__ cycles cpucycles_begin(void)
-{
   uint64_t rax,rdx,aux;
   asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
   return (rdx << 32) + rax;
-}
 
-static __inline__ cycles cpucycles_end(void)
-{
-  uint64_t rax,rdx,aux;
-  asm volatile ( "rdtscp\n" : "=a" (rax), "=d" (rdx), "=c" (aux) : : );
-  return (rdx << 32) + rax;
-}
 #elif defined(__s390x__)
-#include <time.h>
-typedef uint64_t cycles;
 
-static __inline__ cycles cpucycles_begin(void)
-{
   uint64_t tsc;
   asm("\tstck\t%0\n" : "=Q" (tsc) : : "cc");
   return(tsc);
-  //return clock();
+
+#else
+
+#error cpucycles_get(): issing implementation
+
+#endif
+
+}
+
+static __inline__ cycles cpucycles_begin(void)
+{
+  return cpucycles_get();
 }
 
 static __inline__ cycles cpucycles_end(void)
 {
-  uint64_t tsc;
-  asm("\tstck\t%0\n" : "=Q" (tsc) : : "cc");
-  return(tsc);
+  return cpucycles_get();
 }
-#endif
+
+#endif // __x86_64__ || _M_X64 || __s390x__
 
 static inline void print_time(uint64_t count, clock_t tdiff, uint64_t cdiff){
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
