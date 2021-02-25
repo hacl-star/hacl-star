@@ -21,44 +21,71 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_IntTypes_Intrinsics_H
+#define __Hacl_IntTypes_Intrinsics_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include <stdbool.h>
 
-#ifndef __Hacl_IntTypes_Intrinsics_H
-#define __Hacl_IntTypes_Intrinsics_H
 
 #include "Hacl_Kremlib.h"
 
-
-static inline uint64_t
-Hacl_IntTypes_Intrinsics_add_carry_u64(uint64_t cin, uint64_t x, uint64_t y, uint64_t *result1)
+static inline uint32_t
+Hacl_IntTypes_Intrinsics_add_carry_u32(uint32_t cin, uint32_t x, uint32_t y, uint32_t *r)
 {
-  uint64_t res = x + cin + y;
-  uint64_t
-  c = (~FStar_UInt64_gte_mask(res, x) | (FStar_UInt64_eq_mask(res, x) & cin)) & (uint64_t)1U;
-  result1[0U] = res;
+  uint32_t res = x + cin + y;
+  uint32_t
+  c = (~FStar_UInt32_gte_mask(res, x) | (FStar_UInt32_eq_mask(res, x) & cin)) & (uint32_t)1U;
+  r[0U] = res;
   return c;
 }
 
 static inline uint64_t
-Hacl_IntTypes_Intrinsics_sub_borrow_u64(
-  uint64_t cin,
-  uint64_t x,
-  uint64_t y,
-  uint64_t *result1
-)
+Hacl_IntTypes_Intrinsics_add_carry_u64(uint64_t cin, uint64_t x, uint64_t y, uint64_t *r)
+{
+  uint64_t res = x + cin + y;
+  uint64_t
+  c = (~FStar_UInt64_gte_mask(res, x) | (FStar_UInt64_eq_mask(res, x) & cin)) & (uint64_t)1U;
+  r[0U] = res;
+  return c;
+}
+
+static inline uint32_t
+Hacl_IntTypes_Intrinsics_sub_borrow_u32(uint32_t cin, uint32_t x, uint32_t y, uint32_t *r)
+{
+  uint32_t res = x - y - cin;
+  uint32_t
+  c =
+    ((FStar_UInt32_gte_mask(res, x) & ~FStar_UInt32_eq_mask(res, x))
+    | (FStar_UInt32_eq_mask(res, x) & cin))
+    & (uint32_t)1U;
+  r[0U] = res;
+  return c;
+}
+
+static inline uint64_t
+Hacl_IntTypes_Intrinsics_sub_borrow_u64(uint64_t cin, uint64_t x, uint64_t y, uint64_t *r)
 {
   uint64_t res = x - y - cin;
-  uint64_t eqlty = FStar_UInt64_eq_mask(res, x);
   uint64_t
-  c1 =
-    ((FStar_UInt64_gte_mask(res, x) & ~FStar_UInt64_eq_mask(res, x)) | (eqlty & cin))
+  c =
+    ((FStar_UInt64_gte_mask(res, x) & ~FStar_UInt64_eq_mask(res, x))
+    | (FStar_UInt64_eq_mask(res, x) & cin))
     & (uint64_t)1U;
-  result1[0U] = res;
-  return c1;
+  r[0U] = res;
+  return c;
 }
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_IntTypes_Intrinsics_H_DEFINED
 #endif

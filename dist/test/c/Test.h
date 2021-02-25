@@ -21,16 +21,17 @@
  * SOFTWARE.
  */
 
-#include "kremlib.h"
-#include "kremlin/internal/compat.h"
 
 #ifndef __Test_H
 #define __Test_H
+#include "kremlib.h"
+#include "kremlin/internal/compat.h"
 
 
 
 
 exit_code main();
+
 
 #define __Test_H_DEFINED
 #endif

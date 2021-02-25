@@ -9,7 +9,6 @@ open Lib.Buffer
 open Lib.ByteBuffer
 
 open Hacl.Impl.Matrix
-open Hacl.Impl.Frodo.Params
 
 module ST = FStar.HyperStack.ST
 module Loops = Lib.LoopCombinators

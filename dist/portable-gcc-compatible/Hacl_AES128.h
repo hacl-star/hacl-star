@@ -21,15 +21,20 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_AES128_H
+#define __Hacl_AES128_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __Hacl_AES128_H
-#define __Hacl_AES128_H
 
 
 
@@ -46,6 +51,10 @@ extern void
 Hacl_AES128_aes128_encrypt_block(uint16_t *cipher, uint16_t *plain, uint8_t *expanded_key);
 
 /* SNIPPET_END: Hacl_AES128_aes128_encrypt_block */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_AES128_H_DEFINED
 #endif

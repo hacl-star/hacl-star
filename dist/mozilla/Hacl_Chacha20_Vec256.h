@@ -21,18 +21,23 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Chacha20_Vec256_H
+#define __Hacl_Chacha20_Vec256_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include <stdbool.h>
 
-#ifndef __Hacl_Chacha20_Vec256_H
-#define __Hacl_Chacha20_Vec256_H
 
 #include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
-
 
 void
 Hacl_Chacha20_Vec256_chacha20_encrypt_256(
@@ -53,6 +58,10 @@ Hacl_Chacha20_Vec256_chacha20_decrypt_256(
   uint8_t *n,
   uint32_t ctr
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Chacha20_Vec256_H_DEFINED
 #endif

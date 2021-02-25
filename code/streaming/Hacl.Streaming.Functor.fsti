@@ -34,7 +34,10 @@ let uint32 = Lib.IntTypes.uint32
 /// State machinery
 /// ===============
 
-[@CAbstractStruct]
+// TODO: when state_s is declared as CAbstractStruct, it prevents Hacl_Streaming_MD5.c
+// and Hacl_Streaming_SHA1.c from compiling, because Kremlin tries to share the state_s
+// type definition with Hacl_Streaming_SHA2.c, which is hidden.
+//[@CAbstractStruct]
 val state_s (#index: Type0) (c: block index) (i: index)
   (t: Type0 { t == c.state.s i })
   (t': Type0 { t' == optional_key i c.km c.key }):
@@ -84,11 +87,15 @@ let loc_includes_union_l_footprint_s
 
 val invariant_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s' c i): Type0
 
+val freeable (#index : Type0) (c: block index) (i: index) (h: HS.mem) (s: state' c i) : Type0
+
+let preserves_freeable (#index : Type0) (c: block index) (i: index) (s: state' c i) (h0 h1 : HS.mem): Type0 =
+  freeable c i h0 s ==> freeable c i h1 s
+
 let invariant #index (c: block index) (i: index) (m: HS.mem) (s: state' c i) =
-  B.freeable s /\
+  invariant_s c i m (B.get m s 0) /\
   B.live m s /\
-  B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s))) /\
-  invariant_s c i m (B.get m s 0)
+  B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s c i m (B.deref m s)))
 
 val invariant_loc_in_footprint
   (#index: Type0)
@@ -192,7 +199,8 @@ val frame_invariant: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:st
     B.modifies l h0 h1))
   (ensures (
     invariant c i h1 s /\
-    footprint c i h0 s == footprint c i h1 s))
+    footprint c i h0 s == footprint c i h1 s /\
+    preserves_freeable c i s h0 h1))
   [ SMTPat (invariant c i h1 s); SMTPat (B.modifies l h0 h1) ]
 
 val frame_seen: #index:Type0 -> c:block index -> i:index -> l:B.loc -> s:state' c i -> h0:HS.mem -> h1:HS.mem -> Lemma
@@ -221,12 +229,12 @@ val index_of_state:
   (fun h0 i' h1 -> h0 == h1 /\ i' == i))
 
 inline_for_extraction noextract
-val create_in:
-  #index: Type0 ->
-  c:block index ->
-  i:index ->
-  t:Type0 { t == c.state.s i } ->
-  t':Type0 { t' == optional_key i c.km c.key } ->
+let create_in_st
+  (#index: Type0)
+  (c:block index)
+  (i:index)
+  (t:Type0 { t == c.state.s i })
+  (t':Type0 { t' == optional_key i c.km c.key }) =
   k:c.key.s i ->
   r: HS.rid ->
   ST (state c i t t')
@@ -235,21 +243,58 @@ val create_in:
     HyperStack.ST.is_eternal_region r))
   (ensures (fun h0 s h1 ->
     invariant c i h1 s /\
+    freeable c i h1 s /\
     seen c i h1 s == S.empty /\
     key c i h1 s == c.key.v i h0 k /\
     B.(modifies loc_none h0 h1) /\
     B.fresh_loc (footprint c i h1 s) h0 h1 /\
     B.(loc_includes (loc_region_only true r) (footprint c i h1 s))))
 
-/// Note: this is more like a "reinit" function so that clients can reuse the state.
 inline_for_extraction noextract
-val init:
-  #index:Type0 ->
+val create_in:
+  #index: Type0 ->
   c:block index ->
-  i:G.erased index -> (
-  let i = G.reveal i in
+  i:index ->
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
+  create_in_st c i t t'
+
+inline_for_extraction noextract
+let alloca_st
+  (#index: Type0)
+  (c:block index)
+  (i:index)
+  (t:Type0 { t == c.state.s i })
+  (t':Type0 { t' == optional_key i c.km c.key }) =
+  k:c.key.s i ->
+  StackInline (state c i t t')
+  (requires (fun h0 ->
+    c.key.invariant #i h0 k))
+  (ensures (fun h0 s h1 ->
+    invariant c i h1 s /\
+    seen c i h1 s == S.empty /\
+    key c i h1 s == c.key.v i h0 k /\
+    B.(modifies loc_none h0 h1) /\
+    B.fresh_loc (footprint c i h1 s) h0 h1 /\
+    B.(loc_includes (loc_region_only true (HS.get_tip h1)) (footprint c i h1 s))))
+
+inline_for_extraction noextract
+val alloca:
+  #index: Type0 ->
+  c:block index ->
+  i:index ->
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  alloca_st #index c i t t'
+
+/// Note: this is more like a "reinit" function so that clients can reuse the state.
+inline_for_extraction noextract
+let init_st
+  (#index: Type0)
+  (c:block index)
+  (i:index)
+  (t:Type0 { t == c.state.s i })
+  (t':Type0 { t' == optional_key i c.km c.key }) =
   k:c.key.s i ->
   s:state c i t t' ->
   Stack unit
@@ -262,7 +307,18 @@ val init:
     seen c i h1 s == S.empty /\
     key c i h1 s == c.key.v i h0 k /\
     footprint c i h0 s == footprint c i h1 s /\
-    B.(modifies (footprint c i h0 s) h0 h1))))
+    B.(modifies (footprint c i h0 s) h0 h1) /\
+    preserves_freeable c i s h0 h1))
+
+inline_for_extraction noextract
+val init:
+  #index:Type0 ->
+  c:block index ->
+  i:G.erased index -> (
+  let i = G.reveal i in
+  t:Type0 { t == c.state.s i } ->
+  t':Type0 { t' == optional_key i c.km c.key } ->
+  init_st #index c i t t')
 
 unfold noextract
 let update_pre
@@ -294,7 +350,22 @@ let update_post
   B.(modifies (footprint c i h0 s) h0 h1) /\
   footprint c i h0 s == footprint c i h1 s /\
   seen c i h1 s == seen c i h0 s `S.append` B.as_seq h0 data /\
-  key c i h1 s == key c i h0 s
+  key c i h1 s == key c i h0 s /\
+  preserves_freeable c i s h0 h1
+
+inline_for_extraction noextract
+let update_st
+  (#index: Type0)
+  (c:block index)
+  (i:index)
+  (t:Type0 { t == c.state.s i })
+  (t':Type0 { t' == optional_key i c.km c.key }) =
+  s:state c i t t' ->
+  data: B.buffer uint8 ->
+  len: UInt32.t ->
+  Stack unit
+    (requires fun h0 -> update_pre c i s data len h0)
+    (ensures fun h0 s' h1 -> update_post c i s data len h0 h1)
 
 inline_for_extraction noextract
 val update:
@@ -304,12 +375,7 @@ val update:
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
-  s:state c i t t' ->
-  data: B.buffer uint8 ->
-  len: UInt32.t ->
-  Stack unit
-    (requires fun h0 -> update_pre c i s data len h0)
-    (ensures fun h0 s' h1 -> update_post c i s data len h0 h1))
+  update_st #index c i t t')
 
 inline_for_extraction noextract
 let finish_st
@@ -332,7 +398,8 @@ let finish_st
       footprint c i h0 s == footprint c i h1 s /\
       B.(modifies (loc_union (loc_buffer dst) (footprint c i h0 s)) h0 h1) /\ (
       seen_bounded c i h0 s;
-      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s))))
+      S.equal (B.as_seq h1 dst) (c.spec_s i (key c i h0 s) (seen c i h0 s))) /\
+      preserves_freeable c i s h0 h1)
 
 /// A word of caution. Once partially applied to a type class, this function
 /// will generate a stack allocation at type ``state i`` via ``c.alloca``. If
@@ -354,6 +421,21 @@ val mk_finish:
   finish_st c i t t'
 
 inline_for_extraction noextract
+let free_st
+  (#index: Type0)
+  (c:block index)
+  (i:index)
+  (t:Type0 { t == c.state.s i })
+  (t':Type0 { t' == optional_key i c.km c.key }) =
+  s:state c i t t' ->
+  ST unit
+  (requires fun h0 ->
+    invariant c i h0 s /\
+    freeable c i h0 s)
+  (ensures fun h0 _ h1 ->
+    B.modifies (footprint c i h0 s) h0 h1)
+
+inline_for_extraction noextract
 val free:
   #index:Type0 ->
   c:block index ->
@@ -361,9 +443,4 @@ val free:
   let i = G.reveal i in
   t:Type0 { t == c.state.s i } ->
   t':Type0 { t' == optional_key i c.km c.key } ->
-  s:state c i t t' ->
-  ST unit
-  (requires fun h0 ->
-    invariant c i h0 s)
-  (ensures fun h0 _ h1 ->
-    B.modifies (footprint c i h0 s) h0 h1))
+  free_st #index c i t t')

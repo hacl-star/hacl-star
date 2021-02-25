@@ -21,14 +21,19 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Spec_H
+#define __Hacl_Spec_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __Hacl_Spec_H
-#define __Hacl_Spec_H
 
 
 
@@ -39,6 +44,8 @@
 #define Spec_Hash_Definitions_SHA2_512 3
 #define Spec_Hash_Definitions_SHA1 4
 #define Spec_Hash_Definitions_MD5 5
+#define Spec_Hash_Definitions_Blake2S 6
+#define Spec_Hash_Definitions_Blake2B 7
 
 typedef u8 Spec_Hash_Definitions_hash_alg;
 
@@ -53,6 +60,15 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
   Spec_Hash_Definitions_hash_alg _0;
 }
 Spec_ECDSA_hash_alg_ecdsa;
+
+#define Spec_Frodo_Params_SHAKE128 0
+#define Spec_Frodo_Params_AES128 1
+
+typedef u8 Spec_Frodo_Params_frodo_gen_a;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Spec_H_DEFINED
 #endif

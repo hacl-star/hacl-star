@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Blake2s_32_H
+#define __Hacl_Blake2s_32_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,14 +36,48 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Blake2s_32_H
-#define __Hacl_Blake2s_32_H
 
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
-#include "Hacl_Blake2b_32.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 
+void
+Hacl_Blake2s_32_blake2s_init(
+  uint32_t *wv,
+  uint32_t *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t nn
+);
+
+void
+Hacl_Blake2s_32_blake2s_update_multi(
+  uint32_t len,
+  uint32_t *wv,
+  uint32_t *hash,
+  uint64_t prev,
+  uint8_t *blocks,
+  uint32_t nb
+);
+
+void
+Hacl_Blake2s_32_blake2s_update_last(
+  uint32_t len,
+  uint32_t *wv,
+  uint32_t *hash,
+  uint64_t prev,
+  uint32_t rem,
+  uint8_t *d
+);
+
+typedef struct K___uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+}
+K___uint32_t_uint32_t;
+
+void Hacl_Blake2s_32_blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
 
 void
 Hacl_Blake2s_32_blake2s(
@@ -46,6 +88,10 @@ Hacl_Blake2s_32_blake2s(
   uint32_t kk,
   uint8_t *k
 );
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Blake2s_32_H_DEFINED
 #endif

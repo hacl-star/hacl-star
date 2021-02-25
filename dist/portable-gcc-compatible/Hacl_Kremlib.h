@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Kremlib_H
+#define __Hacl_Kremlib_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,11 +36,20 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Kremlib_H
-#define __Hacl_Kremlib_H
 
 
 
+/* SNIPPET_START: FStar_UInt32_eq_mask */
+
+static inline uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b);
+
+/* SNIPPET_END: FStar_UInt32_eq_mask */
+
+/* SNIPPET_START: FStar_UInt32_gte_mask */
+
+static inline uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b);
+
+/* SNIPPET_END: FStar_UInt32_gte_mask */
 
 /* SNIPPET_START: FStar_UInt8_eq_mask */
 
@@ -51,6 +68,12 @@ static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
 static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
 
 /* SNIPPET_END: FStar_UInt64_gte_mask */
+
+/* SNIPPET_START: FStar_UInt16_eq_mask */
+
+static inline uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b);
+
+/* SNIPPET_END: FStar_UInt16_eq_mask */
 
 /* SNIPPET_START: FStar_UInt128_add */
 
@@ -128,6 +151,10 @@ static inline FStar_UInt128_uint128 load128_be(uint8_t *x0);
 uint32_t LowStar_Vector_new_capacity(uint32_t cap);
 
 /* SNIPPET_END: LowStar_Vector_new_capacity */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Kremlib_H_DEFINED
 #endif

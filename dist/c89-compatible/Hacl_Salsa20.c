@@ -89,7 +89,7 @@ static inline void rounds(uint32_t *st)
 static inline void salsa20_core(uint32_t *k, uint32_t *ctx, uint32_t ctr)
 {
   uint32_t ctr_u32;
-  memcpy(k, ctx, (uint32_t)16U * sizeof (ctx[0U]));
+  memcpy(k, ctx, (uint32_t)16U * sizeof (uint32_t));
   ctr_u32 = ctr;
   k[8U] = k[8U] + ctr_u32;
   rounds(k);
@@ -140,13 +140,13 @@ static inline void salsa20_key_block0(uint8_t *out, uint8_t *key, uint8_t *n)
   ctx[0U] = (uint32_t)0x61707865U;
   k0 = k32;
   k1 = k32 + (uint32_t)4U;
-  memcpy(ctx + (uint32_t)1U, k0, (uint32_t)4U * sizeof (k0[0U]));
+  memcpy(ctx + (uint32_t)1U, k0, (uint32_t)4U * sizeof (uint32_t));
   ctx[5U] = (uint32_t)0x3320646eU;
-  memcpy(ctx + (uint32_t)6U, n32, (uint32_t)2U * sizeof (n32[0U]));
+  memcpy(ctx + (uint32_t)6U, n32, (uint32_t)2U * sizeof (uint32_t));
   ctx[8U] = (uint32_t)0U;
   ctx[9U] = (uint32_t)0U;
   ctx[10U] = (uint32_t)0x79622d32U;
-  memcpy(ctx + (uint32_t)11U, k1, (uint32_t)4U * sizeof (k1[0U]));
+  memcpy(ctx + (uint32_t)11U, k1, (uint32_t)4U * sizeof (uint32_t));
   ctx[15U] = (uint32_t)0x6b206574U;
   salsa20_core(k, ctx, (uint32_t)0U);
   {
@@ -200,13 +200,13 @@ salsa20_encrypt(
   ctx[0U] = (uint32_t)0x61707865U;
   k0 = k32;
   k10 = k32 + (uint32_t)4U;
-  memcpy(ctx + (uint32_t)1U, k0, (uint32_t)4U * sizeof (k0[0U]));
+  memcpy(ctx + (uint32_t)1U, k0, (uint32_t)4U * sizeof (uint32_t));
   ctx[5U] = (uint32_t)0x3320646eU;
-  memcpy(ctx + (uint32_t)6U, n32, (uint32_t)2U * sizeof (n32[0U]));
+  memcpy(ctx + (uint32_t)6U, n32, (uint32_t)2U * sizeof (uint32_t));
   ctx[8U] = ctr;
   ctx[9U] = (uint32_t)0U;
   ctx[10U] = (uint32_t)0x79622d32U;
-  memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (k10[0U]));
+  memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (uint32_t));
   ctx[15U] = (uint32_t)0x6b206574U;
   {
     uint32_t k[16U] = { 0U };
@@ -259,7 +259,7 @@ salsa20_encrypt(
       uint8_t *uu____2 = out + nb * (uint32_t)64U;
       uint8_t *uu____3 = text + nb * (uint32_t)64U;
       uint8_t plain[64U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+      memcpy(plain, uu____3, rem * sizeof (uint8_t));
       {
         uint32_t k1[16U] = { 0U };
         salsa20_core(k1, ctx, nb);
@@ -293,7 +293,7 @@ salsa20_encrypt(
               store32_le(plain + i * (uint32_t)4U, bl[i]);
             }
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+          memcpy(uu____2, plain, rem * sizeof (uint8_t));
         }
       }
     }
@@ -342,13 +342,13 @@ salsa20_decrypt(
   ctx[0U] = (uint32_t)0x61707865U;
   k0 = k32;
   k10 = k32 + (uint32_t)4U;
-  memcpy(ctx + (uint32_t)1U, k0, (uint32_t)4U * sizeof (k0[0U]));
+  memcpy(ctx + (uint32_t)1U, k0, (uint32_t)4U * sizeof (uint32_t));
   ctx[5U] = (uint32_t)0x3320646eU;
-  memcpy(ctx + (uint32_t)6U, n32, (uint32_t)2U * sizeof (n32[0U]));
+  memcpy(ctx + (uint32_t)6U, n32, (uint32_t)2U * sizeof (uint32_t));
   ctx[8U] = ctr;
   ctx[9U] = (uint32_t)0U;
   ctx[10U] = (uint32_t)0x79622d32U;
-  memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (k10[0U]));
+  memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (uint32_t));
   ctx[15U] = (uint32_t)0x6b206574U;
   {
     uint32_t k[16U] = { 0U };
@@ -401,7 +401,7 @@ salsa20_decrypt(
       uint8_t *uu____2 = out + nb * (uint32_t)64U;
       uint8_t *uu____3 = cipher + nb * (uint32_t)64U;
       uint8_t plain[64U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+      memcpy(plain, uu____3, rem * sizeof (uint8_t));
       {
         uint32_t k1[16U] = { 0U };
         salsa20_core(k1, ctx, nb);
@@ -435,7 +435,7 @@ salsa20_decrypt(
               store32_le(plain + i * (uint32_t)4U, bl[i]);
             }
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+          memcpy(uu____2, plain, rem * sizeof (uint8_t));
         }
       }
     }
@@ -485,11 +485,11 @@ static inline void hsalsa20(uint8_t *out, uint8_t *key, uint8_t *n)
   k0 = k32;
   k1 = k32 + (uint32_t)4U;
   ctx[0U] = (uint32_t)0x61707865U;
-  memcpy(ctx + (uint32_t)1U, k0, (uint32_t)4U * sizeof (k0[0U]));
+  memcpy(ctx + (uint32_t)1U, k0, (uint32_t)4U * sizeof (uint32_t));
   ctx[5U] = (uint32_t)0x3320646eU;
-  memcpy(ctx + (uint32_t)6U, n32, (uint32_t)4U * sizeof (n32[0U]));
+  memcpy(ctx + (uint32_t)6U, n32, (uint32_t)4U * sizeof (uint32_t));
   ctx[10U] = (uint32_t)0x79622d32U;
-  memcpy(ctx + (uint32_t)11U, k1, (uint32_t)4U * sizeof (k1[0U]));
+  memcpy(ctx + (uint32_t)11U, k1, (uint32_t)4U * sizeof (uint32_t));
   ctx[15U] = (uint32_t)0x6b206574U;
   rounds(ctx);
   r0 = ctx[0U];

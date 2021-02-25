@@ -21,15 +21,16 @@
  * SOFTWARE.
  */
 
-#include "kremlib.h"
 
 #ifndef __Hacl_Test_SHA3_H
 #define __Hacl_Test_SHA3_H
+#include "kremlib.h"
 
 
 
 
 exit_code main();
+
 
 #define __Hacl_Test_SHA3_H_DEFINED
 #endif

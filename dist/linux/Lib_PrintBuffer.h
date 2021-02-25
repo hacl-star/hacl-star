@@ -21,14 +21,19 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Lib_PrintBuffer_H
+#define __Lib_PrintBuffer_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __Lib_PrintBuffer_H
-#define __Lib_PrintBuffer_H
 
 
 
@@ -40,6 +45,10 @@ extern void Lib_PrintBuffer_print_compare(u32 len, u8 *buf0, u8 *buf1);
 extern void Lib_PrintBuffer_print_compare_display(u32 len, const u8 *buf0, const u8 *buf1);
 
 extern bool Lib_PrintBuffer_result_compare_display(u32 len, const u8 *buf0, const u8 *buf1);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Lib_PrintBuffer_H_DEFINED
 #endif

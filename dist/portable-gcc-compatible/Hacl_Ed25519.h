@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Ed25519_H
+#define __Hacl_Ed25519_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,13 +36,70 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Ed25519_H
-#define __Hacl_Ed25519_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Curve25519_51.h"
 
+/* SNIPPET_START: Hacl_Bignum25519_fdifference */
+
+void Hacl_Bignum25519_fdifference(uint64_t *a, uint64_t *b);
+
+/* SNIPPET_END: Hacl_Bignum25519_fdifference */
+
+/* SNIPPET_START: Hacl_Bignum25519_reduce_513 */
+
+void Hacl_Bignum25519_reduce_513(uint64_t *a);
+
+/* SNIPPET_END: Hacl_Bignum25519_reduce_513 */
+
+/* SNIPPET_START: Hacl_Bignum25519_inverse */
+
+void Hacl_Bignum25519_inverse(uint64_t *out, uint64_t *a);
+
+/* SNIPPET_END: Hacl_Bignum25519_inverse */
+
+/* SNIPPET_START: Hacl_Bignum25519_load_51 */
+
+void Hacl_Bignum25519_load_51(uint64_t *output, uint8_t *input);
+
+/* SNIPPET_END: Hacl_Bignum25519_load_51 */
+
+/* SNIPPET_START: Hacl_Bignum25519_store_51 */
+
+void Hacl_Bignum25519_store_51(uint8_t *output, uint64_t *input);
+
+/* SNIPPET_END: Hacl_Bignum25519_store_51 */
+
+/* SNIPPET_START: Hacl_Impl_Ed25519_PointAdd_point_add */
+
+void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
+
+/* SNIPPET_END: Hacl_Impl_Ed25519_PointAdd_point_add */
+
+/* SNIPPET_START: Hacl_Impl_Ed25519_Ladder_point_mul */
+
+void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q);
+
+/* SNIPPET_END: Hacl_Impl_Ed25519_Ladder_point_mul */
+
+/* SNIPPET_START: Hacl_Impl_Ed25519_PointCompress_point_compress */
+
+void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p);
+
+/* SNIPPET_END: Hacl_Impl_Ed25519_PointCompress_point_compress */
+
+/* SNIPPET_START: Hacl_Impl_Ed25519_PointDecompress_point_decompress */
+
+bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *s);
+
+/* SNIPPET_END: Hacl_Impl_Ed25519_PointDecompress_point_decompress */
+
+/* SNIPPET_START: Hacl_Impl_Ed25519_PointEqual_point_equal */
+
+bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q);
+
+/* SNIPPET_END: Hacl_Impl_Ed25519_PointEqual_point_equal */
 
 /* SNIPPET_START: Hacl_Ed25519_sign */
 
@@ -65,6 +130,10 @@ void Hacl_Ed25519_expand_keys(uint8_t *ks, uint8_t *priv);
 void Hacl_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, uint8_t *msg);
 
 /* SNIPPET_END: Hacl_Ed25519_sign_expanded */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Ed25519_H_DEFINED
 #endif

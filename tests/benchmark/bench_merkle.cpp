@@ -23,8 +23,8 @@ void full_sha256(uint8_t *src1, uint8_t *src2, uint8_t *dst) {
             }
           );
   EverCrypt_Hash_init(&st);
-  EverCrypt_Hash_update(&st, src1);
-  EverCrypt_Hash_update(&st, src2);
+  EverCrypt_Hash_update2(&st, 0, src1);
+  EverCrypt_Hash_update2(&st, 64, src2);
   EverCrypt_Hash_finish(&st, dst);
 }
 

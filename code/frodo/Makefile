@@ -8,9 +8,10 @@ include ../../Makefile.local
 
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += -fno-asynchronous-unwind-tables
+CFLAGS += -I../../lib/c -I../../../lib/c
 export CFLAGS
 
-FSTAR_ROOTS = Hacl.Frodo.KEM.fst
+FSTAR_ROOTS = Hacl.Frodo64.fst Hacl.Frodo640.fst Hacl.Frodo976.fst Hacl.Frodo1344.fst
 export FSTAR_ROOTS
 
 BUNDLES = -bundle 'Hacl.SHA3=Hacl.Impl.SHA3,Hacl.SHA3'
@@ -25,7 +26,7 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES)) | dist
 	$(KRML) $^ -o libfrodo.a \
 	  -bundle Lib.RandomBuffer.System \
 	  $(BASE_FLAGS) \
-	  $(HACL_HOME)/lib/c/Lib_Memzero.c \
+	  $(HACL_HOME)/lib/c/Lib_Memzero0.c \
 	  $(HACL_HOME)/lib/c/Lib_RandomBuffer_System.c \
 	  $(FRODO_BUNDLE) \
 	  -tmpdir dist \

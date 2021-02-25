@@ -102,6 +102,9 @@ let lbytes_eq #len b1 b2 =
   pop_frame();
   Raw.u8_to_UInt8 z = 255uy
 
+let buf_mask_select #t #len b1 b2 mask res =
+  map2T len res (BS.mask_select mask) b1 b2
+
 #set-options "--max_fuel 1 --max_ifuel 1"
 
 /// BEGIN using friend Lib.IntTypes
@@ -121,7 +124,7 @@ let rec nat_from_bytes_be_to_n l b =
   else nat_from_bytes_be_to_n l (Seq.slice b 0 (Seq.length b - 1))
 
 let uint_from_bytes_le #t #l i =
-  let h0 = ST.get () in  
+  let h0 = ST.get () in
   nat_from_bytes_le_to_n l (as_seq h0 i);
   match t with
   | U8 -> i.(0ul)
@@ -145,7 +148,7 @@ let uint_from_bytes_be #t #l i =
     cast #t #l U128 l u
 
 val nat_to_bytes_n_to_le: len:size_nat -> l:secrecy_level -> n:nat{n < pow2 (8 * len)} ->
-  Lemma (ensures Seq.equal (FStar.Endianness.n_to_le len n) 
+  Lemma (ensures Seq.equal (FStar.Endianness.n_to_le len n)
                            (BS.nat_to_bytes_le #l len n))
   (decreases len)
 let rec nat_to_bytes_n_to_le len l n =
@@ -260,8 +263,7 @@ let uints_to_bytes_le #t #l len o i =
   let spec (h:mem) = BS.uints_to_bytes_le_inner (as_seq h i) in
   fill_blocks h0 (size (numbytes t)) len o a_spec (fun _ _ -> ()) (fun _ -> loc_none) spec
     (fun j -> uint_to_bytes_le (sub o (mul_mod j (size (numbytes t))) (size (numbytes t))) i.(j));
-  assert_norm (BS.uints_to_bytes_le (as_seq h0 i) ==
-               norm [delta] BS.uints_to_bytes_le (as_seq h0 i))
+  norm_spec [delta_only [`%BS.uints_to_bytes_le]] (BS.uints_to_bytes_le (as_seq h0 i))
 
 let uints_to_bytes_be #t #l len o i =
   let h0 = ST.get () in
@@ -271,8 +273,7 @@ let uints_to_bytes_be #t #l len o i =
   let spec (h:mem) = BS.uints_to_bytes_be_inner (as_seq h i) in
   fill_blocks h0 (size (numbytes t)) len o a_spec (fun _ _ -> ()) (fun _ -> loc_none) spec
     (fun j -> uint_to_bytes_be (sub o (mul_mod j (size (numbytes t))) (size (numbytes t))) i.(j));
-  assert_norm (BS.uints_to_bytes_be (as_seq h0 i) ==
-               norm [delta] BS.uints_to_bytes_be (as_seq h0 i))
+  norm_spec [delta_only [`%BS.uints_to_bytes_be]] (BS.uints_to_bytes_be (as_seq h0 i))
 
 let uint_at_index_le #t #l #len i idx =
   let b = sub i (idx *! (size (numbytes t))) (size (numbytes t)) in

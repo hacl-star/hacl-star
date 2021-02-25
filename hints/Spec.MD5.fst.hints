@@ -1,5 +1,5 @@
 [
-  "\"\u0002g\u0014Ÿk’Ý–ãÅœ1\bá\u0000",
+  "\u0002™‰}Yÿ\u0014·ýŸ®…}„bd",
   [
     [
       "Spec.MD5.init_as_list",
@@ -22,10 +22,10 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7d37be5a37b7f556c2ac13adc72ca039"
+      "85782d1b380b1e4b82e68ec123a2111e"
     ],
     [
-      "Spec.MD5.init",
+      "Spec.MD5.h0",
       1,
       8,
       2,
@@ -52,7 +52,7 @@
         "typing_FStar.List.Tot.Base.length", "typing_Spec.MD5.init_as_list"
       ],
       0,
-      "41f3d8039e9b3b7fc20e54ad61354f91"
+      "0db69b31106f155d04dda5dd867cd16b"
     ],
     [
       "Spec.MD5.t_as_list",
@@ -75,7 +75,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2672f252bc48507d55636c36e3fa29d6"
+      "16b7c6d1386510cd53308595a1961900"
     ],
     [
       "Spec.MD5.t",
@@ -91,7 +91,7 @@
         "typing_Spec.MD5.t_as_list"
       ],
       0,
-      "4c27e43c52ccf7e3eb58c4cccb920a5a"
+      "217b9674499d3497b91c465fb40adcec"
     ],
     [
       "Spec.MD5.round_op_gen_aux",
@@ -121,7 +121,7 @@
         "typing_Spec.MD5.t"
       ],
       0,
-      "58eb7cfee03b3d18f636ca32168594f4"
+      "421e77be42c8b3f8459eca95ee21a555"
     ],
     [
       "Spec.MD5.round1_aux",
@@ -161,7 +161,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ee23d08fa43805f97e094c287413444f"
+      "a20fbde8e01d36fc67830b15649b130e"
     ],
     [
       "Spec.MD5.round2_aux",
@@ -201,7 +201,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1d0869cca89ca4b5b7627c157be05db3"
+      "a72b9db6db873e58ad8b5b137b013b4a"
     ],
     [
       "Spec.MD5.round3_aux",
@@ -241,7 +241,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.uint_to_t"
       ],
       0,
-      "b541af54ff52ee78720ef520e23e15c7"
+      "96d56bf32cecce8cef29bbeb12d4b1dc"
     ],
     [
       "Spec.MD5.round4_aux",
@@ -281,7 +281,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e0cf9a8847e67257cc8c296c34bdd780"
+      "48ce3b3cb6000b8bbd8049e658b84d60"
     ],
     [
       "Spec.MD5.overwrite_aux",
@@ -302,7 +302,7 @@
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "e968db9a20f1d548172c40208eca1e62"
+      "a597f73f9805b3cdb8879cf9a4ca984b"
     ],
     [
       "Spec.MD5.update_aux",
@@ -325,7 +325,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8515b6c0dbc9939b2d1194af8a82c563"
+      "09828358eb89abf35f8baff2c727c08b"
     ],
     [
       "Spec.MD5.update_aux",
@@ -338,31 +338,35 @@
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Hash.Definitions.MD5",
-        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Spec.Hash.Definitions.MD5@tok",
         "equation_FStar.Seq.Properties.lseq", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.lseq", "equation_Prims.nat",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
+        "equation_Prims.nat", "equation_Spec.Hash.Definitions.is_md",
+        "equation_Spec.Hash.Definitions.state_word_length",
         "equation_Spec.Hash.Definitions.word",
         "equation_Spec.Hash.Definitions.word_length",
-        "equation_Spec.Hash.Definitions.word_t", "equation_Spec.MD5.abcd_t",
-        "equation_Spec.MD5.ia", "equation_Spec.MD5.ib",
-        "equation_Spec.MD5.ic", "equation_Spec.MD5.id", "int_typing",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "equation_Spec.Hash.Definitions.word_t",
+        "equation_Spec.Hash.Definitions.words_state_",
+        "equation_Spec.MD5.abcd_t", "equation_Spec.MD5.ia",
+        "equation_Spec.MD5.ib", "equation_Spec.MD5.ic",
+        "equation_Spec.MD5.id", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_778cda52ca3898c9d0220c148d4775e7",
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
-        "refinement_interpretation_Tm_refine_acdad29ca25b25c98ec14726b3dbe3d6",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Lib.IntTypes.bits", "typing_Spec.Hash.Definitions.word_t",
+        "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "1c124f024447484b528fc45dcd43c3ab"
+      "8d309e6dca30bbd33f82555b61b01cb0"
     ],
     [
       "Spec.MD5.update",
@@ -379,7 +383,7 @@
         "equation_Spec.Hash.Definitions.word_t"
       ],
       0,
-      "ffd82f2ec6b93c97b3c212ee5aaa2204"
+      "b9c65db2f32cfe0a6e420bf0aaa1925f"
     ],
     [
       "Spec.MD5.finish",
@@ -388,7 +392,7 @@
       1,
       [ "@query" ],
       0,
-      "60341c632d32db97d21de2ce46e8d9ec"
+      "798bf42823b9cb554423a8851b6edf10"
     ]
   ]
 ]

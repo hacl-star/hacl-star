@@ -21,19 +21,44 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Ed25519_H
+#define __Hacl_Ed25519_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Ed25519_H
-#define __Hacl_Ed25519_H
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Curve25519_51.h"
 
+void Hacl_Bignum25519_fdifference(u64 *a, u64 *b);
+
+void Hacl_Bignum25519_reduce_513(u64 *a);
+
+void Hacl_Bignum25519_inverse(u64 *out, u64 *a);
+
+void Hacl_Bignum25519_load_51(u64 *output, u8 *input);
+
+void Hacl_Bignum25519_store_51(u8 *output, u64 *input);
+
+void Hacl_Impl_Ed25519_PointAdd_point_add(u64 *out, u64 *p, u64 *q);
+
+void Hacl_Impl_Ed25519_Ladder_point_mul(u64 *result, u8 *scalar, u64 *q);
+
+void Hacl_Impl_Ed25519_PointCompress_point_compress(u8 *z, u64 *p);
+
+bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(u64 *out, u8 *s);
+
+bool Hacl_Impl_Ed25519_PointEqual_point_equal(u64 *p, u64 *q);
 
 void Hacl_Ed25519_sign(u8 *signature, u8 *priv, u32 len, u8 *msg);
 
@@ -44,6 +69,10 @@ void Hacl_Ed25519_secret_to_public(u8 *pub, u8 *priv);
 void Hacl_Ed25519_expand_keys(u8 *ks, u8 *priv);
 
 void Hacl_Ed25519_sign_expanded(u8 *signature, u8 *ks, u32 len, u8 *msg);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Ed25519_H_DEFINED
 #endif

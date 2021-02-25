@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Spec_H
+#define __Hacl_Spec_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,11 +36,17 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Spec_H
-#define __Hacl_Spec_H
 
 
 
+/* SNIPPET_START: Spec_Blake2_alg */
+
+#define Spec_Blake2_Blake2S 0
+#define Spec_Blake2_Blake2B 1
+
+/* SNIPPET_END: Spec_Blake2_alg */
+
+typedef uint8_t Spec_Blake2_alg;
 
 /* SNIPPET_START: Spec_Hash_Definitions_hash_alg */
 
@@ -42,6 +56,8 @@
 #define Spec_Hash_Definitions_SHA2_512 3
 #define Spec_Hash_Definitions_SHA1 4
 #define Spec_Hash_Definitions_MD5 5
+#define Spec_Hash_Definitions_Blake2S 6
+#define Spec_Hash_Definitions_Blake2B 7
 
 /* SNIPPET_END: Spec_Hash_Definitions_hash_alg */
 
@@ -66,6 +82,18 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
 Spec_ECDSA_hash_alg_ecdsa;
 
 /* SNIPPET_END: Spec_ECDSA_hash_alg_ecdsa */
+
+/* SNIPPET_START: Spec_FFDHE_ffdhe_alg */
+
+#define Spec_FFDHE_FFDHE2048 0
+#define Spec_FFDHE_FFDHE3072 1
+#define Spec_FFDHE_FFDHE4096 2
+#define Spec_FFDHE_FFDHE6144 3
+#define Spec_FFDHE_FFDHE8192 4
+
+/* SNIPPET_END: Spec_FFDHE_ffdhe_alg */
+
+typedef uint8_t Spec_FFDHE_ffdhe_alg;
 
 /* SNIPPET_START: Spec_Agile_Cipher_cipher_alg */
 
@@ -107,6 +135,19 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 /* SNIPPET_END: Spec_Agile_AEAD_alg */
 
 typedef uint8_t Spec_Agile_AEAD_alg;
+
+/* SNIPPET_START: Spec_Frodo_Params_frodo_gen_a */
+
+#define Spec_Frodo_Params_SHAKE128 0
+#define Spec_Frodo_Params_AES128 1
+
+/* SNIPPET_END: Spec_Frodo_Params_frodo_gen_a */
+
+typedef uint8_t Spec_Frodo_Params_frodo_gen_a;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Spec_H_DEFINED
 #endif

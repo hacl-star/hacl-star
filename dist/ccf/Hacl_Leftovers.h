@@ -21,17 +21,45 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Leftovers_H
+#define __Hacl_Leftovers_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Leftovers_H
-#define __Hacl_Leftovers_H
 
+#include "Hacl_Kremlib.h"
+#include "Lib_Memzero0.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
 
+void
+Hacl_Blake2b_32_blake2b(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
+);
+
+void
+Hacl_Blake2s_32_blake2s(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
+);
 
 extern uint32_t Hacl_HMAC_DRBG_reseed_interval;
 
@@ -50,6 +78,10 @@ typedef struct Hacl_HMAC_DRBG_state_s
   uint32_t *reseed_counter;
 }
 Hacl_HMAC_DRBG_state;
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Leftovers_H_DEFINED
 #endif

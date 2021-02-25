@@ -634,10 +634,19 @@ inline_for_extraction
 val lognot: #t:inttype -> #l:secrecy_level -> int_t t l -> int_t t l
 
 val lognot_lemma: #t: inttype -> #l: secrecy_level ->
-  a: int_t t l -> 
-  Lemma 
+  a: int_t t l ->
+  Lemma
     (requires v a = 0 \/ v a = ones_v t)
     (ensures (if v a = ones_v t then v (lognot a) == 0 else v (lognot a) == ones_v t))
+
+let lognot_v (#t:inttype) (a:range_t t) : range_t t =
+  match t with
+  | S8 | S16 | S32 | S64 | S128 -> Int.lognot #(bits t) a
+  | _ -> UInt.lognot #(bits t) a
+
+val lognot_spec: #t:inttype -> #l:secrecy_level
+  -> a:int_t t l
+  -> Lemma (v (lognot a) == lognot_v (v a))
 
 inline_for_extraction
 type shiftval (t:inttype) = u:size_t{v u < bits t}
@@ -691,16 +700,16 @@ val rotate_left: #t:inttype -> #l:secrecy_level
   -> rotval t
   -> int_t t l
 
-inline_for_extraction noextract
+inline_for_extraction
 let shift_right_i (#t:inttype) (#l:secrecy_level) (s:shiftval t{unsigned t}) (u:uint_t t l) : uint_t t l = shift_right u s
 
-inline_for_extraction noextract
+inline_for_extraction
 let shift_left_i (#t:inttype) (#l:secrecy_level) (s:shiftval t{unsigned t}) (u:uint_t t l) : uint_t t l = shift_left u s
 
-inline_for_extraction noextract
+inline_for_extraction
 let rotate_right_i (#t:inttype) (#l:secrecy_level) (s:rotval t{unsigned t}) (u:uint_t t l) : uint_t t l = rotate_right u s
 
-inline_for_extraction noextract
+inline_for_extraction
 let rotate_left_i (#t:inttype) (#l:secrecy_level) (s:rotval t{unsigned t}) (u:uint_t t l) : uint_t t l = rotate_left u s
 
 

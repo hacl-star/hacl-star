@@ -21,37 +21,66 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_IntTypes_Intrinsics_H
+#define __Hacl_IntTypes_Intrinsics_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_IntTypes_Intrinsics_H
-#define __Hacl_IntTypes_Intrinsics_H
 
 #include "Hacl_Kremlib.h"
 
-
-static inline u64 Hacl_IntTypes_Intrinsics_add_carry_u64(u64 cin, u64 x, u64 y, u64 *result1)
+static inline u32 Hacl_IntTypes_Intrinsics_add_carry_u32(u32 cin, u32 x, u32 y, u32 *r)
 {
-  u64 res = x + cin + y;
-  u64 c = (~FStar_UInt64_gte_mask(res, x) | (FStar_UInt64_eq_mask(res, x) & cin)) & (u64)1U;
-  result1[0U] = res;
+  u32 res = x + cin + y;
+  u32 c = (~FStar_UInt32_gte_mask(res, x) | (FStar_UInt32_eq_mask(res, x) & cin)) & (u32)1U;
+  r[0U] = res;
   return c;
 }
 
-static inline u64 Hacl_IntTypes_Intrinsics_sub_borrow_u64(u64 cin, u64 x, u64 y, u64 *result1)
+static inline u64 Hacl_IntTypes_Intrinsics_add_carry_u64(u64 cin, u64 x, u64 y, u64 *r)
+{
+  u64 res = x + cin + y;
+  u64 c = (~FStar_UInt64_gte_mask(res, x) | (FStar_UInt64_eq_mask(res, x) & cin)) & (u64)1U;
+  r[0U] = res;
+  return c;
+}
+
+static inline u32 Hacl_IntTypes_Intrinsics_sub_borrow_u32(u32 cin, u32 x, u32 y, u32 *r)
+{
+  u32 res = x - y - cin;
+  u32
+  c =
+    ((FStar_UInt32_gte_mask(res, x) & ~FStar_UInt32_eq_mask(res, x))
+    | (FStar_UInt32_eq_mask(res, x) & cin))
+    & (u32)1U;
+  r[0U] = res;
+  return c;
+}
+
+static inline u64 Hacl_IntTypes_Intrinsics_sub_borrow_u64(u64 cin, u64 x, u64 y, u64 *r)
 {
   u64 res = x - y - cin;
-  u64 eqlty = FStar_UInt64_eq_mask(res, x);
   u64
-  c1 =
-    ((FStar_UInt64_gte_mask(res, x) & ~FStar_UInt64_eq_mask(res, x)) | (eqlty & cin))
+  c =
+    ((FStar_UInt64_gte_mask(res, x) & ~FStar_UInt64_eq_mask(res, x))
+    | (FStar_UInt64_eq_mask(res, x) & cin))
     & (u64)1U;
-  result1[0U] = res;
-  return c1;
+  r[0U] = res;
+  return c;
 }
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_IntTypes_Intrinsics_H_DEFINED
 #endif

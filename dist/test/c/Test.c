@@ -30,16 +30,18 @@
 #define SHA2_512 3
 #define SHA1 4
 #define MD5 5
+#define Blake2S 6
+#define Blake2B 7
 
 typedef uint8_t hash_alg;
 
-extern void portable_exit(int32_t uu____31);
+extern void portable_exit(int32_t uu___);
 
-extern void C_String_print(C_String_t uu____68);
+extern void C_String_print(C_String_t uu___);
 
-extern uint32_t C_String_strlen(C_String_t uu____74);
+extern uint32_t C_String_strlen(C_String_t uu___);
 
-extern void C_String_memcpy(uint8_t *uu____92, C_String_t uu____93, uint32_t uu____94);
+extern void C_String_memcpy(uint8_t *uu___, C_String_t uu___1, uint32_t uu___2);
 
 static bool whatever()
 {
@@ -80,7 +82,7 @@ extern void EverCrypt_AutoConfig2_disable_openssl();
 
 extern void EverCrypt_AutoConfig2_disable_bcrypt();
 
-extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___0_5);
+extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___);
 
 #define MD5_s 0
 #define SHA1_s 1
@@ -88,6 +90,8 @@ extern C_String_t EverCrypt_Hash_string_of_alg(hash_alg uu___0_5);
 #define SHA2_256_s 3
 #define SHA2_384_s 4
 #define SHA2_512_s 5
+#define Blake2S_s 6
+#define Blake2B_s 7
 
 typedef uint8_t state_s_tags;
 
@@ -101,6 +105,8 @@ typedef struct state_s_s
     uint32_t *case_SHA2_256_s;
     uint64_t *case_SHA2_384_s;
     uint64_t *case_SHA2_512_s;
+    uint32_t *case_Blake2S_s;
+    uint64_t *case_Blake2B_s;
   }
   ;
 }
@@ -111,33 +117,6 @@ extern state_s *EverCrypt_Hash_create(hash_alg a);
 extern void EverCrypt_Hash_init(state_s *a);
 
 extern void EverCrypt_Hash_hash(hash_alg a, uint8_t *dst, uint8_t *input, uint32_t len);
-
-static bool is_supported_alg(hash_alg uu___0_6)
-{
-  switch (uu___0_6)
-  {
-    case SHA1:
-      {
-        return true;
-      }
-    case SHA2_256:
-      {
-        return true;
-      }
-    case SHA2_384:
-      {
-        return true;
-      }
-    case SHA2_512:
-      {
-        return true;
-      }
-    default:
-      {
-        return false;
-      }
-  }
-}
 
 extern void
 EverCrypt_Cipher_chacha20(
@@ -164,6 +143,33 @@ EverCrypt_HMAC_compute(
   uint8_t *data,
   uint32_t datalen
 );
+
+static bool is_supported_alg(hash_alg uu___)
+{
+  switch (uu___)
+  {
+    case SHA1:
+      {
+        return true;
+      }
+    case SHA2_256:
+      {
+        return true;
+      }
+    case SHA2_384:
+      {
+        return true;
+      }
+    case SHA2_512:
+      {
+        return true;
+      }
+    default:
+      {
+        return false;
+      }
+  }
+}
 
 typedef struct state_s
 {
@@ -341,8 +347,7 @@ EverCrypt_AEAD_decrypt(
   uint8_t *tag
 );
 
-extern void
-TestLib_compare_and_print(C_String_t uu____176, uint8_t *b1, uint8_t *b2, uint32_t l);
+extern void TestLib_compare_and_print(C_String_t uu___, uint8_t *b1, uint8_t *b2, uint32_t l);
 
 static uint8_t
 key0[32U] =
@@ -489,9 +494,9 @@ nonce1[12U] =
     (uint8_t)0x33U, (uint8_t)0x71U, (uint8_t)0x32U, (uint8_t)0x45U, (uint8_t)0x77U, (uint8_t)0x8eU
   };
 
-static uint8_t aad1[0U] = { (uint32_t)0U };
+static uint8_t aad1[0U] = {  };
 
-static uint8_t input1[0U] = { (uint32_t)0U };
+static uint8_t input1[0U] = {  };
 
 static uint8_t
 output1[16U] =
@@ -526,7 +531,7 @@ aad2[8U] =
     (uint8_t)0xd2U, (uint8_t)0x6bU
   };
 
-static uint8_t input2[0U] = { (uint32_t)0U };
+static uint8_t input2[0U] = {  };
 
 static uint8_t
 output2[16U] =
@@ -589,7 +594,7 @@ nonce4[12U] =
     (uint8_t)0xaaU, (uint8_t)0x5fU, (uint8_t)0x9cU, (uint8_t)0xbfU, (uint8_t)0x92U, (uint8_t)0x30U
   };
 
-static uint8_t aad4[0U] = { (uint32_t)0U };
+static uint8_t aad4[0U] = {  };
 
 static uint8_t input4[1U] = { (uint8_t)0x2dU };
 
@@ -701,7 +706,7 @@ nonce6[12U] =
     (uint8_t)0xefU, (uint8_t)0xc3U, (uint8_t)0x65U, (uint8_t)0x1bU, (uint8_t)0x68U, (uint8_t)0xb0U
   };
 
-static uint8_t aad6[0U] = { (uint32_t)0U };
+static uint8_t aad6[0U] = {  };
 
 static uint8_t
 input6[256U] =
@@ -820,7 +825,7 @@ nonce7[12U] =
     (uint8_t)0x57U, (uint8_t)0xbbU, (uint8_t)0x7bU, (uint8_t)0x40U, (uint8_t)0x54U, (uint8_t)0x02U
   };
 
-static uint8_t aad7[0U] = { (uint32_t)0U };
+static uint8_t aad7[0U] = {  };
 
 static uint8_t
 input7[512U] =
@@ -3409,7 +3414,7 @@ tag1[16U] =
     (uint8_t)0xb8U, (uint8_t)0x19U, (uint8_t)0x53U, (uint8_t)0xdeU
   };
 
-static uint8_t input20[0U] = { (uint32_t)0U };
+static uint8_t input20[0U] = {  };
 
 static uint8_t
 key20[32U] =
@@ -4132,7 +4137,7 @@ tag16[16U] =
     (uint8_t)0x25U, (uint8_t)0x8eU, (uint8_t)0xc4U, (uint8_t)0x2fU
   };
 
-static uint8_t input17[0U] = { (uint32_t)0U };
+static uint8_t input17[0U] = {  };
 
 static uint8_t
 key17[32U] =
@@ -5303,24 +5308,23 @@ hash_vectors_low23[64U] =
     (uint8_t)63U, (uint8_t)183U, (uint8_t)186U, (uint8_t)233U
   };
 
-typedef struct lbuffer__uint8_t_s
+typedef struct vec8_s
 {
   uint32_t len;
   uint8_t *b;
 }
-lbuffer__uint8_t;
+vec8;
 
-typedef struct
-__Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_s
+typedef struct hash_vector_s
 {
   hash_alg fst;
   C_String_t snd;
-  lbuffer__uint8_t thd;
+  vec8 thd;
   uint32_t f3;
 }
-__Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t;
+hash_vector;
 
-static __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t
+static hash_vector
 hash_vectors_low24[24U] =
   {
     {
@@ -5469,15 +5473,14 @@ hash_vectors_low24[24U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_s
+typedef struct lbuffer__Test_NoHeap_hash_vector_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t *b;
+  hash_vector *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t;
+lbuffer__Test_NoHeap_hash_vector;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t
+static lbuffer__Test_NoHeap_hash_vector
 hash_vectors_low = { .len = (uint32_t)24U, .b = hash_vectors_low24 };
 
 static uint8_t
@@ -5536,17 +5539,16 @@ hmac_vectors_low5[48U] =
     (uint8_t)82U, (uint8_t)232U, (uint8_t)178U, (uint8_t)250U, (uint8_t)156U, (uint8_t)182U
   };
 
-typedef struct
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct hmac_vector_s
 {
   hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
 }
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+hmac_vector;
 
-static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static hmac_vector
 hmac_vectors_low6[2U] =
   {
     {
@@ -5563,16 +5565,14 @@ hmac_vectors_low6[2U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_NoHeap_hmac_vector_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  hmac_vector *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_NoHeap_hmac_vector;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_NoHeap_hmac_vector
 hmac_vectors_low = { .len = (uint32_t)2U, .b = hmac_vectors_low6 };
 
 static uint8_t
@@ -7991,28 +7991,27 @@ hmac_drbg_vectors_low176[255U] =
     (uint8_t)251U, (uint8_t)239U, (uint8_t)172U
   };
 
-typedef struct __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct __Test_NoHeap_vec8_Test_NoHeap_vec8_s
 {
-  lbuffer__uint8_t fst;
-  lbuffer__uint8_t snd;
+  vec8 fst;
+  vec8 snd;
 }
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+__Test_NoHeap_vec8_Test_NoHeap_vec8;
 
-typedef struct
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct hmac_drbg_vector_s
 {
   hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t f6;
-  lbuffer__uint8_t f7;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
+  vec8 f4;
+  vec8 f5;
+  __Test_NoHeap_vec8_Test_NoHeap_vec8 f6;
+  vec8 f7;
 }
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+hmac_drbg_vector;
 
-static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static hmac_drbg_vector
 hmac_drbg_vectors_low177[28U] =
   {
     {
@@ -8305,16 +8304,14 @@ hmac_drbg_vectors_low177[28U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_NoHeap_hmac_drbg_vector_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  hmac_drbg_vector *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_NoHeap_hmac_drbg_vector;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_NoHeap_hmac_drbg_vector
 hmac_drbg_vectors_low = { .len = (uint32_t)28U, .b = hmac_drbg_vectors_low177 };
 
 static uint8_t
@@ -8481,19 +8478,18 @@ hkdf_vectors_low12[42U] =
     (uint8_t)250U, (uint8_t)164U, (uint8_t)182U, (uint8_t)26U, (uint8_t)150U, (uint8_t)200U
   };
 
-typedef struct
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct hkdf_vector_s
 {
   hash_alg fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
+  vec8 f4;
+  vec8 f5;
 }
-__Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+hkdf_vector;
 
-static __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static hkdf_vector
 hkdf_vectors_low13[3U] =
   {
     {
@@ -8518,16 +8514,14 @@ hkdf_vectors_low13[3U] =
     }
   };
 
-typedef struct
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_NoHeap_hkdf_vector_s
 {
   uint32_t len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  hkdf_vector *b;
 }
-lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_NoHeap_hkdf_vector;
 
-static lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_NoHeap_hkdf_vector
 hkdf_vectors_low = { .len = (uint32_t)3U, .b = hkdf_vectors_low13 };
 
 static uint8_t
@@ -8595,18 +8589,17 @@ chacha20_vectors_low3[114U] =
     (uint8_t)242U, (uint8_t)120U, (uint8_t)94U, (uint8_t)66U, (uint8_t)135U, (uint8_t)77U
   };
 
-typedef struct
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct chacha20_vector_s
 {
-  lbuffer__uint8_t fst;
-  lbuffer__uint8_t snd;
+  vec8 fst;
+  vec8 snd;
   uint32_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
+  vec8 f3;
+  vec8 f4;
 }
-__Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+chacha20_vector;
 
-static __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static chacha20_vector
 chacha20_vectors_low4[1U] =
   {
     {
@@ -8617,16 +8610,14 @@ chacha20_vectors_low4[1U] =
     }
   };
 
-typedef struct
-lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_NoHeap_chacha20_vector_s
 {
   uint32_t len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  chacha20_vector *b;
 }
-lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_NoHeap_chacha20_vector;
 
-static lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_NoHeap_chacha20_vector
 chacha20_vectors_low = { .len = (uint32_t)1U, .b = chacha20_vectors_low4 };
 
 #define AES_128_GCM 0
@@ -9792,20 +9783,19 @@ aead_vectors_low108[80U] =
     (uint8_t)76U, (uint8_t)197U
   };
 
-typedef struct
-__Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct aead_vector_s
 {
   cipher fst;
-  lbuffer__uint8_t snd;
-  lbuffer__uint8_t thd;
-  lbuffer__uint8_t f3;
-  lbuffer__uint8_t f4;
-  lbuffer__uint8_t f5;
-  lbuffer__uint8_t f6;
+  vec8 snd;
+  vec8 thd;
+  vec8 f3;
+  vec8 f4;
+  vec8 f5;
+  vec8 f6;
 }
-__Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+aead_vector;
 
-static __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static aead_vector
 aead_vectors_low109[21U] =
   {
     {
@@ -9975,16 +9965,14 @@ aead_vectors_low109[21U] =
     }
   };
 
-typedef struct
-lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_s
+typedef struct lbuffer__Test_aead_vector_s
 {
   uint32_t len;
-  __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *b;
+  aead_vector *b;
 }
-lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t;
+lbuffer__Test_aead_vector;
 
-static lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
+static lbuffer__Test_aead_vector
 aead_vectors_low = { .len = (uint32_t)21U, .b = aead_vectors_low109 };
 
 static void Test_Hash_main()
@@ -10141,6 +10129,30 @@ vectors2[3U] =
 
 static uint32_t vectors_len2 = (uint32_t)3U;
 
+typedef struct state_s2_s
+{
+  impl i;
+  uint8_t *iv;
+  uint32_t iv_len;
+  uint8_t *xkey;
+  uint32_t ctr;
+}
+state_s2;
+
+extern error_code
+EverCrypt_CTR_create_in(
+  cipher_alg a,
+  state_s2 **r,
+  uint8_t *dst,
+  uint8_t *k,
+  uint32_t iv,
+  uint32_t iv_len
+);
+
+extern void EverCrypt_CTR_update_block(state_s2 *a, uint8_t *p, uint8_t *dst);
+
+extern void EverCrypt_CTR_free(state_s2 *a);
+
 KRML_DEPRECATED("LowStar.Failure.failwith")
 
 static void failwith____(C_String_t s)
@@ -10153,10 +10165,7 @@ static void failwith____(C_String_t s)
   failwith____(s);
 }
 
-static void
-test_one_hash(
-  __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t vec
-)
+static void test_one_hash(hash_vector vec)
 {
   uint32_t repeat = vec.f3;
   uint8_t *expected = vec.thd.b;
@@ -10197,6 +10206,16 @@ test_one_hash(
         tlen = (uint32_t)64U;
         break;
       }
+    case Blake2S:
+      {
+        tlen = (uint32_t)32U;
+        break;
+      }
+    case Blake2B:
+      {
+        tlen = (uint32_t)64U;
+        break;
+      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -10219,11 +10238,11 @@ test_one_hash(
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), tlen);
     uint8_t computed[tlen];
-    memset(computed, 0U, tlen * sizeof (computed[0U]));
+    memset(computed, 0U, tlen * sizeof (uint8_t));
     uint32_t total_input_len = input_len * repeat;
     KRML_CHECK_SIZE(sizeof (uint8_t), total_input_len + (uint32_t)1U);
     uint8_t total_input[total_input_len + (uint32_t)1U];
-    memset(total_input, 0U, (total_input_len + (uint32_t)1U) * sizeof (total_input[0U]));
+    memset(total_input, 0U, (total_input_len + (uint32_t)1U) * sizeof (uint8_t));
     uint8_t *total_input1 = total_input;
     for (uint32_t i = (uint32_t)0U; i < repeat; i++)
     {
@@ -10235,17 +10254,12 @@ test_one_hash(
   }
 }
 
-static void
-test_hash(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t
-  vec
-)
+static void test_hash(lbuffer__Test_NoHeap_hash_vector vec)
 {
   C_String_print("Hashes");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_C_String_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t
-  *vs = vec.b;
+  hash_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_hash(vs[i]);
@@ -10306,6 +10320,16 @@ static bool keysized(hash_alg a, uint32_t l)
         sw = (uint32_t)128U;
         break;
       }
+    case Blake2S:
+      {
+        sw = (uint32_t)64U;
+        break;
+      }
+    case Blake2B:
+      {
+        sw = (uint32_t)128U;
+        break;
+      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -10315,11 +10339,7 @@ static bool keysized(hash_alg a, uint32_t l)
   return l <= (uint32_t)0xffffffffU - sw;
 }
 
-static void
-test_one_hmac(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_one_hmac(hmac_vector vec)
 {
   uint8_t *expected = vec.f3.b;
   uint32_t expectedlen = vec.f3.len;
@@ -10357,6 +10377,16 @@ test_one_hmac(
         break;
       }
     case SHA2_512:
+      {
+        sw0 = (uint32_t)64U;
+        break;
+      }
+    case Blake2S:
+      {
+        sw0 = (uint32_t)32U;
+        break;
+      }
+    case Blake2B:
       {
         sw0 = (uint32_t)64U;
         break;
@@ -10410,6 +10440,16 @@ test_one_hmac(
           sw1 = (uint32_t)128U;
           break;
         }
+      case Blake2S:
+        {
+          sw1 = (uint32_t)64U;
+          break;
+        }
+      case Blake2B:
+        {
+          sw1 = (uint32_t)128U;
+          break;
+        }
       default:
         {
           KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -10455,6 +10495,16 @@ test_one_hmac(
             sw2 = (uint32_t)64U;
             break;
           }
+        case Blake2S:
+          {
+            sw2 = (uint32_t)32U;
+            break;
+          }
+        case Blake2B:
+          {
+            sw2 = (uint32_t)64U;
+            break;
+          }
         default:
           {
             KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -10463,7 +10513,7 @@ test_one_hmac(
       }
       KRML_CHECK_SIZE(sizeof (uint8_t), sw2);
       uint8_t computed[sw2];
-      memset(computed, 0U, sw2 * sizeof (computed[0U]));
+      memset(computed, 0U, sw2 * sizeof (uint8_t));
       EverCrypt_HMAC_compute(ha, computed, key, keylen, data, datalen);
       C_String_t str = EverCrypt_Hash_string_of_alg(ha);
       uint32_t sw;
@@ -10499,6 +10549,16 @@ test_one_hmac(
             sw = (uint32_t)64U;
             break;
           }
+        case Blake2S:
+          {
+            sw = (uint32_t)32U;
+            break;
+          }
+        case Blake2B:
+          {
+            sw = (uint32_t)64U;
+            break;
+          }
         default:
           {
             KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -10510,28 +10570,19 @@ test_one_hmac(
   }
 }
 
-static void
-test_hmac(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_hmac(lbuffer__Test_NoHeap_hmac_vector vec)
 {
   C_String_print("HMAC");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vec.b;
+  hmac_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_hmac(vs[i]);
   }
 }
 
-static void
-test_one_hmac_drbg(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_one_hmac_drbg(hmac_drbg_vector vec)
 {
   uint32_t returned_bits_len = vec.f7.len;
   uint8_t *additional_input_2 = vec.f6.snd.b;
@@ -10556,7 +10607,7 @@ test_one_hmac_drbg(
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), returned_bits_len);
     uint8_t output[returned_bits_len];
-    memset(output, 0U, returned_bits_len * sizeof (output[0U]));
+    memset(output, 0U, returned_bits_len * sizeof (uint8_t));
     uint32_t ctr0;
     uint8_t buf0[64U];
     uint8_t buf1[48U];
@@ -11091,28 +11142,19 @@ test_one_hmac_drbg(
   }
 }
 
-static void
-test_hmac_drbg(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_hmac_drbg(lbuffer__Test_NoHeap_hmac_drbg_vector vec)
 {
   C_String_print("HMAC-DRBG");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vec.b;
+  hmac_drbg_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_hmac_drbg(vs[i]);
   }
 }
 
-static void
-test_one_hkdf(
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_one_hkdf(hkdf_vector vec)
 {
   uint8_t *expected_okm = vec.f5.b;
   uint32_t okmlen = vec.f5.len;
@@ -11158,6 +11200,16 @@ test_one_hkdf(
         sw0 = (uint32_t)64U;
         break;
       }
+    case Blake2S:
+      {
+        sw0 = (uint32_t)32U;
+        break;
+      }
+    case Blake2B:
+      {
+        sw0 = (uint32_t)64U;
+        break;
+      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -11199,6 +11251,16 @@ test_one_hkdf(
           break;
         }
       case SHA2_512:
+        {
+          sw1 = (uint32_t)64U;
+          break;
+        }
+      case Blake2S:
+        {
+          sw1 = (uint32_t)32U;
+          break;
+        }
+      case Blake2B:
         {
           sw1 = (uint32_t)64U;
           break;
@@ -11256,6 +11318,16 @@ test_one_hkdf(
             sw2 = (uint32_t)128U;
             break;
           }
+        case Blake2S:
+          {
+            sw2 = (uint32_t)64U;
+            break;
+          }
+        case Blake2B:
+          {
+            sw2 = (uint32_t)128U;
+            break;
+          }
         default:
           {
             KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -11301,6 +11373,16 @@ test_one_hkdf(
               sw3 = (uint32_t)128U;
               break;
             }
+          case Blake2S:
+            {
+              sw3 = (uint32_t)64U;
+              break;
+            }
+          case Blake2B:
+            {
+              sw3 = (uint32_t)128U;
+              break;
+            }
           default:
             {
               KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -11336,6 +11418,16 @@ test_one_hkdf(
               break;
             }
           case SHA2_512:
+            {
+              sw4 = (uint32_t)64U;
+              break;
+            }
+          case Blake2S:
+            {
+              sw4 = (uint32_t)32U;
+              break;
+            }
+          case Blake2B:
             {
               sw4 = (uint32_t)64U;
               break;
@@ -11386,6 +11478,16 @@ test_one_hkdf(
                 sw5 = (uint32_t)64U;
                 break;
               }
+            case Blake2S:
+              {
+                sw5 = (uint32_t)32U;
+                break;
+              }
+            case Blake2B:
+              {
+                sw5 = (uint32_t)64U;
+                break;
+              }
             default:
               {
                 KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -11394,7 +11496,7 @@ test_one_hkdf(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), sw5);
           uint8_t computed_prk[sw5];
-          memset(computed_prk, 0U, sw5 * sizeof (computed_prk[0U]));
+          memset(computed_prk, 0U, sw5 * sizeof (uint8_t));
           EverCrypt_HKDF_extract(ha, computed_prk, salt, saltlen, ikm, ikmlen);
           uint32_t sw;
           switch (ha)
@@ -11429,6 +11531,16 @@ test_one_hkdf(
                 sw = (uint32_t)64U;
                 break;
               }
+            case Blake2S:
+              {
+                sw = (uint32_t)32U;
+                break;
+              }
+            case Blake2B:
+              {
+                sw = (uint32_t)64U;
+                break;
+              }
             default:
               {
                 KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -11438,7 +11550,7 @@ test_one_hkdf(
           TestLib_compare_and_print(str, expected_prk, computed_prk, sw);
           KRML_CHECK_SIZE(sizeof (uint8_t), okmlen + (uint32_t)1U);
           uint8_t computed_okm[okmlen + (uint32_t)1U];
-          memset(computed_okm, 0U, (okmlen + (uint32_t)1U) * sizeof (computed_okm[0U]));
+          memset(computed_okm, 0U, (okmlen + (uint32_t)1U) * sizeof (uint8_t));
           uint8_t *computed_okm1 = computed_okm;
           EverCrypt_HKDF_expand(ha, computed_okm1, computed_prk, prklen, info, infolen, okmlen);
           TestLib_compare_and_print(str, expected_okm, computed_okm1, okmlen);
@@ -11448,28 +11560,19 @@ test_one_hkdf(
   }
 }
 
-static void
-test_hkdf(
-  lbuffer__K___Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_hkdf(lbuffer__Test_NoHeap_hkdf_vector vec)
 {
   C_String_print("HKDF");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Spec_Hash_Definitions_hash_alg_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vec.b;
+  hkdf_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_hkdf(vs[i]);
   }
 }
 
-static void
-test_one_chacha20(
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  v
-)
+static void test_one_chacha20(chacha20_vector v)
 {
   uint8_t *cipher0 = v.f4.b;
   uint32_t cipher_len = v.f4.len;
@@ -11504,24 +11607,19 @@ test_one_chacha20(
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), cipher_len + (uint32_t)1U);
     uint8_t cipher_[cipher_len + (uint32_t)1U];
-    memset(cipher_, 0U, (cipher_len + (uint32_t)1U) * sizeof (cipher_[0U]));
+    memset(cipher_, 0U, (cipher_len + (uint32_t)1U) * sizeof (uint8_t));
     uint8_t *cipher_1 = cipher_;
     EverCrypt_Cipher_chacha20(plain_len, cipher_1, plain, key, iv, ctr);
     TestLib_compare_and_print("of ChaCha20 message", cipher0, cipher_1, cipher_len);
   }
 }
 
-static void
-test_chacha20(
-  lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vec
-)
+static void test_chacha20(lbuffer__Test_NoHeap_chacha20_vector vec)
 {
   C_String_print("CHACHA20");
   C_String_print("\n");
   uint32_t len = vec.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = vec.b;
+  chacha20_vector *vs = vec.b;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     test_one_chacha20(vs[i]);
@@ -11639,7 +11737,7 @@ static void test_one_chacha20poly1305(vector v)
   {
     KRML_CHECK_SIZE(sizeof (uint8_t), plain_len + (uint32_t)16U);
     uint8_t tmp[plain_len + (uint32_t)16U];
-    memset(tmp, 0U, (plain_len + (uint32_t)16U) * sizeof (tmp[0U]));
+    memset(tmp, 0U, (plain_len + (uint32_t)16U) * sizeof (uint8_t));
     uint8_t *tmp_msg_ = tmp;
     uint8_t *tag_ = tmp + plain_len;
     EverCrypt_Chacha20Poly1305_aead_encrypt(key,
@@ -11689,30 +11787,6 @@ static void test_chacha20poly1305()
   }
 }
 
-typedef struct state_s2_s
-{
-  impl i;
-  uint8_t *iv;
-  uint32_t iv_len;
-  uint8_t *xkey;
-  uint32_t ctr;
-}
-state_s2;
-
-extern error_code
-EverCrypt_CTR_create_in(
-  cipher_alg a,
-  state_s2 **r,
-  uint8_t *dst,
-  uint8_t *k,
-  uint32_t iv,
-  uint32_t iv_len
-);
-
-extern void EverCrypt_CTR_update_block(state_s2 *a, uint8_t *p, uint8_t *dst);
-
-extern void EverCrypt_CTR_free(state_s2 *a);
-
 static uint8_t
 key02[16U] =
   {
@@ -11728,9 +11802,9 @@ nonce01[12U] =
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U
   };
 
-static uint8_t aad00[0U] = { (uint32_t)0U };
+static uint8_t aad00[0U] = {  };
 
-static uint8_t input02[0U] = { (uint32_t)0U };
+static uint8_t input02[0U] = {  };
 
 static uint8_t
 tag00[16U] =
@@ -11740,7 +11814,7 @@ tag00[16U] =
     (uint8_t)0xa4U, (uint8_t)0xe7U, (uint8_t)0x45U, (uint8_t)0x5aU
   };
 
-static uint8_t output01[0U] = { (uint32_t)0U };
+static uint8_t output01[0U] = {  };
 
 static uint8_t
 key112[16U] =
@@ -11757,7 +11831,7 @@ nonce13[12U] =
     (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U, (uint8_t)0x00U
   };
 
-static uint8_t aad12[0U] = { (uint32_t)0U };
+static uint8_t aad12[0U] = {  };
 
 static uint8_t
 input112[16U] =
@@ -11798,7 +11872,7 @@ nonce21[12U] =
     (uint8_t)0xdbU, (uint8_t)0xadU, (uint8_t)0xdeU, (uint8_t)0xcaU, (uint8_t)0xf8U, (uint8_t)0x88U
   };
 
-static uint8_t aad20[0U] = { (uint32_t)0U };
+static uint8_t aad20[0U] = {  };
 
 static uint8_t
 input211[64U] =
@@ -12073,107 +12147,6 @@ static bool aead_iv_length32(alg al, uint32_t x)
   }
 }
 
-static bool __neq__EverCrypt_Error_error_code(error_code y, error_code x)
-{
-  switch (x)
-  {
-    case Success:
-      {
-        switch (y)
-        {
-          case Success:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case UnsupportedAlgorithm:
-      {
-        switch (y)
-        {
-          case UnsupportedAlgorithm:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case InvalidKey:
-      {
-        switch (y)
-        {
-          case InvalidKey:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case AuthenticationFailure:
-      {
-        switch (y)
-        {
-          case AuthenticationFailure:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case InvalidIVLength:
-      {
-        switch (y)
-        {
-          case InvalidIVLength:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case DecodeError:
-      {
-        switch (y)
-        {
-          case DecodeError:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    default:
-      {
-        return true;
-      }
-  }
-}
-
 static void
 test_aead_st(
   alg alg0,
@@ -12248,7 +12221,7 @@ test_aead_st(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), plaintext_blen);
           uint8_t plaintext_[plaintext_blen];
-          memset(plaintext_, 0U, plaintext_blen * sizeof (plaintext_[0U]));
+          memset(plaintext_, 0U, plaintext_blen * sizeof (uint8_t));
           uint8_t *plaintext_1 = plaintext_;
           uint32_t ciphertext_blen;
           if (ciphertext_len == (uint32_t)0U)
@@ -12261,7 +12234,7 @@ test_aead_st(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), ciphertext_blen);
           uint8_t ciphertext_[ciphertext_blen];
-          memset(ciphertext_, 0U, ciphertext_blen * sizeof (ciphertext_[0U]));
+          memset(ciphertext_, 0U, ciphertext_blen * sizeof (uint8_t));
           uint8_t *ciphertext_1 = ciphertext_;
           uint32_t tag_blen;
           if (tag_len == (uint32_t)0U)
@@ -12274,20 +12247,20 @@ test_aead_st(
           }
           KRML_CHECK_SIZE(sizeof (uint8_t), tag_len);
           uint8_t tag_[tag_len];
-          memset(tag_, 0U, tag_len * sizeof (tag_[0U]));
+          memset(tag_, 0U, tag_len * sizeof (uint8_t));
           uint8_t *tag_1 = tag_;
           if
           (
-            __neq__EverCrypt_Error_error_code(EverCrypt_AEAD_encrypt(st1,
-                iv,
-                iv_len,
-                aad,
-                aad_len,
-                plaintext,
-                plaintext_len,
-                ciphertext_1,
-                tag_1),
-              Success)
+            EverCrypt_AEAD_encrypt(st1,
+              iv,
+              iv_len,
+              aad,
+              aad_len,
+              plaintext,
+              plaintext_len,
+              ciphertext_1,
+              tag_1)
+            != Success
           )
           {
             failwith____("Failure AEAD encrypt\n");
@@ -12331,9 +12304,9 @@ test_aead_st(
   }
 }
 
-static alg alg_of_alg(cipher uu___0_867)
+static alg alg_of_alg(cipher uu___)
 {
-  switch (uu___0_867)
+  switch (uu___)
   {
     case CHACHA20_POLY13050:
       {
@@ -12355,76 +12328,13 @@ static alg alg_of_alg(cipher uu___0_867)
   }
 }
 
-static bool __eq__Test_Vectors_cipher(cipher y, cipher x)
+static void test_aead_loop(cipher alg0, lbuffer__Test_aead_vector uu___)
 {
-  switch (x)
-  {
-    case AES_128_GCM:
-      {
-        switch (y)
-        {
-          case AES_128_GCM:
-            {
-              return true;
-            }
-          default:
-            {
-              return false;
-            }
-        }
-        break;
-      }
-    case AES_256_GCM:
-      {
-        switch (y)
-        {
-          case AES_256_GCM:
-            {
-              return true;
-            }
-          default:
-            {
-              return false;
-            }
-        }
-        break;
-      }
-    case CHACHA20_POLY13050:
-      {
-        switch (y)
-        {
-          case CHACHA20_POLY13050:
-            {
-              return true;
-            }
-          default:
-            {
-              return false;
-            }
-        }
-        break;
-      }
-    default:
-      {
-        return false;
-      }
-  }
-}
-
-static void
-test_aead_loop(
-  cipher alg0,
-  lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  uu____905
-)
-{
-  uint32_t len = uu____905.len;
-  __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs = uu____905.b;
+  uint32_t len = uu___.len;
+  aead_vector *vs = uu___.b;
   if (!(len == (uint32_t)0U))
   {
-    __Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-    v = vs[0U];
+    aead_vector v = vs[0U];
     uint8_t *ciphertext = v.f6.b;
     uint32_t ciphertext_len = v.f6.len;
     uint8_t *plaintext = v.f5.b;
@@ -12438,7 +12348,7 @@ test_aead_loop(
     uint8_t *key = v.snd.b;
     uint32_t key_len = v.snd.len;
     cipher alg1 = v.fst;
-    if (__eq__Test_Vectors_cipher(alg1, alg0))
+    if (alg1 == alg0)
     {
       test_aead_st(alg_of_alg(alg1),
         key,
@@ -12455,12 +12365,7 @@ test_aead_loop(
         ciphertext_len);
     }
     test_aead_loop(alg0,
-      (
-        (lbuffer__K___Test_Vectors_cipher_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
-          .len = len - (uint32_t)1U,
-          .b = vs + (uint32_t)1U
-        }
-      ));
+      ((lbuffer__Test_aead_vector){ .len = len - (uint32_t)1U, .b = vs + (uint32_t)1U }));
   }
 }
 
@@ -12608,10 +12513,10 @@ test_ctr_st(
     {
       KRML_CHECK_SIZE(sizeof (uint8_t), block_len(a));
       uint8_t output_[block_len(a)];
-      memset(output_, 0U, block_len(a) * sizeof (output_[0U]));
+      memset(output_, 0U, block_len(a) * sizeof (uint8_t));
       state_s2 *s = NULL;
       error_code r = EverCrypt_CTR_create_in(a, &s, k, nonce, nonce_len, ctr);
-      if (__neq__EverCrypt_Error_error_code(r, Success))
+      if (r != Success)
       {
         failwith____("test_ctr_st: create_in <> Success");
       }
@@ -12645,19 +12550,13 @@ test_ctr_st(
   }
 }
 
-static void
-test_chacha20_ctr_loop(
-  lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  vs
-)
+static void test_chacha20_ctr_loop(lbuffer__Test_NoHeap_chacha20_vector vs)
 {
   uint32_t len = vs.len;
-  __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-  *vs1 = vs.b;
+  chacha20_vector *vs1 = vs.b;
   if (len != (uint32_t)0U)
   {
-    __Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t
-    v = vs1[0U];
+    chacha20_vector v = vs1[0U];
     uint8_t *cipher0 = v.f4.b;
     uint32_t cipher_len = v.f4.len;
     uint8_t *plain = v.f3.b;
@@ -12691,10 +12590,7 @@ test_chacha20_ctr_loop(
         round_len);
     }
     test_chacha20_ctr_loop((
-        (lbuffer__K___Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t_uint32_t_Test_Lowstarize_lbuffer__uint8_t_Test_Lowstarize_lbuffer__uint8_t){
-          .len = len - (uint32_t)1U,
-          .b = vs1 + (uint32_t)1U
-        }
+        (lbuffer__Test_NoHeap_chacha20_vector){ .len = len - (uint32_t)1U, .b = vs1 + (uint32_t)1U }
       ));
   }
 }
@@ -12749,20 +12645,12 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx20 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi20 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_bmi2 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx0 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni0 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext0 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite0;
-  if
-  (
-    (false && no_avx)
-    || (true && no_avx20)
-    || (false && no_bmi20)
-    || (false && no_adx0)
-    || (false && no_aesni0)
-    || (false && no_shaext0)
-  )
+  if (no_avx20 || false || false || false || false)
   {
     ite0 = false;
   }
@@ -12794,20 +12682,12 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx0 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx21 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi21 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_bmi20 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx1 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni1 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext1 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite1;
-  if
-  (
-    (true && no_avx0)
-    || (false && no_avx21)
-    || (false && no_bmi21)
-    || (false && no_adx1)
-    || (false && no_aesni1)
-    || (false && no_shaext1)
-  )
+  if (no_avx0 || false || false || false || false || false)
   {
     ite1 = false;
   }
@@ -12839,7 +12719,7 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx1 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx22 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi22 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_bmi21 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx2 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni2 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext2 = !EverCrypt_AutoConfig2_has_shaext();
@@ -12866,7 +12746,7 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx3 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx23 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi23 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_bmi22 = !EverCrypt_AutoConfig2_has_bmi2();
   bool no_adx3 = !EverCrypt_AutoConfig2_has_adx();
   bool no_aesni3 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext3 = !EverCrypt_AutoConfig2_has_shaext();
@@ -12894,20 +12774,12 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx4 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx24 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi24 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx4 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni4 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_bmi23 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext4 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite2;
-  if
-  (
-    (false && no_avx4)
-    || (false && no_avx24)
-    || (true && no_bmi24)
-    || (true && no_adx4)
-    || (false && no_aesni4)
-    || (false && no_shaext4)
-  )
+  if (no_bmi23 || no_adx || false || false)
   {
     ite2 = false;
   }
@@ -12940,9 +12812,9 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx5 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx25 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi25 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx5 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni5 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_bmi24 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx4 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni4 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext5 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
@@ -12968,20 +12840,12 @@ static void test_all()
   EverCrypt_AutoConfig2_init();
   bool no_avx6 = !EverCrypt_AutoConfig2_has_avx();
   bool no_avx26 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi26 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx6 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni6 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_bmi25 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx5 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni5 = !EverCrypt_AutoConfig2_has_aesni();
   bool no_shaext6 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite3;
-  if
-  (
-    (true && no_avx6)
-    || (false && no_avx26)
-    || (false && no_bmi26)
-    || (false && no_adx6)
-    || (true && no_aesni6)
-    || (false && no_shaext6)
-  )
+  if (no_avx6 || false || false || false || no_aesni5 || false)
   {
     ite3 = false;
   }
@@ -13024,21 +12888,13 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx7 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx27 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi27 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx7 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni7 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext7 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx2 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi26 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx6 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni6 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext = !EverCrypt_AutoConfig2_has_shaext();
   bool ite4;
-  if
-  (
-    (true && no_avx7)
-    || (false && no_avx27)
-    || (false && no_bmi27)
-    || (false && no_adx7)
-    || (true && no_aesni7)
-    || (false && no_shaext7)
-  )
+  if (no_avx7 || false || false || false || no_aesni6 || false)
   {
     ite4 = false;
   }
@@ -13071,11 +12927,11 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx8 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx28 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi28 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx8 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni8 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext8 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx27 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi27 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx7 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni7 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext7 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_vale();
@@ -13099,11 +12955,11 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx9 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx29 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi29 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx9 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni9 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext9 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx28 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi28 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx8 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni8 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext8 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_vale();
@@ -13130,11 +12986,11 @@ static void test_all()
   print_sep();
   EverCrypt_AutoConfig2_init();
   bool no_avx10 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx210 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi210 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx10 = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni10 = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext10 = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx29 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi29 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx9 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni9 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext9 = !EverCrypt_AutoConfig2_has_shaext();
   if (true)
   {
     EverCrypt_AutoConfig2_disable_hacl();
@@ -13169,21 +13025,13 @@ static void test_all()
   }
   EverCrypt_AutoConfig2_init();
   bool no_avx11 = !EverCrypt_AutoConfig2_has_avx();
-  bool no_avx2 = !EverCrypt_AutoConfig2_has_avx2();
-  bool no_bmi2 = !EverCrypt_AutoConfig2_has_bmi2();
-  bool no_adx = !EverCrypt_AutoConfig2_has_adx();
-  bool no_aesni = !EverCrypt_AutoConfig2_has_aesni();
-  bool no_shaext = !EverCrypt_AutoConfig2_has_shaext();
+  bool no_avx210 = !EverCrypt_AutoConfig2_has_avx2();
+  bool no_bmi210 = !EverCrypt_AutoConfig2_has_bmi2();
+  bool no_adx10 = !EverCrypt_AutoConfig2_has_adx();
+  bool no_aesni10 = !EverCrypt_AutoConfig2_has_aesni();
+  bool no_shaext10 = !EverCrypt_AutoConfig2_has_shaext();
   bool ite;
-  if
-  (
-    (false && no_avx11)
-    || (false && no_avx2)
-    || (false && no_bmi2)
-    || (false && no_adx)
-    || (false && no_aesni)
-    || (true && no_shaext)
-  )
+  if (no_shaext10)
   {
     ite = false;
   }

@@ -48,11 +48,13 @@ let ecp256dh_i result scalar =
   lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
   changeEndian_le_be (as_nat h0 resultBufferY); 
   pop_frame();
-  flag
+
+  let open Hacl.Impl.P256.LowLevel.RawCmp in 
+  unsafe_bool_of_u64  flag
 
 
-[@ (Comment "  This code is not side channel resistant on pubKey")]
-
+[@ (Comment "  The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.")] 
 val _ecp256dh_r:
     result:lbuffer uint64 (size 12) 
   -> pubKey:lbuffer uint64 (size 8) 
@@ -144,4 +146,7 @@ let ecp256dh_r result pubKey scalar =
   changeEndian_le_be (as_nat h2 resultBufferFelemY);
 
   pop_frame();
-  flag
+  
+  let open Hacl.Impl.P256.LowLevel.RawCmp in 
+  unsafe_bool_of_u64  flag
+

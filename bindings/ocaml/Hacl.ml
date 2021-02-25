@@ -21,16 +21,19 @@ module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs
 module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
 module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
 
-#if not (defined IS_NOT_X64) || defined IS_ARM_8
+#ifdef SUPPORTS_128
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
 module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
 module Hacl_Blake2s_128 = Hacl_Blake2s_128_bindings.Bindings(Hacl_Blake2s_128_stubs)
 #endif
 
-#ifndef IS_NOT_X64
+#ifdef SUPPORTS_256
 module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
 module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
 module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
+#endif
+
+#ifdef SUPPORTS_VALE
 module Hacl_Curve25519_64 = Hacl_Curve25519_64_bindings.Bindings(Hacl_Curve25519_64_stubs)
 #endif
 
@@ -267,55 +270,46 @@ module NaCl = struct
 end
 
 module P256 = struct
-  let get_result r =
-    if r = UInt64.zero then
-      true
-    else
-    if r = UInt64.max_int then
-      false
-    else
-      failwith "Unknown return value"
   let compress_c p out =
-    (* Hacl.Impl.P256.Compression.compressionCompressedForm *)
+    (* Hacl.P256.compression_compressed_form *)
     assert (C.size p = 64);
     assert (C.size out = 33);
     Hacl_P256.hacl_P256_compression_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
   let compress_n p out =
-    (* Hacl.Impl.P256.Compression.compressionNotCompressedForm *)
+    (* Hacl.P256.compression_not_compressed_form *)
     assert (C.size p = 64);
     assert (C.size out = 65);
     Hacl_P256.hacl_P256_compression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
   let decompress_c p out =
-    (* Hacl.Impl.P256.Compression.decompressionCompressedForm *)
+    (* Hacl.P256.decompression_compressed_form *)
     assert (C.size p = 33);
     assert (C.size out = 64);
     Hacl_P256.hacl_P256_decompression_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
   let decompress_n p out =
-    (* Hacl.Impl.P256.Compression.decompressionNotCompressedForm *)
+    (* Hacl.P256.decompression_not_compressed_form *)
     assert (C.size p = 65);
     assert (C.size out = 64);
     Hacl_P256.hacl_P256_decompression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf out)
   let dh_initiator result scalar =
-    (* Hacl.Interface.P256.DH.ecp256dh_i *)
+    (* Hacl.P256.ecp256dh_i *)
     assert (C.size result = 64);
     assert (C.size scalar = 32);
     assert (C.disjoint result scalar);
-    get_result @@ Hacl_P256.hacl_P256_ecp256dh_i (C.ctypes_buf result) (C.ctypes_buf scalar)
+    Hacl_P256.hacl_P256_ecp256dh_i (C.ctypes_buf result) (C.ctypes_buf scalar)
   let dh_responder result pub scalar =
-    (* Hacl.Interface.P256.DH.ecp256dh_r *)
+    (* Hacl.P256.ecp256dh_r *)
     assert (C.size result = 64);
     assert (C.size pub = 64);
     assert (C.size scalar = 32);
     assert (C.disjoint result scalar);
     assert (C.disjoint result pub);
-    get_result @@ Hacl_P256.hacl_P256_ecp256dh_r (C.ctypes_buf result) (C.ctypes_buf pub) (C.ctypes_buf scalar)
-  let reduction p result =
-    (* Hacl.Interface.P256.ECDSA.reduction_8_32 *)
-    assert (C.size p = 32);
-    assert (C.size result = 32);
-    Hacl_P256.hacl_P256_reduction_8_32 (C.ctypes_buf p) (C.ctypes_buf result)
+    Hacl_P256.hacl_P256_ecp256dh_r (C.ctypes_buf result) (C.ctypes_buf pub) (C.ctypes_buf scalar)
+  let valid_sk priv =
+    (* Hacl.P256.is_more_than_zero_less_than_order *)
+    assert (C.size priv = 32);
+    Hacl_P256.hacl_P256_is_more_than_zero_less_than_order (C.ctypes_buf priv)
   let valid_pk pub =
-    (* Hacl.Interface.P256.ECDSA.verifyQ *)
+    (* Hacl.P256.verify_q *)
     assert (C.size pub = 64);
     Hacl_P256.hacl_P256_verify_q (C.ctypes_buf pub)
   module NoHash = Make_ECDSA (struct
@@ -353,7 +347,7 @@ module Blake2s_32 : Blake2 =
     let blake2s = Hacl_Blake2s_32.hacl_Blake2s_32_blake2s
   end)
 
-#if not (defined IS_NOT_X64) || defined IS_ARM_8
+#ifdef SUPPORTS_128
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [AVX]
@@ -393,7 +387,7 @@ module Blake2s_128 : Blake2 =
   end)
 #endif
 
-#ifndef IS_NOT_X64
+#ifdef SUPPORTS_256
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [AVX2]
@@ -411,14 +405,6 @@ module Blake2b_256 : Blake2 =
   Make_Blake2b (struct
     let reqs = [AVX2]
     let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
-  end)
-
-module Curve25519_64 : Curve25519 =
-  Make_Curve25519 (struct
-    let reqs = [BMI2; ADX]
-    let secret_to_public = Hacl_Curve25519_64.hacl_Curve25519_64_secret_to_public
-    let scalarmult = Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
-    let ecdh = Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
   end)
 #else
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
@@ -439,6 +425,18 @@ module Blake2b_256 : Blake2 =
     let reqs = [AVX2]
     let blake2b _ _ _ = failwith "Not implemented on this platform"
   end)
+#endif
+
+#ifdef SUPPORTS_VALE
+
+module Curve25519_64 : Curve25519 =
+  Make_Curve25519 (struct
+    let reqs = [BMI2; ADX]
+    let secret_to_public = Hacl_Curve25519_64.hacl_Curve25519_64_secret_to_public
+    let scalarmult = Hacl_Curve25519_64.hacl_Curve25519_64_scalarmult
+    let ecdh = Hacl_Curve25519_64.hacl_Curve25519_64_ecdh
+  end)
+#else
 
 module Curve25519_64 : Curve25519 =
   Make_Curve25519 (struct
@@ -447,5 +445,5 @@ module Curve25519_64 : Curve25519 =
     let scalarmult _ _ _ = failwith "Not implemented on this platform"
     let ecdh _ _ _ = failwith "Not implemented on this platform"
   end)
-#endif
 
+#endif

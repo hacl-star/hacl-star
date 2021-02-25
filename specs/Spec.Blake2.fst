@@ -6,6 +6,7 @@ open Lib.RawIntTypes
 open Lib.Sequence
 open Lib.ByteSequence
 open Lib.LoopCombinators
+module UpdateMulti = Lib.UpdateMulti
 
 #set-options "--z3rlimit 50"
 
@@ -174,7 +175,7 @@ type sigma_elt_t = n:size_t{size_v n < 16}
 type list_sigma_t = l:list sigma_elt_t{List.Tot.length l == 160}
 
 [@"opaque_to_smt"]
-inline_for_extraction
+
 let list_sigma: list_sigma_t =
   [@inline_let]
   let l : list sigma_elt_t = [
@@ -436,11 +437,7 @@ val blake2_update_blocks:
 let split (a:alg) (len:nat)
   : nb_rem:(nat & nat){let (nb,rem) = nb_rem in
 		   nb * size_block a + rem == len} =
-  let nb = len / size_block a in
-  let rem = len % size_block a in
-  let nb' = if rem = 0 && nb > 0 then nb - 1 else nb in
-  let rem' = if rem = 0 && nb > 0 then size_block a else rem in
-  (nb',rem')
+  UpdateMulti.split_at_last_lazy_nb_rem (size_block a) len
 
 let blake2_update_blocks a prev m s =
   let (nb,rem) = split a (length m) in
@@ -486,7 +483,6 @@ let blake2_init a kk k nn =
     let key_block = update_sub key_block 0 kk k in
     blake2_update1 a 0 key_block 0 s end
 
-
 val blake2_finish:
     a:alg
   -> s:state a
@@ -505,6 +501,10 @@ val blake2:
   -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (lbytes nn)
 
+(* TODO: SH: this definition is awkward to use because of the multiplication.
+ * Wouldn't it be possible to simply write the following?
+ * [if kk = 0 then 0 else size_block a]
+ * It is actually shorter and clearer. *)
 let compute_prev0 a kk =
   let kn = if kk = 0 then 0 else 1 in
   let prev0 = kn * (size_block a) in
@@ -528,7 +528,7 @@ let blake2s d kk k n = blake2 Blake2S d kk k n
 
 val blake2b:
     d:bytes
-  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 128)}
+  -> kk:size_nat{kk <= 64 /\ (if kk = 0 then length d < pow2 128 else length d + 128 < pow2 64)}
   -> k:lbytes kk
   -> nn:size_nat{1 <= nn /\ nn <= 64} ->
   Tot (lbytes nn)

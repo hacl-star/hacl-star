@@ -447,7 +447,7 @@ static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *resul
   uint64_t *t_low = t;
   uint64_t round2[8U] = { 0U };
   uint64_t round4[8U] = { 0U };
-  memcpy(t_low, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(t_low, a, (uint32_t)4U * sizeof (uint64_t));
   uint64_t tempRound[8U] = { 0U };
   uint64_t t20[8U] = { 0U };
   uint64_t t30[8U] = { 0U };
@@ -1012,14 +1012,14 @@ static void exponent(uint64_t *a, uint64_t *result, uint64_t *tempBuffer)
   uint64_t *buffer_result2 = tempBuffer + (uint32_t)8U;
   uint64_t *buffer_norm_3 = tempBuffer + (uint32_t)12U;
   uint64_t *buffer_result3 = tempBuffer + (uint32_t)16U;
-  memcpy(buffer_norm_1, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(buffer_norm_1, a, (uint32_t)4U * sizeof (uint64_t));
   uint64_t *buffer_a = buffer_norm_1;
   uint64_t *buffer_b0 = buffer_norm_1 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)32U, buffer_a, buffer_b0);
   fsquarePowN((uint32_t)224U, buffer_b0);
-  memcpy(buffer_result2, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(buffer_result2, a, (uint32_t)4U * sizeof (uint64_t));
   fsquarePowN((uint32_t)192U, buffer_result2);
-  memcpy(buffer_norm_3, a, (uint32_t)4U * sizeof (a[0U]));
+  memcpy(buffer_norm_3, a, (uint32_t)4U * sizeof (uint64_t));
   uint64_t *buffer_a0 = buffer_norm_3;
   uint64_t *buffer_b = buffer_norm_3 + (uint32_t)4U;
   fsquarePowNminusOne((uint32_t)94U, buffer_a0, buffer_b);
@@ -1027,7 +1027,7 @@ static void exponent(uint64_t *a, uint64_t *result, uint64_t *tempBuffer)
   montgomery_multiplication_buffer(buffer_result1, buffer_result2, buffer_result1);
   montgomery_multiplication_buffer(buffer_result1, buffer_result3, buffer_result1);
   montgomery_multiplication_buffer(buffer_result1, a, buffer_result1);
-  memcpy(result, buffer_result1, (uint32_t)4U * sizeof (buffer_result1[0U]));
+  memcpy(result, buffer_result1, (uint32_t)4U * sizeof (uint64_t));
 }
 
 static void cube(uint64_t *a, uint64_t *result)
@@ -1372,9 +1372,9 @@ static void point_add(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *temp
   montgomery_multiplication_buffer(z1z2, h, z3_out1);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, q, p);
   copy_point_conditional(x3_out1, y3_out1, z3_out1, p, q);
-  memcpy(result, x3_out1, (uint32_t)4U * sizeof (x3_out1[0U]));
-  memcpy(result + (uint32_t)4U, y3_out1, (uint32_t)4U * sizeof (y3_out1[0U]));
-  memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (z3_out1[0U]));
+  memcpy(result, x3_out1, (uint32_t)4U * sizeof (uint64_t));
+  memcpy(result + (uint32_t)4U, y3_out1, (uint32_t)4U * sizeof (uint64_t));
+  memcpy(result + (uint32_t)8U, z3_out1, (uint32_t)4U * sizeof (uint64_t));
 }
 
 static void pointToDomain(uint64_t *p, uint64_t *result)
@@ -1398,7 +1398,7 @@ static void pointToDomain(uint64_t *p, uint64_t *result)
 
 static void copy_point(uint64_t *p, uint64_t *result)
 {
-  memcpy(result, p, (uint32_t)12U * sizeof (p[0U]));
+  memcpy(result, p, (uint32_t)12U * sizeof (uint64_t));
 }
 
 uint64_t Hacl_Impl_P256_Core_isPointAtInfinityPrivate(uint64_t *p)
@@ -1841,7 +1841,7 @@ static void montgomery_multiplication_ecdsa_module(uint64_t *a, uint64_t *b, uin
 static void bufferToJac(uint64_t *p, uint64_t *result)
 {
   uint64_t *partPoint = result;
-  memcpy(partPoint, p, (uint32_t)8U * sizeof (p[0U]));
+  memcpy(partPoint, p, (uint32_t)8U * sizeof (uint64_t));
   result[8U] = (uint64_t)1U;
   result[9U] = (uint64_t)0U;
   result[10U] = (uint64_t)0U;
@@ -1849,7 +1849,8 @@ static void bufferToJac(uint64_t *p, uint64_t *result)
 }
 
 /*
-  This code is not side channel resistant
+   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.
 */
 static bool isPointAtInfinityPublic(uint64_t *p)
 {
@@ -1865,7 +1866,8 @@ static bool isPointAtInfinityPublic(uint64_t *p)
 }
 
 /*
-  This code is not side channel resistant
+   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.
 */
 static bool isPointOnCurvePublic(uint64_t *p)
 {
@@ -1909,20 +1911,22 @@ static bool isCoordinateValid(uint64_t *p)
 }
 
 /*
-  This code is not side channel resistant
+   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.
 */
 static bool isOrderCorrect(uint64_t *p, uint64_t *tempBuffer)
 {
   uint64_t multResult[12U] = { 0U };
   uint64_t pBuffer[12U] = { 0U };
-  memcpy(pBuffer, p, (uint32_t)12U * sizeof (p[0U]));
+  memcpy(pBuffer, p, (uint32_t)12U * sizeof (uint64_t));
   scalarMultiplicationC(pBuffer, multResult, order_buffer, tempBuffer);
   bool result = isPointAtInfinityPublic(multResult);
   return result;
 }
 
 /*
-  This code is not side channel resistant
+   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.
 */
 static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer)
 {
@@ -1936,8 +1940,22 @@ static bool verifyQValidCurvePoint(uint64_t *pubKeyAsPoint, uint64_t *tempBuffer
   return coordinatesValid && belongsToCurve && orderCorrect;
 }
 
+static bool isMoreThanZeroLessThanOrder(uint8_t *x)
+{
+  uint64_t xAsFelem[4U] = { 0U };
+  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(x, xAsFelem);
+  uint64_t tempBuffer[4U] = { 0U };
+  uint64_t carry = sub4_il(xAsFelem, prime256order_buffer, tempBuffer);
+  uint64_t less = FStar_UInt64_eq_mask(carry, (uint64_t)1U);
+  uint64_t more = isZero_uint64_CT(xAsFelem);
+  uint64_t notMore = ~more;
+  uint64_t result = less & notMore;
+  return ~result == (uint64_t)0U;
+}
+
 /*
-  This code is not side channel resistant on pubKey
+  The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.
 */
 uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar)
 {
@@ -1983,7 +2001,7 @@ static void montgomery_ladder_exponent(uint64_t *r)
     montgomery_multiplication_ecdsa_module(p, p, p);
     cswap0(bit, p, r);
   }
-  memcpy(r, p, (uint32_t)4U * sizeof (p[0U]));
+  memcpy(r, p, (uint32_t)4U * sizeof (uint64_t));
 }
 
 static void fromDomainImpl(uint64_t *a, uint64_t *result)
@@ -2002,7 +2020,8 @@ static void multPowerPartial(uint64_t *a, uint64_t *b, uint64_t *result)
 }
 
 /*
-  This code is not side channel resistant
+   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.
 */
 static bool isMoreThanZeroLessThanOrderMinusOne(uint64_t *f)
 {
@@ -2022,7 +2041,8 @@ static bool isMoreThanZeroLessThanOrderMinusOne(uint64_t *f)
 }
 
 /*
-  This code is not side channel resistant
+   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.
 */
 static bool compare_felem_bool(uint64_t *a, uint64_t *b)
 {
@@ -2038,7 +2058,8 @@ static bool compare_felem_bool(uint64_t *a, uint64_t *b)
 }
 
 /*
-  This code is not side channel resistant
+   The input of the function is considered to be public,
+thus this code is not secret independent with respect to the operations done over the input.
 */
 static bool
 ecdsa_verification_(
@@ -2111,6 +2132,16 @@ ecdsa_verification_(
           sz = (uint32_t)64U;
           break;
         }
+      case Spec_Hash_Definitions_Blake2S:
+        {
+          sz = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_Blake2B:
+        {
+          sz = (uint32_t)64U;
+          break;
+        }
       default:
         {
           KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2124,10 +2155,10 @@ ecdsa_verification_(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
   uint8_t *mHash = alloca(sz * sizeof (uint8_t));
-  memset(mHash, 0U, sz * sizeof (mHash[0U]));
+  memset(mHash, 0U, sz * sizeof (uint8_t));
   if (alg.tag == Spec_ECDSA_NoHash)
   {
-    memcpy(mHash, m, sz * sizeof (m[0U]));
+    memcpy(mHash, m, sz * sizeof (uint8_t));
   }
   else if (alg.tag == Spec_ECDSA_Hash)
   {
@@ -2188,11 +2219,38 @@ ecdsa_verification_(
   scalarMultiplicationWithoutNorm(publicKeyBuffer, pointU2Q0, bufferU2, tempBuffer);
   uint64_t *pointU1G0 = points;
   uint64_t *pointU2Q = points + (uint32_t)12U;
-  point_add(pointU1G0, pointU2Q, pointSum, buff);
+  uint64_t tmp[112U] = { 0U };
+  uint64_t *tmpForNorm = tmp;
+  uint64_t *result0Norm = tmp + (uint32_t)88U;
+  uint64_t *result1Norm = tmp + (uint32_t)100U;
+  uint64_t *pointU1G1 = points;
+  uint64_t *pointU2Q1 = points + (uint32_t)12U;
+  norm(pointU1G1, result0Norm, tmpForNorm);
+  norm(pointU2Q1, result1Norm, tmpForNorm);
+  uint64_t *x0 = result0Norm;
+  uint64_t *y0 = result0Norm + (uint32_t)4U;
+  uint64_t *z0 = result0Norm + (uint32_t)8U;
+  uint64_t *x1 = result1Norm;
+  uint64_t *y1 = result1Norm + (uint32_t)4U;
+  uint64_t *z1 = result1Norm + (uint32_t)8U;
+  bool xEqual = compare_felem_bool(x0, x1);
+  bool yEqual = compare_felem_bool(y0, y1);
+  bool zEqual = compare_felem_bool(z0, z1);
+  bool equalX = xEqual && yEqual && zEqual;
+  bool equalX0 = equalX;
+  if (equalX0)
+  {
+    point_double(pointU1G0, pointSum, buff);
+  }
+  else
+  {
+    point_add(pointU1G0, pointU2Q, pointSum, buff);
+  }
   norm(pointSum, pointSum, buff);
   bool resultIsPAI = isPointAtInfinityPublic(pointSum);
   uint64_t *xCoordinateSum = pointSum;
-  memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (xCoordinateSum[0U]));
+  memcpy(xBuffer, xCoordinateSum, (uint32_t)4U * sizeof (uint64_t));
+  reduction_prime_2prime_order(xBuffer, xBuffer);
   bool r1 = !resultIsPAI;
   bool state = r1;
   if (state == false)
@@ -2258,6 +2316,16 @@ ecdsa_signature_core(
           sz = (uint32_t)64U;
           break;
         }
+      case Spec_Hash_Definitions_Blake2S:
+        {
+          sz = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_Blake2B:
+        {
+          sz = (uint32_t)64U;
+          break;
+        }
       default:
         {
           KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2271,10 +2339,10 @@ ecdsa_signature_core(
   }
   KRML_CHECK_SIZE(sizeof (uint8_t), sz);
   uint8_t *mHash = alloca(sz * sizeof (uint8_t));
-  memset(mHash, 0U, sz * sizeof (mHash[0U]));
+  memset(mHash, 0U, sz * sizeof (uint8_t));
   if (alg.tag == Spec_ECDSA_NoHash)
   {
-    memcpy(mHash, m, sz * sizeof (m[0U]));
+    memcpy(mHash, m, sz * sizeof (uint8_t));
   }
   else if (alg.tag == Spec_ECDSA_Hash)
   {
@@ -2332,7 +2400,7 @@ ecdsa_signature_core(
   uint64_t
   carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (uint64_t)0U, &tempBufferForSubborrow);
   cmovznz4(carry, tempBuffer1, zBuffer, zBuffer);
-  memcpy(kInv, kAsFelem, (uint32_t)4U * sizeof (kAsFelem[0U]));
+  memcpy(kInv, kAsFelem, (uint32_t)4U * sizeof (uint64_t));
   montgomery_ladder_exponent(kInv);
   montgomery_multiplication_ecdsa_module(zBuffer, kInv, s);
   uint64_t sIsZero = isZero_uint64_CT(s);
@@ -2366,7 +2434,7 @@ static void montgomery_ladder_power(uint64_t *a, const uint8_t *scalar, uint64_t
     montgomery_square_buffer(p, p);
     cswap1(bit, p, a);
   }
-  memcpy(result, p, (uint32_t)4U * sizeof (p[0U]));
+  memcpy(result, p, (uint32_t)4U * sizeof (uint64_t));
 }
 
 static const
@@ -2412,11 +2480,11 @@ static void computeYFromX(uint64_t *x, uint64_t *result, uint64_t sign)
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *result,
   uint32_t mLen,
@@ -2446,7 +2514,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
   Hacl_Impl_P256_LowLevel_changeEndian(s);
   Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
-  return flag;
+  return flag == (uint64_t)0U;
 }
 
 /*
@@ -2455,11 +2523,11 @@ Hacl_P256_ecdsa_sign_p256_sha2(
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_sha384(
   uint8_t *result,
   uint32_t mLen,
@@ -2489,7 +2557,7 @@ Hacl_P256_ecdsa_sign_p256_sha384(
   Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
   Hacl_Impl_P256_LowLevel_changeEndian(s);
   Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
-  return flag;
+  return flag == (uint64_t)0U;
 }
 
 /*
@@ -2498,11 +2566,11 @@ Hacl_P256_ecdsa_sign_p256_sha384(
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order.
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_sha512(
   uint8_t *result,
   uint32_t mLen,
@@ -2532,7 +2600,7 @@ Hacl_P256_ecdsa_sign_p256_sha512(
   Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
   Hacl_Impl_P256_LowLevel_changeEndian(s);
   Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
-  return flag;
+  return flag == (uint64_t)0U;
 }
 
 /*
@@ -2541,13 +2609,13 @@ Hacl_P256_ecdsa_sign_p256_sha512(
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
   
- Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   
- The private key and the nonce are expected to be less than the curve order. 
+ The private key and the nonce are expected to be more than 0 and less than the curve order.
   
  The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
 */
-uint64_t
+bool
 Hacl_P256_ecdsa_sign_p256_without_hash(
   uint8_t *result,
   uint32_t mLen,
@@ -2575,11 +2643,12 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
   Hacl_Impl_P256_LowLevel_toUint8(r, resultR);
   Hacl_Impl_P256_LowLevel_changeEndian(s);
   Hacl_Impl_P256_LowLevel_toUint8(s, resultS);
-  return flag;
+  return flag == (uint64_t)0U;
 }
 
 /*
- This code is not side-channel resistant.
+ The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -2622,7 +2691,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
 }
 
 /*
- This code is not side-channel resistant.
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -2665,7 +2735,8 @@ Hacl_P256_ecdsa_verif_p256_sha384(
 }
 
 /*
- This code is not side-channel resistant.
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -2708,7 +2779,8 @@ Hacl_P256_ecdsa_verif_p256_sha512(
 }
 
 /*
-This code is not side-channel resistant.
+ The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: m buffer: uint8 [mLen], 
  pub(lic)Key: uint8[64], 
@@ -2753,7 +2825,8 @@ Hacl_P256_ecdsa_verif_without_hash(
 /*
  Public key verification function. 
   
- This code is not side-channel resistant.
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
   
  Input: pub(lic)Key: uint8[64]. 
   
@@ -2805,7 +2878,7 @@ bool Hacl_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result)
   bool correctIdentifier = (uint8_t)4U == compressionIdentifier;
   if (correctIdentifier)
   {
-    memcpy(result, b + (uint32_t)1U, (uint32_t)64U * sizeof ((b + (uint32_t)1U)[0U]));
+    memcpy(result, b + (uint32_t)1U, (uint32_t)64U * sizeof (uint8_t));
   }
   return correctIdentifier;
 }
@@ -2830,7 +2903,7 @@ bool Hacl_P256_decompression_compressed_form(uint8_t *b, uint8_t *result)
   if (flag)
   {
     uint8_t *x = b + (uint32_t)1U;
-    memcpy(result, x, (uint32_t)32U * sizeof (x[0U]));
+    memcpy(result, x, (uint32_t)32U * sizeof (uint8_t));
     Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(x, t0);
     uint64_t tempBuffer[4U] = { 0U };
     uint64_t carry = sub4_il(t0, prime256_buffer, tempBuffer);
@@ -2858,7 +2931,7 @@ bool Hacl_P256_decompression_compressed_form(uint8_t *b, uint8_t *result)
 void Hacl_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result)
 {
   uint8_t *to = result + (uint32_t)1U;
-  memcpy(to, b, (uint32_t)64U * sizeof (b[0U]));
+  memcpy(to, b, (uint32_t)64U * sizeof (uint8_t));
   result[0U] = (uint8_t)4U;
 }
 
@@ -2872,33 +2945,20 @@ void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result)
   uint8_t lastWordY = y[31U];
   uint8_t lastBitY = lastWordY & (uint8_t)1U;
   uint8_t identifier = lastBitY + (uint8_t)2U;
-  memcpy(result + (uint32_t)1U, b, (uint32_t)32U * sizeof (b[0U]));
+  memcpy(result + (uint32_t)1U, b, (uint32_t)32U * sizeof (uint8_t));
   result[0U] = identifier;
-}
-
-/*
- The function takes an arbitraty 32 bytes buffer and reduces it to contain a value that is less than the curve order.
-  
- Input: x: uint8[32], 
- result: uint8[32], such that by the end of the function the value stored in the buffer result equal to the value stored in the buffer x modulo curveOrder.
-*/
-void Hacl_P256_reduction_8_32(uint8_t *x, uint8_t *result)
-{
-  uint64_t xAsFelem[4U] = { 0U };
-  Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(x, xAsFelem);
-  reduction_prime_2prime_order(xAsFelem, xAsFelem);
-  Hacl_Impl_P256_LowLevel_changeEndian(xAsFelem);
-  Hacl_Impl_P256_LowLevel_toUint8(xAsFelem, result);
 }
 
 /*
  Input: result: uint8[64], 
  scalar: uint8[32].
   
- Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct key generation. 
+  
+ False means that an error has occurred (possibly that the result respresents point at infinity). 
   
 */
-uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
+bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
 {
   uint64_t tempBuffer[100U] = { 0U };
   uint64_t resultBuffer[12U] = { 0U };
@@ -2912,19 +2972,22 @@ uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
   Hacl_Impl_P256_LowLevel_changeEndian(resultBufferY);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferX, resultX);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferY, resultY);
-  return flag;
+  return flag == (uint64_t)0U;
 }
 
 /*
- This code is not side channel resistant on pub_key. 
+ 
+   The pub(lic)_key input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over this variable.
+  
  Input: result: uint8[64], 
  pub(lic)Key: uint8[64], 
  scalar: uint8[32].
   
- Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+ Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   
 */
-uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 {
   uint64_t resultBufferFelem[12U] = { 0U };
   uint64_t *resultBufferFelemX = resultBufferFelem;
@@ -2943,6 +3006,16 @@ uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   Hacl_Impl_P256_LowLevel_changeEndian(resultBufferFelemY);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemX, resultX);
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY);
-  return flag;
+  return flag == (uint64_t)0U;
+}
+
+/*
+ Input: scalar: uint8[32].
+  
+ Output: bool, where true stands for the scalar to be more than 0 and less than order.
+*/
+bool Hacl_P256_is_more_than_zero_less_than_order(uint8_t *x)
+{
+  return isMoreThanZeroLessThanOrder(x);
 }
 

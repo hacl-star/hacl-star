@@ -1,10 +1,15 @@
 module Hacl.Meta.Curve25519
 
-#set-options "--print_implicits --print_full_names --print_effect_args"
+open Lib.Buffer
+
+#set-options "--print_implicits --print_full_names --print_effect_args --z3rlimit 300 --ifuel 0 --max_fuel 0"
 
 friend Hacl.Impl.Curve25519.Generic
 
 let _ = ()
+
+#restart-solver
+
 
 // Hacl_Meta_Curve25519_addanddouble_point_add_and_double_higher
 //   (needs: Hacl_Impl_Curve25519_Fields_Core_fmul, Hacl_Impl_Curve25519_Fields_Core_fsqr2, Hacl_Impl_Curve25519_Fields_Core_fmul1, Hacl_Impl_Curve25519_Fields_Core_fmul2, Hacl_Impl_Curve25519_Fields_Core_fsub, Hacl_Impl_Curve25519_Fields_Core_fadd)
@@ -15,7 +20,7 @@ let _ = ()
 // Hacl_Meta_Curve25519_finv_fsquare_times_higher
 //   (needs: Hacl_Impl_Curve25519_Fields_Core_fsqr)
 // Hacl_Meta_Curve25519_finv_finv_higher
-//   (needs: Hacl_Impl_Curve25519_Finv_fsquare_times, Hacl_Impl_Curve25519_Fields_Core_fmul)
+//   (needs: Hacl_Impl_Curve25519_Fields_Core_fmul, Hacl_Impl_Curve25519_Finv_fsquare_times)
 // Hacl_Meta_Curve25519_fields_store_felem_higher
 //   (needs: Hacl_Impl_Curve25519_Fields_Core_add1)
 // Hacl_Meta_Curve25519_generic_encode_point_higher

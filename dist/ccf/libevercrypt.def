@@ -3,6 +3,19 @@ LIBRARY libevercrypt
 EXPORTS
   LowStar_Vector_new_capacity
   Spec_Cipher_Expansion_cipher_alg_of_impl
+  Hacl_Blake2b_32_blake2b
+  Hacl_Blake2s_32_blake2s
+  Hacl_HMAC_DRBG_min_length
+  Hacl_Hash_Core_Blake2_update_blake2s_32
+  Hacl_Hash_Core_Blake2_finish_blake2s_32
+  Hacl_Hash_Core_Blake2_update_blake2b_32
+  Hacl_Hash_Core_Blake2_finish_blake2b_32
+  Hacl_Hash_Blake2_update_multi_blake2s_32
+  Hacl_Hash_Blake2_update_multi_blake2b_32
+  Hacl_Hash_Blake2_update_last_blake2s_32
+  Hacl_Hash_Blake2_update_last_blake2b_32
+  Hacl_Hash_Blake2_hash_blake2s_32
+  Hacl_Hash_Blake2_hash_blake2b_32
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
@@ -49,7 +62,6 @@ EXPORTS
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
   Hacl_Hash_Definitions_hash_len
-  Hacl_HMAC_DRBG_min_length
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -95,14 +107,21 @@ EXPORTS
   EverCrypt_Hash___proj__SHA2_384_s__item__p
   EverCrypt_Hash_uu___is_SHA2_512_s
   EverCrypt_Hash___proj__SHA2_512_s__item__p
+  EverCrypt_Hash_uu___is_Blake2S_s
+  EverCrypt_Hash___proj__Blake2S_s__item__p
+  EverCrypt_Hash_uu___is_Blake2B_s
+  EverCrypt_Hash___proj__Blake2B_s__item__p
   EverCrypt_Hash_alg_of_state
   EverCrypt_Hash_create_in
   EverCrypt_Hash_create
   EverCrypt_Hash_init
   EverCrypt_Hash_update_multi_256
+  EverCrypt_Hash_update2
   EverCrypt_Hash_update
+  EverCrypt_Hash_update_multi2
   EverCrypt_Hash_update_multi
   EverCrypt_Hash_update_last_256
+  EverCrypt_Hash_update_last2
   EverCrypt_Hash_update_last
   EverCrypt_Hash_finish
   EverCrypt_Hash_free
@@ -110,6 +129,8 @@ EXPORTS
   EverCrypt_Hash_hash_256
   EverCrypt_Hash_hash_224
   EverCrypt_Hash_hash
+  EverCrypt_Hash_Incremental_hash_len
+  EverCrypt_Hash_Incremental_block_len
   EverCrypt_Hash_Incremental_create_in
   EverCrypt_Hash_Incremental_init
   EverCrypt_Hash_Incremental_update
@@ -119,6 +140,8 @@ EXPORTS
   EverCrypt_Hash_Incremental_finish_sha256
   EverCrypt_Hash_Incremental_finish_sha384
   EverCrypt_Hash_Incremental_finish_sha512
+  EverCrypt_Hash_Incremental_finish_blake2s
+  EverCrypt_Hash_Incremental_finish_blake2b
   EverCrypt_Hash_Incremental_alg_of_state
   EverCrypt_Hash_Incremental_finish
   EverCrypt_Hash_Incremental_free
@@ -144,9 +167,6 @@ EXPORTS
   Hacl_Salsa20_salsa20_decrypt
   Hacl_Salsa20_salsa20_key_block0
   Hacl_Salsa20_hsalsa20
-  Hacl_Curve25519_64_Slow_scalarmult
-  Hacl_Curve25519_64_Slow_secret_to_public
-  Hacl_Curve25519_64_Slow_ecdh
   Hacl_Curve25519_64_scalarmult
   Hacl_Curve25519_64_secret_to_public
   Hacl_Curve25519_64_ecdh
@@ -184,6 +204,7 @@ EXPORTS
   mt_init_path
   mt_free_path
   mt_get_path_length
+  mt_path_insert
   mt_get_path_step
   mt_get_path_step_pre
   mt_create_custom
@@ -233,7 +254,7 @@ EXPORTS
   MerkleTree_Low_free_path
   MerkleTree_Low_mt_get_root_pre
   MerkleTree_Low_mt_get_root
-  MerkleTree_Low_path_insert
+  MerkleTree_Low_mt_path_insert
   MerkleTree_Low_mt_get_path_length
   MerkleTree_Low_mt_get_path_step_pre
   MerkleTree_Low_mt_get_path_step
@@ -272,10 +293,9 @@ EXPORTS
   EverCrypt_CTR_init
   EverCrypt_CTR_update_block
   EverCrypt_CTR_free
-  Hacl_Frodo_KEM_crypto_kem_keypair
-  Hacl_Frodo_KEM_crypto_kem_enc
-  Hacl_Frodo_KEM_crypto_kem_dec
+  Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64
+  Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
@@ -286,6 +306,8 @@ EXPORTS
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384
   EverCrypt_HMAC_compute_sha2_512
+  EverCrypt_HMAC_compute_blake2s
+  EverCrypt_HMAC_compute_blake2b
   EverCrypt_HMAC_is_supported_alg
   EverCrypt_HMAC_compute
   EverCrypt_HKDF_expand_sha1
@@ -296,6 +318,10 @@ EXPORTS
   EverCrypt_HKDF_extract_sha2_384
   EverCrypt_HKDF_expand_sha2_512
   EverCrypt_HKDF_extract_sha2_512
+  EverCrypt_HKDF_expand_blake2s
+  EverCrypt_HKDF_extract_blake2s
+  EverCrypt_HKDF_expand_blake2b
+  EverCrypt_HKDF_extract_blake2b
   EverCrypt_HKDF_expand
   EverCrypt_HKDF_extract
   EverCrypt_HKDF_hkdf_expand

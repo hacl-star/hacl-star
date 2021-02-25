@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_HKDF_H
+#define __Hacl_HKDF_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,11 +36,8 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_HKDF_H
-#define __Hacl_HKDF_H
 
 #include "Hacl_HMAC.h"
-
 
 /* SNIPPET_START: Hacl_HKDF_expand_sha2_256 */
 
@@ -87,6 +92,64 @@ Hacl_HKDF_extract_sha2_512(
 );
 
 /* SNIPPET_END: Hacl_HKDF_extract_sha2_512 */
+
+/* SNIPPET_START: Hacl_HKDF_expand_blake2s_32 */
+
+void
+Hacl_HKDF_expand_blake2s_32(
+  uint8_t *okm,
+  uint8_t *prk,
+  uint32_t prklen,
+  uint8_t *info,
+  uint32_t infolen,
+  uint32_t len
+);
+
+/* SNIPPET_END: Hacl_HKDF_expand_blake2s_32 */
+
+/* SNIPPET_START: Hacl_HKDF_extract_blake2s_32 */
+
+void
+Hacl_HKDF_extract_blake2s_32(
+  uint8_t *prk,
+  uint8_t *salt,
+  uint32_t saltlen,
+  uint8_t *ikm,
+  uint32_t ikmlen
+);
+
+/* SNIPPET_END: Hacl_HKDF_extract_blake2s_32 */
+
+/* SNIPPET_START: Hacl_HKDF_expand_blake2b_32 */
+
+void
+Hacl_HKDF_expand_blake2b_32(
+  uint8_t *okm,
+  uint8_t *prk,
+  uint32_t prklen,
+  uint8_t *info,
+  uint32_t infolen,
+  uint32_t len
+);
+
+/* SNIPPET_END: Hacl_HKDF_expand_blake2b_32 */
+
+/* SNIPPET_START: Hacl_HKDF_extract_blake2b_32 */
+
+void
+Hacl_HKDF_extract_blake2b_32(
+  uint8_t *prk,
+  uint8_t *salt,
+  uint32_t saltlen,
+  uint8_t *ikm,
+  uint32_t ikmlen
+);
+
+/* SNIPPET_END: Hacl_HKDF_extract_blake2b_32 */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HKDF_H_DEFINED
 #endif

@@ -9,6 +9,38 @@ let uint8 = Lib.IntTypes.uint8
 
 #set-options "--fuel 0 --ifuel 0"
 
+/// This module establishes some equivalence between the update-multi style used
+/// for specifications in the streaming functor, and the lib-based repeat
+/// imperative combinators.
+
+
+/// The following lemmas characterize the result of ``split_at_last_lazy`` with
+/// conditions which are easy to assess, and is very useful when using it in order 
+/// to implement a stream hash, to prove properties about how to update the internal
+/// buffer so that its content is actually the correct remainder of the data seen
+/// so far.
+
+/// This first auxiliary lemma only manipulates the lengths of the sequences.
+val split_at_last_lazy_nb_rem_spec (l : pos) (d n rest: nat) :
+  Lemma
+  (requires (
+    rest <= l /\
+    (rest = 0 ==> d = 0) /\
+    d = n * l + rest))
+  (ensures ((n, rest) = split_at_last_lazy_nb_rem l d))
+
+/// This second lemma characterizes the sequences themselves.
+val split_at_last_lazy_spec (l : pos)
+                            (b blocks rest: S.seq uint8) :
+  Lemma
+  (requires (
+    S.length blocks % l = 0 /\
+    S.length rest <= l /\
+    (S.length rest = 0 ==> S.length b = 0) /\
+    b `Seq.equal` Seq.append blocks rest))
+  (ensures (
+     (blocks, rest) == split_at_last_lazy l b))
+
 /// Some helpers to flip the order of arguments
 let repeat_f #a (block_length:pos { block_length < pow2 32 })
   (update: (a -> s:S.seq uint8 { S.length s = block_length } -> a))

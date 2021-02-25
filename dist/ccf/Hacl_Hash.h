@@ -21,18 +21,73 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Hash_H
+#define __Hacl_Hash_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Hash_H
-#define __Hacl_Hash_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Leftovers.h"
+#include "Lib_Memzero0.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
 
+uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block);
+
+void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *dst);
+
+uint128_t
+Hacl_Hash_Core_Blake2_update_blake2b_32(uint64_t *s, uint128_t totlen, uint8_t *block);
+
+void Hacl_Hash_Core_Blake2_finish_blake2b_32(uint64_t *s, uint128_t ev, uint8_t *dst);
+
+uint64_t
+Hacl_Hash_Blake2_update_multi_blake2s_32(
+  uint32_t *s,
+  uint64_t ev,
+  uint8_t *blocks,
+  uint32_t n_blocks
+);
+
+uint128_t
+Hacl_Hash_Blake2_update_multi_blake2b_32(
+  uint64_t *s,
+  uint128_t ev,
+  uint8_t *blocks,
+  uint32_t n_blocks
+);
+
+uint64_t
+Hacl_Hash_Blake2_update_last_blake2s_32(
+  uint32_t *s,
+  uint64_t ev,
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+uint128_t
+Hacl_Hash_Blake2_update_last_blake2b_32(
+  uint64_t *s,
+  uint128_t ev,
+  uint128_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+void Hacl_Hash_Blake2_hash_blake2s_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
+
+void Hacl_Hash_Blake2_hash_blake2b_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
@@ -161,6 +216,10 @@ uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);
 uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
 
 uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Hash_H_DEFINED
 #endif

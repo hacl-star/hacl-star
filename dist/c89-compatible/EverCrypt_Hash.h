@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_Hash_H
+#define __EverCrypt_Hash_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,19 +36,17 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __EverCrypt_Hash_H
-#define __EverCrypt_Hash_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 #include "Vale.h"
 #include "Hacl_Hash.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Spec.h"
 
-
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
-C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___0_5);
+C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___);
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_broken_alg;
 
@@ -54,6 +60,8 @@ typedef void *EverCrypt_Hash_e_alg;
 #define EverCrypt_Hash_SHA2_256_s 3
 #define EverCrypt_Hash_SHA2_384_s 4
 #define EverCrypt_Hash_SHA2_512_s 5
+#define EverCrypt_Hash_Blake2S_s 6
+#define EverCrypt_Hash_Blake2B_s 7
 
 typedef uint8_t EverCrypt_Hash_state_s_tags;
 
@@ -67,6 +75,8 @@ typedef struct EverCrypt_Hash_state_s_s
     uint32_t *case_SHA2_256_s;
     uint64_t *case_SHA2_384_s;
     uint64_t *case_SHA2_512_s;
+    uint32_t *case_Blake2S_s;
+    uint64_t *case_Blake2B_s;
   }
   val;
 }
@@ -74,73 +84,97 @@ EverCrypt_Hash_state_s;
 
 bool
 EverCrypt_Hash_uu___is_MD5_s(
-  Spec_Hash_Definitions_hash_alg uu____105,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 uint32_t
 *EverCrypt_Hash___proj__MD5_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____130,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu____151,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 uint32_t
 *EverCrypt_Hash___proj__SHA1_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____176,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA2_224_s(
-  Spec_Hash_Definitions_hash_alg uu____197,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_224_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____222,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu____243,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 uint32_t
 *EverCrypt_Hash___proj__SHA2_256_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____268,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA2_384_s(
-  Spec_Hash_Definitions_hash_alg uu____289,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_384_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____314,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 bool
 EverCrypt_Hash_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu____335,
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
 uint64_t
 *EverCrypt_Hash___proj__SHA2_512_s__item__p(
-  Spec_Hash_Definitions_hash_alg uu____360,
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+bool
+EverCrypt_Hash_uu___is_Blake2S_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+uint32_t
+*EverCrypt_Hash___proj__Blake2S_s__item__p(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+bool
+EverCrypt_Hash_uu___is_Blake2B_s(
+  Spec_Hash_Definitions_hash_alg uu___,
+  EverCrypt_Hash_state_s projectee
+);
+
+uint64_t
+*EverCrypt_Hash___proj__Blake2B_s__item__p(
+  Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
 
@@ -154,17 +188,41 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s);
 
 void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
+void EverCrypt_Hash_update2(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block);
+
+KRML_DEPRECATED("Use update2 instead")
+
 void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block);
+
+void
+EverCrypt_Hash_update_multi2(
+  EverCrypt_Hash_state_s *s,
+  uint64_t prevlen,
+  uint8_t *blocks,
+  uint32_t len
+);
+
+KRML_DEPRECATED("Use update_multi2 instead")
 
 void EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *s, uint8_t *blocks, uint32_t len);
 
 void
 EverCrypt_Hash_update_last_256(
   uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
+  uint64_t input,
+  uint8_t *input_len,
+  uint32_t input_len1
 );
+
+void
+EverCrypt_Hash_update_last2(
+  EverCrypt_Hash_state_s *s,
+  uint64_t prev_len,
+  uint8_t *last,
+  uint32_t last_len
+);
+
+KRML_DEPRECATED("Use update_last2 instead")
 
 void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64_t total_len);
 
@@ -186,7 +244,16 @@ EverCrypt_Hash_hash(
   uint32_t len
 );
 
+uint32_t EverCrypt_Hash_Incremental_hash_len(Spec_Hash_Definitions_hash_alg a);
+
+uint32_t EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_hash_alg a);
+
 typedef struct Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s_____s
+{
+  EverCrypt_Hash_state_s *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
 Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____;
 
 Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
@@ -238,6 +305,18 @@ EverCrypt_Hash_Incremental_finish_sha512(
   uint8_t *dst
 );
 
+void
+EverCrypt_Hash_Incremental_finish_blake2s(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
+void
+EverCrypt_Hash_Incremental_finish_blake2b(
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *dst
+);
+
 Spec_Hash_Definitions_hash_alg
 EverCrypt_Hash_Incremental_alg_of_state(
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s
@@ -251,6 +330,10 @@ EverCrypt_Hash_Incremental_finish(
 
 void
 EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Hash_H_DEFINED
 #endif

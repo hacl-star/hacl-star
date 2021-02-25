@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Lib_RandomBuffer_System_H
+#define __Lib_RandomBuffer_System_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,17 +36,32 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Lib_RandomBuffer_System_H
-#define __Lib_RandomBuffer_System_H
-
 
 
 
 /* SNIPPET_START: Lib_RandomBuffer_System_randombytes */
 
+KRML_DEPRECATED("random_crypto")
+
 extern bool Lib_RandomBuffer_System_randombytes(uint8_t *buf, uint32_t len);
 
 /* SNIPPET_END: Lib_RandomBuffer_System_randombytes */
+
+/* SNIPPET_START: Lib_RandomBuffer_System_entropy_p */
+
+extern void *Lib_RandomBuffer_System_entropy_p;
+
+/* SNIPPET_END: Lib_RandomBuffer_System_entropy_p */
+
+/* SNIPPET_START: Lib_RandomBuffer_System_crypto_random */
+
+extern void Lib_RandomBuffer_System_crypto_random(uint8_t *buf, uint32_t len);
+
+/* SNIPPET_END: Lib_RandomBuffer_System_crypto_random */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Lib_RandomBuffer_System_H_DEFINED
 #endif

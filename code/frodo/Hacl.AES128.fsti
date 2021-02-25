@@ -3,14 +3,14 @@ module Hacl.AES128
 open FStar.HyperStack.ST
 open FStar.Mul
 
-open LowStar.Buffer
-
 open Lib.Buffer
 open Lib.IntTypes
 open Lib.ByteSequence
 open Lib.Sequence
 
 module S = Spec.AES
+
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 val aes128_key_expansion:
     key:lbuffer uint8 16ul
@@ -20,6 +20,7 @@ val aes128_key_expansion:
     (ensures  fun h0 _ h1 ->
       modifies1 expanded_key h0 h1 /\
       as_seq h1 expanded_key == S.aes128_key_expansion (as_seq h0 key))
+
 
 val aes128_encrypt_block:
     cipher:lbuffer uint16 8ul

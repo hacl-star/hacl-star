@@ -165,7 +165,7 @@ chacha20_core_128(
 {
   uint32_t ctr_u32;
   Lib_IntVector_Intrinsics_vec128 cv;
-  memcpy(k, ctx, (uint32_t)16U * sizeof (ctx[0U]));
+  memcpy(k, ctx, (uint32_t)16U * sizeof (Lib_IntVector_Intrinsics_vec128));
   ctr_u32 = (uint32_t)4U * ctr;
   cv = Lib_IntVector_Intrinsics_vec128_load32(ctr_u32);
   k[12U] = Lib_IntVector_Intrinsics_vec128_add32(k[12U], cv);
@@ -410,9 +410,9 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(
             for (i0 = (uint32_t)0U; i0 < (uint32_t)16U; i0++)
             {
               Lib_IntVector_Intrinsics_vec128
-              x = Lib_IntVector_Intrinsics_vec128_load_le(uu____1 + i0 * (uint32_t)16U);
+              x = Lib_IntVector_Intrinsics_vec128_load32_le(uu____1 + i0 * (uint32_t)16U);
               Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i0]);
-              Lib_IntVector_Intrinsics_vec128_store_le(uu____0 + i0 * (uint32_t)16U, y);
+              Lib_IntVector_Intrinsics_vec128_store32_le(uu____0 + i0 * (uint32_t)16U, y);
             }
           }
         }
@@ -423,7 +423,7 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(
       uint8_t *uu____2 = out + nb * (uint32_t)256U;
       uint8_t *uu____3 = text + nb * (uint32_t)256U;
       uint8_t plain[256U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+      memcpy(plain, uu____3, rem * sizeof (uint8_t));
       {
         Lib_IntVector_Intrinsics_vec128 k[16U];
         {
@@ -550,12 +550,12 @@ Hacl_Chacha20_Vec128_chacha20_encrypt_128(
             for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
             {
               Lib_IntVector_Intrinsics_vec128
-              x = Lib_IntVector_Intrinsics_vec128_load_le(plain + i * (uint32_t)16U);
+              x = Lib_IntVector_Intrinsics_vec128_load32_le(plain + i * (uint32_t)16U);
               Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i]);
-              Lib_IntVector_Intrinsics_vec128_store_le(plain + i * (uint32_t)16U, y);
+              Lib_IntVector_Intrinsics_vec128_store32_le(plain + i * (uint32_t)16U, y);
             }
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+          memcpy(uu____2, plain, rem * sizeof (uint8_t));
         }
       }
     }
@@ -717,9 +717,9 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
             for (i0 = (uint32_t)0U; i0 < (uint32_t)16U; i0++)
             {
               Lib_IntVector_Intrinsics_vec128
-              x = Lib_IntVector_Intrinsics_vec128_load_le(uu____1 + i0 * (uint32_t)16U);
+              x = Lib_IntVector_Intrinsics_vec128_load32_le(uu____1 + i0 * (uint32_t)16U);
               Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i0]);
-              Lib_IntVector_Intrinsics_vec128_store_le(uu____0 + i0 * (uint32_t)16U, y);
+              Lib_IntVector_Intrinsics_vec128_store32_le(uu____0 + i0 * (uint32_t)16U, y);
             }
           }
         }
@@ -730,7 +730,7 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
       uint8_t *uu____2 = out + nb * (uint32_t)256U;
       uint8_t *uu____3 = cipher + nb * (uint32_t)256U;
       uint8_t plain[256U] = { 0U };
-      memcpy(plain, uu____3, rem * sizeof (uu____3[0U]));
+      memcpy(plain, uu____3, rem * sizeof (uint8_t));
       {
         Lib_IntVector_Intrinsics_vec128 k[16U];
         {
@@ -857,12 +857,12 @@ Hacl_Chacha20_Vec128_chacha20_decrypt_128(
             for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
             {
               Lib_IntVector_Intrinsics_vec128
-              x = Lib_IntVector_Intrinsics_vec128_load_le(plain + i * (uint32_t)16U);
+              x = Lib_IntVector_Intrinsics_vec128_load32_le(plain + i * (uint32_t)16U);
               Lib_IntVector_Intrinsics_vec128 y = Lib_IntVector_Intrinsics_vec128_xor(x, k[i]);
-              Lib_IntVector_Intrinsics_vec128_store_le(plain + i * (uint32_t)16U, y);
+              Lib_IntVector_Intrinsics_vec128_store32_le(plain + i * (uint32_t)16U, y);
             }
           }
-          memcpy(uu____2, plain, rem * sizeof (plain[0U]));
+          memcpy(uu____2, plain, rem * sizeof (uint8_t));
         }
       }
     }

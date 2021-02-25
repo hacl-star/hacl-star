@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Blake2b_32_H
+#define __Hacl_Blake2b_32_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,24 +36,58 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Blake2b_32_H
-#define __Hacl_Blake2b_32_H
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Blake2s_32.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 
+/* SNIPPET_START: Hacl_Blake2b_32_blake2b_init */
 
-/* SNIPPET_START: K___uint32_t_uint32_t */
+void
+Hacl_Blake2b_32_blake2b_init(
+  uint64_t *wv,
+  uint64_t *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t nn
+);
 
-typedef struct K___uint32_t_uint32_t_s
-{
-  uint32_t fst;
-  uint32_t snd;
-}
-K___uint32_t_uint32_t;
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_init */
 
-/* SNIPPET_END: K___uint32_t_uint32_t */
+/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_multi */
+
+void
+Hacl_Blake2b_32_blake2b_update_multi(
+  uint32_t len,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
+  uint8_t *blocks,
+  uint32_t nb
+);
+
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_multi */
+
+/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_last */
+
+void
+Hacl_Blake2b_32_blake2b_update_last(
+  uint32_t len,
+  uint64_t *wv,
+  uint64_t *hash,
+  FStar_UInt128_uint128 prev,
+  uint32_t rem,
+  uint8_t *d
+);
+
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_last */
+
+/* SNIPPET_START: Hacl_Blake2b_32_blake2b_finish */
+
+void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
+
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_finish */
 
 /* SNIPPET_START: Hacl_Blake2b_32_blake2b */
 
@@ -60,6 +102,10 @@ Hacl_Blake2b_32_blake2b(
 );
 
 /* SNIPPET_END: Hacl_Blake2b_32_blake2b */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Blake2b_32_H_DEFINED
 #endif

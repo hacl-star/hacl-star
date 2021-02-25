@@ -14,14 +14,14 @@ open FStar.Tactics.Canon
 
 #set-options " --z3rlimit 100" 
 
-noextract
+
 val pow: a:nat -> b:nat -> nat
 
 let rec pow a b =
   if b = 0 then 1
   else a * (pow a (b - 1))
 
-noextract
+
 val modulo_distributivity_mult: a: int -> b: int -> c: pos -> 
   Lemma ((a * b) % c = ((a % c) * (b % c)) % c)
 
@@ -38,7 +38,7 @@ let rec power_one a =
   | _ -> power_one (a - 1) 
 
 
-noextract
+
 val pow_plus: a: nat -> b: nat -> c: nat -> 
   Lemma (ensures (pow a b * pow a c = pow a (b + c))) 
   (decreases b)
@@ -49,7 +49,7 @@ let rec pow_plus a b c =
   | _ -> pow_plus a (b - 1) c
 
 
-noextract
+
 val power_distributivity: a: nat -> b: nat -> c: pos -> Lemma ((pow (a % c) b) % c = (pow a b) % c)
 
 let rec power_distributivity a b c =
@@ -73,7 +73,7 @@ let rec power_distributivity_2 a b c =
     assert_by_tactic (pow a (c - 1) * pow b (c - 1) * a * b == (pow a c * pow b c)) canon
 
 
-noextract
+
 val power_mult: a: nat -> b: nat -> c: nat -> Lemma (pow (pow a b) c == pow a (b * c))
 
 let rec power_mult a b c = 
@@ -84,7 +84,7 @@ let rec power_mult a b c =
 
 
 
-noextract
+
 val log_and: a: uint64 -> b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} ->
   Lemma (if uint_v b = 0 then uint_v (logand a b) == 0 else uint_v (logand a b) == uint_v a)
 
@@ -103,7 +103,7 @@ let logor_commutative a b =
   UInt.logor_commutative #(bits U64) (v a) (v b)
   
 
-noextract
+
 val log_or: a: uint64 -> b: uint64 {uint_v b == 0 \/ uint_v a == 0} -> Lemma (
   if uint_v b = 0 then uint_v (logor a b) == uint_v a else uint_v (logor a b) == uint_v b)
 
@@ -134,26 +134,26 @@ let rec exp #n a b =
     else fmul a (exp (fmul a a) (b / 2))
 
 
-noextract
+
 let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (elem prime) =
   (exp #prime x (prime - 2)) % prime
 
-noextract
+
 let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p (x % p)
 
-noextract
+
 let modp_inv2 (x: nat) : Tot (elem prime256) =
   assert_norm(prime256 > 3);
   modp_inv2_prime x prime256
 
 
-noextract
+
 let modp_inv2_pow (x: nat) : Tot (elem prime256) =
    power_distributivity x (prime256 - 2) prime256;
    pow x (prime256 - 2) % prime256
 
 
-noextract
+
 let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =
   let p = x % prime in 
   exp #prime p (prime - 1)

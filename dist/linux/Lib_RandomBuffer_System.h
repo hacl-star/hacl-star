@@ -21,19 +21,34 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Lib_RandomBuffer_System_H
+#define __Lib_RandomBuffer_System_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Lib_RandomBuffer_System_H
-#define __Lib_RandomBuffer_System_H
 
 
 
+KRML_DEPRECATED("random_crypto")
 
 extern bool Lib_RandomBuffer_System_randombytes(u8 *buf, u32 len);
+
+extern void *Lib_RandomBuffer_System_entropy_p;
+
+extern void Lib_RandomBuffer_System_crypto_random(u8 *buf, u32 len);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Lib_RandomBuffer_System_H_DEFINED
 #endif

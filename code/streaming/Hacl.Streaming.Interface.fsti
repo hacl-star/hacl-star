@@ -224,10 +224,23 @@ let optional_t #index
 /// No such indexing occurs for spec-level functions, because they are always
 /// free to ignore superfluous arguments, and the shape of the API does not
 /// matter.
+
+/// SH: TODO: Maybe we should cut the functor in pieces (we could have a functional specifications
+/// functor, containing only the functional specification definitions, and an
+/// implementation and properties functor, which would be parameterized by a spec functor
+/// and would contain all the lemmas and implementations).
+/// It would actually make the proofs simpler, because after the spec functor is defined
+/// could easily use its fields (the current workaround is to define every field before
+/// defining the functor, which is tedious because we have to copy the signatures
+/// correctly), and moreover because the signatures of the fields of the implementations
+/// and properties functor would only depend on the signature functor: it would thus be
+/// possible to define all those signatures indenpendantly, allowing the user to reuse
+/// them rather than copy-paste big chunks of code (as what is done in Hacl.Streaming.Blake2).
+/// Note that a workaround is to partially instanciate the functor at definition time.
+
 inline_for_extraction noextract noeq
 type block (index: Type0) =
 | Block:
-
   km: key_management ->
 
   // Low-level types
@@ -238,15 +251,23 @@ type block (index: Type0) =
   max_input_length: (index -> x:nat { 0 < x /\ x < pow2 64 }) ->
   output_len: (index -> x:U32.t { U32.v x > 0 }) ->
   block_len: (index -> x:U32.t { U32.v x > 0 }) ->
+  // The size of data to process at a time. Must be a multiple of block_len.
+  // Controls the size of the internal buffer.
+  blocks_state_len: (i:index ->
+    x:U32.t { U32.v x > 0 /\ U32.v x % U32.v (block_len i) = 0 }) ->
 
   /// An init/update/update_last/finish specification. The long refinements were
   /// previously defined as blocks / small / output.
   init_s: (i:index -> key.t i -> state.t i) ->
-  update_multi_s: (i:index -> state.t i -> s:S.seq uint8 { S.length s % U32.v (block_len i) = 0 } -> state.t i) ->
+  update_multi_s: (i:index ->
+    state.t i ->
+    prevlen:nat { prevlen % U32.v (block_len i) = 0 } ->
+    s:S.seq uint8 { prevlen + S.length s <= max_input_length i /\ S.length s % U32.v (block_len i) = 0 } ->
+    state.t i) ->
   update_last_s: (i:index ->
     state.t i ->
     prevlen:nat { prevlen % U32.v (block_len i) = 0 } ->
-    s:S.seq uint8 { S.length s + prevlen <= max_input_length i /\ S.length s < U32.v (block_len i) } ->
+    s:S.seq uint8 { S.length s + prevlen <= max_input_length i /\ S.length s <= U32.v (block_len i) } ->
     state.t i) ->
   finish_s: (i:index -> key.t i -> state.t i -> s:S.seq uint8 { S.length s = U32.v (output_len i) }) ->
 
@@ -256,36 +277,49 @@ type block (index: Type0) =
 
   // Required lemmas... clients can enjoy them in their local contexts with the SMT pattern via a let-binding.
 
-  update_multi_zero: (i:index -> h:state.t i -> Lemma
-    (ensures (update_multi_s i h S.empty == h))) ->
+  update_multi_zero: (i:index ->
+    h:state.t i ->
+    prevlen:nat { prevlen % U32.v (block_len i) = 0 /\ prevlen <= max_input_length i } ->
+    Lemma
+    (ensures (
+      Math.Lemmas.modulo_lemma 0 (UInt32.v (block_len i));
+      update_multi_s i h prevlen S.empty == h))) ->
 
   update_multi_associative: (i:index ->
-    h: state.t i ->
+    h:state.t i ->
+    prevlen1:nat ->
+    prevlen2:nat ->
     input1:S.seq uint8 ->
     input2:S.seq uint8 ->
     Lemma
     (requires (
+      prevlen1 % U32.v (block_len i) = 0 /\
       S.length input1 % U32.v (block_len i) = 0 /\
-      S.length input2 % U32.v (block_len i) = 0))
+      S.length input2 % U32.v (block_len i) = 0 /\
+      prevlen1 + S.length input1 + S.length input2 <= max_input_length i /\
+      prevlen2 = prevlen1 + S.length input1))
     (ensures (
       let input = S.append input1 input2 in
       S.length input % U32.v (block_len i) = 0 /\
-      update_multi_s i (update_multi_s i h input1) input2 ==
-        update_multi_s i h input))
-    [ SMTPat (update_multi_s i (update_multi_s i h input1) input2) ]) ->
+      prevlen2 % U32.v (block_len i) = 0 /\
+      update_multi_s i (update_multi_s i h prevlen1 input1) prevlen2 input2 ==
+        update_multi_s i h prevlen1 input))
+    [ SMTPat (update_multi_s i prevlen2 (update_multi_s i h prevlen1 input1) input2) ]) ->
 
+  (* TODO: it might be possible to factorize more the proofs between Lib.UpdateMulti
+   * and Spec.Hash.Incremental *)
   spec_is_incremental: (i:index ->
     key: key.t i ->
     input:S.seq uint8 { S.length input <= max_input_length i } ->
-    Lemma (ensures (
-      let open FStar.Mul in
-      let block_length = U32.v (block_len i) in
-      let n = S.length input / block_length in
-      let bs, l = S.split input (n * block_length) in
-      FStar.Math.Lemmas.multiple_modulo_lemma n block_length;
-      let hash = update_multi_s i (init_s i key) bs in
-      let hash = update_last_s i hash (n * block_length) l in
-      finish_s i key hash `S.equal` spec_s i key input))) ->
+    Lemma (
+      let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len i)) input in
+      (**) Math.Lemmas.modulo_lemma 0 (U32.v (block_len i));
+      (* TODO: use update_full ? *)
+      let hash0 = init_s i key in
+      let hash1 = update_multi_s i hash0 0 bs in
+      let hash2 = update_last_s i hash1 (S.length bs) l in
+      let hash3 = finish_s i key hash2 in
+      hash3 `S.equal` spec_s i key input)) ->
 
   // Stateful operations
   index_of_state: (i:G.erased index -> (
@@ -312,11 +346,14 @@ type block (index: Type0) =
       state.footprint #i h0 s == state.footprint #i h1 s /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
+
   update_multi: (i:G.erased index -> (
     let i = G.reveal i in
     s:state.s i ->
+    prevlen:U64.t { U64.v prevlen % U32.v (block_len i) = 0 } ->
     blocks:B.buffer uint8 { B.length blocks % U32.v (block_len i) = 0 } ->
-    len: U32.t { U32.v len = B.length blocks } ->
+    len: U32.t { U32.v len = B.length blocks /\
+                 U64.v prevlen + U32.v len <= max_input_length i } ->
     Stack unit
     (requires fun h0 ->
       state.invariant #i h0 s /\
@@ -326,17 +363,19 @@ type block (index: Type0) =
       B.(modifies (state.footprint #i h0 s) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
       state.invariant #i h1 s /\
-      state.v i h1 s == update_multi_s i (state.v i h0 s) (B.as_seq h0 blocks) /\
+      state.v i h1 s == update_multi_s i (state.v i h0 s) (U64.v prevlen) (B.as_seq h0 blocks) /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->
 
   update_last: (
     i: G.erased index -> (
     let i = G.reveal i in
     s:state.s i ->
-    last:B.buffer uint8 { B.len last < block_len i } ->
-    total_len:U64.t {
-      U64.v total_len <= max_input_length i /\
-      (U64.v total_len - B.length last) % U32.v (block_len i) = 0 } ->
+    prevlen:U64.t { U64.v prevlen % U32.v (block_len i) = 0 } ->
+    last:B.buffer uint8 ->
+    last_len:U32.t{
+      last_len = B.len last /\
+      U32.v last_len <= U32.v (block_len i) /\
+      U64.v prevlen + U32.v last_len <= max_input_length i} ->
     Stack unit
     (requires fun h0 ->
       state.invariant #i h0 s /\
@@ -344,7 +383,7 @@ type block (index: Type0) =
       B.(loc_disjoint (state.footprint #i h0 s) (loc_buffer last)))
     (ensures fun h0 _ h1 ->
       state.invariant #i h1 s /\
-      state.v i h1 s == update_last_s i (state.v i h0 s) (U64.v total_len - B.length last) (B.as_seq h0 last) /\
+      state.v i h1 s == update_last_s i (state.v i h0 s) (U64.v prevlen) (B.as_seq h0 last) /\
       B.(modifies (state.footprint #i h0 s) h0 h1) /\
       state.footprint #i h0 s == state.footprint #i h1 s /\
       (state.freeable #i h0 s ==> state.freeable #i h1 s)))) ->

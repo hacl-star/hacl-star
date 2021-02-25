@@ -21,15 +21,20 @@
  * SOFTWARE.
  */
 
+
+#ifndef __EverCrypt_Hacl_H
+#define __EverCrypt_Hacl_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-#ifndef __EverCrypt_Hacl_H
-#define __EverCrypt_Hacl_H
 
 
 
@@ -83,6 +88,10 @@ extern void
 EverCrypt_Hacl_aes256_cipher(uint8_t *cipher, uint8_t *plain, uint8_t *w, uint8_t *sb);
 
 /* SNIPPET_END: EverCrypt_Hacl_aes256_cipher */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __EverCrypt_Hacl_H_DEFINED
 #endif

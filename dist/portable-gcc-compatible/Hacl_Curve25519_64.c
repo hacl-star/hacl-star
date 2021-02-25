@@ -232,7 +232,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
   uint64_t *p01 = p01_tmp1_swap;
   uint64_t *p03 = p01;
   uint64_t *p11 = p01 + (uint32_t)8U;
-  memcpy(p11, init, (uint32_t)8U * sizeof (init[0U]));
+  memcpy(p11, init, (uint32_t)8U * sizeof (uint64_t));
   uint64_t *x0 = p03;
   uint64_t *z0 = p03 + (uint32_t)4U;
   x0[0U] = (uint64_t)1U;
@@ -275,7 +275,7 @@ static void montgomery_ladder(uint64_t *out, uint8_t *key, uint64_t *init)
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
   point_double(nq10, tmp1, tmp2);
-  memcpy(out, p0, (uint32_t)8U * sizeof (p0[0U]));
+  memcpy(out, p0, (uint32_t)8U * sizeof (uint64_t));
 }
 
 /* SNIPPET_END: montgomery_ladder */
@@ -298,35 +298,42 @@ static void fsquare_times(uint64_t *o, uint64_t *inp, uint64_t *tmp, uint32_t n)
 static void finv(uint64_t *o, uint64_t *i, uint64_t *tmp)
 {
   uint64_t t1[16U] = { 0U };
-  uint64_t *a = t1;
-  uint64_t *b = t1 + (uint32_t)4U;
-  uint64_t *c = t1 + (uint32_t)8U;
-  uint64_t *t00 = t1 + (uint32_t)12U;
+  uint64_t *a1 = t1;
+  uint64_t *b1 = t1 + (uint32_t)4U;
+  uint64_t *t010 = t1 + (uint32_t)12U;
+  uint64_t *tmp10 = tmp;
+  fsquare_times(a1, i, tmp10, (uint32_t)1U);
+  fsquare_times(t010, a1, tmp10, (uint32_t)2U);
+  fmul0(b1, t010, i, tmp);
+  fmul0(a1, b1, a1, tmp);
+  fsquare_times(t010, a1, tmp10, (uint32_t)1U);
+  fmul0(b1, t010, b1, tmp);
+  fsquare_times(t010, b1, tmp10, (uint32_t)5U);
+  fmul0(b1, t010, b1, tmp);
+  uint64_t *b10 = t1 + (uint32_t)4U;
+  uint64_t *c10 = t1 + (uint32_t)8U;
+  uint64_t *t011 = t1 + (uint32_t)12U;
+  uint64_t *tmp11 = tmp;
+  fsquare_times(t011, b10, tmp11, (uint32_t)10U);
+  fmul0(c10, t011, b10, tmp);
+  fsquare_times(t011, c10, tmp11, (uint32_t)20U);
+  fmul0(t011, t011, c10, tmp);
+  fsquare_times(t011, t011, tmp11, (uint32_t)10U);
+  fmul0(b10, t011, b10, tmp);
+  fsquare_times(t011, b10, tmp11, (uint32_t)50U);
+  fmul0(c10, t011, b10, tmp);
+  uint64_t *b11 = t1 + (uint32_t)4U;
+  uint64_t *c1 = t1 + (uint32_t)8U;
+  uint64_t *t01 = t1 + (uint32_t)12U;
   uint64_t *tmp1 = tmp;
-  fsquare_times(a, i, tmp1, (uint32_t)1U);
-  fsquare_times(t00, a, tmp1, (uint32_t)2U);
-  fmul0(b, t00, i, tmp);
-  fmul0(a, b, a, tmp);
-  fsquare_times(t00, a, tmp1, (uint32_t)1U);
-  fmul0(b, t00, b, tmp);
-  fsquare_times(t00, b, tmp1, (uint32_t)5U);
-  fmul0(b, t00, b, tmp);
-  fsquare_times(t00, b, tmp1, (uint32_t)10U);
-  fmul0(c, t00, b, tmp);
-  fsquare_times(t00, c, tmp1, (uint32_t)20U);
-  fmul0(t00, t00, c, tmp);
-  fsquare_times(t00, t00, tmp1, (uint32_t)10U);
-  fmul0(b, t00, b, tmp);
-  fsquare_times(t00, b, tmp1, (uint32_t)50U);
-  fmul0(c, t00, b, tmp);
-  fsquare_times(t00, c, tmp1, (uint32_t)100U);
-  fmul0(t00, t00, c, tmp);
-  fsquare_times(t00, t00, tmp1, (uint32_t)50U);
-  fmul0(t00, t00, b, tmp);
-  fsquare_times(t00, t00, tmp1, (uint32_t)5U);
-  uint64_t *a0 = t1;
+  fsquare_times(t01, c1, tmp1, (uint32_t)100U);
+  fmul0(t01, t01, c1, tmp);
+  fsquare_times(t01, t01, tmp1, (uint32_t)50U);
+  fmul0(t01, t01, b11, tmp);
+  fsquare_times(t01, t01, tmp1, (uint32_t)5U);
+  uint64_t *a = t1;
   uint64_t *t0 = t1 + (uint32_t)12U;
-  fmul0(o, t0, a0, tmp);
+  fmul0(o, t0, a, tmp);
 }
 
 /* SNIPPET_END: finv */

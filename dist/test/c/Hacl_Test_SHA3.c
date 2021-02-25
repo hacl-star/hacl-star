@@ -30,7 +30,7 @@
 
 typedef uint8_t buftype;
 
-extern void C_String_print(C_String_t uu____68);
+extern void C_String_print(C_String_t uu___);
 
 extern void
 Hacl_Impl_SHA3_keccak(
@@ -150,8 +150,8 @@ test_sha3(
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
   uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (msg_[0U]));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (((uint8_t *)msg)[0U]));
+  memset(msg_, 0U, msg_len * sizeof (uint8_t));
+  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   uint8_t test224[28U] = { 0U };
   uint8_t test256[32U] = { 0U };
   uint8_t test384[48U] = { 0U };
@@ -203,11 +203,11 @@ test_shake128(uint32_t msg_len, const uint8_t *msg, uint32_t out_len, const uint
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
   uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (msg_[0U]));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (((uint8_t *)msg)[0U]));
+  memset(msg_, 0U, msg_len * sizeof (uint8_t));
+  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint8_t), out_len);
   uint8_t test[out_len];
-  memset(test, 0U, out_len * sizeof (test[0U]));
+  memset(test, 0U, out_len * sizeof (uint8_t));
   shake128_hacl(msg_len, msg_, out_len, test);
   if
   (
@@ -225,11 +225,11 @@ test_shake256(uint32_t msg_len, const uint8_t *msg, uint32_t out_len, const uint
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), msg_len);
   uint8_t msg_[msg_len];
-  memset(msg_, 0U, msg_len * sizeof (msg_[0U]));
-  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (((uint8_t *)msg)[0U]));
+  memset(msg_, 0U, msg_len * sizeof (uint8_t));
+  memcpy(msg_, (uint8_t *)msg, msg_len * sizeof (uint8_t));
   KRML_CHECK_SIZE(sizeof (uint8_t), out_len);
   uint8_t test[out_len];
-  memset(test, 0U, out_len * sizeof (test[0U]));
+  memset(test, 0U, out_len * sizeof (uint8_t));
   shake256_hacl(msg_len, msg_, out_len, test);
   if
   (
@@ -242,7 +242,7 @@ test_shake256(uint32_t msg_len, const uint8_t *msg, uint32_t out_len, const uint
   }
 }
 
-static const uint8_t test1_plaintext[0U] = { (uint32_t)0U };
+static const uint8_t test1_plaintext[0U] = {  };
 
 static const
 uint8_t
@@ -503,7 +503,7 @@ test4_expected_sha3_512[64U] =
     (uint8_t)0xf2U, (uint8_t)0x1dU, (uint8_t)0xd1U, (uint8_t)0x85U
   };
 
-static const uint8_t test5_plaintext_shake128[0U] = { (uint32_t)0U };
+static const uint8_t test5_plaintext_shake128[0U] = {  };
 
 static const
 uint8_t
@@ -582,7 +582,7 @@ test8_expected_shake128[16U] =
     (uint8_t)0xe9U, (uint8_t)0xd4U, (uint8_t)0xddU, (uint8_t)0x30U
   };
 
-static const uint8_t test9_plaintext_shake256[0U] = { (uint32_t)0U };
+static const uint8_t test9_plaintext_shake256[0U] = {  };
 
 static const
 uint8_t

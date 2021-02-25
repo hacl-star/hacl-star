@@ -21,23 +21,34 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_Kremlib_H
+#define __Hacl_Kremlib_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_Kremlib_H
-#define __Hacl_Kremlib_H
 
 
 
+static inline u32 FStar_UInt32_eq_mask(u32 a, u32 b);
+
+static inline u32 FStar_UInt32_gte_mask(u32 a, u32 b);
 
 static inline u8 FStar_UInt8_eq_mask(u8 a, u8 b);
 
 static inline u64 FStar_UInt64_eq_mask(u64 a, u64 b);
 
 static inline u64 FStar_UInt64_gte_mask(u64 a, u64 b);
+
+static inline u16 FStar_UInt16_eq_mask(u16 a, u16 b);
 
 static inline uint128_t FStar_UInt128_add(uint128_t a, uint128_t b);
 
@@ -58,6 +69,10 @@ static inline uint128_t FStar_UInt128_mul_wide(u64 x, u64 y);
 static inline void store128_be(u8 *x0, uint128_t x1);
 
 static inline uint128_t load128_be(u8 *x0);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_Kremlib_H_DEFINED
 #endif

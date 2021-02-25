@@ -21,6 +21,14 @@
  * SOFTWARE.
  */
 
+
+#ifndef __Hacl_HPKE_P256_CP128_SHA256_H
+#define __Hacl_HPKE_P256_CP128_SHA256_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
@@ -28,14 +36,11 @@
 #include <string.h>
 #include "kremlin/internal/target.h"
 
-#ifndef __Hacl_HPKE_P256_CP128_SHA256_H
-#define __Hacl_HPKE_P256_CP128_SHA256_H
 
 #include "Hacl_P256.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "Hacl_HKDF.h"
-
 
 /* SNIPPET_START: Hacl_HPKE_P256_CP128_SHA256_setupBaseI */
 
@@ -95,6 +100,10 @@ Hacl_HPKE_P256_CP128_SHA256_openBase(
 );
 
 /* SNIPPET_END: Hacl_HPKE_P256_CP128_SHA256_openBase */
+
+#if defined(__cplusplus)
+}
+#endif
 
 #define __Hacl_HPKE_P256_CP128_SHA256_H_DEFINED
 #endif

@@ -34,7 +34,7 @@ let k_w      (a: sha2_alg) = m:S.seq (word a) {S.length m = size_k_w a}
 let block_w  (a: sha2_alg) = m:S.seq (word a) {S.length m = block_word_length}
 let counter = nat
 
-inline_for_extraction noextract
+inline_for_extraction 
 type ops = {
   c0: size_t; c1: size_t; c2: size_t;
   c3: size_t; c4: size_t; c5: size_t;
@@ -43,7 +43,7 @@ type ops = {
 }
 
 (* Definition of constants used in word functions *)
-inline_for_extraction noextract
+inline_for_extraction 
 let op224_256: ops = {
   c0 = 2ul; c1 = 13ul; c2 = 22ul;
   c3 = 6ul; c4 = 11ul; c5 = 25ul;
@@ -51,7 +51,7 @@ let op224_256: ops = {
   e3 = 17ul; e4 = 19ul; e5 = 10ul
 }
 
-inline_for_extraction noextract
+inline_for_extraction 
 let op384_512: ops = {
   c0 = 28ul; c1 = 34ul; c2 = 39ul;
   c3 = 14ul; c4 = 18ul; c5 = 41ul;
@@ -134,7 +134,7 @@ val _sigma1: a:sha2_alg -> x:(word a) -> Tot (word a)
 inline_for_extraction
 let _sigma1 a x = (x >>>. (op0 a).e3) ^. (x >>>. (op0 a).e4) ^. (x >>. (op0 a).e5)
 
-let h0: a:sha2_alg -> Tot (words_state a) = function
+let h0: a:sha2_alg -> Tot (words_state' a) = function
   | SHA2_224 -> C.h224
   | SHA2_256 -> C.h256
   | SHA2_384 -> C.h384
@@ -150,7 +150,7 @@ unfold
 let (.[]) = S.index
 
 (* Core shuffling function *)
-let shuffle_core_pre_ (a:sha2_alg) (k_t: word a) (ws_t: word a) (hash:words_state a) : Tot (words_state a) =
+let shuffle_core_pre_ (a:sha2_alg) (k_t: word a) (ws_t: word a) (hash:words_state' a) : Tot (words_state' a) =
   (**) assert(7 <= S.length hash);
   let a0 = hash.[0] in
   let b0 = hash.[1] in
@@ -201,7 +201,7 @@ let ws_pre_ (a:sha2_alg) (block:block_w a) : k_w a =
 let ws_pre = ws_pre_
 
 (* Full shuffling function *)
-let shuffle_pre (a:sha2_alg) (hash:words_state a) (block:block_w a): Tot (words_state a) =
+let shuffle_pre (a:sha2_alg) (hash:words_state' a) (block:block_w a): Tot (words_state' a) =
   let ws = ws_pre a block in
   let k = k0 a in
   Lib.LoopCombinators.repeati (size_k_w a)
@@ -209,12 +209,13 @@ let shuffle_pre (a:sha2_alg) (hash:words_state a) (block:block_w a): Tot (words_
 [@"opaque_to_smt"]
 let shuffle = shuffle_pre
 
-let init = h0
+let init a = h0 a, ()
 
 let update_pre (a:sha2_alg) (hash:words_state a) (block:bytes{S.length block = block_length a}): Tot (words_state a) =
+  let hash, _ = hash in
   let block_w = words_of_bytes a #block_word_length block in
   let hash_1 = shuffle a hash block_w in
-  Spec.Loops.seq_map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1
+  Spec.Loops.seq_map2 ( +. ) (hash <: Lib.Sequence.lseq (word a) (state_word_length a)) hash_1, ()
 
 [@"opaque_to_smt"]
 let update = update_pre
