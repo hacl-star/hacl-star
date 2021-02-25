@@ -34,7 +34,7 @@ static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
 }
 
 
-#if defined(__x86_64__) || defined(_M_X64) || defined(__s390x__)
+#if defined(__x86_64__) || defined(_M_X64) || defined(__s390x__) || defined(__powerpc64__)
 
 typedef uint64_t cycles;
 
@@ -52,6 +52,11 @@ static __inline__ cycles cpucycles_get(void)
   uint64_t tsc;
   asm("\tstck\t%0\n" : "=Q" (tsc) : : "cc");
   return(tsc);
+
+#elif defined(__powerpc64__)
+
+  // TODO: find a proper implementation (use tbc?)
+  return clock();
 
 #else
 
