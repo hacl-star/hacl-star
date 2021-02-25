@@ -351,6 +351,10 @@ int main() {
   exp = initialize_vector64(0xcUL,0x20UL);
   compare_and_print_vec64("mul64 (#0)", vec0, exp);
   //  print_vector64("mul64", vec0);
+  vec0 = Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(vec0);
+  vec1 = Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(vec1);
+  print_vector64("mul64 - perm", vec0);
+  print_vector64("mul64 - perm", vec1);
 
   vec0 = initialize_vector64(0x1111222233334444UL, 0x5555666677778888UL);
   vec1 = initialize_vector64(0x9999aaaabbbbccccUL, 0xddddeeeeffff0101UL);
@@ -358,6 +362,10 @@ int main() {
   exp = initialize_vector64(0x258c024630ec9630UL,0x7777118866781088UL);
   compare_and_print_vec64("mul64 (#1)", vec0, exp);
   //  print_vector64("mul64 (#1)", vec0);
+  vec0 = Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(vec0);
+  vec1 = Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(vec1);
+  print_vector64("mul64 - perm", vec0);
+  print_vector64("mul64 - perm", vec1);
 
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec1 = initialize_vector64(0x8899aabbccddeeff, 0x0011223344556677);
