@@ -3,13 +3,13 @@ module Lib.NTuple
 open FStar.Mul
 open Lib.IntTypes
 
-#set-options "--z3rlimit 15 --max_ifuel 0 --max_fuel 1"
+#set-options "--z3rlimit 15 --ifuel 0 --fuel 1"
 
 let max_ntuple_len = max_size_t
 
 unfold let length (#a:Type0) (#len:flen) (s: ntuple a len) : flen = len
 
-inline_for_extraction noextract
+inline_for_extraction
 let fst_ (#a:Type0) (#len:flen) (s:ntuple_ a len) : a =
   if len = 1 then s
   else fst (s <: a & ntuple_ a (len - 1))
@@ -17,14 +17,14 @@ let fst_ (#a:Type0) (#len:flen) (s:ntuple_ a len) : a =
 let fst #a #len (s:ntuple a len) =
   normalize_term (fst_ #a #len s)
 
-inline_for_extraction noextract
+inline_for_extraction
 let rest_ (#a:Type0) (#len:flen{len > 1}) (s:ntuple_ a len) : ntuple_ a (len - 1)=
     snd (s <: a & ntuple_ a (len - 1))
 
 let rest #a #len s =
   normalize_term (rest_ #a #len s)
 
-inline_for_extraction noextract
+inline_for_extraction
 let rec index_ (#a:Type0) (#len:flen) (s:ntuple a len) (i:nat{i < len}) =
   if i = 0 then fst s
   else (assert (len > 1);
@@ -35,11 +35,7 @@ let index #a #len s i =
 
 let index_fst_lemma #a #len s = ()
 
-// let rec index_rest_lemma #a #len s i =
-//   if len = 1 then ()
-//   else admit ()
-
-inline_for_extraction noextract
+inline_for_extraction
 let rec createi_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -> a)) :
   Tot (ntuple_ a (max - min)) (decreases (max - min))
  =
@@ -49,7 +45,7 @@ let rec createi_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -
 let createi #a len f =
   normalize_term (createi_ #a 0 len f)
 
-inline_for_extraction noextract
+inline_for_extraction
 let rec gcreatei_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -> GTot a)) :
   GTot (ntuple_ a (max - min)) (decreases (max - min))
  =
@@ -80,6 +76,8 @@ let gcreatei_lemma #a len f i =
 let to_lseq #a #len l =
   normalize_term (Lib.Sequence.createi len (index l))
 
+let to_lseq_index #a #len l i = ()
+
 let from_lseq #a #len s =
   normalize_term (createi #a len (Lib.Sequence.index s))
 
@@ -91,7 +89,7 @@ let create_lemma #a len init i =
   createi_lemma_ #a 0 len (fun i -> init) i
 
 #push-options "--max_fuel 2"
-inline_for_extraction noextract
+inline_for_extraction
 let rec concat_ (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_ntuple_len})
 		(s0:ntuple a len0) (s1:ntuple a len1) : ntuple_ a (len0 + len1)
  =
@@ -147,7 +145,7 @@ let rec eq_elim #a #len s1 s2 =
 
 (** Updating an element of a fixed-length Sequence *)
 
-inline_for_extraction noextract
+inline_for_extraction
 let rec upd_ (#a:Type) (#len:flen) (s:ntuple a len) (i:nat{i < len}) (x:a) : ntuple_ a len =
   if i = 0 then
     if len = 1 then x
@@ -170,7 +168,7 @@ let index_sub_lemma #a #len s start n i =
   createi_lemma n (fun i -> index s (start + i)) i
 
 //TODO: add to fsti?
-inline_for_extraction noextract
+inline_for_extraction
 let slice (#a:Type) (#len:flen) (s:ntuple a len) (start:nat) (fin:flen{start < fin /\ fin <= len}) : ntuple a (fin - start) =
   normalize_term (sub s start (fin - start))
 
@@ -223,29 +221,24 @@ let map2 #a #b #c #len f s1 s2 =
 let index_map2_lemma #a #b #c #len f s1 s2 i =
   createi_lemma len (fun i -> f (index s1 i) (index s2 i)) i
 
-#set-options "--max_fuel 4"
-
 let ntup1_lemma #a #l t =
   assert (ntuple a l == ntuple a 1)
 
 let tup1_lemma #a #l t =
   assert (ntuple a l == ntuple a 1)
 
+#set-options "--fuel 4"
+
 let ntup4_lemma #a #l t =
   assert (ntuple a l == ntuple a 4)
 
 let tup4_lemma #a #l t =
-  assert (ntuple a l == ntuple a 4);
-  let (x0,(x1,(x2,x3))) = tup4 t in
-  let t' : ntuple a 4 = (x0,(x1,(x2,x3))) in
-  assert (t == t')
+  assert (ntuple a l == ntuple a 4)
 
-#set-options "--max_fuel 9 --max_ifuel 8"
-let ntup8_lemma #a #l t = ()
+#set-options "--fuel 8"
 
+let ntup8_lemma #a #l t =
+  assert (ntuple a l == ntuple a 8)
 
 let tup8_lemma #a #l t =
-  assert (ntuple a l == ntuple a 8);
-  let (x0,(x1,(x2,(x3,(x4,(x5,(x6,x7))))))) = tup8 t in
-  let t' : ntuple a 8 = (x0,(x1,(x2,(x3,(x4,(x5,(x6,x7))))))) in
-  assert (t == t')
+  assert (ntuple a l == ntuple a 8)

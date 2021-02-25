@@ -4,7 +4,6 @@ module Lib.IntVector.Serialize
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
-noextract
 val vecs_from_bytes_le_f:
     vt:v_inttype
   -> w:width
@@ -21,7 +20,7 @@ let vecs_from_bytes_le vt w len b =
 
 let index_vecs_from_bytes_le vt w len b i = ()
 
-noextract
+
 val vecs_from_bytes_be_f:
     vt:v_inttype
   -> w:width
@@ -38,7 +37,7 @@ let vecs_from_bytes_be vt w len b =
 
 let index_vecs_from_bytes_be vt w len b i = ()
 
-noextract
+
 val vecs_to_bytes_le_f:
     #vt:v_inttype
   -> #w:width
@@ -61,7 +60,7 @@ let index_vecs_to_bytes_le #vt #w #len vl i =
   index_generate_blocks (numbytes vt * w) len len
     (vecs_to_bytes_le_f #vt #w #len vl) i
 
-noextract
+
 val vecs_to_bytes_be_f:
     #vt:v_inttype
   -> #w:width
@@ -126,7 +125,7 @@ let vecs_store_le #vt #w #len o i =
     (fun h -> vecs_to_bytes_le_f (as_seq h i))
     (fun j -> vec_store_le (sub o (j *! (size (numbytes vt) *! size w)) (size (numbytes vt) *! size w)) i.(j));
 
-  assert_norm (vecs_to_bytes_le (as_seq h0 i) == norm [delta] vecs_to_bytes_le (as_seq h0 i))
+  norm_spec [delta_only [`%vecs_to_bytes_le]] (vecs_to_bytes_le (as_seq h0 i))
 
 
 let vecs_store_be #vt #w #len o i =
@@ -140,4 +139,4 @@ let vecs_store_be #vt #w #len o i =
     (fun h -> vecs_to_bytes_be_f (as_seq h i))
     (fun j -> vec_store_be (sub o (j *! (size (numbytes vt) *! size w)) (size (numbytes vt) *! size w)) i.(j));
 
-  assert_norm (vecs_to_bytes_be (as_seq h0 i) == norm [delta] vecs_to_bytes_be (as_seq h0 i))
+  norm_spec [delta_only [`%vecs_to_bytes_be]] (vecs_to_bytes_be (as_seq h0 i))
