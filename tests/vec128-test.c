@@ -203,13 +203,13 @@ int main() {
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   Lib_IntVector_Intrinsics_vec128_store32_le(tmp_misaligned, vec0);
   printf("store32_le misaligned:\n");
-  if (!compare_and_print(16, tmp, store_le_b)) { ok = false; }
+  if (!compare_and_print(16, tmp_misaligned, store_le_b)) { ok = false; }
   //  print_buf8("store32_le misaligned", tmp_misaligned);
 
   vec0 = initialize_vector64(0x4455667700112233, 0xccddeeff8899aabb);
   Lib_IntVector_Intrinsics_vec128_store64_le(tmp_misaligned, vec0);
   printf("store64_le misaligned:\n");
-  if (!compare_and_print(16, tmp, store_le_b)) { ok = false; }
+  if (!compare_and_print(16, tmp_misaligned, store_le_b)) { ok = false; }
   //  print_buf8("store_le misaligned", tmp_misaligned);
 
   initialize_buf8(0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
