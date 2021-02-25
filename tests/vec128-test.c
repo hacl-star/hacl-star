@@ -139,12 +139,18 @@ int main() {
   vec128 exp;
   uint32_t x32;
   uint64_t x64;
-  uint8_t tmp[32] = {
+  // Some load/store operations may need the data to be aligned, in which
+  // we need to copy it to intermediate buffers.
+  // To separate concerns, we first test on aligned data, then on misaligned
+  // data. Note that as [tmp] below is aligned, we know for sure that
+  // [tmp+1] is misaligned.
+  uint8_t tmp[32] __attribute__((aligned (16))) = {
     0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,
     0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,
     0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,
     0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U
   };
+  uint8_t *tmp_misaligned = tmp + 1U;
 
   // Extract
   //vec0 = initialize_vector();
@@ -177,8 +183,7 @@ int main() {
   //  print_vector64("insert64", vec0);
 
   // Load/store
-  // TODO: test misaligned data
-  uint8_t store_le_b[16] = {
+  uint8_t store_le_b[16] __attribute__((aligned (16))) = {
       0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
       0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU
   };
@@ -195,8 +200,23 @@ int main() {
   if (!compare_and_print(16, tmp, store_le_b)) { ok = false; }
   //  print_buf8("store_le", tmp);
 
+  vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
+  Lib_IntVector_Intrinsics_vec128_store32_le(tmp_misaligned, vec0);
+  printf("store32_le misaligned:\n");
+  if (!compare_and_print(16, tmp, store_le_b)) { ok = false; }
+  //  print_buf8("store32_le misaligned", tmp_misaligned);
+
+  vec0 = initialize_vector64(0x4455667700112233, 0xccddeeff8899aabb);
+  Lib_IntVector_Intrinsics_vec128_store64_le(tmp_misaligned, vec0);
+  printf("store64_le misaligned:\n");
+  if (!compare_and_print(16, tmp, store_le_b)) { ok = false; }
+  //  print_buf8("store_le misaligned", tmp_misaligned);
+
   initialize_buf8(0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
                   0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU,tmp);
+
+  initialize_buf8(0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
+                  0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU,tmp_misaligned);
 
   vec0 = Lib_IntVector_Intrinsics_vec128_load32_le(tmp);
   exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
@@ -207,6 +227,17 @@ int main() {
   exp = initialize_vector64(0x4455667700112233UL,0xccddeeff8899aabbUL);
   compare_and_print_vec64("load64_le", vec0, exp);
   //  print_vector64("load_le", vec0);
+
+  vec0 = Lib_IntVector_Intrinsics_vec128_load32_le(tmp_misaligned);
+  exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
+  compare_and_print_vec32("load_le misaligned", vec0, exp);
+  //  print_vector32("load32_le", vec0);
+
+  vec0 = Lib_IntVector_Intrinsics_vec128_load64_le(tmp_misaligned);
+  exp = initialize_vector64(0x4455667700112233UL,0xccddeeff8899aabbUL);
+  compare_and_print_vec64("load64_le misaligned", vec0, exp);
+  //  print_vector64("load_le", vec0);
+
 
   /*  // Those tests come from a real, nasty bug where the addresses were incorrectly
   // computed because of type inference.
