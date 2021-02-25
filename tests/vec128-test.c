@@ -375,7 +375,6 @@ int main() {
 
 
   /** Rotate left 32 ========================================================**/
-  /*
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 0);
   exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
