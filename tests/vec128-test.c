@@ -289,7 +289,6 @@ int main() {
   compare_and_print_vec64("gt64", vec0, exp);
   //  print_vector64("gt64", vec0);
 
-  /*
   vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
   vec1 = initialize_vector32(0x0c0d0e0f, 0x00010203, 0x04050607, 0x08090a0b);
   vec0 = Lib_IntVector_Intrinsics_vec128_interleave_high32(vec0, vec1);
@@ -318,6 +317,7 @@ int main() {
   compare_and_print_vec64("interlave_low64", vec0, exp);
   //  print_vector64("interleave_low64", vec0);
 
+  /*
   vec0 = Lib_IntVector_Intrinsics_vec128_load32(0x1);
   exp = initialize_vector32(0x00000001,0x00000001,0x00000001,0x00000001);
   compare_and_print_vec32("load32", vec0, exp);
