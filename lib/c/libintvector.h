@@ -793,6 +793,7 @@ typedef vector128_8 vector128;
 #elif defined(__powerpc64__) // PowerPC 64 - this flag is for GCC only
 
 #include <altivec.h>
+#include <string.h> // for memcpy
 
 // The main vector 128 type
 // We can't use uint8_t, uint32_t, uint64_t... instead of unsigned char,
