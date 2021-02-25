@@ -11,7 +11,7 @@ open Lib.IntVector
 open Lib.MultiBuffer
 
 open Spec.Hash.Definitions
-open Hacl.Hash.Definitions
+//open Hacl.Hash.Definitions
 open Hacl.Spec.SHA2.Vec
 open Hacl.Impl.SHA2.Core
 
@@ -22,6 +22,7 @@ module Spec = Hacl.Spec.SHA2
 module SpecVec = Hacl.Spec.SHA2.Vec
 module VecTranspose = Lib.IntVector.Transpose
 module LSeq = Lib.Sequence
+module HD = Hacl.Hash.Definitions
 
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
@@ -188,7 +189,7 @@ let init #a #m hash =
 
 inline_for_extraction noextract
 let update_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
-    b:multibuf (lanes a m) (block_len a)
+    b:multibuf (lanes a m) (HD.block_len a)
   -> hash:state_t a m ->
   Stack unit
   (requires fun h -> live_multi h b /\ live h hash)
@@ -252,8 +253,8 @@ let update_last #a #m upd totlen len b hash =
   push_frame ();
   let h1 = ST.get() in
   let blocks = padded_blocks a len in
-  let fin = blocks *! block_len a in
-  let last = create (size (lanes a m) *! 2ul *! block_len a) (u8 0) in
+  let fin = blocks *! HD.block_len a in
+  let last = create (size (lanes a m) *! 2ul *! HD.block_len a) (u8 0) in
   let totlen_buf = create (len_len a) (u8 0) in
   let total_len_bits = secret (shift_left #(len_int_type a) totlen 3ul) in
   Lib.ByteBuffer.uint_to_bytes_be #(len_int_type a) totlen_buf total_len_bits;
@@ -306,7 +307,7 @@ let update_nblocks_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
 inline_for_extraction noextract
 val update_nblocks: #a:sha2_alg -> #m:m_spec{is_supported a m} -> update_nblocks_vec_t a m
 let update_nblocks #a #m upd len b st =
-  let blocks = len /. block_len a in
+  let blocks = len /. HD.block_len a in
   let h0 = ST.get() in
   loop1 h0 blocks st
   (fun h -> SpecVec.update_block #a #m (v len) (as_seq_multi h0 b))
@@ -325,7 +326,7 @@ let update_nblocks #a #m upd len b st =
 inline_for_extraction noextract
 let finish_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     st:state_t a m
-  -> h:multibuf (lanes a m) (hash_len a) ->
+  -> h:multibuf (lanes a m) (HD.hash_len a) ->
   Stack unit
   (requires fun h0 -> live_multi h0 h /\ internally_disjoint h /\ live h0 st /\ disjoint_multi h st)
   (ensures  fun h0 _ h1 -> modifies (loc_multi h |+| loc st) h0 h1 /\
@@ -338,7 +339,7 @@ val finish: #a:sha2_alg -> #m:m_spec{is_supported a m} -> finish_vec_t a m
 let finish #a #m st h =
   let h0 = ST.get() in
   push_frame();
-  let hbuf = create (size (lanes a m) *. 8ul *. word_len a) (u8 0) in
+  let hbuf = create (size (lanes a m) *. 8ul *. HD.word_len a) (u8 0) in
   let h1 = ST.get() in
   store_state st hbuf;
   emit hbuf h;
@@ -357,7 +358,7 @@ let finish #a #m st h =
 inline_for_extraction noextract
 let hash_vec_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
     upd:update_vec_t a m
-  -> h:multibuf (lanes a m) (hash_len a)
+  -> h:multibuf (lanes a m) (HD.hash_len a)
   -> len:size_t
   -> b:multibuf (lanes a m) len ->
   Stack unit
@@ -380,7 +381,7 @@ let hash #a #m upd h len b =
   assert (modifies (loc st) h0 h1);
   assert (as_seq h1 st == SpecVec.init a m);
   NTup.eq_intro (as_seq_multi h1 b) (as_seq_multi h0 b);
-  let rem = len %. block_len a in
+  let rem = len %. HD.block_len a in
   let len' : len_t a = Lib.IntTypes.cast #U32 #PUB (len_int_type a) PUB len in
   update_nblocks #a #m upd len b st;
   let h2 = ST.get() in

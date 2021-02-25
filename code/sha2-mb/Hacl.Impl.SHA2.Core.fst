@@ -11,7 +11,7 @@ open Lib.IntVector
 open Lib.MultiBuffer
 
 open Spec.Hash.Definitions
-open Hacl.Hash.Definitions
+//open Hacl.Hash.Definitions // <- defines as_seq which clashes with Lib.Buffer.as_seq
 open Hacl.Spec.SHA2.Vec
 
 module ST = FStar.HyperStack.ST
@@ -19,7 +19,7 @@ module NTup = Lib.NTuple
 module SpecVec = Hacl.Spec.SHA2.Vec
 module VecTranspose = Lib.IntVector.Transpose
 module LSeq = Lib.Sequence
-
+module HD = Hacl.Hash.Definitions
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
@@ -29,7 +29,7 @@ let state_t (a:sha2_alg) (m:m_spec) =
 
 unfold
 let block_t (a:sha2_alg) =
-  lbuffer uint8 (block_len a)
+  lbuffer uint8 (HD.block_len a)
 
 inline_for_extraction noextract
 let ws_t (a:sha2_alg) (m:m_spec) =
@@ -40,7 +40,7 @@ inline_for_extraction noextract
 val set_wsi: #a:sha2_alg -> #m:m_spec
   -> ws:ws_t a m
   -> i:size_t{v i < 16}
-  -> b:lbuffer uint8 (block_len a)
+  -> b:lbuffer uint8 (HD.block_len a)
   -> bi:size_t{v bi < 16 / (lanes a m)} ->
   Stack unit
   (requires fun h -> live h b /\ live h ws /\ disjoint b ws)
@@ -50,7 +50,7 @@ val set_wsi: #a:sha2_alg -> #m:m_spec
 let set_wsi #a #m ws i b bi =
   [@inline_let]
   let l = lanes a m in
-  ws.(i) <- vec_load_be (word_t a) l (sub b (bi *! size l *! word_len a) (size l *! word_len a))
+  ws.(i) <- vec_load_be (word_t a) l (sub b (bi *! size l *! HD.word_len a) (size l *! HD.word_len a))
 
 
 noextract
@@ -85,7 +85,7 @@ let load_blocks_spec1_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 1}) (b:multibl
 #push-options "--z3rlimit 100"
 inline_for_extraction noextract
 val load_blocks1: #a:sha2_alg -> #m:m_spec{lanes a m == 1}
-  -> b:multibuf (lanes a m) (block_len a)
+  -> b:multibuf (lanes a m) (HD.block_len a)
   -> ws:ws_t a m ->
   Stack unit
   (requires fun h -> live_multi h b /\ live h ws /\ disjoint_multi b ws)
@@ -157,7 +157,7 @@ let load_blocks_spec4_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 4}) (b:multibl
 
 inline_for_extraction noextract
 val load_blocks4: #a:sha2_alg -> #m:m_spec{lanes a m == 4}
-  -> b:multibuf (lanes a m) (block_len a)
+  -> b:multibuf (lanes a m) (HD.block_len a)
   -> ws:ws_t a m ->
   Stack unit
   (requires fun h -> live_multi h b /\ live h ws /\ disjoint_multi b ws)
@@ -235,7 +235,7 @@ let load_blocks_spec8_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 8}) (b:multibl
 
 inline_for_extraction noextract
 val load_blocks8: #a:sha2_alg -> #m:m_spec{lanes a m == 8}
-  -> b:multibuf (lanes a m) (block_len a)
+  -> b:multibuf (lanes a m) (HD.block_len a)
   -> ws:ws_t a m ->
   Stack unit
   (requires fun h -> live_multi h b /\ live h ws /\ disjoint_multi b ws)
@@ -276,7 +276,7 @@ let load_blocks8 #a #m ib ws =
 
 inline_for_extraction noextract
 val load_blocks: #a:sha2_alg -> #m:m_spec{is_supported a m}
-  -> b:multibuf (lanes a m) (block_len a)
+  -> b:multibuf (lanes a m) (HD.block_len a)
   -> ws:ws_t a m ->
   Stack unit
   (requires fun h -> live_multi h b /\ live h ws /\ disjoint_multi b ws)
@@ -334,7 +334,7 @@ let transpose_ws #a #m ws =
 
 inline_for_extraction noextract
 val load_ws: #a:sha2_alg -> #m:m_spec{is_supported a m}
-  -> b:multibuf (lanes a m) (block_len a)
+  -> b:multibuf (lanes a m) (HD.block_len a)
   -> ws:ws_t a m ->
   Stack unit
   (requires fun h -> live_multi h b /\ live h ws /\ disjoint_multi b ws)
@@ -350,7 +350,7 @@ inline_for_extraction noextract
 let padded_blocks (a:sha2_alg) (len:size_t{v len < block_length a}) :
   n:size_t{v n == SpecVec.padded_blocks a (v len)}
  =
-  if (len +! len_len a +! 1ul <=. block_len a) then 1ul else 2ul
+  if (len +! len_len a +! 1ul <=. HD.block_len a) then 1ul else 2ul
 
 
 inline_for_extraction noextract
@@ -359,8 +359,8 @@ val load_last_blocks: #a:sha2_alg
   -> len:size_t{v len < block_length a}
   -> b:lbuffer uint8 len
   -> fin:size_t{v fin == block_length a \/ v fin == 2 * block_length a}
-  -> last:lbuffer uint8 (2ul *! block_len a)  ->
-  Stack (lbuffer uint8 (block_len a) & lbuffer uint8 (block_len a))
+  -> last:lbuffer uint8 (2ul *! HD.block_len a)  ->
+  Stack (lbuffer uint8 (HD.block_len a) & lbuffer uint8 (HD.block_len a))
   (requires fun h -> live h totlen_buf /\ live h b /\ live h last /\
     disjoint b last /\ disjoint last totlen_buf /\
     as_seq h last == LSeq.create (2 * block_length a) (u8 0))
@@ -375,8 +375,8 @@ let load_last_blocks #a totlen_buf len b fin last =
   update_sub last 0ul len b;
   last.(len) <- u8 0x80;
   update_sub last (fin -. len_len a) (len_len a) totlen_buf;
-  let last0 : lbuffer uint8 (block_len a) = sub last 0ul (block_len a) in
-  let last1 : lbuffer uint8 (block_len a) = sub last (block_len a) (block_len a) in
+  let last0 : lbuffer uint8 (HD.block_len a) = sub last 0ul (HD.block_len a) in
+  let last1 : lbuffer uint8 (HD.block_len a) = sub last (HD.block_len a) (HD.block_len a) in
   let h1 = ST.get() in
   assert (modifies (loc last) h0 h1);
   (last0,last1)
@@ -394,8 +394,8 @@ let load_last_t (a:sha2_alg) (m:m_spec{is_supported a m}) =
   -> len:size_t{v len < block_length a}
   -> b:multibuf (lanes a m) len
   -> fin:size_t{v fin == block_length a \/ v fin == 2 * block_length a}
-  -> last:lbuffer uint8 (size (lanes a m) *! 2ul *! block_len a) ->
-  Stack (multibuf (lanes a m) (block_len a) & multibuf (lanes a m) (block_len a))
+  -> last:lbuffer uint8 (size (lanes a m) *! 2ul *! HD.block_len a) ->
+  Stack (multibuf (lanes a m) (HD.block_len a) & multibuf (lanes a m) (HD.block_len a))
   (requires  fun h -> live h totlen_buf /\ live_multi h b /\ live h last /\
     disjoint_multi b last /\ disjoint last totlen_buf /\
     as_seq h last == LSeq.create (lanes a m * 2 * block_length a) (u8 0))
@@ -415,8 +415,8 @@ let load_last1 #a #m totlen_buf len b fin last =
   let h0 = ST.get() in
   let b0 = b.(|0|) in
   let (l0,l1) = load_last_blocks #a totlen_buf len b0 fin last in
-  let lb0 : multibuf (lanes a m) (block_len a) = ntup1 l0 in
-  let lb1 : multibuf (lanes a m) (block_len a) = ntup1 l1 in
+  let lb0 : multibuf (lanes a m) (HD.block_len a) = ntup1 l0 in
+  let lb1 : multibuf (lanes a m) (HD.block_len a) = ntup1 l1 in
   let h1 = ST.get() in
   assert (modifies (loc last) h0 h1);
   NTup.eq_intro (as_seq_multi h0 b) (ntup1 (as_seq h0 b0));
@@ -435,10 +435,10 @@ val load_last4: #a:sha2_alg -> #m:m_spec{lanes a m = 4} -> load_last_t a m
 let load_last4 #a #m totlen_buf len b fin last =
   let h0 = ST.get() in
   let (b0,(b1,(b2,b3))) = NTup.tup4 b in
-  let last0 = sub last 0ul (2ul *! block_len a) in
-  let last1 = sub last (2ul *! block_len a) (2ul *! block_len a) in
-  let last2 = sub last (4ul *! block_len a) (2ul *! block_len a) in
-  let last3 = sub last (6ul *! block_len a) (2ul *! block_len a) in
+  let last0 = sub last 0ul (2ul *! HD.block_len a) in
+  let last1 = sub last (2ul *! HD.block_len a) (2ul *! HD.block_len a) in
+  let last2 = sub last (4ul *! HD.block_len a) (2ul *! HD.block_len a) in
+  let last3 = sub last (6ul *! HD.block_len a) (2ul *! HD.block_len a) in
   let h1 = ST.get() in
   assert (disjoint last0 last1);
   LSeq.eq_intro (as_seq h1 last0) (LSeq.create (2 * block_length a) (u8 0));
@@ -449,8 +449,8 @@ let load_last4 #a #m totlen_buf len b fin last =
   let (l10,l11) = load_last_blocks #a totlen_buf len b1 fin last1 in
   let (l20,l21) = load_last_blocks #a totlen_buf len b2 fin last2 in
   let (l30,l31) = load_last_blocks #a totlen_buf len b3 fin last3 in
-  let mb0:multibuf (lanes a m) (block_len a) = ntup4 (l00, (l10, (l20, l30))) in
-  let mb1:multibuf (lanes a m) (block_len a) = ntup4 (l01, (l11, (l21, l31))) in
+  let mb0:multibuf (lanes a m) (HD.block_len a) = ntup4 (l00, (l10, (l20, l30))) in
+  let mb1:multibuf (lanes a m) (HD.block_len a) = ntup4 (l01, (l11, (l21, l31))) in
   let h1 = ST.get() in
   assert ((as_seq h1 l00, as_seq h1 l01) ==
           SpecVec.load_last_blocks #a (as_seq h0 totlen_buf) (v fin) (v len) (as_seq h0 b0));
@@ -477,14 +477,14 @@ val load_last8: #a:sha2_alg -> #m:m_spec{lanes a m = 8} -> load_last_t a m
 let load_last8 #a #m totlen_buf len b fin last =
   let h0 = ST.get() in
   let (b0,(b1,(b2,(b3,(b4,(b5,(b6,b7))))))) = NTup.tup8 b in
-  let last0 = sub last 0ul (2ul *! block_len a) in
-  let last1 = sub last (2ul *! block_len a) (2ul *! block_len a) in
-  let last2 = sub last (4ul *! block_len a) (2ul *! block_len a) in
-  let last3 = sub last (6ul *! block_len a) (2ul *! block_len a) in
-  let last4 = sub last (8ul *! block_len a) (2ul *! block_len a) in
-  let last5 = sub last (10ul *! block_len a) (2ul *! block_len a) in
-  let last6 = sub last (12ul *! block_len a) (2ul *! block_len a) in
-  let last7 = sub last (14ul *! block_len a) (2ul *! block_len a) in
+  let last0 = sub last 0ul (2ul *! HD.block_len a) in
+  let last1 = sub last (2ul *! HD.block_len a) (2ul *! HD.block_len a) in
+  let last2 = sub last (4ul *! HD.block_len a) (2ul *! HD.block_len a) in
+  let last3 = sub last (6ul *! HD.block_len a) (2ul *! HD.block_len a) in
+  let last4 = sub last (8ul *! HD.block_len a) (2ul *! HD.block_len a) in
+  let last5 = sub last (10ul *! HD.block_len a) (2ul *! HD.block_len a) in
+  let last6 = sub last (12ul *! HD.block_len a) (2ul *! HD.block_len a) in
+  let last7 = sub last (14ul *! HD.block_len a) (2ul *! HD.block_len a) in
   assert (internally_disjoint8 last0 last1 last2 last3 last4 last5 last6 last7);
   let h1 = ST.get() in
   assert (h0 == h1);
@@ -509,9 +509,9 @@ let load_last8 #a #m totlen_buf len b fin last =
   let (l70,l71) = load_last_blocks #a totlen_buf len b7 fin last7 in
   let h3 = ST.get() in assert (modifies (loc last0 |+| loc last1 |+| loc last2 |+| loc last3 |+| loc last4 |+| loc last5 |+| loc last6 |+| loc last7) h0 h3);
   assert (modifies (loc last) h0 h3);
-  let mb0:multibuf (lanes a m) (block_len a) =
+  let mb0:multibuf (lanes a m) (HD.block_len a) =
     ntup8 (l00, (l10, (l20, (l30, (l40, (l50, (l60, l70))))))) in
-  let mb1:multibuf (lanes a m) (block_len a) =
+  let mb1:multibuf (lanes a m) (HD.block_len a) =
     ntup8 (l01, (l11, (l21, (l31, (l41, (l51, (l61, l71))))))) in
   ntup8_lemma #_ #8 (l00, (l10, (l20, (l30, (l40, (l50, (l60, l70)))))));
   ntup8_lemma #_ #8 (l01, (l11, (l21, (l31, (l41, (l51, (l61, l71)))))));
@@ -581,7 +581,7 @@ let transpose_state #a #m st =
 inline_for_extraction noextract
 val store_state: #a:sha2_alg -> #m:m_spec{is_supported a m}
   -> st:state_t a m
-  -> hbuf:lbuffer uint8 (size (lanes a m) *! 8ul *! word_len a) ->
+  -> hbuf:lbuffer uint8 (size (lanes a m) *! 8ul *! HD.word_len a) ->
   Stack unit
   (requires fun h -> live h hbuf /\ live h st /\ disjoint hbuf st /\
     as_seq h hbuf == LSeq.create (lanes a m * 8 * word_length a) (u8 0))
@@ -610,8 +610,8 @@ let emit1_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 1}) (hseq:LSeq.lseq uint8 
 
 inline_for_extraction noextract
 val emit1: #a:sha2_alg -> #m:m_spec{lanes a m = 1}
-  -> hbuf:lbuffer uint8 (8ul *! word_len a)
-  -> result:multibuf (lanes a m) (hash_len a) ->
+  -> hbuf:lbuffer uint8 (8ul *! HD.word_len a)
+  -> result:multibuf (lanes a m) (HD.hash_len a) ->
   Stack unit
   (requires fun h -> live_multi h result /\ live h hbuf /\
     internally_disjoint result /\ disjoint_multi result hbuf)
@@ -620,7 +620,7 @@ val emit1: #a:sha2_alg -> #m:m_spec{lanes a m = 1}
 
 let emit1 #a #m hbuf result =
   let h0 = ST.get() in
-  copy result.(|0|) (sub hbuf 0ul (hash_len a));
+  copy result.(|0|) (sub hbuf 0ul (HD.hash_len a));
   let h1 = ST.get() in
   Lib.NTuple.eq_intro (as_seq_multi h1 result) (emit1_spec #a #m (as_seq h0 hbuf));
   emit1_lemma #a #m (as_seq h0 hbuf);
@@ -649,8 +649,8 @@ let emit4_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 4}) (hseq:LSeq.lseq uint8 
 
 inline_for_extraction noextract
 val emit4: #a:sha2_alg -> #m:m_spec{lanes a m = 4}
-  -> hbuf: lbuffer uint8 (size (lanes a m) *! 8ul *! word_len a)
-  -> result:multibuf (lanes a m) (hash_len a) ->
+  -> hbuf: lbuffer uint8 (size (lanes a m) *! 8ul *! HD.word_len a)
+  -> result:multibuf (lanes a m) (HD.hash_len a) ->
   Stack unit
   (requires fun h -> live_multi h result /\ live h hbuf /\
     internally_disjoint result  /\ disjoint_multi result hbuf)
@@ -667,10 +667,10 @@ let emit4 #a #m hbuf result =
   assert (disjoint b1 b2);
   assert (disjoint b1 b3);
   assert (disjoint b2 b3);
-  copy b0 (sub hbuf 0ul (hash_len a));
-  copy b1 (sub hbuf (8ul *! word_len a) (hash_len a));
-  copy b2 (sub hbuf (16ul *! word_len a) (hash_len a));
-  copy b3 (sub hbuf (24ul *! word_len a) (hash_len a));
+  copy b0 (sub hbuf 0ul (HD.hash_len a));
+  copy b1 (sub hbuf (8ul *! HD.word_len a) (HD.hash_len a));
+  copy b2 (sub hbuf (16ul *! HD.word_len a) (HD.hash_len a));
+  copy b3 (sub hbuf (24ul *! HD.word_len a) (HD.hash_len a));
   let h1 = ST.get() in
   assert (as_seq h1 b0 == LSeq.sub (as_seq h0 hbuf) 0 (hash_length a));
   assert (as_seq h1 b1 == LSeq.sub (as_seq h0 hbuf) (8 * word_length a) (hash_length a));
@@ -712,8 +712,8 @@ let emit8_lemma (#a:sha2_alg) (#m:m_spec{lanes a m == 8}) (hseq:LSeq.lseq uint8 
 
 inline_for_extraction noextract
 val emit8: #a:sha2_alg -> #m:m_spec{lanes a m = 8}
-  -> hbuf: lbuffer uint8 (size (lanes a m) *! 8ul *! word_len a)
-  -> result:multibuf (lanes a m) (hash_len a) ->
+  -> hbuf: lbuffer uint8 (size (lanes a m) *! 8ul *! HD.word_len a)
+  -> result:multibuf (lanes a m) (HD.hash_len a) ->
   Stack unit
   (requires fun h -> live_multi h result /\ live h hbuf /\
     internally_disjoint result  /\ disjoint_multi result hbuf)
@@ -725,16 +725,16 @@ let emit8 #a #m hbuf result =
   let h0 = ST.get() in
   let (b0,(b1,(b2,(b3,(b4,(b5,(b6,b7))))))) = NTup.tup8 result in
   assert (internally_disjoint8 b0 b1 b2 b3 b4 b5 b6 b7);
-  copy b0 (sub hbuf 0ul (hash_len a));
-  copy b1 (sub hbuf (8ul *! word_len a) (hash_len a));
-  copy b2 (sub hbuf (16ul *! word_len a) (hash_len a));
-  copy b3 (sub hbuf (24ul *! word_len a) (hash_len a));
+  copy b0 (sub hbuf 0ul (HD.hash_len a));
+  copy b1 (sub hbuf (8ul *! HD.word_len a) (HD.hash_len a));
+  copy b2 (sub hbuf (16ul *! HD.word_len a) (HD.hash_len a));
+  copy b3 (sub hbuf (24ul *! HD.word_len a) (HD.hash_len a));
   let h1 = ST.get() in
   assert (modifies (loc b0 |+| loc b1 |+| loc b2 |+| loc b3) h0 h1);
-  copy b4 (sub hbuf (32ul *! word_len a) (hash_len a));
-  copy b5 (sub hbuf (40ul *! word_len a) (hash_len a));
-  copy b6 (sub hbuf (48ul *! word_len a) (hash_len a));
-  copy b7 (sub hbuf (56ul *! word_len a) (hash_len a));
+  copy b4 (sub hbuf (32ul *! HD.word_len a) (HD.hash_len a));
+  copy b5 (sub hbuf (40ul *! HD.word_len a) (HD.hash_len a));
+  copy b6 (sub hbuf (48ul *! HD.word_len a) (HD.hash_len a));
+  copy b7 (sub hbuf (56ul *! HD.word_len a) (HD.hash_len a));
   let h1 = ST.get() in
   assert (as_seq h1 b0 == LSeq.sub (as_seq h0 hbuf) 0 (hash_length a));
   assert (as_seq h1 b1 == LSeq.sub (as_seq h0 hbuf) (8 * word_length a) (hash_length a));
@@ -757,8 +757,8 @@ let emit8 #a #m hbuf result =
 
 inline_for_extraction noextract
 val emit: #a:sha2_alg -> #m:m_spec{is_supported a m}
-  -> hbuf: lbuffer uint8 (size (lanes a m) *! 8ul *! word_len a)
-  -> result:multibuf (lanes a m) (hash_len a) ->
+  -> hbuf: lbuffer uint8 (size (lanes a m) *! 8ul *! HD.word_len a)
+  -> result:multibuf (lanes a m) (HD.hash_len a) ->
   Stack unit
   (requires fun h -> live_multi h result /\ live h hbuf /\
     internally_disjoint result /\ disjoint_multi result hbuf)
@@ -782,7 +782,7 @@ let get_multiblock_t (a:sha2_alg) (m:m_spec) =
     len:size_t
   -> b:multibuf (lanes a m) len
   -> i:size_t{v i < v len / block_length a} ->
-  Stack (multibuf (lanes a m) (block_len a))
+  Stack (multibuf (lanes a m) (HD.block_len a))
   (requires fun h -> live_multi h b)
   (ensures  fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\ preserves_disjoint_multi b r /\
     as_seq_multi h1 r == SpecVec.get_multiblock_spec (v len) (as_seq_multi h0 b) (v i))
@@ -795,31 +795,31 @@ let get_multiblock #a #m len b i =
   match lanes a m with
   | 1 ->
     let b0 = NTup.tup1 b in
-    let b' = sub b0 (i *! block_len a) (block_len a) in
+    let b' = sub b0 (i *! HD.block_len a) (HD.block_len a) in
     let mb' = NTup.ntup1 b' in
     let h1 = ST.get() in
     NTup.eq_intro (as_seq_multi h1 mb') (SpecVec.get_multiblock_spec #a #m (v len) (as_seq_multi h0 b) (v i));
     mb'
   | 4 ->
     let (b0,(b1,(b2,b3))) = NTup.tup4 b in
-    let bl0 = sub b0 (i *! block_len a) (block_len a) in
-    let bl1 = sub b1 (i *! block_len a) (block_len a) in
-    let bl2 = sub b2 (i *! block_len a) (block_len a) in
-    let bl3 = sub b3 (i *! block_len a) (block_len a) in
+    let bl0 = sub b0 (i *! HD.block_len a) (HD.block_len a) in
+    let bl1 = sub b1 (i *! HD.block_len a) (HD.block_len a) in
+    let bl2 = sub b2 (i *! HD.block_len a) (HD.block_len a) in
+    let bl3 = sub b3 (i *! HD.block_len a) (HD.block_len a) in
     let mb = NTup.ntup4 (bl0, (bl1, (bl2, bl3))) in
     let h1 = ST.get() in
     NTup.eq_intro (as_seq_multi h1 mb) (SpecVec.get_multiblock_spec #a #m (v len) (as_seq_multi h0 b) (v i));
     mb
   | 8 ->
     let (b0,(b1,(b2,(b3,(b4,(b5,(b6,b7))))))) = NTup.tup8 b in
-    let bl0 = sub b0 (i *! block_len a) (block_len a) in
-    let bl1 = sub b1 (i *! block_len a) (block_len a) in
-    let bl2 = sub b2 (i *! block_len a) (block_len a) in
-    let bl3 = sub b3 (i *! block_len a) (block_len a) in
-    let bl4 = sub b4 (i *! block_len a) (block_len a) in
-    let bl5 = sub b5 (i *! block_len a) (block_len a) in
-    let bl6 = sub b6 (i *! block_len a) (block_len a) in
-    let bl7 = sub b7 (i *! block_len a) (block_len a) in
+    let bl0 = sub b0 (i *! HD.block_len a) (HD.block_len a) in
+    let bl1 = sub b1 (i *! HD.block_len a) (HD.block_len a) in
+    let bl2 = sub b2 (i *! HD.block_len a) (HD.block_len a) in
+    let bl3 = sub b3 (i *! HD.block_len a) (HD.block_len a) in
+    let bl4 = sub b4 (i *! HD.block_len a) (HD.block_len a) in
+    let bl5 = sub b5 (i *! HD.block_len a) (HD.block_len a) in
+    let bl6 = sub b6 (i *! HD.block_len a) (HD.block_len a) in
+    let bl7 = sub b7 (i *! HD.block_len a) (HD.block_len a) in
     let mb = NTup.ntup8 (bl0, (bl1, (bl2, (bl3, (bl4, (bl5, (bl6, bl7))))))) in
     let h1 = ST.get() in
     NTup.eq_intro (as_seq_multi h1 mb) (SpecVec.get_multiblock_spec #a #m (v len) (as_seq_multi h0 b) (v i));
@@ -830,7 +830,7 @@ inline_for_extraction noextract
 let get_multilast_t (a:sha2_alg) (m:m_spec) =
     len:size_t
   -> b:multibuf (lanes a m) len ->
-  Stack (multibuf (lanes a m) (len %. block_len a))
+  Stack (multibuf (lanes a m) (len %. HD.block_len a))
   (requires fun h -> live_multi h b)
   (ensures  fun h0 r h1 -> h0 == h1 /\ live_multi h1 r /\ preserves_disjoint_multi b r /\
     as_seq_multi h1 r == SpecVec.get_multilast_spec #a #m (v len) (as_seq_multi h0 b))
@@ -840,7 +840,7 @@ val get_multilast: #a:sha2_alg -> #m:m_spec{is_supported a m} -> get_multilast_t
 #push-options "--z3rlimit 300"
 let get_multilast #a #m len b =
   let h0 = ST.get() in
-  let rem = len %. block_len a in
+  let rem = len %. HD.block_len a in
   assert (v (len -! rem) == v len - v rem);
   match lanes a m with
   | 1 ->

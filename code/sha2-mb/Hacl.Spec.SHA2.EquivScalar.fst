@@ -321,20 +321,20 @@ let ws_next_pre_lemma a block i j =
   assert (Seq.index ws_nj j == Seq.index ws_n j)
 
 
-val shuffle_core_pre_lemma: a:sha2_alg -> k_t:word a -> ws_t:word a -> hash:words_state a ->
+val shuffle_core_pre_lemma: a:sha2_alg -> k_t:word a -> ws_t:word a -> hash:words_state' a ->
   Lemma (shuffle_core_pre a k_t ws_t hash == Spec.shuffle_core_pre a k_t ws_t hash)
 let shuffle_core_pre_lemma a k_t ws_t hash =
   reveal_opaque (`%Spec.shuffle_core_pre) Spec.shuffle_core_pre
 
 
 noextract
-val shuffle_pre_inner: a:sha2_alg -> ws:Spec.k_w a -> i:nat{i < size_k_w a} -> st:words_state a -> words_state a
+val shuffle_pre_inner: a:sha2_alg -> ws:Spec.k_w a -> i:nat{i < size_k_w a} -> st:words_state' a -> words_state' a
 let shuffle_pre_inner a ws i st =
   let k = k0 a in
   shuffle_core_pre a k.[i] ws.[i] st
 
 
-val shuffle_spec_lemma: a:sha2_alg -> st0:words_state a -> block:Spec.block_w a -> Lemma
+val shuffle_spec_lemma: a:sha2_alg -> st0:words_state' a -> block:Spec.block_w a -> Lemma
   (let ws = Spec.ws_pre a block in
    Loops.repeati (Spec.size_k_w a) (shuffle_pre_inner a ws) st0 == Spec.shuffle a st0 block)
 
@@ -342,7 +342,7 @@ let shuffle_spec_lemma a st0 block =
   reveal_opaque (`%Spec.shuffle) Spec.shuffle;
   let ws = Spec.ws_pre a block in
   let k = Spec.k0 a in
-  let aux (i:nat{i < Spec.size_k_w a}) (st:words_state a) :
+  let aux (i:nat{i < Spec.size_k_w a}) (st:words_state' a) :
     Lemma (shuffle_pre_inner a ws i st == Spec.shuffle_core_pre a k.[i] ws.[i] st) =
     let k = Spec.k0 a in
     shuffle_core_pre_lemma a k.[i] ws.[i] st in
@@ -358,8 +358,8 @@ val shuffle_pre_inner16:
   -> ws:Spec.k_w a
   -> i:nat{i < num_rounds16 a}
   -> j:nat{j < 16}
-  -> st:words_state a ->
-  words_state a
+  -> st:words_state' a ->
+  words_state' a
 
 let shuffle_pre_inner16 a ws i j st =
   let k = k0 a in
@@ -371,8 +371,8 @@ val shuffle_pre_inner_num_rounds:
     a:sha2_alg
   -> ws:Spec.k_w a
   -> i:nat{i < num_rounds16 a}
-  -> st:words_state a ->
-  words_state a
+  -> st:words_state' a ->
+  words_state' a
 
 let shuffle_pre_inner_num_rounds a ws i st =
   Loops.repeati 16 (shuffle_pre_inner16 a ws i) st
@@ -382,16 +382,16 @@ val shuffle_spec_lemma16_step:
     a:sha2_alg
   -> block:Spec.block_w a
   -> i:nat{i < num_rounds16 a}
-  -> st:words_state a
+  -> st:words_state' a
   -> j:nat{j <= 16} ->
   Lemma
    (let ws = Spec.ws_pre a block in
     Loops.repeati j (shuffle_pre_inner16 a ws i) st ==
-    Loops.repeat_right (16 * i) (16 * i + j) (Loops.fixed_a (words_state a)) (shuffle_pre_inner a ws) st)
+    Loops.repeat_right (16 * i) (16 * i + j) (Loops.fixed_a (words_state' a)) (shuffle_pre_inner a ws) st)
 
 let rec shuffle_spec_lemma16_step a block i st j =
   let ws = Spec.ws_pre a block in
-  let a_fixed = Loops.fixed_a (words_state a) in
+  let a_fixed = Loops.fixed_a (words_state' a) in
   //let lp = Loops.repeati j (shuffle_pre_inner16 a ws i) st in
   //let rp = Loops.repeat_right (16 * i) (16 * i + j) a_fixed (shuffle_pre_inner a ws) st in
   if j = 0 then begin
@@ -408,7 +408,7 @@ let rec shuffle_spec_lemma16_step a block i st j =
     () end
 
 
-val shuffle_spec_lemma16: a:sha2_alg -> st0:words_state a -> block:Spec.block_w a -> Lemma
+val shuffle_spec_lemma16: a:sha2_alg -> st0:words_state' a -> block:Spec.block_w a -> Lemma
   (let ws = Spec.ws_pre a block in
    Loops.repeati (Spec.size_k_w a) (shuffle_pre_inner a ws) st0 ==
    Loops.repeati (num_rounds16 a) (shuffle_pre_inner_num_rounds a ws) st0)
@@ -416,8 +416,8 @@ val shuffle_spec_lemma16: a:sha2_alg -> st0:words_state a -> block:Spec.block_w 
 let shuffle_spec_lemma16 a st0 block =
   //w = 16, n = num_rounds16 a, normalize_v = id
   let ws = Spec.ws_pre a block in
-  let a_fixed = Loops.fixed_a (words_state a) in
-  let aux (i:nat{i < num_rounds16 a}) (st:words_state a) :
+  let a_fixed = Loops.fixed_a (words_state' a) in
+  let aux (i:nat{i < num_rounds16 a}) (st:words_state' a) :
     Lemma (shuffle_pre_inner_num_rounds a ws i st ==
       Loops.repeat_right (16 * i) (16 * (i + 1)) a_fixed (shuffle_pre_inner a ws) st) =
    shuffle_spec_lemma16_step a block i st 16 in
@@ -464,10 +464,10 @@ let ws_next_inner_lemma a block i ws1 =
 val shuffle_lemma_i_step:
     a:sha2_alg
   -> block:k_w a
-  -> st0:words_state a
+  -> st0:words_state' a
   -> i:nat{i < num_rounds16 a}
   -> ws1:k_w a
-  -> st1:words_state a ->
+  -> st1:words_state' a ->
   Lemma
   (requires
    (let ws_s = Spec.ws_pre a block in
@@ -492,7 +492,7 @@ let shuffle_lemma_i_step a block st0 i ws1 st1 =
   let ws = if i < num_rounds16 a - 1 then ws_next a ws1 else ws1 in
   ws_next_inner_lemma a block i ws1;
 
-  let aux_st (j:nat{j < 16}) (hash:words_state a) :
+  let aux_st (j:nat{j < 16}) (hash:words_state' a) :
     Lemma (shuffle_pre_inner16 a ws_s i j hash == shuffle_inner a ws1 i j hash) =
     let k_t = Seq.index (k0 a) (16 * i + j) in
     let lp = shuffle_core_pre a k_t ws_s.[16 * i + j] st in
@@ -521,11 +521,11 @@ let ws_pre_init_lemma a block =
 val shuffle_lemma_i:
     a:sha2_alg
   -> block:k_w a
-  -> st0:words_state a
+  -> st0:words_state' a
   -> i:nat{i <= num_rounds16 a} ->
   Lemma
   (let ws_s = Spec.ws_pre a block in
-   let (ws, st) : tuple2 (k_w a) (words_state a) =
+   let (ws, st) : tuple2 (k_w a) (words_state' a) =
      Loops.repeati i (shuffle_inner_loop a) (block, st0) in
    st == Loops.repeati i (shuffle_pre_inner_num_rounds a ws_s) st0 /\
    (if i < num_rounds16 a - 1 then
@@ -556,7 +556,7 @@ let rec shuffle_lemma_i a block st0 i =
     shuffle_lemma_i_step a block st0 (i - 1) ws1 st1 end
 
 
-val shuffle_lemma: a:sha2_alg -> block:k_w a -> st0:words_state a ->
+val shuffle_lemma: a:sha2_alg -> block:k_w a -> st0:words_state' a ->
   Lemma (shuffle a block st0 == Spec.shuffle a st0 block)
 let shuffle_lemma a block st0 =
   let ws_s = Spec.ws_pre a block in
@@ -570,9 +570,10 @@ let shuffle_lemma a block st0 =
 
 val update_lemma: a:sha2_alg -> block:block_t a -> hash:words_state a ->
   Lemma (update a block hash == Spec.update a hash block)
-let update_lemma a block hash =
+let update_lemma a block hash' =
+  let hash, _ = hash' in
   reveal_opaque (`%Spec.update) Spec.update;
-  let block_w = BSeq.uints_from_bytes_be #(word_t a) #SEC block in
+  let block_w = BSeq.uints_from_bytes_be #(word_t a) #SEC #block_word_length block in
   assert (block_w == words_of_bytes a #block_word_length block);
   let hash_1 = shuffle a block_w hash in
   shuffle_lemma a block_w hash;
@@ -583,27 +584,28 @@ let update_lemma a block hash =
   let aux (i:nat{i < 8}) : Lemma (res.[i] == res_comm.[i]) =
     assert (index res i == hash_1.[i] +. hash.[i]);
     assert (index res_comm i == hash.[i] +. hash_1.[i]);
-    assert (v (hash_1.[i] +. hash.[i]) == v (hash.[i] +. hash_1.[i]));
+    assert (v #(word_t a) #SEC (hash_1.[i] +. hash.[i]) == v #(word_t a) #SEC (hash.[i] +. hash_1.[i]));
     assert (index res i == index res_comm i) in
 
   Classical.forall_intro aux;
   eq_intro res res_comm;
-  eq_intro #_ #8 (update a block hash) (Spec.update_pre a hash block)
+  eq_intro #_ #8 (fst (update a block hash')) (fst (Spec.update_pre a hash' block))
 
 
 val finish_lemma: a:sha2_alg -> st:words_state a -> Lemma (finish a st == PadFinish.finish a st)
-let finish_lemma a st =
+let finish_lemma a st' =
+  let st, _ = st' in
   let hash_final_w = sub #_ #8 st 0 (hash_word_length a) in
-  assert (PadFinish.finish a st == BSeq.uints_to_bytes_be #(word_t a) #SEC hash_final_w);
-  assert (finish a st == sub (BSeq.uints_to_bytes_be #(word_t a) #SEC #8 st) 0 (hash_length a));
+  assert (PadFinish.finish a st' == BSeq.uints_to_bytes_be #(word_t a) #SEC #(hash_word_length a) hash_final_w);
+  assert (finish a st' == sub (BSeq.uints_to_bytes_be #(word_t a) #SEC #8 st) 0 (hash_length a));
   assert (hash_length a == word_length a * hash_word_length a);
 
-  let aux (i:nat{i < hash_length a}) : Lemma ((finish a st).[i] == (PadFinish.finish a st).[i]) =
-    BSeq.index_uints_to_bytes_be #(word_t a) #SEC hash_final_w i;
+  let aux (i:nat{i < hash_length a}) : Lemma ((finish a st').[i] == (PadFinish.finish a st').[i]) =
+    BSeq.index_uints_to_bytes_be #(word_t a) #SEC #(hash_word_length a) hash_final_w i;
     BSeq.index_uints_to_bytes_be #(word_t a) #SEC #8 st i in
 
   Classical.forall_intro aux;
-  eq_intro (finish a st) (PadFinish.finish a st)
+  eq_intro #uint8 #(hash_length a) (finish a st') (PadFinish.finish a st')
 
 //TODO: move to Lib.Sequence.Lemmas
 val repeat_blocks_multi_extensionality:

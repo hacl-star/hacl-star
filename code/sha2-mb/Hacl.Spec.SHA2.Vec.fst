@@ -49,6 +49,14 @@ inline_for_extraction
 val zero_element: a:sha2_alg -> m:m_spec -> element_t a m
 let zero_element a m = vec_zero (word_t a) (lanes a m)
 
+//TODO: remove when Spec.Hash.Definitions.word is fixed
+inline_for_extraction
+let word (a:hash_alg) = uint_t (word_t a) SEC
+
+//TODO: remove when Spec.Hash.Definitions.word is fixed
+inline_for_extraction
+let words_state' a = m:Seq.seq (word a) {Seq.length m = state_word_length a}
+
 inline_for_extraction
 val load_element: a:sha2_alg -> m:m_spec -> word a -> element_t a m
 let load_element a m x = vec_load x (lanes a m)
@@ -124,8 +132,8 @@ noextract
 let ws_spec (a:sha2_alg) (m:m_spec) = lseq (element_t a m) 16
 
 noextract
-let state_spec_v (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : lseq (words_state a) (lanes a m) =
-  createi #(words_state a) (lanes a m) (fun i ->
+let state_spec_v (#a:sha2_alg) (#m:m_spec) (st:state_spec a m) : lseq (words_state' a) (lanes a m) =
+  createi #(words_state' a) (lanes a m) (fun i ->
     create8
       (vec_v st.[0]).[i] (vec_v st.[1]).[i] (vec_v st.[2]).[i] (vec_v st.[3]).[i]
       (vec_v st.[4]).[i] (vec_v st.[5]).[i] (vec_v st.[6]).[i] (vec_v st.[7]).[i])
