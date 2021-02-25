@@ -597,7 +597,6 @@ int main() {
   exp = initialize_vector64(0x8888888888888888UL,0x8888888888888888UL);
   compare_and_print_vec64("xor", vec0, exp);
   //  print_vector64("xor", vec0);
-  */
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
