@@ -14,7 +14,7 @@
 // Of course, it doesn't make sense to compile and run those test on a platform
 // which doesn't support 256-bits vectors, but using macros directly in the files
 // makes it easy to make the whole directory build on all platforms.
-#if defined(TEST_VEC256)
+#if defined(SUPPORTS_256)
 #include "Hacl_Streaming_Poly1305_256.h"
 #include "poly1305_vectors.h"
 #include "EverCrypt_AutoConfig2.h"
@@ -25,7 +25,7 @@ typedef struct Hacl_Streaming_Poly1305_256_poly1305_256_state_s poly1305_state;
 int main() {
     bool ok = true;
 
-#if defined(TEST_VEC256)
+#if defined(SUPPORTS_256)
     // Here, I can't really loop over the vectors... because I want to exercise
     // the streaming API with various lengths. Otherwise, in an exemplary test,
     // one would write a for-loop over the test vectors.

@@ -15,7 +15,7 @@
 
 #include "test_helpers.h"
 
-#if defined(TEST_VEC256)
+#if defined(SUPPORTS_256)
 #include "Hacl_Blake2b_256.h"
 #endif
 
@@ -38,7 +38,7 @@ bool print_test2b(int in_len, uint8_t* in, int key_len, uint8_t* key, int exp_le
   printf("testing blake2b vec-32:\n");
   bool ok = print_result(exp_len,comp,exp);
 
-#if defined(TEST_VEC256)
+#if defined(SUPPORTS_256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     Hacl_Blake2b_256_blake2b(exp_len,comp,in_len,in,key_len,key);
     printf("testing blake2b vec-256:\n");
@@ -123,7 +123,7 @@ int main()
   uint64_t cdiff3 = b - a;
   double tdiff3 = t2 - t1;
 
-#if defined(TEST_VEC256)
+#if defined(SUPPORTS_256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     for (int j = 0; j < ROUNDS; j++) {
       Hacl_Blake2b_256_blake2b(64,plain,SIZE,plain,0,NULL);
@@ -145,7 +145,7 @@ int main()
   printf("Blake2B (Vec 64-bit):\n"); print_time(count,tdiff2,cdiff2);
   printf("Blake2S (Vec 128-bit):\n"); print_time(count,tdiff3,cdiff3);
 
-#if defined(TEST_VEC256)
+#if defined(SUPPORTS_256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("Blake2B (Vec 256-bit):\n"); print_time(count,tdiff4,cdiff4);
   }
