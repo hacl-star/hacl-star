@@ -931,8 +931,10 @@ Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsic
 #define Lib_IntVector_Intrinsics_vec128_load32s_(x0, x1, x2, x3) \
   ((vector128)((vector128_32){(unsigned int)(x0),(unsigned int)(x1),(unsigned int)(x2),(unsigned int)(x3)}))
 
+// Test
 #define Lib_IntVector_Intrinsics_vec128_load64_(x)                      \
-  ((vector128)((vector128_64)vec_load_pair((unsigned long long)(x),(unsigned long long)(x))))
+  ((vector128)((vector128_64){(unsigned long long)(x),(unsigned long long)(x)}))
+//  ((vector128)((vector128_64)vec_load_pair((unsigned long long)(x),(unsigned long long)(x))))
 
 #define Lib_IntVector_Intrinsics_vec128_lognot_(x0)                     \
   ((vector128)(vec_xor((vector128)(x0), (vector128)vec_splat_u32(-1))))
