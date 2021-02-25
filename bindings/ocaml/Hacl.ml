@@ -21,13 +21,13 @@ module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs
 module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
 module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
 
-#ifdef SUPPORTS_128
+#ifdef COMPILE_VEC128
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
 module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
 module Hacl_Blake2s_128 = Hacl_Blake2s_128_bindings.Bindings(Hacl_Blake2s_128_stubs)
 #endif
 
-#ifdef SUPPORTS_256
+#ifdef COMPILE_VEC256
 module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
 module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
 module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
@@ -347,7 +347,7 @@ module Blake2s_32 : Blake2 =
     let blake2s = Hacl_Blake2s_32.hacl_Blake2s_32_blake2s
   end)
 
-#ifdef SUPPORTS_128
+#ifdef COMPILE_VEC128
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [VEC128]
@@ -387,7 +387,7 @@ module Blake2s_128 : Blake2 =
   end)
 #endif
 
-#ifdef SUPPORTS_256
+#ifdef COMPILE_VEC256
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
     let reqs = [VEC256]

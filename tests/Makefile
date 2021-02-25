@@ -22,17 +22,12 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 
 arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test curve25519-arm-test.test
 
-build-z15: blake2-test.exe blake2s-32-test-streaming.exe blake2s-128-test-streaming.exe \
-     blake2b-32-test-streaming.exe \
-     chacha20-test.exe chacha20-vec-test.exe \
-     poly1305-test.exe poly1305-32-test-streaming.exe poly1305-128-test-streaming.exe \
-     chacha20poly1305-test.exe
+# Curve64 doesn't work on all processors
+TARGETS_NO_CURVE64 = $(filter-out curve64-%, $(TARGETS))
 
-z15: blake2-test.test blake2s-32-test-streaming.test blake2s-128-test-streaming.test \
-     blake2b-32-test-streaming.test \
-     chacha20-test.test chacha20-vec-test.test \
-     poly1305-test.test poly1305-32-test-streaming.test poly1305-128-test-streaming.test \
-     chacha20poly1305-test.test
+all-no-curve64: $(TARGETS_NO_CURVE64)
+
+test-no-curve64: $(patsubst %.exe,%.test,$(TARGETS_NO_CURVE64))
 
 # Dependency
 
@@ -48,6 +43,9 @@ z15: blake2-test.test blake2s-32-test-streaming.test blake2s-128-test-streaming.
 
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
+# Note that vec128-test.exe uses lib/c and not dist/gcc-compatible:
+# this allows to work on and test the vectorized instructions without
+# rebuilding the whole HACL library.
 vec128-test.exe: ../lib/c/libintvector.h vec128-test.c
 	cc -I../lib/c -O3 $(CFLAGS) vec128-test.c -o vec128-test.exe
 

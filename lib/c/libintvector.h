@@ -642,7 +642,7 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
   (vreinterpretq_u32_u64(vzip2q_u64(vreinterpretq_u64_u32(x1),vreinterpretq_u64_u32(x2))))
 
 // IBM z architecture
-#elif (defined(__s390__) || defined(__s390x__) || defined(__zarch__) || defined(__SYSC_ZARCH__))
+#elif defined(__s390x__) // this flag is for GCC only
 
 #include <vecintrin.h>
 
@@ -657,12 +657,14 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 typedef vector128_8 Lib_IntVector_Intrinsics_vec128;
 typedef vector128_8 vector128;
 
-// Small helper to change the endianess of the vector's elements, seen as uint32
+// Small helper to change the endianess of the vector's elements, seen as uint32.
+// Note that we can't use vec_revb.
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
   ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
                         (vector128_8){3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12})))
 
 // Small helper to change the endianess of the vector's elements, seen as uint64
+// Note that we can't use vec_revb.
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0)      \
   ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
                         (vector128_8){7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8})))
