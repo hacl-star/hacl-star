@@ -746,8 +746,9 @@ typedef vector128_8 vector128;
 // We need to permute the low and high components of the uint64
 // before calling vec_mule. The following helper does that.
 #define Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0)        \
-  ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
-                        (vector128_8){4,5,6,7,0,1,2,3,12,13,14,15,8,9,10,11})))
+  ((vector128)x0)
+//  ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},          \
+//                        (vector128_8){4,5,6,7,0,1,2,3,12,13,14,15,8,9,10,11})))
 
 #define Lib_IntVector_Intrinsics_vec128_mul64_(x0, x1)                  \
   ((vector128)(vec_mule((vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0), \
