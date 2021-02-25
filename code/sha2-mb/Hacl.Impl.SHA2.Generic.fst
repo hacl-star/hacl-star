@@ -9,7 +9,6 @@ open Lib.NTuple
 open Lib.Buffer
 open Lib.IntVector
 open Lib.MultiBuffer
-open Lib.CreateN
 
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
@@ -106,7 +105,7 @@ let shuffle_core #a #m k_t ws_t st =
   let f1 = e0 in
   let g1 = f0 in
   let h1 = g0 in
-  create8_st st a1 b1 c1 d1 e1 f1 g1 h1
+  create8 st a1 b1 c1 d1 e1 f1 g1 h1
 
 
 #push-options "--z3rlimit 300"
