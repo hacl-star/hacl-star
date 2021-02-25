@@ -820,8 +820,44 @@ typedef vector128_8 vector128;
   ((vector128)(vec_perm((vector128_8) {}, (vector128_8)(x0),            \
                         (vector128_8){7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8})))
 
+static __inline__ Lib_IntVector_Intrinsics_vec128
+Lib_IntVector_Intrinsics_vec128_load32_le_(Lib_IntVector_Intrinsics_vec128 x) {
+  // vec_ld needs the buffer to be aligned
+  uint8_t tmp[16] __attribute__ ((aligned (16)));
+  memcpy(tmp, x, 16);
+  Lib_IntVector_Intrinsics_vec128 res = (vector128_8)vec_ld(0, x);
+  return Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(res);
+}
+
+static __inline__ Lib_IntVector_Intrinsics_vec128
+Lib_IntVector_Intrinsics_vec128_load64_le_(Lib_IntVector_Intrinsics_vec128 x) {
+  // vec_ld needs the buffer to be aligned
+  uint8_t tmp[16] __attribute__ ((aligned (16)));
+  memcpy(tmp, x, 16);
+  Lib_IntVector_Intrinsics_vec128 res = (vector128_8)vec_ld(0, x);
+  return Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(res);
+}
+
+static __inline__ Lib_IntVector_Intrinsics_vec128
+Lib_IntVector_Intrinsics_vec128_store32_le_(uint8_t *x0, Lib_IntVector_Intrinsics_vec128 x1) {
+  // vec_st needs the buffer to be aligned
+  uint8_t tmp[16] __attribute__ ((aligned (16)));
+  x1 = Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x1);
+  vec_st((vector128_8)x1, 0, tmp);
+  memcpy(x0, tmp, 16);
+}
+
+static __inline__ Lib_IntVector_Intrinsics_vec128
+Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsics_vec128 x1) {
+  // vec_st needs the buffer to be aligned
+  uint8_t tmp[16] __attribute__ ((aligned (16)));
+  x1 = Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x1);
+  vec_st((vector128_8)x1, 0, tmp);
+  memcpy(x0, tmp, 16);
+}
+
 // Test
-#define Lib_IntVector_Intrinsics_vec128_load32_le_(x)              \
+/*#define Lib_IntVector_Intrinsics_vec128_load32_le_(x)                 \
   ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
    ((vector128_8)vec_ld(0, (const uint8_t*)(x)))))
 
@@ -838,7 +874,7 @@ typedef vector128_8 vector128;
 // Test
 #define Lib_IntVector_Intrinsics_vec128_store64_le_(x0, x1)             \
   (vec_st(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x1)), \
-          0, ((uint8_t*)(x0))))
+  0, ((uint8_t*)(x0)))) */
 
 #define Lib_IntVector_Intrinsics_vec128_add32_(x0,x1)            \
   ((vector128)((vector128_32)(((vector128_32)(x0)) + ((vector128_32)(x1)))))
@@ -873,7 +909,6 @@ typedef vector128_8 vector128;
 #define Lib_IntVector_Intrinsics_vec128_insert32_(x0, x1, x2)           \
   ((vector128)((vector128_32)vec_insert((unsigned int)(x1), (vector128_32)(x0), x2)))
 
-// Test - same as SystemZ
 #define Lib_IntVector_Intrinsics_vec128_insert64_(x0, x1, x2)           \
   ((vector128)((vector128_64)vec_insert((unsigned long long)(x1), (vector128_64)(x0), x2)))
 
