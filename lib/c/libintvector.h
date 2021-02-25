@@ -863,10 +863,10 @@ Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsic
   ((vector128)(vec_and((vector128)(x0),(vector128)(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_eq32_(x0, x1)            \
-  ((vector128)((vector128_32)vec_cmpeq(((vector128_32)(x0)),((vector128_32)(x1)))))
+  ((vector128)(vec_cmpeq(((vector128_32)(x0)),((vector128_32)(x1)))))
 
 #define Lib_IntVector_Intrinsics_vec128_eq64_(x0, x1)            \
-  ((vector128)((vector128_64)vec_cmpeq(((vector128_64)(x0)),((vector128_64)(x1)))))
+  ((vector128)(vec_cmpeq(((vector128_64)(x0)),((vector128_64)(x1)))))
 
 // Test - same as SystemZ
 #define Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1)       \
