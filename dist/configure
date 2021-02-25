@@ -309,6 +309,7 @@ echo "CFLAGS ?=" >> Makefile.config
 
 if detect_arm; then
   echo "... detected ARM platform"
+  echo "TARGET_ARCHITECTURE = ARM" >> Makefile.config
   if detect_arm_neon; then
     echo "... $build_target supports 128-bit NEON"
     supports_128=true
@@ -320,12 +321,14 @@ fi
 if detect_x86; then
   # Just print information: none of the above build options are supported on x86
   echo "... detected x86 platform"
+  echo "TARGET_ARCHITECTURE = x86" >> Makefile.config
   # TODO: can probably detect intrinsics here too and try to enable them!
 fi
 
 if detect_x64; then
   echo "... detected x64 platform"
-  echo "... $build_target supports 128-bit and 256-bit AVX/AVX2"
+  echo "TARGET_ARCHITECTURE = x64" >> Makefile.config
+  echo "... $build_target supports compilation of 128-bit and 256-bit AVX/AVX2"
   supports_128=true
   echo "CFLAGS_128 = -mavx" >> Makefile.config
   supports_256=true
@@ -358,6 +361,7 @@ fi
 
 if detect_ibmz; then
   echo "... detected z platform"
+  echo "TARGET_ARCHITECTURE = SystemZ" >> Makefile.config
   echo "... $build_target supports 128-bit z VSX"
   supports_128=true
   echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
