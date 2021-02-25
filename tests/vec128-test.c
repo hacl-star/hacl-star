@@ -347,9 +347,11 @@ int main() {
 
   vec0 = initialize_vector64(0x0000000100000002UL, 0x0000000300000004UL);
   vec1 = initialize_vector64(0x0000000500000006UL, 0x0000000700000008UL);
+  print_vector64("mul64 - vec0", vec0);
+  print_vector64("mul64 - vec1", vec1);
 
-  vector128 vec3 = Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(vec0);
-  vector128 vec4 = Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(vec1);
+  vec128 vec3 = Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(vec0);
+  vec128 vec4 = Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(vec1);
   print_vector64("mul64 - perm", vec3);
   print_vector64("mul64 - perm", vec4);
 
