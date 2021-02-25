@@ -827,7 +827,8 @@ Lib_IntVector_Intrinsics_vec128_load32_le_(uint8_t *x) {
   // vec_ld needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   memcpy(tmp, x, 16);
-  Lib_IntVector_Intrinsics_vec128 res = (vector128_8)vec_ld(0, tmp);
+  //  Lib_IntVector_Intrinsics_vec128 res = (vector128_8)vec_ld(0, tmp);
+  Lib_IntVector_Intrinsics_vec128 res = (vector128_8)vec_ld(0, x);
   return Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(res);
 }
 
@@ -836,7 +837,8 @@ Lib_IntVector_Intrinsics_vec128_load64_le_(uint8_t *x) {
   // vec_ld needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   memcpy(tmp, x, 16);
-  Lib_IntVector_Intrinsics_vec128 res = (vector128_8)vec_ld(0, tmp);
+  //  Lib_IntVector_Intrinsics_vec128 res = (vector128_8)vec_ld(0, tmp);
+  Lib_IntVector_Intrinsics_vec128 res = (vector128_8)vec_ld(0, x);
   return Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(res);
 }
 
@@ -845,8 +847,9 @@ Lib_IntVector_Intrinsics_vec128_store32_le_(uint8_t *x0, Lib_IntVector_Intrinsic
   // vec_st needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   x1 = Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x1);
-  vec_st((vector128_8)x1, 0, tmp);
-  memcpy(x0, tmp, 16);
+  vec_st((vector128_8)x1, 0, x0);
+  //  vec_st((vector128_8)x1, 0, tmp);
+  //  memcpy(x0, tmp, 16);
 }
 
 static __inline__ Lib_IntVector_Intrinsics_vec128
@@ -854,8 +857,9 @@ Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsic
   // vec_st needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   x1 = Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x1);
-  vec_st((vector128_8)x1, 0, tmp);
-  memcpy(x0, tmp, 16);
+  vec_st((vector128_8)x1, 0, x0);
+  //  vec_st((vector128_8)x1, 0, tmp);
+  //  memcpy(x0, tmp, 16);
 }
 
 // Test
