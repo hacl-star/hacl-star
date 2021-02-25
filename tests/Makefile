@@ -14,7 +14,7 @@ TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 TARGETS_NO_CURVE64 = $(filter-out curve64-%, $(TARGETS))
 
 ifeq ($(TARGET_ARCHITECTURE),SystemZ)
-	TARGETS := TARGETS_NO_CURVE64
+	TARGETS := $(TARGETS_NO_CURVE64)
 endif
 
 CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
