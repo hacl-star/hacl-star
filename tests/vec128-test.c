@@ -146,7 +146,38 @@ int main() {
     0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U
   };
 
+  // Extract
+  //vec0 = initialize_vector();
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  x32 = Lib_IntVector_Intrinsics_vec128_extract32(vec0, 3);
+  printf("extract32:\n");
+  printf("computed:%08x\n", x32);
+  printf("expected:%08x\n", 0x0c0d0e0f);
+  if (x32 == 0x0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
+
+  //vec0 = initialize_vector();
+  vec0 = initialize_vector64(0x00010203004050607, 0x08090a0b0c0d0e0f);
+  x64 = Lib_IntVector_Intrinsics_vec128_extract64(vec0, 1);
+  printf("extract64:\n");
+  printf("computed:%lx\n", x64);
+  printf("expected:%lx\n", 0x08090a0b0c0d0e0f);
+  if (x64 == 0x08090a0b0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
+
+  // Insert
+  vec0 = initialize_vector32(0, 1, 2, 3);
+  vec0 = Lib_IntVector_Intrinsics_vec128_insert32(vec0, 4, 3);
+  exp = initialize_vector32(0x00000000,0x00000001,0x00000002,0x00000004);
+  compare_and_print_vec32("insert32", vec0, exp);
+  //  print_vector32("insert32", vec0);
+
+  vec0 = initialize_vector64(0, 1);
+  vec0 = Lib_IntVector_Intrinsics_vec128_insert64(vec0, 2, 1);
+  exp = initialize_vector64(0x0UL,0x2UL);
+  compare_and_print_vec64("insert64", vec0, exp);
+  //  print_vector64("insert64", vec0);
+
   // Load/store
+  // TODO: test misaligned data
   uint8_t store_le_b[16] = {
       0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
       0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU
@@ -191,6 +222,7 @@ int main() {
   compare_and_print_vec64("load64_le with offset", vec0, exp);
   //  print_vector64("load64_le with offset", vec0);
 
+  /*
   // Arithmetic
   
   vec0 = initialize_vector32(0x0, 0x1, 0x2, 0x3);
@@ -228,22 +260,6 @@ int main() {
   compare_and_print_vec32("eq64", vec0, exp);
   //  print_vector64("eq64", vec0);
 
-  //vec0 = initialize_vector();
-  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
-  x32 = Lib_IntVector_Intrinsics_vec128_extract32(vec0, 3);
-  printf("extract32:\n");
-  printf("computed:%08x\n", x32);
-  printf("expected:%08x\n", 0x0c0d0e0f);
-  if (x32 == 0x0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
-
-  //vec0 = initialize_vector();
-  vec0 = initialize_vector64(0x00010203004050607, 0x08090a0b0c0d0e0f);
-  x64 = Lib_IntVector_Intrinsics_vec128_extract64(vec0, 1);
-  printf("extract64:\n");
-  printf("computed:%lx\n", x64);
-  printf("expected:%lx\n", 0x08090a0b0c0d0e0f);
-  if (x64 == 0x08090a0b0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
-
   vec0 = initialize_vector32(0x0, 0x1, 0x0, 0x3);
   vec1 = initialize_vector32(0x0, 0x0, 0x1, 0x2);
   vec0 = Lib_IntVector_Intrinsics_vec128_gt32(vec0, vec1);
@@ -257,18 +273,6 @@ int main() {
   exp = initialize_vector64(0x0UL,0xffffffffffffffffUL);
   compare_and_print_vec64("gt64", vec0, exp);
   //  print_vector64("gt64", vec0);
-
-  vec0 = initialize_vector32(0, 1, 2, 3);
-  vec0 = Lib_IntVector_Intrinsics_vec128_insert32(vec0, 4, 3);
-  exp = initialize_vector32(0x00000000,0x00000001,0x00000002,0x00000004);
-  compare_and_print_vec32("insert32", vec0, exp);
-  //  print_vector32("insert32", vec0);
-
-  vec0 = initialize_vector64(0, 1);
-  vec0 = Lib_IntVector_Intrinsics_vec128_insert64(vec0, 2, 1);
-  exp = initialize_vector64(0x0UL,0x2UL);
-  compare_and_print_vec64("insert64", vec0, exp);
-  //  print_vector64("insert64", vec0);
 
   vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
   vec1 = initialize_vector32(0x0c0d0e0f, 0x00010203, 0x04050607, 0x08090a0b);
@@ -359,6 +363,7 @@ int main() {
 
 
   /** Rotate left 32 ========================================================**/
+  /*
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(vec0, 0);
   exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
@@ -408,6 +413,7 @@ int main() {
   //  print_vector32("rotate_left32 (21)", vec0);
 
   /** Rotate right 32 ========================================================**/
+  /*
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, 0);
   exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
@@ -581,6 +587,7 @@ int main() {
   exp = initialize_vector64(0x8888888888888888UL,0x8888888888888888UL);
   compare_and_print_vec64("xor", vec0, exp);
   //  print_vector64("xor", vec0);
+  */
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
