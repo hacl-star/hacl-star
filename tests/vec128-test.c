@@ -57,10 +57,7 @@ void initialize_buf8(uint8_t x0, uint8_t x1, uint8_t x2, uint8_t x3, uint8_t x4,
 
 vec128 initialize_vector32(uint32_t x0, uint32_t x1, uint32_t x2, uint32_t x3) {
   vec128 vec;
-  vec = Lib_IntVector_Intrinsics_vec128_load32(x0);
-  vec = Lib_IntVector_Intrinsics_vec128_insert32(vec, x1, 1);
-  vec = Lib_IntVector_Intrinsics_vec128_insert32(vec, x2, 2);
-  vec = Lib_IntVector_Intrinsics_vec128_insert32(vec, x3, 3);
+  vec = Lib_IntVector_Intrinsics_vec128_load32s_(x0, x1, x2, x3);
   return vec;
 }
 
