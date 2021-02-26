@@ -36,6 +36,7 @@ val has_rdrand: getter Vale.X64.CPU_Features_s.rdrand_enabled
     See Vale.X64.CPU_Features_s for more details. **)
 val has_avx512: getter Vale.X64.CPU_Features_s.avx512_enabled
 
+[@ (deprecated "")]
 val wants_vale: unit ->
   Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
 val wants_hacl: unit ->
@@ -106,33 +107,10 @@ val disable_bcrypt: disabler
  * not satisfying the requirements.
  *)
 
-// We take [has_avx] as parameter: allows us to make the function pure, and
-// to use it both for executable code and for the specs.
-// The suffix "p" stands for "pure".
-inline_for_extraction
-let has_vec128p (has_avx : bool) =
-  (target_architecture = target_architecture_name_x64 && has_avx)
-  // When compiling for ARM, SystemZ and PowerPC, we make the assumption
-  // that the code will always be run on processors supporting the vectorized
-  // instructions: no dynamic check.
-  || (target_architecture = target_architecture_name_arm7)
-  || (target_architecture = target_architecture_name_arm8)
-  || (target_architecture = target_architecture_name_systemz)
-  || (target_architecture = target_architecture_name_powerpc64)
-
 noextract
-let vec128_enabled = has_vec128p Vale.X64.CPU_Features_s.avx_enabled
-
-val has_vec128: getter (has_vec128p Vale.X64.CPU_Features_s.avx_enabled)
-
-// We take [has_avx] as parameter: allows us to make the function pure, and
-// to use it both for executable code and for the specs.
-// The suffix "p" stands for "pure".
-inline_for_extraction
-let has_vec256p (has_avx2 : bool) =
-  (target_architecture = target_architecture_name_x64 && has_avx2)
-
+let vec128_enabled = Vale.X64.CPU_Features_s.avx_enabled || vec128_not_avx_enabled
 noextract
-let vec256_enabled = has_vec256p (Vale.X64.CPU_Features_s.avx2_enabled)
+let vec256_enabled = Vale.X64.CPU_Features_s.avx2_enabled || vec256_not_avx2_enabled
 
-val has_vec256: getter (has_vec256p Vale.X64.CPU_Features_s.avx2_enabled)
+val has_vec128: getter vec128_enabled
+val has_vec256: getter vec256_enabled

@@ -631,6 +631,8 @@ REQUIRED_FLAGS	= \
   -no-prefix 'MerkleTree' \
   -no-prefix 'MerkleTree.EverCrypt' \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
+  -static-header 'EverCrypt.TargetConfig' \
+  -no-prefix 'EverCrypt.TargetConfig' \
   $(BASE_FLAGS)
 
 # Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
@@ -650,7 +652,7 @@ TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 # those files.
 HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer= -bundle Lib.Memzero0
 # Disabling by pure-HACL distributions
-TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"' -no-prefix EverCrypt.TargetConfig
+TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 
 # By default, we strive to do one file per algorithm for HACL, and one file for
 # logical unit for EverCrypt (e.g. E_HASH_BUNDLE).

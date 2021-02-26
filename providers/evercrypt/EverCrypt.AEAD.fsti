@@ -82,8 +82,6 @@ let config_pre a =
   | AES128_GCM
   | AES256_GCM ->
       EverCrypt.TargetConfig.compile_vale /\
-      EverCrypt.TargetConfig.compile_128 /\
-      EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 /\
       Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\
                                movbe_enabled /\ sse_enabled)
   | CHACHA20_POLY1305 -> True

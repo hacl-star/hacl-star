@@ -24,8 +24,6 @@ let poly1305_vale
   : Stack unit
     (requires fun h ->
       EverCrypt.TargetConfig.compile_vale /\
-      EverCrypt.TargetConfig.compile_128 /\
-      EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 /\
       B.live h src /\ B.live h dst /\ B.live h key /\
       B.disjoint dst src /\ B.disjoint dst key)
     (ensures fun h0 _ h1 ->
@@ -128,8 +126,8 @@ let poly1305 dst src len key =
   let h0 = ST.get () in
   let avx2 = EverCrypt.AutoConfig2.has_avx2 () in
   let avx = EverCrypt.AutoConfig2.has_avx () in
-  let vec256 = EverCrypt.AutoConfig2.has_vec256p avx2 in
-  let vec128 = EverCrypt.AutoConfig2.has_vec128p avx in
+  let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
+  let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
   let vale = EverCrypt.AutoConfig2.wants_vale () in
 
   if EverCrypt.TargetConfig.compile_256 && vec256 then begin
@@ -140,14 +138,8 @@ let poly1305 dst src len key =
 
   end else if EverCrypt.TargetConfig.compile_vale && vale then begin
 
-    // This is a bit annoying: EverCrypt.TargetConfig.compile_128 won't be
-    // translated as an if-def if we group the two below ifs
-    if EverCrypt.TargetConfig.compile_128 then
-      if EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 then begin
+    if EverCrypt.TargetConfig.compile_128 then begin
        poly1305_vale dst src len key
-
-      end else begin
-        Hacl.Poly1305_32.poly1305_mac dst len src key
 
     end else
       Hacl.Poly1305_32.poly1305_mac dst len src key

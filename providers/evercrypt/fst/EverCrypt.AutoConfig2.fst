@@ -293,8 +293,10 @@ let disable_bcrypt = mk_disabler user_wants_bcrypt
 
 let has_vec128 () =
   let avx = has_avx () in
-  has_vec128p avx
+  let other = has_vec128_not_avx () in
+  avx || other
 
 let has_vec256 () =
   let avx2 = has_avx2 () in
-  has_vec256p avx2
+  let other = has_vec256_not_avx2 () in
+  avx2 || other

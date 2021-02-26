@@ -1,45 +1,25 @@
 module EverCrypt.TargetConfig
 
-/// A set of constants to describe the potential target architectures.
-/// We don't define an enumeration to take advantage of the [ @CMacro]
-/// attribute, and so that we can write evercrypt_targetconfig.h
-/// completely by hand. Also note that we don't need any of the properties
-/// which would be provided by an enum in our proofs (we don't need to
-/// know that, say, [target_architecture_name_x86 <> target_architecture_name_z]).
-/// Finally, we use the prefix "target_architecture_name" to make sure the generated C
-/// macros don't clash with any other names, and that there is no ambiguity
-/// on their meaning - e.g. without the prefix, one may think [X86] is a flag
-/// and not a constant, and thus use it to guard some code working only on x86
-/// with [#if defined(X86)].
+open FStar.HyperStack.ST
+module B = LowStar.Buffer
 
-// TODO: the below macros extract to C with lowercase names: fix that
-[@@ CMacro ]
-val target_architecture_name_x86 : FStar.UInt32.t
+// Those functions are called on non-x64 platforms for which the feature detection
+// is not covered by vale's CPUID support; therefore, we hand-write in C ourselves.
+// See the hand-written evercrypt_targetconfig.h for more explanations.
+val vec128_not_avx_enabled : bool
+val vec256_not_avx2_enabled : bool
 
-[@@ CMacro ]
-val target_architecture_name_x64 : FStar.UInt32.t
+val has_vec128_not_avx : unit ->
+  Stack bool (requires fun _ -> True)
+  (ensures (fun h0 b h1 ->
+    B.(modifies loc_none h0 h1) /\
+    (b ==> vec128_not_avx_enabled)))
 
-[@@ CMacro ]
-val target_architecture_name_arm7 : FStar.UInt32.t
-
-[@@ CMacro ]
-val target_architecture_name_arm8 : FStar.UInt32.t
-
-[@@ CMacro ]
-val target_architecture_name_systemz : FStar.UInt32.t
-
-[@@ CMacro ]
-val target_architecture_name_powerpc64 : FStar.UInt32.t
-
-[@@ CMacro ]
-val target_architecture_name_unknown : FStar.UInt32.t
-
-/// The below macro will take the value of one of the above constants,
-/// and is the value used in the code. Note: in the proofs, we don't need
-/// to know it takes only one of the above values (we actually never check
-/// [target_architecture_name_unknown]).
-[@@ CMacro ]
-val target_architecture : FStar.UInt32.t
+val has_vec256_not_avx2 : unit ->
+  Stack bool (requires fun _ -> True)
+  (ensures (fun h0 b h1 ->
+    B.(modifies loc_none h0 h1) /\
+    (b ==> vec256_not_avx2_enabled)))
 
 /// A set of flags that are compiled in C as #if preprocessor statements. Branch
 /// on these flags to avoid generating a reference at link-time. For instance,
