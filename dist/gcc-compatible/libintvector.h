@@ -16,7 +16,9 @@
 // the compilation options to build HACL. More specifically, you may need to
 // always activate the compiler options to use vector support (even for files
 // which actually don't make use of vectors, if they have libintvector.h as
-// a dependency).
+// a dependency). When comparing traces, note that some instructions are not
+// compiled in the same order on the different platforms, but it doesn't lead
+// to a lot of discrepancies in practice.
 
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
 

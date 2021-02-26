@@ -109,6 +109,8 @@ bool EverCrypt_AutoConfig2_has_avx512()
   return cpu_has_avx512[0U];
 }
 
+KRML_DEPRECATED("")
+
 bool EverCrypt_AutoConfig2_wants_vale()
 {
   return user_wants_vale[0U];
@@ -294,35 +296,17 @@ void EverCrypt_AutoConfig2_disable_bcrypt()
   user_wants_bcrypt[0U] = false;
 }
 
-bool EverCrypt_AutoConfig2_has_vec128p(bool has_avx1)
-{
-  return
-    (target_architecture == target_architecture_name_x64 && has_avx1)
-    || target_architecture == target_architecture_name_arm7
-    || target_architecture == target_architecture_name_arm8
-    || target_architecture == target_architecture_name_systemz
-    || target_architecture == target_architecture_name_powerpc64;
-}
-
 bool EverCrypt_AutoConfig2_has_vec128()
 {
   bool avx = EverCrypt_AutoConfig2_has_avx();
-  return
-    (target_architecture == target_architecture_name_x64 && avx)
-    || target_architecture == target_architecture_name_arm7
-    || target_architecture == target_architecture_name_arm8
-    || target_architecture == target_architecture_name_systemz
-    || target_architecture == target_architecture_name_powerpc64;
-}
-
-bool EverCrypt_AutoConfig2_has_vec256p(bool has_avx21)
-{
-  return target_architecture == target_architecture_name_x64 && has_avx21;
+  bool other = has_vec128_not_avx();
+  return avx || other;
 }
 
 bool EverCrypt_AutoConfig2_has_vec256()
 {
   bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  return target_architecture == target_architecture_name_x64 && avx2;
+  bool other = has_vec256_not_avx2();
+  return avx2 || other;
 }
 

@@ -81,12 +81,8 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_AutoConfig2_disable_bcrypt =
       foreign "EverCrypt_AutoConfig2_disable_bcrypt"
         (void @-> (returning void))
-    let everCrypt_AutoConfig2_has_vec128p =
-      foreign "EverCrypt_AutoConfig2_has_vec128p" (bool @-> (returning bool))
     let everCrypt_AutoConfig2_has_vec128 =
       foreign "EverCrypt_AutoConfig2_has_vec128" (void @-> (returning bool))
-    let everCrypt_AutoConfig2_has_vec256p =
-      foreign "EverCrypt_AutoConfig2_has_vec256p" (bool @-> (returning bool))
     let everCrypt_AutoConfig2_has_vec256 =
       foreign "EverCrypt_AutoConfig2_has_vec256" (void @-> (returning bool))
   end

@@ -56,14 +56,8 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
 {
   bool avx2 = EverCrypt_AutoConfig2_has_avx2();
   bool avx = EverCrypt_AutoConfig2_has_avx();
-  bool vec256 = target_architecture == target_architecture_name_x64 && avx2;
-  bool
-  vec128 =
-    (target_architecture == target_architecture_name_x64 && avx)
-    || target_architecture == target_architecture_name_arm7
-    || target_architecture == target_architecture_name_arm8
-    || target_architecture == target_architecture_name_systemz
-    || target_architecture == target_architecture_name_powerpc64;
+  bool vec256 = EverCrypt_AutoConfig2_has_vec256();
+  bool vec128 = EverCrypt_AutoConfig2_has_vec128();
   bool vale = EverCrypt_AutoConfig2_wants_vale();
   #if COMPILE_256
   if (vec256)
@@ -83,16 +77,8 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   if (vale)
   {
     #if COMPILE_128
-    if (target_architecture == target_architecture_name_x64)
-    {
-      poly1305_vale(dst, src, len, key);
-      return;
-    }
-    else
-    {
-      Hacl_Poly1305_32_poly1305_mac(dst, len, src, key);
-      return;
-    }
+    poly1305_vale(dst, src, len, key);
+    return;
     #else
     Hacl_Poly1305_32_poly1305_mac(dst, len, src, key);
     return;

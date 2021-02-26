@@ -311,13 +311,13 @@ if detect_arm; then
   echo "... detected ARM platform"
   echo "TARGET_ARCHITECTURE = ARM" >> Makefile.config
   if detect_arm_neon; then
-    echo "#define target_architecture target_architecture_name_arm8" >> config.h
+    echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_NAME_ARM8" >> config.h
     echo "... $build_target supports 128-bit NEON"
     compile_128=true
     echo "... $CC $CROSS_CFLAGS can cross-compile to ARM64 with SIMD"
     echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
   else
-    echo "#define target_architecture target_architecture_name_arm7" >> config.h
+    echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_NAME_ARM7" >> config.h
   fi
 fi
 
@@ -325,14 +325,14 @@ if detect_x86; then
   # Just print information: none of the above build options are supported on x86
   echo "... detected x86 platform"
   echo "TARGET_ARCHITECTURE = x86" >> Makefile.config
-  echo "#define target_architecture target_architecture_name_x86" >> config.h
+  echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_NAME_X86" >> config.h
   # TODO: can probably detect intrinsics here too and try to enable them!
 fi
 
 if detect_x64; then
   echo "... detected x64 platform"
   echo "TARGET_ARCHITECTURE = x64" >> Makefile.config
-  echo "#define target_architecture target_architecture_name_x64" >> config.h
+  echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_NAME_X64" >> config.h
   echo "... $build_target supports compilation of 128-bit and 256-bit AVX/AVX2"
   compile_128=true
   echo "CFLAGS_128 = -mavx" >> Makefile.config
@@ -367,7 +367,7 @@ fi
 if detect_ibmz; then
   echo "... detected z platform"
   echo "TARGET_ARCHITECTURE = SystemZ" >> Makefile.config
-  echo "#define target_architecture target_architecture_name_systemz" >> config.h
+  echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_NAME_SYSTEMZ" >> config.h
   echo "... $build_target supports 128-bit z VSX"
   compile_128=true
   echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
@@ -438,3 +438,11 @@ if [[ $target_sys == "Linux" ]]; then
     echo "LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all" >> Makefile.config
   fi
 fi
+
+# Export the compilation flags to Makefile.config so that we can reuse them
+# in other directories, like tests
+if $compile_128; then echo "COMPILE_128 =" >> Makefile.config; fi
+if $compile_256; then echo "COMPILE_256 =" >> Makefile.config; fi
+if $compile_vale; then echo "COMPILE_VALE =" >> Makefile.config; fi
+if $compile_inline_asm; then echo "COMPILE_INLINE_ASM =" >> Makefile.config; fi
+if $compile_intrinsics; then echo "COMPILE_INTRINSICS =" >> Makefile.config; fi
