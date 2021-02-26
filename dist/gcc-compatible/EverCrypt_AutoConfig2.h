@@ -105,6 +105,14 @@ void EverCrypt_AutoConfig2_disable_openssl();
 
 void EverCrypt_AutoConfig2_disable_bcrypt();
 
+bool EverCrypt_AutoConfig2_has_vec128p(bool has_avx1);
+
+bool EverCrypt_AutoConfig2_has_vec128();
+
+bool EverCrypt_AutoConfig2_has_vec256p(bool has_avx21);
+
+bool EverCrypt_AutoConfig2_has_vec256();
+
 #if defined(__cplusplus)
 }
 #endif

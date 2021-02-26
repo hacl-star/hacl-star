@@ -139,8 +139,17 @@ EverCrypt_CTR_create_in(
         {
           return EverCrypt_Error_InvalidIVLength;
         }
-        #if EVERCRYPT_TARGETCONFIG_X64
-        if (has_aesni && has_pclmulqdq && has_avx && has_sse)
+        #if COMPILE_VALE
+        #if COMPILE_128
+        if
+        (
+          target_architecture
+          == target_architecture_name_x64
+          && has_aesni
+          && has_pclmulqdq
+          && has_avx
+          && has_sse
+        )
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
           uint8_t *keys_b = ek;
@@ -165,8 +174,14 @@ EverCrypt_CTR_create_in(
           *dst = p;
           return EverCrypt_Error_Success;
         }
-        #endif
         return EverCrypt_Error_UnsupportedAlgorithm;
+        #else
+        return EverCrypt_Error_UnsupportedAlgorithm;
+        #endif
+        #else
+        return EverCrypt_Error_UnsupportedAlgorithm;
+        #endif
+        break;
       }
     case Spec_Agile_Cipher_AES256:
       {
@@ -178,8 +193,17 @@ EverCrypt_CTR_create_in(
         {
           return EverCrypt_Error_InvalidIVLength;
         }
-        #if EVERCRYPT_TARGETCONFIG_X64
-        if (has_aesni && has_pclmulqdq && has_avx && has_sse)
+        #if COMPILE_VALE
+        #if COMPILE_128
+        if
+        (
+          target_architecture
+          == target_architecture_name_x64
+          && has_aesni
+          && has_pclmulqdq
+          && has_avx
+          && has_sse
+        )
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
           uint8_t *keys_b = ek;
@@ -204,8 +228,14 @@ EverCrypt_CTR_create_in(
           *dst = p;
           return EverCrypt_Error_Success;
         }
-        #endif
         return EverCrypt_Error_UnsupportedAlgorithm;
+        #else
+        return EverCrypt_Error_UnsupportedAlgorithm;
+        #endif
+        #else
+        return EverCrypt_Error_UnsupportedAlgorithm;
+        #endif
+        break;
       }
     case Spec_Agile_Cipher_CHACHA20:
       {
@@ -256,21 +286,31 @@ EverCrypt_CTR_init(
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
-        #if EVERCRYPT_TARGETCONFIG_X64
-        uint8_t *keys_b = ek;
-        uint8_t *hkeys_b = ek + (uint32_t)176U;
-        uint64_t scrut = aes128_key_expansion(k, keys_b);
-        uint64_t scrut1 = aes128_keyhash_init(keys_b, hkeys_b);
+        #if COMPILE_VALE
+        #if COMPILE_128
+        if (target_architecture == target_architecture_name_x64)
+        {
+          uint8_t *keys_b = ek;
+          uint8_t *hkeys_b = ek + (uint32_t)176U;
+          uint64_t scrut = aes128_key_expansion(k, keys_b);
+          uint64_t scrut1 = aes128_keyhash_init(keys_b, hkeys_b);
+        }
+        #endif
         #endif
         break;
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
-        #if EVERCRYPT_TARGETCONFIG_X64
-        uint8_t *keys_b = ek;
-        uint8_t *hkeys_b = ek + (uint32_t)240U;
-        uint64_t scrut = aes256_key_expansion(k, keys_b);
-        uint64_t scrut1 = aes256_keyhash_init(keys_b, hkeys_b);
+        #if COMPILE_VALE
+        #if COMPILE_128
+        if (target_architecture == target_architecture_name_x64)
+        {
+          uint8_t *keys_b = ek;
+          uint8_t *hkeys_b = ek + (uint32_t)240U;
+          uint64_t scrut = aes256_key_expansion(k, keys_b);
+          uint64_t scrut1 = aes256_keyhash_init(keys_b, hkeys_b);
+        }
+        #endif
         #endif
         break;
       }
@@ -299,101 +339,113 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
-        #if EVERCRYPT_TARGETCONFIG_X64
-        EverCrypt_CTR_state_s scrut0 = *p;
-        uint32_t c01 = scrut0.ctr;
-        uint8_t *ek1 = scrut0.xkey;
-        uint32_t iv_len1 = scrut0.iv_len;
-        uint8_t *iv1 = scrut0.iv;
-        uint8_t ctr_block[16U] = { 0U };
-        memcpy(ctr_block, iv1, iv_len1 * sizeof (uint8_t));
-        FStar_UInt128_uint128 uu____0 = load128_be(ctr_block);
-        FStar_UInt128_uint128
-        c = FStar_UInt128_add_mod(uu____0, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
-        store128_le(ctr_block, c);
-        uint8_t *uu____1 = ek1;
-        uint8_t inout_b[16U] = { 0U };
-        uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
-        uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
-        uint8_t *in_b_ = src;
-        uint8_t *out_b_ = dst;
-        memcpy(inout_b,
-          src + num_bytes_,
-          (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
-        uint64_t
-        scrut1 =
-          gctr128_bytes(in_b_,
-            (uint64_t)16U,
-            out_b_,
+        #if COMPILE_VALE
+        #if COMPILE_128
+        if (target_architecture == target_architecture_name_x64)
+        {
+          EverCrypt_CTR_state_s scrut0 = *p;
+          uint32_t c01 = scrut0.ctr;
+          uint8_t *ek1 = scrut0.xkey;
+          uint32_t iv_len1 = scrut0.iv_len;
+          uint8_t *iv1 = scrut0.iv;
+          uint8_t ctr_block[16U] = { 0U };
+          memcpy(ctr_block, iv1, iv_len1 * sizeof (uint8_t));
+          FStar_UInt128_uint128 uu____0 = load128_be(ctr_block);
+          FStar_UInt128_uint128
+          c = FStar_UInt128_add_mod(uu____0, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
+          store128_le(ctr_block, c);
+          uint8_t *uu____1 = ek1;
+          uint8_t inout_b[16U] = { 0U };
+          uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
+          uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
+          uint8_t *in_b_ = src;
+          uint8_t *out_b_ = dst;
+          memcpy(inout_b,
+            src + num_bytes_,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
+          uint64_t
+          scrut1 =
+            gctr128_bytes(in_b_,
+              (uint64_t)16U,
+              out_b_,
+              inout_b,
+              uu____1,
+              ctr_block,
+              (uint64_t)num_blocks);
+          memcpy(dst + num_bytes_,
             inout_b,
-            uu____1,
-            ctr_block,
-            (uint64_t)num_blocks);
-        memcpy(dst + num_bytes_,
-          inout_b,
-          (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
-        uint32_t c1 = c01 + (uint32_t)1U;
-        *p
-        =
-          (
-            (EverCrypt_CTR_state_s){
-              .i = Spec_Cipher_Expansion_Vale_AES128,
-              .iv = iv1,
-              .iv_len = iv_len1,
-              .xkey = ek1,
-              .ctr = c1
-            }
-          );
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
+          uint32_t c1 = c01 + (uint32_t)1U;
+          *p
+          =
+            (
+              (EverCrypt_CTR_state_s){
+                .i = Spec_Cipher_Expansion_Vale_AES128,
+                .iv = iv1,
+                .iv_len = iv_len1,
+                .xkey = ek1,
+                .ctr = c1
+              }
+            );
+          return;
+        }
+        #endif
         #endif
         break;
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
-        #if EVERCRYPT_TARGETCONFIG_X64
-        EverCrypt_CTR_state_s scrut0 = *p;
-        uint32_t c01 = scrut0.ctr;
-        uint8_t *ek1 = scrut0.xkey;
-        uint32_t iv_len1 = scrut0.iv_len;
-        uint8_t *iv1 = scrut0.iv;
-        uint8_t ctr_block[16U] = { 0U };
-        memcpy(ctr_block, iv1, iv_len1 * sizeof (uint8_t));
-        FStar_UInt128_uint128 uu____2 = load128_be(ctr_block);
-        FStar_UInt128_uint128
-        c = FStar_UInt128_add_mod(uu____2, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
-        store128_le(ctr_block, c);
-        uint8_t *uu____3 = ek1;
-        uint8_t inout_b[16U] = { 0U };
-        uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
-        uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
-        uint8_t *in_b_ = src;
-        uint8_t *out_b_ = dst;
-        memcpy(inout_b,
-          src + num_bytes_,
-          (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
-        uint64_t
-        scrut1 =
-          gctr256_bytes(in_b_,
-            (uint64_t)16U,
-            out_b_,
+        #if COMPILE_VALE
+        #if COMPILE_128
+        if (target_architecture == target_architecture_name_x64)
+        {
+          EverCrypt_CTR_state_s scrut0 = *p;
+          uint32_t c01 = scrut0.ctr;
+          uint8_t *ek1 = scrut0.xkey;
+          uint32_t iv_len1 = scrut0.iv_len;
+          uint8_t *iv1 = scrut0.iv;
+          uint8_t ctr_block[16U] = { 0U };
+          memcpy(ctr_block, iv1, iv_len1 * sizeof (uint8_t));
+          FStar_UInt128_uint128 uu____2 = load128_be(ctr_block);
+          FStar_UInt128_uint128
+          c = FStar_UInt128_add_mod(uu____2, FStar_UInt128_uint64_to_uint128((uint64_t)c01));
+          store128_le(ctr_block, c);
+          uint8_t *uu____3 = ek1;
+          uint8_t inout_b[16U] = { 0U };
+          uint32_t num_blocks = (uint32_t)(uint64_t)16U / (uint32_t)16U;
+          uint32_t num_bytes_ = num_blocks * (uint32_t)16U;
+          uint8_t *in_b_ = src;
+          uint8_t *out_b_ = dst;
+          memcpy(inout_b,
+            src + num_bytes_,
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
+          uint64_t
+          scrut1 =
+            gctr256_bytes(in_b_,
+              (uint64_t)16U,
+              out_b_,
+              inout_b,
+              uu____3,
+              ctr_block,
+              (uint64_t)num_blocks);
+          memcpy(dst + num_bytes_,
             inout_b,
-            uu____3,
-            ctr_block,
-            (uint64_t)num_blocks);
-        memcpy(dst + num_bytes_,
-          inout_b,
-          (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
-        uint32_t c1 = c01 + (uint32_t)1U;
-        *p
-        =
-          (
-            (EverCrypt_CTR_state_s){
-              .i = Spec_Cipher_Expansion_Vale_AES256,
-              .iv = iv1,
-              .iv_len = iv_len1,
-              .xkey = ek1,
-              .ctr = c1
-            }
-          );
+            (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
+          uint32_t c1 = c01 + (uint32_t)1U;
+          *p
+          =
+            (
+              (EverCrypt_CTR_state_s){
+                .i = Spec_Cipher_Expansion_Vale_AES256,
+                .iv = iv1,
+                .iv_len = iv_len1,
+                .xkey = ek1,
+                .ctr = c1
+              }
+            );
+          return;
+        }
+        #endif
         #endif
         break;
       }

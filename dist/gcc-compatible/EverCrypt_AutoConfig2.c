@@ -136,7 +136,6 @@ void EverCrypt_AutoConfig2_recall()
 
 void EverCrypt_AutoConfig2_init()
 {
-  #if EVERCRYPT_TARGETCONFIG_X64
   uint64_t scrut = check_aesni();
   if (scrut != (uint64_t)0U)
   {
@@ -212,7 +211,6 @@ void EverCrypt_AutoConfig2_init()
       }
     }
   }
-  #endif
   user_wants_hacl[0U] = true;
   user_wants_vale[0U] = true;
   user_wants_bcrypt[0U] = false;
@@ -292,5 +290,37 @@ void EverCrypt_AutoConfig2_disable_openssl()
 void EverCrypt_AutoConfig2_disable_bcrypt()
 {
   user_wants_bcrypt[0U] = false;
+}
+
+bool EverCrypt_AutoConfig2_has_vec128p(bool has_avx1)
+{
+  return
+    (target_architecture == target_architecture_name_x64 && has_avx1)
+    || target_architecture == target_architecture_name_arm7
+    || target_architecture == target_architecture_name_arm8
+    || target_architecture == target_architecture_name_systemz
+    || target_architecture == target_architecture_name_powerpc64;
+}
+
+bool EverCrypt_AutoConfig2_has_vec128()
+{
+  bool avx = EverCrypt_AutoConfig2_has_avx();
+  return
+    (target_architecture == target_architecture_name_x64 && avx)
+    || target_architecture == target_architecture_name_arm7
+    || target_architecture == target_architecture_name_arm8
+    || target_architecture == target_architecture_name_systemz
+    || target_architecture == target_architecture_name_powerpc64;
+}
+
+bool EverCrypt_AutoConfig2_has_vec256p(bool has_avx21)
+{
+  return target_architecture == target_architecture_name_x64 && has_avx21;
+}
+
+bool EverCrypt_AutoConfig2_has_vec256()
+{
+  bool avx2 = EverCrypt_AutoConfig2_has_avx2();
+  return target_architecture == target_architecture_name_x64 && avx2;
 }
 

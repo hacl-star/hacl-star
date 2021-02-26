@@ -38,15 +38,23 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
 {
   bool avx2 = EverCrypt_AutoConfig2_has_avx2();
   bool avx = EverCrypt_AutoConfig2_has_avx();
-  #if EVERCRYPT_TARGETCONFIG_X64
-  if (avx2)
+  bool vec256 = target_architecture == target_architecture_name_x64 && avx;
+  bool
+  vec128 =
+    (target_architecture == target_architecture_name_x64 && avx)
+    || target_architecture == target_architecture_name_arm7
+    || target_architecture == target_architecture_name_arm8
+    || target_architecture == target_architecture_name_systemz
+    || target_architecture == target_architecture_name_powerpc64;
+  #if COMPILE_256
+  if (vec256)
   {
     Hacl_Chacha20Poly1305_256_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
     return;
   }
   #endif
-  #if EVERCRYPT_TARGETCONFIG_X64
-  if (avx)
+  #if COMPILE_128
+  if (vec128)
   {
     Hacl_Chacha20Poly1305_128_aead_encrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
     return;
@@ -69,14 +77,22 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
 {
   bool avx2 = EverCrypt_AutoConfig2_has_avx2();
   bool avx = EverCrypt_AutoConfig2_has_avx();
-  #if EVERCRYPT_TARGETCONFIG_X64
-  if (avx2)
+  bool vec256 = target_architecture == target_architecture_name_x64 && avx;
+  bool
+  vec128 =
+    (target_architecture == target_architecture_name_x64 && avx)
+    || target_architecture == target_architecture_name_arm7
+    || target_architecture == target_architecture_name_arm8
+    || target_architecture == target_architecture_name_systemz
+    || target_architecture == target_architecture_name_powerpc64;
+  #if COMPILE_256
+  if (vec256)
   {
     return Hacl_Chacha20Poly1305_256_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
   }
   #endif
-  #if EVERCRYPT_TARGETCONFIG_X64
-  if (avx)
+  #if COMPILE_128
+  if (vec128)
   {
     return Hacl_Chacha20Poly1305_128_aead_decrypt(k, n, aadlen, aad, mlen, m, cipher, tag);
   }

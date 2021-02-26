@@ -33,36 +33,51 @@ static inline bool has_adx_bmi2()
 
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
-  #if EVERCRYPT_TARGETCONFIG_X64
-  if (has_adx_bmi2())
+  bool uu____0 = has_adx_bmi2();
+  #if COMPILE_VALE
+  #if COMPILE_128
+  if (target_architecture == target_architecture_name_x64 && uu____0)
   {
     Hacl_Curve25519_64_secret_to_public(pub, priv);
     return;
   }
   #endif
   Hacl_Curve25519_51_secret_to_public(pub, priv);
+  #else
+  Hacl_Curve25519_51_secret_to_public(pub, priv);
+  #endif
 }
 
 void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub)
 {
-  #if EVERCRYPT_TARGETCONFIG_X64
-  if (has_adx_bmi2())
+  bool uu____0 = has_adx_bmi2();
+  #if COMPILE_VALE
+  #if COMPILE_128
+  if (target_architecture == target_architecture_name_x64 && uu____0)
   {
     Hacl_Curve25519_64_scalarmult(shared, my_priv, their_pub);
     return;
   }
   #endif
   Hacl_Curve25519_51_scalarmult(shared, my_priv, their_pub);
+  #else
+  Hacl_Curve25519_51_scalarmult(shared, my_priv, their_pub);
+  #endif
 }
 
 bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub)
 {
-  #if EVERCRYPT_TARGETCONFIG_X64
-  if (has_adx_bmi2())
+  bool uu____0 = has_adx_bmi2();
+  #if COMPILE_VALE
+  #if COMPILE_128
+  if (target_architecture == target_architecture_name_x64 && uu____0)
   {
     return Hacl_Curve25519_64_ecdh(shared, my_priv, their_pub);
   }
   #endif
   return Hacl_Curve25519_51_ecdh(shared, my_priv, their_pub);
+  #else
+  return Hacl_Curve25519_51_ecdh(shared, my_priv, their_pub);
+  #endif
 }
 
