@@ -33,7 +33,7 @@ module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256
 module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
 #endif
 
-#ifdef SUPPORTS_VALE
+#ifdef COMPILE_VALE
 module Hacl_Curve25519_64 = Hacl_Curve25519_64_bindings.Bindings(Hacl_Curve25519_64_stubs)
 #endif
 
@@ -427,7 +427,7 @@ module Blake2b_256 : Blake2 =
   end)
 #endif
 
-#ifdef SUPPORTS_VALE
+#ifdef COMPILE_VALE
 
 module Curve25519_64 : Curve25519 =
   Make_Curve25519 (struct
