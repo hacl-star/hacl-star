@@ -55,7 +55,7 @@ static __inline__ cycles cpucycles_get(void)
 
 #else
 
-#error cpucycles_get(): issing implementation
+#error cpucycles_get(): missing implementation
 
 #endif
 

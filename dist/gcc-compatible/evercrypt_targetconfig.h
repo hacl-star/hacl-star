@@ -9,7 +9,7 @@
 /* TODO: this should be overhauled to use the outcome of the configure script,
  * found in config.h, exclusively, rather than doing feature tests via
  * preprocessor macros. In particular, the only relevant information for
- * EverCrypt should be: COMPILE_VEC128 and COMPILE_VEC256. */
+ * EverCrypt should be: COMPILE_128 and COMPILE_256. */
 
 #if defined(__x86_64__) || defined(_M_X64)
 #define EVERCRYPT_TARGETCONFIG_X64 1
@@ -25,7 +25,7 @@
 #include "config.h"
 #endif
 
-#if defined(__GNUC__) && defined(SUPPORTS_INLINE_ASM)
+#if defined(__GNUC__) && !defined(BROKEN_INLINE_ASM)
 #define EVERCRYPT_TARGETCONFIG_GCC 1
 #endif
 
