@@ -7,6 +7,7 @@
 module EverCrypt.AutoConfig2
 
 open FStar.HyperStack.ST
+open EverCrypt.TargetConfig
 
 module B = LowStar.Buffer
 
@@ -88,3 +89,44 @@ val disable_vale: disabler
 val disable_hacl: disabler
 val disable_openssl: disabler
 val disable_bcrypt: disabler
+
+(** Some predicates to dynamically guard the vectorized code *)
+(* Note that those predicates don't check [EverCrypt.TargetConfig.compile_128],
+ * [EverCrypt.TargetConfig.compile_vale], etc.
+ * The reason is that the above booleans are static preconditions, checked at
+ * compilation time. The F* code must thus be guard the following way (note that
+ * the order of the arguments is important for syntactic reasons):
+ * [> if EverCrypt.TargetConfig.compile_128 && has_vec128 ... then
+ * Leading to the following C code:
+ * [> #if defined(COMPILE_128)
+ * [>   if has_vec128 ... { ... }
+ * [> #endif
+ * Note that if one forgets to guard the code with flags like
+ * [EverCrypt.TargetConfig.compile_128], the code will not compile on platforms
+ * not satisfying the requirements.
+ *)
+
+// We take [has_avx] as parameter: allows us to make the function pure, and
+// to use it both for executable code and for the specs.
+inline_for_extraction
+let has_vec128 (has_avx : bool) =
+  (target_archi = target_archi_name_x64 && has_avx)
+  // When compiling for ARM, SystemZ and PowerPC, we make the assumption
+  // that the code will always be run on processors supporting the vectorized
+  // instructions: no dynamic check.
+  || (target_archi = target_archi_name_arm7)
+  || (target_archi = target_archi_name_arm8)
+  || (target_archi = target_archi_name_systemz)
+  || (target_archi = target_archi_name_powerpc)
+
+noextract
+let vec128_enabled = has_vec128 Vale.X64.CPU_Features_s.avx_enabled
+
+// We take [has_avx] as parameter: allows us to make the function pure, and
+// to use it both for executable code and for the specs.
+inline_for_extraction
+let has_vec256 (has_avx2 : bool) =
+  (target_archi = target_archi_name_x64 && has_avx2)
+
+noextract
+let vec256_enabled = has_vec256 (Vale.X64.CPU_Features_s.avx2_enabled)

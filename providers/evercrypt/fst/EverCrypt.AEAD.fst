@@ -128,7 +128,10 @@ fun r dst k ->
   let has_avx = EverCrypt.AutoConfig2.has_avx() in
   let has_sse = EverCrypt.AutoConfig2.has_sse() in
   let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
-  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then (
+  if EverCrypt.TargetConfig.compile_vale then
+  if EverCrypt.TargetConfig.compile_128 &&
+     (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64) then
+  if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then (
     let ek = B.malloc r 0uy (concrete_xkey_len i + 176ul) in
 
     vale_expand i k ek;
@@ -143,6 +146,10 @@ fun r dst k ->
     Success
 
   ) else
+    UnsupportedAlgorithm
+  else
+    UnsupportedAlgorithm
+  else
     UnsupportedAlgorithm
 
 
@@ -311,18 +318,38 @@ fun s iv iv_len ad ad_len plain plain_len cipher tag ->
       pop_frame();
       Success
 
-let encrypt_aes128_gcm (_: squash (EverCrypt.TargetConfig.x64)): encrypt_st AES128_GCM =
+let encrypt_aes128_gcm (_: squash (
+      EverCrypt.TargetConfig.compile_vale /\
+      EverCrypt.TargetConfig.compile_128 /\
+      EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64)):
+  encrypt_st AES128_GCM =
   fun s iv iv_len ad ad_len plain plain_len cipher tag ->
-    if EverCrypt.TargetConfig.x64 then
+    if EverCrypt.TargetConfig.compile_vale then
+    if EverCrypt.TargetConfig.compile_128 &&
+       (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64)
+    then
       encrypt_aes_gcm Vale_AES128 s iv iv_len ad ad_len plain plain_len cipher tag
     else
       let () = false_elim () in
       LowStar.Failure.failwith "statically unreachable"
+    else
+      let () = false_elim () in
+      LowStar.Failure.failwith "statically unreachable"
 
-let encrypt_aes256_gcm (_: squash (EverCrypt.TargetConfig.x64)): encrypt_st AES256_GCM =
+let encrypt_aes256_gcm (_: squash (
+      EverCrypt.TargetConfig.compile_vale /\
+      EverCrypt.TargetConfig.compile_128 /\
+      EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64)):
+  encrypt_st AES256_GCM =
   fun s iv iv_len ad ad_len plain plain_len cipher tag ->
-    if EverCrypt.TargetConfig.x64 then
+    if EverCrypt.TargetConfig.compile_vale then
+    if EverCrypt.TargetConfig.compile_128 &&
+       (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64)
+    then
       encrypt_aes_gcm Vale_AES256 s iv iv_len ad ad_len plain plain_len cipher tag
+    else
+      let () = false_elim () in
+      LowStar.Failure.failwith "statically unreachable"
     else
       let () = false_elim () in
       LowStar.Failure.failwith "statically unreachable"
@@ -375,8 +402,15 @@ let encrypt_expand_aes128_gcm : encrypt_expand_st true AES128_GCM =
   let has_sse = EverCrypt.AutoConfig2.has_sse() in
   let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+  if EverCrypt.TargetConfig.compile_vale then
+  if EverCrypt.TargetConfig.compile_128 &&
+     (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64) then
+  if has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe then
     encrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len plain plain_len cipher tag
+  else
+    UnsupportedAlgorithm
+  else
+    UnsupportedAlgorithm
   else
     UnsupportedAlgorithm
 
@@ -387,8 +421,15 @@ let encrypt_expand_aes256_gcm : encrypt_expand_st true AES256_GCM =
   let has_sse = EverCrypt.AutoConfig2.has_sse() in
   let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+  if EverCrypt.TargetConfig.compile_vale then
+  if EverCrypt.TargetConfig.compile_128 &&
+     (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64) then
+  if has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe then
     encrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len plain plain_len cipher tag
+  else
+    UnsupportedAlgorithm
+  else
+    UnsupportedAlgorithm
   else
     UnsupportedAlgorithm
 
@@ -533,21 +574,42 @@ fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
         else
           AuthenticationFailure
 
-let decrypt_aes128_gcm (_: squash (EverCrypt.TargetConfig.x64)): decrypt_st AES128_GCM =
+let decrypt_aes128_gcm (_: squash (
+      EverCrypt.TargetConfig.compile_vale /\
+      EverCrypt.TargetConfig.compile_128 /\
+      EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64)):
+  decrypt_st AES128_GCM =
   fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
-    if EverCrypt.TargetConfig.x64 then
+    if EverCrypt.TargetConfig.compile_vale then
+    if EverCrypt.TargetConfig.compile_128 &&
+       (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64)
+    then
       decrypt_aes_gcm Vale_AES128 s iv iv_len ad ad_len cipher cipher_len tag dst
     else
       let () = false_elim () in
       LowStar.Failure.failwith "statically unreachable"
+    else
+      let () = false_elim () in
+      LowStar.Failure.failwith "statically unreachable"
 
-let decrypt_aes256_gcm (_: squash (EverCrypt.TargetConfig.x64)): decrypt_st AES256_GCM =
+let decrypt_aes256_gcm (_: squash (
+      EverCrypt.TargetConfig.compile_vale /\
+      EverCrypt.TargetConfig.compile_128 /\
+      EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64)):
+  decrypt_st AES256_GCM =
   fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
-    if EverCrypt.TargetConfig.x64 then
+    if EverCrypt.TargetConfig.compile_vale then
+    if EverCrypt.TargetConfig.compile_128 &&
+       (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64)
+    then
       decrypt_aes_gcm Vale_AES256 s iv iv_len ad ad_len cipher cipher_len tag dst
     else
       let () = false_elim () in
       LowStar.Failure.failwith "statically unreachable"
+    else
+      let () = false_elim () in
+      LowStar.Failure.failwith "statically unreachable"
+
 
 let decrypt_chacha20_poly1305 : decrypt_st CHACHA20_POLY1305 =
   fun s iv iv_len ad ad_len cipher cipher_len tag dst ->
@@ -619,8 +681,15 @@ let decrypt_expand_aes128_gcm : decrypt_expand_st true AES128_GCM =
   let has_sse = EverCrypt.AutoConfig2.has_sse() in
   let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+  if EverCrypt.TargetConfig.compile_vale then
+  if EverCrypt.TargetConfig.compile_128 &&
+     (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64) then
+  if has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe then
     decrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len cipher cipher_len tag dst
+  else
+    UnsupportedAlgorithm
+  else
+    UnsupportedAlgorithm
   else
     UnsupportedAlgorithm
 
@@ -631,8 +700,15 @@ let decrypt_expand_aes256_gcm : decrypt_expand_st true AES256_GCM =
   let has_sse = EverCrypt.AutoConfig2.has_sse() in
   let has_movbe = EverCrypt.AutoConfig2.has_movbe() in
   let has_aesni = EverCrypt.AutoConfig2.has_aesni () in
-  if EverCrypt.TargetConfig.x64 && (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe) then
+  if EverCrypt.TargetConfig.compile_vale then
+  if EverCrypt.TargetConfig.compile_128 &&
+     (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64) then
+  if has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe then
     decrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len cipher cipher_len tag dst
+  else
+    UnsupportedAlgorithm
+  else
+    UnsupportedAlgorithm
   else
     UnsupportedAlgorithm
 
