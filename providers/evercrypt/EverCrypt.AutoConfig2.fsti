@@ -118,7 +118,7 @@ let has_vec128p (has_avx : bool) =
   || (target_archi = target_archi_name_arm7)
   || (target_archi = target_archi_name_arm8)
   || (target_archi = target_archi_name_systemz)
-  || (target_archi = target_archi_name_powerpc)
+  || (target_archi = target_archi_name_powerpc64)
 
 noextract
 let vec128_enabled = has_vec128p Vale.X64.CPU_Features_s.avx_enabled

@@ -289,3 +289,11 @@ let disable_vale = mk_disabler user_wants_vale
 let disable_hacl = mk_disabler user_wants_hacl
 let disable_openssl = mk_disabler user_wants_openssl
 let disable_bcrypt = mk_disabler user_wants_bcrypt
+
+let has_vec128 () =
+  let avx = has_avx () in
+  has_vec128p avx
+
+let has_vec256 () =
+  let avx2 = has_avx2 () in
+  has_vec256p avx2
