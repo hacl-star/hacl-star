@@ -128,8 +128,8 @@ let poly1305 dst src len key =
   let h0 = ST.get () in
   let avx2 = EverCrypt.AutoConfig2.has_avx2 () in
   let avx = EverCrypt.AutoConfig2.has_avx () in
-  let vec256 = EverCrypt.AutoConfig2.has_vec256 avx2 in
-  let vec128 = EverCrypt.AutoConfig2.has_vec128 avx in
+  let vec256 = EverCrypt.AutoConfig2.has_vec256p avx2 in
+  let vec128 = EverCrypt.AutoConfig2.has_vec128p avx in
   let vale = EverCrypt.AutoConfig2.wants_vale () in
 
   if EverCrypt.TargetConfig.compile_256 && vec256 then begin
