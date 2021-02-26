@@ -650,7 +650,7 @@ TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 # those files.
 HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer= -bundle Lib.Memzero0
 # Disabling by pure-HACL distributions
-TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
+TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"' -no-prefix EverCrypt.TargetConfig
 
 # By default, we strive to do one file per algorithm for HACL, and one file for
 # logical unit for EverCrypt (e.g. E_HASH_BUNDLE).
