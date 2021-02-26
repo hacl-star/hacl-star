@@ -951,7 +951,7 @@ val fill_blocks:
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq t (v len)))
   -> impl:(i:size_t{v i < v n} -> Stack unit
       (requires fun h1 ->
-	Math.Lemmas.lemma_mult_le_right (v len) (v i + 1) (v n);
+        (v i + 1) * v len <= max_size_t /\
         modifies (footprint (v i) |+| loc (gsub output 0ul (i *! len))) h0 h1)
       (ensures  fun h1 _ h2 ->
         (let block = gsub output (i *! len) len in
