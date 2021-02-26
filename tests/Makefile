@@ -11,11 +11,21 @@ USER_CFLAGS?=
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
 TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
-# Curve64 is not supported on all patforms
-TARGETS_NO_CURVE64 = $(filter-out curve64-%, $(TARGETS))
 
-ifeq ($(TARGET_ARCHITECTURE),SystemZ)
-	TARGETS := $(TARGETS_NO_CURVE64)
+# Filter the targets if they are not supported
+# Vec128
+ifndef COMPILE_128
+	TARGETS := $(filter-out %128%, $(TARGETS))
+endif
+
+# Vec256
+ifndef COMPILE_256
+	TARGETS := $(filter-out %256%, $(TARGETS))
+endif
+
+# Curve64
+ifndef COMPILE_INTRINSICS
+	TARGETS := $(filter-out curve64-%, $(TARGETS))
 endif
 
 CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \

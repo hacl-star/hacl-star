@@ -438,3 +438,11 @@ if [[ $target_sys == "Linux" ]]; then
     echo "LDFLAGS	+= -Xlinker -z -Xlinker noexecstack -Xlinker --unresolved-symbols=report-all" >> Makefile.config
   fi
 fi
+
+# Export the compilation flags to Makefile.config so that we can reuse them
+# in other directories, like tests
+if $compile_128; then echo "COMPILE_128 =" >> Makefile.config; fi
+if $compile_256; then echo "COMPILE_256 =" >> Makefile.config; fi
+if $compile_vale; then echo "COMPILE_VALE =" >> Makefile.config; fi
+if $compile_inline_asm; then echo "COMPILE_INLINE_ASM =" >> Makefile.config; fi
+if $compile_intrinsics; then echo "COMPILE_INTRINSICS =" >> Makefile.config; fi
