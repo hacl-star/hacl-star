@@ -140,14 +140,20 @@ let poly1305 dst src len key =
 
   end else if EverCrypt.TargetConfig.compile_vale && vale then begin
 
-    if EverCrypt.TargetConfig.compile_128 &&
-       (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64) then begin
+    // This is a bit annoying: EverCrypt.TargetConfig.compile_128 won't be
+    // translated as an if-def if we group the two below ifs
+    if EverCrypt.TargetConfig.compile_128 then
+      if EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 then begin
        poly1305_vale dst src len key
 
-    end else begin
+      end else begin
+        Hacl.Poly1305_32.poly1305_mac dst len src key
+
+    end else
       Hacl.Poly1305_32.poly1305_mac dst len src key
+
     end
 
-  end else begin
+  else begin
     Hacl.Poly1305_32.poly1305_mac dst len src key
   end
