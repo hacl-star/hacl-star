@@ -16,6 +16,8 @@
 // vector instructions, in which case we'll have to do run-time feature detection
 // in addition to compile-time detection.
 
+#include <stdbool.h>
+
 static inline bool has_vec128_not_avx () {
 #if (TARGET_ARCHITECTURE != TARGET_ARCHITECTURE_NAME_X64) && COMPILE_128
   return true;
