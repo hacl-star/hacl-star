@@ -12,10 +12,15 @@
 #include "test_helpers.h"
 
 #include "Hacl_Poly1305_32.h"
+
+#if defined(COMPILE_128)
 #include "Hacl_Poly1305_128.h"
+#endif
+
 #if defined(COMPILE_256)
 #include "Hacl_Poly1305_256.h"
 #endif
+
 #include "EverCrypt_AutoConfig2.h"
 
 #include "poly1305_vectors.h"
@@ -34,9 +39,11 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp){
   printf("Poly1305 (32-bit) Result:\n");
   bool ok = print_result(comp, exp);
 
+#if defined(COMPILE_128)
   Hacl_Poly1305_128_poly1305_mac(comp,in_len,in,key);
   printf("Poly1305 (128-bit) Result:\n");
   ok = ok && print_result(comp, exp);
+#endif
 
 #if defined(COMPILE_256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
@@ -80,7 +87,7 @@ int main() {
   clock_t tdiff1 = t2 - t1;
   cycles cdiff1 = b - a;
 
-
+#if defined(COMPILE_128)
   memset(plain,'P',SIZE);
   memset(key,'K',16);
   for (int j = 0; j < ROUNDS; j++) {
@@ -97,6 +104,7 @@ int main() {
   t2 = clock();
   clock_t tdiff2 = t2 - t1;
   cycles cdiff2 = b - a;
+#endif
 
 #if defined(COMPILE_256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
@@ -121,7 +129,10 @@ int main() {
 
   uint64_t count = ROUNDS * SIZE;
   printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);
+
+#if defined(COMPILE_128)
   printf("Poly1305 (128-bit) PERF:\n"); print_time(count,tdiff2,cdiff2);
+#endif
 
 #if defined(COMPILE_256)
   if (EverCrypt_AutoConfig2_has_avx2()) {

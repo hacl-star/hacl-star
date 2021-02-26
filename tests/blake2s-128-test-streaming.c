@@ -9,16 +9,19 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "Hacl_Streaming_Blake2s_128.h"
-
 #include "test_helpers.h"
+
+#if defined(COMPILE_128)
+#include "Hacl_Streaming_Blake2s_128.h"
 #include "blake2_vectors.h"
+#endif
 
 typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_state_s blake2_state;
 
 int main() {
     bool ok = true;
 
+#if defined(COMPILE_128)
     // Here, I can't really loop over the vectors... because I want to exercise
     // the streaming API with various lengths. Otherwise, in an exemplary test,
     // one would write a for-loop over the test vectors.
@@ -66,6 +69,7 @@ int main() {
     ok &= compare_and_print(32, tag, v->expected);
 
     Hacl_Streaming_Blake2s_128_blake2s_128_with_key_free(32, s);
+#endif
 
     if (ok)
         return EXIT_SUCCESS;
