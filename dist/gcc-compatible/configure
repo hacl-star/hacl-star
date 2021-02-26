@@ -89,7 +89,7 @@ int main() {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DSUPPORTS_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
+  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DCOMPILE_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
   $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
   diff $out.test $out.ref
   else
@@ -299,11 +299,11 @@ if [[ $target_arch == "aarch64" ]]; then
   echo "MARCH = aarch64" >> Makefile.config
 fi
 
-supports_128=false
-supports_256=false
-supports_vale=false
-supports_inline_asm=false
-supports_intrinsics=false
+compile_128=false
+compile_256=false
+compile_vale=false
+compile_inline_asm=false
+compile_intrinsics=false
 
 echo "CFLAGS ?=" >> Makefile.config
 
@@ -312,7 +312,7 @@ if detect_arm; then
   echo "TARGET_ARCHITECTURE = ARM" >> Makefile.config
   if detect_arm_neon; then
     echo "... $build_target supports 128-bit NEON"
-    supports_128=true
+    compile_128=true
     echo "... $CC $CROSS_CFLAGS can cross-compile to ARM64 with SIMD"
     echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
   fi
@@ -329,9 +329,9 @@ if detect_x64; then
   echo "... detected x64 platform"
   echo "TARGET_ARCHITECTURE = x64" >> Makefile.config
   echo "... $build_target supports compilation of 128-bit and 256-bit AVX/AVX2"
-  supports_128=true
+  compile_128=true
   echo "CFLAGS_128 = -mavx" >> Makefile.config
-  supports_256=true
+  compile_256=true
   echo "CFLAGS_256 = -mavx -mavx2" >> Makefile.config
   # x64 always supports Vale -- this configure script assumes a GCC-like
   # compiler, meaning that in theory inline assembly should work (rather than
@@ -340,13 +340,13 @@ if detect_x64; then
   # Note: MSVC compilers don't support inline GCC assembly and are expected to
   # use their own build system
   echo "... $build_target supports vale"
-  supports_vale=true
+  compile_vale=true
   if detect_broken_xcode; then
     echo "found broken XCode version, known to refuse to compile our inline ASM, disabling "
   else
     echo "... not using known buggy Apple LLVM build"
     echo "... $build_target supports our inline ASM"
-    supports_inline_asm=true
+    compile_inline_asm=true
   fi
 fi
 
@@ -354,7 +354,7 @@ if detect_x86 || detect_x64; then
   if ! check_no_bug81300; then
     echo "found broken GCC < 5.5 with bug 81300, disabling subborrow + addcarry"
   else
-    supports_intrinsics=true
+    compile_intrinsics=true
     echo "... using a non-buggy GCC"
   fi
 fi
@@ -363,17 +363,17 @@ if detect_ibmz; then
   echo "... detected z platform"
   echo "TARGET_ARCHITECTURE = SystemZ" >> Makefile.config
   echo "... $build_target supports 128-bit z VSX"
-  supports_128=true
+  compile_128=true
   echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
   echo "#include <stdint.h> " >> config.h
 fi
 
-if $supports_intrinsics; then
+if $compile_intrinsics; then
   echo "$build_target supports _addcarry_u64"
-  echo "#define SUPPORTS_INTRINSICS 1" >> config.h
+  echo "#define COMPILE_INTRINSICS 1" >> config.h
 fi
 
-if ! $supports_vale; then
+if ! $compile_vale; then
   # All reference to Vale symbols are properly guarded in the EverCrypt layer by
   # ifdef TARGET_X64 -- with the exception of Curve25519, which needs to be
   # disabled by the build system since it contains unguarded references to Vale
@@ -383,14 +383,14 @@ if ! $supports_vale; then
   echo "$build_target does not support legacy vale stubs"
   echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
 else
-  echo "#define SUPPORTS_VALE 1" >> config.h
+  echo "#define COMPILE_VALE 1" >> config.h
 fi
 
-if $supports_inline_asm; then
-    echo "#define SUPPORTS_INLINE_ASM 1" >> config.h
+if $compile_inline_asm; then
+    echo "#define COMPILE_INLINE_ASM 1" >> config.h
 fi
 
-if ! $supports_128; then
+if ! $compile_128; then
   echo "$CC $CROSS_CFLAGS cannot compile 128-bit vector arithmetic, disabling"
   echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
@@ -398,7 +398,7 @@ else
   echo "#define COMPILE_128 1" >> config.h
 fi
 
-if ! $supports_256; then
+if ! $compile_256; then
   echo "$build_target does not support 256-bit arithmetic"
   echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec256 void *" >> config.h

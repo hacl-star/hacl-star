@@ -6,27 +6,20 @@
  * - https://sourceforge.net/p/predef/wiki/Architectures/
  */
 
-/* TODO: this should be overhauled to use the outcome of the configure script,
- * found in config.h, exclusively, rather than doing feature tests via
- * preprocessor macros. In particular, the only relevant information for
- * EverCrypt should be: COMPILE_128 and COMPILE_256. */
+enum {
+  TARGET_ARCHI_NAME_X86,
+  TARGET_ARCHI_NAME_X64,
+  TARGET_ARCHI_NAME_ARM7,
+  TARGET_ARCHI_NAME_ARM8,
+  TARGET_ARCHI_NAME_SYSTEMZ,
+  TARGET_ARCHI_NAME_POWERPC64,
+  TARGET_ARCHI_NAME_UNKNOWN
+};
 
-#if defined(__x86_64__) || defined(_M_X64)
-#define EVERCRYPT_TARGETCONFIG_X64 1
-#elif defined(__i386__) || defined(_M_IX86)
-#define EVERCRYPT_TARGETCONFIG_X86 1
-#elif defined(__aarch64__) || defined(_M_ARM64)
-#define EVERCRYPT_TARGETCONFIG_AARCH64 1
-#elif defined(__arm__) || defined(_M_ARM)
-#define EVERCRYPT_TARGETCONFIG_AARCH32 1
-#endif
+#define ARCHI_NAME_X86 0
 
 #if __has_include("config.h")
 #include "config.h"
-#endif
-
-#if defined(__GNUC__) && !defined(BROKEN_INLINE_ASM)
-#define EVERCRYPT_TARGETCONFIG_GCC 1
 #endif
 
 #endif
