@@ -136,6 +136,7 @@ void EverCrypt_AutoConfig2_recall()
 
 void EverCrypt_AutoConfig2_init()
 {
+  #if COMPILE_VALE
   uint64_t scrut = check_aesni();
   if (scrut != (uint64_t)0U)
   {
@@ -211,6 +212,7 @@ void EverCrypt_AutoConfig2_init()
       }
     }
   }
+  #endif
   user_wants_hacl[0U] = true;
   user_wants_vale[0U] = true;
   user_wants_bcrypt[0U] = false;
