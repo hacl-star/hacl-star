@@ -238,17 +238,18 @@ val init_cpu_flags: unit -> Stack unit
     B.modifies (fp_cpu_flags ()) h0 h1))
 
 let init_cpu_flags () =
-  if SC.vale then begin
-    init_aesni_flags ();
-    init_shaext_flags ();
-    init_adx_bmi2_flags();
-    init_avx_flags ();
-    init_avx2_flags ();
-    init_sse_flags ();
-    init_movbe_flags ();
-    init_rdrand_flags ();
-    init_avx512_flags ()
-  end
+  if EverCrypt.TargetConfig.compile_vale then
+    if SC.vale then begin
+      init_aesni_flags ();
+      init_shaext_flags ();
+      init_adx_bmi2_flags();
+      init_avx_flags ();
+      init_avx2_flags ();
+      init_sse_flags ();
+      init_movbe_flags ();
+      init_rdrand_flags ();
+      init_avx512_flags ()
+    end
 
 #set-options "--z3rlimit 50"
 let init () =
