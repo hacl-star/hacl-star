@@ -25,7 +25,7 @@ let poly1305_vale
     (requires fun h ->
       EverCrypt.TargetConfig.compile_vale /\
       EverCrypt.TargetConfig.compile_128 /\
-      EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 /\
+      EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 /\
       B.live h src /\ B.live h dst /\ B.live h key /\
       B.disjoint dst src /\ B.disjoint dst key)
     (ensures fun h0 _ h1 ->
@@ -143,7 +143,7 @@ let poly1305 dst src len key =
     // This is a bit annoying: EverCrypt.TargetConfig.compile_128 won't be
     // translated as an if-def if we group the two below ifs
     if EverCrypt.TargetConfig.compile_128 then
-      if EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 then begin
+      if EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 then begin
        poly1305_vale dst src len key
 
       end else begin

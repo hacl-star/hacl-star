@@ -111,14 +111,14 @@ val disable_bcrypt: disabler
 // The suffix "p" stands for "pure".
 inline_for_extraction
 let has_vec128p (has_avx : bool) =
-  (target_archi = target_archi_name_x64 && has_avx)
+  (target_architecture = target_architecture_name_x64 && has_avx)
   // When compiling for ARM, SystemZ and PowerPC, we make the assumption
   // that the code will always be run on processors supporting the vectorized
   // instructions: no dynamic check.
-  || (target_archi = target_archi_name_arm7)
-  || (target_archi = target_archi_name_arm8)
-  || (target_archi = target_archi_name_systemz)
-  || (target_archi = target_archi_name_powerpc64)
+  || (target_architecture = target_architecture_name_arm7)
+  || (target_architecture = target_architecture_name_arm8)
+  || (target_architecture = target_architecture_name_systemz)
+  || (target_architecture = target_architecture_name_powerpc64)
 
 noextract
 let vec128_enabled = has_vec128p Vale.X64.CPU_Features_s.avx_enabled
@@ -130,7 +130,7 @@ val has_vec128: getter (has_vec128p Vale.X64.CPU_Features_s.avx_enabled)
 // The suffix "p" stands for "pure".
 inline_for_extraction
 let has_vec256p (has_avx2 : bool) =
-  (target_archi = target_archi_name_x64 && has_avx2)
+  (target_architecture = target_architecture_name_x64 && has_avx2)
 
 noextract
 let vec256_enabled = has_vec256p (Vale.X64.CPU_Features_s.avx2_enabled)

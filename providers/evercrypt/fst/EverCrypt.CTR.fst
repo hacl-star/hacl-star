@@ -47,7 +47,7 @@ let cpu_features_invariant (i: impl): Type0 =
   | Vale_AES128 | Vale_AES256 ->
       EverCrypt.TargetConfig.compile_vale /\
       EverCrypt.TargetConfig.compile_128 /\
-      EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 /\
+      EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 /\
       Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled)
   | Hacl_CHACHA20 ->
       True
@@ -117,7 +117,7 @@ fun r dst k iv iv_len c ->
   // This is a bit annoying: EverCrypt.TargetConfig.compile_128 won't be
   // translated as an if-def if we group the two below ifs
   if EverCrypt.TargetConfig.compile_128 then
-  if EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 &&
+  if EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 &&
      has_aesni && has_pclmulqdq && has_avx && has_sse then
     (**) let h0 = ST.get () in
     (**) let g_iv = G.hide (B.as_seq h0 iv) in
@@ -204,12 +204,12 @@ let copy_or_expand (i: impl)
   | Vale_AES128 ->
     if EverCrypt.TargetConfig.compile_vale then
     if EverCrypt.TargetConfig.compile_128 then
-    if EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 then
+    if EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 then
         vale_expand Vale_AES128 k ek
   | Vale_AES256 ->
     if EverCrypt.TargetConfig.compile_vale then
     if EverCrypt.TargetConfig.compile_128 then
-    if EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 then
+    if EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 then
         vale_expand Vale_AES256 k ek
   | Hacl_CHACHA20 ->
       B.blit k 0ul ek 0ul 32ul
@@ -355,13 +355,13 @@ let update_block a p dst src =
   | Vale_AES128 ->
     if EverCrypt.TargetConfig.compile_vale then
     if EverCrypt.TargetConfig.compile_128 then
-    if EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 then
+    if EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 then
         update_block_vale Vale_AES128 p dst src
 
   | Vale_AES256 ->
     if EverCrypt.TargetConfig.compile_vale then
     if EverCrypt.TargetConfig.compile_128 then
-    if EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 then
+    if EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 then
         update_block_vale Vale_AES256 p dst src
 
   | Hacl_CHACHA20 ->

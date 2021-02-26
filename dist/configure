@@ -311,10 +311,13 @@ if detect_arm; then
   echo "... detected ARM platform"
   echo "TARGET_ARCHITECTURE = ARM" >> Makefile.config
   if detect_arm_neon; then
+    echo "#define target_architecture target_architecture_name_arm8" >> config.h
     echo "... $build_target supports 128-bit NEON"
     compile_128=true
     echo "... $CC $CROSS_CFLAGS can cross-compile to ARM64 with SIMD"
     echo "CFLAGS_128 = -march=armv8-a+simd" >> Makefile.config
+  else
+    echo "#define target_architecture target_architecture_name_arm7" >> config.h
   fi
 fi
 
@@ -322,12 +325,14 @@ if detect_x86; then
   # Just print information: none of the above build options are supported on x86
   echo "... detected x86 platform"
   echo "TARGET_ARCHITECTURE = x86" >> Makefile.config
+  echo "#define target_architecture target_architecture_name_x86" >> config.h
   # TODO: can probably detect intrinsics here too and try to enable them!
 fi
 
 if detect_x64; then
   echo "... detected x64 platform"
   echo "TARGET_ARCHITECTURE = x64" >> Makefile.config
+  echo "#define target_architecture target_architecture_name_x64" >> config.h
   echo "... $build_target supports compilation of 128-bit and 256-bit AVX/AVX2"
   compile_128=true
   echo "CFLAGS_128 = -mavx" >> Makefile.config
@@ -362,6 +367,7 @@ fi
 if detect_ibmz; then
   echo "... detected z platform"
   echo "TARGET_ARCHITECTURE = SystemZ" >> Makefile.config
+  echo "#define target_architecture target_architecture_name_systemz" >> config.h
   echo "... $build_target supports 128-bit z VSX"
   compile_128=true
   echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config

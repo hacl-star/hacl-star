@@ -18,7 +18,7 @@ let secret_to_public pub priv =
   let uu__has_adx_bmi2 = has_adx_bmi2 () in
   if EverCrypt.TargetConfig.compile_vale then
   if EverCrypt.TargetConfig.compile_128 &&
-     (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 &&
+     (EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 &&
       uu__has_adx_bmi2) then
     Hacl.Curve25519_64.secret_to_public pub priv
   else
@@ -31,7 +31,7 @@ let scalarmult shared my_priv their_pub =
   let uu__has_adx_bmi2 = has_adx_bmi2 () in
   if EverCrypt.TargetConfig.compile_vale then
   if EverCrypt.TargetConfig.compile_128 &&
-     (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 &&
+     (EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 &&
       uu__has_adx_bmi2) then
     Hacl.Curve25519_64.scalarmult shared my_priv their_pub
   else
@@ -44,7 +44,7 @@ let ecdh shared my_priv their_pub =
   let uu__has_adx_bmi2 = has_adx_bmi2 () in
   if EverCrypt.TargetConfig.compile_vale then
   if EverCrypt.TargetConfig.compile_128 &&
-     (EverCrypt.TargetConfig.target_archi = EverCrypt.TargetConfig.target_archi_name_x64 &&
+     (EverCrypt.TargetConfig.target_architecture = EverCrypt.TargetConfig.target_architecture_name_x64 &&
       uu__has_adx_bmi2) then
     Hacl.Curve25519_64.ecdh shared my_priv their_pub
   else

@@ -7,19 +7,21 @@
  */
 
 enum {
-  TARGET_ARCHI_NAME_X86,
-  TARGET_ARCHI_NAME_X64,
-  TARGET_ARCHI_NAME_ARM7,
-  TARGET_ARCHI_NAME_ARM8,
-  TARGET_ARCHI_NAME_SYSTEMZ,
-  TARGET_ARCHI_NAME_POWERPC64,
-  TARGET_ARCHI_NAME_UNKNOWN
+  // TODO: the macros defined in EverCrypt.TargetConfig.h don't extract as
+  // uppercase - fix that
+  target_architecture_name_x86,
+  target_architecture_name_x64,
+  target_architecture_name_arm7,
+  target_architecture_name_arm8,
+  target_architecture_name_systemz,
+  target_architecture_name_powerpc64,
+  target_architecture_name_unknown
 };
-
-#define ARCHI_NAME_X86 0
 
 #if __has_include("config.h")
 #include "config.h"
+#else
+#define target_architecture target_architecture_name_unknown
 #endif
 
 #endif
