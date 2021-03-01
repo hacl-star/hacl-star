@@ -17,7 +17,6 @@
 #include "libintvector.h"
 #include "test_helpers.h"
 
-#if defined(COMPILE_128)
 typedef Lib_IntVector_Intrinsics_vec128 vec128;
 
 static inline void print_buf8(unsigned char *msg, uint8_t *buf) {
@@ -132,12 +131,10 @@ static inline bool compare_and_print_vec64_(vec128 comp, vec128 exp) {
 #define compare_and_print_vec64(msg, vec0, vec1)                          \
   printf("%s:\n", msg);                                                   \
   if (!compare_and_print_vec64_(vec0, vec1)) { ok = false; }
-#endif
 
 int main() {
   bool ok = true;
 
-#if defined(COMPILE_128)
   vec128 vec0, vec1;
   vec128 exp;
   uint32_t x32;
@@ -584,7 +581,6 @@ int main() {
   exp = initialize_vector64(0x8888888888888888UL,0x8888888888888888UL);
   compare_and_print_vec64("xor", vec0, exp);
   //  print_vector64("xor", vec0);
-#endif
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

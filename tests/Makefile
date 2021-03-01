@@ -57,7 +57,7 @@ curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 # this allows to work on and test the vectorized instructions without
 # rebuilding the whole HACL library.
 vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
-	cc -I../lib/c -O3 $(CFLAGS) vec-128-test.c -o vec-128-test.exe
+	cc -I../lib/c -O3 $(CFLAGS) $(CFLAGS_128) vec-128-test.c -o vec-128-test.exe
 
 ../lib/c/libintvector.h:
 	touch ../lib/c/libintvector.h
