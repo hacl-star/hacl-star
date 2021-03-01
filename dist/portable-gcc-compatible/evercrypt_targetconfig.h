@@ -1,10 +1,27 @@
 #ifndef __EVERCRYPT_TARGETCONFIG_H
 #define __EVERCRYPT_TARGETCONFIG_H
 
+// Instead of listing the identifiers for the target architectures
+// then defining the constant TARGET_ARCHITECTURE in config.h, we might simply
+// define exactly one tag of the form TARGET_ARCHITECTURE_IS_... in config.h.
+// However, for maintenance purposes, we use the first method in
+// order to have all the possible values listed in one place.
+// Note that for now, the only important id is TARGET_ARCHITECTURE_ID_X64,
+// but the other ids might prove useful in the future if we make
+// the dynamic feature detection more precise (see the functions
+// has_vec128_not_avx/has_vec256_not_avx2 below).
+#define TARGET_ARCHITECTURE_ID_UNKNOWN 0
+#define TARGET_ARCHITECTURE_ID_X86 1
+#define TARGET_ARCHITECTURE_ID_X64 2
+#define TARGET_ARCHITECTURE_ID_ARM7 3
+#define TARGET_ARCHITECTURE_ID_ARM8 4
+#define TARGET_ARCHITECTURE_ID_SYSTEMZ 5
+#define TARGET_ARCHITECTURE_ID_POWERPC64 6
+
 #if __has_include("config.h")
 #include "config.h"
 #else
-#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_NAME_UNKNOWN
+#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_UNKNOWN
 #endif
 
 // Those functions are called on non-x64 platforms for which the feature detection
@@ -19,7 +36,7 @@
 #include <stdbool.h>
 
 static inline bool has_vec128_not_avx () {
-#if (TARGET_ARCHITECTURE != TARGET_ARCHITECTURE_NAME_X64) && COMPILE_128
+#if (TARGET_ARCHITECTURE != TARGET_ARCHITECTURE_ID_X64) && COMPILE_128
   return true;
 #else
   return false;
@@ -27,7 +44,7 @@ static inline bool has_vec128_not_avx () {
 }
 
 static inline bool has_vec256_not_avx2 () {
-#if (TARGET_ARCHITECTURE != TARGET_ARCHITECTURE_NAME_X64) && COMPILE_256
+#if (TARGET_ARCHITECTURE != TARGET_ARCHITECTURE_ID_X64) && COMPILE_256
   return true;
 #else
   return false;
