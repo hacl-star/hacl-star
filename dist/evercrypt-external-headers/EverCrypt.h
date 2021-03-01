@@ -570,6 +570,8 @@ extern bool EverCrypt_AutoConfig2_has_rdrand();
 
 extern bool EverCrypt_AutoConfig2_has_avx512();
 
+KRML_DEPRECATED("")
+
 extern bool EverCrypt_AutoConfig2_wants_vale();
 
 extern bool EverCrypt_AutoConfig2_wants_hacl();
@@ -614,11 +616,7 @@ extern void EverCrypt_AutoConfig2_disable_openssl();
 
 extern void EverCrypt_AutoConfig2_disable_bcrypt();
 
-extern bool EverCrypt_AutoConfig2_has_vec128p(bool has_avx1);
-
 extern bool EverCrypt_AutoConfig2_has_vec128();
-
-extern bool EverCrypt_AutoConfig2_has_vec256p(bool has_avx21);
 
 extern bool EverCrypt_AutoConfig2_has_vec256();
 

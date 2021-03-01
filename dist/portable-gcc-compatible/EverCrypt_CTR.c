@@ -181,7 +181,7 @@ EverCrypt_CTR_create_in(
         {
           return EverCrypt_Error_InvalidIVLength;
         }
-        #if EVERCRYPT_TARGETCONFIG_X64
+        #if COMPILE_VALE
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
@@ -220,7 +220,7 @@ EverCrypt_CTR_create_in(
         {
           return EverCrypt_Error_InvalidIVLength;
         }
-        #if EVERCRYPT_TARGETCONFIG_X64
+        #if COMPILE_VALE
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
@@ -302,7 +302,7 @@ EverCrypt_CTR_init(
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
-        #if EVERCRYPT_TARGETCONFIG_X64
+        #if COMPILE_VALE
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)176U;
         uint64_t scrut = aes128_key_expansion(k, keys_b);
@@ -312,7 +312,7 @@ EverCrypt_CTR_init(
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
-        #if EVERCRYPT_TARGETCONFIG_X64
+        #if COMPILE_VALE
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)240U;
         uint64_t scrut = aes256_key_expansion(k, keys_b);
@@ -349,7 +349,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
-        #if EVERCRYPT_TARGETCONFIG_X64
+        #if COMPILE_VALE
         EverCrypt_CTR_state_s scrut0 = *p;
         uint32_t c01 = scrut0.ctr;
         uint8_t *ek1 = scrut0.xkey;
@@ -399,7 +399,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
-        #if EVERCRYPT_TARGETCONFIG_X64
+        #if COMPILE_VALE
         EverCrypt_CTR_state_s scrut0 = *p;
         uint32_t c01 = scrut0.ctr;
         uint8_t *ek1 = scrut0.xkey;
