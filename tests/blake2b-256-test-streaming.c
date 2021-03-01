@@ -10,15 +10,9 @@
 #include <time.h>
 
 #include "test_helpers.h"
-
-// Of course, it doesn't make sense to compile and run those test on a platform
-// which doesn't support 256-bits vectors, but using macros directly in the files
-// makes it easy to make the whole directory build on all platforms.
-#if defined(COMPILE_256)
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Streaming_Blake2b_256.h"
 #include "blake2_vectors.h"
-#endif
 
 
 typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_state_s blake2_state;
@@ -26,7 +20,6 @@ typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_state_s blake2_state;
 int main() {
     bool ok = true;
 
-#if defined(COMPILE_256)
     // Here, I can't really loop over the vectors... because I want to exercise
     // the streaming API with various lengths. Otherwise, in an exemplary test,
     // one would write a for-loop over the test vectors.
@@ -62,7 +55,6 @@ int main() {
     else {
         printf("Blake2b (256-bit) streaming: no AVX2 support: ignoring tests\n");
     }
-#endif
 
     if (ok)
         return EXIT_SUCCESS;
