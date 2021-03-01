@@ -371,7 +371,6 @@ if detect_ibmz; then
   echo "... $build_target supports 128-bit z VSX"
   compile_128=true
   echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
-  echo "#include <stdint.h> " >> config.h
 fi
 
 if $compile_intrinsics; then
