@@ -14,18 +14,18 @@ TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
 # Filter the targets if they are not supported
 # Vec128
-ifndef COMPILE_128
-	TARGETS := $(filter-out %-128-test-streaming.exe, $(filter-out %-128-test.exe, $(TARGETS)))
+ifneq ($(COMPILE_128),1)
+TARGETS := $(filter-out %-128-test-streaming.exe, $(filter-out %-128-test.exe, $(TARGETS)))
 endif
 
 # Vec256
-ifndef COMPILE_256
-	TARGETS := $(filter-out %-256-test-streaming.exe, $(filter-out %-256-test.exe, $(TARGETS)))
+ifneq ($(COMPILE_256),1)
+TARGETS := $(filter-out %-256-test-streaming.exe, $(filter-out %-256-test.exe, $(TARGETS)))
 endif
 
 # Curve64
-ifndef COMPILE_INTRINSICS
-	TARGETS := $(filter-out curve64-%, $(TARGETS))
+ifneq ($(COMPILE_COMPILE_INTRINSICS),1)
+TARGETS := $(filter-out curve64-%, $(TARGETS))
 endif
 
 CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
