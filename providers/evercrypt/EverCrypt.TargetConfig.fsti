@@ -38,4 +38,4 @@ val compile_256 : bool
 
 // Only for Curve25519 64
 [@@ CIfDef ]
-val compile_intrinsics : bool
+val compile_inline_asm : bool
