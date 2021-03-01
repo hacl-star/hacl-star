@@ -10,11 +10,7 @@
 #include <time.h>
 
 #include "test_helpers.h"
-
-#if defined(COMPILE_128)
 #include "Hacl_Streaming_Poly1305_128.h"
-#endif
-
 #include "poly1305_vectors.h"
 
 typedef struct Hacl_Streaming_Poly1305_128_poly1305_128_state_s poly1305_state;
@@ -22,7 +18,6 @@ typedef struct Hacl_Streaming_Poly1305_128_poly1305_128_state_s poly1305_state;
 int main() {
     bool ok = true;
 
-#if defined(COMPILE_128)
     // Here, I can't really loop over the vectors... because I want to exercise
     // the streaming API with various lengths. Otherwise, in an exemplary test,
     // one would write a for-loop over the test vectors.
@@ -56,7 +51,6 @@ int main() {
     ok &= compare_and_print(16, tag, v->tag);
 
     Hacl_Streaming_Poly1305_128_free(s);
-#endif
 
     if (ok)
         return EXIT_SUCCESS;
