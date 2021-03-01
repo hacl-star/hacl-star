@@ -12,20 +12,15 @@ USER_CFLAGS?=
 # Add GF128 tests once code/experimental/gf128 is promoted to code
 TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
-TARGETS1 := $(filter-out %128%, $(TARGETS))
-.PHONY: test1
-test1:
-	echo $(TARGETS1)
-
 # Filter the targets if they are not supported
 # Vec128
 ifndef COMPILE_128
-	TARGETS := $(filter-out %128%, $(TARGETS))
+	TARGETS := $(filter-out %-128-test-streaming.c, $(filter-out %-128-test.c, $(TARGETS)))
 endif
 
 # Vec256
 ifndef COMPILE_256
-	TARGETS := $(filter-out %256%, $(TARGETS))
+	TARGETS := $(filter-out %-256-test-streaming.c, $(filter-out %-256-test.c, $(TARGETS)))
 endif
 
 # Curve64
@@ -58,11 +53,11 @@ arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test curve255
 
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
-# Note that vec128-test.exe uses lib/c and not dist/gcc-compatible:
+# Note that vec-128-test.exe uses lib/c and not dist/gcc-compatible:
 # this allows to work on and test the vectorized instructions without
 # rebuilding the whole HACL library.
-vec128-test.exe: ../lib/c/libintvector.h vec128-test.c
-	cc -I../lib/c -O3 $(CFLAGS) vec128-test.c -o vec128-test.exe
+vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
+	cc -I../lib/c -O3 $(CFLAGS) vec-128-test.c -o vec-128-test.exe
 
 ../lib/c/libintvector.h:
 	touch ../lib/c/libintvector.h
