@@ -12,6 +12,11 @@ USER_CFLAGS?=
 # Add GF128 tests once code/experimental/gf128 is promoted to code
 TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
+TARGETS1 := $(filter-out %128%, $(TARGETS))
+.PHONY: test1
+test1:
+	echo $(TARGETS1)
+
 # Filter the targets if they are not supported
 # Vec128
 ifndef COMPILE_128
@@ -32,10 +37,6 @@ CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
   -O3 $(CFLAGS) $(USER_CFLAGS)
-
-.PHONY: test1
-test1:
-	echo $(TARGETS)
 
 all: $(TARGETS)
 
