@@ -38,8 +38,8 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Curve25519_Bignum51.h"
 #include "Hacl_Ed25519.h"
-#include "Hacl_Curve25519_51.h"
 
 void Hacl_EC_Ed25519_mk_felem_zero(uint64_t *b);
 
