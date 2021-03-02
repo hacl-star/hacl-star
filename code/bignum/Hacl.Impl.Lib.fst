@@ -95,6 +95,7 @@ val fill_blocks4:
        (S.generate_blocks4_f #t #a (v n / 4) (spec h0)) (refl h0 0) in
       refl h1 (v n) == s /\ as_seq #_ #t h1 output == o))
 
+#push-options "--z3rlimit 150"
 let fill_blocks4 #t #a h0 n output refl footprint spec impl =
   fill_blocks h0 4ul (n /. 4ul) output (Loops.fixed_a a)
   (fun h i -> refl h (4 * i))
@@ -112,11 +113,13 @@ let fill_blocks4 #t #a h0 n output refl footprint spec impl =
       let c1, e1 = spec h0 (4 * v i + 1) c0 in
       let c2, e2 = spec h0 (4 * v i + 2) c1 in
       let c3, e3 = spec h0 (4 * v i + 3) c2 in
-      let res = Lib.Sequence.create4 e0 e1 e2 e3 in
+      let res = LSeq.create4 e0 e1 e2 e3 in
+      LSeq.create4_lemma e0 e1 e2 e3;
       let res1 = LSeq.sub (as_seq h2 output) (4 * v i) 4 in
       refl h2 (4 * v i + 4) == c3 /\
       (LSeq.eq_intro res res1; res1 `LSeq.equal` res))
   )
+#pop-options
 
 
 inline_for_extraction noextract
