@@ -17,7 +17,8 @@ dist/libed25519.a: dist/Makefile.basic
 
 HASH_BUNDLE=-bundle Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash]
 BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*'
-CURVE_BUNDLE=-bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.Field51 -bundle 'Hacl.Impl.Curve25519.\*[rename=Hacl_Curve_Leftovers]'
+CURVE_BUNDLE=-bundle Hacl.Impl.Curve25519.Field51[rename=Hacl_Curve25519_Bignum51] -static-header Hacl.Impl.Curve25519.Field51 \
+	-bundle Hacl.Curve25519_51,Hacl.Impl.Curve25519.Field51,Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519]
 
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libed25519.a \

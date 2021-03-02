@@ -90,7 +90,8 @@ CURVE_BUNDLE_SLOW= \
   -bundle 'Hacl.Curve25519_64_Slow=Hacl.Impl.Curve25519.Field64.Hacl,Hacl.Spec.Curve25519,Hacl.Spec.Curve25519.\*'
 CURVE_BUNDLE_BASE= \
   $(CURVE_BUNDLE_SLOW) \
-  -bundle Hacl.Curve25519_51=Hacl.Impl.Curve25519.Field51 \
+  -bundle Hacl.Impl.Curve25519.Field51[rename=Hacl_Curve25519_Bignum51] -static-header Hacl.Impl.Curve25519.Field51 \
+  -bundle Hacl.Curve25519_51 \
   -bundle 'Hacl.Impl.Curve25519.\*[rename=Hacl_Curve_Leftovers]'
 CURVE_BUNDLE_LOCAL=-bundle Hacl.Curve25519_64_Local=Hacl.Impl.Curve25519.Field64.Local[rename=Hacl_Curve25519_64] \
   $(CURVE_BUNDLE_BASE)
