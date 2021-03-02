@@ -2017,7 +2017,8 @@ static void montgomery_multiplication_round_(Spec_P256_curve c, uint64_t *t, uin
   short_mul_bn(c, sw, t1, t2);
 }
 
-static void montgomery_multiplication_round(Spec_P256_curve c, uint64_t *t, uint64_t *round)
+static void
+montgomery_multiplication_round_w_k0(Spec_P256_curve c, uint64_t *t, uint64_t *round)
 {
   uint32_t len;
   switch (c)
@@ -2109,8 +2110,39 @@ montgomery_multiplication_round_k0(
   shift1(c, t2, round);
 }
 
+static void montgomery_multiplication_round(Spec_P256_curve c, uint64_t *t, uint64_t *round)
+{
+  const uint64_t *primeBuffer;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        primeBuffer = prime256_buffer;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        primeBuffer = prime384_buffer;
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  uint64_t primeBuffer0 = primeBuffer[0U];
+  if (primeBuffer0 == (uint64_t)0xffffffffffffffffU)
+  {
+    montgomery_multiplication_round_w_k0(c, t, round);
+    return;
+  }
+  uint64_t k0 = getK0(c);
+  montgomery_multiplication_round_k0(c, t, round, k0);
+}
+
 static void
-montgomery_multiplication_buffer_by_one_w_ko(Spec_P256_curve c, uint64_t *a, uint64_t *result)
+montgomery_multiplication_reduction(Spec_P256_curve c, uint64_t *t, uint64_t *result)
 {
   uint32_t len;
   switch (c)
@@ -2130,202 +2162,9 @@ montgomery_multiplication_buffer_by_one_w_ko(Spec_P256_curve c, uint64_t *a, uin
         len = (uint32_t)4U;
       }
   }
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t[(uint32_t)2U * len];
-  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  uint64_t *t_low = t;
-  memcpy(t_low, a, len * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     montgomery_multiplication_round(c, t, t);
-  }
-  reduction_prime_2prime_with_carry(c, t, result);
-}
-
-static void
-montgomery_multiplication_buffer_by_one_ko(Spec_P256_curve c, uint64_t *a, uint64_t *result)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t[(uint32_t)2U * len];
-  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  uint64_t *t_low = t;
-  memcpy(t_low, a, len * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    montgomery_multiplication_round_k0(c, t, t, getK0(c));
-  }
-  reduction_prime_2prime_with_carry(c, t, result);
-}
-
-static void
-montgomery_multiplication_buffer_w_k0(
-  Spec_P256_curve c,
-  uint64_t *a,
-  uint64_t *b,
-  uint64_t *result
-)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t[(uint32_t)2U * len];
-  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  mul(c, a, b, t);
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    montgomery_multiplication_round(c, t, t);
-  }
-  reduction_prime_2prime_with_carry(c, t, result);
-}
-
-static void
-montgomery_multiplication_buffer_k0(
-  Spec_P256_curve c,
-  uint64_t *a,
-  uint64_t *b,
-  uint64_t *result
-)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t[(uint32_t)2U * len];
-  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  mul(c, a, b, t);
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    montgomery_multiplication_round_k0(c, t, t, getK0(c));
-  }
-  reduction_prime_2prime_with_carry(c, t, result);
-}
-
-static void montgomery_square_buffer_w_k0(Spec_P256_curve c, uint64_t *a, uint64_t *result)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t[(uint32_t)2U * len];
-  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  square_bn(c, a, t);
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    montgomery_multiplication_round(c, t, t);
-  }
-  reduction_prime_2prime_with_carry(c, t, result);
-}
-
-static void montgomery_square_buffer_k0(Spec_P256_curve c, uint64_t *a, uint64_t *result)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t[(uint32_t)2U * len];
-  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  square_bn(c, a, t);
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint64_t sw;
-    switch (c)
-    {
-      case Spec_P256_P256:
-        {
-          sw = (uint64_t)1U;
-          break;
-        }
-      case Spec_P256_P384:
-        {
-          sw = (uint64_t)4294967297U;
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
-    }
-    montgomery_multiplication_round_k0(c, t, t, sw);
   }
   reduction_prime_2prime_with_carry(c, t, result);
 }
@@ -2333,93 +2172,85 @@ static void montgomery_square_buffer_k0(Spec_P256_curve c, uint64_t *a, uint64_t
 static void
 montgomery_multiplication_buffer_by_one(Spec_P256_curve c, uint64_t *a, uint64_t *result)
 {
-  const uint64_t *primeBuffer;
+  uint32_t len;
   switch (c)
   {
     case Spec_P256_P256:
       {
-        primeBuffer = prime256_buffer;
+        len = (uint32_t)4U;
         break;
       }
     case Spec_P256_P384:
       {
-        primeBuffer = prime384_buffer;
+        len = (uint32_t)6U;
         break;
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
-  uint64_t primeBuffer0 = primeBuffer[0U];
-  if (primeBuffer0 == (uint64_t)0xffffffffffffffffU)
-  {
-    montgomery_multiplication_buffer_by_one_w_ko(c, a, result);
-    return;
-  }
-  montgomery_multiplication_buffer_by_one_ko(c, a, result);
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
+  uint64_t t[(uint32_t)2U * len];
+  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
+  uint64_t *t_low = t;
+  memcpy(t_low, a, len * sizeof (uint64_t));
+  montgomery_multiplication_reduction(c, t, result);
 }
 
 static void
 montgomery_multiplication_buffer(Spec_P256_curve c, uint64_t *a, uint64_t *b, uint64_t *result)
 {
-  const uint64_t *primeBuffer;
+  uint32_t len;
   switch (c)
   {
     case Spec_P256_P256:
       {
-        primeBuffer = prime256_buffer;
+        len = (uint32_t)4U;
         break;
       }
     case Spec_P256_P384:
       {
-        primeBuffer = prime384_buffer;
+        len = (uint32_t)6U;
         break;
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
-  uint64_t primeBuffer0 = primeBuffer[0U];
-  if (primeBuffer0 == (uint64_t)0xffffffffffffffffU)
-  {
-    montgomery_multiplication_buffer_w_k0(c, a, b, result);
-    return;
-  }
-  montgomery_multiplication_buffer_k0(c, a, b, result);
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
+  uint64_t t[(uint32_t)2U * len];
+  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
+  mul(c, a, b, t);
+  montgomery_multiplication_reduction(c, t, result);
 }
 
 static void montgomery_square_buffer(Spec_P256_curve c, uint64_t *a, uint64_t *result)
 {
-  const uint64_t *primeBuffer;
+  uint32_t len;
   switch (c)
   {
     case Spec_P256_P256:
       {
-        primeBuffer = prime256_buffer;
+        len = (uint32_t)4U;
         break;
       }
     case Spec_P256_P384:
       {
-        primeBuffer = prime384_buffer;
+        len = (uint32_t)6U;
         break;
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        len = (uint32_t)4U;
       }
   }
-  uint64_t primeBuffer0 = primeBuffer[0U];
-  if (primeBuffer0 == (uint64_t)0xffffffffffffffffU)
-  {
-    montgomery_square_buffer_w_k0(c, a, result);
-    return;
-  }
-  montgomery_square_buffer_k0(c, a, result);
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
+  uint64_t t[(uint32_t)2U * len];
+  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
+  square_bn(c, a, t);
+  montgomery_multiplication_reduction(c, t, result);
 }
 
 static void fsquarePowN(Spec_P256_curve c, uint32_t n, uint64_t *a)

@@ -41,14 +41,14 @@ let montgomery_multiplication_round_ #c t t2 =
   short_mul_bn (prime_buffer #c) t1 t2
   
 
-val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
+val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> round: widefelem c -> 
   Stack unit 
   (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * getPrime c /\
     eq_or_disjoint t round)
   (ensures fun h0 _ h1 -> modifies (loc round)  h0 h1 /\
     wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * (wide_as_nat c h0 t % pow2 64)) / pow2 64)
 
-let montgomery_multiplication_round #c t round =
+let montgomery_multiplication_round_w_k0 #c t round =
   push_frame(); 
     let len = getCoordinateLenU64 c in  
     let t2 = create (size 2 *! len) (u64 0) in 
@@ -115,37 +115,63 @@ let montgomery_multiplication_round_k0 #c t round k0 =
   pop_frame()
 
 
-val montgomery_multiplication_buffer_by_one_w_ko: #c: curve {(getPrime c + 1) % pow2 64 == 0} 
-  -> a: felem c
+
+inline_for_extraction
+val supportsReducedMultiplication: #c: curve -> 
+  Stack bool
+    (requires fun h -> True)
+    (ensures fun h0 r h1 -> r <==> (getPrime c + 1) % pow2 64 == 0)
+
+let supportsReducedMultiplication #c = 
+  let primeBuffer = prime_buffer #c in 
+  let primeBuffer0 = index primeBuffer (size 0) in 
+    eq_lemma #U64 primeBuffer0 (u64 0xffffffffffffffff);
+  eq #U64 primeBuffer0 (u64 0xffffffffffffffff)
+
+
+val montgomery_multiplication_round: #c: curve -> t: widefelem c -> 
+  round: widefelem c -> 
+  Stack unit 
+  (requires fun h -> 
+    let prime = getPrime c in 
+    live h t /\ live h round  /\ wide_as_nat c h t < prime * prime)
+  (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\ (
+    let k0 = (u64 1) in (* to change *)
+    wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * ((uint_v k0 * (wide_as_nat c h0 t % pow2 64)) % pow2 64)) / pow2 64
+  ))
+  
+
+let montgomery_multiplication_round #c t round = 
+  match supportsReducedMultiplication #c with   
+  |true -> montgomery_multiplication_round_w_k0 t round
+  |false -> 
+    let k0 = getK0 c in 
+    montgomery_multiplication_round_k0 t round k0
+
+
+val montgomery_multiplication_reduction: #c: curve
+  -> t: widefelem c 
   -> result: felem c -> 
-  Stack unit
-  (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
+  Stack unit 
+  (requires (fun h -> live h t /\ as_nat c h t < getPrime c /\ live h result)) 
   (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (let prime = getPrime c in 
-    as_nat c h1 result  = (as_nat c h0 a * modp_inv2_prime (getPower2 c) prime) % prime /\
-    as_nat c h1 result = fromDomain_ #c (as_nat c h0 a)))
+    as_nat c h1 result  = (as_nat c h0 t * modp_inv2_prime (getPower2 c) prime) % prime /\
+    as_nat c h1 result = fromDomain_ #c (as_nat c h0 t)))
   )
 
-let montgomery_multiplication_buffer_by_one_w_ko #c a result = 
-  push_frame();
+
+let montgomery_multiplication_reduction #c t result = 
+   let h1 = ST.get() in 
+   let len = getCoordinateLenU64 c in 
   
-  let len = getCoordinateLenU64 c in 
-  let t = create (size 2 *! len) (u64 0) in 
-    let t_low = sub t (size 0) len in 
-    let t_high = sub t len len in 
-
-  let h0 = ST.get() in 
-
-  copy t_low a; 
-
-  let h1 = ST.get() in 
-  
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = let prime = getPrime c in 
-    live h t /\ wide_as_nat c h t < prime * prime /\ modifies (loc t) h0 h /\
+  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
+    let prime = getPrime c in 
+    live h t /\ (* wide_as_nat c h t < prime * prime /\ modifies (loc t) h0 h /\ *)
     wide_as_nat c h t % prime = wide_as_nat c h1 t * modp_inv2 #c (pow2 (i * 64)) % prime in 
-
+(*
   assert(wide_as_nat c h1 t = as_nat c h0 a + as_nat c h0 t_high * getPower2 c);
   assert(as_nat c h0 t_high = 0);
-
+*)
   lemma_inv1 (wide_as_nat c h1 t) (getPrime c);
   lemma_mod_inv #c (wide_as_nat c h1 t);
 
@@ -167,74 +193,40 @@ let montgomery_multiplication_buffer_by_one_w_ko #c a result =
   
   assume (wide_as_nat c h2 t < 2 * getPrime c);
 
-  reduction_prime_2prime_with_carry t result;
-  pop_frame();
-  
-  lemmaFromDomain #c (as_nat c h0 a)
+  reduction_prime_2prime_with_carry t result
 
-
-
-val montgomery_multiplication_buffer_by_one_ko: #c: curve  
+(*
+val montgomery_multiplication_buffer_by_one: #c: curve {(getPrime c + 1) % pow2 64 == 0} 
   -> a: felem c
   -> result: felem c -> 
   Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
-    let prime = getPrime c in 
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (let prime = getPrime c in 
     as_nat c h1 result  = (as_nat c h0 a * modp_inv2_prime (getPower2 c) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c (as_nat c h0 a)))
   )
 
-let montgomery_multiplication_buffer_by_one_ko #c a result = 
+*)
+
+let montgomery_multiplication_buffer_by_one #c a result = 
   push_frame();
-  
   
   let len = getCoordinateLenU64 c in 
   let t = create (size 2 *! len) (u64 0) in 
     let t_low = sub t (size 0) len in 
     let t_high = sub t len len in 
 
-    let h0 = ST.get() in 
+  let h0 = ST.get() in 
+
   copy t_low a; 
-    let h1 = ST.get() in 
-    let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = let prime = getPrime c in 
-      live h t /\ wide_as_nat c h t < prime * prime  /\
-      modifies (loc t) h0 h /\ 
-      wide_as_nat c h t % prime = wide_as_nat c h1 t * modp_inv2 #c (pow2 (i * 64)) % prime
-    in 
-
-    assert(wide_as_nat c h1 t = as_nat c h0 a + as_nat c h0 t_high * getPower2 c);
-    assert(as_nat c h0 t_high = 0);
-
-    lemma_inv1 (wide_as_nat c h1 t) (getPrime c);
-    lemma_mod_inv #c (wide_as_nat c h1 t);
-  
-    for 0ul len inv (fun i -> let h0_ = ST.get() in 
-
-(*       let k0 = (u64 18446744069414584321) in 
-      let k0 = Hacl.Spec.Bignum.ModInv64.mod_inv_u64 k0 in 
- *)
-    montgomery_multiplication_round_k0 #c t t (getK0 c); 
-      let h1_ = ST.get() in
-    
-      let a0 = wide_as_nat c h1 t in 
-      let a_i = wide_as_nat c h0_ t in 
-      let a_il = wide_as_nat c h1_ t in 
-
-      montgomery_multiplication_one_round_proof_border #c (v (getKo c) * (a_i % pow2 64) % pow2 64) a_i a_il;
-      lemma_multiplication_by_inverse_k0 #c a0 a_i a_il (v i)
-    );
-      let h2 = ST.get() in 
-  
-      assume (wide_as_nat c h2 t < 2 * getPrime c);
-
-  reduction_prime_2prime_with_carry t result;
+  montgomery_multiplication_reduction t result;
   pop_frame();
   
-    lemmaFromDomain #c (as_nat c h0 a)
+  lemmaFromDomain #c (as_nat c h0 a)
 
 
-val montgomery_multiplication_buffer_w_k0: #c: curve {(getPrime c + 1) % pow2 64 == 0}
+(*
+val montgomery_multiplication_buffer: #c: curve
   -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h b /\ 
@@ -245,14 +237,18 @@ val montgomery_multiplication_buffer_w_k0: #c: curve {(getPrime c + 1) % pow2 64
     as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b) % prime) /\
     as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b))))
   )
+*)
 
-
-let montgomery_multiplication_buffer_w_k0 #c a b result = 
+let montgomery_multiplication_buffer #c a b result = 
   push_frame();
   let len = getCoordinateLenU64 c in 
   let t = create (size 2 *! len) (u64 0) in 
     let h0 = ST.get() in
   mul a b t;  
+  montgomery_multiplication_reduction #c t result;
+  pop_frame()
+  (*
+
     let h1 = ST.get() in 
   
     let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = let prime = getPrime c in 
@@ -310,9 +306,9 @@ let montgomery_multiplication_buffer_w_k0 #c a b result =
     };
 
     inDomain_mod_is_not_mod #c (fromDomain_ #c a_ * fromDomain_ #c b_)
+*)
 
-
-
+(*
 val montgomery_multiplication_buffer_k0: #c: curve -> a: felem c -> b: felem c 
   -> result: felem c ->  
   Stack unit
@@ -388,10 +384,10 @@ let montgomery_multiplication_buffer_k0 #c a b result =
     };
 
     inDomain_mod_is_not_mod #c (fromDomain_ #c a_ * fromDomain_ #c b_)
+*)
 
-
-
-val montgomery_square_buffer_w_k0: #c: curve {(getPrime c + 1) % pow2 64 == 0} -> a: felem c
+(*
+val montgomery_square_buffer: #c: curve  -> a: felem c
   -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < (getPrime c) /\ live h result)) 
@@ -400,105 +396,18 @@ val montgomery_square_buffer_w_k0: #c: curve {(getPrime c + 1) % pow2 64 == 0} -
     as_nat c h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (getPower c) prime) % prime /\
     as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) /\
     as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
-
-
-let montgomery_square_buffer_w_k0 #c a result = 
-  push_frame();
-    
-  let len = getCoordinateLenU64 c in 
-  let t = create (size 2 *! len) (u64 0) in 
-    let h0 = ST.get() in 
-  square_bn a t;  
-    let h1 = ST.get() in 
-  let inv h (i: nat { i <= uint_v len}) =  let prime = getPrime c in 
-    live h t /\ wide_as_nat c h t < prime * prime  /\
-    modifies (loc t) h0 h /\
-    wide_as_nat c h t % prime = wide_as_nat c h1 t * modp_inv2 #c (pow2 (i * 64)) % prime in 
-
-    assume (wide_as_nat c h1 t < getPrime c * getPrime c);
-    assume (wide_as_nat c h1 t % getPrime c = wide_as_nat c h1 t * modp_inv2 #c (pow2 (0 * 64)) % getPrime c);
-  
-  for 0ul len inv (fun i ->
-      let h0_ = ST.get() in 
-    montgomery_multiplication_round #c t t; 
-      let h1_ = ST.get() in
-
-      let a0 = wide_as_nat c h1 t in 
-      let a_i = wide_as_nat c h0_ t in 
-      let a_il = wide_as_nat c h1_ t in 
-      montgomery_multiplication_one_round_proof_border #c (a_i % pow2 64) a_i a_il;
-      lemma_multiplication_by_inverse_w_k0 #c a0 a_i a_il (v i));
-
-    let h2 = ST.get() in 
-    assume (wide_as_nat c h2 t < 2 * getPrime c);
-  reduction_prime_2prime_with_carry t result; 
-    admit();
-    
-  pop_frame()  
-
-
-
-val montgomery_square_buffer_k0: #c: curve -> a: felem c -> result: felem c ->  
-  Stack unit
-  (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
-  (ensures (fun h0 _ h1 -> (modifies (loc result) h0 h1 /\ (let prime = getPrime c in 
-    as_nat c h1 result < prime /\ 
-    as_nat c h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (getPower c) prime) % prime /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
-  )
-
-
-let montgomery_square_buffer_k0 #c a result = 
-  push_frame();
-    
-  let len = getCoordinateLenU64 c in 
-  let t = create (size 2 *! len) (u64 0) in 
-    let h0 = ST.get() in 
-  square_bn a t;  
-    let h1 = ST.get() in 
-  let inv h (i: nat { i <= uint_v len}) = True in 
-    for 0ul len inv (fun i -> montgomery_multiplication_round_k0 #c t t (getKo c));
-
-  reduction_prime_2prime_with_carry t result; 
-  admit();
-   
-  pop_frame()  
-
-
-inline_for_extraction
-val supportsReducedMultiplication: #c: curve -> 
-  Stack bool
-    (requires fun h -> True)
-    (ensures fun h0 r h1 -> r <==> (getPrime c + 1) % pow2 64 == 0)
-
-let supportsReducedMultiplication #c = 
-  let primeBuffer = prime_buffer #c in 
-  let primeBuffer0 = index primeBuffer (size 0) in 
-    eq_lemma #U64 primeBuffer0 (u64 0xffffffffffffffff);
-  eq #U64 primeBuffer0 (u64 0xffffffffffffffff)
-
-
-let montgomery_multiplication_buffer_by_one #c a result = 
-  match supportsReducedMultiplication #c with 
-  |true -> 
-    montgomery_multiplication_buffer_by_one_w_ko a result
-  |false -> montgomery_multiplication_buffer_by_one_ko a result
-
-
-let montgomery_multiplication_buffer #c a b result = 
-  match supportsReducedMultiplication #c with 
-  |true -> 
-    montgomery_multiplication_buffer_w_k0 a b result
-  |false -> montgomery_multiplication_buffer_k0 a b result
-
-
+*)
 
 let montgomery_square_buffer #c a result = 
-  match supportsReducedMultiplication #c with 
-  |true -> 
-     montgomery_square_buffer_w_k0 a result
-  |false -> montgomery_square_buffer_k0 a result
+  push_frame();
+    
+  let len = getCoordinateLenU64 c in 
+  let t = create (size 2 *! len) (u64 0) in 
+    let h0 = ST.get() in 
+  square_bn a t;  
+  montgomery_multiplication_reduction #c t result;
+
+  pop_frame()  
 
 
 
