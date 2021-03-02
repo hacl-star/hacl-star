@@ -17,17 +17,17 @@ open FStar.Mul
 open Lib.Loops
 
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
 open Spec.ECDSA.Lemmas
 open Spec.P256
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 
-(* friend Hacl.Spec.P.MontgomeryMultiplication *)
+(* friend Hacl.Spec.MontgomeryMultiplication *)
 
-(* open Hacl.Impl.P256.MontgomeryMultiplication.Exponent *)
+(* open Hacl.Impl.EC.MontgomeryMultiplication.Exponent *)
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 

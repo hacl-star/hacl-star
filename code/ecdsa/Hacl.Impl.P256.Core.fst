@@ -12,7 +12,7 @@ open Hacl.Spec.P256.Definition
 open Spec.P256
 open Hacl.Impl.EC.Reduction
 open Hacl.Impl.EC.LowLevel 
-(* open Hacl.Impl.P256.MontgomeryMultiplication *)
+(* open Hacl.Impl.EC.MontgomeryMultiplication *)
 open Hacl.Impl.EC.Exponent
 
 open Hacl.Impl.EC.MontgomeryMultiplication
@@ -31,7 +31,7 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-friend Hacl.Spec.P.MontgomeryMultiplication
+friend Hacl.Spec.MontgomeryMultiplication
 open FStar.Mul
 
 

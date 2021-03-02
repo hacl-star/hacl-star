@@ -21,7 +21,7 @@ open Lib.Loops
 open Hacl.Impl.P256.MM.Lemmas
 
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"

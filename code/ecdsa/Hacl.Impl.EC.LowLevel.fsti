@@ -10,7 +10,7 @@ open Lib.Buffer
 open Hacl.Spec.P256.Definition
 open Spec.P256
 open FStar.Mul
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 
 open Hacl.Impl.EC.Setup
 

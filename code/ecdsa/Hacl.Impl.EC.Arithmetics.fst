@@ -14,10 +14,10 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Spec.P256
 
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 
 open FStar.Math.Lemmas
-friend Hacl.Spec.P.MontgomeryMultiplication
+friend Hacl.Spec.MontgomeryMultiplication
 
 open FStar.Mul
 

@@ -21,7 +21,7 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication.Lemmas
 
 open Lib.Loops
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.Setup
 
 
@@ -188,6 +188,7 @@ val montgomery_multiplication_buffer_by_one_ko: #c: curve
 let montgomery_multiplication_buffer_by_one_ko #c a result = 
   push_frame();
   
+  
   let len = getCoordinateLenU64 c in 
   let t = create (size 2 *! len) (u64 0) in 
     let t_low = sub t (size 0) len in 
@@ -209,7 +210,11 @@ let montgomery_multiplication_buffer_by_one_ko #c a result =
     lemma_mod_inv #c (wide_as_nat c h1 t);
   
     for 0ul len inv (fun i -> let h0_ = ST.get() in 
-    montgomery_multiplication_round_k0 #c t t (getKo c); 
+
+(*       let k0 = (u64 18446744069414584321) in 
+      let k0 = Hacl.Spec.Bignum.ModInv64.mod_inv_u64 k0 in 
+ *)
+    montgomery_multiplication_round_k0 #c t t (getK0 c); 
       let h1_ = ST.get() in
     
       let a0 = wide_as_nat c h1 t in 
@@ -338,7 +343,7 @@ let montgomery_multiplication_buffer_k0 #c a b result =
 
     assume (inv h1 0);
   for 0ul len inv (fun i -> let h0_ = ST.get() in
-    montgomery_multiplication_round_k0 #c t t (getKo c); 
+    montgomery_multiplication_round_k0 #c t t (getK0 c); 
       let h1_ = ST.get() in
       admit();
       montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t)

@@ -142,6 +142,8 @@ let getKo (c: curve) : (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)}
   |P384 -> 
     assert_norm (min_one_prime (pow2 64) (- getPrime P384) == 4294967297);
     (u64 4294967297)
+  (* |Default ->  *)
+    (*  *)
 
 
 inline_for_extraction

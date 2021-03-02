@@ -12,9 +12,9 @@ open Lib.Buffer
 open Hacl.Lemmas.P256
 open Hacl.Spec.P256.Definition
 (* open Hacl.Impl.SolinasReduction *)
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.LowLevel
-open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.EC.MontgomeryMultiplication
 open Spec.P256
 open Hacl.Impl.P256.Math 
 

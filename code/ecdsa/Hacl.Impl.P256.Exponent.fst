@@ -23,45 +23,11 @@ open Hacl.Impl.P256.MM.Lemmas
 open Hacl.Impl.EC.MontgomeryMultiplication
 
 
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
 
-(* 
-val fsquarePowN: n: size_t -> a: felem P256 -> Stack unit 
-  (requires (fun h -> live h a /\ as_nat P256 h a < prime256)) 
-  (ensures (fun h0 _ h1 -> (*
-    let k = fromDomain_ #P256 (as_nat P256 h0 a) in
-    modifies (loc a) h0 h1 /\ as_nat P256 h1 a < prime256 /\ 
-    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 (v n)))*) True))
-
-
-let fsquarePowN n a = 
-  let h0 = ST.get() in  
-  (* lemmaFromDomainToDomain #P256 (as_nat P256 h0 a); *)
-  assert_norm (pow2 0 == 1); 
-  let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = True 
-    let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
-    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 i)) /\
-    as_nat P256 h1 a < prime256 /\ live h1 a /\ modifies1 a h0 h1   in 
-
- (* power_one_2 (fromDomain_ #P256 (as_nat P256 h0 a)); *)
-
-  for (size 0) n (inv h0) (fun x -> 
-    let h0_ = ST.get() in 
-     montgomery_square_buffer a a; 
-     let k = fromDomain_ #P256 (as_nat P256 h0 a) in  
-     inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (as_nat P256 h0_ a) * fromDomain_ #P256 (as_nat P256 h0_ a)); 
-     lemmaFromDomainToDomainModuloPrime #P256 (let k = fromDomain_ #P256 (as_nat P256 h0 a) in pow k (pow2 (v x)));
-
-     (*modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) prime256; 
-     pow_plus k  (pow2 (v x)) (pow2 (v x )); 
-     pow2_double_sum (v x); *)
-     inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1))))
-
-
- *)
 (* Changing argument order *)
 inline_for_extraction noextract
 val montgomery_multiplication_buffer_: result: felem P256 -> a: felem P256 -> b: felem P256 -> Stack unit
@@ -76,6 +42,9 @@ val montgomery_multiplication_buffer_: result: felem P256 -> a: felem P256 -> b:
 
 let montgomery_multiplication_buffer_ result a b = 
   montgomery_multiplication_buffer a b result
+
+
+
 
 
 inline_for_extraction noextract

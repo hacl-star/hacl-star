@@ -12,7 +12,7 @@ open Lib.Buffer
 open Hacl.Lemmas.P256
 open Hacl.Spec.P256.Definition
 (* open Hacl.Impl.SolinasReduction *)
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Spec.P256
@@ -23,7 +23,7 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-friend Hacl.Spec.P.MontgomeryMultiplication
+friend Hacl.Spec.MontgomeryMultiplication
 open FStar.Mul
 
 open Hacl.Impl.P.PointDouble.Aux

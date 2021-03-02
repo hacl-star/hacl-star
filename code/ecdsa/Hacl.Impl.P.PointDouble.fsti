@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 open Spec.P256
 
 val point_double: #c: curve -> p: point c -> result: point c 

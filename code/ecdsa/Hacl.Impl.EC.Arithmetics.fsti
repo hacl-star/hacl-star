@@ -10,10 +10,10 @@ open Lib.Buffer
 (* open Spec.P256.Lemmas *)
 open Hacl.Spec.P256.Definition
 
-open Hacl.Impl.P256.MontgomeryMultiplication
+open Hacl.Impl.EC.MontgomeryMultiplication
 open Spec.P256
 
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 
 open FStar.Math.Lemmas
 

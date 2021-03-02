@@ -21,7 +21,7 @@ open Spec.ECDSA.Lemmas
 open Hacl.Impl.EC.LowLevel
 
 open Lib.Loops
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.Setup
 
 

@@ -21,10 +21,10 @@ open Spec.ECDSA.Lemmas
 open Hacl.Impl.EC.LowLevel
 
 open Lib.Loops
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 
-(* open Hacl.Impl.P256.MontgomeryMultiplication.Exponent *)
-(* open Hacl.Impl.P256.MontgomeryMultiplication *)
+(* open Hacl.Impl.EC.MontgomeryMultiplication.Exponent *)
+(* open Hacl.Impl.EC.MontgomeryMultiplication *)
 (* open Hacl.Impl.P256.MM.Exponent *)
 
 open FStar.Mul

@@ -101,3 +101,23 @@ let prime_inverse_buffer (#c: curve): (x: glbuffer uint8 (getCoordinateLenU c)
     match c with
   | P256 -> prime256_inverse_buffer
   | P384 -> prime384_inverse_buffer
+
+
+val getK0: c: curve -> Stack (r: uint64)
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+(* let getKo (c: curve) : Stack (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)}) =  *)
+let getK0 c = 
+  match c with 
+  |P256 -> 
+    assert_norm (min_one_prime (pow2 64) (- getPrime P256) == 1);
+    (u64 1)
+  |P384 -> 
+    assert_norm (min_one_prime (pow2 64) (- getPrime P384) == 4294967297);
+    (u64 4294967297)
+  |Default -> 
+    let i0 = index (prime_buffer #c) (size 0) in 
+    let negI0 = (u64 0) -. i0 in 
+    Hacl.Bignum.ModInv64.mod_inv_u64 negI0
+  (* |_ -> (u64 1) *)

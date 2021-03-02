@@ -18,7 +18,7 @@ open Hacl.Impl.P256.LowLevel.RawCmp
 open Hacl.Lemmas.P256
 open Hacl.Spec.ECDSA.Definition
 
-open Hacl.Spec.P.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
 
 open Hacl.Spec.P256.Definition
 open Hacl.Impl.EC.Masking

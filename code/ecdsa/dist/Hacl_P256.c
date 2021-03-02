@@ -24,6 +24,27 @@
 
 #include "Hacl_P256.h"
 
+static inline uint64_t mod_inv_u64(uint64_t n0)
+{
+  uint64_t alpha = (uint64_t)9223372036854775808U;
+  uint64_t beta = n0;
+  uint64_t ub = (uint64_t)0U;
+  uint64_t vb = (uint64_t)0U;
+  ub = (uint64_t)1U;
+  vb = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  {
+    uint64_t us = ub;
+    uint64_t vs = vb;
+    uint64_t u_is_odd = (uint64_t)0U - (us & (uint64_t)1U);
+    uint64_t beta_if_u_is_odd = beta & u_is_odd;
+    ub = ((us ^ beta_if_u_is_odd) >> (uint32_t)1U) + (us & beta_if_u_is_odd);
+    uint64_t alpha_if_u_is_odd = alpha & u_is_odd;
+    vb = (vs >> (uint32_t)1U) + alpha_if_u_is_odd;
+  }
+  return vb;
+}
+
 static const
 uint64_t
 prime256_buffer[4U] =
@@ -41,6 +62,51 @@ prime384_buffer[6U] =
     (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
     (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
   };
+
+static uint64_t getK0(Spec_P256_curve c)
+{
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        return (uint64_t)1U;
+      }
+    case Spec_P256_P384:
+      {
+        return (uint64_t)4294967297U;
+      }
+    case Spec_P256_Default:
+      {
+        const uint64_t *sw;
+        switch (c)
+        {
+          case Spec_P256_P256:
+            {
+              sw = prime256_buffer;
+              break;
+            }
+          case Spec_P256_P384:
+            {
+              sw = prime384_buffer;
+              break;
+            }
+          default:
+            {
+              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
+            }
+        }
+        uint64_t i0 = sw[0U];
+        uint64_t negI0 = (uint64_t)0U - i0;
+        return mod_inv_u64(negI0);
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
 
 static inline uint64_t
 mul_carry_add_u64_st(uint64_t c_in, uint64_t a, uint64_t b, uint64_t *out)
@@ -2104,26 +2170,7 @@ montgomery_multiplication_buffer_by_one_ko(Spec_P256_curve c, uint64_t *a, uint6
   memcpy(t_low, a, len * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
-    uint64_t sw;
-    switch (c)
-    {
-      case Spec_P256_P256:
-        {
-          sw = (uint64_t)1U;
-          break;
-        }
-      case Spec_P256_P384:
-        {
-          sw = (uint64_t)4294967297U;
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
-    }
-    montgomery_multiplication_round_k0(c, t, t, sw);
+    montgomery_multiplication_round_k0(c, t, t, getK0(c));
   }
   reduction_prime_2prime_with_carry(c, t, result);
 }
@@ -2197,26 +2244,7 @@ montgomery_multiplication_buffer_k0(
   mul(c, a, b, t);
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
-    uint64_t sw;
-    switch (c)
-    {
-      case Spec_P256_P256:
-        {
-          sw = (uint64_t)1U;
-          break;
-        }
-      case Spec_P256_P384:
-        {
-          sw = (uint64_t)4294967297U;
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
-    }
-    montgomery_multiplication_round_k0(c, t, t, sw);
+    montgomery_multiplication_round_k0(c, t, t, getK0(c));
   }
   reduction_prime_2prime_with_carry(c, t, result);
 }
