@@ -38,7 +38,7 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Curve25519_Bignum51.h"
+#include "Hacl_Bignum25519_51.h"
 
 void
 Hacl_Curve25519_51_fsquare_times(

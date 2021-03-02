@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Curve25519_Bignum51_H
-#define __Hacl_Curve25519_Bignum51_H
+#ifndef __Hacl_Bignum25519_51_H
+#define __Hacl_Bignum25519_51_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -675,5 +675,5 @@ Hacl_Impl_Curve25519_Field51_cswap2(uint64_t bit, uint64_t *p1, uint64_t *p2)
 }
 #endif
 
-#define __Hacl_Curve25519_Bignum51_H_DEFINED
+#define __Hacl_Bignum25519_51_H_DEFINED
 #endif
