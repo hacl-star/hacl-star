@@ -60,9 +60,9 @@ static inline void poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, u32
               e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
           }
           {
-            Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load_le(block);
+            Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load64_le(block);
             Lib_IntVector_Intrinsics_vec256
-            hi = Lib_IntVector_Intrinsics_vec256_load_le(block + (u32)32U);
+            hi = Lib_IntVector_Intrinsics_vec256_load64_le(block + (u32)32U);
             Lib_IntVector_Intrinsics_vec256
             mask260 = Lib_IntVector_Intrinsics_vec256_load64((u64)0x3ffffffU);
             Lib_IntVector_Intrinsics_vec256

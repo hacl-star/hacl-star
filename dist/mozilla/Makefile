@@ -23,6 +23,10 @@
 # By default, this Makefile relies on the local checkout of kremlib
 KREMLIN_HOME ?= ../kremlin
 
+ifeq (,$(wildcard $(KREMLIN_HOME)/include/kremlib.h))
+	$(error Incorrect KREMLIN_HOME)
+endif
+
 -include Makefile.config
 
 # 1. The usual pseudo auto-configuration
@@ -106,10 +110,10 @@ ifneq (,$(wildcard lib_gen))
 
 .PRECIOUS: %.cmx
 
-OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -thread -I lib
+OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -thread -linkpkg -I lib
 OCAMLDEP=ocamlfind dep -I lib -slash
 
-OCAMLC=ocamlfind c -g -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
+OCAMLC=ocamlfind c -g -package ctypes,ctypes.foreign,ctypes.stubs -thread -linkpkg -I lib
 
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 
