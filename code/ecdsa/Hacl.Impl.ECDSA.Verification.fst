@@ -22,7 +22,7 @@ open Spec.ECDSA
 open Spec.P256
 (* open Spec.P256.Lemmas *)
 
-open Hacl.Impl.P256.PointAdd
+open Hacl.Impl.EC.PointAdd
 open Hacl.Impl.P256.LowLevel.RawCmp
 
 open Hacl.Hash.SHA2
@@ -276,12 +276,84 @@ let ecdsa_verification_step5_0 #c points pubKeyAsPoint u1 u2 tempBuffer =
   let pointU2Q = sub points (size 12) (size 12) in
   secretToPublicWithoutNorm #c pointU1G u1 tempBuffer;
   scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
+  
+inline_for_extraction noextract
+val compare_points_bool: #c: curve -> a: point c -> b: point c -> Stack bool
+  (requires fun h -> live h a /\ live h b)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
+    (
+      let xP = gsub a (size 0) (size 4) in 
+      let yP = gsub a (size 4) (size 4) in 
+      let zP = gsub a (size 8) (size 4) in 
+
+      let xQ = gsub b (size 0) (size 4) in 
+      let yQ = gsub b (size 4) (size 4) in 
+      let zQ = gsub b (size 8) (size 4) in 
+
+      r == ((as_nat c h0 xP = as_nat c h0 xQ) && (as_nat c h0 yP = as_nat c h0 yQ) && (as_nat c h0 zP = as_nat c h0 zQ))
+    )
+  )
+
+let compare_points_bool #c a b = 
+  let x0 = sub a (size 0) (size 4) in 
+  let y0 = sub a (size 4) (size 4) in 
+  let z0 = sub a (size 8) (size 4) in 
+
+  let x1 = sub b (size 0) (size 4) in 
+  let y1 = sub b (size 4) (size 4) in 
+  let z1 = sub b (size 8) (size 4) in true (*
+
+  let xEqual = cmp_felem_felem_bool x0 x1 in
+  let yEqual = cmp_felem_felem_bool y0 y1 in 
+  let zEqual = cmp_felem_felem_bool z0 z1 in 
+  xEqual && yEqual && zEqual *)
 
 
 inline_for_extraction noextract
-val ecdsa_verification_step5_1:
-  #c: curve 
-  -> pointSum: point c
+val ecdsa_verification_step5_1: #c: curve -> points:lbuffer uint64 (size 24) -> Stack bool
+  (requires fun h -> live h points /\
+    as_nat c h (gsub points (size 0) (size 4)) < prime256 /\
+    as_nat c h (gsub points (size 4) (size 4)) < prime256 /\
+    as_nat c h (gsub points (size 8) (size 4)) < prime256 /\
+    as_nat c h (gsub points (size 12) (size 4)) < prime256 /\
+    as_nat c h (gsub points (size 16) (size 4)) < prime256 /\
+    as_nat c h (gsub points (size 20) (size 4)) < prime256
+  )
+  (ensures fun h0 r h1 -> modifies0 h0 h1 (* /\ 
+    (
+      let pointU1G = gsub points (size 0) (size 12) in 
+      let pointU2Q = gsub points (size 12) (size 12) in 
+      r = (
+  _norm (fromDomainPoint (point_prime_to_coordinates (as_seq h0 pointU1G))) =
+  _norm (fromDomainPoint (point_prime_to_coordinates (as_seq h0 pointU2Q))))
+    ) *)
+  )
+
+let ecdsa_verification_step5_1 #c points = 
+  push_frame();
+  
+  let tmp = create (size 112) (u64 0) in 
+  let tmpForNorm = sub tmp (size 0) (size 88) in 
+  let result0Norm = sub tmp (size 88) (size 12) in 
+  let result1Norm = sub tmp (size 100) (size 12) in 
+  let pointU1G = sub points (size 0) (size 12) in
+  let pointU2Q = sub points (size 12) (size 12) in 
+  
+  norm #c pointU1G result0Norm tmpForNorm;
+  norm #c pointU2Q result1Norm tmpForNorm;
+  let equalX = compare_points_bool #c result0Norm result1Norm in 
+
+  pop_frame();
+  equalX
+
+
+
+inline_for_extraction noextract
+val ecdsa_verification_step5_2:
+  #c: curve ->
+  (*m0: montgomery_ladder_mode ->
+  m1: montgomery_ladder_mode -> *)
+    pointSum: point c
   -> pubKeyAsPoint: point c
   -> u1: lbuffer uint8 (size 32)
   -> u2: lbuffer uint8 (size 32)
@@ -294,43 +366,57 @@ val ecdsa_verification_step5_1:
       disjoint pubKeyAsPoint u1 /\
       disjoint pubKeyAsPoint u2 /\
       disjoint tempBuffer u1 /\
-      disjoint tempBuffer u2 /\
+      disjoint tempBuffer u2 (* /\
       LowStar.Monotonic.Buffer.all_disjoint [loc pointSum; loc pubKeyAsPoint; loc tempBuffer] /\
-      point_x_as_nat c h pubKeyAsPoint < prime256 /\
-      point_y_as_nat c h pubKeyAsPoint < prime256 /\
-      point_z_as_nat c h pubKeyAsPoint < prime256
+      point_x_as_nat h pubKeyAsPoint < prime256 /\
+      point_y_as_nat h pubKeyAsPoint < prime256 /\
+      point_z_as_nat h pubKeyAsPoint < prime256 *)
     )
     (ensures fun h0 _ h1 ->
       modifies (loc pointSum |+| loc tempBuffer |+| loc pubKeyAsPoint) h0 h1 /\
-      as_nat c h1 (gsub pointSum (size 0) (size 4)) < prime256 /\
+      as_nat c h1 (gsub pointSum (size 0) (size 4)) < prime256 (* /\
       (
         let pointAtInfinity = (0, 0, 0) in
-        let u1D, _ = montgomery_ladder_spec #c (as_seq h0 u1) (pointAtInfinity, basePoint #P256) in
-        let u2D, _ = montgomery_ladder_spec #c (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates c (as_seq h0 pubKeyAsPoint)) in
-        let sumD = _point_add #c u1D u2D in
-        let pointNorm = _norm #c sumD in
-        let resultPoint =  point_prime_to_coordinates c (as_seq h1 pointSum) in
+        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
+        let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
+  let sumD = 
+    if  _norm u1D =  _norm u2D
+    then
+      _point_double u1D
+    else 
+      _point_add u1D u2D in 
+        let pointNorm = _norm sumD in
+        let resultPoint =  point_prime_to_coordinates (as_seq h1 pointSum) in
         pointNorm == resultPoint
-      )
+      ) *)
    )
 
-let ecdsa_verification_step5_1 pointSum pubKeyAsPoint u1 u2 tempBuffer =
+
+let ecdsa_verification_step5_2 (* m0 m1 *) pointSum pubKeyAsPoint u1 u2 tempBuffer =
   push_frame();
-  let points = create (size 24) (u64 0) in
+  let points = create (size 24) (u64 0) in 
   let buff = sub tempBuffer (size 12) (size 88) in
-  ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer;
+  ecdsa_verification_step5_0 (*m0 m1 *) points pubKeyAsPoint u1 u2 tempBuffer;
   let pointU1G = sub points (size 0) (size 12) in
-  let pointU2Q = sub points (size 12) (size 12) in
-  point_add pointU1G pointU2Q pointSum buff;
-  norm pointSum pointSum buff;
+  let pointU2Q = sub points (size 12) (size 12) in 
+(); (*
+  let equalX = ecdsa_verification_step5_1 points in 
+  begin
+  if equalX then
+    point_double pointU1G pointSum buff
+  else  
+    point_add pointU1G pointU2Q pointSum buff end;
+  norm pointSum pointSum buff;  *)
   pop_frame()
 
 
-(* This code is not side channel resistant *)
 inline_for_extraction noextract
-val ecdsa_verification_step5:
+val ecdsa_verification_step5: (*
+  m0: montgomery_ladder_mode ->
+  m1: montgomery_ladder_mode -> *)
+ 
   #c: curve 
-  -> x: felem c
+  ->  x:felem c
   -> pubKeyAsPoint: point c
   -> u1: lbuffer uint8 (size 32)
   -> u2: lbuffer uint8 (size 32)
@@ -351,29 +437,34 @@ val ecdsa_verification_step5:
     )
     (ensures fun h0 state h1 ->
       modifies (loc x |+| loc pubKeyAsPoint |+| loc tempBuffer) h0 h1 /\
-      as_nat c h1 x < prime256 /\
+      as_nat c h1 x < prime256 (*/\
       (
         let pointAtInfinity = (0, 0, 0) in
-        let u1D, _ = montgomery_ladder_spec #c (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
-        let u2D, _ = montgomery_ladder_spec #c (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates c (as_seq h0 pubKeyAsPoint)) in
-        let sumD = _point_add #c u1D u2D in
-        let pointNorm = _norm #c sumD in
+        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
+        let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
+        let sumD = 
+    if  _norm u1D =  _norm u2D
+    then
+      _point_double u1D
+    else 
+      _point_add u1D u2D in 
+        let pointNorm = _norm sumD in
         let (xResult, yResult, zResult) = pointNorm in
         state == not (Spec.P256.isPointAtInfinity pointNorm) /\
-        as_nat c h1 x == xResult
-    )
+        as_nat h1 x == xResult % prime_p256_order
+    ) *)
   )
 
-let ecdsa_verification_step5 #c x pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5  #c (* m0 m1 *) x pubKeyAsPoint u1 u2 tempBuffer =
   push_frame();
   let pointSum = create (size 12) (u64 0) in
-  ecdsa_verification_step5_1 pointSum pubKeyAsPoint u1 u2 tempBuffer;
+  ecdsa_verification_step5_2 (* m0 m1 *) pointSum pubKeyAsPoint u1 u2 tempBuffer;
   let resultIsPAI = isPointAtInfinityPublic #c pointSum in
   let xCoordinateSum = sub pointSum (size 0) (size 4) in
   copy x xCoordinateSum;
+  reduction_prime_2prime_order x x;
   pop_frame();
   not resultIsPAI
-
 
 (* [@ (Comment "  This code is not side channel resistant")] *)
 

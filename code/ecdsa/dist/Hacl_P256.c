@@ -2893,29 +2893,6 @@ point_double(Spec_P256_curve c, uint64_t *p, uint64_t *result, uint64_t *tempBuf
 }
 
 static void
-point_double0(Spec_P256_curve c, uint64_t *p, uint64_t *result, uint64_t *tempBuffer)
-{
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        point_double(c, p, result, tempBuffer);
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        point_double(c, p, result, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
-static void
 copy_point_conditional(
   Spec_P256_curve c,
   uint64_t *x3_out,
@@ -5019,7 +4996,7 @@ static void
 montgomery_ladder_step1(Spec_P256_curve c, uint64_t *r0, uint64_t *r1, uint64_t *tempBuffer)
 {
   point_add(c, r0, r1, r1, tempBuffer);
-  point_double0(c, r0, r0, tempBuffer);
+  point_double(c, r0, r0, tempBuffer);
 }
 
 static void

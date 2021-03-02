@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.PointAdd
+module Hacl.Impl.EC.PointAdd
 
 open FStar.HyperStack.All
 open FStar.HyperStack
