@@ -33,26 +33,16 @@ open Hacl.Impl.EC.Setup
 open Hacl.Impl.MM.Exponent
 
 
-
 let exponent #c a result tempBuffer = 
   match c with 
   |P384 ->
       exponent_p384 a result tempBuffer
-      (* 
-    recall_contents (prime_inverse_buffer #c) (prime_inverse_seq #c);
-    montgomery_ladder_power #c a (prime_inverse_buffer #c) result *)
   |P256 -> 
     exponent_p256 a result tempBuffer
+  |Default -> 
+    recall_contents (prime_inverse_buffer #c) (prime_inverse_seq #c);
+    montgomery_ladder_power #c a (prime_inverse_buffer #c) result
 
-
-inline_for_extraction
-let sqPower_buffer_p256 : x: glbuffer uint8 (getScalarLen P256) {witnessed x sqPower_seq /\ recallable x} = 
-  createL_global sqPower_list_p256
-
-
-inline_for_extraction
-let sqPower_buffer_p384 : x: glbuffer uint8 (getScalarLen P384) {witnessed x sqPower_seq /\ recallable x} = 
-  createL_global sqPower_list_p384
 
 inline_for_extraction
 let sqPower_buffer (#c: curve): (x: glbuffer uint8 (getScalarLen c)) = 

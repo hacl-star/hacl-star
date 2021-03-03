@@ -121,3 +121,69 @@ let getK0 c =
     let negI0 = (u64 0) -. i0 in 
     Hacl.Bignum.ModInv64.mod_inv_u64 negI0
   (* |_ -> (u64 1) *)
+
+
+
+(* TODO: Move it away *)
+inline_for_extraction noextract
+let sqPower_list_p256 : list uint8 =
+  [
+      u8 0;  u8 0;  u8 0;  u8 0;   u8 0;   u8 0;   u8 0;   u8 0;
+      u8 0;  u8 0;  u8 0;  u8 64;  u8 0;   u8 0;   u8 0;   u8 0;
+      u8 0;  u8 0;  u8 0;  u8 0;   u8 0;   u8 0;   u8 0;   u8 64;
+      u8 0;  u8 0;  u8 0;  u8 192; u8 255; u8 255; u8 255; u8 63
+  ]
+
+
+inline_for_extraction noextract
+let sqPower_list_p384 : list uint8 =
+    [ 
+      u8 0;   u8 0;   u8 0;   u8 64;  u8 0;   u8 0;   u8 0;   u8 0; 
+      u8 0;   u8 0;   u8 0;   u8 192; u8 255; u8 255; u8 255; u8 191;
+      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; 
+      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; 
+      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
+      u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 63
+   ]
+
+
+
+inline_for_extraction noextract
+let sqPower_list (#c: curve) : list uint8 = 
+  match c with 
+  |P256 -> sqPower_list_p256
+  |P384 -> sqPower_list_p384
+
+
+
+let sqPower_seq (#c: curve) : s: Lib.Sequence.lseq uint8 (getScalarLenNat c)
+  { 
+  True
+    (* Lib.ByteSequence.nat_from_intseq_le s == (getPrime c + 1) / 4 /\ *)
+    (* Lib.ByteSequence.nat_from_intseq_le s < getPrime c *)
+  } =
+  let open Lib.ByteSequence in 
+  assert_norm (List.Tot.length (sqPower_list #P256) == 32);
+  assert_norm (List.Tot.length (sqPower_list #P384) == 48);
+  
+  (* nat_from_intlist_seq_le 32 (sqPower_list #P256); *)
+  (* nat_from_intlist_seq_le 48 (sqPower_list #P384);  *)
+  
+  (* assert_norm (nat_from_intlist_le (sqPower_list #P256)  == (getPrime P256 + 1) / 4); *)
+  (* assert_norm (nat_from_intlist_le (sqPower_list #P384)  == (getPrime P384 + 1) / 4); *)
+  
+  Lib.Sequence.of_list (sqPower_list #c)
+  
+
+
+inline_for_extraction
+let sqPower_buffer_p256 : x: glbuffer uint8 (getScalarLen P256) {witnessed x sqPower_seq /\ recallable x} = 
+  createL_global sqPower_list_p256
+
+
+inline_for_extraction
+let sqPower_buffer_p384 : x: glbuffer uint8 (getScalarLen P384) {witnessed x sqPower_seq /\ recallable x} = 
+  createL_global sqPower_list_p384
+
+
+
