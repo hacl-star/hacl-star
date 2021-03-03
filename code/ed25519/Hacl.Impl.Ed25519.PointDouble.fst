@@ -9,8 +9,6 @@ open Lib.Buffer
 open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
-module F56 = Hacl.Impl.Ed25519.Field56
-
 module SC = Spec.Curve25519
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
@@ -122,7 +120,7 @@ val point_double_:
   Stack unit
     (requires fun h ->
       live h out /\ live h p /\ live h tmp /\
-      disjoint out p /\ disjoint tmp p /\ disjoint tmp out /\
+      eq_or_disjoint out p /\ disjoint tmp p /\ disjoint tmp out /\
       F51.point_inv_t h p
     )
     (ensures fun h0 _ h1 -> modifies (loc out |+| loc tmp) h0 h1 /\
@@ -148,17 +146,20 @@ let point_double_ out p tmp =
   fmul t3 tmp6 tmp3;
   fmul z3 tmp4 tmp2
 
+
 val point_double:
     out:point
   -> p:point ->
   Stack unit
-    (requires fun h -> live h out /\ live h p /\ disjoint out p /\
+    (requires fun h -> live h out /\ live h p /\ eq_or_disjoint out p /\
       F51.point_inv_t h p
     )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       F51.point_inv_t h1 out /\
       F51.point_eval h1 out == Spec.Ed25519.point_double (F51.point_eval h0 p)
     )
+
+[@CInline]
 let point_double out p =
   push_frame();
   let tmp = create 30ul (u64 0) in

@@ -9,11 +9,12 @@ open Lib.ByteSequence
 open Lib.Buffer
 open Lib.ByteBuffer
 
-module F56 = Hacl.Impl.Ed25519.Field56
-module S56 = Hacl.Spec.Ed25519.Field56.Definition
+module F56 = Hacl.Impl.BignumQ.Mul
+module S56 = Hacl.Spec.BignumQ.Definitions
 
 #reset-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0"
 
+inline_for_extraction noextract
 val hstore56_le:
     out:lbuffer uint8 32ul
   -> off:size_t{v off <= 21}
@@ -106,7 +107,7 @@ val store_56:
       nat_to_bytes_le 32 (F56.as_nat h0 b) == as_seq h1 out)
     )
 
-
+[@CInline]
 let store_56 out b =
   let b0 = b.(0ul) in
   let b1 = b.(1ul) in
