@@ -23,7 +23,7 @@ let poly1305_vale
     (key:B.buffer UInt8.t { B.length key = 32 })
   : Stack unit
     (requires fun h ->
-      EverCrypt.TargetConfig.compile_vale /\
+      EverCrypt.TargetConfig.evercrypt_can_compile_vale /\
       B.live h src /\ B.live h dst /\ B.live h key /\
       B.disjoint dst src /\ B.disjoint dst key)
     (ensures fun h0 _ h1 ->
@@ -130,15 +130,15 @@ let poly1305 dst src len key =
   let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
   let vale = EverCrypt.AutoConfig2.wants_vale () in
 
-  if EverCrypt.TargetConfig.compile_256 && vec256 then begin
+  if EverCrypt.TargetConfig.evercrypt_can_compile_256 && vec256 then begin
     Hacl.Poly1305_256.poly1305_mac dst len src key
 
-  end else if EverCrypt.TargetConfig.compile_128 && vec128 then begin
+  end else if EverCrypt.TargetConfig.evercrypt_can_compile_128 && vec128 then begin
     Hacl.Poly1305_128.poly1305_mac dst len src key
 
-  end else if EverCrypt.TargetConfig.compile_vale && vale then begin
+  end else if EverCrypt.TargetConfig.evercrypt_can_compile_vale && vale then begin
 
-    if EverCrypt.TargetConfig.compile_128 then begin
+    if EverCrypt.TargetConfig.evercrypt_can_compile_128 then begin
        poly1305_vale dst src len key
 
     end else

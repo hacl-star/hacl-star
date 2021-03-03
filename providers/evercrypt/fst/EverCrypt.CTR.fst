@@ -45,7 +45,7 @@ let footprint_s #a s =
 let cpu_features_invariant (i: impl): Type0 =
   match i with
   | Vale_AES128 | Vale_AES256 ->
-      EverCrypt.TargetConfig.compile_vale /\
+      EverCrypt.TargetConfig.evercrypt_can_compile_vale /\
       Vale.X64.CPU_Features_s.(aesni_enabled /\ pclmulqdq_enabled /\ avx_enabled /\ sse_enabled)
   | Hacl_CHACHA20 ->
       True
@@ -111,7 +111,7 @@ fun r dst k iv iv_len c ->
   if iv_len `UInt32.lt` 12ul then
     InvalidIVLength
 
-  else if EverCrypt.TargetConfig.compile_vale && (has_aesni && has_pclmulqdq && has_avx && has_sse) then
+  else if EverCrypt.TargetConfig.evercrypt_can_compile_vale && (has_aesni && has_pclmulqdq && has_avx && has_sse) then
     (**) let h0 = ST.get () in
     (**) let g_iv = G.hide (B.as_seq h0 iv) in
     (**) let g_key: G.erased (key a) = G.hide (B.as_seq h0 (k <: B.buffer uint8)) in
@@ -189,10 +189,10 @@ let copy_or_expand (i: impl)
 =
   match i with
   | Vale_AES128 ->
-    if EverCrypt.TargetConfig.compile_vale then
+    if EverCrypt.TargetConfig.evercrypt_can_compile_vale then
         vale_expand Vale_AES128 k ek
   | Vale_AES256 ->
-    if EverCrypt.TargetConfig.compile_vale then
+    if EverCrypt.TargetConfig.evercrypt_can_compile_vale then
         vale_expand Vale_AES256 k ek
   | Hacl_CHACHA20 ->
       B.blit k 0ul ek 0ul 32ul
@@ -336,11 +336,11 @@ let update_block a p dst src =
   let State i g_iv iv iv_len g_key ek c0 = !*p in
   match i with
   | Vale_AES128 ->
-    if EverCrypt.TargetConfig.compile_vale then
+    if EverCrypt.TargetConfig.evercrypt_can_compile_vale then
         update_block_vale Vale_AES128 p dst src
 
   | Vale_AES256 ->
-    if EverCrypt.TargetConfig.compile_vale then
+    if EverCrypt.TargetConfig.evercrypt_can_compile_vale then
         update_block_vale Vale_AES256 p dst src
 
   | Hacl_CHACHA20 ->
