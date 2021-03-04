@@ -11,7 +11,7 @@
 
 #include "Hacl_Chacha20.h"
 
-#if defined(EVERCRYPT_CAN_COMPILE_128)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
 #include "Hacl_Chacha20_Vec128.h"
 #endif
 
@@ -35,7 +35,7 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, uint8_t* 
   printf("Chacha20 (32-bit) Result:\n");
   bool ok = print_result(in_len,comp,exp);
 
-#if defined(EVERCRYPT_CAN_COMPILE_128)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   Hacl_Chacha20_Vec128_chacha20_encrypt_128(in_len,comp,in,key,nonce,1);
   printf("Chacha20 (128-bit) Result:\n");
   ok = ok && print_result(in_len,comp,exp);
@@ -82,7 +82,7 @@ int main() {
 
   t1 = clock();
 
-#if defined(EVERCRYPT_CAN_COMPILE_128)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Chacha20_Vec128_chacha20_encrypt_128(SIZE,plain,plain,key,nonce,1);
   }

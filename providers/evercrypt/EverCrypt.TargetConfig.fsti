@@ -33,10 +33,10 @@ val has_vec256_not_avx2 : unit ->
 val evercrypt_can_compile_vale : bool
 
 [@@ CIfDef ]
-val evercrypt_can_compile_128 : bool
+val evercrypt_can_compile_vec128 : bool
 
 [@@ CIfDef ]
-val evercrypt_can_compile_256 : bool
+val evercrypt_can_compile_vec256 : bool
 
 // Only for Curve25519 64
 [@@ CIfDef ]

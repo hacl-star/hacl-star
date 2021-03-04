@@ -14,17 +14,17 @@ TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
 # Filter the targets if they are not supported
 # Vec128
-ifneq ($(COMPILE_128),1)
+ifneq ($(COMPILE_VEC128),1)
 TARGETS := $(filter-out %-128-test-streaming.exe, $(filter-out %-128-test.exe, $(TARGETS)))
 endif
 
 # Vec256
-ifneq ($(COMPILE_256),1)
+ifneq ($(COMPILE_VEC256),1)
 TARGETS := $(filter-out %-256-test-streaming.exe, $(filter-out %-256-test.exe, $(TARGETS)))
 endif
 
 # Curve64
-ifneq ($(COMPILE_COMPILE_INTRINSICS),1)
+ifneq ($(COMPILE_INTRINSICS),1)
 TARGETS := $(filter-out curve64-%, $(TARGETS))
 endif
 

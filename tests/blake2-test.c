@@ -14,11 +14,11 @@
 
 #include "test_helpers.h"
 
-#if defined(EVERCRYPT_CAN_COMPILE_128)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
 #include "Hacl_Blake2s_128.h"
 #endif
 
-#if defined(EVERCRYPT_CAN_COMPILE_256)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
 #include "Hacl_Blake2b_256.h"
 #endif
 
@@ -41,7 +41,7 @@ bool print_test2b(int in_len, uint8_t* in, int key_len, uint8_t* key, int exp_le
   printf("testing blake2b vec-32:\n");
   bool ok = print_result(exp_len,comp,exp);
 
-#if defined(EVERCRYPT_CAN_COMPILE_256)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     Hacl_Blake2b_256_blake2b(exp_len,comp,in_len,in,key_len,key);
     printf("testing blake2b vec-256:\n");
@@ -60,7 +60,7 @@ bool print_test2s(int in_len, uint8_t* in, int key_len, uint8_t* key, int exp_le
   printf("testing blake2s vec-32:\n");
   bool ok = print_result(exp_len,comp,exp);
 
-#if defined(EVERCRYPT_CAN_COMPILE_128)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   Hacl_Blake2s_128_blake2s(exp_len,comp,in_len,in,key_len,key);
   printf("testing blake2s vec-128:\n");
   ok = ok && print_result(exp_len,comp,exp);
@@ -116,7 +116,7 @@ int main()
   double tdiff2 = t2 - t1;
 
 
-#if defined(EVERCRYPT_CAN_COMPILE_128)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Blake2s_128_blake2s(32,plain,SIZE,plain,0,NULL);
   }
@@ -131,7 +131,7 @@ int main()
   double tdiff3 = t2 - t1;
 #endif
 
-#if defined(EVERCRYPT_CAN_COMPILE_256)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     for (int j = 0; j < ROUNDS; j++) {
       Hacl_Blake2b_256_blake2b(64,plain,SIZE,plain,0,NULL);
@@ -152,11 +152,11 @@ int main()
   printf("Blake2S (Vec 32-bit):\n"); print_time(count,tdiff1,cdiff1);
   printf("Blake2B (Vec 64-bit):\n"); print_time(count,tdiff2,cdiff2);
 
-#if defined(EVERCRYPT_CAN_COMPILE_128)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   printf("Blake2S (Vec 128-bit):\n"); print_time(count,tdiff3,cdiff3);
 #endif
 
-#if defined(EVERCRYPT_CAN_COMPILE_256)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("Blake2B (Vec 256-bit):\n"); print_time(count,tdiff4,cdiff4);
   }
