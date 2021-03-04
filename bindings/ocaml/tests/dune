@@ -11,7 +11,7 @@
         blake2_test
         p256_test
         bignum_test)
- (libraries hacl-star hex)
+ (libraries hacl-star)
  (preprocessor_deps config.h)
  (preprocess (action (run %{bin:cppo} %{input-file})))
  (flags (:standard -open Hacl_star -warn-error -3)))
