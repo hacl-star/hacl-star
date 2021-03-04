@@ -72,14 +72,14 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
   bool vale = EverCrypt_AutoConfig2_wants_vale();
-  #if EVERCRYPT_CAN_COMPILE_256
+  #if EVERCRYPT_CAN_COMPILE_VEC256
   if (vec256)
   {
     Hacl_Poly1305_256_poly1305_mac(dst, len, src, key);
     return;
   }
   #endif
-  #if EVERCRYPT_CAN_COMPILE_128
+  #if EVERCRYPT_CAN_COMPILE_VEC128
   if (vec128)
   {
     Hacl_Poly1305_128_poly1305_mac(dst, len, src, key);
@@ -89,7 +89,7 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #if EVERCRYPT_CAN_COMPILE_VALE
   if (vale)
   {
-    #if EVERCRYPT_CAN_COMPILE_128
+    #if EVERCRYPT_CAN_COMPILE_VEC128
     poly1305_vale(dst, src, len, key);
     return;
     #else

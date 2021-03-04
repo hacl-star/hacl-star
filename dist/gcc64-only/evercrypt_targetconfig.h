@@ -36,7 +36,7 @@
 #include <stdbool.h>
 
 static inline bool has_vec128_not_avx () {
-#if (TARGET_ARCHITECTURE != TARGET_ARCHITECTURE_ID_X64) && COMPILE_128
+#if (TARGET_ARCHITECTURE != TARGET_ARCHITECTURE_ID_X64) && EVERCRYPT_CAN_COMPILE_128
   return true;
 #else
   return false;
@@ -44,7 +44,7 @@ static inline bool has_vec128_not_avx () {
 }
 
 static inline bool has_vec256_not_avx2 () {
-#if (TARGET_ARCHITECTURE != TARGET_ARCHITECTURE_ID_X64) && COMPILE_256
+#if (TARGET_ARCHITECTURE != TARGET_ARCHITECTURE_ID_X64) && EVERCRYPT_CAN_COMPILE_256
   return true;
 #else
   return false;
