@@ -139,36 +139,7 @@ void Hacl_EC_Ed25519_mk_base_point(u64 *p)
 
 void Hacl_EC_Ed25519_point_negate(u64 *p, u64 *out)
 {
-  u64 zero[5U] = { 0U };
-  u64 *x;
-  u64 *y;
-  u64 *z;
-  u64 *t;
-  u64 *x1;
-  u64 *y1;
-  u64 *z1;
-  u64 *t1;
-  zero[0U] = (u64)0U;
-  zero[1U] = (u64)0U;
-  zero[2U] = (u64)0U;
-  zero[3U] = (u64)0U;
-  zero[4U] = (u64)0U;
-  x = p;
-  y = p + (u32)5U;
-  z = p + (u32)10U;
-  t = p + (u32)15U;
-  x1 = out;
-  y1 = out + (u32)5U;
-  z1 = out + (u32)10U;
-  t1 = out + (u32)15U;
-  memcpy(x1, x, (u32)5U * sizeof (u64));
-  Hacl_Bignum25519_fdifference(x1, zero);
-  Hacl_Bignum25519_reduce_513(x1);
-  memcpy(y1, y, (u32)5U * sizeof (u64));
-  memcpy(z1, z, (u32)5U * sizeof (u64));
-  memcpy(t1, t, (u32)5U * sizeof (u64));
-  Hacl_Bignum25519_fdifference(t1, zero);
-  Hacl_Bignum25519_reduce_513(t1);
+  Hacl_Impl_Ed25519_PointNegate_point_negate(p, out);
 }
 
 void Hacl_EC_Ed25519_point_add(u64 *p, u64 *q, u64 *out)

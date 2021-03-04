@@ -38,17 +38,7 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-
-void Hacl_Impl_Curve25519_Field51_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2);
-
-void Hacl_Impl_Curve25519_Field51_fsub(uint64_t *out, uint64_t *f1, uint64_t *f2);
-
-void
-Hacl_Impl_Curve25519_Field51_fmul(uint64_t *out, uint64_t *f1, uint64_t *f2, uint128_t *uu___);
-
-void Hacl_Impl_Curve25519_Field51_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2);
-
-void Hacl_Impl_Curve25519_Field51_fsqr(uint64_t *out, uint64_t *f, uint128_t *uu___);
+#include "Hacl_Bignum25519_51.h"
 
 void Hacl_Curve25519_51_fsquare_times(uint64_t *o, uint64_t *inp, uint128_t *tmp, uint32_t n);
 
