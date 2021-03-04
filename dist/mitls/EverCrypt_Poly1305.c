@@ -76,13 +76,8 @@ void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8
   #if EVERCRYPT_CAN_COMPILE_VALE
   if (vale)
   {
-    #if EVERCRYPT_CAN_COMPILE_VEC128
     poly1305_vale(dst, src, len, key);
     return;
-    #else
-    Hacl_Poly1305_32_poly1305_mac(dst, len, src, key);
-    return;
-    #endif
   }
   #endif
   Hacl_Poly1305_32_poly1305_mac(dst, len, src, key);
