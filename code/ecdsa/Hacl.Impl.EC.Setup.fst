@@ -81,6 +81,8 @@ let prime_list (c: curve) :  (x: list uint64 {List.Tot.length x == uint_v (getCo
 inline_for_extraction
 let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\ recallable x /\ felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256} =
   assert_norm (felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256);
+  (* [@inline_let] *)
+  (* let l = List.Tot.Base.tail p256_prime_list in *)
   createL_global p256_prime_list
 
 
@@ -97,6 +99,14 @@ let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {witne
   | P256 -> prime256_buffer
   | P384 -> prime384_buffer
   
+
+inline_for_extraction
+let test (#c: curve) : uint64 = 
+  match c with 
+  |P256 -> normalize_term (List.Tot.Base.index p256_prime_list 0)
+  |P384 -> normalize_term (List.Tot.Base.index p384_prime_list 0)
+
+
 
 
 

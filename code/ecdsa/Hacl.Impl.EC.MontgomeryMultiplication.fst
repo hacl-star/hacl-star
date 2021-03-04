@@ -22,56 +22,63 @@ open Hacl.Impl.EC.Setup
 
 inline_for_extraction
 val supportsReducedMultiplication: #c: curve -> 
-  Stack bool
-    (requires fun h -> True)
-    (ensures fun h0 r h1 -> r <==> (getPrime c + 1) % pow2 64 == 0)
+  Tot  (r: bool {r <==> (getPrime c + 1) % pow2 64 == 0})
 
 let supportsReducedMultiplication #c = 
-  let primeBuffer = prime_buffer #c in 
-  let primeBuffer0 = index primeBuffer (size 0) in 
-    eq_lemma #U64 primeBuffer0 (u64 0xffffffffffffffff);
-  eq #U64 primeBuffer0 (u64 0xffffffffffffffff)
+  FStar.UInt64.eq (getLastWord #c) 0xffffffffffffffffuL
 
-(*
-val montgomery_multiplication_round_: #c: curve -> t: widefelem c -> t2: widefelem c -> 
+
+val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> t2: widefelem c -> 
+  Stack unit
+    (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
+    (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
+      wide_as_nat c h1 t2 < getPower2 c * pow2 64 /\
+      wide_as_nat c h1 t2 = getPrime c * (wide_as_nat c h0 t % pow2 64))
+  
+let montgomery_multiplication_round_w_k0 #c t t2 =
+  let t1 = mod64 t in 
+  recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
+  short_mul_bn (prime_buffer #c) t1 t2
+
+val montgomery_multiplication_round_k0: #c: curve -> k0: uint64 -> t: widefelem c -> 
+  t2: widefelem c -> 
   Stack unit
   (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
   (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
     wide_as_nat c h1 t2 < getPower2 c * pow2 64 /\
-    wide_as_nat c h1 t2 = getPrime c * (wide_as_nat c h0 t % pow2 64))
-  
-let montgomery_multiplication_round_ #c t t2 =
-  let t1 = mod64 t in 
-  recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
-  short_mul_bn (prime_buffer #c) t1 t2
-*)
+    wide_as_nat c h1 t2 = getPrime c * (((wide_as_nat c h0 t % pow2 64) * uint_v k0) % pow2 64))
+
+let montgomery_multiplication_round_k0 #c k0 t t2 = 
+  push_frame();
+    let t1 = mod64 #c t in
+    
+    let y = create (size 1) (u64 0) in 
+    let temp = create (size 1) (u64 0) in 
+    
+    mul_atomic t1 k0 y temp;
+    recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
+
+    let h = ST.get() in 
+    let y_ = index y (size 0) in   
+    modulo_addition_lemma (uint_v (Lib.Sequence.index (as_seq h y) 0)) (pow2 64) (uint_v (Lib.Sequence.index (as_seq h temp) 0));
+    short_mul_bn #c (prime_buffer #c) y_ t2;
+  pop_frame()
+
+
 
 val montgomery_multiplication_round_: #c: curve -> t: widefelem c -> t2: widefelem c -> 
   Stack unit
-  (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0) 
-  (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
-    wide_as_nat c h1 t2 < getPower2 c * pow2 64 (*/\
-    wide_as_nat c h1 t2 = getPrime c * (((wide_as_nat c h0 t % pow2 64) * uint_v k0) % pow2 64) *) )
+    (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
+    (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
+      wide_as_nat c h1 t2 < getPower2 c * pow2 64 /\
+      wide_as_nat c h1 t2 = getPrime c * (wide_as_nat c h0 t % pow2 64))
 
 let montgomery_multiplication_round_ #c t t2 = 
-  push_frame();
-    let t1 = mod64 #c t in
-    let t1_buffer = create (size 1) t1 in begin
   match supportsReducedMultiplication #c with   
+  |true -> montgomery_multiplication_round_w_k0 t t2
   |false -> 
-    let temp = create (size 1) (u64 0) in 
     let k0 = getK0 c in 
-    mul_atomic t1 k0 t1_buffer temp;
-    let h = ST.get() in 
-    
-    modulo_addition_lemma (uint_v (Lib.Sequence.index (as_seq h t1_buffer) 0)) (pow2 64) (uint_v (Lib.Sequence.index (as_seq h temp) 0))
- |true -> ()
-   end;
-   let t1 = index t1_buffer (size 0) in 
-   recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
-   short_mul_bn #c (prime_buffer #c) t1 t2;
-  pop_frame()
-
+    montgomery_multiplication_round_k0 k0 t t2
 
 
 val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
