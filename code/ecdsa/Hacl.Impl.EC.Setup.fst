@@ -11,6 +11,73 @@ open Hacl.Spec.P256.Definition
 open Spec.P256
 open FStar.Mul
 
+
+(* This code contains the prime code *)
+inline_for_extraction noextract
+let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ 
+  (
+    let open FStar.Mul in 
+    let l0 = uint_v (List.Tot.index x 0) in 
+    let l1 = uint_v (List.Tot.index x 1) in 
+    let l2 = uint_v (List.Tot.index x 2) in 
+    let l3 = uint_v (List.Tot.index x 3) in 
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256)
+  } =
+  let open FStar.Mul in 
+  [@inline_let]
+  let x =
+    [ (u64 0xffffffffffffffff);  (u64 0xffffffff); (u64 0);  (u64 0xffffffff00000001);] in
+    assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256);
+  x
+
+inline_for_extraction noextract
+let p384_prime_list : x:list uint64{List.Tot.length x == 6 /\ 
+  (
+    let open FStar.Mul in 
+    let l0 = uint_v (List.Tot.index x 0) in 
+    let l1 = uint_v (List.Tot.index x 1) in 
+    let l2 = uint_v (List.Tot.index x 2) in 
+    let l3 = uint_v (List.Tot.index x 3) in 
+    let l4 = uint_v (List.Tot.index x 4) in 
+    let l5 = uint_v (List.Tot.index x 5) in 
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 + l4 * pow2 256 + l5 * pow2 320 == prime384)
+  } =
+  let open FStar.Mul in 
+  [@inline_let]
+  let x =
+    [ (u64 0xffffffff);  (u64 0xffffffff00000000); (u64 0xfffffffffffffffe);  (u64 0xffffffffffffffff); (u64 0xffffffffffffffff); (u64 0xffffffffffffffff);] in
+    assert_norm(0xffffffff + 0xffffffff00000000 * pow2 64 + 0xfffffffffffffffe * pow2 128 + 
+    0xffffffffffffffff * pow2 192 +  0xffffffffffffffff * pow2 256 +  0xffffffffffffffff * pow2 320 == prime384);
+  x
+
+inline_for_extraction noextract
+let prime_list (c: curve) :  (x: list uint64 {List.Tot.length x == uint_v (getCoordinateLenU64 c) /\ (
+  match c with
+  |P256 -> 
+    let open FStar.Mul in 
+    let l0 = uint_v (List.Tot.index x 0) in 
+    let l1 = uint_v (List.Tot.index x 1) in 
+    let l2 = uint_v (List.Tot.index x 2) in 
+    let l3 = uint_v (List.Tot.index x 3) in 
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256
+  |P384 -> 
+    let open FStar.Mul in 
+    let l0 = uint_v (List.Tot.index x 0) in 
+    let l1 = uint_v (List.Tot.index x 1) in 
+    let l2 = uint_v (List.Tot.index x 2) in 
+    let l3 = uint_v (List.Tot.index x 3) in 
+    let l4 = uint_v (List.Tot.index x 4) in 
+    let l5 = uint_v (List.Tot.index x 5) in 
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 + l4 * pow2 256 + l5 * pow2 320 == prime384
+)}) = 
+  let open FStar.Mul in 
+  match c with 
+  |P256 -> 
+    p256_prime_list
+  |P384 -> 
+    p384_prime_list
+
+
 inline_for_extraction
 let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\ recallable x /\ felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256} =
   assert_norm (felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256);
@@ -30,6 +97,37 @@ let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {witne
   | P256 -> prime256_buffer
   | P384 -> prime384_buffer
   
+
+
+
+inline_for_extraction noextract
+let basePointP256 : x:list uint64{List.Tot.length x == 12 (*/\ 
+  (
+    let open FStar.Mul in 
+    let l0 = uint_v (List.Tot.index x 0) in 
+    let l1 = uint_v (List.Tot.index x 1) in 
+    let l2 = uint_v (List.Tot.index x 2) in 
+    let l3 = uint_v (List.Tot.index x 3) in 
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256) *)
+  } =
+  let open FStar.Mul in 
+  [@inline_let]
+  let x =
+    [
+      u64 0x79e730d418a9143c; u64 0x75ba95fc5fedb601; u64 0x79fb732b77622510; u64 0x18905f76a53755c6;
+      u64 0xddf25357ce95560a; u64 0x8b4ab8e4ba19e45c; u64 0xd2e88688dd21f325; u64 0x8571ff1825885d85;
+      u64 0x1;                u64 0xffffffff00000000; u64 0xffffffffffffffff; u64 0xfffffffe;
+  ] in
+    (* assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256); *)
+  x
+
+
+
+
+
+
+
+
 
 inline_for_extraction
 let prime256order_buffer: x: glbuffer uint64 (size 4)  
@@ -101,6 +199,13 @@ let prime_inverse_buffer (#c: curve): (x: glbuffer uint8 (getCoordinateLenU c)
     match c with
   | P256 -> prime256_inverse_buffer
   | P384 -> prime384_inverse_buffer
+
+(*
+val get_prime_inverse_buffer: #c: curve -> 
+*)
+
+
+
 
 
 val getK0: c: curve -> Stack (r: uint64)

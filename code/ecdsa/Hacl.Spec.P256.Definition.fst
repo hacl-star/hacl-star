@@ -13,73 +13,6 @@ open FStar.Mul
 
 open Spec.P256
 
-inline_for_extraction noextract
-let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ 
-  (
-    let open FStar.Mul in 
-    let l0 = uint_v (List.Tot.index x 0) in 
-    let l1 = uint_v (List.Tot.index x 1) in 
-    let l2 = uint_v (List.Tot.index x 2) in 
-    let l3 = uint_v (List.Tot.index x 3) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256)
-  } =
-  let open FStar.Mul in 
-  [@inline_let]
-  let x =
-    [ (u64 0xffffffffffffffff);  (u64 0xffffffff); (u64 0);  (u64 0xffffffff00000001);] in
-    assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256);
-  x
-
-
-
-inline_for_extraction noextract
-let p384_prime_list : x:list uint64{List.Tot.length x == 6 /\ 
-  (
-    let open FStar.Mul in 
-    let l0 = uint_v (List.Tot.index x 0) in 
-    let l1 = uint_v (List.Tot.index x 1) in 
-    let l2 = uint_v (List.Tot.index x 2) in 
-    let l3 = uint_v (List.Tot.index x 3) in 
-    let l4 = uint_v (List.Tot.index x 4) in 
-    let l5 = uint_v (List.Tot.index x 5) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 + l4 * pow2 256 + l5 * pow2 320 == prime384)
-  } =
-  let open FStar.Mul in 
-  [@inline_let]
-  let x =
-    [ (u64 0xffffffff);  (u64 0xffffffff00000000); (u64 0xfffffffffffffffe);  (u64 0xffffffffffffffff); (u64 0xffffffffffffffff); (u64 0xffffffffffffffff);] in
-    assert_norm(0xffffffff + 0xffffffff00000000 * pow2 64 + 0xfffffffffffffffe * pow2 128 + 
-    0xffffffffffffffff * pow2 192 +  0xffffffffffffffff * pow2 256 +  0xffffffffffffffff * pow2 320 == prime384);
-  x
-
-
-inline_for_extraction noextract
-let prime_list (c: curve) :  (x: list uint64 {List.Tot.length x == uint_v (getCoordinateLenU64 c) /\ (
-  match c with
-  |P256 -> 
-    let open FStar.Mul in 
-    let l0 = uint_v (List.Tot.index x 0) in 
-    let l1 = uint_v (List.Tot.index x 1) in 
-    let l2 = uint_v (List.Tot.index x 2) in 
-    let l3 = uint_v (List.Tot.index x 3) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256
-  |P384 -> 
-    let open FStar.Mul in 
-    let l0 = uint_v (List.Tot.index x 0) in 
-    let l1 = uint_v (List.Tot.index x 1) in 
-    let l2 = uint_v (List.Tot.index x 2) in 
-    let l3 = uint_v (List.Tot.index x 3) in 
-    let l4 = uint_v (List.Tot.index x 4) in 
-    let l5 = uint_v (List.Tot.index x 5) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 + l4 * pow2 256 + l5 * pow2 320 == prime384
-)}) = 
-  let open FStar.Mul in 
-  match c with 
-  |P256 -> 
-    p256_prime_list
-  |P384 -> 
-    p384_prime_list
-
 
 inline_for_extraction noextract
 let p256_order_list : x:list uint64 {List.Tot.length x == 4 /\ 
@@ -317,8 +250,9 @@ let point_primeF (c: curve) =
     felem_seq_as_nat c y < prime /\ 
     felem_seq_as_nat c z < prime} 
 
-
-let point_prime_to_coordinates (c: curve) (p:point_seq c) : point_nat =
+(* to redefine *)
+let point_prime_to_coordinates (c: curve) (p:point_seq c) : point_nat_prime #c =
+  admit();
   let len = uint_v (getCoordinateLenU64 c) in 
   felem_seq_as_nat c (Lib.Sequence.sub p 0 len),
   felem_seq_as_nat c (Lib.Sequence.sub p len len),

@@ -17,13 +17,12 @@ noextract
 val fromDomain_: #c: curve -> a: int -> Tot (a: nat {a < getPrime c})
 
 noextract
-val fromDomainPoint: #c: curve ->  a: tuple3 nat nat nat -> Tot (r: tuple3 nat nat nat 
-  {
+val fromDomainPoint: #c: curve -> a: point_nat_prime #c -> 
+  Tot (r: point_nat_prime #c {
     let x, y, z = a in
     let x3, y3, z3 = r in 
-    x3 == fromDomain_ #c x /\ y3 == fromDomain_ #c y /\ z3 == fromDomain_ #c z
-  }
-)
+    x3 == fromDomain_ #c x /\ y3 == fromDomain_ #c y /\ z3 == fromDomain_ #c z}
+  )
 
 noextract
 val toDomain_: #c: curve -> a: int -> Tot nat

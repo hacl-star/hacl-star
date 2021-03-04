@@ -5,14 +5,12 @@ open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
-
 open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
 open Spec.P256
 open Hacl.Impl.EC.Reduction
 open Hacl.Impl.EC.LowLevel 
-(* open Hacl.Impl.EC.MontgomeryMultiplication *)
 open Hacl.Impl.EC.Exponent
 
 open Hacl.Impl.EC.MontgomeryMultiplication
@@ -31,30 +29,26 @@ open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
 
-friend Hacl.Spec.MontgomeryMultiplication
 open FStar.Mul
 
 
-val swap: #c: curve ->  p: point_seq c -> q: point_seq c 
-  -> Tot (r: tuple2 (point_seq c) (point_seq c)
-    {let pNew, qNew = r in  pNew == q /\ qNew == p})
+val swap: #c: curve ->  p: point_seq c -> q: point_seq c -> 
+  Tot (r: tuple2 (point_seq c) (point_seq c) {let pNew, qNew = r in pNew == q /\ qNew == p})
 
 let swap p q = (q, p)
 
 
-val conditional_swap: #c: curve -> i: uint64 -> p: point_seq c -> q: point_seq c -> Tot (r: tuple2 (point_seq c) (point_seq c)
-  {
+val conditional_swap: #c: curve -> i: uint64 -> p: point_seq c -> q: point_seq c -> 
+  Tot (r: tuple2 (point_seq c) (point_seq c) {
     let pNew, qNew = r in 
     if uint_v i = 0 then pNew == p /\ qNew == q
     else
       let p1, q1 = swap p q in 
-      p1 == pNew /\ q1 == qNew})
+      p1 == pNew /\ q1 == qNew}
+  )
 
 let conditional_swap i p q = 
-  if uint_v i = 0 then 
-    (p, q)
-  else
-    (q, p)
+  if uint_v i = 0 then (p, q) else (q, p)
 
 
 #set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0" 
@@ -181,23 +175,6 @@ let lemma_norm_as_specification #c xD yD zD x3 y3 z3 =
   }
 *)
 
-
-[@ CInline]
-val cswap: #c: curve ->  bit:uint64{v bit <= 1} -> p:point c -> q:point c
-  -> Stack unit
-    (requires fun h ->
-      live h p /\ live h q /\ eq_or_disjoint p q /\ point_eval c h p /\ point_eval c h q)
-    (ensures  fun h0 _ h1 ->
-      modifies (loc p |+| loc q) h0 h1 /\
-      point_eval c h1 p /\ point_eval c h1 q /\ (
-      let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
-      let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
-      let condP0, condP1 = conditional_swap #c bit pBefore qBefore  in 
-      condP0 == pAfter /\ condP1 == qAfter) /\
-      (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
-      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q)
-      )
-
 val lemma_point_eval_swapped: c: curve -> h0: mem -> h1: mem -> p: point c -> q: point c ->
   Lemma (requires (point_eval c h0 p /\ as_seq h0 p == as_seq h1 q))
   (ensures (point_eval c h1 q))
@@ -207,6 +184,20 @@ let lemma_point_eval_swapped c h0 h1 p q =
     as_nat c h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) == 
     as_nat c h1 (gsub q (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)))
 
+
+[@ CInline]
+val cswap: #c: curve ->  bit:uint64{v bit <= 1} -> p:point c -> q:point c -> 
+  Stack unit
+  (requires fun h -> live h p /\ live h q /\ eq_or_disjoint p q /\ point_eval c h p /\ point_eval c h q)
+  (ensures  fun h0 _ h1 -> modifies (loc p |+| loc q) h0 h1 /\
+    point_eval c h1 p /\ point_eval c h1 q /\ (
+    let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
+    let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
+    let condP0, condP1 = conditional_swap #c bit pBefore qBefore in 
+    condP0 == pAfter /\ condP1 == qAfter) /\ (
+    v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\ (
+    v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q)
+  )
 
 
 let cswap #c bit p1 p2 =
@@ -238,10 +229,6 @@ let cswap #c bit p1 p2 =
   Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
   Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2);
 
-    (*    (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
-      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q) *)
-
-
   if v bit = 1 then begin
     lemma_point_eval_swapped c h0 h1 p1 p2;
     lemma_point_eval_swapped c h0 h1 p2 p1 
@@ -251,13 +238,11 @@ let cswap #c bit p1 p2 =
     lemma_point_eval c h0 h1 p2 end
 
 
-val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c 
-  -> resultPoint: point c -> Stack unit 
-  (requires fun h -> 
-    live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
+val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c -> resultPoint: point c -> 
+  Stack unit 
+  (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
     felem_eval c h z2x /\ felem_eval c h z3y /\ felem_eval c h (getZ p) /\
-    disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint
-  )
+    disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
   (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\ (
     let x0 = point_x_as_nat c h0 p in 
     let y0 = point_y_as_nat c h0 p in 
@@ -303,6 +288,7 @@ val lemma_norm: #c: curve -> pD : point_nat_prime #c -> r: point_nat_prime #c ->
     (if Spec.P256.isPointAtInfinity (xD, yD, zD) then z3 == 0 else z3 == 1)))
   (ensures (let xN, yN, zN = _norm #c pD in r == (xN, yN, zN))) 
 
+
 let lemma_norm #c pD r = 
   let prime = getPrime c in 
 
@@ -333,8 +319,9 @@ let lemma_norm #c pD r =
     modp_inv2_pow #c (zD * zD * zD) * yD % prime;
   }
 
-
+(* to prove *)
 let norm #c p resultPoint tempBuffer = 
+  admit();
   [@inline_let]
   let len = getCoordinateLenU64 c in 
 
@@ -345,7 +332,7 @@ let norm #c p resultPoint tempBuffer =
   let z2f = sub tempBuffer len len in 
   let z3f = sub tempBuffer (size 2 *! len) len in
 
-  let t8 = sub tempBuffer (3ul *. len) (8ul *. len) in 
+  let t8 = sub tempBuffer (3ul *! len) (8ul *! len) in 
 
     let h0 = ST.get() in 
   montgomery_square_buffer #c zf z2f; 

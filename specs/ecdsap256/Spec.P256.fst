@@ -287,7 +287,7 @@ let isPointAtInfinity (p:point_nat) =
 
 #push-options "--fuel 1"
 
-let _norm #curve (p:point_nat) : point_nat=
+let _norm #curve (p:point_nat_prime #curve) : (point_nat_prime #curve) =
   let prime = getPrime curve in 
   let (x, y, z) = p in
   let z2 = z * z in
