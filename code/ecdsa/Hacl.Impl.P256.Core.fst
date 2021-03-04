@@ -26,8 +26,10 @@ open Hacl.Impl.EC.Masking
 
 open FStar.Tactics 
 open FStar.Tactics.Canon
+open Lib.Loops
 
 open FStar.Math.Lemmas
+open Hacl.Lemmas.P256
 
 open FStar.Mul
 

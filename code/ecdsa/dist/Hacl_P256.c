@@ -2020,6 +2020,35 @@ static void mul_atomic(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
 static void montgomery_multiplication_round_(Spec_P256_curve c, uint64_t *t, uint64_t *t2)
 {
   uint64_t t1 = t[0U];
+  uint64_t t1_buffer = t1;
+  const uint64_t *primeBuffer;
+  switch (c)
+  {
+    case Spec_P256_P256:
+      {
+        primeBuffer = prime256_buffer;
+        break;
+      }
+    case Spec_P256_P384:
+      {
+        primeBuffer = prime384_buffer;
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  uint64_t primeBuffer0 = primeBuffer[0U];
+  uint64_t temp;
+  if (!(primeBuffer0 == (uint64_t)0xffffffffffffffffU))
+  {
+    temp = (uint64_t)0U;
+    uint64_t k0 = getK0(c);
+    mul_atomic(t1, k0, &t1_buffer, &temp);
+  }
+  uint64_t t11 = t1_buffer;
   const uint64_t *sw;
   switch (c)
   {
@@ -2039,11 +2068,10 @@ static void montgomery_multiplication_round_(Spec_P256_curve c, uint64_t *t, uin
         KRML_HOST_EXIT(253U);
       }
   }
-  short_mul_bn(c, sw, t1, t2);
+  short_mul_bn(c, sw, t11, t2);
 }
 
-static void
-montgomery_multiplication_round_w_k0(Spec_P256_curve c, uint64_t *t, uint64_t *round)
+static void montgomery_multiplication_round(Spec_P256_curve c, uint64_t *t, uint64_t *round)
 {
   uint32_t len;
   switch (c)
@@ -2069,101 +2097,6 @@ montgomery_multiplication_round_w_k0(Spec_P256_curve c, uint64_t *t, uint64_t *r
   montgomery_multiplication_round_(c, t, t2);
   uint64_t uu____0 = add_long_bn(c, t, t2, round);
   shift1(c, round, round);
-}
-
-static void
-montgomery_multiplication_round_k0_(Spec_P256_curve c, uint64_t k0, uint64_t *t, uint64_t *t2)
-{
-  uint64_t t1 = t[0U];
-  uint64_t y = (uint64_t)0U;
-  uint64_t temp = (uint64_t)0U;
-  mul_atomic(t1, k0, &y, &temp);
-  uint64_t y_ = y;
-  const uint64_t *sw;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        sw = prime256_buffer;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        sw = prime384_buffer;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  short_mul_bn(c, sw, y_, t2);
-}
-
-static void
-montgomery_multiplication_round_k0(
-  Spec_P256_curve c,
-  uint64_t *t,
-  uint64_t *round,
-  uint64_t k0
-)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t2[(uint32_t)2U * len];
-  memset(t2, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  montgomery_multiplication_round_k0_(c, k0, t, t2);
-  uint64_t uu____0 = add_long_bn(c, t, t2, t2);
-  shift1(c, t2, round);
-}
-
-static void montgomery_multiplication_round(Spec_P256_curve c, uint64_t *t, uint64_t *round)
-{
-  const uint64_t *primeBuffer;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        primeBuffer = prime256_buffer;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        primeBuffer = prime384_buffer;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  uint64_t primeBuffer0 = primeBuffer[0U];
-  if (primeBuffer0 == (uint64_t)0xffffffffffffffffU)
-  {
-    montgomery_multiplication_round_w_k0(c, t, round);
-    return;
-  }
-  uint64_t k0 = getK0(c);
-  montgomery_multiplication_round_k0(c, t, round, k0);
 }
 
 static void
