@@ -10,6 +10,7 @@ open Lib.Buffer
 open Spec.P256.Lemmas
 
 open Spec.P256.Definitions
+open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.P256.Core
 open Spec.P256.MontgomeryMultiplication
@@ -40,7 +41,7 @@ open FStar.Mul
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 
 inline_for_extraction noextract

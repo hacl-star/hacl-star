@@ -11,6 +11,8 @@ open Lib.Buffer
 
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
+open Hacl.Spec.P256.Felem
+
 open Spec.P256.MontgomeryMultiplication
 open Spec.P256.MontgomeryMultiplication.PointAdd
 open Spec.P256

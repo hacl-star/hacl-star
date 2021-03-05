@@ -2,7 +2,7 @@ module Lib.IntTypes
 
 open FStar.Math.Lemmas
 
-#push-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 100"
+#push-options "--max_fuel 0 --max_ifuel 1 --z3rlimit 200"
 
 let pow2_2 _   = assert_norm (pow2 2 = 4)
 let pow2_3 _   = assert_norm (pow2 3 = 8)
@@ -110,7 +110,7 @@ let int64_to_uint128 a = int128_to_uint128 (int64_to_int128 a)
 val int128_to_uint64: a:Int128.t -> b:UInt64.t{UInt64.v b == Int128.v a % pow2 64}
 let int128_to_uint64 a = Int.Cast.Full.uint128_to_uint64 (int128_to_uint128 a)
 
-#push-options "--z3rlimit 800"
+#push-options "--z3rlimit 1000"
 
 [@(strict_on_arguments [0;2])]
 let cast #t #l t' l' u =
