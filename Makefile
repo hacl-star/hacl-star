@@ -473,9 +473,6 @@ obj/%.ml:
 	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
 	  ,[EXTRACT-ML] $(notdir $*),$(call to-obj-dir,$@))
 
-obj/Lib_Memzero0.ml: lib/ml/Lib_Memzero0.ml
-	cp $< $@
-
 dist/vale:
 	mkdir -p $@
 
