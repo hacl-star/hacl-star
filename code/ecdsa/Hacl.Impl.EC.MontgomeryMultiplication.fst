@@ -22,7 +22,7 @@ open Hacl.Impl.EC.Setup
 
 inline_for_extraction
 val supportsReducedMultiplication: #c: curve -> 
-  Tot  (r: bool {r <==> (getPrime c + 1) % pow2 64 == 0})
+  Tot  (r: bool {r <==> min_one_prime (pow2 64) (- getPrime c) == 1})
 
 let supportsReducedMultiplication #c = 
   FStar.UInt64.eq (getLastWord #c) 0xffffffffffffffffuL

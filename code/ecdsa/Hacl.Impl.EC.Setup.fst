@@ -14,21 +14,18 @@ open FStar.Mul
 
 (* This code contains the prime code *)
 inline_for_extraction noextract
-let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ 
-  (
-    let open FStar.Mul in 
+let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ (
     let l0 = uint_v (List.Tot.index x 0) in 
     let l1 = uint_v (List.Tot.index x 1) in 
     let l2 = uint_v (List.Tot.index x 2) in 
     let l3 = uint_v (List.Tot.index x 3) in 
     l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256)
   } =
-  let open FStar.Mul in 
   [@inline_let]
-  let x =
-    [ (u64 0xffffffffffffffff);  (u64 0xffffffff); (u64 0);  (u64 0xffffffff00000001);] in
-    assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256);
+  let x = [ (u64 0xffffffffffffffff);  (u64 0xffffffff); (u64 0);  (u64 0xffffffff00000001);] in
+  assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256);
   x
+
 
 inline_for_extraction noextract
 let p384_prime_list : x:list uint64{List.Tot.length x == 6 /\ 
@@ -101,10 +98,17 @@ let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {witne
   
 
 inline_for_extraction
-let test (#c: curve) : uint64 = 
+let getLastWord (#c: curve) : (r: uint64 {uint_v r == (getPrime c) % pow2 64}) = 
   match c with 
-  |P256 -> normalize_term (List.Tot.Base.index p256_prime_list 0)
-  |P384 -> normalize_term (List.Tot.Base.index p384_prime_list 0)
+  |P256 -> 
+    begin
+      admit();
+      let r =  normalize_term (List.Tot.Base.index p256_prime_list 0) in 
+      r
+    end
+  |P384 -> admit(); normalize_term (List.Tot.Base.index p384_prime_list 0)
+  |_ -> admit()
+  
 
 
 
@@ -218,7 +222,7 @@ val get_prime_inverse_buffer: #c: curve ->
 
 
 
-val getK0: c: curve -> Stack (r: uint64)
+val getK0: c: curve -> Stack (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)})
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 

@@ -204,6 +204,9 @@ let point_seq (c: curve) = Lib.Sequence.lseq uint64 (uint_v (getCoordinateLenU64
 noextract
 let felem_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c))
 
+noextract
+let widefelem_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c *. 2ul))
+
 inline_for_extraction
 let felem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c)
 
@@ -211,29 +214,50 @@ inline_for_extraction
 let widefelem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 2ul)
 
 
+noextract 
+val lseq_as_nat_: #l: size_nat -> a: lseq uint64 l -> i: nat {i <= Lib.Sequence.length a} ->  
+  Tot nat (decreases Lib.Sequence.length a - i)
+
+let rec lseq_as_nat_ #l a i = 
+  if i = Lib.Sequence.length a then 0 else
+  let a_i = Lib.Sequence.index a i in
+  lseq_as_nat_ a (i + 1) + pow2 (64 * i) * v a_i
+
+
+noextract 
+val lseq_as_nat: #l: size_nat -> a: lseq uint64 l -> Tot nat
+
+let lseq_as_nat #l a = lseq_as_nat_ a 0
+
+(*
+noextract 
+val felem_seq_as_nat_: c: curve -> a: felem_seq c -> i: nat {i <= Lib.Sequence.length a} -> Tot nat
+
+let felem_seq_as_nat_ c a i = (*
+  if i = Lib.Sequence.length a then 0 else
+  let a_i = Lib.Sequence.index a i in 
+  felem_seq_as_nat_ c a (i + 1) + pow2 (64 * i) * v a_i *)
+  lseq_as_nat_ a 0
+
 noextract
-let felem_seq_as_nat (c: curve) (a: felem_seq c) : Tot nat  = 
-  let open FStar.Mul in 
-  match c with 
-  |P256 -> 
-    let a0 = Lib.Sequence.index a 0 in 
-    let a1 = Lib.Sequence.index a 1 in 
-    let a2 = Lib.Sequence.index a 2 in 
-    let a3 = Lib.Sequence.index a 3 in 
-    uint_v a0 + uint_v a1 * pow2 64 + uint_v a2 * pow2 64 * pow2 64 + uint_v a3 * pow2 64 * pow2 64 * pow2 64
-  |P384 -> 
-    let a0 = Lib.Sequence.index a 0 in 
-    let a1 = Lib.Sequence.index a 1 in 
-    let a2 = Lib.Sequence.index a 2 in 
-    let a3 = Lib.Sequence.index a 3 in 
-    let a4 = Lib.Sequence.index a 4 in 
-    let a5 = Lib.Sequence.index a 5 in 
-    uint_v a0 + 
-    uint_v a1 * pow2 64 + 
-    uint_v a2 * pow2 64 * pow2 64 + 
-    uint_v a3 * pow2 64 * pow2 64 * pow2 64 +
-    uint_v a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    uint_v a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
+val widefelem_seq_as_nat_: c: curve -> a: felem_seq c -> i: nat {i <= Lib.Sequence.length a} ->
+  Tot nat
+
+let widefelem_seq_as_nat_ c a i = lseq_as_nat_ a 0
+*)
+
+val lseq_as_nat_definiton: #len:size_nat -> a:lseq uint64 len -> i: nat {i < Lib.Sequence.length a} ->
+  Lemma (lseq_as_nat_ #len a i == lseq_as_nat_ a (i + 1) + pow2 (64 * i) * v (Lib.Sequence.index a i))
+
+let lseq_as_nat_definiton #len b i = ()
+
+
+noextract
+let felem_seq_as_nat (c: curve) (a: felem_seq c) : Tot nat = lseq_as_nat a
+
+noextract
+let widefelem_seq_as_nat (c: curve) (a: widefelem_seq c) : Tot nat = lseq_as_nat a
+
 
 
 noextract
@@ -260,25 +284,8 @@ let point_prime_to_coordinates (c: curve) (p:point_seq c) : point_nat_prime #c =
   
 
 noextract
-let as_nat (c: curve) (h:mem) (e:felem c) : GTot nat =
-  match c with 
-  |P256 -> 
-    let s = as_seq h e in
-    let s0 = s.[0] in
-    let s1 = s.[1] in
-    let s2 = s.[2] in
-    let s3 = s.[3] in
-    as_nat_coordinate (s0, s1, s2, s3)
-  |P384 ->     
-    let s = as_seq h e in
-    let s0 = s.[0] in
-    let s1 = s.[1] in
-    let s2 = s.[2] in
-    let s3 = s.[3] in
-    let s4 = s.[4] in 
-    let s5 = s.[5] in 
-    as_nat_coordinate (s0, s1, s2, s3, s4, s5)
-    
+let as_nat (c: curve) (h:mem) (e:felem c) : GTot nat = lseq_as_nat (as_seq h e)
+
 
 noextract
 let as_nat_il (c: curve) (h:mem) (e:glbuffer uint64 (getCoordinateLenU64 c)) : GTot nat =
@@ -303,66 +310,7 @@ let as_nat_il (c: curve) (h:mem) (e:glbuffer uint64 (getCoordinateLenU64 c)) : G
 
 noextract
 let wide_as_nat (c: curve) (h:mem) (e: widefelem c) : GTot nat =
-  match c with 
-  |P256 -> 
-    let s = as_seq h e in
-    let s0 = s.[0] in
-    let s1 = s.[1] in
-    let s2 = s.[2] in
-    let s3 = s.[3] in
-    let s4 = s.[4] in
-    let s5 = s.[5] in
-    let s6 = s.[6] in
-    let s7 = s.[7] in
-    wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
-  |P384 ->
-    let s = as_seq h e in
-    let s0 = s.[0] in
-    let s1 = s.[1] in
-    let s2 = s.[2] in
-    let s3 = s.[3] in
-    let s4 = s.[4] in
-    let s5 = s.[5] in
-    let s6 = s.[6] in
-    let s7 = s.[7] in
-    let s8 = s.[8] in 
-    let s9 = s.[9] in 
-    let s10 = s.[10] in 
-    let s11 = s.[11] in 
-    wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
-
-
-noextract
-let felem_seq_as_nat_8 (a: lseq uint64 8) : GTot nat = 
-  let open FStar.Mul in 
-  let s0 = Lib.Sequence.index a 0 in 
-  let s1 = Lib.Sequence.index a 1 in 
-  let s2 = Lib.Sequence.index a 2 in 
-  let s3 = Lib.Sequence.index a 3 in 
-  let s4 = Lib.Sequence.index a 4 in 
-  let s5 = Lib.Sequence.index a 5 in 
-  let s6 = Lib.Sequence.index a 6 in 
-  let s7 = Lib.Sequence.index a 7 in
-  wide_as_nat4 (s0, s1, s2, s3, s4, s5, s6, s7)
-
-noextract
-let felem_seq_as_nat_12 (a: lseq uint64 12) : GTot nat = 
-  let open FStar.Mul in 
-  let s0 = Lib.Sequence.index a 0 in 
-  let s1 = Lib.Sequence.index a 1 in 
-  let s2 = Lib.Sequence.index a 2 in 
-  let s3 = Lib.Sequence.index a 3 in 
-  let s4 = Lib.Sequence.index a 4 in 
-  let s5 = Lib.Sequence.index a 5 in
-
-  let s6 = Lib.Sequence.index a 6 in 
-  let s7 = Lib.Sequence.index a 7 in
-  let s8 = Lib.Sequence.index a 8 in 
-  let s9 = Lib.Sequence.index a 9 in 
-  let s10 = Lib.Sequence.index a 10 in 
-  let s11 = Lib.Sequence.index a 11 in 
-
-  wide_as_nat4 #P384 (s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11)
+  widefelem_seq_as_nat c (as_seq h e)
 
 
 open FStar.Mul

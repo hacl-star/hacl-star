@@ -2089,8 +2089,7 @@ static void montgomery_multiplication_round_(Spec_P256_curve c, uint64_t *t, uin
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        sw = KRML_EABORT(uint64_t, "");
       }
   }
   if (sw == (uint64_t)0xffffffffffffffffU)
@@ -4092,18 +4091,18 @@ upl_zer_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = store_high_low_u(c1, c0);
-  uint64_t b1 = store_high_low_u(c3, c2);
-  uint64_t b2 = store_high_low_u(c5, c4);
-  uint64_t b3 = store_high_low_u(c7, c6);
-  uint64_t b4 = store_high_low_u(c9, c8);
-  uint64_t b5 = store_high_low_u(c11, c10);
-  o[0U] = b0;
-  o[1U] = b1;
-  o[2U] = b2;
-  o[3U] = b3;
-  o[4U] = b4;
-  o[5U] = b5;
+  uint64_t a0 = store_high_low_u(c1, c0);
+  uint64_t a1 = store_high_low_u(c3, c2);
+  uint64_t a2 = store_high_low_u(c5, c4);
+  uint64_t a3 = store_high_low_u(c7, c6);
+  uint64_t a4 = store_high_low_u(c9, c8);
+  uint64_t a5 = store_high_low_u(c11, c10);
+  o[0U] = a0;
+  o[1U] = a1;
+  o[2U] = a2;
+  o[3U] = a3;
+  o[4U] = a4;
+  o[5U] = a5;
   reduction_prime_2prime(Spec_P256_P384, o, o);
 }
 

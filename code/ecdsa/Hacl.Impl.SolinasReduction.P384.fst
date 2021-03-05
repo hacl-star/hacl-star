@@ -22,6 +22,7 @@ module Seq = FStar.Seq
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 500"
 (* http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.46.2133&rep=rep1&type=pdf *)
 
+
 inline_for_extraction noextract
 val get_high_part: a:uint64 -> r:uint32{uint_v r == uint_v a / pow2 32}
 let get_high_part a = to_u32 (shift_right a (size 32))
@@ -30,7 +31,6 @@ inline_for_extraction noextract
 val get_low_part: a:uint64 -> r:uint32{uint_v r == uint_v a % pow2 32}
 let get_low_part a = to_u32 a
 
-(* ^^ *)
 
 val shift_bound: #n:nat -> num:UInt.uint_t n -> n':nat ->
   Lemma (num * pow2 n' <= pow2 (n' + n) - pow2 n')
@@ -106,40 +106,51 @@ let store_high_low_u high low =
   logxor as_uint64_low as_uint64_high
 
 
-(* / ^^ *)
-
+#push-options "--fuel 1"
 
 inline_for_extraction noextract
-val load_buffer: a0: uint64 -> a1: uint64 -> a2: uint64 -> a3: uint64 -> a4: uint64 -> a5: uint64
-  -> o: lbuffer uint64 (size 6)
-  -> Stack unit
+val load_buffer: a0: uint64 -> a1: uint64 -> a2: uint64 -> a3: uint64 -> a4: uint64 -> a5: uint64 
+  -> o: lbuffer uint64 (size 6) ->
+  Stack unit
   (requires fun h -> live h o)
   (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-    as_nat P384 h1 o = v a0  + v a1 * pow2 (2 * 32) + v a2 * pow2 (4 * 32)  + v a3 * pow2 (6 * 32) + v a4 * pow2 (8 * 32) + v a5 * pow2 (10 * 32))
+    as_nat P384 h1 o = v a0  + v a1 * pow2 (2 * 32) + v a2 * pow2 (4 * 32) + v a3 * pow2 (6 * 32) + v a4 * pow2 (8 * 32) + v a5 * pow2 (10 * 32))
 
 
 let load_buffer a0 a1 a2 a3 a4 a5 o =
-  assert_norm(pow2 (2 * 32) = pow2 64);
-  assert_norm(pow2 (4 * 32) = pow2 64 * pow2 64);
-  assert_norm(pow2 (6 * 32) = pow2 64 * pow2 64 * pow2 64);
-  assert_norm(pow2 (8 * 32) = pow2 64 * pow2 64 * pow2 64 * pow2 64);
-  assert_norm(pow2 (10 * 32) = pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
-
   upd o (size 0) a0;
   upd o (size 1) a1;
   upd o (size 2) a2;
   upd o (size 3) a3;
   upd o (size 4) a4;
-  upd o (size 5) a5
+  upd o (size 5) a5;
+
+  let h0 = ST.get() in 
+
+  let o_seq = as_seq h0 o in 
+  lseq_as_nat_definiton o_seq 0;
+  lseq_as_nat_definiton o_seq 1;
+  lseq_as_nat_definiton o_seq 2;
+  lseq_as_nat_definiton o_seq 3;
+  lseq_as_nat_definiton o_seq 4;
+  lseq_as_nat_definiton o_seq 5;
 
 
-val upl_zer_buffer: c0: uint32 -> c1: uint32 ->  c2: uint32 ->  c3: uint32 ->
-  c4: uint32 -> c5: uint32 ->  c6: uint32 ->  c7: uint32 ->  c8: uint32 -> c9: uint32 ->
-  c10: uint32 -> c11: uint32 -> o: lbuffer uint64 (size 6) ->
+  assert_norm(pow2 (2 * 32) = pow2 64);
+  assert_norm(pow2 (4 * 32) = pow2 (64 * 2));
+  assert_norm(pow2 (6 * 32) = pow2 (64 * 3));
+  assert_norm(pow2 (8 * 32) = pow2 (64 * 4));
+  assert_norm(pow2 (10 * 32) = pow2 (64 * 5))
+
+#pop-options
+
+
+val upl_zer_buffer: c0: uint32 -> c1: uint32 ->  c2: uint32 -> c3: uint32 -> c4: uint32 -> c5: uint32 -> c6: uint32 
+  -> c7: uint32 -> c8: uint32 -> c9: uint32 -> c10: uint32 -> c11: uint32 -> o: lbuffer uint64 (size 6) ->
   Stack unit
-    (requires fun h -> live h o)
-    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      as_nat P384 h1 o == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v c6 * pow2 (6 * 32) + v c7 * pow2 (7 * 32) + v c8 * pow2 (8 * 32) + v c9 * pow2 (9 * 32) + v c10 * pow2 (10 * 32) + v c11 * pow2 (11 * 32)) % prime384)
+  (requires fun h -> live h o)
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+    as_nat P384 h1 o == (v c0 + v c1 * pow2 (1 * 32) + v c2 * pow2 (2 * 32) + v c3 * pow2 (3 * 32) + v c4 * pow2 (4 * 32) + v c5 * pow2 (5 * 32) + v c6 * pow2 (6 * 32) + v c7 * pow2 (7 * 32) + v c8 * pow2 (8 * 32) + v c9 * pow2 (9 * 32) + v c10 * pow2 (10 * 32) + v c11 * pow2 (11 * 32)) % getPrime P384)
 
 
 let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 o =
@@ -154,14 +165,14 @@ let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 o =
   assert_norm (pow2 (9 * 32) * pow2 (2 * 32) = pow2 (11 * 32));
 
 
-  let b0 = store_high_low_u c1 c0 in
-  let b1 = store_high_low_u c3 c2 in
-  let b2 = store_high_low_u c5 c4 in
-  let b3 = store_high_low_u c7 c6 in
-  let b4 = store_high_low_u c9 c8 in
-  let b5 = store_high_low_u c11 c10 in
+  let a0 = store_high_low_u c1 c0 in
+  let a1 = store_high_low_u c3 c2 in
+  let a2 = store_high_low_u c5 c4 in
+  let a3 = store_high_low_u c7 c6 in
+  let a4 = store_high_low_u c9 c8 in
+  let a5 = store_high_low_u c11 c10 in
 
-  load_buffer b0 b1 b2 b3 b4 b5 o;
+  load_buffer a0 a1 a2 a3 a4 a5 o;
   reduction_prime_2prime #P384 o o
 
 
@@ -169,7 +180,7 @@ val upl_fir_buffer: c21: uint32 -> c22: uint32 -> c23: uint32 -> o: lbuffer uint
   Stack unit
     (requires fun h -> live h o)
     (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-      as_nat P384 h1 o == (v c21 * pow2 (4 * 32) + v c22 * pow2 (5 * 32) + v c23 * pow2 (6 * 32)) % prime384)
+      as_nat P384 h1 o == (v c21 * pow2 (4 * 32) + v c22 * pow2 (5 * 32) + v c23 * pow2 (6 * 32)) % getPrime P384)
 
 let upl_fir_buffer c21 c22 c23 o =
   assert_norm (pow2 (1 * 32) * pow2 (2 * 32) = pow2 (3 * 32));
@@ -1057,12 +1068,6 @@ let solinas_reduction_nat c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 
    inside_mod a_ (c12 * pow2 (12 * 32)) (c13 * pow2 (13 * 32)) (c14 * pow2 (14 * 32)) (c15 * pow2 (15 * 32)) (c16 * pow2 (16 * 32)) (c17 * pow2 (17 * 32)) (c18 * pow2 (18 * 32)) (c19 * pow2 (19 * 32)) (c20 * pow2 (20 * 32)) (c21 * pow2 (21 * 32)) (c22 * pow2 (22 * 32)) (c23 * pow2 (23 * 32))
 
 
-val lemma_wild_sequence : i: lbuffer uint64 (size 12) -> h0: mem ->
-  Lemma (felem_seq_as_nat_12 (as_seq h0 i) == wide_as_nat P384 h0 i)
-
-let lemma_wild_sequence i h0 = ()
-
-
 let solinas_reduction_mod c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 s0 s1 s2 s3 s4 s5 s6 s7 s8 s9 n =
 
   let f0 = c0 + c1 * pow2 (1 * 32) + c2 * pow2 (2 * 32) + c3 * pow2 (3 * 32) + c4 * pow2 (4 * 32) + c5 * pow2 (5 * 32) + c6 * pow2 (6 * 32) + c7 * pow2 (7 * 32) + c8 * pow2 (8 * 32) + c9 * pow2 (9 * 32) + c10 * pow2 (10 * 32) + c11 * pow2 (11 * 32) in
@@ -1134,7 +1139,7 @@ val lemma_opened: i:Lib.Sequence.lseq uint64 12 -> Lemma
     let c22 = get_low_part  i11 in
     let c23 = get_high_part i11 in
 
-    felem_seq_as_nat_12 i =
+    lseq_as_nat i =
      v c0  * pow2 (0 * 32) +
      v c1  * pow2 (1 * 32) +
      v c2  * pow2 (2 * 32) +
@@ -1160,6 +1165,42 @@ val lemma_opened: i:Lib.Sequence.lseq uint64 12 -> Lemma
      v c22 * pow2 (22 * 32) +
      v c23 * pow2 (23 * 32)
   )
+
+#push-options "--fuel 1"
+
+val lemma_lseq_12_as_definition: i: Lib.Sequence.lseq uint64 12 -> Lemma (
+  let open Lib.Sequence in 
+  let i0 = index i 0 in
+  let i1 = index i 1 in
+  let i2 = index i 2 in
+  let i3 = index i 3 in
+  let i4 = index i 4 in
+  let i5 = index i 5 in
+  let i6 = index i 6 in
+  let i7 = index i 7 in
+  let i8 = index i 8 in 
+  let i9 = index i 9 in 
+  let i10 = index i 10 in 
+  let i11 = index i 11 in 
+  lseq_as_nat i == v i0 * pow2 (0 * 64) + v i1 * pow2 (1 * 64) + v i2 * pow2 (2 * 64) + v i3 * pow2 (3 * 64) + v i4 * pow2 (4 * 64) + v i5 * pow2 (5 * 64) + v i6 * pow2 (6 * 64) + v i7 * pow2 (7 * 64) +
+  v i8 * pow2 (8 * 64) + v i9 * pow2 (9 * 64) + v i10 * pow2 (10 * 64) + v i11 * pow2 (11 * 64))
+
+let lemma_lseq_12_as_definition i = 
+  lseq_as_nat_definiton i 0;
+  lseq_as_nat_definiton i 1;
+  lseq_as_nat_definiton i 2;
+  lseq_as_nat_definiton i 3;
+  lseq_as_nat_definiton i 4;
+  lseq_as_nat_definiton i 5;
+  
+  lseq_as_nat_definiton i 6;
+  lseq_as_nat_definiton i 7;
+  lseq_as_nat_definiton i 8;
+  lseq_as_nat_definiton i 9;
+  lseq_as_nat_definiton i 10;
+  lseq_as_nat_definiton i 11
+
+#pop-options
 
 
 let lemma_opened i =   
@@ -1335,10 +1376,11 @@ let lemma_opened i =
     v c22 * pow2 (22 * 32) + v c23 * pow2 (23 * 32);
   };
 
+
   calc (==) {
-    felem_seq_as_nat_12 i;
+    lseq_as_nat i;
       
-    == { }
+    == {lemma_lseq_12_as_definition i}
     v i0 * pow2 (0 * 64) +
     v i1 * pow2 (1 * 64) +
     v i2 * pow2 (2 * 64) +
@@ -1350,7 +1392,7 @@ let lemma_opened i =
     v i8 * pow2 (8 * 64) +
     v i9 * pow2 (9 * 64) +
     v i10 * pow2 (10 * 64) +
-    v i11 * pow2 (11 * 64);
+    v i11 * pow2 (11 * 64); 
     == { }
     (v c0  * pow2 (0 * 32)  + v c1  * pow2 (1 * 32)) +
     (v c2  * pow2 (2 * 32)  + v c3  * pow2 (3 * 32)) +
@@ -1455,9 +1497,7 @@ let solinas_reduction_impl_p384 i o =
     (as_nat P384 h1 t0) (as_nat P384 h1 t1) (as_nat P384 h1 t2) (as_nat P384 h1 t3) (as_nat P384 h1 t4) (as_nat P384 h1 t5) (as_nat P384 h1 t6) (as_nat P384 h1 t7) (as_nat P384 h1 t8) (as_nat P384 h1 t9) (as_nat P384 h2 o);
 
     modulo_lemma (as_nat P384 h2 o) prime384;
-
     lemma_opened (as_seq h0 i);
-    lemma_wild_sequence i h0;
     pop_frame()
 
 
