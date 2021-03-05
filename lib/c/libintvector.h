@@ -796,6 +796,7 @@ typedef vector128_8 vector128;
 
 #include <altivec.h>
 #include <string.h> // for memcpy
+#include <stdint.h>
 
 // The main vector 128 type
 // We can't use uint8_t, uint32_t, uint64_t... instead of unsigned char,
