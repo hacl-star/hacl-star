@@ -13,4 +13,4 @@ let expand_keys ks priv =
   Hacl.Impl.Ed25519.Sign.Expanded.expand_keys ks priv
 
 let sign_expanded signature ks len msg =
-  Hacl.Impl.Ed25519.Sign.Expanded.sign signature ks len msg
+  Hacl.Impl.Ed25519.Sign.Expanded.sign_expanded signature ks len msg

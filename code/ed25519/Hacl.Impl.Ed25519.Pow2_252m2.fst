@@ -128,6 +128,7 @@ val pow2_252m2:
       F51.mul_inv_t h1 out /\
       F51.fevalh h1 out == F51.fevalh h0 z `SC.fpow` ((SC.prime + 3) / 8)
     )
+[@CInline]
 let pow2_252m2 out z =
   push_frame();
   let buf = create 20ul (u64 0) in

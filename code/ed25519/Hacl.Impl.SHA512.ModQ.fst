@@ -8,7 +8,7 @@ open Lib.ByteSequence
 open Lib.Sequence
 open Lib.Buffer
 
-module F56 = Hacl.Impl.Ed25519.Field56
+module F56 = Hacl.Impl.BignumQ.Mul
 
 #reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
@@ -26,6 +26,8 @@ val sha512_pre_msg:
       as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
            (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
     )
+
+[@CInline]
 let sha512_pre_msg h prefix len input =
   push_frame ();
   assert_norm(pow2 32 <= pow2 125 - 1);
@@ -33,6 +35,7 @@ let sha512_pre_msg h prefix len input =
   concat2 32ul prefix len input pre_msg;
   Hacl.Hash.SHA2.hash_512_lib (len +. 32ul) pre_msg h;
   pop_frame ()
+
 
 //FIX
 val sha512_pre_pre2_msg:
@@ -54,7 +57,7 @@ val sha512_pre_pre2_msg:
         )
     )
 
-
+[@CInline]
 let sha512_pre_pre2_msg h prefix prefix2 len input =
   push_frame ();
   let pre_msg = create (len +. 64ul) (u8 0) in
@@ -62,6 +65,7 @@ let sha512_pre_pre2_msg h prefix prefix2 len input =
   concat3 32ul prefix 32ul prefix2 len input pre_msg;
   Hacl.Hash.SHA2.hash_512_lib (len +. 64ul) pre_msg h;
   pop_frame ()
+
 
 val sha512_modq_pre:
     out:lbuffer uint64 5ul
@@ -84,6 +88,7 @@ val sha512_modq_pre:
         (concat #uint8 #32 #(v len) (as_seq h0 prefix) (as_seq h0 input))
     )
 
+[@CInline]
 let sha512_modq_pre out prefix len input =
   push_frame();
   let tmp = create 10ul (u64 0) in
@@ -93,6 +98,7 @@ let sha512_modq_pre out prefix len input =
   Hacl.Impl.BignumQ.Mul.barrett_reduction out tmp;
   assert_norm (pow2 56 == 0x100000000000000);
   pop_frame()
+
 
 val sha512_modq_pre_pre2:
     out:lbuffer uint64 5ul
@@ -120,6 +126,8 @@ val sha512_modq_pre_pre2:
           (as_seq h0 input)
         )
       )
+
+[@CInline]
 let sha512_modq_pre_pre2 out prefix prefix2 len input =
   push_frame();
   let tmp = create 10ul (u64 0) in

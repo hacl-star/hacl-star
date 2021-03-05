@@ -2,9 +2,6 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    let hacl_Bignum25519_fdifference =
-      foreign "Hacl_Bignum25519_fdifference"
-        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
     let hacl_Bignum25519_reduce_513 =
       foreign "Hacl_Bignum25519_reduce_513"
         ((ptr uint64_t) @-> (returning void))
@@ -34,6 +31,9 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Impl_Ed25519_PointEqual_point_equal =
       foreign "Hacl_Impl_Ed25519_PointEqual_point_equal"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool)))
+    let hacl_Impl_Ed25519_PointNegate_point_negate =
+      foreign "Hacl_Impl_Ed25519_PointNegate_point_negate"
+        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
     let hacl_Ed25519_sign =
       foreign "Hacl_Ed25519_sign"
         (ocaml_bytes @->

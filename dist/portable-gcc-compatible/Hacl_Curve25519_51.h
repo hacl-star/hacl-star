@@ -38,43 +38,7 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-
-/* SNIPPET_START: Hacl_Impl_Curve25519_Field51_fadd */
-
-void Hacl_Impl_Curve25519_Field51_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2);
-
-/* SNIPPET_END: Hacl_Impl_Curve25519_Field51_fadd */
-
-/* SNIPPET_START: Hacl_Impl_Curve25519_Field51_fsub */
-
-void Hacl_Impl_Curve25519_Field51_fsub(uint64_t *out, uint64_t *f1, uint64_t *f2);
-
-/* SNIPPET_END: Hacl_Impl_Curve25519_Field51_fsub */
-
-/* SNIPPET_START: Hacl_Impl_Curve25519_Field51_fmul */
-
-void
-Hacl_Impl_Curve25519_Field51_fmul(
-  uint64_t *out,
-  uint64_t *f1,
-  uint64_t *f2,
-  FStar_UInt128_uint128 *uu___
-);
-
-/* SNIPPET_END: Hacl_Impl_Curve25519_Field51_fmul */
-
-/* SNIPPET_START: Hacl_Impl_Curve25519_Field51_fmul1 */
-
-void Hacl_Impl_Curve25519_Field51_fmul1(uint64_t *out, uint64_t *f1, uint64_t f2);
-
-/* SNIPPET_END: Hacl_Impl_Curve25519_Field51_fmul1 */
-
-/* SNIPPET_START: Hacl_Impl_Curve25519_Field51_fsqr */
-
-void
-Hacl_Impl_Curve25519_Field51_fsqr(uint64_t *out, uint64_t *f, FStar_UInt128_uint128 *uu___);
-
-/* SNIPPET_END: Hacl_Impl_Curve25519_Field51_fsqr */
+#include "Hacl_Bignum25519_51.h"
 
 /* SNIPPET_START: Hacl_Curve25519_51_fsquare_times */
 
