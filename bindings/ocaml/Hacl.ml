@@ -21,19 +21,19 @@ module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs
 module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
 module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
 
-#ifdef SUPPORTS_128
+#ifdef EVERCRYPT_CAN_COMPILE_VEC128
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
 module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
 module Hacl_Blake2s_128 = Hacl_Blake2s_128_bindings.Bindings(Hacl_Blake2s_128_stubs)
 #endif
 
-#ifdef SUPPORTS_256
+#ifdef EVERCRYPT_CAN_COMPILE_VEC256
 module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
 module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
 module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
 #endif
 
-#ifdef SUPPORTS_VALE
+#ifdef EVERCRYPT_CAN_COMPILE_VALE
 module Hacl_Curve25519_64 = Hacl_Curve25519_64_bindings.Bindings(Hacl_Curve25519_64_stubs)
 #endif
 
@@ -347,87 +347,87 @@ module Blake2s_32 : Blake2 =
     let blake2s = Hacl_Blake2s_32.hacl_Blake2s_32_blake2s
   end)
 
-#ifdef SUPPORTS_128
+#ifdef EVERCRYPT_CAN_COMPILE_VEC128
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let encrypt = Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_encrypt
     let decrypt = Hacl_Chacha20Poly1305_128.hacl_Chacha20Poly1305_128_aead_decrypt
   end)
 
 module Poly1305_128 : MAC =
   Make_Poly1305 (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let mac = Hacl_Poly1305_128.hacl_Poly1305_128_poly1305_mac
 end)
 
 module Blake2s_128 : Blake2 =
   Make_Blake2s (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let blake2s = Hacl_Blake2s_128.hacl_Blake2s_128_blake2s
   end)
 #else
 module Chacha20_Poly1305_128 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let encrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
     let decrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
   end)
 
 module Poly1305_128 : MAC =
   Make_Poly1305 (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let mac _ _ _ = failwith "Not implemented on this platform"
 end)
 
 module Blake2s_128 : Blake2 =
   Make_Blake2s (struct
-    let reqs = [AVX]
+    let reqs = [VEC128]
     let blake2s _ _ _ = failwith "Not implemented on this platform"
   end)
 #endif
 
-#ifdef SUPPORTS_256
+#ifdef EVERCRYPT_CAN_COMPILE_VEC256
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-    let reqs = [AVX2]
+    let reqs = [VEC256]
     let encrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_encrypt
     let decrypt = Hacl_Chacha20Poly1305_256.hacl_Chacha20Poly1305_256_aead_decrypt
   end)
 
 module Poly1305_256 : MAC =
   Make_Poly1305 (struct
-      let reqs = [AVX2]
+      let reqs = [VEC256]
     let mac = Hacl_Poly1305_256.hacl_Poly1305_256_poly1305_mac
 end)
 
 module Blake2b_256 : Blake2 =
   Make_Blake2b (struct
-    let reqs = [AVX2]
+    let reqs = [VEC256]
     let blake2b = Hacl_Blake2b_256.hacl_Blake2b_256_blake2b
   end)
 #else
 module Chacha20_Poly1305_256 : Chacha20_Poly1305 =
   Make_Chacha20_Poly1305 (struct
-     let reqs = [AVX2]
+     let reqs = [VEC256]
     let encrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
     let decrypt _ _ _ _ _ _ = failwith "Not implemented on this platform"
   end)
 
 module Poly1305_256 : MAC =
   Make_Poly1305 (struct
-      let reqs = [AVX2]
+      let reqs = [VEC256]
     let mac _ _ _ = failwith "Not implemented on this platform"
 end)
 
 module Blake2b_256 : Blake2 =
   Make_Blake2b (struct
-    let reqs = [AVX2]
+    let reqs = [VEC256]
     let blake2b _ _ _ = failwith "Not implemented on this platform"
   end)
 #endif
 
-#ifdef SUPPORTS_VALE
+#ifdef EVERCRYPT_CAN_COMPILE_VALE
 
 module Curve25519_64 : Curve25519 =
   Make_Curve25519 (struct

@@ -9,9 +9,8 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "Hacl_Streaming_Poly1305_128.h"
-
 #include "test_helpers.h"
+#include "Hacl_Streaming_Poly1305_128.h"
 #include "poly1305_vectors.h"
 
 typedef struct Hacl_Streaming_Poly1305_128_poly1305_128_state_s poly1305_state;

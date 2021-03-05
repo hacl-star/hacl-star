@@ -16,23 +16,21 @@ let has_adx_bmi2 (): Stack bool
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 let secret_to_public pub priv =
   let uu__has_adx_bmi2 = has_adx_bmi2 () in
-  if EverCrypt.TargetConfig.x64 && uu__has_adx_bmi2 then
+  if EverCrypt.TargetConfig.evercrypt_can_compile_vale && uu__has_adx_bmi2 then
     Hacl.Curve25519_64.secret_to_public pub priv
   else
     Hacl.Curve25519_51.secret_to_public pub priv
 
-
 let scalarmult shared my_priv their_pub =
   let uu__has_adx_bmi2 = has_adx_bmi2 () in
-  if EverCrypt.TargetConfig.x64 && uu__has_adx_bmi2 then
+  if EverCrypt.TargetConfig.evercrypt_can_compile_vale && uu__has_adx_bmi2 then
     Hacl.Curve25519_64.scalarmult shared my_priv their_pub
   else
     Hacl.Curve25519_51.scalarmult shared my_priv their_pub
 
-
 let ecdh shared my_priv their_pub =
   let uu__has_adx_bmi2 = has_adx_bmi2 () in
-  if EverCrypt.TargetConfig.x64 && uu__has_adx_bmi2 then
+  if EverCrypt.TargetConfig.evercrypt_can_compile_vale && uu__has_adx_bmi2 then
     Hacl.Curve25519_64.ecdh shared my_priv their_pub
   else
     Hacl.Curve25519_51.ecdh shared my_priv their_pub

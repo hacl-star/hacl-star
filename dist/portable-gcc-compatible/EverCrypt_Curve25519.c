@@ -39,7 +39,7 @@ static inline bool has_adx_bmi2()
 
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv)
 {
-  #if EVERCRYPT_TARGETCONFIG_X64
+  #if EVERCRYPT_CAN_COMPILE_VALE
   if (has_adx_bmi2())
   {
     Hacl_Curve25519_64_secret_to_public(pub, priv);
@@ -55,7 +55,7 @@ void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv)
 
 void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub)
 {
-  #if EVERCRYPT_TARGETCONFIG_X64
+  #if EVERCRYPT_CAN_COMPILE_VALE
   if (has_adx_bmi2())
   {
     Hacl_Curve25519_64_scalarmult(shared, my_priv, their_pub);
@@ -71,7 +71,7 @@ void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t 
 
 bool EverCrypt_Curve25519_ecdh(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub)
 {
-  #if EVERCRYPT_TARGETCONFIG_X64
+  #if EVERCRYPT_CAN_COMPILE_VALE
   if (has_adx_bmi2())
   {
     return Hacl_Curve25519_64_ecdh(shared, my_priv, their_pub);

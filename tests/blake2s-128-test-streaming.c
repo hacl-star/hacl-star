@@ -9,9 +9,8 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "Hacl_Streaming_Blake2s_128.h"
-
 #include "test_helpers.h"
+#include "Hacl_Streaming_Blake2s_128.h"
 #include "blake2_vectors.h"
 
 typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_state_s blake2_state;

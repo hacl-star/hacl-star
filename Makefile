@@ -631,6 +631,8 @@ REQUIRED_FLAGS	= \
   -no-prefix 'MerkleTree' \
   -no-prefix 'MerkleTree.EverCrypt' \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
+  -static-header 'EverCrypt.TargetConfig' \
+  -no-prefix 'EverCrypt.TargetConfig' \
   $(BASE_FLAGS)
 
 # Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
