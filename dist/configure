@@ -369,11 +369,11 @@ if detect_systemz; then
   echo "#include <stdint.h> " >> config.h
 fi
 
+# TODO: try to enable the intrinsics
 if detect_powerpc; then
   echo "... detected PowerPC platform"
   echo "... $build_target supports 128-bit z VSX"
   supports_128=true
-  # TODO: for now, we only support little endian
   echo "CFLAGS_128 = -m64 -mpowerpc64 -mabi=altivec" >> Makefile.config #-mvsx -maltivec" >> Makefile.config
   echo "#include <stdint.h> " >> config.h
 fi
