@@ -7,6 +7,7 @@
 module EverCrypt.AutoConfig2
 
 open FStar.HyperStack.ST
+open EverCrypt.TargetConfig
 
 module B = LowStar.Buffer
 
@@ -35,6 +36,7 @@ val has_rdrand: getter Vale.X64.CPU_Features_s.rdrand_enabled
     See Vale.X64.CPU_Features_s for more details. **)
 val has_avx512: getter Vale.X64.CPU_Features_s.avx512_enabled
 
+[@ (deprecated "")]
 val wants_vale: unit ->
   Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
 val wants_hacl: unit ->
@@ -88,3 +90,27 @@ val disable_vale: disabler
 val disable_hacl: disabler
 val disable_openssl: disabler
 val disable_bcrypt: disabler
+
+(** Some predicates to dynamically guard the vectorized code *)
+(* Note that those predicates don't check [EverCrypt.TargetConfig.evercrypt_can_compile_vec128],
+ * [EverCrypt.TargetConfig.evercrypt_can_compile_vale], etc.
+ * The reason is that the above booleans are static preconditions, checked at
+ * compilation time. The F* code must thus be guard the following way (note that
+ * the order of the arguments is important for syntactic reasons):
+ * [> if EverCrypt.TargetConfig.evercrypt_can_compile_vec128 && has_vec128 ... then
+ * Leading to the following C code:
+ * [> #if defined(COMPILE_128)
+ * [>   if has_vec128 ... { ... }
+ * [> #endif
+ * Note that if one forgets to guard the code with flags like
+ * [EverCrypt.TargetConfig.evercrypt_can_compile_vec128], the code will not compile on platforms
+ * not satisfying the requirements.
+ *)
+
+noextract
+let vec128_enabled = Vale.X64.CPU_Features_s.avx_enabled || vec128_not_avx_enabled
+noextract
+let vec256_enabled = Vale.X64.CPU_Features_s.avx2_enabled || vec256_not_avx2_enabled
+
+val has_vec128: getter vec128_enabled
+val has_vec256: getter vec256_enabled

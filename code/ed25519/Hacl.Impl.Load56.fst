@@ -9,11 +9,12 @@ open Lib.ByteSequence
 open Lib.Buffer
 open Lib.ByteBuffer
 
-module F56 = Hacl.Impl.Ed25519.Field56
-module S56 = Hacl.Spec.Ed25519.Field56.Definition
+module F56 = Hacl.Impl.BignumQ.Mul
+module S56 = Hacl.Spec.BignumQ.Definitions
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
+inline_for_extraction noextract
 val hload56_le:
     b:lbuffer uint8 64ul
   -> off:size_t{v off <= 56} ->
@@ -83,7 +84,7 @@ let lemma_load_64_bytes (k:lbytes 64) (b0 b1 b2 b3 b4 b5 b6 b7 b8 b9:uint64) : L
     v b8 == nat_from_bytes_le (Seq.slice k 56 63) /\
     v b9 == v (Seq.index k 63)
     )
-  (ensures S56.as_nat10 b0 b1 b2 b3 b4 b5 b6 b7 b8 b9 == nat_from_bytes_le k)
+  (ensures S56.wide_as_nat5 (b0, b1, b2, b3, b4, b5, b6, b7, b8, b9) == nat_from_bytes_le k)
   =
   lemma_nat_from_bytes_le_append (Seq.slice k 0 7) (Seq.slice k 7 14);
   lemma_nat_from_bytes_le_append (Seq.slice k 0 14) (Seq.slice k 14 21);
@@ -122,21 +123,11 @@ val load_64_bytes:
   Stack unit
     (requires fun h -> live h out /\ live h b)
     (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      F56.as_nat10 h1 out == nat_from_bytes_le (as_seq h0 b) /\
-      (let t = as_seq h1 out in
-      let op_String_Access = Seq.index in
-      v t.[0] < 0x100000000000000
-      /\ v t.[1] < 0x100000000000000
-      /\ v t.[2] < 0x100000000000000
-      /\ v t.[3] < 0x100000000000000
-      /\ v t.[4] < 0x100000000000000
-      /\ v t.[5] < 0x100000000000000
-      /\ v t.[6] < 0x100000000000000
-      /\ v t.[7] < 0x100000000000000
-      /\ v t.[8] < 0x100000000000000
-      /\ v t.[9] < 0x100000000000000)
+      F56.wide_as_nat h1 out == nat_from_bytes_le (as_seq h0 b) /\
+      F56.qelem_wide_fits h1 out (1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
     )
 
+[@CInline]
 let load_64_bytes out b =
   let h0 = get() in
   let b0 = hload56_le b 0ul in
@@ -153,6 +144,8 @@ let load_64_bytes out b =
   lemma_load_64_bytes (as_seq h0 b) b0 b1 b2 b3 b4 b5 b6 b7 b8 b9;
   Hacl.Bignum25519.make_u64_10 out b0 b1 b2 b3 b4 b5 b6 b7 b8 b9
 
+
+inline_for_extraction noextract
 val hload56_le':
     b:lbuffer uint8 32ul
   -> off:size_t{v off <= 21} ->
@@ -225,15 +218,10 @@ val load_32_bytes:
     (requires fun h -> live h out /\ live h b)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       F56.as_nat h1 out == nat_from_bytes_le (as_seq h0 b) /\
-      (let s = as_seq h1 out in
-       let op_String_Access = Seq.index in
-       v s.[0] < 0x100000000000000 /\
-       v s.[1] < 0x100000000000000 /\
-       v s.[2] < 0x100000000000000 /\
-       v s.[3] < 0x100000000000000 /\
-       v s.[4] < 0x100000000000000)
+      F56.qelem_fits h1 out (1, 1, 1, 1, 1)
     )
 
+[@CInline]
 let load_32_bytes out b =
   let h0 = get() in
   let b0 = hload56_le' b 0ul in

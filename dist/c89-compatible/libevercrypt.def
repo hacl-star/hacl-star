@@ -118,6 +118,8 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_hacl
   EverCrypt_AutoConfig2_disable_openssl
   EverCrypt_AutoConfig2_disable_bcrypt
+  EverCrypt_AutoConfig2_has_vec128
+  EverCrypt_AutoConfig2_has_vec256
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
   EverCrypt_Hash___proj__MD5_s__item__p
@@ -219,14 +221,17 @@ EXPORTS
   Hacl_Impl_Curve25519_Field51_fadd
   Hacl_Impl_Curve25519_Field51_fsub
   Hacl_Impl_Curve25519_Field51_fmul
+  Hacl_Impl_Curve25519_Field51_fmul2
   Hacl_Impl_Curve25519_Field51_fmul1
   Hacl_Impl_Curve25519_Field51_fsqr
+  Hacl_Impl_Curve25519_Field51_fsqr2
+  Hacl_Impl_Curve25519_Field51_store_felem
+  Hacl_Impl_Curve25519_Field51_cswap2
   Hacl_Curve25519_51_fsquare_times
   Hacl_Curve25519_51_finv
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_Bignum25519_fdifference
   Hacl_Bignum25519_reduce_513
   Hacl_Bignum25519_inverse
   Hacl_Bignum25519_load_51
@@ -236,6 +241,7 @@ EXPORTS
   Hacl_Impl_Ed25519_PointCompress_point_compress
   Hacl_Impl_Ed25519_PointDecompress_point_decompress
   Hacl_Impl_Ed25519_PointEqual_point_equal
+  Hacl_Impl_Ed25519_PointNegate_point_negate
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
   Hacl_Ed25519_secret_to_public
@@ -471,13 +477,13 @@ EXPORTS
   Hacl_Bignum4096_new_bn_from_bytes_be
   Hacl_Bignum4096_bn_to_bytes_be
   Hacl_Bignum4096_lt_mask
-  Hacl_Chacha20_Vec32_chacha20_encrypt_32
-  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
+  Hacl_Chacha20_Vec32_chacha20_encrypt_32
+  Hacl_Chacha20_Vec32_chacha20_decrypt_32
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP128_SHA512_sealBase

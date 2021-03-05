@@ -12,10 +12,15 @@
 #include "test_helpers.h"
 
 #include "Hacl_Chacha20Poly1305_32.h"
+
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
 #include "Hacl_Chacha20Poly1305_128.h"
-#if defined(COMPILE_VEC256)
+#endif
+
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
 #include "Hacl_Chacha20Poly1305_256.h"
 #endif
+
 #include "EverCrypt_AutoConfig2.h"
 
 #include "chacha20poly1305_vectors.h"
@@ -45,7 +50,7 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, int aad_l
   ok = ok && (res == 0);
   ok = ok && print_result(in_len,plaintext,in);
 
-
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   Hacl_Chacha20Poly1305_128_aead_encrypt(key, nonce, aad_len, aad, in_len, in, ciphertext, mac);
   printf("Chacha20Poly1305 (128-bit) Result (chacha20):\n");
   ok = print_result(in_len,ciphertext,exp_cipher);
@@ -56,8 +61,9 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, int aad_l
   if (res != 0) printf("AEAD Decrypt (Chacha20/Poly1305) failed \n.");
   ok = ok && (res == 0);
   ok = ok && print_result(in_len,plaintext,in);
+#endif
 
-#if defined(COMPILE_VEC256)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     Hacl_Chacha20Poly1305_256_aead_encrypt(key, nonce, aad_len, aad, in_len, in, ciphertext, mac);
     printf("Chacha20Poly1305 (256-bit) Result (chacha20):\n");
@@ -112,7 +118,7 @@ int main(){
   clock_t tdiff1 = t2 - t1;
   cycles cdiff1 = b - a;
 
-
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   memset(plain,'P',SIZE);
   memset(aead_key,'K',32);
   for (int j = 0; j < ROUNDS; j++) {
@@ -129,8 +135,9 @@ int main(){
   t2 = clock();
   clock_t tdiff2 = t2 - t1;
   cycles cdiff2 = b - a;
+#endif
 
-#if defined(COMPILE_VEC256)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     memset(plain,'P',SIZE);
     memset(aead_key,'K',32);
@@ -169,7 +176,7 @@ int main(){
   clock_t tdiff4 = t2 - t1;
   cycles cdiff4 = b - a;
 
-
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   res1 = 0;
   for (int j = 0; j < ROUNDS; j++) {
     res1 = Hacl_Chacha20Poly1305_128_aead_decrypt(aead_key, aead_nonce, aad_len, aead_aad, SIZE, plain, cipher, tag);
@@ -187,8 +194,9 @@ int main(){
   t2 = clock();
   clock_t tdiff5 = t2 - t1;
   cycles cdiff5 = b - a;
+#endif
 
-#if defined(COMPILE_VEC256)
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     res1 = 0;
     for (int j = 0; j < ROUNDS; j++) {
@@ -217,15 +225,23 @@ int main(){
 
   uint64_t count = ROUNDS * SIZE;
   printf("Chacha20Poly1305 Encrypt (32-bit) PERF:\n");  print_time(count,tdiff1,cdiff1);
+
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   printf("Chacha20Poly1305 Encrypt (128-bit) PERF:\n"); print_time(count,tdiff2,cdiff2);
-#if defined(COMPILE_VEC256)
+#endif
+
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("Chacha20Poly1305 Encrypt (256-bit) PERF:\n"); print_time(count,tdiff3,cdiff3);
   }
 #endif
   printf("Chacha20Poly1305 Decrypt (32-bit) PERF:\n");  print_time(count,tdiff4,cdiff4);
+
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
   printf("Chacha20Poly1305 Decrypt (128-bit) PERF:\n"); print_time(count,tdiff5,cdiff5);
-#if defined(COMPILE_VEC256)
+#endif
+
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("Chacha20Poly1305 Decrypt (256-bit) PERF:\n"); print_time(count,tdiff6,cdiff6);
   }

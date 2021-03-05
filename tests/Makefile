@@ -10,28 +10,35 @@ KREMLIN_HOME?=../dist/kremlin
 USER_CFLAGS?=
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
-TARGETS = $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
+TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
+
+# Filter the targets if they are not supported
+# Vec128
+ifneq ($(COMPILE_VEC128),1)
+TARGETS := $(filter-out %-128-test-streaming.exe, $(filter-out %-128-test.exe, $(TARGETS)))
+endif
+
+# Vec256
+ifneq ($(COMPILE_VEC256),1)
+TARGETS := $(filter-out %-256-test-streaming.exe, $(filter-out %-256-test.exe, $(TARGETS)))
+endif
+
+# Curve64
+ifneq ($(COMPILE_INTRINSICS),1)
+TARGETS := $(filter-out curve64-%, $(TARGETS))
+endif
+
 CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
-  -O3 -mcpu=native -mtune=native $(CFLAGS) $(USER_CFLAGS)
-#  -O3 -march=native -mtune=native $(CFLAGS) $(USER_CFLAGS)
-# TODO: -march=native is not supported on PowerPC, we need to use -mcpu=native
-# Problem: we need it to compute on SystemZ
-
+#  -O3 -mcpu=native -mtune=native $(CFLAGS) $(USER_CFLAGS)
+  -O3 $(CFLAGS) $(USER_CFLAGS)
 
 all: $(TARGETS)
 
 test: $(patsubst %.exe,%.test,$(TARGETS))
 
 arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test curve25519-arm-test.test
-
-# Curve64 doesn't work on all processors
-TARGETS_NO_CURVE64 = $(filter-out curve64-%, $(TARGETS))
-
-all-no-curve64: $(TARGETS_NO_CURVE64)
-
-test-no-curve64: $(patsubst %.exe,%.test,$(TARGETS_NO_CURVE64))
 
 # Dependency
 
@@ -47,14 +54,11 @@ test-no-curve64: $(patsubst %.exe,%.test,$(TARGETS_NO_CURVE64))
 
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
-# Note that vec128-test.exe uses lib/c and not dist/gcc-compatible:
+# Note that vec-128-test.exe uses lib/c and not dist/gcc-compatible:
 # this allows to work on and test the vectorized instructions without
 # rebuilding the whole HACL library.
-vec128-test.exe: ../lib/c/libintvector.h vec128-test.c
-	cc -I../lib/c -O3 $(CFLAGS) vec128-test.c -o vec128-test.exe
-
-../lib/c/libintvector.h:
-	touch ../lib/c/libintvector.h
+vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
+	cc -I../lib/c -O3 $(CFLAGS) $(CFLAGS_128) vec-128-test.c -o vec-128-test.exe
 
 %.exe: %.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto

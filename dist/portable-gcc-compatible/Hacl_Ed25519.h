@@ -39,13 +39,8 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
+#include "Hacl_Bignum25519_51.h"
 #include "Hacl_Curve25519_51.h"
-
-/* SNIPPET_START: Hacl_Bignum25519_fdifference */
-
-void Hacl_Bignum25519_fdifference(uint64_t *a, uint64_t *b);
-
-/* SNIPPET_END: Hacl_Bignum25519_fdifference */
 
 /* SNIPPET_START: Hacl_Bignum25519_reduce_513 */
 
@@ -100,6 +95,12 @@ bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *
 bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q);
 
 /* SNIPPET_END: Hacl_Impl_Ed25519_PointEqual_point_equal */
+
+/* SNIPPET_START: Hacl_Impl_Ed25519_PointNegate_point_negate */
+
+void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out);
+
+/* SNIPPET_END: Hacl_Impl_Ed25519_PointNegate_point_negate */
 
 /* SNIPPET_START: Hacl_Ed25519_sign */
 

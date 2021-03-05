@@ -38,9 +38,8 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
+#include "Hacl_Bignum25519_51.h"
 #include "Hacl_Curve25519_51.h"
-
-void Hacl_Bignum25519_fdifference(u64 *a, u64 *b);
 
 void Hacl_Bignum25519_reduce_513(u64 *a);
 
@@ -59,6 +58,8 @@ void Hacl_Impl_Ed25519_PointCompress_point_compress(u8 *z, u64 *p);
 bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(u64 *out, u8 *s);
 
 bool Hacl_Impl_Ed25519_PointEqual_point_equal(u64 *p, u64 *q);
+
+void Hacl_Impl_Ed25519_PointNegate_point_negate(u64 *p, u64 *out);
 
 void Hacl_Ed25519_sign(u8 *signature, u8 *priv, u32 len, u8 *msg);
 
