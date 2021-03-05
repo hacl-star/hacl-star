@@ -9,11 +9,10 @@
 #include <stdbool.h>
 #include <time.h>
 
-#include "Hacl_Streaming_Poly1305_256.h"
-#include "EverCrypt_AutoConfig2.h"
-
 #include "test_helpers.h"
+#include "Hacl_Streaming_Poly1305_256.h"
 #include "poly1305_vectors.h"
+#include "EverCrypt_AutoConfig2.h"
 
 typedef struct Hacl_Streaming_Poly1305_256_poly1305_256_state_s poly1305_state;
 

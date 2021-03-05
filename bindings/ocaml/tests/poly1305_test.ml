@@ -35,6 +35,6 @@ let test (v: Bytes.t poly1305_test) t mac reqs =
 let _ =
   List.iter validate_test tests;
   List.iter (fun v -> test v "Hacl.Poly1305_32" Hacl.Poly1305_32.mac []) tests;
-  List.iter (fun v -> test v "Hacl.Poly1305_128" Hacl.Poly1305_128.mac [AVX]) tests;
-  List.iter (fun v -> test v "Hacl.Poly1305_256" Hacl.Poly1305_256.mac [AVX2]) tests;
+  List.iter (fun v -> test v "Hacl.Poly1305_128" Hacl.Poly1305_128.mac [VEC128]) tests;
+  List.iter (fun v -> test v "Hacl.Poly1305_256" Hacl.Poly1305_256.mac [VEC256]) tests;
   List.iter (fun v -> test v "EverCrypt.Poly1305" EverCrypt.Poly1305.mac []) tests

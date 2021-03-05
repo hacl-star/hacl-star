@@ -1,27 +1,43 @@
 module EverCrypt.TargetConfig
 
+open FStar.HyperStack.ST
+module B = LowStar.Buffer
+
+// Those functions are called on non-x64 platforms for which the feature detection
+// is not covered by vale's CPUID support; therefore, we hand-write in C ourselves.
+// See the hand-written evercrypt_targetconfig.h for more explanations.
+val vec128_not_avx_enabled : bool
+val vec256_not_avx2_enabled : bool
+
+val has_vec128_not_avx : unit ->
+  Stack bool (requires fun _ -> True)
+  (ensures (fun h0 b h1 ->
+    B.(modifies loc_none h0 h1) /\
+    (b ==> vec128_not_avx_enabled)))
+
+val has_vec256_not_avx2 : unit ->
+  Stack bool (requires fun _ -> True)
+  (ensures (fun h0 b h1 ->
+    B.(modifies loc_none h0 h1) /\
+    (b ==> vec256_not_avx2_enabled)))
+
 /// A set of flags that are compiled in C as #if preprocessor statements. Branch
 /// on these flags to avoid generating a reference at link-time. For instance,
 /// calling CPUID is guarded by ``x64``, otherwise, compiling for an ARM
 /// target, we would get a reference in the C code to a function for which we have
 /// no implementation at link-time.
 
-[@ CIfDef ]
-inline_for_extraction
-val x64: bool
+/// Note that this file is extracted with the -no-prefix-flag, meaning the
+/// below macros don't have the EVERCRYPT_TARGETCONFIG_ prefix.
+[@@ CIfDef ]
+val evercrypt_can_compile_vale : bool
 
-[@ CIfDef ]
-inline_for_extraction
-val x86: bool
+[@@ CIfDef ]
+val evercrypt_can_compile_vec128 : bool
 
-[@ CIfDef ]
-inline_for_extraction
-val aarch32: bool
+[@@ CIfDef ]
+val evercrypt_can_compile_vec256 : bool
 
-[@ CIfDef ]
-inline_for_extraction
-val aarch64: bool
-
-[@ CIfDef ]
-inline_for_extraction
-val gcc: bool
+// Only for Curve25519 64
+[@@ CIfDef ]
+val evercrypt_can_compile_inline_asm : bool

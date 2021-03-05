@@ -9,11 +9,11 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "test_helpers.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Streaming_Blake2b_256.h"
-
-#include "test_helpers.h"
 #include "blake2_vectors.h"
+
 
 typedef struct Hacl_Streaming_Blake2b_256_blake2b_256_state_s blake2_state;
 

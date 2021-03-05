@@ -238,7 +238,7 @@ val init_cpu_flags: unit -> Stack unit
     B.modifies (fp_cpu_flags ()) h0 h1))
 
 let init_cpu_flags () =
-  if EverCrypt.TargetConfig.x64 then
+  if EverCrypt.TargetConfig.evercrypt_can_compile_vale then
     if SC.vale then begin
       init_aesni_flags ();
       init_shaext_flags ();
@@ -290,3 +290,13 @@ let disable_vale = mk_disabler user_wants_vale
 let disable_hacl = mk_disabler user_wants_hacl
 let disable_openssl = mk_disabler user_wants_openssl
 let disable_bcrypt = mk_disabler user_wants_bcrypt
+
+let has_vec128 () =
+  let avx = has_avx () in
+  let other = has_vec128_not_avx () in
+  avx || other
+
+let has_vec256 () =
+  let avx2 = has_avx2 () in
+  let other = has_vec256_not_avx2 () in
+  avx2 || other
