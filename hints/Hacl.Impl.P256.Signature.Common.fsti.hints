@@ -1,5 +1,5 @@
 [
-  "ÇîQK\u0019vä}S‰ö¥Ef®¡",
+  "\u0003ï•H~\u0005ùaUUË@‰\u0011üÏ",
   [
     [
       "Hacl.Impl.P256.Signature.Common.bufferToJac",
@@ -30,7 +30,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "251d929e84ddf02f521fce2d4b6962a8"
+      "35957415c01cb53e26b98dda51d28fb9"
     ],
     [
       "Hacl.Impl.P256.Signature.Common.isPointAtInfinityPublic",
@@ -56,7 +56,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a5afe8fc0a38841d1f8ff198a6e72b0d"
+      "b7bbceb330ab813c56e598c1178cdb0c"
     ],
     [
       "Hacl.Impl.P256.Signature.Common.isPointOnCurvePublic",
@@ -76,7 +76,9 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.Buffer.as_seq",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Spec.P256.Felem.as_nat",
+        "equation_Hacl.Spec.P256.Felem.point", "equation_Lib.Buffer.as_seq",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.gsub",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.modifies",
@@ -87,8 +89,6 @@
         "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.ECDSAP256.Definition.as_nat",
-        "equation_Spec.P256.Definitions.point",
         "equation_Spec.P256.Definitions.prime256",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
         "function_token_typing_Lib.IntTypes.uint64", "int_inversion",
@@ -97,23 +97,23 @@
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_none_r",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_b983ee9414defaa1a67e964d261f7324",
-        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "refinement_interpretation_Tm_refine_da31e89ed6e4a9e652578f49c0a1aeef",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
-        "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Prims.pow2",
+        "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_Spec.P256.Definitions.prime256",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f08c41f6bb7887cb0a49a112b8138bb6"
+      "bfac140f8c3b37c8cb35a94bc442d511"
     ],
     [
       "Hacl.Impl.P256.Signature.Common.verifyQValidCurvePoint",
@@ -171,7 +171,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "062ac15fd2cd38d8a7c58eeeb267ee78"
+      "30b666a70f4ff7d22dc56868b255a854"
     ],
     [
       "Hacl.Impl.P256.Signature.Common.verifyQ",
@@ -211,7 +211,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8c7747a86e50d113bbd8575f4aedcd30"
+      "51f00343a44ddbc39c2bece8685bf384"
     ],
     [
       "Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder",
@@ -237,7 +237,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1ffb6c0ac95436f1dd6a9cb98673233f"
+      "2d9e06d14c76c4500f83ee200612a93c"
     ]
   ]
 ]

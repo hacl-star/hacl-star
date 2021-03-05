@@ -19,6 +19,7 @@ open Hacl.Hash.SHA2
 open Spec.P256
 open Spec.P256.Lemmas
 open Spec.P256.Definitions
+open Hacl.Spec.P256.Felem
 
 open Spec.ECDSAP256.Definition
 
