@@ -171,9 +171,14 @@ EOF
   $CC $CROSS_CFLAGS -I. -march=armv8-a+simd -c $file -o /dev/null
 }
 
-# We only detect the 64-bit version of the z-architecture (s390x).
-detect_ibmz () {
+# We only detect the 64-bit version of the SystemZ architecture (s390x).
+detect_systemz () {
   [[ $target_arch == "s390x" ]]
+}
+
+# We only detect the 64-bit version of the PowerPC architecture
+detect_powerpc () {
+  [[ $target_arch == "ppc64le" ]]
 }
 
 
@@ -370,7 +375,19 @@ if detect_ibmz; then
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_SYSTEMZ" >> config.h
   echo "... $build_target supports 128-bit z VSX"
   compile_vec128=true
-  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
+  echo "CFLAGS_128 = -mzarch -mvx -mzvector -march=z13" >> Makefile.config
+fi
+
+# TODO: try to enable the intrinsics
+if detect_powerpc; then
+  echo "... detected PowerPC platform"
+  echo "... $build_target supports 128-bit Power VSX"
+  echo "TARGET_ARCHITECTURE = PowerPC64" >> Makefile.config
+  echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_POWERPC64" >> config.h
+  supports_128=true
+  echo "CFLAGS_128 = -mpowerpc64 -mabi=altivec" >> Makefile.config
+  #TODO: -mvsx -maltivec ?
+  echo "#include <stdint.h> " >> config.h
 fi
 
 if $compile_intrinsics; then
