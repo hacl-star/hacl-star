@@ -22,10 +22,14 @@ open Hacl.Impl.EC.Setup
 
 inline_for_extraction
 val supportsReducedMultiplication: #c: curve -> 
-  Tot  (r: bool {r <==> min_one_prime (pow2 64) (- getPrime c) == 1})
+  Tot  (r: bool {r ==> min_one_prime (pow2 64) (- getPrime c) == 1})
 
 let supportsReducedMultiplication #c = 
-  FStar.UInt64.eq (getLastWord #c) 0xffffffffffffffffuL
+  let open Lib.RawIntTypes in 
+  let r = FStar.UInt64.eq (Lib.RawIntTypes.u64_to_UInt64 (getLastWord #c)) 0xffffffffffffffffuL in 
+  lemma_mod_sub_distr 0 (getPrime c) (pow2 64);
+  assert_norm (exp #(pow2 64) 1 (pow2 64 - 1) == 1);
+  r
 
 
 val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> t2: widefelem c -> 

@@ -11,6 +11,63 @@ open Hacl.Spec.P256.Definition
 open Spec.P256
 open FStar.Mul
 
+noextract 
+val lst_as_nat_: a: list uint64 -> i: nat {i <= List.Tot.Base.length a} ->  
+  Tot nat (decreases List.Tot.Base.length a - i)
+
+let rec lst_as_nat_ a i = 
+  if i = List.Tot.Base.length a then 0 else
+  let a_i = List.Tot.Base.index a i in
+  lst_as_nat_ a (i + 1) + pow2 (64 * i) * v a_i
+
+val lst_as_nat: a: list uint64 -> Tot nat 
+
+let lst_as_nat a = lst_as_nat_ a 0
+
+
+val lst_as_nat_0: a: list uint64 -> Lemma (lst_as_nat_ a (List.Tot.Base.length a) = 0)
+
+let lst_as_nat_0 a = ()
+
+val lst_as_nat_definiton: a: list uint64 -> i: nat {i < List.Tot.Base.length a} ->
+  Lemma (lst_as_nat_  a i == lst_as_nat_ a (i + 1) + pow2 (64 * i) * v (List.Tot.Base.index a i))
+
+let lst_as_nat_definiton b i = ()
+
+#set-options "--z3rlimit 300 --ifuel 4 --fuel 4"
+
+val lemma_lst_1: a: list uint64 {List.Tot.Base.length a > 1} 
+  -> i: nat {i > 0 /\ i < List.Tot.Base.length a} ->
+  Lemma (lst_as_nat_ a (List.Tot.Base.length a - i) % pow2 64 == 0)
+
+open FStar.Math.Lemmas 
+
+let rec lemma_lst_1 a i = 
+  match i with 
+  |1 -> assert(i == 1);
+    lst_as_nat_definiton a (List.Tot.Base.length a - 1);
+    let index = List.Tot.Base.length a - 1 in
+    lst_as_nat_0 a;
+    lemma_mod_mul_distr_l (pow2 64 * index) (v (List.Tot.Base.index a index)) (pow2 64);
+    pow2_multiplication_modulo_lemma_1 (v (List.Tot.Base.index a index)) 64 (64 * index)
+  |_ -> 
+    let z = List.Tot.Base.length a - i in 
+    lst_as_nat_definiton a z;
+    lemma_lst_1 a (i - 1); 
+	
+    lemma_mod_add_distr (pow2 (64 * z) * v (List.Tot.Base.index a z)) (lst_as_nat_ a (z + 1)) (pow2 64);
+    pow2_multiplication_modulo_lemma_1 (v (List.Tot.Base.index a z)) 64 (64 * z)
+
+
+val lemmaLstLastWord: a: list uint64 {List.Tot.Base.length a > 1} -> Lemma
+  (v (List.Tot.Base.index a 0) == lst_as_nat a % pow2 64)
+
+let lemmaLstLastWord a = 
+  lst_as_nat_definiton a 0;
+  lst_as_nat_definiton a 1;
+  lemma_lst_1 a (List.Tot.Base.length a - 1)
+
+
 
 (* This code contains the prime code *)
 inline_for_extraction noextract
@@ -19,11 +76,13 @@ let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ (
     let l1 = uint_v (List.Tot.index x 1) in 
     let l2 = uint_v (List.Tot.index x 2) in 
     let l3 = uint_v (List.Tot.index x 3) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256)
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256) /\ 
+    lst_as_nat x == prime256
   } =
   [@inline_let]
   let x = [ (u64 0xffffffffffffffff);  (u64 0xffffffff); (u64 0);  (u64 0xffffffff00000001);] in
   assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256);
+  admit();
   x
 
 
@@ -98,12 +157,21 @@ let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {witne
   
 
 inline_for_extraction
-let getLastWord (#c: curve) : (r: uint64 {uint_v r == (getPrime c) % pow2 64}) = 
+let getLastWord (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64}) = 
   match c with 
   |P256 -> 
     begin
+      let s : uint64 = List.Tot.Base.index p256_prime_list 0 in     
+      let r : uint64 = normalize_term s in 
+      assert(   
+	let l0 = uint_v (List.Tot.index p256_prime_list 0) in 
+	let l1 = uint_v (List.Tot.index p256_prime_list 1) in 
+	let l2 = uint_v (List.Tot.index p256_prime_list 2) in 
+	let l3 = uint_v (List.Tot.index p256_prime_list 3) in 
+	l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256 /\
+      v s == l0);
       admit();
-      let r =  normalize_term (List.Tot.Base.index p256_prime_list 0) in 
+
       r
     end
   |P384 -> admit(); normalize_term (List.Tot.Base.index p384_prime_list 0)
