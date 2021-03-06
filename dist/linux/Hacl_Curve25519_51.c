@@ -24,6 +24,8 @@
 
 #include "Hacl_Curve25519_51.h"
 
+static const u8 g25519[32U] = { (u8)9U };
+
 static void point_add_and_double(u64 *q, u64 *p01_tmp1, uint128_t *tmp2)
 {
   u64 *nq = p01_tmp1;
@@ -254,7 +256,7 @@ static void encode_point(u8 *o, u64 *i)
   }
 }
 
-static void scalarmult(u8 *out, u8 *priv, u8 *pub)
+void Hacl_Curve25519_51_scalarmult(u8 *out, u8 *priv, u8 *pub)
 {
   u64 init[10U] = { 0U };
   u64 tmp[4U] = { 0U };
@@ -307,10 +309,25 @@ static void scalarmult(u8 *out, u8 *priv, u8 *pub)
   encode_point(out, init);
 }
 
+void Hacl_Curve25519_51_secret_to_public(u8 *pub, u8 *priv)
+{
+  u8 basepoint[32U] = { 0U };
+  {
+    u32 i;
+    for (i = (u32)0U; i < (u32)32U; i++)
+    {
+      u8 *os = basepoint;
+      u8 x = g25519[i];
+      os[i] = x;
+    }
+  }
+  Hacl_Curve25519_51_scalarmult(pub, priv, basepoint);
+}
+
 bool Hacl_Curve25519_51_ecdh(u8 *out, u8 *priv, u8 *pub)
 {
   u8 zeros[32U] = { 0U };
-  scalarmult(out, priv, pub);
+  Hacl_Curve25519_51_scalarmult(out, priv, pub);
   {
     u8 res = (u8)255U;
     u8 z;
