@@ -40,15 +40,21 @@ extern "C" {
 #include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Hash.h"
 
+/* SNIPPET_START: Hacl_Streaming_SHA1_state_sha1 */
+
+typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA1_state_sha1;
+
+/* SNIPPET_END: Hacl_Streaming_SHA1_state_sha1 */
+
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_create_in_sha1 */
 
-Hacl_Streaming_Functor_state_s___uint32_t____ *Hacl_Streaming_SHA1_legacy_create_in_sha1();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1();
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_create_in_sha1 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_init_sha1 */
 
-void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
+void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_init_sha1 */
 
@@ -56,7 +62,7 @@ void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_Functor_state_s___uint3
 
 void
 Hacl_Streaming_SHA1_legacy_update_sha1(
-  Hacl_Streaming_Functor_state_s___uint32_t____ *p,
+  Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,
   uint32_t len
 );
@@ -66,16 +72,13 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_finish_sha1 */
 
 void
-Hacl_Streaming_SHA1_legacy_finish_sha1(
-  Hacl_Streaming_Functor_state_s___uint32_t____ *p,
-  uint8_t *dst
-);
+Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_finish_sha1 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_free_sha1 */
 
-void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_Functor_state_s___uint32_t____ *s);
+void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_free_sha1 */
 

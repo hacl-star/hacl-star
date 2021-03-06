@@ -9,13 +9,10 @@ EXPORTS
   Hacl_Impl_Curve25519_Field51_fadd
   Hacl_Impl_Curve25519_Field51_fsub
   Hacl_Impl_Curve25519_Field51_fmul
-  Hacl_Impl_Curve25519_Field51_fmul1
   Hacl_Impl_Curve25519_Field51_fsqr
+  Hacl_Impl_Curve25519_Field51_store_felem
   Hacl_Curve25519_51_fsquare_times
   Hacl_Curve25519_51_finv
-  Hacl_Curve25519_51_scalarmult
-  Hacl_Curve25519_51_secret_to_public
-  Hacl_Curve25519_51_ecdh
   Hacl_Poly1305_32_poly1305_init
   Hacl_Poly1305_32_poly1305_update1
   Hacl_Poly1305_32_poly1305_update
@@ -35,9 +32,10 @@ EXPORTS
   Hacl_Poly1305_256_poly1305_update
   Hacl_Poly1305_256_poly1305_finish
   Hacl_Poly1305_256_poly1305_mac
+  Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64
+  Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
-  Hacl_Bignum25519_fdifference
   Hacl_Bignum25519_reduce_513
   Hacl_Bignum25519_inverse
   Hacl_Bignum25519_load_51
@@ -47,6 +45,7 @@ EXPORTS
   Hacl_Impl_Ed25519_PointCompress_point_compress
   Hacl_Impl_Ed25519_PointDecompress_point_decompress
   Hacl_Impl_Ed25519_PointEqual_point_equal
+  Hacl_Impl_Ed25519_PointNegate_point_negate
   Hacl_EC_Ed25519_mk_felem_zero
   Hacl_EC_Ed25519_mk_felem_one
   Hacl_EC_Ed25519_felem_add

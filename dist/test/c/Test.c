@@ -10129,6 +10129,30 @@ vectors2[3U] =
 
 static uint32_t vectors_len2 = (uint32_t)3U;
 
+typedef struct state_s2_s
+{
+  impl i;
+  uint8_t *iv;
+  uint32_t iv_len;
+  uint8_t *xkey;
+  uint32_t ctr;
+}
+state_s2;
+
+extern error_code
+EverCrypt_CTR_create_in(
+  cipher_alg a,
+  state_s2 **r,
+  uint8_t *dst,
+  uint8_t *k,
+  uint32_t iv,
+  uint32_t iv_len
+);
+
+extern void EverCrypt_CTR_update_block(state_s2 *a, uint8_t *p, uint8_t *dst);
+
+extern void EverCrypt_CTR_free(state_s2 *a);
+
 KRML_DEPRECATED("LowStar.Failure.failwith")
 
 static void failwith____(C_String_t s)
@@ -11763,30 +11787,6 @@ static void test_chacha20poly1305()
   }
 }
 
-typedef struct state_s2_s
-{
-  impl i;
-  uint8_t *iv;
-  uint32_t iv_len;
-  uint8_t *xkey;
-  uint32_t ctr;
-}
-state_s2;
-
-extern error_code
-EverCrypt_CTR_create_in(
-  cipher_alg a,
-  state_s2 **r,
-  uint8_t *dst,
-  uint8_t *k,
-  uint32_t iv,
-  uint32_t iv_len
-);
-
-extern void EverCrypt_CTR_update_block(state_s2 *a, uint8_t *p, uint8_t *dst);
-
-extern void EverCrypt_CTR_free(state_s2 *a);
-
 static uint8_t
 key02[16U] =
   {
@@ -12147,107 +12147,6 @@ static bool aead_iv_length32(alg al, uint32_t x)
   }
 }
 
-static bool __neq__EverCrypt_Error_error_code(error_code y, error_code x)
-{
-  switch (x)
-  {
-    case Success:
-      {
-        switch (y)
-        {
-          case Success:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case UnsupportedAlgorithm:
-      {
-        switch (y)
-        {
-          case UnsupportedAlgorithm:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case InvalidKey:
-      {
-        switch (y)
-        {
-          case InvalidKey:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case AuthenticationFailure:
-      {
-        switch (y)
-        {
-          case AuthenticationFailure:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case InvalidIVLength:
-      {
-        switch (y)
-        {
-          case InvalidIVLength:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    case DecodeError:
-      {
-        switch (y)
-        {
-          case DecodeError:
-            {
-              return false;
-            }
-          default:
-            {
-              return true;
-            }
-        }
-        break;
-      }
-    default:
-      {
-        return true;
-      }
-  }
-}
-
 static void
 test_aead_st(
   alg alg0,
@@ -12352,16 +12251,16 @@ test_aead_st(
           uint8_t *tag_1 = tag_;
           if
           (
-            __neq__EverCrypt_Error_error_code(EverCrypt_AEAD_encrypt(st1,
-                iv,
-                iv_len,
-                aad,
-                aad_len,
-                plaintext,
-                plaintext_len,
-                ciphertext_1,
-                tag_1),
-              Success)
+            EverCrypt_AEAD_encrypt(st1,
+              iv,
+              iv_len,
+              aad,
+              aad_len,
+              plaintext,
+              plaintext_len,
+              ciphertext_1,
+              tag_1)
+            != Success
           )
           {
             failwith____("Failure AEAD encrypt\n");
@@ -12429,62 +12328,6 @@ static alg alg_of_alg(cipher uu___)
   }
 }
 
-static bool __eq__Test_Vectors_cipher(cipher y, cipher x)
-{
-  switch (x)
-  {
-    case AES_128_GCM:
-      {
-        switch (y)
-        {
-          case AES_128_GCM:
-            {
-              return true;
-            }
-          default:
-            {
-              return false;
-            }
-        }
-        break;
-      }
-    case AES_256_GCM:
-      {
-        switch (y)
-        {
-          case AES_256_GCM:
-            {
-              return true;
-            }
-          default:
-            {
-              return false;
-            }
-        }
-        break;
-      }
-    case CHACHA20_POLY13050:
-      {
-        switch (y)
-        {
-          case CHACHA20_POLY13050:
-            {
-              return true;
-            }
-          default:
-            {
-              return false;
-            }
-        }
-        break;
-      }
-    default:
-      {
-        return false;
-      }
-  }
-}
-
 static void test_aead_loop(cipher alg0, lbuffer__Test_aead_vector uu___)
 {
   uint32_t len = uu___.len;
@@ -12505,7 +12348,7 @@ static void test_aead_loop(cipher alg0, lbuffer__Test_aead_vector uu___)
     uint8_t *key = v.snd.b;
     uint32_t key_len = v.snd.len;
     cipher alg1 = v.fst;
-    if (__eq__Test_Vectors_cipher(alg1, alg0))
+    if (alg1 == alg0)
     {
       test_aead_st(alg_of_alg(alg1),
         key,
@@ -12673,7 +12516,7 @@ test_ctr_st(
       memset(output_, 0U, block_len(a) * sizeof (uint8_t));
       state_s2 *s = NULL;
       error_code r = EverCrypt_CTR_create_in(a, &s, k, nonce, nonce_len, ctr);
-      if (__neq__EverCrypt_Error_error_code(r, Success))
+      if (r != Success)
       {
         failwith____("test_ctr_st: create_in <> Success");
       }

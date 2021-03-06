@@ -8,34 +8,32 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Memzero
+open Lib.Memzero0
 
 open Hacl.Impl.Matrix
-open Hacl.Impl.Frodo.Params
 
-module S = Spec.Frodo.Params
-
-#reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
-
-let bytes_mu :r:size_t{v r == S.bytes_mu} =
-  normalize_term (params_extracted_bits *! params_nbar *! params_nbar /. size 8)
-
-let crypto_publickeybytes :r:size_t{v r == S.crypto_publickeybytes} =
-  normalize_term (bytes_seed_a +! params_logq *! params_n *! params_nbar /. size 8)
-
-let crypto_secretkeybytes :r:size_t{v r == S.crypto_secretkeybytes} =
-  normalize_term (crypto_bytes +! crypto_publickeybytes +! size 2 *! params_n *! params_nbar)
-
-let crypto_ciphertextbytes :r:size_t{v r == S.crypto_ciphertextbytes} =
-  normalize_term ((params_nbar *! params_n +! params_nbar *! params_nbar) *! params_logq /. size 8 +! crypto_bytes)
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val clear_matrix:
     #n1:size_t
-  -> #n2:size_t{v n1 * v n2 <= max_size_t /\ v n1 * v n2 % 2 = 0}
+  -> #n2:size_t{v n1 * v n2 <= max_size_t}
   -> m:matrix_t n1 n2
   -> Stack unit
     (requires fun h -> live h m)
     (ensures  fun h0 _ h1 -> modifies1 m h0 h1)
+
 let clear_matrix #n1 #n2 m =
-  clear_words_u16 (n1 *! n2) m
+  memzero #uint16 m (n1 *! n2)
+
+
+inline_for_extraction noextract
+val clear_words_u8:
+    #len:size_t
+  -> b:lbytes len
+  -> Stack unit
+    (requires fun h -> live h b)
+    (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1)
+
+let clear_words_u8 #len b =
+  memzero #uint8 b len

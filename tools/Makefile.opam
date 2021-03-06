@@ -18,18 +18,14 @@ ARCHIVE=$(subst VER,$(VERSION),hacl-star.VER.tar.gz)
 all: release-hacl-star
 
 prepare-raw:
-	rm -rf raw && mkdir -p raw
-	cp -r ../dist/gcc-compatible/* raw
-	cp -r ../dist/kremlin raw
-	sed -i 's/KREMLIN_HOME ?= ..\/kremlin/KREMLIN_HOME=kremlin/g' raw/Makefile
-	make -C raw clean
-	cd raw && rm -rf lib/*.cmx lib/*.cmi lib/*.cmo lib/*.o lib_gen/*.exe lib_gen/*.cmx lib_gen/*.cmi lib_gen/*.o libocamlevercrypt.a libevercrypt.so ocamlevercrypt.* dllocamlevercrypt.so
+	rm -rf hacl-star && mkdir -p hacl-star && mkdir -p hacl-star/raw
+	cp -r ../dist/gcc-compatible/* hacl-star/raw
+	cp -r ../dist/kremlin hacl-star
+	make -C hacl-star/raw clean
+	cd hacl-star/raw && rm -rf lib/*.cmx lib/*.cmi lib/*.cmo lib/*.o lib_gen/*.exe lib_gen/*.cmx lib_gen/*.cmi lib_gen/*.o libocamlevercrypt.a libevercrypt.so ocamlevercrypt.* dllocamlevercrypt.so depend.ocaml
 
 release-hacl-star: prepare-raw
-	rm -rf hacl-star && mkdir -p hacl-star
 	cp -r ../bindings/ocaml/* hacl-star
-	rm -rf hacl-star/archive
-	mv raw hacl-star/
 	mv hacl-star/raw/hacl-star-raw.opam hacl-star/
 	sed -i 's/make/make "-C" "raw"/g' hacl-star/hacl-star-raw.opam
 	sed -i 's/"\.\/configure"/"sh" "-exc" "cd raw \&\& \.\/configure"/g' hacl-star/hacl-star-raw.opam

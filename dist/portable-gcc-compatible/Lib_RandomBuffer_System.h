@@ -41,9 +41,23 @@ extern "C" {
 
 /* SNIPPET_START: Lib_RandomBuffer_System_randombytes */
 
+KRML_DEPRECATED("random_crypto")
+
 extern bool Lib_RandomBuffer_System_randombytes(uint8_t *buf, uint32_t len);
 
 /* SNIPPET_END: Lib_RandomBuffer_System_randombytes */
+
+/* SNIPPET_START: Lib_RandomBuffer_System_entropy_p */
+
+extern void *Lib_RandomBuffer_System_entropy_p;
+
+/* SNIPPET_END: Lib_RandomBuffer_System_entropy_p */
+
+/* SNIPPET_START: Lib_RandomBuffer_System_crypto_random */
+
+extern void Lib_RandomBuffer_System_crypto_random(uint8_t *buf, uint32_t len);
+
+/* SNIPPET_END: Lib_RandomBuffer_System_crypto_random */
 
 #if defined(__cplusplus)
 }
