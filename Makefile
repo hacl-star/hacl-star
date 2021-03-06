@@ -966,7 +966,7 @@ dist/mozilla/Makefile.basic: INTRINSIC_FLAGS = \
   -add-include 'Hacl_P256:"lib_intrinsics.h"'
 dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
-dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
+dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519
 dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
