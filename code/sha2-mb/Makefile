@@ -15,6 +15,8 @@ include ../../Makefile.local
 CFLAGS += -I../../../lib/c -I../../lib/c -I ../hash/dist -march=native -mtune=native -O3
 export CFLAGS
 
+SHA2MB_BUNDLE=-bundle Hacl.Impl.SHA2.Generic=Hacl.Impl.SHA2.*,Hacl.Hash.*[rename=Hacl_SHA2_Generic] -static-header Hacl.Impl.SHA2.Generic
+
 # CUSTOMIZE HERE: how to produce binary objects
 # An archive with all the compiled code in this directory.
 dist/libsha2mb.a: dist/Makefile.basic
