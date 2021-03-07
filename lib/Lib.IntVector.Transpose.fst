@@ -27,7 +27,6 @@ let transpose4x4_0 #t (v0,v1,v2,v3) =
 inline_for_extraction
 val transpose4x4_uint32: #t:v_inttype{t == U32} -> vec_t4 t -> vec_t4 t
 let transpose4x4_uint32 #t vs =
-  [@inline_let]
   let (v0'',v2'',v1'',v3'') = transpose4x4_0 #t vs in
   (v0'',v1'',v2'',v3'')
 
@@ -92,11 +91,8 @@ inline_for_extraction
 val transpose8x8_012: #t:v_inttype -> vec_t8 t -> vec_t8 t
 let transpose8x8_012 #t vs0 =
   let (v0,v1,v2,v3,v4,v5,v6,v7) = vs0 in
-  [@inline_let]
   let (v0',v1',v2',v3',v4',v5',v6',v7') = transpose8x8_0 #t (v0,v1,v2,v3,v4,v5,v6,v7) in
-  [@inline_let]
   let (v0',v1',v2',v3',v4',v5',v6',v7') = transpose8x8_1 #t (v0',v1',v2',v3',v4',v5',v6',v7') in
-  [@inline_let]
   let (v0',v1',v2',v3',v4',v5',v6',v7') = transpose8x8_2 #t (v0',v1',v2',v3',v4',v5',v6',v7') in
   (v0',v1',v2',v3',v4',v5',v6',v7')
 
@@ -104,7 +100,6 @@ let transpose8x8_012 #t vs0 =
 inline_for_extraction
 val transpose8x8_uint32: #t:v_inttype{t == U32} -> vec_t8 t -> vec_t8 t
 let transpose8x8_uint32 #t vs0 =
-  [@inline_let]
   let (v0',v1',v2',v3',v4',v5',v6',v7') = transpose8x8_012 #t vs0 in
   (v0',v2',v1',v3',v4',v6',v5',v7')
 

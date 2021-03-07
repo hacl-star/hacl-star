@@ -85,10 +85,14 @@ val transpose4: st:state 4 ->
     (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
       as_seq h1 st == Spec.transpose4 (as_seq h0 st)))
 let transpose4 st =
-  let (v0,v1,v2,v3) = VecTranspose.transpose4x4 (st.(0ul),st.(1ul),st.(2ul),st.(3ul)) in
-  let (v4,v5,v6,v7) = VecTranspose.transpose4x4 (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
-  let (v8,v9,v10,v11) = VecTranspose.transpose4x4 (st.(8ul),st.(9ul),st.(10ul),st.(11ul)) in
-  let (v12,v13,v14,v15) = VecTranspose.transpose4x4 (st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+  let (st0, st1, st2, st3) = (st.(0ul),st.(1ul),st.(2ul),st.(3ul)) in
+  let (st4, st5, st6, st7) = (st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
+  let (st8, st9, st10, st11) = (st.(8ul),st.(9ul),st.(10ul),st.(11ul)) in
+  let (st12, st13, st14, st15) = (st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+  let (v0,v1,v2,v3) = VecTranspose.transpose4x4 (st0, st1, st2, st3) in
+  let (v4,v5,v6,v7) = VecTranspose.transpose4x4 (st4, st5, st6, st7) in
+  let (v8,v9,v10,v11) = VecTranspose.transpose4x4 (st8, st9, st10, st11) in
+  let (v12,v13,v14,v15) = VecTranspose.transpose4x4 (st12, st13, st14, st15) in
   create16 #(uint32xN 4) st v0 v4 v8 v12 v1 v5 v9 v13 v2 v6 v10 v14 v3 v7 v11 v15
 
 
@@ -99,8 +103,10 @@ val transpose8: st:state 8 ->
     (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
       as_seq h1 st == Spec.transpose8 (as_seq h0 st)))
 let transpose8 st =
-  let (v0,v1,v2,v3,v4,v5,v6,v7) = VecTranspose.transpose8x8 (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
-  let (v8,v9,v10,v11,v12,v13,v14,v15) = VecTranspose.transpose8x8 (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+  let (st0,st1,st2,st3,st4,st5,st6,st7) = (st.(0ul),st.(1ul),st.(2ul),st.(3ul),st.(4ul),st.(5ul),st.(6ul),st.(7ul)) in
+  let (st8,st9,st10,st11,st12,st13,st14,st15) = (st.(8ul),st.(9ul),st.(10ul),st.(11ul),st.(12ul),st.(13ul),st.(14ul),st.(15ul)) in
+  let (v0,v1,v2,v3,v4,v5,v6,v7) = VecTranspose.transpose8x8 (st0,st1,st2,st3,st4,st5,st6,st7) in
+  let (v8,v9,v10,v11,v12,v13,v14,v15) = VecTranspose.transpose8x8 (st8,st9,st10,st11,st12,st13,st14,st15) in
   create16 #(uint32xN 8) st v0 v8 v1 v9 v2 v10 v3 v11 v4 v12 v5 v13 v6 v14 v7 v15
 
 inline_for_extraction noextract
