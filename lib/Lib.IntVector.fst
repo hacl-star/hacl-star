@@ -256,7 +256,7 @@ let vec_gte_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
 
 let cast #t #w t' w' v = v
 
-inline_for_extraction noextract
+inline_for_extraction
 let vec_interleave_low_ (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x
@@ -287,7 +287,7 @@ let vec_interleave_low_n_lemma_uint32_8_4 v1 v2 = admit()
 let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint64_4_2 v1 v2 = admit()
 
-inline_for_extraction noextract
+inline_for_extraction
 let vec_interleave_high_ (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x

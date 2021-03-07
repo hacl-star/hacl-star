@@ -1169,7 +1169,7 @@ val map_blocks:
 	as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val create8: #a:Type0 -> st:lbuffer a 8ul
   -> v0:a -> v1:a -> v2:a -> v3:a
   -> v4:a -> v5:a -> v6:a -> v7:a ->
@@ -1179,7 +1179,7 @@ val create8: #a:Type0 -> st:lbuffer a 8ul
     as_seq h1 st == Seq.create8 v0 v1 v2 v3 v4 v5 v6 v7)
 
 
-inline_for_extraction noextract
+inline_for_extraction
 val create16: #a:Type0 -> st:lbuffer a 16ul
   -> v0:a -> v1:a -> v2:a -> v3:a
   -> v4:a -> v5:a -> v6:a -> v7:a
