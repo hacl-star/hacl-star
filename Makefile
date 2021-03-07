@@ -270,7 +270,7 @@ ifndef MAKE_RESTARTS
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector +C -C.String -C.Failure' > $@ && \
+	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer +C -C.String -C.Failure' > $@ && \
 	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
@@ -473,9 +473,6 @@ obj/%.ml:
 	    --extract_module $(subst .fst.checked,,$(notdir $<)) \
 	  ,[EXTRACT-ML] $(notdir $*),$(call to-obj-dir,$@))
 
-obj/Lib_Memzero0.ml: lib/ml/Lib_Memzero0.ml
-	cp $< $@
-
 dist/vale:
 	mkdir -p $@
 
@@ -631,6 +628,8 @@ REQUIRED_FLAGS	= \
   -no-prefix 'MerkleTree' \
   -no-prefix 'MerkleTree.EverCrypt' \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
+  -static-header 'EverCrypt.TargetConfig' \
+  -no-prefix 'EverCrypt.TargetConfig' \
   $(BASE_FLAGS)
 
 # Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
@@ -971,7 +970,7 @@ dist/mozilla/Makefile.basic: INTRINSIC_FLAGS = \
   -add-include 'Hacl_P256:"lib_intrinsics.h"'
 dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
-dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519
+dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519
 dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree

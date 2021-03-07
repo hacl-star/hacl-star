@@ -178,28 +178,7 @@ void Hacl_EC_Ed25519_mk_base_point(uint64_t *p)
 
 void Hacl_EC_Ed25519_point_negate(uint64_t *p, uint64_t *out)
 {
-  uint64_t zero[5U] = { 0U };
-  zero[0U] = (uint64_t)0U;
-  zero[1U] = (uint64_t)0U;
-  zero[2U] = (uint64_t)0U;
-  zero[3U] = (uint64_t)0U;
-  zero[4U] = (uint64_t)0U;
-  uint64_t *x = p;
-  uint64_t *y = p + (uint32_t)5U;
-  uint64_t *z = p + (uint32_t)10U;
-  uint64_t *t = p + (uint32_t)15U;
-  uint64_t *x1 = out;
-  uint64_t *y1 = out + (uint32_t)5U;
-  uint64_t *z1 = out + (uint32_t)10U;
-  uint64_t *t1 = out + (uint32_t)15U;
-  memcpy(x1, x, (uint32_t)5U * sizeof (uint64_t));
-  Hacl_Bignum25519_fdifference(x1, zero);
-  Hacl_Bignum25519_reduce_513(x1);
-  memcpy(y1, y, (uint32_t)5U * sizeof (uint64_t));
-  memcpy(z1, z, (uint32_t)5U * sizeof (uint64_t));
-  memcpy(t1, t, (uint32_t)5U * sizeof (uint64_t));
-  Hacl_Bignum25519_fdifference(t1, zero);
-  Hacl_Bignum25519_reduce_513(t1);
+  Hacl_Impl_Ed25519_PointNegate_point_negate(p, out);
 }
 
 /* SNIPPET_END: Hacl_EC_Ed25519_point_negate */
