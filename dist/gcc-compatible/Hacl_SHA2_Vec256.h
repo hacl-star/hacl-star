@@ -63,44 +63,44 @@ K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
 
 void
 Hacl_SHA2_Vec256_sha224_8(
-  uint8_t *r0,
-  uint8_t *r1,
-  uint8_t *r2,
-  uint8_t *r3,
-  uint8_t *r4,
-  uint8_t *r5,
-  uint8_t *r6,
-  uint8_t *r7,
-  uint32_t len,
-  uint8_t *b0,
-  uint8_t *b1,
-  uint8_t *b2,
-  uint8_t *b3,
-  uint8_t *b4,
-  uint8_t *b5,
-  uint8_t *b6,
-  uint8_t *b7
+  uint8_t *dst0,
+  uint8_t *dst1,
+  uint8_t *dst2,
+  uint8_t *dst3,
+  uint8_t *dst4,
+  uint8_t *dst5,
+  uint8_t *dst6,
+  uint8_t *dst7,
+  uint32_t input_len,
+  uint8_t *input0,
+  uint8_t *input1,
+  uint8_t *input2,
+  uint8_t *input3,
+  uint8_t *input4,
+  uint8_t *input5,
+  uint8_t *input6,
+  uint8_t *input7
 );
 
 void
 Hacl_SHA2_Vec256_sha256_8(
-  uint8_t *r0,
-  uint8_t *r1,
-  uint8_t *r2,
-  uint8_t *r3,
-  uint8_t *r4,
-  uint8_t *r5,
-  uint8_t *r6,
-  uint8_t *r7,
-  uint32_t len,
-  uint8_t *b0,
-  uint8_t *b1,
-  uint8_t *b2,
-  uint8_t *b3,
-  uint8_t *b4,
-  uint8_t *b5,
-  uint8_t *b6,
-  uint8_t *b7
+  uint8_t *dst0,
+  uint8_t *dst1,
+  uint8_t *dst2,
+  uint8_t *dst3,
+  uint8_t *dst4,
+  uint8_t *dst5,
+  uint8_t *dst6,
+  uint8_t *dst7,
+  uint32_t input_len,
+  uint8_t *input0,
+  uint8_t *input1,
+  uint8_t *input2,
+  uint8_t *input3,
+  uint8_t *input4,
+  uint8_t *input5,
+  uint8_t *input6,
+  uint8_t *input7
 );
 
 typedef struct
@@ -113,28 +113,28 @@ K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8
 
 void
 Hacl_SHA2_Vec256_sha384_4(
-  uint8_t *r0,
-  uint8_t *r1,
-  uint8_t *r2,
-  uint8_t *r3,
-  uint32_t len,
-  uint8_t *b0,
-  uint8_t *b1,
-  uint8_t *b2,
-  uint8_t *b3
+  uint8_t *dst0,
+  uint8_t *dst1,
+  uint8_t *dst2,
+  uint8_t *dst3,
+  uint32_t input_len,
+  uint8_t *input0,
+  uint8_t *input1,
+  uint8_t *input2,
+  uint8_t *input3
 );
 
 void
 Hacl_SHA2_Vec256_sha512_4(
-  uint8_t *r0,
-  uint8_t *r1,
-  uint8_t *r2,
-  uint8_t *r3,
-  uint32_t len,
-  uint8_t *b0,
-  uint8_t *b1,
-  uint8_t *b2,
-  uint8_t *b3
+  uint8_t *dst0,
+  uint8_t *dst1,
+  uint8_t *dst2,
+  uint8_t *dst3,
+  uint32_t input_len,
+  uint8_t *input0,
+  uint8_t *input1,
+  uint8_t *input2,
+  uint8_t *input3
 );
 
 #if defined(__cplusplus)

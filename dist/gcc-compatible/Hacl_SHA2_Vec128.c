@@ -26,7 +26,7 @@
 
 static inline void
 sha224_update4(
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ b,
+  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ block,
   Lib_IntVector_Intrinsics_vec128 *hash
 )
 {
@@ -37,10 +37,10 @@ sha224_update4(
   for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
     ws[_i] = Lib_IntVector_Intrinsics_vec128_zero;
   memcpy(hash_old, hash, (uint32_t)8U * sizeof (Lib_IntVector_Intrinsics_vec128));
-  uint8_t *b3 = b.snd.snd.snd;
-  uint8_t *b2 = b.snd.snd.fst;
-  uint8_t *b10 = b.snd.fst;
-  uint8_t *b00 = b.fst;
+  uint8_t *b3 = block.snd.snd.snd;
+  uint8_t *b2 = block.snd.snd.fst;
+  uint8_t *b10 = block.snd.fst;
+  uint8_t *b00 = block.fst;
   ws[0U] = Lib_IntVector_Intrinsics_vec128_load32_be(b00);
   ws[1U] = Lib_IntVector_Intrinsics_vec128_load32_be(b10);
   ws[2U] = Lib_IntVector_Intrinsics_vec128_load32_be(b2);
@@ -280,21 +280,21 @@ sha224_update4(
 
 void
 Hacl_SHA2_Vec128_sha224_4(
-  uint8_t *r0,
-  uint8_t *r1,
-  uint8_t *r2,
-  uint8_t *r3,
-  uint32_t len,
-  uint8_t *b0,
-  uint8_t *b1,
-  uint8_t *b2,
-  uint8_t *b3
+  uint8_t *dst0,
+  uint8_t *dst1,
+  uint8_t *dst2,
+  uint8_t *dst3,
+  uint32_t input_len,
+  uint8_t *input0,
+  uint8_t *input1,
+  uint8_t *input2,
+  uint8_t *input3
 )
 {
   K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  ib = { .fst = b0, .snd = { .fst = b1, .snd = { .fst = b2, .snd = b3 } } };
+  ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
   K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  rb = { .fst = r0, .snd = { .fst = r1, .snd = { .fst = r2, .snd = r3 } } };
+  rb = { .fst = dst0, .snd = { .fst = dst1, .snd = { .fst = dst2, .snd = dst3 } } };
   Lib_IntVector_Intrinsics_vec128 st[8U];
   for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
     st[_i] = Lib_IntVector_Intrinsics_vec128_zero;
@@ -305,32 +305,32 @@ Hacl_SHA2_Vec128_sha224_4(
     Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
     os[i] = x;
   }
-  uint32_t rem = len % (uint32_t)64U;
-  uint64_t len_ = (uint64_t)len;
-  uint32_t blocks0 = len / (uint32_t)64U;
+  uint32_t rem = input_len % (uint32_t)64U;
+  uint64_t len_ = (uint64_t)input_len;
+  uint32_t blocks0 = input_len / (uint32_t)64U;
   for (uint32_t i = (uint32_t)0U; i < blocks0; i++)
   {
-    uint8_t *b31 = ib.snd.snd.snd;
-    uint8_t *b21 = ib.snd.snd.fst;
-    uint8_t *b11 = ib.snd.fst;
-    uint8_t *b01 = ib.fst;
-    uint8_t *bl0 = b01 + i * (uint32_t)64U;
-    uint8_t *bl1 = b11 + i * (uint32_t)64U;
-    uint8_t *bl2 = b21 + i * (uint32_t)64U;
-    uint8_t *bl3 = b31 + i * (uint32_t)64U;
+    uint8_t *b3 = ib.snd.snd.snd;
+    uint8_t *b2 = ib.snd.snd.fst;
+    uint8_t *b1 = ib.snd.fst;
+    uint8_t *b0 = ib.fst;
+    uint8_t *bl0 = b0 + i * (uint32_t)64U;
+    uint8_t *bl1 = b1 + i * (uint32_t)64U;
+    uint8_t *bl2 = b2 + i * (uint32_t)64U;
+    uint8_t *bl3 = b3 + i * (uint32_t)64U;
     K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
     mb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
     sha224_update4(mb, st);
   }
-  uint32_t rem1 = len % (uint32_t)64U;
-  uint8_t *b31 = ib.snd.snd.snd;
-  uint8_t *b210 = ib.snd.snd.fst;
-  uint8_t *b110 = ib.snd.fst;
-  uint8_t *b010 = ib.fst;
-  uint8_t *bl0 = b010 + len - rem1;
-  uint8_t *bl1 = b110 + len - rem1;
-  uint8_t *bl2 = b210 + len - rem1;
-  uint8_t *bl3 = b31 + len - rem1;
+  uint32_t rem1 = input_len % (uint32_t)64U;
+  uint8_t *b3 = ib.snd.snd.snd;
+  uint8_t *b20 = ib.snd.snd.fst;
+  uint8_t *b10 = ib.snd.fst;
+  uint8_t *b00 = ib.fst;
+  uint8_t *bl0 = b00 + input_len - rem1;
+  uint8_t *bl1 = b10 + input_len - rem1;
+  uint8_t *bl2 = b20 + input_len - rem1;
+  uint8_t *bl3 = b3 + input_len - rem1;
   K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
   lb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
   uint32_t blocks;
@@ -347,15 +347,15 @@ Hacl_SHA2_Vec128_sha224_4(
   uint8_t totlen_buf[8U] = { 0U };
   uint64_t total_len_bits = len_ << (uint32_t)3U;
   store64_be(totlen_buf, total_len_bits);
-  uint8_t *b310 = lb.snd.snd.snd;
-  uint8_t *b211 = lb.snd.snd.fst;
-  uint8_t *b111 = lb.snd.fst;
-  uint8_t *b011 = lb.fst;
+  uint8_t *b30 = lb.snd.snd.snd;
+  uint8_t *b21 = lb.snd.snd.fst;
+  uint8_t *b11 = lb.snd.fst;
+  uint8_t *b01 = lb.fst;
   uint8_t *last00 = last;
   uint8_t *last10 = last + (uint32_t)128U;
   uint8_t *last2 = last + (uint32_t)256U;
   uint8_t *last3 = last + (uint32_t)384U;
-  memcpy(last00, b011, rem * sizeof (uint8_t));
+  memcpy(last00, b01, rem * sizeof (uint8_t));
   last00[rem] = (uint8_t)0x80U;
   memcpy(last00 + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last010 = last00;
@@ -363,7 +363,7 @@ Hacl_SHA2_Vec128_sha224_4(
   K____uint8_t___uint8_t_ scrut = { .fst = last010, .snd = last110 };
   uint8_t *l00 = scrut.fst;
   uint8_t *l01 = scrut.snd;
-  memcpy(last10, b111, rem * sizeof (uint8_t));
+  memcpy(last10, b11, rem * sizeof (uint8_t));
   last10[rem] = (uint8_t)0x80U;
   memcpy(last10 + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last011 = last10;
@@ -371,7 +371,7 @@ Hacl_SHA2_Vec128_sha224_4(
   K____uint8_t___uint8_t_ scrut0 = { .fst = last011, .snd = last111 };
   uint8_t *l10 = scrut0.fst;
   uint8_t *l11 = scrut0.snd;
-  memcpy(last2, b211, rem * sizeof (uint8_t));
+  memcpy(last2, b21, rem * sizeof (uint8_t));
   last2[rem] = (uint8_t)0x80U;
   memcpy(last2 + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last012 = last2;
@@ -379,7 +379,7 @@ Hacl_SHA2_Vec128_sha224_4(
   K____uint8_t___uint8_t_ scrut1 = { .fst = last012, .snd = last112 };
   uint8_t *l20 = scrut1.fst;
   uint8_t *l21 = scrut1.snd;
-  memcpy(last3, b310, rem * sizeof (uint8_t));
+  memcpy(last3, b30, rem * sizeof (uint8_t));
   last3[rem] = (uint8_t)0x80U;
   memcpy(last3 + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last01 = last3;
@@ -471,19 +471,19 @@ Hacl_SHA2_Vec128_sha224_4(
   {
     Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + i * (uint32_t)16U, st[i]);
   }
-  uint8_t *b311 = rb.snd.snd.snd;
-  uint8_t *b21 = rb.snd.snd.fst;
-  uint8_t *b11 = rb.snd.fst;
-  uint8_t *b01 = rb.fst;
-  memcpy(b01, hbuf, (uint32_t)28U * sizeof (uint8_t));
-  memcpy(b11, hbuf + (uint32_t)32U, (uint32_t)28U * sizeof (uint8_t));
-  memcpy(b21, hbuf + (uint32_t)64U, (uint32_t)28U * sizeof (uint8_t));
-  memcpy(b311, hbuf + (uint32_t)96U, (uint32_t)28U * sizeof (uint8_t));
+  uint8_t *b31 = rb.snd.snd.snd;
+  uint8_t *b2 = rb.snd.snd.fst;
+  uint8_t *b1 = rb.snd.fst;
+  uint8_t *b0 = rb.fst;
+  memcpy(b0, hbuf, (uint32_t)28U * sizeof (uint8_t));
+  memcpy(b1, hbuf + (uint32_t)32U, (uint32_t)28U * sizeof (uint8_t));
+  memcpy(b2, hbuf + (uint32_t)64U, (uint32_t)28U * sizeof (uint8_t));
+  memcpy(b31, hbuf + (uint32_t)96U, (uint32_t)28U * sizeof (uint8_t));
 }
 
 static inline void
 sha256_update4(
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ b,
+  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ block,
   Lib_IntVector_Intrinsics_vec128 *hash
 )
 {
@@ -494,10 +494,10 @@ sha256_update4(
   for (uint32_t _i = 0U; _i < (uint32_t)16U; ++_i)
     ws[_i] = Lib_IntVector_Intrinsics_vec128_zero;
   memcpy(hash_old, hash, (uint32_t)8U * sizeof (Lib_IntVector_Intrinsics_vec128));
-  uint8_t *b3 = b.snd.snd.snd;
-  uint8_t *b2 = b.snd.snd.fst;
-  uint8_t *b10 = b.snd.fst;
-  uint8_t *b00 = b.fst;
+  uint8_t *b3 = block.snd.snd.snd;
+  uint8_t *b2 = block.snd.snd.fst;
+  uint8_t *b10 = block.snd.fst;
+  uint8_t *b00 = block.fst;
   ws[0U] = Lib_IntVector_Intrinsics_vec128_load32_be(b00);
   ws[1U] = Lib_IntVector_Intrinsics_vec128_load32_be(b10);
   ws[2U] = Lib_IntVector_Intrinsics_vec128_load32_be(b2);
@@ -737,21 +737,21 @@ sha256_update4(
 
 void
 Hacl_SHA2_Vec128_sha256_4(
-  uint8_t *r0,
-  uint8_t *r1,
-  uint8_t *r2,
-  uint8_t *r3,
-  uint32_t len,
-  uint8_t *b0,
-  uint8_t *b1,
-  uint8_t *b2,
-  uint8_t *b3
+  uint8_t *dst0,
+  uint8_t *dst1,
+  uint8_t *dst2,
+  uint8_t *dst3,
+  uint32_t input_len,
+  uint8_t *input0,
+  uint8_t *input1,
+  uint8_t *input2,
+  uint8_t *input3
 )
 {
   K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  ib = { .fst = b0, .snd = { .fst = b1, .snd = { .fst = b2, .snd = b3 } } };
+  ib = { .fst = input0, .snd = { .fst = input1, .snd = { .fst = input2, .snd = input3 } } };
   K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  rb = { .fst = r0, .snd = { .fst = r1, .snd = { .fst = r2, .snd = r3 } } };
+  rb = { .fst = dst0, .snd = { .fst = dst1, .snd = { .fst = dst2, .snd = dst3 } } };
   Lib_IntVector_Intrinsics_vec128 st[8U];
   for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
     st[_i] = Lib_IntVector_Intrinsics_vec128_zero;
@@ -762,32 +762,32 @@ Hacl_SHA2_Vec128_sha256_4(
     Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
     os[i] = x;
   }
-  uint32_t rem = len % (uint32_t)64U;
-  uint64_t len_ = (uint64_t)len;
-  uint32_t blocks0 = len / (uint32_t)64U;
+  uint32_t rem = input_len % (uint32_t)64U;
+  uint64_t len_ = (uint64_t)input_len;
+  uint32_t blocks0 = input_len / (uint32_t)64U;
   for (uint32_t i = (uint32_t)0U; i < blocks0; i++)
   {
-    uint8_t *b31 = ib.snd.snd.snd;
-    uint8_t *b21 = ib.snd.snd.fst;
-    uint8_t *b11 = ib.snd.fst;
-    uint8_t *b01 = ib.fst;
-    uint8_t *bl0 = b01 + i * (uint32_t)64U;
-    uint8_t *bl1 = b11 + i * (uint32_t)64U;
-    uint8_t *bl2 = b21 + i * (uint32_t)64U;
-    uint8_t *bl3 = b31 + i * (uint32_t)64U;
+    uint8_t *b3 = ib.snd.snd.snd;
+    uint8_t *b2 = ib.snd.snd.fst;
+    uint8_t *b1 = ib.snd.fst;
+    uint8_t *b0 = ib.fst;
+    uint8_t *bl0 = b0 + i * (uint32_t)64U;
+    uint8_t *bl1 = b1 + i * (uint32_t)64U;
+    uint8_t *bl2 = b2 + i * (uint32_t)64U;
+    uint8_t *bl3 = b3 + i * (uint32_t)64U;
     K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
     mb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
     sha256_update4(mb, st);
   }
-  uint32_t rem1 = len % (uint32_t)64U;
-  uint8_t *b31 = ib.snd.snd.snd;
-  uint8_t *b210 = ib.snd.snd.fst;
-  uint8_t *b110 = ib.snd.fst;
-  uint8_t *b010 = ib.fst;
-  uint8_t *bl0 = b010 + len - rem1;
-  uint8_t *bl1 = b110 + len - rem1;
-  uint8_t *bl2 = b210 + len - rem1;
-  uint8_t *bl3 = b31 + len - rem1;
+  uint32_t rem1 = input_len % (uint32_t)64U;
+  uint8_t *b3 = ib.snd.snd.snd;
+  uint8_t *b20 = ib.snd.snd.fst;
+  uint8_t *b10 = ib.snd.fst;
+  uint8_t *b00 = ib.fst;
+  uint8_t *bl0 = b00 + input_len - rem1;
+  uint8_t *bl1 = b10 + input_len - rem1;
+  uint8_t *bl2 = b20 + input_len - rem1;
+  uint8_t *bl3 = b3 + input_len - rem1;
   K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
   lb = { .fst = bl0, .snd = { .fst = bl1, .snd = { .fst = bl2, .snd = bl3 } } };
   uint32_t blocks;
@@ -804,15 +804,15 @@ Hacl_SHA2_Vec128_sha256_4(
   uint8_t totlen_buf[8U] = { 0U };
   uint64_t total_len_bits = len_ << (uint32_t)3U;
   store64_be(totlen_buf, total_len_bits);
-  uint8_t *b310 = lb.snd.snd.snd;
-  uint8_t *b211 = lb.snd.snd.fst;
-  uint8_t *b111 = lb.snd.fst;
-  uint8_t *b011 = lb.fst;
+  uint8_t *b30 = lb.snd.snd.snd;
+  uint8_t *b21 = lb.snd.snd.fst;
+  uint8_t *b11 = lb.snd.fst;
+  uint8_t *b01 = lb.fst;
   uint8_t *last00 = last;
   uint8_t *last10 = last + (uint32_t)128U;
   uint8_t *last2 = last + (uint32_t)256U;
   uint8_t *last3 = last + (uint32_t)384U;
-  memcpy(last00, b011, rem * sizeof (uint8_t));
+  memcpy(last00, b01, rem * sizeof (uint8_t));
   last00[rem] = (uint8_t)0x80U;
   memcpy(last00 + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last010 = last00;
@@ -820,7 +820,7 @@ Hacl_SHA2_Vec128_sha256_4(
   K____uint8_t___uint8_t_ scrut = { .fst = last010, .snd = last110 };
   uint8_t *l00 = scrut.fst;
   uint8_t *l01 = scrut.snd;
-  memcpy(last10, b111, rem * sizeof (uint8_t));
+  memcpy(last10, b11, rem * sizeof (uint8_t));
   last10[rem] = (uint8_t)0x80U;
   memcpy(last10 + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last011 = last10;
@@ -828,7 +828,7 @@ Hacl_SHA2_Vec128_sha256_4(
   K____uint8_t___uint8_t_ scrut0 = { .fst = last011, .snd = last111 };
   uint8_t *l10 = scrut0.fst;
   uint8_t *l11 = scrut0.snd;
-  memcpy(last2, b211, rem * sizeof (uint8_t));
+  memcpy(last2, b21, rem * sizeof (uint8_t));
   last2[rem] = (uint8_t)0x80U;
   memcpy(last2 + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last012 = last2;
@@ -836,7 +836,7 @@ Hacl_SHA2_Vec128_sha256_4(
   K____uint8_t___uint8_t_ scrut1 = { .fst = last012, .snd = last112 };
   uint8_t *l20 = scrut1.fst;
   uint8_t *l21 = scrut1.snd;
-  memcpy(last3, b310, rem * sizeof (uint8_t));
+  memcpy(last3, b30, rem * sizeof (uint8_t));
   last3[rem] = (uint8_t)0x80U;
   memcpy(last3 + fin - (uint32_t)8U, totlen_buf, (uint32_t)8U * sizeof (uint8_t));
   uint8_t *last01 = last3;
@@ -928,13 +928,13 @@ Hacl_SHA2_Vec128_sha256_4(
   {
     Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + i * (uint32_t)16U, st[i]);
   }
-  uint8_t *b311 = rb.snd.snd.snd;
-  uint8_t *b21 = rb.snd.snd.fst;
-  uint8_t *b11 = rb.snd.fst;
-  uint8_t *b01 = rb.fst;
-  memcpy(b01, hbuf, (uint32_t)32U * sizeof (uint8_t));
-  memcpy(b11, hbuf + (uint32_t)32U, (uint32_t)32U * sizeof (uint8_t));
-  memcpy(b21, hbuf + (uint32_t)64U, (uint32_t)32U * sizeof (uint8_t));
-  memcpy(b311, hbuf + (uint32_t)96U, (uint32_t)32U * sizeof (uint8_t));
+  uint8_t *b31 = rb.snd.snd.snd;
+  uint8_t *b2 = rb.snd.snd.fst;
+  uint8_t *b1 = rb.snd.fst;
+  uint8_t *b0 = rb.fst;
+  memcpy(b0, hbuf, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(b1, hbuf + (uint32_t)32U, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(b2, hbuf + (uint32_t)64U, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(b31, hbuf + (uint32_t)96U, (uint32_t)32U * sizeof (uint8_t));
 }
 

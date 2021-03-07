@@ -43,28 +43,28 @@ extern "C" {
 
 void
 Hacl_SHA2_Vec128_sha224_4(
-  uint8_t *r0,
-  uint8_t *r1,
-  uint8_t *r2,
-  uint8_t *r3,
-  uint32_t len,
-  uint8_t *b0,
-  uint8_t *b1,
-  uint8_t *b2,
-  uint8_t *b3
+  uint8_t *dst0,
+  uint8_t *dst1,
+  uint8_t *dst2,
+  uint8_t *dst3,
+  uint32_t input_len,
+  uint8_t *input0,
+  uint8_t *input1,
+  uint8_t *input2,
+  uint8_t *input3
 );
 
 void
 Hacl_SHA2_Vec128_sha256_4(
-  uint8_t *r0,
-  uint8_t *r1,
-  uint8_t *r2,
-  uint8_t *r3,
-  uint32_t len,
-  uint8_t *b0,
-  uint8_t *b1,
-  uint8_t *b2,
-  uint8_t *b3
+  uint8_t *dst0,
+  uint8_t *dst1,
+  uint8_t *dst2,
+  uint8_t *dst3,
+  uint32_t input_len,
+  uint8_t *input0,
+  uint8_t *input1,
+  uint8_t *input2,
+  uint8_t *input3
 );
 
 #if defined(__cplusplus)
