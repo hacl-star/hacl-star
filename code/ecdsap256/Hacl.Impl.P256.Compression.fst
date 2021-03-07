@@ -208,6 +208,8 @@ let decompressionCompressedForm b result =
 	end  
       else 
 	begin 
+	  let h = ST.get () in
+	  assert (as_nat h t0 < prime);
 	  toDomain t0 t0;
 	  lemmaToDomain (as_nat h1 t0);
 	    let h2 = ST.get() in 
