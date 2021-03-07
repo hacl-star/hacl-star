@@ -22,152 +22,162 @@ module SpecVec = Hacl.Spec.SHA2.Vec
 [@CInline]
 private
 val sha224_update8: update_vec_t SHA2_224 M256
-let sha224_update8 b hash = update #SHA2_224 #M256 b hash
+let sha224_update8 block hash = update #SHA2_224 #M256 block hash
 
 
-val sha224_8 (r0 r1 r2 r3 r4 r5 r6 r7 : lbuffer uint8 28ul) (len:size_t) (b0 b1 b2 b3 b4 b5 b6 b7 : lbuffer uint8 len) :
+val sha224_8
+  (dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 : lbuffer uint8 28ul)
+  (input_len:size_t) (input0 input1 input2 input3 input4 input5 input6 input7 : lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v len <= max_input_length SHA2_224 /\
-    live8 h0 b0 b1 b2 b3 b4 b5 b6 b7 /\ live8 h0 r0 r1 r2 r3 r4 r5 r6 r7 /\ internally_disjoint8 r0 r1 r2 r3 r4 r5 r6 r7)
-  (ensures  fun h0 _ h1 -> modifies (loc r0 |+| (loc r1 |+| (loc r2 |+| (loc r3 |+| (loc r4 |+| (loc r5 |+| (loc r6 |+| loc r7))))))) h0 h1 /\
-    as_seq h1 r0 == Spec.hash SHA2_224 (as_seq h0 b0) /\
-    as_seq h1 r1 == Spec.hash SHA2_224 (as_seq h0 b1) /\
-    as_seq h1 r2 == Spec.hash SHA2_224 (as_seq h0 b2) /\
-    as_seq h1 r3 == Spec.hash SHA2_224 (as_seq h0 b3) /\
-    as_seq h1 r4 == Spec.hash SHA2_224 (as_seq h0 b4) /\
-    as_seq h1 r5 == Spec.hash SHA2_224 (as_seq h0 b5) /\
-    as_seq h1 r6 == Spec.hash SHA2_224 (as_seq h0 b6) /\
-    as_seq h1 r7 == Spec.hash SHA2_224 (as_seq h0 b7))
+  (requires fun h0 -> v input_len <= max_input_length SHA2_224 /\
+    live8 h0 input0 input1 input2 input3 input4 input5 input6 input7 /\
+    live8 h0 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 /\
+    internally_disjoint8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc dst0 |+| (loc dst1 |+| (loc dst2 |+| (loc dst3 |+| (loc dst4 |+| (loc dst5 |+| (loc dst6 |+| loc dst7))))))) h0 h1 /\
+    as_seq h1 dst0 == Spec.hash SHA2_224 (as_seq h0 input0) /\
+    as_seq h1 dst1 == Spec.hash SHA2_224 (as_seq h0 input1) /\
+    as_seq h1 dst2 == Spec.hash SHA2_224 (as_seq h0 input2) /\
+    as_seq h1 dst3 == Spec.hash SHA2_224 (as_seq h0 input3) /\
+    as_seq h1 dst4 == Spec.hash SHA2_224 (as_seq h0 input4) /\
+    as_seq h1 dst5 == Spec.hash SHA2_224 (as_seq h0 input5) /\
+    as_seq h1 dst6 == Spec.hash SHA2_224 (as_seq h0 input6) /\
+    as_seq h1 dst7 == Spec.hash SHA2_224 (as_seq h0 input7))
 
-let sha224_8 r0 r1 r2 r3 r4 r5 r6 r7 len b0 b1 b2 b3 b4 b5 b6 b7 =
-  let h0 = ST.get() in
-  let ib = ntup8 (b0,(b1,(b2,(b3,(b4,(b5,(b6,b7))))))) in
-  let rb = ntup8 (r0,(r1,(r2,(r3,(r4,(r5,(r6,r7))))))) in
+let sha224_8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 input_len input0 input1 input2 input3 input4 input5 input6 input7 =
+  let ib = ntup8 (input0,(input1,(input2,(input3,(input4,(input5,(input6,input7))))))) in
+  let rb = ntup8 (dst0,(dst1,(dst2,(dst3,(dst4,(dst5,(dst6,dst7))))))) in
   let h0 = ST.get() in
   assert (live_multi h0 ib);
   assert (live_multi h0 rb);
   assert (internally_disjoint rb);
   loc_multi8 rb;
-  hash #SHA2_224 #M256 sha224_update8 rb len ib;
+  hash #SHA2_224 #M256 sha224_update8 rb input_len ib;
   let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_224 #M256 (v len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 r0);
-  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 r1);
-  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 r2);
-  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 r3);
-  assert ((as_seq_multi h1 rb).(|4|) == as_seq h1 r4);
-  assert ((as_seq_multi h1 rb).(|5|) == as_seq h1 r5);
-  assert ((as_seq_multi h1 rb).(|6|) == as_seq h1 r6);
-  assert ((as_seq_multi h1 rb).(|7|) == as_seq h1 r7)
+  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_224 #M256 (v input_len) (as_seq_multi h0 ib);
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 dst1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 dst2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 dst3);
+  assert ((as_seq_multi h1 rb).(|4|) == as_seq h1 dst4);
+  assert ((as_seq_multi h1 rb).(|5|) == as_seq h1 dst5);
+  assert ((as_seq_multi h1 rb).(|6|) == as_seq h1 dst6);
+  assert ((as_seq_multi h1 rb).(|7|) == as_seq h1 dst7)
 
 
 
 [@CInline]
 private
 val sha256_update8: update_vec_t SHA2_256 M256
-let sha256_update8 b hash = update #SHA2_256 #M256 b hash
+let sha256_update8 block hash = update #SHA2_256 #M256 block hash
 
 
-val sha256_8 (r0 r1 r2 r3 r4 r5 r6 r7 : lbuffer uint8 32ul) (len:size_t) (b0 b1 b2 b3 b4 b5 b6 b7 : lbuffer uint8 len) :
+val sha256_8
+  (dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 : lbuffer uint8 32ul)
+  (input_len:size_t) (input0 input1 input2 input3 input4 input5 input6 input7 : lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v len <= max_input_length SHA2_256 /\
-    live8 h0 b0 b1 b2 b3 b4 b5 b6 b7 /\ live8 h0 r0 r1 r2 r3 r4 r5 r6 r7 /\ internally_disjoint8 r0 r1 r2 r3 r4 r5 r6 r7)
-  (ensures  fun h0 _ h1 -> modifies (loc r0 |+| (loc r1 |+| (loc r2 |+| (loc r3 |+| (loc r4 |+| (loc r5 |+| (loc r6 |+| loc r7))))))) h0 h1 /\
-    as_seq h1 r0 == Spec.hash SHA2_256 (as_seq h0 b0) /\
-    as_seq h1 r1 == Spec.hash SHA2_256 (as_seq h0 b1) /\
-    as_seq h1 r2 == Spec.hash SHA2_256 (as_seq h0 b2) /\
-    as_seq h1 r3 == Spec.hash SHA2_256 (as_seq h0 b3) /\
-    as_seq h1 r4 == Spec.hash SHA2_256 (as_seq h0 b4) /\
-    as_seq h1 r5 == Spec.hash SHA2_256 (as_seq h0 b5) /\
-    as_seq h1 r6 == Spec.hash SHA2_256 (as_seq h0 b6) /\
-    as_seq h1 r7 == Spec.hash SHA2_256 (as_seq h0 b7))
+  (requires fun h0 -> v input_len <= max_input_length SHA2_256 /\
+    live8 h0 input0 input1 input2 input3 input4 input5 input6 input7 /\
+    live8 h0 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 /\
+    internally_disjoint8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc dst0 |+| (loc dst1 |+| (loc dst2 |+| (loc dst3 |+| (loc dst4 |+| (loc dst5 |+| (loc dst6 |+| loc dst7))))))) h0 h1 /\
+    as_seq h1 dst0 == Spec.hash SHA2_256 (as_seq h0 input0) /\
+    as_seq h1 dst1 == Spec.hash SHA2_256 (as_seq h0 input1) /\
+    as_seq h1 dst2 == Spec.hash SHA2_256 (as_seq h0 input2) /\
+    as_seq h1 dst3 == Spec.hash SHA2_256 (as_seq h0 input3) /\
+    as_seq h1 dst4 == Spec.hash SHA2_256 (as_seq h0 input4) /\
+    as_seq h1 dst5 == Spec.hash SHA2_256 (as_seq h0 input5) /\
+    as_seq h1 dst6 == Spec.hash SHA2_256 (as_seq h0 input6) /\
+    as_seq h1 dst7 == Spec.hash SHA2_256 (as_seq h0 input7))
 
-let sha256_8 r0 r1 r2 r3 r4 r5 r6 r7 len b0 b1 b2 b3 b4 b5 b6 b7 =
-  let h0 = ST.get() in
-  let ib = ntup8 (b0,(b1,(b2,(b3,(b4,(b5,(b6,b7))))))) in
-  let rb = ntup8 (r0,(r1,(r2,(r3,(r4,(r5,(r6,r7))))))) in
+let sha256_8 dst0 dst1 dst2 dst3 dst4 dst5 dst6 dst7 input_len input0 input1 input2 input3 input4 input5 input6 input7 =
+  let ib = ntup8 (input0,(input1,(input2,(input3,(input4,(input5,(input6,input7))))))) in
+  let rb = ntup8 (dst0,(dst1,(dst2,(dst3,(dst4,(dst5,(dst6,dst7))))))) in
   let h0 = ST.get() in
   assert (live_multi h0 ib);
   assert (live_multi h0 rb);
   assert (internally_disjoint rb);
   loc_multi8 rb;
-  hash #SHA2_256 #M256 sha256_update8 rb len ib;
+  hash #SHA2_256 #M256 sha256_update8 rb input_len ib;
   let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_256 #M256 (v len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 r0);
-  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 r1);
-  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 r2);
-  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 r3);
-  assert ((as_seq_multi h1 rb).(|4|) == as_seq h1 r4);
-  assert ((as_seq_multi h1 rb).(|5|) == as_seq h1 r5);
-  assert ((as_seq_multi h1 rb).(|6|) == as_seq h1 r6);
-  assert ((as_seq_multi h1 rb).(|7|) == as_seq h1 r7)
+  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_256 #M256 (v input_len) (as_seq_multi h0 ib);
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 dst1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 dst2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 dst3);
+  assert ((as_seq_multi h1 rb).(|4|) == as_seq h1 dst4);
+  assert ((as_seq_multi h1 rb).(|5|) == as_seq h1 dst5);
+  assert ((as_seq_multi h1 rb).(|6|) == as_seq h1 dst6);
+  assert ((as_seq_multi h1 rb).(|7|) == as_seq h1 dst7)
 
 
 [@CInline]
 private
 val sha384_update4: update_vec_t SHA2_384 M256
-let sha384_update4 b hash = update #SHA2_384 #M256 b hash
+let sha384_update4 block hash = update #SHA2_384 #M256 block hash
 
 
-val sha384_4 (r0 r1 r2 r3 : lbuffer uint8 48ul) (len:size_t) (b0 b1 b2 b3 : lbuffer uint8 len) :
+val sha384_4 (dst0 dst1 dst2 dst3: lbuffer uint8 48ul) (input_len:size_t) (input0 input1 input2 input3: lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v len <= max_input_length SHA2_384 /\
-    live4 h0 b0 b1 b2 b3 /\ live4 h0 r0 r1 r2 r3 /\ internally_disjoint4 r0 r1 r2 r3)
-  (ensures  fun h0 _ h1 -> modifies (loc r0 |+| loc r1 |+| loc r2 |+| loc r3) h0 h1 /\
-    as_seq h1 r0 == Spec.hash SHA2_384 (as_seq h0 b0) /\
-    as_seq h1 r1 == Spec.hash SHA2_384 (as_seq h0 b1) /\
-    as_seq h1 r2 == Spec.hash SHA2_384 (as_seq h0 b2) /\
-    as_seq h1 r3 == Spec.hash SHA2_384 (as_seq h0 b3))
+  (requires fun h0 -> v input_len <= max_input_length SHA2_384 /\
+    live4 h0 input0 input1 input2 input3 /\
+    live4 h0 dst0 dst1 dst2 dst3 /\
+    internally_disjoint4 dst0 dst1 dst2 dst3)
+  (ensures  fun h0 _ h1 -> modifies (loc dst0 |+| loc dst1 |+| loc dst2 |+| loc dst3) h0 h1 /\
+    as_seq h1 dst0 == Spec.hash SHA2_384 (as_seq h0 input0) /\
+    as_seq h1 dst1 == Spec.hash SHA2_384 (as_seq h0 input1) /\
+    as_seq h1 dst2 == Spec.hash SHA2_384 (as_seq h0 input2) /\
+    as_seq h1 dst3 == Spec.hash SHA2_384 (as_seq h0 input3))
 
-let sha384_4 r0 r1 r2 r3 len b0 b1 b2 b3 =
-  let h0 = ST.get() in
-  let ib = ntup4 (b0,(b1,(b2,b3))) in
-  let rb = ntup4 (r0,(r1,(r2,r3))) in
+let sha384_4 dst0 dst1 dst2 dst3 input_len input0 input1 input2 input3 =
+  let ib = ntup4 (input0,(input1,(input2,input3))) in
+  let rb = ntup4 (dst0,(dst1,(dst2,dst3))) in
   let h0 = ST.get() in
   assert (live_multi h0 ib);
   assert (live_multi h0 rb);
   assert (internally_disjoint rb);
   loc_multi4 rb;
-  hash #SHA2_384 #M256 sha384_update4 rb len ib;
+  hash #SHA2_384 #M256 sha384_update4 rb input_len ib;
   let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_384 #M256 (v len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 r0);
-  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 r1);
-  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 r2);
-  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 r3)
+  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_384 #M256 (v input_len) (as_seq_multi h0 ib);
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 dst1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 dst2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 dst3)
 
 
 
 [@CInline]
 private
 val sha512_update4: update_vec_t SHA2_512 M256
-let sha512_update4 b hash = update #SHA2_512 #M256 b hash
+let sha512_update4 block hash = update #SHA2_512 #M256 block hash
 
 
-val sha512_4 (r0 r1 r2 r3 : lbuffer uint8 64ul) (len:size_t) (b0 b1 b2 b3 : lbuffer uint8 len) :
+val sha512_4 (dst0 dst1 dst2 dst3: lbuffer uint8 64ul) (input_len:size_t) (input0 input1 input2 input3: lbuffer uint8 input_len) :
   Stack unit
-  (requires fun h0 -> v len <= max_input_length SHA2_512 /\
-    live4 h0 b0 b1 b2 b3 /\ live4 h0 r0 r1 r2 r3 /\ internally_disjoint4 r0 r1 r2 r3)
-  (ensures  fun h0 _ h1 -> modifies (loc r0 |+| loc r1 |+| loc r2 |+| loc r3) h0 h1 /\
-    as_seq h1 r0 == Spec.hash SHA2_512 (as_seq h0 b0) /\
-    as_seq h1 r1 == Spec.hash SHA2_512 (as_seq h0 b1) /\
-    as_seq h1 r2 == Spec.hash SHA2_512 (as_seq h0 b2) /\
-    as_seq h1 r3 == Spec.hash SHA2_512 (as_seq h0 b3))
+  (requires fun h0 -> v input_len <= max_input_length SHA2_512 /\
+    live4 h0 input0 input1 input2 input3 /\
+    live4 h0 dst0 dst1 dst2 dst3 /\
+    internally_disjoint4 dst0 dst1 dst2 dst3)
+  (ensures  fun h0 _ h1 -> modifies (loc dst0 |+| loc dst1 |+| loc dst2 |+| loc dst3) h0 h1 /\
+    as_seq h1 dst0 == Spec.hash SHA2_512 (as_seq h0 input0) /\
+    as_seq h1 dst1 == Spec.hash SHA2_512 (as_seq h0 input1) /\
+    as_seq h1 dst2 == Spec.hash SHA2_512 (as_seq h0 input2) /\
+    as_seq h1 dst3 == Spec.hash SHA2_512 (as_seq h0 input3))
 
-let sha512_4 r0 r1 r2 r3 len b0 b1 b2 b3 =
-  let h0 = ST.get() in
-  let ib = ntup4 (b0,(b1,(b2,b3))) in
-  let rb = ntup4 (r0,(r1,(r2,r3))) in
+let sha512_4 dst0 dst1 dst2 dst3 input_len input0 input1 input2 input3 =
+  let ib = ntup4 (input0,(input1,(input2,input3))) in
+  let rb = ntup4 (dst0,(dst1,(dst2,dst3))) in
   let h0 = ST.get() in
   assert (live_multi h0 ib);
   assert (live_multi h0 rb);
   assert (internally_disjoint rb);
   loc_multi4 rb;
-  hash #SHA2_512 #M256 sha512_update4 rb len ib;
+  hash #SHA2_512 #M256 sha512_update4 rb input_len ib;
   let h1 = ST.get() in
-  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_512 #M256 (v len) (as_seq_multi h0 ib);
-  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 r0);
-  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 r1);
-  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 r2);
-  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 r3)
+  Hacl.Spec.SHA2.Equiv.hash_agile_lemma #SHA2_512 #M256 (v input_len) (as_seq_multi h0 ib);
+  assert ((as_seq_multi h1 rb).(|0|) == as_seq h1 dst0);
+  assert ((as_seq_multi h1 rb).(|1|) == as_seq h1 dst1);
+  assert ((as_seq_multi h1 rb).(|2|) == as_seq h1 dst2);
+  assert ((as_seq_multi h1 rb).(|3|) == as_seq h1 dst3)
