@@ -3,22 +3,10 @@
 
 #include <sys/types.h>
 
-// # DEBUGGING FLAGS
-// =================
-// It is possible to debug the trace of the primitives defined in
-// this file by using the [DEBUG_VECTOR_TRACE] C flag.
-// As we use the same vector types to manipulate blocks of uint32 and blocks
-// of uint64, the log results will vary with the endianess, in particular for
-// some generic operations like [and] or [xor]. By default, the printing is
-// performed as if we were manipulating blocks of uint32. If you want to
-// switch to blocks of uint64, use the flag: [DEBUG_VECTOR_TRACE_ELEMENTS_64].
-// Note that if those flags are activated, it may be necessary to tweak a bit
-// the compilation options to build HACL. More specifically, you may need to
-// always activate the compiler options to use vector support (even for files
-// which actually don't make use of vectors, if they have libintvector.h as
-// a dependency). When comparing traces, note that some instructions are not
-// compiled in the same order on the different platforms, but it doesn't lead
-// to a lot of discrepancies in practice.
+// # DEBUGGING:
+// ============
+// It is possible to debug the current definitions by using libintvector_debug.h
+// See the include at the bottom of the file.
 
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
 
@@ -963,4 +951,12 @@ Lib_IntVector_Intrinsics_vec128_store64_le(uint8_t *x0, Lib_IntVector_Intrinsics
 
 #endif // PowerPC64
 
+// DEBUGGING:
+// If libintvector_debug.h exists, use it to debug the current implementations.
+// Note that some flags must be enabled for the debugging to be effective:
+// see libintvector_debug.h for more details.
+#if __has_include("libintvector_debug.h")
+#include "libintvector_debug.h"
 #endif
+
+#endif // __Vec_Intrin_H
