@@ -384,10 +384,8 @@ if detect_powerpc; then
   echo "... $build_target supports 128-bit Power VSX"
   echo "TARGET_ARCHITECTURE = PowerPC64" >> Makefile.config
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_POWERPC64" >> config.h
-  supports_128=true
+  compile_vec128=true
   echo "CFLAGS_128 = -mpowerpc64 -mabi=altivec" >> Makefile.config
-  #TODO: -mvsx -maltivec ?
-  echo "#include <stdint.h> " >> config.h
 fi
 
 if $compile_intrinsics; then

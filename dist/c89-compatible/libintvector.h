@@ -3,22 +3,10 @@
 
 #include <sys/types.h>
 
-// # DEBUGGING FLAGS
-// =================
-// It is possible to debug the trace of the primitives defined in
-// this file by using the [DEBUG_VECTOR_TRACE] C flag.
-// As we use the same vector types to manipulate blocks of uint32 and blocks
-// of uint64, the log results will vary with the endianess, in particular for
-// some generic operations like [and] or [xor]. By default, the printing is
-// performed as if we were manipulating blocks of uint32. If you want to
-// switch to blocks of uint64, use the flag: [DEBUG_VECTOR_TRACE_ELEMENTS_64].
-// Note that if those flags are activated, it may be necessary to tweak a bit
-// the compilation options to build HACL. More specifically, you may need to
-// always activate the compiler options to use vector support (even for files
-// which actually don't make use of vectors, if they have libintvector.h as
-// a dependency). When comparing traces, note that some instructions are not
-// compiled in the same order on the different platforms, but it doesn't lead
-// to a lot of discrepancies in practice.
+// # DEBUGGING:
+// ============
+// It is possible to debug the current definitions by using libintvector_debug.h
+// See the include at the bottom of the file.
 
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
 
@@ -796,6 +784,7 @@ typedef vector128_8 vector128;
 
 #include <altivec.h>
 #include <string.h> // for memcpy
+#include <stdint.h>
 
 // The main vector 128 type
 // We can't use uint8_t, uint32_t, uint64_t... instead of unsigned char,
@@ -809,19 +798,15 @@ typedef vector128_8 Lib_IntVector_Intrinsics_vec128;
 typedef vector128_8 vector128;
 
 // Small helper to change the endianess of the vector's elements, seen as uint32.
-// Note that we can't use vec_revb.
-// TODO: for now, little endian
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
   ((vector128)(x0))
 
 // Small helper to change the endianess of the vector's elements, seen as uint64
-// Note that we can't use vec_revb.
-// TODO: for now, little endian
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0)      \
   ((vector128)(x0))
 
 static __inline__ Lib_IntVector_Intrinsics_vec128
-Lib_IntVector_Intrinsics_vec128_load32_le_(uint8_t *x) {
+Lib_IntVector_Intrinsics_vec128_load32_le(uint8_t *x) {
   // vec_ld needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   memcpy(tmp, x, 16);
@@ -830,7 +815,7 @@ Lib_IntVector_Intrinsics_vec128_load32_le_(uint8_t *x) {
 }
 
 static __inline__ Lib_IntVector_Intrinsics_vec128
-Lib_IntVector_Intrinsics_vec128_load64_le_(uint8_t *x) {
+Lib_IntVector_Intrinsics_vec128_load64_le(uint8_t *x) {
   // vec_ld needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   memcpy(tmp, x, 16);
@@ -839,7 +824,7 @@ Lib_IntVector_Intrinsics_vec128_load64_le_(uint8_t *x) {
 }
 
 static __inline__ void
-Lib_IntVector_Intrinsics_vec128_store32_le_(uint8_t *x0, Lib_IntVector_Intrinsics_vec128 x1) {
+Lib_IntVector_Intrinsics_vec128_store32_le(uint8_t *x0, Lib_IntVector_Intrinsics_vec128 x1) {
   // vec_st needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   x1 = Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x1);
@@ -848,7 +833,7 @@ Lib_IntVector_Intrinsics_vec128_store32_le_(uint8_t *x0, Lib_IntVector_Intrinsic
 }
 
 static __inline__ void
-Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsics_vec128 x1) {
+Lib_IntVector_Intrinsics_vec128_store64_le(uint8_t *x0, Lib_IntVector_Intrinsics_vec128 x1) {
   // vec_st needs the buffer to be aligned
   uint8_t tmp[16] __attribute__ ((aligned (16)));
   x1 = Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x1);
@@ -856,105 +841,105 @@ Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsic
   memcpy(x0, tmp, 16);
 }
 
-#define Lib_IntVector_Intrinsics_vec128_add32_(x0,x1)            \
+#define Lib_IntVector_Intrinsics_vec128_add32(x0,x1)            \
   ((vector128)((vector128_32)(((vector128_32)(x0)) + ((vector128_32)(x1)))))
 
-#define Lib_IntVector_Intrinsics_vec128_add64_(x0, x1)           \
+#define Lib_IntVector_Intrinsics_vec128_add64(x0, x1)           \
   ((vector128)((vector128_64)(((vector128_64)(x0)) + ((vector128_64)(x1)))))
   
-#define Lib_IntVector_Intrinsics_vec128_and_(x0, x1)             \
+#define Lib_IntVector_Intrinsics_vec128_and(x0, x1)             \
   ((vector128)(vec_and((vector128)(x0),(vector128)(x1))))
 
-#define Lib_IntVector_Intrinsics_vec128_eq32_(x0, x1)            \
+#define Lib_IntVector_Intrinsics_vec128_eq32(x0, x1)            \
   ((vector128)(vec_cmpeq(((vector128_32)(x0)),((vector128_32)(x1)))))
 
-#define Lib_IntVector_Intrinsics_vec128_eq64_(x0, x1)            \
+#define Lib_IntVector_Intrinsics_vec128_eq64(x0, x1)            \
   ((vector128)(vec_cmpeq(((vector128_64)(x0)),((vector128_64)(x1)))))
 
-#define Lib_IntVector_Intrinsics_vec128_extract32_(x0, x1)       \
+#define Lib_IntVector_Intrinsics_vec128_extract32(x0, x1)       \
   ((unsigned int)(vec_extract((vector128_32)(x0), x1)))
 
-#define Lib_IntVector_Intrinsics_vec128_extract64_(x0, x1)       \
+#define Lib_IntVector_Intrinsics_vec128_extract64(x0, x1)       \
   ((unsigned long long)(vec_extract((vector128_64)(x0), x1)))
 
-#define Lib_IntVector_Intrinsics_vec128_gt32_(x0, x1)                   \
+#define Lib_IntVector_Intrinsics_vec128_gt32(x0, x1)                   \
   ((vector128)((vector128_32)(((vector128_32)(x0)) > ((vector128_32)(x1)))))
 
-#define Lib_IntVector_Intrinsics_vec128_gt64_(x0, x1)                   \
+#define Lib_IntVector_Intrinsics_vec128_gt64(x0, x1)                   \
   ((vector128)((vector128_64)(((vector128_64)(x0)) > ((vector128_64)(x1)))))
 
-#define Lib_IntVector_Intrinsics_vec128_insert32_(x0, x1, x2)           \
+#define Lib_IntVector_Intrinsics_vec128_insert32(x0, x1, x2)           \
   ((vector128)((vector128_32)vec_insert((unsigned int)(x1), (vector128_32)(x0), x2)))
 
-#define Lib_IntVector_Intrinsics_vec128_insert64_(x0, x1, x2)           \
+#define Lib_IntVector_Intrinsics_vec128_insert64(x0, x1, x2)           \
   ((vector128)((vector128_64)vec_insert((unsigned long long)(x1), (vector128_64)(x0), x2)))
 
-#define Lib_IntVector_Intrinsics_vec128_interleave_high32_(x0, x1)      \
+#define Lib_IntVector_Intrinsics_vec128_interleave_high32(x0, x1)      \
   ((vector128)((vector128_32)vec_mergel((vector128_32)(x0), (vector128_32)(x1))))
 
-#define Lib_IntVector_Intrinsics_vec128_interleave_high64_(x0, x1)      \
+#define Lib_IntVector_Intrinsics_vec128_interleave_high64(x0, x1)      \
   ((vector128)((vector128_64)vec_mergel((vector128_64)(x0), (vector128_64)(x1))))
 
-#define Lib_IntVector_Intrinsics_vec128_interleave_low32_(x0, x1)       \
+#define Lib_IntVector_Intrinsics_vec128_interleave_low32(x0, x1)       \
   ((vector128)((vector128_32)vec_mergeh((vector128_32)(x0), (vector128_32)(x1))))
 
-#define Lib_IntVector_Intrinsics_vec128_interleave_low64_(x0, x1)       \
+#define Lib_IntVector_Intrinsics_vec128_interleave_low64(x0, x1)       \
   ((vector128)((vector128_64)vec_mergeh((vector128_64)(x0), (vector128_64)(x1))))
 
-#define Lib_IntVector_Intrinsics_vec128_load32_(x)                      \
+#define Lib_IntVector_Intrinsics_vec128_load32(x)                      \
   ((vector128)((vector128_32){(unsigned int)(x), (unsigned int)(x),     \
         (unsigned int)(x), (unsigned int)(x)}))
 
-#define Lib_IntVector_Intrinsics_vec128_load32s_(x0, x1, x2, x3) \
+#define Lib_IntVector_Intrinsics_vec128_load32s(x0, x1, x2, x3) \
   ((vector128)((vector128_32){(unsigned int)(x0),(unsigned int)(x1),(unsigned int)(x2),(unsigned int)(x3)}))
 
-#define Lib_IntVector_Intrinsics_vec128_load64_(x)                      \
+#define Lib_IntVector_Intrinsics_vec128_load64(x)                      \
   ((vector128)((vector128_64){(unsigned long long)(x),(unsigned long long)(x)}))
 
-#define Lib_IntVector_Intrinsics_vec128_lognot_(x0)                     \
+#define Lib_IntVector_Intrinsics_vec128_lognot(x0)                     \
   ((vector128)(vec_xor((vector128)(x0), (vector128)vec_splat_u32(-1))))
 
 // We need to permute the low and high components of the uint64
 // before calling vec_mule. The following helper does that.
-#define Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0)        \
+#define Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high(x0)        \
   ((vector128)(x0))
 
-#define Lib_IntVector_Intrinsics_vec128_mul64_(x0, x1)                  \
-  ((vector128)(vec_mule((vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0), \
-                        (vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x1))))
+#define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)                  \
+  ((vector128)(vec_mule((vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high(x0), \
+                        (vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high(x1))))
 
-#define Lib_IntVector_Intrinsics_vec128_or_(x0, x1)              \
+#define Lib_IntVector_Intrinsics_vec128_or(x0, x1)              \
   ((vector128)(vec_or((vector128)(x0),(vector128)(x1))))
 
-#define Lib_IntVector_Intrinsics_vec128_rotate_left32_(x0, x1)           \
+#define Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, x1)           \
   ((vector128)(vec_rl((vector128_32)(x0), (vector128_32){(unsigned int)(x1),(unsigned int)(x1),(unsigned int)(x1),(unsigned int)(x1)})))
 
-#define Lib_IntVector_Intrinsics_vec128_rotate_right32_(x0, x1)          \
-  (Lib_IntVector_Intrinsics_vec128_rotate_left32_(x0,(uint32_t)(32-(x1))))
+#define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, x1)          \
+  (Lib_IntVector_Intrinsics_vec128_rotate_left32(x0,(uint32_t)(32-(x1))))
 
-#define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_(x0, x1)    \
+#define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(x0, x1)    \
   ((vector128)(vec_perm((vector128)(x0), (vector128){}, (vector128_8){  \
         (x1%4)*4+0,(x1%4)*4+1,(x1%4)*4+2,(x1%4)*4+3,                    \
           ((x1+1)%4)*4+0,((x1+1)%4)*4+1,((x1+1)%4)*4+2,((x1+1)%4)*4+3,  \
           ((x1+2)%4)*4+0,((x1+2)%4)*4+1,((x1+2)%4)*4+2,((x1+2)%4)*4+3,  \
           ((x1+3)%4)*4+0,((x1+3)%4)*4+1,((x1+3)%4)*4+2,((x1+3)%4)*4+3})))
 
-#define Lib_IntVector_Intrinsics_vec128_shift_left64_(x0, x1)            \
+#define Lib_IntVector_Intrinsics_vec128_shift_left64(x0, x1)            \
   (((vector128)((vector128_64)vec_sl((vector128_64)(x0), (vector128_64){(unsigned long)(x1),(unsigned long)(x1)}))) & \
    ((vector128)((vector128_64){0xffffffffffffffff << (x1), 0xffffffffffffffff << (x1)})))
 
-#define Lib_IntVector_Intrinsics_vec128_shift_right64_(x0, x1)         \
+#define Lib_IntVector_Intrinsics_vec128_shift_right64(x0, x1)         \
   (((vector128)((vector128_64)vec_rl((vector128_64)(x0), (vector128_64){(unsigned long)(64-(x1)),(unsigned long)(64-(x1))}))) & \
    ((vector128)((vector128_64){0xffffffffffffffff >> (x1), 0xffffffffffffffff >> (x1)})))
 
 // Doesn't work with vec_splat_u64
-#define Lib_IntVector_Intrinsics_vec128_smul64_(x0, x1)          \
-  ((vector128)(Lib_IntVector_Intrinsics_vec128_mul64_(x0,((vector128_64){(unsigned long long)(x1),(unsigned long long)(x1)}))))
+#define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1)          \
+  ((vector128)(Lib_IntVector_Intrinsics_vec128_mul64(x0,((vector128_64){(unsigned long long)(x1),(unsigned long long)(x1)}))))
 
-#define Lib_IntVector_Intrinsics_vec128_sub64_(x0, x1)   \
+#define Lib_IntVector_Intrinsics_vec128_sub64(x0, x1)   \
   ((vector128)((vector128_64)(x0) - (vector128_64)(x1)))
 
-#define Lib_IntVector_Intrinsics_vec128_xor_(x0, x1)  \
+#define Lib_IntVector_Intrinsics_vec128_xor(x0, x1)  \
   ((vector128)(vec_xor((vector128)(x0), (vector128)(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_zero \
@@ -962,4 +947,12 @@ Lib_IntVector_Intrinsics_vec128_store64_le_(uint8_t *x0, Lib_IntVector_Intrinsic
 
 #endif // PowerPC64
 
+// DEBUGGING:
+// If libintvector_debug.h exists, use it to debug the current implementations.
+// Note that some flags must be enabled for the debugging to be effective:
+// see libintvector_debug.h for more details.
+#if __has_include("libintvector_debug.h")
+#include "libintvector_debug.h"
 #endif
+
+#endif // __Vec_Intrin_H
