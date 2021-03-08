@@ -7,6 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
+
 open FStar.Math.Lemmas
 open FStar.Mul
 
@@ -15,6 +16,7 @@ open Hacl.Impl.EC.MontgomeryMultiplication.Lemmas
 
 open Lib.Loops
 open Hacl.Impl.EC.Setup
+
 
 
 #set-options "--z3rlimit 200"
@@ -88,6 +90,18 @@ let montgomery_multiplication_round_ #c t t2 =
     montgomery_multiplication_round_k0 k0 t t2
 
 
+val montgomery_multiplication_one_round_proof: 
+  #c: curve ->
+  t: nat ->
+  k0: nat {let prime = getPrime c in k0 = min_one_prime (pow2 64) (- prime)}  ->  
+  round: nat {round = (t + getPrime c * (((t % pow2 64) * k0) % pow2 64)) / pow2 64} -> 
+  co: nat {co % getPrime c = t % getPrime c} -> 
+  Lemma (round  % getPrime c == co * (modp_inv2_prime (pow2 64) (getPrime c)) % ( getPrime c ))
+
+let montgomery_multiplication_one_round_proof #c t k0 round co = admit()
+
+
+
 val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
   Stack unit 
   (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * getPrime c /\ eq_or_disjoint t round)
@@ -99,14 +113,8 @@ val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widef
 let montgomery_multiplication_round #c t round =
   push_frame(); 
     let len = getCoordinateLenU64 c in  
-      let h0 = ST.get() in 
     let t2 = create (size 2 *! len) (u64 0) in 
-      let h1 = ST.get() in 
-    assert(as_seq h1 t2 == Seq.create (2 * v len) (u64 0));
-    assert(wide_as_nat c h1 t2 == widefelem_seq_as_nat c (Seq.create (2 * v len) (u64 0)));
-
-    assume (wide_as_nat c h0 t2 = 0);
-    admit();
+    lemma_create_zero_buffer (2 * v len) c;
     montgomery_multiplication_round_ #c t t2;
     add_long_without_carry t t2 round;
     shift1 round round; 
@@ -117,46 +125,54 @@ val montgomery_multiplication_reduction: #c: curve
   -> t: widefelem c 
   -> result: felem c -> 
   Stack unit 
-  (requires (fun h -> live h t /\ as_nat c h t < getPrime c /\ live h result)) 
+  (requires (fun h -> live h t /\ wide_as_nat c h t < getPrime c /\ live h result)) 
   (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (let prime = getPrime c in 
-    as_nat c h1 result  = (as_nat c h0 t * modp_inv2_prime (getPower2 c) prime) % prime /\
-    as_nat c h1 result = fromDomain_ #c (as_nat c h0 t)))
+    as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (getPower2 c) prime) % prime /\
+    as_nat c h1 result = fromDomain_ #c (wide_as_nat c h0 t)))
   )
 
 
 let montgomery_multiplication_reduction #c t result = 
-   let h1 = ST.get() in 
-   let len = getCoordinateLenU64 c in 
-  
+  let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c in 
+   
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
     let prime = getPrime c in 
-    live h t /\ (* wide_as_nat c h t < prime * prime /\ modifies (loc t) h0 h /\ *)
-    wide_as_nat c h t % prime = wide_as_nat c h1 t * modp_inv2 #c (pow2 (i * 64)) % prime in 
-(*
-  assert(wide_as_nat c h1 t = as_nat c h0 a + as_nat c h0 t_high * getPower2 c);
-  assert(as_nat c h0 t_high = 0);
-*)
-  lemma_inv1 (wide_as_nat c h1 t) (getPrime c);
-  lemma_mod_inv #c (wide_as_nat c h1 t);
+    live h t /\ wide_as_nat c h t < prime * prime /\ modifies (loc t) h0 h /\ 
+    wide_as_nat c h t % prime = wide_as_nat c h0 t * modp_inv2 #c (pow2 (i * 64)) % prime in 
 
-  let h3 = ST.get() in 
+  lemma_inv1 (wide_as_nat c h0 t) (getPrime c);
+  lemma_mod_inv #c (wide_as_nat c h0 t);
+
+  let h1 = ST.get() in 
+    assert (inv h1 0);
+    
   for 0ul len inv (fun i ->
     let h0_ = ST.get() in 
+
     montgomery_multiplication_round #c t t; 
     let h1_ = ST.get() in
 
-
-    let a0 = wide_as_nat c h1 t in 
+    let a0 = wide_as_nat c h0 t in 
     let a_i = wide_as_nat c h0_ t in 
     let a_il = wide_as_nat c h1_ t in 
-    montgomery_multiplication_one_round_proof_border #c (a_i % pow2 64) a_i a_il;
-    lemma_multiplication_by_inverse_w_k0 #c a0 a_i a_il (v i)
+
+    let prime = getPrime c in 
+    let k0 = min_one_prime (pow2 64) (- getPrime c) in 
+    let co = a0 * modp_inv2 #c (pow2 (v i * 64)) in 
+
+    montgomery_multiplication_one_round_proof #c a_i k0 a_il co;
+    assert(a_il % prime == a0 * modp_inv2 #c (pow2 (v i * 64)) * modp_inv2_prime (pow2 64) prime % prime);
+    lemma_multiplication_by_inverse #c a0 i;
+
+    assume (wide_as_nat c h1_ t < prime * prime)
+
   );
 
   let h2 = ST.get() in 
   
   assume (wide_as_nat c h2 t < 2 * getPrime c);
-
+  admit();
   reduction_prime_2prime_with_carry t result
 
 (*

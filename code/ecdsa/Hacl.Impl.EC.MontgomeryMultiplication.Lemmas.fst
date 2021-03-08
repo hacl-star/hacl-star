@@ -25,7 +25,7 @@ open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.Setup
 
 
-
+#set-options "--z3rlimit 200"
 
 
 
@@ -97,29 +97,30 @@ let lemma_modp_as_pow #c a =
   lemma_pow_mod_n_is_fpow prime (a % prime) (prime - 2)
 
 
-val lemma_multiplication_by_inverse_w_k0: #c: curve{(getPrime c + 1) % pow2 64 == 0} 
-  -> a0: nat -> a_i: nat {a_i < getPrime c * getPrime c} 
-  -> a_i1: nat {a_i1 = (a_i + getPrime c * (a_i % pow2 64)) / pow2 64} 
-  -> i: nat {i < uint_v (getCoordinateLenU64 c)} -> 
-  Lemma 
-    (requires (a_i % getPrime c = a0 * modp_inv2 #c (pow2 (i * 64)) % getPrime c))
-    (ensures (a_i1 % getPrime c = a0 * modp_inv2 #c (pow2 ((i + 1) * 64)) % getPrime c))
+val lemma_multiplication_by_inverse: #c: curve -> a0: nat -> i: size_t ->
+  Lemma (
+    let prime = getPrime c in 
+    a0 * modp_inv2 #c (pow2 (v i * 64)) * modp_inv2_prime (pow2 64) prime % prime = 
+    a0 * modp_inv2 #c (pow2 ((v i + 1) * 64)) % getPrime c)
 
 
-let lemma_multiplication_by_inverse_w_k0 #c a0 a_i a_i1 i = 
+let lemma_multiplication_by_inverse #c a0 i = 
   let prime = getPrime c in 
 
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
- 
-  assert_by_tactic (a0 * (modp_inv2 #c (pow2 (i * 64))) * (modp_inv2 #c (pow2 64)) == a0 * ((modp_inv2 #c (pow2 (i * 64))) * (modp_inv2 #c (pow2 64)))) canon;
- 
-  montgomery_multiplication_one_round_proof_w_ko #c a_i a_i1 (a0 * modp_inv2 #c (pow2 (i * 64)));
-  lemma_mod_mul_distr_r a0 (modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64)) prime;
 
+  calc (==) {
+      a0 * modp_inv2 #c (pow2 (v i * 64)) * modp_inv2_prime (pow2 64) prime % prime;
+      (==) {assert_by_tactic (a0 * modp_inv2 #c (pow2 (v i * 64)) * modp_inv2_prime (pow2 64) prime ==
+      a0 * (modp_inv2 #c (pow2 (v i * 64)) * modp_inv2_prime (pow2 64) prime)) canon}
+      a0 * (modp_inv2_prime (pow2 (v i * 64)) prime * modp_inv2_prime (pow2 64) prime) % prime;
+      (==) {lemma_mod_mul_distr_r a0 (modp_inv2_prime (pow2 (v i * 64)) prime * modp_inv2_prime (pow2 64) prime) prime}
+      a0 * (modp_inv2 #c (pow2 (v i * 64)) * modp_inv2 #c (pow2 64) % prime) % prime;
+  };
 
   let pow2_64 = pow2 64 in 
-
+  let i = v i in 
   calc(==)
   {
     modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c pow2_64 % prime;
@@ -141,8 +142,9 @@ let lemma_multiplication_by_inverse_w_k0 #c a0 a_i a_i1 i =
     (pow (pow2 ((i + 1) * 64) % prime) (prime - 2)) % prime; 
     (==) {lemma_modp_as_pow #c (pow2 ((i + 1) * 64))}
     modp_inv2 #c (pow2 ((i + 1) * 64)); 
-    
-    }
+  }
+
+
 
 
 val lemma_reduce_mod_ecdsa_prime:

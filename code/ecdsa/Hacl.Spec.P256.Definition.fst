@@ -249,10 +249,10 @@ let rec lemma_create_ #l i =
     lseq_as_nat_definiton #l a z
 
 
-val lemma_create_zero_buffer: len: size_nat {len > 0 /\ len < pow2 31} -> c: curve -> Lemma (
-  lseq_as_nat #(2 * len) (Seq.create (2 * len) (u64 0)) == 0)
+val lemma_create_zero_buffer: len: size_nat {len > 0} -> c: curve -> Lemma (
+  lseq_as_nat #len (Seq.create len (u64 0)) == 0)
 
-let lemma_create_zero_buffer len c = lemma_create_ #(2 * len) (2 * len)
+let lemma_create_zero_buffer len c = lemma_create_ #len len
 
 
 (*
