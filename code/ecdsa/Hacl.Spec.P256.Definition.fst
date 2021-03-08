@@ -205,13 +205,13 @@ noextract
 let felem_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c))
 
 noextract
-let widefelem_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c *. 2ul))
+let widefelem_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c *! 2ul))
 
 inline_for_extraction
 let felem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c)
 
 inline_for_extraction 
-let widefelem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 2ul)
+let widefelem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *! 2ul)
 
 
 noextract 
@@ -228,6 +228,32 @@ noextract
 val lseq_as_nat: #l: size_nat -> a: lseq uint64 l -> Tot nat
 
 let lseq_as_nat #l a = lseq_as_nat_ a 0
+
+val lseq_as_nat_definiton: #len:size_nat -> a:lseq uint64 len -> i: nat {i < Lib.Sequence.length a} ->
+  Lemma (lseq_as_nat_ #len a i == lseq_as_nat_ a (i + 1) + pow2 (64 * i) * v (Lib.Sequence.index a i))
+
+let lseq_as_nat_definiton #len b i = ()
+
+
+val lemma_create_: #l: size_nat -> i: nat {i > 0 /\ i <= l} ->
+  Lemma (let a = Seq.create l (u64 0) in lseq_as_nat_ #l a (Lib.Sequence.length a - i) == 0)
+
+let rec lemma_create_ #l i = 
+  let a = Seq.create l (u64 0) in 
+  match i with 
+  |1 -> 
+    lseq_as_nat_definiton #l a (Lib.Sequence.length a - i)
+  |_ -> 
+    let z = Lib.Sequence.length a - i in 
+    lemma_create_ #l (i - 1);
+    lseq_as_nat_definiton #l a z
+
+
+val lemma_create_zero_buffer: len: size_nat {len > 0 /\ len < pow2 31} -> c: curve -> Lemma (
+  lseq_as_nat #(2 * len) (Seq.create (2 * len) (u64 0)) == 0)
+
+let lemma_create_zero_buffer len c = lemma_create_ #(2 * len) (2 * len)
+
 
 (*
 noextract 
@@ -246,10 +272,6 @@ val widefelem_seq_as_nat_: c: curve -> a: felem_seq c -> i: nat {i <= Lib.Sequen
 let widefelem_seq_as_nat_ c a i = lseq_as_nat_ a 0
 *)
 
-val lseq_as_nat_definiton: #len:size_nat -> a:lseq uint64 len -> i: nat {i < Lib.Sequence.length a} ->
-  Lemma (lseq_as_nat_ #len a i == lseq_as_nat_ a (i + 1) + pow2 (64 * i) * v (Lib.Sequence.index a i))
-
-let lseq_as_nat_definiton #len b i = ()
 
 
 noextract
@@ -303,7 +325,7 @@ noextract
 let felem_seq_prime (c: curve) = a: felem_seq c {felem_seq_as_nat c a < getPrime c}
 
 inline_for_extraction
-type point (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *. 3ul)
+type point (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *! 3ul)
 
 type scalar (c: curve) = lbuffer uint8 (getScalarLen c)
 

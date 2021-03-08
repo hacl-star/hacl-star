@@ -70,33 +70,43 @@ let montgomery_multiplication_round_k0 #c k0 t t2 =
   pop_frame()
 
 
-
 val montgomery_multiplication_round_: #c: curve -> t: widefelem c -> t2: widefelem c -> 
   Stack unit
-    (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
-    (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
-      wide_as_nat c h1 t2 < getPower2 c * pow2 64 /\
-      wide_as_nat c h1 t2 = getPrime c * (wide_as_nat c h0 t % pow2 64))
+  (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
+  (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
+    wide_as_nat c h1 t2 < getPower2 c * pow2 64 /\ (
+    let k0 = min_one_prime (pow2 64) (- getPrime c) in 
+    wide_as_nat c h1 t2 = getPrime c * (((wide_as_nat c h0 t % pow2 64) * k0) % pow2 64))
+  )
 
 let montgomery_multiplication_round_ #c t t2 = 
   match supportsReducedMultiplication #c with   
   |true -> montgomery_multiplication_round_w_k0 t t2
   |false -> 
+    let h0 = ST.get() in 
     let k0 = getK0 c in 
     montgomery_multiplication_round_k0 k0 t t2
 
 
 val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
   Stack unit 
-  (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * getPrime c /\
-    eq_or_disjoint t round)
-  (ensures fun h0 _ h1 -> modifies (loc round)  h0 h1 /\
-    wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * (wide_as_nat c h0 t % pow2 64)) / pow2 64)
+  (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * getPrime c /\ eq_or_disjoint t round)
+  (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\ (
+    let k0 = min_one_prime (pow2 64) (- getPrime c) in
+    wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * (((wide_as_nat c h0 t % pow2 64) * k0) % pow2 64)) / pow2 64)
+  )
 
 let montgomery_multiplication_round #c t round =
   push_frame(); 
     let len = getCoordinateLenU64 c in  
+      let h0 = ST.get() in 
     let t2 = create (size 2 *! len) (u64 0) in 
+      let h1 = ST.get() in 
+    assert(as_seq h1 t2 == Seq.create (2 * v len) (u64 0));
+    assert(wide_as_nat c h1 t2 == widefelem_seq_as_nat c (Seq.create (2 * v len) (u64 0)));
+
+    assume (wide_as_nat c h0 t2 = 0);
+    admit();
     montgomery_multiplication_round_ #c t t2;
     add_long_without_carry t t2 round;
     shift1 round round; 

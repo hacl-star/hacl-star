@@ -2092,7 +2092,8 @@ static void montgomery_multiplication_round_(Spec_P256_curve c, uint64_t *t, uin
         sw = KRML_EABORT(uint64_t, "");
       }
   }
-  if (sw == (uint64_t)0xffffffffffffffffU)
+  bool r = sw == (uint64_t)0xffffffffffffffffU;
+  if (r)
   {
     montgomery_multiplication_round_w_k0(c, t, t2);
     return;

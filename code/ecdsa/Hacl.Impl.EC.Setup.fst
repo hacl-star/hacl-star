@@ -36,8 +36,7 @@ let lst_as_nat_definiton b i = ()
 
 #set-options "--z3rlimit 100"
 
-val lemma_lst_1: a: list uint64 {List.Tot.Base.length a > 1} 
-  -> i: nat {i > 0 /\ i < List.Tot.Base.length a} ->
+val lemma_lst_1: a: list uint64 -> i: nat {i > 0 /\ i < List.Tot.Base.length a} ->
   Lemma (lst_as_nat_ a (List.Tot.Base.length a - i) % pow2 64 == 0)
 
 open FStar.Math.Lemmas 
@@ -62,10 +61,7 @@ let rec lemma_lst_1 a i =
 val lemmaLstLastWord: a: list uint64 {List.Tot.Base.length a > 1} -> Lemma
   (v (List.Tot.Base.index a 0) == lst_as_nat a % pow2 64)
 
-let lemmaLstLastWord a = 
-  lst_as_nat_definiton a 0;
-  lst_as_nat_definiton a 1;
-  lemma_lst_1 a (List.Tot.Base.length a - 1)
+let lemmaLstLastWord a = lemma_lst_1 a (List.Tot.Base.length a - 1)
 
 
 
@@ -280,13 +276,10 @@ val get_prime_inverse_buffer: #c: curve ->
 
 
 
-
-
 val getK0: c: curve -> Stack (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)})
   (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
+  (ensures fun h0 r h1 -> v r == min_one_prime (pow2 64) (- getPrime c) /\ modifies0 h0 h1)
 
-(* let getKo (c: curve) : Stack (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)}) =  *)
 let getK0 c = 
   match c with 
   |P256 -> 
@@ -296,10 +289,10 @@ let getK0 c =
     assert_norm (min_one_prime (pow2 64) (- getPrime P384) == 4294967297);
     (u64 4294967297)
   |Default -> 
+    admit();
     let i0 = index (prime_buffer #c) (size 0) in 
     let negI0 = (u64 0) -. i0 in 
     Hacl.Bignum.ModInv64.mod_inv_u64 negI0
-  (* |_ -> (u64 1) *)
 
 
 
