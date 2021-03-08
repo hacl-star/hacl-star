@@ -17,7 +17,7 @@ open Lib.Loops
 open Hacl.Impl.EC.Setup
 
 
-#set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
+#set-options "--z3rlimit 200"
 
 
 inline_for_extraction
@@ -43,6 +43,7 @@ let montgomery_multiplication_round_w_k0 #c t t2 =
   let t1 = mod64 t in 
   recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
   short_mul_bn (prime_buffer #c) t1 t2
+
 
 val montgomery_multiplication_round_k0: #c: curve -> k0: uint64 -> t: widefelem c -> 
   t2: widefelem c -> 

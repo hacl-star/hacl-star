@@ -289,23 +289,7 @@ let as_nat (c: curve) (h:mem) (e:felem c) : GTot nat = lseq_as_nat (as_seq h e)
 
 noextract
 let as_nat_il (c: curve) (h:mem) (e:glbuffer uint64 (getCoordinateLenU64 c)) : GTot nat =
-  match c with 
-  |P256 -> 
-    let s = as_seq h e in
-    let s0 = s.[0] in
-    let s1 = s.[1] in
-    let s2 = s.[2] in
-    let s3 = s.[3] in
-    as_nat_coordinate (s0, s1, s2, s3)
-  |P384 ->     
-    let s = as_seq h e in
-    let s0 = s.[0] in
-    let s1 = s.[1] in
-    let s2 = s.[2] in
-    let s3 = s.[3] in
-    let s4 = s.[4] in 
-    let s5 = s.[5] in 
-    as_nat_coordinate (s0, s1, s2, s3, s4, s5)
+  lseq_as_nat (as_seq h e)
 
 
 noextract

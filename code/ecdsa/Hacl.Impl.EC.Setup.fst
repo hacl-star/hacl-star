@@ -34,7 +34,7 @@ val lst_as_nat_definiton: a: list uint64 -> i: nat {i < List.Tot.Base.length a} 
 
 let lst_as_nat_definiton b i = ()
 
-#set-options "--z3rlimit 300 --ifuel 4 --fuel 4"
+#set-options "--z3rlimit 100"
 
 val lemma_lst_1: a: list uint64 {List.Tot.Base.length a > 1} 
   -> i: nat {i > 0 /\ i < List.Tot.Base.length a} ->
@@ -71,32 +71,33 @@ let lemmaLstLastWord a =
 
 (* This code contains the prime code *)
 inline_for_extraction noextract
-let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ (
+let p256_prime_list : x:list uint64{List.Tot.length x == 4 (*/\ (
     let l0 = uint_v (List.Tot.index x 0) in 
     let l1 = uint_v (List.Tot.index x 1) in 
     let l2 = uint_v (List.Tot.index x 2) in 
     let l3 = uint_v (List.Tot.index x 3) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256) /\ 
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256) *) /\ 
     lst_as_nat x == prime256
   } =
   [@inline_let]
   let x = [ (u64 0xffffffffffffffff);  (u64 0xffffffff); (u64 0);  (u64 0xffffffff00000001);] in
   assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256);
-  admit();
   x
 
 
 inline_for_extraction noextract
 let p384_prime_list : x:list uint64{List.Tot.length x == 6 /\ 
   (
-    let open FStar.Mul in 
     let l0 = uint_v (List.Tot.index x 0) in 
     let l1 = uint_v (List.Tot.index x 1) in 
     let l2 = uint_v (List.Tot.index x 2) in 
     let l3 = uint_v (List.Tot.index x 3) in 
     let l4 = uint_v (List.Tot.index x 4) in 
     let l5 = uint_v (List.Tot.index x 5) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 + l4 * pow2 256 + l5 * pow2 320 == prime384)
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 + l4 * pow2 256 + l5 * pow2 320 == prime384 /\
+    lst_as_nat x == prime384
+    
+    )
   } =
   let open FStar.Mul in 
   [@inline_let]
@@ -105,6 +106,7 @@ let p384_prime_list : x:list uint64{List.Tot.length x == 6 /\
     assert_norm(0xffffffff + 0xffffffff00000000 * pow2 64 + 0xfffffffffffffffe * pow2 128 + 
     0xffffffffffffffff * pow2 192 +  0xffffffffffffffff * pow2 256 +  0xffffffffffffffff * pow2 320 == prime384);
   x
+
 
 inline_for_extraction noextract
 let prime_list (c: curve) :  (x: list uint64 {List.Tot.length x == uint_v (getCoordinateLenU64 c) /\ (
@@ -160,21 +162,11 @@ inline_for_extraction
 let getLastWord (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64}) = 
   match c with 
   |P256 -> 
-    begin
-      let s : uint64 = List.Tot.Base.index p256_prime_list 0 in     
-      let r : uint64 = normalize_term s in 
-      assert(   
-	let l0 = uint_v (List.Tot.index p256_prime_list 0) in 
-	let l1 = uint_v (List.Tot.index p256_prime_list 1) in 
-	let l2 = uint_v (List.Tot.index p256_prime_list 2) in 
-	let l3 = uint_v (List.Tot.index p256_prime_list 3) in 
-	l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256 /\
-      v s == l0);
-      admit();
-
-      r
-    end
-  |P384 -> admit(); normalize_term (List.Tot.Base.index p384_prime_list 0)
+    lemmaLstLastWord p256_prime_list;
+    normalize_term (List.Tot.Base.index p256_prime_list 0)
+  |P384 -> 
+    lemmaLstLastWord p384_prime_list;
+    normalize_term (List.Tot.Base.index p384_prime_list 0)
   |_ -> admit()
   
 
