@@ -36,10 +36,6 @@ static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__s390x__) || defined(__powerpc64__)
 
-#if defined(__powerpc64__)
-#include <sys/platform/ppc.h>
-#endif
-
 typedef uint64_t cycles;
 
 static __inline__ cycles cpucycles_get(void)
@@ -59,7 +55,7 @@ static __inline__ cycles cpucycles_get(void)
 
 #elif defined(__powerpc64__)
 
-  return __ppc_get_timebase();
+  return clock();
 
 #else
 
