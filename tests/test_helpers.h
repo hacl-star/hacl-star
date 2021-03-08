@@ -36,6 +36,7 @@ static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
 
 #if defined(__x86_64__) || defined(_M_X64) || defined(__s390x__) || defined(__powerpc64__)
 
+// For __ppc_get_timebase - note used for now: see below comment
 #if defined(__powerpc64__)
 #include <sys/platform/ppc.h>
 #endif
@@ -59,7 +60,19 @@ static __inline__ cycles cpucycles_get(void)
 
 #elif defined(__powerpc64__)
 
-  return __ppc_get_timebase();
+  // Computing the CPU cycles for PowerPC is non-trivial.
+  // A possibility is to use the __ppc_get_timebase() function. However, this
+  // doesn't give the number of cpu cycles, but the current timebase, which
+  // is independent from the CPU frequency and is meant to be converted to
+  // seconds. It is possible to retrieve the time base increments per
+  // cycle by doing something similar to this:
+  // https://scm.gforge.inria.fr/anonscm/svn/cfs-signature/trunk/cpucycles-20060326/powerpclinux.c
+  // which exploits the fact that the "/proc/cpuinfo" file contains the CPU
+  // frequencies (you thus need to count how many time base increments happened
+  // in, say, one second).
+  // We don't do it for now because it is a bit tricky, we don't really
+  // need it for now, and it requires an init() function.
+  return 0; 
 
 #else
 
