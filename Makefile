@@ -1134,6 +1134,9 @@ CFLAGS += -Wall -Wextra -g \
   -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I$(KREMLIN_HOME)/include -Idist/gcc-compatible
 
+dist/test/c/%.o: compile-gcc-compatible
+	@
+
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
 .PRECIOUS: %.exe
