@@ -1136,13 +1136,14 @@ CFLAGS += -Wall -Wextra -g \
 
 # The C test files need the extracted headers to compile
 dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
-	$(CC) $(CFLAGS) $< -o $@
+	$(call run-with-log,\
+	  $(CC) $(CFLAGS) $< -c -o $@,[CC $*],$(call to-obj-dir,$@))
 
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
+# Linking with full kremlib since tests may use TestLib, etc.
 .PRECIOUS: %.exe
 %.exe: %.o | compile-gcc-compatible
-	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
 	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
 	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
