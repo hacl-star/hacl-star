@@ -72,6 +72,13 @@ static __inline__ cycles cpucycles_get(void)
   // in, say, one second).
   // We don't do it for now because it is a bit tricky, we don't really
   // need it for now, and it requires an init() function.
+  // 
+  // If you're interested in computing the number of time base increments
+  // per byte, you can uncomment the following line:
+  // return __ppc_get_timebase();
+  // By then doing [cat /proc/cpuinfo | grep "MHz"], you can retrieve the
+  // CPU frequency (one line per logical CPU). With the additional information
+  // printed by the benchmarks, you can compute the cycles per processed byte.
   return 0; 
 
 #else
@@ -92,7 +99,7 @@ static __inline__ cycles cpucycles_end(void)
   return cpucycles_get();
 }
 
-#endif // __x86_64__ || _M_X64 || __s390x__
+#endif // __x86_64__ || _M_X64 || __s390x__ || __powerpc64__
 
 static inline void print_time(uint64_t count, clock_t tdiff, uint64_t cdiff){
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
