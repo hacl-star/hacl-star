@@ -78,11 +78,6 @@ Lib_IntVector_Intrinsics_vec128_load32_le_debug(const uint8_t *x0) {
   print_vector128_32("res", res);
   return res;
 }
-#ifdef Lib_IntVector_Intrinsics_vec128_load32_le
-#undef Lib_IntVector_Intrinsics_vec128_load32_le
-#endif
-#define Lib_IntVector_Intrinsics_vec128_load32_le(x0) \
-  Lib_IntVector_Intrinsics_vec128_load32_le_debug(x0)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_load64_le_debug(const uint8_t *x0) {
@@ -93,11 +88,6 @@ Lib_IntVector_Intrinsics_vec128_load64_le_debug(const uint8_t *x0) {
   print_vector128_64("res", res);
   return res;
 }
-#ifdef Lib_IntVector_Intrinsics_vec128_load64_le
-#undef Lib_IntVector_Intrinsics_vec128_load64_le
-#endif
-#define Lib_IntVector_Intrinsics_vec128_load64_le(x0) \
-  Lib_IntVector_Intrinsics_vec128_load64_le_debug(x0)
 
 static inline void
 Lib_IntVector_Intrinsics_vec128_store32_le_debug(const uint8_t *x0,
@@ -107,11 +97,6 @@ Lib_IntVector_Intrinsics_vec128_store32_le_debug(const uint8_t *x0,
   Lib_IntVector_Intrinsics_vec128_store32_le(x0, x1);
   print_debug_buf8("res", x0);
 }
-#ifdef Lib_IntVector_Intrinsics_vec128_store32_le
-#undef Lib_IntVector_Intrinsics_vec128_store32_le
-#endif
-#define Lib_IntVector_Intrinsics_vec128_store32_le(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_store32_le_debug(x0, x1)
 
 static inline void
 Lib_IntVector_Intrinsics_vec128_store64_le_debug(const uint8_t *x0,
@@ -121,11 +106,6 @@ Lib_IntVector_Intrinsics_vec128_store64_le_debug(const uint8_t *x0,
   Lib_IntVector_Intrinsics_vec128_store64_le(x0, x1);
   print_debug_buf8("res", x0);
 }
-#ifdef Lib_IntVector_Intrinsics_vec128_store64_le
-#undef Lib_IntVector_Intrinsics_vec128_store64_le
-#endif
-#define Lib_IntVector_Intrinsics_vec128_store64_le(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_store64_le_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_add32_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -137,9 +117,6 @@ Lib_IntVector_Intrinsics_vec128_add32_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_add32
-#define Lib_IntVector_Intrinsics_vec128_add32(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_add32_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_add64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -151,9 +128,6 @@ Lib_IntVector_Intrinsics_vec128_add64_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_add64
-#define Lib_IntVector_Intrinsics_vec128_add64(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_add64_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_xor_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -165,9 +139,6 @@ Lib_IntVector_Intrinsics_vec128_xor_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_xor
-#define Lib_IntVector_Intrinsics_vec128_xor(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_xor_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_and_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -179,9 +150,6 @@ Lib_IntVector_Intrinsics_vec128_and_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_unkwn("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_and
-#define Lib_IntVector_Intrinsics_vec128_and(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_and_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_eq32_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -193,9 +161,6 @@ Lib_IntVector_Intrinsics_vec128_eq32_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_eq32
-#define Lib_IntVector_Intrinsics_vec128_eq32(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_eq32_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_eq64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -207,9 +172,6 @@ Lib_IntVector_Intrinsics_vec128_eq64_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_eq64
-#define Lib_IntVector_Intrinsics_vec128_eq64(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_eq64_debug(x0, x1)
 
 static inline uint32_t
 Lib_IntVector_Intrinsics_vec128_extract32_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -231,9 +193,6 @@ Lib_IntVector_Intrinsics_vec128_extract32_debug(Lib_IntVector_Intrinsics_vec128 
   print_debug_uint32_t("res", res);
   return res;
 }
-#undef Lib_IntVector_Intrinsics_vec128_extract32
-#define Lib_IntVector_Intrinsics_vec128_extract32(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_extract32_debug(x0, x1)
 
 static inline uint64_t
 Lib_IntVector_Intrinsics_vec128_extract64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -253,9 +212,6 @@ Lib_IntVector_Intrinsics_vec128_extract64_debug(Lib_IntVector_Intrinsics_vec128 
   print_debug_uint64_t("res", res);
   return res;
 }
-#undef Lib_IntVector_Intrinsics_vec128_extract64
-#define Lib_IntVector_Intrinsics_vec128_extract64(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_extract64_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_gt32_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -267,9 +223,6 @@ Lib_IntVector_Intrinsics_vec128_gt32_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_gt32
-#define Lib_IntVector_Intrinsics_vec128_gt32(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_gt32_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_gt64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -281,9 +234,6 @@ Lib_IntVector_Intrinsics_vec128_gt64_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_gt64
-#define Lib_IntVector_Intrinsics_vec128_gt64(x0, x1) \
-  Lib_IntVector_Intrinsics_vec128_gt64_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_insert32_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -306,9 +256,6 @@ Lib_IntVector_Intrinsics_vec128_insert32_debug(Lib_IntVector_Intrinsics_vec128 x
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_insert32
-#define Lib_IntVector_Intrinsics_vec128_insert32(x0, x1, x2)       \
-  Lib_IntVector_Intrinsics_vec128_insert32_debug(x0, x1, x2)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_insert64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -329,9 +276,6 @@ Lib_IntVector_Intrinsics_vec128_insert64_debug(Lib_IntVector_Intrinsics_vec128 x
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_insert64
-#define Lib_IntVector_Intrinsics_vec128_insert64(x0, x1, x2)       \
-  Lib_IntVector_Intrinsics_vec128_insert64_debug(x0, x1, x2)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_interleave_high32_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -343,9 +287,6 @@ Lib_IntVector_Intrinsics_vec128_interleave_high32_debug(Lib_IntVector_Intrinsics
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_interleave_high32
-#define Lib_IntVector_Intrinsics_vec128_interleave_high32(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_interleave_high32_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_interleave_high64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -357,9 +298,6 @@ Lib_IntVector_Intrinsics_vec128_interleave_high64_debug(Lib_IntVector_Intrinsics
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_interleave_high64
-#define Lib_IntVector_Intrinsics_vec128_interleave_high64(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_interleave_high64_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_interleave_low32_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -371,9 +309,6 @@ Lib_IntVector_Intrinsics_vec128_interleave_low32_debug(Lib_IntVector_Intrinsics_
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_interleave_low32
-#define Lib_IntVector_Intrinsics_vec128_interleave_low32(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_interleave_low32_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_interleave_low64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -385,9 +320,6 @@ Lib_IntVector_Intrinsics_vec128_interleave_low64_debug(Lib_IntVector_Intrinsics_
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_interleave_low64
-#define Lib_IntVector_Intrinsics_vec128_interleave_low64(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_interleave_low64_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_load32_debug(uint32_t x0) {
@@ -398,9 +330,6 @@ Lib_IntVector_Intrinsics_vec128_load32_debug(uint32_t x0) {
   print_vector128_32("res", res);
   return res;
 }
-#undef Lib_IntVector_Intrinsics_vec128_load32
-#define Lib_IntVector_Intrinsics_vec128_load32(x0)      \
-  Lib_IntVector_Intrinsics_vec128_load32_debug(x0)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_load32s_debug(uint32_t x0, uint32_t x1,
@@ -415,9 +344,6 @@ Lib_IntVector_Intrinsics_vec128_load32s_debug(uint32_t x0, uint32_t x1,
   print_vector128_32("res", res);
   return res;
 }
-#undef Lib_IntVector_Intrinsics_vec128_load32s
-#define Lib_IntVector_Intrinsics_vec128_load32s(x0, x1, x2, x3)    \
-  Lib_IntVector_Intrinsics_vec128_load32s_debug(x0, x1, x2, x3)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_load64_debug(uint64_t x0) {
@@ -428,9 +354,6 @@ Lib_IntVector_Intrinsics_vec128_load64_debug(uint64_t x0) {
   print_vector128_64("res", res);
   return res;
 }
-#undef Lib_IntVector_Intrinsics_vec128_load64
-#define Lib_IntVector_Intrinsics_vec128_load64(x0)       \
-  Lib_IntVector_Intrinsics_vec128_load64_debug(x0)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_lognot_debug(Lib_IntVector_Intrinsics_vec128 x0) {
@@ -440,9 +363,6 @@ Lib_IntVector_Intrinsics_vec128_lognot_debug(Lib_IntVector_Intrinsics_vec128 x0)
   print_vector128_unkwn("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_lognot
-#define Lib_IntVector_Intrinsics_vec128_lognot(x0)       \
-  Lib_IntVector_Intrinsics_vec128_lognot_debug(x0)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_mul64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -454,9 +374,6 @@ Lib_IntVector_Intrinsics_vec128_mul64_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_mul64
-#define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_mul64_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_or_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -468,9 +385,6 @@ Lib_IntVector_Intrinsics_vec128_or_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_unkwn("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_or
-#define Lib_IntVector_Intrinsics_vec128_or(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_or_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_rotate_left32_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -482,9 +396,6 @@ Lib_IntVector_Intrinsics_vec128_rotate_left32_debug(Lib_IntVector_Intrinsics_vec
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_rotate_left32
-#define Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_rotate_left32_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_rotate_right32_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -496,9 +407,6 @@ Lib_IntVector_Intrinsics_vec128_rotate_right32_debug(Lib_IntVector_Intrinsics_ve
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_rotate_right32
-#define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_rotate_right32_debug(x0, x1)
 
 // The shift value must be a constant. In practice, is always 1, 2 or 3
 static inline Lib_IntVector_Intrinsics_vec128
@@ -519,9 +427,6 @@ Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_debug(Lib_IntVector_Intrins
   print_vector128_32("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32
-#define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_shift_left64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -533,9 +438,6 @@ Lib_IntVector_Intrinsics_vec128_shift_left64_debug(Lib_IntVector_Intrinsics_vec1
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_shift_left64
-#define Lib_IntVector_Intrinsics_vec128_shift_left64(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_shift_left64_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_shift_right64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -547,9 +449,6 @@ Lib_IntVector_Intrinsics_vec128_shift_right64_debug(Lib_IntVector_Intrinsics_vec
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_shift_right64
-#define Lib_IntVector_Intrinsics_vec128_shift_right64(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_shift_right64_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_smul64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -561,9 +460,6 @@ Lib_IntVector_Intrinsics_vec128_smul64_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_64("res", x0);
   return x0;
 }
-#undef Lib_IntVector_Intrinsics_vec128_smul64
-#define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1)       \
-  Lib_IntVector_Intrinsics_vec128_smul64_debug(x0, x1)
 
 static inline Lib_IntVector_Intrinsics_vec128
 Lib_IntVector_Intrinsics_vec128_sub64_debug(Lib_IntVector_Intrinsics_vec128 x0,
@@ -575,9 +471,176 @@ Lib_IntVector_Intrinsics_vec128_sub64_debug(Lib_IntVector_Intrinsics_vec128 x0,
   print_vector128_64("res", x0);
   return x0;
 }
+
+// Redefine the intrinsics macros to use the debugging functions
+// instead.
+// Note that we take care to redefine the macros at the
+// very end, because some intrinsics definitions rely on
+// other intrinsics definitions.
+//
+// Also, some intrinsics are defined with static inline
+// functions rather than macros, so we sometimes need
+// to check if the macro has been defined before undefining
+// it.
+// Note that it may be a good idea to redefine as
+// many intrinsics as possible by using static inline
+// functions rather than macros, because macros can
+// be dangerous. Note that this is not possible for
+// all the intrinsics, because some intrinsics require
+// immediate values for their parameters.
+// For a simple example of dangerous definitions which did happen:
+// if [b] has type [uint8_t *] and you define the
+// following macro:
+// [> #define get(x) ((uint32_t*) x)[0]
+// If you call: [get(b + 16)] then the coercion to
+// [(uint32_t*)] precedes the address shift [+ 16],
+// leading to an incorrect address computation.
+// The solution is to define:
+// [> #define get(x) ((uint32_t*)(x))[0]
+// (with parentheses around [x]).
+// This kind of problems wouldn't happen with static inline
+// functions.
+
+#ifdef Lib_IntVector_Intrinsics_vec128_load32_le
+#undef Lib_IntVector_Intrinsics_vec128_load32_le
+#endif
+#define Lib_IntVector_Intrinsics_vec128_load32_le(x0) \
+  Lib_IntVector_Intrinsics_vec128_load32_le_debug(x0)
+
+#ifdef Lib_IntVector_Intrinsics_vec128_load64_le
+#undef Lib_IntVector_Intrinsics_vec128_load64_le
+#endif
+#define Lib_IntVector_Intrinsics_vec128_load64_le(x0) \
+  Lib_IntVector_Intrinsics_vec128_load64_le_debug(x0)
+
+#ifdef Lib_IntVector_Intrinsics_vec128_store32_le
+#undef Lib_IntVector_Intrinsics_vec128_store32_le
+#endif
+#define Lib_IntVector_Intrinsics_vec128_store32_le(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_store32_le_debug(x0, x1)
+
+#ifdef Lib_IntVector_Intrinsics_vec128_store64_le
+#undef Lib_IntVector_Intrinsics_vec128_store64_le
+#endif
+#define Lib_IntVector_Intrinsics_vec128_store64_le(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_store64_le_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_add32
+#define Lib_IntVector_Intrinsics_vec128_add32(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_add32_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_add64
+#define Lib_IntVector_Intrinsics_vec128_add64(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_add64_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_xor
+#define Lib_IntVector_Intrinsics_vec128_xor(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_xor_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_and
+#define Lib_IntVector_Intrinsics_vec128_and(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_and_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_eq32
+#define Lib_IntVector_Intrinsics_vec128_eq32(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_eq32_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_eq64
+#define Lib_IntVector_Intrinsics_vec128_eq64(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_eq64_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_extract32
+#define Lib_IntVector_Intrinsics_vec128_extract32(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_extract32_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_extract64
+#define Lib_IntVector_Intrinsics_vec128_extract64(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_extract64_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_gt32
+#define Lib_IntVector_Intrinsics_vec128_gt32(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_gt32_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_gt64
+#define Lib_IntVector_Intrinsics_vec128_gt64(x0, x1) \
+  Lib_IntVector_Intrinsics_vec128_gt64_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_insert32
+#define Lib_IntVector_Intrinsics_vec128_insert32(x0, x1, x2)       \
+  Lib_IntVector_Intrinsics_vec128_insert32_debug(x0, x1, x2)
+
+#undef Lib_IntVector_Intrinsics_vec128_insert64
+#define Lib_IntVector_Intrinsics_vec128_insert64(x0, x1, x2)       \
+  Lib_IntVector_Intrinsics_vec128_insert64_debug(x0, x1, x2)
+
+#undef Lib_IntVector_Intrinsics_vec128_interleave_high32
+#define Lib_IntVector_Intrinsics_vec128_interleave_high32(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_interleave_high32_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_interleave_high64
+#define Lib_IntVector_Intrinsics_vec128_interleave_high64(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_interleave_high64_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_interleave_low32
+#define Lib_IntVector_Intrinsics_vec128_interleave_low32(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_interleave_low32_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_interleave_low64
+#define Lib_IntVector_Intrinsics_vec128_interleave_low64(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_interleave_low64_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_load32
+#define Lib_IntVector_Intrinsics_vec128_load32(x0)      \
+  Lib_IntVector_Intrinsics_vec128_load32_debug(x0)
+
+#undef Lib_IntVector_Intrinsics_vec128_load32s
+#define Lib_IntVector_Intrinsics_vec128_load32s(x0, x1, x2, x3)    \
+  Lib_IntVector_Intrinsics_vec128_load32s_debug(x0, x1, x2, x3)
+
+#undef Lib_IntVector_Intrinsics_vec128_load64
+#define Lib_IntVector_Intrinsics_vec128_load64(x0)       \
+  Lib_IntVector_Intrinsics_vec128_load64_debug(x0)
+
+#undef Lib_IntVector_Intrinsics_vec128_lognot
+#define Lib_IntVector_Intrinsics_vec128_lognot(x0)       \
+  Lib_IntVector_Intrinsics_vec128_lognot_debug(x0)
+
+#undef Lib_IntVector_Intrinsics_vec128_mul64
+#define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_mul64_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_or
+#define Lib_IntVector_Intrinsics_vec128_or(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_or_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_rotate_left32
+#define Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_rotate_left32_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_rotate_right32
+#define Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_rotate_right32_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32
+#define Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_shift_left64
+#define Lib_IntVector_Intrinsics_vec128_shift_left64(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_shift_left64_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_shift_right64
+#define Lib_IntVector_Intrinsics_vec128_shift_right64(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_shift_right64_debug(x0, x1)
+
+#undef Lib_IntVector_Intrinsics_vec128_smul64
+#define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1)       \
+  Lib_IntVector_Intrinsics_vec128_smul64_debug(x0, x1)
+
 #undef Lib_IntVector_Intrinsics_vec128_sub64
 #define Lib_IntVector_Intrinsics_vec128_sub64(x0, x1)       \
   Lib_IntVector_Intrinsics_vec128_sub64_debug(x0, x1)
+
 
 #endif // DEBUG_VECTOR_TRACE
 
