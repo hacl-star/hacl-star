@@ -1139,11 +1139,16 @@ CFLAGS += -Wall -Wextra -g \
   -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I$(KREMLIN_HOME)/include -Idist/gcc-compatible
 
+# The C test files need the extracted headers to compile
+dist/test/c/%.o: dist/test/c/%.c | compile-gcc-compatible
+	$(call run-with-log,\
+	  $(CC) $(CFLAGS) $< -c -o $@,[CC $*],$(call to-obj-dir,$@))
+
 # FIXME there's a kremlin error that generates a void* -- can't use -Werror
 # Need the libraries to be present and compiled.
+# Linking with full kremlib since tests may use TestLib, etc.
 .PRECIOUS: %.exe
 %.exe: %.o | compile-gcc-compatible
-	# Linking with full kremlib since tests may use TestLib, etc.
 	$(call run-with-log,\
 	  $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ \
 	    dist/gcc-compatible/libevercrypt.a -lcrypto $(LDFLAGS) \
