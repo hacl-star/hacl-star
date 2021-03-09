@@ -31,6 +31,7 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, int aad_l
   memset(ciphertext, 0, in_len * sizeof ciphertext[0]);
   uint8_t mac[16] = {0};
   bool ok = true;
+  int res = 0;
 
   Hacl_Chacha20Poly1305_128_aead_encrypt(key, nonce, aad_len, aad, in_len, in, ciphertext, mac);
   printf("Chacha20Poly1305 (128-bit) Result (chacha20):\n");
@@ -38,7 +39,7 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* nonce, int aad_l
   printf("(poly1305):\n");
   ok = ok && print_result(16,mac,exp_mac);
 
-  int res = Hacl_Chacha20Poly1305_128_aead_decrypt(key, nonce, aad_len, aad, in_len, plaintext, exp_cipher, exp_mac);
+  res = Hacl_Chacha20Poly1305_128_aead_decrypt(key, nonce, aad_len, aad, in_len, plaintext, exp_cipher, exp_mac);
   if (res != 0) printf("AEAD Decrypt (Chacha20/Poly1305) failed \n.");
   ok = ok && (res == 0);
   ok = ok && print_result(in_len,plaintext,in);
