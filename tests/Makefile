@@ -16,13 +16,11 @@ TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 # Vec128
 ifneq ($(COMPILE_VEC128),1)
 TARGETS := $(filter-out %-128-test-streaming.exe, $(filter-out %-128-test.exe, $(TARGETS)))
-TARGETS := $(filter-out %-128-test.exe, $(filter-out %-128-test.exe, $(TARGETS)))
 endif
 
 # Vec256
 ifneq ($(COMPILE_VEC256),1)
 TARGETS := $(filter-out %-256-test-streaming.exe, $(filter-out %-256-test.exe, $(TARGETS)))
-TARGETS := $(filter-out %-256-test.exe, $(filter-out %-256-test.exe, $(TARGETS)))
 endif
 
 # Curve64
