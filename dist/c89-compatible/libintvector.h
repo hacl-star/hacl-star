@@ -647,13 +647,13 @@ typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
 typedef vector128_8 Lib_IntVector_Intrinsics_vec128;
 typedef vector128_8 vector128;
 
-// Small helper to change the endianess of the vector's elements, seen as uint32.
+// Small helper to change the endianness of the vector's elements, seen as uint32.
 // Note that we can't use vec_revb.
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
   ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
                         (vector128_8){3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12})))
 
-// Small helper to change the endianess of the vector's elements, seen as uint64
+// Small helper to change the endianness of the vector's elements, seen as uint64
 // Note that we can't use vec_revb.
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0)      \
   ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
@@ -797,11 +797,11 @@ typedef vector unsigned long long vector128_64;
 typedef vector128_8 Lib_IntVector_Intrinsics_vec128;
 typedef vector128_8 vector128;
 
-// Small helper to change the endianess of the vector's elements, seen as uint32.
+// Small helper to change the endianness of the vector's elements, seen as uint32.
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
   ((vector128)(x0))
 
-// Small helper to change the endianess of the vector's elements, seen as uint64
+// Small helper to change the endianness of the vector's elements, seen as uint64
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0)      \
   ((vector128)(x0))
 
