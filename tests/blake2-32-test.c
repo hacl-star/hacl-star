@@ -76,7 +76,6 @@ int main()
   uint64_t cdiff1 = b - a;
   double tdiff1 = t2 - t1;
 
-
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Blake2b_32_blake2b(64,plain,SIZE,plain,0,NULL);
   }

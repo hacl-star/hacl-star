@@ -68,11 +68,11 @@ int main()
   b = cpucycles_end();
   t2 = clock();
 
-  uint64_t cdiff4 = b - a;
-  double tdiff4 = t2 - t1;
+  uint64_t cdiff1 = b - a;
+  double tdiff1 = t2 - t1;
 
   uint64_t count = ROUNDS * SIZE;
-  printf("Blake2B (Vec 256-bit):\n"); print_time(count,tdiff4,cdiff4);
+  printf("Blake2B (Vec 256-bit):\n"); print_time(count,tdiff1,cdiff1);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
