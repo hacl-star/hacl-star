@@ -174,7 +174,6 @@ val point_add:
       F51.point_eval h1 out == Spec.Ed25519.point_add (F51.point_eval h0 p) (F51.point_eval h0 q)
     )
 
-[@CInline]
 let point_add out p q =
   push_frame();
   let tmp = create 30ul (u64 0) in
