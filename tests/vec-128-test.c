@@ -14,13 +14,13 @@
 #include <stdbool.h>
 #include <time.h>
 
-// We use this file to test the vectorized implementations, and to test
+// We can use this file to test the vectorized implementations, and to test
 // the debugging version at the same time. Definining the following flag
 // before including "libintvector.h" toggles debugging on. Note that this works
 // only because we use the libintvector.h from lib/c: in case you want to
 // toggle debugging for the HACL* library, you must copy lib/c/libintvector_debug.h
 // to the appropriate dist/*/ directory.
-#define DEBUG_VECTOR_TRACE 1
+//#define DEBUG_VECTOR_TRACE 1
 #include "libintvector.h"
 #include "test_helpers.h"
 
