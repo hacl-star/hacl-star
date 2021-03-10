@@ -34,8 +34,6 @@ static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
 }
 
 
-#if defined(__x86_64__) || defined(_M_X64) || defined(__s390x__) || defined(__powerpc64__)
-
 // For __ppc_get_timebase - note used for now: see below comment
 #if defined(__powerpc64__)
 #include <sys/platform/ppc.h>
@@ -79,7 +77,12 @@ static __inline__ cycles cpucycles_get(void)
   // By then doing [cat /proc/cpuinfo | grep "MHz"], you can retrieve the
   // CPU frequency (one line per logical CPU). With the additional information
   // printed by the benchmarks, you can compute the cycles per processed byte.
-  return 0; 
+  return 0;
+
+#elif defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)
+
+  // No implementation for ARM
+  return 0;
 
 #else
 
@@ -98,8 +101,6 @@ static __inline__ cycles cpucycles_end(void)
 {
   return cpucycles_get();
 }
-
-#endif // __x86_64__ || _M_X64 || __s390x__ || __powerpc64__
 
 static inline void print_time(uint64_t count, clock_t tdiff, uint64_t cdiff){
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
