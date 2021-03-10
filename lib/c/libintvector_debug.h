@@ -392,7 +392,44 @@ Lib_IntVector_Intrinsics_vec128_rotate_left32_debug(Lib_IntVector_Intrinsics_vec
   printf("[> vec128_rotate_left32\n");
   print_vector128_32("x0", x0);
   print_debug_uint32_t("x1", x1);
-  x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, x1);
+  switch(x1) {
+  case 0U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 0U); break;
+  case 1U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 1U); break;
+  case 2U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 2U); break;
+  case 3U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 3U); break;
+  case 4U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 4U); break;
+  case 5U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 5U); break;
+  case 6U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 6U); break;
+  case 7U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 7U); break;
+  case 8U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 8U); break;
+  case 9U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 9U); break;
+  case 10U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 10U); break;
+  case 11U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 11U); break;
+  case 12U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 12U); break;
+  case 13U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 13U); break;
+  case 14U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 14U); break;
+  case 15U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 15U); break;
+  case 16U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 16U); break;
+  case 17U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 17U); break;
+  case 18U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 18U); break;
+  case 19U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 19U); break;
+  case 20U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 20U); break;
+  case 21U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 21U); break;
+  case 22U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 22U); break;
+  case 23U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 23U); break;
+  case 24U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 24U); break;
+  case 25U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 25U); break;
+  case 26U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 26U); break;
+  case 27U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 27U); break;
+  case 28U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 28U); break;
+  case 29U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 29U); break;
+  case 30U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 30U); break;
+  case 31U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 31U); break;
+  case 32U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_left32(x0, 32U); break;
+  default:
+    printf("**ERROR**: libintvector.h: Lib_IntVector_Intrinsics_vec128_rotate_left32: debugging version: 'x1' must be in [0;32]");
+    abort();
+  }
   print_vector128_32("res", x0);
   return x0;
 }
@@ -403,7 +440,44 @@ Lib_IntVector_Intrinsics_vec128_rotate_right32_debug(Lib_IntVector_Intrinsics_ve
   printf("[> vec128_rotate_right32\n");
   print_vector128_32("x0", x0);
   print_debug_uint32_t("x1", x1);
-  x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, x1);
+  switch(x1) {
+  case 0U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 0U); break;
+  case 1U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 1U); break;
+  case 2U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 2U); break;
+  case 3U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 3U); break;
+  case 4U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 4U); break;
+  case 5U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 5U); break;
+  case 6U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 6U); break;
+  case 7U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 7U); break;
+  case 8U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 8U); break;
+  case 9U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 9U); break;
+  case 10U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 10U); break;
+  case 11U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 11U); break;
+  case 12U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 12U); break;
+  case 13U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 13U); break;
+  case 14U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 14U); break;
+  case 15U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 15U); break;
+  case 16U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 16U); break;
+  case 17U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 17U); break;
+  case 18U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 18U); break;
+  case 19U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 19U); break;
+  case 20U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 20U); break;
+  case 21U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 21U); break;
+  case 22U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 22U); break;
+  case 23U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 23U); break;
+  case 24U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 24U); break;
+  case 25U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 25U); break;
+  case 26U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 26U); break;
+  case 27U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 27U); break;
+  case 28U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 28U); break;
+  case 29U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 29U); break;
+  case 30U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 30U); break;
+  case 31U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 31U); break;
+  case 32U: x0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(x0, 32U); break;
+  default:
+    printf("**ERROR**: libintvector.h: Lib_IntVector_Intrinsics_vec128_rotate_right32: debugging version: 'x1' must be in [0;32]");
+    abort();
+  }
   print_vector128_32("res", x0);
   return x0;
 }
