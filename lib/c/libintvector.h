@@ -733,15 +733,9 @@ typedef vector128_8 vector128;
 #define Lib_IntVector_Intrinsics_vec128_lognot(x0)                     \
   ((vector128)(vec_xor((vector128)(x0), (vector128)vec_splat_u32(-1))))
 
-// We need to permute the low and high components of the uint64
-// before calling vec_mule. The following helper does that.
-#define Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0)        \
-  ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},          \
-                        (vector128_8){4,5,6,7,0,1,2,3,12,13,14,15,8,9,10,11})))
-
 #define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)                  \
-  ((vector128)(vec_mule((vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x0), \
-                        (vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high_(x1))))
+  ((vector128)(vec_mule((vector128_32)(x0), \
+                        (vector128_32)(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_or(x0, x1)              \
   ((vector128)(vec_or((vector128)(x0),(vector128)(x1))))
@@ -899,14 +893,9 @@ Lib_IntVector_Intrinsics_vec128_store64_le(uint8_t *x0, Lib_IntVector_Intrinsics
 #define Lib_IntVector_Intrinsics_vec128_lognot(x0)                     \
   ((vector128)(vec_xor((vector128)(x0), (vector128)vec_splat_u32(-1))))
 
-// We need to permute the low and high components of the uint64
-// before calling vec_mule. The following helper does that.
-#define Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high(x0)        \
-  ((vector128)(x0))
-
 #define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)                  \
-  ((vector128)(vec_mule((vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high(x0), \
-                        (vector128_32) Lib_IntVector_Intrinsics_vec128_mul64_perm_low_high(x1))))
+    ((vector128)(vec_mule((vector128_32)(x0),                          \
+                          (vector128_32)(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_or(x0, x1)              \
   ((vector128)(vec_or((vector128)(x0),(vector128)(x1))))
