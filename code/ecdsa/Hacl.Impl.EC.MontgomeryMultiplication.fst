@@ -118,36 +118,39 @@ let montgomery_multiplication_round #c t round =
   pop_frame()  
 
 
-val lemma_up_bound0: #c: curve -> t: nat{let prime = getPrime c in 
-  t <= (prime * prime) / (pow2 (64 * v (getCoordinateLenU64 c))) + prime} -> Lemma (t < 2 * (getPrime c))
+val lemma_up_bound0: #c: curve -> t0: nat {t0 < getPrime c * pow2 (64 * v (getCoordinateLenU64 c))} 
+  -> t: nat{let prime = getPrime c in 
+  t <= t0 / (pow2 (64 * v (getCoordinateLenU64 c))) + prime} -> 
+  Lemma (t < 2 * (getPrime c))
 
-let lemma_up_bound0 #c t = 
+let lemma_up_bound0 #c t0 t = 
   let prime = getPrime c in 
   let s = pow2 (64 * v (getCoordinateLenU64 c)) in 
   lemma_mult_lt_left prime prime s;
-
-  let c = prime * prime in 
-  assert(c < prime * s);
-  assert(c / s < prime);
+  assert(t0 < prime * s);
+  assert(t0 / s < prime);
 
   assert(t < prime + prime)
 
 
-val lemma_up_bound1: #c: curve -> i: nat {i < v (getCoordinateLenU64 c)} -> t0: nat {let prime = getPrime c in t0 <= prime * prime / (pow2 (64 * i)) + prime} -> k0: nat {k0 < pow2 64} ->
-  t1: nat {t1 = (t0 + getPrime c * (((t0 % pow2 64) * k0) % pow2 64)) / pow2 64} -> 
-  Lemma (let prime = getPrime c in t1 <= prime * prime / (pow2 (64 * (i + 1))) + prime)
+val lemma_up_bound1: #c: curve -> i: nat {i < v (getCoordinateLenU64 c)} 
+  -> t: nat {t < getPrime c * pow2 (64 * v (getCoordinateLenU64 c))}  
+  -> t0: nat {let prime = getPrime c in t0 <= t / (pow2 (64 * i)) + prime} 
+  -> k0: nat {k0 < pow2 64} 
+  -> t1: nat {t1 = (t0 + getPrime c * (((t0 % pow2 64) * k0) % pow2 64)) / pow2 64} -> 
+  Lemma (let prime = getPrime c in t1 <= t / (pow2 (64 * (i + 1))) + prime)
 
-let lemma_up_bound1 #c i t0 k0 t1= 
+let lemma_up_bound1 #c i t t0 k0 t1= 
   let prime = getPrime c in 
-  assert(t0 <= prime * prime / (pow2 (64 * i)) + prime);
+  assert(t0 <= t / (pow2 (64 * i)) + prime); 
   assert(t1 = (t0 + prime * (((t0 % pow2 64) * k0) % pow2 64)) / pow2 64);
   assert(((t0 % pow2 64) * k0) % pow2 64 <= pow2 64 - 1);
   lemma_mult_le_left prime (((t0 % pow2 64) * k0) % pow2 64) (pow2 64 - 1);
   assert(t1 <= (t0 + prime * (pow2 64 - 1)) / pow2 64);
-  assert(t1 <= (t0 + prime * pow2 64 - prime) / pow2 64);
-  assert(t1 <= (prime * prime / (pow2 (64 * i)) / pow2 64 + prime));
-  division_multiplication_lemma (prime * prime) (pow2 (64 * i)) (pow2 64);
-  assert(t1 <= (prime * prime / (pow2 (64 * i) * pow2 64) + prime));
+  assert(t1 <= (t0 + prime * pow2 64 - prime) / pow2 64); 
+  assert(t1 <= (t / (pow2 (64 * i)) / pow2 64 + prime));
+  division_multiplication_lemma t (pow2 (64 * i)) (pow2 64);
+  assert(t1 <= (t / (pow2 (64 * i) * pow2 64) + prime));
   pow2_plus (64 * i) 64
 
 
