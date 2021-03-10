@@ -17,8 +17,6 @@ open Hacl.Impl.EC.MontgomeryMultiplication.Lemmas
 open Lib.Loops
 open Hacl.Impl.EC.Setup
 
-
-
 #set-options "--z3rlimit 200"
 
 
@@ -101,7 +99,6 @@ val montgomery_multiplication_one_round_proof:
 let montgomery_multiplication_one_round_proof #c t k0 round co = admit()
 
 
-
 val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
   Stack unit 
   (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * getPrime c /\ eq_or_disjoint t round)
@@ -121,6 +118,39 @@ let montgomery_multiplication_round #c t round =
   pop_frame()  
 
 
+val lemma_up_bound0: #c: curve -> t: nat{let prime = getPrime c in 
+  t <= (prime * prime) / (pow2 (64 * v (getCoordinateLenU64 c))) + prime} -> Lemma (t < 2 * (getPrime c))
+
+let lemma_up_bound0 #c t = 
+  let prime = getPrime c in 
+  let s = pow2 (64 * v (getCoordinateLenU64 c)) in 
+  lemma_mult_lt_left prime prime s;
+
+  let c = prime * prime in 
+  assert(c < prime * s);
+  assert(c / s < prime);
+
+  assert(t < prime + prime)
+
+
+val lemma_up_bound1: #c: curve -> i: nat {i < v (getCoordinateLenU64 c)} -> t0: nat {let prime = getPrime c in t0 <= prime * prime / (pow2 (64 * i)) + prime} -> k0: nat {k0 < pow2 64} ->
+  t1: nat {t1 = (t0 + getPrime c * (((t0 % pow2 64) * k0) % pow2 64)) / pow2 64} -> 
+  Lemma (let prime = getPrime c in t1 <= prime * prime / (pow2 (64 * (i + 1))) + prime)
+
+let lemma_up_bound1 #c i t0 k0 t1= 
+  let prime = getPrime c in 
+  assert(t0 <= prime * prime / (pow2 (64 * i)) + prime);
+  assert(t1 = (t0 + prime * (((t0 % pow2 64) * k0) % pow2 64)) / pow2 64);
+  assert(((t0 % pow2 64) * k0) % pow2 64 <= pow2 64 - 1);
+  lemma_mult_le_left prime (((t0 % pow2 64) * k0) % pow2 64) (pow2 64 - 1);
+  assert(t1 <= (t0 + prime * (pow2 64 - 1)) / pow2 64);
+  assert(t1 <= (t0 + prime * pow2 64 - prime) / pow2 64);
+  assert(t1 <= (prime * prime / (pow2 (64 * i)) / pow2 64 + prime));
+  division_multiplication_lemma (prime * prime) (pow2 (64 * i)) (pow2 64);
+  assert(t1 <= (prime * prime / (pow2 (64 * i) * pow2 64) + prime));
+  pow2_plus (64 * i) 64
+
+
 val montgomery_multiplication_reduction: #c: curve
   -> t: widefelem c 
   -> result: felem c -> 
@@ -138,18 +168,23 @@ let montgomery_multiplication_reduction #c t result =
    
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
     let prime = getPrime c in 
-    live h t /\ wide_as_nat c h t < prime * prime /\ modifies (loc t) h0 h /\ 
-    wide_as_nat c h t % prime = wide_as_nat c h0 t * modp_inv2 #c (pow2 (i * 64)) % prime in 
+    live h t /\ wide_as_nat c h t < prime * prime /\ 
+    wide_as_nat c h t < prime * prime /\
+    wide_as_nat c h t <= prime * prime / (pow2 (64 * i)) + prime
+    
+    
+    in 
 
   lemma_inv1 (wide_as_nat c h0 t) (getPrime c);
   lemma_mod_inv #c (wide_as_nat c h0 t);
 
-  let h1 = ST.get() in 
-    assert (inv h1 0);
+  let h1 = ST.get() in
+
+  assert(wide_as_nat c h0 t < getPrime c * getPrime c);
+  assert(wide_as_nat c h0 t < getPrime c * getPrime c / (pow2 (64 * 0)) + getPrime c);
     
   for 0ul len inv (fun i ->
     let h0_ = ST.get() in 
-
     montgomery_multiplication_round #c t t; 
     let h1_ = ST.get() in
 
@@ -161,19 +196,21 @@ let montgomery_multiplication_reduction #c t result =
     let k0 = min_one_prime (pow2 64) (- getPrime c) in 
     let co = a0 * modp_inv2 #c (pow2 (v i * 64)) in 
 
-    montgomery_multiplication_one_round_proof #c a_i k0 a_il co;
-    assert(a_il % prime == a0 * modp_inv2 #c (pow2 (v i * 64)) * modp_inv2_prime (pow2 64) prime % prime);
-    lemma_multiplication_by_inverse #c a0 i;
+    lemma_up_bound1 #c (v i) a_i k0 a_il;
 
-    assume (wide_as_nat c h1_ t < prime * prime)
+    admit();
+    montgomery_multiplication_one_round_proof #c a_i k0 a_il co;
+    admit()
 
   );
 
+
   let h2 = ST.get() in 
-  
-  assume (wide_as_nat c h2 t < 2 * getPrime c);
-  admit();
-  reduction_prime_2prime_with_carry t result
+  lemma_up_bound0 #c (wide_as_nat c h2 t); 
+  assume (eq_or_disjoint t result);
+
+  reduction_prime_2prime_with_carry t result;
+  admit()
 
 (*
 val montgomery_multiplication_buffer_by_one: #c: curve {(getPrime c + 1) % pow2 64 == 0} 
