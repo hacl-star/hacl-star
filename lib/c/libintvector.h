@@ -734,7 +734,7 @@ typedef vector128_8 vector128;
   ((vector128)(vec_xor((vector128)(x0), (vector128)vec_splat_u32(-1))))
 
 #define Lib_IntVector_Intrinsics_vec128_mul64(x0, x1)                  \
-  ((vector128)(vec_mule((vector128_32)(x0), \
+  ((vector128)(vec_mulo((vector128_32)(x0), \
                         (vector128_32)(x1))))
 
 #define Lib_IntVector_Intrinsics_vec128_or(x0, x1)              \
