@@ -287,7 +287,6 @@ val point_equal:
       (z <==> Spec.Ed25519.point_equal (F51.point_eval h0 p) (F51.point_eval h0 q))
     )
 
-[@CInline]
 let point_equal p q =
   push_frame();
   let tmp = create 20ul (u64 0) in
