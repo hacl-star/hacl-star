@@ -369,7 +369,7 @@ if detect_x86 || detect_x64; then
   fi
 fi
 
-if detect_ibmz; then
+if detect_systemz; then
   echo "... detected z platform"
   echo "TARGET_ARCHITECTURE = SystemZ" >> Makefile.config
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_SYSTEMZ" >> config.h
