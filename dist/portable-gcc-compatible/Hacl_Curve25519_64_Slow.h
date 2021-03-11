@@ -38,6 +38,7 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Bignum.h"
 
 /* SNIPPET_START: Hacl_Curve25519_64_Slow_scalarmult */
 

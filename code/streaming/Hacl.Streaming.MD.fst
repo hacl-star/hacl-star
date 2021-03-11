@@ -102,6 +102,7 @@ let hacl_md (a:alg)// : block unit =
     (fun () -> max_input_length64 a)
     (fun () -> Hacl.Hash.Definitions.hash_len a)
     (fun () -> Hacl.Hash.Definitions.block_len a)
+    (fun () -> Hacl.Hash.Definitions.block_len a)
 
     (fun () _ -> fst (Spec.Agile.Hash.init a))
     (fun () acc prevlen blocks -> update_multi_s a () acc prevlen blocks)

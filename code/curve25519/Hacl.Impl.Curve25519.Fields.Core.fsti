@@ -8,19 +8,13 @@ open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 
-module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
-
 module P = Spec.Curve25519
-module S = Hacl.Spec.Curve25519.Field64.Definition
-module SC = Hacl.Spec.Curve25519.Field64
 
 /// This module defines the core functions for which we will want to swap out
 /// implementations. They are marked as assume val's since we strictly have more
 /// than one implementation per index value.
 
-#set-options "--z3rlimit 50 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1 --record_options"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 1 --record_options"
 
 /// Shared definitions for agility of the field type
 /// ------------------------------------------------

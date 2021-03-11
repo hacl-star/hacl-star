@@ -61,6 +61,11 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
 }
 Spec_ECDSA_hash_alg_ecdsa;
 
+#define Spec_Frodo_Params_SHAKE128 0
+#define Spec_Frodo_Params_AES128 1
+
+typedef u8 Spec_Frodo_Params_frodo_gen_a;
+
 #if defined(__cplusplus)
 }
 #endif

@@ -33,8 +33,8 @@ void Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 
       e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
   }
   {
-    Lib_IntVector_Intrinsics_vec128 b10 = Lib_IntVector_Intrinsics_vec128_load_le(b);
-    Lib_IntVector_Intrinsics_vec128 b2 = Lib_IntVector_Intrinsics_vec128_load_le(b + (u32)16U);
+    Lib_IntVector_Intrinsics_vec128 b10 = Lib_IntVector_Intrinsics_vec128_load64_le(b);
+    Lib_IntVector_Intrinsics_vec128 b2 = Lib_IntVector_Intrinsics_vec128_load64_le(b + (u32)16U);
     Lib_IntVector_Intrinsics_vec128 lo = Lib_IntVector_Intrinsics_vec128_interleave_low64(b10, b2);
     Lib_IntVector_Intrinsics_vec128
     hi = Lib_IntVector_Intrinsics_vec128_interleave_high64(b10, b2);
@@ -969,9 +969,9 @@ void Hacl_Poly1305_128_poly1305_update(Lib_IntVector_Intrinsics_vec128 *ctx, u32
               e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
           }
           {
-            Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load_le(block);
+            Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load64_le(block);
             Lib_IntVector_Intrinsics_vec128
-            b2 = Lib_IntVector_Intrinsics_vec128_load_le(block + (u32)16U);
+            b2 = Lib_IntVector_Intrinsics_vec128_load64_le(block + (u32)16U);
             Lib_IntVector_Intrinsics_vec128
             lo = Lib_IntVector_Intrinsics_vec128_interleave_low64(b1, b2);
             Lib_IntVector_Intrinsics_vec128

@@ -102,20 +102,26 @@ EXPORTS
   Hacl_Salsa20_salsa20_decrypt
   Hacl_Salsa20_salsa20_key_block0
   Hacl_Salsa20_hsalsa20
+  Hacl_Bignum_Base_mul_wide_add_u64
+  Hacl_Bignum_Base_mul_wide_add2_u64
+  Hacl_Bignum_Addition_bn_add_eq_len_u64
   Hacl_Curve25519_64_Slow_scalarmult
   Hacl_Curve25519_64_Slow_secret_to_public
   Hacl_Curve25519_64_Slow_ecdh
   Hacl_Impl_Curve25519_Field51_fadd
   Hacl_Impl_Curve25519_Field51_fsub
   Hacl_Impl_Curve25519_Field51_fmul
+  Hacl_Impl_Curve25519_Field51_fmul2
   Hacl_Impl_Curve25519_Field51_fmul1
   Hacl_Impl_Curve25519_Field51_fsqr
+  Hacl_Impl_Curve25519_Field51_fsqr2
+  Hacl_Impl_Curve25519_Field51_store_felem
+  Hacl_Impl_Curve25519_Field51_cswap2
   Hacl_Curve25519_51_fsquare_times
   Hacl_Curve25519_51_finv
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_Bignum25519_fdifference
   Hacl_Bignum25519_reduce_513
   Hacl_Bignum25519_inverse
   Hacl_Bignum25519_load_51
@@ -125,6 +131,7 @@ EXPORTS
   Hacl_Impl_Ed25519_PointCompress_point_compress
   Hacl_Impl_Ed25519_PointDecompress_point_decompress
   Hacl_Impl_Ed25519_PointEqual_point_equal
+  Hacl_Impl_Ed25519_PointNegate_point_negate
   Hacl_Ed25519_sign
   Hacl_Ed25519_verify
   Hacl_Ed25519_secret_to_public
@@ -178,16 +185,47 @@ EXPORTS
   Hacl_P256_ecp256dh_i
   Hacl_P256_ecp256dh_r
   Hacl_P256_is_more_than_zero_less_than_order
-  Hacl_Frodo_KEM_crypto_kem_keypair
-  Hacl_Frodo_KEM_crypto_kem_enc
-  Hacl_Frodo_KEM_crypto_kem_dec
+  Hacl_Keccak_shake128_4x
+  Hacl_Impl_Matrix_mod_pow2
+  Hacl_Impl_Matrix_matrix_add
+  Hacl_Impl_Matrix_matrix_sub
+  Hacl_Impl_Matrix_matrix_mul
+  Hacl_Impl_Matrix_matrix_mul_s
+  Hacl_Impl_Matrix_matrix_eq
+  Hacl_Impl_Matrix_matrix_to_lbytes
+  Hacl_Impl_Matrix_matrix_from_lbytes
+  Hacl_Impl_Frodo_Gen_frodo_gen_matrix_shake_4x
+  Hacl_Impl_Frodo_Params_frodo_gen_matrix
+  Hacl_Impl_Frodo_Sample_frodo_sample_matrix64
+  Hacl_Impl_Frodo_Sample_frodo_sample_matrix640
+  Hacl_Impl_Frodo_Sample_frodo_sample_matrix976
+  Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344
+  randombytes_
+  Hacl_Impl_Frodo_Pack_frodo_pack
+  Hacl_Impl_Frodo_Pack_frodo_unpack
+  Hacl_Impl_Frodo_Encode_frodo_key_encode
+  Hacl_Impl_Frodo_Encode_frodo_key_decode
+  Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64
+  Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
+  Hacl_Frodo640_crypto_kem_keypair
+  Hacl_Frodo640_crypto_kem_enc
+  Hacl_Frodo640_crypto_kem_dec
   Hacl_Chacha20_Vec32_chacha20_encrypt_32
   Hacl_Chacha20_Vec32_chacha20_decrypt_32
+  Hacl_Frodo976_crypto_kem_keypair
+  Hacl_Frodo976_crypto_kem_enc
+  Hacl_Frodo976_crypto_kem_dec
   Hacl_HMAC_Blake2s_128_compute_blake2s_128
   Hacl_HKDF_Blake2s_128_expand_blake2s_128
   Hacl_HKDF_Blake2s_128_extract_blake2s_128
+  Hacl_Frodo1344_crypto_kem_keypair
+  Hacl_Frodo1344_crypto_kem_enc
+  Hacl_Frodo1344_crypto_kem_dec
+  Hacl_Frodo64_crypto_kem_keypair
+  Hacl_Frodo64_crypto_kem_enc
+  Hacl_Frodo64_crypto_kem_dec
   Hacl_HMAC_Blake2b_256_compute_blake2b_256
   Hacl_HKDF_Blake2b_256_expand_blake2b_256
   Hacl_HKDF_Blake2b_256_extract_blake2b_256

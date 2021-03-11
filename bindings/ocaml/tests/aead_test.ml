@@ -96,8 +96,8 @@ let _ =
   Printf.printf "SHAEXT: %b\n" (has_feature SHAEXT);
   Printf.printf "AES_NI: %b\n" (has_feature AES_NI);
   Printf.printf "PCLMULQDQ: %b\n" (has_feature PCLMULQDQ);
-  Printf.printf "AVX2: %b\n" (has_feature AVX2);
-  Printf.printf "AVX: %b\n" (has_feature AVX);
+  Printf.printf "VEC256: %b\n" (has_feature VEC256);
+  Printf.printf "VEC128: %b\n" (has_feature VEC128);
   Printf.printf "BMI2: %b\n" (has_feature BMI2);
   Printf.printf "ADX: %b\n" (has_feature ADX);
   Printf.printf "SSE: %b\n" (has_feature SSE);
@@ -106,8 +106,8 @@ let _ =
 
   test_agile chacha20poly1305_test;
   test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_32" Hacl.Chacha20_Poly1305_32.encrypt Hacl.Chacha20_Poly1305_32.decrypt [];
-  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt [AVX];
-  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt [AVX2];
+  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_128" Hacl.Chacha20_Poly1305_128.encrypt Hacl.Chacha20_Poly1305_128.decrypt [VEC128];
+  test_nonagile chacha20poly1305_test "Hacl.Chacha20_Poly1305_256" Hacl.Chacha20_Poly1305_256.encrypt Hacl.Chacha20_Poly1305_256.decrypt [VEC256];
   test_nonagile chacha20poly1305_test "EverCrypt.Chacha20_Poly1305_256" EverCrypt.Chacha20_Poly1305.encrypt EverCrypt.Chacha20_Poly1305.decrypt [];
 
   test_random ()

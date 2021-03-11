@@ -9,8 +9,6 @@ open Lib.Buffer
 
 open Hacl.Bignum25519
 
-module S = Hacl.Spec.Ed25519.Field56.Definition
-module F56 = Hacl.Impl.Ed25519.Field56
 module F51 = Hacl.Impl.Ed25519.Field51
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
@@ -162,6 +160,7 @@ let point_mul_ b k =
       Lib.LoopCombinators.unfold_repeati 256 (spec h0) (acc h0) (v i);
       loop_step b k i)
 
+
 val point_mul:
     result:point
   -> scalar:lbuffer uint8 32ul
@@ -186,6 +185,7 @@ let point_mul result scalar q =
   copy result nq;
   pop_frame()
 
+
 val point_mul_g:
     result:point
   -> scalar:lbuffer uint8 32ul ->
@@ -196,6 +196,8 @@ val point_mul_g:
       F51.point_inv_t h1 result /\
       F51.point_eval h1 result == Spec.Ed25519.point_mul (as_seq h0 scalar) Spec.Ed25519.g
     )
+
+[@CInline]
 let point_mul_g result scalar =
   push_frame();
   let g = create 20ul (u64 0) in

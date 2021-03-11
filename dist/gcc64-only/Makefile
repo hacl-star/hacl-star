@@ -23,6 +23,10 @@
 # By default, this Makefile relies on the local checkout of kremlib
 KREMLIN_HOME ?= ../kremlin
 
+ifeq (,$(wildcard $(KREMLIN_HOME)/include/kremlib.h))
+	$(error Incorrect KREMLIN_HOME)
+endif
+
 -include Makefile.config
 
 # 1. The usual pseudo auto-configuration
@@ -80,21 +84,23 @@ OBJS 		+= $(patsubst %.S,%.o,$(wildcard *-$(MARCH)$(VARIANT).S))
 include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
-# TODO: also move this to configure
-CFLAGS_128 	?= -mavx
-CFLAGS_256 	?= -mavx -mavx2
 
 Hacl_Poly1305_128.o Hacl_Streaming_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o Hacl_Blake2s_128.o Hacl_HMAC_Blake2s_128.o Hacl_HKDF_Blake2s_128.o Hacl_Streaming_Blake2s_128.o: CFLAGS += $(CFLAGS_128)
 Hacl_Poly1305_256.o Hacl_Streaming_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_Blake2b_256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_Streaming_Blake2b_256.o: CFLAGS += $(CFLAGS_256)
 
 all: libevercrypt.$(SO)
 
-libevercrypt.$(SO): config.h $(OBJS)
-	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)
+# This one and the one below are for people who run "make" without running
+# configure. It's not perfect but perhaps a tiny bit better than nothing.
+Makefile.config:
+	./configure
 
 # If the configure script has not run, create an empty config.h
 config.h:
 	touch $@
+
+libevercrypt.$(SO): config.h $(OBJS)
+	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)
 
 # 4. Compilation of OCaml bindings; conditional on the presence of the lib_gen
 # folder, possibly disabled by configure.
@@ -104,10 +110,10 @@ ifneq (,$(wildcard lib_gen))
 
 .PRECIOUS: %.cmx
 
-OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
+OCAMLOPT=ocamlfind opt -package ctypes,ctypes.foreign,ctypes.stubs -thread -linkpkg -I lib
 OCAMLDEP=ocamlfind dep -I lib -slash
 
-OCAMLC=ocamlfind c -g -package ctypes,ctypes.foreign,ctypes.stubs -linkpkg -I lib
+OCAMLC=ocamlfind c -g -package ctypes,ctypes.foreign,ctypes.stubs -thread -linkpkg -I lib
 
 CFLAGS += -I "$(shell ocamlfind query ctypes)" -I "$(shell ocamlfind c -where)"
 

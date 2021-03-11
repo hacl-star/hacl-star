@@ -1,362 +1,328 @@
 module Hacl.Spec.Curve25519.Field64.Core
 
 open FStar.Mul
-open Lib.Sequence
+
 open Lib.IntTypes
-open Spec.Curve25519
+open Lib.Sequence
 
 open Hacl.Spec.Curve25519.Field64.Definition
-open Hacl.Spec.Curve25519.Field64.Lemmas
 
-#reset-options "--z3rlimit 50  --using_facts_from '* -FStar.Seq'"
+module P = Spec.Curve25519
+module CL = Hacl.Spec.Curve25519.Field64.Lemmas
 
-inline_for_extraction noextract
-val lt_u64:a:uint64 -> b:uint64 -> Tot bool
-let lt_u64 a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a <^ u64_to_UInt64 b)
+module SD = Hacl.Spec.Bignum.Definitions
+module SB = Hacl.Spec.Bignum
 
-inline_for_extraction noextract
-val le_u64:a:uint64 -> b:uint64 -> Tot bool
-let le_u64 a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a <=^ u64_to_UInt64 b)
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-inline_for_extraction noextract
-val eq_u64:a:uint64 -> b:uint64 -> Tot bool
-let eq_u64 a b =
-  let open Lib.RawIntTypes in
-  FStar.UInt64.(u64_to_UInt64 a =^ u64_to_UInt64 b)
+unfold
+let felem = SD.lbignum U64 4
+unfold
+let felem_wide = SD.lbignum U64 8
 
-val addcarry:
-    x:uint64
-  -> y:uint64
-  -> cin:uint64
-  -> Pure (uint64 & uint64)
-    (requires True)
-    (ensures fun (r, c) -> v c <= 2 /\
-      v r + v c * pow2 64 == v x + v y + v cin)
-[@CInline]
-let addcarry x y cin =
-  let res1 = x +. cin in
-  let c = if lt_u64 res1 cin then u64 1 else u64 0 in
-  let res = res1 +. y in
-  let c = if lt_u64 res res1 then c +. u64 1 else c in
-  res, c
+// let as_felem4 (e:felem) : felem4 =
+//   (e.[0], e.[1], e.[2], e.[3])
 
-val subborrow:
-    x:uint64
-  -> y:uint64
-  -> cin:uint64{v cin <= 1}
-  -> Pure (uint64 & uint64)
-    (requires True)
-    (ensures fun (r, c) ->
-      v r - v c * pow2 64 == v x - v y - v cin)
-[@CInline]
-let subborrow x y cin =
-  let res = x -. y -. cin in
-  let c =
-    if eq_u64 cin (u64 1) then
-      (if le_u64 x y then u64 1 else u64 0)
-    else
-      (if lt_u64 x y then u64 1 else u64 0) in
-  res, c
-
-val mul64:
-    x:uint64
-  -> y:uint64
-  -> Pure (uint64 & uint64)
-    (requires True)
-    (ensures fun (l0, l1) ->
-      v l0 + v l1 * pow2 64 = v x * v y)
-[@CInline]
-let mul64 x y =
-  let res = mul64_wide x y in
-  (to_u64 res, to_u64 (res >>. 64ul))
-
-val add0carry:
-    x:uint64
-  -> y:uint64
-  -> Pure (uint64 & uint64)
-    (requires True)
-    (ensures fun (r, c) ->
-      v r + v c * pow2 64 == v x + v y)
-[@CInline]
-let add0carry x y =
-  let res = x +. y in
-  let c = if lt_u64 res x then u64 1 else u64 0 in
-  res, c
+// let as_nat (e:felem) = as_nat4 (as_felem4 e)
 
 
-val add1:
-    f:felem4
-  -> cin:uint64
-  -> Pure (uint64 & felem4)
-    (requires True)
-    (ensures fun (c, r) ->
-      as_nat4 r + v c * pow2 256 == as_nat4 f + v cin)
+val add1: f:felem -> cin:uint64 ->
+  Pure (uint64 & felem)
+  (requires True)
+  (ensures fun (c, r) -> v c <= 1 /\
+    SD.bn_v r + v c * pow2 256 == SD.bn_v f + v cin)
+
 let add1 f cin =
-  let (f0, f1, f2, f3) = f in
-  let o0, c0 = add0carry f0 cin in
-  let o1, c1 = add0carry f1 c0 in
-  let o2, c2 = add0carry f2 c1 in
-  let o3, c3 = add0carry f3 c2 in
-  let out = (o0, o1, o2, o3) in
-  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  c3, out
+  let (c, out) = SB.bn_add1 f cin in
+  SB.bn_add1_lemma f cin;
+  (c, out)
 
-val sub1:
-    f:felem4
-  -> cin:uint64
-  -> Pure (uint64 & felem4)
-    (requires True)
-    (ensures fun (c, r) ->
-      as_nat4 r - v c * pow2 256 == as_nat4 f - v cin)
+
+val sub1: f:felem -> cin:uint64 ->
+  Pure (uint64 & felem)
+  (requires True)
+  (ensures fun (c, r) -> v c <= 1 /\
+    SD.bn_v r - v c * pow2 256 == SD.bn_v f - v cin)
+
 let sub1 f cin =
-  let (f0, f1, f2, f3) = f in
-  let o0, c0 = subborrow f0 cin (u64 0) in
-  let o1, c1 = subborrow f1 (u64 0) c0 in
-  let o2, c2 = subborrow f2 (u64 0) c1 in
-  let o3, c3 = subborrow f3 (u64 0) c2 in
-  let out = (o0, o1, o2, o3) in
-  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  c3, out
+  let c, out = SB.bn_sub1 f cin in
+  SB.bn_sub1_lemma f cin;
+  c, out
 
-#set-options "--z3rlimit 150"
 
-val mul1:
-    f:felem4
-  -> u:uint64
-  -> Pure (uint64 & felem4)
-    (requires True)
-    (ensures fun (c, r) ->
-      as_nat4 r + v c * pow2 256 == as_nat4 f * v u)
+val mul1: f:felem -> u:uint64 ->
+  Pure (uint64 & felem)
+  (requires True)
+  (ensures fun (c, r) ->
+    SD.bn_v r + v c * pow2 256 == SD.bn_v f * v u)
+
 let mul1 f u =
-  let (f0, f1, f2, f3) = f in
-  let l0, h0 = mul64 f0 u in
-  let l1, h1 = mul64 f1 u in
-  let l2, h2 = mul64 f2 u in
-  let l3, h3 = mul64 f3 u in
-  let o0 = l0 in
-  let o1, c0 = addcarry l1 h0 (u64 0) in
-  let o2, c1 = addcarry l2 h1 c0 in
-  let o3, c2 = addcarry l3 h2 c1 in
-  let out = (o0, o1, o2, o3) in
+  let c, out = SB.bn_mul1 f u in
+  SB.bn_mul1_lemma f u;
+  c, out
 
-  assert (as_nat4 out  ==
-    v f0 * v u - v h0 * pow2 64 +
-    (v f1 * v u - v h1 * pow2 64 + v h0 - v c0 * pow2 64) * pow2 64 +
-    (v f2 * v u - v h2 * pow2 64 + v h1 + v c0 - v c1 * pow2 64) * pow2 64 * pow2 64 +
-    (v f3 * v u - v h3 * pow2 64 + v h2 + v c1 - v c2 * pow2 64) * pow2 64 * pow2 64 * pow2 64);
 
-  assert (as_nat4 out ==
-    v f0 * v u +
-    v f1 * v u * pow2 64  +
-    v f2 * v u * pow2 64 * pow2 64 +
-    v f3 * v u * pow2 64 * pow2 64 * pow2 64 -
-    v h3 * pow2 64 * pow2 64 * pow2 64 * pow2 64 -
-    v c2 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
-  lemma_mul1_simplify out f u h3 c2;
-  assert (as_nat4 out + (v h3 + v c2) * pow2 256 == as_nat4 f * v u);
+val mul1_add: f1:felem -> u2:uint64 -> f3:felem ->
+  Pure (uint64 & felem)
+  (requires True)
+  (ensures fun (c, r) ->
+    SD.bn_v r + v c * pow2 256 == SD.bn_v f3 + SD.bn_v f1 * v u2)
 
-  lemma_mul1 f u;
-  lemma_as_nat4 out;
-  lemma_mul1_no_carry (as_nat4 out) (as_nat4 f * v u) (v h3 + v c2);
-  let c3 = h3 +! c2 in
-  c3, out
-
-val mul1_add:
-    f1:felem4
-  -> u2:uint64
-  -> f3:felem4
-  -> Pure (uint64 & felem4)
-    (requires True)
-    (ensures fun (c, r) ->
-      as_nat4 r + v c * pow2 256 == as_nat4 f3 + as_nat4 f1 * v u2)
 let mul1_add f1 u2 f3 =
-  lemma_mul1_add_pre f1 u2 f3;
-  assert (as_nat4 f3 + as_nat4 f1 * v u2 < pow2 320);
-  let c, out0 = mul1 f1 u2 in
-  let (o0, o1, o2, o3) = out0 in
-  let (f30, f31, f32, f33) = f3 in
-  let o0', c0 = addcarry f30 o0 (u64 0) in
-  let o1', c1 = addcarry f31 o1 c0 in
-  let o2', c2 = addcarry f32 o2 c1 in
-  let o3', c3 = addcarry f33 o3 c2 in
-  let out = (o0', o1', o2', o3') in
-  lemma_mul1_add out f3 out0 c0 c1 c2 c3;
-  assert (as_nat4 out == as_nat4 f3 + as_nat4 out0 -
-   v c3 * pow2 64 * pow2 64 * pow2 64 * pow2 64);
-  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  assert (as_nat4 out == as_nat4 f3 + as_nat4 out0 - v c3 * pow2 256);
-  assert (as_nat4 out == as_nat4 f3 + as_nat4 f1 * v u2 - v c * pow2 256 - v c3 * pow2 256);
-  assert (as_nat4 out + v c * pow2 256 + v c3 * pow2 256 == as_nat4 f3 + as_nat4 f1 * v u2);
-  FStar.Math.Lemmas.distributivity_add_left (v c) (v c3) (pow2 256);
-  assert (as_nat4 out + (v c + v c3) * pow2 256 == as_nat4 f3 + as_nat4 f1 * v u2);
-  lemma_as_nat4 out;
-  lemma_as_nat4 f1;
-  lemma_as_nat4 f3;
-  lemma_mul1_add_no_carry (as_nat4 out) (as_nat4 f3) (as_nat4 f1) (v u2) (v c + v c3);
-  let c4 = c +! c3 in
-  c4, out
+  let c, out = SB.bn_mul1_lshift_add f1 u2 0 f3 in
+  SB.bn_mul1_lshift_add_lemma f1 u2 0 f3;
+  c, out
 
-val carry_pass:
-    f:felem4
-  -> cin:uint64{v cin * 38 < pow2 63}
-  -> out:felem4{feval out == (as_nat4 f + v cin * pow2 256) % prime}
+
+val carry_pass: f:felem -> cin:uint64 -> felem
 let carry_pass f cin =
-  lemma_mul_pow256_add f cin;
-  let carry, out0 = add1 f (cin *! u64 38) in
-  let (o0, o1, o2, o3) = out0 in
-  lemma_mul_pow256_add out0 carry;
-  let o0' = o0 +! carry *! u64 38 in
-  (o0', o1, o2, o3)
+  let c, r = add1 f (cin *. u64 38) in
+  let b1 = r.[0] +. c *. u64 38 in
+  let out = r.[0] <- b1 in
+  out
 
-val carry_wide:
-    f:felem_wide4
-  -> out:felem4{feval out == feval_wide f}
+
+val lemma_add1_carry: f:felem -> cin:uint64{v cin * 38 < pow2 63} ->
+  Lemma (let c, r = add1 f (cin *! u64 38) in
+    let b1 = r.[0] +. c *. u64 38 in
+    v b1 == v r.[0] + v c * 38)
+
+let lemma_add1_carry f cin =
+  let c, r = add1 f (cin *! u64 38) in
+  let b1 = r.[0] +. c *. u64 38 in
+  assert (SD.bn_v r + v c * pow2 256 == SD.bn_v f + v cin * 38);
+  SD.bn_eval_split_i f 1;
+  SD.bn_eval1 (slice f 0 1);
+  //assert (SD.bn_v f == v f.[0] + pow2 64 * SD.bn_v (slice f 1 4));
+  SD.bn_eval_split_i r 1;
+  SD.bn_eval1 (slice r 0 1);
+  assert (v r.[0] + pow2 64 * SD.bn_v (slice r 1 4) + v c * pow2 256 == v f.[0] + pow2 64 * SD.bn_v (slice f 1 4) + v cin * 38);
+  SD.bn_eval_bound (slice f 1 4) 3;
+  SD.bn_eval_bound (slice r 1 4) 3;
+  Math.Lemmas.pow2_plus 64 192;
+  assert (v r.[0] == (v f.[0] + v cin * 38) % pow2 64)
+
+
+val carry_pass_lemma: f:felem -> cin:uint64{v cin * 38 < pow2 63} ->
+  Lemma (SD.bn_v (carry_pass f cin) % P.prime == (SD.bn_v f + v cin * pow2 256) % P.prime)
+
+let carry_pass_lemma f cin =
+  let c, r = add1 f (cin *! u64 38) in
+  let b1 = r.[0] +. c *. u64 38 in
+
+  let out = r.[0] <- b1 in
+  SD.bn_upd_eval r b1 0;
+  calc (==) {
+    SD.bn_v out % P.prime;
+    (==) { assert_norm (pow2 0 = 1) }
+    (SD.bn_v r - v r.[0] + v b1) % P.prime;
+    (==) { lemma_add1_carry f cin }
+    (SD.bn_v r - v r.[0] + (v r.[0] + v c * 38)) % P.prime;
+    (==) { }
+    (SD.bn_v r + v c * 38) % P.prime;
+    (==) { Lemmas.lemma_mul_pow256_add (SD.bn_v r) (v c) }
+    (SD.bn_v r + v c * pow2 256) % P.prime;
+    (==) { }
+    (SD.bn_v f + v cin * 38) % P.prime;
+    (==) { Lemmas.lemma_mul_pow256_add (SD.bn_v f) (v cin) }
+    (SD.bn_v f + v cin * pow2 256) % P.prime;
+    }
+
+
+val carry_wide: f:felem_wide ->
+  Pure felem
+  (requires True)
+  (ensures  fun out ->
+    SD.bn_v out % P.prime == SD.bn_v f % P.prime)
+
 let carry_wide f =
-  let (f0, f1, f2, f3, f4, f5, f6, f7) = f in
-  lemma_as_nat4 (f4, f5, f6, f7);
-  lemma_as_nat4 (f0, f1, f2, f3);
-  assert_norm (38 < pow2 6);
-  assert_norm (pow2 6 * pow2 256 = pow2 262);
-  assert (as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * 38 < pow2 263);
-  assert_norm (pow2 263 < pow2 320);
-  let c0, out0 = mul1_add (f4, f5, f6, f7) (u64 38) (f0, f1, f2, f3) in
-  assert (as_nat4 out0 + v c0 * pow2 256 == as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * 38);
-  lemma_as_nat4 out0;
-  lemma_carry_wide (as_nat4 out0) (as_nat4 (f0, f1, f2, f3) + as_nat4 (f4, f5, f6, f7) * 38) (v c0);
-  let out1 = carry_pass out0 c0 in
-  lemma_feval_wide f;
-  out1
+  let c, r0 = mul1_add (sub f 4 4) (u64 38) (sub f 0 4) in
+  assert (SD.bn_v r0 + v c * pow2 256 == SD.bn_v (sub f 0 4) + SD.bn_v (sub f 4 4) * 38);
+  SD.bn_eval_bound (sub f 0 4) 4;
+  SD.bn_eval_bound (sub f 4 4) 4;
+  SD.bn_eval_bound r0 4;
+  Lemmas.carry_wide_bound (SD.bn_v r0) (v c) (SD.bn_v (sub f 0 4)) (SD.bn_v (sub f 4 4));
 
-val add4:
-    f1:felem4
-  -> f2:felem4
-  -> Pure (uint64 & felem4)
-    (requires True)
-    (ensures fun (c, r) -> v c <= 1 /\
-      as_nat4 r + v c * pow2 256 == as_nat4 f1 + as_nat4 f2)
+  let out = carry_pass r0 c in
+  calc (==) {
+    SD.bn_v out % P.prime;
+    (==) { carry_pass_lemma r0 c }
+    (SD.bn_v r0 + v c * pow2 256) % P.prime;
+    (==) { }
+    (SD.bn_v (sub f 0 4) + SD.bn_v (sub f 4 4) * 38) % P.prime;
+    (==) { Lemmas.lemma_mul_pow256_add (SD.bn_v (sub f 0 4)) (SD.bn_v (sub f 4 4)) }
+    (SD.bn_v (sub f 0 4) + SD.bn_v (sub f 4 4) * pow2 256) % P.prime;
+    (==) { SD.bn_concat_lemma (sub f 0 4) (sub f 4 4) }
+    SD.bn_v (concat (sub f 0 4) (sub f 4 4)) % P.prime;
+    (==) { eq_intro f (concat (sub f 0 4) (sub f 4 4)) }
+    SD.bn_v f % P.prime;
+  };
+  out
+
+
+val add4: f1:felem -> f2:felem ->
+  Pure (uint64 & felem)
+  (requires True)
+  (ensures fun (c, r) -> v c <= 1 /\
+    SD.bn_v r + v c * pow2 256 == SD.bn_v f1 + SD.bn_v f2)
+
 let add4 f1 f2 =
-  let (f10, f11, f12, f13) = f1 in
-  let (f20, f21, f22, f23) = f2 in
-  let o0, c0 = addcarry f10 f20 (u64 0) in
-  let o1, c1 = addcarry f11 f21 c0 in
-  let o2, c2 = addcarry f12 f22 c1 in
-  let o3, c3 = addcarry f13 f23 c2 in
-  let out = (o0, o1, o2, o3) in
-  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  c3, out
+  let c, out = SB.bn_add f1 f2 in
+  SB.bn_add_lemma f1 f2;
+  c, out
 
-val fadd4:
-    f1:felem4
-  -> f2:felem4
-  -> out:felem4{feval out == fadd (feval f1) (feval f2)}
+
+val fadd4: f1:felem -> f2:felem ->
+  Pure felem
+  (requires True)
+  (ensures  fun out ->
+    SD.bn_v out % P.prime == P.fadd (SD.bn_v f1 % P.prime) (SD.bn_v f2 % P.prime))
+
 let fadd4 f1 f2 =
   let c0, out0 = add4 f1 f2 in
   let out = carry_pass out0 c0 in
-  assert (feval out == (as_nat4 f1 + as_nat4 f2) % prime);
-  FStar.Math.Lemmas.lemma_mod_plus_distr_l (as_nat4 f1) (as_nat4 f2) prime;
-  FStar.Math.Lemmas.lemma_mod_plus_distr_r ((as_nat4 f1) % prime) (as_nat4 f2) prime;
+  carry_pass_lemma out0 c0;
+  assert (SD.bn_v out % P.prime == (SD.bn_v f1 + SD.bn_v f2) % P.prime);
+  Math.Lemmas.lemma_mod_plus_distr_l (SD.bn_v f1) (SD.bn_v f2) P.prime;
+  Math.Lemmas.lemma_mod_plus_distr_r (SD.bn_v f1 % P.prime) (SD.bn_v f2) P.prime;
   out
 
-val sub4:
-    f1:felem4
-  -> f2:felem4
-  -> Pure (uint64 & felem4)
-    (requires True)
-    (ensures fun (c, r) -> v c <= 1 /\
-      as_nat4 r - v c * pow2 256 == as_nat4 f1 - as_nat4 f2)
+
+val sub4: f1:felem -> f2:felem ->
+  Pure (uint64 & felem)
+  (requires True)
+  (ensures fun (c, r) -> v c <= 1 /\
+    SD.bn_v r - v c * pow2 256 == SD.bn_v f1 - SD.bn_v f2)
+
 let sub4 f1 f2 =
-  let (f10, f11, f12, f13) = f1 in
-  let (f20, f21, f22, f23) = f2 in
-  let o0, c0 = subborrow f10 f20 (u64 0) in
-  let o1, c1 = subborrow f11 f21 c0 in
-  let o2, c2 = subborrow f12 f22 c1 in
-  let o3, c3 = subborrow f13 f23 c2 in
-  let out = (o0, o1, o2, o3) in
-  lemma_mul_assos_5 (v c3) (pow2 64) (pow2 64) (pow2 64) (pow2 64);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  c3, out
+  let c, out = SB.bn_sub f1 f2 in
+  SB.bn_sub_lemma f1 f2;
+  c, out
 
-val fsub4:
-    f1:felem4
-  -> f2:felem4
-  -> out:felem4{feval out == fsub (feval f1) (feval f2)}
+
+val lemma_sub1_carry: f:felem -> cin:uint64{v cin * 38 < pow2 63} ->
+  Lemma (let c, r = sub1 f (cin *! u64 38) in
+    let b1 = r.[0] -. c *. u64 38 in
+    v b1 == v r.[0] - v c * 38)
+
+let lemma_sub1_carry f cin =
+  let c, r = sub1 f (cin *! u64 38) in
+  let b1 = r.[0] -. c *. u64 38 in
+  assert (SD.bn_v r - v c * pow2 256 == SD.bn_v f - v cin * 38);
+
+  SD.bn_eval_split_i f 1;
+  SD.bn_eval1 (slice f 0 1);
+  //assert (SD.bn_v f == v f.[0] + pow2 64 * SD.bn_v (slice f 1 4));
+  SD.bn_eval_split_i r 1;
+  SD.bn_eval1 (slice r 0 1);
+  assert (v r.[0] + pow2 64 * SD.bn_v (slice r 1 4) - v c * pow2 256 == v f.[0] + pow2 64 * SD.bn_v (slice f 1 4) - v cin * 38);
+  SD.bn_eval_bound (slice f 1 4) 3;
+  SD.bn_eval_bound (slice r 1 4) 3;
+  Math.Lemmas.pow2_plus 64 192;
+  assert (v r.[0] == (v f.[0] - v cin * 38) % pow2 64)
+
+
+val fsub4: f1:felem -> f2:felem ->
+  Pure felem
+  (requires True)
+  (ensures  fun out ->
+    SD.bn_v out % P.prime == P.fsub (SD.bn_v f1 % P.prime) (SD.bn_v f2 % P.prime))
+
 let fsub4 f1 f2 =
-  let c0, out0 = sub4 f1 f2 in
-  let c1, out1 = sub1 out0 (c0 *! u64 38) in
-  let (o0, o1, o2, o3) = out1 in
-  let o0' = o0 -! c1 *! u64 38 in
-  let out2 = (o0', o1, o2, o3) in
-  assert (as_nat4 out2 == as_nat4 out1 - v c1 * 38);
-  assert (as_nat4 out2 == as_nat4 f1 - as_nat4 f2 + v c0 * pow2 256 -
-    v c0 * 38 + v c1 * pow2 256 - v c1 * 38);
-  lemma_fsub4 out2 f1 f2 c0 c1;
-  out2
+  let c0, r0 = sub4 f1 f2 in
+  let c1, r1 = sub1 r0 (c0 *! u64 38) in
+  let b1 = r1.[0] -. c1 *. u64 38 in
 
-val mul4:
-    f:felem4
-  -> r:felem4
-  -> out:felem_wide4{wide_as_nat4 out == as_nat4 f * as_nat4 r}
-let mul4 f r =
-  let (f0, f1, f2, f3) = f in
-  let c0, out0 = mul1 r f0 in
-  let (o00, o01, o02, o03) = out0 in
-  let c1, out1 = mul1_add r f1 (o01, o02, o03, c0) in
-  let (o11, o12, o13, o14) = out1 in
-  let c2, out2 = mul1_add r f2 (o12, o13, o14, c1) in
-  let (o22, o23, o24, o25) = out2 in
-  let c3, out3 = mul1_add r f3 (o23, o24, o25, c2) in
-  let (o33, o34, o35, o36) = out3 in
-  let o37 = c3 in
-  let out = (o00, o11, o22, o33, o34, o35, o36, o37) in
-  lemma_mul4 (as_nat4 r) (v f0) (v f1) (v f2) (v f3) (v c0) (v c1) (v c2) (v c3)
-    (v o01) (v o02) (v o03) (v o12) (v o13) (v o14) (v o23) (v o24) (v o25) (v o34) (v o35) (v o36);
-  lemma_mul4_expand f r;
+  let out = r1.[0] <- b1 in
+  SD.bn_upd_eval r1 b1 0;
+  calc (==) {
+    SD.bn_v out % P.prime;
+    (==) { assert_norm (pow2 0 = 1) }
+    (SD.bn_v r1 - v r1.[0] + v b1) % P.prime;
+    (==) { lemma_sub1_carry r0 c0 }
+    (SD.bn_v r1 - v r1.[0] + (v r1.[0] - v c1 * 38)) % P.prime;
+    (==) { }
+    (SD.bn_v f1 - SD.bn_v f2 + v c0 * pow2 256 - v c0 * 38 + v c1 * pow2 256 - v c1 * 38) % P.prime;
+    (==) { Lemmas.lemma_fsub4 (SD.bn_v f1) (SD.bn_v f2) (v c0) (v c1) }
+    (SD.bn_v f1 % P.prime - SD.bn_v f2 % P.prime) % P.prime;
+    };
   out
 
-val fmul4:
-    f1:felem4
-  -> r:felem4
-  -> out:felem4{feval out == fmul (feval f1) (feval r)}
+
+val mul4: f:felem -> r:felem ->
+  Pure felem_wide
+  (requires True)
+  (ensures  fun out ->
+    SD.bn_v out == SD.bn_v f * SD.bn_v r)
+
+let mul4 f r =
+  let out = SB.bn_mul f r in
+  SB.bn_mul_lemma f r;
+  out
+
+
+val fmul4: f1:felem -> r:felem ->
+  Pure felem
+  (requires True)
+  (ensures  fun out ->
+    SD.bn_v out % P.prime == P.fmul (SD.bn_v f1 % P.prime) (SD.bn_v r % P.prime))
+
 let fmul4 f1 r =
   let tmp = mul4 f1 r in
   let out = carry_wide tmp in
-  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat4 f1) (as_nat4 r) prime;
-  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat4 f1 % prime) (as_nat4 r) prime;
+  Math.Lemmas.lemma_mod_mul_distr_l (SD.bn_v f1) (SD.bn_v r) P.prime;
+  Math.Lemmas.lemma_mod_mul_distr_r (SD.bn_v f1 % P.prime) (SD.bn_v r) P.prime;
   out
 
-val fmul14:
-    f1:felem4
-  -> f2:uint64{v f2 < pow2 17} //121665 < pow2 17
-  -> out:felem4{feval out == (feval f1 * v f2) % prime}
+
+//121665 < pow2 17
+val fmul14: f1:felem -> f2:uint64 ->
+  Pure felem
+  (requires v f2 < pow2 17)
+  (ensures  fun out ->
+    SD.bn_v out % P.prime == SD.bn_v f1 % P.prime * v f2 % P.prime)
+
 let fmul14 f1 f2 =
-  let c0, out0 = mul1 f1 f2 in
-  assert (as_nat4 out0 + v c0 * pow2 256 == as_nat4 f1 * v f2);
-  lemma_as_nat4 f1;
-  lemma_fmul14 (as_nat4 f1) (v f2);
-  lemma_as_nat4 out0;
-  lemma_fmul14_no_carry0 (as_nat4 out0) (as_nat4 f1 * v f2) (v c0);
-  assert (v c0 < pow2 17);
-  assert_norm (38 * pow2 17 < pow2 63);
-  let out1 = carry_pass out0 c0 in
-  assert (feval out1 == (as_nat4 f1 * v f2) % prime);
-  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat4 f1) (v f2) prime;
-  out1
+  let c0, r0 = mul1 f1 f2 in
+  assert (SD.bn_v r0 + v c0 * pow2 256 == SD.bn_v f1 * v f2);
+  SD.bn_eval_bound f1 4;
+  SD.bn_eval_bound r0 4;
+  Lemmas.fmul14_bound (SD.bn_v r0) (v c0) (SD.bn_v f1) (v f2);
 
-val sqr4: f:felem4 -> out:felem_wide4{wide_as_nat4 out == as_nat4 f * as_nat4 f}
-let sqr4 f = mul4 f f
+  let out = carry_pass r0 c0 in
+  calc (==) {
+    SD.bn_v out % P.prime;
+    (==) { carry_pass_lemma r0 c0 }
+    (SD.bn_v r0 + v c0 * pow2 256) % P.prime;
+    (==) { }
+    (SD.bn_v f1 * v f2) % P.prime;
+    (==) {Math.Lemmas.lemma_mod_mul_distr_l (SD.bn_v f1) (v f2) P.prime }
+    (SD.bn_v f1 % P.prime * v f2) % P.prime;
+    };
+  out
 
-val fsqr4: f:felem4 -> out:felem4{feval out == fmul (feval f) (feval f)}
+
+val sqr4: f:felem ->
+  Pure felem_wide
+  (requires True)
+  (ensures  fun out ->
+    SD.bn_v out == SD.bn_v f * SD.bn_v f)
+
+let sqr4 f =
+  let out = SB.bn_sqr f in
+  SB.bn_sqr_lemma f;
+  out
+
+
+val fsqr4: f:felem ->
+  Pure felem
+  (requires True)
+  (ensures  fun out ->
+    SD.bn_v out % P.prime == P.fmul (SD.bn_v f % P.prime) (SD.bn_v f % P.prime))
+
 let fsqr4 f =
   let tmp = sqr4 f in
   let out = carry_wide tmp in
-  FStar.Math.Lemmas.lemma_mod_mul_distr_l (as_nat4 f) (as_nat4 f) prime;
-  FStar.Math.Lemmas.lemma_mod_mul_distr_r (as_nat4 f % prime) (as_nat4 f) prime;
+  Math.Lemmas.lemma_mod_mul_distr_l (SD.bn_v f) (SD.bn_v f) P.prime;
+  Math.Lemmas.lemma_mod_mul_distr_r (SD.bn_v f % P.prime) (SD.bn_v f) P.prime;
   out

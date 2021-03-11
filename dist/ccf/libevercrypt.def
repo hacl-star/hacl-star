@@ -1,8 +1,8 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  Spec_Cipher_Expansion_cipher_alg_of_impl
   LowStar_Vector_new_capacity
+  Spec_Cipher_Expansion_cipher_alg_of_impl
   Hacl_Blake2b_32_blake2b
   Hacl_Blake2s_32_blake2s
   Hacl_HMAC_DRBG_min_length
@@ -94,6 +94,8 @@ EXPORTS
   EverCrypt_AutoConfig2_disable_hacl
   EverCrypt_AutoConfig2_disable_openssl
   EverCrypt_AutoConfig2_disable_bcrypt
+  EverCrypt_AutoConfig2_has_vec128
+  EverCrypt_AutoConfig2_has_vec256
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
   EverCrypt_Hash___proj__MD5_s__item__p
@@ -167,17 +169,18 @@ EXPORTS
   Hacl_Salsa20_salsa20_decrypt
   Hacl_Salsa20_salsa20_key_block0
   Hacl_Salsa20_hsalsa20
-  Hacl_Curve25519_64_Slow_scalarmult
-  Hacl_Curve25519_64_Slow_secret_to_public
-  Hacl_Curve25519_64_Slow_ecdh
   Hacl_Curve25519_64_scalarmult
   Hacl_Curve25519_64_secret_to_public
   Hacl_Curve25519_64_ecdh
   Hacl_Impl_Curve25519_Field51_fadd
   Hacl_Impl_Curve25519_Field51_fsub
   Hacl_Impl_Curve25519_Field51_fmul
+  Hacl_Impl_Curve25519_Field51_fmul2
   Hacl_Impl_Curve25519_Field51_fmul1
   Hacl_Impl_Curve25519_Field51_fsqr
+  Hacl_Impl_Curve25519_Field51_fsqr2
+  Hacl_Impl_Curve25519_Field51_store_felem
+  Hacl_Impl_Curve25519_Field51_cswap2
   Hacl_Curve25519_51_fsquare_times
   Hacl_Curve25519_51_finv
   Hacl_Curve25519_51_scalarmult
@@ -296,10 +299,9 @@ EXPORTS
   EverCrypt_CTR_init
   EverCrypt_CTR_update_block
   EverCrypt_CTR_free
-  Hacl_Frodo_KEM_crypto_kem_keypair
-  Hacl_Frodo_KEM_crypto_kem_enc
-  Hacl_Frodo_KEM_crypto_kem_dec
+  Hacl_IntTypes_Intrinsics_add_carry_u32
   Hacl_IntTypes_Intrinsics_add_carry_u64
+  Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
   EverCrypt_Ed25519_sign
   EverCrypt_Ed25519_verify

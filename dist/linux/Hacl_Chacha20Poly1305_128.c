@@ -60,9 +60,9 @@ static inline void poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, u32
               e[_i] = Lib_IntVector_Intrinsics_vec128_zero;
           }
           {
-            Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load_le(block);
+            Lib_IntVector_Intrinsics_vec128 b1 = Lib_IntVector_Intrinsics_vec128_load64_le(block);
             Lib_IntVector_Intrinsics_vec128
-            b2 = Lib_IntVector_Intrinsics_vec128_load_le(block + (u32)16U);
+            b2 = Lib_IntVector_Intrinsics_vec128_load64_le(block + (u32)16U);
             Lib_IntVector_Intrinsics_vec128
             lo = Lib_IntVector_Intrinsics_vec128_interleave_low64(b1, b2);
             Lib_IntVector_Intrinsics_vec128
@@ -1042,7 +1042,8 @@ static inline void poly1305_do_128(u8 *k, u32 aadlen, u8 *aad, u32 mlen, u8 *m, 
     Lib_IntVector_Intrinsics_vec128 *pre;
     Lib_IntVector_Intrinsics_vec128 *acc;
     Hacl_Poly1305_128_poly1305_init(ctx, k);
-    poly1305_padded_128(ctx, aadlen, aad);
+    if (aadlen != (u32)0U)
+      poly1305_padded_128(ctx, aadlen, aad);
     poly1305_padded_128(ctx, mlen, m);
     store64_le(block, (u64)aadlen);
     store64_le(block + (u32)8U, (u64)mlen);

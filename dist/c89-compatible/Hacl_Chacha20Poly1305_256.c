@@ -61,9 +61,9 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
               e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
           }
           {
-            Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load_le(block);
+            Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load64_le(block);
             Lib_IntVector_Intrinsics_vec256
-            hi = Lib_IntVector_Intrinsics_vec256_load_le(block + (uint32_t)32U);
+            hi = Lib_IntVector_Intrinsics_vec256_load64_le(block + (uint32_t)32U);
             Lib_IntVector_Intrinsics_vec256
             mask260 = Lib_IntVector_Intrinsics_vec256_load64((uint64_t)0x3ffffffU);
             Lib_IntVector_Intrinsics_vec256
@@ -1052,7 +1052,10 @@ poly1305_do_256(
     Lib_IntVector_Intrinsics_vec256 *pre;
     Lib_IntVector_Intrinsics_vec256 *acc;
     Hacl_Poly1305_256_poly1305_init(ctx, k);
-    poly1305_padded_256(ctx, aadlen, aad);
+    if (aadlen != (uint32_t)0U)
+    {
+      poly1305_padded_256(ctx, aadlen, aad);
+    }
     poly1305_padded_256(ctx, mlen, m);
     store64_le(block, (uint64_t)aadlen);
     store64_le(block + (uint32_t)8U, (uint64_t)mlen);

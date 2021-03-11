@@ -11,7 +11,6 @@ open Lib.Buffer
 open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
-module F56 = Hacl.Impl.Ed25519.Field56
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
@@ -156,6 +155,7 @@ let point_compress_ tmp p =
   reduce x;
   fmul out py zinv;
   reduce_513 out
+
 
 val point_compress:
   out:lbuffer uint8 32ul

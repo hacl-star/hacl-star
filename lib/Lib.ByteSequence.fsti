@@ -33,6 +33,21 @@ val seq_eq_mask: #t:inttype{~(S128? t)} -> #len1:size_nat -> #len2:size_nat
 inline_for_extraction
 val lbytes_eq: #len:size_nat -> b1:lbytes len -> b2:lbytes len -> b:bool{b <==> b1 == b2}
 
+inline_for_extraction
+val mask_select: #t:inttype{~(S128? t)} -> mask:int_t t SEC -> a:int_t t SEC -> b:int_t t SEC -> int_t t SEC
+
+val mask_select_lemma: #t:inttype{~(S128? t)} -> mask:int_t t SEC -> a:int_t t SEC -> b:int_t t SEC -> Lemma
+  (requires v mask = 0 \/ v mask = v (ones t SEC))
+  (ensures  mask_select mask a b == (if v mask = 0 then b else a))
+
+val seq_mask_select: #t:inttype{~(S128? t)} -> #len:size_nat
+  -> a:lseq (int_t t SEC) len
+  -> b:lseq (int_t t SEC) len
+  -> mask:int_t t SEC
+  -> Pure (lseq (int_t t SEC) len)
+    (requires v mask = 0 \/ v mask = v (ones t SEC))
+    (ensures  fun res -> res == (if v mask = 0 then b else a))
+
 /// Constant for empty lbytes
 
 
@@ -86,12 +101,12 @@ val index_nat_to_intseq_be:
            uint #t #l (n / pow2 (bits t * i) % pow2 (bits t)))
 
 inline_for_extraction
-val nat_to_bytes_be: #l:secrecy_level -> len:nat -> n:nat{n < pow2 (8 * len)}
-  -> b:bytes_l l{length b == len /\ n == nat_from_intseq_be #U8 b}
+let nat_to_bytes_be (#l:secrecy_level) (len:nat) (n:nat{n < pow2 (8 * len)}) : b:bytes_l l{length b == len /\ n == nat_from_intseq_be #U8 b} =
+  nat_to_intseq_be #U8 #l len n
 
 inline_for_extraction
-val nat_to_bytes_le: #l:secrecy_level -> len:nat -> n:nat{n < pow2 (8 * len)}
-  -> b:bytes_l l{length b == len /\ n == nat_from_intseq_le #U8 b}
+let nat_to_bytes_le (#l:secrecy_level) (len:nat) (n:nat{n < pow2 (8 * len)}) : b:bytes_l l{length b == len /\ n == nat_from_intseq_le #U8 b} =
+  nat_to_intseq_le #U8 #l len n
 
 inline_for_extraction
 val uint_to_bytes_le: #t:inttype{unsigned t} -> #l:secrecy_level -> uint_t t l -> lbytes_l l (numbytes t)
@@ -268,3 +283,11 @@ val lemma_uint_from_to_bytes_be_preserves_value :
   #l : secrecy_level ->
   s : lbytes_l l (numbytes t) ->
   Lemma(uint_to_bytes_be #t #l (uint_from_bytes_be #t #l s) `equal` s)
+
+val nat_from_intseq_be_public_to_secret:
+  #t:inttype{unsigned t} -> len:size_pos{len * bits t < pow2 32} -> b:lseq (uint_t t PUB) len ->
+  Lemma (nat_from_intseq_be b == nat_from_intseq_be (map secret b))
+
+val nat_from_intseq_le_public_to_secret:
+  #t:inttype{unsigned t} -> len:size_pos{len * bits t < pow2 32} -> b:lseq (uint_t t PUB) len ->
+  Lemma (nat_from_intseq_le b == nat_from_intseq_le (map secret b))

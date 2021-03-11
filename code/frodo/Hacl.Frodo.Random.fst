@@ -14,11 +14,14 @@ module S = Spec.Frodo.Random
 
 friend Lib.IntTypes
 
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
 let state = gcmalloc HyperStack.root 0uy 48ul
 
 let randombytes_init_ entropy_input =
   let h0 = HyperStack.ST.get () in
-  assume (as_seq h0 state == S.randombytes_init_ (as_seq h0 entropy_input))  
+  assume (as_seq h0 state == S.randombytes_init_ (as_seq h0 entropy_input))
+
 
 let randombytes_ len res =
   let h0 = HyperStack.ST.get () in

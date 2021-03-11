@@ -11,6 +11,7 @@ open Lib.ByteSequence
 open Spec.P256
 open Spec.ECDSA
 open Spec.P256.Definitions
+open Hacl.Spec.P256.Felem
 open Spec.DH
 open Spec.ECDSAP256.Definition
 open Spec.P256.Lemmas

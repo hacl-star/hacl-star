@@ -166,29 +166,7 @@ val point_negate: p:F51.point -> out:F51.point ->
     F51.point_eval h1 out == SC.((-x1) % prime, y1, z1, (-t1) % prime)))
 
 let point_negate p out =
-  push_frame ();
-  let zero = create 5ul (u64 0) in
-  Hacl.Bignum25519.make_zero zero;
-  let x = sub p 0ul 5ul in
-  let y = sub p 5ul 5ul in
-  let z = sub p 10ul 5ul in
-  let t = sub p 15ul 5ul in
-
-  let x1 = sub out 0ul 5ul in
-  let y1 = sub out 5ul 5ul in
-  let z1 = sub out 10ul 5ul in
-  let t1 = sub out 15ul 5ul in
-
-  copy x1 x;
-  Hacl.Bignum25519.fdifference x1 zero;
-  Hacl.Bignum25519.reduce_513 x1;
-  copy y1 y;
-  copy z1 z;
-  copy t1 t;
-  Hacl.Bignum25519.fdifference t1 zero;
-  Hacl.Bignum25519.reduce_513 t1;
-  pop_frame()
-
+  Hacl.Impl.Ed25519.PointNegate.point_negate p out
 
 val point_add: p:F51.point -> q:F51.point -> out:F51.point ->
   Stack unit

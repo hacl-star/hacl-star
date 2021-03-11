@@ -21,6 +21,8 @@ val secret_to_public:
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       as_seq h1 out == Spec.Ed25519.secret_to_public (as_seq h0 secret)
     )
+
+[@CInline]
 let secret_to_public out secret =
   push_frame();
   let expanded_secret = create 64ul (u8 0) in

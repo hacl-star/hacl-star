@@ -107,6 +107,8 @@ bool EverCrypt_AutoConfig2_has_avx512();
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_wants_vale */
 
+KRML_DEPRECATED("")
+
 bool EverCrypt_AutoConfig2_wants_vale();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_wants_vale */
@@ -236,6 +238,18 @@ void EverCrypt_AutoConfig2_disable_openssl();
 void EverCrypt_AutoConfig2_disable_bcrypt();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_bcrypt */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_vec128 */
+
+bool EverCrypt_AutoConfig2_has_vec128();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_vec128 */
+
+/* SNIPPET_START: EverCrypt_AutoConfig2_has_vec256 */
+
+bool EverCrypt_AutoConfig2_has_vec256();
+
+/* SNIPPET_END: EverCrypt_AutoConfig2_has_vec256 */
 
 #if defined(__cplusplus)
 }

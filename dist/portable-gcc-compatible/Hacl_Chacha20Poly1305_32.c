@@ -421,7 +421,10 @@ poly1305_do_32(
   uint64_t ctx[25U] = { 0U };
   uint8_t block[16U] = { 0U };
   Hacl_Poly1305_32_poly1305_init(ctx, k);
-  poly1305_padded_32(ctx, aadlen, aad);
+  if (aadlen != (uint32_t)0U)
+  {
+    poly1305_padded_32(ctx, aadlen, aad);
+  }
   poly1305_padded_32(ctx, mlen, m);
   store64_le(block, (uint64_t)aadlen);
   store64_le(block + (uint32_t)8U, (uint64_t)mlen);
