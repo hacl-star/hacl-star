@@ -34,7 +34,7 @@ static inline void fdifference(uint64_t *a, uint64_t *b)
   Hacl_Impl_Curve25519_Field51_fsub(a, b, a);
 }
 
-static inline void reduce_513(uint64_t *a)
+static void reduce_513(uint64_t *a)
 {
   uint64_t f0 = a[0U];
   uint64_t f1 = a[1U];
@@ -139,7 +139,7 @@ static inline void fsquare_times_inplace(uint64_t *output, uint32_t count)
   Hacl_Curve25519_51_fsquare_times(output, output, tmp, count);
 }
 
-static inline void inverse(uint64_t *out, uint64_t *a)
+static void inverse(uint64_t *out, uint64_t *a)
 {
   uint128_t tmp[10U];
   for (uint32_t _i = 0U; _i < (uint32_t)10U; ++_i)
@@ -200,7 +200,7 @@ static inline void reduce(uint64_t *out)
   out[4U] = f41;
 }
 
-static inline void load_51(uint64_t *output, uint8_t *input)
+static void load_51(uint64_t *output, uint8_t *input)
 {
   uint64_t u64s[4U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
@@ -221,7 +221,7 @@ static inline void load_51(uint64_t *output, uint8_t *input)
   output[4U] = u64s[3U] >> (uint32_t)12U;
 }
 
-static inline void store_51(uint8_t *output, uint64_t *input)
+static void store_51(uint8_t *output, uint64_t *input)
 {
   uint64_t u64s[4U] = { 0U };
   Hacl_Impl_Curve25519_Field51_store_felem(u64s, input);
@@ -231,7 +231,7 @@ static inline void store_51(uint8_t *output, uint64_t *input)
   }
 }
 
-static inline void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
+static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
 {
   uint64_t tmp[30U] = { 0U };
   uint64_t *tmp1 = tmp;
@@ -407,7 +407,7 @@ static inline void swap_conditional_inplace(uint64_t *a, uint64_t *b, uint64_t i
     swap);
 }
 
-static inline void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
+static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
 {
   uint64_t b[80U] = { 0U };
   uint64_t *nq = b;
@@ -485,7 +485,7 @@ static inline void point_mul_g(uint64_t *result, uint8_t *scalar)
   point_mul(result, scalar, g);
 }
 
-static inline void point_compress(uint8_t *z, uint64_t *p)
+static void point_compress(uint8_t *z, uint64_t *p)
 {
   uint64_t tmp[15U] = { 0U };
   uint64_t *x = tmp + (uint32_t)5U;
@@ -1382,7 +1382,7 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
   return res0;
 }
 
-static inline bool point_decompress(uint64_t *out, uint8_t *s)
+static bool point_decompress(uint64_t *out, uint8_t *s)
 {
   uint64_t tmp[10U] = { 0U };
   uint64_t *y = tmp;
@@ -1474,7 +1474,7 @@ static inline bool eq(uint64_t *a, uint64_t *b)
   return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4;
 }
 
-static inline bool point_equal(uint64_t *p, uint64_t *q)
+static bool point_equal(uint64_t *p, uint64_t *q)
 {
   uint64_t tmp[20U] = { 0U };
   uint64_t *pxqz = tmp;
