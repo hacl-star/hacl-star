@@ -1,0 +1,31 @@
+(executable
+ (name gen_dune_rules)
+ (modules gen_dune_rules))
+
+(rule
+ (deps libintvector.h lib_intrinsics.h)
+ (targets config.h Makefile.config)
+ (action
+  (run ./configure)))
+
+(rule
+ (deps
+  (file config.h)
+  (source_tree .))
+ (targets libevercrypt.a libevercrypt.so)
+ (action
+  (no-infer
+   (progn
+    (run make libevercrypt.a libevercrypt.so)))))
+
+(rule
+ (action
+  (progn
+   (copy libevercrypt.a libocamlevercrypt.a)
+   (copy libevercrypt.so dllocamlevercrypt.so))))
+
+(library
+ (name ocamlevercrypt)
+ (public_name hacl-star-raw.ocamlevercrypt)
+ (modules)
+ (foreign_archives ocamlevercrypt))

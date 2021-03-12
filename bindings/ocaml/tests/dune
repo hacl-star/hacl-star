@@ -15,6 +15,7 @@
  (preprocess (action (run %{bin:cppo} %{input-file})))
  (flags (:standard -open Hacl_star -warn-error -3)))
 
-(rule (targets config.h) (deps)
+(rule
+ (targets config.h)
  (action
-  (bash "cp $(ocamlfind query hacl-star-raw)/config.h .")))
+  (copy %{lib:hacl-star-raw:config.h} config.h)))

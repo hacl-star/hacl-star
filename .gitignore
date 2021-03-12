@@ -15,6 +15,9 @@ out.krml
 .extracted
 .*depend*
 .evercrypt_config
+/_opam
+/duniverse
+/*.opam.locked
 code/**/dist
 !code/**/dist/Makefile
 code/old/experimental/aesgcm/aesgcm-c
@@ -27,6 +30,6 @@ Makefile.config
 tests/benchmark/build
 dist/**/lib/*_stubs.ml
 dist/**/lib/*_c_stubs.c
-doc/_build
+_build
 config.h
 *.smt2

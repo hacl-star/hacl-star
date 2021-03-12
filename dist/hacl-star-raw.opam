@@ -16,11 +16,11 @@ which `hacl-star-raw` is a dependency.
 """
 depends: [
   "ocaml" { >= "4.05.0" }
-  "ocamlfind" {build}
+  "dune" { >= "2.6" }
   "ctypes"
   "ctypes-foreign"
-  "conf-which" {build}
 ]
+dev-repo: "git+https://github.com/project-everest/hacl-star.git"
 x-ci-accept-failures: [
   "centos-7" # Default C compiler is too old
   "oraclelinux-7" # Default C compiler is too old
@@ -29,9 +29,6 @@ available: [
   os-family != "bsd"
 ]
 build: [
-  ["./configure"]
-  [make]
-]
-install: [
-  make "install-hacl-star-raw"
+  ["dune" "subst"] {pinned}
+  ["dune" "build" "-p" name "-j" jobs "@install" "@runtest" {with-test} "@doc" {with-doc}]
 ]
