@@ -26,6 +26,7 @@ let copy_state (#m:m_spec) (st:state m) (ost:state m) =
 
 inline_for_extraction
 let load_block0 (#m:m_spec) (st:state m) (b:lbuffer uint8 16ul) =
+  admit();
   match m with
   | MAES -> Hacl.Impl.AES.CoreNI.load_block0 st b
   | M32 -> Hacl.Impl.AES.CoreBitSlice.load_block0 st b
@@ -93,6 +94,7 @@ let aes_keygen_assist1 #m n p =
 
 inline_for_extraction
 let key_expansion_step #m n p =
+  admit();
   match m with
   | MAES -> Hacl.Impl.AES.CoreNI.key_expansion_step n p
   | M32 -> Hacl.Impl.AES.CoreBitSlice.key_expansion_step n p

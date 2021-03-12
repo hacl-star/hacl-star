@@ -28,6 +28,7 @@ let ( <<| )  (#n:bitlen) (#l:lanes) (x:u1xNxL n l) (y:nat{y < n}) : u1xNxL n l =
 
 type state (l: lanes) = fseq (u1xNxL 16 l) 8
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let rotate_row_right (#l:lanes) (x:u1xNxL 16 l) (i:nat{i < 4}) (r:nat{r < 4}) =
   if r = 0 then x else
   let row_mask16 = from_uint16 (0x1111us <<. size i) in
@@ -35,6 +36,7 @@ let rotate_row_right (#l:lanes) (x:u1xNxL 16 l) (i:nat{i < 4}) (r:nat{r < 4}) =
   let xm = x &| row_mask in
   (xm >>| (4*r)) || (xm <<| (16-(4*r)))
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let rotate_cols_right (#l:lanes) (x:u1xNxL 16 l) (r:nat{r < 4}) =
   if r = 0 then x
   else if r = 1 then
@@ -52,19 +54,24 @@ let rotate_cols_right (#l:lanes) (x:u1xNxL 16 l) (r:nat{r < 4}) =
 
 type blocks (l: lanes) = fseq (fseq uint8 16) l
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let store_state (#l:lanes) (s:state l) : blocks l =
     createi l (fun i -> createi 16 (fun j -> createi 8 (fun k -> s.[k].[i].[j])))
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let load_state (#l:lanes) (s:blocks l) : state l =
     createi 8 (fun i -> createi l (fun j -> createi 16 (fun k -> s.[j].[i].[j])))
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let store_state0 (#l:lanes) (s:state l) : blocks 1 =
     createi 16 (fun j -> createi 8 (fun k -> s.[k].[0].[j]))
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let load_state0 (#l:lanes) (s:blocks 1) : state l =
     createi 8 (fun i -> createi l (fun j -> if j = 0 then createi 16 (fun k -> s.[0].[k].[i]) else create 16 (u1 0)))
 
 #set-options "--z3rlimit 100"
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val subBytes: #n:bitlen -> #l: lanes -> s: fseq (u1xNxL n l) 8 -> fseq (u1xNxL n l) 8
 let subBytes #n #l (st0, (st1, (st2, (st3, (st4, (st5, (st6, st7)))))))  =
   let u0: u1xNxL n l = st7 in
@@ -211,6 +218,7 @@ let subBytes #n #l (st0, (st1, (st2, (st3, (st4, (st5, (st6, st7)))))))  =
 
 (* The result of subbytes is the same as calling the sbox for each uint8
    in the transpose of the state *)
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val subBytesVecLemma: #n:bitlen -> #l: lanes -> s: fseq (u1xNxL n l) 8 ->
 		   i:nat{i < 8} -> j:nat{j < l} -> k:nat{k < n} ->
 		   Lemma (let r = subBytes #n #l s in
@@ -220,6 +228,8 @@ val subBytesVecLemma: #n:bitlen -> #l: lanes -> s: fseq (u1xNxL n l) 8 ->
 let subBytesVecLemma #n #l s i j k = admit()
 
 assume val sbox: uint8 -> uint8
+
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val subBytesLemma: #l:lanes -> s: state l ->
 		   i:nat{i < 8} -> j:nat{j < l} -> k:nat{k < 16} ->
 		   Lemma (let r = subBytes #16 #l s in
@@ -228,6 +238,7 @@ val subBytesLemma: #l:lanes -> s: state l ->
 			  r.[i].[j].[k] == r'.[i])
 let subBytesLemma #l s i j k = admit()
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val mix_columns: #l:lanes -> s:state l -> state l
 let mix_columns #l s =
   let cols = map (fun u -> u ^| rotate_cols_right u 1) s in
@@ -253,6 +264,7 @@ let mix_columns #l s =
   s'
 
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val shift_rows: #l:lanes -> s:state l -> state l
 let shift_rows #l s =
   map (fun u -> u ||
@@ -260,9 +272,11 @@ let shift_rows #l s =
 	 (rotate_row_right #l u 2 2) ||
 	 (rotate_row_right #l u 3 3)) s
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val xor_state_key1: #l:lanes -> state l -> state l -> state l
 let xor_state_key1 #l s1 s2 = map2 (^|) s1 s2
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val aes_enc: #l:lanes -> state l -> state l -> state l
 let aes_enc #l st key =
     let st = subBytes st in
@@ -270,6 +284,7 @@ let aes_enc #l st key =
     let st = mix_columns st in
     xor_state_key1 st key
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val aes_enc_last: #l:lanes -> state l -> state l -> state l
 let aes_enc_last #l st key =
     let st = subBytes st in
@@ -277,8 +292,8 @@ let aes_enc_last #l st key =
     xor_state_key1 st key
 
 
-[@"opaque_to_smt"]
-inline_for_extraction
+(* [@"opaque_to_smt"] *)
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let list_rcon: List.Tot.llist (uint_t U8 PUB) 11 =
   [@inline_let]
   let l = [
@@ -288,11 +303,12 @@ let list_rcon: List.Tot.llist (uint_t U8 PUB) 11 =
   assert_norm(List.Tot.length l == 11);
   l
 
-inline_for_extraction
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let rconTable  : Seq.lseq uint8 11 =
   admit();
   Seq.seq_of_list list_rcon
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let rcon_seq : fseq uint8 11 =
   (from_uint8 0x8duy,(
    from_uint8 0x01uy,(
@@ -306,6 +322,7 @@ let rcon_seq : fseq uint8 11 =
    from_uint8 0x1buy,(
    from_uint8 0x36uy)))))))))))
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val aes_keygen_assisti: #l:lanes -> rcon:uint8 -> i:nat{i < 8} -> u1xNxL 16 l -> u1xNxL 16 l
 let aes_keygen_assisti #l rcon i u =
   let row_mask16 = from_uint16 0xf000us in
@@ -318,11 +335,13 @@ let aes_keygen_assisti #l rcon i u =
   let n = n <<| 12 in
   n ^| (u3 >>| 4)
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val aes_keygen_assist: #l:lanes -> rcon:uint8 -> state l -> state l
 let aes_keygen_assist #l rcon prev =
   mapi (aes_keygen_assisti rcon) prev
 
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val aes_keygen_assist0: #l:lanes -> rcon:uint8 -> state l -> state l
 let aes_keygen_assist0 #l rcon prev =
   let next = aes_keygen_assist rcon prev in
@@ -334,6 +353,7 @@ let aes_keygen_assist0 #l rcon prev =
     let n3210 = n32 ^| (n32 >>| 8) in
     n3210) next
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val aes_keygen_assist1: #l:lanes -> state l -> state l
 let aes_keygen_assist1 #l prev =
   let next = aes_keygen_assist (from_uint8 0uy) prev in
@@ -345,6 +365,7 @@ let aes_keygen_assist1 #l prev =
     let n3210 = n32 ^| (n32 >>| 8) in
     n3210) next
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val key_expand1: #l:lanes -> u1xNxL 16 l -> u1xNxL 16 l -> u1xNxL 16 l
 let key_expand1 #l p n =
     let mask1 = create l (from_uint16 0x0fffus) in
@@ -353,25 +374,32 @@ let key_expand1 #l p n =
     let p = p ^| ((p &| mask1) <<| 4) ^| ((p &| mask2) <<| 8) ^| ((p &| mask3) <<| 12) in
     n ^| p
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val key_expansion_step: #l:lanes -> state l -> state l -> state l
 let key_expansion_step #l prev next =
   map2 key_expand1 prev next
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 val load_key1: #l:lanes -> blocks 1 -> state l
 let load_key1 #l k =
   let st : state l = load_state0 k in
   map (fun x -> create l x.[0]) st
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let keys l nr = fseq (state l) nr
+
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let enc_rounds #l #nr (st:state l) (k:keys l nr) =
   Lib.LoopCombinators.repeati nr
     (fun i st -> aes_enc st k.[i]) st
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let block_cipher #l (#nr:nat{nr > 1 /\ nr < max_fseq_len}) (st:state l) (k:keys l (nr+1)) =
     let st = xor_state_key1 st k.[0] in
     let st = enc_rounds #l #(nr - 1) st (sub k 1 (nr - 1)) in
     aes_enc_last st k.[nr]
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let aes128_key_expansion #l (k:blocks 1) : keys l 11 =
   let k1 = load_key1 k in
   let kx = create 11 k1 in
@@ -379,6 +407,7 @@ let aes128_key_expansion #l (k:blocks 1) : keys l 11 =
     let n = aes_keygen_assist0 rcon_seq.[i+1] kx.[i] in
     kx.[i+1] <- key_expansion_step n kx.[i]) kx
 
+[@@ noextract_to "Kremlin"] inline_for_extraction noextract
 let aes256_key_expansion #l (k:blocks 2) : keys l 15 =
   let k0 = load_key1 #l (sub k 0 1) in
   let k1 = load_key1 #l (sub k 1 1) in
