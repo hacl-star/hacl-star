@@ -36,13 +36,16 @@ val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> t2: wid
   Stack unit
     (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
     (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
-      wide_as_nat c h1 t2 < getPower2 c * pow2 64 /\
-      wide_as_nat c h1 t2 = getPrime c * (wide_as_nat c h0 t % pow2 64))
+      wide_as_nat c h1 t2 = getPrime c * (wide_as_nat c h0 t % pow2 64) /\
+      wide_as_nat c h1 t2 < getPrime c * pow2 64
+  )
   
 let montgomery_multiplication_round_w_k0 #c t t2 =
+    let h0 = ST.get() in 
   let t1 = mod64 t in 
   recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
-  short_mul_bn (prime_buffer #c) t1 t2
+  short_mul_bn (prime_buffer #c) t1 t2;
+  lemma_mult_lt_left (getPrime c) (wide_as_nat c h0 t % pow2 64) (pow2 64)
 
 
 val montgomery_multiplication_round_k0: #c: curve -> k0: uint64 -> t: widefelem c -> 
@@ -50,11 +53,12 @@ val montgomery_multiplication_round_k0: #c: curve -> k0: uint64 -> t: widefelem 
   Stack unit
   (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
   (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
-    wide_as_nat c h1 t2 < getPower2 c * pow2 64 /\
+    wide_as_nat c h1 t2 < getPrime c * pow2 64 /\
     wide_as_nat c h1 t2 = getPrime c * (((wide_as_nat c h0 t % pow2 64) * uint_v k0) % pow2 64))
 
 let montgomery_multiplication_round_k0 #c k0 t t2 = 
   push_frame();
+    let h0 = ST.get() in 
     let t1 = mod64 #c t in
     
     let y = create (size 1) (u64 0) in 
@@ -67,6 +71,7 @@ let montgomery_multiplication_round_k0 #c k0 t t2 =
     let y_ = index y (size 0) in   
     modulo_addition_lemma (uint_v (Lib.Sequence.index (as_seq h y) 0)) (pow2 64) (uint_v (Lib.Sequence.index (as_seq h temp) 0));
     short_mul_bn #c (prime_buffer #c) y_ t2;
+    lemma_mult_lt_left (getPrime c) (((wide_as_nat c h0 t % pow2 64) * uint_v k0) % pow2 64) (pow2 64);
   pop_frame()
 
 
@@ -74,7 +79,7 @@ val montgomery_multiplication_round_: #c: curve -> t: widefelem c -> t2: widefel
   Stack unit
   (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
   (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
-    wide_as_nat c h1 t2 < getPower2 c * pow2 64 /\ (
+    wide_as_nat c h1 t2 < getPrime c * pow2 64 /\ (
     let k0 = min_one_prime (pow2 64) (- getPrime c) in 
     wide_as_nat c h1 t2 = getPrime c * (((wide_as_nat c h0 t % pow2 64) * k0) % pow2 64))
   )
@@ -101,20 +106,22 @@ let montgomery_multiplication_one_round_proof #c t k0 round co = admit()
 
 val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
   Stack unit 
-  (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * getPrime c /\ eq_or_disjoint t round)
+  (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * pow2 256 /\ eq_or_disjoint t round)
   (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\ (
     let k0 = min_one_prime (pow2 64) (- getPrime c) in
     wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * (((wide_as_nat c h0 t % pow2 64) * k0) % pow2 64)) / pow2 64)
   )
 
+(* disjoint round *)
 let montgomery_multiplication_round #c t round =
   push_frame(); 
     let len = getCoordinateLenU64 c in  
     let t2 = create (size 2 *! len) (u64 0) in 
     lemma_create_zero_buffer (2 * v len) c;
     montgomery_multiplication_round_ #c t t2;
-    add_long_without_carry t t2 round;
+    let carry = add_long_bn t t2 round in 
     shift1 round round; 
+    upd round (2ul *! getCoordinateLenU64 c -. 1ul) carry; 
   pop_frame()  
 
 
@@ -154,11 +161,25 @@ let lemma_up_bound1 #c i t t0 k0 t1=
   pow2_plus (64 * i) 64
 
 
+val lemma_up_bound2: #c: curve 
+  -> i: nat {i < v (getCoordinateLenU64 c)} 
+  -> t0: nat 
+  -> ti: nat {let prime = getPrime c in ti <= t0 / (pow2 (64 * (i + 1))) + prime} 
+  -> t: nat {let prime = getPrime c in t <= t0 / (pow2 (64 * i)) + prime} 
+  -> Lemma (ti <= t)
+
+
+let lemma_up_bound2 #c i t0 t =
+    admit()
+  
+
+
+
 val montgomery_multiplication_reduction: #c: curve
   -> t: widefelem c 
   -> result: felem c -> 
   Stack unit 
-  (requires (fun h -> live h t /\ wide_as_nat c h t < getPrime c /\ live h result)) 
+  (requires (fun h -> live h t /\ wide_as_nat c h t < getPrime c * getPrime c /\ live h result)) 
   (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (let prime = getPrime c in 
     as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (getPower2 c) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c (wide_as_nat c h0 t)))
@@ -172,19 +193,12 @@ let montgomery_multiplication_reduction #c t result =
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
     let prime = getPrime c in 
     live h t /\ wide_as_nat c h t < prime * prime /\ 
-    wide_as_nat c h t < prime * prime /\
-    wide_as_nat c h t <= prime * prime / (pow2 (64 * i)) + prime
-    
-    
-    in 
+    wide_as_nat c h0 t < getPrime c * pow2 (64 * v (getCoordinateLenU64 c)) /\ 
+    wide_as_nat c h t <= wide_as_nat c h0 t / (pow2 (64 * i)) + prime in 
 
-  lemma_inv1 (wide_as_nat c h0 t) (getPrime c);
-  lemma_mod_inv #c (wide_as_nat c h0 t);
+  lemma_mult_lt_left (getPrime c) (getPrime c) (pow2 (64 * v (getCoordinateLenU64 c)));
 
   let h1 = ST.get() in
-
-  assert(wide_as_nat c h0 t < getPrime c * getPrime c);
-  assert(wide_as_nat c h0 t < getPrime c * getPrime c / (pow2 (64 * 0)) + getPrime c);
     
   for 0ul len inv (fun i ->
     let h0_ = ST.get() in 
@@ -199,19 +213,23 @@ let montgomery_multiplication_reduction #c t result =
     let k0 = min_one_prime (pow2 64) (- getPrime c) in 
     let co = a0 * modp_inv2 #c (pow2 (v i * 64)) in 
 
-    lemma_up_bound1 #c (v i) a_i k0 a_il;
+    lemma_up_bound1 #c (v i) a0 a_i k0 a_il;
+    assume (k0 = min_one_prime (pow2 64) (- getPrime c));
+    assume (co % prime == a_i % prime);
+    assume (a_il = (a_i + getPrime c * ((a_i % pow2 64) * k0 % pow2 64)) / pow2 64);
 
-    admit();
     montgomery_multiplication_one_round_proof #c a_i k0 a_il co;
-    admit()
+    
+    assume(wide_as_nat c h1 t < wide_as_nat c h0 t)
 
   );
 
+  admit();
 
   let h2 = ST.get() in 
-  lemma_up_bound0 #c (wide_as_nat c h2 t); 
+  lemma_up_bound0 #c (wide_as_nat c h0 t) (wide_as_nat c h2 t); 
   assume (eq_or_disjoint t result);
-
+  admit();
   reduction_prime_2prime_with_carry t result;
   admit()
 

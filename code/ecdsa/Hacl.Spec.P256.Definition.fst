@@ -215,44 +215,72 @@ let widefelem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *! 2ul)
 
 
 noextract 
-val lseq_as_nat_: #l: size_nat -> a: lseq uint64 l -> i: nat {i <= Lib.Sequence.length a} ->  
-  Tot nat (decreases Lib.Sequence.length a - i)
+val lseq_as_nat_: #l: size_nat -> a: lseq uint64 l -> i: nat {i <= Lib.Sequence.length a} -> Tot nat
 
 let rec lseq_as_nat_ #l a i = 
-  if i = Lib.Sequence.length a then 0 else
-  let a_i = Lib.Sequence.index a i in
-  lseq_as_nat_ a (i + 1) + pow2 (64 * i) * v a_i
+  if i = 0 then 0 else
+  let a_i_1 = Lib.Sequence.index a (i - 1) in
+  lseq_as_nat_ a (i - 1) + pow2 (64 * (i - 1)) * v a_i_1
+
+val lseq_as_nat_last: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat_ #l a 0 == 0)
+
+let lseq_as_nat_last #l a = ()
+
+val lseq_as_nat_first: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat_ #l a 1 == Lib.Sequence.index a 0)
+
+let lseq_as_nat_first #l a = ()
+
 
 
 noextract 
 val lseq_as_nat: #l: size_nat -> a: lseq uint64 l -> Tot nat
 
-let lseq_as_nat #l a = lseq_as_nat_ a 0
+let lseq_as_nat #l a = lseq_as_nat_ a l
 
-val lseq_as_nat_definiton: #len:size_nat -> a:lseq uint64 len -> i: nat {i < Lib.Sequence.length a} ->
-  Lemma (lseq_as_nat_ #len a i == lseq_as_nat_ a (i + 1) + pow2 (64 * i) * v (Lib.Sequence.index a i))
+val lseq_as_nat_definiton: #len:size_nat -> a: lseq uint64 len 
+  -> i: nat {i > 0 /\ i <= len} ->
+  Lemma (lseq_as_nat_ #len a i == 
+    lseq_as_nat_ a (i - 1) + pow2 (64 * (i - 1)) * v (Lib.Sequence.index a (i - 1)))
 
 let lseq_as_nat_definiton #len b i = ()
 
 
 val lemma_create_: #l: size_nat -> i: nat {i > 0 /\ i <= l} ->
-  Lemma (let a = Seq.create l (u64 0) in lseq_as_nat_ #l a (Lib.Sequence.length a - i) == 0)
+  Lemma (let a = Seq.create l (u64 0) in lseq_as_nat_ #l a i == 0)
+
 
 let rec lemma_create_ #l i = 
   let a = Seq.create l (u64 0) in 
   match i with 
   |1 -> 
-    lseq_as_nat_definiton #l a (Lib.Sequence.length a - i)
+    lseq_as_nat_definiton #l a 1
   |_ -> 
-    let z = Lib.Sequence.length a - i in 
     lemma_create_ #l (i - 1);
-    lseq_as_nat_definiton #l a z
+    lseq_as_nat_definiton #l a i
 
 
 val lemma_create_zero_buffer: len: size_nat {len > 0} -> c: curve -> Lemma (
   lseq_as_nat #len (Seq.create len (u64 0)) == 0)
 
 let lemma_create_zero_buffer len c = lemma_create_ #len len
+
+
+val lemma_lseq_as_seq_as_forall: #l: size_nat -> a: lseq uint64 l -> b: lseq uint64 l -> i: nat {i >= 0 /\ i < l} ->
+  Lemma 
+    (requires (forall (k: nat). k <= (i - 1) ==> Lib.Sequence.index a k == Lib.Sequence.index b k))
+    (ensures (lseq_as_nat_ #l a i == lseq_as_nat_ #l b i))
+
+let rec lemma_lseq_as_seq_as_forall #l a b i = 
+  match i with 
+  |0 -> lseq_as_nat_last a; lseq_as_nat_last b
+  |_ -> 
+    assert(forall (k:nat). k <= i - 1 ==> Lib.Sequence.index a k == Lib.Sequence.index b k);
+    lemma_lseq_as_seq_as_forall a b (i - 1);
+    lseq_as_nat_definiton a i;
+    lseq_as_nat_definiton b i;
+    assert(v (Lib.Sequence.index a (i - 1)) == v (Lib.Sequence.index b (i - 1)))
+
+
 
 
 (*

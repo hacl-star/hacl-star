@@ -408,23 +408,57 @@ let shiftLeftWord #c i o =
   for 0ul len inv (fun j -> upd o j (u64 0))
   
 
-
-
 let mod64 #c a =
   let h0 = ST.get() in 
   lemma_wide_felem c h0 a;
   index a (size 0)
 
 
-let shift1 #c t out = 
-  admit();
-  let len = getCoordinateLenU64 c *! 2ul in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
-  for 0ul (len -! 1ul) inv (fun i -> 
-    let elem = index t (size 1 +! i) in 
-    upd out i elem);
-  upd out (len -! 1ul) (u64 0)
 
+#push-options "--fuel 2"
+
+let shift1 #c t out = 
+  let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c *! 2ul -! 1ul in 
+  let inv h (i: nat { i <= uint_v len}) = 
+    live h t /\ live h out /\ modifies (loc out) h0 h /\  (
+    lseq_as_nat_ #(v len + 1) (as_seq h0 t) (i + 1) / pow2 64 == lseq_as_nat_ #(v len + 1) (as_seq h out) i) 
+  in 
+
+  lseq_as_nat_first #(v len + 1) (as_seq h0 t);
+  lseq_as_nat_last #(v len + 1) (as_seq h0 out);
+
+  for 0ul len inv 
+  (fun i -> 
+
+    let h0_ = ST.get() in 
+    let elem = index t (size 1 +! i) in 
+    upd out i elem;
+    let h1_ = ST.get() in 
+
+    lemma_lseq_as_seq_as_forall (as_seq h0_ out) (as_seq h1_ out) (v i);
+
+    lseq_as_nat_definiton #(v len + 1) (as_seq h1_ out) (v i + 1);
+    lseq_as_nat_definiton #(v len + 1) (as_seq h1_ t) (v i + 2);
+
+    pow2_plus (64 * (v i)) 64;
+    
+    let open FStar.Tactics in 
+    let open FStar.Tactics.Canon in 
+
+    assert_by_tactic (pow2 64 * pow2 (64 * (v i)) * v (Lib.Sequence.index (as_seq h1_ t) (v i + 1)) == 
+    pow2 (64 * v i) * v (Lib.Sequence.index (as_seq h1_ t) (v i + 1)) * pow2 64) canon;
+    
+    lemma_div_plus (lseq_as_nat_ (as_seq h1_ t) (v i + 1)) (pow2 (64 * v i) * v (Lib.Sequence.index (as_seq h1_ t) (v i + 1)))
+  (pow2 64));
+
+
+  let h2 = ST.get() in 
+  upd out len (u64 0);  
+
+  let h3 = ST.get() in 
+  lemma_lseq_as_seq_as_forall (as_seq h2 out) (as_seq h3 out) (v len - 1);
+  lseq_as_nat_definiton (as_seq h3 out) (v len + 1)
 
 
 let upload_one_montg_form #c b =
