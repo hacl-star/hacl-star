@@ -34,8 +34,8 @@ let supportsReducedMultiplication #c =
 
 val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> t2: widefelem c -> 
   Stack unit
-    (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
-    (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
+  (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
+  (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
       wide_as_nat c h1 t2 = getPrime c * (wide_as_nat c h0 t % pow2 64) /\
       wide_as_nat c h1 t2 < getPrime c * pow2 64
   )
@@ -106,7 +106,7 @@ let montgomery_multiplication_one_round_proof #c t k0 round co = admit()
 
 val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
   Stack unit 
-  (requires fun h -> live h t /\ live h round /\ wide_as_nat c h t < getPrime c * pow2 256 /\ eq_or_disjoint t round)
+  (requires fun h -> live h t /\ live h round /\ eq_or_disjoint t round)
   (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\ (
     let k0 = min_one_prime (pow2 64) (- getPrime c) in
     wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * (((wide_as_nat c h0 t % pow2 64) * k0) % pow2 64)) / pow2 64)
@@ -119,9 +119,8 @@ let montgomery_multiplication_round #c t round =
     let t2 = create (size 2 *! len) (u64 0) in 
     lemma_create_zero_buffer (2 * v len) c;
     montgomery_multiplication_round_ #c t t2;
-    let carry = add_long_bn t t2 round in 
-    shift1 round round; 
-    upd round (2ul *! getCoordinateLenU64 c -. 1ul) carry; 
+    let carry = add_long_bn t t2 t2  in 
+    shift1_with_carry t2 round carry; 
   pop_frame()  
 
 
@@ -159,19 +158,6 @@ let lemma_up_bound1 #c i t t0 k0 t1=
   division_multiplication_lemma t (pow2 (64 * i)) (pow2 64);
   assert(t1 <= (t / (pow2 (64 * i) * pow2 64) + prime));
   pow2_plus (64 * i) 64
-
-
-val lemma_up_bound2: #c: curve 
-  -> i: nat {i < v (getCoordinateLenU64 c)} 
-  -> t0: nat 
-  -> ti: nat {let prime = getPrime c in ti <= t0 / (pow2 (64 * (i + 1))) + prime} 
-  -> t: nat {let prime = getPrime c in t <= t0 / (pow2 (64 * i)) + prime} 
-  -> Lemma (ti <= t)
-
-
-let lemma_up_bound2 #c i t0 t =
-    admit()
-  
 
 
 

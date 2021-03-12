@@ -190,10 +190,10 @@ val mod64: #c: curve -> a: widefelem c -> Stack uint64
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat c h1 a % pow2 64 = uint_v r)
 
 
-val shift1: #c: curve -> t: widefelem c -> t1: widefelem c -> Stack unit 
+val shift1_with_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> carry: uint64 -> Stack unit 
   (requires fun h -> live h t /\ live h t1 /\ disjoint t t1)
   (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ 
-    wide_as_nat c h0 t / pow2 64 = wide_as_nat c h1 t1)
+    (wide_as_nat c h0 t + pow2 (getLongPower c) * v carry) / pow2 64 = wide_as_nat c h1 t1)
 
 
 inline_for_extraction noextract 
@@ -210,18 +210,6 @@ val scalar_bit: #c: curve -> #buf_type: buftype
     (requires fun h0 -> live h0 s)
     (ensures  fun h0 r h1 -> h0 == h1 /\ r == Spec.ECDSA.ith_bit_felem #c (as_seq h0 s) (v n) 
     /\ v r <= 1)
-      
-
-inline_for_extraction noextract
-val add_long_without_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> result: widefelem c -> Stack unit
-  (requires fun h -> 
-    live h t /\ live h t1 /\ live h result /\ eq_or_disjoint t1 result /\ 
-    eq_or_disjoint t result /\ 
-    wide_as_nat c h t1 < getPrime c * pow2 64 /\ 
-    wide_as_nat c h t < getPrime c * getPrime c
-  )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    wide_as_nat c h1 result = wide_as_nat c h0 t + wide_as_nat c h0 t1)
 
 
 val mul_atomic: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) ->

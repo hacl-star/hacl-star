@@ -191,7 +191,7 @@ let montgomery_multiplication_round #c t round k0 =
     let y_ = index y (size 0) in   
     short_mul_bn #c order_buffer y_ t2;
     add_long_without_carry #c t t2 t3;
-    shift1 #c t3 round;
+    (* shift1 #c t3 round; *)
     admit();
   pop_frame()
 

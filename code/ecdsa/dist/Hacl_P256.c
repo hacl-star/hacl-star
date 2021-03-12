@@ -1979,7 +1979,7 @@ static void shiftLeftWord(Spec_P256_curve c, uint64_t *i, uint64_t *o)
   }
 }
 
-static void shift1(Spec_P256_curve c, uint64_t *t, uint64_t *out)
+static void shift1_with_carry(Spec_P256_curve c, uint64_t *t, uint64_t *out, uint64_t carry)
 {
   uint32_t sw;
   switch (c)
@@ -1999,13 +1999,13 @@ static void shift1(Spec_P256_curve c, uint64_t *t, uint64_t *out)
         sw = (uint32_t)4U;
       }
   }
-  uint32_t len = sw * (uint32_t)2U;
-  for (uint32_t i = (uint32_t)0U; i < len - (uint32_t)1U; i++)
+  uint32_t len = sw * (uint32_t)2U - (uint32_t)1U;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     uint64_t elem = t[(uint32_t)1U + i];
     out[i] = elem;
   }
-  out[len - (uint32_t)1U] = (uint64_t)0U;
+  out[len] = carry;
 }
 
 static void mul_atomic(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
@@ -2126,27 +2126,8 @@ static void montgomery_multiplication_round(Spec_P256_curve c, uint64_t *t, uint
   uint64_t t2[(uint32_t)2U * len];
   memset(t2, 0U, (uint32_t)2U * len * sizeof (uint64_t));
   montgomery_multiplication_round_(c, t, t2);
-  uint64_t carry = add_long_bn(c, t, t2, round);
-  shift1(c, round, round);
-  uint32_t sw;
-  switch (c)
-  {
-    case Spec_P256_P256:
-      {
-        sw = (uint32_t)4U;
-        break;
-      }
-    case Spec_P256_P384:
-      {
-        sw = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw = (uint32_t)4U;
-      }
-  }
-  round[(uint32_t)2U * sw - (uint32_t)1U] = carry;
+  uint64_t carry = add_long_bn(c, t, t2, t2);
+  shift1_with_carry(c, t2, round, carry);
 }
 
 static void

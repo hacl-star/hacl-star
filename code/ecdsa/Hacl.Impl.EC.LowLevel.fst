@@ -417,7 +417,7 @@ let mod64 #c a =
 
 #push-options "--fuel 2"
 
-let shift1 #c t out = 
+let shift1_with_carry #c t out carry = 
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c *! 2ul -! 1ul in 
   let inv h (i: nat { i <= uint_v len}) = 
@@ -454,11 +454,14 @@ let shift1 #c t out =
 
 
   let h2 = ST.get() in 
-  upd out len (u64 0);  
+  upd out len carry;  
 
   let h3 = ST.get() in 
   lemma_lseq_as_seq_as_forall (as_seq h2 out) (as_seq h3 out) (v len - 1);
-  lseq_as_nat_definiton (as_seq h3 out) (v len + 1)
+  lseq_as_nat_definiton (as_seq h3 out) (v len + 1);
+  pow2_plus (getPower c * 2 - 64) 64
+
+#pop-options
 
 
 let upload_one_montg_form #c b =
@@ -490,13 +493,6 @@ let scalar_bit #c #buf_type s n =
   assert_norm (1 = pow2 1 - 1); 
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
-
-
-
-let add_long_without_carry #c t t1 result  = 
-  let _  = add_long_bn t t1 result in 
-    assert_norm (getPower2 P256 * pow2 64 + getPrime P256 * getPrime P256 < getLongPower2 P256);
-    assert_norm (getPower2 P384 * pow2 64 + getPrime P384 * getPrime P384 < getLongPower2 P384)
 
 
 let mul_atomic x y result temp = 
