@@ -14,30 +14,43 @@ module Make_Chacha20_Poly1305_generic (C: Buffer)
 = struct
   type bytes = C.t
   open AEADDefs
+  let alg = CHACHA20_POLY1305
 
-  let encrypt ~key ~iv ~ad ~pt ~ct ~tag =
-    check_reqs Impl.reqs;
-    (* code/chacha20poly1305/Hacl.Impl.Chacha20Poly1305.aead_encrypt_st *)
-    check_sizes ~alg:CHACHA20_POLY1305 ~iv_len:(C.size iv) ~tag_len:(C.size tag)
-      ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
-    assert (C.disjoint key ct);
-    assert (C.disjoint iv ct);
-    assert (C.disjoint key tag);
-    assert (C.disjoint iv tag);
-    assert (C.disjoint ct tag);
-    assert (C.disjoint ad ct);
-    Impl.encrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
-      (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag)
-
-  let decrypt ~key ~iv ~ad ~ct ~tag ~pt =
-    check_reqs Impl.reqs;
-    (* code/chacha20poly1305/Hacl.Impl.Chacha20Poly1305.aead_decrypt_st *)
-    check_sizes ~alg:CHACHA20_POLY1305 ~iv_len:(C.size iv) ~tag_len:(C.size tag)
-      ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
-    let result = Impl.decrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
+  module Noalloc = struct
+    let encrypt ~key ~iv ~ad ~pt ~ct ~tag =
+      check_reqs Impl.reqs;
+      (* code/chacha20poly1305/Hacl.Impl.Chacha20Poly1305.aead_encrypt_st *)
+      check_sizes ~alg ~iv_len:(C.size iv) ~tag_len:(C.size tag)
+        ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
+      assert (C.disjoint key ct);
+      assert (C.disjoint iv ct);
+      assert (C.disjoint key tag);
+      assert (C.disjoint iv tag);
+      assert (C.disjoint ct tag);
+      assert (C.disjoint ad ct);
+      Impl.encrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
         (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag)
-    in
-    UInt32.to_int result = 0
+    let decrypt ~key ~iv ~ad ~ct ~tag ~pt =
+      check_reqs Impl.reqs;
+      (* code/chacha20poly1305/Hacl.Impl.Chacha20Poly1305.aead_decrypt_st *)
+      check_sizes ~alg ~iv_len:(C.size iv) ~tag_len:(C.size tag)
+        ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
+      let result = Impl.decrypt (C.ctypes_buf key) (C.ctypes_buf iv) (C.size_uint32 ad) (C.ctypes_buf ad)
+          (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf ct) (C.ctypes_buf tag)
+      in
+      UInt32.to_int result = 0
+  end
+  let encrypt ~key ~iv ~ad ~pt =
+    let ct = C.make (C.size pt) in
+    let tag = C.make (tag_length alg) in
+    Noalloc.encrypt ~key ~iv ~ad ~pt ~ct ~tag;
+    (ct, tag)
+  let decrypt ~key ~iv ~ad ~ct ~tag =
+    let pt = C.make (C.size ct) in
+    if Noalloc.decrypt ~key ~iv ~ad ~ct ~tag ~pt then
+      Some pt
+    else
+      None
 end
 
 module Make_Curve25519_generic (C: Buffer)
@@ -49,31 +62,47 @@ module Make_Curve25519_generic (C: Buffer)
   end)
 = struct
   type bytes = C.t
-  let secret_to_public ~sk ~pk =
-    check_reqs Impl.reqs;
-    (* Hacl.Impl.Curve25519.Generic.secret_to_public_st *)
-    assert (C.disjoint pk sk);
-    assert (C.size pk = 32);
-    assert (C.size sk = 32);
-    Impl.secret_to_public (C.ctypes_buf pk) (C.ctypes_buf sk)
-  let scalarmult ~scalar ~input ~result =
-    check_reqs Impl.reqs;
-    (* Hacl.Impl.Curve25519.Generic.scalarmult_st *)
-    assert (C.disjoint result scalar);
-    assert (C.disjoint result input);
-    assert (C.size result = 32);
-    assert (C.size scalar = 32);
-    assert (C.size input = 32);
-    Impl.scalarmult (C.ctypes_buf result) (C.ctypes_buf scalar) (C.ctypes_buf input)
-  let ecdh ~sk ~pk ~shared =
-    check_reqs Impl.reqs;
-    (* Hacl.Impl.Curve25519.Generic.ecdh_st *)
-    assert (C.disjoint shared sk);
-    assert (C.disjoint shared pk);
-    assert (C.size shared = 32);
-    assert (C.size sk = 32);
-    assert (C.size pk = 32);
-    Impl.ecdh (C.ctypes_buf shared) (C.ctypes_buf sk) (C.ctypes_buf pk)
+  module Noalloc = struct
+    let secret_to_public ~sk ~pk =
+      check_reqs Impl.reqs;
+      (* Hacl.Impl.Curve25519.Generic.secret_to_public_st *)
+      assert (C.disjoint pk sk);
+      assert (C.size pk = 32);
+      assert (C.size sk = 32);
+      Impl.secret_to_public (C.ctypes_buf pk) (C.ctypes_buf sk)
+    let scalarmult ~scalar ~input ~result =
+      check_reqs Impl.reqs;
+      (* Hacl.Impl.Curve25519.Generic.scalarmult_st *)
+      assert (C.disjoint result scalar);
+      assert (C.disjoint result input);
+      assert (C.size result = 32);
+      assert (C.size scalar = 32);
+      assert (C.size input = 32);
+      Impl.scalarmult (C.ctypes_buf result) (C.ctypes_buf scalar) (C.ctypes_buf input)
+    let ecdh ~sk ~pk ~shared =
+      check_reqs Impl.reqs;
+      (* Hacl.Impl.Curve25519.Generic.ecdh_st *)
+      assert (C.disjoint shared sk);
+      assert (C.disjoint shared pk);
+      assert (C.size shared = 32);
+      assert (C.size sk = 32);
+      assert (C.size pk = 32);
+      Impl.ecdh (C.ctypes_buf shared) (C.ctypes_buf sk) (C.ctypes_buf pk)
+  end
+  let secret_to_public ~sk =
+    let pk = C.make 32 in
+    Noalloc.secret_to_public ~sk ~pk;
+    pk
+  let scalarmult ~scalar ~input =
+    let result = C.make 32 in
+    Noalloc.scalarmult ~scalar ~input ~result;
+    result
+  let ecdh ~sk ~pk =
+    let shared = C.make 32 in
+    if Noalloc.ecdh ~sk ~pk ~shared then
+      Some shared
+    else
+      None
 end
 
 module Make_EdDSA_generic (C: Buffer)
@@ -87,36 +116,54 @@ module Make_EdDSA_generic (C: Buffer)
 = struct
   type bytes = C.t
   let max_size_t = pow2 32
-  let secret_to_public ~sk ~pk =
-    (* Hacl.Ed25519.secret_to_public *)
-    assert (C.size pk = 32);
-    assert (C.size sk = 32);
-    assert (C.disjoint pk sk);
-    Impl.secret_to_public (C.ctypes_buf pk) (C.ctypes_buf sk)
-  let sign ~sk ~pt ~signature =
-    (* Hacl.Ed25519.sign *)
-    assert (C.size sk = 32);
-    assert (C.size signature = 64);
-    assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
-    Impl.sign (C.ctypes_buf signature) (C.ctypes_buf sk) (C.size_uint32 pt) (C.ctypes_buf pt)
   let verify ~pk ~pt ~signature =
     (* Hacl.Ed25519.verify *)
     assert (C.size pk = 32);
     assert (C.size signature = 64);
     assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
     Impl.verify (C.ctypes_buf pk) (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf signature)
-  let expand_keys ~sk ~ks =
-    (* Hacl.Ed25519.expand_keys *)
-    assert (C.size ks = 96);
-    assert (C.size sk = 32);
-    assert (C.disjoint ks sk); (* VD: redundant for Bytes, since size is different *)
-    Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf sk)
-  let sign_expanded ~ks ~pt ~signature =
-    (* Hacl.Ed25519.sign_expanded *)
-    assert (C.size ks = 96);
-    assert (C.size signature = 64);
-    assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
-    Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 pt) (C.ctypes_buf pt)
+  module Noalloc = struct
+    let secret_to_public ~sk ~pk =
+      (* Hacl.Ed25519.secret_to_public *)
+      assert (C.size pk = 32);
+      assert (C.size sk = 32);
+      assert (C.disjoint pk sk);
+      Impl.secret_to_public (C.ctypes_buf pk) (C.ctypes_buf sk)
+    let sign ~sk ~pt ~signature =
+      (* Hacl.Ed25519.sign *)
+      assert (C.size sk = 32);
+      assert (C.size signature = 64);
+      assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
+      Impl.sign (C.ctypes_buf signature) (C.ctypes_buf sk) (C.size_uint32 pt) (C.ctypes_buf pt)
+    let expand_keys ~sk ~ks =
+      (* Hacl.Ed25519.expand_keys *)
+      assert (C.size ks = 96);
+      assert (C.size sk = 32);
+      assert (C.disjoint ks sk); (* VD: redundant for Bytes, since size is different *)
+      Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf sk)
+    let sign_expanded ~ks ~pt ~signature =
+      (* Hacl.Ed25519.sign_expanded *)
+      assert (C.size ks = 96);
+      assert (C.size signature = 64);
+      assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
+      Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 pt) (C.ctypes_buf pt)
+  end
+  let secret_to_public ~sk =
+    let pk = C.make 32 in
+    Noalloc.secret_to_public ~sk ~pk;
+    pk
+  let sign ~sk ~pt =
+    let signature = C.make 64 in
+    Noalloc.sign ~sk ~pt ~signature;
+    signature
+  let expand_keys ~sk =
+    let ks = C.make 96 in
+    Noalloc.expand_keys ~sk ~ks;
+    ks
+  let sign_expanded ~ks ~pt =
+    let signature = C.make 64 in
+    Noalloc.sign_expanded ~ks ~pt ~signature;
+    signature
 end
 
 (* HashDefs only defines algorithms that are included in the EverCrypt agile hashing interface.
@@ -229,7 +276,7 @@ module Make_ECDSA_generic (C: Buffer)
     else
       failwith "Unknown return value"
   let prime_p256_order = Z.of_string "115792089210356248762697446949407573529996955224135760342422259061068512044369"
-  let sign ~sk ~pt ~k ~signature =
+  let sign_noalloc ~sk ~pt ~k ~signature =
     (* Hacl.Interface.P256.ECDSA.ecdsa_sign_p256_without_hash/sha2/sha384 *)
     assert (C.size signature = 64);
     assert (C.size sk = 32);
@@ -239,6 +286,12 @@ module Make_ECDSA_generic (C: Buffer)
     assert (C.z_compare sk prime_p256_order < 0);
     assert (C.z_compare k prime_p256_order < 0);
     Impl.sign (C.ctypes_buf signature) (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf sk) (C.ctypes_buf k)
+  let sign ~sk ~pt ~k =
+    let signature = C.make 64 in
+    if sign_noalloc ~sk ~pt ~k ~signature then
+      Some signature
+    else
+      None
   let verify ~pk ~pt ~signature =
     (* Hacl.Interface.P256.ECDSA.ecdsa_verif_without_hash/sha2/sha384 *)
     assert (C.size signature = 64);

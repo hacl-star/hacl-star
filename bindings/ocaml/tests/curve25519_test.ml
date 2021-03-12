@@ -21,31 +21,62 @@ let tests = [
 
 let basepoint = Bytes.init 32 (function 0 -> '\x09' | _ -> '\x00')
 
-let test (v: Bytes.t curve25519_test) t scalarmult ecdh secret_to_public reqs =
-  let test_result = test_result (t ^ " " ^ v.name) in
-  if supports reqs then begin
-    let out_scalarmult = Test_utils.init_bytes 32 in
-    let out_ecdh = Test_utils.init_bytes 32 in
+module MakeTests (M: SharedDefs.Curve25519) = struct
+  let test_noalloc v t reqs =
+    let test_result = test_result (t ^ ".Noalloc " ^ v.name) in
+    if supports reqs then begin
+      let out_scalarmult = Test_utils.init_bytes 32 in
+      let out_ecdh = Test_utils.init_bytes 32 in
 
-    let pk = Test_utils.init_bytes 32 in
-    scalarmult ~scalar:v.scalar ~input:basepoint ~result:pk;
-    let pk2 = Test_utils.init_bytes 32 in
-    secret_to_public ~sk:v.scalar ~pk:pk2;
-    if not (Bytes.compare pk pk2 = 0) then
-      test_result Failure "secret_to_public failure";
+      let pk = Test_utils.init_bytes 32 in
+      M.Noalloc.scalarmult ~scalar:v.scalar ~input:basepoint ~result:pk;
+      let pk2 = Test_utils.init_bytes 32 in
+      M.Noalloc.secret_to_public ~sk:v.scalar ~pk:pk2;
+      if not (Bytes.compare pk pk2 = 0) then
+        test_result Failure "secret_to_public failure";
 
-    scalarmult ~scalar:v.scalar ~input:v.input ~result:out_scalarmult;
-    if ecdh ~sk:v.scalar ~pk:v.input ~shared:out_ecdh then
-      if Bytes.compare out_scalarmult v.expected = 0 && Bytes.compare out_ecdh v.expected = 0 then
-        test_result Success ""
+      M.Noalloc.scalarmult ~scalar:v.scalar ~input:v.input ~result:out_scalarmult;
+      if M.Noalloc.ecdh ~sk:v.scalar ~pk:v.input ~shared:out_ecdh then
+        if Bytes.compare out_scalarmult v.expected = 0 && Bytes.compare out_ecdh v.expected = 0 then
+          test_result Success ""
+        else
+          test_result Failure "ECDH shared scret mismatch"
       else
-        test_result Failure "ECDH shared scret mismatch"
-    else
-      test_result Failure "ECDH failure"
-  end else
-    test_result Skipped "Required CPU feature not detected"
+        test_result Failure "ECDH failure"
+    end else
+      test_result Skipped "Required CPU feature not detected"
+
+  let test v t reqs =
+    let test_result = test_result (t ^ " " ^ v.name) in
+    if supports reqs then begin
+      let pk = M.scalarmult ~scalar:v.scalar ~input:basepoint in
+      let pk2 = M.secret_to_public ~sk:v.scalar in
+      if not (Bytes.compare pk pk2 = 0) then
+        test_result Failure "secret_to_public failure";
+
+      let out_scalarmult = M.scalarmult ~scalar:v.scalar ~input:v.input in
+      match M.ecdh ~sk:v.scalar ~pk:v.input with
+      | Some out_ecdh ->
+        if Bytes.compare out_scalarmult v.expected = 0 && Bytes.compare out_ecdh v.expected = 0 then
+          test_result Success ""
+        else
+          test_result Failure "ECDH shared scret mismatch"
+      | None ->
+        test_result Failure "ECDH failure"
+    end else
+      test_result Skipped "Required CPU feature not detected"
+
+  let run_tests name reqs =
+    List.iter (fun v -> test_noalloc v name reqs) tests;
+    List.iter (fun v -> test v name reqs) tests
+end
 
 let _ =
-  List.iter (fun v -> test v "EverCrypt.Curve25519" EverCrypt.Curve25519.scalarmult EverCrypt.Curve25519.ecdh EverCrypt.Curve25519.secret_to_public []) tests;
-  List.iter (fun v -> test v "Hacl.Curve25519_51" Hacl.Curve25519_51.scalarmult Hacl.Curve25519_51.ecdh Hacl.Curve25519_51.secret_to_public []) tests;
-  List.iter (fun v -> test v "Hacl.Curve25519_64" Hacl.Curve25519_64.scalarmult Hacl.Curve25519_64.ecdh Hacl.Curve25519_64.secret_to_public [BMI2; ADX]) tests
+  let module Tests = MakeTests (EverCrypt.Curve25519) in
+  Tests.run_tests "EverCrypt.Curve25519" [];
+
+  let module Tests = MakeTests (Hacl.Curve25519_51) in
+  Tests.run_tests "Hacl.Curve25519_51" [];
+
+  let module Tests = MakeTests (Hacl.Curve25519_64) in
+  Tests.run_tests "Hacl.Curve25519_64" [BMI2; ADX]

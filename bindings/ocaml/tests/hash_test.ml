@@ -263,8 +263,8 @@ let _ =
   test_nonagile "Hacl" test_md5 Hacl.MD5.hash;
 
   List.iter (fun v -> test_keyed_blake2 v "BLAKE2b_32" Hacl.Blake2b_32.hash []) blake2b_keyed_tests;
-  List.iter (fun v -> test_keyed_blake2 v "BLAKE2b_256" Hacl.Blake2b_256.hash [AVX2]) blake2b_keyed_tests;
+  List.iter (fun v -> test_keyed_blake2 v "BLAKE2b_256" Hacl.Blake2b_256.hash [VEC256]) blake2b_keyed_tests;
   List.iter (fun v -> test_keyed_blake2 v "BLAKE2s_32" Hacl.Blake2s_32.hash []) blake2s_keyed_tests;
-  List.iter (fun v -> test_keyed_blake2 v "BLAKE2s_128" Hacl.Blake2s_128.hash [AVX]) blake2s_keyed_tests;
+  List.iter (fun v -> test_keyed_blake2 v "BLAKE2s_128" Hacl.Blake2s_128.hash [VEC128]) blake2s_keyed_tests;
 
   test_keccak ()

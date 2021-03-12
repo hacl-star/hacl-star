@@ -33,17 +33,30 @@ module AEAD : sig
   (** [init alg key] tries to allocate the internal state for algorithm [alg] with [key]
       and returns a {!t} if successful or an {!Error.error_code} otherwise. *)
 
-  val encrypt : st:t -> iv:bytes -> ad:bytes -> pt:bytes -> ct:bytes -> tag:bytes -> unit Error.result
-  (** [encrypt st iv ad pt ct tag] takes a state [st], an initial value [iv], additional data
-      [ad], and plaintext [pt], as well as output buffers [ct], which, if successful, will
-      contain the encrypted [pt], and [tag], which will contain the authentication tag for
-      the plaintext and the associated data. *)
+  val encrypt : st:t -> iv:bytes -> ad:bytes -> pt:bytes -> (bytes * bytes) Error.result
+  (** [encrypt key iv ad pt] takes a [key], an initial value [iv], additional data
+      [ad], and plaintext [pt] and, if successful, returns a tuple containing the encrypted [pt] and the
+      authentication tag for the plaintext and the associated data. *)
 
-  val decrypt : st:t -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> pt:bytes -> unit Error.result
-  (** [decrypt st iv ad ct tag pt] takes a state [st], the initial value [iv], additional
-      data [ad], ciphertext [ct], and authentication tag [tag], as well as output buffer [pt],
-      which, if successful, will contain the decrypted [ct]. *)
+  val decrypt : st:t -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> bytes Error.result
+  (** [decrypt key iv ad ct tag] takes a [key], the initial value [iv], additional
+      data [ad], ciphertext [ct], and authentication tag [tag], and, if successful,
+      returns the decrypted [ct]. *)
 
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+    val encrypt : st:t -> iv:bytes -> ad:bytes -> pt:bytes -> ct:bytes -> tag:bytes -> unit Error.result
+    (** [encrypt st iv ad pt ct tag] takes a state [st], an initial value [iv], additional data
+        [ad], and plaintext [pt], as well as output buffers [ct], which, if successful, will
+        contain the encrypted [pt], and [tag], which will contain the authentication tag for
+        the plaintext and the associated data. *)
+
+    val decrypt : st:t -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> pt:bytes -> unit Error.result
+    (** [decrypt st iv ad ct tag pt] takes a state [st], the initial value [iv], additional
+        data [ad], ciphertext [ct], and authentication tag [tag], as well as output buffer [pt],
+        which, if successful, will contain the decrypted [ct]. *)
+  end
 end
 (** Agile, multiplexing AEAD interface exposing AES128-GCM, AES256-GCM, and Chacha20-Poly1305
 

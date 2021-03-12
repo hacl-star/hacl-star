@@ -9,6 +9,7 @@ module type Buffer = sig
   val ctypes_buf : bytes -> buf
   val size : bytes -> int
   val equal : bytes -> bytes -> bool
+  val make : int -> bytes
   val disjoint : bytes -> bytes -> bool
   val sub : bytes -> int -> int -> bytes
   val z_compare : bytes -> Z.t -> int
@@ -23,6 +24,7 @@ module CBytes : Buffer with type t = Bytes.t and type buf = Bytes.t Ctypes.ocaml
   let ctypes_buf = Ctypes.ocaml_bytes_start
   let size = Bytes.length
   let equal = Bytes.equal
+  let make l = Bytes.make l '\x00'
   let disjoint b1 b2 = b1 != b2
   let sub = Bytes.sub
   let z_compare b z = Z.compare (Z.of_bits (Bytes.to_string b)) z
@@ -133,18 +135,30 @@ end
 
 module type Chacha20_Poly1305_generic = sig
   type bytes
+  val encrypt: key:bytes -> iv:bytes -> ad:bytes -> pt:bytes -> bytes * bytes
+  (** [encrypt key iv ad pt] takes a [key], an initial value [iv], additional data
+      [ad], and plaintext [pt] and returns a tuple containing the encrypted [pt] and the
+      authentication tag for the plaintext and the associated data. *)
 
-  val encrypt: key:bytes -> iv:bytes -> ad:bytes -> pt:bytes -> ct:bytes -> tag:bytes -> unit
-  (** [encrypt key iv ad pt ct tag] takes a [key], an initial value [iv], additional data
-      [ad], and plaintext [pt], as well as output buffers [ct], which, if successful, will
-      contain the encrypted [pt], and [tag], which will contain the authentication tag for
-      the plaintext and the associated data. *)
+  val decrypt: key:bytes -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> bytes option
+  (** [decrypt key iv ad ct tag] takes a [key], the initial value [iv], additional
+      data [ad], ciphertext [ct], and authentication tag [tag], and, if successful,
+      returns the decrypted [ct]. *)
 
-  val decrypt: key:bytes -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> pt:bytes -> bool
-  (** [decrypt key iv ad ct tag pt] takes a [key], the initial value [iv], additional
-      data [ad], ciphertext [ct], and authentication tag [tag], as well as output buffer [pt],
-      which, if successful, will contain the decrypted [ct]. *)
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+    val encrypt: key:bytes -> iv:bytes -> ad:bytes -> pt:bytes -> ct:bytes -> tag:bytes -> unit
+    (** [encrypt key iv ad pt ct tag] takes a [key], an initial value [iv], additional data
+        [ad], and plaintext [pt], as well as output buffers [ct], which will
+        contain the encrypted [pt], and [tag], which will contain the authentication tag for
+        the plaintext and the associated data. *)
 
+    val decrypt: key:bytes -> iv:bytes -> ad:bytes -> ct:bytes -> tag:bytes -> pt:bytes -> bool
+    (** [decrypt key iv ad ct tag pt] takes a [key], the initial value [iv], additional
+        data [ad], ciphertext [ct], and authentication tag [tag], as well as output buffer [pt],
+        which, if successful, will contain the decrypted [ct]. *)
+  end
 end
 
 module type Curve25519_generic = sig
@@ -153,58 +167,99 @@ module type Curve25519_generic = sig
 *)
 
   type bytes
-  val secret_to_public : sk:bytes -> pk:bytes -> unit
-  (** [secret_to_public sk pk] takes a 32-byte secret key [sk] and writes the corresponding
-      32-byte ECDH public key in [pk]. Buffers [pk] and [sk] must be distinct. *)
+  val secret_to_public : sk:bytes -> bytes
+  (** [secret_to_public sk] takes a 32-byte secret key [sk] and returns the corresponding
+      32-byte ECDH public key. *)
 
-  val ecdh : sk:bytes -> pk:bytes -> shared:bytes -> bool
-  (** [ecdh sk pk shared] takes a 32-byte secret key [sk] and another party's 32-byte public
-      key and writes the 32-byte ECDH shared key in [shared]. Buffer [shared] must be distinct from
-      [pk] and [sk]. *)
+  val ecdh : sk:bytes -> pk:bytes -> bytes option
+  (** [ecdh sk pk] takes a 32-byte secret key [sk] and another party's 32-byte public
+      key and returns the 32-byte ECDH shared key. *)
 
-  val scalarmult : scalar:bytes -> input:bytes -> result:bytes -> unit
-  (** [scalarmult scalar input result] performs X25519 scalar multiplication. All buffers
+  val scalarmult : scalar:bytes -> input:bytes -> bytes
+  (** [scalarmult scalar input] performs X25519 scalar multiplication. Buffers
       are 32-byte long and must be distinct. *)
 
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+    val secret_to_public : sk:bytes -> pk:bytes -> unit
+    (** [secret_to_public sk pk] takes a 32-byte secret key [sk] and writes the corresponding
+        32-byte ECDH public key in [pk]. Buffers [pk] and [sk] must be distinct. *)
+
+    val ecdh : sk:bytes -> pk:bytes -> shared:bytes -> bool
+    (** [ecdh sk pk shared] takes a 32-byte secret key [sk] and another party's 32-byte public
+        key and writes the 32-byte ECDH shared key in [shared]. Buffer [shared] must be distinct from
+        [pk] and [sk]. *)
+
+    val scalarmult : scalar:bytes -> input:bytes -> result:bytes -> unit
+    (** [scalarmult scalar input result] performs X25519 scalar multiplication. All buffers
+        are 32-byte long and must be distinct. *)
+  end
 end
 
 module type EdDSA_generic = sig
 (** See {{:https://hacl-star.github.io/HaclSig.html} here} for detailed
     usage instructions.
-
-    Buffers have the following size constraints:
-    - [sk], [pk]: 32 bytes
-    - [signature]: 64 bytes
 *)
 
   type bytes
 
   (** {1 EdDSA} *)
 
-  val secret_to_public : sk:bytes -> pk:bytes -> unit
-  (** [secret_to_public sk pk] takes a secret key [sk] and writes the corresponding
-      public key in [pk]. Buffers [pk] and [sk] must be distinct. *)
+  val secret_to_public : sk:bytes -> bytes
+  (** [secret_to_public sk] takes a secret key [sk] and returns the corresponding
+      public key. *)
 
-  val sign : sk:bytes -> pt:bytes -> signature:bytes -> unit
-  (** [sign sk pt signature] takes secret key [sk] and message [pt] and writes
-      the Ed25519 signature in [signature]. *)
+  val sign : sk:bytes -> pt:bytes -> bytes
+  (** [sign sk pt] takes secret key [sk] and message [pt] and returns
+      the Ed25519 signature. *)
 
   val verify : pk:bytes -> pt:bytes -> signature:bytes -> bool
   (** [verify pk pt signature] takes public key [pk], message [pt] and verifies the
       Ed25519 signature, returning true if valid. *)
 
-  (** {1 EdDSA Expanded Signing}
+  (** {1 EdDSA Expanded Signing} *)
 
-      The buffer [ks] containing the expanded secret key must be 96 bytes long.
-*)
+  val expand_keys : sk:bytes -> bytes
+  (** [expand_keys sk] takes secret key [sk] and returns the expanded secret key. *)
 
-  val expand_keys : sk:bytes -> ks:bytes -> unit
-  (** [expand_keys sk ks] takes secret key [sk] and writes the expanded secret key in [ks]. *)
+  val sign_expanded : ks:bytes -> pt:bytes -> bytes
+  (** [sign_expanded ks pt signature] takes expanded secret key [ks] and message [pt] and
+      returns the Ed25519 signature. *)
 
-  val sign_expanded : ks:bytes -> pt:bytes -> signature:bytes -> unit
-  (** [sign_expanded ks pt signature] takes expanded secret key [ks] and message [pt] and writes
-      the Ed25519 signature in [signature]. *)
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
 
+    (** Buffers have the following size constraints:
+        - [sk], [pk]: 32 bytes
+        - [signature]: 64 bytes
+
+        {1 EdDSA}
+
+        Note: The [verify] function does not return a buffer so it has no been duplicated here.
+    *)
+
+    val secret_to_public : sk:bytes -> pk:bytes -> unit
+    (** [secret_to_public sk pk] takes a secret key [sk] and writes the corresponding
+        public key in [pk]. Buffers [pk] and [sk] must be distinct. *)
+
+    val sign : sk:bytes -> pt:bytes -> signature:bytes -> unit
+    (** [sign sk pt signature] takes secret key [sk] and message [pt] and writes
+        the Ed25519 signature in [signature]. *)
+
+    (** {1 EdDSA Expanded Signing}
+
+        The buffer [ks] containing the expanded secret key must be 96 bytes long.
+    *)
+
+    val expand_keys : sk:bytes -> ks:bytes -> unit
+    (** [expand_keys sk ks] takes secret key [sk] and writes the expanded secret key in [ks]. *)
+
+    val sign_expanded : ks:bytes -> pt:bytes -> signature:bytes -> unit
+    (** [sign_expanded ks pt signature] takes expanded secret key [ks] and message [pt] and writes
+        the Ed25519 signature in [signature]. *)
+  end
 end
 
 module type HashFunction_generic = sig
@@ -259,8 +314,12 @@ module type ECDSA_generic = sig
 
   type bytes
 
-  val sign : sk:bytes -> pt:bytes -> k:bytes -> signature:bytes -> bool
-  (** [sign sk pt k signature] attempts to sign the message [pt] with secret key [sk] and
+  val sign : sk:bytes -> pt:bytes -> k:bytes -> bytes option
+  (** [sign sk pt k] attempts to sign the message [pt] with secret key [sk] and
+      signing secret [k] and returns the signature if successful. *)
+
+  val sign_noalloc : sk:bytes -> pt:bytes -> k:bytes -> signature:bytes -> bool
+  (** [sign_noalloc sk pt k signature] attempts to sign the message [pt] with secret key [sk] and
       signing secret [k]. If successful, the signature is written in [signature] and the
       function returns true. *)
 

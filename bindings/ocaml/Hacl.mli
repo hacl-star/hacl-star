@@ -16,10 +16,10 @@ module Chacha20_Poly1305_32 : Chacha20_Poly1305
 (** Portable C implementation of Chacha20-Poly1305 that runs on any 32-bit platform *)
 
 module Chacha20_Poly1305_128 : Chacha20_Poly1305
-(** 128-bit vectorized C implementation of Chacha20-Poly1305 that runs on any platform that supports {{!AutoConfig2.AVX} Intel AVX} *)
+(** 128-bit vectorized C implementation of Chacha20-Poly1305 that runs on platforms with {{!AutoConfig2.VEC128} 128-bit vector support} *)
 
 module Chacha20_Poly1305_256 : Chacha20_Poly1305
-(** 256-bit vectorized C implementation of Chacha20-Poly1305 that runs on any platform that supports {{!AutoConfig2.AVX2} Intel AVX2} *)
+(** 256-bit vectorized C implementation of Chacha20-Poly1305 that runs on platforms with {{!AutoConfig2.VEC256} 256-bit vector support} *)
 
 (** {1 ECDH, EdDSA, and ECDSA} *)
 (** {2:curve Curve25519}
@@ -63,19 +63,19 @@ module P256 : sig
       These functions convert points between these representations:
 *)
 
-  val raw_to_compressed : p:bytes -> result:bytes -> unit
-    (** [raw_to_compressed p result] converts a "raw" point [p] (64 bytes) to a "compressed" point [result] (33 bytes) *)
+  val raw_to_compressed : bytes -> bytes
+    (** [raw_to_compressed p] converts a "raw" point [p] (64 bytes) to a "compressed" point (33 bytes) *)
 
-  val raw_to_uncompressed : p:bytes -> result:bytes -> unit
-    (** [raw_to_uncompressed p result] converts a "raw" point [p] (64 bytes) to an "uncompressed" point [result] (65 bytes) *)
+  val raw_to_uncompressed : bytes -> bytes
+    (** [raw_to_uncompressed p] converts a "raw" point [p] (64 bytes) to an "uncompressed" point (65 bytes) *)
 
-  val compressed_to_raw : p:bytes -> result:bytes -> bool
-    (** [compressed_to_raw p result] converts a "compressed" point [p] (33 bytes) to a "raw" point [result] (64 bytes).
-        Returns true if successful. *)
+  val compressed_to_raw : bytes -> bytes option
+    (** [compressed_to_raw p] attempts to convert a "compressed" point [p] (33 bytes) to a "raw" point (64 bytes)
+        and returns it if successful. *)
 
-  val uncompressed_to_raw : p:bytes -> result:bytes -> bool
-    (** [uncompressed_to_raw p result] converts an "uncompressed" point [p] (65 bytes) to a "raw" point [result] (64 bytes).
-        Returns true if successful. *)
+  val uncompressed_to_raw : bytes -> bytes option
+    (** [uncompressed_to_raw p] attempts to convert an "uncompressed" point [p] (65 bytes) to a "raw" point (64 bytes)
+        and returns it if successful. *)
 
   (** {1 Point validation} *)
 
@@ -91,14 +91,13 @@ module P256 : sig
   *)
 
   (* TODO: consistent names with those in Curve25519? *)
-  val dh_initiator : sk:bytes -> pk:bytes -> bool
-  (** [dh_initiator sk pk] takes a 32-byte secret key [sk] and writes the corresponding
-      64-byte public key in [pk]. *)
+  val dh_initiator : sk:bytes -> bytes option
+  (** [dh_initiator sk] takes a 32-byte secret key [sk] and returns the corresponding
+      64-byte public key. *)
 
-  val dh_responder : sk:bytes -> pk:bytes -> shared:bytes -> bool
-  (** [dh_responder sk pk shared] takes a 32-byte secret key [sk] and another party's 64-byte public
-      key and writes the 64-byte ECDH shared key in [shared]. Buffer [shared] must be distinct from
-      [pk]. *)
+  val dh_responder : sk:bytes -> pk:bytes -> bytes option
+  (** [dh_responder sk pk] takes a 32-byte secret key [sk] and another party's 64-byte public
+      key and returns the 64-byte ECDH shared key. *)
 
   (** {1:ecdsa ECDSA}
       ECDSA signing and signature verification functions
@@ -116,6 +115,40 @@ module P256 : sig
   module SHA2_256 : ECDSA
   module SHA2_384 : ECDSA
   module SHA2_512 : ECDSA
+
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+
+    (** {1 Point representation and conversions} *)
+
+    val raw_to_compressed : p:bytes -> result:bytes -> unit
+    (** [raw_to_compressed p result] converts a "raw" point [p] (64 bytes) to a "compressed" point [result] (33 bytes) *)
+
+    val raw_to_uncompressed : p:bytes -> result:bytes -> unit
+    (** [raw_to_uncompressed p result] converts a "raw" point [p] (64 bytes) to an "uncompressed" point [result] (65 bytes) *)
+
+    val compressed_to_raw : p:bytes -> result:bytes -> bool
+    (** [compressed_to_raw p result] converts a "compressed" point [p] (33 bytes) to a "raw" point [result] (64 bytes).
+        Returns true if successful. *)
+
+    val uncompressed_to_raw : p:bytes -> result:bytes -> bool
+    (** [uncompressed_to_raw p result] converts an "uncompressed" point [p] (65 bytes) to a "raw" point [result] (64 bytes).
+        Returns true if successful. *)
+
+    (** {1 ECDH}
+        ECDH key agreement protocol
+    *)
+
+    val dh_initiator : sk:bytes -> pk:bytes -> bool
+    (** [dh_initiator sk pk] takes a 32-byte secret key [sk] and writes the corresponding
+        64-byte public key in [pk]. *)
+
+    val dh_responder : sk:bytes -> pk:bytes -> shared:bytes -> bool
+    (** [dh_responder sk pk shared] takes a 32-byte secret key [sk] and another party's 64-byte public
+        key and writes the 64-byte ECDH shared key in [shared]. Buffer [shared] must be distinct from
+        [pk]. *)
+  end
 
 end
 (** ECDSA and ECDH functions using P-256 *)
@@ -214,13 +247,13 @@ module Blake2b_32 : Blake2
 (** Portable BLAKE2b implementation *)
 
 module Blake2b_256 : Blake2
-(** Vectorized BLAKE2b implementation, requiring {{!AutoConfig2.AVX2} Intel AVX2} *)
+(** Vectorized BLAKE2b implementation, requiring {{!AutoConfig2.VEC256} 256-bit vector support} *)
 
 module Blake2s_32 : Blake2
 (** Portable BLAKE2s implementation *)
 
 module Blake2s_128 : Blake2
-(** Vectorized BLAKE2s implementation, requiring {{!AutoConfig2.AVX} Intel AVX} *)
+(** Vectorized BLAKE2s implementation, requiring {{!AutoConfig2.VEC128} 128-bit vector support} *)
 
 (** {2 Legacy (deprecated)}
 Legacy algorithms, which are {b not suitable for cryptographic applications.} *)
@@ -270,10 +303,10 @@ module Poly1305_32 : MAC
 (** Portable C implementation of Poly1305 *)
 
 module Poly1305_128 : MAC
-(** Vectorized C implementation of Poly1305 that runs on any platform that supports {{!AutoConfig2.AVX} Intel AVX} *)
+(** Vectorized C implementation of Poly1305 that runs on platforms with {{!AutoConfig2.VEC128} 128-bit vector support} *)
 
 module Poly1305_256 : MAC
-(** Vectorized C implementation of Poly1305 that runs on any platform that supports {{!AutoConfig2.AVX2} Intel AVX2} *)
+(** Vectorized C implementation of Poly1305 that runs on platforms with {{!AutoConfig2.VEC256} 256-bit vector support} *)
 
 
 (** {1 NaCl } *)
@@ -429,8 +462,11 @@ module HKDF_BLAKE2s : HKDF
 (** {1 Randomness (not verified)} *)
 
 module RandomBuffer : sig
-  val randombytes : out:bytes -> bool
-  (** [randombytes out] attempts to fill [out] with random bytes and returns true if successful. *)
+  val randombytes : size:int -> bytes option
+  (** [randombytes size] attempts to create a buffer containing [size] random bytes *)
+
+  val randombytes_noalloc : out:bytes -> bool
+  (** [randombytes_noalloc out] attempts to fill [out] with random bytes and returns true if successful. *)
 
 
 end

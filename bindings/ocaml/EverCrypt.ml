@@ -66,33 +66,45 @@ module AEAD = struct
     | 0 -> Success (alg, st)
     | n -> error n
 
-  let encrypt ~st:(alg, st) ~iv ~ad ~pt ~ct ~tag : unit result =
-    (* providers/EverCrypt.AEAD.encrypt_pre *)
-    check_sizes ~alg ~iv_len:(C.size iv) ~tag_len:(C.size tag)
-      ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
-    assert (C.disjoint ct tag);
-    assert (C.disjoint iv ct);
-    assert (C.disjoint iv tag);
-    assert (C.disjoint pt tag);
-    assert (C.disjoint pt ad);
-    assert (C.disjoint ad ct);
-    assert (C.disjoint ad tag);
-    get_result (everCrypt_AEAD_encrypt (!@st)
-                  (C.ctypes_buf iv) (C.size_uint32 iv) (C.ctypes_buf ad) (C.size_uint32 ad)
-                  (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf ct) (C.ctypes_buf tag))
-
-  let decrypt ~st:(alg, st) ~iv ~ad ~ct ~tag ~pt : unit result =
-    (* EverCrypt.AEAD.decrypt_st *)
-    check_sizes ~alg ~iv_len:(C.size iv) ~tag_len:(C.size tag)
-      ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
-    assert (C.disjoint tag pt);
-    assert (C.disjoint tag ct);
-    assert (C.disjoint tag ad);
-    assert (C.disjoint ct ad);
-    assert (C.disjoint pt ad);
-    get_result (everCrypt_AEAD_decrypt (!@st)
-                  (C.ctypes_buf iv) (C.size_uint32 iv) (C.ctypes_buf ad) (C.size_uint32 ad)
-                  (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf tag) (C.ctypes_buf pt))
+  module Noalloc = struct
+    let encrypt ~st:(alg, st) ~iv ~ad ~pt ~ct ~tag : unit result =
+      (* providers/EverCrypt.AEAD.encrypt_pre *)
+      check_sizes ~alg ~iv_len:(C.size iv) ~tag_len:(C.size tag)
+        ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
+      assert (C.disjoint ct tag);
+      assert (C.disjoint iv ct);
+      assert (C.disjoint iv tag);
+      assert (C.disjoint pt tag);
+      assert (C.disjoint pt ad);
+      assert (C.disjoint ad ct);
+      assert (C.disjoint ad tag);
+      get_result (everCrypt_AEAD_encrypt (!@st)
+                    (C.ctypes_buf iv) (C.size_uint32 iv) (C.ctypes_buf ad) (C.size_uint32 ad)
+                    (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf ct) (C.ctypes_buf tag))
+    let decrypt ~st:(alg, st) ~iv ~ad ~ct ~tag ~pt : unit result =
+      (* EverCrypt.AEAD.decrypt_st *)
+      check_sizes ~alg ~iv_len:(C.size iv) ~tag_len:(C.size tag)
+        ~ad_len:(C.size ad)~pt_len:(C.size pt) ~ct_len:(C.size ct);
+      assert (C.disjoint tag pt);
+      assert (C.disjoint tag ct);
+      assert (C.disjoint tag ad);
+      assert (C.disjoint ct ad);
+      assert (C.disjoint pt ad);
+      get_result (everCrypt_AEAD_decrypt (!@st)
+                    (C.ctypes_buf iv) (C.size_uint32 iv) (C.ctypes_buf ad) (C.size_uint32 ad)
+                    (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf tag) (C.ctypes_buf pt))
+  end
+  let encrypt ~st:(alg, st) ~iv ~ad ~pt =
+    let ct = C.make (C.size pt) in
+    let tag = C.make (tag_length alg) in
+    match Noalloc.encrypt ~st:(alg, st) ~iv ~ad ~pt ~ct ~tag with
+    | Success () -> Success (ct, tag)
+    | Error n -> Error n
+  let decrypt ~st:(alg, st) ~iv ~ad ~ct ~tag =
+    let pt = C.make (C.size ct) in
+    match Noalloc.decrypt ~st:(alg, st) ~iv ~ad ~ct ~tag ~pt with
+    | Success () -> Success pt
+    | Error n -> Error n
 end
 
 module Chacha20_Poly1305 : Chacha20_Poly1305 =
