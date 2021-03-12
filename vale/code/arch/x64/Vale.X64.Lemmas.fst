@@ -72,6 +72,7 @@ let rec lemma_eq_instr_apply_eval_inouts
     )
 
 #restart-solver
+#push-options "--z3rlimit_factor 2"
 let rec lemma_eq_instr_write_outputs
     (outs:list instr_out) (args:list instr_operand)
     (vs:instr_ret_t outs) (oprs:instr_operands_t outs args) (s1_orig s1 s2_orig s2:machine_state)
@@ -95,7 +96,7 @@ let rec lemma_eq_instr_write_outputs
         match outs with
         | [] -> (vs, ())
         | _::_ -> let vs = coerce vs in (fst vs, snd vs)
-        in
+      in
       match i with
       | IOpEx i ->
         let oprs = coerce oprs in
@@ -109,6 +110,7 @@ let rec lemma_eq_instr_write_outputs
         allow_inversion operand128;
         lemma_eq_instr_write_outputs outs args vs (coerce oprs) s1_orig s1 s2_orig s2
     )
+#pop-options
 
 #restart-solver
 let eval_ins_eq_instr (inst:BS.ins) (s1 s2:machine_state) : Lemma
