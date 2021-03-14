@@ -21,6 +21,3 @@ build: [
 run-test: [
   ["dune" "runtest" "-p" name "-j" jobs]
 ]
-available: [
-  os-family != "bsd"
-]
