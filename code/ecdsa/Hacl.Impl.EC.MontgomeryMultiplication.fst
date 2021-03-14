@@ -160,12 +160,70 @@ let lemma_up_bound1 #c i t t0 k0 t1=
   pow2_plus (64 * i) 64
 
 
+#push-options "--z3rlimit 100 --ifuel 2 --fuel 2"
+
+val lemma_mm_reduction: #c: curve -> a0: nat -> i: nat -> Lemma
+  (let prime = getPrime c in 
+    a0 * modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64) % prime == a0 * modp_inv2 #c (pow2 ((i + 1) * 64)) % prime)
+
+let lemma_mm_reduction #c a0 i = 
+  let prime = getPrime c in 
+  
+  let a = pow2 (i * 64) in 
+
+  let exp_prime: pos = prime - 2 in 
+
+  assert(modp_inv2 #c a == exp #prime (a % prime) exp_prime % prime);
+  Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (a % prime) exp_prime;
+  lemma_mod_twice (pow (a % prime) exp_prime) prime;
+
+  assert(modp_inv2 #c (pow2 64) == exp #prime (pow2 64 % prime) exp_prime % prime);
+  Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (pow2 64 % prime) exp_prime;
+  lemma_mod_twice (pow (pow2 64 % prime) exp_prime) prime;
+
+  Hacl.Lemmas.P256.power_distributivity_2 (a % prime) (pow2 64 % prime) exp_prime;
+
+
+  lemma_mod_mul_distr_r a0 (modp_inv2 #c a * modp_inv2 #c (pow2 64)) prime;
+
+  calc (==) {
+    modp_inv2 #c a * modp_inv2 #c (pow2 64) % prime;
+    (==) {}
+    (pow (a % prime) exp_prime % prime * (pow (pow2 64 % prime) exp_prime % prime)) % prime; 
+    (==) {lemma_mod_mul_distr_l (pow (a % prime) exp_prime) (pow (pow2 64 % prime) exp_prime % prime) prime}
+    (pow (a % prime) exp_prime * (pow (pow2 64 % prime) exp_prime % prime)) % prime; 
+    (==) {lemma_mod_mul_distr_r (pow (a % prime) exp_prime) (pow (pow2 64 % prime) exp_prime) prime}
+    (pow (a % prime) exp_prime * pow (pow2 64 % prime) exp_prime) % prime; 
+    (==) {pow_plus (a % prime) (pow2 64 % prime) exp_prime}
+    (pow (a % prime * (pow2 64 % prime)) exp_prime) % prime; 
+    (==) {Hacl.Lemmas.P256.power_distributivity (a % prime * (pow2 64 % prime)) exp_prime prime}
+    (pow (a % prime * (pow2 64 % prime) % prime) exp_prime) % prime; 
+    (==) {lemma_mod_mul_distr_l a (pow2 64 % prime) prime}
+    (pow ((a * (pow2 64 % prime)) % prime) exp_prime) % prime; 
+    (==) {lemma_mod_mul_distr_r a (pow2 64) prime}
+    (pow ((a * pow2 64) % prime) exp_prime) % prime; 
+    (==) {lemma_mod_twice (pow ((a * pow2 64) % prime) exp_prime) prime}
+    ((pow ((a * pow2 64) % prime) exp_prime) % prime) % prime; 
+    (==) {Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (a * pow2 64 % prime) exp_prime} 
+    exp #prime ((a * pow2 64) % prime) exp_prime % prime; 
+    (==) {}
+    modp_inv2 #c (a * pow2 64);
+    (==) {pow2_plus (i * 64) 64}
+    modp_inv2 #c (pow2 ((i + 1) * 64));};
+
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+
+  assert_by_tactic (a0 * modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64) % prime == a0 * (modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64)) % prime) canon
+
+#pop-options
+
 
 val montgomery_multiplication_reduction: #c: curve
   -> t: widefelem c 
   -> result: felem c -> 
   Stack unit 
-  (requires (fun h -> live h t /\ wide_as_nat c h t < getPrime c * getPrime c /\ live h result)) 
+  (requires (fun h -> live h t /\ wide_as_nat c h t < getPrime c * pow2 (getPower c) /\ live h result /\ eq_or_disjoint t result)) 
   (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (let prime = getPrime c in 
     as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (getPower2 c) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c (wide_as_nat c h0 t)))
@@ -178,14 +236,17 @@ let montgomery_multiplication_reduction #c t result =
    
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
     let prime = getPrime c in 
-    live h t /\ wide_as_nat c h t < prime * prime /\ 
-    wide_as_nat c h0 t < getPrime c * pow2 (64 * v (getCoordinateLenU64 c)) /\ 
-    wide_as_nat c h t <= wide_as_nat c h0 t / (pow2 (64 * i)) + prime in 
+    live h t /\
+    wide_as_nat c h0 t < getPrime c * pow2 (getPower c) /\ 
+    wide_as_nat c h t <= wide_as_nat c h0 t / (pow2 (64 * i)) + prime /\ 
+    wide_as_nat c h t % prime = wide_as_nat c h0 t * modp_inv2 #c (pow2 (i * 64)) % prime in 
 
   lemma_mult_lt_left (getPrime c) (getPrime c) (pow2 (64 * v (getCoordinateLenU64 c)));
 
   let h1 = ST.get() in
-    
+
+  lemma_mod_inv #c (wide_as_nat c h0 t);
+
   for 0ul len inv (fun i ->
     let h0_ = ST.get() in 
     montgomery_multiplication_round #c t t; 
@@ -200,37 +261,31 @@ let montgomery_multiplication_reduction #c t result =
     let co = a0 * modp_inv2 #c (pow2 (v i * 64)) in 
 
     lemma_up_bound1 #c (v i) a0 a_i k0 a_il;
-    assume (k0 = min_one_prime (pow2 64) (- getPrime c));
-    assume (co % prime == a_i % prime);
-    assume (a_il = (a_i + getPrime c * ((a_i % pow2 64) * k0 % pow2 64)) / pow2 64);
-
     montgomery_multiplication_one_round_proof #c a_i k0 a_il co;
     
-    assume(wide_as_nat c h1 t < wide_as_nat c h0 t)
+
+    assert(a_i % prime = co % prime);
+    assert(a_il % prime == co * modp_inv2_prime (pow2 64) prime % prime);
+
+    calc (==) {
+      co * modp_inv2_prime (pow2 64) prime % prime;
+      (==) {}
+      a0 * modp_inv2 #c (pow2 (v i * 64)) * modp_inv2 #c (pow2 64) % prime;
+      
+
+
+    };
+    
+
+    assume (a_il % prime = wide_as_nat c h0 t * modp_inv2 #c (pow2 ((v i + 1) * 64)) % prime)
 
   );
 
-  admit();
-
   let h2 = ST.get() in 
   lemma_up_bound0 #c (wide_as_nat c h0 t) (wide_as_nat c h2 t); 
-  assume (eq_or_disjoint t result);
-  admit();
   reduction_prime_2prime_with_carry t result;
   admit()
 
-(*
-val montgomery_multiplication_buffer_by_one: #c: curve {(getPrime c + 1) % pow2 64 == 0} 
-  -> a: felem c
-  -> result: felem c -> 
-  Stack unit
-  (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h result)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (let prime = getPrime c in 
-    as_nat c h1 result  = (as_nat c h0 a * modp_inv2_prime (getPower2 c) prime) % prime /\
-    as_nat c h1 result = fromDomain_ #c (as_nat c h0 a)))
-  )
-
-*)
 
 let montgomery_multiplication_buffer_by_one #c a result = 
   push_frame();
