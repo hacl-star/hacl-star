@@ -429,6 +429,8 @@ val table_select_ct:
    (Math.Lemmas.lemma_mult_le_right (v len) (v i + 1) (v table_len);
     as_seq h1 res == LSeq.sub (as_seq h0 table) (v i * v len) (v len)))
 
+
+#push-options "--z3rlimit_factor 2 --fuel 100 --ifuel 100"
 let table_select_ct #a_t len table_len table i res =
   let h0 = ST.get () in
   copy res (sub table 0ul len);
@@ -453,6 +455,7 @@ let table_select_ct #a_t len table_len table i res =
       (if v i = v j + 1 then LSeq.sub (as_seq h0 table) (v i * v len) (v len) else as_seq h2 res));
     assert (inv h3 (v j + 1))
     )
+#pop-options
 
 //////////////////////////////////////////////////////////
 
