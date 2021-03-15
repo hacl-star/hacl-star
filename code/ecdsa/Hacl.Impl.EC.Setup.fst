@@ -276,23 +276,26 @@ val get_prime_inverse_buffer: #c: curve ->
 
 
 
-val getK0: c: curve -> Stack (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)})
+val get0: c: curve -> Stack (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)})
   (requires fun h -> True)
-  (ensures fun h0 r h1 -> v r == min_one_prime (pow2 64) (- getPrime c) /\ modifies0 h0 h1)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
+    r == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c)
+  )
 
 let getK0 c = 
   match c with 
   |P256 -> 
+    admit();
     assert_norm (min_one_prime (pow2 64) (- getPrime P256) == 1);
     (u64 1)
   |P384 -> 
+    admit();
     assert_norm (min_one_prime (pow2 64) (- getPrime P384) == 4294967297);
     (u64 4294967297)
-  |Default -> 
-    admit();
-    let i0 = index (prime_buffer #c) (size 0) in 
-    let negI0 = (u64 0) -. i0 in 
-    Hacl.Bignum.ModInv64.mod_inv_u64 negI0
+  |Default ->  
+    let r = Hacl.Bignum.ModInv64.mod_inv_u64 (getLastWord #c) in 
+    assert(r = Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c));
+    r
 
 
 

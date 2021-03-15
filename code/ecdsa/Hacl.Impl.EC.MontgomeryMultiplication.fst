@@ -22,7 +22,7 @@ open Hacl.Impl.EC.Setup
 
 inline_for_extraction
 val supportsReducedMultiplication: #c: curve -> 
-  Tot  (r: bool {r ==> min_one_prime (pow2 64) (- getPrime c) == 1})
+  Tot  (r: bool {r ==> v (Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c)) == 1})
 
 let supportsReducedMultiplication #c = 
   let open Lib.RawIntTypes in 
@@ -80,8 +80,8 @@ val montgomery_multiplication_round_: #c: curve -> t: widefelem c -> t2: widefel
   (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
   (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
     wide_as_nat c h1 t2 < getPrime c * pow2 64 /\ (
-    let k0 = min_one_prime (pow2 64) (- getPrime c) in 
-    wide_as_nat c h1 t2 = getPrime c * (((wide_as_nat c h0 t % pow2 64) * k0) % pow2 64))
+    let k0 = Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c) in 
+    wide_as_nat c h1 t2 = getPrime c * (((wide_as_nat c h0 t % pow2 64) * v k0) % pow2 64))
   )
 
 let montgomery_multiplication_round_ #c t t2 = 
@@ -93,40 +93,129 @@ let montgomery_multiplication_round_ #c t t2 =
     montgomery_multiplication_round_k0 k0 t t2
 
 
+open FStar.Math.Euclid 
+open FStar.Math.Fermat
+
+
+#push-options "--z3rlimit 100 --ifuel 0 --fuel 0"
+
+val lemma_division_is_multiplication:
+  t3: nat{t3 % pow2 64 = 0} ->
+  prime: pos {is_prime prime /\ prime > 3 /\ prime > pow2 64} -> 
+  Lemma (t3 * modp_inv2_prime (pow2 64) prime % prime = (t3 / pow2 64) % prime)
+
+let lemma_division_is_multiplication t3 prime =  
+
+  Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (pow2 64 % prime) (prime - 2);
+  lemma_mod_twice (Spec.P256.pow (pow2 64 % prime) (prime - 2)) prime;
+
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+
+  calc (==) {t3 * modp_inv2_prime (pow2 64) prime % prime;
+    (==) {FStar.Math.Lib.lemma_div_def t3 (pow2 64)}
+     pow2 64 * (t3 / pow2 64) * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime) % prime;
+    (==) {assert_by_tactic (pow2 64 * (t3 / pow2 64) * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime) % prime == 
+    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime)) % prime) canon}
+    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime)) % prime;
+    (==) {lemma_mod_mul_distr_r (t3 / pow2 64) (pow2 64 * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime)) prime}
+    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime) % prime) % prime;
+    (==) {Hacl.Lemmas.P256.power_distributivity (pow2 64) (prime - 2) prime}
+    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64) (prime - 2) % prime) % prime) % prime;
+    (==) {lemma_mod_mul_distr_r (pow2 64) (Spec.P256.pow (pow2 64) (prime - 2)) prime}
+    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64) (prime - 2)) % prime) % prime;
+    (==) {Hacl.Lemmas.P256.power_one_2 (pow2 64)}
+    (t3 / pow2 64) * (Spec.P256.pow (pow2 64) 1 * (Spec.P256.pow (pow2 64) (prime - 2)) % prime) % prime;
+    (==) {pow_plus (pow2 64) 1 (prime - 2)}
+    (t3 / pow2 64) * ((Spec.P256.pow (pow2 64) (prime - 1)) % prime) % prime;
+    (==) {  FStar.Math.Fermat.fermat_alt prime (pow2 64);
+      power_as_specification_same_as_fermat (pow2 64) (prime - 1)}
+    (t3 / pow2 64) % prime;
+  }
+
+
+val lemma_k0_computation: #c: curve-> t: nat -> k0 : uint64 {k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c)} ->
+  Lemma (let prime = getPrime c in  (t + prime * (((t % pow2 64) * v k0) % pow2 64)) % pow2 64 == 0)
+
+let lemma_k0_computation #c t k0 = 
+  let prime = getPrime c in 
+  let n0 = getLastWord #c in 
+
+  Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWord #c);
+
+  let k = t + prime * (((t % pow2 64) * v k0) % pow2 64) in  
+  lemma_mod_mul_distr_l t (v k0) (pow2 64);
+  lemma_mod_add_distr t (prime * (t * v k0 % pow2 64)) (pow2 64);
+  lemma_mod_mul_distr_r prime (t * v k0) (pow2 64);
+  
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+
+
+  assert_by_tactic (prime * (t * v k0) == t * (prime * v k0)) canon;
+
+  assert(k % pow2 64 == (t + t * (prime * v k0) % pow2 64) % pow2 64);
+
+  lemma_mod_mul_distr_r t (prime * v k0) (pow2 64);
+  lemma_mod_mul_distr_l prime (v k0) (pow2 64);
+
+  assert(k % pow2 64 == (t + t * ((-1 + (1 + prime % pow2 64 * v k0)) % pow2 64) % pow2 64) % pow2 64);
+
+  lemma_mod_add_distr (-1) (1 + (prime) % pow2 64 * v k0) (pow2 64); 
+  lemma_mod_mul_distr_r t (-1) (pow2 64);
+  lemma_mod_add_distr t (t * (-1)) (pow2 64);
+  
+  assert(k % pow2 64 == 0)
+
+
+
 val montgomery_multiplication_one_round_proof: 
   #c: curve ->
   t: nat ->
-  k0: nat {let prime = getPrime c in k0 = min_one_prime (pow2 64) (- prime)}  ->  
-  round: nat {round = (t + getPrime c * (((t % pow2 64) * k0) % pow2 64)) / pow2 64} -> 
+  k0 : uint64 {k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c)} ->
+  round: nat {round = (t + getPrime c * (((t % pow2 64) * v k0) % pow2 64)) / pow2 64} -> 
   co: nat {co % getPrime c = t % getPrime c} -> 
   Lemma (round  % getPrime c == co * (modp_inv2_prime (pow2 64) (getPrime c)) % ( getPrime c ))
 
-let montgomery_multiplication_one_round_proof #c t k0 round co = admit()
+let montgomery_multiplication_one_round_proof #c t k0 round co =
+  let prime = getPrime c in 
+  let round = (t + prime * (((t % pow2 64) * v k0) % pow2 64)) / pow2 64 in 
+  assert(round % prime = (t + prime * (((t % pow2 64) * v k0) % pow2 64)) / pow2 64 % prime);
+
+  let k = t + prime * (((t % pow2 64) * v k0) % pow2 64) in 
+
+  lemma_k0_computation #c t k0;
+  assume (is_prime prime /\ prime > pow2 64);
+  lemma_division_is_multiplication k prime;
+
+  modulo_addition_lemma t prime (((t % pow2 64) * v k0) % pow2 64);
+
+  lemma_mod_mul_distr_l k (modp_inv2_prime (pow2 64) prime) prime;
+  lemma_mod_mul_distr_l co (modp_inv2_prime (pow2 64) prime) prime
+
 
 
 val montgomery_multiplication_round: #c: curve -> t: widefelem c -> round: widefelem c -> 
   Stack unit 
   (requires fun h -> live h t /\ live h round /\ eq_or_disjoint t round)
   (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\ (
-    let k0 = min_one_prime (pow2 64) (- getPrime c) in
-    wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * (((wide_as_nat c h0 t % pow2 64) * k0) % pow2 64)) / pow2 64)
+    let k0 = Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c) in 
+    wide_as_nat c h1 round = (wide_as_nat c h0 t + getPrime c * (((wide_as_nat c h0 t % pow2 64) * v k0) % pow2 64)) / pow2 64)
   )
 
-(* disjoint round *)
 let montgomery_multiplication_round #c t round =
   push_frame(); 
     let len = getCoordinateLenU64 c in  
     let t2 = create (size 2 *! len) (u64 0) in 
     lemma_create_zero_buffer (2 * v len) c;
     montgomery_multiplication_round_ #c t t2;
-    let carry = add_long_bn t t2 t2  in 
+    let carry = add_long_bn t t2 t2 in 
     shift1_with_carry t2 round carry; 
   pop_frame()  
 
 
 val lemma_up_bound0: #c: curve -> t0: nat {t0 < getPrime c * pow2 (64 * v (getCoordinateLenU64 c))} 
-  -> t: nat{let prime = getPrime c in 
-  t <= t0 / (pow2 (64 * v (getCoordinateLenU64 c))) + prime} -> 
+  -> t: nat{let prime = getPrime c in t <= t0 / (pow2 (64 * v (getCoordinateLenU64 c))) + prime} -> 
   Lemma (t < 2 * (getPrime c))
 
 let lemma_up_bound0 #c t0 t = 
@@ -167,6 +256,7 @@ val lemma_mm_reduction: #c: curve -> a0: nat -> i: nat -> Lemma
     a0 * modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64) % prime == a0 * modp_inv2 #c (pow2 ((i + 1) * 64)) % prime)
 
 let lemma_mm_reduction #c a0 i = 
+  let open Spec.P256 in 
   let prime = getPrime c in 
   
   let a = pow2 (i * 64) in 
@@ -257,29 +347,12 @@ let montgomery_multiplication_reduction #c t result =
     let a_il = wide_as_nat c h1_ t in 
 
     let prime = getPrime c in 
-    let k0 = min_one_prime (pow2 64) (- getPrime c) in 
+    let k0 = Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c) in 
     let co = a0 * modp_inv2 #c (pow2 (v i * 64)) in 
 
-    lemma_up_bound1 #c (v i) a0 a_i k0 a_il;
+    lemma_up_bound1 #c (v i) a0 a_i (v k0) a_il;
     montgomery_multiplication_one_round_proof #c a_i k0 a_il co;
-    
-
-    assert(a_i % prime = co % prime);
-    assert(a_il % prime == co * modp_inv2_prime (pow2 64) prime % prime);
-
-    calc (==) {
-      co * modp_inv2_prime (pow2 64) prime % prime;
-      (==) {}
-      a0 * modp_inv2 #c (pow2 (v i * 64)) * modp_inv2 #c (pow2 64) % prime;
-      
-
-
-    };
-    
-
-    assume (a_il % prime = wide_as_nat c h0 t * modp_inv2 #c (pow2 ((v i + 1) * 64)) % prime)
-
-  );
+    lemma_mm_reduction #c a0 (v i));
 
   let h2 = ST.get() in 
   lemma_up_bound0 #c (wide_as_nat c h0 t) (wide_as_nat c h2 t); 

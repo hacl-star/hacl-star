@@ -194,8 +194,20 @@ let rec pow a b =
   if b = 0 then 1
   else a * (pow a (b - 1))
 
+(*let rec pow (a:int) (k:nat) : int =
+  if k = 0 then 1
+  else a * pow a (k - 1) *)
 
 #push-options "--fuel 1"
+
+
+val power_as_specification_same_as_fermat: a: nat -> b: nat -> Lemma (pow a b == FStar.Math.Fermat.pow a b)
+
+let rec power_as_specification_same_as_fermat a b = 
+  match b with 
+  |0 -> ()
+  |_ -> power_as_specification_same_as_fermat a (b - 1)
+
 
 noextract
 val pow_plus: a: nat -> b: nat -> c: nat -> 
