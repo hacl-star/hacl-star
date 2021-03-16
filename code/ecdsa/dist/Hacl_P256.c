@@ -102,28 +102,26 @@ static uint64_t getK0(Spec_P256_curve c)
       }
     case Spec_P256_Default:
       {
-        const uint64_t *sw;
+        uint64_t sw;
         switch (c)
         {
           case Spec_P256_P256:
             {
-              sw = prime256_buffer;
+              sw = (uint64_t)0xffffffffffffffffU;
               break;
             }
           case Spec_P256_P384:
             {
-              sw = prime384_buffer;
+              sw = (uint64_t)0xffffffffU;
               break;
             }
           default:
             {
-              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
+              sw = KRML_EABORT(uint64_t, "");
             }
         }
-        uint64_t i0 = sw[0U];
-        uint64_t negI0 = (uint64_t)0U - i0;
-        return mod_inv_u64(negI0);
+        uint64_t r = mod_inv_u64(sw);
+        return r;
       }
     default:
       {
