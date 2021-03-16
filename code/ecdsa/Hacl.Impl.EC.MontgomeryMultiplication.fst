@@ -431,19 +431,50 @@ let montgomery_multiplication_buffer_by_one #c a result =
   lemmaFromDomain #c (as_nat c h0 a)
 
 
-(*
-val montgomery_multiplication_buffer: #c: curve
-  -> a: felem c -> b: felem c -> result: felem c ->  
-  Stack unit
-  (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h b /\ 
-      live h result /\ as_nat c h b < getPrime c)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result < getPrime c /\ (
-    let prime = getPrime c in 
-    as_nat c h1 result = (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b) % prime) /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b))))
-  )
-*)
+
+val lemma_mult_lt_center: a: nat -> b: nat -> c: pos -> d: pos -> Lemma
+    (requires (a < c /\ b < d))
+    (ensures (a * b < c * d))
+
+let lemma_mult_lt_center a b c d = ()
+
+
+val lemma_domain: #c: curve -> a: nat {a < getPrime c} -> b: nat {b < getPrime c} ->  k: nat ->
+  Lemma 
+    (requires (k == (a *  b * modp_inv2_prime (pow2 (getPower c)) (getPrime c)) % getPrime c))
+    (ensures (
+      k == toDomain_ #c (fromDomain_ #c a * fromDomain_ #c b % getPrime c) /\
+      k == toDomain_ #c (fromDomain_ #c a * fromDomain_ #c b)))
+
+let lemma_domain #c a b k = 
+  let prime = getPrime c in 
+  let multResult = a * b * modp_inv2_prime (pow2 (getPower c)) prime % prime in 
+
+  let mod = modp_inv2_prime (pow2 (getPower c)) prime in 
+  
+  calc (==) {
+    a * b * mod % prime;
+    (==) {lemmaFromDomainToDomain #c multResult}
+    toDomain_ #c (fromDomain_ #c multResult);
+    (==) {lemmaFromDomain #c multResult}
+    toDomain_ #c ((a * b * mod  % prime) * mod % prime);
+    (==) {lemma_mod_mul_distr_l (a * b * mod) mod prime}
+    toDomain_ #c (a * b * mod * mod % prime);
+    (==) {
+      let open FStar.Tactics in 
+      let open FStar.Tactics.Canon in 
+      assert_by_tactic (a * b * mod * mod == (a * mod) * (b * mod)) canon}
+    toDomain_ #c ((a * mod) * (b * mod) % prime);
+    (==) {
+      lemma_mod_mul_distr_l (a * mod) (b *  mod) prime; 
+      lemma_mod_mul_distr_r (a * mod % prime) (b * mod) prime}
+      
+    toDomain_ #c ((a * mod % prime) * (b * mod % prime) % prime);
+    (==) {lemmaFromDomain #c a; lemmaFromDomain #c b}
+    toDomain_ #c (fromDomain_ #c a * fromDomain_ #c b % prime);};
+
+    inDomain_mod_is_not_mod #c (fromDomain_ #c a * fromDomain_ #c b)
+
 
 let montgomery_multiplication_buffer #c a b result = 
   push_frame();
@@ -451,146 +482,15 @@ let montgomery_multiplication_buffer #c a b result =
   let t = create (size 2 *! len) (u64 0) in 
     let h0 = ST.get() in
   mul a b t;  
+    lemma_mult_lt_center (as_nat c h0 a) (as_nat c h0 b) (getPrime c) (pow2 (getPower c));
+
   montgomery_multiplication_reduction #c t result;
-  pop_frame()
-  (*
-
-    let h1 = ST.get() in 
-  
-    let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = let prime = getPrime c in 
-      live h t /\ wide_as_nat c h t < prime * prime /\ modifies (loc t) h0 h /\ 
-      wide_as_nat c h t % prime = wide_as_nat c h1 t * modp_inv2 #c (pow2 (i * 64)) % prime in
-
-    lemma_mult_lt_sqr (as_nat c h0 a) (as_nat c h0 b) (getPrime c);
-    lemma_mod_inv #c (wide_as_nat c h1 t);
-
-  for 0ul len inv (fun i -> let h0_ = ST.get() in
-    montgomery_multiplication_round #c t t; 
-      let h1_ = ST.get() in
-      admit();
-      montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t)
-    );
-    
-    (*lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i)); *)
-
-    let h2 = ST.get() in 
-  
-    assume (wide_as_nat c h2 t < 2 * getPrime c);
-  reduction_prime_2prime_with_carry t result;
-  
   pop_frame();
-
-    let prime = getPrime c in 
-    let multResult = as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) prime % prime in 
-
-    let a_ = as_nat c h0 a in 
-    let b_ = as_nat c h0 b in 
-    let mod = modp_inv2_prime (pow2 (getPower c)) prime in 
   
-    calc (==)
-    {
-      a_ * b_ * mod % prime;
-      (==) {lemmaFromDomainToDomain #c multResult}
-      toDomain_ #c (fromDomain_ #c multResult);
-      (==) {lemmaFromDomain #c multResult}
-      toDomain_ #c ((a_ * b_ * mod  % prime) * mod % prime);
-      (==) {lemma_mod_mul_distr_l (a_ * b_ * mod) mod prime}
-      toDomain_ #c (a_ * b_ * mod * mod % prime);
-      (==) {
-	let open FStar.Tactics in 
-	let open FStar.Tactics.Canon in 
-	assert_by_tactic (a_ * b_ * mod * mod == (a_ * mod) * (b_ * mod)) canon}
-      toDomain_ #c ((a_ * mod) * (b_ * mod) % prime);
-      (==) {
-	lemma_mod_mul_distr_l (a_ * mod) (b_ *  mod) prime; 
-	lemma_mod_mul_distr_r (a_ * mod % prime) (b_ * mod) prime}
-      
-      toDomain_ #c ((a_ * mod % prime) * (b_ * mod % prime) % prime);
-      (==) {lemmaFromDomain #c a_; lemmaFromDomain #c b_}
-      toDomain_ #c (fromDomain_ #c a_ * fromDomain_ #c b_ % prime);
-
-    };
-
-    inDomain_mod_is_not_mod #c (fromDomain_ #c a_ * fromDomain_ #c b_)
-*)
-
-(*
-val montgomery_multiplication_buffer_k0: #c: curve -> a: felem c -> b: felem c 
-  -> result: felem c ->  
-  Stack unit
-  (requires (fun h -> live h a /\ as_nat c h a < getPrime c /\ live h b /\ 
-    live h result /\ as_nat c h b < getPrime c)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\  
-    as_nat c h1 result < getPrime c /\ (
-    let prime = getPrime c in 
-    as_nat c h1 result = (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) (getPrime c)) % prime /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b) % prime) /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b))))
-  )
-
-let montgomery_multiplication_buffer_k0 #c a b result = 
-  push_frame();
-  let len = getCoordinateLenU64 c in 
-  let t = create (size 2 *! len) (u64 0) in 
-    let h0 = ST.get() in 
-  mul a b t;  
     let h1 = ST.get() in 
-    
-    let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = let prime = getPrime c in 
-      live h t /\ wide_as_nat c h t < prime * prime /\ modifies (loc t) h0 h /\ 
-      wide_as_nat c h t % prime = wide_as_nat c h1 t * modp_inv2 #c (pow2 (i * 64)) % prime in
 
-    lemma_mult_lt_sqr (as_nat c h0 a) (as_nat c h0 b) (getPrime c);
-    lemma_mod_inv #c (wide_as_nat c h1 t);
+    lemma_domain #c (as_nat c h0 a) (as_nat c h0 b) (as_nat c h1 result)
 
-    assume (inv h1 0);
-  for 0ul len inv (fun i -> let h0_ = ST.get() in
-    montgomery_multiplication_round_k0 #c t t (getK0 c); 
-      let h1_ = ST.get() in
-      admit();
-      montgomery_multiplication_one_round_proof_w_ko #c (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (wide_as_nat c h0_ t)
-      (*lemma_inv2 #c (wide_as_nat c h1 t) (wide_as_nat c h0_ t) (wide_as_nat c h1_ t) (v i) *));
-
-    let h2 = ST.get() in   
-    assume (wide_as_nat c h2 t < 2 * getPrime c);
-  reduction_prime_2prime_with_carry t result;
-  
-  pop_frame();
-
-    let prime = getPrime c in 
-    let multResult = as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) prime % prime in 
-
-    let a_ = as_nat c h0 a in 
-    let b_ = as_nat c h0 b in 
-    let mod = modp_inv2_prime (pow2 (getPower c)) prime in 
-
-    admit();
-    calc (==)
-    {
-      a_ * b_ * mod % prime;
-      (==) {lemmaFromDomainToDomain #c multResult}
-      toDomain_ #c (fromDomain_ #c multResult);
-      (==) {lemmaFromDomain #c multResult}
-      toDomain_ #c ((a_ * b_ * mod  % prime) * mod % prime);
-      (==) {lemma_mod_mul_distr_l (a_ * b_ * mod) mod prime}
-      toDomain_ #c (a_ * b_ * mod * mod % prime);
-      (==) {
-	let open FStar.Tactics in 
-	let open FStar.Tactics.Canon in 
-	assert_by_tactic (a_ * b_ * mod * mod == (a_ * mod) * (b_ * mod)) canon}
-      toDomain_ #c ((a_ * mod) * (b_ * mod) % prime);
-      (==) {
-	lemma_mod_mul_distr_l (a_ * mod) (b_ *  mod) prime; 
-	lemma_mod_mul_distr_r (a_ * mod % prime) (b_ * mod) prime}
-      
-      toDomain_ #c ((a_ * mod % prime) * (b_ * mod % prime) % prime);
-      (==) {lemmaFromDomain #c a_; lemmaFromDomain #c b_}
-      toDomain_ #c (fromDomain_ #c a_ * fromDomain_ #c b_ % prime);
-
-    };
-
-    inDomain_mod_is_not_mod #c (fromDomain_ #c a_ * fromDomain_ #c b_)
-*)
 
 (*
 val montgomery_square_buffer: #c: curve  -> a: felem c
