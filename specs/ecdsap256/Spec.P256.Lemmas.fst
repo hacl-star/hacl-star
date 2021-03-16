@@ -148,10 +148,15 @@ let modp_inv2 (x: nat) : Tot (elem prime256) =
 
 
 
+//let modp_inv2_pow (x: nat{x < prime256}) : Tot (elem prime256) =
 let modp_inv2_pow (x: nat) : Tot (elem prime256) =
    power_distributivity x (prime256 - 2) prime256;
-   pow x (prime256 - 2) % prime256
+//   pow x (prime256 - 2) % prime256
+//   lemma_pow_mod_n_is_fpow prime256 x (prime256 - 2);
+   exp #prime256 (x % prime256) (prime256 - 2)
 
+// ((pow (a % c) b) % c = (pow a b) % c)
+// exp #n a b == pow a (b % n)
 
 
 let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (elem prime) =
