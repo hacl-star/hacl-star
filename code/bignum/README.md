@@ -52,7 +52,7 @@ This enforces the user to call the corresponding spec-level lemmas:
 - Hacl.Bignum ==> Hacl.Spec.Bignum
 - Hacl.Bignum.Montgomery ==> Hacl.Spec.Bignum.Montgomery ==> Hacl.Spec.Montgomery.Lemmas
   * this module is not supposed to get exposed
-- Hacl.Bignum.Exponentiation ==> Hacl.Spec.Bignum.Exponentiation \[==> Hacl.Spec.Exponentiation.Lemmas] ==> Lib.NatMod/Lib.Exponentiation
+- Hacl.Bignum.Exponentiation ==> Hacl.Spec.Bignum.Exponentiation ==> Lib.NatMod/Lib.Exponentiation
 
 The reason behind such a design choice may not be obvious if we look only at the Hacl.Bignum module.
 This is done in order to simplify the preconditions of the functions and avoid proving the same things twice: in the Low* code and low-level spec.

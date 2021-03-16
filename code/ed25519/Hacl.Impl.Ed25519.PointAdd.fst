@@ -9,8 +9,6 @@ open Lib.Buffer
 open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
-module F56 = Hacl.Impl.Ed25519.Field56
-
 module SC = Spec.Curve25519
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
@@ -134,7 +132,7 @@ val point_add_:
     (requires fun h ->
       live h out /\ live h p /\ live h q /\ live h tmp /\
       disjoint tmp p /\ disjoint tmp q /\ disjoint tmp out /\
-      disjoint p out /\ disjoint q out /\
+      eq_or_disjoint p out /\ eq_or_disjoint q out /\
       F51.point_inv_t h p /\
       F51.point_inv_t h q
     )
@@ -167,7 +165,7 @@ val point_add:
   Stack unit
     (requires fun h ->
       live h out /\ live h p /\ live h q /\
-      disjoint p out /\ disjoint q out /\
+      eq_or_disjoint p out /\ eq_or_disjoint q out /\
       F51.point_inv_t h p /\
       F51.point_inv_t h q
       )
@@ -175,6 +173,7 @@ val point_add:
       F51.point_inv_t h1 out /\
       F51.point_eval h1 out == Spec.Ed25519.point_add (F51.point_eval h0 p) (F51.point_eval h0 q)
     )
+
 let point_add out p q =
   push_frame();
   let tmp = create 30ul (u64 0) in

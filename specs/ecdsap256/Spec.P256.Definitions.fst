@@ -7,7 +7,6 @@ open FStar.Math.Lib
 (* open FStar.HyperStack
 open FStar.HyperStack.All *)
 open Lib.Sequence
-(* open Lib.Buffer *)
 open FStar.Mul
 
 

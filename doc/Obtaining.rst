@@ -56,7 +56,7 @@ NMake-compatible makefile).
 Integrating the code
 --------------------
 
-To incoroporate our verified crypto code into a C software project, a developer
+To incorporate our verified crypto code into a C software project, a developer
 has two choices.
 
 - Pick a full EverCrypt distribution, along with the

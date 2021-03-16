@@ -33,6 +33,21 @@ val seq_eq_mask: #t:inttype{~(S128? t)} -> #len1:size_nat -> #len2:size_nat
 inline_for_extraction
 val lbytes_eq: #len:size_nat -> b1:lbytes len -> b2:lbytes len -> b:bool{b <==> b1 == b2}
 
+inline_for_extraction
+val mask_select: #t:inttype{~(S128? t)} -> mask:int_t t SEC -> a:int_t t SEC -> b:int_t t SEC -> int_t t SEC
+
+val mask_select_lemma: #t:inttype{~(S128? t)} -> mask:int_t t SEC -> a:int_t t SEC -> b:int_t t SEC -> Lemma
+  (requires v mask = 0 \/ v mask = v (ones t SEC))
+  (ensures  mask_select mask a b == (if v mask = 0 then b else a))
+
+val seq_mask_select: #t:inttype{~(S128? t)} -> #len:size_nat
+  -> a:lseq (int_t t SEC) len
+  -> b:lseq (int_t t SEC) len
+  -> mask:int_t t SEC
+  -> Pure (lseq (int_t t SEC) len)
+    (requires v mask = 0 \/ v mask = v (ones t SEC))
+    (ensures  fun res -> res == (if v mask = 0 then b else a))
+
 /// Constant for empty lbytes
 
 

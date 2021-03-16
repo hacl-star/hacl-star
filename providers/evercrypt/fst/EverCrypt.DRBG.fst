@@ -206,8 +206,8 @@ let mk_uninstantiate a st =
   let ctr:B.buffer size_t = s.reseed_counter in
   assert (B.disjoint k v /\ B.disjoint k ctr /\ B.disjoint v ctr);
   assert (B.loc_disjoint (B.loc_addr_of_buffer st) (footprint_s st_s));
-  Lib.Memzero.clear_words_u8 (hash_len a) k;
-  Lib.Memzero.clear_words_u8 (hash_len a) v;
+  Lib.Memzero0.memzero k (hash_len a);
+  Lib.Memzero0.memzero v (hash_len a);  
   ctr.(0ul) <- 0ul;
   B.free k;
   B.free v;

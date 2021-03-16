@@ -10,7 +10,6 @@ open Lib.Buffer
 open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
-module F56 = Hacl.Impl.Ed25519.Field56
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
@@ -28,6 +27,7 @@ val swap_conditional_step:
       (if v swap = pow2 64 - 1 then (as_seq h1 out_a == as_seq h0 b /\ as_seq h1 out_b == as_seq h0 a)
       else (as_seq h1 out_a == as_seq h0 a /\ as_seq h1 out_b == as_seq h0 b)))
 
+[@CInline]
 let swap_conditional_step a' b' a b swap =
   let h0 = get() in
   let a0 = a.(0ul) in
@@ -92,6 +92,7 @@ let swap_conditional_step a' b' a b swap =
   Classical.move_requires lemma_zero ();
   Classical.move_requires lemma_ones ()
 
+
 val swap_conditional:
     out_a:point
   -> out_b:point
@@ -113,6 +114,7 @@ val swap_conditional:
 
 #set-options "--z3rlimit 50"
 
+[@CInline]
 let swap_conditional a' b' a b iswap =
   let swap = u64 0 -. iswap in
   Math.Lemmas.small_mod (v iswap) (pow2 8);
@@ -120,6 +122,7 @@ let swap_conditional a' b' a b iswap =
   swap_conditional_step (gety a') (gety b') (gety a) (gety b) swap;
   swap_conditional_step (getz a') (getz b') (getz a) (getz b) swap;
   swap_conditional_step (gett a') (gett b') (gett a) (gett b) swap
+
 
 val swap_conditional_inplace:
     a:point
@@ -134,6 +137,8 @@ val swap_conditional_inplace:
       (F51.point_eval h1 a, F51.point_eval h1 b) ==
       Spec.Ed25519.cswap2 (to_u8 i) (F51.point_eval h0 a) (F51.point_eval h0 b)
     )
+
+[@CInline]
 let swap_conditional_inplace a b iswap =
   let swap = u64 0 -. iswap in
   Math.Lemmas.small_mod (v iswap) (pow2 8);

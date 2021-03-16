@@ -29,6 +29,9 @@ let hacl_md5 = hacl_md MD5
 inline_for_extraction noextract
 let state_t_md5 = state_t MD5
 
+/// Type abbreviation - for pretty code generation
+let state_md5 = F.state_s hacl_md5 () (state_t_md5.s ()) (G.erased unit)
+
 noextract
 let legacy_alloca_md5 = F.alloca hacl_md5 () (state_t_md5.s ()) (G.erased unit)
 let legacy_create_in_md5 = F.create_in hacl_md5 () (state_t_md5.s ()) (G.erased unit)

@@ -6,7 +6,7 @@
 #include "config.h"
 #endif
 
-#if !defined(BROKEN_INTRINSICS)
+#if defined(COMPILE_INTRINSICS)
 #if defined(_MSC_VER)
 #include <immintrin.h>
 #else
@@ -14,7 +14,7 @@
 #endif
 #endif
 
-#if defined(BROKEN_INTRINSICS)
+#if !defined(COMPILE_INTRINSICS)
 
 #include "Hacl_IntTypes_Intrinsics.h"
 
@@ -64,4 +64,4 @@
 
 #endif // GCC < 7.2
 
-#endif // BROKEN_INTRINSICS
+#endif // !COMPILE_INTRINSICS

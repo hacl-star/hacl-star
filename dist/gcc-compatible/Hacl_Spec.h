@@ -39,6 +39,11 @@ extern "C" {
 
 
 
+#define Spec_Blake2_Blake2S 0
+#define Spec_Blake2_Blake2B 1
+
+typedef uint8_t Spec_Blake2_alg;
+
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2
@@ -94,6 +99,11 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 #define Spec_Agile_AEAD_AES256_CCM8 6
 
 typedef uint8_t Spec_Agile_AEAD_alg;
+
+#define Spec_Frodo_Params_SHAKE128 0
+#define Spec_Frodo_Params_AES128 1
+
+typedef uint8_t Spec_Frodo_Params_frodo_gen_a;
 
 #if defined(__cplusplus)
 }

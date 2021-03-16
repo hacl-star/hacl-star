@@ -109,6 +109,8 @@ bool EverCrypt_AutoConfig2_has_avx512()
   return cpu_has_avx512[0U];
 }
 
+KRML_DEPRECATED("")
+
 bool EverCrypt_AutoConfig2_wants_vale()
 {
   return user_wants_vale[0U];
@@ -136,7 +138,7 @@ void EverCrypt_AutoConfig2_recall()
 
 void EverCrypt_AutoConfig2_init()
 {
-  #if EVERCRYPT_TARGETCONFIG_X64
+  #if EVERCRYPT_CAN_COMPILE_VALE
   uint64_t scrut = check_aesni();
   if (scrut != (uint64_t)0U)
   {
@@ -292,5 +294,19 @@ void EverCrypt_AutoConfig2_disable_openssl()
 void EverCrypt_AutoConfig2_disable_bcrypt()
 {
   user_wants_bcrypt[0U] = false;
+}
+
+bool EverCrypt_AutoConfig2_has_vec128()
+{
+  bool avx = EverCrypt_AutoConfig2_has_avx();
+  bool other = has_vec128_not_avx();
+  return avx || other;
+}
+
+bool EverCrypt_AutoConfig2_has_vec256()
+{
+  bool avx2 = EverCrypt_AutoConfig2_has_avx2();
+  bool other = has_vec256_not_avx2();
+  return avx2 || other;
 }
 

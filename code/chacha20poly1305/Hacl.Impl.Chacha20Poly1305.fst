@@ -38,7 +38,7 @@ val poly1305_do_:
   (ensures fun h0 _ h1 ->
     modifies (loc ctx |+| loc block) h0 h1 /\
     (let acc, r = SpecPoly.poly1305_init (as_seq h0 k) in
-    let acc = Spec.poly1305_padded r (as_seq h0 aad) acc in
+    let acc = if (length aad <> 0) then Spec.poly1305_padded r (as_seq h0 aad) acc else acc in
     let acc = Spec.poly1305_padded r (as_seq h0 m) acc in
     let block_s = LSeq.concat (BSeq.uint_to_bytes_le #U64 (u64 (length aad)))
       (BSeq.uint_to_bytes_le #U64 (u64 (length m))) in
@@ -48,7 +48,9 @@ val poly1305_do_:
 [@Meta.Attribute.inline_]
 let poly1305_do_ #w k aadlen aad mlen m ctx block =
   Poly.poly1305_init ctx k;
-  poly1305_padded ctx aadlen aad;
+  if (aadlen <> 0ul) then (
+    poly1305_padded ctx aadlen aad)
+  else ();
   poly1305_padded ctx mlen m;
   let h0 = ST.get () in
   update_sub_f h0 block 0ul 8ul

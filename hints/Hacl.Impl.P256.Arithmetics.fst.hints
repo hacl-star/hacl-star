@@ -13,7 +13,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "8cecc0b4b24e99257feec51f0e230b67"
+      "808015531868c65de54d705cf327d689"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.cube",
@@ -24,14 +24,14 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.Buffer.MUT@tok", "equation_Lib.Buffer.as_seq",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_Hacl.Spec.P256.Felem.as_nat",
+        "equation_Hacl.Spec.P256.Felem.felem", "equation_Lib.Buffer.as_seq",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
         "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
         "equation_Lib.IntTypes.uint64", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
-        "equation_Spec.P256.Definitions.as_nat",
-        "equation_Spec.P256.Definitions.felem",
         "equation_Spec.P256.MontgomeryMultiplication.prime",
         "function_token_typing_Lib.IntTypes.uint64", "int_typing",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
@@ -44,17 +44,17 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1",
+        "refinement_interpretation_Tm_refine_3aa6b94818a83b1f2a0e8fa40249ffbe",
+        "refinement_interpretation_Tm_refine_4d5a73b0e327275c799e8e82b7d02c8b",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_e1f05a248486e3d457f1cccabe7ac90d",
-        "refinement_interpretation_Tm_refine_f655f7a915639b5af79f848b9e71670d",
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
         "typing_Lib.Buffer.loc", "typing_LowStar.Buffer.trivial_preorder",
         "typing_Spec.P256.MontgomeryMultiplication.prime",
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "599f156c969fbd9eb090e26a48856ea6"
+      "d4d481652fa35783a7f259dc409c7900"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.quatre",
@@ -68,7 +68,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "5c2c168c93e627d6a6dc4c394b16e47a"
+      "610b83b51c92ab5fbeae22ebda3f9c64"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.quatre",
@@ -79,12 +79,13 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.Buffer.MUT@tok", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
-        "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.uint64",
-        "equation_LowStar.Buffer.buffer",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_Hacl.Spec.P256.Felem.felem",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.live", "equation_Lib.Buffer.modifies",
+        "equation_Lib.IntTypes.uint64", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.P256.Definitions.felem",
+        "equation_Prims.pos",
         "equation_Spec.P256.MontgomeryMultiplication.prime",
         "function_token_typing_Lib.IntTypes.uint64", "int_inversion",
         "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
@@ -96,19 +97,19 @@
         "primitive_Prims.op_Multiply", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1",
-        "refinement_interpretation_Tm_refine_0c7c025157384759fabb89231fa473d4",
+        "refinement_interpretation_Tm_refine_3aa6b94818a83b1f2a0e8fa40249ffbe",
+        "refinement_interpretation_Tm_refine_41615747e0e7a31d03959244fb603dca",
+        "refinement_interpretation_Tm_refine_4d5a73b0e327275c799e8e82b7d02c8b",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_e1f05a248486e3d457f1cccabe7ac90d",
-        "refinement_interpretation_Tm_refine_f655f7a915639b5af79f848b9e71670d",
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
         "typing_Lib.Buffer.loc", "typing_LowStar.Buffer.trivial_preorder",
         "typing_Spec.P256.MontgomeryMultiplication.prime",
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "e61099c5026a2b70e373a3ca030ac9a6"
+      "059ea8f6fd3ec7878f941843ef9a0d72"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByTwo",
@@ -129,7 +130,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "83418e42767e03745d1d3523240040d3"
+      "f9a6d37926f5fc1ca2f7227dbfe343e1"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByTwo",
@@ -141,13 +142,13 @@
         "equation_Spec.P256.MontgomeryMultiplication.prime",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_02ca0dd698b8d375f31550fd7f95d505",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_a9e01978e31e62588da7f45b789d32fe",
-        "refinement_interpretation_Tm_refine_de73c70f285ef7f57303f4689f825dc2",
-        "typing_Spec.P256.Definitions.as_nat"
+        "refinement_interpretation_Tm_refine_f1ff85bfeaf1efee5891c900b4f9e306",
+        "typing_Hacl.Spec.P256.Felem.as_nat"
       ],
       0,
-      "cdfc57e5e20d9dc13ec61e3840f63f20"
+      "71be5166d87bba652c09da8fa7ed287f"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByThree",
@@ -156,7 +157,7 @@
       1,
       [ "@query" ],
       0,
-      "276bba26a9ab23ecae1791a17da63e73"
+      "33cf1c7541acb1c1a323e356b6004b5a"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByThree",
@@ -167,35 +168,39 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.Buffer.MUT@tok", "equation_Lib.Buffer.as_seq",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_Hacl.Spec.P256.Felem.as_nat",
+        "equation_Hacl.Spec.P256.Felem.felem", "equation_Lib.Buffer.as_seq",
         "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
         "equation_Lib.Buffer.eq_or_disjoint",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
         "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
         "equation_Lib.IntTypes.uint64", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
-        "equation_Spec.P256.Definitions.as_nat",
-        "equation_Spec.P256.Definitions.felem",
         "equation_Spec.P256.MontgomeryMultiplication.prime",
-        "function_token_typing_Lib.IntTypes.uint64", "int_inversion",
-        "int_typing", "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
+        "function_token_typing_Lib.IntTypes.uint64", "int_typing",
+        "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1",
+        "refinement_interpretation_Tm_refine_3aa6b94818a83b1f2a0e8fa40249ffbe",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_f655f7a915639b5af79f848b9e71670d",
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
-        "typing_Lib.Buffer.loc", "typing_LowStar.Buffer.trivial_preorder",
-        "typing_Spec.P256.Definitions.as_nat",
+        "typing_Hacl.Spec.P256.Felem.as_nat", "typing_Lib.Buffer.loc",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Spec.P256.MontgomeryMultiplication.prime",
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "9536283d0c2f536c5a7ccb8029a45bc5"
+      "a99a224d1d40baff52f5a551a7c53845"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByFour",
@@ -216,7 +221,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "608669ed23dbacb49409a867d64fa27b"
+      "c57a905946cda6c8a0772be5d6df735d"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByFour",
@@ -227,13 +232,13 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.Buffer.MUT@tok", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.eq_or_disjoint",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_Hacl.Spec.P256.Felem.felem",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.eq_or_disjoint",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
         "equation_Lib.Buffer.loc", "equation_Lib.Buffer.modifies",
         "equation_Lib.IntTypes.uint64", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
-        "equation_Spec.P256.Definitions.felem",
         "equation_Spec.P256.MontgomeryMultiplication.prime",
         "function_token_typing_Lib.IntTypes.uint64", "int_typing",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
@@ -243,16 +248,16 @@
         "lemma_Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
         "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_55b5194bd379517e81bd4dc17871b790",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_de73c70f285ef7f57303f4689f825dc2",
+        "refinement_interpretation_Tm_refine_acab523c1a0727bc45d49743826a4645",
+        "refinement_interpretation_Tm_refine_f1ff85bfeaf1efee5891c900b4f9e306",
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
-        "typing_Lib.Buffer.loc", "typing_LowStar.Buffer.trivial_preorder",
-        "typing_Spec.P256.Definitions.as_nat",
+        "typing_Hacl.Spec.P256.Felem.as_nat", "typing_Lib.Buffer.loc",
+        "typing_LowStar.Buffer.trivial_preorder",
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "7e907e946b0d26ec4ec627f9e1f09e8b"
+      "bf54ee0dfa322878119e26c54acce368"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByEight",
@@ -261,7 +266,7 @@
       1,
       [ "@query" ],
       0,
-      "9ebdbf90283e8a0411f5c4e5e74f580e"
+      "2ed66144203e4f9c8ea3b69ac4b4e41b"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByEight",
@@ -272,13 +277,13 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.Buffer.MUT@tok", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.eq_or_disjoint",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equation_Hacl.Spec.P256.Felem.felem",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.eq_or_disjoint",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.live",
         "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.uint64",
         "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
-        "equation_Spec.P256.Definitions.felem",
         "equation_Spec.P256.MontgomeryMultiplication.prime",
         "function_token_typing_Lib.IntTypes.uint64", "int_typing",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
@@ -286,19 +291,22 @@
         "lemma_LowStar.Monotonic.Buffer.loc_includes_refl",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
         "lemma_Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_GreaterThan", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1",
+        "refinement_interpretation_Tm_refine_3aa6b94818a83b1f2a0e8fa40249ffbe",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_55b5194bd379517e81bd4dc17871b790",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_de73c70f285ef7f57303f4689f825dc2",
-        "refinement_interpretation_Tm_refine_f655f7a915639b5af79f848b9e71670d",
+        "refinement_interpretation_Tm_refine_acab523c1a0727bc45d49743826a4645",
+        "refinement_interpretation_Tm_refine_f1ff85bfeaf1efee5891c900b4f9e306",
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
         "typing_Lib.Buffer.loc", "typing_LowStar.Buffer.trivial_preorder",
-        "typing_Spec.P256.Definitions.as_nat",
+        "typing_Spec.P256.MontgomeryMultiplication.prime",
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "40c1ae20f6e73b31beb1320f99829832"
+      "febe8e992ef870ebbe315f4696fc5bf0"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByMinusThree",
@@ -307,7 +315,7 @@
       1,
       [ "@query" ],
       0,
-      "7ce50f679a3663162de473985cce26ba"
+      "d7b0ec3fee872c39105172e86f4d8cef"
     ],
     [
       "Hacl.Impl.P256.Arithmetics.multByMinusThree",
@@ -323,6 +331,7 @@
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
@@ -346,8 +355,10 @@
         "equation_FStar.Monotonic.HyperStack.remove_elt",
         "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
         "equation_FStar.UInt.size", "equation_FStar.UInt.uint_t",
-        "equation_Lib.Buffer.as_seq", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.disjoint", "equation_Lib.Buffer.eq_or_disjoint",
+        "equation_Hacl.Spec.P256.Felem.as_nat",
+        "equation_Hacl.Spec.P256.Felem.felem", "equation_Lib.Buffer.as_seq",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.disjoint",
+        "equation_Lib.Buffer.eq_or_disjoint",
         "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
         "equation_Lib.Buffer.modifies",
@@ -360,9 +371,8 @@
         "equation_Lib.Sequence.seq", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.P256.Definitions.as_nat",
+        "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.P256.Definitions.as_nat4",
-        "equation_Spec.P256.Definitions.felem",
         "equation_Spec.P256.MontgomeryMultiplication.fromDomain_",
         "equation_Spec.P256.MontgomeryMultiplication.prime",
         "equation_with_fuel_Prims.pow2.fuel_instrumented",
@@ -415,6 +425,7 @@
         "lemma_Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_BarBar", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_GreaterThan", "primitive_Prims.op_LessThan",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Negation",
         "primitive_Prims.op_Subtraction",
@@ -425,25 +436,27 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__3",
         "projection_inverse_FStar.Pervasives.Native.Mktuple4__4",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
+        "refinement_interpretation_Tm_refine_0c4926e33a4dc1c024a6bb2210141ee1",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_156c49afb7e1e070fbb2e47dc0e3d4b2",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
-        "refinement_interpretation_Tm_refine_387c5a9eb2d31c51d2106e3b82408610",
+        "refinement_interpretation_Tm_refine_3aa6b94818a83b1f2a0e8fa40249ffbe",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_56c3919dda5153be7f87d90b0a6641c4",
         "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
-        "refinement_interpretation_Tm_refine_7d84b8f3dff73d3cc195fbe597f5a194",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_b47cabb890633249ae7f38d35cac724e",
+        "refinement_interpretation_Tm_refine_d1106023e91a20ca0d1b60be0df402e8",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "refinement_interpretation_Tm_refine_f655f7a915639b5af79f848b9e71670d",
         "refinement_interpretation_Tm_refine_fc1f69e4229a94f85b0de30f1747a8d3",
         "refinement_interpretation_Tm_refine_ff2b90c8f94db4f4bcfea92159681cf1",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_FStar.Map.contains", "typing_FStar.Map.domain",
         "typing_FStar.Map.restrict", "typing_FStar.Map.sel",
         "typing_FStar.Monotonic.Heap.emp",
@@ -457,9 +470,9 @@
         "typing_FStar.Set.complement", "typing_FStar.Set.mem",
         "typing_FStar.Set.singleton", "typing_FStar.Set.union",
         "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
-        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.IntTypes.v", "typing_Lib.Sequence.create",
-        "typing_Lib.Sequence.index",
+        "typing_Hacl.Spec.P256.Felem.as_nat", "typing_Lib.Buffer.length",
+        "typing_Lib.Buffer.loc", "typing_Lib.IntTypes.v",
+        "typing_Lib.Sequence.create", "typing_Lib.Sequence.index",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.as_addr",
@@ -470,15 +483,14 @@
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
-        "typing_LowStar.Monotonic.Buffer.loc_union",
-        "typing_Spec.P256.Definitions.as_nat",
+        "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Prims.pow2",
         "typing_Spec.P256.MontgomeryMultiplication.prime",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "3f38f878ee1b6934edd30f68592830fa"
+      "f8a23325aabd099267e642dacd626686"
     ]
   ]
 ]

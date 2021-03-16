@@ -51,7 +51,7 @@ val poly1305_do:
   Tot Poly.tag
 let poly1305_do k m aad =
   let acc, r = Poly.poly1305_init k in
-  let acc = poly1305_padded r aad acc in
+  let acc = if (length aad <> 0) then poly1305_padded r aad acc else acc in
   let acc = poly1305_padded r m acc in
   let aad_len8 = uint_to_bytes_le #U64 (u64 (length aad)) in
   let ciphertext_len8 = uint_to_bytes_le #U64 (u64 (length m)) in

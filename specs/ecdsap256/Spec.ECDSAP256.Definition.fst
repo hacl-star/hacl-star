@@ -7,7 +7,6 @@ open FStar.Math.Lib
 open FStar.HyperStack
 open FStar.HyperStack.All *)
 open Lib.Sequence
-(*open Lib.Buffer *)
 open FStar.Mul
 
 
@@ -32,32 +31,6 @@ let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\
     [ (u64 17562291160714782033);  (u64 13611842547513532036); (u64 18446744073709551615);  (u64 18446744069414584320);] in
     assert_norm(17562291160714782033 + 13611842547513532036 * pow2 64 + 18446744073709551615* pow2 128 + 18446744069414584320 * pow2 192 == prime_p256_order);
   x  
-
-
-inline_for_extraction 
-let felem4 = tuple4 uint64 uint64 uint64 uint64
-inline_for_extraction 
-let felem8 = tuple8 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64
-
-
-val as_nat4: f:felem4 -> GTot nat
-let as_nat4 f =
-  let (s0, s1, s2, s3) = f in
-  v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-  v s3 * pow2 64 * pow2 64 * pow2 64
-
-
-
-val wide_as_nat4: f:felem8 -> GTot nat
-let wide_as_nat4 f =
-  let (s0, s1, s2, s3, s4, s5, s6, s7) = f in
-  v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-  v s3 * pow2 64 * pow2 64 * pow2 64 +
-  v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-  v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
-
 
 
 let felem_seq_as_nat_8 (a: lseq uint64 8) : Tot nat = 

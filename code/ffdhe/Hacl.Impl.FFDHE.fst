@@ -210,6 +210,7 @@ let ffdhe_compute_exp_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) (ke:BE.exp t)
     ke.BE.mont.BM.bn.BN.len == nLen /\
     live h p_r2_n /\ live h sk_n /\ live h b_n /\ live h res /\
     disjoint p_r2_n res /\ disjoint sk_n res /\ disjoint b_n res /\ disjoint p_r2_n b_n /\
+    disjoint p_r2_n sk_n /\
    (let p_n = gsub p_r2_n 0ul nLen in let r2_n = gsub p_r2_n nLen nLen in
     bn_v h p_n == BSeq.nat_from_bytes_be (S.Mk_ffdhe_params?.ffdhe_p (S.get_ffdhe_params a)) /\
     0 < bn_v h p_n /\ bn_v h r2_n == pow2 (2 * bits t * v nLen) % bn_v h p_n /\
@@ -238,16 +239,14 @@ let ffdhe_compute_exp #t a len ke p_r2_n sk_n b_n res =
   let res_n = create nLen (uint #t #SEC 0) in
 
   let h1 = ST.get () in
-  S.ffdhe_p_lemma a;  
+  S.ffdhe_p_lemma a;
   assert_norm (pow2 4 = 16);
   assert_norm (pow2 10 = 1024);
   Math.Lemmas.pow2_plus 4 10;
   Math.Lemmas.pow2_lt_compat 32 14;
-  
-  ke.BE.ct_mod_exp_fw_precomp p_n b_n (size (bits t) *! nLen) sk_n 4ul r2_n res_n; //b_n ^ sk_n % p_n
+
   SD.bn_eval_bound #t (as_seq h1 sk_n) (v nLen);
-  SE.bn_mod_exp_fw_precompr2_lemma (v nLen)
-    (as_seq h1 p_n) (as_seq h1 b_n) (bits t * v nLen) (as_seq h1 sk_n) 4 (as_seq h1 r2_n);
+  ke.BE.ct_mod_exp_fw_precomp p_n b_n (size (bits t) *! nLen) sk_n 4ul r2_n res_n; //b_n ^ sk_n % p_n
 
   let h2 = ST.get () in
   BN.bn_to_bytes_be len res_n res;
@@ -355,7 +354,7 @@ let ffdhe_check_pk #t a len pk_n p_n =
   let p_n1 = create nLen (uint #t #SEC 0) in
   let h0 = ST.get () in
 
-  let _ = BN.bn_sub1 nLen p_n (uint #t 1) p_n1 in
+  let c = BN.bn_sub1 nLen p_n (uint #t 1) p_n1 in
   SB.bn_sub1_lemma (as_seq h0 p_n) (uint #t 1);
   let h1 = ST.get () in
   S.ffdhe_p_lemma a;

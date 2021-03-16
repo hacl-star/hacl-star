@@ -30,7 +30,7 @@
         "typing_tok_Spec.Agile.Cipher.CHACHA20@tok"
       ],
       0,
-      "0056b1de7cbc0a8728c156d21d8250d5"
+      "0b3db41f645c3213113de41697feef11"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.tag",
@@ -159,7 +159,7 @@
         "typing_tok_Spec.Agile.Cipher.AES128@tok"
       ],
       0,
-      "a193e38899d7c2033875554ea6592772"
+      "77ccd1a38b3a8b07899e39bdf4d8b5ec"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_st",
@@ -170,11 +170,14 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_FStar.Integers.Signed",
+        "b2t_def", "bool_inversion",
+        "constructor_distinct_FStar.Integers.Signed",
         "constructor_distinct_FStar.Integers.W16",
         "constructor_distinct_FStar.Integers.W32",
         "constructor_distinct_FStar.Integers.W8",
         "constructor_distinct_FStar.Integers.Winfinite",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U128",
@@ -197,13 +200,17 @@
         "equation_FStar.Integers.int_t",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
         "equation_FStar.Monotonic.HyperStack.mem",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.mk_int", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred",
+        "equation_FStar.UInt.fits", "equation_FStar.UInt.max_int",
+        "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t", "equation_Lib.Buffer.buffer_t",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_v",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_Lib.Sequence.lseq", "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
         "equation_Spec.Agile.AEAD.cipher_alg_of_supported_alg",
         "equation_Spec.Agile.AEAD.is_supported_alg",
         "equation_Spec.Agile.AEAD.iv_length",
@@ -214,13 +221,17 @@
         "equation_Spec.Agile.AEAD.uint8",
         "equation_Spec.Agile.Cipher.key_length",
         "equation_Spec.Chacha20.size_block",
-        "equation_Spec.Chacha20.size_key",
-        "equation_Spec.Chacha20.size_nonce", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Chacha20.size_key", "equation_Spec.GaloisField.gf",
+        "equation_Spec.Poly1305.size_block",
         "equation_Spec.Poly1305.size_key",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "int_typing", "lemma_FStar.UInt.pow2_values",
-        "lemma_Lib.IntTypes.v_injective", "lemma_Lib.IntTypes.v_mk_int",
-        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.v_injective",
+        "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
+        "lemma_LowStar.Monotonic.Buffer.length_null_2",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
@@ -240,9 +251,11 @@
         "refinement_interpretation_Tm_refine_ce5a1bd8437baa640019cd70bf466fc0",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.Monotonic.HyperHeap.rid_freeable",
-        "typing_FStar.Monotonic.HyperHeap.root", "typing_Lib.Buffer.length",
-        "typing_Lib.IntTypes.v", "typing_Spec.AES.gf8",
+        "typing_FStar.Monotonic.HyperHeap.root", "typing_FStar.UInt.fits",
+        "typing_Lib.Buffer.length", "typing_Lib.IntTypes.v",
+        "typing_LowStar.Buffer.trivial_preorder", "typing_Spec.AES.gf8",
         "typing_Spec.Agile.AEAD.cipher_alg_of_supported_alg",
         "typing_Spec.Agile.AEAD.is_supported_alg",
         "typing_Spec.Agile.AEAD.key_length",
@@ -250,12 +263,13 @@
         "typing_Spec.Agile.Cipher.key_length",
         "typing_Spec.Chacha20.size_block",
         "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_Spec.Poly1305.size_block", "typing_Spec.Poly1305.size_key",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok",
         "typing_tok_Spec.Agile.Cipher.AES128@tok"
       ],
       0,
-      "da639c1a8921f60bd459eee694fabee5"
+      "378edd30fef5cf467180e39e6c1364cb"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt",
@@ -291,7 +305,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "e1f4aba19cd49442ad30b75f5c6cbd43"
+      "bf0dc3b514844c118a043c873c3e79cc"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt",
@@ -327,7 +341,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "03f4c5645073f0417a52997d48ef7828"
+      "f72e117022f766f58c5178e96de585e2"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt",
@@ -363,7 +377,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "6f633f2bb501ba11442c75e0d10282d7"
+      "14180065be205b266acead744481a187"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt",
@@ -399,7 +413,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "5372af3e84b25dcd1f0368d38ed1230f"
+      "f9c16f9ac2364d2a2359824db688ec9b"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt_cp32",
@@ -427,7 +441,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "4f16854e05a50226efeb125394c39e75"
+      "37e0d5586dc835b4e2f028fb4f57effb"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt_cp32",
@@ -476,7 +490,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "7f011ae25f852ab5a44f9f5391c9bb53"
+      "61152a3694af16d10920cdb4ce8d01fc"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt_cp32",
@@ -618,7 +632,7 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "49bde6c5ba6e0ae929302e0715e06b43"
+      "763b3e42f7070fed26c8de16c3312b38"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_cp32",
@@ -646,7 +660,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "289f3d02c6ed6b556143c2c6febf6ebc"
+      "e0aa568ebaf34253aa65f57506eba550"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_cp32",
@@ -695,7 +709,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a5b92a13b7262e51de9222c65358069e"
+      "4c7b4daa18f43265b0f0115e49721038"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_cp32",
@@ -805,7 +819,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "165fbd180772bbb21f11c2c0ff7193e2"
+      "9c07cc97e6acb986897415b7ec340a88"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt_cp128",
@@ -833,7 +847,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "813f6ba4f23a1a3a6819353595e95196"
+      "df8b332879b80181232bcaac264de1da"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt_cp128",
@@ -882,7 +896,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "7330b6d14fc50f283b6b636edeebf477"
+      "59d394fb05fae34c4c1c62a34a92d099"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt_cp128",
@@ -1025,7 +1039,7 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "572063ae664241c6dd2da1ce573076e4"
+      "76906f174865234ff46822ff00369790"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_cp128",
@@ -1053,7 +1067,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "cddf984ba44af1eff16490ae518505de"
+      "79647581f9a5ade87c1c94550b49dfec"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_cp128",
@@ -1102,7 +1116,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "8297635b6a8b187acda5108e8e877956"
+      "ca629db1be129cd838e22d5567b0606e"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_cp128",
@@ -1212,7 +1226,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2d52c62155b276f7aea3609318d66a04"
+      "3ad4a26119b1d760ab5bf5c0c2564d9f"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt_cp256",
@@ -1240,7 +1254,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "dd072888c089da53c16a11fd2687ac07"
+      "eda05c2a45c58d1c8f1d614c1e05a2f0"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt_cp256",
@@ -1289,7 +1303,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "f0b5bcaee71da456ce0dde4183d714c3"
+      "ff40a7585f0d86cf543681dda3b03d01"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_encrypt_cp256",
@@ -1435,7 +1449,7 @@
         "typing_tok_Spec.Agile.AEAD.CHACHA20_POLY1305@tok"
       ],
       0,
-      "8ea6f6ca7d4b47b8dc0314020959d549"
+      "1d4bc2e8b36b7f756598023f2d78a8bf"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_cp256",
@@ -1463,7 +1477,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "5a30fb21dc6c5ab26038c19ca23a08cd"
+      "385682a70f4494c38351366af1dd0726"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_cp256",
@@ -1512,7 +1526,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "9fbff91c4bae6015e1ae8ccb93d83ef6"
+      "0f1d22509153a0319b4464c200c669bf"
     ],
     [
       "Hacl.HPKE.Interface.AEAD.aead_decrypt_cp256",
@@ -1619,7 +1633,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2053da268cf7c14ec5ad887b6382a662"
+      "6426f2d8374e882d084c62af7b0f182a"
     ]
   ]
 ]

@@ -1867,8 +1867,8 @@ void EverCrypt_DRBG_uninstantiate_sha1(EverCrypt_DRBG_state_s *st)
   uint8_t *k = s.k;
   uint8_t *v = s.v;
   uint32_t *ctr = s.reseed_counter;
-  Lib_Memzero_clear_words_u8((uint32_t)20U, k);
-  Lib_Memzero_clear_words_u8((uint32_t)20U, v);
+  Lib_Memzero0_memzero(k, (uint32_t)20U * sizeof (k[0U]));
+  Lib_Memzero0_memzero(v, (uint32_t)20U * sizeof (v[0U]));
   ctr[0U] = (uint32_t)0U;
   KRML_HOST_FREE(k);
   KRML_HOST_FREE(v);
@@ -1891,8 +1891,8 @@ void EverCrypt_DRBG_uninstantiate_sha2_256(EverCrypt_DRBG_state_s *st)
   uint8_t *k = s.k;
   uint8_t *v = s.v;
   uint32_t *ctr = s.reseed_counter;
-  Lib_Memzero_clear_words_u8((uint32_t)32U, k);
-  Lib_Memzero_clear_words_u8((uint32_t)32U, v);
+  Lib_Memzero0_memzero(k, (uint32_t)32U * sizeof (k[0U]));
+  Lib_Memzero0_memzero(v, (uint32_t)32U * sizeof (v[0U]));
   ctr[0U] = (uint32_t)0U;
   KRML_HOST_FREE(k);
   KRML_HOST_FREE(v);
@@ -1915,8 +1915,8 @@ void EverCrypt_DRBG_uninstantiate_sha2_384(EverCrypt_DRBG_state_s *st)
   uint8_t *k = s.k;
   uint8_t *v = s.v;
   uint32_t *ctr = s.reseed_counter;
-  Lib_Memzero_clear_words_u8((uint32_t)48U, k);
-  Lib_Memzero_clear_words_u8((uint32_t)48U, v);
+  Lib_Memzero0_memzero(k, (uint32_t)48U * sizeof (k[0U]));
+  Lib_Memzero0_memzero(v, (uint32_t)48U * sizeof (v[0U]));
   ctr[0U] = (uint32_t)0U;
   KRML_HOST_FREE(k);
   KRML_HOST_FREE(v);
@@ -1939,8 +1939,8 @@ void EverCrypt_DRBG_uninstantiate_sha2_512(EverCrypt_DRBG_state_s *st)
   uint8_t *k = s.k;
   uint8_t *v = s.v;
   uint32_t *ctr = s.reseed_counter;
-  Lib_Memzero_clear_words_u8((uint32_t)64U, k);
-  Lib_Memzero_clear_words_u8((uint32_t)64U, v);
+  Lib_Memzero0_memzero(k, (uint32_t)64U * sizeof (k[0U]));
+  Lib_Memzero0_memzero(v, (uint32_t)64U * sizeof (v[0U]));
   ctr[0U] = (uint32_t)0U;
   KRML_HOST_FREE(k);
   KRML_HOST_FREE(v);

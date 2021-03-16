@@ -92,6 +92,7 @@ let point_decompress_ out s tmp =
   ) in
   res
 
+
 val point_decompress:
     out:point
   -> s:lbuffer uint8 32ul ->
@@ -102,6 +103,7 @@ val point_decompress:
       (b <==> Some? (Spec.Ed25519.point_decompress (as_seq h0 s))) /\
       (b ==> (F51.point_eval h1 out == Some?.v (Spec.Ed25519.point_decompress (as_seq h0 s))))
     )
+
 let point_decompress out s =
   push_frame();
   let tmp  = create 10ul (u64 0) in

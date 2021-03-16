@@ -466,13 +466,13 @@ let vec_from_bytes_be t w b = admit()
 
 let vec_load_le t w b =
   match t,w with
-  | U128,1 -> vec128_load_le b
+  | U128,1 -> vec128_load128_le b // unused for now, and no implementation in libintvector.h
   | _,1 -> Lib.ByteBuffer.uint_from_bytes_le #t #SEC b
-  | U32,4 -> vec128_load_le b
-  | U64,2 -> vec128_load_le b
-  | U32,8 -> vec256_load_le b
-  | U64,4 -> vec256_load_le b
-  | U128,2 -> vec256_load_le b
+  | U32,4 -> vec128_load32_le b
+  | U64,2 -> vec128_load64_le b
+  | U32,8 -> vec256_load32_le b
+  | U64,4 -> vec256_load64_le b
+  | U128,2 -> vec256_load128_le b // unused for now, and no implementation in libintvector.h
 
 let vec_load_be t w b =
   match t,w with
@@ -486,13 +486,13 @@ let vec_to_bytes_be #vt #w v = admit()
 
 let vec_store_le #t #w b v =
   match t,w with
-  | U128,1 -> vec128_store_le b v
+  | U128,1 -> vec128_store128_le b v // unused for now, and no implementation in libintvector.h
   | _,1 -> Lib.ByteBuffer.uint_to_bytes_le #t #SEC b v
-  | U32,4 -> vec128_store_le b v
-  | U64,2 -> vec128_store_le b v
-  | U32,8 -> vec256_store_le b v
-  | U64,4 -> vec256_store_le b v
-  | U128,2 -> vec256_store_le b v
+  | U32,4 -> vec128_store32_le b v
+  | U64,2 -> vec128_store64_le b v
+  | U32,8 -> vec256_store32_le b v
+  | U64,4 -> vec256_store64_le b v
+  | U128,2 -> vec256_store128_le b v // unused for now, and no implementation in libintvector.h
 
 let vec_store_be #t #w b v =
   match t,w with

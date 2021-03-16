@@ -8,7 +8,6 @@ open LowStar.Buffer
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.Memzero
 
 open Hacl.Impl.Matrix
 open Hacl.Impl.Frodo.Params
@@ -20,276 +19,389 @@ open Hacl.Impl.Frodo.Sample
 open Hacl.Frodo.Random
 
 module ST = FStar.HyperStack.ST
+module LSeq = Lib.Sequence
+
+module FP = Spec.Frodo.Params
+module KG = Hacl.Impl.Frodo.KEM.KeyGen
 module S = Spec.Frodo.KEM.Decaps
 module M = Spec.Matrix
-module Seq = Lib.Sequence
 
-#reset-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 val get_bp_c_matrices:
-     ct:lbytes crypto_ciphertextbytes
-  -> bp_matrix:matrix_t params_nbar params_n
+     a:FP.frodo_alg
+  -> ct:lbytes (crypto_ciphertextbytes a)
+  -> bp_matrix:matrix_t params_nbar (params_n a)
   -> c_matrix:matrix_t params_nbar params_nbar
   -> Stack unit
     (requires fun h ->
       live h ct /\ live h bp_matrix /\ live h c_matrix /\
       disjoint bp_matrix ct /\ disjoint c_matrix ct /\ disjoint bp_matrix c_matrix)
-    (ensures  fun h0 _ h1 ->
-      modifies2 bp_matrix c_matrix h0 h1 /\
-      (as_matrix h1 bp_matrix, as_matrix h1 c_matrix) == S.get_bp_c_matrices (as_seq h0 ct))
-let get_bp_c_matrices ct bp_matrix c_matrix =
-  Spec.Frodo.Params.expand_crypto_ciphertextbytes ();
-  let c1Len = params_logq *! params_nbar *! params_n /. size 8 in
-  let c2Len = params_logq *! params_nbar *! params_nbar /. size 8 in
-  let c1 = sub ct (size 0) c1Len in
-  let c2 = sub ct c1Len c2Len in
-  frodo_unpack params_nbar params_n params_logq c1 bp_matrix;
-  frodo_unpack params_nbar params_nbar params_logq c2 c_matrix
+    (ensures  fun h0 _ h1 -> modifies (loc bp_matrix |+| loc c_matrix) h0 h1 /\
+      (as_matrix h1 bp_matrix, as_matrix h1 c_matrix) == S.get_bp_c_matrices a (as_seq h0 ct))
 
-inline_for_extraction noextract
-val get_bpp_cp_matrices:
-     g:lbytes (size 3 *! crypto_bytes)
-  -> mu_decode:lbytes bytes_mu
-  -> sk:lbytes crypto_secretkeybytes
-  -> bpp_matrix:matrix_t params_nbar params_n
-  -> cp_matrix:matrix_t params_nbar params_nbar
-  -> Stack unit
-    (requires fun h ->
-      live h g /\ live h mu_decode /\ live h sk /\
-      live h bpp_matrix /\ live h cp_matrix /\
-      disjoint g bpp_matrix /\ disjoint sk bpp_matrix /\
-      disjoint mu_decode bpp_matrix /\ disjoint mu_decode cp_matrix /\
-      disjoint g cp_matrix /\ disjoint sk cp_matrix /\ disjoint bpp_matrix cp_matrix)
-    (ensures fun h0 _ h1 ->
-      modifies2 bpp_matrix cp_matrix h0 h1 /\
-      (as_matrix h1 bpp_matrix, as_matrix h1 cp_matrix) ==
-      S.get_bpp_cp_matrices (as_seq h0 g) (as_seq h0 mu_decode) (as_seq h0 sk))
-let get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix =
-  assert (v params_nbar * v params_n % 2 = 0);
-  push_frame();
-  Spec.Frodo.Params.expand_crypto_publickeybytes ();
-  Spec.Frodo.Params.expand_crypto_secretkeybytes ();
-  let pk: lbytes crypto_publickeybytes = sub sk crypto_bytes crypto_publickeybytes in
-  let seed_a = sub pk (size 0) bytes_seed_a in
-  let b = sub pk bytes_seed_a (crypto_publickeybytes -! bytes_seed_a) in
-  let seed_ep = sub g (size 0) crypto_bytes in
+let get_bp_c_matrices a ct bp_matrix c_matrix =
+  let c1 = sub ct 0ul (ct1bytes_len a) in
+  let c2 = sub ct (ct1bytes_len a) (ct2bytes_len a) in
+  frodo_unpack params_nbar (params_n a) (params_logq a) c1 bp_matrix;
+  frodo_unpack params_nbar params_nbar (params_logq a) c2 c_matrix
 
-  let sp_matrix  = matrix_create params_nbar params_n in
-  frodo_sample_matrix params_nbar params_n crypto_bytes seed_ep (u16 4) sp_matrix;
-  frodo_mul_add_sa_plus_e seed_a seed_ep sp_matrix bpp_matrix;
-
-  frodo_mul_add_sb_plus_e_plus_mu b seed_ep mu_decode sp_matrix cp_matrix;
-  clear_matrix sp_matrix;
-  pop_frame()
 
 inline_for_extraction noextract
 val frodo_mu_decode:
-    s_bytes:lbytes (size 2 *! params_n *! params_nbar)
-  -> bp_matrix:matrix_t params_nbar params_n
+    a:FP.frodo_alg
+  -> s_bytes:lbytes (secretmatrixbytes_len a)
+  -> bp_matrix:matrix_t params_nbar (params_n a)
   -> c_matrix:matrix_t params_nbar params_nbar
-  -> mu_decode:lbytes bytes_mu
+  -> mu_decode:lbytes (bytes_mu a)
   -> Stack unit
     (requires fun h ->
       live h s_bytes /\ live h bp_matrix /\
       live h c_matrix /\ live h mu_decode /\
       disjoint mu_decode s_bytes /\
-      as_seq h (mu_decode) == Seq.create (v bytes_mu) (u8 0))
-    (ensures fun h0 _ h1 ->
-      modifies1 mu_decode h0 h1 /\
+      as_seq h (mu_decode) == Seq.create (v (bytes_mu a)) (u8 0))
+    (ensures fun h0 _ h1 -> modifies (loc mu_decode) h0 h1 /\
       as_seq h1 mu_decode ==
-      S.frodo_mu_decode (as_seq h0 s_bytes) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
-let frodo_mu_decode s_bytes bp_matrix c_matrix mu_decode =
+      S.frodo_mu_decode a (as_seq h0 s_bytes) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
+
+let frodo_mu_decode a s_bytes bp_matrix c_matrix mu_decode =
   push_frame();
-  let s_matrix = matrix_create params_n params_nbar in
+  let s_matrix = matrix_create (params_n a) params_nbar in
   let m_matrix = matrix_create params_nbar params_nbar in
   matrix_from_lbytes s_bytes s_matrix;
   matrix_mul_s bp_matrix s_matrix m_matrix;
   matrix_sub c_matrix m_matrix;
-  frodo_key_decode params_extracted_bits m_matrix mu_decode;
+  frodo_key_decode (params_logq a) (params_extracted_bits a) params_nbar m_matrix mu_decode;
+  clear_matrix s_matrix;
+  clear_matrix m_matrix;
   pop_frame()
+
+
+inline_for_extraction noextract
+val get_bpp_cp_matrices_:
+    a:FP.frodo_alg
+  -> gen_a:FP.frodo_gen_a{is_supported gen_a}
+  -> mu_decode:lbytes (bytes_mu a)
+  -> sk:lbytes (crypto_secretkeybytes a)
+  -> bpp_matrix:matrix_t params_nbar (params_n a)
+  -> cp_matrix:matrix_t params_nbar params_nbar
+  -> sp_matrix:matrix_t params_nbar (params_n a)
+  -> ep_matrix:matrix_t params_nbar (params_n a)
+  -> epp_matrix:matrix_t params_nbar params_nbar
+  -> Stack unit
+    (requires fun h ->
+      live h mu_decode /\ live h sk /\
+      live h bpp_matrix /\ live h cp_matrix /\
+      live h sp_matrix /\ live h ep_matrix /\ live h epp_matrix /\
+      loc_pairwise_disjoint [loc mu_decode; loc sk; loc bpp_matrix;
+        loc cp_matrix; loc sp_matrix; loc ep_matrix; loc epp_matrix])
+    (ensures fun h0 _ h1 -> modifies (loc bpp_matrix |+| loc cp_matrix) h0 h1 /\
+      (as_matrix h1 bpp_matrix, as_matrix h1 cp_matrix) ==
+      S.get_bpp_cp_matrices_ a gen_a (as_seq h0 mu_decode) (as_seq h0 sk)
+        (as_matrix h0 sp_matrix) (as_matrix h0 ep_matrix) (as_matrix h0 epp_matrix))
+
+let get_bpp_cp_matrices_ a gen_a mu_decode sk bpp_matrix cp_matrix sp_matrix ep_matrix epp_matrix =
+  FP.expand_crypto_secretkeybytes a;
+  FP.expand_crypto_publickeybytes a;
+  let pk = sub sk (crypto_bytes a) (crypto_publickeybytes a) in
+  let seed_a = sub pk 0ul bytes_seed_a in
+  let b = sub pk bytes_seed_a (crypto_publickeybytes a -! bytes_seed_a) in
+
+  frodo_mul_add_sa_plus_e a gen_a seed_a sp_matrix ep_matrix bpp_matrix;
+  frodo_mul_add_sb_plus_e_plus_mu a mu_decode b sp_matrix epp_matrix cp_matrix;
+  mod_pow2 (params_logq a) bpp_matrix;
+  mod_pow2 (params_logq a) cp_matrix
+
+
+#push-options "--z3rlimit 150"
+inline_for_extraction noextract
+val get_bpp_cp_matrices:
+    a:FP.frodo_alg
+  -> gen_a:FP.frodo_gen_a{is_supported gen_a}
+  -> mu_decode:lbytes (bytes_mu a)
+  -> seed_se:lbytes (crypto_bytes a)
+  -> sk:lbytes (crypto_secretkeybytes a)
+  -> bpp_matrix:matrix_t params_nbar (params_n a)
+  -> cp_matrix:matrix_t params_nbar params_nbar
+  -> Stack unit
+    (requires fun h ->
+      live h seed_se /\ live h mu_decode /\ live h sk /\
+      live h bpp_matrix /\ live h cp_matrix /\
+      loc_pairwise_disjoint [loc mu_decode; loc seed_se; loc sk; loc bpp_matrix; loc cp_matrix])
+    (ensures fun h0 _ h1 -> modifies (loc bpp_matrix |+| loc cp_matrix) h0 h1 /\
+      (as_matrix h1 bpp_matrix, as_matrix h1 cp_matrix) ==
+      S.get_bpp_cp_matrices a gen_a (as_seq h0 mu_decode) (as_seq h0 seed_se) (as_seq h0 sk))
+
+let get_bpp_cp_matrices a gen_a mu_decode seed_se sk bpp_matrix cp_matrix =
+  push_frame ();
+  let sp_matrix  = matrix_create params_nbar (params_n a) in
+  let ep_matrix  = matrix_create params_nbar (params_n a) in
+  let epp_matrix = matrix_create params_nbar params_nbar in
+  get_sp_ep_epp_matrices a seed_se sp_matrix ep_matrix epp_matrix;
+  get_bpp_cp_matrices_ a gen_a mu_decode sk bpp_matrix cp_matrix sp_matrix ep_matrix epp_matrix;
+  clear_matrix3 a sp_matrix ep_matrix epp_matrix;
+  pop_frame ()
+#pop-options
+
 
 inline_for_extraction noextract
 val crypto_kem_dec_kp_s_cond:
-    d:lbytes crypto_bytes
-  -> dp:lbytes crypto_bytes
-  -> bp_matrix:matrix_t params_nbar params_n
-  -> bpp_matrix:matrix_t params_nbar params_n
+    a:FP.frodo_alg
+  -> bp_matrix:matrix_t params_nbar (params_n a)
+  -> bpp_matrix:matrix_t params_nbar (params_n a)
   -> c_matrix:matrix_t params_nbar params_nbar
   -> cp_matrix:matrix_t params_nbar params_nbar
-  -> Stack bool
+  -> Stack uint16
     (requires fun h ->
-      live h d /\ live h dp /\ live h bp_matrix /\
-      live h bpp_matrix /\ live h c_matrix /\ live h cp_matrix)
-    (ensures  fun h0 r h1 ->
-      modifies0 h0 h1 /\
-      r == S.crypto_kem_dec_kp_s_cond (as_seq h0 d) (as_seq h0 dp) (as_matrix h0 bp_matrix)
-	(as_matrix h0 bpp_matrix) (as_matrix h0 c_matrix) (as_matrix h0 cp_matrix))
-let crypto_kem_dec_kp_s_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix =
-  let b1 = Lib.ByteBuffer.lbytes_eq d dp in
-  let b2 = matrix_eq params_logq bp_matrix bpp_matrix in
-  let b3 = matrix_eq params_logq c_matrix cp_matrix in
-  b1 && b2 && b3
+      live h bp_matrix /\ live h bpp_matrix /\
+      live h c_matrix /\ live h cp_matrix)
+    (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+      r == S.crypto_kem_dec_kp_s_cond a (as_matrix h0 bp_matrix) (as_matrix h0 bpp_matrix)
+        (as_matrix h0 c_matrix) (as_matrix h0 cp_matrix))
+
+let crypto_kem_dec_kp_s_cond a bp_matrix bpp_matrix c_matrix cp_matrix =
+  let b1 = matrix_eq bp_matrix bpp_matrix in
+  let b2 = matrix_eq c_matrix cp_matrix in
+  b1 &. b2
+
 
 inline_for_extraction noextract
 val crypto_kem_dec_kp_s:
-    mu_decode:lbytes bytes_mu
-  -> g:lbytes (size 3 *! crypto_bytes)
-  -> bp_matrix:matrix_t params_nbar params_n
+    a:FP.frodo_alg
+  -> gen_a:FP.frodo_gen_a{is_supported gen_a}
+  -> mu_decode:lbytes (bytes_mu a)
+  -> seed_se:lbytes (crypto_bytes a)
+  -> sk:lbytes (crypto_secretkeybytes a)
+  -> bp_matrix:matrix_t params_nbar (params_n a)
   -> c_matrix:matrix_t params_nbar params_nbar
-  -> sk:lbytes crypto_secretkeybytes
-  -> ct:lbytes crypto_ciphertextbytes
-  -> Stack bool
+  -> Stack uint16
     (requires fun h ->
-      live h mu_decode /\ live h bp_matrix /\ live h g /\
-      live h c_matrix /\ live h sk /\ live h ct)
-    (ensures fun h0 r h1 ->
-      modifies0 h0 h1 /\
-      r == S.crypto_kem_dec_kp_s (as_seq h0 mu_decode) (as_seq h0 g)
-	(as_matrix h0 bp_matrix) (as_matrix h0 c_matrix) (as_seq h0 sk) (as_seq h0 ct))
-let crypto_kem_dec_kp_s mu_decode g bp_matrix c_matrix sk ct =
+      live h mu_decode /\ live h bp_matrix /\ live h seed_se /\
+      live h c_matrix /\ live h sk /\
+      loc_pairwise_disjoint [loc mu_decode; loc seed_se; loc sk])
+    (ensures fun h0 r h1 -> modifies0 h0 h1 /\
+      r == S.crypto_kem_dec_kp_s a gen_a (as_seq h0 mu_decode) (as_seq h0 seed_se)
+        (as_seq h0 sk) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
+
+let crypto_kem_dec_kp_s a gen_a mu_decode seed_se sk bp_matrix c_matrix =
   push_frame ();
-  Spec.Frodo.Params.expand_crypto_ciphertextbytes ();
-  let dp = sub g (crypto_bytes +! crypto_bytes) crypto_bytes in
-  let d = sub ct (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes in
-  let bpp_matrix = matrix_create params_nbar params_n in
+  let bpp_matrix = matrix_create params_nbar (params_n a) in
   let cp_matrix  = matrix_create params_nbar params_nbar in
-  get_bpp_cp_matrices g mu_decode sk bpp_matrix cp_matrix;
-  let b = crypto_kem_dec_kp_s_cond d dp bp_matrix bpp_matrix c_matrix cp_matrix in
+  get_bpp_cp_matrices a gen_a mu_decode seed_se sk bpp_matrix cp_matrix;
+  let mask = crypto_kem_dec_kp_s_cond a bp_matrix bpp_matrix c_matrix cp_matrix in
   pop_frame ();
-  b
+  mask
+
 
 inline_for_extraction noextract
 val crypto_kem_dec_ss0:
-    ct:lbytes crypto_ciphertextbytes
-  -> kp_s:lbytes crypto_bytes
-  -> ss:lbytes crypto_bytes
+    a:FP.frodo_alg
+  -> ct:lbytes (crypto_ciphertextbytes a)
+  -> mask:uint16{v mask == 0 \/ v mask == v (ones U16 SEC)}
+  -> kp:lbytes (crypto_bytes a)
+  -> s:lbytes (crypto_bytes a)
+  -> ss:lbytes (crypto_bytes a)
   -> Stack unit
     (requires fun h ->
-      live h ct /\ live h kp_s /\ live h ss /\
-      disjoint ss ct /\ disjoint ss kp_s)
-    (ensures fun h0 _ h1 -> modifies1 ss h0 h1 /\
-      as_seq h1 ss == S.crypto_kem_dec_ss0 (as_seq h0 ct) (as_seq h0 kp_s))
-let crypto_kem_dec_ss0 ct kp_s ss =
-  push_frame();
-  let c12 = sub ct (size 0) (crypto_ciphertextbytes -! crypto_bytes) in
-  let d = sub ct (crypto_ciphertextbytes -! crypto_bytes) crypto_bytes in
+      live h ct /\ live h kp /\ live h s /\ live h ss /\
+      disjoint ss ct /\ disjoint ss kp /\ disjoint ss s /\
+      disjoint kp s)
+    (ensures fun h0 _ h1 -> modifies (loc ss) h0 h1 /\
+      as_seq h1 ss == S.crypto_kem_dec_ss0 a (as_seq h0 ct) mask (as_seq h0 kp) (as_seq h0 s))
 
-  let ss_init_len = crypto_ciphertextbytes +! crypto_bytes in
+let crypto_kem_dec_ss0 a ct mask kp s ss =
+  push_frame ();
+  let kp_s = create (crypto_bytes a) (u8 0) in
+  Lib.ByteBuffer.buf_mask_select kp s (to_u8 mask) kp_s;
+
+  let ss_init_len = crypto_ciphertextbytes a +! crypto_bytes a in
   let ss_init = create ss_init_len (u8 0) in
-  concat3 (crypto_ciphertextbytes -! crypto_bytes) c12 crypto_bytes kp_s crypto_bytes d ss_init;
-  cshake_frodo ss_init_len ss_init (u16 7) crypto_bytes ss;
-  pop_frame()
+  concat2 (crypto_ciphertextbytes a) ct (crypto_bytes a) kp_s ss_init;
+  frodo_shake a ss_init_len ss_init (crypto_bytes a) ss;
+  clear_words_u8 ss_init;
+  clear_words_u8 kp_s;
+  pop_frame ()
+
 
 inline_for_extraction noextract
-val crypto_kem_dec_ss:
-    ct:lbytes crypto_ciphertextbytes
-  -> sk:lbytes crypto_secretkeybytes
-  -> g:lbytes (size 3 *! crypto_bytes)
-  -> mu_decode:lbytes bytes_mu
-  -> bp_matrix:matrix_t params_nbar params_n
-  -> c_matrix:matrix_t params_nbar params_nbar
-  -> ss:lbytes crypto_bytes
+val crypto_kem_dec_seed_se_k:
+    a:FP.frodo_alg
+  -> mu_decode:lbytes (bytes_mu a)
+  -> sk:lbytes (crypto_secretkeybytes a)
+  -> seed_se_k:lbytes (2ul *! crypto_bytes a)
   -> Stack unit
     (requires fun h ->
-      live h mu_decode /\ live h bp_matrix /\ live h g /\
+      live h mu_decode /\ live h sk /\ live h seed_se_k /\
+      disjoint mu_decode seed_se_k /\ disjoint sk seed_se_k)
+    (ensures fun h0 _ h1 -> modifies (loc seed_se_k) h0 h1 /\
+      as_seq h1 seed_se_k == S.crypto_kem_dec_seed_se_k a (as_seq h0 mu_decode) (as_seq h0 sk))
+
+let crypto_kem_dec_seed_se_k a mu_decode sk seed_se_k =
+  push_frame ();
+  let pkh_mu_decode_len = bytes_pkhash a +! bytes_mu a in
+  let pkh_mu_decode = create pkh_mu_decode_len (u8 0) in
+  let pkh = sub sk (crypto_secretkeybytes a -! bytes_pkhash a) (bytes_pkhash a) in
+
+  concat2 (bytes_pkhash a) pkh (bytes_mu a) mu_decode pkh_mu_decode;
+  frodo_shake a pkh_mu_decode_len pkh_mu_decode (2ul *! crypto_bytes a) seed_se_k;
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val crypto_kem_dec_ss1:
+    a:FP.frodo_alg
+  -> gen_a:FP.frodo_gen_a{is_supported gen_a}
+  -> ct:lbytes (crypto_ciphertextbytes a)
+  -> sk:lbytes (crypto_secretkeybytes a)
+  -> mu_decode:lbytes (bytes_mu a)
+  -> seed_se_k:lbytes (2ul *! crypto_bytes a)
+  -> bp_matrix:matrix_t params_nbar (params_n a)
+  -> c_matrix:matrix_t params_nbar params_nbar
+  -> ss:lbytes (crypto_bytes a)
+  -> Stack unit
+    (requires fun h ->
+      live h mu_decode /\ live h bp_matrix /\ live h seed_se_k /\
       live h c_matrix /\ live h sk /\ live h ct /\ live h ss /\
-      disjoint ss ct /\ disjoint ss sk /\ disjoint ss mu_decode /\
-      disjoint ss bp_matrix /\ disjoint ss c_matrix /\ disjoint ss g)
-    (ensures fun h0 _ h1 ->
-      modifies1 ss h0 h1 /\
-      as_seq h1 ss == S.crypto_kem_dec_ss (as_seq h0 ct) (as_seq h0 sk)
-	(as_seq h0 g) (as_seq h0 mu_decode) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
-let crypto_kem_dec_ss ct sk g mu_decode bp_matrix c_matrix ss =
-  let b = crypto_kem_dec_kp_s mu_decode g bp_matrix c_matrix sk ct in
-  let kp = sub g crypto_bytes crypto_bytes in
-  let s = sub sk (size 0) crypto_bytes in
-  let kp_s = if b then kp else s in
-  crypto_kem_dec_ss0 ct kp_s ss
+      loc_pairwise_disjoint [loc ct; loc sk; loc seed_se_k;
+        loc mu_decode; loc bp_matrix; loc c_matrix; loc ss])
+    (ensures fun h0 _ h1 -> modifies (loc ss) h0 h1 /\
+      as_seq h1 ss == S.crypto_kem_dec_ss1 a gen_a (as_seq h0 ct) (as_seq h0 sk)
+        (as_seq h0 mu_decode) (as_seq h0 seed_se_k) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
+
+let crypto_kem_dec_ss1 a gen_a ct sk mu_decode seed_se_k bp_matrix c_matrix ss =
+  let seed_se = sub seed_se_k 0ul (crypto_bytes a) in
+  let kp = sub seed_se_k (crypto_bytes a) (crypto_bytes a) in
+  let s = sub sk 0ul (crypto_bytes a) in
+
+  let mask = crypto_kem_dec_kp_s a gen_a mu_decode seed_se sk bp_matrix c_matrix in
+  crypto_kem_dec_ss0 a ct mask kp s ss
+
 
 inline_for_extraction noextract
-val crypto_kem_dec_0:
-    mu_decode:lbytes bytes_mu
-  -> sk:lbytes crypto_secretkeybytes
-  -> g:lbytes (size 3 *! crypto_bytes)
-  -> Stack unit
-    (requires fun h ->
-      live h mu_decode /\ live h sk /\ live h g /\
-      disjoint mu_decode g /\ disjoint sk g)
-    (ensures fun h0 _ h1 ->
-      let pk = Seq.sub (as_seq h0 sk) (v crypto_bytes) (v crypto_publickeybytes) in
-      let pk_mu_decode = Seq.concat pk (as_seq h0 mu_decode) in
-      modifies1 g h0 h1 /\
-      as_seq h1 g == Spec.Frodo.Params.frodo_prf_spec (v crypto_publickeybytes + v bytes_mu)
-	pk_mu_decode (u16 3) (3 * v crypto_bytes))
-let crypto_kem_dec_0 mu_decode sk g =
-  push_frame();
-  let pk_mu_decode_len = crypto_publickeybytes +! bytes_mu in
-  let pk_mu_decode = create pk_mu_decode_len (u8 0) in
-  let pk = sub sk crypto_bytes crypto_publickeybytes in
-  concat2 crypto_publickeybytes pk bytes_mu mu_decode pk_mu_decode;
-  cshake_frodo pk_mu_decode_len pk_mu_decode (u16 3) (size 3 *! crypto_bytes) g;
-  pop_frame()
-
-inline_for_extraction noextract
-val crypto_kem_dec_1:
-    mu_decode:lbytes bytes_mu
-  -> bp_matrix:matrix_t params_nbar params_n
+val crypto_kem_dec_ss2:
+    a:FP.frodo_alg
+  -> gen_a:FP.frodo_gen_a{is_supported gen_a}
+  -> ct:lbytes (crypto_ciphertextbytes a)
+  -> sk:lbytes (crypto_secretkeybytes a)
+  -> mu_decode:lbytes (bytes_mu a)
+  -> bp_matrix:matrix_t params_nbar (params_n a)
   -> c_matrix:matrix_t params_nbar params_nbar
-  -> sk:lbytes crypto_secretkeybytes
-  -> ct:lbytes crypto_ciphertextbytes
-  -> ss:lbytes crypto_bytes
+  -> ss:lbytes (crypto_bytes a)
   -> Stack unit
     (requires fun h ->
       live h mu_decode /\ live h bp_matrix /\
       live h c_matrix /\ live h sk /\ live h ct /\ live h ss /\
-      disjoint ss ct /\ disjoint ss sk /\ disjoint ss mu_decode /\
-      disjoint ss bp_matrix /\ disjoint ss c_matrix)
-    (ensures fun h0 _ h1 ->
-      let pk = Seq.sub (as_seq h0 sk) (v crypto_bytes) (v crypto_publickeybytes) in
-      let pk_mu_decode = Seq.concat pk (as_seq h0 mu_decode) in
-      let g = Spec.Frodo.Params.frodo_prf_spec (v crypto_publickeybytes + v bytes_mu)
-	pk_mu_decode (u16 3) (3 * v crypto_bytes) in
-      modifies1 ss h0 h1 /\
-      as_seq h1 ss == S.crypto_kem_dec_ss (as_seq h0 ct) (as_seq h0 sk) g
-	 (as_seq h0 mu_decode) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
-let crypto_kem_dec_1 mu_decode bp_matrix c_matrix sk ct ss =
-  assert_spinoff (v (size 2 *! crypto_bytes) % 4 == 0);
-  assert_spinoff (v (size 2 *! crypto_bytes) <= v (size 3 *! crypto_bytes));
-  push_frame();
-  let g = create (size 3 *! crypto_bytes) (u8 0) in
-  crypto_kem_dec_0 mu_decode sk g;
-  crypto_kem_dec_ss ct sk g mu_decode bp_matrix c_matrix ss;
-  clear_words_u8 (size 2 *! crypto_bytes) g;
-  pop_frame()
+      loc_pairwise_disjoint [loc ct; loc sk;
+        loc mu_decode; loc bp_matrix; loc c_matrix; loc ss])
+    (ensures fun h0 _ h1 -> modifies (loc ss) h0 h1 /\
+      as_seq h1 ss == S.crypto_kem_dec_ss2 a gen_a (as_seq h0 ct) (as_seq h0 sk)
+        (as_seq h0 mu_decode) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
+
+let crypto_kem_dec_ss2 a gen_a ct sk mu_decode bp_matrix c_matrix ss =
+  push_frame ();
+  let seed_se_k = create (2ul *! crypto_bytes a) (u8 0) in
+  crypto_kem_dec_seed_se_k a mu_decode sk seed_se_k;
+  crypto_kem_dec_ss1 a gen_a ct sk mu_decode seed_se_k bp_matrix c_matrix ss;
+  clear_words_u8 seed_se_k;
+  pop_frame ()
+
+
+inline_for_extraction noextract
+val crypto_kem_dec_mu:
+     a:FP.frodo_alg
+  -> sk:lbytes (crypto_secretkeybytes a)
+  -> bp_matrix:matrix_t params_nbar (params_n a)
+  -> c_matrix:matrix_t params_nbar params_nbar
+  -> mu_decode:lbytes (bytes_mu a)
+  -> Stack unit
+    (requires fun h ->
+      live h sk /\ live h mu_decode /\
+      live h bp_matrix /\ live h c_matrix /\
+      as_seq h (mu_decode) == Seq.create (v (bytes_mu a)) (u8 0) /\
+      loc_pairwise_disjoint [loc sk; loc mu_decode; loc bp_matrix; loc c_matrix])
+    (ensures  fun h0 _ h1 -> modifies (loc mu_decode) h0 h1 /\
+      as_seq h1 mu_decode == S.crypto_kem_dec_mu a (as_seq h0 sk)
+        (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
+
+let crypto_kem_dec_mu a sk bp_matrix c_matrix mu_decode =
+  FP.expand_crypto_secretkeybytes a;
+  let s_bytes = sub sk (crypto_bytes a +! crypto_publickeybytes a) (secretmatrixbytes_len a) in
+  frodo_mu_decode a s_bytes bp_matrix c_matrix mu_decode
+
+
+inline_for_extraction noextract
+val crypto_kem_dec0:
+     a:FP.frodo_alg
+  -> gen_a:FP.frodo_gen_a{is_supported gen_a}
+  -> ss:lbytes (crypto_bytes a)
+  -> ct:lbytes (crypto_ciphertextbytes a)
+  -> sk:lbytes (crypto_secretkeybytes a)
+  -> bp_matrix:matrix_t params_nbar (params_n a)
+  -> c_matrix:matrix_t params_nbar params_nbar
+  -> mu_decode:lbytes (bytes_mu a)
+  -> Stack unit
+    (requires fun h ->
+      live h ss /\ live h ct /\ live h sk /\ live h mu_decode /\
+      live h bp_matrix /\ live h c_matrix /\
+      as_seq h (mu_decode) == Seq.create (v (bytes_mu a)) (u8 0) /\
+      loc_pairwise_disjoint [loc ss; loc ct; loc sk;
+        loc mu_decode; loc bp_matrix; loc c_matrix])
+    (ensures  fun h0 _ h1 -> modifies (loc ss |+| loc mu_decode) h0 h1 /\
+      as_seq h1 ss == S.crypto_kem_dec_ a gen_a (as_seq h0 ct)
+        (as_seq h0 sk) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
+
+let crypto_kem_dec0 a gen_a ss ct sk bp_matrix c_matrix mu_decode =
+  crypto_kem_dec_mu a sk bp_matrix c_matrix mu_decode;
+  crypto_kem_dec_ss2 a gen_a ct sk mu_decode bp_matrix c_matrix ss
+
+
+inline_for_extraction noextract
+val crypto_kem_dec1:
+     a:FP.frodo_alg
+  -> gen_a:FP.frodo_gen_a{is_supported gen_a}
+  -> ss:lbytes (crypto_bytes a)
+  -> ct:lbytes (crypto_ciphertextbytes a)
+  -> sk:lbytes (crypto_secretkeybytes a)
+  -> bp_matrix:matrix_t params_nbar (params_n a)
+  -> c_matrix:matrix_t params_nbar params_nbar
+  -> Stack unit
+    (requires fun h ->
+      live h ss /\ live h ct /\ live h sk /\
+      live h bp_matrix /\ live h c_matrix /\
+      loc_pairwise_disjoint [loc ss; loc ct; loc sk; loc bp_matrix; loc c_matrix])
+    (ensures  fun h0 _ h1 -> modifies (loc ss) h0 h1 /\
+      as_seq h1 ss == S.crypto_kem_dec_ a gen_a (as_seq h0 ct)
+        (as_seq h0 sk) (as_matrix h0 bp_matrix) (as_matrix h0 c_matrix))
+
+let crypto_kem_dec1 a gen_a ss ct sk bp_matrix c_matrix =
+  push_frame ();
+  let mu_decode = create (bytes_mu a) (u8 0) in
+  crypto_kem_dec0 a gen_a ss ct sk bp_matrix c_matrix mu_decode;
+  clear_words_u8 mu_decode;
+  pop_frame ()
+
 
 inline_for_extraction noextract
 val crypto_kem_dec:
-    ss:lbytes crypto_bytes
-  -> ct:lbytes crypto_ciphertextbytes
-  -> sk:lbytes crypto_secretkeybytes
+     a:FP.frodo_alg
+  -> gen_a:FP.frodo_gen_a{is_supported gen_a}
+  -> ss:lbytes (crypto_bytes a)
+  -> ct:lbytes (crypto_ciphertextbytes a)
+  -> sk:lbytes (crypto_secretkeybytes a)
   -> Stack uint32
     (requires fun h ->
       live h ss /\ live h ct /\ live h sk /\
       disjoint ss ct /\ disjoint ss sk /\ disjoint ct sk)
-    (ensures  fun h0 _ h1 ->
-      modifies1 ss h0 h1 /\
-      as_seq h1 ss == S.crypto_kem_dec (as_seq h0 ct) (as_seq h0 sk))
-let crypto_kem_dec ss ct sk =
-  Spec.Frodo.Params.expand_crypto_secretkeybytes ();
-  let h0 = ST.get() in
-  push_frame();
-  let bp_matrix = matrix_create params_nbar params_n in
+    (ensures  fun h0 _ h1 -> modifies (loc ss) h0 h1 /\
+      as_seq h1 ss == S.crypto_kem_dec a gen_a (as_seq h0 ct) (as_seq h0 sk))
+
+let crypto_kem_dec a gen_a ss ct sk =
+  push_frame ();
+  let bp_matrix = matrix_create params_nbar (params_n a) in
   let c_matrix  = matrix_create params_nbar params_nbar in
-  let mu_decode = create bytes_mu (u8 0) in
-  get_bp_c_matrices ct bp_matrix c_matrix;
-  let s_bytes = sub sk (crypto_bytes +! crypto_publickeybytes) (size 2 *! params_n *! params_nbar) in
-  let mu_decode = create bytes_mu (u8 0) in
-  let h1 = ST.get() in
-  assert (LowStar.Buffer.modifies loc_none h0 h1);
-  frodo_mu_decode s_bytes bp_matrix c_matrix mu_decode;
-  crypto_kem_dec_1 mu_decode bp_matrix c_matrix sk ct ss;
-  pop_frame();
-  let h1 = ST.get () in
-  assert (modifies (loc ss) h0 h1);
+
+  get_bp_c_matrices a ct bp_matrix c_matrix;
+  crypto_kem_dec1 a gen_a ss ct sk bp_matrix c_matrix;
+  pop_frame ();
   u32 0

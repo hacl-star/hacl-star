@@ -4,15 +4,15 @@ module ST = FStar.HyperStack.ST
 open FStar.HyperStack.All
 
 open Lib.IntTypes
-open Lib.ByteSequence
 open Lib.Buffer
 
+module BSeq = Lib.ByteSequence
 module S51 = Hacl.Spec.Curve25519.Field51.Definition
-module S56 = Hacl.Spec.Ed25519.Field56.Definition
 module F51 = Hacl.Impl.Ed25519.Field51
-module F56 = Hacl.Impl.Ed25519.Field56
 
 module SC = Spec.Curve25519
+
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 (* Type abbreviations *)
 inline_for_extraction noextract
@@ -22,23 +22,24 @@ let felem = lbuffer uint64 5ul
 inline_for_extraction noextract
 let point = lbuffer uint64 20ul
 
-#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
-
 inline_for_extraction noextract
 let getx (p:point) : Stack felem
   (requires fun h -> live h p)
   (ensures fun h0 f h1 -> f == gsub p 0ul 5ul /\ h0 == h1)
   = sub p 0ul 5ul
+
 inline_for_extraction noextract
 let gety (p:point) : Stack felem
   (requires fun h -> live h p)
   (ensures fun h0 f h1 -> f == gsub p 5ul 5ul /\ h0 == h1)
   = sub p 5ul 5ul
+
 inline_for_extraction noextract
 let getz (p:point) : Stack felem
   (requires fun h -> live h p)
   (ensures fun h0 f h1 -> f == gsub p 10ul 5ul /\ h0 == h1)
   = sub p 10ul 5ul
+
 inline_for_extraction noextract
 let gett (p:point) : Stack felem
   (requires fun h -> live h p)
@@ -76,15 +77,6 @@ val make_u64_10:
        Seq.index s 8 == s8 /\
        Seq.index s 9 == s9)
     )
-
-inline_for_extraction noextract
-val make_u128_9:
-    b:lbuffer uint128 9ul
-  -> s0:uint128 -> s1:uint128 -> s2:uint128 -> s3:uint128 -> s4:uint128
-  -> s5:uint128 -> s6:uint128 -> s7:uint128 -> s8:uint128 ->
-  Stack unit
-    (requires fun h -> live h b)
-    (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
 
 inline_for_extraction noextract
 val make_zero:
@@ -142,7 +134,6 @@ val reduce_513:
       F51.fevalh h1 a == F51.fevalh h0 a /\
       F51.mul_inv_t h1 a
     )
-
 
 val fmul:
     out:felem
@@ -256,7 +247,7 @@ val load_51:
     (requires fun h -> live h output /\ live h input)
     (ensures  fun h0 _ h1 -> modifies (loc output) h0 h1 /\
       F51.felem_fits h1 output (1, 1, 1, 1, 1) /\
-      F51.as_nat h1 output == (nat_from_bytes_le (as_seq h0 input) % pow2 255)
+      F51.as_nat h1 output == (BSeq.nat_from_bytes_le (as_seq h0 input) % pow2 255)
     )
 
 val store_51:
@@ -265,5 +256,5 @@ val store_51:
   Stack unit
     (requires fun h -> live h input /\ live h output /\ F51.mul_inv_t h input)
     (ensures fun h0 _ h1 -> modifies (loc output) h0 h1 /\
-      as_seq h1 output == nat_to_bytes_le 32 (F51.fevalh h0 input)
+      as_seq h1 output == BSeq.nat_to_bytes_le 32 (F51.fevalh h0 input)
     )

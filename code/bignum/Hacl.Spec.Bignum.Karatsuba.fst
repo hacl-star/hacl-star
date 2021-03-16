@@ -13,6 +13,7 @@ open Hacl.Spec.Lib
 
 open Hacl.Spec.Bignum.Addition
 open Hacl.Spec.Bignum.Multiplication
+open Hacl.Spec.Bignum.Squaring
 
 module K = Hacl.Spec.Karatsuba.Lemmas
 

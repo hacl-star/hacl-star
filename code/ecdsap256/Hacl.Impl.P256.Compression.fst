@@ -20,6 +20,7 @@ open Hacl.Impl.P256.LowLevel.RawCmp
 open Spec.P256.MontgomeryMultiplication
 
 open Spec.P256.Definitions
+open Hacl.Spec.P256.Felem
 
 open FStar.Math.Lemmas
 

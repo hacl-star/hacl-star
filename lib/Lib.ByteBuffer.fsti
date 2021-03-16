@@ -12,6 +12,8 @@ open Lib.Buffer
 module B = LowStar.Buffer
 module BS = Lib.ByteSequence
 
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
+
 /// Host to {little,big}-endian conversions
 /// TODO: missing specifications
 
@@ -28,7 +30,7 @@ inline_for_extraction
 val uint_from_le: #t:inttype{unsigned t /\ ~(U128? t)} -> #l:secrecy_level -> uint_t t l -> uint_t t l
 
 (** Constructs the equality mask for two buffers of secret integers in constant-time *)
-inline_for_extraction 
+inline_for_extraction
 val buf_eq_mask:
     #t:inttype{~(S128? t)}
   -> #len1:size_t
@@ -51,6 +53,22 @@ inline_for_extraction
 val lbytes_eq: #len:size_t -> b1:lbuffer uint8 len -> b2:lbuffer uint8 len -> Stack bool
   (requires fun h -> live h b1 /\ live h b2)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == BS.lbytes_eq (as_seq h0 b1) (as_seq h0 b2))
+
+inline_for_extraction
+val buf_mask_select:
+    #t:inttype{~(S128? t)}
+  -> #len:size_t
+  -> b1:lbuffer (int_t t SEC) len
+  -> b2:lbuffer (int_t t SEC) len
+  -> mask:int_t t SEC{v mask = 0 \/ v mask = v (ones t SEC)}
+  -> res:lbuffer (int_t t SEC) len ->
+  Stack unit
+    (requires fun h ->
+      live h b1 /\ live h b2 /\ live h res /\
+      eq_or_disjoint res b1 /\ eq_or_disjoint res b2)
+    (ensures fun h0 _ h1 ->
+      modifies1 res h0 h1 /\
+      as_seq h1 res == BS.seq_mask_select (as_seq h0 b1) (as_seq h0 b2) mask)
 
 inline_for_extraction
 val uint_from_bytes_le:
@@ -161,8 +179,8 @@ val uint_at_index_le:
     #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> #len:size_t{v len * numbytes t <= max_size_t}
-  -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) 
-  -> idx:size_t{v idx < v len} -> 
+  -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t))
+  -> idx:size_t{v idx < v len} ->
   Stack (uint_t t l)
         (requires fun h0 -> live h0 i)
         (ensures  fun h0 r h1 ->
@@ -174,8 +192,8 @@ val uint_at_index_be:
     #t:inttype{unsigned t /\ ~(U1? t)}
   -> #l:secrecy_level
   -> #len:size_t{v len * numbytes t <= max_size_t}
-  -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t)) 
-  -> idx:size_t{v idx < v len} -> 
+  -> i:lbuffer (uint_t U8 l) (len *! size (numbytes t))
+  -> idx:size_t{v idx < v len} ->
   Stack (uint_t t l)
         (requires fun h0 -> live h0 i)
         (ensures  fun h0 r h1 ->

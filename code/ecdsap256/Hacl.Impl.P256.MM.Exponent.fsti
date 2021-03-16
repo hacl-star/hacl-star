@@ -27,6 +27,7 @@ open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Arithmetics
 
 open Spec.P256.Definitions
+open Hacl.Spec.P256.Felem
 open Spec.P256.Lemmas
 open Spec.P256
 open Spec.P256.MontgomeryMultiplication

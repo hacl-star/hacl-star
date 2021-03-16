@@ -38,7 +38,13 @@ extern "C" {
 
 
 
+KRML_DEPRECATED("random_crypto")
+
 extern bool Lib_RandomBuffer_System_randombytes(u8 *buf, u32 len);
+
+extern void *Lib_RandomBuffer_System_entropy_p;
+
+extern void Lib_RandomBuffer_System_crypto_random(u8 *buf, u32 len);
 
 #if defined(__cplusplus)
 }

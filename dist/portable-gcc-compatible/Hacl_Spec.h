@@ -39,6 +39,15 @@ extern "C" {
 
 
 
+/* SNIPPET_START: Spec_Blake2_alg */
+
+#define Spec_Blake2_Blake2S 0
+#define Spec_Blake2_Blake2B 1
+
+/* SNIPPET_END: Spec_Blake2_alg */
+
+typedef uint8_t Spec_Blake2_alg;
+
 /* SNIPPET_START: Spec_Hash_Definitions_hash_alg */
 
 #define Spec_Hash_Definitions_SHA2_224 0
@@ -126,6 +135,15 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 /* SNIPPET_END: Spec_Agile_AEAD_alg */
 
 typedef uint8_t Spec_Agile_AEAD_alg;
+
+/* SNIPPET_START: Spec_Frodo_Params_frodo_gen_a */
+
+#define Spec_Frodo_Params_SHAKE128 0
+#define Spec_Frodo_Params_AES128 1
+
+/* SNIPPET_END: Spec_Frodo_Params_frodo_gen_a */
+
+typedef uint8_t Spec_Frodo_Params_frodo_gen_a;
 
 #if defined(__cplusplus)
 }

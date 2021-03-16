@@ -14,7 +14,7 @@
 #include "test_helpers.h"
 #include "sha2_vectors.h"
 
-typedef Hacl_Streaming_Functor_state_s___uint32_t____ sha2_state;
+typedef Hacl_Streaming_SHA2_state_sha2_256 sha2_state;
 
 int main() {
   bool ok = true;

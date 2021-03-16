@@ -10,7 +10,7 @@ open Lib.Buffer
 open Spec.P256.Definitions
 open Spec.P256.Lemmas
 open Spec.ECDSA
-
+open Hacl.Spec.P256.Felem
 open FStar.Math
 open FStar.Math.Lemmas
 open FStar.Mul
