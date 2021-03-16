@@ -5,8 +5,6 @@ open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
-open Lib.Buffer
-
 
 open FStar.Math.Lemmas
 open FStar.Mul
@@ -17,7 +15,65 @@ open Hacl.Impl.EC.MontgomeryMultiplication.Lemmas
 open Lib.Loops
 open Hacl.Impl.EC.Setup
 
-#set-options "--z3rlimit 200"
+#set-options "--z3rlimit 300"
+
+open Lib.Sequence 
+
+val lemma_test: #l: size_nat -> c: curve ->  a: lseq uint64 l -> i: nat {i <= l} 
+  -> Lemma (ensures (
+    let a0 = sub a 0 i in 
+    let a1 = sub a i (l - i) in 
+    lseq_as_nat a = lseq_as_nat a0 + pow2 (64 * i) * lseq_as_nat a1))
+    (decreases (l - i))
+
+let rec lemma_test #l c a i = 
+  if i = 0 then begin 
+    let a0 = sub a 0 0 in 
+    let a1 = sub a 0 l in 
+    lseq_as_nat_last a0
+    end
+  else begin if i = l then lseq_as_nat_last (sub a l 0) else
+    begin 
+      let a0 = sub a 0 i in 
+      let a1 = sub a i (l - i) in 
+
+      calc (==) 
+      {
+	lseq_as_nat a1;
+	(==) {lemma_test #(l - i) c a1 1}
+	lseq_as_nat (sub a1 0 1) + pow2 64 * lseq_as_nat (sub a1 1 (l - i - 1));
+	(==) {lseq_as_nat_first (sub a1 0 1)}
+	v (index a1 0) + pow2 64 * lseq_as_nat (sub a1 1 (l - i - 1));
+	(==) {Seq.lemma_index_slice a 0 (i + 1) i}
+	v (index a i) + pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
+      };
+    
+    assert(lseq_as_nat a1 - v (index a i) =  pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))));
+
+    lemma_lseq_as_seq_extension (sub a 0 (i + 1)) (sub a 0 i) i;
+
+    let open FStar.Tactics in 
+    let open FStar.Tactics.Canon in 
+
+    
+    calc (==) {
+      lseq_as_nat a;
+      (==) {lemma_test c a (i + 1)}
+      lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * (i + 1)) * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
+      (==) { pow2_plus (64 * i) 64}
+      lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * i) * pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
+      (==) {assert_by_tactic (pow2 (64 * i) * pow2 64 * lseq_as_nat (sub a  (i + 1) (l - (i + 1))) == 
+	pow2 (64 * i) * (pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))))) canon}
+      lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * i) * (pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))));
+      (==) {assert(lseq_as_nat a1 - v (index a i) =  pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))))}
+      lseq_as_nat (sub a 0 (i + 1)) - pow2 (64 * i) * v (index a i) + pow2 (64 * i) * lseq_as_nat a1; 
+      (==) {assert (lseq_as_nat (sub a 0 (i + 1)) == lseq_as_nat (sub a 0 i) + pow2 (64 * i) * v (index a i))}
+      lseq_as_nat (sub a 0 i) + pow2 (64 * i) * lseq_as_nat a1;}
+    end end
+
+
+
+open Lib.Buffer
 
 
 inline_for_extraction
@@ -313,8 +369,9 @@ val montgomery_multiplication_reduction: #c: curve
   -> t: widefelem c 
   -> result: felem c -> 
   Stack unit 
-  (requires (fun h -> live h t /\ wide_as_nat c h t < getPrime c * pow2 (getPower c) /\ live h result /\ eq_or_disjoint t result)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (let prime = getPrime c in 
+  (requires (fun h -> live h t /\ wide_as_nat c h t < getPrime c * pow2 (getPower c) /\ live h result /\ 
+    eq_or_disjoint t result)) 
+  (ensures (fun h0 _ h1 -> modifies (loc result |+| loc t) h0 h1 /\ (let prime = getPrime c in 
     as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (getPower2 c) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c (wide_as_nat c h0 t)))
   )
@@ -326,7 +383,7 @@ let montgomery_multiplication_reduction #c t result =
    
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
     let prime = getPrime c in 
-    live h t /\
+    live h t /\ modifies (loc t) h0 h /\
     wide_as_nat c h0 t < getPrime c * pow2 (getPower c) /\ 
     wide_as_nat c h t <= wide_as_nat c h0 t / (pow2 (64 * i)) + prime /\ 
     wide_as_nat c h t % prime = wide_as_nat c h0 t * modp_inv2 #c (pow2 (i * 64)) % prime in 
@@ -357,6 +414,31 @@ let montgomery_multiplication_reduction #c t result =
   let h2 = ST.get() in 
   lemma_up_bound0 #c (wide_as_nat c h0 t) (wide_as_nat c h2 t); 
   reduction_prime_2prime_with_carry t result;
+
+  lemmaFromDomain #c (wide_as_nat c h0 t)
+
+
+#push-options "--z3rlimit 200"
+
+
+
+
+(*
+val lemma_wide_as_nat: #c: curve -> a: widefelem c -> h: mem -> i: nat{i > getCoordinateLenU64 c} -> Lemma (
+  let len = getCoordinateLenU64 c in 
+  wide_as_nat c h a == as_nat c h (gsub a (size 0) len) + as_nat c h (gsub a len len) * pow2 (getPower c))
+
+let lemma_wide_as_nat #c a h = 
+  assert(wide_as_nat c h a == lseq_as_nat (as_seq h a));
+  
+  let len = getCoordinateLenU64 c in 
+  
+  let a0 = gsub a (size 0) len in 
+  let a1 = gsub a len len in 
+
+  assert(as_nat c h a0 == lseq_as_nat (as_seq h a0));
+  assert(as_nat c h a1 == lseq_as_nat (as_seq h a1));
+
   admit()
 
 
@@ -369,8 +451,15 @@ let montgomery_multiplication_buffer_by_one #c a result =
     let t_high = sub t len len in 
 
   let h0 = ST.get() in 
-
+  assert(as_nat c h0 a < getPrime c);
+  
   copy t_low a; 
+
+  let h1 = ST.get() in 
+  lemma_create_zero_buffer (2 * v len) c; 
+  assert(wide_as_nat c h0 t == 0);
+  assert(wide_as_nat c h1 t == 
+
   montgomery_multiplication_reduction t result;
   pop_frame();
   

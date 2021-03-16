@@ -226,9 +226,9 @@ val lseq_as_nat_last: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat_ #l
 
 let lseq_as_nat_last #l a = ()
 
-val lseq_as_nat_first: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat_ #l a 1 == Lib.Sequence.index a 0)
+val lseq_as_nat_first: a: lseq uint64 1 -> Lemma (lseq_as_nat_ a 1 == v (Lib.Sequence.index a 0))
 
-let lseq_as_nat_first #l a = ()
+let lseq_as_nat_first a = ()
 
 
 
@@ -236,6 +236,7 @@ noextract
 val lseq_as_nat: #l: size_nat -> a: lseq uint64 l -> Tot nat
 
 let lseq_as_nat #l a = lseq_as_nat_ a l
+
 
 val lseq_as_nat_definiton: #len:size_nat -> a: lseq uint64 len 
   -> i: nat {i > 0 /\ i <= len} ->
@@ -281,6 +282,33 @@ let rec lemma_lseq_as_seq_as_forall #l a b i =
     assert(v (Lib.Sequence.index a (i - 1)) == v (Lib.Sequence.index b (i - 1)))
 
 
+val lemma_lseq_as_seq_extension: 
+  #l0: size_nat ->  #l1: size_nat -> 
+  a0: lseq uint64 l0 -> a1: lseq uint64 l1 -> 
+  i: nat {i <= l0 /\ i <= l1} ->
+  Lemma 
+    (requires (Lib.Sequence.sub a0 0 i == Lib.Sequence.sub a1 0 i))
+    (ensures lseq_as_nat_ a0 i == lseq_as_nat_ a1 i)
+
+let rec lemma_lseq_as_seq_extension #l0 #l1 a0 a1 i = 
+  match i with 
+  | 0 -> ()
+  | _ -> 
+    assert(forall (k: nat {k < i}). Lib.Sequence.index (Lib.Sequence.sub a1 0 i) k == Lib.Sequence.index a0 k);
+    assert(forall (k: nat {k < i}). Lib.Sequence.index (Lib.Sequence.sub a0 0 i) k == Lib.Sequence.index a0 k);
+    
+    eq_intro (Lib.Sequence.sub a0 0 (i - 1)) (Lib.Sequence.sub a1 0 (i - 1));
+    assert(Lib.Sequence.sub a0 0 (i - 1) == Lib.Sequence.sub a1 0 (i - 1));
+    
+    lemma_lseq_as_seq_extension a0 a1 (i - 1);
+
+    lseq_as_nat_definiton a0 i;
+    lseq_as_nat_definiton a1 i;
+
+    assert(forall (k: nat {k < i}). Lib.Sequence.index a0 k == Lib.Sequence.index a1 k);
+    assert (Lib.Sequence.index a0 (i - 1) == Lib.Sequence.index a1 (i - 1))
+
+    
 
 
 (*
