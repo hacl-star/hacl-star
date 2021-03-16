@@ -190,7 +190,7 @@ let montgomery_multiplication_round #c t round k0 =
     recall_contents (order_buffer #c)  (Lib.Sequence.of_list (Hacl.Spec.P256.Definition.order_list c));
     let y_ = index y (size 0) in   
     short_mul_bn #c order_buffer y_ t2;
-    add_long_without_carry #c t t2 t3;
+    (* add_long_without_carry #c t t2 t3; *)
     (* shift1 #c t3 round; *)
     admit();
   pop_frame()

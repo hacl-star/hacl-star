@@ -37,15 +37,17 @@ open Hacl.Bignum
 let uploadZeroImpl #c f =
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
-  let inv h (i: nat {i <= uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\
-    (forall (j: nat {j < i}). 
-      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0) in 
+  let inv h (i: nat {i <= uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\ 
+    lseq_as_nat_ (as_seq h f) i == 0 in 
+
+  lseq_as_nat_last (as_seq h0 f);
   for 0ul len inv (fun i -> 
+      let h0_ = ST.get() in 
     upd f i (u64 0); 
-    let h = ST.get() in 
-    assert(
-      forall (j: nat {j < uint_v i}). 
-      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0))
+      let h_ = ST.get() in 
+
+      lseq_as_nat_definiton (as_seq h_ f) (v i + 1);
+      lemma_lseq_as_seq_as_forall (as_seq h0_ f) (as_seq h_ f) (v i))
 
 
 let uploadOneImpl #c f =
@@ -53,16 +55,18 @@ let uploadOneImpl #c f =
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\
-    v (Lib.Sequence.index (as_seq h f) 0) == 1 /\
-    (forall (j: nat {j > 0 /\ j < i}). 
-      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0)
-  in 
+    lseq_as_nat_ (as_seq h f) i == 1 in  
+
+  lseq_as_nat_definiton (as_seq h0 f) 1;
+  lseq_as_nat_last (as_seq h0 f);
+  
   for 1ul len inv (fun i -> 
+      let h0_ = ST.get() in 
     upd f i (u64 0);
-    let h = ST.get() in 
-        assert(
-      forall (j: nat {j > 0 /\ j < uint_v i}). 
-      let elemUpdated = Lib.Sequence.index (as_seq h f) j in uint_v elemUpdated = 0))
+      let h_ = ST.get() in 
+
+      lseq_as_nat_definiton (as_seq h_ f) (v i + 1);
+      lemma_lseq_as_seq_as_forall (as_seq h0_ f) (as_seq h_ f) (v i))
 
 
 let uploadZeroPoint #c p =
@@ -425,7 +429,7 @@ let shift1_with_carry #c t out carry =
     lseq_as_nat_ #(v len + 1) (as_seq h0 t) (i + 1) / pow2 64 == lseq_as_nat_ #(v len + 1) (as_seq h out) i) 
   in 
 
-  lseq_as_nat_first #(v len + 1) (as_seq h0 t);
+  lseq_as_nat_first (as_seq h0 t);
   lseq_as_nat_last #(v len + 1) (as_seq h0 out);
 
   for 0ul len inv 

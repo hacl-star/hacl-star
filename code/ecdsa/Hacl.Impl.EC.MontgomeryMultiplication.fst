@@ -483,63 +483,46 @@ let montgomery_multiplication_buffer #c a b result =
     let h0 = ST.get() in
   mul a b t;  
     lemma_mult_lt_center (as_nat c h0 a) (as_nat c h0 b) (getPrime c) (pow2 (getPower c));
-
   montgomery_multiplication_reduction #c t result;
   pop_frame();
-  
     let h1 = ST.get() in 
-
     lemma_domain #c (as_nat c h0 a) (as_nat c h0 b) (as_nat c h1 result)
 
 
-(*
-val montgomery_square_buffer: #c: curve  -> a: felem c
-  -> result: felem c ->  
-  Stack unit
-  (requires (fun h -> live h a /\ as_nat c h a < (getPrime c) /\ live h result)) 
-  (ensures (fun h0 _ h1 -> (let prime = getPrime c in modifies (loc result) h0 h1 /\  
-    as_nat c h1 result < prime /\ 
-    as_nat c h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (getPower c) prime) % prime /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
-*)
-
 let montgomery_square_buffer #c a result = 
   push_frame();
-    
   let len = getCoordinateLenU64 c in 
   let t = create (size 2 *! len) (u64 0) in 
     let h0 = ST.get() in 
-  square_bn a t;  
+  square_bn a t;   
+    lemma_mult_lt_center (as_nat c h0 a) (as_nat c h0 a) (getPrime c) (pow2 (getPower c));
   montgomery_multiplication_reduction #c t result;
-
-  pop_frame()  
-
-
-
+  pop_frame();
+    let h1 = ST.get() in
+    lemma_domain #c (as_nat c h0 a) (as_nat c h0 a) (as_nat c h1 result)
+    
 
 let fsquarePowN #c n a = 
   let h0 = ST.get() in  
-  (* lemmaFromDomainToDomain #P256 (as_nat P256 h0 a); *)
+    lemmaFromDomainToDomain #c (as_nat c h0 a);  
   assert_norm (pow2 0 == 1); 
-  let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = True (*
-    let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
-    as_nat P256 h1 a = toDomain_ #P256 (pow k (pow2 i)) /\
-    as_nat P256 h1 a < prime256 /\ live h1 a /\ modifies1 a h0 h1  *) in 
+  let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = 
+    let k = fromDomain_ #c (as_nat c h0 a) in 
+    as_nat c h1 a = toDomain_ #c (Spec.P256.pow k (pow2 i)) /\
+    as_nat c h1 a < getPrime c /\ live h1 a /\ modifies (loc a) h0 h1 in 
 
- (* power_one_2 (fromDomain_ #P256 (as_nat P256 h0 a)); *)
-
+  Hacl.Lemmas.P256.power_one_2 (fromDomain_ #c (as_nat c h0 a)); 
+  
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
-     montgomery_square_buffer #c a a
-     (* ; 
-     let k = fromDomain_ #P256 (as_nat P256 h0 a) in  
-     inDomain_mod_is_not_mod #P256 (fromDomain_ #P256 (as_nat P256 h0_ a) * fromDomain_ #P256 (as_nat P256 h0_ a)); 
-     lemmaFromDomainToDomainModuloPrime #P256 (let k = fromDomain_ #P256 (as_nat P256 h0 a) in pow k (pow2 (v x)));
+     montgomery_square_buffer #c a a;
 
-     (*modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) prime256; 
+     let pow = Spec.P256.pow in 
+     let k = fromDomain_ #c (as_nat c h0 a) in  
+     inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0_ a) * fromDomain_ #c (as_nat c h0_ a)); 
+     lemmaFromDomainToDomainModuloPrime #c (let k = fromDomain_ #c (as_nat c h0 a) in pow k (pow2 (v x)));
+
+     Spec.ECDSA.Lemmas.modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) (getPrime c); 
      pow_plus k  (pow2 (v x)) (pow2 (v x )); 
-     pow2_double_sum (v x); *)
-     inDomain_mod_is_not_mod #P256 (pow k (pow2 (v x + 1)))
- *)
-   )
+     pow2_double_sum (v x); 
+     inDomain_mod_is_not_mod #c (pow k (pow2 (v x + 1))))
