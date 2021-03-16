@@ -14,6 +14,18 @@ open Spec.P256
 open FStar.Mul
 
 
+val montgomery_multiplication_reduction: #c: curve
+  -> t: widefelem c 
+  -> result: felem c -> 
+  Stack unit 
+  (requires (fun h -> live h t /\ wide_as_nat c h t < getPrime c * pow2 (getPower c) /\ live h result /\ 
+    eq_or_disjoint t result)) 
+  (ensures (fun h0 _ h1 -> modifies (loc result |+| loc t) h0 h1 /\ (let prime = getPrime c in 
+    as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (getPower2 c) prime) % prime /\
+    as_nat c h1 result = fromDomain_ #c (wide_as_nat c h0 t)))
+  )
+
+
 val montgomery_multiplication_buffer_by_one: #c: curve -> a: felem c -> result: felem c -> 
   Stack unit
   (requires (fun h -> live h a /\ felem_eval c h a /\ live h result)) 

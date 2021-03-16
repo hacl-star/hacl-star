@@ -365,18 +365,6 @@ let lemma_mm_reduction #c a0 i =
 #pop-options
 
 
-val montgomery_multiplication_reduction: #c: curve
-  -> t: widefelem c 
-  -> result: felem c -> 
-  Stack unit 
-  (requires (fun h -> live h t /\ wide_as_nat c h t < getPrime c * pow2 (getPower c) /\ live h result /\ 
-    eq_or_disjoint t result)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result |+| loc t) h0 h1 /\ (let prime = getPrime c in 
-    as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (getPower2 c) prime) % prime /\
-    as_nat c h1 result = fromDomain_ #c (wide_as_nat c h0 t)))
-  )
-
-
 let montgomery_multiplication_reduction #c t result = 
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
@@ -418,30 +406,6 @@ let montgomery_multiplication_reduction #c t result =
   lemmaFromDomain #c (wide_as_nat c h0 t)
 
 
-#push-options "--z3rlimit 200"
-
-
-
-
-(*
-val lemma_wide_as_nat: #c: curve -> a: widefelem c -> h: mem -> i: nat{i > getCoordinateLenU64 c} -> Lemma (
-  let len = getCoordinateLenU64 c in 
-  wide_as_nat c h a == as_nat c h (gsub a (size 0) len) + as_nat c h (gsub a len len) * pow2 (getPower c))
-
-let lemma_wide_as_nat #c a h = 
-  assert(wide_as_nat c h a == lseq_as_nat (as_seq h a));
-  
-  let len = getCoordinateLenU64 c in 
-  
-  let a0 = gsub a (size 0) len in 
-  let a1 = gsub a len len in 
-
-  assert(as_nat c h a0 == lseq_as_nat (as_seq h a0));
-  assert(as_nat c h a1 == lseq_as_nat (as_seq h a1));
-
-  admit()
-
-
 let montgomery_multiplication_buffer_by_one #c a result = 
   push_frame();
   
@@ -451,15 +415,16 @@ let montgomery_multiplication_buffer_by_one #c a result =
     let t_high = sub t len len in 
 
   let h0 = ST.get() in 
-  assert(as_nat c h0 a < getPrime c);
-  
   copy t_low a; 
 
   let h1 = ST.get() in 
+  
   lemma_create_zero_buffer (2 * v len) c; 
-  assert(wide_as_nat c h0 t == 0);
-  assert(wide_as_nat c h1 t == 
 
+  lemma_test c (as_seq h0 t) (v len);
+  lemma_test c (as_seq h1 t) (v len);
+
+  
   montgomery_multiplication_reduction t result;
   pop_frame();
   
