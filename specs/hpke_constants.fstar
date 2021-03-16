@@ -1,12 +1,12 @@
-// generated: "HPKE-07"
+// generated: "HPKE-v1"
 inline_for_extraction
-let size_label_rfcXXXX: size_nat = 7
-let label_rfcXXXX_list : l:list uint8{List.Tot.length l == size_label_rfcXXXX} =
+let size_label_version: size_nat = 7
+let label_version_list : l:list uint8{List.Tot.length l == size_label_version} =
   [@inline_let]
-  let l = [u8 0x48; u8 0x50; u8 0x4b; u8 0x45; u8 0x2d; u8 0x30; u8 0x37] in
-  assert_norm(List.Tot.length l == size_label_rfcXXXX);
+  let l = [u8 0x48; u8 0x50; u8 0x4b; u8 0x45; u8 0x2d; u8 0x76; u8 0x31] in
+  assert_norm(List.Tot.length l == size_label_version);
   l
-let label_rfcXXXX : lbytes size_label_rfcXXXX = createL label_rfcXXXX_list
+let label_version : lbytes size_label_version = createL label_version_list
 
 
 // generated: "eae_prk"
@@ -128,5 +128,38 @@ let label_sec_list : l:list uint8{List.Tot.length l == size_label_sec} =
   assert_norm(List.Tot.length l == size_label_sec);
   l
 let label_sec : lbytes size_label_sec = createL label_sec_list
+
+
+// generated: "dkp_prk"
+inline_for_extraction
+let size_label_dkp_prk: size_nat = 7
+let label_dkp_prk_list : l:list uint8{List.Tot.length l == size_label_dkp_prk} =
+  [@inline_let]
+  let l = [u8 0x64; u8 0x6b; u8 0x70; u8 0x5f; u8 0x70; u8 0x72; u8 0x6b] in
+  assert_norm(List.Tot.length l == size_label_dkp_prk);
+  l
+let label_dkp_prk : lbytes size_label_dkp_prk = createL label_dkp_prk_list
+
+
+// generated: "candidate"
+inline_for_extraction
+let size_label_candidate: size_nat = 9
+let label_candidate_list : l:list uint8{List.Tot.length l == size_label_candidate} =
+  [@inline_let]
+  let l = [u8 0x63; u8 0x61; u8 0x6e; u8 0x64; u8 0x69; u8 0x64; u8 0x61; u8 0x74; u8 0x65] in
+  assert_norm(List.Tot.length l == size_label_candidate);
+  l
+let label_candidate : lbytes size_label_candidate = createL label_candidate_list
+
+
+// generated: "sk"
+inline_for_extraction
+let size_label_sk: size_nat = 2
+let label_sk_list : l:list uint8{List.Tot.length l == size_label_sk} =
+  [@inline_let]
+  let l = [u8 0x73; u8 0x6b] in
+  assert_norm(List.Tot.length l == size_label_sk);
+  l
+let label_sk : lbytes size_label_sk = createL label_sk_list
 
 

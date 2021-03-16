@@ -65,15 +65,16 @@ type mode =
 /// Constants
 
 (** Constants for HPKE labels *)
-// generated: "HPKE-07"
+
+// generated: "HPKE-v1"
 inline_for_extraction
-let size_label_rfcXXXX: size_nat = 7
-let label_rfcXXXX_list : l:list uint8{List.Tot.length l == size_label_rfcXXXX} =
+let size_label_version: size_nat = 7
+let label_version_list : l:list uint8{List.Tot.length l == size_label_version} =
   [@inline_let]
-  let l = [u8 0x48; u8 0x50; u8 0x4b; u8 0x45; u8 0x2d; u8 0x30; u8 0x37] in
-  assert_norm(List.Tot.length l == size_label_rfcXXXX);
+  let l = [u8 0x48; u8 0x50; u8 0x4b; u8 0x45; u8 0x2d; u8 0x76; u8 0x31] in
+  assert_norm(List.Tot.length l == size_label_version);
   l
-let label_rfcXXXX : lbytes size_label_rfcXXXX = createL label_rfcXXXX_list
+let label_version : lbytes size_label_version = createL label_version_list
 
 
 // generated: "eae_prk"
@@ -197,6 +198,39 @@ let label_sec_list : l:list uint8{List.Tot.length l == size_label_sec} =
 let label_sec : lbytes size_label_sec = createL label_sec_list
 
 
+// generated: "dkp_prk"
+inline_for_extraction
+let size_label_dkp_prk: size_nat = 7
+let label_dkp_prk_list : l:list uint8{List.Tot.length l == size_label_dkp_prk} =
+  [@inline_let]
+  let l = [u8 0x64; u8 0x6b; u8 0x70; u8 0x5f; u8 0x70; u8 0x72; u8 0x6b] in
+  assert_norm(List.Tot.length l == size_label_dkp_prk);
+  l
+let label_dkp_prk : lbytes size_label_dkp_prk = createL label_dkp_prk_list
+
+
+// generated: "candidate"
+inline_for_extraction
+let size_label_candidate: size_nat = 9
+let label_candidate_list : l:list uint8{List.Tot.length l == size_label_candidate} =
+  [@inline_let]
+  let l = [u8 0x63; u8 0x61; u8 0x6e; u8 0x64; u8 0x69; u8 0x64; u8 0x61; u8 0x74; u8 0x65] in
+  assert_norm(List.Tot.length l == size_label_candidate);
+  l
+let label_candidate : lbytes size_label_candidate = createL label_candidate_list
+
+
+// generated: "sk"
+inline_for_extraction
+let size_label_sk: size_nat = 2
+let label_sk_list : l:list uint8{List.Tot.length l == size_label_sk} =
+  [@inline_let]
+  let l = [u8 0x73; u8 0x6b] in
+  assert_norm(List.Tot.length l == size_label_sk);
+  l
+let label_sk : lbytes size_label_sk = createL label_sk_list
+
+
 
 /// Constants sizes
 
@@ -249,8 +283,9 @@ let size_ks_ctx (cs:ciphersuite): size_nat = size_mode_identifier + 2*(size_kdf 
 (*   l + block_length a < pow2 32 *)
 
 let labeled_extract_ikm_length_pred (a:hash_algorithm) (ikm_length:nat) =
-  HKDF.extract_ikm_length_pred a (Seq.length label_rfcXXXX + ikm_length)
+  HKDF.extract_ikm_length_pred a (Seq.length label_version + ikm_length)
 
+// TODO this should not be exposed
 val labeled_extract:
     a:hash_algorithm
   -> suite_id:bytes
@@ -264,8 +299,9 @@ val labeled_extract:
     (ensures fun _ -> True)
 
 let labeled_expand_info_length_pred (a:hash_algorithm) (info_length:nat) =
-  HKDF.expand_info_length_pred a (2 + Seq.length label_rfcXXXX + info_length)
+  HKDF.expand_info_length_pred a (2 + Seq.length label_version + info_length)
 
+// TODO this should not be exposed
 val labeled_expand:
     a:hash_algorithm
   -> suite_id:bytes
@@ -293,16 +329,16 @@ let hash_max_input_length (a:hash_algorithm) =
   | Hash.SHA2_384 | Hash.SHA2_512 -> 42535295865117307932921825928971026431 // pow2 125 - 1
 
 let labeled_extract_max_length_ikm (a:hash_algorithm) (size_suite_id:size_nat) (size_local_label:size_nat) =
-  hash_max_input_length a - size_label_rfcXXXX - size_suite_id - size_local_label - Spec.Hash.Definitions.block_length a
+  hash_max_input_length a - size_label_version - size_suite_id - size_local_label - Spec.Hash.Definitions.block_length a
 
 let labeled_expand_max_length_info (a:hash_algorithm) (size_suite_id:size_nat) (size_local_label:size_nat) =
-  hash_max_input_length a - Spec.Hash.Definitions.hash_length a - 2 - size_label_rfcXXXX - size_suite_id - size_local_label - 1 - Spec.Hash.Definitions.block_length a
+  hash_max_input_length a - Spec.Hash.Definitions.hash_length a - 2 - size_label_version - size_suite_id - size_local_label - 1 - Spec.Hash.Definitions.block_length a
 
 let max_length_psk (a:hash_algorithm) = labeled_extract_max_length_ikm a size_suite_id_hpke size_label_secret
 let max_length_psk_id (a:hash_algorithm) = labeled_extract_max_length_ikm a size_suite_id_hpke size_label_psk_id_hash
 let max_length_info (a:hash_algorithm) = labeled_extract_max_length_ikm a size_suite_id_hpke size_label_info_hash
 let max_length_exp_ctx (a:hash_algorithm) = labeled_expand_max_length_info a size_suite_id_hpke size_label_sec
-
+let max_length_dkp_ikm (a:hash_algorithm) = labeled_extract_max_length_ikm a size_suite_id_kem size_label_dkp_prk
 
 /// Types
 
@@ -326,35 +362,47 @@ type psk_s (cs:ciphersuite) =     b:bytes{Seq.length b >= 32 /\ Seq.length b <= 
 type psk_id_s (cs:ciphersuite) =   b:bytes{Seq.length b >= 1 /\ Seq.length b <= max_length_psk_id (hash_of_cs cs)}
 type info_s (cs:ciphersuite) =    b:bytes{Seq.length b <= max_length_info (hash_of_cs cs)}
 type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_exp_ctx (hash_of_cs cs)}
+type dkp_ikm_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_dkp_ikm (kem_hash_of_cs cs) /\ Seq.length b >= size_dh_key cs}
 (* type psk_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_psk} *)
 (* type psk_id_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_psk_id} *)
 (* type info_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_info} *)
 (* type exp_ctx_s (cs:ciphersuite) = b:bytes{Seq.length b <= max_length_exp_ctx} *)
 
-val deserialize:
+// TODO public keys should be more abstract to prepare for other KEMs
+// TODO This looks weird: _de_serialize function returns a _serialized_ point.
+//      Well, ok, understood: HPKE has _another_ format (the stupid extra byte).
+val deserialize_public_key:
     cs:ciphersuite // TODO could this be an implicit parameter?
   -> pk:key_dh_public_s cs ->
   Tot (DH.serialized_point (curve_of_cs cs))
 
-val serialize:
+val serialize_public_key:
     cs:ciphersuite
   -> pk:DH.serialized_point (curve_of_cs cs) ->
   Tot (key_dh_public_s cs)
 
+val derive_key_pair:
+    cs:ciphersuite
+  -> ikm:dkp_ikm_s cs ->
+  Tot (option (key_dh_secret_s cs & key_dh_public_s cs))
+// TODO annotate this saying it does not return None for Curve25519.
+
 // TODO can we hide the contents of encryption_context, i.e. not
 //      expose them in this fsti, to avoid usage which is not
 //      conform with the spec?
+//      -> just declare a Type0 and only detail it in the fst, as a constructed type.
+// TODO encode that key and nonce will be all-zero if AEAD is Export-Only
 // TODO maybe rename to _state (because it is not a context that gets hashed into smth)
 let encryption_context (cs:ciphersuite) = key_aead_s cs & nonce_aead_s cs & seq_aead_s cs & exporter_secret_s cs
+
+let exp_len (cs:ciphersuite) = l:size_nat{HKDF.expand_output_length_pred (hash_of_cs cs) l}
 
 val context_export:
     cs:ciphersuite
   -> ctx:encryption_context cs
   -> exp_ctx:exp_ctx_s cs // TODO replace this by a pre-condition that uses labeled_expand predicates
-  -> l:size_nat ->
-  Pure (lbytes l)
-    (requires HKDF.expand_output_length_pred (hash_of_cs cs) l)
-    (ensures fun _ -> True)
+  -> l:exp_len cs ->
+  Tot (lbytes l)
 
 val context_compute_nonce:
     cs:ciphersuite
@@ -413,6 +461,28 @@ val openBase:
   -> ct:AEAD.cipher (aead_of_cs cs) ->
   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
 
+val sendExportBase:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> exp_ctx:exp_ctx_s cs
+  -> l:exp_len cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> pt:AEAD.plain (aead_of_cs cs) ->
+  Tot (option (key_dh_public_s cs & lbytes l))
+
+val receiveExportBase:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> exp_ctx:exp_ctx_s cs
+  -> l:exp_len cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> ct:AEAD.cipher (aead_of_cs cs) ->
+  Tot (option (lbytes l))
+
 val setupPSKS:
     cs:ciphersuite
   -> skE:key_dh_secret_s cs
@@ -453,6 +523,32 @@ val openPSK:
   -> psk_id:psk_id_s cs ->
   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
 
+val sendExportPSK:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> exp_ctx:exp_ctx_s cs
+  -> l:exp_len cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> pt:AEAD.plain (aead_of_cs cs)
+  -> psk:psk_s cs
+  -> psk_id:psk_id_s cs ->
+  Tot (option (key_dh_public_s cs & lbytes l))
+
+val receiveExportPSK:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> exp_ctx:exp_ctx_s cs
+  -> l:exp_len cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> ct:AEAD.cipher (aead_of_cs cs)
+  -> psk:psk_s cs
+  -> psk_id:psk_id_s cs ->
+  Tot (option (lbytes l))
+
 val setupAuthS:
     cs:ciphersuite
   -> skE:key_dh_secret_s cs
@@ -488,6 +584,30 @@ val openAuth:
   -> ct:AEAD.cipher (aead_of_cs cs)
   -> pkS:DH.serialized_point (curve_of_cs cs) ->
   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
+
+val sendExportAuth:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> exp_ctx:exp_ctx_s cs
+  -> l:exp_len cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> pt:AEAD.plain (aead_of_cs cs)
+  -> skS:key_dh_secret_s cs ->
+  Tot (option (key_dh_public_s cs & lbytes l))
+
+val receiveExportAuth:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> exp_ctx:exp_ctx_s cs
+  -> l:exp_len cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> ct:AEAD.cipher (aead_of_cs cs)
+  -> pkS:DH.serialized_point (curve_of_cs cs) ->
+  Tot (option (lbytes l))
 
 val setupAuthPSKS:
     cs:ciphersuite
@@ -532,4 +652,32 @@ val openAuthPSK:
   -> psk_id:psk_id_s cs
   -> pkS:DH.serialized_point (curve_of_cs cs) ->
   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
+
+val sendExportAuthPSK:
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> info:info_s cs
+  -> exp_ctx:exp_ctx_s cs
+  -> l:exp_len cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> pt:AEAD.plain (aead_of_cs cs)
+  -> psk:psk_s cs
+  -> psk_id:psk_id_s cs
+  -> skS:key_dh_secret_s cs ->
+  Tot (option (key_dh_public_s cs & lbytes l))
+
+val receiveExportAuthPSK:
+    cs:ciphersuite
+  -> enc:key_dh_public_s cs
+  -> skR:key_dh_secret_s cs
+  -> info:info_s cs
+  -> exp_ctx:exp_ctx_s cs
+  -> l:exp_len cs
+  -> aad:AEAD.ad (aead_of_cs cs)
+  -> ct:AEAD.cipher (aead_of_cs cs)
+  -> psk:psk_s cs
+  -> psk_id:psk_id_s cs
+  -> pkS:DH.serialized_point (curve_of_cs cs) ->
+  Tot (option (lbytes l))
 

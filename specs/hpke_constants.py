@@ -5,7 +5,7 @@
 # Variable name will be prefixed with "label_" (see template variable)
 
 labels = [
-    ("rfcXXXX", "HPKE-07"),
+    ("version", "HPKE-v1"),
     "eae_prk",
     "KEM",
     "HPKE",
@@ -16,7 +16,10 @@ labels = [
     "key",
     "base_nonce",
     "exp",
-    "sec"
+    "sec",
+    "dkp_prk",
+    "candidate",
+    "sk"
 ]
 
 template = """// generated: "{label_content}"
