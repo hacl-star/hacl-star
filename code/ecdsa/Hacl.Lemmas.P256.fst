@@ -53,94 +53,6 @@ let lemma_equ_felem a b c d  a1 b1 c1 d1  =
   assert(c == c1);
   assert(d == d1)
 
-val lemma_equality_: 
-  a0: nat {a0 < pow2 64} -> b0: nat {b0 < pow2 64} -> 
-  a1: nat {a1 < pow2 64} -> b1: nat {b1 < pow2 64} ->
-  a2: nat {a2 < pow2 64} -> b2: nat {b2 < pow2 64} ->
-  a3: nat {a3 < pow2 64} -> b3: nat {b3 < pow2 64} ->
-  a4: nat {a4 < pow2 64} -> b4: nat {b4 < pow2 64} ->
-  a5: nat {a5 < pow2 64} -> b5: nat {b5 < pow2 64} ->
-  Lemma
-    (a0 = b0 && a1 = b1  && a2 = b2 && a3 = b3 && a4 = b4 && a5 = b5  <==> 
-	a0 + 
-	a1 * pow2 64 +
-	a2 * pow2 64 * pow2 64  + 
-	a3 * pow2 64 * pow2 64 * pow2 64 + 
-	a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-	a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  = 
-	
-	b0 + 
-	b1 * pow2 64  + 
-	b2 * pow2 64 * pow2 64  +
-	b3 * pow2 64 * pow2 64 * pow2 64  + 
-	b4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
-	b5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64) 
-
-
-let lemma_equality_ a0 b0 a1 b1 a2 b2 a3 b3 a4 b4 a5 b5 = 
-  assert
-    (a0 = b0 && a1 = b1  && a2 = b2 && a3 = b3 && a4 = b4 && a5 = b5 ==> 
-	a0 + 
-	a1 * pow2 64 +
-	a2 * pow2 64 * pow2 64  + 
-	a3 * pow2 64 * pow2 64 * pow2 64 + 
-	a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
-	a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  = 
-	
-	b0 + 
-	b1 * pow2 64  + 
-	b2 * pow2 64 * pow2 64  +
-	b3 * pow2 64 * pow2 64 * pow2 64  + 
-	b4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
-	b5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 );  
-
-    assert
-    (
-      	a0 + 
-	a1 * pow2 64 +
-	a2 * pow2 64 * pow2 64  + 
-	a3 * pow2 64 * pow2 64 * pow2 64 + 
-	a4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
-	a5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = 
-	
-	b0 + 
-	b1 * pow2 64  + 
-	b2 * pow2 64 * pow2 64  +
-	b3 * pow2 64 * pow2 64 * pow2 64  + 
-	b4 * pow2 64 * pow2 64 * pow2 64 * pow2 64  + 
-	b5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 ==>
-   
-	a0 = b0 && a1 = b1  && a2 = b2 && a3 = b3 && a4 = b4 && a5 = b5)
-
-
-
-val lemma_equality: #c: curve ->  a: felem_coordinate c -> b: felem_coordinate c -> 
-  Lemma (
-    match c with 
-    |P256 -> 
-      let (a_0, a_1, a_2, a_3) : felem_coordinate P256 = a in 
-      let (b_0, b_1, b_2, b_3) : felem_coordinate P256 = b in 
-      if (uint_v a_0 = uint_v b_0 && uint_v a_1 = uint_v b_1 && uint_v a_2 = uint_v b_2 && uint_v a_3 = uint_v b_3) 
-      then as_nat_coordinate #P256 a == as_nat_coordinate #P256 b 
-      else 
-	as_nat_coordinate #P256 a <> as_nat_coordinate #P256 b
-    |P384 -> 
-      let (a_0, a_1, a_2, a_3, a_4, a_5) : felem_coordinate P384 = a in 
-      let (b_0, b_1, b_2, b_3, b_4, b_5) : felem_coordinate P384 = b in 
-      if (uint_v a_0 = uint_v b_0 && uint_v a_1 = uint_v b_1 && uint_v a_2 = uint_v b_2 && uint_v a_3 = uint_v b_3 && uint_v a_4 = uint_v b_4 && uint_v a_5 = uint_v b_5 ) 
-	then as_nat_coordinate #P384 a == as_nat_coordinate #P384 b 
-      else 
-	as_nat_coordinate #P384 a <> as_nat_coordinate #P384 b
-  )
-
-let lemma_equality #c a b = 
-  match c with 
-    |P256 -> ()
-    |P384 -> 
-      let (a_0, a_1, a_2, a_3, a_4, a_5) : felem_coordinate P384 = a in 
-      let (b_0, b_1, b_2, b_3, b_4, b_5) : felem_coordinate P384 = b in 
-      lemma_equality_ (v a_0) (v b_0) (v a_1) (v b_1) (v a_2) (v b_2) (v a_3) (v b_3) (v a_4) (v b_4) (v a_5) (v b_5)
-      
 
 val lemma_eq_funct: #c: curve -> a: felem_seq c -> b: felem_seq c -> Lemma
    (requires (felem_seq_as_nat c a == felem_seq_as_nat c b))
@@ -192,18 +104,6 @@ let lemma_core_0 c a h =
     nat_from_intseq_le_lemma0 (Seq.slice k2 1 2)
   |P384 -> admit()
 
-(*
-val lemma_core_1: a:lbuffer uint64 (size 4) -> h:mem ->
-  Lemma (nat_from_bytes_le (uints_to_bytes_le (as_seq h a)) == as_nat h a)
-
-
-let lemma_core_1 a h= 
-  lemma_core_0 a h;
-  lemma_nat_from_to_intseq_le_preserves_value #U64 #SEC 4 (as_seq h a);
-  let n = nat_from_intseq_le (as_seq h a) in 
-  uints_to_bytes_le_nat_lemma #U64 #SEC 4 n;
-  lemma_nat_to_from_bytes_le_preserves_value #SEC (uints_to_bytes_le #U64 #SEC #4 (as_seq h a)) 32 (as_nat h a)
-*)
 
 
 (*This code is taken from Curve25519, written by Polubelova M *)
@@ -233,11 +133,11 @@ let lemma_cswap2_step bit p1 p2 =
   logxor_lemma p2 p1
 
 
+(* Used in ecdsa *)
 let mul_lemma_1 (a: nat) (c: nat) (b: pos) : Lemma (requires (a < c)) (ensures (a * b < c * b)) = ()
 
+(* Used in ecdsa *)
 let mul_lemma_ (a: nat) (b: nat) (c: nat) : Lemma (requires (a < c /\ b < c)) (ensures (a * b < c * c)) = ()
-
-let mul_lemma_2 (a: nat) (c: nat) (b: pos) : Lemma (requires (a <= c)) (ensures (a * b <= c * b)) = ()
 
 let mul_lemma_3 (a: nat) (c: nat) (b: nat) (d: nat) : Lemma (requires (a < c && b < d)) (ensures (a * b < c * d)) = ()
 
@@ -498,82 +398,6 @@ let modulo_distributivity_mult_last_two a b c d e f =
   lemma_mod_mul_distr_r (a * b * c) (d * e) f
 
 
-val lemma_multiplication_to_same_number: a: nat -> b: nat ->c: nat -> prime: pos ->  
-  Lemma 
-    (requires (a % prime = b % prime)) 
-    (ensures ((a * c) % prime = (b * c) % prime))
-
-let lemma_multiplication_to_same_number a b c prime = 
-  lemma_mod_mul_distr_l a c prime;
-  lemma_mod_mul_distr_l b c prime
-  
-
-open FStar.Math.Euclid 
-open FStar.Math.Fermat
-
-val lemma_division_is_multiplication:
-  t3: nat{exists (k: nat) . k * pow2 64 = t3} ->
-  prime: pos {is_prime prime /\ prime > 3 /\ prime > pow2 64} -> 
-  Lemma (t3 * modp_inv2_prime (pow2 64) prime  % prime = (t3 / pow2 64) % prime)
-
-let lemma_division_is_multiplication t3 prime =  
-  let remainder = t3 / pow2 64 in 
-  FStar.Math.Fermat.fermat_alt prime (pow2 64);
-  assert(pow (pow2 64) (prime - 1) % prime == 1);
-    let a = pow2 64 in 
-    let b = prime - 1 in 
-    let n = prime in 
-    lemma_pow_mod_n_is_fpow n a b;
-  assume (exp #prime (pow2 64) (prime - 1) == (modp_inv2_prime (pow2 64) prime * pow2 64) % prime);
-  let k =  modp_inv2_prime (pow2 64) prime * pow2 64 in 
-  modulo_distributivity_mult remainder k prime;
-  lemma_mod_twice remainder prime;
-  assert_by_tactic (t3 / pow2 64 * (modp_inv2_prime (pow2 64) prime * pow2 64) == t3 / pow2 64 * pow2 64 * modp_inv2_prime (pow2 64) prime) canon
-
-
-val lemma_reduce_mod_by_sub3: #c: curve -> prime: nat {(prime + 1) % pow2 64 == 0} ->
-  t: nat -> Lemma ((t + (t % pow2 64) * prime) % pow2 64 == 0)
-
-let lemma_reduce_mod_by_sub3 #c prime t = 
-  let t_ = (t + (t % pow2 64) * prime) % pow2 64 in 
-  lemma_mod_add_distr t ((t % pow2 64) * prime) (pow2 64);
-  lemma_mod_mul_distr_l t prime (pow2 64);
-    assert(t_ == (t + (t * prime) % pow2 64) % pow2 64);
-  lemma_mod_add_distr t (t * prime) (pow2 64); 
-    assume (t * (prime + 1) % pow2 64 == 0)
-
-
-(* Only for primes with prime + 1 % pow2 64 == 0 *)
-val mult_one_round: #c: curve -> 
-  t: nat -> 
-  co: nat {t % getPrime c == co % getPrime c} -> 
-  Lemma (
-    (getPrime c + 1) % pow2 64 == 0 ==> 
-    (let prime = getPrime c in 
-    let result = (t + (t % pow2 64) * prime) / pow2 64 % prime in 
-    result == (co * modp_inv2 #c (pow2 64)) % prime))
-
-let mult_one_round #c t co = 
-  if (getPrime c + 1) % pow2 64 = 0 then 
-    begin
-      let prime = getPrime c in 
-      let t1 = t % pow2 64 in 
-      let t2 = t1 * prime in 
-      let t3 = t + t2 in
-	modulo_addition_lemma t prime (t % pow2 64);
-	assert(t3 % prime = co % prime); 
-      lemma_div_mod t3 (pow2 64);
-      lemma_reduce_mod_by_sub3 #c (getPrime c)  t;
-      assert(t3 % pow2 64 == 0);
-      assert(let rem = t3/ pow2 64 in rem * pow2 64 = t3);
-      assert(exists (k: nat). k * pow2 64 = t3);
-      assume (is_prime (getPrime c) /\ getPrime c > pow2 64);
-      lemma_division_is_multiplication t3 prime;
-      lemma_multiplication_to_same_number t3 co (modp_inv2 #c (pow2 64)) prime
-   end
-  else ()
-
-
 val lemma_reduce_mod_ecdsa_prime:
   prime : nat {prime = 115792089210356248762697446949407573529996955224135760342422259061068512044369} ->
   t: nat -> k0: nat {k0 = min_one_prime (pow2 64) (- prime)} ->  Lemma (
@@ -593,6 +417,7 @@ let lemma_reduce_mod_ecdsa_prime prime t k0 =
   lemma_mod_add_distr t (-t) (pow2 64)
 
 
+(*  Used in ECDSA.MM*)
 val mult_one_round_ecdsa_prime: t: nat -> 
   prime: pos {prime = 115792089210356248762697446949407573529996955224135760342422259061068512044369} -> 
   co: nat {t % prime == co % prime} -> k0: nat {k0 = min_one_prime (pow2 64) (- prime)} -> Lemma (
@@ -611,56 +436,18 @@ let mult_one_round_ecdsa_prime t prime co k0 =
     lemma_division_is_multiplication t3 prime;
     lemma_multiplication_to_same_number t3 co (modp_inv2_prime (pow2 64) prime) prime
 
-(*
-val lemma_decrease_pow: a: nat -> Lemma (
-  (a * modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2 (pow2 64)) % prime256 == 
-  (a * modp_inv2 (pow2 256)) % prime256) 
 
-let lemma_decrease_pow a = 
-  assert_norm(modp_inv2 (pow2 64) = 6277101733925179126845168871924920046849447032244165148672);
-  assert_norm(modp_inv2 (pow2 256) = 115792089183396302114378112356516095823261736990586219612555396166510339686400 );
-  assert_norm((modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2(pow2 64)) % prime256  = (modp_inv2 (pow2 256)) % prime256);
-  lemma_mod_mul_distr_r a (modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2 (pow2 64) * modp_inv2(pow2 64)) prime256;
-  lemma_mod_mul_distr_r a (modp_inv2 (pow2 256)) prime256
-*)
-
+(* to replace with calc?  *)
 val lemma_brackets : a: int -> b: int -> c: int -> Lemma (a * b * c = a * (b * c))
 
 let lemma_brackets a b c = ()
 
-val lemma_brackets4 : a: int -> b: int -> c: int -> d: nat -> Lemma (a * b * c * d = a * (b * c * d))
 
-let lemma_brackets4 a b c d = ()
-
-val lemma_brackets5_0 : a: int -> b: int -> c: int -> d: nat ->e: nat ->  Lemma (a * b * c * d * e = a * (b * c * d * e))
-
-let lemma_brackets5_0 a b c d e= ()
-
-
+(* To replace with calc *)
 val lemma_twice_brackets: a: int -> b: int -> c: int -> d: int -> e: int -> f: int -> h: int-> Lemma (
   (a * b * c) * (d * e * f) * h = a * b * c * d * e * f * h)
 
 let lemma_twice_brackets a b c d e f h = ()
-
-
-val lemma_mul_nat2: a: nat -> b: nat -> Lemma (a * b >= 0)
-
-let lemma_mul_nat2 a b = ()
-
-
-val lemma_mul_nat: a:nat -> b:nat -> c: nat -> Lemma (a * b * c >= 0)
-
-let lemma_mul_nat a b c = ()
-
-
-val lemma_mul_nat4: a:nat -> b:nat -> c: nat -> d: nat -> Lemma (a * b * c * d >= 0)
-
-let lemma_mul_nat4 a b c d = ()
-
-
-val lemma_mul_nat5: a: nat -> b: nat -> c: nat -> d: nat -> e: nat -> Lemma (a * b * c * d * e >= 0)
-
-let lemma_mul_nat5 a b c d e = ()
 
 
 val modulo_distributivity_mult2: a: int -> b: int -> c: int -> d: pos -> Lemma (((a % d) * (b % d) * c) % d = (a * b * c) % d)
