@@ -19,11 +19,16 @@ let is_valid_kem = function
   | DH.DH_P256,       Hash.SHA2_256 -> true
   | _,_ -> false
 
+noeq type aead =
+  | Seal: alg:AEAD.alg -> aead
+  | ExportOnly
+
 let is_valid_aead = function
 // TODO AES disabled due to Vale build
 //  | AEAD.AES128_GCM
 //  | AEAD.AES256_GCM
-  | AEAD.CHACHA20_POLY1305 -> true
+  | Seal AEAD.CHACHA20_POLY1305 -> true
+  | ExportOnly -> true
   | _ -> false
 
 let is_valid_hash = function
@@ -37,11 +42,11 @@ let hash_algorithm = a:Hash.algorithm{is_valid_hash a}
 //let aead_algorithm = a:AEAD.alg{is_valid_aead a}
 //let dh_algorithm = a:DH.algorithm{is_valid_dh a}
 
-let is_valid_ciphersuite (cs:DH.algorithm & hash_algorithm & AEAD.alg & Hash.algorithm) : bool =
+let is_valid_ciphersuite (cs:DH.algorithm & hash_algorithm & aead & Hash.algorithm) : bool =
   let kem_dh, kem_hash, aead, hash = cs in
   (is_valid_kem (kem_dh, kem_hash)) && (is_valid_aead aead) && (is_valid_hash hash)
 
-let ciphersuite = cs:(DH.algorithm & hash_algorithm & AEAD.alg & Hash.algorithm){is_valid_ciphersuite cs}
+let ciphersuite = cs:(DH.algorithm & hash_algorithm & aead & Hash.algorithm){is_valid_ciphersuite cs}
 
 // TODO rename to dh_of_cs or kemdh or dhkem
 let curve_of_cs (cs:ciphersuite) : DH.algorithm =
@@ -50,7 +55,7 @@ let curve_of_cs (cs:ciphersuite) : DH.algorithm =
 let kem_hash_of_cs (cs:ciphersuite) : hash_algorithm =
   let (_,h,_,_) = cs in h
 
-let aead_of_cs (cs:ciphersuite) : AEAD.alg =
+let aead_of_cs (cs:ciphersuite) : aead =
   let (_,_,a,_) = cs in a
 
 let hash_of_cs (cs:ciphersuite) : hash_algorithm =
@@ -232,18 +237,31 @@ let label_sk : lbytes size_label_sk = createL label_sk_list
 
 
 
+let is_valid_not_export_only_ciphersuite (cs:ciphersuite) : bool =
+  match aead_of_cs cs with
+  | ExportOnly -> false
+  | Seal _ -> true
+
+let ciphersuite_not_export_only = cs:ciphersuite{is_valid_not_export_only_ciphersuite cs}
+
+let aead_alg_of (cs:ciphersuite_not_export_only) = match aead_of_cs cs with
+  | Seal alg -> alg
+
+
+///
 /// Constants sizes
+///
 
 inline_for_extraction
-let size_aead_nonce (cs:ciphersuite): (n:size_nat{AEAD.iv_length (aead_of_cs cs) n}) =
+let size_aead_nonce (cs:ciphersuite_not_export_only): (n:size_nat{AEAD.iv_length (aead_alg_of cs) n}) =
   assert_norm (8 * 12 <= pow2 64 - 1);
   12
 
 inline_for_extraction
-let size_aead_key (cs:ciphersuite): size_nat = AEAD.key_length (aead_of_cs cs)
+let size_aead_key (cs:ciphersuite_not_export_only): size_nat = AEAD.key_length (aead_alg_of cs)
 
 inline_for_extraction
-let size_aead_tag (cs:ciphersuite): size_nat = AEAD.tag_length (aead_of_cs cs)
+let size_aead_tag (cs:ciphersuite_not_export_only): size_nat = AEAD.tag_length (aead_alg_of cs)
 
 inline_for_extraction
 let size_dh_key (cs:ciphersuite): size_nat = DH.size_key (curve_of_cs cs)
@@ -264,7 +282,7 @@ let size_kem_key (cs:ciphersuite): size_nat = Hash.size_hash (kem_hash_of_cs cs)
 inline_for_extraction
 let size_kdf (cs:ciphersuite): size_nat = Hash.size_hash (hash_of_cs cs)
 
-let max_seq (cs:ciphersuite): nat = pow2 (8*(size_aead_nonce cs)) - 1
+let max_seq (cs:ciphersuite_not_export_only): nat = pow2 (8*(size_aead_nonce cs)) - 1
 
 inline_for_extraction
 let size_suite_id_kem: size_nat = size_label_KEM + 2
@@ -345,9 +363,9 @@ let max_length_dkp_ikm (a:hash_algorithm) = labeled_extract_max_length_ikm a siz
 type key_dh_public_s (cs:ciphersuite) = lbytes (size_dh_public cs)
 type key_dh_secret_s (cs:ciphersuite) = lbytes (size_dh_key cs)
 type key_kem_s (cs:ciphersuite) = lbytes (size_kem_key cs) // TODO This is true for the current DHKEM. It would be nice to have it modular depending on the KEM.
-type key_aead_s (cs:ciphersuite) = lbytes (size_aead_key cs)
-type nonce_aead_s (cs:ciphersuite) = lbytes (size_aead_nonce cs)
-type seq_aead_s (cs:ciphersuite) = n:nat{n <= max_seq cs}
+type key_aead_s (cs:ciphersuite_not_export_only) = lbytes (size_aead_key cs)
+type nonce_aead_s (cs:ciphersuite_not_export_only) = lbytes (size_aead_nonce cs)
+type seq_aead_s (cs:ciphersuite_not_export_only) = n:nat{n <= max_seq cs}
 type exporter_secret_s (cs:ciphersuite) = lbytes (size_kdf cs)
 (* let max_length_psk: size_nat = 65535 *)
 (* let max_length_psk_id: size_nat = 65535 *)
@@ -387,13 +405,35 @@ val derive_key_pair:
   Tot (option (key_dh_secret_s cs & key_dh_public_s cs))
 // TODO annotate this saying it does not return None for Curve25519.
 
+
+(* noeq type encryption_context_full (cs:ciphersuite_not_export_only) =
+  | FullContext: key:key_aead_s cs -> base_nonce:nonce_aead_s cs -> seq:seq_aead_s cs -> exp:exporter_secret_s cs -> encryption_context_full cs *)
+
+let encryption_context_full (cs:ciphersuite_not_export_only) = key_aead_s cs & nonce_aead_s cs & seq_aead_s cs & exporter_secret_s cs
+
+let ciphersuite_export_only = cs:ciphersuite{not (is_valid_not_export_only_ciphersuite cs)}
+
+let encryption_context_export_only (cs:ciphersuite_export_only) = exporter_secret_s cs
+
+(* noeq type encryption_context_export_only (cs:ciphersuite_export_only) =
+  | ExportOnlyContext: exp:exporter_secret_s cs -> encryption_context_export_only cs *)
+
 // TODO can we hide the contents of encryption_context, i.e. not
 //      expose them in this fsti, to avoid usage which is not
 //      conform with the spec?
 //      -> just declare a Type0 and only detail it in the fst, as a constructed type.
 // TODO encode that key and nonce will be all-zero if AEAD is Export-Only
 // TODO maybe rename to _state (because it is not a context that gets hashed into smth)
-let encryption_context (cs:ciphersuite) = key_aead_s cs & nonce_aead_s cs & seq_aead_s cs & exporter_secret_s cs
+// TODO This name is bad because it is also used for context_export
+(* let encryption_context (cs:ciphersuite) = *)
+(*   if is_valid_not_export_only_ciphersuite cs then FullContext (key_aead_s cs) (nonce_aead_s cs) (seq_aead_s cs) (exporter_secret_s cs) *)
+(*   else ExportOnlyContext (exporter_secret_s cs) *)
+(* let encryption_context (cs:ciphersuite) = *)
+(*   if is_valid_not_export_only_ciphersuite cs then (key_aead_s cs & nonce_aead_s cs & seq_aead_s cs & exporter_secret_s cs) *)
+(*   else exporter_secret_s cs *)
+let encryption_context (cs:ciphersuite) =
+  if is_valid_not_export_only_ciphersuite cs then encryption_context_full cs
+  else encryption_context_export_only cs
 
 let exp_len (cs:ciphersuite) = l:size_nat{HKDF.expand_output_length_pred (hash_of_cs cs) l}
 
@@ -405,29 +445,29 @@ val context_export:
   Tot (lbytes l)
 
 val context_compute_nonce:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> ctx:encryption_context cs
   -> seq:seq_aead_s cs ->
   Tot (nonce_aead_s cs)
 
 val context_increment_seq:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> ctx:encryption_context cs ->
   Tot (option (encryption_context cs))
 
 val context_seal:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> ctx:encryption_context cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> pt:AEAD.plain (aead_of_cs cs) ->
-  Tot (option (encryption_context cs & AEAD.cipher (aead_of_cs cs)))
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> pt:AEAD.plain (aead_alg_of cs) ->
+  Tot (option (encryption_context cs & AEAD.cipher (aead_alg_of cs)))
 
 val context_open:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> ctx:encryption_context cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> ct:AEAD.cipher (aead_of_cs cs) ->
-  Tot (option (encryption_context cs & AEAD.plain (aead_of_cs cs)))
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> ct:AEAD.cipher (aead_alg_of cs) ->
+  Tot (option (encryption_context cs & AEAD.plain (aead_alg_of cs)))
 
 val setupBaseS:
     cs:ciphersuite
@@ -444,22 +484,22 @@ val setupBaseR:
   Tot (option (encryption_context cs))
 
 val sealBase:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> skE:key_dh_secret_s cs
   -> pkR:DH.serialized_point (curve_of_cs cs)
   -> info:info_s cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> pt:AEAD.plain (aead_of_cs cs) ->
-  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt))
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> pt:AEAD.plain (aead_alg_of cs) ->
+  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_alg_of cs) pt))
 
 val openBase:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> enc:key_dh_public_s cs
   -> skR:key_dh_secret_s cs
   -> info:info_s cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> ct:AEAD.cipher (aead_of_cs cs) ->
-  Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> ct:AEAD.cipher (aead_alg_of cs) ->
+  Tot (option (AEAD.decrypted #(aead_alg_of cs) ct))
 
 val sendExportBase:
     cs:ciphersuite
@@ -467,9 +507,7 @@ val sendExportBase:
   -> pkR:DH.serialized_point (curve_of_cs cs)
   -> info:info_s cs
   -> exp_ctx:exp_ctx_s cs
-  -> l:exp_len cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> pt:AEAD.plain (aead_of_cs cs) ->
+  -> l:exp_len cs ->
   Tot (option (key_dh_public_s cs & lbytes l))
 
 val receiveExportBase:
@@ -478,9 +516,7 @@ val receiveExportBase:
   -> skR:key_dh_secret_s cs
   -> info:info_s cs
   -> exp_ctx:exp_ctx_s cs
-  -> l:exp_len cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> ct:AEAD.cipher (aead_of_cs cs) ->
+  -> l:exp_len cs ->
   Tot (option (lbytes l))
 
 val setupPSKS:
@@ -502,26 +538,26 @@ val setupPSKR:
   Tot (option (encryption_context cs))
 
 val sealPSK:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> skE:key_dh_secret_s cs
   -> pkR:DH.serialized_point (curve_of_cs cs)
   -> info:info_s cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> pt:AEAD.plain (aead_of_cs cs)
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> pt:AEAD.plain (aead_alg_of cs)
   -> psk:psk_s cs
   -> psk_id:psk_id_s cs ->
-  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt))
+  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_alg_of cs) pt))
 
 val openPSK:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> enc:key_dh_public_s cs
   -> skR:key_dh_secret_s cs
   -> info:info_s cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> ct:AEAD.cipher (aead_of_cs cs)
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> ct:AEAD.cipher (aead_alg_of cs)
   -> psk:psk_s cs
   -> psk_id:psk_id_s cs ->
-  Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
+  Tot (option (AEAD.decrypted #(aead_alg_of cs) ct))
 
 val sendExportPSK:
     cs:ciphersuite
@@ -530,8 +566,6 @@ val sendExportPSK:
   -> info:info_s cs
   -> exp_ctx:exp_ctx_s cs
   -> l:exp_len cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> pt:AEAD.plain (aead_of_cs cs)
   -> psk:psk_s cs
   -> psk_id:psk_id_s cs ->
   Tot (option (key_dh_public_s cs & lbytes l))
@@ -543,8 +577,6 @@ val receiveExportPSK:
   -> info:info_s cs
   -> exp_ctx:exp_ctx_s cs
   -> l:exp_len cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> ct:AEAD.cipher (aead_of_cs cs)
   -> psk:psk_s cs
   -> psk_id:psk_id_s cs ->
   Tot (option (lbytes l))
@@ -566,24 +598,24 @@ val setupAuthR:
   Tot (option (encryption_context cs))
 
 val sealAuth:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> skE:key_dh_secret_s cs
   -> pkR:DH.serialized_point (curve_of_cs cs)
   -> info:info_s cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> pt:AEAD.plain (aead_of_cs cs)
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> pt:AEAD.plain (aead_alg_of cs)
   -> skS:key_dh_secret_s cs ->
-  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt))
+  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_alg_of cs) pt))
 
 val openAuth:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> enc:key_dh_public_s cs
   -> skR:key_dh_secret_s cs
   -> info:info_s cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> ct:AEAD.cipher (aead_of_cs cs)
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> ct:AEAD.cipher (aead_alg_of cs)
   -> pkS:DH.serialized_point (curve_of_cs cs) ->
-  Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
+  Tot (option (AEAD.decrypted #(aead_alg_of cs) ct))
 
 val sendExportAuth:
     cs:ciphersuite
@@ -592,8 +624,6 @@ val sendExportAuth:
   -> info:info_s cs
   -> exp_ctx:exp_ctx_s cs
   -> l:exp_len cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> pt:AEAD.plain (aead_of_cs cs)
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_dh_public_s cs & lbytes l))
 
@@ -604,8 +634,6 @@ val receiveExportAuth:
   -> info:info_s cs
   -> exp_ctx:exp_ctx_s cs
   -> l:exp_len cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> ct:AEAD.cipher (aead_of_cs cs)
   -> pkS:DH.serialized_point (curve_of_cs cs) ->
   Tot (option (lbytes l))
 
@@ -630,28 +658,28 @@ val setupAuthPSKR:
   Tot (option (encryption_context cs))
 
 val sealAuthPSK:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> skE:key_dh_secret_s cs
   -> pkR:DH.serialized_point (curve_of_cs cs)
   -> info:info_s cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> pt:AEAD.plain (aead_of_cs cs)
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> pt:AEAD.plain (aead_alg_of cs)
   -> psk:psk_s cs
   -> psk_id:psk_id_s cs
   -> skS:key_dh_secret_s cs ->
-  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_of_cs cs) pt))
+  Tot (option (key_dh_public_s cs & AEAD.encrypted #(aead_alg_of cs) pt))
 
 val openAuthPSK:
-    cs:ciphersuite
+    cs:ciphersuite_not_export_only
   -> enc:key_dh_public_s cs
   -> skR:key_dh_secret_s cs
   -> info:info_s cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> ct:AEAD.cipher (aead_of_cs cs)
+  -> aad:AEAD.ad (aead_alg_of cs)
+  -> ct:AEAD.cipher (aead_alg_of cs)
   -> psk:psk_s cs
   -> psk_id:psk_id_s cs
   -> pkS:DH.serialized_point (curve_of_cs cs) ->
-  Tot (option (AEAD.decrypted #(aead_of_cs cs) ct))
+  Tot (option (AEAD.decrypted #(aead_alg_of cs) ct))
 
 val sendExportAuthPSK:
     cs:ciphersuite
@@ -660,8 +688,6 @@ val sendExportAuthPSK:
   -> info:info_s cs
   -> exp_ctx:exp_ctx_s cs
   -> l:exp_len cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> pt:AEAD.plain (aead_of_cs cs)
   -> psk:psk_s cs
   -> psk_id:psk_id_s cs
   -> skS:key_dh_secret_s cs ->
@@ -674,8 +700,6 @@ val receiveExportAuthPSK:
   -> info:info_s cs
   -> exp_ctx:exp_ctx_s cs
   -> l:exp_len cs
-  -> aad:AEAD.ad (aead_of_cs cs)
-  -> ct:AEAD.cipher (aead_of_cs cs)
   -> psk:psk_s cs
   -> psk_id:psk_id_s cs
   -> pkS:DH.serialized_point (curve_of_cs cs) ->

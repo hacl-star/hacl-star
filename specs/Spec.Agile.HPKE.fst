@@ -40,9 +40,10 @@ val id_aead: cs:ciphersuite -> Tot (lbytes 2)
 let id_aead cs = let _, _, a, _ = cs in
   match a with
 // TODO AES disabled due to Vale build
-//  | AEAD.AES128_GCM -> create 1 (u8 0) @| create 1 (u8 1)
-//  | AEAD.AES256_GCM -> create 1 (u8 0) @| create 1 (u8 2)
-  | AEAD.CHACHA20_POLY1305 -> create 1 (u8 0) @| create 1 (u8 3)
+//  | Seal AEAD.AES128_GCM -> create 1 (u8 0) @| create 1 (u8 1)
+//  | Seal AEAD.AES256_GCM -> create 1 (u8 0) @| create 1 (u8 2)
+  | Seal AEAD.CHACHA20_POLY1305 -> create 1 (u8 0) @| create 1 (u8 3)
+  | ExportOnly -> create 1 (u8 255) @| create 1 (u8 255)
 
 val suite_id_kem: cs:ciphersuite -> Tot (lbytes size_suite_id_kem)
 let suite_id_kem cs =
@@ -149,6 +150,9 @@ let derive_key_pair cs ikm =
     let dkp_prk = labeled_extract (kem_hash_of_cs cs) (suite_id_kem cs) lbytes_empty label_dkp_prk ikm in
     dkp_nist_p cs dkp_prk (u8 0)
 
+let prepare_dh cs dh = match (curve_of_cs cs) with
+  | DH.DH_Curve25519 -> serialize_public_key cs dh
+  | DH.DH_P256 -> sub dh 0 32
 
 
 val encap:
@@ -157,7 +161,7 @@ val encap:
   -> pkR:DH.serialized_point (curve_of_cs cs) ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 2 --quake 10/1"
 let encap cs skE pkR =
   match DH.secret_to_public (curve_of_cs cs) skE with
   | None -> None
@@ -168,7 +172,7 @@ let encap cs skE pkR =
     | Some dh ->
       let pkRm = serialize_public_key cs pkR in
       let kem_context:lbytes (2*size_dh_public cs) = concat enc pkRm in
-      let dhm = serialize_public_key cs dh in
+      let dhm = prepare_dh cs dh in
       assert (Seq.length enc + Seq.length pkRm = Seq.length kem_context);
       assert (extract_and_expand_ctx_pred cs (Seq.length enc + Seq.length pkRm));
       let shared_secret:key_kem_s cs = extract_and_expand cs dhm kem_context in
@@ -181,7 +185,7 @@ val decap:
   -> skR: key_dh_secret_s cs ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 200 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 500 --fuel 0 --ifuel 4 --quake 10/1"
 let decap cs enc skR =
   let pkE = deserialize_public_key cs enc in
   match DH.dh (curve_of_cs cs) skR pkE with
@@ -192,7 +196,7 @@ let decap cs enc skR =
     | Some pkR ->
       let pkRm = serialize_public_key cs pkR in
       let kem_context:lbytes (2*size_dh_public cs) = concat enc pkRm in
-      let dhm = serialize_public_key cs dh in
+      let dhm = prepare_dh cs dh in
       assert (Seq.length enc + Seq.length pkRm = Seq.length kem_context);
       assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
       let shared_secret = extract_and_expand cs dhm kem_context in
@@ -207,7 +211,7 @@ val auth_encap:
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 400 --fuel 0 --ifuel 2 --quake 10/1"
+#set-options "--z3rlimit 800 --fuel 0 --ifuel 4 --quake 10/1"
 let auth_encap cs skE pkR skS =
   match DH.secret_to_public (curve_of_cs cs) skE with
   | None -> None
@@ -218,9 +222,10 @@ let auth_encap cs skE pkR skS =
       match DH.dh (curve_of_cs cs) skS pkR with
       | None -> None
       | Some ss ->
-        let esm = serialize_public_key cs es in
-        let ssm = serialize_public_key cs ss in
-        let dh = concat esm ssm in
+        let esm = prepare_dh cs es in
+        let ssm = prepare_dh cs ss in
+        // TODO Something is wrong here
+        let dh = concat #uint8 #32 #32 esm ssm in
         let enc = serialize_public_key cs pkE in
         match DH.secret_to_public (curve_of_cs cs) skS with
         | None -> None
@@ -230,7 +235,7 @@ let auth_encap cs skE pkR skS =
           let kem_context:lbytes (3*size_dh_public cs) = concat enc (concat pkRm pkSm) in
           assert (Seq.length enc + Seq.length pkRm + Seq.length pkSm = Seq.length kem_context);
           assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
-          assert (Seq.length dh = 2*size_dh_public cs);
+          assert (Seq.length dh = 64);
           assert (extract_and_expand_dh_pred cs (Seq.length dh));
           let shared_secret = extract_and_expand cs dh kem_context in
           Some (shared_secret, enc)
@@ -243,7 +248,7 @@ val auth_decap:
   -> pkS: DH.serialized_point (curve_of_cs cs) ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 4000 --fuel 0 --ifuel 4 --quake 10/1"
+#set-options "--z3rlimit 8000 --fuel 0 --ifuel 4 --quake 10/1"
 let auth_decap cs enc skR pkS =
   let pkE = deserialize_public_key cs enc in
   match DH.dh (curve_of_cs cs) skR pkE with
@@ -252,9 +257,9 @@ let auth_decap cs enc skR pkS =
     match DH.dh (curve_of_cs cs) skR pkS with
     | None -> None
     | Some ss ->
-      let esm = serialize_public_key cs es in
-      let ssm = serialize_public_key cs ss in
-      let dh = concat esm ssm in
+      let esm = prepare_dh cs es in
+      let ssm = prepare_dh cs ss in
+      let dh = concat #uint8 #32 #32 esm ssm in
       match DH.secret_to_public (curve_of_cs cs) skR with
       | None -> None
       | Some pkR ->
@@ -264,15 +269,13 @@ let auth_decap cs enc skR pkS =
         assert (Seq.length enc + Seq.length pkRm + Seq.length pkSm = Seq.length kem_context);
         assert (labeled_expand_info_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + Seq.length label_shared_secret + Seq.length kem_context));
 //        assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
-        assert (Seq.length dh = 2*size_dh_public cs);
+        assert (Seq.length dh = 64);
         assert (labeled_extract_ikm_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + Seq.length label_eae_prk + Seq.length dh));
         let shared_secret = extract_and_expand cs dh kem_context in
         Some (shared_secret)
 #reset-options
 
 
-//let default_psk (cs:ciphersuite):psk_s cs  = create (size_kdf cs) (u8 0)
-//let default_psk_id (cs:ciphersuite):psk_id_s cs = create (size_kdf cs) (u8 0)
 let default_psk = lbytes_empty
 let default_psk_id = lbytes_empty
 
@@ -351,25 +354,42 @@ let key_schedule cs m shared_secret info opsk =
   let info_hash = labeled_extract (hash_of_cs cs) (suite_id_hpke cs) lbytes_empty label_info_hash info in
   let context = build_context cs m psk_id_hash info_hash in
   let secret = labeled_extract (hash_of_cs cs) (suite_id_hpke cs) shared_secret label_secret psk in
-  (* TODO if AEAD is Export-Only, then skip computation of key and base_nonce *)
-  let key = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_key context (size_aead_key cs) in
-  let base_nonce = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_base_nonce context (size_aead_nonce cs) in
-  let exporter_secret = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_exp context (size_kdf cs) in
-  (key, base_nonce, 0, exporter_secret)
 
-let key_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
+  let exporter_secret = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_exp context (size_kdf cs) in
+
+  if is_valid_not_export_only_ciphersuite cs then (
+    assert (encryption_context cs == encryption_context_full cs);
+    let key = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_key context (size_aead_key cs) in
+    let base_nonce = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_base_nonce context (size_aead_nonce cs) in
+    (key, base_nonce, 0, exporter_secret)
+
+  ) else (
+    (* if AEAD is Export-Only, then skip computation of key and base_nonce *)
+    assert (encryption_context cs == encryption_context_export_only cs);
+    assert (encryption_context cs == lbytes (size_kdf cs));
+    exporter_secret)
+
+let key_of_ctx (cs:ciphersuite_not_export_only) (ctx:encryption_context cs) =
+  assert (encryption_context cs == encryption_context_full cs);
+  assert (encryption_context cs == key_aead_s cs & nonce_aead_s cs & seq_aead_s cs & exporter_secret_s cs);
   let key, _, _, _ = ctx in key
 
-let base_nonce_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
+let base_nonce_of_ctx (cs:ciphersuite_not_export_only) (ctx:encryption_context cs) =
+  assert (encryption_context cs == encryption_context_full cs);
   let _, base_nonce, _, _ = ctx in base_nonce
 
-let seq_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
+let seq_of_ctx (cs:ciphersuite_not_export_only) (ctx:encryption_context cs) =
+  assert (encryption_context cs == encryption_context_full cs);
   let _, _, seq, _ = ctx in seq
 
 let exp_sec_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
-  let _, _, _, exp_sec = ctx in exp_sec
+  if is_valid_not_export_only_ciphersuite cs then
+    let _, _, _, exp_sec = ctx in exp_sec
+  else
+    ctx
 
-let set_seq (cs:ciphersuite) (ctx:encryption_context cs) (seq:seq_aead_s cs) =
+let set_seq (cs:ciphersuite_not_export_only) (ctx:encryption_context cs) (seq:seq_aead_s cs) =
+  assert (encryption_context cs == encryption_context_full cs);
   let key, base_nonce, _, exp_sec = ctx in
   (key, base_nonce, seq, exp_sec)
 
@@ -389,7 +409,8 @@ let context_compute_nonce cs ctx seq =
   Spec.Loops.seq_map2 logxor enc_seq base_nonce
 
 let context_increment_seq cs ctx =
-  let key, base_nonce, seq, exporter_secret = ctx in
+  let seq = seq_of_ctx ctx in
+//  let key, base_nonce, seq, exporter_secret = ctx in
   if seq = max_seq cs then None else // TODO this should be a pre-condition. “no need for dynamic checks in the Pure world”
   Some (set_seq cs ctx (seq + 1))
 
@@ -449,13 +470,13 @@ let openBase cs enc skR info aad ct =
     | None -> None
     | Some (_, pt) -> Some pt
 
-let sendExportBase cs skE pkR info exp_ctx l aad pt =
+let sendExportBase cs skE pkR info exp_ctx l =
   match setupBaseS cs skE pkR info with
   | None -> None
   | Some (enc, ctx) ->
     Some (enc, context_export cs ctx exp_ctx l)
 
-let receiveExportBase cs enc skR info exp_ctx l aad ct =
+let receiveExportBase cs enc skR info exp_ctx l =
   match setupBaseR cs enc skR info with
   | None -> None
   | Some ctx ->
@@ -497,13 +518,13 @@ let openPSK cs enc skR info aad ct psk psk_id =
     | None -> None
     | Some (_, pt) -> Some pt
 
-let sendExportPSK cs skE pkR info exp_ctx l aad pt psk psk_id =
+let sendExportPSK cs skE pkR info exp_ctx l psk psk_id =
   match setupPSKS cs skE pkR info psk psk_id with
   | None -> None
   | Some (enc, ctx) ->
     Some (enc, context_export cs ctx exp_ctx l)
 
-let receiveExportPSK cs enc skR info exp_ctx l aad ct psk psk_id =
+let receiveExportPSK cs enc skR info exp_ctx l psk psk_id =
   match setupPSKR cs enc skR info psk psk_id with
   | None -> None
   | Some ctx ->
@@ -544,13 +565,13 @@ let openAuth cs enc skR info aad ct pkS =
     | None -> None
     | Some (_, pt) -> Some pt
 
-let sendExportAuth cs skE pkR info exp_ctx l aad pt skS =
+let sendExportAuth cs skE pkR info exp_ctx l skS =
   match setupAuthS cs skE pkR info skS with
   | None -> None
   | Some (enc, ctx) ->
     Some (enc, context_export cs ctx exp_ctx l)
 
-let receiveExportAuth cs enc skR info exp_ctx l aad ct pkS =
+let receiveExportAuth cs enc skR info exp_ctx l pkS =
   match setupAuthR cs enc skR info pkS with
   | None -> None
   | Some ctx ->
@@ -591,13 +612,13 @@ let openAuthPSK cs enc skR info aad ct psk psk_id pkS =
     | None -> None
     | Some (_, pt) -> Some pt
 
-let sendExportAuthPSK cs skE pkR info exp_ctx l aad pt psk psk_id skS =
+let sendExportAuthPSK cs skE pkR info exp_ctx l psk psk_id skS =
   match setupAuthPSKS cs skE pkR info psk psk_id skS with
   | None -> None
   | Some (enc, ctx) ->
     Some (enc, context_export cs ctx exp_ctx l)
 
-let receiveExportAuthPSK cs enc skR info exp_ctx l aad ct psk psk_id pkS =
+let receiveExportAuthPSK cs enc skR info exp_ctx l psk psk_id pkS =
   match setupAuthPSKR cs enc skR info psk psk_id pkS with
   | None -> None
   | Some ctx ->
