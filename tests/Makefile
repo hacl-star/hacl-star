@@ -4,6 +4,11 @@
 # export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1d/include/"
 # export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib"
 
+ifeq (,$(OPENSSL_HOME))
+  OPENSSL_HOME = /usr/local/src/openssl-1.1.1c
+  $(warning **WARNING**: OPENSSL_HOME not defined: using a default location)
+endif
+
 include ../dist/gcc-compatible/Makefile.config
 
 KREMLIN_HOME?=../dist/kremlin
@@ -58,7 +63,12 @@ vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
 	cc -I../lib/c -O3 $(CFLAGS) $(CFLAGS_128) vec-128-test.c -o vec-128-test.exe
 
 %.exe: %.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto -lsodium
+	$(CC) $(CFLAGS) $(LDFLAGS) \
+	$^ ../dist/gcc-compatible/libevercrypt.a \
+	$(OPENSSL_HOME)/libcrypto.a \
+	$(OPENSSL_HOME)/libssl.a \
+	-o $@ \
+	-lsodium
 
 # Running tests
 

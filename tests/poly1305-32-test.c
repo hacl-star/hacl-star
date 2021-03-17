@@ -8,7 +8,8 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
-//#include <openssl/poly1305.h>
+#include "openssl_poly1305.h"
+#include <openssl/evp.h>
 #include <sodium.h>
 
 #include "test_helpers.h"
@@ -29,12 +30,12 @@ void sodium_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key
     crypto_onetimeauth_poly1305_final(&ctx, tag);
 }
 
-/*void ossl_poly1305(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key){
+void ossl_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key){
     POLY1305 ctx;
     Poly1305_Init(&ctx, key);
     Poly1305_Update(&ctx, text, len);
-    Poly1305_Final(&ctx, &tag);
-    }*/
+    Poly1305_Final(&ctx, tag);
+}
 
 bool print_result(uint8_t* comp, uint8_t* exp) {
   return compare_and_print(16, comp, exp);
@@ -46,6 +47,10 @@ bool print_test(int in_len, uint8_t* in, uint8_t* key, uint8_t* exp){
   Hacl_Poly1305_32_poly1305_mac(comp,in_len,in,key);
   printf("Poly1305 (32-bit) Result:\n");
   bool ok = print_result(comp, exp);
+
+  ossl_poly1305_mac(comp,in_len,in,key);
+  printf("OpenSSL Poly1305 Result:\n");
+  ok = print_result(comp, exp);
 
   sodium_poly1305_mac(comp,in_len,in,key);
   printf("Libsodium Poly1305 Result:\n");
@@ -89,7 +94,7 @@ int main() {
   t1 = clock();
   a = cpucycles_begin();
   for (int j = 0; j < ROUNDS; j++) {
-    sodium_poly1305_mac(tag,SIZE,plain,key);
+    ossl_poly1305_mac(tag,SIZE,plain,key);
     res ^= tag[0] ^ tag[15];
   }
   b = cpucycles_end();
@@ -97,10 +102,22 @@ int main() {
   clock_t tdiff2 = t2 - t1;
   cycles cdiff2 = b - a;
 
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    sodium_poly1305_mac(tag,SIZE,plain,key);
+    res ^= tag[0] ^ tag[15];
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  clock_t tdiff3 = t2 - t1;
+  cycles cdiff3 = b - a;
+
 
   uint64_t count = ROUNDS * SIZE;
   printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);
-  printf("Libsodium Poly1305 PERF: %d\n",(int)res); print_time(count,tdiff2,cdiff2);
+  printf("OpenSSL Poly1305 PERF: %d\n",(int)res); print_time(count,tdiff2,cdiff2);
+  printf("Libsodium Poly1305 PERF: %d\n",(int)res); print_time(count,tdiff3,cdiff3);
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
