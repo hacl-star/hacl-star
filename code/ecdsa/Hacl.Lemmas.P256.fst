@@ -432,9 +432,9 @@ let mult_one_round_ecdsa_prime t prime co k0 =
     lemma_div_mod t3 (pow2 64);
     lemma_reduce_mod_ecdsa_prime prime t k0;
       assert(let rem = t3/ pow2 64 in rem * pow2 64 = t3);
-      assert(exists (k: nat). k * pow2 64 = t3);
-    lemma_division_is_multiplication t3 prime;
-    lemma_multiplication_to_same_number t3 co (modp_inv2_prime (pow2 64) prime) prime
+      assert(exists (k: nat). k * pow2 64 = t3)
+    (* lemma_division_is_multiplication t3 prime; *)
+    (* lemma_multiplication_to_same_number t3 co (modp_inv2_prime (pow2 64) prime) prime *)
 
 
 (* to replace with calc?  *)
