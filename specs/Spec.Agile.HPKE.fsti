@@ -24,10 +24,9 @@ noeq type aead =
   | ExportOnly
 
 let is_valid_aead = function
-// TODO AES disabled due to Vale build
-//  | AEAD.AES128_GCM
-//  | AEAD.AES256_GCM
-  | Seal AEAD.CHACHA20_POLY1305 -> true
+  | Seal AEAD.AES128_GCM
+  | Seal AEAD.AES256_GCM
+  | Seal AEAD.CHACHA20_POLY1305
   | ExportOnly -> true
   | _ -> false
 

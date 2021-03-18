@@ -8,24 +8,22 @@ module S = FStar.Seq
 
 // to be used via a module abbreviation, e.g. AEAD.alg
 type alg =
-// TODO AES disabled due to Vale build
-//  | AES128_GCM
-//  | AES256_GCM
+  | AES128_GCM
+  | AES256_GCM
   | CHACHA20_POLY1305
   // the algorithms below are used in TLS 1.3 but not yet supported by
   // EverCrypt or miTLS; they are included e.g. for parsing
-//  | AES128_CCM  // "Counter with CBC-Message Authentication Code"
-//  | AES256_CCM
-//  | AES128_CCM8 // variant with truncated 8-byte tags
-//  | AES256_CCM8
+  | AES128_CCM  // "Counter with CBC-Message Authentication Code"
+  | AES256_CCM
+  | AES128_CCM8 // variant with truncated 8-byte tags
+  | AES256_CCM8
 
 let _: squash (inversion alg) = allow_inversion alg
 
 let is_supported_alg (a: alg): bool =
   match a with
-// TODO AES disabled due to Vale build
-//  | AES128_GCM
-//  | AES256_GCM
+  | AES128_GCM
+  | AES256_GCM
   | CHACHA20_POLY1305 -> true
   | _ -> false
 
@@ -34,41 +32,37 @@ let supported_alg = a:alg { is_supported_alg a }
 let cipher_alg_of_supported_alg (a: supported_alg): Spec.Agile.Cipher.cipher_alg =
   let open Spec.Agile.Cipher in
   match a with
-// TODO AES disabled due to Vale build
-//  | AES128_GCM -> AES128
-//  | AES256_GCM -> AES256
+  | AES128_GCM -> AES128
+  | AES256_GCM -> AES256
   | CHACHA20_POLY1305 -> CHACHA20
 
 // naming convention: length for nats, len for uint32s
 let key_length (a: alg): nat =
   match a with
-// TODO AES disabled due to Vale build
-//  | AES128_GCM
-//  | AES256_GCM
+  | AES128_GCM
+  | AES256_GCM
   | CHACHA20_POLY1305 -> Spec.Agile.Cipher.key_length (cipher_alg_of_supported_alg a)
-//  | AES128_CCM        -> 16
-//  | AES128_CCM8       -> 16
-//  | AES256_CCM        -> 32
-//  | AES256_CCM8       -> 32
+  | AES128_CCM        -> 16
+  | AES128_CCM8       -> 16
+  | AES256_CCM        -> 32
+  | AES256_CCM8       -> 32
 
 let tag_length: alg -> nat =
   function
-// TODO AES disabled due to Vale build
-//  | AES128_CCM8       ->  8
-//  | AES256_CCM8       ->  8
-//  | AES128_GCM        -> 16
-//  | AES256_GCM        -> 16
+  | AES128_CCM8       ->  8
+  | AES256_CCM8       ->  8
+  | AES128_GCM        -> 16
+  | AES256_GCM        -> 16
   | CHACHA20_POLY1305 -> 16
-//  | AES128_CCM        -> 16
-//  | AES256_CCM        -> 16
+  | AES128_CCM        -> 16
+  | AES256_CCM        -> 16
 
 /// No sharing with Spec.Agile.Cipher, since AES-GCM offers IV reduction via the
 /// GHASH function.
 let iv_length (a: supported_alg) (len: nat) =
   match a with
-// TODO AES disabled due to Vale build
-//  | AES128_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
-//  | AES256_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
+  | AES128_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
+  | AES256_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
   | CHACHA20_POLY1305 -> len == 12
 
 // Maximum length for both plaintexts and additional data.
@@ -84,8 +78,7 @@ let iv_length (a: supported_alg) (len: nat) =
 let max_length: supported_alg -> nat =
   function
   | CHACHA20_POLY1305 -> pow2 32 - 1 - 16
-// TODO AES disabled due to Vale build
-//  | AES128_GCM | AES256_GCM -> pow2 32 - 1
+  | AES128_GCM | AES256_GCM -> pow2 32 - 1
 
 let cipher_max_length (a:supported_alg) = max_length a + tag_length a
 
