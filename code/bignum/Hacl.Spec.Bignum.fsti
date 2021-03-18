@@ -123,6 +123,25 @@ val bn_add_mod_n_lemma:
   (ensures  bn_v (bn_add_mod_n n a b) == (bn_v a + bn_v b) % bn_v n)
 
 
+val bn_sub_mod_n:
+    #t:limb_t
+  -> #len:size_nat
+  -> n:lbignum t len
+  -> a:lbignum t len
+  -> b:lbignum t len ->
+  lbignum t len
+
+
+val bn_sub_mod_n_lemma:
+    #t:limb_t
+  -> #len:size_nat
+  -> n:lbignum t len
+  -> a:lbignum t len
+  -> b:lbignum t len -> Lemma
+  (requires bn_v a < bn_v n /\ bn_v b < bn_v n)
+  (ensures  bn_v (bn_sub_mod_n n a b) == (bn_v a - bn_v b) % bn_v n)
+
+
 val bn_mul1:
     #t:limb_t
   -> #aLen:size_nat

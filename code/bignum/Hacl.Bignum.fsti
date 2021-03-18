@@ -146,6 +146,23 @@ val bn_add_mod_n: #t:limb_t -> len:size_t{v len > 0} -> bn_add_mod_n_st t len
 
 
 inline_for_extraction noextract
+val bn_sub_mod_n:
+    #t:limb_t
+  -> len:size_t{v len > 0}
+  -> n:lbignum t len
+  -> a:lbignum t len
+  -> b:lbignum t len
+  -> res:lbignum t len ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h a /\ live h b /\ live h res /\
+    disjoint n a /\ disjoint n b /\ disjoint n res /\
+    eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_sub_mod_n (as_seq h0 n) (as_seq h0 a) (as_seq h0 b))
+
+
+inline_for_extraction noextract
 val bn_mul1:
     #t:limb_t
   -> aLen:size_t
