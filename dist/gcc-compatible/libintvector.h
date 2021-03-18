@@ -22,7 +22,7 @@
 
 #define Lib_IntVector_Intrinsics_bit_mask64(x) -((x) & 1)
 
-#if TARGET_ARCHITECTURE == TARGET_ARCHITECTURE_ID_X86
+#if defined(__x86_64__) || defined(_M_X64)
 
 #if defined(EVERCRYPT_CAN_COMPILE_VEC128)
 
@@ -451,7 +451,8 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
 
 #endif // EVERCRYPT_CAN_COMPILE_VEC256
 
-#elif TARGET_ARCHITECTURE == TARGET_ARCHITECTURE_ID_ARM8
+#elif (defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)) \
+      && !defined(__ARM_32BIT_STATE)
 
 #if defined(EVERCRYPT_CAN_COMPILE_VEC128)
 
@@ -651,7 +652,7 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 #endif // EVERCRYPT_CAN_COMPILE_VEC128
 
 // IBM z architecture
-#elif TARGET_ARCHITECTURE == TARGET_ARCHITECTURE_ID_SYSTEMZ
+#elif defined(__s390x__) // this flag is for GCC only
 
 #if defined(EVERCRYPT_CAN_COMPILE_VEC128)
 
@@ -803,6 +804,6 @@ typedef vector128_8 vector128;
 
 #endif // EVERCRYPT_CAN_COMPILE_VEC128
 
-#endif // IBM z architecture
+#endif // Architectures
 
 #endif
