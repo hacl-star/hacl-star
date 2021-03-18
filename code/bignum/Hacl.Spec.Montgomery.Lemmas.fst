@@ -93,10 +93,24 @@ let eea_pow2_odd_k_lemma a n k1 =
     () end
 #pop-options
 
+
+val eea_pow2_odd_k_lemma_bound: a:pos -> n:pos -> k1:pos -> Lemma
+  (requires n * k1 % pow2 (a - 1) == 1 /\ n % 2 = 1 /\ k1 < pow2 (a - 1))
+  (ensures (let k = if n * k1 % pow2 a < pow2 (a - 1) then k1 else k1 + pow2 (a - 1) in
+    k < pow2 a))
+
+let eea_pow2_odd_k_lemma_bound a n k1 =
+  if n * k1 % pow2 a < pow2 (a - 1) then
+    Math.Lemmas.pow2_lt_compat a (a - 1)
+  else
+    Math.Lemmas.pow2_double_sum (a - 1)
+
+
 val eea_pow2_odd_k: a:pos -> n:pos ->
   Pure pos
   (requires n % 2 = 1)
-  (ensures  fun k -> n * k % pow2 a == 1)
+  (ensures  fun k ->
+    n * k % pow2 a == 1 /\ k < pow2 a)
 
 let rec eea_pow2_odd_k a n =
   if a = 1 then 1
@@ -105,6 +119,7 @@ let rec eea_pow2_odd_k a n =
     assert (n * k1 % pow2 (a - 1) == 1);
     let k = if n * k1 % pow2 a < pow2 (a - 1) then k1 else k1 + pow2 (a - 1) in
     eea_pow2_odd_k_lemma a n k1;
+    eea_pow2_odd_k_lemma_bound a n k1;
     assert (n * k % pow2 a == 1);
     k end
 
@@ -112,13 +127,17 @@ let rec eea_pow2_odd_k a n =
 val eea_pow2_odd: a:pos -> n:pos ->
   Pure (tuple2 int int)
   (requires n % 2 = 1)
-  (ensures  fun (d, k) -> pow2 a * d == 1 + k * n)
+  (ensures  fun (d, k) ->
+    pow2 a * d == 1 + k * n /\ - d < n)
 
 let eea_pow2_odd a n =
   let k = eea_pow2_odd_k a n in
   assert (n * k % pow2 a == 1);
   assert (n * k == n * k / pow2 a * pow2 a + 1);
   let d = n * k / pow2 a in
+  assert (n * k < n * pow2 a);
+  Math.Lemmas.cancel_mul_div n (pow2 a);
+  assert (d < n);
   assert (n * k == d * pow2 a + 1);
   (- d, - k)
 
