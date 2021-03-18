@@ -19,7 +19,6 @@ open Spec.ECDSAP256.Definition
 open Hacl.Impl.P256.Compression
 open Spec.P256.MontgomeryMultiplication
  
-(*
 
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
@@ -151,7 +150,7 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
-val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64) 
+val ecdsa_sign_p256_without_hash_ladder: result: lbuffer uint8 (size 64) 
   -> mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
   -> m: lbuffer uint8 mLen
   -> privKey: lbuffer uint8 (size 32) 
@@ -178,6 +177,39 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
       flag == flagSpec 
     )    
   )
+
+[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
+  \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
+  \n The private key and the nonce are expected to be more than 0 and less than the curve order.
+  \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
+val ecdsa_sign_p256_without_hash_comb: result: lbuffer uint8 (size 64) 
+  -> mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
+  -> m: lbuffer uint8 mLen
+  -> privKey: lbuffer uint8 (size 32) 
+  -> k: lbuffer uint8 (size 32) -> 
+  Stack bool
+  (requires fun h -> 
+    live h result /\ live h m /\ live h privKey /\ live h k /\
+    disjoint result m /\
+    disjoint result privKey /\
+    disjoint result k /\
+    nat_from_bytes_be (as_seq h privKey) > 0 /\
+    nat_from_bytes_be (as_seq h k) > 0 /\
+    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
+    nat_from_bytes_be (as_seq h k) < prime_p256_order
+  )
+  (ensures fun h0 flag h1 -> 
+    modifies (loc result) h0 h1 /\
+     (assert_norm (pow2 32 < pow2 61);
+      let resultR = gsub result (size 0) (size 32) in 
+      let resultS = gsub result (size 32) (size 32) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile Spec.ECDSA.NoHash (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in  
+      as_seq h1 resultR == nat_to_bytes_be 32 r /\
+      as_seq h1 resultS == nat_to_bytes_be 32 s /\
+      flag == flagSpec 
+    )    
+  )
+
 
 
 [@ (Comment " The input of the function is considered to be public, 
@@ -272,13 +304,14 @@ val ecdsa_verif_p256_sha512:
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile (Spec.ECDSA.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
    ) 
+*)
 
 [@ (Comment " The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
-val ecdsa_verif_without_hash:
+val ecdsa_verif_without_hash_ladder:
   mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
   -> m:lbuffer uint8 mLen
   -> pubKey:lbuffer uint8 (size 64)
@@ -296,8 +329,34 @@ val ecdsa_verif_without_hash:
       result == Spec.ECDSA.ecdsa_verification_agile Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
    )
    
-*)    
-    
+
+[@ (Comment " The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
+  \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
+  \n Output: bool, where true stands for the correct signature verification.
+  \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
+val ecdsa_verif_without_hash_comb:
+  mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length Spec.ECDSA.NoHash}
+  -> m:lbuffer uint8 mLen
+  -> pubKey:lbuffer uint8 (size 64)
+  -> r:lbuffer uint8 (size 32)
+  -> s:lbuffer uint8 (size 32)
+  -> 
+  Stack bool
+    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
+    (ensures fun h0 result h1 ->
+      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
+      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
+      let r = nat_from_bytes_be (as_seq h1 r) in
+      let s = nat_from_bytes_be (as_seq h1 s) in
+      modifies0 h0 h1 /\
+      result == Spec.ECDSA.ecdsa_verification_agile Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
+   )
+   
+
+
+
+
 [@ (Comment " Public key verification function. 
   \n  The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
@@ -316,9 +375,9 @@ val verify_q:
         r == Spec.ECDSA.verifyQValidCurvePointSpec pkJ
       )
     )
- *)
 
-(* [@ (Comment " There and further we introduce notions of compressed point and not compressed point. 
+
+ [@ (Comment " There and further we introduce notions of compressed point and not compressed point. 
   \n We denote || as byte concatenation. 
   \n A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
   \n A not Compressed point is a point representation as follows: 0x4 || x || y.
@@ -405,8 +464,6 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
         x == xResult  
       )  
   )
-
-  *)
 
 
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].

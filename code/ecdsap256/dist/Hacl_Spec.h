@@ -33,12 +33,6 @@
 
 
 
-#define Spec_P256_Ladder 0
-#define Spec_P256_Radix4 1
-#define Spec_P256_Comb 2
-
-typedef uint8_t Spec_P256_montgomery_ladder_mode;
-
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2
@@ -49,6 +43,24 @@ typedef uint8_t Spec_P256_montgomery_ladder_mode;
 #define Spec_Hash_Definitions_Blake2B 7
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
+
+#define Spec_P256_Ladder 0
+#define Spec_P256_Radix4 1
+#define Spec_P256_Comb 2
+
+typedef uint8_t Spec_P256_montgomery_ladder_mode;
+
+#define Spec_ECDSA_NoHash 0
+#define Spec_ECDSA_Hash 1
+
+typedef uint8_t Spec_ECDSA_hash_alg_ecdsa_tags;
+
+typedef struct Spec_ECDSA_hash_alg_ecdsa_s
+{
+  Spec_ECDSA_hash_alg_ecdsa_tags tag;
+  Spec_Hash_Definitions_hash_alg _0;
+}
+Spec_ECDSA_hash_alg_ecdsa;
 
 
 #define __Hacl_Spec_H_DEFINED

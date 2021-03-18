@@ -1,14 +1,6 @@
 LIBRARY libecdsa
 
 EXPORTS
-  Hacl_P256_ecp256dh_i_ladder
-  Hacl_P256_ecp256dh_i_radix4
-  Hacl_P256_ecp256dh_i_cmb
-  Hacl_P256_ecp256dh_r_ladder
-  Hacl_P256_ecp256dh_r_radix4
-  Hacl_P256_ecp256dh_r_comb
-  Hacl_P256_points_op
-  Hacl_P256_is_more_than_zero_less_than_order
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
@@ -41,6 +33,29 @@ EXPORTS
   Hacl_Hash_SHA2_hash_256
   Hacl_Hash_SHA2_hash_384
   Hacl_Hash_SHA2_hash_512
+  Hacl_P256_ecdsa_sign_p256_sha2_ladder
+  Hacl_P256_ecdsa_sign_p256_sha2_comb
+  Hacl_P256_ecdsa_sign_p256_sha384
+  Hacl_P256_ecdsa_sign_p256_sha512
+  Hacl_P256_ecdsa_sign_p256_without_hash_ladder
+  Hacl_P256_ecdsa_sign_p256_without_hash_comb
+  Hacl_P256_ecdsa_verif_p256_sha2_ladder
+  Hacl_P256_ecdsa_verif_p256_sha2_comb_radix
+  Hacl_P256_ecdsa_verif_without_hash_ladder
+  Hacl_P256_ecdsa_verif_without_hash_comb
+  Hacl_P256_verify_q
+  Hacl_P256_decompression_not_compressed_form
+  Hacl_P256_decompression_compressed_form
+  Hacl_P256_compression_not_compressed_form
+  Hacl_P256_compression_compressed_form
+  Hacl_P256_ecp256dh_i_ladder
+  Hacl_P256_ecp256dh_i_radix4
+  Hacl_P256_ecp256dh_i_cmb
+  Hacl_P256_ecp256dh_r_ladder
+  Hacl_P256_ecp256dh_r_radix4
+  Hacl_P256_ecp256dh_r_comb
+  Hacl_P256_points_op
+  Hacl_P256_is_more_than_zero_less_than_order
   Hacl_Impl_Blake2_Core_uu___is_M32
   Hacl_Impl_Blake2_Core_uu___is_M128
   Hacl_Impl_Blake2_Core_uu___is_M256

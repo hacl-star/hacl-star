@@ -28,8 +28,8 @@ open Spec.Hash.Definitions
 open Hacl.Impl.ECDSA.P256.Signature.Agile
 open Hacl.Impl.ECDSA.P256.Verification.Agile
 
-(*
-let ecdsa_sign_p256sha2_ladder result mLen m privKey k = 
+
+let ecdsa_sign_p256_sha2_ladder result mLen m privKey k = 
   ecdsa_signature Ladder (Hash SHA2_256) result mLen m privKey k
 
 
@@ -39,15 +39,17 @@ let ecdsa_sign_p256_sha2_comb result mLen m privKey k =
 
 
 let ecdsa_sign_p256_sha384 result mLen m privKey k = 
-  ecdsa_signature (Hash SHA2_384) result mLen m privKey k
+  ecdsa_signature Ladder (Hash SHA2_384) result mLen m privKey k
 
 let ecdsa_sign_p256_sha512 result mLen m privKey k = 
-  ecdsa_signature (Hash SHA2_512) result mLen m privKey k
+  ecdsa_signature Ladder (Hash SHA2_512) result mLen m privKey k
 
 
- let ecdsa_sign_p256_without_hash result mLen m privKey k = 
-  ecdsa_signature NoHash result mLen m privKey k
- 
+let ecdsa_sign_p256_without_hash_ladder result mLen m privKey k = 
+  ecdsa_signature Ladder NoHash result mLen m privKey k
+
+let ecdsa_sign_p256_without_hash_comb result mLen m privKey k = 
+  ecdsa_signature Comb NoHash result mLen m privKey k
 
 
 let ecdsa_verif_p256_sha2_ladder mLen m pubKey r s = 
@@ -59,13 +61,17 @@ let ecdsa_verif_p256_sha2_comb_radix mLen m pubKey r s =
 
 
 let ecdsa_verif_p256_sha384 mLen m pubKey r s = 
-  ecdsa_verification (Hash SHA2_384) pubKey r s mLen m
+  ecdsa_verification Ladder Ladder (Hash SHA2_384) pubKey r s mLen m
 
 let ecdsa_verif_p256_sha512 mLen m pubKey r s = 
-  ecdsa_verification (Hash SHA2_512) pubKey r s mLen m
+  ecdsa_verification Ladder Ladder (Hash SHA2_512) pubKey r s mLen m
 
-let ecdsa_verif_without_hash mLen m pubKey r s  =
-   ecdsa_verification NoHash pubKey r s mLen m
+
+let ecdsa_verif_without_hash_ladder mLen m pubKey r s  =
+   ecdsa_verification Ladder Ladder NoHash pubKey r s mLen m
+
+let ecdsa_verif_without_hash_comb mLen m pubKey r s  =
+   ecdsa_verification Comb Radix4  NoHash pubKey r s mLen m
 
  
 let verify_q pubKey = 
@@ -85,7 +91,7 @@ let compression_not_compressed_form b result =
 
 let compression_compressed_form b result = 
   Hacl.Impl.P256.Compression.compressionCompressedForm b result
-*) 
+ 
 
 let ecp256dh_i_ladder result scalar = Hacl.Impl.P256.DH.ecp256dh_i Ladder result scalar
 
