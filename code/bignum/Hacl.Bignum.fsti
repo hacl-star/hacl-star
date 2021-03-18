@@ -361,6 +361,7 @@ val cswap2:
 /// whether they can be specialized for the bignum size, or whether they have to
 /// been inline-for-extraction'd.
 
+inline_for_extraction noextract
 let meta_len (t:limb_t) = len:size_t{0 < v len /\ 2 * bits t * v len <= max_size_t}
 
 /// This type class is entirely meta-level and will not appear after partial

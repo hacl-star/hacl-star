@@ -10,9 +10,6 @@ module GF = Hacl.Bignum.GenericField
 inline_for_extraction noextract
 let t_limbs: Hacl.Bignum.Definitions.limb_t = Lib.IntTypes.U64
 
-inline_for_extraction noextract
-let bn_mont_ctx_u64 = GF.bn_mont_ctx t_limbs
-
 [@@ CPrologue
 "/*******************************************************************************
 
@@ -44,7 +41,7 @@ val field_init: len:BN.meta_len t_limbs -> GF.bn_field_init_st t_limbs len
 [@@ Comment "Return a size of the modulus `n` in limbs.
 
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init."]
-val field_get_len: k:bn_mont_ctx_u64 -> GF.bn_field_get_len_st k
+val field_get_len: k:GF.bn_mont_ctx_u64 -> GF.bn_field_get_len_st k
 
 [@@ Comment "Convert a bignum to its Montgomery representation.
 
@@ -57,7 +54,7 @@ val field_get_len: k:bn_mont_ctx_u64 -> GF.bn_field_get_len_st k
   from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
   • a < n
 "]
-val to_field: k:bn_mont_ctx_u64 -> GF.bn_to_field_st k
+val to_field: k:GF.bn_mont_ctx_u64 -> GF.bn_to_field_st k
 
 [@@ Comment "Convert the result back from the Montgomery representation to the regular representation.
 
@@ -71,7 +68,7 @@ val to_field: k:bn_mont_ctx_u64 -> GF.bn_to_field_st k
   from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
   • aM < n
 "]
-val from_field: k:bn_mont_ctx_u64 -> GF.bn_from_field_st k
+val from_field: k:GF.bn_mont_ctx_u64 -> GF.bn_from_field_st k
 
 [@@ Comment "Write `aM + bM mod n` in `cM`.
 
@@ -82,7 +79,7 @@ val from_field: k:bn_mont_ctx_u64 -> GF.bn_from_field_st k
   from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
   • aM < n
   • bM < n "]
-val add: k:bn_mont_ctx_u64 -> GF.bn_field_add_st k
+val add: k:GF.bn_mont_ctx_u64 -> GF.bn_field_add_st k
 
 [@@ Comment "Write `aM - bM mod n` to `cM`.
 
@@ -93,7 +90,7 @@ val add: k:bn_mont_ctx_u64 -> GF.bn_field_add_st k
   from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
   • aM < n
   • bM < n "]
-val sub: k:bn_mont_ctx_u64 -> GF.bn_field_sub_st k
+val sub: k:GF.bn_mont_ctx_u64 -> GF.bn_field_sub_st k
 
 [@@ Comment "Write `aM * bM mod n` in `cM`.
 
@@ -104,7 +101,7 @@ val sub: k:bn_mont_ctx_u64 -> GF.bn_field_sub_st k
   from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
   • aM < n
   • bM < n "]
-val mul: k:bn_mont_ctx_u64 -> GF.bn_field_mul_st k
+val mul: k:GF.bn_mont_ctx_u64 -> GF.bn_field_mul_st k
 
 [@@ Comment "Write `aM * aM mod n` in `cM`.
 
@@ -114,13 +111,13 @@ val mul: k:bn_mont_ctx_u64 -> GF.bn_field_mul_st k
   This function is *UNSAFE* and requires C clients to observe bn_field_sqr
   from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
   • aM < n "]
-val sqr: k:bn_mont_ctx_u64 -> GF.bn_field_sqr_st k
+val sqr: k:GF.bn_mont_ctx_u64 -> GF.bn_field_sqr_st k
 
 [@@ Comment "Convert a bignum `one` to its Montgomery representation.
 
   The argument oneM is meant to be `len` limbs in size, i.e. uint64_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init."]
-val one: k:bn_mont_ctx_u64 -> GF.bn_field_one_st k
+val one: k:GF.bn_mont_ctx_u64 -> GF.bn_field_one_st k
 
 [@@ Comment "Write `aM ^ (-1) mod n` in `aInvM`.
 
@@ -131,4 +128,4 @@ val one: k:bn_mont_ctx_u64 -> GF.bn_field_one_st k
   from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
   • aM < n
   • 0 < aM "]
-val inverse: k:bn_mont_ctx_u64 -> GF.bn_field_inv_st k
+val inverse: k:GF.bn_mont_ctx_u64 -> GF.bn_field_inv_st k

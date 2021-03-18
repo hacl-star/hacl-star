@@ -41,7 +41,7 @@ let ll (t:limb_t) =
   | U32 -> uint32
   | U64 -> uint64
 
-//inline_for_extraction noextract
+inline_for_extraction// noextract
 noeq
 type bn_mont_ctx' (t:limb_t) (a:Type0{a == lb t}) (b:Type0{b == ll t}) = {
   nBits: size_t;
@@ -51,8 +51,11 @@ type bn_mont_ctx' (t:limb_t) (a:Type0{a == lb t}) (b:Type0{b == ll t}) = {
   r2: x:a{length #MUT #(limb t) x == v len};
   }
 
-
+inline_for_extraction noextract
 let bn_mont_ctx (t:limb_t) = bn_mont_ctx' t (lb t) (ll t)
+
+let bn_mont_ctx_u32 = bn_mont_ctx' U32 (lb U32) (ll U32)
+let bn_mont_ctx_u64 = bn_mont_ctx' U64 (lb U64) (ll U64)
 
 
 inline_for_extraction noextract
