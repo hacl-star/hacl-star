@@ -21,18 +21,18 @@ module SD = Hacl.Spec.Bignum.Definitions
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let bn_check_bn_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
+let bn_check_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> a:lbignum t len ->
   Stack (limb t)
   (requires fun h -> live h n /\ live h a /\ disjoint n a)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_check_bn_mod_inv_prime (as_seq h0 n) (as_seq h0 a))
+    r == S.bn_check_mod_inv_prime (as_seq h0 n) (as_seq h0 a))
 
 
 inline_for_extraction noextract
-val bn_check_bn_mod_inv_prime: #t:limb_t -> k:BE.exp t -> bn_check_bn_mod_inv_prime_st t k.BE.mont.BM.bn.BN.len
-let bn_check_bn_mod_inv_prime #t k n a =
+val bn_check_mod_inv_prime: #t:limb_t -> k:BE.exp t -> bn_check_mod_inv_prime_st t k.BE.mont.BM.bn.BN.len
+let bn_check_mod_inv_prime #t k n a =
   [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   let m0 = k.BE.mont.BM.mont_check n in
   let m1 = BN.bn_is_zero_mask len a in
@@ -56,8 +56,13 @@ let bn_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_inv_prime_raw: #t:limb_t -> k:BE.exp t -> bn_mod_inv_prime_st t k.BE.mont.BM.bn.BN.len
-let bn_mod_inv_prime_raw #t k nBits n a res =
+val bn_mod_inv_prime_vartime:
+    #t:limb_t
+  -> k:BE.exp t
+  -> bn_mod_exp_vartime_precompr2:BE.bn_mod_exp_precompr2_st t k.BE.mont.BM.bn.BN.len ->
+  bn_mod_inv_prime_st t k.BE.mont.BM.bn.BN.len
+
+let bn_mod_inv_prime_vartime #t k bn_mod_exp_vartime_precompr2 nBits n a res =
   [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   push_frame ();
   let n2 = create len (uint #t #SEC 0) in
@@ -66,6 +71,9 @@ let bn_mod_inv_prime_raw #t k nBits n a res =
   SN.bn_sub1_lemma (as_seq h0 n) (uint #t #SEC 2);
   SD.bn_eval_bound (as_seq h0 n2) (v len);
   SD.bn_eval_bound (as_seq h0 n) (v len);
-  
-  BE.bn_mod_exp_raw k.BE.mont k.BE.raw_mod_exp_precomp nBits n a (size (bits t) *! len) n2 res;
+
+  BE.bn_mod_exp_vartime k bn_mod_exp_vartime_precompr2 nBits n a (size (bits t) *! len) n2 res;
+  let h1 = ST.get () in
+  assert (bn_v h1 res == Lib.NatMod.pow_mod #(bn_v h0 n) (bn_v h0 a) (bn_v h0 n2));
+  SD.bn_eval_inj (v len) (as_seq h1 res) (S.bn_mod_inv_prime (v nBits) (as_seq h0 n) (as_seq h0 a));
   pop_frame ()

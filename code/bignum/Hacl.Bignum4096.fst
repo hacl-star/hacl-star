@@ -21,12 +21,13 @@ let add_mod_n: BN.bn_add_mod_n_st t_limbs n_limbs =
   BN.bn_add_mod_n n_limbs
 
 let mul (a:lbignum t_limbs n_limbs) : BN.bn_karatsuba_mul_st t_limbs n_limbs a =
-  BN.bn_mul n_limbs n_limbs a
+  BN.bn_karatsuba_mul n_limbs a
+  //BN.bn_mul n_limbs n_limbs a
 
-[@CInline]
 let sqr (a:lbignum t_limbs n_limbs) : BN.bn_karatsuba_sqr_st t_limbs n_limbs a =
+  BN.bn_karatsuba_sqr n_limbs a
   //BN.bn_sqr n_limbs a
-  BN.bn_mul n_limbs n_limbs a a
+  //BN.bn_mul n_limbs n_limbs a a
 
 inline_for_extraction noextract
 instance bn_inst: BN.bn t_limbs = {
@@ -86,40 +87,50 @@ let mod = BS.bn_mod_slow_safe mont_inst mod_precompr2
 let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =
   BE.bn_check_mod_exp mont_inst
 
-let mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_raw_precompr2 mont_inst
-
-let mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_ct_precompr2 mont_inst
+[@CInline]
+let mod_exp_bm_vartime_precompr2: BE.bn_mod_exp_bm_vartime_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_bm_vartime_precompr2 mont_inst
 
 [@CInline]
-let mod_exp_fw_raw_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_raw_precompr2 mont_inst
+let mod_exp_bm_consttime_precompr2: BE.bn_mod_exp_bm_consttime_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_bm_consttime_precompr2 mont_inst
 
 [@CInline]
-let mod_exp_fw_ct_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_ct_precompr2 mont_inst
+let mod_exp_fw_vartime_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_fw_vartime_precompr2 mont_inst
+
+[@CInline]
+let mod_exp_fw_consttime_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_fw_consttime_precompr2 mont_inst
 
 inline_for_extraction noextract
 instance exp_inst: BE.exp t_limbs = {
   BE.mont = mont_inst;
   BE.exp_check;
-  BE.raw_mod_exp_precomp = mod_exp_raw_precompr2;
-  BE.ct_mod_exp_precomp = mod_exp_ct_precompr2;
-  BE.raw_mod_exp_fw_precomp = mod_exp_fw_raw_precompr2;
-  BE.ct_mod_exp_fw_precomp = mod_exp_fw_ct_precompr2;
+  BE.exp_bm_vt_precomp = mod_exp_bm_vartime_precompr2;
+  BE.exp_bm_ct_precomp = mod_exp_bm_consttime_precompr2;
+  BE.exp_fw_vt_precomp = mod_exp_fw_vartime_precompr2;
+  BE.exp_fw_ct_precomp = mod_exp_fw_consttime_precompr2;
 }
 
-let mod_exp_raw = BS.bn_mod_exp_raw_safe exp_inst
+let mod_exp_vartime_precompr2 = BE.bn_mod_exp_vartime_precompr2 exp_inst
 
-let mod_exp_ct = BS.bn_mod_exp_ct_safe exp_inst
+let mod_exp_consttime_precompr2 = BE.bn_mod_exp_consttime_precompr2 exp_inst
+
+let mod_exp_vartime = BS.bn_mod_exp_vartime_safe exp_inst mod_exp_vartime_precompr2
+
+let mod_exp_consttime = BS.bn_mod_exp_consttime_safe exp_inst mod_exp_consttime_precompr2
 
 let new_precompr2 = BS.new_bn_precomp_r2_mod_n mont_inst
 
-let mod_inv_prime_raw = BS.bn_mod_inv_prime_raw_safe exp_inst
+let mod_inv_prime_vartime = BS.bn_mod_inv_prime_vartime_safe exp_inst mod_exp_vartime_precompr2
 
 let new_bn_from_bytes_be = BS.new_bn_from_bytes_be
 
+let new_bn_from_bytes_le = BS.new_bn_from_bytes_le
+
 let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be n_bytes
+
+let bn_to_bytes_le = Hacl.Bignum.Convert.mk_bn_to_bytes_le n_bytes
 
 let lt_mask = BN.bn_lt_mask n_limbs

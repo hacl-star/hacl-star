@@ -18,7 +18,7 @@ module BN = Hacl.Spec.Bignum
 ///  Modular reduction based on Montgomery arithmetic (it is slow!)
 ///
 
-val bn_check_bn_mod:
+val bn_check_mod:
     #t:limb_t
   -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
   -> n:lbignum t nLen
@@ -27,7 +27,7 @@ val bn_check_bn_mod:
     let b = 1 < bn_v n && bn_v n % 2 = 1 && bn_v a < bn_v n * bn_v n in
     v res == (if b then v (ones t SEC) else v (zeros t SEC))}
 
-let bn_check_bn_mod #t #nLen n a =
+let bn_check_mod #t #nLen n a =
   let m0 = BM.bn_check_modulus n in
   let n2 = BN.bn_mul n n in
   BN.bn_mul_lemma n n;

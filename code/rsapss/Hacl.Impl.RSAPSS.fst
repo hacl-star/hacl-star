@@ -71,8 +71,8 @@ let rsapss_sign_bn #t ke modBits eBits dBits skey m m' s =
   Math.Lemmas.pow2_le_compat (bits * v nLen) (v modBits);
   let h = ST.get () in
   SM.bn_precomp_r2_mod_n_lemma (v modBits - 1) (as_seq h n);
-  ke.BE.ct_mod_exp_fw_precomp n m dBits d 4ul r2 s;
-  ke.BE.raw_mod_exp_precomp n s eBits e r2 m';
+  ke.BE.exp_fw_ct_precomp 4ul n m dBits d r2 s;
+  ke.BE.exp_bm_vt_precomp n s eBits e r2 m';
   let eq_m = BN.bn_eq_mask nLen m m' in
   mapT nLen s (logand eq_m) s;
   BB.unsafe_bool_of_limb eq_m
@@ -317,7 +317,7 @@ let rsapss_verify_bn #t ke modBits eBits pkey m_def s =
       Math.Lemmas.pow2_le_compat (v bits * v nLen) (v modBits);
       SM.bn_precomp_r2_mod_n_lemma (v modBits - 1) (as_seq h n);
 
-      ke.BE.raw_mod_exp_precomp n s eBits e r2 m_def;
+      ke.BE.exp_bm_vt_precomp n s eBits e r2 m_def;
       if bn_lt_pow2 modBits m_def then true
       else false end
     else false in

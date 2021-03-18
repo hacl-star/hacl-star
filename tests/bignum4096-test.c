@@ -26,7 +26,7 @@ bool mod_exp_bytes_be_precompr2(
   uint64_t *b = Hacl_Bignum4096_new_bn_from_bytes_be(bBytesLen, bBytes);
   uint64_t *r2 = Hacl_Bignum4096_new_precompr2(n);
 
-  Hacl_Bignum4096_mod_exp_raw_precompr2(n, a, bBits, b, r2, res);
+  Hacl_Bignum4096_mod_exp_vartime_precompr2(n, a, bBits, b, r2, res);
   Hacl_Bignum4096_bn_to_bytes_be(res, resBytes);
 
   return 1;
@@ -48,7 +48,7 @@ bool mod_exp_bytes_be(
   uint64_t *n = Hacl_Bignum4096_new_bn_from_bytes_be(512, nBytes);
   uint64_t *b = Hacl_Bignum4096_new_bn_from_bytes_be(bBytesLen, bBytes);
 
-  Hacl_Bignum4096_mod_exp_raw(n, a, bBits, b, res);
+  Hacl_Bignum4096_mod_exp_vartime(n, a, bBits, b, res);
   Hacl_Bignum4096_bn_to_bytes_be(res, resBytes);
 
   return 1;
@@ -97,7 +97,7 @@ bool print_test(
 )
 {
   uint64_t res[64U] = {0};
-  Hacl_Bignum4096_mod_exp_raw(n, a, bBits, b, res);
+  Hacl_Bignum4096_mod_exp_vartime(n, a, bBits, b, res);
   printf("\n mod_exp Result: \n");
 
   bool ok = true;

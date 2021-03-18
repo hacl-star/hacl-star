@@ -246,7 +246,7 @@ let ffdhe_compute_exp #t a len ke p_r2_n sk_n b_n res =
   Math.Lemmas.pow2_lt_compat 32 14;
 
   SD.bn_eval_bound #t (as_seq h1 sk_n) (v nLen);
-  ke.BE.ct_mod_exp_fw_precomp p_n b_n (size (bits t) *! nLen) sk_n 4ul r2_n res_n; //b_n ^ sk_n % p_n
+  ke.BE.exp_fw_ct_precomp 4ul p_n b_n (size (bits t) *! nLen) sk_n r2_n res_n; //b_n ^ sk_n % p_n
 
   let h2 = ST.get () in
   BN.bn_to_bytes_be len res_n res;

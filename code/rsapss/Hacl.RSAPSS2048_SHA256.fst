@@ -91,29 +91,29 @@ let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =
   BE.bn_check_mod_exp mont_inst
 
 [@CInline]
-let mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_raw_precompr2 mont_inst
+let mod_exp_bm_vartime_precompr2: BE.bn_mod_exp_bm_vartime_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_bm_vartime_precompr2 mont_inst
 
 [@CInline]
-let mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_ct_precompr2 mont_inst
+let mod_exp_bm_consttime_precompr2: BE.bn_mod_exp_bm_consttime_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_bm_consttime_precompr2 mont_inst
 
 [@CInline]
-let mod_exp_fw_raw_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_raw_precompr2 mont_inst
+let mod_exp_fw_vartime_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_fw_vartime_precompr2 mont_inst
 
 [@CInline]
-let mod_exp_fw_ct_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_ct_precompr2 mont_inst
+let mod_exp_fw_consttime_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
+  BE.bn_mod_exp_fw_consttime_precompr2 mont_inst
 
 inline_for_extraction noextract
 instance ke_2048: BE.exp t_limbs = {
   BE.mont = mont_inst;
   BE.exp_check;
-  BE.raw_mod_exp_precomp = mod_exp_raw_precompr2;
-  BE.ct_mod_exp_precomp = mod_exp_ct_precompr2;
-  BE.raw_mod_exp_fw_precomp = mod_exp_fw_raw_precompr2;
-  BE.ct_mod_exp_fw_precomp = mod_exp_fw_ct_precompr2;
+  BE.exp_bm_vt_precomp = mod_exp_bm_vartime_precompr2;
+  BE.exp_bm_ct_precomp = mod_exp_bm_consttime_precompr2;
+  BE.exp_fw_vt_precomp = mod_exp_fw_vartime_precompr2;
+  BE.exp_fw_ct_precomp = mod_exp_fw_consttime_precompr2;
 }
 
 

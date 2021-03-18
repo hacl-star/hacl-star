@@ -21,18 +21,18 @@ module BM = Hacl.Bignum.Montgomery
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let bn_check_bn_mod_st (t:limb_t) (len:BN.meta_len t) =
+let bn_check_mod_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> a:lbignum t (len +! len) ->
   Stack (limb t)
   (requires fun h -> live h n /\ live h a)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == S.bn_check_bn_mod (as_seq h0 n) (as_seq h0 a))
+    r == S.bn_check_mod (as_seq h0 n) (as_seq h0 a))
 
 
 inline_for_extraction noextract
-val bn_check_bn_mod: #t:limb_t -> k:BM.mont t -> bn_check_bn_mod_st t k.BM.bn.BN.len
-let bn_check_bn_mod #t k n a =
+val bn_check_mod: #t:limb_t -> k:BM.mont t -> bn_check_mod_st t k.BM.bn.BN.len
+let bn_check_mod #t k n a =
   [@inline_let] let len = k.BM.bn.BN.len in
   push_frame ();
   let m0 = BM.mont_check n in

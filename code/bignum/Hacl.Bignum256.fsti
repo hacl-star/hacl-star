@@ -72,6 +72,12 @@ val sub: BN.bn_sub_eq_len_st t_limbs n_limbs
   The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8]."]
 val mul: a:lbignum t_limbs n_limbs -> BN.bn_karatsuba_mul_st t_limbs n_limbs a
 
+[@@ Comment "Write `a * a` in `res`.
+
+  The argument a is meant to be a 256-bit bignum, i.e. uint64_t[4].
+  The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8]."]
+val sqr: a:lbignum t_limbs n_limbs -> BN.bn_karatsuba_sqr_st t_limbs n_limbs a
+
 [@@ Comment "Write `a mod n` in `res` if a < n * n.
 
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
@@ -108,7 +114,7 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
   default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   The function is *NOT* constant-time on the argument b. See the
-  mod_exp_ct_* functions for constant-time variants.
+  mod_exp_consttime_* functions for constant-time variants.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
   from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
@@ -119,8 +125,8 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
   • a < n
 
   Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_raw below."]
-val mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs
+  r2, this function is notably faster than mod_exp_vartime below."]
+val mod_exp_vartime_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -132,7 +138,7 @@ val mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs
   default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_raw_precompr2.
+  execution time than mod_exp_vartime_precompr2.
 
   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
   from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
@@ -143,8 +149,8 @@ val mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs
   • a < n
 
   Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_ct below."]
-val mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs
+  r2, this function is notably faster than mod_exp_consttime below."]
+val mod_exp_consttime_precompr2: BE.bn_mod_exp_precompr2_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -155,11 +161,11 @@ val mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs
   default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
 
   The function is *NOT* constant-time on the argument b. See the
-  mod_exp_ct_* functions for constant-time variants.
+  mod_exp_consttime_* functions for constant-time variants.
 
   The function returns false if any of the preconditions of mod_exp_precompr2 are
   violated, true otherwise."]
-val mod_exp_raw: BS.bn_mod_exp_safe_st t_limbs n_limbs
+val mod_exp_vartime: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -170,11 +176,11 @@ val mod_exp_raw: BS.bn_mod_exp_safe_st t_limbs n_limbs
   default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_raw.
+  execution time than mod_exp_vartime.
 
   The function returns false if any of the preconditions of
-  mod_exp_ct_precompr2 are violated, true otherwise."]
-val mod_exp_ct: BS.bn_mod_exp_safe_st t_limbs n_limbs
+  mod_exp_consttime_precompr2 are violated, true otherwise."]
+val mod_exp_consttime: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Compute `2 ^ 512 mod n`.
 
@@ -200,7 +206,7 @@ val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs n_limbs
   • 1 < n
   • 0 < a
   • a < n "]
-val mod_inv_prime_raw: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
+val mod_inv_prime_vartime: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
 
 [@@ CPrologue
 "\n/********************/
@@ -218,11 +224,28 @@ Comment
   avoid memory leaks."]
 val new_bn_from_bytes_be: BS.new_bn_from_bytes_be_st t_limbs
 
+[@@ Comment "Load a little-endian bignum from memory.
+
+  The argument b points to len bytes of valid memory.
+  The function returns a heap-allocated bignum of size sufficient to hold the
+   result of loading b, or NULL if either the allocation failed, or the amount of
+    required memory would exceed 4GB.
+
+  If the return value is non-null, clients must eventually call free(3) on it to
+  avoid memory leaks."]
+val new_bn_from_bytes_le: BS.new_bn_from_bytes_le_st t_limbs
+
 [@@ Comment "Serialize a bignum into big-endian memory.
 
   The argument b points to a 256-bit bignum.
   The outparam res points to 32 bytes of valid memory."]
 val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st t_limbs n_bytes
+
+[@@ Comment "Serialize a bignum into little-endian memory.
+
+  The argument b points to a 256-bit bignum.
+  The outparam res points to 32 bytes of valid memory."]
+val bn_to_bytes_le: Hacl.Bignum.Convert.bn_to_bytes_le_st t_limbs n_bytes
 
 [@@ CPrologue
 "\n/***************/

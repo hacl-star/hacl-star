@@ -27,7 +27,7 @@ let rec lemma_pow_ge_zero a b =
 
 
 let rec lemma_pow_nat_is_pow a b =
-  let k = mk_nat_group in
+  let k = mk_nat_comm_monoid in
   if b = 0 then begin
     lemma_pow0 a;
     LE.lemma_pow0 k a end
@@ -39,7 +39,7 @@ let rec lemma_pow_nat_is_pow a b =
 
 
 let lemma_pow_add x n m =
-  let k = mk_nat_group in
+  let k = mk_nat_comm_monoid in
   LE.lemma_pow_add k x n m;
   lemma_pow_nat_is_pow x n;
   lemma_pow_nat_is_pow x m;
@@ -47,7 +47,7 @@ let lemma_pow_add x n m =
 
 
 let lemma_pow_mul x n m =
-  let k = mk_nat_group in
+  let k = mk_nat_comm_monoid in
   LE.lemma_pow_mul k x n m;
   lemma_pow_nat_is_pow x n;
   lemma_pow_nat_is_pow (pow x n) m;
@@ -55,14 +55,14 @@ let lemma_pow_mul x n m =
 
 
 let lemma_pow_double a b =
-  let k = mk_nat_group in
+  let k = mk_nat_comm_monoid in
   LE.lemma_pow_double k a b;
   lemma_pow_nat_is_pow (a * a) b;
   lemma_pow_nat_is_pow a (b + b)
 
 
 let lemma_pow_mul_base a b n =
-  let k = mk_nat_group in
+  let k = mk_nat_comm_monoid in
   LE.lemma_pow_mul_base k a b n;
   lemma_pow_nat_is_pow a n;
   lemma_pow_nat_is_pow b n;
@@ -183,7 +183,7 @@ let lemma_pow_mod #n a b = lemma_pow_mod_ n a b
 
 
 let rec lemma_pow_nat_mod_is_pow #n a b =
-  let k = mk_nat_mod_group n in
+  let k = mk_nat_mod_comm_monoid n in
   if b = 1 then begin
     lemma_pow1 a;
     LE.lemma_pow1 k a end
@@ -197,7 +197,7 @@ let rec lemma_pow_nat_mod_is_pow #n a b =
       (==) { lemma_pow_nat_mod_is_pow #n a (b - 1) }
       a * LE.pow k a (b - 1) % n;
       (==) { }
-      k.LE.fmul a (LE.pow k a (b - 1));
+      k.LE.mul a (LE.pow k a (b - 1));
       (==) { LE.lemma_pow_unfold k a b }
       LE.pow k a b;
       }; () end

@@ -78,6 +78,50 @@ let new_bn_from_bytes_be #t r len b =
 
 
 inline_for_extraction noextract
+let new_bn_from_bytes_le_st (t:limb_t) =
+    r:HS.rid
+  -> len:size_t
+  -> b:lbuffer uint8 len ->
+  ST (B.buffer (limb t))
+  (requires fun h ->
+    live h b /\
+    ST.is_eternal_region r)
+  (ensures  fun h0 res h1 ->
+    B.(modifies loc_none h0 h1) /\
+    not (B.g_is_null res) ==> (
+      0 < v len /\ numbytes t * v (blocks len (size (numbytes t))) <= max_size_t /\
+      B.len res == blocks len (size (numbytes t)) /\
+      B.(fresh_loc (loc_buffer res) h0 h1) /\
+      B.(loc_includes (loc_region_only false r) (loc_buffer res)) /\
+      as_seq h1 (res <: lbignum t (blocks len (size (numbytes t)))) == SC.bn_from_bytes_le (v len) (as_seq h0 b)))
+
+
+inline_for_extraction noextract
+val new_bn_from_bytes_le: #t:limb_t -> new_bn_from_bytes_le_st t
+let new_bn_from_bytes_le #t r len b =
+  [@inline_let]
+  let numb = size (numbytes t) in
+  if len = 0ul || not (blocks len numb <=. 0xfffffffful `FStar.UInt32.div` numb) then
+    B.null
+  else
+    let h0 = ST.get () in
+    let res = LowStar.Monotonic.Buffer.mmalloc_partial r (uint #t 0) (blocks len numb) in
+    if B.is_null res then
+      res
+    else
+      let h1 = ST.get () in
+      B.(modifies_only_not_unused_in loc_none h0 h1);
+      assert (B.len res == blocks len numb);
+      let res: Lib.Buffer.buffer (limb t) = res in
+      assert (B.length res == FStar.UInt32.v (blocks len numb));
+      let res: lbignum t (blocks len numb) = res in
+      BC.mk_bn_from_bytes_le len b res;
+      let h2 = ST.get () in
+      B.(modifies_only_not_unused_in loc_none h0 h2);
+      res
+
+
+inline_for_extraction noextract
 let new_bn_precomp_r2_mod_n_st (t:limb_t) (len:BN.meta_len t) =
     r:HS.rid
   -> n:lbignum t len ->
@@ -133,7 +177,7 @@ let bn_mod_slow_safe_st (t:limb_t) (len:BN.meta_len t) =
     live h n /\ live h a /\ live h res /\
     disjoint res n /\ disjoint res a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
-    r == BB.unsafe_bool_of_limb (SR.bn_check_bn_mod (as_seq h0 n) (as_seq h0 a)) /\
+    r == BB.unsafe_bool_of_limb (SR.bn_check_mod (as_seq h0 n) (as_seq h0 a)) /\
     (r ==> bn_v h1 res == bn_v h0 a % bn_v h0 n))
 
 
@@ -147,7 +191,7 @@ val bn_mod_slow_safe:
 let bn_mod_slow_safe #t k bn_mod_precompr2 n a res =
   [@inline_let] let len = k.BM.bn.BN.len in
   let h0 = ST.get () in
-  let is_valid_m = BR.bn_check_bn_mod k n a in
+  let is_valid_m = BR.bn_check_mod k n a in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
   BR.bn_mod_slow k bn_mod_precompr2 nBits n a res;
@@ -178,8 +222,13 @@ let bn_mod_exp_safe_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_raw_safe: #t:limb_t -> k:BE.exp t -> bn_mod_exp_safe_st t k.BE.mont.BM.bn.BN.len
-let bn_mod_exp_raw_safe #t k n a bBits b res =
+val bn_mod_exp_vartime_safe:
+    #t:limb_t
+  -> k:BE.exp t
+  -> bn_mod_exp_vartime_precompr2:BE.bn_mod_exp_precompr2_st t k.BE.mont.BM.bn.BN.len ->
+  bn_mod_exp_safe_st t k.BE.mont.BM.bn.BN.len
+
+let bn_mod_exp_vartime_safe #t k bn_mod_exp_vartime_precompr2 n a bBits b res =
   [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   let h0 = ST.get () in
   let is_valid_m = k.BE.exp_check n a bBits b in
@@ -187,7 +236,7 @@ let bn_mod_exp_raw_safe #t k n a bBits b res =
 
   if BB.unsafe_bool_of_limb is_valid_m then begin
     SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
-    BE.bn_mod_exp_raw k.BE.mont k.BE.raw_mod_exp_precomp nBits n a bBits b res end;
+    BE.bn_mod_exp_vartime k bn_mod_exp_vartime_precompr2 nBits n a bBits b res end;
 
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
@@ -196,8 +245,13 @@ let bn_mod_exp_raw_safe #t k n a bBits b res =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_ct_safe: #t:limb_t -> k:BE.exp t -> bn_mod_exp_safe_st t k.BE.mont.BM.bn.BN.len
-let bn_mod_exp_ct_safe #t k n a bBits b res =
+val bn_mod_exp_consttime_safe:
+    #t:limb_t
+  -> k:BE.exp t
+  -> bn_mod_exp_consttime_precompr2:BE.bn_mod_exp_precompr2_st t k.BE.mont.BM.bn.BN.len ->
+  bn_mod_exp_safe_st t k.BE.mont.BM.bn.BN.len
+
+let bn_mod_exp_consttime_safe #t k bn_mod_exp_consttime_precompr2 n a bBits b res =
   [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   let h0 = ST.get () in
   let is_valid_m = k.BE.exp_check n a bBits b in
@@ -205,7 +259,7 @@ let bn_mod_exp_ct_safe #t k n a bBits b res =
 
   if BB.unsafe_bool_of_limb is_valid_m then begin
     SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
-    BE.bn_mod_exp_ct k.BE.mont k.BE.ct_mod_exp_precomp nBits n a bBits b res end;
+    BE.bn_mod_exp_consttime k bn_mod_exp_consttime_precompr2 nBits n a bBits b res end;
 
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;
@@ -223,21 +277,26 @@ let bn_mod_inv_prime_safe_st (t:limb_t) (len:BN.meta_len t) =
     live h n /\ live h a /\ live h res /\
     disjoint res n /\ disjoint res a /\ disjoint n a)
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
-    r == BB.unsafe_bool_of_limb (SI.bn_check_bn_mod_inv_prime (as_seq h0 n) (as_seq h0 a)) /\
+    r == BB.unsafe_bool_of_limb (SI.bn_check_mod_inv_prime (as_seq h0 n) (as_seq h0 a)) /\
    (r ==> bn_v h1 res * bn_v h0 a % bn_v h0 n = 1))
 
 
 inline_for_extraction noextract
-val bn_mod_inv_prime_raw_safe: #t:limb_t -> k:BE.exp t -> bn_mod_inv_prime_safe_st t k.BE.mont.BM.bn.BN.len
-let bn_mod_inv_prime_raw_safe #t k n a res =
+val bn_mod_inv_prime_vartime_safe:
+    #t:limb_t
+  -> k:BE.exp t
+  -> bn_mod_exp_vartime_precompr2:BE.bn_mod_exp_precompr2_st t k.BE.mont.BM.bn.BN.len ->
+  bn_mod_inv_prime_safe_st t k.BE.mont.BM.bn.BN.len
+
+let bn_mod_inv_prime_vartime_safe #t k bn_mod_exp_vartime_precompr2 n a res =
   [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
   let h0 = ST.get () in
-  let is_valid_m = BI.bn_check_bn_mod_inv_prime #t k n a in
+  let is_valid_m = BI.bn_check_mod_inv_prime #t k n a in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
   if BB.unsafe_bool_of_limb is_valid_m then begin
     SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
-    BI.bn_mod_inv_prime_raw k nBits n a res end;
+    BI.bn_mod_inv_prime_vartime k bn_mod_exp_vartime_precompr2 nBits n a res end;
 
   let h1 = ST.get () in
   mapT len res (logand is_valid_m) res;

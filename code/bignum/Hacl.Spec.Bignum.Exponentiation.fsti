@@ -62,8 +62,8 @@ let bn_mod_exp_precompr2_st (t:limb_t) (len:bn_len t) =
     bn_mod_exp_post n a bBits b res)
 
 
-val bn_mod_exp_raw_precompr2: #t:limb_t -> len:bn_len t -> bn_mod_exp_precompr2_st t len
-val bn_mod_exp_ct_precompr2: #t:limb_t -> len:bn_len t -> bn_mod_exp_precompr2_st t len
+val bn_mod_exp_rl_precompr2: #t:limb_t -> len:bn_len t -> bn_mod_exp_precompr2_st t len
+val bn_mod_exp_mont_ladder_swap_precompr2: #t:limb_t -> len:bn_len t -> bn_mod_exp_precompr2_st t len
 
 val bn_mod_exp_fw_precompr2:
     #t:limb_t
@@ -86,11 +86,9 @@ let bn_mod_exp_st (t:limb_t) (len:bn_len t) =
     bn_mod_exp_post n a bBits b res)
 
 
-val bn_mod_exp_raw: #t:limb_t -> len:bn_len t -> bn_mod_exp_st t len
-val bn_mod_exp_ct: #t:limb_t -> len:bn_len t -> bn_mod_exp_st t len
+//no need to distinguish between vartime and consttime in the spec
+val bn_mod_exp_vartime_precompr2: #t:limb_t -> len:bn_len t -> bn_mod_exp_precompr2_st t len
+val bn_mod_exp_consttime_precompr2: #t:limb_t -> len:bn_len t -> bn_mod_exp_precompr2_st t len
 
-val bn_mod_exp_fw:
-    #t:limb_t
-  -> len:bn_len t
-  -> l:size_pos{l < bits t /\ pow2 l * len <= max_size_t} ->
-  bn_mod_exp_st t len
+val bn_mod_exp_vartime: #t:limb_t -> len:bn_len t -> bn_mod_exp_st t len
+val bn_mod_exp_consttime: #t:limb_t -> len:bn_len t -> bn_mod_exp_st t len

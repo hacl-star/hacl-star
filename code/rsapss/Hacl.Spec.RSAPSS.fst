@@ -315,7 +315,7 @@ let rsapss_sign_bn #t modBits eBits dBits skey m =
   Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
   SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
   let s = bn_mod_exp_fw_precompr2 nLen 4 n m dBits d r2 in
-  let m' = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
+  let m' = bn_mod_exp_rl_precompr2 nLen n s eBits e r2 in
   let eq_m = bn_eq_mask m m' in
   let s = map (logand eq_m) s in
   BB.unsafe_bool_of_limb eq_m, s
@@ -461,7 +461,7 @@ let rsapss_sign_lemma #t a modBits eBits dBits skey sLen salt msgLen msg =
   Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
   SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
   let s = bn_mod_exp_fw_precompr2 nLen 4 n m dBits d r2 in
-  let m' = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
+  let m' = bn_mod_exp_rl_precompr2 nLen n s eBits e r2 in
 
   let eq_m = bn_eq_mask m m' in
   bn_eq_mask_lemma m m';
@@ -542,7 +542,7 @@ let rsapss_verify_bn #t modBits eBits pkey m_def s =
     Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
     SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
 
-    let m = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
+    let m = bn_mod_exp_rl_precompr2 nLen n s eBits e r2 in
     if bn_lt_pow2 modBits m then (true, m)
     else false, m end
   else false, m_def
@@ -673,7 +673,7 @@ let rsapss_verify_lemma #t a modBits eBits pkey sLen sgnt msgLen msg =
   if BB.unsafe_bool_of_limb mask then begin
     Math.Lemmas.pow2_le_compat (bits * nLen) modBits;
     SM.bn_precomp_r2_mod_n_lemma (modBits - 1) n;
-    let m = bn_mod_exp_raw_precompr2 nLen n s eBits e r2 in
+    let m = bn_mod_exp_rl_precompr2 nLen n s eBits e r2 in
 
     blocks_bits_lemma t emBits;
     blocks_numb_lemma t emBits;
