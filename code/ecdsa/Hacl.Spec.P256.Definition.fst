@@ -308,6 +308,8 @@ let rec lemma_lseq_as_seq_extension #l0 #l1 a0 a1 i =
     assert(forall (k: nat {k < i}). Lib.Sequence.index a0 k == Lib.Sequence.index a1 k);
     assert (Lib.Sequence.index a0 (i - 1) == Lib.Sequence.index a1 (i - 1))
 
+
+assume val lseq_upperbound: #l: size_nat -> a: Lib.Sequence.lseq uint64 l -> Lemma (lseq_as_nat a < pow2 (64 * l))
     
 
 

@@ -4065,6 +4065,42 @@ point_add(Spec_P256_curve c, uint64_t *p, uint64_t *q, uint64_t *result, uint64_
   _point_add_if_second_branch_impl1(c, result, p, q, t12, t5);
 }
 
+static uint32_t coordinate521 = (uint32_t)9U;
+
+extern void Hacl_Impl_EC_P521_Reduction_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
+
+static void getZeroWord(uint64_t *i, uint64_t *o)
+{
+  memcpy(o, i, coordinate521 * sizeof (uint64_t));
+  uint64_t o8 = o[8U];
+  uint64_t o8Updated = (uint64_t)0x00000000000002ffU & o8;
+  o[8U] = o8Updated;
+}
+
+static void getFirstWord(uint64_t *i, uint64_t *o)
+{
+  uint64_t flag0 = (uint64_t)0xfffffffffffffd00U;
+  uint64_t flag1 = (uint64_t)0x00000000000002ffU;
+  uint64_t i0 = i[9U];
+  uint64_t i1 = i[10U];
+  uint64_t i0_ = i0 & flag0;
+  uint64_t i1_ = i1 & flag1;
+  uint64_t o0 = i0_ ^ i1_;
+  o[0U] = o0;
+}
+
+static void reduction_p521(uint64_t *i, uint64_t *o)
+{
+  uint64_t a0[9U] = { 0U };
+  uint64_t a1[9U] = { 0U };
+  uint64_t a2[9U] = { 0U };
+  getZeroWord(i, a0);
+  getFirstWord(i, a1);
+  getFirstWord(i, a2);
+  Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
+  Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
+}
+
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
 {
   uint64_t as_uint64_high = (uint64_t)high;
@@ -4614,6 +4650,11 @@ static void reduction(Spec_P256_curve c, uint64_t *i, uint64_t *o)
     case Spec_P256_P384:
       {
         solinas_reduction_impl_p384(i, o);
+        break;
+      }
+    case Spec_P256_Default:
+      {
+        reduction_p521(i, o);
         break;
       }
     default:

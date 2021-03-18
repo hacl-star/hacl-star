@@ -52,14 +52,14 @@ val mult_one_round_ecdsa_prime:
 let mult_one_round_ecdsa_prime #c t co k0 = admit()
 
 
-val lemma_test: #l: size_nat -> c: curve ->  a: lseq uint64 l -> i: nat {i <= l} 
+val lemma_test: #l: size_nat -> a: lseq uint64 l -> i: nat {i <= l} 
   -> Lemma (ensures (
     let a0 = sub a 0 i in 
     let a1 = sub a i (l - i) in 
     lseq_as_nat a = lseq_as_nat a0 + pow2 (64 * i) * lseq_as_nat a1))
     (decreases (l - i))
 
-let rec lemma_test #l c a i = 
+let rec lemma_test #l a i = 
   if i = 0 then begin 
     let a0 = sub a 0 0 in 
     let a1 = sub a 0 l in 
@@ -73,7 +73,7 @@ let rec lemma_test #l c a i =
       calc (==) 
       {
   lseq_as_nat a1;
-  (==) {lemma_test #(l - i) c a1 1}
+  (==) {lemma_test #(l - i) a1 1}
   lseq_as_nat (sub a1 0 1) + pow2 64 * lseq_as_nat (sub a1 1 (l - i - 1));
   (==) {lseq_as_nat_first (sub a1 0 1)}
   v (index a1 0) + pow2 64 * lseq_as_nat (sub a1 1 (l - i - 1));
@@ -91,7 +91,7 @@ let rec lemma_test #l c a i =
     
     calc (==) {
       lseq_as_nat a;
-      (==) {lemma_test c a (i + 1)}
+      (==) {lemma_test a (i + 1)}
       lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * (i + 1)) * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
       (==) { pow2_plus (64 * i) 64}
       lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * i) * pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1)));

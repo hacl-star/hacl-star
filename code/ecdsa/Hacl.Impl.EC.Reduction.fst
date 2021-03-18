@@ -15,6 +15,7 @@ open Hacl.Impl.EC.LowLevel
 
 open Hacl.Impl.SolinasReduction.P384
 open Hacl.Impl.SolinasReduction.P256
+open Hacl.Impl.EC.P521.Reduction
 
 open Hacl.Spec.P256.Definition
 open FStar.Mul
@@ -28,3 +29,4 @@ let reduction #c i o =
   match c with 
     |P256 -> solinas_reduction_impl_p256 i o 
     |P384 -> solinas_reduction_impl_p384 i o
+    |Default -> reduction_p521 i o

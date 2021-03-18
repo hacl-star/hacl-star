@@ -172,8 +172,8 @@ let montgomery_multiplication_buffer_by_one #c a result =
   
   lemma_create_zero_buffer (2 * v len) c; 
 
-  lemma_test c (as_seq h0 t) (v len);
-  lemma_test c (as_seq h1 t) (v len);
+  lemma_test (as_seq h0 t) (v len);
+  lemma_test (as_seq h1 t) (v len);
 
   
   montgomery_multiplication_reduction t result;
