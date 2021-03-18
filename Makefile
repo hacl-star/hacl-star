@@ -184,7 +184,7 @@ ifeq ($(shell uname -s),Darwin)
   ifeq (,$(shell which gtime))
     $(error gtime not found; try brew install gnu-time)
   endif
-  TIME := gtime
+  TIME := gtime -q -f '%E'
 else
   ifeq ($(shell uname -s),FreeBSD)
     SED := sed
@@ -193,7 +193,7 @@ else
   else
     SED := sed
     SEDi := -i
-    TIME := /usr/bin/time
+    TIME := /usr/bin/time -q -f '%E'
   endif
 endif
 
@@ -220,7 +220,7 @@ SHELL:=$(shell which bash)
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
   @echo "$(subst ",\",$1)" > $3.cmd; \
-  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
+  $(TIME) -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
   if [ $$ret -eq 0 ]; then \
