@@ -32,7 +32,7 @@ if [ -e vale/bin/.vale_version ]; then
 fi
 
 if [ $vale_version != $old_vale_version ]; then
-  wget "https://github.com/project-everest/vale/releases/download/v${vale_version}/vale-release-${vale_version}.zip" -O vale/vale-release.zip
+  wget --ca-directory=/etc/ssl/certs "https://github.com/project-everest/vale/releases/download/v${vale_version}/vale-release-${vale_version}.zip" -O vale/vale-release.zip
   rm -rf "vale/vale-release-${vale_version}"
   unzip -o vale/vale-release.zip -d vale
   rm -rf "vale/bin"
