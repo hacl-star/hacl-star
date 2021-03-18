@@ -7,7 +7,7 @@ all: dist/bignum-test.exe
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-CFLAGS += -I ../../../lib/c -I ../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I ../../../lib/c -I ../../lib/c -march=native -mtune=native -O3 -DCOMPILE_INTRINSICS
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects

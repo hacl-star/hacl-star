@@ -9,7 +9,7 @@ module BM = Hacl.Bignum.Montgomery
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let km (len:BN.meta_len Lib.IntTypes.U64) =
+let km (len:BN.meta_len t_limbs) =
   BM.mk_runtime_mont len
 
 let field_init len r nBits n =
