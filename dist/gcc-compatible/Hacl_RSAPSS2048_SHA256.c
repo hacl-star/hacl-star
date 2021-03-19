@@ -203,7 +203,7 @@ static inline void mont_sqr(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64
 }
 
 static inline void
-mod_exp_raw_precompr2(
+mod_exp_bm_vartime_precompr2(
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
@@ -242,12 +242,12 @@ mod_exp_raw_precompr2(
 }
 
 static inline void
-mod_exp_fw_ct_precompr2(
+mod_exp_fw_consttime_precompr2(
+  uint32_t l,
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
-  uint32_t l,
   uint64_t *r2,
   uint64_t *res
 )
@@ -280,6 +280,10 @@ mod_exp_fw_ct_precompr2(
   }
   for (uint32_t i0 = (uint32_t)0U; i0 < bBits / l; i0++)
   {
+    for (uint32_t i = (uint32_t)0U; i < l; i++)
+    {
+      mont_sqr(n, nInv, accM, accM);
+    }
     uint64_t mask_l = ((uint64_t)1U << l) - (uint64_t)1U;
     uint32_t i1 = (bBits - l * i0 - l) / (uint32_t)64U;
     uint32_t j = (bBits - l * i0 - l) % (uint32_t)64U;
@@ -307,15 +311,15 @@ mod_exp_fw_ct_precompr2(
         os[i] = x;
       }
     }
-    for (uint32_t i = (uint32_t)0U; i < l; i++)
-    {
-      mont_sqr(n, nInv, accM, accM);
-    }
     mont_mul(n, nInv, accM, a_bits_l, accM);
   }
   if (!(bBits % l == (uint32_t)0U))
   {
     uint32_t c = bBits % l;
+    for (uint32_t i = (uint32_t)0U; i < c; i++)
+    {
+      mont_sqr(n, nInv, accM, accM);
+    }
     uint32_t c10 = bBits % l;
     uint64_t mask_l = ((uint64_t)1U << c10) - (uint64_t)1U;
     uint32_t i0 = (uint32_t)0U;
@@ -344,10 +348,6 @@ mod_exp_fw_ct_precompr2(
         uint64_t x = (c1 & res_j[i]) | (~c1 & a_bits_c[i]);
         os[i] = x;
       }
-    }
-    for (uint32_t i = (uint32_t)0U; i < c; i++)
-    {
-      mont_sqr(n, nInv, accM, accM);
     }
     mont_mul(n, nInv, accM, a_bits_c, accM);
   }
@@ -446,8 +446,8 @@ Hacl_RSAPSS2048_SHA256_rsapss_sign(
     uint64_t *r2 = skey + nLen2;
     uint64_t *e = skey + nLen2 + nLen2;
     uint64_t *d = skey + nLen2 + nLen2 + eLen;
-    mod_exp_fw_ct_precompr2(n, m, dBits, d, (uint32_t)4U, r2, s);
-    mod_exp_raw_precompr2(n, s, eBits, e, r2, m_);
+    mod_exp_fw_consttime_precompr2((uint32_t)4U, n, m, dBits, d, r2, s);
+    mod_exp_bm_vartime_precompr2(n, s, eBits, e, r2, m_);
     uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
     for (uint32_t i = (uint32_t)0U; i < nLen2; i++)
     {
@@ -515,7 +515,7 @@ Hacl_RSAPSS2048_SHA256_rsapss_verify(
     bool res;
     if (mask == (uint64_t)0xFFFFFFFFFFFFFFFFU)
     {
-      mod_exp_raw_precompr2(n, s, eBits, e, r2, m);
+      mod_exp_bm_vartime_precompr2(n, s, eBits, e, r2, m);
       bool ite;
       if (!((uint32_t)7U == (uint32_t)0U))
       {

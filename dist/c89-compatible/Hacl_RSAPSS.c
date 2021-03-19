@@ -550,17 +550,19 @@ Hacl_RSAPSS_rsapss_sign(
                   uint64_t *r2 = skey + nLen2;
                   uint64_t *e = skey + nLen2 + nLen2;
                   uint64_t *d = skey + nLen2 + nLen2 + eLen;
-                  Hacl_Bignum_Exponentiation_bn_mod_exp_fw_ct_precompr2_u64((modBits - (uint32_t)1U)
+                  Hacl_Bignum_Exponentiation_bn_mod_exp_fw_consttime_precompr2_u64((modBits
+                    - (uint32_t)1U)
                     / (uint32_t)64U
                     + (uint32_t)1U,
+                    (uint32_t)4U,
                     n,
                     m,
                     dBits,
                     d,
-                    (uint32_t)4U,
                     r2,
                     s);
-                  Hacl_Bignum_Exponentiation_bn_mod_exp_raw_precompr2_u64((modBits - (uint32_t)1U)
+                  Hacl_Bignum_Exponentiation_bn_mod_exp_bm_vartime_precompr2_u64((modBits
+                    - (uint32_t)1U)
                     / (uint32_t)64U
                     + (uint32_t)1U,
                     n,
@@ -669,7 +671,8 @@ Hacl_RSAPSS_rsapss_verify(
               bool res;
               if (mask == (uint64_t)0xFFFFFFFFFFFFFFFFU)
               {
-                Hacl_Bignum_Exponentiation_bn_mod_exp_raw_precompr2_u64((modBits - (uint32_t)1U)
+                Hacl_Bignum_Exponentiation_bn_mod_exp_bm_vartime_precompr2_u64((modBits
+                  - (uint32_t)1U)
                   / (uint32_t)64U
                   + (uint32_t)1U,
                   n,

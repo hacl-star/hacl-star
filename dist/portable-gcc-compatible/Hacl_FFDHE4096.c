@@ -226,15 +226,15 @@ static inline void mont_sqr(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint64
 
 /* SNIPPET_END: mont_sqr */
 
-/* SNIPPET_START: mod_exp_fw_ct_precompr2 */
+/* SNIPPET_START: mod_exp_fw_consttime_precompr2 */
 
 static inline void
-mod_exp_fw_ct_precompr2(
+mod_exp_fw_consttime_precompr2(
+  uint32_t l,
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
-  uint32_t l,
   uint64_t *r2,
   uint64_t *res
 )
@@ -267,6 +267,10 @@ mod_exp_fw_ct_precompr2(
   }
   for (uint32_t i0 = (uint32_t)0U; i0 < bBits / l; i0++)
   {
+    for (uint32_t i = (uint32_t)0U; i < l; i++)
+    {
+      mont_sqr(n, nInv, accM, accM);
+    }
     uint64_t mask_l = ((uint64_t)1U << l) - (uint64_t)1U;
     uint32_t i1 = (bBits - l * i0 - l) / (uint32_t)64U;
     uint32_t j = (bBits - l * i0 - l) % (uint32_t)64U;
@@ -294,15 +298,15 @@ mod_exp_fw_ct_precompr2(
         os[i] = x;
       }
     }
-    for (uint32_t i = (uint32_t)0U; i < l; i++)
-    {
-      mont_sqr(n, nInv, accM, accM);
-    }
     mont_mul(n, nInv, accM, a_bits_l, accM);
   }
   if (!(bBits % l == (uint32_t)0U))
   {
     uint32_t c = bBits % l;
+    for (uint32_t i = (uint32_t)0U; i < c; i++)
+    {
+      mont_sqr(n, nInv, accM, accM);
+    }
     uint32_t c10 = bBits % l;
     uint64_t mask_l = ((uint64_t)1U << c10) - (uint64_t)1U;
     uint32_t i0 = (uint32_t)0U;
@@ -332,10 +336,6 @@ mod_exp_fw_ct_precompr2(
         os[i] = x;
       }
     }
-    for (uint32_t i = (uint32_t)0U; i < c; i++)
-    {
-      mont_sqr(n, nInv, accM, accM);
-    }
     mont_mul(n, nInv, accM, a_bits_c, accM);
   }
   uint64_t tmp[128U] = { 0U };
@@ -343,7 +343,7 @@ mod_exp_fw_ct_precompr2(
   reduction(n, nInv, tmp, res);
 }
 
-/* SNIPPET_END: mod_exp_fw_ct_precompr2 */
+/* SNIPPET_END: mod_exp_fw_consttime_precompr2 */
 
 /* SNIPPET_START: ffdhe_precomp_p */
 
@@ -451,7 +451,13 @@ ffdhe_compute_exp(uint64_t *p_r2_n, uint64_t *sk_n, uint64_t *b_n, uint8_t *res)
   KRML_CHECK_SIZE(sizeof (uint64_t), nLen);
   uint64_t res_n[nLen];
   memset(res_n, 0U, nLen * sizeof (uint64_t));
-  mod_exp_fw_ct_precompr2(p_n, b_n, (uint32_t)64U * nLen, sk_n, (uint32_t)4U, r2_n, res_n);
+  mod_exp_fw_consttime_precompr2((uint32_t)4U,
+    p_n,
+    b_n,
+    (uint32_t)64U * nLen,
+    sk_n,
+    r2_n,
+    res_n);
   Hacl_Bignum_Convert_bn_to_bytes_be_uint64((uint32_t)512U, res_n, res);
 }
 
