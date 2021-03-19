@@ -211,7 +211,7 @@ val auth_encap:
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 800 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 1000 --fuel 0 --ifuel 4"
 let auth_encap cs skE pkR skS =
   match DH.secret_to_public (curve_of_cs cs) skE with
   | None -> None
@@ -251,7 +251,7 @@ val auth_decap:
   -> pkS: DH.serialized_point (curve_of_cs cs) ->
   Tot (option (key_kem_s cs))
 
-#set-options "--z3rlimit 800 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 1000 --fuel 0 --ifuel 4"
 let auth_decap cs enc skR pkS =
   let pkE = deserialize_public_key cs enc in
   match DH.dh (curve_of_cs cs) skR pkE with
