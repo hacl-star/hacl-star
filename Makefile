@@ -160,7 +160,7 @@ min-test:
 TO_CLEAN=$(foreach ext,checked checked.lax out cmd err time dump types.vaf krml cmx cmo cmi o d a,-or -iname '*.$(ext)')
 clean:
 	find . -iname '.depend*' $(TO_CLEAN) -delete
-	rm -rf obj/*
+	find obj -depth 1 -name .gitignore -o -delete
 
 
 #################
@@ -179,22 +179,17 @@ ifeq ($(shell uname -s),Darwin)
   ifeq (,$(shell which gsed))
     $(error gsed not found; try brew install gnu-sed)
   endif
-  SED := gsed
-  SEDi := -i
+  SED := gsed -i
   ifeq (,$(shell which gtime))
     $(error gtime not found; try brew install gnu-time)
   endif
   TIME := gtime -q -f '%E'
-else
-  ifeq ($(shell uname -s),FreeBSD)
-    SED := sed
-    SEDi := -i ''
+else ifeq ($(shell uname -s),FreeBSD)
+    SED := sed -i ''
     TIME := /usr/bin/time
-  else
-    SED := sed
-    SEDi := -i
-    TIME := /usr/bin/time -q -f '%E'
-  endif
+else
+  SED := sed -i
+  TIME := /usr/bin/time -q -f '%E'
 endif
 
 ifneq ($(OS),Windows_NT)
@@ -278,8 +273,8 @@ ifndef MAKE_RESTARTS
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector +C -C.String -C.Failure' > $@ && \
-	  $(SED) $(SEDi) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
+	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer +C -C.String -C.Failure' > $@ && \
+	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
@@ -289,7 +284,7 @@ ifndef MAKE_RESTARTS
 	    $(addprefix -in ,$(VALE_ROOTS)) \
 	    -dep $< \
 	    > $@ && \
-	  $(SED) $(SEDi) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!g' $@ \
+	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!g' $@ \
 	  ,[VALE-DEPEND],$(call to-obj-dir,$@))
 
 .PHONY: .FORCE
