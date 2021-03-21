@@ -17,7 +17,7 @@ open FStar.Mul
 
 inline_for_extraction noextract 
 val toDomain: #c: curve -> value: felem c -> result: felem c -> Stack unit 
-  (requires fun h -> felem_eval c h value /\ live h value /\live h result /\ eq_or_disjoint value result)
+  (requires fun h -> felem_eval c h value /\ live h value /\ live h result /\ eq_or_disjoint value result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result = toDomain_ #c (as_nat c h0 value))
  
  
@@ -56,8 +56,7 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
 
 val norm: #c: curve -> p: point c -> resultPoint: point c -> 
   tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> Stack unit
-  (requires fun h -> 
-    live h p /\ live h resultPoint /\ live h tempBuffer /\ 
+  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ 
     disjoint p tempBuffer /\ disjoint tempBuffer resultPoint /\ 
     point_eval c h p) 
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
@@ -67,8 +66,7 @@ val norm: #c: curve -> p: point c -> resultPoint: point c ->
     pointNorm == resultPoint))
 
 
-val normX: #c: curve -> p: point c -> result: felem c 
-  -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> 
+val normX: #c: curve -> p: point c -> result: felem c -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> 
   Stack unit
   (requires fun h -> live h p /\ live h result /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc result; loc tempBuffer] /\ point_eval c h p) 
@@ -82,12 +80,11 @@ val normX: #c: curve -> p: point c -> result: felem c
 #push-options "--z3rlimit 100" 
 
 inline_for_extraction noextract
-val scalarMultiplication: #c: curve -> #buf_type: buftype->  p: point c -> result: point c 
+val scalarMultiplication: #c: curve -> #buf_type: buftype -> p: point c -> result: point c 
   -> scalar: lbuffer_t buf_type uint8 (getScalarLen c)
   -> tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
   Stack unit
-  (requires fun h ->
-    live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+  (requires fun h -> live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\ 
     point_eval c h p)
   (ensures fun h0 _ h1 -> 
@@ -104,31 +101,21 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
   scalar: lbuffer uint8 (getScalarLen c) -> 
   tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
   Stack unit
-    (requires fun h -> 
-      point_eval c h p /\
-      live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result]
-    )
-  (ensures fun h0 _ h1 -> 
-    point_eval c h1 result /\
-    modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\
-    (
-      let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
-      let rN, _ = montgomery_ladder_spec #c (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates c (as_seq h0 p)) in 
-      rN == p1
-  )
-) 
+  (requires fun h -> point_eval c h p /\
+    live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result])
+  (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ (
+    let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
+    let rN, _ = montgomery_ladder_spec #c (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates c (as_seq h0 p)) in 
+    rN == p1)) 
+    
 
-
-val secretToPublic: #c: curve -> result: point c  -> scalar: lbuffer uint8 (getScalarLen c) 
+val secretToPublic: #c: curve -> result: point c -> scalar: lbuffer uint8 (getScalarLen c) 
   -> tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
-  Stack unit
-    (requires fun h -> 
-      live h result /\ live h scalar /\ live h tempBuffer /\ 
-      LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result]
-    )
-  (ensures fun h0 _ h1 -> 
-    point_eval c h0 result /\
+  Stack unit (requires fun h -> 
+    live h result /\ live h scalar /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
+  (ensures fun h0 _ h1 -> point_eval c h0 result /\
     modifies (loc result |+| loc tempBuffer) h0 h1 (* /\
     (
       let x3, y3, z3 = point_prime_to_coordinates
@@ -138,12 +125,10 @@ val secretToPublic: #c: curve -> result: point c  -> scalar: lbuffer uint8 (getS
   )
 
 val secretToPublicWithoutNorm: #c: curve -> result: point c -> scalar: lbuffer uint8 (getScalarLen c) -> 
- tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+  tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
   Stack unit
-    (requires fun h -> 
-      live h result /\ live h scalar /\ live h tempBuffer /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result]
-    )
+  (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
   (ensures fun h0 _ h1 ->
     let prime = getPrime c in 
     let len = getCoordinateLenU64 c in
@@ -151,8 +136,8 @@ val secretToPublicWithoutNorm: #c: curve -> result: point c -> scalar: lbuffer u
     modifies (loc result |+| loc tempBuffer) h0 h1 /\
     as_nat c h1 (gsub result (size 0) len) < prime /\ 
     as_nat c h1 (gsub result len len) < prime /\ 
-    as_nat c h1 (gsub result (size 2 *! len) len) < prime /\
-    (
-	let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
-	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), (basePoint #c)) in 
-	rN == p1))  
+    as_nat c h1 (gsub result (size 2 *! len) len) < prime /\ (
+    
+    let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
+    let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), (basePoint #c)) in 
+    rN == p1))  

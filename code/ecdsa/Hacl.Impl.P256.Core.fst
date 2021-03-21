@@ -15,7 +15,6 @@ open Hacl.Impl.EC.Exponent
 
 open Hacl.Impl.EC.MontgomeryMultiplication
 
-
 open Hacl.Impl.P256.Math 
 
 open Hacl.Impl.EC.PointAdd
@@ -183,8 +182,8 @@ val lemma_point_eval_swapped: c: curve -> h0: mem -> h1: mem -> p: point c -> q:
 
 let lemma_point_eval_swapped c h0 h1 p q = 
   assert(
-    as_nat c h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) == 
-    as_nat c h1 (gsub q (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)))
+  as_nat c h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) == 
+  as_nat c h1 (gsub q (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)))
 
 
 [@ CInline]
@@ -281,7 +280,8 @@ let normalisation_update #c z2x z3y p resultPoint =
 
 
 val lemma_norm: #c: curve -> pD : point_nat_prime #c -> r: point_nat_prime #c ->
-  Lemma (requires (
+  Lemma 
+  (requires (
     let prime = getPrime c in 
     let xD, yD, zD = pD in 
     let x3, y3, z3 = r in 
