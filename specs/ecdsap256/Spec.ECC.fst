@@ -7,6 +7,8 @@ open Lib.IntTypes
 open Lib.Sequence
 open Lib.RawIntTypes
 
+open Lib.LoopCombinators 
+
 open FStar.Math.Lemmas
 open FStar.Math.Lib
 
@@ -29,8 +31,60 @@ let _point_double #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
   (x3, y3, z3)
 
 
+let isPointAtInfinity (p:point_nat) =
+  let (_, _, z) = p in z = 0
+
+
+#push-options "--fuel 1"
+
+let _norm #curve (p:point_nat_prime #curve) : (point_nat_prime #curve) =
+  let prime = getPrime curve in 
+  let (x, y, z) = p in
+  let z2 = z * z in
+  let z2i = modp_inv2_pow #curve z2 in
+  let z3 = z * z * z in
+  let z3i = modp_inv2_pow #curve z3 in
+  let x3 = (z2i * x) % prime in
+  let y3 = (z3i * y) % prime in
+  let z3 = if isPointAtInfinity p then 0 else 1 in
+  (x3, y3, z3)
+
+
+let scalar_bytes (#c: curve) = lbytes (v (getScalarLenBytes c))
+
+let ith_bit (#c: curve) (k: scalar_bytes #c) (i:nat{i < getScalarLen c}) : uint64 =
+  let q = (v (getScalarLenBytes c) - 1) - i / 8 in 
+  let r = size (i % 8) in
+  to_u64 ((index k q >>. r) &. u8 1)
+  
+
+let isPointOnCurve (#c: curve) (p: point_nat_prime #c) : bool = 
+  let (x, y, z) = p in
+  (y * y) % (getPrime c) =
+  (x * x * x + aCoordinate #c  * x + bCoordinate #c) % prime256
+
+
+val toJacobianCoordinates: tuple2 nat nat -> tuple3 nat nat nat
+
+let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
+
+
+let pointEqual #curve (p: point_nat_prime #curve) (q: point_nat_prime #curve) = 
+  let pAffineX, pAffineY, pAffineZ = _norm p in 
+  let qAffineX, qAffineY, qAffineZ = _norm q in 
+
+  (* we try to present points in equality without infinity *)
+  (*if isPointAtInfinity (p <: point_nat) && isPointAtInfinity (p <: point_nat) then 
+    true
+  else *)
+    if (pAffineX = qAffineX && pAffineY = qAffineY) = false then 
+      false
+    else 
+      true
+
+
 noextract
-let _point_add #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
+let _point_add #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve {~ (pointEqual p q)}) : point_nat_prime #curve =
   let prime = getPrime curve in 
   let (x1, y1, z1) = p in
   let (x2, y2, z2) = q in
@@ -63,50 +117,56 @@ let _point_add #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : po
       (x3, y3, z3)
 
 
-let isPointAtInfinity (p:point_nat) =
-  let (_, _, z) = p in z = 0
+val _ml_step0_lemma: #c: curve -> r0: point_nat_prime #c -> r1: point_nat_prime {~ (pointEqual r0 r1)} -> Lemma (
+  let r2 = _point_add r1 r0 in 
+  let r3 = _point_double r1 in 
+  ~ (pointEqual r2 r3))
+
+let _ml_step0_lemma #c r0 r1 = 
+  let r0x, r0y, r0z = r0 in 
+  let r1x, r1y, r1z = r1 in 
+
+  let r2 = _point_add r1 r0 in 
+  let r3 = _point_double r1 in 
+
+  let r2x, r2y, r2z = _point_add r1 r0 in  
+  let r3x, r3y, r3z = _point_double r0 in 
 
 
-#push-options "--fuel 1"
-
-let _norm #curve (p:point_nat_prime #curve) : (point_nat_prime #curve) =
-  let prime = getPrime curve in 
-  let (x, y, z) = p in
-  let z2 = z * z in
-  let z2i = modp_inv2_pow #curve z2 in
-  let z3 = z * z * z in
-  let z3i = modp_inv2_pow #curve z3 in
-  let x3 = (z2i * x) % prime in
-  let y3 = (z3i * y) % prime in
-  let z3 = if isPointAtInfinity p then 0 else 1 in
-  (x3, y3, z3)
+  assume (~ (pointEqual (_point_add r1 r0) (_point_double r1)))
 
 
-let scalar_bytes (#c: curve) = lbytes (v (getScalarLenBytes c))
 
-let ith_bit (#c: curve) (k: scalar_bytes #c) (i:nat{i < getScalarLen c}) : uint64 =
-  let q = (v (getScalarLenBytes c) - 1) - i / 8 in 
-  let r = size (i % 8) in
-  to_u64 ((index k q >>. r) &. u8 1)
 
-val _ml_step0: #c: curve -> p:point_nat_prime #c -> q:point_nat_prime #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
+val _ml_step0: #c: curve -> r0: point_nat_prime #c -> r1: point_nat_prime #c {~ (pointEqual r0 r1)} 
+  -> r: tuple2 (point_nat_prime #c) (point_nat_prime #c) {let r0, r1 = r in ~ (pointEqual r0 r1)}
 
-let _ml_step0 r0 r1 =
+let _ml_step0 #c r0 r1 =
+    _ml_step0_lemma #c r0 r1;
   let r0 = _point_add r1 r0 in
   let r1 = _point_double r1 in
   (r0, r1)
 
 
-val _ml_step1: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
+assume val _ml_step1_lemma: #c: curve -> r0: point_nat_prime #c -> r1: point_nat_prime #c {~ (pointEqual r0 r1)} -> Lemma (
+  let r2 = _point_add r0 r1 in
+  let r3 = _point_double r0 in
+  ~ (pointEqual r2 r3))
+    
 
-let _ml_step1 r0 r1 =
-  let r1 = _point_add r0 r1 in
-  let r0 = _point_double r0 in
-  (r0, r1)
+val _ml_step1: #c: curve -> r0: point_nat_prime #c -> r1: point_nat_prime #c {~ (pointEqual r0 r1)} -> 
+  r: tuple2 (point_nat_prime #c) (point_nat_prime #c) {let r0, r1 = r in ~ (pointEqual r0 r1)}
+
+let _ml_step1 #c r0 r1 =
+  let r3 = _point_add r0 r1 in
+  let r2 = _point_double r0 in
+  _ml_step1_lemma #c r0 r1;
+  (r2, r3)
 
 
 val _ml_step: #c: curve -> k:scalar_bytes #c -> i:nat{i < getScalarLen c} 
-  -> tuple2 (point_nat_prime #c) (point_nat_prime #c) -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
+  -> r: tuple2 (point_nat_prime #c) (point_nat_prime #c) {let r0, r1 = r in ~ (pointEqual r0 r1)} 
+  -> r: tuple2 (point_nat_prime #c) (point_nat_prime #c) {let r0, r1 = r in ~ (pointEqual r0 r1)} 
 
 let _ml_step #c k i (p, q) =
   let bit = (getPower c - 1) - i in
@@ -117,17 +177,58 @@ let _ml_step #c k i (p, q) =
     _ml_step0 p q
 
 
-val montgomery_ladder_spec: #c: curve -> scalar_bytes #c 
-  -> tuple2 (point_nat_prime #c) (point_nat_prime #c) -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
+
+
+
+let pointAdd #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
+  if pointEqual p q then 
+    _point_double p 
+  else
+    _point_add p q
+
+
+val point_mult: #c: curve -> i: nat -> p: point_nat_prime #c -> point_nat_prime #c
+
+let point_mult #c i p = repeat i (fun x -> pointAdd #c p x) p 
+
+
+assume val scalar_as_nat: #c: curve -> scalar_bytes #c -> nat
+
+
+val montgomery_ladder_spec: #c: curve -> s: scalar_bytes #c 
+  -> i: tuple2 (point_nat_prime #c) (point_nat_prime #c) {let r0, r1 = i in ~ (pointEqual r0 r1)} -> 
+  o: tuple2 (point_nat_prime #c) (point_nat_prime #c) {
+    let p, q = i in 
+    let r0, r1 = o in ~ (pointEqual r0 r1) /\
+    r0 == point_mult (scalar_as_nat #c s) p} 
+
 
 let montgomery_ladder_spec #c k pq =
-  Lib.LoopCombinators.repeati (getScalarLen c) (_ml_step k) pq
+  let pred (i:nat) (p: tuple2 (point_nat_prime #c) (point_nat_prime #c)) =
+    (let p_i, q_i = p in  ~ (pointEqual p_i q_i)) in
+
+  let r = repeati_inductive (getScalarLen c) pred
+    (fun i out ->  _ml_step k i out) pq in 
+
+  assert(
+    let p_i1, q_i1 = r in ~ (pointEqual p_i1 q_i1));
+
+  admit();
+  r
 
 
-val scalar_multiplication: #c: curve -> scalar_bytes #c -> point_nat_prime #c -> point_nat_prime #c 
+
+assume val lemma_not_equal_to_infinity: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} -> 
+  Lemma (~ (pointEqual (0, 0, 0) p))
+
+
+val scalar_multiplication: #c: curve -> scalar_bytes #c -> 
+  p: point_nat_prime #c {~ (isPointAtInfinity p)} -> 
+  point_nat_prime #c 
 
 let scalar_multiplication #c k p =
   let pai = (0, 0, 0) in
+    lemma_not_equal_to_infinity #c p;
   let q, f = montgomery_ladder_spec k (pai, p) in
   _norm #c q
 
@@ -136,17 +237,36 @@ val secret_to_public: #c: curve -> scalar_bytes #c -> (point_nat_prime #c)
 
 let secret_to_public #c k =
   let pai = (0, 0, 0) in
+    lemma_not_equal_to_infinity #c (basePoint #c);
   let q, f = montgomery_ladder_spec #c k (pai, (basePoint #c)) in
   _norm #c q
 
 
-let isPointOnCurve (#c: curve) (p: point_nat_prime #c) : bool = 
-  let (x, y, z) = p in
-  (y * y) % (getPrime c) =
-  (x * x * x + aCoordinate #c  * x + bCoordinate #c) % prime256
 
 
-val toJacobianCoordinates: tuple2 nat nat -> tuple3 nat nat nat
+(*
+point_mult: i: nat -> p: point -> q: point 
+point_mult i p q = 
+ repeat i (pointAdd p) p
 
-let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
 
+Add == _add <==> p <> q
+
+
+for: 
+
+inv0 = k == 0/ j == 1
+
+ 1) p_i = point_mul (k = as_nat i scalar) p 
+ 2) q_i = point_mul (j = as_nat i scalar + 1) p
+ 3) as_nat i scalar != as_nat i scalar + 1
+
+ assume (p == q iff point_mult (as_nat i scalar % order) p == point_mult (as_nat i scalar  % order) q)
+
+ if b = 0 then 
+  add (-> Add) 
+  double (-> Add) 
+
+ else 
+  add (-> add) 
+  double (-> Add) *)

@@ -145,7 +145,10 @@ let getPrime curve : prime: nat {prime > 3} =
 
 
 let nat_prime #curve = n:nat{n < getPrime curve}
-let point_nat_prime #curve = tuple3 (a: nat {a < getPrime curve}) (a: nat {a < getPrime curve}) (a: nat {a < getPrime curve}) 
+
+let point_nat_prime #curve = 
+  p: point_nat{let (a, b, c) = p in a < getPrime curve /\ b < getPrime curve /\ c < getPrime curve}
+
 
 noextract
 let modp_inv2 #curve (x: nat) : Tot (elem (getPrime curve)) =
