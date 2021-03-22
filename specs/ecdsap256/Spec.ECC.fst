@@ -187,9 +187,88 @@ let pointAdd #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : poin
     _point_add p q
 
 
+val pointAddAsAdd: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
+    (requires (~ (pointEqual p q)))
+    (ensures (pointAdd p q == _point_add p q))
+
+let pointAddAsAdd #c p q = ()
+
+val pointAddAsDouble: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
+  (requires (True))
+  (ensures (pointAdd p p == _point_double p))
+
+let pointAddAsDouble #c p q = ()
+
+
 val point_mult: #c: curve -> i: nat -> p: point_nat_prime #c -> point_nat_prime #c
 
 let point_mult #c i p = repeat i (fun x -> pointAdd #c p x) p
+
+
+
+val mlStep0AsPointAdd: #c: curve 
+  -> p0: point_nat_prime #c 
+  -> pk: nat 
+  -> p: point_nat_prime #c {p == point_mult #c pk p0}  
+  -> qk: nat
+  -> q: point_nat_prime #c {q == point_mult #c qk p0} -> 
+  Lemma
+    (requires (~ (pointEqual p q)))
+    (ensures (
+      let p_i, q_i = _ml_step0 p q in 
+      p_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\
+      q_i == repeat (2 * qk) (fun x -> pointAdd #c p0 x) p0))
+
+
+let mlStep0AsPointAdd #c p0 p_k p q_k q = 
+    _ml_step0_lemma #c p q;
+  let r0 = _point_add q p in
+  let r1 = _point_double q in
+
+  pointAddAsAdd p q;
+  pointAddAsDouble q q;
+
+  let f = (fun x -> pointAdd #c p0 x) in 
+  
+  assert(r0 == pointAdd q p);
+  assume(r0 == repeat (p_k + q_k) f p0);
+
+  assert (r1 == pointAdd q q);
+  assume (r1 == repeat (q_k + q_k) f p0)
+
+
+
+val mlStep1AsPointAdd: #c: curve
+  -> p0: point_nat_prime #c
+  -> pk: nat
+  -> p: point_nat_prime #c {p == point_mult #c pk p0} 
+  -> qk: nat 
+  -> q: point_nat_prime #c {q == point_mult #c qk p0} -> 
+  Lemma
+    (requires (~ (pointEqual p q)))
+    (ensures (
+      let p_i, q_i = _ml_step1 p q in 
+      q_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\
+      p_i == repeat (2 * pk) (fun x -> pointAdd #c p0 x) p0))
+     
+      
+let mlStep1AsPointAdd #c p0 pk p qk q = 
+  let r1 = _point_add p q in
+  let r0 = _point_double p in
+  _ml_step1_lemma #c p q;
+
+  pointAddAsAdd p q; 
+  pointAddAsDouble p p;
+
+  let f = (fun x -> pointAdd #c p0 x) in 
+  
+  assert (r1 == pointAdd p q);
+  assume (r1 == repeat (pk + qk) f p0);
+
+  assert (r0 == pointAdd p p);
+  assume (r0 == repeat (2 * pk) f p0)
+  
+
 
 
 val point_mult_0_lemma: #c: curve -> p: point_nat_prime #c ->  Lemma (point_mult 0 p == p)
@@ -202,8 +281,13 @@ val scalar_as_nat_: #c: curve -> scalar_bytes #c -> i: nat {i <= getScalarLen c}
 
 let rec scalar_as_nat_ #c s i = 
   if i = 0 then 0 else 
-  let bit = ith_bit s (i - 1) in 
+  let bit = ith_bit s (getScalarLen c - i) in 
   scalar_as_nat_ #c s (i - 1) + pow2 (1 * (i - 1)) * uint_to_nat bit 
+
+val scalar_as_nat_def: #c: curve -> s: scalar_bytes #c -> i: nat {i > 0 /\ i <= getScalarLen c} -> Lemma
+  (scalar_as_nat_ #c s i == scalar_as_nat_ #c s (i - 1) + pow2 (1 * (i - 1)) * uint_to_nat (ith_bit s (getScalarLen c - i)))
+
+let scalar_as_nat_def #c s i = ()
 
 
 val scalar_as_nat: #c: curve -> scalar_bytes #c -> nat
@@ -239,13 +323,41 @@ let montgomery_ladder_spec #c s pq =
   let r = repeati_inductive (getScalarLen c) pred
     (fun i out -> 
       let r = _ml_step s i out in  
-      let p_i1, q_i1 = r in 
+
+      let p_i, q_i = out in 
+      let bit = ith_bit s (getPower c - i - 1) in
+      let p_i1, q_i1 =   
+	if uint_to_nat bit = 0 then
+	  _ml_step1 p_i q_i
+	else
+	  begin
+	    _ml_step0_lemma #c p_i q_i;
+	      assert(~ (pointEqual p_i q_i));
+	    pointAddAsAdd q_i p_i;
+	    pointAddAsDouble q_i p_i; 
+	    
+	    let r0 = pointAdd q_i p_i in
+	    let r1 = _point_double q_i in
+	    (r0, r1)
+	  end
+	  in 
+
+
+
+      scalar_as_nat_def #c s (i + 1);
+      assert(scalar_as_nat_ #c s (i + 1) = scalar_as_nat_ s i + pow2 i * uint_to_nat bit);
+
+
+
+
+      assert(r == (p_i1, q_i1));
 
       assume (p_i1 == point_mult #c (scalar_as_nat_ #c s (i + 1)) p0);
       assume (q_i1 == point_mult #c (scalar_as_nat_ #c s (i + 1) + 1) p0);
 
 
-      r) pq in 
+      (p_i1, q_i1)
+      ) pq in 
 
   r
 
