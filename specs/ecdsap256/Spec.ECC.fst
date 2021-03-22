@@ -52,9 +52,10 @@ let _norm #curve (p:point_nat_prime #curve) : (point_nat_prime #curve) =
 
 let scalar_bytes (#c: curve) = lbytes (v (getScalarLenBytes c))
 
-let ith_bit (#c: curve) (k: scalar_bytes #c) (i:nat{i < getScalarLen c}) : uint64 =
+let ith_bit (#c: curve) (k: scalar_bytes #c) (i:nat{i < getScalarLen c}) : (r: uint64 {v r == 0 \/ v r == 1}) =
   let q = (v (getScalarLenBytes c) - 1) - i / 8 in 
   let r = size (i % 8) in
+  logand_mask (index k q >>. r) (u8 1) 1;
   to_u64 ((index k q >>. r) &. u8 1)
   
 
@@ -217,7 +218,10 @@ val mlStep0AsPointAdd: #c: curve
     (ensures (
       let p_i, q_i = _ml_step0 p q in 
       p_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\
-      q_i == repeat (2 * qk) (fun x -> pointAdd #c p0 x) p0))
+      p_i == point_mult #c (pk + qk) p0 /\
+      q_i == repeat (2 * qk) (fun x -> pointAdd #c p0 x) p0 /\ 
+      q_i == point_mult #c (2 * qk) p0
+  ))
 
 
 let mlStep0AsPointAdd #c p0 p_k p q_k q = 
@@ -249,7 +253,10 @@ val mlStep1AsPointAdd: #c: curve
     (ensures (
       let p_i, q_i = _ml_step1 p q in 
       q_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\
-      p_i == repeat (2 * pk) (fun x -> pointAdd #c p0 x) p0))
+      q_i == point_mult (pk + qk) p0 /\
+      p_i == repeat (2 * pk) (fun x -> pointAdd #c p0 x) p0 /\
+      p_i == point_mult (2 * pk) p0
+  ))
      
       
 let mlStep1AsPointAdd #c p0 pk p qk q = 
@@ -282,10 +289,10 @@ val scalar_as_nat_: #c: curve -> scalar_bytes #c -> i: nat {i <= getScalarLen c}
 let rec scalar_as_nat_ #c s i = 
   if i = 0 then 0 else 
   let bit = ith_bit s (getScalarLen c - i) in 
-  scalar_as_nat_ #c s (i - 1) + pow2 (1 * (i - 1)) * uint_to_nat bit 
+  scalar_as_nat_ #c s (i - 1) * 2 + uint_to_nat bit 
 
-val scalar_as_nat_def: #c: curve -> s: scalar_bytes #c -> i: nat {i > 0 /\ i <= getScalarLen c} -> Lemma
-  (scalar_as_nat_ #c s i == scalar_as_nat_ #c s (i - 1) + pow2 (1 * (i - 1)) * uint_to_nat (ith_bit s (getScalarLen c - i)))
+val scalar_as_nat_def: #c: curve -> s: scalar_bytes #c -> i: nat {i > 0 /\ i <= getScalarLen c} -> Lemma (
+  scalar_as_nat_ #c s i == 2 * scalar_as_nat_ #c s (i - 1) +  uint_to_nat (ith_bit s (getScalarLen c - i)))
 
 let scalar_as_nat_def #c s i = ()
 
@@ -300,7 +307,7 @@ val scalar_as_nat_0_lemma: #c: curve -> s: scalar_bytes #c -> Lemma (scalar_as_n
 let scalar_as_nat_0_lemma #c s = ()
 
 
-val montgomery_ladder_spec: #c: curve -> s: scalar_bytes #c 
+val montgomery_ladder_spec_left: #c: curve -> s: scalar_bytes #c 
   -> i: tuple2 (point_nat_prime #c) (point_nat_prime #c) 
     {let r0, r1 = i in ~ (pointEqual r0 r1) /\ r1 == point_mult #c 1 r0} 
   -> o: tuple2 (point_nat_prime #c) (point_nat_prime #c) {
@@ -309,7 +316,7 @@ val montgomery_ladder_spec: #c: curve -> s: scalar_bytes #c
     r0 == point_mult (scalar_as_nat #c s) p} 
 
 
-let montgomery_ladder_spec #c s pq =
+let montgomery_ladder_spec_left #c s pq =
   let pred (i:nat {i <= getScalarLen c}) (p: tuple2 (point_nat_prime #c) (point_nat_prime #c)) = (
     let p0, q0 = pq in 
     let p_i, q_i = p in  ~ (pointEqual p_i q_i) /\
@@ -327,26 +334,15 @@ let montgomery_ladder_spec #c s pq =
       let p_i, q_i = out in 
       let bit = (getPower c - 1) - i in
       let bit = ith_bit s bit in
-      let p_i1, q_i1 = 
-	if uint_to_nat bit = 0 then
-	  _ml_step1 p_i q_i
-	else
-	  _ml_step0 p_i q_i in 
+      
+      let pk = scalar_as_nat_ #c s i in 
 
-      mlStep0AsPointAdd p0 (scalar_as_nat_ #c s i) p_i (scalar_as_nat_ #c s i + 1) q_i;
-      mlStep1AsPointAdd p0 (scalar_as_nat_ #c s i) p_i (scalar_as_nat_ #c s i + 1) q_i;
-
+      mlStep0AsPointAdd p0 pk p_i (pk + 1) q_i;
+      mlStep1AsPointAdd p0 pk p_i (pk + 1) q_i;
 
       scalar_as_nat_def #c s (i + 1);
-      assert(scalar_as_nat_ #c s (i + 1) = scalar_as_nat_ s i + pow2 i * uint_to_nat bit);
 
-      assume (p_i1 == point_mult #c (scalar_as_nat_ #c s (i + 1)) p0);
-      assume (q_i1 == point_mult #c (scalar_as_nat_ #c s (i + 1) + 1) p0);
-
-
-      (p_i1, q_i1)
-      ) pq in 
-
+      r) pq in 
   r
 
 
@@ -362,7 +358,7 @@ val scalar_multiplication: #c: curve -> scalar_bytes #c ->
 let scalar_multiplication #c k p =
   let pai = (0, 0, 0) in
     lemma_not_equal_to_infinity #c p;
-  let q, f = montgomery_ladder_spec k (pai, p) in
+  let q, f = montgomery_ladder_spec_left k (pai, p) in
   _norm #c q
 
 
@@ -371,7 +367,7 @@ val secret_to_public: #c: curve -> scalar_bytes #c -> (point_nat_prime #c)
 let secret_to_public #c k =
   let pai = (0, 0, 0) in
     lemma_not_equal_to_infinity #c (basePoint #c);
-  let q, f = montgomery_ladder_spec #c k (pai, (basePoint #c)) in
+  let q, f = montgomery_ladder_spec_left #c k (pai, (basePoint #c)) in
   _norm #c q
 
 
