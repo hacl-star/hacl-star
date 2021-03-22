@@ -192,7 +192,18 @@ val point_mult: #c: curve -> i: nat -> p: point_nat_prime #c -> point_nat_prime 
 let point_mult #c i p = repeat i (fun x -> pointAdd #c p x) p 
 
 
-assume val scalar_as_nat: #c: curve -> scalar_bytes #c -> nat
+val scalar_as_nat_: #c: curve -> scalar_bytes #c -> i: nat {i <= v (getScalarLenBytes c)} -> nat
+
+let rec scalar_as_nat_ #c s i = 
+  if i = 0 then 0 else 
+  let bit = ith_bit s i in 
+  scalar_as_nat_ #c s (i - 1) +  pow2 (1 * (i - 1)) * uint_to_nat bit 
+
+
+val scalar_as_nat: #c: curve -> scalar_bytes #c -> nat
+
+let scalar_as_nat #c s = scalar_as_nat_ #c s (v (getScalarLenBytes c))
+
 
 
 val montgomery_ladder_spec: #c: curve -> s: scalar_bytes #c 
@@ -203,12 +214,21 @@ val montgomery_ladder_spec: #c: curve -> s: scalar_bytes #c
     r0 == point_mult (scalar_as_nat #c s) p} 
 
 
-let montgomery_ladder_spec #c k pq =
-  let pred (i:nat) (p: tuple2 (point_nat_prime #c) (point_nat_prime #c)) =
-    (let p_i, q_i = p in  ~ (pointEqual p_i q_i)) in
+let montgomery_ladder_spec #c s pq =
+  let pred (i:nat) (p: tuple2 (point_nat_prime #c) (point_nat_prime #c)) = (
+    let p0, q0 = pq in 
+    let p_i, q_i = p in  ~ (pointEqual p_i q_i) /\
+    p_i == point_mult #c (scalar_as_nat_ #c s i) p0 /\
+    q_i == point_mult #c (scalar_as_nat_ #c s (i + 1)) p0
+    
+    ) in
+
+  assume (pred 0 pq);
 
   let r = repeati_inductive (getScalarLen c) pred
-    (fun i out ->  _ml_step k i out) pq in 
+    (fun i out -> 
+      let r = _ml_step s i out in  
+      admit(); r) pq in 
 
   assert(
     let p_i1, q_i1 = r in ~ (pointEqual p_i1 q_i1));
