@@ -198,17 +198,17 @@ let point_mult_0_lemma #c p =
   Lib.LoopCombinators.eq_repeat0 (fun x -> pointAdd #c p x) p 
 
 
-val scalar_as_nat_: #c: curve -> scalar_bytes #c -> i: nat {i <= v (getScalarLenBytes c)} -> nat
+val scalar_as_nat_: #c: curve -> scalar_bytes #c -> i: nat {i <= getScalarLen c} -> nat
 
 let rec scalar_as_nat_ #c s i = 
   if i = 0 then 0 else 
-  let bit = ith_bit s i in 
+  let bit = ith_bit s (i - 1) in 
   scalar_as_nat_ #c s (i - 1) + pow2 (1 * (i - 1)) * uint_to_nat bit 
 
 
 val scalar_as_nat: #c: curve -> scalar_bytes #c -> nat
 
-let scalar_as_nat #c s = scalar_as_nat_ #c s (v (getScalarLenBytes c))
+let scalar_as_nat #c s = scalar_as_nat_ #c s (getScalarLen c)
 
 
 val scalar_as_nat_0_lemma: #c: curve -> s: scalar_bytes #c -> Lemma (scalar_as_nat_ #c s 0 == 0)
@@ -217,15 +217,16 @@ let scalar_as_nat_0_lemma #c s = ()
 
 
 val montgomery_ladder_spec: #c: curve -> s: scalar_bytes #c 
-  -> i: tuple2 (point_nat_prime #c) (point_nat_prime #c) {let r0, r1 = i in ~ (pointEqual r0 r1)} -> 
-  o: tuple2 (point_nat_prime #c) (point_nat_prime #c) {
+  -> i: tuple2 (point_nat_prime #c) (point_nat_prime #c) 
+    {let r0, r1 = i in ~ (pointEqual r0 r1) /\ r1 == point_mult #c 1 r0} 
+  -> o: tuple2 (point_nat_prime #c) (point_nat_prime #c) {
     let p, q = i in 
     let r0, r1 = o in ~ (pointEqual r0 r1) /\
     r0 == point_mult (scalar_as_nat #c s) p} 
 
 
 let montgomery_ladder_spec #c s pq =
-  let pred (i:nat {i <= v (getScalarLenBytes c)}) (p: tuple2 (point_nat_prime #c) (point_nat_prime #c)) = (
+  let pred (i:nat {i <= getScalarLen c}) (p: tuple2 (point_nat_prime #c) (point_nat_prime #c)) = (
     let p0, q0 = pq in 
     let p_i, q_i = p in  ~ (pointEqual p_i q_i) /\
     p_i == point_mult #c (scalar_as_nat_ #c s i) p0 /\
@@ -234,20 +235,18 @@ let montgomery_ladder_spec #c s pq =
   let p0, q0 = pq in 
   scalar_as_nat_0_lemma #c s;
   point_mult_0_lemma #c p0;
-  assert(p0 == point_mult #c (scalar_as_nat_ #c s 0) p0);
-  
-  
-  assume (pred 0 pq);
-  admit();
-  
+
   let r = repeati_inductive (getScalarLen c) pred
     (fun i out -> 
       let r = _ml_step s i out in  
-      admit(); r) pq in 
+      let p_i1, q_i1 = r in 
 
-  assert(let p_i1, q_i1 = r in ~ (pointEqual p_i1 q_i1));
+      assume (p_i1 == point_mult #c (scalar_as_nat_ #c s (i + 1)) p0);
+      assume (q_i1 == point_mult #c (scalar_as_nat_ #c s (i + 1) + 1) p0);
 
-  admit();
+
+      r) pq in 
+
   r
 
 
