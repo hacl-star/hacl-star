@@ -160,7 +160,7 @@ min-test:
 TO_CLEAN=$(foreach ext,checked checked.lax out cmd err time dump types.vaf krml cmx cmo cmi o d a,-or -iname '*.$(ext)')
 clean:
 	find . -iname '.depend*' $(TO_CLEAN) -delete
-	find obj -depth 1 -name .gitignore -o -delete
+	find obj -maxdepth 1 -mindepth 1 -not -name .gitignore -delete
 
 
 #################
