@@ -325,32 +325,20 @@ let montgomery_ladder_spec #c s pq =
       let r = _ml_step s i out in  
 
       let p_i, q_i = out in 
-      let bit = ith_bit s (getPower c - i - 1) in
-      let p_i1, q_i1 =   
+      let bit = (getPower c - 1) - i in
+      let bit = ith_bit s bit in
+      let p_i1, q_i1 = 
 	if uint_to_nat bit = 0 then
 	  _ml_step1 p_i q_i
 	else
-	  begin
-	    _ml_step0_lemma #c p_i q_i;
-	      assert(~ (pointEqual p_i q_i));
-	    pointAddAsAdd q_i p_i;
-	    pointAddAsDouble q_i p_i; 
-	    
-	    let r0 = pointAdd q_i p_i in
-	    let r1 = _point_double q_i in
-	    (r0, r1)
-	  end
-	  in 
+	  _ml_step0 p_i q_i in 
 
+      mlStep0AsPointAdd p0 (scalar_as_nat_ #c s i) p_i (scalar_as_nat_ #c s i + 1) q_i;
+      mlStep1AsPointAdd p0 (scalar_as_nat_ #c s i) p_i (scalar_as_nat_ #c s i + 1) q_i;
 
 
       scalar_as_nat_def #c s (i + 1);
       assert(scalar_as_nat_ #c s (i + 1) = scalar_as_nat_ s i + pow2 i * uint_to_nat bit);
-
-
-
-
-      assert(r == (p_i1, q_i1));
 
       assume (p_i1 == point_mult #c (scalar_as_nat_ #c s (i + 1)) p0);
       assume (q_i1 == point_mult #c (scalar_as_nat_ #c s (i + 1) + 1) p0);
