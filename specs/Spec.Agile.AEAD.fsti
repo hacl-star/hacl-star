@@ -61,8 +61,10 @@ let tag_length: alg -> nat =
 /// GHASH function.
 let iv_length (a: supported_alg) (len: nat) =
   match a with
-  | AES128_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
-  | AES256_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1
+  (* | AES128_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1 *)
+  (* | AES256_GCM -> len > 0 /\ 8 * len <= pow2 64 - 1 *)
+  | AES128_GCM
+  | AES256_GCM
   | CHACHA20_POLY1305 -> len == 12
 
 // Maximum length for both plaintexts and additional data.
