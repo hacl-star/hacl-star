@@ -74,14 +74,14 @@ let pointEqual #curve (p: point_nat_prime #curve) (q: point_nat_prime #curve) =
   let pAffineX, pAffineY, pAffineZ = _norm p in 
   let qAffineX, qAffineY, qAffineZ = _norm q in 
 
-  (* we try to present points in equality without infinity *)
-  (*if isPointAtInfinity (p <: point_nat) && isPointAtInfinity (p <: point_nat) then 
+  (* if one point is at infinity, but not the second *)
+  if pAffineZ <> qAffineZ then false else
+  (* if two points are at infinity *)
+  if pAffineZ = 0 && qAffineZ = 0 then true else
+  (* if affine coordinates are equal *)
+  if (pAffineX = qAffineX && pAffineY = qAffineY) then 
     true
-  else *)
-    if (pAffineX = qAffineX && pAffineY = qAffineY) = false then 
-      false
-    else 
-      true
+  else false
 
 
 noextract
@@ -202,11 +202,23 @@ let pointAddAsDouble #c p q = ()
 
 
 (*  *)
-val point_mult: #c: curve -> i: nat -> p: point_nat_prime #c -> point_nat_prime #c
+val point_mult: #c: curve -> i: int -> p: point_nat_prime #c -> point_nat_prime #c
 
 let point_mult #c i p =
   if i = 0 then (0, 0, 0) else
-    repeat (i - 1) (fun x -> pointAdd #c p x) p
+  let i = (i - 1) % getOrder #c in 
+  repeat i (fun x -> pointAdd #c p x) p
+
+assume val point_mult_ext: #c: curve -> i: int -> p: point_nat_prime #c -> Lemma (
+  let f = (fun x -> pointAdd #c p x) in  
+  f (point_mult #c i p) == point_mult #c (i + 1) p)
+
+
+
+val point_mult_1: #c: curve ->p: point_nat_prime #c ->  Lemma (point_mult #c 1 p == p)
+
+let point_mult_1 #c p = 
+  eq_repeat0 (fun x -> pointAdd #c p x) p 
 
 
 assume val lemmaPointAddR: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
@@ -214,14 +226,18 @@ assume val lemmaPointAddR: #c: curve -> p: point_nat_prime #c -> q: point_nat_pr
   
 
 
-assume val lemma_point_add : #c: curve -> p0: point_nat_prime #c -> pk: nat -> qk: nat -> i: nat {i <= qk} ->
+assume val lemma_point_add : #c: curve -> p0: point_nat_prime #c -> pk: int -> qk: int -> i: int ->
   Lemma (
     let f = (fun x -> pointAdd #c p0 x) in 
-    pointAdd (repeat pk f p0) (repeat qk f p0) == pointAdd (repeat (pk + i) f p0) (repeat (qk - i) f p0))
+    pointAdd (point_mult pk p0) (point_mult qk p0) == 
+    pointAdd (point_mult (pk - i) p0) (point_mult (qk + i) p0))
 
 
 
-val lemmaApplPointDouble: #c: curve -> p0: point_nat_prime #c -> pk: nat -> p: point_nat_prime #c {p == point_mult pk p0} ->
+val lemmaApplPointDouble: #c: curve 
+  -> p0: point_nat_prime #c 
+  -> pk: int
+  -> p: point_nat_prime #c {p == point_mult pk p0} ->
   Lemma (
     let r = pointAdd p p in 
     let f = (fun x -> pointAdd #c p0 x) in 
@@ -230,16 +246,16 @@ val lemmaApplPointDouble: #c: curve -> p0: point_nat_prime #c -> pk: nat -> p: p
 let lemmaApplPointDouble #c p0 pk p = 
   let f = (fun x -> pointAdd #c p0 x) in 
 
-  lemma_point_add #c p0 (pk - 1) (pk - 1) (pk  - 1);
-  eq_repeat0 f p0;
-  
-  lemmaPointAddR (repeat (2 * pk - 2) f p0) p0;
-  unfold_repeat (2 * pk) f p0 (2 * pk - 2)
+  lemma_point_add #c p0 pk pk (pk - 1);
+  let r = pointAdd p p in 
+  point_mult_1 p0;
+  point_mult_ext (2 * pk - 1) p0
 
 
-val lemmaApplPointAdd: #c: curve -> p0: point_nat_prime #c -> pk: nat
+val lemmaApplPointAdd: #c: curve -> p0: point_nat_prime #c 
+  -> pk: int
   -> p: point_nat_prime #c {p == point_mult pk p0} 
-  -> qk: pos {qk > pk}
+  -> qk: int
   -> q: point_nat_prime #c {q == point_mult qk p0} -> 
   Lemma (
     let r = pointAdd p q in 
@@ -250,28 +266,28 @@ let lemmaApplPointAdd #c p0 pk p qk q =
   let f = (fun x -> pointAdd #c p0 x) in 
 
   let r = pointAdd p q in 
-  
-  lemma_point_add #c p0 (pk - 1) (qk - 1) (qk - 1);
-  eq_repeat0 f p0;
+  assert(r == pointAdd (point_mult pk p0) (point_mult qk p0));
 
-  lemmaPointAddR (repeat (pk + qk - 2) f p0) p0;
-  unfold_repeat (pk + qk) f p0 (pk + qk - 2)
+  lemmaPointAddR (point_mult pk p0) (point_mult qk p0);
+  lemma_point_add #c p0 qk pk (qk - 1);
+  assert(r == pointAdd (point_mult 1 p0) (point_mult (pk + qk - 1) p0));
+  point_mult_1 p0;
+  
+  point_mult_ext (pk + qk - 1) p0
 
 
 
 val mlStep0AsPointAdd: #c: curve 
   -> p0: point_nat_prime #c 
-  -> pk: pos
+  -> pk: nat
   -> p: point_nat_prime #c {p == point_mult #c pk p0}  
-  -> qk: pos {qk > pk}
+  -> qk: nat 
   -> q: point_nat_prime #c {q == point_mult #c qk p0} -> 
   Lemma
     (requires (~ (pointEqual p q)))
     (ensures (
       let p_i, q_i = _ml_step0 p q in 
-      (*p_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\ *)
       p_i == point_mult #c (pk + qk) p0 /\
-     (* q_i == repeat (2 * qk) (fun x -> pointAdd #c p0 x) p0 /\  *)
       q_i == point_mult #c (2 * qk) p0
   ))
 
@@ -298,17 +314,15 @@ let mlStep0AsPointAdd #c p0 p_k p q_k q =
 
 val mlStep1AsPointAdd: #c: curve
   -> p0: point_nat_prime #c
-  -> pk: pos
+  -> pk: nat
   -> p: point_nat_prime #c {p == point_mult #c pk p0} 
-  -> qk: pos {qk > pk}
+  -> qk: nat {qk > pk}
   -> q: point_nat_prime #c {q == point_mult #c qk p0} -> 
   Lemma
     (requires (~ (pointEqual p q)))
     (ensures (
       let p_i, q_i = _ml_step1 p q in 
-      (* q_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\ *)
       q_i == point_mult (pk + qk) p0 /\ 
-      (*p_i == repeat (2 * pk) (fun x -> pointAdd #c p0 x) p0 /\ *)
       p_i == point_mult (2 * pk) p0
   ))
      
@@ -371,32 +385,32 @@ val montgomery_ladder_spec_left: #c: curve -> s: scalar_bytes #c
 
 
 let montgomery_ladder_spec_left #c s pq =
+  let p0, q0 = pq in 
   let pred (i:nat {i <= getScalarLen c}) (r: tuple2 (point_nat_prime #c) (point_nat_prime #c)) = (
     let p, q = pq in 
     let p_i, q_i = r in 
     ~ (pointEqual p_i q_i) /\
-    p_i == point_mult #c (scalar_as_nat_ #c s i) q /\
-    q_i == point_mult #c (scalar_as_nat_ #c s i + 1) q) in
+    p_i == point_mult #c (scalar_as_nat_ #c s i) q0 /\
+    q_i == point_mult #c (scalar_as_nat_ #c s i + 1) q0) in
 
-  let p_0, q_0 = pq in 
   scalar_as_nat_0_lemma #c s;
-  point_mult_0_lemma #c p_0;
+  point_mult_0_lemma #c q0;
 
-  assume (pred 0 pq);
+  assert (q0 == point_mult #c 1 q0);
   
   let r = repeati_inductive (getScalarLen c) pred
     (fun i out -> 
-      admit();
+
       let r = _ml_step s i out in  
 
       let p_i, q_i = out in 
       let bit = (getPower c - 1) - i in
       let bit = ith_bit s bit in
-      
-      let pk = scalar_as_nat_ #c s i in 
 
-      mlStep0AsPointAdd p_0 pk p_i (pk + 1) q_i;
-      mlStep1AsPointAdd p_0 pk p_i (pk + 1) q_i;
+      let pk = scalar_as_nat_ #c s i in 
+      
+      mlStep0AsPointAdd q0 pk p_i (pk + 1) q_i;
+      mlStep1AsPointAdd q0 pk p_i (pk + 1) q_i;
 
       scalar_as_nat_def #c s (i + 1);
 
@@ -406,8 +420,10 @@ let montgomery_ladder_spec_left #c s pq =
 
 
 
-assume val lemma_not_equal_to_infinity: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} -> 
+val lemma_not_equal_to_infinity: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} -> 
   Lemma (~ (pointEqual (0, 0, 0) p))
+
+let lemma_not_equal_to_infinity #c p = ()
 
 
 val scalar_multiplication: #c: curve -> scalar_bytes #c -> 
@@ -417,9 +433,7 @@ val scalar_multiplication: #c: curve -> scalar_bytes #c ->
 let scalar_multiplication #c k p =
   let pai = (0, 0, 0) in
     lemma_not_equal_to_infinity #c p;
-
-  assert(pai == point_mult 0 p);
-  assume(p == point_mult 1 p);
+    point_mult_0_lemma #c p;
   let q, f = montgomery_ladder_spec_left k (pai, p) in
   _norm #c q
 
