@@ -201,25 +201,55 @@ val pointAddAsDouble: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #
 let pointAddAsDouble #c p q = ()
 
 
-val point_mult: #c: curve -> i: nat -> p: point_nat_prime #c -> point_nat_prime #c
+(*  *)
+val point_mult: #c: curve -> i: nat {i > 0} -> p: point_nat_prime #c -> point_nat_prime #c
 
-let point_mult #c i p = repeat i (fun x -> pointAdd #c p x) p
+let point_mult #c i p = repeat (i - 1) (fun x -> pointAdd #c p x) p
+
+
+assume val lemmaPointAddR: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
+  (pointAdd p q == pointAdd q p)
+  
+
+
+assume val lemma_point_add : #c: curve -> p0: point_nat_prime #c -> pk: nat
+  -> i: nat {i <= pk} ->
+  Lemma (
+   let f = (fun x -> pointAdd #c p0 x) in 
+   pointAdd (repeat pk f p0) (repeat pk f p0) == pointAdd (repeat (pk + i) f p0) (repeat (pk - i) f p0))
+
+
+
+val lemmaApplPointDouble: #c: curve -> p0: point_nat_prime #c -> pk: pos -> p: point_nat_prime #c {p == point_mult pk p0} ->
+  Lemma (
+    let r = pointAdd p p in 
+    let f = (fun x -> pointAdd #c p0 x) in 
+    r == point_mult (2 * pk) p0)
+
+let lemmaApplPointDouble #c p0 pk p = 
+  let f = (fun x -> pointAdd #c p0 x) in 
+
+  lemma_point_add #c p0 (pk - 1) (pk  - 1);
+  eq_repeat0 f p0;
+  
+  lemmaPointAddR (repeat (2 * pk - 2) f p0) p0;
+  unfold_repeat (2 * pk) f p0 (2 * pk - 2)
 
 
 
 val mlStep0AsPointAdd: #c: curve 
   -> p0: point_nat_prime #c 
-  -> pk: nat 
+  -> pk: pos
   -> p: point_nat_prime #c {p == point_mult #c pk p0}  
-  -> qk: nat
+  -> qk: pos
   -> q: point_nat_prime #c {q == point_mult #c qk p0} -> 
   Lemma
     (requires (~ (pointEqual p q)))
     (ensures (
       let p_i, q_i = _ml_step0 p q in 
-      p_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\
+      (*p_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\ *)
       p_i == point_mult #c (pk + qk) p0 /\
-      q_i == repeat (2 * qk) (fun x -> pointAdd #c p0 x) p0 /\ 
+     (* q_i == repeat (2 * qk) (fun x -> pointAdd #c p0 x) p0 /\  *)
       q_i == point_mult #c (2 * qk) p0
   ))
 
@@ -235,26 +265,26 @@ let mlStep0AsPointAdd #c p0 p_k p q_k q =
   let f = (fun x -> pointAdd #c p0 x) in 
   
   assert(r0 == pointAdd q p);
-  assume(r0 == repeat (p_k + q_k) f p0);
+  assume(r0 == repeat (p_k + q_k - 1) f p0);
 
   assert (r1 == pointAdd q q);
-  assume (r1 == repeat (q_k + q_k) f p0)
+  lemmaApplPointDouble p0 q_k q
 
 
 
 val mlStep1AsPointAdd: #c: curve
   -> p0: point_nat_prime #c
-  -> pk: nat
+  -> pk: pos
   -> p: point_nat_prime #c {p == point_mult #c pk p0} 
-  -> qk: nat 
+  -> qk: pos
   -> q: point_nat_prime #c {q == point_mult #c qk p0} -> 
   Lemma
     (requires (~ (pointEqual p q)))
     (ensures (
       let p_i, q_i = _ml_step1 p q in 
-      q_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\
-      q_i == point_mult (pk + qk) p0 /\
-      p_i == repeat (2 * pk) (fun x -> pointAdd #c p0 x) p0 /\
+      (* q_i == repeat (pk + qk) (fun x -> pointAdd #c p0 x) p0 /\ *)
+      q_i == point_mult (pk + qk) p0 /\ 
+      (*p_i == repeat (2 * pk) (fun x -> pointAdd #c p0 x) p0 /\ *)
       p_i == point_mult (2 * pk) p0
   ))
      
@@ -270,11 +300,10 @@ let mlStep1AsPointAdd #c p0 pk p qk q =
   let f = (fun x -> pointAdd #c p0 x) in 
   
   assert (r1 == pointAdd p q);
-  assume (r1 == repeat (pk + qk) f p0);
+  assume (r1 == repeat (pk + qk - 1) f p0);
 
   assert (r0 == pointAdd p p);
-  assume (r0 == repeat (2 * pk) f p0)
-  
+  lemmaApplPointDouble p0 pk p
 
 
 
@@ -370,32 +399,3 @@ let secret_to_public #c k =
   let q, f = montgomery_ladder_spec_left #c k (pai, (basePoint #c)) in
   _norm #c q
 
-
-
-
-(*
-point_mult: i: nat -> p: point -> q: point 
-point_mult i p q = 
- repeat i (pointAdd p) p
-
-
-Add == _add <==> p <> q
-
-
-for: 
-
-inv0 = k == 0/ j == 1
-
- 1) p_i = point_mul (k = as_nat i scalar) p 
- 2) q_i = point_mul (j = as_nat i scalar + 1) p
- 3) as_nat i scalar != as_nat i scalar + 1
-
- assume (p == q iff point_mult (as_nat i scalar % order) p == point_mult (as_nat i scalar  % order) q)
-
- if b = 0 then 
-  add (-> Add) 
-  double (-> Add) 
-
- else 
-  add (-> add) 
-  double (-> Add) *)
