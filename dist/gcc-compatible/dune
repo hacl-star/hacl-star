@@ -6,7 +6,7 @@
  (deps libintvector.h lib_intrinsics.h)
  (targets config.h Makefile.config)
  (action
-  (run ./configure)))
+  (run ./configure --enable-ocaml)))
 
 (rule
  (deps

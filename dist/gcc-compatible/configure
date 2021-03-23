@@ -15,6 +15,34 @@ fi
 # Helpers to help do feature or bug detection
 # -------------------------------------------
 
+detect_ocamlfind () {
+  package=$1
+  loc=$(ocamlfind query $package)
+  r=$?
+  if [[ $r == 0 ]]; then
+    echo "... found $package in $loc"
+  else
+    echo "OCaml package $package not found"
+  fi
+  return $r
+}
+
+detect_ocaml () {
+  # Detect ocamlfind
+  loc=$(which ocamlfind)
+  r=$?
+  if [[ $r == 0 ]]; then
+    echo "... found ocamlfind in $loc"
+  else
+    echo "ocamlfind not found"
+    return 1
+  fi
+  # Detect packages
+  for p in ctypes ctypes.foreign; do
+    detect_ocamlfind $p || return 1
+  done
+}
+
 check_no_bug81300 () {
   # Perform the check only if lib_intrinsics.h is present. In practice,
   # lib_intrinsics.h is present in all the directories which contain libintvector.h,
@@ -162,7 +190,8 @@ show_help () {
   printf "                    * aarch64-none-linux-android\n"
   printf "                    * aarch64-none-linux-gnu\n"
   printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
-  printf "    --disable-ocaml Disable OCAML bindings\n"
+  printf "    --disable-ocaml Always disable OCAML bindings\n"
+  printf "    --enable-ocaml  Always enable OCAML bindings\n"
   printf "\n"
 }
 
@@ -172,6 +201,7 @@ echo -n > Makefile.config
 echo -n > config.h
 
 # Default arguments
+enable_ocaml=0
 disable_ocaml=0
 disable_bzero=0
 
@@ -180,6 +210,7 @@ all_args=("$@")
 while [ $# -gt 0 ]; do
     case "$1" in
         -target) build_target="$2"; shift ;;
+        --enable-ocaml) enable_ocaml=1 ;;
         --disable-ocaml) disable_ocaml=1 ;;
         --disable-bzero) disable_bzero=1 ;;
         --help) show_help; exit 0 ;;
@@ -390,7 +421,7 @@ if ! detect_uint128; then
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
 fi
 
-if [[ "$disable_ocaml" == "1" ]]; then
+if [[ "$enable_ocaml" == "0" ]] || [[ "$disable_ocaml" == "1" ]] || ! detect_ocaml; then
   echo "OCaml bindings disabled"
   echo "DISABLE_OCAML_BINDINGS=1" >> Makefile.config
 fi
