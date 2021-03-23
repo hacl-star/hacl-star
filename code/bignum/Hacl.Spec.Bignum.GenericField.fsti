@@ -104,6 +104,22 @@ val bn_field_one: #t:limb_t -> k:bn_mont_ctx t{bn_mont_ctx_inv k} ->
     bn_v (bn_from_field k oneM) == 1)
 
 
+noextract
+let bn_field_exp_st (t:limb_t) (k:bn_mont_ctx t{bn_mont_ctx_inv k}) =
+    aM:bn_mont_nat k
+  -> bBits:size_pos
+  -> b:lbignum t (blocks bBits (bits t)) ->
+  Pure (bn_mont_nat k)
+  (requires 0 < bn_v b /\ bn_v b < pow2 bBits)
+  (ensures  fun cM ->
+    bn_v (bn_from_field k cM) == Lib.NatMod.pow_mod #(bn_v k.n) (bn_v (bn_from_field k aM)) (bn_v b))
+
+
+val bn_field_exp_consttime: #t:limb_t -> k:bn_mont_ctx t{bn_mont_ctx_inv k} -> bn_field_exp_st t k
+
+val bn_field_exp_vartime: #t:limb_t -> k:bn_mont_ctx t{bn_mont_ctx_inv k} -> bn_field_exp_st t k
+
+
 val bn_field_inv: #t:limb_t -> k:bn_mont_ctx t{bn_mont_ctx_inv k} -> aM:bn_mont_nat k ->
   Pure (bn_mont_nat k)
   (requires 0 < bn_v aM /\ Euclid.is_prime (bn_v k.n))

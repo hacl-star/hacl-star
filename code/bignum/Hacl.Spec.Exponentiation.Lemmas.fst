@@ -116,7 +116,7 @@ let mod_exp_mont n r d a b =
 
 
 val mod_exp_mont_lemma: n:pos -> r:pos -> d:int{r * d % n == 1} -> a:nat_mod n -> b:pos ->
-  Lemma (mod_exp_mont n r d a b == pow a b % n)
+  Lemma (mod_exp_mont n r d a b == pow_mod #n a b)
 
 let mod_exp_mont_lemma n r d a b =
   let k = mk_nat_mont_comm_monoid n r d in
@@ -136,7 +136,9 @@ let mod_exp_mont_lemma n r d a b =
     pow (a % n) b % n;
     (==) { Math.Lemmas.small_mod a n }
     pow a b % n;
-    }
+    };
+  assert (mod_exp_mont n r d a b == pow a b % n);
+  lemma_pow_mod #n a b
 
 
 (* Modular exponentiation with Montgomery arithmetic
@@ -264,7 +266,7 @@ let mod_exp_mont_ll pbits rLen n mu a b =
 
 val mod_exp_mont_ll_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
   -> a:nat_mod n -> b:pos ->
-  Lemma (mod_exp_mont_ll pbits rLen n mu a b == pow a b % n)
+  Lemma (mod_exp_mont_ll pbits rLen n mu a b == pow_mod #n a b)
 
 let mod_exp_mont_ll_lemma pbits rLen n mu a b =
   let r = pow2 (pbits * rLen) in
@@ -296,7 +298,7 @@ val from_mont_exp_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> aM:nat -> b
     let cM = LE.pow k aM b in
     let c = M.from_mont pbits rLen n mu cM in
     let a = M.from_mont pbits rLen n mu aM in
-    c == pow a b % n))
+    a < n /\ c == pow_mod #n a b))
 
 let from_mont_exp_lemma pbits rLen n mu aM b =
   let r = pow2 (pbits * rLen) in
@@ -311,6 +313,7 @@ let from_mont_exp_lemma pbits rLen n mu aM b =
   let a = M.from_mont pbits rLen n mu aM in
 
   M.from_mont_lemma pbits rLen n d mu cM;
+  M.from_mont_lemma pbits rLen n d mu aM;
   //assert (c == cM * d % n);
   calc (==) {
     cM * d % n;
@@ -320,7 +323,9 @@ let from_mont_exp_lemma pbits rLen n mu aM b =
     pow (aM * d % n) b * r % n * d % n;
     (==) { M.lemma_mont_id n r d (pow (aM * d % n) b) }
     pow (aM * d % n) b % n;
-    (==) { M.from_mont_lemma pbits rLen n d mu aM }
+    (==) { }
     pow a b % n;
+    (==) { Lib.NatMod.lemma_pow_mod #n a b }
+    pow_mod #n a b;
     };
-  assert (c == pow a b % n)
+  assert (a < n /\ c == pow_mod #n a b)

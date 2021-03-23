@@ -143,16 +143,20 @@ let bn_field_one #t k =
   BM.bn_mont_one k.n k.mu r2
 
 
+let bn_field_exp_consttime #t k aM bBits b =
+  E.from_mont_exp_lemma (bits t) k.len (bn_v k.n) (v k.mu) (bn_v aM) (bn_v b);
+  ME.bn_exp_mont_consttime k.n k.mu aM bBits b
+
+
+let bn_field_exp_vartime #t k aM bBits b =
+  E.from_mont_exp_lemma (bits t) k.len (bn_v k.n) (v k.mu) (bn_v aM) (bn_v b);
+  ME.bn_exp_mont_vartime k.n k.mu aM bBits b
+
+
 let bn_field_inv #t k aM =
   let n2 = BI.bn_mod_inv_prime_n2 k.n in
   assert (bn_v n2 == bn_v k.n - 2);
-  let aInvM = ME.bn_exp_mont_vartime k.n k.mu aM k.nBits n2 in
-
-  let k1 = E.mk_nat_mont_ll_comm_monoid (bits t) k.len (bn_v k.n) (v k.mu) in
-  assert (bn_v aInvM == LE.pow k1 (bn_v aM) (bn_v n2));
-
-  E.from_mont_exp_lemma (bits t) k.len (bn_v k.n) (v k.mu) (bn_v aM) (bn_v n2);
-  Lib.NatMod.lemma_pow_mod #(bn_v k.n) (bn_v (bn_from_field k aM)) (bn_v n2);
+  let aInvM = bn_field_exp_vartime #t k aM k.nBits n2 in
   assert (bn_v (bn_from_field k aInvM) == Lib.NatMod.pow_mod #(bn_v k.n) (bn_v (bn_from_field k aM)) (bn_v n2));
   from_mont_lemma_nonzero (bits t) k.len (bn_v k.n) (v k.mu) (bn_v aM);
   assert (0 < bn_v (bn_from_field k aM));

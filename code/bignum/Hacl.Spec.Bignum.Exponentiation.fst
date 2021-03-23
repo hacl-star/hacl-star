@@ -74,8 +74,7 @@ let bn_mod_exp_rl_precompr2 #t len n a bBits b r2 =
   BM.bn_from_mont_lemma n mu accM;
 
   E.mod_exp_mont_ll_lemma (bits t) len (bn_v n) (v mu) (bn_v a) (bn_v b);
-  assert (bn_v acc == Lib.NatMod.pow (bn_v a) (bn_v b) % bn_v n);
-  Lib.NatMod.lemma_pow_mod #(bn_v n) (bn_v a) (bn_v b);
+  assert (bn_v acc == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b));
   acc
 
 
@@ -98,8 +97,7 @@ let bn_mod_exp_mont_ladder_swap_precompr2 #t len n a bBits b r2 =
   BM.bn_from_mont_lemma n mu accM;
 
   E.mod_exp_mont_ll_lemma (bits t) len (bn_v n) (v mu) (bn_v a) (bn_v b);
-  assert (bn_v acc == Lib.NatMod.pow (bn_v a) (bn_v b) % bn_v n);
-  Lib.NatMod.lemma_pow_mod #(bn_v n) (bn_v a) (bn_v b);
+  assert (bn_v acc == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b));
   acc
 
 
@@ -121,8 +119,7 @@ let bn_mod_exp_fw_precompr2 #t len l n a bBits b r2 =
   BM.bn_from_mont_lemma n mu accM;
 
   E.mod_exp_mont_ll_lemma (bits t) len (bn_v n) (v mu) (bn_v a) (bn_v b);
-  assert (bn_v acc == Lib.NatMod.pow (bn_v a) (bn_v b) % bn_v n);
-  Lib.NatMod.lemma_pow_mod #(bn_v n) (bn_v a) (bn_v b);
+  assert (bn_v acc == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b));
   acc
 
 
