@@ -23,7 +23,7 @@ module SB = Hacl.Spec.Bignum.Base
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let lexp_rl #a_t len ctx_len k ctx a bLen bBits b acc =
+let lexp_rl_vartime #a_t len ctx_len k ctx a bLen bBits b acc =
   //k.lone ctx acc;
   let h0 = ST.get () in
 
@@ -61,7 +61,7 @@ val cswap2:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> bit:uint_t a_t SEC{v bit <= 1}
   -> p1:lbuffer (uint_t a_t SEC) len
   -> p2:lbuffer (uint_t a_t SEC) len ->
@@ -101,7 +101,7 @@ let lemma_bit_xor_is_sum_mod2 #a_t a b =
 
 
 //r0 = acc; r1 = a
-let lexp_mont_ladder_swap #a_t len ctx_len k ctx a bLen bBits b acc =
+let lexp_mont_ladder_swap_consttime #a_t len ctx_len k ctx a bLen bBits b acc =
   push_frame ();
   let sw = create 1ul (uint #a_t #SEC 0) in
 
@@ -176,7 +176,7 @@ val precomp_table_inv:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> a:LSeq.lseq (uint_t a_t SEC) (v len)
   -> table_len:size_t{v table_len * v len <= max_size_t}
   -> table:LSeq.lseq (uint_t a_t SEC) (v table_len * v len)
@@ -190,13 +190,12 @@ let precomp_table_inv #a_t len ctx_len k a table_len table j =
   k.to.refl bj == S.pow k.to.comm_monoid (k.to.refl a) j
 
 
-
 inline_for_extraction noextract
 val lprecomp_table_mul:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> i:size_t
@@ -229,7 +228,7 @@ val precomp_table_inv_lemma_j:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> a:LSeq.lseq (uint_t a_t SEC) (v len)
   -> table_len:size_t{v table_len * v len <= max_size_t}
   -> table1:LSeq.lseq (uint_t a_t SEC) (v table_len * v len)
@@ -269,7 +268,7 @@ val precomp_table_inv_lemma:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> a:LSeq.lseq (uint_t a_t SEC) (v len)
   -> table_len:size_t{v table_len * v len <= max_size_t}
   -> table1:LSeq.lseq (uint_t a_t SEC) (v table_len * v len)
@@ -295,7 +294,7 @@ val lprecomp_table_f:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
@@ -330,11 +329,11 @@ let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
     (LSeq.sub (as_seq h0 table) 0 ((v i + 2) * v len))
     (LSeq.sub (as_seq h1 table) 0 ((v i + 2) * v len));
 
-  assert (forall (j:nat{j <= v i + 1}).
-    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) j);
-  precomp_table_inv_lemma len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (as_seq h1 table) (v i + 2);
-  assert (forall (j:nat{j <= v i + 1}).
-    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j)
+  // assert (forall (j:nat{j <= v i + 1}).
+  //   precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) j);
+  precomp_table_inv_lemma len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (as_seq h1 table) (v i + 2)
+  // assert (forall (j:nat{j <= v i + 1}).
+  //   precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j)
 #pop-options
 
 
@@ -343,7 +342,7 @@ val lprecomp_table:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
@@ -510,7 +509,7 @@ val lexp_fw_precomp_get_vartime:
      #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
   -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
@@ -540,7 +539,7 @@ val lexp_fw_precomp_get_consttime:
      #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
   -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
@@ -568,7 +567,7 @@ let lexp_fw_precomp_get_consttime #a_t len ctx_len k a table_len table bits_l tm
 
 
 inline_for_extraction noextract
-let lmul_acc_pow_a_bits_l_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
+let lmul_acc_pow_a_bits_l_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:concrete_ops a_t len ctx_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
@@ -601,7 +600,7 @@ val lmul_acc_pow_a_bits_l_vartime:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len ->
+  -> k:concrete_ops a_t len ctx_len ->
   lmul_acc_pow_a_bits_l_st a_t len ctx_len k
 
 #push-options "--z3rlimit 150"
@@ -623,7 +622,7 @@ val lmul_acc_pow_a_bits_l_consttime:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len ->
+  -> k:concrete_ops a_t len ctx_len ->
   lmul_acc_pow_a_bits_l_st a_t len ctx_len k
 
 let lmul_acc_pow_a_bits_l_consttime #a_t len ctx_len k ctx a bLen bBits b l table_len table i acc =
@@ -638,7 +637,7 @@ let lmul_acc_pow_a_bits_l_consttime #a_t len ctx_len k ctx a bLen bBits b l tabl
 
 
 inline_for_extraction noextract
-let lmul_acc_pow_a_bits_c_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
+let lmul_acc_pow_a_bits_c_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:concrete_ops a_t len ctx_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
@@ -670,7 +669,7 @@ val lmul_acc_pow_a_bits_c_vartime:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len ->
+  -> k:concrete_ops a_t len ctx_len ->
   lmul_acc_pow_a_bits_c_st a_t len ctx_len k
 
 #push-options "--z3rlimit 150"
@@ -692,7 +691,7 @@ val lmul_acc_pow_a_bits_c_consttime:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len ->
+  -> k:concrete_ops a_t len ctx_len ->
   lmul_acc_pow_a_bits_c_st a_t len ctx_len k
 
 let lmul_acc_pow_a_bits_c_consttime #a_t len ctx_len k ctx a bLen bBits b l table_len table acc =
@@ -708,7 +707,7 @@ let lmul_acc_pow_a_bits_c_consttime #a_t len ctx_len k ctx a bLen bBits b l tabl
 
 
 inline_for_extraction noextract
-let lexp_fw_f_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
+let lexp_fw_f_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:concrete_ops a_t len ctx_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
@@ -741,7 +740,7 @@ val lexp_fw_f:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> lmul_acc_pow_a_bits_l:lmul_acc_pow_a_bits_l_st a_t len ctx_len k ->
   lexp_fw_f_st a_t len ctx_len k
 
@@ -751,7 +750,7 @@ let lexp_fw_f #a_t len ctx_len k lmul_acc_pow_a_bits_l ctx a bLen bBits b l tabl
 
 
 inline_for_extraction noextract
-let lexp_fw_rem_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
+let lexp_fw_rem_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:concrete_ops a_t len ctx_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
@@ -783,7 +782,7 @@ val lexp_fw_rem:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> lmul_acc_pow_a_bits_c:lmul_acc_pow_a_bits_c_st a_t len ctx_len k ->
   lexp_fw_rem_st a_t len ctx_len k
 
@@ -795,7 +794,7 @@ let lexp_fw_rem #a_t len ctx_len k lmul_acc_pow_a_bits_c ctx a bLen bBits b l ta
 
 
 inline_for_extraction noextract
-let lexp_fw_loop_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
+let lexp_fw_loop_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:concrete_ops a_t len ctx_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
@@ -826,7 +825,7 @@ val lexp_fw_loop:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> lmul_acc_pow_a_bits_l:lmul_acc_pow_a_bits_l_st a_t len ctx_len k ->
   lexp_fw_loop_st a_t len ctx_len k
 
@@ -856,7 +855,7 @@ let lexp_fw_loop #a_t len ctx_len k lmul_acc_pow_a_bits_l ctx a bLen bBits b l t
 
 
 inline_for_extraction noextract
-let lexp_fw_gen_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
+let lexp_fw_gen_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:concrete_ops a_t len ctx_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
@@ -887,7 +886,7 @@ val lexp_fw_gen_:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> lmul_acc_pow_a_bits_l:lmul_acc_pow_a_bits_l_st a_t len ctx_len k
   -> lmul_acc_pow_a_bits_c:lmul_acc_pow_a_bits_c_st a_t len ctx_len k ->
   lexp_fw_gen_st a_t len ctx_len k
@@ -905,7 +904,7 @@ val lexp_fw_gen:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
+  -> k:concrete_ops a_t len ctx_len
   -> lmul_acc_pow_a_bits_l:lmul_acc_pow_a_bits_l_st a_t len ctx_len k
   -> lmul_acc_pow_a_bits_c:lmul_acc_pow_a_bits_c_st a_t len ctx_len k ->
   lexp_fw_st a_t len ctx_len k
@@ -937,307 +936,3 @@ let lexp_fw_consttime #a_t len ctx_len k ctx a bLen bBits b acc w =
     (lmul_acc_pow_a_bits_l_consttime #a_t len ctx_len k)
     (lmul_acc_pow_a_bits_c_consttime #a_t len ctx_len k)
     ctx a bLen bBits b acc w
-
-///////////////////////////////////////
-
-inline_for_extraction noextract
-let lexp_double_fw_f_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
-    ctx:lbuffer (uint_t a_t SEC) ctx_len
-  -> a1:lbuffer (uint_t a_t SEC) len
-  -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
-  -> b1:lbuffer (uint_t a_t SEC) bLen
-  -> a2:lbuffer (uint_t a_t SEC) len
-  -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> i:size_t{v i < v bBits / v l}
-  -> acc:lbuffer (uint_t a_t SEC) len ->
-  Stack unit
-  (requires fun h ->
-    live h a1 /\ live h b1 /\ live h a2 /\ live h b2 /\
-    live h acc /\ live h ctx /\ live h table1 /\ live h table2 /\
-
-    eq_or_disjoint a1 a2 /\ disjoint a1 acc /\ disjoint a1 ctx /\
-    disjoint a1 table1 /\ disjoint a1 table2 /\ disjoint b1 acc /\
-    disjoint a2 acc /\ disjoint a2 ctx /\ disjoint a2 table1 /\ disjoint a2 table2 /\
-    disjoint b2 acc /\ disjoint acc ctx /\ disjoint acc table1 /\ disjoint acc table2 /\
-    disjoint ctx table1 /\ disjoint ctx table2 /\ eq_or_disjoint table1 table2 /\
-
-    BD.bn_v h b1 < pow2 (v bBits) /\
-    BD.bn_v h b2 < pow2 (v bBits) /\
-    k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h a1) /\ k.to.linv (as_seq h a2) /\
-    k.to.linv (as_seq h acc) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a1) table_len (as_seq h table1) j) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a2) table_len (as_seq h table2) j))
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
-    k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) ==
-    S.exp_double_fw_f #k.to.a_spec k.to.comm_monoid
-      (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
-      (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l) (v i) (k.to.refl (as_seq h0 acc)))
-
-
-inline_for_extraction noextract
-val lexp_double_fw_f:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
-  -> lmul_acc_pow_a_bits_l:lmul_acc_pow_a_bits_l_st a_t len ctx_len k ->
-  lexp_double_fw_f_st a_t len ctx_len k
-
-let lexp_double_fw_f #a_t len ctx_len k lmul_acc_pow_a_bits_l ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 i acc =
-  lexp_fw_f #a_t len ctx_len k lmul_acc_pow_a_bits_l ctx a1 bLen bBits b1 l table_len table1 i acc;
-  lmul_acc_pow_a_bits_l ctx a2 bLen bBits b2 l table_len table2 i acc
-
-
-inline_for_extraction noextract
-let lexp_double_fw_rem_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
-    ctx:lbuffer (uint_t a_t SEC) ctx_len
-  -> a1:lbuffer (uint_t a_t SEC) len
-  -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
-  -> b1:lbuffer (uint_t a_t SEC) bLen
-  -> a2:lbuffer (uint_t a_t SEC) len
-  -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> acc:lbuffer (uint_t a_t SEC) len ->
-  Stack unit
-  (requires fun h ->
-    live h a1 /\ live h b1 /\ live h a2 /\ live h b2 /\
-    live h acc /\ live h ctx /\ live h table1 /\ live h table2 /\
-
-    eq_or_disjoint a1 a2 /\ disjoint a1 acc /\ disjoint a1 ctx /\
-    disjoint a1 table1 /\ disjoint a1 table2 /\ disjoint b1 acc /\
-    disjoint a2 acc /\ disjoint a2 ctx /\ disjoint a2 table1 /\ disjoint a2 table2 /\
-    disjoint b2 acc /\ disjoint acc ctx /\ disjoint acc table1 /\ disjoint acc table2 /\
-    disjoint ctx table1 /\ disjoint ctx table2 /\ eq_or_disjoint table1 table2 /\
-
-    BD.bn_v h b1 < pow2 (v bBits) /\
-    BD.bn_v h b2 < pow2 (v bBits) /\
-    k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h a1) /\ k.to.linv (as_seq h a2) /\
-    k.to.linv (as_seq h acc) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a1) table_len (as_seq h table1) j) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a2) table_len (as_seq h table2) j))
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
-    k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) ==
-    S.exp_double_fw_rem #k.to.a_spec k.to.comm_monoid
-      (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
-      (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l) (k.to.refl (as_seq h0 acc)))
-
-
-inline_for_extraction noextract
-val lexp_double_fw_rem:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
-  -> lmul_acc_pow_a_bits_c:lmul_acc_pow_a_bits_c_st a_t len ctx_len k ->
-  lexp_double_fw_rem_st a_t len ctx_len k
-
-let lexp_double_fw_rem #a_t len ctx_len k lmul_acc_pow_a_bits_c ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc =
-  lexp_fw_rem #a_t len ctx_len k lmul_acc_pow_a_bits_c ctx a1 bLen bBits b1 l table_len table1 acc;
-  lmul_acc_pow_a_bits_c ctx a2 bLen bBits b2 l table_len table2 acc
-
-
-inline_for_extraction noextract
-let lexp_double_fw_loop_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
-    ctx:lbuffer (uint_t a_t SEC) ctx_len
-  -> a1:lbuffer (uint_t a_t SEC) len
-  -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
-  -> b1:lbuffer (uint_t a_t SEC) bLen
-  -> a2:lbuffer (uint_t a_t SEC) len
-  -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> acc:lbuffer (uint_t a_t SEC) len ->
-  Stack unit
-  (requires fun h ->
-    live h a1 /\ live h b1 /\ live h a2 /\ live h b2 /\
-    live h acc /\ live h ctx /\ live h table1 /\ live h table2 /\
-
-    eq_or_disjoint a1 a2 /\ disjoint a1 acc /\ disjoint a1 ctx /\
-    disjoint a1 table1 /\ disjoint a1 table2 /\ disjoint b1 acc /\
-    disjoint a2 acc /\ disjoint a2 ctx /\ disjoint a2 table1 /\ disjoint a2 table2 /\
-    disjoint b2 acc /\ disjoint acc ctx /\ disjoint acc table1 /\ disjoint acc table2 /\
-    disjoint ctx table1 /\ disjoint ctx table2 /\ eq_or_disjoint table1 table2 /\
-
-    BD.bn_v h b1 < pow2 (v bBits) /\
-    BD.bn_v h b2 < pow2 (v bBits) /\
-    k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h a1) /\ k.to.linv (as_seq h a2) /\
-    k.to.linv (as_seq h acc) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a1) table_len (as_seq h table1) j) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a2) table_len (as_seq h table2) j))
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\ k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) ==
-    Loops.repeati (v bBits / v l) (S.exp_double_fw_f k.to.comm_monoid (k.to.refl (as_seq h0 a1))
-      (v bBits) (BD.bn_v h0 b1) (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l)) (k.to.refl (as_seq h0 acc)))
-
-
-inline_for_extraction noextract
-val lexp_double_fw_loop:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
-  -> lmul_acc_pow_a_bits_l:lmul_acc_pow_a_bits_l_st a_t len ctx_len k ->
-  lexp_double_fw_loop_st a_t len ctx_len k
-
-let lexp_double_fw_loop #a_t len ctx_len k lmul_acc_pow_a_bits_l ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc =
-  let h0 = ST.get () in
-
-  [@ inline_let]
-  let refl1 i : GTot k.to.a_spec = k.to.refl (as_seq h0 acc) in
-  [@inline_let]
-  let spec (h:mem) = S.exp_double_fw_f k.to.comm_monoid (k.to.refl (as_seq h0 a1))
-    (v bBits) (BD.bn_v h0 b1) (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l) in
-
-  [@inline_let]
-  let inv h (i:nat{i <= v bBits / v l}) =
-    modifies (loc acc) h0 h /\
-    k.to.linv (as_seq h acc) /\
-    k.to.refl (as_seq h acc) == Loops.repeati i (spec h0) (refl1 0) /\
-    (forall (j:nat{j < v table_len}). precomp_table_inv len ctx_len k (as_seq h a1) table_len (as_seq h table1) j) /\
-    (forall (j:nat{j < v table_len}). precomp_table_inv len ctx_len k (as_seq h a2) table_len (as_seq h table2) j) in
-
-
-  Loops.eq_repeati0 (v bBits / v l) (spec h0) (refl1 0);
-  Lib.Loops.for 0ul (bBits /. l) inv
-  (fun i ->
-    Loops.unfold_repeati (v bBits / v l) (spec h0) (refl1 0) (v i);
-    lexp_double_fw_f len ctx_len k lmul_acc_pow_a_bits_l ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 i acc
-  )
-
-
-inline_for_extraction noextract
-let lexp_double_fw_gen_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:lexp a_t len ctx_len) =
-    ctx:lbuffer (uint_t a_t SEC) ctx_len
-  -> a1:lbuffer (uint_t a_t SEC) len
-  -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
-  -> b1:lbuffer (uint_t a_t SEC) bLen
-  -> a2:lbuffer (uint_t a_t SEC) len
-  -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
-  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> acc:lbuffer (uint_t a_t SEC) len ->
-  Stack unit
-  (requires fun h ->
-    live h a1 /\ live h b1 /\ live h a2 /\ live h b2 /\
-    live h acc /\ live h ctx /\ live h table1 /\ live h table2 /\
-
-    eq_or_disjoint a1 a2 /\ disjoint a1 acc /\ disjoint a1 ctx /\
-    disjoint a1 table1 /\ disjoint a1 table2 /\ disjoint b1 acc /\
-    disjoint a2 acc /\ disjoint a2 ctx /\ disjoint a2 table1 /\ disjoint a2 table2 /\
-    disjoint b2 acc /\ disjoint acc ctx /\ disjoint acc table1 /\ disjoint acc table2 /\
-    disjoint ctx table1 /\ disjoint ctx table2 /\ eq_or_disjoint table1 table2 /\
-
-    BD.bn_v h b1 < pow2 (v bBits) /\
-    BD.bn_v h b2 < pow2 (v bBits) /\
-    k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h a1) /\ k.to.linv (as_seq h a2) /\
-    k.to.linv (as_seq h acc) /\ k.to.refl (as_seq h acc) == k.to.comm_monoid.S.one /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a1) table_len (as_seq h table1) j) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a2) table_len (as_seq h table2) j))
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
-    k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) ==
-    S.exp_double_fw k.to.comm_monoid
-      (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
-      (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l))
-
-
-inline_for_extraction noextract
-val lexp_double_fw_gen_:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
-  -> lmul_acc_pow_a_bits_l:lmul_acc_pow_a_bits_l_st a_t len ctx_len k
-  -> lmul_acc_pow_a_bits_c:lmul_acc_pow_a_bits_c_st a_t len ctx_len k ->
-  lexp_double_fw_gen_st a_t len ctx_len k
-
-let lexp_double_fw_gen_ #a_t len ctx_len k lmul_acc_pow_a_bits_l lmul_acc_pow_a_bits_c ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc =
-  lexp_double_fw_loop #a_t len ctx_len k lmul_acc_pow_a_bits_l ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc;
-
-  assert (v (bBits %. l) == v bBits % v l);
-  if bBits %. l <>. 0ul then lexp_double_fw_rem len ctx_len k lmul_acc_pow_a_bits_c ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc
-
-
-inline_for_extraction noextract
-val lexp_double_fw_gen:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:lexp a_t len ctx_len
-  -> lmul_acc_pow_a_bits_l:lmul_acc_pow_a_bits_l_st a_t len ctx_len k
-  -> lmul_acc_pow_a_bits_c:lmul_acc_pow_a_bits_c_st a_t len ctx_len k ->
-  lexp_double_fw_st a_t len ctx_len k
-
-#push-options "--z3rlimit 150"
-let lexp_double_fw_gen #a_t len ctx_len k lmul_acc_pow_a_bits_l lmul_acc_pow_a_bits_c ctx a1 bLen bBits b1 a2 b2 acc l =
-  push_frame ();
-  Math.Lemmas.pow2_lt_compat 32 (v l);
-  let table_len = 1ul <<. l in
-  assert (v table_len == pow2 (v l));
-  Math.Lemmas.pow2_le_compat (v l) 1;
-  assert (1 < v table_len /\ v table_len * v len <= max_size_t);
-
-  let table1 = create (table_len *! len) (uint #a_t #SEC 0) in
-  update_sub table1 0ul len acc;
-  lprecomp_table #a_t len ctx_len k ctx a1 table_len table1;
-  let h = ST.get () in
-  assert (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a1) table_len (as_seq h table1) j);
-
-  let table2 = create (table_len *! len) (uint #a_t #SEC 0) in
-  update_sub table2 0ul len acc;
-  lprecomp_table #a_t len ctx_len k ctx a2 table_len table2;
-  let h = ST.get () in
-  assert (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a1) table_len (as_seq h table1) j);
-  assert (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a2) table_len (as_seq h table2) j);
-
-  lexp_double_fw_gen_ #a_t len ctx_len k
-    lmul_acc_pow_a_bits_l lmul_acc_pow_a_bits_c
-    ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc;
-  pop_frame ()
-#pop-options
-
-
-let lexp_double_fw_vartime #a_t len ctx_len k ctx a1 bLen bBits b1 a2 b2 acc w =
-  lexp_double_fw_gen #a_t len ctx_len k
-    (lmul_acc_pow_a_bits_l_vartime #a_t len ctx_len k)
-    (lmul_acc_pow_a_bits_c_vartime #a_t len ctx_len k)
-    ctx a1 bLen bBits b1 a2 b2 acc w
-
-
-let lexp_double_fw_consttime #a_t len ctx_len k ctx a1 bLen bBits b1 a2 b2 acc w =
-  lexp_double_fw_gen #a_t len ctx_len k
-    (lmul_acc_pow_a_bits_l_consttime #a_t len ctx_len k)
-    (lmul_acc_pow_a_bits_c_consttime #a_t len ctx_len k)
-    ctx a1 bLen bBits b1 a2 b2 acc w
