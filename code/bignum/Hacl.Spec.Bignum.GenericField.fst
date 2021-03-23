@@ -34,8 +34,7 @@ let bn_field_init #t nBits n =
 
   let mu = Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb n.[0] in
   Hacl.Spec.Bignum.ModInvLimb.bn_mod_inv_limb_lemma n;
-  assert ((1 + (bn_v n % pow2 (bits t)) * v mu) % pow2 (bits t) == 0);
-  M.mont_preconditions_n0 (bits t) (bn_v n) (v mu);
+  assert ((1 + bn_v n * v mu) % pow2 (bits t) == 0);
 
   bn_eval_bound n len;
 

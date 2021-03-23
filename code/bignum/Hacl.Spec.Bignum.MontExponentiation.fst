@@ -101,11 +101,9 @@ inline_for_extraction noextract
 let bn_exp_mont_consttime_threshold = 200
 
 
-// no diff between vartime and consttime at the spec level
-val bn_exp_mont_vartime:
-    #t:limb_t
-  -> #len:BN.bn_len t
-  -> n:lbignum t len
+noextract
+let bn_exp_mont_st (t:limb_t) (len:BN.bn_len t) =
+    n:lbignum t len
   -> mu:limb t{BM.bn_mont_pre n mu}
   -> aM:bn_mont_t n
   -> bBits:size_pos
@@ -116,6 +114,9 @@ val bn_exp_mont_vartime:
     let k = E.mk_nat_mont_ll_comm_monoid (bits t) len (bn_v n) (v mu) in
     bn_v resM == LE.pow k (bn_v aM) (bn_v b))
 
+
+// no diff between vartime and consttime at the spec level
+val bn_exp_mont_vartime: #t:limb_t -> #len:BN.bn_len t -> bn_exp_mont_st t len
 let bn_exp_mont_vartime #t #len n mu aM bBits b =
   let k1 = mk_bn_mont_concrete_ops n mu in
   if bBits < bn_exp_mont_vartime_threshold then begin
@@ -126,20 +127,7 @@ let bn_exp_mont_vartime #t #len n mu aM bBits b =
     SE.exp_fw k1 aM bBits (bn_v b) 4 end
 
 
-val bn_exp_mont_consttime:
-    #t:limb_t
-  -> #len:BN.bn_len t
-  -> n:lbignum t len
-  -> mu:limb t{BM.bn_mont_pre n mu}
-  -> aM:bn_mont_t n
-  -> bBits:size_pos
-  -> b:lbignum t (blocks bBits (bits t)){bn_v b < pow2 bBits} ->
-  Pure (bn_mont_t n)
-  (requires True)
-  (ensures  fun resM ->
-    let k = E.mk_nat_mont_ll_comm_monoid (bits t) len (bn_v n) (v mu) in
-    bn_v resM == LE.pow k (bn_v aM) (bn_v b))
-
+val bn_exp_mont_consttime: #t:limb_t -> #len:BN.bn_len t -> bn_exp_mont_st t len
 let bn_exp_mont_consttime #t #len n mu aM bBits b =
   let k1 = mk_bn_mont_concrete_ops n mu in
   if bBits < bn_exp_mont_consttime_threshold then begin

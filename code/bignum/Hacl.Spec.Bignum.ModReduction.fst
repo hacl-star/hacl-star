@@ -48,8 +48,7 @@ val bn_mod_slow_precompr2_lemma:
 let bn_mod_slow_precompr2_lemma #t #nLen n mu r2 a =
   let r = pow2 (bits t * nLen) in
   let d, _ = M.eea_pow2_odd (bits t * nLen) (bn_v n) in
-  M.mont_preconditions (bits t) nLen (bn_v n) (v mu);
-  bn_eval_bound n nLen;
+  M.mont_preconditions_d (bits t) nLen (bn_v n);
   assert (M.mont_pre (bits t) nLen (bn_v n) (v mu));
 
   let a_mod = BAM.bn_almost_mont_reduction n mu a in
@@ -110,4 +109,5 @@ let bn_mod_slow_lemma #t #nLen nBits n a =
   BI.bn_mod_inv_limb_lemma n;
   let r2 = BM.bn_precomp_r2_mod_n nBits n in
   BM.bn_precomp_r2_mod_n_lemma nBits n;
+  bn_eval_bound n nLen;
   bn_mod_slow_precompr2_lemma n mu r2 a
