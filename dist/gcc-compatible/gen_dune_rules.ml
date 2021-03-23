@@ -121,20 +121,7 @@ module Lib = struct
           ; field "names" [ Item.c_stubs_module item ]
           ; field_s "extra_deps"
               [ atoms ([ "alias"; "foreign_headers" ] @ local_name) ]
-          ; field_s "flags"
-              [ atoms
-                  [ ":standard"
-                  ; "-I.."
-                  ; "-Wno-parentheses"
-                  ; "-Wno-deprecated-declarations"
-                  ; "-Wno-#warnings"
-                  ; "-Wno-error=cpp"
-                  ; "-Wno-cpp"
-                  ; "-g"
-                  ; "-std=gnu11"
-                  ; "-O3"
-                  ]
-              ]
+          ; field_s "flags" [ atoms [ ":include"; "dune.cflags" ] ]
           ; field "include_dirs"
               [ "../../kremlin/include"; "../../kremlin/kremlib/dist/minimal" ]
           ]

@@ -3,6 +3,9 @@
  (section lib)
  (package hacl-star-raw))
 
+(rule
+  (write-file dune.cflags "(:standard -I.. -Wno-parentheses -Wno-deprecated-declarations -Wno-#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3)"))
+
 (include dune.inc)
 
 (rule
