@@ -15,7 +15,9 @@
  (targets libevercrypt.a libevercrypt.so)
  (action
   (no-infer
-   (progn
+   (setenv
+    CC
+    "%{cc}"
     (run make libevercrypt.a libevercrypt.so)))))
 
 (rule
