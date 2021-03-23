@@ -69,18 +69,16 @@ let mk_nat_mont_comm_monoid (n:pos) (r:nat) (d:int{r * d % n = 1}) : LE.comm_mon
 
 
 val pow_nat_mont_is_pow: n:pos -> r:nat -> d:int{r * d % n = 1} -> aM:nat_mod n -> b:pos ->
-  Lemma (pow aM b * mont_one n r * pow d b % n == LE.pow (mk_nat_mont_comm_monoid n r d) aM b)
+  Lemma (pow (aM * d % n) b * r % n == LE.pow (mk_nat_mont_comm_monoid n r d) aM b)
 
 let rec pow_nat_mont_is_pow n r d aM b =
   let k = mk_nat_mont_comm_monoid n r d in
   if b = 1 then begin
     calc (==) {
-      pow aM b * mont_one n r * pow d b % n;
-      (==) { lemma_pow1 aM; lemma_pow1 d }
-      aM * mont_one n r * d % n;
-      (==) { M.lemma_mod_mul_distr3 aM r d n }
-      aM * r * d % n;
-      (==) { Math.Lemmas.paren_mul_right aM r d; Math.Lemmas.lemma_mod_mul_distr_r aM (r * d) n }
+      pow (aM * d % n) b * r % n;
+      (==) { lemma_pow1 (aM * d % n) }
+      (aM * d % n) * r % n;
+      (==) { M.lemma_mont_id1 n r d aM }
       aM % n;
       (==) { Math.Lemmas.small_mod aM n }
       aM;
@@ -89,19 +87,21 @@ let rec pow_nat_mont_is_pow n r d aM b =
       }; () end
   else begin
     calc (==) {
-      pow aM b * mont_one n r * pow d b % n;
-      (==) { lemma_pow_unfold aM b; lemma_pow_unfold d b }
-      aM * pow aM (b - 1) * mont_one n r * (d * pow d (b - 1)) % n;
-      (==) { Math.Lemmas.paren_mul_right aM (pow aM (b - 1)) (mont_one n r) }
-      aM * (pow aM (b - 1) * mont_one n r) * (d * pow d (b - 1)) % n;
-      (==) { Math.Lemmas.paren_mul_right (aM * (pow aM (b - 1) * mont_one n r)) (pow d (b - 1)) d }
-      (aM * (pow aM (b - 1) * mont_one n r) * pow d (b - 1)) * d % n;
-      (==) { Math.Lemmas.paren_mul_right aM (pow aM (b - 1) * mont_one n r) (pow d (b - 1)) }
-      aM * (pow aM (b - 1) * mont_one n r * pow d (b - 1)) * d % n;
-      (==) { M.lemma_mod_mul_distr3 aM (pow aM (b - 1) * mont_one n r * pow d (b - 1)) d n }
-      aM * (pow aM (b - 1) * mont_one n r * pow d (b - 1) % n) * d % n;
+      pow (aM * d % n) b * r % n;
+      (==) { lemma_pow_unfold (aM * d % n) b }
+      (aM * d % n) * pow (aM * d % n) (b - 1) * r % n;
+      (==) {
+        Math.Lemmas.paren_mul_right (aM * d % n) (pow (aM * d % n) (b - 1)) r;
+        Math.Lemmas.lemma_mod_mul_distr_r (aM * d % n) (pow (aM * d % n) (b - 1) * r) n }
+      (aM * d % n) * (pow (aM * d % n) (b - 1) * r % n) % n;
       (==) { pow_nat_mont_is_pow n r d aM (b - 1) }
-      aM * (LE.pow k aM (b - 1)) * d % n;
+      (aM * d % n) * LE.pow k aM (b - 1) % n;
+      (==) { Math.Lemmas.lemma_mod_mul_distr_l (aM * d) (LE.pow k aM (b - 1)) n }
+      aM * d * LE.pow k aM (b - 1) % n;
+      (==) {
+        Math.Lemmas.paren_mul_right aM d (LE.pow k aM (b - 1));
+        Math.Lemmas.paren_mul_right aM (LE.pow k aM (b - 1)) d }
+      aM * LE.pow k aM (b - 1) * d % n;
       (==) { LE.lemma_pow_unfold k aM b }
       LE.pow k aM b;
       }; () end
@@ -115,75 +115,36 @@ let mod_exp_mont n r d a b =
   acc
 
 
-val mod_exp_mont_lemma_before_to_mont: n:pos -> r:pos -> d:int{r * d % n == 1} -> a:nat_mod n -> b:pos ->
-  Lemma (pow (a * r % n) b * mont_one n r * pow d b % n == pow a b * mont_one n r % n)
-
-let mod_exp_mont_lemma_before_to_mont n r d a b =
-  let aM = a * r % n in
-  let accM0 = mont_one n r in
-  calc (==) {
-    pow aM b * accM0 * pow d b % n;
-    (==) { Math.Lemmas.paren_mul_right (pow aM b) accM0 (pow d b);
-      Math.Lemmas.paren_mul_right (pow aM b) (pow d b) accM0 }
-    pow aM b * pow d b * accM0 % n;
-    (==) { lemma_pow_mul_base aM d b }
-    pow (aM * d) b * accM0 % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (pow (aM * d) b) accM0 n }
-    pow (aM * d) b % n * accM0 % n;
-    (==) { lemma_pow_mod_base (aM * d) b n }
-    pow (aM * d % n) b % n * accM0 % n;
-    (==) { M.lemma_mont_id n r d a }
-    pow (a % n) b % n * accM0 % n;
-    (==) { lemma_pow_mod_base a b n }
-    pow a b % n * accM0 % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (pow a b) accM0 n }
-    pow a b * accM0 % n;
-  };
-  assert (pow aM b * accM0 * pow d b % n == pow a b * accM0 % n)
-
-
-val mod_exp_mont_lemma_after_to_mont: n:pos -> r:pos -> d:int{r * d % n == 1} -> a:nat_mod n -> b:pos ->
-  Lemma (pow a b * mont_one n r % n * d % n == pow a b % n)
-
-let mod_exp_mont_lemma_after_to_mont n r d a b =
-  let accM0 = mont_one n r in
-  calc (==) {
-    pow a b * accM0 % n * d % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (pow a b * accM0) d n }
-    pow a b * accM0 * d % n;
-    (==) { Math.Lemmas.paren_mul_right (pow a b) accM0 d }
-    pow a b * (accM0 * d) % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (pow a b) (accM0 * d) n }
-    pow a b * (accM0 * d % n) % n;
-    (==) { M.lemma_mont_id n r d 1 }
-    pow a b * (1 % n) % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (pow a b) 1 n }
-    pow a b % n;
-  }
-
-
 val mod_exp_mont_lemma: n:pos -> r:pos -> d:int{r * d % n == 1} -> a:nat_mod n -> b:pos ->
   Lemma (mod_exp_mont n r d a b == pow a b % n)
 
 let mod_exp_mont_lemma n r d a b =
   let k = mk_nat_mont_comm_monoid n r d in
   let aM = a * r % n in
-  calc (==) {
+  //let accM = LE.pow k aM b in
+  //let acc = accM * d % n in
+
+  calc (==) { // acc
     LE.pow k aM b * d % n;
     (==) { pow_nat_mont_is_pow n r d aM b }
-    pow aM b * mont_one n r * pow d b % n * d % n;
-    (==) { mod_exp_mont_lemma_before_to_mont n r d a b }
-    pow a b * mont_one n r % n * d % n;
-    (==) { mod_exp_mont_lemma_after_to_mont n r d a b }
+    (pow (aM * d % n) b * r % n) * d % n;
+    (==) { M.lemma_mont_id n r d (pow (aM * d % n) b) }
+    pow (aM * d % n) b % n;
+    (==) { }
+    pow (a * r % n * d % n) b % n;
+    (==) { M.lemma_mont_id n r d a }
+    pow (a % n) b % n;
+    (==) { Math.Lemmas.small_mod a n }
     pow a b % n;
     }
+
 
 (* Modular exponentiation with Montgomery arithmetic
    using functions from Hacl.Spec.Montgomery.Lemmas *)
 
 val mont_one_ll: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu} -> nat_mod n
 let mont_one_ll pbits rLen n mu =
-  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
   M.mont_one_lemma pbits rLen n d mu;
   M.mont_one pbits rLen n mu
@@ -191,7 +152,7 @@ let mont_one_ll pbits rLen n mu =
 val mont_mul_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
   -> a:nat_mod n -> b:nat_mod n -> nat_mod n
 let mont_mul_ll pbits rLen n mu a b =
-  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
   M.mont_mul_lemma pbits rLen n d mu a b;
   M.mont_mul pbits rLen n mu a b
@@ -201,7 +162,7 @@ val lemma_mont_one_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{M.mont_pre pbits
   Lemma (mont_mul_ll pbits rLen n mu a (mont_one_ll pbits rLen n mu) == a)
 let lemma_mont_one_ll pbits rLen n mu a =
   let r = pow2 (pbits * rLen) in
-  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
 
   let mont_one = mont_one_ll pbits rLen n mu in
@@ -218,7 +179,7 @@ val lemma_mont_mul_ll_assoc: pbits:pos -> rLen:nat -> n:pos -> mu:nat{M.mont_pre
 
 let lemma_mont_mul_ll_assoc pbits rLen n mu a b c =
   let r = pow2 (pbits * rLen) in
-  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
 
   M.mont_mul_lemma pbits rLen n d mu a b;
@@ -234,7 +195,7 @@ val lemma_mont_mul_ll_comm: pbits:pos -> rLen:nat -> n:pos -> mu:nat{M.mont_pre 
 
 let lemma_mont_mul_ll_comm pbits rLen n mu a b =
   let r = pow2 (pbits * rLen) in
-  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
 
   M.mont_mul_lemma pbits rLen n d mu a b;
@@ -259,7 +220,7 @@ val pow_nat_mont_ll_is_pow_nat_mont:
   (requires M.mont_pre pbits rLen n mu)
   (ensures
    (let r = pow2 (pbits * rLen) in
-    let d, k = M.eea_pow2_odd (pbits * rLen) n in
+    let d, _ = M.eea_pow2_odd (pbits * rLen) n in
     M.mont_preconditions_d pbits rLen n;
 
     LE.pow (mk_nat_mont_comm_monoid n r d) a b ==
@@ -267,7 +228,7 @@ val pow_nat_mont_ll_is_pow_nat_mont:
 
 let rec pow_nat_mont_ll_is_pow_nat_mont pbits rLen n mu a b =
   let r = pow2 (pbits * rLen) in
-  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
 
   let k0 = mk_nat_mont_comm_monoid n r d in
@@ -290,7 +251,7 @@ val mod_exp_mont_ll: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre pbits r
   -> a:nat_mod n -> b:pos -> nat_mod n
 
 let mod_exp_mont_ll pbits rLen n mu a b =
-  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
 
   let aM = M.to_mont pbits rLen n mu a in
@@ -307,7 +268,7 @@ val mod_exp_mont_ll_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre p
 
 let mod_exp_mont_ll_lemma pbits rLen n mu a b =
   let r = pow2 (pbits * rLen) in
-  let d, k = M.eea_pow2_odd (pbits * rLen) n in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
 
   let k1 = mk_nat_mont_ll_comm_monoid pbits rLen n mu in
@@ -325,3 +286,41 @@ let mod_exp_mont_ll_lemma pbits rLen n mu a b =
   M.from_mont_lemma pbits rLen n d mu accM;
   assert (acc == accM * d % n);
   mod_exp_mont_lemma n r d a b
+
+
+val from_mont_exp_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> aM:nat -> b:pos -> Lemma
+  (requires
+    M.mont_pre pbits rLen n mu /\ aM < n)
+  (ensures
+   (let k = mk_nat_mont_ll_comm_monoid pbits rLen n mu in
+    let cM = LE.pow k aM b in
+    let c = M.from_mont pbits rLen n mu cM in
+    let a = M.from_mont pbits rLen n mu aM in
+    c == pow a b % n))
+
+let from_mont_exp_lemma pbits rLen n mu aM b =
+  let r = pow2 (pbits * rLen) in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  let k1 = mk_nat_mont_ll_comm_monoid pbits rLen n mu in
+  let k2 = mk_nat_mont_comm_monoid n r d in
+
+  let cM = LE.pow k1 aM b in
+  let c = M.from_mont pbits rLen n mu cM in
+  let a = M.from_mont pbits rLen n mu aM in
+
+  M.from_mont_lemma pbits rLen n d mu cM;
+  //assert (c == cM * d % n);
+  calc (==) {
+    cM * d % n;
+    (==) { pow_nat_mont_ll_is_pow_nat_mont pbits rLen n mu aM b }
+    LE.pow k2 aM b * d % n;
+    (==) { pow_nat_mont_is_pow n r d aM b }
+    pow (aM * d % n) b * r % n * d % n;
+    (==) { M.lemma_mont_id n r d (pow (aM * d % n) b) }
+    pow (aM * d % n) b % n;
+    (==) { M.from_mont_lemma pbits rLen n d mu aM }
+    pow a b % n;
+    };
+  assert (c == pow a b % n)

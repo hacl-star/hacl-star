@@ -11,15 +11,72 @@ module M = Hacl.Spec.Montgomery.Lemmas
 module BM = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Spec.Bignum
 
-//module LE = Lib.Exponentiation
-//module E = Hacl.Spec.Exponentiation.Lemmas
-//module BE = Hacl.Spec.Bignum.Exponentiation
-//module Euclid = FStar.Math.Euclid
-//module BI = Hacl.Spec.Bignum.ModInv
-
-//friend Hacl.Spec.Bignum.Exponentiation
+module LE = Lib.Exponentiation
+module SE = Spec.Exponentiation
+module ME = Hacl.Spec.Bignum.MontExponentiation
+module E = Hacl.Spec.Exponentiation.Lemmas
+module Euclid = FStar.Math.Euclid
+module BI = Hacl.Spec.Bignum.ModInv
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
+//////////////////////////////////////////
+
+val mul_zero_lemma: n:pos{Euclid.is_prime n} -> x:int -> y:int ->
+  Lemma (x * y % n == 0 <==> (x % n == 0 \/ y % n == 0))
+let mul_zero_lemma n x y =
+  assert (0 % n = 0);
+  if x % n = 0 then
+    Math.Lemmas.lemma_mod_mul_distr_l x y n
+  else
+    if y % n = 0 then
+      Math.Lemmas.lemma_mod_mul_distr_r x y n
+    else
+      if x * y % n = 0 then
+        Math.Fermat.mod_mult_congr n x 0 y
+      else ()
+
+
+val mul_nonzero_lemma: n:pos{Euclid.is_prime n} -> x:int -> y:int -> Lemma
+  (requires x % n <> 0 /\ y % n <> 0)
+  (ensures  x * y % n <> 0)
+let mul_nonzero_lemma n x y =
+  mul_zero_lemma n x y
+
+
+val from_mont_lemma_nonzero: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> aM:nat -> Lemma
+  (requires
+    M.mont_pre pbits rLen n mu /\
+    0 < aM /\ aM < n /\
+    Euclid.is_prime n)
+  (ensures
+   (let a = M.from_mont pbits rLen n mu aM in
+    0 < a /\ a < n))
+
+let from_mont_lemma_nonzero pbits rLen n mu aM =
+  let r = pow2 (pbits * rLen) in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
+  M.mont_preconditions_d pbits rLen n;
+
+  let a = M.from_mont pbits rLen n mu aM in
+  M.from_mont_lemma pbits rLen n d mu aM;
+  assert (a == aM * d % n);
+  assert (d <> 0);
+
+  Math.Lemmas.small_mod aM n;
+  assert (aM % n <> 0);
+
+  let d1 = -d in
+  assert (0 < d1 /\ d1 < n);
+  Math.Lemmas.lemma_mod_sub_1 d1 n;
+  assert ((-d1) % n == n - (d1 % n));
+  assert (d % n <> 0);
+
+  mul_nonzero_lemma n aM d;
+  assert (a <> 0)
+
+///////////////////////////////////////////////
+
 
 let bn_field_get_len #t k = k.len
 
@@ -86,4 +143,18 @@ let bn_field_one #t k =
   BM.bn_mont_one k.n k.mu r2
 
 
-let bn_field_inv #t k aM = admit()
+let bn_field_inv #t k aM =
+  let n2 = BI.bn_mod_inv_prime_n2 k.n in
+  assert (bn_v n2 == bn_v k.n - 2);
+  let aInvM = ME.bn_exp_mont_vartime k.n k.mu aM k.nBits n2 in
+
+  let k1 = E.mk_nat_mont_ll_comm_monoid (bits t) k.len (bn_v k.n) (v k.mu) in
+  assert (bn_v aInvM == LE.pow k1 (bn_v aM) (bn_v n2));
+
+  E.from_mont_exp_lemma (bits t) k.len (bn_v k.n) (v k.mu) (bn_v aM) (bn_v n2);
+  Lib.NatMod.lemma_pow_mod #(bn_v k.n) (bn_v (bn_from_field k aM)) (bn_v n2);
+  assert (bn_v (bn_from_field k aInvM) == Lib.NatMod.pow_mod #(bn_v k.n) (bn_v (bn_from_field k aM)) (bn_v n2));
+  from_mont_lemma_nonzero (bits t) k.len (bn_v k.n) (v k.mu) (bn_v aM);
+  assert (0 < bn_v (bn_from_field k aM));
+  BI.mod_inv_prime_lemma (bn_v k.n) (bn_v (bn_from_field k aM));
+  aInvM

@@ -50,14 +50,14 @@ let mod_inv_prime_lemma n a =
 //pow2 nBits < bn_v n /\ Euclid.is_prime (bn_v n) are still needed to be checked
 val bn_check_mod_inv_prime:
     #t:limb_t
-  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
-  -> n:lbignum t nLen
-  -> a:lbignum t nLen ->
+  -> #len:size_pos{2 * bits t * len <= max_size_t}
+  -> n:lbignum t len
+  -> a:lbignum t len ->
   res:limb t{
     let b = bn_v n % 2 = 1 && 1 < bn_v n && 0 < bn_v a && bn_v a < bn_v n in
     v res == (if b then v (ones t SEC) else v (zeros t SEC))}
 
-let bn_check_mod_inv_prime #t #nLen n a =
+let bn_check_mod_inv_prime #t #len n a =
   let m0 = BM.bn_check_modulus n in
   let m1 = BN.bn_is_zero_mask a in
   BN.bn_is_zero_mask_lemma a;
@@ -74,37 +74,51 @@ let bn_check_mod_inv_prime #t #nLen n a =
 
 let bn_mod_inv_prime_pre
   (#t:limb_t)
-  (#nLen:size_pos{2 * bits t * nLen <= max_size_t})
-  (nBits:size_nat{nBits / bits t < nLen})
-  (n:lbignum t nLen)
-  (a:lbignum t nLen)
+  (#len:size_pos{2 * bits t * len <= max_size_t})
+  (nBits:size_nat{nBits / bits t < len})
+  (n:lbignum t len)
+  (a:lbignum t len)
  =
   bn_v n % 2 = 1 /\ 1 < bn_v n /\ pow2 nBits < bn_v n /\
   0 < bn_v a /\ bn_v a < bn_v n /\ Euclid.is_prime (bn_v n)
 
 
+val bn_mod_inv_prime_n2:
+    #t:limb_t
+  -> #len:size_pos
+  -> n:lbignum t len ->
+  Pure (lbignum t len)
+  (requires 1 < bn_v n)
+  (ensures fun res ->
+    bn_v res == bn_v n - 2)
+
+let bn_mod_inv_prime_n2 #t #len n =
+  let c, n2 = bn_sub1 n (uint #t 2) in
+  bn_sub1_lemma n (uint #t 2);
+  assert (bn_v n2 - v c * pow2 (bits t * len) == bn_v n - 2);
+  bn_eval_bound n2 len;
+  bn_eval_bound n len;
+  assert (v c = 0);
+  assert (bn_v n2 == bn_v n - 2);
+  n2
+
+
 val bn_mod_inv_prime:
     #t:limb_t
-  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
-  -> nBits:size_nat{nBits / bits t < nLen}
-  -> n:lbignum t nLen
-  -> a:lbignum t nLen ->
-  Pure (lbignum t nLen)
+  -> #len:size_pos{2 * bits t * len <= max_size_t}
+  -> nBits:size_nat{nBits / bits t < len}
+  -> n:lbignum t len
+  -> a:lbignum t len ->
+  Pure (lbignum t len)
   (requires
     bn_mod_inv_prime_pre nBits n a)
   (ensures fun res ->
     bn_v res * bn_v a % bn_v n = 1)
 
-let bn_mod_inv_prime #t #nLen nBits n a =
-  let c, n2 = bn_sub1 n (uint #t 2) in
-  bn_sub1_lemma n (uint #t 2);
-  assert (bn_v n2 - v c * pow2 (bits t * nLen) == bn_v n - 2);
-  bn_eval_bound n2 nLen;
-  bn_eval_bound n nLen;
-  assert (v c = 0);
-  assert (bn_v n2 == bn_v n - 2);
-
-  let res = BE.bn_mod_exp_vartime nLen nBits n a (bits t * nLen) n2 in
+let bn_mod_inv_prime #t #len nBits n a =
+  let n2 = bn_mod_inv_prime_n2 n in
+  bn_eval_bound n len;
+  let res = BE.bn_mod_exp_vartime len nBits n a (bits t * len) n2 in
   assert (bn_v res == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v n2));
   mod_inv_prime_lemma (bn_v n) (bn_v a);
   res
