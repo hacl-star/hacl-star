@@ -12,7 +12,8 @@ module M = Hacl.Spec.Montgomery.Lemmas
 
 let bn_mont_pre (#t:limb_t) (#nLen:size_pos) (n:lbignum t nLen) (mu:limb t) =
   (1 + bn_v n * v mu) % pow2 (bits t) == 0 /\
-  bn_v n % 2 = 1 /\ 1 < bn_v n
+  bn_v n % 2 = 1 /\ 1 < bn_v n /\
+  bn_v n < pow2 (bits t * nLen) // bn_eval_bound n nLen
 
 
 ///  Check a modulus for Montgomery arithmetic
