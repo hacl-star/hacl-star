@@ -181,18 +181,14 @@ let mod_exp_mont_lemma n r d a b =
 (* Modular exponentiation with Montgomery arithmetic
    using functions from Hacl.Spec.Montgomery.Lemmas *)
 
-let mont_pre (pbits:pos) (rLen:nat) (n:pos) (mu:nat) =
-  (1 + n * mu) % pow2 pbits == 0 /\
-  1 < n /\ n < pow2 (pbits * rLen) /\ n % 2 = 1
-
-val mont_one_ll: pbits:pos -> rLen:pos -> n:pos -> mu:nat{mont_pre pbits rLen n mu} -> nat_mod n
+val mont_one_ll: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu} -> nat_mod n
 let mont_one_ll pbits rLen n mu =
   let d, k = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
   M.mont_one_lemma pbits rLen n d mu;
   M.mont_one pbits rLen n mu
 
-val mont_mul_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{mont_pre pbits rLen n mu}
+val mont_mul_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
   -> a:nat_mod n -> b:nat_mod n -> nat_mod n
 let mont_mul_ll pbits rLen n mu a b =
   let d, k = M.eea_pow2_odd (pbits * rLen) n in
@@ -201,7 +197,7 @@ let mont_mul_ll pbits rLen n mu a b =
   M.mont_mul pbits rLen n mu a b
 
 
-val lemma_mont_one_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{mont_pre pbits rLen n mu} -> a:nat_mod n ->
+val lemma_mont_one_ll: pbits:pos -> rLen:nat -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu} -> a:nat_mod n ->
   Lemma (mont_mul_ll pbits rLen n mu a (mont_one_ll pbits rLen n mu) == a)
 let lemma_mont_one_ll pbits rLen n mu a =
   let r = pow2 (pbits * rLen) in
@@ -215,7 +211,7 @@ let lemma_mont_one_ll pbits rLen n mu a =
   lemma_mont_one n r d a
 
 
-val lemma_mont_mul_ll_assoc: pbits:pos -> rLen:nat -> n:pos -> mu:nat{mont_pre pbits rLen n mu}
+val lemma_mont_mul_ll_assoc: pbits:pos -> rLen:nat -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
   -> a:nat_mod n -> b:nat_mod n -> c:nat_mod n ->
   Lemma (mont_mul_ll pbits rLen n mu (mont_mul_ll pbits rLen n mu a b) c ==
     mont_mul_ll pbits rLen n mu a (mont_mul_ll pbits rLen n mu b c))
@@ -232,7 +228,7 @@ let lemma_mont_mul_ll_assoc pbits rLen n mu a b c =
   lemma_mont_mul_assoc n d a b c
 
 
-val lemma_mont_mul_ll_comm: pbits:pos -> rLen:nat -> n:pos -> mu:nat{mont_pre pbits rLen n mu}
+val lemma_mont_mul_ll_comm: pbits:pos -> rLen:nat -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
   -> a:nat_mod n -> b:nat_mod n ->
   Lemma (mont_mul_ll pbits rLen n mu a b == mont_mul_ll pbits rLen n mu b a)
 
@@ -246,7 +242,8 @@ let lemma_mont_mul_ll_comm pbits rLen n mu a b =
   lemma_mont_mul_comm n d a b
 
 
-let mk_nat_mont_ll_comm_monoid (pbits:pos) (rLen:nat) (n:pos) (mu:nat{mont_pre pbits rLen n mu}) : LE.comm_monoid (nat_mod n) = {
+let mk_nat_mont_ll_comm_monoid (pbits:pos) (rLen:nat)
+  (n:pos) (mu:nat{M.mont_pre pbits rLen n mu}) : LE.comm_monoid (nat_mod n) = {
   LE.one = mont_one_ll pbits rLen n mu;
   LE.mul = mont_mul_ll pbits rLen n mu;
   LE.lemma_one = lemma_mont_one_ll pbits rLen n mu;
@@ -259,7 +256,7 @@ val pow_nat_mont_ll_is_pow_nat_mont:
     pbits:pos -> rLen:pos
   -> n:pos -> mu:nat
   -> a:nat_mod n -> b:nat -> Lemma
-  (requires mont_pre pbits rLen n mu)
+  (requires M.mont_pre pbits rLen n mu)
   (ensures
    (let r = pow2 (pbits * rLen) in
     let d, k = M.eea_pow2_odd (pbits * rLen) n in
@@ -289,7 +286,7 @@ let rec pow_nat_mont_ll_is_pow_nat_mont pbits rLen n mu a b =
     () end
 
 
-val mod_exp_mont_ll: pbits:pos -> rLen:pos -> n:pos -> mu:nat{mont_pre pbits rLen n mu}
+val mod_exp_mont_ll: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
   -> a:nat_mod n -> b:pos -> nat_mod n
 
 let mod_exp_mont_ll pbits rLen n mu a b =
@@ -304,7 +301,7 @@ let mod_exp_mont_ll pbits rLen n mu a b =
   acc
 
 
-val mod_exp_mont_ll_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat{mont_pre pbits rLen n mu}
+val mod_exp_mont_ll_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
   -> a:nat_mod n -> b:pos ->
   Lemma (mod_exp_mont_ll pbits rLen n mu a b == pow a b % n)
 

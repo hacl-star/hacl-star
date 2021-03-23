@@ -13,6 +13,8 @@ module BSeq = Lib.ByteSequence
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let bn_len (t:limb_t) = len:size_pos{2 * bits t * len <= max_size_t}
+
 val bn_add1:
     #t:limb_t
   -> #aLen:size_pos

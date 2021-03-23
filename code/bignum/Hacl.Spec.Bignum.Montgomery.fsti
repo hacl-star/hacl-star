@@ -11,7 +11,7 @@ module M = Hacl.Spec.Montgomery.Lemmas
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let bn_mont_pre (#t:limb_t) (#nLen:size_pos) (n:lbignum t nLen) (mu:limb t) =
-  (1 + (bn_v n % pow2 (bits t)) * v mu) % pow2 (bits t) == 0 /\
+  (1 + bn_v n * v mu) % pow2 (bits t) == 0 /\
   bn_v n % 2 = 1 /\ 1 < bn_v n
 
 
@@ -35,7 +35,7 @@ val bn_precomp_r2_mod_n_lemma: #t:limb_t -> #nLen:size_pos -> nBits:size_nat -> 
   (ensures  bn_v (bn_precomp_r2_mod_n nBits n) == pow2 (2 * bits t * nLen) % bn_v n)
 
 
-///  Conversion functions to/from the Montgomery domen and the Montgomery reduction
+///  Conversion functions to/from the Montgomery domain and the Montgomery reduction
 val bn_mont_reduction:
     #t:limb_t
   -> #nLen:size_pos{nLen + nLen <= max_size_t}
@@ -99,7 +99,7 @@ val bn_mont_reduction_lemma:
   -> mu:limb t
   -> c:lbignum t (nLen + nLen) -> Lemma
   (requires
-    bn_mont_pre n mu /\ bn_v c < bn_v n * bn_v n)
+    bn_mont_pre n mu /\ bn_v c < bn_v n * pow2 (bits t * nLen))
   (ensures
     (let res = bn_v (bn_mont_reduction n mu c) in
     res == M.mont_reduction (bits t) nLen (bn_v n) (v mu) (bn_v c) /\
@@ -114,7 +114,7 @@ val bn_to_mont_lemma:
   -> r2:lbignum t nLen
   -> a:lbignum t nLen -> Lemma
   (requires
-    bn_mont_pre n mu /\ bn_v a < bn_v n /\
+    bn_mont_pre n mu /\
     bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
   (ensures
    (let aM = bn_v (bn_to_mont n mu r2 a) in
@@ -128,8 +128,7 @@ val bn_from_mont_lemma:
   -> n:lbignum t nLen
   -> mu:limb t
   -> aM:lbignum t nLen -> Lemma
-  (requires
-    bn_mont_pre n mu /\ bn_v aM < bn_v n)
+  (requires bn_mont_pre n mu)
   (ensures
    (let a = bn_v (bn_from_mont n mu aM) in
     a == M.from_mont (bits t) nLen (bn_v n) (v mu) (bn_v aM) /\
