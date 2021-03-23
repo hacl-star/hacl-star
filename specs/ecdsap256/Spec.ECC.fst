@@ -17,6 +17,13 @@ open Spec.ECC.Curves
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 
+let pointAtInfinity #c : point_nat_prime #c  = (0, 0, 0)
+
+let isPointAtInfinity (p:point_nat) =
+  let (_, _, z) = p in z = 0
+
+
+
 noextract
 let _point_double #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
   let prime = getPrime curve in 
@@ -31,8 +38,6 @@ let _point_double #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
   (x3, y3, z3)
 
 
-let isPointAtInfinity (p:point_nat) =
-  let (_, _, z) = p in z = 0
 
 
 #push-options "--fuel 1"
@@ -118,6 +123,12 @@ let _point_add #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve {~ (p
       (x3, y3, z3)
 
 
+val lemma_point_add_infinity: #c: curve ->
+  p: point_nat_prime #c {~ (pointEqual p pointAtInfinity)} -> Lemma (_point_add #c p pointAtInfinity == p)
+  
+let lemma_point_add_infinity #c p = ()
+
+
 val _ml_step0_lemma: #c: curve -> r0: point_nat_prime #c -> r1: point_nat_prime {~ (pointEqual r0 r1)} -> Lemma (
   let r2 = _point_add r1 r0 in 
   let r3 = _point_double r1 in 
@@ -180,12 +191,24 @@ let _ml_step #c k i (p, q) =
 
 
 
-
 let pointAdd #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
   if pointEqual p q then 
     _point_double p 
   else
     _point_add p q
+
+
+assume val lemmaPointAddR: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
+  (pointAdd p q == pointAdd q p)
+  
+
+val pointAddInfinity: #c: curve -> q: point_nat_prime #c -> Lemma (pointEqual (pointAdd pointAtInfinity q) q)
+
+let pointAddInfinity #c q = ()
+
+  
+assume val point_mult_infinity_as_repeat: #c: curve -> i: int {(i + 1) % getOrder #c = 0} -> p: point_nat_prime -> 
+  Lemma (repeat (i % getOrder #c) (fun x -> pointAdd #c p x) p == pointAtInfinity)
 
 
 val pointAddAsAdd: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
@@ -201,18 +224,18 @@ val pointAddAsDouble: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #
 let pointAddAsDouble #c p q = ()
 
 
-(*  *)
+
+
 val point_mult: #c: curve -> i: int -> p: point_nat_prime #c -> point_nat_prime #c
 
-let point_mult #c i p =
-  if i = 0 then (0, 0, 0) else
+let point_mult #c i p = 
   let i = (i - 1) % getOrder #c in 
   repeat i (fun x -> pointAdd #c p x) p
 
-assume val point_mult_ext: #c: curve -> i: int -> p: point_nat_prime #c -> Lemma (
-  let f = (fun x -> pointAdd #c p x) in  
-  f (point_mult #c i p) == point_mult #c (i + 1) p)
+val point_mult_0: #c: curve -> p: point_nat_prime #c -> i: int {i % getOrder #c = 0} -> 
+  Lemma (point_mult #c i p == pointAtInfinity)
 
+let point_mult_0 #c p i = point_mult_infinity_as_repeat #c (getOrder #c - 1) p
 
 
 val point_mult_1: #c: curve ->p: point_nat_prime #c ->  Lemma (point_mult #c 1 p == p)
@@ -221,9 +244,30 @@ let point_mult_1 #c p =
   eq_repeat0 (fun x -> pointAdd #c p x) p 
 
 
-assume val lemmaPointAddR: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
-  (pointAdd p q == pointAdd q p)
-  
+val lemma_eq: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma (pointEqual p q)
+
+let lemma_eq #c p q = admit()
+
+
+
+val point_mult_ext: #c: curve -> i: int -> p: point_nat_prime #c -> Lemma (
+  let f = (fun x -> pointAdd #c p x) in  
+  pointEqual (f (point_mult #c i p)) (point_mult #c (i + 1) p))
+
+let point_mult_ext #c i p = 
+  let f = (fun x -> pointAdd #c p x) in 
+  if i % getOrder #c = 0 then 
+    begin
+      point_mult_0 #c p i;
+      pointAddInfinity p;
+      lemmaPointAddR pointAtInfinity p;
+      point_mult_1 #c p
+    end
+  else 
+    begin
+      unfold_repeat (getOrder #c) f p ((i - 1) % getOrder #c);
+      lemma_mod_add_distr 1 (i - 1) (getOrder #c)
+    end
 
 
 assume val lemma_point_add : #c: curve -> p0: point_nat_prime #c -> pk: int -> qk: int -> i: int ->
@@ -241,7 +285,7 @@ val lemmaApplPointDouble: #c: curve
   Lemma (
     let r = pointAdd p p in 
     let f = (fun x -> pointAdd #c p0 x) in 
-    r == point_mult (2 * pk) p0)
+    pointEqual r (point_mult (2 * pk) p0))
 
 let lemmaApplPointDouble #c p0 pk p = 
   let f = (fun x -> pointAdd #c p0 x) in 
