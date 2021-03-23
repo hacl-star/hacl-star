@@ -93,8 +93,8 @@ val from_almost_mont_mul_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> aM:n
 let from_almost_mont_mul_lemma pbits rLen n mu aM bM =
   let r = pow2 (pbits * rLen) in
   let d, _ = M.eea_pow2_odd (pbits * rLen) n in
-  M.mont_preconditions pbits rLen n mu;
-  assert (r * d % n == 1 /\ n < r /\ (1 + n * mu) % pow2 pbits == 0);
+  M.mont_preconditions_d pbits rLen n;
+  assert (r * d % n == 1);
 
   let cM = almost_mont_mul pbits rLen n mu aM bM in
   let c = M.from_mont pbits rLen n mu cM in

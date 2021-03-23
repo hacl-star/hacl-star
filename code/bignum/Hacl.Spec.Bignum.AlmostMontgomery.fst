@@ -8,10 +8,8 @@ open Lib.Sequence
 open Hacl.Spec.Bignum.Base
 open Hacl.Spec.Bignum.Definitions
 
-module Loops = Lib.LoopCombinators
-module BN = Hacl.Spec.Bignum
-
 module M = Hacl.Spec.Montgomery.Lemmas
+module BN = Hacl.Spec.Bignum
 module BM = Hacl.Spec.Bignum.Montgomery
 
 friend Hacl.Spec.Bignum.Montgomery

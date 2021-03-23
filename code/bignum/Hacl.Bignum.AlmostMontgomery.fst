@@ -9,15 +9,9 @@ open Lib.Buffer
 
 open Hacl.Bignum.Definitions
 open Hacl.Bignum.Base
-open Hacl.Impl.Lib
 
 module ST = FStar.HyperStack.ST
-module Loops = Lib.LoopCombinators
-module LSeq = Lib.Sequence
-module B = LowStar.Buffer
-
 module S = Hacl.Spec.Bignum.AlmostMontgomery
-module SB = Hacl.Spec.Bignum
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 
