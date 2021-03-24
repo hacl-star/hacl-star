@@ -30,10 +30,9 @@ let bn_check_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_check_mod_inv_prime: #t:limb_t -> k:BE.exp t -> bn_check_mod_inv_prime_st t k.BE.bn.BN.len
-let bn_check_mod_inv_prime #t k n a =
-  [@inline_let] let len = k.BE.bn.BN.len in
-  let m0 = k.BE.mod_check n in
+val bn_check_mod_inv_prime: #t:limb_t -> len:BN.meta_len t -> bn_check_mod_inv_prime_st t len
+let bn_check_mod_inv_prime #t len n a =
+  let m0 = BM.bn_check_modulus n in
   let m1 = BN.bn_is_zero_mask len a in
   let m2 = BN.bn_lt_mask len a n in
   m0 &. (lognot m1) &. m2

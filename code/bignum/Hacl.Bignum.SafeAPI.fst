@@ -13,17 +13,20 @@ module B = LowStar.Buffer
 module HS = FStar.HyperStack
 module LSeq = Lib.Sequence
 
+module E = Hacl.Spec.Exponentiation.Lemmas
+
 module BL = Hacl.Bignum.Lib
 module BB = Hacl.Bignum.Base
 module BN = Hacl.Bignum
 module AM = Hacl.Bignum.AlmostMontgomery
+module BMA = Hacl.Bignum.MontArithmetic
+module ME = Hacl.Bignum.MontExponentiation
 module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
 module BC = Hacl.Bignum.Convert
 module BI = Hacl.Bignum.ModInv
 
-module SN = Hacl.Spec.Bignum
 module SL = Hacl.Spec.Bignum.Lib
 module SD = Hacl.Spec.Bignum.Definitions
 module SR = Hacl.Spec.Bignum.ModReduction
@@ -176,6 +179,7 @@ let bn_mod_exp_safe_st (t:limb_t) (len:BN.meta_len t) =
     (r ==> SE.bn_mod_exp_post (as_seq h0 n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res)))
 
 
+//TODO: rm k:BE.exp ?
 inline_for_extraction noextract
 val mk_bn_mod_exp_safe:
     #t:limb_t
@@ -199,26 +203,26 @@ let mk_bn_mod_exp_safe #t k bn_mod_exp n a bBits b res =
   BB.unsafe_bool_of_limb is_valid_m
 
 
-inline_for_extraction noextract
-val bn_mod_exp_vartime_safe:
-    #t:limb_t
-  -> k:BE.exp t
-  -> bn_mod_exp_vartime:BE.bn_mod_exp_st t k.BE.bn.BN.len ->
-  bn_mod_exp_safe_st t k.BE.bn.BN.len
+// inline_for_extraction noextract
+// val bn_mod_exp_vartime_safe:
+//     #t:limb_t
+//   -> k:BE.exp t
+//   -> bn_mod_exp_vartime:BE.bn_mod_exp_st t k.BE.bn.BN.len ->
+//   bn_mod_exp_safe_st t k.BE.bn.BN.len
 
-let bn_mod_exp_vartime_safe #t k bn_mod_exp_vartime n a bBits b res =
-  mk_bn_mod_exp_safe #t k bn_mod_exp_vartime n a bBits b res
+// let bn_mod_exp_vartime_safe #t k bn_mod_exp_vartime n a bBits b res =
+//   mk_bn_mod_exp_safe #t k bn_mod_exp_vartime n a bBits b res
 
 
-inline_for_extraction noextract
-val bn_mod_exp_consttime_safe:
-    #t:limb_t
-  -> k:BE.exp t
-  -> bn_mod_exp_consttime:BE.bn_mod_exp_st t k.BE.bn.BN.len ->
-  bn_mod_exp_safe_st t k.BE.bn.BN.len
+// inline_for_extraction noextract
+// val bn_mod_exp_consttime_safe:
+//     #t:limb_t
+//   -> k:BE.exp t
+//   -> bn_mod_exp_consttime:BE.bn_mod_exp_st t k.BE.bn.BN.len ->
+//   bn_mod_exp_safe_st t k.BE.bn.BN.len
 
-let bn_mod_exp_consttime_safe #t k bn_mod_exp_consttime n a bBits b res =
-  mk_bn_mod_exp_safe #t k bn_mod_exp_consttime n a bBits b res
+// let bn_mod_exp_consttime_safe #t k bn_mod_exp_consttime n a bBits b res =
+//   mk_bn_mod_exp_safe #t k bn_mod_exp_consttime n a bBits b res
 
 
 inline_for_extraction noextract
@@ -238,14 +242,13 @@ let bn_mod_inv_prime_safe_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val mk_bn_mod_inv_prime_safe:
     #t:limb_t
-  -> k:BE.exp t
-  -> bn_mod_exp:BE.bn_mod_exp_st t k.BE.bn.BN.len ->
-  bn_mod_inv_prime_safe_st t k.BE.bn.BN.len
+  -> len:BN.meta_len t
+  -> bn_mod_exp:BE.bn_mod_exp_st t len ->
+  bn_mod_inv_prime_safe_st t len
 
-let mk_bn_mod_inv_prime_safe #t k bn_mod_exp n a res =
-  [@inline_let] let len = k.BE.bn.BN.len in
+let mk_bn_mod_inv_prime_safe #t len bn_mod_exp n a res =
   let h0 = ST.get () in
-  let is_valid_m = BI.bn_check_mod_inv_prime #t k n a in
+  let is_valid_m = BI.bn_check_mod_inv_prime #t len n a in
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
 
   if BB.unsafe_bool_of_limb is_valid_m then begin
@@ -258,12 +261,101 @@ let mk_bn_mod_inv_prime_safe #t k bn_mod_exp n a res =
   BB.unsafe_bool_of_limb is_valid_m
 
 
-inline_for_extraction noextract
-val bn_mod_inv_prime_vartime_safe:
-    #t:limb_t
-  -> k:BE.exp t
-  -> bn_mod_exp_vartime:BE.bn_mod_exp_st t k.BE.bn.BN.len ->
-  bn_mod_inv_prime_safe_st t k.BE.bn.BN.len
+// inline_for_extraction noextract
+// val bn_mod_inv_prime_vartime_safe:
+//     #t:limb_t
+//   -> len:BN.meta_len t
+//   -> bn_mod_exp_vartime:BE.bn_mod_exp_st t len ->
+//   bn_mod_inv_prime_safe_st t len
 
-let bn_mod_inv_prime_vartime_safe #t k bn_mod_exp_vartime n a res =
-  mk_bn_mod_inv_prime_safe #t k bn_mod_exp_vartime n a res
+// let bn_mod_inv_prime_vartime_safe #t len bn_mod_exp_vartime n a res =
+//   mk_bn_mod_inv_prime_safe #t len bn_mod_exp_vartime n a res
+
+
+inline_for_extraction noextract
+let bn_mod_exp_ctx_st (t:limb_t) (k:BMA.bn_mont_ctx t) =
+    a:lbignum t k.BMA.len
+  -> bBits:size_t{v bBits > 0}
+  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> res:lbignum t k.BMA.len ->
+  Stack unit
+  (requires fun h ->
+    BMA.bn_mont_ctx_inv h k /\
+    bn_v h a < bn_v #t #k.BMA.len h k.BMA.n /\
+    0 < bn_v h b /\ bn_v h b < pow2 (v bBits) /\
+
+    live h a /\ live h b /\ live h res /\
+    disjoint res a /\ disjoint res b /\
+    disjoint res (k.BMA.n <: lbignum t k.BMA.len) /\
+    disjoint a (k.BMA.n <: lbignum t k.BMA.len) /\
+    disjoint res (k.BMA.r2 <: lbignum t k.BMA.len) /\
+    disjoint a (k.BMA.r2 <: lbignum t k.BMA.len))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    SE.bn_mod_exp_post (as_seq #MUT #(limb t) h0 k.BMA.n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res))
+
+
+inline_for_extraction noextract
+val mk_bn_mod_exp_ctx:
+    #t:limb_t
+  -> km:BM.mont t
+  -> k:BMA.bn_mont_ctx t{k.BMA.len == km.BM.bn.BN.len}
+  -> bn_exp_mont: ME.bn_exp_mont_st t km.BM.bn.BN.len ->
+  bn_mod_exp_ctx_st t k
+
+let mk_bn_mod_exp_ctx #t km k bn_exp_mont a bBits b res =
+  let h0 = ST.get () in
+  [@inline_let] let len = km.BM.bn.BN.len in
+  push_frame ();
+  let aM = create len (uint #t #SEC 0) in
+  BM.to k.BMA.n k.BMA.mu k.BMA.r2 a aM;
+  SM.bn_to_mont_lemma (as_seq #MUT h0 k.BMA.n) k.BMA.mu (as_seq #MUT h0 k.BMA.r2) (as_seq h0 a);
+
+  let resM = create len (uint #t #SEC 0) in
+  bn_exp_mont k.BMA.n k.BMA.mu k.BMA.r2 aM bBits b resM;
+  BM.from k.BMA.n k.BMA.mu resM res;
+
+  let h1 = ST.get () in
+  SM.bn_from_mont_lemma (as_seq #MUT h0 k.BMA.n) k.BMA.mu (as_seq h1 resM);
+  E.mod_exp_mont_ll_lemma (bits t) (v len) (bn_v #t #len h0 k.BMA.n) (v #t #SEC k.BMA.mu) (bn_v h0 a) (bn_v h0 b);
+  assert (bn_v h1 res == Lib.NatMod.pow_mod #(bn_v #t #len h0 k.BMA.n) (bn_v h0 a) (bn_v h0 b));
+  pop_frame ()
+
+
+// inline_for_extraction noextract
+// val bn_mod_exp_ctx_consttime:
+//     #t:limb_t
+//   -> km:BM.mont t
+//   -> k:BMA.bn_mont_ctx t{k.BMA.len == km.BM.bn.BN.len}
+//   -> bn_exp_mont_consttime: ME.bn_exp_mont_st t km.BM.bn.BN.len ->
+//   bn_mod_exp_ctx_st t k
+
+// let bn_mod_exp_ctx_consttime #t km k bn_exp_mont_consttime a bBits b res =
+//   mk_bn_mod_exp_ctx #t km k bn_exp_mont_consttime a bBits b res
+
+inline_for_extraction noextract
+let bn_mod_slow_ctx_st (t:limb_t) (k:BMA.bn_mont_ctx t) =
+    a:lbignum t (k.BMA.len +! k.BMA.len)
+  -> res:lbignum t k.BMA.len ->
+  Stack unit
+  (requires fun h ->
+    BMA.bn_mont_ctx_inv h k /\
+
+    live h a /\ live h res /\ disjoint res a /\
+    disjoint res (k.BMA.n <: lbignum t k.BMA.len) /\
+    disjoint res (k.BMA.r2 <: lbignum t k.BMA.len))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    bn_v h1 res == bn_v h0 a % bn_v #t #k.BMA.len h0 k.BMA.n)
+
+
+inline_for_extraction noextract
+val bn_mod_ctx:
+    #t:limb_t
+  -> km:AM.almost_mont t
+  -> k:BMA.bn_mont_ctx t{k.BMA.len == km.AM.bn.BN.len} ->
+  bn_mod_slow_ctx_st t k
+
+let bn_mod_ctx #t km k a res =
+  let h0 = ST.get () in
+  SR.bn_mod_slow_precompr2_lemma (as_seq #MUT h0 k.BMA.n) k.BMA.mu
+    (as_seq #MUT #(limb t) #k.BMA.len h0 k.BMA.r2) (as_seq h0 a);
+  BR.bn_mod_slow_precompr2 km k.BMA.n k.BMA.mu k.BMA.r2 a res
