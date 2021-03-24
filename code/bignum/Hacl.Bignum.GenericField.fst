@@ -13,14 +13,15 @@ module B = LowStar.Buffer
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-module Euclid = FStar.Math.Euclid
 module S = Hacl.Spec.Bignum.GenericField
+module BD = Hacl.Spec.Bignum.Definitions
+
+module ME = Hacl.Bignum.MontExponentiation
 module BE = Hacl.Bignum.Exponentiation
-module IE = Hacl.Impl.Exponentiation
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
+module BI = Hacl.Bignum.ModInv
 
-friend Hacl.Bignum.Exponentiation
 friend Hacl.Spec.Bignum.GenericField
 
 #set-options "--z3rlimit 50 --fuel 1 --ifuel 0"
@@ -102,26 +103,37 @@ let bn_field_one #t km k oneM =
   assert (as_seq h1 oneM == S.bn_field_one (as_ctx h0 k))
 
 
+let bn_field_exp_consttime #t km k aM bBits b resM =
+  push_frame ();
+  let aMc = create k.len (uint #t #SEC 0) in
+  copy aMc aM;
+  ME.bn_exp_mont_consttime #t km k.n k.mu k.r2 aMc bBits b resM;
+  let h0 = ST.get () in
+  assert (bn_v h0 aM < bn_v #t #k.len h0 k.n);
+  BD.bn_eval_inj (v k.len)
+    (S.bn_field_exp_consttime (as_ctx h0 k) (as_seq h0 aM) (v bBits) (as_seq h0 b))
+    (as_seq h0 resM);
+  pop_frame ()
+
+
+let bn_field_exp_vartime #t km k aM bBits b resM =
+  push_frame ();
+  let aMc = create k.len (uint #t #SEC 0) in
+  copy aMc aM;
+  ME.bn_exp_mont_vartime #t km k.n k.mu k.r2 aMc bBits b resM;
+  let h0 = ST.get () in
+  assert (bn_v h0 aM < bn_v #t #k.len h0 k.n);
+  BD.bn_eval_inj (v k.len)
+    (S.bn_field_exp_vartime (as_ctx h0 k) (as_seq h0 aM) (v bBits) (as_seq h0 b))
+    (as_seq h0 resM);
+  pop_frame ()
+
+
 let bn_field_inv #t km k aM aInvM =
   [@inline_let]
   let len = k.len in
   push_frame ();
   let n2 = create len (uint #t #SEC 0) in
-  let c = BN.bn_sub1 len k.n (uint #t #SEC 2) n2 in
-  let h0 = ST.get () in
-  S.bn_field_inv_lemma (as_ctx h0 k) (as_seq h0 aM);
-  Hacl.Spec.Bignum.bn_sub1_lemma (as_seq h0 (k.n <: lbignum t len)) (uint #t #SEC 2);
-  Hacl.Spec.Bignum.Definitions.bn_eval_bound (as_seq h0 n2) (v len);
-  Hacl.Spec.Bignum.Definitions.bn_eval_bound (as_seq h0 (k.n <: lbignum t len)) (v len);
-  BE.bn_mont_one km k.n k.mu k.r2 aInvM;
-  IE.lexp_fw_vartime len len (BE.mk_lexp t km ((as_ctx h0 k).S.n) k.mu) k.n aM len k.nBits n2 aInvM 4ul;
-  let h1 = ST.get () in
-  assert (bn_v h0 n2 == bn_v #t #k.len h0 k.n - 2);
-  assert (as_seq h1 aInvM ==
-    Lib.Exponentiation.exp_fw
-    (Hacl.Spec.Bignum.Exponentiation.mk_bn_mont_comm_monoid ((as_ctx h0 k).S.n) k.mu)
-    (as_seq h0 aM) (v k.nBits) (bn_v #t #k.len h0 k.n - 2) 4);
-
-  norm_spec [delta_only [`%S.bn_field_inv]] (S.bn_field_inv (as_ctx h0 k) (as_seq h0 aM));
-  assert (as_seq h1 aInvM == S.bn_field_inv (as_ctx h0 k) (as_seq h0 aM));
+  BI.bn_mod_inv_prime_n2 len k.n n2;
+  bn_field_exp_vartime #t km k aM k.nBits n2 aInvM;
   pop_frame ()

@@ -7,7 +7,6 @@ open Lib.Sequence
 
 open Hacl.Spec.Bignum.Definitions
 
-module Loops = Lib.LoopCombinators
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 
@@ -16,7 +15,6 @@ module M = Hacl.Spec.Montgomery.Lemmas
 
 module BN = Hacl.Spec.Bignum
 module BM = Hacl.Spec.Bignum.Montgomery
-module BI = Hacl.Spec.Bignum.ModInvLimb
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -116,24 +114,44 @@ let bn_exp_mont_st (t:limb_t) (len:BN.bn_len t) =
 
 
 // no diff between vartime and consttime at the spec level
+val bn_exp_mont_bm_vartime: #t:limb_t -> #len:BN.bn_len t -> bn_exp_mont_st t len
+let bn_exp_mont_bm_vartime #t #len n mu aM bBits b =
+  let k1 = mk_bn_mont_concrete_ops n mu in
+  LE.exp_rl_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b);
+  SE.exp_rl k1 aM bBits (bn_v b)
+
+
+val bn_exp_mont_bm_consttime: #t:limb_t -> #len:BN.bn_len t -> bn_exp_mont_st t len
+let bn_exp_mont_bm_consttime #t #len n mu aM bBits b =
+  let k1 = mk_bn_mont_concrete_ops n mu in
+  LE.exp_mont_ladder_swap_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b);
+  LE.exp_mont_ladder_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b);
+  SE.exp_mont_ladder_swap k1 aM bBits (bn_v b)
+
+
+val bn_exp_mont_fw:
+    #t:limb_t
+  -> #len:BN.bn_len t
+  -> l:size_pos{l < bits t /\ pow2 l * len <= max_size_t} ->
+  bn_exp_mont_st t len
+
+let bn_exp_mont_fw #t #len l n mu aM bBits b =
+  let k1 = mk_bn_mont_concrete_ops n mu in
+  LE.exp_fw_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b) l;
+  SE.exp_fw k1 aM bBits (bn_v b) l
+
+
 val bn_exp_mont_vartime: #t:limb_t -> #len:BN.bn_len t -> bn_exp_mont_st t len
 let bn_exp_mont_vartime #t #len n mu aM bBits b =
-  let k1 = mk_bn_mont_concrete_ops n mu in
-  if bBits < bn_exp_mont_vartime_threshold then begin
-    LE.exp_rl_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b);
-    SE.exp_rl k1 aM bBits (bn_v b) end
-  else begin
-    LE.exp_fw_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b) 4;
-    SE.exp_fw k1 aM bBits (bn_v b) 4 end
+  if bBits < bn_exp_mont_vartime_threshold then
+    bn_exp_mont_bm_vartime n mu aM bBits b
+  else
+    bn_exp_mont_fw 4 n mu aM bBits b
 
 
 val bn_exp_mont_consttime: #t:limb_t -> #len:BN.bn_len t -> bn_exp_mont_st t len
 let bn_exp_mont_consttime #t #len n mu aM bBits b =
-  let k1 = mk_bn_mont_concrete_ops n mu in
-  if bBits < bn_exp_mont_consttime_threshold then begin
-    LE.exp_mont_ladder_swap_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b);
-    LE.exp_mont_ladder_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b);
-    SE.exp_mont_ladder_swap k1 aM bBits (bn_v b) end
-  else begin
-    LE.exp_fw_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b) 4;
-    SE.exp_fw k1 aM bBits (bn_v b) 4 end
+  if bBits < bn_exp_mont_consttime_threshold then
+    bn_exp_mont_bm_consttime n mu aM bBits b
+  else
+    bn_exp_mont_fw 4 n mu aM bBits b

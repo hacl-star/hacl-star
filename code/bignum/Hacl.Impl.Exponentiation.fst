@@ -313,14 +313,15 @@ val lprecomp_table_f:
 
 #push-options "--z3rlimit 300"
 let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
-  Math.Lemmas.lemma_mult_le_right (v len) (v i + 3) (v table_len);
-  let t1 = sub table ((i +! 1ul) *! len) len in
-  let t2 = sub table ((i +! 2ul) *! len) len in
   assert (v ((i +! 1ul) *! len) == (v i + 1) * v len);
   assert (v ((i +! 2ul) *! len) == (v i + 2) * v len);
+  Math.Lemmas.lemma_mult_le_right (v len) (v i + 2) (v table_len);
+  Math.Lemmas.lemma_mult_le_right (v len) (v i + 3) (v table_len);
 
   let h0 = ST.get () in
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v i + 1));
+  let t1 = sub table ((i +! 1ul) *! len) len in
+  let t2 = sub table ((i +! 2ul) *! len) len in
   lprecomp_table_mul len ctx_len k ctx a i t1 t2;
   let h1 = ST.get () in
   B.modifies_buffer_elim (B.gsub #(uint_t a_t SEC) table 0ul ((i +! 2ul) *! len)) (loc t2) h0 h1;
@@ -329,11 +330,11 @@ let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
     (LSeq.sub (as_seq h0 table) 0 ((v i + 2) * v len))
     (LSeq.sub (as_seq h1 table) 0 ((v i + 2) * v len));
 
-  // assert (forall (j:nat{j <= v i + 1}).
-  //   precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) j);
-  precomp_table_inv_lemma len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (as_seq h1 table) (v i + 2)
-  // assert (forall (j:nat{j <= v i + 1}).
-  //   precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j)
+  assert (forall (j:nat{j <= v i + 1}).
+    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) j);
+  precomp_table_inv_lemma len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (as_seq h1 table) (v i + 2);
+  assert (forall (j:nat{j <= v i + 1}).
+    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j)
 #pop-options
 
 
@@ -680,8 +681,8 @@ let lmul_acc_pow_a_bits_c_vartime #a_t len ctx_len k ctx a bLen bBits b l table_
   Math.Lemmas.lemma_mult_le_right (v len) (v bits_c32 + 1) (v table_len);
 
   let a_bits_c = lexp_fw_precomp_get_vartime len ctx_len k a table_len table bits_c32 in
-  assert (a_bits_c == gsub table (bits_c32 *! len) len);
   assert (v (bits_c32 *! len) == v bits_c32 * v len);
+  assert (a_bits_c == gsub table (bits_c32 *! len) len);
   k.lmul ctx acc a_bits_c acc
 #pop-options
 
@@ -919,6 +920,8 @@ let lexp_fw_gen #a_t len ctx_len k lmul_acc_pow_a_bits_l lmul_acc_pow_a_bits_c c
 
   let table = create (table_len *! len) (uint #a_t #SEC 0) in
   update_sub table 0ul len acc;
+  let h = ST.get () in
+  assert (k.to.refl (as_seq h (gsub table 0ul len)) == k.to.comm_monoid.S.one);
   lprecomp_table #a_t len ctx_len k ctx a table_len table;
   lexp_fw_gen_ #a_t len ctx_len k lmul_acc_pow_a_bits_l lmul_acc_pow_a_bits_c ctx a bLen bBits b l table_len table acc;
   pop_frame ()

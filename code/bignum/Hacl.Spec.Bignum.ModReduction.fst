@@ -9,8 +9,10 @@ open Hacl.Spec.Bignum.Definitions
 
 module M = Hacl.Spec.Montgomery.Lemmas
 module AM = Hacl.Spec.AlmostMontgomery.Lemmas
+
 module BM = Hacl.Spec.Bignum.Montgomery
 module BAM = Hacl.Spec.Bignum.AlmostMontgomery
+
 module BI = Hacl.Spec.Bignum.ModInvLimb
 module BN = Hacl.Spec.Bignum
 

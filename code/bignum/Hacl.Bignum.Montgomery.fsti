@@ -11,7 +11,6 @@ open Hacl.Bignum.Definitions
 
 module S = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Bignum
-module ST = FStar.HyperStack.ST
 
 include Hacl.Bignum.ModInvLimb
 

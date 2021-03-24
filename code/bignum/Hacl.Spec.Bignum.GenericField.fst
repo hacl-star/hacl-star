@@ -11,10 +11,9 @@ module M = Hacl.Spec.Montgomery.Lemmas
 module BM = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Spec.Bignum
 
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
-module ME = Hacl.Spec.Bignum.MontExponentiation
 module E = Hacl.Spec.Exponentiation.Lemmas
+module ME = Hacl.Spec.Bignum.MontExponentiation
+
 module Euclid = FStar.Math.Euclid
 module BI = Hacl.Spec.Bignum.ModInv
 

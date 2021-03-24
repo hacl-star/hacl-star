@@ -10,9 +10,6 @@ open Lib.Buffer
 open Hacl.Bignum.Definitions
 
 module ST = FStar.HyperStack.ST
-module Loops = Lib.LoopCombinators
-module LSeq = Lib.Sequence
-module B = LowStar.Buffer
 
 module S = Hacl.Spec.Bignum.ModReduction
 module BN = Hacl.Bignum

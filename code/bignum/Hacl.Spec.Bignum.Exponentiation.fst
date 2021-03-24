@@ -7,7 +7,6 @@ open Lib.Sequence
 
 open Hacl.Spec.Bignum.Definitions
 
-module Loops = Lib.LoopCombinators
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 
@@ -56,19 +55,21 @@ let bn_check_mod_exp #t #len n a bBits b =
   r
 
 
-let bn_mod_exp_rl_precompr2 #t len n a bBits b r2 =
-  let bLen = blocks bBits (bits t) in
+val bn_mod_exp_precompr2_gen:
+    #t:limb_t
+  -> len:BN.bn_len t
+  -> bn_exp_mont:ME.bn_exp_mont_st t len ->
+  bn_mod_exp_precompr2_st t len
+
+let bn_mod_exp_precompr2_gen #t len bn_exp_mont n a bBits b r2 =
   let mu = BI.mod_inv_limb n.[0] in
   BI.bn_mod_inv_limb_lemma n;
   bn_eval_bound n len;
 
-  let k1 = ME.mk_bn_mont_concrete_ops n mu in
-
   let aM = BM.bn_to_mont n mu r2 a in
   BM.bn_to_mont_lemma n mu r2 a;
 
-  let accM = SE.exp_rl k1 aM bBits (bn_v b) in
-  LE.exp_rl_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b);
+  let accM = bn_exp_mont n mu aM bBits b in
 
   let acc = BM.bn_from_mont n mu accM in
   BM.bn_from_mont_lemma n mu accM;
@@ -76,51 +77,18 @@ let bn_mod_exp_rl_precompr2 #t len n a bBits b r2 =
   E.mod_exp_mont_ll_lemma (bits t) len (bn_v n) (v mu) (bn_v a) (bn_v b);
   assert (bn_v acc == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b));
   acc
+
+
+let bn_mod_exp_rl_precompr2 #t len n a bBits b r2 =
+  bn_mod_exp_precompr2_gen #t len ME.bn_exp_mont_bm_vartime n a bBits b r2
 
 
 let bn_mod_exp_mont_ladder_swap_precompr2 #t len n a bBits b r2 =
-  let bLen = blocks bBits (bits t) in
-  let mu = BI.mod_inv_limb n.[0] in
-  BI.bn_mod_inv_limb_lemma n;
-  bn_eval_bound n len;
-
-  let k1 = ME.mk_bn_mont_concrete_ops n mu in
-
-  let aM = BM.bn_to_mont n mu r2 a in
-  BM.bn_to_mont_lemma n mu r2 a;
-
-  let accM = SE.exp_mont_ladder_swap k1 aM bBits (bn_v b) in
-  LE.exp_mont_ladder_swap_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b);
-  LE.exp_mont_ladder_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b);
-
-  let acc = BM.bn_from_mont n mu accM in
-  BM.bn_from_mont_lemma n mu accM;
-
-  E.mod_exp_mont_ll_lemma (bits t) len (bn_v n) (v mu) (bn_v a) (bn_v b);
-  assert (bn_v acc == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b));
-  acc
+  bn_mod_exp_precompr2_gen #t len ME.bn_exp_mont_bm_consttime n a bBits b r2
 
 
 let bn_mod_exp_fw_precompr2 #t len l n a bBits b r2 =
-  let bLen = blocks bBits (bits t) in
-  let mu = BI.mod_inv_limb n.[0] in
-  BI.bn_mod_inv_limb_lemma n;
-  bn_eval_bound n len;
-
-  let k1 = ME.mk_bn_mont_concrete_ops n mu in
-
-  let aM = BM.bn_to_mont n mu r2 a in
-  BM.bn_to_mont_lemma n mu r2 a;
-
-  let accM = SE.exp_fw k1 aM bBits (bn_v b) l in
-  LE.exp_fw_lemma k1.SE.to.SE.comm_monoid (bn_v aM) bBits (bn_v b) l;
-
-  let acc = BM.bn_from_mont n mu accM in
-  BM.bn_from_mont_lemma n mu accM;
-
-  E.mod_exp_mont_ll_lemma (bits t) len (bn_v n) (v mu) (bn_v a) (bn_v b);
-  assert (bn_v acc == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b));
-  acc
+  bn_mod_exp_precompr2_gen #t len (ME.bn_exp_mont_fw l) n a bBits b r2
 
 
 let bn_mod_exp_vartime_precompr2 #t len n a bBits b r2 =

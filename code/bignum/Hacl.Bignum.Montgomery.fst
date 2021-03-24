@@ -9,7 +9,6 @@ open Lib.Buffer
 
 open Hacl.Bignum.Definitions
 open Hacl.Bignum.Base
-open Hacl.Impl.Lib
 
 module ST = FStar.HyperStack.ST
 module Loops = Lib.LoopCombinators

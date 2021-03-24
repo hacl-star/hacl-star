@@ -9,7 +9,6 @@ open Lib.Buffer
 
 open Hacl.Bignum.Definitions
 
-module ST = FStar.HyperStack.ST
 module S = Hacl.Spec.Bignum.AlmostMontgomery
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
