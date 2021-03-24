@@ -1,4 +1,4 @@
-module Hacl.Spec.Bignum.GenericField
+module Hacl.Spec.Bignum.MontArithmetic
 
 open FStar.Mul
 

@@ -1,4 +1,4 @@
-module Hacl.Bignum.GenericField
+module Hacl.Bignum.MontArithmetic
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -13,7 +13,7 @@ module B = LowStar.Buffer
 module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-module S = Hacl.Spec.Bignum.GenericField
+module S = Hacl.Spec.Bignum.MontArithmetic
 module BD = Hacl.Spec.Bignum.Definitions
 
 module ME = Hacl.Bignum.MontExponentiation
@@ -22,9 +22,9 @@ module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 module BI = Hacl.Bignum.ModInv
 
-friend Hacl.Spec.Bignum.GenericField
+friend Hacl.Spec.Bignum.MontArithmetic
 
-#set-options "--z3rlimit 50 --fuel 1 --ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let bn_field_get_len #t k _ =
   k.len

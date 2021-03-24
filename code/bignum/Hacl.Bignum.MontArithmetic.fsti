@@ -1,4 +1,4 @@
-module Hacl.Bignum.GenericField
+module Hacl.Bignum.MontArithmetic
 
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -14,7 +14,7 @@ module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 module Euclid = FStar.Math.Euclid
-module S = Hacl.Spec.Bignum.GenericField
+module S = Hacl.Spec.Bignum.MontArithmetic
 module BE = Hacl.Bignum.Exponentiation
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
