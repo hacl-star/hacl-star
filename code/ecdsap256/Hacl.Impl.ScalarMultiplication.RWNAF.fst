@@ -60,7 +60,8 @@ let scalar_rwnaf out scalar =
   push_frame();
 
   let in0 = index scalar (size 31) in 
-  let windowStartValue =  (logor (u8 1) (logand in0 (dradix_wnaf -! (u8 1))))  in 
+  let mask = dradix_wnaf -! (u8 1) in 
+  let windowStartValue = logor (u8 1) (logand in0 mask) in 
   
   let window = create (size 1) windowStartValue in 
 
@@ -70,19 +71,22 @@ let scalar_rwnaf out scalar =
   let h0 = ST.get() in 
   let inv h1 (i:nat) = live h1 window /\ live h1 out in  
 
-  let dradix_wnaf = to_u64 dradix_wnaf in 
-  let dradix = to_u64 dradix in 
 
   admit();
 
   Lib.Loops.for 0ul 50ul inv
     (fun i ->
-
+  
       let h0 = ST.get() in 
+      let wVar = index window (size 0) in 
+      let w = logand wVar mask in 
 
-      let wVar =  to_u64 (index window (size 0)) in 
-      
-      let w = logand wVar  (dradix_wnaf -! (u64 1)) in 
+
+      let dradix_wnaf = to_u64 dradix_wnaf in 
+      let dradix = to_u64 dradix in 
+
+      let wVar = to_u64 wVar in 
+      let w = to_u64 w in 
       
       let d = logand wVar (dradix_wnaf -! (u64 1)) -! dradix in 
 
@@ -106,6 +110,10 @@ let scalar_rwnaf out scalar =
 
 
     );
+
+
+  let dradix_wnaf = to_u64 dradix_wnaf in 
+  let dradix = to_u64 dradix in 
 
  let i = 50ul in 
 
