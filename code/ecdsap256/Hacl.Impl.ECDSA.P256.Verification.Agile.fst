@@ -273,7 +273,7 @@ let ecdsa_verification_step5_0 m0 m1 points pubKeyAsPoint u1 u2 tempBuffer =
   secretToPublicWithoutNorm m0 pointU1G u1 tempBuffer;
   scalarMultiplicationWithoutNorm m1 pubKeyAsPoint pointU2Q u2 tempBuffer
 
-(* 
+
 [@ (Comment "   The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.")] 
 val compare_felem_bool: a: felem -> b: felem -> Stack bool
@@ -297,7 +297,7 @@ let compare_felem_bool a b  =
   eq_u64_nCT a_1 b_1 &&
   eq_u64_nCT a_2 b_2 &&
   eq_u64_nCT a_3 b_3
- *)
+
 
 
 inline_for_extraction noextract
@@ -332,6 +332,53 @@ let compare_points_bool a b =
   xEqual && yEqual && zEqual
 
 
+
+val point_add_c: p: point -> q: point 
+  -> tempBuffer: lbuffer uint64 (size 80) -> 
+   Stack bool (requires fun h -> 
+     live h p /\ live h q /\  live h tempBuffer /\ 
+     disjoint p q /\ disjoint p tempBuffer /\ 
+     disjoint q tempBuffer
+   )
+   (ensures fun h0 _ h1 -> 
+     modifies (loc tempBuffer) h0 h1)
+
+
+let point_add_c p q tempBuffer = 
+  let len = size 4 in 
+  
+  let sq_z1 = sub tempBuffer (size 0) len in 
+  let tr_z1 = sub tempBuffer len len in 
+  
+  let sq_z2 = sub tempBuffer (size 2 *! len) len in 
+  let tr_z2 = sub tempBuffer (size 3 *! len) len in 
+
+  let x1 = sub p (size 0) len in 
+  let y1 = sub p len len in
+  let z1 = sub p (size 2 *! len) len in 
+
+  let x2 = sub q (size 0) len in 
+  let y2 = sub q len len in 
+  let z2 = sub q (size 2 *! len) len in 
+
+  montgomery_multiplication_ecdsa_module z1 z1 sq_z1;
+  montgomery_multiplication_ecdsa_module z2 z1 sq_z2;
+
+  montgomery_multiplication_ecdsa_module sq_z1 z1 tr_z1;
+  montgomery_multiplication_ecdsa_module sq_z2 z2 tr_z2;
+
+  montgomery_multiplication_ecdsa_module sq_z1 x2 sq_z1;
+  montgomery_multiplication_ecdsa_module sq_z2 x1 sq_z2;
+
+  montgomery_multiplication_ecdsa_module tr_z1 y2 tr_z1;
+  montgomery_multiplication_ecdsa_module tr_z2 y1 tr_z2;
+
+  let equalX = compare_felem_bool sq_z1 sq_z2 in 
+  let equalY = compare_felem_bool tr_z1 tr_z2 in 
+
+   equalX && equalY
+
+
 inline_for_extraction noextract
 val ecdsa_verification_step5_1: points:lbuffer uint64 (size 24) -> Stack bool
   (requires fun h -> live h points /\
@@ -362,12 +409,10 @@ let ecdsa_verification_step5_1 points =
   let pointU1G = sub points (size 0) (size 12) in
   let pointU2Q = sub points (size 12) (size 12) in 
   
-  norm pointU1G result0Norm tmpForNorm;
-  norm pointU2Q result1Norm tmpForNorm;
-  let equalX = compare_points_bool result0Norm result1Norm in 
+  let equal = point_add_c pointU1G pointU2Q tmpForNorm in 
 
   pop_frame();
-  equalX
+  equal
 
 
 
@@ -567,6 +612,8 @@ let ecdsa_verification_core m0 m1 alg publicKeyBuffer hashAsFelem r s mLen m xBu
 
 [@ (Comment "   The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.")] 
+
+inline_for_extraction 
 val ecdsa_verification_:
   m0: montgomery_ladder_mode ->
   m1: montgomery_ladder_mode ->

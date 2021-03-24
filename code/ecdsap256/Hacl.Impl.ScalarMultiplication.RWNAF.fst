@@ -32,7 +32,7 @@ val scalar_bit:
   -> n:size_t{v n < 256}
   -> Stack uint64
     (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\  v r <= 1)
+    (ensures  fun h0 r h1 -> h0 == h1 /\ v r <= 1)
 
 let scalar_bit s n =
   let h0 = ST.get () in
@@ -43,11 +43,11 @@ let scalar_bit s n =
 
 
 inline_for_extraction noextract
-let dradix_wnaf = (u64 64)
+let dradix_wnaf = (u8 64)
 inline_for_extraction noextract
-let dradix = (u64 32)
+let dradix = (u8 32)
 inline_for_extraction noextract
-let radix = (u64 5)
+let radix = (u8 5)
 
 (* I work *)
 val scalar_rwnaf : out: lbuffer uint64 (size 104) -> scalar: lbuffer uint8 (size 32) -> 
@@ -60,22 +60,27 @@ let scalar_rwnaf out scalar =
   push_frame();
 
   let in0 = index scalar (size 31) in 
-  let windowStartValue =  (logor (u64 1) (logand (to_u64 in0) (dradix_wnaf -! (u64 1))))  in 
+  let windowStartValue =  (logor (u8 1) (logand in0 (dradix_wnaf -! (u8 1))))  in 
   
- let window = create (size 1) windowStartValue in 
+  let window = create (size 1) windowStartValue in 
 
- let r = create (size 1) (u64 0) in 
- let r1 = create (size 1) (u64 0) in 
+  let r = create (size 1) (u64 0) in 
+  let r1 = create (size 1) (u64 0) in 
 
- let h0 = ST.get() in 
- let inv h1 (i:nat) = live h1 window /\ live h1 out in  
+  let h0 = ST.get() in 
+  let inv h1 (i:nat) = live h1 window /\ live h1 out in  
+
+  let dradix_wnaf = to_u64 dradix_wnaf in 
+  let dradix = to_u64 dradix in 
+
+  admit();
 
   Lib.Loops.for 0ul 50ul inv
     (fun i ->
 
       let h0 = ST.get() in 
 
-      let wVar : uint64 = index window (size 0) in 
+      let wVar =  to_u64 (index window (size 0)) in 
       
       let w = logand wVar  (dradix_wnaf -! (u64 1)) in 
       
@@ -97,14 +102,14 @@ let scalar_rwnaf out scalar =
       let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 4))) (size 4)) in 
       let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 5))) (size 5)) in
 
-      upd window (size 0) w0
+      upd window (size 0) (to_u8 w0)
 
 
     );
 
  let i = 50ul in 
 
-      let wVar : uint64 = index window (size 0) in 
+      let wVar = to_u64 (index window (size 0)) in 
       
       let w = logand wVar  (dradix_wnaf -! (u64 1)) in 
       
