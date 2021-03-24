@@ -55,13 +55,13 @@ let bn_check_mod_exp #t #len n a bBits b =
   r
 
 
-val bn_mod_exp_precompr2_gen:
+val mk_bn_mod_exp_precompr2:
     #t:limb_t
   -> len:BN.bn_len t
   -> bn_exp_mont:ME.bn_exp_mont_st t len ->
   bn_mod_exp_precompr2_st t len
 
-let bn_mod_exp_precompr2_gen #t len bn_exp_mont n a bBits b r2 =
+let mk_bn_mod_exp_precompr2 #t len bn_exp_mont n a bBits b r2 =
   let mu = BI.mod_inv_limb n.[0] in
   BI.bn_mod_inv_limb_lemma n;
   bn_eval_bound n len;
@@ -80,15 +80,15 @@ let bn_mod_exp_precompr2_gen #t len bn_exp_mont n a bBits b r2 =
 
 
 let bn_mod_exp_rl_precompr2 #t len n a bBits b r2 =
-  bn_mod_exp_precompr2_gen #t len ME.bn_exp_mont_bm_vartime n a bBits b r2
+  mk_bn_mod_exp_precompr2 #t len ME.bn_exp_mont_bm_vartime n a bBits b r2
 
 
 let bn_mod_exp_mont_ladder_swap_precompr2 #t len n a bBits b r2 =
-  bn_mod_exp_precompr2_gen #t len ME.bn_exp_mont_bm_consttime n a bBits b r2
+  mk_bn_mod_exp_precompr2 #t len ME.bn_exp_mont_bm_consttime n a bBits b r2
 
 
 let bn_mod_exp_fw_precompr2 #t len l n a bBits b r2 =
-  bn_mod_exp_precompr2_gen #t len (ME.bn_exp_mont_fw l) n a bBits b r2
+  mk_bn_mod_exp_precompr2 #t len (ME.bn_exp_mont_fw l) n a bBits b r2
 
 
 let bn_mod_exp_vartime_precompr2 #t len n a bBits b r2 =
@@ -104,13 +104,21 @@ let bn_mod_exp_consttime_precompr2 #t len n a bBits b r2 =
     bn_mod_exp_fw_precompr2 #t len 4 n a bBits b r2
 
 
-let bn_mod_exp_vartime #t len nBits n a bBits b =
+val mk_bn_mod_exp:
+    #t:limb_t
+  -> len:BN.bn_len t
+  -> bn_mod_exp_precompr2:bn_mod_exp_precompr2_st t len ->
+  bn_mod_exp_st t len
+
+let mk_bn_mod_exp #t len bn_mod_exp_precompr2 nBits n a bBits b =
   let r2 = BM.bn_precomp_r2_mod_n nBits n in
   BM.bn_precomp_r2_mod_n_lemma nBits n;
-  bn_mod_exp_vartime_precompr2 #t len n a bBits b r2
+  bn_mod_exp_precompr2 n a bBits b r2
+
+
+let bn_mod_exp_vartime #t len nBits n a bBits b =
+  mk_bn_mod_exp len (bn_mod_exp_vartime_precompr2 len) nBits n a bBits b
 
 
 let bn_mod_exp_consttime #t len nBits n a bBits b =
-  let r2 = BM.bn_precomp_r2_mod_n nBits n in
-  BM.bn_precomp_r2_mod_n_lemma nBits n;
-  bn_mod_exp_consttime_precompr2 #t len n a bBits b r2
+  mk_bn_mod_exp len (bn_mod_exp_consttime_precompr2 len) nBits n a bBits b

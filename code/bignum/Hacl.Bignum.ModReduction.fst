@@ -13,8 +13,9 @@ module ST = FStar.HyperStack.ST
 
 module S = Hacl.Spec.Bignum.ModReduction
 module BN = Hacl.Bignum
-module BM = Hacl.Bignum.Montgomery
-module BAM = Hacl.Bignum.AlmostMontgomery
+//module BM = Hacl.Bignum.Montgomery
+module AM = Hacl.Bignum.AlmostMontgomery
+module BI = Hacl.Bignum.ModInvLimb
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -36,17 +37,17 @@ let bn_mod_slow_precompr2_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_mod_slow_precompr2:
     #t:limb_t
-  -> k:BM.mont t ->
-  bn_mod_slow_precompr2_st t k.BM.bn.BN.len
+  -> k:AM.almost_mont t ->
+  bn_mod_slow_precompr2_st t k.AM.bn.BN.len
 
 let bn_mod_slow_precompr2 #t k n mu r2 a res =
-  [@inline_let] let len = k.BM.bn.BN.len in
+  [@inline_let] let len = k.AM.bn.BN.len in
   push_frame ();
   let a_mod = create len (uint #t #SEC 0) in
   let a1 = create (len +! len) (uint #t #SEC 0) in
   copy a1 a;
-  BAM.bn_almost_mont_reduction k.BM.bn n mu a1 a_mod;
-  BM.to n mu r2 a_mod res;
+  AM.bn_almost_mont_reduction k.AM.bn n mu a1 a_mod;
+  AM.to n mu r2 a_mod res;
   pop_frame ()
 
 
@@ -67,15 +68,15 @@ let bn_mod_slow_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_mod_slow:
     #t:limb_t
-  -> k:BM.mont t
-  -> bn_mod_slow_precompr2:bn_mod_slow_precompr2_st t k.BM.bn.BN.len ->
-  bn_mod_slow_st t k.BM.bn.BN.len
+  -> k:AM.almost_mont t
+  -> bn_mod_slow_precompr2:bn_mod_slow_precompr2_st t k.AM.bn.BN.len ->
+  bn_mod_slow_st t k.AM.bn.BN.len
 
 let bn_mod_slow #t k bn_mod_slow_precompr2 nBits n a res =
-  [@inline_let] let len = k.BM.bn.BN.len in
+  [@inline_let] let len = k.AM.bn.BN.len in
   push_frame ();
-  let mu = BM.mod_inv_limb n.(0ul) in
+  let mu = BI.mod_inv_limb n.(0ul) in
   let r2 = create len (uint #t #SEC 0) in
-  BM.precomp nBits n r2;
+  AM.precomp nBits n r2;
   bn_mod_slow_precompr2 n mu r2 a res;
   pop_frame ()

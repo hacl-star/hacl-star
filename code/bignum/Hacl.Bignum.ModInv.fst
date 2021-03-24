@@ -30,10 +30,10 @@ let bn_check_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_check_mod_inv_prime: #t:limb_t -> k:BE.exp t -> bn_check_mod_inv_prime_st t k.BE.mont.BM.bn.BN.len
+val bn_check_mod_inv_prime: #t:limb_t -> k:BE.exp t -> bn_check_mod_inv_prime_st t k.BE.bn.BN.len
 let bn_check_mod_inv_prime #t k n a =
-  [@inline_let] let len = k.BE.mont.BM.bn.BN.len in
-  let m0 = k.BE.mont.BM.mont_check n in
+  [@inline_let] let len = k.BE.bn.BN.len in
+  let m0 = k.BE.mod_check n in
   let m1 = BN.bn_is_zero_mask len a in
   let m2 = BN.bn_lt_mask len a n in
   m0 &. (lognot m1) &. m2
@@ -72,20 +72,20 @@ let bn_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_inv_prime_vartime:
+val bn_mod_inv_prime:
     #t:limb_t
   -> len:BN.meta_len t
-  -> bn_mod_exp_vartime:BE.bn_mod_exp_st t len ->
+  -> bn_mod_exp:BE.bn_mod_exp_st t len ->
   bn_mod_inv_prime_st t len
 
-let bn_mod_inv_prime_vartime #t len bn_mod_exp_vartime nBits n a res =
+let bn_mod_inv_prime #t len bn_mod_exp nBits n a res =
   let h0 = ST.get () in
   push_frame ();
   let n2 = create len (uint #t #SEC 0) in
   bn_mod_inv_prime_n2 #t len n n2;
   SD.bn_eval_bound (as_seq h0 n) (v len);
 
-  bn_mod_exp_vartime nBits n a (size (bits t) *! len) n2 res;
+  bn_mod_exp nBits n a (size (bits t) *! len) n2 res;
   let h1 = ST.get () in
   assert (bn_v h1 res == Lib.NatMod.pow_mod #(bn_v h0 n) (bn_v h0 a) (bn_v h1 n2));
   SD.bn_eval_inj (v len) (as_seq h1 res) (S.bn_mod_inv_prime (v nBits) (as_seq h0 n) (as_seq h0 a));

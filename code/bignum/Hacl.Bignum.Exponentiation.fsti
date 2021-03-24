@@ -100,10 +100,11 @@ val bn_mod_exp_consttime_precompr2:
 
 inline_for_extraction noextract
 class exp (t:limb_t) = {
-  mont: BM.mont t;
-  exp_check: bn_check_mod_exp_st t mont.BM.bn.BN.len;
-  exp_vt_precomp: bn_mod_exp_precompr2_st t mont.BM.bn.BN.len;
-  exp_ct_precomp: bn_mod_exp_precompr2_st t mont.BM.bn.BN.len;
+  bn: BN.bn t;
+  mod_check: BM.bn_check_modulus_st t bn.BN.len;
+  exp_check: bn_check_mod_exp_st t bn.BN.len;
+  exp_vt_precomp: bn_mod_exp_precompr2_st t bn.BN.len;
+  exp_ct_precomp: bn_mod_exp_precompr2_st t bn.BN.len;
 }
 
 
@@ -112,7 +113,7 @@ inline_for_extraction noextract
 val mk_runtime_exp: #t:limb_t -> len:BN.meta_len t -> exp t
 
 val mk_runtime_exp_len_lemma: #t:limb_t -> len:BN.meta_len t ->
-  Lemma ((mk_runtime_exp #t len).mont.BM.bn.BN.len == len) [SMTPat (mk_runtime_exp #t len)]
+  Lemma ((mk_runtime_exp #t len).bn.BN.len == len) [SMTPat (mk_runtime_exp #t len)]
 
 
 inline_for_extraction noextract
@@ -137,13 +138,15 @@ inline_for_extraction noextract
 val bn_mod_exp_vartime:
     #t:limb_t
   -> k:exp t
-  -> bn_mod_exp_vartime_precompr2:bn_mod_exp_precompr2_st t k.mont.BM.bn.BN.len ->
-  bn_mod_exp_st t k.mont.BM.bn.BN.len
+  -> precomp_r2:BM.bn_precomp_r2_mod_n_st t k.bn.BN.len
+  -> bn_mod_exp_vartime_precompr2:bn_mod_exp_precompr2_st t k.bn.BN.len ->
+  bn_mod_exp_st t k.bn.BN.len
 
 
 inline_for_extraction noextract
 val bn_mod_exp_consttime:
     #t:limb_t
   -> k:exp t
-  -> bn_mod_exp_consttime_precompr2:bn_mod_exp_precompr2_st t k.mont.BM.bn.BN.len ->
-  bn_mod_exp_st t k.mont.BM.bn.BN.len
+  -> precomp_r2:BM.bn_precomp_r2_mod_n_st t k.bn.BN.len
+  -> bn_mod_exp_consttime_precompr2:bn_mod_exp_precompr2_st t k.bn.BN.len ->
+  bn_mod_exp_st t k.bn.BN.len
