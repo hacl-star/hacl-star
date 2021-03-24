@@ -103,15 +103,14 @@ let bn_field_init_st (t:limb_t) (len:BN.meta_len t) =
   -> n:lbignum t len ->
   ST (bn_mont_ctx t)
   (requires fun h ->
-    live h n /\ ST.is_eternal_region r /\
-
-    S.bn_mont_ctx_pre (as_seq h n))
+    live h n /\ ST.is_eternal_region r)
   (ensures  fun h0 res h1 ->
     B.(modifies loc_none h0 h1) /\
-    S.bn_mont_ctx_inv (as_ctx h1 res) /\
-    B.(fresh_loc (loc_union (loc_buffer (res.n <: buffer (limb t))) (loc_buffer (res.r2 <: buffer (limb t)))) h0 h1) /\
-    B.(loc_includes (loc_region_only false r) (loc_union (loc_buffer (res.n <: buffer (limb t))) (loc_buffer (res.r2 <: buffer (limb t))))) /\
-    as_ctx h1 res == S.bn_field_init (as_seq h0 n))
+    S.bn_mont_ctx_pre (as_seq h0 n) ==> (
+      S.bn_mont_ctx_inv (as_ctx h1 res) /\
+      B.(fresh_loc (loc_union (loc_buffer (res.n <: buffer (limb t))) (loc_buffer (res.r2 <: buffer (limb t)))) h0 h1) /\
+      B.(loc_includes (loc_region_only false r) (loc_union (loc_buffer (res.n <: buffer (limb t))) (loc_buffer (res.r2 <: buffer (limb t))))) /\
+      as_ctx h1 res == S.bn_field_init (as_seq h0 n)))
 
 
 inline_for_extraction noextract

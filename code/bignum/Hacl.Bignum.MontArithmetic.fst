@@ -49,18 +49,26 @@ let bn_field_init #t km r n =
   assert (B.length n1 == FStar.UInt32.v len);
   let r2 : lbignum t len = r2 in
   let n1 : lbignum t len = n1 in
-  copy n1 n;
 
-  let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
-  km.BM.precomp nBits n r2;
+  if bn_field_check_modulus len n then begin
+    copy n1 n;
 
-  let mu = BM.mod_inv_limb n.(0ul) in
-  let res : bn_mont_ctx t = { len = len; n = n1; mu = mu; r2 = r2 } in
-  let h2 = ST.get () in
-  assert (as_ctx h2 res == S.bn_field_init (as_seq h0 n));
-  assert (S.bn_mont_ctx_inv (as_ctx h2 res));
-  B.(modifies_only_not_unused_in loc_none h0 h2);
-  res
+    let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
+    km.BM.precomp nBits n r2;
+
+    let mu = BM.mod_inv_limb n.(0ul) in
+    let res : bn_mont_ctx t = { len = len; n = n1; mu = mu; r2 = r2 } in
+    let h2 = ST.get () in
+    assert (as_ctx h2 res == S.bn_field_init (as_seq h0 n));
+    assert (S.bn_mont_ctx_inv (as_ctx h2 res));
+    B.(modifies_only_not_unused_in loc_none h0 h2);
+    res end
+  else begin
+    let mu = uint #t #SEC 0 in
+    let res : bn_mont_ctx t = { len = len; n = n1; mu = mu; r2 = r2 } in
+    let h2 = ST.get () in
+    B.(modifies_only_not_unused_in loc_none h0 h2);
+    res end
 
 
 let bn_to_field #t km k a aM =
