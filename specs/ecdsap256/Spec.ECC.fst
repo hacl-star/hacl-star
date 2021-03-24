@@ -153,11 +153,11 @@ let _ml_step #c k i (p, q) =
     _ml_step0 p q
 
 (* P + Q == Q + P *)
-assume val curve_symmetry_lemma: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
+assume val curve_commutativity_lemma: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
   (pointEqual (pointAdd p q) (pointAdd q p))
 
 (* P == P' ==> P + Q == P' + Q *)
-assume val curve_transitivity_lemma: #c: curve -> p: point_nat_prime #c -> p1: point_nat_prime #c {pointEqual p p1}
+assume val curve_compatibility_with_translation_lemma: #c: curve -> p: point_nat_prime #c -> p1: point_nat_prime #c {pointEqual p p1}
   -> q: point_nat_prime #c -> 
   Lemma (pointEqual (pointAdd p q) (pointAdd p1 q))
 
@@ -194,7 +194,7 @@ let point_mult_ext #c i p =
     begin
       point_mult_0 #c p 0;
       curve_point_at_infinity_property p;  
-      curve_symmetry_lemma pointAtInfinity p; 
+      curve_commutativity_lemma pointAtInfinity p; 
       point_mult_1 #c p
     end
   else 
@@ -226,7 +226,7 @@ let lemmaApplPointDouble #c p0 pk p =
   point_mult_1 p0;
   point_mult_ext (2 * pk - 1) p0;
 
-  curve_transitivity_lemma p pk_p pk_p
+  curve_compatibility_with_translation_lemma p pk_p pk_p
 
 
 val lemmaApplPointAdd: #c: curve -> p0: point_nat_prime #c 
@@ -244,12 +244,12 @@ let lemmaApplPointAdd #c p0 pk p qk q =
   point_mult_1 p0;
   
   point_mult_ext (pk + qk - 1) p0; 
-  curve_transitivity_lemma p pk_p qk_p;
-  curve_transitivity_lemma q qk_p p;
+  curve_compatibility_with_translation_lemma p pk_p qk_p;
+  curve_compatibility_with_translation_lemma q qk_p p;
    
-  curve_symmetry_lemma pk_p qk_p;
-  curve_symmetry_lemma p qk_p;
-  curve_symmetry_lemma q p
+  curve_commutativity_lemma pk_p qk_p;
+  curve_commutativity_lemma p qk_p;
+  curve_commutativity_lemma q p
 
 
 
@@ -267,7 +267,7 @@ val mlStep0AsPointAdd: #c: curve
 
 
 let mlStep0AsPointAdd #c p0 p_k p q_k q = 
-  curve_symmetry_lemma p q; 
+  curve_commutativity_lemma p q; 
   lemmaApplPointAdd p0 p_k p q_k q;
   lemmaApplPointDouble p0 q_k q
 
