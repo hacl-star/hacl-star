@@ -49,7 +49,36 @@ let dradix = (u8 32)
 inline_for_extraction noextract
 let radix = (u8 5)
 
-(* I work *)
+open FStar.Mul
+
+#set-options "--z3rlimit 200" 
+
+val subborrow_u8: a: uint8 -> b: uint8 -> r: lbuffer uint8 (size 1) -> 
+  Stack uint8 
+  (requires fun h -> live h r)
+  (ensures fun h0 c h1 -> modifies (loc r) h0 h1 /\ (
+    v c <= 1 /\ (
+    let r = Seq.index (as_seq h1 r) 0 in 
+    v r - v c * pow2 8 == v a - v b)))
+
+let subborrow_u8 a b r =
+  let x1 = to_u16 a -. to_u16 b in 
+
+  let x2 = logand x1 (u16 0xff) in 
+    logand_mask x1 (u16 0xff) 8;
+    
+  let x3 = shift_right x1 (size 8) in 
+    shift_right_lemma x1 (size 8);
+
+  upd r (size 0) (to_u8 x2);
+  let r = u8 0 -. (to_u8 x3) in 
+  
+  assert(if (v a - v b ) >= 0 then v r == 0 else v r == 1);
+
+  r
+  
+
+
 val scalar_rwnaf : out: lbuffer uint64 (size 104) -> scalar: lbuffer uint8 (size 32) -> 
   Stack unit 
     (requires fun h -> live h out /\ live h scalar)
@@ -65,7 +94,7 @@ let scalar_rwnaf out scalar =
   
   let window = create (size 1) windowStartValue in 
 
-  let r = create (size 1) (u64 0) in 
+  let r = create (size 1) (u8 0) in 
   let r1 = create (size 1) (u64 0) in 
 
   let h0 = ST.get() in 
@@ -80,6 +109,8 @@ let scalar_rwnaf out scalar =
       let h0 = ST.get() in 
       let wVar = index window (size 0) in 
       let w = logand wVar mask in 
+      let c = subborrow_u8 w dradix r in 
+      let r2 = (u8 0) -. index r (size 0) in 
 
 
       let dradix_wnaf = to_u64 dradix_wnaf in 
@@ -87,18 +118,19 @@ let scalar_rwnaf out scalar =
 
       let wVar = to_u64 wVar in 
       let w = to_u64 w in 
+     
+      (*let c = sub_borrow_u64 (u64 0) w dradix r in 
+      let r2 = (u64 0) -. index r (size 0) in  *)
       
-      let d = logand wVar (dradix_wnaf -! (u64 1)) -! dradix in 
-
-      let c = sub_borrow_u64 (u64 0) w dradix r in 
-      sub_borrow_u64_void (u64 0) (u64 0) (index r (size 0)) r1;
-      
-      let cAsFlag = (u64 0xffffffff) +! c in 
-      let r3 = logand (cmovznz2 (index r (size 0)) (index r1 (size 0)) cAsFlag) (u64 0xff) in 
+      let cAsFlag = (u64 0xffffffff) +! to_u64 c in 
+      let r3 = logand (cmovznz2 (to_u64 (index r (size 0))) (to_u64 r2) cAsFlag) (u64 0xff) in 
       
       upd out (size 2 *! i) r3;
-      upd out (size 2 *! i +! 1) c;
+      upd out (size 2 *! i +! 1) (to_u64 c);
 
+
+
+      let d = logand wVar (dradix_wnaf -! (u64 1)) -! dradix in 
       let wStart = shift_right (wVar -! d) radix in 
       let w0 = wStart +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 1))) (size 1)) in 
       let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 2))) (size 2)) in 
@@ -124,10 +156,10 @@ let scalar_rwnaf out scalar =
       let d = logand wVar (dradix_wnaf -! (u64 1)) -! dradix in 
 
       let c = sub_borrow_u64 (u64 0) w dradix r in 
-      sub_borrow_u64_void (u64 0) (u64 0) (index r (size 0)) r1;
+      sub_borrow_u64_void (u64 0) (u64 0) (to_u64 (index r (size 0))) r1;
       
       let cAsFlag = (u64 0xffffffff) +! c in 
-      let r3 = logand (cmovznz2 (index r (size 0)) (index r1 (size 0)) cAsFlag) (u64 0xff) in 
+      let r3 = logand (cmovznz2 (to_u64 (index r (size 0))) (index r1 (size 0)) cAsFlag) (u64 0xff) in 
       
       upd out (size 2 *! i) r3;
       upd out (size 2 *! i +! 1) c;
