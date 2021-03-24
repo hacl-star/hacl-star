@@ -15,6 +15,8 @@ module ST = FStar.HyperStack.ST
 
 module S = Hacl.Spec.Bignum.MontArithmetic
 module BD = Hacl.Spec.Bignum.Definitions
+module BB = Hacl.Bignum.Base
+module BL = Hacl.Bignum.Lib
 
 module ME = Hacl.Bignum.MontExponentiation
 module BE = Hacl.Bignum.Exponentiation
@@ -30,7 +32,12 @@ let bn_field_get_len #t k _ =
   k.len
 
 
-let bn_field_init #t km r nBits n =
+let bn_field_check_modulus #t len n =
+  let m = BM.bn_check_modulus n in
+  BB.unsafe_bool_of_limb m
+
+
+let bn_field_init #t km r n =
   [@inline_let]
   let len = km.BM.bn.BN.len in
   let h0 = ST.get () in
@@ -44,11 +51,13 @@ let bn_field_init #t km r nBits n =
   let n1 : lbignum t len = n1 in
   copy n1 n;
 
-  km.BM.precomp (nBits -! 1ul) n r2;
+  let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
+  km.BM.precomp nBits n r2;
+
   let mu = BM.mod_inv_limb n.(0ul) in
-  let res : bn_mont_ctx t = { nBits = nBits; len = len; n = n1; mu = mu; r2 = r2 } in
+  let res : bn_mont_ctx t = { len = len; n = n1; mu = mu; r2 = r2 } in
   let h2 = ST.get () in
-  assert (as_ctx h2 res == S.bn_field_init (v nBits) (as_seq h0 n));
+  assert (as_ctx h2 res == S.bn_field_init (as_seq h0 n));
   assert (S.bn_mont_ctx_inv (as_ctx h2 res));
   B.(modifies_only_not_unused_in loc_none h0 h2);
   res
@@ -135,5 +144,5 @@ let bn_field_inv #t km k aM aInvM =
   push_frame ();
   let n2 = create len (uint #t #SEC 0) in
   BI.bn_mod_inv_prime_n2 len k.n n2;
-  bn_field_exp_vartime #t km k aM k.nBits n2 aInvM;
+  bn_field_exp_vartime #t km k aM (k.len *! size (bits t)) n2 aInvM;
   pop_frame ()

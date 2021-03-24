@@ -13,15 +13,12 @@ module BN = Hacl.Spec.Bignum
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let bn_mont_ctx_pre (#t:limb_t) (nBits:size_pos) (n:lbignum t (blocks nBits (bits t))) =
-  2 * bits t * blocks nBits (bits t) <= max_size_t /\
-  pow2 (nBits - 1) < bn_v n /\ bn_v n < pow2 nBits /\
+let bn_mont_ctx_pre (#t:limb_t) (#len:BN.bn_len t) (n:lbignum t len) =
   1 < bn_v n /\ bn_v n % 2 = 1
 
 
 inline_for_extraction
 class bn_mont_ctx (t:limb_t) = {
-  nBits: size_pos;
   len: BN.bn_len t;
   n: lbignum t len;
   mu: limb t;
@@ -30,9 +27,8 @@ class bn_mont_ctx (t:limb_t) = {
 
 
 let bn_mont_ctx_inv (#t:limb_t) (k:bn_mont_ctx t) =
-  k.len == blocks k.nBits (bits t) /\
   bn_v k.n < pow2 (bits t * k.len) /\
-  bn_mont_ctx_pre k.nBits k.n /\
+  bn_mont_ctx_pre k.n /\
   (1 + bn_v k.n * v k.mu) % pow2 (bits t) == 0 /\
   bn_v k.r2 == pow2 (2 * bits t * k.len) % bn_v k.n
 
@@ -44,10 +40,14 @@ let bn_mont_nat (#t:limb_t) (k:bn_mont_ctx t) =
 val bn_field_get_len: #t:limb_t -> k:bn_mont_ctx t{bn_mont_ctx_inv k} -> BN.bn_len t
 
 
+val bn_field_check_modulus: #t:limb_t -> #len:BN.bn_len t -> n:lbignum t len ->
+  res:bool{res <==> bn_mont_ctx_pre n}
+
+
 // computes the Montgomery constants r2 and mu
-val bn_field_init: #t:limb_t -> nBits:size_pos -> n:lbignum t (blocks nBits (bits t)) ->
+val bn_field_init: #t:limb_t -> #len:BN.bn_len t -> n:lbignum t len ->
   Pure (bn_mont_ctx t)
-  (requires bn_mont_ctx_pre nBits n)
+  (requires bn_mont_ctx_pre n)
   (ensures  fun k -> bn_mont_ctx_inv k)
 
 

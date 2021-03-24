@@ -44,7 +44,6 @@ let ll (t:limb_t) =
 inline_for_extraction// noextract
 noeq
 type bn_mont_ctx' (t:limb_t) (a:Type0{a == lb t}) (b:Type0{b == ll t}) = {
-  nBits: x:size_t{0 < v x};
   len: BN.meta_len t;
   n: x:a{length #MUT #(limb t) x == v len};
   mu: b;
@@ -60,7 +59,6 @@ let bn_mont_ctx_u64 = bn_mont_ctx' U64 (lb U64) (ll U64)
 
 inline_for_extraction noextract
 let as_ctx (#t:limb_t) (h:mem) (k:bn_mont_ctx t) : GTot (S.bn_mont_ctx t) = {
-  S.nBits = v k.nBits;
   S.len = v k.len;
   S.n = as_seq h (k.n <: lbignum t k.len);
   S.mu = k.mu;
@@ -87,24 +85,33 @@ inline_for_extraction noextract
 val bn_field_get_len: #t:limb_t -> k:bn_mont_ctx t -> bn_field_get_len_st k
 
 
-//TODO: safe api for this function!
+inline_for_extraction noextract
+let bn_field_check_modulus_st (t:limb_t) (len:BN.meta_len t) = n:lbignum t len ->
+  Stack bool
+  (requires fun h -> live h n)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    r == S.bn_field_check_modulus (as_seq h0 n))
+
+
+inline_for_extraction noextract
+val bn_field_check_modulus: #t:limb_t -> len:BN.meta_len t -> bn_field_check_modulus_st t len
+
+
 inline_for_extraction noextract
 let bn_field_init_st (t:limb_t) (len:BN.meta_len t) =
     r:HS.rid
-  -> nBits:size_t
   -> n:lbignum t len ->
   ST (bn_mont_ctx t)
   (requires fun h ->
     live h n /\ ST.is_eternal_region r /\
 
-    0 < v nBits /\ len == blocks nBits (size (bits t)) /\
-    S.bn_mont_ctx_pre (v nBits) (as_seq h n))
+    S.bn_mont_ctx_pre (as_seq h n))
   (ensures  fun h0 res h1 ->
     B.(modifies loc_none h0 h1) /\
     S.bn_mont_ctx_inv (as_ctx h1 res) /\
     B.(fresh_loc (loc_union (loc_buffer (res.n <: buffer (limb t))) (loc_buffer (res.r2 <: buffer (limb t)))) h0 h1) /\
     B.(loc_includes (loc_region_only false r) (loc_union (loc_buffer (res.n <: buffer (limb t))) (loc_buffer (res.r2 <: buffer (limb t))))) /\
-    as_ctx h1 res == S.bn_field_init (v nBits) (as_seq h0 n))
+    as_ctx h1 res == S.bn_field_init (as_seq h0 n))
 
 
 inline_for_extraction noextract
@@ -279,7 +286,6 @@ let bn_field_exp_consttime_st (#t:limb_t) (k:bn_mont_ctx t) =
     disjoint aM b /\
     disjoint (k.n <: lbignum t k.len) resM /\
     disjoint (k.n <: lbignum t k.len) aM /\
-    disjoint (k.n <: lbignum t k.len) b /\
     disjoint (k.r2 <: lbignum t k.len) resM /\
     disjoint (k.r2 <: lbignum t k.len) aM)
   (ensures  fun h0 _ h1 -> modifies (loc resM) h0 h1 /\
@@ -312,7 +318,6 @@ let bn_field_exp_vartime_st (#t:limb_t) (k:bn_mont_ctx t) =
     disjoint aM b /\
     disjoint (k.n <: lbignum t k.len) resM /\
     disjoint (k.n <: lbignum t k.len) aM /\
-    disjoint (k.n <: lbignum t k.len) b /\
     disjoint (k.r2 <: lbignum t k.len) resM /\
     disjoint (k.r2 <: lbignum t k.len) aM)
   (ensures  fun h0 _ h1 -> modifies (loc resM) h0 h1 /\

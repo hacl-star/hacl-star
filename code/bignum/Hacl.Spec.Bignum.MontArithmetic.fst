@@ -10,6 +10,9 @@ open Hacl.Spec.Bignum.Definitions
 module M = Hacl.Spec.Montgomery.Lemmas
 module BM = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Spec.Bignum
+module BB = Hacl.Spec.Bignum.Base
+module BL = Hacl.Spec.Bignum.Lib
+module BIL = Hacl.Spec.Bignum.ModInvLimb
 
 module E = Hacl.Spec.Exponentiation.Lemmas
 module ME = Hacl.Spec.Bignum.MontExponentiation
@@ -80,21 +83,26 @@ let from_mont_lemma_nonzero pbits rLen n mu aM =
 let bn_field_get_len #t k = k.len
 
 
-let bn_field_init #t nBits n =
-  let len = blocks nBits (bits t) in
-  assert (nBits <= len * bits t);
+let bn_field_check_modulus #t #len n =
+  let m = BM.bn_check_modulus n in
+  BB.unsafe_bool_of_limb m
 
-  BM.bn_precomp_r2_mod_n_lemma (nBits - 1) n;
-  let r2 = BM.bn_precomp_r2_mod_n (nBits - 1) n in
+
+let bn_field_init #t #len n =
+  let nBits = bits t * BL.bn_get_top_index n in
+  BL.bn_low_bound_bits_lemma n;
+
+  BM.bn_precomp_r2_mod_n_lemma nBits n;
+  let r2 = BM.bn_precomp_r2_mod_n nBits n in
   assert (bn_v r2 == pow2 (2 * bits t * len) % bn_v n);
 
-  let mu = Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb n.[0] in
-  Hacl.Spec.Bignum.ModInvLimb.bn_mod_inv_limb_lemma n;
+  let mu = BIL.mod_inv_limb n.[0] in
+  BIL.bn_mod_inv_limb_lemma n;
   assert ((1 + bn_v n * v mu) % pow2 (bits t) == 0);
 
   bn_eval_bound n len;
 
-  { nBits = nBits; len = len; n = n; mu = mu; r2 = r2 }
+  { len = len; n = n; mu = mu; r2 = r2 }
 
 
 let bn_to_field #t k a =
@@ -155,7 +163,7 @@ let bn_field_exp_vartime #t k aM bBits b =
 let bn_field_inv #t k aM =
   let n2 = BI.bn_mod_inv_prime_n2 k.n in
   assert (bn_v n2 == bn_v k.n - 2);
-  let aInvM = bn_field_exp_vartime #t k aM k.nBits n2 in
+  let aInvM = bn_field_exp_vartime #t k aM (k.len * bits t) n2 in
   assert (bn_v (bn_from_field k aInvM) == Lib.NatMod.pow_mod #(bn_v k.n) (bn_v (bn_from_field k aM)) (bn_v n2));
   from_mont_lemma_nonzero (bits t) k.len (bn_v k.n) (v k.mu) (bn_v aM);
   assert (0 < bn_v (bn_from_field k aM));
