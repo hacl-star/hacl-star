@@ -112,7 +112,7 @@ let scalar_rwnaf out scalar =
       let r3 = cmovznz2 r2 r0 cAsFlag in 
 
       upd out (size 2 *! i) r3;
-      upd out (size 2 *! i +! size 1) c;
+      upd out (size 2 *! i +! size 1) cAsFlag;
 
 
       let d = w -! dradix in 
@@ -140,7 +140,7 @@ let scalar_rwnaf out scalar =
   let r3 = cmovznz2 r2 r0 cAsFlag in 
 
   upd out (size 2 *! i) r3;
-  upd out (size 2 *! i +! size 1) c;
+  upd out (size 2 *! i +! size 1) cAsFlag;
 
   let d = w -! dradix in 
 
@@ -242,7 +242,7 @@ let scalar_multiplication_cmb #buf_type result scalar tempBuffer =
 
     Lib.Loops.for 0ul 26ul invJ (fun j ->
       let d = index rnaf2 (size 2 *! (j *! (size 2) +! i)) in
-      let is_neg = (u64 0) -. (index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1))) in 
+      let is_neg = index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1)) in 
       let d = shift_right (d -! size 1) (size 1) in 
 
       loopK lut d lut j;
@@ -262,7 +262,7 @@ let scalar_multiplication_cmb #buf_type result scalar tempBuffer =
 
     Lib.Loops.for 0ul 26ul invJ (fun j ->
       let d = index rnaf2 (size 2 *! (j *! (size 2) +! i)) in 
-      let is_neg = (u64 0) -. (index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1))) in 
+      let is_neg = index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1)) in 
       let d = shift_right (d -! size 1) (size 1) in 
 
       loopK lut d lut j;
