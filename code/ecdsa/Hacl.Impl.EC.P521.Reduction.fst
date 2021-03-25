@@ -54,6 +54,8 @@ let lemma_second_word_reduction t0 t1 =
   lseq_upperbound t0;
   assert(lseq_as_nat t1 < prime521)
 
+(* the word consists of 9 words == 576 bits, we need the first 521 bits, 
+meaning that we zero the last 54 bits*)
 
 val getZeroWord: i: widefelem -> o: felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
@@ -62,30 +64,27 @@ val getZeroWord: i: widefelem -> o: felem -> Stack unit
 let getZeroWord i o = 
   copy o (sub i (size 0) (size 9));
   let o8 = index o (size 8) in 
-  let o8Updated = logand (u64 0x00000000000002ff) o8 in 
+  let o8Updated = logand (u64 0xfffffffffffffc00) o8 in 
   upd o (size 8) o8Updated
   
   (* 576 bits copies *)
 
 
-val getFirstWord: i: widefelem -> o: felem -> Stack unit 
+val getFirstWord: i: widefelem -> o: felem -> shift: size_t -> Stack unit 
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
-let getFirstWord i o = 
-  let flag0 = u64 0xfffffffffffffd00 in 
-  let flag1 = u64 0x00000000000002ff in 
-  let i0 = index i (size 9) in 
-  let i1 = index i (size 10) in 
-
-  let i0_ = logand i0 flag0 in 
-  let i1_ = logand i1 flag1 in 
-
-  let o0 = logxor i0_ i1_ in 
-  upd o (size 0) o0
-
-
-
+let getFirstWord i o shift = 
+  let h0 = ST.get() in 
+  let inv h (i: nat) = True in 
+  Lib.Loops.for 0ul 8ul inv (fun j -> 
+    let i0 = index i (size 9 *! shift +! j) in 
+    let i1 = index i (size 9 *! shift +! size 1 +! j) in 
+    let i0 = shift_right i0 (size 10) in 
+    let i1 = Lib.IntTypes.shift_left i1 (size 54) in 
+    let o0 = logxor i0 i1 in 
+    upd o j o0)
+    
 val reduction_p521: i: widefelem -> o: felem -> 
   Stack unit
     (requires fun h -> live h i /\ live h o /\ disjoint i o /\ lseq_as_nat (as_seq h i) < prime521 * pow2 (64 * v coordinate521))
@@ -99,12 +98,8 @@ let reduction_p521 i o =
     let a2 = create (size 9) (u64 0) in 
 
   getZeroWord i a0;
-  getFirstWord i a1;
-  getFirstWord i a2;
-  
-
-
-
+  getFirstWord i a1 (size 1);
+  getFirstWord i a2 (size 2);
 
   felem_add a0 a1 o;
   felem_add o a2 o;

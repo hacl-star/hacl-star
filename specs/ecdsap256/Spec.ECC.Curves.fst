@@ -113,11 +113,17 @@ let getCoordinateLen curve = v (getCoordinateLenU curve)
 let getPointLen curve = getCoordinateLen curve * 3
 
 (* the expected scalar length *)
+
+inline_for_extraction
+let getScalarLenWords curve = 
+  match curve with
+  |P256 -> 4ul
+  |P384 -> 6ul
+  |_ -> 0ul
+
+inline_for_extraction
 let getScalarLenBytes curve = 
-  match curve with 
-  |P256 -> 32ul
-  |P384 -> 48ul
-  | _ -> 0ul
+  getScalarLenWords curve *. 8ul
 
 (* the scalar length in bits *)
 let getScalarLen (c: curve) = getScalarLenBytes c *. 8ul

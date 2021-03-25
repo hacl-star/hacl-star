@@ -2309,7 +2309,25 @@ montgomery_ladder_power_step(
   uint32_t i
 )
 {
-  uint32_t bit0 = Spec_ECC_Curves_getScalarLenBytes(c) * (uint32_t)8U - (uint32_t)1U - i;
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)0U;
+      }
+  }
+  uint32_t bit0 = sw * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - i;
   uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
   cswap(c, bit, a, b);
   montgomery_multiplication_buffer(c, a, b, b);
@@ -2325,7 +2343,25 @@ _montgomery_ladder_power(
   const uint8_t *scalar
 )
 {
-  uint32_t scalarLen = Spec_ECC_Curves_getScalarLenBytes(c) * (uint32_t)8U;
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)0U;
+      }
+  }
+  uint32_t scalarLen = sw * (uint32_t)8U * (uint32_t)8U;
   for (uint32_t i = (uint32_t)0U; i < scalarLen; i++)
   {
     montgomery_ladder_power_step(c, a, b, scalar, i);
@@ -4070,20 +4106,76 @@ static void getZeroWord(uint64_t *i, uint64_t *o)
 {
   memcpy(o, i, coordinate521 * sizeof (uint64_t));
   uint64_t o8 = o[8U];
-  uint64_t o8Updated = (uint64_t)0x00000000000002ffU & o8;
+  uint64_t o8Updated = (uint64_t)0xfffffffffffffc00U & o8;
   o[8U] = o8Updated;
 }
 
-static void getFirstWord(uint64_t *i, uint64_t *o)
+static void getFirstWord(uint64_t *i, uint64_t *o, uint32_t shift)
 {
-  uint64_t flag0 = (uint64_t)0xfffffffffffffd00U;
-  uint64_t flag1 = (uint64_t)0x00000000000002ffU;
-  uint64_t i0 = i[9U];
-  uint64_t i1 = i[10U];
-  uint64_t i0_ = i0 & flag0;
-  uint64_t i1_ = i1 & flag1;
-  uint64_t o0 = i0_ ^ i1_;
-  o[0U] = o0;
+  {
+    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)0U];
+    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)0U];
+    uint64_t i01 = i0 >> (uint32_t)10U;
+    uint64_t i12 = i11 << (uint32_t)54U;
+    uint64_t o0 = i01 ^ i12;
+    o[0U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)1U];
+    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)1U];
+    uint64_t i01 = i0 >> (uint32_t)10U;
+    uint64_t i12 = i11 << (uint32_t)54U;
+    uint64_t o0 = i01 ^ i12;
+    o[1U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)2U];
+    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)2U];
+    uint64_t i01 = i0 >> (uint32_t)10U;
+    uint64_t i12 = i11 << (uint32_t)54U;
+    uint64_t o0 = i01 ^ i12;
+    o[2U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)3U];
+    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)3U];
+    uint64_t i01 = i0 >> (uint32_t)10U;
+    uint64_t i12 = i11 << (uint32_t)54U;
+    uint64_t o0 = i01 ^ i12;
+    o[3U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)4U];
+    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)4U];
+    uint64_t i01 = i0 >> (uint32_t)10U;
+    uint64_t i12 = i11 << (uint32_t)54U;
+    uint64_t o0 = i01 ^ i12;
+    o[4U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)5U];
+    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)5U];
+    uint64_t i01 = i0 >> (uint32_t)10U;
+    uint64_t i12 = i11 << (uint32_t)54U;
+    uint64_t o0 = i01 ^ i12;
+    o[5U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)6U];
+    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)6U];
+    uint64_t i01 = i0 >> (uint32_t)10U;
+    uint64_t i12 = i11 << (uint32_t)54U;
+    uint64_t o0 = i01 ^ i12;
+    o[6U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)7U];
+    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)7U];
+    uint64_t i01 = i0 >> (uint32_t)10U;
+    uint64_t i12 = i11 << (uint32_t)54U;
+    uint64_t o0 = i01 ^ i12;
+    o[7U] = o0;
+  }
 }
 
 static void reduction_p521(uint64_t *i, uint64_t *o)
@@ -4092,10 +4184,10 @@ static void reduction_p521(uint64_t *i, uint64_t *o)
   uint64_t a1[9U] = { 0U };
   uint64_t a2[9U] = { 0U };
   getZeroWord(i, a0);
-  getFirstWord(i, a1);
-  getFirstWord(i, a2);
-  Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
-  Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
+  getFirstWord(i, a1, (uint32_t)1U);
+  getFirstWord(i, a2, (uint32_t)2U);
+  // Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
+  // Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
 }
 
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
@@ -4966,22 +5058,76 @@ norm(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t *temp
 static uint64_t
 scalar_bit(Spec_ECC_Curves_curve c, Lib_Buffer_buftype buf_type, void *s, uint32_t n)
 {
-  uint8_t sw;
+  uint8_t sw0;
   switch (buf_type)
   {
     case Lib_Buffer_MUT:
       {
-        sw = ((uint8_t *)s)[Spec_ECC_Curves_getScalarLen(c) - (uint32_t)1U - n / (uint32_t)8U];
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)0U;
+            }
+        }
+        sw0 = ((uint8_t *)s)[sw * (uint32_t)8U - (uint32_t)1U - n / (uint32_t)8U];
         break;
       }
     case Lib_Buffer_IMMUT:
       {
-        sw = ((uint8_t *)s)[Spec_ECC_Curves_getScalarLen(c) - (uint32_t)1U - n / (uint32_t)8U];
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)0U;
+            }
+        }
+        sw0 = ((uint8_t *)s)[sw * (uint32_t)8U - (uint32_t)1U - n / (uint32_t)8U];
         break;
       }
     case Lib_Buffer_CONST:
       {
-        sw = ((const uint8_t *)s)[Spec_ECC_Curves_getScalarLen(c) - (uint32_t)1U - n / (uint32_t)8U];
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)0U;
+            }
+        }
+        sw0 = ((const uint8_t *)s)[sw * (uint32_t)8U - (uint32_t)1U - n / (uint32_t)8U];
         break;
       }
     default:
@@ -4990,7 +5136,7 @@ scalar_bit(Spec_ECC_Curves_curve c, Lib_Buffer_buftype buf_type, void *s, uint32
         KRML_HOST_EXIT(253U);
       }
   }
-  return (uint64_t)(sw >> n % (uint32_t)8U & (uint8_t)1U);
+  return (uint64_t)(sw0 >> n % (uint32_t)8U & (uint8_t)1U);
 }
 
 static void
@@ -5478,7 +5624,7 @@ _ecp256dh_r(Spec_ECC_Curves_curve c, uint64_t *result, uint64_t *pubKey, uint8_t
 uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
 {
   uint32_t len = (uint32_t)4U;
-  uint32_t scalarLen = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256);
+  uint32_t scalarLen = (uint32_t)4U * (uint32_t)8U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)25U * len);
   uint64_t tempBuffer[(uint32_t)25U * len];
   memset(tempBuffer, 0U, (uint32_t)25U * len * sizeof (uint64_t));
@@ -5501,7 +5647,7 @@ uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
 uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar)
 {
   uint32_t len = (uint32_t)6U;
-  uint32_t scalarLen = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384);
+  uint32_t scalarLen = (uint32_t)6U * (uint32_t)8U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)25U * len);
   uint64_t tempBuffer[(uint32_t)25U * len];
   memset(tempBuffer, 0U, (uint32_t)25U * len * sizeof (uint64_t));
@@ -5530,14 +5676,14 @@ uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   uint64_t *resultBufferFelemX = resultBufferFelem;
   uint64_t *resultBufferFelemY = resultBufferFelem + len;
   uint8_t *resultX = result;
-  uint8_t *resultY = result + Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256);
+  uint8_t *resultY = result + (uint32_t)4U * (uint32_t)8U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
   uint64_t publicKeyAsFelem[(uint32_t)2U * len];
   memset(publicKeyAsFelem, 0U, (uint32_t)2U * len * sizeof (uint64_t));
   uint64_t *publicKeyFelemX = publicKeyAsFelem;
   uint64_t *publicKeyFelemY = publicKeyAsFelem + len;
   uint8_t *pubKeyX = pubKey;
-  uint8_t *pubKeyY = pubKey + Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256);
+  uint8_t *pubKeyY = pubKey + (uint32_t)4U * (uint32_t)8U;
   toUint64ChangeEndian(Spec_ECC_Curves_P256, pubKeyX, publicKeyFelemX);
   toUint64ChangeEndian(Spec_ECC_Curves_P256, pubKeyY, publicKeyFelemY);
   uint64_t flag = _ecp256dh_r(Spec_ECC_Curves_P256, resultBufferFelem, publicKeyAsFelem, scalar);
@@ -5557,14 +5703,14 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   uint64_t *resultBufferFelemX = resultBufferFelem;
   uint64_t *resultBufferFelemY = resultBufferFelem + len;
   uint8_t *resultX = result;
-  uint8_t *resultY = result + Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384);
+  uint8_t *resultY = result + (uint32_t)6U * (uint32_t)8U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
   uint64_t publicKeyAsFelem[(uint32_t)2U * len];
   memset(publicKeyAsFelem, 0U, (uint32_t)2U * len * sizeof (uint64_t));
   uint64_t *publicKeyFelemX = publicKeyAsFelem;
   uint64_t *publicKeyFelemY = publicKeyAsFelem + len;
   uint8_t *pubKeyX = pubKey;
-  uint8_t *pubKeyY = pubKey + Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384);
+  uint8_t *pubKeyY = pubKey + (uint32_t)6U * (uint32_t)8U;
   toUint64ChangeEndian(Spec_ECC_Curves_P384, pubKeyX, publicKeyFelemX);
   toUint64ChangeEndian(Spec_ECC_Curves_P384, pubKeyY, publicKeyFelemY);
   uint64_t flag = _ecp256dh_r(Spec_ECC_Curves_P384, resultBufferFelem, publicKeyAsFelem, scalar);

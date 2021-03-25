@@ -397,7 +397,7 @@ let scalar_bit #c #buf_type s n =
   (* mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v (getScalarLen c) -1 - v n / 8)) >>. (n %. 8ul)) 1ul; *)
   assert_norm (1 = pow2 1 - 1);
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1)); 
-  to_u64 ((s.(getScalarLen c -. 1ul -. n /. 8ul) >>. (n %. 8ul)) &. u8 1)
+  to_u64 ((s.(getScalarLenBytes c -. 1ul -. n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
 
 val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c 

@@ -26,7 +26,7 @@ open Hacl.Impl.EC.Intro
 let ecp256dh_i c result scalar =
   push_frame();
   let len = getCoordinateLenU64 c in 
-  let scalarLen = getScalarLen c in 
+  let scalarLen = getScalarLenBytes c in 
 
   let tempBuffer = create (size 25 *! len) (u64 0) in
     
@@ -132,14 +132,14 @@ let ecp256dh_r c result pubKey scalar =
   let resultBufferFelem = create (size 3 *! len) (u64 0) in
   let resultBufferFelemX = sub resultBufferFelem (size 0) len in
   let resultBufferFelemY = sub resultBufferFelem len len in
-  let resultX = sub result (size 0) (getScalarLen c) in
-  let resultY = sub result (getScalarLen c) (getScalarLen c) in
+  let resultX = sub result (size 0) (getScalarLenBytes c) in
+  let resultY = sub result (getScalarLenBytes c) (getScalarLenBytes c) in
 
   let publicKeyAsFelem = create (size 2 *! len) (u64 0) in
   let publicKeyFelemX = sub publicKeyAsFelem (size 0) len in
   let publicKeyFelemY = sub publicKeyAsFelem len len in
-  let pubKeyX = sub pubKey (size 0) (getScalarLen c) in
-  let pubKeyY = sub pubKey (getScalarLen c) (getScalarLen c) in
+  let pubKeyX = sub pubKey (size 0) (getScalarLenBytes c) in
+  let pubKeyY = sub pubKey (getScalarLenBytes c) (getScalarLenBytes c) in
 
   toUint64ChangeEndian #c pubKeyX publicKeyFelemX;
   toUint64ChangeEndian #c pubKeyY publicKeyFelemY;
