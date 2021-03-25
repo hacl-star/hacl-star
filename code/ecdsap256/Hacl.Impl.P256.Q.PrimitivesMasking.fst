@@ -164,7 +164,8 @@ let copy_point_conditional_mask_u64_3 #buf_type result x y mask =
 
 
 inline_for_extraction noextract
-val cmovznz2: uint64 -> uint64 -> mask: uint64 -> Tot (r: uint64)
+val cmovznz2: #t:inttype{unsigned t} -> #l:secrecy_level ->
+  a: uint_t t l  -> b: uint_t t l -> mask: uint_t t l -> Tot (r: uint_t t l)
 
 let cmovznz2 a b mask = 
   logor (logand a mask) (logand b (lognot mask))
@@ -198,14 +199,14 @@ val maskU8toU64: a: uint8 {v a = 0 \/ v a = pow2 8 - 1} ->
 
 let maskU8toU64 a = 
   let a0 = to_u64 a in 
-  let a1 = shift_right a0 (size 8) in 
-  let a2 = shift_right a0 (size 16) in 
-  let a3 = shift_right a0 (size 24) in 
+  let a1 = shift_left a0 (size 8) in 
+  let a2 = shift_left a0 (size 16) in 
+  let a3 = shift_left a0 (size 24) in 
   
-  let a4 = shift_right a0 (size 32) in 
-  let a5 = shift_right a0 (size 40) in 
-  let a6 = shift_right a0 (size 48) in 
-  let a7 = shift_right a0 (size 56) in 
+  let a4 = shift_left a0 (size 32) in 
+  let a5 = shift_left a0 (size 40) in 
+  let a6 = shift_left a0 (size 48) in 
+  let a7 = shift_left a0 (size 56) in 
 
   let a01 = logxor a0 a1 in 
   let a23 = logxor a2 a3 in 

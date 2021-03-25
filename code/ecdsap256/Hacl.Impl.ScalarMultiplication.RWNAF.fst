@@ -43,39 +43,32 @@ let scalar_bit s n =
 
 
 inline_for_extraction noextract
-let dradix_wnaf = (u8 64)
+let dradix_wnaf = (u64 64)
 inline_for_extraction noextract
-let dradix = (u8 32)
+let dradix = (u64 32)
 inline_for_extraction noextract
-let radix = (u8 5)
+let radix = (u64 5)
 
 open FStar.Mul
 
 #set-options "--z3rlimit 200" 
 
-val subborrow_u8: a: uint8 -> b: uint8 -> r: lbuffer uint8 (size 1) -> 
-  Stack uint8 
-  (requires fun h -> live h r)
-  (ensures fun h0 c h1 -> modifies (loc r) h0 h1 /\ (
-    v c <= 1 /\ (
-    let r = Seq.index (as_seq h1 r) 0 in 
-    v r - v c * pow2 8 == v a - v b)))
+val subborrow_u64: x:uint64 -> y:uint64 -> r:lbuffer uint64 (size 1) ->
+  Stack uint64
+    (requires fun h -> live h r)
+    (ensures  fun h0 c h1 ->
+      modifies1 r h0 h1 /\
+      (let r = Seq.index (as_seq h1 r) 0 in
+       v r - v c * pow2 64 == v x - v y))
 
-let subborrow_u8 a b r =
-  let x1 = to_u16 a -. to_u16 b in 
+let subborrow_u64 x y r = 
+  let x1 = to_u128 x -. to_u128 y in 
+  let x2 = logand x1 (u128 0xffffffffffffffff) in 
+  let x3 = shift_right x1 (size 64) in 
 
-  let x2 = logand x1 (u16 0xff) in 
-    logand_mask x1 (u16 0xff) 8;
-    
-  let x3 = shift_right x1 (size 8) in 
-    shift_right_lemma x1 (size 8);
+  upd r (size 0) (to_u64 x2);
+  (u64 0) -. (to_u64 x3)
 
-  upd r (size 0) (to_u8 x2);
-  let r = u8 0 -. (to_u8 x3) in 
-  
-  assert(if (v a - v b ) >= 0 then v r == 0 else v r == 1);
-
-  r
   
 
 
@@ -88,13 +81,13 @@ val scalar_rwnaf : out: lbuffer uint64 (size 104) -> scalar: lbuffer uint8 (size
 let scalar_rwnaf out scalar = 
   push_frame();
 
-  let in0 = index scalar (size 31) in 
-  let mask = dradix_wnaf -! (u8 1) in 
-  let windowStartValue = logor (u8 1) (logand in0 mask) in 
+  let in0 = to_u64 (index scalar (size 31)) in 
+  let mask = dradix_wnaf -! (u64 1) in 
+  let windowStartValue = logor (u64 1) (logand in0 mask) in 
   
   let window = create (size 1) windowStartValue in 
 
-  let r = create (size 1) (u8 0) in 
+  let r = create (size 1) (u64 0) in 
   let r1 = create (size 1) (u64 0) in 
 
   let h0 = ST.get() in 
@@ -107,67 +100,54 @@ let scalar_rwnaf out scalar =
     (fun i ->
   
       let h0 = ST.get() in 
-      let wVar = index window (size 0) in 
+      let wVar = to_u64 (index window (size 0)) in 
       let w = logand wVar mask in 
-      let c = subborrow_u8 w dradix r in 
-      let r2 = (u8 0) -. index r (size 0) in 
+      let c = subborrow_u64 w dradix r in 
+
+      let r0 = index r (size 0) in 
+      let r2 = (u64 0) -. index r (size 0) in 
 
 
-      let dradix_wnaf = to_u64 dradix_wnaf in 
-      let dradix = to_u64 dradix in 
+      let cAsFlag = (u64 0) -. c in 
+      let r3 = cmovznz2 r2 r0 cAsFlag in 
 
-      let wVar = to_u64 wVar in 
-      let w = to_u64 w in 
-     
-      (*let c = sub_borrow_u64 (u64 0) w dradix r in 
-      let r2 = (u64 0) -. index r (size 0) in  *)
-      
-      let cAsFlag = (u64 0xffffffff) +! to_u64 c in 
-      let r3 = logand (cmovznz2 (to_u64 (index r (size 0))) (to_u64 r2) cAsFlag) (u64 0xff) in 
-      
       upd out (size 2 *! i) r3;
-      upd out (size 2 *! i +! 1) (to_u64 c);
+      upd out (size 2 *! i +! size 1) c;
 
 
-
-      let d = logand wVar (dradix_wnaf -! (u64 1)) -! dradix in 
+      let d = w -! dradix in 
       let wStart = shift_right (wVar -! d) radix in 
+
       let w0 = wStart +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 1))) (size 1)) in 
       let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 2))) (size 2)) in 
       let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 3))) (size 3)) in 
       let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 4))) (size 4)) in 
       let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 5))) (size 5)) in
 
-      upd window (size 0) (to_u8 w0)
+      upd window (size 0) w0
+  );
 
+  let i = size 50 in 
+  
+  let wVar = index window (size 0) in 
+  let w = logand wVar mask in 
+  let c = subborrow_u64 w dradix r in 
 
-    );
+  let r0 = index r (size 0) in 
+  let r2 = (u64 0) -. index r (size 0) in 
 
+  let cAsFlag = (u64 0) -. c in 
+  let r3 = cmovznz2 r2 r0 cAsFlag in 
 
-  let dradix_wnaf = to_u64 dradix_wnaf in 
-  let dradix = to_u64 dradix in 
+  upd out (size 2 *! i) r3;
+  upd out (size 2 *! i +! size 1) c;
 
- let i = 50ul in 
+  let d = w -! dradix in 
 
-      let wVar = to_u64 (index window (size 0)) in 
-      
-      let w = logand wVar  (dradix_wnaf -! (u64 1)) in 
-      
-      let d = logand wVar (dradix_wnaf -! (u64 1)) -! dradix in 
+  let wStart = shift_right (wVar -! d) radix in 
+  upd out (size 102) wStart; 
 
-      let c = sub_borrow_u64 (u64 0) w dradix r in 
-      sub_borrow_u64_void (u64 0) (u64 0) (to_u64 (index r (size 0))) r1;
-      
-      let cAsFlag = (u64 0xffffffff) +! c in 
-      let r3 = logand (cmovznz2 (to_u64 (index r (size 0))) (index r1 (size 0)) cAsFlag) (u64 0xff) in 
-      
-      upd out (size 2 *! i) r3;
-      upd out (size 2 *! i +! 1) c;
-
-      let wStart = shift_right (wVar -! d) radix in 
-     upd out (size 102) wStart; 
-
-pop_frame()
+  pop_frame()
 
 
 
@@ -181,21 +161,17 @@ val loopK: result: pointAffine -> d: uint64 -> point: pointAffine -> j: size_t -
 
 let loopK result d point j = 
   let invK h (k: nat) = True in 
-  Lib.Loops.for 0ul 16ul invK
-    (fun k -> 
-      let mask = eq_mask d (to_u64 k) in 
-        eq_mask_lemma d (to_u64 k); 
+  Lib.Loops.for 0ul 16ul invK (fun k -> 
+ 
+    let mask = eq_mask d (to_u64 k) in 
+    eq_mask_lemma d (to_u64 k); 
+    
 
-	(* 
-	let lut_cmb_x = const_to_lbuffer (sub points_cmb ((j *! size 16 +! k) *! 8) (size 4)) in 
-	let lut_cmb_y = const_to_lbuffer (sub points_cmb ((j *! size 16 +! k) *! 8 +! (size 4)) (size 4)) in *)
-	
-	let lut_cmb_x = getUInt64 ((j *! size 16 +! k) *! 8) in 
-	let lut_cmb_y = getUInt64 ((j *! size 16 +! k) *! 8 +! (size 4))  in
+    let lut_cmb_x = getUInt64 ((j *! size 16 +! k) *! 8) in 
+    let lut_cmb_y = getUInt64 ((j *! size 16 +! k) *! 8 +! (size 4))  in
 
-	copy_conditional (sub point (size 0) (size 4)) lut_cmb_x mask;
-	copy_conditional (sub point (size 4) (size 4)) lut_cmb_y mask 
-    )
+    copy_conditional (sub point (size 0) (size 4)) lut_cmb_x mask;
+    copy_conditional (sub point (size 4) (size 4)) lut_cmb_y mask)
 
 
 
@@ -228,18 +204,6 @@ let conditional_substraction result p scalar tempBuffer =
   point_add_mixed p bpMinus tempPoint tempBuffer;
 
   copy_point_conditional_mask_u64_2 result tempPoint mask;
-
-(*   let bpX = const_to_lbuffer (sub points_cmb (size 0) (size 4)) in
-    copy bpMinusX bpX;
-  let bpY = const_to_lbuffer (sub points_cmb (size 4) (size 4)) in
-    p256_neg bpY bpMinusY;
-
-  point_add_mixed p bpMinus tempPoint tempBuffer;
-
-  copy_point_conditional_mask_u64_2 result tempPoint mask;  *)
-  
-
-
   pop_frame()
 
 
