@@ -9,7 +9,8 @@ open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
 open Hacl.Spec.MontgomeryMultiplication
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 
 val point_double: #c: curve -> p: point c -> result: point c 
   -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 c *! 17ul) 

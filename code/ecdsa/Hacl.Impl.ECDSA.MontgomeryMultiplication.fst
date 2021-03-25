@@ -187,7 +187,7 @@ let montgomery_multiplication_round #c t round k0 =
     let t1 = mod64 #c t in
     
     mul_atomic t1 k0 y temp;
-    recall_contents (order_buffer #c)  (Lib.Sequence.of_list (Hacl.Spec.P256.Definition.order_list c));
+    (* recall_contents (order_buffer #c)  (Lib.Sequence.of_list (Hacl.Spec.ECC.Definition.order_list c)); *)
     let y_ = index y (size 0) in   
     short_mul_bn #c order_buffer y_ t2;
     (* add_long_without_carry #c t t2 t3; *)

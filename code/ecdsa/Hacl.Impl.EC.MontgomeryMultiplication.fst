@@ -215,7 +215,7 @@ let fsquarePowN #c n a =
   assert_norm (pow2 0 == 1); 
   let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = 
     let k = fromDomain_ #c (as_nat c h0 a) in 
-    as_nat c h1 a = toDomain_ #c (Spec.P256.pow k (pow2 i)) /\
+    as_nat c h1 a = toDomain_ #c (pow k (pow2 i)) /\
     as_nat c h1 a < getPrime c /\ live h1 a /\ modifies (loc a) h0 h1 in 
 
   Hacl.Lemmas.P256.power_one_2 (fromDomain_ #c (as_nat c h0 a)); 
@@ -224,7 +224,7 @@ let fsquarePowN #c n a =
     let h0_ = ST.get() in 
      montgomery_square_buffer #c a a;
 
-     let pow = Spec.P256.pow in 
+     let pow = pow in 
      let k = fromDomain_ #c (as_nat c h0 a) in  
      inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0_ a) * fromDomain_ #c (as_nat c h0_ a)); 
      lemmaFromDomainToDomainModuloPrime #c (let k = fromDomain_ #c (as_nat c h0 a) in pow k (pow2 (v x)));

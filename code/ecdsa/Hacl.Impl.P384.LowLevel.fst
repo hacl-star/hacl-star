@@ -1,3 +1,4 @@
+
 module Hacl.Impl.P384.LowLevel
 
 open FStar.HyperStack.All
@@ -8,7 +9,9 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
+
 
 open FStar.Math
 open FStar.Math.Lemmas

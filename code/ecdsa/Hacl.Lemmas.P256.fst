@@ -6,8 +6,12 @@ open Lib.ByteSequence
 
 open FStar.Mul
 
+open FStar.Tactics 
+open FStar.Tactics.Canon 
+
 open Hacl.Spec.P256.Definition
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Spec.ECDSA.Lemmas
 
 open FStar.Math.Lemmas
@@ -17,19 +21,17 @@ open Lib.Buffer
 open FStar.HyperStack.All
 open FStar.HyperStack
 
-open FStar.Tactics 
-open FStar.Tactics.Canon 
 
-open Spec.P256
+open Spec.ECC
 
 #set-options " --z3rlimit 200" 
 
-val lemma_scalar_ith: c: curve ->  sc:lbytes (getScalarLenNat c) -> k:nat{k < getScalarLenNat c} -> Lemma
+val lemma_scalar_ith: c: curve ->  sc:lbytes (getScalarLen c) -> k:nat{k < getScalarLen c} -> Lemma
   (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
 
 let lemma_scalar_ith c sc k =
-  index_nat_to_intseq_le #U8 #SEC (getScalarLenNat c) (nat_from_intseq_le sc) k;
-  nat_from_intseq_le_inj sc (nat_to_intseq_le (getScalarLenNat c) (nat_from_intseq_le sc))
+  index_nat_to_intseq_le #U8 #SEC (getScalarLen c) (nat_from_intseq_le sc) k;
+  nat_from_intseq_le_inj sc (nat_to_intseq_le (getScalarLen c) (nat_from_intseq_le sc))
 
 
 val lemma_equ_felem: a: nat {a < pow2 64} 

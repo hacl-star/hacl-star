@@ -8,7 +8,8 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Hacl.Spec.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"

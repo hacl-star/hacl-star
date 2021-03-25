@@ -4,7 +4,8 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 open FStar.Mul
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Hacl.Lemmas.P256
 open Hacl.Spec.P256.Definition
 

@@ -10,7 +10,8 @@ open Lib.Buffer
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
 (* open Spec.ECDSA.Lemmas *)
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Spec.ECDSA
 
 open FStar.Math
@@ -20,7 +21,7 @@ open FStar.Mul
 open FStar.Tactics
 open FStar.Tactics.Canon 
 
-(* open Spec.P256.Lemmas *)
+(* open Spec.ECC.Lemmas *)
 open Lib.IntTypes.Intrinsics
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
@@ -1307,7 +1308,7 @@ val shortened_mul_p256: a: glbuffer uint64 (size 4) -> b: uint64 -> result: wide
   (requires fun h -> live h a /\ live h result /\ wide_as_nat P256 h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat_il P256 h0 a * uint_v b = wide_as_nat P256 h1 result /\ 
-    wide_as_nat P256 h1 result < getPower2 P256 * pow2 64)
+    wide_as_nat P256 h1 result < pow2 (getPower P256) * pow2 64)
 
 let shortened_mul_p256 a b result = 
   let result04 = sub result (size 0) (size 4) in 

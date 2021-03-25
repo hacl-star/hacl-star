@@ -10,7 +10,7 @@ open Lib.ByteBuffer
 open Lib.ByteSequence
 open Lib.Buffer 
 
-open Spec.P256 
+open Spec.ECC 
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
 
@@ -335,7 +335,7 @@ val isOrderCorrect: #c: curve -> p: point c -> tempBuffer: lbuffer uint64 (size 
   (ensures fun h0 r h1 -> 
     modifies(loc tempBuffer) h0 h1 /\ 
     (let (xN, yN, zN) = scalar_multiplication #c (prime_order_seq #P256) (point_prime_to_coordinates c (as_seq h0 p)) in 
-     r == Spec.P256.isPointAtInfinity (xN, yN, zN))
+     r == Spec.ECC.isPointAtInfinity (xN, yN, zN))
   )
 
 let isOrderCorrect #c p tempBuffer = 

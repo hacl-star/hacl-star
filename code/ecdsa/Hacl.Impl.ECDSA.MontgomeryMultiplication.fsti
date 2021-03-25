@@ -9,7 +9,8 @@ open Lib.Buffer
 
 open FStar.Math.Lemmas
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Hacl.Spec.ECDSA.Definition
 open Spec.ECDSA
 open Hacl.Impl.P256.LowLevel 

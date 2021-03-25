@@ -22,7 +22,8 @@ open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
 open Spec.ECDSA.Lemmas
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Hacl.Spec.MontgomeryMultiplication
 
 (* friend Hacl.Spec.MontgomeryMultiplication *)
@@ -100,7 +101,7 @@ let montgomery_ladder_power_step0 #c a b =
 
 val montgomery_ladder_power_step: #c: curve -> a: felem c -> b: felem c 
   -> scalar: glbuffer uint8 (getScalarLen c) 
-  -> i:size_t{v i < getScalarLenNat c} ->  Stack unit
+  -> i:size_t{v i < getScalarLen c} ->  Stack unit
   (requires fun h -> live h a  /\ live h b /\ live h scalar /\ as_nat c h a < getPrime c 
     /\ as_nat c h b < getPrime c /\ disjoint a b)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1  /\
@@ -115,7 +116,7 @@ val montgomery_ladder_power_step: #c: curve -> a: felem c -> b: felem c
 
 let montgomery_ladder_power_step #c a b scalar i = 
     let h0 = ST.get() in 
-  let bit0 = getScalarLenU64 c -. 1ul -. i in  
+  let bit0 = getScalarLenBytes c *. 8ul -. 1ul -. i in  
   let bit = scalar_bit scalar bit0 in 
   cswap bit a b;
   montgomery_ladder_power_step0 a b;
@@ -131,27 +132,27 @@ val _montgomery_ladder_power: #c: curve -> a: felem c -> b: felem c
     (
       let a_ = fromDomain_ #c (as_nat c h0 a) in 
       let b_ = fromDomain_ #c (as_nat c h0 b) in 
-      let (r0D, r1D) = Lib.LoopCombinators.repeati (getScalarLenNat c) (_pow_step #c (as_seq h0 scalar)) (a_, b_) in 
+      let (r0D, r1D) = Lib.LoopCombinators.repeati (getScalarLen c) (_pow_step #c (as_seq h0 scalar)) (a_, b_) in 
       r0D == fromDomain_ #c (as_nat c h1 a) /\ r1D == fromDomain_ #c (as_nat c h1 b) /\
       as_nat c h1 a < getPrime c /\ as_nat c h1 b < getPrime c))
 
   
 let _montgomery_ladder_power #c a b scalar = 
-  let scalarLen = getScalarLenU64 c in 
+  let scalarLen = getScalarLenBytes c *. 8ul in 
   let h0 = ST.get() in 
   [@inline_let]
   let spec_exp h0  = _pow_step #c (as_seq h0 scalar) in 
   [@inline_let]
   let acc (h: mem) : GTot (tuple2 nat_prime nat_prime) = (fromDomain_ #c (as_nat c h a), fromDomain_ #c (as_nat c h b)) in 
-  Lib.LoopCombinators.eq_repeati0 (getScalarLenNat c) (spec_exp h0) (acc h0);
+  Lib.LoopCombinators.eq_repeati0 (getScalarLen c) (spec_exp h0) (acc h0);
   [@inline_let]
-  let inv h (i: nat {i <= (getScalarLenNat c)}) = 
+  let inv h (i: nat {i <= (getScalarLen c)}) = 
     live h a /\ live h b /\ live h scalar /\ modifies (loc a |+| loc b) h0 h /\ as_nat c h a < getPrime c /\ as_nat c h b < getPrime c /\
     acc h == Lib.LoopCombinators.repeati i (spec_exp h0) (acc h0) in 
   for 0ul scalarLen inv (
     fun i -> 
 	  montgomery_ladder_power_step a b scalar i;
-	  Lib.LoopCombinators.unfold_repeati (getScalarLenNat c) (spec_exp h0) (acc h0) (uint_v i))
+	  Lib.LoopCombinators.unfold_repeati (getScalarLen c) (spec_exp h0) (acc h0) (uint_v i))
 
 
 val montgomery_ladder_power: #c: curve -> a: felem c 

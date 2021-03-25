@@ -8,7 +8,8 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open FStar.Mul
 
 noextract 
@@ -331,7 +332,7 @@ let sqPower_list (#c: curve) : list uint8 =
 
 
 
-let sqPower_seq (#c: curve) : s: Lib.Sequence.lseq uint8 (getScalarLenNat c)
+let sqPower_seq (#c: curve) : s: Lib.Sequence.lseq uint8 (getScalarLen c)
   { 
   True
     (* Lib.ByteSequence.nat_from_intseq_le s == (getPrime c + 1) / 4 /\ *)
@@ -352,12 +353,12 @@ let sqPower_seq (#c: curve) : s: Lib.Sequence.lseq uint8 (getScalarLenNat c)
 
 
 inline_for_extraction
-let sqPower_buffer_p256 : x: glbuffer uint8 (getScalarLen P256) {witnessed x sqPower_seq /\ recallable x} = 
+let sqPower_buffer_p256 : x: glbuffer uint8 (getScalarLen P256) {witnessed x (sqPower_seq #P256) /\ recallable x} = 
   createL_global sqPower_list_p256
 
 
 inline_for_extraction
-let sqPower_buffer_p384 : x: glbuffer uint8 (getScalarLen P384) {witnessed x sqPower_seq /\ recallable x} = 
+let sqPower_buffer_p384 : x: glbuffer uint8 (getScalarLen P384) {witnessed x (sqPower_seq #P384) /\ recallable x} = 
   createL_global sqPower_list_p384
 
 

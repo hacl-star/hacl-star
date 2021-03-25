@@ -4,7 +4,7 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 open FStar.Mul
 
-open Spec.P256
+open Spec.ECC
 open Spec.ECDSA.Lemmas
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
@@ -29,7 +29,7 @@ let lemmaToDomain #c a = ()
 
 
 let lemmaToDomainAndBackIsTheSame #c a =
-  let power = getPower2 c in 
+  let power = pow2 (getPower c) in 
   let prime = getPrime c in 
   
   let to = toDomain_ #c a in
@@ -47,10 +47,11 @@ let lemmaToDomainAndBackIsTheSame #c a =
 
 let lemmaFromDomainToDomain #c a =
   let prime = getPrime c in 
-  let power = getPower2 c in 
+  let power = pow2 (getPower c) in 
   
   let from = fromDomain_ #c a in
   lemmaFromDomain #c a;
+  
   let to = toDomain_ #c from in
   lemmaToDomain #c from;
   lemma_mod_mul_distr_l (a * modp_inv2 #c power) power prime;
@@ -64,7 +65,7 @@ let lemmaFromDomainToDomain #c a =
 
 let lemmaFromDomainToDomainModuloPrime #c a =
   let prime = getPrime c in 
-  let power = getPower2 c in 
+  let power = pow2 (getPower c) in 
   
   lemma_mod_mul_distr_l (a * power) (modp_inv2 #c power) prime;
   
@@ -76,14 +77,14 @@ let lemmaFromDomainToDomainModuloPrime #c a =
 
 let inDomain_mod_is_not_mod #c a =
   let prime = getPrime c in 
-  let power = getPower2 c in 
+  let power = pow2 (getPower c) in 
 
   lemma_mod_mul_distr_l a power prime
 
 
 let multiplicationInDomainNat #c #k #l a b =
   let prime = getPrime c in 
-  let power = getPower2 c in 
+  let power = pow2 (getPower c)in 
 
   let multResult = a * b * modp_inv2_prime power prime % prime in
   
@@ -99,7 +100,7 @@ let multiplicationInDomainNat #c #k #l a b =
 
 let additionInDomain #c a b =
   let prime = getPrime c in 
-  let power = getPower2 c in 
+  let power = pow2 (getPower c) in 
   
   let k = fromDomain_ #c a in
   let l = fromDomain_ #c b in
@@ -121,7 +122,7 @@ let additionInDomain #c a b =
 
 let substractionInDomain #c a b =
   let prime = getPrime c in 
-  let power = getPower2 c in 
+  let power = pow2 (getPower c) in 
   
   let k = fromDomain_ #c a in
   let l = fromDomain_ #c b in
@@ -266,7 +267,7 @@ val lemma_exponen_spec_0:
 
 let lemma_exponen_spec_0 #c k start =
   let prime = getPrime c in 
-  let power = getPower2 c in 
+  let power = pow2 (getPower c) in 
 
   let st0, st1 = start in
   let number = nat_from_bytes_le #SEC k in
@@ -281,7 +282,7 @@ let lemma_exponen_spec_0 #c k start =
 
 let rec lemma_exponen_spec #c k start index =
   let prime = getPrime c in 
-  let power = getPower2 c in 
+  let power = pow2 (getPower c) in 
 
   let f = _pow_step k in
   let st0, st1 = start in
@@ -359,7 +360,7 @@ let rec lemma_exponen_spec #c k start index =
 
 
 let pow_spec #c k p =
-  let a, b = Lib.LoopCombinators.repeati (getScalarLenNat c) (_pow_step k) (1, p) in 
+  let a, b = Lib.LoopCombinators.repeati (getScalarLen c) (_pow_step k) (1, p) in 
   lemma_exponen_spec k (1, p) (getPower c);
   a
 

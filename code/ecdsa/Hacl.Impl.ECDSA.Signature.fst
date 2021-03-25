@@ -16,8 +16,9 @@ open FStar.Math.Lemmas
 
 open Hacl.Hash.SHA2
 
-open Spec.P256
-(* open Spec.P256.Lemmas *)
+open Spec.ECC
+open Spec.ECC.Curves
+(* open Spec.ECC.Lemmas *)
 open Hacl.Spec.P256.Definition
 open Hacl.Spec.ECDSA.Definition
 
@@ -71,7 +72,7 @@ let ecdsa_signature_step12 #c alg mLen m result =
   
   (* TO CHANGE! *)
   (* Copy the mininum between the two *)
-  let sz: FStar.UInt32.t = getScalarLen c in 
+  let sz: FStar.UInt32.t = (1000ul) in 
   let cutHash = create sz (u8 0) in 
 
   begin
@@ -115,7 +116,7 @@ val ecdsa_signature_step45:
       modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
       as_nat c h1 x < prime_p256_order /\ 
       (
-	let (rxN, ryN, rzN), _ = montgomery_ladder_spec #c (as_seq h0 k) ((0,0,0), basePoint #P256) in 
+	let (rxN, ryN, rzN), _ = montgomery_ladder_spec_left #c (as_seq h0 k) ((0,0,0), basePoint #P256) in 
 	let (xN, _, _) = _norm #P256 (rxN, ryN, rzN) in 
 	as_nat c h1 x == xN % prime_p256_order /\ 
 	(
@@ -248,7 +249,7 @@ val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
       let hashM = hashSpec P256 alg (v mLen) (as_seq h0 m) in 
       let cutHashM = Lib.Sequence.sub hashM 0 32 in 
       let z =  nat_from_bytes_be cutHashM % prime_p256_order in 
-      let (rxN, ryN, rzN), _ = montgomery_ladder_spec #c (as_seq h0 k) ((0,0,0), basePoint #P256) in 
+      let (rxN, ryN, rzN), _ = montgomery_ladder_spec_left #c (as_seq h0 k) ((0,0,0), basePoint #P256) in 
       let (xN, _, _) = _norm #P256 (rxN, ryN, rzN) in 
       
       let kFelem = nat_from_bytes_be (as_seq h0 k) in 

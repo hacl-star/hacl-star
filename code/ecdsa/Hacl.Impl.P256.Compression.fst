@@ -154,15 +154,15 @@ let computeYFromX #c x result sign =
   let x_ = fromDomain_ #c (as_nat c h0 x) in
 
   calc (==) {
-    ((((x_ * x_ * x_ % prime256 + ((Spec.P256.aCoordinate #P256 % prime256) * x_ % prime256)) % prime256) + Spec.P256.bCoordinate #P256) % prime256);
-    (==) {lemma_mod_add_distr (bCoordinate #P256) (x_ * x_ * x_ % prime256 + ((Spec.P256.aCoordinate #P256 % prime256) * x_ % prime256)) prime256}
-     ((x_ * x_ * x_ % prime256 + (Spec.P256.aCoordinate #P256 % prime256) * x_ % prime256 + Spec.P256.bCoordinate #P256) % prime256);
-    (==) {lemma_mod_add_distr ((Spec.P256.aCoordinate #P256 % prime256) * x_ % prime256 + Spec.P256.bCoordinate #P256) (x_ * x_ * x_) prime256}
-     ((x_ * x_ * x_ + (Spec.P256.aCoordinate #P256 % prime256) * x_ % prime256 + Spec.P256.bCoordinate #P256) % prime256); 
+    ((((x_ * x_ * x_ % prime256 + ((Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256)) % prime256) + Spec.ECC.Curves.bCoordinate #P256) % prime256);
+    (==) {lemma_mod_add_distr (bCoordinate #P256) (x_ * x_ * x_ % prime256 + ((Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256)) prime256}
+     ((x_ * x_ * x_ % prime256 + (Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256 + Spec.ECC.Curves.bCoordinate #P256) % prime256);
+    (==) {lemma_mod_add_distr ((Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256 + Spec.ECC.Curves.bCoordinate #P256) (x_ * x_ * x_) prime256}
+     ((x_ * x_ * x_ + (Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256 + Spec.ECC.Curves.bCoordinate #P256) % prime256); 
     (==) {lemma_mod_mul_distr_l (aCoordinate #P256) x_ prime256}
-    ((x_ * x_ * x_ + Spec.P256.aCoordinate #P256 * x_ % prime256 + Spec.P256.bCoordinate #P256) % prime256); 
+    ((x_ * x_ * x_ + Spec.ECC.Curves.aCoordinate #P256 * x_ % prime256 + Spec.ECC.Curves.bCoordinate #P256) % prime256); 
     (==) {lemma_mod_add_distr (x_ * x_ * x_ + bCoordinate #P256) (aCoordinate #P256 * x_) prime256}
-    ((x_ * x_ * x_ + Spec.P256.aCoordinate #P256 * x_ + Spec.P256.bCoordinate #P256) % prime256); }
+    ((x_ * x_ * x_ + Spec.ECC.Curves.aCoordinate #P256 * x_ + Spec.ECC.Curves.bCoordinate #P256) % prime256); }
 
 
 let decompressionNotCompressedForm #c b result = 
@@ -252,7 +252,7 @@ let decompressionCompressedForm #c b result =
 	    let h3 = ST.get() in 
 	    assert(    
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
-	      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + Spec.P256.aCoordinate #P256 * xD + Spec.P256.bCoordinate #P256) % prime256)) in 
+	      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + Spec.ECC.Curves.aCoordinate #P256 * xD + Spec.ECC.Curves.bCoordinate #P256) % prime256)) in 
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 as_nat c h3 t1 = sqRootWithoutSign 
 	      else
@@ -271,7 +271,7 @@ let decompressionCompressedForm #c b result =
 	  
 	  assert(   
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
-	      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + Spec.P256.aCoordinate #P256 * xD + Spec.P256.bCoordinate #P256) % prime256)) in 
+	      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + Spec.ECC.Curves.aCoordinate #P256 * xD + Spec.ECC.Curves.bCoordinate #P256) % prime256)) in 
 	      let to = as_seq h5 (gsub result (size 32) (size 32)) in 
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 to == Lib.ByteSequence.nat_to_bytes_be 32 sqRootWithoutSign 

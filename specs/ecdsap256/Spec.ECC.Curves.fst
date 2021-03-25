@@ -96,6 +96,7 @@ let prime384: (a: pos {a > 3 && a < pow2 384}) =
   pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1
 
 (* the length of each coordinate of the point as uint64 *)
+inline_for_extraction noextract
 let getCoordinateLenU64 curve = 
   match curve with
   |P256 -> 4ul
@@ -119,7 +120,7 @@ let getScalarLenBytes curve =
   | _ -> 0ul
 
 (* the scalar length in bits *)
-let getScalarLen (c: curve) = v (getScalarLenBytes c) * 8
+let getScalarLen (c: curve) = getScalarLenBytes c *. 8ul
 
 
 (* the next power in pow2 (k * 64) after the prime *)

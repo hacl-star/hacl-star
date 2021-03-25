@@ -10,7 +10,8 @@ open FStar.Math.Lib
 open Lib.Buffer
 
 open Hacl.SolinasReduction.Lemmas
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Hacl.Impl.EC.LowLevel
 
 open Hacl.Impl.SolinasReduction.P384

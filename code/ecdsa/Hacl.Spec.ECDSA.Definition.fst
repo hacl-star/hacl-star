@@ -12,7 +12,7 @@ open Lib.Sequence
 open Lib.Buffer
 open FStar.Mul
 
-open Spec.P256
+open Spec.ECC.Curves
 
 noextract
 let prime_p256_order: (a: pos{a < pow2 256}) =

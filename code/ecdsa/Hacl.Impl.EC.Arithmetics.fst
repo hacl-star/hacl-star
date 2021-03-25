@@ -12,7 +12,7 @@ open Hacl.Spec.P256.Definition
 
 open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Spec.P256
+open Spec.ECC
 
 open Hacl.Spec.MontgomeryMultiplication
 
@@ -100,11 +100,11 @@ let multByMinusThree #c a result  =
 
       let prime = getPrime c in 
       lemmaFromDomain #c 0; 
-
+(* 
       assert_norm(0 * modp_inv2 #P256 (getPower2 P256) % getPrime P256 == 0);
-      assert_norm(0 * modp_inv2 #P384 (getPower2 P384) % getPrime P384 == 0);
+      assert_norm(0 * modp_inv2 #P384 (getPower2 P384) % getPrime P384 == 0); *)
 
-      assert_norm(0 * modp_inv2 #c (getPower2 c) % getPrime c == 0);
+      (* assert_norm(0 * modp_inv2 #c (pow (getPower c)) % getPrime c == 0); *)
 
       assert_norm (fromDomain_ #c 0 == 0); 
 

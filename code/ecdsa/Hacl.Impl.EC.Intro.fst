@@ -10,7 +10,8 @@ open Lib.Buffer
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 
 open FStar.Math
 open FStar.Math.Lemmas
@@ -50,7 +51,7 @@ val changeEndian: #c: curve -> i: felem c -> Stack unit
   (requires fun h -> live h i)
   (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
     as_seq h1 i == Hacl.Spec.P256.Definition.changeEndian (as_seq h0 i) /\
-    as_nat c h1 i < getPower2 c) 
+    as_nat c h1 i < pow2 (getPower c)) 
 
 
 val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: felem c -> Stack unit

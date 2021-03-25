@@ -15,7 +15,8 @@ open Hacl.Spec.P256.Definition
 open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Hacl.Impl.P256.Math 
 
 open FStar.Tactics 

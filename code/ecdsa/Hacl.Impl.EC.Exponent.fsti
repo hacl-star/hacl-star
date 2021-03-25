@@ -15,7 +15,8 @@ open FStar.Mul
 
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Spec.ECDSA.Lemmas
 
 open Hacl.Impl.EC.LowLevel

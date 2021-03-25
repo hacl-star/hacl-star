@@ -6,7 +6,8 @@ open Lib.Sequence
 
 open Spec.ECDSA
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 
 #set-options "--fuel 0 --ifuel 0"
 

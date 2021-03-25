@@ -15,7 +15,8 @@ open FStar.Mul
 
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Spec.ECDSA.Lemmas
 
 open Hacl.Impl.EC.LowLevel
@@ -120,27 +121,27 @@ val lemma_division_is_multiplication:
 let lemma_division_is_multiplication t3 prime =  
 
   Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (pow2 64 % prime) (prime - 2);
-  lemma_mod_twice (Spec.P256.pow (pow2 64 % prime) (prime - 2)) prime;
+  lemma_mod_twice (pow (pow2 64 % prime) (prime - 2)) prime;
 
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
 
   calc (==) {t3 * modp_inv2_prime (pow2 64) prime % prime;
     (==) {FStar.Math.Lib.lemma_div_def t3 (pow2 64)}
-     pow2 64 * (t3 / pow2 64) * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime) % prime;
-    (==) {assert_by_tactic (pow2 64 * (t3 / pow2 64) * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime) % prime == 
-    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime)) % prime) canon}
-    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime)) % prime;
-    (==) {lemma_mod_mul_distr_r (t3 / pow2 64) (pow2 64 * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime)) prime}
-    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64 % prime) (prime - 2) % prime) % prime) % prime;
+     pow2 64 * (t3 / pow2 64) * (pow (pow2 64 % prime) (prime - 2) % prime) % prime;
+    (==) {assert_by_tactic (pow2 64 * (t3 / pow2 64) * (pow (pow2 64 % prime) (prime - 2) % prime) % prime == 
+    (t3 / pow2 64) * (pow2 64 * (pow (pow2 64 % prime) (prime - 2) % prime)) % prime) canon}
+    (t3 / pow2 64) * (pow2 64 * (pow (pow2 64 % prime) (prime - 2) % prime)) % prime;
+    (==) {lemma_mod_mul_distr_r (t3 / pow2 64) (pow2 64 * (pow (pow2 64 % prime) (prime - 2) % prime)) prime}
+    (t3 / pow2 64) * (pow2 64 * (pow (pow2 64 % prime) (prime - 2) % prime) % prime) % prime;
     (==) {Hacl.Lemmas.P256.power_distributivity (pow2 64) (prime - 2) prime}
-    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64) (prime - 2) % prime) % prime) % prime;
-    (==) {lemma_mod_mul_distr_r (pow2 64) (Spec.P256.pow (pow2 64) (prime - 2)) prime}
-    (t3 / pow2 64) * (pow2 64 * (Spec.P256.pow (pow2 64) (prime - 2)) % prime) % prime;
+    (t3 / pow2 64) * (pow2 64 * (pow (pow2 64) (prime - 2) % prime) % prime) % prime;
+    (==) {lemma_mod_mul_distr_r (pow2 64) (pow (pow2 64) (prime - 2)) prime}
+    (t3 / pow2 64) * (pow2 64 * (pow (pow2 64) (prime - 2)) % prime) % prime;
     (==) {Hacl.Lemmas.P256.power_one_2 (pow2 64)}
-    (t3 / pow2 64) * (Spec.P256.pow (pow2 64) 1 * (Spec.P256.pow (pow2 64) (prime - 2)) % prime) % prime;
+    (t3 / pow2 64) * (pow (pow2 64) 1 * (pow (pow2 64) (prime - 2)) % prime) % prime;
     (==) {pow_plus (pow2 64) 1 (prime - 2)}
-    (t3 / pow2 64) * ((Spec.P256.pow (pow2 64) (prime - 1)) % prime) % prime;
+    (t3 / pow2 64) * ((pow (pow2 64) (prime - 1)) % prime) % prime;
     (==) {  FStar.Math.Fermat.fermat_alt prime (pow2 64);
       power_as_specification_same_as_fermat (pow2 64) (prime - 1)}
     (t3 / pow2 64) % prime;
@@ -259,7 +260,7 @@ val lemma_mm_reduction: #c: curve -> a0: nat -> i: nat -> Lemma
     a0 * modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64) % prime == a0 * modp_inv2 #c (pow2 ((i + 1) * 64)) % prime)
 
 let lemma_mm_reduction #c a0 i = 
-  let open Spec.P256 in 
+  let open Spec.ECC in 
   let prime = getPrime c in 
   
   let a = pow2 (i * 64) in 

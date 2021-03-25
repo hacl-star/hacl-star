@@ -19,8 +19,9 @@ open Hacl.Impl.ECDSA.MM.Exponent
 
 open Hacl.Spec.ECDSA.Definition
 open Spec.ECDSA
-open Spec.P256
-(* open Spec.P256.Lemmas *)
+open Spec.ECC
+open Spec.ECC.Curves
+(* open Spec.ECC.Lemmas *)
 
 open Hacl.Impl.EC.PointAdd
 open Hacl.Impl.P256.LowLevel.RawCmp
@@ -265,8 +266,8 @@ val ecdsa_verification_step5_0:
       let fromDomainPointU1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 pointU1)) in
       let fromDomainPointU2 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 pointU2)) in
       let pointAtInfinity = (0, 0, 0) in
-      let u1D, _ = montgomery_ladder_spec #P256 (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
-      let u2D, _ = montgomery_ladder_spec #P256 (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates c (as_seq h0 pubKeyAsPoint)) in
+      let u1D, _ = montgomery_ladder_spec_left #P256 (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
+      let u2D, _ = montgomery_ladder_spec_left #P256 (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates c (as_seq h0 pubKeyAsPoint)) in
       fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D
     )
   )
@@ -377,8 +378,8 @@ val ecdsa_verification_step5_2:
       as_nat c h1 (gsub pointSum (size 0) (size 4)) < prime256 (* /\
       (
         let pointAtInfinity = (0, 0, 0) in
-        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
-        let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
+        let u1D, _ = montgomery_ladder_spec_left (as_seq h0 u1) (pointAtInfinity, basePoint) in
+        let u2D, _ = montgomery_ladder_spec_left (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
   let sumD = 
     if  _norm u1D =  _norm u2D
     then
@@ -440,8 +441,8 @@ val ecdsa_verification_step5: (*
       as_nat c h1 x < prime256 (*/\
       (
         let pointAtInfinity = (0, 0, 0) in
-        let u1D, _ = montgomery_ladder_spec (as_seq h0 u1) (pointAtInfinity, basePoint) in
-        let u2D, _ = montgomery_ladder_spec (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
+        let u1D, _ = montgomery_ladder_spec_left (as_seq h0 u1) (pointAtInfinity, basePoint) in
+        let u2D, _ = montgomery_ladder_spec_left (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
         let sumD = 
     if  _norm u1D =  _norm u2D
     then
@@ -450,7 +451,7 @@ val ecdsa_verification_step5: (*
       _point_add u1D u2D in 
         let pointNorm = _norm sumD in
         let (xResult, yResult, zResult) = pointNorm in
-        state == not (Spec.P256.isPointAtInfinity pointNorm) /\
+        state == not (Spec.ECC.isPointAtInfinity pointNorm) /\
         as_nat h1 x == xResult % prime_p256_order
     ) *)
   )
@@ -540,11 +541,11 @@ val ecdsa_verification_core:
 	 let bufferU1 = nat_to_bytes_be 32 p0  in 
 	 let bufferU2 = nat_to_bytes_be 32 p1 in 
 	 let pointAtInfinity = (0, 0, 0) in
-         let u1D, _ = montgomery_ladder_spec #c bufferU1 (pointAtInfinity, basePoint #P256) in
-         let u2D, _ = montgomery_ladder_spec #c bufferU2 (pointAtInfinity, point_prime_to_coordinates c (as_seq h0 publicKeyPoint)) in
+         let u1D, _ = montgomery_ladder_spec_left #c bufferU1 (pointAtInfinity, basePoint #P256) in
+         let u2D, _ = montgomery_ladder_spec_left #c bufferU2 (pointAtInfinity, point_prime_to_coordinates c (as_seq h0 publicKeyPoint)) in
          let sumD = _point_add #c u1D u2D in
          let (xResult, yResult, zResult) = _norm #c sumD in
-         state == not (Spec.P256.isPointAtInfinity (_norm #c sumD)) /\
+         state == not (Spec.ECC.isPointAtInfinity (_norm #c sumD)) /\
          as_nat c h1 xBuffer == xResult
       )
   )

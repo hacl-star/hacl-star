@@ -13,7 +13,9 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
+
 open Hacl.Spec.P256.Definition
 
 val solinas_reduction_impl_p384: i: lbuffer uint64 (size 12) -> o: lbuffer uint64 (size 6) -> 

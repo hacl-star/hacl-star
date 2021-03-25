@@ -5,7 +5,8 @@ open FStar.Mul
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 
 open FStar.Tactics 
 open FStar.Tactics.Canon 

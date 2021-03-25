@@ -12,7 +12,8 @@ open Lib.Buffer
 
 open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 
 open FStar.Tactics 
 open FStar.Tactics.Canon

@@ -8,11 +8,12 @@ open Lib.ByteBuffer
 open Lib.ByteSequence
 open Lib.Buffer
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Hacl.Spec.P256.Definition
 
 open Spec.ECDSA
-(* open Spec.P256.Lemmas *)
+(* open Spec.ECC.Lemmas *)
 open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.P256.Core
@@ -41,7 +42,7 @@ val bufferToJac: #c: curve -> p: lbuffer uint64 (getCoordinateLenU64 c *. 2ul) -
 val isPointAtInfinityPublic: #c: curve -> p:point c -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r == Spec.P256.isPointAtInfinity (point_prime_to_coordinates c (as_seq h0 p)))
+    r == Spec.ECC.isPointAtInfinity (point_prime_to_coordinates c (as_seq h0 p)))
 
 
 [@ (Comment "  This code is not side channel resistant")]
@@ -85,7 +86,7 @@ val verifyQ:
       (
 	let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size (getCoordinateLen c)))) in 
 	let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size (getCoordinateLen c)) (size (getCoordinateLen c)))) in
-	let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in 
+	let pkJ = Spec.ECC.toJacobianCoordinates (publicKeyX, publicKeyY) in 
 	r == verifyQValidCurvePointSpec #c pkJ
       )
     )

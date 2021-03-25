@@ -4,7 +4,8 @@ open FStar.Math.Lemmas
 open FStar.Math
 open FStar.Mul
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open Hacl.Lemmas.P256
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
@@ -227,7 +228,7 @@ let lemma_multiplication_not_mod_prime_p384 a =
 
 
 val lemma_multiplication_not_mod_prime: #c: curve -> a: nat {a < getPrime c} -> 
-  Lemma (a * (modp_inv2 #c (getPower2 c)) % getPrime c == 0 <==> a == 0)
+  Lemma (a * (modp_inv2 #c (pow2 (getPower c))) % getPrime c == 0 <==> a == 0)
   
 let lemma_multiplication_not_mod_prime #c a = 
   match c with 
@@ -257,6 +258,6 @@ let lemma_modular_multiplication_p256 a b =
 
 val lemma_modular_multiplication: #c: curve -> a: nat {a < getPrime c} -> b: nat {b < getPrime c} -> 
   Lemma (
-    a == b <==> a * modp_inv2 #c (getPower2 c) % getPrime c == b * modp_inv2 #c (getPower2 c) % getPrime c)
+    a == b <==> a * modp_inv2 #c (pow2 (getPower c)) % getPrime c == b * modp_inv2 #c (pow2 (getPower c)) % getPrime c)
 
 let lemma_modular_multiplication #c a b = admit()

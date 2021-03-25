@@ -16,7 +16,7 @@ open Hacl.Impl.P256.LowLevel
 open Hacl.Lemmas.P256
 open Lib.ByteSequence
 
-open Spec.P256
+open Spec.ECC
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 

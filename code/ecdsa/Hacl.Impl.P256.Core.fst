@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.P256.Definition
-open Spec.P256
+open Spec.ECC
 open Hacl.Impl.EC.Reduction
 open Hacl.Impl.EC.LowLevel 
 open Hacl.Impl.EC.Exponent
@@ -105,6 +105,7 @@ val copy_point: #c: curve ->  p: point c -> result: point c -> Stack unit
 
 let copy_point p result = copy result p
  
+let getPower2 c = pow2 (getPower c)
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
 val lemma_pointAtInfInDomain: #c: curve -> x: nat -> y: nat -> z: nat {z < getPrime c} -> 
@@ -255,7 +256,7 @@ val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point 
 
     x1 == fromDomain_ #c (as_nat c h0 z2x) /\ 
     y1 == fromDomain_ #c (as_nat c h0 z3y) /\ (
-    if Spec.P256.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) 
+    if Spec.ECC.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) 
     then 
       z1 == 0 
     else 
@@ -287,7 +288,7 @@ val lemma_norm: #c: curve -> pD : point_nat_prime #c -> r: point_nat_prime #c ->
     let x3, y3, z3 = r in 
     x3 == xD * (pow (zD * zD % prime) (prime - 2) % prime) % prime /\
     y3 == yD * (pow ((zD * zD % prime) * zD % prime) (prime - 2) % prime) % prime/\
-    (if Spec.P256.isPointAtInfinity (xD, yD, zD) then z3 == 0 else z3 == 1)))
+    (if Spec.ECC.isPointAtInfinity (xD, yD, zD) then z3 == 0 else z3 == 1)))
   (ensures (let xN, yN, zN = _norm #c pD in r == (xN, yN, zN))) 
 
 
@@ -393,7 +394,7 @@ val scalar_bit: #c: curve
 
 let scalar_bit #c #buf_type s n =
   let h0 = ST.get () in
-  mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (getScalarLenNat c -1 - v n / 8)) >>. (n %. 8ul)) 1ul;
+  (* mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v (getScalarLen c) -1 - v n / 8)) >>. (n %. 8ul)) 1ul; *)
   assert_norm (1 = pow2 1 - 1);
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1)); 
   to_u64 ((s.(getScalarLen c -. 1ul -. n /. 8ul) >>. (n %. 8ul)) &. u8 1)
@@ -539,7 +540,7 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point
       (
 	let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 p)) in 
 	let q1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 q)) in 
-	let rN, qN = montgomery_ladder_spec #c(as_seq h0 scalar) 
+	let rN, qN = montgomery_ladder_spec_left #c(as_seq h0 scalar) 
 	  (
 	    fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p)),  
 	    fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 q))

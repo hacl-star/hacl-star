@@ -10,7 +10,8 @@ open Lib.Buffer
 open Hacl.Spec.P256.Definition
 open Hacl.Lemmas.P256
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 
 open FStar.Math
 open FStar.Math.Lemmas

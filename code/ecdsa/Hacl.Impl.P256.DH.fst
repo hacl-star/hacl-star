@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 open Lib.ByteSequence
 
-open Spec.P256
+open Spec.ECC
 open Spec.ECDSA
 open Hacl.Spec.P256.Definition
 open Spec.DH

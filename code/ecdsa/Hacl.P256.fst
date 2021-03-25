@@ -17,8 +17,8 @@ open Lib.ByteSequence
 
 open FStar.Mul
 
-open Spec.P256
-(* open Spec.P256.Lemmas *)
+open Spec.ECC
+(* open Spec.ECC.Lemmas *)
 open Hacl.Spec.P256.Definition
 
 open Spec.ECDSA

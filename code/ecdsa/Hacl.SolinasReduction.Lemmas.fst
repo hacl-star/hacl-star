@@ -3,7 +3,7 @@ module Hacl.SolinasReduction.Lemmas
 open Lib.IntTypes
 open FStar.Math.Lemmas
 open FStar.Math.Lib
-open Spec.P256
+open Spec.ECC.Curves
 open FStar.Mul
 open Lib.Sequence
 

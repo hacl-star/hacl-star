@@ -9,7 +9,8 @@ open Lib.Buffer
 open Hacl.Spec.P256.Definition
 open Hacl.Spec.MontgomeryMultiplication
 
-open Spec.P256
+open Spec.ECC
+open Spec.ECC.Curves
 open FStar.Mul
 
 
@@ -25,7 +26,7 @@ inline_for_extraction noextract
 val fromDomain: #c: curve -> f: felem c -> result: felem c -> Stack unit 
   (requires fun h -> live h f /\ live h result /\ felem_eval c h f)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat c h1 result = (as_nat c h0 f * modp_inv2 #c (getPower2 c)) % getPrime c /\ 
+    as_nat c h1 result = (as_nat c h0 f * modp_inv2 #c (pow2 (getPower c))) % getPrime c /\ 
     as_nat c h1 result = fromDomain_ #c (as_nat c h0 f))
 
 
@@ -50,8 +51,8 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ ((uint_v r == 0 \/ uint_v r == maxint U64) /\ (
     let xD, yD, zD = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p)) in 
     let x, y, z = point_prime_to_coordinates c (as_seq h0 p) in 
-    if Spec.P256.isPointAtInfinity (xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0 /\ (
-    if Spec.P256.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
+    if Spec.ECC.isPointAtInfinity (xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0 /\ (
+    if Spec.ECC.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
 
 
 val norm: #c: curve -> p: point c -> resultPoint: point c -> 
@@ -106,7 +107,7 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result])
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ (
     let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
-    let rN, _ = montgomery_ladder_spec #c (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates c (as_seq h0 p)) in 
+    let rN, _ = montgomery_ladder_spec_left #c (as_seq h0 scalar) ((0, 0, 0),  point_prime_to_coordinates c (as_seq h0 p)) in 
     rN == p1)) 
     
 
@@ -139,5 +140,5 @@ val secretToPublicWithoutNorm: #c: curve -> result: point c -> scalar: lbuffer u
     as_nat c h1 (gsub result (size 2 *! len) len) < prime /\ (
     
     let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) in 
-    let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), (basePoint #c)) in 
+    let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) ((0, 0, 0), (basePoint #c)) in 
     rN == p1))  
