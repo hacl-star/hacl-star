@@ -65,48 +65,147 @@ val lemmaLstLastWord: a: list uint64 {List.Tot.Base.length a > 1} -> Lemma
 let lemmaLstLastWord a = lemma_lst_1 a (List.Tot.Base.length a - 1)
 
 
+val lemma_lst_nat_instant_4: a: list uint64 {List.Tot.length a == 4} -> Lemma (
+  lst_as_nat a == 
+    v (List.Tot.index a 0) * pow2 (64 * 0) + 
+    v (List.Tot.index a 1) * pow2 (64 * 1) + 
+    v (List.Tot.index a 2) * pow2 (64 * 2) +
+    v (List.Tot.index a 3) * pow2 (64 * 3))
+
+let lemma_lst_nat_instant_4 a = 
+  lst_as_nat_definiton a 3;
+  lst_as_nat_definiton a 2;
+  lst_as_nat_definiton a 1;
+  lst_as_nat_definiton a 0
+
+
+val lemma_lst_nat_instant_6: a: list uint64 {List.Tot.length a == 6} -> Lemma (
+  lst_as_nat a == 
+    v (List.Tot.index a 0) * pow2 (64 * 0) + 
+    v (List.Tot.index a 1) * pow2 (64 * 1) + 
+    v (List.Tot.index a 2) * pow2 (64 * 2) +
+    v (List.Tot.index a 3) * pow2 (64 * 3) +
+    v (List.Tot.index a 4) * pow2 (64 * 4) +
+    v (List.Tot.index a 5) * pow2 (64 * 5))
+
+let lemma_lst_nat_instant_6 a = 
+  lst_as_nat_definiton a 5;
+  lst_as_nat_definiton a 4;
+  lst_as_nat_definiton a 3;
+  lst_as_nat_definiton a 2;
+  lst_as_nat_definiton a 1;
+  lst_as_nat_definiton a 0
+
 
 (* This code contains the prime code *)
 inline_for_extraction noextract
-let p256_prime_list : x:list uint64{List.Tot.length x == 4 (*/\ (
-    let l0 = uint_v (List.Tot.index x 0) in 
-    let l1 = uint_v (List.Tot.index x 1) in 
-    let l2 = uint_v (List.Tot.index x 2) in 
-    let l3 = uint_v (List.Tot.index x 3) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256) *) /\ 
-    lst_as_nat x == prime256
-  } =
+let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ lst_as_nat x == prime256} =
   [@inline_let]
   let x = [ (u64 0xffffffffffffffff);  (u64 0xffffffff); (u64 0);  (u64 0xffffffff00000001);] in
+  lemma_lst_nat_instant_4 x;
   assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256);
   x
 
 
 inline_for_extraction noextract
-let p384_prime_list : x:list uint64{List.Tot.length x == 6 /\ 
-  (
-    let l0 = uint_v (List.Tot.index x 0) in 
-    let l1 = uint_v (List.Tot.index x 1) in 
-    let l2 = uint_v (List.Tot.index x 2) in 
-    let l3 = uint_v (List.Tot.index x 3) in 
-    let l4 = uint_v (List.Tot.index x 4) in 
-    let l5 = uint_v (List.Tot.index x 5) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 + l4 * pow2 256 + l5 * pow2 320 == prime384 /\
-    lst_as_nat x == prime384
-    
-    )
-  } =
-  let open FStar.Mul in 
+let p384_prime_list : x:list uint64{List.Tot.length x == 6 /\ lst_as_nat x == prime384} =
   [@inline_let]
-  let x =
-    [ (u64 0xffffffff);  (u64 0xffffffff00000000); (u64 0xfffffffffffffffe);  (u64 0xffffffffffffffff); (u64 0xffffffffffffffff); (u64 0xffffffffffffffff);] in
-    assert_norm(0xffffffff + 0xffffffff00000000 * pow2 64 + 0xfffffffffffffffe * pow2 128 + 
-    0xffffffffffffffff * pow2 192 +  0xffffffffffffffff * pow2 256 +  0xffffffffffffffff * pow2 320 == prime384);
+  let x = [ (u64 0xffffffff);  (u64 0xffffffff00000000); (u64 0xfffffffffffffffe);  (u64 0xffffffffffffffff); (u64 0xffffffffffffffff); (u64 0xffffffffffffffff);] in
+  lemma_lst_nat_instant_6 x;
+  assert_norm(0xffffffff + 0xffffffff00000000 * pow2 64 + 0xfffffffffffffffe * pow2 (64 * 2) + 
+  0xffffffffffffffff * pow2 (64 * 3) +  0xffffffffffffffff * pow2 (64 * 4) +  0xffffffffffffffff * pow2 (64 * 5) == prime384);
   x
 
 
 inline_for_extraction noextract
-let prime_list (c: curve) :  (x: list uint64 {List.Tot.length x == uint_v (getCoordinateLenU64 c) /\ (
+let prime_list (c: curve) : (x: list uint64 {List.Tot.length x == uint_v (getCoordinateLenU64 c) /\ 
+  lst_as_nat x == getPrime c}) = 
+  let open FStar.Mul in 
+  match c with 
+  |P256 -> 
+    p256_prime_list
+  |P384 -> 
+    p384_prime_list
+  |_ -> admit(); []
+
+
+inline_for_extraction
+let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\ 
+  recallable x /\ lseq_as_nat (Lib.Sequence.of_list (p256_prime_list)) == prime256} =
+  assert_norm (lseq_as_nat (Lib.Sequence.of_list (p256_prime_list)) == prime256);
+  createL_global p256_prime_list
+
+
+inline_for_extraction
+let prime384_buffer: x: glbuffer uint64 6ul {witnessed #uint64 #(size 6) x (Lib.Sequence.of_list p384_prime_list) /\ 
+  recallable x /\ lseq_as_nat (Lib.Sequence.of_list (p384_prime_list)) == prime384} = 
+  assert_norm (lseq_as_nat (Lib.Sequence.of_list (p384_prime_list)) == prime384);
+  createL_global p384_prime_list
+
+
+inline_for_extraction
+let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) 
+  {witnessed #uint64 #(getCoordinateLenU64 c) x (Lib.Sequence.of_list (prime_list c)) /\ recallable x /\
+  lseq_as_nat (Lib.Sequence.of_list (prime_list c)) == getPrime c}) = 
+  match c with
+  | P256 -> prime256_buffer
+  | P384 -> prime384_buffer
+  
+
+inline_for_extraction
+let getLastWord (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64}) = 
+  match c with 
+  |P256 -> 
+    lemmaLstLastWord p256_prime_list;
+    normalize_term (List.Tot.Base.index p256_prime_list 0)
+  |P384 -> 
+    lemmaLstLastWord p384_prime_list;
+    normalize_term (List.Tot.Base.index p384_prime_list 0)
+  |_ -> admit()
+  
+
+inline_for_extraction noextract
+let basePointP256 : x:list uint64{List.Tot.length x == 12 /\ (
+  let pX = v (List.Tot.index x 0) + v (List.Tot.index x 1) * pow2 (64 * 1) + v (List.Tot.index x 2) * pow2 (64 * 2) + v (List.Tot.index x 3) * pow2 (64 * 3) in 
+  let pY = v (List.Tot.index x 4) + v (List.Tot.index x 5) * pow2 (64 * 1) + v (List.Tot.index x 6) * pow2 (64 * 2) + v (List.Tot.index x 7) * pow2 (64 * 3) in 
+  let pZ = v (List.Tot.index x 8) + v (List.Tot.index x 9) * pow2 (64 * 1) + v (List.Tot.index x 10) * pow2 (64 * 2) + v (List.Tot.index x 11) * pow2 (64 * 3) in 
+  let (bpX, bpY, bpZ) = basePoint #P256 in  pX == bpX /\ pY == bpY /\ pZ == bpZ)} =
+  [@inline_let]
+  let x = [
+    u64 0x79e730d418a9143c; u64 0x75ba95fc5fedb601; u64 0x79fb732b77622510; u64 0x18905f76a53755c6;
+    u64 0xddf25357ce95560a; u64 0x8b4ab8e4ba19e45c; u64 0xd2e88688dd21f325; u64 0x8571ff1825885d85;
+    u64 0x1;                u64 0xffffffff00000000; u64 0xffffffffffffffff; u64 0xfffffffe;] in
+  admit();
+  x
+
+
+inline_for_extraction noextract
+let p256_order_list : x:list uint64 {List.Tot.length x == 4 /\ lst_as_nat x == getOrder #P256} =
+  [@inline_let]
+  let x = [ 
+    u64 17562291160714782033; u64 13611842547513532036; u64 18446744073709551615; u64 18446744069414584320;] in
+    assert_norm(17562291160714782033 + 13611842547513532036 * pow2 64 + 18446744073709551615* pow2 128 + 18446744069414584320 * pow2 192 == getOrder #P256);
+  x  
+
+
+inline_for_extraction noextract
+let p384_order_list : x:list uint64 {List.Tot.length x == 6 /\ 
+  (lst_as_nat x == getOrder #P384)
+  } =
+  let open FStar.Mul in 
+  [@inline_let]
+  let x =
+    [ (u64 17072048233947408755);  (u64 6348401684107011962); (u64 14367412456785391071);  
+      (u64 18446744073709551615); (u64 18446744073709551615); (u64 18446744073709551615)
+    ] in
+    assert_norm(17072048233947408755 + 6348401684107011962 * pow2 64 + 14367412456785391071 * pow2 128 + 18446744073709551615 * pow2 192 + 18446744073709551615 * pow2 256 + 18446744073709551615 * pow2 320 
+    == getOrder #P384);
+  x  
+
+
+inline_for_extraction noextract
+let order_list (c: curve) :  
+  (x: list uint64 {List.Tot.length x == uint_v (getCoordinateLenU64 c) /\ (
   match c with
   |P256 -> 
     let open FStar.Mul in 
@@ -128,77 +227,9 @@ let prime_list (c: curve) :  (x: list uint64 {List.Tot.length x == uint_v (getCo
   let open FStar.Mul in 
   match c with 
   |P256 -> 
-    p256_prime_list
+    p256_order_list
   |P384 -> 
-    p384_prime_list
-
-
-inline_for_extraction
-let prime256_buffer: x: glbuffer uint64 4ul {witnessed #uint64 #(size 4) x (Lib.Sequence.of_list p256_prime_list) /\ recallable x /\ felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256} =
-  assert_norm (felem_seq_as_nat P256 (Lib.Sequence.of_list (p256_prime_list)) == prime256);
-  (* [@inline_let] *)
-  (* let l = List.Tot.Base.tail p256_prime_list in *)
-  createL_global p256_prime_list
-
-
-inline_for_extraction
-let prime384_buffer: x: glbuffer uint64 6ul {witnessed #uint64 #(size 6) x (Lib.Sequence.of_list
-p384_prime_list) /\ recallable x /\ felem_seq_as_nat P384 (Lib.Sequence.of_list (p384_prime_list)) == prime384}  = 
-  assert_norm (felem_seq_as_nat P384 (Lib.Sequence.of_list (p384_prime_list)) == prime384);
-  createL_global p384_prime_list
-
-
-inline_for_extraction
-let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {witnessed #uint64 #(getCoordinateLenU64 c) x (Lib.Sequence.of_list (prime_list c)) /\ recallable x /\ felem_seq_as_nat c (Lib.Sequence.of_list (prime_list c)) == getPrime c}) = 
-  match c with
-  | P256 -> prime256_buffer
-  | P384 -> prime384_buffer
-  
-
-inline_for_extraction
-let getLastWord (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64}) = 
-  match c with 
-  |P256 -> 
-    lemmaLstLastWord p256_prime_list;
-    normalize_term (List.Tot.Base.index p256_prime_list 0)
-  |P384 -> 
-    lemmaLstLastWord p384_prime_list;
-    normalize_term (List.Tot.Base.index p384_prime_list 0)
-  |_ -> admit()
-  
-
-
-
-
-
-inline_for_extraction noextract
-let basePointP256 : x:list uint64{List.Tot.length x == 12 (*/\ 
-  (
-    let open FStar.Mul in 
-    let l0 = uint_v (List.Tot.index x 0) in 
-    let l1 = uint_v (List.Tot.index x 1) in 
-    let l2 = uint_v (List.Tot.index x 2) in 
-    let l3 = uint_v (List.Tot.index x 3) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime256) *)
-  } =
-  let open FStar.Mul in 
-  [@inline_let]
-  let x =
-    [
-      u64 0x79e730d418a9143c; u64 0x75ba95fc5fedb601; u64 0x79fb732b77622510; u64 0x18905f76a53755c6;
-      u64 0xddf25357ce95560a; u64 0x8b4ab8e4ba19e45c; u64 0xd2e88688dd21f325; u64 0x8571ff1825885d85;
-      u64 0x1;                u64 0xffffffff00000000; u64 0xffffffffffffffff; u64 0xfffffffe;
-  ] in
-    (* assert_norm(0xffffffffffffffff + 0xffffffff * pow2 64 + 0xffffffff00000001 * pow2 192 == prime256); *)
-  x
-
-
-
-
-
-
-
-
+    p384_order_list
 
 inline_for_extraction
 let prime256order_buffer: x: glbuffer uint64 (size 4)  
