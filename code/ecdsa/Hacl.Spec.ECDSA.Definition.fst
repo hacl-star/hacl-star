@@ -14,11 +14,6 @@ open FStar.Mul
 
 open Spec.ECC.Curves
 
-noextract
-let prime_p256_order: (a: pos{a < pow2 256}) =
-  assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 256);
-  115792089210356248762697446949407573529996955224135760342422259061068512044369
-
 
 inline_for_extraction noextract
 let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\ 
@@ -28,13 +23,13 @@ let p256_order_prime_list : x:list uint64{List.Tot.length x == 4 /\
     let l1 = uint_v (List.Tot.index x 1) in 
     let l2 = uint_v (List.Tot.index x 2) in 
     let l3 = uint_v (List.Tot.index x 3) in 
-    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == prime_p256_order)
+    l0 + l1 * pow2 64 + l2 * pow2 128 + l3 * pow2 192 == getOrder #P256)
   } =
   let open FStar.Mul in 
   [@inline_let]
   let x =
     [ (u64 17562291160714782033);  (u64 13611842547513532036); (u64 18446744073709551615);  (u64 18446744069414584320);] in
-    assert_norm(17562291160714782033 + 13611842547513532036 * pow2 64 + 18446744073709551615* pow2 128 + 18446744069414584320 * pow2 192 == prime_p256_order);
+    assert_norm(17562291160714782033 + 13611842547513532036 * pow2 64 + 18446744073709551615* pow2 128 + 18446744069414584320 * pow2 192 == getOrder #P256 );
   x  
 
 
@@ -58,6 +53,11 @@ unfold let prime_order_inverse_list (#c: curve) : list uint8 =
    ]
 
    
+   inline_for_extraction
+let order_inverse_buffer: x: glbuffer uint8 32ul {recallable x} = 
+  createL_global (prime_order_inverse_list #P256)
+
+
 
 inline_for_extraction
 let felem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c)

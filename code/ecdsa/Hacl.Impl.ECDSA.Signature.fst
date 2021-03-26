@@ -44,6 +44,7 @@ open Hacl.Impl.EC.Intro
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
+let prime_p256_order = getOrder #P256
 
 val ecdsa_signature_step12: 
   #c: curve 

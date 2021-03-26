@@ -27,7 +27,7 @@ open Lib.Loops
 #reset-options " --z3rlimit 200"
 
 noextract
-let prime = prime_p256_order
+let prime = getOrder #P256
 
 val montgomery_ladder_exponent: #c: curve -> a: felem c -> Stack unit 
   (requires fun h -> live h a /\ as_nat c h a < prime)
@@ -48,7 +48,7 @@ val fromDomainImpl: #c: curve -> a: felem c -> result: felem c -> Stack unit
 val multPower: #c: curve -> a: felem c -> b: felem c ->  result: felem c -> Stack unit 
   (requires fun h -> live h a /\ live h b /\ live h result /\ as_nat c h a < prime /\ as_nat c h b < prime)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat c h1 result = (pow (as_nat c h0 a) (prime_p256_order - 2)  * (as_nat c h0 b)) % prime_p256_order)
+    as_nat c h1 result = (pow (as_nat c h0 a) ((getOrder #P256) - 2)  * (as_nat c h0 b)) % prime)
 
 
 val multPowerPartial: #c: curve -> s: felem c -> a: felem c 
@@ -60,4 +60,4 @@ val multPowerPartial: #c: curve -> s: felem c -> a: felem c
       fromDomain_ (as_nat c h a) == r0D)
   )
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    as_nat c h1 result = (pow (as_nat c h0 s) (prime_p256_order - 2)  * (as_nat c h0 b)) % prime_p256_order)
+    as_nat c h1 result = (pow (as_nat c h0 s) (prime - 2)  * (as_nat c h0 b)) % prime)

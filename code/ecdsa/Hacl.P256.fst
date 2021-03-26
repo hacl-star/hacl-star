@@ -28,11 +28,12 @@ open Spec.Hash.Definitions
 open Hacl.Impl.ECDSA.Signature
 open Hacl.Impl.ECDSA.Verification
 
-(* 
+
 let ecdsa_sign_p256_sha2 result mLen m privKey k = 
   ecdsa_signature P256 (Hash SHA2_256) result mLen m privKey k
 
-let ecdsa_sign_p256_sha384 result mLen m privKey k = 
+(*
+  let ecdsa_sign_p256_sha384 result mLen m privKey k = 
   ecdsa_signature P256 (Hash SHA2_384) result mLen m privKey k
 
 let ecdsa_sign_p256_sha512 result mLen m privKey k = 

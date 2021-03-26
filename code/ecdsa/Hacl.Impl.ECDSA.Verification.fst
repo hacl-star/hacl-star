@@ -37,6 +37,8 @@ open Hacl.Impl.EC.Intro
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
+open Hacl.Impl.EC.Setup
+
 open FStar.Mul
 
 module H = Spec.Agile.Hash
@@ -44,6 +46,8 @@ module Def = Spec.Hash.Definitions
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+
+let prime_p256_order = getOrder #P256
 
 inline_for_extraction noextract
 val isZero_uint64_nCT: #c: curve -> f: felem c -> Stack bool
@@ -74,8 +78,8 @@ val isMoreThanZeroLessThanOrderMinusOne: #c: curve -> f: felem c-> Stack bool
 let isMoreThanZeroLessThanOrderMinusOne f =
   push_frame();
   let tempBuffer = create (size 4) (u64 0) in
-  recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
-  let carry = sub_bn_gl #P256 f prime256order_buffer tempBuffer in
+  recall_contents (order_buffer #P256) (Lib.Sequence.of_list p256_order_prime_list);
+  let carry = sub_bn_gl #P256 f (order_buffer #P256) tempBuffer in
   let less = eq_u64_nCT carry (u64 1) in
   let more = isZero_uint64_nCT f in
   let result = less && not more in

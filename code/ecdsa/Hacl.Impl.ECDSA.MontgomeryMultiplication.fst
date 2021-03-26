@@ -130,49 +130,50 @@ let lemma_montgomery_mult_result_less_than_prime_p256_order #c a b k0 =
 
   admit()
   
+let prime_p256_order = getOrder #P256
 
 val lemma_montgomery_mod_inverse_addition: a: nat -> 
   Lemma (
-    (a * modp_inv2_prime(pow2 64) prime_p256_order  * modp_inv2_prime (pow2 64) prime_p256_order) % prime_p256_order == 
+    (a * modp_inv2_prime(pow2 64) (getOrder #P256)  * modp_inv2_prime (pow2 64) prime_p256_order) % (getOrder #P256) == 
     (a * modp_inv2_prime(pow2 128) prime_p256_order) % prime_p256_order)
 
 let lemma_montgomery_mod_inverse_addition a =
-    assert_norm ((modp_inv2_prime(pow2 64) prime_p256_order * modp_inv2_prime (pow2 64) prime_p256_order) % prime_p256_order == modp_inv2_prime (pow2 128) prime_p256_order % prime_p256_order);
-    assert_by_tactic ((a * modp_inv2_prime (pow2 64) prime_p256_order * modp_inv2_prime (pow2 64) prime_p256_order)  == (a * (modp_inv2_prime (pow2 64) prime_p256_order * modp_inv2_prime (pow2 64) prime_p256_order))) canon;
-    lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 64) prime_p256_order * modp_inv2_prime (pow2 64) prime_p256_order) prime_p256_order; 
+    assert_norm ((modp_inv2_prime(pow2 64) (getOrder #P256) * modp_inv2_prime (pow2 64) prime_p256_order) % (getOrder #P256) == modp_inv2_prime (pow2 128) (getOrder #P256) % prime_p256_order);
+    assert_by_tactic ((a * modp_inv2_prime (pow2 64) (getOrder #P256) * modp_inv2_prime (pow2 64) prime_p256_order)  == (a * (modp_inv2_prime (pow2 64) (getOrder #P256) * modp_inv2_prime (pow2 64) prime_p256_order))) canon;
+    lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 64) (getOrder #P256) * modp_inv2_prime (pow2 64) prime_p256_order) prime_p256_order; 
     lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 128) prime_p256_order) prime_p256_order
 
 
 val lemma_montgomery_mod_inverse_addition2: a: int -> 
   Lemma ( 
-    (a * modp_inv2_prime (pow2 128) prime_p256_order  * modp_inv2_prime (pow2 128) prime_p256_order) % prime_p256_order == 
+    (a * modp_inv2_prime (pow2 128) (getOrder #P256)  * modp_inv2_prime (pow2 128) prime_p256_order) % (getOrder #P256) == 
     (a * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order)
 
 let lemma_montgomery_mod_inverse_addition2 a = 
-  assert_norm ((modp_inv2_prime (pow2 128) prime_p256_order * modp_inv2_prime (pow2 128) prime_p256_order) % prime_p256_order == (modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order);
-    assert_by_tactic ((a * modp_inv2_prime (pow2 128) prime_p256_order * modp_inv2_prime (pow2 128) prime_p256_order)  == (a * (modp_inv2_prime (pow2 128) prime_p256_order * modp_inv2_prime (pow2 128) prime_p256_order))) canon;
-    lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 128) prime_p256_order * modp_inv2_prime (pow2 128) prime_p256_order) prime_p256_order; 
+  assert_norm ((modp_inv2_prime (pow2 128) (getOrder #P256) * modp_inv2_prime (pow2 128) prime_p256_order) % (getOrder #P256) == (modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order);
+    assert_by_tactic ((a * modp_inv2_prime (pow2 128) (getOrder #P256) * modp_inv2_prime (pow2 128) prime_p256_order)  == (a * (modp_inv2_prime (pow2 128) (getOrder #P256) * modp_inv2_prime (pow2 128) prime_p256_order))) canon;
+    lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 128) (getOrder #P256) * modp_inv2_prime (pow2 128) prime_p256_order) prime_p256_order; 
     lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 256) prime_p256_order) prime_p256_order
 
 
 val montgomery_multiplication_one_round_proof: 
   t: nat ->
   k0: nat {k0 = min_one_prime (pow2 64) (- prime)}  ->  
-  round: nat {round = (t + prime_p256_order * ((k0 * (t % pow2 64)) % pow2 64)) / pow2 64} -> 
-  co: nat {co % prime_p256_order = t % prime_p256_order} -> 
-  Lemma (round  % prime_p256_order == co * (modp_inv2_prime (pow2 64) prime_p256_order) % prime_p256_order)
+  round: nat {round = (t + (getOrder #P256) * ((k0 * (t % pow2 64)) % pow2 64)) / pow2 64} -> 
+  co: nat {co % (getOrder #P256) = t % prime_p256_order} -> 
+  Lemma (round  % (getOrder #P256) == co * (modp_inv2_prime (pow2 64) prime_p256_order) % prime_p256_order)
 
 let montgomery_multiplication_one_round_proof t k0 round co = 
-  mult_one_round_ecdsa_prime t prime_p256_order co k0
+  mult_one_round_ecdsa_prime t (getOrder #P256) co k0
 
 #reset-options "--z3rlimit 700"
 
 val montgomery_multiplication_round: #c: curve -> t: widefelem c 
   ->  round: widefelem c -> k0: uint64 ->
   Stack unit 
-    (requires fun h -> live h t /\ live h round  /\ wide_as_nat c h t < prime_p256_order * prime_p256_order)
+    (requires fun h -> live h t /\ live h round  /\ wide_as_nat c h t < (getOrder #P256) * prime_p256_order)
     (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\ 
-      wide_as_nat c h1 round = (wide_as_nat c h0 t + prime_p256_order * ((uint_v k0 * (wide_as_nat c h0 t % pow2 64)) % pow2 64)) / pow2 64)
+      wide_as_nat c h1 round = (wide_as_nat c h0 t + (getOrder #P256) * ((uint_v k0 * (wide_as_nat c h0 t % pow2 64)) % pow2 64)) / pow2 64)
 
 let montgomery_multiplication_round #c t round k0 = 
   push_frame(); 
@@ -202,13 +203,13 @@ val montgomery_multiplication_round_twice: #c: curve -> t: widefelem c
   -> result: widefelem c -> k0: uint64-> 
   Stack unit 
     (requires fun h -> live h t /\ live h result /\ uint_v k0 = min_one_prime (pow2 64) (- prime) /\
-      wide_as_nat c h t < prime_p256_order * prime_p256_order)
+      wide_as_nat c h t < (getOrder #P256) * prime_p256_order)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-      wide_as_nat c h1 result % prime_p256_order == (wide_as_nat c h0 t * modp_inv2_prime (pow2 128) prime_p256_order) % prime_p256_order /\
+      wide_as_nat c h1 result % (getOrder #P256) == (wide_as_nat c h0 t * modp_inv2_prime (pow2 128) prime_p256_order) % (getOrder #P256) /\
       (
-	let round = (wide_as_nat c h0 t + prime_p256_order * ((uint_v k0 * (wide_as_nat c h0 t % pow2 64)) % pow2 64)) / pow2 64 in 
-	wide_as_nat c h1 result == (round + prime_p256_order * ((uint_v k0 * (round % pow2 64)) % pow2 64)) / pow2 64)  /\
-	wide_as_nat c h1 result < prime_p256_order * prime_p256_order
+	let round = (wide_as_nat c h0 t + (getOrder #P256) * ((uint_v k0 * (wide_as_nat c h0 t % pow2 64)) % pow2 64)) / pow2 64 in 
+	wide_as_nat c h1 result == (round + (getOrder #P256) * ((uint_v k0 * (round % pow2 64)) % pow2 64)) / pow2 64)  /\
+	wide_as_nat c h1 result < (getOrder #P256) * prime_p256_order
       )
     
 let montgomery_multiplication_round_twice #c t result k0 = 
@@ -242,7 +243,7 @@ let reduction_prime_2prime_with_carry #c x result  =
 	let h1 = ST.get() in 
 
 	assert(if uint_v c = 0 then 
-	  as_nat P256 h0 x_ >= prime_p256_order 
+	  as_nat P256 h0 x_ >= (getOrder #P256) 
 	  else as_nat P256 h0 x_ < prime_p256_order);
 	assert(wide_as_nat P256 h0 x = as_nat P256 h0 x_ + uint_v cin * pow2 256);
       let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
@@ -267,12 +268,12 @@ let reduction_prime_2prime_with_carry2 #cu cin x result  =
  pop_frame()      
 
 
-val lemma_reduction1: a: nat {a < pow2 256} -> r: nat{if a >= prime_p256_order then r = a - prime_p256_order else r = a} -> 
+val lemma_reduction1: a: nat {a < pow2 256} -> r: nat{if a >= (getOrder #P256) then r = a - (getOrder #P256) else r = a} -> 
   Lemma (r = a % prime_p256_order)
 
 let lemma_reduction1 a r = 
-  let prime256 = prime_p256_order in 
-  assert_norm (pow2 256 - prime_p256_order < prime_p256_order)
+  let prime256 = (getOrder #P256) in 
+  assert_norm (pow2 256 - (getOrder #P256) < prime_p256_order)
 
 
 let reduction_prime_2prime_order #cu x result  = 
@@ -282,8 +283,8 @@ let reduction_prime_2prime_order #cu x result  =
       let h0 = ST.get() in 
     let c = sub4_il x prime256order_buffer tempBuffer in
       let h1 = ST.get() in 
-      assert(as_nat c h1 tempBuffer = as_nat c h0 x - prime_p256_order + uint_v c * pow2 256);
-      assert(let x = as_nat c h0 x in if x < prime_p256_order then uint_v c = 1 else uint_v c = 0);
+      assert(as_nat c h1 tempBuffer = as_nat c h0 x - (getOrder #P256) + uint_v c * pow2 256);
+      assert(let x = as_nat c h0 x in if x < (getOrder #P256) then uint_v c = 1 else uint_v c = 0);
     cmovznz4 #cu c tempBuffer x result; 
     let h2 = ST.get() in 
       assert_norm (pow2 256 == pow2 64 * pow2 64 * pow2 64 * pow2 64);
@@ -301,26 +302,26 @@ let upload_k0 () =
 
 let fromDomain_ a = (a * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order
 
-let toDomain_ a = (a * pow2 256) % prime_p256_order 
+let toDomain_ a = (a * pow2 256) % (getOrder #P256) 
 
 let lemmaFromDomain a = ()
 
 let lemmaToDomain a = ()
 
 let lemmaFromDomainToDomain a = 
-   let fromA = (a * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order in 
-   let toFromA = (((a * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order) * pow2 256) % prime_p256_order in 
+   let fromA = (a * modp_inv2_prime (pow2 256) prime_p256_order) % (getOrder #P256) in 
+   let toFromA = (((a * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order) * pow2 256) % (getOrder #P256) in 
    lemma_mod_mul_distr_l (a * modp_inv2_prime (pow2 256) prime_p256_order) (pow2 256) prime_p256_order;
-     assert_by_tactic (a * (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) = a * modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) canon;
-   lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) prime_p256_order; 
-   assert_norm((modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) % prime_p256_order == 1);
+     assert_by_tactic (a * (modp_inv2_prime (pow2 256) (getOrder #P256) * pow2 256) = a * modp_inv2_prime (pow2 256) (getOrder #P256) * pow2 256) canon;
+   lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 256) (getOrder #P256) * pow2 256) prime_p256_order; 
+   assert_norm((modp_inv2_prime (pow2 256) (getOrder #P256) * pow2 256) % (getOrder #P256) == 1);
    small_modulo_lemma_1 a prime_p256_order
 
 
 val multiplicationInDomain: #k: nat -> #l: nat -> 
   a: nat {a == toDomain_ (k) /\ a < prime} -> 
   b: nat {b == toDomain_ (l) /\ b < prime} -> 
-  Lemma  ((a *  b * modp_inv2_prime (pow2 256) prime) % prime_p256_order == toDomain_ (k * l))
+  Lemma  ((a *  b * modp_inv2_prime (pow2 256) prime) % (getOrder #P256) == toDomain_ (k * l))
 
 let multiplicationInDomain #k #l a b = 
   let f = a * b * modp_inv2_prime (pow2 256) prime in 
@@ -329,13 +330,13 @@ let multiplicationInDomain #k #l a b =
     ((k * pow2 256) % prime_p256_order) * (((l * pow2 256) % prime_p256_order) * modp_inv2_prime (pow2 256) prime)) canon;
   lemma_mod_mul_distr_l (k * pow2 256) (((l * pow2 256) % prime_p256_order) * modp_inv2_prime (pow2 256) prime) prime_p256_order;
   assert_by_tactic (
-    ((k * pow2 256) * (((l * pow2 256) % prime_p256_order) * modp_inv2_prime (pow2 256) prime)) % prime_p256_order = 
+    ((k * pow2 256) * (((l * pow2 256) % prime_p256_order) * modp_inv2_prime (pow2 256) prime)) % (getOrder #P256) = 
     ((((l * pow2 256) % prime_p256_order) * (((k * pow2 256) * modp_inv2_prime (pow2 256) prime)) % prime_p256_order))) canon;
   lemma_mod_mul_distr_l (l * pow2 256)  ((k * pow2 256) * modp_inv2_prime (pow2 256) prime) prime_p256_order;
   assert_by_tactic ( ((l * pow2 256 * ((k * pow2 256) * modp_inv2_prime (pow2 256) prime))) == 
      ((l * pow2 256 * k) * (pow2 256 * modp_inv2_prime (pow2 256) prime))) canon;
   lemma_mod_mul_distr_r (l * pow2 256 * k) (pow2 256 * modp_inv2_prime (pow2 256) prime) prime_p256_order;
-  assert_norm ((pow2 256 * modp_inv2_prime (pow2 256) prime) % prime_p256_order == 1);
+  assert_norm ((pow2 256 * modp_inv2_prime (pow2 256) prime) % (getOrder #P256) == 1);
   assert_by_tactic ((l * pow2 256 * k) == ((k * l) * pow2 256)) canon
   
 
@@ -346,12 +347,12 @@ let inDomain_mod_is_not_mod a =
 
 
 let lemmaToDomainFromDomain a = 
-  let to = (a * pow2 256) % prime_p256_order in 
+  let to = (a * pow2 256) % (getOrder #P256) in 
   let from_to = ((((a * pow2 256) % prime_p256_order) * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order) in 
   lemma_mod_mul_distr_l (a * pow2 256) (modp_inv2_prime (pow2 256) prime_p256_order) prime_p256_order;
-  assert_by_tactic ((a * pow2 256) * modp_inv2_prime (pow2 256) prime_p256_order == a * (pow2 256 * modp_inv2_prime (pow2 256) prime_p256_order)) canon;
+  assert_by_tactic ((a * pow2 256) * modp_inv2_prime (pow2 256) (getOrder #P256) == a * (pow2 256 * modp_inv2_prime (pow2 256) prime_p256_order)) canon;
   lemma_mod_mul_distr_r a (pow2 256 * modp_inv2_prime (pow2 256) prime_p256_order) prime_p256_order;
-  assert_norm ((pow2 256 * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order == 1)
+  assert_norm ((pow2 256 * modp_inv2_prime (pow2 256) prime_p256_order) % (getOrder #P256) == 1)
 
 
 #reset-options "--z3rlimit 200"
@@ -402,13 +403,13 @@ let lemma_felem_add a b =
   lemmaFromDomain a;
   lemmaFromDomain b;
   lemmaFromDomain (a + b);
-  assert(fromDomain_ a + fromDomain_ b = (a * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order + (b * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order);
-  let aD = a * modp_inv2_prime (pow2 256) prime_p256_order in 
-  let bD = b * modp_inv2_prime (pow2 256) prime_p256_order in 
+  assert(fromDomain_ a + fromDomain_ b = (a * modp_inv2_prime (pow2 256) prime_p256_order) % (getOrder #P256) + (b * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order);
+  let aD = a * modp_inv2_prime (pow2 256) (getOrder #P256) in 
+  let bD = b * modp_inv2_prime (pow2 256) (getOrder #P256) in 
   assert(fromDomain_ (a + b) = (aD + bD) % prime_p256_order);
 
   lemma_mod_plus_distr_l aD bD prime_p256_order;
   lemma_mod_plus_distr_l bD (aD % prime_p256_order) prime_p256_order;
-  assert(fromDomain_ (a + b) = (aD % prime_p256_order + bD % prime_p256_order) % prime_p256_order);
+  assert(fromDomain_ (a + b) = (aD % (getOrder #P256) + bD % prime_p256_order) % prime_p256_order);
 
   assert(fromDomain_ (a + b) = (fromDomain_ a + fromDomain_ b) % prime_p256_order)

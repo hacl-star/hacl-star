@@ -20,7 +20,6 @@ open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P256.Compression
 open Hacl.Spec.MontgomeryMultiplication
 
-(* 
 (* [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
   \n The private key and the nonce are expected to be less than the curve order.")]
@@ -38,8 +37,8 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
     disjoint result m /\
     disjoint result privKey /\
     disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h privKey) < (getOrder #P256) /\
+    nat_from_bytes_be (as_seq h k) < (getOrder #P256)
   )
   (ensures fun h0 flag h1 -> 
     modifies (loc result) h0 h1 /\
@@ -53,6 +52,7 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
     )    
   )
 
+(*)
 (*
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
@@ -69,8 +69,8 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
     disjoint result m /\
     disjoint result privKey /\
     disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h privKey) < (getOrder #P256) /\
+    nat_from_bytes_be (as_seq h k) < (getOrder #P256)
   )
   (ensures fun h0 flag h1 -> 
     modifies (loc result) h0 h1 /\
@@ -102,8 +102,8 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
     disjoint result m /\
     disjoint result privKey /\
     disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h privKey) < (getOrder #P256) /\
+    nat_from_bytes_be (as_seq h k) < (getOrder #P256)
   )
   (ensures fun h0 flag h1 -> 
     modifies (loc result) h0 h1 /\
@@ -136,8 +136,8 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
     disjoint result m /\
     disjoint result privKey /\
     disjoint result k /\
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h privKey) < (getOrder #P256) /\
+    nat_from_bytes_be (as_seq h k) < (getOrder #P256)
   )
   (ensures fun h0 flag h1 -> 
     modifies (loc result) h0 h1 /\
