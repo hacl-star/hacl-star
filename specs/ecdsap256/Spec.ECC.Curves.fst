@@ -130,6 +130,7 @@ let getScalarLen (c: curve) = getScalarLenBytes c *. 8ul
 
 
 (* the next power in pow2 (k * 64) after the prime *)
+inline_for_extraction noextract
 let getPowerU curve = 
   match curve with 
   |P256 -> 256ul
@@ -173,20 +174,6 @@ let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (r: int {r < prime}) =
   let p = x % prime in 
   exp #prime p (prime - 1)
 
-
-(*
-inline_for_extraction
-let getKo (c: curve) : (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)}) = 
-  match c with 
-  |P256 -> 
-    assert_norm (min_one_prime (pow2 64) (- getPrime P256) == 1);
-    (u64 1)
-  |P384 -> 
-    assert_norm (min_one_prime (pow2 64) (- getPrime P384) == 4294967297);
-    (u64 4294967297)
-  (* |Default ->  *)
-    (*  *)
-*)
 
 (* order of the curves *)
 inline_for_extraction

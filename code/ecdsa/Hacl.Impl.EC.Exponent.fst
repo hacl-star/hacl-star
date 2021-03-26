@@ -35,22 +35,15 @@ open Hacl.Impl.MM.Exponent
 
 let exponent #c a result tempBuffer = 
   match c with 
-  |P384 ->
-      exponent_p384 a result tempBuffer
   |P256 -> 
     exponent_p256 a result tempBuffer
+  |P384 ->
+    exponent_p384 a result tempBuffer
   |Default -> 
-    recall_contents (prime_inverse_buffer #c) (prime_inverse_seq #c);
+    recall_contents (prime_inverse_buffer #c) (Lib.Sequence.of_list (prime_inverse_list c));
     montgomery_ladder_power #c a (prime_inverse_buffer #c) result
 
 
-inline_for_extraction
-let sqPower_buffer (#c: curve): (x: glbuffer uint8 (getScalarLen c)) = 
-  match c with
-  |P256 -> sqPower_buffer_p256 
-  |P384 -> sqPower_buffer_p384 
-
-
 let square_root #c a result = 
-  recall_contents (sqPower_buffer #c) (sqPower_seq #c);
-  montgomery_ladder_power a sqPower_buffer result
+  recall_contents (sqPower_buffer #c) (Lib.Sequence.of_list (sqPower_list #c));
+  montgomery_ladder_power a (sqPower_buffer #c) result

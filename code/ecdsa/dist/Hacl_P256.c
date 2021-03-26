@@ -120,8 +120,7 @@ static uint64_t getK0(Spec_ECC_Curves_curve c)
               sw = KRML_EABORT(uint64_t, "");
             }
         }
-        uint64_t r = mod_inv_u64(sw);
-        return r;
+        return mod_inv_u64(sw);
       }
     default:
       {
@@ -2544,14 +2543,14 @@ exponent(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result, uint64_t *tempB
 {
   switch (c)
   {
-    case Spec_ECC_Curves_P384:
-      {
-        exponent_p384(a, result, tempBuffer);
-        break;
-      }
     case Spec_ECC_Curves_P256:
       {
         exponent_p256(a, result, tempBuffer);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        exponent_p384(a, result, tempBuffer);
         break;
       }
     case Spec_ECC_Curves_Default:
@@ -2571,8 +2570,7 @@ exponent(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result, uint64_t *tempB
             }
           default:
             {
-              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
+              sw = prime256_inverse_buffer;
             }
         }
         montgomery_ladder_power(c, a, sw, result);
@@ -4186,8 +4184,8 @@ static void reduction_p521(uint64_t *i, uint64_t *o)
   getZeroWord(i, a0);
   getFirstWord(i, a1, (uint32_t)1U);
   getFirstWord(i, a2, (uint32_t)2U);
-  // Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
-  // Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
+  Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
+  Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
 }
 
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
@@ -5162,7 +5160,25 @@ montgomery_ladder_step(
   uint32_t i
 )
 {
-  uint32_t bit0 = Spec_ECC_Curves_getPowerU(c) - i - (uint32_t)1U;
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)256U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)384U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)256U;
+      }
+  }
+  uint32_t bit0 = sw - i - (uint32_t)1U;
   uint64_t bit = scalar_bit(c, buf_type, scalar, bit0);
   cswap0(c, bit, r0, r1);
   montgomery_ladder_step1(c, r0, r1, tempBuffer);
@@ -5179,7 +5195,24 @@ montgomery_ladder(
   uint64_t *tempBuffer
 )
 {
-  uint32_t cycleLoop = Spec_ECC_Curves_getPowerU(c);
+  uint32_t cycleLoop;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        cycleLoop = (uint32_t)256U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        cycleLoop = (uint32_t)384U;
+        break;
+      }
+    default:
+      {
+        cycleLoop = (uint32_t)256U;
+      }
+  }
   for (uint32_t i = (uint32_t)0U; i < cycleLoop; i++)
   {
     montgomery_ladder_step(c, a, p, q, tempBuffer, scalar, i);

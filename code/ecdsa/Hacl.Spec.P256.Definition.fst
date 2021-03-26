@@ -1,142 +1,21 @@
 module Hacl.Spec.P256.Definition
 
 open Lib.IntTypes
-open FStar.Math.Lemmas
-open FStar.Math.Lib
-
 open FStar.HyperStack
 open FStar.HyperStack.All
-open Lib.ByteSequence
 open Lib.Sequence
 open Lib.Buffer
 open FStar.Mul
 
-open Spec.ECC
 open Spec.ECC.Curves
-
-
-inline_for_extraction noextract
-let p256_inverse_list: x: list uint8 = 
-  [
-      u8 253; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-      u8 255; u8 255; u8 255; u8 255; u8 0;   u8 0;   u8 0;   u8 0;
-      u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;   u8 0;
-      u8 1;   u8 0;   u8 0;   u8 0;   u8 255; u8 255; u8 255;  u8 255
-  ]
-
-
-inline_for_extraction noextract
-let p384_inverse_list: x: list uint8 = 
-  [ 
-    u8 253; u8 255; u8 255; u8 255; u8 0;   u8 0;   u8 0;   u8 0;
-    u8 0;   u8 0  ; u8 0  ; u8 0  ; u8 255; u8 255; u8 255; u8 255;
-    u8 254; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-    u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-    u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
-    u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255
-  ]
-
-
-inline_for_extraction noextract
-let prime_inverse_list (c: curve) : x: list uint8 = 
-  match c with 
-  |P256 -> 
-    p256_inverse_list
-  |P384 -> 
-    p384_inverse_list
-
-(* 
-
-let prime_inverse_seq (#c: curve) : (s:lseq uint8 (getCoordinateLen c) {nat_from_intseq_le s == getPrime c - 2}) =  
-  assert_norm (List.Tot.length (prime_order_inverse_list #P256) == getCoordinateLen P256);
-  assert_norm (List.Tot.length (prime_order_inverse_list #P384) == getCoordinateLen P384);
-  nat_from_intlist_seq_le (getCoordinateLen c) (prime_order_inverse_list #c); 
-  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P256) == getPrimeOrder #P256 - 2);
-  assert_norm (nat_from_intlist_le (prime_order_inverse_list #P384) == getPrimeOrder #P384 - 2);
-  of_list (prime_inverse_list #c)
- *)
-
-
-inline_for_extraction noextract
-let felem_coordinate (c: curve) =
-  match c with 
-  |P256 -> tuple4 uint64 uint64 uint64 uint64
-  |P384 -> tuple6 uint64 uint64 uint64 uint64 uint64 uint64
-
-
-inline_for_extraction noextract
-let widefelem_t (c: curve) = 
-  match c with 
-  |P256 -> 
-    tuple8 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 
-  |P384 -> 
-    tuple12 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64 uint64
-
-
-inline_for_extraction noextract
-let felem8_32 = tuple8 uint32 uint32 uint32 uint32 uint32 uint32 uint32 uint32
-inline_for_extraction noextract
-let felem9 = tuple9 uint64 uint64 uint64  uint64 uint64 uint64 uint64 uint64 uint64
-
-
-noextract
-val as_nat_coordinate: #c: curve -> f:felem_coordinate c -> GTot nat
-
-let as_nat_coordinate #c f =
-  match c with 
-  |P256 -> 
-    let (s0, s1, s2, s3) : tuple4 uint64 uint64 uint64 uint64 = f in
-    v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-    v s3 * pow2 64 * pow2 64 * pow2 64
-  |P384 -> 
-    let (s0, s1, s2, s3, s4, s5) : tuple6 uint64 uint64 uint64 uint64 uint64 uint64 = f in
-    v s0 + 
-    v s1 * pow2 64 + 
-    v s2 * pow2 64 * pow2 64 +
-    v s3 * pow2 64 * pow2 64 * pow2 64 + 
-    v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-    v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
-
 
 #set-options " --z3rlimit 200"
 
 noextract
-val wide_as_nat4: #c: curve -> f: widefelem_t c -> GTot nat
-
-let wide_as_nat4 #c f =
-  match c with 
-  |P256 -> 
-    let (s0, s1, s2, s3, s4, s5, s6, s7) : widefelem_t P256 = f in
-    v s0 + v s1 * pow2 64 + v s2 * pow2 64 * pow2 64 +
-    v s3 * pow2 64 * pow2 64 * pow2 64 +
-    v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
-  |P384 -> 
-    let (s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, s11) : widefelem_t P384 = f in
-     v s0 + 
-     v s1 * pow2 64 + 
-     v s2 * pow2 64 * pow2 64 +
-     v s3 * pow2 64 * pow2 64 * pow2 64 +
-     v s4 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-     v s5 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-     v s6 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-     v s7 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64  +
-     v s8 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-     v s9 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-    v s10 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
-    v s11 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 
-
-
-noextract
-let point_seq (c: curve) = Lib.Sequence.lseq uint64 (uint_v (getCoordinateLenU64 c) * 3)
+let point_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c) * 3)
 
 noextract
 let felem_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c))
-
-noextract
-let widefelem_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c *! 2ul))
 
 inline_for_extraction
 let felem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c)
@@ -160,7 +39,6 @@ let lseq_as_nat_last #l a = ()
 val lseq_as_nat_first: a: lseq uint64 1 -> Lemma (lseq_as_nat_ a 1 == v (Lib.Sequence.index a 0))
 
 let lseq_as_nat_first a = ()
-
 
 
 noextract 
@@ -240,63 +118,21 @@ let rec lemma_lseq_as_seq_extension #l0 #l1 a0 a1 i =
     assert (Lib.Sequence.index a0 (i - 1) == Lib.Sequence.index a1 (i - 1))
 
 
-assume val lseq_upperbound: #l: size_nat -> a: Lib.Sequence.lseq uint64 l -> Lemma (lseq_as_nat a < pow2 (64 * l))
-    
-
-
-(*
-noextract 
-val felem_seq_as_nat_: c: curve -> a: felem_seq c -> i: nat {i <= Lib.Sequence.length a} -> Tot nat
-
-let felem_seq_as_nat_ c a i = (*
-  if i = Lib.Sequence.length a then 0 else
-  let a_i = Lib.Sequence.index a i in 
-  felem_seq_as_nat_ c a (i + 1) + pow2 (64 * i) * v a_i *)
-  lseq_as_nat_ a 0
-
-noextract
-val widefelem_seq_as_nat_: c: curve -> a: felem_seq c -> i: nat {i <= Lib.Sequence.length a} ->
-  Tot nat
-
-let widefelem_seq_as_nat_ c a i = lseq_as_nat_ a 0
-*)
-
+assume val lseq_upperbound: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat a < pow2 (64 * l))
 
 
 noextract
 let felem_seq_as_nat (c: curve) (a: felem_seq c) : Tot nat = lseq_as_nat a
 
-noextract
-let widefelem_seq_as_nat (c: curve) (a: widefelem_seq c) : Tot nat = lseq_as_nat a
-
-
-
-noextract
-let point_primeF (c: curve) =  
-  p: point_seq c {
-    let len = uint_v (getCoordinateLenU64 c) in 
-    let prime = getPrime c in 
-
-    let x = Lib.Sequence.sub p 0 len in 
-    let y = Lib.Sequence.sub p len len in 
-    let z = Lib.Sequence.sub p (2 * len) len in 
-    
-    felem_seq_as_nat c x < prime /\ 
-    felem_seq_as_nat c y < prime /\ 
-    felem_seq_as_nat c z < prime} 
-
-(* to redefine *)
 let point_prime_to_coordinates (c: curve) (p:point_seq c) : point_nat_prime #c =
-  admit();
   let len = uint_v (getCoordinateLenU64 c) in 
-  felem_seq_as_nat c (Lib.Sequence.sub p 0 len),
-  felem_seq_as_nat c (Lib.Sequence.sub p len len),
-  felem_seq_as_nat c (Lib.Sequence.sub p (len * 2) len)
+  lseq_as_nat (Lib.Sequence.sub p 0 len),
+  lseq_as_nat (Lib.Sequence.sub p len len),
+  lseq_as_nat (Lib.Sequence.sub p (len * 2) len)
   
 
 noextract
 let as_nat (c: curve) (h:mem) (e:felem c) : GTot nat = lseq_as_nat (as_seq h e)
-
 
 noextract
 let as_nat_il (c: curve) (h:mem) (e:glbuffer uint64 (getCoordinateLenU64 c)) : GTot nat =
@@ -304,14 +140,8 @@ let as_nat_il (c: curve) (h:mem) (e:glbuffer uint64 (getCoordinateLenU64 c)) : G
 
 
 noextract
-let wide_as_nat (c: curve) (h:mem) (e: widefelem c) : GTot nat =
-  widefelem_seq_as_nat c (as_seq h e)
+let wide_as_nat (c: curve) (h:mem) (e: widefelem c) : GTot nat = lseq_as_nat (as_seq h e)
 
-
-open FStar.Mul
-
-noextract
-let felem_seq_prime (c: curve) = a: felem_seq c {felem_seq_as_nat c a < getPrime c}
 
 inline_for_extraction
 type point (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *! 3ul)
@@ -323,7 +153,6 @@ type scalar (c: curve) = lbuffer uint8 (getScalarLen c)
 noextract 
 let point_x_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
   as_nat c h (gsub e (size 0) (getCoordinateLenU64 c))
-
 
 noextract 
 let point_y_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
@@ -337,7 +166,6 @@ let getZ #c p = gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)
 noextract 
 let point_z_as_nat (c: curve) (h: mem) (e: point c) : GTot nat = 
   as_nat c h (getZ #c e)
-
 
 val felem_eval: c: curve -> h: mem -> f: felem c -> Type0
 
@@ -367,9 +195,10 @@ let changeEndian #c b =
 
 
 val changeEndianLemma: #c: curve -> k: lseq uint64 (getCoordinateLen c) -> Lemma
-  (nat_from_intseq_le (changeEndian #c k) == nat_from_intseq_be k)
+  (Lib.ByteSequence.nat_from_intseq_le (changeEndian #c k) == Lib.ByteSequence.nat_from_intseq_be k)
 
 let changeEndianLemma #c k =
+  let open Lib.ByteSequence in 
   let k0 = changeEndian #c k in
 
   nat_from_intseq_be_slice_lemma (slice k 2 4) 1;
@@ -394,9 +223,10 @@ let changeEndianLemma #c k =
 
 
 val changeEndianLemmaI: #c: curve -> a: nat {a < pow2 (getPower c)} -> Lemma
-  (changeEndian #c (nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a) == nat_to_intseq_be (uint_v (getCoordinateLenU64 c)) a)
+  (changeEndian #c (Lib.ByteSequence.nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a) == Lib.ByteSequence.nat_to_intseq_be (uint_v (getCoordinateLenU64 c)) a)
 
 let changeEndianLemmaI #c a =
+  let open Lib.ByteSequence in 
   let len = getCoordinateLenU64 c in
   let a0 = nat_to_intseq_le #U64 #SEC 4 a in
   index_nat_to_intseq_le #U64 #SEC  4 a 0;
@@ -421,25 +251,11 @@ let changeEndianLemmaI #c a =
 
 
 val changeEndian_le_be: #c: curve -> a:nat{a < pow2 (getPower c)} -> Lemma
-  (uints_to_bytes_be (changeEndian #c (nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a)) == nat_to_bytes_be (getCoordinateLen c) a)
+  (Lib.ByteSequence.uints_to_bytes_be (changeEndian #c (Lib.ByteSequence.nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a)) == Lib.ByteSequence.nat_to_bytes_be (getCoordinateLen c) a)
 
 let changeEndian_le_be #c a =
   changeEndianLemmaI #c a;
-  uints_to_bytes_be_nat_lemma #U64 #SEC (uint_v (getCoordinateLenU64 c)) a
-
-
-val lemmaPowerMoreThanU64: #c: curve -> Lemma (pow2 (getPower c) > pow2 64)
-
-let lemmaPowerMoreThanU64 #c = admit()(* 
-  assert_norm (getPower2 P256 > pow2 64);
-  assert_norm (getPower2 P384 > pow2 64) *)
-
-
-val lemmaPrimeLowerBound: #c: curve -> Lemma (getPrime c > pow2 (getPower c - 1))
-
-let lemmaPrimeLowerBound #c = 
-  assert_norm (getPrime P256 > pow2 (getPower P256 - 1));  
-  assert_norm (getPrime P384 > pow2 (getPower P384 - 1))
+  Lib.ByteSequence.uints_to_bytes_be_nat_lemma #U64 #SEC (uint_v (getCoordinateLenU64 c)) a
 
 
 let point_eval (c: curve) (h:mem) (p:point c) = 
