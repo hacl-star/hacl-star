@@ -1131,6 +1131,7 @@ LDFLAGS 	+= -L$(OPENSSL_HOME)
 
 CFLAGS += -Wall -Wextra -g \
   -Wno-int-conversion -Wno-unused-parameter \
+  -I$(OPENSSL_HOME)/include \
   -O3 -march=native -mtune=native -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I$(KREMLIN_HOME)/include -Idist/gcc-compatible
 
