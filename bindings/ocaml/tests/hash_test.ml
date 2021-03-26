@@ -169,42 +169,64 @@ let test_agile (v: Bytes.t hash_test) =
   let alg = alg_definition v.alg in
   let digest = Test_utils.init_bytes (output_len v.alg) in
 
-  Hash.hash ~alg ~pt:v.plaintext ~digest;
-  if Bytes.compare digest v.expected = 0 then
+  Hash.hash_noalloc ~alg ~pt:v.plaintext ~digest;
+  let digest2 = Hash.hash ~alg ~pt:v.plaintext in
+  if Bytes.equal digest v.expected &&
+     Bytes.equal digest2 v.expected then
     test_result Success "one-shot hash"
   else
     test_result Failure "one-shot hash";
 
   let st = Hash.init ~alg:(alg_definition v.alg) in
   Hash.update ~st ~pt:v.plaintext;
-  Hash.finish ~st ~digest;
-  if Bytes.compare digest v.expected = 0 then
+  Hash.finish_noalloc ~st ~digest;
+  let digest2 = Hash.finish ~st in
+  if Bytes.equal digest v.expected &&
+     Bytes.equal digest2 v.expected then
     test_result Success "incremental hash"
   else
     test_result Failure "incremental hash"
 
-let test_nonagile (n: string) (v: Bytes.t hash_test) hash =
+let test_nonagile (n: string) (v: Bytes.t hash_test) hash hash_noalloc =
   let test_result = test_result (n ^ "." ^ v.name) in
   let digest = Test_utils.init_bytes (output_len v.alg) in
-  hash ~pt:v.plaintext ~digest;
-  if Bytes.compare digest v.expected = 0 then
+  hash_noalloc ~pt:v.plaintext ~digest;
+  let digest2 = hash v.plaintext in
+  if Bytes.equal digest v.expected &&
+     Bytes.equal digest2 v.expected then
     test_result Success ""
   else
     test_result Failure ""
 
-let test_keyed_blake2 (v: Bytes.t blake2_keyed_test) n hash reqs =
-  let test_result = test_result (n ^ " " ^ v.name) in
+module MakeBlake2Tests (M: Blake2) = struct
+  let test_nonagile_noalloc (v: Bytes.t blake2_keyed_test) t reqs =
+    let test_result = test_result (t ^ " (noalloc) " ^ v.name) in
+    if supports reqs then begin
+      let output = Test_utils.init_bytes (Bytes.length v.expected) in
+      M.hash_noalloc ~key:v.key ~pt:v.plaintext ~digest:output;
+      if Bytes.equal output v.expected then
+        test_result Success ""
+      else
+        test_result Failure "Output mismatch"
+    end else
+      test_result Skipped "Required CPU feature not detected"
 
-  if supports reqs then begin
-    let output = Test_utils.init_bytes (Bytes.length v.expected) in
+  let test_nonagile (v: Bytes.t blake2_keyed_test) t reqs =
+    let test_result = test_result (t ^ " " ^ v.name) in
+    if supports reqs then begin
+      let size = Bytes.length v.expected in
+      let digest = M.hash ~key:v.key v.plaintext size in
+      if Bytes.equal digest v.expected then
+        test_result Success ""
+      else
+        test_result Failure "Output mismatch"
+    end else
+      test_result Skipped "Required CPU feature not detected"
 
-    hash ?key:(Some v.key) ~pt:v.plaintext ~digest:output;
-    if Bytes.compare output v.expected = 0 then
-      test_result Success ""
-    else
-      test_result Failure "Output mismatch"
-  end else
-    test_result Skipped "Required CPU feature not detected"
+  let run_tests name tests reqs =
+    List.iter (fun v -> test_nonagile_noalloc v name reqs) tests;
+    List.iter (fun v -> test_nonagile v name reqs) tests
+end
 
 let test_keccak () =
   let v = test_sha3_256 in
@@ -227,9 +249,9 @@ let test_keccak () =
   let output_keccak_256 = Test_utils.init_bytes 32 in
   keccak_256 ~pt:v.plaintext ~digest:output_keccak_256;
 
-  if Bytes.compare digest v.expected = 0 &&
-     Bytes.compare output_shake128 output_keccak_128 = 0 &&
-     Bytes.compare output_shake256 output_keccak_256 = 0 then
+  if Bytes.equal digest v.expected &&
+     Bytes.equal output_shake128 output_keccak_128 &&
+     Bytes.equal output_shake256 output_keccak_256 then
     test_result Success ""
   else
     test_result Failure ""
@@ -243,28 +265,35 @@ let _ =
   test_agile test_blake2b;
   test_agile test_blake2s;
 
-  test_nonagile "Hacl" test_sha2_224 Hacl.SHA2_224.hash;
-  test_nonagile "Hacl" test_sha2_256 Hacl.SHA2_256.hash;
-  test_nonagile "Hacl" test_sha2_384 Hacl.SHA2_384.hash;
-  test_nonagile "Hacl" test_sha2_512 Hacl.SHA2_512.hash;
+  test_nonagile "Hacl" test_sha2_224 Hacl.SHA2_224.hash Hacl.SHA2_224.hash_noalloc;
+  test_nonagile "Hacl" test_sha2_256 Hacl.SHA2_256.hash Hacl.SHA2_256.hash_noalloc;
+  test_nonagile "Hacl" test_sha2_384 Hacl.SHA2_384.hash Hacl.SHA2_384.hash_noalloc;
+  test_nonagile "Hacl" test_sha2_512 Hacl.SHA2_512.hash Hacl.SHA2_512.hash_noalloc;
 
-  test_nonagile "Hacl" test_sha3_224 Hacl.SHA3_224.hash;
-  test_nonagile "Hacl" test_sha3_256 Hacl.SHA3_256.hash;
-  test_nonagile "Hacl" test_sha3_384 Hacl.SHA3_384.hash;
-  test_nonagile "Hacl" test_sha3_512 Hacl.SHA3_512.hash;
+  test_nonagile "Hacl" test_sha3_224 Hacl.SHA3_224.hash Hacl.SHA3_224.hash_noalloc;
+  test_nonagile "Hacl" test_sha3_256 Hacl.SHA3_256.hash Hacl.SHA3_256.hash_noalloc;
+  test_nonagile "Hacl" test_sha3_384 Hacl.SHA3_384.hash Hacl.SHA3_384.hash_noalloc;
+  test_nonagile "Hacl" test_sha3_512 Hacl.SHA3_512.hash Hacl.SHA3_512.hash_noalloc;
 
-  test_nonagile "EverCrypt" test_sha2_224 EverCrypt.SHA2_224.hash;
-  test_nonagile "EverCrypt" test_sha2_256 EverCrypt.SHA2_256.hash;
+  test_nonagile "EverCrypt" test_sha2_224 EverCrypt.SHA2_224.hash EverCrypt.SHA2_224.hash_noalloc;
+  test_nonagile "EverCrypt" test_sha2_256 EverCrypt.SHA2_256.hash EverCrypt.SHA2_256.hash_noalloc;
 
   test_agile test_sha1;
   test_agile test_md5;
 
-  test_nonagile "Hacl" test_sha1 Hacl.SHA1.hash;
-  test_nonagile "Hacl" test_md5 Hacl.MD5.hash;
+  test_nonagile "Hacl" test_sha1 Hacl.SHA1.hash Hacl.SHA1.hash_noalloc;
+  test_nonagile "Hacl" test_md5 Hacl.MD5.hash Hacl.MD5.hash_noalloc;
 
-  List.iter (fun v -> test_keyed_blake2 v "BLAKE2b_32" Hacl.Blake2b_32.hash []) blake2b_keyed_tests;
-  List.iter (fun v -> test_keyed_blake2 v "BLAKE2b_256" Hacl.Blake2b_256.hash [VEC256]) blake2b_keyed_tests;
-  List.iter (fun v -> test_keyed_blake2 v "BLAKE2s_32" Hacl.Blake2s_32.hash []) blake2s_keyed_tests;
-  List.iter (fun v -> test_keyed_blake2 v "BLAKE2s_128" Hacl.Blake2s_128.hash [VEC128]) blake2s_keyed_tests;
+  let module Tests = MakeBlake2Tests (Hacl.Blake2b_32) in
+  Tests.run_tests "BLAKE2b_32" blake2b_keyed_tests [];
+
+  let module Tests = MakeBlake2Tests (Hacl.Blake2b_256) in
+  Tests.run_tests "BLAKE2b_256" blake2b_keyed_tests [VEC256];
+
+  let module Tests = MakeBlake2Tests (Hacl.Blake2s_32) in
+  Tests.run_tests "BLAKE2s_32" blake2s_keyed_tests [];
+
+  let module Tests = MakeBlake2Tests (Hacl.Blake2s_128) in
+  Tests.run_tests "BLAKE2s_128" blake2s_keyed_tests [VEC128];
 
   test_keccak ()

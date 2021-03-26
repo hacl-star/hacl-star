@@ -25,7 +25,7 @@ let test (v: Bytes.t poly1305_test) t mac reqs =
 
     mac ~key:v.key ~msg:v.msg ~tag;
 
-    if Bytes.compare tag v.expected = 0 then
+    if Bytes.equal tag v.expected then
       test_result Success ""
     else
       test_result Failure ""

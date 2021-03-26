@@ -32,12 +32,12 @@ module MakeTests (M: SharedDefs.Curve25519) = struct
       M.Noalloc.scalarmult ~scalar:v.scalar ~input:basepoint ~result:pk;
       let pk2 = Test_utils.init_bytes 32 in
       M.Noalloc.secret_to_public ~sk:v.scalar ~pk:pk2;
-      if not (Bytes.compare pk pk2 = 0) then
+      if not (Bytes.equal pk pk2) then
         test_result Failure "secret_to_public failure";
 
       M.Noalloc.scalarmult ~scalar:v.scalar ~input:v.input ~result:out_scalarmult;
       if M.Noalloc.ecdh ~sk:v.scalar ~pk:v.input ~shared:out_ecdh then
-        if Bytes.compare out_scalarmult v.expected = 0 && Bytes.compare out_ecdh v.expected = 0 then
+        if Bytes.equal out_scalarmult v.expected && Bytes.equal out_ecdh v.expected then
           test_result Success ""
         else
           test_result Failure "ECDH shared scret mismatch"
@@ -51,13 +51,13 @@ module MakeTests (M: SharedDefs.Curve25519) = struct
     if supports reqs then begin
       let pk = M.scalarmult ~scalar:v.scalar ~input:basepoint in
       let pk2 = M.secret_to_public ~sk:v.scalar in
-      if not (Bytes.compare pk pk2 = 0) then
+      if not (Bytes.equal pk pk2) then
         test_result Failure "secret_to_public failure";
 
       let out_scalarmult = M.scalarmult ~scalar:v.scalar ~input:v.input in
       match M.ecdh ~sk:v.scalar ~pk:v.input with
       | Some out_ecdh ->
-        if Bytes.compare out_scalarmult v.expected = 0 && Bytes.compare out_ecdh v.expected = 0 then
+        if Bytes.equal out_scalarmult v.expected && Bytes.equal out_ecdh v.expected then
           test_result Success ""
         else
           test_result Failure "ECDH shared scret mismatch"

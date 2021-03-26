@@ -193,11 +193,15 @@ module Make_HashFunction_generic (C: Buffer)
     match alg with
     | Agile alg -> HashDefs.check_max_input_len alg len
     | _ -> ()
-  let hash ~pt ~digest =
+  let hash_noalloc ~pt ~digest =
     check_max_input_len Impl.hash_alg (C.size pt);
     assert (C.size digest = digest_len Impl.hash_alg);
     assert (C.disjoint pt digest);
     Impl.hash (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf digest)
+  let hash pt =
+    let digest = C.make (digest_len Impl.hash_alg) in
+    hash_noalloc ~pt ~digest;
+    digest
 end
 
 module Make_Poly1305_generic (C: Buffer)
@@ -309,7 +313,7 @@ module Make_Blake2b_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let hash ?key:(key=C.empty) ~pt ~digest =
+  let hash_noalloc ~key ~pt ~digest =
     check_reqs Impl.reqs;
     (* specs/Spec.Blake2.blake2b *)
     assert (C.size digest > 0 && C.size digest <= 64);
@@ -322,6 +326,11 @@ module Make_Blake2b_generic (C: Buffer)
     assert (C.disjoint key digest);
     assert (C.disjoint pt digest);
     Impl.blake2b (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
+  let hash ?(key = C.empty) pt size =
+    assert (size > 0 && size <= 64);
+    let digest = C.make size in
+    hash_noalloc ~key ~pt ~digest;
+    digest
 end
 
 module Make_Blake2s_generic (C: Buffer)
@@ -331,7 +340,7 @@ module Make_Blake2s_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let hash ?(key=C.empty) ~pt ~digest =
+  let hash_noalloc ~key ~pt ~digest =
     check_reqs Impl.reqs;
     (* specs/Spec.Blake2.blake2s *)
     assert (C.size digest > 0 && C.size digest <= 32);
@@ -344,6 +353,11 @@ module Make_Blake2s_generic (C: Buffer)
     assert (C.disjoint key digest);
     assert (C.disjoint pt digest);
     Impl.blake2s (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
+  let hash ?(key = C.empty) pt size =
+    assert (size > 0 && size <= 32);
+    let digest = C.make size in
+    hash_noalloc ~key ~pt ~digest;
+    digest
 end
 
 module Make_Chacha20_Poly1305 = Make_Chacha20_Poly1305_generic (CBytes)

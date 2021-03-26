@@ -151,14 +151,22 @@ module Hash = struct
     incr_len := Z.add !incr_len (Z.of_int (C.size pt));
     assert (Z.lt !incr_len (max_input_len alg));
     everCrypt_Hash_Incremental_update t (C.ctypes_buf pt) (C.size_uint32 pt)
-  let finish ~st:(alg, _, t) ~digest =
+  let finish_noalloc ~st:(alg, _, t) ~digest =
     assert (C.size digest = digest_len alg);
     everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest)
-  let hash ~alg ~pt ~digest =
+  let finish ~st:(alg, _, t) =
+    let digest = C.make (digest_len alg) in
+    everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest);
+    digest
+  let hash_noalloc ~alg ~pt ~digest =
     check_max_input_len alg (C.size pt);
     assert (C.size digest = digest_len alg);
     assert (C.disjoint digest pt);
     everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf digest) (C.ctypes_buf pt) (C.size_uint32 pt)
+  let hash ~alg ~pt =
+    let digest = C.make (digest_len alg) in
+    hash_noalloc ~alg ~pt ~digest;
+    digest
 end
 
 module SHA2_224 : HashFunction =

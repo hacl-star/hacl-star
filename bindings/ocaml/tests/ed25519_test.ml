@@ -28,11 +28,11 @@ module MakeTests (M: SharedDefs.EdDSA) = struct
     let signature = Test_utils.init_bytes 64 in
     let pk = Test_utils.init_bytes 32 in
     M.Noalloc.secret_to_public ~sk:v.sk ~pk;
-    if not (Bytes.compare pk v.pk = 0) then
+    if not (Bytes.equal pk v.pk) then
       test_result Failure "secret_to_public failure";
 
     M.Noalloc.sign ~sk:v.sk ~pt:v.msg ~signature;
-    if Bytes.compare signature v.expected_sig = 0 then
+    if Bytes.equal signature v.expected_sig then
       begin
         if M.verify ~pk:v.pk ~pt:v.msg ~signature then
           test_result Success ""
@@ -46,11 +46,11 @@ module MakeTests (M: SharedDefs.EdDSA) = struct
     let test_result = test_result (t ^ " " ^ v.name) in
 
     let pk = M.secret_to_public ~sk:v.sk in
-    if not (Bytes.compare pk v.pk = 0) then
+    if not (Bytes.equal pk v.pk) then
       test_result Failure "secret_to_public failure";
 
     let signature = M.sign ~sk:v.sk ~pt:v.msg in
-    if Bytes.compare signature v.expected_sig = 0 then
+    if Bytes.equal signature v.expected_sig then
       begin
         if M.verify ~pk:v.pk ~pt:v.msg ~signature then
           test_result Success ""

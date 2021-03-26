@@ -50,12 +50,12 @@ module MakeTests (M: SharedDefs.ECDSA) = struct
     if not (Hacl.P256.Noalloc.dh_initiator ~sk:v.sk ~pk) then
       test_result Failure "DH initiator";
     assert (Hacl.P256.valid_pk ~pk);
-    if Bytes.compare pk v.pk <> 0 then
+    if not (Bytes.equal pk v.pk) then
       test_result Failure "Key generation";
 
     let signature = Test_utils.init_bytes 64 in
     assert (M.sign_noalloc ~sk:v.sk ~pt:v.msg ~k:v.k ~signature);
-    if Bytes.compare signature v.expected_sig = 0 then
+    if Bytes.equal signature v.expected_sig then
       begin
         if M.verify ~pk:v.pk ~pt:v.msg ~signature then
           test_result Success ""
@@ -72,12 +72,12 @@ module MakeTests (M: SharedDefs.ECDSA) = struct
     match Hacl.P256.dh_initiator ~sk:v.sk with
     | Some pk -> begin
         assert (Hacl.P256.valid_pk ~pk);
-        if Bytes.compare pk v.pk <> 0 then
+        if not (Bytes.equal pk v.pk) then
           test_result Failure "Key generation";
 
         match M.sign ~sk:v.sk ~pt:v.msg ~k:v.k with
         | Some signature ->
-          if Bytes.compare signature v.expected_sig = 0 then
+          if Bytes.equal signature v.expected_sig then
             begin
               if M.verify ~pk:v.pk ~pt:v.msg ~signature then
                 test_result Success ""
@@ -99,22 +99,22 @@ let test_p256_compression_noalloc (v: Bytes.t compression_test) =
 
   let result = Test_utils.init_bytes 33 in
   Hacl.P256.Noalloc.raw_to_compressed ~p:v.raw ~result;
-  if Bytes.compare result v.compressed <> 0 then
+  if not (Bytes.equal result v.compressed) then
     test_result Failure "Hacl.P256.Noalloc.raw_to_compressed";
 
   let result = Test_utils.init_bytes 65 in
   Hacl.P256.Noalloc.raw_to_uncompressed ~p:v.raw ~result;
-  if Bytes.compare result v.uncompressed <> 0 then
+  if not (Bytes.equal result v.uncompressed) then
     test_result Failure "Hacl.P256.Noalloc.raw_to_uncompressed";
 
   let result = Test_utils.init_bytes 64 in
   assert (Hacl.P256.Noalloc.compressed_to_raw ~p:v.compressed ~result);
-  if Bytes.compare result v.raw <> 0 then
+  if not (Bytes.equal result v.raw) then
     test_result Failure "Hacl.P256.Noalloc.compressed_to_raw";
 
   let result = Test_utils.init_bytes 64 in
   assert (Hacl.P256.Noalloc.uncompressed_to_raw ~p:v.uncompressed ~result);
-  if Bytes.compare result v.raw <> 0 then
+  if not (Bytes.equal result v.raw) then
     test_result Failure "Hacl.P256.Noalloc.uncompressed_to_raw";
 
   test_result Success "P256 point compression/decompression"
@@ -123,23 +123,23 @@ let test_p256_compression (v: Bytes.t compression_test) =
   let test_result = test_result ("P-256 compression " ^ v.name) in
 
   let result = Hacl.P256.raw_to_compressed v.raw in
-  if Bytes.compare result v.compressed <> 0 then
+  if not (Bytes.equal result v.compressed) then
     test_result Failure "Hacl.P256.raw_to_compressed";
 
   let result = Hacl.P256.raw_to_uncompressed v.raw in
-  if Bytes.compare result v.uncompressed <> 0 then
+  if not (Bytes.equal result v.uncompressed) then
     test_result Failure "Hacl.P256.raw_to_uncompressed";
 
   (match Hacl.P256.compressed_to_raw v.compressed with
   | Some result ->
-    if Bytes.compare result v.raw <> 0 then
+    if not (Bytes.equal result v.raw) then
       test_result Failure "Hacl.P256.compressed_to_raw"
   | None ->
     test_result Failure "Hacl.P256.compressed_to_raw");
 
   (match Hacl.P256.uncompressed_to_raw v.uncompressed with
   | Some result ->
-    if Bytes.compare result v.raw <> 0 then
+    if not (Bytes.equal result v.raw) then
       test_result Failure "Hacl.P256.uncompressed_to_raw"
   | None ->
     test_result Failure "Hacl.P256.uncompressed_to_raw");

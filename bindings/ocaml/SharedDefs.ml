@@ -265,8 +265,11 @@ end
 module type HashFunction_generic = sig
 
   type bytes
-  val hash : pt:bytes -> digest:bytes -> unit
-  (** [hash pt digest] hashes [pt] and outputs the result in [digest]. *)
+  val hash : bytes -> bytes
+  (** [hash pt] returns the hash of [pt]. *)
+
+  val hash_noalloc : pt:bytes -> digest:bytes -> unit
+  (** [hash_noalloc pt digest] hashes [pt] and outputs the result in [digest]. *)
 end
 
 module type MAC_generic = sig
@@ -336,9 +339,14 @@ module type Blake2_generic = sig
   (* TODO: review checks and write documentation for large  maximum buffer sizes *)
 
   type bytes
-  val hash : ?key:bytes -> pt:bytes -> digest:bytes -> unit
-  (** [hash ?key ~pt ~digest] hashes [pt] and outputs the result in [digest].
-      An optional [key] argument can passed for keyed hashing. *)
+
+  val hash : ?key:bytes -> bytes -> int -> bytes
+  (** [hash ?key pt size] hashes [pt] and returns a digest of length [size].
+      An optional [key] argument can be passed for keyed hashing. *)
+
+  val hash_noalloc : key:bytes -> pt:bytes -> digest:bytes -> unit
+  (** [hash_noalloc key pt digest] hashes [pt] and outputs the result in [digest].
+      A non-empty [key] can be passed for keyed hashing. *)
 end
 
 module type Chacha20_Poly1305 = Chacha20_Poly1305_generic with type bytes = CBytes.t

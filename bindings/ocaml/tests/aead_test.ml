@@ -43,14 +43,14 @@ let test_agile_noalloc (v: Bytes.t aead_test) =
   | Success st -> begin
       match Noalloc.encrypt ~st ~iv:v.test_iv ~ad:v.test_ad ~pt:v.test_pt ~ct ~tag with
       | Success () -> begin
-          if Bytes.compare tag v.test_tag = 0 && Bytes.compare ct v.test_ct = 0 then
+          if Bytes.equal tag v.test_tag && Bytes.equal ct v.test_ct then
             test_result Success "Encryption succeeded"
           else
             test_result Failure "Wrong ciphertext/mac";
           let pt = Test_utils.init_bytes v.msg_len in
           match Noalloc.decrypt ~st ~iv:v.test_iv ~ad:v.test_ad ~ct ~tag:v.test_tag ~pt with
           | Success () ->
-            if Bytes.compare v.test_pt pt = 0 then
+            if Bytes.equal v.test_pt pt then
               test_result Success "Decryption succeeded"
             else
               test_result Failure "Decrypted and plaintext do not match"
@@ -68,13 +68,13 @@ let test_agile (v: Bytes.t aead_test) =
   | Success st -> begin
       match encrypt ~st ~iv:v.test_iv ~ad:v.test_ad ~pt:v.test_pt with
       | Success (ct, tag) -> begin
-          if Bytes.compare tag v.test_tag = 0 && Bytes.compare ct v.test_ct = 0 then
+          if Bytes.equal tag v.test_tag && Bytes.equal ct v.test_ct then
             test_result Success "Encryption succeeded"
           else
             test_result Failure "Wrong ciphertext/mac";
           match decrypt ~st ~iv:v.test_iv ~ad:v.test_ad ~ct ~tag:v.test_tag with
           | Success pt ->
-            if Bytes.compare v.test_pt pt = 0 then
+            if Bytes.equal v.test_pt pt then
               test_result Success "Decryption succeeded"
             else
               test_result Failure "Decrypted and plaintext do not match"
@@ -91,14 +91,13 @@ module MakeTests (M: Chacha20_Poly1305) = struct
       let ct = Test_utils.init_bytes v.msg_len in
       let tag = Test_utils.init_bytes v.tag_len in
       M.Noalloc.encrypt ~key:v.test_key ~iv:v.test_iv ~ad:v.test_ad ~pt:v.test_pt ~ct ~tag;
-      if Bytes.compare tag v.test_tag = 0 && Bytes.compare ct v.test_ct = 0 then
+      if Bytes.equal tag v.test_tag && Bytes.equal ct v.test_ct then
         test_result Success "Encryption succeeded"
       else
-        test_result Failure
-          (Printf.sprintf "Wrong ciphertext/mac %d %d \n" (Bytes.compare ct v.test_ct) (Bytes.compare tag v.test_tag));
+        test_result Failure "Wrong ciphertext/mac";
       let pt = Test_utils.init_bytes v.msg_len in
       if M.Noalloc.decrypt ~key:v.test_key ~iv:v.test_iv ~ad:v.test_ad ~ct ~tag ~pt then
-        if Bytes.compare v.test_pt pt = 0 then
+        if Bytes.equal v.test_pt pt then
           test_result Success "Decryption succeeded"
         else
           test_result Failure "Decrypted and plaintext do not match"
@@ -110,14 +109,13 @@ module MakeTests (M: Chacha20_Poly1305) = struct
     let test_result = test_result t in
     if supports reqs then begin
       let ct, tag = M.encrypt ~key:v.test_key ~iv:v.test_iv ~ad:v.test_ad ~pt:v.test_pt in
-      if Bytes.compare tag v.test_tag = 0 && Bytes.compare ct v.test_ct = 0 then
+      if Bytes.equal tag v.test_tag && Bytes.equal ct v.test_ct then
         test_result Success "Encryption succeeded"
       else
-        test_result Failure
-          (Printf.sprintf "Wrong ciphertext/mac %d %d \n" (Bytes.compare ct v.test_ct) (Bytes.compare tag v.test_tag));
+        test_result Failure "Wrong ciphertext/mac";
       match M.decrypt ~key:v.test_key ~iv:v.test_iv ~ad:v.test_ad ~ct ~tag with
       | Some pt ->
-        if Bytes.compare v.test_pt pt = 0 then
+        if Bytes.equal v.test_pt pt then
           test_result Success "Decryption succeeded"
         else
           test_result Failure "Decrypted and plaintext do not match"

@@ -51,7 +51,7 @@ let test_agile (v: Bytes.t hmac_test) =
 
   if EverCrypt.HMAC.is_supported_alg ~alg:v.alg then begin
     EverCrypt.HMAC.mac ~alg:v.alg ~key:v.key ~msg:v.data ~tag;
-    if Bytes.compare tag v.expected = 0 then
+    if Bytes.equal tag v.expected then
       test_result Success ""
     else
       test_result Failure "MAC mismatch"
@@ -66,7 +66,7 @@ let test_nonagile (v: Bytes.t hmac_test) t alg mac =
     let tag = Test_utils.init_bytes (Bytes.length v.expected) in
 
     mac ~key:v.key ~msg:v.data ~tag;
-    if Bytes.compare tag v.expected = 0 then
+    if Bytes.equal tag v.expected then
       test_result Success ""
     else
       test_result Failure "MAC mismatch"
@@ -80,4 +80,3 @@ let _ =
   List.iter (fun v -> test_nonagile v "Hacl.HMAC" SHA2_256 Hacl.HMAC_SHA2_256.mac) tests;
   List.iter (fun v -> test_nonagile v "Hacl.HMAC" SHA2_384 Hacl.HMAC_SHA2_384.mac) tests;
   List.iter (fun v -> test_nonagile v "Hacl.HMAC" SHA2_512 Hacl.HMAC_SHA2_512.mac) tests
-
