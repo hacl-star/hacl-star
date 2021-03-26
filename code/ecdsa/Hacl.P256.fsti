@@ -12,7 +12,7 @@ open FStar.Mul
 open Spec.ECC
 open Spec.ECC.Curves
 (* open Spec.ECC.Lemmas *)
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Spec.Hash.Definitions
 
 open Spec.DH

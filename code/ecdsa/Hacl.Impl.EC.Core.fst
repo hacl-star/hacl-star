@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Core 
+module Hacl.Impl.EC.Core 
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Spec.ECC
 open Hacl.Impl.EC.Reduction
 open Hacl.Impl.EC.LowLevel 

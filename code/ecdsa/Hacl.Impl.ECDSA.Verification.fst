@@ -9,10 +9,10 @@ open Lib.Buffer
 
 open Hacl.Lemmas.P256
 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.EC.LowLevel 
-open Hacl.Impl.P256.Core
+open Hacl.Impl.EC.Core
 open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MM.Exponent
@@ -204,11 +204,11 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
     calc(==) {
     as_seq h2 bufferU1;
     == {}
-    uints_to_bytes_be (Hacl.Spec.P256.Definition.changeEndian #c (as_seq h1 u1));
+    uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (as_seq h1 u1));
     == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u1)}
-    uints_to_bytes_be (Hacl.Spec.P256.Definition.changeEndian #c (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
+    uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
     == {lemma_core_0 c u1 h1}
-    uints_to_bytes_be (Hacl.Spec.P256.Definition.changeEndian #c (nat_to_intseq_le 4 (as_nat c h1 u1)));
+    uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (nat_to_intseq_le 4 (as_nat c h1 u1)));
     == {changeEndian_le_be #c (as_nat c h1 u1) }
     nat_to_bytes_be 32 (as_nat c h1 u1);
     };
@@ -216,11 +216,11 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
     calc(==) {
       as_seq h2 bufferU2;
       == {}
-      uints_to_bytes_be (Hacl.Spec.P256.Definition.changeEndian #c (as_seq h1 u2));
+      uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (as_seq h1 u2));
       == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2)}
-      uints_to_bytes_be (Hacl.Spec.P256.Definition.changeEndian #c (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
+      uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
       == {lemma_core_0 c u2 h1}
-      uints_to_bytes_be (Hacl.Spec.P256.Definition.changeEndian #c (nat_to_intseq_le 4 (as_nat c h1 u2)));
+      uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (nat_to_intseq_le 4 (as_nat c h1 u2)));
       == {changeEndian_le_be #c (as_nat c h1 u2) }
       nat_to_bytes_be 32 (as_nat c h1 u2);
     };

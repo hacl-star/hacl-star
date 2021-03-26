@@ -9,7 +9,7 @@ open Lib.Buffer
 
 open Hacl.Impl.EC.LowLevel 
 
-open Hacl.Impl.P256.Core
+open Hacl.Impl.EC.Core
 open Hacl.Impl.EC.Exponent
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Impl.EC.Arithmetics
@@ -20,7 +20,7 @@ open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Spec.MontgomeryMultiplication
 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Hacl.Impl.EC.Masking
 open Hacl.Impl.EC.Setup
 open Hacl.Impl.EC.Intro

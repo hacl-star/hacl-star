@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Lemmas.P256
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 
 open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication

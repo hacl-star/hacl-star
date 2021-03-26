@@ -12,7 +12,7 @@ open Lib.Buffer
 open Hacl.Impl.P256.LowLevel 
 
 open Spec.ECC
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open FStar.Mul
 
 open Hacl.Impl.EC.MontgomeryMultiplication.Lemmas

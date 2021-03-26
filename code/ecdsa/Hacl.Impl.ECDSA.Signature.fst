@@ -19,14 +19,14 @@ open Hacl.Hash.SHA2
 open Spec.ECC
 open Spec.ECC.Curves
 (* open Spec.ECC.Lemmas *)
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.EC.LowLevel 
 
-open Hacl.Impl.P256.Core
+open Hacl.Impl.EC.Core
 
 open Hacl.Impl.ECDSA.MM.Exponent
 open Hacl.Impl.ECDSA.MontgomeryMultiplication

@@ -10,13 +10,13 @@ open Lib.Buffer
 
 open Spec.ECC
 open Spec.ECC.Curves
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 
 open Spec.ECDSA
 (* open Spec.ECC.Lemmas *)
 open Hacl.Spec.ECDSA.Definition
 
-open Hacl.Impl.P256.Core
+open Hacl.Impl.EC.Core
 
 open FStar.Mul
 

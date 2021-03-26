@@ -16,7 +16,7 @@ open Lib.Buffer
 open Spec.ECC
 open Spec.ECC.Curves
 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 
 val solinas_reduction_impl_p384: i: lbuffer uint64 (size 12) -> o: lbuffer uint64 (size 6) -> 
   Stack unit 

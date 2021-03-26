@@ -10,13 +10,13 @@ open Lib.ByteSequence
 
 open Spec.ECC
 open Spec.ECDSA
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Spec.DH
 open Hacl.Spec.ECDSA.Definition
 open Hacl.Lemmas.P256
 
 open Hacl.Impl.EC.LowLevel 
-open Hacl.Impl.P256.Core
+open Hacl.Impl.EC.Core
 open Hacl.Impl.P256.Signature.Common
 
 open Hacl.Impl.EC.Intro

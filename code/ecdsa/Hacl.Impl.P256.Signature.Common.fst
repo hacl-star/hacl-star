@@ -11,7 +11,7 @@ open Lib.ByteSequence
 open Lib.Buffer 
 
 open Spec.ECC 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Hacl.Lemmas.P256
 
 open Spec.ECDSA
@@ -21,7 +21,7 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
-open Hacl.Impl.P256.Core
+open Hacl.Impl.EC.Core
 open Hacl.Impl.EC.Setup
 
 

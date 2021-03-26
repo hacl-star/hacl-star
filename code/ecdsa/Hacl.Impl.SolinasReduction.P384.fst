@@ -10,7 +10,7 @@ open FStar.Math.Lib
 open Lib.Buffer
 
 open Spec.ECC
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Hacl.Impl.EC.LowLevel
 
 open FStar.Mul

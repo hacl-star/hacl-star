@@ -19,7 +19,7 @@ open FStar.Mul
 
 open Spec.ECC
 (* open Spec.ECC.Lemmas *)
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 
 open Spec.ECDSA
 open Hacl.Impl.P256.Compression

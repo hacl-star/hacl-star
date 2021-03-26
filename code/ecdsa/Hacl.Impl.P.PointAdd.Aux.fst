@@ -23,7 +23,7 @@ open FStar.Math.Lemmas
 open Hacl.Spec.MontgomeryMultiplication
 open FStar.Mul
 
-open  Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"  

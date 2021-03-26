@@ -19,7 +19,7 @@ open Lib.Loops
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Spec.MontgomeryMultiplication
 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Hacl.Lemmas.P256
 open Spec.ECDSA.Lemmas
 open Spec.ECC

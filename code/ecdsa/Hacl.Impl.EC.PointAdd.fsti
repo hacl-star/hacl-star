@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Spec.ECC
 open Spec.ECC.Curves
 open Hacl.Spec.MontgomeryMultiplication

@@ -9,7 +9,7 @@ open FStar.Mul
 open FStar.Tactics 
 open FStar.Tactics.Canon 
 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Spec.ECC
 open Spec.ECC.Curves
 open Spec.ECDSA.Lemmas

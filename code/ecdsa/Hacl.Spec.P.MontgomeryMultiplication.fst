@@ -6,7 +6,7 @@ open FStar.Mul
 
 open Spec.ECC
 open Spec.ECDSA.Lemmas
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Hacl.Lemmas.P256
 
 open Lib.IntTypes

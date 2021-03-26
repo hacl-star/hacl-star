@@ -17,7 +17,7 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.SolinasReduction.P384
 open Hacl.Impl.SolinasReduction.P256
 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open FStar.Mul
 
 module BV = FStar.BitVector

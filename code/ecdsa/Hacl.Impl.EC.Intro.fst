@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.P256.Definition
+open Hacl.Spec.EC.Definition
 open Hacl.Lemmas.P256
 
 open Spec.ECC
@@ -50,7 +50,7 @@ let toUint8 #c i o =
 val changeEndian: #c: curve -> i: felem c -> Stack unit 
   (requires fun h -> live h i)
   (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ 
-    as_seq h1 i == Hacl.Spec.P256.Definition.changeEndian (as_seq h0 i) /\
+    as_seq h1 i == Hacl.Spec.EC.Definition.changeEndian (as_seq h0 i) /\
     as_nat c h1 i < pow2 (getPower c)) 
 
 
@@ -58,7 +58,7 @@ val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: fe
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
     modifies (loc o) h0 h1  /\
-    as_seq h1 o == Hacl.Spec.P256.Definition.changeEndian (
+    as_seq h1 o == Hacl.Spec.EC.Definition.changeEndian (
       Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
 
 let changeEndian #c b =
@@ -67,7 +67,7 @@ let changeEndian #c b =
   let lenByTwo = shift_right len 1ul in 
 
   [@inline_let]
-  let spec h0 = Hacl.Spec.P256.Definition.changeEndianStep #c  in 
+  let spec h0 = Hacl.Spec.EC.Definition.changeEndianStep #c  in 
   admit();
    [@inline_let]
   let acc (h: mem) : GTot (felem_seq c) = as_seq h b in 
@@ -121,7 +121,7 @@ val toUint64CEP256: i:lbuffer uint8 (getScalarLen P256) -> o: felem P256 -> Stac
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
     modifies (loc o) h0 h1  /\
-    as_seq h1 o == Hacl.Spec.P256.Definition.changeEndian (
+    as_seq h1 o == Hacl.Spec.EC.Definition.changeEndian (
       Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
 
 let toUint64CEP256 i o = 
@@ -133,7 +133,7 @@ val toUint64CEP384: i:lbuffer uint8 (getScalarLen P384) -> o: felem P384 -> Stac
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 ->
     modifies (loc o) h0 h1  /\
-    as_seq h1 o == Hacl.Spec.P256.Definition.changeEndian (
+    as_seq h1 o == Hacl.Spec.EC.Definition.changeEndian (
       Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
 
 let toUint64CEP384 i o = 
