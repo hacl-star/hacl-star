@@ -32,8 +32,8 @@ let bn_field_get_len #t k _ =
   k.len
 
 
-let bn_field_check_modulus #t len n =
-  let m = BM.bn_check_modulus n in
+let bn_field_check_modulus #t km n =
+  let m = km.BM.mont_check n in
   BB.unsafe_bool_of_limb m
 
 
@@ -41,8 +41,8 @@ let bn_field_init #t km r n =
   [@inline_let]
   let len = km.BM.bn.BN.len in
   let h0 = ST.get () in
-  let r2 : buffer (limb t) = LowStar.Monotonic.Buffer.mmalloc r (uint #t #SEC 0) len in
-  let n1 : buffer (limb t) = LowStar.Monotonic.Buffer.mmalloc r (uint #t #SEC 0) len in
+  let r2 : buffer (limb t) = B.mmalloc r (uint #t #SEC 0) len in
+  let n1 : buffer (limb t) = B.mmalloc r (uint #t #SEC 0) len in
   let h1 = ST.get () in
   B.(modifies_only_not_unused_in loc_none h0 h1);
   assert (B.length r2 == FStar.UInt32.v len);
@@ -50,7 +50,7 @@ let bn_field_init #t km r n =
   let r2 : lbignum t len = r2 in
   let n1 : lbignum t len = n1 in
 
-  if bn_field_check_modulus len n then begin
+  if bn_field_check_modulus km n then begin
     copy n1 n;
 
     let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
@@ -69,6 +69,14 @@ let bn_field_init #t km r n =
     let h2 = ST.get () in
     B.(modifies_only_not_unused_in loc_none h0 h2);
     res end
+
+
+let bn_field_free #t k =
+  let n : buffer (limb t) = k.n in
+  let r2 : buffer (limb t) = k.r2 in
+  B.free n;
+  B.freeable_disjoint n r2;
+  B.free r2
 
 
 let bn_to_field #t km k a aM =
@@ -146,11 +154,11 @@ let bn_field_exp_vartime #t km k aM bBits b resM =
   pop_frame ()
 
 
-let bn_field_inv #t km k aM aInvM =
+let bn_field_inv #t k bn_field_exp_vartime aM aInvM =
   [@inline_let]
   let len = k.len in
   push_frame ();
   let n2 = create len (uint #t #SEC 0) in
   BI.bn_mod_inv_prime_n2 len k.n n2;
-  bn_field_exp_vartime #t km k aM (k.len *! size (bits t)) n2 aInvM;
+  bn_field_exp_vartime aM (k.len *! size (bits t)) n2 aInvM;
   pop_frame ()

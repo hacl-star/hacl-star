@@ -30,7 +30,7 @@ let bn_check_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_check_mod_exp: #t:limb_t -> k:BM.mont t -> bn_check_mod_exp_st t k.BM.bn.BN.len
+val bn_check_mod_exp: #t:limb_t -> len:BN.meta_len t -> bn_check_mod_exp_st t len
 
 
 inline_for_extraction noextract
@@ -82,38 +82,20 @@ val bn_mod_exp_fw_consttime_precompr2:
 inline_for_extraction noextract
 val bn_mod_exp_vartime_precompr2:
     #t:limb_t
-  -> k:BM.mont t
-  -> bn_mod_exp_bm_vartime_precompr2:bn_mod_exp_precompr2_st t k.BM.bn.BN.len
-  -> bn_mod_exp_fw_vartime_precompr2:bn_mod_exp_precompr2_st t k.BM.bn.BN.len ->
-  bn_mod_exp_precompr2_st t k.BM.bn.BN.len
+  -> len:BN.meta_len t
+  -> bn_mod_exp_bm_vartime_precompr2:bn_mod_exp_precompr2_st t len
+  -> bn_mod_exp_fw_vartime_precompr2:bn_mod_exp_precompr2_st t len ->
+  bn_mod_exp_precompr2_st t len
 
 
 // This function is constant-time on the exponent b.
 inline_for_extraction noextract
 val bn_mod_exp_consttime_precompr2:
     #t:limb_t
-  -> k:BM.mont t
-  -> bn_mod_exp_bm_consttime_precompr2:bn_mod_exp_precompr2_st t k.BM.bn.BN.len
-  -> bn_mod_exp_fw_consttime_precompr2:bn_mod_exp_precompr2_st t k.BM.bn.BN.len ->
-  bn_mod_exp_precompr2_st t k.BM.bn.BN.len
-
-
-inline_for_extraction noextract
-class exp (t:limb_t) = {
-  bn: BN.bn t;
-  mod_check: BM.bn_check_modulus_st t bn.BN.len;
-  exp_check: bn_check_mod_exp_st t bn.BN.len;
-  exp_vt_precomp: bn_mod_exp_precompr2_st t bn.BN.len;
-  exp_ct_precomp: bn_mod_exp_precompr2_st t bn.BN.len;
-}
-
-
-// A completely run-time-only instance where the functions above exist in the C code.
-inline_for_extraction noextract
-val mk_runtime_exp: #t:limb_t -> len:BN.meta_len t -> exp t
-
-val mk_runtime_exp_len_lemma: #t:limb_t -> len:BN.meta_len t ->
-  Lemma ((mk_runtime_exp #t len).bn.BN.len == len) [SMTPat (mk_runtime_exp #t len)]
+  -> len:BN.meta_len t
+  -> bn_mod_exp_bm_consttime_precompr2:bn_mod_exp_precompr2_st t len
+  -> bn_mod_exp_fw_consttime_precompr2:bn_mod_exp_precompr2_st t len ->
+  bn_mod_exp_precompr2_st t len
 
 
 inline_for_extraction noextract
@@ -135,18 +117,30 @@ let bn_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_exp_vartime:
+val mk_bn_mod_exp:
     #t:limb_t
-  -> k:exp t
-  -> precomp_r2:BM.bn_precomp_r2_mod_n_st t k.bn.BN.len
-  -> bn_mod_exp_vartime_precompr2:bn_mod_exp_precompr2_st t k.bn.BN.len ->
-  bn_mod_exp_st t k.bn.BN.len
+  -> len:BN.meta_len t
+  -> precomp_r2:BM.bn_precomp_r2_mod_n_st t len
+  -> bn_mod_exp_precompr2:bn_mod_exp_precompr2_st t len ->
+  bn_mod_exp_st t len
 
 
 inline_for_extraction noextract
-val bn_mod_exp_consttime:
-    #t:limb_t
-  -> k:exp t
-  -> precomp_r2:BM.bn_precomp_r2_mod_n_st t k.bn.BN.len
-  -> bn_mod_exp_consttime_precompr2:bn_mod_exp_precompr2_st t k.bn.BN.len ->
-  bn_mod_exp_st t k.bn.BN.len
+class exp (t:limb_t) = {
+  bn: BN.bn t;
+  mod_check: BM.bn_check_modulus_st t bn.BN.len;
+  exp_check: bn_check_mod_exp_st t bn.BN.len;
+  precompr2: BM.bn_precomp_r2_mod_n_st t bn.BN.len;
+  exp_vt_precomp: bn_mod_exp_precompr2_st t bn.BN.len;
+  exp_ct_precomp: bn_mod_exp_precompr2_st t bn.BN.len;
+  exp_vt: bn_mod_exp_st t bn.BN.len;
+  exp_ct: bn_mod_exp_st t bn.BN.len;
+}
+
+
+// A completely run-time-only instance where the functions above exist in the C code.
+inline_for_extraction noextract
+val mk_runtime_exp: #t:limb_t -> len:BN.meta_len t -> exp t
+
+val mk_runtime_exp_len_lemma: #t:limb_t -> len:BN.meta_len t ->
+  Lemma ((mk_runtime_exp #t len).bn.BN.len == len) [SMTPat (mk_runtime_exp #t len)]

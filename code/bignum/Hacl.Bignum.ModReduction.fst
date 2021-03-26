@@ -66,13 +66,13 @@ let bn_mod_slow_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_slow:
+val mk_bn_mod_slow:
     #t:limb_t
   -> k:AM.almost_mont t
   -> bn_mod_slow_precompr2:bn_mod_slow_precompr2_st t k.AM.bn.BN.len ->
   bn_mod_slow_st t k.AM.bn.BN.len
 
-let bn_mod_slow #t k bn_mod_slow_precompr2 nBits n a res =
+let mk_bn_mod_slow #t k bn_mod_slow_precompr2 nBits n a res =
   [@inline_let] let len = k.AM.bn.BN.len in
   push_frame ();
   let mu = BI.mod_inv_limb n.(0ul) in

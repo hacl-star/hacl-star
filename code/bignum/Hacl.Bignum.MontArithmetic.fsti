@@ -43,6 +43,7 @@ let ll (t:limb_t) =
 
 inline_for_extraction// noextract
 noeq
+[@CAbstractStruct]
 type bn_mont_ctx' (t:limb_t) (a:Type0{a == lb t}) (b:Type0{b == ll t}) = {
   len: BN.meta_len t;
   n: x:a{length #MUT #(limb t) x == v len};
@@ -94,7 +95,7 @@ let bn_field_check_modulus_st (t:limb_t) (len:BN.meta_len t) = n:lbignum t len -
 
 
 inline_for_extraction noextract
-val bn_field_check_modulus: #t:limb_t -> len:BN.meta_len t -> bn_field_check_modulus_st t len
+val bn_field_check_modulus: #t:limb_t -> km:BM.mont t -> bn_field_check_modulus_st t km.BM.bn.BN.len
 
 
 inline_for_extraction noextract
@@ -106,15 +107,38 @@ let bn_field_init_st (t:limb_t) (len:BN.meta_len t) =
     live h n /\ ST.is_eternal_region r)
   (ensures  fun h0 res h1 ->
     B.(modifies loc_none h0 h1) /\
-    S.bn_mont_ctx_pre (as_seq h0 n) ==> (
+   (let n1 : buffer (limb t) = res.n in
+    let r2 : buffer (limb t) = res.r2 in
+    live h1 n1 /\ live h1 r2 /\ disjoint n1 r2 /\
+    B.(fresh_loc (loc_union (loc_buffer n1) (loc_buffer r2)) h0 h1) /\
+    B.(loc_includes (loc_region_only true r) (loc_union (loc_buffer n1) (loc_buffer r2))) /\
+    B.freeable n1 /\ B.freeable r2 /\
+
+   (S.bn_mont_ctx_pre (as_seq h0 n) ==> (
       S.bn_mont_ctx_inv (as_ctx h1 res) /\
-      B.(fresh_loc (loc_union (loc_buffer (res.n <: buffer (limb t))) (loc_buffer (res.r2 <: buffer (limb t)))) h0 h1) /\
-      B.(loc_includes (loc_region_only false r) (loc_union (loc_buffer (res.n <: buffer (limb t))) (loc_buffer (res.r2 <: buffer (limb t))))) /\
-      as_ctx h1 res == S.bn_field_init (as_seq h0 n)))
+      as_ctx h1 res == S.bn_field_init (as_seq h0 n)))))
 
 
 inline_for_extraction noextract
 val bn_field_init: #t:limb_t -> km:BM.mont t -> bn_field_init_st t km.BM.bn.BN.len
+
+
+inline_for_extraction noextract
+let bn_field_free_st (t:limb_t) = k:bn_mont_ctx t ->
+  ST unit
+  (requires fun h ->
+   (let n : buffer (limb t) = k.n in
+    let r2 : buffer (limb t) = k.r2 in
+    live h n /\ live h r2 /\ disjoint n r2 /\
+    B.freeable n /\ B.freeable r2))
+  (ensures  fun h0 _ h1 ->
+    let n : buffer (limb t) = k.n in
+    let r2 : buffer (limb t) = k.r2 in
+    B.(modifies (loc_union (loc_addr_of_buffer r2) (loc_addr_of_buffer n)) h0 h1))
+
+
+inline_for_extraction noextract
+val bn_field_free: #t:limb_t -> bn_field_free_st t
 
 
 inline_for_extraction noextract
@@ -355,4 +379,8 @@ let bn_field_inv_st (#t:limb_t) (k:bn_mont_ctx t) =
 
 
 inline_for_extraction noextract
-val bn_field_inv: #t:limb_t -> km:BM.mont t -> k:bn_mont_ctx t{k.len == km.BM.bn.BN.len} -> bn_field_inv_st k
+val bn_field_inv:
+    #t:limb_t
+  -> k:bn_mont_ctx t
+  -> bn_field_exp_vartime:bn_field_exp_vartime_st k ->
+  bn_field_inv_st k

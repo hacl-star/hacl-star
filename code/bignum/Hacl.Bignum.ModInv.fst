@@ -71,13 +71,13 @@ let bn_mod_inv_prime_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mod_inv_prime:
+val mk_bn_mod_inv_prime:
     #t:limb_t
   -> len:BN.meta_len t
   -> bn_mod_exp:BE.bn_mod_exp_st t len ->
   bn_mod_inv_prime_st t len
 
-let bn_mod_inv_prime #t len bn_mod_exp nBits n a res =
+let mk_bn_mod_inv_prime #t len bn_mod_exp nBits n a res =
   let h0 = ST.get () in
   push_frame ();
   let n2 = create len (uint #t #SEC 0) in

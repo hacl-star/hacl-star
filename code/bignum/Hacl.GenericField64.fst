@@ -13,10 +13,13 @@ let km (len:BN.meta_len t_limbs) =
   BM.mk_runtime_mont len
 
 let field_modulus_check len n =
-  MA.bn_field_check_modulus len n
+  MA.bn_field_check_modulus (km len) n
 
 let field_init len r n =
   MA.bn_field_init (km len) r n
+
+let field_free k =
+  MA.bn_field_free k
 
 let field_get_len k =
   MA.bn_field_get_len k
@@ -49,4 +52,4 @@ let exp_vartime k aM bBits b resM =
   MA.bn_field_exp_vartime (km k.MA.len) k aM bBits b resM
 
 let inverse k aM aInvM =
-  MA.bn_field_inv (km k.MA.len) k aM aInvM
+  MA.bn_field_inv k (exp_vartime k) aM aInvM
