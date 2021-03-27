@@ -3,11 +3,8 @@ module Hacl.Bignum32
 open FStar.Mul
 
 module BN = Hacl.Bignum
-module BM = Hacl.Bignum.Montgomery
-module BE = Hacl.Bignum.Exponentiation
-module BR = Hacl.Bignum.ModReduction
-module BI = Hacl.Bignum.ModInv
 module BS = Hacl.Bignum.SafeAPI
+module GF = Hacl.GenericField32
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -57,23 +54,6 @@ val mul: len:BN.meta_len t_limbs -> a:lbignum t_limbs len -> BN.bn_karatsuba_mul
   The outparam res is meant to be `2*len` limbs in size, i.e. uint32_t[2*len]."]
 val sqr: len:BN.meta_len t_limbs -> a:lbignum t_limbs len -> BN.bn_karatsuba_sqr_st t_limbs len a
 
-// [@@ Comment "Write `a mod n` in `res`.
-
-//   The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
-//   The argument n, r2 and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
-//   The argument r2 is a precomputed constant 2 ^ (128 * len) mod n obtained through Hacl_Bignum32_new_precompr2.
-
-//   This function is *UNSAFE* and requires C clients to observe the precondition
-//   of bn_mod_slow_precompr2_lemma in Hacl.Spec.Bignum.ModReduction.fst, which
-//   amounts to:
-//   • 1 < n
-//   • n % 2 = 1
-//   • a < n * n
-
-//   Owing to the absence of run-time checks, and factoring out the precomputation
-//   r2, this function is notably faster than mod below."]
-// val mod_precompr2: len:BN.meta_len t_limbs -> BR.bn_mod_slow_precompr2_st t_limbs len
-
 [@@ Comment "Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
@@ -84,54 +64,6 @@ val sqr: len:BN.meta_len t_limbs -> a:lbignum t_limbs len -> BN.bn_karatsuba_sqr
    • 1 < n
    • n % 2 = 1 "]
 val mod: len:BN.meta_len t_limbs -> BS.bn_mod_slow_safe_st t_limbs len
-
-// [@@ Comment "Write `a ^ b mod n` in `res`.
-
-//   The arguments a, n, r2 and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
-//   The argument r2 is a precomputed constant 2 ^ (128 * len) mod n obtained through Hacl_Bignum32_new_precompr2.
-//   The argument b is a bignum of any size, and bBits is an upper bound on the
-//   number of significant bits of b. A tighter bound results in faster execution
-//   time. When in doubt, the number of bits for the bignum size is always a safe
-//   default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-//   The function is *NOT* constant-time on the argument b. See the
-//   mod_exp_consttime_* functions for constant-time variants.
-
-//   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-//   from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-//   • n % 2 = 1
-//   • 1 < n
-//   • 0 < b
-//   • b < pow2 bBits
-//   • a < n
-
-//   Owing to the absence of run-time checks, and factoring out the precomputation
-//   r2, this function is notably faster than mod_exp_vartime below."]
-// val mod_exp_vartime_precompr2: len:BN.meta_len t_limbs -> BE.bn_mod_exp_precompr2_st t_limbs len
-
-// [@@ Comment "Write `a ^ b mod n` in `res`.
-
-//   The arguments a, n, r2 and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
-//   The argument r2 is a precomputed constant 2 ^ (128 * len) mod n obtained through Hacl_Bignum32_new_precompr2.
-//   The argument b is a bignum of any size, and bBits is an upper bound on the
-//   number of significant bits of b. A tighter bound results in faster execution
-//   time. When in doubt, the number of bits for the bignum size is always a safe
-//   default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-//   This function is constant-time over its argument b, at the cost of a slower
-//   execution time than mod_exp_vartime_precompr2.
-
-//   This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-//   from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-//   • n % 2 = 1
-//   • 1 < n
-//   • 0 < b
-//   • b < pow2 bBits
-//   • a < n
-
-//   Owing to the absence of run-time checks, and factoring out the precomputation
-//   r2, this function is notably faster than mod_exp_consttime below."]
-// val mod_exp_consttime_precompr2: len:BN.meta_len t_limbs -> BE.bn_mod_exp_precompr2_st t_limbs len
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -175,17 +107,6 @@ val mod_exp_vartime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs le
    • a < n "]
 val mod_exp_consttime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs len
 
-// [@@ Comment "Compute `2 ^ (128 * len) mod n`.
-
-//   The argument n points to `len` limbs of valid memory.
-//   The function returns a heap-allocated bignum of size `len`, or NULL if:
-//   • the allocation failed, or
-//   • n % 2 = 1 && 1 < n does not hold
-
-//   If the return value is non-null, clients must eventually call free(3) on it to
-//   avoid memory leaks."]
-// val new_precompr2: len:BN.meta_len t_limbs -> BS.new_bn_precomp_r2_mod_n_st t_limbs len
-
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -201,6 +122,70 @@ val mod_exp_consttime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs 
   • 0 < a
   • a < n "]
 val mod_inv_prime_vartime: len:BN.meta_len t_limbs -> BS.bn_mod_inv_prime_safe_st t_limbs len
+
+[@@ CPrologue
+"\n/**********************************************/
+/* Arithmetic functions with precomputations. */
+/**********************************************/\n";
+
+Comment "Write `a mod n` in `res`.
+
+  The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
+  The outparam res is meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
+val mod_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_slow_ctx_st t_limbs k
+
+[@@ Comment "Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_consttime_* functions for constant-time variants.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits
+  • a < n "]
+val mod_exp_vartime_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_exp_ctx_st t_limbs k
+
+[@@ Comment "Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than mod_exp_vartime_*.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits
+  • a < n "]
+val mod_exp_consttime_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_exp_ctx_st t_limbs k
+
+[@@ Comment "Write `a ^ (-1) mod n` in `res`.
+
+  The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
+  • 0 < a
+  • a < n "]
+val mod_inv_prime_vartime_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_inv_prime_ctx_st t_limbs k
 
 [@@ CPrologue
 "\n/********************/
@@ -231,13 +216,13 @@ val new_bn_from_bytes_le: BS.new_bn_from_bytes_le_st t_limbs
 
 [@@ Comment "Serialize a bignum into big-endian memory.
 
-  The argument b points to a bignum of ⌈len / 32⌉ size.
+  The argument b points to a bignum of ⌈len / 4⌉ size.
   The outparam res points to `len` bytes of valid memory."]
 val bn_to_bytes_be: len:_ -> Hacl.Bignum.Convert.bn_to_bytes_be_st t_limbs len
 
 [@@ Comment "Serialize a bignum into little-endian memory.
 
-  The argument b points to a bignum of ⌈len / 32⌉ size.
+  The argument b points to a bignum of ⌈len / 4⌉ size.
   The outparam res points to `len` bytes of valid memory."]
 val bn_to_bytes_le: len:_ -> Hacl.Bignum.Convert.bn_to_bytes_le_st t_limbs len
 

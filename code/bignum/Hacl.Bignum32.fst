@@ -3,10 +3,11 @@ module Hacl.Bignum32
 open FStar.Mul
 
 module BN = Hacl.Bignum
-module BM = Hacl.Bignum.Montgomery
 module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
 module AM = Hacl.Bignum.AlmostMontgomery
+module MA = Hacl.Bignum.MontArithmetic
+module BI = Hacl.Bignum.ModInv
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -30,26 +31,33 @@ let mul len a b res =
 let sqr len a res =
   (ke len).BE.bn.BN.sqr a res
 
+[@CInline]
+let bn_slow_precomp (len:BN.meta_len t_limbs) : BR.bn_mod_slow_precomp_st t_limbs len =
+  BR.bn_mod_slow_precomp (kam len)
+
 let mod len n a res =
-  BS.mk_bn_mod_slow_safe (kam len) (BR.bn_mod_slow_precompr2 (kam len)) n a res
-
-// let mod_exp_vartime_precompr2 len n a bBits b r2 res =
-//   BE.bn_mod_exp_vartime_precompr2 (ke len) n a bBits b r2 res
-
-// let mod_exp_consttime_precompr2 len n a bBits b r2 res =
-//   BE.bn_mod_exp_consttime_precompr2 (ke len) n a bBits b r2 res
+  BS.mk_bn_mod_slow_safe len (BR.mk_bn_mod_slow (kam len) (bn_slow_precomp len)) n a res
 
 let mod_exp_vartime len n a bBits b res =
-  BS.mk_bn_mod_exp_safe (ke len) (ke len).BE.exp_vt n a bBits b res
+  BS.mk_bn_mod_exp_safe len (ke len).BE.exp_check (ke len).BE.exp_vt n a bBits b res
 
 let mod_exp_consttime len n a bBits b res =
-  BS.mk_bn_mod_exp_safe (ke len) (ke len).BE.exp_ct n a bBits b res
-
-// let new_precompr2 len r n =
-//   BS.new_bn_precomp_r2_mod_n (ke len).BE.mont r n
+  BS.mk_bn_mod_exp_safe len (ke len).BE.exp_check (ke len).BE.exp_ct n a bBits b res
 
 let mod_inv_prime_vartime len n a res =
   BS.mk_bn_mod_inv_prime_safe len (ke len).BE.exp_vt n a res
+
+let mod_precomp k a res =
+  BS.bn_mod_ctx k (bn_slow_precomp k.MA.len) a res
+
+let mod_exp_vartime_precomp k a bBits b res =
+  BS.mk_bn_mod_exp_ctx k (ke k.MA.len).BE.exp_vt_precomp a bBits b res
+
+let mod_exp_consttime_precomp k a bBits b res =
+  BS.mk_bn_mod_exp_ctx k (ke k.MA.len).BE.exp_ct_precomp a bBits b res
+
+let mod_inv_prime_vartime_precomp k a res =
+  BS.mk_bn_mod_inv_prime_ctx k (BI.mk_bn_mod_inv_prime_precomp k.MA.len (ke k.MA.len).BE.exp_vt_precomp) a res
 
 let new_bn_from_bytes_be r len b =
   BS.new_bn_from_bytes_be r len b
