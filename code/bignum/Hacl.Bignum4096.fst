@@ -4,6 +4,7 @@ open FStar.Mul
 
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
+module AM = Hacl.Bignum.AlmostMontgomery
 module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
 module BI = Hacl.Bignum.ModInv
@@ -79,51 +80,77 @@ instance mont_inst: BM.mont t_limbs = {
   BM.sqr = mont_sqr;
 }
 
-let mod_precompr2 = BR.bn_mod_slow_precompr2 mont_inst
-
-let mod = BS.bn_mod_slow_safe mont_inst mod_precompr2
+[@CInline]
+let areduction: AM.bn_almost_mont_reduction_st t_limbs n_limbs =
+  AM.bn_almost_mont_reduction bn_inst
 
 [@CInline]
-let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =
-  BE.bn_check_mod_exp mont_inst
+let amont_mul: AM.bn_almost_mont_mul_st t_limbs n_limbs =
+  AM.bn_almost_mont_mul bn_inst areduction
 
 [@CInline]
-let mod_exp_bm_vartime_precompr2: BE.bn_mod_exp_bm_vartime_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_bm_vartime_precompr2 mont_inst
-
-[@CInline]
-let mod_exp_bm_consttime_precompr2: BE.bn_mod_exp_bm_consttime_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_bm_consttime_precompr2 mont_inst
-
-[@CInline]
-let mod_exp_fw_vartime_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_vartime_precompr2 mont_inst
-
-[@CInline]
-let mod_exp_fw_consttime_precompr2: BE.bn_mod_exp_fw_precompr2_st t_limbs n_limbs =
-  BE.bn_mod_exp_fw_consttime_precompr2 mont_inst
+let amont_sqr: AM.bn_almost_mont_sqr_st t_limbs n_limbs =
+  AM.bn_almost_mont_sqr bn_inst areduction
 
 inline_for_extraction noextract
-instance exp_inst: BE.exp t_limbs = {
-  BE.mont = mont_inst;
-  BE.exp_check;
-  BE.exp_bm_vt_precomp = mod_exp_bm_vartime_precompr2;
-  BE.exp_bm_ct_precomp = mod_exp_bm_consttime_precompr2;
-  BE.exp_fw_vt_precomp = mod_exp_fw_vartime_precompr2;
-  BE.exp_fw_ct_precomp = mod_exp_fw_consttime_precompr2;
+instance almost_mont_inst: AM.almost_mont t_limbs = {
+  AM.bn = bn_inst;
+  AM.mont_check;
+  AM.precomp;
+  AM.reduction = areduction;
+  AM.to;
+  AM.from;
+  AM.mul = amont_mul;
+  AM.sqr = amont_sqr;
 }
 
-let mod_exp_vartime_precompr2 = BE.bn_mod_exp_vartime_precompr2 exp_inst
+[@CInline]
+let bn_slow_precomp : BR.bn_mod_slow_precomp_st t_limbs n_limbs =
+  BR.bn_mod_slow_precomp almost_mont_inst
 
-let mod_exp_consttime_precompr2 = BE.bn_mod_exp_consttime_precompr2 exp_inst
+let mod n a res =
+  BS.mk_bn_mod_slow_safe n_limbs (BR.mk_bn_mod_slow almost_mont_inst bn_slow_precomp) n a res
 
-let mod_exp_vartime = BS.bn_mod_exp_vartime_safe exp_inst mod_exp_vartime_precompr2
+let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =
+  BE.bn_check_mod_exp n_limbs
 
-let mod_exp_consttime = BS.bn_mod_exp_consttime_safe exp_inst mod_exp_consttime_precompr2
+[@CInline]
+let exp_vartime_precomp: BE.bn_mod_exp_precomp_st t_limbs n_limbs =
+  BE.bn_mod_exp_vartime_precomp n_limbs
+    (BE.bn_mod_exp_bm_vartime_precomp mont_inst)
+    (BE.bn_mod_exp_fw_vartime_precomp mont_inst 4ul)
 
-let new_precompr2 = BS.new_bn_precomp_r2_mod_n mont_inst
+[@CInline]
+let exp_consttime_precomp: BE.bn_mod_exp_precomp_st t_limbs n_limbs =
+  BE.bn_mod_exp_consttime_precomp n_limbs
+    (BE.bn_mod_exp_bm_consttime_precomp mont_inst)
+    (BE.bn_mod_exp_fw_consttime_precomp mont_inst 4ul)
 
-let mod_inv_prime_vartime = BS.bn_mod_inv_prime_vartime_safe exp_inst mod_exp_vartime_precompr2
+[@CInline]
+let exp_vartime: BE.bn_mod_exp_st t_limbs n_limbs =
+  BE.mk_bn_mod_exp n_limbs precomp exp_vartime_precomp
+
+[@CInline]
+let exp_consttime: BE.bn_mod_exp_st t_limbs n_limbs =
+  BE.mk_bn_mod_exp n_limbs precomp exp_consttime_precomp
+
+let mod_exp_vartime = BS.mk_bn_mod_exp_safe n_limbs exp_check exp_vartime
+
+let mod_exp_consttime = BS.mk_bn_mod_exp_safe n_limbs exp_check exp_consttime
+
+let mod_inv_prime_vartime = BS.mk_bn_mod_inv_prime_safe n_limbs exp_vartime
+
+let mod_precomp k a res =
+  BS.bn_mod_ctx k bn_slow_precomp a res
+
+let mod_exp_vartime_precomp k a bBits b res =
+  BS.mk_bn_mod_exp_ctx k exp_vartime_precomp a bBits b res
+
+let mod_exp_consttime_precomp k a bBits b res =
+  BS.mk_bn_mod_exp_ctx k exp_consttime_precomp a bBits b res
+
+let mod_inv_prime_vartime_precomp k a res =
+  BS.mk_bn_mod_inv_prime_ctx k (BI.mk_bn_mod_inv_prime_precomp k.MA.len exp_vartime_precomp) a res
 
 let new_bn_from_bytes_be = BS.new_bn_from_bytes_be
 
