@@ -43,7 +43,7 @@ let ll (t:limb_t) =
 
 inline_for_extraction// noextract
 noeq
-[@CAbstractStruct]
+//[@CAbstractStruct]
 type bn_mont_ctx' (t:limb_t) (a:Type0{a == lb t}) (b:Type0{b == ll t}) = {
   len: BN.meta_len t;
   n: x:a{length #MUT #(limb t) x == v len};

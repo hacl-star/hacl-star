@@ -55,17 +55,14 @@ let bn_check_mod_exp #t #len n a bBits b =
   r
 
 
-val mk_bn_mod_exp_precompr2:
+val mk_bn_mod_exp_precomp:
     #t:limb_t
   -> len:BN.bn_len t
   -> bn_exp_mont:ME.bn_exp_mont_st t len ->
-  bn_mod_exp_precompr2_st t len
+  bn_mod_exp_precomp_st t len
 
-let mk_bn_mod_exp_precompr2 #t len bn_exp_mont n a bBits b r2 =
-  let mu = BI.mod_inv_limb n.[0] in
-  BI.bn_mod_inv_limb_lemma n;
+let mk_bn_mod_exp_precomp #t len bn_exp_mont n mu r2 a bBits b =
   bn_eval_bound n len;
-
   let aM = BM.bn_to_mont n mu r2 a in
   BM.bn_to_mont_lemma n mu r2 a;
 
@@ -79,46 +76,64 @@ let mk_bn_mod_exp_precompr2 #t len bn_exp_mont n a bBits b r2 =
   acc
 
 
-let bn_mod_exp_rl_precompr2 #t len n a bBits b r2 =
-  mk_bn_mod_exp_precompr2 #t len ME.bn_exp_mont_bm_vartime n a bBits b r2
+let bn_mod_exp_rl_precomp #t len n mu r2 a bBits b =
+  mk_bn_mod_exp_precomp #t len ME.bn_exp_mont_bm_vartime n mu r2 a bBits b
+
+let bn_mod_exp_mont_ladder_swap_precomp #t len n mu r2 a bBits b =
+  mk_bn_mod_exp_precomp #t len ME.bn_exp_mont_bm_consttime n mu r2 a bBits b
+
+let bn_mod_exp_fw_precomp #t len l n mu r2 a bBits b =
+  mk_bn_mod_exp_precomp #t len (ME.bn_exp_mont_fw l) n mu r2 a bBits b
 
 
-let bn_mod_exp_mont_ladder_swap_precompr2 #t len n a bBits b r2 =
-  mk_bn_mod_exp_precompr2 #t len ME.bn_exp_mont_bm_consttime n a bBits b r2
-
-
-let bn_mod_exp_fw_precompr2 #t len l n a bBits b r2 =
-  mk_bn_mod_exp_precompr2 #t len (ME.bn_exp_mont_fw l) n a bBits b r2
-
-
-let bn_mod_exp_vartime_precompr2 #t len n a bBits b r2 =
+let bn_mod_exp_vartime_precomp #t len n mu r2 a bBits b =
   if bBits < ME.bn_exp_mont_vartime_threshold then
-    bn_mod_exp_rl_precompr2 #t len n a bBits b r2
+    bn_mod_exp_rl_precomp #t len n mu r2 a bBits b
   else
-    bn_mod_exp_fw_precompr2 #t len 4 n a bBits b r2
+    bn_mod_exp_fw_precomp #t len 4 n mu r2 a bBits b
 
-let bn_mod_exp_consttime_precompr2 #t len n a bBits b r2 =
+let bn_mod_exp_consttime_precomp #t len n mu r2 a bBits b =
   if bBits < ME.bn_exp_mont_consttime_threshold then
-    bn_mod_exp_mont_ladder_swap_precompr2 #t len n a bBits b r2
+    bn_mod_exp_mont_ladder_swap_precomp #t len n mu r2 a bBits b
   else
-    bn_mod_exp_fw_precompr2 #t len 4 n a bBits b r2
+    bn_mod_exp_fw_precomp #t len 4 n mu r2 a bBits b
+
+
+val mk_bn_mod_exp_precompr2:
+    #t:limb_t
+  -> len:BN.bn_len t
+  -> bn_exp_precomp:bn_mod_exp_precomp_st t len ->
+  bn_mod_exp_precompr2_st t len
+
+let mk_bn_mod_exp_precompr2 #t len bn_exp_precomp n r2 a bBits b =
+  let mu = BI.mod_inv_limb n.[0] in
+  BI.bn_mod_inv_limb_lemma n;
+  bn_exp_precomp n mu r2 a bBits b
+
+
+let bn_mod_exp_vartime_precompr2 #t len n r2 a bBits b =
+  mk_bn_mod_exp_precompr2 #t len (bn_mod_exp_vartime_precomp len) n r2 a bBits b
+
+let bn_mod_exp_consttime_precompr2 #t len n r2 a bBits b =
+  mk_bn_mod_exp_precompr2 #t len (bn_mod_exp_consttime_precomp len) n r2 a bBits b
 
 
 val mk_bn_mod_exp:
     #t:limb_t
   -> len:BN.bn_len t
-  -> bn_mod_exp_precompr2:bn_mod_exp_precompr2_st t len ->
+  -> bn_mod_exp_precomp:bn_mod_exp_precomp_st t len ->
   bn_mod_exp_st t len
 
-let mk_bn_mod_exp #t len bn_mod_exp_precompr2 nBits n a bBits b =
+let mk_bn_mod_exp #t len bn_mod_exp_precomp nBits n a bBits b =
+  let mu = BI.mod_inv_limb n.[0] in
+  BI.bn_mod_inv_limb_lemma n;
   let r2 = BM.bn_precomp_r2_mod_n nBits n in
   BM.bn_precomp_r2_mod_n_lemma nBits n;
-  bn_mod_exp_precompr2 n a bBits b r2
+  bn_mod_exp_precomp n mu r2 a bBits b
 
 
 let bn_mod_exp_vartime #t len nBits n a bBits b =
-  mk_bn_mod_exp len (bn_mod_exp_vartime_precompr2 len) nBits n a bBits b
-
+  mk_bn_mod_exp len (bn_mod_exp_vartime_precomp len) nBits n a bBits b
 
 let bn_mod_exp_consttime #t len nBits n a bBits b =
-  mk_bn_mod_exp len (bn_mod_exp_consttime_precompr2 len) nBits n a bBits b
+  mk_bn_mod_exp len (bn_mod_exp_consttime_precomp len) nBits n a bBits b

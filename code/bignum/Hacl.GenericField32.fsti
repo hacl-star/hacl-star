@@ -10,6 +10,9 @@ module MA = Hacl.Bignum.MontArithmetic
 inline_for_extraction noextract
 let t_limbs: Hacl.Bignum.Definitions.limb_t = Lib.IntTypes.U32
 
+//inline_for_extraction noextract
+let bn_mont_ctx_u32 = MA.bn_mont_ctx_u32
+
 [@@ CPrologue
 "/*******************************************************************************
 
@@ -50,7 +53,7 @@ val field_free: MA.bn_field_free_st t_limbs
 [@@ Comment "Return the size of a modulus `n` in limbs.
 
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val field_get_len: k:MA.bn_mont_ctx_u32 -> MA.bn_field_get_len_st k
+val field_get_len: k:bn_mont_ctx_u32 -> MA.bn_field_get_len_st k
 
 [@@ Comment "Convert a bignum from the regular representation to the Montgomery representation.
 
@@ -58,7 +61,7 @@ val field_get_len: k:MA.bn_mont_ctx_u32 -> MA.bn_field_get_len_st k
 
   The argument a and the outparam aM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val to_field: k:MA.bn_mont_ctx_u32 -> MA.bn_to_field_st k
+val to_field: k:bn_mont_ctx_u32 -> MA.bn_to_field_st k
 
 [@@ Comment "Convert a result back from the Montgomery representation to the regular representation.
 
@@ -67,37 +70,37 @@ val to_field: k:MA.bn_mont_ctx_u32 -> MA.bn_to_field_st k
 
   The argument aM and the outparam a are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val from_field: k:MA.bn_mont_ctx_u32 -> MA.bn_from_field_st k
+val from_field: k:bn_mont_ctx_u32 -> MA.bn_from_field_st k
 
 [@@ Comment "Write `aM + bM mod n` in `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val add: k:MA.bn_mont_ctx_u32 -> MA.bn_field_add_st k
+val add: k:bn_mont_ctx_u32 -> MA.bn_field_add_st k
 
 [@@ Comment "Write `aM - bM mod n` to `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val sub: k:MA.bn_mont_ctx_u32 -> MA.bn_field_sub_st k
+val sub: k:bn_mont_ctx_u32 -> MA.bn_field_sub_st k
 
 [@@ Comment "Write `aM * bM mod n` in `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val mul: k:MA.bn_mont_ctx_u32 -> MA.bn_field_mul_st k
+val mul: k:bn_mont_ctx_u32 -> MA.bn_field_mul_st k
 
 [@@ Comment "Write `aM * aM mod n` in `cM`.
 
   The argument aM and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val sqr: k:MA.bn_mont_ctx_u32 -> MA.bn_field_sqr_st k
+val sqr: k:bn_mont_ctx_u32 -> MA.bn_field_sqr_st k
 
 [@@ Comment "Convert a bignum `one` to its Montgomery representation.
 
   The outparam oneM is meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val one: k:MA.bn_mont_ctx_u32 -> MA.bn_field_one_st k
+val one: k:bn_mont_ctx_u32 -> MA.bn_field_one_st k
 
 [@@ Comment "Write `aM ^ b mod n` in `resM`.
 
@@ -116,7 +119,7 @@ val one: k:MA.bn_mont_ctx_u32 -> MA.bn_field_one_st k
   preconditions are observed.
   • 0 < b
   • b < pow2 bBits "]
-val exp_consttime: k:MA.bn_mont_ctx_u32 -> MA.bn_field_exp_consttime_st k
+val exp_consttime: k:bn_mont_ctx_u32 -> MA.bn_field_exp_consttime_st k
 
 [@@ Comment "Write `aM ^ b mod n` in `resM`.
 
@@ -135,7 +138,7 @@ val exp_consttime: k:MA.bn_mont_ctx_u32 -> MA.bn_field_exp_consttime_st k
   preconditions are observed.
   • 0 < b
   • b < pow2 bBits "]
-val exp_vartime: k:MA.bn_mont_ctx_u32 -> MA.bn_field_exp_vartime_st k
+val exp_vartime: k:bn_mont_ctx_u32 -> MA.bn_field_exp_vartime_st k
 
 [@@ Comment "Write `aM ^ (-1) mod n` in `aInvM`.
 
@@ -146,4 +149,4 @@ val exp_vartime: k:MA.bn_mont_ctx_u32 -> MA.bn_field_exp_vartime_st k
   preconditions are observed.
   • n is a prime
   • 0 < aM "]
-val inverse: k:MA.bn_mont_ctx_u32 -> MA.bn_field_inv_st k
+val inverse: k:bn_mont_ctx_u32 -> MA.bn_field_inv_st k

@@ -20,55 +20,55 @@ module BN = Hacl.Spec.Bignum
 
 ///  Modular reduction based on Montgomery arithmetic
 
-val bn_mod_slow_precompr2:
+val bn_mod_slow_precomp:
     #t:limb_t
-  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
-  -> n:lbignum t nLen
+  -> #len:BN.bn_len t
+  -> n:lbignum t len
   -> mu:limb t
-  -> r2:lbignum t nLen
-  -> a:lbignum t (nLen + nLen) ->
-  lbignum t nLen
+  -> r2:lbignum t len
+  -> a:lbignum t (len + len) ->
+  lbignum t len
 
-let bn_mod_slow_precompr2 #t #nLen n mu r2 a =
+let bn_mod_slow_precomp #t #len n mu r2 a =
   let a_mod = BAM.bn_almost_mont_reduction n mu a in
   let res = BM.bn_to_mont n mu r2 a_mod in
   res
 
 
-val bn_mod_slow_precompr2_lemma:
+val bn_mod_slow_precomp_lemma:
     #t:limb_t
-  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
-  -> n:lbignum t nLen
+  -> #len:BN.bn_len t
+  -> n:lbignum t len
   -> mu:limb t
-  -> r2:lbignum t nLen
-  -> a:lbignum t (nLen + nLen) -> Lemma
+  -> r2:lbignum t len
+  -> a:lbignum t (len + len) -> Lemma
   (requires
     BM.bn_mont_pre n mu /\
-    bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
-  (ensures bn_v (bn_mod_slow_precompr2 n mu r2 a) == bn_v a % bn_v n)
+    bn_v r2 == pow2 (2 * bits t * len) % bn_v n)
+  (ensures bn_v (bn_mod_slow_precomp n mu r2 a) == bn_v a % bn_v n)
 
-let bn_mod_slow_precompr2_lemma #t #nLen n mu r2 a =
-  let r = pow2 (bits t * nLen) in
-  let d, _ = M.eea_pow2_odd (bits t * nLen) (bn_v n) in
-  M.mont_preconditions_d (bits t) nLen (bn_v n);
-  assert (M.mont_pre (bits t) nLen (bn_v n) (v mu));
+let bn_mod_slow_precomp_lemma #t #len n mu r2 a =
+  let r = pow2 (bits t * len) in
+  let d, _ = M.eea_pow2_odd (bits t * len) (bn_v n) in
+  M.mont_preconditions_d (bits t) len (bn_v n);
+  assert (M.mont_pre (bits t) len (bn_v n) (v mu));
 
   let a_mod = BAM.bn_almost_mont_reduction n mu a in
   let res = BM.bn_to_mont n mu r2 a_mod in
   BAM.bn_almost_mont_reduction_lemma n mu a;
   BM.bn_to_mont_lemma n mu r2 a_mod;
 
-  bn_eval_bound a (nLen + nLen);
-  assert (bn_v a < pow2 (bits t * (nLen + nLen)));
-  Math.Lemmas.pow2_plus (bits t * nLen) (bits t * nLen);
+  bn_eval_bound a (len + len);
+  assert (bn_v a < pow2 (bits t * (len + len)));
+  Math.Lemmas.pow2_plus (bits t * len) (bits t * len);
   assert (bn_v a < r * r);
 
-  AM.almost_mont_reduction_lemma (bits t) nLen (bn_v n) d (v mu) (bn_v a);
+  AM.almost_mont_reduction_lemma (bits t) len (bn_v n) d (v mu) (bn_v a);
   assert (bn_v a_mod % bn_v n == bn_v a * d % bn_v n);
 
   calc (==) {
     bn_v res;
-    (==) { M.to_mont_lemma (bits t) nLen (bn_v n) d (v mu) (bn_v a_mod) }
+    (==) { M.to_mont_lemma (bits t) len (bn_v n) d (v mu) (bn_v a_mod) }
     bn_v a_mod * r % bn_v n;
     (==) { Math.Lemmas.lemma_mod_mul_distr_l (bn_v a_mod) r (bn_v n) }
     bn_v a_mod % bn_v n * r % bn_v n;
@@ -83,33 +83,33 @@ let bn_mod_slow_precompr2_lemma #t #nLen n mu r2 a =
 
 val bn_mod_slow:
     #t:limb_t
-  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
-  -> nBits:size_nat{nBits / bits t < nLen}
-  -> n:lbignum t nLen
-  -> a:lbignum t (nLen + nLen) ->
-  lbignum t nLen
+  -> #len:BN.bn_len t
+  -> nBits:size_nat{nBits / bits t < len}
+  -> n:lbignum t len
+  -> a:lbignum t (len + len) ->
+  lbignum t len
 
-let bn_mod_slow #t #nLen nBits n a =
+let bn_mod_slow #t #len nBits n a =
   let mu = BI.mod_inv_limb n.[0] in
   let r2 = BM.bn_precomp_r2_mod_n nBits n in
-  bn_mod_slow_precompr2 n mu r2 a
+  bn_mod_slow_precomp n mu r2 a
 
 
 val bn_mod_slow_lemma:
     #t:limb_t
-  -> #nLen:size_pos{2 * bits t * nLen <= max_size_t}
-  -> nBits:size_nat{nBits / bits t < nLen}
-  -> n:lbignum t nLen
-  -> a:lbignum t (nLen + nLen) -> Lemma
+  -> #len:BN.bn_len t
+  -> nBits:size_nat
+  -> n:lbignum t len
+  -> a:lbignum t (len + len) -> Lemma
   (requires
     1 < bn_v n /\ bn_v n % 2 = 1 /\
-    pow2 nBits < bn_v n)
+    nBits / bits t < len /\ pow2 nBits < bn_v n)
   (ensures  bn_v (bn_mod_slow nBits n a) == bn_v a % bn_v n)
 
-let bn_mod_slow_lemma #t #nLen nBits n a =
+let bn_mod_slow_lemma #t #len nBits n a =
   let mu = BI.mod_inv_limb n.[0] in
   BI.bn_mod_inv_limb_lemma n;
   let r2 = BM.bn_precomp_r2_mod_n nBits n in
   BM.bn_precomp_r2_mod_n_lemma nBits n;
-  bn_eval_bound n nLen;
-  bn_mod_slow_precompr2_lemma n mu r2 a
+  bn_eval_bound n len;
+  bn_mod_slow_precomp_lemma n mu r2 a
