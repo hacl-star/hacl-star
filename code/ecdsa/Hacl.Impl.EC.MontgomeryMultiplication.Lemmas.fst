@@ -151,14 +151,14 @@ let lemma_division_is_multiplication t3 prime =
 
 
 
-val lemma_k0_computation: #c: curve-> t: nat -> k0 : uint64 {k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c)} ->
+val lemma_k0_computation: #c: curve-> t: nat -> k0 : uint64 {k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)} ->
   Lemma (let prime = getPrime c in  (t + prime * (((t % pow2 64) * v k0) % pow2 64)) % pow2 64 == 0)
 
 let lemma_k0_computation #c t k0 = 
   let prime = getPrime c in 
-  let n0 = getLastWord #c in 
+  let n0 = getLastWordPrime #c in 
 
-  Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWord #c);
+  Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWordPrime #c);
 
   let k = t + prime * (((t % pow2 64) * v k0) % pow2 64) in  
   lemma_mod_mul_distr_l t (v k0) (pow2 64);
@@ -192,7 +192,7 @@ let lemma_k0_computation #c t k0 =
 val montgomery_multiplication_one_round_proof: 
   #c: curve ->
   t: nat ->
-  k0 : uint64 {k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c)} ->
+  k0 : uint64 {k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)} ->
   round: nat {round = (t + getPrime c * (((t % pow2 64) * v k0) % pow2 64)) / pow2 64} -> 
   co: nat {co % getPrime c = t % getPrime c} -> 
   Lemma (round  % getPrime c == co * (modp_inv2_prime (pow2 64) (getPrime c)) % ( getPrime c ))

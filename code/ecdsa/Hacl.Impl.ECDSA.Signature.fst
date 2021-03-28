@@ -15,6 +15,7 @@ open FStar.Mul
 open FStar.Math.Lemmas
 
 open Hacl.Hash.SHA2
+open Hacl.Spec.EC.Definition
 
 open Spec.ECC
 open Spec.ECC.Curves

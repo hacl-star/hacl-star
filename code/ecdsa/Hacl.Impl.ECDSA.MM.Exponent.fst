@@ -19,6 +19,7 @@ open FStar.Tactics.Canon
 open FStar.Mul
 
 open Lib.Loops
+open Hacl.Spec.EC.Definition
 
 friend Hacl.Impl.ECDSA.MontgomeryMultiplication
 
@@ -161,13 +162,13 @@ let montgomery_ladder_exponent #c r =
   push_frame(); 
     let p = create (size 4) (u64 0) in 
     upload_one_montg_form #c p; 
-    recall_contents order_inverse_buffer (prime_order_inverse_seq #P256);
+    recall_contents (order_inverse_buffer #P256) (prime_order_inverse_seq #P256);
     let h = ST.get() in
-    mut_const_immut_disjoint #uint64 #uint8 p order_inverse_buffer h;
-    mut_const_immut_disjoint #uint64 #uint8 r order_inverse_buffer h;
-    assert (disjoint p order_inverse_buffer);
-    assert (disjoint r order_inverse_buffer);
-    _montgomery_ladder_exponent p r order_inverse_buffer;
+    mut_const_immut_disjoint #uint64 #uint8 p (order_inverse_buffer #P256) h;
+    mut_const_immut_disjoint #uint64 #uint8 r (order_inverse_buffer #P256) h;
+    assert (disjoint p (order_inverse_buffer #P256));
+    assert (disjoint r (order_inverse_buffer #P256));
+    _montgomery_ladder_exponent p r (order_inverse_buffer #P256);
       lemmaToDomainFromDomain 1;
     copy r p;
   pop_frame()  

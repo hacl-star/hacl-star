@@ -20,9 +20,13 @@ open FStar.Tactics
 open FStar.Tactics.Canon 
 
 open Hacl.Impl.EC.Masking
-
+open Hacl.Spec.EC.Definition
 open FStar.Mul
 open Lib.IntTypes.Intrinsics
+
+open Hacl.Impl.ECDSA.LowLevel
+
+
 
 #reset-options "--z3rlimit 200"
 
@@ -238,7 +242,7 @@ let reduction_prime_2prime_with_carry #c x result  =
       let tempBufferForSubborrow = create (size 1) (u64 0) in 
       let cin = Lib.Buffer.index x (size 4) in 
       let x_ = Lib.Buffer.sub x (size 0) (size 4) in 
-          recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
+          recall_contents prime256order_buffer (Lib.Sequence.of_list (order_list P256));
       let c = Hacl.Impl.P256.LowLevel.sub4_il x_ prime256order_buffer tempBuffer in
 	let h1 = ST.get() in 
 
@@ -261,7 +265,7 @@ let reduction_prime_2prime_with_carry2 #cu cin x result  =
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in 
     let tempBufferForSubborrow = create (size 1) (u64 0) in 
-        recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
+        recall_contents prime256order_buffer (Lib.Sequence.of_list (order_list P256));
     let c = Hacl.Impl.P256.LowLevel .sub4_il x prime256order_buffer tempBuffer in
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
     cmovznz4 #cu carry tempBuffer x result;
@@ -279,7 +283,7 @@ let lemma_reduction1 a r =
 let reduction_prime_2prime_order #cu x result  = 
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in 
-    recall_contents prime256order_buffer (Lib.Sequence.of_list p256_order_prime_list);
+    recall_contents prime256order_buffer (Lib.Sequence.of_list (order_list P256));
       let h0 = ST.get() in 
     let c = sub4_il x prime256order_buffer tempBuffer in
       let h1 = ST.get() in 
@@ -372,9 +376,9 @@ let montgomery_multiplication_ecdsa_module #c  a b result =
     montgomery_multiplication_round #c t t k0;
     montgomery_multiplication_round #c t t k0;
     montgomery_multiplication_round #c t t k0;
-(*
 
-      assert_by_tactic (as_nat c h0 b * as_nat c h0 a == as_nat c h0 a * as_nat c h0 b) canon;
+
+(*       assert_by_tactic (as_nat c h0 b * as_nat c h0 a == as_nat c h0 a * as_nat c h0 b) canon;
       mul_lemma_ (as_nat c h0 a) (as_nat c h0 b) prime_p256_order;
    montgomery_multiplication_round_twice #P256 t round2 k0; 
      let h2 = ST.get() in 
@@ -383,33 +387,14 @@ let montgomery_multiplication_ecdsa_module #c  a b result =
      lemma_mod_mul_distr_l (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 128) prime_p256_order) (modp_inv2_prime (pow2 128) prime_p256_order) prime_p256_order; 
      lemma_montgomery_mod_inverse_addition2 (as_nat c h0 a * as_nat c h0 b);
      
-     lemma_montgomery_mult_result_less_than_prime_p256_order (as_nat c h0 a) (as_nat c h0 b) (uint_v k0); *) 
+     lemma_montgomery_mult_result_less_than_prime_p256_order (as_nat c h0 a) (as_nat c h0 b) (uint_v k0);  
    reduction_prime_2prime_with_carry t result;  
      
      lemmaFromDomainToDomain (as_nat c h0 a);
      lemmaFromDomainToDomain (as_nat c h0 b);
      multiplicationInDomain #(fromDomain_ (as_nat c h0 a)) #(fromDomain_ (as_nat c h0 b)) (as_nat c h0 a) (as_nat c h0 b);
-     inDomain_mod_is_not_mod (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b));
+     inDomain_mod_is_not_mod (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b)); *)
     pop_frame()
 
 
 
-let felem_add arg1 arg2 out = 
-  let t = add4 arg1 arg2 out in 
-  reduction_prime_2prime_with_carry2 t out out
-
-
-let lemma_felem_add a b = 
-  lemmaFromDomain a;
-  lemmaFromDomain b;
-  lemmaFromDomain (a + b);
-  assert(fromDomain_ a + fromDomain_ b = (a * modp_inv2_prime (pow2 256) prime_p256_order) % (getOrder #P256) + (b * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order);
-  let aD = a * modp_inv2_prime (pow2 256) (getOrder #P256) in 
-  let bD = b * modp_inv2_prime (pow2 256) (getOrder #P256) in 
-  assert(fromDomain_ (a + b) = (aD + bD) % prime_p256_order);
-
-  lemma_mod_plus_distr_l aD bD prime_p256_order;
-  lemma_mod_plus_distr_l bD (aD % prime_p256_order) prime_p256_order;
-  assert(fromDomain_ (a + b) = (aD % (getOrder #P256) + bD % prime_p256_order) % prime_p256_order);
-
-  assert(fromDomain_ (a + b) = (fromDomain_ a + fromDomain_ b) % prime_p256_order)

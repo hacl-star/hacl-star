@@ -101,17 +101,17 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
 
   let h0 = ST.get() in 
 
-  montgomery_square_buffer #c qZ z2Square; 
-  montgomery_square_buffer #c pZ z1Square;
+  montgomery_square_buffer_dh #c qZ z2Square; 
+  montgomery_square_buffer_dh #c pZ z1Square;
 
-  montgomery_multiplication_buffer #c z2Square qZ z2Cube;
-  montgomery_multiplication_buffer #c z1Square pZ z1Cube;
+  montgomery_multiplication_buffer_dh #c z2Square qZ z2Cube;
+  montgomery_multiplication_buffer_dh #c z1Square pZ z1Cube;
 
-  montgomery_multiplication_buffer #c z2Square pX u1;
-  montgomery_multiplication_buffer #c z1Square qX u2;
+  montgomery_multiplication_buffer_dh #c z2Square pX u1;
+  montgomery_multiplication_buffer_dh #c z1Square qX u2;
     
-  montgomery_multiplication_buffer #c z2Cube pY s1;
-  montgomery_multiplication_buffer #c z1Cube qY s2;
+  montgomery_multiplication_buffer_dh #c z2Cube pY s1;
+  montgomery_multiplication_buffer_dh #c z1Cube qY s2;
 
   let prime = getPrime c in 
   
@@ -222,10 +222,10 @@ let _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 t4 =
   
   felem_sub u2 u1 h; 
   felem_sub s2 s1 r;    
-  montgomery_square_buffer h temp;
+  montgomery_square_buffer_dh h temp;
     let h1 = ST.get() in   
-  montgomery_multiplication_buffer temp u1 uh;
-  montgomery_multiplication_buffer temp h hCube;
+  montgomery_multiplication_buffer_dh temp u1 uh;
+  montgomery_multiplication_buffer_dh temp h hCube;
 
   let prime = getPrime c in 
   lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h1 h) * fromDomain_ #c (as_nat c h1 h)) (fromDomain_ #c (as_nat c h1 u1)) prime;
@@ -297,7 +297,7 @@ let _computeX3_point_add #c x3 hCube uh r t3 =
   let rH = sub t3 len len in 
   let twoUh = sub t3 (size 2 *! len) len in 
   
-  montgomery_square_buffer r rSquare; 
+  montgomery_square_buffer_dh r rSquare; 
   felem_sub rSquare hCube rH;
   multByTwo uh twoUh;
   felem_sub rH twoUh x3; 
@@ -379,9 +379,9 @@ let _computeY3_point_add #c y3 s1 hCube uh x3 r t3 =
   let u1hx3 = sub t3 len len in 
   let ru1hx3 = sub t3 (size 2 *! len) len in 
 
-  montgomery_multiplication_buffer s1 hCube s1hCube;
+  montgomery_multiplication_buffer_dh s1 hCube s1hCube;
   felem_sub uh x3 u1hx3; 
-  montgomery_multiplication_buffer u1hx3 r ru1hx3; 
+  montgomery_multiplication_buffer_dh u1hx3 r ru1hx3; 
   felem_sub #c ru1hx3 s1hCube y3;
 
   let h3 = ST.get() in 
@@ -460,8 +460,8 @@ val __computeZ3_point_add: #c: curve -> z3: felem  c ->  z1: felem c -> z2: fele
 let __computeZ3_point_add #c z3 z1 z2 h tempBuffer = 
   let h0 = ST.get() in 
   let z1z2 = sub tempBuffer (size 0) (getCoordinateLenU64 c) in
-  montgomery_multiplication_buffer z1 z2 z1z2;
-  montgomery_multiplication_buffer z1z2 h z3;
+  montgomery_multiplication_buffer_dh z1 z2 z1z2;
+  montgomery_multiplication_buffer_dh z1z2 h z3;
 
   calc (==)
   {

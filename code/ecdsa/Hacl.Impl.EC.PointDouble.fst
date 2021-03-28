@@ -71,16 +71,16 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
   let a1 = sub tempBuffer (coordinateLen) (coordinateLen) in 
   let alpha0 = sub tempBuffer (size 2 *! coordinateLen) (coordinateLen) in 
 
-  montgomery_square_buffer pZ delta; (* delta = z * z*)
-  montgomery_square_buffer pY gamma; (* gamma = y * y *)
-  montgomery_multiplication_buffer pX gamma beta; (* beta = x * gamma *)
+  montgomery_square_buffer_dh pZ delta; (* delta = z * z*)
+  montgomery_square_buffer_dh pY gamma; (* gamma = y * y *)
+  montgomery_multiplication_buffer_dh pX gamma beta; (* beta = x * gamma *)
   
   let h0 = ST.get() in 
 
   felem_sub pX delta a0; (* a0 = x - delta *)
   felem_add pX delta a1; (* a1 = x + delta *)
 
-  montgomery_multiplication_buffer #c a0 a1 alpha0; (* alpha = (x - delta) * (x + delta) *)
+  montgomery_multiplication_buffer_dh #c a0 a1 alpha0; (* alpha = (x - delta) * (x + delta) *)
   multByThree alpha0 alpha;
 
     let prime = getPrime c in 
@@ -120,7 +120,7 @@ val point_double_x3: #c: curve -> x3: felem c -> alpha: felem c -> fourBeta: fel
 
 let point_double_x3 #c x3 alpha fourBeta beta eightBeta  = 
     let h0 = ST.get() in 
-  montgomery_square_buffer alpha x3; (* x3 = alpha ** 2 *)
+  montgomery_square_buffer_dh alpha x3; (* x3 = alpha ** 2 *)
   multByFour beta fourBeta; (*  fourBeta = beta * 4 *)
   multByTwo fourBeta eightBeta; (* eightBeta = beta * 8 *)
   felem_sub x3 eightBeta x3 (* x3 = alpha ** 2 - beta * 8 *);
@@ -162,7 +162,7 @@ let point_double_z3 #c z3 pY pZ gamma delta  =
     let h0 = ST.get() in 
 
   felem_add pY pZ z3; (* z3 = py + pz *) 
-  montgomery_square_buffer z3 z3; (* z3 = (py + pz) ** 2 *) 
+  montgomery_square_buffer_dh z3 z3; (* z3 = (py + pz) ** 2 *) 
   felem_sub z3 gamma z3; (* z3 =  (py + pz) ** 2 - gamma  *)
   felem_sub z3 delta z3 (* z3 = (py + pz) ** 2 - gamma - delta *);
 
@@ -209,8 +209,8 @@ val point_double_y3: #c: curve -> y3: felem c -> x3: felem c -> alpha: felem c -
 let point_double_y3 #c y3 x3 alpha gamma eightGamma fourBeta = 
     let h0 = ST.get() in 
   felem_sub fourBeta x3 y3; (* y3 = 4 * beta - x3 *)
-  montgomery_multiplication_buffer alpha y3 y3; (* y3 = alpha * (4 * beta - x3) *)
-  montgomery_square_buffer gamma gamma; (* gamma = gamma ** 2 *)
+  montgomery_multiplication_buffer_dh alpha y3 y3; (* y3 = alpha * (4 * beta - x3) *)
+  montgomery_square_buffer_dh gamma gamma; (* gamma = gamma ** 2 *)
   multByEight gamma eightGamma; (* gamma = 8 * gamma ** 2 *)
   felem_sub y3 eightGamma y3; (* y3 = alpha * y3 - 8 * gamma **2 *)
 

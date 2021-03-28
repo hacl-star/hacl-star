@@ -186,10 +186,19 @@ int main()
 	if (test_nist())
 		printf("%s\n", "Testing is correct \n ");
 	else
-		{
-			printf("%s\n", "Testing is failed \n ");
-			return -1;
-		}
+	{
+		printf("%s\n", "Testing is failed \n ");
+		return -1;
+	}
+
+	uint64_t test[18] = {0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff, 0xffffffffffffffff,0xffffffffffffffff, 0xffffffffffffffff,0xffffffffffffffff, 0xffffffffffffffff,0xffffffffffffffff, 0xffffffffffffffff,0xffffffffffffffff, 0xffffffffffffffff,0xffffffffffffffff, 0xffffffffffffffff,0xffffffffffffffff, 0xffffffffffffffff}; 
+	uint64_t o [9] = {0};
+
+
+	// reduction_p521(test, o);
+
+
+
 
 
 

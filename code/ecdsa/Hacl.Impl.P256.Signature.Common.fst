@@ -70,7 +70,7 @@ val y_2: #c: curve -> y: felem c -> r: felem c -> Stack unit
 
 let y_2 #c y r = 
   toDomain #c y r;
-  montgomery_square_buffer #c r r
+  montgomery_square_buffer_dh #c r r
 
 
 inline_for_extraction noextract
@@ -150,8 +150,8 @@ let xcube_minus_x #c x r =
   let b_constant = create sz (u64 0) in 
 
   toDomain #c x xToDomainBuffer; 
-  montgomery_square_buffer #c xToDomainBuffer r;
-  montgomery_multiplication_buffer #c r xToDomainBuffer r;
+  montgomery_square_buffer_dh #c xToDomainBuffer r;
+  montgomery_multiplication_buffer_dh #c r xToDomainBuffer r;
     lemma_mod_mul_distr_l ((as_nat c h0 x) * (as_nat c h0 x)) (as_nat c h0 x) prime;
   multByThree #c xToDomainBuffer minusThreeXBuffer;
   felem_sub #c r minusThreeXBuffer r;

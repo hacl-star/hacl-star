@@ -14,6 +14,7 @@ open Hacl.Impl.ECDSA.MontgomeryMultiplication
 open Hacl.Impl.P256.LowLevel 
 
 open Hacl.Lemmas.P256
+open Hacl.Spec.EC.Definition
 open Lib.ByteSequence
 
 open Spec.ECC

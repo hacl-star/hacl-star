@@ -108,7 +108,7 @@ let computeYFromX #c x result sign =
     uploadA #c aCoordinateBuffer;
     uploadB #c bCoordinateBuffer;
     
-    montgomery_multiplication_buffer aCoordinateBuffer x aCoordinateBuffer;
+    montgomery_multiplication_buffer_dh aCoordinateBuffer x aCoordinateBuffer;
   cube x result;
     felem_add result aCoordinateBuffer result;
     felem_add result bCoordinateBuffer result;

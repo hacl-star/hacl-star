@@ -20,6 +20,7 @@ open Hacl.Impl.ECDSA.MM.Exponent
 open Hacl.Spec.ECDSA.Definition
 open Spec.ECDSA
 open Spec.ECC
+open Hacl.Spec.EC.Definition
 open Spec.ECC.Curves
 (* open Spec.ECC.Lemmas *)
 
@@ -78,7 +79,7 @@ val isMoreThanZeroLessThanOrderMinusOne: #c: curve -> f: felem c-> Stack bool
 let isMoreThanZeroLessThanOrderMinusOne f =
   push_frame();
   let tempBuffer = create (size 4) (u64 0) in
-  recall_contents (order_buffer #P256) (Lib.Sequence.of_list p256_order_prime_list);
+  recall_contents (order_buffer #P256) (Lib.Sequence.of_list (order_list P256));
   let carry = sub_bn_gl #P256 f (order_buffer #P256) tempBuffer in
   let less = eq_u64_nCT carry (u64 1) in
   let more = isZero_uint64_nCT f in

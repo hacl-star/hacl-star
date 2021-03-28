@@ -15,6 +15,7 @@ open Hacl.Spec.ECDSA.Definition
 open Spec.ECDSA
 open Hacl.Impl.P256.LowLevel 
 open Hacl.Impl.EC.Setup
+open Hacl.Spec.EC.Definition
 
 open FStar.Mul
 
@@ -73,13 +74,3 @@ val montgomery_multiplication_ecdsa_module: #c: curve -> a: felem c -> b: felem 
       as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b) % (getOrder #P256)))
 
 
-val felem_add: #c: curve -> arg1: felem c -> arg2: felem c -> out: felem c -> Stack unit 
-  (requires (fun h0 ->  
-    live h0 arg1 /\ live h0 arg2 /\ live h0 out /\ 
-    eq_or_disjoint arg1 out /\ eq_or_disjoint arg2 out /\
-    as_nat c h0 arg1 < (getOrder #P256) /\ as_nat c h0 arg2 < (getOrder #P256)
-   )
-  )
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ as_nat c h1 out == (as_nat c h0 arg1 + as_nat c h0 arg2) % (getOrder #P256)))
-
-val lemma_felem_add: a: nat -> b: nat -> Lemma ((fromDomain_ a + fromDomain_ b) % (getOrder #P256) = fromDomain_ (a + b))

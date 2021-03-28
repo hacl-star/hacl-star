@@ -64,7 +64,7 @@ let toDomain #c value result =
 
 
 let fromDomain f result = 
-  montgomery_multiplication_buffer_by_one f result  
+  montgomery_multiplication_buffer_by_one_dh f result  
 
 
 let pointToDomain #c p result = 
@@ -338,13 +338,13 @@ let norm #c p resultPoint tempBuffer =
   let t8 = sub tempBuffer (3ul *! len) (8ul *! len) in 
 
     let h0 = ST.get() in 
-  montgomery_square_buffer #c zf z2f; 
-  montgomery_multiplication_buffer #c z2f zf z3f; 
+  montgomery_square_buffer_dh #c zf z2f; 
+  montgomery_multiplication_buffer_dh #c z2f zf z3f; 
 
   exponent #c z2f z2f t8;
   exponent #c z3f z3f t8; 
-  montgomery_multiplication_buffer #c xf z2f z2f;
-  montgomery_multiplication_buffer #c yf z3f z3f;
+  montgomery_multiplication_buffer_dh #c xf z2f z2f;
+  montgomery_multiplication_buffer_dh #c yf z3f z3f;
   normalisation_update z2f z3f p resultPoint; 
 
   admit();
@@ -371,9 +371,9 @@ let normX #c p result tempBuffer =
   let t8 = sub tempBuffer (3ul *. len) (8ul *. len) in 
 
     let h0 = ST.get() in 
-  montgomery_square_buffer #c zf z2f; 
+  montgomery_square_buffer_dh #c zf z2f; 
   exponent #c z2f z2f t8;
-  montgomery_multiplication_buffer #c z2f xf z2f;
+  montgomery_multiplication_buffer_dh #c z2f xf z2f;
   fromDomain z2f result;
 
   admit();

@@ -152,7 +152,7 @@ let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c)
   
 
 inline_for_extraction
-let getLastWord (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64}) = 
+let getLastWordPrime (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64}) = 
   match c with 
   |P256 -> 
     lemmaLstLastWord p256_prime_list;
@@ -205,6 +205,18 @@ let order_list (c: curve) : (x: list uint64 {List.Tot.length x == uint_v (getCoo
 
 
 inline_for_extraction
+let getLastWordOrder (#c: curve) : (r: uint64 {uint_v r == getOrder #c % pow2 64}) = 
+  match c with 
+  |P256 -> 
+    lemmaLstLastWord p256_prime_list;
+    normalize_term (List.Tot.Base.index p256_order_list 0)
+  |P384 -> 
+    lemmaLstLastWord p384_prime_list;
+    normalize_term (List.Tot.Base.index p384_order_list 0)
+  |_ -> admit()
+
+
+inline_for_extraction
 let prime256order_buffer: x: glbuffer uint64 (getCoordinateLenU64 P256) {witnessed #uint64 #(getCoordinateLenU64 P256) x (Lib.Sequence.of_list p256_order_list) /\
   recallable x /\ lseq_as_nat (Lib.Sequence.of_list (order_list P256)) == getOrder #P256} = 
   createL_global p256_order_list
@@ -225,7 +237,7 @@ let order_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {
   | P384 -> prime384order_buffer
   | _ -> admit(); prime256order_buffer
 
-
+(* Unfold? *)
 inline_for_extraction noextract
 let p256_inverse_list: x: list uint8 {List.Tot.length x == v (getScalarLenBytes P256) /\ lst_as_nat x == getPrime P256 - 2} = 
   [@inline_let]
@@ -283,16 +295,16 @@ let prime_inverse_buffer (#c: curve): (x: glbuffer uint8 (getCoordinateLenU c)
   | _ -> admit(); prime256_inverse_buffer
   
 
-val get0: c: curve -> Stack (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)})
+val getK0: c: curve -> Stack (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)})
   (requires fun h -> True)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    r == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWord #c))
+    r == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c))
 
 let getK0 c = 
   match c with 
-  |P256 -> Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWord #P256); (u64 1)
-  |P384 -> Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWord #P384); (u64 4294967297)
-  |Default -> Hacl.Bignum.ModInv64.mod_inv_u64 (getLastWord #c)
+  |P256 -> Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWordPrime #P256); (u64 1)
+  |P384 -> Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWordPrime #P384); (u64 4294967297)
+  |Default -> Hacl.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)
 
 
 inline_for_extraction noextract

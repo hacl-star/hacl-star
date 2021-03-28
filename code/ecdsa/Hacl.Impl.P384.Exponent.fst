@@ -55,30 +55,30 @@ let exponent_p384 t result tempBuffer =
 
 (* _10     = sq(t) *)
 (* t0 = _10  *)
-  montgomery_square_buffer #P384 t t0;
+  montgomery_square_buffer_dh #P384 t t0;
 
 (* _11     = m(t, _10) *)
-  montgomery_multiplication_buffer #P384 t t0 t0;
+  montgomery_multiplication_buffer_dh #P384 t t0 t0;
 (* t0 = _11*)
 
 (* _110    = sq(_11) *)
-  montgomery_square_buffer #P384 t0 t0;
+  montgomery_square_buffer_dh #P384 t0 t0;
 (* t0 = _110 *)  
 
 (* _111    = m(t, _110) *)
-  montgomery_multiplication_buffer #P384 t t0 t0;
+  montgomery_multiplication_buffer_dh #P384 t t0 t0;
 (* t0 = _111 *)  
 
 (* _111000 (t1) = n_sq(_111, 3) *)
-  montgomery_square_buffer #P384 t0 t1;
-  fsquarePowN #P384 (size 2) t1;
+  montgomery_square_buffer_dh #P384 t0 t1;
+  fsquarePowN_dh #P384 (size 2) t1;
 (* t1 = sq _111 *)
 (* t1 = n_sq _111 3  *)
 (* t1 = _111000 *)
 
 
 (* _111111 = m(_111,  _111000) *)
-  montgomery_multiplication_buffer #P384 t0 t1 t1;  
+  montgomery_multiplication_buffer_dh #P384 t0 t1 t1;  
 (* t1 = t0 * t1 *)
 (* t1 = _111 * _111000 *)
 (* t1 = _111111 *)
@@ -86,82 +86,82 @@ let exponent_p384 t result tempBuffer =
 
 
 (* x12     = m(n_sq(_111111, 6), _111111) *)
-  montgomery_square_buffer #P384 t1 t2;
-  fsquarePowN #P384 (size 5) t2 ;
-  montgomery_multiplication_buffer #P384 t2 t1 t2;
+  montgomery_square_buffer_dh #P384 t1 t2;
+  fsquarePowN_dh #P384 (size 5) t2 ;
+  montgomery_multiplication_buffer_dh #P384 t2 t1 t2;
 (* t2 = x12 *)
 
 
 
 (* x24     = m(n_sq(x12 , 12), x12) *)
-  montgomery_square_buffer #P384 t2 t3;
-  fsquarePowN #P384 (size 11) t3 ;
-  montgomery_multiplication_buffer #P384 t2 t3 t2;
+  montgomery_square_buffer_dh #P384 t2 t3;
+  fsquarePowN_dh #P384 (size 11) t3 ;
+  montgomery_multiplication_buffer_dh #P384 t2 t3 t2;
 (* t2 = x24*) 
 
 (* x30     = m(n_sq(x24 , 6) , _111111) *)
-  fsquarePowN #P384 (size 6) t2 ;
-  montgomery_multiplication_buffer #P384 t2 t1 t1;  
+  fsquarePowN_dh #P384 (size 6) t2 ;
+  montgomery_multiplication_buffer_dh #P384 t2 t1 t1;  
 (* t1 = x30 *)
 
 
 (* x31     = m(sq(x30), t) *)
-  montgomery_square_buffer #P384 t1 t2;
-  (* fsquarePowN #P384 (size 29) t2 ; *)
-  montgomery_multiplication_buffer #P384 t2 t t2;
+  montgomery_square_buffer_dh #P384 t1 t2;
+  (* fsquarePowN_dh #P384 (size 29) t2 ; *)
+  montgomery_multiplication_buffer_dh #P384 t2 t t2;
 (* t2 = x31 *)
 
 
  (* x32     = m(sq(x31), t)  *)
-  montgomery_square_buffer #P384 t2 t3;
-  (* fsquarePowN #P384 (size 30) t3 ; *)
-  montgomery_multiplication_buffer #P384 t t3 t3;
+  montgomery_square_buffer_dh #P384 t2 t3;
+  (* fsquarePowN_dh #P384 (size 30) t3 ; *)
+  montgomery_multiplication_buffer_dh #P384 t t3 t3;
 (* t3 = x32*)
 
 
 
 
 (* x63     = m(n_sq(x32, 31) , x31) *)
-  montgomery_square_buffer #P384 t3 t4;
-  fsquarePowN #P384 (size 30) t4 ;
-  montgomery_multiplication_buffer #P384 t4 t2 t4;
+  montgomery_square_buffer_dh #P384 t3 t4;
+  fsquarePowN_dh #P384 (size 30) t4 ;
+  montgomery_multiplication_buffer_dh #P384 t4 t2 t4;
 (* t4 = x63 *)
 
 
 
 (* x126    = m(n_sq(x63, 63) , x63) *)
-  montgomery_square_buffer #P384 t4 t5;
-  fsquarePowN #P384 (size 62) t5 ;
-  montgomery_multiplication_buffer #P384 t4 t5 t4;  
+  montgomery_square_buffer_dh #P384 t4 t5;
+  fsquarePowN_dh #P384 (size 62) t5 ;
+  montgomery_multiplication_buffer_dh #P384 t4 t5 t4;  
 (* t4 = x126*)
 
 
 (* x252    = m(n_sq(x126, 126) , x126) *)
-  montgomery_square_buffer #P384 t4 t5;
-  fsquarePowN #P384 (size 125) t5 ;
-  montgomery_multiplication_buffer #P384 t4 t5 t4;
+  montgomery_square_buffer_dh #P384 t4 t5;
+  fsquarePowN_dh #P384 (size 125) t5 ;
+  montgomery_multiplication_buffer_dh #P384 t4 t5 t4;
 (* t4 = x252 *)
 
 
 (* x255    = m(n_sq(x252, 3) , _111) *)
-  fsquarePowN #P384 (size 3) t4 ;
-  montgomery_multiplication_buffer #P384 t4 t0 t4;
+  fsquarePowN_dh #P384 (size 3) t4 ;
+  montgomery_multiplication_buffer_dh #P384 t4 t0 t4;
 (* t4 = x255 *)
 
 
 (* i0 = m(n_sq(x255, 33), x32) *)
-  fsquarePowN #P384 (size 33) t4 ;
-  montgomery_multiplication_buffer #P384 t4 t3 t4;
+  fsquarePowN_dh #P384 (size 33) t4 ;
+  montgomery_multiplication_buffer_dh #P384 t4 t3 t4;
 (*t4 = i0 *)
 
 
 (* i1 = m(n_sq(i0, 94), x30) *)
-  fsquarePowN #P384 (size 94) t4 ;
-  montgomery_multiplication_buffer #P384 t4 t1 t4;
+  fsquarePowN_dh #P384 (size 94) t4 ;
+  montgomery_multiplication_buffer_dh #P384 t4 t1 t4;
 (* t4 = i1 *)
 
 (* i397    = n_sq(i1, 2) *)
-  fsquarePowN #P384  (size 2) t4;
+  fsquarePowN_dh #P384  (size 2) t4;
 
 (* r = m(t, i397) *)
-  montgomery_multiplication_buffer #P384 t4 t result
+  montgomery_multiplication_buffer_dh #P384 t4 t result

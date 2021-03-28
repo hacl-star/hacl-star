@@ -25,8 +25,8 @@ open FStar.Mul
 
 let cube #c a result =
   let h0 = ST.get() in 
-    montgomery_square_buffer a result;
-    montgomery_multiplication_buffer result a result;
+    montgomery_square_buffer_dh a result;
+    montgomery_multiplication_buffer_dh result a result;
  let h1 = ST.get() in 
  lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)) (fromDomain_ #c (as_nat c h0 a)) (getPrime c);
 inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a))
@@ -34,8 +34,8 @@ inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_
 
 let quatre #c a result = 
     let h0 = ST.get() in 
-  montgomery_square_buffer a result;
-  montgomery_square_buffer result result;
+  montgomery_square_buffer_dh a result;
+  montgomery_square_buffer_dh result result;
 
   let prime = getPrime c in 
   

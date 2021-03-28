@@ -16,6 +16,7 @@ open Spec.ECDSA
 open Hacl.Impl.P256.LowLevel 
 open Spec.ECC
 open Spec.ECC.Curves
+open Hacl.Spec.EC.Definition
 
 (* open Spec.ECC.Lemmas *)
 

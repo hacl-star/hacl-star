@@ -93,9 +93,9 @@ val montgomery_ladder_power_step0: #c: curve -> a: felem c -> b: felem c -> Stac
 
 let montgomery_ladder_power_step0 #c a b = 
   let h0 = ST.get() in 
-    montgomery_multiplication_buffer a b b;
+    montgomery_multiplication_buffer_dh a b b;
       lemmaToDomainAndBackIsTheSame #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b) % getPrime c);
-    montgomery_square_buffer a a ;
+    montgomery_square_buffer_dh a a ;
       lemmaToDomainAndBackIsTheSame #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % getPrime c)
 
 

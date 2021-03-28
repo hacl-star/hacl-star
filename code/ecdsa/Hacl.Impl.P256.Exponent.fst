@@ -42,7 +42,7 @@ val montgomery_multiplication_buffer_: result: felem P256 -> a: felem P256 -> b:
 
 
 let montgomery_multiplication_buffer_ result a b = 
-  montgomery_multiplication_buffer a b result
+  montgomery_multiplication_buffer_dh a b result
 
 
 
@@ -59,7 +59,7 @@ val montgomery_square_buffer_: result: felem P256 -> a: felem P256 -> Stack unit
   )
 
 
-let montgomery_square_buffer_ result a = montgomery_square_buffer #P256 a result
+let montgomery_square_buffer_ result a = montgomery_square_buffer_dh #P256 a result
 
 inline_for_extraction noextract
 val exponent_0: t: felem P256 -> t0: felem P256 -> t1: felem P256 -> t2: felem P256 -> t6: felem P256 -> t7: felem P256 -> 
@@ -83,7 +83,7 @@ let exponent_0 t t0 t1 t2 t6 t7 =
   montgomery_square_buffer_ t0 t0;
   montgomery_multiplication_buffer_ t6 t0 t2;
   montgomery_square_buffer_ t0 t6;
-  fsquarePowN #P256 (size 3) t0; 
+  fsquarePowN_dh #P256 (size 3) t0; 
   montgomery_multiplication_buffer_ t7 t0 t6;
   montgomery_square_buffer_ t0 t7;
   montgomery_square_buffer_ t0 t0;
@@ -156,18 +156,18 @@ val exponent_1: t: felem P256 -> t0: felem P256 -> t1: felem P256 -> t2: felem P
 
 let exponent_1 t t0 t1 t2 t3 t4 t5 = 
     let h0 = ST.get() in 
-  fsquarePowN #P256 (size 9) t0;
+  fsquarePowN_dh #P256 (size 9) t0;
   montgomery_multiplication_buffer_ t3 t0 t1;
   montgomery_square_buffer_ t0 t3;
-  fsquarePowN #P256  (size 9) t0;
+  fsquarePowN_dh #P256  (size 9) t0;
   montgomery_multiplication_buffer_ t4 t0 t1;
   montgomery_square_buffer_ t0 t4;
   montgomery_square_buffer_ t0 t0;
   montgomery_multiplication_buffer_ t5 t0 t2;
   montgomery_square_buffer_ t0 t5;
-  fsquarePowN #P256  (size 31) t0;
+  fsquarePowN_dh #P256  (size 31) t0;
   montgomery_multiplication_buffer_ t0 t0 t;
-  fsquarePowN  #P256 (size 128) t0;
+  fsquarePowN_dh  #P256 (size 128) t0;
   montgomery_multiplication_buffer_ t0 t0 t5; ()
 (*
   let tD = fromDomain_ (as_nat h0 t) in let t0D = fromDomain_ (as_nat h0 t0) in 
@@ -246,11 +246,11 @@ val exponent_2: t: felem P256 -> t0: felem P256-> t4: felem P256-> t5: felem P25
 
 let exponent_2 t t0 t4 t5 result = 
     let h0 = ST.get() in 
-  fsquarePowN #P256  (size 32) t0;
+  fsquarePowN_dh #P256  (size 32) t0;
   montgomery_multiplication_buffer_ t0 t0 t5; 
-  fsquarePowN #P256  (size 30) t0;
+  fsquarePowN_dh #P256  (size 30) t0;
   montgomery_multiplication_buffer_ t0 t0 t4;
-  fsquarePowN  #P256 (size 2) t0;
+  fsquarePowN_dh  #P256 (size 2) t0;
   montgomery_multiplication_buffer_ result t0 t; 
 (*
   let tD =  fromDomain_ (as_nat h0 t) in 

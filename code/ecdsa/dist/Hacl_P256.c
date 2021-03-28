@@ -2043,6 +2043,11 @@ static void mul_atomic(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
   temp[0U] = h0;
 }
 
+#define DH 0
+#define DSA 1
+
+typedef uint8_t mode;
+
 static void
 montgomery_multiplication_round_w_k0(Spec_ECC_Curves_curve c, uint64_t *t, uint64_t *t2)
 {
@@ -2105,95 +2110,46 @@ montgomery_multiplication_round_k0(
 }
 
 static void
-montgomery_multiplication_round_(Spec_ECC_Curves_curve c, uint64_t *t, uint64_t *t2)
+montgomery_multiplication_round_dsa_(
+  Spec_ECC_Curves_curve c,
+  uint64_t k0,
+  uint64_t *t,
+  uint64_t *t2
+)
 {
-  uint64_t sw;
+  uint64_t t1 = t[0U];
+  uint64_t y = (uint64_t)0U;
+  uint64_t temp = (uint64_t)0U;
+  mul_atomic(t1, k0, &y, &temp);
+  uint64_t y_ = y;
+  const uint64_t *sw;
   switch (c)
   {
     case Spec_ECC_Curves_P256:
       {
-        sw = (uint64_t)0xffffffffffffffffU;
+        sw = prime256order_buffer;
         break;
       }
     case Spec_ECC_Curves_P384:
       {
-        sw = (uint64_t)0xffffffffU;
+        sw = prime384order_buffer;
         break;
       }
     default:
       {
-        sw = KRML_EABORT(uint64_t, "");
+        sw = prime256order_buffer;
       }
   }
-  bool r = sw == (uint64_t)0xffffffffffffffffU;
-  if (r)
-  {
-    montgomery_multiplication_round_w_k0(c, t, t2);
-    return;
-  }
-  uint64_t k0 = getK0(c);
-  montgomery_multiplication_round_k0(c, k0, t, t2);
+  short_mul_bn(c, sw, y_, t2);
 }
 
 static void
-montgomery_multiplication_round(Spec_ECC_Curves_curve c, uint64_t *t, uint64_t *round)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t2[(uint32_t)2U * len];
-  memset(t2, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  montgomery_multiplication_round_(c, t, t2);
-  uint64_t carry = add_long_bn(c, t, t2, t2);
-  shift1_with_carry(c, t2, round, carry);
-}
-
-static void
-montgomery_multiplication_reduction(Spec_ECC_Curves_curve c, uint64_t *t, uint64_t *result)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    montgomery_multiplication_round(c, t, t);
-  }
-  reduction_prime_2prime_with_carry(c, t, result);
-}
-
-static void
-montgomery_multiplication_buffer_by_one(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result)
+montgomery_multiplication_buffer_by_one(
+  Spec_ECC_Curves_curve c,
+  mode m,
+  uint64_t *a,
+  uint64_t *result
+)
 {
   uint32_t len;
   switch (c)
@@ -2218,12 +2174,131 @@ montgomery_multiplication_buffer_by_one(Spec_ECC_Curves_curve c, uint64_t *a, ui
   memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
   uint64_t *t_low = t;
   memcpy(t_low, a, len * sizeof (uint64_t));
-  montgomery_multiplication_reduction(c, t, result);
+  uint32_t len1;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len1 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len1 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len1 = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    uint32_t len2;
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          len2 = (uint32_t)4U;
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          len2 = (uint32_t)6U;
+          break;
+        }
+      default:
+        {
+          len2 = (uint32_t)4U;
+        }
+    }
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
+    uint64_t t2[(uint32_t)2U * len2];
+    memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
+    switch (m)
+    {
+      case DSA:
+        {
+          uint64_t sw;
+          switch (c)
+          {
+            case Spec_ECC_Curves_P256:
+              {
+                sw = (uint64_t)17562291160714782033U;
+                break;
+              }
+            case Spec_ECC_Curves_P384:
+              {
+                sw = (uint64_t)17072048233947408755U;
+                break;
+              }
+            default:
+              {
+                sw = KRML_EABORT(uint64_t, "");
+              }
+          }
+          uint64_t k0 = mod_inv_u64(sw);
+          montgomery_multiplication_round_dsa_(c, k0, t, t2);
+          break;
+        }
+      case DH:
+        {
+          uint64_t sw;
+          switch (c)
+          {
+            case Spec_ECC_Curves_P256:
+              {
+                sw = (uint64_t)0xffffffffffffffffU;
+                break;
+              }
+            case Spec_ECC_Curves_P384:
+              {
+                sw = (uint64_t)0xffffffffU;
+                break;
+              }
+            default:
+              {
+                sw = KRML_EABORT(uint64_t, "");
+              }
+          }
+          bool r = sw == (uint64_t)0xffffffffffffffffU;
+          if (r)
+          {
+            montgomery_multiplication_round_w_k0(c, t, t2);
+          }
+          else
+          {
+            uint64_t k0 = getK0(c);
+            montgomery_multiplication_round_k0(c, k0, t, t2);
+          }
+          break;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
+    }
+    uint64_t carry = add_long_bn(c, t, t2, t2);
+    shift1_with_carry(c, t2, t, carry);
+  }
+  reduction_prime_2prime_with_carry(c, t, result);
+}
+
+static void
+montgomery_multiplication_buffer_by_one_dh(
+  Spec_ECC_Curves_curve c,
+  uint64_t *a,
+  uint64_t *result
+)
+{
+  montgomery_multiplication_buffer_by_one(c, DH, a, result);
 }
 
 static void
 montgomery_multiplication_buffer(
   Spec_ECC_Curves_curve c,
+  mode m,
   uint64_t *a,
   uint64_t *b,
   uint64_t *result
@@ -2251,10 +2326,130 @@ montgomery_multiplication_buffer(
   uint64_t t[(uint32_t)2U * len];
   memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
   mul(c, a, b, t);
-  montgomery_multiplication_reduction(c, t, result);
+  uint32_t len1;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len1 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len1 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len1 = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    uint32_t len2;
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          len2 = (uint32_t)4U;
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          len2 = (uint32_t)6U;
+          break;
+        }
+      default:
+        {
+          len2 = (uint32_t)4U;
+        }
+    }
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
+    uint64_t t2[(uint32_t)2U * len2];
+    memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
+    switch (m)
+    {
+      case DSA:
+        {
+          uint64_t sw;
+          switch (c)
+          {
+            case Spec_ECC_Curves_P256:
+              {
+                sw = (uint64_t)17562291160714782033U;
+                break;
+              }
+            case Spec_ECC_Curves_P384:
+              {
+                sw = (uint64_t)17072048233947408755U;
+                break;
+              }
+            default:
+              {
+                sw = KRML_EABORT(uint64_t, "");
+              }
+          }
+          uint64_t k0 = mod_inv_u64(sw);
+          montgomery_multiplication_round_dsa_(c, k0, t, t2);
+          break;
+        }
+      case DH:
+        {
+          uint64_t sw;
+          switch (c)
+          {
+            case Spec_ECC_Curves_P256:
+              {
+                sw = (uint64_t)0xffffffffffffffffU;
+                break;
+              }
+            case Spec_ECC_Curves_P384:
+              {
+                sw = (uint64_t)0xffffffffU;
+                break;
+              }
+            default:
+              {
+                sw = KRML_EABORT(uint64_t, "");
+              }
+          }
+          bool r = sw == (uint64_t)0xffffffffffffffffU;
+          if (r)
+          {
+            montgomery_multiplication_round_w_k0(c, t, t2);
+          }
+          else
+          {
+            uint64_t k0 = getK0(c);
+            montgomery_multiplication_round_k0(c, k0, t, t2);
+          }
+          break;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
+    }
+    uint64_t carry = add_long_bn(c, t, t2, t2);
+    shift1_with_carry(c, t2, t, carry);
+  }
+  reduction_prime_2prime_with_carry(c, t, result);
 }
 
-static void montgomery_square_buffer(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result)
+static void
+montgomery_multiplication_buffer_dh(
+  Spec_ECC_Curves_curve c,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *result
+)
+{
+  montgomery_multiplication_buffer(c, DH, a, b, result);
+}
+
+static void
+montgomery_square_buffer(Spec_ECC_Curves_curve c, mode m, uint64_t *a, uint64_t *result)
 {
   uint32_t len;
   switch (c)
@@ -2278,15 +2473,133 @@ static void montgomery_square_buffer(Spec_ECC_Curves_curve c, uint64_t *a, uint6
   uint64_t t[(uint32_t)2U * len];
   memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
   square_bn(c, a, t);
-  montgomery_multiplication_reduction(c, t, result);
+  uint32_t len1;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len1 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len1 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len1 = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    uint32_t len2;
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          len2 = (uint32_t)4U;
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          len2 = (uint32_t)6U;
+          break;
+        }
+      default:
+        {
+          len2 = (uint32_t)4U;
+        }
+    }
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
+    uint64_t t2[(uint32_t)2U * len2];
+    memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
+    switch (m)
+    {
+      case DSA:
+        {
+          uint64_t sw;
+          switch (c)
+          {
+            case Spec_ECC_Curves_P256:
+              {
+                sw = (uint64_t)17562291160714782033U;
+                break;
+              }
+            case Spec_ECC_Curves_P384:
+              {
+                sw = (uint64_t)17072048233947408755U;
+                break;
+              }
+            default:
+              {
+                sw = KRML_EABORT(uint64_t, "");
+              }
+          }
+          uint64_t k0 = mod_inv_u64(sw);
+          montgomery_multiplication_round_dsa_(c, k0, t, t2);
+          break;
+        }
+      case DH:
+        {
+          uint64_t sw;
+          switch (c)
+          {
+            case Spec_ECC_Curves_P256:
+              {
+                sw = (uint64_t)0xffffffffffffffffU;
+                break;
+              }
+            case Spec_ECC_Curves_P384:
+              {
+                sw = (uint64_t)0xffffffffU;
+                break;
+              }
+            default:
+              {
+                sw = KRML_EABORT(uint64_t, "");
+              }
+          }
+          bool r = sw == (uint64_t)0xffffffffffffffffU;
+          if (r)
+          {
+            montgomery_multiplication_round_w_k0(c, t, t2);
+          }
+          else
+          {
+            uint64_t k0 = getK0(c);
+            montgomery_multiplication_round_k0(c, k0, t, t2);
+          }
+          break;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
+    }
+    uint64_t carry = add_long_bn(c, t, t2, t2);
+    shift1_with_carry(c, t2, t, carry);
+  }
+  reduction_prime_2prime_with_carry(c, t, result);
 }
 
-static void fsquarePowN(Spec_ECC_Curves_curve c, uint32_t n, uint64_t *a)
+static void montgomery_square_buffer_dh(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result)
+{
+  montgomery_square_buffer(c, DH, a, result);
+}
+
+static void fsquarePowN(Spec_ECC_Curves_curve c, mode m, uint32_t n, uint64_t *a)
 {
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
-    montgomery_square_buffer(c, a, a);
+    montgomery_square_buffer(c, m, a, a);
   }
+}
+
+static void fsquarePowN_dh(Spec_ECC_Curves_curve c, uint32_t n, uint64_t *a)
+{
+  fsquarePowN(c, DH, n, a);
 }
 
 static inline void cswap(Spec_ECC_Curves_curve c, uint64_t bit, uint64_t *p1, uint64_t *p2)
@@ -2348,8 +2661,8 @@ montgomery_ladder_power_step(
   uint32_t bit0 = sw * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - i;
   uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
   cswap(c, bit, a, b);
-  montgomery_multiplication_buffer(c, a, b, b);
-  montgomery_square_buffer(c, a, a);
+  montgomery_multiplication_buffer_dh(c, a, b, b);
+  montgomery_square_buffer_dh(c, a, a);
   cswap(c, bit, a, b);
 }
 
@@ -2476,42 +2789,42 @@ static inline void exponent_p384(uint64_t *t, uint64_t *result, uint64_t *tempBu
   uint64_t *t3 = tempBuffer + (uint32_t)18U;
   uint64_t *t4 = tempBuffer + (uint32_t)24U;
   uint64_t *t5 = tempBuffer + (uint32_t)30U;
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t, t0, t0);
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t0, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t, t0, t0);
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t0, t1);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)2U, t1);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t0, t1, t1);
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t1, t2);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)5U, t2);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t2, t1, t2);
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t2, t3);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)11U, t3);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t2, t3, t2);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)6U, t2);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t2, t1, t1);
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t1, t2);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t2, t, t2);
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t2, t3);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t, t3, t3);
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t3, t4);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)30U, t4);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t4, t2, t4);
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t4, t5);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)62U, t5);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t4, t5, t4);
-  montgomery_square_buffer(Spec_ECC_Curves_P384, t4, t5);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)125U, t5);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t4, t5, t4);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)3U, t4);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t4, t0, t4);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)33U, t4);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t4, t3, t4);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)94U, t4);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t4, t1, t4);
-  fsquarePowN(Spec_ECC_Curves_P384, (uint32_t)2U, t4);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P384, t4, t, result);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t, t0, t0);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t0, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t, t0, t0);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t0, t1);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)2U, t1);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t0, t1, t1);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t1, t2);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)5U, t2);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t2, t1, t2);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t2, t3);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)11U, t3);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t2, t3, t2);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)6U, t2);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t2, t1, t1);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t1, t2);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t2, t, t2);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t2, t3);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t, t3, t3);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t3, t4);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)30U, t4);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t4, t2, t4);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t4, t5);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)62U, t5);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t4, t5, t4);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t4, t5);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)125U, t5);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t4, t5, t4);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)3U, t4);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t4, t0, t4);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)33U, t4);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t4, t3, t4);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)94U, t4);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t4, t1, t4);
+  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)2U, t4);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P384, t4, t, result);
 }
 
 static inline void exponent_p256(uint64_t *t, uint64_t *result, uint64_t *tempBuffer)
@@ -2524,37 +2837,37 @@ static inline void exponent_p256(uint64_t *t, uint64_t *result, uint64_t *tempBu
   uint64_t *t5 = tempBuffer + (uint32_t)20U;
   uint64_t *t6 = tempBuffer + (uint32_t)24U;
   uint64_t *t7 = tempBuffer + (uint32_t)28U;
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t, t2);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t2, t0);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t0, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t2, t6);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t6, t0);
-  fsquarePowN(Spec_ECC_Curves_P256, (uint32_t)3U, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t6, t7);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t7, t0);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t0, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t2, t1);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t1, t0);
-  fsquarePowN(Spec_ECC_Curves_P256, (uint32_t)9U, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t1, t3);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t3, t0);
-  fsquarePowN(Spec_ECC_Curves_P256, (uint32_t)9U, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t1, t4);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t4, t0);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t0, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t2, t5);
-  montgomery_square_buffer(Spec_ECC_Curves_P256, t5, t0);
-  fsquarePowN(Spec_ECC_Curves_P256, (uint32_t)31U, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t, t0);
-  fsquarePowN(Spec_ECC_Curves_P256, (uint32_t)128U, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t5, t0);
-  fsquarePowN(Spec_ECC_Curves_P256, (uint32_t)32U, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t5, t0);
-  fsquarePowN(Spec_ECC_Curves_P256, (uint32_t)30U, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t4, t0);
-  fsquarePowN(Spec_ECC_Curves_P256, (uint32_t)2U, t0);
-  montgomery_multiplication_buffer(Spec_ECC_Curves_P256, t0, t, result);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t, t2);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t2, t0);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t0, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t2, t6);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t6, t0);
+  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)3U, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t6, t7);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t7, t0);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t0, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t2, t1);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t1, t0);
+  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)9U, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t1, t3);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t3, t0);
+  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)9U, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t1, t4);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t4, t0);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t0, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t2, t5);
+  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t5, t0);
+  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)31U, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t, t0);
+  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)128U, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t5, t0);
+  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)32U, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t5, t0);
+  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)30U, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t4, t0);
+  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)2U, t0);
+  montgomery_multiplication_buffer_dh(Spec_ECC_Curves_P256, t0, t, result);
 }
 
 static void
@@ -2855,12 +3168,12 @@ point_double_a_b_g(
   uint64_t *a0 = tempBuffer;
   uint64_t *a1 = tempBuffer + coordinateLen;
   uint64_t *alpha0 = tempBuffer + (uint32_t)2U * coordinateLen;
-  montgomery_square_buffer(c, pZ, delta);
-  montgomery_square_buffer(c, pY, gamma);
-  montgomery_multiplication_buffer(c, pX, gamma, beta);
+  montgomery_square_buffer_dh(c, pZ, delta);
+  montgomery_square_buffer_dh(c, pY, gamma);
+  montgomery_multiplication_buffer_dh(c, pX, gamma, beta);
   felem_sub(c, pX, delta, a0);
   felem_add(c, pX, delta, a1);
-  montgomery_multiplication_buffer(c, a0, a1, alpha0);
+  montgomery_multiplication_buffer_dh(c, a0, a1, alpha0);
   multByThree(c, alpha0, alpha);
 }
 
@@ -2874,7 +3187,7 @@ point_double_x3(
   uint64_t *eightBeta
 )
 {
-  montgomery_square_buffer(c, alpha, x3);
+  montgomery_square_buffer_dh(c, alpha, x3);
   multByFour(c, beta, fourBeta);
   multByTwo(c, fourBeta, eightBeta);
   felem_sub(c, x3, eightBeta, x3);
@@ -2891,7 +3204,7 @@ point_double_z3(
 )
 {
   felem_add(c, pY, pZ, z3);
-  montgomery_square_buffer(c, z3, z3);
+  montgomery_square_buffer_dh(c, z3, z3);
   felem_sub(c, z3, gamma, z3);
   felem_sub(c, z3, delta, z3);
 }
@@ -2908,8 +3221,8 @@ point_double_y3(
 )
 {
   felem_sub(c, fourBeta, x3, y3);
-  montgomery_multiplication_buffer(c, alpha, y3, y3);
-  montgomery_square_buffer(c, gamma, gamma);
+  montgomery_multiplication_buffer_dh(c, alpha, y3, y3);
+  montgomery_square_buffer_dh(c, gamma, gamma);
   multByEight(c, gamma, eightGamma);
   felem_sub(c, y3, eightGamma, y3);
 }
@@ -3186,9 +3499,9 @@ static void compute_common_params_point_add(Spec_ECC_Curves_curve c, uint64_t *t
   uint64_t *temp = t4;
   felem_sub(c, u2, u1, h);
   felem_sub(c, s2, s1, r);
-  montgomery_square_buffer(c, h, temp);
-  montgomery_multiplication_buffer(c, temp, u1, uh);
-  montgomery_multiplication_buffer(c, temp, h, hCube);
+  montgomery_square_buffer_dh(c, h, temp);
+  montgomery_multiplication_buffer_dh(c, temp, u1, uh);
+  montgomery_multiplication_buffer_dh(c, temp, h, hCube);
 }
 
 static void
@@ -3259,7 +3572,7 @@ computex3_point_add(
       }
   }
   uint64_t *twoUh = tempBuffer3 + (uint32_t)2U * sw;
-  montgomery_square_buffer(c, r, rSquare);
+  montgomery_square_buffer_dh(c, r, rSquare);
   felem_sub(c, rSquare, hCube, rH);
   multByTwo(c, uh, twoUh);
   felem_sub(c, rH, twoUh, x3);
@@ -3353,9 +3666,9 @@ computeY3_point_add(
       }
   }
   uint64_t *ru1hx3 = tempBuffer3 + (uint32_t)2U * sw;
-  montgomery_multiplication_buffer(c, s1, hCube, s1hCube);
+  montgomery_multiplication_buffer_dh(c, s1, hCube, s1hCube);
   felem_sub(c, uh, x3, u1hx3);
-  montgomery_multiplication_buffer(c, u1hx3, r, ru1hx3);
+  montgomery_multiplication_buffer_dh(c, u1hx3, r, ru1hx3);
   felem_sub(c, ru1hx3, s1hCube, y3);
 }
 
@@ -3627,8 +3940,8 @@ computeXYZ(
   }
   uint64_t *t1 = t5 + (uint32_t)3U * sw;
   uint64_t *z1z2 = t1;
-  montgomery_multiplication_buffer(c, z1, z2, z1z2);
-  montgomery_multiplication_buffer(c, z1z2, h, z3);
+  montgomery_multiplication_buffer_dh(c, z1, z2, z1z2);
+  montgomery_multiplication_buffer_dh(c, z1z2, h, z3);
 }
 
 static void
@@ -4071,14 +4384,14 @@ static void _point_add_0(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *q, uint
       }
   }
   uint64_t *z1Cube = t4 + (uint32_t)3U * sw;
-  montgomery_square_buffer(c, qZ, z2Square);
-  montgomery_square_buffer(c, pZ, z1Square);
-  montgomery_multiplication_buffer(c, z2Square, qZ, z2Cube);
-  montgomery_multiplication_buffer(c, z1Square, pZ, z1Cube);
-  montgomery_multiplication_buffer(c, z2Square, pX, u1);
-  montgomery_multiplication_buffer(c, z1Square, qX, u2);
-  montgomery_multiplication_buffer(c, z2Cube, pY, s1);
-  montgomery_multiplication_buffer(c, z1Cube, qY, s2);
+  montgomery_square_buffer_dh(c, qZ, z2Square);
+  montgomery_square_buffer_dh(c, pZ, z1Square);
+  montgomery_multiplication_buffer_dh(c, z2Square, qZ, z2Cube);
+  montgomery_multiplication_buffer_dh(c, z1Square, pZ, z1Cube);
+  montgomery_multiplication_buffer_dh(c, z2Square, pX, u1);
+  montgomery_multiplication_buffer_dh(c, z1Square, qX, u2);
+  montgomery_multiplication_buffer_dh(c, z2Cube, pY, s1);
+  montgomery_multiplication_buffer_dh(c, z1Cube, qY, s2);
   compute_common_params_point_add(c, t12);
 }
 
@@ -4981,8 +5294,8 @@ normalisation_update(
   uint64_t *resultY = resultPoint + len;
   uint64_t *resultZ = resultPoint + (uint32_t)2U * len;
   uint64_t bit = isPointAtInfinityPrivate(c, p);
-  montgomery_multiplication_buffer_by_one(c, z2x, resultX);
-  montgomery_multiplication_buffer_by_one(c, z3y, resultY);
+  montgomery_multiplication_buffer_by_one_dh(c, z2x, resultX);
+  montgomery_multiplication_buffer_by_one_dh(c, z3y, resultY);
   uploadOneImpl(c, resultZ);
   copy_conditional(c, resultZ, zeroBuffer, bit);
 }
@@ -5086,12 +5399,12 @@ norm(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t *temp
       }
   }
   uint64_t *t8 = tempBuffer + (uint32_t)3U * sw;
-  montgomery_square_buffer(c, zf, z2f);
-  montgomery_multiplication_buffer(c, z2f, zf, z3f);
+  montgomery_square_buffer_dh(c, zf, z2f);
+  montgomery_multiplication_buffer_dh(c, z2f, zf, z3f);
   exponent(c, z2f, z2f, t8);
   exponent(c, z3f, z3f, t8);
-  montgomery_multiplication_buffer(c, xf, z2f, z2f);
-  montgomery_multiplication_buffer(c, yf, z3f, z3f);
+  montgomery_multiplication_buffer_dh(c, xf, z2f, z2f);
+  montgomery_multiplication_buffer_dh(c, yf, z3f, z3f);
   normalisation_update(c, z2f, z3f, p, resultPoint);
 }
 
@@ -5193,10 +5506,10 @@ static void normX(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result, uint64
       }
   }
   uint64_t *t8 = tempBuffer + (uint32_t)3U * sw3;
-  montgomery_square_buffer(c, zf, z2f);
+  montgomery_square_buffer_dh(c, zf, z2f);
   exponent(c, z2f, z2f, t8);
-  montgomery_multiplication_buffer(c, z2f, xf, z2f);
-  montgomery_multiplication_buffer_by_one(c, z2f, result);
+  montgomery_multiplication_buffer_dh(c, z2f, xf, z2f);
+  montgomery_multiplication_buffer_by_one_dh(c, z2f, result);
 }
 
 static uint64_t
@@ -5524,7 +5837,7 @@ secretToPublicWithoutNorm(
   copy_point(c, q, result);
 }
 
-static void montgomery_multiplication_round0(Spec_ECC_Curves_curve c, uint64_t *t, uint64_t k0)
+static void montgomery_multiplication_round(Spec_ECC_Curves_curve c, uint64_t *t, uint64_t k0)
 {
   uint32_t len;
   switch (c)
@@ -5577,53 +5890,16 @@ static void montgomery_multiplication_round0(Spec_ECC_Curves_curve c, uint64_t *
 }
 
 static void
-reduction_prime_2prime_with_carry0(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result)
-{
-  switch (c)
-  {
-    case Spec_ECC_Curves_P384:
-      {
-        break;
-      }
-    case Spec_ECC_Curves_P256:
-      {
-        uint64_t tempBuffer[4U] = { 0U };
-        uint64_t tempBufferForSubborrow = (uint64_t)0U;
-        uint64_t cin = x[4U];
-        uint64_t *x_ = x;
-        uint64_t c1 = sub4_il(x_, prime256order_buffer, tempBuffer);
-        uint64_t
-        carry =
-          Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-            cin,
-            (uint64_t)0U,
-            &tempBufferForSubborrow);
-        cmovznz4(Spec_ECC_Curves_P256, carry, tempBuffer, x_, result);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-}
-
-static void
 reduction_prime_2prime_order(Spec_ECC_Curves_curve cu, uint64_t *x, uint64_t *result)
 {
   uint64_t tempBuffer[4U] = { 0U };
-  uint64_t c = sub4_il(x, prime256order_buffer, tempBuffer);
+  uint64_t
+  c = sub4_il(x, (const uint64_t *)Hacl_Spec_ECDSA_Definition_prime256order_buffer, tempBuffer);
   cmovznz4(cu, c, tempBuffer, x, result);
 }
 
 static void
-montgomery_multiplication_ecdsa_module(
-  Spec_ECC_Curves_curve c,
-  uint64_t *a,
-  uint64_t *b,
-  uint64_t *result
-)
+montgomery_multiplication_ecdsa_module(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *b)
 {
   uint32_t len;
   switch (c)
@@ -5651,23 +5927,10 @@ montgomery_multiplication_ecdsa_module(
   memset(prime_p256_orderBuffer, 0U, len * sizeof (uint64_t));
   uint64_t k0 = (uint64_t)14758798090332847183U;
   mul(c, a, b, t);
-  montgomery_multiplication_round0(c, t, k0);
-  montgomery_multiplication_round0(c, t, k0);
-  montgomery_multiplication_round0(c, t, k0);
-  montgomery_multiplication_round0(c, t, k0);
-  reduction_prime_2prime_with_carry0(c, t, result);
-}
-
-static void
-felem_add0(Spec_ECC_Curves_curve uu___, uint64_t *arg1, uint64_t *arg2, uint64_t *out)
-{
-  uint64_t t = add4(arg1, arg2, out);
-  uint64_t tempBuffer[4U] = { 0U };
-  uint64_t tempBufferForSubborrow = (uint64_t)0U;
-  uint64_t c = sub4_il(out, prime256order_buffer, tempBuffer);
-  uint64_t
-  carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t, (uint64_t)0U, &tempBufferForSubborrow);
-  cmovznz4(uu___, carry, tempBuffer, out, out);
+  montgomery_multiplication_round(c, t, k0);
+  montgomery_multiplication_round(c, t, k0);
+  montgomery_multiplication_round(c, t, k0);
+  montgomery_multiplication_round(c, t, k0);
 }
 
 static void bufferToJac(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result)
@@ -5775,7 +6038,7 @@ static bool isPointOnCurvePublic(Spec_ECC_Curves_curve c, uint64_t *p)
   memset(multBuffer, 0U, (uint32_t)2U * len0 * sizeof (uint64_t));
   shiftLeftWord(c, y, multBuffer);
   reduction(c, multBuffer, y2Buffer);
-  montgomery_square_buffer(c, y2Buffer, y2Buffer);
+  montgomery_square_buffer_dh(c, y2Buffer, y2Buffer);
   uint32_t sz1;
   switch (c)
   {
@@ -5826,8 +6089,8 @@ static bool isPointOnCurvePublic(Spec_ECC_Curves_curve c, uint64_t *p)
   memset(multBuffer0, 0U, (uint32_t)2U * len * sizeof (uint64_t));
   shiftLeftWord(c, x, multBuffer0);
   reduction(c, multBuffer0, xToDomainBuffer);
-  montgomery_square_buffer(c, xToDomainBuffer, xBuffer);
-  montgomery_multiplication_buffer(c, xBuffer, xToDomainBuffer, xBuffer);
+  montgomery_square_buffer_dh(c, xToDomainBuffer, xBuffer);
+  montgomery_multiplication_buffer_dh(c, xBuffer, xToDomainBuffer, xBuffer);
   multByThree(c, xToDomainBuffer, minusThreeXBuffer);
   felem_sub(c, xBuffer, minusThreeXBuffer, xBuffer);
   switch (c)
@@ -6728,13 +6991,13 @@ static void montgomery_ladder_exponent(Spec_ECC_Curves_curve c, uint64_t *r)
     uint32_t bit0 = (uint32_t)255U - i;
     uint64_t
     bit =
-      (uint64_t)(Hacl_Spec_ECDSA_Definition_order_inverse_buffer[bit0
+      (uint64_t)(Hacl_Spec_ECDSA_Definition_prime256order_buffer[bit0
       / (uint32_t)8U]
       >> bit0 % (uint32_t)8U
       & (uint8_t)1U);
     cswap1(bit, p, r);
-    montgomery_multiplication_ecdsa_module(c, p, r, r);
-    montgomery_multiplication_ecdsa_module(c, p, p, p);
+    montgomery_multiplication_ecdsa_module(c, p, r);
+    montgomery_multiplication_ecdsa_module(c, p, p);
     cswap1(bit, p, r);
   }
   uint32_t sw;
@@ -6758,11 +7021,11 @@ static void montgomery_ladder_exponent(Spec_ECC_Curves_curve c, uint64_t *r)
   memcpy(r, p, sw * sizeof (uint64_t));
 }
 
-static void fromDomainImpl(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result)
+static void fromDomainImpl(Spec_ECC_Curves_curve c, uint64_t *a)
 {
   uint64_t one[4U] = { 0U };
   uploadOneImpl(c, one);
-  montgomery_multiplication_ecdsa_module(c, one, a, result);
+  montgomery_multiplication_ecdsa_module(c, one, a);
 }
 
 static void
@@ -6890,7 +7153,6 @@ ecdsa_signature_step45(Spec_ECC_Curves_curve c, uint64_t *x, uint8_t *k, uint64_
 static void
 ecdsa_signature_step6(
   Spec_ECC_Curves_curve c,
-  uint64_t *result,
   uint64_t *kFelem,
   uint64_t *z,
   uint64_t *r,
@@ -6900,12 +7162,12 @@ ecdsa_signature_step6(
   uint64_t rda[4U] = { 0U };
   uint64_t zBuffer[4U] = { 0U };
   uint64_t kInv[4U] = { 0U };
-  montgomery_multiplication_ecdsa_module(c, r, da, rda);
-  fromDomainImpl(c, z, zBuffer);
-  felem_add0(c, rda, zBuffer, zBuffer);
+  montgomery_multiplication_ecdsa_module(c, r, da);
+  fromDomainImpl(c, z);
+  felem_add(c, rda, zBuffer, zBuffer);
   memcpy(kInv, kFelem, (uint32_t)4U * sizeof (uint64_t));
   montgomery_ladder_exponent(c, kInv);
-  montgomery_multiplication_ecdsa_module(c, zBuffer, kInv, result);
+  montgomery_multiplication_ecdsa_module(c, zBuffer, kInv);
 }
 
 static uint64_t
@@ -6948,7 +7210,7 @@ ecdsa_signature_core(
   toUint64ChangeEndian(c, k, kAsFelem);
   ecdsa_signature_step12(c, alg, mLen, m, hashAsFelem);
   uint64_t step5Flag = ecdsa_signature_step45(c, r, k, tempBuffer);
-  ecdsa_signature_step6(c, s, kAsFelem, hashAsFelem, r, privKeyAsFelem);
+  ecdsa_signature_step6(c, kAsFelem, hashAsFelem, r, privKeyAsFelem);
   uint64_t sIsZero = isZero_uint64_CT(c, s);
   return step5Flag | sIsZero;
 }
