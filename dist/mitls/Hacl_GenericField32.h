@@ -40,6 +40,15 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s
+{
+  uint32_t len;
+  uint32_t *n;
+  uint32_t mu;
+  uint32_t *r2;
+}
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32;
+
 typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_GenericField32_pbn_mont_ctx_u32;
 
 /*******************************************************************************

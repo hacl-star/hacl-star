@@ -501,32 +501,6 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u64(
 
 /* SNIPPET_END: Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u64 */
 
-/* SNIPPET_START: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 */
-
-typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s
-{
-  uint32_t len;
-  uint32_t *n;
-  uint32_t mu;
-  uint32_t *r2;
-}
-Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32;
-
-/* SNIPPET_END: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 */
-
-/* SNIPPET_START: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 */
-
-typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s
-{
-  uint32_t len;
-  uint64_t *n;
-  uint64_t mu;
-  uint64_t *r2;
-}
-Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64;
-
-/* SNIPPET_END: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 */
-
 #if defined(__cplusplus)
 }
 #endif

@@ -197,11 +197,35 @@ bool Hacl_Bignum4096_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *r
 
 
 /*
+Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be a 4096-bit bignum, i.e. uint64_t[64].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_Bignum4096_mont_ctx_free on the return value
+  to avoid memory leaks.
+*/
+Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t
+*Hacl_Bignum4096_mont_ctx_init(uint64_t *n);
+
+/*
+Deallocate the memory previously allocated by Hacl_Bignum4096_mont_ctx_init.
+
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
+*/
+void
+Hacl_Bignum4096_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k);
+
+/*
 Write `a mod n` in `res`.
 
   The argument a is meant to be a 8192-bit bignum, i.e. uint64_t[128].
   The outparam res is meant to be a 4096-bit bignum, i.e. uint64_t[64].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
 */
 void
 Hacl_Bignum4096_mod_precomp(
@@ -214,7 +238,7 @@ Hacl_Bignum4096_mod_precomp(
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -243,7 +267,7 @@ Hacl_Bignum4096_mod_exp_vartime_precomp(
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -272,7 +296,7 @@ Hacl_Bignum4096_mod_exp_consttime_precomp(
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.

@@ -461,11 +461,60 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
 
 
 /*
+Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be `len` limbs in size, i.e. uint32_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_Bignum32_mont_ctx_free on the return value
+  to avoid memory leaks.
+*/
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
+*Hacl_Bignum32_mont_ctx_init(uint32_t len, uint32_t *n)
+{
+  KRML_CHECK_SIZE(sizeof (uint32_t), len);
+  uint32_t *r2 = KRML_HOST_CALLOC(len, sizeof (uint32_t));
+  KRML_CHECK_SIZE(sizeof (uint32_t), len);
+  uint32_t *n1 = KRML_HOST_CALLOC(len, sizeof (uint32_t));
+  uint32_t *r21 = r2;
+  uint32_t *n11 = n1;
+  memcpy(n11, n, len * sizeof (uint32_t));
+  uint32_t nBits = (uint32_t)32U * Hacl_Bignum_Lib_bn_get_top_index_u32(len, n);
+  Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32(len, nBits, n, r21);
+  uint32_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint32(n[0U]);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 res = { .len = len, .n = n11, .mu = mu, .r2 = r21 };
+  KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32), (uint32_t)1U);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
+  *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32));
+  buf[0U] = res;
+  return buf;
+}
+
+/*
+Deallocate the memory previously allocated by Hacl_Bignum32_mont_ctx_init.
+
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
+*/
+void Hacl_Bignum32_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k)
+{
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k1 = *k;
+  uint32_t *n = k1.n;
+  uint32_t *r2 = k1.r2;
+  KRML_HOST_FREE(n);
+  KRML_HOST_FREE(r2);
+  KRML_HOST_FREE(k);
+}
+
+/*
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
   The outparam res is meant to be `len` limbs in size, i.e. uint32_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
 */
 void
 Hacl_Bignum32_mod_precomp(
@@ -474,7 +523,8 @@ Hacl_Bignum32_mod_precomp(
   uint32_t *res
 )
 {
-  uint32_t len1 = Hacl_GenericField32_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k10 = *k;
+  uint32_t len1 = k10.len;
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k1 = *k;
   bn_slow_precomp(len1, k1.n, k1.mu, k1.r2, a, res);
 }
@@ -483,7 +533,7 @@ Hacl_Bignum32_mod_precomp(
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -508,7 +558,8 @@ Hacl_Bignum32_mod_exp_vartime_precomp(
   uint32_t *res
 )
 {
-  uint32_t len1 = Hacl_GenericField32_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k10 = *k;
+  uint32_t len1 = k10.len;
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k1 = *k;
   Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(len1,
     k1.n,
@@ -524,7 +575,7 @@ Hacl_Bignum32_mod_exp_vartime_precomp(
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -549,7 +600,8 @@ Hacl_Bignum32_mod_exp_consttime_precomp(
   uint32_t *res
 )
 {
-  uint32_t len1 = Hacl_GenericField32_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k10 = *k;
+  uint32_t len1 = k10.len;
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k1 = *k;
   Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(len1,
     k1.n,
@@ -565,7 +617,7 @@ Hacl_Bignum32_mod_exp_consttime_precomp(
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
@@ -580,7 +632,8 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
   uint32_t *res
 )
 {
-  uint32_t len1 = Hacl_GenericField32_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k10 = *k;
+  uint32_t len1 = k10.len;
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k1 = *k;
   KRML_CHECK_SIZE(sizeof (uint32_t), len1);
   uint32_t n2[len1];

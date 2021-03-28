@@ -1235,7 +1235,7 @@ bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *re
 
 /* SNIPPET_END: Hacl_Bignum256_mod_inv_prime_vartime */
 
-/* SNIPPET_START: Hacl_Bignum256_mod_precomp */
+/* SNIPPET_START: Hacl_Bignum256_mont_ctx_init */
 
 
 /**********************************************/
@@ -1244,11 +1244,67 @@ bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *re
 
 
 /*
+Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be a 256-bit bignum, i.e. uint64_t[4].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_Bignum256_mont_ctx_free on the return value
+  to avoid memory leaks.
+*/
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum256_mont_ctx_init(uint64_t *n)
+{
+  uint64_t *r2 = KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint64_t));
+  uint64_t *n1 = KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint64_t));
+  uint64_t *r21 = r2;
+  uint64_t *n11 = n1;
+  memcpy(n11, n, (uint32_t)4U * sizeof (uint64_t));
+  uint32_t
+  nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64((uint32_t)4U, n);
+  precomp(nBits, n, r21);
+  uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
+  res = { .len = (uint32_t)4U, .n = n11, .mu = mu, .r2 = r21 };
+  KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64), (uint32_t)1U);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
+  *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64));
+  buf[0U] = res;
+  return buf;
+}
+
+/* SNIPPET_END: Hacl_Bignum256_mont_ctx_init */
+
+/* SNIPPET_START: Hacl_Bignum256_mont_ctx_free */
+
+/*
+Deallocate the memory previously allocated by Hacl_Bignum256_mont_ctx_init.
+
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
+*/
+void Hacl_Bignum256_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k)
+{
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  uint64_t *n = k1.n;
+  uint64_t *r2 = k1.r2;
+  KRML_HOST_FREE(n);
+  KRML_HOST_FREE(r2);
+  KRML_HOST_FREE(k);
+}
+
+/* SNIPPET_END: Hacl_Bignum256_mont_ctx_free */
+
+/* SNIPPET_START: Hacl_Bignum256_mod_precomp */
+
+/*
 Write `a mod n` in `res`.
 
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
   The outparam res is meant to be a 256-bit bignum, i.e. uint64_t[4].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
 */
 void
 Hacl_Bignum256_mod_precomp(
@@ -1269,7 +1325,7 @@ Hacl_Bignum256_mod_precomp(
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -1306,7 +1362,7 @@ Hacl_Bignum256_mod_exp_vartime_precomp(
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -1343,7 +1399,7 @@ Hacl_Bignum256_mod_exp_consttime_precomp(
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.

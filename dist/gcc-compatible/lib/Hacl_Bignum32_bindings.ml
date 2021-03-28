@@ -2,9 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Bignum_applied =
-      (Hacl_Bignum_bindings.Bindings)(Hacl_Bignum_stubs)
-    open Hacl_Bignum_applied
+    module Hacl_GenericField32_applied =
+      (Hacl_GenericField32_bindings.Bindings)(Hacl_GenericField32_stubs)
+    open Hacl_GenericField32_applied
     let hacl_Bignum32_add =
       foreign "Hacl_Bignum32_add"
         (uint32_t @->
@@ -48,6 +48,15 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint32_t @->
            ((ptr uint32_t) @->
               ((ptr uint32_t) @-> ((ptr uint32_t) @-> (returning bool)))))
+    let hacl_Bignum32_mont_ctx_init =
+      foreign "Hacl_Bignum32_mont_ctx_init"
+        (uint32_t @->
+           ((ptr uint32_t) @->
+              (returning (ptr hacl_Bignum_MontArithmetic_bn_mont_ctx_u32))))
+    let hacl_Bignum32_mont_ctx_free =
+      foreign "Hacl_Bignum32_mont_ctx_free"
+        ((ptr hacl_Bignum_MontArithmetic_bn_mont_ctx_u32) @->
+           (returning void))
     let hacl_Bignum32_mod_precomp =
       foreign "Hacl_Bignum32_mod_precomp"
         ((ptr hacl_Bignum_MontArithmetic_bn_mont_ctx_u32) @->

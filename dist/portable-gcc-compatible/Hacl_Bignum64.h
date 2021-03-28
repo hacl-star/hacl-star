@@ -37,11 +37,16 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_GenericField64.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 #include "Hacl_Bignum_Base.h"
 #include "Hacl_Bignum256.h"
+
+/* SNIPPET_START: Hacl_Bignum64_pbn_mont_ctx_u64 */
+
+typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum64_pbn_mont_ctx_u64;
+
+/* SNIPPET_END: Hacl_Bignum64_pbn_mont_ctx_u64 */
 
 /* SNIPPET_START: Hacl_Bignum64_add */
 
@@ -217,7 +222,7 @@ Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a, uint
 
 /* SNIPPET_END: Hacl_Bignum64_mod_inv_prime_vartime */
 
-/* SNIPPET_START: Hacl_Bignum64_mod_precomp */
+/* SNIPPET_START: Hacl_Bignum64_mont_ctx_init */
 
 
 /**********************************************/
@@ -226,11 +231,42 @@ Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a, uint
 
 
 /*
+Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_Bignum64_mont_ctx_free on the return value
+  to avoid memory leaks.
+*/
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
+*Hacl_Bignum64_mont_ctx_init(uint32_t len, uint64_t *n);
+
+/* SNIPPET_END: Hacl_Bignum64_mont_ctx_init */
+
+/* SNIPPET_START: Hacl_Bignum64_mont_ctx_free */
+
+/*
+Deallocate the memory previously allocated by Hacl_Bignum64_mont_ctx_init.
+
+  The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
+*/
+void Hacl_Bignum64_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k);
+
+/* SNIPPET_END: Hacl_Bignum64_mont_ctx_free */
+
+/* SNIPPET_START: Hacl_Bignum64_mod_precomp */
+
+/*
 Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
   The outparam res is meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
 */
 void
 Hacl_Bignum64_mod_precomp(
@@ -247,7 +283,7 @@ Hacl_Bignum64_mod_precomp(
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -280,7 +316,7 @@ Hacl_Bignum64_mod_exp_vartime_precomp(
 Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -313,7 +349,7 @@ Hacl_Bignum64_mod_exp_consttime_precomp(
 Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum64_mont_ctx_init.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
