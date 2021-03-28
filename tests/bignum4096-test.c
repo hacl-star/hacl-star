@@ -23,12 +23,12 @@ bool mod_exp_bytes_be_precomp(
   uint64_t *a = Hacl_Bignum4096_new_bn_from_bytes_be(512, aBytes);
   uint64_t *n = Hacl_Bignum4096_new_bn_from_bytes_be(512, nBytes);
   uint64_t *b = Hacl_Bignum4096_new_bn_from_bytes_be(bBytesLen, bBytes);
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k = Hacl_GenericField64_field_init(64, n);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k = Hacl_Bignum4096_mont_ctx_init(n);
 
   Hacl_Bignum4096_mod_exp_vartime_precomp(k, a, bBits, b, res);
   Hacl_Bignum4096_bn_to_bytes_be(res, resBytes);
 
-  Hacl_GenericField64_field_free(k);
+  Hacl_Bignum4096_mont_ctx_free(k);
   return 1;
 }
 

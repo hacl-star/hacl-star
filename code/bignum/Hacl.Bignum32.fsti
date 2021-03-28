@@ -4,7 +4,7 @@ open FStar.Mul
 
 module BN = Hacl.Bignum
 module BS = Hacl.Bignum.SafeAPI
-module GF = Hacl.GenericField32
+module MA = Hacl.Bignum.MontArithmetic
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -13,6 +13,8 @@ let t_limbs: Hacl.Bignum.Definitions.limb_t = Lib.IntTypes.U32
 
 inline_for_extraction noextract
 let lbignum = Hacl.Bignum.Definitions.lbignum
+
+let pbn_mont_ctx_u32 = MA.pbn_mont_ctx_u32
 
 [@@ CPrologue
 "/*******************************************************************************
@@ -128,17 +130,35 @@ val mod_inv_prime_vartime: len:BN.meta_len t_limbs -> BS.bn_mod_inv_prime_safe_s
 /* Arithmetic functions with precomputations. */
 /**********************************************/\n";
 
-Comment "Write `a mod n` in `res`.
+Comment "Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be `len` limbs in size, i.e. uint32_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_Bignum32_mont_ctx_free on the return value
+  to avoid memory leaks."]
+val mont_ctx_init: len:BN.meta_len t_limbs -> MA.bn_field_init_st t_limbs len
+
+[@@ Comment "Deallocate the memory previously allocated by Hacl_Bignum32_mont_ctx_init.
+
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init."]
+val mont_ctx_free: MA.bn_field_free_st t_limbs
+
+[@@ Comment "Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
   The outparam res is meant to be `len` limbs in size, i.e. uint32_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init."]
 val mod_precomp: len:Ghost.erased _ -> BS.bn_mod_slow_ctx_st t_limbs len
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -158,7 +178,7 @@ val mod_exp_vartime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limbs 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -178,7 +198,7 @@ val mod_exp_consttime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limb
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
-  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum32_mont_ctx_init.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.

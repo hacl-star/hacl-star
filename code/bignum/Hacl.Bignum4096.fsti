@@ -5,7 +5,6 @@ open FStar.Mul
 module BN = Hacl.Bignum
 module BS = Hacl.Bignum.SafeAPI
 module MA = Hacl.Bignum.MontArithmetic
-module GF = Hacl.GenericField64
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -153,17 +152,35 @@ val mod_inv_prime_vartime: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
 /* Arithmetic functions with precomputations. */
 /**********************************************/\n";
 
-Comment "Write `a mod n` in `res`.
+Comment "Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be a 4096-bit bignum, i.e. uint64_t[64].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_Bignum4096_mont_ctx_free on the return value
+  to avoid memory leaks."]
+val mont_ctx_init: MA.bn_field_init_st t_limbs n_limbs
+
+[@@ Comment "Deallocate the memory previously allocated by Hacl_Bignum4096_mont_ctx_init.
+
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init."]
+val mont_ctx_free: MA.bn_field_free_st t_limbs
+
+[@@ Comment "Write `a mod n` in `res`.
 
   The argument a is meant to be a 8192-bit bignum, i.e. uint64_t[128].
   The outparam res is meant to be a 4096-bit bignum, i.e. uint64_t[64].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init."]
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init."]
 val mod_precomp: BS.bn_mod_slow_ctx_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -183,7 +200,7 @@ val mod_exp_vartime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
   The arguments a and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
 
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
@@ -203,7 +220,7 @@ val mod_exp_consttime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
   The argument a and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
-  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+  The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.

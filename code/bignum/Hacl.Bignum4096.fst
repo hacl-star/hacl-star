@@ -8,7 +8,6 @@ module AM = Hacl.Bignum.AlmostMontgomery
 module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
 module BI = Hacl.Bignum.ModInv
-module GF = Hacl.GenericField64
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -140,6 +139,12 @@ let mod_exp_vartime = BS.mk_bn_mod_exp_safe n_limbs exp_check exp_vartime
 let mod_exp_consttime = BS.mk_bn_mod_exp_safe n_limbs exp_check exp_consttime
 
 let mod_inv_prime_vartime = BS.mk_bn_mod_inv_prime_safe n_limbs exp_vartime
+
+let mont_ctx_init r n =
+  MA.bn_field_init mont_inst r n
+
+let mont_ctx_free k =
+  MA.bn_field_free k
 
 let mod_precomp k a res =
   BS.bn_mod_ctx n_limbs bn_slow_precomp k a res
