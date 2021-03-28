@@ -39,6 +39,8 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 
+uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
+
 uint64_t
 Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out);
 
@@ -63,8 +65,6 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint64_t *tmp,
   uint64_t *res
 );
-
-uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
 
 #if defined(__cplusplus)
 }

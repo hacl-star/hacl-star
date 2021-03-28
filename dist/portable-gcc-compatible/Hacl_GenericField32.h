@@ -37,23 +37,16 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
 
-/* SNIPPET_START: Hacl_Bignum_GenericField_bn_mont_ctx_u32 */
+/* SNIPPET_START: Hacl_GenericField32_pbn_mont_ctx_u32 */
 
-typedef struct Hacl_Bignum_GenericField_bn_mont_ctx_u32_s
-{
-  uint32_t nBits;
-  uint32_t len;
-  uint32_t *n;
-  uint32_t mu;
-  uint32_t *r2;
-}
-Hacl_Bignum_GenericField_bn_mont_ctx_u32;
+typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_GenericField32_pbn_mont_ctx_u32;
 
-/* SNIPPET_END: Hacl_Bignum_GenericField_bn_mont_ctx_u32 */
+/* SNIPPET_END: Hacl_GenericField32_pbn_mont_ctx_u32 */
 
-/* SNIPPET_START: Hacl_GenericField32_field_init */
+/* SNIPPET_START: Hacl_GenericField32_field_modulus_check */
 
 /*******************************************************************************
 
@@ -61,63 +54,83 @@ A verified field arithmetic library.
 
 This is a 32-bit optimized version, where bignums are represented as an array
 of `len` unsigned 32-bit integers, i.e. uint32_t[len].
+
 All the arithmetic operations are performed in the Montgomery domain.
+
+All the functions below preserve the following invariant for a bignum `aM` in
+Montgomery form.
+  • aM < n
 
 *******************************************************************************/
 
 
 /*
-Allocate and initialize a montgomery context.
+Check whether this library will work for a modulus `n`.
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+  • n % 2 = 1
+  • 1 < n 
+*/
+bool Hacl_GenericField32_field_modulus_check(uint32_t len, uint32_t *n);
+
+/* SNIPPET_END: Hacl_GenericField32_field_modulus_check */
+
+/* SNIPPET_START: Hacl_GenericField32_field_init */
+
+/*
+Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be `len` limbs in size, i.e. uint32_t[len].
-  The argument nBits is an exact number of significant bits of n.
 
-  This function is *UNSAFE* and requires C clients to observe bn_mont_ctx_pre
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-
-  • 0 < nBits /\ (nBits - 1) / bits t < len
-  • pow2 (nBits - 1) < n /\ n < pow2 nBits
-
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
   • n % 2 = 1
   • 1 < n
 
-  • n is a prime // needed for the modular multiplicative inverse
-
+  The caller will need to call Hacl_GenericField32_field_free on the return value
+  to avoid memory leaks.
 */
-Hacl_Bignum_GenericField_bn_mont_ctx_u32
-Hacl_GenericField32_field_init(uint32_t len, uint32_t nBits, uint32_t *n);
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
+*Hacl_GenericField32_field_init(uint32_t len, uint32_t *n);
 
 /* SNIPPET_END: Hacl_GenericField32_field_init */
+
+/* SNIPPET_START: Hacl_GenericField32_field_free */
+
+/*
+Deallocate the memory previously allocated by Hacl_GenericField32_field_init.
+
+  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+*/
+void Hacl_GenericField32_field_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k);
+
+/* SNIPPET_END: Hacl_GenericField32_field_free */
 
 /* SNIPPET_START: Hacl_GenericField32_field_get_len */
 
 /*
-Return a size of the modulus `n` in limbs.
+Return the size of a modulus `n` in limbs.
 
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
 */
-uint32_t Hacl_GenericField32_field_get_len(Hacl_Bignum_GenericField_bn_mont_ctx_u32 k);
+uint32_t Hacl_GenericField32_field_get_len(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k);
 
 /* SNIPPET_END: Hacl_GenericField32_field_get_len */
 
 /* SNIPPET_START: Hacl_GenericField32_to_field */
 
 /*
-Convert a bignum to its Montgomery representation.
+Convert a bignum from the regular representation to the Montgomery representation.
 
   Write `a * R mod n` in `aM`.
 
-  The arguments a and aM are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument a and the outparam aM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_to_field
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • a < n
-
 */
 void
 Hacl_GenericField32_to_field(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u32 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k,
   uint32_t *a,
   uint32_t *aM
 );
@@ -127,22 +140,17 @@ Hacl_GenericField32_to_field(
 /* SNIPPET_START: Hacl_GenericField32_from_field */
 
 /*
-Convert the result back from the Montgomery representation to the regular representation.
+Convert a result back from the Montgomery representation to the regular representation.
 
   Write `aM / R mod n` in `a`, i.e.
-  Hacl_GenericField32_from_field(k, Hacl_GenericField32_to_field(k, a)) == a
+  Hacl_GenericField32_from_field(k, Hacl_GenericField32_to_field(k, a)) == a % n
 
-  The arguments a and aM are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument aM and the outparam a are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_from_field
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
-
 */
 void
 Hacl_GenericField32_from_field(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u32 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k,
   uint32_t *aM,
   uint32_t *a
 );
@@ -154,17 +162,12 @@ Hacl_GenericField32_from_field(
 /*
 Write `aM + bM mod n` in `cM`.
 
-  The arguments aM, bM, and cM are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_field_add
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
-  • bM < n 
 */
 void
 Hacl_GenericField32_add(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u32 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k,
   uint32_t *aM,
   uint32_t *bM,
   uint32_t *cM
@@ -177,17 +180,12 @@ Hacl_GenericField32_add(
 /*
 Write `aM - bM mod n` to `cM`.
 
-  The arguments aM, bM, and cM are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_field_sub
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
-  • bM < n 
 */
 void
 Hacl_GenericField32_sub(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u32 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k,
   uint32_t *aM,
   uint32_t *bM,
   uint32_t *cM
@@ -200,17 +198,12 @@ Hacl_GenericField32_sub(
 /*
 Write `aM * bM mod n` in `cM`.
 
-  The arguments aM, bM, and cM are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_field_mul
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
-  • bM < n 
 */
 void
 Hacl_GenericField32_mul(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u32 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k,
   uint32_t *aM,
   uint32_t *bM,
   uint32_t *cM
@@ -223,15 +216,15 @@ Hacl_GenericField32_mul(
 /*
 Write `aM * aM mod n` in `cM`.
 
-  The arguments aM and cM are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument aM and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_field_sqr
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n 
 */
 void
-Hacl_GenericField32_sqr(Hacl_Bignum_GenericField_bn_mont_ctx_u32 k, uint32_t *aM, uint32_t *cM);
+Hacl_GenericField32_sqr(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k,
+  uint32_t *aM,
+  uint32_t *cM
+);
 
 /* SNIPPET_END: Hacl_GenericField32_sqr */
 
@@ -240,29 +233,93 @@ Hacl_GenericField32_sqr(Hacl_Bignum_GenericField_bn_mont_ctx_u32 k, uint32_t *aM
 /*
 Convert a bignum `one` to its Montgomery representation.
 
-  The argument oneM is meant to be `len` limbs in size, i.e. uint32_t[len].
+  The outparam oneM is meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
 */
-void Hacl_GenericField32_one(Hacl_Bignum_GenericField_bn_mont_ctx_u32 k, uint32_t *oneM);
+void Hacl_GenericField32_one(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k, uint32_t *oneM);
 
 /* SNIPPET_END: Hacl_GenericField32_one */
+
+/* SNIPPET_START: Hacl_GenericField32_exp_consttime */
+
+/*
+Write `aM ^ b mod n` in `resM`.
+
+  The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than exp_vartime.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits 
+*/
+void
+Hacl_GenericField32_exp_consttime(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k,
+  uint32_t *aM,
+  uint32_t bBits,
+  uint32_t *b,
+  uint32_t *resM
+);
+
+/* SNIPPET_END: Hacl_GenericField32_exp_consttime */
+
+/* SNIPPET_START: Hacl_GenericField32_exp_vartime */
+
+/*
+Write `aM ^ b mod n` in `resM`.
+
+  The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  The function is *NOT* constant-time on the argument b. See the
+  exp_consttime function for constant-time variant.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits 
+*/
+void
+Hacl_GenericField32_exp_vartime(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k,
+  uint32_t *aM,
+  uint32_t bBits,
+  uint32_t *b,
+  uint32_t *resM
+);
+
+/* SNIPPET_END: Hacl_GenericField32_exp_vartime */
 
 /* SNIPPET_START: Hacl_GenericField32_inverse */
 
 /*
 Write `aM ^ (-1) mod n` in `aInvM`.
 
-  The arguments aM and aInvM are meant to be `len` limbs in size, i.e. uint32_t[len].
+  The argument aM and the outparam aInvM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init.
 
-  This function is *UNSAFE* and requires C clients to observe bn_field_inv
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
   • 0 < aM 
 */
 void
 Hacl_GenericField32_inverse(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u32 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *k,
   uint32_t *aM,
   uint32_t *aInvM
 );

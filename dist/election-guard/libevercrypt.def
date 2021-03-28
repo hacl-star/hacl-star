@@ -49,24 +49,25 @@ EXPORTS
   Hacl_Streaming_SHA2_update_512
   Hacl_Streaming_SHA2_finish_512
   Hacl_Streaming_SHA2_free_512
+  Hacl_Bignum_ModInvLimb_mod_inv_uint64
   Hacl_Bignum_Base_mul_wide_add2_u64
   Hacl_Bignum_Lib_bn_get_top_index_u64
   Hacl_Bignum_Addition_bn_add_eq_len_u64
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64
-  Hacl_Bignum_ModInvLimb_mod_inv_uint64
   Hacl_Bignum256_add
   Hacl_Bignum256_sub
   Hacl_Bignum256_mul
   Hacl_Bignum256_sqr
-  Hacl_Bignum256_mod_precompr2
   Hacl_Bignum256_mod
-  Hacl_Bignum256_mod_exp_vartime_precompr2
-  Hacl_Bignum256_mod_exp_consttime_precompr2
   Hacl_Bignum256_mod_exp_vartime
   Hacl_Bignum256_mod_exp_consttime
-  Hacl_Bignum256_new_precompr2
   Hacl_Bignum256_mod_inv_prime_vartime
+  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t_LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t_______LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t______
+  Hacl_Bignum256_mod_precomp
+  Hacl_Bignum256_mod_exp_vartime_precomp
+  Hacl_Bignum256_mod_exp_consttime_precomp
+  Hacl_Bignum256_mod_inv_prime_vartime_precomp
   Hacl_Bignum256_new_bn_from_bytes_be
   Hacl_Bignum256_new_bn_from_bytes_le
   Hacl_Bignum256_bn_to_bytes_be
@@ -76,14 +77,14 @@ EXPORTS
   Hacl_Bignum4096_sub
   Hacl_Bignum4096_mul
   Hacl_Bignum4096_sqr
-  Hacl_Bignum4096_mod_precompr2
   Hacl_Bignum4096_mod
-  Hacl_Bignum4096_mod_exp_vartime_precompr2
-  Hacl_Bignum4096_mod_exp_consttime_precompr2
   Hacl_Bignum4096_mod_exp_vartime
   Hacl_Bignum4096_mod_exp_consttime
-  Hacl_Bignum4096_new_precompr2
   Hacl_Bignum4096_mod_inv_prime_vartime
+  Hacl_Bignum4096_mod_precomp
+  Hacl_Bignum4096_mod_exp_vartime_precomp
+  Hacl_Bignum4096_mod_exp_consttime_precomp
+  Hacl_Bignum4096_mod_inv_prime_vartime_precomp
   Hacl_Bignum4096_new_bn_from_bytes_be
   Hacl_Bignum4096_new_bn_from_bytes_le
   Hacl_Bignum4096_bn_to_bytes_be

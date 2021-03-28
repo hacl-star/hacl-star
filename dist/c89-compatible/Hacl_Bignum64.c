@@ -43,7 +43,7 @@ Write `a + b mod 2 ^ (64 * len)` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be `len` limbs in size, i.e. uint64_t[len]
+  The arguments a, b and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len]
 */
 uint64_t Hacl_Bignum64_add(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res)
 {
@@ -55,7 +55,7 @@ Write `a - b mod 2 ^ (64 * len)` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be `len` limbs in size, i.e. uint64_t[len]
+  The arguments a, b and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len]
 */
 uint64_t Hacl_Bignum64_sub(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res)
 {
@@ -94,29 +94,13 @@ void Hacl_Bignum64_sqr(uint32_t len, uint64_t *a, uint64_t *res)
   }
 }
 
-/*
-Write `a mod n` in `res` if a < n * n.
-
-  The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
-  The argument n, r2 and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument r2 is a precomputed constant 2 ^ (128 * len) mod n obtained through Hacl_Bignum64_new_precompr2.
-
-  This function is *UNSAFE* and requires C clients to observe the precondition
-  of bn_mod_slow_precompr2_lemma in Hacl.Spec.Bignum.ModReduction.fst, which
-  amounts to:
-  • 1 < n
-  • n % 2 = 1
-  • a < n * n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod below.
-*/
-void
-Hacl_Bignum64_mod_precompr2(
+static inline void
+bn_slow_precomp(
   uint32_t len,
   uint64_t *n,
-  uint64_t *a,
+  uint64_t mu,
   uint64_t *r2,
+  uint64_t *a,
   uint64_t *res
 )
 {
@@ -128,132 +112,126 @@ Hacl_Bignum64_mod_precompr2(
     {
       uint64_t a1[len + len];
       memset(a1, 0U, (len + len) * sizeof (uint64_t));
+      memcpy(a1, a, (len + len) * sizeof (uint64_t));
       {
-        uint64_t mu;
-        memcpy(a1, a, (len + len) * sizeof (uint64_t));
-        mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
+        uint64_t c00 = (uint64_t)0U;
+        uint64_t c0;
         {
-          uint64_t c0 = (uint64_t)0U;
-          uint64_t c01;
+          uint32_t i0;
+          for (i0 = (uint32_t)0U; i0 < len; i0++)
           {
-            uint32_t i0;
-            for (i0 = (uint32_t)0U; i0 < len; i0++)
+            uint64_t qj = mu * a1[i0];
+            uint64_t *res_j0 = a1 + i0;
+            uint64_t c = (uint64_t)0U;
             {
-              uint64_t qj = mu * a1[i0];
-              uint64_t *res_j0 = a1 + i0;
-              uint64_t c = (uint64_t)0U;
+              uint32_t i;
+              for (i = (uint32_t)0U; i < len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
               {
-                uint32_t i;
-                for (i = (uint32_t)0U; i < len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+                uint64_t a_i = n[(uint32_t)4U * i];
+                uint64_t *res_i0 = res_j0 + (uint32_t)4U * i;
+                c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, qj, c, res_i0);
                 {
-                  uint64_t a_i = n[(uint32_t)4U * i];
-                  uint64_t *res_i0 = res_j0 + (uint32_t)4U * i;
-                  c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, qj, c, res_i0);
+                  uint64_t a_i0 = n[(uint32_t)4U * i + (uint32_t)1U];
+                  uint64_t *res_i1 = res_j0 + (uint32_t)4U * i + (uint32_t)1U;
+                  c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, qj, c, res_i1);
                   {
-                    uint64_t a_i0 = n[(uint32_t)4U * i + (uint32_t)1U];
-                    uint64_t *res_i1 = res_j0 + (uint32_t)4U * i + (uint32_t)1U;
-                    c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, qj, c, res_i1);
+                    uint64_t a_i1 = n[(uint32_t)4U * i + (uint32_t)2U];
+                    uint64_t *res_i2 = res_j0 + (uint32_t)4U * i + (uint32_t)2U;
+                    c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, qj, c, res_i2);
                     {
-                      uint64_t a_i1 = n[(uint32_t)4U * i + (uint32_t)2U];
-                      uint64_t *res_i2 = res_j0 + (uint32_t)4U * i + (uint32_t)2U;
-                      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, qj, c, res_i2);
-                      {
-                        uint64_t a_i2 = n[(uint32_t)4U * i + (uint32_t)3U];
-                        uint64_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
-                        c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, qj, c, res_i);
-                      }
+                      uint64_t a_i2 = n[(uint32_t)4U * i + (uint32_t)3U];
+                      uint64_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
+                      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, qj, c, res_i);
                     }
                   }
                 }
-              }
-              {
-                uint32_t i;
-                for (i = len / (uint32_t)4U * (uint32_t)4U; i < len; i++)
-                {
-                  uint64_t a_i = n[i];
-                  uint64_t *res_i = res_j0 + i;
-                  c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, qj, c, res_i);
-                }
-              }
-              {
-                uint64_t r = c;
-                uint64_t c1 = r;
-                uint64_t *resb = a1 + len + i0;
-                uint64_t res_j = a1[len + i0];
-                c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c1, res_j, resb);
               }
             }
-          }
-          memcpy(a_mod, a1 + len, (len + len - len) * sizeof (uint64_t));
-          c01 = c0;
-          KRML_CHECK_SIZE(sizeof (uint64_t), len);
-          {
-            uint64_t tmp0[len];
-            memset(tmp0, 0U, len * sizeof (uint64_t));
             {
-              uint64_t c2 = (uint64_t)0U;
-              uint64_t c1;
-              uint64_t c;
+              uint32_t i;
+              for (i = len / (uint32_t)4U * (uint32_t)4U; i < len; i++)
               {
-                uint32_t i;
-                for (i = (uint32_t)0U; i < len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+                uint64_t a_i = n[i];
+                uint64_t *res_i = res_j0 + i;
+                c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, qj, c, res_i);
+              }
+            }
+            {
+              uint64_t r = c;
+              uint64_t c1 = r;
+              uint64_t *resb = a1 + len + i0;
+              uint64_t res_j = a1[len + i0];
+              c00 = Lib_IntTypes_Intrinsics_add_carry_u64(c00, c1, res_j, resb);
+            }
+          }
+        }
+        memcpy(a_mod, a1 + len, (len + len - len) * sizeof (uint64_t));
+        c0 = c00;
+        KRML_CHECK_SIZE(sizeof (uint64_t), len);
+        {
+          uint64_t tmp0[len];
+          memset(tmp0, 0U, len * sizeof (uint64_t));
+          {
+            uint64_t c = (uint64_t)0U;
+            uint64_t c1;
+            {
+              uint32_t i;
+              for (i = (uint32_t)0U; i < len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+              {
+                uint64_t t1 = a_mod[(uint32_t)4U * i];
+                uint64_t t20 = n[(uint32_t)4U * i];
+                uint64_t *res_i0 = tmp0 + (uint32_t)4U * i;
+                c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, res_i0);
                 {
-                  uint64_t t1 = a_mod[(uint32_t)4U * i];
-                  uint64_t t20 = n[(uint32_t)4U * i];
-                  uint64_t *res_i0 = tmp0 + (uint32_t)4U * i;
-                  c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t20, res_i0);
+                  uint64_t t10 = a_mod[(uint32_t)4U * i + (uint32_t)1U];
+                  uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
+                  uint64_t *res_i1 = tmp0 + (uint32_t)4U * i + (uint32_t)1U;
+                  c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, res_i1);
                   {
-                    uint64_t t10 = a_mod[(uint32_t)4U * i + (uint32_t)1U];
-                    uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-                    uint64_t *res_i1 = tmp0 + (uint32_t)4U * i + (uint32_t)1U;
-                    c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t10, t21, res_i1);
+                    uint64_t t11 = a_mod[(uint32_t)4U * i + (uint32_t)2U];
+                    uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
+                    uint64_t *res_i2 = tmp0 + (uint32_t)4U * i + (uint32_t)2U;
+                    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, res_i2);
                     {
-                      uint64_t t11 = a_mod[(uint32_t)4U * i + (uint32_t)2U];
-                      uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-                      uint64_t *res_i2 = tmp0 + (uint32_t)4U * i + (uint32_t)2U;
-                      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t11, t22, res_i2);
-                      {
-                        uint64_t t12 = a_mod[(uint32_t)4U * i + (uint32_t)3U];
-                        uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-                        uint64_t *res_i = tmp0 + (uint32_t)4U * i + (uint32_t)3U;
-                        c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t12, t2, res_i);
-                      }
+                      uint64_t t12 = a_mod[(uint32_t)4U * i + (uint32_t)3U];
+                      uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
+                      uint64_t *res_i = tmp0 + (uint32_t)4U * i + (uint32_t)3U;
+                      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, res_i);
                     }
                   }
                 }
               }
+            }
+            {
+              uint32_t i;
+              for (i = len / (uint32_t)4U * (uint32_t)4U; i < len; i++)
               {
-                uint32_t i;
-                for (i = len / (uint32_t)4U * (uint32_t)4U; i < len; i++)
-                {
-                  uint64_t t1 = a_mod[i];
-                  uint64_t t2 = n[i];
-                  uint64_t *res_i = tmp0 + i;
-                  c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t2, res_i);
-                }
+                uint64_t t1 = a_mod[i];
+                uint64_t t2 = n[i];
+                uint64_t *res_i = tmp0 + i;
+                c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, res_i);
               }
-              c1 = c2;
-              c = c01 - c1;
+            }
+            c1 = c;
+            {
+              uint32_t i;
+              for (i = (uint32_t)0U; i < len; i++)
               {
-                uint32_t i;
-                for (i = (uint32_t)0U; i < len; i++)
-                {
-                  uint64_t *os = a_mod;
-                  uint64_t x = (c & a_mod[i]) | (~c & tmp0[i]);
-                  os[i] = x;
-                }
+                uint64_t *os = a_mod;
+                uint64_t x = (((uint64_t)0U - c0) & tmp0[i]) | (~((uint64_t)0U - c0) & a_mod[i]);
+                os[i] = x;
               }
-              KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
+            }
+            KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
+            {
+              uint64_t c2[len + len];
+              memset(c2, 0U, (len + len) * sizeof (uint64_t));
+              KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * len);
               {
-                uint64_t c3[len + len];
-                memset(c3, 0U, (len + len) * sizeof (uint64_t));
-                KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * len);
-                {
-                  uint64_t tmp[(uint32_t)4U * len];
-                  memset(tmp, 0U, (uint32_t)4U * len * sizeof (uint64_t));
-                  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, a_mod, r2, tmp, c3);
-                  Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, c3, res);
-                }
+                uint64_t tmp[(uint32_t)4U * len];
+                memset(tmp, 0U, (uint32_t)4U * len * sizeof (uint64_t));
+                Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, a_mod, r2, tmp, c2);
+                Hacl_Bignum_Montgomery_bn_mont_reduction_u64(len, n, mu, c2, res);
               }
             }
           }
@@ -264,318 +242,17 @@ Hacl_Bignum64_mod_precompr2(
 }
 
 /*
-Write `a mod n` in `res` if a < n * n.
+Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
   The argument n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
 
-  The function returns false if any of the preconditions of mod_precompr2 above
-  are violated, true otherwise.
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • 1 < n
+   • n % 2 = 1 
 */
 bool Hacl_Bignum64_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
-{
-  uint64_t m0 = Hacl_Bignum_Montgomery_bn_check_modulus_u64(len, n);
-  KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
-  {
-    uint64_t n2[len + len];
-    memset(n2, 0U, (len + len) * sizeof (uint64_t));
-    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * len);
-    {
-      uint64_t tmp[(uint32_t)4U * len];
-      memset(tmp, 0U, (uint32_t)4U * len * sizeof (uint64_t));
-      Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(len, n, n, tmp, n2);
-      {
-        uint64_t acc = (uint64_t)0U;
-        uint64_t m1;
-        uint64_t is_valid_m;
-        uint32_t nBits;
-        {
-          uint32_t i;
-          for (i = (uint32_t)0U; i < len + len; i++)
-          {
-            uint64_t beq = FStar_UInt64_eq_mask(a[i], n2[i]);
-            uint64_t blt = ~FStar_UInt64_gte_mask(a[i], n2[i]);
-            acc =
-              (beq & acc)
-              | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
-          }
-        }
-        m1 = acc;
-        is_valid_m = m0 & m1;
-        nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
-        KRML_CHECK_SIZE(sizeof (uint64_t), len);
-        {
-          uint64_t r2[len];
-          memset(r2, 0U, len * sizeof (uint64_t));
-          {
-            uint32_t i;
-            uint32_t j;
-            memset(r2, 0U, len * sizeof (uint64_t));
-            i = nBits / (uint32_t)64U;
-            j = nBits % (uint32_t)64U;
-            r2[i] = r2[i] | (uint64_t)1U << j;
-            {
-              uint32_t i0;
-              for (i0 = (uint32_t)0U; i0 < (uint32_t)128U * len - nBits; i0++)
-              {
-                Hacl_Bignum_bn_add_mod_n_u64(len, n, r2, r2, r2);
-              }
-            }
-            Hacl_Bignum64_mod_precompr2(len, n, a, r2, res);
-            {
-              uint32_t i0;
-              for (i0 = (uint32_t)0U; i0 < len; i0++)
-              {
-                uint64_t *os = res;
-                uint64_t x = res[i0];
-                uint64_t x0 = is_valid_m & x;
-                os[i0] = x0;
-              }
-            }
-            return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
-          }
-        }
-      }
-    }
-  }
-}
-
-/*
-Write `a ^ b mod n` in `res`.
-
-  The arguments a, n, r2 and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument r2 is a precomputed constant 2 ^ (128 * len) mod n obtained through Hacl_Bignum64_new_precompr2.
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-  The function is *NOT* constant-time on the argument b. See the
-  mod_exp_consttime_* functions for constant-time variants.
-
-  This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  • n % 2 = 1
-  • 1 < n
-  • 0 < b
-  • b < pow2 bBits
-  • a < n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_vartime below.
-*/
-void
-Hacl_Bignum64_mod_exp_vartime_precompr2(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *r2,
-  uint64_t *res
-)
-{
-  if (bBits < (uint32_t)200U)
-  {
-    Hacl_Bignum_Exponentiation_bn_mod_exp_bm_vartime_precompr2_u64(len, n, a, bBits, b, r2, res);
-    return;
-  }
-  Hacl_Bignum_Exponentiation_bn_mod_exp_fw_vartime_precompr2_u64(len,
-    (uint32_t)4U,
-    n,
-    a,
-    bBits,
-    b,
-    r2,
-    res);
-}
-
-/*
-Write `a ^ b mod n` in `res`.
-
-  The arguments a, n, r2 and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument r2 is a precomputed constant 2 ^ (128 * len) mod n obtained through Hacl_Bignum64_new_precompr2.
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-  This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_vartime_precompr2.
-
-  This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  • n % 2 = 1
-  • 1 < n
-  • 0 < b
-  • b < pow2 bBits
-  • a < n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_consttime below.
-*/
-void
-Hacl_Bignum64_mod_exp_consttime_precompr2(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *r2,
-  uint64_t *res
-)
-{
-  if (bBits < (uint32_t)200U)
-  {
-    Hacl_Bignum_Exponentiation_bn_mod_exp_bm_consttime_precompr2_u64(len, n, a, bBits, b, r2, res);
-    return;
-  }
-  Hacl_Bignum_Exponentiation_bn_mod_exp_fw_consttime_precompr2_u64(len,
-    (uint32_t)4U,
-    n,
-    a,
-    bBits,
-    b,
-    r2,
-    res);
-}
-
-/*
-Write `a ^ b mod n` in `res`.
-
-  The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-  The function is *NOT* constant-time on the argument b. See the
-  mod_exp_consttime_* functions for constant-time variants.
-
-  The function returns false if any of the preconditions of mod_exp_precompr2 are
-  violated, true otherwise.
-*/
-bool
-Hacl_Bignum64_mod_exp_vartime(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *res
-)
-{
-  uint64_t is_valid_m = Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64(len, n, a, bBits, b);
-  uint32_t nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
-  if (is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
-  {
-    KRML_CHECK_SIZE(sizeof (uint64_t), len);
-    {
-      uint64_t r2[len];
-      memset(r2, 0U, len * sizeof (uint64_t));
-      memset(r2, 0U, len * sizeof (uint64_t));
-      {
-        uint32_t i = nBits / (uint32_t)64U;
-        uint32_t j = nBits % (uint32_t)64U;
-        r2[i] = r2[i] | (uint64_t)1U << j;
-        {
-          uint32_t i0;
-          for (i0 = (uint32_t)0U; i0 < (uint32_t)128U * len - nBits; i0++)
-          {
-            Hacl_Bignum_bn_add_mod_n_u64(len, n, r2, r2, r2);
-          }
-        }
-        Hacl_Bignum64_mod_exp_vartime_precompr2(len, n, a, bBits, b, r2, res);
-      }
-    }
-  }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < len; i++)
-    {
-      uint64_t *os = res;
-      uint64_t x = res[i];
-      uint64_t x0 = is_valid_m & x;
-      os[i] = x0;
-    }
-  }
-  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
-}
-
-/*
-Write `a ^ b mod n` in `res`.
-
-  The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-  This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_vartime.
-
-  The function returns false if any of the preconditions of
-  mod_exp_consttime_precompr2 are violated, true otherwise.
-*/
-bool
-Hacl_Bignum64_mod_exp_consttime(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *res
-)
-{
-  uint64_t is_valid_m = Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64(len, n, a, bBits, b);
-  uint32_t nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
-  if (is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
-  {
-    KRML_CHECK_SIZE(sizeof (uint64_t), len);
-    {
-      uint64_t r2[len];
-      memset(r2, 0U, len * sizeof (uint64_t));
-      memset(r2, 0U, len * sizeof (uint64_t));
-      {
-        uint32_t i = nBits / (uint32_t)64U;
-        uint32_t j = nBits % (uint32_t)64U;
-        r2[i] = r2[i] | (uint64_t)1U << j;
-        {
-          uint32_t i0;
-          for (i0 = (uint32_t)0U; i0 < (uint32_t)128U * len - nBits; i0++)
-          {
-            Hacl_Bignum_bn_add_mod_n_u64(len, n, r2, r2, r2);
-          }
-        }
-        Hacl_Bignum64_mod_exp_consttime_precompr2(len, n, a, bBits, b, r2, res);
-      }
-    }
-  }
-  {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < len; i++)
-    {
-      uint64_t *os = res;
-      uint64_t x = res[i];
-      uint64_t x0 = is_valid_m & x;
-      os[i] = x0;
-    }
-  }
-  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
-}
-
-/*
-Compute `2 ^ (128 * len) mod n`.
-
-  The argument n points to `len` limbs of valid memory.
-  The function returns a heap-allocated bignum of size `len`, or NULL if:
-  • the allocation failed, or
-  • n % 2 = 1 && 1 < n does not hold
-
-  If the return value is non-null, clients must eventually call free(3) on it to
-  avoid memory leaks.
-*/
-uint64_t *Hacl_Bignum64_new_precompr2(uint32_t len, uint64_t *n)
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   {
@@ -592,7 +269,7 @@ uint64_t *Hacl_Bignum64_new_precompr2(uint32_t len, uint64_t *n)
         uint64_t acc = (uint64_t)0U;
         uint64_t m1;
         uint64_t is_valid_m;
-        uint64_t *ite;
+        uint32_t nBits;
         {
           uint32_t i;
           for (i = (uint32_t)0U; i < len; i++)
@@ -606,188 +283,27 @@ uint64_t *Hacl_Bignum64_new_precompr2(uint32_t len, uint64_t *n)
         }
         m1 = acc;
         is_valid_m = m0 & m1;
-        if (!(is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU))
-        {
-          ite = NULL;
-        }
-        else
-        {
-          KRML_CHECK_SIZE(sizeof (uint64_t), len);
-          {
-            uint64_t *res = KRML_HOST_CALLOC(len, sizeof (uint64_t));
-            if (res == NULL)
-            {
-              ite = res;
-            }
-            else
-            {
-              uint64_t *res1 = res;
-              uint64_t *res2 = res1;
-              uint32_t
-              nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
-              memset(res2, 0U, len * sizeof (uint64_t));
-              {
-                uint32_t i = nBits / (uint32_t)64U;
-                uint32_t j = nBits % (uint32_t)64U;
-                res2[i] = res2[i] | (uint64_t)1U << j;
-                {
-                  uint32_t i0;
-                  for (i0 = (uint32_t)0U; i0 < (uint32_t)128U * len - nBits; i0++)
-                  {
-                    Hacl_Bignum_bn_add_mod_n_u64(len, n, res2, res2, res2);
-                  }
-                }
-                ite = res2;
-              }
-            }
-          }
-        }
-        return ite;
-      }
-    }
-  }
-}
-
-/*
-Write `a ^ (-1) mod n` in `res`.
-
-  The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-
-  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_pre
-  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
-  • n is a prime
-
-  The function returns false if any of the following preconditions are violated, true otherwise.
-  • n % 2 = 1
-  • 1 < n
-  • 0 < a
-  • a < n 
-*/
-bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
-{
-  uint64_t m0 = Hacl_Bignum_Montgomery_bn_check_modulus_u64(len, n);
-  KRML_CHECK_SIZE(sizeof (uint64_t), len);
-  {
-    uint64_t bn_zero[len];
-    memset(bn_zero, 0U, len * sizeof (uint64_t));
-    {
-      uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
-      uint64_t mask1;
-      uint64_t res10;
-      uint64_t m1;
-      {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < len; i++)
-        {
-          uint64_t uu____0 = FStar_UInt64_eq_mask(a[i], bn_zero[i]);
-          mask = uu____0 & mask;
-        }
-      }
-      mask1 = mask;
-      res10 = mask1;
-      m1 = res10;
-      {
-        uint64_t acc = (uint64_t)0U;
-        uint64_t m2;
-        uint64_t is_valid_m;
-        uint32_t nBits;
-        {
-          uint32_t i;
-          for (i = (uint32_t)0U; i < len; i++)
-          {
-            uint64_t beq = FStar_UInt64_eq_mask(a[i], n[i]);
-            uint64_t blt = ~FStar_UInt64_gte_mask(a[i], n[i]);
-            acc =
-              (beq & acc)
-              | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
-          }
-        }
-        m2 = acc;
-        is_valid_m = (m0 & ~m1) & m2;
         nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
         if (is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
         {
+          uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
           KRML_CHECK_SIZE(sizeof (uint64_t), len);
           {
-            uint64_t n2[len];
-            memset(n2, 0U, len * sizeof (uint64_t));
+            uint64_t r2[len];
+            memset(r2, 0U, len * sizeof (uint64_t));
+            memset(r2, 0U, len * sizeof (uint64_t));
             {
-              uint64_t
-              c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, n[0U], (uint64_t)2U, n2);
-              uint64_t c1;
-              if ((uint32_t)1U < len)
+              uint32_t i = nBits / (uint32_t)64U;
+              uint32_t j = nBits % (uint32_t)64U;
+              r2[i] = r2[i] | (uint64_t)1U << j;
               {
-                uint32_t rLen = len - (uint32_t)1U;
-                uint64_t *a1 = n + (uint32_t)1U;
-                uint64_t *res1 = n2 + (uint32_t)1U;
-                uint64_t c = c0;
+                uint32_t i0;
+                for (i0 = (uint32_t)0U; i0 < (uint32_t)128U * len - nBits; i0++)
                 {
-                  uint32_t i;
-                  for (i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
-                  {
-                    uint64_t t1 = a1[(uint32_t)4U * i];
-                    uint64_t *res_i0 = res1 + (uint32_t)4U * i;
-                    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res_i0);
-                    {
-                      uint64_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
-                      uint64_t *res_i1 = res1 + (uint32_t)4U * i + (uint32_t)1U;
-                      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, (uint64_t)0U, res_i1);
-                      {
-                        uint64_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
-                        uint64_t *res_i2 = res1 + (uint32_t)4U * i + (uint32_t)2U;
-                        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, (uint64_t)0U, res_i2);
-                        {
-                          uint64_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
-                          uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
-                          c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
-                        }
-                      }
-                    }
-                  }
-                }
-                {
-                  uint32_t i;
-                  for (i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
-                  {
-                    uint64_t t1 = a1[i];
-                    uint64_t *res_i = res1 + i;
-                    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res_i);
-                  }
-                }
-                {
-                  uint64_t c10 = c;
-                  c1 = c10;
+                  Hacl_Bignum_bn_add_mod_n_u64(len, n, r2, r2, r2);
                 }
               }
-              else
-              {
-                c1 = c0;
-              }
-              KRML_CHECK_SIZE(sizeof (uint64_t), len);
-              {
-                uint64_t r2[len];
-                memset(r2, 0U, len * sizeof (uint64_t));
-                memset(r2, 0U, len * sizeof (uint64_t));
-                {
-                  uint32_t i = nBits / (uint32_t)64U;
-                  uint32_t j = nBits % (uint32_t)64U;
-                  r2[i] = r2[i] | (uint64_t)1U << j;
-                  {
-                    uint32_t i0;
-                    for (i0 = (uint32_t)0U; i0 < (uint32_t)128U * len - nBits; i0++)
-                    {
-                      Hacl_Bignum_bn_add_mod_n_u64(len, n, r2, r2, r2);
-                    }
-                  }
-                  Hacl_Bignum64_mod_exp_vartime_precompr2(len,
-                    n,
-                    a,
-                    (uint32_t)64U * len,
-                    n2,
-                    r2,
-                    res);
-                }
-              }
+              bn_slow_precomp(len, n, mu, r2, a, res);
             }
           }
         }
@@ -803,6 +319,491 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
         }
         return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
       }
+    }
+  }
+}
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_consttime_* functions for constant-time variants.
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • 0 < b
+   • b < pow2 bBits
+   • a < n 
+*/
+bool
+Hacl_Bignum64_mod_exp_vartime(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+)
+{
+  uint64_t is_valid_m = Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64(len, n, a, bBits, b);
+  uint32_t nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
+  if (is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
+  {
+    Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_u64(len, nBits, n, a, bBits, b, res);
+  }
+  {
+    uint32_t i;
+    for (i = (uint32_t)0U; i < len; i++)
+    {
+      uint64_t *os = res;
+      uint64_t x = res[i];
+      uint64_t x0 = is_valid_m & x;
+      os[i] = x0;
+    }
+  }
+  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+}
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than mod_exp_vartime.
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • 0 < b
+   • b < pow2 bBits
+   • a < n 
+*/
+bool
+Hacl_Bignum64_mod_exp_consttime(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+)
+{
+  uint64_t is_valid_m = Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64(len, n, a, bBits, b);
+  uint32_t nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
+  if (is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
+  {
+    Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u64(len, nBits, n, a, bBits, b, res);
+  }
+  {
+    uint32_t i;
+    for (i = (uint32_t)0U; i < len; i++)
+    {
+      uint64_t *os = res;
+      uint64_t x = res[i];
+      uint64_t x0 = is_valid_m & x;
+      os[i] = x0;
+    }
+  }
+  return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+}
+
+/*
+Write `a ^ (-1) mod n` in `res`.
+
+  The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+  • n % 2 = 1
+  • 1 < n
+  • 0 < a
+  • a < n 
+*/
+bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
+{
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  {
+    uint64_t one[len];
+    memset(one, 0U, len * sizeof (uint64_t));
+    {
+      uint64_t bit0;
+      uint64_t m00;
+      memset(one, 0U, len * sizeof (uint64_t));
+      one[0U] = (uint64_t)1U;
+      bit0 = n[0U] & (uint64_t)1U;
+      m00 = (uint64_t)0U - bit0;
+      {
+        uint64_t acc0 = (uint64_t)0U;
+        uint64_t m10;
+        uint64_t m0;
+        {
+          uint32_t i;
+          for (i = (uint32_t)0U; i < len; i++)
+          {
+            uint64_t beq = FStar_UInt64_eq_mask(one[i], n[i]);
+            uint64_t blt = ~FStar_UInt64_gte_mask(one[i], n[i]);
+            acc0 =
+              (beq & acc0)
+              | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+          }
+        }
+        m10 = acc0;
+        m0 = m00 & m10;
+        KRML_CHECK_SIZE(sizeof (uint64_t), len);
+        {
+          uint64_t bn_zero[len];
+          memset(bn_zero, 0U, len * sizeof (uint64_t));
+          {
+            uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+            uint64_t mask1;
+            uint64_t res10;
+            uint64_t m1;
+            {
+              uint32_t i;
+              for (i = (uint32_t)0U; i < len; i++)
+              {
+                uint64_t uu____0 = FStar_UInt64_eq_mask(a[i], bn_zero[i]);
+                mask = uu____0 & mask;
+              }
+            }
+            mask1 = mask;
+            res10 = mask1;
+            m1 = res10;
+            {
+              uint64_t acc = (uint64_t)0U;
+              uint64_t m2;
+              uint64_t is_valid_m;
+              uint32_t nBits;
+              {
+                uint32_t i;
+                for (i = (uint32_t)0U; i < len; i++)
+                {
+                  uint64_t beq = FStar_UInt64_eq_mask(a[i], n[i]);
+                  uint64_t blt = ~FStar_UInt64_gte_mask(a[i], n[i]);
+                  acc =
+                    (beq & acc)
+                    | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+                }
+              }
+              m2 = acc;
+              is_valid_m = (m0 & ~m1) & m2;
+              nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
+              if (is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
+              {
+                KRML_CHECK_SIZE(sizeof (uint64_t), len);
+                {
+                  uint64_t n2[len];
+                  memset(n2, 0U, len * sizeof (uint64_t));
+                  {
+                    uint64_t
+                    c0 =
+                      Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U,
+                        n[0U],
+                        (uint64_t)2U,
+                        n2);
+                    uint64_t c1;
+                    if ((uint32_t)1U < len)
+                    {
+                      uint32_t rLen = len - (uint32_t)1U;
+                      uint64_t *a1 = n + (uint32_t)1U;
+                      uint64_t *res1 = n2 + (uint32_t)1U;
+                      uint64_t c = c0;
+                      {
+                        uint32_t i;
+                        for
+                        (i
+                          = (uint32_t)0U;
+                          i
+                          < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
+                          i++)
+                        {
+                          uint64_t t1 = a1[(uint32_t)4U * i];
+                          uint64_t *res_i0 = res1 + (uint32_t)4U * i;
+                          c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res_i0);
+                          {
+                            uint64_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
+                            uint64_t *res_i1 = res1 + (uint32_t)4U * i + (uint32_t)1U;
+                            c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, (uint64_t)0U, res_i1);
+                            {
+                              uint64_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
+                              uint64_t *res_i2 = res1 + (uint32_t)4U * i + (uint32_t)2U;
+                              c =
+                                Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+                                  t11,
+                                  (uint64_t)0U,
+                                  res_i2);
+                              {
+                                uint64_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
+                                uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
+                                c =
+                                  Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+                                    t12,
+                                    (uint64_t)0U,
+                                    res_i);
+                              }
+                            }
+                          }
+                        }
+                      }
+                      {
+                        uint32_t i;
+                        for (i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+                        {
+                          uint64_t t1 = a1[i];
+                          uint64_t *res_i = res1 + i;
+                          c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res_i);
+                        }
+                      }
+                      {
+                        uint64_t c10 = c;
+                        c1 = c10;
+                      }
+                    }
+                    else
+                    {
+                      c1 = c0;
+                    }
+                    Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_u64(len,
+                      nBits,
+                      n,
+                      a,
+                      (uint32_t)64U * len,
+                      n2,
+                      res);
+                  }
+                }
+              }
+              {
+                uint32_t i;
+                for (i = (uint32_t)0U; i < len; i++)
+                {
+                  uint64_t *os = res;
+                  uint64_t x = res[i];
+                  uint64_t x0 = is_valid_m & x;
+                  os[i] = x0;
+                }
+              }
+              return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+
+/**********************************************/
+/* Arithmetic functions with precomputations. */
+/**********************************************/
+
+
+/*
+Write `a mod n` in `res`.
+
+  The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
+  The outparam res is meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+void
+Hacl_Bignum64_mod_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint64_t *res
+)
+{
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  bn_slow_precomp(len1, k1.n, k1.mu, k1.r2, a, res);
+}
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_consttime_* functions for constant-time variants.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits
+  • a < n 
+*/
+void
+Hacl_Bignum64_mod_exp_vartime_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+)
+{
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(len1,
+    k1.n,
+    k1.mu,
+    k1.r2,
+    a,
+    bBits,
+    b,
+    res);
+}
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than mod_exp_vartime_*.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits
+  • a < n 
+*/
+void
+Hacl_Bignum64_mod_exp_consttime_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+)
+{
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(len1,
+    k1.n,
+    k1.mu,
+    k1.r2,
+    a,
+    bBits,
+    b,
+    res);
+}
+
+/*
+Write `a ^ (-1) mod n` in `res`.
+
+  The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
+  • 0 < a
+  • a < n 
+*/
+void
+Hacl_Bignum64_mod_inv_prime_vartime_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint64_t *res
+)
+{
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len1);
+  {
+    uint64_t n2[len1];
+    memset(n2, 0U, len1 * sizeof (uint64_t));
+    {
+      uint64_t
+      c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, k1.n[0U], (uint64_t)2U, n2);
+      uint64_t c1;
+      if ((uint32_t)1U < len1)
+      {
+        uint32_t rLen = len1 - (uint32_t)1U;
+        uint64_t *a1 = k1.n + (uint32_t)1U;
+        uint64_t *res1 = n2 + (uint32_t)1U;
+        uint64_t c = c0;
+        {
+          uint32_t i;
+          for (i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+          {
+            uint64_t t1 = a1[(uint32_t)4U * i];
+            uint64_t *res_i0 = res1 + (uint32_t)4U * i;
+            c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res_i0);
+            {
+              uint64_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
+              uint64_t *res_i1 = res1 + (uint32_t)4U * i + (uint32_t)1U;
+              c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, (uint64_t)0U, res_i1);
+              {
+                uint64_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
+                uint64_t *res_i2 = res1 + (uint32_t)4U * i + (uint32_t)2U;
+                c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, (uint64_t)0U, res_i2);
+                {
+                  uint64_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
+                  uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
+                  c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
+                }
+              }
+            }
+          }
+        }
+        {
+          uint32_t i;
+          for (i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+          {
+            uint64_t t1 = a1[i];
+            uint64_t *res_i = res1 + i;
+            c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res_i);
+          }
+        }
+        {
+          uint64_t c10 = c;
+          c1 = c10;
+        }
+      }
+      else
+      {
+        c1 = c0;
+      }
+      Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(len1,
+        k1.n,
+        k1.mu,
+        k1.r2,
+        a,
+        (uint32_t)64U * len1,
+        n2,
+        res);
     }
   }
 }
@@ -930,7 +931,7 @@ uint64_t *Hacl_Bignum64_new_bn_from_bytes_le(uint32_t len, uint8_t *b)
 /*
 Serialize a bignum into big-endian memory.
 
-  The argument b points to a bignum of `64 * len` size.
+  The argument b points to a bignum of ⌈len / 8⌉ size.
   The outparam res points to `len` bytes of valid memory.
 */
 void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
@@ -958,7 +959,7 @@ void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res)
 /*
 Serialize a bignum into little-endian memory.
 
-  The argument b points to a bignum of `64 * len` size.
+  The argument b points to a bignum of ⌈len / 8⌉ size.
   The outparam res points to `len` bytes of valid memory.
 */
 void Hacl_Bignum64_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res)
@@ -987,7 +988,8 @@ void Hacl_Bignum64_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res)
 
 
 /*
-Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b, otherwise returns 0.
+Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
+ otherwise returns 0.
 */
 uint64_t Hacl_Bignum64_lt_mask(uint32_t len, uint64_t *a, uint64_t *b)
 {

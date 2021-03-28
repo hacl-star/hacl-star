@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_RSAPSS2048_SHA256_H
-#define __Hacl_RSAPSS2048_SHA256_H
+#ifndef __Hacl_Bignum_Base_H
+#define __Hacl_Bignum_Base_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -37,75 +37,42 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_RSAPSS.h"
 #include "Hacl_Kremlib.h"
-#include "Hacl_Bignum.h"
-#include "Hacl_Spec.h"
 
-bool
-Hacl_RSAPSS2048_SHA256_rsapss_sign(
-  uint32_t eBits,
-  uint32_t dBits,
-  uint64_t *skey,
-  uint32_t sLen,
-  uint8_t *salt,
-  uint32_t msgLen,
-  uint8_t *msg,
-  uint8_t *sgnt
-);
+static inline uint64_t
+Hacl_Bignum_Base_mul_wide_add_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out)
+{
+  FStar_UInt128_uint128
+  res = FStar_UInt128_add(FStar_UInt128_mul_wide(a, b), FStar_UInt128_uint64_to_uint128(c_in));
+  out[0U] = FStar_UInt128_uint128_to_uint64(res);
+  return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
+}
 
-bool
-Hacl_RSAPSS2048_SHA256_rsapss_verify(
-  uint32_t eBits,
-  uint64_t *pkey,
-  uint32_t sLen,
-  uint32_t k,
-  uint8_t *sgnt,
-  uint32_t msgLen,
-  uint8_t *msg
-);
+static inline uint32_t
+Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out)
+{
+  uint32_t out0 = out[0U];
+  uint64_t res = (uint64_t)a * (uint64_t)b + (uint64_t)c_in + (uint64_t)out0;
+  out[0U] = (uint32_t)res;
+  return (uint32_t)(res >> (uint32_t)32U);
+}
 
-uint64_t
-*Hacl_RSAPSS2048_SHA256_new_rsapss_load_pkey(uint32_t eBits, uint8_t *nb, uint8_t *eb);
-
-uint64_t
-*Hacl_RSAPSS2048_SHA256_new_rsapss_load_skey(
-  uint32_t eBits,
-  uint32_t dBits,
-  uint8_t *nb,
-  uint8_t *eb,
-  uint8_t *db
-);
-
-bool
-Hacl_RSAPSS2048_SHA256_rsapss_skey_sign(
-  uint32_t eBits,
-  uint32_t dBits,
-  uint8_t *nb,
-  uint8_t *eb,
-  uint8_t *db,
-  uint32_t sLen,
-  uint8_t *salt,
-  uint32_t msgLen,
-  uint8_t *msg,
-  uint8_t *sgnt
-);
-
-bool
-Hacl_RSAPSS2048_SHA256_rsapss_pkey_verify(
-  uint32_t eBits,
-  uint8_t *nb,
-  uint8_t *eb,
-  uint32_t sLen,
-  uint32_t k,
-  uint8_t *sgnt,
-  uint32_t msgLen,
-  uint8_t *msg
-);
+static inline uint64_t
+Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out)
+{
+  uint64_t out0 = out[0U];
+  FStar_UInt128_uint128
+  res =
+    FStar_UInt128_add(FStar_UInt128_add(FStar_UInt128_mul_wide(a, b),
+        FStar_UInt128_uint64_to_uint128(c_in)),
+      FStar_UInt128_uint64_to_uint128(out0));
+  out[0U] = FStar_UInt128_uint128_to_uint64(res);
+  return FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res, (uint32_t)64U));
+}
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_RSAPSS2048_SHA256_H_DEFINED
+#define __Hacl_Bignum_Base_H_DEFINED
 #endif

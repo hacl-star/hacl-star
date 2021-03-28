@@ -30,31 +30,45 @@ A verified field arithmetic library.
 
 This is a 64-bit optimized version, where bignums are represented as an array
 of `len` unsigned 64-bit integers, i.e. uint64_t[len].
+
 All the arithmetic operations are performed in the Montgomery domain.
+
+All the functions below preserve the following invariant for a bignum `aM` in
+Montgomery form.
+  • aM < n
 
 *******************************************************************************/
 
 
 /*
-Allocate and initialize a montgomery context.
+Check whether this library will work for a modulus `n`.
+
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+  • n % 2 = 1
+  • 1 < n 
+*/
+bool Hacl_GenericField64_field_modulus_check(uint32_t len, uint64_t *n)
+{
+  uint64_t m = Hacl_Bignum_Montgomery_bn_check_modulus_u64(len, n);
+  return m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
+}
+
+/*
+Heap-allocate and initialize a montgomery context.
 
   The argument n is meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument nBits is an exact number of significant bits of n.
 
-  This function is *UNSAFE* and requires C clients to observe bn_mont_ctx_pre
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-
-  • 0 < nBits /\ (nBits - 1) / bits t < len
-  • pow2 (nBits - 1) < n /\ n < pow2 nBits
-
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
   • n % 2 = 1
   • 1 < n
 
-  • n is a prime // needed for the modular multiplicative inverse
-
+  The caller will need to call Hacl_GenericField64_field_free on the return value
+  to avoid memory leaks.
 */
-Hacl_Bignum_GenericField_bn_mont_ctx_u64
-Hacl_GenericField64_field_init(uint32_t len, uint32_t nBits, uint64_t *n)
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
+*Hacl_GenericField64_field_init(uint32_t len, uint64_t *n)
 {
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   {
@@ -64,126 +78,137 @@ Hacl_GenericField64_field_init(uint32_t len, uint32_t nBits, uint64_t *n)
       uint64_t *n1 = KRML_HOST_CALLOC(len, sizeof (uint64_t));
       uint64_t *r21 = r2;
       uint64_t *n11 = n1;
+      uint32_t nBits;
       uint64_t mu;
       memcpy(n11, n, len * sizeof (uint64_t));
-      Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(len, nBits - (uint32_t)1U, n, r21);
+      nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
+      Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(len, nBits, n, r21);
       mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
       {
-        Hacl_Bignum_GenericField_bn_mont_ctx_u64 lit;
-        lit.nBits = nBits;
-        lit.len = len;
-        lit.n = n11;
-        lit.mu = mu;
-        lit.r2 = r21;
-        return lit;
+        Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 res;
+        res.len = len;
+        res.n = n11;
+        res.mu = mu;
+        res.r2 = r21;
+        KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64), (uint32_t)1U);
+        {
+          Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
+          *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64));
+          buf[0U] = res;
+          return buf;
+        }
       }
     }
   }
 }
 
 /*
-Return a size of the modulus `n` in limbs.
+Deallocate the memory previously allocated by Hacl_GenericField64_field_init.
 
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
-uint32_t Hacl_GenericField64_field_get_len(Hacl_Bignum_GenericField_bn_mont_ctx_u64 k)
+void Hacl_GenericField64_field_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k)
 {
-  return k.len;
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  uint64_t *n = k1.n;
+  uint64_t *r2 = k1.r2;
+  KRML_HOST_FREE(n);
+  KRML_HOST_FREE(r2);
+  KRML_HOST_FREE(k);
 }
 
 /*
-Convert a bignum to its Montgomery representation.
+Return the size of a modulus `n` in limbs.
+
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+uint32_t Hacl_GenericField64_field_get_len(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k)
+{
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  return k1.len;
+}
+
+/*
+Convert a bignum from the regular representation to the Montgomery representation.
 
   Write `a * R mod n` in `aM`.
 
-  The arguments a and aM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument a and the outparam aM are meant to be `len` limbs in size, i.e. uint64_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_to_field
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • a < n
-
 */
 void
 Hacl_GenericField64_to_field(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u64 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint64_t *aM
 )
 {
-  Hacl_Bignum_Montgomery_bn_to_mont_u64(k.len, k.n, k.mu, k.r2, a, aM);
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  Hacl_Bignum_Montgomery_bn_to_mont_u64(len1, k1.n, k1.mu, k1.r2, a, aM);
 }
 
 /*
-Convert the result back from the Montgomery representation to the regular representation.
+Convert a result back from the Montgomery representation to the regular representation.
 
   Write `aM / R mod n` in `a`, i.e.
-  Hacl_GenericField64_from_field(k, Hacl_GenericField64_to_field(k, a)) == a
+  Hacl_GenericField64_from_field(k, Hacl_GenericField64_to_field(k, a)) == a % n
 
-  The arguments a and aM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument aM and the outparam a are meant to be `len` limbs in size, i.e. uint64_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_from_field
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
-
 */
 void
 Hacl_GenericField64_from_field(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u64 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *aM,
   uint64_t *a
 )
 {
-  Hacl_Bignum_Montgomery_bn_from_mont_u64(k.len, k.n, k.mu, aM, a);
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, k1.n, k1.mu, aM, a);
 }
 
 /*
 Write `aM + bM mod n` in `cM`.
 
-  The arguments aM, bM, and cM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_field_add
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
-  • bM < n 
 */
 void
 Hacl_GenericField64_add(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u64 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *aM,
   uint64_t *bM,
   uint64_t *cM
 )
 {
-  Hacl_Bignum_bn_add_mod_n_u64(k.len, k.n, aM, bM, cM);
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  Hacl_Bignum_bn_add_mod_n_u64(len1, k1.n, aM, bM, cM);
 }
 
 /*
 Write `aM - bM mod n` to `cM`.
 
-  The arguments aM, bM, and cM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_field_sub
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
-  • bM < n 
 */
 void
 Hacl_GenericField64_sub(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u64 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *aM,
   uint64_t *bM,
   uint64_t *cM
 )
 {
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   uint64_t c2 = (uint64_t)0U;
   uint64_t c0;
   {
     uint32_t i;
-    for (i = (uint32_t)0U; i < k.len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    for (i = (uint32_t)0U; i < k1.len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
     {
       uint64_t t1 = aM[(uint32_t)4U * i];
       uint64_t t20 = bM[(uint32_t)4U * i];
@@ -211,7 +236,7 @@ Hacl_GenericField64_sub(
   }
   {
     uint32_t i;
-    for (i = k.len / (uint32_t)4U * (uint32_t)4U; i < k.len; i++)
+    for (i = k1.len / (uint32_t)4U * (uint32_t)4U; i < k1.len; i++)
     {
       uint64_t t1 = aM[i];
       uint64_t t2 = bM[i];
@@ -220,35 +245,35 @@ Hacl_GenericField64_sub(
     }
   }
   c0 = c2;
-  KRML_CHECK_SIZE(sizeof (uint64_t), k.len);
+  KRML_CHECK_SIZE(sizeof (uint64_t), k1.len);
   {
-    uint64_t tmp[k.len];
-    memset(tmp, 0U, k.len * sizeof (uint64_t));
+    uint64_t tmp[k1.len];
+    memset(tmp, 0U, k1.len * sizeof (uint64_t));
     {
       uint64_t c3 = (uint64_t)0U;
       uint64_t c1;
       uint64_t c;
       {
         uint32_t i;
-        for (i = (uint32_t)0U; i < k.len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        for (i = (uint32_t)0U; i < k1.len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
         {
           uint64_t t1 = cM[(uint32_t)4U * i];
-          uint64_t t20 = k.n[(uint32_t)4U * i];
+          uint64_t t20 = k1.n[(uint32_t)4U * i];
           uint64_t *res_i0 = tmp + (uint32_t)4U * i;
           c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t1, t20, res_i0);
           {
             uint64_t t10 = cM[(uint32_t)4U * i + (uint32_t)1U];
-            uint64_t t21 = k.n[(uint32_t)4U * i + (uint32_t)1U];
+            uint64_t t21 = k1.n[(uint32_t)4U * i + (uint32_t)1U];
             uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
             c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t10, t21, res_i1);
             {
               uint64_t t11 = cM[(uint32_t)4U * i + (uint32_t)2U];
-              uint64_t t22 = k.n[(uint32_t)4U * i + (uint32_t)2U];
+              uint64_t t22 = k1.n[(uint32_t)4U * i + (uint32_t)2U];
               uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
               c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t11, t22, res_i2);
               {
                 uint64_t t12 = cM[(uint32_t)4U * i + (uint32_t)3U];
-                uint64_t t2 = k.n[(uint32_t)4U * i + (uint32_t)3U];
+                uint64_t t2 = k1.n[(uint32_t)4U * i + (uint32_t)3U];
                 uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
                 c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t12, t2, res_i);
               }
@@ -258,10 +283,10 @@ Hacl_GenericField64_sub(
       }
       {
         uint32_t i;
-        for (i = k.len / (uint32_t)4U * (uint32_t)4U; i < k.len; i++)
+        for (i = k1.len / (uint32_t)4U * (uint32_t)4U; i < k1.len; i++)
         {
           uint64_t t1 = cM[i];
-          uint64_t t2 = k.n[i];
+          uint64_t t2 = k1.n[i];
           uint64_t *res_i = tmp + i;
           c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t1, t2, res_i);
         }
@@ -270,7 +295,7 @@ Hacl_GenericField64_sub(
       c = (uint64_t)0U - c0;
       {
         uint32_t i;
-        for (i = (uint32_t)0U; i < k.len; i++)
+        for (i = (uint32_t)0U; i < k1.len; i++)
         {
           uint64_t *os = cM;
           uint64_t x = (c & tmp[i]) | (~c & cM[i]);
@@ -284,65 +309,422 @@ Hacl_GenericField64_sub(
 /*
 Write `aM * bM mod n` in `cM`.
 
-  The arguments aM, bM, and cM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_field_mul
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
-  • bM < n 
 */
 void
 Hacl_GenericField64_mul(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u64 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *aM,
   uint64_t *bM,
   uint64_t *cM
 )
 {
-  Hacl_Bignum_Montgomery_bn_mont_mul_u64(k.len, k.n, k.mu, aM, bM, cM);
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, aM, bM, cM);
 }
 
 /*
 Write `aM * aM mod n` in `cM`.
 
-  The arguments aM and cM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument aM and the outparam cM are meant to be `len` limbs in size, i.e. uint64_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
-
-  This function is *UNSAFE* and requires C clients to observe bn_field_sqr
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n 
 */
 void
-Hacl_GenericField64_sqr(Hacl_Bignum_GenericField_bn_mont_ctx_u64 k, uint64_t *aM, uint64_t *cM)
+Hacl_GenericField64_sqr(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *aM,
+  uint64_t *cM
+)
 {
-  Hacl_Bignum_Montgomery_bn_mont_sqr_u64(k.len, k.n, k.mu, aM, cM);
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, aM, cM);
 }
 
 /*
 Convert a bignum `one` to its Montgomery representation.
 
-  The argument oneM is meant to be `len` limbs in size, i.e. uint64_t[len].
+  The outparam oneM is meant to be `len` limbs in size, i.e. uint64_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 */
-void Hacl_GenericField64_one(Hacl_Bignum_GenericField_bn_mont_ctx_u64 k, uint64_t *oneM)
+void Hacl_GenericField64_one(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k, uint64_t *oneM)
 {
-  KRML_CHECK_SIZE(sizeof (uint64_t), k.len);
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, k1.n, k1.mu, k1.r2, oneM);
+}
+
+/*
+Write `aM ^ b mod n` in `resM`.
+
+  The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than exp_vartime.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits 
+*/
+void
+Hacl_GenericField64_exp_consttime(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *aM,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *resM
+)
+{
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  KRML_CHECK_SIZE(sizeof (uint64_t), k1.len);
   {
-    uint64_t one[k.len];
-    memset(one, 0U, k.len * sizeof (uint64_t));
-    memset(one, 0U, k.len * sizeof (uint64_t));
-    one[0U] = (uint64_t)1U;
-    KRML_CHECK_SIZE(sizeof (uint64_t), k.len + k.len);
+    uint64_t aMc[k1.len];
+    memset(aMc, 0U, k1.len * sizeof (uint64_t));
+    memcpy(aMc, aM, k1.len * sizeof (uint64_t));
+    if (bBits < (uint32_t)200U)
     {
-      uint64_t c[k.len + k.len];
-      memset(c, 0U, (k.len + k.len) * sizeof (uint64_t));
-      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * k.len);
+      Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, k1.n, k1.mu, k1.r2, resM);
       {
-        uint64_t tmp[(uint32_t)4U * k.len];
-        memset(tmp, 0U, (uint32_t)4U * k.len * sizeof (uint64_t));
-        Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(k.len, one, k.r2, tmp, c);
-        Hacl_Bignum_Montgomery_bn_mont_reduction_u64(k.len, k.n, k.mu, c, oneM);
+        uint64_t sw = (uint64_t)0U;
+        {
+          uint32_t i0;
+          for (i0 = (uint32_t)0U; i0 < bBits; i0++)
+          {
+            uint32_t i1 = (bBits - i0 - (uint32_t)1U) / (uint32_t)64U;
+            uint32_t j = (bBits - i0 - (uint32_t)1U) % (uint32_t)64U;
+            uint64_t tmp = b[i1];
+            uint64_t bit = tmp >> j & (uint64_t)1U;
+            uint64_t sw1 = bit ^ sw;
+            {
+              uint32_t i;
+              for (i = (uint32_t)0U; i < len1; i++)
+              {
+                uint64_t dummy = ((uint64_t)0U - sw1) & (resM[i] ^ aMc[i]);
+                resM[i] = resM[i] ^ dummy;
+                aMc[i] = aMc[i] ^ dummy;
+              }
+            }
+            Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, aMc, resM, aMc);
+            Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, resM, resM);
+            sw = bit;
+          }
+        }
+        {
+          uint64_t sw0 = sw;
+          {
+            uint32_t i;
+            for (i = (uint32_t)0U; i < len1; i++)
+            {
+              uint64_t dummy = ((uint64_t)0U - sw0) & (resM[i] ^ aMc[i]);
+              resM[i] = resM[i] ^ dummy;
+              aMc[i] = aMc[i] ^ dummy;
+            }
+          }
+        }
+      }
+    }
+    else
+    {
+      uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+      Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, k1.n, k1.mu, k1.r2, resM);
+      {
+        uint32_t table_len = (uint32_t)16U;
+        KRML_CHECK_SIZE(sizeof (uint64_t), table_len * len1);
+        {
+          uint64_t table[table_len * len1];
+          memset(table, 0U, table_len * len1 * sizeof (uint64_t));
+          memcpy(table, resM, len1 * sizeof (uint64_t));
+          {
+            uint64_t *t1 = table + len1;
+            memcpy(t1, aMc, len1 * sizeof (uint64_t));
+            {
+              uint32_t i;
+              for (i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+              {
+                uint64_t *t11 = table + (i + (uint32_t)1U) * len1;
+                uint64_t *t2 = table + (i + (uint32_t)2U) * len1;
+                Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, t11, aMc, t2);
+              }
+            }
+            {
+              uint32_t i0;
+              for (i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
+              {
+                {
+                  uint32_t i;
+                  for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                  {
+                    Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, resM, resM);
+                  }
+                }
+                {
+                  uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+                  uint32_t i1 = (bBits - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
+                  uint32_t j = (bBits - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
+                  uint64_t p1 = b[i1] >> j;
+                  uint64_t ite;
+                  if (i1 + (uint32_t)1U < bLen && (uint32_t)0U < j)
+                  {
+                    ite = p1 | b[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
+                  }
+                  else
+                  {
+                    ite = p1;
+                  }
+                  {
+                    uint64_t bits_l = ite & mask_l;
+                    KRML_CHECK_SIZE(sizeof (uint64_t), len1);
+                    {
+                      uint64_t a_bits_l[len1];
+                      memset(a_bits_l, 0U, len1 * sizeof (uint64_t));
+                      memcpy(a_bits_l, table, len1 * sizeof (uint64_t));
+                      {
+                        uint32_t i2;
+                        for (i2 = (uint32_t)0U; i2 < table_len - (uint32_t)1U; i2++)
+                        {
+                          uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
+                          uint64_t *res_j = table + (i2 + (uint32_t)1U) * len1;
+                          {
+                            uint32_t i;
+                            for (i = (uint32_t)0U; i < len1; i++)
+                            {
+                              uint64_t *os = a_bits_l;
+                              uint64_t x = (c & res_j[i]) | (~c & a_bits_l[i]);
+                              os[i] = x;
+                            }
+                          }
+                        }
+                      }
+                      Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1,
+                        k1.n,
+                        k1.mu,
+                        resM,
+                        a_bits_l,
+                        resM);
+                    }
+                  }
+                }
+              }
+            }
+            if (!(bBits % (uint32_t)4U == (uint32_t)0U))
+            {
+              uint32_t c = bBits % (uint32_t)4U;
+              {
+                uint32_t i;
+                for (i = (uint32_t)0U; i < c; i++)
+                {
+                  Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, resM, resM);
+                }
+              }
+              {
+                uint32_t c10 = bBits % (uint32_t)4U;
+                uint64_t mask_l = ((uint64_t)1U << c10) - (uint64_t)1U;
+                uint32_t i0 = (uint32_t)0U;
+                uint32_t j = (uint32_t)0U;
+                uint64_t p1 = b[i0] >> j;
+                uint64_t ite;
+                if (i0 + (uint32_t)1U < bLen && (uint32_t)0U < j)
+                {
+                  ite = p1 | b[i0 + (uint32_t)1U] << ((uint32_t)64U - j);
+                }
+                else
+                {
+                  ite = p1;
+                }
+                {
+                  uint64_t bits_c = ite & mask_l;
+                  uint64_t bits_c0 = bits_c;
+                  KRML_CHECK_SIZE(sizeof (uint64_t), len1);
+                  {
+                    uint64_t a_bits_c[len1];
+                    memset(a_bits_c, 0U, len1 * sizeof (uint64_t));
+                    memcpy(a_bits_c, table, len1 * sizeof (uint64_t));
+                    {
+                      uint32_t i1;
+                      for (i1 = (uint32_t)0U; i1 < table_len - (uint32_t)1U; i1++)
+                      {
+                        uint64_t c1 = FStar_UInt64_eq_mask(bits_c0, (uint64_t)(i1 + (uint32_t)1U));
+                        uint64_t *res_j = table + (i1 + (uint32_t)1U) * len1;
+                        {
+                          uint32_t i;
+                          for (i = (uint32_t)0U; i < len1; i++)
+                          {
+                            uint64_t *os = a_bits_c;
+                            uint64_t x = (c1 & res_j[i]) | (~c1 & a_bits_c[i]);
+                            os[i] = x;
+                          }
+                        }
+                      }
+                    }
+                    Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, resM, a_bits_c, resM);
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/*
+Write `aM ^ b mod n` in `resM`.
+
+  The argument aM and the outparam resM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  The function is *NOT* constant-time on the argument b. See the
+  exp_consttime function for constant-time variant.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits 
+*/
+void
+Hacl_GenericField64_exp_vartime(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *aM,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *resM
+)
+{
+  uint32_t len1 = Hacl_GenericField64_field_get_len(k);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  KRML_CHECK_SIZE(sizeof (uint64_t), k1.len);
+  {
+    uint64_t aMc[k1.len];
+    memset(aMc, 0U, k1.len * sizeof (uint64_t));
+    memcpy(aMc, aM, k1.len * sizeof (uint64_t));
+    if (bBits < (uint32_t)200U)
+    {
+      Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, k1.n, k1.mu, k1.r2, resM);
+      {
+        uint32_t i;
+        for (i = (uint32_t)0U; i < bBits; i++)
+        {
+          uint32_t i1 = i / (uint32_t)64U;
+          uint32_t j = i % (uint32_t)64U;
+          uint64_t tmp = b[i1];
+          uint64_t bit = tmp >> j & (uint64_t)1U;
+          if (!(bit == (uint64_t)0U))
+          {
+            Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, resM, aMc, resM);
+          }
+          Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, aMc, aMc);
+        }
+      }
+    }
+    else
+    {
+      uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+      Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, k1.n, k1.mu, k1.r2, resM);
+      {
+        uint32_t table_len = (uint32_t)16U;
+        KRML_CHECK_SIZE(sizeof (uint64_t), table_len * len1);
+        {
+          uint64_t table[table_len * len1];
+          memset(table, 0U, table_len * len1 * sizeof (uint64_t));
+          memcpy(table, resM, len1 * sizeof (uint64_t));
+          {
+            uint64_t *t1 = table + len1;
+            memcpy(t1, aMc, len1 * sizeof (uint64_t));
+            {
+              uint32_t i;
+              for (i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+              {
+                uint64_t *t11 = table + (i + (uint32_t)1U) * len1;
+                uint64_t *t2 = table + (i + (uint32_t)2U) * len1;
+                Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, t11, aMc, t2);
+              }
+            }
+            {
+              uint32_t i;
+              for (i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
+              {
+                {
+                  uint32_t i0;
+                  for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
+                  {
+                    Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, resM, resM);
+                  }
+                }
+                {
+                  uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+                  uint32_t i1 = (bBits - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
+                  uint32_t j = (bBits - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
+                  uint64_t p1 = b[i1] >> j;
+                  uint64_t ite;
+                  if (i1 + (uint32_t)1U < bLen && (uint32_t)0U < j)
+                  {
+                    ite = p1 | b[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
+                  }
+                  else
+                  {
+                    ite = p1;
+                  }
+                  {
+                    uint64_t bits_l = ite & mask_l;
+                    uint32_t bits_l32 = (uint32_t)bits_l;
+                    uint64_t *a_bits_l = table + bits_l32 * len1;
+                    Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, resM, a_bits_l, resM);
+                  }
+                }
+              }
+            }
+            if (!(bBits % (uint32_t)4U == (uint32_t)0U))
+            {
+              uint32_t c = bBits % (uint32_t)4U;
+              {
+                uint32_t i;
+                for (i = (uint32_t)0U; i < c; i++)
+                {
+                  Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, k1.n, k1.mu, resM, resM);
+                }
+              }
+              {
+                uint32_t c1 = bBits % (uint32_t)4U;
+                uint64_t mask_l = ((uint64_t)1U << c1) - (uint64_t)1U;
+                uint32_t i = (uint32_t)0U;
+                uint32_t j = (uint32_t)0U;
+                uint64_t p1 = b[i] >> j;
+                uint64_t ite;
+                if (i + (uint32_t)1U < bLen && (uint32_t)0U < j)
+                {
+                  ite = p1 | b[i + (uint32_t)1U] << ((uint32_t)64U - j);
+                }
+                else
+                {
+                  ite = p1;
+                }
+                {
+                  uint64_t bits_c = ite & mask_l;
+                  uint64_t bits_c0 = bits_c;
+                  uint32_t bits_c32 = (uint32_t)bits_c0;
+                  uint64_t *a_bits_c = table + bits_c32 * len1;
+                  Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, resM, a_bits_c, resM);
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -351,32 +733,35 @@ void Hacl_GenericField64_one(Hacl_Bignum_GenericField_bn_mont_ctx_u64 k, uint64_
 /*
 Write `aM ^ (-1) mod n` in `aInvM`.
 
-  The arguments aM and aInvM are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument aM and the outparam aInvM are meant to be `len` limbs in size, i.e. uint64_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
 
-  This function is *UNSAFE* and requires C clients to observe bn_field_inv
-  from Hacl.Spec.Bignum.GenericField.fsti, which amounts to:
-  • aM < n
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
   • 0 < aM 
 */
 void
 Hacl_GenericField64_inverse(
-  Hacl_Bignum_GenericField_bn_mont_ctx_u64 k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *aM,
   uint64_t *aInvM
 )
 {
-  KRML_CHECK_SIZE(sizeof (uint64_t), k.len);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
+  uint32_t len1 = k1.len;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len1);
   {
-    uint64_t n2[k.len];
-    memset(n2, 0U, k.len * sizeof (uint64_t));
+    uint64_t n2[len1];
+    memset(n2, 0U, len1 * sizeof (uint64_t));
     {
-      uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, k.n[0U], (uint64_t)2U, n2);
-      uint64_t c2;
-      if ((uint32_t)1U < k.len)
+      uint64_t
+      c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, k1.n[0U], (uint64_t)2U, n2);
+      uint64_t c1;
+      if ((uint32_t)1U < len1)
       {
-        uint32_t rLen = k.len - (uint32_t)1U;
-        uint64_t *a1 = k.n + (uint32_t)1U;
+        uint32_t rLen = len1 - (uint32_t)1U;
+        uint64_t *a1 = k1.n + (uint32_t)1U;
         uint64_t *res1 = n2 + (uint32_t)1U;
         uint64_t c = c0;
         {
@@ -413,134 +798,15 @@ Hacl_GenericField64_inverse(
           }
         }
         {
-          uint64_t c1 = c;
-          c2 = c1;
+          uint64_t c10 = c;
+          c1 = c10;
         }
       }
       else
       {
-        c2 = c0;
+        c1 = c0;
       }
-      KRML_CHECK_SIZE(sizeof (uint64_t), k.len);
-      {
-        uint64_t one1[k.len];
-        memset(one1, 0U, k.len * sizeof (uint64_t));
-        memset(one1, 0U, k.len * sizeof (uint64_t));
-        one1[0U] = (uint64_t)1U;
-        KRML_CHECK_SIZE(sizeof (uint64_t), k.len + k.len);
-        {
-          uint64_t c1[k.len + k.len];
-          memset(c1, 0U, (k.len + k.len) * sizeof (uint64_t));
-          KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * k.len);
-          {
-            uint64_t tmp[(uint32_t)4U * k.len];
-            memset(tmp, 0U, (uint32_t)4U * k.len * sizeof (uint64_t));
-            Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(k.len, one1, k.r2, tmp, c1);
-            Hacl_Bignum_Montgomery_bn_mont_reduction_u64(k.len, k.n, k.mu, c1, aInvM);
-            {
-              uint32_t table_len = (uint32_t)16U;
-              KRML_CHECK_SIZE(sizeof (uint64_t), table_len * k.len);
-              {
-                uint64_t table[table_len * k.len];
-                memset(table, 0U, table_len * k.len * sizeof (uint64_t));
-                {
-                  uint64_t *t1;
-                  memcpy(table, aInvM, k.len * sizeof (uint64_t));
-                  t1 = table + k.len;
-                  memcpy(t1, aM, k.len * sizeof (uint64_t));
-                  {
-                    uint32_t i;
-                    for (i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
-                    {
-                      uint64_t *t11 = table + (i + (uint32_t)1U) * k.len;
-                      uint64_t *t2 = table + (i + (uint32_t)2U) * k.len;
-                      Hacl_Bignum_Montgomery_bn_mont_mul_u64(k.len, k.n, k.mu, t11, aM, t2);
-                    }
-                  }
-                  {
-                    uint32_t i;
-                    for (i = (uint32_t)0U; i < k.nBits / (uint32_t)4U; i++)
-                    {
-                      {
-                        uint32_t i0;
-                        for (i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-                        {
-                          Hacl_Bignum_Montgomery_bn_mont_sqr_u64(k.len, k.n, k.mu, aInvM, aInvM);
-                        }
-                      }
-                      {
-                        uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
-                        uint32_t i1 = (k.nBits - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
-                        uint32_t j = (k.nBits - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-                        uint64_t p1 = n2[i1] >> j;
-                        uint64_t ite;
-                        if (i1 + (uint32_t)1U < k.len && (uint32_t)0U < j)
-                        {
-                          ite = p1 | n2[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
-                        }
-                        else
-                        {
-                          ite = p1;
-                        }
-                        {
-                          uint64_t bits_l = ite & mask_l;
-                          uint32_t bits_l32 = (uint32_t)bits_l;
-                          uint64_t *a_bits_l = table + bits_l32 * k.len;
-                          Hacl_Bignum_Montgomery_bn_mont_mul_u64(k.len,
-                            k.n,
-                            k.mu,
-                            aInvM,
-                            a_bits_l,
-                            aInvM);
-                        }
-                      }
-                    }
-                  }
-                  if (!(k.nBits % (uint32_t)4U == (uint32_t)0U))
-                  {
-                    uint32_t c10 = k.nBits % (uint32_t)4U;
-                    {
-                      uint32_t i;
-                      for (i = (uint32_t)0U; i < c10; i++)
-                      {
-                        Hacl_Bignum_Montgomery_bn_mont_sqr_u64(k.len, k.n, k.mu, aInvM, aInvM);
-                      }
-                    }
-                    {
-                      uint32_t c20 = k.nBits % (uint32_t)4U;
-                      uint64_t mask_l = ((uint64_t)1U << c20) - (uint64_t)1U;
-                      uint32_t i = (uint32_t)0U;
-                      uint32_t j = (uint32_t)0U;
-                      uint64_t p1 = n2[i] >> j;
-                      uint64_t ite;
-                      if (i + (uint32_t)1U < k.len && (uint32_t)0U < j)
-                      {
-                        ite = p1 | n2[i + (uint32_t)1U] << ((uint32_t)64U - j);
-                      }
-                      else
-                      {
-                        ite = p1;
-                      }
-                      {
-                        uint64_t bits_c = ite & mask_l;
-                        uint64_t bits_c0 = bits_c;
-                        uint32_t bits_c32 = (uint32_t)bits_c0;
-                        uint64_t *a_bits_c = table + bits_c32 * k.len;
-                        Hacl_Bignum_Montgomery_bn_mont_mul_u64(k.len,
-                          k.n,
-                          k.mu,
-                          aInvM,
-                          a_bits_c,
-                          aInvM);
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
+      Hacl_GenericField64_exp_vartime(k, aM, k1.len * (uint32_t)64U, n2, aInvM);
     }
   }
 }

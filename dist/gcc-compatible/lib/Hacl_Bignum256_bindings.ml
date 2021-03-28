@@ -2,6 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
+    module Hacl_Bignum_applied =
+      (Hacl_Bignum_bindings.Bindings)(Hacl_Bignum_stubs)
+    open Hacl_Bignum_applied
     let hacl_Bignum256_add =
       foreign "Hacl_Bignum256_add"
         ((ptr uint64_t) @->
@@ -17,29 +20,10 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Bignum256_sqr =
       foreign "Hacl_Bignum256_sqr"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
-    let hacl_Bignum256_mod_precompr2 =
-      foreign "Hacl_Bignum256_mod_precompr2"
-        ((ptr uint64_t) @->
-           ((ptr uint64_t) @->
-              ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))
     let hacl_Bignum256_mod =
       foreign "Hacl_Bignum256_mod"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))
-    let hacl_Bignum256_mod_exp_vartime_precompr2 =
-      foreign "Hacl_Bignum256_mod_exp_vartime_precompr2"
-        ((ptr uint64_t) @->
-           ((ptr uint64_t) @->
-              (uint32_t @->
-                 ((ptr uint64_t) @->
-                    ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))))
-    let hacl_Bignum256_mod_exp_consttime_precompr2 =
-      foreign "Hacl_Bignum256_mod_exp_consttime_precompr2"
-        ((ptr uint64_t) @->
-           ((ptr uint64_t) @->
-              (uint32_t @->
-                 ((ptr uint64_t) @->
-                    ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))))
     let hacl_Bignum256_mod_exp_vartime =
       foreign "Hacl_Bignum256_mod_exp_vartime"
         ((ptr uint64_t) @->
@@ -52,13 +36,30 @@ module Bindings(F:Cstubs.FOREIGN) =
            ((ptr uint64_t) @->
               (uint32_t @->
                  ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))))
-    let hacl_Bignum256_new_precompr2 =
-      foreign "Hacl_Bignum256_new_precompr2"
-        ((ptr uint64_t) @-> (returning (ptr uint64_t)))
     let hacl_Bignum256_mod_inv_prime_vartime =
       foreign "Hacl_Bignum256_mod_inv_prime_vartime"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning bool))))
+    let hacl_Bignum256_mod_precomp =
+      foreign "Hacl_Bignum256_mod_precomp"
+        ((ptr hacl_Bignum_MontArithmetic_bn_mont_ctx_u64) @->
+           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_Bignum256_mod_exp_vartime_precomp =
+      foreign "Hacl_Bignum256_mod_exp_vartime_precomp"
+        ((ptr hacl_Bignum_MontArithmetic_bn_mont_ctx_u64) @->
+           ((ptr uint64_t) @->
+              (uint32_t @->
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+    let hacl_Bignum256_mod_exp_consttime_precomp =
+      foreign "Hacl_Bignum256_mod_exp_consttime_precomp"
+        ((ptr hacl_Bignum_MontArithmetic_bn_mont_ctx_u64) @->
+           ((ptr uint64_t) @->
+              (uint32_t @->
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+    let hacl_Bignum256_mod_inv_prime_vartime_precomp =
+      foreign "Hacl_Bignum256_mod_inv_prime_vartime_precomp"
+        ((ptr hacl_Bignum_MontArithmetic_bn_mont_ctx_u64) @->
+           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
     let hacl_Bignum256_new_bn_from_bytes_be =
       foreign "Hacl_Bignum256_new_bn_from_bytes_be"
         (uint32_t @-> (ocaml_bytes @-> (returning (ptr uint64_t))))

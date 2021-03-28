@@ -24,6 +24,27 @@
 
 #include "Hacl_Bignum.h"
 
+inline uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0)
+{
+  uint64_t alpha = (uint64_t)9223372036854775808U;
+  uint64_t beta = n0;
+  uint64_t ub = (uint64_t)0U;
+  uint64_t vb = (uint64_t)0U;
+  ub = (uint64_t)1U;
+  vb = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  {
+    uint64_t us = ub;
+    uint64_t vs = vb;
+    uint64_t u_is_odd = (uint64_t)0U - (us & (uint64_t)1U);
+    uint64_t beta_if_u_is_odd = beta & u_is_odd;
+    ub = ((us ^ beta_if_u_is_odd) >> (uint32_t)1U) + (us & beta_if_u_is_odd);
+    uint64_t alpha_if_u_is_odd = alpha & u_is_odd;
+    vb = (vs >> (uint32_t)1U) + alpha_if_u_is_odd;
+  }
+  return vb;
+}
+
 inline uint64_t
 Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out)
 {
@@ -199,7 +220,7 @@ static inline void bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64(resLen, res, tmp, res);
 }
 
-inline void
+void
 Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
   uint32_t aLen,
   uint64_t *a,
@@ -314,7 +335,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64(
   uint64_t c9 = c;
 }
 
-inline void
+void
 Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint32_t aLen,
   uint64_t *a,
@@ -402,26 +423,5 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint64_t c8 = r1;
   uint64_t c = c8;
   uint64_t c9 = c;
-}
-
-inline uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0)
-{
-  uint64_t alpha = (uint64_t)9223372036854775808U;
-  uint64_t beta = n0;
-  uint64_t ub = (uint64_t)0U;
-  uint64_t vb = (uint64_t)0U;
-  ub = (uint64_t)1U;
-  vb = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-  {
-    uint64_t us = ub;
-    uint64_t vs = vb;
-    uint64_t u_is_odd = (uint64_t)0U - (us & (uint64_t)1U);
-    uint64_t beta_if_u_is_odd = beta & u_is_odd;
-    ub = ((us ^ beta_if_u_is_odd) >> (uint32_t)1U) + (us & beta_if_u_is_odd);
-    uint64_t alpha_if_u_is_odd = alpha & u_is_odd;
-    vb = (vs >> (uint32_t)1U) + alpha_if_u_is_odd;
-  }
-  return vb;
 }
 

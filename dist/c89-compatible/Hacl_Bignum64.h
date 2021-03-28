@@ -37,8 +37,11 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_GenericField64.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
+#include "Hacl_Bignum_Base.h"
+#include "Hacl_Bignum256.h"
 
 /*******************************************************************************
 
@@ -59,7 +62,7 @@ Write `a + b mod 2 ^ (64 * len)` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be `len` limbs in size, i.e. uint64_t[len]
+  The arguments a, b and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len]
 */
 uint64_t Hacl_Bignum64_add(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res);
 
@@ -68,7 +71,7 @@ Write `a - b mod 2 ^ (64 * len)` in `res`.
 
   This functions returns the carry.
 
-  The arguments a, b and res are meant to be `len` limbs in size, i.e. uint64_t[len]
+  The arguments a, b and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len]
 */
 uint64_t Hacl_Bignum64_sub(uint32_t len, uint64_t *a, uint64_t *b, uint64_t *res);
 
@@ -89,116 +92,23 @@ Write `a * a` in `res`.
 void Hacl_Bignum64_sqr(uint32_t len, uint64_t *a, uint64_t *res);
 
 /*
-Write `a mod n` in `res` if a < n * n.
-
-  The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
-  The argument n, r2 and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument r2 is a precomputed constant 2 ^ (128 * len) mod n obtained through Hacl_Bignum64_new_precompr2.
-
-  This function is *UNSAFE* and requires C clients to observe the precondition
-  of bn_mod_slow_precompr2_lemma in Hacl.Spec.Bignum.ModReduction.fst, which
-  amounts to:
-  • 1 < n
-  • n % 2 = 1
-  • a < n * n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod below.
-*/
-void
-Hacl_Bignum64_mod_precompr2(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t *a,
-  uint64_t *r2,
-  uint64_t *res
-);
-
-/*
-Write `a mod n` in `res` if a < n * n.
+Write `a mod n` in `res`.
 
   The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
   The argument n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
 
-  The function returns false if any of the preconditions of mod_precompr2 above
-  are violated, true otherwise.
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • 1 < n
+   • n % 2 = 1 
 */
 bool Hacl_Bignum64_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res);
 
 /*
 Write `a ^ b mod n` in `res`.
 
-  The arguments a, n, r2 and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument r2 is a precomputed constant 2 ^ (128 * len) mod n obtained through Hacl_Bignum64_new_precompr2.
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-  The function is *NOT* constant-time on the argument b. See the
-  mod_exp_consttime_* functions for constant-time variants.
-
-  This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  • n % 2 = 1
-  • 1 < n
-  • 0 < b
-  • b < pow2 bBits
-  • a < n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_vartime below.
-*/
-void
-Hacl_Bignum64_mod_exp_vartime_precompr2(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *r2,
-  uint64_t *res
-);
-
-/*
-Write `a ^ b mod n` in `res`.
-
-  The arguments a, n, r2 and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
-  The argument r2 is a precomputed constant 2 ^ (128 * len) mod n obtained through Hacl_Bignum64_new_precompr2.
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-  This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_vartime_precompr2.
-
-  This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  • n % 2 = 1
-  • 1 < n
-  • 0 < b
-  • b < pow2 bBits
-  • a < n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_consttime below.
-*/
-void
-Hacl_Bignum64_mod_exp_consttime_precompr2(
-  uint32_t len,
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *r2,
-  uint64_t *res
-);
-
-/*
-Write `a ^ b mod n` in `res`.
-
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
@@ -207,8 +117,13 @@ Write `a ^ b mod n` in `res`.
   The function is *NOT* constant-time on the argument b. See the
   mod_exp_consttime_* functions for constant-time variants.
 
-  The function returns false if any of the preconditions of mod_exp_precompr2 are
-  violated, true otherwise.
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • 0 < b
+   • b < pow2 bBits
+   • a < n 
 */
 bool
 Hacl_Bignum64_mod_exp_vartime(
@@ -224,6 +139,7 @@ Hacl_Bignum64_mod_exp_vartime(
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
@@ -232,8 +148,13 @@ Write `a ^ b mod n` in `res`.
   This function is constant-time over its argument b, at the cost of a slower
   execution time than mod_exp_vartime.
 
-  The function returns false if any of the preconditions of
-  mod_exp_consttime_precompr2 are violated, true otherwise.
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • 0 < b
+   • b < pow2 bBits
+   • a < n 
 */
 bool
 Hacl_Bignum64_mod_exp_consttime(
@@ -246,28 +167,16 @@ Hacl_Bignum64_mod_exp_consttime(
 );
 
 /*
-Compute `2 ^ (128 * len) mod n`.
-
-  The argument n points to `len` limbs of valid memory.
-  The function returns a heap-allocated bignum of size `len`, or NULL if:
-  • the allocation failed, or
-  • n % 2 = 1 && 1 < n does not hold
-
-  If the return value is non-null, clients must eventually call free(3) on it to
-  avoid memory leaks.
-*/
-uint64_t *Hacl_Bignum64_new_precompr2(uint32_t len, uint64_t *n);
-
-/*
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
 
-  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_pre
-  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
   • n is a prime
 
-  The function returns false if any of the following preconditions are violated, true otherwise.
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
   • n % 2 = 1
   • 1 < n
   • 0 < a
@@ -275,6 +184,103 @@ Write `a ^ (-1) mod n` in `res`.
 */
 bool
 Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res);
+
+
+/**********************************************/
+/* Arithmetic functions with precomputations. */
+/**********************************************/
+
+
+/*
+Write `a mod n` in `res`.
+
+  The argument a is meant to be `2*len` limbs in size, i.e. uint64_t[2*len].
+  The outparam res is meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+*/
+void
+Hacl_Bignum64_mod_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint64_t *res
+);
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_consttime_* functions for constant-time variants.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits
+  • a < n 
+*/
+void
+Hacl_Bignum64_mod_exp_vartime_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than mod_exp_vartime_*.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < b
+  • b < pow2 bBits
+  • a < n 
+*/
+void
+Hacl_Bignum64_mod_exp_consttime_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
+
+/*
+Write `a ^ (-1) mod n` in `res`.
+
+  The argument a and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+  The argument k is a montgomery context obtained through Hacl_GenericField64_field_init.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
+  • 0 < a
+  • a < n 
+*/
+void
+Hacl_Bignum64_mod_inv_prime_vartime_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint64_t *res
+);
 
 
 /********************/
@@ -311,7 +317,7 @@ uint64_t *Hacl_Bignum64_new_bn_from_bytes_le(uint32_t len, uint8_t *b);
 /*
 Serialize a bignum into big-endian memory.
 
-  The argument b points to a bignum of `64 * len` size.
+  The argument b points to a bignum of ⌈len / 8⌉ size.
   The outparam res points to `len` bytes of valid memory.
 */
 void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res);
@@ -319,7 +325,7 @@ void Hacl_Bignum64_bn_to_bytes_be(uint32_t len, uint64_t *b, uint8_t *res);
 /*
 Serialize a bignum into little-endian memory.
 
-  The argument b points to a bignum of `64 * len` size.
+  The argument b points to a bignum of ⌈len / 8⌉ size.
   The outparam res points to `len` bytes of valid memory.
 */
 void Hacl_Bignum64_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res);
@@ -331,7 +337,8 @@ void Hacl_Bignum64_bn_to_bytes_le(uint32_t len, uint64_t *b, uint8_t *res);
 
 
 /*
-Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b, otherwise returns 0.
+Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
+ otherwise returns 0.
 */
 uint64_t Hacl_Bignum64_lt_mask(uint32_t len, uint64_t *a, uint64_t *b);
 
