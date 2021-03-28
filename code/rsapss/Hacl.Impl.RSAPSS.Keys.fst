@@ -197,7 +197,7 @@ let rsapss_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
   -> pkey:lbignum t (2ul *! blocks modBits (size (bits t)) +! blocks eBits (size (bits t))) ->
   Stack bool
   (requires fun h ->
-    blocks modBits (size (bits t)) == ke.BE.mont.BM.bn.BN.len /\
+    blocks modBits (size (bits t)) == ke.BE.bn.BN.len /\
     live h nb /\ live h eb /\ live h pkey /\
     disjoint pkey nb /\ disjoint pkey eb)
   (ensures  fun h0 b h1 -> modifies (loc pkey) h0 h1 /\
@@ -222,7 +222,7 @@ let rsapss_load_pkey #t ke modBits kc eBits nb eb pkey =
   let nLen = blocks modBits bits in
   let eLen = blocks eBits bits in
   assert (v ((modBits -! 1ul) /. bits) < v nLen);
-  
+
   LS.blocks_bits_lemma t (v modBits);
   assert (v (blocks nbLen numb) == v nLen);
 
@@ -234,7 +234,7 @@ let rsapss_load_pkey #t ke modBits kc eBits nb eb pkey =
   let e  = sub pkey (nLen +! nLen) eLen in
 
   BN.bn_from_bytes_be nbLen nb n;
-  ke.BE.mont.BM.precomp (modBits -! 1ul) n r2;
+  ke.BE.precompr2 (modBits -! 1ul) n r2;
   BN.bn_from_bytes_be ebLen eb e;
   let h1 = ST.get () in
   LSeq.lemma_concat3 (v nLen) (as_seq h1 n)
@@ -259,7 +259,7 @@ let rsapss_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
   -> skey:lbignum t (2ul *! blocks modBits (size (bits t)) +! blocks eBits (size (bits t)) +! blocks dBits (size (bits t))) ->
   Stack bool
   (requires fun h ->
-    blocks modBits (size (bits t)) == ke.BE.mont.BM.bn.BN.len /\
+    blocks modBits (size (bits t)) == ke.BE.bn.BN.len /\
     live h nb /\ live h eb /\ live h db /\ live h skey /\
     disjoint skey nb /\ disjoint skey eb /\ disjoint skey db)
   (ensures  fun h0 b h1 -> modifies (loc skey) h0 h1 /\
@@ -315,7 +315,7 @@ let new_rsapss_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t{v modBits >
   -> eb:lbuffer uint8 (blocks eBits 8ul) ->
   ST (B.buffer (limb t))
   (requires fun h ->
-    blocks modBits (size (bits t)) == ke.BE.mont.BM.bn.BN.len /\
+    blocks modBits (size (bits t)) == ke.BE.bn.BN.len /\
     live h nb /\ live h eb /\ ST.is_eternal_region r)
   (ensures  fun h0 pkey h1 -> B.(modifies loc_none h0 h1) /\
     not (B.g_is_null pkey) ==> (
@@ -378,7 +378,7 @@ let new_rsapss_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t{v modBits >
   -> db:lbuffer uint8 (blocks dBits 8ul) ->
   ST (B.buffer (limb t))
   (requires fun h ->
-    blocks modBits (size (bits t)) == ke.BE.mont.BM.bn.BN.len /\
+    blocks modBits (size (bits t)) == ke.BE.bn.BN.len /\
     live h nb /\ live h eb /\ live h db /\
     ST.is_eternal_region r)
   (ensures  fun h0 skey h1 -> B.(modifies loc_none h0 h1) /\
