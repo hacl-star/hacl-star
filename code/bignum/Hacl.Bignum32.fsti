@@ -133,7 +133,7 @@ Comment "Write `a mod n` in `res`.
   The argument a is meant to be `2*len` limbs in size, i.e. uint32_t[2*len].
   The outparam res is meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val mod_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_slow_ctx_st t_limbs k
+val mod_precomp: len:Ghost.erased _ -> BS.bn_mod_slow_ctx_st t_limbs len
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -153,7 +153,7 @@ val mod_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_slow_ctx_st t_limbs k
   • 0 < b
   • b < pow2 bBits
   • a < n "]
-val mod_exp_vartime_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_exp_ctx_st t_limbs k
+val mod_exp_vartime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limbs len
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -173,7 +173,7 @@ val mod_exp_vartime_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_exp_ctx_st t_limb
   • 0 < b
   • b < pow2 bBits
   • a < n "]
-val mod_exp_consttime_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_exp_ctx_st t_limbs k
+val mod_exp_consttime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limbs len
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
@@ -185,7 +185,7 @@ val mod_exp_consttime_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_exp_ctx_st t_li
   • n is a prime
   • 0 < a
   • a < n "]
-val mod_inv_prime_vartime_precomp: k:GF.bn_mont_ctx_u32 -> BS.bn_mod_inv_prime_ctx_st t_limbs k
+val mod_inv_prime_vartime_precomp: len:Ghost.erased _ -> BS.bn_mod_inv_prime_ctx_st t_limbs len
 
 [@@ CPrologue
 "\n/********************/

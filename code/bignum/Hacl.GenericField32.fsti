@@ -10,8 +10,7 @@ module MA = Hacl.Bignum.MontArithmetic
 inline_for_extraction noextract
 let t_limbs: Hacl.Bignum.Definitions.limb_t = Lib.IntTypes.U32
 
-//inline_for_extraction noextract
-let bn_mont_ctx_u32 = MA.bn_mont_ctx_u32
+let pbn_mont_ctx_u32 = MA.pbn_mont_ctx_u32
 
 [@@ CPrologue
 "/*******************************************************************************
@@ -41,6 +40,11 @@ val field_modulus_check: len:BN.meta_len t_limbs -> MA.bn_field_check_modulus_st
 
   The argument n is meant to be `len` limbs in size, i.e. uint32_t[len].
 
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
   The caller will need to call Hacl_GenericField32_field_free on the return value
   to avoid memory leaks."]
 val field_init: len:BN.meta_len t_limbs -> MA.bn_field_init_st t_limbs len
@@ -53,7 +57,7 @@ val field_free: MA.bn_field_free_st t_limbs
 [@@ Comment "Return the size of a modulus `n` in limbs.
 
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val field_get_len: k:bn_mont_ctx_u32 -> MA.bn_field_get_len_st k
+val field_get_len: MA.bn_field_get_len_st t_limbs
 
 [@@ Comment "Convert a bignum from the regular representation to the Montgomery representation.
 
@@ -61,7 +65,7 @@ val field_get_len: k:bn_mont_ctx_u32 -> MA.bn_field_get_len_st k
 
   The argument a and the outparam aM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val to_field: k:bn_mont_ctx_u32 -> MA.bn_to_field_st k
+val to_field: len:Ghost.erased _ -> MA.bn_to_field_st t_limbs len
 
 [@@ Comment "Convert a result back from the Montgomery representation to the regular representation.
 
@@ -70,37 +74,37 @@ val to_field: k:bn_mont_ctx_u32 -> MA.bn_to_field_st k
 
   The argument aM and the outparam a are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val from_field: k:bn_mont_ctx_u32 -> MA.bn_from_field_st k
+val from_field: len:Ghost.erased _ -> MA.bn_from_field_st t_limbs len
 
 [@@ Comment "Write `aM + bM mod n` in `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val add: k:bn_mont_ctx_u32 -> MA.bn_field_add_st k
+val add: len:Ghost.erased _ -> MA.bn_field_add_st t_limbs len
 
 [@@ Comment "Write `aM - bM mod n` to `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val sub: k:bn_mont_ctx_u32 -> MA.bn_field_sub_st k
+val sub: len:Ghost.erased _ -> MA.bn_field_sub_st t_limbs len
 
 [@@ Comment "Write `aM * bM mod n` in `cM`.
 
   The arguments aM, bM, and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val mul: k:bn_mont_ctx_u32 -> MA.bn_field_mul_st k
+val mul: len:Ghost.erased _ -> MA.bn_field_mul_st t_limbs len
 
 [@@ Comment "Write `aM * aM mod n` in `cM`.
 
   The argument aM and the outparam cM are meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val sqr: k:bn_mont_ctx_u32 -> MA.bn_field_sqr_st k
+val sqr: len:Ghost.erased _ -> MA.bn_field_sqr_st t_limbs len
 
 [@@ Comment "Convert a bignum `one` to its Montgomery representation.
 
   The outparam oneM is meant to be `len` limbs in size, i.e. uint32_t[len].
   The argument k is a montgomery context obtained through Hacl_GenericField32_field_init."]
-val one: k:bn_mont_ctx_u32 -> MA.bn_field_one_st k
+val one: len:Ghost.erased _ -> MA.bn_field_one_st t_limbs len
 
 [@@ Comment "Write `aM ^ b mod n` in `resM`.
 
@@ -119,7 +123,7 @@ val one: k:bn_mont_ctx_u32 -> MA.bn_field_one_st k
   preconditions are observed.
   • 0 < b
   • b < pow2 bBits "]
-val exp_consttime: k:bn_mont_ctx_u32 -> MA.bn_field_exp_consttime_st k
+val exp_consttime: len:Ghost.erased _ -> MA.bn_field_exp_consttime_st t_limbs len
 
 [@@ Comment "Write `aM ^ b mod n` in `resM`.
 
@@ -138,7 +142,7 @@ val exp_consttime: k:bn_mont_ctx_u32 -> MA.bn_field_exp_consttime_st k
   preconditions are observed.
   • 0 < b
   • b < pow2 bBits "]
-val exp_vartime: k:bn_mont_ctx_u32 -> MA.bn_field_exp_vartime_st k
+val exp_vartime: len:Ghost.erased _ -> MA.bn_field_exp_vartime_st t_limbs len
 
 [@@ Comment "Write `aM ^ (-1) mod n` in `aInvM`.
 
@@ -149,4 +153,4 @@ val exp_vartime: k:bn_mont_ctx_u32 -> MA.bn_field_exp_vartime_st k
   preconditions are observed.
   • n is a prime
   • 0 < aM "]
-val inverse: k:bn_mont_ctx_u32 -> MA.bn_field_inv_st k
+val inverse: len:Ghost.erased _ -> MA.bn_field_inv_st t_limbs len

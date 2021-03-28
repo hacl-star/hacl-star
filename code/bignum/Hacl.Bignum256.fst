@@ -8,6 +8,7 @@ module AM = Hacl.Bignum.AlmostMontgomery
 module BE = Hacl.Bignum.Exponentiation
 module BR = Hacl.Bignum.ModReduction
 module BI = Hacl.Bignum.ModInv
+module GF = Hacl.GenericField64
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -139,16 +140,17 @@ let mod_exp_consttime = BS.mk_bn_mod_exp_safe n_limbs exp_check exp_consttime
 let mod_inv_prime_vartime = BS.mk_bn_mod_inv_prime_safe n_limbs exp_vartime
 
 let mod_precomp k a res =
-  BS.bn_mod_ctx k bn_slow_precomp a res
+  BS.bn_mod_ctx n_limbs bn_slow_precomp k a res
 
 let mod_exp_vartime_precomp k a bBits b res =
-  BS.mk_bn_mod_exp_ctx k exp_vartime_precomp a bBits b res
+  BS.mk_bn_mod_exp_ctx n_limbs exp_vartime_precomp k a bBits b res
 
 let mod_exp_consttime_precomp k a bBits b res =
-  BS.mk_bn_mod_exp_ctx k exp_consttime_precomp a bBits b res
+  BS.mk_bn_mod_exp_ctx n_limbs exp_consttime_precomp k a bBits b res
 
 let mod_inv_prime_vartime_precomp k a res =
-  BS.mk_bn_mod_inv_prime_ctx k (BI.mk_bn_mod_inv_prime_precomp k.MA.len exp_vartime_precomp) a res
+  BS.mk_bn_mod_inv_prime_ctx n_limbs
+    (BI.mk_bn_mod_inv_prime_precomp n_limbs exp_vartime_precomp) k a res
 
 let new_bn_from_bytes_be = BS.new_bn_from_bytes_be
 

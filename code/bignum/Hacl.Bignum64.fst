@@ -47,17 +47,22 @@ let mod_exp_consttime len n a bBits b res =
 let mod_inv_prime_vartime len n a res =
   BS.mk_bn_mod_inv_prime_safe len (ke len).BE.exp_vt n a res
 
-let mod_precomp k a res =
-  BS.bn_mod_ctx k (bn_slow_precomp k.MA.len) a res
+let mod_precomp len k a res =
+  let len1 = GF.field_get_len k in
+  BS.bn_mod_ctx len (bn_slow_precomp len1) k a res
 
-let mod_exp_vartime_precomp k a bBits b res =
-  BS.mk_bn_mod_exp_ctx k (ke k.MA.len).BE.exp_vt_precomp a bBits b res
+let mod_exp_vartime_precomp len k a bBits b res =
+  let len1 = GF.field_get_len k in
+  BS.mk_bn_mod_exp_ctx len (ke len1).BE.exp_vt_precomp k a bBits b res
 
-let mod_exp_consttime_precomp k a bBits b res =
-  BS.mk_bn_mod_exp_ctx k (ke k.MA.len).BE.exp_ct_precomp a bBits b res
+let mod_exp_consttime_precomp len k a bBits b res =
+  let len1 = GF.field_get_len k in
+  BS.mk_bn_mod_exp_ctx len (ke len1).BE.exp_ct_precomp k a bBits b res
 
-let mod_inv_prime_vartime_precomp k a res =
-  BS.mk_bn_mod_inv_prime_ctx k (BI.mk_bn_mod_inv_prime_precomp k.MA.len (ke k.MA.len).BE.exp_vt_precomp) a res
+let mod_inv_prime_vartime_precomp len k a res =
+  let len1 = GF.field_get_len k in
+  BS.mk_bn_mod_inv_prime_ctx len
+    (BI.mk_bn_mod_inv_prime_precomp len1 (ke len1).BE.exp_vt_precomp) k a res
 
 let new_bn_from_bytes_be r len b =
   BS.new_bn_from_bytes_be r len b

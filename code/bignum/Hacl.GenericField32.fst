@@ -24,32 +24,41 @@ let field_free k =
 let field_get_len k =
   MA.bn_field_get_len k
 
-let to_field k a aM =
-  MA.bn_to_field (km k.MA.len) k a aM
+let to_field len k a aM =
+  let len = field_get_len k in
+  MA.bn_to_field (km len) k a aM
 
-let from_field k aM a =
-  MA.bn_from_field (km k.MA.len) k aM a
+let from_field len k aM a =
+  let len = field_get_len k in
+  MA.bn_from_field (km len) k aM a
 
-let add k aM bM cM =
-  MA.bn_field_add (km k.MA.len) k aM bM cM
+let add len k aM bM cM =
+  let len = field_get_len k in
+  MA.bn_field_add (km len) k aM bM cM
 
-let sub k aM bM cM =
-  MA.bn_field_sub (km k.MA.len) k aM bM cM
+let sub len k aM bM cM =
+  let len = field_get_len k in
+  MA.bn_field_sub (km len) k aM bM cM
 
-let mul k aM bM cM =
-  MA.bn_field_mul (km k.MA.len) k aM bM cM
+let mul len k aM bM cM =
+  let len = field_get_len k in
+  MA.bn_field_mul (km len) k aM bM cM
 
-let sqr k aM cM =
-  MA.bn_field_sqr (km k.MA.len) k aM cM
+let sqr len k aM cM =
+  let len = field_get_len k in
+  MA.bn_field_sqr (km len) k aM cM
 
-let one k oneM =
-  MA.bn_field_one (km k.MA.len) k oneM
+let one len k oneM =
+  let len = field_get_len k in
+  MA.bn_field_one (km len) k oneM
 
-let exp_consttime k aM bBits b resM =
-  MA.bn_field_exp_consttime (km k.MA.len) k aM bBits b resM
+let exp_consttime len k aM bBits b resM =
+  let len = field_get_len k in
+  MA.bn_field_exp_consttime (km len) k aM bBits b resM
 
-let exp_vartime k aM bBits b resM =
-  MA.bn_field_exp_vartime (km k.MA.len) k aM bBits b resM
+let exp_vartime len k aM bBits b resM =
+  let len = field_get_len k in
+  MA.bn_field_exp_vartime (km len) k aM bBits b resM
 
-let inverse k aM aInvM =
-  MA.bn_field_inv k (exp_vartime k) aM aInvM
+let inverse len k aM aInvM =
+  MA.bn_field_inv len (exp_vartime len) k aM aInvM

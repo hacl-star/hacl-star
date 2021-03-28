@@ -94,7 +94,7 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   The function is *NOT* constant-time on the argument b. See the
   mod_exp_consttime_* functions for constant-time variants.
@@ -154,7 +154,7 @@ Comment "Write `a mod n` in `res`.
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
   The outparam res is meant to be a 256-bit bignum, i.e. uint64_t[4].
   The argument k is a montgomery context obtained through Hacl_GenericField64_field_init."]
-val mod_precomp: k:GF.bn_mont_ctx_u64{k.MA.len == n_limbs} -> BS.bn_mod_slow_ctx_st t_limbs k
+val mod_precomp: BS.bn_mod_slow_ctx_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -174,7 +174,7 @@ val mod_precomp: k:GF.bn_mont_ctx_u64{k.MA.len == n_limbs} -> BS.bn_mod_slow_ctx
   • 0 < b
   • b < pow2 bBits
   • a < n "]
-val mod_exp_vartime_precomp: k:GF.bn_mont_ctx_u64{k.MA.len == n_limbs} -> BS.bn_mod_exp_ctx_st t_limbs k
+val mod_exp_vartime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
@@ -194,7 +194,7 @@ val mod_exp_vartime_precomp: k:GF.bn_mont_ctx_u64{k.MA.len == n_limbs} -> BS.bn_
   • 0 < b
   • b < pow2 bBits
   • a < n "]
-val mod_exp_consttime_precomp: k:GF.bn_mont_ctx_u64{k.MA.len == n_limbs} -> BS.bn_mod_exp_ctx_st t_limbs k
+val mod_exp_consttime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
@@ -206,7 +206,7 @@ val mod_exp_consttime_precomp: k:GF.bn_mont_ctx_u64{k.MA.len == n_limbs} -> BS.b
   • n is a prime
   • 0 < a
   • a < n "]
-val mod_inv_prime_vartime_precomp: k:GF.bn_mont_ctx_u64{k.MA.len == n_limbs} -> BS.bn_mod_inv_prime_ctx_st t_limbs k
+val mod_inv_prime_vartime_precomp: BS.bn_mod_inv_prime_ctx_st t_limbs n_limbs
 
 [@@ CPrologue
 "\n/********************/

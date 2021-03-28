@@ -234,89 +234,97 @@ let mk_bn_mod_inv_prime_safe #t len bn_mod_exp n a res =
 
 
 inline_for_extraction noextract
-let bn_mod_slow_ctx_st (t:limb_t) (k:MA.bn_mont_ctx t) =
-    a:lbignum t (k.MA.len +! k.MA.len)
-  -> res:lbignum t k.MA.len ->
+let bn_mod_slow_ctx_st (t:limb_t) (len:BN.meta_len t) =
+    k:MA.pbn_mont_ctx t
+  -> a:lbignum t (len +! len)
+  -> res:lbignum t len ->
   Stack unit
   (requires fun h ->
-    MA.bn_mont_ctx_inv h k /\
+    (B.deref h k).MA.len == len /\
+    MA.pbn_mont_ctx_inv h k /\
 
     live h a /\ live h res /\ disjoint res a /\
-    disjoint res (k.MA.n <: lbignum t k.MA.len) /\
-    disjoint res (k.MA.r2 <: lbignum t k.MA.len))
+    B.(loc_disjoint (MA.footprint h k) (loc_buffer (res <: buffer (limb t)))))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    bn_v h1 res == bn_v h0 a % bn_v #t #k.MA.len h0 k.MA.n)
+    bn_v h1 res == bn_v h0 a % MA.bn_v_n h0 k)
 
 
 inline_for_extraction noextract
 val bn_mod_ctx:
     #t:limb_t
-  -> k:MA.bn_mont_ctx t
-  -> bn_mod_slow_precomp:BR.bn_mod_slow_precomp_st t k.MA.len ->
-  bn_mod_slow_ctx_st t k
+  -> len:Ghost.erased _
+  -> bn_mod_slow_precomp:BR.bn_mod_slow_precomp_st t len ->
+  bn_mod_slow_ctx_st t len
 
-let bn_mod_ctx #t k bn_mod_slow_precomp a res =
-  bn_mod_slow_precomp k.MA.n k.MA.mu k.MA.r2 a res
+let bn_mod_ctx #t len bn_mod_slow_precomp k a res =
+  let open LowStar.BufferOps in
+  let k1 = !*k in
+  bn_mod_slow_precomp k1.MA.n k1.MA.mu k1.MA.r2 a res
 
 
 inline_for_extraction noextract
-let bn_mod_exp_ctx_st (t:limb_t) (k:MA.bn_mont_ctx t) =
-    a:lbignum t k.MA.len
+let bn_mod_exp_ctx_st (t:limb_t) (len:BN.meta_len t) =
+    k:MA.pbn_mont_ctx t
+  -> a:lbignum t len
   -> bBits:size_t{v bBits > 0}
   -> b:lbignum t (blocks bBits (size (bits t)))
-  -> res:lbignum t k.MA.len ->
+  -> res:lbignum t len ->
   Stack unit
   (requires fun h ->
-    MA.bn_mont_ctx_inv h k /\
-    bn_v h a < bn_v #t #k.MA.len h k.MA.n /\
+    (B.deref h k).MA.len == len /\
+    MA.pbn_mont_ctx_inv h k /\
+    bn_v h a < MA.bn_v_n h k /\
     0 < bn_v h b /\ bn_v h b < pow2 (v bBits) /\
 
     live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\
-    disjoint res (k.MA.n <: lbignum t k.MA.len) /\
-    disjoint a (k.MA.n <: lbignum t k.MA.len) /\
-    disjoint res (k.MA.r2 <: lbignum t k.MA.len) /\
-    disjoint a (k.MA.r2 <: lbignum t k.MA.len))
+    B.(loc_disjoint (MA.footprint h k) (loc_buffer (a <: buffer (limb t)))) /\
+    B.(loc_disjoint (MA.footprint h k) (loc_buffer (res <: buffer (limb t)))))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    SE.bn_mod_exp_post (as_seq #MUT #(limb t) h0 k.MA.n) (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res))
+    SE.bn_mod_exp_post (as_seq #MUT #(limb t) h0 (B.deref h0 k).MA.n)
+      (as_seq h0 a) (v bBits) (as_seq h0 b) (as_seq h1 res))
 
 
 inline_for_extraction noextract
 val mk_bn_mod_exp_ctx:
     #t:limb_t
-  -> k:MA.bn_mont_ctx t
-  -> bn_mod_exp_precomp:BE.bn_mod_exp_precomp_st t k.MA.len ->
-  bn_mod_exp_ctx_st t k
+  -> len:Ghost.erased _
+  -> bn_mod_exp_precomp:BE.bn_mod_exp_precomp_st t len ->
+  bn_mod_exp_ctx_st t len
 
-let mk_bn_mod_exp_ctx #t k bn_mod_exp_precomp a bBits b res =
-  bn_mod_exp_precomp k.MA.n k.MA.mu k.MA.r2 a bBits b res
+let mk_bn_mod_exp_ctx #t len bn_mod_exp_precomp k a bBits b res =
+  let open LowStar.BufferOps in
+  let k1 = !*k in
+  bn_mod_exp_precomp k1.MA.n k1.MA.mu k1.MA.r2 a bBits b res
 
 
 inline_for_extraction noextract
-let bn_mod_inv_prime_ctx_st (t:limb_t) (k:MA.bn_mont_ctx t) =
-    a:lbignum t k.MA.len
-  -> res:lbignum t k.MA.len ->
+let bn_mod_inv_prime_ctx_st (t:limb_t) (len:BN.meta_len t) =
+    k:MA.pbn_mont_ctx t
+  -> a:lbignum t len
+  -> res:lbignum t len ->
   Stack unit
   (requires fun h ->
-    MA.bn_mont_ctx_inv h k /\
-    0 < bn_v h a /\ bn_v h a < bn_v #t #k.MA.len h k.MA.n /\
-    FStar.Math.Euclid.is_prime (bn_v #t #k.MA.len h k.MA.n) /\
+    (B.deref h k).MA.len == len /\
+    MA.pbn_mont_ctx_inv h k /\
+    0 < bn_v h a /\ bn_v h a < MA.bn_v_n h k /\
+    FStar.Math.Euclid.is_prime (MA.bn_v_n h k) /\
 
     live h a /\ live h res /\ disjoint res a /\
-    disjoint a (k.MA.n <: lbignum t k.MA.len) /\
-    disjoint res (k.MA.n <: lbignum t k.MA.len) /\
-    disjoint a (k.MA.r2 <: lbignum t k.MA.len) /\
-    disjoint res (k.MA.r2 <: lbignum t k.MA.len))
+    B.(loc_disjoint (MA.footprint h k) (loc_buffer (a <: buffer (limb t)))) /\
+    B.(loc_disjoint (MA.footprint h k) (loc_buffer (res <: buffer (limb t)))))
   (ensures  fun h0 r h1 -> modifies (loc res) h0 h1 /\
-    bn_v h1 res * bn_v h0 a % bn_v #t #k.MA.len h0 k.MA.n = 1)
+    bn_v h1 res * bn_v h0 a % MA.bn_v_n h0 k = 1)
 
 
 inline_for_extraction noextract
 val mk_bn_mod_inv_prime_ctx:
     #t:limb_t
-  -> k:MA.bn_mont_ctx t
-  -> bn_mod_inv_precomp:BI.bn_mod_inv_prime_precomp_st t k.MA.len ->
-  bn_mod_inv_prime_ctx_st t k
+  -> len:Ghost.erased _
+  -> bn_mod_inv_precomp:BI.bn_mod_inv_prime_precomp_st t len ->
+  bn_mod_inv_prime_ctx_st t len
 
-let mk_bn_mod_inv_prime_ctx #t k bn_mod_inv_precomp a res =
-  bn_mod_inv_precomp k.MA.n k.MA.mu k.MA.r2 a res
+let mk_bn_mod_inv_prime_ctx #t len bn_mod_inv_precomp k a res =
+  let open LowStar.BufferOps in
+  let k1 = !*k in
+  bn_mod_inv_precomp k1.MA.n k1.MA.mu k1.MA.r2 a res
