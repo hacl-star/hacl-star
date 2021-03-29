@@ -53,7 +53,7 @@ let bn_mod_slow_precomp #t k n mu r2 a res =
   let a_mod = create len (uint #t #SEC 0) in
   let a1 = create (len +! len) (uint #t #SEC 0) in
   copy a1 a;
-  AM.bn_almost_mont_reduction k.AM.bn n mu a1 a_mod;
+  AM.reduction n mu a1 a_mod;
   AM.to n mu r2 a_mod res;
   pop_frame ()
 

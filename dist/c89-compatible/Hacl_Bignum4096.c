@@ -553,49 +553,8 @@ bn_slow_precomp(uint64_t *n, uint64_t mu, uint64_t *r2, uint64_t *a, uint64_t *r
     c0 = c00;
     {
       uint64_t tmp[64U] = { 0U };
-      uint64_t c = (uint64_t)0U;
-      uint64_t c1;
-      uint64_t m;
-      {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
-        {
-          uint64_t t1 = a_mod[(uint32_t)4U * i];
-          uint64_t t20 = n[(uint32_t)4U * i];
-          uint64_t *res_i0 = tmp + (uint32_t)4U * i;
-          c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, res_i0);
-          {
-            uint64_t t10 = a_mod[(uint32_t)4U * i + (uint32_t)1U];
-            uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-            uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
-            c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, res_i1);
-            {
-              uint64_t t11 = a_mod[(uint32_t)4U * i + (uint32_t)2U];
-              uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-              uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
-              c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, res_i2);
-              {
-                uint64_t t12 = a_mod[(uint32_t)4U * i + (uint32_t)3U];
-                uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-                uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
-                c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, res_i);
-              }
-            }
-          }
-        }
-      }
-      {
-        uint32_t i;
-        for (i = (uint32_t)64U; i < (uint32_t)64U; i++)
-        {
-          uint64_t t1 = a_mod[i];
-          uint64_t t2 = n[i];
-          uint64_t *res_i = tmp + i;
-          c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, res_i);
-        }
-      }
-      c1 = c;
-      m = (uint64_t)0U - c0;
+      uint64_t c1 = Hacl_Bignum4096_sub(a_mod, n, tmp);
+      uint64_t m = (uint64_t)0U - c0;
       {
         uint32_t i;
         for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
@@ -606,9 +565,9 @@ bn_slow_precomp(uint64_t *n, uint64_t mu, uint64_t *r2, uint64_t *a, uint64_t *r
         }
       }
       {
-        uint64_t c2[128U] = { 0U };
-        Hacl_Bignum4096_mul(a_mod, r2, c2);
-        reduction(n, mu, c2, res);
+        uint64_t c[128U] = { 0U };
+        Hacl_Bignum4096_mul(a_mod, r2, c);
+        reduction(n, mu, c, res);
       }
     }
   }

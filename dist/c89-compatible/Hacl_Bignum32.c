@@ -172,49 +172,8 @@ bn_slow_precomp(
           uint32_t tmp0[len];
           memset(tmp0, 0U, len * sizeof (uint32_t));
           {
-            uint32_t c = (uint32_t)0U;
-            uint32_t c1;
-            uint32_t m;
-            {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
-              {
-                uint32_t t1 = a_mod[(uint32_t)4U * i];
-                uint32_t t20 = n[(uint32_t)4U * i];
-                uint32_t *res_i0 = tmp0 + (uint32_t)4U * i;
-                c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, t20, res_i0);
-                {
-                  uint32_t t10 = a_mod[(uint32_t)4U * i + (uint32_t)1U];
-                  uint32_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-                  uint32_t *res_i1 = tmp0 + (uint32_t)4U * i + (uint32_t)1U;
-                  c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, t21, res_i1);
-                  {
-                    uint32_t t11 = a_mod[(uint32_t)4U * i + (uint32_t)2U];
-                    uint32_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-                    uint32_t *res_i2 = tmp0 + (uint32_t)4U * i + (uint32_t)2U;
-                    c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, t22, res_i2);
-                    {
-                      uint32_t t12 = a_mod[(uint32_t)4U * i + (uint32_t)3U];
-                      uint32_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-                      uint32_t *res_i = tmp0 + (uint32_t)4U * i + (uint32_t)3U;
-                      c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, t2, res_i);
-                    }
-                  }
-                }
-              }
-            }
-            {
-              uint32_t i;
-              for (i = len / (uint32_t)4U * (uint32_t)4U; i < len; i++)
-              {
-                uint32_t t1 = a_mod[i];
-                uint32_t t2 = n[i];
-                uint32_t *res_i = tmp0 + i;
-                c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, t2, res_i);
-              }
-            }
-            c1 = c;
-            m = (uint32_t)0U - c0;
+            uint32_t c1 = Hacl_Bignum_Addition_bn_sub_eq_len_u32(len, a_mod, n, tmp0);
+            uint32_t m = (uint32_t)0U - c0;
             {
               uint32_t i;
               for (i = (uint32_t)0U; i < len; i++)
@@ -226,14 +185,14 @@ bn_slow_precomp(
             }
             KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
             {
-              uint32_t c2[len + len];
-              memset(c2, 0U, (len + len) * sizeof (uint32_t));
+              uint32_t c[len + len];
+              memset(c, 0U, (len + len) * sizeof (uint32_t));
               KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * len);
               {
                 uint32_t tmp[(uint32_t)4U * len];
                 memset(tmp, 0U, (uint32_t)4U * len * sizeof (uint32_t));
-                Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, a_mod, r2, tmp, c2);
-                Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, c2, res);
+                Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32(len, a_mod, r2, tmp, c);
+                Hacl_Bignum_Montgomery_bn_mont_reduction_u32(len, n, mu, c, res);
               }
             }
           }
