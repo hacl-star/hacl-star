@@ -241,5 +241,5 @@ let mk_runtime_mont (#t:limb_t) (len:BN.meta_len t) : mont t =
 let mk_runtime_mont_len_lemma #t len = ()
 
 
-let bn_mont_one #t k n mu r2 oneM =
-  k.from n mu r2 oneM
+let bn_mont_one #t len bn_from_mont n mu r2 oneM =
+  bn_from_mont n mu r2 oneM

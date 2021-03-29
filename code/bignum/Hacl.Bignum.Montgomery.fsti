@@ -206,4 +206,8 @@ let bn_mont_one_st (t:limb_t) (nLen:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_mont_one: #t:limb_t -> k:mont t -> bn_mont_one_st t k.bn.BN.len
+val bn_mont_one:
+    #t:limb_t
+  -> len:BN.meta_len t
+  -> bn_mont_from:bn_from_mont_st t len ->
+  bn_mont_one_st t len

@@ -162,7 +162,11 @@ let bn_field_init_st (t:limb_t) (len:BN.meta_len t) =
 
 
 inline_for_extraction noextract
-val bn_field_init: #t:limb_t -> km:BM.mont t -> bn_field_init_st t km.BM.bn.BN.len
+val bn_field_init:
+    #t:limb_t
+  -> len:BN.meta_len t
+  -> precomp_r2:BM.bn_precomp_r2_mod_n_st t len ->
+  bn_field_init_st t len
 
 
 inline_for_extraction noextract

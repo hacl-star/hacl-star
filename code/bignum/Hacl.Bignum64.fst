@@ -17,10 +17,6 @@ let kam (len:BN.meta_len t_limbs) =
   AM.mk_runtime_almost_mont #t_limbs len
 
 inline_for_extraction noextract
-let km (len:BN.meta_len t_limbs) =
-  BM.mk_runtime_mont #t_limbs len
-
-inline_for_extraction noextract
 let ke (len:BN.meta_len t_limbs) =
   BE.mk_runtime_exp #t_limbs len
 
@@ -53,7 +49,7 @@ let mod_inv_prime_vartime len n a res =
   BS.mk_bn_mod_inv_prime_safe len (ke len).BE.exp_vt n a res
 
 let mont_ctx_init len r n =
-  MA.bn_field_init (km len) r n
+  MA.bn_field_init len (ke len).BE.precompr2 r n
 
 let mont_ctx_free k =
   MA.bn_field_free k

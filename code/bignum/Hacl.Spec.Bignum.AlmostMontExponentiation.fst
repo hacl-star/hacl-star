@@ -11,7 +11,6 @@ module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 
 module E = Hacl.Spec.Exponentiation.Lemmas
-module M = Hacl.Spec.Montgomery.Lemmas
 module AM = Hacl.Spec.AlmostMontgomery.Lemmas
 
 module BN = Hacl.Spec.Bignum

@@ -11,7 +11,6 @@ open Hacl.Bignum.Definitions
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
-module Loops = Lib.LoopCombinators
 
 module BD = Hacl.Spec.Bignum.Definitions
 module SN = Hacl.Spec.Bignum
@@ -21,7 +20,6 @@ module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 
 module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module E = Hacl.Spec.Exponentiation.Lemmas
 
@@ -85,10 +83,8 @@ inline_for_extraction noextract
 val bn_mont_one: #t:limb_t -> k:BM.mont t -> bn_mont_one_st t k.BM.bn.BN.len
 let bn_mont_one #t k n mu r2 oneM =
   let h0 = ST.get () in
-  BM.bn_mont_one k n mu r2 oneM;
-  SM.bn_mont_one_lemma (as_seq h0 n) mu (as_seq h0 r2);
-  SM.bn_precomp_r2_mod_n_lemma 0 (as_seq h0 n);
-  BD.bn_eval_inj (v k.BM.bn.BN.len) (SM.bn_precomp_r2_mod_n 0 (as_seq h0 n)) (as_seq h0 r2)
+  BM.bn_mont_one k.BM.bn.BN.len k.BM.from n mu r2 oneM;
+  SM.bn_mont_one_lemma (as_seq h0 n) mu (as_seq h0 r2)
 
 
 inline_for_extraction noextract

@@ -12,6 +12,7 @@ open Hacl.Bignum.Definitions
 module S = Hacl.Spec.Bignum.Exponentiation
 module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
+module AM = Hacl.Bignum.AlmostMontgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -73,6 +74,27 @@ val bn_mod_exp_fw_consttime_precomp:
   -> k:BM.mont t
   -> l:size_t{0 < v l /\ v l < bits U32 /\ pow2 (v l) * v k.BM.bn.BN.len <= max_size_t} ->
   bn_mod_exp_precomp_st t k.BM.bn.BN.len
+
+
+inline_for_extraction noextract
+val bn_mod_exp_amm_bm_vartime_precomp: #t:limb_t -> k:AM.almost_mont t -> bn_mod_exp_precomp_st t k.AM.bn.BN.len
+
+inline_for_extraction noextract
+val bn_mod_exp_amm_bm_consttime_precomp: #t:limb_t -> k:AM.almost_mont t -> bn_mod_exp_precomp_st t k.AM.bn.BN.len
+
+inline_for_extraction noextract
+val bn_mod_exp_amm_fw_vartime_precomp:
+    #t:limb_t
+  -> k:AM.almost_mont t
+  -> l:size_t{0 < v l /\ v l < bits U32 /\ pow2 (v l) * v k.AM.bn.BN.len <= max_size_t} ->
+  bn_mod_exp_precomp_st t k.AM.bn.BN.len
+
+inline_for_extraction noextract
+val bn_mod_exp_amm_fw_consttime_precomp:
+    #t:limb_t
+  -> k:AM.almost_mont t
+  -> l:size_t{0 < v l /\ v l < bits U32 /\ pow2 (v l) * v k.AM.bn.BN.len <= max_size_t} ->
+  bn_mod_exp_precomp_st t k.AM.bn.BN.len
 
 
 inline_for_extraction noextract

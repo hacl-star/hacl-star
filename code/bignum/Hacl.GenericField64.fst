@@ -16,7 +16,7 @@ let field_modulus_check len n =
   MA.bn_field_check_modulus (km len) n
 
 let field_init len r n =
-  MA.bn_field_init (km len) r n
+  MA.bn_field_init len (km len).BM.precomp r n
 
 let field_free k =
   MA.bn_field_free k

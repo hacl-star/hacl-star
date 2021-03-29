@@ -45,7 +45,7 @@ let mont_check: BM.bn_check_modulus_st t_limbs n_limbs =
   BM.bn_check_modulus
 
 [@CInline]
-let precomp: BM.bn_precomp_r2_mod_n_st t_limbs n_limbs =
+let precompr2: BM.bn_precomp_r2_mod_n_st t_limbs n_limbs =
   BM.bn_precomp_r2_mod_n bn_inst
 
 [@CInline]
@@ -60,25 +60,25 @@ let to: BM.bn_to_mont_st t_limbs n_limbs =
 let from: BM.bn_from_mont_st t_limbs n_limbs =
   BM.bn_from_mont bn_inst reduction
 
-[@CInline]
-let mont_mul: BM.bn_mont_mul_st t_limbs n_limbs =
-  BM.bn_mont_mul bn_inst reduction
+// [@CInline]
+// let mont_mul: BM.bn_mont_mul_st t_limbs n_limbs =
+//   BM.bn_mont_mul bn_inst reduction
 
-[@CInline]
-let mont_sqr: BM.bn_mont_sqr_st t_limbs n_limbs =
-  BM.bn_mont_sqr bn_inst reduction
+// [@CInline]
+// let mont_sqr: BM.bn_mont_sqr_st t_limbs n_limbs =
+//   BM.bn_mont_sqr bn_inst reduction
 
-inline_for_extraction noextract
-instance mont_inst: BM.mont t_limbs = {
-  BM.bn = bn_inst;
-  BM.mont_check;
-  BM.precomp;
-  BM.reduction;
-  BM.to;
-  BM.from;
-  BM.mul = mont_mul;
-  BM.sqr = mont_sqr;
-}
+// inline_for_extraction noextract
+// instance mont_inst: BM.mont t_limbs = {
+//   BM.bn = bn_inst;
+//   BM.mont_check;
+//   BM.precomp = precompr2;
+//   BM.reduction;
+//   BM.to;
+//   BM.from;
+//   BM.mul = mont_mul;
+//   BM.sqr = mont_sqr;
+// }
 
 [@CInline]
 let areduction: AM.bn_almost_mont_reduction_st t_limbs n_limbs =
@@ -96,7 +96,7 @@ inline_for_extraction noextract
 instance almost_mont_inst: AM.almost_mont t_limbs = {
   AM.bn = bn_inst;
   AM.mont_check;
-  AM.precomp;
+  AM.precomp = precompr2;
   AM.reduction = areduction;
   AM.to;
   AM.from;
@@ -117,22 +117,22 @@ let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =
 [@CInline]
 let exp_vartime_precomp: BE.bn_mod_exp_precomp_st t_limbs n_limbs =
   BE.bn_mod_exp_vartime_precomp n_limbs
-    (BE.bn_mod_exp_bm_vartime_precomp mont_inst)
-    (BE.bn_mod_exp_fw_vartime_precomp mont_inst 4ul)
+    (BE.bn_mod_exp_amm_bm_vartime_precomp almost_mont_inst)
+    (BE.bn_mod_exp_amm_fw_vartime_precomp almost_mont_inst 4ul)
 
 [@CInline]
 let exp_consttime_precomp: BE.bn_mod_exp_precomp_st t_limbs n_limbs =
   BE.bn_mod_exp_consttime_precomp n_limbs
-    (BE.bn_mod_exp_bm_consttime_precomp mont_inst)
-    (BE.bn_mod_exp_fw_consttime_precomp mont_inst 4ul)
+    (BE.bn_mod_exp_amm_bm_consttime_precomp almost_mont_inst)
+    (BE.bn_mod_exp_amm_fw_consttime_precomp almost_mont_inst 4ul)
 
 [@CInline]
 let exp_vartime: BE.bn_mod_exp_st t_limbs n_limbs =
-  BE.mk_bn_mod_exp n_limbs precomp exp_vartime_precomp
+  BE.mk_bn_mod_exp n_limbs precompr2 exp_vartime_precomp
 
 [@CInline]
 let exp_consttime: BE.bn_mod_exp_st t_limbs n_limbs =
-  BE.mk_bn_mod_exp n_limbs precomp exp_consttime_precomp
+  BE.mk_bn_mod_exp n_limbs precompr2 exp_consttime_precomp
 
 let mod_exp_vartime = BS.mk_bn_mod_exp_safe n_limbs exp_check exp_vartime
 
@@ -141,7 +141,7 @@ let mod_exp_consttime = BS.mk_bn_mod_exp_safe n_limbs exp_check exp_consttime
 let mod_inv_prime_vartime = BS.mk_bn_mod_inv_prime_safe n_limbs exp_vartime
 
 let mont_ctx_init r n =
-  MA.bn_field_init mont_inst r n
+  MA.bn_field_init n_limbs precompr2 r n
 
 let mont_ctx_free k =
   MA.bn_field_free k

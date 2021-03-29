@@ -39,9 +39,7 @@ let bn_field_check_modulus #t km n =
   BB.unsafe_bool_of_limb m
 
 
-let bn_field_init #t km r n =
-  [@inline_let]
-  let len = km.BM.bn.BN.len in
+let bn_field_init #t len precomp_r2 r n =
   let h0 = ST.get () in
   let r2 : buffer (limb t) = B.mmalloc r (uint #t #SEC 0) len in
   let n1 : buffer (limb t) = B.mmalloc r (uint #t #SEC 0) len in
@@ -54,7 +52,7 @@ let bn_field_init #t km r n =
 
   copy n1 n;
   let nBits = size (bits t) *! BB.unsafe_size_from_limb (BL.bn_get_top_index len n) in
-  km.BM.precomp nBits n r2;
+  precomp_r2 nBits n r2;
 
   let mu = BM.mod_inv_limb n.(0ul) in
   let res : bn_mont_ctx t = { len = len; n = n1; mu = mu; r2 = r2 } in
@@ -134,7 +132,7 @@ let bn_field_one #t km k oneM =
   let open LowStar.BufferOps in
   let k1 = !*k in
   let h0 = ST.get () in
-  BM.bn_mont_one km k1.n k1.mu k1.r2 oneM;
+  BM.bn_mont_one km.BM.bn.BN.len km.BM.from k1.n k1.mu k1.r2 oneM;
   let h1 = ST.get () in
   assert (as_seq h1 oneM == S.bn_field_one (as_pctx h0 k))
 

@@ -26,7 +26,8 @@ let bn_almost_mont_reduction #t k n nInv c res =
   let c0 = BM.bn_mont_reduction_loop_div_r #t k n nInv c res in
   let tmp = create len (uint #t #SEC 0) in
   let c1 = k.BN.sub res n tmp in
-  map2T len res (mask_select (uint #t 0 -. c0)) tmp res;
+  let m = uint #t 0 -. c0 in
+  map2T len res (mask_select m) tmp res;
   pop_frame ()
 
 
