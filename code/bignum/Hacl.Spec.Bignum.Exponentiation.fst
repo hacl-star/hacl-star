@@ -23,33 +23,23 @@ module ME = Hacl.Spec.Bignum.MontExponentiation
 let bn_check_mod_exp #t #len n a bBits b =
   let pbits = bits t in
   let m0 = BM.bn_check_modulus n in
-  let m1 = BN.bn_is_zero_mask b in
-  BN.bn_is_zero_mask_lemma b;
-  assert (if v m1 = 0 then bn_v b > 0 else bn_v b = 0);
-  assert (v m1 = 0 \/ v m1 = ones_v t);
-  let m1' = lognot m1 in
-  lognot_lemma m1;
-  assert (if v m1' = 0 then bn_v b = 0 else bn_v b > 0);
 
   bn_eval_bound b (blocks bBits pbits);
-  let m2 =
+  let m1 =
     if bBits < pbits * blocks bBits pbits then begin
       BN.bn_lt_pow2_mask_lemma b bBits;
       BN.bn_lt_pow2_mask b bBits end
     else begin
       Math.Lemmas.pow2_le_compat bBits (pbits * blocks bBits pbits);
       ones t SEC end in
-  assert (if v m2 = 0 then pow2 bBits <= bn_v b else bn_v b < pow2 bBits);
+  assert (if v m1 = 0 then pow2 bBits <= bn_v b else bn_v b < pow2 bBits);
 
-  let m3 = BN.bn_lt_mask a n in
+  let m2 = BN.bn_lt_mask a n in
   BN.bn_lt_mask_lemma a n;
-  assert (if v m3 = 0 then bn_v a >= bn_v n else bn_v a < bn_v n);
+  assert (if v m2 = 0 then bn_v a >= bn_v n else bn_v a < bn_v n);
 
-  let m = m1' &. m2 &. m3 in
-  logand_ones (m1' &. m2);
-  logand_zeros (m1' &. m2);
-  logand_ones m1';
-  logand_zeros m1';
+  let m = m1 &. m2 in
+  logand_lemma m1 m2;
   let r = m0 &. m in
   logand_lemma m0 m;
   r

@@ -147,7 +147,7 @@ let bn_exp_mont_pre
  =
    SM.bn_mont_pre n mu /\
    BD.bn_v r2 == pow2 (2 * bits t * len) % BD.bn_v n /\
-   0 < BD.bn_v b /\ BD.bn_v b < pow2 bBits /\
+   BD.bn_v b < pow2 bBits /\
    BD.bn_v aM < BD.bn_v n
 
 

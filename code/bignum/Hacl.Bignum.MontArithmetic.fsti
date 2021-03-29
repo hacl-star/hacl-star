@@ -359,7 +359,7 @@ let bn_field_exp_consttime_st (t:limb_t) (len:BN.meta_len t) =
     (B.deref h k).len == len /\
     pbn_mont_ctx_inv h k /\
     bn_v h aM < bn_v_n h k /\
-    0 < bn_v h b /\ bn_v h b < pow2 (v bBits) /\
+    bn_v h b < pow2 (v bBits) /\
 
     live h aM /\ live h b /\ live h resM /\
     disjoint resM aM /\ disjoint resM b /\ disjoint aM b /\
@@ -386,7 +386,7 @@ let bn_field_exp_vartime_st (t:limb_t) (len:BN.meta_len t) =
     (B.deref h k).len == len /\
     pbn_mont_ctx_inv h k /\
     bn_v h aM < bn_v_n h k /\
-    0 < bn_v h b /\ bn_v h b < pow2 (v bBits) /\
+    bn_v h b < pow2 (v bBits) /\
 
     live h aM /\ live h b /\ live h resM /\
     disjoint resM aM /\ disjoint resM b /\ disjoint aM b /\

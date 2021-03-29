@@ -110,9 +110,9 @@ let lemma_mul_mod_assoc #m a b c =
 let lemma_mul_mod_comm #m a b = ()
 
 
-val pow_mod_ (#m:pos) (a:nat_mod m) (b:pos) : Tot (nat_mod m) (decreases b)
+val pow_mod_ (#m:pos{1 < m}) (a:nat_mod m) (b:nat) : Tot (nat_mod m) (decreases b)
 let rec pow_mod_ #m a b =
-  if b = 1 then a
+  if b = 0 then 1
   else
     if b % 2 = 0 then pow_mod_ (mul_mod a a) (b / 2)
     else mul_mod a (pow_mod_ (mul_mod a a) (b / 2))
@@ -121,27 +121,27 @@ let pow_mod #m a b = pow_mod_ #m a b
 
 
 #push-options "--fuel 2"
-val lemma_pow_mod1: #n:pos -> a:nat_mod n -> Lemma (pow_mod #n a 1 == a)
-let lemma_pow_mod1 #n a = ()
+val lemma_pow_mod0: #n:pos{1 < n} -> a:nat_mod n -> Lemma (pow_mod #n a 0 == 1)
+let lemma_pow_mod0 #n a = ()
 
-val lemma_pow_mod_unfold0: n:pos -> a:nat_mod n -> b:pos{1 < b /\ b % 2 = 0} -> Lemma
+val lemma_pow_mod_unfold0: n:pos{1 < n} -> a:nat_mod n -> b:pos{b % 2 = 0} -> Lemma
   (pow_mod #n a b == pow_mod (mul_mod a a) (b / 2))
 let lemma_pow_mod_unfold0 n a b = ()
 
-val lemma_pow_mod_unfold1: n:pos -> a:nat_mod n -> b:pos{1 < b /\ b % 2 = 1} -> Lemma
+val lemma_pow_mod_unfold1: n:pos{1 < n} -> a:nat_mod n -> b:pos{b % 2 = 1} -> Lemma
   (pow_mod #n a b == mul_mod a (pow_mod (mul_mod a a) (b / 2)))
 let lemma_pow_mod_unfold1 n a b = ()
 #pop-options
 
 
-val lemma_pow_mod_: n:pos -> a:nat_mod n -> b:pos -> Lemma
+val lemma_pow_mod_: n:pos{1 < n} -> a:nat_mod n -> b:nat -> Lemma
   (ensures (pow_mod #n a b == pow a b % n))
   (decreases b)
 
 let rec lemma_pow_mod_ n a b =
-  if b = 1 then begin
-    lemma_pow1 a;
-    lemma_pow_mod1 a end
+  if b = 0 then begin
+    lemma_pow0 a;
+    lemma_pow_mod0 a end
   else begin
     if b % 2 = 0 then begin
       calc (==) {
@@ -184,9 +184,9 @@ let lemma_pow_mod #n a b = lemma_pow_mod_ n a b
 
 let rec lemma_pow_nat_mod_is_pow #n a b =
   let k = mk_nat_mod_comm_monoid n in
-  if b = 1 then begin
-    lemma_pow1 a;
-    LE.lemma_pow1 k a end
+  if b = 0 then begin
+    lemma_pow0 a;
+    LE.lemma_pow0 k a end
   else begin
     calc (==) {
       pow a b % n;

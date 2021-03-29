@@ -110,7 +110,7 @@ let bn_field_exp_st (t:limb_t) (k:bn_mont_ctx t{bn_mont_ctx_inv k}) =
   -> bBits:size_pos
   -> b:lbignum t (blocks bBits (bits t)) ->
   Pure (bn_mont_nat k)
-  (requires 0 < bn_v b /\ bn_v b < pow2 bBits)
+  (requires bn_v b < pow2 bBits)
   (ensures  fun cM ->
     bn_v (bn_from_field k cM) == Lib.NatMod.pow_mod #(bn_v k.n) (bn_v (bn_from_field k aM)) (bn_v b))
 

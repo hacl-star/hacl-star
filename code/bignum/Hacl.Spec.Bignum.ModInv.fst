@@ -25,7 +25,7 @@ let rec pow_eq a n =
   else pow_eq a (n - 1)
 #pop-options
 
-val mod_inv_prime_lemma: n:nat{2 < n /\ Euclid.is_prime n} -> a:pos{a < n} ->
+val mod_inv_prime_lemma: n:nat{1 < n /\ Euclid.is_prime n} -> a:pos{a < n} ->
   Lemma (Lib.NatMod.pow_mod #n a (n - 2) * a % n = 1)
 
 let mod_inv_prime_lemma n a =

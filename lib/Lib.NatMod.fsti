@@ -62,9 +62,9 @@ let mk_nat_mod_comm_monoid (m:pos) : LE.comm_monoid (nat_mod m) = {
   LE.lemma_mul_comm = lemma_mul_mod_comm;
   }
 
-val pow_mod: #m:pos -> a:nat_mod m -> b:pos -> nat_mod m
+val pow_mod: #m:pos{1 < m} -> a:nat_mod m -> b:nat -> nat_mod m
 
-val lemma_pow_mod: #m:pos -> a:nat_mod m -> b:pos -> Lemma (pow a b % m == pow_mod #m a b)
+val lemma_pow_mod: #m:pos{1 < m} -> a:nat_mod m -> b:nat -> Lemma (pow a b % m == pow_mod #m a b)
 
-val lemma_pow_nat_mod_is_pow: #n:pos -> a:nat_mod n -> b:pos ->
+val lemma_pow_nat_mod_is_pow: #n:pos{1 < n} -> a:nat_mod n -> b:nat ->
   Lemma (pow a b % n == LE.pow (mk_nat_mod_comm_monoid n) a b)

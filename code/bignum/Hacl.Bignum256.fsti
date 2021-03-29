@@ -102,7 +102,7 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < b
+   • 0 < bBits
    • b < pow2 bBits
    • a < n "]
 val mod_exp_vartime: BS.bn_mod_exp_safe_st t_limbs n_limbs
@@ -123,7 +123,7 @@ val mod_exp_vartime: BS.bn_mod_exp_safe_st t_limbs n_limbs
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < b
+   • 0 < bBits
    • b < pow2 bBits
    • a < n "]
 val mod_exp_consttime: BS.bn_mod_exp_safe_st t_limbs n_limbs
@@ -188,7 +188,7 @@ val mod_precomp: BS.bn_mod_slow_ctx_st t_limbs n_limbs
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < b
+  • 0 < bBits
   • b < pow2 bBits
   • a < n "]
 val mod_exp_vartime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
@@ -208,7 +208,7 @@ val mod_exp_vartime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < b
+  • 0 < bBits
   • b < pow2 bBits
   • a < n "]
 val mod_exp_consttime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs

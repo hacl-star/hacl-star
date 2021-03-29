@@ -274,7 +274,7 @@ let bn_mod_exp_ctx_st (t:limb_t) (len:BN.meta_len t) =
     (B.deref h k).MA.len == len /\
     MA.pbn_mont_ctx_inv h k /\
     bn_v h a < MA.bn_v_n h k /\
-    0 < bn_v h b /\ bn_v h b < pow2 (v bBits) /\
+    bn_v h b < pow2 (v bBits) /\
 
     live h a /\ live h b /\ live h res /\
     disjoint res a /\ disjoint res b /\

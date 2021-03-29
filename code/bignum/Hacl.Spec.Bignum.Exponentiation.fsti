@@ -20,7 +20,7 @@ let bn_mod_exp_pre
   (b:lbignum t (blocks bBits (bits t)))
  =
    bn_v n % 2 = 1 /\ 1 < bn_v n /\
-   0 < bn_v b /\ bn_v b < pow2 bBits /\ bn_v a < bn_v n
+   bn_v b < pow2 bBits /\ bn_v a < bn_v n
 
 
 let bn_mod_exp_post
@@ -46,7 +46,7 @@ val bn_check_mod_exp:
   res:limb t{
     let b =
       bn_v n % 2 = 1 && 1 < bn_v n &&
-      0 < bn_v b && bn_v b < pow2 bBits &&
+      bn_v b < pow2 bBits &&
       bn_v a < bn_v n in
     v res == (if b then v (ones t SEC) else v (zeros t SEC))}
 
