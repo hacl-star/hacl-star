@@ -40,17 +40,19 @@ let lemma_fits_c_lt_rr c r n =
   Math.Lemmas.lemma_div_le (c - n) c r
 
 
-val almost_mont_reduction_lemma: pbits:pos -> rLen:nat -> n:pos -> d:int -> mu:nat -> c:nat -> Lemma
+val almost_mont_reduction_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> c:nat -> Lemma
   (requires (let r = pow2 (pbits * rLen) in
-    (1 + n * mu) % pow2 pbits == 0 /\ r * d % n == 1 /\ c < r * r))
+    M.mont_pre pbits rLen n mu /\ c < r * r))
   (ensures  (let res = almost_mont_reduction pbits rLen n mu c in
     let r = pow2 (pbits * rLen) in
+    let d, _ = M.eea_pow2_odd (pbits * rLen) n in
     res % n == c * d % n /\ res < r))
 
-let almost_mont_reduction_lemma pbits rLen n d mu c =
+let almost_mont_reduction_lemma pbits rLen n mu c =
   let r = pow2 (pbits * rLen) in
+  let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   let res = M.mont_reduction_loop_div_r pbits rLen n mu c in
-  M.mont_reduction_loop_div_r_lemma pbits rLen n d mu c;
+  M.mont_reduction_loop_div_r_lemma pbits rLen n mu c;
   assert (res % n == c * d % n /\ res <= (c - n) / r + n);
 
   let res1 = if res < r then res else res - n in
@@ -63,19 +65,20 @@ let almost_mont_reduction_lemma pbits rLen n d mu c =
     lemma_fits_c_lt_rr c r n end
 
 
-val almost_mont_mul_lemma: pbits:pos -> rLen:nat -> n:pos -> d:int-> mu:nat -> a:nat -> b:nat -> Lemma
+val almost_mont_mul_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> a:nat -> b:nat -> Lemma
   (requires (let r = pow2 (pbits * rLen) in
-    (1 + n * mu) % pow2 pbits == 0 /\ r * d % n == 1 /\ a < r /\ b < r /\ n < r))
+    M.mont_pre pbits rLen n mu /\ a < r /\ b < r))
   (ensures  (let res = almost_mont_mul pbits rLen n mu a b in
     let r = pow2 (pbits * rLen) in
+    let d, _ = M.eea_pow2_odd (pbits * rLen) n in
     res % n == a * b * d % n /\ res < r))
 
-let almost_mont_mul_lemma pbits rLen n d mu a b =
+let almost_mont_mul_lemma pbits rLen n mu a b =
   let r = pow2 (pbits * rLen) in
   let res = almost_mont_mul pbits rLen n mu a b in
   Math.Lemmas.lemma_mult_lt_sqr a b r;
   assert (a * b < r * r);
-  almost_mont_reduction_lemma pbits rLen n d mu (a * b)
+  almost_mont_reduction_lemma pbits rLen n mu (a * b)
 
 
 ///  Properties
@@ -93,17 +96,15 @@ val from_almost_mont_mul_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> aM:n
 let from_almost_mont_mul_lemma pbits rLen n mu aM bM =
   let r = pow2 (pbits * rLen) in
   let d, _ = M.eea_pow2_odd (pbits * rLen) n in
-  M.mont_preconditions_d pbits rLen n;
-  assert (r * d % n == 1);
 
   let cM = almost_mont_mul pbits rLen n mu aM bM in
   let c = M.from_mont pbits rLen n mu cM in
   let a = M.from_mont pbits rLen n mu aM in
   let b = M.from_mont pbits rLen n mu bM in
 
-  almost_mont_mul_lemma pbits rLen n d mu aM bM;
+  almost_mont_mul_lemma pbits rLen n mu aM bM;
   //assert (cM % n == aM * bM * d % n);
-  M.from_mont_lemma pbits rLen n d mu cM;
+  M.from_mont_lemma pbits rLen n mu cM;
   //assert (c == cM * d % n);
 
   calc (==) { //c
@@ -125,5 +126,5 @@ let from_almost_mont_mul_lemma pbits rLen n mu aM bM =
     (aM * d % n) * (bM * d % n) % n;
     };
 
-  M.from_mont_lemma pbits rLen n d mu aM;
-  M.from_mont_lemma pbits rLen n d mu bM
+  M.from_mont_lemma pbits rLen n mu aM;
+  M.from_mont_lemma pbits rLen n mu bM

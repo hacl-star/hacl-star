@@ -63,12 +63,12 @@ let bn_mod_slow_precomp_lemma #t #len n mu r2 a =
   Math.Lemmas.pow2_plus (bits t * len) (bits t * len);
   assert (bn_v a < r * r);
 
-  AM.almost_mont_reduction_lemma (bits t) len (bn_v n) d (v mu) (bn_v a);
+  AM.almost_mont_reduction_lemma (bits t) len (bn_v n) (v mu) (bn_v a);
   assert (bn_v a_mod % bn_v n == bn_v a * d % bn_v n);
 
   calc (==) {
     bn_v res;
-    (==) { M.to_mont_lemma (bits t) len (bn_v n) d (v mu) (bn_v a_mod) }
+    (==) { M.to_mont_lemma (bits t) len (bn_v n) (v mu) (bn_v a_mod) }
     bn_v a_mod * r % bn_v n;
     (==) { Math.Lemmas.lemma_mod_mul_distr_l (bn_v a_mod) r (bn_v n) }
     bn_v a_mod % bn_v n * r % bn_v n;

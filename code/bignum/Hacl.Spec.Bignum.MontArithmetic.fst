@@ -58,10 +58,9 @@ val from_mont_lemma_nonzero: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> aM:nat 
 let from_mont_lemma_nonzero pbits rLen n mu aM =
   let r = pow2 (pbits * rLen) in
   let d, _ = M.eea_pow2_odd (pbits * rLen) n in
-  M.mont_preconditions_d pbits rLen n;
 
   let a = M.from_mont pbits rLen n mu aM in
-  M.from_mont_lemma pbits rLen n d mu aM;
+  M.from_mont_lemma pbits rLen n mu aM;
   assert (a == aM * d % n);
   assert (d <> 0);
 

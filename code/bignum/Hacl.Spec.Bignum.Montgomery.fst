@@ -379,8 +379,7 @@ let bn_mont_reduction_lemma #t #nLen n mu res0 =
 
   let resM = M.mont_reduction (bits t) nLen (bn_v n) (v mu) (bn_v res0) in
   let d, _ = M.eea_pow2_odd (pbits * nLen) (bn_v n) in
-  M.mont_preconditions_d pbits nLen (bn_v n);
-  M.mont_reduction_lemma (bits t) nLen (bn_v n) d (v mu) (bn_v res0);
+  M.mont_reduction_lemma (bits t) nLen (bn_v n) (v mu) (bn_v res0);
   assert (resM == bn_v res0 * d % bn_v n);
 
   let resM1 = M.mont_reduction_loop_div_r (bits t) nLen (bn_v n) (v mu) (bn_v res0) in
