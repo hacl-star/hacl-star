@@ -41,18 +41,6 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum_Base.h"
 
-/* SNIPPET_START: Hacl_Bignum_ModInvLimb_mod_inv_uint32 */
-
-uint32_t Hacl_Bignum_ModInvLimb_mod_inv_uint32(uint32_t n0);
-
-/* SNIPPET_END: Hacl_Bignum_ModInvLimb_mod_inv_uint32 */
-
-/* SNIPPET_START: Hacl_Bignum_ModInvLimb_mod_inv_uint64 */
-
-uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
-
-/* SNIPPET_END: Hacl_Bignum_ModInvLimb_mod_inv_uint64 */
-
 /* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
 
 void Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *res);
@@ -180,6 +168,18 @@ Hacl_Bignum_bn_add_mod_n_u64(
 );
 
 /* SNIPPET_END: Hacl_Bignum_bn_add_mod_n_u64 */
+
+/* SNIPPET_START: Hacl_Bignum_ModInvLimb_mod_inv_uint32 */
+
+uint32_t Hacl_Bignum_ModInvLimb_mod_inv_uint32(uint32_t n0);
+
+/* SNIPPET_END: Hacl_Bignum_ModInvLimb_mod_inv_uint32 */
+
+/* SNIPPET_START: Hacl_Bignum_ModInvLimb_mod_inv_uint64 */
+
+uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
+
+/* SNIPPET_END: Hacl_Bignum_ModInvLimb_mod_inv_uint64 */
 
 /* SNIPPET_START: Hacl_Bignum_Montgomery_bn_check_modulus_u32 */
 

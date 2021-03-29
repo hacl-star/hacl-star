@@ -174,6 +174,7 @@ bn_slow_precomp(
           {
             uint64_t c = (uint64_t)0U;
             uint64_t c1;
+            uint64_t m;
             {
               uint32_t i;
               for (i = (uint32_t)0U; i < len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
@@ -213,12 +214,13 @@ bn_slow_precomp(
               }
             }
             c1 = c;
+            m = (uint64_t)0U - c0;
             {
               uint32_t i;
               for (i = (uint32_t)0U; i < len; i++)
               {
                 uint64_t *os = a_mod;
-                uint64_t x = (((uint64_t)0U - c0) & tmp0[i]) | (~((uint64_t)0U - c0) & a_mod[i]);
+                uint64_t x = (m & tmp0[i]) | (~m & a_mod[i]);
                 os[i] = x;
               }
             }
@@ -286,7 +288,6 @@ bool Hacl_Bignum64_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
         nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64(len, n);
         if (is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
         {
-          uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
           KRML_CHECK_SIZE(sizeof (uint64_t), len);
           {
             uint64_t r2[len];
@@ -303,7 +304,10 @@ bool Hacl_Bignum64_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
                   Hacl_Bignum_bn_add_mod_n_u64(len, n, r2, r2, r2);
                 }
               }
-              bn_slow_precomp(len, n, mu, r2, a, res);
+              {
+                uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
+                bn_slow_precomp(len, n, mu, r2, a, res);
+              }
             }
           }
         }
@@ -340,7 +344,7 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < b
+   • 0 < bBits
    • b < pow2 bBits
    • a < n 
 */
@@ -390,7 +394,7 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < b
+   • 0 < bBits
    • b < pow2 bBits
    • a < n 
 */
@@ -717,7 +721,7 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < b
+  • 0 < bBits
   • b < pow2 bBits
   • a < n 
 */
@@ -759,7 +763,7 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < b
+  • 0 < bBits
   • b < pow2 bBits
   • a < n 
 */

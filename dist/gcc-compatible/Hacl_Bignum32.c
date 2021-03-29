@@ -173,10 +173,11 @@ bn_slow_precomp(
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, t2, res_i);
   }
   uint32_t c1 = c;
+  uint32_t m = (uint32_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
     uint32_t *os = a_mod;
-    uint32_t x = (((uint32_t)0U - c00) & tmp0[i]) | (~((uint32_t)0U - c00) & a_mod[i]);
+    uint32_t x = (m & tmp0[i]) | (~m & a_mod[i]);
     os[i] = x;
   }
   KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
@@ -221,7 +222,6 @@ bool Hacl_Bignum32_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res)
   uint32_t nBits = (uint32_t)32U * Hacl_Bignum_Lib_bn_get_top_index_u32(len, n);
   if (is_valid_m == (uint32_t)0xFFFFFFFFU)
   {
-    uint32_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint32(n[0U]);
     KRML_CHECK_SIZE(sizeof (uint32_t), len);
     uint32_t r2[len];
     memset(r2, 0U, len * sizeof (uint32_t));
@@ -233,6 +233,7 @@ bool Hacl_Bignum32_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res)
     {
       Hacl_Bignum_bn_add_mod_n_u32(len, n, r2, r2, r2);
     }
+    uint32_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint32(n[0U]);
     bn_slow_precomp(len, n, mu, r2, a, res);
   }
   for (uint32_t i = (uint32_t)0U; i < len; i++)
@@ -262,7 +263,7 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < b
+   • 0 < bBits
    • b < pow2 bBits
    • a < n 
 */
@@ -309,7 +310,7 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < b
+   • 0 < bBits
    • b < pow2 bBits
    • a < n 
 */
@@ -545,7 +546,7 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < b
+  • 0 < bBits
   • b < pow2 bBits
   • a < n 
 */
@@ -587,7 +588,7 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < b
+  • 0 < bBits
   • b < pow2 bBits
   • a < n 
 */

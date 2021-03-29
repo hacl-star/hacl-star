@@ -217,7 +217,7 @@ Write `aM ^ b mod n` in `resM`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < b
+  • 0 < bBits
   • b < pow2 bBits 
 */
 void
@@ -245,7 +245,7 @@ Write `aM ^ b mod n` in `resM`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < b
+  • 0 < bBits
   • b < pow2 bBits 
 */
 void

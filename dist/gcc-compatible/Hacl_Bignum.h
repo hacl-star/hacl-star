@@ -41,10 +41,6 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum_Base.h"
 
-uint32_t Hacl_Bignum_ModInvLimb_mod_inv_uint32(uint32_t n0);
-
-uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
-
 void Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *res);
 
 void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res);
@@ -116,6 +112,10 @@ Hacl_Bignum_bn_add_mod_n_u64(
   uint64_t *b,
   uint64_t *res
 );
+
+uint32_t Hacl_Bignum_ModInvLimb_mod_inv_uint32(uint32_t n0);
+
+uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
 
 uint32_t Hacl_Bignum_Montgomery_bn_check_modulus_u32(uint32_t len, uint32_t *n);
 
