@@ -459,14 +459,7 @@ bool Hacl_Bignum4096_mod(uint64_t *n, uint64_t *a, uint64_t *res)
   if (is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU)
   {
     uint64_t r2[64U] = { 0U };
-    memset(r2, 0U, (uint32_t)64U * sizeof (uint64_t));
-    uint32_t i = nBits / (uint32_t)64U;
-    uint32_t j = nBits % (uint32_t)64U;
-    r2[i] = r2[i] | (uint64_t)1U << j;
-    for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)8192U - nBits; i0++)
-    {
-      add_mod_n(n, r2, r2, r2);
-    }
+    precompr2(nBits, n, r2);
     uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
     bn_slow_precomp(n, mu, r2, a, res);
   }

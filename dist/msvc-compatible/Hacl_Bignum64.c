@@ -198,14 +198,7 @@ bool Hacl_Bignum64_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
     KRML_CHECK_SIZE(sizeof (uint64_t), len);
     uint64_t *r2 = alloca(len * sizeof (uint64_t));
     memset(r2, 0U, len * sizeof (uint64_t));
-    memset(r2, 0U, len * sizeof (uint64_t));
-    uint32_t i = nBits / (uint32_t)64U;
-    uint32_t j = nBits % (uint32_t)64U;
-    r2[i] = r2[i] | (uint64_t)1U << j;
-    for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)128U * len - nBits; i0++)
-    {
-      Hacl_Bignum_bn_add_mod_n_u64(len, n, r2, r2, r2);
-    }
+    Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(len, nBits, n, r2);
     uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
     bn_slow_precomp(len, n, mu, r2, a, res);
   }

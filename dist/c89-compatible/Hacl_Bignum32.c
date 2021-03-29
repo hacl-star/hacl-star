@@ -249,22 +249,10 @@ bool Hacl_Bignum32_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res)
           {
             uint32_t r2[len];
             memset(r2, 0U, len * sizeof (uint32_t));
-            memset(r2, 0U, len * sizeof (uint32_t));
+            Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32(len, nBits, n, r2);
             {
-              uint32_t i = nBits / (uint32_t)32U;
-              uint32_t j = nBits % (uint32_t)32U;
-              r2[i] = r2[i] | (uint32_t)1U << j;
-              {
-                uint32_t i0;
-                for (i0 = (uint32_t)0U; i0 < (uint32_t)64U * len - nBits; i0++)
-                {
-                  Hacl_Bignum_bn_add_mod_n_u32(len, n, r2, r2, r2);
-                }
-              }
-              {
-                uint32_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint32(n[0U]);
-                bn_slow_precomp(len, n, mu, r2, a, res);
-              }
+              uint32_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint32(n[0U]);
+              bn_slow_precomp(len, n, mu, r2, a, res);
             }
           }
         }
