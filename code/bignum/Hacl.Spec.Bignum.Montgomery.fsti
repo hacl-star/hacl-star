@@ -36,6 +36,20 @@ val bn_precomp_r2_mod_n_lemma: #t:limb_t -> #nLen:size_pos -> nBits:size_nat -> 
   (ensures  bn_v (bn_precomp_r2_mod_n nBits n) == pow2 (2 * bits t * nLen) % bn_v n)
 
 
+val bn_mont_precomp:
+    #t:limb_t
+  -> #nLen:size_pos
+  -> nBits:size_nat
+  -> n:lbignum t nLen ->
+  Pure (tuple2 (lbignum t nLen) (limb t))
+  (requires
+    1 < bn_v n /\ bn_v n % 2 = 1 /\ 2 * bits t * nLen <= max_size_t /\
+    pow2 nBits < bn_v n /\ nBits / bits t < nLen)
+  (ensures  fun (r2, mu) ->
+    bn_mont_pre n mu /\
+    bn_v r2 == pow2 (2 * bits t * nLen) % bn_v n)
+
+
 ///  Conversion functions to/from the Montgomery domain and the Montgomery reduction
 val bn_mont_reduction:
     #t:limb_t

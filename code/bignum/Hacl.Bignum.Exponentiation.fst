@@ -103,13 +103,9 @@ let mk_bn_mod_exp_precompr2 #t k bn_mod_exp_precomp n r2 a bBits b res =
 
 
 let mk_bn_mod_exp #t len precomp_r2 bn_mod_exp_precomp nBits n a bBits b res =
-  let h0 = ST.get () in
-  SM.bn_precomp_r2_mod_n_lemma (v nBits) (as_seq h0 n);
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
-  precomp_r2 nBits n r2;
-  let mu = BM.mod_inv_limb n.(0ul) in // n * mu = 1 (mod (pow2 64))
-  Hacl.Spec.Bignum.ModInvLimb.bn_mod_inv_limb_lemma (as_seq h0 n);
+  let mu = BM.bn_mont_precomp len precomp_r2 nBits n r2 in
   bn_mod_exp_precomp n mu r2 a bBits b res;
   pop_frame ()
 

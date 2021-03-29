@@ -47,6 +47,29 @@ val bn_precomp_r2_mod_n: #t:limb_t -> k:BN.bn t -> bn_precomp_r2_mod_n_st t k.BN
 
 
 inline_for_extraction noextract
+let bn_mont_precomp_st (t:limb_t) (len:BN.meta_len t) =
+    nBits:size_t
+  -> n:lbignum t len
+  -> r2:lbignum t len ->
+  Stack (limb t)
+  (requires fun h ->
+    live h n /\ live h r2 /\ disjoint n r2 /\
+
+    1 < bn_v h n /\ bn_v h n % 2 = 1 /\
+    pow2 (v nBits) < bn_v h n /\ v nBits / bits t < v len)
+  (ensures  fun h0 mu h1 -> modifies (loc r2) h0 h1 /\
+    (as_seq h1 r2, mu) == S.bn_mont_precomp (v nBits) (as_seq h0 n))
+
+
+inline_for_extraction noextract
+val bn_mont_precomp:
+    #t:limb_t
+  -> len:BN.meta_len t
+  -> precompr2:bn_precomp_r2_mod_n_st t len ->
+  bn_mont_precomp_st t len
+
+
+inline_for_extraction noextract
 let bn_mont_reduction_st (t:limb_t) (len:size_t{0 < v len /\ v len + v len <= max_size_t}) =
     n:lbignum t len
   -> mu:limb t

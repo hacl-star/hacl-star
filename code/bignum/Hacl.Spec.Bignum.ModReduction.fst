@@ -12,8 +12,6 @@ module AM = Hacl.Spec.AlmostMontgomery.Lemmas
 
 module BM = Hacl.Spec.Bignum.Montgomery
 module BAM = Hacl.Spec.Bignum.AlmostMontgomery
-
-module BI = Hacl.Spec.Bignum.ModInvLimb
 module BN = Hacl.Spec.Bignum
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -84,32 +82,17 @@ let bn_mod_slow_precomp_lemma #t #len n mu r2 a =
 val bn_mod_slow:
     #t:limb_t
   -> #len:BN.bn_len t
-  -> nBits:size_nat{nBits / bits t < len}
-  -> n:lbignum t len
-  -> a:lbignum t (len + len) ->
-  lbignum t len
-
-let bn_mod_slow #t #len nBits n a =
-  let mu = BI.mod_inv_limb n.[0] in
-  let r2 = BM.bn_precomp_r2_mod_n nBits n in
-  bn_mod_slow_precomp n mu r2 a
-
-
-val bn_mod_slow_lemma:
-    #t:limb_t
-  -> #len:BN.bn_len t
   -> nBits:size_nat
   -> n:lbignum t len
-  -> a:lbignum t (len + len) -> Lemma
+  -> a:lbignum t (len + len) ->
+  Pure (lbignum t len)
   (requires
     1 < bn_v n /\ bn_v n % 2 = 1 /\
     nBits / bits t < len /\ pow2 nBits < bn_v n)
-  (ensures  bn_v (bn_mod_slow nBits n a) == bn_v a % bn_v n)
+  (ensures fun res ->
+    bn_v res == bn_v a % bn_v n)
 
-let bn_mod_slow_lemma #t #len nBits n a =
-  let mu = BI.mod_inv_limb n.[0] in
-  BI.bn_mod_inv_limb_lemma n;
-  let r2 = BM.bn_precomp_r2_mod_n nBits n in
-  BM.bn_precomp_r2_mod_n_lemma nBits n;
-  bn_eval_bound n len;
-  bn_mod_slow_precomp_lemma n mu r2 a
+let bn_mod_slow #t #len nBits n a =
+  let r2, mu = BM.bn_mont_precomp nBits n in
+  bn_mod_slow_precomp_lemma n mu r2 a;
+  bn_mod_slow_precomp n mu r2 a

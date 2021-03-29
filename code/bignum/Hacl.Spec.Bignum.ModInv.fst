@@ -15,7 +15,6 @@ module Euclid = FStar.Math.Euclid
 module BE = Hacl.Spec.Bignum.Exponentiation
 module BM = Hacl.Spec.Bignum.Montgomery
 module BN = Hacl.Spec.Bignum
-module BI = Hacl.Spec.Bignum.ModInvLimb
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -144,10 +143,7 @@ val bn_mod_inv_prime:
     bn_v res * bn_v a % bn_v n = 1)
 
 let bn_mod_inv_prime #t #len nBits n a =
-  let mu = BI.mod_inv_limb n.[0] in
-  BI.bn_mod_inv_limb_lemma n;
-  let r2 = BM.bn_precomp_r2_mod_n nBits n in
-  BM.bn_precomp_r2_mod_n_lemma nBits n;
+  let r2, mu = BM.bn_mont_precomp nBits n in
   let res = bn_mod_inv_prime_precomp #t #len n mu r2 a in
   mod_inv_prime_lemma (bn_v n) (bn_v a);
   res

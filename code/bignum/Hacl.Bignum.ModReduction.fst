@@ -15,7 +15,7 @@ module S = Hacl.Spec.Bignum.ModReduction
 
 module BN = Hacl.Bignum
 module AM = Hacl.Bignum.AlmostMontgomery
-module BI = Hacl.Bignum.ModInvLimb
+module BM = Hacl.Bignum.Montgomery
 module SM = Hacl.Spec.Bignum.Montgomery
 module BD = Hacl.Spec.Bignum.Definitions
 
@@ -60,7 +60,7 @@ let bn_mod_slow_precomp #t k n mu r2 a res =
 
 inline_for_extraction noextract
 let bn_mod_slow_st (t:limb_t) (len:BN.meta_len t) =
-    nBits:size_t{v nBits / bits t < v len}
+    nBits:size_t
   -> n:lbignum t len
   -> a:lbignum t (len +! len)
   -> res:lbignum t len ->
@@ -84,14 +84,8 @@ val mk_bn_mod_slow:
 
 let mk_bn_mod_slow #t k bn_mod_slow_precomp nBits n a res =
   [@inline_let] let len = k.AM.bn.BN.len in
-  let h0 = ST.get () in
-  S.bn_mod_slow_lemma (v nBits) (as_seq h0 n) (as_seq h0 a);
-  Hacl.Spec.Bignum.ModInvLimb.bn_mod_inv_limb_lemma (as_seq h0 n);
-  SM.bn_precomp_r2_mod_n_lemma (v nBits) (as_seq h0 n);
-  BD.bn_eval_bound (as_seq h0 n) (v len);
   push_frame ();
-  let mu = BI.mod_inv_limb n.(0ul) in
   let r2 = create len (uint #t #SEC 0) in
-  AM.precomp nBits n r2;
+  let mu = BM.bn_mont_precomp len AM.precomp nBits n r2 in
   bn_mod_slow_precomp n mu r2 a res;
   pop_frame ()

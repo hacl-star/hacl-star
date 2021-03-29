@@ -10,6 +10,7 @@ open Hacl.Spec.Bignum.Definitions
 
 module Loops = Lib.LoopCombinators
 module BN = Hacl.Spec.Bignum
+module BI = Hacl.Spec.Bignum.ModInvLimb
 
 #reset-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
@@ -78,6 +79,15 @@ let bn_precomp_r2_mod_n_lemma #t #nLen nBits n =
   assert (bn_v res == pow2 (2 * bits t * nLen - nBits) * pow2 nBits % bn_v n);
   Math.Lemmas.pow2_plus (2 * bits t * nLen - nBits) nBits;
   assert (bn_v res == pow2 (2 * bits t * nLen) % bn_v n)
+
+
+let bn_mont_precomp #t #nLen nBits n =
+  let r2 = bn_precomp_r2_mod_n nBits n in
+  bn_precomp_r2_mod_n_lemma nBits n;
+  let mu = BI.mod_inv_limb n.[0] in
+  BI.bn_mod_inv_limb_lemma n;
+  bn_eval_bound n nLen;
+  r2, mu
 
 
 ///  Low-level specification of Montgomery arithmetic

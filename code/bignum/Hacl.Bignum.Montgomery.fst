@@ -51,6 +51,11 @@ let bn_precomp_r2_mod_n #t k nBits n res =
   )
 
 
+let bn_mont_precomp #t len precompr2 nBits n r2 =
+  precompr2 nBits n r2;
+  mod_inv_limb n.(0ul)
+
+
 inline_for_extraction noextract
 val bn_mont_reduction_f:
     #t:limb_t

@@ -125,10 +125,7 @@ val mk_bn_mod_exp:
   bn_mod_exp_st t len
 
 let mk_bn_mod_exp #t len bn_mod_exp_precomp nBits n a bBits b =
-  let mu = BI.mod_inv_limb n.[0] in
-  BI.bn_mod_inv_limb_lemma n;
-  let r2 = BM.bn_precomp_r2_mod_n nBits n in
-  BM.bn_precomp_r2_mod_n_lemma nBits n;
+  let r2, mu = BM.bn_mont_precomp nBits n in
   bn_mod_exp_precomp n mu r2 a bBits b
 
 
