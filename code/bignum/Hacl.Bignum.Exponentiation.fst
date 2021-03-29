@@ -30,14 +30,12 @@ friend Hacl.Bignum.Montgomery
 let bn_check_mod_exp #t len n a bBits b =
   let m0 = BM.bn_check_modulus n in
   let bLen = blocks bBits (size (bits t)) in
-  let m1 = BN.bn_is_zero_mask bLen b in
-  let m1' = lognot m1 in
-  let m2 =
+  let m1 =
     if bBits <. size (bits t) *! bLen
     then BN.bn_lt_pow2_mask bLen b bBits
     else ones t SEC in
-  let m3 = BN.bn_lt_mask len a n in
-  let m = m1' &. m2 &. m3 in
+  let m2 = BN.bn_lt_mask len a n in
+  let m = m1 &. m2 in
   m0 &. m
 
 
