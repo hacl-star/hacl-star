@@ -83,48 +83,32 @@ let almost_mont_mul_lemma pbits rLen n mu a b =
 
 ///  Properties
 
-val from_almost_mont_mul_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> aM:nat -> bM:nat -> Lemma
+val almost_mont_mul_is_mont_mul_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> a:nat-> b:nat -> Lemma
   (requires (let r = pow2 (pbits * rLen) in
-    M.mont_pre pbits rLen n mu /\ aM < r /\ bM < r))
+    M.mont_pre pbits rLen n mu /\ a < r /\ b < r))
   (ensures
-   (let cM = almost_mont_mul pbits rLen n mu aM bM in
-    let c = M.from_mont pbits rLen n mu cM in
-    let a = M.from_mont pbits rLen n mu aM in
-    let b = M.from_mont pbits rLen n mu bM in
-    c == a * b % n))
+   (let c = almost_mont_mul pbits rLen n mu a b in
+    let r = pow2 (pbits * rLen) in
+    c % n == M.mont_mul pbits rLen n mu (a % n) (b % n) /\ c < r))
 
-let from_almost_mont_mul_lemma pbits rLen n mu aM bM =
+let almost_mont_mul_is_mont_mul_lemma pbits rLen n mu a b =
+  let c = almost_mont_mul pbits rLen n mu a b in
+  almost_mont_mul_lemma pbits rLen n mu a b;
   let r = pow2 (pbits * rLen) in
   let d, _ = M.eea_pow2_odd (pbits * rLen) n in
+  assert (c % n == a * b * d % n /\ c < r);
 
-  let cM = almost_mont_mul pbits rLen n mu aM bM in
-  let c = M.from_mont pbits rLen n mu cM in
-  let a = M.from_mont pbits rLen n mu aM in
-  let b = M.from_mont pbits rLen n mu bM in
-
-  almost_mont_mul_lemma pbits rLen n mu aM bM;
-  //assert (cM % n == aM * bM * d % n);
-  M.from_mont_lemma pbits rLen n mu cM;
-  //assert (c == cM * d % n);
-
-  calc (==) { //c
-    cM * d % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l cM d n }
-    (aM * bM * d % n) * d % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (aM * bM * d) d n }
-    aM * bM * d * d % n;
-    (==) { Math.Lemmas.paren_mul_right aM bM d }
-    aM * (bM * d) * d % n;
+  let c1 = M.mont_mul pbits rLen n mu (a % n) (b % n) in
+  calc (==) {
+    c1;
+    (==) { M.mont_mul_lemma pbits rLen n mu (a % n) (b % n) }
+    (a % n) * (b % n) * d % n;
+    (==) { M.lemma_mod_mul_distr3 (a % n) b d n }
+    (a % n) * b * d % n;
     (==) {
-      Math.Lemmas.paren_mul_right aM (bM * d) d;
-      Math.Lemmas.swap_mul (bM * d) d;
-      Math.Lemmas.paren_mul_right aM d (bM * d) }
-    aM * d * (bM * d) % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (aM * d) (bM * d) n }
-    (aM * d % n) * (bM * d) % n;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (aM * d % n) (bM * d) n }
-    (aM * d % n) * (bM * d % n) % n;
+      Math.Lemmas.paren_mul_right (a % n) b d;
+      Math.Lemmas.lemma_mod_mul_distr_l a (b * d) n;
+      Math.Lemmas.paren_mul_right a b d }
+    a * b * d % n;
     };
-
-  M.from_mont_lemma pbits rLen n mu aM;
-  M.from_mont_lemma pbits rLen n mu bM
+  assert (c % n == c1)
