@@ -256,11 +256,17 @@ let mod_exp_mont_ll pbits rLen n mu a b =
   acc
 
 
-val mod_exp_mont_ll_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
-  -> a:nat_mod n -> b:nat ->
-  Lemma (mod_exp_mont_ll pbits rLen n mu a b == pow_mod #n a b)
+val mod_exp_mont_ll_mod_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
+  -> a:nat_mod n -> b:nat -> accM:nat -> Lemma
+  (requires (let r = pow2 (pbits * rLen) in
+    let k = mk_nat_mont_ll_comm_monoid pbits rLen n mu in
+    accM < r /\ accM % n == LE.pow k (a * r % n) b))
+  (ensures
+    (let aM = M.to_mont pbits rLen n mu a in
+     let acc = M.from_mont pbits rLen n mu accM in
+     acc == pow_mod #n a b))
 
-let mod_exp_mont_ll_lemma pbits rLen n mu a b =
+let mod_exp_mont_ll_mod_lemma pbits rLen n mu a b accM =
   let r = pow2 (pbits * rLen) in
   let d, _ = M.eea_pow2_odd (pbits * rLen) n in
   M.mont_preconditions_d pbits rLen n;
@@ -272,14 +278,29 @@ let mod_exp_mont_ll_lemma pbits rLen n mu a b =
   M.to_mont_lemma pbits rLen n mu a;
   assert (aM == a * r % n);
 
-  let accM = LE.pow k1 aM b in
   pow_nat_mont_ll_is_pow_nat_mont pbits rLen n mu aM b;
-  assert (accM == LE.pow k2 aM b);
+  assert (accM % n == LE.pow k2 aM b);
 
   let acc = M.from_mont pbits rLen n mu accM in
   M.from_mont_lemma pbits rLen n mu accM;
   assert (acc == accM * d % n);
+  Math.Lemmas.lemma_mod_mul_distr_l accM d n;
   mod_exp_mont_lemma n r d a b
+
+
+val mod_exp_mont_ll_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat{M.mont_pre pbits rLen n mu}
+  -> a:nat_mod n -> b:nat ->
+  Lemma (mod_exp_mont_ll pbits rLen n mu a b == pow_mod #n a b)
+
+let mod_exp_mont_ll_lemma pbits rLen n mu a b =
+  let k = mk_nat_mont_ll_comm_monoid pbits rLen n mu in
+  let aM = M.to_mont pbits rLen n mu a in
+  M.to_mont_lemma pbits rLen n mu a;
+
+  let accM = LE.pow k aM b in
+  assert (accM == LE.pow k aM b /\ accM < n);
+  Math.Lemmas.small_mod accM n;
+  mod_exp_mont_ll_mod_lemma pbits rLen n mu a b accM
 
 
 val from_mont_exp_lemma: pbits:pos -> rLen:pos -> n:pos -> mu:nat -> aM:nat -> b:nat -> Lemma

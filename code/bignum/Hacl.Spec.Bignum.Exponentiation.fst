@@ -17,6 +17,7 @@ module BN = Hacl.Spec.Bignum
 module BM = Hacl.Spec.Bignum.Montgomery
 module BI = Hacl.Spec.Bignum.ModInvLimb
 module ME = Hacl.Spec.Bignum.MontExponentiation
+module AE = Hacl.Spec.Bignum.AlmostMontExponentiation
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -45,13 +46,13 @@ let bn_check_mod_exp #t #len n a bBits b =
   r
 
 
-val mk_bn_mod_exp_precomp:
+val mk_bn_mod_exp_precomp_mont:
     #t:limb_t
   -> len:BN.bn_len t
   -> bn_exp_mont:ME.bn_exp_mont_st t len ->
   bn_mod_exp_precomp_st t len
 
-let mk_bn_mod_exp_precomp #t len bn_exp_mont n mu r2 a bBits b =
+let mk_bn_mod_exp_precomp_mont #t len bn_exp_mont n mu r2 a bBits b =
   bn_eval_bound n len;
   let aM = BM.bn_to_mont n mu r2 a in
   BM.bn_to_mont_lemma n mu r2 a;
@@ -66,14 +67,40 @@ let mk_bn_mod_exp_precomp #t len bn_exp_mont n mu r2 a bBits b =
   acc
 
 
+val mk_bn_mod_exp_precomp_amont:
+    #t:limb_t
+  -> len:BN.bn_len t
+  -> bn_exp_almost_mont:AE.bn_exp_almost_mont_st t len ->
+  bn_mod_exp_precomp_st t len
+
+let mk_bn_mod_exp_precomp_amont #t len bn_exp_almost_mont n mu r2 a bBits b =
+  bn_eval_bound n len;
+  let aM = BM.bn_to_mont n mu r2 a in
+  BM.bn_to_mont_lemma n mu r2 a;
+  M.to_mont_lemma (bits t) len (bn_v n) (v mu) (bn_v a);
+
+  let accM = bn_exp_almost_mont n mu aM bBits b in
+
+  let acc = BM.bn_from_mont n mu accM in
+  BM.bn_from_mont_lemma n mu accM;
+
+  bn_eval_bound accM len;
+  E.mod_exp_mont_ll_mod_lemma (bits t) len (bn_v n) (v mu) (bn_v a) (bn_v b) (bn_v accM);
+  assert (bn_v acc == Lib.NatMod.pow_mod #(bn_v n) (bn_v a) (bn_v b));
+  acc
+
+
 let bn_mod_exp_rl_precomp #t len n mu r2 a bBits b =
-  mk_bn_mod_exp_precomp #t len ME.bn_exp_mont_bm_vartime n mu r2 a bBits b
+  //mk_bn_mod_exp_precomp_mont #t len ME.bn_exp_mont_bm_vartime n mu r2 a bBits b
+  mk_bn_mod_exp_precomp_amont #t len AE.bn_exp_almost_mont_bm_vartime n mu r2 a bBits b
 
 let bn_mod_exp_mont_ladder_swap_precomp #t len n mu r2 a bBits b =
-  mk_bn_mod_exp_precomp #t len ME.bn_exp_mont_bm_consttime n mu r2 a bBits b
+  //mk_bn_mod_exp_precomp_mont #t len ME.bn_exp_mont_bm_consttime n mu r2 a bBits b
+  mk_bn_mod_exp_precomp_amont #t len AE.bn_exp_almost_mont_bm_consttime n mu r2 a bBits b
 
 let bn_mod_exp_fw_precomp #t len l n mu r2 a bBits b =
-  mk_bn_mod_exp_precomp #t len (ME.bn_exp_mont_fw l) n mu r2 a bBits b
+  //mk_bn_mod_exp_precomp_mont #t len (ME.bn_exp_mont_fw l) n mu r2 a bBits b
+  mk_bn_mod_exp_precomp_amont #t len (AE.bn_exp_almost_mont_fw l) n mu r2 a bBits b
 
 
 let bn_mod_exp_vartime_precomp #t len n mu r2 a bBits b =
