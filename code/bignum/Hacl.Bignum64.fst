@@ -37,7 +37,7 @@ let bn_slow_precomp (len:BN.meta_len t_limbs) : BR.bn_mod_slow_precomp_st t_limb
   BR.bn_mod_slow_precomp (kam len)
 
 let mod len n a res =
-  BS.mk_bn_mod_slow_safe len (BR.mk_bn_mod_slow (kam len) (bn_slow_precomp len)) n a res
+  BS.mk_bn_mod_slow_safe len (BR.mk_bn_mod_slow len (kam len).AM.precomp (bn_slow_precomp len)) n a res
 
 let mod_exp_vartime len n a bBits b res =
   BS.mk_bn_mod_exp_safe len (ke len).BE.exp_check (ke len).BE.exp_vt n a bBits b res

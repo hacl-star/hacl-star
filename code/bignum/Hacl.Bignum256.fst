@@ -107,7 +107,7 @@ let bn_slow_precomp : BR.bn_mod_slow_precomp_st t_limbs n_limbs =
   BR.bn_mod_slow_precomp almost_mont_inst
 
 let mod n a res =
-  BS.mk_bn_mod_slow_safe n_limbs (BR.mk_bn_mod_slow almost_mont_inst bn_slow_precomp) n a res
+  BS.mk_bn_mod_slow_safe n_limbs (BR.mk_bn_mod_slow n_limbs precompr2 bn_slow_precomp) n a res
 
 let exp_check: BE.bn_check_mod_exp_st t_limbs n_limbs =
   BE.bn_check_mod_exp n_limbs
