@@ -256,15 +256,9 @@ bool Hacl_Bignum32_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res)
             }
           }
         }
+        else
         {
-          uint32_t i;
-          for (i = (uint32_t)0U; i < len; i++)
-          {
-            uint32_t *os = res;
-            uint32_t x = res[i];
-            uint32_t x0 = is_valid_m & x;
-            os[i] = x0;
-          }
+          memset(res, 0U, len * sizeof (uint32_t));
         }
         return is_valid_m == (uint32_t)0xFFFFFFFFU;
       }
@@ -309,15 +303,9 @@ Hacl_Bignum32_mod_exp_vartime(
   {
     Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_u32(len, nBits, n, a, bBits, b, res);
   }
+  else
   {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < len; i++)
-    {
-      uint32_t *os = res;
-      uint32_t x = res[i];
-      uint32_t x0 = is_valid_m & x;
-      os[i] = x0;
-    }
+    memset(res, 0U, len * sizeof (uint32_t));
   }
   return is_valid_m == (uint32_t)0xFFFFFFFFU;
 }
@@ -359,15 +347,9 @@ Hacl_Bignum32_mod_exp_consttime(
   {
     Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u32(len, nBits, n, a, bBits, b, res);
   }
+  else
   {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < len; i++)
-    {
-      uint32_t *os = res;
-      uint32_t x = res[i];
-      uint32_t x0 = is_valid_m & x;
-      os[i] = x0;
-    }
+    memset(res, 0U, len * sizeof (uint32_t));
   }
   return is_valid_m == (uint32_t)0xFFFFFFFFU;
 }
@@ -540,15 +522,9 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
                   }
                 }
               }
+              else
               {
-                uint32_t i;
-                for (i = (uint32_t)0U; i < len; i++)
-                {
-                  uint32_t *os = res;
-                  uint32_t x = res[i];
-                  uint32_t x0 = is_valid_m & x;
-                  os[i] = x0;
-                }
+                memset(res, 0U, len * sizeof (uint32_t));
               }
               return is_valid_m == (uint32_t)0xFFFFFFFFU;
             }

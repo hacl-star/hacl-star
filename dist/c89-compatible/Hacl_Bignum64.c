@@ -258,15 +258,9 @@ bool Hacl_Bignum64_mod(uint32_t len, uint64_t *n, uint64_t *a, uint64_t *res)
             }
           }
         }
+        else
         {
-          uint32_t i;
-          for (i = (uint32_t)0U; i < len; i++)
-          {
-            uint64_t *os = res;
-            uint64_t x = res[i];
-            uint64_t x0 = is_valid_m & x;
-            os[i] = x0;
-          }
+          memset(res, 0U, len * sizeof (uint64_t));
         }
         return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
       }
@@ -311,15 +305,9 @@ Hacl_Bignum64_mod_exp_vartime(
   {
     Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_u64(len, nBits, n, a, bBits, b, res);
   }
+  else
   {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < len; i++)
-    {
-      uint64_t *os = res;
-      uint64_t x = res[i];
-      uint64_t x0 = is_valid_m & x;
-      os[i] = x0;
-    }
+    memset(res, 0U, len * sizeof (uint64_t));
   }
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
@@ -361,15 +349,9 @@ Hacl_Bignum64_mod_exp_consttime(
   {
     Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u64(len, nBits, n, a, bBits, b, res);
   }
+  else
   {
-    uint32_t i;
-    for (i = (uint32_t)0U; i < len; i++)
-    {
-      uint64_t *os = res;
-      uint64_t x = res[i];
-      uint64_t x0 = is_valid_m & x;
-      os[i] = x0;
-    }
+    memset(res, 0U, len * sizeof (uint64_t));
   }
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
@@ -544,15 +526,9 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
                   }
                 }
               }
+              else
               {
-                uint32_t i;
-                for (i = (uint32_t)0U; i < len; i++)
-                {
-                  uint64_t *os = res;
-                  uint64_t x = res[i];
-                  uint64_t x0 = is_valid_m & x;
-                  os[i] = x0;
-                }
+                memset(res, 0U, len * sizeof (uint64_t));
               }
               return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
             }

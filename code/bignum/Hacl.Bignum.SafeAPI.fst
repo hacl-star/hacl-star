@@ -150,11 +150,9 @@ let mk_bn_mod_slow_safe #t len bn_mod_slow n a res =
 
   if BB.unsafe_bool_of_limb is_valid_m then begin
     SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
-    bn_mod_slow nBits n a res end;
-
-  let h1 = ST.get () in
-  mapT len res (logand is_valid_m) res;
-  SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
+    bn_mod_slow nBits n a res end
+  else
+    memset res (uint #t 0) len;
   BB.unsafe_bool_of_limb is_valid_m
 
 
@@ -189,11 +187,9 @@ let mk_bn_mod_exp_safe #t len exp_check bn_mod_exp n a bBits b res =
 
   if BB.unsafe_bool_of_limb is_valid_m then begin
     SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
-    bn_mod_exp nBits n a bBits b res end;
-
-  let h1 = ST.get () in
-  mapT len res (logand is_valid_m) res;
-  SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
+    bn_mod_exp nBits n a bBits b res end
+  else
+    memset res (uint #t 0) len;
   BB.unsafe_bool_of_limb is_valid_m
 
 
@@ -225,11 +221,9 @@ let mk_bn_mod_inv_prime_safe #t len bn_mod_exp n a res =
 
   if BB.unsafe_bool_of_limb is_valid_m then begin
     SL.bn_low_bound_bits_lemma #t #(v len) (as_seq h0 n);
-    BI.mk_bn_mod_inv_prime len bn_mod_exp nBits n a res end;
-
-  let h1 = ST.get () in
-  mapT len res (logand is_valid_m) res;
-  SD.bn_mask_lemma (as_seq h1 res) is_valid_m;
+    BI.mk_bn_mod_inv_prime len bn_mod_exp nBits n a res end
+  else
+    memset res (uint #t 0) len;
   BB.unsafe_bool_of_limb is_valid_m
 
 

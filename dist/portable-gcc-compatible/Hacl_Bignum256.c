@@ -649,12 +649,9 @@ bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res)
     uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
     bn_slow_precomp(n, mu, r2, a, res);
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  else
   {
-    uint64_t *os = res;
-    uint64_t x = res[i];
-    uint64_t x0 = is_valid_m & x;
-    os[i] = x0;
+    memset(res, 0U, (uint32_t)4U * sizeof (uint64_t));
   }
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
@@ -1071,12 +1068,9 @@ Hacl_Bignum256_mod_exp_vartime(
   {
     exp_vartime(nBits, n, a, bBits, b, res);
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  else
   {
-    uint64_t *os = res;
-    uint64_t x = res[i];
-    uint64_t x0 = is_valid_m & x;
-    os[i] = x0;
+    memset(res, 0U, (uint32_t)4U * sizeof (uint64_t));
   }
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
@@ -1122,12 +1116,9 @@ Hacl_Bignum256_mod_exp_consttime(
   {
     exp_consttime(nBits, n, a, bBits, b, res);
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  else
   {
-    uint64_t *os = res;
-    uint64_t x = res[i];
-    uint64_t x0 = is_valid_m & x;
-    os[i] = x0;
+    memset(res, 0U, (uint32_t)4U * sizeof (uint64_t));
   }
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
@@ -1229,12 +1220,9 @@ bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *re
     }
     exp_vartime(nBits, n, a, (uint32_t)256U, n2, res);
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  else
   {
-    uint64_t *os = res;
-    uint64_t x = res[i];
-    uint64_t x0 = is_valid_m & x;
-    os[i] = x0;
+    memset(res, 0U, (uint32_t)4U * sizeof (uint64_t));
   }
   return is_valid_m == (uint64_t)0xFFFFFFFFFFFFFFFFU;
 }
