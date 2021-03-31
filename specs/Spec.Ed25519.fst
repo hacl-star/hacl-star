@@ -177,7 +177,7 @@ let sign_expanded pub s prefix msg =
   let h = sha512_modq (64 + len)
     (concat #uint8 #64 #(length msg) (concat #uint8 #32 #32 rs pub) msg)
   in
-  let s = (r + (h * nat_from_bytes_le s) % q) % q in
+  let s = (r + h * nat_from_bytes_le s) % q in
   concat #uint8 #32 #32 rs (nat_to_bytes_le 32 s)
 
 val sign:

@@ -11,43 +11,35 @@ open Lib.Buffer
 open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
-module F56 = Hacl.Impl.BignumQ.Mul
 module S51 = Hacl.Spec.Curve25519.Field51.Definition
 
 module SC = Spec.Curve25519
 
+module BD = Hacl.Bignum.Definitions
+module BN = Hacl.Bignum
+module SD = Hacl.Spec.Bignum.Definitions
+module SN = Hacl.Spec.Bignum
+
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
-val gte_q:
-  s:lbuffer uint64 5ul ->
+val gte_q: s:lbuffer uint64 4ul ->
   Stack bool
-    (requires fun h -> live h s /\
-      F56.qelem_fits h s (1, 1, 1, 1, 1)
-     )
-    (ensures  fun h0 b h1 -> h0 == h1 /\
-      (b <==> F56.as_nat h0 s >= Spec.Ed25519.q)
-    )
+  (requires fun h -> live h s)
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    (b <==> BD.bn_v h0 s >= Spec.Ed25519.q))
 
 [@CInline]
 let gte_q s =
-  let h0 = get() in
-  let s0 = s.(0ul) in
-  let s1 = s.(1ul) in
-  let s2 = s.(2ul) in
-  let s3 = s.(3ul) in
-  let s4 = s.(4ul) in
-  assert_norm (Spec.Ed25519.q == 0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed);
-  let open FStar.UInt64 in
-  let open Lib.RawIntTypes in
-  if u64_to_UInt64 s4 >^ 0x00000010000000uL then true
-  else if u64_to_UInt64 s4 <^ 0x00000010000000uL then false
-  else (if u64_to_UInt64 s3 >^ 0x00000000000000uL then true
-  else if u64_to_UInt64 s2 >^ 0x000000000014deuL then true
-  else if u64_to_UInt64 s2 <^ 0x000000000014deuL then false
-  else if u64_to_UInt64 s1 >^ 0xf9dea2f79cd658uL then true
-  else if u64_to_UInt64 s1 <^ 0xf9dea2f79cd658uL then false
-  else if u64_to_UInt64 s0 >=^ 0x12631a5cf5d3eduL then true
-  else false)
+  push_frame ();
+  let q = create 4ul (u64 0) in
+  Hacl.Impl.BignumQ.make_q q;
+  let b = BN.bn_lt_mask 4ul s q in
+  let h = ST.get () in
+  SN.bn_lt_mask_lemma (as_seq h s) (as_seq h q);
+  assert (if v b = 0 then BD.bn_v h s >= BD.bn_v h q else BD.bn_v h s < BD.bn_v h q);
+  pop_frame ();
+  Hacl.Spec.Bignum.Base.unsafe_bool_of_limb0 b
+
 
 let u51 = n:nat{n < 0x8000000000000}
 
