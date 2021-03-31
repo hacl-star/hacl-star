@@ -20,6 +20,7 @@ open Spec.ECC.Curves
 open Lib.Loops
 
 open Hacl.Impl.P256.MM.Lemmas
+open Hacl.Impl.EC.LowLevel
 
 open Hacl.Impl.EC.MontgomeryMultiplication
 
@@ -285,8 +286,8 @@ val exponent_p256: a: felem P256->result: felem P256 -> tempBuffer: lbuffer uint
   (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
     disjoint a tempBuffer /\ as_nat P256 h a < prime256)
   (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (
-    let k = fromDomain_ #P256 (as_nat P256 h0 a) in 
-    as_nat P256 h1 result =  toDomain_ #P256 (pow k (prime256 - 2) % prime256)))
+    let k = fromDomain #P256 (as_nat P256 h0 a) in 
+    as_nat P256 h1 result =  toDomain #P256 (pow k (prime256 - 2) % prime256)))
 
 
 let exponent_p256 t result tempBuffer = 
@@ -308,7 +309,7 @@ let exponent_p256 t result tempBuffer =
   exponent_2 t t0 t4 t5 result;
     let h3 = ST.get() in 
 
-  let tD = fromDomain_ #P256 (as_nat P256 h0 t) in 
+  let tD = fromDomain #P256 (as_nat P256 h0 t) in 
   
   lemma_exp_1 tD; 
   lemma_exp_2 tD;

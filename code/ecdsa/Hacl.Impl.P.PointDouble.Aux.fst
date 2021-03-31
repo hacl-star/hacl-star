@@ -1,29 +1,15 @@
 module Hacl.Impl.P.PointDouble.Aux
 
-open FStar.HyperStack.All
-open FStar.HyperStack
-module ST = FStar.HyperStack.ST
-
 open Lib.IntTypes
-open Hacl.Impl.EC.Arithmetics
 
-open Lib.Buffer
-
-open Hacl.Lemmas.P256
 open Hacl.Spec.EC.Definition
-(* open Hacl.Impl.SolinasReduction *)
-open Hacl.Spec.MontgomeryMultiplication
-open Hacl.Impl.EC.LowLevel
-open Hacl.Impl.EC.MontgomeryMultiplication
 open Spec.ECC
 open Spec.ECC.Curves
-open Hacl.Impl.P256.Math 
 
 open FStar.Tactics 
 open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
-
 open FStar.Mul
 
 

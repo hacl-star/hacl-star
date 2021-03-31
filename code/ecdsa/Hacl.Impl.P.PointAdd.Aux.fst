@@ -6,12 +6,9 @@ open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
-open Hacl.Impl.EC.Arithmetics
-
 open Lib.Buffer
 
 open Hacl.Impl.EC.LowLevel
-open Hacl.Impl.EC.MontgomeryMultiplication
 open Spec.ECC
 open Spec.ECC.Curves
 
@@ -21,13 +18,12 @@ open FStar.Tactics.Canon
 open FStar.Math.Lemmas
 
 open Hacl.Spec.MontgomeryMultiplication
-open FStar.Mul
-
 open Hacl.Spec.EC.Definition
+
+open FStar.Mul
 
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"  
-
 
 
 val getXYZ: #c: curve -> lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> GTot (tuple3 (felem c) (felem c) (felem c))
@@ -54,7 +50,7 @@ let getU1S2 #c t8 =
   (u1, u2, s1, s2)
 
 
-val getHHCube : #c: curve -> lbuffer uint64 (size 4 *! getCoordinateLenU64 c)  -> GTot (tuple4 (felem c) (felem c) (felem c) (felem c))
+val getHHCube : #c: curve -> lbuffer uint64 (size 4 *! getCoordinateLenU64 c) -> GTot (tuple4 (felem c) (felem c) (felem c) (felem c))
 
 let getHHCube #c t4 = 
   let len = getCoordinateLenU64 c in 
@@ -85,56 +81,51 @@ let getU1HCube #c tempBuffer12 =
   (u1, u2, s1, s2, h, r, uh, hCube)
 
 
-
-
-
 let u1Invariant (#c: curve) (h0: mem) (h1: mem) (u1: felem c) (p: point c) (q: point c)  =  
-  let pxD = fromDomain_ #c (point_x_as_nat c h0 p) in 
-  let qzD = fromDomain_ #c (point_z_as_nat c h0 q) in 
-  felem_eval c h1 u1 /\ as_nat c h1 u1 == toDomain_ #c (qzD * qzD * pxD % getPrime c)
+  let pxD = fromDomain #c (point_x_as_nat c h0 p) in 
+  let qzD = fromDomain #c (point_z_as_nat c h0 q) in 
+  felem_eval c h1 u1 /\ as_nat c h1 u1 == toDomain #c (qzD * qzD * pxD % getPrime c)
 
 
 let u2Invariant (#c: curve) (h0: mem) (h1: mem) (u2: felem c) (p: point c) (q: point c)  =  
-  let pzD = fromDomain_ #c (point_z_as_nat c h0 p) in 
-  let qxD = fromDomain_ #c (point_x_as_nat c h0 q) in 
-  felem_eval c h1 u2 /\ as_nat c h1 u2 == toDomain_ #c (pzD * pzD * qxD % getPrime c)
+  let pzD = fromDomain #c (point_z_as_nat c h0 p) in 
+  let qxD = fromDomain #c (point_x_as_nat c h0 q) in 
+  felem_eval c h1 u2 /\ as_nat c h1 u2 == toDomain #c (pzD * pzD * qxD % getPrime c)
 
 
 let s1Invariant (#c: curve) (h0: mem) (h1: mem) (s1: felem c) (p: point c) (q: point c)  = 
-  let pyD = fromDomain_ #c (point_y_as_nat c h0 p) in 
-  let qzD = fromDomain_ #c (point_z_as_nat c h0 q) in 
-  felem_eval c h1 s1 /\ as_nat c h1 s1 == toDomain_ #c (qzD * qzD * qzD * pyD % getPrime c)
+  let pyD = fromDomain #c (point_y_as_nat c h0 p) in 
+  let qzD = fromDomain #c (point_z_as_nat c h0 q) in 
+  felem_eval c h1 s1 /\ as_nat c h1 s1 == toDomain #c (qzD * qzD * qzD * pyD % getPrime c)
 
 
 let s2Invariant (#c: curve) (h0: mem) (h1: mem) (s2: felem c) (p: point c) (q: point c)  = 
-  let pzD = fromDomain_ #c (point_z_as_nat c h0 p) in 
-  let qyD = fromDomain_ #c (point_y_as_nat c h0 q) in 
-  felem_eval c h1 s2 /\ as_nat c h1 s2 == toDomain_ #c (pzD * pzD * pzD * qyD % getPrime c)
+  let pzD = fromDomain #c (point_z_as_nat c h0 p) in 
+  let qyD = fromDomain #c (point_y_as_nat c h0 q) in 
+  felem_eval c h1 s2 /\ as_nat c h1 s2 == toDomain #c (pzD * pzD * pzD * qyD % getPrime c)
 
 
 let hInvariant (#c: curve) (h0: mem) (h: felem c) (u1: felem c) (u2: felem c) = 
-  let u1D = fromDomain_ #c (as_nat c h0 u1) in 
-  let u2D = fromDomain_ #c (as_nat c h0 u2) in 
-  felem_eval c h0 h /\ as_nat c h0 h == toDomain_ #c ((u2D - u1D) % getPrime c)
+  let u1D = fromDomain #c (as_nat c h0 u1) in 
+  let u2D = fromDomain #c (as_nat c h0 u2) in 
+  felem_eval c h0 h /\ as_nat c h0 h == toDomain #c ((u2D - u1D) % getPrime c)
 
 let rInvariant (#c: curve) (h0: mem) (r: felem c) (s1: felem c) (s2: felem c)  = 
-  let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-  let s2D = fromDomain_ #c (as_nat c h0 s2) in 
-  felem_eval c h0 r /\ as_nat c h0 r == toDomain_ #c ((s2D - s1D) % getPrime c) 
+  let s1D = fromDomain #c (as_nat c h0 s1) in 
+  let s2D = fromDomain #c (as_nat c h0 s2) in 
+  felem_eval c h0 r /\ as_nat c h0 r == toDomain #c ((s2D - s1D) % getPrime c) 
 
 let uhInvariant (#c: curve) (h0: mem) (uh: felem c) (h: felem c) (u1: felem c) = 
-  let hD = fromDomain_ #c (as_nat c h0 h) in 
-  let u1D = fromDomain_ #c (as_nat c h0 u1) in 
-  felem_eval c h0 uh /\ as_nat c h0 uh == toDomain_ #c (hD * hD * u1D % getPrime c) 
+  let hD = fromDomain #c (as_nat c h0 h) in 
+  let u1D = fromDomain #c (as_nat c h0 u1) in 
+  felem_eval c h0 uh /\ as_nat c h0 uh == toDomain #c (hD * hD * u1D % getPrime c) 
 
 let hCubeInvariant (#c: curve) (h0 : mem) (hCube: felem c) (h: felem c) = 
-  let hD = fromDomain_ #c (as_nat c h0 h) in 
-  felem_eval c h0 hCube /\ as_nat c h0 hCube == toDomain_ #c (hD * hD * hD % getPrime c)
+  let hD = fromDomain #c (as_nat c h0 h) in 
+  felem_eval c h0 hCube /\ as_nat c h0 hCube == toDomain #c (hD * hD * hD % getPrime c)
 
 
-
-val lemma_ICuttable_common: #c: curve -> Lemma 
-  (
+val lemma_ICuttable_common: #c: curve -> Lemma (
     let len = getCoordinateLenU64 c in 
     v (size 0) + v (size 4 *! len) <= v (size 12 *! len) /\
     v (size 4 *! len) + v len <= v (size 12 *! len) /\
@@ -146,37 +137,36 @@ val lemma_ICuttable_common: #c: curve -> Lemma
     v (size 10 *! len) + v len <= v (size 12 *! len) /\
     v (size 11 *! len) + v len <= v (size 12 *! len))
 	
-let lemma_ICuttable_common #c = admit()
+let lemma_ICuttable_common #c = ()
 
 
 
 let x3Invariant (#c: curve) (h0: mem) (h1: mem) (x3: felem c) (r: felem c) (hCube: felem c) (uh: felem c) = 
-  let hCubeD = fromDomain_ #c (as_nat c h0 hCube) in 
-  let uhD = fromDomain_ #c (as_nat c h0 uh) in 
-  let rD = fromDomain_ #c (as_nat c h0 r) in 
-  felem_eval c h1 x3 /\ as_nat c h1 x3 == toDomain_ #c ((rD * rD - hCubeD - 2 * uhD) % getPrime c)
+  let hCubeD = fromDomain #c (as_nat c h0 hCube) in 
+  let uhD = fromDomain #c (as_nat c h0 uh) in 
+  let rD = fromDomain #c (as_nat c h0 r) in 
+  felem_eval c h1 x3 /\ as_nat c h1 x3 == toDomain #c ((rD * rD - hCubeD - 2 * uhD) % getPrime c)
 
 
 let y3Invariant (#c: curve) (h0: mem) (h1: mem) (y3: felem c) (s1: felem c) (hCube: felem c) (uh: felem c) (x3: felem c) (r: felem c) = 
-  let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-  let hCubeD = fromDomain_ #c (as_nat c h0 hCube) in 
-  let uhD = fromDomain_ #c (as_nat c h0 uh) in 
-  let rD = fromDomain_ #c (as_nat c h0 r) in 
+  let s1D = fromDomain #c (as_nat c h0 s1) in 
+  let hCubeD = fromDomain #c (as_nat c h0 hCube) in 
+  let uhD = fromDomain #c (as_nat c h0 uh) in 
+  let rD = fromDomain #c (as_nat c h0 r) in 
 
-
-  let x3D = fromDomain_ #c (as_nat c h1 x3) in 
+  let x3D = fromDomain #c (as_nat c h1 x3) in 
   felem_eval c h1 y3 /\ 
-  as_nat c h1 y3 = toDomain_ #c (((uhD - x3D) * rD - s1D * hCubeD) % getPrime c)
+  as_nat c h1 y3 = toDomain #c (((uhD - x3D) * rD - s1D * hCubeD) % getPrime c)
 
 
 
 
 let z3Invariant (#c: curve) (h0: mem) (h1: mem) (z3: felem c) (z1: felem c) (z2: felem c) (h: felem c) = 
-  let z1D = fromDomain_ #c (as_nat c h0 z1) in 
-  let z2D = fromDomain_ #c (as_nat c h0 z2) in 
-  let hD = fromDomain_ #c (as_nat c h0 h) in 
+  let z1D = fromDomain #c (as_nat c h0 z1) in 
+  let z2D = fromDomain #c (as_nat c h0 z2) in 
+  let hD = fromDomain #c (as_nat c h0 h) in 
   felem_eval c h1 z3 /\ 
-  as_nat c h1 z3 == toDomain_ #c (z1D * z2D * hD % getPrime c)
+  as_nat c h1 z3 == toDomain #c (z1D * z2D * hD % getPrime c)
 
 
 
@@ -234,21 +224,21 @@ val lemma_point_add_if_0: #c: curve -> p: point c -> result: point c
   -> h2: mem {point_eval c h2 result}
   -> 
   Lemma (	
-    (point_x_as_nat c h2 result == point_x_as_nat c h0 p <==> fromDomain_ #c (point_x_as_nat c h2 result) == fromDomain_ #c (point_x_as_nat c h0 p)) /\
-    (point_x_as_nat c h2 result == point_x_as_nat c h0 p <==> fromDomain_ #c (point_x_as_nat c h2 result) == fromDomain_ #c (point_x_as_nat c h0 p)) /\
-    (point_x_as_nat c h2 result == point_x_as_nat c h0 p <==> fromDomain_ #c (point_x_as_nat c h2 result) == fromDomain_ #c (point_x_as_nat c h0 p)))
+    (point_x_as_nat c h2 result == point_x_as_nat c h0 p <==> fromDomain #c (point_x_as_nat c h2 result) == fromDomain #c (point_x_as_nat c h0 p)) /\
+    (point_x_as_nat c h2 result == point_x_as_nat c h0 p <==> fromDomain #c (point_x_as_nat c h2 result) == fromDomain #c (point_x_as_nat c h0 p)) /\
+    (point_x_as_nat c h2 result == point_x_as_nat c h0 p <==> fromDomain #c (point_x_as_nat c h2 result) == fromDomain #c (point_x_as_nat c h0 p)))
 
 
 let lemma_point_add_if_0 #c p result h0 h2 = 
-  lemmaFromDomain #c (point_x_as_nat c h0 p);
-  lemmaFromDomain #c (point_x_as_nat c h2 result);
+  lemmaFromDomain #c #DH (point_x_as_nat c h0 p);
+  lemmaFromDomain #c #DH (point_x_as_nat c h2 result);
   Hacl.Impl.P256.Math.lemma_modular_multiplication #c (point_x_as_nat c h0 p) (point_x_as_nat c h2 result);
 
-  lemmaFromDomain #c (point_y_as_nat c h0 p);
-  lemmaFromDomain #c (point_y_as_nat c h2 result);
+  lemmaFromDomain #c #DH (point_y_as_nat c h0 p);
+  lemmaFromDomain #c #DH (point_y_as_nat c h2 result);
   Hacl.Impl.P256.Math.lemma_modular_multiplication #c (point_y_as_nat c h0 p) (point_y_as_nat c h2 result);
 
-  lemmaFromDomain #c (point_z_as_nat c h2 result);
+  lemmaFromDomain #c #DH (point_z_as_nat c h2 result);
   Hacl.Impl.P256.Math.lemma_modular_multiplication #c (point_z_as_nat c h0 p) (point_z_as_nat c h2 result)
 
 
@@ -291,38 +281,37 @@ val lemma_point_add_if: #c: curve -> p: point c -> q: point c  -> result: point 
     let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
     let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
 
-    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+    let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
+    let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
+    let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
 
-    let rD = fromDomain_ #c (as_nat c h0 r) in  
-    let hD = fromDomain_ #c (as_nat c h0 h) in 
-    let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-    let u1D = fromDomain_ #c (as_nat c h0 u1) in  
+    let rD = fromDomain #c (as_nat c h0 r) in  
+    let hD = fromDomain #c (as_nat c h0 h) in 
+    let s1D = fromDomain #c (as_nat c h0 s1) in 
+    let u1D = fromDomain #c (as_nat c h0 u1) in  
     
     if qzD = 0 then 
       x3D == pxD /\ y3D == pyD /\ z3D == pzD 
     else if pzD = 0 then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
-      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
-      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime)  /\
-      z3 == toDomain_ #c (pzD * qzD * hD % prime))) 
- )
+      x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
+      y3 == toDomain #c (((hD * hD * u1D - fromDomain #c x3) * rD - s1D * hD * hD * hD) % prime)  /\
+      z3 == toDomain #c (pzD * qzD * hD % prime))))
 
 
 
 let lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h1 h2 = 
   let prime = getPrime c in 
-  let fromDomain = fromDomain_ #c in 
+  let fromDomain = fromDomain #c in 
   
   let x3, y3, z3 = point_x_as_nat c h2 result, point_y_as_nat c h2 result, point_z_as_nat c h2 result in
   let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
   let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
 
-  let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-  let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-  let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+  let pxD, pyD, pzD = fromDomain pX, fromDomain pY, fromDomain pZ in 
+  let qxD, qyD, qzD = fromDomain qX, fromDomain qY, fromDomain qZ in 
+  let x3D, y3D, z3D = fromDomain x3, fromDomain y3, fromDomain z3 in 
 
   lemma_point_add_if_0 #c p result h0 h2;
   lemma_point_add_if_0 #c q result h0 h2;
@@ -331,17 +320,17 @@ let lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h1 h2 =
   Hacl.Impl.P256.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 q);
   Hacl.Impl.P256.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 p);
 
-  lemmaFromDomain #c (point_z_as_nat c h0 p);
-  lemmaFromDomain #c (point_z_as_nat c h0 q);
+  lemmaFromDomain #c #DH (point_z_as_nat c h0 p);
+  lemmaFromDomain #c #DH (point_z_as_nat c h0 q);
   
-  assert(point_z_as_nat c h0 q = 0 <==> fromDomain_ #c (point_z_as_nat c h0 q) = 0);
-  assert(point_z_as_nat c h0 p = 0 <==> fromDomain_ #c (point_z_as_nat c h0 p) = 0);
+  assert(point_z_as_nat c h0 q = 0 <==> fromDomain (point_z_as_nat c h0 q) = 0);
+  assert(point_z_as_nat c h0 p = 0 <==> fromDomain (point_z_as_nat c h0 p) = 0);
 
  
-  let rD = fromDomain_ #c (as_nat c h0 r) in  
-  let hD = fromDomain_ #c (as_nat c h0 h) in 
-  let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-  let u1D = fromDomain_ #c (as_nat c h0 u1) in 
+  let rD = fromDomain (as_nat c h0 r) in  
+  let hD = fromDomain (as_nat c h0 h) in 
+  let s1D = fromDomain (as_nat c h0 s1) in 
+  let u1D = fromDomain (as_nat c h0 u1) in 
 
   let uhD = fromDomain (as_nat c h0 uh) in 
   let hCubeD = fromDomain (as_nat c h0 hCube) in 
@@ -365,7 +354,7 @@ let lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h1 h2 =
     (rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime;
   };
 
-  let x3D = fromDomain_ #c (point_x_as_nat c h2 result) in 
+  let x3D = fromDomain (point_x_as_nat c h2 result) in 
   let rh = s1D * hD * hD * hD in
   let lh = hD * hD * u1D in 
 
@@ -402,21 +391,14 @@ let lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h1 h2 =
     ((hD * hD * u1D - x3D) * rD - s1D * hD * hD * hD) % prime;}
 
 
+val lemma_ICuttable_point_add0: #c: curve  -> Lemma (
+  let len = getCoordinateLenU64 c in 
+  v (size 4 *! len) + v len <= v (size 8 *! len) /\
+  v (size 5 *! len) + v len <= v (size 8 *! len) /\
+  v (size 6 *! len) + v len <= v (size 8 *! len) /\
+  v (size 7 *! len) + v len <= v (size 8 *! len))
 
-
-
-val lemma_ICuttable_point_add0: #c: curve  -> Lemma
-  (
-    let len = getCoordinateLenU64 c in 
-    v (size 4 *! len) + v len <= v (size 8 *! len) /\
-    v (size 5 *! len) + v len <= v (size 8 *! len) /\
-    v (size 6 *! len) + v len <= v (size 8 *! len) /\
-    v (size 7 *! len) + v len <= v (size 8 *! len)
-  )
-
-let lemma_ICuttable_point_add0 #c = admit()
-
-
+let lemma_ICuttable_point_add0 #c = ()
 
 
 (* To combine them to one? *)
@@ -440,37 +422,49 @@ val l_main: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) ->
     gsub a (size 10 *! len) len == gsub a1 (size 2 *! len) len /\
     gsub a (size 11 *! len) len == gsub a1 (size 3 *! len) len)
 
-let l_main #c a h0 = admit()
+let l_main #c a h0 = 
+  let len = getCoordinateLenU64 c in 
+  let a0 = gsub a (size 0) (size 8 *! len) in 
+  let a1 = gsub a (size 8 *! len) (size 4 *! len) in 
+
+  assert(gsub a (size 0 *! len) len == gsub a0 (size 0) len);
+  assert(gsub a (size 1 *! len) len == gsub a0 (size 1 *! len) len);
+  assert(gsub a (size 2 *! len) len == gsub a0 (size 2 *! len) len);
+  assert(gsub a (size 3 *! len) len == gsub a0 (size 3 *! len) len);
+  assert(gsub a (size 4 *! len) len == gsub a0 (size 4 *! len) len);
+  assert(gsub a (size 5 *! len) len == gsub a0 (size 5 *! len) len);
+  assert(gsub a (size 6 *! len) len == gsub a0 (size 6 *! len) len);
+  assert(gsub a (size 7 *! len) len == gsub a0 (size 7 *! len) len);
+
+  assert(gsub a (size 8 *! len) len == gsub a1 (size 0) len);
+  assert(gsub a (size 9 *! len) len == gsub a1 (size 1 *! len) len);
+  assert(gsub a (size 10 *! len) len == gsub a1 (size 2 *! len) len);
+  assert(gsub a (size 11 *! len) len == gsub a1 (size 3 *! len) len)
 
 
 
-
-
-val l0: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> h0: mem -> p: point c -> q: point c ->
-  Lemma
-    (
-      let a0 = gsub a (size 0) (size 8 *! getCoordinateLenU64 c) in 
-      let a1 = gsub a (size 8 *! getCoordinateLenU64 c) (size 4 *! getCoordinateLenU64 c) in 
-      let h, r, uh, hCube = getHHCube #c a1 in 
-      let u1, u2, s1, s2 = getU1S2 a0 in 
-      
-      let  u1_, u2_, s1_, s2_, h_, r_, uh_, hCube_ = getU1HCube a in 
-
-      u1_ == u1 /\ u2_ == u2 /\ s1_ == s1 /\ s2_ == s2 /\ h_ == h /\ r_ == r /\ uh_ == uh /\ hCube_ == hCube)
+val l0: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> h0: mem -> p: point c 
+  -> q: point c ->
+  Lemma (
+    let a0 = gsub a (size 0) (size 8 *! getCoordinateLenU64 c) in 
+    let a1 = gsub a (size 8 *! getCoordinateLenU64 c) (size 4 *! getCoordinateLenU64 c) in 
+    let h, r, uh, hCube = getHHCube #c a1 in 
+    let u1, u2, s1, s2 = getU1S2 a0 in 
+    let  u1_, u2_, s1_, s2_, h_, r_, uh_, hCube_ = getU1HCube a in 
+    u1_ == u1 /\ u2_ == u2 /\ s1_ == s1 /\ s2_ == s2 /\ h_ == h /\ r_ == r /\ uh_ == uh /\ 
+      hCube_ == hCube)
 
 let l0 #c a h0 p q = l_main #c a h0 
 
-
-
-val lemma_disjoint_invariant: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) 
+val lemma_disjoint_invariant: #c: curve 
+  -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) 
   -> b: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
   Lemma 
-    (requires (disjoint a b))
-    (ensures (
-      let len = getCoordinateLenU64 c in 
-      let t4 = gsub a (size 8 *! len) (size 4 *! len) in 
-      let h, r, uh, hCube = getHHCube #c t4 in 
-      disjoint hCube b /\ disjoint uh b /\ disjoint r b /\ disjoint b h))
+  (requires (disjoint a b))
+  (ensures (let len = getCoordinateLenU64 c in 
+    let t4 = gsub a (size 8 *! len) (size 4 *! len) in 
+    let h, r, uh, hCube = getHHCube #c t4 in 
+    disjoint hCube b /\ disjoint uh b /\ disjoint r b /\ disjoint b h))
 
 
 let lemma_disjoint_invariant #c a b =

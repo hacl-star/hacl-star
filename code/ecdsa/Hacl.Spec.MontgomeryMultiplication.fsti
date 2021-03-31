@@ -14,76 +14,92 @@ open Lib.Sequence
 
 #set-options "--z3rlimit 40 --fuel 0 --ifuel 0"
 
-noextract
-val fromDomain_: #c: curve -> a: int -> Tot (a: nat {a < getPrime c})
+
+type mode = |DH |DSA
+
+let invert_mode (m: mode): Lemma
+  (requires True)
+  (ensures (inversion mode))
+  [SMTPat (mode) ] = allow_inversion (mode)
+
+let getModePrime (m: mode) (c: curve) : nat = match m with |DH -> getPrime c |DSA -> getOrder #c
+
+let point_prime_mm #c #m = p: point_nat {let (x, y, z) = p in x < getModePrime m c /\ y < getModePrime m c /\ 
+  z < getModePrime m c}
+
 
 noextract
-val fromDomainPoint: #c: curve -> a: point_nat_prime #c -> 
-  Tot (r: point_nat_prime #c {
+val fromDomain_: #c: curve -> #m: mode -> a: int -> Tot (a: nat {a < getModePrime m c})
+
+noextract
+val fromDomainPoint: #c: curve -> #m: mode -> a: point_prime_mm #c #m ->
+  Tot (r: point_prime_mm #c #m {
     let x, y, z = a in
     let x3, y3, z3 = r in 
-    x3 == fromDomain_ #c x /\ y3 == fromDomain_ #c y /\ z3 == fromDomain_ #c z}
-  )
+    x3 == fromDomain_ #c #m x /\ y3 == fromDomain_ #c #m y /\ z3 == fromDomain_ #c #m z})
+
 
 noextract
-val toDomain_: #c: curve -> a: int -> Tot nat
+val toDomain_: #c: curve -> #m: mode -> a: int -> Tot nat
 
-val lemmaFromDomain: #c: curve -> a: int -> Lemma (fromDomain_ #c a == a * modp_inv2 #c (pow2 (getPower c)) % getPrime c)
+val lemmaFromDomain: #c: curve -> #m: mode -> a: int -> Lemma (fromDomain_ #c #m a == a * modp_inv2_prime (pow2 (getPower c)) (getModePrime m c) % getModePrime m c)
 
-val lemmaToDomain: #c: curve -> a: int -> Lemma (toDomain_ #c a == a * (pow2 (getPower c)) % getPrime c)
+val lemmaToDomain: #c: curve -> #m: mode -> a: int -> Lemma (toDomain_ #c #m a == a * (pow2 (getPower c)) % getModePrime m c)
 
-val lemmaToDomainAndBackIsTheSame: #c: curve -> a: nat {a < getPrime c} ->
-  Lemma (fromDomain_ #c (toDomain_ #c a) == a)
-  [SMTPat (fromDomain_ #c (toDomain_ #c a))]
+val lemmaToDomainFromDomain: #c: curve -> #m: mode -> a: nat {a < getModePrime m c} ->
+  Lemma (fromDomain_ #c #m (toDomain_ #c #m a) == a)
+  [SMTPat (fromDomain_ #c #m (toDomain_ #c #m a))]
 
-val lemmaFromDomainToDomain: #c: curve -> a: nat {a < getPrime c} -> 
-  Lemma (toDomain_ #c (fromDomain_ #c a) == a)
+val lemmaFromDomainToDomain: #c: curve -> #m: mode -> a: nat {a < getModePrime m c} -> 
+  Lemma (toDomain_ #c #m (fromDomain_ #c #m a) == a)
 
-val lemmaFromDomainToDomainModuloPrime: #c: curve -> a: int -> 
-  Lemma (a % (getPrime c) == fromDomain_ #c (toDomain_ #c a))
+val lemmaFromDomainToDomainModuloPrime: #c: curve -> #m: mode -> a: int -> 
+  Lemma (a % (getModePrime m c) == fromDomain_ #c #m (toDomain_ #c #m a))
 
-val inDomain_mod_is_not_mod: #c: curve -> a: int ->
-  Lemma (toDomain_ #c a == toDomain_ #c (a % getPrime c))
+val inDomain_mod_is_not_mod: #c: curve -> #m: mode -> a: int ->
+  Lemma (toDomain_ #c #m a == toDomain_ #c #m (a % getModePrime m c))
 
-val multiplicationInDomainNat: #c: curve -> 
+val multiplicationInDomainNat: #c: curve ->
   #k: nat -> #l: nat ->
-  a: nat {a == toDomain_ #c k /\ a < getPrime c} -> 
-  b: nat {b == toDomain_ #c l /\ b < getPrime c} ->
-  Lemma (
-    let prime = getPrime c in 
+  #m: mode ->
+  a: nat {a == toDomain_ #c #m k /\ a < getModePrime m c} -> 
+  b: nat {b == toDomain_ #c #m l /\ b < getModePrime m c} ->
+  Lemma (let prime = getModePrime m c in 
     let multResult = a * b * modp_inv2_prime (pow2 (getPower c)) prime % prime in 
-    multResult == toDomain_ #c (k * l))
+    multResult == toDomain_ #c #m (k * l))
 
-val additionInDomain: #c: curve -> a: nat {a < getPrime c} -> b: nat {b < getPrime c} -> Lemma 
-  ((a + b) % getPrime c == toDomain_ #c (fromDomain_ #c a + fromDomain_ #c b))
+val additionInDomain: #c: curve -> #m: mode -> a: nat {a < getModePrime m c} -> b: nat {b < getModePrime m c} -> Lemma (
+  let prime = getModePrime m c in 
+  (a + b) % prime == toDomain_ #c #m (fromDomain_ #c #m a + fromDomain_ #c #m b))
   
-val substractionInDomain: #c: curve ->  a: nat {a < getPrime c} -> b: nat {b < getPrime c} -> Lemma 
-  ((a - b) % getPrime c == toDomain_ #c (fromDomain_ #c a - fromDomain_ #c b))
+val substractionInDomain: #c: curve -> #m: mode -> a: nat {a < getModePrime m c} -> b: nat {b < getModePrime m c} -> Lemma (
+  let prime = getModePrime m c in 
+  (a - b) % prime == toDomain_ #c #m (fromDomain_ #c #m a - fromDomain_ #c #m b))
 
 
-val _pow_step0: #c: curve -> p:nat_prime #c -> q:nat_prime #c -> tuple2 (nat_prime #c) (nat_prime #c)
+val _pow_step0: #c: curve -> #m: mode -> p: nat -> q: nat -> 
+  tuple2 (* (r0: nat {r0 < getModePrime m c}) (r1: nat {r1 < getModePrime m c}) *) nat nat
 
-val _pow_step1: #c: curve -> p:nat_prime #c -> q:nat_prime #c -> tuple2 (nat_prime #c) (nat_prime #c)
+val _pow_step1: #c: curve -> #m: mode -> p:nat -> q:nat -> tuple2 (*(r0: nat {r0 < getModePrime m c}) (r1: nat {r1 < getModePrime m c}) *) nat nat
 
-let swap (#c: curve) (p:nat_prime #c) (q:nat_prime #c) = q, p
+let swap p q = q, p
 
-val conditional_swap_pow: #c: curve -> i:uint64 -> p:nat_prime #c -> q:nat_prime #c -> tuple2 (nat_prime #c) (nat_prime #c)
+val conditional_swap_pow: #c: curve -> i:uint64 -> nat -> nat -> tuple2 nat nat
 
-val lemma_swaped_steps: #c: curve ->  p: nat_prime -> q: nat_prime ->
-  Lemma (
-    let afterSwapP, afterSwapQ = swap p q in
-    let p1, q1 = _pow_step0 afterSwapP afterSwapQ in
-    let p2, q2 = swap p1 q1 in
-    let r0, r1 = _pow_step1 #c p q in
-    p2 == r0 /\ q2 == r1)
+val lemma_swaped_steps: #c: curve -> #m: mode -> p: nat -> q: nat -> Lemma (
+  let afterSwapP, afterSwapQ = swap p q in
+  let p1, q1 = _pow_step0 #c #m afterSwapP afterSwapQ in
+  let p2, q2 = swap p1 q1 in
+  let r0, r1 = _pow_step1 #c #m p q in
+  p2 == r0 /\ q2 == r1)
 
-val _pow_step: #c: curve -> k: scalar_bytes #c -> i:nat{i < getPower c} 
-  -> before: tuple2 (nat_prime #c) (nat_prime #c)
-  -> tuple2 (nat_prime #c) (nat_prime #c)
+val _pow_step: #c: curve -> #m: mode -> k: scalar_bytes #c -> i:nat{i < v (getScalarLen c)} 
+  -> before: tuple2 (nat) (nat)
+  -> tuple2 (nat) (nat)
 
-val pow_spec: #c: curve -> k:scalar_bytes #c
+val pow_spec: #c: curve -> #m: mode -> k:scalar_bytes #c
   -> a:nat_prime #c
   -> Tot (r: nat_prime #c {r = pow a (Lib.ByteSequence.nat_from_bytes_le k) % getPrime c})
 
-val sq_root_spec: #c: curve -> a: nat_prime #c 
-  -> Tot (r: nat_prime #c {let prime = getPrime c in  r = pow a ((prime + 1) / 4) % prime})
+val sq_root_spec: #c: curve -> #m: mode -> a: nat_prime #c 
+  -> Tot (r: nat_prime #c {let prime = getModePrime m c in  r = pow a ((prime + 1) / 4) % prime})

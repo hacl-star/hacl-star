@@ -16,6 +16,7 @@ open Hacl.Lemmas.P256
 open FStar.Tactics
 open FStar.Tactics.Canon 
 
+open Hacl.Impl.EC.MontgomeryMultiplication
 open FStar.Mul
 
 open Lib.Loops
@@ -27,38 +28,32 @@ friend Hacl.Impl.ECDSA.MontgomeryMultiplication
 
 
 [@ CInline]
-val cswap: #c: curve ->  bit:uint64{v bit <= 1} -> p:felem c -> q:felem c
-  -> Stack unit
-    (requires fun h ->
-      as_nat c h p < prime /\ as_nat c h q < prime /\ 
-      live h p /\ live h q /\ (disjoint p q \/ p == q))
-    (ensures  fun h0 _ h1 ->
-      modifies (loc p |+| loc q) h0 h1 /\
-	(
-	  let (r0, r1) = Spec.ECDSA.conditional_swap #P256 bit (as_nat c h0 p) (as_nat c h0 q) in 
-	  let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
-	  let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
-	  if uint_v bit = 0 then r0 == as_nat c h0 p /\ r1 == as_nat c h0 q else r0 == as_nat c h0 q /\ r1 == as_nat c h0 p) /\
-	  as_nat c h1 p < prime /\ as_nat c h1 q < prime /\
-      (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
-      (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q))
+val cswap: #c: curve ->  bit: uint64{v bit <= 1} -> p: felem c -> q: felem c -> Stack unit
+  (requires fun h -> as_nat c h p < getOrder #c /\ as_nat c h q < getOrder #c /\ live h p /\ live h q /\ eq_or_disjoint p q)
+  (ensures  fun h0 _ h1 -> modifies (loc p |+| loc q) h0 h1 /\ as_nat c h1 p < getOrder #c /\ as_nat c h1 q < getOrder #c /\ (
+    let (r0, r1) = Spec.ECDSA.conditional_swap #c bit (as_nat c h0 p) (as_nat c h0 q) in 
+    let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
+    let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
+    if uint_v bit = 0 then r0 == as_nat c h0 p /\ r1 == as_nat c h0 q else r0 == as_nat c h0 q /\ r1 == as_nat c h0 p) /\
+    (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
+    (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q))
 
 
-let cswap bit p1 p2 =
+let cswap #c bit p1 p2 =
   let h0 = ST.get () in
   let mask = u64 0 -. bit in
   let open Lib.Sequence in 
   [@ inline_let]
-  let inv h1 (i:nat{i <= 4}) =
+  let inv h1 (i:nat{i <= v (getCoordinateLenU64 c)}) =
     (forall (k:nat{k < i}).
       if v bit = 1
       then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
       else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    (forall (k:nat{i <= k /\ k < 4}).
+    (forall (k:nat{i <= k /\ k < v (getCoordinateLenU64 c)}).
       (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
     modifies (loc p1 |+| loc p2) h0 h1 in
  
-  Lib.Loops.for 0ul 4ul inv
+  Lib.Loops.for 0ul (getCoordinateLenU64 c) inv
     (fun i ->
       let dummy = mask &. (p1.(i) ^. p2.(i)) in
       p1.(i) <- p1.(i) ^. dummy;
@@ -71,60 +66,56 @@ let cswap bit p1 p2 =
 
 
 inline_for_extraction noextract
-val montgomery_ladder_exponent_step0: #c: curve -> a: felem c-> b: felem c -> Stack unit
+val montgomery_ladder_exponent_step0: #c: curve -> a: felem c -> b: felem c -> Stack unit
   (requires fun h -> live h a /\ live h b /\ 
-    as_nat c h a < prime /\ as_nat c h b < prime /\ disjoint a b)
+    as_nat c h a < getOrder #c /\ as_nat c h b < getOrder #c /\ disjoint a b)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
-    as_nat c h1 a < prime /\ as_nat c h1 b < prime /\
-    (
-      let (r0D, r1D) = _exp_step0 #P256 (fromDomain_ (as_nat c h0 a)) (fromDomain_ (as_nat c h0 b)) in 
-      r0D == fromDomain_ (as_nat c h1 a) /\ r1D == fromDomain_ (as_nat c h1 b)
-    )
-)
+    as_nat c h1 a < getOrder #c /\ as_nat c h1 b < getOrder #c /\ (
+    let (r0D, r1D) = _exp_step0 #c (fromDomain_ #c #DSA (as_nat c h0 a)) (fromDomain_ #c #DSA (as_nat c h0 b)) in 
+    r0D == fromDomain_ #c #DSA (as_nat c h1 a) /\ r1D == fromDomain_ #c #DSA (as_nat c h1 b)))
 
-let montgomery_ladder_exponent_step0  #c a b = 
+let montgomery_ladder_exponent_step0 #c a b = 
     let h0 = ST.get() in 
-  montgomery_multiplication_ecdsa_module a b b;
-    lemmaToDomainFromDomain (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b) % prime);
-  montgomery_multiplication_ecdsa_module a a a ;
-    lemmaToDomainFromDomain (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 a) % prime)
+  montgomery_multiplication_buffer_dsa a b b;
+    lemmaToDomainFromDomain #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 b) % getOrder #c);
+  montgomery_multiplication_buffer_dsa a a a ;
+    lemmaToDomainFromDomain #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 a) % getOrder #c)
 
 
 inline_for_extraction noextract
-val montgomery_ladder_exponent_step: #c: curve -> a: felem c -> b: felem c -> scalar: glbuffer uint8 (size 32) ->   i:size_t{v i < 256} ->  Stack unit
-  (requires fun h -> live h a  /\ live h b /\ live h scalar /\ as_nat c h a < prime /\ as_nat c h b < prime /\ disjoint a b)
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1  /\
-    (
-      let a_ = fromDomain_ (as_nat c h0 a) in 
-      let b_ = fromDomain_ (as_nat c h0 b) in 
-      let (r0D, r1D) = _exp_step #c (as_seq h0 scalar) (uint_v i) (a_, b_) in 
-      r0D == fromDomain_ (as_nat c h1 a) /\ r1D == fromDomain_ (as_nat c h1 b) /\ 
-      as_nat c h1 a < prime /\ as_nat c h1 b < prime
-    ) 
-  )  
+val montgomery_ladder_exponent_step: #c: curve -> a: felem c -> b: felem c -> scalar: glbuffer uint8 (getScalarLenBytes c) 
+  -> i:size_t{v i < v (getScalarLen c)} -> 
+  Stack unit
+  (requires fun h -> live h a  /\ live h b /\ live h scalar /\ as_nat c h a < getOrder #c /\ as_nat c h b < getOrder #c /\
+    disjoint a b)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ (
+    let a_ = fromDomain_ #c #DSA (as_nat c h0 a) in 
+    let b_ = fromDomain_ #c #DSA (as_nat c h0 b) in 
+    let (r0D, r1D) = _exp_step #c (as_seq h0 scalar) (uint_v i) (a_, b_) in 
+    r0D == fromDomain_ #c #DSA (as_nat c h1 a) /\ r1D == fromDomain_ #c #DSA (as_nat c h1 b) /\ 
+    as_nat c h1 a < getOrder #c /\ as_nat c h1 b < getOrder #c))  
 
 let montgomery_ladder_exponent_step #c a b scalar i = 
     let h0 = ST.get() in 
-  let bit0 = (size 255) -. i in 
-  let bit = scalar_bit #P256 scalar bit0 in 
+  let bit0 = getScalarLen c -. 1ul -. i in 
+  let bit = scalar_bit #c scalar bit0 in 
   cswap bit a b;
   montgomery_ladder_exponent_step0 a b;
   cswap bit a b;
-  Spec.ECDSA.lemma_swaped_steps #P256 (fromDomain_ (as_nat c h0 a)) (fromDomain_ (as_nat c h0 b))
+  Spec.ECDSA.lemma_swaped_steps #c (fromDomain_ #c #DSA (as_nat c h0 a)) (fromDomain_ #c #DSA (as_nat c h0 b))
 
 
 inline_for_extraction noextract 
-val _montgomery_ladder_exponent: #c: curve -> a: felem c ->b: felem c ->  scalar: glbuffer uint8 (size 32) -> Stack unit
-  (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat c h a < prime /\ 
-    as_nat c h b < prime /\ disjoint a b /\disjoint a scalar /\ disjoint b scalar)
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
-    (
-      let a_ = fromDomain_ (as_nat c h0 a) in 
-      let b_ = fromDomain_ (as_nat c h0 b) in 
-      let (r0D, r1D) = _exponent_spec #P256 (as_seq h0 scalar) (a_, b_) in 
-      r0D == fromDomain_ (as_nat c h1 a) /\ r1D == fromDomain_ (as_nat c h1 b) /\
-      as_nat c h1 a < prime /\ as_nat c h1 b < prime )
-  )
+val _montgomery_ladder_exponent: #c: curve -> a: felem c -> b: felem c -> scalar: glbuffer uint8 (getScalarLenBytes c) -> 
+  Stack unit
+  (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat c h a < getOrder #c /\ as_nat c h b < getOrder #c /\
+    disjoint a b /\disjoint a scalar /\ disjoint b scalar)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ (
+    let a_ = fromDomain_ #c #DSA (as_nat c h0 a) in 
+    let b_ = fromDomain_ #c #DSA (as_nat c h0 b) in 
+    let (r0D, r1D) = _exponent_spec #c (as_seq h0 scalar) (a_, b_) in 
+    r0D == fromDomain_ #c #DSA (as_nat c h1 a) /\ r1D == fromDomain_ #c #DSA (as_nat c h1 b) /\
+    as_nat c h1 a < getOrder #c /\ as_nat c h1 b < getOrder #c))
 
   
 let _montgomery_ladder_exponent #c a b scalar = 

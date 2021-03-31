@@ -8,10 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Impl.EC.LowLevel 
-
-open Hacl.Impl.EC.Core
 open Hacl.Impl.EC.Exponent
-open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Impl.EC.Arithmetics
 
 open Hacl.Impl.P256.LowLevel.RawCmp
@@ -27,6 +24,10 @@ open Hacl.Impl.EC.Intro
 
 open FStar.Math.Lemmas
 
+
+open Hacl.Impl.EC.MontgomeryMultiplication
+open Hacl.Impl.EC.Core
+
 open FStar.Mul
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
@@ -38,7 +39,7 @@ val uploadA: #c: curve -> a: felem c -> Stack unit
   (ensures fun h0 _ h1 ->
     let prime = getPrime c in 
     modifies (loc a) h0 h1 /\ 
-    as_nat c h1 a == toDomain_ #c (aCoordinate #c % prime) /\
+    as_nat c h1 a == toDomain_ #c #DH (aCoordinate #c % prime) /\
     as_nat c h1 a < prime
   )
 
@@ -51,7 +52,7 @@ let uploadA #c a =
       upd a (size 3) (u64 18446744056529682436);
       
       let prime = getPrime c in 
-      lemmaToDomain #c (aCoordinate #c % prime);
+      lemmaToDomain #c #DH (aCoordinate #c % prime);
       assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256)
 
     |P384 -> 
@@ -64,7 +65,7 @@ val uploadB: #c: curve -> b: felem c -> Stack unit
   (ensures fun h0 _ h1 -> 
     let prime = getPrime c in 
     modifies (loc b) h0 h1 /\ as_nat c h1 b < prime /\ 
-    as_nat c h1 b == toDomain_ #c (bCoordinate #c)
+    as_nat c h1 b == toDomain_ #c #DH (bCoordinate #c)
   )
 
 let uploadB #c b = 
@@ -75,7 +76,7 @@ let uploadB #c b =
     upd b (size 2) (u64 16546823903870267094);
     upd b (size 3) (u64 15866188208926050356);
 
-    lemmaToDomain #c (bCoordinate #c);
+    lemmaToDomain #c #DH (bCoordinate #c);
     assert_norm (15608596021259845087 + 12461466548982526096 * pow2 64 + 16546823903870267094 * pow2 64 * pow2 64 + 15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (bCoordinate #P256 * pow2 256 % prime256))
   |P384 -> 
     admit()
@@ -86,8 +87,8 @@ val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 ->
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     as_nat c h1 result < prime256 /\
     (
-      let xD = fromDomain_ #c (as_nat c h0 x) in 
-      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + aCoordinate #P256 * xD + bCoordinate #P256) % prime256)) in 
+      let xD = fromDomain_ #c #DH (as_nat c h0 x) in 
+      let sqRootWithoutSign = sq_root_spec #c #DH (((xD * xD * xD + aCoordinate #P256 * xD + bCoordinate #P256) % prime256)) in 
       
       if sqRootWithoutSign  % pow2 1 = uint_v sign then
 	as_nat c h1 result = sqRootWithoutSign 
@@ -117,13 +118,13 @@ let computeYFromX #c x result sign =
 
   let h6 = ST.get() in 
   
-    lemmaFromDomain #c (as_nat c h6 aCoordinateBuffer);
+    lemmaFromDomain #c #DH (as_nat c h6 aCoordinateBuffer);
     assert_norm (0 * modp_inv2 #P256 (pow2 256) % prime256 == 0);
     square_root result result;
 
   let h7 = ST.get() in 
   
-    lemmaFromDomainToDomain #c (as_nat c h7 result);
+    lemmaFromDomainToDomain #c #DH (as_nat c h7 result);
     fromDomain result result; 
 
   let h8 = ST.get() in 
@@ -151,7 +152,7 @@ let computeYFromX #c x result sign =
     assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h9);
     pop_frame();
 
-  let x_ = fromDomain_ #c (as_nat c h0 x) in
+  let x_ = fromDomain_ #c #DH (as_nat c h0 x) in
 
   calc (==) {
     ((((x_ * x_ * x_ % prime256 + ((Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256)) % prime256) + Spec.ECC.Curves.bCoordinate #P256) % prime256);
@@ -239,7 +240,7 @@ let decompressionCompressedForm #c b result =
       else 
 	begin 
 	  toDomain #c t0 t0;
-	  lemmaToDomain #c (as_nat c h1 t0);
+	  lemmaToDomain #c #DH (as_nat c h1 t0);
 	    let h2 = ST.get() in 
       (* This is the function from Spec*)
 	    (* assert(as_nat c h2 t0 =  (toDomain_ #c (Lib.ByteSequence.nat_from_intseq_le (changeEndian #c (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x)))))); *)
@@ -247,12 +248,12 @@ let decompressionCompressedForm #c b result =
 	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in 
 	  logand_mask compressedIdentifier (u8 1) 1;
 	  computeYFromX #c t0 t1 identifierBit;
-	  lemmaToDomainAndBackIsTheSame #c (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
+	  lemmaToDomainAndBackIsTheSame #c #DH (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
 
 	    let h3 = ST.get() in 
 	    assert(    
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
-	      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + Spec.ECC.Curves.aCoordinate #P256 * xD + Spec.ECC.Curves.bCoordinate #P256) % prime256)) in 
+	      let sqRootWithoutSign = sq_root_spec #c #DH (((xD * xD * xD + Spec.ECC.Curves.aCoordinate #P256 * xD + Spec.ECC.Curves.bCoordinate #P256) % prime256)) in 
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 as_nat c h3 t1 = sqRootWithoutSign 
 	      else
@@ -271,7 +272,7 @@ let decompressionCompressedForm #c b result =
 	  
 	  assert(   
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
-	      let sqRootWithoutSign = sq_root_spec #c (((xD * xD * xD + Spec.ECC.Curves.aCoordinate #P256 * xD + Spec.ECC.Curves.bCoordinate #P256) % prime256)) in 
+	      let sqRootWithoutSign = sq_root_spec #c #DH (((xD * xD * xD + Spec.ECC.Curves.aCoordinate #P256 * xD + Spec.ECC.Curves.bCoordinate #P256) % prime256)) in 
 	      let to = as_seq h5 (gsub result (size 32) (size 32)) in 
 	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
 		 to == Lib.ByteSequence.nat_to_bytes_be 32 sqRootWithoutSign 

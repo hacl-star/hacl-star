@@ -4,29 +4,18 @@ open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-open Hacl.Impl.P256.Math 
-
 open Lib.IntTypes
 open Lib.Buffer
 
-open FStar.Math.Lemmas
 open FStar.Mul
 
 open Hacl.Spec.EC.Definition
-open Hacl.Lemmas.P256
-open Hacl.Impl.P256.LowLevel 
 open Spec.ECC
 open Spec.ECC.Curves
-open Lib.Loops
-
-open Hacl.Impl.P256.MM.Lemmas
-
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Hacl.Spec.MontgomeryMultiplication
-
+open Hacl.Impl.EC.LowLevel
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
-
 
 
 [@ CInline]
@@ -35,8 +24,8 @@ val exponent_p384: a: felem P384 -> result: felem P384 ->
   (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
     disjoint a tempBuffer /\ as_nat P384 h a < prime256)
   (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (
-    let k = fromDomain_ #P384 (as_nat P384 h0 a) in 
-    as_nat P384 h1 result =  toDomain_ #P384 (pow k (prime384 - 2) % prime256)))
+    let k = fromDomain #P384 (as_nat P384 h0 a) in 
+    as_nat P384 h1 result =  toDomain #P384 (pow k (prime384 - 2) % prime256)))
 
 
 let exponent_p384 t result tempBuffer = 

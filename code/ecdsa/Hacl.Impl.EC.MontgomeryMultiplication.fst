@@ -160,7 +160,7 @@ val montgomery_multiplication_reduction: #c: curve
     wide_as_nat c h t < prime * pow2 (getPower c) /\ live h result /\ eq_or_disjoint t result)))
   (ensures (fun h0 _ h1 -> modifies (loc result |+| loc t) h0 h1 /\ (let prime = getModePrime m c in   
     as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
-    as_nat c h1 result = fromDomain_ #c (wide_as_nat c h0 t))))
+    as_nat c h1 result = fromDomain_ #c #m (wide_as_nat c h0 t))))
 
 
 let montgomery_multiplication_reduction #c m t result = 
@@ -203,7 +203,7 @@ let montgomery_multiplication_reduction #c m t result =
   lemma_up_bound0 #c (wide_as_nat c h0 t) (wide_as_nat c h2 t); 
   reduction_prime_2prime_with_carry t result;
 
-  lemmaFromDomain #c (wide_as_nat c h0 t)
+  lemmaFromDomain #c #m (wide_as_nat c h0 t)
 
 
 let montgomery_multiplication_reduction_dh #c t result = montgomery_multiplication_reduction #c DH t result
@@ -217,7 +217,7 @@ val montgomery_multiplication_buffer_by_one: #c: curve -> m: mode -> a: felem c 
   (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
     let prime = getModePrime m c in  
     as_nat c h1 result = (as_nat c h0 a * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
-    as_nat c h1 result = fromDomain_ #c (as_nat c h0 a))))
+    as_nat c h1 result = fromDomain_ #c #m (as_nat c h0 a))))
 
 
 let montgomery_multiplication_buffer_by_one #c m a result = 
@@ -242,23 +242,13 @@ let montgomery_multiplication_buffer_by_one #c m a result =
   montgomery_multiplication_reduction m t result;
   pop_frame();
   
-  lemmaFromDomain #c (as_nat c h0 a)
+  lemmaFromDomain #c #m (as_nat c h0 a)
 
 
 let montgomery_multiplication_buffer_by_one_dh #c a result = montgomery_multiplication_buffer_by_one #c DH a result
 
 let montgomery_multiplication_buffer_by_one_dsa #c a result = montgomery_multiplication_buffer_by_one #c DSA a result
 
-
-val montgomery_multiplication_buffer: #c: curve -> m: mode -> a: felem c -> b: felem c -> result: felem c ->  
-  Stack unit
-  (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat c h a < getModePrime m c /\ 
-    as_nat c h b < getModePrime m c)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result < getModePrime m c /\ (
-    let prime = getModePrime m c in 
-    as_nat c h1 result = (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b) % prime) /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 b)))))
 
 let montgomery_multiplication_buffer #c m a b result = 
   push_frame();
@@ -270,21 +260,12 @@ let montgomery_multiplication_buffer #c m a b result =
   montgomery_multiplication_reduction #c m t result;
   pop_frame();
     let h1 = ST.get() in admit();
-    lemma_domain #c (as_nat c h0 a) (as_nat c h0 b) (as_nat c h1 result)
+    lemma_domain #c #m (as_nat c h0 a) (as_nat c h0 b) (as_nat c h1 result)
 
 let montgomery_multiplication_buffer_dh #c a b result = montgomery_multiplication_buffer #c DH a b result
 
 let montgomery_multiplication_buffer_dsa #c a b result = montgomery_multiplication_buffer #c DSA a b result
 
-
-val montgomery_square_buffer: #c: curve -> m: mode -> a: felem c -> result: felem c ->  
-  Stack unit
-  (requires (fun h -> live h a /\ as_nat c h a < getModePrime m c /\ live h result)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result < getModePrime m c /\ (
-    let prime = getModePrime m c in 
-    as_nat c h1 result = (as_nat c h0 a * as_nat c h0 a * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a) % prime) /\
-    as_nat c h1 result = toDomain_ #c (fromDomain_ #c (as_nat c h0 a) * fromDomain_ #c (as_nat c h0 a)))))
 
 let montgomery_square_buffer #c m a result = 
   push_frame();
@@ -296,8 +277,8 @@ let montgomery_square_buffer #c m a result =
   montgomery_multiplication_reduction #c m t result;
   pop_frame();
     let h1 = ST.get() in
-    admit();
-    lemma_domain #c (as_nat c h0 a) (as_nat c h0 a) (as_nat c h1 result)
+    lemma_domain #c #m (as_nat c h0 a) (as_nat c h0 a) (as_nat c h1 result)
+
 
 let montgomery_square_buffer_dh #c a result = montgomery_square_buffer #c DH a result
 
@@ -307,31 +288,31 @@ let montgomery_square_buffer_dsa #c a result = montgomery_square_buffer #c DSA a
 val fsquarePowN: #c: curve -> m: mode -> n: size_t -> a: felem c -> Stack unit 
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime m c)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
-    let k = fromDomain_ #c (as_nat c h0 a) in 
-    as_nat c h1 a < getModePrime m c /\ as_nat c h1 a = toDomain_ #c (pow k (pow2 (v n))))))
+    let k = fromDomain_ #c #m (as_nat c h0 a) in 
+    as_nat c h1 a < getModePrime m c /\ as_nat c h1 a = toDomain_ #c #m (pow k (pow2 (v n))))))
 
 let fsquarePowN #c m n a = 
   let h0 = ST.get() in 
-    lemmaFromDomainToDomain #c (as_nat c h0 a);  
+    lemmaFromDomainToDomain #c #m (as_nat c h0 a);  
   assert_norm (pow2 0 == 1); 
   let inv (h0: HyperStack.mem) (h1: HyperStack.mem) (i: nat) : Type0 = 
-    let k = fromDomain_ #c (as_nat c h0 a) in 
-    as_nat c h1 a = toDomain_ #c (pow k (pow2 i)) /\
+    let k = fromDomain_ #c #m (as_nat c h0 a) in 
+    as_nat c h1 a = toDomain_ #c #m (pow k (pow2 i)) /\
     as_nat c h1 a < getModePrime m c /\ live h1 a /\ modifies (loc a) h0 h1 in 
 
-  Hacl.Lemmas.P256.power_one_2 (fromDomain_ #c (as_nat c h0 a)); 
+  Hacl.Lemmas.P256.power_one_2 (fromDomain_ #c #m (as_nat c h0 a)); 
   
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
      montgomery_square_buffer m a a;
-     let k = fromDomain_ #c (as_nat c h0 a) in  
-     inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0_ a) * fromDomain_ #c (as_nat c h0_ a)); 
-     lemmaFromDomainToDomainModuloPrime #c (let k = fromDomain_ #c (as_nat c h0 a) in pow k (pow2 (v x)));
+     let k = fromDomain_ #c #m (as_nat c h0 a) in  
+     inDomain_mod_is_not_mod #c #m (fromDomain_ #c #m (as_nat c h0_ a) * fromDomain_ #c #m (as_nat c h0_ a)); 
+     lemmaFromDomainToDomainModuloPrime #c #m (let k = fromDomain_ #c #m (as_nat c h0 a) in pow k (pow2 (v x)));
 
      Spec.ECDSA.Lemmas.modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) (getModePrime m c); 
      pow_plus k (pow2 (v x)) (pow2 (v x )); 
      pow2_double_sum (v x); 
-     inDomain_mod_is_not_mod #c (pow k (pow2 (v x + 1))))
+     inDomain_mod_is_not_mod #c #m (pow k (pow2 (v x + 1))))
 
 
 let fsquarePowN_dh #c n a = fsquarePowN #c DH n a 

@@ -323,38 +323,38 @@ val lemma_mult_lt_center: a: nat -> b: nat -> c: pos -> d: pos -> Lemma
 let lemma_mult_lt_center a b c d = ()
 
 
-val lemma_domain: #c: curve -> a: nat {a < getPrime c} -> b: nat {b < getPrime c} ->  k: nat ->
+val lemma_domain: #c: curve -> #m: mode -> a: nat {a < getModePrime m c} -> b: nat {b < getModePrime m c} ->  k: nat ->
   Lemma 
-    (requires (k == (a *  b * modp_inv2_prime (pow2 (getPower c)) (getPrime c)) % getPrime c))
+    (requires (k == (a *  b * modp_inv2_prime (pow2 (getPower c)) (getModePrime m c)) % getModePrime m c))
     (ensures (
-      k == toDomain_ #c (fromDomain_ #c a * fromDomain_ #c b % getPrime c) /\
-      k == toDomain_ #c (fromDomain_ #c a * fromDomain_ #c b)))
+      k == toDomain_ #c #m (fromDomain_ #c #m a * fromDomain_ #c #m b % getModePrime m c) /\
+      k == toDomain_ #c #m (fromDomain_ #c #m a * fromDomain_ #c #m b)))
 
-let lemma_domain #c a b k = 
-  let prime = getPrime c in 
+let lemma_domain #c #m a b k = 
+  let prime = getModePrime m c in 
   let multResult = a * b * modp_inv2_prime (pow2 (getPower c)) prime % prime in 
 
   let mod = modp_inv2_prime (pow2 (getPower c)) prime in 
   
   calc (==) {
     a * b * mod % prime;
-    (==) {lemmaFromDomainToDomain #c multResult}
-    toDomain_ #c (fromDomain_ #c multResult);
-    (==) {lemmaFromDomain #c multResult}
-    toDomain_ #c ((a * b * mod  % prime) * mod % prime);
+    (==) {lemmaFromDomainToDomain #c #m multResult}
+    toDomain_ #c #m (fromDomain_ #c #m multResult);
+    (==) {lemmaFromDomain #c #m multResult}
+    toDomain_ #c #m ((a * b * mod  % prime) * mod % prime);
     (==) {lemma_mod_mul_distr_l (a * b * mod) mod prime}
-    toDomain_ #c (a * b * mod * mod % prime);
+    toDomain_ #c #m (a * b * mod * mod % prime);
     (==) {
       let open FStar.Tactics in 
       let open FStar.Tactics.Canon in 
       assert_by_tactic (a * b * mod * mod == (a * mod) * (b * mod)) canon}
-    toDomain_ #c ((a * mod) * (b * mod) % prime);
+    toDomain_ #c #m ((a * mod) * (b * mod) % prime);
     (==) {
       lemma_mod_mul_distr_l (a * mod) (b *  mod) prime; 
       lemma_mod_mul_distr_r (a * mod % prime) (b * mod) prime}
       
-    toDomain_ #c ((a * mod % prime) * (b * mod % prime) % prime);
-    (==) {lemmaFromDomain #c a; lemmaFromDomain #c b}
-    toDomain_ #c (fromDomain_ #c a * fromDomain_ #c b % prime);};
+    toDomain_ #c #m ((a * mod % prime) * (b * mod % prime) % prime);
+    (==) {lemmaFromDomain #c #m a; lemmaFromDomain #c #m b}
+    toDomain_ #c #m (fromDomain_ #c #m a * fromDomain_ #c #m b % prime);};
 
-    inDomain_mod_is_not_mod #c (fromDomain_ #c a * fromDomain_ #c b)
+    inDomain_mod_is_not_mod #c #m (fromDomain_ #c #m a * fromDomain_ #c #m b)

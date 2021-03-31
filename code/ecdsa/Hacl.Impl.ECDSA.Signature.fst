@@ -42,10 +42,13 @@ open Hacl.Hash.Definitions
 
 open Hacl.Impl.EC.Intro
 
+open Hacl.Impl.EC.MontgomeryMultiplication
+open Hacl.Spec.MontgomeryMultiplication
+
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
 
-let prime_p256_order = getOrder #P256
+let prime_p256_order #c = getOrder #c
 
 val ecdsa_signature_step12: 
   #c: curve 
@@ -69,35 +72,29 @@ let ecdsa_signature_step12 #c alg mLen m result =
   assert_norm (pow2 32 < pow2 125);
   push_frame(); 
     let h0 = ST.get() in 
-  let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a ->  hash_len a in
-  let mHash = create sz (u8 0) in    
-  
-  (* TO CHANGE! *)
-  (* Copy the mininum between the two *)
-  let sz: FStar.UInt32.t = (1000ul) in 
-  let cutHash = create sz (u8 0) in 
-
+  let sz_hash: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a -> hash_len a in
+    assume (v sz_hash + v (getCoordinateLenU c) < pow2 32);
+  let mHash = create (sz_hash +! getCoordinateLenU c) (u8 0) in 
+    let mHashHPart = sub mHash (size 0) sz_hash in 
+    let mHashRPart = sub mHash (size 0) (getCoordinateLenU c) in 
   begin
   match alg with 
-    |NoHash -> copy mHash m 
+    |NoHash -> copy mHashHPart m 
     |Hash a -> match a with 
-      |SHA2_256 -> hash_256 m mLen mHash
-      |SHA2_384 -> hash_384 m mLen mHash
-      |SHA2_512 -> hash_512 m mLen mHash 
+      |SHA2_256 -> hash_256 m mLen mHashHPart
+      |SHA2_384 -> hash_384 m mLen mHashHPart
+      |SHA2_512 -> hash_512 m mLen mHashHPart 
   end;
 
-  copy (sub cutHash (size 0) (size 32)) (sub mHash (size 0) (size 32));
-
-  (* let cutHash = sub mHash2 (size 0) (getScalarLen c) in  *)
-  toUint64ChangeEndian #c cutHash result;
+  toUint64ChangeEndian #c mHashRPart result;
+  reduction_prime_2prime_order result result;
 
   let h1 = ST.get() in 
- 
-  reduction_prime_2prime_order result result;
-(* 
+
   lemma_core_0 c result h1;
-  changeEndianLemma (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash)); 
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);  *)
+  admit();
+  changeEndianLemma #c (uints_from_bytes_be #U64 #_ #_ (as_seq h1 mHashRPart)); 
+  uints_from_bytes_be_nat_lemma #U64 #_ #(v (getCoordinateLenU64 c)) (as_seq h1 mHashRPart); 
   pop_frame()
 
 
@@ -107,25 +104,17 @@ let ecdsa_signature_step12 #c alg mLen m result =
 val ecdsa_signature_step45:
   c: curve
   -> x: felem c
-  -> k: lbuffer uint8 (size 32) 
-  -> tempBuffer: lbuffer uint64 (size 100) 
-  -> Stack uint64
-    (requires fun h -> 
-      live h x /\ live h k /\ live h tempBuffer /\ 
-      LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc k; loc x]
-    )
-    (ensures fun h0 r h1 -> 
-      modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
-      as_nat c h1 x < prime_p256_order /\ 
-      (
-	let (rxN, ryN, rzN), _ = montgomery_ladder_spec_left #c (as_seq h0 k) ((0,0,0), basePoint #P256) in 
-	let (xN, _, _) = _norm #P256 (rxN, ryN, rzN) in 
-	as_nat c h1 x == xN % prime_p256_order /\ 
-	(
-	  if as_nat c h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0
-	)
-      )
-    )
+  -> k: lbuffer uint8 (getScalarLenBytes c) 
+  -> tempBuffer: lbuffer uint64 (size 100) -> 
+  Stack uint64
+  (requires fun h -> live h x /\ live h k /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc k; loc x])
+  (ensures fun h0 r h1 -> modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
+    as_nat c h1 x < getOrder #c /\ (
+    let (rxN, ryN, rzN), _ = montgomery_ladder_spec_left #c (as_seq h0 k) ((0,0,0), basePoint #c) in 
+    let (xN, _, _) = _norm #c (rxN, ryN, rzN) in 
+    as_nat c h1 x == xN % getOrder #c /\ (
+    if as_nat c h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0)))
 
 let ecdsa_signature_step45 c x k tempBuffer = 
   push_frame();
@@ -139,12 +128,13 @@ let ecdsa_signature_step45 c x k tempBuffer =
 
 #pop-options
 
-val lemma_power_step6: kInv: nat -> Lemma 
-  (Spec.ECDSA.exponent_spec #P256 (fromDomain_ kInv) == toDomain_ (pow kInv (prime_p256_order - 2)))
+val lemma_power_step6: #c: curve -> kInv: nat -> Lemma 
+  (Spec.ECDSA.exponent_spec #c (fromDomain_ #c #DSA kInv) == toDomain_ #c #DSA (pow kInv (getOrder #c - 2)))
 
-let lemma_power_step6 kInv = 
-  let a = Spec.ECDSA.exponent_spec #P256 (fromDomain_ kInv) in 
-  lemmaFromDomain kInv;
+let lemma_power_step6 #c kInv = 
+  let a = Spec.ECDSA.exponent_spec #c (fromDomain_ #c #DSA kInv) in 
+  let order = getOrder #c in 
+  lemmaFromDomain #c #DSA kInv (*
 
   power_distributivity (kInv * modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 2) prime_p256_order;
   power_distributivity_2 kInv (modp_inv2_prime (pow2 256) prime_p256_order % prime_p256_order) (prime_p256_order - 2);
@@ -155,10 +145,10 @@ let lemma_power_step6 kInv =
   let inverse2_256 = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in 
   assert_norm(modp_inv2_prime (pow2 256) prime_p256_order = inverse2_256); 
   lemma_pow_mod_n_is_fpow prime_p256_order inverse2_256 (prime_p256_order - 2);
-  assert_norm(exp #prime_p256_order inverse2_256 (prime_p256_order - 2) == pow2 256 % prime_p256_order);
+  assert_norm(exp #prime_p256_order inverse2_256 (order - 2) == pow2 256 % order);
 
-  lemma_mod_mul_distr_r (pow kInv (prime_p256_order - 2)) (pow2 256) prime_p256_order;
-  lemmaToDomain (pow kInv (prime_p256_order - 2))
+  lemma_mod_mul_distr_r (pow kInv (order - 2)) (pow2 256) order;
+  lemmaToDomain (pow kInv (getOrder #c - 2)) *)
 
 
 val ecdsa_signature_step6: #c: curve -> result: felem c
@@ -167,33 +157,34 @@ val ecdsa_signature_step6: #c: curve -> result: felem c
   -> r: felem c
   -> da: felem  c
   -> Stack unit
-    (requires fun h -> 
+    (requires fun h ->  True (*
       live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
       as_nat c h kFelem < prime_p256_order /\ 
       as_nat c h z < prime_p256_order /\ 
       as_nat c h r < prime_p256_order /\ 
-      as_nat c h da < prime_p256_order
+      as_nat c h da < prime_p256_order *)
     )
     (ensures fun h0 _ h1 -> 
-      modifies (loc result) h0 h1 /\
-      as_nat c h1 result = (as_nat c h0 z + as_nat c h0 r * as_nat c h0 da) * pow (as_nat c h0 kFelem) (prime_p256_order - 2) % prime_p256_order
-    )
+      modifies (loc result) h0 h1  (*/\
+      as_nat c h1 result = (as_nat c h0 z + as_nat c h0 r * as_nat c h0 da) * pow (as_nat c h0 kFelem) (prime_p256_order - 2) % prime_p256_order *)
+    ) 
 
+open Hacl.Impl.MM.Exponent
 
 let ecdsa_signature_step6 #c result kFelem z r da = 
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
   push_frame();
-    let rda = create (size 4) (u64 0) in 
-    let zBuffer = create (size 4) (u64 0) in 
-    let kInv = create (size 4) (u64 0) in 
+    let rda = create (getCoordinateLenU64 c) (u64 0) in 
+    let zBuffer = create (getCoordinateLenU64 c) (u64 0) in 
+    let kInv = create (getCoordinateLenU64 c) (u64 0) in 
   let h0 = ST.get() in 
-    montgomery_multiplication_ecdsa_module r da rda;
+    montgomery_multiplication_buffer_dsa #c r da rda;
     fromDomainImpl z zBuffer;
     felem_add #c rda zBuffer zBuffer;  
-    copy kInv kFelem;
-    montgomery_ladder_exponent #c kInv;
-    montgomery_multiplication_ecdsa_module zBuffer kInv result;
+    copy kInv kFelem; (*
+    montgomery_ladder_power #c #DSA kInv; *)
+    montgomery_multiplication_buffer_dsa zBuffer kInv result;
   pop_frame()
       (*let br0 = as_nat c h0 z + as_nat c h0 r * as_nat c h0 da in
       let br1 = pow (as_nat c h0 kFelem) (prime_p256_order - 2) in 
@@ -239,12 +230,12 @@ val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
     disjoint privKeyAsFelem s /\
     disjoint k r /\
     disjoint r s /\   
-    as_nat c h privKeyAsFelem < prime_p256_order /\
+    as_nat c h privKeyAsFelem < getOrder #c /\
     as_nat c h s == 0 /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h k) < getOrder #c
   )
   (ensures fun h0 flag h1 -> 
-    modifies (loc r |+| loc s) h0 h1 /\
+    modifies (loc r |+| loc s) h0 h1 (* /\
     (
       assert_norm (pow2 32 < pow2 61); 
       assert_norm (pow2 32 < pow2 125);
@@ -263,7 +254,7 @@ val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
 	else 
 	  uint_v flag == 0
       )
-    )
+    ) *)
   )
 
 
@@ -307,9 +298,9 @@ val ecdsa_signature:
     live h result /\ live h m /\ live h privKey /\ live h k /\
     disjoint result m /\
     disjoint result privKey /\
-    disjoint result k /\
+    disjoint result k (*
     nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order
+    nat_from_bytes_be (as_seq h k) < prime_p256_order *)
   )
   (ensures fun h0 flag h1 -> 
     modifies (loc result) h0 h1 /\

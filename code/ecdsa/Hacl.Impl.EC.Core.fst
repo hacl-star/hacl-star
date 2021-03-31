@@ -111,12 +111,12 @@ let getPower2 c = pow2 (getPower c)
 val lemma_pointAtInfInDomain: #c: curve -> x: nat -> y: nat -> z: nat {z < getPrime c} -> 
   Lemma (
     isPointAtInfinity (x, y, z) == 
-    isPointAtInfinity ((fromDomain_ #c x), (fromDomain_ #c y), (fromDomain_ #c z)))
+    isPointAtInfinity ((fromDomain_ #c #DH x), (fromDomain_ #c #DH y), (fromDomain_ #c #DH z)))
 
 let lemma_pointAtInfInDomain #c x y z =
     assert_norm (modp_inv2 #P256 (getPower2 P256) % (getPrime P256) <> 0);
     assert_norm (modp_inv2 #P384 (getPower2 P384) % (getPrime P384) <> 0);
-  lemmaFromDomain #c z;
+  lemmaFromDomain #c #DH z;
     assert_norm (0 * modp_inv2 #P256 (getPower2 P256) % (getPrime P256) == 0);
     assert_norm (0 * modp_inv2 #P384 (getPower2 P384) % (getPrime P384) == 0);
   begin
@@ -254,9 +254,9 @@ val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point 
     let y1 = point_y_as_nat c h1 resultPoint in 
     let z1 = point_z_as_nat c h1 resultPoint in 
 
-    x1 == fromDomain_ #c (as_nat c h0 z2x) /\ 
-    y1 == fromDomain_ #c (as_nat c h0 z3y) /\ (
-    if Spec.ECC.isPointAtInfinity (fromDomain_ #c x0, fromDomain_ #c y0, fromDomain_ #c z0) 
+    x1 == fromDomain_ #c #DH (as_nat c h0 z2x) /\ 
+    y1 == fromDomain_ #c #DH (as_nat c h0 z3y) /\ (
+    if Spec.ECC.isPointAtInfinity (fromDomain_ #c #DH x0, fromDomain_ #c #DH y0, fromDomain_ #c #DH z0) 
     then 
       z1 == 0 
     else 
@@ -351,9 +351,8 @@ let norm #c p resultPoint tempBuffer =
     let h1 = ST.get() in 
 
   lemma_norm #c
-    (fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p))) 
+    (fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h0 p))) 
     (point_prime_to_coordinates c (as_seq h1 resultPoint))
-
 
 
 let normX #c p result tempBuffer = 
@@ -378,7 +377,7 @@ let normX #c p result tempBuffer =
 
   admit();
     let prime = getPrime c in 
-    power_distributivity (fromDomain_ #c (as_nat c h0 zf) * fromDomain_ #c (as_nat c h0 zf)) (prime - 2) prime
+    power_distributivity (fromDomain_ #c #DH (as_nat c h0 zf) * fromDomain_ #c #DH (as_nat c h0 zf)) (prime - 2) prime
 
 
 (* this piece of code is taken from Hacl.Curve25519 *)
@@ -427,11 +426,11 @@ val montgomery_ladder_step1: #c : curve ->  p: point c -> q: point c
       let r1Z = point_z_as_nat c h1 q in
 
       let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step1 #c
-	(fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ) 
-	(fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ) in 
+	(fromDomain_ #c #DH pX, fromDomain_ #c #DH pY, fromDomain_ #c #DH pZ) 
+	(fromDomain_ #c #DH qX, fromDomain_ #c #DH qY, fromDomain_ #c #DH qZ) in 
       
-      fromDomain_ #c r0X == rN0X /\ fromDomain_ #c r0Y == rN0Y /\ fromDomain_ #c r0Z == rN0Z /\
-      fromDomain_ #c r1X == rN1X /\ fromDomain_ #c r1Y == rN1Y /\ fromDomain_ #c r1Z == rN1Z
+      fromDomain_ #c #DH r0X == rN0X /\ fromDomain_ #c #DH r0Y == rN0Y /\ fromDomain_ #c #DH r0Z == rN0Z /\
+      fromDomain_ #c #DH r1X == rN1X /\ fromDomain_ #c #DH r1Y == rN1Y /\ fromDomain_ #c #DH r1Z == rN1Z
   ) 
 )
 
@@ -485,11 +484,11 @@ val montgomery_ladder_step: #c: curve -> #buf_type: buftype->
       let r1Z = point_z_as_nat c h1 q in
 
       let (rN0X, rN0Y, rN0Z), (rN1X, rN1Y, rN1Z) = _ml_step #c (as_seq h0 scalar) (uint_v i) (
-	(fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ), 
-	(fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ)) in 
+	(fromDomain_ #c #DH pX, fromDomain_ #c #DH pY, fromDomain_ #c #DH pZ), 
+	(fromDomain_ #c #DH qX, fromDomain_ #c #DH qY, fromDomain_ #c #DH qZ)) in 
       
-      fromDomain_ #c r0X == rN0X /\ fromDomain_ #c r0Y == rN0Y /\ fromDomain_ #c r0Z == rN0Z /\
-      fromDomain_ #c r1X == rN1X /\ fromDomain_ #c r1Y == rN1Y /\ fromDomain_ #c r1Z == rN1Z
+      fromDomain_ #c #DH r0X == rN0X /\ fromDomain_ #c #DH r0Y == rN0Y /\ fromDomain_ #c #DH r0Z == rN0Z /\
+      fromDomain_ #c #DH r1X == rN1X /\ fromDomain_ #c #DH r1Y == rN1Y /\ fromDomain_ #c #DH r1Z == rN1Z
     ) 
   )
 
@@ -538,12 +537,12 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype->  p: point c -> q: point
 
 
       (
-	let p1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 p)) in 
-	let q1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 q)) in 
+	let p1 = fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h1 p)) in 
+	let q1 = fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h1 q)) in 
 	let rN, qN = montgomery_ladder_spec_left #c(as_seq h0 scalar) 
 	  (
-	    fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 p)),  
-	    fromDomainPoint #c (point_prime_to_coordinates c (as_seq h0 q))
+	    fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h0 p)),  
+	    fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h0 q))
 	  ) in 
 	rN == p1 /\ qN == q1
 	)
@@ -563,8 +562,8 @@ let montgomery_ladder #c #a p q scalar tempBuffer =
 
   [@inline_let] 
   let acc (h:mem) : GTot (tuple2 point_nat_prime point_nat_prime) = 
-  (fromDomainPoint #c (point_prime_to_coordinates c (as_seq h p)),
-  fromDomainPoint #c (point_prime_to_coordinates c (as_seq h q)))  in 
+  (fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h p)),
+  fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h q)))  in 
   
   Lib.LoopCombinators.eq_repeati0 (getPower c) (spec_ml h0) (acc h0);
   [@inline_let]
@@ -596,12 +595,12 @@ val lemma_point_to_domain: #c: curve ->  h0: mem -> h1: mem
      point_x_as_nat c h0 p < getPrime c /\ 
      point_y_as_nat c h0 p < getPrime c /\
      point_z_as_nat c h0 p < getPrime c /\
-       point_x_as_nat c h1 result == toDomain_ #c (point_x_as_nat c h0 p) /\
-       point_y_as_nat c h1 result == toDomain_ #c (point_y_as_nat c h0 p) /\
-       point_z_as_nat c h1 result == toDomain_ #c (point_z_as_nat c h0 p) 
+       point_x_as_nat c h1 result == toDomain_ #c #DH (point_x_as_nat c h0 p) /\
+       point_y_as_nat c h1 result == toDomain_ #c #DH (point_y_as_nat c h0 p) /\
+       point_z_as_nat c h1 result == toDomain_ #c #DH (point_z_as_nat c h0 p) 
      )
    )
-   (ensures (fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 result)) == point_prime_to_coordinates c (as_seq h0 p)))
+   (ensures (fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h1 result)) == point_prime_to_coordinates c (as_seq h0 p)))
 
 let lemma_point_to_domain #c h0 h1 p result = ()
 
@@ -611,27 +610,27 @@ val lemma_pif_to_domain: #c: curve -> h: mem ->  p: point c -> Lemma
     point_x_as_nat c h p == 0 /\ 
     point_y_as_nat c h p == 0 /\ 
     point_z_as_nat c h p == 0))
-  (ensures (fromDomainPoint #c 
+  (ensures (fromDomainPoint #c #DH
     (point_prime_to_coordinates c (as_seq h p)) == 
     point_prime_to_coordinates c (as_seq h p)))
 
 let lemma_pif_to_domain #c h p = 
   let (x, y, z) = point_prime_to_coordinates c (as_seq h p) in 
-  let (x3, y3, z3) = fromDomainPoint #c (x, y, z) in 
-  lemmaFromDomain #c x;
-  lemmaFromDomain #c y;
-  lemmaFromDomain #c z;
+  let (x3, y3, z3) = fromDomainPoint #c #DH (x, y, z) in 
+  lemmaFromDomain #c #DH x;
+  lemmaFromDomain #c #DH y;
+  lemmaFromDomain #c #DH z;
   lemma_multiplication_not_mod_prime #c x; 
   lemma_multiplication_not_mod_prime #c y;
   lemma_multiplication_not_mod_prime #c z
 
 
 val lemma_coord: #c: curve -> h3: mem -> q: point c -> Lemma (
-   let (r0, r1, r2) = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h3 q)) in 
-	let xD = fromDomain_ #c (point_x_as_nat c h3 q) in 
-	let yD = fromDomain_ #c (point_y_as_nat c h3 q) in 
-	let zD = fromDomain_ #c (point_z_as_nat c h3 q) in 
-    r0 == xD /\ r1 == yD /\ r2 == zD)	
+   let (r0, r1, r2) = fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h3 q)) in 
+   let xD = fromDomain_ #c #DH (point_x_as_nat c h3 q) in 
+   let yD = fromDomain_ #c #DH (point_y_as_nat c h3 q) in 
+   let zD = fromDomain_ #c #DH (point_z_as_nat c h3 q) in 
+   r0 == xD /\ r1 == yD /\ r2 == zD)	
 
 let lemma_coord h3 q = ()
 
@@ -707,17 +706,14 @@ val uploadBasePoint: #c: curve -> p: point c -> Stack unit
     modifies (loc p) h0 h1 /\ 
     as_nat c h1 (gsub p (size 0) len) < prime /\ 
     as_nat c h1 (gsub p len len) < prime /\
-    as_nat c h1 (gsub p (size 2 *! len) len) < prime /\
-      (
-	let x1 = as_nat c h1 (gsub p (size 0) len) in 
-	let y1 = as_nat c h1 (gsub p len len) in 
-	let z1 = as_nat c h1 (gsub p (size 2 *! len) len) in 
+    as_nat c h1 (gsub p (size 2 *! len) len) < prime /\ (
+    
+    let x1 = as_nat c h1 (gsub p (size 0) len) in 
+    let y1 = as_nat c h1 (gsub p len len) in 
+    let z1 = as_nat c h1 (gsub p (size 2 *! len) len) in 
 
-	let baseX, baseY, baseZ = basePoint #c in 
-	fromDomain_ #c x1 == baseX /\ fromDomain_ #c y1 == baseY /\ fromDomain_ #c z1 == baseZ
-    )
-)
-
+    let baseX, baseY, baseZ = basePoint #c in 
+    fromDomain_ #c #DH x1 == baseX /\ fromDomain_ #c #DH y1 == baseY /\ fromDomain_ #c #DH z1 == baseZ))
 
 let uploadBasePoint #c p = 
   match c with
@@ -758,7 +754,7 @@ let uploadBasePoint #c p =
 (*
   assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 < prime256); 
     assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + pow2 64 * pow2 64 * 8789745728267363600 + pow2 64 * pow2 64 * pow2 64 * 1770019616739251654 = 11110593207902424140321080247206512405358633331993495164878354046817554469948); 
-  assert_norm(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 == fromDomain_ #P256 11110593207902424140321080247206512405358633331993495164878354046817554469948);
+  assert_norm(0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296 == fromDomain #P256 11110593207902424140321080247206512405358633331993495164878354046817554469948);
 *) 
   upd p (size 4) (u64 0xddf25357ce95560a);
   upd p (size 5) (u64 0x8b4ab8e4ba19e45c);
@@ -767,7 +763,7 @@ let uploadBasePoint #c p =
 (* 
   assert_norm(15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 < prime256);
   assert_norm (15992936863339206154 + pow2 64 * 10037038012062884956 + pow2 64 * pow2 64 * 15197544864945402661 + pow2 64 * pow2 64 * pow2 64 * 9615747158586711429 = 60359023176204190920225817201443260813112970217682417638161152432929735267850);
-  assert_norm (0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 == fromDomain_ #P256 60359023176204190920225817201443260813112970217682417638161152432929735267850);
+  assert_norm (0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5 == fromDomain #P256 60359023176204190920225817201443260813112970217682417638161152432929735267850);
   *)
   
   upd p (size 8) (u64 0x1);
@@ -777,7 +773,7 @@ let uploadBasePoint #c p =
   
   (* 
   assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 < prime256);
-  assert_norm (1 = fromDomain_ #P256 26959946660873538059280334323183841250350249843923952699046031785985);
+  assert_norm (1 = fromDomain #P256 26959946660873538059280334323183841250350249843923952699046031785985);
   assert_norm (1 + pow2 64 * 18446744069414584320 + pow2 64 * pow2 64 * 18446744073709551615 + pow2 64 * pow2 64 * pow2 64 * 4294967294 = 26959946660873538059280334323183841250350249843923952699046031785985)  *)
   admit()
 

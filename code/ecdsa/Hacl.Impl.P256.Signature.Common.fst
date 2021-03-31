@@ -21,7 +21,6 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
 
-open Hacl.Impl.EC.Core
 open Hacl.Impl.EC.Setup
 
 
@@ -33,6 +32,8 @@ open Hacl.Impl.EC.Arithmetics
 open Hacl.Impl.P256.LowLevel .RawCmp
 open Hacl.Spec.MontgomeryMultiplication
 friend Hacl.Spec.MontgomeryMultiplication
+
+open Hacl.Impl.EC.Core
 
 open Hacl.Impl.EC.Intro
 
@@ -66,7 +67,7 @@ inline_for_extraction noextract
 val y_2: #c: curve -> y: felem c -> r: felem c -> Stack unit
   (requires fun h -> as_nat c h y < getPrime c /\ live h y /\ live h r /\ eq_or_disjoint y r)
   (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ 
-    as_nat c h1 r == toDomain_ #c ((as_nat c h0 y) * (as_nat c h0 y) % getPrime c))
+    as_nat c h1 r == toDomain_ #c #DH ((as_nat c h0 y) * (as_nat c h0 y) % getPrime c))
 
 let y_2 #c y r = 
   toDomain #c y r;
@@ -77,7 +78,7 @@ inline_for_extraction noextract
 val upload_b_constant: #c: curve -> x: felem c -> Stack unit
   (requires fun h -> live h x)
   (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\ 
-    as_nat c h1 x == toDomain_ #c (bCoordinate #c) /\
+    as_nat c h1 x == toDomain_ #c #DH (bCoordinate #c) /\
     as_nat c h1 x < getPrime c
  )
 
@@ -125,8 +126,8 @@ val lemma_xcube2: #c: curve
   -> x_ : nat {x_ < getPrime c} 
   -> Lemma (
     let prime = getPrime c in 
-    toDomain_ #c (((((x_ * x_ * x_) - (3 * x_)) % prime) + bCoordinate #P256) % prime) == 
-    toDomain_ #c ((x_ * x_ * x_  + aCoordinate #P256 * x_ + bCoordinate #P256) % prime))
+    toDomain_ #c #DH (((((x_ * x_ * x_) - (3 * x_)) % prime) + bCoordinate #P256) % prime) == 
+    toDomain_ #c #DH ((x_ * x_ * x_  + aCoordinate #P256 * x_ + bCoordinate #P256) % prime))
 
 let lemma_xcube2 #c x_ = 
   let prime = getPrime c in 
@@ -139,7 +140,7 @@ val xcube_minus_x: #c: curve -> x: felem c -> r: felem c -> Stack unit
     modifies (loc r) h0 h1 /\
     (
       let x_ = as_nat c h0 x in 
-      as_nat c h1 r = toDomain_ #c ((x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % getPrime c)))
+      as_nat c h1 r = toDomain_ #c #DH ((x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % getPrime c)))
 
 let xcube_minus_x #c x r = 
   push_frame();
@@ -196,11 +197,11 @@ let isPointAtInfinityPublic #c p =
 
 val lemma_modular_multiplication_2_d: #c: curve -> 
   a:nat {a < getPrime c} -> b:nat {b < getPrime c } -> 
-  Lemma (toDomain_ #c a = toDomain_ #c b <==> a == b)
+  Lemma (toDomain_ #c #DH a = toDomain_ #c #DH b <==> a == b)
 
 let lemma_modular_multiplication_2_d #c a b = 
-   lemmaToDomain #c a;
-   lemmaToDomain #c b;
+   lemmaToDomain #c #DH a;
+   lemmaToDomain #c #DH b;
    match c with 
    |P256 -> lemma_modular_multiplication_p256_2 a b
    |P384 -> lemma_modular_multiplication_p384_2 a b

@@ -35,16 +35,15 @@ open Lib.ByteBuffer
 
 
 
-val toUint8: #c: curve -> i: felem c ->  o: lbuffer uint8 (getScalarLen c) -> Stack unit
+val toUint8: #c: curve -> i: felem c -> o: lbuffer uint8 (getCoordinateLenU c) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures fun h0 _ h1 -> 
-    modifies (loc o) h0 h1 /\ 
-      as_seq h1 o == Lib.ByteSequence.uints_to_bytes_be (as_seq h0 i))
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_seq h1 o == Lib.ByteSequence.uints_to_bytes_be (as_seq h0 i))
 
 let toUint8 #c i o =
   match c with
-  |P256 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 P256) o i
-  |P384 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 P384) o i
+  |P256 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 c) o i
+  |P384 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 c) o i
+  |_ -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 c) o i
 
 
 val changeEndian: #c: curve -> i: felem c -> Stack unit 
@@ -54,12 +53,12 @@ val changeEndian: #c: curve -> i: felem c -> Stack unit
     as_nat c h1 i < pow2 (getPower c)) 
 
 
-val toUint64ChangeEndian: #c: curve -> i:lbuffer uint8 (getScalarLen c) -> o: felem c -> Stack unit
+val toUint64ChangeEndian: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 ->
-    modifies (loc o) h0 h1  /\
+  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
     as_seq h1 o == Hacl.Spec.EC.Definition.changeEndian (
-      Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
+    Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
+
 
 let changeEndian #c b =
   let h0 = ST.get() in 

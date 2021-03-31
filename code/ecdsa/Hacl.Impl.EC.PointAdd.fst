@@ -69,9 +69,9 @@ val _move_from_jacobian_coordinates: #c: curve -> u1: felem c -> u2: felem c ->
   s1: felem c -> s2: felem c -> p: point c -> q: point c -> 
   tempBuffer4: lbuffer uint64 (size 4 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h ->  
-    live h u1 /\ live h u2 /\ live h s1 /\ live h s2 /\ live h tempBuffer4 /\ live h p /\ live h q /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer4; loc p; loc q; loc u1; loc u2; loc s1; loc s2] /\ 
-    point_eval c h p /\ point_eval c h q)
+    live h u1 /\ live h u2 /\ live h s1 /\ live h s2 /\ live h tempBuffer4 /\ live h p /\ 
+    live h q /\ point_eval c h p /\ point_eval c h q /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer4; loc p; loc q; loc u1; loc u2; loc s1; loc s2])
   (ensures fun h0 _ h1 ->  
     modifies (loc u1 |+| loc u2 |+| loc s1 |+| loc s2 |+| loc tempBuffer4) h0 h1 /\
     u1Invariant #c h0 h1 u1 p q /\
@@ -115,11 +115,9 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
 
   let prime = getPrime c in 
   
-  let fromDomain = fromDomain_ #c in 
-  let toDomain = toDomain_ #c in 
-  
+  let fromDomain = fromDomain #c in 
+  let toDomain = toDomain #c in   
   let as_nat = as_nat c in 
-
 
   let pxD = fromDomain (as_nat h0 pX) in 
   let qxD = fromDomain (as_nat h0 qX) in 
@@ -127,8 +125,8 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
   let pyD = fromDomain (as_nat h0 pY) in 
   let qyD = fromDomain (as_nat h0 qY) in 
 
-  let pzD = fromDomain_ #c (as_nat h0 pZ) in 
-  let qzD = fromDomain_ #c (as_nat h0 qZ) in 
+  let pzD = fromDomain (as_nat h0 pZ) in 
+  let qzD = fromDomain (as_nat h0 qZ) in 
 
 
   calc (==)
@@ -228,35 +226,34 @@ let _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 t4 =
   montgomery_multiplication_buffer_dh temp h hCube;
 
   let prime = getPrime c in 
-  lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h1 h) * fromDomain_ #c (as_nat c h1 h)) (fromDomain_ #c (as_nat c h1 u1)) prime;
-  lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h1 h) * fromDomain_ #c (as_nat c h1 h)) (fromDomain_ #c (as_nat c h1 h)) prime
+  lemma_mod_mul_distr_l (fromDomain #c (as_nat c h1 h) * fromDomain #c (as_nat c h1 h)) (fromDomain #c (as_nat c h1 u1)) prime;
+  lemma_mod_mul_distr_l (fromDomain #c (as_nat c h1 h) * fromDomain #c (as_nat c h1 h)) (fromDomain #c (as_nat c h1 h)) prime
 
 
-val compute_common_params_point_add: #c: curve -> t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
+val compute_common_params_point_add: #c: curve 
+  -> t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
   Stack unit 
-  (requires fun h0 ->
-    live h0 t12 /\ (
+  (requires fun h0 -> live h0 t12 /\ (
     let u1, u2, s1, s2, _, _, _, _ = getU1HCube t12 in  
     felem_eval c h0 u1 /\ felem_eval c h0 u2 /\ felem_eval c h0 s1 /\ felem_eval c h0 s2))
-    (ensures fun h0 _ h1 -> 
-      let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube t12 in 
-
-      modifies (loc t12) h0 h1 /\
-      as_nat c h0 u1 == as_nat c h1 u1 /\
-      as_nat c h0 u2 == as_nat c h1 u2 /\
-      as_nat c h0 s1 == as_nat c h1 s1 /\
-      as_nat c h0 s2 == as_nat c h1 s2 /\
-
-      hInvariant #c h1 h u1 u2 /\
-      rInvariant #c h1 r s1 s2 /\
-      uhInvariant #c h1 uh h u1 /\
-      hCubeInvariant #c h1 hCube h)
+  (ensures fun h0 _ h1 -> 
+    let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube t12 in 
+    modifies (loc t12) h0 h1 /\
+    as_nat c h0 u1 == as_nat c h1 u1 /\
+    as_nat c h0 u2 == as_nat c h1 u2 /\
+    as_nat c h0 s1 == as_nat c h1 s1 /\
+    as_nat c h0 s2 == as_nat c h1 s2 /\
+    
+    hInvariant #c h1 h u1 u2 /\
+    rInvariant #c h1 r s1 s2 /\
+    uhInvariant #c h1 uh h u1 /\
+    hCubeInvariant #c h1 hCube h)
 
 
 let compute_common_params_point_add #c t12 =
   [@inline_let]
   let len = getCoordinateLenU64 c in
-  lemma_ICuttable_common #c;
+  lemma_ICuttable_common #c; 
 
   let t4 = sub t12 (size 0) (size 4 *! len) in 
 
@@ -279,10 +276,8 @@ val _computeX3_point_add: #c : curve -> x3: felem c -> hCube: felem c -> uh: fel
   Stack unit 
   (requires fun h0 -> 
     live h0 x3 /\ live h0 hCube /\ live h0 uh /\ live h0 r /\ live h0 r /\ live h0 t3 /\
-    
     disjoint hCube t3 /\  disjoint uh t3 /\  disjoint x3 t3 /\ disjoint r t3 /\ 
     disjoint x3 r /\ disjoint x3 hCube /\ disjoint x3 uh /\
-    
     felem_eval c h0 hCube /\ felem_eval c h0 uh /\ felem_eval c h0 r)
   (ensures fun h0 _ h1 -> 
     modifies (loc x3 |+| loc t3) h0 h1 /\ x3Invariant #c h0 h1 x3 r hCube uh)
@@ -306,8 +301,8 @@ let _computeX3_point_add #c x3 hCube uh r t3 =
   let r = as_nat c h0 r in 
 
   let as_nat = as_nat c in 
-  let toDomain = toDomain_ #c in 
-  let fromDomain = fromDomain_ #c in 
+  let toDomain = toDomain #c in 
+  let fromDomain = fromDomain #c in 
   
   calc (==)
   {
@@ -333,8 +328,7 @@ val computex3_point_add: #c : curve -> hCube: felem c -> uh: felem c ->
   (ensures fun h0 _ h1 -> 
     let x3 = gsub t5 (size 0) (getCoordinateLenU64 c) in 
     modifies (loc t5) h0 h1 /\ 
-    x3Invariant #c h0 h1 x3 r hCube uh
-  )
+    x3Invariant #c h0 h1 x3 r hCube uh)
 
 
 let computex3_point_add #c hCube uh r t4 = 
@@ -353,10 +347,7 @@ val _computeY3_point_add: #c: curve -> y3: felem c -> s1: felem c ->
   Stack unit 
     (requires fun h -> 
       live h y3 /\ live h s1 /\ live h hCube /\ live h uh /\ live h uh /\ live h x3_out /\ live h r /\ live h t3 /\
-      
-      disjoint uh t3 /\
-      disjoint x3_out t3 /\
-      disjoint y3 t3 /\
+      disjoint uh t3 /\ disjoint x3_out t3 /\  disjoint y3 t3 /\
       disjoint r t3 /\
       disjoint s1 t3 /\
       disjoint hCube t3 /\ 
@@ -389,23 +380,23 @@ let _computeY3_point_add #c y3 s1 hCube uh x3 r t3 =
 
   let prime = getPrime c in
 
-  let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-  let hCubeD = fromDomain_ #c (as_nat c h0 hCube) in 
-  let uhD = fromDomain_ #c (as_nat c h0 uh) in 
-  let x3D = fromDomain_ #c (as_nat c h0 x3) in 
-  let rD = fromDomain_ #c (as_nat c h0 r) in 
+  let s1D = fromDomain #c (as_nat c h0 s1) in 
+  let hCubeD = fromDomain #c (as_nat c h0 hCube) in 
+  let uhD = fromDomain #c (as_nat c h0 uh) in 
+  let x3D = fromDomain #c (as_nat c h0 x3) in 
+  let rD = fromDomain #c (as_nat c h0 r) in 
 
   calc (==)
   {
-    toDomain_ #c (((uhD - x3D) % prime * rD % prime  - (s1D * hCubeD % prime)) % getPrime c);
+    toDomain #c (((uhD - x3D) % prime * rD % prime  - (s1D * hCubeD % prime)) % getPrime c);
     (==) {lemma_mod_mul_distr_l (uhD - x3D) rD prime}
-    toDomain_ #c (((uhD - x3D) * rD % prime  - (s1D * hCubeD % prime)) % getPrime c);
+    toDomain #c (((uhD - x3D) * rD % prime  - (s1D * hCubeD % prime)) % getPrime c);
     (==) {_ by (canon())}
-    toDomain_ #c (((uhD - x3D) * rD % prime  - s1D * hCubeD % prime) % getPrime c);
+    toDomain #c (((uhD - x3D) * rD % prime  - s1D * hCubeD % prime) % getPrime c);
     (==) {lemma_mod_sub_distr ((uhD - x3D) * rD % prime) (s1D * hCubeD) prime}
-    toDomain_ #c (((uhD - x3D) * rD % prime - s1D * hCubeD) % getPrime c);
+    toDomain #c (((uhD - x3D) * rD % prime - s1D * hCubeD) % getPrime c);
     (==) {lemma_mod_add_distr (-s1D * hCubeD) ((uhD - x3D) * rD) prime}
-    toDomain_ #c (((uhD - x3D) * rD - s1D * hCubeD) % getPrime c);
+    toDomain #c (((uhD - x3D) * rD - s1D * hCubeD) % getPrime c);
   }
 
 
@@ -465,9 +456,9 @@ let __computeZ3_point_add #c z3 z1 z2 h tempBuffer =
 
   calc (==)
   {
-    toDomain_ #c ((fromDomain_ #c (as_nat c h0 z1) * fromDomain_ #c (as_nat c h0 z2) % getPrime c) * fromDomain_ #c (as_nat c h0 h) % getPrime c);
-    (==) {lemma_mod_mul_distr_l (fromDomain_ #c (as_nat c h0 z1) * fromDomain_ #c (as_nat c h0 z2)) (fromDomain_ #c (as_nat c h0 h)) (getPrime c)}
-    toDomain_ #c (fromDomain_ #c (as_nat c h0 z1) * fromDomain_ #c (as_nat c h0 z2) * fromDomain_ #c (as_nat c h0 h) % getPrime c);}
+    toDomain #c ((fromDomain #c (as_nat c h0 z1) * fromDomain #c (as_nat c h0 z2) % getPrime c) * fromDomain #c (as_nat c h0 h) % getPrime c);
+    (==) {lemma_mod_mul_distr_l (fromDomain #c (as_nat c h0 z1) * fromDomain #c (as_nat c h0 z2)) (fromDomain #c (as_nat c h0 h)) (getPrime c)}
+    toDomain #c (fromDomain #c (as_nat c h0 z1) * fromDomain #c (as_nat c h0 z2) * fromDomain #c (as_nat c h0 h) % getPrime c);}
 
 
 inline_for_extraction noextract 
@@ -628,14 +619,14 @@ val __point_add_if_second_branch_impl: #c: curve -> result: point c
     let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
     let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
 
-    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+    let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
+    let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
+    let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
 
-    let rD = fromDomain_ #c (as_nat c h0 r) in  
-    let hD = fromDomain_ #c (as_nat c h0 h) in 
-    let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-    let u1D = fromDomain_ #c (as_nat c h0 u1) in  
+    let rD = fromDomain #c (as_nat c h0 r) in  
+    let hD = fromDomain #c (as_nat c h0 h) in 
+    let s1D = fromDomain #c (as_nat c h0 s1) in 
+    let u1D = fromDomain #c (as_nat c h0 u1) in  
 
     point_eval c h1 result /\ (
     if qzD = 0 then 
@@ -643,9 +634,9 @@ val __point_add_if_second_branch_impl: #c: curve -> result: point c
     else if pzD = 0 then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
-      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
-      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
-      z3 == toDomain_ #c (pzD * qzD * hD % prime))))
+      x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
+      y3 == toDomain #c (((hD * hD * u1D - fromDomain #c x3) * rD - s1D * hD * hD * hD) % prime) /\
+      z3 == toDomain #c (pzD * qzD * hD % prime))))
 
 
 
@@ -693,14 +684,14 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c
     let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
     let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
 
-    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+    let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
+    let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
+    let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
 
-    let rD = fromDomain_ #c (as_nat c h0 r) in  
-    let hD = fromDomain_ #c (as_nat c h0 h) in 
-    let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-    let u1D = fromDomain_ #c (as_nat c h0 u1) in  
+    let rD = fromDomain #c (as_nat c h0 r) in  
+    let hD = fromDomain #c (as_nat c h0 h) in 
+    let s1D = fromDomain #c (as_nat c h0 s1) in 
+    let u1D = fromDomain #c (as_nat c h0 u1) in  
 
     point_eval c h1 result /\ (
     if qzD = 0 then 
@@ -708,9 +699,9 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c
     else if pzD = 0 then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
-      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
-      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
-      z3 == toDomain_ #c (pzD * qzD * hD % prime))))
+      x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
+      y3 == toDomain #c (((hD * hD * u1D - fromDomain #c x3) * rD - s1D * hD * hD * hD) % prime) /\
+      z3 == toDomain #c (pzD * qzD * hD % prime))))
 
 
 let _point_add_if_second_branch_impl #c result p q x3y3z3u1u2s1s2 r h uh hCube t5 = 
@@ -761,14 +752,14 @@ val _point_add_if_second_branch_impl0: #c: curve -> result: point c
     let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
     let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
 
-    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+    let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
+    let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
+    let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
 
-    let rD = fromDomain_ #c (as_nat c h0 r) in  
-    let hD = fromDomain_ #c (as_nat c h0 h) in 
-    let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-    let u1D = fromDomain_ #c (as_nat c h0 u1) in  
+    let rD = fromDomain #c (as_nat c h0 r) in  
+    let hD = fromDomain #c (as_nat c h0 h) in 
+    let s1D = fromDomain #c (as_nat c h0 s1) in 
+    let u1D = fromDomain #c (as_nat c h0 u1) in  
 
     point_eval c h1 result /\ (
     if qzD = 0 then 
@@ -776,9 +767,9 @@ val _point_add_if_second_branch_impl0: #c: curve -> result: point c
     else if pzD = 0 then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
-      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
-      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
-      z3 == toDomain_ #c (pzD * qzD * hD % prime))))
+      x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
+      y3 == toDomain #c (((hD * hD * u1D - fromDomain  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
+      z3 == toDomain #c (pzD * qzD * hD % prime))))
 
 
 let _point_add_if_second_branch_impl0 #c result p q x3y3z3u1u2s1s2 rhuhhCube tempBuffer5 = 
@@ -821,14 +812,14 @@ val _point_add_if_second_branch_impl1: #c: curve -> result: point c
     let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
     let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
 
-    let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-    let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-    let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+    let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
+    let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
+    let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
 
-    let rD = fromDomain_ #c (as_nat c h0 r) in  
-    let hD = fromDomain_ #c (as_nat c h0 h) in 
-    let s1D = fromDomain_ #c (as_nat c h0 s1) in 
-    let u1D = fromDomain_ #c (as_nat c h0 u1) in  
+    let rD = fromDomain #c (as_nat c h0 r) in  
+    let hD = fromDomain #c (as_nat c h0 h) in 
+    let s1D = fromDomain #c (as_nat c h0 s1) in 
+    let u1D = fromDomain #c (as_nat c h0 u1) in  
 
     point_eval c h1 result /\ (
     if qzD = 0 then 
@@ -836,9 +827,9 @@ val _point_add_if_second_branch_impl1: #c: curve -> result: point c
     else if pzD = 0 then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
-      x3 == toDomain_ #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
-      y3 == toDomain_ #c (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
-      z3 == toDomain_ #c (pzD * qzD * hD % prime))))
+      x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
+      y3 == toDomain #c (((hD * hD * u1D - fromDomain  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
+      z3 == toDomain #c (pzD * qzD * hD % prime))))
 
 
 
@@ -908,9 +899,9 @@ let point_add #c p q result tempBuffer =
   let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
   let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
 
-  let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-  let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-  let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in 
+  let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
+  let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
+  let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
 
 
   calc (==)
@@ -959,9 +950,9 @@ let point_add #c p q result tempBuffer =
 
   calc (==)
   {
-    (((hD * hD * u1D - fromDomain_  #c x3) * rD - s1D * hD * hD * hD) % prime);
+    (((hD * hD * u1D - fromDomain  #c x3) * rD - s1D * hD * hD * hD) % prime);
     (==) {_ by (canon())}
-    (rD * (u1D * (hD * hD) - fromDomain_  #c x3) - s1D * (hD * hD * hD)) % prime;
+    (rD * (u1D * (hD * hD) - fromDomain  #c x3) - s1D * (hD * hD * hD)) % prime;
   };
 
   calc (==)

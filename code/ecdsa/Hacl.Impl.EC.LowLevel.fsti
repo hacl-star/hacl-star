@@ -119,6 +119,9 @@ val reduction_prime_2prime: #c: curve -> x: felem c -> result: felem c ->
     (ensures fun h0 _ h1 -> 
       modifies (loc result) h0 h1 /\ as_nat c h1 result == as_nat c h0 x % getPrime c)
 
+let fromDomain #c a = fromDomain_ #c #DH a
+
+let toDomain #c a = toDomain_ #c #DH a
 
 val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c -> 
   Stack unit
@@ -128,7 +131,7 @@ val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
     (ensures (fun h0 _ h1 -> 
       modifies (loc out) h0 h1 /\ 
       as_nat c h1 out == (as_nat c h0 a + as_nat c h0 b) % getPrime c /\
-      as_nat c h1 out == toDomain_ #c((fromDomain_ #c (as_nat c h0 a) + fromDomain_ #c (as_nat c h0 b)) % getPrime c)))
+      as_nat c h1 out == toDomain #c((fromDomain #c (as_nat c h0 a) + fromDomain #c (as_nat c h0 b)) % getPrime c)))
 
 
 val felem_double: #c: curve -> a: felem c -> out: felem c -> 
@@ -138,18 +141,17 @@ val felem_double: #c: curve -> a: felem c -> out: felem c ->
     (ensures (fun h0 _ h1 -> 
       modifies (loc out) h0 h1 /\ 
       as_nat c h1 out == (2 * as_nat c h0 a) % getPrime c /\
-      as_nat c h1 out == toDomain_ #c (2 * fromDomain_ #c (as_nat c h0 a) % getPrime c)))
+      as_nat c h1 out == toDomain #c (2 * fromDomain #c (as_nat c h0 a) % getPrime c)))
 
 
 val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c -> 
   Stack unit 
-    (requires (fun h0 -> 
-      live h0 out /\ live h0 a /\ live h0 b /\ 
-      as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
-    (ensures (fun h0 _ h1 -> 
-      modifies (loc out) h0 h1 /\ 
-      as_nat c h1 out == (as_nat c h0 a - as_nat c h0 b) % getPrime c /\
-      as_nat c h1 out == toDomain_ #c ((fromDomain_ #c (as_nat c h0 a) - fromDomain_ #c (as_nat c h0 b)) % getPrime c)))    
+  (requires (fun h0 -> 
+    live h0 out /\ live h0 a /\ live h0 b /\ 
+    as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
+    as_nat c h1 out == (as_nat c h0 a - as_nat c h0 b) % getPrime c /\
+    as_nat c h1 out == toDomain #c ((fromDomain #c (as_nat c h0 a) - fromDomain #c (as_nat c h0 b)) % getPrime c)))    
 
 
 val mul: #c: curve -> f: felem c -> r: felem c -> out: widefelem c -> 
@@ -191,7 +193,8 @@ val mod64: #c: curve -> a: widefelem c -> Stack uint64
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat c h1 a % pow2 64 = uint_v r)
 
 
-val shift1_with_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> carry: uint64 -> Stack unit 
+val shift1_with_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> carry: uint64 -> 
+  Stack unit 
   (requires fun h -> live h t /\ live h t1 /\ disjoint t t1)
   (ensures fun h0 _ h1 -> modifies (loc t1) h0 h1 /\ 
     (wide_as_nat c h0 t + pow2 (getLongPower c) * v carry) / pow2 64 = wide_as_nat c h1 t1)
@@ -200,24 +203,24 @@ val shift1_with_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> carry: 
 inline_for_extraction noextract 
 val upload_one_montg_form: #c: curve -> b: felem c -> Stack unit
   (requires fun h -> live h b /\ as_nat c h b = 0)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b = toDomain_ #c 1)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b = toDomain #c 1)
 
 
 inline_for_extraction noextract
 val scalar_bit: #c: curve -> #buf_type: buftype
-  -> s:lbuffer_t buf_type uint8 (getScalarLen c)
-  -> n:size_t{v n < v (getScalarLenBytes c)}
+  -> s:lbuffer_t buf_type uint8 (getScalarLenBytes c)
+  -> n:size_t{v n < v (getScalarLen c)}
   -> Stack uint64
-    (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == Spec.ECDSA.ith_bit_felem #c (as_seq h0 s) (v n) 
-    /\ v r <= 1)
+  (requires fun h0 -> live h0 s)
+  (ensures  fun h0 r h1 -> h0 == h1 /\ r == Spec.ECDSA.ith_bit_felem #c (as_seq h0 s) (v n) /\ 
+    v r <= 1)
 
 
-val mul_atomic: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) ->
+val mul_atomic: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1) 
+  -> temp: lbuffer uint64 (size 1) ->
   Stack unit
-    (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
-  (ensures fun h0 _ h1 -> modifies (loc result |+| loc temp) h0 h1 /\ 
-    (
-      let h0 = Seq.index (as_seq h1 temp) 0 in 
-      let result = Seq.index (as_seq h1 result) 0 in 
-      uint_v result + uint_v h0 * pow2 64 = uint_v x * uint_v y))
+  (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc temp) h0 h1 /\ (
+    let h0 = Seq.index (as_seq h1 temp) 0 in 
+    let result = Seq.index (as_seq h1 result) 0 in 
+    uint_v result + uint_v h0 * pow2 64 = uint_v x * uint_v y))

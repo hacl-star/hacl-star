@@ -263,8 +263,8 @@ let felem_add #c arg1 arg2 out =
   let t = add_bn arg1 arg2 out in
   reduction_prime_2prime_with_carry_cin t out out;
 
-  additionInDomain #c (as_nat c h0 arg1) (as_nat c h0 arg2);
-  inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 arg1) + fromDomain_ #c (as_nat c h0 arg2))
+  additionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg2);
+  inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) + fromDomain #c (as_nat c h0 arg2))
 
 
 let felem_double #c arg1 out =
@@ -273,8 +273,8 @@ let felem_double #c arg1 out =
   let t = add_bn arg1 arg1 out in
   reduction_prime_2prime_with_carry_cin t out out;
 
-  additionInDomain #c (as_nat c h0 arg1) (as_nat c h0 arg1);
-  inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 arg1) + fromDomain_ #c (as_nat c h0 arg1))
+  additionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg1);
+  inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) + fromDomain #c (as_nat c h0 arg1))
 
 
 
@@ -301,8 +301,8 @@ let felem_sub #c arg1 arg2 out =
 	as_nat c h2 out == (as_nat c h0 arg1 - as_nat c h0 arg2) % prime
       end);
 
-  substractionInDomain #c (as_nat c h0 arg1) (as_nat c h0 arg2); 
-  inDomain_mod_is_not_mod #c (fromDomain_ #c (as_nat c h0 arg1) - fromDomain_ #c (as_nat c h0 arg2))
+  substractionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg2); 
+  inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) - fromDomain #c (as_nat c h0 arg2))
 
 
 let mul #c f r out =
@@ -476,7 +476,7 @@ let upload_one_montg_form #c b =
     upd b (size 1) (u64 18446744069414584320);
     upd b (size 2) (u64 18446744073709551615);
     upd b (size 3) (u64 4294967294);
-    lemmaToDomain #P256 1;
+    lemmaToDomain #P256 #DH 1;
     assert_norm(1 + 18446744069414584320 * pow2 64 + 18446744073709551615 * pow2 64 * pow2 64 + 4294967294 * pow2 64 * pow2 64 * pow2 64 == pow2 (getPower P256) % getPrime P256)
   |P384 -> 
     upd b (size 0) (u64 18446744069414584321);
@@ -485,11 +485,10 @@ let upload_one_montg_form #c b =
     upd b (size 3) (u64 0);
     upd b (size 4) (u64 0);
     upd b (size 5) (u64 0);
-    lemmaToDomain #P384 1;
+    lemmaToDomain #P384 #DH 1;
     assert_norm(18446744069414584321 + 4294967295 * pow2 64 + 1 * pow2 64 * pow2 64 == pow2 (getPower P384) % getPrime P384)
   |Default -> 
     reduction_prime_2prime_with_carry_cin #c (u64 1) b b
-
 
 
 let scalar_bit #c #buf_type s n =
