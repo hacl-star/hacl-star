@@ -39,6 +39,7 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
+#include "Hacl_Bignum_Base.h"
 
 /*******************************************************************************
 
@@ -89,120 +90,49 @@ Write `a * b` in `res`.
 void Hacl_Bignum256_mul(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /*
-Write `a mod n` in `res` if a < n * n.
+Write `a * a` in `res`.
 
-  The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
-  The argument n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument r2 is a precomputed constant 2 ^ 512 mod n obtained through Hacl_Bignum256_new_precompr2.
-
-  This function is *UNSAFE* and requires C clients to observe the precondition
-  of bn_mod_slow_precompr2_lemma in Hacl.Spec.Bignum.ModReduction.fst, which
-  amounts to:
-  • 1 < n
-  • n % 2 = 1
-  • a < n * n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod below.
+  The argument a is meant to be a 256-bit bignum, i.e. uint64_t[4].
+  The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8].
 */
-void Hacl_Bignum256_mod_precompr2(uint64_t *n, uint64_t *a, uint64_t *r2, uint64_t *res);
+void Hacl_Bignum256_sqr(uint64_t *a, uint64_t *res);
 
 /*
-Write `a mod n` in `res` if a < n * n.
+Write `a mod n` in `res`.
 
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
   The argument n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
 
-  The function returns false if any of the preconditions of mod_precompr2 above
-  are violated, true otherwise.
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • 1 < n
+   • n % 2 = 1 
 */
 bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res);
 
 /*
 Write `a ^ b mod n` in `res`.
 
-  The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument r2 is a precomputed constant 2 ^ 512 mod n obtained through Hacl_Bignum256_new_precompr2.
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 256-bit bignum, bBits should be 256.
-
-  The function is *NOT* constant-time on the argument b. See the
-  mod_exp_ct_* functions for constant-time variants.
-
-  This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  • n % 2 = 1
-  • 1 < n
-  • 0 < b
-  • b < pow2 bBits
-  • a < n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_raw below.
-*/
-void
-Hacl_Bignum256_mod_exp_raw_precompr2(
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *r2,
-  uint64_t *res
-);
-
-/*
-Write `a ^ b mod n` in `res`.
-
-  The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument r2 is a precomputed constant 2 ^ 512 mod n obtained through Hacl_Bignum256_new_precompr2.
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 256-bit bignum, bBits should be 256.
-
-  This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_raw_precompr2.
-
-  This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  • n % 2 = 1
-  • 1 < n
-  • 0 < b
-  • b < pow2 bBits
-  • a < n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_ct below.
-*/
-void
-Hacl_Bignum256_mod_exp_ct_precompr2(
-  uint64_t *n,
-  uint64_t *a,
-  uint32_t bBits,
-  uint64_t *b,
-  uint64_t *r2,
-  uint64_t *res
-);
-
-/*
-Write `a ^ b mod n` in `res`.
-
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   The function is *NOT* constant-time on the argument b. See the
-  mod_exp_ct_* functions for constant-time variants.
+  mod_exp_consttime_* functions for constant-time variants.
 
-  The function returns false if any of the preconditions of mod_exp_precompr2 are
-  violated, true otherwise.
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • 0 < bBits
+   • b < pow2 bBits
+   • a < n 
 */
 bool
-Hacl_Bignum256_mod_exp_raw(
+Hacl_Bignum256_mod_exp_vartime(
   uint64_t *n,
   uint64_t *a,
   uint32_t bBits,
@@ -214,40 +144,39 @@ Hacl_Bignum256_mod_exp_raw(
 Write `a ^ b mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
   default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_raw.
+  execution time than mod_exp_vartime.
 
-  The function returns false if any of the preconditions of
-  mod_exp_ct_precompr2 are violated, true otherwise.
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • 0 < bBits
+   • b < pow2 bBits
+   • a < n 
 */
 bool
-Hacl_Bignum256_mod_exp_ct(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b, uint64_t *res);
-
-/*
-Compute `2 ^ 512 mod n`.
-
-  The argument n points to a 256-bit bignum of valid memory.
-  The function returns a heap-allocated 256-bit bignum, or NULL if:
-  • the allocation failed, or
-  • n % 2 = 1 && 1 < n does not hold
-
-  If the return value is non-null, clients must eventually call free(3) on it to
-  avoid memory leaks.
-*/
-uint64_t *Hacl_Bignum256_new_precompr2(uint64_t *n);
+Hacl_Bignum256_mod_exp_consttime(
+  uint64_t *n,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
 
 /*
 Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
 
-  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_pre
-  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
   • n is a prime
 
   The function returns false if any of the following preconditions are violated, true otherwise.
@@ -256,7 +185,135 @@ Write `a ^ (-1) mod n` in `res`.
   • 0 < a
   • a < n 
 */
-bool Hacl_Bignum256_mod_inv_prime_raw(uint64_t *n, uint64_t *a, uint64_t *res);
+bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *res);
+
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s
+{
+  uint32_t len;
+  uint64_t *n;
+  uint64_t mu;
+  uint64_t *r2;
+}
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64;
+
+
+/**********************************************/
+/* Arithmetic functions with precomputations. */
+/**********************************************/
+
+
+/*
+Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be a 256-bit bignum, i.e. uint64_t[4].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_Bignum256_mont_ctx_free on the return value
+  to avoid memory leaks.
+*/
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum256_mont_ctx_init(uint64_t *n);
+
+/*
+Deallocate the memory previously allocated by Hacl_Bignum256_mont_ctx_init.
+
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
+*/
+void Hacl_Bignum256_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k);
+
+/*
+Write `a mod n` in `res`.
+
+  The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
+  The outparam res is meant to be a 256-bit bignum, i.e. uint64_t[4].
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
+*/
+void
+Hacl_Bignum256_mod_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint64_t *res
+);
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_consttime_* functions for constant-time variants.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < bBits
+  • b < pow2 bBits
+  • a < n 
+*/
+void
+Hacl_Bignum256_mod_exp_vartime_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
+
+/*
+Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than mod_exp_vartime_*.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • 0 < bBits
+  • b < pow2 bBits
+  • a < n 
+*/
+void
+Hacl_Bignum256_mod_exp_consttime_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint32_t bBits,
+  uint64_t *b,
+  uint64_t *res
+);
+
+/*
+Write `a ^ (-1) mod n` in `res`.
+
+  The argument a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
+  • 0 < a
+  • a < n 
+*/
+void
+Hacl_Bignum256_mod_inv_prime_vartime_precomp(
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
+  uint64_t *a,
+  uint64_t *res
+);
 
 
 /********************/
@@ -278,12 +335,33 @@ Load a bid-endian bignum from memory.
 uint64_t *Hacl_Bignum256_new_bn_from_bytes_be(uint32_t len, uint8_t *b);
 
 /*
+Load a little-endian bignum from memory.
+
+  The argument b points to len bytes of valid memory.
+  The function returns a heap-allocated bignum of size sufficient to hold the
+   result of loading b, or NULL if either the allocation failed, or the amount of
+    required memory would exceed 4GB.
+
+  If the return value is non-null, clients must eventually call free(3) on it to
+  avoid memory leaks.
+*/
+uint64_t *Hacl_Bignum256_new_bn_from_bytes_le(uint32_t len, uint8_t *b);
+
+/*
 Serialize a bignum into big-endian memory.
 
   The argument b points to a 256-bit bignum.
   The outparam res points to 32 bytes of valid memory.
 */
 void Hacl_Bignum256_bn_to_bytes_be(uint64_t *b, uint8_t *res);
+
+/*
+Serialize a bignum into little-endian memory.
+
+  The argument b points to a 256-bit bignum.
+  The outparam res points to 32 bytes of valid memory.
+*/
+void Hacl_Bignum256_bn_to_bytes_le(uint64_t *b, uint8_t *res);
 
 
 /***************/
@@ -292,7 +370,8 @@ void Hacl_Bignum256_bn_to_bytes_be(uint64_t *b, uint8_t *res);
 
 
 /*
-Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b, otherwise returns 0.
+Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
+ otherwise returns 0.
 */
 uint64_t Hacl_Bignum256_lt_mask(uint64_t *a, uint64_t *b);
 

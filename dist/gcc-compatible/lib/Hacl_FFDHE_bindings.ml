@@ -4,9 +4,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     open F
     module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
     open Hacl_Spec_applied
-    let hacl_Impl_FFDHE_ffdhe_len =
-      foreign "Hacl_Impl_FFDHE_ffdhe_len"
-        (spec_FFDHE_ffdhe_alg @-> (returning uint32_t))
     let hacl_FFDHE_ffdhe_len =
       foreign "Hacl_FFDHE_ffdhe_len"
         (spec_FFDHE_ffdhe_alg @-> (returning uint32_t))

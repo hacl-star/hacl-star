@@ -16,6 +16,7 @@ module SB = Hacl.Spec.Bignum
 module BB = Hacl.Spec.Bignum.Base
 module SD = Hacl.Spec.Bignum.Definitions
 module SM = Hacl.Spec.Bignum.Montgomery
+module SE = Hacl.Spec.Bignum.Exponentiation
 
 module BN = Hacl.Bignum
 module BE = Hacl.Bignum.Exponentiation
@@ -45,7 +46,7 @@ let rsapss_sign_bn_st (t:limb_t) (ke:BE.exp t) (modBits:modBits_t t) =
   -> m':lbignum t len
   -> s:lbignum t len ->
   Stack bool
-  (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
+  (requires fun h -> len == ke.BE.bn.BN.len /\
     live h skey /\ live h m /\ live h s /\ live h m' /\
     disjoint s m /\ disjoint s skey /\ disjoint m skey /\
     disjoint m m' /\ disjoint m' s /\ disjoint m' skey /\
@@ -69,10 +70,17 @@ let rsapss_sign_bn #t ke modBits eBits dBits skey m m' s =
   let d  = sub skey (nLen +! nLen +! eLen) dLen in
 
   Math.Lemmas.pow2_le_compat (bits * v nLen) (v modBits);
-  let h = ST.get () in
-  SM.bn_precomp_r2_mod_n_lemma (v modBits - 1) (as_seq h n);
-  ke.BE.ct_mod_exp_fw_precomp n m dBits d 4ul r2 s;
-  ke.BE.raw_mod_exp_precomp n s eBits e r2 m';
+  let h0 = ST.get () in
+  SM.bn_precomp_r2_mod_n_lemma (v modBits - 1) (as_seq h0 n);
+  BE.mk_bn_mod_exp_precompr2 nLen ke.BE.exp_ct_precomp n r2 m dBits d s;
+  BE.mk_bn_mod_exp_precompr2 nLen ke.BE.exp_vt_precomp n r2 s eBits e m';
+  let h1 = ST.get () in
+  SD.bn_eval_inj (v nLen) (as_seq h1 s)
+    (SE.bn_mod_exp_consttime_precompr2 (v nLen) (as_seq h0 n) (as_seq h0 r2)
+    (as_seq h0 m) (v dBits) (as_seq h0 d));
+  SD.bn_eval_inj (v nLen) (as_seq h1 m')
+    (SE.bn_mod_exp_vartime_precompr2 (v nLen) (as_seq h0 n) (as_seq h0 r2)
+    (as_seq h1 s) (v eBits) (as_seq h0 e));
   let eq_m = BN.bn_eq_mask nLen m m' in
   mapT nLen s (logand eq_m) s;
   BB.unsafe_bool_of_limb eq_m
@@ -137,7 +145,7 @@ let rsapss_sign_compute_sgnt_st (t:limb_t) (ke:BE.exp t) (modBits:modBits_t t) =
   -> m:lbignum t len
   -> sgnt:lbuffer uint8 (blocks modBits 8ul) ->
   Stack bool
-  (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
+  (requires fun h -> len == ke.BE.bn.BN.len /\
     live h sgnt /\ live h skey /\ live h m /\
     disjoint sgnt skey /\ disjoint m sgnt /\ disjoint m skey /\
     LS.rsapss_skey_pre (v modBits) (v eBits) (v dBits) (as_seq h skey) /\
@@ -185,7 +193,7 @@ let rsapss_sign_st1 (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_support
   -> msg:lbuffer uint8 msgLen
   -> sgnt:lbuffer uint8 (blocks modBits 8ul) ->
   Stack bool
-  (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
+  (requires fun h -> len == ke.BE.bn.BN.len /\
     live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
     disjoint sgnt salt /\ disjoint sgnt msg /\ disjoint sgnt salt /\ disjoint sgnt skey /\
     disjoint salt msg /\
@@ -228,7 +236,7 @@ let rsapss_sign_st (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_supporte
   -> msg:lbuffer uint8 msgLen
   -> sgnt:lbuffer uint8 (blocks modBits 8ul) ->
   Stack bool
-  (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
+  (requires fun h -> len == ke.BE.bn.BN.len /\
     live h salt /\ live h msg /\ live h sgnt /\ live h skey /\
     disjoint sgnt salt /\ disjoint sgnt msg /\ disjoint sgnt salt /\ disjoint sgnt skey /\
     disjoint salt msg /\
@@ -289,7 +297,7 @@ let rsapss_verify_bn_st (t:limb_t) (ke:BE.exp t) (modBits:modBits_t t) =
   -> m_def:lbignum t len
   -> s:lbignum t len ->
   Stack bool
-  (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
+  (requires fun h -> len == ke.BE.bn.BN.len /\
     live h pkey /\ live h m_def /\ live h s /\
     disjoint m_def pkey /\ disjoint m_def s /\ disjoint s pkey /\
     LS.rsapss_pkey_pre (v modBits) (v eBits) (as_seq h pkey))
@@ -317,7 +325,13 @@ let rsapss_verify_bn #t ke modBits eBits pkey m_def s =
       Math.Lemmas.pow2_le_compat (v bits * v nLen) (v modBits);
       SM.bn_precomp_r2_mod_n_lemma (v modBits - 1) (as_seq h n);
 
-      ke.BE.raw_mod_exp_precomp n s eBits e r2 m_def;
+      let h0 = ST.get () in
+      BE.mk_bn_mod_exp_precompr2 nLen ke.BE.exp_vt_precomp n r2 s eBits e m_def;
+      let h1 = ST.get () in
+      SD.bn_eval_inj (v nLen) (as_seq h1 m_def)
+        (SE.bn_mod_exp_vartime_precompr2 (v nLen) (as_seq h0 n) (as_seq h0 r2)
+        (as_seq h1 s) (v eBits) (as_seq h0 e));
+
       if bn_lt_pow2 modBits m_def then true
       else false end
     else false in
@@ -378,7 +392,7 @@ let rsapss_verify_compute_msg_st (t:limb_t) (ke:BE.exp t) (modBits:modBits_t t) 
   -> sgnt:lbuffer uint8 (blocks modBits 8ul)
   -> m:lbignum t len ->
   Stack bool
-  (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
+  (requires fun h -> len == ke.BE.bn.BN.len /\
     live h sgnt /\ live h pkey /\ live h m /\
     disjoint m sgnt /\ disjoint m pkey /\
     as_seq h m == LSeq.create (v len) (uint #t 0) /\
@@ -423,7 +437,7 @@ let rsapss_verify_st1 (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_suppo
   -> msgLen:size_t
   -> msg:lbuffer uint8 msgLen ->
   Stack bool
-  (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
+  (requires fun h -> len == ke.BE.bn.BN.len /\
     live h msg /\ live h sgnt /\ live h pkey /\
     disjoint msg sgnt /\ disjoint msg pkey /\
 
@@ -464,7 +478,7 @@ let rsapss_verify_st (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_suppor
   -> msgLen:size_t
   -> msg:lbuffer uint8 msgLen ->
   Stack bool
-  (requires fun h -> len == ke.BE.mont.BM.bn.BN.len /\
+  (requires fun h -> len == ke.BE.bn.BN.len /\
     live h msg /\ live h sgnt /\ live h pkey /\
     disjoint msg sgnt /\ disjoint msg pkey /\
 
@@ -514,7 +528,7 @@ let rsapss_skey_sign_st (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_sup
   -> sgnt:lbuffer uint8 (blocks modBits 8ul) ->
   Stack bool
   (requires fun h ->
-    blocks modBits (size (bits t)) == ke.BE.mont.BM.bn.BN.len /\
+    blocks modBits (size (bits t)) == ke.BE.bn.BN.len /\
     live h salt /\ live h msg /\ live h sgnt /\
     live h nb /\ live h eb /\ live h db /\
     disjoint sgnt salt /\ disjoint sgnt msg /\ disjoint sgnt salt /\
@@ -569,7 +583,7 @@ let rsapss_pkey_verify_st (t:limb_t) (ke:BE.exp t) (a:Hash.algorithm{S.hash_is_s
   -> msg:lbuffer uint8 msgLen ->
   Stack bool
   (requires fun h ->
-    blocks modBits (size (bits t)) == ke.BE.mont.BM.bn.BN.len /\
+    blocks modBits (size (bits t)) == ke.BE.bn.BN.len /\
     live h msg /\ live h sgnt /\ live h nb /\ live h eb /\
     disjoint msg sgnt /\ disjoint nb eb /\ disjoint sgnt nb /\
     disjoint sgnt eb /\ disjoint msg nb /\ disjoint msg eb)

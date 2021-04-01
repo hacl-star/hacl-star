@@ -7,7 +7,7 @@ all: dist/bignum-test.exe
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-CFLAGS += -I ../../../lib/c -I ../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I ../../../lib/c -I ../../lib/c -march=native -mtune=native -O3 -DCOMPILE_INTRINSICS
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
@@ -15,7 +15,8 @@ export CFLAGS
 dist/libbignum.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
-BIGNUM_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.*
+BIGNUM_BUNDLE= -bundle Hacl.Bignum.Base -static-header Hacl.Bignum.Base \
+	-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
 
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libbignum.a $(BASE_FLAGS) $(BIGNUM_BUNDLE) \

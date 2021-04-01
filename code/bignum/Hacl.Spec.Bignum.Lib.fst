@@ -372,7 +372,7 @@ let bn_get_top_index_eval_lemma #t #len b ind =
 val bn_low_bound_bits:
     #t:limb_t
   -> #len:size_pos{bits t * len <= max_size_t}
-  -> b:lbignum t len{0 < bn_v b} ->
+  -> b:lbignum t len ->
   res:size_nat{res / bits t < len}
 
 let bn_low_bound_bits #t #len b =
