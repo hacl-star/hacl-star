@@ -21,14 +21,6 @@ module BM = Hacl.Bignum.Montgomery
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-// from Jonathan:
-// type limb_t = U32 | U64
-// let f (x: t) = match x with | U32 -> lbuffer UInt32.t | U64 -> lbuffer UInt64.t
-// type ctx' (x: t) (a: Type0 { a == f x }) = {
-//   r2: a;
-// }
-// let ctx (x: t) = ctx' x (f x)
-
 inline_for_extraction noextract
 let lb (t:limb_t) =
   match t with
@@ -41,9 +33,8 @@ let ll (t:limb_t) =
   | U32 -> uint32
   | U64 -> uint64
 
-inline_for_extraction// noextract
+inline_for_extraction
 noeq
-//[@CAbstractStruct]
 type bn_mont_ctx' (t:limb_t) (a:Type0{a == lb t}) (b:Type0{b == ll t}) = {
   len: BN.meta_len t;
   n: x:a{length #MUT #(limb t) x == v len};
