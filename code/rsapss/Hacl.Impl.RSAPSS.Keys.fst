@@ -398,6 +398,8 @@ let new_rsapss_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t{v modBits >
 	(as_seq h0 nb) (as_seq h0 eb) (as_seq h0 db) (as_seq h1 skey)))))
 
 
+#set-options "--z3rlimit 100"
+
 inline_for_extraction noextract
 val new_rsapss_load_skey:
     #t:limb_t

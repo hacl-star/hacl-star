@@ -313,11 +313,11 @@ val lprecomp_table_f:
 
 #push-options "--z3rlimit 300"
 let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
-  assert (v ((i +! 1ul) *! len) == (v i + 1) * v len);
-  assert (v ((i +! 2ul) *! len) == (v i + 2) * v len);
   Math.Lemmas.lemma_mult_le_right (v len) (v i + 2) (v table_len);
   Math.Lemmas.lemma_mult_le_right (v len) (v i + 3) (v table_len);
-
+  assert (v ((i +! 1ul) *! len) == (v i + 1) * v len);
+  assert (v ((i +! 2ul) *! len) == (v i + 2) * v len);
+  
   let h0 = ST.get () in
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v i + 1));
   let t1 = sub table ((i +! 1ul) *! len) len in
