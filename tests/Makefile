@@ -68,4 +68,4 @@ vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
 	./$<
 
 clean:
-	rm -f *.exe
+	rm -f *.o *.exe
