@@ -74,7 +74,12 @@ static __inline__ cycles cpucycles_end(void)
 #endif // __x86_64__ || _M_X64 || __s390x__
 
 static inline void print_time(uint64_t count, clock_t tdiff, uint64_t cdiff){
-  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
+  printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2f cycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
+  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2f us/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
+}
+
+static inline void print_time_ops(uint64_t count, clock_t tdiff, uint64_t cdiff){
+  printf("cycles for %" PRIu64 " ops: %" PRIu64 " (%.0f cycles/op)\n", count, (uint64_t)cdiff, (double)cdiff/count);
+  printf("time for %" PRIu64 " ops: %" PRIu64 " (%.0f ops/s)\n", count, (uint64_t)tdiff, (((double)tdiff / CLOCKS_PER_SEC) * 1000000.0)/(double)count);
 }
