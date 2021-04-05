@@ -9,7 +9,6 @@ open Lib.Buffer
 
 open Hacl.Bignum.Definitions
 open Hacl.Bignum.Base
-open Hacl.Impl.Lib
 
 module ST = FStar.HyperStack.ST
 module Loops = Lib.LoopCombinators
@@ -52,6 +51,11 @@ let bn_precomp_r2_mod_n #t k nBits n res =
   )
 
 
+let bn_mont_precomp #t len precompr2 nBits n r2 =
+  precompr2 nBits n r2;
+  mod_inv_limb n.(0ul)
+
+
 inline_for_extraction noextract
 val bn_mont_reduction_f:
     #t:limb_t
@@ -86,7 +90,23 @@ let bn_mont_reduction_f #t len n nInv j c res =
   LSeq.eq_intro (as_seq h1 res) (LSeq.upd (as_seq h0 res) (v len + v j) (Seq.index (as_seq h1 res) (v len + v j)))
 
 
-let bn_mont_reduction #t k n nInv c res =
+inline_for_extraction noextract
+let bn_mont_reduction_loop_div_r_st (t:limb_t) (len:size_t{0 < v len /\ v len + v len <= max_size_t}) =
+    n:lbignum t len
+  -> mu:limb t
+  -> c:lbignum t (len +! len)
+  -> res:lbignum t len ->
+  Stack (carry t)
+  (requires fun h ->
+    live h n /\ live h c /\ live h res /\
+    disjoint res n /\ disjoint res c /\ disjoint n c)
+  (ensures  fun h0 c0 h1 -> modifies (loc res |+| loc c) h0 h1 /\
+    (c0, as_seq h1 res) == S.bn_mont_reduction_loop_div_r (as_seq h0 n) mu (as_seq h0 c))
+
+
+inline_for_extraction noextract
+val bn_mont_reduction_loop_div_r: #t:limb_t -> k:BN.bn t -> bn_mont_reduction_loop_div_r_st t k.BN.len
+let bn_mont_reduction_loop_div_r #t k n nInv c res =
   [@inline_let] let len = k.BN.len in
   push_frame ();
   let c0 = create 1ul (uint #t 0) in
@@ -103,12 +123,16 @@ let bn_mont_reduction #t k n nInv c res =
     Loops.unfold_repeat_gen (v len) S.bn_mont_reduction_t (spec h0) (refl h0 0) (v j);
     bn_mont_reduction_f len n nInv j c0 c
   );
-  // Easy to specialize, but such a small function that it's not worth it (per
-  // Marina's advice).
   BN.bn_rshift (len +! len) c len res;
   let c0 = c0.(0ul) in
-  BN.bn_reduce_once len n c0 res;
-  pop_frame ()
+  pop_frame ();
+  c0
+
+
+let bn_mont_reduction #t k n nInv c res =
+  [@inline_let] let len = k.BN.len in
+  let c0 = bn_mont_reduction_loop_div_r #t k n nInv c res in
+  BN.bn_reduce_once len n c0 res
 
 
 let bn_to_mont #t k mont_reduction n nInv r2 a aM =
@@ -154,25 +178,18 @@ let bn_mont_sqr #t k mont_reduction n nInv_u64 aM resM =
 /// ``len``. We provide a default implementation that actually keeps ``len`` at
 /// runtime, to offer a version of mod_exp where all the parameters are present
 /// at run-time.
-[@CInline]
 let bn_check_modulus_u32 (len:BN.meta_len U32) : bn_check_modulus_st U32 len =
   bn_check_modulus #U32 #len
-[@CInline]
 let bn_precomp_r2_mod_n_u32 (len:BN.meta_len U32) : bn_precomp_r2_mod_n_st U32 len =
   bn_precomp_r2_mod_n (BN.mk_runtime_bn U32 len)
-[@CInline]
 let bn_mont_reduction_u32 (len:BN.meta_len U32) : bn_mont_reduction_st U32 len =
   bn_mont_reduction (BN.mk_runtime_bn U32 len)
-[@CInline]
 let bn_to_mont_u32 (len:BN.meta_len U32) : bn_to_mont_st U32 len =
   bn_to_mont (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
-[@CInline]
 let bn_from_mont_u32 (len:BN.meta_len U32) : bn_from_mont_st U32 len =
   bn_from_mont (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
-[@CInline]
 let bn_mont_mul_u32 (len:BN.meta_len U32) : bn_mont_mul_st U32 len =
   bn_mont_mul (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
-[@CInline]
 let bn_mont_sqr_u32 (len:BN.meta_len U32) : bn_mont_sqr_st U32 len =
   bn_mont_sqr (BN.mk_runtime_bn U32 len) (bn_mont_reduction_u32 len)
 
@@ -189,25 +206,18 @@ let mk_runtime_mont_u32 (len:BN.meta_len U32) : mont U32 = {
 }
 
 
-[@CInline]
 let bn_check_modulus_u64 (len:BN.meta_len U64) : bn_check_modulus_st U64 len =
   bn_check_modulus #U64 #len
-[@CInline]
 let bn_precomp_r2_mod_n_u64 (len:BN.meta_len U64) : bn_precomp_r2_mod_n_st U64 len =
   bn_precomp_r2_mod_n (BN.mk_runtime_bn U64 len)
-[@CInline]
 let bn_mont_reduction_u64 (len:BN.meta_len U64) : bn_mont_reduction_st U64 len =
   bn_mont_reduction (BN.mk_runtime_bn U64 len)
-[@CInline]
 let bn_to_mont_u64 (len:BN.meta_len U64) : bn_to_mont_st U64 len =
   bn_to_mont (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
-[@CInline]
 let bn_from_mont_u64 (len:BN.meta_len U64) : bn_from_mont_st U64 len =
   bn_from_mont (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
-[@CInline]
 let bn_mont_mul_u64 (len:BN.meta_len U64) : bn_mont_mul_st U64 len =
   bn_mont_mul (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
-[@CInline]
 let bn_mont_sqr_u64 (len:BN.meta_len U64) : bn_mont_sqr_st U64 len =
   bn_mont_sqr (BN.mk_runtime_bn U64 len) (bn_mont_reduction_u64 len)
 
@@ -231,10 +241,5 @@ let mk_runtime_mont (#t:limb_t) (len:BN.meta_len t) : mont t =
 let mk_runtime_mont_len_lemma #t len = ()
 
 
-let bn_mont_one #t k n mu r2 oneM =
-  [@inline_let] let len = k.bn.BN.len in
-  push_frame ();
-  let one = create len (uint #t #SEC 0) in
-  BN.bn_from_uint len (uint #t #SEC 1) one;
-  k.to n mu r2 one oneM;
-  pop_frame ()
+let bn_mont_one #t len bn_from_mont n mu r2 oneM =
+  bn_from_mont n mu r2 oneM

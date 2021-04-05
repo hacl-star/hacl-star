@@ -1,0 +1,191 @@
+[
+  "@d]ˇÆﬁ-ΩÀwè€œfnÅ",
+  [
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_reduction",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "4e893d1a0d88d6b613da0c5f348394e3"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_mul",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "f8cb95ef2688935d03c34048ef3ae0a3"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_sqr",
+      1,
+      0,
+      0,
+      [
+        "@query", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "6643582c6d293af20e8a57583024e3c8"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.lemma_fits_c_lt_rr",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "e71b8ac23db174edf39ac3c37b6455ea"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.lemma_fits_c_lt_rr",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "0a6fb60b6876c63feb47c6cbe1744311"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_reduction_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Prims.nat", "equation_Prims.pos", "equation_Prims.squash",
+        "int_inversion", "l_and-interp", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "570bd2820f8b6c5fef2d686704fdfe4d"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_reduction_lemma",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_reduction",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "e1fc302697218863370a6005dae370a3"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_mul_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Prims.nat", "equation_Prims.pos", "equation_Prims.squash",
+        "int_inversion", "l_and-interp", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "e859d01c0d3a1b302f2317bdb4c16671"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_mul_lemma",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_mul",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "a4668c765ad97ddd1fba4a4e25f70137"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_mul_is_mont_mul_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "48f36cb90dcc2a5ffec50688ee5a9cf8"
+    ],
+    [
+      "Hacl.Spec.AlmostMontgomery.Lemmas.almost_mont_mul_is_mont_mul_lemma",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "0f6fd6f1b8e967e8cb14763e29ef2525"
+    ]
+  ]
+]

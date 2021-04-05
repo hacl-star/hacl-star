@@ -554,12 +554,12 @@ and visit_body (t_i: term)
       let e = pack (Tv_Abs b e) in
       st, e, bvs, ses
 
-  | Tv_Match scrut branches ->
+  | Tv_Match scrut _returns branches ->
       let st, scrut, bvs, ses = visit_body t_i index_bv inv_bv st bvs scrut in
       let pats, es = List.Tot.split branches in
       let st, es, bvs, ses' = visit_many t_i index_bv inv_bv st bvs es in
       let branches = zip pats es in
-      st, pack (Tv_Match scrut branches), bvs, ses @ ses'
+      st, pack (Tv_Match scrut _returns branches), bvs, ses @ ses'
 
   | Tv_Let r attrs bv e1 e2 ->
       let st, e1, bvs, ses = visit_body t_i index_bv inv_bv st bvs e1 in
