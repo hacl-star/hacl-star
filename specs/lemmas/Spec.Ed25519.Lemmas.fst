@@ -19,10 +19,12 @@ open FStar.Tactics
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
 [@canon_attr]
+noextract
 let elem_add_cm : cm elem =
   CM zero ( +% ) (LM.lemma_add_mod_one #prime) (LM.lemma_add_mod_assoc #prime) (LM.lemma_add_mod_comm #prime)
 
 [@canon_attr]
+noextract
 let elem_mul_cm : cm elem =
   CM one ( *% ) (LM.lemma_mul_mod_one #prime) (LM.lemma_mul_mod_assoc #prime) (LM.lemma_mul_mod_comm #prime)
 
@@ -37,9 +39,11 @@ let fadd_opp a =
   FStar.Math.Lemmas.small_mod 0 prime
 
 [@canon_attr]
+noextract
 let elem_cr : cr elem =
   CR elem_add_cm elem_mul_cm ( ~% ) fadd_opp (LM.lemma_mod_distributivity_add_right #prime) fmul_zero_l
 
+noextract
 let ed25519_semiring () : Tac unit = canon_semiring elem_cr; trefl()
 
 

@@ -69,7 +69,6 @@ let verify_step_2' s h' a' tmp =
   let h0 = ST.get () in
 
   Spec.Ed25519.Lemmas.to_aff_point_negate (PM.refl_ext_point (as_seq h0 a'));
-  Spec.Ed25519.Lemmas.aff_point_negate_lemma (PM.refl (as_seq h0 a'));
   Hacl.Impl.Ed25519.PointNegate.point_negate a' a_neg;
   Hacl.Impl.Ed25519.Ladder.point_mul_g_double_vartime exp_d s h' a_neg
 
