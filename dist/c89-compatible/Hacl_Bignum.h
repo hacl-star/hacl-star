@@ -43,8 +43,6 @@ extern "C" {
 
 void Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *res);
 
-void Hacl_Bignum_Convert_bn_from_bytes_le_uint64(uint32_t len, uint8_t *b, uint64_t *res);
-
 void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res);
 
 uint32_t Hacl_Bignum_Lib_bn_get_top_index_u32(uint32_t len, uint32_t *b);

@@ -17,8 +17,8 @@ module BE = Hacl.Impl.Exponentiation
 module ME = Hacl.Impl.MultiExponentiation
 
 module BD = Hacl.Bignum.Definitions
-module BN = Hacl.Bignum
-module SN = Hacl.Spec.Bignum
+module BC = Hacl.Bignum.Convert
+module SC = Hacl.Spec.Bignum.Convert
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -163,7 +163,7 @@ val point_mul:
     live h scalar /\ live h q /\ live h result /\
     disjoint q result /\ disjoint q scalar /\
     F51.point_inv_t h q /\ inv_ext_point (as_seq h q))
-  (ensures  fun h0 _ h1 -> modifies (loc result |+| loc q) h0 h1 /\
+  (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
     Spec.Ed25519.to_aff_point (F51.point_eval h1 result) ==
     Spec.Ed25519.to_aff_point (Spec.Ed25519.point_mul (as_seq h0 scalar) (F51.point_eval h0 q)))
@@ -172,8 +172,8 @@ let point_mul result scalar q =
   let h0 = ST.get () in
   push_frame ();
   let bscalar = create 4ul (u64 0) in
-  BN.bn_from_bytes_le 32ul scalar bscalar;
-  SN.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar);
+  BC.mk_bn_from_bytes_le 32ul scalar bscalar;
+  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar);
 
   make_point_inf result;
   BE.lexp_fw_consttime 20ul 0ul mk_ed25519_concrete_ops (null uint64) q 4ul 256ul bscalar result 4ul;
@@ -228,12 +228,12 @@ let point_mul_double_vartime result scalar1 q1 scalar2 q2 =
   let h0 = ST.get () in
   push_frame ();
   let bscalar1 = create 4ul (u64 0) in
-  BN.bn_from_bytes_le 32ul scalar1 bscalar1;
-  SN.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar1);
+  BC.mk_bn_from_bytes_le 32ul scalar1 bscalar1;
+  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar1);
 
   let bscalar2 = create 4ul (u64 0) in
-  BN.bn_from_bytes_le 32ul scalar2 bscalar2;
-  SN.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar2);
+  BC.mk_bn_from_bytes_le 32ul scalar2 bscalar2;
+  SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar2);
 
   make_point_inf result;
   ME.lexp_double_fw_vartime 20ul 0ul mk_ed25519_concrete_ops (null uint64) q1 4ul 256ul bscalar1 q2 bscalar2 result 4ul;

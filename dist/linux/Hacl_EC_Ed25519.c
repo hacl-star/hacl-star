@@ -149,9 +149,7 @@ void Hacl_EC_Ed25519_point_add(u64 *p, u64 *q, u64 *out)
 
 void Hacl_EC_Ed25519_point_mul(u8 *scalar, u64 *p, u64 *out)
 {
-  u64 p_[20U] = { 0U };
-  memcpy(p_, p, (u32)20U * sizeof (u64));
-  Hacl_Impl_Ed25519_Ladder_point_mul(out, scalar, p_);
+  Hacl_Impl_Ed25519_Ladder_point_mul(out, scalar, p);
 }
 
 bool Hacl_EC_Ed25519_point_eq(u64 *p, u64 *q)

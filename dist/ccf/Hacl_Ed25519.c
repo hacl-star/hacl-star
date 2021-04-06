@@ -337,7 +337,26 @@ static void point_add(uint64_t *out, uint64_t *p, uint64_t *q)
 static void point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q)
 {
   uint64_t bscalar[4U] = { 0U };
-  Hacl_Bignum_Convert_bn_from_bytes_le_uint64((uint32_t)32U, scalar, bscalar);
+  uint32_t bnLen = ((uint32_t)32U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t tmpLen = (uint32_t)8U * bnLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
+  uint8_t tmp[tmpLen];
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
+  memcpy(tmp, scalar, (uint32_t)32U * sizeof (uint8_t));
+  for
+  (uint32_t
+    i = (uint32_t)0U;
+    i
+    < ((uint32_t)32U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+    i++)
+  {
+    uint64_t *os = bscalar;
+    uint8_t *bj = tmp + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;
+  }
   uint64_t *x0 = result;
   uint64_t *y = result + (uint32_t)5U;
   uint64_t *z = result + (uint32_t)10U;
@@ -490,9 +509,47 @@ point_mul_double_vartime(
 )
 {
   uint64_t bscalar1[4U] = { 0U };
-  Hacl_Bignum_Convert_bn_from_bytes_le_uint64((uint32_t)32U, scalar1, bscalar1);
+  uint32_t bnLen0 = ((uint32_t)32U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t tmpLen = (uint32_t)8U * bnLen0;
+  KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
+  uint8_t tmp[tmpLen];
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
+  memcpy(tmp, scalar1, (uint32_t)32U * sizeof (uint8_t));
+  for
+  (uint32_t
+    i = (uint32_t)0U;
+    i
+    < ((uint32_t)32U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+    i++)
+  {
+    uint64_t *os = bscalar1;
+    uint8_t *bj = tmp + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;
+  }
   uint64_t bscalar2[4U] = { 0U };
-  Hacl_Bignum_Convert_bn_from_bytes_le_uint64((uint32_t)32U, scalar2, bscalar2);
+  uint32_t bnLen = ((uint32_t)32U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t tmpLen0 = (uint32_t)8U * bnLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen0);
+  uint8_t tmp0[tmpLen0];
+  memset(tmp0, 0U, tmpLen0 * sizeof (uint8_t));
+  memcpy(tmp0, scalar2, (uint32_t)32U * sizeof (uint8_t));
+  for
+  (uint32_t
+    i = (uint32_t)0U;
+    i
+    < ((uint32_t)32U - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+    i++)
+  {
+    uint64_t *os = bscalar2;
+    uint8_t *bj = tmp0 + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;
+  }
   uint64_t *x = result;
   uint64_t *y = result + (uint32_t)5U;
   uint64_t *z = result + (uint32_t)10U;

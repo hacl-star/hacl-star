@@ -199,6 +199,8 @@ val point_mul: scalar:lbuffer uint8 32ul -> p:F51.point -> out:F51.point ->
   Stack unit
   (requires fun h ->
     live h scalar /\ live h p /\ live h out /\
+    disjoint out p /\ disjoint out scalar /\
+    disjoint p scalar /\
     F51.point_inv_t h p /\ ML.inv_ext_point (as_seq h p))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     F51.point_inv_t h1 out /\ ML.inv_ext_point (as_seq h1 out) /\
@@ -206,11 +208,7 @@ val point_mul: scalar:lbuffer uint8 32ul -> p:F51.point -> out:F51.point ->
     Spec.Ed25519.to_aff_point (SE.point_mul (as_seq h0 scalar) (F51.point_eval h0 p)))
 
 let point_mul scalar p out =
-  push_frame ();
-  let p' = create 20ul (u64 0) in
-  copy p' p;
-  Hacl.Impl.Ed25519.Ladder.point_mul out scalar p';
-  pop_frame ()
+  Hacl.Impl.Ed25519.Ladder.point_mul out scalar p
 
 
 val point_eq: p:F51.point -> q:F51.point ->
