@@ -64,7 +64,7 @@ val point_decompress_:
       (b ==> (F51.point_eval h1 out == Some?.v (SE.point_decompress (as_seq h0 s))))
     )
 
-#push-options "--z3rlimit 30"
+#push-options "--z3rlimit 50"
 
 let point_decompress_ out s tmp =
   let y    = sub tmp 0ul 5ul in
