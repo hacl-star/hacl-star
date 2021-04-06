@@ -46,6 +46,30 @@ Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *
 
 /* SNIPPET_END: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
 
+/* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_le_uint64 */
+
+inline void
+Hacl_Bignum_Convert_bn_from_bytes_le_uint64(uint32_t len, uint8_t *b, uint64_t *res)
+{
+  uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t tmpLen = (uint32_t)8U * bnLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
+  uint8_t tmp[tmpLen];
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
+  memcpy(tmp, b, len * sizeof (uint8_t));
+  for (uint32_t i = (uint32_t)0U; i < (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U; i++)
+  {
+    uint64_t *os = res;
+    uint8_t *bj = tmp + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;
+  }
+}
+
+/* SNIPPET_END: Hacl_Bignum_Convert_bn_from_bytes_le_uint64 */
+
 /* SNIPPET_START: Hacl_Bignum_Convert_bn_to_bytes_be_uint64 */
 
 inline void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res)

@@ -22,39 +22,25 @@
  */
 
 
-#ifndef __Hacl_Ed25519_H
-#define __Hacl_Ed25519_H
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
-
-#include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
-#include "Hacl_Hash.h"
-#include "Hacl_Bignum25519_51.h"
-#include "Hacl_Curve25519_51.h"
 
-void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *priv, uint32_t len, uint8_t *msg);
-
-bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *signature);
-
-void Hacl_Ed25519_secret_to_public(uint8_t *pub, uint8_t *priv);
-
-void Hacl_Ed25519_expand_keys(uint8_t *ks, uint8_t *priv);
-
-void Hacl_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, uint8_t *msg);
-
-#if defined(__cplusplus)
+inline void
+Hacl_Bignum_Convert_bn_from_bytes_le_uint64(uint32_t len, uint8_t *b, uint64_t *res)
+{
+  uint32_t bnLen = (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
+  uint32_t tmpLen = (uint32_t)8U * bnLen;
+  KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
+  uint8_t tmp[tmpLen];
+  memset(tmp, 0U, tmpLen * sizeof (uint8_t));
+  memcpy(tmp, b, len * sizeof (uint8_t));
+  for (uint32_t i = (uint32_t)0U; i < (len - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U; i++)
+  {
+    uint64_t *os = res;
+    uint8_t *bj = tmp + i * (uint32_t)8U;
+    uint64_t u = load64_le(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i] = x;
+  }
 }
-#endif
 
-#define __Hacl_Ed25519_H_DEFINED
-#endif

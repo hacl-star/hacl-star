@@ -47,6 +47,12 @@ void Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint6
 
 /* SNIPPET_END: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
 
+/* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_le_uint64 */
+
+void Hacl_Bignum_Convert_bn_from_bytes_le_uint64(uint32_t len, uint8_t *b, uint64_t *res);
+
+/* SNIPPET_END: Hacl_Bignum_Convert_bn_from_bytes_le_uint64 */
+
 /* SNIPPET_START: Hacl_Bignum_Convert_bn_to_bytes_be_uint64 */
 
 void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res);

@@ -37,6 +37,7 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Bignum.h"
 #include "Hacl_Hash.h"
 #include "Hacl_Bignum25519_51.h"
 #include "Hacl_Curve25519_51.h"
