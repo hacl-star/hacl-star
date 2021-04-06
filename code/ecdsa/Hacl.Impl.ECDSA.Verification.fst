@@ -146,7 +146,7 @@ let ecdsa_verification_step23 #c alg mLen m result =
   reduction_prime_2prime_order result result;
 
   lemma_core_0 c result h1;
-  changeEndianLemma #c (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash));
+  (* changeEndianLemma #c (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash)); *)
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);
 
   pop_frame()
@@ -206,7 +206,7 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
   
   let h2 = ST.get() in
 
-    calc(==) {
+ (*    calc(==) {
     as_seq h2 bufferU1;
     == {}
     uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (as_seq h1 u1));
@@ -228,7 +228,7 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
       uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (nat_to_intseq_le 4 (as_nat c h1 u2)));
       == {changeEndian_le_be #c (as_nat c h1 u2) }
       nat_to_bytes_be 32 (as_nat c h1 u2);
-    };
+    }; *)
 
   pop_frame()
 
@@ -268,8 +268,8 @@ val ecdsa_verification_step5_0:
       let pointU1 = gsub points (size 0) (size 12) in
       let pointU2 = gsub points (size 12) (size 12) in
 
-      let fromDomainPointU1 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 pointU1)) in
-      let fromDomainPointU2 = fromDomainPoint #c (point_prime_to_coordinates c (as_seq h1 pointU2)) in
+      let fromDomainPointU1 = fromDomainPoint #c #DSA (point_prime_to_coordinates c (as_seq h1 pointU1)) in
+      let fromDomainPointU2 = fromDomainPoint #c #DSA (point_prime_to_coordinates c (as_seq h1 pointU2)) in
       let pointAtInfinity = (0, 0, 0) in
       let u1D, _ = montgomery_ladder_spec_left #P256 (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
       let u2D, _ = montgomery_ladder_spec_left #P256 (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates c (as_seq h0 pubKeyAsPoint)) in
@@ -684,7 +684,7 @@ let ecdsa_verification c alg pubKey r s mLen m =
     let result = ecdsa_verification_ #c alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
     pop_frame();
 
-    changeEndianLemma #c (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
+(*     changeEndianLemma #c (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
     
     changeEndianLemma #c (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
@@ -694,6 +694,6 @@ let ecdsa_verification c alg pubKey r s mLen m =
     uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 r);
     
     changeEndianLemma #c (uints_from_bytes_be (as_seq h1 s));
-    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 s);
+    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 s); *)
 
   result

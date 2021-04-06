@@ -61,7 +61,7 @@ let rec pow_plus a b c =
 
 noextract
 let modp_inv_prime (prime: pos {prime > 3}) (x: elem prime) : Tot (elem prime) =
-  (exp #prime x (prime - 2)) % prime
+  exp #prime x (prime - 2)
 
 noextract
 let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p (x % p)
@@ -94,6 +94,15 @@ let prime384: (a: pos {a > 3 && a < pow2 384}) =
   assert_norm(pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1 > 3);
   assert_norm(pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1 < pow2 384);
   pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1
+
+
+inline_for_extraction
+let getPrime curve : prime: nat {prime > 3} = 
+  match curve with 
+  |P256 -> prime256
+  |P384 -> prime384
+  |_ -> 4
+
 
 (* the length of each coordinate of the point as uint64 *)
 inline_for_extraction noextract
@@ -137,18 +146,11 @@ let getPowerU curve =
   |P384 -> 384ul
   |_ -> 256ul
 
-let getPower curve : a: nat {a = v (getCoordinateLenU64 curve) * 64} = v (getPowerU curve)
+let getPower curve : a: nat {getPrime curve < a /\ a = v (getCoordinateLenU64 curve) * 64} = v (getPowerU curve)
 
 (* the power for 2 words *)
 let getLongPower curve = getPower curve * 2
 
-
-inline_for_extraction
-let getPrime curve : prime: nat {prime > 3} = 
-  match curve with 
-  |P256 -> prime256
-  |P384 -> prime384
-  |_ -> 4
 
 
 

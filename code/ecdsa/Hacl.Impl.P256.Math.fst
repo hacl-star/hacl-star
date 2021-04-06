@@ -213,28 +213,68 @@ let lemma_multiplication_not_mod_prime_left_p384 a =
   assert (a % prime256 == 0);
   small_mod a prime256
 
+private val lemma_a_not_zero_b_not_zero_mod_not_zero_: p: nat {Math.Euclid.is_prime p} -> a: nat {a % p <> 0} -> b: nat {b % p <> 0} ->
+  Lemma (requires a * b <> 0)
+  (ensures a * b % p <> 0)
 
-val lemma_multiplication_not_mod_prime_p256: a:nat{a < prime256} ->
-  Lemma (a * (modp_inv2 #P256 (pow2 256)) % prime256 == 0 <==> a == 0)
+private let lemma_a_not_zero_b_not_zero_mod_not_zero_ p a b = 
+  if a * b % p = 0 then begin
+    FStar.Math.Euclid.euclid_prime p a b;
+    assert False
+  end
 
-let lemma_multiplication_not_mod_prime_p256 a =
-  Classical.move_requires lemma_multiplication_not_mod_prime_left_p256 a
+val lemma_a_not_zero_b_not_zero_mod_not_zero: p: nat {Math.Euclid.is_prime p} -> a: nat {a % p <> 0} -> b: nat {b % p <> 0} ->
+  Lemma (requires a * b <> 0)
+  (ensures a * b % p <> 0)
 
-val lemma_multiplication_not_mod_prime_p384: a:nat{a < prime384} ->
-  Lemma (a * (modp_inv2 #P384 (pow2 384)) % prime384 == 0 <==> a == 0)
+let lemma_a_not_zero_b_not_zero_mod_not_zero p a b = lemma_a_not_zero_b_not_zero_mod_not_zero_ p a b
 
-let lemma_multiplication_not_mod_prime_p384 a =
-  Classical.move_requires lemma_multiplication_not_mod_prime_left_p384 a
+
+val lemma_0: p: nat {Math.Euclid.is_prime p} -> a: nat {a % p <> 0} -> k: pos -> Lemma 
+  (requires (pow (a % p) (k - 1) % p <> 0 /\ pow (a % p) (k - 1) * pow (a % p) 1 <> 0))  
+  (ensures (pow (a % p) (k - 1) * pow (a % p) 1 % p <> 0))
+  
+let lemma_0 p a k = 
+  power_one_2 (a % p);
+  lemma_a_not_zero_b_not_zero_mod_not_zero p (pow (a % p) (k - 1)) (pow (a % p) 1)
+
+
+
+val lemma_exp_not_zero: p: nat {Math.Euclid.is_prime p} -> a: nat {a % p <> 0} -> k: pos ->
+  Lemma (Spec.ECC.Curves.exp #p (a % p) k % p <> 0)
+
+let rec lemma_exp_not_zero p a k = 
+  match k with 
+  |1 -> 
+    lemma_pow_mod_n_is_fpow p (a % p) 1;
+    let b = Spec.ECC.Curves.exp #p (a % p) 1 % p in 
+    power_one_2 (a % p)
+  | _ -> 
+    lemma_exp_not_zero p a (k - 1);
+    lemma_pow_mod_n_is_fpow p (a % p) k;
+    lemma_pow_mod_n_is_fpow p (a % p) (k - 1);
+    power_one_2 (a % p);
+    pow_plus (a % p) 1 (k - 1);
+    lemma_0 p a k
 
 
 val lemma_multiplication_not_mod_prime: #c: curve -> a: nat {a < getPrime c} -> 
   Lemma (a * (modp_inv2 #c (pow2 (getPower c))) % getPrime c == 0 <==> a == 0)
-  
-let lemma_multiplication_not_mod_prime #c a = 
-  match c with 
-  |P256 -> lemma_multiplication_not_mod_prime_p256 a
-  |P384 -> lemma_multiplication_not_mod_prime_p384 a
 
+let lemma_multiplication_not_mod_prime #c a = 
+  let prime = getPrime c in 
+  let pow = pow2 (getPower c) in 
+  assume (FStar.Math.Euclid.is_prime (getPrime c));
+  assume (pow % prime <> 0);
+  
+  lemma_exp_not_zero prime pow (prime - 2);
+  lemma_exp_not_zero (getPrime c) (pow2 (getPower c)) (getPrime c - 2);
+  
+  assert (if a * modp_inv2_prime pow prime % prime = 0 then begin 
+    FStar.Math.Euclid.euclid_prime prime a (modp_inv2_prime pow prime);
+    (a % prime == 0) end else True);
+
+  small_mod a prime
 
 
 val lemma_modular_multiplication_p256: a:nat{a < prime256} -> b:nat{b < prime256} -> Lemma

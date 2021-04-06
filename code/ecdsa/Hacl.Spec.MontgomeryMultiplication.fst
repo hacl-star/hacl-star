@@ -51,6 +51,73 @@ let lemma_mod_inv2_mult_prime prime a =
   }
 
 
+val lemma_norm: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c ->  Lemma (
+  let pX, pY, pZ = p in
+  let qX, qY, qZ = q in 
+  let pNX, pNY, pNZ = _norm p in 
+  let qNX, qNY, qNZ = _norm q in 
+  pX == qX <==> pNX * (pZ * pZ) % getPrime c == qNX * (qZ * qZ) % getPrime c)
+
+
+let lemma_norm #c p q = 
+  let prime = getPrime c in 
+  let pX, pY, pZ = p in
+  let qX, qY, qZ = q in 
+  let pNX, pNY, pNZ = _norm p in 
+  let qNX, qNY, qNZ = _norm q in 
+
+  assume ((pZ * pZ) % prime <> 0);
+  assume ((qZ * qZ) % prime <> 0);
+  assume (Math.Euclid.is_prime prime);
+
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+
+  assert(pNX == (pX * modp_inv2 #c (pZ * pZ)) % prime);
+  assert(pNX * (pZ * pZ) % prime == (pX * modp_inv2 #c (pZ * pZ)) % prime * (pZ * pZ) % prime);
+
+
+  calc (==)
+  {
+    (pX * modp_inv2 #c (pZ * pZ)) % prime * (pZ * pZ) % prime;
+    (==) {lemma_mod_mul_distr_l (pX * modp_inv2 #c (pZ * pZ)) (pZ * pZ) prime}
+    pX * modp_inv2 #c (pZ * pZ) * (pZ * pZ) % prime;
+    (==) {assert_by_tactic (pX * modp_inv2 #c (pZ * pZ) * (pZ * pZ) == pX * (modp_inv2 #c (pZ * pZ) * (pZ * pZ))) canon}
+    pX * (modp_inv2 #c (pZ * pZ) * (pZ * pZ)) % prime;
+    (==) {lemma_mod_mul_distr_r pX (modp_inv2 #c (pZ * pZ) * (pZ * pZ)) prime}
+    pX * (modp_inv2 #c (pZ * pZ) * (pZ * pZ) % prime) % prime;
+    (==) {lemma_mod_inv2_mult_prime prime (pZ * pZ)}
+    pX % prime;
+    (==) {small_mod pX prime}
+    pX;
+  };
+
+  calc (==)
+  {
+    (qX * modp_inv2 #c (qZ * qZ)) % prime * (qZ * qZ) % prime;
+    (==) {lemma_mod_mul_distr_l (qX * modp_inv2 #c (qZ * qZ)) (qZ * qZ) prime}
+    qX * modp_inv2 #c (qZ * qZ) * (qZ * qZ) % prime;
+    (==) {assert_by_tactic (qX * modp_inv2 #c (qZ * qZ) * (qZ * qZ) == qX * (modp_inv2 #c (qZ * qZ) * (qZ * qZ))) canon}
+    qX * (modp_inv2 #c (qZ * qZ) * (qZ * qZ)) % prime;
+    (==) {lemma_mod_mul_distr_r qX (modp_inv2 #c (qZ * qZ) * (qZ * qZ)) prime}
+    qX * (modp_inv2 #c (qZ * qZ) * (qZ * qZ) % prime) % prime;
+    (==) {lemma_mod_inv2_mult_prime prime (qZ * qZ)}
+    qX % prime;
+    (==) {small_mod qX prime}
+    qX;
+  };
+
+  assert(pX == qX <==> pNX * (pZ * pZ) % prime == qNX * (qZ * qZ) % prime);
+  
+  admit();
+
+
+  assert(qNX == (qX * modp_inv2 #c (qZ * qZ)) % prime);
+
+  admit()
+
+
+
 let lemmaToDomainFromDomain #c #m a =
   let power = pow2 (getPower c) in 
   let prime = getModePrime m c in 

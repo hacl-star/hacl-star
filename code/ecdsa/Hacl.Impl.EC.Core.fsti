@@ -15,12 +15,13 @@ open Spec.ECC.Curves
 open FStar.Mul
 
 
-#set-options "--z3rlimit 50" 
+#set-options "--z3rlimit 100" 
 
 inline_for_extraction noextract 
 val toDomain: #c: curve -> value: felem c -> result: felem c -> Stack unit 
   (requires fun h -> felem_eval c h value /\ live h value /\ live h result /\ eq_or_disjoint value result)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result = toDomain #c (as_nat c h0 value))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result = toDomain #c (as_nat c h0 value) /\ 
+    felem_eval c h1 result)
  
 inline_for_extraction noextract
 val fromDomain: #c: curve -> f: felem c -> result: felem c -> Stack unit 
@@ -43,7 +44,6 @@ val pointFromDomain: #c : curve -> p: point c -> result: point c-> Stack unit
     point_y_as_nat c h1 result == fromDomain_ #c #DH (point_y_as_nat c h0 p) /\
     point_z_as_nat c h1 result == fromDomain_ #c #DH (point_z_as_nat c h0 p))
     
-
 val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
   (requires fun h -> live h p /\ felem_eval c h (getZ p))
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ ((uint_v r == 0 \/ uint_v r == maxint U64) /\ (
@@ -51,7 +51,6 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
     let x, y, z = point_prime_to_coordinates c (as_seq h0 p) in 
     if Spec.ECC.isPointAtInfinity (xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0 /\ (
     if Spec.ECC.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
-
 
 val norm: #c: curve -> p: point c -> resultPoint: point c -> 
   tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> Stack unit
@@ -74,8 +73,6 @@ val normX: #c: curve -> p: point c -> result: felem c -> tempBuffer: lbuffer uin
     let (xN, _, _) = _norm #c (pxD, pyD, pzD) in 
     as_nat c h1 result == xN))
 
-
-#push-options "--z3rlimit 100" 
 
 inline_for_extraction noextract
 val scalarMultiplication: #c: curve -> #buf_type: buftype 

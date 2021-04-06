@@ -22,6 +22,7 @@ val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer 
   (ensures fun h0 _ h1 -> 
     let k = fromDomain #c (as_nat c h0 a) in 
     modifies (loc a |+| loc result) h0 h1 /\
+    as_nat c h1 result < getPrime c /\ 
     as_nat c h1 result = toDomain #c (pow k (getPrime c - 2) % getPrime c))
 
 

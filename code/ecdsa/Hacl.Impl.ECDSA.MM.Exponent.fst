@@ -22,136 +22,27 @@ open FStar.Mul
 open Lib.Loops
 open Hacl.Spec.EC.Definition
 
-friend Hacl.Impl.ECDSA.MontgomeryMultiplication
+open Hacl.Spec.ECDSA.Definition
+open Hacl.Impl.MM.Exponent
 
 #reset-options " --z3rlimit 200"
-
-
-[@ CInline]
-val cswap: #c: curve ->  bit: uint64{v bit <= 1} -> p: felem c -> q: felem c -> Stack unit
-  (requires fun h -> as_nat c h p < getOrder #c /\ as_nat c h q < getOrder #c /\ live h p /\ live h q /\ eq_or_disjoint p q)
-  (ensures  fun h0 _ h1 -> modifies (loc p |+| loc q) h0 h1 /\ as_nat c h1 p < getOrder #c /\ as_nat c h1 q < getOrder #c /\ (
-    let (r0, r1) = Spec.ECDSA.conditional_swap #c bit (as_nat c h0 p) (as_nat c h0 q) in 
-    let pBefore = as_seq h0 p in let qBefore = as_seq h0 q in 
-    let pAfter = as_seq h1 p in let qAfter = as_seq h1 q in 
-    if uint_v bit = 0 then r0 == as_nat c h0 p /\ r1 == as_nat c h0 q else r0 == as_nat c h0 q /\ r1 == as_nat c h0 p) /\
-    (v bit == 1 ==> as_seq h1 p == as_seq h0 q /\ as_seq h1 q == as_seq h0 p) /\
-    (v bit == 0 ==> as_seq h1 p == as_seq h0 p /\ as_seq h1 q == as_seq h0 q))
-
-
-let cswap #c bit p1 p2 =
-  let h0 = ST.get () in
-  let mask = u64 0 -. bit in
-  let open Lib.Sequence in 
-  [@ inline_let]
-  let inv h1 (i:nat{i <= v (getCoordinateLenU64 c)}) =
-    (forall (k:nat{k < i}).
-      if v bit = 1
-      then (as_seq h1 p1).[k] == (as_seq h0 p2).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p1).[k]
-      else (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    (forall (k:nat{i <= k /\ k < v (getCoordinateLenU64 c)}).
-      (as_seq h1 p1).[k] == (as_seq h0 p1).[k] /\ (as_seq h1 p2).[k] == (as_seq h0 p2).[k]) /\
-    modifies (loc p1 |+| loc p2) h0 h1 in
- 
-  Lib.Loops.for 0ul (getCoordinateLenU64 c) inv
-    (fun i ->
-      let dummy = mask &. (p1.(i) ^. p2.(i)) in
-      p1.(i) <- p1.(i) ^. dummy;
-      p2.(i) <- p2.(i) ^. dummy;
-      lemma_cswap2_step bit ((as_seq h0 p1).[v i]) ((as_seq h0 p2).[v i])
-    );
-  let h1 = ST.get () in
-  Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
-  Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2)
-
-
-inline_for_extraction noextract
-val montgomery_ladder_exponent_step0: #c: curve -> a: felem c -> b: felem c -> Stack unit
-  (requires fun h -> live h a /\ live h b /\ 
-    as_nat c h a < getOrder #c /\ as_nat c h b < getOrder #c /\ disjoint a b)
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ 
-    as_nat c h1 a < getOrder #c /\ as_nat c h1 b < getOrder #c /\ (
-    let (r0D, r1D) = _exp_step0 #c (fromDomain_ #c #DSA (as_nat c h0 a)) (fromDomain_ #c #DSA (as_nat c h0 b)) in 
-    r0D == fromDomain_ #c #DSA (as_nat c h1 a) /\ r1D == fromDomain_ #c #DSA (as_nat c h1 b)))
-
-let montgomery_ladder_exponent_step0 #c a b = 
-    let h0 = ST.get() in 
-  montgomery_multiplication_buffer_dsa a b b;
-    lemmaToDomainFromDomain #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 b) % getOrder #c);
-  montgomery_multiplication_buffer_dsa a a a ;
-    lemmaToDomainFromDomain #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 a) % getOrder #c)
-
-
-inline_for_extraction noextract
-val montgomery_ladder_exponent_step: #c: curve -> a: felem c -> b: felem c -> scalar: glbuffer uint8 (getScalarLenBytes c) 
-  -> i:size_t{v i < v (getScalarLen c)} -> 
-  Stack unit
-  (requires fun h -> live h a  /\ live h b /\ live h scalar /\ as_nat c h a < getOrder #c /\ as_nat c h b < getOrder #c /\
-    disjoint a b)
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ (
-    let a_ = fromDomain_ #c #DSA (as_nat c h0 a) in 
-    let b_ = fromDomain_ #c #DSA (as_nat c h0 b) in 
-    let (r0D, r1D) = _exp_step #c (as_seq h0 scalar) (uint_v i) (a_, b_) in 
-    r0D == fromDomain_ #c #DSA (as_nat c h1 a) /\ r1D == fromDomain_ #c #DSA (as_nat c h1 b) /\ 
-    as_nat c h1 a < getOrder #c /\ as_nat c h1 b < getOrder #c))  
-
-let montgomery_ladder_exponent_step #c a b scalar i = 
-    let h0 = ST.get() in 
-  let bit0 = getScalarLen c -. 1ul -. i in 
-  let bit = scalar_bit #c scalar bit0 in 
-  cswap bit a b;
-  montgomery_ladder_exponent_step0 a b;
-  cswap bit a b;
-  Spec.ECDSA.lemma_swaped_steps #c (fromDomain_ #c #DSA (as_nat c h0 a)) (fromDomain_ #c #DSA (as_nat c h0 b))
-
-
-inline_for_extraction noextract 
-val _montgomery_ladder_exponent: #c: curve -> a: felem c -> b: felem c -> scalar: glbuffer uint8 (getScalarLenBytes c) -> 
-  Stack unit
-  (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat c h a < getOrder #c /\ as_nat c h b < getOrder #c /\
-    disjoint a b /\disjoint a scalar /\ disjoint b scalar)
-  (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ (
-    let a_ = fromDomain_ #c #DSA (as_nat c h0 a) in 
-    let b_ = fromDomain_ #c #DSA (as_nat c h0 b) in 
-    let (r0D, r1D) = _exponent_spec #c (as_seq h0 scalar) (a_, b_) in 
-    r0D == fromDomain_ #c #DSA (as_nat c h1 a) /\ r1D == fromDomain_ #c #DSA (as_nat c h1 b) /\
-    as_nat c h1 a < getOrder #c /\ as_nat c h1 b < getOrder #c))
-
-  
-let _montgomery_ladder_exponent #c a b scalar = 
-  let h0 = ST.get() in 
-  [@inline_let]
-  let spec_exp h0  = _exp_step #P256 (as_seq h0 scalar) in 
-  [@inline_let]
-  let acc (h: mem) : GTot (tuple2 nat_prime nat_prime) = (fromDomain_ (as_nat c h a), fromDomain_ (as_nat c h b)) in 
-  Lib.LoopCombinators.eq_repeati0 256 (spec_exp h0) (acc h0);
-  [@inline_let]
-  let inv h (i: nat {i <= 256}) = 
-    live h a /\ live h b /\ live h scalar /\ 
-    modifies (loc a |+| loc b) h0 h /\ as_nat c h a < prime /\ as_nat c h b < prime /\
-    acc h == Lib.LoopCombinators.repeati i (spec_exp h0) (acc h0) in 
-  for 0ul 256ul inv (
-    fun i -> 
-	  montgomery_ladder_exponent_step a b scalar i;
-	  Lib.LoopCombinators.unfold_repeati 256 (spec_exp h0) (acc h0) (uint_v i))
-
 
 inline_for_extraction noextract 
 val upload_one_montg_form: #c: curve -> b: felem c -> Stack unit
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b == toDomain_ (1))
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b == toDomain_ #c #DSA (1))
 
-let upload_one_montg_form b =
+let upload_one_montg_form #c b =
   upd b (size 0) (u64 884452912994769583);
   upd b (size 1) (u64 4834901526196019579);
   upd b (size 2) (u64 0);
   upd b (size 3) (u64 4294967295);
-    assert_norm(toDomain_ 1 == 26959946660873538059280334323273029441504803697035324946844617595567)
+    assert_norm(toDomain_ #c #DSA 1 == 26959946660873538059280334323273029441504803697035324946844617595567)
   
 
 let montgomery_ladder_exponent #c r = 
   push_frame(); 
-    let p = create (size 4) (u64 0) in 
+    let p = create (size 4) (u64 0) in  
     upload_one_montg_form #c p; 
     recall_contents (order_inverse_buffer #P256) (prime_order_inverse_seq #P256);
     let h = ST.get() in
@@ -159,8 +50,8 @@ let montgomery_ladder_exponent #c r =
     mut_const_immut_disjoint #uint64 #uint8 r (order_inverse_buffer #P256) h;
     assert (disjoint p (order_inverse_buffer #P256));
     assert (disjoint r (order_inverse_buffer #P256));
-    _montgomery_ladder_exponent p r (order_inverse_buffer #P256);
-      lemmaToDomainFromDomain 1;
+    _montgomery_ladder_power #c #DSA p r (order_inverse_buffer #P256);
+      lemmaToDomainFromDomain #c #DSA 1;
     copy r p;
   pop_frame()  
 
@@ -169,12 +60,12 @@ let fromDomainImpl #c a result =
   push_frame();
     let one = create (size 4) (u64 0) in 
     uploadOneImpl #c one;
-    montgomery_multiplication_ecdsa_module one a result;
+    montgomery_multiplication_buffer_dsa one a result;
   pop_frame()   
 
 
-val lemma_fromDomain1: a: nat -> 
-  Lemma ((fromDomain_ (fromDomain_ (fromDomain_ a))) == ((a * modp_inv2_prime (pow2 256) prime_p256_order * modp_inv2_prime (pow2 256) prime_p256_order * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order))
+val lemma_fromDomain1: #c: curve -> a: nat -> 
+  Lemma ((fromDomain_ #c #DSA (fromDomain_ #c #DSA (fromDomain_ #c #DSA a))) == ((a * modp_inv2_prime (pow2 256) prime_p256_order * modp_inv2_prime (pow2 256) prime_p256_order * modp_inv2_prime (pow2 256) prime_p256_order) % prime_p256_order))
 
 let lemma_fromDomain1 a = 
   let f = modp_inv2_prime (pow2 256) prime_p256_order in 
@@ -182,8 +73,8 @@ let lemma_fromDomain1 a =
   lemma_mod_mul_distr_l (a * f * f) f prime_p256_order
 
 
-val lemma_fromDomain2: a: nat -> 
-  Lemma (pow (fromDomain_ (fromDomain_ a)) (prime_p256_order - 2) % prime_p256_order == 
+val lemma_fromDomain2: #c: curve -> a: nat -> 
+  Lemma (pow (fromDomain_ #c #DSA (fromDomain_ #c #DSA a)) (prime_p256_order - 2) % prime_p256_order == 
     (
       pow a (prime_p256_order - 2) * 
       pow (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 2) * 
@@ -223,14 +114,14 @@ let multPower #c a b result =
       fromDomainImpl #c b buffFromDB;
       fromDomainImpl #c buffFromDB buffFromDB;
       montgomery_ladder_exponent #c tempB1;
-      montgomery_multiplication_ecdsa_module tempB1 buffFromDB result;
+      montgomery_multiplication_buffer_dsa tempB1 buffFromDB result;
     pop_frame();
     
-      let p = pow (fromDomain_ (fromDomain_ (as_nat c h0 a))) (prime_p256_order - 2) % prime_p256_order in 
-      let q = fromDomain_ (fromDomain_ (fromDomain_ (as_nat c h0 b))) in 
+      let p = pow (fromDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a))) (prime_p256_order - 2) % prime_p256_order in 
+      let q = fromDomain_ #c #DSA (fromDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 b))) in 
       let r = modp_inv2_prime (pow2 256) prime_p256_order in 
-      lemma_fromDomain1 (as_nat c h0 b);
-      lemma_fromDomain2 (as_nat c h0 a);
+      lemma_fromDomain1 #c (as_nat c h0 b);
+      lemma_fromDomain2 #c (as_nat c h0 a);
 
       lemma_mod_mul_distr_l (pow (as_nat c h0 a) (prime_p256_order - 2) * pow r (prime_p256_order - 2) * pow r (prime_p256_order - 2)) (((as_nat c h0 b) * r * r * r) % prime_p256_order) prime_p256_order;
       lemma_mod_mul_distr_r (pow (as_nat c h0 a) (prime_p256_order - 2) * pow r (prime_p256_order - 2) * pow r (prime_p256_order - 2)) ((as_nat c h0 b) * r * r * r) prime_p256_order;
@@ -259,14 +150,14 @@ let multPowerPartial #c s a b result =
     let buffFromDB = create (size 4) (u64 0) in 
     fromDomainImpl #c b buffFromDB;
     fromDomainImpl #c buffFromDB buffFromDB;
-    montgomery_multiplication_ecdsa_module a buffFromDB result;
+    montgomery_multiplication_buffer_dsa a buffFromDB result;
   pop_frame();
 
-    let p = pow (fromDomain_ (fromDomain_ (as_nat c h0 s))) (prime_p256_order - 2) % prime_p256_order in 
-    let q = fromDomain_ (fromDomain_ (fromDomain_ (as_nat c h0 b))) in 
+    let p = pow (fromDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 s))) (prime_p256_order - 2) % prime_p256_order in 
+    let q = fromDomain_ #c #DSA (fromDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 b))) in 
     let r = modp_inv2_prime (pow2 256) prime_p256_order in 
-      lemma_fromDomain1 (as_nat c h0 b);
-      lemma_fromDomain2 (as_nat c h0 s);
+      lemma_fromDomain1 #c (as_nat c h0 b);
+      lemma_fromDomain2 #c (as_nat c h0 s);
 
       lemma_mod_mul_distr_l (pow (as_nat c h0 s) (prime_p256_order - 2) * pow r (prime_p256_order - 2) * pow r (prime_p256_order - 2)) (((as_nat c h0 b) * r * r * r) % prime_p256_order) prime_p256_order;
       lemma_mod_mul_distr_r (pow (as_nat c h0 s) (prime_p256_order - 2) * pow r (prime_p256_order - 2) * pow r (prime_p256_order - 2)) ((as_nat c h0 b) * r * r * r) prime_p256_order;

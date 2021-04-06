@@ -41,9 +41,9 @@ let exponent #c a result tempBuffer =
     exponent_p384 a result tempBuffer
   |Default -> 
     recall_contents (prime_inverse_buffer #c) (Lib.Sequence.of_list (prime_inverse_list c));
-    montgomery_ladder_power #c a (prime_inverse_buffer #c) result
+    montgomery_ladder_power #c #DH a (prime_inverse_buffer #c) result
 
 
 let square_root #c a result = 
   recall_contents (sqPower_buffer #c) (Lib.Sequence.of_list (sqPower_list #c));
-  montgomery_ladder_power a (sqPower_buffer #c) result
+  montgomery_ladder_power #c #DH a (sqPower_buffer #c) result

@@ -229,7 +229,7 @@ let decompressionCompressedForm #c b result =
       lemma_core_0 c t0 h1;
 
       let lessThanPrimeXCoordinate = lessThanPrime #c t0 in 
-      changeEndianLemma #c (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x));
+      (* changeEndianLemma #c (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x)); *)
 	Lib.ByteSequence.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 x);
 
       if not (lessThanPrimeXCoordinate) then 
@@ -248,7 +248,7 @@ let decompressionCompressedForm #c b result =
 	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in 
 	  logand_mask compressedIdentifier (u8 1) 1;
 	  computeYFromX #c t0 t1 identifierBit;
-	  lemmaToDomainAndBackIsTheSame #c #DH (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
+	  lemmaToDomainFromDomain #c #DH (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
 
 	    let h3 = ST.get() in 
 	    assert(    
@@ -268,7 +268,7 @@ let decompressionCompressedForm #c b result =
 	  lemma_core_0 c t1 h3;
 	  
 	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h3 t1);
-	  changeEndian_le_be #c (as_nat c h3 t1);
+	  (* changeEndian_le_be #c (as_nat c h3 t1); *)
 	  
 	  assert(   
 	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 

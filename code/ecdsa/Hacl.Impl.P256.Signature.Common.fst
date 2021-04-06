@@ -373,10 +373,10 @@ let verifyQ #c pubKey =
 	let publicKeyX = sub publicKeyB (size 0) len in 
 	let publicKeyY = sub publicKeyB len len in 
     
-    toUint64ChangeEndian #c pubKeyX publicKeyX;
-    toUint64ChangeEndian #c pubKeyY publicKeyY;
+(*     toUint64ChangeEndian #c pubKeyX publicKeyX;
+    toUint64ChangeEndian #c pubKeyY publicKeyY; *)
   let h1 = ST.get() in 
-      lemma_core_0 c publicKeyX h1;
+    (*   lemma_core_0 c publicKeyX h1;
       uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  
       lemma_core_0 c publicKeyY h1;
       uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY); 
@@ -386,7 +386,7 @@ let verifyQ #c pubKey =
       
       changeEndianLemma #c (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
       uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
-
+ *)
   bufferToJac #c publicKeyB publicKeyJ;
   let r = verifyQValidCurvePoint #c publicKeyJ tempBufferV in 
   pop_frame();
