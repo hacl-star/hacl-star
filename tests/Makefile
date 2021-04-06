@@ -5,7 +5,8 @@
 # export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib"
 
 ifeq (,$(OPENSSL_HOME))
-  OPENSSL_HOME = /usr/local/src/openssl-1.1.1c
+#  OPENSSL_HOME = /usr/local/src/openssl-1.1.1c
+  OPENSSL_HOME = /home/soho/Projects/prosecco/openssl
   $(warning **WARNING**: OPENSSL_HOME not defined: using a default location)
 endif
 
@@ -36,6 +37,7 @@ endif
 CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
+  -I$(OPENSSL_HOME)/include \
   -O3 $(CFLAGS) $(USER_CFLAGS)
 
 all: $(TARGETS)
@@ -67,8 +69,11 @@ vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
 	$^ ../dist/gcc-compatible/libevercrypt.a \
 	$(OPENSSL_HOME)/libcrypto.a \
 	$(OPENSSL_HOME)/libssl.a \
+        -lpthread \
+	-ldl \
 	-o $@ \
 	-lsodium
+
 
 # Running tests
 
