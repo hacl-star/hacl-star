@@ -539,6 +539,27 @@ let ext_denominator_lemma2 p =
   assert (_Y *% _Y -% _X *% _X <> zero)
 
 
+val lemma_neg_sqr: x:elem -> Lemma ((-x) % prime *% ((-x) % prime) == x *% x)
+let lemma_neg_sqr x =
+  calc (==) {
+    (- x) % prime * ((- x) % prime) % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- x) ((- x) % prime) prime }
+    (- x) * ((- x) % prime) % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (- x) (- x) prime }
+    (- x) * (- x) % prime;
+    (==) { Math.Lemmas.neg_mul_left x (- x); Math.Lemmas.neg_mul_right x x }
+    (x * x) % prime;
+  }
+
+
+let aff_point_negate_lemma p =
+  let (x, y) = p in
+  assert (aff_point_negate p == ((-x) % prime, y));
+  //assert (y *% y -% x *% x == 1 +% d *% (x *% x) *% (y *% y));
+  lemma_neg_sqr x;
+  assert (is_on_curve (aff_point_negate p))
+
+
 let to_aff_point_at_infinity_lemma () =
   let x, y = to_aff_point point_at_infinity in
   assert (point_at_infinity == (zero, one, one, zero));
@@ -856,7 +877,8 @@ let to_aff_point_add_lemma p q =
     (==) { ext_dx1x2y1y2 p q }
     k3 /% k4;
     };
-  assert (k1 /% k2 == _X3 /% _Z3 /\ k3 /% k4 == _Y3 /% _Z3)
+  assert (k1 /% k2 == _X3 /% _Z3 /\ k3 /% k4 == _Y3 /% _Z3);
+  aff_point_add_lemma (to_aff_point p) (to_aff_point q)
 
 
 val point_double_expand_eh_lemma: p:ext_point{is_ext p} -> Lemma (
@@ -1057,8 +1079,179 @@ let to_aff_point_double_lemma p =
     (==) { fdiv_to_one_denominator _X _X _Z _Z; fdiv_to_one_denominator _Y _Y _Z _Z }
     k3 /% k4;
     };
-  assert (k1 /% k2 == _X3 /% _Z3 /\ k3 /% k4 == _Y3 /% _Z3)
+  assert (k1 /% k2 == _X3 /% _Z3 /\ k3 /% k4 == _Y3 /% _Z3);
+  aff_point_double_lemma (to_aff_point p);
+  aff_point_add_lemma (to_aff_point p) (to_aff_point p)
 
+
+let to_aff_point_negate p =
+  let (_X, _Y, _Z, _T) = p in
+  let p' = point_negate p in
+  assert (point_negate p == ((-_X) % prime, _Y, _Z, (-_T) % prime));
+  assert (is_ext p /\ is_on_curve (to_aff_point p));
+  assert (_T == _X *% _Y /% _Z);
+  let x = _X /% _Z in
+  let y = _Y /% _Z in
+  assert (y *% y -% x *% x == 1 +% d *% (x *% x) *% (y *% y));
+  calc (==) {
+    (-_X) % prime * finv _Z % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (-_X) (finv _Z) prime }
+    (-_X) * finv _Z % prime;
+    (==) { Math.Lemmas.neg_mul_left _X (finv _Z) }
+    (- (_X * finv _Z)) % prime;
+    (==) { Math.Lemmas.lemma_mod_sub_distr 0 (_X * finv _Z) prime }
+    (- (_X *% finv _Z)) % prime;
+    };
+  lemma_neg_sqr (_X *% finv _Z);
+  assert (is_on_curve (to_aff_point p'));
+
+  calc (==) {
+    ((-_X) % prime * _Y) % prime * finv _Z % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (-_X) _Y prime }
+    ((-_X) * _Y) % prime * finv _Z % prime;
+    (==) { Math.Lemmas.neg_mul_left _X _Y }
+    (-(_X * _Y)) % prime * finv _Z % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (-(_X * _Y)) (finv _Z) prime }
+    (-(_X * _Y)) * finv _Z % prime;
+    (==) { Math.Lemmas.neg_mul_left (_X * _Y) (finv _Z) }
+    (-(_X * _Y * finv _Z)) % prime;
+    (==) { Math.Lemmas.lemma_mod_sub_distr 0 (_X * _Y * finv _Z) prime }
+    (-(_X * _Y * finv _Z % prime)) % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (_X * _Y) (finv _Z) prime }
+    (-(_X *% _Y *% finv _Z)) % prime;
+    (==) { }
+    (-_T) % prime;
+    };
+  assert (is_ext p');
+  aff_point_negate_lemma (to_aff_point p)
+
+
+val fmul_both_lemma: a:elem -> b:elem -> c:elem -> Lemma
+  (requires a == b)
+  (ensures  a *% c == b *% c)
+let fmul_both_lemma a b c =
+  calc (==) {
+    (a * c) % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l a c prime }
+    ((a % prime) * c) % prime;
+    (==) {  }
+    ((b % prime) * c) % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l b c prime }
+    (b * c) % prime;
+  }
+
+val fmul_both_lemma_neq: a:elem -> b:elem -> c:elem{c <> 0} -> Lemma
+  (a <> b <==> (a *% c <> b *% c))
+let fmul_both_lemma_neq a b c =
+  prime_lemma ();
+  if a *% c = b *% c then
+    Fermat.mod_mult_congr prime a b c
+  else ()
+
+
+val lemma_fmul_assoc1: a:elem -> b:elem -> c:elem ->
+  Lemma (a *% b *% c == a *% c *% b)
+let lemma_fmul_assoc1 a b c =
+  LM.lemma_mul_mod_assoc #prime a b c;
+  LM.lemma_mul_mod_comm #prime b c;
+  LM.lemma_mul_mod_assoc #prime a c b
+
+
+val fdiv_lemma1: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> Lemma
+  (requires a /% b == c /% d)
+  (ensures  a *% d == c *% b)
+let fdiv_lemma1 a b c d =
+  fmul_both_lemma (a /% b) (c /% d) (b *% d);
+  assert (a *% finv b *% (b *% d) == c *% finv d *% (b *% d));
+  calc (==) {
+    a *% finv b *% (b *% d);
+    (==) { lemma_fmul_assoc1 a (finv b) (b *% d) }
+    a *% (b *% d) *% finv b;
+    (==) {
+      LM.lemma_mul_mod_comm #prime b d;
+      LM.lemma_mul_mod_assoc #prime a (d *% b) (finv b) }
+    a *% ((d *% b) *% finv b);
+    (==) { LM.lemma_mul_mod_assoc #prime d b (finv b) }
+    a *% (d *% (b *% finv b));
+    (==) { fdiv_one_lemma1 d b }
+    a *% d;
+    };
+
+  calc (==) {
+    c *% finv d *% (b *% d);
+    (==) { lemma_fmul_assoc1 c (finv d) (b *% d) }
+    c *% (b *% d) *% finv d;
+    (==) { LM.lemma_mul_mod_assoc #prime c (b *% d) (finv d) }
+    c *% ((b *% d) *% finv d);
+    (==) { LM.lemma_mul_mod_assoc #prime b d (finv d) }
+    c *% (b *% (d *% finv d));
+    (==) { fdiv_one_lemma1 b d }
+    c *% b;
+    }
+
+
+val point_equal_lemma_aux1: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> e:elem -> f:elem{f <> 0} -> Lemma
+  (requires a *% b <> c *% d /\ a /% d == e /% f)
+  (ensures  e *% b <> c *% f)
+let point_equal_lemma_aux1 a b c d e f =
+  fmul_both_lemma_neq (a *% b) (c *% d) f;
+  assert (a *% b *% f <> c *% d *% f);
+  calc (==) {
+    a *% b *% f;
+    (==) { lemma_fmul_assoc1 a b f }
+    a *% f *% b;
+    (==) { fdiv_lemma1 a d e f }
+    e *% d *% b;
+    (==) { lemma_fmul_assoc1 e d b }
+    e *% b *% d;
+    };
+  lemma_fmul_assoc1 c d f;
+  assert (e *% b *% d <> c *% f *% d);
+  fmul_both_lemma_neq (e *% b) (c *% f) d
+
+
+val point_equal_lemma_aux2: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> e:elem -> f:elem{f <> 0} -> Lemma
+  (requires a *% b == c *% d /\ a /% d == e /% f)
+  (ensures  e *% b == c *% f)
+let point_equal_lemma_aux2 a b c d e f =
+  fmul_both_lemma (a *% b) (c *% d) f;
+  assert (a *% b *% f == c *% d *% f);
+  calc (==) {
+    a *% b *% f;
+    (==) { lemma_fmul_assoc1 a b f }
+    a *% f *% b;
+    (==) { fdiv_lemma1 a d e f }
+    e *% d *% b;
+    (==) { lemma_fmul_assoc1 e d b }
+    e *% b *% d;
+    };
+  lemma_fmul_assoc1 c d f;
+  assert (e *% b *% d == c *% f *% d);
+  prime_lemma ();
+  Fermat.mod_mult_congr prime (e *% b) (c *% f) d;
+  Math.Lemmas.small_mod (e *% b) prime;
+  Math.Lemmas.small_mod (c *% f) prime;
+  assert (e *% b == c *% f)
+
+
+let point_equal_lemma p q s =
+  let px, py, pz, pt = p in
+  let qx, qy, qz, qt = q in
+  let sx, sy, sz, st = s in
+  assert (px /% pz == qx /% qz);
+  assert (py /% pz == qy /% qz);
+
+  if ((px *% sz) <> (sx *% pz)) then
+    point_equal_lemma_aux1 px sz sx pz qx qz
+  else if ((py *% sz) <> (sy *% pz)) then
+    point_equal_lemma_aux1 py sz sy pz qy qz
+    else begin
+      point_equal_lemma_aux2 px sz sx pz qx qz;
+      point_equal_lemma_aux2 py sz sy pz qy qz end
+
+
+let aff_g_is_on_curve () =
+  assert_norm (is_on_curve (g_x, g_y))
 
 
 let g_is_on_curve () =
@@ -1068,6 +1261,7 @@ let g_is_on_curve () =
   assert (to_aff_point g == (g_x, g_y));
   assert_norm (is_on_curve (g_x, g_y));
   fdiv_one_lemma (g_x *% g_y)
+
 
 val recover_x_lemma_aux: y:elem ->
   Lemma (let y2 = y *% y in
@@ -1105,19 +1299,6 @@ let recover_x_lemma_aux y =
   Math.Lemmas.mod_add_both (d *% x2 *% y2 + x2) (y2 - one) (one - x2) prime;
   assert ((d *% x2 *% y2 + x2 + one - x2) % prime == (y2 - one + one - x2) % prime);
   assert (d *% x2 *% y2 +% one == y2 -% x2)
-
-
-val lemma_neg_sqr: x:elem -> Lemma ((-x) % prime *% ((-x) % prime) == x *% x)
-let lemma_neg_sqr x =
-  calc (==) {
-    (- x) % prime * ((- x) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- x) ((- x) % prime) prime }
-    (- x) * ((- x) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (- x) (- x) prime }
-    (- x) * (- x) % prime;
-    (==) { Math.Lemmas.neg_mul_left x (- x); Math.Lemmas.neg_mul_right x x }
-    (x * x) % prime;
-  }
 
 
 val recover_x_lemma: y:nat -> sign:bool -> Lemma (let x = recover_x y sign in
@@ -1161,7 +1342,7 @@ let recover_x_lemma y sign =
 
 module BSeq = Lib.ByteSequence
 
-let point_negate_decompress_lemma s =
+let point_decompress_lemma s =
   let p = point_decompress s in
   let y = BSeq.nat_from_bytes_le s in
   let sign = (y / pow2 255) % 2 = 1 in
@@ -1171,35 +1352,13 @@ let point_negate_decompress_lemma s =
   recover_x_lemma y sign;
   if (Some? x) then begin
     let x = Some?.v x in
-    let x' = (-x) % prime in
-    let p' = point_negate (Some?.v p) in
     let p = (x, y, one, x *% y) in
     assert (is_on_curve (x, y));
     fdiv_one_lemma x;
     fdiv_one_lemma y;
     assert (is_on_curve (to_aff_point p));
     fdiv_one_lemma (x *% y);
-    assert (is_ext p);
-
-    assert (p' == point_negate p);
-    assert (p' == (x', y, one, (- x *% y) % prime));
-    lemma_neg_sqr x;
-    fdiv_one_lemma x';
-    assert (is_on_curve (to_aff_point p'));
-
-    calc (==) {
-      (- x *% y) % prime;
-      (==) { }
-      (- (x * y) % prime) % prime;
-      (==) { Math.Lemmas.lemma_mod_sub_distr 0 (x * y) prime }
-      (- (x * y)) % prime;
-      (==) { Math.Lemmas.neg_mul_left x y }
-      (- x) * y % prime;
-      (==) { Math.Lemmas.lemma_mod_mul_distr_l (- x) y prime }
-      x' *% y;
-      };
-    fdiv_one_lemma (x' *% y);
-    assert (is_ext p') end
+    assert (is_ext p) end
 
 
 #push-options "--fuel 2"

@@ -43,7 +43,7 @@ let mk_ed25519_comm_monoid: LE.comm_monoid aff_point_c = {
   LE.lemma_mul_comm = EL.aff_point_add_comm_lemma;
   }
 
-let ext_point_c = p:ext_point{is_ext p /\ is_on_curve (to_aff_point p)}
+let ext_point_c = p:ext_point{point_inv p}
 let mk_to_ed25519_comm_monoid : SE.to_comm_monoid ext_point_c = {
   SE.a_spec = aff_point_c;
   SE.comm_monoid = mk_ed25519_comm_monoid;
@@ -57,18 +57,13 @@ let point_at_inifinity_c _ =
 
 val point_add_c: SE.mul_st ext_point_c mk_to_ed25519_comm_monoid
 let point_add_c p q =
-  let r = point_add p q in
   EL.to_aff_point_add_lemma p q;
-  EL.aff_point_add_lemma (to_aff_point p) (to_aff_point q);
-  r
+  point_add p q
 
 val point_double_c: SE.sqr_st ext_point_c mk_to_ed25519_comm_monoid
 let point_double_c p =
-  let r = point_double p in
   EL.to_aff_point_double_lemma p;
-  EL.aff_point_double_lemma (to_aff_point p);
-  EL.aff_point_add_lemma (to_aff_point p) (to_aff_point p);
-  r
+  point_double p
 
 let mk_ed25519_concrete_ops : SE.concrete_ops ext_point_c = {
   SE.to = mk_to_ed25519_comm_monoid;
@@ -90,6 +85,11 @@ let point_mul_g (a:lbytes 32) : ext_point_c =
 let point_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:ext_point_c) : ext_point_c =
   EL.g_is_on_curve ();
   point_mul_double a1 g a2 p
+
+let point_negate_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:ext_point_c) : ext_point_c =
+  let p1 = point_negate p in
+  EL.to_aff_point_negate p;
+  point_mul_double_g a1 a2 p1
 
 
 ///  Ed25519 API
@@ -166,10 +166,9 @@ let verify public msg signature =
 	in
         let sb = nat_to_bytes_le 32 s in
         let hb = nat_to_bytes_le 32 h in
-        let a'' = point_negate a' in
 
-        EL.point_negate_decompress_lemma public;
-        let exp_d = point_mul_double_g sb hb a'' in
+        EL.point_decompress_lemma public;
+        let exp_d = point_negate_mul_double_g sb hb a' in
         point_equal exp_d r'
       )
     )

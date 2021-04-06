@@ -12,6 +12,7 @@ open Lib.Buffer
 open Hacl.Bignum25519
 
 module F51 = Hacl.Impl.Ed25519.Field51
+module PM = Hacl.Impl.Ed25519.Ladder
 
 #reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
@@ -43,37 +44,37 @@ let verify_step_1 r msg len rs public =
   Hacl.Impl.Store56.store_56 r r';
   pop_frame()
 
+
 inline_for_extraction noextract
 val verify_step_2':
     s:lbuffer uint8 32ul
   -> h':lbuffer uint8 32ul
   -> a':point
-  -> r':point
-  -> tmp:lbuffer uint64 60ul ->
-  Stack bool
+  -> tmp:lbuffer uint64 40ul ->
+  Stack unit
     (requires fun h ->
-      live h s  /\ live h h' /\ live h a' /\ live h r' /\ live h tmp /\
-      disjoint tmp h' /\ disjoint tmp s /\ disjoint tmp a' /\ disjoint tmp r' /\
-      disjoint a' r' /\
-      F51.point_inv_t h a' /\ F51.point_inv_t h r'
+      live h s  /\ live h h' /\ live h a' /\ live h tmp /\
+      disjoint tmp h' /\ disjoint tmp s /\ disjoint tmp a' /\
+      F51.point_inv_t h a' /\ PM.inv_ext_point (as_seq h a')
     )
-    (ensures fun h0 z h1 -> modifies (loc tmp) h0 h1 /\
-      (z == Spec.Ed25519.(
-        let sB = point_mul (as_seq h0 s) g in
-        let hA = point_mul (as_seq h0 h') (F51.point_eval h0 a') in
-        point_equal sB (point_add (F51.point_eval h0 r') hA)))
-    )
-let verify_step_2' s h' a' r' tmp =
-  let hA   = sub tmp  0ul  20ul in
-  let rhA  = sub tmp 20ul  20ul in
-  let sB   = sub tmp 40ul  20ul in
-  Hacl.Impl.Ed25519.Ladder.point_mul_g sB s;
-  Hacl.Impl.Ed25519.Ladder.point_mul hA h' a';
-  Hacl.Impl.Ed25519.PointAdd.point_add rhA r' hA;
-  let b = Hacl.Impl.Ed25519.PointEqual.point_equal sB rhA in
-  b
+    (ensures fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
+     (let exp_d = gsub tmp 20ul 20ul in
+      F51.point_inv_t h1 exp_d /\ PM.inv_ext_point (as_seq h1 exp_d) /\
+      Spec.Ed25519.to_aff_point (F51.point_eval h1 exp_d) ==
+      Spec.Ed25519.(to_aff_point (point_negate_mul_double_g (as_seq h0 s) (as_seq h0 h') (F51.point_eval h0 a')))))
+
+let verify_step_2' s h' a' tmp =
+  let a_neg = sub tmp 0ul 20ul in
+  let exp_d = sub tmp 20ul 20ul in
+  let h0 = ST.get () in
+
+  Spec.Ed25519.Lemmas.to_aff_point_negate (PM.refl_ext_point (as_seq h0 a'));
+  Spec.Ed25519.Lemmas.aff_point_negate_lemma (PM.refl (as_seq h0 a'));
+  Hacl.Impl.Ed25519.PointNegate.point_negate a' a_neg;
+  Hacl.Impl.Ed25519.Ladder.point_mul_g_double_vartime exp_d s h' a_neg
 
 
+#push-options "--z3rlimit 150"
 inline_for_extraction noextract
 val verify_step_2:
     s:lbuffer uint8 32ul
@@ -84,20 +85,28 @@ val verify_step_2:
     (requires fun h ->
       live h s  /\ live h h' /\ live h a' /\ live h r' /\
       disjoint a' r' /\
-      F51.point_inv_t h a' /\ F51.point_inv_t h r'
+      F51.point_inv_t h a' /\ PM.inv_ext_point (as_seq h a') /\
+      F51.point_inv_t h r' /\ PM.inv_ext_point (as_seq h r')
     )
     (ensures fun h0 z h1 -> modifies0 h0 h1 /\
       (z == Spec.Ed25519.(
-        let sB = point_mul (as_seq h0 s) g in
-        let hA = point_mul (as_seq h0 h') (F51.point_eval h0 a') in
-        point_equal sB (point_add (F51.point_eval h0 r') hA)))
+        let exp_d = point_negate_mul_double_g (as_seq h0 s) (as_seq h0 h') (F51.point_eval h0 a') in
+        point_equal exp_d (F51.point_eval h0 r')))
     )
 let verify_step_2 s h' a' r' =
   push_frame();
-  let tmp = create 60ul (u64 0) in
-  let b = verify_step_2' s h' a' r' tmp in
+  let tmp = create 40ul (u64 0) in
+  verify_step_2' s h' a' tmp;
+  let exp_d = sub tmp 20ul 20ul in
+  let b = Hacl.Impl.Ed25519.PointEqual.point_equal exp_d r' in
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.point_equal_lemma
+    (F51.point_eval h0 exp_d)
+    (Spec.Ed25519.point_negate_mul_double_g (as_seq h0 s) (as_seq h0 h') (F51.point_eval h0 a'))
+    (F51.point_eval h0 r');
   pop_frame();
   b
+
 
 inline_for_extraction noextract
 val verify_inner_:
@@ -112,7 +121,8 @@ val verify_inner_:
       live h public /\ live h msg /\ live h signature /\ live h tmp /\ live h tmp' /\
       disjoint tmp public /\ disjoint tmp msg /\ disjoint tmp signature /\
       disjoint tmp tmp' /\ disjoint tmp' signature /\ disjoint tmp' public /\ disjoint tmp' msg /\
-      F51.point_inv_t h (gsub tmp 0ul 20ul) /\ F51.point_inv_t h (gsub tmp 20ul 20ul) /\
+      F51.point_inv_t h (gsub tmp 0ul 20ul) /\ PM.inv_ext_point (as_seq h (gsub tmp 0ul 20ul)) /\
+      F51.point_inv_t h (gsub tmp 20ul 20ul) /\ PM.inv_ext_point (as_seq h (gsub tmp 20ul 20ul)) /\
       (Some? (Spec.Ed25519.point_decompress (as_seq h public))) /\
       (F51.point_eval h (gsub tmp 0ul 20ul) == Some?.v (Spec.Ed25519.point_decompress (as_seq h public))) /\
       (Some? (Spec.Ed25519.point_decompress (as_seq h (gsub signature 0ul 32ul)))) /\
@@ -164,10 +174,13 @@ let verify_ public msg len signature tmp tmp' =
   let s  = sub tmp 40ul 5ul  in
   let h'  = tmp' in
   let b = Hacl.Impl.Ed25519.PointDecompress.point_decompress a' public in
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.point_decompress_lemma (as_seq h0 public);
   let res =
   if b then (
     let rs = sub signature 0ul 32ul in
     let b' = Hacl.Impl.Ed25519.PointDecompress.point_decompress r' rs in
+    Spec.Ed25519.Lemmas.point_decompress_lemma (as_seq h0 rs);
     if b' then (
       verify_inner_ public msg len signature tmp tmp'
     ) else false

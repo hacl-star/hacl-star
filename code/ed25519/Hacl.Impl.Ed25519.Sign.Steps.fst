@@ -13,7 +13,7 @@ module F51 = Hacl.Impl.Ed25519.Field51
 module F56 = Hacl.Impl.BignumQ.Mul
 module S56 = Hacl.Spec.BignumQ.Definitions
 
-#set-options "--z3rlimit 10 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 let point = lbuffer uint64 20ul
@@ -25,7 +25,7 @@ val point_mul_g_compress:
     (requires fun h ->
       live h out /\ live h s /\ disjoint s out)
     (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      as_seq h1 out == Spec.Ed25519.point_compress (Spec.Ed25519.point_mul (as_seq h0 s) Spec.Ed25519.g)
+      as_seq h1 out == Spec.Ed25519.point_compress (Spec.Ed25519.point_mul_g (as_seq h0 s))
     )
 
 [@CInline]
@@ -49,7 +49,7 @@ val sign_step_1:
         as_seq h1 (gsub tmp_bytes 224ul 32ul) == a /\
         as_seq h1 (gsub tmp_bytes 256ul 32ul) == prefix /\
         as_seq h1 (gsub tmp_bytes 96ul 32ul) ==
-        Spec.Ed25519.point_compress (Spec.Ed25519.point_mul a Spec.Ed25519.g)))
+        Spec.Ed25519.point_compress (Spec.Ed25519.point_mul_g a)))
 
 let sign_step_1 secret tmp_bytes =
   let a''    = sub tmp_bytes 96ul  32ul in
@@ -112,9 +112,8 @@ val sign_step_3:
       (assert_norm (pow2 56 < pow2 64); assert_norm (pow2 32 < pow2 64);
         assert_norm (S56.as_nat5 (u64 (pow2 56 - 1), u64 (pow2 56 - 1), u64 (pow2 56 - 1), u64 (pow2 56 - 1), u64 (pow2 32 - 1)) < pow2 256);
       as_seq h1 (gsub tmp_bytes 160ul 32ul) ==
-      Spec.Ed25519.point_compress (Spec.Ed25519.point_mul
-        (nat_to_bytes_le 32 (F56.as_nat h0 (gsub tmp_ints 20ul 5ul)))
-        (Spec.Ed25519.g))))
+      Spec.Ed25519.point_compress (Spec.Ed25519.point_mul_g
+        (nat_to_bytes_le 32 (F56.as_nat h0 (gsub tmp_ints 20ul 5ul))))))
 
 let sign_step_3 tmp_bytes tmp_ints =
   let a''  = sub tmp_bytes 96ul  32ul in

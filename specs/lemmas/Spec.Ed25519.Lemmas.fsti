@@ -25,29 +25,42 @@ val aff_point_add_comm_lemma: p:aff_point -> q:aff_point ->
 val aff_point_double_lemma: p:aff_point{is_on_curve p} ->
   Lemma (aff_point_double p == aff_point_add p p)
 
+val aff_point_negate_lemma: p:aff_point -> Lemma
+  (requires is_on_curve p)
+  (ensures  is_on_curve (aff_point_negate p))
+
 
 val to_aff_point_at_infinity_lemma: unit ->
   Lemma (to_aff_point point_at_infinity == aff_point_at_infinity)
 
 val to_aff_point_add_lemma: p:ext_point -> q:ext_point -> Lemma
-  (requires
-    is_ext p /\ is_on_curve (to_aff_point p) /\
-    is_ext q /\ is_on_curve (to_aff_point q))
-  (ensures (let r = point_add p q in is_ext r /\
+  (requires point_inv p /\ point_inv q)
+  (ensures (let r = point_add p q in point_inv r /\
     to_aff_point r == aff_point_add (to_aff_point p) (to_aff_point q)))
 
 val to_aff_point_double_lemma: p:ext_point -> Lemma
+  (requires point_inv p)
+  (ensures (let r = point_double p in point_inv r /\
+    to_aff_point r == aff_point_double (to_aff_point p) /\
+    to_aff_point r == aff_point_add (to_aff_point p) (to_aff_point p)))
+
+val to_aff_point_negate: p:ext_point -> Lemma
+  (requires point_inv p)
+  (ensures (let r = point_negate p in point_inv r /\
+    to_aff_point r == aff_point_negate (to_aff_point p)))
+
+
+val point_equal_lemma: p:ext_point -> q:ext_point -> s:ext_point -> Lemma
   (requires
-    is_ext p /\ is_on_curve (to_aff_point p))
-  (ensures (let r = point_double p in is_ext r /\
-    to_aff_point r == aff_point_double (to_aff_point p)))
+    is_ext p /\ is_ext q /\ is_ext s /\
+    to_aff_point p == to_aff_point q)
+  (ensures  point_equal p s == point_equal q s)
 
 
-val g_is_on_curve: unit -> Lemma (is_on_curve (to_aff_point g) /\ is_ext g)
+val aff_g_is_on_curve: unit -> Lemma (is_on_curve aff_g)
+val g_is_on_curve: unit -> Lemma (point_inv g /\ to_aff_point g == aff_g)
 
-val point_negate_decompress_lemma: s:Lib.ByteSequence.lbytes 32 ->
-  Lemma (let p = point_decompress s in Some? p ==>
-    (let p1 = point_negate (Some?.v p) in
-     is_ext p1 /\ is_on_curve (to_aff_point p1)))
+val point_decompress_lemma: s:Lib.ByteSequence.lbytes 32 ->
+  Lemma (let p = point_decompress s in Some? p ==> point_inv (Some?.v p))
 
 val fpow_is_pow_mod: a:elem -> b:pos -> Lemma (fpow a b == LM.pow_mod #prime a b)

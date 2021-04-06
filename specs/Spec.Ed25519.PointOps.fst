@@ -25,6 +25,7 @@ let d : elem =
 let g_x : elem = 15112221349535400772501151409588531511454012693041857206046113283949847762202
 let g_y : elem = 46316835694926478169428394003475163141307993866256225615783033603165251855960
 
+let aff_g : aff_point = (g_x, g_y)
 let g: ext_point = (g_x, g_y, 1, g_x *% g_y)
 
 
@@ -39,6 +40,9 @@ let to_aff_point (p:ext_point) : aff_point =
 let is_ext (p:ext_point) =
   let _X, _Y, _Z, _T = p in
   _T == _X *% _Y /% _Z /\ _Z <> zero
+
+let point_inv (p:ext_point) =
+  is_ext p /\ is_on_curve (to_aff_point p)
 
 // let is_on_curve_ext (p:ext_point) =
 //   let _X, _Y, _Z, _T = p in
@@ -64,6 +68,11 @@ let aff_point_double (p:aff_point) : aff_point =
   x3, y3
 
 let aff_point_at_infinity : aff_point = (zero, one)
+
+let aff_point_negate (p:aff_point) : aff_point =
+  let x, y = p in
+  ((-x) % prime, y)
+
 
 ///  Point addition and doubling in Extended Twisted Edwards Coordinates
 
