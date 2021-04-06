@@ -50,8 +50,10 @@ let nat_mod (m:pos) = n:nat{n < m}
 
 let one_mod (#m:pos) : nat_mod m = 1 % m
 let mul_mod (#m:pos) (a:nat_mod m) (b:nat_mod m) : nat_mod m = a * b % m
+let add_mod (#m:pos) (a:nat_mod m) (b:nat_mod m) : nat_mod m = (a + b) % m
+let sub_mod (#m:pos) (a:nat_mod m) (b:nat_mod m) : nat_mod m = (a - b) % m
 
-val lemma_one_mod: #m:pos -> a:nat_mod m -> Lemma (mul_mod a one_mod == a)
+val lemma_mul_mod_one: #m:pos -> a:nat_mod m -> Lemma (mul_mod a one_mod == a)
 
 val lemma_mul_mod_assoc: #m:pos -> a:nat_mod m -> b:nat_mod m -> c:nat_mod m ->
   Lemma (mul_mod (mul_mod a b) c == mul_mod a (mul_mod b c))
@@ -62,7 +64,7 @@ val lemma_mul_mod_comm: #m:pos -> a:nat_mod m -> b:nat_mod m ->
 let mk_nat_mod_comm_monoid (m:pos) : LE.comm_monoid (nat_mod m) = {
   LE.one = one_mod;
   LE.mul = mul_mod;
-  LE.lemma_one = lemma_one_mod;
+  LE.lemma_one = lemma_mul_mod_one;
   LE.lemma_mul_assoc = lemma_mul_mod_assoc;
   LE.lemma_mul_comm = lemma_mul_mod_comm;
   }
@@ -75,8 +77,14 @@ val lemma_pow_nat_mod_is_pow: #n:pos{1 < n} -> a:nat_mod n -> b:nat ->
   Lemma (pow a b % n == LE.pow (mk_nat_mod_comm_monoid n) a b)
 
 
-let add_mod (#m:pos) (a:nat_mod m) (b:nat_mod m) : nat_mod m = (a + b) % m
-let sub_mod (#m:pos) (a:nat_mod m) (b:nat_mod m) : nat_mod m = (a - b) % m
+val lemma_add_mod_one: #m:pos -> a:nat_mod m -> Lemma (add_mod a 0 == a)
+
+val lemma_add_mod_assoc: #m:pos -> a:nat_mod m -> b:nat_mod m -> c:nat_mod m ->
+  Lemma (add_mod (add_mod a b) c == add_mod a (add_mod b c))
+
+val lemma_add_mod_comm: #m:pos -> a:nat_mod m -> b:nat_mod m ->
+  Lemma (add_mod a b == add_mod b a)
+
 
 val lemma_mod_distributivity_add_right: #m:pos -> a:nat_mod m -> b:nat_mod m -> c:nat_mod m ->
   Lemma (mul_mod a (add_mod b c) == add_mod (mul_mod a b) (mul_mod a c))

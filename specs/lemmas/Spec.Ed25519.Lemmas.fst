@@ -12,9 +12,36 @@ open Spec.Curve25519
 open Spec.Curve25519.Lemmas
 open Spec.Ed25519.PointOps
 
+open FStar.Algebra.CommMonoid
+open FStar.Tactics.CanonCommSemiring
+open FStar.Tactics
+
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
-//TODO: use the semiring tactic similar to poly1305
+[@canon_attr]
+let elem_add_cm : cm elem =
+  CM zero ( +% ) (LM.lemma_add_mod_one #prime) (LM.lemma_add_mod_assoc #prime) (LM.lemma_add_mod_comm #prime)
+
+[@canon_attr]
+let elem_mul_cm : cm elem =
+  CM one ( *% ) (LM.lemma_mul_mod_one #prime) (LM.lemma_mul_mod_assoc #prime) (LM.lemma_mul_mod_comm #prime)
+
+val fmul_zero_l: mult_zero_l_lemma elem elem_add_cm elem_mul_cm
+let fmul_zero_l a = assert_norm (forall x. zero *% x == zero)
+
+let ( ~% ) (a:elem) : elem = (-a) % prime
+
+val fadd_opp (a:elem) : Lemma (a +% ~%a == zero)
+let fadd_opp a =
+  FStar.Math.Lemmas.lemma_mod_add_distr a (-a) prime;
+  FStar.Math.Lemmas.small_mod 0 prime
+
+[@canon_attr]
+let elem_cr : cr elem =
+  CR elem_add_cm elem_mul_cm ( ~% ) fadd_opp (LM.lemma_mod_distributivity_add_right #prime) fmul_zero_l
+
+let ed25519_semiring () : Tac unit = canon_semiring elem_cr; trefl()
+
 
 assume val prime_lemma: unit -> Lemma (Euclid.is_prime prime)
 // see Theorem 3.3. from https://eprint.iacr.org/2007/286.pdf
@@ -43,7 +70,7 @@ let fdiv_one_lemma x =
 val fdiv_one_lemma1: x:elem -> z:elem{z <> zero} -> Lemma (x *% (z *% finv z) == x)
 let fdiv_one_lemma1 x z =
   fdiv_lemma z;
-  LM.lemma_one_mod #prime x
+  LM.lemma_mul_mod_one #prime x
 
 val fdiv_cancel_lemma: x:elem -> y:elem -> z:elem{z <> zero} -> Lemma ((x *% z) /% (z *% y) == x /% y)
 let fdiv_cancel_lemma x y z =
@@ -94,6 +121,7 @@ let lemma_aff_double_aux x y =
   assert ((d *% (x *% x) *% (y *% y)) % prime == (y *% y -% x *% x - 1) % prime);
   Math.Lemmas.small_mod (d *% (x *% x) *% (y *% y)) prime;
   assert (d *% (x *% x) *% (y *% y) == y *% y -% x *% x -% 1);
+
   calc (==) {
     1 -% d *% (x *% x) *% (y *% y);
     (==) { }
@@ -178,11 +206,7 @@ let aff_point_double_lemma p =
     k1;
     (==) { }
     x *% y +% y *% x;
-    (==) { Math.Lemmas.modulo_distributivity (x * y) (y * x) prime }
-    (x * y + y * x) % prime;
-    (==) { Math.Lemmas.paren_mul_right 2 x y }
-    (2 * x * y) % prime;
-    (==) {Math.Lemmas.lemma_mod_mul_distr_l (2 * x) y prime }
+    (==) { assert (x *% y +% y *% x == 2 *% x *% y) by (ed25519_semiring ()) }
     2 *% x *% y;
     (==) { }
     k5;
@@ -235,15 +259,10 @@ let ext_dx1x2y1y2 p q =
     d *% (_X1 *% _X2 *% finv (_Z1 *% _Z2)) *% (y1 *% y2);
     (==) { fdiv_to_one_denominator _Y1 _Y2 _Z1 _Z2 }
     d *% (_X1 *% _X2 *% finv (_Z1 *% _Z2)) *% (_Y1 *% _Y2 *% finv (_Z1 *% _Z2));
-    (==) { LM.lemma_mul_mod_assoc #prime (d *% (_X1 *% _X2 *% finv (_Z1 *% _Z2))) (_Y1 *% _Y2) (finv (_Z1 *% _Z2)) }
-    d *% (_X1 *% _X2 *% finv (_Z1 *% _Z2)) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2);
-    (==) { LM.lemma_mul_mod_assoc #prime d (_X1 *% _X2) (finv (_Z1 *% _Z2)) }
-    d *% (_X1 *% _X2) *% finv (_Z1 *% _Z2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2);
-    (==) {
-      LM.lemma_mul_mod_assoc #prime (d *% (_X1 *% _X2)) (finv (_Z1 *% _Z2)) (_Y1 *% _Y2);
-      LM.lemma_mul_mod_assoc #prime (d *% (_X1 *% _X2)) (_Y1 *% _Y2) (finv (_Z1 *% _Z2)) }
-    d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% finv (_Z1 *% _Z2);
-    }
+  };
+  assert (
+    d *% (_X1 *% _X2 *% finv (_Z1 *% _Z2)) *% (_Y1 *% _Y2 *% finv (_Z1 *% _Z2)) ==
+    d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% finv (_Z1 *% _Z2)) by (ed25519_semiring ())
 
 
 val ext_dx1x2y1y2_mulz1z2: p:ext_point -> q:ext_point -> Lemma
@@ -266,9 +285,11 @@ let ext_dx1x2y1y2_mulz1z2 p q =
     _Z1 *% _Z2 *% (d *% (x1 *% x2) *% (y1 *% y2));
     (==) { ext_dx1x2y1y2 p q }
     _Z1 *% _Z2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% finv (_Z1 *% _Z2));
-    (==) { LM.lemma_mul_mod_comm #prime (_Z1 *% _Z2) (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% finv (_Z1 *% _Z2)) }
-    d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% finv (_Z1 *% _Z2) *% (_Z1 *% _Z2);
-    (==) { LM.lemma_mul_mod_assoc #prime (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2)) (finv (_Z1 *% _Z2)) (_Z1 *% _Z2) }
+    (==) {
+      assert (
+	_Z1 *% _Z2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% finv (_Z1 *% _Z2)) ==
+	d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% (finv (_Z1 *% _Z2) *% (_Z1 *% _Z2)))
+       by (ed25519_semiring ()) }
     d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% (finv (_Z1 *% _Z2) *% (_Z1 *% _Z2));
     (==) { fmul_nonzero_lemma _Z1 _Z2; fdiv_one_lemma1 (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2)) (_Z1 *% _Z2) }
     d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2);
@@ -291,30 +312,17 @@ let ext_dt1t2 p q =
     d *% (_T1 *% _T2);
     (==) { }
     d *% (_X1 *% _Y1 *% finv _Z1 *% (_X2 *% _Y2 *% finv _Z2));
-    (==) { LM.lemma_mul_mod_assoc #prime (_X1 *% _Y1) (finv _Z1) (_X2 *% _Y2 *% finv _Z2) }
-    d *% (_X1 *% _Y1 *% (finv _Z1 *% (_X2 *% _Y2 *% finv _Z2)));
-    (==) { LM.lemma_mul_mod_comm #prime (_X2 *% _Y2) (finv _Z2) }
-    d *% (_X1 *% _Y1 *% (finv _Z1 *% (finv _Z2 *% (_X2 *% _Y2))));
-    (==) { LM.lemma_mul_mod_assoc #prime (finv _Z1) (finv _Z2) (_X2 *% _Y2) }
-    d *% (_X1 *% _Y1 *% (finv _Z1 *% finv _Z2 *% (_X2 *% _Y2)));
-    (==) { LM.lemma_mul_mod_comm #prime (finv _Z1 *% finv _Z2) (_X2 *% _Y2) }
-    d *% (_X1 *% _Y1 *% (_X2 *% _Y2 *% (finv _Z1 *% finv _Z2)));
-    (==) { LM.lemma_mul_mod_assoc #prime (_X1 *% _Y1) (_X2 *% _Y2) (finv _Z1 *% finv _Z2) }
+    (==) {
+      assert (
+	d *% (_X1 *% _Y1 *% finv _Z1 *% (_X2 *% _Y2 *% finv _Z2)) ==
+	d *% (_X1 *% _Y1 *% (_X2 *% _Y2) *% (finv _Z1 *% finv _Z2))) by (ed25519_semiring ()) }
     d *% (_X1 *% _Y1 *% (_X2 *% _Y2) *% (finv _Z1 *% finv _Z2));
     (==) { prime_lemma(); LM.lemma_inv_mod_both #prime _Z1 _Z2 }
     d *% (_X1 *% _Y1 *% (_X2 *% _Y2) *% finv (_Z1 *% _Z2));
-    (==) { LM.lemma_mul_mod_assoc #prime (_X1 *% _Y1) _X2 _Y2 }
-    d *% (_X1 *% _Y1 *% _X2 *% _Y2 *% finv (_Z1 *% _Z2));
     (==) {
-      LM.lemma_mul_mod_assoc #prime _X1 _Y1 _X2;
-      LM.lemma_mul_mod_comm #prime _Y1 _X2;
-      LM.lemma_mul_mod_assoc #prime _X1 _X2 _Y1 }
-    d *% (_X1 *% _X2 *% _Y1 *% _Y2 *% finv (_Z1 *% _Z2));
-    (==) { LM.lemma_mul_mod_assoc #prime (_X1 *% _X2) _Y1 _Y2 }
-    d *% ((_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2));
-    (==) { LM.lemma_mul_mod_assoc #prime d ((_X1 *% _X2) *% (_Y1 *% _Y2)) (finv (_Z1 *% _Z2)) }
-    d *% ((_X1 *% _X2) *% (_Y1 *% _Y2)) *% finv (_Z1 *% _Z2);
-    (==) { LM.lemma_mul_mod_assoc #prime d (_X1 *% _X2) (_Y1 *% _Y2) }
+      assert (
+	d *% (_X1 *% _Y1 *% (_X2 *% _Y2) *% finv (_Z1 *% _Z2)) ==
+	d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2)) by (ed25519_semiring ()) }
     d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2);
     }
 
@@ -900,15 +908,8 @@ let point_double_expand_eh_lemma p =
   let e = h -% ((_X +% _Y) *% (_X +% _Y)) in
   assert (h == _X *% _X +% _Y *% _Y);
 
-  calc (==) {
-    (_X +% _Y) *% (_X +% _Y);
-    (==) { LM.lemma_mod_distributivity_add_right #prime (_X +% _Y) _X _Y }
-    (_X +% _Y) *% _X +% (_X +% _Y) *% _Y;
-    (==) { LM.lemma_mod_distributivity_add_left #prime _X _Y _X }
-    _X *% _X +% _Y *% _X +% (_X +% _Y) *% _Y;
-    (==) { LM.lemma_mod_distributivity_add_left #prime _X _Y _Y }
-    _X *% _X +% _Y *% _X +% (_X *% _Y +% _Y *% _Y);
-    };
+  assert ((_X +% _Y) *% (_X +% _Y) ==
+    _X *% _X +% _Y *% _X +% (_X *% _Y +% _Y *% _Y)) by (ed25519_semiring ());
 
   calc (==) {
     h -% ((_X +% _Y) *% (_X +% _Y));
@@ -1152,9 +1153,7 @@ let fmul_both_lemma_neq a b c =
 val lemma_fmul_assoc1: a:elem -> b:elem -> c:elem ->
   Lemma (a *% b *% c == a *% c *% b)
 let lemma_fmul_assoc1 a b c =
-  LM.lemma_mul_mod_assoc #prime a b c;
-  LM.lemma_mul_mod_comm #prime b c;
-  LM.lemma_mul_mod_assoc #prime a c b
+  assert (a *% b *% c == a *% c *% b) by (ed25519_semiring ())
 
 
 val fdiv_lemma1: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> Lemma
@@ -1163,31 +1162,13 @@ val fdiv_lemma1: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> Lemma
 let fdiv_lemma1 a b c d =
   fmul_both_lemma (a /% b) (c /% d) (b *% d);
   assert (a *% finv b *% (b *% d) == c *% finv d *% (b *% d));
-  calc (==) {
-    a *% finv b *% (b *% d);
-    (==) { lemma_fmul_assoc1 a (finv b) (b *% d) }
-    a *% (b *% d) *% finv b;
-    (==) {
-      LM.lemma_mul_mod_comm #prime b d;
-      LM.lemma_mul_mod_assoc #prime a (d *% b) (finv b) }
-    a *% ((d *% b) *% finv b);
-    (==) { LM.lemma_mul_mod_assoc #prime d b (finv b) }
-    a *% (d *% (b *% finv b));
-    (==) { fdiv_one_lemma1 d b }
-    a *% d;
-    };
+  assert (a *% finv b *% (b *% d) == a *% (d *% (b *% finv b))) by (ed25519_semiring ());
+  fdiv_one_lemma1 d b;
+  assert (a *% finv b *% (b *% d) == a *% d);
 
-  calc (==) {
-    c *% finv d *% (b *% d);
-    (==) { lemma_fmul_assoc1 c (finv d) (b *% d) }
-    c *% (b *% d) *% finv d;
-    (==) { LM.lemma_mul_mod_assoc #prime c (b *% d) (finv d) }
-    c *% ((b *% d) *% finv d);
-    (==) { LM.lemma_mul_mod_assoc #prime b d (finv d) }
-    c *% (b *% (d *% finv d));
-    (==) { fdiv_one_lemma1 b d }
-    c *% b;
-    }
+  assert (c *% finv d *% (b *% d) == c *% (b *% (d *% finv d))) by (ed25519_semiring ());
+  fdiv_one_lemma1 b d;
+  assert (c *% finv d *% (b *% d) == c *% b)
 
 
 val point_equal_lemma_aux1: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> e:elem -> f:elem{f <> 0} -> Lemma
@@ -1282,19 +1263,8 @@ let recover_x_lemma_aux y =
     y2 -% one;
     };
   assert (x2 *% (d *% y2 +% one) == y2 -% one);
-  calc (==) {
-    x2 *% (d *% y2 +% one);
-    (==) { LM.lemma_mod_distributivity_add_right #prime x2 (d *% y2) one }
-    x2 *% (d *% y2) +% x2 *% one;
-    (==) {
-      Lib.NatMod.lemma_mul_mod_assoc #prime d y2 x2;
-      Lib.NatMod.lemma_mul_mod_comm #prime y2 x2;
-      Lib.NatMod.lemma_mul_mod_assoc #prime d x2 y2 }
-    d *% x2 *% y2 +% x2 *% one;
-    (==) { Math.Lemmas.small_mod x2 prime }
-    d *% x2 *% y2 +% x2;
-    };
-
+  assert (x2 *% (d *% y2 +% one) == d *% x2 *% y2 +% x2 *% one) by (ed25519_semiring ());
+  Math.Lemmas.small_mod x2 prime;
   assert (d *% x2 *% y2 +% x2 == y2 -% one);
   Math.Lemmas.mod_add_both (d *% x2 *% y2 + x2) (y2 - one) (one - x2) prime;
   assert ((d *% x2 *% y2 + x2 + one - x2) % prime == (y2 - one + one - x2) % prime);

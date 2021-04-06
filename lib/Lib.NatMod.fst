@@ -100,7 +100,7 @@ let rec lemma_pow_mod_base a b n =
 
 
 
-let lemma_one_mod #m a = ()
+let lemma_mul_mod_one #m a = ()
 
 let lemma_mul_mod_assoc #m a b c =
   calc (==) {
@@ -207,6 +207,25 @@ let rec lemma_pow_nat_mod_is_pow #n a b =
       (==) { LE.lemma_pow_unfold k a b }
       LE.pow k a b;
       }; () end
+
+
+let lemma_add_mod_one #m a =
+  Math.Lemmas.small_mod a m
+
+
+let lemma_add_mod_assoc #m a b c =
+  calc (==) {
+    add_mod (add_mod a b) c;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_l (a + b) c m }
+    ((a + b) + c) % m;
+    (==) { }
+    (a + (b + c)) % m;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r a (b + c) m }
+    add_mod a (add_mod b c);
+  }
+
+
+let lemma_add_mod_comm #m a b = ()
 
 
 let lemma_mod_distributivity_add_right #m a b c =
