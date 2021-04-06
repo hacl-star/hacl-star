@@ -236,9 +236,39 @@ let aff_point_double_lemma p =
     k8;
     }
 
+
+val lemma_neg_sqr: x:elem -> Lemma ((-x) % prime *% ((-x) % prime) == x *% x)
+let lemma_neg_sqr x =
+  calc (==) {
+    (- x) % prime * ((- x) % prime) % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- x) ((- x) % prime) prime }
+    (- x) * ((- x) % prime) % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r (- x) (- x) prime }
+    (- x) * (- x) % prime;
+    (==) { Math.Lemmas.neg_mul_left x (- x); Math.Lemmas.neg_mul_right x x }
+    (x * x) % prime;
+  }
+
+
+let aff_point_negate_lemma p =
+  let (x, y) = p in
+  assert (aff_point_negate p == ((-x) % prime, y));
+  //assert (y *% y -% x *% x == 1 +% d *% (x *% x) *% (y *% y));
+  lemma_neg_sqr x;
+  assert (is_on_curve (aff_point_negate p))
+
 /////////////////////////////////////////////////////////////////////
 //// Pseudo-addition laws in Extended Twisted Edwards Coordinates ///
 /////////////////////////////////////////////////////////////////////
+
+let to_aff_point_at_infinity_lemma () =
+  let x, y = to_aff_point point_at_infinity in
+  assert (point_at_infinity == (zero, one, one, zero));
+  assert (aff_point_at_infinity == (zero, one));
+  assert (x == zero /% one /\ y == one /% one);
+  fdiv_one_lemma zero;
+  fdiv_one_lemma one
+
 
 val ext_dx1x2y1y2: p:ext_point -> q:ext_point -> Lemma
   (requires is_ext p /\ is_ext q)
@@ -296,37 +326,6 @@ let ext_dx1x2y1y2_mulz1z2 p q =
        by (ed25519_semiring ()) }
     d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2) *% (finv (_Z1 *% _Z2) *% (_Z1 *% _Z2));
     (==) { fmul_nonzero_lemma _Z1 _Z2; fdiv_one_lemma1 (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2)) (_Z1 *% _Z2) }
-    d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2);
-    }
-
-
-val ext_dt1t2: p:ext_point -> q:ext_point -> Lemma
-  (requires is_ext p /\ is_ext q)
-  (ensures
-   (let _X1, _Y1, _Z1, _T1 = p in
-    let _X2, _Y2, _Z2, _T2 = q in
-    d *% _T1 *% _T2 == d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2)))
-
-let ext_dt1t2 p q =
-  let _X1, _Y1, _Z1, _T1 = p in
-  let _X2, _Y2, _Z2, _T2 = q in
-  calc (==) {
-    d *% _T1 *% _T2;
-    (==) { LM.lemma_mul_mod_assoc #prime d _T1 _T2 }
-    d *% (_T1 *% _T2);
-    (==) { }
-    d *% (_X1 *% _Y1 *% finv _Z1 *% (_X2 *% _Y2 *% finv _Z2));
-    (==) {
-      assert (
-	d *% (_X1 *% _Y1 *% finv _Z1 *% (_X2 *% _Y2 *% finv _Z2)) ==
-	d *% (_X1 *% _Y1 *% (_X2 *% _Y2) *% (finv _Z1 *% finv _Z2))) by (ed25519_semiring ()) }
-    d *% (_X1 *% _Y1 *% (_X2 *% _Y2) *% (finv _Z1 *% finv _Z2));
-    (==) { prime_lemma(); LM.lemma_inv_mod_both #prime _Z1 _Z2 }
-    d *% (_X1 *% _Y1 *% (_X2 *% _Y2) *% finv (_Z1 *% _Z2));
-    (==) {
-      assert (
-	d *% (_X1 *% _Y1 *% (_X2 *% _Y2) *% finv (_Z1 *% _Z2)) ==
-	d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2)) by (ed25519_semiring ()) }
     d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2);
     }
 
@@ -551,36 +550,6 @@ let ext_denominator_lemma2 p =
   assert (_Y *% _Y -% _X *% _X <> zero)
 
 
-val lemma_neg_sqr: x:elem -> Lemma ((-x) % prime *% ((-x) % prime) == x *% x)
-let lemma_neg_sqr x =
-  calc (==) {
-    (- x) % prime * ((- x) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- x) ((- x) % prime) prime }
-    (- x) * ((- x) % prime) % prime;
-    (==) { Math.Lemmas.lemma_mod_mul_distr_r (- x) (- x) prime }
-    (- x) * (- x) % prime;
-    (==) { Math.Lemmas.neg_mul_left x (- x); Math.Lemmas.neg_mul_right x x }
-    (x * x) % prime;
-  }
-
-
-let aff_point_negate_lemma p =
-  let (x, y) = p in
-  assert (aff_point_negate p == ((-x) % prime, y));
-  //assert (y *% y -% x *% x == 1 +% d *% (x *% x) *% (y *% y));
-  lemma_neg_sqr x;
-  assert (is_on_curve (aff_point_negate p))
-
-
-let to_aff_point_at_infinity_lemma () =
-  let x, y = to_aff_point point_at_infinity in
-  assert (point_at_infinity == (zero, one, one, zero));
-  assert (aff_point_at_infinity == (zero, one));
-  assert (x == zero /% one /\ y == one /% one);
-  fdiv_one_lemma zero;
-  fdiv_one_lemma one
-
-
 val point_add_expand_eh_lemma: p:ext_point -> q:ext_point -> Lemma (
   let _X1, _Y1, _Z1, _T1 = p in
   let _X2, _Y2, _Z2, _T2 = q in
@@ -702,12 +671,16 @@ let point_add_expand_gf_lemma p q =
   calc (==) { //c
     d2 *% _T1 *% _T2;
     (==) {
-      LM.lemma_mul_mod_assoc #prime 2 d _T1;
-      LM.lemma_mul_mod_assoc #prime 2 (d *% _T1) _T2 }
-    2 *% (d *% _T1 *% _T2);
-    (==) { ext_dt1t2 p q }
+      assert (
+	2 *% d *% (_X1 *% _Y1 *% finv _Z1) *% (_X2 *% _Y2 *% finv _Z2) ==
+	2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% (finv _Z1 *% finv _Z2))) by (ed25519_semiring ()) }
+    2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% (finv _Z1 *% finv _Z2));
+    (==) { prime_lemma(); LM.lemma_inv_mod_both #prime _Z1 _Z2 }
+    2 *% (d *% (_X1 *% _X2) *% (_Y1 *% _Y2) *% finv (_Z1 *% _Z2));
+    (==) { }
     2 *% k;
     };
+
 
   calc (==) { //f == d1 -% c
     2 *% _Z1 *% _Z2 -% d2 *% _T1 *% _T2;
@@ -804,9 +777,9 @@ let fghe_relation f g h e =
     _X3 *% (_Y3 /% _Z3);
     (==) { }
     e *% f *% (h /% f);
-    (==) { LM.lemma_mul_mod_comm #prime (finv f) h; LM.lemma_mul_mod_assoc #prime (e *% f) (finv f) h }
-    e *% f *% finv f *% h;
-    (==) { LM.lemma_mul_mod_assoc #prime e f (finv f); fdiv_one_lemma1 e f }
+    (==) { assert (e *% f *% (h *% finv f) == e *% h *% (f *% finv f)) by (ed25519_semiring ()) }
+    e *% h *% (f *% finv f);
+    (==) { fdiv_one_lemma1 (e *% h) f }
     e *% h;
     };
 
