@@ -120,9 +120,14 @@ bool print_test2s(int in_len, uint8_t* in, int key_len, uint8_t* key, int exp_le
 
   bool ok = true;
 
-  sodium_blake2s_mac(in_len,in,key_len,key,exp_len,comp);
-  printf("testing blake2s (OpenSSL) vec-32:\n");
-  ok = print_result(exp_len,comp,exp) && ok;
+  if(key_len > 0) {
+    sodium_blake2s_mac(in_len,in,key_len,key,exp_len,comp);
+    printf("testing blake2s (OpenSSL) vec-32:\n");
+    ok = print_result(exp_len,comp,exp) && ok;
+  }
+  else {
+      printf("Ignoring a test for OpenSSL: OpenSSL only supports keyed-hash\n");
+  }
 
   memset(comp, 0, exp_len * sizeof comp[0]);
 
