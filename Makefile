@@ -160,7 +160,7 @@ min-test:
 TO_CLEAN=$(foreach ext,checked checked.lax out cmd err time dump types.vaf krml cmx cmo cmi o d a,-or -iname '*.$(ext)')
 clean:
 	find . -iname '.depend*' $(TO_CLEAN) -delete
-	rm -rf obj/*
+	find obj -maxdepth 1 -mindepth 1 -not -name .gitignore -delete
 
 
 #################
@@ -179,14 +179,17 @@ ifeq ($(shell uname -s),Darwin)
   ifeq (,$(shell which gsed))
     $(error gsed not found; try brew install gnu-sed)
   endif
-  SED := gsed
+  SED := gsed -i
   ifeq (,$(shell which gtime))
     $(error gtime not found; try brew install gnu-time)
   endif
-  TIME := gtime
+  TIME := gtime -q -f '%E'
+else ifeq ($(shell uname -s),FreeBSD)
+    SED := sed -i ''
+    TIME := /usr/bin/time
 else
-  SED := sed
-  TIME := /usr/bin/time
+  SED := sed -i
+  TIME := /usr/bin/time -q -f '%E'
 endif
 
 ifneq ($(OS),Windows_NT)
@@ -200,7 +203,7 @@ endif
 # Pretty-printing helper #
 ##########################
 
-SHELL=/bin/bash
+SHELL:=$(shell which bash)
 
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM)
@@ -212,7 +215,7 @@ SHELL=/bin/bash
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
   @echo "$(subst ",\",$1)" > $3.cmd; \
-  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
+  $(TIME) -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
   if [ $$ret -eq 0 ]; then \
@@ -271,7 +274,7 @@ ifndef MAKE_RESTARTS
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
 	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer +C -C.String -C.Failure' > $@ && \
-	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
+	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
@@ -281,7 +284,7 @@ ifndef MAKE_RESTARTS
 	    $(addprefix -in ,$(VALE_ROOTS)) \
 	    -dep $< \
 	    > $@ && \
-	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!g' $@ \
+	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!g' $@ \
 	  ,[VALE-DEPEND],$(call to-obj-dir,$@))
 
 .PHONY: .FORCE
