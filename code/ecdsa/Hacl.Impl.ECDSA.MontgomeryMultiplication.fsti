@@ -44,33 +44,3 @@ val reduction_prime_2prime_order: #c: curve -> x: felem c
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\  as_nat c h1 result == as_nat c h0 x % (getOrder #P256))  
 
-
-noextract
-val fromDomain_: a: nat -> Tot (r: nat { r < prime})
-
-noextract
-val toDomain_: a: nat -> Tot nat
-
-val lemmaFromDomain: a: nat ->  Lemma (
-  (a * modp_inv2_prime (pow2 256) (getOrder #P256)) % (getOrder #P256) == fromDomain_ a)
-
-val lemmaToDomain: a: nat ->  Lemma (
-  (a * pow2 256) % (getOrder #P256) == toDomain_ a)
-
-
-val lemmaFromDomainToDomain: a: nat { a < prime} -> Lemma (toDomain_ (fromDomain_ a) == a)
-
-val lemmaToDomainFromDomain: a: nat { a < prime} -> Lemma (fromDomain_ (toDomain_ a) == a)
-
-
-val montgomery_multiplication_ecdsa_module: #c: curve -> a: felem c -> b: felem c 
-  ->result: felem c -> 
-  Stack unit 
-    (requires fun h -> live h a /\ live h b /\ live h result /\
-      as_nat c h a < (getOrder #P256) /\ as_nat c h b < (getOrder #P256))
-    (ensures fun h0 _ h1 -> 
-      modifies (loc result) h0 h1 /\ 
-      as_nat c h1 result = (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 256) (getOrder #P256)) % (getOrder #P256) /\ 
-      as_nat c h1 result = toDomain_ (fromDomain_ (as_nat c h0 a) * fromDomain_ (as_nat c h0 b) % (getOrder #P256)))
-
-

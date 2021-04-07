@@ -61,6 +61,13 @@ bool test_nist()
 	0x7d, 0x7d, 0xc5, 0xf7, 0x1e, 0xb2, 0x9d, 0xda, 0xf8, 0x0d, 0x62, 0x14, 0x63, 0x2e, 0xea, 0xe0, 0x3d, 0x90, 0x58, 0xaf, 0x1f, 0xb6, 0xd2, 0x2e, 0xd8, 0x0b, 0xad, 0xb6, 0x2b, 0xc1, 0xa5, 0x34 
 	};
 
+	// static uint8_t privateKey_P256[32] = {
+	// 	0, 0, 0, 0, 0, 0, 0, 0, 
+	// 	0, 0, 0, 0, 0, 0, 0, 0, 
+	// 	0, 0, 0, 0, 0, 0, 0, 0,
+	// 	0, 0, 0, 0, 0, 0, 0, 1};
+
+
 	static uint8_t expectedPublicKeyX_P256[32] = {
 	0xea, 0xd2, 0x18, 0x59, 0x01, 0x19, 0xe8, 0x87, 0x6b, 0x29, 0x14, 0x6f, 0xf8, 0x9c, 0xa6, 0x17, 0x70, 0xc4, 0xed, 0xbb, 0xf9, 0x7d, 0x38, 0xce, 0x38, 0x5e, 0xd2, 0x81, 0xd8, 0xa6, 0xb2, 0x30 
 	};
@@ -160,14 +167,14 @@ bool test_nist()
 	compare_and_print(lenP384, result_p384 + lenP384, expectedPublicKeyY_P384);
 
 
-	uint8_t* pk_p384 = (uint8_t*) malloc (sizeof (uint8_t) * (lenP384 * 2));
-	uint8_t* result_ecdh_p384 = (uint8_t*) malloc (sizeof (uint8_t) * (lenP384 * 2));
-	memcpy(pk_p384, publicKeyX1_P384, lenP384);
-	memcpy(pk_p384 + lenP384, publicKeyY1_P384,  lenP384);
+	// uint8_t* pk_p384 = (uint8_t*) malloc (sizeof (uint8_t) * (lenP384 * 2));
+	// uint8_t* result_ecdh_p384 = (uint8_t*) malloc (sizeof (uint8_t) * (lenP384 * 2));
+	// memcpy(pk_p384, publicKeyX1_P384, lenP384);
+	// memcpy(pk_p384 + lenP384, publicKeyY1_P384,  lenP384);
 	   
-	bool successDHR_p384 = Hacl_P256_ecp384dh_r(result_p384, pk_p384, privateKey_ecdh_r);
+	// bool successDHR_p384 = Hacl_P256_ecp384dh_r(result_p384, pk_p384, privateKey_ecdh_r);
 	
-	compare_and_print(lenP384, result_p384, expectedResult_P384);
+	// compare_and_print(lenP384, result_p384, expectedResult_P384);
 
 
 	return true;

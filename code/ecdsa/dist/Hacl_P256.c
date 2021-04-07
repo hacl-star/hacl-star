@@ -4508,7 +4508,7 @@ montgomery_ladder(
 
 static uint32_t coordinate521 = (uint32_t)9U;
 
-// extern void Hacl_Impl_EC_P521_Reduction_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
+extern void Hacl_Impl_EC_P521_Reduction_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
 
 static void getZeroWord(uint64_t *i, uint64_t *o)
 {
@@ -4593,9 +4593,9 @@ static void reduction_p521(uint64_t *i, uint64_t *o)
   uint64_t a2[9U] = { 0U };
   getZeroWord(i, a0);
   getFirstWord(i, a1, (uint32_t)1U);
-  // getFirstWord(i, a2, (uint32_t)2U);
-  // Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
-  // Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
+  getFirstWord(i, a2, (uint32_t)2U);
+  Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
+  Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
 }
 
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
