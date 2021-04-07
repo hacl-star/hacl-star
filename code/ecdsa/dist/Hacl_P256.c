@@ -2920,31 +2920,9 @@ static void toUint8(Spec_ECC_Curves_curve c, uint64_t *i, uint8_t *o)
         len = (uint32_t)4U;
       }
   }
-  switch (c)
+  for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
   {
-    case Spec_ECC_Curves_P256:
-      {
-        for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
-        {
-          store64_be(o + i0 * (uint32_t)8U, i[i0]);
-        }
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
-        {
-          store64_be(o + i0 * (uint32_t)8U, i[i0]);
-        }
-        break;
-      }
-    default:
-      {
-        for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
-        {
-          store64_be(o + i0 * (uint32_t)8U, i[i0]);
-        }
-      }
+    store64_be(o + i0 * (uint32_t)8U, i[i0]);
   }
 }
 
@@ -2997,9 +2975,36 @@ static void changeEndian(Spec_ECC_Curves_curve c, uint64_t *b)
   }
 }
 
-static void toUint64ChangeEndian(Spec_ECC_Curves_curve c)
+static void toUint64ChangeEndian(Spec_ECC_Curves_curve c, uint8_t *i, uint64_t *o)
 {
-  
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + i0 * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i0] = x;
+  }
+  changeEndian(c, o);
 }
 
 static void multByTwo(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *out)
@@ -6839,6 +6844,7 @@ ecdsa_signature_step12(
   uint8_t mHash[sz_hash + len];
   memset(mHash, 0U, (sz_hash + len) * sizeof (uint8_t));
   uint8_t *mHashHPart = mHash;
+  uint8_t *mHashRPart = mHash;
   if (alg.tag == Spec_ECDSA_NoHash)
   {
     memcpy(mHashHPart, m, sz_hash * sizeof (uint8_t));
@@ -6878,7 +6884,7 @@ ecdsa_signature_step12(
       "unreachable (pattern matches are exhaustive in F*)");
     KRML_HOST_EXIT(255U);
   }
-  toUint64ChangeEndian(c);
+  toUint64ChangeEndian(c, mHashRPart, result);
   reduction_prime_2prime_order(c, result, result);
 }
 
@@ -6974,7 +6980,7 @@ ecdsa_signature_core(
   KRML_CHECK_SIZE(sizeof (uint64_t), sz);
   uint64_t kAsFelem[sz];
   memset(kAsFelem, 0U, sz * sizeof (uint64_t));
-  toUint64ChangeEndian(c);
+  toUint64ChangeEndian(c, k, kAsFelem);
   ecdsa_signature_step12(c, alg, mLen, m, hashAsFelem);
   uint64_t step5Flag = ecdsa_signature_step45(c, r, k, tempBuffer);
   ecdsa_signature_step6(c, s, kAsFelem, hashAsFelem, r, privKeyAsFelem);
@@ -6996,7 +7002,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   uint64_t s[4U] = { 0U };
   uint8_t *resultR = result;
   uint8_t *resultS = result + (uint32_t)32U;
-  toUint64ChangeEndian(Spec_ECC_Curves_P256);
+  toUint64ChangeEndian(Spec_ECC_Curves_P256, privKey, privKeyAsFelem);
   uint64_t
   flag =
     ecdsa_signature_core(Spec_ECC_Curves_P256,
@@ -7073,8 +7079,12 @@ uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
   uint64_t publicKeyAsFelem[(uint32_t)2U * len];
   memset(publicKeyAsFelem, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  toUint64ChangeEndian(Spec_ECC_Curves_P256);
-  toUint64ChangeEndian(Spec_ECC_Curves_P256);
+  uint64_t *publicKeyFelemX = publicKeyAsFelem;
+  uint64_t *publicKeyFelemY = publicKeyAsFelem + len;
+  uint8_t *pubKeyX = pubKey;
+  uint8_t *pubKeyY = pubKey + (uint32_t)4U * (uint32_t)8U;
+  toUint64ChangeEndian(Spec_ECC_Curves_P256, pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(Spec_ECC_Curves_P256, pubKeyY, publicKeyFelemY);
   uint64_t flag = _ecp256dh_r(Spec_ECC_Curves_P256, resultBufferFelem, publicKeyAsFelem, scalar);
   changeEndian(Spec_ECC_Curves_P256, resultBufferFelemX);
   changeEndian(Spec_ECC_Curves_P256, resultBufferFelemY);
@@ -7096,8 +7106,12 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
   uint64_t publicKeyAsFelem[(uint32_t)2U * len];
   memset(publicKeyAsFelem, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  toUint64ChangeEndian(Spec_ECC_Curves_P384);
-  toUint64ChangeEndian(Spec_ECC_Curves_P384);
+  uint64_t *publicKeyFelemX = publicKeyAsFelem;
+  uint64_t *publicKeyFelemY = publicKeyAsFelem + len;
+  uint8_t *pubKeyX = pubKey;
+  uint8_t *pubKeyY = pubKey + (uint32_t)6U * (uint32_t)8U;
+  toUint64ChangeEndian(Spec_ECC_Curves_P384, pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian(Spec_ECC_Curves_P384, pubKeyY, publicKeyFelemY);
   uint64_t flag = _ecp256dh_r(Spec_ECC_Curves_P384, resultBufferFelem, publicKeyAsFelem, scalar);
   changeEndian(Spec_ECC_Curves_P384, resultBufferFelemX);
   changeEndian(Spec_ECC_Curves_P384, resultBufferFelemY);

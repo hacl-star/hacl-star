@@ -24,7 +24,7 @@ open Hacl.Spec.EC.Definition
 open FStar.Mul
 open Lib.IntTypes.Intrinsics
 
-open Hacl.Impl.ECDSA.LowLevel
+(* open Hacl.Impl.ECDSA.LowLevel *)
 
 #reset-options "--z3rlimit 200"
 
