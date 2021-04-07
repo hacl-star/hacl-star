@@ -50,13 +50,16 @@ let lemma_mod_inv2_mult_prime prime a =
     1;
   }
 
+#set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
-val lemma_norm: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c ->  Lemma (
+val lemma_norm: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
+  -> q: point_nat_prime #c {~ (isPointAtInfinity q)} ->  Lemma (
   let pX, pY, pZ = p in
   let qX, qY, qZ = q in 
   let pNX, pNY, pNZ = _norm p in 
   let qNX, qNY, qNZ = _norm q in 
-  pX == qX <==> pNX * (pZ * pZ) % getPrime c == qNX * (qZ * qZ) % getPrime c)
+  (pX == qX <==> pNX * (pZ * pZ) % getPrime c == qNX * (qZ * qZ) % getPrime c) /\ 
+  (pY == qY <==> pNY * (pZ * pZ * pZ) % getPrime c == qNY * (qZ * qZ * qZ) % getPrime c))
 
 
 let lemma_norm #c p q = 
@@ -66,16 +69,18 @@ let lemma_norm #c p q =
   let pNX, pNY, pNZ = _norm p in 
   let qNX, qNY, qNZ = _norm q in 
 
-  assume ((pZ * pZ) % prime <> 0);
-  assume ((qZ * qZ) % prime <> 0);
+  
   assume (Math.Euclid.is_prime prime);
+  small_mod pZ prime;
+  small_mod qZ prime;
+
+  Hacl.Impl.P256.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime pZ pZ; 
+  Hacl.Impl.P256.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (pZ * pZ) pZ; 
+  Hacl.Impl.P256.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime qZ qZ;
+  Hacl.Impl.P256.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (qZ * qZ) qZ;
 
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
-
-  assert(pNX == (pX * modp_inv2 #c (pZ * pZ)) % prime);
-  assert(pNX * (pZ * pZ) % prime == (pX * modp_inv2 #c (pZ * pZ)) % prime * (pZ * pZ) % prime);
-
 
   calc (==)
   {
@@ -94,6 +99,21 @@ let lemma_norm #c p q =
 
   calc (==)
   {
+    (pY * modp_inv2 #c (pZ * pZ * pZ)) % prime * (pZ * pZ * pZ) % prime;
+    (==) {lemma_mod_mul_distr_l (pY * modp_inv2 #c (pZ * pZ * pZ)) (pZ * pZ * pZ) prime}
+    pY * modp_inv2 #c (pZ * pZ * pZ) * (pZ * pZ * pZ) % prime; 
+    (==) {assert_by_tactic (pY * modp_inv2 #c (pZ * pZ * pZ) * (pZ * pZ * pZ) == pY * (modp_inv2 #c (pZ * pZ * pZ) * (pZ * pZ * pZ))) canon}
+    pY * (modp_inv2 #c (pZ * pZ * pZ) * (pZ * pZ * pZ)) % prime; 
+    (==) {lemma_mod_mul_distr_r pY (modp_inv2 #c (pZ * pZ * pZ) * (pZ * pZ * pZ)) prime}
+    pY * (modp_inv2 #c (pZ * pZ * pZ) * (pZ * pZ * pZ) % prime) % prime; 
+    (==) {lemma_mod_inv2_mult_prime prime (pZ * pZ * pZ)}
+    pY % prime;
+    (==) {small_mod pY prime}
+    pY; 
+  };
+
+  calc (==)
+  {
     (qX * modp_inv2 #c (qZ * qZ)) % prime * (qZ * qZ) % prime;
     (==) {lemma_mod_mul_distr_l (qX * modp_inv2 #c (qZ * qZ)) (qZ * qZ) prime}
     qX * modp_inv2 #c (qZ * qZ) * (qZ * qZ) % prime;
@@ -107,15 +127,24 @@ let lemma_norm #c p q =
     qX;
   };
 
+  calc (==)
+  {
+    (qY * modp_inv2 #c (qZ * qZ * qZ)) % prime * (qZ * qZ * qZ) % prime;
+    (==) {lemma_mod_mul_distr_l (qY * modp_inv2 #c (qZ * qZ * qZ)) (qZ * qZ * qZ) prime}
+    qY * modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ) % prime; 
+    (==) {assert_by_tactic (qY * modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ) == qY * (modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ))) canon}
+    qY * (modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ)) % prime; 
+    (==) {lemma_mod_mul_distr_r qY (modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ)) prime}
+    qY * (modp_inv2 #c (qZ * qZ * qZ) * (qZ * qZ * qZ) % prime) % prime; 
+    (==) {lemma_mod_inv2_mult_prime prime (qZ * qZ * qZ)}
+    qY % prime;
+    (==) {small_mod qY prime}
+    qY; 
+  };
+
+
   assert(pX == qX <==> pNX * (pZ * pZ) % prime == qNX * (qZ * qZ) % prime);
-  
-  admit();
-
-
-  assert(qNX == (qX * modp_inv2 #c (qZ * qZ)) % prime);
-
-  admit()
-
+  assert(pY == qY <==> pNY * (pZ * pZ * pZ) % prime == qNY * (qZ * qZ * qZ) % prime)
 
 
 let lemmaToDomainFromDomain #c #m a =

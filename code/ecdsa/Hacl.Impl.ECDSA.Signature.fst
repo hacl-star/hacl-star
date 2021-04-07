@@ -74,7 +74,8 @@ let ecdsa_signature_step12 #c alg mLen m result =
     let h0 = ST.get() in 
   let sz_hash: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a -> hash_len a in
     assume (v sz_hash + v (getCoordinateLenU c) < pow2 32);
-  let mHash = create (sz_hash +! getCoordinateLenU c) (u8 0) in 
+  let len: FStar.UInt32.t  = getCoordinateLenU c in 
+  let mHash = create (sz_hash +! len) (u8 0) in 
     let mHashHPart = sub mHash (size 0) sz_hash in 
     let mHashRPart = sub mHash (size 0) (getCoordinateLenU c) in 
   begin
@@ -175,9 +176,10 @@ let ecdsa_signature_step6 #c result kFelem z r da =
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
   push_frame();
-    let rda = create (getCoordinateLenU64 c) (u64 0) in 
-    let zBuffer = create (getCoordinateLenU64 c) (u64 0) in 
-    let kInv = create (getCoordinateLenU64 c) (u64 0) in 
+    let len : FStar.UInt32.t  = getCoordinateLenU64 c in 
+    let rda = create len (u64 0) in 
+    let zBuffer = create len (u64 0) in 
+    let kInv = create len (u64 0) in 
   let h0 = ST.get() in 
     montgomery_multiplication_buffer_dsa #c r da rda;
     fromDomainImpl z zBuffer;

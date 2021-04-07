@@ -185,7 +185,6 @@ let changeEndianStep #c i b =
   Lib.Sequence.upd b lenRight left
 
 
-(* If you have imagination, it's indeed like this *)
 val changeEndian: #c: curve -> felem_seq c -> felem_seq c
 
 let changeEndian #c b =

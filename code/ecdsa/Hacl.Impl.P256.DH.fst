@@ -42,9 +42,9 @@ let ecp256dh_i c result scalar =
   let flag = isPointAtInfinityPrivate #c resultBuffer in
 
   let h0 = ST.get() in
-(*   changeEndian #c resultBufferX;
+  changeEndian #c resultBufferX;
   changeEndian #c resultBufferY;
- *)
+ 
   toUint8 #c resultBufferX resultX;
   toUint8 #c resultBufferY resultY;
 

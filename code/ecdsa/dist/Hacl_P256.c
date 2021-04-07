@@ -2043,11 +2043,6 @@ static void mul_atomic(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
   temp[0U] = h0;
 }
 
-#define DH 0
-#define DSA 1
-
-typedef uint8_t mode;
-
 static void
 montgomery_multiplication_round_w_k0(Spec_ECC_Curves_curve c, uint64_t *t, uint64_t *t2)
 {
@@ -2146,7 +2141,7 @@ montgomery_multiplication_round_dsa_(
 static void
 montgomery_multiplication_buffer_by_one(
   Spec_ECC_Curves_curve c,
-  mode m,
+  Hacl_Spec_MontgomeryMultiplication_mode m,
   uint64_t *a,
   uint64_t *result
 )
@@ -2217,7 +2212,7 @@ montgomery_multiplication_buffer_by_one(
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
     switch (m)
     {
-      case DSA:
+      case Hacl_Spec_MontgomeryMultiplication_DSA:
         {
           uint64_t sw;
           switch (c)
@@ -2241,7 +2236,7 @@ montgomery_multiplication_buffer_by_one(
           montgomery_multiplication_round_dsa_(c, k0, t, t2);
           break;
         }
-      case DH:
+      case Hacl_Spec_MontgomeryMultiplication_DH:
         {
           uint64_t sw;
           switch (c)
@@ -2292,13 +2287,13 @@ montgomery_multiplication_buffer_by_one_dh(
   uint64_t *result
 )
 {
-  montgomery_multiplication_buffer_by_one(c, DH, a, result);
+  montgomery_multiplication_buffer_by_one(c, Hacl_Spec_MontgomeryMultiplication_DH, a, result);
 }
 
 static void
 montgomery_multiplication_buffer(
   Spec_ECC_Curves_curve c,
-  mode m,
+  Hacl_Spec_MontgomeryMultiplication_mode m,
   uint64_t *a,
   uint64_t *b,
   uint64_t *result
@@ -2369,7 +2364,7 @@ montgomery_multiplication_buffer(
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
     switch (m)
     {
-      case DSA:
+      case Hacl_Spec_MontgomeryMultiplication_DSA:
         {
           uint64_t sw;
           switch (c)
@@ -2393,7 +2388,7 @@ montgomery_multiplication_buffer(
           montgomery_multiplication_round_dsa_(c, k0, t, t2);
           break;
         }
-      case DH:
+      case Hacl_Spec_MontgomeryMultiplication_DH:
         {
           uint64_t sw;
           switch (c)
@@ -2445,11 +2440,27 @@ montgomery_multiplication_buffer_dh(
   uint64_t *result
 )
 {
-  montgomery_multiplication_buffer(c, DH, a, b, result);
+  montgomery_multiplication_buffer(c, Hacl_Spec_MontgomeryMultiplication_DH, a, b, result);
 }
 
 static void
-montgomery_square_buffer(Spec_ECC_Curves_curve c, mode m, uint64_t *a, uint64_t *result)
+montgomery_multiplication_buffer_dsa(
+  Spec_ECC_Curves_curve c,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *result
+)
+{
+  montgomery_multiplication_buffer(c, Hacl_Spec_MontgomeryMultiplication_DSA, a, b, result);
+}
+
+static void
+montgomery_square_buffer(
+  Spec_ECC_Curves_curve c,
+  Hacl_Spec_MontgomeryMultiplication_mode m,
+  uint64_t *a,
+  uint64_t *result
+)
 {
   uint32_t len;
   switch (c)
@@ -2516,7 +2527,7 @@ montgomery_square_buffer(Spec_ECC_Curves_curve c, mode m, uint64_t *a, uint64_t 
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
     switch (m)
     {
-      case DSA:
+      case Hacl_Spec_MontgomeryMultiplication_DSA:
         {
           uint64_t sw;
           switch (c)
@@ -2540,7 +2551,7 @@ montgomery_square_buffer(Spec_ECC_Curves_curve c, mode m, uint64_t *a, uint64_t 
           montgomery_multiplication_round_dsa_(c, k0, t, t2);
           break;
         }
-      case DH:
+      case Hacl_Spec_MontgomeryMultiplication_DH:
         {
           uint64_t sw;
           switch (c)
@@ -2586,10 +2597,16 @@ montgomery_square_buffer(Spec_ECC_Curves_curve c, mode m, uint64_t *a, uint64_t 
 
 static void montgomery_square_buffer_dh(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result)
 {
-  montgomery_square_buffer(c, DH, a, result);
+  montgomery_square_buffer(c, Hacl_Spec_MontgomeryMultiplication_DH, a, result);
 }
 
-static void fsquarePowN(Spec_ECC_Curves_curve c, mode m, uint32_t n, uint64_t *a)
+static void
+fsquarePowN(
+  Spec_ECC_Curves_curve c,
+  Hacl_Spec_MontgomeryMultiplication_mode m,
+  uint32_t n,
+  uint64_t *a
+)
 {
   for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
@@ -2599,7 +2616,7 @@ static void fsquarePowN(Spec_ECC_Curves_curve c, mode m, uint32_t n, uint64_t *a
 
 static void fsquarePowN_dh(Spec_ECC_Curves_curve c, uint32_t n, uint64_t *a)
 {
-  fsquarePowN(c, DH, n, a);
+  fsquarePowN(c, Hacl_Spec_MontgomeryMultiplication_DH, n, a);
 }
 
 static inline void cswap(Spec_ECC_Curves_curve c, uint64_t bit, uint64_t *p1, uint64_t *p2)
@@ -2634,74 +2651,41 @@ static inline void cswap(Spec_ECC_Curves_curve c, uint64_t bit, uint64_t *p1, ui
 static void
 montgomery_ladder_power_step(
   Spec_ECC_Curves_curve c,
+  Hacl_Spec_MontgomeryMultiplication_mode m,
   uint64_t *a,
   uint64_t *b,
   const uint8_t *scalar,
   uint32_t i
 )
 {
-  uint32_t sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw = (uint32_t)0U;
-      }
-  }
-  uint32_t bit0 = sw * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - i;
+  uint32_t bit0 = Spec_ECC_Curves_getScalarLen(c) - (uint32_t)1U - i;
   uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
   cswap(c, bit, a, b);
-  montgomery_multiplication_buffer_dh(c, a, b, b);
-  montgomery_square_buffer_dh(c, a, a);
+  montgomery_multiplication_buffer(c, m, a, b, b);
+  montgomery_square_buffer(c, m, a, a);
   cswap(c, bit, a, b);
 }
 
 static void
 _montgomery_ladder_power(
   Spec_ECC_Curves_curve c,
+  Hacl_Spec_MontgomeryMultiplication_mode m,
   uint64_t *a,
   uint64_t *b,
   const uint8_t *scalar
 )
 {
-  uint32_t sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw = (uint32_t)0U;
-      }
-  }
-  uint32_t scalarLen = sw * (uint32_t)8U * (uint32_t)8U;
+  uint32_t scalarLen = Spec_ECC_Curves_getScalarLen(c);
   for (uint32_t i = (uint32_t)0U; i < scalarLen; i++)
   {
-    montgomery_ladder_power_step(c, a, b, scalar, i);
+    montgomery_ladder_power_step(c, m, a, b, scalar, i);
   }
 }
 
 static void
 montgomery_ladder_power(
   Spec_ECC_Curves_curve c,
+  Hacl_Spec_MontgomeryMultiplication_mode m,
   uint64_t *a,
   const uint8_t *scalar,
   uint64_t *result
@@ -2759,7 +2743,7 @@ montgomery_ladder_power(
         KRML_HOST_EXIT(253U);
       }
   }
-  _montgomery_ladder_power(c, p, a, scalar);
+  _montgomery_ladder_power(c, m, p, a, scalar);
   uint32_t sw;
   switch (c)
   {
@@ -2905,7 +2889,7 @@ exponent(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result, uint64_t *tempB
               sw = prime256_inverse_buffer;
             }
         }
-        montgomery_ladder_power(c, a, sw, result);
+        montgomery_ladder_power(c, Hacl_Spec_MontgomeryMultiplication_DH, a, sw, result);
         break;
       }
     default:
@@ -2918,50 +2902,48 @@ exponent(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result, uint64_t *tempB
 
 static void toUint8(Spec_ECC_Curves_curve c, uint64_t *i, uint8_t *o)
 {
+  uint32_t len;
   switch (c)
   {
     case Spec_ECC_Curves_P256:
       {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
         {
-          store64_be(o + (uint32_t)0U * (uint32_t)8U, i[0U]);
-        }
-        {
-          store64_be(o + (uint32_t)1U * (uint32_t)8U, i[1U]);
-        }
-        {
-          store64_be(o + (uint32_t)2U * (uint32_t)8U, i[2U]);
-        }
-        {
-          store64_be(o + (uint32_t)3U * (uint32_t)8U, i[3U]);
+          store64_be(o + i0 * (uint32_t)8U, i[i0]);
         }
         break;
       }
     case Spec_ECC_Curves_P384:
       {
+        for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
         {
-          store64_be(o + (uint32_t)0U * (uint32_t)8U, i[0U]);
-        }
-        {
-          store64_be(o + (uint32_t)1U * (uint32_t)8U, i[1U]);
-        }
-        {
-          store64_be(o + (uint32_t)2U * (uint32_t)8U, i[2U]);
-        }
-        {
-          store64_be(o + (uint32_t)3U * (uint32_t)8U, i[3U]);
-        }
-        {
-          store64_be(o + (uint32_t)4U * (uint32_t)8U, i[4U]);
-        }
-        {
-          store64_be(o + (uint32_t)5U * (uint32_t)8U, i[5U]);
+          store64_be(o + i0 * (uint32_t)8U, i[i0]);
         }
         break;
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
+        {
+          store64_be(o + i0 * (uint32_t)8U, i[i0]);
+        }
       }
   }
 }
@@ -2989,124 +2971,35 @@ static void changeEndian(Spec_ECC_Curves_curve c, uint64_t *b)
   uint32_t lenByTwo = len >> (uint32_t)1U;
   for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
   {
+    uint32_t sw;
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          sw = (uint32_t)4U;
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          sw = (uint32_t)6U;
+          break;
+        }
+      default:
+        {
+          sw = (uint32_t)4U;
+        }
+    }
+    uint32_t lenRight = sw - (uint32_t)1U - i;
     uint64_t left = b[i];
-    uint32_t rightIndex = len - (uint32_t)1U - i;
-    uint64_t right = b[rightIndex];
+    uint64_t right = b[lenRight];
     b[i] = right;
-    b[rightIndex] = left;
+    b[lenRight] = left;
   }
 }
 
-static void toUint64CEP256(uint8_t *i, uint64_t *o)
+static void toUint64ChangeEndian(Spec_ECC_Curves_curve c)
 {
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)0U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[0U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)1U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[1U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)2U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[2U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)3U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[3U] = x;
-  }
-  changeEndian(Spec_ECC_Curves_P256, o);
-}
-
-static void toUint64CEP384(uint8_t *i, uint64_t *o)
-{
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)0U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[0U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)1U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[1U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)2U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[2U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)3U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[3U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)4U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[4U] = x;
-  }
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + (uint32_t)5U * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[5U] = x;
-  }
-  changeEndian(Spec_ECC_Curves_P384, o);
-}
-
-static void toUint64ChangeEndian(Spec_ECC_Curves_curve c, uint8_t *i, uint64_t *o)
-{
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        toUint64CEP256(i, o);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        toUint64CEP384(i, o);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
+  
 }
 
 static void multByTwo(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *out)
@@ -4428,9 +4321,194 @@ point_add(
   _point_add_if_second_branch_impl1(c, result, p, q, t12, t5);
 }
 
+static uint64_t
+scalar_bit(Spec_ECC_Curves_curve c, Lib_Buffer_buftype buf_type, void *s, uint32_t n)
+{
+  uint8_t sw0;
+  switch (buf_type)
+  {
+    case Lib_Buffer_MUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)0U;
+            }
+        }
+        sw0 = ((uint8_t *)s)[sw * (uint32_t)8U - (uint32_t)1U - n / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_IMMUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)0U;
+            }
+        }
+        sw0 = ((uint8_t *)s)[sw * (uint32_t)8U - (uint32_t)1U - n / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_CONST:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)0U;
+            }
+        }
+        sw0 = ((const uint8_t *)s)[sw * (uint32_t)8U - (uint32_t)1U - n / (uint32_t)8U];
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  return (uint64_t)(sw0 >> n % (uint32_t)8U & (uint8_t)1U);
+}
+
+static inline void cswap0(Spec_ECC_Curves_curve c, uint64_t bit, uint64_t *p1, uint64_t *p2)
+{
+  uint64_t mask = (uint64_t)0U - bit;
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)4U;
+      }
+  }
+  uint32_t len = sw * (uint32_t)3U;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t dummy = mask & (p1[i] ^ p2[i]);
+    p1[i] = p1[i] ^ dummy;
+    p2[i] = p2[i] ^ dummy;
+  }
+}
+
+static void
+point_add_as_spec(
+  Spec_ECC_Curves_curve c,
+  uint64_t *p,
+  uint64_t *q,
+  uint64_t *result,
+  uint64_t *tempBuffer
+)
+{
+  point_add(c, p, q, result, tempBuffer);
+}
+
+static void
+montgomery_ladder_step1(
+  Spec_ECC_Curves_curve c,
+  uint64_t *p,
+  uint64_t *q,
+  uint64_t *tempBuffer
+)
+{
+  point_add_as_spec(c, p, q, q, tempBuffer);
+  point_double(c, p, p, tempBuffer);
+}
+
+static void
+_montgomery_ladder_step(
+  Spec_ECC_Curves_curve c,
+  uint64_t *r0,
+  uint64_t *r1,
+  uint64_t *tempBuffer,
+  uint64_t bit
+)
+{
+  cswap0(c, bit, r0, r1);
+  montgomery_ladder_step1(c, r0, r1, tempBuffer);
+  cswap0(c, bit, r0, r1);
+}
+
+static void
+montgomery_ladder_step(
+  Spec_ECC_Curves_curve c,
+  Lib_Buffer_buftype buf_type,
+  uint64_t *r0,
+  uint64_t *r1,
+  uint64_t *tempBuffer,
+  void *scalar,
+  uint32_t i
+)
+{
+  uint32_t bit0 = Spec_ECC_Curves_getScalarLen(c) - (uint32_t)1U - i;
+  uint64_t bit = scalar_bit(c, buf_type, scalar, bit0);
+  _montgomery_ladder_step(c, r0, r1, tempBuffer, bit);
+}
+
+static void
+montgomery_ladder(
+  Spec_ECC_Curves_curve c,
+  Lib_Buffer_buftype a,
+  uint64_t *p,
+  uint64_t *q,
+  void *scalar,
+  uint64_t *tempBuffer
+)
+{
+  uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(c);
+  for (uint32_t i = (uint32_t)0U; i < cycleLoop; i++)
+  {
+    montgomery_ladder_step(c, a, p, q, tempBuffer, scalar, i);
+  }
+}
+
 static uint32_t coordinate521 = (uint32_t)9U;
 
-extern void Hacl_Impl_EC_P521_Reduction_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
+// extern void Hacl_Impl_EC_P521_Reduction_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
 
 static void getZeroWord(uint64_t *i, uint64_t *o)
 {
@@ -4515,9 +4593,9 @@ static void reduction_p521(uint64_t *i, uint64_t *o)
   uint64_t a2[9U] = { 0U };
   getZeroWord(i, a0);
   getFirstWord(i, a1, (uint32_t)1U);
-  getFirstWord(i, a2, (uint32_t)2U);
-  Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
-  Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
+  // getFirstWord(i, a2, (uint32_t)2U);
+  // Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
+  // Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
 }
 
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
@@ -5230,36 +5308,6 @@ static uint64_t isPointAtInfinityPrivate(Spec_ECC_Curves_curve c, uint64_t *p)
   return r;
 }
 
-static inline void cswap0(Spec_ECC_Curves_curve c, uint64_t bit, uint64_t *p1, uint64_t *p2)
-{
-  uint64_t mask = (uint64_t)0U - bit;
-  uint32_t sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw = (uint32_t)4U;
-      }
-  }
-  uint32_t len = sw * (uint32_t)3U;
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint64_t dummy = mask & (p1[i] ^ p2[i]);
-    p1[i] = p1[i] ^ dummy;
-    p2[i] = p2[i] ^ dummy;
-  }
-}
-
 static void
 normalisation_update(
   Spec_ECC_Curves_curve c,
@@ -5512,172 +5560,6 @@ static void normX(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result, uint64
   montgomery_multiplication_buffer_by_one_dh(c, z2f, result);
 }
 
-static uint64_t
-scalar_bit(Spec_ECC_Curves_curve c, Lib_Buffer_buftype buf_type, void *s, uint32_t n)
-{
-  uint8_t sw0;
-  switch (buf_type)
-  {
-    case Lib_Buffer_MUT:
-      {
-        uint32_t sw;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              sw = (uint32_t)4U;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              sw = (uint32_t)6U;
-              break;
-            }
-          default:
-            {
-              sw = (uint32_t)0U;
-            }
-        }
-        sw0 = ((uint8_t *)s)[sw * (uint32_t)8U - (uint32_t)1U - n / (uint32_t)8U];
-        break;
-      }
-    case Lib_Buffer_IMMUT:
-      {
-        uint32_t sw;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              sw = (uint32_t)4U;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              sw = (uint32_t)6U;
-              break;
-            }
-          default:
-            {
-              sw = (uint32_t)0U;
-            }
-        }
-        sw0 = ((uint8_t *)s)[sw * (uint32_t)8U - (uint32_t)1U - n / (uint32_t)8U];
-        break;
-      }
-    case Lib_Buffer_CONST:
-      {
-        uint32_t sw;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              sw = (uint32_t)4U;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              sw = (uint32_t)6U;
-              break;
-            }
-          default:
-            {
-              sw = (uint32_t)0U;
-            }
-        }
-        sw0 = ((const uint8_t *)s)[sw * (uint32_t)8U - (uint32_t)1U - n / (uint32_t)8U];
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  return (uint64_t)(sw0 >> n % (uint32_t)8U & (uint8_t)1U);
-}
-
-static void
-montgomery_ladder_step1(
-  Spec_ECC_Curves_curve c,
-  uint64_t *r0,
-  uint64_t *r1,
-  uint64_t *tempBuffer
-)
-{
-  point_add(c, r0, r1, r1, tempBuffer);
-  point_double(c, r0, r0, tempBuffer);
-}
-
-static void
-montgomery_ladder_step(
-  Spec_ECC_Curves_curve c,
-  Lib_Buffer_buftype buf_type,
-  uint64_t *r0,
-  uint64_t *r1,
-  uint64_t *tempBuffer,
-  void *scalar,
-  uint32_t i
-)
-{
-  uint32_t sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = (uint32_t)256U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = (uint32_t)384U;
-        break;
-      }
-    default:
-      {
-        sw = (uint32_t)256U;
-      }
-  }
-  uint32_t bit0 = sw - i - (uint32_t)1U;
-  uint64_t bit = scalar_bit(c, buf_type, scalar, bit0);
-  cswap0(c, bit, r0, r1);
-  montgomery_ladder_step1(c, r0, r1, tempBuffer);
-  cswap0(c, bit, r0, r1);
-}
-
-static void
-montgomery_ladder(
-  Spec_ECC_Curves_curve c,
-  Lib_Buffer_buftype a,
-  uint64_t *p,
-  uint64_t *q,
-  void *scalar,
-  uint64_t *tempBuffer
-)
-{
-  uint32_t cycleLoop;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        cycleLoop = (uint32_t)256U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        cycleLoop = (uint32_t)384U;
-        break;
-      }
-    default:
-      {
-        cycleLoop = (uint32_t)256U;
-      }
-  }
-  for (uint32_t i = (uint32_t)0U; i < cycleLoop; i++)
-  {
-    montgomery_ladder_step(c, a, p, q, tempBuffer, scalar, i);
-  }
-}
-
 static void
 scalarMultiplicationL(
   Spec_ECC_Curves_curve c,
@@ -5837,58 +5719,6 @@ secretToPublicWithoutNorm(
   copy_point(c, q, result);
 }
 
-static void montgomery_multiplication_round(Spec_ECC_Curves_curve c, uint64_t *t, uint64_t k0)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  uint64_t temp = (uint64_t)0U;
-  uint64_t y = (uint64_t)0U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t2[(uint32_t)2U * len];
-  memset(t2, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t3[(uint32_t)2U * len];
-  memset(t3, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  uint64_t t1 = t[0U];
-  mul_atomic(t1, k0, &y, &temp);
-  uint64_t y_ = y;
-  const uint64_t *sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = prime256order_buffer;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = prime384order_buffer;
-        break;
-      }
-    default:
-      {
-        sw = prime256order_buffer;
-      }
-  }
-  short_mul_bn(c, sw, y_, t2);
-}
-
 static void
 reduction_prime_2prime_order(Spec_ECC_Curves_curve cu, uint64_t *x, uint64_t *result)
 {
@@ -5896,41 +5726,6 @@ reduction_prime_2prime_order(Spec_ECC_Curves_curve cu, uint64_t *x, uint64_t *re
   uint64_t
   c = sub4_il(x, (const uint64_t *)Hacl_Spec_ECDSA_Definition_prime256order_buffer, tempBuffer);
   cmovznz4(cu, c, tempBuffer, x, result);
-}
-
-static void
-montgomery_multiplication_ecdsa_module(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *b)
-{
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
-  uint64_t t[(uint32_t)2U * len];
-  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  KRML_CHECK_SIZE(sizeof (uint64_t), len);
-  uint64_t prime_p256_orderBuffer[len];
-  memset(prime_p256_orderBuffer, 0U, len * sizeof (uint64_t));
-  uint64_t k0 = (uint64_t)14758798090332847183U;
-  mul(c, a, b, t);
-  montgomery_multiplication_round(c, t, k0);
-  montgomery_multiplication_round(c, t, k0);
-  montgomery_multiplication_round(c, t, k0);
-  montgomery_multiplication_round(c, t, k0);
 }
 
 static void bufferToJac(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result)
@@ -6954,51 +6749,72 @@ static void hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst)
   finish_512(s, dst);
 }
 
-static inline void cswap1(uint64_t bit, uint64_t *p1, uint64_t *p2)
+static void fromDomainImpl(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result)
 {
-  uint64_t mask = (uint64_t)0U - bit;
-  {
-    uint64_t dummy = mask & (p1[0U] ^ p2[0U]);
-    p1[0U] = p1[0U] ^ dummy;
-    p2[0U] = p2[0U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[1U] ^ p2[1U]);
-    p1[1U] = p1[1U] ^ dummy;
-    p2[1U] = p2[1U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[2U] ^ p2[2U]);
-    p1[2U] = p1[2U] ^ dummy;
-    p2[2U] = p2[2U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[3U] ^ p2[3U]);
-    p1[3U] = p1[3U] ^ dummy;
-    p2[3U] = p2[3U] ^ dummy;
-  }
+  uint64_t one[4U] = { 0U };
+  uploadOneImpl(c, one);
+  montgomery_multiplication_buffer_dsa(c, one, a, result);
 }
 
-static void montgomery_ladder_exponent(Spec_ECC_Curves_curve c, uint64_t *r)
+static void
+ecdsa_signature_step12(
+  Spec_ECC_Curves_curve c,
+  Spec_ECDSA_hash_alg_ecdsa alg,
+  uint32_t mLen,
+  uint8_t *m,
+  uint64_t *result
+)
 {
-  uint64_t p[4U] = { 0U };
-  p[0U] = (uint64_t)884452912994769583U;
-  p[1U] = (uint64_t)4834901526196019579U;
-  p[2U] = (uint64_t)0U;
-  p[3U] = (uint64_t)4294967295U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)256U; i++)
+  uint32_t sz_hash;
+  if (alg.tag == Spec_ECDSA_NoHash)
   {
-    uint32_t bit0 = (uint32_t)255U - i;
-    uint64_t
-    bit =
-      (uint64_t)(Hacl_Spec_ECDSA_Definition_prime256order_buffer[bit0
-      / (uint32_t)8U]
-      >> bit0 % (uint32_t)8U
-      & (uint8_t)1U);
-    cswap1(bit, p, r);
-    montgomery_multiplication_ecdsa_module(c, p, r);
-    montgomery_multiplication_ecdsa_module(c, p, p);
-    cswap1(bit, p, r);
+    sz_hash = mLen;
+  }
+  else if (alg.tag == Spec_ECDSA_Hash)
+  {
+    Spec_Hash_Definitions_hash_alg a = alg._0;
+    switch (a)
+    {
+      case Spec_Hash_Definitions_MD5:
+        {
+          sz_hash = (uint32_t)16U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA1:
+        {
+          sz_hash = (uint32_t)20U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_224:
+        {
+          sz_hash = (uint32_t)28U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_256:
+        {
+          sz_hash = (uint32_t)32U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_384:
+        {
+          sz_hash = (uint32_t)48U;
+          break;
+        }
+      case Spec_Hash_Definitions_SHA2_512:
+        {
+          sz_hash = (uint32_t)64U;
+          break;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
+    }
+  }
+  else
+  {
+    sz_hash = KRML_EABORT(uint32_t, "unreachable (pattern matches are exhaustive in F*)");
   }
   uint32_t sw;
   switch (c)
@@ -7018,86 +6834,14 @@ static void montgomery_ladder_exponent(Spec_ECC_Curves_curve c, uint64_t *r)
         sw = (uint32_t)4U;
       }
   }
-  memcpy(r, p, sw * sizeof (uint64_t));
-}
-
-static void fromDomainImpl(Spec_ECC_Curves_curve c, uint64_t *a)
-{
-  uint64_t one[4U] = { 0U };
-  uploadOneImpl(c, one);
-  montgomery_multiplication_ecdsa_module(c, one, a);
-}
-
-static void
-ecdsa_signature_step12(
-  Spec_ECC_Curves_curve c,
-  Spec_ECDSA_hash_alg_ecdsa alg,
-  uint32_t mLen,
-  uint8_t *m,
-  uint64_t *result
-)
-{
-  uint32_t sz;
+  uint32_t len = sw * (uint32_t)8U;
+  KRML_CHECK_SIZE(sizeof (uint8_t), sz_hash + len);
+  uint8_t mHash[sz_hash + len];
+  memset(mHash, 0U, (sz_hash + len) * sizeof (uint8_t));
+  uint8_t *mHashHPart = mHash;
   if (alg.tag == Spec_ECDSA_NoHash)
   {
-    sz = mLen;
-  }
-  else if (alg.tag == Spec_ECDSA_Hash)
-  {
-    Spec_Hash_Definitions_hash_alg a = alg._0;
-    switch (a)
-    {
-      case Spec_Hash_Definitions_MD5:
-        {
-          sz = (uint32_t)16U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA1:
-        {
-          sz = (uint32_t)20U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA2_224:
-        {
-          sz = (uint32_t)28U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA2_256:
-        {
-          sz = (uint32_t)32U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA2_384:
-        {
-          sz = (uint32_t)48U;
-          break;
-        }
-      case Spec_Hash_Definitions_SHA2_512:
-        {
-          sz = (uint32_t)64U;
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
-    }
-  }
-  else
-  {
-    sz = KRML_EABORT(uint32_t, "unreachable (pattern matches are exhaustive in F*)");
-  }
-  KRML_CHECK_SIZE(sizeof (uint8_t), sz);
-  uint8_t mHash[sz];
-  memset(mHash, 0U, sz * sizeof (uint8_t));
-  uint32_t sz1 = (uint32_t)1000U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), sz1);
-  uint8_t cutHash[sz1];
-  memset(cutHash, 0U, sz1 * sizeof (uint8_t));
-  if (alg.tag == Spec_ECDSA_NoHash)
-  {
-    memcpy(mHash, m, sz * sizeof (uint8_t));
+    memcpy(mHashHPart, m, sz_hash * sizeof (uint8_t));
   }
   else if (alg.tag == Spec_ECDSA_Hash)
   {
@@ -7106,17 +6850,17 @@ ecdsa_signature_step12(
     {
       case Spec_Hash_Definitions_SHA2_256:
         {
-          hash_256(m, mLen, mHash);
+          hash_256(m, mLen, mHashHPart);
           break;
         }
       case Spec_Hash_Definitions_SHA2_384:
         {
-          hash_384(m, mLen, mHash);
+          hash_384(m, mLen, mHashHPart);
           break;
         }
       case Spec_Hash_Definitions_SHA2_512:
         {
-          hash_512(m, mLen, mHash);
+          hash_512(m, mLen, mHashHPart);
           break;
         }
       default:
@@ -7134,8 +6878,7 @@ ecdsa_signature_step12(
       "unreachable (pattern matches are exhaustive in F*)");
     KRML_HOST_EXIT(255U);
   }
-  memcpy(cutHash, mHash, (uint32_t)32U * sizeof (uint8_t));
-  toUint64ChangeEndian(c, cutHash, result);
+  toUint64ChangeEndian(c);
   reduction_prime_2prime_order(c, result, result);
 }
 
@@ -7153,21 +6896,45 @@ ecdsa_signature_step45(Spec_ECC_Curves_curve c, uint64_t *x, uint8_t *k, uint64_
 static void
 ecdsa_signature_step6(
   Spec_ECC_Curves_curve c,
+  uint64_t *result,
   uint64_t *kFelem,
   uint64_t *z,
   uint64_t *r,
   uint64_t *da
 )
 {
-  uint64_t rda[4U] = { 0U };
-  uint64_t zBuffer[4U] = { 0U };
-  uint64_t kInv[4U] = { 0U };
-  montgomery_multiplication_ecdsa_module(c, r, da);
-  fromDomainImpl(c, z);
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t rda[len];
+  memset(rda, 0U, len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t zBuffer[len];
+  memset(zBuffer, 0U, len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t kInv[len];
+  memset(kInv, 0U, len * sizeof (uint64_t));
+  montgomery_multiplication_buffer_dsa(c, r, da, rda);
+  fromDomainImpl(c, z, zBuffer);
   felem_add(c, rda, zBuffer, zBuffer);
-  memcpy(kInv, kFelem, (uint32_t)4U * sizeof (uint64_t));
-  montgomery_ladder_exponent(c, kInv);
-  montgomery_multiplication_ecdsa_module(c, zBuffer, kInv);
+  memcpy(kInv, kFelem, len * sizeof (uint64_t));
+  montgomery_multiplication_buffer_dsa(c, zBuffer, kInv, result);
 }
 
 static uint64_t
@@ -7207,10 +6974,10 @@ ecdsa_signature_core(
   KRML_CHECK_SIZE(sizeof (uint64_t), sz);
   uint64_t kAsFelem[sz];
   memset(kAsFelem, 0U, sz * sizeof (uint64_t));
-  toUint64ChangeEndian(c, k, kAsFelem);
+  toUint64ChangeEndian(c);
   ecdsa_signature_step12(c, alg, mLen, m, hashAsFelem);
   uint64_t step5Flag = ecdsa_signature_step45(c, r, k, tempBuffer);
-  ecdsa_signature_step6(c, kAsFelem, hashAsFelem, r, privKeyAsFelem);
+  ecdsa_signature_step6(c, s, kAsFelem, hashAsFelem, r, privKeyAsFelem);
   uint64_t sIsZero = isZero_uint64_CT(c, s);
   return step5Flag | sIsZero;
 }
@@ -7229,7 +6996,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   uint64_t s[4U] = { 0U };
   uint8_t *resultR = result;
   uint8_t *resultS = result + (uint32_t)32U;
-  toUint64ChangeEndian(Spec_ECC_Curves_P256, privKey, privKeyAsFelem);
+  toUint64ChangeEndian(Spec_ECC_Curves_P256);
   uint64_t
   flag =
     ecdsa_signature_core(Spec_ECC_Curves_P256,
@@ -7306,12 +7073,8 @@ uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
   uint64_t publicKeyAsFelem[(uint32_t)2U * len];
   memset(publicKeyAsFelem, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  uint64_t *publicKeyFelemX = publicKeyAsFelem;
-  uint64_t *publicKeyFelemY = publicKeyAsFelem + len;
-  uint8_t *pubKeyX = pubKey;
-  uint8_t *pubKeyY = pubKey + (uint32_t)4U * (uint32_t)8U;
-  toUint64ChangeEndian(Spec_ECC_Curves_P256, pubKeyX, publicKeyFelemX);
-  toUint64ChangeEndian(Spec_ECC_Curves_P256, pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian(Spec_ECC_Curves_P256);
+  toUint64ChangeEndian(Spec_ECC_Curves_P256);
   uint64_t flag = _ecp256dh_r(Spec_ECC_Curves_P256, resultBufferFelem, publicKeyAsFelem, scalar);
   changeEndian(Spec_ECC_Curves_P256, resultBufferFelemX);
   changeEndian(Spec_ECC_Curves_P256, resultBufferFelemY);
@@ -7333,12 +7096,8 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
   uint64_t publicKeyAsFelem[(uint32_t)2U * len];
   memset(publicKeyAsFelem, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  uint64_t *publicKeyFelemX = publicKeyAsFelem;
-  uint64_t *publicKeyFelemY = publicKeyAsFelem + len;
-  uint8_t *pubKeyX = pubKey;
-  uint8_t *pubKeyY = pubKey + (uint32_t)6U * (uint32_t)8U;
-  toUint64ChangeEndian(Spec_ECC_Curves_P384, pubKeyX, publicKeyFelemX);
-  toUint64ChangeEndian(Spec_ECC_Curves_P384, pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian(Spec_ECC_Curves_P384);
+  toUint64ChangeEndian(Spec_ECC_Curves_P384);
   uint64_t flag = _ecp256dh_r(Spec_ECC_Curves_P384, resultBufferFelem, publicKeyAsFelem, scalar);
   changeEndian(Spec_ECC_Curves_P384, resultBufferFelemX);
   changeEndian(Spec_ECC_Curves_P384, resultBufferFelemY);

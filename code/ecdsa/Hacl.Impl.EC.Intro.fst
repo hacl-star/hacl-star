@@ -19,10 +19,11 @@ val toUint8: #c: curve -> i: felem c -> o: lbuffer uint8 (getCoordinateLenU c) -
   (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_seq h1 o == Lib.ByteSequence.uints_to_bytes_be (as_seq h0 i))
 
 let toUint8 #c i o =
+  let len = getCoordinateLenU64 c in 
   match c with
-  |P256 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 c) o i
-  |P384 -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 c) o i
-  |_ -> Lib.ByteBuffer.uints_to_bytes_be (getCoordinateLenU64 c) o i
+  |P256 -> Lib.ByteBuffer.uints_to_bytes_be len o i
+  |P384 -> Lib.ByteBuffer.uints_to_bytes_be len o i
+  |_ -> Lib.ByteBuffer.uints_to_bytes_be len o i
 
 
 #set-options " --z3rlimit 200"

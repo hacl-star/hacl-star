@@ -114,6 +114,7 @@ let getCoordinateLenU64 curve =
 
 
 (* the length of each coordinate of the point as uint8 *)
+inline_for_extraction noextract
 let getCoordinateLenU curve = getCoordinateLenU64 curve *. 8ul
 
 let getCoordinateLen curve = v (getCoordinateLenU curve)
