@@ -153,6 +153,8 @@ let _ml_step #c k i (p, q) =
     _ml_step0 p q
 
 (* P + R == P + Q <==> R == Q --> P + P == P + Q <==> P == Q *)
+assume val curve_point_equality: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
+  (pointEqual (pointAdd p q) (pointAdd p p) <==> pointEqual p q)
 
 (* P + Q == Q + P *)
 assume val curve_commutativity_lemma: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
@@ -236,8 +238,7 @@ let lemma_test1 #c p0 a b =
   curve_associativity a p0 b
   
 
-val lemma_point_add: #c: curve -> p0: point_nat_prime #c -> pk: nat -> qk: nat -> i: nat -> Lemma (
-  let f = (fun x -> pointAdd #c p0 x) in 
+val lemma_point_add: #c: curve -> p0: point_nat_prime #c -> pk: nat -> qk: nat -> i: nat -> Lemma ( 
   let p = pointAdd (point_mult pk p0) (point_mult qk p0) in 
   let p_i = pointAdd (point_mult (pk - i) p0) (point_mult (qk + i) p0) in 
   pointEqual p p_i)
@@ -280,7 +281,6 @@ let rec lemma_point_add #curve p0 pk qk i =
       assert(pointEqual a (f c))
     end;
 
-
     point_mult_def (qk + i - 1) p0;
     point_mult_def (qk + i) p0;
     unfold_repeat o f p0 ((qk + i - 1 - 1) % o);
@@ -302,7 +302,8 @@ let rec lemma_point_add #curve p0 pk qk i =
     curve_compatibility_with_translation_lemma d (f b) c;
     curve_commutativity_lemma #curve d c;
 
-    lemma_test1 p0 c b
+    lemma_test1 p0 c b;
+    assert(pointEqual p_i1 p_i)
 
 
 val lemmaApplPointDouble: #c: curve 
@@ -417,22 +418,26 @@ let point_mult_0_lemma #c p =
   Lib.LoopCombinators.eq_repeat0 (fun x -> pointAdd #c p x) p 
 
 
-val scalar_as_nat_: #c: curve -> scalar_bytes #c -> i: nat {i <= getScalarLen c} -> nat
+val scalar_as_nat_: #c: curve -> scalar_bytes #c -> i: nat {i <= v (getScalarLen c)} -> nat
 
 let rec scalar_as_nat_ #c s i = 
   if i = 0 then 0 else 
-  let bit = ith_bit s (getScalarLen c - i) in 
+  let bit = ith_bit s (v (getScalarLen c) - i) in 
   scalar_as_nat_ #c s (i - 1) * 2 + uint_to_nat bit 
 
-val scalar_as_nat_def: #c: curve -> s: scalar_bytes #c -> i: nat {i > 0 /\ i <= getScalarLen c} -> Lemma (
-  scalar_as_nat_ #c s i == 2 * scalar_as_nat_ #c s (i - 1) +  uint_to_nat (ith_bit s (getScalarLen c - i)))
+
+
+#set-options "--fuel 1 --ifuel 1 --z3rlimit 100"
+
+val scalar_as_nat_def: #c: curve -> s: scalar_bytes #c -> i: nat {i > 0 /\ i <= v (getScalarLen c)} -> Lemma (
+  scalar_as_nat_ #c s i == 2 * scalar_as_nat_ #c s (i - 1) + uint_to_nat (ith_bit s (v (getScalarLen c) - i)))
 
 let scalar_as_nat_def #c s i = ()
 
 
 val scalar_as_nat: #c: curve -> scalar_bytes #c -> nat
 
-let scalar_as_nat #c s = scalar_as_nat_ #c s (getScalarLen c)
+let scalar_as_nat #c s = scalar_as_nat_ #c s (v (getScalarLen c))
 
 
 val montgomery_ladder_spec_left: #c: curve -> s: scalar_bytes #c 
@@ -443,19 +448,20 @@ val montgomery_ladder_spec_left: #c: curve -> s: scalar_bytes #c
 
 
 let montgomery_ladder_spec_left #c s (p0, q0) =
-  let pred (i:nat {i <= getScalarLen c}) (r: tuple2 (point_nat_prime #c) (point_nat_prime #c)) = (
+  let pred (i:nat {i <= v (getScalarLen c)}) (r: tuple2 (point_nat_prime #c) (point_nat_prime #c)) = (
     let p_i, q_i = r in 
-    pointEqual p_i (point_mult #c (scalar_as_nat_ #c s i) q0) /\
-    pointEqual q_i (point_mult #c (scalar_as_nat_ #c s i + 1) q0)) in
-
+    let si = scalar_as_nat_ #c s i in 
+    let si1 = scalar_as_nat_ #c s i + 1 in
+    pointEqual p_i (point_mult #c si q0) /\
+    pointEqual q_i (point_mult #c si1 q0)) in
   point_mult_0_lemma #c q0;
 
-  repeati_inductive (getScalarLen c) pred (fun i (p_i, q_i) -> 
+  repeati_inductive (v (getScalarLen c)) pred (fun i (p_i, q_i) -> 
     let r = _ml_step s i (p_i, q_i) in  
     let pk = scalar_as_nat_ #c s i in 
     mlStep0AsPointAdd q0 pk p_i (pk + 1) q_i; 
     mlStep1AsPointAdd q0 pk p_i (pk + 1) q_i; 
-    scalar_as_nat_def #c s (i + 1);
+    scalar_as_nat_def #c s (i + 1); 
     r
   ) (p0, q0)
 
