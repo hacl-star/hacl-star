@@ -225,11 +225,12 @@ let point_mult_def #c i p = ()
 #push-options "--z3rlimit 500"
 
 
-val lemma_test1: #c: curve -> p0: point_nat_prime #c  -> a: point_nat_prime #c -> b: point_nat_prime #c -> Lemma (
+val lemma_commutativity_extended: #c: curve -> p0: point_nat_prime #c  -> a: point_nat_prime #c -> b: point_nat_prime #c -> 
+  Lemma (
     let f = (fun x -> pointAdd #c p0 x) in 
     pointEqual (pointAdd (f a) b) (pointAdd (f b) a))
 
-let lemma_test1 #c p0 a b = 
+let lemma_commutativity_extended #c p0 a b = 
   let f = (fun x -> pointAdd #c p0 x) in 
   curve_commutativity_lemma (f b) a;
   curve_commutativity_lemma (pointAdd a (pointAdd p0 b)) (pointAdd (pointAdd p0 b) a);
@@ -238,18 +239,18 @@ let lemma_test1 #c p0 a b =
   curve_associativity a p0 b
   
 
-val lemma_point_add: #c: curve -> p0: point_nat_prime #c -> pk: nat -> qk: nat -> i: nat -> Lemma ( 
+val lemma_point_add_minus_plus_same_value: #c: curve -> p0: point_nat_prime #c -> pk: nat -> qk: nat -> i: nat -> Lemma ( 
   let p = pointAdd (point_mult pk p0) (point_mult qk p0) in 
   let p_i = pointAdd (point_mult (pk - i) p0) (point_mult (qk + i) p0) in 
   pointEqual p p_i)
 
-let rec lemma_point_add #curve p0 pk qk i = 
+let rec lemma_point_add_minus_plus_same_value #curve p0 pk qk i = 
    match i with 
   |0 -> ()
   | _ -> 
     let o = getOrder #curve in  
     let f = (fun x -> pointAdd #curve p0 x) in 
-    lemma_point_add #curve p0 pk qk (i - 1);
+    lemma_point_add_minus_plus_same_value #curve p0 pk qk (i - 1);
     
     let p = pointAdd (point_mult pk p0) (point_mult qk p0) in 
   
@@ -302,7 +303,7 @@ let rec lemma_point_add #curve p0 pk qk i =
     curve_compatibility_with_translation_lemma d (f b) c;
     curve_commutativity_lemma #curve d c;
 
-    lemma_test1 p0 c b;
+    lemma_commutativity_extended p0 c b;
     assert(pointEqual p_i1 p_i)
 
 
@@ -317,7 +318,7 @@ let lemmaApplPointDouble #c p0 pk p =
 
   let pk_p = point_mult pk p0 in 
 
-  lemma_point_add #c p0 (pk % o) (pk % o) ((pk - 1) % o);
+  lemma_point_add_minus_plus_same_value #c p0 (pk % o) (pk % o) ((pk - 1) % o);
   lemma_test p0 pk;
 
   calc (==) {
@@ -361,9 +362,40 @@ val lemmaApplPointAdd: #c: curve -> p0: point_nat_prime #c
 let lemmaApplPointAdd #c p0 pk p qk q = 
   let pk_p = point_mult pk p0 in 
   let qk_p = point_mult qk p0 in 
+  
+  let o = getOrder #c in 
 
-  (* to change *)
-  lemma_point_add #c p0 qk pk (qk - 1);
+  lemma_point_add_minus_plus_same_value #c p0 (qk % o) (pk % o) ((qk - 1) % o);
+  lemma_test p0 qk;
+  lemma_test p0 pk;
+
+  assert(pointEqual (pointAdd (point_mult qk p0) (point_mult pk p0)) 
+    (pointAdd (point_mult ((qk % o) - ((qk - 1) % o)) p0) (point_mult (pk % o + ((qk - 1) % o)) p0)));
+
+  calc (==) {
+    point_mult ((qk % o) - ((qk - 1) % o)) p0;
+    (==) {lemma_test p0 ((qk % o) - ((qk - 1) % o))}
+    point_mult (((qk % o) - ((qk - 1) % o)) % o) p0;
+    (==) {lemma_mod_add_distr (- ((qk - 1) % o)) qk o}
+    point_mult ((qk - ((qk - 1) % o)) % o) p0;
+    (==) {lemma_mod_sub_distr qk (qk - 1) o}
+    point_mult ((qk - qk + 1) % o) p0;
+    (==) {lemma_test p0 1}
+    point_mult 1 p0;
+  };
+
+  calc (==) {
+    point_mult (pk % o + ((qk - 1) % o)) p0;
+    (==) {lemma_test p0 (pk % o + ((qk - 1) % o))}
+    point_mult ((pk % o + ((qk - 1) % o)) % o) p0;    
+    (==) {lemma_mod_add_distr ((qk - 1) % o) pk o}
+    point_mult ((pk + ((qk - 1) % o)) % o) p0;    
+    (==) {lemma_mod_add_distr pk (qk - 1) o}
+    point_mult ((pk + qk - 1) % o) p0;    
+    (==) {lemma_test p0 (pk + qk - 1)}
+    point_mult (pk + qk - 1) p0;  
+  };
+
   point_mult_1 p0;
   
   point_mult_ext (pk + qk - 1) p0; 
