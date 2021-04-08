@@ -85,65 +85,49 @@ let uploadZeroPoint #c p =
 
 let add_bn #c x y result =
   let len = getCoordinateLenU64 c in 
-  match c with
-  |P256 -> add4 x y result
-  |P384 -> bn_add_eq_len len x y result
-  |Default -> bn_add_eq_len len x y result
+  bn_add_eq_len len x y result
 
 
 let add_long_bn #c x y result = 
   let len = getCoordinateLenU64 c *. 2ul in 
-  match c with
-  |P256 -> add8 x y result
-  |P384 -> bn_add_eq_len len x y result
-  |Default -> bn_add_eq_len len x y result
+  bn_add_eq_len len x y result
 
 
-val _add_dep_prime: #c: curve -> x: felem c -> t: uint64{v t == 0 \/ v t == 1} 
-  -> result: felem c ->
+val _add_dep_prime: #c: curve -> x: felem c -> t: uint64{v t == 0 \/ v t == 1} -> result: felem c ->
   Stack uint64
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
-      if uint_v t = 1 then 
-        as_nat c h1 result + uint_v r * getPower2 c == as_nat c h0 x + getPrime c
-      else
-       as_nat c h1 result  == as_nat c h0 x))  
+  (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+    if uint_v t = 1 then 
+      as_nat c h1 result + uint_v r * getPower2 c == as_nat c h0 x + getPrime c
+    else
+      as_nat c h1 result  == as_nat c h0 x))  
 
 
 let _add_dep_prime #c x t result = 
   push_frame();
-    let len = getCoordinateLenU64 c in 
-    let b = create len (u64 0) in 
-  let carry = add_bn (const_to_ilbuffer (prime_buffer #c)) x b in 
+  let len = getCoordinateLenU64 c in 
+  let b = create len (u64 0) in 
+  admit();
+  let carry = add_bn (const_to_lbuffer (prime_buffer #c)) x b in 
 
   let mask = (u64 0) -. t in 
   copy_conditional #c result b mask;
-  admit();
   pop_frame();
   carry
 
 
 let add_dep_prime #c x t result =
-  match c with
-  |P256 -> _add_dep_prime x t result
-  |P384 -> add_dep_prime_p384 x t result
-  |Default -> _add_dep_prime x t result
+  _add_dep_prime x t result
 
 
 let sub_bn #c x y result =
   let len = getCoordinateLenU64 c in 
-  match c with
-  |P256 -> sub4 x y result
-  |P384 -> bn_sub_eq_len len x y result
-  |Default -> bn_sub_eq_len len x y result
+  bn_sub_eq_len len x y result
   
 
 let sub_bn_gl #c x y result =
   let y_ = const_to_ilbuffer y in 
-  match c with
-  |P256 -> sub4_il x y result
-  |P384 -> sub_bn x y_ result
-  |Default ->  sub_bn x y_ result
+  sub_bn x y_ result
 
 
 val _shortened_mul: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: uint64 -> result: widefelem c -> Stack unit
@@ -157,14 +141,8 @@ let _shortened_mul #c a b result =
   push_frame();
     let len = getCoordinateLenU64 c in 
     let bBuffer = create (size 1) b in 
-    let a_ = const_to_ilbuffer a in (
-    match c with 
-      |P256 ->   
-	bn_mul len a_ (size 1) bBuffer result
-      |P384 -> 
-	bn_mul len a_ (size 1) bBuffer result
-      |Default -> 
-	bn_mul len a_ (size 1) bBuffer result ); 
+    let a_ = const_to_ilbuffer a in 
+    bn_mul len a_ (size 1) bBuffer result; 
   pop_frame()
 
 
@@ -192,14 +170,12 @@ let square_bn #c x result =
 
 
 
-val reduction_prime_2prime_with_carry_cin: #c: curve ->
-  cin: uint64 -> x: felem c -> result: felem c ->
+val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c -> result: felem c ->
   Stack unit
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ (
     as_nat c h x + uint_v cin * getPower2 c) < 2 * getPrime c)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat c h1 result = (as_nat c h0 x + uint_v cin * getPower2 c) % getPrime c
-  )
+    as_nat c h1 result = (as_nat c h0 x + uint_v cin * getPower2 c) % getPrime c)
 
 
 let reduction_prime_2prime_with_carry_cin #c cin x result =
@@ -219,11 +195,7 @@ let reduction_prime_2prime_with_carry_cin #c cin x result =
   pop_frame();
   
   let h2 = ST.get() in 
-
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
-
-  lemma_cin_1 #c (as_nat c h0 x) (uint_v cin);
+  lseq_upperbound #(v (getCoordinateLenU64 c)) (as_seq h0 x);
   lemma_reduction_prime_2prime_with_carry_cin c (v cin) (as_nat c h0 x) (uint_v carry0) (as_nat c h2 result)
 
 
@@ -235,7 +207,11 @@ let reduction_prime_2prime_with_carry #c x result =
   let x__ = Lib.Buffer.sub x len len in 
 
   let h0 = ST.get() in 
-  lemma_less_2prime #c h0 x;
+  FStar.Math.Lemmas.pow2_plus 64 (v (getCoordinateLenU64 c) * 64);
+  lseq_upperbound1 (as_seq h0 x) (v (getCoordinateLenU64 c) + 1) (2 * v (getCoordinateLenU64 c) - v (getCoordinateLenU64 c) - 1);
+  lseq_as_nat_definiton (as_seq h0 x) (v (getCoordinateLenU64 c) + 1);
+
+  lemma_lseq_as_seq_extension (as_seq h0 (gsub x (size 0) (getCoordinateLenU64 c))) (as_seq h0 x) (v (getCoordinateLenU64 c));
   reduction_prime_2prime_with_carry_cin cin x_ result
 
 
@@ -243,16 +219,11 @@ let reduction_prime_2prime #c x result =
   push_frame();
   let len = getCoordinateLenU64 c in
   let tempBuffer = create len (u64 0) in
-  recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
-
-    let h0 = ST.get() in
+    recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
+  let h0 = ST.get() in
   let r = sub_bn_gl x (prime_buffer #c) tempBuffer in
   cmovznz4 r tempBuffer x result;
-    let h1 = ST.get() in
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
-  
-  lemma_reduction1 #c (as_nat c h0 x) (as_nat c h1 result);
+  lseq_upperbound #(v (getCoordinateLenU64 c)) (as_seq h0 x);
   pop_frame()
 
 
@@ -415,7 +386,7 @@ let shiftLeftWord #c i o =
 
 let mod64 #c a =
   let h0 = ST.get() in 
-  lemma_wide_felem c h0 a;
+  lemma_lseq_1 (v (getCoordinateLenU64 c *! 2ul)) (as_seq h0 a) (v (getCoordinateLenU64 c *! 2ul));
   index a (size 0)
 
 

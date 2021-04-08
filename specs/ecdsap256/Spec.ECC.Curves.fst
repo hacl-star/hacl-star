@@ -147,7 +147,7 @@ let getPowerU curve =
   |P384 -> 384ul
   |_ -> 256ul
 
-let getPower curve : a: nat {getPrime curve < a /\ a = v (getCoordinateLenU64 curve) * 64} = v (getPowerU curve)
+let getPower curve : a: nat {getPrime curve < pow2 a /\ pow2 a < 2 * getPrime curve /\ a = v (getCoordinateLenU64 curve) * 64} = v (getPowerU curve)
 
 (* the power for 2 words *)
 let getLongPower curve = getPower curve * 2

@@ -23,12 +23,9 @@ val uploadZeroImpl: #c: curve -> f: felem c -> Stack unit
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat c h1 f == 0 /\ modifies (loc f) h0 h1)
 
-
-
 val uploadOneImpl: #c: curve -> f: felem c -> Stack unit
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat c h1 f == 1 /\ modifies (loc f) h0 h1)
-
 
 val uploadZeroPoint: #c: curve -> p: point c -> 
   Stack unit
@@ -40,20 +37,17 @@ val uploadZeroPoint: #c: curve -> p: point c ->
     as_nat c h1 (gsub p len len) == 0 /\
     as_nat c h1 (gsub p (size 2 *! len) len) == 0) 
 
-
 val add_bn: #c: curve -> x: felem c -> y: felem c -> result: felem c -> 
   Stack uint64
     (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
     (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ 
       as_nat c h1 result + v r * (pow2 (getPower c)) == as_nat c h0 x + as_nat c h0 y)   
 
-
 val add_long_bn: #c: curve -> x: widefelem c -> y: widefelem c -> result: widefelem c -> 
   Stack uint64 
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ 
     wide_as_nat c h1 result + v r * pow2 (getLongPower c) == wide_as_nat c h0 x + wide_as_nat c h0 y)
-
 
 val add_dep_prime: #c: curve -> x: felem c -> t: uint64 {uint_v t == 0 \/ uint_v t == 1} -> result: felem c -> 
   Stack uint64
@@ -160,26 +154,15 @@ val mul: #c: curve -> f: felem c -> r: felem c -> out: widefelem c ->
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
       wide_as_nat c h1 out = as_nat c h0 r * as_nat c h0 f)
 
-
-
 val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
     (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
-
-
+    
 val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
   (requires fun h -> live h a /\ live h b) 
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
     (if as_nat c h0 a = as_nat c h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
-
-(*
-val copy_conditional: #c: curve -> out: felem c -> x: felem c 
-  -> mask: uint64 {uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
-  (requires fun h -> live h out /\ live h x)
-  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
-    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x))  *)
-
 
 val shiftLeftWord: #c: curve -> i: felem c -> o: lbuffer uint64 (getCoordinateLenU64 c *. 2ul)-> 
   Stack unit 
