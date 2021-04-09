@@ -219,6 +219,15 @@ cmovznz4(Spec_ECC_Curves_curve c, uint64_t cin, uint64_t *x, uint64_t *y, uint64
   }
 }
 
+static void mul64(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
+{
+  uint128_t res = (uint128_t)x * y;
+  uint64_t l0 = (uint64_t)res;
+  uint64_t h0 = (uint64_t)(res >> (uint32_t)64U);
+  result[0U] = l0;
+  temp[0U] = h0;
+}
+
 static void uploadZeroImpl(Spec_ECC_Curves_curve c, uint64_t *f)
 {
   uint32_t len;
@@ -674,6 +683,92 @@ static void
 short_mul_bn(Spec_ECC_Curves_curve c, const uint64_t *x, uint64_t y, uint64_t *result)
 {
   _shortened_mul(c, x, y, result);
+}
+
+static void short_mul_prime(Spec_ECC_Curves_curve c, uint64_t b, uint64_t *result)
+{
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = result;
+        uint64_t *o1 = result + (uint32_t)1U;
+        uint64_t *o2 = result + (uint32_t)2U;
+        uint64_t *o3 = result + (uint32_t)3U;
+        mul64(f0, b, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, b, o1, &temp);
+        uint64_t l0 = o1[0U];
+        uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l0, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c1;
+        temp = (uint64_t)0U;
+        uint64_t h4 = temp;
+        mul64(f3, b, o3, &temp);
+        uint64_t l = o3[0U];
+        uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h4, o3);
+        uint64_t temp0 = temp;
+        result[4U] = c3 + temp0;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        const uint64_t *primeBuffer;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              primeBuffer = prime256_buffer;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              primeBuffer = prime384_buffer;
+              break;
+            }
+          default:
+            {
+              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
+            }
+        }
+        short_mul_bn(c, primeBuffer, b, result);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        const uint64_t *primeBuffer;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              primeBuffer = prime256_buffer;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              primeBuffer = prime384_buffer;
+              break;
+            }
+          default:
+            {
+              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
+            }
+        }
+        short_mul_bn(c, primeBuffer, b, result);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
 }
 
 static void square_bn(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result)
@@ -1157,26 +1252,7 @@ static void
 montgomery_multiplication_round_w_k0(Spec_ECC_Curves_curve c, uint64_t *t, uint64_t *t2)
 {
   uint64_t t1 = t[0U];
-  const uint64_t *sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = prime256_buffer;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = prime384_buffer;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  short_mul_bn(c, sw, t1, t2);
+  short_mul_prime(c, t1, t2);
 }
 
 static void
@@ -1192,26 +1268,7 @@ montgomery_multiplication_round_k0(
   uint64_t temp = (uint64_t)0U;
   mul_atomic(t1, k0, &y, &temp);
   uint64_t y_ = y;
-  const uint64_t *sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = prime256_buffer;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = prime384_buffer;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  short_mul_bn(c, sw, y_, t2);
+  short_mul_prime(c, y_, t2);
 }
 
 static void
@@ -3623,8 +3680,6 @@ montgomery_ladder(
 
 static uint32_t coordinate521 = (uint32_t)9U;
 
-// extern void Hacl_Impl_EC_P521_Reduction_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
-
 static void getZeroWord(uint64_t *i, uint64_t *o)
 {
   memcpy(o, i, coordinate521 * sizeof (uint64_t));
@@ -3701,16 +3756,14 @@ static void getFirstWord(uint64_t *i, uint64_t *o, uint32_t shift)
   }
 }
 
-static void reduction_p521(uint64_t *i, uint64_t *o)
+static void reduction_p521(uint64_t *i)
 {
   uint64_t a0[9U] = { 0U };
   uint64_t a1[9U] = { 0U };
   uint64_t a2[9U] = { 0U };
   getZeroWord(i, a0);
-  // getFirstWord(i, a1, (uint32_t)1U);
-  // getFirstWord(i, a2, (uint32_t)2U);
-  // Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
-  // Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
+  getFirstWord(i, a1, (uint32_t)1U);
+  getFirstWord(i, a2, (uint32_t)2U);
 }
 
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
@@ -4266,7 +4319,7 @@ static void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
       }
     case Spec_ECC_Curves_Default:
       {
-        reduction_p521(i, o);
+        reduction_p521(i);
         break;
       }
     default:

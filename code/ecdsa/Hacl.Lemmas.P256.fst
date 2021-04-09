@@ -10,12 +10,10 @@ open FStar.Tactics
 open FStar.Tactics.Canon 
 
 open Hacl.Spec.EC.Definition
-open Spec.ECC
 open Spec.ECC.Curves
 open Spec.ECDSA.Lemmas
 
 open FStar.Math.Lemmas
-open FStar.Math.Lib
 
 open Lib.Buffer
 open FStar.HyperStack.All
@@ -26,9 +24,8 @@ open Spec.ECC
 
 #set-options " --z3rlimit 200" 
 
-val lemma_scalar_ith: c: curve -> sc:lbytes (v (getScalarLenBytes c)) 
-  -> k:nat{k < v (getScalarLenBytes c)} -> Lemma
-  (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
+val lemma_scalar_ith: c: curve -> sc: lbytes (v (getScalarLenBytes c)) -> k:nat{k < v (getScalarLenBytes c)} ->
+  Lemma (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
 
 let lemma_scalar_ith c sc k =
   index_nat_to_intseq_le #U8 #SEC (v (getScalarLenBytes c)) (nat_from_intseq_le sc) k;
@@ -134,42 +131,7 @@ let lemma_cswap2_step bit p1 p2 =
   logxor_lemma p1 p2;
   let p2' = p2 ^. dummy in
   logxor_lemma p2 p1
-
-
-(* Used in ecdsa *)
-let mul_lemma_1 (a: nat) (c: nat) (b: pos) : Lemma (requires (a < c)) (ensures (a * b < c * b)) = ()
-
-(* Used in ecdsa *)
-let mul_lemma_ (a: nat) (b: nat) (c: nat) : Lemma (requires (a < c /\ b < c)) (ensures (a * b < c * c)) = ()
-
-let mul_lemma_3 (a: nat) (c: nat) (b: nat) (d: nat) : Lemma (requires (a < c && b < d)) (ensures (a * b < c * d)) = ()
-
-let mul_lemma_4 (a: nat) (b: nat) (c: nat) (d: nat) : Lemma (requires (a <= c && b <= d)) (ensures (a * b <= c * d)) = ()
-
-
-val lemma_low_level0: o0: nat -> o1: nat -> o2: nat -> o3: nat -> f0: nat  ->  f1: nat -> f2: nat -> 
-  f3: nat {f0 + f1 * pow2 64 + f2 * pow2 128  + f3 * pow2 192 < pow2 256} -> 
-  u: nat {u < pow2 64} -> h2: nat -> c1: nat -> c2: nat -> c3: nat -> h3: nat -> h4: nat ->
-  Lemma
-  (requires (
-    h2 * pow2 64 * pow2 64 +  o0 + o1 * pow2 64 + c1 * pow2 64 * pow2 64 ==  f0 * u + f1 * u * pow2 64 /\
-    o2 + c2 * pow2 64 + h3 * pow2 64 - h2 - c1 == f2 * u /\
-    o3 + c3 * pow2 64 + h4 * pow2 64 - h3 - c2 == f3 * u)
-  )
-  (ensures 
-    (o0 + o1 * pow2 64 + o2 * pow2 128 +  o3 * pow2 192 + (c3 + h4) * pow2 256  == (f0  + f1 * pow2 64 + f2  * pow2 128  + f3 * pow2 192) * u /\
-    f0 * u + f1 * u * pow2 64 + f2 * u * pow2 128  + f3 * u * pow2 192 < pow2 320 /\
-    (c3 + h4) < pow2 64)
-  )
-
-let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 = 
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);  
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 320); 
-
-  mul_lemma_3  (f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) (pow2 256) u (pow2 64)
-
+  
 
 val logand_lemma: a: uint64 -> b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} ->
   Lemma (if uint_v b = 0 then uint_v (logand a b) == 0 else uint_v (logand a b) == uint_v a)
@@ -408,7 +370,6 @@ let modulo_distributivity_mult2 a b c d =
     (a * (b % d) * c) % d; 
     (==)
     {assert_by_tactic (a * (b % d) * c == (b % d) * (a * c)) canon}
-
     ((b % d) * (a * c)) % d;
     (==) 
     {lemma_mod_mul_distr_l b (a * c) d; assert_by_tactic (b * (a * c) == a * b * c) canon }

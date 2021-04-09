@@ -233,7 +233,7 @@ let lemma_norm #c pD r =
   }
 
 
-(* to prove *)
+
 let norm #c p resultPoint tempBuffer = 
   [@inline_let]
   let len = getCoordinateLenU64 c in 

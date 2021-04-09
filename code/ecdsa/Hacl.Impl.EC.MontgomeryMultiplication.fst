@@ -45,7 +45,7 @@ let montgomery_multiplication_round_w_k0 #c t t2 =
     let h0 = ST.get() in 
   let t1 = mod64 t in 
   recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
-  short_mul_bn (prime_buffer #c) t1 t2;
+  short_mul_prime t1 t2;
   lemma_mult_lt_left (getPrime c) (wide_as_nat c h0 t % pow2 64) (pow2 64)
 
 
@@ -71,7 +71,7 @@ let montgomery_multiplication_round_k0 #c k0 t t2 =
     let h = ST.get() in 
     let y_ = index y (size 0) in   
     modulo_addition_lemma (uint_v (Lib.Sequence.index (as_seq h y) 0)) (pow2 64) (uint_v (Lib.Sequence.index (as_seq h temp) 0));
-    short_mul_bn #c (prime_buffer #c) y_ t2;
+    short_mul_prime #c y_ t2;
     lemma_mult_lt_left (getPrime c) (((wide_as_nat c h0 t % pow2 64) * uint_v k0) % pow2 64) (pow2 64);
   pop_frame()
 

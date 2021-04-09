@@ -83,6 +83,14 @@ val short_mul_bn: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: 
     as_nat_il c h0 a * uint_v b = wide_as_nat c h1 result /\ 
     wide_as_nat c h1 result < (pow2 (getPower c)) * pow2 64)
 
+
+val short_mul_prime: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
+  (requires fun h -> live h result /\ wide_as_nat c h result = 0)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    getPrime c * uint_v b = wide_as_nat c h1 result /\ 
+    wide_as_nat c h1 result < (pow2 (getPower c))  * pow2 64)
+
+
 val square_bn: #c: curve -> f: felem c -> out: widefelem c -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
@@ -129,7 +137,7 @@ val felem_double: #c: curve -> a: felem c -> out: felem c ->
       as_nat c h1 out == toDomain #c (2 * fromDomain #c (as_nat c h0 a) % getPrime c)))
 
 
- val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c -> 
+val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c -> 
   Stack unit 
   (requires (fun h0 -> 
     live h0 out /\ live h0 a /\ live h0 b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\

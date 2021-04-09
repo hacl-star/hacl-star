@@ -282,7 +282,7 @@ let exponent_2 t t0 t4 t5 result =
 
 
 [@ CInline]
-val exponent_p256: a: felem P256->result: felem P256 -> tempBuffer: lbuffer uint64 (getCoordinateLenU P256 *. 8ul) -> Stack unit
+val exponent_p256: a: felem P256->result: felem P256 -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 P256 *. 8ul) -> Stack unit
   (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
     disjoint a tempBuffer /\ as_nat P256 h a < prime256)
   (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (

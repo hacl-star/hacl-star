@@ -101,8 +101,8 @@ let reduction_p521 i o =
   getFirstWord i a1 (size 1);
   getFirstWord i a2 (size 2);
 
-  felem_add a0 a1 o;
-  felem_add o a2 o;
+(*   felem_add a0 a1 o;
+  felem_add o a2 o; *)
 
 
   admit()
