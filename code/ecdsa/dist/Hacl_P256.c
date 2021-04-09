@@ -699,20 +699,15 @@ static void short_mul_prime(Spec_ECC_Curves_curve c, uint64_t b, uint64_t *resul
         uint64_t *o1 = result + (uint32_t)1U;
         uint64_t *o2 = result + (uint32_t)2U;
         uint64_t *o3 = result + (uint32_t)3U;
+        uint64_t *o4 = result + (uint32_t)4U;
         mul64(f0, b, o0, &temp);
         uint64_t h0 = temp;
         mul64(f1, b, o1, &temp);
-        uint64_t l0 = o1[0U];
-        uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l0, h0, o1);
+        uint64_t l = o1[0U];
+        uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
         uint64_t h = temp;
         o2[0U] = h + c1;
-        temp = (uint64_t)0U;
-        uint64_t h4 = temp;
-        mul64(f3, b, o3, &temp);
-        uint64_t l = o3[0U];
-        uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h4, o3);
-        uint64_t temp0 = temp;
-        result[4U] = c3 + temp0;
+        mul64(f3, b, o3, o4);
         break;
       }
     case Spec_ECC_Curves_P384:

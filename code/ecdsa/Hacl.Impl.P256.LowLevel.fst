@@ -41,6 +41,45 @@ let lemma_lseq_nat_instant_4 a =
   lseq_as_nat_last a
 
 
+val lemma_lseq_nat_instant_5: a: Lib.Sequence.lseq uint64 8 -> Lemma (
+  lseq_as_nat_ a 5 == 
+    v (Lib.Sequence.index a 0) * pow2 (64 * 0) + 
+    v (Lib.Sequence.index a 1) * pow2 (64 * 1) + 
+    v (Lib.Sequence.index a 2) * pow2 (64 * 2) +
+    v (Lib.Sequence.index a 3) * pow2 (64 * 3) + 
+    v (Lib.Sequence.index a 4) * pow2 (64 * 4))
+
+let lemma_lseq_nat_instant_5 a = 
+  lseq_as_nat_definiton a 5;
+  lseq_as_nat_definiton a 4;
+  lseq_as_nat_definiton a 3;
+  lseq_as_nat_definiton a 2;
+  lseq_as_nat_definiton a 1;
+  lseq_as_nat_last a
+
+val lemma_lseq_nat_instant_8: a: Lib.Sequence.lseq uint64 8 -> Lemma (
+  lseq_as_nat a == 
+    v (Lib.Sequence.index a 0) * pow2 (64 * 0) + 
+    v (Lib.Sequence.index a 1) * pow2 (64 * 1) + 
+    v (Lib.Sequence.index a 2) * pow2 (64 * 2) +
+    v (Lib.Sequence.index a 3) * pow2 (64 * 3) + 
+    v (Lib.Sequence.index a 4) * pow2 (64 * 4) +
+    v (Lib.Sequence.index a 5) * pow2 (64 * 5) +
+    v (Lib.Sequence.index a 6) * pow2 (64 * 6) +
+    v (Lib.Sequence.index a 7) * pow2 (64 * 7))
+
+let lemma_lseq_nat_instant_8 a = 
+  lseq_as_nat_definiton a 8;
+  lseq_as_nat_definiton a 7;
+  lseq_as_nat_definiton a 6;
+  lseq_as_nat_definiton a 5;
+  lseq_as_nat_definiton a 4;
+  lseq_as_nat_definiton a 3;
+  lseq_as_nat_definiton a 2;
+  lseq_as_nat_definiton a 1;
+  lseq_as_nat_last a
+
+
 val add_dep_prime_p256: x: felem P256 -> t: uint64 {uint_v t == 0 \/ uint_v t == 1} -> result: felem P256 -> 
   Stack uint64
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
@@ -120,8 +159,9 @@ let mult64_c x u cin result temp =
 
 inline_for_extraction noextract
 val shortened_mul_prime256: b: uint64 -> result: widefelem P256 -> Stack unit
-  (requires fun h -> live h result /\ wide_as_nat P256 h result < pow2 320)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ wide_as_nat P256 h1 result < pow2 320)
+  (requires fun h -> live h result /\ wide_as_nat P256 h result < pow2 (64 * 5))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ wide_as_nat P256 h1 result < pow2 (64 * 5) /\
+    lseq_as_nat (as_seq h1 result) = v b * prime256 )
 
 let shortened_mul_prime256 u result = 
   push_frame();
@@ -131,6 +171,7 @@ let shortened_mul_prime256 u result =
     assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 == pow2 320);
   let result04 = sub result (size 0) (size 4) in 
   let result48 = sub result (size 4) (size 4) in 
+  let result58 = sub result (size 5) (size 3) in 
 
   let temp = create (size 1) (u64 0) in 
 
@@ -142,6 +183,7 @@ let shortened_mul_prime256 u result =
   let o1 = sub result (size 1) (size 1) in 
   let o2 = sub result (size 2) (size 1) in 
   let o3 = sub result (size 3) (size 1) in 
+  let o4 = sub result (size 4) (size 1) in 
     
     let h0 = ST.get() in 
   mul64 f0 u o0 temp;
@@ -150,33 +192,35 @@ let shortened_mul_prime256 u result =
     let h2 = ST.get() in 
     
   let h = index temp (size 0) in 
-    let h3 = ST.get() in 
   upd o2 (size 0) (h +! c1);
-  assert(v (Lib.Sequence.index (as_seq h3 o2) 0) == (v h + v c1) % pow2 64);
-  admit();
-
-  upd temp (size 0) (u64 0);
-
-
-  let c3 = mult64_c f3 u (u64 0) o3 temp in 
+      let h3 = ST.get() in 
+  mul64 f3 u o3 o4;
     let h4 = ST.get() in 
-  let temp0 = index temp (size 0) in 
-  upd result (size 4) (c3 +! temp0);
+  pop_frame();
 
   let o0_0 = v (Lib.Sequence.index (as_seq h1 o0) 0) in 
   let o1_0 = v (Lib.Sequence.index (as_seq h2 o1) 0) in 
-  let temp1 = v (Lib.Sequence.index (as_seq h1 temp) 0) in 
-  let temp2 = v (Lib.Sequence.index (as_seq h2 temp) 0) in 
+  let o2_0 = v (Lib.Sequence.index (as_seq h3 o2) 0) in 
+  let o3_0 = v (Lib.Sequence.index (as_seq h4 o3) 0) in 
+  let o4_0 = v (Lib.Sequence.index (as_seq h4 o4) 0) in 
+
+
+  lemma_lseq_nat_instant_8 (as_seq h0 result);
+  Hacl.Spec.EC.Definition.lemma_test (as_seq h0 result) 5;
   
-  assert(o0_0 + temp1 * pow2 64 = uint_v f0 * uint_v u);
-  assert(o1_0 + uint_v c1 * pow2 64 == uint_v f1 * uint_v u - temp2 * pow2 64 + temp1 + 0);
+  assert_norm (v f0 + v f1 * pow2 64 + v f3 * pow2 64 * pow2 64 * pow2 64 == prime256);
 
+  lemma_lseq_nat_instant_8 (as_seq h4 result);
 
-  admit();
-    assert(Lib.Sequence.index (as_seq h0 result) 5 == Lib.Sequence.index (as_seq h0 result48) 1);
-    assert(Lib.Sequence.index (as_seq h0 result) 6 == Lib.Sequence.index (as_seq h0 result48) 2);
-    assert(Lib.Sequence.index (as_seq h0 result) 7 == Lib.Sequence.index (as_seq h0 result48) 3);
+  
+  assert(Lib.Sequence.index (as_seq h0 result) 5 == Lib.Sequence.index (as_seq h0 result48) 1);
+  assert(Lib.Sequence.index (as_seq h0 result) 6 == Lib.Sequence.index (as_seq h0 result48) 2);
+  assert(Lib.Sequence.index (as_seq h0 result) 7 == Lib.Sequence.index (as_seq h0 result48) 3);
 
-  admit()
-
-   
+  assert(Lib.Sequence.index (as_seq h0 result) 5 == Lib.Sequence.index (as_seq h0 result58) 0);
+  assert(Lib.Sequence.index (as_seq h0 result) 6 == Lib.Sequence.index (as_seq h0 result58) 1);
+  assert(Lib.Sequence.index (as_seq h0 result) 7 == Lib.Sequence.index (as_seq h0 result58) 2);
+  
+  lseq_as_nat_definiton (Lib.Sequence.sub (as_seq h4 result) 5 3) 1;
+  lseq_as_nat_definiton (Lib.Sequence.sub (as_seq h4 result) 5 3) 2;
+  lseq_as_nat_definiton (Lib.Sequence.sub (as_seq h4 result) 5 3) 3

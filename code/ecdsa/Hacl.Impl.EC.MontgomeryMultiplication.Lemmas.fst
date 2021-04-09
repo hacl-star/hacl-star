@@ -38,60 +38,6 @@ let lemma_mod_inv #c t =
   power_one (prime - 2)
 
 
-val lemma_test: #l: size_nat -> a: lseq uint64 l -> i: nat {i <= l} 
-  -> Lemma (ensures (
-    let a0 = sub a 0 i in 
-    let a1 = sub a i (l - i) in 
-    lseq_as_nat a = lseq_as_nat a0 + pow2 (64 * i) * lseq_as_nat a1))
-    (decreases (l - i))
-
-let rec lemma_test #l a i = 
-  if i = 0 then begin 
-    let a0 = sub a 0 0 in 
-    let a1 = sub a 0 l in 
-    lseq_as_nat_last a0
-    end
-  else begin if i = l then lseq_as_nat_last (sub a l 0) else
-    begin 
-      let a0 = sub a 0 i in 
-      let a1 = sub a i (l - i) in 
-
-      calc (==) 
-      {
-  lseq_as_nat a1;
-  (==) {lemma_test #(l - i) a1 1}
-  lseq_as_nat (sub a1 0 1) + pow2 64 * lseq_as_nat (sub a1 1 (l - i - 1));
-  (==) {lseq_as_nat_first (sub a1 0 1)}
-  v (index a1 0) + pow2 64 * lseq_as_nat (sub a1 1 (l - i - 1));
-  (==) {Seq.lemma_index_slice a 0 (i + 1) i}
-  v (index a i) + pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
-      };
-    
-    assert(lseq_as_nat a1 - v (index a i) =  pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))));
-
-    lemma_lseq_as_seq_extension (sub a 0 (i + 1)) (sub a 0 i) i;
-
-    let open FStar.Tactics in 
-    let open FStar.Tactics.Canon in 
-
-    
-    calc (==) {
-      lseq_as_nat a;
-      (==) {lemma_test a (i + 1)}
-      lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * (i + 1)) * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
-      (==) { pow2_plus (64 * i) 64}
-      lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * i) * pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
-      (==) {assert_by_tactic (pow2 (64 * i) * pow2 64 * lseq_as_nat (sub a  (i + 1) (l - (i + 1))) == 
-  pow2 (64 * i) * (pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))))) canon}
-      lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * i) * (pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))));
-      (==) {assert(lseq_as_nat a1 - v (index a i) =  pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))))}
-      lseq_as_nat (sub a 0 (i + 1)) - pow2 (64 * i) * v (index a i) + pow2 (64 * i) * lseq_as_nat a1; 
-      (==) {assert (lseq_as_nat (sub a 0 (i + 1)) == lseq_as_nat (sub a 0 i) + pow2 (64 * i) * v (index a i))}
-      lseq_as_nat (sub a 0 i) + pow2 (64 * i) * lseq_as_nat a1;}
-    end end
-
-
-
 open FStar.Math.Euclid 
 open FStar.Math.Fermat
 
@@ -131,9 +77,6 @@ let lemma_division_is_multiplication t3 prime =
       power_as_specification_same_as_fermat (pow2 64) (prime - 1)}
     (t3 / pow2 64) % prime;
   }
-
-
-
 
 
 val lemma_k0_computation: #c: curve-> t: nat -> k0 : uint64 {k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)} ->
