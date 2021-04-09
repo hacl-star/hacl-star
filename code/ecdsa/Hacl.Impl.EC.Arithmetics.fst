@@ -41,7 +41,7 @@ let quatre #c a result =
   
   inDomain_mod_is_not_mod #c #DH ((fromDomain #c (as_nat c h0 a) * fromDomain #c (as_nat c h0 a) % prime) * (fromDomain #c (as_nat c h0 a) * fromDomain #c (as_nat c h0 a) % prime));
     modulo_distributivity_mult2 (fromDomain #c (as_nat c h0 a) * fromDomain #c (as_nat c h0 a)) (fromDomain #c (as_nat c h0 a) * fromDomain #c (as_nat c h0 a)) 1 prime;
-    lemma_brackets (fromDomain #c (as_nat c h0 a) * fromDomain #c (as_nat c h0 a)) (fromDomain #c (as_nat c h0 a)) (fromDomain #c (as_nat c h0 a));
+    lemma_multiplication_associative (fromDomain #c (as_nat c h0 a) * fromDomain #c (as_nat c h0 a)) (fromDomain #c (as_nat c h0 a)) (fromDomain #c (as_nat c h0 a));
     inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 a) * fromDomain #c (as_nat c h0 a) * fromDomain #c (as_nat c h0 a) * fromDomain #c (as_nat c h0 a))
 
 
@@ -69,7 +69,7 @@ let multByFour #c a result  =
 
   let prime = getPrime c in 
     lemma_mod_mul_distr_r 2 (2 * fromDomain #c (as_nat c h0 a)) prime;
-    lemma_brackets 2 2 (fromDomain #c (as_nat c h0 a)); 
+    lemma_multiplication_associative 2 2 (fromDomain #c (as_nat c h0 a)); 
     inDomain_mod_is_not_mod #c #DH (4 * fromDomain #c (as_nat c h0 a))
 
 
@@ -81,10 +81,10 @@ let multByEight #c a result  =
 
     let prime = getPrime c in 
     lemma_mod_mul_distr_r 2 (2 * fromDomain #c (as_nat c h0 a)) prime;
-    lemma_brackets 2 2 (fromDomain #c (as_nat c h0 a)); 
+    lemma_multiplication_associative 2 2 (fromDomain #c (as_nat c h0 a)); 
     inDomain_mod_is_not_mod #c #DH (4 * fromDomain #c (as_nat c h0 a)); 
     lemma_mod_mul_distr_r 2 (4 * fromDomain #c (as_nat c h0 a)) prime;
-    lemma_brackets 2 4 (fromDomain #c (as_nat c h0 a));
+    lemma_multiplication_associative 2 4 (fromDomain #c (as_nat c h0 a));
     inDomain_mod_is_not_mod #c #DH (8 * fromDomain #c (as_nat c h0 a))
 
 

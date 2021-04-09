@@ -147,10 +147,7 @@ let _shortened_mul #c a b result =
 
 
 let short_mul_bn #c x y result = 
-  match c with
-  | P256 -> shortened_mul_p256 x y result
-  | P384 -> _shortened_mul x y result
-  | Default -> _shortened_mul x y result
+  _shortened_mul x y result
  
 
 let square_bn #c x result = 

@@ -171,15 +171,14 @@ let lemma_low_level0 o0 o1 o2 o3 f0 f1 f2 f3 u h2 c1 c2 c3 h3 h4 =
   mul_lemma_3  (f0 + f1 * pow2 64 + f2 * pow2 128 + f3 * pow2 192) (pow2 256) u (pow2 64)
 
 
-val log_and: a: uint64 -> b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} ->
+val logand_lemma: a: uint64 -> b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} ->
   Lemma (if uint_v b = 0 then uint_v (logand a b) == 0 else uint_v (logand a b) == uint_v a)
 
-let log_and a b = 
+let logand_lemma a b = 
   logand_lemma b a;
   logand_spec a b;
   logand_spec b a;
   UInt.logand_commutative #(bits U64) (v a) (v b)
-
 
 val logor_commutative: a: uint64 -> b: uint64 -> Lemma (logor a b == logor b a)
 
@@ -188,21 +187,17 @@ let logor_commutative a b =
   logor_spec b a;
   UInt.logor_commutative #(bits U64) (v a) (v b)
 
+val logor_lemma_one_element_is_zero: a: uint64 -> b: uint64 {uint_v b == 0 \/ uint_v a == 0} -> 
+  Lemma (if uint_v b = 0 then uint_v (logor a b) == uint_v a else uint_v (logor a b) == uint_v b)
 
-val log_or: a: uint64 -> b: uint64 {uint_v b == 0 \/ uint_v a == 0} -> Lemma (
-  if uint_v b = 0 then uint_v (logor a b) == uint_v a else uint_v (logor a b) == uint_v b)
-
-let log_or a b = 
-    if uint_v b = 0 then 
-       begin
-	 logor_lemma b a;
-	 logor_commutative a b
-       end
-    else 
-      begin
-	assert(uint_v a == 0);
-	logor_lemma a b
-      end
+let logor_lemma_one_element_is_zero a b = 
+  if uint_v b = 0 then 
+    begin
+      logor_lemma b a;
+      logor_commutative a b
+    end
+  else 
+    logor_lemma a b
 
 
 val cmovznz4_lemma: cin: uint64 -> x: uint64 -> y: uint64 -> Lemma (
@@ -215,11 +210,10 @@ let cmovznz4_lemma cin x y =
       neq_mask_lemma cin (u64 0);
   let x3 = logor (logand y x2) (logand x (lognot x2)) in
   let ln = lognot (neq_mask cin (u64 0)) in 
-    log_and y x2; 
-    lognot_lemma x2;
-    log_and x ln;
-    log_or (logand y x2) (logand x (lognot x2))
-
+  logand_lemma y x2; 
+  lognot_lemma x2;
+  logand_lemma x ln;
+  logor_lemma_one_element_is_zero (logand y x2) (logand x (lognot x2))
 
 val lemma_xor_copy_cond: a: uint64 -> b: uint64 -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 -1} -> Lemma(
   let r = logxor a (logand mask (logxor a b)) in 
@@ -392,65 +386,9 @@ let rec lemma_pow_mod_n_is_fpow n a b =
 
 (* End of Marina RSA PSS code *) 
 
+val lemma_multiplication_associative : a: int -> b: int -> c: int -> Lemma (a * b * c = a * (b * c))
 
-val modulo_distributivity_mult_last_two: a: int -> b: int -> c: int -> d: int -> e: int -> f: pos -> Lemma (
-  (a * b * c * d * e) % f = (a * b * c * ((d * e) % f)) % f)
-
-let modulo_distributivity_mult_last_two a b c d e f =
-  assert_by_tactic (a * b * c * d * e == a * b * c * (d * e)) canon;
-  lemma_mod_mul_distr_r (a * b * c) (d * e) f
-
-
-val lemma_reduce_mod_ecdsa_prime:
-  prime : nat {prime = 115792089210356248762697446949407573529996955224135760342422259061068512044369} ->
-  t: nat -> k0: nat {k0 = min_one_prime (pow2 64) (- prime)} ->  Lemma (
-  (t + prime * (k0 * (t % pow2 64) % pow2 64)) % pow2 64 == 0)
-    
-let lemma_reduce_mod_ecdsa_prime prime t k0 = 
-  let f = prime * (k0 * (t % pow2 64) % pow2 64) in 
-  let t0 = (t + f) % pow2 64 in 
-  lemma_mod_add_distr t f (pow2 64);
-  modulo_addition_lemma t (pow2 64) f;
-  lemma_mod_mul_distr_r k0 t (pow2 64);
-  lemma_mod_mul_distr_r prime (k0 * t) (pow2 64); 
-    assert_by_tactic(prime * (k0 * t) == (prime * k0) * t) canon;
-  lemma_mod_mul_distr_l (prime * k0) t (pow2 64); 
-    assert_norm (exp #(pow2 64) 884452912994769583 (pow2 64  - 1)  = 14758798090332847183);
-  lemma_mod_mul_distr_l (-1) t (pow2 64);
-  lemma_mod_add_distr t (-t) (pow2 64)
-
-
-(*  Used in ECDSA.MM*)
-val mult_one_round_ecdsa_prime: t: nat -> 
-  prime: pos {prime = 115792089210356248762697446949407573529996955224135760342422259061068512044369} -> 
-  co: nat {t % prime == co % prime} -> k0: nat {k0 = min_one_prime (pow2 64) (- prime)} -> Lemma (
-    let result = (t + prime * ((k0 * (t % pow2 64)) % pow2 64)) / pow2 64 in 
-    result % prime == (co * modp_inv2_prime (pow2 64) prime) % prime)
-
-
-let mult_one_round_ecdsa_prime t prime co k0 = 
-  let t2 = ((k0 * (t % pow2 64)) % pow2 64) * prime in 
-  let t3 = t + t2 in  
-    modulo_addition_lemma t prime ((k0 * (t % pow2 64)) % pow2 64); 
-    lemma_div_mod t3 (pow2 64);
-    lemma_reduce_mod_ecdsa_prime prime t k0;
-      assert(let rem = t3/ pow2 64 in rem * pow2 64 = t3);
-      assert(exists (k: nat). k * pow2 64 = t3)
-    (* lemma_division_is_multiplication t3 prime; *)
-    (* lemma_multiplication_to_same_number t3 co (modp_inv2_prime (pow2 64) prime) prime *)
-
-
-(* to replace with calc?  *)
-val lemma_brackets : a: int -> b: int -> c: int -> Lemma (a * b * c = a * (b * c))
-
-let lemma_brackets a b c = ()
-
-
-(* To replace with calc *)
-val lemma_twice_brackets: a: int -> b: int -> c: int -> d: int -> e: int -> f: int -> h: int-> Lemma (
-  (a * b * c) * (d * e * f) * h = a * b * c * d * e * f * h)
-
-let lemma_twice_brackets a b c d e f h = ()
+let lemma_multiplication_associative a b c = ()
 
 
 val modulo_distributivity_mult2: a: int -> b: int -> c: int -> d: pos -> Lemma (((a % d) * (b % d) * c) % d = (a * b * c) % d)

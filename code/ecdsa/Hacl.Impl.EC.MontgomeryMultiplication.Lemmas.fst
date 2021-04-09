@@ -38,21 +38,6 @@ let lemma_mod_inv #c t =
   power_one (prime - 2)
 
 
-(* Used onlyECDSA.MontgomeryMult - to delete *)
-val mult_one_round_ecdsa_prime: 
-  #c: curve 
-  -> t: nat 
-  -> co: nat {t % getPrime c == co % getPrime c} 
-  -> k0: nat {k0 = min_one_prime (pow2 64) (- getPrime c)} -> 
-  Lemma (
-    let prime = getPrime c in 
-    let result = (t + getPrime c * ((k0 * (t % pow2 64)) % pow2 64)) / pow2 64 in 
-    result % prime == (co * modp_inv2_prime (pow2 64) prime) % prime)
-
-
-let mult_one_round_ecdsa_prime #c t co k0 = admit()
-
-
 val lemma_test: #l: size_nat -> a: lseq uint64 l -> i: nat {i <= l} 
   -> Lemma (ensures (
     let a0 = sub a 0 i in 

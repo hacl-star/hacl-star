@@ -42,9 +42,9 @@ let reduction_prime_2prime_with_carry #c x result  =
       let cin = Lib.Buffer.index x (size 4) in 
       let x_ = Lib.Buffer.sub x (size 0) (size 4) in 
           recall_contents prime256order_buffer (Lib.Sequence.of_list (order_list P256));
-      let c = Hacl.Impl.P256.LowLevel.sub4_il x_ prime256order_buffer tempBuffer in
+      (* let c = Hacl.Impl.P256.LowLevel.sub4_il x_ prime256order_buffer tempBuffer in *)
 	let h1 = ST.get() in 
-
+(* 
 	assert(if uint_v c = 0 then 
 	  as_nat P256 h0 x_ >= (getOrder #P256) 
 	  else as_nat P256 h0 x_ < prime_p256_order);
@@ -52,10 +52,10 @@ let reduction_prime_2prime_with_carry #c x result  =
       let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
       let h2 = ST.get() in 
       assert(if (as_nat P256 h0 x_ >= prime_p256_order) then uint_v carry = 0 
-	else if uint_v cin < uint_v c then uint_v carry = 1 
-	else uint_v carry = 0); 
-
-    cmovznz4 #P256 carry tempBuffer x_ result;
+	else if uint_v cin < uint_v c then uint_v carry = 1  *)
+(* 	else uint_v carry = 0); 
+ *)
+    (* cmovznz4 #P256 carry tempBuffer x_ result; *)
  pop_frame()   
 
 
@@ -64,10 +64,10 @@ let reduction_prime_2prime_with_carry2 #cu cin x result  =
   push_frame();
     let tempBuffer = create (size 4) (u64 0) in 
     let tempBufferForSubborrow = create (size 1) (u64 0) in 
-        recall_contents prime256order_buffer (Lib.Sequence.of_list (order_list P256));
+(*         recall_contents prime256order_buffer (Lib.Sequence.of_list (order_list P256));
     let c = Hacl.Impl.P256.LowLevel .sub4_il x prime256order_buffer tempBuffer in
     let carry = sub_borrow_u64 c cin (u64 0) tempBufferForSubborrow in 
-    cmovznz4 #cu carry tempBuffer x result;
+    cmovznz4 #cu carry tempBuffer x result; *)
  pop_frame()      
 
 
@@ -84,12 +84,12 @@ let reduction_prime_2prime_order #cu x result  =
     let tempBuffer = create (size 4) (u64 0) in 
     recall_contents prime256order_buffer (Lib.Sequence.of_list (order_list P256));
       let h0 = ST.get() in 
-    let c = sub4_il x prime256order_buffer tempBuffer in
-      let h1 = ST.get() in 
+    (* let c = sub4_il x prime256order_buffer tempBuffer in *)
+(*       let h1 = ST.get() in 
       assert(as_nat c h1 tempBuffer = as_nat c h0 x - (getOrder #P256) + uint_v c * pow2 256);
       assert(let x = as_nat c h0 x in if x < (getOrder #P256) then uint_v c = 1 else uint_v c = 0);
     cmovznz4 #cu c tempBuffer x result; 
     let h2 = ST.get() in 
       assert_norm (pow2 256 == pow2 64 * pow2 64 * pow2 64 * pow2 64);
-    lemma_reduction1 (as_nat c h0 x) (as_nat c h2 result);
+    lemma_reduction1 (as_nat c h0 x) (as_nat c h2 result); *)
   pop_frame()  

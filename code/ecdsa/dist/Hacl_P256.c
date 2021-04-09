@@ -219,28 +219,6 @@ cmovznz4(Spec_ECC_Curves_curve c, uint64_t cin, uint64_t *x, uint64_t *y, uint64
   }
 }
 
-static uint64_t sub4_il(uint64_t *x, const uint64_t *y, uint64_t *result)
-{
-  uint64_t *r0 = result;
-  uint64_t *r1 = result + (uint32_t)1U;
-  uint64_t *r2 = result + (uint32_t)2U;
-  uint64_t *r3 = result + (uint32_t)3U;
-  uint64_t cc = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, x[0U], y[0U], r0);
-  uint64_t cc1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc, x[1U], y[1U], r1);
-  uint64_t cc2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc1, x[2U], y[2U], r2);
-  uint64_t cc3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(cc2, x[3U], y[3U], r3);
-  return cc3;
-}
-
-static void mul64(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
-{
-  uint128_t res = (uint128_t)x * y;
-  uint64_t l0 = (uint64_t)res;
-  uint64_t h0 = (uint64_t)(res >> (uint32_t)64U);
-  result[0U] = l0;
-  temp[0U] = h0;
-}
-
 static void uploadZeroImpl(Spec_ECC_Curves_curve c, uint64_t *f)
 {
   uint32_t len;
@@ -695,54 +673,7 @@ _shortened_mul(Spec_ECC_Curves_curve c, const uint64_t *a, uint64_t b, uint64_t 
 static void
 short_mul_bn(Spec_ECC_Curves_curve c, const uint64_t *x, uint64_t y, uint64_t *result)
 {
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        uint64_t *result04 = result;
-        uint64_t temp = (uint64_t)0U;
-        uint64_t f1 = x[1U];
-        uint64_t f2 = x[2U];
-        uint64_t f3 = x[3U];
-        uint64_t *o0 = result04;
-        uint64_t *o1 = result04 + (uint32_t)1U;
-        uint64_t *o2 = result04 + (uint32_t)2U;
-        uint64_t *o3 = result04 + (uint32_t)3U;
-        uint64_t f01 = x[0U];
-        mul64(f01, y, o0, &temp);
-        uint64_t h0 = temp;
-        mul64(f1, y, o1, &temp);
-        uint64_t l0 = o1[0U];
-        uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l0, h0, o1);
-        uint64_t h1 = temp;
-        mul64(f2, y, o2, &temp);
-        uint64_t l1 = o2[0U];
-        uint64_t c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, l1, h1, o2);
-        uint64_t h = temp;
-        mul64(f3, y, o3, &temp);
-        uint64_t l = o3[0U];
-        uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, l, h, o3);
-        uint64_t temp0 = temp;
-        uint64_t c10 = c3 + temp0;
-        result[4U] = c10;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        _shortened_mul(c, x, y, result);
-        break;
-      }
-    case Spec_ECC_Curves_Default:
-      {
-        _shortened_mul(c, x, y, result);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
+  _shortened_mul(c, x, y, result);
 }
 
 static void square_bn(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result)
@@ -3692,7 +3623,7 @@ montgomery_ladder(
 
 static uint32_t coordinate521 = (uint32_t)9U;
 
-extern void Hacl_Impl_EC_P521_Reduction_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
+// extern void Hacl_Impl_EC_P521_Reduction_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
 
 static void getZeroWord(uint64_t *i, uint64_t *o)
 {
@@ -3776,10 +3707,10 @@ static void reduction_p521(uint64_t *i, uint64_t *o)
   uint64_t a1[9U] = { 0U };
   uint64_t a2[9U] = { 0U };
   getZeroWord(i, a0);
-  getFirstWord(i, a1, (uint32_t)1U);
-  getFirstWord(i, a2, (uint32_t)2U);
-  Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
-  Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
+  // getFirstWord(i, a1, (uint32_t)1U);
+  // getFirstWord(i, a2, (uint32_t)2U);
+  // Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
+  // Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
 }
 
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
@@ -4903,13 +4834,9 @@ secretToPublicWithoutNorm(
   copy_point(c, q, result);
 }
 
-static void
-reduction_prime_2prime_order(Spec_ECC_Curves_curve cu, uint64_t *x, uint64_t *result)
+static void reduction_prime_2prime_order(Spec_ECC_Curves_curve cu)
 {
   uint64_t tempBuffer[4U] = { 0U };
-  uint64_t
-  c = sub4_il(x, (const uint64_t *)Hacl_Spec_ECDSA_Definition_prime256order_buffer, tempBuffer);
-  cmovznz4(cu, c, tempBuffer, x, result);
 }
 
 static void bufferToJac(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result)
@@ -6064,7 +5991,7 @@ ecdsa_signature_step12(
     KRML_HOST_EXIT(255U);
   }
   toUint64ChangeEndian(c, mHashRPart, result);
-  reduction_prime_2prime_order(c, result, result);
+  reduction_prime_2prime_order(c);
 }
 
 static uint64_t
@@ -6074,7 +6001,7 @@ ecdsa_signature_step45(Spec_ECC_Curves_curve c, uint64_t *x, uint8_t *k, uint64_
   uint64_t *tempForNorm = tempBuffer;
   secretToPublicWithoutNorm(c, result, k, tempBuffer);
   normX(c, result, x, tempForNorm);
-  reduction_prime_2prime_order(c, x, x);
+  reduction_prime_2prime_order(c);
   return isZero_uint64_CT(c, x);
 }
 
