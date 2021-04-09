@@ -96,11 +96,11 @@ let add_long_bn #c x y result =
 val _add_dep_prime: #c: curve -> x: felem c -> t: uint64{v t == 0 \/ v t == 1} -> result: felem c ->
   Stack uint64
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ (
     if uint_v t = 1 then 
       as_nat c h1 result + uint_v r * getPower2 c == as_nat c h0 x + getPrime c
     else
-      as_nat c h1 result  == as_nat c h0 x))  
+      as_nat c h1 result == as_nat c h0 x))  
 
 
 let _add_dep_prime #c x t result = 
@@ -146,28 +146,16 @@ let _shortened_mul #c a b result =
   pop_frame()
 
 
-(* I expect that I use only with prime buffer, so this function will be deleted *)
 let short_mul_bn #c x y result = 
   match c with
   | P256 -> shortened_mul_p256 x y result
   | P384 -> _shortened_mul x y result
   | Default -> _shortened_mul x y result
-
-
-let short_mul_prime #c b result = 
-  match c with
-  | P256 -> shortened_mul_prime256 b result
-  | P384 -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
-  | Default -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
-  
+ 
 
 let square_bn #c x result = 
   let len = getCoordinateLenU64 c in 
-  match c with 
-  |P256 -> square_p256 x result
-  |P384 -> Hacl.Bignum.bn_sqr len x result
-  |Default -> Hacl.Bignum.bn_sqr len x result
-
+  Hacl.Bignum.bn_sqr len x result
 
 
 val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c -> result: felem c ->
@@ -247,18 +235,18 @@ let felem_double #c arg1 out =
   additionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg1);
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) + fromDomain #c (as_nat c h0 arg1))
 
-
+#set-options "--fuel 1 --ifuel 1 --z3rlimit 200"
 
 let felem_sub #c arg1 arg2 out =
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 384);
     let h0 = ST.get() in
   let t = sub_bn arg1 arg2 out in
+    let h1 = ST.get() in 
   let cc = add_dep_prime #c out t out in 
+    let h2 = ST.get() in
 
+  lseq_upperbound (as_seq h1 out); 
   modulo_addition_lemma (as_nat c h0 arg1 - as_nat c h0 arg2) (getPrime c) 1;
 
-  let h2 = ST.get() in
   assert(
     let prime = getPrime c in 
     if as_nat c h0 arg1 - as_nat c h0 arg2 >= 0 then
@@ -268,6 +256,7 @@ let felem_sub #c arg1 arg2 out =
       end
     else
       begin
+	lseq_upperbound (as_seq h2 out);
 	modulo_lemma (as_nat c h2 out) prime;
 	as_nat c h2 out == (as_nat c h0 arg1 - as_nat c h0 arg2) % prime
       end);
@@ -278,11 +267,7 @@ let felem_sub #c arg1 arg2 out =
 
 let mul #c f r out =
   let len = getCoordinateLenU64 c in 
-  match c with
-  |P256 -> mul_p256 f r out
-  |P384 -> bn_mul len f len r out
-  |Default -> bn_mul len f len r out
-
+  bn_mul len f len r out
 
 
 let isZero_uint64_CT #c f =
@@ -295,12 +280,11 @@ let isZero_uint64_CT #c f =
     live h f /\ live h tmp /\ modifies (loc tmp) h0 h /\ (
       let tmp = uint_v (Lib.Sequence.index (as_seq h tmp) 0) in (
       forall (j: nat {j < i}). v (Lib.Sequence.index (as_seq h0 f) j) == 0) <==>
-      tmp == ones_v U64) 
-    /\ (
+      tmp == ones_v U64) /\ (
       let tmp = uint_v (Lib.Sequence.index (as_seq h tmp) 0) in 
       ~ (forall (j: nat {j < i}). v (Lib.Sequence.index (as_seq h0 f) j) == 0) <==>
-      tmp == 0
-    ) in
+      tmp == 0) in
+
   for 0ul len inv (fun i -> 
     let h0 = ST.get() in 
     assert(let tmp = uint_v (Lib.Sequence.index (as_seq h0 tmp) 0) in tmp == (ones_v U64) <==> 
@@ -319,12 +303,10 @@ let isZero_uint64_CT #c f =
       tmp == (ones_v U64) <==> (forall (j: nat {j < (v i + 1)}). v (Lib.Sequence.index (as_seq h0 f) j) == 0)));
 
   let r = index tmp (size 0) in 
-  
-  assert(as_nat c h0 f = 0 <==> uint_v r == pow2 64 - 1);
-
+  let h1 = ST.get() in 
+  lseq_as_nat_zero (as_seq h0 f);
   pop_frame();
   r
-
 
 
 let compare_felem #c a b =
@@ -365,7 +347,7 @@ let compare_felem #c a b =
 
   let r = index tmp (size 0) in 
 
-  lemma_felem_as_forall #c a b h0;
+  lemma_lseq_as_seq_as_forall_lr (as_seq h0 a) (as_seq h0 b) (v (getCoordinateLenU64 c));
   assert(as_nat c h0 a == as_nat c h0 b <==> v r == ones_v U64);
 
   pop_frame(); 

@@ -76,21 +76,18 @@ val lemma_create_zero_buffer: len: size_nat {len > 0} -> c: curve -> Lemma (lseq
 let lemma_create_zero_buffer len c = lemma_create_ #len len
 
 
-val lemma_lseq_as_seq_as_forall: #l: size_nat -> a: lseq uint64 l -> b: lseq uint64 l -> i: nat {i >= 0 /\ i < l} ->
-  Lemma 
-    (requires (forall (k: nat). k <= (i - 1) ==> Lib.Sequence.index a k == Lib.Sequence.index b k))
-    (ensures (lseq_as_nat_ #l a i == lseq_as_nat_ #l b i))
+val lemma_lseq_as_seq_as_forall: #l: size_nat -> a: lseq uint64 l -> b: lseq uint64 l -> i: nat {i >= 0 /\ i <= l} ->
+  Lemma ((forall (k: nat). k <= (i - 1) ==> Lib.Sequence.index a k == Lib.Sequence.index b k) ==>
+    (lseq_as_nat_ #l a i == lseq_as_nat_ #l b i))
 
 let rec lemma_lseq_as_seq_as_forall #l a b i = 
   match i with 
   |0 -> lseq_as_nat_last a; lseq_as_nat_last b
   |_ -> 
-    assert(forall (k:nat). k <= i - 1 ==> Lib.Sequence.index a k == Lib.Sequence.index b k);
     lemma_lseq_as_seq_as_forall a b (i - 1);
     lseq_as_nat_definiton a i;
-    lseq_as_nat_definiton b i;
-    assert(v (Lib.Sequence.index a (i - 1)) == v (Lib.Sequence.index b (i - 1)))
-
+    lseq_as_nat_definiton b i
+    
 
 val lemma_lseq_1: l: size_nat -> a: lseq uint64 l -> i: nat {i > 0 /\ i <= l} ->
   Lemma (lseq_as_nat_ a i % pow2 64 == v (Lib.Sequence.index a 0))
@@ -170,7 +167,82 @@ let rec lseq_upperbound1 #l a i k =
       FStar.Math.Lemmas.pow2_le_compat (64 * (i + k - 1)) (64 * i);
       assert(False)
   end
+
+
+val lemma_lseq_as_seq_as_forall_r_: #l: size_nat -> a: lseq uint64 l -> b: lseq uint64 l -> i: nat {i >= 1 /\ i <= l} -> 
+  Lemma (requires lseq_as_nat_ a i == lseq_as_nat_ #l b i)
+  (ensures lseq_as_nat_ a (i - 1) == lseq_as_nat_ #l b (i - 1))
+
+let lemma_lseq_as_seq_as_forall_r_ #l a b i = 
+  lseq_as_nat_definiton a i;
+  lseq_as_nat_definiton b i;
   
+  lseq_upperbound_ a (i - 1);
+  lseq_upperbound_ b (i - 1);
+
+  let ai = v (Lib.Sequence.index a (i - 1)) in 
+  let bi = v (Lib.Sequence.index b (i - 1)) in 
+
+  FStar.Math.Lemmas.lemma_mod_plus (lseq_as_nat_ a (i - 1)) ai (pow2 (64 * (i - 1)));
+  FStar.Math.Lemmas.lemma_mod_plus (lseq_as_nat_ b (i - 1)) bi (pow2 (64 * (i - 1)));
+
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+
+  assert_by_tactic (ai * pow2 (64 * (i - 1)) == pow2 (64 * (i - 1)) * ai) canon;
+  assert_by_tactic (bi * pow2 (64 * (i - 1)) == pow2 (64 * (i - 1)) * bi) canon;
+
+  FStar.Math.Lemmas.small_mod (lseq_as_nat_ a (i - 1)) (pow2 (64 * (i - 1)));
+  FStar.Math.Lemmas.small_mod (lseq_as_nat_ b (i - 1)) (pow2 (64 * (i - 1)))
+
+
+val lemma_lseq_as_seq_as_forall_r: #l: size_nat -> a: lseq uint64 l -> b: lseq uint64 l -> i: nat {i >= 0 /\ i <= l} ->
+  Lemma ((lseq_as_nat_ #l a i == lseq_as_nat_ #l b i) ==> (forall (k: nat). k <= (i - 1) ==> Lib.Sequence.index a k == Lib.Sequence.index b k))
+
+let rec lemma_lseq_as_seq_as_forall_r #l a b i = 
+  match i with 
+  |0 -> ()
+  |_ -> lemma_lseq_as_seq_as_forall_r #l a b (i - 1);
+    let i_1 = i - 1 in 
+    lseq_as_nat_definiton a i;
+    lseq_as_nat_definiton b i;
+    if lseq_as_nat_ a i = lseq_as_nat_ b i then
+      lemma_lseq_as_seq_as_forall_r_ a b i
+
+
+val lemma_lseq_as_seq_as_forall_lr: #l: size_nat -> a: lseq uint64 l -> b: lseq uint64 l -> i: nat {i >= 0 /\ i <= l} -> 
+  Lemma ((lseq_as_nat_ #l a i == lseq_as_nat_ #l b i) <==> (forall (k: nat). k <= (i - 1) ==> Lib.Sequence.index a k == Lib.Sequence.index b k))
+
+let lemma_lseq_as_seq_as_forall_lr #l a b i = 
+  lemma_lseq_as_seq_as_forall #l a b i;
+  lemma_lseq_as_seq_as_forall_r #l a b i
+
+
+val lseq_as_nat_zero_l: #l: size_nat -> a: lseq uint64 l -> i: nat {i >= 0 /\ i <= l} -> Lemma 
+  (lseq_as_nat_ a i == 0 ==> (forall (j: nat {j < i}). v (Lib.Sequence.index a j) == 0))
+
+let rec lseq_as_nat_zero_l #l a i = 
+  match i with 
+  |0 -> ()
+  |_ -> lseq_as_nat_zero_l #l a (i - 1); lseq_as_nat_definiton a i
+
+
+val lseq_as_nat_zero_r: #l: size_nat -> a: lseq uint64 l -> i: nat {i >= 0 /\ i <= l} -> Lemma 
+  ((forall (j: nat {j < i}). v (Lib.Sequence.index a j) == 0) ==> lseq_as_nat_ a i == 0)
+
+let rec lseq_as_nat_zero_r #l a i = 
+  match i with 
+  |0 -> ()
+  |_ -> lseq_as_nat_zero_r #l a (i - 1); lseq_as_nat_definiton a i
+
+
+val lseq_as_nat_zero: #l: size_nat -> a: lseq uint64 l -> Lemma 
+  (lseq_as_nat_ a l == 0 <==> (forall (j: nat {j < l}). v (Lib.Sequence.index a j) == 0))
+
+let lseq_as_nat_zero #l a = 
+  lseq_as_nat_zero_l #l a l;
+  lseq_as_nat_zero_r #l a l
+
 
 noextract
 let felem_seq_as_nat (c: curve) (a: felem_seq c) : Tot nat = lseq_as_nat a

@@ -51,30 +51,30 @@ val add_long_bn: #c: curve -> x: widefelem c -> y: widefelem c -> result: widefe
 
 val add_dep_prime: #c: curve -> x: felem c -> t: uint64 {uint_v t == 0 \/ uint_v t == 1} -> result: felem c -> 
   Stack uint64
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
-      if uint_v t = 1 then 
-	as_nat c h1 result + uint_v r * (pow2 (getPower c))  == as_nat c h0 x + getPrime c
-      else
-	as_nat c h1 result  == as_nat c h0 x))  
+  (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ (
+    if uint_v t = 1 then 
+      as_nat c h1 result + uint_v r * (pow2 (getPower c))  == as_nat c h0 x + getPrime c
+    else
+      as_nat c h1 result  == as_nat c h0 x))  
  
 
 val sub_bn: #c: curve -> x: felem c -> y:felem c -> result: felem c -> 
   Stack uint64
-    (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
-    (ensures fun h0 r h1 -> modifies1 result h0 h1 /\ v r <= 1 /\ 
-      as_nat c h1 result - v r * (pow2 (getPower c)) == as_nat c h0 x - as_nat c h0 y)
+  (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result)
+  (ensures fun h0 r h1 -> modifies1 result h0 h1 /\ v r <= 1 /\ 
+    as_nat c h1 result - v r * (pow2 (getPower c)) == as_nat c h0 x - as_nat c h0 y)
 
-
-val sub_bn_gl: #c: curve -> x: felem c -> y: glbuffer uint64 (getCoordinateLenU64 c) -> 
-  result: felem c -> Stack uint64
-    (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint y result)
-    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ 
-      as_nat c h1 result - v r * (pow2 (getPower c)) == as_nat c h0 x  - as_nat_il c h0 y /\ (
-      if uint_v r = 0 then 
-	as_nat c h0 x >= as_nat_il c h0 y 
-      else 
-	as_nat c h0 x < as_nat_il c h0 y))
+val sub_bn_gl: #c: curve -> x: felem c -> y: glbuffer uint64 (getCoordinateLenU64 c) 
+  -> result: felem c -> 
+  Stack uint64
+  (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ disjoint y result)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ 
+    as_nat c h1 result - v r * (pow2 (getPower c)) == as_nat c h0 x  - as_nat_il c h0 y /\ (
+    if uint_v r = 0 then 
+      as_nat c h0 x >= as_nat_il c h0 y 
+    else 
+      as_nat c h0 x < as_nat_il c h0 y))
 
 
 val short_mul_bn: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: uint64 -> result: widefelem c -> Stack unit
@@ -83,20 +83,11 @@ val short_mul_bn: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: 
     as_nat_il c h0 a * uint_v b = wide_as_nat c h1 result /\ 
     wide_as_nat c h1 result < (pow2 (getPower c)) * pow2 64)
 
-val short_mul_prime: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
-  (requires fun h -> live h result /\ wide_as_nat c h result = 0)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
-    getPrime c * uint_v b = wide_as_nat c h1 result /\ 
-    wide_as_nat c h1 result < (pow2 (getPower c))  * pow2 64)
-
-
 val square_bn: #c: curve -> f: felem c -> out: widefelem c -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
       wide_as_nat c h1 out = as_nat c h0 f * as_nat c h0 f)
       
-
-
 
 val reduction_prime_2prime_with_carry: #c: curve -> x: widefelem c -> result: felem c -> 
   Stack unit 
@@ -120,7 +111,7 @@ let toDomain #c a = toDomain_ #c #DH a
 val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c -> 
   Stack unit
     (requires (fun h0 -> 
-      live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\  eq_or_disjoint b out /\
+      live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
       as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
     (ensures (fun h0 _ h1 -> 
       modifies (loc out) h0 h1 /\ 
@@ -138,10 +129,10 @@ val felem_double: #c: curve -> a: felem c -> out: felem c ->
       as_nat c h1 out == toDomain #c (2 * fromDomain #c (as_nat c h0 a) % getPrime c)))
 
 
-val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c -> 
+ val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c -> 
   Stack unit 
   (requires (fun h0 -> 
-    live h0 out /\ live h0 a /\ live h0 b /\ 
+    live h0 out /\ live h0 a /\ live h0 b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
     as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
     as_nat c h1 out == (as_nat c h0 a - as_nat c h0 b) % getPrime c /\

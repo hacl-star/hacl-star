@@ -63,13 +63,3 @@ let lemma_reduction_prime_2prime_with_carry_cin c cin x carry0 result =
       small_mod result prime;
       assert(result = (x + cin * getPower2 c) % prime)
     end
-
-
-val lemma_felem_as_forall: #c: curve -> a: felem c -> b: felem c -> h0: mem ->
-  Lemma (
-    let len = getCoordinateLenU64 c in 
-    forall (i: nat {i < v len}). 
-      Lib.Sequence.index (as_seq h0 a) i == Lib.Sequence.index (as_seq h0 b) i 
-      <==> as_nat c h0 a == as_nat c h0 b) 
-
-let lemma_felem_as_forall #c a b h0 = admit()
