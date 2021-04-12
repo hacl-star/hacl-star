@@ -299,11 +299,11 @@ let rec lemma_lseq_as_bn_v_ #l a i =
   |_ -> lemma_lseq_as_bn_v_ #l a (i - 1)
 
 
-val lemma_lseq_as_bn_v: #l: size_nat -> a: Lib.Sequence.lseq uint64 l -> i: nat{i <= l} -> 
+val lemma_lseq_as_bn_v: #l: size_nat -> a: Lib.Sequence.lseq uint64 l -> 
   Lemma (lseq_as_nat #l a == Hacl.Spec.Bignum.Definitions.bn_v #l a) 
   [SMTPat (Hacl.Spec.Bignum.Definitions.bn_v #l a)]
 
-let lemma_lseq_as_bn_v #l a i =  
+let lemma_lseq_as_bn_v #l a =  
   lemma_lseq_as_bn_v_ #l a l
 
 

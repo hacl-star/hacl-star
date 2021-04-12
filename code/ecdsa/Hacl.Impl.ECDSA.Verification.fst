@@ -56,31 +56,21 @@ val isZero_uint64_nCT: #c: curve -> f: felem c -> Stack bool
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat c h0 f = 0))
 
 let isZero_uint64_nCT f =
-    let f0 = index f (size 0) in
-    let f1 = index f (size 1) in
-    let f2 = index f (size 2) in
-    let f3 = index f (size 3) in
-
-    let z0_zero = eq_0_u64 f0 in
-    let z1_zero = eq_0_u64 f1 in
-    let z2_zero = eq_0_u64 f2 in
-    let z3_zero = eq_0_u64 f3 in
-
-    z0_zero && z1_zero && z2_zero && z3_zero
+  let f = isZero_uint64_CT f in 
+  eq_u64_nCT f (u64 0xffffffffffffffff)
 
 
-(* [@ (Comment "  This code is not side channel resistant")] *)
-
-val isMoreThanZeroLessThanOrderMinusOne: #c: curve -> f: felem c-> Stack bool
+[@ (Comment "  This code is not side channel resistant")] 
+val isMoreThanZeroLessThanOrderMinusOne: #c: curve -> f: felem c -> Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    r = (as_nat c h0 f > 0 && as_nat c h0 f < prime_p256_order))
+    r = (as_nat c h0 f > 0 && as_nat c h0 f < getOrder #c))
 
-let isMoreThanZeroLessThanOrderMinusOne f =
+let isMoreThanZeroLessThanOrderMinusOne #c f =
   push_frame();
-  let tempBuffer = create (size 4) (u64 0) in
-  recall_contents (order_buffer #P256) (Lib.Sequence.of_list (order_list P256));
-  let carry = sub_bn_gl #P256 f (order_buffer #P256) tempBuffer in
+  let len = getCoordinateLenU64 c in 
+  let tempBuffer = create len (u64 0) in
+  let carry = sub_bn_order #c f tempBuffer in
   let less = eq_u64_nCT carry (u64 1) in
   let more = isZero_uint64_nCT f in
   let result = less && not more in
@@ -89,11 +79,12 @@ let isMoreThanZeroLessThanOrderMinusOne f =
 
 
 inline_for_extraction noextract
-val ecdsa_verification_step1: #c: curve -> r:lbuffer uint64 (size 4) -> s:lbuffer uint64 (size 4) -> Stack bool
+val ecdsa_verification_step1: #c: curve -> r: lbuffer uint64 (getCoordinateLenU64 c) 
+  -> s:lbuffer uint64 (getCoordinateLenU64 c) -> Stack bool
   (requires fun h -> live h r /\ live h s)
   (ensures  fun h0 result h1 ->
     modifies0 h0 h1 /\
-    result == checkCoordinates #P256 (as_nat c h0 r) (as_nat c h0 s))
+    result == checkCoordinates #c (as_nat c h0 r) (as_nat c h0 s))
 
 let ecdsa_verification_step1 #c r s =
   let isRCorrect = isMoreThanZeroLessThanOrderMinusOne #c r in

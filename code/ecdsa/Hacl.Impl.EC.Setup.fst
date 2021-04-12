@@ -98,7 +98,7 @@ let lemma_lst_nat_instant_6 a =
   lst_as_nat_definiton a 0
 
 
-(* This code contains the prime code *)
+(* This code contains the prime *)
 inline_for_extraction noextract
 let p256_prime_list : x:list uint64{List.Tot.length x == 4 /\ lst_as_nat x == prime256} =
   [@inline_let]

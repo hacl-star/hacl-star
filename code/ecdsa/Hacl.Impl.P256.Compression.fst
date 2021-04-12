@@ -187,7 +187,7 @@ let lessThanPrime #c f =
     let len = getCoordinateLenU64 c in 
     let tempBuffer = create c (u64 0) in 
     recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
-    let carry = sub_bn_gl f prime_buffer tempBuffer in 
+    let carry = sub_bn_prime f tempBuffer in 
     let less = eq_u64_nCT carry (u64 1) in 
   pop_frame();
     less

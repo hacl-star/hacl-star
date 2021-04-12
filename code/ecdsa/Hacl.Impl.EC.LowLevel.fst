@@ -84,68 +84,165 @@ let uploadZeroPoint #c p =
 
 
 let add_bn #c x y result =
+    let h0 = ST.get() in   
+  Hacl.Spec.Bignum.bn_add_lemma (as_seq h0 x) (as_seq h0 y);
   let len = getCoordinateLenU64 c in 
   bn_add_eq_len len x y result
 
 
 let add_long_bn #c x y result = 
+    let h0 = ST.get() in 
   let len = getCoordinateLenU64 c *. 2ul in 
+  Hacl.Spec.Bignum.bn_add_lemma (as_seq h0 x) (as_seq h0 y);
   bn_add_eq_len len x y result
 
 
-val _add_dep_prime: #c: curve -> x: felem c -> t: uint64{v t == 0 \/ v t == 1} -> result: felem c ->
+val _add_dep_prime: #c: curve 
+  -> x: felem c 
+  -> p: felem c 
+  -> t: uint64{v t == 0 \/ v t == 1} 
+  -> result: felem c ->
   Stack uint64
-  (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\ (
+  (requires fun h -> live h x /\ live h result /\ live h p /\ 
+    eq_or_disjoint x p /\ eq_or_disjoint p result /\ disjoint x result /\ 
+    (v t = 1 ==> as_nat c h x + as_nat c h p < pow2 (getPower c)))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
     if uint_v t = 1 then 
-      as_nat c h1 result + uint_v r * getPower2 c == as_nat c h0 x + getPrime c
+      as_nat c h1 result == (as_nat c h0 x  + as_nat c h0 p)
     else
       as_nat c h1 result == as_nat c h0 x))  
 
 
-let _add_dep_prime #c x t result = 
+let _add_dep_prime #c x p t result = 
   push_frame();
   let len = getCoordinateLenU64 c in 
   let b = create len (u64 0) in 
-  admit();
-  let carry = add_bn (const_to_lbuffer (prime_buffer #c)) x b in 
 
+  let carry = add_bn p x b in 
   let mask = (u64 0) -. t in 
-  copy_conditional #c result b mask;
+  cmovznz4 #c mask x b result;
   pop_frame();
-  carry
+  u64 0
+
+
+assume val lemma_lseq_as_list: l: size_nat -> a: list uint64 {List.Tot.Base.length a == l} -> 
+  Lemma (lseq_as_nat #l (Seq.seq_of_list a) == lst_as_nat a)
+
+
+inline_for_extraction noextract
+val add_dep_prime: #c: curve -> x: felem c -> t: uint64 {uint_v t == 0 \/ uint_v t == 1}
+  -> result: felem c ->
+  Stack unit
+  (requires fun h -> live h x /\ live h result /\ disjoint x result /\ 
+    (v t = 1 ==> as_nat c h x + getPrime c < pow2 (getPower c)))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1  /\ (
+    if uint_v t = 1 then
+      as_nat c h1 result == as_nat c h0 x + getPrime c
+    else
+      as_nat c h1 result  == as_nat c h0 x))
 
 
 let add_dep_prime #c x t result =
-  match c with 
-  |P256 -> add_dep_prime_p256 x t result
-  |P384 -> add_dep_prime_p384 x t result
-  |_ -> _add_dep_prime x t result
+  match c with
+  |P256 -> begin let r = add_dep_prime_p256 x t result in () end 
+  |P384 -> begin let r = add_dep_prime_p384 x t result in () end
+  |_ -> begin 
+    push_frame();
+    assume (getPrime c == prime256);
+    let p = createL p256_prime_list in 
+      lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_prime_list);
+    let r = _add_dep_prime x p t result in 
+      pop_frame() end
 
 
 let sub_bn #c x y result =
+  let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
+  Hacl.Spec.Bignum.bn_sub_lemma (as_seq h0 x) (as_seq h0 y);
   bn_sub_eq_len len x y result
   
 
-let sub_bn_gl #c x y result =
-  let y_ = const_to_ilbuffer y in 
-  sub_bn x y_ result
+let sub_bn_order #c x result =
+  let h0 = ST.get() in 
+  match c with 
+  |P256 -> push_frame();
+    let p = createL p256_order_list in 
+      lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_order_list);
+    let r = sub_bn x p result in 
+      let h1 = ST.get() in 
+    lseq_upperbound (as_seq h0 x);
+    lseq_upperbound (as_seq h1 result);
+      pop_frame(); r
+  |P384 -> push_frame();
+    let p = createL p384_order_list in 
+      lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p384_order_list);
+    let r = sub_bn x p result in 
+      let h1 = ST.get() in 
+    lseq_upperbound (as_seq h0 x);
+    lseq_upperbound (as_seq h1 result);
+      pop_frame(); r
+  |_ -> admit(); u64 0
 
 
-val _shortened_mul: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: uint64 -> result: widefelem c -> Stack unit
-  (requires fun h -> live h a /\ live h result /\ wide_as_nat c h result = 0)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1(* /\ 
-    as_nat_il c h0 a * uint_v b = wide_as_nat P384 h1 result /\ 
-    wide_as_nat P384 h1 result < pow2 384 * pow2 64 *) )
+let sub_bn_prime #c x result =
+  let h0 = ST.get() in 
+  match c with 
+  |P256 -> push_frame();
+    let p = createL p256_prime_list in 
+      lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_prime_list);
+    let r = sub_bn x p result in 
+      let h1 = ST.get() in 
+    lseq_upperbound (as_seq h0 x);
+    lseq_upperbound (as_seq h1 result);
+      pop_frame(); r
+  |P384 -> push_frame();
+    let p = createL p384_prime_list in 
+      lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p384_prime_list);
+    let r = sub_bn x p result in 
+      let h1 = ST.get() in 
+    lseq_upperbound (as_seq h0 x);
+    lseq_upperbound (as_seq h1 result);
+      pop_frame(); r
+  |_ -> admit(); u64 0
 
+
+val lemma_zero_lseq: #l0: size_nat -> #l1: size_nat -> a: Lib.Sequence.lseq uint64 l0 -> b: Lib.Sequence.lseq uint64 l1 
+  ->  c: pos -> 
+  Lemma ((lseq_as_nat a + c * lseq_as_nat b)  == 0 ==> lseq_as_nat b == 0)
+
+let lemma_zero_lseq a b c = ()
+
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+
+
+val _shortened_mul: #c: curve -> a: felem c -> b: uint64 -> result: widefelem c -> Stack unit
+  (requires fun h -> live h a /\ live h result /\ eq_or_disjoint a result /\ wide_as_nat c h result = 0)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h0 a * uint_v b = wide_as_nat c h1 result /\ 
+    wide_as_nat c h1 result < pow2 (getPower c) * pow2 64)
 
 let _shortened_mul #c a b result = 
   push_frame();
     let len = getCoordinateLenU64 c in 
     let bBuffer = create (size 1) b in 
-    let a_ = const_to_ilbuffer a in 
-    bn_mul len a_ (size 1) bBuffer result; 
+    let partResult = sub result (size 0) (len +! size 1) in 
+    let partClean = sub result (len +! size 1) (len -! size 1) in 
+        let h0 = ST.get() in 
+    bn_mul len a (size 1) bBuffer partResult; 
+    Hacl.Spec.Bignum.bn_mul_lemma (as_seq h0 a) (as_seq h0 bBuffer);
+        let h1 = ST.get() in 
+    lseq_as_nat_first (as_seq h0 bBuffer);
+    lseq_upperbound (as_seq h0 a);
+    
+    lemma_mult_le_right (v b) (lseq_as_nat (as_seq h0 a)) (pow2 (getPower c) - 1);
+    lemma_test (as_seq h0 result) (v len + 1);
+
+    lemma_zero_lseq (as_seq h0 partResult) (as_seq h0 partClean) (pow2 (64 * (v len - 1)));
+    lemma_test (as_seq h1 result) (v len + 1);
+    
+    assert(wide_as_nat c h1 result == lseq_as_nat (as_seq h0 a) * v b);
+    assert(wide_as_nat c h1 result < pow2 (getPower c) * pow2 64);
+
   pop_frame()
 
 
@@ -165,7 +262,8 @@ let square_bn #c x result =
   Hacl.Bignum.bn_sqr len x result
 
 
-val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c -> result: felem c ->
+val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c 
+  -> result: felem c ->
   Stack unit
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ (
     as_nat c h x + uint_v cin * getPower2 c) < 2 * getPrime c)
@@ -184,7 +282,7 @@ let reduction_prime_2prime_with_carry_cin #c cin x result =
   let tempBufferForSubborrow = create (size 1) (u64 0) in
  
   recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
-  let carry0 = sub_bn_gl x prime_buffer tempBuffer in
+  let carry0 = sub_bn_prime x tempBuffer in
   let carry = sub_borrow_u64 carry0 cin (u64 0) tempBufferForSubborrow in
   cmovznz4 carry tempBuffer x result;
   pop_frame();
@@ -216,7 +314,7 @@ let reduction_prime_2prime #c x result =
   let tempBuffer = create len (u64 0) in
     recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
   let h0 = ST.get() in
-  let r = sub_bn_gl x (prime_buffer #c) tempBuffer in
+  let r = sub_bn_prime x tempBuffer in
   cmovznz4 r tempBuffer x result;
   lseq_upperbound #(v (getCoordinateLenU64 c)) (as_seq h0 x);
   pop_frame()
@@ -244,11 +342,18 @@ let felem_double #c arg1 out =
 
 #set-options "--fuel 1 --ifuel 1 --z3rlimit 200"
 
+
 let felem_sub #c arg1 arg2 out =
     let h0 = ST.get() in
   let t = sub_bn arg1 arg2 out in
     let h1 = ST.get() in 
-  let cc = add_dep_prime #c out t out in 
+    assert(as_nat c h1 out - v t * pow2 (getPower c) == as_nat c h0 arg1 - as_nat c h0 arg2);
+    lseq_upperbound (as_seq h0 arg1);
+    lseq_upperbound (as_seq h0 arg2);
+    lseq_upperbound (as_seq h1 out);
+    assert(v t == 1 ==> (as_nat c h1 out - pow2 (getPower c) < 0));
+    admit();
+  add_dep_prime #c out t out; 
     let h2 = ST.get() in
 
   lseq_upperbound (as_seq h1 out); 
