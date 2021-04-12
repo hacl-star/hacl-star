@@ -209,9 +209,9 @@ let point_mult_ext #c i p =
       lemma_mod_add_distr 1 (i - 1) (getOrder #c)
     end
 
-val lemma_test: #c: curve -> p: point_nat_prime #c -> pk: int -> Lemma (point_mult pk p == point_mult #c (pk % getOrder #c) p)
+val lemma_scalar_reduce: #c: curve -> p: point_nat_prime #c -> pk: int -> Lemma (point_mult pk p == point_mult #c (pk % getOrder #c) p)
 
-let lemma_test #c p pk = 
+let lemma_scalar_reduce #c p pk = 
   assert(point_mult pk p == repeat ((pk - 1) % getOrder #c) (fun x -> pointAdd #c p x) p);
   assert(point_mult #c (pk % getOrder #c) p == repeat ((pk - 1) % getOrder #c % getOrder #c) (fun x -> pointAdd #c p x) p);
   lemma_mod_twice (pk - 1) (getOrder #c)
@@ -319,29 +319,29 @@ let lemmaApplPointDouble #c p0 pk p =
   let pk_p = point_mult pk p0 in 
 
   lemma_point_add_minus_plus_same_value #c p0 (pk % o) (pk % o) ((pk - 1) % o);
-  lemma_test p0 pk;
+  lemma_scalar_reduce p0 pk;
 
   calc (==) {
     point_mult (pk % o - ((pk - 1) % o)) p0;
-    (==) {lemma_test p0 (pk % o - ((pk - 1) % o))}
+    (==) {lemma_scalar_reduce p0 (pk % o - ((pk - 1) % o))}
     point_mult ((pk % o - ((pk - 1) % o)) % o) p0;
     (==) {lemma_mod_add_distr (- ((pk - 1) % o)) pk o}
     point_mult ((pk - ((pk - 1) % o)) % o) p0;
     (==) {lemma_mod_sub_distr pk (pk - 1) o}
     point_mult ((pk - (pk - 1)) % o) p0;
-    (==) {lemma_test p0 (pk - (pk - 1))}
+    (==) {lemma_scalar_reduce p0 (pk - (pk - 1))}
     point_mult ((pk - (pk - 1))) p0;
   };
 
   calc (==) {
     point_mult (pk % o + ((pk - 1) % o)) p0;
-    (==) {lemma_test p0 (pk % o + ((pk - 1) % o))}
+    (==) {lemma_scalar_reduce p0 (pk % o + ((pk - 1) % o))}
     point_mult ((pk % o + ((pk - 1) % o)) % o) p0;
     (==) {lemma_mod_add_distr ((pk - 1) % o) pk o}
     point_mult ((pk + ((pk - 1) % o)) % o) p0;
     (==) {lemma_mod_add_distr pk (pk - 1) o}
     point_mult ((pk + pk - 1) % o) p0;
-    (==) {lemma_test p0 (pk + pk - 1)}
+    (==) {lemma_scalar_reduce p0 (pk + pk - 1)}
     point_mult ((pk + pk - 1)) p0;
     
   };
@@ -366,33 +366,33 @@ let lemmaApplPointAdd #c p0 pk p qk q =
   let o = getOrder #c in 
 
   lemma_point_add_minus_plus_same_value #c p0 (qk % o) (pk % o) ((qk - 1) % o);
-  lemma_test p0 qk;
-  lemma_test p0 pk;
+  lemma_scalar_reduce p0 qk;
+  lemma_scalar_reduce p0 pk;
 
   assert(pointEqual (pointAdd (point_mult qk p0) (point_mult pk p0)) 
     (pointAdd (point_mult ((qk % o) - ((qk - 1) % o)) p0) (point_mult (pk % o + ((qk - 1) % o)) p0)));
 
   calc (==) {
     point_mult ((qk % o) - ((qk - 1) % o)) p0;
-    (==) {lemma_test p0 ((qk % o) - ((qk - 1) % o))}
+    (==) {lemma_scalar_reduce p0 ((qk % o) - ((qk - 1) % o))}
     point_mult (((qk % o) - ((qk - 1) % o)) % o) p0;
     (==) {lemma_mod_add_distr (- ((qk - 1) % o)) qk o}
     point_mult ((qk - ((qk - 1) % o)) % o) p0;
     (==) {lemma_mod_sub_distr qk (qk - 1) o}
     point_mult ((qk - qk + 1) % o) p0;
-    (==) {lemma_test p0 1}
+    (==) {lemma_scalar_reduce p0 1}
     point_mult 1 p0;
   };
 
   calc (==) {
     point_mult (pk % o + ((qk - 1) % o)) p0;
-    (==) {lemma_test p0 (pk % o + ((qk - 1) % o))}
+    (==) {lemma_scalar_reduce p0 (pk % o + ((qk - 1) % o))}
     point_mult ((pk % o + ((qk - 1) % o)) % o) p0;    
     (==) {lemma_mod_add_distr ((qk - 1) % o) pk o}
     point_mult ((pk + ((qk - 1) % o)) % o) p0;    
     (==) {lemma_mod_add_distr pk (qk - 1) o}
     point_mult ((pk + qk - 1) % o) p0;    
-    (==) {lemma_test p0 (pk + qk - 1)}
+    (==) {lemma_scalar_reduce p0 (pk + qk - 1)}
     point_mult (pk + qk - 1) p0;  
   };
 

@@ -219,13 +219,106 @@ cmovznz4(Spec_ECC_Curves_curve c, uint64_t cin, uint64_t *x, uint64_t *y, uint64
   }
 }
 
-static void mul64(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
+static uint64_t add_dep_prime_p384(uint64_t *x, uint64_t t, uint64_t *result)
 {
-  uint128_t res = (uint128_t)x * y;
-  uint64_t l0 = (uint64_t)res;
-  uint64_t h0 = (uint64_t)(res >> (uint32_t)64U);
-  result[0U] = l0;
-  temp[0U] = h0;
+  uint64_t b[6U] = { 0U };
+  uint64_t t3 = (uint64_t)0U - t;
+  uint64_t t2 = t3 - t;
+  uint64_t t1 = t3 << (uint32_t)32U;
+  uint64_t t0 = ((uint64_t)0U - t) >> (uint32_t)32U;
+  b[0U] = t0;
+  b[1U] = t1;
+  b[2U] = t2;
+  b[3U] = t3;
+  b[4U] = t3;
+  b[5U] = t3;
+  uint64_t c = (uint64_t)0U;
+  uint32_t k = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+  {
+    uint64_t t11 = x[(uint32_t)4U * i];
+    uint64_t t210 = b[(uint32_t)4U * i];
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t210, result + (uint32_t)4U * i);
+    uint64_t t110 = x[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t211 = b[(uint32_t)4U * i + (uint32_t)1U];
+    c =
+      Lib_IntTypes_Intrinsics_add_carry_u64(c,
+        t110,
+        t211,
+        result + (uint32_t)4U * i + (uint32_t)1U);
+    uint64_t t111 = x[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t212 = b[(uint32_t)4U * i + (uint32_t)2U];
+    c =
+      Lib_IntTypes_Intrinsics_add_carry_u64(c,
+        t111,
+        t212,
+        result + (uint32_t)4U * i + (uint32_t)2U);
+    uint64_t t112 = x[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)3U];
+    c =
+      Lib_IntTypes_Intrinsics_add_carry_u64(c,
+        t112,
+        t21,
+        result + (uint32_t)4U * i + (uint32_t)3U);
+  }
+  for (uint32_t i = k; i < (uint32_t)6U; i++)
+  {
+    uint64_t t11 = x[i];
+    uint64_t t21 = b[i];
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t21, result + i);
+  }
+  uint64_t r = c;
+  return r;
+}
+
+static uint64_t add_dep_prime_p256(uint64_t *x, uint64_t t, uint64_t *result)
+{
+  uint64_t y0 = (uint64_t)0U - t;
+  uint64_t y1 = ((uint64_t)0U - t) >> (uint32_t)32U;
+  uint64_t y2 = (uint64_t)0U;
+  uint64_t y3 = t - (t << (uint32_t)32U);
+  uint64_t *r0 = result;
+  uint64_t *r1 = result + (uint32_t)1U;
+  uint64_t *r2 = result + (uint32_t)2U;
+  uint64_t *r3 = result + (uint32_t)3U;
+  uint64_t cc = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, x[0U], y0, r0);
+  uint64_t cc1 = Lib_IntTypes_Intrinsics_add_carry_u64(cc, x[1U], y1, r1);
+  uint64_t cc2 = Lib_IntTypes_Intrinsics_add_carry_u64(cc1, x[2U], y2, r2);
+  uint64_t cc3 = Lib_IntTypes_Intrinsics_add_carry_u64(cc2, x[3U], y3, r3);
+  return cc3;
+}
+
+static void shortened_mul_prime256(uint64_t u, uint64_t *result)
+{
+  uint64_t temp = (uint64_t)0U;
+  uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+  uint64_t f1 = (uint64_t)0xffffffffU;
+  uint64_t f3 = (uint64_t)0xffffffff00000001U;
+  uint64_t *o0 = result;
+  uint64_t *o1 = result + (uint32_t)1U;
+  uint64_t *o2 = result + (uint32_t)2U;
+  uint64_t *o3 = result + (uint32_t)3U;
+  uint64_t *o4 = result + (uint32_t)4U;
+  uint128_t res0 = (uint128_t)f0 * u;
+  uint64_t l00 = (uint64_t)res0;
+  uint64_t h010 = (uint64_t)(res0 >> (uint32_t)64U);
+  o0[0U] = l00;
+  temp = h010;
+  uint64_t h0 = temp;
+  uint128_t res = (uint128_t)f1 * u;
+  uint64_t l01 = (uint64_t)res;
+  uint64_t h011 = (uint64_t)(res >> (uint32_t)64U);
+  o1[0U] = l01;
+  temp = h011;
+  uint64_t l = o1[0U];
+  uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+  uint64_t h = temp;
+  o2[0U] = h + c1;
+  uint128_t res1 = (uint128_t)f3 * u;
+  uint64_t l0 = (uint64_t)res1;
+  uint64_t h01 = (uint64_t)(res1 >> (uint32_t)64U);
+  o3[0U] = l0;
+  o4[0U] = h01;
 }
 
 static void uploadZeroImpl(Spec_ECC_Curves_curve c, uint64_t *f)
@@ -507,7 +600,21 @@ _add_dep_prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t t, uint64_t *resul
 static uint64_t
 add_dep_prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t t, uint64_t *result)
 {
-  return _add_dep_prime(c, x, t, result);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        return add_dep_prime_p256(x, t, result);
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        return add_dep_prime_p384(x, t, result);
+      }
+    default:
+      {
+        return _add_dep_prime(c, x, t, result);
+      }
+  }
 }
 
 static uint64_t sub_bn(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *y, uint64_t *result)
@@ -691,23 +798,7 @@ static void short_mul_prime(Spec_ECC_Curves_curve c, uint64_t b, uint64_t *resul
   {
     case Spec_ECC_Curves_P256:
       {
-        uint64_t temp = (uint64_t)0U;
-        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-        uint64_t f1 = (uint64_t)0xffffffffU;
-        uint64_t f3 = (uint64_t)0xffffffff00000001U;
-        uint64_t *o0 = result;
-        uint64_t *o1 = result + (uint32_t)1U;
-        uint64_t *o2 = result + (uint32_t)2U;
-        uint64_t *o3 = result + (uint32_t)3U;
-        uint64_t *o4 = result + (uint32_t)4U;
-        mul64(f0, b, o0, &temp);
-        uint64_t h0 = temp;
-        mul64(f1, b, o1, &temp);
-        uint64_t l = o1[0U];
-        uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-        uint64_t h = temp;
-        o2[0U] = h + c1;
-        mul64(f3, b, o3, o4);
+        shortened_mul_prime256(b, result);
         break;
       }
     case Spec_ECC_Curves_P384:

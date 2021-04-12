@@ -117,7 +117,10 @@ let _add_dep_prime #c x t result =
 
 
 let add_dep_prime #c x t result =
-  _add_dep_prime x t result
+  match c with 
+  |P256 -> add_dep_prime_p256 x t result
+  |P384 -> add_dep_prime_p384 x t result
+  |_ -> _add_dep_prime x t result
 
 
 let sub_bn #c x y result =

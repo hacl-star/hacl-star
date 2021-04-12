@@ -290,6 +290,24 @@ let rec lemma_test #l a i =
     end end
 
 
+val lemma_lseq_as_bn_v_: #l: size_nat -> a: Lib.Sequence.lseq uint64 l -> i: nat{i <= l} ->
+  Lemma (lseq_as_nat_ #l a i == Hacl.Spec.Bignum.Definitions.eval_ l a i) 
+
+let rec lemma_lseq_as_bn_v_ #l a i = 
+  match i with 
+  |0 -> ()
+  |_ -> lemma_lseq_as_bn_v_ #l a (i - 1)
+
+
+val lemma_lseq_as_bn_v: #l: size_nat -> a: Lib.Sequence.lseq uint64 l -> i: nat{i <= l} -> 
+  Lemma (lseq_as_nat #l a == Hacl.Spec.Bignum.Definitions.bn_v #l a) 
+  [SMTPat (Hacl.Spec.Bignum.Definitions.bn_v #l a)]
+
+let lemma_lseq_as_bn_v #l a i =  
+  lemma_lseq_as_bn_v_ #l a l
+
+
+
 open Lib.Buffer
 
 inline_for_extraction

@@ -1,4 +1,3 @@
-
 module Hacl.Spec.MontgomeryMultiplication
 
 open FStar.Math.Lemmas

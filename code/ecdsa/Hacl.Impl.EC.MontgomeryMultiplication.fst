@@ -129,7 +129,8 @@ let montgomery_multiplication_round_ #c m t t2 =
 
 
 inline_for_extraction noextract
-val montgomery_multiplication_round: #c: curve -> m: mode -> t: widefelem c -> round: widefelem c -> 
+val montgomery_multiplication_round: #c: curve -> m: mode -> t: widefelem c 
+  -> round: widefelem c -> 
   Stack unit 
   (requires fun h -> live h t /\ live h round /\ eq_or_disjoint t round)
   (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\ (
