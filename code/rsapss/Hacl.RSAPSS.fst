@@ -58,12 +58,12 @@ let rsapss_verify a modBits eBits pkey sLen k sgnt msgLen msg =
 
 val new_rsapss_load_pkey: modBits:modBits_t -> RK.new_rsapss_load_pkey_st t_limbs (ke modBits) modBits
 let new_rsapss_load_pkey modBits r eBits nb eb =
-  RK.new_rsapss_load_pkey (ke modBits) modBits (load_pkey modBits) r eBits nb eb
+  RK.new_rsapss_load_pkey (ke modBits) modBits RK.mk_runtime_rsapss_checks r eBits nb eb
 
 
 val new_rsapss_load_skey: modBits:modBits_t -> RK.new_rsapss_load_skey_st t_limbs (ke modBits) modBits
 let new_rsapss_load_skey modBits r eBits dBits nb eb db =
-  RK.new_rsapss_load_skey (ke modBits) modBits (load_skey modBits) r eBits dBits nb eb db
+  RK.new_rsapss_load_skey (ke modBits) modBits RK.mk_runtime_rsapss_checks r eBits dBits nb eb db
 
 
 val rsapss_skey_sign:

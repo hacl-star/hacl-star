@@ -160,8 +160,8 @@ inline_for_extraction noextract
 let bn_mod_exp_safe_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> a:lbignum t len
-  -> bBits:size_t{bits t * v (blocks bBits (size (bits t))) <= max_size_t}
-  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> bBits:size_t{bits t * v (blocks0 bBits (size (bits t))) <= max_size_t}
+  -> b:lbignum t (blocks0 bBits (size (bits t)))
   -> res:lbignum t len ->
   Stack bool
   (requires fun h ->
@@ -261,7 +261,7 @@ let bn_mod_exp_ctx_st (t:limb_t) (len:BN.meta_len t) =
     k:MA.pbn_mont_ctx t
   -> a:lbignum t len
   -> bBits:size_t
-  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> b:lbignum t (blocks0 bBits (size (bits t)))
   -> res:lbignum t len ->
   Stack unit
   (requires fun h ->

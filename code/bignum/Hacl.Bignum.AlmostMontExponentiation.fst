@@ -147,7 +147,7 @@ let bn_exp_almost_mont_pre
   (r2:BD.lbignum t len)
   (aM:BD.lbignum t len)
   (bBits:size_nat)
-  (b:BD.lbignum t (BD.blocks bBits (bits t)))
+  (b:BD.lbignum t (BD.blocks0 bBits (bits t)))
  =
    SM.bn_mont_pre n mu /\
    BD.bn_v r2 == pow2 (2 * bits t * len) % BD.bn_v n /\
@@ -162,7 +162,7 @@ let bn_exp_almost_mont_st (t:limb_t) (len:BN.meta_len t) =
   -> r2:lbignum t len
   -> aM:lbignum t len
   -> bBits:size_t
-  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> b:lbignum t (blocks0 bBits (size (bits t)))
   -> resM:lbignum t len ->
   Stack unit
   (requires fun h ->
@@ -184,7 +184,7 @@ let bn_exp_almost_mont_bm_vartime #t k n mu r2 aM bBits b resM =
   let h0 = ST.get () in
   let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
 
-  let bLen = blocks bBits (size (bits t)) in
+  [@inline_let] let bLen = blocks0 bBits (size (bits t)) in
   bn_almost_mont_one k n mu r2 resM;
   BD.bn_eval_bound (as_seq h0 aM) (v len);
   BE.lexp_rl_vartime len len (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) n aM bLen bBits b resM;
@@ -200,7 +200,7 @@ let bn_exp_almost_mont_bm_consttime #t k n mu r2 aM bBits b resM =
   let h0 = ST.get () in
   let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
 
-  let bLen = blocks bBits (size (bits t)) in
+  [@inline_let] let bLen = blocks0 bBits (size (bits t)) in
   bn_almost_mont_one k n mu r2 resM;
   BE.lexp_mont_ladder_swap_consttime len len (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) n aM bLen bBits b resM;
   LE.exp_mont_ladder_swap_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b);
@@ -221,7 +221,7 @@ let bn_exp_almost_mont_fw_vartime #t k l n mu r2 aM bBits b resM =
   let h0 = ST.get () in
   let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
 
-  let bLen = blocks bBits (size (bits t)) in
+  let bLen = blocks0 bBits (size (bits t)) in
   bn_almost_mont_one k n mu r2 resM;
   BE.lexp_fw_vartime len len (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) n aM bLen bBits b resM l;
   LE.exp_fw_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b) (v l);
@@ -241,7 +241,7 @@ let bn_exp_almost_mont_fw_consttime #t k l n mu r2 aM bBits b resM =
   let h0 = ST.get () in
   let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
 
-  let bLen = blocks bBits (size (bits t)) in
+  let bLen = blocks0 bBits (size (bits t)) in
   bn_almost_mont_one k n mu r2 resM;
   BE.lexp_fw_consttime len len (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) n aM bLen bBits b resM l;
   LE.exp_fw_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b) (v l);

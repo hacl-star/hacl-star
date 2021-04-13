@@ -302,11 +302,11 @@ inline_for_extraction noextract
 let new_rsapss_load_pkey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     r:HS.rid
   -> eBits:size_t
-  -> nb:lbuffer uint8 (blocks modBits 8ul)
-  -> eb:lbuffer uint8 (blocks eBits 8ul) ->
+  -> nb:lbuffer uint8 (blocks0 modBits 8ul)
+  -> eb:lbuffer uint8 (blocks0 eBits 8ul) ->
   ST (B.buffer (limb t))
   (requires fun h ->
-    blocks modBits (size (bits t)) == ke.BE.bn.BN.len /\
+    blocks0 modBits (size (bits t)) == ke.BE.bn.BN.len /\
     live h nb /\ live h eb /\ ST.is_eternal_region r)
   (ensures  fun h0 pkey h1 -> B.(modifies loc_none h0 h1) /\
     not (B.g_is_null pkey) ==> (
@@ -334,13 +334,13 @@ val new_rsapss_load_pkey:
 
 let new_rsapss_load_pkey #t ke modBits kc r eBits nb eb =
   [@inline_let] let bits = size (bits t) in
-  let nLen = blocks modBits bits in
-  let eLen = blocks eBits bits in
 
   if not (rsapss_check_pkey_len #t modBits eBits) then
    B.null
   else
     let h0 = ST.get () in
+    let nLen = blocks modBits bits in
+    let eLen = blocks eBits bits in
     let pkeyLen = nLen +! nLen +! eLen in
     let pkey = LowStar.Monotonic.Buffer.mmalloc_partial r (uint #t 0) pkeyLen in
     if B.is_null pkey then
@@ -364,12 +364,12 @@ let new_rsapss_load_skey_st (t:limb_t) (ke:BE.exp t) (modBits:size_t) =
     r:HS.rid
   -> eBits:size_t
   -> dBits:size_t
-  -> nb:lbuffer uint8 (blocks modBits 8ul)
-  -> eb:lbuffer uint8 (blocks eBits 8ul)
-  -> db:lbuffer uint8 (blocks dBits 8ul) ->
+  -> nb:lbuffer uint8 (blocks0 modBits 8ul)
+  -> eb:lbuffer uint8 (blocks0 eBits 8ul)
+  -> db:lbuffer uint8 (blocks0 dBits 8ul) ->
   ST (B.buffer (limb t))
   (requires fun h ->
-    blocks modBits (size (bits t)) == ke.BE.bn.BN.len /\
+    blocks0 modBits (size (bits t)) == ke.BE.bn.BN.len /\
     live h nb /\ live h eb /\ live h db /\
     ST.is_eternal_region r)
   (ensures  fun h0 skey h1 -> B.(modifies loc_none h0 h1) /\
@@ -401,15 +401,15 @@ val new_rsapss_load_skey:
 
 let new_rsapss_load_skey #t ke modBits kc r eBits dBits nb eb db =
   [@inline_let] let bits = size (bits t) in
-  let nLen = blocks modBits bits in
-  let eLen = blocks eBits bits in
-  let dLen = blocks dBits bits in
 
   if not (rsapss_check_skey_len #t modBits eBits dBits) then
    B.null
   else begin
     assert (LS.skey_len_pre t (v modBits) (v eBits) (v dBits));
     let h0 = ST.get () in
+    let nLen = blocks modBits bits in
+    let eLen = blocks eBits bits in
+    let dLen = blocks dBits bits in
     let skeyLen = nLen +! nLen +! eLen +! dLen in
     let skey = LowStar.Monotonic.Buffer.mmalloc_partial r (uint #t 0) skeyLen in
     if B.is_null skey then
