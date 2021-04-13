@@ -317,7 +317,7 @@ let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
   Math.Lemmas.lemma_mult_le_right (v len) (v i + 3) (v table_len);
   assert (v ((i +! 1ul) *! len) == (v i + 1) * v len);
   assert (v ((i +! 2ul) *! len) == (v i + 2) * v len);
-  
+
   let h0 = ST.get () in
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v i + 1));
   let t1 = sub table ((i +! 1ul) *! len) len in
@@ -572,7 +572,7 @@ let lmul_acc_pow_a_bits_l_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:si
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
@@ -712,7 +712,7 @@ let lexp_fw_f_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:con
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
@@ -799,7 +799,7 @@ let lexp_fw_loop_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
@@ -860,7 +860,7 @@ let lexp_fw_gen_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:c
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}

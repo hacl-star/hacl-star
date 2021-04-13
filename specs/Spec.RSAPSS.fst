@@ -22,8 +22,8 @@ module Hash = Spec.Agile.Hash
 /// Auxillary functions
 ///
 
-val blocks: x:size_pos -> m:size_pos -> Tot (r:size_pos{x <= m * r})
-let blocks x m = (x - 1) / m + 1
+val blocks: x:size_nat -> m:size_pos -> Tot (r:size_pos{x <= m * r})
+let blocks x m = if x = 0 then 1 else (x - 1) / m + 1
 
 val xor_bytes: #len:size_pos -> b1:lbytes len -> b2:lbytes len -> Tot (lbytes len)
 let xor_bytes #len b1 b2 = map2 (fun x y -> x ^. y) b1 b2

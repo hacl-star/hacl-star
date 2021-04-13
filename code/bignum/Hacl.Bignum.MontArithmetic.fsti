@@ -346,7 +346,7 @@ inline_for_extraction noextract
 let bn_field_exp_consttime_st (t:limb_t) (len:BN.meta_len t) =
     k:pbn_mont_ctx t
   -> aM:lbignum t len
-  -> bBits:size_t{0 < v bBits}
+  -> bBits:size_t
   -> b:lbignum t (blocks bBits (size (bits t)))
   -> resM:lbignum t len ->
   Stack unit
@@ -373,7 +373,7 @@ inline_for_extraction noextract
 let bn_field_exp_vartime_st (t:limb_t) (len:BN.meta_len t) =
     k:pbn_mont_ctx t
   -> aM:lbignum t len
-  -> bBits:size_t{0 < v bBits}
+  -> bBits:size_t
   -> b:lbignum t (blocks bBits (size (bits t)))
   -> resM:lbignum t len ->
   Stack unit

@@ -30,7 +30,7 @@ let lexp_double_fw_f_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t)
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a1:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen
@@ -143,7 +143,7 @@ let lexp_double_fw_loop_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a1:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen
@@ -218,7 +218,7 @@ let lexp_double_fw_gen_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a1:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen

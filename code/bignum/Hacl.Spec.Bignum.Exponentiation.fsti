@@ -16,7 +16,7 @@ let bn_mod_exp_pre
   (#len:BN.bn_len t)
   (n:lbignum t len)
   (a:lbignum t len)
-  (bBits:size_pos)
+  (bBits:size_nat)
   (b:lbignum t (blocks bBits (bits t)))
  =
    bn_v n % 2 = 1 /\ 1 < bn_v n /\
@@ -28,7 +28,7 @@ let bn_mod_exp_post
   (#len:BN.bn_len t)
   (n:lbignum t len)
   (a:lbignum t len)
-  (bBits:size_pos)
+  (bBits:size_nat)
   (b:lbignum t (blocks bBits (bits t)))
   (res:lbignum t len)
  =
@@ -41,7 +41,7 @@ val bn_check_mod_exp:
   -> #len:BN.bn_len t
   -> n:lbignum t len
   -> a:lbignum t len
-  -> bBits:size_pos
+  -> bBits:size_nat
   -> b:lbignum t (blocks bBits (bits t)) ->
   res:limb t{
     let b =
@@ -56,7 +56,7 @@ let bn_mod_exp_precomp_st (t:limb_t) (len:BN.bn_len t) =
   -> mu:limb t
   -> r2:lbignum t len
   -> a:lbignum t len
-  -> bBits:size_pos
+  -> bBits:size_nat
   -> b:lbignum t (blocks bBits (bits t)) ->
   Pure (lbignum t len)
   (requires
@@ -86,7 +86,7 @@ let bn_mod_exp_precompr2_st (t:limb_t) (len:BN.bn_len t) =
     n:lbignum t len
   -> r2:lbignum t len
   -> a:lbignum t len
-  -> bBits:size_pos
+  -> bBits:size_nat
   -> b:lbignum t (blocks bBits (bits t)) ->
   Pure (lbignum t len)
   (requires
@@ -104,7 +104,7 @@ let bn_mod_exp_st (t:limb_t) (len:BN.bn_len t) =
     nBits:size_nat
   -> n:lbignum t len
   -> a:lbignum t len
-  -> bBits:size_pos
+  -> bBits:size_nat
   -> b:lbignum t (blocks bBits (bits t)) ->
   Pure (lbignum t len)
   (requires

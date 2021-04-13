@@ -138,7 +138,7 @@ let bn_exp_mont_pre
   (mu:limb t)
   (r2:BD.lbignum t len)
   (aM:BD.lbignum t len)
-  (bBits:size_pos)
+  (bBits:size_nat)
   (b:BD.lbignum t (BD.blocks bBits (bits t)))
  =
    SM.bn_mont_pre n mu /\
@@ -153,7 +153,7 @@ let bn_exp_mont_st (t:limb_t) (len:BN.meta_len t) =
   -> mu:limb t
   -> r2:lbignum t len
   -> aM:lbignum t len
-  -> bBits:size_t{v bBits > 0}
+  -> bBits:size_t
   -> b:lbignum t (blocks bBits (size (bits t)))
   -> resM:lbignum t len ->
   Stack unit
