@@ -97,7 +97,7 @@ let montgomery_multiplication_round_dsa_ #c k0 t t2 =
     let h = ST.get() in 
     let y_ = index y (size 0) in   
     modulo_addition_lemma (uint_v (Lib.Sequence.index (as_seq h y) 0)) (pow2 64) (uint_v (Lib.Sequence.index (as_seq h temp) 0));
-    short_mul_bn #c (order_buffer #c) y_ t2;
+    short_mul_order #c y_ t2;
     lemma_mult_lt_left (getOrder #c) (((wide_as_nat c h0 t % pow2 64) * uint_v k0) % pow2 64) (pow2 64);
   pop_frame()
 

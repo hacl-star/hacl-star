@@ -46,43 +46,6 @@ static inline uint64_t mod_inv_u64(uint64_t n0)
 }
 
 static const
-uint64_t
-prime256_buffer[4U] =
-  {
-    (uint64_t)0xffffffffffffffffU,
-    (uint64_t)0xffffffffU,
-    (uint64_t)0U,
-    (uint64_t)0xffffffff00000001U
-  };
-
-static const
-uint64_t
-prime384_buffer[6U] =
-  {
-    (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-    (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-  };
-
-static const
-uint64_t
-prime256order_buffer[4U] =
-  {
-    (uint64_t)17562291160714782033U,
-    (uint64_t)13611842547513532036U,
-    (uint64_t)18446744073709551615U,
-    (uint64_t)18446744069414584320U
-  };
-
-static const
-uint64_t
-prime384order_buffer[6U] =
-  {
-    (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
-    (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
-    (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
-  };
-
-static const
 uint8_t
 prime256_inverse_buffer[32U] =
   {
@@ -520,18 +483,8 @@ add_long_bn(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *y, uint64_t *result)
   return c1;
 }
 
-static uint64_t *const_to_buffer__uint64_t(const uint64_t *b)
-{
-  return (uint64_t *)b;
-}
-
-static uint64_t *const_to_lbuffer__uint64_t(const uint64_t *b)
-{
-  return const_to_buffer__uint64_t(b);
-}
-
 static uint64_t
-_add_dep_prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t t, uint64_t *result)
+_add_dep_prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *p, uint64_t t, uint64_t *result)
 {
   uint32_t len;
   switch (c)
@@ -554,67 +507,10 @@ _add_dep_prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t t, uint64_t *resul
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t b[len];
   memset(b, 0U, len * sizeof (uint64_t));
-  uint32_t unused;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        unused = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        unused = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        unused = (uint32_t)4U;
-      }
-  }
-  const uint64_t *sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = prime256_buffer;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = prime384_buffer;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  uint64_t carry = add_bn(c, const_to_lbuffer__uint64_t(sw), x, b);
+  uint64_t carry = add_bn(c, p, x, b);
   uint64_t mask = (uint64_t)0U - t;
-  copy_conditional(c, result, b, mask);
-  return carry;
-}
-
-static uint64_t
-add_dep_prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t t, uint64_t *result)
-{
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        return add_dep_prime_p256(x, t, result);
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        return add_dep_prime_p384(x, t, result);
-      }
-    default:
-      {
-        return _add_dep_prime(c, x, t, result);
-      }
-  }
+  cmovznz4(c, mask, x, b, result);
+  return (uint64_t)0U;
 }
 
 static uint64_t sub_bn(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *y, uint64_t *result)
@@ -675,43 +571,43 @@ static uint64_t sub_bn(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *y, uint64
   return c1;
 }
 
-static uint64_t *const_to_ibuffer__uint64_t(const uint64_t *b)
+static uint64_t sub_bn_prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result)
 {
-  return (uint64_t *)b;
-}
-
-static uint64_t *const_to_ilbuffer__uint64_t(const uint64_t *b)
-{
-  return const_to_ibuffer__uint64_t(b);
-}
-
-static uint64_t
-sub_bn_gl(Spec_ECC_Curves_curve c, uint64_t *x, const uint64_t *y, uint64_t *result)
-{
-  uint32_t unused;
   switch (c)
   {
     case Spec_ECC_Curves_P256:
       {
-        unused = (uint32_t)4U;
-        break;
+        uint64_t
+        p[4U] =
+          {
+            (uint64_t)0xffffffffffffffffU,
+            (uint64_t)0xffffffffU,
+            (uint64_t)0U,
+            (uint64_t)0xffffffff00000001U
+          };
+        uint64_t r = sub_bn(c, x, p, result);
+        return r;
       }
     case Spec_ECC_Curves_P384:
       {
-        unused = (uint32_t)6U;
-        break;
+        uint64_t
+        p[6U] =
+          {
+            (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+            (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
+            (uint64_t)0xffffffffffffffffU
+          };
+        uint64_t r = sub_bn(c, x, p, result);
+        return r;
       }
     default:
       {
-        unused = (uint32_t)4U;
+        return (uint64_t)0U;
       }
   }
-  uint64_t *y_ = const_to_ilbuffer__uint64_t(y);
-  return sub_bn(c, x, y_, result);
 }
 
-static void
-_shortened_mul(Spec_ECC_Curves_curve c, const uint64_t *a, uint64_t b, uint64_t *result)
+static void _shortened_mul(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t b, uint64_t *result)
 {
   uint32_t len;
   switch (c)
@@ -732,64 +628,40 @@ _shortened_mul(Spec_ECC_Curves_curve c, const uint64_t *a, uint64_t b, uint64_t 
       }
   }
   uint64_t bBuffer = b;
-  uint32_t unused;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        unused = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        unused = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        unused = (uint32_t)4U;
-      }
-  }
-  uint64_t *a_ = const_to_ilbuffer__uint64_t(a);
+  uint64_t *partResult = result;
   uint32_t resLen = len + (uint32_t)1U;
-  memset(result, 0U, resLen * sizeof (uint64_t));
+  memset(partResult, 0U, resLen * sizeof (uint64_t));
   {
     uint64_t uu____0 = (&bBuffer)[0U];
-    uint64_t *res_ = result;
+    uint64_t *res_ = partResult;
     uint64_t c1 = (uint64_t)0U;
     uint32_t k = len / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
-      c1 = mul_carry_add_u64_st(c1, a_[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
+      c1 = mul_carry_add_u64_st(c1, a[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
       c1 =
         mul_carry_add_u64_st(c1,
-          a_[(uint32_t)4U * i + (uint32_t)1U],
+          a[(uint32_t)4U * i + (uint32_t)1U],
           uu____0,
           res_ + (uint32_t)4U * i + (uint32_t)1U);
       c1 =
         mul_carry_add_u64_st(c1,
-          a_[(uint32_t)4U * i + (uint32_t)2U],
+          a[(uint32_t)4U * i + (uint32_t)2U],
           uu____0,
           res_ + (uint32_t)4U * i + (uint32_t)2U);
       c1 =
         mul_carry_add_u64_st(c1,
-          a_[(uint32_t)4U * i + (uint32_t)3U],
+          a[(uint32_t)4U * i + (uint32_t)3U],
           uu____0,
           res_ + (uint32_t)4U * i + (uint32_t)3U);
     }
     for (uint32_t i = k; i < len; i++)
     {
-      c1 = mul_carry_add_u64_st(c1, a_[i], uu____0, res_ + i);
+      c1 = mul_carry_add_u64_st(c1, a[i], uu____0, res_ + i);
     }
     uint64_t r = c1;
-    result[len + (uint32_t)0U] = r;
+    partResult[len + (uint32_t)0U] = r;
   }
-}
-
-static void
-short_mul_bn(Spec_ECC_Curves_curve c, const uint64_t *x, uint64_t y, uint64_t *result)
-{
-  _shortened_mul(c, x, y, result);
 }
 
 static void short_mul_prime(Spec_ECC_Curves_curve c, uint64_t b, uint64_t *result)
@@ -803,56 +675,71 @@ static void short_mul_prime(Spec_ECC_Curves_curve c, uint64_t b, uint64_t *resul
       }
     case Spec_ECC_Curves_P384:
       {
-        const uint64_t *primeBuffer;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              primeBuffer = prime256_buffer;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              primeBuffer = prime384_buffer;
-              break;
-            }
-          default:
-            {
-              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
-            }
-        }
-        short_mul_bn(c, primeBuffer, b, result);
-        break;
-      }
-    case Spec_ECC_Curves_Default:
-      {
-        const uint64_t *primeBuffer;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              primeBuffer = prime256_buffer;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              primeBuffer = prime384_buffer;
-              break;
-            }
-          default:
-            {
-              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
-            }
-        }
-        short_mul_bn(c, primeBuffer, b, result);
+        uint64_t
+        p[6U] =
+          {
+            (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+            (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
+            (uint64_t)0xffffffffffffffffU
+          };
+        _shortened_mul(c, p, b, result);
         break;
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        uint64_t
+        p[4U] =
+          {
+            (uint64_t)0xffffffffffffffffU,
+            (uint64_t)0xffffffffU,
+            (uint64_t)0U,
+            (uint64_t)0xffffffff00000001U
+          };
+        _shortened_mul(c, p, b, result);
+      }
+  }
+}
+
+static void short_mul_order(Spec_ECC_Curves_curve c, uint64_t b, uint64_t *result)
+{
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        uint64_t
+        p[4U] =
+          {
+            (uint64_t)17562291160714782033U,
+            (uint64_t)13611842547513532036U,
+            (uint64_t)18446744073709551615U,
+            (uint64_t)18446744069414584320U
+          };
+        _shortened_mul(c, p, b, result);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        uint64_t
+        p[6U] =
+          {
+            (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
+            (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
+            (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
+          };
+        _shortened_mul(c, p, b, result);
+        break;
+      }
+    default:
+      {
+        uint64_t
+        p[4U] =
+          {
+            (uint64_t)17562291160714782033U,
+            (uint64_t)13611842547513532036U,
+            (uint64_t)18446744073709551615U,
+            (uint64_t)18446744069414584320U
+          };
+        _shortened_mul(c, p, b, result);
       }
   }
 }
@@ -1025,26 +912,7 @@ reduction_prime_2prime_with_carry_cin(
   uint64_t tempBuffer[len];
   memset(tempBuffer, 0U, len * sizeof (uint64_t));
   uint64_t tempBufferForSubborrow = (uint64_t)0U;
-  const uint64_t *sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = prime256_buffer;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = prime384_buffer;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  uint64_t carry0 = sub_bn_gl(c, x, sw, tempBuffer);
+  uint64_t carry0 = sub_bn_prime(c, x, tempBuffer);
   uint64_t
   carry =
     Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
@@ -1103,26 +971,7 @@ static void reduction_prime_2prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t tempBuffer[len];
   memset(tempBuffer, 0U, len * sizeof (uint64_t));
-  const uint64_t *sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = prime256_buffer;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = prime384_buffer;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  uint64_t r = sub_bn_gl(c, x, sw, tempBuffer);
+  uint64_t r = sub_bn_prime(c, x, tempBuffer);
   cmovznz4(c, r, tempBuffer, x, result);
 }
 
@@ -1141,7 +990,31 @@ static void felem_double(Spec_ECC_Curves_curve c, uint64_t *arg1, uint64_t *out)
 static void felem_sub(Spec_ECC_Curves_curve c, uint64_t *arg1, uint64_t *arg2, uint64_t *out)
 {
   uint64_t t = sub_bn(c, arg1, arg2, out);
-  uint64_t cc = add_dep_prime(c, out, t, out);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        uint64_t r = add_dep_prime_p256(out, t, out);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        uint64_t r = add_dep_prime_p384(out, t, out);
+        break;
+      }
+    default:
+      {
+        uint64_t
+        p[4U] =
+          {
+            (uint64_t)0xffffffffffffffffU,
+            (uint64_t)0xffffffffU,
+            (uint64_t)0U,
+            (uint64_t)0xffffffff00000001U
+          };
+        uint64_t r = _add_dep_prime(c, out, p, t, out);
+      }
+  }
 }
 
 static void mul(Spec_ECC_Curves_curve c, uint64_t *f, uint64_t *r, uint64_t *out)
@@ -1370,25 +1243,7 @@ montgomery_multiplication_round_dsa_(
   uint64_t temp = (uint64_t)0U;
   mul_atomic(t1, k0, &y, &temp);
   uint64_t y_ = y;
-  const uint64_t *sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = prime256order_buffer;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = prime384order_buffer;
-        break;
-      }
-    default:
-      {
-        sw = prime256order_buffer;
-      }
-  }
-  short_mul_bn(c, sw, y_, t2);
+  short_mul_order(c, y_, t2);
 }
 
 static void
@@ -5194,46 +5049,8 @@ static bool isCoordinateValid(Spec_ECC_Curves_curve c, uint64_t *p)
   memset(tempBuffer, 0U, len * sizeof (uint64_t));
   uint64_t *x = p;
   uint64_t *y = p + len;
-  const uint64_t *sw0;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw0 = prime256_buffer;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw0 = prime384_buffer;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  uint64_t carryX = sub_bn_gl(c, x, sw0, tempBuffer);
-  const uint64_t *sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = prime256_buffer;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = prime384_buffer;
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  uint64_t carryY = sub_bn_gl(c, y, sw, tempBuffer);
+  uint64_t carryX = sub_bn_prime(c, x, tempBuffer);
+  uint64_t carryY = sub_bn_prime(c, y, tempBuffer);
   bool lessX = carryX == (uint64_t)1U;
   bool lessY = carryY == (uint64_t)1U;
   return lessX && lessY;

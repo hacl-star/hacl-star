@@ -246,20 +246,50 @@ let _shortened_mul #c a b result =
   pop_frame()
 
 
-let short_mul_bn #c x y result = 
-  _shortened_mul x y result
-
-
 let short_mul_prime #c b result = 
   match c with
   | P256 -> shortened_mul_prime256 b result
-  | P384 -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
-  | Default -> let primeBuffer = prime_buffer #c in short_mul_bn primeBuffer b result
+  | P384 -> 
+    push_frame();
+    let p = createL p384_prime_list in 
+    lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p384_prime_list);
+    _shortened_mul p b result;
+    pop_frame()
+  | _ -> admit();
+    push_frame();
+    let p = createL p256_prime_list in 
+    lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_prime_list);
+    _shortened_mul p b result;
+    pop_frame()
+
+
+let short_mul_order #c b result = 
+  match c with
+  | P256 ->     
+	 push_frame();
+    let p = createL p256_order_list in 
+    lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_order_list);
+    _shortened_mul p b result;
+      pop_frame()
+  | P384 -> 
+	 push_frame();
+    let p = createL p384_order_list in 
+    lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p384_order_list);
+    _shortened_mul p b result;
+      pop_frame()
+  | _ -> admit();
+      push_frame();
+    let p = createL p256_order_list in 
+    lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_order_list);
+    _shortened_mul p b result;
+      pop_frame()
 
 
 let square_bn #c x result = 
+    let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
-  Hacl.Bignum.bn_sqr len x result
+  Hacl.Bignum.bn_sqr len x result;
+  Hacl.Spec.Bignum.bn_sqr_lemma (as_seq h0 x)
 
 
 val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c 
@@ -320,13 +350,10 @@ let reduction_prime_2prime #c x result =
   pop_frame()
 
 
-
 let felem_add #c arg1 arg2 out =
   let h0 = ST.get() in
-
   let t = add_bn arg1 arg2 out in
   reduction_prime_2prime_with_carry_cin t out out;
-
   additionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg2);
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) + fromDomain #c (as_nat c h0 arg2))
 

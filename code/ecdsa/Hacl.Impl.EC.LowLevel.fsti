@@ -79,19 +79,18 @@ val sub_bn_prime: #c: curve -> x: felem c -> result: felem c ->
       as_nat c h0 x < getPrime c))
 
 
-
-val short_mul_bn: #c: curve -> a: glbuffer uint64 (getCoordinateLenU64 c) -> b: uint64 -> result: widefelem c -> Stack unit
-  (requires fun h -> live h a /\ live h result /\ wide_as_nat c h result = 0)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat_il c h0 a * uint_v b = wide_as_nat c h1 result /\
-    wide_as_nat c h1 result < (pow2 (getPower c)) * pow2 64)
-
-
 val short_mul_prime: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
   (requires fun h -> live h result /\ wide_as_nat c h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     getPrime c * uint_v b = wide_as_nat c h1 result /\
     wide_as_nat c h1 result < (pow2 (getPower c))  * pow2 64)
+
+
+val short_mul_order: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
+  (requires fun h -> live h result /\ wide_as_nat c h result = 0)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    getOrder #c * uint_v b = wide_as_nat c h1 result /\
+    wide_as_nat c h1 result < (pow2 (getPower c)) * pow2 64)
 
 
 val square_bn: #c: curve -> f: felem c -> out: widefelem c -> Stack unit

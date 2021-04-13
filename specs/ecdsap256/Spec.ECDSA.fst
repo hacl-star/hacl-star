@@ -335,11 +335,11 @@ let verifyQValidCurvePointSpec #c publicKey =
 
 
 (* Check that {\displaystyle Q_{A}}Q_{A} is not equal to the identity element O, and its coordinates are otherwise valid *)
-val checkCoordinates: #c: curve ->  r: nat -> s: nat -> bool
+val checkCoordinates: #c: curve -> r: nat -> s: nat -> bool
 
 let checkCoordinates #c r s =
-  let prime = getPrime c in 
-  if r > 0 && r < prime && s > 0 && s < prime
+  let order = getOrder #c in 
+  if r > 0 && r < order && s > 0 && s < order
   then true
   else false
 
