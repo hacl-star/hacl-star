@@ -1,4 +1,4 @@
-module Hacl.SolinasReduction.Lemmas
+module Hacl.SolinasReductionP256.Lemmas
 
 open Lib.IntTypes
 open FStar.Math.Lemmas

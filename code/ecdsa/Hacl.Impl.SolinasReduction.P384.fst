@@ -128,7 +128,7 @@ let load_buffer a0 a1 a2 a3 a4 a5 o =
   let h0 = ST.get() in 
 
   let o_seq = as_seq h0 o in 
-  lseq_as_nat_definiton o_seq 0;
+  lseq_as_nat_zero o_seq;
   lseq_as_nat_definiton o_seq 1;
   lseq_as_nat_definiton o_seq 2;
   lseq_as_nat_definiton o_seq 3;
@@ -1186,7 +1186,7 @@ val lemma_lseq_12_as_definition: i: Lib.Sequence.lseq uint64 12 -> Lemma (
   v i8 * pow2 (8 * 64) + v i9 * pow2 (9 * 64) + v i10 * pow2 (10 * 64) + v i11 * pow2 (11 * 64))
 
 let lemma_lseq_12_as_definition i = 
-  lseq_as_nat_definiton i 0;
+  lseq_as_nat_zero i;
   lseq_as_nat_definiton i 1;
   lseq_as_nat_definiton i 2;
   lseq_as_nat_definiton i 3;

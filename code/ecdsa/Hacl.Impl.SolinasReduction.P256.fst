@@ -9,13 +9,12 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 open Lib.Buffer
 
-open Hacl.SolinasReduction.Lemmas
+open Hacl.SolinasReductionP256.Lemmas
 open Spec.ECC
 open Spec.ECC.Curves
 open Hacl.Impl.EC.LowLevel
 
-open Hacl.Impl.SolinasReduction.P384
-open Hacl.Impl.SolinasReduction.P256
+open Hacl.Impl.EC.Setup
 
 open Hacl.Spec.EC.Definition
 open FStar.Mul
@@ -116,23 +115,24 @@ val load_buffer: a0: uint64 -> a1: uint64 -> a2: uint64 -> a3: uint64
   -> Stack unit
   (requires fun h -> live h o)
   (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\
-    as_nat P256 h1 o = v a0 + v a1 * pow2 64 + v a2 * pow2 128 + v a3 * pow2 192)
+    as_nat P256 h1 o = v a0 + v a1 * pow2 64 + v a2 * pow2 (64 * 2) + v a3 * pow2 (64 * 3))
 
 let load_buffer a0 a1 a2 a3 o =
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
+  assert_norm (pow2 64 * pow2 64 = pow2 (64 * 2));
+  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 (64 * 3)); 
   upd o (size 0) a0;
   upd o (size 1) a1;
   upd o (size 2) a2;
   upd o (size 3) a3;
 
-  let h0 = ST.get() in 
-
+  let h0 = ST.get() in
+  
   let o_seq = as_seq h0 o in 
-  lseq_as_nat_definiton o_seq 0;
+  lseq_as_nat_zero o_seq;
   lseq_as_nat_definiton o_seq 1;
   lseq_as_nat_definiton o_seq 2;
   lseq_as_nat_definiton o_seq 3
+  
 
 #pop-options
 
@@ -518,7 +518,7 @@ val lemma_lseq_8_as_definition: i: Lib.Sequence.lseq uint64 8 -> Lemma (
   lseq_as_nat i == v i0 * pow2 (0 * 64) + v i1 * pow2 (1 * 64) + v i2 * pow2 (2 * 64) + v i3 * pow2 (3 * 64) + v i4 * pow2 (4 * 64) + v i5 * pow2 (5 * 64) + v i6 * pow2 (6 * 64) + v i7 * pow2 (7 * 64))
 
 let lemma_lseq_8_as_definition i = 
-  lseq_as_nat_definiton i 0;
+  lseq_as_nat_zero i;
   lseq_as_nat_definiton i 1;
   lseq_as_nat_definiton i 2;
   lseq_as_nat_definiton i 3;
