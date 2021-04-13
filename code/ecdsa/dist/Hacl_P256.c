@@ -182,6 +182,70 @@ cmovznz4(Spec_ECC_Curves_curve c, uint64_t cin, uint64_t *x, uint64_t *y, uint64
   }
 }
 
+static uint64_t isZero_uint64_CT(Spec_ECC_Curves_curve c, uint64_t *f)
+{
+  uint64_t tmp = (uint64_t)18446744073709551615U;
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t a_i = f[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  return tmp;
+}
+
+static uint64_t compare_felem(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *b)
+{
+  uint64_t tmp = (uint64_t)0U;
+  tmp = (uint64_t)18446744073709551615U;
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t a_i = a[i];
+    uint64_t b_i = b[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, b_i);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  return tmp;
+}
+
 static uint64_t add_dep_prime_p384(uint64_t *x, uint64_t t, uint64_t *result)
 {
   uint64_t b[6U] = { 0U };
@@ -508,9 +572,9 @@ _add_dep_prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *p, uint64_t t, ui
   uint64_t b[len];
   memset(b, 0U, len * sizeof (uint64_t));
   uint64_t carry = add_bn(c, p, x, b);
-  uint64_t mask = (uint64_t)0U - t;
-  cmovznz4(c, mask, x, b, result);
-  return (uint64_t)0U;
+  uint64_t mask = ~((uint64_t)0U - t);
+  cmovznz4(c, mask, b, x, result);
+  return carry;
 }
 
 static uint64_t sub_bn(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *y, uint64_t *result)
@@ -990,16 +1054,17 @@ static void felem_double(Spec_ECC_Curves_curve c, uint64_t *arg1, uint64_t *out)
 static void felem_sub(Spec_ECC_Curves_curve c, uint64_t *arg1, uint64_t *arg2, uint64_t *out)
 {
   uint64_t t = sub_bn(c, arg1, arg2, out);
+  uint64_t r;
   switch (c)
   {
     case Spec_ECC_Curves_P256:
       {
-        uint64_t r = add_dep_prime_p256(out, t, out);
+        r = add_dep_prime_p256(out, t, out);
         break;
       }
     case Spec_ECC_Curves_P384:
       {
-        uint64_t r = add_dep_prime_p384(out, t, out);
+        r = add_dep_prime_p384(out, t, out);
         break;
       }
     default:
@@ -1012,7 +1077,8 @@ static void felem_sub(Spec_ECC_Curves_curve c, uint64_t *arg1, uint64_t *arg2, u
             (uint64_t)0U,
             (uint64_t)0xffffffff00000001U
           };
-        uint64_t r = _add_dep_prime(c, out, p, t, out);
+        uint64_t r0 = _add_dep_prime(c, out, p, t, out);
+        r = r0;
       }
   }
 }
@@ -1073,70 +1139,6 @@ static void mul(Spec_ECC_Curves_curve c, uint64_t *f, uint64_t *r, uint64_t *out
   }
 }
 
-static uint64_t isZero_uint64_CT(Spec_ECC_Curves_curve c, uint64_t *f)
-{
-  uint64_t tmp = (uint64_t)18446744073709551615U;
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint64_t a_i = f[i];
-    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
-    uint64_t tmp0 = tmp;
-    tmp = r_i & tmp0;
-  }
-  return tmp;
-}
-
-static uint64_t compare_felem(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *b)
-{
-  uint64_t tmp = (uint64_t)0U;
-  tmp = (uint64_t)18446744073709551615U;
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint64_t a_i = a[i];
-    uint64_t b_i = b[i];
-    uint64_t r_i = FStar_UInt64_eq_mask(a_i, b_i);
-    uint64_t tmp0 = tmp;
-    tmp = r_i & tmp0;
-  }
-  return tmp;
-}
-
 static void shiftLeftWord(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
 {
   uint32_t len;
@@ -1157,15 +1159,10 @@ static void shiftLeftWord(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
         len = (uint32_t)4U;
       }
   }
-  for (uint32_t i0 = len; i0 < (uint32_t)2U * len; i0++)
-  {
-    uint64_t i_i = i[i0 - len];
-    o[i0] = i_i;
-  }
-  for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
-  {
-    o[i0] = (uint64_t)0U;
-  }
+  uint64_t *oToZero = o;
+  uint64_t *oToCopy = o + len;
+  memcpy(oToCopy, i, len * sizeof (uint64_t));
+  uploadZeroImpl(c, oToZero);
 }
 
 static void
@@ -1840,15 +1837,9 @@ montgomery_ladder_power(
         p[5U] = (uint64_t)0U;
         break;
       }
-    case Spec_ECC_Curves_Default:
-      {
-        reduction_prime_2prime_with_carry_cin(c, (uint64_t)1U, p, p);
-        break;
-      }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
+        reduction_prime_2prime_with_carry_cin(c, (uint64_t)1U, p, p);
       }
   }
   _montgomery_ladder_power(c, m, p, a, scalar);

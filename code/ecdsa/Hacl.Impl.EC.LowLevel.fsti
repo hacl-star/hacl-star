@@ -121,12 +121,12 @@ let toDomain #c a = toDomain_ #c #DH a
 val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
   Stack unit
     (requires (fun h0 ->
-      live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
+      live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\
       as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
     (ensures (fun h0 _ h1 ->
       modifies (loc out) h0 h1 /\
       as_nat c h1 out == (as_nat c h0 a + as_nat c h0 b) % getPrime c /\
-      as_nat c h1 out == toDomain #c((fromDomain #c (as_nat c h0 a) + fromDomain #c (as_nat c h0 b)) % getPrime c)))
+      as_nat c h1 out == toDomain #c ((fromDomain #c (as_nat c h0 a) + fromDomain #c (as_nat c h0 b)) % getPrime c)))
 
 
 val felem_double: #c: curve -> a: felem c -> out: felem c ->
@@ -142,7 +142,7 @@ val felem_double: #c: curve -> a: felem c -> out: felem c ->
 val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
   Stack unit
   (requires (fun h0 ->
-    live h0 out /\ live h0 a /\ live h0 b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\
+    live h0 out /\ live h0 a /\ live h0 b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\
     as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
   (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_nat c h1 out == (as_nat c h0 a - as_nat c h0 b) % getPrime c /\
@@ -151,19 +151,10 @@ val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
 
 val mul: #c: curve -> f: felem c -> r: felem c -> out: widefelem c ->
   Stack unit
-    (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out)
+    (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out /\ disjoint f out /\ eq_or_disjoint f r)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       wide_as_nat c h1 out = as_nat c h0 r * as_nat c h0 f)
 
-val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
-  (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
-
-val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
-  (requires fun h -> live h a /\ live h b)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (if as_nat c h0 a = as_nat c h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
 
 val shiftLeftWord: #c: curve -> i: felem c -> o: lbuffer uint64 (getCoordinateLenU64 c *. 2ul)->
   Stack unit

@@ -41,6 +41,7 @@ open Hacl.Hash.Definitions
 open Hacl.Impl.EC.Setup
 
 open FStar.Mul
+open Hacl.Impl.EC.Masking
 
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
@@ -96,7 +97,7 @@ inline_for_extraction
 val ecdsa_verification_step23: 
     #c: curve 
   -> alg:hash_alg_ecdsa
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
   -> m: lbuffer uint8 mLen 
   -> result: felem c
   -> Stack unit
@@ -105,7 +106,7 @@ val ecdsa_verification_step23:
       (
 	assert_norm (pow2 32 < pow2 61);
 	assert_norm (pow2 32 < pow2 125);
-	let hashM = hashSpec P256 alg (v mLen) (as_seq h0 m) in 
+	let hashM = hashSpec c alg (v mLen) (as_seq h0 m) in 
 	let cutHashM = Lib.Sequence.sub hashM 0 32 in 
 	as_nat c h1 result = nat_from_bytes_be cutHashM % prime_p256_order
       )
@@ -128,13 +129,15 @@ let ecdsa_verification_step23 #c alg mLen m result =
       |SHA2_384 -> hash_384 m mLen mHash
       |SHA2_512 -> hash_512 m mLen mHash 
   end;
-  
+
+  admit();
   let cutHash = sub mHash (size 0) (size 32) in 
   toUint64ChangeEndian #c cutHash result;
   
   let h1 = ST.get() in 
  
   reduction_prime_2prime_order result result;
+  admit();
 
   lemma_core_0 c result h1;
   (* changeEndianLemma #c (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash)); *)

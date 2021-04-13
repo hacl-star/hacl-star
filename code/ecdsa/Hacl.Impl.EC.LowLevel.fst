@@ -99,30 +99,30 @@ let add_long_bn #c x y result =
 
 val _add_dep_prime: #c: curve 
   -> x: felem c 
-  -> p: felem c 
+  -> p: felem c
   -> t: uint64{v t == 0 \/ v t == 1} 
   -> result: felem c ->
   Stack uint64
   (requires fun h -> live h x /\ live h result /\ live h p /\ 
-    eq_or_disjoint x p /\ eq_or_disjoint p result /\ disjoint x result /\ 
-    (v t = 1 ==> as_nat c h x + as_nat c h p < pow2 (getPower c)))
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    eq_or_disjoint x p /\ eq_or_disjoint p result /\ eq_or_disjoint x result)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
     if uint_v t = 1 then 
-      as_nat c h1 result == (as_nat c h0 x  + as_nat c h0 p)
+      as_nat c h1 result + v r * pow2 (getPower c) == as_nat c h0 x + as_nat c h0 p
     else
-      as_nat c h1 result == as_nat c h0 x))  
+      as_nat c h1 result  == as_nat c h0 x))
 
 
 let _add_dep_prime #c x p t result = 
   push_frame();
+    let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let b = create len (u64 0) in 
-
   let carry = add_bn p x b in 
-  let mask = (u64 0) -. t in 
-  cmovznz4 #c mask x b result;
+  let mask = lognot ((u64 0) -. t) in 
+    lognot_lemma (u64 0 -. t);
+  cmovznz4 #c mask b x result;
   pop_frame();
-  u64 0
+  carry
 
 
 assume val lemma_lseq_as_list: l: size_nat -> a: list uint64 {List.Tot.Base.length a == l} -> 
@@ -132,27 +132,26 @@ assume val lemma_lseq_as_list: l: size_nat -> a: list uint64 {List.Tot.Base.leng
 inline_for_extraction noextract
 val add_dep_prime: #c: curve -> x: felem c -> t: uint64 {uint_v t == 0 \/ uint_v t == 1}
   -> result: felem c ->
-  Stack unit
-  (requires fun h -> live h x /\ live h result /\ disjoint x result /\ 
-    (v t = 1 ==> as_nat c h x + getPrime c < pow2 (getPower c)))
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1  /\ (
-    if uint_v t = 1 then
-      as_nat c h1 result == as_nat c h0 x + getPrime c
+  Stack uint64
+  (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1  /\ (
+    if uint_v t = 1 then 
+      as_nat c h1 result + v r * pow2 (getPower c) == as_nat c h0 x + getPrime c
     else
       as_nat c h1 result  == as_nat c h0 x))
 
 
 let add_dep_prime #c x t result =
   match c with
-  |P256 -> begin let r = add_dep_prime_p256 x t result in () end 
-  |P384 -> begin let r = add_dep_prime_p384 x t result in () end
+  |P256 -> begin add_dep_prime_p256 x t result end 
+  |P384 -> begin add_dep_prime_p384 x t result end
   |_ -> begin 
     push_frame();
     assume (getPrime c == prime256);
     let p = createL p256_prime_list in 
       lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_prime_list);
     let r = _add_dep_prime x p t result in 
-      pop_frame() end
+      pop_frame(); r end
 
 
 let sub_bn #c x y result =
@@ -374,18 +373,15 @@ let felem_sub #c arg1 arg2 out =
     let h0 = ST.get() in
   let t = sub_bn arg1 arg2 out in
     let h1 = ST.get() in 
-    assert(as_nat c h1 out - v t * pow2 (getPower c) == as_nat c h0 arg1 - as_nat c h0 arg2);
     lseq_upperbound (as_seq h0 arg1);
     lseq_upperbound (as_seq h0 arg2);
     lseq_upperbound (as_seq h1 out);
-    assert(v t == 1 ==> (as_nat c h1 out - pow2 (getPower c) < 0));
-    admit();
-  add_dep_prime #c out t out; 
+
+  let r = add_dep_prime #c out t out in 
     let h2 = ST.get() in
 
-  lseq_upperbound (as_seq h1 out); 
   modulo_addition_lemma (as_nat c h0 arg1 - as_nat c h0 arg2) (getPrime c) 1;
-
+  
   assert(
     let prime = getPrime c in 
     if as_nat c h0 arg1 - as_nat c h0 arg2 >= 0 then
@@ -396,6 +392,10 @@ let felem_sub #c arg1 arg2 out =
     else
       begin
 	lseq_upperbound (as_seq h2 out);
+	lemma_mod_plus (as_nat c h2 out) (v r) (pow2 (getPower c));
+	lemma_mod_plus (as_nat c h0 arg1 - as_nat c h0 arg2 + prime) 1 (pow2 (getPower c));
+	modulo_lemma (as_nat c h2 out) (pow2 (getPower c));
+	modulo_lemma (as_nat c h0 arg1 - as_nat c h0 arg2 + prime) (pow2 (getPower c));
 	modulo_lemma (as_nat c h2 out) prime;
 	as_nat c h2 out == (as_nat c h0 arg1 - as_nat c h0 arg2) % prime
       end);
@@ -405,105 +405,21 @@ let felem_sub #c arg1 arg2 out =
 
 
 let mul #c f r out =
-  let len = getCoordinateLenU64 c in 
-  bn_mul len f len r out
-
-
-let isZero_uint64_CT #c f =
-  push_frame();
   let h0 = ST.get() in 
-  let tmp = create (size 1) (u64 18446744073709551615) in
-  
   let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v len}) = 
-    live h f /\ live h tmp /\ modifies (loc tmp) h0 h /\ (
-      let tmp = uint_v (Lib.Sequence.index (as_seq h tmp) 0) in (
-      forall (j: nat {j < i}). v (Lib.Sequence.index (as_seq h0 f) j) == 0) <==>
-      tmp == ones_v U64) /\ (
-      let tmp = uint_v (Lib.Sequence.index (as_seq h tmp) 0) in 
-      ~ (forall (j: nat {j < i}). v (Lib.Sequence.index (as_seq h0 f) j) == 0) <==>
-      tmp == 0) in
-
-  for 0ul len inv (fun i -> 
-    let h0 = ST.get() in 
-    assert(let tmp = uint_v (Lib.Sequence.index (as_seq h0 tmp) 0) in tmp == (ones_v U64) <==> 
-      (forall (j: nat {j < (v i)}). v (Lib.Sequence.index (as_seq h0 f) j) == 0));
-
-    let a_i = index f i in 
-    let r_i = eq_mask a_i (u64 0) in 
-    let tmp0 = index tmp (size 0) in 
-    assert(if v a_i = 0 then v r_i == ones_v U64 else v r_i == 0);
-    upd tmp (size 0) (logand r_i tmp0);
-    logand_lemma r_i tmp0;
-
-    let h1 = ST.get() in 
-    let tmp1 = index tmp (size 0) in 
-    assert(let tmp = uint_v (Lib.Sequence.index (as_seq h1 tmp) 0) in 
-      tmp == (ones_v U64) <==> (forall (j: nat {j < (v i + 1)}). v (Lib.Sequence.index (as_seq h0 f) j) == 0)));
-
-  let r = index tmp (size 0) in 
-  let h1 = ST.get() in 
-  lseq_as_nat_zero (as_seq h0 f);
-  pop_frame();
-  r
-
-
-let compare_felem #c a b =
-  push_frame();
-  let h0 = ST.get() in 
-  let tmp = create (size 1) (u64 0) in 
-  upd tmp (size 0) (u64 18446744073709551615);
-    
-  let len = getCoordinateLenU64 c in 
-  
-  let inv h (i: nat { i <= uint_v len}) = live h a /\ live h b /\ live h tmp /\  modifies (loc tmp) h0 h /\ (
-    let tmp = v (Lib.Sequence.index (as_seq h tmp) 0) in (
-    forall (j: nat {j < i}). v (Lib.Sequence.index (as_seq h0 a) j) == 
-      v (Lib.Sequence.index (as_seq h0 b) j)) <==> tmp == ones_v U64) /\ (
-    let tmp = v (Lib.Sequence.index (as_seq h tmp) 0) in ( 
-      ~ (forall (j: nat {j < i}).
-	v (Lib.Sequence.index (as_seq h0 a) j) == v (Lib.Sequence.index (as_seq h0 b) j)) <==> tmp == 0)) in    
-  for 0ul len inv (fun i -> 
-    let h0 = ST.get() in 
-    assert(let tmp = v (Lib.Sequence.index (as_seq h0 tmp) 0) in 
-    tmp == ones_v U64 <==> (forall (j: nat {j < v i}). 
-      v (Lib.Sequence.index (as_seq h0 a) j) == v (Lib.Sequence.index (as_seq h0 b) j)));
-    
-    let a_i = index a i in 
-    let b_i = index b i in 
-    let r_i = eq_mask a_i b_i in 
-    let tmp0 = index tmp (size 0) in 
-
-    logand_lemma r_i tmp0;
-    upd tmp (size 0) (logand r_i tmp0);
-    
-    let h1 = ST.get() in 
-
-    assert(let tmp = v (Lib.Sequence.index (as_seq h1 tmp) 0) in 
-      tmp == ones_v U64 <==> (forall (j: nat {j < v i + 1}). 
-	v (Lib.Sequence.index (as_seq h0 a) j) == v (Lib.Sequence.index (as_seq h0 b) j)))
-    );
-
-  let r = index tmp (size 0) in 
-
-  lemma_lseq_as_seq_as_forall_lr (as_seq h0 a) (as_seq h0 b) (v (getCoordinateLenU64 c));
-  assert(as_nat c h0 a == as_nat c h0 b <==> v r == ones_v U64);
-
-  pop_frame(); 
-  r
+  bn_mul len f len r out;
+  Hacl.Spec.Bignum.bn_mul_lemma (as_seq h0 f) (as_seq h0 r)
 
 
 let shiftLeftWord #c i o =
   let len = getCoordinateLenU64 c in 
-  let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = True in 
-  
-  for len (size 2 *! len) inv (fun j -> 
-    let i_i = index i (j -. len) in 
-    upd o j i_i
-    );
+  let oToZero = sub o (size 0) len in 
+  let oToCopy = sub o len len in 
+  copy oToCopy i;
+  uploadZeroImpl #c oToZero;
+    let h1 = ST.get() in
+  lemma_test (as_seq h1 o)  (v (getCoordinateLenU64 c))
 
-  for 0ul len inv (fun j -> upd o j (u64 0))
-  
 
 let mod64 #c a =
   let h0 = ST.get() in 
@@ -522,7 +438,6 @@ let shift1_with_carry #c t out carry =
     lseq_as_nat_ #(v len + 1) (as_seq h0 t) (i + 1) / pow2 64 == lseq_as_nat_ #(v len + 1) (as_seq h out) i) 
   in 
 
-  lseq_as_nat_first (as_seq h0 t);
   lseq_as_nat_last #(v len + 1) (as_seq h0 out);
 
   for 0ul len inv 
@@ -558,7 +473,6 @@ let shift1_with_carry #c t out carry =
   lseq_as_nat_definiton (as_seq h3 out) (v len + 1);
   pow2_plus (getPower c * 2 - 64) 64
 
-#pop-options
 
 
 let upload_one_montg_form #c b =
@@ -569,7 +483,9 @@ let upload_one_montg_form #c b =
     upd b (size 2) (u64 18446744073709551615);
     upd b (size 3) (u64 4294967294);
     lemmaToDomain #P256 #DH 1;
-    assert_norm(1 + 18446744069414584320 * pow2 64 + 18446744073709551615 * pow2 64 * pow2 64 + 4294967294 * pow2 64 * pow2 64 * pow2 64 == pow2 (getPower P256) % getPrime P256)
+      let h1 = ST.get() in 
+    lemma_lseq_nat_instant_4 (as_seq h1 b); 
+    assert_norm(1 + 18446744069414584320 * pow2 64 + 18446744073709551615 * pow2 (2 * 64) + 4294967294 * pow2 (3 * 64) == pow2 256 % getPrime P256)
   |P384 -> 
     upd b (size 0) (u64 18446744069414584321);
     upd b (size 1) (u64 4294967295);
@@ -578,9 +494,14 @@ let upload_one_montg_form #c b =
     upd b (size 4) (u64 0);
     upd b (size 5) (u64 0);
     lemmaToDomain #P384 #DH 1;
-    assert_norm(18446744069414584321 + 4294967295 * pow2 64 + 1 * pow2 64 * pow2 64 == pow2 (getPower P384) % getPrime P384)
-  |Default -> 
-    reduction_prime_2prime_with_carry_cin #c (u64 1) b b
+      let h1 = ST.get() in 
+    assert_norm(18446744069414584321 + 4294967295 * pow2 64 + 1 * pow2 64 * pow2 64 == pow2 384 % getPrime P384);
+    lemma_lseq_nat_instant_6 (as_seq h1 b)
+  |_ -> 
+    reduction_prime_2prime_with_carry_cin #c (u64 1) b b;
+    lemmaToDomain #c #DH 1
+    
+#pop-options
 
 
 let scalar_bit #c #buf_type s n =

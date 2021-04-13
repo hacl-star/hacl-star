@@ -41,6 +41,7 @@ open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
 open Hacl.Impl.EC.Intro
+open Hacl.Impl.EC.Masking
 
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Spec.MontgomeryMultiplication

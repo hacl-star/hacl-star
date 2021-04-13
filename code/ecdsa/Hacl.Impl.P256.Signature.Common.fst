@@ -34,6 +34,7 @@ open Hacl.Spec.MontgomeryMultiplication
 friend Hacl.Spec.MontgomeryMultiplication
 
 open Hacl.Impl.EC.Core
+open Hacl.Impl.EC.Masking
 
 open Hacl.Impl.EC.Intro
 
