@@ -21,10 +21,9 @@ val bufferToJac: #c: curve -> p: lbuffer uint64 (getCoordinateLenU64 c *. 2ul) -
   (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
     let len = getCoordinateLenU64 c in 
     let x, y = as_nat c h0 (gsub p (size 0) len),  as_nat c h0 (gsub p len len) in
-    point_eval c h1 result /\ (
-    let x3, y3, z3 = point_as_nat c h1 result in
+    let x3, y3, z3 = point_prime_to_coordinates c (as_seq h1 result) in 
     let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in 
-    as_nat c h1 (gsub result (len *. size 2) len) == 1 /\ x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ)))
+    as_nat c h1 (gsub result (len *. size 2) len) == 1 /\ x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
 
 
 [@ (Comment "  This code is not side channel resistant")]  

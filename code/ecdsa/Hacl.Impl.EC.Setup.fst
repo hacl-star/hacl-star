@@ -8,6 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.EC.Definition
+open Hacl.Spec.MontgomeryMultiplication
 open Spec.ECC
 open Spec.ECC.Curves
 open FStar.Mul
@@ -375,3 +376,47 @@ let sqPower_buffer (#c: curve): x: glbuffer uint8 (getScalarLenBytes c) {witness
   |P384 -> sqPower_buffer_p384
   |_ -> admit(); sqPower_buffer_p256
 
+
+inline_for_extraction noextract
+val upload_b_constant: #c: curve -> x: felem c -> Stack unit
+  (requires fun h -> live h x)
+  (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\ as_nat c h1 x == toDomain_ #c #DH (bCoordinate #c) /\
+    as_nat c h1 x < getPrime c)
+
+
+let upload_b_constant #c x = 
+  match c with 
+  |P256 -> 
+    upd x (size 0) (u64 15608596021259845087);
+    upd x (size 1) (u64 12461466548982526096);
+    upd x (size 2) (u64 16546823903870267094);
+    upd x (size 3) (u64 15866188208926050356);
+      let h1 = ST.get() in 
+    Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 x);
+    Hacl.Spec.MontgomeryMultiplication.lemmaToDomain #P256 #DH (bCoordinate #P256);
+    assert_norm (
+      15608596021259845087 * pow2 (64 * 0) + 
+      12461466548982526096 * pow2 64 + 
+      16546823903870267094 * pow2 (64 * 2) + 
+      15866188208926050356 * pow2 (64 * 3)  ==
+      bCoordinate #P256 * pow2 256 % getPrime P256)
+  |P384 -> 
+    upd x (size 0) (u64 581395848458481100);
+    upd x (size 1) (u64 17809957346689692396);
+    upd x (size 2) (u64 8643006485390950958);
+    upd x (size 3) (u64 16372638458395724514);
+    upd x (size 4) (u64 13126622871277412500);
+    upd x (size 5) (u64 14774077593024970745);
+      let h1 = ST.get() in 
+      Hacl.Impl.P384.LowLevel.lemma_lseq_nat_instant_6 (as_seq h1 x);
+      Hacl.Spec.MontgomeryMultiplication.lemmaToDomain #P384 #DH (bCoordinate #P384);
+    assert_norm (
+      581395848458481100   * pow2 (64 * 0) + 
+      17809957346689692396 * pow2 64 + 
+      8643006485390950958  * pow2 (64 * 2) + 
+      16372638458395724514 * pow2 (64 * 3) + 
+      13126622871277412500 * pow2 (64 * 4) +
+      14774077593024970745 * pow2 (64 * 5)
+      == bCoordinate #P384 * pow2 384 % getPrime P384)
+  | _ -> admit()
+    

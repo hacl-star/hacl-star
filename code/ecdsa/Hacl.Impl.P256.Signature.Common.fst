@@ -39,29 +39,13 @@ open Hacl.Impl.EC.Intro
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-#push-options "--ifuel 1"
-
-
 let bufferToJac #c p result = 
-  let lengthXY = getCoordinateLenU64 c *. 2ul in 
+  let len = getCoordinateLenU64 c in 
+  let lengthXY = len *. 2ul in 
   let partPoint = sub result (size 0) lengthXY in 
+  let zCoordinate = sub result lengthXY len in 
   copy partPoint p;
-  admit();
-  match c with 
-  |P256 -> 
-    upd result lengthXY (u64 1);
-    upd result (lengthXY +. 1ul) (u64 0);
-    upd result (lengthXY +. 2ul) (u64 0);
-    upd result (lengthXY +. 3ul) (u64 0)
-  |P384 -> 
-    upd result lengthXY (u64 1);
-    upd result (lengthXY +. 1ul) (u64 0);
-    upd result (lengthXY +. 2ul) (u64 0);
-    upd result (lengthXY +. 3ul) (u64 0);
-    upd result (lengthXY +. 4ul) (u64 0);
-    upd result (lengthXY +. 5ul) (u64 0)
-
-#pop-options
+  uploadOneImpl #c zCoordinate
 
 
 inline_for_extraction noextract
@@ -74,43 +58,6 @@ let y_2 #c y r =
   toDomain #c y r;
   montgomery_square_buffer_dh #c r r
 
-
-inline_for_extraction noextract
-val upload_b_constant: #c: curve -> x: felem c -> Stack unit
-  (requires fun h -> live h x)
-  (ensures fun h0 _ h1 -> modifies (loc x) h0 h1 /\ 
-    as_nat c h1 x == toDomain_ #c #DH (bCoordinate #c) /\
-    as_nat c h1 x < getPrime c
- )
-
-let upload_b_constant #c x = 
-  match c with 
-  |P256 -> 
-    upd x (size 0) (u64 15608596021259845087);
-    upd x (size 1) (u64 12461466548982526096);
-    upd x (size 2) (u64 16546823903870267094);
-    upd x (size 3) (u64 15866188208926050356);
-    assert_norm (
-      15608596021259845087 + 12461466548982526096 * pow2 64 + 
-      16546823903870267094 * pow2 64 * pow2 64 + 
-      15866188208926050356 * pow2 64 * pow2 64 * pow2 64 ==
-      bCoordinate #P256 * pow2 256 % getPrime P256)
-  |P384 -> 
-    upd x (size 0) (u64 581395848458481100);
-    upd x (size 1) (u64 17809957346689692396);
-    upd x (size 2) (u64 8643006485390950958);
-    upd x (size 3) (u64 16372638458395724514);
-    upd x (size 4) (u64 13126622871277412500);
-    upd x (size 5) (u64 14774077593024970745);
-    assert_norm (
-      581395848458481100 + 
-      17809957346689692396 * pow2 64 + 
-      8643006485390950958 * pow2 64 * pow2 64 + 
-      16372638458395724514 * pow2 64 * pow2 64 * pow2 64 + 
-      13126622871277412500 * pow2 64 * pow2 64 * pow2 64 * pow2 64 +
-      14774077593024970745 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64
-      == bCoordinate #P384 * pow2 384 % getPrime P384)
-    
 
 val lemma_xcube: #c: curve -> x_: nat {x_ < getPrime c} -> Lemma 
   (
