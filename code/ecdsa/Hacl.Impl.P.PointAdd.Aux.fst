@@ -232,14 +232,14 @@ val lemma_point_add_if_0: #c: curve -> p: point c -> result: point c
 let lemma_point_add_if_0 #c p result h0 h2 = 
   lemmaFromDomain #c #DH (point_x_as_nat c h0 p);
   lemmaFromDomain #c #DH (point_x_as_nat c h2 result);
-  Hacl.Impl.P256.Math.lemma_modular_multiplication #c (point_x_as_nat c h0 p) (point_x_as_nat c h2 result);
+  Hacl.Impl.EC.Math.lemma_modular_multiplication #c (point_x_as_nat c h0 p) (point_x_as_nat c h2 result);
 
   lemmaFromDomain #c #DH (point_y_as_nat c h0 p);
   lemmaFromDomain #c #DH (point_y_as_nat c h2 result);
-  Hacl.Impl.P256.Math.lemma_modular_multiplication #c (point_y_as_nat c h0 p) (point_y_as_nat c h2 result);
+  Hacl.Impl.EC.Math.lemma_modular_multiplication #c (point_y_as_nat c h0 p) (point_y_as_nat c h2 result);
 
   lemmaFromDomain #c #DH (point_z_as_nat c h2 result);
-  Hacl.Impl.P256.Math.lemma_modular_multiplication #c (point_z_as_nat c h0 p) (point_z_as_nat c h2 result)
+  Hacl.Impl.EC.Math.lemma_modular_multiplication #c (point_z_as_nat c h0 p) (point_z_as_nat c h2 result)
 
 
 
@@ -317,8 +317,8 @@ let lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h1 h2 =
   lemma_point_add_if_0 #c q result h0 h2;
 
 
-(*   Hacl.Impl.P256.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 q);
-  Hacl.Impl.P256.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 p); *)
+(*   Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 q);
+  Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 p); *)
 
   lemmaFromDomain #c #DH (point_z_as_nat c h0 p);
   lemmaFromDomain #c #DH (point_z_as_nat c h0 q);

@@ -148,9 +148,11 @@ let getPowerU curve =
   |P384 -> 384ul
   |_ -> 256ul
 
-let getPower curve : a: nat
-  {getPrime curve < pow2 a /\ pow2 a < 2 * getPrime curve /\ pow2 a % getPrime curve <> 0 /\
-    a = v (getCoordinateLenU64 curve) * 64} = v (getPowerU curve)
+let getPower curve : a: nat {
+  getPrime curve < pow2 a /\ 
+  pow2 a < 2 * getPrime curve /\ 
+  pow2 a % getPrime curve <> 0 /\
+  a = v (getCoordinateLenU64 curve) * 64} = v (getPowerU curve)
 
 (* the power for 2 words *)
 let getLongPower curve = getPower curve * 2
@@ -158,7 +160,7 @@ let getLongPower curve = getPower curve * 2
 
 (* order of the curves *)
 inline_for_extraction
-let getOrder (#c: curve) : (a: pos{a < pow2 (getPower c) /\ FStar.Math.Euclid.is_prime a /\ pow2 (getPower c) % a <> 0}) =
+let getOrder (#c: curve) : (a: pos{a < pow2 (getPower c) /\ pow2 (getPower c) < 2 * a /\ FStar.Math.Euclid.is_prime a /\ pow2 (getPower c) % a <> 0}) =
   admit();
   match c with 
   |P256 -> assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 (getPower P256));

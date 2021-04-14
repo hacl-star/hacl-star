@@ -1,4 +1,3 @@
-
 module Hacl.Impl.P256.Signature.Common
 
 open FStar.HyperStack.All
@@ -19,12 +18,12 @@ open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
+open Hacl.Impl.ECDSA.LowLevel
 
 open Hacl.Impl.EC.Setup
 
 
-open Hacl.Impl.P256.Math 
+open Hacl.Impl.EC.Math 
 open FStar.Math.Lemmas
 open FStar.Mul
 
@@ -47,6 +46,7 @@ let bufferToJac #c p result =
   let lengthXY = getCoordinateLenU64 c *. 2ul in 
   let partPoint = sub result (size 0) lengthXY in 
   copy partPoint p;
+  admit();
   match c with 
   |P256 -> 
     upd result lengthXY (u64 1);
@@ -154,7 +154,7 @@ let xcube_minus_x #c x r =
   toDomain #c x xToDomainBuffer; 
   montgomery_square_buffer_dh #c xToDomainBuffer r;
   montgomery_multiplication_buffer_dh #c r xToDomainBuffer r;
-    lemma_mod_mul_distr_l ((as_nat c h0 x) * (as_nat c h0 x)) (as_nat c h0 x) prime;
+    lemma_mod_mul_distr_l ((as_nat c h0 x) * (as_nat c h0 x)) (as_nat c h0 x) (getPrime c);
   multByThree #c xToDomainBuffer minusThreeXBuffer;
   felem_sub #c r minusThreeXBuffer r;
   upload_b_constant #c b_constant;
@@ -222,8 +222,8 @@ let isPointOnCurvePublic #c p =
 
     admit();
 
-  lemma_modular_multiplication_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % prime) 
-    (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % prime);
+  lemma_modular_multiplication_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % (getPrime c)) 
+    (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % (getPrime c));
     
   let r = compare_felem #c y2Buffer xBuffer in 
   let z = not (eq_0_u64 r) in 

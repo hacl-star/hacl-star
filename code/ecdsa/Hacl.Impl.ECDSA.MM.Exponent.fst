@@ -9,7 +9,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open FStar.Math.Lemmas
-open Hacl.Impl.P256.Math 
+open Hacl.Impl.EC.Math 
 
 open Hacl.Impl.EC.LowLevel 
 open Hacl.Lemmas.P256

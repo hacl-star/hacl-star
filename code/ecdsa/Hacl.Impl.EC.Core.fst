@@ -13,7 +13,7 @@ open Hacl.Impl.EC.Reduction
 open Hacl.Impl.EC.Exponent
 
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Hacl.Impl.P256.Math 
+open Hacl.Impl.EC.Math 
 open Hacl.Impl.EC.Masking
 
 open FStar.Tactics 

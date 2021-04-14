@@ -15,7 +15,7 @@ open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Spec.ECC
-open Hacl.Impl.P256.Math 
+open Hacl.Impl.EC.Math 
 
 open FStar.Tactics 
 open FStar.Tactics.Canon

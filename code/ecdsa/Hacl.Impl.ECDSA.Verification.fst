@@ -14,7 +14,7 @@ open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.EC.LowLevel 
 open Hacl.Impl.EC.Core
 open Hacl.Spec.MontgomeryMultiplication
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
+open Hacl.Impl.ECDSA.LowLevel
 open Hacl.Impl.ECDSA.MM.Exponent
 
 open Hacl.Spec.ECDSA.Definition

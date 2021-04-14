@@ -10,7 +10,7 @@ open Lib.Buffer
 open Hacl.Spec.EC.Definition
 open Hacl.Spec.ECDSA.Definition
 
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
+open Hacl.Impl.ECDSA.LowLevel
 open Hacl.Impl.P256.LowLevel 
 
 open Hacl.Lemmas.P256
@@ -27,8 +27,7 @@ val reduction_8_32: #c: curve -> x: lbuffer uint8 (size 32) -> result: lbuffer u
     (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
       nat_from_bytes_be (as_seq h1 result) == nat_from_bytes_be (as_seq h0 x) % prime_p256_order /\
-      nat_from_bytes_be (as_seq h1 result) < prime_p256_order
-    )
+      nat_from_bytes_be (as_seq h1 result) < prime_p256_order)
 
 let reduction_8_32 #c x result = 
   push_frame();

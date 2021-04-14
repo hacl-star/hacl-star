@@ -71,10 +71,10 @@ let lemma_norm #c p q =
   small_mod pZ prime;
   small_mod qZ prime;
 
-  Hacl.Impl.P256.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime pZ pZ; 
-  Hacl.Impl.P256.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (pZ * pZ) pZ; 
-  Hacl.Impl.P256.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime qZ qZ;
-  Hacl.Impl.P256.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (qZ * qZ) qZ;
+  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime pZ pZ; 
+  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (pZ * pZ) pZ; 
+  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime qZ qZ;
+  Hacl.Impl.EC.Math.lemma_a_not_zero_b_not_zero_mod_not_zero prime (qZ * qZ) qZ;
 
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 

@@ -319,12 +319,6 @@ let widefelem (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *! 2ul)
 noextract
 let felem_seq_as_nat (c: curve) (a: felem_seq c) : Tot nat = lseq_as_nat a
 
-let point_prime_to_coordinates (c: curve) (p:point_seq c) : point_nat_prime #c =
-  let len = uint_v (getCoordinateLenU64 c) in 
-  lseq_as_nat (Lib.Sequence.sub p 0 len),
-  lseq_as_nat (Lib.Sequence.sub p len len),
-  lseq_as_nat (Lib.Sequence.sub p (len * 2) len)
-  
 
 noextract
 let as_nat (c: curve) (h:mem) (e:felem c) : GTot nat = lseq_as_nat (as_seq h e)
@@ -374,5 +368,11 @@ noextract
 let point_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (point_nat_prime #c) = 
   point_x_as_nat c h e, point_y_as_nat c h e, point_z_as_nat c h e
 
+let point_prime_to_coordinates (c: curve) (p:point_seq c) : point_nat =
+  let len = uint_v (getCoordinateLenU64 c) in 
+  lseq_as_nat (Lib.Sequence.sub p 0 len),
+  lseq_as_nat (Lib.Sequence.sub p len len),
+  lseq_as_nat (Lib.Sequence.sub p (len * 2) len)
+  
 
 

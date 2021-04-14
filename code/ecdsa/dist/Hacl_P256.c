@@ -635,6 +635,42 @@ static uint64_t sub_bn(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *y, uint64
   return c1;
 }
 
+static uint64_t sub_bn_order(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result)
+{
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        uint64_t
+        p[4U] =
+          {
+            (uint64_t)17562291160714782033U,
+            (uint64_t)13611842547513532036U,
+            (uint64_t)18446744073709551615U,
+            (uint64_t)18446744069414584320U
+          };
+        uint64_t r = sub_bn(c, x, p, result);
+        return r;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        uint64_t
+        p[6U] =
+          {
+            (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
+            (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
+            (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
+          };
+        uint64_t r = sub_bn(c, x, p, result);
+        return r;
+      }
+    default:
+      {
+        return (uint64_t)0U;
+      }
+  }
+}
+
 static uint64_t sub_bn_prime(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result)
 {
   switch (c)
@@ -4900,9 +4936,32 @@ secretToPublicWithoutNorm(
   copy_point(c, q, result);
 }
 
-static void reduction_prime_2prime_order(Spec_ECC_Curves_curve cu)
+static void
+reduction_prime_2prime_order(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result)
 {
-  uint64_t tempBuffer[4U] = { 0U };
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t tempBuffer[len];
+  memset(tempBuffer, 0U, len * sizeof (uint64_t));
+  uint64_t r = sub_bn_order(c, x, tempBuffer);
+  cmovznz4(c, r, tempBuffer, x, result);
 }
 
 static void bufferToJac(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result)
@@ -6019,7 +6078,7 @@ ecdsa_signature_step12(
     KRML_HOST_EXIT(255U);
   }
   toUint64ChangeEndian(c, mHashRPart, result);
-  reduction_prime_2prime_order(c);
+  reduction_prime_2prime_order(c, result, result);
 }
 
 static uint64_t
@@ -6029,7 +6088,7 @@ ecdsa_signature_step45(Spec_ECC_Curves_curve c, uint64_t *x, uint8_t *k, uint64_
   uint64_t *tempForNorm = tempBuffer;
   secretToPublicWithoutNorm(c, result, k, tempBuffer);
   normX(c, result, x, tempForNorm);
-  reduction_prime_2prime_order(c);
+  reduction_prime_2prime_order(c, x, x);
   return isZero_uint64_CT(c, x);
 }
 

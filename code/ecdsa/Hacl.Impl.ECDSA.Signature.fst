@@ -30,7 +30,7 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.Core
 
 open Hacl.Impl.ECDSA.MM.Exponent
-open Hacl.Impl.ECDSA.MontgomeryMultiplication
+open Hacl.Impl.ECDSA.LowLevel
 
 open Hacl.Impl.P256.Signature.Common
 

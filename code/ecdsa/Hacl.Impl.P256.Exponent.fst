@@ -4,7 +4,7 @@ open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-open Hacl.Impl.P256.Math 
+open Hacl.Impl.EC.Math 
 
 open Lib.IntTypes
 open Lib.Buffer

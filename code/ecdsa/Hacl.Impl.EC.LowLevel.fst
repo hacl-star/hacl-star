@@ -310,7 +310,6 @@ let reduction_prime_2prime_with_carry_cin #c cin x result =
   let tempBuffer = create len (u64 0) in
   let tempBufferForSubborrow = create (size 1) (u64 0) in
  
-  recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
   let carry0 = sub_bn_prime x tempBuffer in
   let carry = sub_borrow_u64 carry0 cin (u64 0) tempBufferForSubborrow in
   cmovznz4 carry tempBuffer x result;
@@ -341,7 +340,6 @@ let reduction_prime_2prime #c x result =
   push_frame();
   let len = getCoordinateLenU64 c in
   let tempBuffer = create len (u64 0) in
-    recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
   let h0 = ST.get() in
   let r = sub_bn_prime x tempBuffer in
   cmovznz4 r tempBuffer x result;
