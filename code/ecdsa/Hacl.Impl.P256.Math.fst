@@ -10,12 +10,6 @@ open Hacl.Lemmas.P256
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
-noextract
-let prime256: (p: pos {p > 3}) =
-  assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
-  pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
-// 115792089210356248762697446949407573530086143415290314195533631308867097853951
-
 val mod_sub: n:pos -> a:int -> b:int -> Lemma
   (requires a % n = b % n)
   (ensures  (a - b) % n = 0)
@@ -115,44 +109,6 @@ let prime_p256_order:pos =
   assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369> 0);
   115792089210356248762697446949407573529996955224135760342422259061068512044369
 
-val lemma_montgomery_mod_inverse_addition: a:nat -> Lemma (
-  a * modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256 % prime256 ==
-  a * modp_inv2_prime (pow2 128) prime256 % prime256)
-
-
-let lemma_montgomery_mod_inverse_addition a =
-  calc (==) {
-    a * modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256 % prime256;
-    == { FStar.Math.Lemmas.paren_mul_right a (modp_inv2_prime (pow2 64) prime256) (modp_inv2_prime (pow2 64) prime256)}
-    a * (modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256) % prime256;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a
-    (modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256) prime256 }
-    a * (modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256 % prime256) % prime256;
-    == { assert_norm (modp_inv2_prime (pow2 64) prime256 * modp_inv2_prime (pow2 64) prime256 % prime256 ==
-    modp_inv2_prime (pow2 128) prime256 % prime256) }
-    a * (modp_inv2_prime (pow2 128) prime256 % prime256) % prime256;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 128) prime256) prime256 }
-    a * modp_inv2_prime (pow2 128) prime256 % prime256;
-  }
-
-val lemma_montgomery_mod_inverse_addition2: a:nat -> Lemma (
-  a * modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256 % prime256 ==
-  a * modp_inv2_prime (pow2 256) prime256 % prime256)
-
-let lemma_montgomery_mod_inverse_addition2 a =
-  calc (==) {
-    a * modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256 % prime256;
-    == { FStar.Math.Lemmas.paren_mul_right a (modp_inv2_prime (pow2 128) prime256) (modp_inv2_prime (pow2 128) prime256)}
-    a * (modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256) % prime256;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a
-    (modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256) prime256 }
-    a * (modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256 % prime256) % prime256;
-    == { assert_norm (modp_inv2_prime (pow2 128) prime256 * modp_inv2_prime (pow2 128) prime256 % prime256 ==
-    modp_inv2_prime (pow2 256) prime256 % prime256) }
-    a * (modp_inv2_prime (pow2 256) prime256 % prime256) % prime256;
-    == { FStar.Math.Lemmas.lemma_mod_mul_distr_r a (modp_inv2_prime (pow2 256) prime256) prime256 }
-    a * modp_inv2_prime (pow2 256) prime256 % prime256;
-  }
 
 (* Fermat's Little Theorem
    applied to r = modp_inv2_prime (pow2 256) prime_p256_order
@@ -175,43 +131,6 @@ let lemma_l_ferm () =
   assert_norm (exp #prime_p256_order (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 1)  == 1);
   lemma_pow_mod_n_is_fpow prime_p256_order r (prime_p256_order - 1)
   
-
-val lemma_multiplication_not_mod_prime_left_p256: a:nat{a < prime256} -> Lemma
-  (requires a * (modp_inv2 #P256 (pow2 256)) % prime256 == 0)
-  (ensures a == 0)
-
-let lemma_multiplication_not_mod_prime_left_p256 a =
-  let b = modp_inv2 #P256 (pow2 256) in
-  lemma_mod_mul_distr_r a b prime256;
-  assert (a * b % prime256 == a * (b % prime256) % prime256);
-  let r = -26959946654596436328278158470660195847911760999080590586820792680449 in
-  let s = 26959946660873538059280334323183841250350249843923952699046031785985 in
-  assert_norm (r * prime256 + s * b == 1);
-  swap_mul a b;
-  assert (b * a % prime256 == 0);
-  euclid prime256 b a r s;
-  assert (a % prime256 == 0);
-  small_mod a prime256
-
-
-val lemma_multiplication_not_mod_prime_left_p384: a:nat{a < prime384} -> Lemma
-  (requires a * (modp_inv2 #P384 (pow2 384)) % prime384 == 0)
-  (ensures a == 0)
-
-let lemma_multiplication_not_mod_prime_left_p384 a =
-  let b = modp_inv2 #P384 (pow2 84) in
-  lemma_mod_mul_distr_r a b prime384;
-  assert (a * b % prime384 == a * (b % prime384) % prime384);
-  admit();
-    (* and some other stuff I don´t want to compute for now *)
-  let r = -26959946654596436328278158470660195847911760999080590586820792680449 in
-  let s = 26959946660873538059280334323183841250350249843923952699046031785985 in
-  assert_norm (r * prime256 + s * b == 1);
-  swap_mul a b;
-  assert (b * a % prime256 == 0);
-  euclid prime256 b a r s;
-  assert (a % prime256 == 0);
-  small_mod a prime256
 
 private val lemma_a_not_zero_b_not_zero_mod_not_zero_: p: nat {Math.Euclid.is_prime p} -> a: nat {a % p <> 0} -> b: nat {b % p <> 0} ->
   Lemma (requires a * b <> 0)
@@ -264,8 +183,6 @@ val lemma_multiplication_not_mod_prime: #c: curve -> a: nat {a < getPrime c} ->
 let lemma_multiplication_not_mod_prime #c a = 
   let prime = getPrime c in 
   let pow = pow2 (getPower c) in 
-  assume (FStar.Math.Euclid.is_prime (getPrime c));
-  assume (pow % prime <> 0);
   
   lemma_exp_not_zero prime pow (prime - 2);
   lemma_exp_not_zero (getPrime c) (pow2 (getPower c)) (getPrime c - 2);
@@ -276,7 +193,7 @@ let lemma_multiplication_not_mod_prime #c a =
 
   small_mod a prime
 
-
+(* 
 val lemma_modular_multiplication_p256: a:nat{a < prime256} -> b:nat{b < prime256} -> Lemma
   (requires a * modp_inv2 #P256 (pow2 256) % prime256 == b * modp_inv2 #P256 (pow2 256) % prime256)
   (ensures  a == b)
@@ -293,11 +210,21 @@ let lemma_modular_multiplication_p256 a b =
   sub_mod prime256 a b;
   assert (a % prime256 == b % prime256);
   FStar.Math.Lemmas.modulo_lemma a prime256;
-  FStar.Math.Lemmas.modulo_lemma b prime256
+  FStar.Math.Lemmas.modulo_lemma b prime256 *)
 
 
 val lemma_modular_multiplication: #c: curve -> a: nat {a < getPrime c} -> b: nat {b < getPrime c} -> 
-  Lemma (
-    a == b <==> a * modp_inv2 #c (pow2 (getPower c)) % getPrime c == b * modp_inv2 #c (pow2 (getPower c)) % getPrime c)
+  Lemma (a == b <==> a * modp_inv2 #c (pow2 (getPower c)) % getPrime c == b * modp_inv2 #c (pow2 (getPower c)) % getPrime c)
 
-let lemma_modular_multiplication #c a b = admit()
+let lemma_modular_multiplication #c a b = 
+  let prime = getPrime c in 
+  let d = modp_inv2 #c (pow2 (getPower c)) in 
+  small_mod d prime;
+
+  lemma_exp_not_zero prime (pow2 (getPower c) % prime) (prime - 2);
+  if a * d % prime = b * d % prime then begin
+    FStar.Math.Fermat.mod_mult_congr prime a b d;
+    small_mod a prime;
+    small_mod b prime
+    end
+  

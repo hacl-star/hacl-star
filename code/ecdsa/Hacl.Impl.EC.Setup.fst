@@ -152,7 +152,17 @@ let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c)
   
 
 inline_for_extraction
-let getLastWordPrime (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64}) = 
+let getLastWordPrime (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64 /\ v r % 2 == 1}) = 
+  assert(FStar.Math.Euclid.is_prime (getPrime c));
+  assert(~(FStar.Math.Euclid.divides (getPrime c) 2));
+  if (getPrime c) % 2 = 0 then 
+    begin 
+      FStar.Math.Euclid.mod_divides (getPrime c) 2;
+      assert(False)
+    end;
+  assert_norm (pow2 1 == 2); 
+  pow2_modulo_modulo_lemma_1 (getPrime c) 1 64; 
+
   match c with 
   |P256 -> 
     lemmaLstLastWord p256_prime_list;

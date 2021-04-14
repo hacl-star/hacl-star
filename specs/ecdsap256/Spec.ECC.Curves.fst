@@ -97,12 +97,12 @@ let prime384: (a: pos {a > 3 && a < pow2 384}) =
 
 
 inline_for_extraction
-let getPrime curve : prime: nat {prime > 3 /\ FStar.Math.Euclid.is_prime prime} = 
+let getPrime curve : prime: nat {prime > 3 /\ FStar.Math.Euclid.is_prime prime /\ prime > pow2 64} = 
   admit();
   match curve with 
   |P256 -> prime256
   |P384 -> prime384
-  |_ -> 4
+  |_ -> prime384
 
 
 (* the length of each coordinate of the point as uint64 *)
