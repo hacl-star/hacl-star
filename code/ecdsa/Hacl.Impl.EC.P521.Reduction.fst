@@ -100,12 +100,12 @@ let getFirstWord i o =
   let h0 = ST.get() in 
   let inv h (j: nat) = live h i /\ live h o /\ modifies (loc o) h0 h in 
   Lib.Loops.for 0ul 8ul inv (fun j -> 
-    let i0 = index i (size 9 *! size 1 +! j) in 
-    let i1 = index i (size 9 *! size 1 +! size 1 +! j) in 
-    let i0 = shift_right i0 (size 10) in 
-      shift_right_lemma i0 (size 10);
-    let i1U = Lib.IntTypes.shift_left i1 (size 54) in 
-      shift_left_lemma i1 (size 54);
+    let i0 = index i (size 8 *! size 1 +! j) in 
+    let i1 = index i (size 8 *! size 1 +! size 1 +! j) in 
+    let i0 = shift_right i0 (size 9) in 
+      shift_right_lemma i0 (size 9);
+    let i1U = Lib.IntTypes.shift_left i1 (size 55) in 
+      shift_left_lemma i1 (size 55);
     let o0 = logxor i0 i1U in 
     upd o j o0);
   let o8 = index o (size 8) in 
@@ -121,12 +121,12 @@ let getSecondWord i o =
   let h0 = ST.get() in 
   let inv h (j: nat) = live h i /\ live h o /\ modifies (loc o) h0 h in 
   Lib.Loops.for 0ul 8ul inv (fun j -> 
-    let i0 = index i (size 9 *! size 2 +! j) in 
-    let i1 = index i (size 9 *! size 2 +! size 1 +! j) in 
-    let i0 = shift_right i0 (size 10) in 
-      shift_right_lemma i0 (size 10);
-    let i1U = Lib.IntTypes.shift_left i1 (size 54) in 
-      shift_left_lemma i1 (size 54);
+    let i0 = index i (size 8 *! size 2 +! j) in 
+    let i1 = index i (size 8 *! size 2 +! size 1 +! j) in 
+    let i0 = shift_right i0 (size 18) in 
+      shift_right_lemma i0 (size 18);
+    let i1U = Lib.IntTypes.shift_left i1 (size 46) in 
+      shift_left_lemma i1 (size 46);
     let o0 = logxor i0 i1U in 
     upd o j o0);
   let o8 = index o (size 8) in 

@@ -3610,95 +3610,355 @@ montgomery_ladder(
   }
 }
 
-static uint32_t coordinate521 = (uint32_t)9U;
+extern void Hacl_Impl_EC_P521_Reduction_felem_add(uint64_t *a, uint64_t *b, uint64_t *out);
 
 static void getZeroWord(uint64_t *i, uint64_t *o)
 {
-  memcpy(o, i, coordinate521 * sizeof (uint64_t));
-  uint64_t o8 = o[8U];
-  uint64_t o8Updated = (uint64_t)0xfffffffffffffc00U & o8;
+  uint64_t *iCopy = i;
+  uint64_t *oCopy = o;
+  memcpy(oCopy, iCopy, (uint32_t)8U * sizeof (uint64_t));
+  uint64_t o8 = i[8U];
+  uint64_t o8Updated = o8 & (uint64_t)0x1ffU;
   o[8U] = o8Updated;
 }
 
-static void getFirstWord(uint64_t *i, uint64_t *o, uint32_t shift)
+static void getFirstWord(uint64_t *i, uint64_t *o)
 {
   {
-    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)0U];
-    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)0U];
-    uint64_t i01 = i0 >> (uint32_t)10U;
-    uint64_t i12 = i11 << (uint32_t)54U;
-    uint64_t o0 = i01 ^ i12;
+    uint64_t i0 = i[(uint32_t)8U + (uint32_t)0U];
+    uint64_t i11 = i[(uint32_t)9U + (uint32_t)0U];
+    uint64_t i01 = i0 >> (uint32_t)9U;
+    uint64_t i1U = i11 << (uint32_t)55U;
+    uint64_t o0 = i01 ^ i1U;
     o[0U] = o0;
   }
   {
-    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)1U];
-    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)1U];
-    uint64_t i01 = i0 >> (uint32_t)10U;
-    uint64_t i12 = i11 << (uint32_t)54U;
-    uint64_t o0 = i01 ^ i12;
+    uint64_t i0 = i[(uint32_t)8U + (uint32_t)1U];
+    uint64_t i11 = i[(uint32_t)9U + (uint32_t)1U];
+    uint64_t i01 = i0 >> (uint32_t)9U;
+    uint64_t i1U = i11 << (uint32_t)55U;
+    uint64_t o0 = i01 ^ i1U;
     o[1U] = o0;
   }
   {
-    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)2U];
-    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)2U];
-    uint64_t i01 = i0 >> (uint32_t)10U;
-    uint64_t i12 = i11 << (uint32_t)54U;
-    uint64_t o0 = i01 ^ i12;
+    uint64_t i0 = i[(uint32_t)8U + (uint32_t)2U];
+    uint64_t i11 = i[(uint32_t)9U + (uint32_t)2U];
+    uint64_t i01 = i0 >> (uint32_t)9U;
+    uint64_t i1U = i11 << (uint32_t)55U;
+    uint64_t o0 = i01 ^ i1U;
     o[2U] = o0;
   }
   {
-    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)3U];
-    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)3U];
-    uint64_t i01 = i0 >> (uint32_t)10U;
-    uint64_t i12 = i11 << (uint32_t)54U;
-    uint64_t o0 = i01 ^ i12;
+    uint64_t i0 = i[(uint32_t)8U + (uint32_t)3U];
+    uint64_t i11 = i[(uint32_t)9U + (uint32_t)3U];
+    uint64_t i01 = i0 >> (uint32_t)9U;
+    uint64_t i1U = i11 << (uint32_t)55U;
+    uint64_t o0 = i01 ^ i1U;
     o[3U] = o0;
   }
   {
-    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)4U];
-    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)4U];
-    uint64_t i01 = i0 >> (uint32_t)10U;
-    uint64_t i12 = i11 << (uint32_t)54U;
-    uint64_t o0 = i01 ^ i12;
+    uint64_t i0 = i[(uint32_t)8U + (uint32_t)4U];
+    uint64_t i11 = i[(uint32_t)9U + (uint32_t)4U];
+    uint64_t i01 = i0 >> (uint32_t)9U;
+    uint64_t i1U = i11 << (uint32_t)55U;
+    uint64_t o0 = i01 ^ i1U;
     o[4U] = o0;
   }
   {
-    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)5U];
-    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)5U];
-    uint64_t i01 = i0 >> (uint32_t)10U;
-    uint64_t i12 = i11 << (uint32_t)54U;
-    uint64_t o0 = i01 ^ i12;
+    uint64_t i0 = i[(uint32_t)8U + (uint32_t)5U];
+    uint64_t i11 = i[(uint32_t)9U + (uint32_t)5U];
+    uint64_t i01 = i0 >> (uint32_t)9U;
+    uint64_t i1U = i11 << (uint32_t)55U;
+    uint64_t o0 = i01 ^ i1U;
     o[5U] = o0;
   }
   {
-    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)6U];
-    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)6U];
-    uint64_t i01 = i0 >> (uint32_t)10U;
-    uint64_t i12 = i11 << (uint32_t)54U;
-    uint64_t o0 = i01 ^ i12;
+    uint64_t i0 = i[(uint32_t)8U + (uint32_t)6U];
+    uint64_t i11 = i[(uint32_t)9U + (uint32_t)6U];
+    uint64_t i01 = i0 >> (uint32_t)9U;
+    uint64_t i1U = i11 << (uint32_t)55U;
+    uint64_t o0 = i01 ^ i1U;
     o[6U] = o0;
   }
   {
-    uint64_t i0 = i[(uint32_t)9U * shift + (uint32_t)7U];
-    uint64_t i11 = i[(uint32_t)9U * shift + (uint32_t)1U + (uint32_t)7U];
-    uint64_t i01 = i0 >> (uint32_t)10U;
-    uint64_t i12 = i11 << (uint32_t)54U;
-    uint64_t o0 = i01 ^ i12;
+    uint64_t i0 = i[(uint32_t)8U + (uint32_t)7U];
+    uint64_t i11 = i[(uint32_t)9U + (uint32_t)7U];
+    uint64_t i01 = i0 >> (uint32_t)9U;
+    uint64_t i1U = i11 << (uint32_t)55U;
+    uint64_t o0 = i01 ^ i1U;
     o[7U] = o0;
   }
+  uint64_t o8 = o[8U];
+  uint64_t o8Updated = o8 & (uint64_t)0x1ffU;
+  o[8U] = o8Updated;
 }
 
-static void reduction_p521(uint64_t *i)
+static void getSecondWord(uint64_t *i, uint64_t *o)
+{
+  {
+    
+    printf("%" PRIx64 "\n",   i[16]);
+    printf("%" PRIx64 "\n",   i[17]);
+
+    uint64_t i0 = i[(uint32_t)16U + (uint32_t)0U];
+    uint64_t i11 = i[(uint32_t)17U + (uint32_t)0U];
+    uint64_t i01 = i0 >> (uint32_t)18U;
+    uint64_t i1U = i11 << (uint32_t)46U;
+    uint64_t o0 = i01 ^ i1U;
+    
+    printf("%" PRIx64 "\n",   o0);
+    
+    o[0U] = o0;
+  }
+
+    printf("\n");
+    printf("\n");
+
+
+  {
+
+    
+    printf("%" PRIx64 "\n",   i[17]);
+    printf("%" PRIx64 "\n",   i[18]);
+
+    uint64_t i0 = i[(uint32_t)16U + (uint32_t)1U];
+    uint64_t i11 = i[(uint32_t)17U + (uint32_t)1U];
+    uint64_t i01 = i0 >> (uint32_t)18U;
+    uint64_t i1U = i11 << (uint32_t)46U;
+    uint64_t o0 = i01 ^ i1U;
+
+    printf("%" PRIx64 "\n",   o0);
+    
+    o[1U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)16U + (uint32_t)2U];
+    uint64_t i11 = i[(uint32_t)17U + (uint32_t)2U];
+    uint64_t i01 = i0 >> (uint32_t)18U;
+    uint64_t i1U = i11 << (uint32_t)46U;
+    uint64_t o0 = i01 ^ i1U;
+    o[2U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)16U + (uint32_t)3U];
+    uint64_t i11 = i[(uint32_t)17U + (uint32_t)3U];
+    uint64_t i01 = i0 >> (uint32_t)18U;
+    uint64_t i1U = i11 << (uint32_t)46U;
+    uint64_t o0 = i01 ^ i1U;
+    o[3U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)16U + (uint32_t)4U];
+    uint64_t i11 = i[(uint32_t)17U + (uint32_t)4U];
+    uint64_t i01 = i0 >> (uint32_t)18U;
+    uint64_t i1U = i11 << (uint32_t)46U;
+    uint64_t o0 = i01 ^ i1U;
+    o[4U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)16U + (uint32_t)5U];
+    uint64_t i11 = i[(uint32_t)17U + (uint32_t)5U];
+    uint64_t i01 = i0 >> (uint32_t)18U;
+    uint64_t i1U = i11 << (uint32_t)46U;
+    uint64_t o0 = i01 ^ i1U;
+    o[5U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)16U + (uint32_t)6U];
+    uint64_t i11 = i[(uint32_t)17U + (uint32_t)6U];
+    uint64_t i01 = i0 >> (uint32_t)18U;
+    uint64_t i1U = i11 << (uint32_t)46U;
+    uint64_t o0 = i01 ^ i1U;
+    o[6U] = o0;
+  }
+  {
+    uint64_t i0 = i[(uint32_t)16U + (uint32_t)7U];
+    uint64_t i11 = i[(uint32_t)17U + (uint32_t)7U];
+    uint64_t i01 = i0 >> (uint32_t)18U;
+    uint64_t i1U = i11 << (uint32_t)46U;
+    uint64_t o0 = i01 ^ i1U;
+    o[7U] = o0;
+  }
+  uint64_t o8 = o[8U];
+  uint64_t o8Updated = o8 & (uint64_t)0x1ffU;
+  o[8U] = o8Updated;
+}
+
+#include <inttypes.h>
+void printU(uint64_t* a, int len)
+{
+  for (int i = 0; i < len; i++)
+   printf("%" PRIx64 "\n",   a[i]);
+}
+
+
+void reduction_p521(uint64_t *i, uint64_t *o)
 {
   uint64_t a0[9U] = { 0U };
   uint64_t a1[9U] = { 0U };
   uint64_t a2[9U] = { 0U };
-  getZeroWord(i, a0);
-  getFirstWord(i, a1, (uint32_t)1U);
-  getFirstWord(i, a2, (uint32_t)2U);
+  uint64_t a3[27U] = { 0U };
+  uint64_t *a3Part = a3;
+  memcpy(a3Part, i, (uint32_t)18U * sizeof (uint64_t));
+  getZeroWord(a3, a0);
+  getFirstWord(a3, a1);
+  getSecondWord(a3, a2);
+  
+  printU(a0, 9);
+  printU(a1, 9);
+  printU(a2, 9);
+
+
+  // Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
+  // Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
 }
 
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
+{
+  uint64_t as_uint64_high = (uint64_t)high;
+  uint64_t as_uint64_high1 = as_uint64_high << (uint32_t)32U;
+  uint64_t as_uint64_low = (uint64_t)low;
+  return as_uint64_low ^ as_uint64_high1;
+}
+
+static void solinas_reduction_impl_p256(uint64_t *i, uint64_t *o)
+{
+  uint64_t tempBuffer[36U] = { 0U };
+  uint64_t i0 = i[0U];
+  uint64_t i1 = i[1U];
+  uint64_t i2 = i[2U];
+  uint64_t i3 = i[3U];
+  uint64_t i4 = i[4U];
+  uint64_t i5 = i[5U];
+  uint64_t i6 = i[6U];
+  uint64_t i7 = i[7U];
+  uint32_t c0 = (uint32_t)i0;
+  uint32_t c1 = (uint32_t)(i0 >> (uint32_t)32U);
+  uint32_t c2 = (uint32_t)i1;
+  uint32_t c3 = (uint32_t)(i1 >> (uint32_t)32U);
+  uint32_t c4 = (uint32_t)i2;
+  uint32_t c5 = (uint32_t)(i2 >> (uint32_t)32U);
+  uint32_t c6 = (uint32_t)i3;
+  uint32_t c7 = (uint32_t)(i3 >> (uint32_t)32U);
+  uint32_t c8 = (uint32_t)i4;
+  uint32_t c9 = (uint32_t)(i4 >> (uint32_t)32U);
+  uint32_t c10 = (uint32_t)i5;
+  uint32_t c11 = (uint32_t)(i5 >> (uint32_t)32U);
+  uint32_t c12 = (uint32_t)i6;
+  uint32_t c13 = (uint32_t)(i6 >> (uint32_t)32U);
+  uint32_t c14 = (uint32_t)i7;
+  uint32_t c15 = (uint32_t)(i7 >> (uint32_t)32U);
+  uint64_t *t01 = tempBuffer;
+  uint64_t *t110 = tempBuffer + (uint32_t)4U;
+  uint64_t *t210 = tempBuffer + (uint32_t)8U;
+  uint64_t *t310 = tempBuffer + (uint32_t)12U;
+  uint64_t *t410 = tempBuffer + (uint32_t)16U;
+  uint64_t *t510 = tempBuffer + (uint32_t)20U;
+  uint64_t *t610 = tempBuffer + (uint32_t)24U;
+  uint64_t *t710 = tempBuffer + (uint32_t)28U;
+  uint64_t *t810 = tempBuffer + (uint32_t)32U;
+  uint64_t b0 = store_high_low_u(c1, c0);
+  uint64_t b10 = store_high_low_u(c3, c2);
+  uint64_t b20 = store_high_low_u(c5, c4);
+  uint64_t b30 = store_high_low_u(c7, c6);
+  t01[0U] = b0;
+  t01[1U] = b10;
+  t01[2U] = b20;
+  t01[3U] = b30;
+  reduction_prime_2prime(Spec_ECC_Curves_P256, t01, t01);
+  uint64_t b00 = (uint64_t)0U;
+  uint64_t b11 = store_high_low_u(c11, (uint32_t)0U);
+  uint64_t b21 = store_high_low_u(c13, c12);
+  uint64_t b31 = store_high_low_u(c15, c14);
+  t110[0U] = b00;
+  t110[1U] = b11;
+  t110[2U] = b21;
+  t110[3U] = b31;
+  reduction_prime_2prime(Spec_ECC_Curves_P256, t110, t110);
+  uint64_t b01 = (uint64_t)0U;
+  uint64_t b12 = store_high_low_u(c12, (uint32_t)0U);
+  uint64_t b22 = store_high_low_u(c14, c13);
+  uint64_t b32 = store_high_low_u((uint32_t)0U, c15);
+  t210[0U] = b01;
+  t210[1U] = b12;
+  t210[2U] = b22;
+  t210[3U] = b32;
+  uint64_t b02 = store_high_low_u(c9, c8);
+  uint64_t b13 = store_high_low_u((uint32_t)0U, c10);
+  uint64_t b23 = (uint64_t)0U;
+  uint64_t b33 = store_high_low_u(c15, c14);
+  t310[0U] = b02;
+  t310[1U] = b13;
+  t310[2U] = b23;
+  t310[3U] = b33;
+  reduction_prime_2prime(Spec_ECC_Curves_P256, t310, t310);
+  uint64_t b03 = store_high_low_u(c10, c9);
+  uint64_t b14 = store_high_low_u(c13, c11);
+  uint64_t b24 = store_high_low_u(c15, c14);
+  uint64_t b34 = store_high_low_u(c8, c13);
+  t410[0U] = b03;
+  t410[1U] = b14;
+  t410[2U] = b24;
+  t410[3U] = b34;
+  reduction_prime_2prime(Spec_ECC_Curves_P256, t410, t410);
+  uint64_t b04 = store_high_low_u(c12, c11);
+  uint64_t b15 = store_high_low_u((uint32_t)0U, c13);
+  uint64_t b25 = (uint64_t)0U;
+  uint64_t b35 = store_high_low_u(c10, c8);
+  t510[0U] = b04;
+  t510[1U] = b15;
+  t510[2U] = b25;
+  t510[3U] = b35;
+  reduction_prime_2prime(Spec_ECC_Curves_P256, t510, t510);
+  uint64_t b05 = store_high_low_u(c13, c12);
+  uint64_t b16 = store_high_low_u(c15, c14);
+  uint64_t b26 = (uint64_t)0U;
+  uint64_t b36 = store_high_low_u(c11, c9);
+  t610[0U] = b05;
+  t610[1U] = b16;
+  t610[2U] = b26;
+  t610[3U] = b36;
+  reduction_prime_2prime(Spec_ECC_Curves_P256, t610, t610);
+  uint64_t b06 = store_high_low_u(c14, c13);
+  uint64_t b17 = store_high_low_u(c8, c15);
+  uint64_t b27 = store_high_low_u(c10, c9);
+  uint64_t b37 = store_high_low_u(c12, (uint32_t)0U);
+  t710[0U] = b06;
+  t710[1U] = b17;
+  t710[2U] = b27;
+  t710[3U] = b37;
+  reduction_prime_2prime(Spec_ECC_Curves_P256, t710, t710);
+  uint64_t b07 = store_high_low_u(c15, c14);
+  uint64_t b1 = store_high_low_u(c9, (uint32_t)0U);
+  uint64_t b2 = store_high_low_u(c11, c10);
+  uint64_t b3 = store_high_low_u(c13, (uint32_t)0U);
+  t810[0U] = b07;
+  t810[1U] = b1;
+  t810[2U] = b2;
+  t810[3U] = b3;
+  reduction_prime_2prime(Spec_ECC_Curves_P256, t810, t810);
+  uint64_t *t010 = tempBuffer;
+  uint64_t *t11 = tempBuffer + (uint32_t)4U;
+  uint64_t *t21 = tempBuffer + (uint32_t)8U;
+  uint64_t *t31 = tempBuffer + (uint32_t)12U;
+  uint64_t *t41 = tempBuffer + (uint32_t)16U;
+  uint64_t *t51 = tempBuffer + (uint32_t)20U;
+  uint64_t *t61 = tempBuffer + (uint32_t)24U;
+  uint64_t *t71 = tempBuffer + (uint32_t)28U;
+  uint64_t *t81 = tempBuffer + (uint32_t)32U;
+  felem_double(Spec_ECC_Curves_P256, t21, t21);
+  felem_double(Spec_ECC_Curves_P256, t11, t11);
+  felem_add(Spec_ECC_Curves_P256, t010, t11, o);
+  felem_add(Spec_ECC_Curves_P256, t21, o, o);
+  felem_add(Spec_ECC_Curves_P256, t31, o, o);
+  felem_add(Spec_ECC_Curves_P256, t41, o, o);
+  felem_sub(Spec_ECC_Curves_P256, o, t51, o);
+  felem_sub(Spec_ECC_Curves_P256, o, t61, o);
+  felem_sub(Spec_ECC_Curves_P256, o, t71, o);
+  felem_sub(Spec_ECC_Curves_P256, o, t81, o);
+}
+
+static uint64_t store_high_low_u0(uint32_t high, uint32_t low)
 {
   uint64_t as_uint64_high = (uint64_t)high;
   uint64_t as_uint64_high1 = as_uint64_high << (uint32_t)32U;
@@ -3723,12 +3983,12 @@ upl_zer_buffer(
   uint64_t *o
 )
 {
-  uint64_t a0 = store_high_low_u(c1, c0);
-  uint64_t a1 = store_high_low_u(c3, c2);
-  uint64_t a2 = store_high_low_u(c5, c4);
-  uint64_t a3 = store_high_low_u(c7, c6);
-  uint64_t a4 = store_high_low_u(c9, c8);
-  uint64_t a5 = store_high_low_u(c11, c10);
+  uint64_t a0 = store_high_low_u0(c1, c0);
+  uint64_t a1 = store_high_low_u0(c3, c2);
+  uint64_t a2 = store_high_low_u0(c5, c4);
+  uint64_t a3 = store_high_low_u0(c7, c6);
+  uint64_t a4 = store_high_low_u0(c9, c8);
+  uint64_t a5 = store_high_low_u0(c11, c10);
   o[0U] = a0;
   o[1U] = a1;
   o[2U] = a2;
@@ -3740,12 +4000,12 @@ upl_zer_buffer(
 
 static void upl_fir_buffer(uint32_t c21, uint32_t c22, uint32_t c23, uint64_t *o)
 {
-  uint64_t b0 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b1 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b2 = store_high_low_u(c22, c21);
-  uint64_t b3 = store_high_low_u((uint32_t)0U, c23);
-  uint64_t b4 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b5 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
+  uint64_t b0 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b1 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b2 = store_high_low_u0(c22, c21);
+  uint64_t b3 = store_high_low_u0((uint32_t)0U, c23);
+  uint64_t b4 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b5 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -3771,12 +4031,12 @@ upl_sec_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = store_high_low_u(c13, c12);
-  uint64_t b1 = store_high_low_u(c15, c14);
-  uint64_t b2 = store_high_low_u(c17, c16);
-  uint64_t b3 = store_high_low_u(c19, c18);
-  uint64_t b4 = store_high_low_u(c21, c20);
-  uint64_t b5 = store_high_low_u(c23, c22);
+  uint64_t b0 = store_high_low_u0(c13, c12);
+  uint64_t b1 = store_high_low_u0(c15, c14);
+  uint64_t b2 = store_high_low_u0(c17, c16);
+  uint64_t b3 = store_high_low_u0(c19, c18);
+  uint64_t b4 = store_high_low_u0(c21, c20);
+  uint64_t b5 = store_high_low_u0(c23, c22);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -3803,12 +4063,12 @@ upl_thi_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = store_high_low_u(c22, c21);
-  uint64_t b1 = store_high_low_u(c12, c23);
-  uint64_t b2 = store_high_low_u(c14, c13);
-  uint64_t b3 = store_high_low_u(c16, c15);
-  uint64_t b4 = store_high_low_u(c18, c17);
-  uint64_t b5 = store_high_low_u(c20, c19);
+  uint64_t b0 = store_high_low_u0(c22, c21);
+  uint64_t b1 = store_high_low_u0(c12, c23);
+  uint64_t b2 = store_high_low_u0(c14, c13);
+  uint64_t b3 = store_high_low_u0(c16, c15);
+  uint64_t b4 = store_high_low_u0(c18, c17);
+  uint64_t b5 = store_high_low_u0(c20, c19);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -3833,12 +4093,12 @@ upl_forth_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = store_high_low_u(c23, (uint32_t)0U);
-  uint64_t b1 = store_high_low_u(c20, (uint32_t)0U);
-  uint64_t b2 = store_high_low_u(c13, c12);
-  uint64_t b3 = store_high_low_u(c15, c14);
-  uint64_t b4 = store_high_low_u(c17, c16);
-  uint64_t b5 = store_high_low_u(c19, c18);
+  uint64_t b0 = store_high_low_u0(c23, (uint32_t)0U);
+  uint64_t b1 = store_high_low_u0(c20, (uint32_t)0U);
+  uint64_t b2 = store_high_low_u0(c13, c12);
+  uint64_t b3 = store_high_low_u0(c15, c14);
+  uint64_t b4 = store_high_low_u0(c17, c16);
+  uint64_t b5 = store_high_low_u0(c19, c18);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -3850,12 +4110,12 @@ upl_forth_buffer(
 
 static void upl_fif_buffer(uint32_t c20, uint32_t c21, uint32_t c22, uint32_t c23, uint64_t *o)
 {
-  uint64_t b0 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b1 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b2 = store_high_low_u(c21, c20);
-  uint64_t b3 = store_high_low_u(c23, c22);
-  uint64_t b4 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b5 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
+  uint64_t b0 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b1 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b2 = store_high_low_u0(c21, c20);
+  uint64_t b3 = store_high_low_u0(c23, c22);
+  uint64_t b4 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b5 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -3867,12 +4127,12 @@ static void upl_fif_buffer(uint32_t c20, uint32_t c21, uint32_t c22, uint32_t c2
 
 static void upl_six_buffer(uint32_t c20, uint32_t c21, uint32_t c22, uint32_t c23, uint64_t *o)
 {
-  uint64_t b0 = store_high_low_u((uint32_t)0U, c20);
-  uint64_t b1 = store_high_low_u(c21, (uint32_t)0U);
-  uint64_t b2 = store_high_low_u(c23, c22);
-  uint64_t b3 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b4 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b5 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
+  uint64_t b0 = store_high_low_u0((uint32_t)0U, c20);
+  uint64_t b1 = store_high_low_u0(c21, (uint32_t)0U);
+  uint64_t b2 = store_high_low_u0(c23, c22);
+  uint64_t b3 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b4 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b5 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -3899,12 +4159,12 @@ upl_sev_buffer(
   uint64_t *o
 )
 {
-  uint64_t b0 = store_high_low_u(c12, c23);
-  uint64_t b1 = store_high_low_u(c14, c13);
-  uint64_t b2 = store_high_low_u(c16, c15);
-  uint64_t b3 = store_high_low_u(c18, c17);
-  uint64_t b4 = store_high_low_u(c20, c19);
-  uint64_t b5 = store_high_low_u(c22, c21);
+  uint64_t b0 = store_high_low_u0(c12, c23);
+  uint64_t b1 = store_high_low_u0(c14, c13);
+  uint64_t b2 = store_high_low_u0(c16, c15);
+  uint64_t b3 = store_high_low_u0(c18, c17);
+  uint64_t b4 = store_high_low_u0(c20, c19);
+  uint64_t b5 = store_high_low_u0(c22, c21);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -3916,12 +4176,12 @@ upl_sev_buffer(
 
 static void upl_eit_buffer(uint32_t c20, uint32_t c21, uint32_t c22, uint32_t c23, uint64_t *o)
 {
-  uint64_t b0 = store_high_low_u(c20, (uint32_t)0U);
-  uint64_t b1 = store_high_low_u(c22, c21);
-  uint64_t b2 = store_high_low_u((uint32_t)0U, c23);
-  uint64_t b3 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b4 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b5 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
+  uint64_t b0 = store_high_low_u0(c20, (uint32_t)0U);
+  uint64_t b1 = store_high_low_u0(c22, c21);
+  uint64_t b2 = store_high_low_u0((uint32_t)0U, c23);
+  uint64_t b3 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b4 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b5 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -3933,12 +4193,12 @@ static void upl_eit_buffer(uint32_t c20, uint32_t c21, uint32_t c22, uint32_t c2
 
 static void upl_nin_buffer(uint32_t c23, uint64_t *o)
 {
-  uint64_t b0 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b1 = store_high_low_u(c23, (uint32_t)0U);
-  uint64_t b2 = store_high_low_u((uint32_t)0U, c23);
-  uint64_t b3 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b4 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
-  uint64_t b5 = store_high_low_u((uint32_t)0U, (uint32_t)0U);
+  uint64_t b0 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b1 = store_high_low_u0(c23, (uint32_t)0U);
+  uint64_t b2 = store_high_low_u0((uint32_t)0U, c23);
+  uint64_t b3 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b4 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
+  uint64_t b5 = store_high_low_u0((uint32_t)0U, (uint32_t)0U);
   o[0U] = b0;
   o[1U] = b1;
   o[2U] = b2;
@@ -4090,151 +4350,6 @@ static void solinas_reduction_impl_p384(uint64_t *i, uint64_t *o)
   solinas_reduction_operations(tempBuffer, o);
 }
 
-static uint64_t store_high_low_u0(uint32_t high, uint32_t low)
-{
-  uint64_t as_uint64_high = (uint64_t)high;
-  uint64_t as_uint64_high1 = as_uint64_high << (uint32_t)32U;
-  uint64_t as_uint64_low = (uint64_t)low;
-  return as_uint64_low ^ as_uint64_high1;
-}
-
-static void solinas_reduction_impl_p256(uint64_t *i, uint64_t *o)
-{
-  uint64_t tempBuffer[36U] = { 0U };
-  uint64_t i0 = i[0U];
-  uint64_t i1 = i[1U];
-  uint64_t i2 = i[2U];
-  uint64_t i3 = i[3U];
-  uint64_t i4 = i[4U];
-  uint64_t i5 = i[5U];
-  uint64_t i6 = i[6U];
-  uint64_t i7 = i[7U];
-  uint32_t c0 = (uint32_t)i0;
-  uint32_t c1 = (uint32_t)(i0 >> (uint32_t)32U);
-  uint32_t c2 = (uint32_t)i1;
-  uint32_t c3 = (uint32_t)(i1 >> (uint32_t)32U);
-  uint32_t c4 = (uint32_t)i2;
-  uint32_t c5 = (uint32_t)(i2 >> (uint32_t)32U);
-  uint32_t c6 = (uint32_t)i3;
-  uint32_t c7 = (uint32_t)(i3 >> (uint32_t)32U);
-  uint32_t c8 = (uint32_t)i4;
-  uint32_t c9 = (uint32_t)(i4 >> (uint32_t)32U);
-  uint32_t c10 = (uint32_t)i5;
-  uint32_t c11 = (uint32_t)(i5 >> (uint32_t)32U);
-  uint32_t c12 = (uint32_t)i6;
-  uint32_t c13 = (uint32_t)(i6 >> (uint32_t)32U);
-  uint32_t c14 = (uint32_t)i7;
-  uint32_t c15 = (uint32_t)(i7 >> (uint32_t)32U);
-  uint64_t *t01 = tempBuffer;
-  uint64_t *t110 = tempBuffer + (uint32_t)4U;
-  uint64_t *t210 = tempBuffer + (uint32_t)8U;
-  uint64_t *t310 = tempBuffer + (uint32_t)12U;
-  uint64_t *t410 = tempBuffer + (uint32_t)16U;
-  uint64_t *t510 = tempBuffer + (uint32_t)20U;
-  uint64_t *t610 = tempBuffer + (uint32_t)24U;
-  uint64_t *t710 = tempBuffer + (uint32_t)28U;
-  uint64_t *t810 = tempBuffer + (uint32_t)32U;
-  uint64_t b0 = store_high_low_u0(c1, c0);
-  uint64_t b10 = store_high_low_u0(c3, c2);
-  uint64_t b20 = store_high_low_u0(c5, c4);
-  uint64_t b30 = store_high_low_u0(c7, c6);
-  t01[0U] = b0;
-  t01[1U] = b10;
-  t01[2U] = b20;
-  t01[3U] = b30;
-  reduction_prime_2prime(Spec_ECC_Curves_P256, t01, t01);
-  uint64_t b00 = (uint64_t)0U;
-  uint64_t b11 = store_high_low_u0(c11, (uint32_t)0U);
-  uint64_t b21 = store_high_low_u0(c13, c12);
-  uint64_t b31 = store_high_low_u0(c15, c14);
-  t110[0U] = b00;
-  t110[1U] = b11;
-  t110[2U] = b21;
-  t110[3U] = b31;
-  reduction_prime_2prime(Spec_ECC_Curves_P256, t110, t110);
-  uint64_t b01 = (uint64_t)0U;
-  uint64_t b12 = store_high_low_u0(c12, (uint32_t)0U);
-  uint64_t b22 = store_high_low_u0(c14, c13);
-  uint64_t b32 = store_high_low_u0((uint32_t)0U, c15);
-  t210[0U] = b01;
-  t210[1U] = b12;
-  t210[2U] = b22;
-  t210[3U] = b32;
-  uint64_t b02 = store_high_low_u0(c9, c8);
-  uint64_t b13 = store_high_low_u0((uint32_t)0U, c10);
-  uint64_t b23 = (uint64_t)0U;
-  uint64_t b33 = store_high_low_u0(c15, c14);
-  t310[0U] = b02;
-  t310[1U] = b13;
-  t310[2U] = b23;
-  t310[3U] = b33;
-  reduction_prime_2prime(Spec_ECC_Curves_P256, t310, t310);
-  uint64_t b03 = store_high_low_u0(c10, c9);
-  uint64_t b14 = store_high_low_u0(c13, c11);
-  uint64_t b24 = store_high_low_u0(c15, c14);
-  uint64_t b34 = store_high_low_u0(c8, c13);
-  t410[0U] = b03;
-  t410[1U] = b14;
-  t410[2U] = b24;
-  t410[3U] = b34;
-  reduction_prime_2prime(Spec_ECC_Curves_P256, t410, t410);
-  uint64_t b04 = store_high_low_u0(c12, c11);
-  uint64_t b15 = store_high_low_u0((uint32_t)0U, c13);
-  uint64_t b25 = (uint64_t)0U;
-  uint64_t b35 = store_high_low_u0(c10, c8);
-  t510[0U] = b04;
-  t510[1U] = b15;
-  t510[2U] = b25;
-  t510[3U] = b35;
-  reduction_prime_2prime(Spec_ECC_Curves_P256, t510, t510);
-  uint64_t b05 = store_high_low_u0(c13, c12);
-  uint64_t b16 = store_high_low_u0(c15, c14);
-  uint64_t b26 = (uint64_t)0U;
-  uint64_t b36 = store_high_low_u0(c11, c9);
-  t610[0U] = b05;
-  t610[1U] = b16;
-  t610[2U] = b26;
-  t610[3U] = b36;
-  reduction_prime_2prime(Spec_ECC_Curves_P256, t610, t610);
-  uint64_t b06 = store_high_low_u0(c14, c13);
-  uint64_t b17 = store_high_low_u0(c8, c15);
-  uint64_t b27 = store_high_low_u0(c10, c9);
-  uint64_t b37 = store_high_low_u0(c12, (uint32_t)0U);
-  t710[0U] = b06;
-  t710[1U] = b17;
-  t710[2U] = b27;
-  t710[3U] = b37;
-  reduction_prime_2prime(Spec_ECC_Curves_P256, t710, t710);
-  uint64_t b07 = store_high_low_u0(c15, c14);
-  uint64_t b1 = store_high_low_u0(c9, (uint32_t)0U);
-  uint64_t b2 = store_high_low_u0(c11, c10);
-  uint64_t b3 = store_high_low_u0(c13, (uint32_t)0U);
-  t810[0U] = b07;
-  t810[1U] = b1;
-  t810[2U] = b2;
-  t810[3U] = b3;
-  reduction_prime_2prime(Spec_ECC_Curves_P256, t810, t810);
-  uint64_t *t010 = tempBuffer;
-  uint64_t *t11 = tempBuffer + (uint32_t)4U;
-  uint64_t *t21 = tempBuffer + (uint32_t)8U;
-  uint64_t *t31 = tempBuffer + (uint32_t)12U;
-  uint64_t *t41 = tempBuffer + (uint32_t)16U;
-  uint64_t *t51 = tempBuffer + (uint32_t)20U;
-  uint64_t *t61 = tempBuffer + (uint32_t)24U;
-  uint64_t *t71 = tempBuffer + (uint32_t)28U;
-  uint64_t *t81 = tempBuffer + (uint32_t)32U;
-  felem_double(Spec_ECC_Curves_P256, t21, t21);
-  felem_double(Spec_ECC_Curves_P256, t11, t11);
-  felem_add(Spec_ECC_Curves_P256, t010, t11, o);
-  felem_add(Spec_ECC_Curves_P256, t21, o, o);
-  felem_add(Spec_ECC_Curves_P256, t31, o, o);
-  felem_add(Spec_ECC_Curves_P256, t41, o, o);
-  felem_sub(Spec_ECC_Curves_P256, o, t51, o);
-  felem_sub(Spec_ECC_Curves_P256, o, t61, o);
-  felem_sub(Spec_ECC_Curves_P256, o, t71, o);
-  felem_sub(Spec_ECC_Curves_P256, o, t81, o);
-}
-
 static void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
 {
   switch (c)
@@ -4251,7 +4366,7 @@ static void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
       }
     case Spec_ECC_Curves_Default:
       {
-        reduction_p521(i);
+        reduction_p521(i, o);
         break;
       }
     default:

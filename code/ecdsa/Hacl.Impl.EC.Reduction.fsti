@@ -9,7 +9,6 @@ open FStar.Math.Lemmas
 open FStar.Math.Lib
 open Lib.Buffer
 
-open Hacl.SolinasReduction.Lemmas
 open Hacl.Impl.P256.LowLevel 
 
 open Spec.ECC
