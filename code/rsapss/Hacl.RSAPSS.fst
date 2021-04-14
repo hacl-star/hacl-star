@@ -43,8 +43,8 @@ val rsapss_sign:
   -> modBits:modBits_t ->
   RI.rsapss_sign_st t_limbs (ke modBits) a modBits
 
-let rsapss_sign a modBits eBits dBits skey sLen salt msgLen msg sgnt =
-  RI.rsapss_sign (ke modBits) a modBits eBits dBits skey sLen salt msgLen msg sgnt
+let rsapss_sign a modBits eBits dBits skey saltLen salt msgLen msg sgnt =
+  RI.rsapss_sign (ke modBits) a modBits eBits dBits skey saltLen salt msgLen msg sgnt
 
 
 val rsapss_verify:
@@ -52,8 +52,8 @@ val rsapss_verify:
   -> modBits:modBits_t ->
   RI.rsapss_verify_st t_limbs (ke modBits) a modBits
 
-let rsapss_verify a modBits eBits pkey sLen k sgnt msgLen msg =
-  RI.rsapss_verify (ke modBits) a modBits eBits pkey sLen k sgnt msgLen msg
+let rsapss_verify a modBits eBits pkey saltLen sgntLen sgnt msgLen msg =
+  RI.rsapss_verify (ke modBits) a modBits eBits pkey saltLen sgntLen sgnt msgLen msg
 
 
 val new_rsapss_load_pkey: modBits:modBits_t -> RK.new_rsapss_load_pkey_st t_limbs (ke modBits) modBits
@@ -71,9 +71,9 @@ val rsapss_skey_sign:
   -> modBits:modBits_t ->
   RI.rsapss_skey_sign_st t_limbs (ke modBits) a modBits
 
-let rsapss_skey_sign a modBits eBits dBits nb eb db sLen salt msgLen msg sgnt =
+let rsapss_skey_sign a modBits eBits dBits nb eb db saltLen salt msgLen msg sgnt =
   RI.rsapss_skey_sign (ke modBits) a modBits
-    (load_skey modBits) (rsapss_sign a modBits) eBits dBits nb eb db sLen salt msgLen msg sgnt
+    (load_skey modBits) (rsapss_sign a modBits) eBits dBits nb eb db saltLen salt msgLen msg sgnt
 
 
 val rsapss_pkey_verify:
@@ -81,6 +81,6 @@ val rsapss_pkey_verify:
   -> modBits:modBits_t ->
   RI.rsapss_pkey_verify_st t_limbs (ke modBits) a modBits
 
-let rsapss_pkey_verify a modBits eBits nb eb sLen k sgnt msgLen msg =
+let rsapss_pkey_verify a modBits eBits nb eb saltLen sgntLen sgnt msgLen msg =
   RI.rsapss_pkey_verify (ke modBits) a modBits
-    (load_pkey modBits) (rsapss_verify a modBits) eBits nb eb sLen k sgnt msgLen msg
+    (load_pkey modBits) (rsapss_verify a modBits) eBits nb eb saltLen sgntLen sgnt msgLen msg
