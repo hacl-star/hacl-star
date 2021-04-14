@@ -78,9 +78,9 @@ val substractionInDomain: #c: curve -> #m: mode -> a: nat {a < getModePrime m c}
 
 
 val _pow_step0: #c: curve -> #m: mode -> p: nat -> q: nat -> 
-  tuple2 (* (r0: nat {r0 < getModePrime m c}) (r1: nat {r1 < getModePrime m c}) *) nat nat
+  tuple2 (r0: nat {r0 < getModePrime m c}) (r1: nat {r1 < getModePrime m c})
 
-val _pow_step1: #c: curve -> #m: mode -> p:nat -> q:nat -> tuple2 (*(r0: nat {r0 < getModePrime m c}) (r1: nat {r1 < getModePrime m c}) *) nat nat
+val _pow_step1: #c: curve -> #m: mode -> p:nat -> q:nat -> tuple2 (r0: nat {r0 < getModePrime m c}) (r1: nat {r1 < getModePrime m c})
 
 let swap p q = q, p
 
@@ -94,12 +94,12 @@ val lemma_swaped_steps: #c: curve -> #m: mode -> p: nat -> q: nat -> Lemma (
   p2 == r0 /\ q2 == r1)
 
 val _pow_step: #c: curve -> #m: mode -> k: scalar_bytes #c -> i:nat{i < v (getScalarLen c)} 
-  -> before: tuple2 (nat) (nat)
-  -> tuple2 (nat) (nat)
+  -> before: tuple2 (r0: nat {r0 < getModePrime m c}) (r1: nat {r1 < getModePrime m c})
+  -> tuple2 (r0: nat {r0 < getModePrime m c}) (r1: nat {r1 < getModePrime m c})
 
 val pow_spec: #c: curve -> #m: mode -> k:scalar_bytes #c
-  -> a:nat_prime #c
-  -> Tot (r: nat_prime #c {r = pow a (Lib.ByteSequence.nat_from_bytes_le k) % getPrime c})
+  -> a: nat {a < getModePrime m c}
+  -> Tot (r: nat {r = pow a (Lib.ByteSequence.nat_from_bytes_le k) % getModePrime m c /\ r < getModePrime m c})
 
-val sq_root_spec: #c: curve -> #m: mode -> a: nat_prime #c 
-  -> Tot (r: nat_prime #c {let prime = getModePrime m c in  r = pow a ((prime + 1) / 4) % prime})
+val sq_root_spec: #c: curve -> #m: mode -> a: nat {a < getModePrime m c}
+  -> Tot (r: nat {let prime = getModePrime m c in r = pow a ((prime + 1) / 4) % prime /\ r < getModePrime m c})

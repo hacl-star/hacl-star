@@ -68,8 +68,6 @@ let lemma_norm #c p q =
   let pNX, pNY, pNZ = _norm p in 
   let qNX, qNY, qNZ = _norm q in 
 
-  
-  assume (Math.Euclid.is_prime prime);
   small_mod pZ prime;
   small_mod qZ prime;
 
@@ -150,9 +148,6 @@ let lemmaToDomainFromDomain #c #m a =
   let power = pow2 (getPower c) in 
   let prime = getModePrime m c in 
 
-  assume(FStar.Math.Euclid.is_prime prime);
-  assume(power % prime <> 0);
-
   calc (==) {
     fromDomain_ #c #m (toDomain_ #c #m a);
     (==) {lemmaFromDomain #c #m (toDomain_ #c #m a)}
@@ -176,9 +171,6 @@ let lemmaFromDomainToDomain #c #m a =
   let prime = getModePrime m c in 
   let power = pow2 (getPower c) in 
   
-  assume(FStar.Math.Euclid.is_prime prime);
-  assume(power % prime <> 0);
-
   calc (==) {
     toDomain_ #c #m (fromDomain_ #c #m a);
     (==) {lemmaToDomain #c #m (fromDomain_ #c #m a)}
@@ -202,9 +194,6 @@ let lemmaFromDomainToDomain #c #m a =
 let lemmaFromDomainToDomainModuloPrime #c #m a =
   let prime = getModePrime m c in 
   let power = pow2 (getPower c) in 
-
-  assume(FStar.Math.Euclid.is_prime prime);
-  assume(power % prime <> 0);
 
   calc (==) {
     fromDomain_ #c #m (toDomain_ #c #m a);
@@ -233,8 +222,6 @@ let multiplicationInDomainNat #c #k #l #m a b =
   let prime = getModePrime m c in 
   let power = pow2 (getPower c) in 
   
-  assume(FStar.Math.Euclid.is_prime prime);
-  assume(power % prime <> 0);
   
   calc (==) { 
     a * b * modp_inv2_prime power prime % prime;
@@ -394,34 +381,35 @@ let lemma_odd #c index k =
           2 * arithmetic_shift_right number (n + 1) + 1)
 
 
+#push-options "--fuel 1 --ifuel 1 --z3rlimit 100"
+
 val lemma_exponen_spec:
   #c: curve 
   -> #m: mode 
   -> k: scalar_bytes #c
-  -> start:tuple2 nat nat {let st0, st1 = start in st0 == 1}
+  -> start:tuple2 nat nat {let st0, st1 = start in st0 == 1 /\ st1 < getModePrime m c}
   -> index:nat{index <= v (getScalarLen c)} ->
   Lemma (
     let start0, start1 = start in
     let number = nat_from_bytes_le #SEC k in
     let newIndex = v (getScalarLen c) - index in
-    let f0, f1 = Lib.LoopCombinators.repeati index (_pow_step #c #m k) start in
-    f0 == pow start1 (arithmetic_shift_right number newIndex) % getPrime c /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getPrime c
+    let f0, f1 = Lib.LoopCombinators.repeati index (_pow_step #c #m k) (start0, start1) in
+    f0 == pow start1 (arithmetic_shift_right number newIndex) % getModePrime m c /\
+    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getModePrime m c
   )
 
-#push-options "--fuel 1 --ifuel 1 --z3rlimit 100"
 
 val lemma_exponen_spec_0:
   #c: curve 
   -> #m: mode 
   -> k: scalar_bytes #c
-  -> start:tuple2 nat nat {let st0, _ = start in st0 == 1} 
+  -> start:tuple2 nat nat {let st0, st1 = start in st0 == 1 /\ st1 < getModePrime m c} 
   -> Lemma (
     let prime = getModePrime m c in 
     let start0, start1 = start in
     let number = nat_from_bytes_le k in
     let newIndex = v (getScalarLen c) in
-    let f0, f1 = Lib.LoopCombinators.repeati 0 (_pow_step #c #m k) start in
+    let f0, f1 = Lib.LoopCombinators.repeati 0 (_pow_step #c #m k) (start0, start1) in
     f0 == pow start1 (arithmetic_shift_right number newIndex) % prime /\
     f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % prime
   )
@@ -435,14 +423,14 @@ let lemma_exponen_spec_0 #c #m k start =
     assert (arithmetic_shift_right number (v (getScalarLen c)) == number / power);
   FStar.Math.Lemmas.lemma_div_lt_nat number (v (getScalarLen c)) (v (getScalarLen c));
     assert (arithmetic_shift_right number (v (getScalarLen c)) == 0);
-  Lib.LoopCombinators.eq_repeati0 (v (getScalarLen c)) (_pow_step #c #m k) start;
+  Lib.LoopCombinators.eq_repeati0 (v (getScalarLen c)) (_pow_step #c #m k) (st0, st1);
   FStar.Math.Lemmas.small_modulo_lemma_1 st1 prime
 
 
 #pop-options
 
 let rec lemma_exponen_spec #c #m k start index =
-  let prime = getPrime c in 
+  let prime = getModePrime m c in 
   let power = pow2 (getPower c) in 
 
   let f = _pow_step #c #m k in
@@ -455,7 +443,7 @@ let rec lemma_exponen_spec #c #m k start index =
   | _ ->
     begin
     let p2 = getPower c in 
-    unfold_repeati p2 f start (index - 1);
+    unfold_repeati p2 f (st0, st1) (index - 1);
     lemma_exponen_spec #c #m k start (index - 1);
     let bitMask = uint_v (ith_bit_power #c k (p2 - index)) in
     match bitMask with
@@ -521,11 +509,11 @@ let rec lemma_exponen_spec #c #m k start index =
 
 
 let pow_spec #c #m k p =
-  let a, b = Lib.LoopCombinators.repeati (getScalarLen c) (_pow_step #c #m k) (1, p) in 
-  lemma_exponen_spec #c #m k (1, p) (getPower c);
+  let a, b = Lib.LoopCombinators.repeati (v (getScalarLen c)) (_pow_step #c #m k) (1, p) in 
+  lemma_exponen_spec #c #m k (1, p) (v (getScalarLen c));
   a
 
 
-let sq_root_spec #c a = 
-  let prime = getPrime c in 
+let sq_root_spec #c #m a = 
+  let prime = getModePrime m c in 
   pow a ((prime + 1) / 4) % prime
