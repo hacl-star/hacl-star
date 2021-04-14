@@ -105,7 +105,7 @@ val lexp_rl_vartime:
   -> ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
@@ -132,7 +132,7 @@ val lexp_mont_ladder_swap_consttime:
   -> ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> acc:lbuffer (uint_t a_t SEC) len ->
   Stack unit
@@ -172,7 +172,7 @@ let lexp_fw_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:concr
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
-  -> bBits:size_t{0 < v bBits /\ (v bBits - 1) / bits a_t < v bLen}
+  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
   -> acc:lbuffer (uint_t a_t SEC) len
   -> l:size_t{0 < v l /\ v l < bits a_t /\ pow2 (v l) * v len <= max_size_t /\ v l < 32} ->

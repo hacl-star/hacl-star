@@ -149,7 +149,6 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < bBits
    • b < pow2 bBits
    • a < n 
 */
@@ -183,7 +182,6 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < bBits
    • b < pow2 bBits
    • a < n 
 */
@@ -304,7 +302,6 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < bBits
   • b < pow2 bBits
   • a < n 
 */
@@ -337,7 +334,6 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < bBits
   • b < pow2 bBits
   • a < n 
 */

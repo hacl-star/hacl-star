@@ -1760,7 +1760,15 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u32(
   }
   uint32_t m10 = acc0;
   uint32_t m00 = m0 & m10;
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
+  uint32_t bLen;
+  if (bBits == (uint32_t)0U)
+  {
+    bLen = (uint32_t)1U;
+  }
+  else
+  {
+    bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
+  }
   uint32_t m1;
   if (bBits < (uint32_t)32U * bLen)
   {
@@ -1866,7 +1874,15 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
   uint32_t resM[len];
   memset(resM, 0U, len * sizeof (uint32_t));
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
+  uint32_t bLen;
+  if (bBits == (uint32_t)0U)
+  {
+    bLen = (uint32_t)1U;
+  }
+  else
+  {
+    bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
+  }
   KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
   uint32_t tmp[len + len];
   memset(tmp, 0U, (len + len) * sizeof (uint32_t));
@@ -2026,7 +2042,15 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
   uint32_t resM[len];
   memset(resM, 0U, len * sizeof (uint32_t));
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
+  uint32_t bLen;
+  if (bBits == (uint32_t)0U)
+  {
+    bLen = (uint32_t)1U;
+  }
+  else
+  {
+    bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
+  }
   KRML_CHECK_SIZE(sizeof (uint32_t), len + len);
   uint32_t tmp[len + len];
   memset(tmp, 0U, (len + len) * sizeof (uint32_t));
@@ -2204,7 +2228,15 @@ Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64(
   }
   uint64_t m10 = acc0;
   uint64_t m00 = m0 & m10;
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint32_t bLen;
+  if (bBits == (uint32_t)0U)
+  {
+    bLen = (uint32_t)1U;
+  }
+  else
+  {
+    bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  }
   uint64_t m1;
   if (bBits < (uint32_t)64U * bLen)
   {
@@ -2310,7 +2342,15 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t resM[len];
   memset(resM, 0U, len * sizeof (uint64_t));
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint32_t bLen;
+  if (bBits == (uint32_t)0U)
+  {
+    bLen = (uint32_t)1U;
+  }
+  else
+  {
+    bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  }
   KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
   uint64_t tmp[len + len];
   memset(tmp, 0U, (len + len) * sizeof (uint64_t));
@@ -2470,7 +2510,15 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t resM[len];
   memset(resM, 0U, len * sizeof (uint64_t));
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint32_t bLen;
+  if (bBits == (uint32_t)0U)
+  {
+    bLen = (uint32_t)1U;
+  }
+  else
+  {
+    bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  }
   KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
   uint64_t tmp[len + len];
   memset(tmp, 0U, (len + len) * sizeof (uint64_t));

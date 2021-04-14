@@ -536,7 +536,15 @@ static uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
   }
   uint64_t m10 = acc0;
   uint64_t m00 = m0 & m10;
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint32_t bLen;
+  if (bBits == (uint32_t)0U)
+  {
+    bLen = (uint32_t)1U;
+  }
+  else
+  {
+    bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  }
   uint64_t m1;
   if (bBits < (uint32_t)64U * bLen)
   {
@@ -619,7 +627,15 @@ exp_vartime_precomp(
   Hacl_Bignum4096_mul(a, r2, c);
   reduction(n, mu, c, aM);
   uint64_t resM[64U] = { 0U };
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint32_t bLen;
+  if (bBits == (uint32_t)0U)
+  {
+    bLen = (uint32_t)1U;
+  }
+  else
+  {
+    bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  }
   uint64_t tmp[128U] = { 0U };
   memcpy(tmp, r2, (uint32_t)64U * sizeof (uint64_t));
   reduction(n, mu, tmp, resM);
@@ -752,7 +768,15 @@ exp_consttime_precomp(
   Hacl_Bignum4096_mul(a, r2, c0);
   reduction(n, mu, c0, aM);
   uint64_t resM[64U] = { 0U };
-  uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  uint32_t bLen;
+  if (bBits == (uint32_t)0U)
+  {
+    bLen = (uint32_t)1U;
+  }
+  else
+  {
+    bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+  }
   uint64_t tmp[128U] = { 0U };
   memcpy(tmp, r2, (uint32_t)64U * sizeof (uint64_t));
   reduction(n, mu, tmp, resM);
@@ -908,7 +932,6 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < bBits
    • b < pow2 bBits
    • a < n 
 */
@@ -956,7 +979,6 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < bBits
    • b < pow2 bBits
    • a < n 
 */
@@ -1191,7 +1213,6 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < bBits
   • b < pow2 bBits
   • a < n 
 */
@@ -1228,7 +1249,6 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < bBits
   • b < pow2 bBits
   • a < n 
 */

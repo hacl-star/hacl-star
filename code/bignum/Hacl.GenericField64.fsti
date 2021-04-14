@@ -120,8 +120,7 @@ val one: len:Ghost.erased _ -> MA.bn_field_one_st t_limbs len
   execution time than exp_vartime.
 
   Before calling this function, the caller will need to ensure that the following
-  preconditions are observed.
-  • 0 < bBits
+  precondition is observed.
   • b < pow2 bBits "]
 val exp_consttime: len:Ghost.erased _ -> MA.bn_field_exp_consttime_st t_limbs len
 
@@ -139,8 +138,7 @@ val exp_consttime: len:Ghost.erased _ -> MA.bn_field_exp_consttime_st t_limbs le
   exp_consttime function for constant-time variant.
 
   Before calling this function, the caller will need to ensure that the following
-  preconditions are observed.
-  • 0 < bBits
+  precondition is observed.
   • b < pow2 bBits "]
 val exp_vartime: len:Ghost.erased _ -> MA.bn_field_exp_vartime_st t_limbs len
 

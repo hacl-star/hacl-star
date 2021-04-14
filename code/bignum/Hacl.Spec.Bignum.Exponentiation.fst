@@ -25,9 +25,9 @@ let bn_check_mod_exp #t #len n a bBits b =
   let pbits = bits t in
   let m0 = BM.bn_check_modulus n in
 
-  bn_eval_bound b (blocks bBits pbits);
+  bn_eval_bound b (blocks0 bBits pbits);
   let m1 =
-    if bBits < pbits * blocks bBits pbits then begin
+    if bBits < pbits * blocks0 bBits pbits then begin
       BN.bn_lt_pow2_mask_lemma b bBits;
       BN.bn_lt_pow2_mask b bBits end
     else begin
