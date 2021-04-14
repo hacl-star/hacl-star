@@ -51,15 +51,6 @@ module Def = Spec.Hash.Definitions
 
 let prime_p256_order = getOrder #P256
 
-inline_for_extraction noextract
-val isZero_uint64_nCT: #c: curve -> f: felem c -> Stack bool
-  (requires fun h -> live h f)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat c h0 f = 0))
-
-let isZero_uint64_nCT f =
-  let f = isZero_uint64_CT f in 
-  eq_u64_nCT f (u64 0xffffffffffffffff)
-
 
 [@ (Comment "  This code is not side channel resistant")] 
 val isMoreThanZeroLessThanOrderMinusOne: #c: curve -> f: felem c -> Stack bool

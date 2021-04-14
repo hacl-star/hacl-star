@@ -59,10 +59,9 @@ let y_2 #c y r =
   montgomery_square_buffer_dh #c r r
 
 
-val lemma_xcube: #c: curve -> x_: nat {x_ < getPrime c} -> Lemma 
-  (
-    let prime = getPrime c in 
-    ((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3 * x_) % prime)
+val lemma_xcube: #c: curve -> x_: nat {x_ < getPrime c} -> Lemma (
+  let prime = getPrime c in 
+  ((x_ * x_ * x_ % prime) - (3 * x_ % prime)) % prime == (x_ * x_ * x_ - 3 * x_) % prime)
 
 let lemma_xcube #c x_ = 
   let prime = getPrime c in 
@@ -70,25 +69,22 @@ let lemma_xcube #c x_ =
   lemma_mod_sub_distr (x_ * x_ * x_ ) (3 * x_) prime
 
 
-val lemma_xcube2: #c: curve 
-  -> x_ : nat {x_ < getPrime c} 
-  -> Lemma (
-    let prime = getPrime c in 
-    toDomain_ #c #DH (((((x_ * x_ * x_) - (3 * x_)) % prime) + bCoordinate #P256) % prime) == 
-    toDomain_ #c #DH ((x_ * x_ * x_  + aCoordinate #P256 * x_ + bCoordinate #P256) % prime))
+val lemma_xcube2: #c: curve -> x_ : nat {x_ < getPrime c} -> Lemma (
+  let prime = getPrime c in 
+  toDomain_ #c #DH (((((x_ * x_ * x_) - (3 * x_)) % prime) + bCoordinate #P256) % prime) == 
+  toDomain_ #c #DH ((x_ * x_ * x_  + aCoordinate #P256 * x_ + bCoordinate #P256) % prime))
 
 let lemma_xcube2 #c x_ = 
   let prime = getPrime c in 
   lemma_mod_add_distr (bCoordinate #P256) ((x_ * x_ * x_) - (3 * x_)) prime
 
+
 inline_for_extraction noextract
 val xcube_minus_x: #c: curve -> x: felem c -> r: felem c -> Stack unit 
   (requires fun h -> as_nat c h x < getPrime c /\ live h x  /\ live h r /\ eq_or_disjoint x r)
-  (ensures fun h0 _ h1 -> 
-    modifies (loc r) h0 h1 /\
-    (
-      let x_ = as_nat c h0 x in 
-      as_nat c h1 r = toDomain_ #c #DH ((x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % getPrime c)))
+  (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ (
+    let x_ = as_nat c h0 x in 
+    as_nat c h1 r = toDomain_ #c #DH ((x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % getPrime c)))
 
 let xcube_minus_x #c x r = 
   push_frame();
@@ -111,36 +107,13 @@ let xcube_minus_x #c x r =
     let x_ = as_nat c h0 x in 
     lemma_xcube #c x_;
     lemma_mod_add_distr (bCoordinate #c) (x_ * x_ * x_ - 3 * x_) (getPrime c);
-    lemma_xcube2 #c x_;
-    admit()
+    lemma_xcube2 #c x_
 
 
 let isPointAtInfinityPublic #c p =  
-  match c with 
-  |P256 -> 
-    let z0 = index p (size 8) in 
-    let z1 = index p (size 9) in 
-    let z2 = index p (size 10) in 
-    let z3 = index p (size 11) in 
-    let z0_zero = eq_0_u64 z0 in 
-    let z1_zero = eq_0_u64 z1 in 
-    let z2_zero = eq_0_u64 z2 in 
-    let z3_zero = eq_0_u64 z3 in 
-    z0_zero && z1_zero && z2_zero && z3_zero
-  |P384 -> 
-    let z0 = index p (size 12) in 
-    let z1 = index p (size 13) in 
-    let z2 = index p (size 14) in 
-    let z3 = index p (size 15) in 
-    let z4 = index p (size 16) in 
-    let z5 = index p (size 17) in 
-    let z0_zero = eq_0_u64 z0 in 
-    let z1_zero = eq_0_u64 z1 in 
-    let z2_zero = eq_0_u64 z2 in 
-    let z3_zero = eq_0_u64 z3 in 
-    let z4_zero = eq_0_u64 z4 in 
-    let z5_zero = eq_0_u64 z5 in 
-    z0_zero && z1_zero && z2_zero && z3_zero && z4_zero && z5_zero
+  let len = getCoordinateLenU64 c in 
+  let zCoordinate = sub p (size 2 *! len) len in 
+  isZero_uint64_nCT #c zCoordinate 
     
 
 val lemma_modular_multiplication_2_d: #c: curve -> 
