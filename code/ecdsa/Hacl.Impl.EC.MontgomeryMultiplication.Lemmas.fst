@@ -241,9 +241,6 @@ let lemma_mm_reduction #c a0 i =
 #pop-options
 
 
-
-
-
 val lemma_mult_lt_center: a: nat -> b: nat -> c: pos -> d: pos -> Lemma
     (requires (a < c /\ b < d))
     (ensures (a * b < c * d))

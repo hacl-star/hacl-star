@@ -3696,39 +3696,19 @@ static void getFirstWord(uint64_t *i, uint64_t *o)
 static void getSecondWord(uint64_t *i, uint64_t *o)
 {
   {
-    
-    printf("%" PRIx64 "\n",   i[16]);
-    printf("%" PRIx64 "\n",   i[17]);
-
     uint64_t i0 = i[(uint32_t)16U + (uint32_t)0U];
     uint64_t i11 = i[(uint32_t)17U + (uint32_t)0U];
     uint64_t i01 = i0 >> (uint32_t)18U;
     uint64_t i1U = i11 << (uint32_t)46U;
     uint64_t o0 = i01 ^ i1U;
-    
-    printf("%" PRIx64 "\n",   o0);
-    
     o[0U] = o0;
   }
-
-    printf("\n");
-    printf("\n");
-
-
   {
-
-    
-    printf("%" PRIx64 "\n",   i[17]);
-    printf("%" PRIx64 "\n",   i[18]);
-
     uint64_t i0 = i[(uint32_t)16U + (uint32_t)1U];
     uint64_t i11 = i[(uint32_t)17U + (uint32_t)1U];
     uint64_t i01 = i0 >> (uint32_t)18U;
     uint64_t i1U = i11 << (uint32_t)46U;
     uint64_t o0 = i01 ^ i1U;
-
-    printf("%" PRIx64 "\n",   o0);
-    
     o[1U] = o0;
   }
   {
@@ -3784,15 +3764,7 @@ static void getSecondWord(uint64_t *i, uint64_t *o)
   o[8U] = o8Updated;
 }
 
-#include <inttypes.h>
-void printU(uint64_t* a, int len)
-{
-  for (int i = 0; i < len; i++)
-   printf("%" PRIx64 "\n",   a[i]);
-}
-
-
-void reduction_p521(uint64_t *i, uint64_t *o)
+static void reduction_p521(uint64_t *i, uint64_t *o)
 {
   uint64_t a0[9U] = { 0U };
   uint64_t a1[9U] = { 0U };
@@ -3803,14 +3775,8 @@ void reduction_p521(uint64_t *i, uint64_t *o)
   getZeroWord(a3, a0);
   getFirstWord(a3, a1);
   getSecondWord(a3, a2);
-  
-  printU(a0, 9);
-  printU(a1, 9);
-  printU(a2, 9);
-
-
-  // Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
-  // Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
+  Hacl_Impl_EC_P521_Reduction_felem_add(a0, a1, o);
+  Hacl_Impl_EC_P521_Reduction_felem_add(o, a2, o);
 }
 
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
