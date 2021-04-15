@@ -11,6 +11,7 @@ open Spec.ECC.Curves
 
 open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.Setup
+open Hacl.Spec.EC.Definition
 
 
 #set-options "--z3rlimit 200 --ifuel 0 --fuel 0"
@@ -25,7 +26,7 @@ let lemma_mod_inv #c t =
   power_one (prime - 2)
 
 val lemma_division_is_multiplication:
-  t3: nat{t3 % pow2 64 = 0} -> 
+  t3: nat {t3 % pow2 64 = 0} -> 
   prime: pos {FStar.Math.Euclid.is_prime prime /\ prime > 3 /\ prime > pow2 64} -> 
   Lemma (t3 * modp_inv2_prime (pow2 64) prime % prime = (t3 / pow2 64) % prime)
 
@@ -59,15 +60,22 @@ let lemma_division_is_multiplication t3 prime =
   }
 
 
-val lemma_k0_computation: #c: curve-> t: nat -> k0 : uint64 {k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)} ->
-  Lemma (let prime = getPrime c in  (t + prime * (((t % pow2 64) * v k0) % pow2 64)) % pow2 64 == 0)
+#set-options "--z3rlimit 500 --ifuel 1 --fuel 1"
 
-let lemma_k0_computation #c t k0 = 
-  let prime = getPrime c in 
+
+val lemma_k0_computation: #c: curve-> #m: mode -> t: nat -> 
+  k0 : uint64 {match m with 
+    |DH -> k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)
+    |DSA -> k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordOrder #c)} ->
+  Lemma (let prime = getModePrime m c in (t + prime * (((t % pow2 64) * v k0) % pow2 64)) % pow2 64 == 0)
+
+let lemma_k0_computation #c #m t k0 = 
+  let prime = getModePrime m c in 
   let n0 = getLastWordPrime #c in 
 
   Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWordPrime #c);
-
+  Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWordOrder #c);
+  
   let k = t + prime * (((t % pow2 64) * v k0) % pow2 64) in  
   lemma_mod_mul_distr_l t (v k0) (pow2 64);
   lemma_mod_add_distr t (prime * (t * v k0 % pow2 64)) (pow2 64);
@@ -75,7 +83,6 @@ let lemma_k0_computation #c t k0 =
   
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
-
 
   assert_by_tactic (prime * (t * v k0) == t * (prime * v k0)) canon;
 
@@ -90,38 +97,44 @@ let lemma_k0_computation #c t k0 =
   lemma_mod_mul_distr_r t (-1) (pow2 64);
   lemma_mod_add_distr t (t * (-1)) (pow2 64);
   
-  assert(k % pow2 64 == 0)
+  assert(k % pow2 64 == 0) 
+
 
 val montgomery_multiplication_one_round_proof: 
   #c: curve ->
+  #m: mode ->
   t: nat ->
-  k0 : uint64 {k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)} ->
-  round: nat {round = (t + getPrime c * (((t % pow2 64) * v k0) % pow2 64)) / pow2 64} -> 
-  co: nat {co % getPrime c = t % getPrime c} -> 
-  Lemma (round  % getPrime c == co * (modp_inv2_prime (pow2 64) (getPrime c)) % ( getPrime c ))
+  k0 : uint64 {
+    match m with 
+    |DH -> k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)
+    |DSA -> k0 == Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordOrder #c)} ->
+  round: nat {round = (t + getModePrime m c * (((t % pow2 64) * v k0) % pow2 64)) / pow2 64} -> 
+  co: nat {co % getModePrime m c = t % getModePrime m c} -> 
+  Lemma (round  % getModePrime m c == co * (modp_inv2_prime (pow2 64) (getModePrime m c)) % getModePrime m c)
 
-let montgomery_multiplication_one_round_proof #c t k0 round co =
-  let prime = getPrime c in 
+let montgomery_multiplication_one_round_proof #c #m t k0 round co =
+  let prime = getModePrime m c in 
   let round = (t + prime * (((t % pow2 64) * v k0) % pow2 64)) / pow2 64 in 
   assert(round % prime = (t + prime * (((t % pow2 64) * v k0) % pow2 64)) / pow2 64 % prime);
 
   let k = t + prime * (((t % pow2 64) * v k0) % pow2 64) in 
 
-  lemma_k0_computation #c t k0;
-  lemma_division_is_multiplication k prime;
+  lemma_k0_computation #c #m t k0; 
+  lemma_division_is_multiplication k prime; 
 
-  modulo_addition_lemma t prime (((t % pow2 64) * v k0) % pow2 64);
+  modulo_addition_lemma t prime (((t % pow2 64) * v k0) % pow2 64); 
 
   lemma_mod_mul_distr_l k (modp_inv2_prime (pow2 64) prime) prime;
   lemma_mod_mul_distr_l co (modp_inv2_prime (pow2 64) prime) prime
 
 
-val lemma_up_bound0: #c: curve -> t0: nat {t0 < getPrime c * pow2 (64 * v (getCoordinateLenU64 c))} 
-  -> t: nat{let prime = getPrime c in t <= t0 / (pow2 (64 * v (getCoordinateLenU64 c))) + prime} -> 
-  Lemma (t < 2 * (getPrime c))
+val lemma_up_bound0: #c: curve -> #m: mode 
+  -> t0: nat {t0 < getModePrime m c * pow2 (64 * v (getCoordinateLenU64 c))} 
+  -> t: nat{let prime = getModePrime m c in t <= t0 / (pow2 (64 * v (getCoordinateLenU64 c))) + prime} -> 
+  Lemma (t < 2 * (getModePrime m c))
 
-let lemma_up_bound0 #c t0 t = 
-  let prime = getPrime c in 
+let lemma_up_bound0 #c #m t0 t = 
+  let prime = getModePrime m c in 
   let s = pow2 (64 * v (getCoordinateLenU64 c)) in 
   assert(getPower c == v (getCoordinateLenU64 c) * 64);
   assert(prime < pow2 (v (getCoordinateLenU64 c) * 64));
@@ -132,15 +145,15 @@ let lemma_up_bound0 #c t0 t =
   assert(t < prime + prime)
 
 
-val lemma_up_bound1: #c: curve -> i: nat {i < v (getCoordinateLenU64 c)} 
-  -> t: nat {t < getPrime c * pow2 (64 * v (getCoordinateLenU64 c))}  
-  -> t0: nat {let prime = getPrime c in t0 <= t / (pow2 (64 * i)) + prime} 
+val lemma_up_bound1: #c: curve -> #m: mode -> i: nat {i < v (getCoordinateLenU64 c)} 
+  -> t: nat {t < getModePrime m c * pow2 (64 * v (getCoordinateLenU64 c))}  
+  -> t0: nat {let prime = getModePrime m c in t0 <= t / (pow2 (64 * i)) + prime} 
   -> k0: nat {k0 < pow2 64} 
-  -> t1: nat {t1 = (t0 + getPrime c * (((t0 % pow2 64) * k0) % pow2 64)) / pow2 64} -> 
-  Lemma (let prime = getPrime c in t1 <= t / (pow2 (64 * (i + 1))) + prime)
+  -> t1: nat {t1 = (t0 + getModePrime m c * (((t0 % pow2 64) * k0) % pow2 64)) / pow2 64} -> 
+  Lemma (let prime = getModePrime m c in t1 <= t / (pow2 (64 * (i + 1))) + prime)
 
-let lemma_up_bound1 #c i t t0 k0 t1= 
-  let prime = getPrime c in 
+let lemma_up_bound1 #c #m i t t0 k0 t1= 
+  let prime = getModePrime m c in 
   assert(t0 <= t / (pow2 (64 * i)) + prime); 
   assert(t1 = (t0 + prime * (((t0 % pow2 64) * k0) % pow2 64)) / pow2 64);
   assert(((t0 % pow2 64) * k0) % pow2 64 <= pow2 64 - 1);
@@ -155,30 +168,31 @@ let lemma_up_bound1 #c i t t0 k0 t1=
 
 #push-options "--z3rlimit 100 --ifuel 2 --fuel 2"
 
-val lemma_mm_reduction: #c: curve -> a0: nat -> i: nat -> Lemma
-  (let prime = getPrime c in 
-    a0 * modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64) % prime == a0 * modp_inv2 #c (pow2 ((i + 1) * 64)) % prime)
+val lemma_mm_reduction: #c: curve -> #m: mode -> a0: nat -> i: nat -> Lemma (
+  let prime = getModePrime m c in 
+  a0 * modp_inv2_prime (pow2 (i * 64)) prime * modp_inv2_prime (pow2 64) prime % prime == 
+  a0 * modp_inv2_prime (pow2 ((i + 1) * 64)) prime % prime)
 
-let lemma_mm_reduction #c a0 i = 
+let lemma_mm_reduction #c #m a0 i = 
   let open Spec.ECC in 
-  let prime = getPrime c in 
+  let prime = getModePrime m c in 
   
   let a = pow2 (i * 64) in
   let exp_prime: pos = prime - 2 in
 
-  assert(modp_inv2 #c a == exp #prime (a % prime) (prime - 2));
+  assert(modp_inv2_prime a prime == exp #prime (a % prime) (prime - 2));
   
   Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (a % prime) exp_prime;
 
-  assert(modp_inv2 #c (pow2 64) == exp #prime (pow2 64 % prime) exp_prime);
+  assert(modp_inv2_prime (pow2 64) prime == exp #prime (pow2 64 % prime) exp_prime); 
   Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (pow2 64 % prime) exp_prime;
 
   Hacl.Lemmas.P256.power_distributivity_2 (a % prime) (pow2 64 % prime) exp_prime;
 
-  lemma_mod_mul_distr_r a0 (modp_inv2 #c a * modp_inv2 #c (pow2 64)) prime;
+  lemma_mod_mul_distr_r a0 (modp_inv2_prime a prime * modp_inv2_prime (pow2 64) prime) prime; 
 
   calc (==) {
-    modp_inv2 #c a * modp_inv2 #c (pow2 64) % prime;
+    modp_inv2_prime a prime * modp_inv2_prime (pow2 64) prime % prime;
     (==) {}
     (pow (a % prime) exp_prime % prime * (pow (pow2 64 % prime) exp_prime % prime)) % prime; 
     (==) {lemma_mod_mul_distr_l (pow (a % prime) exp_prime) (pow (pow2 64 % prime) exp_prime % prime) prime}
@@ -198,17 +212,17 @@ let lemma_mm_reduction #c a0 i =
     (==) {Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (a * pow2 64 % prime) exp_prime} 
     exp #prime ((a * pow2 64) % prime) exp_prime % prime; 
     (==) {}
-    modp_inv2 #c (a * pow2 64) % prime; 
-    (==) {small_mod (modp_inv2 #c (a * pow2 64)) prime}
-    modp_inv2 #c (a * pow2 64); 
+    modp_inv2_prime (a * pow2 64) prime % prime; 
+    (==) {small_mod (modp_inv2_prime (a * pow2 64) prime) prime}
+    modp_inv2_prime (a * pow2 64) prime; 
     (==) {pow2_plus (i * 64) 64}
-    modp_inv2 #c (pow2 ((i + 1) * 64)); 
+    modp_inv2_prime (pow2 ((i + 1) * 64)) prime; 
     };
 
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
 
-  assert_by_tactic (a0 * modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64) % prime == a0 * (modp_inv2 #c (pow2 (i * 64)) * modp_inv2 #c (pow2 64)) % prime) canon
+  assert_by_tactic (a0 * modp_inv2_prime (pow2 (i * 64)) prime * modp_inv2_prime (pow2 64) prime % prime == a0 * (modp_inv2_prime (pow2 (i * 64)) prime * modp_inv2_prime (pow2 64) prime) % prime) canon
 
 #pop-options
 
