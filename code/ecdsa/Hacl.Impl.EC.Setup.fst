@@ -216,7 +216,7 @@ let order_list (c: curve) : (x: list uint64 {List.Tot.length x == uint_v (getCoo
 
 
 inline_for_extraction
-let getLastWordOrder (#c: curve) : (r: uint64 {uint_v r == getOrder #c % pow2 64}) = 
+let getLastWordOrder (#c: curve) : (r: uint64 {uint_v r == getOrder #c % pow2 64 /\ v r % 2 == 1}) = 
   match c with 
   |P256 -> 
     lemmaLstLastWord p256_prime_list;

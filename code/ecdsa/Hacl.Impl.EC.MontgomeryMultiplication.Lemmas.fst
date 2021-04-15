@@ -18,10 +18,10 @@ open Hacl.Spec.EC.Definition
 
 open Lib.Sequence
 
-val lemma_mod_inv: #c: curve -> t: int -> Lemma (t % getPrime c = t * modp_inv2 #c (pow2 0) % getPrime c)
+val lemma_mod_inv: #c: curve -> #m: mode -> t: int -> Lemma (t % getModePrime m c = t * modp_inv2_prime (pow2 0) (getModePrime m c) % getModePrime m c)
 
-let lemma_mod_inv #c t = 
-  let prime = getPrime c in 
+let lemma_mod_inv #c #m t = 
+  let prime = getModePrime m c in 
   lemma_pow_mod_n_is_fpow prime 1 (prime - 2);
   power_one (prime - 2)
 

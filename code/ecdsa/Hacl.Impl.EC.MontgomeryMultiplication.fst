@@ -15,12 +15,13 @@ open Hacl.Impl.EC.MontgomeryMultiplication.Lemmas
 open Lib.Loops
 open Hacl.Impl.EC.Setup
 
-#set-options "--z3rlimit 300"
-
 open Lib.Sequence 
 
 open Lib.Buffer
 
+
+
+#set-options "--z3rlimit 300"
 
 inline_for_extraction
 val supportsReducedMultiplication: #c: curve -> 
@@ -29,6 +30,7 @@ val supportsReducedMultiplication: #c: curve ->
 let supportsReducedMultiplication #c = 
   let open Lib.RawIntTypes in 
   let r = FStar.UInt64.eq (Lib.RawIntTypes.u64_to_UInt64 (getLastWordPrime #c)) 0xffffffffffffffffuL in 
+  Hacl.Spec.Bignum.ModInv64.mod_inv_u64_lemma (getLastWordPrime #c);
   lemma_mod_sub_distr 0 (getPrime c) (pow2 64);
   assert_norm (exp #(pow2 64) 1 (pow2 64 - 1) == 1);
   r
@@ -38,8 +40,7 @@ val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> t2: wid
   (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
   (ensures fun h0 _ h1 -> modifies (loc t2) h0 h1 /\ 
       wide_as_nat c h1 t2 = getPrime c * (wide_as_nat c h0 t % pow2 64) /\
-      wide_as_nat c h1 t2 < getPrime c * pow2 64
-  )
+      wide_as_nat c h1 t2 < getPrime c * pow2 64)
   
 let montgomery_multiplication_round_w_k0 #c t t2 =
     let h0 = ST.get() in 
@@ -151,6 +152,17 @@ let montgomery_multiplication_round #c m t round =
   pop_frame()  
 
 
+val reduction_prime_2prime_with_carry: #c: curve -> #m: mode -> x: widefelem c -> result: felem c ->
+  Stack unit 
+  (requires fun h -> live h x /\ live h result /\  eq_or_disjoint x result /\ wide_as_nat c h x < 2 * getModePrime m c)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result = wide_as_nat c h0 x % getModePrime m c)  
+
+let reduction_prime_2prime_with_carry #c #m x result = 
+  match m with 
+  |DH -> Hacl.Impl.EC.LowLevel.reduction_prime_2prime_with_carry #c x result
+  |DSA -> Hacl.Impl.ECDSA.LowLevel.reduction_prime_2prime_with_carry #c x result
+
+
 inline_for_extraction noextract
 val montgomery_multiplication_reduction: #c: curve
   -> m: mode
@@ -173,16 +185,16 @@ let montgomery_multiplication_reduction #c m t result =
     live h t /\ modifies (loc t) h0 h /\
     wide_as_nat c h0 t < prime * pow2 (getPower c) /\ 
     wide_as_nat c h t <= wide_as_nat c h0 t / (pow2 (64 * i)) + prime /\ 
-    wide_as_nat c h t % prime = wide_as_nat c h0 t * modp_inv2 #c (pow2 (i * 64)) % prime in 
+    wide_as_nat c h t % prime = wide_as_nat c h0 t * modp_inv2_prime (pow2 (i * 64)) prime % prime in 
 
   lemma_mult_lt_left (getModePrime m c) (getModePrime m c) (pow2 (64 * v (getCoordinateLenU64 c)));
 
   let h1 = ST.get() in
 
-  lemma_mod_inv #c (wide_as_nat c h0 t);
+  lemma_mod_inv #c #m (wide_as_nat c h0 t);
 
-  for 0ul len inv (fun i ->
-    let h0_ = ST.get() in 
+  for 0ul len inv (fun i -> 
+    let h0_ = ST.get() in
     montgomery_multiplication_round #c m t t; 
     let h1_ = ST.get() in
 
@@ -190,20 +202,22 @@ let montgomery_multiplication_reduction #c m t result =
     let a_i = wide_as_nat c h0_ t in 
     let a_il = wide_as_nat c h1_ t in 
 
-    let prime = getModePrime m c in  
-    let k0 = match m with 
-      |DH -> Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)
-      |DSA -> Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordOrder #c) in 
-    let co = a0 * modp_inv2 #c (pow2 (v i * 64)) in 
+    let prime = getModePrime m c in 
 
-    lemma_up_bound1 #c (v i) a0 a_i (v k0) a_il;
-    montgomery_multiplication_one_round_proof #c a_i k0 a_il co;
-    lemma_mm_reduction #c a0 (v i));
+    let lw = match m with
+      |DH -> getLastWordPrime #c 
+      |DSA -> getLastWordOrder #c in
+
+    let k0 = Hacl.Spec.Bignum.ModInv64.mod_inv_u64 lw in 
+    let co = a0 * modp_inv2_prime (pow2 (v i * 64)) prime in 
+
+    lemma_up_bound1 #c #m (v i) a0 a_i (v k0) a_il; 
+    montgomery_multiplication_one_round_proof #c #m a_i k0 a_il co; 
+    lemma_mm_reduction #c #m a0 (v i));
 
   let h2 = ST.get() in 
-  lemma_up_bound0 #c (wide_as_nat c h0 t) (wide_as_nat c h2 t); 
-  reduction_prime_2prime_with_carry t result;
-
+  lemma_up_bound0 #c #m (wide_as_nat c h0 t) (wide_as_nat c h2 t); 
+  reduction_prime_2prime_with_carry #c #m t result; 
   lemmaFromDomain #c #m (wide_as_nat c h0 t)
 
 
@@ -260,7 +274,7 @@ let montgomery_multiplication_buffer #c m a b result =
     lemma_mult_lt_center (as_nat c h0 a) (as_nat c h0 b) (getModePrime m c) (pow2 (getPower c)); 
   montgomery_multiplication_reduction #c m t result;
   pop_frame();
-    let h1 = ST.get() in admit();
+    let h1 = ST.get() in 
     lemma_domain #c #m (as_nat c h0 a) (as_nat c h0 b) (as_nat c h1 result)
 
 let montgomery_multiplication_buffer_dh #c a b result = montgomery_multiplication_buffer #c DH a b result

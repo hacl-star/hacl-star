@@ -55,8 +55,8 @@ val montgomery_multiplication_buffer_by_one_dsa: #c: curve -> a: felem c -> resu
 
 val montgomery_multiplication_buffer: #c: curve -> m: mode -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
-  (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat c h a < getModePrime m c /\ 
-    as_nat c h b < getModePrime m c)) 
+  (requires (fun h -> live h a /\ live h b /\ live h result /\ eq_or_disjoint a b /\ 
+    as_nat c h a < getModePrime m c /\ as_nat c h b < getModePrime m c)) 
   (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result < getModePrime m c /\ (
     let prime = getModePrime m c in 
     as_nat c h1 result = (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
@@ -65,8 +65,9 @@ val montgomery_multiplication_buffer: #c: curve -> m: mode -> a: felem c -> b: f
 
 val montgomery_multiplication_buffer_dh: #c: curve -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
-  (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat c h a < getModePrime DH c /\ 
-    as_nat c h b < getModePrime DH c))
+  (requires (fun h -> live h a /\ live h b /\ live h result /\ 
+    eq_or_disjoint a b /\
+    as_nat c h a < getModePrime DH c /\ as_nat c h b < getModePrime DH c))
   (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result < getModePrime DH c /\ (
     let prime = getModePrime DH c in 
     as_nat c h1 result = (as_nat c h0 a * as_nat c h0 b * modp_inv2_prime (pow2 (getPower c)) prime) % getPrime c /\
@@ -75,7 +76,7 @@ val montgomery_multiplication_buffer_dh: #c: curve -> a: felem c -> b: felem c -
 
 val montgomery_multiplication_buffer_dsa: #c: curve -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
-  (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat c h a < getModePrime DSA c /\ 
+  (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat c h a < getModePrime DSA c /\  eq_or_disjoint a b /\
     as_nat c h b < getModePrime DSA c))
   (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result < getModePrime DSA c /\ (
     let prime = getModePrime DSA c in 
