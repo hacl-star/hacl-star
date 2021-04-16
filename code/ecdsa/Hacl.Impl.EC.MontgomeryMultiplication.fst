@@ -303,7 +303,7 @@ val fsquarePowN: #c: curve -> m: mode -> n: size_t -> a: felem c -> Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime m c)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
     let k = fromDomain_ #c #m (as_nat c h0 a) in 
-    as_nat c h1 a < getModePrime m c /\ as_nat c h1 a = toDomain_ #c #m (pow k (pow2 (v n))))))
+    as_nat c h1 a < getModePrime m c /\ as_nat c h1 a = toDomain_ #c #m (pow k (pow2 (v n)) % getModePrime m c))))
 
 let fsquarePowN #c m n a = 
   let h0 = ST.get() in 
@@ -323,12 +323,15 @@ let fsquarePowN #c m n a =
      inDomain_mod_is_not_mod #c #m (fromDomain_ #c #m (as_nat c h0_ a) * fromDomain_ #c #m (as_nat c h0_ a)); 
      lemmaFromDomainToDomainModuloPrime #c #m (let k = fromDomain_ #c #m (as_nat c h0 a) in pow k (pow2 (v x)));
 
-     Spec.ECDSA.Lemmas.modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) (getModePrime m c); 
-     pow_plus k (pow2 (v x)) (pow2 (v x )); 
-     pow2_double_sum (v x); 
-     inDomain_mod_is_not_mod #c #m (pow k (pow2 (v x + 1))))
+  Spec.ECDSA.Lemmas.modulo_distributivity_mult (pow k (pow2 (v x))) (pow k (pow2 (v x))) (getModePrime m c); 
+  pow_plus k (pow2 (v x)) (pow2 (v x )); 
+  pow2_double_sum (v x); 
+  inDomain_mod_is_not_mod #c #m (pow k (pow2 (v x + 1)))); 
+  
+  inDomain_mod_is_not_mod #c #m (let k = fromDomain_ #c #m (as_nat c h0 a) in pow k (pow2 (v n)))
 
 
 let fsquarePowN_dh #c n a = fsquarePowN #c DH n a 
+
 
 let fsquarePowN_dsa #c n a = fsquarePowN #c DSA n a 
