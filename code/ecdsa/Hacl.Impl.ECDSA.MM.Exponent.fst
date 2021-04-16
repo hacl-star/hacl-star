@@ -27,18 +27,6 @@ open Hacl.Impl.MM.Exponent
 
 #reset-options " --z3rlimit 200"
 
-inline_for_extraction noextract 
-val upload_one_montg_form: #c: curve -> b: felem c -> Stack unit
-  (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b == toDomain_ #c #DSA (1))
-
-let upload_one_montg_form #c b =
-  upd b (size 0) (u64 884452912994769583);
-  upd b (size 1) (u64 4834901526196019579);
-  upd b (size 2) (u64 0);
-  upd b (size 3) (u64 4294967295);
-    assert_norm(toDomain_ #c #DSA 1 == 26959946660873538059280334323273029441504803697035324946844617595567)
-  
 
 let montgomery_ladder_exponent #c r = 
   push_frame(); 

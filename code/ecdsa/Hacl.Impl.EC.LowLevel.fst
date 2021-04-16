@@ -463,7 +463,6 @@ let shift1_with_carry #c t out carry =
   pow2_plus (getPower c * 2 - 64) 64
 
 
-
 let upload_one_montg_form #c b =
   match c with 
   |P256 -> 
@@ -487,6 +486,7 @@ let upload_one_montg_form #c b =
     assert_norm(18446744069414584321 + 4294967295 * pow2 64 + 1 * pow2 64 * pow2 64 == pow2 384 % getPrime P384);
     lemma_lseq_nat_instant_6 (as_seq h1 b)
   |_ -> 
+    uploadZeroImpl b; 
     reduction_prime_2prime_with_carry_cin #c (u64 1) b b;
     lemmaToDomain #c #DH 1
     

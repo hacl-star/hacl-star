@@ -185,7 +185,7 @@ val shift1_with_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> carry: 
 
 inline_for_extraction noextract
 val upload_one_montg_form: #c: curve -> b: felem c -> Stack unit
-  (requires fun h -> live h b /\ as_nat c h b = 0)
+  (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b = toDomain #c 1)
 
 
@@ -195,7 +195,7 @@ val scalar_bit: #c: curve -> #buf_type: buftype
   -> n:size_t{v n < v (getScalarLen c)}
   -> Stack uint64
   (requires fun h0 -> live h0 s)
-  (ensures  fun h0 r h1 -> h0 == h1 /\ r == Spec.ECDSA.ith_bit_felem #c (as_seq h0 s) (v n) /\
+  (ensures  fun h0 r h1 -> h0 == h1 /\ r == Spec.ECDSA.ith_bit_power #c (as_seq h0 s) (v n) /\
     v r <= 1)
 
 

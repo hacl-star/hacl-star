@@ -5,6 +5,7 @@ open FStar.Math.Lib
 open FStar.Mul
 
 open Spec.ECC
+open Spec.ECDSA
 open Spec.ECDSA.Lemmas
 open Hacl.Spec.EC.Definition
 open Hacl.Lemmas.P256
@@ -313,28 +314,6 @@ let substractionInDomain #c #m a b =
 
 
 open Lib.ByteSequence
-
-val ith_bit_power: #c: curve -> k: scalar_bytes #c -> i:nat{i < v (getScalarLen c)}
-  -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
-
-let ith_bit_power #c k i =
-  let q = i / 8 in
-  let r = i % 8 in
-  let tmp1 = k.[q] >>. (size r) in
-  let tmp2 = tmp1 &. u8 1 in
-  let res = to_u64 tmp2 in
-  
-  logand_le tmp1 (u8 1);
-  logand_mask tmp1 (u8 1) 1;
-  lemma_scalar_ith c k q;
-  
-  let k = nat_from_intseq_le k in
-  pow2_modulo_division_lemma_1 (k / pow2 (8 * (i / 8))) (i % 8) 8;
-  division_multiplication_lemma k (pow2 (8 * (i / 8))) (pow2 (i % 8));
-  lemma_euclidian_for_ithbit k i;
-  pow2_modulo_modulo_lemma_1 (k / pow2 i) 1 (8 - (i % 8));
-  res
-
 
 let _pow_step0 #c #m r0 r1 =
   let prime = getModePrime m c in 

@@ -103,3 +103,11 @@ let reduction_prime_2prime_order #c x result  =
   cmovznz4 r tempBuffer x result;
     let h2 = ST.get() in 
   pop_frame()
+
+let upload_one_montg_form #c b =
+  upd b (size 0) (u64 884452912994769583);
+  upd b (size 1) (u64 4834901526196019579);
+  upd b (size 2) (u64 0);
+  upd b (size 3) (u64 4294967295);
+    assert_norm(toDomain_ #c #DSA 1 == 26959946660873538059280334323273029441504803697035324946844617595567)
+  

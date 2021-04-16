@@ -11,6 +11,8 @@ open Spec.ECC
 open Spec.ECC.Curves
 open Hacl.Spec.EC.Definition
 
+open Hacl.Spec.MontgomeryMultiplication
+
 open FStar.Mul
 
 
@@ -24,3 +26,7 @@ val reduction_prime_2prime_order: #c: curve -> x: felem c -> result: felem c ->
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result == as_nat c h0 x % getOrder #c)  
 
+inline_for_extraction noextract 
+val upload_one_montg_form: #c: curve -> b: felem c -> Stack unit
+  (requires fun h -> live h b)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b == toDomain_ #c #DSA (1))

@@ -19,10 +19,10 @@ open FStar.Math.Lib
 
 #set-options "--z3rlimit 200"
 
-val ith_bit_felem: #c: curve -> k: scalar_bytes #c -> i:nat{i < v (getScalarLen c)}
+val ith_bit_power: #c: curve -> k: scalar_bytes #c -> i:nat{i < v (getScalarLen c)}
   -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
 
-let ith_bit_felem #c k i =
+let ith_bit_power #c k i =
   let q = i / 8 in
   let r = i % 8 in
   let tmp1 = k.[q] >>. (size r) in
@@ -87,7 +87,7 @@ val _exp_step: #c: curve
 
 let _exp_step #c k i (p, q) =
   let bit0 = v (getScalarLen c) - 1 - i in
-  let bit = ith_bit_felem #c k bit0 in
+  let bit = ith_bit_power #c k bit0 in
   let open Lib.RawIntTypes in
   if uint_to_nat bit = 0 then _exp_step0 #c p q else _exp_step1 #c p q
 
@@ -104,7 +104,7 @@ let _exponent_spec #c k (p, q) =
 
 val lemma_even: #c: curve 
   -> index: pos {index <= v (getScalarLen c)} 
-  -> k: scalar_bytes #c {v (ith_bit_felem #c k (v (getScalarLen c) - index)) == 0} ->
+  -> k: scalar_bytes #c {v (ith_bit_power #c k (v (getScalarLen c) - index)) == 0} ->
   Lemma (
     let number = nat_from_bytes_le k in
     let newIndex = v (getScalarLen c) - index in
@@ -119,7 +119,7 @@ let lemma_even #c index k =
 
 
 val lemma_odd: #c: curve -> index:pos{index <= getPower c} 
-  -> k:lseq uint8 (getCoordinateLen c) {uint_v (ith_bit_felem #c k (getPower c - index)) == 1} ->
+  -> k:lseq uint8 (getCoordinateLen c) {uint_v (ith_bit_power #c k (getPower c - index)) == 1} ->
   Lemma(
     let number = nat_from_intseq_le k in 
     let n = getPower c - index  in
@@ -189,7 +189,7 @@ let rec lemma_exponen_spec #c k start index =
     begin
     unfold_repeati (getPower c) f start (index - 1);
     lemma_exponen_spec k start (index - 1);
-    let bitMask = uint_v (ith_bit_felem #c k ((getPower c) - index)) in
+    let bitMask = uint_v (ith_bit_power #c k ((getPower c) - index)) in
     match bitMask with
       | 0 ->
         let a0 = pow st1 (arithmetic_shift_right number (power - index + 1)) in
