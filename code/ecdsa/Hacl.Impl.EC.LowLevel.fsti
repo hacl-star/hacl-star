@@ -99,6 +99,14 @@ val square_bn: #c: curve -> f: felem c -> out: widefelem c -> Stack unit
       wide_as_nat c h1 out = as_nat c h0 f * as_nat c h0 f)
 
 
+val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c 
+  -> result: felem c ->
+  Stack unit
+  (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ (
+    as_nat c h x + uint_v cin * pow2 (getPower c) < 2 * getPrime c))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat c h1 result = (as_nat c h0 x + uint_v cin * pow2 (getPower c)) % getPrime c)
+
 val reduction_prime_2prime_with_carry: #c: curve -> x: widefelem c -> result: felem c ->
   Stack unit
     (requires fun h ->

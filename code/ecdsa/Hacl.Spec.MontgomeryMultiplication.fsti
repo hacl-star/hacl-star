@@ -56,6 +56,9 @@ val lemmaFromDomainToDomain: #c: curve -> #m: mode -> a: nat {a < getModePrime m
 val lemmaFromDomainToDomainModuloPrime: #c: curve -> #m: mode -> a: int -> 
   Lemma (a % (getModePrime m c) == fromDomain_ #c #m (toDomain_ #c #m a))
 
+val lemmaToDomainFromDomainModuloPrime: #c: curve -> #m: mode -> a: int -> 
+  Lemma (a % (getModePrime m c) == toDomain_ #c #m (fromDomain_ #c #m a))  
+
 val inDomain_mod_is_not_mod: #c: curve -> #m: mode -> a: int ->
   Lemma (toDomain_ #c #m a == toDomain_ #c #m (a % getModePrime m c))
 

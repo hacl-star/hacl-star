@@ -211,6 +211,27 @@ let lemmaFromDomainToDomainModuloPrime #c #m a =
     (==) {lemma_mod_inv2_mult_prime prime power}
     a % prime;}
 
+let lemmaToDomainFromDomainModuloPrime #c #m a = 
+  let prime = getModePrime m c in 
+  let power = pow2 (getPower c) in 
+
+  calc (==) {
+    toDomain_ #c #m (fromDomain_ #c #m a);
+    (==) {lemmaToDomain #c #m (fromDomain_ #c #m a)}
+    fromDomain_ #c #m a * power % prime;
+    (==) {lemmaFromDomain #c #m a}
+    (a * modp_inv2_prime power prime % prime) * power % prime;
+    (==) {lemma_mod_mul_distr_l (a * modp_inv2_prime power prime) power prime}
+    (a * modp_inv2_prime power prime) * power % prime; 
+    (==) {let open FStar.Tactics in let open FStar.Tactics.Canon in 
+      assert_by_tactic ((a * modp_inv2_prime power prime) * power == a * (power * modp_inv2_prime power prime)) canon}
+    a * (pow2 (getPower c) * modp_inv2_prime power prime) % prime;  
+    (==) {lemma_mod_mul_distr_r a (pow2 (getPower c) * modp_inv2_prime power prime) prime}
+    a * (power * modp_inv2_prime power prime % prime) % prime;
+    (==) {lemma_mod_inv2_mult_prime prime power}
+    a % prime;}
+
+
 
 let inDomain_mod_is_not_mod #c #m a =
   let prime = getModePrime m c in 

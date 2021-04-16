@@ -291,15 +291,6 @@ let square_bn #c x result =
   Hacl.Spec.Bignum.bn_sqr_lemma (as_seq h0 x)
 
 
-val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c 
-  -> result: felem c ->
-  Stack unit
-  (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ (
-    as_nat c h x + uint_v cin * getPower2 c) < 2 * getPrime c)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat c h1 result = (as_nat c h0 x + uint_v cin * getPower2 c) % getPrime c)
-
-
 let reduction_prime_2prime_with_carry_cin #c cin x result =
   push_frame();
 

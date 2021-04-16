@@ -16,7 +16,6 @@ open Lib.Loops
 open Hacl.Impl.EC.Setup
 
 open Lib.Sequence 
-
 open Lib.Buffer
 
 
@@ -271,7 +270,7 @@ let montgomery_multiplication_buffer #c m a b result =
   let t = create (size 2 *! len) (u64 0) in 
     let h0 = ST.get() in
   mul a b t;
-    lemma_mult_lt_center (as_nat c h0 a) (as_nat c h0 b) (getModePrime m c) (pow2 (getPower c)); 
+    lemma_mult_lt_center (as_nat c h0 a) (as_nat c h0 b) (getModePrime m c) (pow2 (getPower c));
   montgomery_multiplication_reduction #c m t result;
   pop_frame();
     let h1 = ST.get() in 

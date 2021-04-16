@@ -234,7 +234,7 @@ val lemma_mult_lt_center: a: nat -> b: nat -> c: pos -> d: pos -> Lemma
 let lemma_mult_lt_center a b c d = ()
 
 
-val lemma_domain: #c: curve -> #m: mode -> a: nat {a < getModePrime m c} -> b: nat {b < getModePrime m c} ->  k: nat ->
+val lemma_domain: #c: curve -> #m: mode -> a: nat -> b: nat -> k: nat ->
   Lemma 
   (requires (k == (a *  b * modp_inv2_prime (pow2 (getPower c)) (getModePrime m c)) % getModePrime m c))
   (ensures (
@@ -246,7 +246,7 @@ let lemma_domain #c #m a b k =
   let multResult = a * b * modp_inv2_prime (pow2 (getPower c)) prime % prime in 
 
   let mod = modp_inv2_prime (pow2 (getPower c)) prime in 
-  
+
   calc (==) {
     a * b * mod % prime;
     (==) {lemmaFromDomainToDomain #c #m multResult}
@@ -259,13 +259,13 @@ let lemma_domain #c #m a b k =
       let open FStar.Tactics in 
       let open FStar.Tactics.Canon in 
       assert_by_tactic (a * b * mod * mod == (a * mod) * (b * mod)) canon}
-    toDomain_ #c #m ((a * mod) * (b * mod) % prime);
+    toDomain_ #c #m ((a * mod) * (b * mod) % prime); 
     (==) {
       lemma_mod_mul_distr_l (a * mod) (b *  mod) prime; 
       lemma_mod_mul_distr_r (a * mod % prime) (b * mod) prime}
       
-    toDomain_ #c #m ((a * mod % prime) * (b * mod % prime) % prime);
+    toDomain_ #c #m ((a * mod % prime) * (b * mod % prime) % prime); 
     (==) {lemmaFromDomain #c #m a; lemmaFromDomain #c #m b}
     toDomain_ #c #m (fromDomain_ #c #m a * fromDomain_ #c #m b % prime);};
 
-    inDomain_mod_is_not_mod #c #m (fromDomain_ #c #m a * fromDomain_ #c #m b)
+    inDomain_mod_is_not_mod #c #m (fromDomain_ #c #m a * fromDomain_ #c #m b) 
