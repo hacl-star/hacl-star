@@ -4,27 +4,14 @@ open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
-open Lib.Sequence
 open Lib.IntTypes
 open Lib.Buffer
 
-open FStar.Math.Lemmas
-
-open Hacl.Impl.EC.LowLevel 
-
-open FStar.Mul
-
-open Lib.Loops
-
-open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Spec.MontgomeryMultiplication
 
 open Hacl.Spec.EC.Definition
-open Hacl.Lemmas.P256
-open Spec.ECDSA.Lemmas
 open Spec.ECC
 open Spec.ECC.Curves
-open Hacl.Spec.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"
 
