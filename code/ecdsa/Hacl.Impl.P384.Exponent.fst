@@ -251,7 +251,7 @@ let lemma_exp1_4_2 t1D t2D t3D prime384 =
 
 val lemma_exp1_5_2: tD: nat -> t1D: nat -> t2D : nat -> t3D: nat -> prime384: pos -> Lemma (
   toDomain_ ((pow t2D (pow2 7) * pow t3D (pow2 7) * pow t1D 2 * tD % prime384) * (pow t2D (pow2 7) * pow t3D (pow2 7) * pow t1D 2 * tD % prime384) % prime384) ==
-    toDomain_ (((pow t2D (pow2 8)) * (pow t3D (pow2 8)) * (pow t1D 4) * (pow tD 2)) % prime384))
+    toDomain_ ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 2) % prime384))
 
 
 let lemma_exp1_5_2 tD t1D t2D t3D prime384 = 
@@ -267,13 +267,50 @@ let lemma_exp1_5_2 tD t1D t2D t3D prime384 =
      toDomain_ (((pow t2D (pow2 8)) * (pow t3D (pow2 8)) * (pow t1D 4) * (pow tD 2)) % prime384);}
 
 
+val lemma_exp1_8_2: tD: nat -> t1D: nat -> t2D : nat -> t3D: nat -> prime384: pos -> Lemma (
+  toDomain_ (((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3) % prime384) * ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3) % prime384) % prime384) == 
+  toDomain_ ((pow t2D (pow2 9) * pow t3D (pow2 9) * pow t1D (pow2 3) * pow tD 6) % prime384))
+
+let lemma_exp1_8_2 tD t1D t2D t3D prime384 = 
+   calc (==) {
+     toDomain_ (((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3) % prime384) * ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3) % prime384) % prime384);
+     (==) {lemma_mod_mul_distr (pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3) (pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3) prime384}
+     toDomain_ (pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3 * ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3)) % prime384);
+     (==) {assert_by_tactic ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3 * ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3))) == (pow t2D (pow2 8) * pow t2D (pow2 8)) * (pow t3D (pow2 8) * pow t3D (pow2 8)) * (pow t1D (pow2 2) * pow t1D (pow2 2)) * (pow tD 3 * pow tD 3)) canon}
+     toDomain_ (((pow t2D (pow2 8) * pow t2D (pow2 8)) * (pow t3D (pow2 8) * pow t3D (pow2 8)) * (pow t1D (pow2 2) * pow t1D (pow2 2)) * (pow tD 3 * pow tD 3)) % prime384);
+     (==) {pow_plus t2D (pow2 8) (pow2 8); pow_plus t3D (pow2 8) (pow2 8); pow_plus t1D (pow2 2) (pow2 2); pow_plus tD 3 3}
+     toDomain_ ((pow t2D (2 * pow2 8) * pow t3D (2 * pow2 8) * pow t1D (2 * pow2 2) * pow tD 6) % prime384);
+     (==) {pow2_double_sum 8; pow2_double_sum 2}
+     toDomain_ ((pow t2D (pow2 9) * pow t3D (pow2 9) * pow t1D (pow2 3) * pow tD 6) % prime384);}
+
+val lemma_exp1_9_2_: a: nat -> b: nat -> c: nat -> d: nat -> e: pos -> Lemma
+   (pow (a * b * c * d) e = pow a e * pow b e * pow c e * pow d e)
+
+let lemma_exp1_9_2_ a b c d  e = 
+  Hacl.Lemmas.P256.power_distributivity_2 (a * b * c) d e;
+  Hacl.Lemmas.P256.power_distributivity_2 (a * b) c e;
+  Hacl.Lemmas.P256.power_distributivity_2 a b e
+  
+
+
+val lemma_exp1_9_2: tD: nat -> t1D: nat -> t2D : nat -> t3D: nat -> prime384: pos -> Lemma (True)
+
+let lemma_exp1_9_2 tD t1D t2D t3D prime384 = 
+  let pow2_30 = pow2 30 in 
+   calc (==) {
+     toDomain_ (pow ((pow t2D (pow2 9) * pow t3D (pow2 9) * pow t1D (pow2 3) * pow tD 6) % prime384) pow2_30 % prime384);
+   (==) {power_distributivity (pow t2D (pow2 9) * pow t3D (pow2 9) * pow t1D (pow2 3) * pow tD 6) (pow2_30) prime384}
+     toDomain_ (pow (pow t2D (pow2 9) * pow t3D (pow2 9) * pow t1D (pow2 3) * pow tD 6) pow2_30 % prime384);
+  }
+
+
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"
 
 val exponent1: t: felem P384 -> t1: felem P384 -> t2: felem P384 -> t3: felem P384 -> t4: felem P384 ->  Stack unit 
   (requires fun h -> live h t /\ live h t1 /\ live h t2 /\ live h t3 /\ live h t4 /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t1; loc t2; loc t3; loc t4] /\
     as_nat h t < prime384 /\ as_nat h t1 < prime384 /\ as_nat h t2 < prime384 /\ as_nat h t3 < prime384)
-  (ensures fun h0 _ h1 -> True)
+  (ensures fun h0 _ h1 -> modifies (loc t1 |+| loc t2 |+| loc t3 |+| loc t4) h0 h1)
 
 
 let exponent1 t t1 t2 t3 t4 = 
@@ -300,11 +337,15 @@ let exponent1 t t1 t2 t3 t4 =
     let h6 = ST.get() in 
   (* fsquarePowN_dh #P384 (size 30) t3 ; *)
   montgomery_multiplication_buffer_dh #P384 t t3 t3;
+    let h7 = ST.get() in 
 (* t3 = x32*)
 
 (* x63     = m(n_sq(x32, 31) , x31) *)
   montgomery_square_buffer_dh #P384 t3 t4;
-  fsquarePowN_dh #P384 (size 30) t4 ;
+    let h8 = ST.get() in 
+  fsquarePowN_dh #P384 (size 30) t4;
+    let h9 = ST.get() in 
+    
   montgomery_multiplication_buffer_dh #P384 t4 t2 t4;
 (* t4 = x63 *)
 
@@ -352,10 +393,34 @@ let exponent1 t t1 t2 t3 t4 =
      (==) {}
      toDomain_ ((pow t2D (pow2 7) * pow t3D (pow2 7) * pow t1D 2 * tD % prime384) * (pow t2D (pow2 7) * pow t3D (pow2 7) * pow t1D 2 * tD % prime384) % prime384);
      (==) {lemma_exp1_5_2 tD t1D t2D t3D prime384}
-     toDomain_ (((pow t2D (pow2 8)) * (pow t3D (pow2 8)) * (pow t1D 4) * (pow tD 2)) % prime384);};
+     toDomain_ ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 2) % prime384);};
 
+   calc (==) {
+     as_nat h7 t3;
+     (==) {}
+     toDomain_ (tD * ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 2) % prime384) % prime384);
+     (==) {lemma_mod_mul_distr_r tD ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 2)) prime384}
+     toDomain_ (tD * (pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 2) % prime384);
+     (==) {assert_by_tactic (tD * (pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 2) == 
+       (pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * (pow tD 2 * tD))) canon; power_one_2 tD}
+     toDomain_ ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * (pow tD 2 * pow tD 1)) % prime384);
+     (==) {pow_plus tD 2 1}
+     toDomain_ ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3) % prime384);};
 
-   admit()
+   calc (==) {
+     as_nat h8 t4;
+     (==) {}
+     toDomain_ (((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3) % prime384) * ((pow t2D (pow2 8) * pow t3D (pow2 8) * pow t1D (pow2 2) * pow tD 3) % prime384) % prime384);
+     (==) {lemma_exp1_8_2 tD t1D t2D t3D prime384}
+     toDomain_ ((pow t2D (pow2 9) * pow t3D (pow2 9) * pow t1D (pow2 3) * pow tD 6) % prime384); };
+
+   let pow2_30 = pow2 30 in 
+
+   calc (==) {
+     as_nat h9 t4;
+     (==) {}
+     toDomain_ (pow ((pow t2D (pow2 9) * pow t3D (pow2 9) * pow t1D (pow2 3) * pow tD 6) % prime384) pow2_30 % prime384);
+     }
 
 
 
