@@ -479,14 +479,6 @@ let exponent3 t t1 t4 result =
   montgomery_multiplication_buffer_dh #P384 t4 t result
 
 
-val exponent_p384: a: felem P384 -> result: felem P384 -> 
-  tempBuffer: lbuffer uint64 (getCoordinateLenU P384 *. 8ul) -> Stack unit
-  (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
-    disjoint a tempBuffer /\ as_nat  h a < getPrime P384)
-  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
-    let k = fromDomain #P384 (as_nat h0 a) in True ))(*
-    as_nat P384 h1 result =  toDomain #P384 (pow k (prime384 - 2) % prime256) *) 
-
 
 let exponent_p384 t result tempBuffer = 
   let h0 = ST.get () in 

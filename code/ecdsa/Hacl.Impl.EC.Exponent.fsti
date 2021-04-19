@@ -1,4 +1,3 @@
-
 module Hacl.Impl.EC.Exponent
 
 open FStar.HyperStack.All
@@ -15,15 +14,17 @@ open Spec.ECC.Curves
 open Hacl.Impl.EC.LowLevel
 open Hacl.Spec.MontgomeryMultiplication
 
-
+(* disjoint a result comes from ML, tempBffer - from specific *)
 val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *. 8ul) -> 
   Stack unit
-  (requires fun h -> live h a /\ live h result /\ as_nat c h a < getPrime c)
+  (requires fun h -> live h a /\ live h result /\ live h tempBuffer /\ disjoint tempBuffer result /\ disjoint a tempBuffer /\
+    disjoint a result /\ as_nat c h a < getPrime c)
   (ensures fun h0 _ h1 -> 
     let k = fromDomain #c (as_nat c h0 a) in 
-    modifies (loc a |+| loc result) h0 h1 /\
+    (*to check what is supposed to be changed *)
+    modifies (loc a |+| loc tempBuffer |+| loc result) h0 h1 /\
     as_nat c h1 result < getPrime c /\ 
-    as_nat c h1 result = toDomain #c (pow k (getPrime c - 2) % getPrime c))
+    as_nat c h1 result = toDomain_ #c #DH (pow k (getPrime c - 2) % getPrime c))
 
 
 val square_root: #c: curve -> a: felem c -> result: felem c -> Stack unit 

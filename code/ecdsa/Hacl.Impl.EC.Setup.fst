@@ -14,57 +14,51 @@ open Spec.ECC.Curves
 open FStar.Mul
 
 noextract 
-val lst_as_nat_: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> i: nat {i <= List.Tot.Base.length a} ->  
-  Tot nat (decreases List.Tot.Base.length a - i)
+val lst_as_nat_: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> i: nat {i <= List.Tot.Base.length a} -> Tot nat
 
 let rec lst_as_nat_ #t a i = 
-  if i = List.Tot.Base.length a then 0 else
-  let a_i = List.Tot.Base.index a i in
-  lst_as_nat_ a (i + 1) + pow2 (bits t * i) * v a_i
+  if i = 0 then 0 else
+  let a_i_1 = List.Tot.Base.index a (i - 1) in
+  lst_as_nat_ a (i - 1) + pow2 (bits t * (i - 1)) * v a_i_1
+
 
 val lst_as_nat: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> Tot nat 
 
-let lst_as_nat a = lst_as_nat_ a 0
+let lst_as_nat a = lst_as_nat_ a (List.Tot.Base.length a)
 
 
-val lst_as_nat_0: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> Lemma (lst_as_nat_ a (List.Tot.Base.length a) = 0)
+val lst_as_nat_0: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> Lemma (lst_as_nat_ a 0 = 0)
 
 let lst_as_nat_0 a = ()
 
 
-val lst_as_nat_definiton: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> i: nat {i < List.Tot.Base.length a} ->
-  Lemma (lst_as_nat_  a i == lst_as_nat_ a (i + 1) + pow2 (bits t * i) * v (List.Tot.Base.index a i))
+val lst_as_nat_definiton: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> i: nat {i > 0 /\ i <= List.Tot.Base.length a} ->
+  Lemma (lst_as_nat_ a i == lst_as_nat_ a (i - 1) + pow2 (bits t * (i - 1)) * v (List.Tot.Base.index a (i - 1)))
 
 let lst_as_nat_definiton b i = ()
 
+
+val lst_as_nat_first: #t:inttype{unsigned t} -> a: list (uint_t t SEC)  {List.Tot.Base.length a > 0} -> Lemma (lst_as_nat_ a 1 == v (List.Tot.Base.index a 0))
+
+let lseq_as_nat_first a = ()
+
+
 #set-options "--z3rlimit 100"
 
-val lemma_lst_1: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> i: nat {i > 0 /\ i < List.Tot.Base.length a} ->
-  Lemma (lst_as_nat_ a (List.Tot.Base.length a - i) % pow2 (bits t) == 0)
+val lemma_lst_1: a: list uint64 -> i: nat {i > 0 /\ i <= List.Tot.Base.length a} ->
+  Lemma (lst_as_nat_ a i % pow2 64 == v (List.Tot.Base.index a 0))
 
-open FStar.Math.Lemmas 
-
-let rec lemma_lst_1 #t a i = 
+let rec lemma_lst_1 a i = 
   match i with 
-  |1 -> assert(i == 1);
-    lst_as_nat_definiton a (List.Tot.Base.length a - 1);
-    let index = List.Tot.Base.length a - 1 in
-    lst_as_nat_0 a;
-    lemma_mod_mul_distr_l (pow2 (bits t) * index) (v (List.Tot.Base.index a index)) (pow2 (bits t));
-    pow2_multiplication_modulo_lemma_1 (v (List.Tot.Base.index a index)) (bits t) ((bits t) * index)
-  |_ -> 
-    let z = List.Tot.Base.length a - i in 
-    lst_as_nat_definiton a z;
-    lemma_lst_1 a (i - 1); 
-	
-    lemma_mod_add_distr (pow2 ((bits t) * z) * v (List.Tot.Base.index a z)) (lst_as_nat_ a (z + 1)) (pow2 (bits t));
-    pow2_multiplication_modulo_lemma_1 (v (List.Tot.Base.index a z)) (bits t) ((bits t) * z)
-
-
+  |1 -> ()
+  |_ -> lemma_lst_1 a (i - 1);
+    lst_as_nat_definiton a i;
+    FStar.Math.Lemmas.lemma_mod_add_distr (lst_as_nat_ a (i - 1)) (pow2 (64 * (i - 1)) * v (List.Tot.Base.index a (i - 1))) (pow2 64);
+    FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v (List.Tot.Base.index a (i - 1))) 64 (64 * (i - 1))  
 val lemmaLstLastWord: a: list uint64 {List.Tot.Base.length a > 1} -> Lemma
   (v (List.Tot.Base.index a 0) == lst_as_nat a % pow2 64)
 
-let lemmaLstLastWord a = lemma_lst_1 a (List.Tot.Base.length a - 1)
+let lemmaLstLastWord a = lemma_lst_1 a (List.Tot.Base.length a)
 
 
 val lemma_lst_nat_instant_4: a: list uint64 {List.Tot.length a == 4} -> Lemma (
@@ -78,7 +72,7 @@ let lemma_lst_nat_instant_4 a =
   lst_as_nat_definiton a 3;
   lst_as_nat_definiton a 2;
   lst_as_nat_definiton a 1;
-  lst_as_nat_definiton a 0
+  lst_as_nat_0 a
 
 
 val lemma_lst_nat_instant_6: a: list uint64 {List.Tot.length a == 6} -> Lemma (
@@ -96,7 +90,7 @@ let lemma_lst_nat_instant_6 a =
   lst_as_nat_definiton a 3;
   lst_as_nat_definiton a 2;
   lst_as_nat_definiton a 1;
-  lst_as_nat_definiton a 0
+  lst_as_nat_0 a
 
 
 (* This code contains the prime *)
@@ -151,6 +145,8 @@ let prime_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c)
   | P256 -> prime256_buffer
   | P384 -> prime384_buffer
   
+
+open FStar.Math.Lemmas
 
 inline_for_extraction
 let getLastWordPrime (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64 /\ v r % 2 == 1}) = 
@@ -250,7 +246,7 @@ let order_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {
 
 (* Unfold? *)
 inline_for_extraction noextract
-let p256_inverse_list: x: list uint8 {List.Tot.length x == v (getScalarLenBytes P256) /\ lst_as_nat x == getPrime P256 - 2} = 
+let p256_inverse_list: x: list uint8 {List.Tot.length x == v (getCoordinateLenU P256) /\ lst_as_nat x == getPrime P256 - 2} = 
   [@inline_let]
   let x = [
     u8 253; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;
@@ -263,7 +259,7 @@ let p256_inverse_list: x: list uint8 {List.Tot.length x == v (getScalarLenBytes 
 
 
 inline_for_extraction noextract
-let p384_inverse_list: x: list uint8 {List.Tot.length x == v (getScalarLenBytes P384) /\ lst_as_nat x == getPrime P384 - 2} = 
+let p384_inverse_list: x: list uint8 {List.Tot.length x == v (getCoordinateLenU P384) /\ lst_as_nat x == getPrime P384 - 2} = 
   [@inline_let]
   let x = [ 
     u8 253; u8 255; u8 255; u8 255; u8 0;   u8 0;   u8 0;   u8 0;
@@ -278,7 +274,7 @@ let p384_inverse_list: x: list uint8 {List.Tot.length x == v (getScalarLenBytes 
 
 
 inline_for_extraction noextract
-let prime_inverse_list (c: curve) : x: list uint8 {List.Tot.length x == v (getScalarLenBytes c) /\ 
+let prime_inverse_list (c: curve) : x: list uint8 {List.Tot.length x == v (getCoordinateLenU c) /\ 
   lst_as_nat x == getPrime c - 2} = 
   match c with 
   |P256 -> p256_inverse_list
@@ -320,7 +316,7 @@ let getK0 c =
 
 inline_for_extraction noextract
 let sqPower_list_p256: x: list uint8 {List.Tot.length x == v (getScalarLenBytes P256) /\ 
-  lst_as_nat x == (getPrime P256 - 1) / 4}  =
+  lst_as_nat x == (getPrime P256 + 1) / 4} =
   [@inline_let]
   let x = [
     u8 0;  u8 0;  u8 0;  u8 0;   u8 0;   u8 0;   u8 0;   u8 0;
@@ -334,7 +330,7 @@ let sqPower_list_p256: x: list uint8 {List.Tot.length x == v (getScalarLenBytes 
 
 inline_for_extraction noextract
 let sqPower_list_p384: x: list uint8 {List.Tot.length x == v (getScalarLenBytes P384) /\ 
-  lst_as_nat x == (getPrime P384 - 1) / 4} =
+  lst_as_nat x == (getPrime P384 + 1) / 4} =
   [@inline_let]
   let x = [
     u8 0;   u8 0;   u8 0;   u8 64;  u8 0;   u8 0;   u8 0;   u8 0; 

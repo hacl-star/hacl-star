@@ -17,7 +17,7 @@ open Spec.ECC.Curves
 
 
 val _montgomery_ladder_power: #c: curve -> #m: mode -> a: felem c -> b: felem c 
-  -> scalar: glbuffer uint8 (getScalarLenBytes c) -> Stack unit
+  -> scalar: glbuffer uint8 (getCoordinateLenU c) -> Stack unit
   (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat c h a < getModePrime m c /\ 
     as_nat c h b < getModePrime m c /\ disjoint a b /\ disjoint a scalar /\ disjoint b scalar)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc b) h0 h1 /\ (
@@ -29,7 +29,7 @@ val _montgomery_ladder_power: #c: curve -> #m: mode -> a: felem c -> b: felem c
 
   
 val montgomery_ladder_power: #c: curve -> #m: mode -> a: felem c 
-  -> scalar: glbuffer uint8 (getScalarLenBytes c) -> result: felem c -> 
+  -> scalar: glbuffer uint8 (getCoordinateLenU c) -> result: felem c -> 
   Stack unit 
   (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat c h a < getModePrime m c /\
     disjoint a scalar)

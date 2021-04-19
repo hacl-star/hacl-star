@@ -294,16 +294,6 @@ let exponent_2 t t0 t4 t5 result =
   pow t0D pow2_64 * pow t5D pow2_32 * pow t4D (pow2 2) * tD % prime256;}
 
 
-[@ CInline]
-val exponent_p256: a: felem P256->result: felem P256 -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 P256 *. 8ul) ->
-  Stack unit
-  (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 
-    disjoint a tempBuffer /\ as_nat h a < prime256)
-  (ensures fun h0 _ h1 -> modifies2 result tempBuffer h0 h1 /\ (
-    let k = fromDomain #P256 (as_nat h0 a) in 
-    as_nat h1 result =  toDomain #P256 (pow k (prime256 - 2) % prime256)))
-
-
 let exponent_p256 t result tempBuffer = 
   let h0 = ST.get () in 
 
