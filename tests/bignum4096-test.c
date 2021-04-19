@@ -9,8 +9,7 @@
 #include "test_helpers.h"
 #include "bignum4096_vectors.h"
 
-
-bool mod_exp_bytes_be_precompr2(
+bool mod_exp_bytes_be_precomp(
   uint8_t *nBytes,
   uint8_t *aBytes,
   uint32_t bBits,
@@ -24,11 +23,12 @@ bool mod_exp_bytes_be_precompr2(
   uint64_t *a = Hacl_Bignum4096_new_bn_from_bytes_be(512, aBytes);
   uint64_t *n = Hacl_Bignum4096_new_bn_from_bytes_be(512, nBytes);
   uint64_t *b = Hacl_Bignum4096_new_bn_from_bytes_be(bBytesLen, bBytes);
-  uint64_t *r2 = Hacl_Bignum4096_new_precompr2(n);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k = Hacl_Bignum4096_mont_ctx_init(n);
 
-  Hacl_Bignum4096_mod_exp_raw_precompr2(n, a, bBits, b, r2, res);
+  Hacl_Bignum4096_mod_exp_vartime_precomp(k, a, bBits, b, res);
   Hacl_Bignum4096_bn_to_bytes_be(res, resBytes);
 
+  Hacl_Bignum4096_mont_ctx_free(k);
   return 1;
 }
 
@@ -48,13 +48,13 @@ bool mod_exp_bytes_be(
   uint64_t *n = Hacl_Bignum4096_new_bn_from_bytes_be(512, nBytes);
   uint64_t *b = Hacl_Bignum4096_new_bn_from_bytes_be(bBytesLen, bBytes);
 
-  Hacl_Bignum4096_mod_exp_raw(n, a, bBits, b, res);
+  Hacl_Bignum4096_mod_exp_vartime(n, a, bBits, b, res);
   Hacl_Bignum4096_bn_to_bytes_be(res, resBytes);
 
   return 1;
 }
 
-bool print_test_bytes_be_precompr2(
+bool print_test_bytes_be_precomp(
   uint8_t *nBytes,
   uint8_t *aBytes,
   uint32_t bBits,
@@ -63,8 +63,8 @@ bool print_test_bytes_be_precompr2(
 )
 {
   uint8_t resBytes[512U] = {0};
-  bool ok = mod_exp_bytes_be_precompr2(nBytes, aBytes, bBits, bBytes, resBytes);
-  printf("\n mod_exp_precompr2 for bytes Result: \n");
+  bool ok = mod_exp_bytes_be_precomp(nBytes, aBytes, bBits, bBytes, resBytes);
+  printf("\n mod_exp_precomp for bytes Result: \n");
   ok = ok && compare_and_print(512U, resBytes, resBytes_expected);
 
   return ok;
@@ -97,7 +97,7 @@ bool print_test(
 )
 {
   uint64_t res[64U] = {0};
-  Hacl_Bignum4096_mod_exp_raw(n, a, bBits, b, res);
+  Hacl_Bignum4096_mod_exp_vartime(n, a, bBits, b, res);
   printf("\n mod_exp Result: \n");
 
   bool ok = true;
@@ -116,7 +116,7 @@ int main() {
 
   bool ok = true;
   for (int i = 0; i < sizeof(vectors_be)/sizeof(bignum4096_bytes_be_test_vector); ++i) {
-    ok &= print_test_bytes_be_precompr2(vectors_be[i].nBytes, vectors_be[i].aBytes, vectors_be[i].bBits, vectors_be[i].bBytes, vectors_be[i].resBytes);
+    ok &= print_test_bytes_be_precomp(vectors_be[i].nBytes, vectors_be[i].aBytes, vectors_be[i].bBits, vectors_be[i].bBytes, vectors_be[i].resBytes);
   }
 
   for (int i = 0; i < sizeof(vectors_be)/sizeof(bignum4096_bytes_be_test_vector); ++i) {

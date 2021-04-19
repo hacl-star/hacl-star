@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # From: RFC 1321, section A.5 (https://www.ietf.org/rfc/rfc1321.txt)
 
