@@ -399,7 +399,6 @@ val new_rsapss_load_skey:
   -> kc:rsapss_checks t ->
   new_rsapss_load_skey_st t ke modBits
 
-#push-options "--z3rlimit_factor 2"
 let new_rsapss_load_skey #t ke modBits kc r eBits dBits nb eb db =
   [@inline_let] let bits = size (bits t) in
 
