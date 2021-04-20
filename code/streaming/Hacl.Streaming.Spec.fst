@@ -58,7 +58,8 @@ val mod_trans_lem (a : nat) (b c : pos) :
   Lemma (requires (a % b = 0 /\ b % c = 0))
   (ensures (a % c = 0))
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 400"
+#restart-solver
 let mod_trans_lem a b c =
   Math.Lemmas.lemma_div_mod a b;
   Math.Lemmas.lemma_div_mod b c;
