@@ -15,6 +15,8 @@ open Hacl.Spec.EC.Definition
 open Hacl.Lemmas.P256
 open Spec.ECDSA.Lemmas
 open Spec.ECC.Curves
+
+open Hacl.Impl.EC.MontgomeryMultiplication
 friend Hacl.Spec.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"
@@ -144,6 +146,8 @@ let montgomery_ladder_power #c #m a scalar result =
   let p = create len (u64 0) in  
     lemma_create_zero_buffer (v (getCoordinateLenU64 c)) c;
   upload_one_montg_form #c #m p; 
+  
+  copy a result;
     lemmaToDomain #c #m 1;
     let h0 = ST.get() in 
   _montgomery_ladder_power #c #m p a scalar;

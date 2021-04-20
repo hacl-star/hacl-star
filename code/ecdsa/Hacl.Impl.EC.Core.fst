@@ -24,9 +24,10 @@ open Hacl.Lemmas.P256
 
 open FStar.Mul
 open Hacl.Impl.EC.MontgomeryLadder
+open Spec.ECC.Curves
 
 
-#set-options "--z3rlimit 300 --max_fuel 0 --max_ifuel 0" 
+#set-options "--z3rlimit 200" 
 
 let toDomain #c value result = 
   push_frame();
@@ -111,7 +112,7 @@ let isPointAtInfinityPrivate #c p =
     (as_nat c h0 (gsub p (2ul *! len) len)); 
   r
 
-(*
+
 val lemma_norm_as_specification: #c: curve 
   -> xD: nat {xD < getPrime c} 
   -> yD: nat {yD < getPrime c} 
@@ -143,31 +144,22 @@ let lemma_norm_as_specification #c xD yD zD x3 y3 z3 =
     yD * (modp_inv2_pow #c (zD * zD * zD)) % prime;
     (==) {_ by (canon())}
     modp_inv2_pow #c (zD * zD * zD) * yD % prime;
-  }
-*)
-
+  };
+  admit()
 
 
 val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c -> resultPoint: point c -> 
   Stack unit 
-  (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ felem_eval c h z2x /\ 
-    felem_eval c h z3y /\ felem_eval c h (getZ p) /\ disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
-  (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\ (
-    let x0 = point_x_as_nat c h0 p in 
-    let y0 = point_y_as_nat c h0 p in 
-    let z0 = point_z_as_nat c h0 p in 
-
-    let x1 = point_x_as_nat c h1 resultPoint in 
-    let y1 = point_y_as_nat c h1 resultPoint in 
-    let z1 = point_z_as_nat c h1 resultPoint in 
-
+  (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
+    felem_eval c h z2x /\ felem_eval c h z3y /\ felem_eval c h (getZ p) /\ point_eval c h p /\
+    disjoint z2x z3y /\ disjoint z2x resultPoint /\ disjoint z3y resultPoint)
+  (ensures fun h0 _ h1 -> modifies (loc resultPoint) h0 h1 /\ point_eval c h1 resultPoint /\ (
+    let x0, y0, z0 = point_as_nat c h0 p in 
+    let x1, y1, z1 = point_as_nat c h1 resultPoint in
     x1 == fromDomain_ #c #DH (as_nat c h0 z2x) /\ 
     y1 == fromDomain_ #c #DH (as_nat c h0 z3y) /\ (
     if Spec.ECC.isPointAtInfinity (fromDomain_ #c #DH x0, fromDomain_ #c #DH y0, fromDomain_ #c #DH z0) 
-    then 
-      z1 == 0 
-    else 
-      z1 == 1)))
+    then z1 == 0 else  z1 == 1)))
 
 let normalisation_update #c z2x z3y p resultPoint = 
   push_frame(); 
@@ -177,14 +169,13 @@ let normalisation_update #c z2x z3y p resultPoint =
   let resultX = sub resultPoint (size 0) len in 
   let resultY = sub resultPoint len len in 
   let resultZ = sub resultPoint (size 2 *! len) len in 
-
+  
   let bit = isPointAtInfinityPrivate p in
 
-  fromDomain z2x resultX;
+  fromDomain z2x resultX; 
   fromDomain z3y resultY;
   uploadOneImpl #c resultZ;
   copy_conditional #c resultZ zeroBuffer bit;
-  
     lemma_create_zero_buffer (v len) c;
 
   pop_frame()
@@ -211,12 +202,10 @@ let lemma_norm #c pD r =
   calc (==)
   {
     xD * (pow (zD * zD % prime) (prime - 2) % prime) % prime;
-    (==) {power_distributivity (zD * zD) (prime - 2) prime}
-    xD * (pow (zD * zD) (prime - 2) % prime) % prime;
-    (==) {}
-    xD * (modp_inv2_pow #c (zD * zD)) % prime;
+    (==) {lemma_pow_mod_n_is_fpow prime (zD * zD % prime) (prime - 2)}
+    xD * (modp_inv2 #c (zD * zD)) % prime;
     (==) {_ by (canon())}
-    modp_inv2_pow #c (zD * zD) * xD % prime;
+    modp_inv2 #c (zD * zD) * xD % prime; 
   };  
 
   calc (==) 
@@ -224,12 +213,12 @@ let lemma_norm #c pD r =
     yD * (pow ((zD * zD % prime) * zD % prime) (prime - 2) % prime) % prime;
     (==) {lemma_mod_mul_distr_l (zD * zD) zD prime}
     yD * (pow (zD * zD * zD % prime) (prime - 2) % prime) % prime;
-    (==) {power_distributivity (zD * zD * zD) (prime - 2) prime}
-    yD * (pow (zD * zD * zD) (prime - 2) % prime) % prime;
+    (==) {lemma_pow_mod_n_is_fpow prime (zD * zD * zD % prime) (prime - 2)}
+    yD * (modp_inv2 #c (zD * zD * zD)) % prime;
     (==) {}
-    yD * (modp_inv2_pow #c (zD * zD * zD)) % prime;
+    yD * (modp_inv2 #c (zD * zD * zD)) % prime;
     (==) {_ by (canon())}
-    modp_inv2_pow #c (zD * zD * zD) * yD % prime;
+    modp_inv2 #c (zD * zD * zD) * yD % prime;
   }
 
 
@@ -256,7 +245,6 @@ let norm #c p resultPoint tempBuffer =
   montgomery_multiplication_buffer_dh #c xf z2f z2f;
   montgomery_multiplication_buffer_dh #c yf z3f z3f;
   normalisation_update z2f z3f p resultPoint; 
-
 
     let h1 = ST.get() in 
 

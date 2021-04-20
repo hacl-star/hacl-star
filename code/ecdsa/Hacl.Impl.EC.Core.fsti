@@ -43,7 +43,7 @@ val pointFromDomain: #c : curve -> p: point c -> result: point c-> Stack unit
     point_x_as_nat c h1 result == fromDomain_ #c #DH (point_x_as_nat c h0 p) /\
     point_y_as_nat c h1 result == fromDomain_ #c #DH (point_y_as_nat c h0 p) /\
     point_z_as_nat c h1 result == fromDomain_ #c #DH (point_z_as_nat c h0 p))
-    
+ 
 val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
   (requires fun h -> live h p /\ felem_eval c h (getZ p))
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ ((uint_v r == 0 \/ uint_v r == maxint U64) /\ (

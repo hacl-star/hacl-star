@@ -32,7 +32,7 @@ noextract
 val fromDomain_: #c: curve -> #m: mode -> a: int -> Tot (a: nat {a < getModePrime m c})
 
 noextract
-val fromDomainPoint: #c: curve -> #m: mode -> a: point_prime_mm #c #m ->
+val fromDomainPoint: #c: curve -> #m: mode -> a: point_nat ->
   Tot (r: point_prime_mm #c #m {
     let x, y, z = a in
     let x3, y3, z3 = r in 
