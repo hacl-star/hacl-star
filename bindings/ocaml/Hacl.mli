@@ -312,14 +312,21 @@ module Poly1305_256 : MAC
 (** {1 NaCl } *)
 
 module NaCl : sig
-  val box_beforenm : pk:bytes -> sk:bytes -> ck:bytes -> bool
-  (** [box_beforenm pk sk ck] precomputes a 32-byte {{!section:curve}X25519 shared key} [ck] using one party's
+  val box_beforenm : pk:bytes -> sk:bytes -> bytes option
+  (** [box_beforenm pk sk] precomputes a 32-byte {{!section:curve}X25519 shared key} [ck] using one party's
       32-byte public key [pk] and the other party's 32-byte secret key [sk]. The shared key
       can then be used in the Box precomputation interface ([box_afternm] and [box_open_afternm] functions)
       in both {!Easy} and {!Detached}.
 
       This is useful when calling the functions repeatedly, as it avoids computing the
       shared key on every function call.
+  *)
+
+  (* TODO move this to NaCl.Easy.Noalloc *)
+  val box_beforenm_noalloc : pk:bytes -> sk:bytes -> ck:bytes -> bool
+  (** [box_beforenm_noalloc pk sk ck] is a version of [box_beforenm] which takes an additional argument [ck]
+      where the result is written, returning `true` if it is successful, similar to the functions in
+      {!NaCl.Easy.Noalloc}.
 
       Buffers [pk], [sk], and [ck] must be distinct.
   *)
@@ -328,50 +335,96 @@ module NaCl : sig
     (** {1 Box}
         {2 One-shot interface} *)
 
-    val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> bool
-    (** [box pt n pk sk ct] authenticates and encrypts plaintext [pt] using public key [pk],
-        secret key [sk], and nonce [n] and writes both the message authentication tag
-        and the ciphertext in [ct].
-        Returns true if successful. *)
+    val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> bytes option
+    (** [box pt n pk sk] authenticates and encrypts plaintext [pt] using public key [pk],
+        secret key [sk], and nonce [n] and returns both the message authentication tag
+        in a single buffer if successful. *)
 
-    val box_open : ct:bytes -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> bool
-    (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using public key [pk],
-        secret key [sk], and nonce [n] and if successful writes the plaintext in [pt]
-        and returns true. *)
+    val box_open : ct:bytes -> n:bytes -> pk:bytes -> sk:bytes -> bytes option
+    (** [box_open ct n pk sk] attempts to verify and decrypt ciphertext [ct] using public key [pk],
+        secret key [sk], and nonce [n] and returns the plaintext if successful. *)
 
     (** {2 Precomputation interface }
         The shared key [ck] is obtained using {!NaCl.box_beforenm}. *)
 
-    val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> ct:bytes -> bool
-    (** [box_afternm pt n ck ct] authenticates and encrypts [pt] using shared key [ck] and
-        nonce [n] and writes both the message authentication tag and the ciphertext in [ct].
-        Returns true if successful. *)
+    val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> bytes option
+    (** [box_afternm pt n ck] authenticates and encrypts [pt] using shared key [ck] and
+        nonce [n] and returns both the message authentication tag in a single buffer
+        if successful. *)
 
-    val box_open_afternm : ct:bytes -> n:bytes -> ck:bytes -> pt:bytes -> bool
-    (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using
-        shared key [ck] and nonce [n] and if successful writes the plaintext in [pt]
-        and returns true. *)
+    val box_open_afternm : ct:bytes -> n:bytes -> ck:bytes -> bytes option
+    (** [box_open ct n pk sk] attempts to verify and decrypt ciphertext [ct] using
+        shared key [ck] and nonce [n] and returns the plaintext if successful. *)
 
     (** {1 Secretbox} *)
 
-    val secretbox : pt:bytes -> n:bytes -> key:bytes -> ct:bytes -> bool
-    (** [secretbox pt n key ct] authenticates and encrypts plaintext [pt] using
-        secret key [key] and nonce [n] and writes both the message authentication tag
-        and the ciphertext in [ct].
-        Returns true if successful. *)
+    val secretbox : pt:bytes -> n:bytes -> key:bytes -> bytes option
+    (** [secretbox pt n key] authenticates and encrypts plaintext [pt] using
+        secret key [key] and nonce [n] and returns both the message authentication tag
+        and the ciphertext in a single buffer if successful. *)
 
-    val secretbox_open : ct:bytes -> n:bytes -> key:bytes -> pt:bytes -> bool
-    (** [secretbox_open ct n key pt] attempts to verify and decrypt ciphertext [ct] using
-        secret key [key] and nonce [n] and if successful writes the plaintext in [pt]
-        and returns true. *)
+    val secretbox_open : ct:bytes -> n:bytes -> key:bytes -> bytes option
+    (** [secretbox_open ct n key] attempts to verify and decrypt ciphertext [ct] using
+        secret key [key] and nonce [n] and and returns the plaintext if successful. *)
 
+    (** {1 Noalloc} *)
+
+    (** Versions of these functions which write their output in a buffer passed in as
+        an argument
+
+        Buffers have the following size requirements:
+        - [ct] must be 16 bytes longer than [pt] to also include the message
+        authentication tag
+        - [pk], [sk], [ck]: 32 bytes
+        - [n]: 24 bytes
+    *)
+    module Noalloc : sig
+    (** {1 Box}
+        {2 One-shot interface} *)
+
+      val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> ct:bytes -> bool
+      (** [box pt n pk sk ct] authenticates and encrypts plaintext [pt] using public key [pk],
+          secret key [sk], and nonce [n] and writes both the message authentication tag
+          and the ciphertext in [ct].
+          Returns true if successful. *)
+
+      val box_open : ct:bytes -> n:bytes -> pk:bytes -> sk:bytes -> pt:bytes -> bool
+      (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using public key [pk],
+          secret key [sk], and nonce [n] and if successful writes the plaintext in [pt]
+          and returns true. *)
+
+      (** {2 Precomputation interface }
+          The shared key [ck] is obtained using {!NaCl.box_beforenm} or {!NaCl.box_beforenm_noalloc}. *)
+
+      val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> ct:bytes -> bool
+      (** [box_afternm pt n ck ct] authenticates and encrypts [pt] using shared key [ck] and
+          nonce [n] and writes both the message authentication tag and the ciphertext in [ct].
+          Returns true if successful. *)
+
+      val box_open_afternm : ct:bytes -> n:bytes -> ck:bytes -> pt:bytes -> bool
+      (** [box_open ct n pk sk pt] attempts to verify and decrypt ciphertext [ct] using
+          shared key [ck] and nonce [n] and if successful writes the plaintext in [pt]
+          and returns true. *)
+
+      (** {1 Secretbox} *)
+
+      val secretbox : pt:bytes -> n:bytes -> key:bytes -> ct:bytes -> bool
+      (** [secretbox pt n key ct] authenticates and encrypts plaintext [pt] using
+          secret key [key] and nonce [n] and writes both the message authentication tag
+          and the ciphertext in [ct].
+          Returns true if successful. *)
+
+      val secretbox_open : ct:bytes -> n:bytes -> key:bytes -> pt:bytes -> bool
+      (** [secretbox_open ct n key pt] attempts to verify and decrypt ciphertext [ct] using
+          secret key [key] and nonce [n] and if successful writes the plaintext in [pt]
+          and returns true. *)
+    end
   end
-  (** The {i easy} interface concatenates the ciphertext and the message authentication tag
-      into a single buffer.
+  (** The {i easy} interface concatenates the ciphertext and the 16-byte long message
+      authentication tag into a single buffer.
 
       Buffers have the following size requirements:
-      - [ct] must be 16 bytes longer than [pt] in order to also accommodate the message
-      authentication tag
+      - [ct]: at least 16 bytes
       - [pk], [sk], [ck]: 32 bytes
       - [n]: 24 bytes
 *)
@@ -419,19 +472,16 @@ module NaCl : sig
         message authentication tag [tag] using
         secret key [key] and nonce [n] and if successful writes the plaintext in [pt]
         and returns true. *)
-
   end
   (** The {i detached} interface uses 2 separate buffers for the ciphertext and
       the message authentication tag. This allows users to encrypt and decrypt data in-place,
       by passing the same buffer for both plaintext and ciphertext.
 
       Buffers have the following size requirements:
-      - [pt] and [ct] must have the same size
       - [tag]: 16 bytes
       - [pk], [sk], [ck]: 32 bytes
       - [n]: 24 bytes
-*)
-
+  *)
 end
 (** Box (public-key authenticated encryption) and Secretbox (secret-key authenticated encryption)
 

@@ -245,38 +245,84 @@ module NaCl = struct
     assert (C.disjoint tag pt);
     assert (C.disjoint n pt);
     assert (C.disjoint n ct)
-
-  let box_beforenm ~pk ~sk ~ck =
+  let box_beforenm_noalloc ~pk ~sk ~ck =
     check_key_sizes pk sk;
     assert (C.size ck = 32);
     assert (C.disjoint ck pk);
     assert (C.disjoint ck sk);
     get_result @@ hacl_NaCl_crypto_box_beforenm (C.ctypes_buf ck) (C.ctypes_buf pk) (C.ctypes_buf sk)
+  let box_beforenm ~pk ~sk =
+    let ck = C.make 32 in
+    if box_beforenm_noalloc ~pk ~sk ~ck then
+      Some ck
+    else
+      None
   module Easy = struct
-    let box ~pt ~n ~pk ~sk ~ct =
-      check_key_sizes pk sk;
-      check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_box_easy (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
-    let box_open ~ct ~n ~pk ~sk ~pt =
-      check_key_sizes pk sk;
-      check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_box_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
-    let box_afternm ~pt ~n ~ck ~ct =
-      assert (C.size ck = 32);
-      check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_box_easy_afternm (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf ck)
-    let box_open_afternm ~ct ~n ~ck ~pt =
-      assert (C.size ck = 32);
-      check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_box_open_easy_afternm (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf ck)
-    let secretbox ~pt ~n ~key ~ct =
-      assert (C.size key = 32);
-      check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_secretbox_easy (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf key)
-    let secretbox_open ~ct ~n ~key ~pt=
-      assert (C.size key = 32);
-      check_easy pt ct n;
-      get_result @@ hacl_NaCl_crypto_secretbox_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf key)
+    module Noalloc = struct
+      let box ~pt ~n ~pk ~sk ~ct =
+        check_key_sizes pk sk;
+        check_easy pt ct n;
+        get_result @@ hacl_NaCl_crypto_box_easy (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
+      let box_open ~ct ~n ~pk ~sk ~pt =
+        check_key_sizes pk sk;
+        check_easy pt ct n;
+        get_result @@ hacl_NaCl_crypto_box_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf pk) (C.ctypes_buf sk)
+      let box_afternm ~pt ~n ~ck ~ct =
+        assert (C.size ck = 32);
+        check_easy pt ct n;
+        get_result @@ hacl_NaCl_crypto_box_easy_afternm (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf ck)
+      let box_open_afternm ~ct ~n ~ck ~pt =
+        assert (C.size ck = 32);
+        check_easy pt ct n;
+        get_result @@ hacl_NaCl_crypto_box_open_easy_afternm (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf ck)
+      let secretbox ~pt ~n ~key ~ct =
+        assert (C.size key = 32);
+        check_easy pt ct n;
+        get_result @@ hacl_NaCl_crypto_secretbox_easy (C.ctypes_buf ct) (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf n) (C.ctypes_buf key)
+      let secretbox_open ~ct ~n ~key ~pt =
+        assert (C.size key = 32);
+        check_easy pt ct n;
+        get_result @@ hacl_NaCl_crypto_secretbox_open_easy (C.ctypes_buf pt) (C.ctypes_buf ct) (C.size_uint32 ct) (C.ctypes_buf n) (C.ctypes_buf key)
+    end
+    let box ~pt ~n ~pk ~sk =
+      let ct = C.make (C.size pt + 16) in
+      if Noalloc.box ~pt ~n ~pk ~sk ~ct then
+        Some ct
+      else
+        None
+    let box_open ~ct ~n ~pk ~sk =
+      assert (C.size ct >= 16);
+      let pt = C.make (C.size ct - 16) in
+      if Noalloc.box_open ~ct ~n ~pk ~sk ~pt then
+        Some pt
+      else
+        None
+    let box_afternm ~pt ~n ~ck =
+      let ct = C.make (C.size pt + 16) in
+      if Noalloc.box_afternm ~pt ~n ~ck ~ct then
+        Some ct
+      else
+        None
+    let box_open_afternm ~ct ~n ~ck =
+      assert (C.size ct >= 16);
+      let pt = C.make (C.size ct - 16) in
+      if Noalloc.box_open_afternm ~ct ~n ~ck ~pt then
+        Some pt
+      else
+        None
+    let secretbox ~pt ~n ~key =
+      let ct = C.make (C.size pt + 16) in
+      if Noalloc.secretbox ~pt ~n ~key ~ct then
+        Some ct
+      else
+        None
+    let secretbox_open ~ct ~n ~key =
+      assert (C.size ct >= 16);
+      let pt = C.make (C.size ct - 16) in
+      if Noalloc.secretbox_open ~ct ~n ~key ~pt then
+        Some pt
+      else
+        None
   end
   module Detached = struct
     let box ~pt ~n ~pk ~sk ~ct ~tag =
