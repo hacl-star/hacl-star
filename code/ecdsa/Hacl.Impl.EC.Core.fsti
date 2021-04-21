@@ -32,7 +32,8 @@ val fromDomain: #c: curve -> f: felem c -> result: felem c -> Stack unit
 
 val pointToDomain: #c: curve -> p: point c -> result: point c -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ eq_or_disjoint p result /\ point_eval c h p)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    point_eval c h1 result /\ point_eval c h1 p /\
     point_x_as_nat c h1 result == toDomain_ #c #DH (point_x_as_nat c h0 p) /\
     point_y_as_nat c h1 result == toDomain_ #c #DH (point_y_as_nat c h0 p) /\
     point_z_as_nat c h1 result == toDomain_ #c #DH (point_z_as_nat c h0 p))
@@ -53,23 +54,23 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
     if Spec.ECC.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
 
 val norm: #c: curve -> p: point c -> resultPoint: point c -> 
-  tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> Stack unit
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> Stack unit
   (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval c h p /\
     disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
-  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
-    let resultPoint = point_prime_to_coordinates c (as_seq h1 resultPoint) in 
-    let pointD = fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h0 p)) in 
+  (ensures fun h0 _ h1 -> point_eval c h1 resultPoint /\
+    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
+    let resultPoint = point_as_nat c h1 resultPoint in 
+    let pointD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
     let pointNorm = _norm #c pointD in
     pointNorm == resultPoint))
 
-val normX: #c: curve -> p: point c -> result: felem c -> tempBuffer: lbuffer uint64 (size 22 *! getCoordinateLenU64 c) -> 
+val normX: #c: curve -> p: point c -> result: felem c 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
   Stack unit
   (requires fun h -> live h p /\ live h result /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc result; loc tempBuffer] /\ point_eval c h p) 
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ (
-    let pxD = fromDomain_ #c #DH (point_x_as_nat c h0 p) in 
-    let pyD = fromDomain_ #c #DH (point_y_as_nat c h0 p) in 
-    let pzD = fromDomain_ #c #DH (point_z_as_nat c h0 p) in 
+    let pxD, pyD, pzD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
     let (xN, _, _) = _norm #c (pxD, pyD, pzD) in 
     as_nat c h1 result == xN))
 
@@ -79,27 +80,24 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype
   -> p: point c
   -> result: point c 
   -> scalar: lbuffer_t buf_type uint8 (getScalarLenBytes c)
-  -> tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
   (requires fun h -> live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\ point_eval c h p /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    ~ (isPointAtInfinity (point_prime_to_coordinates c (as_seq h p))))
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ 
-    point_eval c h0 p /\ point_eval c h1 result /\ (
-    let r = point_prime_to_coordinates c (as_seq h1 result) in
-    let rN = scalar_multiplication #c (as_seq h0 scalar) (point_prime_to_coordinates c (as_seq h0 p)) in 
-    r == rN))
+    ~ (isPointAtInfinity (point_as_nat c h p)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
+    pointEqual (scalar_multiplication (as_seq h0 scalar) (point_as_nat c h0 p)) (point_as_nat c h1 result))
 
 
 val scalarMultiplicationWithoutNorm: #c: curve 
   -> p: point c 
   -> result: point c 
   -> scalar: lbuffer uint8 (getScalarLenBytes c) 
-  -> tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
   (requires fun h -> point_eval c h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    ~ (isPointAtInfinity (point_prime_to_coordinates c (as_seq h p))))
+    ~ (isPointAtInfinity (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p1 = fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h1 result)) in 
     let p = point_prime_to_coordinates c (as_seq h0 p) in point_mult_0 #c p 0; 

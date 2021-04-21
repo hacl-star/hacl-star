@@ -56,16 +56,6 @@ let conditional_swap i p q =
   if uint_v i = 0 then (p, q) else (q, p)
 
 
-val lemma_point_eval_swapped: c: curve -> h0: mem -> h1: mem -> p: point c -> q: point c ->
-  Lemma (requires (point_eval c h0 p /\ as_seq h0 p == as_seq h1 q))
-  (ensures (point_eval c h1 q))
-
-let lemma_point_eval_swapped c h0 h1 p q = 
-  assert(
-  as_nat c h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) == 
-  as_nat c h1 (gsub q (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)))
-
-
 val lemma_PointEqualR: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
   ((~ (pointEqual p q)) <==> ~ (pointEqual q p))
 
@@ -135,16 +125,13 @@ let cswap #c bit p1 p2 =
   Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2);
 
   if v bit = 1 then begin
-    lemma_point_eval_swapped c h0 h1 p1 p2; 
     lemma_point_as_nat #c h0 h1 p1 p2;
-    lemma_point_as_nat #c h0 h1 p2 p1;
-    lemma_point_eval_swapped c h0 h1 p2 p1 
+    lemma_point_as_nat #c h0 h1 p2 p1
     end
   else begin
-    lemma_point_eval c h0 h1 p1;
     lemma_point_as_nat #c h0 h1 p1 p1;
-    lemma_point_as_nat #c h0 h1 p2 p2;
-    lemma_point_eval c h0 h1 p2 end
+    lemma_point_as_nat #c h0 h1 p2 p2
+  end
 
 
 val pointAddAsAdd: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
@@ -205,7 +192,6 @@ let montgomery_ladder_step1 #c p q tempBuffer =
     let h1 = ST.get() in 
   point_double p p tempBuffer; 
     let h2 = ST.get() in 
-  lemma_point_eval c h1 h2 q;
   lemma_coord_eval c h1 h2 q;
   pointAddAsDouble #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 p));
   curve_point_equality #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 q))

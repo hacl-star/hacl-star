@@ -171,25 +171,16 @@ let z3Invariant (#c: curve) (h0: mem) (h1: mem) (z3: felem c) (z1: felem c) (z2:
 
 
 val point_x_modifies_lemma: c: curve -> h0: mem -> h1 : mem -> q: point c -> 
-  Lemma (requires (as_seq h0 q == as_seq h1 q))
+  Lemma (requires (point_eval c h0 q /\ as_seq h0 q == as_seq h1 q))
   (ensures (point_x_as_nat c h0 q == point_x_as_nat c h1 q))
 
 let point_x_modifies_lemma c h0 h1 q = ()
 
 val point_y_modifies_lemma: c: curve -> h0: mem -> h1 : mem -> q: point c -> 
-  Lemma (requires (as_seq h0 q == as_seq h1 q))
+  Lemma (requires (point_eval c h0 q /\as_seq h0 q == as_seq h1 q))
   (ensures (point_y_as_nat c h0 q == point_y_as_nat c h1 q))
 
 let point_y_modifies_lemma c h0 h1 q = ()
-
-val point_z_modifies_lemma: c: curve -> h0: mem -> h1 : mem -> q: point c -> 
-  Lemma (requires (as_seq h0 q == as_seq h1 q))
-  (ensures (point_z_as_nat c h0 q == point_z_as_nat c h1 q))
-
-let point_z_modifies_lemma c h0 h1 q = 
-  assert(as_nat c h0 (gsub q (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) == 
-    as_nat c h1 (gsub q (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)))
-
 
 val lemma_point_eval: c: curve -> h0: mem -> h1: mem -> p: point c -> Lemma
   (requires (point_eval c h0 p /\ as_seq h0 p == as_seq h1 p))
@@ -198,17 +189,16 @@ val lemma_point_eval: c: curve -> h0: mem -> h1: mem -> p: point c -> Lemma
 
 val lemma_coord_eval: c: curve -> h0: mem -> h1 : mem -> p: point c -> 
   Lemma 
-    (requires (as_seq h1 p == as_seq h0 p))
-    (ensures (
-      point_x_as_nat c h0 p == point_x_as_nat c h1 p /\
-      point_y_as_nat c h0 p == point_y_as_nat c h1 p /\
-      point_z_as_nat c h0 p == point_z_as_nat c h1 p))  
+  (requires (point_eval c h0 p /\ as_seq h1 p == as_seq h0 p))
+  (ensures (point_eval c h1 p /\ 
+    point_x_as_nat c h0 p == point_x_as_nat c h1 p /\
+    point_y_as_nat c h0 p == point_y_as_nat c h1 p /\
+    point_z_as_nat c h0 p == point_z_as_nat c h1 p))  
 
 
 let lemma_point_eval c h0 h1 p = 
   point_x_modifies_lemma c h0 h1 p;
-  point_y_modifies_lemma c h0 h1 p;
-  point_z_modifies_lemma c h0 h1 p
+  point_y_modifies_lemma c h0 h1 p
 
 
 let lemma_coord_eval c h0 h1 p = 

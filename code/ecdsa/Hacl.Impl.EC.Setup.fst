@@ -415,4 +415,93 @@ let upload_b_constant #c x =
       14774077593024970745 * pow2 (64 * 5)
       == bCoordinate #P384 * pow2 384 % getPrime P384)
   | _ -> admit()
-    
+
+val uploadBasePoint: #c: curve -> p: point c -> Stack unit 
+  (requires fun h -> live h p)
+  (ensures fun h0 _ h1 -> 
+    modifies (loc p) h0 h1 /\ point_eval c h1 p /\ (
+    basePoint #c == fromDomainPoint #c #DH (point_as_nat c h1 p)))
+
+let uploadBasePoint #c p = 
+  match c with
+  |P384 -> 
+    let h0 = ST.get() in
+    upd p (size 0) (u64 0x3dd0756649c0b528);
+    upd p (size 1) (u64 0x20e378e2a0d6ce38);
+    upd p (size 2) (u64 0x879c3afc541b4d6e);
+    upd p (size 3) (u64 0x6454868459a30eff);
+    upd p (size 4) (u64 0x812ff723614ede2b);
+    upd p (size 5) (u64 0x4d3aadc2299e1513);
+
+
+    upd p (size 6) (u64 0x23043dad4b03a4fe);
+    upd p (size 7) (u64 0xa1bfa8bf7bb4a9ac);
+    upd p (size 8) (u64 0x8bade7562e83b050);
+    upd p (size 9) (u64 0xc6c3521968f4ffd9);
+    upd p (size 10) (u64 0xdd8002263969a840);
+    upd p (size 11) (u64 0x2b78abc25a15c5e9);
+
+    upd p (size 12) (u64 0xffffffff00000001);
+    upd p (size 13) (u64 0xffffffff);
+    upd p (size 14) (u64 0x1);
+    upd p (size 15) (u64 0);
+    upd p (size 16) (u64 0);
+    upd p (size 17) (u64 0);
+    admit()
+
+
+
+  |P256 -> 
+    let h0 = ST.get() in 
+  upd p (size 0) (u64 0x79e730d418a9143c);
+  upd p (size 1) (u64 0x75ba95fc5fedb601);
+  upd p (size 2) (u64 0x79fb732b77622510);
+  upd p (size 3) (u64 0x18905f76a53755c6);
+  
+  upd p (size 4) (u64 0xddf25357ce95560a);
+  upd p (size 5) (u64 0x8b4ab8e4ba19e45c);
+  upd p (size 6) (u64 0xd2e88688dd21f325);
+  upd p (size 7) (u64 0x8571ff1825885d85);
+  
+  upd p (size 8) (u64 0x1);
+  upd p (size 9) (u64 0xffffffff00000000);
+  upd p (size 10) (u64 0xffffffffffffffff);
+  upd p (size 11) (u64 0xfffffffe);
+
+  let h1 = ST.get() in 
+
+  let x = gsub p (size 0) (size 4) in 
+  let y = gsub p (size 4) (size 4) in 
+  let z = gsub p (size 8) (size 4) in 
+  
+  Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 x);
+  Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 y);
+  Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 z);
+  lemmaFromDomain #c #DH (as_nat c h1 x); 
+  lemmaFromDomain #c #DH (as_nat c h1 y); 
+  lemmaFromDomain #c #DH (as_nat c h1 z); 
+
+  let bX, bY, bZ = basePoint #c in 
+
+  assert_norm (8784043285714375740 + pow2 64 * 8483257759279461889 + 
+    pow2 (64 * 2) * 8789745728267363600 + 
+    pow2 (64 * 3) * 1770019616739251654 = 11110593207902424140321080247206512405358633331993495164878354046817554469948); 
+  assert_norm(bX == 11110593207902424140321080247206512405358633331993495164878354046817554469948 * modp_inv2_prime (pow2 256) prime256 % prime256);
+
+  assert_norm(15992936863339206154 + pow2 64 * 10037038012062884956 + 
+    pow2 (64 * 2) * 15197544864945402661 + 
+    pow2 (64 * 3) * 9615747158586711429 = 60359023176204190920225817201443260813112970217682417638161152432929735267850);
+  assert_norm(bY == 60359023176204190920225817201443260813112970217682417638161152432929735267850 * modp_inv2_prime (pow2 256) prime256 % prime256);
+
+  
+  assert_norm (1 + pow2 64 * 18446744069414584320 + 
+    pow2 (64 * 2) * 18446744073709551615 + 
+    pow2 (64 * 3) * 4294967294 == 26959946660873538059280334323183841250350249843923952699046031785985);
+  assert_norm (bZ = 26959946660873538059280334323183841250350249843923952699046031785985 * modp_inv2_prime (pow2 256) prime256 % prime256);
+
+  assert(fromDomain_ #c #DH (as_nat P256 h1 x) == bX); 
+  assert(fromDomain_ #c #DH (as_nat P256 h1 y) == bY);
+  assert(fromDomain_ #c #DH (as_nat P256 h1 z) == bZ);
+
+  admit()
+  |_ -> admit()
