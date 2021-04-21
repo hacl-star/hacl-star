@@ -429,6 +429,7 @@ val table_select_consttime:
    (Math.Lemmas.lemma_mult_le_right (v len) (v i + 1) (v table_len);
     as_seq h1 res == LSeq.sub (as_seq h0 table) (v i * v len) (v len)))
 
+#restart-solver
 let table_select_consttime #a_t len table_len table i res =
   let h0 = ST.get () in
   copy res (sub table 0ul len);
