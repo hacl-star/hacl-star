@@ -14,22 +14,23 @@ open Spec.DH
 open Hacl.Spec.ECDSA.Definition
 
 
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+
 inline_for_extraction noextract
 val ecp256dh_i:
     c: curve 
   -> result:lbuffer uint8 (getPointLen c)
-  -> scalar:lbuffer uint8 (getScalarLen c)
+  -> scalar:lbuffer uint8 (getScalarLenBytes c)
   -> Stack uint64
   (requires fun h ->
-    live h result /\ live h scalar /\ 
-    disjoint result scalar)
+    live h result /\ live h scalar /\ disjoint result scalar)
   (ensures fun h0 r h1 ->
     let pointX, pointY, flag = ecp256_dh_i #c (as_seq h0 scalar) in
-    modifies (loc result) h0 h1 /\
-    r == flag /\
-    as_seq h1 (gsub result (size 0) (getCoordinateLen c)) == pointX /\
-    as_seq h1 (gsub result (getCoordinateLen c) (getCoordinateLen c)) == pointY
-  )
+    modifies (loc result) h0 h1 /\ r == flag /\ (
+    let len = getCoordinateLenU c in 
+    let x = as_seq h1 (gsub result (size 0) len) in 
+    let y = as_seq h1 (gsub result len len) in 
+    pointX == x /\ pointY == y))
 
 
 inline_for_extraction noextract

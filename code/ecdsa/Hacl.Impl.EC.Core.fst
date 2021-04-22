@@ -451,3 +451,73 @@ let secretToPublicWithoutNorm #c result scalar tempBuffer =
 
   uploadStartPointsS2P result q; 
   montgomery_ladder result q scalar buff
+
+
+val lemma_norm_twice: #c: curve -> p0: point_nat_prime #c {~ (isPointAtInfinity p0)} -> 
+  Lemma (_norm (_norm p0) == _norm p0)
+
+let lemma_norm_twice #c p0 = 
+  let prime = getPrime c in 
+  
+  let (x, y, z) = p0 in
+  let kX, kY, kZ = _norm p0 in 
+  let kkX, kkY, kkZ = _norm (_norm p0) in 
+    
+  small_mod 1 prime;
+  small_mod kX prime;
+  small_mod kY prime;
+  lemma_pow_mod_n_is_fpow prime 1 (prime - 2);
+  power_one (prime - 2)
+
+val lemma_norm_twice1: #c: curve -> p0: point_nat_prime #c {let (x, y, z) = p0 in z == 1} -> 
+  Lemma (p0 == _norm p0)
+
+let lemma_norm_twice1 #c p0 = 
+  let prime = getPrime c in 
+  
+  let (x, y, z) = p0 in
+    
+  small_mod 1 prime;
+  small_mod x prime;
+  small_mod y prime;
+  lemma_pow_mod_n_is_fpow prime 1 (prime - 2);
+  power_one (prime - 2)
+
+
+val lemma_test: #c: curve -> p0: point_nat_prime #c -> s: scalar_bytes #c -> 
+  Lemma (requires (pointEqual p0 (secret_to_public #c s)))
+  (ensures (
+    let p1 = secret_to_public #c s in
+    let pAffineX, pAffineY, pAffineZ = _norm p0 in 
+    let qAffineX, qAffineY, qAffineZ = _norm p1 in 
+    (isPointAtInfinity p0 /\ isPointAtInfinity p1) \/ (pAffineX == qAffineX /\ pAffineY == qAffineY)))
+
+
+let lemma_test #c p0 scalar =
+  let p1 = secret_to_public #c scalar in 
+  
+    point_mult_0 (basePoint #c) 0;
+    
+  let q, _ = montgomery_ladder_spec_left #c scalar (pointAtInfinity, (basePoint #c)) in
+  
+  assert(p1 == _norm q);
+
+
+
+  let pAffineX, pAffineY, pAffineZ = _norm p0 in 
+  let qAffineX, qAffineY, qAffineZ = p1 in 
+
+  if ((isPointAtInfinity q) = false) then begin
+    lemma_norm_twice q;
+    assert(qAffineZ == 1)
+  end;
+
+  
+  assert((isPointAtInfinity p0 /\ isPointAtInfinity p1) \/ (pAffineX == qAffineX /\ pAffineY == qAffineY));
+
+
+  admit();
+
+  
+
+  admit()

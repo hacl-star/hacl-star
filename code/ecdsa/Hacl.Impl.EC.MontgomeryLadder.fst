@@ -298,8 +298,12 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype -> p: point c -> q: point
     pointEqual #c pD (point_mult #c 0 qD) /\ ~ (pointEqual #c pD qD)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\
     point_eval c h1 p /\ point_eval c h1 q /\ ( 
+    let p0D = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
     let q0D = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
     let pD = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
+    let qD = fromDomainPoint #c #DH (point_as_nat c h1 q) in 
+    let r0, r1 = montgomery_ladder_spec_left (as_seq h0 scalar) (p0D, q0D) in 
+    (r0, r1) == (pD, qD)  /\
     pointEqual pD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) q0D)))
 
 
@@ -320,14 +324,26 @@ let montgomery_ladder #c #a p q scalar tempBuffer =
     let q0D = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
     let pD = fromDomainPoint #c #DH (point_as_nat c h p) in 
     let qD = fromDomainPoint #c #DH (point_as_nat c h q) in
+
+    let r0, r1 = Lib.LoopCombinators.repeati i (spec_ml h0) (p0D, q0D) in 
+    r0 == pD /\ r1 == qD /\
+
     pointEqual qD (point_mult #c (scalar_as_nat_ #c (as_seq h0 scalar) i + 1) q0D) /\
-    pointEqual pD (point_mult #c (scalar_as_nat_ #c (as_seq h0 scalar) i) q0D) /\ (
-    ~ (pointEqual #c pD qD))) in 
-  
+    pointEqual pD (point_mult #c (scalar_as_nat_ #c (as_seq h0 scalar) i) q0D) /\ 
+    ~ (pointEqual #c pD qD)) in 
+
+   Lib.LoopCombinators.eq_repeati0 (v (getScalarLen c)) (spec_ml h0) 
+     (fromDomainPoint #c #DH (point_as_nat c h0 p), fromDomainPoint #c #DH (point_as_nat c h0 q));
+
   point_mult_0_lemma #c (fromDomainPoint #c #DH (point_as_nat c h0 q)); 
   for 0ul cycleLoop inv (fun i -> 
     let h2 = ST.get() in 
       montgomery_ladder_step p q tempBuffer scalar i; 
+	let h3 = ST.get() in 
+	
+      Lib.LoopCombinators.unfold_repeati (v (getScalarLen c)) (spec_ml h0)
+	(fromDomainPoint #c #DH (point_as_nat c h0 p),  fromDomainPoint #c #DH (point_as_nat c h0 q)) (v i);
+
       mlStepAsPointAdd (fromDomainPoint #c #DH (point_as_nat c h0 q)) 
       (scalar_as_nat_ #c (as_seq h0 scalar) (v i)) (fromDomainPoint #c #DH (point_as_nat c h2 p)) 
       (scalar_as_nat_ #c (as_seq h0 scalar) (v i) + 1) (fromDomainPoint #c #DH (point_as_nat c h2 q)) (as_seq h0 scalar) (v i)

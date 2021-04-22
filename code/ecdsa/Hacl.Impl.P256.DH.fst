@@ -25,10 +25,11 @@ open Hacl.Impl.EC.Intro
 
 let ecp256dh_i c result scalar =
   push_frame();
+    let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let scalarLen = getScalarLenBytes c in 
 
-  let tempBuffer = create (size 25 *! len) (u64 0) in
+  let tempBuffer = create (size 20 *! len) (u64 0) in
     
   let resultBuffer = create (size 3 *! len) (u64 0) in
   let resultBufferX = sub resultBuffer (size 0) len in
@@ -38,8 +39,8 @@ let ecp256dh_i c result scalar =
   let resultY = sub result scalarLen scalarLen in
 
   secretToPublic #c resultBuffer scalar tempBuffer;
-
   let flag = isPointAtInfinityPrivate #c resultBuffer in
+
 
   let h0 = ST.get() in
   changeEndian #c resultBufferX;
