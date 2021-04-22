@@ -89,9 +89,7 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype
     pointEqual (scalar_multiplication (as_seq h0 scalar) (point_as_nat c h0 p)) (point_as_nat c h1 result))
 
 
-val scalarMultiplicationWithoutNorm: #c: curve 
-  -> p: point c 
-  -> result: point c 
+val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
   -> scalar: lbuffer uint8 (getScalarLenBytes c) 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
@@ -99,29 +97,28 @@ val scalarMultiplicationWithoutNorm: #c: curve
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
     ~ (isPointAtInfinity (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
-    let p1 = fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h1 result)) in 
-    let p = point_prime_to_coordinates c (as_seq h0 p) in point_mult_0 #c p 0; 
+    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
+    let p = point_as_nat c h0 p in point_mult_0 #c p 0; 
     let rN, _ = montgomery_ladder_spec_left #c (as_seq h0 scalar) (pointAtInfinity, p) in 
-    rN == p1)) 
+    pointEqual rN p1)) 
     
 
 val secretToPublic: #c: curve -> result: point c 
   -> scalar: lbuffer uint8 (getScalarLenBytes c) 
-  -> tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
-  (ensures fun h0 _ h1 -> point_eval c h0 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
-    let p = point_prime_to_coordinates c (as_seq h1 result) in 
+  (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
+    let p = point_as_nat c h1 result in 
     let r = secret_to_public #c (as_seq h0 scalar) in 
-    p == r))
+    pointEqual p r))
 
 val secretToPublicWithoutNorm: #c: curve -> result: point c 
   -> scalar: lbuffer uint8 (getScalarLenBytes c) 
-  -> tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) ->
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
-  (ensures fun h0 _ h1 -> point_eval c h0 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
-    let p1 = fromDomainPoint #c #DH (point_prime_to_coordinates c (as_seq h1 result)) in 
-    point_mult_0 (basePoint #c) 0;
+  (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
+    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 result) in point_mult_0 (basePoint #c) 0;
     let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, basePoint #c) in 
-    rN == p1))  
+    pointEqual p1 rN))  

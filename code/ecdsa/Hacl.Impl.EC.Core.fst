@@ -333,9 +333,9 @@ let scalar_multiplication_t_0 #c  q p result scalar tempBuffer =
   montgomery_ladder q result scalar tempBuffer
 
 
-val point_mult_0: #c: curve -> p: point_nat_prime #c ->  Lemma (point_mult #c 0 p == pointAtInfinity)
+val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c ->  Lemma (point_mult #c 0 p == pointAtInfinity)
 
-let point_mult_0 #c p = Spec.ECC.point_mult_0 p 0
+let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 p 0
 
 
 inline_for_extraction
@@ -364,7 +364,7 @@ let scalarMultiplication_t #c #t p result scalar tempBuffer  =
   scalar_multiplication_t_0 q p result scalar buff; 
   norm q result buff; 
   let i1 = point_as_nat c h0 p in 
-    point_mult_0 i1
+    point_mult0_is_infinity i1
 
 
 let scalarMultiplicationL #c = scalarMultiplication_t #c #MUT
@@ -380,51 +380,74 @@ let scalarMultiplication #c #buf_type p result scalar tempBuffer =
 
 
 let scalarMultiplicationWithoutNorm #c p result scalar tempBuffer = 
-  let h0 = ST.get() in  
+    let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
-  uploadZeroPoint #c q;
-  let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
-  pointToDomain p result;
-    let h1 = ST.get() in 
-    admit();
-  montgomery_ladder q result scalar buff;
+  size_cuttable_scalar_mult #c;
+  let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in
+  scalar_multiplication_t_0 q p result scalar buff; 
+  
   copy_point q result;  
-    lemma_point_to_domain h0 h1 p result;
-    lemma_pif_to_domain #c h1 q
+  let i1 = point_as_nat c h0 p in 
+    point_mult0_is_infinity i1
     
 
-let secretToPublic #c result scalar tempBuffer = 
-  push_frame(); 
-    let len = getCoordinateLenU64 c in 
-    let basePoint = create (size 3 *! len) (u64 0) in 
-  uploadBasePoint #c basePoint;
-    let q = sub tempBuffer (size 0) (size 3 *! len) in 
-    let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
-  uploadZeroPoint #c q; 
-  admit();
-  let h1 = ST.get() in 
+val uploadStartPointsS2P: #c: curve -> q: point c -> result: point c -> Stack unit 
+  (requires fun h -> live h q /\ live h result /\ disjoint q result)
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc q) h0 h1 /\
+    point_eval c h1 q /\ point_eval c h1 result /\ (
+    let pD = fromDomainPoint #c #DH (point_as_nat c h1 q) in 
+    let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
+    qD == basePoint #c /\ isPointAtInfinity pD /\ 
+    pointEqual #c pD (point_mult #c 0 qD) /\ ~ (pointEqual #c pD qD)))
+
+let uploadStartPointsS2P #c q result = 
+  uploadZeroPoint #c q;
+    let h1 = ST.get() in 
+  Hacl.Impl.EC.Setup.uploadBasePoint #c result;
+    let h2 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 q;
     lemma_pif_to_domain #c h1 q;
-  montgomery_ladder #c q basePoint scalar buff; 
-  norm q result buff;  
-  pop_frame();
-  admit()
+  let qD = fromDomainPoint #c #DH (point_as_nat c h2 result) in 
+    point_mult_0 #c qD 0; 
+    let x, y, z = point_as_nat c h2 result in 
+    lemma_pointAtInfInDomain #c x y z
+
+
+val secretToPublic_0: #c: curve -> #t: buftype -> q: point c -> result: point c -> 
+  scalar: lbuffer_t t uint8 (getScalarLenBytes c) -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack unit 
+  (requires fun h -> live h q /\ live h result /\ live h scalar /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc q; loc tempBuffer; loc scalar] /\
+    disjoint q result /\ disjoint result tempBuffer /\ disjoint result scalar)
+  (ensures fun h0 _ h1 -> modifies (loc q |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 q /\ (
+    let i1 = basePoint #c in 
+    point_mult_0 i1 0; 
+    let pD = fromDomainPoint #c #DH (point_as_nat c h1 q) in
+    let r0, r1 = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity , i1) in pointEqual pD r0))
+
+
+let secretToPublic_0 #c q result scalar tempBuffer = 
+  uploadStartPointsS2P q result; 
+  montgomery_ladder q result scalar tempBuffer
+
+
+let secretToPublic #c result scalar tempBuffer = 
+  let len = getCoordinateLenU64 c in 
+  let q = sub tempBuffer (size 0) (size 3 *! len) in
+  size_cuttable_scalar_mult #c;
+  let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
+
+  secretToPublic_0 q result scalar buff;
+  norm q result buff
 
 
 let secretToPublicWithoutNorm #c result scalar tempBuffer = 
-  push_frame(); 
-    let len = getCoordinateLenU64 c in 
-    let basePoint = create (size 3 *! len) (u64 0) in 
-  uploadBasePoint #c basePoint;
-      let q = sub tempBuffer (size 0) (size 3 *! len) in 
-      let buff = sub tempBuffer (size 3 *! len) (size 22 *! len) in 
-  uploadZeroPoint #c q; 
-  admit();
-      let h1 = ST.get() in 
-      lemma_pif_to_domain #c h1 q; 
-  montgomery_ladder #c q basePoint scalar buff; 
-  copy_point q result;
-  pop_frame()  
+  let len = getCoordinateLenU64 c in 
+  let q = sub tempBuffer (size 0) (size 3 *! len) in
+  size_cuttable_scalar_mult #c;
+  let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
 
-
-
+  uploadStartPointsS2P result q; 
+  montgomery_ladder result q scalar buff
