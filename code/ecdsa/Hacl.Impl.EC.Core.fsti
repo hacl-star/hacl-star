@@ -85,9 +85,9 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype
   (requires fun h -> live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\ point_eval c h p /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
     ~ (isPointAtInfinity (point_as_nat c h p)))
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
-    pointEqual (scalar_multiplication (as_seq h0 scalar) (point_as_nat c h0 p)) (point_as_nat c h1 result))
-
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
+    let pD = scalar_multiplication  (as_seq h0 scalar) (point_as_nat c h0 p) in 
+    pD == point_as_nat c h1 result))
 
 val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
   -> scalar: lbuffer uint8 (getScalarLenBytes c) 
@@ -100,7 +100,7 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c
     let p1 = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
     let p = point_as_nat c h0 p in point_mult_0 #c p 0; 
     let rN, _ = montgomery_ladder_spec_left #c (as_seq h0 scalar) (pointAtInfinity, p) in 
-    pointEqual rN p1)) 
+    rN == p1)) 
     
 
 val secretToPublic: #c: curve -> result: point c 
@@ -111,7 +111,7 @@ val secretToPublic: #c: curve -> result: point c
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let p = point_as_nat c h1 result in 
     let r = secret_to_public #c (as_seq h0 scalar) in 
-    pointEqual p r))
+    p == r))
 
 val secretToPublicWithoutNorm: #c: curve -> result: point c 
   -> scalar: lbuffer uint8 (getScalarLenBytes c) 
@@ -121,4 +121,4 @@ val secretToPublicWithoutNorm: #c: curve -> result: point c
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let p1 = fromDomainPoint #c #DH (point_as_nat c h1 result) in point_mult_0 (basePoint #c) 0;
     let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, basePoint #c) in 
-    pointEqual p1 rN))  
+    p1 == rN))  
