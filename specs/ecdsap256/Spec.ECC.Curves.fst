@@ -121,7 +121,7 @@ let getCoordinateLenU curve = getCoordinateLenU64 curve *. 8ul
 let getCoordinateLen curve = v (getCoordinateLenU curve)
 
 (* each point consists of three coordinates *)
-let getPointLen curve = getCoordinateLen curve * 3
+let getPointLen curve = getCoordinateLenU curve *. 3ul
 
 (* the expected scalar length *)
 

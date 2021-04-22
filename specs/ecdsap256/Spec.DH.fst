@@ -9,11 +9,10 @@ open Spec.ECDSA
 open Spec.ECC
 open Spec.ECC.Curves
 
-#set-options "--fuel 0 --ifuel 0"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 (* Initiator *)
-val ecp256_dh_i: #c: curve 
-  -> s:lbytes (getCoordinateLen c) 
+val ecp256_dh_i: #c: curve -> s: scalar_bytes #c
   -> tuple3 (lbytes (getCoordinateLen c)) (lbytes (getCoordinateLen c)) uint64
 
 let ecp256_dh_i #c s =
