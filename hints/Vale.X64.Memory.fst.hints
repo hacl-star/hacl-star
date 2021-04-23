@@ -1493,8 +1493,8 @@
         "equality_tok_Vale.Arch.HeapTypes_s.TUInt8@tok",
         "equation_FStar.Monotonic.HyperHeap.hmap",
         "equation_FStar.Monotonic.HyperStack.is_wf_with_ctr_and_tip",
-        "equation_FStar.Monotonic.HyperStack.mem", "equation_Prims.squash",
-        "equation_Vale.Arch.HeapImpl._ih",
+        "equation_FStar.Monotonic.HyperStack.mem", "equation_Prims.pos",
+        "equation_Prims.squash", "equation_Vale.Arch.HeapImpl._ih",
         "equation_Vale.Interop.Types.view_n", "equation_Vale.X64.Memory.b8",
         "equation_Vale.X64.Memory.buffer_addr",
         "equation_Vale.X64.Memory.scale_by",
@@ -1523,6 +1523,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_61ad87a48c5493622a87dee22c6da699",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_92021f726392e5bad2e8fce80b5e9a8b",
         "refinement_interpretation_Tm_refine_c8d14e43ad9ba7ceb64e36ef13e09448",
         "refinement_interpretation_Tm_refine_fb46804529de36a0e6813ea1066a078a",
@@ -1531,10 +1532,12 @@
         "typing_FStar.Map.contains", "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperHeap.root",
         "typing_FStar.Monotonic.HyperStack.get_hmap",
-        "typing_Vale.Arch.HeapImpl._ih", "typing_Vale.X64.Memory.addr_in_ptr"
+        "typing_Vale.Arch.HeapImpl._ih", "typing_Vale.Interop.Types.view_n",
+        "typing_Vale.X64.Memory.addr_in_ptr",
+        "typing_Vale.X64.Memory.scale_by"
       ],
       0,
-      "c1d67de42cb771703f533799fc7a6062"
+      "c0ae42057e5baa674d3ddc600c98df73"
     ],
     [
       "Vale.X64.Memory.find_valid_buffer_ps",
@@ -3176,7 +3179,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "2f45c184e9e267a999e6c1fbf25008e2"
+      "0c7b256ded1d6a19b32e47aff49e70c5"
     ],
     [
       "Vale.X64.Memory.valid_layout_data_buffer",
