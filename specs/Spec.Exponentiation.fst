@@ -156,17 +156,15 @@ val exp_fw_acc0:
   -> k:concrete_ops t
   -> a:t
   -> bBits:nat -> b:nat{b < pow2 bBits}
-  -> l:pos ->
+  -> l:pos{bBits % l <> 0} ->
   Pure t
   (requires True)
   (ensures  fun r ->
     k.to.refl r == S.exp_fw_acc0 k.to.comm_monoid (k.to.refl a) bBits b l)
 
 let exp_fw_acc0 #t k a bBits b l =
-  if bBits % l = 0 then k.one ()
-  else begin
-    let bits_c = S.get_ith_lbits bBits b (bBits / l * l) l in
-    pow k a bits_c end
+  let bits_c = S.get_ith_lbits bBits b (bBits / l * l) l in
+  pow k a bits_c
 
 
 val exp_fw:
@@ -181,7 +179,7 @@ val exp_fw:
     k.to.refl r == S.exp_fw k.to.comm_monoid (k.to.refl a) bBits b l)
 
 let exp_fw #t k a bBits b l =
-  let acc0 = exp_fw_acc0 k a bBits b l in
+  let acc0 = if bBits % l = 0 then one () else exp_fw_acc0 k a bBits b l in
   let f = S.exp_fw_f k.to.comm_monoid (k.to.refl a) bBits b l in
   Loops.eq_repeati0 (bBits / l) f (k.to.refl acc0);
 
@@ -202,6 +200,24 @@ let exp_fw #t k a bBits b l =
   acc
 
 
+val exp_double_fw_acc0:
+    #t:Type
+  -> k:concrete_ops t
+  -> a1:t
+  -> bBits:nat -> b1:nat{b1 < pow2 bBits}
+  -> a2:t -> b2:nat{b2 < pow2 bBits}
+  -> l:pos{bBits % l <> 0} ->
+  Pure t
+  (requires True)
+  (ensures  fun r ->
+    k.to.refl r == S.exp_double_fw_acc0 k.to.comm_monoid (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l)
+
+let exp_double_fw_acc0 #t k a1 bBits b1 a2 b2 l =
+  let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
+  let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
+  k.mul acc_a1 acc_a2
+
+
 val exp_double_fw:
     #t:Type
   -> k:concrete_ops t
@@ -215,9 +231,7 @@ val exp_double_fw:
     k.to.refl r == S.exp_double_fw k.to.comm_monoid (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l)
 
 let exp_double_fw #t k a1 bBits b1 a2 b2 l =
-  let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
-  let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
-  let acc0 = k.mul acc_a1 acc_a2 in
+  let acc0 = if bBits % l = 0 then one () else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
   let f = S.exp_double_fw_f k.to.comm_monoid (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l in
   Loops.eq_repeati0 (bBits / l) f (k.to.refl acc0);
 

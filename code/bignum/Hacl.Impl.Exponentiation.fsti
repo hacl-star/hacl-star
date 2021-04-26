@@ -17,20 +17,9 @@ module Loops = Lib.LoopCombinators
 module S = Lib.Exponentiation
 module BD = Hacl.Bignum.Definitions
 
+include Hacl.Spec.Exponentiation
+
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
-
-inline_for_extraction noextract
-let inttype_a = t:inttype{t = U32 \/ t = U64}
-
-inline_for_extraction noextract
-class to_comm_monoid (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) = {
-  a_spec: Type0;
-  comm_monoid: S.comm_monoid a_spec;
-  linv_ctx: x:LSeq.lseq (uint_t a_t SEC) (v ctx_len) -> Type0;
-  linv: x:LSeq.lseq (uint_t a_t SEC) (v len) -> Type0;
-  refl: x:LSeq.lseq (uint_t a_t SEC) (v len){linv x} -> GTot a_spec;
-}
-
 
 // inline_for_extraction noextract
 // let lone_st
@@ -54,7 +43,7 @@ let lmul_st
   (a_t:inttype_a)
   (len:size_t{v len > 0})
   (ctx_len:size_t)
-  (to:to_comm_monoid a_t len ctx_len) =
+  (to:to_comm_monoid a_t (v len) (v ctx_len)) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> x:lbuffer (uint_t a_t SEC) len
   -> y:lbuffer (uint_t a_t SEC) len
@@ -74,7 +63,7 @@ let lsqr_st
   (a_t:inttype_a)
   (len:size_t{v len > 0})
   (ctx_len:size_t)
-  (to:to_comm_monoid a_t len ctx_len) =
+  (to:to_comm_monoid a_t (v len) (v ctx_len)) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> x:lbuffer (uint_t a_t SEC) len
   -> xx:lbuffer (uint_t a_t SEC) len ->
@@ -89,7 +78,7 @@ let lsqr_st
 
 inline_for_extraction noextract
 class concrete_ops (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) = {
-  to: Ghost.erased (to_comm_monoid a_t len ctx_len);
+  to: Ghost.erased (to_comm_monoid a_t (v len) (v ctx_len));
   //lone: lone_st a_t len ctx_len to;
   lmul: lmul_st a_t len ctx_len to;
   lsqr: lsqr_st a_t len ctx_len to;

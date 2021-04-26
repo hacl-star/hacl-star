@@ -54,7 +54,7 @@ let mk_to_nat_mont_ll_comm_monoid
   (len:BN.meta_len t)
   (n:BD.lbignum t (v len))
   (mu:limb t{SM.bn_mont_pre n mu})
-  : BE.to_comm_monoid t len len =
+  : BE.to_comm_monoid t (v len) (v len) =
 {
   BE.a_spec = a_spec n;
   BE.comm_monoid = E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (BD.bn_v n) (v mu);

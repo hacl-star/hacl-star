@@ -449,9 +449,25 @@ let rec exp_fw_lemma_loop #t k a bBits b l i =
     () end
 
 
-val exp_fw_acc0_lemma: #t:Type -> k:comm_monoid t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos ->
+val exp_fw_acc0_lemma: #t:Type -> k:comm_monoid t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos{bBits % l <> 0} ->
   Lemma (exp_fw_acc0 k a bBits b l == pow k a (b / pow2 (bBits / l * l)))
 let exp_fw_acc0_lemma #t k a bBits b l =
+  let bits_c = get_ith_lbits bBits b (bBits / l * l) l in
+  let acc = pow k a bits_c in
+  assert (bits_c == b / pow2 (bBits / l * l) % pow2 l);
+  Math.Lemmas.lemma_div_lt_nat b bBits (bBits / l * l);
+  assert (b / pow2 (bBits / l * l) < pow2 (bBits % l));
+  Math.Lemmas.pow2_lt_compat l (bBits % l);
+  Math.Lemmas.small_mod (b / pow2 (bBits / l * l)) (pow2 l);
+  assert (bits_c == b / pow2 (bBits / l * l));
+  assert (acc == pow k a (b / pow2 (bBits / l * l)));
+  ()
+
+
+val exp_fw_acc0_aux_lemma: #t:Type -> k:comm_monoid t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos ->
+  Lemma (let acc0 = if bBits % l = 0 then one else exp_fw_acc0 k a bBits b l in
+    acc0 == pow k a (b / pow2 (bBits / l * l)))
+let exp_fw_acc0_aux_lemma #t k a bBits b l =
   if bBits % l = 0 then begin
     let acc = one in
     assert (bBits / l * l == bBits);
@@ -460,23 +476,14 @@ let exp_fw_acc0_lemma #t k a bBits b l =
     lemma_pow0 k a;
     assert (acc == pow k a (b / pow2 (bBits / l * l)));
     () end
-  else begin
-    let bits_c = get_ith_lbits bBits b (bBits / l * l) l in
-    let acc = pow k a bits_c in
-    assert (bits_c == b / pow2 (bBits / l * l) % pow2 l);
-    Math.Lemmas.lemma_div_lt_nat b bBits (bBits / l * l);
-    assert (b / pow2 (bBits / l * l) < pow2 (bBits % l));
-    Math.Lemmas.pow2_lt_compat l (bBits % l);
-    Math.Lemmas.small_mod (b / pow2 (bBits / l * l)) (pow2 l);
-    assert (bits_c == b / pow2 (bBits / l * l));
-    assert (acc == pow k a (b / pow2 (bBits / l * l)));
-    () end
+  else
+    exp_fw_acc0_lemma #t k a bBits b l
 
 
 let exp_fw_lemma #t k a bBits b l =
   let bk = bBits - bBits % l in
-  let acc0 = exp_fw_acc0 k a bBits b l in
-  exp_fw_acc0_lemma k a bBits b l;
+  let acc0 = if bBits % l = 0 then one else exp_fw_acc0 k a bBits b l in
+  exp_fw_acc0_aux_lemma k a bBits b l;
   assert (acc0 == pow k a (b / pow2 bk));
 
   let res = Loops.repeati (bBits / l) (exp_fw_f k a bBits b l) acc0 in
@@ -572,16 +579,35 @@ let rec exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l i =
     () end
 
 
+val exp_double_fw_acc0_lemma: #t:Type -> k:comm_monoid t
+  -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
+  -> a2:t -> b2:nat{b2 < pow2 bBits} -> l:pos ->
+  Lemma (let acc0 = if bBits % l = 0 then one else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
+    let bk = bBits - bBits % l in
+    acc0 == mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
+
+let exp_double_fw_acc0_lemma #t k a1 bBits b1 a2 b2 l =
+  let bk = bBits - bBits % l in
+  if bBits % l = 0 then begin
+    let acc = one in
+    assert (bBits / l * l == bBits);
+    Math.Lemmas.small_div b1 (pow2 bBits);
+    assert (b1 / pow2 (bBits / l * l) == 0);
+    assert (b2 / pow2 (bBits / l * l) == 0);
+    lemma_pow0 k a1;
+    lemma_pow0 k a2;
+    lemma_one k.one;
+    assert (acc == mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)));
+    () end
+  else begin
+    exp_fw_acc0_lemma #t k a1 bBits b1 l;
+    exp_fw_acc0_lemma #t k a2 bBits b2 l end
+
+
 let exp_double_fw_lemma #t k a1 bBits b1 a2 b2 l =
   let bk = bBits - bBits % l in
-
-  let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
-  exp_fw_acc0_lemma k a1 bBits b1 l;
-  //assert (acc_a1 == pow k a1 (b1 / pow2 bk));
-  let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
-  exp_fw_acc0_lemma k a2 bBits b2 l;
-  //assert (acc_a2 == pow k a2 (b2 / pow2 bk));
-  let acc0 = mul acc_a1 acc_a2 in
+  let acc0 = if bBits % l = 0 then one else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
+  exp_double_fw_acc0_lemma #t k a1 bBits b1 a2 b2 l;
   assert (acc0 == mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)));
 
   let res = Loops.repeati (bBits / l) (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in

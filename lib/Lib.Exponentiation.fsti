@@ -143,26 +143,23 @@ let get_ith_lbits (bBits:nat) (b:nat{b < pow2 bBits}) (i:nat{i < bBits}) (l:pos)
 let get_bits_l (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) (i:nat{i < bBits / l}) : r:nat{r < pow2 l} =
   Math.Lemmas.lemma_mult_le_left l (i + 1) (bBits / l);
   assert (l * (i + 1) <= l * (bBits / l));
-  b / pow2 (bBits - bBits % l - l * i - l) % pow2 l
-
+  get_ith_lbits bBits b (bBits - bBits % l - l * i - l) l
 
 let mul_acc_pow_a_bits_l (#t:Type) (k:comm_monoid t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) (i:nat{i < bBits / l}) (acc:t) : t =
   let bits_l = get_bits_l bBits b l i in
   mul acc (pow k a bits_l)
 
-
 let exp_fw_f (#t:Type) (k:comm_monoid t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) (i:nat{i < bBits / l}) (acc:t) : t =
   let acc1 = exp_pow2 k acc l in
   mul_acc_pow_a_bits_l k a bBits b l i acc1
 
-let exp_fw_acc0 (#t:Type) (k:comm_monoid t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) : t =
-  if bBits % l = 0 then one
-  else begin
-    let bits_c = get_ith_lbits bBits b (bBits / l * l) l in
-    pow k a bits_c end
+
+let exp_fw_acc0 (#t:Type) (k:comm_monoid t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos{bBits % l <> 0}) : t =
+  let bits_c = get_ith_lbits bBits b (bBits / l * l) l in
+  pow k a bits_c
 
 let exp_fw (#t:Type) (k:comm_monoid t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) : t =
-  let acc0 = exp_fw_acc0 k a bBits b l in
+  let acc0 = if bBits % l = 0 then one else exp_fw_acc0 k a bBits b l in
   let res = Loops.repeati (bBits / l) (exp_fw_f k a bBits b l) acc0 in
   res
 
@@ -179,14 +176,16 @@ let exp_double_fw_f (#t:Type) (k:comm_monoid t)
   let acc1 = exp_fw_f k a1 bBits b1 l i acc in
   mul_acc_pow_a_bits_l k a2 bBits b2 l i acc1
 
-
-let exp_double_fw (#t:Type) (k:comm_monoid t) (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits}) (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos) : t =
+let exp_double_fw_acc0 (#t:Type) (k:comm_monoid t)
+  (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits}) (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos{bBits % l <> 0}) : t =
   let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
   let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
-  let acc0 = mul acc_a1 acc_a2 in
+  mul acc_a1 acc_a2
+
+let exp_double_fw (#t:Type) (k:comm_monoid t) (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits}) (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos) : t =
+  let acc0 = if bBits % l = 0 then one else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
   let res = Loops.repeati (bBits / l) (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in
   res
-
 
 val exp_double_fw_lemma: #t:Type -> k:comm_monoid t
   -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
