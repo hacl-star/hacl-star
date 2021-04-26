@@ -24,7 +24,7 @@
 
 #if defined(__x86_64__) || defined(_M_X64)
 
-// The following functions are only available on machines that support Intel AVX
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
 
 #include <emmintrin.h>
 #include <tmmintrin.h>
@@ -224,7 +224,9 @@ typedef __m128i Lib_IntVector_Intrinsics_vec128;
 #define Lib_IntVector_Intrinsics_vec128_interleave_high64(x1, x2) \
   (_mm_unpackhi_epi64(x1, x2))
 
-// The following functions are only available on machines that support Intel AVX2
+#endif // EVERCRYPT_CAN_COMPILE_VEC128
+
+#if defined(EVERCRYPT_CAN_COMPILE_VEC256)
 
 #include <immintrin.h>
 #include <wmmintrin.h>
@@ -447,9 +449,13 @@ typedef __m256i Lib_IntVector_Intrinsics_vec256;
 #define Lib_IntVector_Intrinsics_vec256_interleave_high128(x1, x2) \
   (_mm256_permute2x128_si256(x1, x2, 0x31))
 
+#endif // EVERCRYPT_CAN_COMPILE_VEC256
 
 #elif (defined(__aarch64__) || defined(_M_ARM64) || defined(__arm__) || defined(_M_ARM)) \
       && !defined(__ARM_32BIT_STATE)
+
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
+
 #include <arm_neon.h>
 
 typedef uint32x4_t Lib_IntVector_Intrinsics_vec128;
@@ -643,8 +649,12 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 #define Lib_IntVector_Intrinsics_vec128_interleave_high64(x1,x2) \
   (vreinterpretq_u32_u64(vzip2q_u64(vreinterpretq_u64_u32(x1),vreinterpretq_u64_u32(x2))))
 
+#endif // EVERCRYPT_CAN_COMPILE_VEC128
+
 // IBM z architecture
 #elif defined(__s390x__) // this flag is for GCC only
+
+#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
 
 #include <vecintrin.h>
 
@@ -792,6 +802,8 @@ typedef vector128_8 vector128;
 #define Lib_IntVector_Intrinsics_vec128_zero \
   ((vector128){})
 
-#endif // IBM z architecture
+#endif // EVERCRYPT_CAN_COMPILE_VEC128
+
+#endif // Architectures
 
 #endif

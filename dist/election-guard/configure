@@ -101,7 +101,7 @@ EOF
 detect_uint128 () {
   local file=$(mktemp /tmp/testint128.XXXXXXX).c
   echo "unsigned __int128 x = 0;" > $file
-  $CC $CROSS_CFLAGS -c $file -o /dev/null
+  $CC $CROSS_CFLAGS -DEVERCRYPT_CAN_COMPILE_VEC128 -c $file -o /dev/null
 }
 
 detect_broken_xcode () {
