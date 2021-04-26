@@ -37,7 +37,7 @@ ifneq ($(COMPILE_INTRINSICS),1)
 TARGETS := $(filter-out curve64-%, $(TARGETS))
 endif
 
-CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
+CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
   -O3 $(CFLAGS) $(USER_CFLAGS)
