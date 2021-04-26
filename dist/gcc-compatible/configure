@@ -141,7 +141,7 @@ EOF
 # -------------------------
 
 detect_x64 () {
-  [[ $target_arch == "x86_64" ]]
+  [[ $target_arch == "x86_64" ]] || [[ $target_arch == "amd64" ]]
 }
 
 detect_x86 () {

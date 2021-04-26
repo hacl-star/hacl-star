@@ -34,7 +34,7 @@ static inline void fdifference(u64 *a, u64 *b)
   Hacl_Impl_Curve25519_Field51_fsub(a, b, a);
 }
 
-inline void Hacl_Bignum25519_reduce_513(u64 *a)
+void Hacl_Bignum25519_reduce_513(u64 *a)
 {
   u64 f0 = a[0U];
   u64 f1 = a[1U];
@@ -151,7 +151,7 @@ static inline void fsquare_times_inplace(u64 *output, u32 count)
   Hacl_Curve25519_51_fsquare_times(output, output, tmp, count);
 }
 
-inline void Hacl_Bignum25519_inverse(u64 *out, u64 *a)
+void Hacl_Bignum25519_inverse(u64 *out, u64 *a)
 {
   uint128_t tmp[10U];
   {
@@ -215,7 +215,7 @@ static inline void reduce(u64 *out)
   out[4U] = f41;
 }
 
-inline void Hacl_Bignum25519_load_51(u64 *output, u8 *input)
+void Hacl_Bignum25519_load_51(u64 *output, u8 *input)
 {
   u64 u64s[4U] = { 0U };
   u64 u64s3;
@@ -240,7 +240,7 @@ inline void Hacl_Bignum25519_load_51(u64 *output, u8 *input)
   output[4U] = u64s[3U] >> (u32)12U;
 }
 
-inline void Hacl_Bignum25519_store_51(u8 *output, u64 *input)
+void Hacl_Bignum25519_store_51(u8 *output, u64 *input)
 {
   u64 u64s[4U] = { 0U };
   Hacl_Impl_Curve25519_Field51_store_felem(u64s, input);
@@ -251,7 +251,7 @@ inline void Hacl_Bignum25519_store_51(u8 *output, u64 *input)
   }
 }
 
-inline void Hacl_Impl_Ed25519_PointAdd_point_add(u64 *out, u64 *p, u64 *q)
+void Hacl_Impl_Ed25519_PointAdd_point_add(u64 *out, u64 *p, u64 *q)
 {
   u64 tmp[30U] = { 0U };
   u64 *tmp10 = tmp;
@@ -427,7 +427,7 @@ static inline void swap_conditional_inplace(u64 *a, u64 *b, u64 iswap)
   swap_conditional_step(a + (u32)15U, b + (u32)15U, a + (u32)15U, b + (u32)15U, swap);
 }
 
-inline void Hacl_Impl_Ed25519_Ladder_point_mul(u64 *result, u8 *scalar, u64 *q)
+void Hacl_Impl_Ed25519_Ladder_point_mul(u64 *result, u8 *scalar, u64 *q)
 {
   u64 b[80U] = { 0U };
   u64 *nq = b;
@@ -508,7 +508,7 @@ static inline void point_mul_g(u64 *result, u8 *scalar)
   Hacl_Impl_Ed25519_Ladder_point_mul(result, scalar, g);
 }
 
-inline void Hacl_Impl_Ed25519_PointCompress_point_compress(u8 *z, u64 *p)
+void Hacl_Impl_Ed25519_PointCompress_point_compress(u8 *z, u64 *p)
 {
   u64 tmp[15U] = { 0U };
   u64 *x = tmp + (u32)5U;
@@ -1414,7 +1414,7 @@ static inline bool recover_x(u64 *x, u64 *y, u64 sign)
   }
 }
 
-inline bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(u64 *out, u8 *s)
+bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(u64 *out, u8 *s)
 {
   u64 tmp[10U] = { 0U };
   u64 *y = tmp;
@@ -1490,7 +1490,7 @@ static inline bool eq(u64 *a, u64 *b)
   return a0 == b0 && a1 == b1 && a2 == b2 && a3 == b3 && a4 == b4;
 }
 
-inline bool Hacl_Impl_Ed25519_PointEqual_point_equal(u64 *p, u64 *q)
+bool Hacl_Impl_Ed25519_PointEqual_point_equal(u64 *p, u64 *q)
 {
   u64 tmp[20U] = { 0U };
   u64 *pxqz = tmp;
@@ -1517,7 +1517,7 @@ inline bool Hacl_Impl_Ed25519_PointEqual_point_equal(u64 *p, u64 *q)
   return res;
 }
 
-inline void Hacl_Impl_Ed25519_PointNegate_point_negate(u64 *p, u64 *out)
+void Hacl_Impl_Ed25519_PointNegate_point_negate(u64 *p, u64 *out)
 {
   u64 zero[5U] = { 0U };
   u64 *x;

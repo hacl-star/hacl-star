@@ -20,6 +20,11 @@ unfold inline_for_extraction let lbytes (len:size_nat) = lbytes_l SEC len
 unfold inline_for_extraction let pub_bytes = bytes_l PUB
 unfold inline_for_extraction let pub_lbytes (len:size_nat) = lbytes_l PUB len
 
+(* Alias *)
+unfold inline_for_extraction let bytes_t = bytes
+unfold inline_for_extraction let pub_bytes_t = pub_bytes
+
+
 (** Construct the equality mask for a pair of secret integer sequences *)
 val seq_eq_mask: #t:inttype{~(S128? t)} -> #len1:size_nat -> #len2:size_nat
   -> b1:lseq (int_t t SEC) len1
@@ -52,6 +57,7 @@ val seq_mask_select: #t:inttype{~(S128? t)} -> #len:size_nat
 
 
 let bytes_empty: bytes = Seq.Base.empty
+let pub_bytes_empty: pub_bytes = Seq.Base.empty
 
 
 let lbytes_empty: lbytes 0 = create 0 (u8 0)

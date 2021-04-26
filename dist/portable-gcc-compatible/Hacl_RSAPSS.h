@@ -42,53 +42,6 @@ extern "C" {
 #include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
 
-/* SNIPPET_START: Hacl_Impl_RSAPSS_MGF_hash_len */
-
-uint32_t Hacl_Impl_RSAPSS_MGF_hash_len(Spec_Hash_Definitions_hash_alg a);
-
-/* SNIPPET_END: Hacl_Impl_RSAPSS_MGF_hash_len */
-
-/* SNIPPET_START: Hacl_Impl_RSAPSS_Keys_check_modulus_u64 */
-
-uint64_t Hacl_Impl_RSAPSS_Keys_check_modulus_u64(uint32_t modBits, uint64_t *n);
-
-/* SNIPPET_END: Hacl_Impl_RSAPSS_Keys_check_modulus_u64 */
-
-/* SNIPPET_START: Hacl_Impl_RSAPSS_Keys_check_exponent_u64 */
-
-uint64_t Hacl_Impl_RSAPSS_Keys_check_exponent_u64(uint32_t eBits, uint64_t *e);
-
-/* SNIPPET_END: Hacl_Impl_RSAPSS_Keys_check_exponent_u64 */
-
-/* SNIPPET_START: Hacl_Impl_RSAPSS_Padding_pss_encode */
-
-void
-Hacl_Impl_RSAPSS_Padding_pss_encode(
-  Spec_Hash_Definitions_hash_alg a,
-  uint32_t sLen,
-  uint8_t *salt,
-  uint32_t msgLen,
-  uint8_t *msg,
-  uint32_t emBits,
-  uint8_t *em
-);
-
-/* SNIPPET_END: Hacl_Impl_RSAPSS_Padding_pss_encode */
-
-/* SNIPPET_START: Hacl_Impl_RSAPSS_Padding_pss_verify */
-
-bool
-Hacl_Impl_RSAPSS_Padding_pss_verify(
-  Spec_Hash_Definitions_hash_alg a,
-  uint32_t sLen,
-  uint32_t msgLen,
-  uint8_t *msg,
-  uint32_t emBits,
-  uint8_t *em
-);
-
-/* SNIPPET_END: Hacl_Impl_RSAPSS_Padding_pss_verify */
-
 /* SNIPPET_START: Hacl_RSAPSS_rsapss_sign */
 
 bool
@@ -98,7 +51,7 @@ Hacl_RSAPSS_rsapss_sign(
   uint32_t eBits,
   uint32_t dBits,
   uint64_t *skey,
-  uint32_t sLen,
+  uint32_t saltLen,
   uint8_t *salt,
   uint32_t msgLen,
   uint8_t *msg,
@@ -115,8 +68,8 @@ Hacl_RSAPSS_rsapss_verify(
   uint32_t modBits,
   uint32_t eBits,
   uint64_t *pkey,
-  uint32_t sLen,
-  uint32_t k,
+  uint32_t saltLen,
+  uint32_t sgntLen,
   uint8_t *sgnt,
   uint32_t msgLen,
   uint8_t *msg
@@ -156,7 +109,7 @@ Hacl_RSAPSS_rsapss_skey_sign(
   uint8_t *nb,
   uint8_t *eb,
   uint8_t *db,
-  uint32_t sLen,
+  uint32_t saltLen,
   uint8_t *salt,
   uint32_t msgLen,
   uint8_t *msg,
@@ -174,8 +127,8 @@ Hacl_RSAPSS_rsapss_pkey_verify(
   uint32_t eBits,
   uint8_t *nb,
   uint8_t *eb,
-  uint32_t sLen,
-  uint32_t k,
+  uint32_t saltLen,
+  uint32_t sgntLen,
   uint8_t *sgnt,
   uint32_t msgLen,
   uint8_t *msg

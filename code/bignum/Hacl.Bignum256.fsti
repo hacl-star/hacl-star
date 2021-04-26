@@ -3,11 +3,8 @@ module Hacl.Bignum256
 open FStar.Mul
 
 module BN = Hacl.Bignum
-module BM = Hacl.Bignum.Montgomery
-module BE = Hacl.Bignum.Exponentiation
-module BR = Hacl.Bignum.ModReduction
-module BI = Hacl.Bignum.ModInv
 module BS = Hacl.Bignum.SafeAPI
+module MA = Hacl.Bignum.MontArithmetic
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -72,127 +69,69 @@ val sub: BN.bn_sub_eq_len_st t_limbs n_limbs
   The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8]."]
 val mul: a:lbignum t_limbs n_limbs -> BN.bn_karatsuba_mul_st t_limbs n_limbs a
 
-[@@ Comment "Write `a mod n` in `res` if a < n * n.
+[@@ Comment "Write `a * a` in `res`.
 
-  The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
-  The argument n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument r2 is a precomputed constant 2 ^ 512 mod n obtained through Hacl_Bignum256_new_precompr2.
+  The argument a is meant to be a 256-bit bignum, i.e. uint64_t[4].
+  The outparam res is meant to be a 512-bit bignum, i.e. uint64_t[8]."]
+val sqr: a:lbignum t_limbs n_limbs -> BN.bn_karatsuba_sqr_st t_limbs n_limbs a
 
-  This function is *UNSAFE* and requires C clients to observe the precondition
-  of bn_mod_slow_precompr2_lemma in Hacl.Spec.Bignum.ModReduction.fst, which
-  amounts to:
-  • 1 < n
-  • n % 2 = 1
-  • a < n * n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod below."]
-val mod_precompr2: BR.bn_mod_slow_precompr2_st t_limbs n_limbs
-
-[@@ Comment "Write `a mod n` in `res` if a < n * n.
+[@@ Comment "Write `a mod n` in `res`.
 
   The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
   The argument n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
 
-  The function returns false if any of the preconditions of mod_precompr2 above
-  are violated, true otherwise."]
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • 1 < n
+   • n % 2 = 1 "]
 val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
-  The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument r2 is a precomputed constant 2 ^ 512 mod n obtained through Hacl_Bignum256_new_precompr2.
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
   default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   The function is *NOT* constant-time on the argument b. See the
-  mod_exp_ct_* functions for constant-time variants.
+  mod_exp_consttime_* functions for constant-time variants.
 
-  This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  • n % 2 = 1
-  • 1 < n
-  • 0 < b
-  • b < pow2 bBits
-  • a < n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_raw below."]
-val mod_exp_raw_precompr2: BE.bn_mod_exp_raw_precompr2_st t_limbs n_limbs
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • b < pow2 bBits
+   • a < n "]
+val mod_exp_vartime: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
 
-  The arguments a, n, r2 and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument r2 is a precomputed constant 2 ^ 512 mod n obtained through Hacl_Bignum256_new_precompr2.
+  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+
   The argument b is a bignum of any size, and bBits is an upper bound on the
   number of significant bits of b. A tighter bound results in faster execution
   time. When in doubt, the number of bits for the bignum size is always a safe
   default, e.g. if b is a 256-bit bignum, bBits should be 256.
 
   This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_raw_precompr2.
+  execution time than mod_exp_vartime.
 
-  This function is *UNSAFE* and requires C clients to observe bn_mod_exp_pre
-  from Hacl.Spec.Bignum.Exponentiation.fsti, which amounts to:
-  • n % 2 = 1
-  • 1 < n
-  • 0 < b
-  • b < pow2 bBits
-  • a < n
-
-  Owing to the absence of run-time checks, and factoring out the precomputation
-  r2, this function is notably faster than mod_exp_ct below."]
-val mod_exp_ct_precompr2: BE.bn_mod_exp_ct_precompr2_st t_limbs n_limbs
-
-[@@ Comment "Write `a ^ b mod n` in `res`.
-
-  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 4096-bit bignum, bBits should be 4096.
-
-  The function is *NOT* constant-time on the argument b. See the
-  mod_exp_ct_* functions for constant-time variants.
-
-  The function returns false if any of the preconditions of mod_exp_precompr2 are
-  violated, true otherwise."]
-val mod_exp_raw: BS.bn_mod_exp_safe_st t_limbs n_limbs
-
-[@@ Comment "Write `a ^ b mod n` in `res`.
-
-  The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
-  The argument b is a bignum of any size, and bBits is an upper bound on the
-  number of significant bits of b. A tighter bound results in faster execution
-  time. When in doubt, the number of bits for the bignum size is always a safe
-  default, e.g. if b is a 256-bit bignum, bBits should be 256.
-
-  This function is constant-time over its argument b, at the cost of a slower
-  execution time than mod_exp_raw.
-
-  The function returns false if any of the preconditions of
-  mod_exp_ct_precompr2 are violated, true otherwise."]
-val mod_exp_ct: BS.bn_mod_exp_safe_st t_limbs n_limbs
-
-[@@ Comment "Compute `2 ^ 512 mod n`.
-
-  The argument n points to a 256-bit bignum of valid memory.
-  The function returns a heap-allocated 256-bit bignum, or NULL if:
-  • the allocation failed, or
-  • n % 2 = 1 && 1 < n does not hold
-
-  If the return value is non-null, clients must eventually call free(3) on it to
-  avoid memory leaks."]
-val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs n_limbs
+  The function returns false if any of the following preconditions are violated,
+  true otherwise.
+   • n % 2 = 1
+   • 1 < n
+   • b < pow2 bBits
+   • a < n "]
+val mod_exp_consttime: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
 
   The arguments a, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
 
-  This function is *UNSAFE* and requires C clients to observe bn_mod_inv_prime_pre
-  from Hacl.Spec.Bignum.ModInv.fst, which amounts to:
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
   • n is a prime
 
   The function returns false if any of the following preconditions are violated, true otherwise.
@@ -200,7 +139,87 @@ val new_precompr2: BS.new_bn_precomp_r2_mod_n_st t_limbs n_limbs
   • 1 < n
   • 0 < a
   • a < n "]
-val mod_inv_prime_raw: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
+val mod_inv_prime_vartime: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
+
+[@@ CPrologue
+"\n/**********************************************/
+/* Arithmetic functions with precomputations. */
+/**********************************************/\n";
+
+Comment "Heap-allocate and initialize a montgomery context.
+
+  The argument n is meant to be a 256-bit bignum, i.e. uint64_t[4].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n % 2 = 1
+  • 1 < n
+
+  The caller will need to call Hacl_Bignum256_mont_ctx_free on the return value
+  to avoid memory leaks."]
+val mont_ctx_init: MA.bn_field_init_st t_limbs n_limbs
+
+[@@ Comment "Deallocate the memory previously allocated by Hacl_Bignum256_mont_ctx_init.
+
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init."]
+val mont_ctx_free: MA.bn_field_free_st t_limbs
+
+[@@ Comment "Write `a mod n` in `res`.
+
+  The argument a is meant to be a 512-bit bignum, i.e. uint64_t[8].
+  The outparam res is meant to be a 256-bit bignum, i.e. uint64_t[4].
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init."]
+val mod_precomp: BS.bn_mod_slow_ctx_st t_limbs n_limbs
+
+[@@ Comment "Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  The function is *NOT* constant-time on the argument b. See the
+  mod_exp_consttime_* functions for constant-time variants.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • b < pow2 bBits
+  • a < n "]
+val mod_exp_vartime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
+
+[@@ Comment "Write `a ^ b mod n` in `res`.
+
+  The arguments a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
+
+  The argument b is a bignum of any size, and bBits is an upper bound on the
+  number of significant bits of b. A tighter bound results in faster execution
+  time. When in doubt, the number of bits for the bignum size is always a safe
+  default, e.g. if b is a 256-bit bignum, bBits should be 256.
+
+  This function is constant-time over its argument b, at the cost of a slower
+  execution time than mod_exp_vartime_*.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • b < pow2 bBits
+  • a < n "]
+val mod_exp_consttime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
+
+[@@ Comment "Write `a ^ (-1) mod n` in `res`.
+
+  The argument a and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+  The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • n is a prime
+  • 0 < a
+  • a < n "]
+val mod_inv_prime_vartime_precomp: BS.bn_mod_inv_prime_ctx_st t_limbs n_limbs
 
 [@@ CPrologue
 "\n/********************/
@@ -218,16 +237,34 @@ Comment
   avoid memory leaks."]
 val new_bn_from_bytes_be: BS.new_bn_from_bytes_be_st t_limbs
 
+[@@ Comment "Load a little-endian bignum from memory.
+
+  The argument b points to len bytes of valid memory.
+  The function returns a heap-allocated bignum of size sufficient to hold the
+   result of loading b, or NULL if either the allocation failed, or the amount of
+    required memory would exceed 4GB.
+
+  If the return value is non-null, clients must eventually call free(3) on it to
+  avoid memory leaks."]
+val new_bn_from_bytes_le: BS.new_bn_from_bytes_le_st t_limbs
+
 [@@ Comment "Serialize a bignum into big-endian memory.
 
   The argument b points to a 256-bit bignum.
   The outparam res points to 32 bytes of valid memory."]
 val bn_to_bytes_be: Hacl.Bignum.Convert.bn_to_bytes_be_st t_limbs n_bytes
 
+[@@ Comment "Serialize a bignum into little-endian memory.
+
+  The argument b points to a 256-bit bignum.
+  The outparam res points to 32 bytes of valid memory."]
+val bn_to_bytes_le: Hacl.Bignum.Convert.bn_to_bytes_le_st t_limbs n_bytes
+
 [@@ CPrologue
 "\n/***************/
 /* Comparisons */
 /***************/\n";
 Comment
-"Returns 2 ^ 64 - 1 if and only if argument a is strictly less than the argument b, otherwise returns 0."]
+"Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
+ otherwise returns 0."]
 val lt_mask: BN.bn_lt_mask_st t_limbs n_limbs

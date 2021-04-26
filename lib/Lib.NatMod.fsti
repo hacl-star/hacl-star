@@ -6,12 +6,12 @@ module LE = Lib.Exponentiation
 
 #set-options "--z3rlimit 10 --fuel 0 --ifuel 0"
 
-let mk_nat_group : LE.exp int = {
+let mk_nat_comm_monoid : LE.comm_monoid int = {
   LE.one = 1;
-  LE.fmul = FStar.Mul.op_Star;
+  LE.mul = FStar.Mul.op_Star;
   LE.lemma_one = Math.Lemmas.mul_one_right_is_same;
-  LE.lemma_fmul_assoc = Math.Lemmas.paren_mul_right;
-  LE.lemma_fmul_comm = Math.Lemmas.swap_mul;
+  LE.lemma_mul_assoc = Math.Lemmas.paren_mul_right;
+  LE.lemma_mul_comm = Math.Lemmas.swap_mul;
   }
 
 
@@ -27,7 +27,7 @@ val lemma_pow_gt_zero: a:pos -> b:nat -> Lemma (pow a b > 0) [SMTPat (pow a b)]
 val lemma_pow_ge_zero: a:nat -> b:nat -> Lemma (pow a b >= 0) [SMTPat (pow a b)]
 
 val lemma_pow_nat_is_pow: a:int -> b:nat ->
-  Lemma (pow a b == LE.pow mk_nat_group a b)
+  Lemma (pow a b == LE.pow mk_nat_comm_monoid a b)
 
 val lemma_pow_add: x:int -> n:nat -> m:nat -> Lemma (pow x n * pow x m = pow x (n + m))
 
@@ -54,17 +54,17 @@ val lemma_mul_mod_assoc: #m:pos -> a:nat_mod m -> b:nat_mod m -> c:nat_mod m ->
 val lemma_mul_mod_comm: #m:pos -> a:nat_mod m -> b:nat_mod m ->
   Lemma (mul_mod a b == mul_mod b a)
 
-let mk_nat_mod_group (m:pos) : LE.exp (nat_mod m) = {
+let mk_nat_mod_comm_monoid (m:pos) : LE.comm_monoid (nat_mod m) = {
   LE.one = one_mod;
-  LE.fmul = mul_mod;
+  LE.mul = mul_mod;
   LE.lemma_one = lemma_one_mod;
-  LE.lemma_fmul_assoc = lemma_mul_mod_assoc;
-  LE.lemma_fmul_comm = lemma_mul_mod_comm;
+  LE.lemma_mul_assoc = lemma_mul_mod_assoc;
+  LE.lemma_mul_comm = lemma_mul_mod_comm;
   }
 
-val pow_mod: #m:pos -> a:nat_mod m -> b:pos -> nat_mod m
+val pow_mod: #m:pos{1 < m} -> a:nat_mod m -> b:nat -> nat_mod m
 
-val lemma_pow_mod: #m:pos -> a:nat_mod m -> b:pos -> Lemma (pow a b % m == pow_mod #m a b)
+val lemma_pow_mod: #m:pos{1 < m} -> a:nat_mod m -> b:nat -> Lemma (pow a b % m == pow_mod #m a b)
 
-val lemma_pow_nat_mod_is_pow: #n:pos -> a:nat_mod n -> b:pos ->
-  Lemma (pow a b % n == LE.pow (mk_nat_mod_group n) a b)
+val lemma_pow_nat_mod_is_pow: #n:pos{1 < n} -> a:nat_mod n -> b:nat ->
+  Lemma (pow a b % n == LE.pow (mk_nat_mod_comm_monoid n) a b)

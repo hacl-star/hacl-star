@@ -50,6 +50,10 @@ else ifeq ($(OS),Windows_NT)
   VARIANT	= -mingw
   SO		= dll
   LDFLAGS	= -Wl,--out-implib,libevercrypt.dll.a
+else ifeq ($(UNAME),FreeBSD)
+  CFLAGS	+= -fPIC
+  VARIANT	= -freebsd
+  SO 		= so
 endif
 
 # 2. Parameters we want to compile with, for the generated Makefile
