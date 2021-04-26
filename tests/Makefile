@@ -12,14 +12,23 @@ USER_CFLAGS?=
 # Add GF128 tests once code/experimental/gf128 is promoted to code
 TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
+# TODO: some tests are still not separated into different files
+# Ideally, each algorithm has foo-test, foo-test-128, foo-test-256 and we run
+# whatever Makefile.config tells us is supported for the current build
+# configuration.
+
 # Filter the targets if they are not supported
 # Vec128
-ifneq ($(COMPILE_VEC128),1)
+ifeq ($(COMPILE_VEC128),1)
+CFLAGS += -DEVERCRYPT_CAN_COMPILE_VEC128
+else
 TARGETS := $(filter-out %-128-test-streaming.exe, $(filter-out %-128-test.exe, $(TARGETS)))
 endif
 
 # Vec256
-ifneq ($(COMPILE_VEC256),1)
+ifeq ($(COMPILE_VEC256),1)
+CFLAGS += -DEVERCRYPT_CAN_COMPILE_VEC256
+else
 TARGETS := $(filter-out %-256-test-streaming.exe, $(filter-out %-256-test.exe, $(TARGETS)))
 endif
 
