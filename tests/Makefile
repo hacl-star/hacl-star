@@ -12,28 +12,41 @@ USER_CFLAGS?=
 # Add GF128 tests once code/experimental/gf128 is promoted to code
 TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
+# The idea of this Makefile is that each test is enabled depending on whether
+# the required features for it have been detected by the configure script. The
+# eventual goal is to have all tests in this directory be feature-controlled by
+# this Makefile, which will remove the distinction between all/ARM: the Makefile
+# will automatically strip tests for which features are missing.
+#
+# In the meanwhile:
 # TODO: some tests are still not separated into different files
 # Ideally, each algorithm has foo-test, foo-test-128, foo-test-256 and we run
 # whatever Makefile.config tells us is supported for the current build
 # configuration.
 
-# Filter the targets if they are not supported
 # Vec128
-ifeq ($(COMPILE_VEC128),1)
+ifneq ($(COMPILE_VEC128),)
 CFLAGS += -DEVERCRYPT_CAN_COMPILE_VEC128
 else
 TARGETS := $(filter-out %-128-test-streaming.exe, $(filter-out %-128-test.exe, $(TARGETS)))
 endif
 
 # Vec256
-ifeq ($(COMPILE_VEC256),1)
+ifneq ($(COMPILE_VEC256),)
 CFLAGS += -DEVERCRYPT_CAN_COMPILE_VEC256
 else
 TARGETS := $(filter-out %-256-test-streaming.exe, $(filter-out %-256-test.exe, $(TARGETS)))
 endif
 
 # Curve64
-ifneq ($(COMPILE_INTRINSICS),1)
+ifneq ($(COMPILE_INTRINSICS),)
+CFLAGS += -DCOMPILE_INTRINSICS
+else
+endif
+
+ifneq ($(COMPILE_INLINE_ASM),)
+CFLAGS += -DEVERCRYPT_CAN_COMPILE_INLINE_ASM
+else
 TARGETS := $(filter-out curve64-%, $(TARGETS))
 endif
 
