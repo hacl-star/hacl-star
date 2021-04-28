@@ -477,8 +477,14 @@ function link(imports, modules) {
   return fold(i, modules);
 }
 
+function setMyPrint(f) {
+  my_print = f;
+  return;
+}
+
 if (typeof module !== "undefined")
   module.exports = {
+    setMyPrint: setMyPrint,
     link: link,
     reserve: reserve,
     dump: dump,
