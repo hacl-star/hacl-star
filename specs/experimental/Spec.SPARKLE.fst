@@ -78,12 +78,29 @@ let xor n b =
   |4 -> let (x0, y0), (x1, y1), (x2, y2), (x3, y3) = (b <: branch 4) in y0 ^. y1 ^. y2 ^. y3, x0 ^. x1 ^. x2 ^. x3
 
 
+val xor_x: n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch n -> lu: uint32 -> lv: uint32 -> Tot (branch n)
+
+let xor_x n b lu lv = 
+  match n with 
+  |2 -> let (x0, y0), (x1, y1) = (b <: branch 2) in ((x0 ^. lu), (y0 ^. lv)), ((x0 ^. lu), (y1 ^. lv))
+  |_ -> admit()
+
+
+val m_test: n: nat {n == 2 \/ n == 3 \/ n == 4} ->  branch n -> Tot (branch n)
+
+let m_test n b = 
+  let u, v = xor n b in 
+  let lu = l1 u in
+  let lv = l1 v in
+  xor_x n b lu lv
+  
+
 val m2: (branch 2) -> Tot (branch 2)
 
 let m2 b =
   let (x0, x1), (y0, y1) = b in
-  (*let u = y0 ^. y1 in
-  let v = x0 ^. x1 in *)
+  let u = y0 ^. y1 in
+  let v = x0 ^. x1 in 
   let u, v = xor 2 b in 
   let lu = l1 u in
   let lv = l1 v in
