@@ -69,21 +69,22 @@ val l1: x:uint32 -> Tot uint32
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
 
-(* AW: unstable *)
-val xor: n: branch_len -> b: branch n -> Tot (tuple2 uint32 uint32)
+val xor: n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch n -> Tot (tuple2 uint32 uint32)
 
 let xor n b = 
   match n with 
   |2 -> let (x0, y0), (x1, y1) = (b <: branch 2) in y0 ^. y1, x0 ^. x1
   |3 -> let (x0, y0), (x1, y1), (x2, y2) = (b <: branch 3) in y0 ^. y1 ^. y2, x0 ^. x1 ^. x2
-  |_ -> admit(); (0, 0)
+  |4 -> let (x0, y0), (x1, y1), (x2, y2), (x3, y3) = (b <: branch 4) in y0 ^. y1 ^. y2 ^. y3, x0 ^. x1 ^. x2 ^. x3
 
 
 val m2: (branch 2) -> Tot (branch 2)
 
-let m2 ((x0, y0), (x1, y1)) =
-  let u = y0 ^. y1 in
-  let v = x0 ^. x1 in
+let m2 b =
+  let (x0, x1), (y0, y1) = b in
+  (*let u = y0 ^. y1 in
+  let v = x0 ^. x1 in *)
+  let u, v = xor 2 b in 
   let lu = l1 u in
   let lv = l1 v in
   let t0 = x0 ^. lu in
