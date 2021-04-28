@@ -17,7 +17,7 @@ inline_for_extraction
 let vsize_rcon: size_nat = 8
 
 inline_for_extraction
-let rcon_list: l:List.Tot.llist uint32 vsize_rcon =
+let rcon_list: List.Tot.llist uint32 vsize_rcon =
   [@inline_let]
   let l = List.Tot.map u32 [
     0xB7E15162; 0xBF715880; 0x38B4DA56; 0x324E7738;
@@ -27,10 +27,11 @@ let rcon_list: l:List.Tot.llist uint32 vsize_rcon =
 
 let rcon: lseq uint32 vsize_rcon  = createL rcon_list
 
+type branch_len =  n: nat {n = 1 \/ n = 2 \/ n = 3 \/ n = 4 \/ n = 6 \/ n = 8}
 
 type branch1 = (uint32 & uint32)
 
-val branch: (n:nat{n = 1 \/ n = 2 \/ n = 3 \/ n = 4 \/ n = 6 \/ n = 8}) -> Type0
+val branch: branch_len -> Type0
 let branch n =
   match n with
   | 1 -> branch1
@@ -67,12 +68,9 @@ let arx c b =
 val l1: x:uint32 -> Tot uint32
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
-
 val m2: (branch 2) -> Tot (branch 2)
-let m2 b =
-  let x,y = b in
-  let x0,y0 = x in
-  let x1,y1 = y in
+
+let m2 ((x0, y0), (x1, y1)) =
   let u = y0 ^. y1 in
   let v = x0 ^. x1 in
   let lu = l1 u in
