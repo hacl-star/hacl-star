@@ -12,7 +12,8 @@ open Spec.ECC.Curves
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 (* Initiator *)
-val ecp256_dh_i: #c: curve -> s: scalar_bytes #c
+val ecp256_dh_i: #c: curve 
+  -> scalar_bytes #c
   -> tuple3 (lbytes (getCoordinateLen c)) (lbytes (getCoordinateLen c)) uint64
 
 let ecp256_dh_i #c s =
@@ -29,9 +30,9 @@ let ecp256_dh_i #c s =
 
 (* Responder *)
 val ecp256_dh_r: #c: curve 
-  -> x:lbytes (getCoordinateLen c) 
-  -> y:lbytes (getCoordinateLen c) 
-  -> s:lbytes (getCoordinateLen c)
+  -> lbytes (getCoordinateLen c) 
+  -> lbytes (getCoordinateLen c) 
+  -> scalar_bytes #c
   -> tuple3 (lbytes (getCoordinateLen c)) (lbytes (getCoordinateLen c)) uint64
 
 let ecp256_dh_r #c x y s =

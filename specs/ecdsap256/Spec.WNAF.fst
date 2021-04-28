@@ -34,14 +34,14 @@ let mod_win di w =
     begin
       let sign = di_mod_2w >= pow2 w in
       if sign = false then begin
-	FStar.Math.Lemmas.pow2_plus 1 (w - 1);
-	false, (pow2 w - di_mod_2w) end
+			FStar.Math.Lemmas.pow2_plus 1 (w - 1);		
+		false, (pow2 w - di_mod_2w) end
       else
 	true, di_mod_2w - (pow2 w) 
     end
-  else begin
+  else
     true, di_mod_2w
-    end
+   
 
 
 (*  i ← 0

@@ -6,23 +6,16 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.ByteBuffer 
-open Lib.ByteSequence
 open Lib.Buffer 
 
 open Spec.ECC 
 open Hacl.Spec.EC.Definition
-open Hacl.Lemmas.P256
-
 open Spec.ECDSA
-open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Hacl.Impl.ECDSA.LowLevel
 
 open Hacl.Impl.EC.Setup
-
-
 open Hacl.Impl.EC.Math 
 open FStar.Math.Lemmas
 open FStar.Mul
@@ -35,17 +28,19 @@ friend Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.Core
 open Hacl.Impl.EC.Masking
 
-open Hacl.Impl.EC.Intro
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 let bufferToJac #c p result = 
+    let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let lengthXY = len *. 2ul in 
   let partPoint = sub result (size 0) lengthXY in 
   let zCoordinate = sub result lengthXY len in 
   copy partPoint p;
-  uploadOneImpl #c zCoordinate
+  uploadOneImpl #c zCoordinate;
+    let h1 = ST.get() in 
+    assert(felem_eval c h1 (gsub result (2ul *! getCoordinateLenU64 c) (getCoordinateLenU64 c)))
 
 
 inline_for_extraction noextract
@@ -116,16 +111,9 @@ let isPointAtInfinityPublic #c p =
   isZero_uint64_nCT #c zCoordinate 
     
 
-val lemma_modular_multiplication_2_d: #c: curve -> 
+assume val lemma_modular_multiplication_2_d: #c: curve -> 
   a:nat {a < getPrime c} -> b:nat {b < getPrime c } -> 
   Lemma (toDomain_ #c #DH a = toDomain_ #c #DH b <==> a == b)
-
-let lemma_modular_multiplication_2_d #c a b = 
-   lemmaToDomain #c #DH a;
-   lemmaToDomain #c #DH b;
-   match c with 
-   |P256 -> lemma_modular_multiplication_p256_2 a b
-   |P384 -> lemma_modular_multiplication_p384_2 a b
 
 
 let isPointOnCurvePublic #c p = 
@@ -140,14 +128,12 @@ let isPointOnCurvePublic #c p =
   y_2 #c y y2Buffer;
   xcube_minus_x #c x xBuffer;
 
-    admit();
-
   lemma_modular_multiplication_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % (getPrime c)) 
     (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % (getPrime c));
     
   let r = compare_felem #c y2Buffer xBuffer in 
   let z = not (eq_0_u64 r) in 
-  admit();
+  
   pop_frame();
   z
 

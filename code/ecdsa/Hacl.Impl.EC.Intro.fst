@@ -59,14 +59,14 @@ let changeEndian_spec #c b =
   Lib.LoopCombinators.repeati_inductive lenByTwo pred (fun i b0 -> changeEndianStep #c i b0) b
 
 
-let changedEndian #c (i : Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c))) 
+let changedEndian_ #c (i : Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c))) 
   (o: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c))) = 
   forall (j: nat). (j < v (getCoordinateLenU64 c)) ==> 
     Lib.Sequence.index i j == Lib.Sequence.index o (v (getCoordinateLenU64 c) - j - 1)
 
 val changeEndian: #c: curve -> i: felem c -> Stack unit 
   (requires fun h -> live h i)
-  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ changedEndian (as_seq h0 i) (as_seq h1 i))
+  (ensures  fun h0 _ h1 -> modifies1 i h0 h1 /\ changedEndian_ (as_seq h0 i) (as_seq h1 i))
 
 let changeEndian #c b =
   let h0 = ST.get() in 
@@ -135,7 +135,7 @@ let changeEndian_le_be #c a =
 val toUint64ChangeEndian: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1  /\
-    changedEndian (as_seq h1 o) (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
+    changedEndian_ (as_seq h1 o) (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
 
 let toUint64ChangeEndian #c i o = 
   let len : FStar.UInt32.t = getCoordinateLenU64 c in 
@@ -229,3 +229,76 @@ let changeEndian_le_be #c a =
   Lib.ByteSequence.uints_to_bytes_be_nat_lemma #U64 #SEC (uint_v (getCoordinateLenU64 c)) a
 
 *)
+
+*) 
+
+open Lib.ByteSequence
+
+val lemma_lseq_nat_from_bytes_: #l: size_nat -> a: Lib.Sequence.lseq uint64 l -> i: nat {i > 0 /\ i <= l} ->
+  Lemma (Lib.ByteSequence.nat_from_intseq_le (Lib.Sequence.slice a 0 i) == lseq_as_nat_ a i)
+
+let rec lemma_lseq_nat_from_bytes_ #l a i = 
+  let sl = Lib.Sequence.slice a 0 i in 
+  match i with 
+  |1 -> nat_from_intseq_le_lemma0 sl; lseq_as_nat_first a
+  |_ -> lemma_lseq_nat_from_bytes_ a (i - 1);
+    let i1 = i - 1 in 
+    nat_from_intseq_le_slice_lemma a i1;
+    nat_from_intseq_le_slice_lemma sl (i - 1);
+    nat_from_intseq_le_lemma0 (Lib.Sequence.slice sl i1 i); 
+    lseq_as_nat_definiton a i
+
+
+val lemma_lseq_nat_from_bytes: #l: size_nat {l > 0} -> a: Lib.Sequence.lseq uint64 l -> 
+  Lemma (Lib.ByteSequence.nat_from_intseq_le a == lseq_as_nat a)
+
+let lemma_lseq_nat_from_bytes #l a = lemma_lseq_nat_from_bytes_ #l a l
+
+
+
+val lemma_lseq_nat_from_bytes_test_: #c: curve
+  -> a: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c))
+  -> b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c)) {changedEndian_ a b}
+  -> i: nat {i > 0 /\ i <= (v (getCoordinateLenU64 c))} ->
+  Lemma (let len = v (getCoordinateLenU64 c) in 
+    Lib.ByteSequence.nat_from_intseq_be (Lib.Sequence.slice b (len - i) len) == lseq_as_nat_ a i)
+
+
+let rec lemma_lseq_nat_from_bytes_test_ #c a b i = 
+  let open Lib.Sequence in 
+  let open FStar.Mul in 
+  let len = v (getCoordinateLenU64 c) in 
+  match i with
+  |1 -> let sl = Lib.Sequence.slice b (len - i) len  in  nat_from_intseq_be_lemma0 sl; lseq_as_nat_first a
+  |_ -> lemma_lseq_nat_from_bytes_test_ #c a b (i - 1);
+    let sl = Lib.Sequence.slice b (len - i) len  in  
+    let i1 = i - 1 in 
+    lseq_as_nat_definiton a i;
+
+    nat_from_intseq_be_slice_lemma sl 1;
+    nat_from_intseq_be_lemma0 (Lib.Sequence.slice sl 0 1);
+    Seq.lemma_index_slice b (len - i) len 0
+
+
+val lemma_lseq_nat_from_bytes_test: #c: curve
+  -> a: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c))
+  -> b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c)) {changedEndian_ a b} ->
+  Lemma (Lib.ByteSequence.nat_from_intseq_be b == lseq_as_nat a)
+
+let lemma_lseq_nat_from_bytes_test #c a b = 
+  lemma_lseq_nat_from_bytes_test_ #c a b (v (getCoordinateLenU64 c))
+
+
+val lemma_change_endian: #c: curve
+  -> a: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c))
+  -> b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c)) -> 
+  Lemma 
+  (requires (Hacl.Impl.EC.Intro.changedEndian_ #c a b))
+  (ensures (nat_from_intseq_le a == nat_from_intseq_be b))
+
+let lemma_change_endian #c a b = 
+  lemma_lseq_nat_from_bytes a;
+  lemma_lseq_nat_from_bytes_test #c a b
+
+
+

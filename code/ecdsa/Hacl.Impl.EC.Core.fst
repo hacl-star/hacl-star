@@ -77,12 +77,34 @@ let pointFromDomain #c p result =
   fromDomain #c p_z r_z
 
 
-val copy_point: #c: curve ->  p: point c -> result: point c -> Stack unit 
+val copy_point: #c: curve -> p: point c -> result: point c -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_eval c h p) 
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_seq h1 result == as_seq h0 p /\ point_eval c h1 p)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ 
+    point_as_nat c h0 p == point_as_nat c h1 result)
 
-let copy_point p result = copy result p
+let copy_point #c p result = 
+  let h0 = ST.get() in 
+    copy result p;
+  let h1 = ST.get() in 
+    lemma_equal_lseq_equal_nat (as_seq h0 p) (as_seq h1 result);
+
+    let xP = as_seq h0 (getX p) in 
+    let yP = as_seq h0 (getY p) in 
+    let zP = as_seq h0 (getZ p) in 
+    
+    let xR = as_seq h1 (getX result) in 
+    let yR = as_seq h1 (getY result) in 
+    let zR = as_seq h1 (getZ result) in 
+
+
+    assert(as_seq h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) == 
+      as_seq h1 (gsub result (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)));
+
+    lemma_equal_lseq_equal_nat xP xR;
+    lemma_equal_lseq_equal_nat yP yR;
+    lemma_equal_lseq_equal_nat zP zR
  
+
 let getPower2 c = pow2 (getPower c)
 
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
@@ -105,12 +127,15 @@ let isPointAtInfinityPrivate #c p =
 
   let zCoordinate = sub p start len in 
   let r = isZero_uint64_CT #c zCoordinate in 
+    let h1 = ST.get() in 
 
  lemma_pointAtInfInDomain #c
     (as_nat c h0 (gsub p (size 0) len))
     (as_nat c h0 (gsub p len len))
     (as_nat c h0 (gsub p (2ul *! len) len)); 
+  Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
   r
+
 
 val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c -> resultPoint: point c -> 
   Stack unit 
@@ -123,7 +148,7 @@ val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point 
     x1 == fromDomain_ #c #DH (as_nat c h0 z2x) /\ 
     y1 == fromDomain_ #c #DH (as_nat c h0 z3y) /\ (
     if Spec.ECC.isPointAtInfinity (fromDomain_ #c #DH x0, fromDomain_ #c #DH y0, fromDomain_ #c #DH z0) 
-    then z1 == 0 else  z1 == 1)))
+    then z1 == 0 else z1 == 1)))
 
 let normalisation_update #c z2x z3y p resultPoint = 
   push_frame(); 
@@ -283,7 +308,7 @@ let lemma_coord h3 q = ()
 
 
 val uploadStartPoints: #c: curve -> q: point c -> p: point c -> result: point c -> Stack unit 
-  (requires fun h -> live h q /\ live h p /\ live h result /\ 
+  (requires fun h -> live h q /\ live h p /\ live h result /\
     disjoint p q /\ disjoint q result /\ eq_or_disjoint p result /\ point_eval c h p /\
     ~ (isPointAtInfinity (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc q) h0 h1 /\
@@ -313,7 +338,7 @@ let uploadStartPoints #c q p result =
 
 
 val scalar_multiplication_t_0: #c: curve -> #t:buftype -> q: point c -> p: point c -> result: point c -> 
-  scalar: lbuffer_t t uint8 (getScalarLenBytes c) -> 
+  scalar: scalar_t c -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
   Stack unit 
   (requires fun h -> live h q /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
@@ -332,14 +357,14 @@ let scalar_multiplication_t_0 #c q p result scalar tempBuffer =
   montgomery_ladder q result scalar tempBuffer
 
 
-val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c ->  Lemma (point_mult #c 0 p == pointAtInfinity)
+val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c -> Lemma (point_mult #c 0 p == pointAtInfinity)
 
 let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 p 0
 
 
 inline_for_extraction
 val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: point c -> 
-  scalar: lbuffer_t t uint8 (getScalarLenBytes c) -> 
+  scalar: scalar_t c -> 
   tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
   (requires fun h -> 
@@ -349,19 +374,19 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: poi
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let pD = point_as_nat c h1 result in 
     scalar_multiplication (as_seq h0 scalar) (point_as_nat c h0 p) == pD))
-
+(*
 val size_cuttable_scalar_mult: #c: curve -> 
   Lemma (let len = getCoordinateLenU64 c in  (v (size 3 *! len) + v (size 17 *! len) <= v (size 20 *! len)))
 
 let size_cuttable_scalar_mult #c = ()
+*)
 
 let scalarMultiplication_t #c #t p result scalar tempBuffer  = 
     let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
-  size_cuttable_scalar_mult #c;
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in
-  scalar_multiplication_t_0 q p result scalar buff; 
+  scalar_multiplication_t_0 #c #t q p result scalar buff; 
   norm q result buff; 
   let i1 = point_as_nat c h0 p in 
     point_mult0_is_infinity i1
@@ -371,6 +396,7 @@ let scalarMultiplicationL #c = scalarMultiplication_t #c #MUT
 let scalarMultiplicationI #c = scalarMultiplication_t #c #IMMUT
 let scalarMultiplicationC #c = scalarMultiplication_t #c #CONST
 
+#push-options "--ifuel 1"
 
 let scalarMultiplication #c #buf_type p result scalar tempBuffer = 
   match buf_type with 
@@ -378,17 +404,16 @@ let scalarMultiplication #c #buf_type p result scalar tempBuffer =
   |IMMUT -> scalarMultiplicationI #c p result scalar tempBuffer
   |CONST -> scalarMultiplicationC #c p result scalar tempBuffer
 
+#pop-options 
 
 let scalarMultiplicationWithoutNorm #c p result scalar tempBuffer = 
     let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
-  size_cuttable_scalar_mult #c;
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in
-  scalar_multiplication_t_0 q p result scalar buff; 
-    let h1 = ST.get() in 
+  scalar_multiplication_t_0 #c #MUT q p result scalar buff; 
   copy_point q result
-    
+
 
 val uploadStartPointsS2P: #c: curve -> q: point c -> result: point c -> Stack unit 
   (requires fun h -> live h q /\ live h result /\ disjoint q result)
@@ -435,7 +460,6 @@ let secretToPublic #c result scalar tempBuffer =
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in
-  size_cuttable_scalar_mult #c;
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
 
   secretToPublic_0 q result scalar buff;
@@ -445,82 +469,7 @@ let secretToPublic #c result scalar tempBuffer =
 let secretToPublicWithoutNorm #c result scalar tempBuffer = 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in
-  size_cuttable_scalar_mult #c;
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
 
   uploadStartPointsS2P result q; 
   montgomery_ladder result q scalar buff
-
-(*
-val lemma_norm_twice: #c: curve -> p0: point_nat_prime #c {~ (isPointAtInfinity p0)} -> 
-  Lemma (_norm (_norm p0) == _norm p0)
-
-let lemma_norm_twice #c p0 = 
-  let prime = getPrime c in 
-  
-  let (x, y, z) = p0 in
-  let kX, kY, kZ = _norm p0 in 
-  let kkX, kkY, kkZ = _norm (_norm p0) in 
-    
-  small_mod 1 prime;
-  small_mod kX prime;
-  small_mod kY prime;
-  lemma_pow_mod_n_is_fpow prime 1 (prime - 2);
-  power_one (prime - 2)
-
-val lemma_norm_twice1: #c: curve -> p0: point_nat_prime #c {let (x, y, z) = p0 in z == 1} -> 
-  Lemma (p0 == _norm p0)
-
-let lemma_norm_twice1 #c p0 = 
-  let prime = getPrime c in 
-  
-  let (x, y, z) = p0 in
-    
-  small_mod 1 prime;
-  small_mod x prime;
-  small_mod y prime;
-  lemma_pow_mod_n_is_fpow prime 1 (prime - 2);
-  power_one (prime - 2)
-
-
-val lemma_test: #c: curve -> p0: point_nat_prime #c -> s: scalar_bytes #c -> 
-  Lemma (requires (pointEqual p0 (secret_to_public #c s)))
-  (ensures (
-    let p1 = secret_to_public #c s in
-    let pAffineX, pAffineY, pAffineZ = _norm p0 in 
-    let qAffineX, qAffineY, qAffineZ = _norm p1 in 
-    (isPointAtInfinity p0 /\ isPointAtInfinity p1) \/ (pAffineX == qAffineX /\ pAffineY == qAffineY)))
-
-
-let lemma_test #c p0 scalar =
-  let p1 = secret_to_public #c scalar in 
-  
-    point_mult_0 (basePoint #c) 0;
-    
-  let q, _ = montgomery_ladder_spec_left #c scalar (pointAtInfinity, (basePoint #c)) in
-  
-  assert(p1 == _norm q);
-
-  assert(pointEqual p0 p1);
-
-  let pAffineX, pAffineY, pAffineZ = _norm p0 in 
-  let qAffineX, qAffineY, qAffineZ = p1 in 
-
-  assert(pAffineZ == 0 \/ pAffineZ == 1);
-
-
-  if ((isPointAtInfinity p1) = false) then begin
-    lemma_norm_twice q;
-    assert(qAffineZ == 1)
-  end;
-
-
-  assert((isPointAtInfinity p0 /\ isPointAtInfinity p1) \/ (pAffineX == qAffineX /\ pAffineY == qAffineY));
-
-
-  admit();
-
-  
-
-  admit()
-*)

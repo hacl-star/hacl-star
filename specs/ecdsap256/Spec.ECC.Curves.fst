@@ -107,6 +107,8 @@ let getPrime curve : prime: nat {prime > 3 /\ FStar.Math.Euclid.is_prime prime /
 
 (* the length of each coordinate of the point as uint64 *)
 inline_for_extraction noextract
+val getCoordinateLenU64: c: curve -> Tot (a: size_t {v a * 20 < maxint U32})
+
 let getCoordinateLenU64 curve = 
   match curve with
   |P256 -> 4ul
@@ -116,12 +118,12 @@ let getCoordinateLenU64 curve =
 
 (* the length of each coordinate of the point as uint8 *)
 inline_for_extraction noextract
-let getCoordinateLenU curve = getCoordinateLenU64 curve *. 8ul
+let getCoordinateLenU curve = getCoordinateLenU64 curve *! 8ul
 
 let getCoordinateLen curve = v (getCoordinateLenU curve)
 
 (* each point consists of three coordinates *)
-let getPointLen curve = getCoordinateLenU curve *. 3ul
+let getPointLen curve = getCoordinateLenU curve *! 2ul
 
 (* the expected scalar length *)
 
@@ -137,7 +139,7 @@ let getScalarLenBytes curve =
   getScalarLenWords curve *. 8ul
 
 (* the scalar length in bits *)
-let getScalarLen (c: curve) = getScalarLenBytes c *. 8ul
+let getScalarLen (c: curve) = getScalarLenBytes c *! 8ul
 
 
 (* the next power in pow2 (k * 64) after the prime *)

@@ -19,5 +19,5 @@ val exponent_p384: a: felem P384 -> result: felem P384 ->
     disjoint a tempBuffer /\ as_nat P384 h a < getPrime P384)
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let k = fromDomain_ #P384 #DH (as_nat P384 h0 a) in 
-    as_nat P384 h1 result =  toDomain_ #P384 #DH (pow k (prime384 - 2) % prime384) /\
+    as_nat P384 h1 result = toDomain_ #P384 #DH (pow k (prime384 - 2) % prime384) /\
     as_nat P384 h1 result < getPrime P384)) 

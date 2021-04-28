@@ -63,7 +63,7 @@ let isPointOnCurve (#c: curve) (p: point_nat_prime #c) : bool =
   (x * x * x + aCoordinate #c  * x + bCoordinate #c) % prime256
 
 
-val toJacobianCoordinates: tuple2 nat nat -> tuple3 nat nat nat
+val toJacobianCoordinates: tuple2 nat nat -> r: tuple3 nat nat nat {~ (isPointAtInfinity r)}
 
 let toJacobianCoordinates (r0, r1) = (r0, r1, 1)
 

@@ -21,106 +21,136 @@ open Hacl.Impl.P256.Signature.Common
 
 open Hacl.Impl.EC.Intro
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
+
+#set-options " --z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+
+
+inline_for_extraction noextract
+val fromForm: #c: curve -> i: felem c -> o: coordinateAffine8 c -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ as_nat c h i < pow2 (getPower c))
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  
+    as_seq h1 o == nat_to_bytes_be (v (getCoordinateLenU c)) (as_nat c h0 i))
+
+let fromForm #c i o = 
+  let h0 = ST.get() in
+  changeEndian i;
+    let h1 = ST.get() in 
+  lemma_change_endian #c (as_seq h0 i) (as_seq h1 i);
+  toUint8 i o;
+  lemma_lseq_nat_from_bytes (as_seq h0 i);
+  lemma_nat_from_to_intseq_be_preserves_value (v (getCoordinateLenU64 c)) (as_seq h1 i);
+  uints_to_bytes_be_nat_lemma #U64 #SEC (v (getCoordinateLenU64 c)) (as_nat c h0 i)
+
+
+val fromFormPoint: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ point_eval c h i /\ (
+    let xCoordinate, yCoordinate, _ = point_as_nat c h i in 
+    xCoordinate < pow2 (getPower c) /\ yCoordinate < pow2 (getPower c)))
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\ (
+    let coordinateX_u64, coordinateY_u64, _ = point_as_nat c h0 i in 
+    let coordinateX_u8, coordinateY_u8 = getXAff8 #c o, getYAff8 #c o in
+    as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateX_u64 /\
+    as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateY_u64))
+    
+
+let fromFormPoint #c i o = 
+  let len = getCoordinateLenU64 c in 
+  let scalarLen = getCoordinateLenU c in 
+  
+  let resultBufferX = sub i (size 0) len in
+  let resultBufferY = sub i len len in
+
+  let resultX = sub o (size 0) scalarLen in
+  let resultY = sub o scalarLen scalarLen in
+
+  fromForm #c resultBufferX resultX;
+  fromForm #c resultBufferY resultY
+
+
+open FStar.Mul 
+
+val ecp256_dh_i_: #c: curve -> resultBuffer: point c 
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) 
+  -> scalar: scalar_t c -> result: pointAffine8 c -> 
+  Stack uint64
+  (requires fun h -> live h resultBuffer /\ live h tempBuffer /\ live h scalar /\ live h result /\
+    disjoint resultBuffer result /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc resultBuffer])
+  (ensures fun h0 r h1 -> modifies (loc result |+| loc tempBuffer |+| loc resultBuffer) h0 h1 /\ (
+    let pointX, pointY, flag = ecp256_dh_i #c (as_seq h0 scalar) in 
+    let coordinateX_u8, coordinateY_u8 = getXAff8 #c result, getYAff8 #c result in
+    let scalarX, scalarY = as_seq h1 (coordinateX_u8), as_seq h1 (coordinateY_u8) in 
+    pointX == scalarX /\ pointY == scalarY /\ r == flag))
+
+
+let ecp256_dh_i_ #c resultBuffer tempBuffer scalar result = 
+  secretToPublic #c resultBuffer scalar tempBuffer;
+    let h1 = ST.get() in 
+  let r = isPointAtInfinityPrivate #c resultBuffer in 
+    let h2 = ST.get() in 
+  fromFormPoint #c resultBuffer result;
+  Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 resultBuffer;
+  r
+ 
 
 let ecp256dh_i c result scalar =
   push_frame();
-    let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
-  let scalarLen = getScalarLenBytes c in 
-
   let tempBuffer = create (size 20 *! len) (u64 0) in
-    
   let resultBuffer = create (size 3 *! len) (u64 0) in
-  let resultBufferX = sub resultBuffer (size 0) len in
-  let resultBufferY = sub resultBuffer len len in
-    
-  let resultX = sub result (size 0) scalarLen in
-  let resultY = sub result scalarLen scalarLen in
-
-  secretToPublic #c resultBuffer scalar tempBuffer;
-  let flag = isPointAtInfinityPrivate #c resultBuffer in
-
-
-  let h0 = ST.get() in
-  changeEndian #c resultBufferX;
-  changeEndian #c resultBufferY;
- 
-  toUint8 #c resultBufferX resultX;
-  toUint8 #c resultBufferY resultY;
-
-  lemma_core_0 c resultBufferX h0;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferX);
-  (* changeEndian_le_be #c (as_nat c h0 resultBufferX); *)
-
-  lemma_core_0 c resultBufferY h0;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 resultBufferY);
-  (* changeEndian_le_be #c (as_nat c h0 resultBufferY);  *)
+    let h0 = ST.get() in 
+  let flag = ecp256_dh_i_ resultBuffer tempBuffer scalar result in 
   pop_frame();
   flag
 
 
-(*
 [@ (Comment "  This code is not side channel resistant on pubKey")]
-*)
-
-val _ecp256dh_r:
-  #c: curve 
-  -> result:lbuffer uint64 (size 3 *! getCoordinateLenU64 c) 
-  -> pubKey:lbuffer uint64 (size 2 *! getCoordinateLenU64 c) 
-  -> scalar: lbuffer uint8 (getScalarLen c) 
-  -> Stack uint64
-    (requires fun h -> 
-      let len = getCoordinateLenU64 c in 
-      
-      live h result /\ live h pubKey /\ live h scalar /\
-      disjoint result pubKey /\ disjoint result scalar /\
-      
-      as_nat c h (gsub result (size 0) len) == 0 /\
-      as_nat c h (gsub result len len) == 0
-   )
-    (ensures fun h0 r h1 -> 
-      let len = getCoordinateLenU64 c in 
-      let prime = getPrime c in       
-      
-      modifies (loc result) h0 h1 /\ (
-      
-      let x, y = as_nat c h0 (gsub pubKey (size 0) len), as_nat c h0 (gsub pubKey len len) in
-      
-       let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
-       let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
-       if not (verifyQValidCurvePointSpec #c (pointJacX, pointJacY, pointJacZ)) then
-	 uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
-       else
-	 x3 < prime /\ y3 < prime /\ z3 < prime /\
-         (
-	   let xN, yN, zN = scalar_multiplication #c (as_seq h0 scalar) (pointJacX, pointJacY, pointJacZ) in
-           xN == x3 /\ yN == y3 /\ zN == z3 /\
-         (if isPointAtInfinity (xN, yN, zN) then
-           uint_v r = maxint U64
-         else
-           uint_v r = 0))))
+val _ecp256dh_r: #c: curve 
+  -> result: point c
+  -> pubKey: pointAffine c
+  -> scalar: scalar_t c -> 
+  Stack uint64
+  (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ 
+    disjoint result pubKey /\ disjoint result scalar /\
+    felem_eval c h (getXAff pubKey) /\ felem_eval c h (getYAff pubKey))
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ (
+    let pkX, pkY = as_nat c h0 (getXAff pubKey), as_nat c h0 (getYAff pubKey) in 
+    let x3, y3, z3 = point_as_nat c h1 result in
+    let pointJ = toJacobianCoordinates (pkX, pkY) in 
+    if not (verifyQValidCurvePointSpec #c pointJ) then
+      uint_v r = maxint U64 /\ x3 == pkX /\ y3 == pkY
+    else begin
+      let xN, yN, zN = scalar_multiplication #c (as_seq h0 scalar) pointJ in
+      xN == x3 /\ yN == y3 /\ zN == z3 /\ (
+      if isPointAtInfinity (xN, yN, zN) then
+	uint_v r = maxint U64
+      else
+	uint_v r = 0) end))
 
 
 let _ecp256dh_r #c result pubKey scalar =
   push_frame();
-  admit();
-  let len = getCoordinateLenU64 c in 
-  let tempBuffer = create (size 25 *! len) (u64 0) in
-  let publicKeyBuffer = create (size 3 *! len) (u64 0) in
-  bufferToJac #c pubKey publicKeyBuffer;
-  let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in
+    let h0 = ST.get() in 
+    let len = getCoordinateLenU64 c in 
+    let tempBuffer = create (size 20 *! len) (u64 0) in
+    let publicKeyBuffer = create (size 3 *! len) (u64 0) in
+  bufferToJac #c pubKey publicKeyBuffer; 
+  let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in 
   if publicKeyCorrect then
     begin
-    scalarMultiplication #c publicKeyBuffer result scalar tempBuffer;
-    let flag = isPointAtInfinityPrivate #c result in
-    pop_frame();
+      admit();
+      scalarMultiplication #c #MUT publicKeyBuffer result scalar tempBuffer;
+      let flag = isPointAtInfinityPrivate #c result in
+      pop_frame();
     flag
     end
   else
     begin
     pop_frame();
-    u64 18446744073709551615
+      let h1 = ST.get() in 
+      let r = u64 18446744073709551615 in 
+      admit();
+      u64 18446744073709551615
     end
 
 

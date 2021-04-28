@@ -29,7 +29,7 @@ val lseq_as_nat_last: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat_ #l
 
 let lseq_as_nat_last #l a = ()
 
-val lseq_as_nat_first: a: lseq uint64 1 -> Lemma (lseq_as_nat_ a 1 == v (Lib.Sequence.index a 0))
+val lseq_as_nat_first: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat_ a 1 == v (Lib.Sequence.index a 0))
 
 let lseq_as_nat_first a = ()
 
@@ -335,44 +335,80 @@ let wide_as_nat (c: curve) (h:mem) (e: widefelem c) : GTot nat = lseq_as_nat (as
 inline_for_extraction
 type point (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *! 3ul)
 
-type scalar (c: curve) = lbuffer uint8 (getScalarLen c)
+inline_for_extraction
+type pointAffine (c: curve) = lbuffer uint64 (getCoordinateLenU64 c *! 2ul)
+
+
+inline_for_extraction
+type coordinateAffine8 (c: curve) = lbuffer uint8 (getCoordinateLenU c)
+
+inline_for_extraction
+type pointAffine8 (c: curve) = lbuffer uint8 (2ul *! getCoordinateLenU c)
+
+
+type scalar_t (c: curve) = lbuffer uint8 (getScalarLenBytes c)
 
 
 let felem_eval (c: curve) (h: mem) (f: felem c) = as_nat c h f < getPrime c
 
 
-let point_eval (c: curve) (h:mem) (p:point c) = 
-  let x = gsub p (size 0) (getCoordinateLenU64 c) in 
-  let y = gsub p (getCoordinateLenU64 c) (getCoordinateLenU64 c) in 
-  let z = gsub p (2ul *! getCoordinateLenU64 c) (getCoordinateLenU64 c) in 
-  felem_eval c h x /\ felem_eval c h y /\ felem_eval c h z 
-  
+val getX: #c: curve -> p: point c -> GTot (felem c)
 
-noextract 
-let point_x_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (a: nat {a < getPrime c}) = 
-  as_nat c h (gsub e (size 0) (getCoordinateLenU64 c))
+let getX #c p = gsub p (size 0) (getCoordinateLenU64 c)
 
-noextract 
-let point_y_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (a: nat {a < getPrime c}) = 
-  as_nat c h (gsub e (getCoordinateLenU64 c) (getCoordinateLenU64 c))
+val getY: #c: curve -> p: point c -> GTot (felem c)
+
+let getY #c p = gsub p (getCoordinateLenU64 c) (getCoordinateLenU64 c)
 
 val getZ: #c: curve -> p: point c -> GTot (felem c)
 
 let getZ #c p = gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)
 
+
+val getXAff: #c: curve -> p: pointAffine c -> GTot (felem c)
+
+let getXAff #c p = gsub p (size 0) (getCoordinateLenU64 c)
+
+val getYAff: #c: curve -> p: pointAffine c  -> GTot (felem c)
+
+let getYAff #c p = gsub p (getCoordinateLenU64 c) (getCoordinateLenU64 c)
+
+
+val getXAff8: #c: curve -> p: pointAffine8 c -> GTot (coordinateAffine8 c)
+
+let getXAff8 #c p = gsub p (size 0) (getCoordinateLenU c)
+
+val getYAff8: #c: curve -> p: pointAffine8 c -> GTot (coordinateAffine8 c)
+
+let getYAff8 #c p = gsub p (getCoordinateLenU c) (getCoordinateLenU c)
+
+
+
+let point_eval (c: curve) (h:mem) (p:point c) = 
+  let x, y, z = getX p, getY p, getZ p in 
+  felem_eval c h x /\ felem_eval c h y /\ felem_eval c h z 
+  
+
+noextract 
+let point_x_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (a: nat {a < getPrime c}) = 
+  as_nat c h (getX e)
+
+noextract 
+let point_y_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (a: nat {a < getPrime c}) = 
+  as_nat c h (getY e)
+
 noextract 
 let point_z_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (a: nat {a < getPrime c}) = 
-  as_nat c h (getZ #c e)
+  as_nat c h (getZ e)
+
 
 noextract
 let point_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (point_nat_prime #c) = 
   point_x_as_nat c h e, point_y_as_nat c h e, point_z_as_nat c h e
 
-let point_prime_to_coordinates (c: curve) (p:point_seq c) : point_nat =
+let point_prime_to_coordinates (c: curve) (p:point_seq c) : GTot point_nat =
   let len = uint_v (getCoordinateLenU64 c) in 
   lseq_as_nat (Lib.Sequence.sub p 0 len),
   lseq_as_nat (Lib.Sequence.sub p len len),
   lseq_as_nat (Lib.Sequence.sub p (len * 2) len)
   
-
-
