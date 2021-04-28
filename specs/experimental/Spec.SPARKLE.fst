@@ -86,12 +86,11 @@ let xor_x n b lu lv =
   |_ -> admit()
 
 
-val m_test: n: nat {n == 2 \/ n == 3 \/ n == 4} ->  branch n -> Tot (branch n)
+val m: n: nat {n == 2 \/ n == 3 \/ n == 4} -> branch n -> Tot (branch n)
 
-let m_test n b = 
+let m n b = 
   let u, v = xor n b in 
-  let lu = l1 u in
-  let lv = l1 v in
+  let lu, lv = l1 u, l1 v in
   xor_x n b lu lv
   
 
