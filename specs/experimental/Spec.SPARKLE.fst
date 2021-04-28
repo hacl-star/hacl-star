@@ -68,6 +68,17 @@ let arx c b =
 val l1: x:uint32 -> Tot uint32
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
+
+(* AW: unstable *)
+val xor: n: branch_len -> b: branch n -> Tot (tuple2 uint32 uint32)
+
+let xor n b = 
+  match n with 
+  |2 -> let (x0, y0), (x1, y1) = (b <: branch 2) in y0 ^. y1, x0 ^. x1
+  |3 -> let (x0, y0), (x1, y1), (x2, y2) = (b <: branch 3) in y0 ^. y1 ^. y2, x0 ^. x1 ^. x2
+  |_ -> admit(); (0, 0)
+
+
 val m2: (branch 2) -> Tot (branch 2)
 
 let m2 ((x0, y0), (x1, y1)) =
