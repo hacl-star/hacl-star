@@ -279,8 +279,34 @@ Deterministic random bit generator
 
 module DRBG : sig
   type t
+
+  val is_supported_alg : HashDefs.alg -> bool
+  (** [is_supported_alg alg] returns true if the hashing algorithm [alg] is supported
+      in the agile HMAC-DRBG interface. *)
+
   val instantiate : ?personalization_string: bytes -> HashDefs.alg -> t option
+  (** [instantiate ?personalization_string alg] allocates the internal state for algorithm [alg]
+      using the optional [personalization_string] and returns a {!t}. *)
+
+  val generate : ?additional_input: bytes -> t -> int -> bytes option
+  (** [generate ?additional_input st size] takes optional [additional_input], a state [st] and
+      [size], the desired number of random bytes, and returns such a buffer if successful. *)
+
+  val generate_noalloc : ?additional_input: bytes -> t -> bytes -> bool
+  (** [generate ?additional_input st output] takes an optional [additional_input], a state [st] and
+      an output buffer [output], which will be filled with random bytes if successful. *)
+
   val reseed : ?additional_input: bytes -> t -> bool
-  val generate : ?additional_input: bytes -> t -> bytes -> bool
-  val uninstantiate : t -> unit
+  (** [reseed ?additional_input st] attempts to reseed [st], using the optional [additional_input]
+      and returns true if successful. *)
 end
+(** Agile, multiplexing interface for HMAC-DRBG
+
+    The supported hashing algorithms are SHA2-256, SHA2-384, SHA2-512.
+
+    Users first need to instantiate an internal state with a compatible hashing algorithm and an
+    optional but recommended personalization string. The [generate] or [generate_noalloc] functions
+    can then be called any number of times.
+
+    Users have the possibility to reseed, but it is not required.
+*)

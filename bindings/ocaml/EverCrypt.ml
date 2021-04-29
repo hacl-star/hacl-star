@@ -277,21 +277,32 @@ module DRBG = struct
   open EverCrypt_DRBG
 
   type t = everCrypt_DRBG_state_s ptr
+  let is_supported_alg alg =
+    (* as defined in Spec.HMAC_DRBG, excluding SHA-1 *)
+    alg = HashDefs.SHA2_256 || alg = HashDefs.SHA2_384 || alg = HashDefs.SHA2_512
+
   let instantiate ?(personalization_string=Bytes.empty) alg =
-    if HMAC.is_supported_alg ~alg then
+    (* EverCrypt.DRBG.instantiate_st *)
+    if is_supported_alg alg then
       let st = everCrypt_DRBG_create (HashDefs.alg_definition alg) in
-      if everCrypt_DRBG_instantiate st (C.ctypes_buf personalization_string) (C.size_uint32 personalization_string) then
+      if everCrypt_DRBG_instantiate st (C.ctypes_buf personalization_string) (C.size_uint32 personalization_string) then begin
+        Gc.finalise everCrypt_DRBG_uninstantiate st;
         Some st
-      else
+      end else
         None
     else
       None
-  let reseed ?(additional_input=Bytes.empty) st =
-    everCrypt_DRBG_reseed st (C.ctypes_buf additional_input) (C.size_uint32 additional_input)
-  let generate ?(additional_input=Bytes.empty) st output =
+  let generate_noalloc ?(additional_input=Bytes.empty) st output =
     (* EverCrypt.DRBG.generate_st *)
     assert (C.disjoint output additional_input);
     everCrypt_DRBG_generate (C.ctypes_buf output) st (C.size_uint32 output) (C.ctypes_buf additional_input) (C.size_uint32 additional_input)
-  let uninstantiate st =
-    everCrypt_DRBG_uninstantiate st
+  let generate ?(additional_input=Bytes.empty) st size =
+    let output = C.make size in
+    if generate_noalloc ~additional_input st output then
+      Some output
+    else
+      None
+  let reseed ?(additional_input=Bytes.empty) st =
+    (* EverCrypt.DRBG.reseed_st *)
+    everCrypt_DRBG_reseed st (C.ctypes_buf additional_input) (C.size_uint32 additional_input)
 end
