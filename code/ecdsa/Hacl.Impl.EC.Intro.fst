@@ -88,49 +88,6 @@ let changeEndian #c b =
     upd b i right;
     upd b lenRight left)
 
-(*
-val changeEndianLemma: #c: curve -> k: Lib.Sequence.lseq uint64 (getCoordinateLen c) -> Lemma
-  (Lib.ByteSequence.nat_from_intseq_le (changeEndian #c k) == Lib.ByteSequence.nat_from_intseq_be k)
-
-let changeEndianLemma #c k = ()
-
-
-val changeEndianLemmaI: #c: curve -> a: nat {a < pow2 (getPower c)} -> Lemma
-  (changeEndian #c (Lib.ByteSequence.nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a) == Lib.ByteSequence.nat_to_intseq_be (uint_v (getCoordinateLenU64 c)) a)
-
-let changeEndianLemmaI #c a = 
-  let open Lib.ByteSequence in 
-  let len = getCoordinateLenU64 c in
-  let a0 = nat_to_intseq_le #U64 #SEC 4 a in
-  index_nat_to_intseq_le #U64 #SEC  4 a 0;
-  index_nat_to_intseq_le #U64 #SEC  4 a 1;
-  index_nat_to_intseq_le #U64 #SEC  4 a 2;
-  index_nat_to_intseq_le #U64 #SEC  4 a 3;
-
-  index_nat_to_intseq_be #U64 #SEC 4 a 0;
-  index_nat_to_intseq_be #U64 #SEC 4 a 2;
-  index_nat_to_intseq_be #U64 #SEC 4 a 3;
-  index_nat_to_intseq_be #U64 #SEC 4 a 1;
-
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 3 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 3);
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 2 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 2);
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 1 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 1);
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 0 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 0);
-  eq_intro (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) (nat_to_intseq_be 4 a) 
-
-
-val changeEndian_le_be: #c: curve -> a:nat{a < pow2 (getPower c)} -> Lemma
-  (Lib.ByteSequence.uints_to_bytes_be (changeEndian #c (Lib.ByteSequence.nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a)) == Lib.ByteSequence.nat_to_bytes_be (getCoordinateLen c) a)
-
-let changeEndian_le_be #c a =
-  changeEndianLemmaI #c a;
-  Lib.ByteSequence.uints_to_bytes_be_nat_lemma #U64 #SEC (uint_v (getCoordinateLenU64 c)) a
-*)
-
 
 val toUint64ChangeEndian: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
@@ -142,95 +99,6 @@ let toUint64ChangeEndian #c i o =
   Lib.ByteBuffer.uints_from_bytes_be #U64 #SEC #len o i;
   changeEndian o
 
-
-
-(*
-val changeEndianStep_: #c: curve 
-  -> i: nat {i <= v (shift_right (getCoordinateLenU64 c) 1ul)}  -> felem_seq c -> felem_seq c 
-
-let changeEndianStep_ #c i b =
-  let len = v (getCoordinateLenU64 c) in 
-  let lenRight = len - 1 - i in 
-  let left = Lib.Sequence.index b i in 
-  let right = Lib.Sequence.index b lenRight in 
-  let b = Lib.Sequence.upd b i right in 
-  Lib.Sequence.upd b lenRight left
-
-
-val changeEndian_: #c: curve -> felem_seq c -> felem_seq c
-
-let changeEndian_ #c b =
-  let len = getCoordinateLenU64 c in 
-  let lenByTwo = shift_right len 1ul in 
-  Lib.LoopCombinators.repeati (v lenByTwo) (changeEndianStep) b
-
-(*
-val changeEndianLemma: #c: curve -> k: lseq uint64 (getCoordinateLen c) -> Lemma
-  (Lib.ByteSequence.nat_from_intseq_le (changeEndian #c k) == Lib.ByteSequence.nat_from_intseq_be k)
-
-let changeEndianLemma #c k =
-  let open Lib.ByteSequence in 
-  let k0 = changeEndian #c k in
-
-  nat_from_intseq_be_slice_lemma (slice k 2 4) 1;
-  nat_from_intseq_be_slice_lemma (slice k 1 4) 1;
-  nat_from_intseq_be_slice_lemma k 1;
-
-  nat_from_intseq_be_lemma0 (slice k 0 1);
-  nat_from_intseq_be_lemma0 (slice k 1 2);
-  nat_from_intseq_be_lemma0 (slice k 2 3);
-  nat_from_intseq_be_lemma0 (slice k 3 4);
-
-  nat_from_intseq_le_slice_lemma (slice k0 2 4) 1;
-  nat_from_intseq_le_slice_lemma (slice k0 1 4) 1;
-  nat_from_intseq_le_slice_lemma k0 1;
-
-  nat_from_intseq_le_lemma0 (slice k0 0 1);
-  nat_from_intseq_le_lemma0 (slice k0 1 2);
-  nat_from_intseq_le_lemma0 (slice k0 2 3);
-  nat_from_intseq_le_lemma0 (slice k0 3 4);
-
-  assert_norm (pow2 (2 * 64) * pow2 64 == pow2 (3 * 64))
-
-
-val changeEndianLemmaI: #c: curve -> a: nat {a < pow2 (getPower c)} -> Lemma
-  (changeEndian #c (Lib.ByteSequence.nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a) == Lib.ByteSequence.nat_to_intseq_be (uint_v (getCoordinateLenU64 c)) a)
-
-let changeEndianLemmaI #c a =
-  let open Lib.ByteSequence in 
-  let len = getCoordinateLenU64 c in
-  let a0 = nat_to_intseq_le #U64 #SEC 4 a in
-  index_nat_to_intseq_le #U64 #SEC  4 a 0;
-  index_nat_to_intseq_le #U64 #SEC  4 a 1;
-  index_nat_to_intseq_le #U64 #SEC  4 a 2;
-  index_nat_to_intseq_le #U64 #SEC  4 a 3;
-
-  index_nat_to_intseq_be #U64 #SEC 4 a 0;
-  index_nat_to_intseq_be #U64 #SEC 4 a 2;
-  index_nat_to_intseq_be #U64 #SEC 4 a 3;
-  index_nat_to_intseq_be #U64 #SEC 4 a 1;
-
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 3 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 3);
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 2 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 2);
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 1 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 1);
-
-  assert(Lib.Sequence.index #_ #4 (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) 0 == Lib.Sequence.index #_ #4 (nat_to_intseq_be #U64 #SEC 4 a) 0);
-  eq_intro (changeEndian #c (nat_to_intseq_le #U64 #SEC 4 a)) (nat_to_intseq_be 4 a)
-
-
-val changeEndian_le_be: #c: curve -> a:nat{a < pow2 (getPower c)} -> Lemma
-  (Lib.ByteSequence.uints_to_bytes_be (changeEndian #c (Lib.ByteSequence.nat_to_intseq_le (uint_v (getCoordinateLenU64 c)) a)) == Lib.ByteSequence.nat_to_bytes_be (getCoordinateLen c) a)
-
-let changeEndian_le_be #c a =
-  changeEndianLemmaI #c a;
-  Lib.ByteSequence.uints_to_bytes_be_nat_lemma #U64 #SEC (uint_v (getCoordinateLenU64 c)) a
-
-*)
-
-*) 
 
 open Lib.ByteSequence
 
@@ -253,7 +121,6 @@ val lemma_lseq_nat_from_bytes: #l: size_nat {l > 0} -> a: Lib.Sequence.lseq uint
   Lemma (Lib.ByteSequence.nat_from_intseq_le a == lseq_as_nat a)
 
 let lemma_lseq_nat_from_bytes #l a = lemma_lseq_nat_from_bytes_ #l a l
-
 
 
 val lemma_lseq_nat_from_bytes_test_: #c: curve

@@ -71,7 +71,7 @@ open FStar.Mul
 
 val ecp256_dh_i_: #c: curve -> resultBuffer: point c 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) 
-  -> scalar: scalar_t c -> result: pointAffine8 c -> 
+  -> scalar: scalar_t #MUT #c -> result: pointAffine8 c -> 
   Stack uint64
   (requires fun h -> live h resultBuffer /\ live h tempBuffer /\ live h scalar /\ live h result /\
     disjoint resultBuffer result /\
@@ -91,7 +91,7 @@ let ecp256_dh_i_ #c resultBuffer tempBuffer scalar result =
   fromFormPoint #c resultBuffer result;
   Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 resultBuffer;
   r
- 
+
 
 let ecp256dh_i c result scalar =
   push_frame();
@@ -108,17 +108,18 @@ let ecp256dh_i c result scalar =
 val _ecp256dh_r: #c: curve 
   -> result: point c
   -> pubKey: pointAffine c
-  -> scalar: scalar_t c -> 
+  -> scalar: scalar_t #MUT #c -> 
   Stack uint64
   (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ 
     disjoint result pubKey /\ disjoint result scalar /\
-    felem_eval c h (getXAff pubKey) /\ felem_eval c h (getYAff pubKey))
+    felem_eval c h (getXAff pubKey) /\ felem_eval c h (getYAff pubKey) /\
+    as_nat c h (getX result) == 0 /\ as_nat c h (getY result) == 0 /\ as_nat c h (getZ result) == 0)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ (
     let pkX, pkY = as_nat c h0 (getXAff pubKey), as_nat c h0 (getYAff pubKey) in 
     let x3, y3, z3 = point_as_nat c h1 result in
     let pointJ = toJacobianCoordinates (pkX, pkY) in 
     if not (verifyQValidCurvePointSpec #c pointJ) then
-      uint_v r = maxint U64 /\ x3 == pkX /\ y3 == pkY
+      uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
     else begin
       let xN, yN, zN = scalar_multiplication #c (as_seq h0 scalar) pointJ in
       xN == x3 /\ yN == y3 /\ zN == z3 /\ (
@@ -129,27 +130,32 @@ val _ecp256dh_r: #c: curve
 
 
 let _ecp256dh_r #c result pubKey scalar =
-  push_frame();
     let h0 = ST.get() in 
+  push_frame();
     let len = getCoordinateLenU64 c in 
     let tempBuffer = create (size 20 *! len) (u64 0) in
     let publicKeyBuffer = create (size 3 *! len) (u64 0) in
   bufferToJac #c pubKey publicKeyBuffer; 
+    let h1 = ST.get() in 
+
   let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in 
   if publicKeyCorrect then
     begin
-      admit();
+        let h2 = ST.get() in 
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 publicKeyBuffer;
       scalarMultiplication #c #MUT publicKeyBuffer result scalar tempBuffer;
+	let h3 = ST.get() in 
       let flag = isPointAtInfinityPrivate #c result in
-      pop_frame();
-    flag
+	pop_frame();
+	let h4 = ST.get() in 
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h3 h4 result;
+      flag
     end
   else
     begin
-    pop_frame();
-      let h1 = ST.get() in 
-      let r = u64 18446744073709551615 in 
-      admit();
+      pop_frame();
+	let h2 = ST.get() in 
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h2 result;
       u64 18446744073709551615
     end
 

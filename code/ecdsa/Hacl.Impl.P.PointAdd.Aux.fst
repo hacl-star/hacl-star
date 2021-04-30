@@ -208,6 +208,11 @@ let lemma_coord_eval c h0 h1 p =
   assert(as_nat c h0 f == as_nat c h1 f)
 
 
+val lemma_point_eval_if_zero: c: curve -> p: point c -> h: mem -> Lemma 
+  (requires (as_nat c h (getX p) == 0 /\ as_nat c h (getY p) == 0 /\ as_nat c h (getZ p) == 0))
+  (ensures (point_eval c h p))
+
+let lemma_point_eval_if_zero c p h = ()
 
 
 val lemma_point_add_if_0: #c: curve -> p: point c -> result: point c 

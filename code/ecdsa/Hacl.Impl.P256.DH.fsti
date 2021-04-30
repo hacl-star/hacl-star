@@ -19,7 +19,7 @@ open Hacl.Spec.ECDSA.Definition
 inline_for_extraction noextract
 val ecp256dh_i: c: curve 
   -> result: pointAffine8 c
-  -> s: scalar_t c 
+  -> s: scalar_t #MUT #c 
   -> Stack uint64
   (requires fun h -> live h result /\ live h s /\ disjoint result s)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
@@ -32,7 +32,7 @@ inline_for_extraction noextract
 val ecp256dh_r: c: curve 
   -> result: pointAffine8 c
   -> pubKey: pointAffine8 c
-  -> s: scalar_t c
+  -> s: scalar_t #MUT #c 
   -> Stack uint64
     (requires fun h -> live h result /\ live h pubKey /\ live h s /\ disjoint result pubKey /\ disjoint result s)
     (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
