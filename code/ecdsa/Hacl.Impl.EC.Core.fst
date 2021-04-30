@@ -77,11 +77,6 @@ let pointFromDomain #c p result =
   fromDomain #c p_z r_z
 
 
-val copy_point: #c: curve -> p: point c -> result: point c -> Stack unit 
-  (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_eval c h p) 
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ 
-    point_as_nat c h0 p == point_as_nat c h1 result)
-
 let copy_point #c p result = 
   let h0 = ST.get() in 
     copy result p;

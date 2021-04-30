@@ -45,6 +45,11 @@ val pointFromDomain: #c : curve -> p: point c -> result: point c -> Stack unit
     point_y_as_nat c h1 result == fromDomain_ #c #DH (point_y_as_nat c h0 p) /\
     point_z_as_nat c h1 result == fromDomain_ #c #DH (point_z_as_nat c h0 p))
 
+val copy_point: #c: curve -> p: point c -> result: point c -> Stack unit 
+  (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_eval c h p) 
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ 
+    point_as_nat c h0 p == point_as_nat c h1 result)
+
 val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
   (requires fun h -> live h p /\ felem_eval c h (getZ p) /\ point_eval c h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\  point_eval c h1 p /\ 

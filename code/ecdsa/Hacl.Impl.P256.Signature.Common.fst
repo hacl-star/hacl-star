@@ -176,8 +176,7 @@ val multByOrder: #c: curve {isPrimeGroup c == false} -> result: point c ->  p: p
     live h p /\ live h result /\ live h tempBuffer /\ point_eval c h p /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc result] /\
     ~ (isPointAtInfinity (point_as_nat c h p)))
-  (ensures fun h0 _ h1 -> 
-    modifies (loc result |+| loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
     scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
 
 let multByOrder #c result p tempBuffer =
@@ -185,65 +184,65 @@ let multByOrder #c result p tempBuffer =
   scalarMultiplication #c #CONST p result (order_u8_buffer #c) tempBuffer
 
 
-val multByOrder2: #c: curve -> result: point c ->  p: point c -> tempBuffer: lbuffer uint64 (size 100) -> Stack unit 
+val multByOrder2: #c: curve {isPrimeGroup c == false} -> result: point c -> p: point c
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack unit 
   (requires fun h -> 
-    live h result /\ live h p /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc result; loc p; loc tempBuffer] /\
-    point_x_as_nat c h p < prime256 /\ 
-    point_y_as_nat c h p < prime256 /\
-    point_z_as_nat c h p < prime256
-  )
-  (ensures fun h0 _ h1  -> modifies (loc result |+| loc tempBuffer) h0 h1 /\
-    (
-      let xN, yN, zN = scalar_multiplication #c (prime_order_seq #P256) (point_prime_to_coordinates c (as_seq h0 p)) in 
-      let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
-      x3 == xN /\ y3 == yN /\ z3 == zN 
-    )
-  )
+    live h p /\ live h result /\ live h tempBuffer /\ point_eval c h p /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc result] /\
+    ~ (isPointAtInfinity (point_as_nat c h p)))
+  (ensures fun h0 _ h1  -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
+    scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
 
 let multByOrder2 #c result p tempBuffer = 
+    let h0 = ST.get() in 
   push_frame();
     let len = getCoordinateLenU64 c in 
-  let pBuffer = create (size 3 *! len) (u64 0) in 
-  copy pBuffer p;
+    let pBuffer = create (size 3 *! len) (u64 0) in 
+    let h = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h p;
+  copy_point p pBuffer;
   multByOrder result pBuffer tempBuffer;
   pop_frame()  
     
-(*
+
+
 [@ (Comment "  This code is not side channel resistant")]
- *)
-
-
-val isOrderCorrect: #c: curve -> p: point c -> tempBuffer: lbuffer uint64 (size 100) -> Stack bool
+val isOrderCorrect: #c: curve {isPrimeGroup c == false}  -> p: point c 
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack bool
   (requires fun h -> 
-    live h p /\ live h tempBuffer /\ 
-    disjoint p tempBuffer /\
-    point_x_as_nat c h p < prime256 /\ 
-    point_y_as_nat c h p < prime256 /\
-    point_z_as_nat c h p < prime256
-  )
-  (ensures fun h0 r h1 -> 
-    modifies(loc tempBuffer) h0 h1 /\ 
-    (let (xN, yN, zN) = scalar_multiplication #c (prime_order_seq #P256) (point_prime_to_coordinates c (as_seq h0 p)) in 
-     r == Spec.ECC.isPointAtInfinity (xN, yN, zN))
-  )
+    live h p /\ live h tempBuffer /\ point_eval c h p /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; ] /\
+    ~ (isPointAtInfinity (point_as_nat c h p)))
+  (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) in 
+     r == Spec.ECC.isPointAtInfinity pointMultOrder))
 
 let isOrderCorrect #c p tempBuffer = 
+    let h0 = ST.get() in 
   push_frame(); 
     let len = getCoordinateLenU64 c in 
     let multResult = create (size 3 *! len) (u64 0) in 
+    let h = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h p;
     multByOrder2 multResult p tempBuffer;
     let result = isPointAtInfinityPublic #c multResult in  
   pop_frame();
     result
 
 
-let verifyQValidCurvePoint pubKeyAsPoint tempBuffer = 
-  let coordinatesValid = isCoordinateValid pubKeyAsPoint in 
-  if not coordinatesValid then false else 
-    let belongsToCurve = isPointOnCurvePublic pubKeyAsPoint in 
-    (* let orderCorrect = isOrderCorrect pubKeyAsPoint tempBuffer in  *)
-    coordinatesValid && belongsToCurve (* && orderCorrect *)
+let verifyQValidCurvePoint #c pubKey tempBuffer = 
+    let h0 = ST.get() in 
+  let coordinatesValid = isCoordinateValid pubKey in 
+  if not coordinatesValid then false else begin
+    let h1 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKey;
+    let belongsToCurve = isPointOnCurvePublic pubKey in 
+    let orderCorrect = 
+      if not (isPrimeGroup c) then 
+	let orderCorrect = isOrderCorrect pubKey tempBuffer in 
+	orderCorrect 
+      else true in 
+    coordinatesValid && belongsToCurve && orderCorrect end
 
 
 let verifyQ #c pubKey = 

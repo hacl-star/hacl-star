@@ -330,8 +330,9 @@ let verifyQValidCurvePointSpec #c publicKey =
   x < prime &&
   y < prime &&
   z < prime &&
-  isPointOnCurve #c (x, y, z) &&
-  isPointAtInfinity (scalar_multiplication #c (prime_order_seq #c) publicKey)
+  isPointOnCurve #c (x, y, z) && (
+  if (isPrimeGroup c) then true else 
+    isPointAtInfinity (scalar_multiplication #c (prime_order_seq #c) publicKey))
 
 
 (* Check that {\displaystyle Q_{A}}Q_{A} is not equal to the identity element O, and its coordinates are otherwise valid *)

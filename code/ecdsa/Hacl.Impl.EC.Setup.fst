@@ -513,15 +513,6 @@ let uploadBasePoint #c p =
   |_ -> admit()
 
 
-val isPrimeGroup: c: curve -> Tot bool
-
-let isPrimeGroup c = 
-  match c with 
-  |P256 -> true
-  |P384 -> true
-  |_ -> false
-
-
 inline_for_extraction noextract
 let order_u8_list (c: curve {~ (isPrimeGroup c)}) : x: list uint8 {List.Tot.length x == v (getScalarLenBytes c) /\ 
   lst_as_nat x == getPrime c - 2} = 
