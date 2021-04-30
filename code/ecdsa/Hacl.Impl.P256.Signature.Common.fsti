@@ -41,18 +41,16 @@ val isPointOnCurvePublic: #c: curve -> p: point c -> Stack bool
 val verifyQValidCurvePoint: #c: curve -> pubKey: point c 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
   Stack bool
-  (requires fun h -> live h pubKey /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ (
-    let len = getCoordinateLenU64 c in as_nat c h (getZ pubKey) == 1))
-  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\
-    ~ (isPointAtInfinity ((point_prime_to_coordinates c (as_seq h0 pubKey)))) /\
-    r == verifyQValidCurvePointSpec #c (point_prime_to_coordinates c (as_seq h0 pubKey)))
+  (requires fun h -> live h pubKey /\ live h tempBuffer /\ point_eval c h pubKey /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat c h (getZ pubKey) == 1)
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (let p = point_as_nat c h0 pubKey in 
+    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
 
 
-val verifyQ: #c: curve -> pubKey: lbuffer uint8 (getPointLen c) -> Stack bool
+val verifyQ: #c: curve -> pubKey: pointAffine8 c -> Stack bool
   (requires fun h -> live h pubKey)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ (
-    let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size (getCoordinateLen c)))) in 
-    let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size (getCoordinateLen c)) (size (getCoordinateLen c)))) in
+    let publicKeyX = nat_from_bytes_be (as_seq h1 (getXAff8 pubKey)) in 
+    let publicKeyY = nat_from_bytes_be (as_seq h1 (getYAff8 pubKey)) in
     let pkJ = Spec.ECC.toJacobianCoordinates (publicKeyX, publicKeyY) in 
     r == verifyQValidCurvePointSpec #c pkJ))

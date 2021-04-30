@@ -44,7 +44,6 @@ val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> t2: wid
 let montgomery_multiplication_round_w_k0 #c t t2 =
     let h0 = ST.get() in 
   let t1 = mod64 t in 
-  recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
   short_mul_prime t1 t2;
   lemma_mult_lt_left (getPrime c) (wide_as_nat c h0 t % pow2 64) (pow2 64)
 
@@ -65,8 +64,7 @@ let montgomery_multiplication_round_k0 #c k0 t t2 =
     let y = create (size 1) (u64 0) in 
     let temp = create (size 1) (u64 0) in 
     
-    mul_atomic t1 k0 y temp;
-    recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c)); 
+    mul_atomic t1 k0 y temp; 
 
     let h = ST.get() in 
     let y_ = index y (size 0) in   

@@ -128,7 +128,7 @@ let getPointLen curve = getCoordinateLenU curve *! 2ul
 (* the expected scalar length *)
 
 inline_for_extraction
-let getScalarLenWords curve = 
+let getScalarLenWords curve : (a: FStar.UInt32.t {v a > 0}) = 
   match curve with
   |P256 -> 4ul
   |P384 -> 6ul

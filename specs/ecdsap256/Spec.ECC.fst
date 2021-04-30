@@ -59,8 +59,8 @@ let ith_bit (#c: curve) (k: scalar_bytes #c) (i:nat{i < v (getScalarLen c)}) : (
   
 let isPointOnCurve (#c: curve) (p: point_nat_prime #c) : bool = 
   let (x, y, z) = p in
-  (y * y) % (getPrime c) =
-  (x * x * x + aCoordinate #c  * x + bCoordinate #c) % prime256
+  let prime = getPrime c in 
+  (y * y) % prime = (x * x * x + aCoordinate #c  * x + bCoordinate #c) % prime
 
 
 val toJacobianCoordinates: tuple2 nat nat -> r: tuple3 nat nat nat {~ (isPointAtInfinity r)}

@@ -194,6 +194,7 @@ let p256_order_list: x:list uint64 {List.Tot.length x == 4 /\ lst_as_nat x == ge
   x  
 
 
+
 inline_for_extraction noextract
 let p384_order_list : x:list uint64 {List.Tot.length x == 6 /\ lst_as_nat x == getOrder #P384} =
   [@inline_let]
@@ -224,7 +225,7 @@ let getLastWordOrder (#c: curve) : (r: uint64 {uint_v r == getOrder #c % pow2 64
 
 
 inline_for_extraction
-let prime256order_buffer: x: glbuffer uint64 (getCoordinateLenU64 P256) {witnessed #uint64 #(getCoordinateLenU64 P256) x (Lib.Sequence.of_list p256_order_list) /\
+let prime256order_buffer: x: glbuffer uint64 (getScalarLenWords P256) {witnessed #uint64 #(getScalarLenWords P256) x (Lib.Sequence.of_list p256_order_list) /\
   recallable x /\ lseq_as_nat (Lib.Sequence.of_list (order_list P256)) == getOrder #P256} = 
   createL_global p256_order_list
 
@@ -236,13 +237,17 @@ let prime384order_buffer: x: glbuffer uint64 (size 6) {witnessed #uint64 #(size 
 
 
 inline_for_extraction
-let order_buffer (#c: curve): (x: glbuffer uint64 (getCoordinateLenU64 c) {
-  witnessed #uint64 #(getCoordinateLenU64 c) x (Lib.Sequence.of_list (order_list c)) /\ recallable x /\ 
+let order_buffer (#c: curve): (x: glbuffer uint64 (getScalarLenWords c) {
+  witnessed #uint64 #(getScalarLenWords c) x (Lib.Sequence.of_list (order_list c)) /\ recallable x /\ 
   lseq_as_nat (Lib.Sequence.of_list (order_list c)) == getOrder #c }) = 
   match c with
   | P256 -> prime256order_buffer
   | P384 -> prime384order_buffer
   | _ -> admit(); prime256order_buffer
+
+
+
+
 
 (* Unfold? *)
 inline_for_extraction noextract
@@ -506,3 +511,31 @@ let uploadBasePoint #c p =
 
   admit()
   |_ -> admit()
+
+
+val isPrimeGroup: c: curve -> Tot bool
+
+let isPrimeGroup c = 
+  match c with 
+  |P256 -> true
+  |P384 -> true
+  |_ -> false
+
+
+inline_for_extraction noextract
+let order_u8_list (c: curve {~ (isPrimeGroup c)}) : x: list uint8 {List.Tot.length x == v (getScalarLenBytes c) /\ 
+  lst_as_nat x == getPrime c - 2} = 
+  match c with 
+  |_ -> admit(); p256_inverse_list
+
+
+inline_for_extraction
+let order_u8_buffer_ (#c: curve {~ (isPrimeGroup c)}) (x: glbuffer uint8 (getScalarLenBytes c)
+  {witnessed #uint8 #(getScalarLenBytes c) x (Lib.Sequence.of_list (order_u8_list c)) /\ recallable x}) = 
+  createL_global (order_u8_list c)
+
+
+inline_for_extraction
+let order_u8_buffer (#c: curve {~ (isPrimeGroup c)}): (x: glbuffer uint8 (getScalarLenBytes c)
+  {witnessed #uint8 #(getScalarLenBytes c) x (Lib.Sequence.of_list (order_u8_list c)) /\ recallable x}) = 
+  order_u8_buffer_ #c

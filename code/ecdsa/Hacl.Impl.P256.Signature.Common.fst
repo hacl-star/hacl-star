@@ -21,12 +21,12 @@ open FStar.Math.Lemmas
 open FStar.Mul
 
 open Hacl.Impl.EC.Arithmetics
-open Hacl.Impl.P256.LowLevel .RawCmp
+open Hacl.Impl.P256.LowLevel.RawCmp
 open Hacl.Spec.MontgomeryMultiplication
-friend Hacl.Spec.MontgomeryMultiplication
 
 open Hacl.Impl.EC.Core
 open Hacl.Impl.EC.Masking
+open Hacl.Impl.EC.Intro
 
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
@@ -111,9 +111,14 @@ let isPointAtInfinityPublic #c p =
   isZero_uint64_nCT #c zCoordinate 
     
 
-assume val lemma_modular_multiplication_2_d: #c: curve -> 
+val lemma_modular_multiplication_2_d: #c: curve -> 
   a:nat {a < getPrime c} -> b:nat {b < getPrime c } -> 
   Lemma (toDomain_ #c #DH a = toDomain_ #c #DH b <==> a == b)
+
+let lemma_modular_multiplication_2_d #c a b = 
+  lemmaToDomain #c #DH a;
+  lemmaToDomain #c #DH b;
+  Hacl.Impl.EC.Math.lemma_modular_multiplication_toDomain #c a b
 
 
 let isPointOnCurvePublic #c p = 
@@ -133,18 +138,15 @@ let isPointOnCurvePublic #c p =
     
   let r = compare_felem #c y2Buffer xBuffer in 
   let z = not (eq_0_u64 r) in 
-  
   pop_frame();
   z
 
 
 val isCoordinateValid: #c: curve -> p: point c -> Stack bool 
-  (requires fun h -> live h p /\ point_z_as_nat c h p == 1)
-  (ensures fun h0 r h1 -> 
-    let prime = getPrime c in 
-    modifies0 h0 h1 /\ 
-    r == (point_x_as_nat c h0 p < prime && point_y_as_nat c h0 p < prime && point_z_as_nat c h0 p < prime)
-  )
+  (requires fun h -> live h p /\ as_nat c h (getZ p) == 1)
+  (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ (
+    let prime = getPrime c in
+    r == (as_nat c h0 (getX p) < prime && as_nat c h0 (getY p) < prime && as_nat c h0 (getZ p) < prime)))
 
 
 let isCoordinateValid #c p = 
@@ -163,44 +165,24 @@ let isCoordinateValid #c p =
   let lessX = eq_u64_nCT carryX (u64 1) in   
   let lessY = eq_u64_nCT carryY (u64 1) in 
 
-  let r = lessX && lessY in admit();
+  let r = lessX && lessY in
   pop_frame();
   r  
 
 
-val multByOrder: #c: curve -> result: point c ->  p: point c -> 
-  tempBuffer: lbuffer uint64 (size 25 *! getCoordinateLenU64 c) -> Stack unit 
+val multByOrder: #c: curve {isPrimeGroup c == false} -> result: point c ->  p: point c -> 
+  tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack unit 
   (requires fun h -> 
-    let prime = getPrime c in 
-    
-    live h result /\ live h p /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc result; loc p; loc tempBuffer] /\
-    point_x_as_nat c h p < prime /\ 
-    point_y_as_nat c h p < prime /\
-    point_z_as_nat c h p < prime
-  )
-  (ensures fun h0 _ h1 ->
-    let prime = getPrime c in 
-    modifies (loc result |+| loc p |+| loc tempBuffer) h0 h1 /\
-    (
-      let xN, yN, zN = scalar_multiplication #c (prime_order_seq #c) (point_prime_to_coordinates c (as_seq h0 p)) in 
-      let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
-      x3 == xN /\ y3 == yN /\ z3 == zN 
-    ) 
-  ) 
-
-
-#push-options "--z3rlimit 100"
+    live h p /\ live h result /\ live h tempBuffer /\ point_eval c h p /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc result] /\
+    ~ (isPointAtInfinity (point_as_nat c h p)))
+  (ensures fun h0 _ h1 -> 
+    modifies (loc result |+| loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
+    scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
 
 let multByOrder #c result p tempBuffer =
-  admit() (*);
-  recall_contents order_buffer (prime_order_seq #c)
-  assert (disjoint p order_buffer);
-  assert (disjoint result order_buffer);
-  assert (disjoint tempBuffer order_buffer)
-  scalarMultiplication #c p result (order_buffer #c) tempBuffer *)
-
-#pop-options
+  recall_contents (order_u8_buffer #c) (Lib.Sequence.of_list (order_u8_list c));
+  scalarMultiplication #c #CONST p result (order_u8_buffer #c) tempBuffer
 
 
 val multByOrder2: #c: curve -> result: point c ->  p: point c -> tempBuffer: lbuffer uint64 (size 100) -> Stack unit 

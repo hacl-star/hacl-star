@@ -80,7 +80,7 @@ inline_for_extraction noextract
 val scalarMultiplication: #c: curve -> #buf_type: buftype 
   -> p: point c
   -> result: point c 
-  -> scalar: scalar_t c
+  -> scalar: scalar_t #buf_type #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
   (requires fun h -> live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\ point_eval c h p /\
@@ -91,7 +91,7 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype
     pD == point_as_nat c h1 result))
 
 val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
-  -> scalar: scalar_t c
+  -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
   (requires fun h -> point_eval c h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
@@ -105,7 +105,7 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c
     
 
 val secretToPublic: #c: curve -> result: point c 
-  -> scalar: scalar_t c
+  -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
@@ -115,7 +115,7 @@ val secretToPublic: #c: curve -> result: point c
     p == r))
 
 val secretToPublicWithoutNorm: #c: curve -> result: point c 
-  -> scalar: scalar_t c
+  -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])

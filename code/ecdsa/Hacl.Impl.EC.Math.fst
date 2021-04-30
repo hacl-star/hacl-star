@@ -61,67 +61,12 @@ let euclid n a b r s =
   }
 
 
-val lemma_modular_multiplication_p256_2_left:
-  a:nat{a < prime256} -> b:nat{b < prime256} -> Lemma
-  (requires a * pow2 256 % prime256 = b * pow2 256 % prime256)
-  (ensures  a == b)
-
-let lemma_modular_multiplication_p256_2_left a b =
-  mod_sub prime256 (a * pow2 256) (b * pow2 256);
-  assert (pow2 256 * (a - b) % prime256 = 0);
-  let r = 26959946654596436323893653559348051827142583427821597254581997273087 in
-  let s = -26959946648319334592891477706824406424704094582978235142356758167551 in
-  assert_norm (r * prime256 + s * pow2 256 = 1);
-  euclid prime256 (pow2 256) (a - b) r s;
-  assert ((a - b) % prime256 = 0);
-  sub_mod prime256 a b;
-  assert (a % prime256 = b % prime256);
-  FStar.Math.Lemmas.modulo_lemma a prime256;
-  FStar.Math.Lemmas.modulo_lemma b prime256
-
-
-val lemma_modular_multiplication_p384_2_left:
-  a: nat{ a < prime384} -> b: nat {b < prime384} -> Lemma
-  (requires a * pow2 384 % prime384 = b * pow2 384 % prime384)
-  (ensures a == b)
-
-let lemma_modular_multiplication_p384_2_left a b =
-  admit()
-  
-val lemma_modular_multiplication_p256_2: a: nat{a < prime256} -> b: nat{b < prime256} ->
-  Lemma
-  (a * pow2 256 % prime256 = b * pow2 256 % prime256 <==> a == b)
-
-let lemma_modular_multiplication_p256_2 a b =
-  Classical.move_requires_2 lemma_modular_multiplication_p256_2_left a b
-
-
-val lemma_modular_multiplication_p384_2: a: nat {a < prime384} -> b: nat {b < prime384} ->
-  Lemma
-    (a * pow2 384 % prime384 = b * pow2 384 % prime384 <==> a == b)
-
-let lemma_modular_multiplication_p384_2 a b = 
-  Classical.move_requires_2 lemma_modular_multiplication_p384_2_left a b
-
-
 noextract
 let prime_p256_order:pos =
   assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369> 0);
   115792089210356248762697446949407573529996955224135760342422259061068512044369
 
 
-(* Fermat's Little Theorem
-   applied to r = modp_inv2_prime (pow2 256) prime_p256_order
-
-  Verified in Sage:
-   prime256 = Zmod(Integer(115792089210356248762697446949407573530086143415290314195533631308867097853951))
-   p = 41058363725152142129326129780047268409114441015993725554835256314039467401291
-   C = EllipticCurve(prime256, [-3, p])
-   prime_p256_order =/ C.cardinality()
-   Z = Integers(prime_p256_order)
-   r = Z(inverse_mod(2**256, prime_p256_order))
-   r ^ (prime_p256_order - 1)
-*)
 val lemma_l_ferm: unit -> Lemma
   (let r = modp_inv2_prime (pow2 256) prime_p256_order in
   (pow r (prime_p256_order - 1) % prime_p256_order == 1))
@@ -193,25 +138,6 @@ let lemma_multiplication_not_mod_prime #c a =
 
   small_mod a prime
 
-(* 
-val lemma_modular_multiplication_p256: a:nat{a < prime256} -> b:nat{b < prime256} -> Lemma
-  (requires a * modp_inv2 #P256 (pow2 256) % prime256 == b * modp_inv2 #P256 (pow2 256) % prime256)
-  (ensures  a == b)
-
-let lemma_modular_multiplication_p256 a b =
-  let c = modp_inv2 #P256 (pow2 256) in
-  mod_sub prime256 (a * c) (b * c);
-  assert (c * (a - b) % prime256 = 0);
-  let r = -26959946654596436328278158470660195847911760999080590586820792680449 in
-  let s = 26959946660873538059280334323183841250350249843923952699046031785985 in
-  assert_norm (r * prime256 + s * c = 1);
-  euclid prime256 c (a - b) r s;
-  assert ((a - b) % prime256 = 0);
-  sub_mod prime256 a b;
-  assert (a % prime256 == b % prime256);
-  FStar.Math.Lemmas.modulo_lemma a prime256;
-  FStar.Math.Lemmas.modulo_lemma b prime256 *)
-
 
 val lemma_modular_multiplication: #c: curve -> a: nat {a < getPrime c} -> b: nat {b < getPrime c} -> 
   Lemma (a == b <==> a * modp_inv2 #c (pow2 (getPower c)) % getPrime c == b * modp_inv2 #c (pow2 (getPower c)) % getPrime c)
@@ -227,4 +153,16 @@ let lemma_modular_multiplication #c a b =
     small_mod a prime;
     small_mod b prime
     end
-  
+
+
+val lemma_modular_multiplication_toDomain: #c: curve -> a: nat {a < getPrime c}
+  -> b: nat {b < getPrime c} -> 
+  Lemma (a == b <==> a * pow2 (getPower c) % getPrime c == b * pow2 (getPower c) % getPrime c)
+
+let lemma_modular_multiplication_toDomain #c a b = 
+  let prime = getPrime c in 
+  if a * pow2 (getPower c) % prime = b * pow2 (getPower c) % prime then begin
+    FStar.Math.Fermat.mod_mult_congr prime a b (pow2 (getPower c));
+    small_mod a prime;
+    small_mod b prime
+  end

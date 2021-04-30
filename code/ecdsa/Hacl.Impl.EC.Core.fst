@@ -338,7 +338,7 @@ let uploadStartPoints #c q p result =
 
 
 val scalar_multiplication_t_0: #c: curve -> #t:buftype -> q: point c -> p: point c -> result: point c -> 
-  scalar: scalar_t c -> 
+  scalar: scalar_t #t #c -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
   Stack unit 
   (requires fun h -> live h q /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
@@ -364,7 +364,7 @@ let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 p 0
 
 inline_for_extraction
 val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: point c -> 
-  scalar: scalar_t c -> 
+  scalar: scalar_t #t #c -> 
   tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
   (requires fun h -> 

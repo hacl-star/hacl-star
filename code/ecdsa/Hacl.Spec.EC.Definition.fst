@@ -346,7 +346,7 @@ inline_for_extraction
 type pointAffine8 (c: curve) = lbuffer uint8 (2ul *! getCoordinateLenU c)
 
 
-type scalar_t (c: curve) = lbuffer uint8 (getScalarLenBytes c)
+type scalar_t (#t: buftype) (#c: curve)  = lbuffer_t t uint8 (getScalarLenBytes c)
 
 
 let felem_eval (c: curve) (h: mem) (f: felem c) = as_nat c h f < getPrime c
