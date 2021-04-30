@@ -24,49 +24,6 @@ open Hacl.Impl.EC.Intro
 
 #set-options " --z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
-
-inline_for_extraction noextract
-val fromForm: #c: curve -> i: felem c -> o: coordinateAffine8 c -> Stack unit 
-  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ as_nat c h i < pow2 (getPower c))
-  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  
-    as_seq h1 o == nat_to_bytes_be (v (getCoordinateLenU c)) (as_nat c h0 i))
-
-let fromForm #c i o = 
-  let h0 = ST.get() in
-  changeEndian i;
-    let h1 = ST.get() in 
-  lemma_change_endian #c (as_seq h0 i) (as_seq h1 i);
-  toUint8 i o;
-  lemma_lseq_nat_from_bytes (as_seq h0 i);
-  lemma_nat_from_to_intseq_be_preserves_value (v (getCoordinateLenU64 c)) (as_seq h1 i);
-  uints_to_bytes_be_nat_lemma #U64 #SEC (v (getCoordinateLenU64 c)) (as_nat c h0 i)
-
-
-val fromFormPoint: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit 
-  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ point_eval c h i /\ (
-    let xCoordinate, yCoordinate, _ = point_as_nat c h i in 
-    xCoordinate < pow2 (getPower c) /\ yCoordinate < pow2 (getPower c)))
-  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\ (
-    let coordinateX_u64, coordinateY_u64, _ = point_as_nat c h0 i in 
-    let coordinateX_u8, coordinateY_u8 = getXAff8 #c o, getYAff8 #c o in
-    as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateX_u64 /\
-    as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateY_u64))
-    
-
-let fromFormPoint #c i o = 
-  let len = getCoordinateLenU64 c in 
-  let scalarLen = getCoordinateLenU c in 
-  
-  let resultBufferX = sub i (size 0) len in
-  let resultBufferY = sub i len len in
-
-  let resultX = sub o (size 0) scalarLen in
-  let resultY = sub o scalarLen scalarLen in
-
-  fromForm #c resultBufferX resultX;
-  fromForm #c resultBufferY resultY
-
-
 open FStar.Mul 
 
 val ecp256_dh_i_: #c: curve -> resultBuffer: point c 

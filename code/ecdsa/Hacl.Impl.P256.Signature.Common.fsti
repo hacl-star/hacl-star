@@ -24,6 +24,28 @@ val bufferToJac: #c: curve -> p: pointAffine c -> result: point c -> Stack unit
     let pJ = toJacobianCoordinates (x, y) in 
     ~ (isPointAtInfinity resultTuple) /\ as_nat c h1 (getZ result) == 1 /\ resultTuple == pJ))
 
+val fromFormPoint: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ point_eval c h i /\ (
+    let xCoordinate, yCoordinate, _ = point_as_nat c h i in 
+    xCoordinate < pow2 (getPower c) /\ yCoordinate < pow2 (getPower c)))
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\ (
+    let coordinateX_u64, coordinateY_u64, _ = point_as_nat c h0 i in 
+    let coordinateX_u8, coordinateY_u8 = getXAff8 #c o, getYAff8 #c o in
+    as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateX_u64 /\
+    as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateY_u64))
+
+
+val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ (
+    let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (getXAff8 i))  in 
+    let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (getYAff8 i)) in 
+    let x, y, z = as_nat c h1 (getX o), as_nat c h1 (getY o), as_nat c h1 (getZ o) in  
+    let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
+    x == pointScalarXSeq /\ y == pointScalarYSeq /\ z == 1 /\
+    x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
+
+
 
 [@ (Comment "  This code is not side channel resistant")]  
 val isPointAtInfinityPublic: #c: curve -> p: point c -> Stack bool

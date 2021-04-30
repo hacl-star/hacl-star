@@ -44,6 +44,70 @@ let bufferToJac #c p result =
 
 
 inline_for_extraction noextract
+val fromForm: #c: curve -> i: felem c -> o: coordinateAffine8 c -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ as_nat c h i < pow2 (getPower c))
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  
+    as_seq h1 o == nat_to_bytes_be (v (getCoordinateLenU c)) (as_nat c h0 i))
+
+let fromForm #c i o = 
+  let h0 = ST.get() in
+  changeEndian i;
+    let h1 = ST.get() in 
+  lemma_change_endian #c (as_seq h0 i) (as_seq h1 i);
+  toUint8 i o;
+  lemma_lseq_nat_from_bytes (as_seq h0 i);
+  lemma_nat_from_to_intseq_be_preserves_value (v (getCoordinateLenU64 c)) (as_seq h1 i);
+  uints_to_bytes_be_nat_lemma #U64 #SEC (v (getCoordinateLenU64 c)) (as_nat c h0 i)
+
+
+let fromFormPoint #c i o = 
+  let len = getCoordinateLenU64 c in 
+  let scalarLen = getCoordinateLenU c in 
+  
+  let resultBufferX = sub i (size 0) len in
+  let resultBufferY = sub i len len in
+
+  let resultX = sub o (size 0) scalarLen in
+  let resultY = sub o scalarLen scalarLen in
+
+  fromForm #c resultBufferX resultX;
+  fromForm #c resultBufferY resultY
+
+
+inline_for_extraction noextract
+val toForm: #c: curve -> i: coordinateAffine8 c -> o: felem c -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat c h1 o == nat_from_bytes_be (as_seq h0 i))
+
+let toForm #c i o = 
+  let open Lib.ByteSequence in 
+    let h0 = ST.get() in 
+  toUint64ChangeEndian i o;
+    let h1 = ST.get() in 
+  lemma_change_endian #c (as_seq h1 o) (uints_from_bytes_be #_ #_ #(v (getCoordinateLenU64 c)) (as_seq h0 i));
+  uints_from_bytes_be_nat_lemma #U64 #_ #(v (getCoordinateLenU64 c))  (as_seq h0 i);
+  lemma_lseq_nat_from_bytes (as_seq h1 o)
+
+      
+let toFormPoint #c i o = 
+  let len = getCoordinateLenU64 c in 
+  let coordLen = getCoordinateLenU c in 
+  
+  let pointScalarX = sub i (size 0) coordLen in 
+  let pointScalarY = sub i coordLen coordLen in 
+
+  let pointX = sub o (size 0) len in 
+  let pointY = sub o len len in 
+  let pointZ = sub o (size 2 *! len) len in 
+
+    let h0 = ST.get() in 
+  toForm #c pointScalarX pointX;
+  toForm #c pointScalarY pointY;
+  uploadOneImpl #c pointZ
+
+
+
+inline_for_extraction noextract
 val y_2: #c: curve -> y: felem c -> r: felem c -> Stack unit
   (requires fun h -> as_nat c h y < getPrime c /\ live h y /\ live h r /\ eq_or_disjoint y r)
   (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ 
