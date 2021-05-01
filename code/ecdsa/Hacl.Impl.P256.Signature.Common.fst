@@ -313,33 +313,11 @@ let verifyQ #c pubKey =
   push_frame();
     let h0 = ST.get() in
     let len = getCoordinateLenU64 c in 
-    let lenScalar = getScalarLen c in 
     
-    let pubKeyX = sub pubKey (size 0) lenScalar in 
-    let pubKeyY = sub pubKey lenScalar lenScalar in 
-    
-    let tempBuffer = create (size 30 *! len) (u64 0) in 
-      let tempBufferV = sub tempBuffer (size 0) (size 25 *! len) in 
-      let publicKeyJ = sub tempBuffer (size 25 *! len) (size 3 *! len) in 
-      let publicKeyB = sub tempBuffer (size 28 *! len) (size 2 *! len) in  
-	let publicKeyX = sub publicKeyB (size 0) len in 
-	let publicKeyY = sub publicKeyB len len in 
-    
-(*     toUint64ChangeEndian #c pubKeyX publicKeyX;
-    toUint64ChangeEndian #c pubKeyY publicKeyY; *)
-  let h1 = ST.get() in 
-    (*   lemma_core_0 c publicKeyX h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  
-      lemma_core_0 c publicKeyY h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY); 
+    let tempBuffer = create (size 20 *! len) (u64 0) in 
+    let publicKeyJ = create (size 3 *! len) (u64 0) in 
 
-      changeEndianLemma #c (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
-      uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
-      
-      changeEndianLemma #c (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
-      uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
- *)
-  bufferToJac #c publicKeyB publicKeyJ;
-  let r = verifyQValidCurvePoint #c publicKeyJ tempBufferV in 
+  toFormPoint pubKey publicKeyJ; 
+  let r = verifyQValidCurvePoint #c publicKeyJ tempBuffer in 
   pop_frame();
   r

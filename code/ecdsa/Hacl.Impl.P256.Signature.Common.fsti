@@ -63,9 +63,10 @@ val isPointOnCurvePublic: #c: curve -> p: point c -> Stack bool
 val verifyQValidCurvePoint: #c: curve -> pubKey: point c 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
   Stack bool
-  (requires fun h -> live h pubKey /\ live h tempBuffer /\ point_eval c h pubKey /\
+  (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat c h (getZ pubKey) == 1)
-  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (let p = point_as_nat c h0 pubKey in 
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
     ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
 
 
