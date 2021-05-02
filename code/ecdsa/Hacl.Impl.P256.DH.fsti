@@ -29,14 +29,14 @@ val ecp256dh_i: c: curve
 
 
 inline_for_extraction noextract
-val ecp256dh_r: c: curve 
+val ecp256dh_r: #c: curve 
   -> result: pointAffine8 c
   -> pubKey: pointAffine8 c
-  -> s: scalar_t #MUT #c 
+  -> scalar: scalar_t #MUT #c 
   -> Stack uint64
-    (requires fun h -> live h result /\ live h pubKey /\ live h s /\ disjoint result pubKey /\ disjoint result s)
-    (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
-      let pubKeyX, pubKeyY = getXAff8 result, getYAff8 result in
-      let pointX, pointY, flag = ecp256_dh_r #c (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 s) in
-      let resultX, resultY = as_seq h1 (getXAff8 result), as_seq h1 (getYAff8 result) in 
-      r == flag /\ resultX == pointX /\ resultY == pointY))
+  (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ disjoint result pubKey /\ disjoint result scalar)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+    let pubKeyX, pubKeyY = getXAff8 pubKey, getYAff8 pubKey in
+    let pointX, pointY, flag = ecp256_dh_r #c (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
+    let resultX, resultY = as_seq h1 (getXAff8 result), as_seq h1 (getYAff8 result) in 
+    r == flag /\ resultX == pointX /\ resultY == pointY))

@@ -60,25 +60,24 @@ let ecp256dh_i c result scalar =
   pop_frame();
   flag
 
-
 [@ (Comment "  This code is not side channel resistant on pubKey")]
 val _ecp256dh_r: #c: curve 
   -> result: point c
-  -> pubKey: pointAffine c
+  -> pubKey: point c
   -> scalar: scalar_t #MUT #c -> 
   Stack uint64
   (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ 
-    disjoint result pubKey /\ disjoint result scalar /\
-    felem_eval c h (getXAff pubKey) /\ felem_eval c h (getYAff pubKey) /\
-    as_nat c h (getX result) == 0 /\ as_nat c h (getY result) == 0 /\ as_nat c h (getZ result) == 0)
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ (
-    let pkX, pkY = as_nat c h0 (getXAff pubKey), as_nat c h0 (getYAff pubKey) in 
+     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey;  loc scalar; loc result] /\ (
+    let pk = as_nat c h (getX pubKey), as_nat c h (getY pubKey), as_nat c h (getZ pubKey) in 
+    ~ (isPointAtInfinity pk) /\ as_nat c h (getZ pubKey) == 1 /\
+    as_nat c h (getX result) == 0 /\ as_nat c h (getY result) == 0 /\ as_nat c h (getZ result) == 0))
+  (ensures fun h0 r h1 -> modifies (loc result |+| loc pubKey) h0 h1 /\ point_eval c h1 result /\ (
+    let pk = as_nat c h0 (getX pubKey), as_nat c h0 (getY pubKey), as_nat c h0 (getZ pubKey) in 
     let x3, y3, z3 = point_as_nat c h1 result in
-    let pointJ = toJacobianCoordinates (pkX, pkY) in 
-    if not (verifyQValidCurvePointSpec #c pointJ) then
+    if not (verifyQValidCurvePointSpec #c pk) then
       uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
     else begin
-      let xN, yN, zN = scalar_multiplication #c (as_seq h0 scalar) pointJ in
+      let xN, yN, zN = scalar_multiplication #c (as_seq h0 scalar) pk in
       xN == x3 /\ yN == y3 /\ zN == z3 /\ (
       if isPointAtInfinity (xN, yN, zN) then
 	uint_v r = maxint U64
@@ -91,21 +90,19 @@ let _ecp256dh_r #c result pubKey scalar =
   push_frame();
     let len = getCoordinateLenU64 c in 
     let tempBuffer = create (size 20 *! len) (u64 0) in
-    let publicKeyBuffer = create (size 3 *! len) (u64 0) in
-  bufferToJac #c pubKey publicKeyBuffer; 
     let h1 = ST.get() in 
-
-  let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_getZ_noChangeInState c h0 h1 pubKey;
+  let publicKeyCorrect = verifyQValidCurvePoint #c pubKey tempBuffer in 
   if publicKeyCorrect then
     begin
         let h2 = ST.get() in 
-      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 publicKeyBuffer;
-      scalarMultiplication #c #MUT publicKeyBuffer result scalar tempBuffer;
-	let h3 = ST.get() in 
-      let flag = isPointAtInfinityPrivate #c result in
+	Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h2 pubKey;
+	scalarMultiplication #c #MUT pubKey result scalar tempBuffer; 
+	  let h3 = ST.get() in 
+	let flag = isPointAtInfinityPrivate #c result in 
 	pop_frame();
-	let h4 = ST.get() in 
-      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h3 h4 result;
+	  let h4 = ST.get() in 
+	  Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h3 h4 result;
       flag
     end
   else
@@ -116,53 +113,58 @@ let _ecp256dh_r #c result pubKey scalar =
       u64 18446744073709551615
     end
 
+val lemma_zero_point_zero_coordinates: c: curve -> h: mem -> p: point c -> 
+  Lemma (requires lseq_as_nat (as_seq h p) == 0)
+  (ensures (as_nat c h (getX p) == 0) /\ (as_nat c h (getY p) == 0) /\ (as_nat c h (getZ p) == 0) /\ point_eval c h p)
+    
 
-let ecp256dh_r c result pubKey scalar =
+let lemma_zero_point_zero_coordinates c h p = 
+  let yz = gsub p (getCoordinateLenU64 c) (size 2 *! getCoordinateLenU64 c) in 
+  lemma_test (as_seq h p) (v (getCoordinateLenU64 c));
+  lemma_test (as_seq h yz) (v (getCoordinateLenU64 c));
+  Hacl.Impl.P.PointAdd.Aux.lemma_point_eval_if_zero c p h
+
+
+val ecp256_dh_r_: #c: curve -> result: pointAffine8 c 
+  -> pubKey: pointAffine8 c 
+  -> scalar: scalar_t #MUT #c
+  -> pkF: point c
+  -> rF: point c ->
+  Stack uint64 
+  (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ live h pkF /\ live h rF /\
+    disjoint pubKey pkF /\ point_eval c h rF /\ disjoint rF result /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc rF; loc pkF; loc scalar] /\
+    as_nat c h (getX rF) == 0 /\ as_nat c h (getY rF) == 0 /\ as_nat c h (getZ rF) == 0
+  )
+  (ensures fun h0 r h1 -> modifies (loc result |+| loc pkF |+| loc rF) h0 h1 /\ (
+    let pubKeyX, pubKeyY = getXAff8 pubKey, getYAff8 pubKey in
+    let pointX, pointY, flag = ecp256_dh_r #c (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
+    let resultX, resultY = as_seq h1 (getXAff8 result), as_seq h1 (getYAff8 result) in 
+    r == flag /\ resultX == pointX /\ resultY == pointY))
+
+let ecp256_dh_r_ #c result pubKey scalar pkF rF = 
+    let h0 = ST.get() in 
+  toFormPoint pubKey pkF; 
+    let h1 = ST.get() in 
+  Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 rF; 
+  let flag = _ecp256dh_r #c rF pkF scalar in 
+  fromFormPoint rF result; 
+  flag
+
+
+
+let ecp256dh_r #c result pubKey scalar =
+  let h0 = ST.get() in 
   push_frame();
-  let h0 = ST.get() in
-  
-  let len = getCoordinateLenU64 c in 
+    let len = getCoordinateLenU64 c in 
 
-  let resultBufferFelem = create (size 3 *! len) (u64 0) in
-  let resultBufferFelemX = sub resultBufferFelem (size 0) len in
-  let resultBufferFelemY = sub resultBufferFelem len len in
-  let resultX = sub result (size 0) (getScalarLenBytes c) in
-  let resultY = sub result (getScalarLenBytes c) (getScalarLenBytes c) in
+    let rF = create (size 3 *! len) (u64 0) in
+    let pkF = create (size 3 *! len) (u64 0) in
+    let h1 = ST.get() in 
 
-  let publicKeyAsFelem = create (size 2 *! len) (u64 0) in
-  let publicKeyFelemX = sub publicKeyAsFelem (size 0) len in
-  let publicKeyFelemY = sub publicKeyAsFelem len len in
-  let pubKeyX = sub pubKey (size 0) (getScalarLenBytes c) in
-  let pubKeyY = sub pubKey (getScalarLenBytes c) (getScalarLenBytes c) in
-
-  toUint64ChangeEndian #c pubKeyX publicKeyFelemX;
-  toUint64ChangeEndian #c pubKeyY publicKeyFelemY;
-
-  let h1 = ST.get() in
-  lemma_core_0 c publicKeyFelemX h1;
-  (* changeEndianLemma #c (uints_from_bytes_be (as_seq h0 pubKeyX)); *)
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyX);
-
-  lemma_core_0 c publicKeyFelemY h1;
-  (* changeEndianLemma #c (uints_from_bytes_be (as_seq h0 pubKeyY)); *)
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyY);
-
-  let flag = _ecp256dh_r #c resultBufferFelem publicKeyAsFelem scalar in
-
-  let h2 = ST.get() in
-  
-  changeEndian #c resultBufferFelemX;
-  changeEndian #c resultBufferFelemY;
-  toUint8 #c resultBufferFelemX resultX;
-  toUint8 #c resultBufferFelemY resultY;
-
-  lemma_core_0 c resultBufferFelemX h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);
-  (* changeEndian_le_be #c (as_nat c h2 resultBufferFelemX); *)
-
-  lemma_core_0 c resultBufferFelemY h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemY);
-  (* changeEndian_le_be #c (as_nat c h2 resultBufferFelemY); *)
+    lemma_create_zero_buffer (3 * v len) c;
+    lemma_zero_point_zero_coordinates c h1 rF;
+  let flag = ecp256_dh_r_ #c result pubKey scalar pkF rF in 
 
   pop_frame();
   flag

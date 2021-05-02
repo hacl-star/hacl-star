@@ -187,6 +187,16 @@ val lemma_point_eval: c: curve -> h0: mem -> h1: mem -> p: point c -> Lemma
   (ensures (point_eval c h1 p))
 
 
+val lemma_getZ_noChangeInState: c: curve -> h0: mem -> h1: mem -> p: point c -> 
+  Lemma 
+    (requires as_seq h0 p == as_seq h1 p)
+    (ensures as_nat c h1 (getZ p) == as_nat c h0 (getZ p))
+
+let lemma_getZ_noChangeInState c h0 h1 p = 
+  let gZp = gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c) in 
+  assert(lseq_as_nat (as_seq h0 gZp) == lseq_as_nat (as_seq h1 gZp))
+
+
 val lemma_coord_eval: c: curve -> h0: mem -> h1 : mem -> p: point c -> 
   Lemma 
   (requires (point_eval c h0 p /\ as_seq h1 p == as_seq h0 p))
