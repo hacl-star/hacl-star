@@ -69,13 +69,17 @@ val l1: x:uint32 -> Tot uint32
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
 
+assume val getBranchI: n: branch_len -> index: nat {index < n} -> branch n -> uint32 & uint32
+
 val xor: n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch n -> Tot (tuple2 uint32 uint32)
 
 let xor n b = 
-  match n with 
-  |2 -> let (x0, y0), (x1, y1) = (b <: branch 2) in y0 ^. y1, x0 ^. x1
-  |3 -> let (x0, y0), (x1, y1), (x2, y2) = (b <: branch 3) in y0 ^. y1 ^. y2, x0 ^. x1 ^. x2
-  |4 -> let (x0, y0), (x1, y1), (x2, y2), (x3, y3) = (b <: branch 4) in y0 ^. y1 ^. y2 ^. y3, x0 ^. x1 ^. x2 ^. x3
+  let xor_step n b index (u, v) = 
+  let (xi, yi) = getBranchI n index b in 
+  xi ^. u, yi ^. v in 
+  
+  let zeroBranch = getBranchI n 0 b in 
+  Lib.LoopCombinators.repeati (n - 1) (xor_step n b) zeroBranch
 
 
 val xor_x: n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch n -> lu: uint32 -> lv: uint32 -> Tot (branch n)
