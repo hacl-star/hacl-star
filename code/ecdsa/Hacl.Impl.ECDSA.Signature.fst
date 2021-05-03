@@ -9,7 +9,7 @@ open Lib.Buffer
 open Lib.ByteSequence
 
 open Spec.ECDSA
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 open FStar.Mul
 open FStar.Math.Lemmas

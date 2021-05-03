@@ -3,7 +3,7 @@ module Hacl.Impl.P256.MM.Lemmas
 open FStar.Math.Lemmas
 open FStar.Mul
 open Hacl.Spec.EC.Definition
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 open Spec.ECC
 open Spec.ECC.Curves

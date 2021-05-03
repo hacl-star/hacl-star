@@ -1,11 +1,12 @@
 module Hacl.Impl.EC.MontgomeryMultiplication.Lemmas
 
+
 open Lib.IntTypes
 
 open FStar.Math.Lemmas
 open FStar.Mul
 
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 open Spec.ECC
 open Spec.ECC.Curves
 
@@ -32,7 +33,7 @@ val lemma_division_is_multiplication:
 
 let lemma_division_is_multiplication t3 prime =  
 
-  Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (pow2 64 % prime) (prime - 2);
+  Hacl.EC.Lemmas.lemma_pow_mod_n_is_fpow prime (pow2 64 % prime) (prime - 2);
   lemma_mod_twice (pow (pow2 64 % prime) (prime - 2)) prime;
 
   let open FStar.Tactics in 
@@ -46,11 +47,11 @@ let lemma_division_is_multiplication t3 prime =
     (t3 / pow2 64) * (pow2 64 * (pow (pow2 64 % prime) (prime - 2) % prime)) % prime;
     (==) {lemma_mod_mul_distr_r (t3 / pow2 64) (pow2 64 * (pow (pow2 64 % prime) (prime - 2) % prime)) prime}
     (t3 / pow2 64) * (pow2 64 * (pow (pow2 64 % prime) (prime - 2) % prime) % prime) % prime;
-    (==) {Hacl.Lemmas.P256.power_distributivity (pow2 64) (prime - 2) prime}
+    (==) {Hacl.EC.Lemmas.power_distributivity (pow2 64) (prime - 2) prime}
     (t3 / pow2 64) * (pow2 64 * (pow (pow2 64) (prime - 2) % prime) % prime) % prime;
     (==) {lemma_mod_mul_distr_r (pow2 64) (pow (pow2 64) (prime - 2)) prime}
     (t3 / pow2 64) * (pow2 64 * (pow (pow2 64) (prime - 2)) % prime) % prime;
-    (==) {Hacl.Lemmas.P256.power_one_2 (pow2 64)}
+    (==) {Hacl.EC.Lemmas.power_one_2 (pow2 64)}
     (t3 / pow2 64) * (pow (pow2 64) 1 * (pow (pow2 64) (prime - 2)) % prime) % prime;
     (==) {pow_plus (pow2 64) 1 (prime - 2)}
     (t3 / pow2 64) * ((pow (pow2 64) (prime - 1)) % prime) % prime;
@@ -182,12 +183,12 @@ let lemma_mm_reduction #c #m a0 i =
 
   assert(modp_inv2_prime a prime == exp #prime (a % prime) (prime - 2));
   
-  Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (a % prime) exp_prime;
+  Hacl.EC.Lemmas.lemma_pow_mod_n_is_fpow prime (a % prime) exp_prime;
 
   assert(modp_inv2_prime (pow2 64) prime == exp #prime (pow2 64 % prime) exp_prime); 
-  Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (pow2 64 % prime) exp_prime;
+  Hacl.EC.Lemmas.lemma_pow_mod_n_is_fpow prime (pow2 64 % prime) exp_prime;
 
-  Hacl.Lemmas.P256.power_distributivity_2 (a % prime) (pow2 64 % prime) exp_prime;
+  Hacl.EC.Lemmas.power_distributivity_2 (a % prime) (pow2 64 % prime) exp_prime;
 
   lemma_mod_mul_distr_r a0 (modp_inv2_prime a prime * modp_inv2_prime (pow2 64) prime) prime; 
 
@@ -201,7 +202,7 @@ let lemma_mm_reduction #c #m a0 i =
     (pow (a % prime) exp_prime * pow (pow2 64 % prime) exp_prime) % prime; 
     (==) {pow_plus (a % prime) (pow2 64 % prime) exp_prime}
     (pow (a % prime * (pow2 64 % prime)) exp_prime) % prime; 
-    (==) {Hacl.Lemmas.P256.power_distributivity (a % prime * (pow2 64 % prime)) exp_prime prime}
+    (==) {Hacl.EC.Lemmas.power_distributivity (a % prime * (pow2 64 % prime)) exp_prime prime}
     (pow (a % prime * (pow2 64 % prime) % prime) exp_prime) % prime;  
     (==) {lemma_mod_mul_distr_l a (pow2 64 % prime) prime}
     (pow ((a * (pow2 64 % prime)) % prime) exp_prime) % prime; 
@@ -209,7 +210,7 @@ let lemma_mm_reduction #c #m a0 i =
     (pow ((a * pow2 64) % prime) exp_prime) % prime; 
     (==) {lemma_mod_twice (pow ((a * pow2 64) % prime) exp_prime) prime}
     ((pow ((a * pow2 64) % prime) exp_prime) % prime) % prime; 
-    (==) {Hacl.Lemmas.P256.lemma_pow_mod_n_is_fpow prime (a * pow2 64 % prime) exp_prime} 
+    (==) {Hacl.EC.Lemmas.lemma_pow_mod_n_is_fpow prime (a * pow2 64 % prime) exp_prime} 
     exp #prime ((a * pow2 64) % prime) exp_prime % prime; 
     (==) {}
     modp_inv2_prime (a * pow2 64) prime % prime; 

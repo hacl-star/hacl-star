@@ -6,7 +6,7 @@ open FStar.Mul
 
 open Spec.ECC
 open Spec.ECC.Curves
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 open Hacl.Spec.EC.Definition
 
 open Lib.IntTypes

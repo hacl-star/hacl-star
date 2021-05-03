@@ -233,7 +233,7 @@ let isCoordinateValid #c p =
   pop_frame();
   r  
 
-
+inline_for_extraction
 val multByOrder: #c: curve {isPrimeGroup c == false} -> result: point c ->  p: point c -> 
   tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack unit 
   (requires fun h -> 

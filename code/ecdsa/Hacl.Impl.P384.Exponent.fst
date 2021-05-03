@@ -16,7 +16,7 @@ open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Impl.EC.LowLevel
 
 open FStar.Math.Lemmas
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 open FStar.Tactics 
 open FStar.Tactics.Canon 
@@ -120,7 +120,7 @@ let exponent0 t t0 t1 t2 t3 =
 (* t2 = x24*) 
 
   let tD = fromDomain__ (as_nat_ h0 t) in
-  Hacl.Lemmas.P256.power_one_2 tD;
+  Hacl.EC.Lemmas.power_one_2 tD;
   
   assert(as_nat_ h1 t0 = toDomain__ (tD * tD % prime384));
   assert(as_nat_ h3 t0 = toDomain__ (fromDomain__ (as_nat_ h2 t0) * fromDomain__ (as_nat_ h2 t0) % prime384));
@@ -287,9 +287,9 @@ val lemma_exp1_9_2_: a: nat -> b: nat -> c: nat -> d: nat -> e: pos -> Lemma
    (pow (a * b * c * d) e = pow a e * pow b e * pow c e * pow d e)
 
 let lemma_exp1_9_2_ a b c d  e = 
-  Hacl.Lemmas.P256.power_distributivity_2 (a * b * c) d e;
-  Hacl.Lemmas.P256.power_distributivity_2 (a * b) c e;
-  Hacl.Lemmas.P256.power_distributivity_2 a b e
+  Hacl.EC.Lemmas.power_distributivity_2 (a * b * c) d e;
+  Hacl.EC.Lemmas.power_distributivity_2 (a * b) c e;
+  Hacl.EC.Lemmas.power_distributivity_2 a b e
   
 
 

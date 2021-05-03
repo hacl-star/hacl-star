@@ -7,7 +7,7 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 open Hacl.Spec.EC.Definition
 open Hacl.Spec.ECDSA.Definition

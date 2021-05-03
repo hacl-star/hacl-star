@@ -12,7 +12,7 @@ open FStar.Mul
 open Lib.Loops
 
 open Hacl.Spec.EC.Definition
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 open Spec.ECDSA.Lemmas
 open Spec.ECC.Curves
 

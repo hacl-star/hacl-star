@@ -8,7 +8,7 @@ open Spec.ECC
 open Spec.ECDSA
 open Spec.ECDSA.Lemmas
 open Hacl.Spec.EC.Definition
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 open Lib.IntTypes
 

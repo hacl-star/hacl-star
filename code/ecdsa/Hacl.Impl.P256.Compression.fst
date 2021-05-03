@@ -12,7 +12,7 @@ open Hacl.Impl.EC.Exponent
 open Hacl.Impl.EC.Arithmetics
 
 open Hacl.Impl.P256.LowLevel.RawCmp
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Spec.MontgomeryMultiplication

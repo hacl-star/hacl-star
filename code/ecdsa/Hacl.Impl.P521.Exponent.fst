@@ -13,7 +13,7 @@ open FStar.Math.Lemmas
 open FStar.Mul
 
 open Hacl.Spec.EC.Definition
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 open Hacl.Impl.P256.LowLevel 
 open Spec.ECC
 open Lib.Loops

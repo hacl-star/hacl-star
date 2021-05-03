@@ -20,7 +20,7 @@ open FStar.Tactics
 open FStar.Tactics.Canon
 
 open FStar.Math.Lemmas
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 open FStar.Mul
 open Hacl.Impl.EC.MontgomeryLadder

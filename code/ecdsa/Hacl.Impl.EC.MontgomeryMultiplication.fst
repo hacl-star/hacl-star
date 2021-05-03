@@ -312,7 +312,7 @@ let fsquarePowN #c m n a =
     as_nat c h1 a = toDomain_ #c #m (pow k (pow2 i)) /\
     as_nat c h1 a < getModePrime m c /\ live h1 a /\ modifies (loc a) h0 h1 in 
 
-  Hacl.Lemmas.P256.power_one_2 (fromDomain_ #c #m (as_nat c h0 a)); 
+  Hacl.EC.Lemmas.power_one_2 (fromDomain_ #c #m (as_nat c h0 a)); 
   
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 

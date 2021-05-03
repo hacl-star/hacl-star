@@ -320,7 +320,6 @@ let exponent_spec #c a =
   a0
 
 
-(* The last check should be done only if the group is not prime *)
 val verifyQValidCurvePointSpec: #c: curve 
   -> publicKey:tuple3 nat nat nat{~(isPointAtInfinity publicKey)} -> bool
 

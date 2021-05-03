@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.EC.Definition
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 open Spec.ECC
 open Spec.ECC.Curves

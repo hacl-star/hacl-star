@@ -1,4 +1,4 @@
-module Hacl.Lemmas.P256
+module Hacl.EC.Lemmas
 
 open Lib.IntTypes
 open Lib.Sequence

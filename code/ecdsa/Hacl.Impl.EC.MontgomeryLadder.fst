@@ -17,7 +17,7 @@ open Hacl.Impl.EC.PointDouble
 
 open Lib.Loops
 
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 open FStar.Mul
 open Hacl.Spec.MontgomeryMultiplication

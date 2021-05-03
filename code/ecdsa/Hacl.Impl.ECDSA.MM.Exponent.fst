@@ -12,7 +12,7 @@ open FStar.Math.Lemmas
 open Hacl.Impl.EC.Math 
 
 open Hacl.Impl.EC.LowLevel 
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 open FStar.Tactics
 open FStar.Tactics.Canon 
 

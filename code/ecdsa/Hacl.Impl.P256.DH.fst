@@ -13,7 +13,7 @@ open Spec.ECDSA
 open Hacl.Spec.EC.Definition
 open Spec.DH
 open Hacl.Spec.ECDSA.Definition
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 open Hacl.Impl.EC.LowLevel 
 open Hacl.Impl.EC.Core

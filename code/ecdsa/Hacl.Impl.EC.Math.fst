@@ -6,7 +6,7 @@ open FStar.Mul
 
 open Spec.ECC
 open Spec.ECC.Curves
-open Hacl.Lemmas.P256
+open Hacl.EC.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
