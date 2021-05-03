@@ -68,19 +68,17 @@ let arx c b =
 val l1: x:uint32 -> Tot uint32
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
+assume val getBranchI: #n: branch_len -> i: nat {i < n} -> branch n -> uint32 & uint32
 
-assume val getBranchI: n: branch_len -> index: nat {index < n} -> branch n -> uint32 & uint32
+val xor: #n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch n -> Tot (tuple2 uint32 uint32)
 
-val xor: n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch n -> Tot (tuple2 uint32 uint32)
-
-let xor n b = 
+let xor #n b = 
   let xor_step n b index (u, v) = 
-  let (xi, yi) = getBranchI n index b in 
+  let (xi, yi) = getBranchI index b in 
   xi ^. u, yi ^. v in 
   
-  let zeroBranch = getBranchI n 0 b in 
+  let zeroBranch = getBranchI 0 b in 
   Lib.LoopCombinators.repeati (n - 1) (xor_step n b) zeroBranch
-
 
 val xor_x: n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch n -> lu: uint32 -> lv: uint32 -> Tot (branch n)
 
@@ -90,10 +88,32 @@ let xor_x n b lu lv =
   |_ -> admit()
 
 
-val m: n: nat {n == 2 \/ n == 3 \/ n == 4} -> branch n -> Tot (branch n)
+
+(* AW: <TESTING FUNCTIONALITY> *)
+type branch_test (n: nat) = branch_n: seq branch1 {Seq.Base.length branch_n == n}
+
+val getBranchI_test: #n: branch_len -> i: nat {i < n} -> branch_test n -> uint32 & uint32
+
+let getBranchI_test #n i b = Seq.Base.index b i
+
+val xor_test: #n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch_test n -> Tot (tuple2 uint32 uint32)
+
+let xor_test #n b = 
+  let xor_step n b index (u, v) = 
+  let (xi, yi) = getBranchI_test index b in 
+  xi ^. u, yi ^. v in 
+  
+  let zeroBranch = getBranchI_test 0 b in 
+  Lib.LoopCombinators.repeati (n - 1) (xor_step n b) zeroBranch
+
+
+(* AW: </TESTING FUNCTIONALITY> *)
+
+
+val m: #n: nat {n == 2 \/ n == 3 \/ n == 4} -> branch n -> Tot (branch n)
 
 let m n b = 
-  let u, v = xor n b in 
+  let u, v = xor #n b in 
   let lu, lv = l1 u, l1 v in
   xor_x n b lu lv
   
@@ -104,7 +124,7 @@ let m2 b =
   let (x0, x1), (y0, y1) = b in
   let u = y0 ^. y1 in
   let v = x0 ^. x1 in 
-  let u, v = xor 2 b in 
+  let u, v = xor #2 b in 
   let lu = l1 u in
   let lv = l1 v in
   let t0 = x0 ^. lu in
