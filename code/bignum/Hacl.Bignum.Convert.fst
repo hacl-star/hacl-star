@@ -187,7 +187,6 @@ let mk_bn_to_bytes_be #t len b res =
 
 [@CInline]
 let bn_to_bytes_be_uint32 len : bn_to_bytes_be_st U32 len = mk_bn_to_bytes_be #U32 len
-[@CInline]
 let bn_to_bytes_be_uint64 len : bn_to_bytes_be_st U64 len = mk_bn_to_bytes_be #U64 len
 
 
