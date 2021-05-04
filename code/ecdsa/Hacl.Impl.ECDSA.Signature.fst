@@ -183,7 +183,7 @@ let ecdsa_signature_step6 #c result kFelem z r da =
     let kInv = create len (u64 0) in 
   let h0 = ST.get() in 
     montgomery_multiplication_buffer_dsa #c r da rda;
-    fromDomainImpl z zBuffer;
+    fromDomainImpl  z zBuffer;
     felem_add #c rda zBuffer zBuffer;  
     copy kInv kFelem; (*
     montgomery_ladder_power #c #DSA kInv; *)
