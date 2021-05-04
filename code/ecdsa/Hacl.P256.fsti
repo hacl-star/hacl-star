@@ -156,7 +156,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
 *)
-
+*) 
 
 val ecdsa_verif_p256_sha2:
     mLen: size_t
@@ -182,7 +182,7 @@ val ecdsa_verif_p256_sha2:
   \n Output: bool, where true stands for the correct signature verification. ")]
 *)
 
-
+(*)
 val ecdsa_verif_p256_sha384:
     mLen: size_t
   -> m: lbuffer uint8 mLen

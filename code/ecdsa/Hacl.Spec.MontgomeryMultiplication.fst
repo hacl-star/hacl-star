@@ -28,9 +28,6 @@ let lemmaFromDomain a = ()
 
 let lemmaToDomain #c a = ()
 
-val lemma_mod_inv2_mult_prime: prime: pos {prime > 3 /\ Math.Euclid.is_prime prime} -> a: nat {a % prime <> 0} -> 
-  Lemma (a * modp_inv2_prime a prime % prime == 1)
-
 let lemma_mod_inv2_mult_prime prime a = 
   calc (==) {
     a * modp_inv2_prime a prime % prime;

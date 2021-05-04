@@ -17,13 +17,13 @@ open Hacl.Spec.MontgomeryMultiplication
 
 #reset-options " --z3rlimit 200"
 
-val montgomery_ladder_exponent: #c: curve -> a: felem c -> Stack unit 
-  (requires fun h -> live h a /\ as_nat c h a < getOrder #c)
-  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
+val montgomery_ladder_exponent: #c: curve -> a: felem c -> r: felem c -> Stack unit 
+  (requires fun h -> live h a /\ live h r /\ as_nat c h a < getOrder #c)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc r) h0 h1 /\ (
     let b_ = fromDomain_ #c #DSA (as_nat c h0 a) in 
     let r0D = exponent_spec #c b_ in 
-    fromDomain_ #c #DSA (as_nat c h1 a) == r0D /\
-    as_nat c h1 a < getOrder #c))
+    fromDomain_ #c #DSA (as_nat c h1 r) == r0D /\
+    as_nat c h1 r < getOrder #c))
 
 val fromDomainImpl: #c: curve -> a: felem c -> result: felem c -> Stack unit
   (requires fun h -> live h a /\ live h result /\ as_nat c h a < getOrder #c)

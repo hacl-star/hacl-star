@@ -46,6 +46,9 @@ val lemmaFromDomain: #c: curve -> #m: mode -> a: int -> Lemma (fromDomain_ #c #m
 
 val lemmaToDomain: #c: curve -> #m: mode -> a: int -> Lemma (toDomain_ #c #m a == a * (pow2 (getPower c)) % getModePrime m c)
 
+val lemma_mod_inv2_mult_prime: prime: pos {prime > 3 /\ Math.Euclid.is_prime prime} -> a: nat {a % prime <> 0} -> 
+  Lemma (a * modp_inv2_prime a prime % prime == 1)
+
 val lemmaToDomainFromDomain: #c: curve -> #m: mode -> a: nat {a < getModePrime m c} ->
   Lemma (fromDomain_ #c #m (toDomain_ #c #m a) == a)
   [SMTPat (fromDomain_ #c #m (toDomain_ #c #m a))]
