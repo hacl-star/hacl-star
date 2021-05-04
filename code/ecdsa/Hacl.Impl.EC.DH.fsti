@@ -20,7 +20,7 @@ inline_for_extraction noextract
 val ecp256dh_i: c: curve 
   -> result: pointAffine8 c
   -> s: scalar_t #MUT #c 
-  -> Stack uint64
+  -> Stack bool
   (requires fun h -> live h result /\ live h s /\ disjoint result s)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
     let pointX, pointY, flag = ecp256_dh_i #c (as_seq h0 s) in
@@ -33,7 +33,7 @@ val ecp256dh_r: #c: curve
   -> result: pointAffine8 c
   -> pubKey: pointAffine8 c
   -> scalar: scalar_t #MUT #c 
-  -> Stack uint64
+  -> Stack bool
   (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ disjoint result pubKey /\ disjoint result scalar)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
     let pubKeyX, pubKeyY = getXAff8 pubKey, getYAff8 pubKey in

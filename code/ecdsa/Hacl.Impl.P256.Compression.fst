@@ -11,7 +11,7 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.Exponent
 open Hacl.Impl.EC.Arithmetics
 
-open Hacl.Impl.P256.LowLevel.RawCmp
+open Hacl.Impl.EC.LowLevel.RawCmp
 open Hacl.EC.Lemmas
 open Hacl.Spec.ECDSA.Definition
 

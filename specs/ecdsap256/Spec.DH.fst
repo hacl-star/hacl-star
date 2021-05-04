@@ -14,18 +14,18 @@ open Spec.ECC.Curves
 (* Initiator *)
 val ecp256_dh_i: #c: curve 
   -> scalar_bytes #c
-  -> tuple3 (lbytes (getCoordinateLen c)) (lbytes (getCoordinateLen c)) uint64
+  -> tuple3 (lbytes (getCoordinateLen c)) (lbytes (getCoordinateLen c)) bool
 
 let ecp256_dh_i #c s =
   let xN, yN, zN = secret_to_public #c s in
   if isPointAtInfinity (xN, yN, zN) then
     nat_to_bytes_be (getCoordinateLen c) xN, 
     nat_to_bytes_be (getCoordinateLen c) yN, 
-    u64 (pow2 64 - 1)
+    false
   else
     nat_to_bytes_be (getCoordinateLen c) xN, 
     nat_to_bytes_be (getCoordinateLen c) yN, 
-    (u64 0)
+    true
 
 
 (* Responder *)
@@ -33,7 +33,7 @@ val ecp256_dh_r: #c: curve
   -> lbytes (getCoordinateLen c) 
   -> lbytes (getCoordinateLen c) 
   -> scalar_bytes #c
-  -> tuple3 (lbytes (getCoordinateLen c)) (lbytes (getCoordinateLen c)) uint64
+  -> tuple3 (lbytes (getCoordinateLen c)) (lbytes (getCoordinateLen c)) bool
 
 let ecp256_dh_r #c x y s =
   let x_, y_ = nat_from_bytes_be x, nat_from_bytes_be y in 
@@ -43,12 +43,12 @@ let ecp256_dh_r #c x y s =
     if isPointAtInfinity (xN, yN, zN) then
       nat_to_bytes_be (getCoordinateLen c) xN, 
       nat_to_bytes_be (getCoordinateLen c) yN, 
-      u64 (pow2 64 - 1)
+      false
     else
       nat_to_bytes_be (getCoordinateLen c) xN, 
       nat_to_bytes_be (getCoordinateLen c) yN, 
-      u64 0
+      true
   else
       nat_to_bytes_be (getCoordinateLen c) 0, 
       nat_to_bytes_be (getCoordinateLen c) 0, 
-      u64 (pow2 64 - 1)
+      false

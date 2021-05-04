@@ -172,7 +172,7 @@ val isZero_uint64_nCT: #c: curve -> f: felem c -> Stack bool
 
 let isZero_uint64_nCT f =
   let f = isZero_uint64_CT f in 
-  Hacl.Impl.P256.LowLevel.RawCmp.eq_u64_nCT f (u64 0xffffffffffffffff)
+  Hacl.Impl.EC.LowLevel.RawCmp.eq_u64_nCT f (u64 0xffffffffffffffff)
 
 
 val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64

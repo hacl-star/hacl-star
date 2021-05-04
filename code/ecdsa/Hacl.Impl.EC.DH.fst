@@ -29,7 +29,7 @@ open FStar.Mul
 val ecp256_dh_i_: #c: curve -> resultBuffer: point c 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) 
   -> scalar: scalar_t #MUT #c -> result: pointAffine8 c -> 
-  Stack uint64
+  Stack bool
   (requires fun h -> live h resultBuffer /\ live h tempBuffer /\ live h scalar /\ live h result /\
     disjoint resultBuffer result /\
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc resultBuffer])
@@ -47,7 +47,9 @@ let ecp256_dh_i_ #c resultBuffer tempBuffer scalar result =
     let h2 = ST.get() in 
   fromFormPoint #c resultBuffer result;
   Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 resultBuffer;
-  r
+
+  let open Hacl.Impl.EC.LowLevel.RawCmp in 
+  unsafe_bool_of_u64 r
 
 
 let ecp256dh_i c result scalar =
@@ -65,7 +67,7 @@ val _ecp256dh_r: #c: curve
   -> result: point c
   -> pubKey: point c
   -> scalar: scalar_t #MUT #c -> 
-  Stack uint64
+  Stack bool
   (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ 
      LowStar.Monotonic.Buffer.all_disjoint [loc pubKey;  loc scalar; loc result] /\ (
     let pk = as_nat c h (getX pubKey), as_nat c h (getY pubKey), as_nat c h (getZ pubKey) in 
@@ -75,14 +77,14 @@ val _ecp256dh_r: #c: curve
     let pk = as_nat c h0 (getX pubKey), as_nat c h0 (getY pubKey), as_nat c h0 (getZ pubKey) in 
     let x3, y3, z3 = point_as_nat c h1 result in
     if not (verifyQValidCurvePointSpec #c pk) then
-      uint_v r = maxint U64 /\ x3 == 0 /\ y3 == 0
+      r = false /\ x3 == 0 /\ y3 == 0
     else begin
       let xN, yN, zN = scalar_multiplication #c (as_seq h0 scalar) pk in
       xN == x3 /\ yN == y3 /\ zN == z3 /\ (
       if isPointAtInfinity (xN, yN, zN) then
-	uint_v r = maxint U64
+	r == false
       else
-	uint_v r = 0) end))
+	r == true) end))
 
 
 let _ecp256dh_r #c result pubKey scalar =
@@ -103,14 +105,15 @@ let _ecp256dh_r #c result pubKey scalar =
 	pop_frame();
 	  let h4 = ST.get() in 
 	  Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h3 h4 result;
-      flag
+	let open Hacl.Impl.EC.LowLevel.RawCmp in 
+	unsafe_bool_of_u64 flag
     end
   else
     begin
       pop_frame();
 	let h2 = ST.get() in 
       Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h2 result;
-      u64 18446744073709551615
+      false
     end
 
 val lemma_zero_point_zero_coordinates: c: curve -> h: mem -> p: point c -> 
@@ -130,7 +133,7 @@ val ecp256_dh_r_: #c: curve -> result: pointAffine8 c
   -> scalar: scalar_t #MUT #c
   -> pkF: point c
   -> rF: point c ->
-  Stack uint64 
+  Stack bool
   (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ live h pkF /\ live h rF /\
     disjoint pubKey pkF /\ point_eval c h rF /\ disjoint rF result /\
     LowStar.Monotonic.Buffer.all_disjoint [loc rF; loc pkF; loc scalar] /\

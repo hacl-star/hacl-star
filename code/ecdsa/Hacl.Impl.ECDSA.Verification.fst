@@ -25,7 +25,7 @@ open Spec.ECC.Curves
 (* open Spec.ECC.Lemmas *)
 
 open Hacl.Impl.EC.PointAdd
-open Hacl.Impl.P256.LowLevel.RawCmp
+open Hacl.Impl.EC.LowLevel.RawCmp
 
 open Hacl.Hash.SHA2
 
