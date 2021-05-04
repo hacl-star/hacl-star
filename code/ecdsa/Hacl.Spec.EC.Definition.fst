@@ -18,26 +18,28 @@ let felem_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c))
 
 
 noextract 
-val lseq_as_nat_: #l: size_nat -> a: lseq uint64 l -> i: nat {i <= Lib.Sequence.length a} -> Tot nat
+val lseq_as_nat_: #l: size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC) l -> i: nat {i <= Lib.Sequence.length a} -> Tot nat
 
-let rec lseq_as_nat_ #l a i = 
+let rec lseq_as_nat_ #l #t a i = 
   if i = 0 then 0 else
   let a_i_1 = Lib.Sequence.index a (i - 1) in
-  lseq_as_nat_ a (i - 1) + pow2 (64 * (i - 1)) * v a_i_1
+  lseq_as_nat_ a (i - 1) + pow2 (bits t * (i - 1)) * v a_i_1
+
+noextract 
+val lseq_as_nat: #l: size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC) l -> Tot nat
+
+let lseq_as_nat #l a = lseq_as_nat_ a l
+
 
 val lseq_as_nat_last: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat_ #l a 0 == 0)
 
 let lseq_as_nat_last #l a = ()
 
-val lseq_as_nat_first: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat_ a 1 == v (Lib.Sequence.index a 0))
+val lseq_as_nat_first: #l: size_nat -> a: lseq uint64 l {l > 0} -> Lemma (lseq_as_nat_ a 1 == v (Lib.Sequence.index a 0))
 
 let lseq_as_nat_first a = ()
 
 
-noextract 
-val lseq_as_nat: #l: size_nat -> a: lseq uint64 l -> Tot nat
-
-let lseq_as_nat #l a = lseq_as_nat_ a l
 
 
 val lseq_as_nat_definiton: #len:size_nat -> a: lseq uint64 len -> i: nat {i > 0 /\ i <= len} ->

@@ -47,9 +47,11 @@ open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Spec.MontgomeryMultiplication
 
 
-#set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
+#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
 
-let prime_p256_order #c = getOrder #c
+(* 
+Let {\displaystyle z}z be the {\displaystyle L_{n}}L_{n} leftmost bits of {\displaystyle e}e, where {\displaystyle L_{n}}L_{n} is the bit length of the group order {\displaystyle n}n. (Note that {\displaystyle z}z can be greater than {\displaystyle n}n but not longer.[2])
+*)
 
 val ecdsa_signature_step12: 
   #c: curve 
@@ -57,15 +59,12 @@ val ecdsa_signature_step12:
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
   -> m: lbuffer uint8 mLen -> result: felem c -> Stack unit
   (requires fun h -> live h m /\ live h result )
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 (*/\
-    (
-      assert_norm (pow2 32 < pow2 61);
-      assert_norm (pow2 32 < pow2 125);
-      let hashM = hashSpec P256 alg (v mLen) (as_seq h0 m) in 
-      let cutHashM = Lib.Sequence.sub hashM 0 32 in 
-      as_nat c h1 result = nat_from_bytes_be cutHashM % prime_p256_order
-    ) *)
-  )
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    assert_norm (pow2 32 < pow2 61);
+    assert_norm (pow2 32 < pow2 125);
+    let hashM = hashSpec c alg (v mLen) (as_seq h0 m) in True (*
+    let cutHashM = Lib.Sequence.sub hashM 0 (v (getCoordinateLenU c)) in 
+    as_nat c h1 result = nat_from_bytes_be cutHashM % getOrder #c) *)))
 
 
 let ecdsa_signature_step12 #c alg mLen m result = 
@@ -75,10 +74,12 @@ let ecdsa_signature_step12 #c alg mLen m result =
     let h0 = ST.get() in 
   let sz_hash: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a -> hash_len a in
     assume (v sz_hash + v (getCoordinateLenU c) < pow2 32);
-  let len: FStar.UInt32.t  = getCoordinateLenU c in 
-  let mHash = create (sz_hash +! len) (u8 0) in 
+  let len: FStar.UInt32.t  = sz_hash +! getCoordinateLenU c in 
+  let mHash = create len (u8 0) in 
     let mHashHPart = sub mHash (size 0) sz_hash in 
     let mHashRPart = sub mHash (size 0) (getCoordinateLenU c) in 
+    let mHashLeft = sub mHash (getCoordinateLenU c) sz_hash in 
+    
   begin
   match alg with 
     |NoHash -> copy mHashHPart m 
@@ -87,17 +88,42 @@ let ecdsa_signature_step12 #c alg mLen m result =
       |SHA2_384 -> hash_384 m mLen mHashHPart
       |SHA2_512 -> hash_512 m mLen mHashHPart 
   end;
+    let h1 = ST.get() in 
+  
+  assert(match alg with 
+    |NoHash -> as_seq h1 mHashHPart == as_seq h0 m 
+    |Hash a -> as_seq h1 mHashHPart == Spec.Agile.Hash.hash a (as_seq h0 m));
+
+  assert(nat_from_bytes_be (as_seq h1 mHashRPart) == nat_from_bytes_be (Lib.Sequence.sub (as_seq h1 mHash) 0 (v (getCoordinateLenU c))));
+
+  (* everything exept mHashHPart == 0 *)
+  (*extension? *)
+  assume (lseq_as_nat (as_seq h1 mHashHPart) == lseq_as_nat (as_seq h1 mHash));
+  (* lemma_test *)
+  assume (lseq_as_nat (as_seq h1 mHash) == lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * v (getCoordinateLenU c)) * lseq_as_nat (as_seq h1 mHashLeft));
+  assert(lseq_as_nat (as_seq h1 mHashHPart) == lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * v (getCoordinateLenU c)) * lseq_as_nat (as_seq h1 mHashLeft));
+  assert(lseq_as_nat (as_seq h1 mHashHPart) % pow2 (8 * v (getCoordinateLenU c)) == (lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * v (getCoordinateLenU c)) * lseq_as_nat (as_seq h1 mHashLeft)) % pow2 (8 * v (getCoordinateLenU c)));
+
+  assume (nat_from_bytes_be (as_seq h1 mHashRPart) == lseq_as_nat (as_seq h1 mHashRPart));
+  
+  assume (nat_from_bytes_be (as_seq h1 mHashRPart) == nat_from_bytes_be (as_seq h1 mHash) % pow2 (v (getCoordinateLenU c) * 8));
+
 
   toUint64ChangeEndian #c mHashRPart result;
+    let h2 = ST.get() in 
   reduction_prime_2prime_order result result;
+    let h3 = ST.get() in 
+  pop_frame();
 
-  let h1 = ST.get() in 
 
-  lemma_core_0 c result h1;
-  admit();
-  (* changeEndianLemma #c (uints_from_bytes_be #U64 #_ #_ (as_seq h1 mHashRPart));  *)
-  uints_from_bytes_be_nat_lemma #U64 #_ #(v (getCoordinateLenU64 c)) (as_seq h1 mHashRPart); 
-  pop_frame()
+  let r = as_seq h2 result in 
+  let mr = uints_from_bytes_be (as_seq h1 mHashRPart) in 
+
+  lemma_lseq_nat_from_bytes_test #c #_ r mr;
+  uints_from_bytes_be_nat_lemma #U64 #_ #(v (getCoordinateLenU64 c)) (as_seq h1 mHashRPart);
+  
+  assert(as_nat c h3 result == nat_from_bytes_be (as_seq h1 mHashRPart) % getOrder #c);
+  admit()
 
 
 

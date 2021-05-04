@@ -159,6 +159,12 @@ let getPower curve : a: nat {
 (* the power for 2 words *)
 let getLongPower curve = getPower curve * 2
 
+inline_for_extraction 
+let getOrderLen (c: curve) = 
+  match c with
+  | P256 -> 32ul
+  | _ -> 32ul
+
 
 (* order of the curves *)
 inline_for_extraction

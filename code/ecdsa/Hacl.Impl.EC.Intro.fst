@@ -59,12 +59,12 @@ let changeEndian_spec #c b =
   Lib.LoopCombinators.repeati_inductive lenByTwo pred (fun i b0 -> changeEndianStep #c i b0) b
 
 
-let changedEndian_ #c #l (i: Lib.Sequence.lseq uint64 l) (o: Lib.Sequence.lseq uint64 l) = 
+let changedEndian_ #l (i: Lib.Sequence.lseq uint64 l) (o: Lib.Sequence.lseq uint64 l) = 
   forall (j: nat). (j < l) ==> Lib.Sequence.index i j == Lib.Sequence.index o (l - j - 1)
 
 val changeEndian: #c: curve -> i: felem c -> Stack unit 
   (requires fun h -> live h i)
-  (ensures  fun h0 _ h1 -> modifies (loc i) h0 h1 /\ changedEndian_ #_ #(v (getCoordinateLenU64 c)) (as_seq h0 i) (as_seq h1 i))
+  (ensures  fun h0 _ h1 -> modifies (loc i) h0 h1 /\ changedEndian_ #(v (getCoordinateLenU64 c)) (as_seq h0 i) (as_seq h1 i))
 
 let changeEndian #c b =
   let h0 = ST.get() in 
@@ -90,7 +90,7 @@ let changeEndian #c b =
 val toUint64ChangeEndian: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1  /\
-    changedEndian_  #_ #(v (getCoordinateLenU64 c))  (as_seq h1 o) (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
+    changedEndian_  #(v (getCoordinateLenU64 c))  (as_seq h1 o) (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
 
 let toUint64ChangeEndian #c i o = 
   let len : FStar.UInt32.t = getCoordinateLenU64 c in 
@@ -123,7 +123,7 @@ let lemma_lseq_nat_from_bytes #l a = lemma_lseq_nat_from_bytes_ #l a l
 
 val lemma_lseq_nat_from_bytes_test_: #c: curve -> #l: size_nat {l > 0}
   -> a: Lib.Sequence.lseq uint64 l
-  -> b: Lib.Sequence.lseq uint64 l {changedEndian_  #_ #l a b}
+  -> b: Lib.Sequence.lseq uint64 l {changedEndian_  #l a b}
   -> i: nat {i > 0 /\ i <= l} ->
   Lemma (Lib.ByteSequence.nat_from_intseq_be (Lib.Sequence.slice b (l - i) l) == lseq_as_nat_ a i)
 
@@ -149,7 +149,7 @@ let rec lemma_lseq_nat_from_bytes_test_ #c #len a b i =
 
 val lemma_lseq_nat_from_bytes_test: #c: curve -> #l: size_nat {l > 0}
   -> a: Lib.Sequence.lseq uint64 l
-  -> b: Lib.Sequence.lseq uint64 l {changedEndian_ #_ #l a b} ->
+  -> b: Lib.Sequence.lseq uint64 l {changedEndian_ #l a b} ->
   Lemma (Lib.ByteSequence.nat_from_intseq_be b == lseq_as_nat a)
 
 let lemma_lseq_nat_from_bytes_test #c #l a b = 
@@ -160,7 +160,7 @@ val lemma_change_endian: #c: curve -> #l: size_nat {l > 0}
   -> a: Lib.Sequence.lseq uint64 l
   -> b: Lib.Sequence.lseq uint64 l -> 
   Lemma 
-  (requires (Hacl.Impl.EC.Intro.changedEndian_ #_ #l a b))
+  (requires (Hacl.Impl.EC.Intro.changedEndian_  #l a b))
   (ensures (nat_from_intseq_le a == nat_from_intseq_be b))
 
 let lemma_change_endian #c a b = 
