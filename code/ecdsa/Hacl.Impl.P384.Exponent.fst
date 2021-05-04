@@ -494,7 +494,9 @@ let exponent2 t0 t3 t4 t5  =
   let h0 = ST.get() in 
 (* x126    = m(n_sq(x63, 63) , x63) *)
   montgomery_square_buffer_dh #P384 t4 t5;
+    let h1 = ST.get() in 
   fsquarePowN_dh #P384 (size 62) t5;
+    let h2 = ST.get() in 
 
   montgomery_multiplication_buffer_dh #P384 t4 t5 t4;  
 (* t4 = x126*)
@@ -515,7 +517,38 @@ let exponent2 t0 t3 t4 t5  =
 
 (* i0 = m(n_sq(x255, 33), x32) *)
   fsquarePowN_dh #P384 (size 33) t4 ;
-  montgomery_multiplication_buffer_dh #P384 t4 t3 t4
+  montgomery_multiplication_buffer_dh #P384 t4 t3 t4;
+
+  let t0D = fromDomain__ (as_nat_ h0 t0) in 
+  let t3D = fromDomain__ (as_nat_ h0 t3) in 
+  let t4D = fromDomain__ (as_nat_ h0 t4) in 
+  let t5D = fromDomain__ (as_nat_ h0 t5) in 
+
+  calc (==) {
+    as_nat_ h1 t5;
+  (==) {}
+    toDomain__ (t4D * t4D % prime384);
+  (==) {power_one_2 t4D}
+    toDomain__ (pow t4D 1 * pow t4D 1 % prime384);
+  (==) {pow_plus t4D 1 1}
+    toDomain__ (pow t4D 2 % prime384);};
+
+  let pow2_62 = pow2 62 in 
+  let pow2_63 = pow2 63 in 
+
+  calc (==) {
+    as_nat_ h2 t5;
+  (==) {}
+    toDomain__ (pow (pow t4D 2 % prime384) pow2_62 % prime384);
+  (==) {power_distributivity (pow t4D 2) pow2_62 prime384}
+    toDomain__ (pow (pow t4D 2) pow2_62 % prime384);
+  (==) {power_mult t4D 2 pow2_62}
+    toDomain__ (pow t4D (pow2 1 * pow2_62) % prime384);
+  (==) {pow2_plus 1 62}
+     toDomain__ (pow t4D pow2_63 % prime384);}
+  
+    
+
 (*t4 = i0 *)
 
 
