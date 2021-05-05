@@ -40,6 +40,8 @@ open Hacl.Impl.EC.Masking
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Spec.MontgomeryMultiplication
 
+open Hacl.Impl.MM.Exponent
+
 
 #set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
 
@@ -101,6 +103,8 @@ let ecdsa_signature_step12 #c alg mLen m result =
 
   (* everything exept mHashHPart == 0 *)
   (*extension? *)
+
+  
 
   assume (lseq_as_nat (as_seq h1 mHashHPart) == lseq_as_nat (as_seq h1 mHash));
   (* lemma_test *)
@@ -191,69 +195,85 @@ let lemma_power_step6 #c kInv =
   lemmaToDomain (pow kInv (getOrder #c - 2)) *)
 
 
-val ecdsa_signature_step6: #c: curve -> result: felem c
-  -> kFelem: felem c
-  -> z: felem  c
-  -> r: felem c
-  -> da: felem  c
-  -> Stack unit
-    (requires fun h ->  True (*
-      live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\
-      as_nat c h kFelem < prime_p256_order /\ 
-      as_nat c h z < prime_p256_order /\ 
-      as_nat c h r < prime_p256_order /\ 
-      as_nat c h da < prime_p256_order *)
-    )
-    (ensures fun h0 _ h1 -> 
-      modifies (loc result) h0 h1  (*/\
+val ecdsa_signature_step6: #c: curve -> result: felem c -> kFelem: felem c -> z: felem  c -> r: felem c -> da: felem c -> 
+  Stack unit
+  (requires fun h -> 
+    live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\ 
+    eq_or_disjoint r da /\
+    
+    (
+    let order = getOrder #c in 
+    as_nat c h kFelem < order /\ as_nat c h z < order /\ as_nat c h r < order /\ as_nat c h da < order))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1  (*/\
       as_nat c h1 result = (as_nat c h0 z + as_nat c h0 r * as_nat c h0 da) * pow (as_nat c h0 kFelem) (prime_p256_order - 2) % prime_p256_order *)
-    ) 
+  ) 
 
-open Hacl.Impl.MM.Exponent
 
 let ecdsa_signature_step6 #c result kFelem z r da = 
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
   push_frame();
-    let len : FStar.UInt32.t  = getCoordinateLenU64 c in 
-    let rda = create len (u64 0) in 
-    let zBuffer = create len (u64 0) in 
-    let kInv = create len (u64 0) in 
-  let h0 = ST.get() in 
-    montgomery_multiplication_buffer_dsa #c r da rda;
-    fromDomainImpl  z zBuffer;
-    felem_add #c rda zBuffer zBuffer;  
-    copy kInv kFelem;
-    montgomery_ladder_exponent #c kInv kInv; 
-    montgomery_multiplication_buffer_dsa zBuffer kInv result;
-  pop_frame()
-      (*let br0 = as_nat c h0 z + as_nat c h0 r * as_nat c h0 da in
-      let br1 = pow (as_nat c h0 kFelem) (prime_p256_order - 2) in 
+  let len : FStar.UInt32.t  = getCoordinateLenU64 c in 
+  let rda = create len (u64 0) in 
+  let zBuffer = create len (u64 0) in 
+  let kInv = create len (u64 0) in 
+  
+    let h0 = ST.get() in 
+  montgomery_multiplication_buffer_dsa #c r da rda;
+  fromDomainImpl z zBuffer; 
+  felem_add #c rda zBuffer zBuffer;
+  copy kInv kFelem;
+  montgomery_ladder_exponent #c kInv kInv; 
+  montgomery_multiplication_buffer_dsa zBuffer kInv result;
+    let h6 = ST.get() in 
+  pop_frame();
 
-      lemmaFromDomain (as_nat c h0 r * as_nat c h0 da); 
-      lemma_felem_add (as_nat c h0 r * as_nat c h0 da) (as_nat c h0 z);
-      lemma_power_step6 (as_nat c h0 kFelem); 
+  let r = as_nat c h0 r in 
+  let da = as_nat c h0 da in 
+  let z = as_nat c h0 z in
+  let k = as_nat c h0 kFelem in 
 
-      lemmaFromDomain (fromDomain_ br0);
-      lemmaToDomain br1;
-      assert_norm ((modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) % prime_p256_order = 1);
-       
-      lemma_mod_mul_distr_l (fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order) (br1 * pow2 256 % prime_p256_order) prime_p256_order;
-      lemma_mod_mul_distr_r (fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order) (br1 * pow2 256) prime_p256_order;
-       
-      assert_by_tactic (fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order * (br1 * pow2 256) == fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order * br1 * pow2 256) canon;
-      assert_by_tactic (fromDomain_ br0 * br1 * (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) == fromDomain_ br0 * modp_inv2_prime (pow2 256) prime_p256_order * br1 * pow2 256) canon;
-       
-      lemma_mod_mul_distr_r (fromDomain_ br0 * br1) (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) prime_p256_order;
-      lemmaToDomain ((fromDomain_ br0 * br1) % prime_p256_order);
-      lemmaFromDomain br0;
-       
-      lemma_mod_mul_distr_l (br0 * modp_inv2_prime (pow2 256) prime_p256_order) br1 prime_p256_order;
-      lemma_mod_mul_distr_l (br0 * modp_inv2_prime (pow2 256) prime_p256_order * br1) (pow2 256) prime_p256_order;
-       
-      assert_by_tactic (br0 * modp_inv2_prime (pow2 256) prime_p256_order * br1 * pow2 256 = br0 * br1 * (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256)) canon;
-      lemma_mod_mul_distr_r (br0 * br1) (modp_inv2_prime (pow2 256) prime_p256_order * pow2 256) prime_p256_order;
-      lemma_mod_mul_distr_r br0 br1 prime_p256_order *) 
+  let order = getOrder #c in 
+  let p = modp_inv2_prime (pow2 (getPower c)) order in
+  
+
+  
+  assert(as_nat c h6 result = toDomain_ #c #DSA (((fromDomain_ #c #DSA r) * (fromDomain_ #c #DSA da) % order + fromDomain_ #c #DSA (fromDomain_ #c #DSA z)) % order * (pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order) % order));
+
+  calc (==) {
+    as_nat c h6 result;
+  (==) {} 
+    toDomain_ #c #DSA (((fromDomain_ #c #DSA r) * (fromDomain_ #c #DSA da) % order + fromDomain_ #c #DSA (fromDomain_ #c #DSA z)) % order * (pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order) % order); 
+  (==) {lemmaFromDomain #c #DSA r; lemmaFromDomain #c #DSA da; lemmaFromDomain #c #DSA z}
+    toDomain_ #c #DSA (((r * p % order) * (da * p % order) % order + fromDomain_ #c #DSA (z * p % order)) % order * (pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order) % order); 
+  (==) {lemmaFromDomain #c #DSA (z * p % order)}
+    toDomain_ #c #DSA (((r * p % order) * (da * p % order) % order + ((z * p % order) * p % order)) % order * (pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order) % order); 
+  (==) {lemma_mod_mul_distr_l (r * p) (da * p % order) order; lemma_mod_mul_distr_l (z * p) p order}
+      toDomain_ #c #DSA ((r * p * (da * p % order) % order + (z * p * p % order)) % order * (pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order) % order); 
+   (==) {lemma_mod_mul_distr_r (r * p) (da * p) order}
+      toDomain_ #c #DSA ((r * p * (da * p) % order + (z * p * p % order)) % order * (pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order) % order);    
+   (==) {lemma_mod_add_distr (r * p * (da * p) % order) (z * p * p) order}
+      toDomain_ #c #DSA ((r * p * (da * p) % order + (z * p * p)) % order * (pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order) % order);     
+   (==) {lemma_mod_add_distr (z * p * p) (r * p * (da * p)) order}
+     toDomain_ #c #DSA ((r * p * (da * p) + (z * p * p)) % order * (pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order) % order);  
+   (==) {assert_by_tactic (r * p * (da * p) + (z * p * p) == (p * p) * (r * da + z)) canon}
+     toDomain_ #c #DSA ((p * p) * (r * da + z) % order * (pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order) % order);       
+   (==) {lemma_mod_mul_distr_l ((p * p) * (r * da + z)) ((pow (fromDomain_ #c #DSA (as_nat c h0 kFelem)) (order - 2) % order)) order}
+     toDomain_ #c #DSA ((p * p) * (r * da + z) * (pow (fromDomain_ #c #DSA k) (order - 2) % order) % order);   
+   (==) {lemmaFromDomain #c #DSA k}
+     toDomain_ #c #DSA ((p * p) * (r * da + z) * (pow (k * p % order) (order - 2) % order) % order);   
+   (==) {power_distributivity (k * p) (order - 2) order} 
+     toDomain_ #c #DSA ((p * p) * (r * da + z) * (pow (k * p) (order - 2) % order) % order); 
+   (==) {power_distributivity_2 k p (order - 2)}
+     toDomain_ #c #DSA ((p * p) * (r * da + z) * (pow k (order - 2) * pow p (order - 2) % order) % order); 
+
+  };
+
+
+
+
+
+    admit()
 
 #push-options "--ifuel 1"
 
