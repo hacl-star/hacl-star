@@ -12,7 +12,7 @@
 #include "Hacl_Blake2s_32.h"
 #include "Hacl_Blake2b_32.h"
 
-#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
+#if defined(HACL_CAN_COMPILE_VEC128)
 #include "Hacl_Blake2s_128.h"
 #endif
 
@@ -47,7 +47,7 @@ bool print_test2s(int in_len, uint8_t* in, int key_len, uint8_t* key, int exp_le
   printf("testing blake2s vec-32:\n");
   bool ok = print_result(exp_len,comp,exp);
 
-#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
+#if defined(HACL_CAN_COMPILE_VEC128)
   Hacl_Blake2s_128_blake2s(exp_len,comp,in_len,in,key_len,key);
   printf("testing blake2s vec-128:\n");
   ok = ok && print_result(exp_len,comp,exp);
@@ -96,7 +96,7 @@ int main()
   t2 = clock();
   clock_t tdiff2 = (t2 - t1);
 
-#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
+#if defined(HACL_CAN_COMPILE_VEC128)
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Blake2s_128_blake2s(32,plain,SIZE,plain,0,NULL);
   }
@@ -112,7 +112,7 @@ int main()
   printf("Blake2S (Vec 32-bit):\n"); print_time(count,tdiff1,0);
   printf("Blake2B (Vec 64-bit):\n"); print_time(count,tdiff2,0);
 
-#if defined(EVERCRYPT_CAN_COMPILE_VEC128)
+#if defined(HACL_CAN_COMPILE_VEC128)
   printf("Blake2S (Vec 128-bit):\n"); print_time(count,tdiff3,0);
 #endif
 

@@ -26,14 +26,14 @@ TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
 # Vec128
 ifneq ($(COMPILE_VEC128),)
-CFLAGS += -DEVERCRYPT_CAN_COMPILE_VEC128
+CFLAGS += -DHACL_CAN_COMPILE_VEC128
 else
 TARGETS := $(filter-out %-128-test-streaming.exe, $(filter-out %-128-test.exe, $(TARGETS)))
 endif
 
 # Vec256
 ifneq ($(COMPILE_VEC256),)
-CFLAGS += -DEVERCRYPT_CAN_COMPILE_VEC256
+CFLAGS += -DHACL_CAN_COMPILE_VEC256
 else
 TARGETS := $(filter-out %-256-test-streaming.exe, $(filter-out %-256-test.exe, $(TARGETS)))
 endif
@@ -45,7 +45,7 @@ else
 endif
 
 ifneq ($(COMPILE_INLINE_ASM),)
-CFLAGS += -DEVERCRYPT_CAN_COMPILE_INLINE_ASM
+CFLAGS += -DHACL_CAN_COMPILE_INLINE_ASM
 else
 TARGETS := $(filter-out curve64-%, $(TARGETS))
 endif
