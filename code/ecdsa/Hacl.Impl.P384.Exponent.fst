@@ -482,6 +482,32 @@ let exponent1 t t1 t2 t3 t4 =
      }
 
 
+val lemma_exp2_9: t0D : nat -> t4D: nat -> Lemma (
+  toDomain__ (pow (pow t4D (pow2 192 + pow2 129 + pow2 66 + pow2 3) * t0D % prime384) (pow2 33) % prime384) ==
+  toDomain__ (pow t4D (pow2 225 + pow2 162 + pow2 99 + pow2 36) * pow t0D (pow2 33) % prime384))
+
+let lemma_exp2_9 t0D t4D = 
+  let pow2_33 = pow2 33 in 
+  let pow2_192 = pow2 192 in 
+  let pow2_129 = pow2 129 in 
+  let pow2_66 = pow2 66 in 
+
+  let pow2_225 = pow2 225 in 
+  let pow2_162 = pow2 162 in 
+  let pow2_99 = pow2 99 in 
+  let pow2_36 = pow2 36 in 
+
+  calc (==) {
+    toDomain__ (pow (pow t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3) * t0D % prime384) pow2_33 % prime384);
+  (==) {power_distributivity (pow t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3) * t0D) pow2_33 prime384}
+    toDomain__ (pow (pow t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3) * t0D) pow2_33 % prime384);
+  (==) {power_distributivity_2 (pow t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3)) t0D pow2_33; power_one_2 t0D}
+    toDomain__ (pow (pow t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3)) pow2_33 * pow (pow t0D 1) pow2_33 % prime384);
+  (==) {power_mult t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3) pow2_33; power_mult t0D 1 pow2_33}
+    toDomain__ (pow t4D (pow2_192 * pow2_33 + pow2_129 * pow2_33 + pow2_66 * pow2_33 + pow2 3 * pow2_33) * pow t0D pow2_33 % prime384);
+  (==) {pow2_plus 192 33; pow2_plus 129 33; pow2_plus 66 33; pow2_plus 3 33}
+    toDomain__ (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D pow2_33 % prime384);}
+
 
 val exponent2: t0: felem P384 -> t3: felem P384 -> t4: felem P384 -> t5: felem P384 -> Stack unit 
   (requires fun h -> live h t0 /\ live h t3 /\ live h t4 /\ live h t5 /\
@@ -497,27 +523,33 @@ let exponent2 t0 t3 t4 t5  =
     let h1 = ST.get() in 
   fsquarePowN_dh #P384 (size 62) t5;
     let h2 = ST.get() in 
-
   montgomery_multiplication_buffer_dh #P384 t4 t5 t4;  
-(* t4 = x126*)
-
+  (* t4 = x126*)
+    let h3 = ST.get() in 
 
 (* x252    = m(n_sq(x126, 126) , x126) *)
   montgomery_square_buffer_dh #P384 t4 t5;
+    let h4 = ST.get() in 
+
   fsquarePowN_dh #P384 (size 125) t5 ;
+    let h5 = ST.get() in 
+
   montgomery_multiplication_buffer_dh #P384 t4 t5 t4;
+    let h6 = ST.get() in 
 (* t4 = x252 *)
-
-
+   
 (* x255    = m(n_sq(x252, 3) , _111) *)
   fsquarePowN_dh #P384 (size 3) t4 ;
+    let h7 = ST.get() in 
   montgomery_multiplication_buffer_dh #P384 t4 t0 t4;
+    let h8 = ST.get() in 
 (* t4 = x255 *)
-
 
 (* i0 = m(n_sq(x255, 33), x32) *)
   fsquarePowN_dh #P384 (size 33) t4 ;
+    let h9 = ST.get() in 
   montgomery_multiplication_buffer_dh #P384 t4 t3 t4;
+    let h10 = ST.get() in 
 
   let t0D = fromDomain__ (as_nat_ h0 t0) in 
   let t3D = fromDomain__ (as_nat_ h0 t3) in 
@@ -545,9 +577,92 @@ let exponent2 t0 t3 t4 t5  =
   (==) {power_mult t4D 2 pow2_62}
     toDomain__ (pow t4D (pow2 1 * pow2_62) % prime384);
   (==) {pow2_plus 1 62}
-     toDomain__ (pow t4D pow2_63 % prime384);}
+     toDomain__ (pow t4D pow2_63 % prime384);};
+
+  calc (==) {
+    as_nat_ h3 t4;
+  (==) {}
+    toDomain__ (t4D * (pow t4D pow2_63 % prime384) % prime384);
+  (==) {lemma_mod_mul_distr_r t4D (pow t4D pow2_63) prime384}
+    toDomain__ (t4D * pow t4D pow2_63 % prime384);
+  (==) {power_one_2 t4D}
+    toDomain__ (pow t4D 1 * pow t4D pow2_63 % prime384);
+  (==) {pow_plus t4D 1 pow2_63}
+    toDomain__ (pow t4D (pow2_63 + 1) % prime384);};
+
+  let pow2_64 = pow2 64 in 
   
+  calc (==) {
+    as_nat_ h4 t5;
+  (==) {}
+    toDomain__ (pow t4D (pow2_63 + 1) % prime384 * (pow t4D (pow2_63 + 1) % prime384) % prime384);
+  (==) {lemma_mod_mul_distr (pow t4D (pow2_63 + 1)) (pow t4D (pow2_63 + 1)) prime384}
+    toDomain__ (pow t4D (pow2_63 + 1) * pow t4D (pow2_63 + 1) % prime384);
+  (==) {pow_plus t4D (pow2_63 + 1) (pow2_63 + 1)}
+    toDomain__ (pow t4D (2 * pow2_63 + 2) % prime384);
+  (==) {pow2_double_mult 63}
+    toDomain__ (pow t4D (pow2_64 + 2) % prime384);};
+
+  let pow2_125 = pow2 125 in 
+  let pow2_126 = pow2 126 in 
+  let pow2_189 = pow2 189 in 
+  
+  calc (==) {
+    as_nat_ h5 t5;
+  (==) {}
+    toDomain__ (pow (pow t4D (pow2_64 + 2) % prime384) pow2_125 % prime384);
+  (==) {power_distributivity (pow t4D (pow2_64 + 2)) pow2_125 prime384}
+    toDomain__ (pow (pow t4D (pow2_64 + 2)) pow2_125 % prime384);
+  (==) {power_mult t4D (pow2_64 + 2) pow2_125}
+    toDomain__ (pow t4D (pow2_64 * pow2_125 + 2 * pow2_125) % prime384);  
+  (==) {pow2_plus 64 125; pow2_double_mult 125}
+    toDomain__ (pow t4D (pow2_189 + pow2_126) % prime384);};
+
+  calc (==) {
+    as_nat_ h6 t4;
+  (==) {}
+    toDomain__ (pow t4D (pow2_63 + 1) % prime384 * (pow t4D (pow2_189 + pow2_126) % prime384) % prime384);
+  (==) {lemma_mod_mul_distr (pow t4D (pow2_63 + 1)) (pow t4D (pow2_189 + pow2_126)) prime384}
+    toDomain__ (pow t4D (pow2_63 + 1) * pow t4D (pow2_189 + pow2_126) % prime384);
+  (==) {pow_plus t4D (pow2_63 + 1) (pow2_189 + pow2_126)}  
+    toDomain__ (pow t4D (pow2_189 + pow2_126 + pow2_63 + 1) % prime384);};
+
+  let pow2_192 = pow2 192 in 
+  let pow2_129 = pow2 129 in 
+  let pow2_66 = pow2 66 in 
+
+  calc (==) {
+    as_nat_ h7 t4;
+  (==) {}
+    toDomain__ (pow (pow t4D (pow2_189 + pow2_126 + pow2_63 + 1) % prime384) (pow2 3) % prime384);
+  (==) {power_distributivity (pow t4D (pow2_189 + pow2_126 + pow2_63 + 1)) (pow2 3) prime384}
+    toDomain__ (pow (pow t4D (pow2_189 + pow2_126 + pow2_63 + 1)) (pow2 3) % prime384);
+  (==) {power_mult t4D (pow2_189 + pow2_126 + pow2_63 + 1) (pow2 3)}
+    toDomain__ (pow t4D (pow2_189 * pow2 3 + pow2_126 * pow2 3 + pow2_63 * pow2 3 + pow2 3) % prime384);
+  (==) {pow2_plus 189 3; pow2_plus 126 3; pow2_plus 63 3}
+    toDomain__ (pow t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3) % prime384);};
     
+  calc (==) {
+    as_nat_ h8 t4;
+  (==) {}
+    toDomain__ (pow t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3) % prime384 * t0D % prime384);
+  (==) {lemma_mod_mul_distr_l (pow t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3)) t0D prime384}
+    toDomain__ (pow t4D (pow2_192 + pow2_129 + pow2_66 + pow2 3) * t0D % prime384);};
+
+  let pow2_33 = pow2 33 in 
+
+  let pow2_225 = pow2 225 in 
+  let pow2_162 = pow2 162 in 
+  let pow2_99 = pow2 99 in 
+  let pow2_36 = pow2 36 in 
+  
+  calc (==) {
+    as_nat_ h9 t4;
+  (==) {lemma_exp2_9 t0D t4D}
+    toDomain__ (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D (pow2_33) % prime384);}
+
+
+
 
 (*t4 = i0 *)
 
