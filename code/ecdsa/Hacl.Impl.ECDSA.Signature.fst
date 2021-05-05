@@ -15,18 +15,12 @@ open FStar.Mul
 open FStar.Math.Lemmas
 
 open Hacl.Hash.SHA2
-open Hacl.Spec.EC.Definition
 
 open Spec.ECC
 open Spec.ECC.Curves
-(* open Spec.ECC.Lemmas *)
 open Hacl.Spec.EC.Definition
-open Hacl.Spec.ECDSA.Definition
-
-open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Impl.EC.LowLevel 
-
 open Hacl.Impl.EC.Core
 
 open Hacl.Impl.ECDSA.MM.Exponent
@@ -47,7 +41,7 @@ open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Spec.MontgomeryMultiplication
 
 
-#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0"
+#set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
 
 (* 
 Let {\displaystyle z}z be the {\displaystyle L_{n}}L_{n} leftmost bits of {\displaystyle e}e, where {\displaystyle L_{n}}L_{n} is the bit length of the group order {\displaystyle n}n. (Note that {\displaystyle z}z can be greater than {\displaystyle n}n but not longer.[2])
@@ -56,15 +50,17 @@ Let {\displaystyle z}z be the {\displaystyle L_{n}}L_{n} leftmost bits of {\disp
 val ecdsa_signature_step12: 
   #c: curve 
   -> alg:hash_alg_ecdsa
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg} 
   -> m: lbuffer uint8 mLen -> result: felem c -> Stack unit
   (requires fun h -> live h m /\ live h result )
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
     assert_norm (pow2 32 < pow2 61);
     assert_norm (pow2 32 < pow2 125);
-    let hashM = hashSpec c alg (v mLen) (as_seq h0 m) in True (*
-    let cutHashM = Lib.Sequence.sub hashM 0 (v (getCoordinateLenU c)) in 
-    as_nat c h1 result = nat_from_bytes_be cutHashM % getOrder #c) *)))
+    let len = match alg with |NoHash -> v mLen |Hash a -> v (hash_len a) in 
+    let hashM : lbytes len  = match alg with
+      |NoHash -> as_seq h0 m 
+      |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
+    as_nat c h1 result == (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c))
 
 
 let ecdsa_signature_step12 #c alg mLen m result = 
@@ -89,12 +85,19 @@ let ecdsa_signature_step12 #c alg mLen m result =
       |SHA2_512 -> hash_512 m mLen mHashHPart 
   end;
     let h1 = ST.get() in 
+  toUint64ChangeEndian #c mHashRPart result;
+    let h2 = ST.get() in 
+  reduction_prime_2prime_order result result;
+  pop_frame();
+      let h3 = ST.get() in 
   
+
   assert(match alg with 
     |NoHash -> as_seq h1 mHashHPart == as_seq h0 m 
     |Hash a -> as_seq h1 mHashHPart == Spec.Agile.Hash.hash a (as_seq h0 m));
 
   assert(nat_from_bytes_be (as_seq h1 mHashRPart) == nat_from_bytes_be (Lib.Sequence.sub (as_seq h1 mHash) 0 (v (getCoordinateLenU c))));
+
 
   (* everything exept mHashHPart == 0 *)
   (*extension? *)
@@ -102,18 +105,15 @@ let ecdsa_signature_step12 #c alg mLen m result =
   (* lemma_test *)
   assume (lseq_as_nat (as_seq h1 mHash) == lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * v (getCoordinateLenU c)) * lseq_as_nat (as_seq h1 mHashLeft));
   assert(lseq_as_nat (as_seq h1 mHashHPart) == lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * v (getCoordinateLenU c)) * lseq_as_nat (as_seq h1 mHashLeft));
-  assert(lseq_as_nat (as_seq h1 mHashHPart) % pow2 (8 * v (getCoordinateLenU c)) == (lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * v (getCoordinateLenU c)) * lseq_as_nat (as_seq h1 mHashLeft)) % pow2 (8 * v (getCoordinateLenU c)));
 
-  assume (nat_from_bytes_be (as_seq h1 mHashRPart) == lseq_as_nat (as_seq h1 mHashRPart));
+  modulo_addition_lemma (lseq_as_nat (as_seq h1 mHashRPart)) (pow2 (8 * v (getCoordinateLenU c))) (lseq_as_nat (as_seq h1 mHashLeft)) ;
   
-  assume (nat_from_bytes_be (as_seq h1 mHashRPart) == nat_from_bytes_be (as_seq h1 mHash) % pow2 (v (getCoordinateLenU c) * 8));
+  (*lseq upperbound *)
+  assume (lseq_as_nat (as_seq h1 mHashRPart) < pow2 (8 * v (getCoordinateLenU c)));
+  small_mod (lseq_as_nat (as_seq h1 mHashRPart)) (pow2 (8 * v (getCoordinateLenU c)));
+  assert(lseq_as_nat (as_seq h1 mHashHPart) % pow2 (8 * v (getCoordinateLenU c)) == lseq_as_nat (as_seq h1 mHashRPart));
+  assume (nat_from_bytes_be (as_seq h1 mHashRPart) == lseq_as_nat (as_seq h1 mHashRPart));
 
-
-  toUint64ChangeEndian #c mHashRPart result;
-    let h2 = ST.get() in 
-  reduction_prime_2prime_order result result;
-    let h3 = ST.get() in 
-  pop_frame();
 
 
   let r = as_seq h2 result in 
@@ -121,38 +121,49 @@ let ecdsa_signature_step12 #c alg mLen m result =
 
   lemma_lseq_nat_from_bytes_test #c #_ r mr;
   uints_from_bytes_be_nat_lemma #U64 #_ #(v (getCoordinateLenU64 c)) (as_seq h1 mHashRPart);
-  
-  assert(as_nat c h3 result == nat_from_bytes_be (as_seq h1 mHashRPart) % getOrder #c);
-  admit()
 
+  assert(
+    let hashM = 
+      match alg with 
+      |NoHash -> as_seq h0 m 
+      |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
+  as_nat c h3 result == (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c);
+
+  assume(
+    let len = match alg with |NoHash -> v mLen |Hash a -> v (hash_len a) in 
+    let hashM : lbytes len  = match alg with
+      |NoHash -> as_seq h0 m 
+      |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
+    as_nat c h1 result == (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c)
 
 
 #push-options "--ifuel 1"
 
-val ecdsa_signature_step45:
-  c: curve
+val ecdsa_signature_step45: #c: curve
   -> x: felem c
-  -> k: lbuffer uint8 (getScalarLenBytes c) 
-  -> tempBuffer: lbuffer uint64 (size 100) -> 
+  -> k: scalar_t #MUT #c
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
   Stack uint64
   (requires fun h -> live h x /\ live h k /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc k; loc x])
   (ensures fun h0 r h1 -> modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
-    as_nat c h1 x < getOrder #c /\ (
-    let (rxN, ryN, rzN), _ = montgomery_ladder_spec_left #c (as_seq h0 k) ((0,0,0), basePoint #c) in 
+    as_nat c h1 x < getOrder #c /\ (point_mult_0 #c (basePoint #c) 0; 
+    let (rxN, ryN, rzN), _ = montgomery_ladder_spec_left #c (as_seq h0 k) (pointAtInfinity, basePoint #c) in 
     let (xN, _, _) = _norm #c (rxN, ryN, rzN) in 
     as_nat c h1 x == xN % getOrder #c /\ (
     if as_nat c h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0)))
 
-let ecdsa_signature_step45 c x k tempBuffer = 
+let ecdsa_signature_step45 #c x k tempBuffer = 
   push_frame();
-    let result = create (size 12) (u64 0) in 
-    let tempForNorm = sub tempBuffer (size 0) (size 88) in 
+    let len = getCoordinateLenU64 c in 
+    let result = create (size 3 *! len) (u64 0) in 
+    let tempForNorm = sub tempBuffer (size 0) (size 17 *! len) in 
     secretToPublicWithoutNorm #c result k tempBuffer; 
     normX #c result x tempForNorm;
     reduction_prime_2prime_order x x;
   pop_frame();
     isZero_uint64_CT #c x
+
 
 #pop-options
 
@@ -211,8 +222,8 @@ let ecdsa_signature_step6 #c result kFelem z r da =
     montgomery_multiplication_buffer_dsa #c r da rda;
     fromDomainImpl  z zBuffer;
     felem_add #c rda zBuffer zBuffer;  
-    copy kInv kFelem; (*
-    montgomery_ladder_power #c #DSA kInv; *)
+    copy kInv kFelem;
+    montgomery_ladder_exponent #c kInv kInv; 
     montgomery_multiplication_buffer_dsa zBuffer kInv result;
   pop_frame()
       (*let br0 = as_nat c h0 z + as_nat c h0 r * as_nat c h0 da in
@@ -300,7 +311,7 @@ let ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k =
   lemma_core_0 c kAsFelem h1;
   (* changeEndianLemma #c (uints_from_bytes_be (as_seq h0 k)); *)
   uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 k);
-  let step5Flag = ecdsa_signature_step45 c r k tempBuffer in 
+  let step5Flag = ecdsa_signature_step45 #c r k tempBuffer in 
   assert_norm (pow2 32 < pow2 61);
   ecdsa_signature_step6 #c s kAsFelem hashAsFelem r privKeyAsFelem;  
   let sIsZero = isZero_uint64_CT #c s in 
