@@ -101,6 +101,7 @@ let ecdsa_signature_step12 #c alg mLen m result =
 
   (* everything exept mHashHPart == 0 *)
   (*extension? *)
+
   assume (lseq_as_nat (as_seq h1 mHashHPart) == lseq_as_nat (as_seq h1 mHash));
   (* lemma_test *)
   assume (lseq_as_nat (as_seq h1 mHash) == lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * v (getCoordinateLenU c)) * lseq_as_nat (as_seq h1 mHashLeft));

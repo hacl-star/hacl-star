@@ -8,7 +8,7 @@ open FStar.Mul
 
 open Spec.ECC.Curves
 
-#set-options " --z3rlimit 200"
+#set-options " --z3rlimit 100"
 
 noextract
 let point_seq (c: curve) = lseq uint64 (uint_v (getCoordinateLenU64 c) * 3)
@@ -31,27 +31,28 @@ val lseq_as_nat: #l: size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC
 let lseq_as_nat #l a = lseq_as_nat_ a l
 
 
-val lseq_as_nat_last: #l: size_nat -> a: lseq uint64 l -> Lemma (lseq_as_nat_ #l a 0 == 0)
+val lseq_as_nat_last: #l: size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC) l -> Lemma (lseq_as_nat_ #l a 0 == 0)
 
 let lseq_as_nat_last #l a = ()
 
-val lseq_as_nat_first: #l: size_nat -> a: lseq uint64 l {l > 0} -> Lemma (lseq_as_nat_ a 1 == v (Lib.Sequence.index a 0))
+
+val lseq_as_nat_first: #l: size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC) l {l > 0} -> Lemma (lseq_as_nat_ a 1 == v (Lib.Sequence.index a 0))
 
 let lseq_as_nat_first a = ()
 
 
 
+val lseq_as_nat_definiton: #l:size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC) l -> i: nat {i > 0 /\ i <= l} ->
+  Lemma (lseq_as_nat_ a i == lseq_as_nat_ a (i - 1) + pow2 (bits t * (i - 1)) * v (Lib.Sequence.index a (i - 1)))
 
-val lseq_as_nat_definiton: #len:size_nat -> a: lseq uint64 len -> i: nat {i > 0 /\ i <= len} ->
-  Lemma (lseq_as_nat_ #len a i == lseq_as_nat_ a (i - 1) + pow2 (64 * (i - 1)) * v (Lib.Sequence.index a (i - 1)))
-
-let lseq_as_nat_definiton #len b i = ()
+let lseq_as_nat_definiton b i = ()
 
 
-val lemma_equal_lseq_equal_nat: #len: size_nat -> a: lseq uint64 len -> b: lseq uint64 len -> 
+val lemma_equal_lseq_equal_nat: #l: size_nat -> #t:inttype{unsigned t} 
+  -> a: lseq (uint_t t SEC) l -> b: lseq (uint_t t SEC) l -> 
   Lemma (a == b ==> lseq_as_nat a == lseq_as_nat b)
 
-let lemma_equal_lseq_equal_nat #len a b = ()
+let lemma_equal_lseq_equal_nat a b = ()
 
 
 val lemma_create_: #l: size_nat -> i: nat {i > 0 /\ i <= l} -> Lemma (let a = Seq.create l (u64 0) in lseq_as_nat_ #l a i == 0)
@@ -97,9 +98,8 @@ let rec lemma_lseq_1 l a i =
 
 
 val lemma_lseq_as_seq_extension: 
-  #l0: size_nat ->  #l1: size_nat -> 
-  a0: lseq uint64 l0 -> a1: lseq uint64 l1 -> 
-  i: nat {i <= l0 /\ i <= l1} ->
+  #l0: size_nat ->  #l1: size_nat -> #t:inttype{unsigned t} -> a0: lseq (uint_t t SEC) l0 -> a1: lseq (uint_t t SEC) l1 
+  -> i: nat {i <= l0 /\ i <= l1} ->
   Lemma 
     (requires (Lib.Sequence.sub a0 0 i == Lib.Sequence.sub a1 0 i))
     (ensures lseq_as_nat_ a0 i == lseq_as_nat_ a1 i)
@@ -239,14 +239,53 @@ let lseq_as_nat_zero #l a =
   lseq_as_nat_zero_r #l a l
 
 
-val lemma_test: #l: size_nat -> a: lseq uint64 l -> i: nat {i <= l} 
-  -> Lemma (ensures (
+#push-options " --z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+
+val lemma_test_: #l: size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC) l -> i: nat {i <> 0 /\ i < l} -> 
+  Lemma
+  (requires lseq_as_nat (sub a i (l - i)) - v (index a i) = pow2 (bits t) * lseq_as_nat (sub a (i + 1) (l - (i + 1))))
+  (ensures (
     let a0 = sub a 0 i in 
     let a1 = sub a i (l - i) in 
-    lseq_as_nat a = lseq_as_nat a0 + pow2 (64 * i) * lseq_as_nat a1))
+    lseq_as_nat (sub a 0 (i + 1)) + pow2 (bits t * i + bits t) * lseq_as_nat (sub a (i + 1) (l - (i + 1))) == 
+    lseq_as_nat (sub a 0 i) + pow2 (bits t * i) * lseq_as_nat a1))
+
+let lemma_test_ #l #t a i = 
+  let a_i = sub a 0 (i + 1) in 
+  let a_l = sub a (i + 1) (l - (i + 1)) in 
+
+  let a0 = sub a 0 i in 
+  let a1 = sub a i (l - i) in 
+
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+
+  let t = bits t in 
+
+  calc (==) {lseq_as_nat a_i + pow2 (t * i + t) * lseq_as_nat a_l; 
+  (==) {FStar.Math.Lemmas.pow2_plus (t * i) t} 
+    lseq_as_nat a_i + pow2 (t * i) * pow2 t * lseq_as_nat a_l; 
+  (==) {assert_by_tactic (pow2 (t * i) * pow2 t * lseq_as_nat a_l == pow2 (t * i) * (pow2 t * lseq_as_nat a_l)) canon}
+    lseq_as_nat a_i + pow2 (t * i) * (pow2 t * lseq_as_nat a_l); };
+    
+
+  lseq_as_nat_definiton a_i (i + 1);
+  lemma_lseq_as_seq_extension a_i a0 i;
+
+  FStar.Math.Lemmas.distributivity_sub_left (lseq_as_nat a1) (v (index a i)) (pow2 (t * i));
+  
+  assert (pow2 (t * i) * (lseq_as_nat a1 - v (index a i)) == pow2 (t * i) * lseq_as_nat a1 - 
+    pow2 (t * i) * v (index a i))
+
+
+val lemma_test: #l: size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC) l -> i: nat {i <= l} -> 
+  Lemma (ensures (
+    let a0 = sub a 0 i in 
+    let a1 = sub a i (l - i) in 
+    lseq_as_nat a = lseq_as_nat a0 + pow2 (bits t * i) * lseq_as_nat a1))
     (decreases (l - i))
 
-let rec lemma_test #l a i = 
+let rec lemma_test #l #t a i = 
   if i = 0 then begin 
     let a0 = sub a 0 0 in 
     let a1 = sub a 0 l in 
@@ -256,39 +295,34 @@ let rec lemma_test #l a i =
     begin 
       let a0 = sub a 0 i in 
       let a1 = sub a i (l - i) in 
+      let t = bits t in 
 
-      calc (==) 
-      {
-  lseq_as_nat a1;
-  (==) {lemma_test #(l - i) a1 1}
-  lseq_as_nat (sub a1 0 1) + pow2 64 * lseq_as_nat (sub a1 1 (l - i - 1));
-  (==) {lseq_as_nat_first (sub a1 0 1)}
-  v (index a1 0) + pow2 64 * lseq_as_nat (sub a1 1 (l - i - 1));
-  (==) {Seq.lemma_index_slice a 0 (i + 1) i}
-  v (index a i) + pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
-      };
-    
-    assert(lseq_as_nat a1 - v (index a i) =  pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))));
+      calc (==) {
+	lseq_as_nat a1;
+      (==) {lemma_test #(l - i) a1 1}
+	lseq_as_nat (sub a1 0 1) + pow2 t * lseq_as_nat (sub a1 1 (l - i - 1));
+      (==) {lseq_as_nat_first (sub a1 0 1)}
+	v (index a1 0) + pow2 t * lseq_as_nat (sub a1 1 (l - i - 1));
+      (==) {Seq.lemma_index_slice a 0 (i + 1) i}
+	v (index a i) + pow2 t * lseq_as_nat (sub a (i + 1) (l - (i + 1)));};
+       
+      assert(lseq_as_nat a1 - v (index a i) =  pow2 t * lseq_as_nat (sub a (i + 1) (l - (i + 1))));
 
-    lemma_lseq_as_seq_extension (sub a 0 (i + 1)) (sub a 0 i) i;
+      lemma_lseq_as_seq_extension (sub a 0 (i + 1)) (sub a 0 i) i;
 
-    let open FStar.Tactics in 
-    let open FStar.Tactics.Canon in 
+      let open FStar.Tactics in 
+      let open FStar.Tactics.Canon in 
 
-    
-    calc (==) {
-      lseq_as_nat a;
+      let a_i = sub a 0 (i + 1) in 
+      let a_l = sub a (i + 1) (l - (i + 1)) in 
+
+      calc (==) {
+	lseq_as_nat a;
       (==) {lemma_test a (i + 1)}
-      lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * (i + 1)) * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
-      (==) {FStar.Math.Lemmas.pow2_plus (64 * i) 64}
-      lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * i) * pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1)));
-      (==) {assert_by_tactic (pow2 (64 * i) * pow2 64 * lseq_as_nat (sub a  (i + 1) (l - (i + 1))) == 
-  pow2 (64 * i) * (pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))))) canon}
-      lseq_as_nat (sub a 0 (i + 1)) + pow2 (64 * i) * (pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))));
-      (==) {assert(lseq_as_nat a1 - v (index a i) =  pow2 64 * lseq_as_nat (sub a (i + 1) (l - (i + 1))))}
-      lseq_as_nat (sub a 0 (i + 1)) - pow2 (64 * i) * v (index a i) + pow2 (64 * i) * lseq_as_nat a1; 
-      (==) {assert (lseq_as_nat (sub a 0 (i + 1)) == lseq_as_nat (sub a 0 i) + pow2 (64 * i) * v (index a i))}
-      lseq_as_nat (sub a 0 i) + pow2 (64 * i) * lseq_as_nat a1;}
+	lseq_as_nat a_i + pow2 (t * i + t) * lseq_as_nat a_l; 
+      (==) {lemma_test_ a i}
+	lseq_as_nat (sub a 0 i) + pow2 (t * i) * lseq_as_nat a1;
+      }
     end end
 
 
