@@ -40,8 +40,6 @@ extern "C" {
 #include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Hash.h"
 
-typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_MD5_state_md5;
-
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_MD5_legacy_create_in_md5();
 
 void Hacl_Streaming_MD5_legacy_init_md5(Hacl_Streaming_SHA2_state_sha2_224 *s);

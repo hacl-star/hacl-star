@@ -40,8 +40,6 @@ extern "C" {
 #include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Hash.h"
 
-typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA1_state_sha1;
-
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1();
 
 void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);

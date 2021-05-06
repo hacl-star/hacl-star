@@ -954,7 +954,7 @@ dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/evercry
 dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
 dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
   -bundle '\*[rename=Should_not_be_here]' \
-  -falloca -ftail-calls
+  -falloca -ftail-calls -fc89 -add-include '"kremlin/internal/builtin.h"'
 
 # Mozilla distribution
 # --------------------

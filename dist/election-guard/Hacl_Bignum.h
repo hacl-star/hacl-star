@@ -35,6 +35,7 @@ extern "C" {
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+#include "kremlin/internal/builtin.h"
 
 
 #include "Hacl_Kremlib.h"

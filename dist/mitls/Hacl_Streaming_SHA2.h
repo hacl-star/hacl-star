@@ -48,18 +48,6 @@ typedef struct Hacl_Streaming_SHA2_state_sha2_224_s
 }
 Hacl_Streaming_SHA2_state_sha2_224;
 
-typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA2_state_sha2_256;
-
-typedef struct Hacl_Streaming_SHA2_state_sha2_384_s
-{
-  uint64_t *block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Streaming_SHA2_state_sha2_384;
-
-typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA2_state_sha2_512;
-
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224();
 
 void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
@@ -89,6 +77,14 @@ Hacl_Streaming_SHA2_update_256(
 void Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
 
 void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
+
+typedef struct Hacl_Streaming_SHA2_state_sha2_384_s
+{
+  uint64_t *block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_SHA2_state_sha2_384;
 
 Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384();
 

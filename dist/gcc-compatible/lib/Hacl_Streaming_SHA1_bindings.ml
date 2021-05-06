@@ -5,10 +5,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     module Hacl_Streaming_SHA2_applied =
       (Hacl_Streaming_SHA2_bindings.Bindings)(Hacl_Streaming_SHA2_stubs)
     open Hacl_Streaming_SHA2_applied
-    type hacl_Streaming_SHA1_state_sha1 = hacl_Streaming_SHA2_state_sha2_224
-    let hacl_Streaming_SHA1_state_sha1 =
-      typedef hacl_Streaming_SHA2_state_sha2_224
-        "Hacl_Streaming_SHA1_state_sha1"
     let hacl_Streaming_SHA1_legacy_create_in_sha1 =
       foreign "Hacl_Streaming_SHA1_legacy_create_in_sha1"
         (void @-> (returning (ptr hacl_Streaming_SHA2_state_sha2_224)))
