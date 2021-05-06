@@ -71,17 +71,6 @@ let changeEndian #c b =
     upd b lenRight left)
 
 
-val toUint64ChangeEndian: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1  /\
-    changedEndian_  #(v (getCoordinateLenU64 c))  (as_seq h1 o) (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
-
-let toUint64ChangeEndian #c i o = 
-  let len : FStar.UInt32.t = getCoordinateLenU64 c in 
-  Lib.ByteBuffer.uints_from_bytes_be #U64 #SEC #len o i;
-  changeEndian o
-
-
 open Lib.ByteSequence
 
 val lemma_lseq_nat_from_bytes_: #l: size_nat -> #t:inttype{unsigned t} -> a: Lib.Sequence.lseq (uint_t t SEC) l
@@ -154,3 +143,21 @@ let lemma_change_endian #c a b =
 
 
 let changeEndian_u8 len n = nat_from_bytes_be (nat_to_bytes_le #SEC len n)
+
+
+val toUint64ChangeEndian: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1  /\
+    nat_from_bytes_be (as_seq h0 i) == as_nat c h1 o /\
+    changedEndian_  #(v (getCoordinateLenU64 c))  (as_seq h1 o) (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
+
+let toUint64ChangeEndian #c i o = 
+    let h0 = ST.get() in 
+    let open Lib.ByteSequence in 
+  let len : FStar.UInt32.t = getCoordinateLenU64 c in 
+  Lib.ByteBuffer.uints_from_bytes_be #U64 #SEC #len o i;
+  changeEndian o;
+    let h1 = ST.get() in 
+  
+  lemma_lseq_nat_from_bytes_test #c (as_seq h1 o) (uints_from_bytes_be (as_seq h0 i));
+  uints_from_bytes_be_nat_lemma #U64 #_ #(v (getCoordinateLenU64 c)) (as_seq h0 i)
