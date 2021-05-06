@@ -166,3 +166,15 @@ let lemma_modular_multiplication_toDomain #c a b =
     small_mod a prime;
     small_mod b prime
   end
+
+
+val lemma_fermat_exp: #c: curve -> Lemma (
+  let order = getOrder #c in 
+  let p = modp_inv2_prime (pow2 (getPower c)) order in
+  FStar.Math.Fermat.pow p (order - 1) % order == 1)
+
+let lemma_fermat_exp #c = 
+  let order = getOrder #c in 
+  let p = modp_inv2_prime (pow2 (getPower c)) order in
+  lemma_exp_not_zero order (pow2 (getPower c)) (order - 2);
+  FStar.Math.Fermat.fermat_alt order p 

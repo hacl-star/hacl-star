@@ -172,41 +172,15 @@ let ecdsa_signature_step45 #c x k tempBuffer =
 
 #pop-options
 
-val lemma_power_step6: #c: curve -> kInv: nat -> Lemma 
-  (Spec.ECDSA.exponent_spec #c (fromDomain_ #c #DSA kInv) == toDomain_ #c #DSA (pow kInv (getOrder #c - 2)))
-
-let lemma_power_step6 #c kInv = 
-  let a = Spec.ECDSA.exponent_spec #c (fromDomain_ #c #DSA kInv) in 
-  let order = getOrder #c in 
-  lemmaFromDomain #c #DSA kInv (*
-
-  power_distributivity (kInv * modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 2) prime_p256_order;
-  power_distributivity_2 kInv (modp_inv2_prime (pow2 256) prime_p256_order % prime_p256_order) (prime_p256_order - 2);
-  lemma_mod_mul_distr_r (pow kInv (prime_p256_order - 2)) (pow (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 2)) prime_p256_order;
-
-  lemma_pow_mod_n_is_fpow prime_p256_order (pow2 256 % prime_p256_order) (prime_p256_order - 2);
-  
-  let inverse2_256 = 43790243014242295660885426880012836369732278457577312309071968676491870960761 in 
-  assert_norm(modp_inv2_prime (pow2 256) prime_p256_order = inverse2_256); 
-  lemma_pow_mod_n_is_fpow prime_p256_order inverse2_256 (prime_p256_order - 2);
-  assert_norm(exp #prime_p256_order inverse2_256 (order - 2) == pow2 256 % order);
-
-  lemma_mod_mul_distr_r (pow kInv (order - 2)) (pow2 256) order;
-  lemmaToDomain (pow kInv (getOrder #c - 2)) *)
-
-
 val ecdsa_signature_step6: #c: curve -> result: felem c -> kFelem: felem c -> z: felem  c -> r: felem c -> da: felem c -> 
   Stack unit
   (requires fun h -> 
-    live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\ 
-    eq_or_disjoint r da /\
-    
-    (
+    live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\ eq_or_disjoint r da /\ (
     let order = getOrder #c in 
     as_nat c h kFelem < order /\ as_nat c h z < order /\ as_nat c h r < order /\ as_nat c h da < order))
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1  (*/\
-      as_nat c h1 result = (as_nat c h0 z + as_nat c h0 r * as_nat c h0 da) * pow (as_nat c h0 kFelem) (prime_p256_order - 2) % prime_p256_order *)
-  ) 
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    let order = getOrder #c in 
+    as_nat c h1 result = (as_nat c h0 z + as_nat c h0 r * as_nat c h0 da) * pow (as_nat c h0 kFelem) (getOrder #c - 2) % order)) 
 
 
 let ecdsa_signature_step6 #c result kFelem z r da = 
@@ -266,14 +240,23 @@ let ecdsa_signature_step6 #c result kFelem z r da =
      toDomain_ #c #DSA ((p * p) * (r * da + z) * (pow (k * p) (order - 2) % order) % order); 
    (==) {power_distributivity_2 k p (order - 2)}
      toDomain_ #c #DSA ((p * p) * (r * da + z) * (pow k (order - 2) * pow p (order - 2) % order) % order); 
-
-  };
-
-
-
-
-
-    admit()
+   (==) {lemma_mod_mul_distr_r ((p * p) * (r * da + z)) (pow k (order - 2) * pow p (order - 2)) order}
+     toDomain_ #c #DSA ((p * p) * (r * da + z) * (pow k (order - 2) * pow p (order - 2)) % order); 
+   (==) {assert_by_tactic ((p * p) * (r * da + z) * (pow k (order - 2) * pow p (order - 2)) == (p * pow p (order - 2)) * (p * ((r * da + z) * pow k (order - 2)))) canon; power_one_2 p}
+     toDomain_ #c #DSA ((pow p 1 * pow p (order - 2)) * (p * ((r * da + z) * pow k (order - 2))) % order); 
+   (==) {pow_plus p 1 (order - 2)}
+     toDomain_ #c #DSA ((pow p (order - 1)) * (p * ((r * da + z) * pow k (order - 2))) % order); 
+   (==) {power_as_specification_same_as_fermat p (order - 1)}
+     toDomain_ #c #DSA ((FStar.Math.Fermat.pow p (order - 1)) * (p * ((r * da + z) * pow k (order - 2))) % order); 
+   (==) {lemma_mod_mul_distr_l (FStar.Math.Fermat.pow p (order - 1)) (p * ((r * da + z) * pow k (order - 2))) order}
+     toDomain_ #c #DSA ((FStar.Math.Fermat.pow p (order - 1)) % order * (p * ((r * da + z) * pow k (order - 2))) % order); 
+   (==) {Hacl.Impl.EC.Math.lemma_fermat_exp #c}
+     toDomain_ #c #DSA (p * ((r * da + z) * pow k (order - 2)) % order); 
+   (==) {lemmaFromDomain #c #DSA ((r * da + z) * pow k (order - 2))}
+     toDomain_ #c #DSA (fromDomain_ #c #DSA ((r * da + z) * pow k (order - 2))); 
+   (==) {lemmaToDomainFromDomainModuloPrime #c #DSA ((r * da + z) * pow k (order - 2))}
+     ((r * da + z) * pow k (order - 2)) % order;
+  }
 
 #push-options "--ifuel 1"
 
