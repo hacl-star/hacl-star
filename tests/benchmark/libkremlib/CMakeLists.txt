@@ -22,7 +22,6 @@ message("-- Using KreMLin at ${KREMLIB_MINIMAL}")
 add_library(kremlib STATIC
   ${KREMLIB_DIR}/c.c
   ${KREMLIB_DIR}/c_string.c
-  ${KREMLIB_DIR}/FStar_BitVector.c
   ${KREMLIB_DIR}/fstar_bytes.c
   ${KREMLIB_DIR}/fstar_char.c
   ${KREMLIB_DIR}/fstar_date.c
