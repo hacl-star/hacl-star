@@ -43,22 +43,6 @@ let changeEndianStep #c i b =
   b2
 
 
-val changeEndian_spec: #c: curve -> b0: felem_seq c -> Tot (b1: felem_seq c 
-  {forall (j: nat). (j < v (getCoordinateLenU64 c)) ==> Lib.Sequence.index b0 j == 
-  Lib.Sequence.index b1 (v (getCoordinateLenU64 c) - j - 1)})
-
-let changeEndian_spec #c b =
-  let len = getCoordinateLenU64 c in 
-  let lenByTwo = v len / 2 in
-  
-  let pred (i: nat {i <= lenByTwo}) (b1: felem_seq c) =  
-    (forall (j: nat). (j >= i /\ j <= v len - 1 - i) ==> Lib.Sequence.index b1 j == Lib.Sequence.index b j) /\ 
-    (forall (j: nat). (j > v len - 1 - i /\ j < v len) ==> Lib.Sequence.index b1 (v len - j - 1) == Lib.Sequence.index b j) /\ 
-    (forall (j: nat). (j < i) ==> Lib.Sequence.index b1 (v len - j - 1) == Lib.Sequence.index b j) in 
-
-  Lib.LoopCombinators.repeati_inductive lenByTwo pred (fun i b0 -> changeEndianStep #c i b0) b
-
-
 let changedEndian_ #l (i: Lib.Sequence.lseq uint64 l) (o: Lib.Sequence.lseq uint64 l) = 
   forall (j: nat). (j < l) ==> Lib.Sequence.index i j == Lib.Sequence.index o (l - j - 1)
 
@@ -100,10 +84,11 @@ let toUint64ChangeEndian #c i o =
 
 open Lib.ByteSequence
 
-val lemma_lseq_nat_from_bytes_: #l: size_nat -> a: Lib.Sequence.lseq uint64 l -> i: nat {i > 0 /\ i <= l} ->
+val lemma_lseq_nat_from_bytes_: #l: size_nat -> #t:inttype{unsigned t} -> a: Lib.Sequence.lseq (uint_t t SEC) l
+  -> i: nat {i > 0 /\ i <= l} ->
   Lemma (Lib.ByteSequence.nat_from_intseq_le (Lib.Sequence.slice a 0 i) == lseq_as_nat_ a i)
 
-let rec lemma_lseq_nat_from_bytes_ #l a i = 
+let rec lemma_lseq_nat_from_bytes_ #l #t a i = 
   let sl = Lib.Sequence.slice a 0 i in 
   match i with 
   |1 -> nat_from_intseq_le_lemma0 sl; lseq_as_nat_first a
@@ -115,7 +100,7 @@ let rec lemma_lseq_nat_from_bytes_ #l a i =
     lseq_as_nat_definiton a i
 
 
-val lemma_lseq_nat_from_bytes: #l: size_nat {l > 0} -> a: Lib.Sequence.lseq uint64 l -> 
+val lemma_lseq_nat_from_bytes: #l: size_nat {l > 0} -> #t:inttype{unsigned t} -> a: Lib.Sequence.lseq (uint_t t SEC) l -> 
   Lemma (Lib.ByteSequence.nat_from_intseq_le a == lseq_as_nat a)
 
 let lemma_lseq_nat_from_bytes #l a = lemma_lseq_nat_from_bytes_ #l a l
@@ -168,4 +153,4 @@ let lemma_change_endian #c a b =
   lemma_lseq_nat_from_bytes_test #c a b
 
 
-
+let changeEndian_u8 len n = nat_from_bytes_be (nat_to_bytes_le #SEC len n)

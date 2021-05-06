@@ -56,21 +56,23 @@ val lemma_equal_lseq_equal_nat: #l: size_nat -> #t:inttype{unsigned t}
 let lemma_equal_lseq_equal_nat a b = ()
 
 
-val lemma_create_: #l: size_nat -> i: nat {i > 0 /\ i <= l} -> Lemma (let a = Seq.create l (u64 0) in lseq_as_nat_ #l a i == 0)
+val lemma_create_: #l: size_nat -> #t:inttype{unsigned t} -> i: nat {i > 0 /\ i <= l} ->
+  Lemma (let a = Seq.create l (uint #t #SEC 0) in lseq_as_nat_ #l a i == 0)
 
-let rec lemma_create_ #l i = 
-  let a = Seq.create l (u64 0) in 
+let rec lemma_create_ #l #t i = 
+  let a = Seq.create l (uint #t #SEC 0) in 
   match i with 
   |1 -> 
     lseq_as_nat_definiton #l a 1
   |_ -> 
-    lemma_create_ #l (i - 1);
+    lemma_create_ #l #t (i - 1);
     lseq_as_nat_definiton #l a i
 
 
-val lemma_create_zero_buffer: len: size_nat {len > 0} -> c: curve -> Lemma (lseq_as_nat #len (Seq.create len (u64 0)) == 0)
+val lemma_create_zero_buffer: #t:inttype{unsigned t} -> len: size_nat {len > 0} -> c: curve -> 
+  Lemma (lseq_as_nat #len (Seq.create len (uint #t #SEC 0)) == 0)
 
-let lemma_create_zero_buffer len c = lemma_create_ #len len
+let lemma_create_zero_buffer #t len c = lemma_create_ #len #t len
 
 
 val lemma_lseq_as_seq_as_forall: #l: size_nat -> #t:inttype{unsigned t}

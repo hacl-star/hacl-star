@@ -54,28 +54,57 @@ val ecdsa_signature_step12:
   -> alg:hash_alg_ecdsa
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg} 
   -> m: lbuffer uint8 mLen -> result: felem c -> Stack unit
-  (requires fun h -> live h m /\ live h result )
+  (requires fun h -> live h m /\ live h result /\ (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
     assert_norm (pow2 32 < pow2 61);
     assert_norm (pow2 32 < pow2 125);
     let len = match alg with |NoHash -> v mLen |Hash a -> v (hash_len a) in 
-    let hashM : lbytes len  = match alg with
-      |NoHash -> as_seq h0 m 
+    let hashM = match alg with
+      |NoHash -> (as_seq h0 m <: lbytes len)
       |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
-    as_nat c h1 result == (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c))
+    as_nat c h1 result == changeEndian_u8 (v (getCoordinateLenU c)) (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c))
 
+
+val ecdsa_signature_step12_lemma: cur: curve -> l: size_t  -> l1: size_t {v l + v l1 < pow2 32} -> h0: mem -> h1: mem -> 
+  mHash: lbuffer uint8 (l +! l1) {lseq_as_nat (as_seq h0 mHash) == 0 /\ live h0 mHash} -> 
+  mHashHPart: lbuffer uint8 l {mHashHPart == gsub mHash (size 0) l /\ modifies (loc mHashHPart) h0 h1} ->
+  hashS: Lib.Sequence.lseq uint8 (v l) {as_seq h1 mHashHPart == hashS} -> Lemma (
+    let mHashRPart = gsub mHash (size 0) l1 in 
+    lseq_as_nat (as_seq h1 mHashRPart) == lseq_as_nat hashS % pow2 (8 * v l1))
+
+
+let ecdsa_signature_step12_lemma cur h c h0 h1 mHash mHashHPart hashS = 
+  let mHashRPart = gsub mHash (size 0) c in 
+  let mHashHPartLeft = gsub mHash h c in 
+  let mHashRPartLeft = gsub mHash c h in 
+
+  lemma_test (as_seq h0 mHash) (v h);
+  lemma_test (as_seq h1 mHash) (v h);
+  lemma_test (as_seq h1 mHash) (v c);
+
+  assert(lseq_as_nat hashS % (pow2 (8 * (v c))) == (lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * (v c)) * lseq_as_nat (as_seq h1 mHashRPartLeft)) % pow2 (8 * (v c)));
+
+  modulo_addition_lemma (lseq_as_nat (as_seq h1 mHashRPart)) (pow2 (8 * (v c))) (lseq_as_nat (as_seq h1 mHashRPartLeft));
+  
+  assert(lseq_as_nat hashS % (pow2 (8 * (v c))) == (lseq_as_nat (as_seq h1 mHashRPart)) % pow2 (8 * (v c)));
+  lseq_upperbound (as_seq h1 mHashRPart);
+  small_mod (lseq_as_nat (as_seq h1 mHashRPart)) (pow2 (8 * (v c)));
+  
+  assert(lseq_as_nat hashS % (pow2 (8 * (v c))) == lseq_as_nat (as_seq h1 mHashRPart))
+    
 
 let ecdsa_signature_step12 #c alg mLen m result = 
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   push_frame(); 
-    let h0 = ST.get() in 
   let sz_hash: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a -> hash_len a in
-    assume (v sz_hash + v (getCoordinateLenU c) < pow2 32);
+
   let len: FStar.UInt32.t  = sz_hash +! getCoordinateLenU c in 
   let mHash = create len (u8 0) in 
+    let h0 = ST.get() in 
     let mHashHPart = sub mHash (size 0) sz_hash in 
     let mHashRPart = sub mHash (size 0) (getCoordinateLenU c) in 
+    let mHashHPartLeft = sub mHash sz_hash (getCoordinateLenU c) in 
     let mHashLeft = sub mHash (getCoordinateLenU c) sz_hash in 
     
   begin
@@ -92,54 +121,19 @@ let ecdsa_signature_step12 #c alg mLen m result =
   reduction_prime_2prime_order result result;
   pop_frame();
       let h3 = ST.get() in 
-  
 
-  assert(match alg with 
-    |NoHash -> as_seq h1 mHashHPart == as_seq h0 m 
-    |Hash a -> as_seq h1 mHashHPart == Spec.Agile.Hash.hash a (as_seq h0 m));
+  lemma_create_zero_buffer #U8 (v len) c;
+  ecdsa_signature_step12_lemma c sz_hash (getCoordinateLenU c) h0 h1 mHash mHashHPart (as_seq h1 mHashHPart);
 
-  assert(nat_from_bytes_be (as_seq h1 mHashRPart) == nat_from_bytes_be (Lib.Sequence.sub (as_seq h1 mHash) 0 (v (getCoordinateLenU c))));
+  lemma_lseq_nat_from_bytes (as_seq h1 mHashRPart);
+  lemma_nat_from_to_intseq_le_preserves_value #U8 #SEC (v (getCoordinateLenU c)) (as_seq h1 mHashRPart);
 
+  let m = uints_from_bytes_be (as_seq h1 mHashRPart) in 
+  lemma_change_endian #c (as_seq h2 result) m;
+  uints_from_bytes_be_nat_lemma #U64 #SEC #(v (getCoordinateLenU64 c)) (nat_to_intseq_le #U8 #SEC  (v (getCoordinateLenU c)) (lseq_as_nat (as_seq h1 mHashHPart) % pow2 (getPower c)));
 
-  (* everything exept mHashHPart == 0 *)
-  (*extension? *)
+  lemma_lseq_nat_from_bytes (as_seq h2 result)
 
-  
-
-  assume (lseq_as_nat (as_seq h1 mHashHPart) == lseq_as_nat (as_seq h1 mHash));
-  (* lemma_test *)
-  assume (lseq_as_nat (as_seq h1 mHash) == lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * v (getCoordinateLenU c)) * lseq_as_nat (as_seq h1 mHashLeft));
-  assert(lseq_as_nat (as_seq h1 mHashHPart) == lseq_as_nat (as_seq h1 mHashRPart) + pow2 (8 * v (getCoordinateLenU c)) * lseq_as_nat (as_seq h1 mHashLeft));
-
-  modulo_addition_lemma (lseq_as_nat (as_seq h1 mHashRPart)) (pow2 (8 * v (getCoordinateLenU c))) (lseq_as_nat (as_seq h1 mHashLeft)) ;
-  
-  (*lseq upperbound *)
-  assume (lseq_as_nat (as_seq h1 mHashRPart) < pow2 (8 * v (getCoordinateLenU c)));
-  small_mod (lseq_as_nat (as_seq h1 mHashRPart)) (pow2 (8 * v (getCoordinateLenU c)));
-  assert(lseq_as_nat (as_seq h1 mHashHPart) % pow2 (8 * v (getCoordinateLenU c)) == lseq_as_nat (as_seq h1 mHashRPart));
-  assume (nat_from_bytes_be (as_seq h1 mHashRPart) == lseq_as_nat (as_seq h1 mHashRPart));
-
-
-
-  let r = as_seq h2 result in 
-  let mr = uints_from_bytes_be (as_seq h1 mHashRPart) in 
-
-  lemma_lseq_nat_from_bytes_test #c #_ r mr;
-  uints_from_bytes_be_nat_lemma #U64 #_ #(v (getCoordinateLenU64 c)) (as_seq h1 mHashRPart);
-
-  assert(
-    let hashM = 
-      match alg with 
-      |NoHash -> as_seq h0 m 
-      |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
-  as_nat c h3 result == (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c);
-
-  assume(
-    let len = match alg with |NoHash -> v mLen |Hash a -> v (hash_len a) in 
-    let hashM : lbytes len  = match alg with
-      |NoHash -> as_seq h0 m 
-      |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
-    as_nat c h1 result == (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c)
 
 
 #push-options "--ifuel 1"
