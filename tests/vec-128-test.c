@@ -14,6 +14,7 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "config.h"
 #include "libintvector.h"
 #include "test_helpers.h"
 

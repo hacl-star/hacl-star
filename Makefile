@@ -1121,7 +1121,7 @@ copy-kremlib:
 
 compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-kremlib
 	cp $< dist/$*/Makefile
-	(if [ -f dist/$*/libintvector.h ]; then cp dist/configure dist/$*/configure; fi;)
+	(if [ -f dist/$*/libintvector.h -a $* != mozilla ]; then cp dist/configure dist/$*/configure; fi;)
 	$(MAKE) -C dist/$*
 
 ###########################

@@ -30,14 +30,14 @@ val has_vec256_not_avx2 : unit ->
 /// Note that this file is extracted with the -no-prefix-flag, meaning the
 /// below macros don't have the EVERCRYPT_TARGETCONFIG_ prefix.
 [@@ CIfDef ]
-val evercrypt_can_compile_vale : bool
+val hacl_can_compile_vale : bool
 
 [@@ CIfDef ]
-val evercrypt_can_compile_vec128 : bool
+val hacl_can_compile_vec128 : bool
 
 [@@ CIfDef ]
-val evercrypt_can_compile_vec256 : bool
+val hacl_can_compile_vec256 : bool
 
 // Only for Curve25519 64
 [@@ CIfDef ]
-val evercrypt_can_compile_inline_asm : bool
+val hacl_can_compile_inline_asm : bool
