@@ -95,7 +95,7 @@ let multByMinusThree #c a result  =
   let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
   let zeros : felem c = create sz (u64 0) in
   let h0 = ST.get() in 
-    lemma_create_zero_buffer (v (getCoordinateLenU64 c)) c;
+    lemma_create_zero_buffer #U64 (v (getCoordinateLenU64 c)) c;
   felem_sub zeros result result; 
   
   let prime = getPrime c in 

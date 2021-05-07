@@ -412,7 +412,7 @@ let shiftLeftWord #c i o =
 
 let mod64 #c a =
   let h0 = ST.get() in 
-  lemma_lseq_1 (v (getCoordinateLenU64 c *! 2ul)) (as_seq h0 a) (v (getCoordinateLenU64 c *! 2ul));
+  lemma_lseq_1 #(v (getCoordinateLenU64 c *! 2ul)) (as_seq h0 a) (v (getCoordinateLenU64 c *! 2ul));
   index a (size 0)
 
 

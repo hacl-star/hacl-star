@@ -144,7 +144,7 @@ let montgomery_ladder_power #c #m a scalar result =
   push_frame(); 
   let len = getCoordinateLenU64 c in 
   let p = create len (u64 0) in  
-    lemma_create_zero_buffer (v (getCoordinateLenU64 c)) c;
+    lemma_create_zero_buffer #U64 (v (getCoordinateLenU64 c)) c;
   upload_one_montg_form #c #m p; 
   
   copy a result;

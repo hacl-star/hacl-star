@@ -20,17 +20,11 @@ open Spec.ECC
 open Spec.ECC.Curves
 open Hacl.Spec.EC.Definition
 
-open Hacl.Impl.EC.LowLevel 
 open Hacl.Impl.EC.Core
-
 open Hacl.Impl.ECDSA.MM.Exponent
 open Hacl.Impl.ECDSA.LowLevel
 
 open Hacl.Impl.P256.Signature.Common
-
-module H = Spec.Agile.Hash
-module Def = Spec.Hash.Definitions
-
 open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 
@@ -40,7 +34,6 @@ open Hacl.Impl.EC.Masking
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Spec.MontgomeryMultiplication
 
-open Hacl.Impl.MM.Exponent
 
 
 #set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
@@ -57,22 +50,18 @@ val ecdsa_signature_step12:
   (requires fun h -> live h m /\ live h result /\ 
     (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
-    assert_norm (pow2 32 < pow2 61);
-    assert_norm (pow2 32 < pow2 125);
-    let len = match alg with |NoHash -> v mLen |Hash a -> v (hash_len a) in 
-    let hashM = match alg with
-      |NoHash -> (as_seq h0 m <: lbytes len)
-      |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
-    as_nat c h1 result == changeEndian_u8 (v (getCoordinateLenU c)) (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c /\
+    let message = hashSpec c alg (v mLen) (as_seq h0 m) in 
+    as_nat c h1 result == message % getOrder #c /\
     as_nat c h1 result < getOrder #c))
 
 
-val ecdsa_signature_step12_lemma: cur: curve -> l: size_t  -> l1: size_t {v l + v l1 < pow2 32} -> h0: mem -> h1: mem -> 
+val ecdsa_signature_step12_lemma: cur: curve -> l: size_t{v l > 0} -> l1: size_t {v l + v l1 < pow2 32 /\ v l1 > 0} 
+  -> h0: mem -> h1: mem -> 
   mHash: lbuffer uint8 (l +! l1) {lseq_as_nat (as_seq h0 mHash) == 0 /\ live h0 mHash} -> 
   mHashHPart: lbuffer uint8 l {mHashHPart == gsub mHash (size 0) l /\ modifies (loc mHashHPart) h0 h1} ->
   hashS: Lib.Sequence.lseq uint8 (v l) {as_seq h1 mHashHPart == hashS} -> Lemma (
     let mHashRPart = gsub mHash (size 0) l1 in 
-    lseq_as_nat (as_seq h1 mHashRPart) == lseq_as_nat hashS % pow2 (8 * v l1))
+    lseq_as_nat (as_seq h1 mHashRPart) == nat_from_bytes_le hashS % pow2 (8 * v l1))
 
 
 let ecdsa_signature_step12_lemma cur h c h0 h1 mHash mHashHPart hashS = 
@@ -92,7 +81,9 @@ let ecdsa_signature_step12_lemma cur h c h0 h1 mHash mHashHPart hashS =
   lseq_upperbound (as_seq h1 mHashRPart);
   small_mod (lseq_as_nat (as_seq h1 mHashRPart)) (pow2 (8 * (v c)));
   
-  assert(lseq_as_nat hashS % (pow2 (8 * (v c))) == lseq_as_nat (as_seq h1 mHashRPart))
+  assert(lseq_as_nat hashS % (pow2 (8 * (v c))) == lseq_as_nat (as_seq h1 mHashRPart));
+  lemma_lseq_nat_from_bytes (as_seq h1 mHashRPart);
+  lemma_lseq_nat_from_bytes hashS
     
 
 let ecdsa_signature_step12 #c alg mLen m result = 
@@ -128,7 +119,7 @@ let ecdsa_signature_step12 #c alg mLen m result =
   ecdsa_signature_step12_lemma c sz_hash (getCoordinateLenU c) h0 h1 mHash mHashHPart (as_seq h1 mHashHPart);
 
   lemma_lseq_nat_from_bytes (as_seq h1 mHashRPart);
-  lemma_nat_from_to_intseq_le_preserves_value #U8 #SEC (v (getCoordinateLenU c)) (as_seq h1 mHashRPart);
+  lemma_nat_from_to_intseq_le_preserves_value #U8 #SEC (getCoordinateLen c) (as_seq h1 mHashRPart);
   lemma_lseq_nat_from_bytes (as_seq h2 result)
 
 
@@ -169,8 +160,7 @@ val ecdsa_signature_step6: #c: curve -> result: felem c -> kFelem: felem c -> z:
     live h result /\ live h kFelem /\ live h z /\ live h r /\ live h da /\ eq_or_disjoint r da /\ (
     let order = getOrder #c in 
     as_nat c h kFelem < order /\ as_nat c h z < order /\ as_nat c h r < order /\ as_nat c h da < order))
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
-    let order = getOrder #c in 
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (let order = getOrder #c in 
     as_nat c h1 result = (as_nat c h0 z + as_nat c h0 r * as_nat c h0 da) * pow (as_nat c h0 kFelem) (getOrder #c - 2) % order)) 
 
 
@@ -249,8 +239,6 @@ let ecdsa_signature_step6 #c result kFelem z r da =
      ((r * da + z) * pow k (order - 2)) % order;
   }
 
-#push-options "--ifuel 1"
-
 val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
   -> r: felem  c
   -> s: felem c
@@ -261,36 +249,23 @@ val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
   Stack uint64
   (requires fun h -> 
     live h r /\ live h s /\ live h m /\ live h privKeyAsFelem /\ live h k /\
-    disjoint privKeyAsFelem r /\
-    disjoint privKeyAsFelem s /\
-    disjoint k r /\
-    disjoint r s /\   
+    disjoint privKeyAsFelem r /\ disjoint privKeyAsFelem s /\ disjoint k r /\ disjoint r s /\   
     as_nat c h privKeyAsFelem < getOrder #c /\
-    as_nat c h s == 0 /\
     nat_from_bytes_be (as_seq h k) < getOrder #c /\ 
-    (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32
-  )
-  (ensures fun h0 flag h1 ->     
-    assert_norm (pow2 32 < pow2 61);
-    assert_norm (pow2 32 < pow2 125);
-    modifies (loc r |+| loc s) h0 h1 /\ (
-    let len = match alg with |NoHash -> v mLen |Hash a -> v (hash_len a) in 
+    (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32)
+  (ensures fun h0 flag h1 -> modifies (loc r |+| loc s) h0 h1 /\ (
+    point_mult_0 #c (basePoint #c) 0; 
     let order = getOrder #c in 
-    let hashM = match alg with
-      |NoHash -> (as_seq h0 m <: lbytes len)
-      |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
-    
-    let z = changeEndian_u8 (v (getCoordinateLenU c)) (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c in 
-      (point_mult_0 #c (basePoint #c) 0; 
-    let (rxN, ryN, rzN), _ = montgomery_ladder_spec_left #c (as_seq h0 k) (pointAtInfinity #c, basePoint #c) in 
-    let (xN, _, _) = _norm #c (rxN, ryN, rzN) in 
+    let z = hashSpec c alg (v mLen) (as_seq h0 m) % order in 
+    let baseMultK, _ = montgomery_ladder_spec_left #c (as_seq h0 k) (pointAtInfinity #c, basePoint #c) in 
+    let (xN, _, _) = _norm #c baseMultK in 
     let kFelem = nat_from_bytes_be (as_seq h0 k) in 
     as_nat c h1 r == xN % order  /\
     as_nat c h1 s == (z + (as_nat c h1 r) * as_nat c h0 privKeyAsFelem) * pow kFelem (order - 2) % order /\ (
     if as_nat c h1 r = 0 || as_nat c h1 s = 0 then 
       uint_v flag == pow2 64 - 1
     else 
-      uint_v flag == 0))))
+      uint_v flag == 0)))
 
 
 let ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k = 
@@ -304,11 +279,6 @@ let ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k =
   toUint64ChangeEndian #c k kAsFelem; 
   ecdsa_signature_step12 #c alg mLen m hashAsFelem; 
   let step5Flag = ecdsa_signature_step45 #c r k tempBuffer in 
-  
-    let h1 = ST.get() in 
-    assert(nat_from_bytes_be (as_seq h0 k) == as_nat c h1 kAsFelem);
-
-
   ecdsa_signature_step6 #c s kAsFelem hashAsFelem r privKeyAsFelem; 
   let sIsZero = isZero_uint64_CT #c s in 
   logor_lemma step5Flag sIsZero;
@@ -316,72 +286,74 @@ let ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k =
   logor step5Flag sIsZero
 
 
+inline_for_extraction noextract
+val ecdsa_signature_: #c: curve -> alg : hash_alg_ecdsa 
+  -> privKey: scalar_t #MUT #c 
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
+  -> m: lbuffer uint8 mLen 
+  -> k: scalar_t #MUT #c 
+  -> r: felem c 
+  -> s: felem c ->
+  Stack bool
+  (requires fun h -> live h privKey /\ live h m /\ live h k /\ live h r /\ live h s /\
+    disjoint k r /\ disjoint r s /\ disjoint s r /\ 
+    nat_from_bytes_be (as_seq h privKey) < getOrder #c /\ 
+    nat_from_bytes_be (as_seq h k) < getOrder #c /\
+    (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + getCoordinateLen c < pow2 32)
+  (ensures fun h0 f h1 -> modifies ( loc r |+| loc s) h0 h1 /\ (
+    let r_, s_, flag = ecdsa_signature c alg (v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+    as_nat c h1 r < pow2 (getPower c) /\ as_nat c h1 s < pow2 (getPower c) /\
+    as_nat c h1 r == r_ /\ as_nat c h1 s == s_ /\  f == flag))
 
-#pop-options
+let ecdsa_signature_ #c alg privKey mLen m k r s = 
+  push_frame();
+    let privKeyAsFelem = create (getCoordinateLenU64 c) (u64 0) in 
+  toUint64ChangeEndian #c privKey privKeyAsFelem; 
+  let flagU64 = ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k in
+  let open Hacl.Impl.EC.LowLevel.RawCmp in 
+  pop_frame();
+  unsafe_bool_of_u64 flagU64
+
 
 inline_for_extraction noextract
-val ecdsa_signature: 
-  c: curve 
+val ecdsa_signature: #c: curve 
   -> alg: hash_alg_ecdsa 
-  -> result: lbuffer uint8 (size 64) 
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
+  -> result: pointAffine8 c
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
   -> m: lbuffer uint8 mLen 
-  -> privKey: lbuffer uint8 (size 32) 
-  -> k: lbuffer uint8 (size 32) -> 
-  Stack uint64
+  -> privKey: scalar_t #MUT #c
+  -> k: scalar_t #MUT #c -> 
+  Stack bool
   (requires fun h -> 
     live h result /\ live h m /\ live h privKey /\ live h k /\
+    (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32 /\
+    nat_from_bytes_be (as_seq h k) < getOrder #c /\
+    nat_from_bytes_be (as_seq h privKey) < getOrder #c /\
     disjoint result m /\
     disjoint result privKey /\
-    disjoint result k (*
-    nat_from_bytes_be (as_seq h privKey) < prime_p256_order /\
-    nat_from_bytes_be (as_seq h k) < prime_p256_order *)
-  )
-  (ensures fun h0 flag h1 -> 
-    modifies (loc result) h0 h1 /\
-     (assert_norm (pow2 32 < pow2 61);
-      let resultR = gsub result (size 0) (size 32) in 
-      let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile P256 alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
-      as_seq h1 resultR == nat_to_bytes_be 32 r /\
-      as_seq h1 resultS == nat_to_bytes_be 32 s /\
-      flag == flagSpec 
-    )    
-  )
+    disjoint result k)
+  (ensures fun h0 flag h1 -> modifies (loc result) h0 h1 /\ (
+    let resultR = gsub result (size 0) (getCoordinateLenU c) in 
+    let resultS = gsub result (getCoordinateLenU c) (getCoordinateLenU c) in 
+    let r, s, flagSpec = ecdsa_signature c alg (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+    as_seq h1 resultR == nat_to_bytes_be (v (getCoordinateLenU c)) r /\
+    as_seq h1 resultS == nat_to_bytes_be (v (getCoordinateLenU c)) s /\
+    flag == flagSpec))
 
 
-let ecdsa_signature c alg result mLen m privKey k = 
+let ecdsa_signature #c alg result mLen m privKey k = 
   push_frame();
   let h0 = ST.get() in 
-  assert_norm (pow2 32 < pow2 61); 
-  let privKeyAsFelem = create (size 4) (u64 0) in 
-  let r = create (size 4) (u64 0) in 
-  let s = create (size 4) (u64 0) in 
-  let resultR = sub result (size 0) (size 32) in 
-  let resultS = sub result (size 32) (size 32) in 
-  toUint64ChangeEndian #c privKey privKeyAsFelem;
+    let len: FStar.UInt32.t = getCoordinateLenU64 c in 
+    let r = create len (u64 0) in 
+    let s = create len (u64 0) in 
+    let resultR = sub result (size 0) (getCoordinateLenU c) in 
+    let resultS = sub result (getCoordinateLenU c) (getCoordinateLenU c) in 
 
+  let flag = ecdsa_signature_ #c alg privKey mLen m k r s in
   let h1 = ST.get() in 
-  lemma_core_0 privKeyAsFelem c h1;
-  (* changeEndianLemma #c (uints_from_bytes_be (as_seq h0 privKey)); *)
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 privKey);    
-  let flag = ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k in 
-
-  let h2 = ST.get() in 
-  
-  changeEndian #c r;
-  toUint8 #c r resultR;
-  lemma_core_0 c r h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 r);
-
-  changeEndian #c s;
-  toUint8 #c s resultS;
-  let h3 = ST.get() in 
-  lemma_core_0 c s h2;
-  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 s);
-
-  (* changeEndian_le_be #c (as_nat c h2 r);
-  changeEndian_le_be #c (as_nat c h2 s); *)
+  fromForm #c r resultR;
+  fromForm #c s resultS;
 
   pop_frame();
   flag  

@@ -22,7 +22,6 @@ open Spec.ECDSA
 open Spec.ECC
 open Hacl.Spec.EC.Definition
 open Spec.ECC.Curves
-(* open Spec.ECC.Lemmas *)
 
 open Hacl.Impl.EC.PointAdd
 open Hacl.Impl.EC.LowLevel.RawCmp
@@ -46,10 +45,8 @@ open Hacl.Impl.EC.Masking
 module H = Spec.Agile.Hash
 module Def = Spec.Hash.Definitions
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
-
-let prime_p256_order = getOrder #P256
+#set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
 
 
 [@ (Comment "  This code is not side channel resistant")] 
@@ -85,107 +82,99 @@ let ecdsa_verification_step1 #c r s =
 
 
 inline_for_extraction
-val ecdsa_verification_step23: 
-    #c: curve 
+val ecdsa_verification_step23: #c: curve 
   -> alg:hash_alg_ecdsa
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
-  -> m: lbuffer uint8 mLen 
-  -> result: felem c
-  -> Stack unit
-    (requires fun h -> live h m /\ live h result )
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      (
-	assert_norm (pow2 32 < pow2 61);
-	assert_norm (pow2 32 < pow2 125);
-	let hashM = hashSpec c alg (v mLen) (as_seq h0 m) in 
-	let cutHashM = Lib.Sequence.sub hashM 0 32 in 
-	as_nat c h1 result = nat_from_bytes_be cutHashM % prime_p256_order
-      )
-    )
-
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg} 
+  -> m: lbuffer uint8 mLen -> result: felem c -> Stack unit
+  (requires fun h -> live h m /\ live h result /\ 
+    (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    assert_norm (pow2 32 < pow2 61);
+    assert_norm (pow2 32 < pow2 125);
+    let len = match alg with |NoHash -> v mLen |Hash a -> v (hash_len a) in 
+    let hashM = match alg with
+      |NoHash -> (as_seq h0 m <: lbytes len)
+      |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
+    as_nat c h1 result == changeEndian_u8 (v (getCoordinateLenU c)) (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c /\
+    as_nat c h1 result < getOrder #c))
 
 let ecdsa_verification_step23 #c alg mLen m result = 
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   push_frame(); 
+  let sz_hash: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a -> hash_len a in
+
+  let len: FStar.UInt32.t  = sz_hash +! getCoordinateLenU c in 
+  let mHash = create len (u8 0) in 
     let h0 = ST.get() in 
-  let sz: FStar.UInt32.t = match alg with |NoHash -> mLen |Hash a ->  hash_len a in
-  let mHash = create sz (u8 0) in    
-  
+    let mHashHPart = sub mHash (size 0) sz_hash in 
+    let mHashRPart = sub mHash (size 0) (getCoordinateLenU c) in 
+    let mHashHPartLeft = sub mHash sz_hash (getCoordinateLenU c) in 
+    let mHashLeft = sub mHash (getCoordinateLenU c) sz_hash in 
+    
   begin
   match alg with 
-    |NoHash -> copy mHash m 
+    |NoHash -> copy mHashHPart m 
     |Hash a -> match a with 
-      |SHA2_256 -> hash_256 m mLen mHash
-      |SHA2_384 -> hash_384 m mLen mHash
-      |SHA2_512 -> hash_512 m mLen mHash 
+      |SHA2_256 -> hash_256 m mLen mHashHPart
+      |SHA2_384 -> hash_384 m mLen mHashHPart
+      |SHA2_512 -> hash_512 m mLen mHashHPart 
   end;
-
-  admit();
-  let cutHash = sub mHash (size 0) (size 32) in 
-  toUint64ChangeEndian #c cutHash result;
-  
-  let h1 = ST.get() in 
- 
+    let h1 = ST.get() in 
+  toUint64ChangeEndian #c mHashRPart result;
+    let h2 = ST.get() in 
   reduction_prime_2prime_order result result;
-  admit();
+  pop_frame();
+      let h3 = ST.get() in 
 
-  lemma_core_0 c result h1;
-  (* changeEndianLemma #c (uints_from_bytes_be #U64 #_ #4 (as_seq h1 cutHash)); *)
-  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 cutHash);
+  lemma_create_zero_buffer #U8 (v len) c;
+  Hacl.Impl.ECDSA.Signature.ecdsa_signature_step12_lemma c sz_hash (getCoordinateLenU c) h0 h1 mHash mHashHPart (as_seq h1 mHashHPart);
 
-  pop_frame()
+  lemma_lseq_nat_from_bytes (as_seq h1 mHashRPart);
+  lemma_nat_from_to_intseq_le_preserves_value #U8 #SEC (v (getCoordinateLenU c)) (as_seq h1 mHashRPart);
+  lemma_lseq_nat_from_bytes (as_seq h2 result)
 
 
+#push-options "--ifuel 1"
 
 inline_for_extraction noextract
-val ecdsa_verification_step4:
-  #c: curve 
-  -> bufferU1:lbuffer uint8 (size 32)
-  -> bufferU2: lbuffer uint8 (size 32)
+val ecdsa_verification_step4: #c: curve 
+  -> bufferU1: lbuffer uint8 (getCoordinateLenU c)
+  -> bufferU2: lbuffer uint8 (getCoordinateLenU c)
   -> r: felem c
   -> s: felem c
   -> hash: felem c ->
   Stack unit
-    (requires fun h ->
-      live h r /\ live h s /\ live h hash /\ live h bufferU1 /\ live h bufferU2 /\
-      disjoint bufferU1 bufferU2 /\
-      disjoint bufferU1 hash /\
-      disjoint bufferU1 r /\
-      disjoint bufferU1 s /\
-      disjoint bufferU2 hash /\
-      disjoint bufferU2 r /\
-      disjoint bufferU2 s /\
-      as_nat c h s < prime_p256_order /\
-      as_nat c h hash < prime_p256_order /\
-      as_nat c h r < prime_p256_order
-    )
-    (ensures fun h0 _ h1 ->
-      modifies (loc bufferU1 |+| loc bufferU2) h0 h1 /\
-      (
-	let p0 = pow (as_nat c h0 s) (prime_p256_order - 2) * as_nat c h0 hash % prime_p256_order in 
-	let p1 = pow (as_nat c h0 s) (prime_p256_order - 2) * as_nat c h0 r % prime_p256_order in 
-	as_seq h1 bufferU1 == nat_to_bytes_be 32 p0 /\
-	as_seq h1 bufferU2 == nat_to_bytes_be 32 p1
-      )
-    )
+  (requires fun h -> (
+    let order = getOrder #c in 
+    live h r /\ live h s /\ live h hash /\ live h bufferU1 /\ live h bufferU2 /\
+    disjoint bufferU1 bufferU2 /\ disjoint bufferU1 hash /\ disjoint bufferU1 r /\ disjoint bufferU1 s /\
+    disjoint bufferU2 hash /\ disjoint bufferU2 r /\ disjoint bufferU2 s /\
+    as_nat c h s < order /\ as_nat c h hash < order /\ as_nat c h r < order))
+  (ensures fun h0 _ h1 -> modifies (loc bufferU1 |+| loc bufferU2) h0 h1 /\ (
+    let order = getOrder #c in 
+    let p0 = pow (as_nat c h0 s) (order - 2) * as_nat c h0 hash % order in 
+    let p1 = pow (as_nat c h0 s) (order - 2) * as_nat c h0 r % order in 
+    as_seq h1 bufferU1 == nat_to_bytes_be (v (getCoordinateLenU c)) p0 /\ 
+    as_seq h1 bufferU2 == nat_to_bytes_be (v (getCoordinateLenU c)) p1))
 
 let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
   push_frame();
   let h0 = ST.get() in
-    let tempBuffer = create (size 12) (u64 0) in
-    let inverseS = sub tempBuffer (size 0) (size 4) in
-    let u1 = sub tempBuffer (size 4) (size 4) in
-    let u2 = sub tempBuffer (size 8) (size 4) in
+    let len = getCoordinateLenU64 c in 
+    let tempBuffer = create (size 3 *! len) (u64 0) in
+      let inverseS = sub tempBuffer (size 0) len in
+      let u1 = sub tempBuffer len len in
+      let u2 = sub tempBuffer (size 2 *! len) len in
 
     fromDomainImpl s inverseS;
     montgomery_ladder_exponent #c inverseS inverseS;
     multPowerPartial s inverseS hash u1;
     multPowerPartial s inverseS r u2;
-  
+
   let h1 = ST.get() in 
     changeEndian #c u1;
-    changeEndian #c u2;
+    changeEndian #c u2; 
     toUint8 #c u1 bufferU1;
     toUint8 #c u2 bufferU2;
   
@@ -214,7 +203,7 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
       == {changeEndian_le_be #c (as_nat c h1 u2) }
       nat_to_bytes_be 32 (as_nat c h1 u2);
     }; *)
-
+ admit();
   pop_frame()
 
 
@@ -255,7 +244,6 @@ val ecdsa_verification_step5_0:
 
       let fromDomainPointU1 = fromDomainPoint #c #DSA (point_prime_to_coordinates c (as_seq h1 pointU1)) in
       let fromDomainPointU2 = fromDomainPoint #c #DSA (point_prime_to_coordinates c (as_seq h1 pointU2)) in
-      let pointAtInfinity = (0, 0, 0) in
       let u1D, _ = montgomery_ladder_spec_left #P256 (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
       let u2D, _ = montgomery_ladder_spec_left #P256 (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates c (as_seq h0 pubKeyAsPoint)) in
       fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D

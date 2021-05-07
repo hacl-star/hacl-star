@@ -165,7 +165,7 @@ let ecp256dh_r #c result pubKey scalar =
     let pkF = create (size 3 *! len) (u64 0) in
     let h1 = ST.get() in 
 
-    lemma_create_zero_buffer (3 * v len) c;
+    lemma_create_zero_buffer #U64 (3 * v len) c;
     lemma_zero_point_zero_coordinates c h1 rF;
   let flag = ecp256_dh_r_ #c result pubKey scalar pkF rF in 
 

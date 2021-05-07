@@ -142,7 +142,7 @@ let montgomery_multiplication_round #c m t round =
   push_frame(); 
     let len = getCoordinateLenU64 c in  
     let t2 = create (size 2 *! len) (u64 0) in 
-    lemma_create_zero_buffer (2 * v len) c;
+    lemma_create_zero_buffer #U64 (2 * v len) c;
     montgomery_multiplication_round_ #c m t t2;
     let carry = add_long_bn t t2 t2 in 
     shift1_with_carry t2 round carry; 
@@ -245,7 +245,7 @@ let montgomery_multiplication_buffer_by_one #c m a result =
 
   let h1 = ST.get() in 
   
-  lemma_create_zero_buffer (2 * v len) c; 
+  lemma_create_zero_buffer #U64 (2 * v len) c; 
 
   lemma_test (as_seq h0 t) (v len);
   lemma_test (as_seq h1 t) (v len);

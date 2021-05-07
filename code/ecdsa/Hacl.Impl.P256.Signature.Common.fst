@@ -43,12 +43,6 @@ let bufferToJac #c p result =
     assert(felem_eval c h1 (gsub result (2ul *! getCoordinateLenU64 c) (getCoordinateLenU64 c)))
 
 
-inline_for_extraction noextract
-val fromForm: #c: curve -> i: felem c -> o: coordinateAffine8 c -> Stack unit 
-  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ as_nat c h i < pow2 (getPower c))
-  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  
-    as_seq h1 o == nat_to_bytes_be (v (getCoordinateLenU c)) (as_nat c h0 i))
-
 let fromForm #c i o = 
   let h0 = ST.get() in
   changeEndian i;

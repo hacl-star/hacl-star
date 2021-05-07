@@ -160,7 +160,7 @@ let normalisation_update #c z2x z3y p resultPoint =
   fromDomain z3y resultY;
   uploadOneImpl #c resultZ;
   copy_conditional #c resultZ zeroBuffer bit;
-    lemma_create_zero_buffer (v len) c;
+    lemma_create_zero_buffer #U64 (v len) c;
 
   pop_frame()
 

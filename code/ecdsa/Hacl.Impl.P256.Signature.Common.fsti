@@ -24,6 +24,12 @@ val bufferToJac: #c: curve -> p: pointAffine c -> result: point c -> Stack unit
     let pJ = toJacobianCoordinates (x, y) in 
     ~ (isPointAtInfinity resultTuple) /\ as_nat c h1 (getZ result) == 1 /\ resultTuple == pJ))
 
+inline_for_extraction noextract
+val fromForm: #c: curve -> i: felem c -> o: coordinateAffine8 c -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ as_nat c h i < pow2 (getPower c))
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  
+    as_seq h1 o == nat_to_bytes_be (v (getCoordinateLenU c)) (as_nat c h0 i))
+
 val fromFormPoint: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o /\ point_eval c h i /\ (
     let xCoordinate, yCoordinate, _ = point_as_nat c h i in 

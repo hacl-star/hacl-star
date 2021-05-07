@@ -36,3 +36,8 @@ val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
     as_nat c h1 out == (as_nat c h0 a + as_nat c h0 b) % getOrder #c /\
     as_nat c h1 out == toDomain_ #c #DSA ((fromDomain_ #c #DSA (as_nat c h0 a) + fromDomain_ #c #DSA (as_nat c h0 b)) % getOrder #c)))
 
+
+inline_for_extraction noextract
+val upload_one_montg_form: #c: curve -> b: felem c -> Stack unit
+  (requires fun h -> live h b)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_nat c h1 b = toDomain_ #c #DSA 1)

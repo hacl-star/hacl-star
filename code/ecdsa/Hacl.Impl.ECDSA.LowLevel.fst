@@ -112,3 +112,20 @@ let felem_add #c arg1 arg2 out =
   
   additionInDomain #c #DSA (as_nat c h0 arg1) (as_nat c h0 arg2);
   inDomain_mod_is_not_mod #c #DSA (fromDomain_ #c #DSA (as_nat c h0 arg1) + fromDomain_ #c #DSA (as_nat c h0 arg2))
+
+
+let upload_one_montg_form #c b = 
+  match c with 
+  |P256 -> 
+    upd b (size 0) (u64 884452912994769583);
+    upd b (size 1) (u64 4834901526196019579);
+    upd b (size 2) (u64 0);
+    upd b (size 3) (u64 4294967295);
+    lemmaToDomain #P256 #DSA 1;
+      let h1 = ST.get() in 
+    Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 b); 
+    assert_norm(884452912994769583 + 4834901526196019579 * pow2 64 + 0 * pow2 (2 * 64) + 4294967295 * pow2 (3 * 64) == pow2 256 % getOrder #P256)
+  |_ -> 
+    uploadZeroImpl b; 
+    reduction_prime_2prime_with_carry_cin #c (u64 1) b b;
+    lemmaToDomain #c #DSA 1
