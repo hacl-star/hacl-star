@@ -100,7 +100,8 @@ val xor_test: #n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch_test n -> Tot (t
 
 let xor_test #n b = 
   let xor_step n b index (u, v) = 
-  let (xi, yi) = getBranchI_test index b in 
+  (* Changed from index to index + 1, because we already have the 0 case *)
+  let (xi, yi) = getBranchI_test (index + 1) b in 
   xi ^. u, yi ^. v in 
   
   let zeroBranch = getBranchI_test 0 b in 
