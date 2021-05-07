@@ -369,28 +369,20 @@ let min_input_length #c a =
 (* Calculate {\displaystyle e={\textrm {HASH}}(m)}e={\textrm {HASH}}(m). (Here HASH is a cryptographic hash function, such as SHA-2, with the output converted to an integer.)
 Let {\displaystyle z}z be the {\displaystyle L_{n}}L_{n} leftmost bits of {\displaystyle e}e, where {\displaystyle L_{n}}L_{n} is the bit length of the group order {\displaystyle n}n. (Note that {\displaystyle z}z can be greater than {\displaystyle n}n but not longer.[1]) *)
 
+let changeEndian_u8 len n = nat_from_bytes_be (nat_to_bytes_le #SEC len n)
+
 val hashSpec:
   c: curve 
-  -> a: hash_alg_ecdsa 
-  -> mLen: size_nat{mLen >= min_input_length #c a}
-  -> m: lseq uint8 mLen ->
-  Tot (Lib.ByteSequence.lbytes (
-    if NoHash? a then getCoordinateLen c 
-    else if hash_length (match a with Hash a -> a) > getCoordinateLen c
-    then getCoordinateLen c else hash_length (match a with Hash a -> a)))
+  -> alg: hash_alg_ecdsa 
+  -> mLen: size_nat{mLen >= min_input_length #c alg}
+  -> m: lseq uint8 mLen -> 
+  Tot nat
 
-let hashSpec c a mLen m = 
+let hashSpec c alg mLen m = 
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
-  allow_inversion hash_alg_ecdsa;
-  match a with 
-  |NoHash ->  sub m 0 (getCoordinateLen c)
-  |Hash a ->
-    let hashed = Spec.Agile.Hash.hash a m in 
-    if hash_length a > getCoordinateLen c then 
-      sub hashed 0 (getCoordinateLen c)
-    else
-      hashed
+  let message = match alg with |NoHash -> m |Hash a -> Spec.Agile.Hash.hash a m in 
+  changeEndian_u8 (getCoordinateLen c) (Lib.ByteSequence.nat_from_intseq_le message % pow2 (getPower c))
 
 
 val ecdsa_verification_agile:
@@ -414,7 +406,7 @@ let ecdsa_verification_agile c alg publicKey r s mLen m =
     else
       begin
       let hashM = hashSpec c alg mLen m in
-      let hashNat = nat_from_bytes_be hashM % order in 
+      let hashNat = hashM % order in 
 
       let u1 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * hashNat % order) in
       let u2 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * r % order) in 
@@ -433,29 +425,25 @@ let ecdsa_verification_agile c alg publicKey r s mLen m =
   end
 
 
-val ecdsa_signature_agile:
-  c: curve  
+val ecdsa_signature: c: curve  
   -> alg: hash_alg_ecdsa
   -> mLen:size_nat{mLen >= min_input_length #c alg} 
   -> m:lseq uint8 mLen
-  -> privateKey: scalar_bytes #c
+  -> privateKey: scalar_bytes #c 
   -> k: scalar_bytes #c
-  -> tuple3 nat nat uint64
+  -> tuple3 nat nat bool
 
-let ecdsa_signature_agile c alg mLen m privateKey k =
+let ecdsa_signature c alg mLen m privateKey k =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
-  let prime_order = getOrder #c in 
-    point_mult_0 (basePoint #c) 0;
-  let r, _ = montgomery_ladder_spec_left #c k (pointAtInfinity, (basePoint #c)) in
-  let (xN, _, _) = _norm #c r in
-  let hashM = hashSpec c alg mLen m in 
-  let z = nat_from_bytes_be hashM % prime_order in
-  let kFelem = nat_from_bytes_be k in
+  let order = getOrder #c in 
+  let (xN, _, _) = secret_to_public #c k in 
+  let hashM = hashSpec c alg mLen m % order in  
+  let kFelem = nat_from_bytes_be k in 
   let privateKeyFelem = nat_from_bytes_be privateKey in
-  let resultR = xN % prime_order in
-  let resultS = (z + resultR * privateKeyFelem) * pow kFelem (prime_order - 2) % prime_order in
+  let resultR = xN % order in
+  let resultS = (hashM + resultR * privateKeyFelem) * pow kFelem (order - 2) % order in
     if resultR = 0 || resultS = 0 then
-      resultR, resultS, u64 (pow2 64 - 1)
+      resultR, resultS, false
     else
-      resultR, resultS, u64 0
+      resultR, resultS, true

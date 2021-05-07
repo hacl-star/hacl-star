@@ -97,7 +97,7 @@ let prime384: (a: pos {a > 3 && a < pow2 384}) =
 
 
 inline_for_extraction
-let getPrime curve : prime: nat {prime > 3 /\ FStar.Math.Euclid.is_prime prime /\ prime > pow2 64} = 
+let getPrime curve : prime: pos {prime > 3 /\ FStar.Math.Euclid.is_prime prime /\ prime > pow2 64} = 
   admit();
   match curve with 
   |P256 -> prime256
@@ -120,7 +120,7 @@ let getCoordinateLenU64 curve =
 inline_for_extraction noextract
 let getCoordinateLenU curve = getCoordinateLenU64 curve *! 8ul
 
-let getCoordinateLen curve = v (getCoordinateLenU curve)
+let getCoordinateLen curve : pos = v (getCoordinateLenU curve)
 
 (* each point consists of three coordinates *)
 let getPointLen curve = getCoordinateLenU curve *! 2ul
@@ -132,7 +132,7 @@ let getScalarLenWords curve : (a: FStar.UInt32.t {v a > 0}) =
   match curve with
   |P256 -> 4ul
   |P384 -> 6ul
-  |_ -> 0ul
+  |_ -> 1ul
 
 inline_for_extraction
 let getScalarLenBytes curve = 
@@ -144,17 +144,25 @@ let getScalarLen (c: curve) = getScalarLenBytes c *! 8ul
 
 (* the next power in pow2 (k * 64) after the prime *)
 inline_for_extraction noextract
-let getPowerU curve = 
+let getPowerU curve : (a: UInt32.t {
+  getPrime curve < pow2 (v a) /\ 
+  pow2 (v a) < 2 * getPrime curve}) = 
   match curve with 
-  |P256 -> 256ul
-  |P384 -> 384ul
-  |_ -> 256ul
+  |P256 ->  assert_norm (pow2 256 < 2 * getPrime P256); 256ul
+  |P384 ->  admit(); 384ul
+  |_ -> admit(); 256ul
 
 let getPower curve : a: nat {
   getPrime curve < pow2 a /\ 
   pow2 a < 2 * getPrime curve /\ 
   pow2 a % getPrime curve <> 0 /\
-  a = v (getCoordinateLenU64 curve) * 64} = v (getPowerU curve)
+  a == v (getCoordinateLenU64 curve) * 64} = v (getPowerU curve)
+
+
+val lemmaGetPowerAsCoordinateLen: #c: curve -> Lemma (pow2 (getPower c) == pow2 (8 * v (getCoordinateLenU c)))
+
+let lemmaGetPowerAsCoordinateLen #c = ()
+
 
 (* the power for 2 words *)
 let getLongPower curve = getPower curve * 2
