@@ -96,17 +96,34 @@ val getBranchI_test: #n: branch_len -> i: nat {i < n} -> branch_test n -> uint32
 
 let getBranchI_test #n i b = Seq.Base.index b i
 
-val xor_test: #n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch_test n -> Tot (tuple2 uint32 uint32)
+val xor_test: #n: branch_len -> b: branch_test n -> Tot (tuple2 uint32 uint32)
 
 let xor_test #n b = 
-  let xor_step n b index (u, v) = 
-  (* Changed from index to index + 1, because we already have the 0 case *)
-  let (xi, yi) = getBranchI_test (index + 1) b in 
-  xi ^. u, yi ^. v in 
-  
+  let xor_step (n : branch_len) b (index : nat {index + 1 < n}) (u, v) = 
+    let (xi, yi) = getBranchI_test #n (index + 1) b in 
+    xi ^. u, yi ^. v in 
   let zeroBranch = getBranchI_test 0 b in 
   Lib.LoopCombinators.repeati (n - 1) (xor_step n b) zeroBranch
 
+
+let xor_x_step (n: branch_len) (u, v) (index : nat {index < n}) (b : branch_test n) = 
+  let (xi, yi) = getBranchI_test #n index b in 
+  let xi_n, yi_n = xi ^. u, yi ^. v in 
+  upd #_ #n b index (xi_n, yi_n)
+
+val xor_x_test: #n: branch_len -> b: branch_test n -> lu: uint32 -> lv: uint32 -> branch_test n
+
+let xor_x_test #n b lu lv = 
+  Lib.LoopCombinators.repeati n (xor_x_step n (lu, lv)) b
+
+
+val m_test: #n: branch_len-> branch_test n -> Tot (branch_test n)
+
+let m_test #n b = 
+  let u, v = xor_test #n b in 
+  let lu, lv = l1 u, l1 v in
+  xor_x_test #n b lu lv
+  
 
 (* AW: </TESTING FUNCTIONALITY> *)
 
