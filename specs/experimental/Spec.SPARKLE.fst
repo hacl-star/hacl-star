@@ -7,7 +7,7 @@ open Lib.ByteSequence
 open Lib.LoopCombinators
 open Lib.ByteSequence.Tuples
 
-#set-options "--z3rlimit 15 --max_fuel 0"
+#set-options "--z3rlimit 15"
 
 
 let size_word: size_nat = 4
@@ -99,29 +99,52 @@ let getBranchI_test #n i b = Seq.Base.index b i
 val xor_test: #n: branch_len -> b: branch_test n -> Tot (tuple2 uint32 uint32)
 
 let xor_test #n b = 
-  let xor_step (n : branch_len) b (index : nat {index + 1 < n}) (u, v) = 
+  let xor_step (n : branch_len) b (index : nat {index + 1 < n}) (tx, ty) = 
     let (xi, yi) = getBranchI_test #n (index + 1) b in 
-    xi ^. u, yi ^. v in 
+    xi ^. tx, yi ^. ty in 
+    
   let zeroBranch = getBranchI_test 0 b in 
   Lib.LoopCombinators.repeati (n - 1) (xor_step n b) zeroBranch
 
 
-val xor_x_test: #n: branch_len -> b: branch_test n -> lu: uint32 -> lv: uint32 -> branch_test n
+val xor_x_test: #n: branch_len -> b: branch_test n -> lty: uint32 -> ltx: uint32 -> branch_test n
 
-let xor_x_test #n b lu lv = 
-  let xor_x_step (n: branch_len) (u, v) (index : nat {index < n}) (b : branch_test n) = 
+let xor_x_test #n b lty ltx = 
+  let xor_x_step (n: branch_len) (lty, ltx) (index : nat {index < n}) (b : branch_test n) = 
     let xi, yi = getBranchI_test #n index b in 
-    let xi_n, yi_n = xi ^. u, yi ^. v in 
+    let xi_n, yi_n = xi ^. lty, yi ^. ltx in 
     let s = upd #_ #n b index (xi_n, yi_n) in s in
-  Lib.LoopCombinators.repeati n (xor_x_step n (lu, lv)) b
+  Lib.LoopCombinators.repeati n (xor_x_step n (lty, ltx)) b
 
 
-val m_test: #n: branch_len-> branch_test n -> Tot (branch_test n)
+val m_test: #n: branch_len -> branch_test n -> Tot (branch_test n)
 
 let m_test #n b = 
-  let u, v = xor_test #n b in 
-  let lu, lv = l1 u, l1 v in
-  xor_x_test #n b lu lv
+  let tx, ty = xor_test #n b in 
+  let ltx, lty = l1 tx, l1 ty in
+  xor_x_test #n b lty ltx
+
+
+
+
+val l_test: #n0: branch_len -> #n: branch_len {n0 % 2 == 0 /\ n == n0 / 2} -> b: branch_test n0 -> branch_test n0
+
+let l_test #n0 #n b = 
+  let leftBranch = sub #_ #n0 b 0 n in 
+  let rightBranch = sub #_ #n0 b n n in 
+  let perm = m_test #n leftBranch in 
+
+
+  let seqEmpty = create n (u32 0, u32 0) in 
+
+  let l_test_step (#n: branch_len) (rightBranch : branch_test n) (perm: branch_test n) i branchResult = 
+    let (xi, yi) = index #_ #n rightBranch i in 
+    let (p0i, p1i) = index #_ #n perm i in 
+    let branchIUpd = xi ^. p0i, yi ^. p1i in 
+    let s = upd #_ #n branchResult ((i - 1) % n) branchIUpd in s in  
+
+  let r = Lib.LoopCombinators.repeati n (l_test_step rightBranch perm) seqEmpty in 
+  concat #_ #_ #n r leftBranch
   
 
 (* AW: </TESTING FUNCTIONALITY> *)
@@ -139,8 +162,8 @@ val m2: (branch 2) -> Tot (branch 2)
 
 let m2 b =
   let (x0, x1), (y0, y1) = b in
-  let u = y0 ^. y1 in
   let v = x0 ^. x1 in 
+  let u = y0 ^. y1 in
   let u, v = xor #2 b in 
   let lu = l1 u in
   let lv = l1 v in
