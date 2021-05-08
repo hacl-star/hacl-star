@@ -106,14 +106,13 @@ let xor_test #n b =
   Lib.LoopCombinators.repeati (n - 1) (xor_step n b) zeroBranch
 
 
-let xor_x_step (n: branch_len) (u, v) (index : nat {index < n}) (b : branch_test n) = 
-  let (xi, yi) = getBranchI_test #n index b in 
-  let xi_n, yi_n = xi ^. u, yi ^. v in 
-  upd #_ #n b index (xi_n, yi_n)
-
 val xor_x_test: #n: branch_len -> b: branch_test n -> lu: uint32 -> lv: uint32 -> branch_test n
 
 let xor_x_test #n b lu lv = 
+  let xor_x_step (n: branch_len) (u, v) (index : nat {index < n}) (b : branch_test n) = 
+    let xi, yi = getBranchI_test #n index b in 
+    let xi_n, yi_n = xi ^. u, yi ^. v in 
+    let s = upd #_ #n b index (xi_n, yi_n) in s in
   Lib.LoopCombinators.repeati n (xor_x_step n (lu, lv)) b
 
 
