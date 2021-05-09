@@ -25,7 +25,16 @@ open FStar.Math.Lib
 type nat_windowed (w: nat) = a: nat {a < pow2 w /\ (a == 0 \/ a % 2 == 1)}
 
 
-val mod_win: di: nat {di % 2 == 1} -> w: pos -> tuple2 bool (nat_windowed w)
+let abs i = if i < 0 then i * (- 1) else i
+
+
+val mod_win: di: nat {di % 2 == 1} -> w: pos -> tuple2 
+  (* sign is negative only when we need to use the point negation *)
+  (sign: bool {let dModWindow = di % pow2 w in sign == false <==> dModWindow <= pow2 w /\ dModWindow >= pow2 (w - 1)})
+  (diR: nat_windowed w {diR <= di /\ (
+    let dModWindow = di % pow2 w in 
+    diR == (if dModWindow >= pow2 (w - 1) then abs (dModWindow - pow2 w) else dModWindow))})
+
 
 let mod_win di w = 
   let di_mod_2w = di % (pow2 w) in 
@@ -34,13 +43,13 @@ let mod_win di w =
     begin
       let sign = di_mod_2w >= pow2 w in
       if sign = false then begin
-			FStar.Math.Lemmas.pow2_plus 1 (w - 1);		
-		false, (pow2 w - di_mod_2w) end
+	FStar.Math.Lemmas.pow2_plus 1 (w - 1);		
+	false, (pow2 w - di_mod_2w) end
       else
-	true, di_mod_2w - (pow2 w) 
+	true, di_mod_2w - (pow2 w)
     end
   else
-    true, di_mod_2w
+    true, di_mod_2w 
    
 
 
@@ -57,29 +66,36 @@ let mod_win di w =
 *)
 
 
-val scalar_to_wnaf_step: #c: curve -> s: scalar_bytes #c -> window: pos -> i: nat {i < v (getScalarLenBytes c)} 
-  -> Tot (tuple2 bool (nat_windowed window))
+val scalar_to_wnaf_step: #c: curve -> d: nat -> window: pos -> i: nat {i < v (getScalarLenBytes c)} 
+  -> Tot (tuple2 (tuple2 bool (nat_windowed window)) nat)
       
-let scalar_to_wnaf_step #c s window i = 
-  let d = arithmetic_shift_right (scalar_as_nat s) i in 
-  if d % 2 = 0 then true, 0 else begin mod_win d window end
+let scalar_to_wnaf_step #c d window i = 
+  let dShift = arithmetic_shift_right d 1 in 
+  if d % 2 = 0 then (true, 0), dShift else 
+      let sign, di = mod_win d window in 
+      let dUp: nat = d - di in 
+      let dNew: nat = arithmetic_shift_right dUp 1 in 
+      ((sign, di), dNew)
 
 
-val scalar_to_wnaf_step_l: #c: curve -> s: scalar_bytes #c -> window: pos 
-  -> i: nat {i < v (getScalarLenBytes c)}
-  -> l: lseq (tuple2 bool (nat_windowed window)) (v (getScalarLenBytes c))
-  -> lseq (tuple2 bool (nat_windowed window)) (v (getScalarLenBytes c))
+val scalar_to_wnaf_step_l: #c: curve -> window: pos 
+  -> index: nat {index < v (getScalarLenBytes c)}
+  -> i: tuple2 (lseq (tuple2 bool (nat_windowed window)) (v (getScalarLenBytes c))) nat 
+  -> tuple2 (lseq (tuple2 bool (nat_windowed window)) (v (getScalarLenBytes c))) nat
 
-let scalar_to_wnaf_step_l #c s window i l = 
-  let di = scalar_to_wnaf_step #c s window i in 
-  upd l i di
+let scalar_to_wnaf_step_l #c window index i = 
+  let (l, d) = i in 
+  let di, dNew = scalar_to_wnaf_step #c d window index in 
+  upd l index di, dNew
 
 
 val scalar_to_wnaf: #c: curve -> s: scalar_bytes #c -> window: pos -> Tot (lseq (tuple2 bool (nat_windowed window)) (v (getScalarLenBytes c)))
 
 let scalar_to_wnaf #c s w =  
+  let d: nat = scalar_as_nat #c s in 
   let l = Lib.Sequence.create (v (getScalarLenBytes c)) (false, 0) in  
-  Lib.LoopCombinators.repeati (v (getScalarLenBytes c)) (scalar_to_wnaf_step_l s w) l
+  let result, _ = Lib.LoopCombinators.repeati (v (getScalarLenBytes c)) (scalar_to_wnaf_step_l w) (l, d) in 
+  result
 
 
 (*
