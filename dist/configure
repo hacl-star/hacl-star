@@ -370,7 +370,7 @@ if detect_ibmz; then
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_SYSTEMZ" >> config.h
   echo "... $build_target supports 128-bit z VSX"
   compile_vec128=true
-  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z15" >> Makefile.config
+  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=native" >> Makefile.config
 fi
 
 if $compile_intrinsics; then
