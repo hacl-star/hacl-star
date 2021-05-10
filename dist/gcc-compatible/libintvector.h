@@ -693,12 +693,12 @@ typedef vector128_8 vector128;
   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))*/
 
 #define Lib_IntVector_Intrinsics_vec128_load32_le(x)              \
-    ((vector128_32)(__builtin_s390_vlbr((vector128_32)x)))
+    ((vector128_32)(__builtin_s390_vlbrf((vector128_32)x)))
 /*  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
     ((vector128_8)vec_load_len((const uint8_t*)(x), 16)))) */
 
 #define Lib_IntVector_Intrinsics_vec128_load64_le(x)              \
-    ((vector128_64)(__builtin_s390_vlbr((vector128_64)x)))
+    ((vector128_64)(__builtin_s390_vlbrf((vector128_64)x)))
 /*  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64( \
     ((vector128_8)vec_load_len((const uint8_t*)(x), 16)))) */
 
