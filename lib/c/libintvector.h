@@ -698,7 +698,7 @@ typedef vector128_8 vector128;
     ((vector128_8)vec_load_len((const uint8_t*)(x), 16)))) */
 
 #define Lib_IntVector_Intrinsics_vec128_load64_le(x)              \
-    ((vector128_64)(vec_vlbrf((vector128_64)x)))
+    ((vector128_64)(vec_vlbrg((vector128_64)x)))
 /*  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64( \
     ((vector128_8)vec_load_len((const uint8_t*)(x), 16)))) */
 
