@@ -102,9 +102,15 @@ all:
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
-  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
+  compile-portable-gcc-compatible dist/linux/Makefile.basic \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
   obj/libhaclml.cmxa compile-election-guard
+
+# Mozilla does not want to run the configure script, so this means that the
+# build of Mozilla will break on platforms other than x86-64
+ifeq ($(shell uname -m),x86_64)
+all-unstaged: compile-mozilla
+endif
 
 # Automatic staging.
 %-staged: .last_vale_version
