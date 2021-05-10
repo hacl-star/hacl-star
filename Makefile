@@ -1074,6 +1074,10 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	echo "KreMLin version: $(shell cd $(KREMLIN_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
 	if [ "$*" == "wasm" ]; then touch $@; fi
+	if [ x"$*" == xmozilla ]; then \
+	  cp dist/Makefile.mozilla.config $(dir $@)/Makefile.config; \
+	  cp dist/config.mozilla.h $(dir $@)/config.h; \
+	fi
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
