@@ -14,7 +14,6 @@
 #include "test_helpers.h"
 
 #include "Hacl_Poly1305_32.h"
-
 #include "EverCrypt_AutoConfig2.h"
 
 #include "poly1305_vectors.h"
@@ -28,13 +27,6 @@ void sodium_poly1305_mac(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key
     crypto_onetimeauth_poly1305_update(&ctx, text, len);
     crypto_onetimeauth_poly1305_final(&ctx, tag);
 }
-
-/*void ossl_poly1305(uint8_t *tag, uint32_t len, uint8_t *text, uint8_t *key){
-    POLY1305 ctx;
-    Poly1305_Init(&ctx, key);
-    Poly1305_Update(&ctx, text, len);
-    Poly1305_Final(&ctx, &tag);
-    }*/
 
 bool print_result(uint8_t* comp, uint8_t* exp) {
   return compare_and_print(16, comp, exp);
@@ -96,7 +88,6 @@ int main() {
   t2 = clock();
   clock_t tdiff2 = t2 - t1;
   cycles cdiff2 = b - a;
-
 
   uint64_t count = ROUNDS * SIZE;
   printf("Poly1305 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);

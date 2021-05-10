@@ -7,362 +7,217 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module BN = Hacl.Bignum
-module BM = Hacl.Bignum.Montgomery
-
 open Hacl.Bignum.Definitions
 
 module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
-module Loops = Lib.LoopCombinators
 
-module S = Hacl.Spec.Bignum.Exponentiation
 module BD = Hacl.Spec.Bignum.Definitions
-module BN = Hacl.Bignum
-module BM = Hacl.Bignum.Montgomery
 module SM = Hacl.Spec.Bignum.Montgomery
 
-module LE = Lib.Exponentiation
-module BE = Hacl.Impl.Exponentiation
+module BN = Hacl.Bignum
+module BM = Hacl.Bignum.Montgomery
+module AM = Hacl.Bignum.AlmostMontgomery
+module ME = Hacl.Bignum.MontExponentiation
+module AE = Hacl.Bignum.AlmostMontExponentiation
+
+module E = Hacl.Spec.Exponentiation.Lemmas
+module M = Hacl.Spec.Montgomery.Lemmas
+module SE = Hacl.Spec.Bignum.MontExponentiation
+module S = Hacl.Spec.Bignum.Exponentiation
 
 friend Hacl.Spec.Bignum.Exponentiation
+friend Hacl.Bignum.Montgomery
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let bn_check_mod_exp #t k n a bBits b =
-  [@inline_let] let len = k.BM.bn.BN.len in
-  let m0 = k.BM.mont_check n in
-  let bLen = blocks bBits (size (bits t)) in
-  let m1 = BN.bn_is_zero_mask bLen b in
-  let m1' = lognot m1 in
-  let m2 =
+let bn_check_mod_exp #t len n a bBits b =
+  let m0 = BM.bn_check_modulus n in
+  let bLen = blocks0 bBits (size (bits t)) in
+  let m1 =
     if bBits <. size (bits t) *! bLen
     then BN.bn_lt_pow2_mask bLen b bBits
     else ones t SEC in
-  let m3 = BN.bn_lt_mask len a n in
-  let m = m1' &. m2 &. m3 in
+  let m2 = BN.bn_lt_mask len a n in
+  let m = m1 &. m2 in
   m0 &. m
 
-//////////////////////////////////////////////////////////////
-
-unfold
-let a_spec
-  (#t:limb_t)
-  (#len:S.bn_len t)
-  (n:BD.lbignum t len)
- =
-  S.nat_mod_bn n
-
 
 inline_for_extraction noextract
-let exp_s
-  (#t:limb_t)
-  (#len:S.bn_len t)
-  (n:BD.lbignum t len)
-  (mu:limb t{SM.bn_mont_pre n mu})
-  : LE.exp (a_spec n)
- =
-  S.mk_nat_mont_group_bn n mu
-
-
-unfold
-let linv_ctx
-  (#t:limb_t)
-  (#len:S.bn_len t)
-  (n:BD.lbignum t len)
-  (a:BD.lbignum t len) : Type0
- =
-  n == a
-
-
-unfold
-let linv
-  (#t:limb_t)
-  (#len:S.bn_len t)
-  (n:BD.lbignum t len)
-  (a:BD.lbignum t len) : Type0
- =
-  BD.bn_v a < BD.bn_v n
-
-
-unfold
-let refl
-  (#t:limb_t)
-  (#len:S.bn_len t)
-  (n:BD.lbignum t len)
-  (a:BD.lbignum t len{linv n a}) : a_spec n
- =
-  a
-
-
-inline_for_extraction noextract
-let mk_lexp_to_exp
-  (t:limb_t)
-  (len:BN.meta_len t)
-  (n:BD.lbignum t (v len))
-  (mu:limb t{SM.bn_mont_pre n mu}) : BE.lexp_to_exp t len len =
-{
-  BE.a_spec = a_spec n;
-  BE.exp = exp_s n mu;
-  BE.linv_ctx = linv_ctx n;
-  BE.linv = linv n;
-  BE.refl = refl n;
-}
-
-
-inline_for_extraction noextract
-let bn_mont_one_st (t:limb_t) (len:BN.meta_len t) =
-    n:lbignum t len
-  -> mu:limb t
-  -> r2:lbignum t len
-  -> oneM:lbignum t len ->
-  Stack unit
-  (requires fun h ->
-    live h n /\ live h r2 /\ live h oneM /\
-    disjoint n r2 /\ disjoint n oneM /\ disjoint r2 oneM /\
-    SM.bn_mont_pre (as_seq h n) mu /\
-    bn_v h r2 == pow2 (2 * bits t * v len) % bn_v h n)
-  (ensures  fun h0 _ h1 -> modifies (loc oneM) h0 h1 /\
-    as_seq h1 oneM == S.bn_mont_one (as_seq h0 n) mu)
-
-
-inline_for_extraction noextract
-val bn_mont_one: #t:limb_t -> k:BM.mont t -> bn_mont_one_st t k.BM.bn.BN.len
-let bn_mont_one #t k n mu r2 oneM =
-  let h0 = ST.get () in
-  let len = k.BM.bn.BN.len in
-  BM.bn_mont_one k n mu r2 oneM;
-  SM.bn_mont_one_lemma (as_seq h0 n) mu (as_seq h0 r2);
-  SM.bn_precomp_r2_mod_n_lemma 0 (as_seq h0 n);
-  BD.bn_eval_inj (v len) (SM.bn_precomp_r2_mod_n 0 (as_seq h0 n)) (as_seq h0 r2)
-
-
-inline_for_extraction noextract
-val bn_mont_mul:
+val mk_bn_mod_exp_precomp_mont:
     #t:limb_t
   -> k:BM.mont t
-  -> n:Ghost.erased (BD.lbignum t (v k.BM.bn.BN.len))
-  -> mu:limb t{SM.bn_mont_pre n mu}
-  -> BE.lmul_st t k.BM.bn.BN.len k.BM.bn.BN.len (mk_lexp_to_exp t k.BM.bn.BN.len n mu)
+  -> bn_exp_mont: ME.bn_exp_mont_st t k.BM.bn.BN.len ->
+  bn_mod_exp_precomp_st t k.BM.bn.BN.len
 
-let bn_mont_mul #t k n mu ctx aM bM resM =
+let mk_bn_mod_exp_precomp_mont #t k bn_exp_mont n mu r2 a bBits b res =
   let h0 = ST.get () in
-  let len = k.BM.bn.BN.len in
-  SM.bn_mont_mul_lemma n mu (as_seq h0 aM) (as_seq h0 bM);
-  k.BM.mul ctx mu aM bM resM
+  [@inline_let] let len = k.BM.bn.BN.len in
+  push_frame ();
+  BD.bn_eval_bound (as_seq h0 n) (v len);
+  let aM = create len (uint #t #SEC 0) in
+  BM.to n mu r2 a aM;
+  SM.bn_to_mont_lemma (as_seq h0 n) mu (as_seq h0 r2) (as_seq h0 a);
+
+  let resM = create len (uint #t #SEC 0) in
+  bn_exp_mont n mu r2 aM bBits b resM;
+  BM.from n mu resM res;
+
+  let h1 = ST.get () in
+  SM.bn_from_mont_lemma (as_seq h0 n) mu (as_seq h1 resM);
+  E.mod_exp_mont_ll_lemma (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 a) (bn_v h0 b);
+  assert (bn_v h1 res == Lib.NatMod.pow_mod #(bn_v h0 n) (bn_v h0 a) (bn_v h0 b));
+  pop_frame ()
 
 
 inline_for_extraction noextract
-val bn_mont_sqr:
+val mk_bn_mod_exp_precomp_amont:
     #t:limb_t
-  -> k:BM.mont t
-  -> n:Ghost.erased (BD.lbignum t (v k.BM.bn.BN.len))
-  -> mu:limb t{SM.bn_mont_pre n mu}
-  -> BE.lsqr_st t k.BM.bn.BN.len k.BM.bn.BN.len (mk_lexp_to_exp t k.BM.bn.BN.len n mu)
+  -> k:AM.almost_mont t
+  -> bn_exp_amont: AE.bn_exp_almost_mont_st t k.AM.bn.BN.len ->
+  bn_mod_exp_precomp_st t k.AM.bn.BN.len
 
-let bn_mont_sqr #t k n mu ctx aM resM =
+let mk_bn_mod_exp_precomp_amont #t k bn_exp_amont n mu r2 a bBits b res =
   let h0 = ST.get () in
-  let len = k.BM.bn.BN.len in
-  SM.bn_mont_sqr_lemma n mu (as_seq h0 aM);
-  SM.bn_mont_mul_lemma n mu (as_seq h0 aM) (as_seq h0 aM);
-  BD.bn_eval_inj #t (v len)
-    (SM.bn_mont_mul n mu (as_seq h0 aM) (as_seq h0 aM))
-    (SM.bn_mont_sqr n mu (as_seq h0 aM));
-  k.BM.sqr ctx mu aM resM
-
-
-inline_for_extraction noextract
-let mk_lexp
-  (t:limb_t)
-  (k:BM.mont t)
-  (n:Ghost.erased (BD.lbignum t (v k.BM.bn.BN.len)))
-  (mu:limb t{SM.bn_mont_pre n mu}) : BE.lexp t k.BM.bn.BN.len k.BM.bn.BN.len =
-{
-  BE.to = mk_lexp_to_exp t k.BM.bn.BN.len n mu;
-  BE.lmul = bn_mont_mul k n mu;
-  BE.lsqr = bn_mont_sqr k n mu;
-}
-
-///////////////////////////////////////////////////////////////////////
-
-let bn_mod_exp_raw_precompr2 #t k n a bBits b r2 res =
-  let h0 = ST.get () in
-  [@inline_let] let len = k.BM.bn.BN.len in
+  [@inline_let] let len = k.AM.bn.BN.len in
   push_frame ();
-  let bLen = blocks bBits (size (bits t)) in
-  let nInv = BM.mod_inv_limb n.(0ul) in // n * nInv = 1 (mod (pow2 64))
-  Hacl.Spec.Bignum.ModInvLimb.bn_mod_inv_limb_lemma (as_seq h0 n);
+  BD.bn_eval_bound (as_seq h0 n) (v len);
+  let aM = create len (uint #t #SEC 0) in
+  AM.to n mu r2 a aM;
+  SM.bn_to_mont_lemma (as_seq h0 n) mu (as_seq h0 r2) (as_seq h0 a);
+  M.to_mont_lemma (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 a);
 
-  let aM   = create len (uint #t #SEC 0) in
-  let accM = create len (uint #t #SEC 0) in
-  BM.to n nInv r2 a aM;
-  SM.bn_to_mont_lemma (as_seq h0 n) nInv (as_seq h0 r2) (as_seq h0 a);
-  bn_mont_one k n nInv r2 accM;
+  let resM = create len (uint #t #SEC 0) in
+  bn_exp_amont n mu r2 aM bBits b resM;
+  AM.from n mu resM res;
 
-  BE.lexp_rl len len (mk_lexp t k (as_seq h0 n) nInv) n aM bLen bBits b accM;
-
-  BM.from n nInv accM res;
+  let h1 = ST.get () in
+  SM.bn_from_mont_lemma (as_seq h0 n) mu (as_seq h1 resM);
+  BD.bn_eval_bound (as_seq h1 resM) (v len);
+  E.mod_exp_mont_ll_mod_lemma (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 a) (bn_v h0 b) (bn_v h1 resM);
+  assert (bn_v h1 res == Lib.NatMod.pow_mod #(bn_v h0 n) (bn_v h0 a) (bn_v h0 b));
   pop_frame ()
 
 
-let bn_mod_exp_ct_precompr2 #t k n a bBits b r2 res =
+let bn_mod_exp_bm_vartime_precomp #t k n mu r2 a bBits b res =
+  mk_bn_mod_exp_precomp_mont #t k (ME.bn_exp_mont_bm_vartime #t k) n mu r2 a bBits b res
+
+let bn_mod_exp_bm_consttime_precomp #t k n mu r2 a bBits b res =
+  mk_bn_mod_exp_precomp_mont #t k (ME.bn_exp_mont_bm_consttime #t k) n mu r2 a bBits b res
+
+let bn_mod_exp_fw_vartime_precomp #t k l n mu r2 a bBits b res =
+  mk_bn_mod_exp_precomp_mont #t k (ME.bn_exp_mont_fw_vartime #t k l) n mu r2 a bBits b res
+
+let bn_mod_exp_fw_consttime_precomp #t k l n mu r2 a bBits b res =
+  mk_bn_mod_exp_precomp_mont #t k (ME.bn_exp_mont_fw_consttime #t k l) n mu r2 a bBits b res
+
+let bn_mod_exp_amm_bm_vartime_precomp #t k n mu r2 a bBits b res =
+  mk_bn_mod_exp_precomp_amont #t k (AE.bn_exp_almost_mont_bm_vartime #t k) n mu r2 a bBits b res
+
+let bn_mod_exp_amm_bm_consttime_precomp #t k n mu r2 a bBits b res =
+  mk_bn_mod_exp_precomp_amont #t k (AE.bn_exp_almost_mont_bm_consttime #t k) n mu r2 a bBits b res
+
+let bn_mod_exp_amm_fw_vartime_precomp #t k l n mu r2 a bBits b res =
+  mk_bn_mod_exp_precomp_amont #t k (AE.bn_exp_almost_mont_fw_vartime #t k l) n mu r2 a bBits b res
+
+let bn_mod_exp_amm_fw_consttime_precomp #t k l n mu r2 a bBits b res =
+  mk_bn_mod_exp_precomp_amont #t k (AE.bn_exp_almost_mont_fw_consttime #t k l) n mu r2 a bBits b res
+
+
+let bn_mod_exp_consttime_precomp #t len bn_mod_exp_bm_consttime_precomp bn_mod_exp_fw_consttime_precomp n mu r2 a bBits b res =
+  if bBits <. size SE.bn_exp_mont_consttime_threshold then
+    bn_mod_exp_bm_consttime_precomp n mu r2 a bBits b res
+  else
+    bn_mod_exp_fw_consttime_precomp n mu r2 a bBits b res
+
+
+let bn_mod_exp_vartime_precomp #t len bn_mod_exp_bm_vartime_precomp bn_mod_exp_fw_vartime_precomp n mu r2 a bBits b res =
+  if bBits <. size SE.bn_exp_mont_vartime_threshold then
+    bn_mod_exp_bm_vartime_precomp n mu r2 a bBits b res
+  else
+    bn_mod_exp_fw_vartime_precomp n mu r2 a bBits b res
+
+
+let mk_bn_mod_exp_precompr2 #t len bn_mod_exp_precomp n r2 a bBits b res =
   let h0 = ST.get () in
-  [@inline_let] let len = k.BM.bn.BN.len in
-  push_frame ();
-  let bLen = blocks bBits (size (bits t)) in
-  let nInv = BM.mod_inv_limb n.(0ul) in // n * nInv = 1 (mod (pow2 64))
+  let mu = BM.mod_inv_limb n.(0ul) in // n * mu = 1 (mod (pow2 64))
   Hacl.Spec.Bignum.ModInvLimb.bn_mod_inv_limb_lemma (as_seq h0 n);
-
-  let aM   = create len (uint #t #SEC 0) in
-  let accM = create len (uint #t #SEC 0) in
-  BM.to n nInv r2 a aM;
-  SM.bn_to_mont_lemma (as_seq h0 n) nInv (as_seq h0 r2) (as_seq h0 a);
-  bn_mont_one k n nInv r2 accM;
-
-  BE.lexp_mont_ladder_swap len len (mk_lexp t k (as_seq h0 n) nInv) n aM bLen bBits b accM;
-
-  BM.from n nInv accM res;
-  pop_frame ()
+  bn_mod_exp_precomp n mu r2 a bBits b res
 
 
-let bn_mod_exp_fw_raw_precompr2 #t k n a bBits b l r2 res =
-  let h0 = ST.get () in
-  [@inline_let] let len = k.BM.bn.BN.len in
-  push_frame ();
-  let bLen = blocks bBits (size (bits t)) in
-  let nInv = BM.mod_inv_limb n.(0ul) in // n * nInv = 1 (mod (pow2 64))
-  Hacl.Spec.Bignum.ModInvLimb.bn_mod_inv_limb_lemma (as_seq h0 n);
-
-  let aM   = create len (uint #t #SEC 0) in
-  let accM = create len (uint #t #SEC 0) in
-  BM.to n nInv r2 a aM;
-  SM.bn_to_mont_lemma (as_seq h0 n) nInv (as_seq h0 r2) (as_seq h0 a);
-  bn_mont_one k n nInv r2 accM;
-
-  BE.lexp_fw_raw len len (mk_lexp t k (as_seq h0 n) nInv) n aM bLen bBits b accM l;
-
-  BM.from n nInv accM res;
-  pop_frame ()
-
-
-let bn_mod_exp_fw_ct_precompr2 #t k n a bBits b l r2 res =
-  let h0 = ST.get () in
-  [@inline_let] let len = k.BM.bn.BN.len in
-  push_frame ();
-  let bLen = blocks bBits (size (bits t)) in
-  let nInv = BM.mod_inv_limb n.(0ul) in // n * nInv = 1 (mod (pow2 64))
-  Hacl.Spec.Bignum.ModInvLimb.bn_mod_inv_limb_lemma (as_seq h0 n);
-
-  let aM   = create len (uint #t #SEC 0) in
-  let accM = create len (uint #t #SEC 0) in
-  BM.to n nInv r2 a aM;
-  SM.bn_to_mont_lemma (as_seq h0 n) nInv (as_seq h0 r2) (as_seq h0 a);
-  bn_mont_one k n nInv r2 accM;
-
-  BE.lexp_fw_ct len len (mk_lexp t k (as_seq h0 n) nInv) n aM bLen bBits b accM l;
-
-  BM.from n nInv accM res;
-  pop_frame ()
-
-
-
-let bn_mod_exp_raw #t k bn_mod_exp_raw_precompr2 nBits n a bBits b res =
-  let h0 = ST.get () in
-  SM.bn_precomp_r2_mod_n_lemma (v nBits) (as_seq h0 n);
-  [@inline_let] let len = k.BM.bn.BN.len in
+let mk_bn_mod_exp #t len precomp_r2 bn_mod_exp_precomp nBits n a bBits b res =
   push_frame ();
   let r2 = create len (uint #t #SEC 0) in
-  BM.precomp nBits n r2;
-  bn_mod_exp_raw_precompr2 n a bBits b r2 res;
+  let mu = BM.bn_mont_precomp len precomp_r2 nBits n r2 in
+  bn_mod_exp_precomp n mu r2 a bBits b res;
   pop_frame ()
 
-
-let bn_mod_exp_ct #t k bn_mod_exp_ct_precompr2 nBits n a bBits b res =
-  let h0 = ST.get () in
-  SM.bn_precomp_r2_mod_n_lemma (v nBits) (as_seq h0 n);
-  [@inline_let] let len = k.BM.bn.BN.len in
-  push_frame ();
-  let r2 = create len (uint #t #SEC 0) in
-  BM.precomp nBits n r2;
-  bn_mod_exp_ct_precompr2 n a bBits b r2 res;
-  pop_frame ()
-
-
-let bn_mod_exp_fw_raw #t k bn_mod_exp_fw_raw_precompr2 nBits n a bBits b l res =
-  let h0 = ST.get () in
-  SM.bn_precomp_r2_mod_n_lemma (v nBits) (as_seq h0 n);
-  [@inline_let] let len = k.BM.bn.BN.len in
-  push_frame ();
-  let r2 = create len (uint #t #SEC 0) in
-  BM.precomp nBits n r2;
-  bn_mod_exp_fw_raw_precompr2 n a bBits b l r2 res;
-  pop_frame ()
-
-
-let bn_mod_exp_fw_ct #t k bn_mod_exp_fw_ct_precompr2 nBits n a bBits b l res =
-  let h0 = ST.get () in
-  SM.bn_precomp_r2_mod_n_lemma (v nBits) (as_seq h0 n);
-  [@inline_let] let len = k.BM.bn.BN.len in
-  push_frame ();
-  let r2 = create len (uint #t #SEC 0) in
-  BM.precomp nBits n r2;
-  bn_mod_exp_fw_ct_precompr2 n a bBits b l r2 res;
-  pop_frame ()
-
+///////////////////////////////////////////////
 
 /// A fully runtime implementation of modular exponentiation.
 
-[@CInline]
 let bn_check_mod_exp_u32 (len:BN.meta_len U32) : bn_check_mod_exp_st U32 len =
-  bn_check_mod_exp (BM.mk_runtime_mont len)
-[@CInline]
-let bn_mod_exp_raw_precompr2_u32 (len:BN.meta_len U32) : bn_mod_exp_raw_precompr2_st U32 len =
-  bn_mod_exp_raw_precompr2 (BM.mk_runtime_mont len)
-[@CInline]
-let bn_mod_exp_ct_precompr2_u32 (len:BN.meta_len U32) : bn_mod_exp_ct_precompr2_st U32 len =
-  bn_mod_exp_ct_precompr2 (BM.mk_runtime_mont len)
-[@CInline]
-let bn_mod_exp_fw_raw_precompr2_u32 (len:BN.meta_len U32) : bn_mod_exp_fw_precompr2_st U32 len =
-  bn_mod_exp_fw_raw_precompr2 (BM.mk_runtime_mont len)
-[@CInline]
-let bn_mod_exp_fw_ct_precompr2_u32 (len:BN.meta_len U32) : bn_mod_exp_fw_precompr2_st U32 len =
-  bn_mod_exp_fw_ct_precompr2 (BM.mk_runtime_mont len)
+  bn_check_mod_exp len
+let bn_mod_exp_vartime_precomp_u32 (len:BN.meta_len U32) : bn_mod_exp_precomp_st U32 len =
+  [@inline_let]
+  let km = AM.mk_runtime_almost_mont len in
+  bn_mod_exp_vartime_precomp len
+    (bn_mod_exp_amm_bm_vartime_precomp km)
+    (bn_mod_exp_amm_fw_vartime_precomp km 4ul)
+let bn_mod_exp_consttime_precomp_u32 (len:BN.meta_len U32) : bn_mod_exp_precomp_st U32 len =
+  [@inline_let]
+  let km = AM.mk_runtime_almost_mont len in
+  bn_mod_exp_consttime_precomp len
+    (bn_mod_exp_amm_bm_consttime_precomp km)
+    (bn_mod_exp_amm_fw_consttime_precomp km 4ul)
+let bn_mod_exp_vartime_u32 (len:BN.meta_len U32) : bn_mod_exp_st U32 len =
+  mk_bn_mod_exp len (BM.bn_precomp_r2_mod_n_u32 len) (bn_mod_exp_vartime_precomp_u32 len)
+let bn_mod_exp_consttime_u32 (len:BN.meta_len U32) : bn_mod_exp_st U32 len =
+  mk_bn_mod_exp len (BM.bn_precomp_r2_mod_n_u32 len) (bn_mod_exp_consttime_precomp_u32 len)
+
 
 inline_for_extraction noextract
 let mk_runtime_exp_u32 (len:BN.meta_len U32) : exp U32 = {
-  mont = BM.mk_runtime_mont len;
+  bn = BN.mk_runtime_bn U32 len;
+  mod_check = BM.bn_check_modulus;
   exp_check = bn_check_mod_exp_u32 len;
-  raw_mod_exp_precomp = bn_mod_exp_raw_precompr2_u32 len;
-  ct_mod_exp_precomp = bn_mod_exp_ct_precompr2_u32 len;
-  raw_mod_exp_fw_precomp = bn_mod_exp_fw_raw_precompr2_u32 len;
-  ct_mod_exp_fw_precomp = bn_mod_exp_fw_ct_precompr2_u32 len;
+  precompr2 = BM.bn_precomp_r2_mod_n_u32 len;
+  exp_vt_precomp = bn_mod_exp_vartime_precomp_u32 len;
+  exp_ct_precomp = bn_mod_exp_consttime_precomp_u32 len;
+  exp_vt = bn_mod_exp_vartime_u32 len;
+  exp_ct = bn_mod_exp_consttime_u32 len;
   }
 
 
-[@CInline]
 let bn_check_mod_exp_u64 (len:BN.meta_len U64) : bn_check_mod_exp_st U64 len =
-  bn_check_mod_exp (BM.mk_runtime_mont len)
-[@CInline]
-let bn_mod_exp_raw_precompr2_u64 (len:BN.meta_len U64) : bn_mod_exp_raw_precompr2_st U64 len =
-  bn_mod_exp_raw_precompr2 (BM.mk_runtime_mont len)
-[@CInline]
-let bn_mod_exp_ct_precompr2_u64 (len:BN.meta_len U64) : bn_mod_exp_ct_precompr2_st U64 len =
-  bn_mod_exp_ct_precompr2 (BM.mk_runtime_mont len)
-[@CInline]
-let bn_mod_exp_fw_raw_precompr2_u64 (len:BN.meta_len U64) : bn_mod_exp_fw_precompr2_st U64 len =
-  bn_mod_exp_fw_raw_precompr2 (BM.mk_runtime_mont len)
-[@CInline]
-let bn_mod_exp_fw_ct_precompr2_u64 (len:BN.meta_len U64) : bn_mod_exp_fw_precompr2_st U64 len =
-  bn_mod_exp_fw_ct_precompr2 (BM.mk_runtime_mont len)
+  bn_check_mod_exp len
+let bn_mod_exp_vartime_precomp_u64 (len:BN.meta_len U64) : bn_mod_exp_precomp_st U64 len =
+  [@inline_let]
+  let km = AM.mk_runtime_almost_mont len in
+  bn_mod_exp_vartime_precomp len
+    (bn_mod_exp_amm_bm_vartime_precomp km)
+    (bn_mod_exp_amm_fw_vartime_precomp km 4ul)
+let bn_mod_exp_consttime_precomp_u64 (len:BN.meta_len U64) : bn_mod_exp_precomp_st U64 len =
+  [@inline_let]
+  let km = AM.mk_runtime_almost_mont len in
+  bn_mod_exp_consttime_precomp len
+    (bn_mod_exp_amm_bm_consttime_precomp km)
+    (bn_mod_exp_amm_fw_consttime_precomp km 4ul)
+let bn_mod_exp_vartime_u64 (len:BN.meta_len U64) : bn_mod_exp_st U64 len =
+  mk_bn_mod_exp len (BM.bn_precomp_r2_mod_n_u64 len) (bn_mod_exp_vartime_precomp_u64 len)
+let bn_mod_exp_consttime_u64 (len:BN.meta_len U64) : bn_mod_exp_st U64 len =
+  mk_bn_mod_exp len (BM.bn_precomp_r2_mod_n_u64 len) (bn_mod_exp_consttime_precomp_u64 len)
+
 
 inline_for_extraction noextract
 let mk_runtime_exp_u64 (len:BN.meta_len U64) : exp U64 = {
-  mont = BM.mk_runtime_mont len;
+  bn = BN.mk_runtime_bn U64 len;
+  mod_check = BM.bn_check_modulus;
   exp_check = bn_check_mod_exp_u64 len;
-  raw_mod_exp_precomp = bn_mod_exp_raw_precompr2_u64 len;
-  ct_mod_exp_precomp = bn_mod_exp_ct_precompr2_u64 len;
-  raw_mod_exp_fw_precomp = bn_mod_exp_fw_raw_precompr2_u64 len;
-  ct_mod_exp_fw_precomp = bn_mod_exp_fw_ct_precompr2_u64 len;
+  precompr2 = BM.bn_precomp_r2_mod_n_u64 len;
+  exp_vt_precomp = bn_mod_exp_vartime_precomp_u64 len;
+  exp_ct_precomp = bn_mod_exp_consttime_precomp_u64 len;
+  exp_vt = bn_mod_exp_vartime_u64 len;
+  exp_ct = bn_mod_exp_consttime_u64 len;
   }
 
 

@@ -166,7 +166,6 @@ val point_compress:
       as_seq h1 out == Spec.Ed25519.point_compress (F51.point_eval h0 p)
     )
 
-[@CInline]
 let point_compress z p =
   push_frame();
   let tmp  = create 15ul (u64 0) in

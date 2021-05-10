@@ -50,17 +50,18 @@ endif
 #   to not enforce trivial preconditions
 #   for top-level unannotated effectful functions
 
-# 272: top-level bindings must be total
-# 247: checked file not written because some of its dependencies...
 # 241: corrupt cache file AND stale cache file (argh!) we wish to make the
 #      former fatal, and the latter non-fatal if it's the file we're about to
 #      verify... see https://github.com/FStarLang/FStar/issues/1652
+# 272: top-level bindings must be total
+# 274: shadowing
+# 247: checked file not written because some of its dependencies...
 # 332: abstract keyword
 FSTAR_NO_FLAGS = $(FSTAR_HOME)/bin/fstar.exe $(FSTAR_HINTS) \
   --odir $(OUTPUT_DIR) --cache_checked_modules $(FSTAR_INCLUDES) --cmi \
-  --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' --warn_error '+241@247-272' \
-  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false \
-  --warn_error @332
+  --already_cached 'Prims FStar LowStar C Spec.Loops TestLib WasmSupport' \
+  --warn_error '+241@247-272-274@332' \
+  --cache_dir $(OUTPUT_DIR) --trivial_pre_for_unannotated_effectful_fns false
 
 FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 
@@ -119,7 +120,7 @@ STREAMING_BUNDLE=-bundle Hacl.Streaming.Interface,Hacl.Streaming.Lemmas
 INTTYPES_BUNDLE=-bundle Hacl.IntTypes.Intrinsics= -static-header Hacl.IntTypes.Intrinsics
 RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 FFDHE_BUNDLE=-bundle Hacl.Impl.FFDHE.Constants -static-header Hacl.Impl.FFDHE.Constants -bundle Hacl.FFDHE=Hacl.Impl.FFDHE[rename=Hacl_FFDHE]
-BIGNUM_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.*
+BIGNUM_BUNDLE=-bundle Hacl.Bignum.Base -static-header Hacl.Bignum.Base -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
 
 # 3. OCaml
 

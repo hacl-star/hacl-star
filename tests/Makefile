@@ -12,26 +12,48 @@ USER_CFLAGS?=
 # Add GF128 tests once code/experimental/gf128 is promoted to code
 TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
 
-# Filter the targets if they are not supported
+# The idea of this Makefile is that each test is enabled depending on whether
+# the required features for it have been detected by the configure script. The
+# eventual goal is to have all tests in this directory be feature-controlled by
+# this Makefile, which will remove the distinction between all/ARM: the Makefile
+# will automatically strip tests for which features are missing.
+#
+# In the meanwhile:
+# TODO: some tests are still not separated into different files
+# Ideally, each algorithm has foo-test, foo-test-128, foo-test-256 and we run
+# whatever Makefile.config tells us is supported for the current build
+# configuration.
+
 # Vec128
-ifneq ($(COMPILE_VEC128),1)
+ifneq ($(COMPILE_VEC128),)
+CFLAGS += -DHACL_CAN_COMPILE_VEC128
+else
 TARGETS := $(filter-out %-128-test-streaming.exe, $(filter-out %-128-test.exe, $(TARGETS)))
 endif
 
 # Vec256
-ifneq ($(COMPILE_VEC256),1)
+ifneq ($(COMPILE_VEC256),)
+CFLAGS += -DHACL_CAN_COMPILE_VEC256
+else
 TARGETS := $(filter-out %-256-test-streaming.exe, $(filter-out %-256-test.exe, $(TARGETS)))
 endif
 
 # Curve64
-ifneq ($(COMPILE_INTRINSICS),1)
+ifneq ($(COMPILE_INTRINSICS),)
+CFLAGS += -DCOMPILE_INTRINSICS
+else
+endif
+
+ifneq ($(COMPILE_INLINE_ASM),)
+CFLAGS += -DHACL_CAN_COMPILE_INLINE_ASM
+else
 TARGETS := $(filter-out curve64-%, $(TARGETS))
 endif
 
-CFLAGS := -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
+CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
-  -O3 $(CFLAGS) $(USER_CFLAGS)
+  -O3 $(USER_CFLAGS)
 
 all: $(TARGETS)
 

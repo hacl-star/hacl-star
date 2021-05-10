@@ -12,6 +12,10 @@
 #include "Hacl_Blake2s_32.h"
 #include "Hacl_Blake2b_32.h"
 
+#if defined(HACL_CAN_COMPILE_VEC128)
+#include "Hacl_Blake2s_128.h"
+#endif
+
 #include "test_helpers.h"
 
 #include "EverCrypt_AutoConfig2.h"
@@ -41,6 +45,12 @@ bool print_test2s(int in_len, uint8_t* in, int key_len, uint8_t* key, int exp_le
   Hacl_Blake2s_32_blake2s(exp_len,comp,in_len,in,key_len,key);
   printf("testing blake2s vec-32:\n");
   bool ok = print_result(exp_len,comp,exp);
+
+#if defined(HACL_CAN_COMPILE_VEC128)
+  Hacl_Blake2s_128_blake2s(exp_len,comp,in_len,in,key_len,key);
+  printf("testing blake2s vec-128:\n");
+  ok = ok && print_result(exp_len,comp,exp);
+#endif
 
   return ok;
 }
@@ -73,8 +83,7 @@ int main()
   }
   b = cpucycles_end();
   t2 = clock();
-  uint64_t cdiff1 = b - a;
-  double tdiff1 = t2 - t1;
+  clock_t tdiff1 = t2 - t1;
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_Blake2b_32_blake2b(64,plain,SIZE,plain,0,NULL);
@@ -86,12 +95,27 @@ int main()
   }
   b = cpucycles_end();
   t2 = clock();
-  uint64_t cdiff2 = b - a;
-  double tdiff2 = t2 - t1;
+  clock_t tdiff2 = (t2 - t1);
+
+#if defined(HACL_CAN_COMPILE_VEC128)
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Blake2s_128_blake2s(32,plain,SIZE,plain,0,NULL);
+  }
+  t1 = clock();
+  for (int j = 0; j < ROUNDS; j++) {
+    Hacl_Blake2s_128_blake2s(32,plain,SIZE,plain,0,NULL);
+  }
+  t2 = clock();
+  clock_t tdiff3 = (t2 - t1);
+#endif
 
   uint64_t count = ROUNDS * SIZE;
-  printf("Blake2S (Vec 32-bit):\n"); print_time(count,tdiff1,cdiff1);
-  printf("Blake2B (Vec 64-bit):\n"); print_time(count,tdiff2,cdiff2);
+  printf("Blake2S (Vec 32-bit):\n"); print_time(count,tdiff1,0);
+  printf("Blake2B (Vec 64-bit):\n"); print_time(count,tdiff2,0);
+
+#if defined(HACL_CAN_COMPILE_VEC128)
+  printf("Blake2S (Vec 128-bit):\n"); print_time(count,tdiff3,0);
+#endif
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;

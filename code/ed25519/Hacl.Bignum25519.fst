@@ -92,7 +92,6 @@ let carry51 l cin =
   (l' &. mask_51, l' >>. 51ul)
 
 
-[@CInline]
 let reduce_513 a =
   let (f0, f1, f2, f3, f4) = (a.(0ul), a.(1ul), a.(2ul), a.(3ul), a.(4ul)) in
   let tmp0, c0 = carry51 #9 f0 (u64 0) in
@@ -233,7 +232,6 @@ let fsquare_times_inplace output count =
   pop_frame()
 
 
-[@CInline]
 let inverse out a =
   push_frame();
   let tmp = create 10ul (u128 0) in
@@ -250,7 +248,6 @@ let reduce out =
   make_u64_5 out f0 f1 f2 f3 f4
 
 
-[@CInline]
 let load_51 output input =
   push_frame ();
   let u64s = create 4ul (u64 0) in
@@ -279,7 +276,6 @@ let load_51 output input =
   pop_frame ()
 
 
-[@CInline]
 let store_51 output input =
   let h0 = ST.get () in
   push_frame ();

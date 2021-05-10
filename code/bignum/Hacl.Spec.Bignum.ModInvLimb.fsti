@@ -17,6 +17,6 @@ val mod_inv_limb_lemma: #t:limb_t -> n0:limb t -> Lemma
 
 
 val bn_mod_inv_limb_lemma: #t:limb_t -> #nLen:size_pos -> n:lbignum t nLen -> Lemma
-  (requires bn_v n % 2 = 1)
+  (requires 1 < bn_v n /\ bn_v n % 2 = 1)
   (ensures  (let mu = mod_inv_limb (Lib.Sequence.index n 0) in
-    (1 + (bn_v n % pow2 (bits t)) * v mu) % pow2 (bits t) == 0))
+    (1 + bn_v n * v mu) % pow2 (bits t) == 0))

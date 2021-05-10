@@ -1,5 +1,5 @@
 [
-  "Gôˆ¾\u0011+3\u001c¤6\u0010É\u000bq8G",
+  "\u0016x\u001b\u0017lªdC\u0007–\u0006=ŠÒ†Ô",
   [
     [
       "Hacl.Bignum.Montgomery.bn_check_modulus_st",
@@ -13,7 +13,7 @@
         "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814"
       ],
       0,
-      "ffbb233008c22a7dfd9bfd8b5c5ce878"
+      "81ea9ae7f8ca4855dabf0bc6c017bb2f"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_precomp_r2_mod_n_st",
@@ -51,7 +51,60 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "81a3961b9fcf67caaf553ae7e32b97da"
+      "9e77e1e0d014bbcdd95a276e4a059aa9"
+    ],
+    [
+      "Hacl.Bignum.Montgomery.bn_mont_precomp_st",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U16",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok",
+        "equality_tok_Lib.IntTypes.PUB@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
+        "equation_Hacl.Bignum.Definitions.bn_v",
+        "equation_Hacl.Bignum.Definitions.lbignum",
+        "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Bignum.Definitions.limb_t",
+        "equation_Hacl.Bignum.meta_len",
+        "equation_Hacl.Spec.Bignum.Definitions.limb_t",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
+        "equation_Lib.Buffer.length", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.uv_inv", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_ade5c576efe77d70eb2ea981b50a39dc",
+        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
+        "typing_Hacl.Bignum.Definitions.limb", "typing_Lib.IntTypes.minint",
+        "typing_Lib.IntTypes.v", "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.len",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "0359e34f0371b1eeb7a9c5d24e467d26"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_mont_reduction_st",
@@ -75,7 +128,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6957fe41b0ea7f945ef46f065ef83c89"
+      "afb993f69a1ae021242fe97d5a4bddd9"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_mont_reduction",
@@ -107,7 +160,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a203cedc527df2a8b0bebc564a5b119d"
+      "cc00dc1dab954ad36ee910cb3d16afcb"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_to_mont_st",
@@ -145,7 +198,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f558df7fd9709e97123d1385be6cc009"
+      "16085ec77231b71aff32a536a15228f1"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_to_mont",
@@ -177,7 +230,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0a3b1fa08b4ee7b86af190dc567d5ab6"
+      "dd66f61a5b316171a5e8032c9c3a1391"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_from_mont_st",
@@ -215,7 +268,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "ca565e49b1c6f9391330381d7b05f39b"
+      "4e013bed7fd7a954aea8da016cd68a45"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_from_mont",
@@ -247,7 +300,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1b4e5347785657bfbed4b351fe5ccabd"
+      "1db6df5fae73c7f780c56a7703d090f0"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_mont_mul_st",
@@ -285,7 +338,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f77693a01991cc0ebcc2d9b29a19a87b"
+      "62fc210a279eca878ddca28c9c406667"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_mont_mul",
@@ -317,7 +370,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "af2f38d804b6ceece964de07afaea2ca"
+      "260bb2727bdc44812dbc14e49208b4ba"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_mont_sqr_st",
@@ -355,7 +408,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d5778b2aec7ff36b024d5a1376c096fd"
+      "bf477e3c3ff83635d1521633a5457116"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_mont_sqr",
@@ -387,7 +440,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "24a1dd83e9153da9faac1e954479808b"
+      "aacebb4c5e737e3f17548172fa7c1e18"
     ],
     [
       "Hacl.Bignum.Montgomery.mont",
@@ -419,7 +472,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "508235769b66988b5d149b74622744bb"
+      "a8ccc275dcc4aeab15cb625fc450016d"
     ],
     [
       "Hacl.Bignum.Montgomery.__proj__Mkmont__item__mont_check",
@@ -435,7 +488,7 @@
         "projection_inverse_Hacl.Bignum.Montgomery.Mkmont_bn"
       ],
       0,
-      "54cd06921a9bb24cc02f446d71797d24"
+      "e4ef98458c2c4054d2ba6848af2a106f"
     ],
     [
       "Hacl.Bignum.Montgomery.__proj__Mkmont__item__precomp",
@@ -450,7 +503,7 @@
         "projection_inverse_Hacl.Bignum.Montgomery.Mkmont_bn"
       ],
       0,
-      "340b0b1ddcb57026630e33aa845fb6ce"
+      "cc4d29e43d33b31a9b6bdf13520327e5"
     ],
     [
       "Hacl.Bignum.Montgomery.__proj__Mkmont__item__reduction",
@@ -481,7 +534,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9aecd9f7ee25858cfa066ca3079c9d3d"
+      "62e2fea3efe52c018e5d1f1742b3ff31"
     ],
     [
       "Hacl.Bignum.Montgomery.__proj__Mkmont__item__reduction",
@@ -516,7 +569,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "6722a3bb7b47f1752ebc40102d6deb16"
+      "5fa74b282cd4d87b4a040300a18a944e"
     ],
     [
       "Hacl.Bignum.Montgomery.__proj__Mkmont__item__to",
@@ -531,7 +584,7 @@
         "projection_inverse_Hacl.Bignum.Montgomery.Mkmont_bn"
       ],
       0,
-      "4c91f36e3120018805d2197529862acf"
+      "9175801ca4fb449755123dc447673185"
     ],
     [
       "Hacl.Bignum.Montgomery.__proj__Mkmont__item__from",
@@ -546,7 +599,7 @@
         "projection_inverse_Hacl.Bignum.Montgomery.Mkmont_bn"
       ],
       0,
-      "4d62168e51de942ea4c6de35e59cf6c0"
+      "e71501d0e104b40c1fdc69e3f044ee0c"
     ],
     [
       "Hacl.Bignum.Montgomery.__proj__Mkmont__item__mul",
@@ -561,7 +614,7 @@
         "refinement_interpretation_Tm_refine_fbca4c5cf6464419bc2c4c1abeeb71d4"
       ],
       0,
-      "4a0daac19472c734d179d601efec2211"
+      "e0e19aaf6facb74ea4004d1cc6f40922"
     ],
     [
       "Hacl.Bignum.Montgomery.__proj__Mkmont__item__sqr",
@@ -576,7 +629,7 @@
         "refinement_interpretation_Tm_refine_7b8c16c5d24024d13413b65d51ef286c"
       ],
       0,
-      "001c8d1e04a3a9c6d64dd1b00ffb7eba"
+      "b577adde3c213a3ff2c8c11a0ff0ed64"
     ],
     [
       "Hacl.Bignum.Montgomery.reduction",
@@ -607,7 +660,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2c5cea29cc54bae9138c00a3d3fcd5cb"
+      "d68075d3665e34ff8764aa569b95a010"
     ],
     [
       "Hacl.Bignum.Montgomery.bn_mont_one_st",
@@ -645,7 +698,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8475cddf3c61d76ebf48c3ec28eee3a2"
+      "1a0b4ef5e9cc76cf779968ff639b20f9"
     ]
   ]
 ]

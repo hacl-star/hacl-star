@@ -174,7 +174,6 @@ val point_mul:
       F51.point_eval h1 result == Spec.Ed25519.point_mul (as_seq h0 scalar) (F51.point_eval h0 q)
     )
 
-[@CInline]
 let point_mul result scalar q =
   push_frame();
   let b = create 80ul (u64 0) in

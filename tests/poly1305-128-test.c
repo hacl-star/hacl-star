@@ -10,7 +10,6 @@
 #include <time.h>
 
 #include "test_helpers.h"
-
 #include "Hacl_Poly1305_128.h"
 
 #include "EverCrypt_AutoConfig2.h"

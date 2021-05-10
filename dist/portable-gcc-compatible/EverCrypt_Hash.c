@@ -657,7 +657,7 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n)
 {
   bool has_shaext = EverCrypt_AutoConfig2_has_shaext();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (has_shaext && has_sse)
   {
     uint64_t n1 = (uint64_t)n;
