@@ -678,23 +678,30 @@ typedef vector128_8 vector128;
 
 /* Small helper to change the endianess of the vector's elements, seen as uint32.
  * Note that we can't use vec_revb. */
-#define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0)      \
+// TODO: remove
+#define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0) \
   ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
-                        (vector128_8){3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12})))
+  (vector128_8){3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12})))
 
 /* Small helper to change the endianess of the vector's elements, seen as uint64
  * Note that we can't use vec_revb. */
-#define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0)      \
+#define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0) \
   ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
-                        (vector128_8){7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8})))
+  (vector128_8){7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8})))
+
+/*#define Lib_IntVector_Intrinsics_vec128_load32_le(x)                  \
+  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
+  ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))*/
 
 #define Lib_IntVector_Intrinsics_vec128_load32_le(x)              \
-  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
-   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
+    ((vector128_32)(__builtin_s390_vlbr((vector128_32)x)))
+//  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
+//   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
 
 #define Lib_IntVector_Intrinsics_vec128_load64_le(x)              \
-  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64( \
-   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
+    ((vector128_64)(__builtin_s390_vlbr((vector128_64)x)))
+//  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64( \
+//   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
 
 #define Lib_IntVector_Intrinsics_vec128_store32_le(x0, x1)             \
    (vec_store_len(((vector128_8)Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x1)), \
