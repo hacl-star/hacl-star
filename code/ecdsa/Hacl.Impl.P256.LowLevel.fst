@@ -80,6 +80,7 @@ let lemma_lseq_nat_instant_8 a =
   lseq_as_nat_last a
 
 
+inline_for_extraction noextract
 val add_dep_prime_p256: x: felem P256 -> t: uint64 {uint_v t == 0 \/ uint_v t == 1} -> result: felem P256 -> 
   Stack uint64
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
@@ -156,7 +157,7 @@ let mult64_c x u cin result temp =
   let l = index result (size 0) in     
   add_carry_u64 cin l h result
 
-
+inline_for_extraction noextract
 val shortened_mul_prime256: b: uint64 -> result: widefelem P256 -> Stack unit
   (requires fun h -> live h result /\ wide_as_nat P256 h result < pow2 (64 * 5))
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ wide_as_nat P256 h1 result < pow2 (64 * 5) /\

@@ -70,6 +70,7 @@ let lemma_t_computation_p384 t =
     0xffffffffffffffff * pow2 (64 * 3) + 0xffffffffffffffff * pow2 (64 * 4) + 0xffffffffffffffff * pow2 (64 * 5) == prime384)
 
 
+inline_for_extraction noextract
 val add_dep_prime_p384: x: felem P384 -> t: uint64 {uint_v t == 0 \/ uint_v t == 1} -> result: felem P384 -> 
   Stack uint64
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)

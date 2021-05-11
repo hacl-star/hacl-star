@@ -470,6 +470,8 @@ let compare_felem_bool a b  =
   eq_u64_nCT a_3 b_3
 
 
+let prime_p256_order = getOrder #P256
+
 inline_for_extraction
 val ecdsa_verification_core:
   #c: curve -> 
@@ -498,13 +500,13 @@ val ecdsa_verification_core:
       disjoint tempBuffer s /\
       disjoint tempBuffer m /\
       LowStar.Monotonic.Buffer.all_disjoint [loc publicKeyPoint; loc hashAsFelem; loc xBuffer; loc tempBuffer] /\
-      as_nat c h s < prime_p256_order /\ as_nat c h r < prime_p256_order /\
+      (* as_nat c h s < prime_p256_order /\ as_nat c h r < prime_p256_order /\ *)
       point_x_as_nat c h publicKeyPoint < prime256 /\
       point_y_as_nat c h publicKeyPoint < prime256 /\
       point_z_as_nat c h publicKeyPoint < prime256
     )
     (ensures fun h0 state h1 ->
-      modifies (loc publicKeyPoint |+| loc hashAsFelem |+| loc xBuffer |+| loc tempBuffer) h0 h1 /\
+      modifies (loc publicKeyPoint |+| loc hashAsFelem |+| loc xBuffer |+| loc tempBuffer) h0 h1 (*/\
        (
          assert_norm (pow2 32 < pow2 61);
 	 assert_norm (pow2 32 < pow2 125);
@@ -525,7 +527,7 @@ val ecdsa_verification_core:
          let (xResult, yResult, zResult) = _norm #c sumD in
          state == not (Spec.ECC.isPointAtInfinity (_norm #c sumD)) /\
          as_nat c h1 xBuffer == xResult
-      )
+      )*)
   )
 
 let ecdsa_verification_core alg publicKeyBuffer hashAsFelem r s mLen m xBuffer tempBuffer =

@@ -157,8 +157,8 @@ let reduction_p521 i o =
     assume (lseq_as_nat (as_seq h1 a1) < prime521);
     assume (lseq_as_nat (as_seq h1 a2) < prime521);
 
-  felem_add a0 a1 o;
-  felem_add o a2 o;
+(*   felem_add a0 a1 o;
+  felem_add o a2 o; *)
   pop_frame()
 
 

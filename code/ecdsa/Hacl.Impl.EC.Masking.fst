@@ -17,6 +17,7 @@ open Hacl.EC.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
+[@CInline]
 val copy_conditional: #c: curve 
   -> out: felem c
   -> x: felem c
@@ -121,6 +122,7 @@ let eq1_u64 a =
   neq_mask a (u64 0)
 
 
+inline_for_extraction noextract
 val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
@@ -174,7 +176,7 @@ let isZero_uint64_nCT f =
   let f = isZero_uint64_CT f in 
   Hacl.Impl.EC.LowLevel.RawCmp.eq_u64_nCT f (u64 0xffffffffffffffff)
 
-
+inline_for_extraction noextract
 val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
   (requires fun h -> live h a /\ live h b)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\

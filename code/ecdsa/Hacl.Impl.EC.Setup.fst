@@ -307,6 +307,7 @@ let prime_inverse_buffer (#c: curve): (x: glbuffer uint8 (getCoordinateLenU c)
   | _ -> admit(); prime256_inverse_buffer
   
 
+inline_for_extraction noextract
 val getK0: c: curve -> Stack (r: uint64 {v r = min_one_prime (pow2 64) (- getPrime c)})
   (requires fun h -> True)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
@@ -421,6 +422,7 @@ let upload_b_constant #c x =
       == bCoordinate #P384 * pow2 384 % getPrime P384)
   | _ -> admit()
 
+inline_for_extraction noextract
 val uploadBasePoint: #c: curve -> p: point c -> Stack unit 
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> 

@@ -18,15 +18,17 @@ open Hacl.Impl.EC.Setup
 
 #set-options "--z3rlimit 100"
 
-
+inline_for_extraction noextract
 val uploadZeroImpl: #c: curve -> f: felem c -> Stack unit
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat c h1 f == 0 /\ modifies (loc f) h0 h1)
 
+inline_for_extraction noextract
 val uploadOneImpl: #c: curve -> f: felem c -> Stack unit
   (requires fun h -> live h f)
   (ensures fun h0 _ h1 -> as_nat c h1 f == 1 /\ modifies (loc f) h0 h1)
 
+inline_for_extraction noextract
 val uploadZeroPoint: #c: curve -> p: point c ->
   Stack unit
   (requires fun h -> live h p)
@@ -37,26 +39,28 @@ val uploadZeroPoint: #c: curve -> p: point c ->
     as_nat c h1 (gsub p len len) == 0 /\
     as_nat c h1 (gsub p (size 2 *! len) len) == 0)
 
+inline_for_extraction noextract
 val add_bn: #c: curve -> x: felem c -> y: felem c -> result: felem c ->
   Stack uint64
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result /\ eq_or_disjoint x y)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\
     as_nat c h1 result + v r * (pow2 (getPower c)) == as_nat c h0 x + as_nat c h0 y)
 
+inline_for_extraction noextract
 val add_long_bn: #c: curve -> x: widefelem c -> y: widefelem c -> result: widefelem c ->
   Stack uint64
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result /\ eq_or_disjoint x y)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ v r <= 1 /\
     wide_as_nat c h1 result + v r * pow2 (getLongPower c) == wide_as_nat c h0 x + wide_as_nat c h0 y)
 
-
+inline_for_extraction noextract
 val sub_bn: #c: curve -> x: felem c -> y:felem c -> result: felem c ->
   Stack uint64
   (requires fun h -> live h x /\ live h y /\ live h result /\ eq_or_disjoint x result /\ eq_or_disjoint y result /\ eq_or_disjoint x y)
   (ensures fun h0 r h1 -> modifies1 result h0 h1 /\ v r <= 1 /\
     as_nat c h1 result - v r * (pow2 (getPower c)) == as_nat c h0 x - as_nat c h0 y)
 
-
+inline_for_extraction noextract
 val sub_bn_order: #c: curve -> x: felem c -> result: felem c ->
   Stack uint64
   (requires fun h -> live h x /\ live h result /\ disjoint x result)
@@ -67,7 +71,7 @@ val sub_bn_order: #c: curve -> x: felem c -> result: felem c ->
     else
       as_nat c h0 x < getOrder #c))
 
-
+inline_for_extraction noextract
 val sub_bn_prime: #c: curve -> x: felem c -> result: felem c ->
   Stack uint64
   (requires fun h -> live h x /\ live h result /\ disjoint x result)
@@ -78,27 +82,27 @@ val sub_bn_prime: #c: curve -> x: felem c -> result: felem c ->
     else
       as_nat c h0 x < getPrime c))
 
-
+inline_for_extraction noextract
 val short_mul_prime: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
   (requires fun h -> live h result /\ wide_as_nat c h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     getPrime c * uint_v b = wide_as_nat c h1 result /\
     wide_as_nat c h1 result < (pow2 (getPower c))  * pow2 64)
 
-
+inline_for_extraction noextract
 val short_mul_order: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
   (requires fun h -> live h result /\ wide_as_nat c h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     getOrder #c * uint_v b = wide_as_nat c h1 result /\
     wide_as_nat c h1 result < (pow2 (getPower c)) * pow2 64)
 
-
+inline_for_extraction noextract
 val square_bn: #c: curve -> f: felem c -> out: widefelem c -> Stack unit
     (requires fun h -> live h out /\ live h f /\ eq_or_disjoint f out)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       wide_as_nat c h1 out = as_nat c h0 f * as_nat c h0 f)
 
-
+inline_for_extraction noextract
 val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c 
   -> result: felem c ->
   Stack unit
@@ -107,6 +111,7 @@ val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem 
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     as_nat c h1 result = (as_nat c h0 x + uint_v cin * pow2 (getPower c)) % getPrime c)
 
+inline_for_extraction noextract
 val reduction_prime_2prime_with_carry: #c: curve -> x: widefelem c -> result: felem c ->
   Stack unit
     (requires fun h ->
@@ -114,7 +119,7 @@ val reduction_prime_2prime_with_carry: #c: curve -> x: widefelem c -> result: fe
     (ensures fun h0 _ h1 ->
       modifies (loc result) h0 h1 /\ as_nat c h1 result = wide_as_nat c h0 x % getPrime c)
 
-
+inline_for_extraction noextract
 val reduction_prime_2prime: #c: curve -> x: felem c -> result: felem c ->
   Stack unit
     (requires fun h ->
@@ -156,26 +161,25 @@ val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
     as_nat c h1 out == (as_nat c h0 a - as_nat c h0 b) % getPrime c /\
     as_nat c h1 out == toDomain #c ((fromDomain #c (as_nat c h0 a) - fromDomain #c (as_nat c h0 b)) % getPrime c)))
 
-
+inline_for_extraction noextract
 val mul: #c: curve -> f: felem c -> r: felem c -> out: widefelem c ->
   Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out /\ disjoint f out /\ eq_or_disjoint f r)
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       wide_as_nat c h1 out = as_nat c h0 r * as_nat c h0 f)
 
-
+inline_for_extraction noextract
 val shiftLeftWord: #c: curve -> i: felem c -> o: lbuffer uint64 (getCoordinateLenU64 c *. 2ul)->
   Stack unit
     (requires fun h -> live h i /\ live h o /\ disjoint i o)
     (ensures fun h0 _ h1 -> modifies1 o h0 h1 /\ wide_as_nat c h1 o == as_nat c h0 i * (pow2 (getPower c)))
-
 
 inline_for_extraction noextract
 val mod64: #c: curve -> a: widefelem c -> Stack uint64
   (requires fun h -> live h a)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ wide_as_nat c h1 a % pow2 64 = uint_v r)
 
-
+inline_for_extraction noextract
 val shift1_with_carry: #c: curve -> t: widefelem c -> t1: widefelem c -> carry: uint64 ->
   Stack unit
   (requires fun h -> live h t /\ live h t1 /\ disjoint t t1)
@@ -198,7 +202,7 @@ val scalar_bit: #c: curve -> #buf_type: buftype
   (ensures  fun h0 r h1 -> h0 == h1 /\ r == Spec.ECDSA.ith_bit_power #c (as_seq h0 s) (v n) /\
     v r <= 1)
 
-
+inline_for_extraction noextract
 val mul_atomic: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1)
   -> temp: lbuffer uint64 (size 1) ->
   Stack unit

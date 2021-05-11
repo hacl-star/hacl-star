@@ -26,7 +26,7 @@ open Hacl.Spec.MontgomeryMultiplication
 *)
 
 
-val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) 
+(* val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) 
   -> mLen: size_t 
   -> m: lbuffer uint8 mLen 
   -> privKey: lbuffer uint8 (size 32) 
@@ -51,7 +51,7 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
       flag == flagSpec 
     )    
   )
-
+ *)
 (*)
 (*
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
@@ -158,7 +158,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
 *)
 *) 
 
-val ecdsa_verif_p256_sha2:
+(* val ecdsa_verif_p256_sha2:
     mLen: size_t
   -> m: lbuffer uint8 mLen
   -> pubKey: lbuffer uint8 (size 64)
@@ -175,7 +175,7 @@ val ecdsa_verif_p256_sha2:
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile P256 (Spec.ECDSA.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
     )
-
+ *)
 (*
 [@ (Comment " This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
