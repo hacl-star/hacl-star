@@ -21,7 +21,6 @@ jobs:
           - macos-latest
           - ubuntu-latest
           - windows-latest
-          - macos-11.0
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -29,5 +28,5 @@ jobs:
       - name: Run CI script
         run: .ci/script.sh
       - name: Apple Silicon Build
-        if: matrix.os == 'macos-11.0'
+        if: matrix.os == 'macos-latest'
         run: CROSS_CI="aarch64-apple-darwin" .ci/script.sh
