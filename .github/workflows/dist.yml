@@ -27,6 +27,3 @@ jobs:
       - uses: actions/checkout@v2
       - name: Run CI script
         run: .ci/script.sh
-      - name: Apple Silicon Build
-        if: matrix.os == 'macos-latest'
-        run: CROSS_CI="aarch64-apple-darwin" .ci/script.sh
