@@ -1190,8 +1190,7 @@ Heap-allocate and initialize a montgomery context.
   The caller will need to call Hacl_Bignum256_mont_ctx_free on the return value
   to avoid memory leaks.
 */
-Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t
-*Hacl_Bignum256_mont_ctx_init(uint64_t *n)
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum256_mont_ctx_init(uint64_t *n)
 {
   uint64_t *r2 = KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint64_t));
   uint64_t *n1 = KRML_HOST_CALLOC((uint32_t)4U, sizeof (uint64_t));
@@ -1202,12 +1201,11 @@ Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t
   nBits = (uint32_t)64U * (uint32_t)Hacl_Bignum_Lib_bn_get_top_index_u64((uint32_t)4U, n);
   precompr2(nBits, n, r21);
   uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
   res = { .len = (uint32_t)4U, .n = n11, .mu = mu, .r2 = r21 };
-  KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t),
-    (uint32_t)1U);
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t
-  *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t));
+  KRML_CHECK_SIZE(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64), (uint32_t)1U);
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64
+  *buf = KRML_HOST_MALLOC(sizeof (Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64));
   buf[0U] = res;
   return buf;
 }
@@ -1217,10 +1215,9 @@ Deallocate the memory previously allocated by Hacl_Bignum256_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
 */
-void
-Hacl_Bignum256_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k)
+void Hacl_Bignum256_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k)
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t k1 = *k;
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   uint64_t *n = k1.n;
   uint64_t *r2 = k1.r2;
   KRML_HOST_FREE(n);
@@ -1237,12 +1234,12 @@ Write `a mod n` in `res`.
 */
 void
 Hacl_Bignum256_mod_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint64_t *res
 )
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t k1 = *k;
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   bn_slow_precomp(k1.n, k1.mu, k1.r2, a, res);
 }
 
@@ -1267,14 +1264,14 @@ Write `a ^ b mod n` in `res`.
 */
 void
 Hacl_Bignum256_mod_exp_vartime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
   uint64_t *res
 )
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t k1 = *k;
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   exp_vartime_precomp(k1.n, k1.mu, k1.r2, a, bBits, b, res);
 }
 
@@ -1299,14 +1296,14 @@ Write `a ^ b mod n` in `res`.
 */
 void
 Hacl_Bignum256_mod_exp_consttime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
   uint64_t *res
 )
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t k1 = *k;
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   exp_consttime_precomp(k1.n, k1.mu, k1.r2, a, bBits, b, res);
 }
 
@@ -1324,12 +1321,12 @@ Write `a ^ (-1) mod n` in `res`.
 */
 void
 Hacl_Bignum256_mod_inv_prime_vartime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint64_t *res
 )
 {
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t k1 = *k;
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   uint64_t n2[4U] = { 0U };
   uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, k1.n[0U], (uint64_t)2U, n2);
   uint64_t c1;

@@ -41,13 +41,13 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
 
-typedef struct MerkleTree_Low_Datastructures_hash_vec_s
+typedef struct LowStar_Vector_vector_str___uint8_t__s
 {
   uint32_t sz;
   uint32_t cap;
   uint8_t **vs;
 }
-MerkleTree_Low_Datastructures_hash_vec;
+LowStar_Vector_vector_str___uint8_t_;
 
 typedef uint32_t hash_size_t;
 
@@ -58,7 +58,7 @@ typedef uint32_t index_t;
 typedef struct MerkleTree_Low_path_s
 {
   uint32_t hash_size;
-  MerkleTree_Low_Datastructures_hash_vec hashes;
+  LowStar_Vector_vector_str___uint8_t_ hashes;
 }
 MerkleTree_Low_path;
 
@@ -68,13 +68,13 @@ typedef MerkleTree_Low_path *path_p;
 
 typedef const MerkleTree_Low_path *const_path_p;
 
-typedef struct MerkleTree_Low_Datastructures_hash_vv_s
+typedef struct LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t__s
 {
   uint32_t sz;
   uint32_t cap;
-  MerkleTree_Low_Datastructures_hash_vec *vs;
+  LowStar_Vector_vector_str___uint8_t_ *vs;
 }
-MerkleTree_Low_Datastructures_hash_vv;
+LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_;
 
 typedef struct MerkleTree_Low_merkle_tree_s
 {
@@ -82,9 +82,9 @@ typedef struct MerkleTree_Low_merkle_tree_s
   uint64_t offset;
   uint32_t i;
   uint32_t j;
-  MerkleTree_Low_Datastructures_hash_vv hs;
+  LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs;
   bool rhs_ok;
-  MerkleTree_Low_Datastructures_hash_vec rhs;
+  LowStar_Vector_vector_str___uint8_t_ rhs;
   uint8_t *mroot;
   void (*hash_fun)(uint8_t *x0, uint8_t *x1, uint8_t *x2);
 }
@@ -410,12 +410,12 @@ uint32_t MerkleTree_Low___proj__MT__item__i(MerkleTree_Low_merkle_tree projectee
 
 uint32_t MerkleTree_Low___proj__MT__item__j(MerkleTree_Low_merkle_tree projectee);
 
-MerkleTree_Low_Datastructures_hash_vv
+LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
 MerkleTree_Low___proj__MT__item__hs(MerkleTree_Low_merkle_tree projectee);
 
 bool MerkleTree_Low___proj__MT__item__rhs_ok(MerkleTree_Low_merkle_tree projectee);
 
-MerkleTree_Low_Datastructures_hash_vec
+LowStar_Vector_vector_str___uint8_t_
 MerkleTree_Low___proj__MT__item__rhs(MerkleTree_Low_merkle_tree projectee);
 
 uint8_t *MerkleTree_Low___proj__MT__item__mroot(MerkleTree_Low_merkle_tree projectee);
@@ -436,9 +436,9 @@ MerkleTree_Low_merkle_tree_conditions(
   uint64_t offset,
   uint32_t i,
   uint32_t j,
-  MerkleTree_Low_Datastructures_hash_vv hs,
+  LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_ hs,
   bool rhs_ok,
-  MerkleTree_Low_Datastructures_hash_vec rhs,
+  LowStar_Vector_vector_str___uint8_t_ rhs,
   uint8_t *mroot
 );
 
@@ -461,7 +461,7 @@ bool MerkleTree_Low_uu___is_Path(MerkleTree_Low_path projectee);
 
 uint32_t MerkleTree_Low___proj__Path__item__hash_size(MerkleTree_Low_path projectee);
 
-MerkleTree_Low_Datastructures_hash_vec
+LowStar_Vector_vector_str___uint8_t_
 MerkleTree_Low___proj__Path__item__hashes(MerkleTree_Low_path projectee);
 
 typedef MerkleTree_Low_path *MerkleTree_Low_path_p;
