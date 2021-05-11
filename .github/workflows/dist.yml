@@ -19,16 +19,16 @@ jobs:
       matrix:
         os:
           - macos-latest
-          - ubuntu-latest
-          - windows-latest
+          # - ubuntu-latest
+          # - windows-latest
     runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v2
-      - name: Run CI script
-        run: .ci/script.sh
+      # - name: Run CI script
+      #   run: .ci/script.sh
       - name: Apple Silicon Build
         if: matrix.os == 'macos-latest'
         run: |
-          sudo xcode-select -s "/Applications/Xcode_12.4.app
+          sudo xcode-select -s /Applications/Xcode_12.4.app
           CROSS_CI="aarch64-apple-darwin" .ci/script.sh
