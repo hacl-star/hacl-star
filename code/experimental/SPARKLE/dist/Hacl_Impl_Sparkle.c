@@ -44,3 +44,26 @@ void Hacl_Impl_Sparkle_arx(uint32_t c, uint32_t *b)
   b[1U] = y4;
 }
 
+uint32_t Hacl_Impl_Sparkle_l1(uint32_t x)
+{
+  return (x << (uint32_t)16U | x >> (uint32_t)16U) ^ (x & (uint32_t)0xffffU);
+}
+
+K___uint32_t_uint32_t Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b)
+{
+  uint32_t tx = (uint32_t)0U;
+  uint32_t tu = (uint32_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < l >> (uint32_t)1U; i++)
+  {
+    uint32_t xi = b[i];
+    uint32_t yi = b[i + (uint32_t)1U];
+    uint32_t tx_0 = tx;
+    uint32_t ty_0 = tu;
+    tx = xi ^ tx_0;
+    tx = yi ^ ty_0;
+  }
+  uint32_t u = tx;
+  uint32_t v = tu;
+  return ((K___uint32_t_uint32_t){ .fst = u, .snd = v });
+}
+
