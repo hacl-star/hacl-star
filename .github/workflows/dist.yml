@@ -30,5 +30,6 @@ jobs:
       - name: Apple Silicon Build
         if: matrix.os == 'macos-latest'
         run: |
+          sudo rm -Rf /Library/Developer/CommandLineTools/SDKs/*
           sudo xcode-select -s /Applications/Xcode_12.4.app
           CROSS_CI="aarch64-apple-darwin" .ci/script.sh
