@@ -168,7 +168,11 @@ int main () {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -DHACL_CAN_COMPILE_VEC128 -I. -march=armv8-a+simd -c $file -o /dev/null
+  if [[ $target_arch == "aarch64" ]] && [[ $target_abi == "darwin" ]]; then
+    $CC $CROSS_CFLAGS -DHACL_CAN_COMPILE_VEC128 -I. -c $file -o /dev/null
+  else
+    $CC $CROSS_CFLAGS -DHACL_CAN_COMPILE_VEC128 -I. -march=armv8-a+simd -c $file -o /dev/null
+  fi
 }
 
 # We only detect the 64-bit version of the z-architecture (s390x).
@@ -189,6 +193,7 @@ show_help () {
   printf "                    Currently supported triples are:\n"
   printf "                    * aarch64-none-linux-android\n"
   printf "                    * aarch64-none-linux-gnu\n"
+  printf "                    * aarch64-apple-darwin\n"
   printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
   printf "    --disable-ocaml Disable OCAML bindings\n"
   printf "\n"
@@ -280,6 +285,13 @@ if [ ! -z "$build_target" ]; then
     target_sys=$(uname)
     target_abi="native"
     echo "MARCH = ia32" >> Makefile.config
+  elif [[ "$build_target" == "aarch64-apple-darwin" ]]; then
+    # Cross compiling for aarch64-apple-darwin (presumably on x86_64-apple-darwin).
+    target_arch="aarch64"
+    target_sys="apple"
+    target_abi="darwin"
+    # See https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary
+    CROSS_TARGET="-target arm64-apple-macos11"
   else
     show_help
     exit 0
