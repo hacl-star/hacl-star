@@ -194,6 +194,8 @@ show_help () {
   printf "                    * aarch64-none-linux-android\n"
   printf "                    * aarch64-none-linux-gnu\n"
   printf "                    * aarch64-apple-darwin\n"
+  printf "                    * aarch64-apple-ios\n"
+  printf "                    * x86_64-apple-ios\n"
   printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
   printf "    --disable-ocaml Disable OCAML bindings\n"
   printf "\n"
@@ -292,6 +294,13 @@ if [ ! -z "$build_target" ]; then
     target_abi="darwin"
     # See https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary
     CROSS_TARGET="-target arm64-apple-macos11"
+  elif [[ "$build_target" == "aarch64-apple-ios" ]]; then
+    # Cross compiling for aarch64-apple-ios
+    # (presumably on x86_64-apple-darwin or aarch64-apple-darwin).
+    target_arch="aarch64"
+    target_sys="apple"
+    target_abi="ios"
+    CROSS_TARGET="-target arm64-apple-darwin"
   else
     show_help
     exit 0

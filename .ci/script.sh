@@ -26,7 +26,7 @@ fi
 # Cross compile for aarch64-apple-darwin. Build only.
 if [[ $CROSS_CI == "aarch64-apple-darwin" ]]; then
   pushd dist/gcc-compatible
-  make clean
+  rm -rf *.o *.d libevercrypt.a
   ./configure -target aarch64-apple-darwin --disable-ocaml
   make -j
   popd
