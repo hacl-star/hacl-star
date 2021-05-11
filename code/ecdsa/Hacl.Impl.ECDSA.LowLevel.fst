@@ -47,7 +47,7 @@ let lemma_reduction_prime_2prime_with_carry_cin c cin x carry0 result =
       assert(result = (x + cin * pow2 (getPower c)) % prime)
     end
 
-
+inline_for_extraction noextract
 val reduction_prime_2prime_with_carry_cin: #c: curve -> cin: uint64 -> x: felem c -> result: felem c ->
   Stack unit
   (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result /\ (

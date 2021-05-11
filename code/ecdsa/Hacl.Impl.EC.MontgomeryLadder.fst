@@ -25,6 +25,7 @@ open Hacl.Spec.MontgomeryMultiplication
 
 #set-options " --z3rlimit 200"
 
+[@CInline]
 val scalar_bit: #c: curve 
   -> #buf_type: buftype 
   -> s:lbuffer_t buf_type uint8 (getScalarLenBytes c) 
@@ -146,7 +147,7 @@ val pointAddAsDouble: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #
 
 let pointAddAsDouble #c p q = ()
 
-
+inline_for_extraction
 val point_add_as_spec: #c: curve -> p: point c -> q: point c -> result: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h -> 
@@ -172,7 +173,7 @@ let point_add_as_spec #c p q result tempBuffer =
     (let qX, qY, qZ = point_as_nat c h0 q in fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ);
   lemma_coord_eval c h0 h1 p
   
-
+inline_for_extraction
 val montgomery_ladder_step1: #c : curve -> p: point c -> q: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> Stack unit
   (requires fun h ->  live h p /\ live h q /\ live h tempBuffer /\ 
@@ -196,7 +197,7 @@ let montgomery_ladder_step1 #c p q tempBuffer =
   pointAddAsDouble #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 p));
   curve_point_equality #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 q))
 
-
+inline_for_extraction
 val _montgomery_ladder_step: #c: curve -> #buf_type: buftype
   -> p: point c -> q: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
@@ -224,7 +225,7 @@ let _montgomery_ladder_step #c #buf_type r0 r1 tempBuffer bit =
   montgomery_ladder_step1 r0 r1 tempBuffer;
   cswap bit r0 r1
     
-
+inline_for_extraction
 val montgomery_ladder_step: #c: curve -> #buf_type: buftype
   -> p: point c -> q: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
@@ -285,7 +286,7 @@ let mlStepAsPointAdd #c p0 pk p qk q s i =
     else 
       pointEqual p_i (point_mult #c (scalar_as_nat_ s (i + 1)) p0) /\ pointEqual q_i (point_mult #c (scalar_as_nat_ s (i + 1) + 1) p0))
 
-
+[@CInline]
 val montgomery_ladder: #c: curve -> #buf_type: buftype -> p: point c -> q: point c ->
   scalar: lbuffer_t buf_type uint8 (getScalarLenBytes c) -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c)  -> 

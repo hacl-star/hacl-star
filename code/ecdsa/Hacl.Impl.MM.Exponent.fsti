@@ -15,7 +15,7 @@ open Spec.ECC.Curves
 
 #set-options "--z3rlimit 100"
 
-
+inline_for_extraction noextract
 val _montgomery_ladder_power: #c: curve -> #m: mode -> a: felem c -> b: felem c 
   -> scalar: glbuffer uint8 (getCoordinateLenU c) -> Stack unit
   (requires fun h -> live h a /\ live h b /\ live h scalar /\ as_nat c h a < getModePrime m c /\ 
@@ -27,7 +27,7 @@ val _montgomery_ladder_power: #c: curve -> #m: mode -> a: felem c -> b: felem c
     r0D == fromDomain_ #c #m (as_nat c h1 a) /\ r1D == fromDomain_ #c #m (as_nat c h1 b) /\
     as_nat c h1 a < getModePrime m c /\ as_nat c h1 b < getModePrime m c))
 
-  
+[@CInline]
 val montgomery_ladder_power: #c: curve -> #m: mode -> a: felem c 
   -> scalar: glbuffer uint8 (getCoordinateLenU c) -> result: felem c -> 
   Stack unit 

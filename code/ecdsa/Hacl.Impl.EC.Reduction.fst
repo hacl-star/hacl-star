@@ -23,7 +23,7 @@ open FStar.Mul
 
 #reset-options "--fuel 1 --ifuel 1 --z3rlimit 100"
 
-
+inline_for_extraction noextract
 val upload_r2: #c: curve -> a: felem c -> Stack unit 
   (requires (fun h -> live h a))
   (ensures fun h0 _ h1 -> as_nat c h1 a == toDomain_ #c #DH (toDomain_ #c #DH 1) /\ as_nat c h1 a < getPrime c /\ modifies0 h0 h1)
@@ -89,7 +89,7 @@ let ml_reduction #c a b result =
     lemma_mod_mul_distr_r a b prime;
     assert(as_nat c h2 result =  a * (b % prime) % prime)
 
-
+inline_for_extraction noextract
 val ml_reduction1: #c: curve -> r: widefelem c -> result: felem c -> Stack unit 
   (requires fun h -> live h result /\ live h r /\ wide_as_nat c h r < getPrime c * pow2 (getPower c) /\ eq_or_disjoint r result) 
   (ensures fun h0 _ h1 -> as_nat c h1 result = wide_as_nat c h0 r % getPrime c /\ modifies (loc result |+| loc r) h0 h1)

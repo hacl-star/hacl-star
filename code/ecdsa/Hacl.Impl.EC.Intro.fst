@@ -13,7 +13,7 @@ open Spec.ECC.Curves
 open Lib.Loops
 open FStar.Mul
 
-
+inline_for_extraction noextract
 val toUint8: #c: curve -> i: felem c -> o: lbuffer uint8 (getCoordinateLenU c) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_seq h1 o == Lib.ByteSequence.uints_to_bytes_be (as_seq h0 i))
@@ -46,6 +46,7 @@ let changeEndianStep #c i b =
 let changedEndian_ #l (i: Lib.Sequence.lseq uint64 l) (o: Lib.Sequence.lseq uint64 l) = 
   forall (j: nat). (j < l) ==> Lib.Sequence.index i j == Lib.Sequence.index o (l - j - 1)
 
+inline_for_extraction
 val changeEndian: #c: curve -> i: felem c -> Stack unit 
   (requires fun h -> live h i)
   (ensures  fun h0 _ h1 -> modifies (loc i) h0 h1 /\ changedEndian_ #(v (getCoordinateLenU64 c)) (as_seq h0 i) (as_seq h1 i))
@@ -144,7 +145,7 @@ let lemma_change_endian #c a b =
 
 let changeEndian_u8 len n = nat_from_bytes_be (nat_to_bytes_le #SEC len n)
 
-
+inline_for_extraction noextract
 val toUint64ChangeEndian: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1  /\

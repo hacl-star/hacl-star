@@ -97,6 +97,7 @@ let add_long_bn #c x y result =
   bn_add_eq_len len x y result
 
 
+inline_for_extraction noextract
 val _add_dep_prime: #c: curve 
   -> x: felem c 
   -> p: felem c
@@ -214,7 +215,7 @@ let lemma_zero_lseq a b c = ()
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
-
+inline_for_extraction noextract
 val _shortened_mul: #c: curve -> a: felem c -> b: uint64 -> result: widefelem c -> Stack unit
   (requires fun h -> live h a /\ live h result /\ eq_or_disjoint a result /\ wide_as_nat c h result = 0)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h0 a * uint_v b = wide_as_nat c h1 result /\ 
@@ -290,7 +291,7 @@ let square_bn #c x result =
   Hacl.Bignum.bn_sqr len x result;
   Hacl.Spec.Bignum.bn_sqr_lemma (as_seq h0 x)
 
-
+inline_for_extraction noextract
 let reduction_prime_2prime_with_carry_cin #c cin x result =
   push_frame();
 
@@ -311,6 +312,7 @@ let reduction_prime_2prime_with_carry_cin #c cin x result =
   lemma_reduction_prime_2prime_with_carry_cin c (v cin) (as_nat c h0 x) (uint_v carry0) (as_nat c h2 result)
 
 
+inline_for_extraction noextract
 let reduction_prime_2prime_with_carry #c x result =
   let len = getCoordinateLenU64 c in
   

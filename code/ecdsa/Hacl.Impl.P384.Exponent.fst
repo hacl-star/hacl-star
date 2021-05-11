@@ -46,7 +46,7 @@ let lemma_mod_mul_distr1 a b c prime =
   lemma_mod_mul_distr (pow a b) (pow a c) prime;
   pow_plus a b c
 
-
+inline_for_extraction noextract
 val exponent0: t: felem P384 -> t0: felem P384 -> t1: felem P384 -> t2: felem P384 -> t3: felem P384 ->  Stack unit 
   (requires fun h -> live h t /\ live h t0 /\ live h t1 /\ live h t2 /\ live h t3 /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t0; loc t1; loc t2; loc t3] /\
@@ -346,6 +346,8 @@ let lemma_exp1_10_2 tD t1D t2D t3D prime384 =
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"
 
+
+inline_for_extraction noextract
 val exponent1: t: felem P384 -> t1: felem P384 -> t2: felem P384 -> t3: felem P384 -> t4: felem P384 ->  Stack unit 
   (requires fun h -> live h t /\ live h t1 /\ live h t2 /\ live h t3 /\ live h t4 /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t1; loc t2; loc t3; loc t4] /\
@@ -508,7 +510,7 @@ let lemma_exp2_9 t0D t4D =
   (==) {pow2_plus 192 33; pow2_plus 129 33; pow2_plus 66 33; pow2_plus 3 33}
     toDomain__ (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D pow2_33 % prime384);}
 
-
+inline_for_extraction noextract
 val exponent2: t0: felem P384 -> t3: felem P384 -> t4: felem P384 -> t5: felem P384 -> Stack unit 
   (requires fun h -> live h t0 /\ live h t3 /\ live h t4 /\ live h t5 /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t0; loc t3; loc t4; loc t5] /\ 
@@ -666,7 +668,7 @@ let exponent2 t0 t3 t4 t5  =
 
 (*t4 = i0 *)
 
-
+inline_for_extraction noextract
 val exponent3: t: felem P384 -> t1: felem P384 -> t4: felem P384 -> result: felem P384 -> Stack unit 
   (requires fun h -> live h t /\ live h t1 /\ live h t4 /\ live h result /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t1; loc t4] /\

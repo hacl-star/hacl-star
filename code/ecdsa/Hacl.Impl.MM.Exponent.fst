@@ -79,7 +79,7 @@ let montgomery_ladder_power_step0 #c #m a b =
 
 #set-options "--z3rlimit 300"
 
-
+inline_for_extraction noextract
 val montgomery_ladder_power_step: #c: curve -> #m: mode -> a: felem c -> b: felem c 
   -> scalar: glbuffer uint8 (getScalarLenBytes c) 
   -> i:size_t{v i < v (getScalarLen c)} -> 

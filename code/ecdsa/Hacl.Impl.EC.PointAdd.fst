@@ -29,6 +29,7 @@ open Hacl.Impl.P.PointAdd.Aux
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"  
 
+inline_for_extraction noextract
 val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c -> p: point c -> mask: point c ->
   Stack unit
   (requires fun h -> 
@@ -229,7 +230,7 @@ let _compute_common_params_point_add #c h r uh hCube u1 u2 s1 s2 t4 =
   lemma_mod_mul_distr_l (fromDomain #c (as_nat c h1 h) * fromDomain #c (as_nat c h1 h)) (fromDomain #c (as_nat c h1 u1)) prime;
   lemma_mod_mul_distr_l (fromDomain #c (as_nat c h1 h) * fromDomain #c (as_nat c h1 h)) (fromDomain #c (as_nat c h1 h)) prime
 
-
+inline_for_extraction noextract
 val compute_common_params_point_add: #c: curve 
   -> t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
   Stack unit 
@@ -317,7 +318,7 @@ let _computeX3_point_add #c x3 hCube uh r t3 =
     toDomain ((fromDomain r * fromDomain r - fromDomain (as_nat h0 hCube) - 2 * fromDomain (as_nat h0 uh)) % prime);
   }
 
-
+inline_for_extraction noextract
 val computex3_point_add: #c : curve -> hCube: felem c -> uh: felem c -> 
   r: felem c -> t5: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) ->  
   Stack unit 
@@ -399,7 +400,7 @@ let _computeY3_point_add #c y3 s1 hCube uh x3 r t3 =
     toDomain #c (((uhD - x3D) * rD - s1D * hCubeD) % getPrime c);
   }
 
-
+inline_for_extraction noextract
 val computeY3_point_add: #c: curve -> s1: felem c -> hCube: felem c -> uh: felem c -> r: felem c -> 
   t5: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
   Stack unit 
@@ -492,7 +493,7 @@ let computeZ3_point_add #c p q h t5 =
 
   __computeZ3_point_add z3 z1 z2 h t1
 
-
+inline_for_extraction noextract
 val copy_result_point_add: #c: curve 
   -> t5: lbuffer uint64 (size 5 *! (getCoordinateLenU64 c)) 
   -> p: point c -> q: point c -> result: point c ->
@@ -533,7 +534,7 @@ let copy_result_point_add #c t5 p q result =
   copy_point_conditional x3_out y3_out z3_out p q;
   concat3 len x3_out len y3_out len z3_out result
 
-
+inline_for_extraction noextract
 val computeXY: #c: curve -> hCube: felem c -> uh: felem c 
   -> r: felem c -> t5: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) 
   -> s1: felem c -> h: felem c ->
@@ -553,7 +554,7 @@ let computeXY #c hCube uh r t5 s1 h =
   computeY3_point_add #c s1 hCube uh r t5
 
 
-
+inline_for_extraction noextract
 val computeXYZ: #c: curve -> p: point c -> q: point c -> hCube: felem c -> uh: felem c 
   -> r: felem c -> t5: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) 
   -> s1: felem c -> h: felem c ->
@@ -591,7 +592,7 @@ let computeXYZ #c p q hCube uh r t5 s1 h =
 
   computeZ3_point_add #c p q h t5
 
-
+inline_for_extraction noextract
 val __point_add_if_second_branch_impl: #c: curve -> result: point c 
   -> p: point c -> q: point c 
   -> u1: felem c -> u2: felem c -> s1: felem c -> s2: felem c 
@@ -650,7 +651,7 @@ let __point_add_if_second_branch_impl #c result p q u1 u2 s1 s2 r h uh hCube t5 
     lemma_coord_eval c h0 h1 q;
     lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h1 h2
 
-
+inline_for_extraction noextract
 val _point_add_if_second_branch_impl: #c: curve -> result: point c 
   -> p: point c -> q: point c 
   -> x3y3z3u1u2s1s2: lbuffer uint64 (size 8 *! getCoordinateLenU64 c) 
@@ -717,7 +718,7 @@ let _point_add_if_second_branch_impl #c result p q x3y3z3u1u2s1s2 r h uh hCube t
   
   __point_add_if_second_branch_impl result p q u1 u2 s1 s2 r h uh hCube t5 
 
-
+inline_for_extraction noextract
 val _point_add_if_second_branch_impl0: #c: curve -> result: point c 
   -> p: point c -> q: point c 
   -> x3y3z3u1u2s1s2: lbuffer uint64 (size 8 *! getCoordinateLenU64 c) 
@@ -783,7 +784,7 @@ let _point_add_if_second_branch_impl0 #c result p q x3y3z3u1u2s1s2 rhuhhCube tem
   
   _point_add_if_second_branch_impl result p q x3y3z3u1u2s1s2 r h uh hCube tempBuffer5
 
-
+inline_for_extraction noextract
 val _point_add_if_second_branch_impl1: #c: curve -> result: point c 
   -> p: point c -> q: point c 
   -> x3hCube: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) 
@@ -845,7 +846,7 @@ let _point_add_if_second_branch_impl1 #c result p q x3hCube t5 =
   lemma_disjoint_invariant #c x3hCube t5;
   _point_add_if_second_branch_impl0 #c result p q x3y3z3u1u2s1s2 rhuhhCube t5
 
-
+inline_for_extraction noextract
 val _point_add_0: #c: curve -> p: point c -> q: point c -> t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
   Stack unit 
     (requires fun h0 ->   

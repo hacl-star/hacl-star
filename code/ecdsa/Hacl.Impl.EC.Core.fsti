@@ -30,6 +30,7 @@ val fromDomain: #c: curve -> f: felem c -> result: felem c -> Stack unit
     as_nat c h1 result = (as_nat c h0 f * modp_inv2 #c (pow2 (getPower c))) % getPrime c /\ 
     as_nat c h1 result = fromDomain #c (as_nat c h0 f))
 
+inline_for_extraction noextract
 val pointToDomain: #c: curve -> p: point c -> result: point c -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ eq_or_disjoint p result /\ point_eval c h p)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
@@ -38,6 +39,7 @@ val pointToDomain: #c: curve -> p: point c -> result: point c -> Stack unit
     point_y_as_nat c h1 result == toDomain_ #c #DH (point_y_as_nat c h0 p) /\
     point_z_as_nat c h1 result == toDomain_ #c #DH (point_z_as_nat c h0 p))
 
+inline_for_extraction noextract
 val pointFromDomain: #c : curve -> p: point c -> result: point c -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ eq_or_disjoint p result /\ point_eval c h p)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\
@@ -45,11 +47,13 @@ val pointFromDomain: #c : curve -> p: point c -> result: point c -> Stack unit
     point_y_as_nat c h1 result == fromDomain_ #c #DH (point_y_as_nat c h0 p) /\
     point_z_as_nat c h1 result == fromDomain_ #c #DH (point_z_as_nat c h0 p))
 
+inline_for_extraction noextract
 val copy_point: #c: curve -> p: point c -> result: point c -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_eval c h p) 
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ 
     point_as_nat c h0 p == point_as_nat c h1 result)
 
+inline_for_extraction noextract
 val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
   (requires fun h -> live h p /\ felem_eval c h (getZ p) /\ point_eval c h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\  point_eval c h1 p /\ 
@@ -59,6 +63,7 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
     (if Spec.ECC.isPointAtInfinity (xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0) /\ 
     (if Spec.ECC.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
 
+[@CInline]
 val norm: #c: curve -> p: point c -> resultPoint: point c -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> Stack unit
   (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval c h p /\
@@ -70,6 +75,7 @@ val norm: #c: curve -> p: point c -> resultPoint: point c ->
     let pointNorm = _norm #c pointD in
     pointNorm == resultPoint))
 
+inline_for_extraction noextract
 val normX: #c: curve -> p: point c -> result: felem c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
   Stack unit
@@ -95,6 +101,7 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype
     let pD = scalar_multiplication  (as_seq h0 scalar) (point_as_nat c h0 p) in 
     pD == point_as_nat c h1 result))
 
+[@CInline]
 val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
@@ -108,7 +115,7 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c
     let rN, _ = montgomery_ladder_spec_left #c (as_seq h0 scalar) (pointAtInfinity, p) in 
     rN == p1)) 
     
-
+inline_for_extraction noextract
 val secretToPublic: #c: curve -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->

@@ -48,6 +48,7 @@ assume val reduction_prime_2prime:  x: felem-> result: felem ->
 
 assume val getZeroWord0: a: Lib.Sequence.lseq uint64 8 -> o8: nat -> Lemma ((lseq_as_nat a + (o8 % pow2 9) * pow2 (64 * 8)) < pow2 521)
 
+inline_for_extraction noextract
 val getZeroWord: i: lbuffer uint64 (size 27) -> o: lbuffer uint64 (size 9) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ lseq_as_nat (as_seq h1 o) == lseq_as_nat (as_seq h0 i) % pow2 521)
@@ -91,7 +92,7 @@ let getZeroWord i o =
   
   assert(lseq_as_nat (as_seq h2 o) == lseq_as_nat (as_seq h0 i) % pow2 521)
 
-
+inline_for_extraction noextract
 val getFirstWord: i: lbuffer uint64 (size 27) -> o: lbuffer uint64 (size 9) -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)
@@ -112,7 +113,7 @@ let getFirstWord i o =
   let o8Updated = logand o8 (u64 0x1ff) in 
   upd o (size 8) o8Updated
 
-
+inline_for_extraction noextract
 val getSecondWord: i: lbuffer uint64 (size 27) -> o: lbuffer uint64 (size 9) -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> modifies (loc o) h0 h1)

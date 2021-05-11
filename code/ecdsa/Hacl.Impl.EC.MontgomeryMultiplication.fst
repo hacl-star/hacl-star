@@ -34,6 +34,7 @@ let supportsReducedMultiplication #c =
   assert_norm (exp #(pow2 64) 1 (pow2 64 - 1) == 1);
   r
 
+[@CInline]
 val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> t2: widefelem c -> 
   Stack unit
   (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
@@ -47,7 +48,7 @@ let montgomery_multiplication_round_w_k0 #c t t2 =
   short_mul_prime t1 t2;
   lemma_mult_lt_left (getPrime c) (wide_as_nat c h0 t % pow2 64) (pow2 64)
 
-
+[@CInline]
 val montgomery_multiplication_round_k0: #c: curve -> k0: uint64 -> t: widefelem c -> 
   t2: widefelem c -> 
   Stack unit
@@ -73,6 +74,7 @@ let montgomery_multiplication_round_k0 #c k0 t t2 =
     lemma_mult_lt_left (getPrime c) (((wide_as_nat c h0 t % pow2 64) * uint_v k0) % pow2 64) (pow2 64);
   pop_frame()
 
+inline_for_extraction noextract
 val montgomery_multiplication_round_dsa_: #c: curve -> k0: uint64 -> t: widefelem c -> 
   t2: widefelem c -> 
   Stack unit
@@ -149,6 +151,7 @@ let montgomery_multiplication_round #c m t round =
   pop_frame()  
 
 
+inline_for_extraction noextract
 val reduction_prime_2prime_with_carry: #c: curve -> #m: mode -> x: widefelem c -> result: felem c ->
   Stack unit 
   (requires fun h -> live h x /\ live h result /\  eq_or_disjoint x result /\ wide_as_nat c h x < 2 * getModePrime m c)
@@ -222,7 +225,7 @@ let montgomery_multiplication_reduction_dh #c t result = montgomery_multiplicati
 
 let montgomery_multiplication_reduction_dsa #c t result = montgomery_multiplication_reduction #c DSA t result
 
-
+inline_for_extraction noextract
 val montgomery_multiplication_buffer_by_one: #c: curve -> m: mode -> a: felem c -> result: felem c -> 
   Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime m c /\ live h result)) 
@@ -296,7 +299,7 @@ let montgomery_square_buffer_dh #c a result = montgomery_square_buffer #c DH a r
 
 let montgomery_square_buffer_dsa #c a result = montgomery_square_buffer #c DSA a result
 
-
+inline_for_extraction noextract
 val fsquarePowN: #c: curve -> m: mode -> n: size_t -> a: felem c -> Stack unit 
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime m c)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (

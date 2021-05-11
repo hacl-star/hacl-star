@@ -30,6 +30,7 @@ open Hacl.Impl.P.PointDouble.Aux
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0" 
 
+inline_for_extraction noextract
 val point_double_a_b_g: #c: curve 
   -> p: point c 
   -> alpha: felem c 
@@ -104,7 +105,7 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
       (3 * (xD - dlt) * (xD + dlt)) % prime;
   }
 
-
+inline_for_extraction noextract
 val point_double_x3: #c: curve -> x3: felem c -> alpha: felem c -> fourBeta: felem c 
   -> beta: felem c -> eightBeta: felem c ->
   Stack unit
@@ -143,7 +144,7 @@ let point_double_x3 #c x3 alpha fourBeta beta eightBeta  =
     toDomain #c ((fromDomain #c (as_nat c h0 alpha) * fromDomain #c (as_nat c h0 alpha) - 8 * fromDomain #c (as_nat c h0 beta)) % prime);
   }
 
-
+inline_for_extraction noextract
 val point_double_z3: #c: curve -> z3: felem c -> pY: felem c -> pZ: felem c -> gamma: felem c 
   -> delta: felem c ->
   Stack unit 
@@ -189,7 +190,7 @@ let point_double_z3 #c z3 pY pZ gamma delta  =
     toDomain #c (((pyD + pzD) * (pyD + pzD) - fromDomain #c (as_nat c h0 gamma) - fromDomain #c (as_nat c h0 delta)) % prime);
   }
 
-
+inline_for_extraction noextract
 val point_double_y3: #c: curve -> y3: felem c -> x3: felem c -> alpha: felem c -> gamma: felem c 
   -> eightGamma: felem c -> fourBeta: felem c ->
   Stack unit 

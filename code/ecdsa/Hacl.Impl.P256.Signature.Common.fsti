@@ -16,6 +16,7 @@ open FStar.Mul
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
+inline_for_extraction noextract
 val bufferToJac: #c: curve -> p: pointAffine c -> result: point c -> Stack unit
   (requires fun h -> live h p /\ live h result /\ disjoint p result /\ felem_eval c h (getXAff p) /\ felem_eval c h (getYAff p))
   (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ (
@@ -30,6 +31,7 @@ val fromForm: #c: curve -> i: felem c -> o: coordinateAffine8 c -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  
     as_seq h1 o == nat_to_bytes_be (v (getCoordinateLenU c)) (as_nat c h0 i))
 
+[@CInline]
 val fromFormPoint: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o /\ point_eval c h i /\ (
     let xCoordinate, yCoordinate, _ = point_as_nat c h i in 
@@ -40,7 +42,7 @@ val fromFormPoint: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit
     as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateX_u64 /\
     as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateY_u64))
 
-
+[@CInline]
 val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ (
@@ -51,21 +53,19 @@ val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit
     x == pointScalarXSeq /\ y == pointScalarYSeq /\ z == 1 /\
     x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
 
-
-
-[@ (Comment "  This code is not side channel resistant")]  
+[@CInline]  
 val isPointAtInfinityPublic: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.ECC.isPointAtInfinity (point_prime_to_coordinates c (as_seq h0 p)))
 
 
-[@ (Comment "  This code is not side channel resistant")]
+[@CInline]
 val isPointOnCurvePublic: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\ felem_eval c h (getX p) /\ felem_eval c h (getY p) /\ as_nat c h (getZ p) == 1)
   (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ r == isPointOnCurve #c (point_as_nat c h0 p))
 
 
-[@ (Comment "  This code is not side channel resistant")] 
+[@CInline]
 val verifyQValidCurvePoint: #c: curve -> pubKey: point c 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
   Stack bool

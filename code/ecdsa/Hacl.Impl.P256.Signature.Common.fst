@@ -199,7 +199,7 @@ let isPointOnCurvePublic #c p =
   pop_frame();
   z
 
-
+inline_for_extraction noextract
 val isCoordinateValid: #c: curve -> p: point c -> Stack bool 
   (requires fun h -> live h p /\ as_nat c h (getZ p) == 1)
   (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ (
@@ -241,7 +241,7 @@ let multByOrder #c result p tempBuffer =
   recall_contents (order_u8_buffer #c) (Lib.Sequence.of_list (order_u8_list c));
   scalarMultiplication #c #CONST p result (order_u8_buffer #c) tempBuffer
 
-
+inline_for_extraction noextract
 val multByOrder2: #c: curve {isPrimeGroup c == false} -> result: point c -> p: point c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack unit 
   (requires fun h -> 
@@ -265,6 +265,7 @@ let multByOrder2 #c result p tempBuffer =
 
 
 [@ (Comment "  This code is not side channel resistant")]
+inline_for_extraction noextract
 val isOrderCorrect: #c: curve {isPrimeGroup c == false}  -> p: point c 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack bool
   (requires fun h -> 

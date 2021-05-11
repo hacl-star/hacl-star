@@ -12,7 +12,7 @@ open Spec.ECC
 open Spec.ECC.Curves
 open Hacl.Spec.MontgomeryMultiplication
 
-
+[@CInline]
 val exponent_p384: a: felem P384 -> result: felem P384 -> 
   tempBuffer: lbuffer uint64 (getCoordinateLenU64 P384 *. 8ul) -> Stack unit
   (requires fun h -> live h a /\ live h tempBuffer /\ live h result /\ disjoint tempBuffer result /\ 

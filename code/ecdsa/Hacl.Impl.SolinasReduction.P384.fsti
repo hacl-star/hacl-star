@@ -18,6 +18,7 @@ open Spec.ECC.Curves
 
 open Hacl.Spec.EC.Definition
 
+[@CInline]
 val solinas_reduction_impl_p384: i: lbuffer uint64 (size 12) -> o: lbuffer uint64 (size 6) -> 
   Stack unit 
     (requires fun h -> live h i /\ live h o /\ disjoint i o)

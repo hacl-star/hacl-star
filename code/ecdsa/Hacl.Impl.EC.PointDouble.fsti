@@ -12,6 +12,7 @@ open Hacl.Spec.EC.Definition
 open Spec.ECC
 open Spec.ECC.Curves
 
+[@CInline]
 val point_double: #c: curve -> p: point c -> result: point c 
   -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 c *! 17ul) 
   -> Stack unit

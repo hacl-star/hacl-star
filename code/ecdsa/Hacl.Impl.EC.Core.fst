@@ -131,7 +131,7 @@ let isPointAtInfinityPrivate #c p =
   Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
   r
 
-
+inline_for_extraction noextract
 val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c -> resultPoint: point c -> 
   Stack unit 
   (requires fun h -> live h z2x /\ live h z3y /\ live h resultPoint /\ live h p /\ 
@@ -301,7 +301,7 @@ val lemma_coord: #c: curve -> h3: mem -> q: point c {point_eval c h3 q} -> Lemma
 
 let lemma_coord h3 q = ()
 
-
+inline_for_extraction noextract
 val uploadStartPoints: #c: curve -> q: point c -> p: point c -> result: point c -> Stack unit 
   (requires fun h -> live h q /\ live h p /\ live h result /\
     disjoint p q /\ disjoint q result /\ eq_or_disjoint p result /\ point_eval c h p /\
@@ -331,7 +331,7 @@ let uploadStartPoints #c q p result =
   let x, y, z = point_as_nat c h2 result in 
   lemma_pointAtInfInDomain #c x y z
 
-
+inline_for_extraction noextract
 val scalar_multiplication_t_0: #c: curve -> #t:buftype -> q: point c -> p: point c -> result: point c -> 
   scalar: scalar_t #t #c -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
@@ -386,9 +386,10 @@ let scalarMultiplication_t #c #t p result scalar tempBuffer  =
   let i1 = point_as_nat c h0 p in 
     point_mult0_is_infinity i1
 
-
+inline_for_extraction noextract
 let scalarMultiplicationL #c = scalarMultiplication_t #c #MUT
 let scalarMultiplicationI #c = scalarMultiplication_t #c #IMMUT
+inline_for_extraction noextract
 let scalarMultiplicationC #c = scalarMultiplication_t #c #CONST
 
 #push-options "--ifuel 1"
@@ -409,7 +410,7 @@ let scalarMultiplicationWithoutNorm #c p result scalar tempBuffer =
   scalar_multiplication_t_0 #c #MUT q p result scalar buff; 
   copy_point q result
 
-
+inline_for_extraction noextract
 val uploadStartPointsS2P: #c: curve -> q: point c -> result: point c -> Stack unit 
   (requires fun h -> live h q /\ live h result /\ disjoint q result)
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc q) h0 h1 /\
@@ -431,7 +432,7 @@ let uploadStartPointsS2P #c q result =
     let x, y, z = point_as_nat c h2 result in 
     lemma_pointAtInfInDomain #c x y z
 
-
+inline_for_extraction noextract
 val secretToPublic_0: #c: curve -> #t: buftype -> q: point c -> result: point c -> 
   scalar: lbuffer_t t uint8 (getScalarLenBytes c) -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->

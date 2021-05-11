@@ -15,6 +15,7 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Spec.MontgomeryMultiplication
 
 (* disjoint a result comes from ML, tempBffer - from specific *)
+[@CInline]
 val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *. 8ul) -> 
   Stack unit
   (requires fun h -> live h a /\ live h result /\ live h tempBuffer /\ disjoint tempBuffer result /\ disjoint a tempBuffer /\ as_nat c h a < getPrime c)
@@ -24,7 +25,7 @@ val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer 
     as_nat c h1 result < getPrime c /\ 
     as_nat c h1 result = toDomain_ #c #DH (pow k (getPrime c - 2) % getPrime c))
 
-
+[@CInline]
 val square_root: #c: curve -> a: felem c -> result: felem c -> Stack unit 
   (requires fun h -> live h a /\ live h result /\ as_nat c h a < getPrime c)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\

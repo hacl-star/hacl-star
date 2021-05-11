@@ -14,7 +14,7 @@ open Spec.ECC.Curves
 
 open FStar.Mul
 
-
+[@CInline]
 val montgomery_multiplication_reduction_dh: #c: curve
   -> t: widefelem c 
   -> result: felem c -> 
@@ -25,6 +25,7 @@ val montgomery_multiplication_reduction_dh: #c: curve
     as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c #DH (wide_as_nat c h0 t))))
 
+[@CInline]
 val montgomery_multiplication_reduction_dsa: #c: curve
   -> t: widefelem c 
   -> result: felem c -> 
@@ -35,7 +36,7 @@ val montgomery_multiplication_reduction_dsa: #c: curve
     as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c #DSA (wide_as_nat c h0 t))))
 
-
+[@CInline]
 val montgomery_multiplication_buffer_by_one_dh: #c: curve -> a: felem c -> result: felem c -> 
   Stack unit
   (requires (fun h -> live h a /\ felem_eval c h a /\ live h result)) 
@@ -44,6 +45,7 @@ val montgomery_multiplication_buffer_by_one_dh: #c: curve -> a: felem c -> resul
     as_nat c h1 result = (as_nat c h0 a * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c #DH (as_nat c h0 a))))
 
+[@CInline]
 val montgomery_multiplication_buffer_by_one_dsa: #c: curve -> a: felem c -> result: felem c -> 
   Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < getOrder #c /\ live h result)) 
@@ -52,7 +54,7 @@ val montgomery_multiplication_buffer_by_one_dsa: #c: curve -> a: felem c -> resu
     as_nat c h1 result = (as_nat c h0 a * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c #DSA (as_nat c h0 a))))
 
-
+inline_for_extraction noextract
 val montgomery_multiplication_buffer: #c: curve -> m: mode -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ eq_or_disjoint a b /\ 
@@ -63,6 +65,7 @@ val montgomery_multiplication_buffer: #c: curve -> m: mode -> a: felem c -> b: f
     as_nat c h1 result = toDomain_ #c #m (fromDomain_ #c #m (as_nat c h0 a) * fromDomain_ #c #m (as_nat c h0 b) % prime) /\
     as_nat c h1 result = toDomain_ #c #m (fromDomain_ #c #m (as_nat c h0 a) * fromDomain_ #c #m (as_nat c h0 b)))))
 
+[@CInline]
 val montgomery_multiplication_buffer_dh: #c: curve -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ 
@@ -73,6 +76,7 @@ val montgomery_multiplication_buffer_dh: #c: curve -> a: felem c -> b: felem c -
     as_nat c h1 result = toDomain_ #c #DH (fromDomain_ #c #DH (as_nat c h0 a) * fromDomain_ #c #DH (as_nat c h0 b) % prime) /\
     as_nat c h1 result = toDomain_ #c #DH (fromDomain_ #c #DH (as_nat c h0 a) * fromDomain_ #c #DH (as_nat c h0 b)))))
 
+[@CInline]
 val montgomery_multiplication_buffer_dsa: #c: curve -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat c h a < getModePrime DSA c /\  eq_or_disjoint a b /\
@@ -83,7 +87,7 @@ val montgomery_multiplication_buffer_dsa: #c: curve -> a: felem c -> b: felem c 
     as_nat c h1 result = toDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 b) % prime) /\
     as_nat c h1 result = toDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 b)))))
 
-
+inline_for_extraction noextract
 val montgomery_square_buffer: #c: curve -> m: mode -> a: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime m c /\ live h result)) 
@@ -93,6 +97,7 @@ val montgomery_square_buffer: #c: curve -> m: mode -> a: felem c -> result: fele
     as_nat c h1 result = toDomain_ #c #m (fromDomain_ #c #m (as_nat c h0 a) * fromDomain_ #c #m (as_nat c h0 a) % prime) /\
     as_nat c h1 result = toDomain_ #c #m (fromDomain_ #c #m (as_nat c h0 a) * fromDomain_ #c #m (as_nat c h0 a)))))
 
+[@CInline]
 val montgomery_square_buffer_dh: #c: curve -> a: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime DH c /\ live h result)) 
@@ -102,6 +107,7 @@ val montgomery_square_buffer_dh: #c: curve -> a: felem c -> result: felem c ->
     as_nat c h1 result = toDomain_ #c #DH (fromDomain_ #c #DH (as_nat c h0 a) * fromDomain_ #c #DH (as_nat c h0 a) % prime) /\
     as_nat c h1 result = toDomain_ #c #DH (fromDomain_ #c #DH (as_nat c h0 a) * fromDomain_ #c #DH (as_nat c h0 a)))))
 
+[@CInline]
 val montgomery_square_buffer_dsa: #c: curve -> a: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime DSA c /\ live h result)) 
@@ -111,13 +117,14 @@ val montgomery_square_buffer_dsa: #c: curve -> a: felem c -> result: felem c ->
     as_nat c h1 result = toDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 a) % prime) /\
     as_nat c h1 result = toDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 a)))))
 
-
+[@CInline]
 val fsquarePowN_dh: #c: curve -> n: size_t -> a: felem c -> Stack unit 
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime DH c)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
     let k = fromDomain_ #c #DH (as_nat c h0 a) in 
     as_nat c h1 a < getModePrime DH c /\ as_nat c h1 a = toDomain_ #c #DH (pow k (pow2 (v n)) % getModePrime DH c))))
 
+[@CInline]
 val fsquarePowN_dsa: #c: curve -> n: size_t -> a: felem c -> Stack unit 
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime DSA c)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (

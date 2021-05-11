@@ -25,7 +25,7 @@ open Hacl.Impl.EC.Intro
 #set-options " --z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 open FStar.Mul 
-
+inline_for_extraction noextract
 val ecp256_dh_i_: #c: curve -> resultBuffer: point c 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) 
   -> scalar: scalar_t #MUT #c -> result: pointAffine8 c -> 
@@ -63,6 +63,7 @@ let ecp256dh_i c result scalar =
   flag
 
 [@ (Comment "  This code is not side channel resistant on pubKey")]
+inline_for_extraction noextract
 val _ecp256dh_r: #c: curve 
   -> result: point c
   -> pubKey: point c
@@ -127,7 +128,7 @@ let lemma_zero_point_zero_coordinates c h p =
   lemma_test (as_seq h yz) (v (getCoordinateLenU64 c));
   Hacl.Impl.P.PointAdd.Aux.lemma_point_eval_if_zero c p h
 
-
+inline_for_extraction noextract
 val ecp256_dh_r_: #c: curve -> result: pointAffine8 c 
   -> pubKey: pointAffine8 c 
   -> scalar: scalar_t #MUT #c

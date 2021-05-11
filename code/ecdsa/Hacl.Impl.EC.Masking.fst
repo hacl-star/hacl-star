@@ -17,7 +17,7 @@ open Hacl.EC.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
-[@CInline]
+inline_for_extraction noextract
 val copy_conditional: #c: curve 
   -> out: felem c
   -> x: felem c
@@ -63,7 +63,7 @@ let copy_conditional #c out x mask =
     Lib.Sequence.eq_intro (as_seq h0 x) (as_seq h1 out);
     lemma_lseq_as_seq_as_forall_lr (as_seq h0 x) (as_seq h1 out) (v (getCoordinateLenU64 c)) end
 
-  
+[@CInline]  
 val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
   Stack unit
   (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)

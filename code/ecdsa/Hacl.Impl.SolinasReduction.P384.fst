@@ -94,6 +94,7 @@ let lemma_xor_zero l h =
   logxor_spec l h
 
 
+inline_for_extraction noextract
 val store_high_low_u: high:uint32 -> low:uint32 -> r:uint64{v r = v high * pow2 32 + v low}
 
 let store_high_low_u high low =
@@ -144,7 +145,7 @@ let load_buffer a0 a1 a2 a3 a4 a5 o =
 
 #pop-options
 
-
+inline_for_extraction noextract
 val upl_zer_buffer: c0: uint32 -> c1: uint32 ->  c2: uint32 -> c3: uint32 -> c4: uint32 -> c5: uint32 -> c6: uint32 
   -> c7: uint32 -> c8: uint32 -> c9: uint32 -> c10: uint32 -> c11: uint32 -> o: lbuffer uint64 (size 6) ->
   Stack unit
@@ -175,7 +176,7 @@ let upl_zer_buffer c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 o =
   load_buffer a0 a1 a2 a3 a4 a5 o;
   reduction_prime_2prime #P384 o o
 
-
+inline_for_extraction noextract
 val upl_fir_buffer: c21: uint32 -> c22: uint32 -> c23: uint32 -> o: lbuffer uint64 (size 6) ->
   Stack unit
     (requires fun h -> live h o)
@@ -200,7 +201,7 @@ let upl_fir_buffer c21 c22 c23 o =
     assert_norm (pow2 (7 * 32) < prime384);
   modulo_lemma (as_nat P384 h1 o) prime384
 
-
+inline_for_extraction noextract
 val upl_sec_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32 -> c16: uint32 -> c17: uint32 -> c18: uint32 -> c19: uint32 -> c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 ->
 o: lbuffer uint64 (size 6) ->
   Stack unit
@@ -229,7 +230,7 @@ let upl_sec_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 o =
   load_buffer b0 b1 b2 b3 b4 b5 o;
   reduction_prime_2prime #P384 o o
 
-
+inline_for_extraction noextract
 val upl_thi_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32 -> c16: uint32 -> c17: uint32 -> c18: uint32 -> c19: uint32 -> c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 -> o: lbuffer uint64 (size 6) ->
   Stack unit
     (requires fun h -> live h o)
@@ -258,7 +259,7 @@ let upl_thi_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 o =
   load_buffer b0 b1 b2 b3 b4 b5 o;
   reduction_prime_2prime #P384 o o
 
-
+inline_for_extraction noextract
 val upl_forth_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32 -> c16: uint32 -> c17: uint32 -> c18: uint32 -> c19: uint32-> c20: uint32 -> c23: uint32 ->
 o: lbuffer uint64 (size 6) ->
   Stack unit
@@ -288,7 +289,7 @@ let upl_forth_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c23 o =
   load_buffer b0 b1 b2 b3 b4 b5 o;
   reduction_prime_2prime #P384 o o
 
-
+inline_for_extraction noextract
 val upl_fif_buffer: c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 ->
   o: lbuffer uint64 (size 6) ->
   Stack unit
@@ -320,7 +321,7 @@ let upl_fif_buffer c20 c21 c22 c23 o =
   assert_norm (pow2 (8 * 32) < prime384);
   modulo_lemma (as_nat P384 h1 o) prime384
 
-
+inline_for_extraction noextract
 val upl_six_buffer: c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 ->
   o: lbuffer uint64 (size 6) ->
   Stack unit
@@ -352,7 +353,7 @@ let upl_six_buffer c20 c21 c22 c23 o =
   assert_norm (pow2 (6 * 32) < prime384);
   modulo_lemma (as_nat P384 h1 o) prime384
 
-
+inline_for_extraction noextract
 val upl_sev_buffer: c12: uint32 -> c13: uint32 -> c14: uint32 -> c15: uint32 -> c16: uint32 -> c17: uint32 -> c18: uint32 -> c19: uint32 -> c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 ->
   o: lbuffer uint64 (size 6) ->
   Stack unit
@@ -381,7 +382,7 @@ let upl_sev_buffer c12 c13 c14 c15 c16 c17 c18 c19 c20 c21 c22 c23 o =
   load_buffer b0 b1 b2 b3 b4 b5 o;
   reduction_prime_2prime #P384 o o
 
-
+inline_for_extraction noextract
 val upl_eit_buffer: c20: uint32 -> c21: uint32 -> c22: uint32 -> c23: uint32 ->
   o: lbuffer uint64 (size 6) ->
   Stack unit
@@ -413,7 +414,7 @@ let upl_eit_buffer c20 c21 c22 c23 o =
   assert_norm (pow2 (6 * 32) < prime384);
   modulo_lemma (as_nat P384 h1 o) prime384
 
-
+inline_for_extraction noextract
 val upl_nin_buffer: c23: uint32 ->
   o: lbuffer uint64 (size 6) ->
   Stack unit
@@ -446,7 +447,7 @@ let upl_nin_buffer c23 o =
   modulo_lemma (as_nat P384 h1 o) prime384
 
 
-(* Not sure that FStar will manage to reason about such an input *)
+inline_for_extraction noextract
 val solinas_reduction_upload: c0: uint32 -> c1: uint32 ->  c2: uint32 ->  c3: uint32 ->
   c4: uint32 ->  c5: uint32 ->  c6: uint32 ->  c7: uint32 ->  c8: uint32 ->  c9: uint32 ->
   c10: uint32 ->  c11: uint32 ->  c12: uint32 ->  c13: uint32 ->  c14: uint32 ->  c15: uint32 ->
@@ -504,7 +505,7 @@ let solinas_reduction_upload c0 c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c
   upl_eit_buffer c20 c21 c22 c23 t8;
   upl_nin_buffer c23 t9
 
-
+inline_for_extraction noextract
 val solinas_reduction_operations: tempBuffer: lbuffer uint64 (size 60) -> o: lbuffer uint64 (size 6) ->
   Stack unit
     (requires fun h -> live h o /\ live h tempBuffer /\ disjoint tempBuffer o /\

@@ -131,6 +131,7 @@ let fromDomain #c a = fromDomain_ #c #DH a
 
 let toDomain #c a = toDomain_ #c #DH a
 
+[@CInline]
 val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
   Stack unit
     (requires (fun h0 ->
@@ -141,7 +142,7 @@ val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
       as_nat c h1 out == (as_nat c h0 a + as_nat c h0 b) % getPrime c /\
       as_nat c h1 out == toDomain #c ((fromDomain #c (as_nat c h0 a) + fromDomain #c (as_nat c h0 b)) % getPrime c)))
 
-
+[@CInline]
 val felem_double: #c: curve -> a: felem c -> out: felem c ->
   Stack unit
     (requires (fun h0 ->
@@ -151,7 +152,7 @@ val felem_double: #c: curve -> a: felem c -> out: felem c ->
       as_nat c h1 out == (2 * as_nat c h0 a) % getPrime c /\
       as_nat c h1 out == toDomain #c (2 * fromDomain #c (as_nat c h0 a) % getPrime c)))
 
-
+[@CInline]
 val felem_sub: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
   Stack unit
   (requires (fun h0 ->
