@@ -44,6 +44,10 @@ detect_ocaml () {
 }
 
 check_no_bug81300 () {
+  if [[ "$cross_build" == "1" ]]; then
+    # We don't want to build anything with march=native
+    return 0
+  fi
   # Perform the check only if lib_intrinsics.h is present. In practice,
   # lib_intrinsics.h is present in all the directories which contain libintvector.h,
   # but mozilla. If lib_intrinsics.h is not present, assume there is no bug and
@@ -195,7 +199,6 @@ show_help () {
   printf "                    * aarch64-none-linux-gnu\n"
   printf "                    * aarch64-apple-darwin\n"
   printf "                    * aarch64-apple-ios\n"
-  printf "                    * x86_64-apple-ios\n"
   printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
   printf "    --disable-ocaml Disable OCAML bindings\n"
   printf "\n"
@@ -209,6 +212,7 @@ echo -n > config.h
 # Default arguments
 disable_ocaml=0
 disable_bzero=0
+cross_build=0
 
 # Parse command line arguments.
 all_args=("$@")
@@ -234,6 +238,7 @@ done
 # target_{arch,sys,abi} accordingly; otherwise, query the host via uname for
 # these parameteres and assume we don't do cross-compilation.
 if [ ! -z "$build_target" ]; then
+  cross_build=1
   echo "Doing cross build for $build_target. Make sure that your toolchain is configured properly."
   if [[ "$build_target" == "aarch64-none-linux-android" ]]; then
     # NOTE: We assume that the Android environment is set up correctly.
@@ -300,7 +305,8 @@ if [ ! -z "$build_target" ]; then
     target_arch="aarch64"
     target_sys="apple"
     target_abi="ios"
-    CROSS_TARGET="-target arm64-apple-darwin"
+    CROSS_TARGET="-target arm64-apple-ios"
+    CROSS_SYSROOT="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) -arch arm64"
   else
     show_help
     exit 0
