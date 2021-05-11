@@ -23,6 +23,15 @@ if [[ $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
   exit 0
 fi
 
+# Cross compile for aarch64-apple-darwin. Build only.
+if [[ $CROSS_CI == "aarch64-apple-darwin" ]]; then
+  pushd dist/gcc-compatible
+  ./configure -target aarch64-apple-darwin
+  make -j
+  popd
+  exit 0
+fi
+
 if [[ $TARGET == "IA32" ]]; then
   # Test 32-bit build; Tests don't work here yet.
   pushd dist/gcc-compatible
