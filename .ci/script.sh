@@ -27,7 +27,7 @@ fi
 if [[ $CROSS_CI == "aarch64-apple-darwin" ]]; then
   pushd dist/gcc-compatible
   make clean
-  ./configure -target aarch64-apple-darwin
+  ./configure -target aarch64-apple-darwin --disable-ocaml
   make -j
   popd
   exit 0
