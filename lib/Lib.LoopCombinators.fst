@@ -94,35 +94,21 @@ let unfold_repeat_right_once
 
 module T = FStar.Tactics
 
-let eta_a (lo n:nat) (a:(i:nat{lo <= i /\ i <= n} -> Type)) = fun i -> a i
-let rec repeat_right_eta_a
-    (n:nat)
-    (lo:nat)
-    (hi:nat{lo <= hi /\ hi <= n})
-    (a:(i:nat{lo <= i /\ i <= n} -> Type))
-    (f:(i:nat{lo <= i /\ i < n} -> a i -> a (i + 1)))
-    (acc:a lo) 
-   : Lemma (ensures repeat_right lo hi a f acc == repeat_right lo hi (eta_a lo n a) f acc) 
-           (decreases hi)
-   = if hi = lo
-     then () 
-     else (repeat_right_eta_a n lo (hi - 1) a f acc)
-
-#push-options "--print_bound_var_types --print_implicits"
-
-let pext (a:Type) (p q: a -> prop) (_:squash (forall (x:a). p x <==> q x)) (x:a) : Lemma (p x == q x) 
-  = FStar.PropositionalExtensionality.apply (p x) (q x)
-
 let refine_eq (a:Type) (p q:a -> prop) (x:squash (forall (i:a). p i <==> q i))
   : Lemma ((i:a{p i} == i:a{q i}))
-  = assert (i:a{p i} == i:a{q i})
+  = let pext (a:Type) (p q: a -> prop) (_:squash (forall (x:a). p x <==> q x)) (x:a) : Lemma (p x == q x) 
+        = FStar.PropositionalExtensionality.apply (p x) (q x)
+    in
+    assert (i:a{p i} == i:a{q i})
         by (T.l_to_r [quote (pext a p q x)]; T.trefl())
-
-let b2t_prop (b:bool) : Lemma ((b2t b) `subtype_of` unit) = assert_norm (b2t b == squash (equals b true))
 
 let nat_refine_equiv (n:nat)
   : Lemma ((i:nat{i <= n}) == (i:nat{0<=i /\ i<=n})) 
-  = refine_eq nat (fun (i:nat) -> b2t_prop (i <= n); b2t (i <= n)) (fun (i:nat) -> 0 <= i /\ i <= n) ()
+  = let b2t_prop (b:bool) 
+      : Lemma ((b2t b) `subtype_of` unit) 
+      = assert_norm (b2t b == squash (equals b true))
+    in
+    refine_eq nat (fun (i:nat) -> b2t_prop (i <= n); b2t (i <= n)) (fun (i:nat) -> 0 <= i /\ i <= n) ()
 
 let a' (#a:Type) (n:nat) (pred:(i:nat{i <= n} -> a -> Type)) = fun (i:nat{i<=n}) -> x:a{pred i x}
 
@@ -139,6 +125,28 @@ let repeati_repeat_left_rewrite_type (#a:Type) (n:nat) (pred:(i:nat{i <= n} -> a
              T.l_to_r [`nat_refine_equiv];                                                   
              T.trefl())
 
+(* This proof is technical, for multiple reasons. 
+
+   1. It requires an extensionality lemma at the level to types to
+      relate the type of a dependent function and an eta expansion of
+      that type
+
+   2. It requires an extensionality lemma at the level of the
+      computation, which also introduces an eta expansion on f to
+      retype it
+
+   3. The retyping introduces a function type at a different by
+      propositional equal domain, so it requires a use of rewriting
+      based on propositional extensionality to prove that the retyping
+      is benign
+
+   The proof was simpler earlier, when F* had eta
+   equivalence. But the use of eta reduction in the SMT encoding which
+   this was relying on was a bit dodgy. In particular, the eta
+   reduction hid the retyping and so was silently (and
+   unintentionally) also enabling the use of propositional
+   extensionality. Now, that has to be explicit.
+*)      
 let repeati_inductive_repeat_gen #a n pred f x0 =
   let eta_a n (a:(i:nat{0 <= i /\ i <= n} -> Type)) = fun i -> a i in
   let eta_f (f:repeatable #a #n pred) (i:nat{i < n}) (x:a' n pred i) : a' n pred (i + 1) = f i x in
