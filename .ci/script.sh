@@ -23,7 +23,7 @@ if [[ $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
   exit 0
 fi
 
-# Cross compile for aarch64-apple-darwin. Build only.
+# Cross compile for other targets. Build and static library only.
 if [ ! -z "$CROSS_CI" ]; then
   pushd dist/gcc-compatible
   rm -rf *.o *.d libevercrypt.a
