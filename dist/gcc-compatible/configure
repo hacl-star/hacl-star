@@ -199,6 +199,7 @@ show_help () {
   printf "                    * aarch64-none-linux-gnu\n"
   printf "                    * aarch64-apple-darwin\n"
   printf "                    * aarch64-apple-ios\n"
+  printf "                    * x86_64-apple-ios-simulator\n"
   printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
   printf "    --disable-ocaml Disable OCAML bindings\n"
   printf "\n"
@@ -307,6 +308,15 @@ if [ ! -z "$build_target" ]; then
     target_abi="ios"
     CROSS_TARGET="-target arm64-apple-ios"
     CROSS_SYSROOT="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) -arch arm64"
+    # CROSS_INCLUDES="-I$SYSROOT/usr/include/"
+  elif [[ "$build_target" == "x86_64-apple-ios-simulator" ]]; then
+    # Cross compiling for x86_64-apple-ios (emulator only)
+    # (presumably on x86_64-apple-darwin).
+    target_arch="x86_64"
+    target_sys="apple"
+    target_abi="ios-simulator"
+    CROSS_TARGET="-target x86_64-apple-ios-simulator"
+    CROSS_SYSROOT="-isysroot $(xcrun --sdk iphonesimulator --show-sdk-path)"
   else
     show_help
     exit 0

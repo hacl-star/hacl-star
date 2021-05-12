@@ -28,7 +28,7 @@ if [ -z "$CROSS_CI" ]; then
   pushd dist/gcc-compatible
   rm -rf *.o *.d libevercrypt.a
   ./configure -target $CROSS_CI --disable-ocaml
-  make -j
+  make -j libevercrypt.a
   popd
   exit 0
 fi
