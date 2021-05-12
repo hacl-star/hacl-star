@@ -82,19 +82,76 @@ let repeat_range_inductive #a min max pred f x =
 let repeati_inductive #a n pred f x0 =
   repeat_range_inductive #a 0 n pred f x0
 
+let unfold_repeat_right_once 
+    (lo:nat)
+    (hi:nat{lo < hi})
+    (a:(i:nat{lo <= i /\ i <= hi} -> Type))
+    (f:(i:nat{lo <= i /\ i < hi} -> a i -> a (i + 1)))
+    (acc:a lo)
+  : Lemma (repeat_right lo hi a f acc ==
+           f (hi - 1) (repeat_right lo (hi - 1) a f acc))
+  = ()
+
+module T = FStar.Tactics
+
+let eta_a (lo n:nat) (a:(i:nat{lo <= i /\ i <= n} -> Type)) = fun i -> a i
+let rec repeat_right_eta_a
+    (n:nat)
+    (lo:nat)
+    (hi:nat{lo <= hi /\ hi <= n})
+    (a:(i:nat{lo <= i /\ i <= n} -> Type))
+    (f:(i:nat{lo <= i /\ i < n} -> a i -> a (i + 1)))
+    (acc:a lo) 
+   : Lemma (ensures repeat_right lo hi a f acc == repeat_right lo hi (eta_a lo n a) f acc) 
+           (decreases hi)
+   = if hi = lo
+     then () 
+     else (repeat_right_eta_a n lo (hi - 1) a f acc)
+
+#push-options "--print_bound_var_types --print_implicits"
+
+
+let a' (#a:Type) (n:nat) (pred:(i:nat{i <= n} -> a -> Type)) = fun i -> x:a{pred i x}
+
 let repeati_inductive_repeat_gen #a n pred f x0 =
-  admit ();
-  let a' i = x:a{pred i x} in
-  let f' (i:nat{i < n}) (x:a' i) : a' (i + 1) = f i x in
+  let eta_a n (a:(i:nat{0 <= i /\ i <= n} -> Type)) = fun i -> a i in
+  let eta_f (f:repeatable #a #n pred) (i:nat{i < n}) (x:a' n pred i) : a' n pred (i + 1) = f i x in
   repeat_left_right 0 n (fun i -> x:a{pred i x}) f x0;
-  assert_norm (repeati_inductive n pred f x0 == repeat_right 0 n (fun i -> a' i) f' x0);
-  assert (repeat_gen n (fun i -> x:a{pred i x}) f x0 == repeat_right 0 n a' f' x0);
-  let repeat_right_eta
+  assume (repeati_inductive n pred f x0 ==
+          repeat_right 0 n (fun i -> a' n pred i) (eta_f f) x0);
+  let rec repeat_right_eta
+    (n:nat)
+    (hi:nat{hi <= n})
     (a:(i:nat{0 <= i /\ i <= n} -> Type))
     (f:(i:nat{0 <= i /\ i < n} -> a i -> a (i + 1)))
-    (acc:a 0) :
-    Lemma (repeat_right 0 n a f acc == repeat_right 0 n (fun i -> a i) f acc) = () in
-  repeat_right_eta a' f' x0
+    (acc:a 0) 
+   : Lemma (ensures repeat_right 0 hi a f acc == repeat_right 0 hi (eta_a n a) f acc) 
+           (decreases hi)
+   = if hi = 0
+     then () 
+     else (repeat_right_eta n (hi - 1) a f acc)
+  in
+  repeat_right_eta n n (a' n pred) (eta_f f) x0;
+  assert (repeat_gen n (fun i -> x:a{pred i x}) f x0 ==
+          repeat_right 0 n (fun (i:nat{i <= n}) -> x:a{pred i x}) f x0)
+       by (T.norm [delta_only [`%repeat_gen]];
+           T.dump "A";
+           T.trefl());
+  assert_norm (a' n pred == (fun (i:nat{i <= n}) -> x:a{pred i x}));
+  assert (repeat_right 0 n (fun (i:nat{i <= n}) -> x:a{pred i x}) f x0 ==
+          repeat_right 0 n (a' n pred) f x0);
+  let rec repeat_right_eta_f
+    (hi:nat{hi <= n})
+    (acc:a' n pred 0)
+   : Lemma (ensures repeat_right 0 hi (a' n pred) f acc ==
+                    repeat_right 0 hi (a' n pred) (eta_f f) acc)
+           (decreases hi)
+   = if hi = 0
+     then () 
+     else (repeat_right_eta_f (hi - 1) acc)
+  in
+  repeat_right_eta_f n x0
+  
 
 let repeat_gen_inductive n a pred f x0 =
   let f' (i:nat{i < n})
