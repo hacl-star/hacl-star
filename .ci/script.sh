@@ -24,7 +24,7 @@ if [[ $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
 fi
 
 # Cross compile for aarch64-apple-darwin. Build only.
-if [ -z "$CROSS_CI" ]; then
+if [ ! -z "$CROSS_CI" ]; then
   pushd dist/gcc-compatible
   rm -rf *.o *.d libevercrypt.a
   ./configure -target $CROSS_CI --disable-ocaml
