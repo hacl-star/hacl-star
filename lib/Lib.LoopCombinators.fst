@@ -110,15 +110,38 @@ let rec repeat_right_eta_a
 
 #push-options "--print_bound_var_types --print_implicits"
 
+let pext (a:Type) (p q: a -> prop) (_:squash (forall (x:a). p x <==> q x)) (x:a) : Lemma (p x == q x) 
+  = FStar.PropositionalExtensionality.apply (p x) (q x)
 
-let a' (#a:Type) (n:nat) (pred:(i:nat{i <= n} -> a -> Type)) = fun i -> x:a{pred i x}
+let refine_eq (a:Type) (p q:a -> prop) (x:squash (forall (i:a). p i <==> q i))
+  : Lemma ((i:a{p i} == i:a{q i}))
+  = assert (i:a{p i} == i:a{q i})
+        by (T.l_to_r [quote (pext a p q x)]; T.trefl())
+
+let b2t_prop (b:bool) : Lemma ((b2t b) `subtype_of` unit) = assert_norm (b2t b == squash (equals b true))
+
+let nat_refine_equiv (n:nat)
+  : Lemma ((i:nat{i <= n}) == (i:nat{0<=i /\ i<=n})) 
+  = refine_eq nat (fun (i:nat) -> b2t_prop (i <= n); b2t (i <= n)) (fun (i:nat) -> 0 <= i /\ i <= n) ()
+
+let a' (#a:Type) (n:nat) (pred:(i:nat{i <= n} -> a -> Type)) = fun (i:nat{i<=n}) -> x:a{pred i x}
+
+let repeati_repeat_left_rewrite_type (#a:Type) (n:nat) (pred:(i:nat{i <= n} -> a -> Type))
+                                     (f:repeatable #a #n pred)
+                                     (x0:a{pred 0 x0})
+  : Lemma (repeati_inductive n pred f x0 ==
+           repeat_left 0 n (a' n pred) f x0)
+  =  assert (repeati_inductive n pred f x0 ==
+             repeat_left 0 n (a' n pred) f x0)
+         by (T.norm [delta_only [`%repeati_inductive;
+                                 `%repeat_range_inductive;
+                                 `%a']];
+             T.l_to_r [`nat_refine_equiv];                                                   
+             T.trefl())
 
 let repeati_inductive_repeat_gen #a n pred f x0 =
   let eta_a n (a:(i:nat{0 <= i /\ i <= n} -> Type)) = fun i -> a i in
   let eta_f (f:repeatable #a #n pred) (i:nat{i < n}) (x:a' n pred i) : a' n pred (i + 1) = f i x in
-  repeat_left_right 0 n (fun i -> x:a{pred i x}) f x0;
-  assume (repeati_inductive n pred f x0 ==
-          repeat_right 0 n (fun i -> a' n pred i) (eta_f f) x0);
   let rec repeat_right_eta
     (n:nat)
     (hi:nat{hi <= n})
@@ -135,7 +158,6 @@ let repeati_inductive_repeat_gen #a n pred f x0 =
   assert (repeat_gen n (fun i -> x:a{pred i x}) f x0 ==
           repeat_right 0 n (fun (i:nat{i <= n}) -> x:a{pred i x}) f x0)
        by (T.norm [delta_only [`%repeat_gen]];
-           T.dump "A";
            T.trefl());
   assert_norm (a' n pred == (fun (i:nat{i <= n}) -> x:a{pred i x}));
   assert (repeat_right 0 n (fun (i:nat{i <= n}) -> x:a{pred i x}) f x0 ==
@@ -150,6 +172,12 @@ let repeati_inductive_repeat_gen #a n pred f x0 =
      then () 
      else (repeat_right_eta_f (hi - 1) acc)
   in
+  repeati_repeat_left_rewrite_type n pred f x0;
+  assert (repeati_inductive n pred f x0 ==
+          repeat_left 0 n (a' n pred) f x0);
+  repeat_left_right 0 n (a' n pred) f x0;
+  assert (repeat_left 0 n (a' n pred) f x0 ==
+          repeat_right 0 n (a' n pred) f x0); 
   repeat_right_eta_f n x0
   
 
