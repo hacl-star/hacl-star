@@ -83,6 +83,7 @@ let repeati_inductive #a n pred f x0 =
   repeat_range_inductive #a 0 n pred f x0
 
 let repeati_inductive_repeat_gen #a n pred f x0 =
+  admit ();
   let a' i = x:a{pred i x} in
   let f' (i:nat{i < n}) (x:a' i) : a' (i + 1) = f i x in
   repeat_left_right 0 n (fun i -> x:a{pred i x}) f x0;
