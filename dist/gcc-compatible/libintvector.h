@@ -663,6 +663,7 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
 
 #if defined(HACL_CAN_COMPILE_VEC128)
 
+#include <stdint.h>
 #include <vecintrin.h>
 
 /* The main vector 128 type
