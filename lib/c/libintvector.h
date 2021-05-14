@@ -693,7 +693,7 @@ typedef vector128_8 vector128;
   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))*/
 
 static inline
-vector128 Lib_IntVector_Intrinsics_vec128_load32_le(const unsigned char *x0) {
+vector128 Lib_IntVector_Intrinsics_vec128_load32_le(const uint8_t *x0) {
     vector128 x1;
     vec_vstbrf(&x1, x0);
     return x1;
@@ -705,7 +705,7 @@ vector128 Lib_IntVector_Intrinsics_vec128_load32_le(const unsigned char *x0) {
     ((vector128_8)vec_load_len((const uint8_t*)(x), 16)))) */
 
 static inline
-vector128 Lib_IntVector_Intrinsics_vec128_load64_le(const unsigned char *x0) {
+vector128 Lib_IntVector_Intrinsics_vec128_load64_le(const uint8_t *x0) {
     vector128 x1;
     vec_vstbrg(&x1, x0);
     return x1;
