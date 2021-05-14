@@ -11,7 +11,7 @@ let for start finish inv f =
 
 let while inv guard test body =
   let test: unit -> Stack bool
-    (requires inv)
+    (requires fun h -> inv h)  //AR: C.Loops.while precondition is written in eta-expanded form
     (ensures  fun _ b h -> inv h /\ b == guard h)
   = test
   in
