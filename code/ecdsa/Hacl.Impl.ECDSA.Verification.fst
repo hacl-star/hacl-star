@@ -10,14 +10,12 @@ open Lib.Buffer
 open Hacl.EC.Lemmas
 
 open Hacl.Spec.EC.Definition
-open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.EC.LowLevel 
 open Hacl.Impl.EC.Core
 open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.LowLevel
 open Hacl.Impl.ECDSA.MM.Exponent
 
-open Hacl.Spec.ECDSA.Definition
 open Spec.ECDSA
 open Spec.ECC
 open Hacl.Spec.EC.Definition
@@ -30,7 +28,6 @@ open Hacl.Hash.SHA2
 
 open Hacl.Impl.P256.Signature.Common
 open Lib.ByteSequence
-open Lib.IntVector.Intrinsics
 
 open Hacl.Impl.EC.Intro
 
@@ -42,8 +39,6 @@ open Hacl.Impl.EC.Setup
 open FStar.Mul
 open Hacl.Impl.EC.Masking
 
-module H = Spec.Agile.Hash
-module Def = Spec.Hash.Definitions
 
 
 #set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
@@ -82,21 +77,17 @@ let ecdsa_verification_step1 #c r s =
 
 
 inline_for_extraction
-val ecdsa_verification_step23: #c: curve 
+val ecdsa_verification_step23:   #c: curve 
   -> alg:hash_alg_ecdsa
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg} 
   -> m: lbuffer uint8 mLen -> result: felem c -> Stack unit
   (requires fun h -> live h m /\ live h result /\ 
     (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
-    assert_norm (pow2 32 < pow2 61);
-    assert_norm (pow2 32 < pow2 125);
-    let len = match alg with |NoHash -> v mLen |Hash a -> v (hash_len a) in 
-    let hashM = match alg with
-      |NoHash -> (as_seq h0 m <: lbytes len)
-      |Hash a -> Spec.Agile.Hash.hash a (as_seq h0 m) in 
-    as_nat c h1 result == changeEndian_u8 (v (getCoordinateLenU c)) (lseq_as_nat hashM % pow2 (getPower c)) % getOrder #c /\
+    let message = hashSpec c alg (v mLen) (as_seq h0 m) in 
+    as_nat c h1 result == message % getOrder #c /\
     as_nat c h1 result < getOrder #c))
+
 
 let ecdsa_verification_step23 #c alg mLen m result = 
   assert_norm (pow2 32 < pow2 61);
@@ -131,7 +122,7 @@ let ecdsa_verification_step23 #c alg mLen m result =
   Hacl.Impl.ECDSA.Signature.ecdsa_signature_step12_lemma c sz_hash (getCoordinateLenU c) h0 h1 mHash mHashHPart (as_seq h1 mHashHPart);
 
   lemma_lseq_nat_from_bytes (as_seq h1 mHashRPart);
-  lemma_nat_from_to_intseq_le_preserves_value #U8 #SEC (v (getCoordinateLenU c)) (as_seq h1 mHashRPart);
+  lemma_nat_from_to_intseq_le_preserves_value #U8 #SEC (getCoordinateLen c) (as_seq h1 mHashRPart);
   lemma_lseq_nat_from_bytes (as_seq h2 result)
 
 
@@ -173,39 +164,10 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
     multPowerPartial s inverseS r u2;
 
   let h1 = ST.get() in 
-    changeEndian #c u1;
-    changeEndian #c u2; 
-    toUint8 #c u1 bufferU1;
-    toUint8 #c u2 bufferU2;
-  
+    fromForm u1 bufferU1;
+    fromForm u2 bufferU2;
   let h2 = ST.get() in
-
- (*    calc(==) {
-    as_seq h2 bufferU1;
-    == {}
-    uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (as_seq h1 u1));
-    == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u1)}
-    uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u1))));
-    == {lemma_core_0 c u1 h1}
-    uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (nat_to_intseq_le 4 (as_nat c h1 u1)));
-    == {changeEndian_le_be #c (as_nat c h1 u1) }
-    nat_to_bytes_be 32 (as_nat c h1 u1);
-    };
-
-    calc(==) {
-      as_seq h2 bufferU2;
-      == {}
-      uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (as_seq h1 u2));
-      == {lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h1 u2)}
-      uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (nat_to_intseq_le 4 (nat_from_intseq_le (as_seq h1 u2))));
-      == {lemma_core_0 c u2 h1}
-      uints_to_bytes_be (Hacl.Spec.EC.Definition.changeEndian #c (nat_to_intseq_le 4 (as_nat c h1 u2)));
-      == {changeEndian_le_be #c (as_nat c h1 u2) }
-      nat_to_bytes_be 32 (as_nat c h1 u2);
-    }; *)
- admit();
   pop_frame()
-
 
 
 inline_for_extraction noextract

@@ -86,3 +86,41 @@ let ecp256dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P256 result pu
 
 let ecp384dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P384 result pubKey scalar
 
+
+inline_for_extraction
+class curve_test = {
+  len: (a: size_t {v a > 0})
+}
+
+val uploadZero: c: curve_test -> l: lbuffer uint64 (c.len) -> Stack unit 
+  (requires fun h -> live h l)
+  (ensures fun h0 _ h1 -> modifies (loc l) h0 h1)
+
+
+let uploadZero c l = 
+  upd l (size 0) (u64 5)
+
+
+
+instance p256: curve_test = {
+  len = 10ul}
+
+
+let uploadp256 () = 
+  push_frame();
+    let a = p256.len in 
+    let b = create a (u64 0) in 
+    uploadZero p256 b;
+  pop_frame()
+
+
+instance smth: curve_test = {
+  len = 11ul}
+
+
+let uploadpsmth () = 
+  push_frame();
+    let a = smth.len in 
+    let b = create a (u64 0) in 
+    uploadZero smth b;
+  pop_frame()

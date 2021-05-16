@@ -469,3 +469,13 @@ val ecp384dh_r:
 
 
 
+
+
+
+val uploadp256: unit -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> modifies0 h0 h1)
+
+val uploadpsmth: unit -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> modifies0 h0 h1)
