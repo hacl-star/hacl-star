@@ -123,7 +123,7 @@ let eq1_u64 a =
 
 
 inline_for_extraction noextract
-val isZero_uint64_CT: #c: curve ->  f: felem c -> Stack uint64
+val isZero_uint64_CT: #c: curve -> f: felem c -> Stack uint64
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
@@ -176,13 +176,14 @@ let isZero_uint64_nCT f =
   let f = isZero_uint64_CT f in 
   Hacl.Impl.EC.LowLevel.RawCmp.eq_u64_nCT f (u64 0xffffffffffffffff)
 
+
 inline_for_extraction noextract
-val compare_felem: #c: curve -> a: felem c -> b: felem c -> Stack uint64
+val cmp_felem_felem_u64: #c: curve -> a: felem c -> b: felem c -> Stack uint64
   (requires fun h -> live h a /\ live h b)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
     (if as_nat c h0 a = as_nat c h0 b then uint_v r == pow2 64 - 1 else uint_v r = 0))
 
-let compare_felem #c a b =
+let cmp_felem_felem_u64 #c a b =
   push_frame();
   let h0 = ST.get() in 
   let tmp = create (size 1) (u64 0) in 
@@ -225,3 +226,14 @@ let compare_felem #c a b =
   pop_frame(); 
   r
 
+
+inline_for_extraction noextract
+val cmp_felem_felem_bool: #c: curve -> a: felem c -> b: felem c -> Stack bool
+  (requires fun h -> live h a /\ live h b)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
+    if as_nat c h0 a = as_nat c h0 b then r == true else r == false))
+
+let cmp_felem_felem_bool #c a b = 
+  let r = lognot (cmp_felem_felem_u64 a b) in
+    lognot_lemma (cmp_felem_felem_u64 a b);   
+  Hacl.Impl.EC.LowLevel.RawCmp.unsafe_bool_of_u64 r

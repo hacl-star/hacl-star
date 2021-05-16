@@ -170,84 +170,74 @@ let ecdsa_verification_step4 #c bufferU1 bufferU2 r s hash =
   pop_frame()
 
 
-inline_for_extraction noextract
-val ecdsa_verification_step5_0:
-  #c: curve 
-  -> points:lbuffer uint64 (size 24)
-  -> pubKeyAsPoint: point c
-  -> u1: lbuffer uint8 (size 32)
-  -> u2: lbuffer uint8 (size 32)
-  -> tempBuffer: lbuffer uint64 (size 100) ->
-  Stack unit
-    (requires fun h ->
-      live h points /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
-      disjoint points u1 /\
-      disjoint points u2 /\
-      disjoint pubKeyAsPoint u1 /\
-      disjoint pubKeyAsPoint u2 /\
-      disjoint tempBuffer u1 /\
-      disjoint tempBuffer u2 /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc points; loc pubKeyAsPoint; loc tempBuffer] /\
-      point_x_as_nat c h pubKeyAsPoint < prime256 /\
-      point_y_as_nat c h pubKeyAsPoint < prime256 /\
-      point_z_as_nat c h pubKeyAsPoint < prime256
-    )
-  (ensures fun h0 _ h1 ->
-    modifies (loc pubKeyAsPoint |+| loc tempBuffer |+| loc points) h0 h1 /\
-    as_nat c h1 (gsub points (size 0) (size 4)) < prime256 /\
-    as_nat c h1 (gsub points (size 4) (size 4)) < prime256 /\
-    as_nat c h1 (gsub points (size 8) (size 4)) < prime256 /\
-    as_nat c h1 (gsub points (size 12) (size 4)) < prime256 /\
-    as_nat c h1 (gsub points (size 16) (size 4)) < prime256 /\
-    as_nat c h1 (gsub points (size 20) (size 4)) < prime256 /\
-    (
-      let pointU1 = gsub points (size 0) (size 12) in
-      let pointU2 = gsub points (size 12) (size 12) in
+let getU1U2 (#c: curve) (points: (lbuffer uint64 (getCoordinateLenU64 c *! 6ul))) = 
+  gsub points (size 0) (getCoordinateLenU64 c *! 3ul), 
+  gsub points (getCoordinateLenU64 c *! 3ul) (getCoordinateLenU64 c *! 3ul)
 
-      let fromDomainPointU1 = fromDomainPoint #c #DSA (point_prime_to_coordinates c (as_seq h1 pointU1)) in
-      let fromDomainPointU2 = fromDomainPoint #c #DSA (point_prime_to_coordinates c (as_seq h1 pointU2)) in
-      let u1D, _ = montgomery_ladder_spec_left #P256 (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
-      let u2D, _ = montgomery_ladder_spec_left #P256 (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates c (as_seq h0 pubKeyAsPoint)) in
-      fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D
-    )
-  )
+
+val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c -> Lemma (point_mult #c 0 p == pointAtInfinity)
+
+let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 p 0
+
+
+inline_for_extraction noextract
+val ecdsa_verification_step5_0: #c: curve 
+  -> points:lbuffer uint64 (getCoordinateLenU64 c *! 6ul)
+  -> pubKeyAsPoint: point c
+  -> u1: scalar_t #MUT #c
+  -> u2: scalar_t #MUT #c
+  -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *! 20ul) ->
+  Stack unit
+  (requires fun h ->
+    live h points /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
+    disjoint points u1 /\ disjoint points u2 /\ disjoint pubKeyAsPoint u1 /\ 
+    disjoint pubKeyAsPoint u2 /\ disjoint tempBuffer u1 /\ disjoint tempBuffer u2 /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc points; loc pubKeyAsPoint; loc tempBuffer] /\
+    point_eval c h pubKeyAsPoint /\ ~ (isPointAtInfinity (point_as_nat c h pubKeyAsPoint)))
+  (ensures fun h0 _ h1 -> modifies (loc pubKeyAsPoint |+| loc tempBuffer |+| loc points) h0 h1 /\ (
+    let pointU1G, pointU2Q = getU1U2 #c points in (point_eval c h1 pointU1G /\ point_eval c h1 pointU2Q /\ (
+    let fromDomainPointU1 = fromDomainPoint #c #DH (point_as_nat c h1 pointU1G) in
+    let fromDomainPointU2 = fromDomainPoint #c #DH (point_as_nat c h1 pointU2Q) in
+      point_mult0_is_infinity (basePoint #c); point_mult0_is_infinity (point_as_nat c h0 pubKeyAsPoint);
+    let u1D, _ = montgomery_ladder_spec_left #c (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
+    let u2D, _ = montgomery_ladder_spec_left #c (as_seq h0 u2) (pointAtInfinity, point_as_nat c h0 pubKeyAsPoint) in
+    fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D))))
+    
 
 let ecdsa_verification_step5_0 #c points pubKeyAsPoint u1 u2 tempBuffer =
-  let pointU1G = sub points (size 0) (size 12) in
-  let pointU2Q = sub points (size 12) (size 12) in
-  secretToPublicWithoutNorm #c pointU1G u1 tempBuffer;
-  scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer
-  
+    let h0 = ST.get() in 
+    let pointU1G = sub points (size 0) (getCoordinateLenU64 c *! 3ul) in
+    let pointU2Q = sub points (getCoordinateLenU64 c *! 3ul) (getCoordinateLenU64 c *! 3ul) in
+  secretToPublicWithoutNorm #c pointU1G u1 tempBuffer; 
+    let h1 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint; 
+  scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer;
+    let h2 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 pointU1G
+
+
 inline_for_extraction noextract
 val compare_points_bool: #c: curve -> a: point c -> b: point c -> Stack bool
-  (requires fun h -> live h a /\ live h b)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
-    (
-      let xP = gsub a (size 0) (size 4) in 
-      let yP = gsub a (size 4) (size 4) in 
-      let zP = gsub a (size 8) (size 4) in 
-
-      let xQ = gsub b (size 0) (size 4) in 
-      let yQ = gsub b (size 4) (size 4) in 
-      let zQ = gsub b (size 8) (size 4) in 
-
-      r == ((as_nat c h0 xP = as_nat c h0 xQ) && (as_nat c h0 yP = as_nat c h0 yQ) && (as_nat c h0 zP = as_nat c h0 zQ))
-    )
-  )
+  (requires fun h -> live h a /\ live h b /\ point_eval c h a /\ point_eval c h b)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
+    let xP, yP, zP = point_as_nat c h0 a in 
+    let xQ, yQ, zQ = point_as_nat c h0 b in 
+    r == ((xP = xQ) && (yP = yQ) && (zP = zQ))))
 
 let compare_points_bool #c a b = 
-  let x0 = sub a (size 0) (size 4) in 
-  let y0 = sub a (size 4) (size 4) in 
-  let z0 = sub a (size 8) (size 4) in 
+  let len = getCoordinateLenU64 c in 
+  let x0 = sub a (size 0) len in 
+  let y0 = sub a len len in 
+  let z0 = sub a (size 2 *! len) len in 
 
-  let x1 = sub b (size 0) (size 4) in 
-  let y1 = sub b (size 4) (size 4) in 
-  let z1 = sub b (size 8) (size 4) in true (*
+  let x1 = sub b (size 0) len in 
+  let y1 = sub b len len in 
+  let z1 = sub b (size 2 *! len) len in 
 
-  let xEqual = cmp_felem_felem_bool x0 x1 in
-  let yEqual = cmp_felem_felem_bool y0 y1 in 
-  let zEqual = cmp_felem_felem_bool z0 z1 in 
-  xEqual && yEqual && zEqual *)
+  let xEqual = cmp_felem_felem_bool #c x0 x1 in
+  let yEqual = cmp_felem_felem_bool #c y0 y1 in 
+  let zEqual = cmp_felem_felem_bool #c z0 z1 in 
+  xEqual && yEqual && zEqual
 
 
 inline_for_extraction noextract

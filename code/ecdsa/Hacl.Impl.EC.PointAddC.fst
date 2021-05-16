@@ -20,7 +20,7 @@ open FStar.Math.Lemmas
 open Hacl.Impl.EC.Masking
 open Hacl.Spec.EC.Definition
 
-open Hacl.Impl.P256.LowLevel.RawCmp
+open Hacl.Impl.EC.LowLevel.RawCmp
 
 open Hacl.Impl.EC.PointDouble
 open Hacl.Impl.EC.PointAdd
@@ -29,6 +29,19 @@ open Hacl.Impl.EC.PointAdd
 open Hacl.Spec.MontgomeryMultiplication
 open FStar.Mul
 
+
+(* val lemma_norm: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
+  -> q: point_nat_prime #c {~ (isPointAtInfinity q)} ->  Lemma (
+  let pX, pY, pZ = p in
+  let qX, qY, qZ = q in 
+  let pNX, pNY, pNZ = _norm p in 
+  let qNX, qNY, qNZ = _norm q in 
+  (pX == qX <==> pNX * (pZ * pZ) % getPrime c == qNX * (qZ * qZ) % getPrime c) /\ 
+  (pY == qY <==> pNY * (pZ * pZ * pZ) % getPrime c == qNY * (qZ * qZ * qZ) % getPrime c))
+
+
+Hacl.Spec.MontgomeryMultiplication
+ *)
 
 
 
@@ -56,17 +69,7 @@ val point_add_c: #c: curve -> p: point c -> q: point c -> result: point c
      point_eval c h p /\ point_eval c h q
    )
    (ensures fun h0 _ h1 -> 
-     modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
-     let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-     let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
-     let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in 
-     
-     let pxD, pyD, pzD = fromDomain_ #c pX, fromDomain_ #c pY, fromDomain_ #c pZ in 
-     let qxD, qyD, qzD = fromDomain_ #c qX, fromDomain_ #c qY, fromDomain_ #c qZ in 
-     let x3D, y3D, z3D = fromDomain_ #c x3, fromDomain_ #c y3, fromDomain_ #c z3 in
-      
-     let xN, yN, zN = _point_add #c (pxD, pyD, pzD) (qxD, qyD, qzD) in 
-     x3D == xN /\ y3D == yN /\ z3D == zN))
+     modifies (loc tempBuffer |+| loc result) h0 h1)
 
 
 let point_add_c #c p q result tempBuffer = 
@@ -98,10 +101,10 @@ let point_add_c #c p q result tempBuffer =
   montgomery_multiplication_buffer #c tr_z1 y2 tr_z1;
   montgomery_multiplication_buffer #c tr_z2 y1 tr_z2;
 
-  let equalX = compare_felem #c sq_z1 sq_z2 in 
-  let equalY = compare_felem #c tr_z1 tr_z2 in 
+  let equalX = cmp_felem_felem_u64 #c sq_z1 sq_z2 in 
+  let equalY = cmp_felem_felem_u64 #c tr_z1 tr_z2 in 
 
-  let equalXandY = eq_0_u64 equalX && eq_0_u64 equalY in 
+  let equalXandY = equalX && equalY in 
 
   if equalXandY then
    point_double p result tempBuffer
