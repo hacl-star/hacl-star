@@ -40,6 +40,12 @@ extern "C" {
 #include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Hash.h"
 
+/* SNIPPET_START: Hacl_Streaming_MD5_state_md5 */
+
+typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_MD5_state_md5;
+
+/* SNIPPET_END: Hacl_Streaming_MD5_state_md5 */
+
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_create_in_md5 */
 
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_MD5_legacy_create_in_md5();

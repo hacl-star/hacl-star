@@ -14,6 +14,28 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_SHA2_state_sha2_224_total_len =
       field hacl_Streaming_SHA2_state_sha2_224 "total_len" uint64_t
     let _ = seal hacl_Streaming_SHA2_state_sha2_224
+    type hacl_Streaming_SHA2_state_sha2_256 =
+      hacl_Streaming_SHA2_state_sha2_224
+    let hacl_Streaming_SHA2_state_sha2_256 =
+      typedef hacl_Streaming_SHA2_state_sha2_224
+        "Hacl_Streaming_SHA2_state_sha2_256"
+    type hacl_Streaming_SHA2_state_sha2_384 =
+      [ `hacl_Streaming_SHA2_state_sha2_384 ] structure
+    let (hacl_Streaming_SHA2_state_sha2_384 :
+      [ `hacl_Streaming_SHA2_state_sha2_384 ] structure typ) =
+      structure "Hacl_Streaming_SHA2_state_sha2_384_s"
+    let hacl_Streaming_SHA2_state_sha2_384_block_state =
+      field hacl_Streaming_SHA2_state_sha2_384 "block_state" (ptr uint64_t)
+    let hacl_Streaming_SHA2_state_sha2_384_buf =
+      field hacl_Streaming_SHA2_state_sha2_384 "buf" (ptr uint8_t)
+    let hacl_Streaming_SHA2_state_sha2_384_total_len =
+      field hacl_Streaming_SHA2_state_sha2_384 "total_len" uint64_t
+    let _ = seal hacl_Streaming_SHA2_state_sha2_384
+    type hacl_Streaming_SHA2_state_sha2_512 =
+      hacl_Streaming_SHA2_state_sha2_384
+    let hacl_Streaming_SHA2_state_sha2_512 =
+      typedef hacl_Streaming_SHA2_state_sha2_384
+        "Hacl_Streaming_SHA2_state_sha2_512"
     let hacl_Streaming_SHA2_create_in_224 =
       foreign "Hacl_Streaming_SHA2_create_in_224"
         (void @-> (returning (ptr hacl_Streaming_SHA2_state_sha2_224)))
@@ -48,18 +70,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     let hacl_Streaming_SHA2_free_256 =
       foreign "Hacl_Streaming_SHA2_free_256"
         ((ptr hacl_Streaming_SHA2_state_sha2_224) @-> (returning void))
-    type hacl_Streaming_SHA2_state_sha2_384 =
-      [ `hacl_Streaming_SHA2_state_sha2_384 ] structure
-    let (hacl_Streaming_SHA2_state_sha2_384 :
-      [ `hacl_Streaming_SHA2_state_sha2_384 ] structure typ) =
-      structure "Hacl_Streaming_SHA2_state_sha2_384_s"
-    let hacl_Streaming_SHA2_state_sha2_384_block_state =
-      field hacl_Streaming_SHA2_state_sha2_384 "block_state" (ptr uint64_t)
-    let hacl_Streaming_SHA2_state_sha2_384_buf =
-      field hacl_Streaming_SHA2_state_sha2_384 "buf" (ptr uint8_t)
-    let hacl_Streaming_SHA2_state_sha2_384_total_len =
-      field hacl_Streaming_SHA2_state_sha2_384 "total_len" uint64_t
-    let _ = seal hacl_Streaming_SHA2_state_sha2_384
     let hacl_Streaming_SHA2_create_in_384 =
       foreign "Hacl_Streaming_SHA2_create_in_384"
         (void @-> (returning (ptr hacl_Streaming_SHA2_state_sha2_384)))
