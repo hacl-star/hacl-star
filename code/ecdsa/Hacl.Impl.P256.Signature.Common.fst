@@ -167,16 +167,6 @@ let isPointAtInfinityPublic #c p =
   let len = getCoordinateLenU64 c in 
   let zCoordinate = sub p (size 2 *! len) len in 
   isZero_uint64_nCT #c zCoordinate 
-    
-
-val lemma_modular_multiplication_2_d: #c: curve -> 
-  a:nat {a < getPrime c} -> b:nat {b < getPrime c } -> 
-  Lemma (toDomain_ #c #DH a = toDomain_ #c #DH b <==> a == b)
-
-let lemma_modular_multiplication_2_d #c a b = 
-  lemmaToDomain #c #DH a;
-  lemmaToDomain #c #DH b;
-  Hacl.Impl.EC.Math.lemma_modular_multiplication_toDomain #c a b
 
 
 let isPointOnCurvePublic #c p = 

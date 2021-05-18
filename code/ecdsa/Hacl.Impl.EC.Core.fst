@@ -102,16 +102,6 @@ let copy_point #c p result =
 
 let getPower2 c = pow2 (getPower c)
 
-(* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
-val lemma_pointAtInfInDomain: #c: curve -> x: nat -> y: nat -> z: nat {z < getPrime c} -> 
-  Lemma (
-    isPointAtInfinity (x, y, z) == 
-    isPointAtInfinity ((fromDomain_ #c #DH x), (fromDomain_ #c #DH y), (fromDomain_ #c #DH z)))
-
-let lemma_pointAtInfInDomain #c x y z =
-  lemmaFromDomain #c #DH z;
-  lemma_multiplication_not_mod_prime #c z
-
 
 (* The point is a point at infinity iff z == 0 *)
 let isPointAtInfinityPrivate #c p =  

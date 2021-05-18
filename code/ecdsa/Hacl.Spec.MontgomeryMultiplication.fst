@@ -514,3 +514,14 @@ let pow_spec #c #m k p =
 let sq_root_spec #c #m a = 
   let prime = getModePrime m c in 
   pow a ((prime + 1) / 4) % prime
+
+
+let lemma_modular_multiplication_2_d #c a b = 
+  lemmaToDomain #c #DH a;
+  lemmaToDomain #c #DH b;
+  Hacl.Impl.EC.Math.lemma_modular_multiplication_toDomain #c a b
+
+
+let lemma_pointAtInfInDomain #c x y z =
+  lemmaFromDomain #c #DH z;
+  lemma_multiplication_not_mod_prime #c z

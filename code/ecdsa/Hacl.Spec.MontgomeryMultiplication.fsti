@@ -109,3 +109,15 @@ val pow_spec: #c: curve -> #m: mode -> k:scalar_bytes #c
 
 val sq_root_spec: #c: curve -> #m: mode -> a: nat {a < getModePrime m c}
   -> Tot (r: nat {let prime = getModePrime m c in r = pow a ((prime + 1) / 4) % prime /\ r < getModePrime m c})
+
+
+val lemma_modular_multiplication_2_d: #c: curve -> 
+  a:nat {a < getPrime c} -> b:nat {b < getPrime c } -> 
+  Lemma (toDomain_ #c #DH a = toDomain_ #c #DH b <==> a == b)
+
+
+(* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
+val lemma_pointAtInfInDomain: #c: curve -> x: nat -> y: nat -> z: nat {z < getPrime c} -> 
+  Lemma (
+    isPointAtInfinity (x, y, z) == 
+    isPointAtInfinity ((fromDomain_ #c #DH x), (fromDomain_ #c #DH y), (fromDomain_ #c #DH z)))

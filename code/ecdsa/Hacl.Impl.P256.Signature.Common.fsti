@@ -53,6 +53,7 @@ val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit
     x == pointScalarXSeq /\ y == pointScalarYSeq /\ z == 1 /\
     x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
 
+
 [@CInline]  
 val isPointAtInfinityPublic: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p)
