@@ -672,20 +672,18 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
  * combination is invalid. */
 typedef unsigned char vector128_8 __attribute__ ((vector_size(16)));
 typedef unsigned int vector128_32 __attribute__ ((vector_size(16)));
-typedef int vector128_s32 __attribute__ ((vector_size(16)));
 typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
-typedef long long vector128_s64 __attribute__ ((vector_size(16)));
 
 typedef vector128_8 Lib_IntVector_Intrinsics_vec128;
 typedef vector128_8 vector128;
 
 /* Small helper to change the endianess of the vector's elements, seen as int32. */
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0) \
-  ((vector128)(vec_revb((vector128_s32)(x0))))
+  ((vector128)(vec_revb((vector128_32)(x0))))
 
 /* Small helper to change the endianess of the vector's elements, seen as int64 */
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0) \
-  ((vector128)(vec_revb((vector128_s64)(x0))))
+  ((vector128)(vec_revb((vector128_64)(x0))))
 
 #define Lib_IntVector_Intrinsics_vec128_load32_le(x)                  \
   (Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(        \
