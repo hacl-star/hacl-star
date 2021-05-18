@@ -693,24 +693,30 @@ typedef vector128_8 vector128;
   ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))*/
 
-static inline
+#define Lib_IntVector_Intrinsics_vec128_load32_le(x)                  \
+    ((vector128) __builtin_s390_vlbrf((vector128_32)vec_load_len((const uint8_t*)(x), 16)))
+
+/*static inline
 vector128 Lib_IntVector_Intrinsics_vec128_load32_le(const uint8_t *x0) {
     vector128 x1;
     __builtin_s390_vlbrf(&x1, x0);
     return x1;
-}
+    }*/
 
 //#define Lib_IntVector_Intrinsics_vec128_load32_le(x)
 //    ((vector128_32)(vec_vlbrf((vector128_32)x)))
 /*  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
     ((vector128_8)vec_load_len((const uint8_t*)(x), 16)))) */
 
-static inline
+#define Lib_IntVector_Intrinsics_vec128_load64_le(x)                  \
+    ((vector128) __builtin_s390_vlbrg((vector128_64)vec_load_len((const uint8_t*)(x), 16)))
+
+/*static inline
 vector128 Lib_IntVector_Intrinsics_vec128_load64_le(const uint8_t *x0) {
     vector128 x1;
     __builtin_s390_vlbrg(&x1, x0);
     return x1;
-}
+    }*/
 
 //#define Lib_IntVector_Intrinsics_vec128_load64_le(x)
 //    ((vector128_64)(vec_vlbrg((vector128_64)x)))
