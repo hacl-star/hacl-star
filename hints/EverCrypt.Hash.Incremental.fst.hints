@@ -51,7 +51,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "a901b73b64b01bec4d71776c174f8477"
+      "af78da0b9303c7aa42954b3b2c61d066"
     ],
     [
       "EverCrypt.Hash.Incremental.mk_words_state",
@@ -90,7 +90,7 @@
         "unit_typing"
       ],
       0,
-      "c1ea11eb7083692ad380e44f6a8669a4"
+      "a80c50daf215410954d1edadb698d7dc"
     ],
     [
       "EverCrypt.Hash.Incremental.evercrypt_hash",
@@ -100,10 +100,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Spec.Hash.Definitions_interpretation_Tm_arrow_3ac874e39b1c409ba69a2358a6f73691",
-        "b2t_def", "bool_inversion",
-        "constructor_distinct_FStar.Integers.Signed",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "constructor_distinct_FStar.Integers.Signed",
         "constructor_distinct_FStar.Integers.W128",
         "constructor_distinct_FStar.Integers.W16",
         "constructor_distinct_FStar.Integers.W32",
@@ -222,7 +220,6 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__",
-        "function_token_typing_Spec.Hash.Definitions.words_state_",
         "int_inversion", "int_typing",
         "interpretation_Tm_abs_7db19245573865e2013f96b9787edb72",
         "interpretation_Tm_abs_b2e90973e02ca16cb7aa657b99901054",
@@ -231,10 +228,9 @@
         "interpretation_Tm_abs_f006d723251ddaabe831b91f6d482a4e",
         "kinding_Spec.Hash.Definitions.hash_alg@tok",
         "lemma_FStar.Seq.Base.lemma_eq_elim",
-        "lemma_FStar.Seq.Base.lemma_eq_refl",
-        "lemma_FStar.Seq.Base.lemma_len_append",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.IntTypes.v_injective", "lemma_Lib.IntTypes.v_mk_int",
+        "lemma_FStar.Seq.Base.lemma_eq_refl", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.v_injective",
+        "lemma_Lib.IntTypes.v_mk_int",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
@@ -304,17 +300,14 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__invariant",
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s",
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__v",
-        "token_correspondence_Spec.Hash.Definitions.words_state_",
         "true_interp", "typing_EverCrypt.Hash.Incremental.block_len",
         "typing_EverCrypt.Hash.Incremental.hash_len",
         "typing_EverCrypt.Hash.state_s", "typing_FStar.Ghost.reveal",
-        "typing_FStar.Pervasives.Native.snd", "typing_FStar.Seq.Base.length",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt.max_int",
+        "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits",
         "typing_FStar.UInt32.v", "typing_FStar.UInt64.v",
         "typing_Hacl.Streaming.MD.max_input_length64",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.cast",
-        "typing_Lib.IntTypes.maxint", "typing_Lib.IntTypes.minint",
-        "typing_Lib.IntTypes.mk_int",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
         "typing_Lib.IntTypes.op_At_Percent_Dot",
         "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
         "typing_LowStar.Buffer.trivial_preorder",
@@ -323,7 +316,6 @@
         "typing_Spec.Blake2.wt",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Hash.Definitions.block_length",
-        "typing_Spec.Hash.Definitions.extra_state",
         "typing_Spec.Hash.Definitions.extra_state_int_type",
         "typing_Spec.Hash.Definitions.is_blake",
         "typing_Spec.Hash.Definitions.max_extra_state",
@@ -340,7 +332,7 @@
         "typing_tok_Spec.Hash.Definitions.Blake2S@tok", "unit_inversion"
       ],
       0,
-      "cd81333fa792b5b17162623f8f3d7e13"
+      "a0e87fb3fb1dfb4aa15455e08a1c0429"
     ],
     [
       "EverCrypt.Hash.Incremental.create_in",
@@ -371,7 +363,7 @@
         "unit_typing"
       ],
       0,
-      "e264f6ee54013c368d8dce3f2ad39149"
+      "5048d5be3b08d7b54b38aae189dd9808"
     ],
     [
       "EverCrypt.Hash.Incremental.init",
@@ -402,7 +394,7 @@
         "unit_typing"
       ],
       0,
-      "518c3feb945073f2f51d00b0d7568315"
+      "ca4eb2f1a3b1754247de73a84bbcd7ac"
     ],
     [
       "EverCrypt.Hash.Incremental.update",
@@ -432,7 +424,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "84853f1075f1788eb4d4cb2a2aa16021"
+      "6ee881926d9317a654f2368ff6e5729e"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_st",
@@ -462,7 +454,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "c08d19a4c81bf52b6be63497c8d5b614"
+      "69ee35f623d782241980631ef3aa0b0c"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_md5",
@@ -493,7 +485,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "76b91a825aeb7fccd6cf797eca0440ee"
+      "c5f98a741584f90c4b46a1bd6cc50b8e"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha1",
@@ -524,7 +516,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "14cc047bf9ac7c81a8bc9a4a9ef27d04"
+      "7de329a297f35736d79d6708995f64fa"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha224",
@@ -555,7 +547,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "bd23b0c44d175a8aad6954002fbfd0d1"
+      "43c388c8e09dfe7f60561e72ab5db31f"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha256",
@@ -586,7 +578,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "42fcd919c4441464a577f02962df2843"
+      "014906b87e3a0d5160867b239a15a03d"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha384",
@@ -617,7 +609,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "c61880384865299af402e3b74a8082fc"
+      "928cb323a1431f8a800df63ea486a600"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha512",
@@ -648,7 +640,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "19e97b41bfd44d976fdda14e1df87954"
+      "2ff397969658ecb7165572ff5da950dc"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_blake2s",
@@ -679,7 +671,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "9ddf7ca465d009df984d15b607679469"
+      "7395caba120e5d859c5df3c2594eb5a9"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_blake2b",
@@ -710,7 +702,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "3877f9d51b2cee415452aa5f86032fe1"
+      "f64b3a38ea7218050e2d83f0061fd401"
     ],
     [
       "EverCrypt.Hash.Incremental.alg_of_state",
@@ -740,7 +732,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "56383513fe9a0e10abd9e43b7472feee"
+      "a81968b2ac9505719d3740963a326883"
     ],
     [
       "EverCrypt.Hash.Incremental.finish",
@@ -770,7 +762,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "a7bb28efed880395cd3e0f48ac785197"
+      "2e6a0c1d9daacc1e33f9d46c7e65faa2"
     ],
     [
       "EverCrypt.Hash.Incremental.finish",
@@ -833,7 +825,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "e5ce41110b4dbd2438e9d4a9c5bf84fa"
+      "dff0ee6b5d84357e6aae64803ade3823"
     ],
     [
       "EverCrypt.Hash.Incremental.state",
@@ -863,7 +855,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "e1f38e9da930791fa46b23b450810b83"
+      "3b76fe38beaf97cd8bbe9a45699849d5"
     ]
   ]
 ]

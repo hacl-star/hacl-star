@@ -102,9 +102,15 @@ all:
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
-  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
+  compile-portable-gcc-compatible dist/linux/Makefile.basic \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
   obj/libhaclml.cmxa compile-election-guard
+
+# Mozilla does not want to run the configure script, so this means that the
+# build of Mozilla will break on platforms other than x86-64
+ifeq ($(shell uname -m),x86_64)
+all-unstaged: compile-mozilla
+endif
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -1074,6 +1080,10 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	echo "KreMLin version: $(shell cd $(KREMLIN_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
 	if [ "$*" == "wasm" ]; then touch $@; fi
+	if [ x"$*" == xmozilla ]; then \
+	  cp dist/Makefile.mozilla.config $(dir $@)/Makefile.config; \
+	  cp dist/config.mozilla.h $(dir $@)/config.h; \
+	fi
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
