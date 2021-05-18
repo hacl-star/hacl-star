@@ -672,7 +672,9 @@ static inline Lib_IntVector_Intrinsics_vec128 Lib_IntVector_Intrinsics_vec128_lo
  * combination is invalid. */
 typedef unsigned char vector128_8 __attribute__ ((vector_size(16)));
 typedef unsigned int vector128_32 __attribute__ ((vector_size(16)));
+typedef int vector128_s32 __attribute__ ((vector_size(16)));
 typedef unsigned long long vector128_64 __attribute__ ((vector_size(16)));
+typedef long long vector128_s64 __attribute__ ((vector_size(16)));
 
 typedef vector128_8 Lib_IntVector_Intrinsics_vec128;
 typedef vector128_8 vector128;
@@ -680,22 +682,20 @@ typedef vector128_8 vector128;
 /* Small helper to change the endianess of the vector's elements, seen as uint32.
  * Note that we can't use vec_revb. */
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(x0) \
-  ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
-  (vector128_8){3,2,1,0,7,6,5,4,11,10,9,8,15,14,13,12})))
+  ((vector128)(vec_revb((vector128_s32)(x0))))
 
 /* Small helper to change the endianess of the vector's elements, seen as uint64
  * Note that we can't use vec_revb. */
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0) \
-  ((vector128)(vec_perm((vector128_8)(x0), (vector128_8) {},            \
-  (vector128_8){7,6,5,4,3,2,1,0,15,14,13,12,11,10,9,8})))
+  ((vector128)(vec_perm((vector128_s64)(x0))))
 
 /*#define Lib_IntVector_Intrinsics_vec128_load32_le(x)                  \
   ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))*/
 
 #define Lib_IntVector_Intrinsics_vec128_load32_le(x)                  \
-    ((vector128) __builtin_s390_vlbrf(                                \
-     (vector128_32)((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
+  (Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32(        \
+   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
 
 /*static inline
 vector128 Lib_IntVector_Intrinsics_vec128_load32_le(const uint8_t *x0) {
@@ -709,9 +709,13 @@ vector128 Lib_IntVector_Intrinsics_vec128_load32_le(const uint8_t *x0) {
 /*  ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
     ((vector128_8)vec_load_len((const uint8_t*)(x), 16)))) */
 
-#define Lib_IntVector_Intrinsics_vec128_load64_le(x)                  \
+/*#define Lib_IntVector_Intrinsics_vec128_load64_le(x)                \
     ((vector128) __builtin_s390_vlbrg(                                \
-     (vector128_64)((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
+    (vector128_64)((vector128_8)vec_load_len((const uint8_t*)(x), 16))))*/
+
+#define Lib_IntVector_Intrinsics_vec128_load64_le(x)                  \
+  (Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(        \
+   ((vector128_8)vec_load_len((const uint8_t*)(x), 16))))
 
 /*static inline
 vector128 Lib_IntVector_Intrinsics_vec128_load64_le(const uint8_t *x0) {
