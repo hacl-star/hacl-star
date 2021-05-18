@@ -687,7 +687,7 @@ typedef vector128_8 vector128;
 /* Small helper to change the endianess of the vector's elements, seen as uint64
  * Note that we can't use vec_revb. */
 #define Lib_IntVector_Intrinsics_vec128_load_store_switch_endian64(x0) \
-  ((vector128)(vec_perm((vector128_s64)(x0))))
+  ((vector128)(vec_revb((vector128_s64)(x0))))
 
 /*#define Lib_IntVector_Intrinsics_vec128_load32_le(x)                  \
   ((vector128) Lib_IntVector_Intrinsics_vec128_load_store_switch_endian32( \
