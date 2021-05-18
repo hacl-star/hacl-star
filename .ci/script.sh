@@ -23,6 +23,16 @@ if [[ $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
   exit 0
 fi
 
+# Cross compile for other targets. Build and static library only.
+if [ ! -z "$CROSS_CI" ]; then
+  pushd dist/gcc-compatible
+  rm -rf *.o *.d libevercrypt.a
+  ./configure -target $CROSS_CI --disable-ocaml
+  make -j libevercrypt.a
+  popd
+  exit 0
+fi
+
 if [[ $TARGET == "IA32" ]]; then
   # Test 32-bit build; Tests don't work here yet.
   pushd dist/gcc-compatible

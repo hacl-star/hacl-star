@@ -323,8 +323,7 @@ Write `aM ^ b mod n` in `resM`.
   execution time than exp_vartime.
 
   Before calling this function, the caller will need to ensure that the following
-  preconditions are observed.
-  • 0 < bBits
+  precondition is observed.
   • b < pow2 bBits 
 */
 void
@@ -373,7 +372,15 @@ Hacl_GenericField64_exp_consttime(
   }
   else
   {
-    uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+    uint32_t bLen;
+    if (bBits == (uint32_t)0U)
+    {
+      bLen = (uint32_t)1U;
+    }
+    else
+    {
+      bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+    }
     Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, k1.n, k1.mu, k1.r2, resM);
     uint32_t table_len = (uint32_t)16U;
     KRML_CHECK_SIZE(sizeof (uint64_t), table_len * len1);
@@ -483,8 +490,7 @@ Write `aM ^ b mod n` in `resM`.
   exp_consttime function for constant-time variant.
 
   Before calling this function, the caller will need to ensure that the following
-  preconditions are observed.
-  • 0 < bBits
+  precondition is observed.
   • b < pow2 bBits 
 */
 void
@@ -520,7 +526,15 @@ Hacl_GenericField64_exp_vartime(
   }
   else
   {
-    uint32_t bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+    uint32_t bLen;
+    if (bBits == (uint32_t)0U)
+    {
+      bLen = (uint32_t)1U;
+    }
+    else
+    {
+      bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+    }
     Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, k1.n, k1.mu, k1.r2, resM);
     uint32_t table_len = (uint32_t)16U;
     KRML_CHECK_SIZE(sizeof (uint64_t), table_len * len1);

@@ -16,6 +16,10 @@ val blocks: x:size_t{v x > 0} -> m:size_t{v m > 0} -> r:size_t{v r == S.blocks (
 let blocks x m = (x -. 1ul) /. m +. 1ul
 
 inline_for_extraction noextract
+val blocks0: x:size_t -> m:size_t{v m > 0} -> r:size_t{v r == S.blocks0 (v x) (v m)}
+let blocks0 x m = if x =. 0ul then 1ul else (x -. 1ul) /. m +. 1ul
+
+inline_for_extraction noextract
 let limb_t = S.limb_t
 
 inline_for_extraction noextract

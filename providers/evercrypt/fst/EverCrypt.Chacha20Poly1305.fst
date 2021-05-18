@@ -19,10 +19,10 @@ let aead_encrypt k n aadlen aad mlen m cipher tag =
   let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
   let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
 
-  if EverCrypt.TargetConfig.evercrypt_can_compile_vec256 && vec256 then begin
+  if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then begin
     Hacl.Chacha20Poly1305_256.aead_encrypt k n aadlen aad mlen m cipher tag
 
-  end else if EverCrypt.TargetConfig.evercrypt_can_compile_vec128 && vec128 then begin
+  end else if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then begin
     Hacl.Chacha20Poly1305_128.aead_encrypt k n aadlen aad mlen m cipher tag
 
   end else begin
@@ -35,10 +35,10 @@ let aead_decrypt k n aadlen aad mlen m cipher tag =
   let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
   let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
 
-  if EverCrypt.TargetConfig.evercrypt_can_compile_vec256 && vec256 then begin
+  if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then begin
     Hacl.Chacha20Poly1305_256.aead_decrypt k n aadlen aad mlen m cipher tag
 
-  end else if EverCrypt.TargetConfig.evercrypt_can_compile_vec128 && vec128 then begin
+  end else if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then begin
     Hacl.Chacha20Poly1305_128.aead_decrypt k n aadlen aad mlen m cipher tag
 
   end else begin

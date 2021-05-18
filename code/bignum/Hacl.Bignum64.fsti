@@ -83,7 +83,6 @@ val mod: len:BN.meta_len t_limbs -> BS.bn_mod_slow_safe_st t_limbs len
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < bBits
    • b < pow2 bBits
    • a < n "]
 val mod_exp_vartime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs len
@@ -104,7 +103,6 @@ val mod_exp_vartime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs le
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < bBits
    • b < pow2 bBits
    • a < n "]
 val mod_exp_consttime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs len
@@ -170,7 +168,6 @@ val mod_precomp: len:Ghost.erased _ -> BS.bn_mod_slow_ctx_st t_limbs len
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < bBits
   • b < pow2 bBits
   • a < n "]
 val mod_exp_vartime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limbs len
@@ -190,7 +187,6 @@ val mod_exp_vartime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limbs 
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < bBits
   • b < pow2 bBits
   • a < n "]
 val mod_exp_consttime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limbs len

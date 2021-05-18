@@ -92,18 +92,18 @@ val disable_openssl: disabler
 val disable_bcrypt: disabler
 
 (** Some predicates to dynamically guard the vectorized code *)
-(* Note that those predicates don't check [EverCrypt.TargetConfig.evercrypt_can_compile_vec128],
- * [EverCrypt.TargetConfig.evercrypt_can_compile_vale], etc.
+(* Note that those predicates don't check [EverCrypt.TargetConfig.hacl_can_compile_vec128],
+ * [EverCrypt.TargetConfig.hacl_can_compile_vale], etc.
  * The reason is that the above booleans are static preconditions, checked at
  * compilation time. The F* code must thus be guard the following way (note that
  * the order of the arguments is important for syntactic reasons):
- * [> if EverCrypt.TargetConfig.evercrypt_can_compile_vec128 && has_vec128 ... then
+ * [> if EverCrypt.TargetConfig.hacl_can_compile_vec128 && has_vec128 ... then
  * Leading to the following C code:
  * [> #if defined(COMPILE_128)
  * [>   if has_vec128 ... { ... }
  * [> #endif
  * Note that if one forgets to guard the code with flags like
- * [EverCrypt.TargetConfig.evercrypt_can_compile_vec128], the code will not compile on platforms
+ * [EverCrypt.TargetConfig.hacl_can_compile_vec128], the code will not compile on platforms
  * not satisfying the requirements.
  *)
 

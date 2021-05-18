@@ -216,8 +216,7 @@ Write `aM ^ b mod n` in `resM`.
   execution time than exp_vartime.
 
   Before calling this function, the caller will need to ensure that the following
-  preconditions are observed.
-  • 0 < bBits
+  precondition is observed.
   • b < pow2 bBits 
 */
 void
@@ -244,8 +243,7 @@ Write `aM ^ b mod n` in `resM`.
   exp_consttime function for constant-time variant.
 
   Before calling this function, the caller will need to ensure that the following
-  preconditions are observed.
-  • 0 < bBits
+  precondition is observed.
   • b < pow2 bBits 
 */
 void
