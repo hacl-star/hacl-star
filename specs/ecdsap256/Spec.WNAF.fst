@@ -13,7 +13,7 @@ open Spec.ECC
 
 open FStar.Math.Lib
 
-#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
+#set-options "--z3rlimit 100"
 
 
 (* if (d mod 2w) >= 2w−1
@@ -143,8 +143,60 @@ let wnaf_point_multiplication_step #c window s precomputePoints i q =
     let r = if sign = false then pointNegation point else point in 
     pointAdd q r
 
+(* 
+d = 991
+i = 0
+l = list()
 
-assume val wnaf_as_nat: #c: curve -> w: pos ->  s: lseq (tuple2 bool (nat_windowed w)) (v (getScalarLen c)) -> Tot nat
+def mod2w(a):
+    a = a % 2 ** 5
+    if a >= 2 ** 4:
+        return a - 2 ** 5
+    else:
+        return a
+
+while (d > 0):
+    if d % 2 == 1:
+        di = mod2w(d)
+        l.append(di)
+        d = d - di
+    else:    
+         l.append(0)
+    d = d / 2
+    i = i + 1
+    
+l *)
+
+(* 
+def wnaf_as_int(l, i):
+    if i == len(l):  
+        return 0
+    return wnaf_as_int(l, i + 1) * 2 + l[i] *)
+
+
+val wnaf_as_nat_: #c: curve -> w: pos -> lseq (tuple2 bool (nat_windowed w)) (v (getScalarLen c))
+  -> i: nat {i <= v (getScalarLen c)} -> Tot int
+  (decreases v (getScalarLen c) - i)
+  
+
+let rec wnaf_as_nat_ #c w s i = 
+  if i = v (getScalarLen c) then 0 else 
+  let sign, value = Lib.Sequence.index s i in 
+  wnaf_as_nat_ #c w s  (i + 1) * 2 + (if sign = false then - value else value)
+
+
+val wnaf_as_nat: #c: curve -> w: pos -> s: lseq (tuple2 bool (nat_windowed w)) (v (getScalarLen c)) -> Tot int
+
+let wnaf_as_nat #c w s = wnaf_as_nat_ w s 0
+
+
+val lemma_wnaf_as_nat_is_scalar_as_nat: #c: curve -> s: scalar_bytes #c -> w: pos -> 
+  Lemma (wnaf_as_nat w (scalar_to_wnaf s w) >= 0)
+
+
+let lemma_wnaf_as_nat_is_scalar_as_nat #c s w = 
+  assume (
+
 
 
 val wnaf_point_multiplication: #c: curve -> window: pos {pow2 window < pow2 32} -> s: scalar_bytes #c ->
@@ -159,3 +211,45 @@ let wnaf_point_multiplication #c window s i =
   let pred index (r: point_nat_prime #c) : Type0 = pointEqual r (point_mult (wnaf_as_nat #c window scalar_wnaf) i) in 
 admit();
   Lib.LoopCombinators.repeati_inductive' (v (getScalarLen c)) pred (wnaf_point_multiplication_step window scalar_wnaf precomputedPoints) i
+
+
+
+(* Extension of scalar is the same *)
+(* d = randrange(2 ** 256)
+dMem = d
+i = 0
+l = list()
+
+def mod2w(a):
+    a = a % 2 ** 5
+    if a >= 2 ** 4:
+        return a - 2 ** 5
+    else:
+        return a
+
+while (d > 0):
+    if d % 2 == 1:
+        di = mod2w(d)
+        l.append(di)
+        d = d - di
+    else:    
+         l.append(0)
+    d = d / 2
+    i = i + 1
+    
+l1 = l + [0] + [0]+ [0]+ [0]+ [0]+ [0]+ [0]
+
+print(l)
+print(l1)
+
+def wnaf_as_int(l, i):
+    if i == len(l):  
+        return 0
+    return wnaf_as_int(l, i + 1) * 2 + l[i]
+as_nat_number = wnaf_as_int(l, 0)
+as_nat_number_test = wnaf_as_int(l1, 0)
+
+print(dMem)
+print(as_nat_number)
+print(as_nat_number_test)
+*)
