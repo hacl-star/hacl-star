@@ -274,7 +274,8 @@ let lemma_multiplication_is_pointEqual_r #c p q =
     lemma_multiplication_is_pointEqual_r1 #c p q;
     assert ((pY * (qZ * qZ * qZ) % getPrime c == qY * (pZ * pZ * pZ) % getPrime c))
     end
-    
+
+
 
 (* 
 The formulas for complete point addition for jacobian coordinates require a check for points not to be 
@@ -284,23 +285,6 @@ Weierstraß Elliptic Curves and Side-Channel Attacks Eric Brier and Marc Joye.
 
 Such way we don't provide a method to compute it, but the following code is used as a wrapper over the check of point equality,
 followed by point double (if they are equal) or point add (otherwise).*)
-
-
-val point_add_c: #c: curve -> p: point c -> q: point c -> result: point c 
-  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
-   Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
-     eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
-     disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\ 
-     point_eval c h p /\ point_eval c h q /\ ~ (isPointAtInfinity (point_as_nat c h p)) /\ 
-     ~ (isPointAtInfinity (point_as_nat c h q)))
-   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
-     let pD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
-     let qD = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
-     if pointEqual #c pD qD then 
-       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_double #c pD
-     else
-       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c pD qD /\
-     fromDomainPoint #c #DH (point_as_nat c h1 result) == pointAdd #c pD qD))
 
 
 let point_add_c #c p q result tempBuffer = 
