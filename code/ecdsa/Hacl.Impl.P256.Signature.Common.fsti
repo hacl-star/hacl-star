@@ -56,8 +56,8 @@ val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit
 
 [@CInline]  
 val isPointAtInfinityPublic: #c: curve -> p: point c -> Stack bool
-  (requires fun h -> live h p)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.ECC.isPointAtInfinity (point_prime_to_coordinates c (as_seq h0 p)))
+  (requires fun h -> live h p /\ point_eval c h p)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.ECC.isPointAtInfinity (point_as_nat c h0 p))
 
 
 [@CInline]

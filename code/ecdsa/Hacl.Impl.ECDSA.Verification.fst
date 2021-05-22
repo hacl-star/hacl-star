@@ -307,76 +307,40 @@ inline_for_extraction noextract
 val ecdsa_verification_step5: #c: curve 
   -> x: felem c
   -> pubKeyAsPoint: point c
-  -> u1: lbuffer uint8 (size 32)
-  -> u2: lbuffer uint8 (size 32)
-  -> tempBuffer: lbuffer uint64 (size 100) ->
+  -> u1: scalar_t #MUT #c
+  -> u2: scalar_t #MUT #c
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack bool
-    (requires fun h ->
-      live h x /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
-      disjoint x u1 /\ disjoint x u2 /\ disjoint pubKeyAsPoint u1 /\ disjoint pubKeyAsPoint u2 /\
-      disjoint tempBuffer u1 /\ disjoint tempBuffer u2 /\
-      LowStar.Monotonic.Buffer.all_disjoint [loc x; loc pubKeyAsPoint; loc tempBuffer]
-    )
-    (ensures fun h0 state h1 ->
-      modifies (loc x |+| loc pubKeyAsPoint |+| loc tempBuffer) h0 h1 (*/\
-      (
-        let pointAtInfinity = (0, 0, 0) in
-        let u1D, _ = montgomery_ladder_spec_left (as_seq h0 u1) (pointAtInfinity, basePoint) in
-        let u2D, _ = montgomery_ladder_spec_left (as_seq h0 u2) (pointAtInfinity, point_prime_to_coordinates (as_seq h0 pubKeyAsPoint)) in
-        let sumD = 
-    if  _norm u1D =  _norm u2D
-    then
-      _point_double u1D
-    else 
-      _point_add u1D u2D in 
-        let pointNorm = _norm sumD in
-        let (xResult, yResult, zResult) = pointNorm in
-        state == not (Spec.ECC.isPointAtInfinity pointNorm) /\
-        as_nat h1 x == xResult % prime_p256_order
-    ) *)
-  )
+  (requires fun h ->
+    live h x /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
+    disjoint x u1 /\ disjoint x u2 /\ disjoint pubKeyAsPoint u1 /\ disjoint pubKeyAsPoint u2 /\
+    disjoint tempBuffer u1 /\ disjoint tempBuffer u2 /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc x; loc pubKeyAsPoint; loc tempBuffer] /\
+     point_eval c h pubKeyAsPoint /\ ~ (isPointAtInfinity (point_as_nat c h pubKeyAsPoint)))
+  (ensures fun h0 isPointAtInfinityState h1 -> modifies (loc pubKeyAsPoint |+| loc tempBuffer |+| loc x) h0 h1 /\ (
+    point_mult0_is_infinity (basePoint #c); point_mult0_is_infinity (point_as_nat c h0 pubKeyAsPoint);
+    let u1D, _ = montgomery_ladder_spec_left #c (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
+    let u2D, _ = montgomery_ladder_spec_left #c (as_seq h0 u2) (pointAtInfinity, point_as_nat c h0 pubKeyAsPoint) in
+    let normSum = _norm (pointAdd #c u1D u2D) in 
+    let xN, yN, zN = normSum in 
+    as_nat c h1 x == xN % getOrder #c /\
+    isPointAtInfinityState = not (isPointAtInfinity normSum)))
+    
 
 let ecdsa_verification_step5 #c x pubKeyAsPoint u1 u2 tempBuffer =
-  push_frame();
-  let pointSum = create (size 12) (u64 0) in
-    admit();
-    ecdsa_verification_step5_0 
-    ecdsa_verification_step5_1 pointSum pubKeyAsPoint u1 u2 tempBuffer;
-  let resultIsPAI = isPointAtInfinityPublic #c pointSum in
-  let xCoordinateSum = sub pointSum (size 0) (size 4) in
+  let h0 = ST.get() in 
+    push_frame();
+    let result = create (getCoordinateLenU64 c *! size 3) (u64 0) in
+  let h1 = ST.get() in 
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint;
+  ecdsa_verification_step5_2 result pubKeyAsPoint u1 u2 tempBuffer;
+  let resultIsPAI = isPointAtInfinityPublic #c result in
+  let xCoordinateSum = sub result (size 0) (getCoordinateLenU64 c) in
   copy x xCoordinateSum;
   reduction_prime_2prime_order x x;
   pop_frame();
   not resultIsPAI
 
-
-
-(* [@ (Comment "  This code is not side channel resistant")] *)
-
-val compare_felem_bool: #c: curve -> a: felem c -> b: felem c -> Stack bool
-  (requires fun h -> live h a /\ live h b)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == (as_nat c h0 a = as_nat c h0 b))
-
-let compare_felem_bool a b  =
-  assert_norm (pow2 64 * pow2 64 == pow2 128);
-  assert_norm (pow2 128 * pow2 64 == pow2 192);
-  let a_0 = index a (size 0) in
-  let a_1 = index a (size 1) in
-  let a_2 = index a (size 2) in
-  let a_3 = index a (size 3) in
-
-  let b_0 = index b (size 0) in
-  let b_1 = index b (size 1) in
-  let b_2 = index b (size 2) in
-  let b_3 = index b (size 3) in
-
-  eq_u64_nCT a_0 b_0 &&
-  eq_u64_nCT a_1 b_1 &&
-  eq_u64_nCT a_2 b_2 &&
-  eq_u64_nCT a_3 b_3
-
-
-let prime_p256_order = getOrder #P256
 
 inline_for_extraction
 val ecdsa_verification_core:
