@@ -486,7 +486,8 @@ let bn_get_bits_limb_lemma #t #nLen n ind =
       logor_disjoint p1 p2 (pbits - j);
       assert (v p3 == v p1 + v p2);
       bn_eval_index n (i + 1);
-      assert (res == v p1 + v p2) end
+      assert (res == v p1 + v p2);
+      assert (ind / bits t + 1 < nLen && 0 < ind % bits t) end
     else begin
       bn_eval_bound n nLen;
       assert (bn_v n < pow2 (nLen * pbits));
@@ -497,7 +498,6 @@ let bn_get_bits_limb_lemma #t #nLen n ind =
       assert (res == v p1)
     end
   end
-
 
 val bn_get_bits:
     #t:limb_t
