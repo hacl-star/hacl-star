@@ -35,11 +35,13 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
   {
     uint8_t
     *buf =
-      KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
+      (uint8_t *)KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
           Hacl_Impl_Blake2_Core_M128),
         sizeof (uint8_t));
     Lib_IntVector_Intrinsics_vec128
-    *wv = KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+    *wv =
+      (Lib_IntVector_Intrinsics_vec128 *)KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec128)
+        * (uint32_t)4U);
     {
       uint32_t _i;
       for (_i = 0U; _i < (uint32_t)4U; ++_i)
@@ -47,7 +49,9 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
     }
     {
       Lib_IntVector_Intrinsics_vec128
-      *b = KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+      *b =
+        (Lib_IntVector_Intrinsics_vec128 *)KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec128)
+          * (uint32_t)4U);
       {
         uint32_t _i;
         for (_i = 0U; _i < (uint32_t)4U; ++_i)
@@ -67,7 +71,10 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
           KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2s_128_blake2s_128_state), (uint32_t)1U);
           {
             Hacl_Streaming_Blake2s_128_blake2s_128_state
-            *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Blake2s_128_blake2s_128_state));
+            *p =
+              (Hacl_Streaming_Blake2s_128_blake2s_128_state *)KRML_HOST_MALLOC(sizeof (
+                  Hacl_Streaming_Blake2s_128_blake2s_128_state
+                ));
             p[0U] = s;
             Hacl_Blake2s_128_blake2s_init(block_state.fst,
               block_state.snd,
@@ -729,11 +736,13 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
   {
     uint8_t
     *buf =
-      KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
+      (uint8_t *)KRML_HOST_CALLOC(Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_Blake2S,
           Hacl_Impl_Blake2_Core_M128),
         sizeof (uint8_t));
     Lib_IntVector_Intrinsics_vec128
-    *wv = KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+    *wv =
+      (Lib_IntVector_Intrinsics_vec128 *)KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec128)
+        * (uint32_t)4U);
     {
       uint32_t _i;
       for (_i = 0U; _i < (uint32_t)4U; ++_i)
@@ -741,7 +750,9 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
     }
     {
       Lib_IntVector_Intrinsics_vec128
-      *b = KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec128) * (uint32_t)4U);
+      *b =
+        (Lib_IntVector_Intrinsics_vec128 *)KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec128)
+          * (uint32_t)4U);
       {
         uint32_t _i;
         for (_i = 0U; _i < (uint32_t)4U; ++_i)
@@ -761,7 +772,10 @@ Hacl_Streaming_Blake2s_128_blake2s_128_state
           KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Blake2s_128_blake2s_128_state), (uint32_t)1U);
           {
             Hacl_Streaming_Blake2s_128_blake2s_128_state
-            *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Blake2s_128_blake2s_128_state));
+            *p =
+              (Hacl_Streaming_Blake2s_128_blake2s_128_state *)KRML_HOST_MALLOC(sizeof (
+                  Hacl_Streaming_Blake2s_128_blake2s_128_state
+                ));
             p[0U] = s;
             Hacl_Blake2s_128_blake2s_init(block_state.fst,
               block_state.snd,
