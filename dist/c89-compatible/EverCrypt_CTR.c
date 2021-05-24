@@ -142,12 +142,12 @@ EverCrypt_CTR_create_in(
         #if HACL_CAN_COMPILE_VALE
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
-          uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
+          uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
           uint8_t *keys_b = ek;
           uint8_t *hkeys_b = ek + (uint32_t)176U;
           uint64_t scrut = aes128_key_expansion(k, keys_b);
           uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
-          uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
+          uint8_t *iv_ = (uint8_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
           memcpy(iv_, iv, iv_len * sizeof (uint8_t));
           {
             EverCrypt_CTR_state_s lit;
@@ -159,7 +159,8 @@ EverCrypt_CTR_create_in(
             lit.ctr = c;
             KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
             {
-              EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
+              EverCrypt_CTR_state_s
+              *p = (EverCrypt_CTR_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
               p[0U] = lit;
               *dst = p;
               return EverCrypt_Error_Success;
@@ -182,12 +183,12 @@ EverCrypt_CTR_create_in(
         #if HACL_CAN_COMPILE_VALE
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
-          uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
+          uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
           uint8_t *keys_b = ek;
           uint8_t *hkeys_b = ek + (uint32_t)240U;
           uint64_t scrut = aes256_key_expansion(k, keys_b);
           uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
-          uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
+          uint8_t *iv_ = (uint8_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
           memcpy(iv_, iv, iv_len * sizeof (uint8_t));
           {
             EverCrypt_CTR_state_s lit;
@@ -199,7 +200,8 @@ EverCrypt_CTR_create_in(
             lit.ctr = c;
             KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
             {
-              EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
+              EverCrypt_CTR_state_s
+              *p = (EverCrypt_CTR_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
               p[0U] = lit;
               *dst = p;
               return EverCrypt_Error_Success;
@@ -211,11 +213,11 @@ EverCrypt_CTR_create_in(
       }
     case Spec_Agile_Cipher_CHACHA20:
       {
-        uint8_t *ek = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+        uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
         memcpy(ek, k, (uint32_t)32U * sizeof (uint8_t));
         KRML_CHECK_SIZE(sizeof (uint8_t), iv_len);
         {
-          uint8_t *iv_ = KRML_HOST_CALLOC(iv_len, sizeof (uint8_t));
+          uint8_t *iv_ = (uint8_t *)KRML_HOST_CALLOC(iv_len, sizeof (uint8_t));
           memcpy(iv_, iv, iv_len * sizeof (uint8_t));
           {
             EverCrypt_CTR_state_s lit;
@@ -226,7 +228,8 @@ EverCrypt_CTR_create_in(
             lit.ctr = c;
             KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
             {
-              EverCrypt_CTR_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
+              EverCrypt_CTR_state_s
+              *p = (EverCrypt_CTR_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_CTR_state_s));
               p[0U] = lit;
               *dst = p;
               return EverCrypt_Error_Success;
