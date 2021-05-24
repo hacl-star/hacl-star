@@ -48,6 +48,8 @@ let rec mods_contains (allowed:mods_t) (found:mods_t) : bool =
 [@va_qattr]
 let if_code (b:bool) (c1:code) (c2:code) : code = if b then c1 else c2
 
+open FStar.Monotonic.Pure
+
 noeq type quickCodes (a:Type0) : codes -> Type =
 | QEmpty: a -> quickCodes a []
 | QSeq: #b:Type -> #c:code -> #cs:codes -> r:range -> msg:string ->
@@ -55,8 +57,8 @@ noeq type quickCodes (a:Type0) : codes -> Type =
 | QBind: #b:Type -> #c:code -> #cs:codes -> r:range -> msg:string ->
     quickCode b c -> (va_state -> b -> GTot (quickCodes a cs)) -> quickCodes a (c::cs)
 | QGetState: #cs:codes -> (va_state -> GTot (quickCodes a cs)) -> quickCodes a ((Block [])::cs)
-| QPURE: #cs:codes -> r:range -> msg:string -> pre:((unit -> GTot Type0) -> GTot Type0) ->
-    (unit -> PURE unit pre) -> quickCodes a cs -> quickCodes a cs
+| QPURE: #cs:codes -> r:range -> msg:string -> pre:((unit -> GTot Type0) -> GTot Type0){is_monotonic pre} ->
+    (unit -> PURE unit (as_pure_wp pre)) -> quickCodes a cs -> quickCodes a cs
 //| QBindPURE: #cs:codes -> b:Type -> r:range -> msg:string -> pre:((b -> GTot Type0) -> GTot Type0) ->
 //    (unit -> PURE b pre) -> (va_state -> b -> GTot (quickCodes a cs)) -> quickCodes a ((Block [])::cs)
 | QLemma: #cs:codes -> r:range -> msg:string -> pre:Type0 -> post:(squash pre -> Type0) ->
@@ -73,8 +75,8 @@ noeq type quickCodes (a:Type0) : codes -> Type =
 
 [@va_qattr]
 let va_qPURE
-    (#cs:codes) (#pre:(unit -> GTot Type0) -> GTot Type0) (#a:Type0) (r:range) (msg:string)
-    ($l:unit -> PURE unit pre) (qcs:quickCodes a cs)
+    (#cs:codes) (#pre:((unit -> GTot Type0) -> GTot Type0){is_monotonic pre}) (#a:Type0) (r:range) (msg:string)
+    ($l:unit -> PURE unit (intro_pure_wp_monotonicity pre; pre)) (qcs:quickCodes a cs)
   : quickCodes a cs =
   QPURE r msg pre l qcs
 
