@@ -27,6 +27,10 @@ val ecp256dh_i: c: curve
     let x, y = as_seq h1 (getXAff8 result), as_seq h1 (getYAff8 result) in 
     pointX == x /\ pointY == y /\ r == flag))
 
+val lemma_zero_point_zero_coordinates: c: curve -> h: mem -> p: point c -> 
+  Lemma (requires lseq_as_nat (as_seq h p) == 0)
+  (ensures (as_nat c h (getX p) == 0) /\ (as_nat c h (getY p) == 0) /\ (as_nat c h (getZ p) == 0) /\ point_eval c h p)
+    
 
 inline_for_extraction noextract
 val ecp256dh_r: #c: curve 

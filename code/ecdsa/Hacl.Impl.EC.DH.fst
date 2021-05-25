@@ -117,10 +117,7 @@ let _ecp256dh_r #c result pubKey scalar =
       false
     end
 
-val lemma_zero_point_zero_coordinates: c: curve -> h: mem -> p: point c -> 
-  Lemma (requires lseq_as_nat (as_seq h p) == 0)
-  (ensures (as_nat c h (getX p) == 0) /\ (as_nat c h (getY p) == 0) /\ (as_nat c h (getZ p) == 0) /\ point_eval c h p)
-    
+
 
 let lemma_zero_point_zero_coordinates c h p = 
   let yz = gsub p (getCoordinateLenU64 c) (size 2 *! getCoordinateLenU64 c) in 

@@ -416,11 +416,28 @@ let ecdsa_verification_agile c alg publicKey r s mLen m =
       let u1D, _ = montgomery_ladder_spec_left #c u1 (pointAtInfinity, basePoint #c) in
       let u2D, _ = montgomery_ladder_spec_left #c u2 (pointAtInfinity, publicJacobian) in
 
-      let sumPoints = _point_add #c u1D u2D in
+      let sumPoints = pointAdd #c u1D u2D in
       let pointNorm = _norm #c sumPoints in
       let x, y, z = pointNorm in
-      let x = x % order in 
-      if isPointAtInfinity pointNorm then false else x = r
+      if isPointAtInfinity pointNorm then false else x % order = r
+
+
+      (*  let order = getOrder #c in 
+    
+    let message = hashSpec c alg (v mLen) (as_seq h0 m) % order in 
+    let p0 = pow (as_nat c h0 s) (order - 2) * message % order in 
+    let p1 = pow (as_nat c h0 s) (order - 2) * as_nat c h0 r % order in 
+    let u1 = nat_to_bytes_be (v (getCoordinateLenU c)) p0 in 
+    let u2 = nat_to_bytes_be (v (getCoordinateLenU c)) p1 in
+
+    point_mult0_is_infinity (basePoint #c); point_mult0_is_infinity (point_as_nat c h0 pubKeyAsPoint);
+    
+    let u1D, _ = montgomery_ladder_spec_left #c u1 (pointAtInfinity, basePoint #c) in
+    let u2D, _ = montgomery_ladder_spec_left #c u2 (pointAtInfinity, point_as_nat c h0 pubKeyAsPoint) in
+    let normSum = _norm (pointAdd #c u1D u2D) in 
+    let xN, yN, zN = normSum in 
+    as_nat c h1 x == xN % order /\
+    isPointAtInfinityState = not (isPointAtInfinity normSum) *)
     end
   end
 

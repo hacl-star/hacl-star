@@ -384,7 +384,7 @@ let ecdsa_verification_step45 #c u1 u2 r s hash x pubKeyAsPoint tempBuffer =
 
 
 inline_for_extraction
-val ecdsa_verification_core:#c: curve 
+val ecdsa_verification_core_ :#c: curve 
   -> alg: hash_alg_ecdsa
   -> pubKeyAsPoint: point c
   -> hashAsFelem: felem c
@@ -399,7 +399,7 @@ val ecdsa_verification_core:#c: curve
     let order = getOrder #c in (
     live h pubKeyAsPoint /\ live h hashAsFelem /\ live h r /\ live h s /\ live h m /\ live h x /\ live h tempBuffer /\
     (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32 /\
-    as_nat c h s < order /\ as_nat c h hashAsFelem < order /\ as_nat c h r < order /\
+    as_nat c h s < order /\  as_nat c h r < order /\
     
     LowStar.Monotonic.Buffer.all_disjoint [loc r; loc s; loc hashAsFelem; loc x; loc pubKeyAsPoint; loc tempBuffer] /\
     
@@ -424,7 +424,7 @@ val ecdsa_verification_core:#c: curve
     isPointAtInfinityState = not (isPointAtInfinity normSum)))
 
 
-let ecdsa_verification_core #c alg pubKeyAsPoint hashAsFelem r s mLen m x tempBuffer =
+let ecdsa_verification_core_ #c alg pubKeyAsPoint hashAsFelem r s mLen m x tempBuffer =
     assert_norm (pow2 32 < pow2 61 - 1);
     assert_norm (pow2 32 < pow2 125);
     let h0 = ST.get() in 
@@ -440,131 +440,175 @@ let ecdsa_verification_core #c alg pubKeyAsPoint hashAsFelem r s mLen m x tempBu
   r
 
 
-(*[@ (Comment "  This code is not side channel resistant")] *)
-
-val ecdsa_verification_:
-  #c: curve 
-  ->  alg:hash_alg_ecdsa
-  -> pubKey:lbuffer uint64 (size 8)
-  -> r:lbuffer uint64 (size 4)
-  -> s: lbuffer uint64 (size 4)
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
-  -> m:lbuffer uint8 mLen ->
+[@ (Comment "  This code is not side channel resistant")] 
+val ecdsa_verification_core: #c: curve 
+  -> alg: hash_alg_ecdsa
+  -> pubKey: pointAffine c
+  -> r: felem c
+  -> s: felem c
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
+  -> m: lbuffer uint8 mLen
+  -> publicKeyBuffer: point c
+  -> hashAsFelem: felem c
+  -> x: felem c
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack bool
-    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61);
-      assert_norm (pow2 32 < pow2 125);
-      let pubKeyX = as_nat c h0 (gsub pubKey (size 0) (size 4)) in
-      let pubKeyY = as_nat c h0 (gsub pubKey (size 4) (size 4)) in
-      let r = as_nat c h0 r in
-      let s = as_nat c h0 s in
-      modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile P256 alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m))
+  (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m /\ live h publicKeyBuffer /\ live h hashAsFelem /\ 
+    live h x /\ live h tempBuffer /\
+    felem_eval c h (getXAff pubKey) /\ felem_eval c h (getYAff pubKey) /\ point_eval c h publicKeyBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc r; loc s; loc m; loc hashAsFelem; loc x; loc pubKey; loc publicKeyBuffer; loc tempBuffer] /\
+    (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32 /\ (
+    let order = getOrder #c in 
+    as_nat c h s < order /\  as_nat c h r < order))
+  (ensures fun h0 result h1 -> modifies (loc publicKeyBuffer |+| loc tempBuffer |+| loc hashAsFelem |+| loc x) h0 h1 /\ (
+    let pubKeyX = as_nat c h0 (getXAff pubKey)  in
+    let pubKeyY = as_nat c h0 (getYAff pubKey) in
+    let r = as_nat c h0 r in
+    let s = as_nat c h0 s in
+    result == Spec.ECDSA.ecdsa_verification_agile c alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m)))
+
+
+
+let ecdsa_verification_core #c alg pubKey r s mLen m publicKeyBuffer hashAsFelem x tempBuffer = 
+  bufferToJac #c pubKey publicKeyBuffer; 
+    let h0 = ST.get() in 
+  let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in
+  if publicKeyCorrect = false then false
+  else 
+    let step1 = ecdsa_verification_step1 #c r s in
+    if step1 = false then false
+    else
+	let h1 = ST.get() in 
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 publicKeyBuffer; 
+      let state = ecdsa_verification_core_ #c alg publicKeyBuffer hashAsFelem r s mLen m x tempBuffer in 
+      if state = false then false
+      else cmp_felem_felem_bool #c x r
+
+
+[@ (Comment "  This code is not side channel resistant")] 
+val ecdsa_verification_: #c: curve 
+  -> alg: hash_alg_ecdsa
+  -> pubKey: pointAffine c
+  -> r: felem c
+  -> s: felem c
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
+  -> m: lbuffer uint8 mLen ->
+  Stack bool
+  (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m /\ 
+    felem_eval c h (getXAff pubKey) /\ felem_eval c h (getYAff pubKey) /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc r; loc s; loc m; loc pubKey] /\
+    (match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32 /\ (
+    let order = getOrder #c in 
+    as_nat c h s < order /\  as_nat c h r < order))
+  (ensures fun h0 result h1 -> modifies0 h0 h1 /\ (
+    let pubKeyX = as_nat c h0 (getXAff pubKey)  in
+    let pubKeyY = as_nat c h0 (getYAff pubKey) in
+    let r = as_nat c h0 r in
+    let s = as_nat c h0 s in
+    result == Spec.ECDSA.ecdsa_verification_agile c alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m)))
 
 let ecdsa_verification_ #c alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
+  let h0 = ST.get() in 
   push_frame();
-  let tempBufferU64 = create (size 120) (u64 0) in
-  let publicKeyBuffer = sub tempBufferU64 (size 0) (size 12) in
-  let hashAsFelem = sub tempBufferU64 (size 12) (size 4) in
-  let tempBuffer = sub tempBufferU64 (size 16) (size 100) in
-  let xBuffer = sub tempBufferU64 (size 116) (size 4) in
+    let len = getCoordinateLenU64 c in 
+    let tempBuffer = create (len *! size 20) (u64 0) in 
+    let hashAsFelem = create len (u64 0) in
+    let x = create len (u64 0) in 
+    let publicKeyBuffer = create (len *! size 3) (u64 0) in 
+    
+    let h1 = ST.get() in 
+    lemma_create_zero_buffer #U64 (3 * v len) c;
+    Hacl.Impl.EC.DH.lemma_zero_point_zero_coordinates c h1 publicKeyBuffer;
 
-  bufferToJac #c pubKey publicKeyBuffer;
-  let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in
-  if publicKeyCorrect = false then
-    begin
-    pop_frame();
-    false
-    end
-  else
-    let step1 = ecdsa_verification_step1 #c r s in
-    if step1 = false then
-      begin
-      pop_frame();
-      false
-      end
-    else
-      let state = ecdsa_verification_core #c alg publicKeyBuffer hashAsFelem r s mLen m xBuffer tempBuffer in
-      if state = false then
-        begin
-        pop_frame();
-        false
-        end
-      else
-        begin
-        let result = compare_felem_bool #c xBuffer r in
-        pop_frame();
-        result
-        end
+  let r = ecdsa_verification_core alg pubKey r s mLen m publicKeyBuffer hashAsFelem x tempBuffer in
+  pop_frame();
+    let h2 = ST.get() in 
+    assert(modifies0 h0 h2);
+  r
 
 
 inline_for_extraction
-val ecdsa_verification:
-  c: curve 
-  -> alg:hash_alg_ecdsa
-  -> pubKey:lbuffer uint8 (size 64)
-  -> r:lbuffer uint8 (size 32)
-  -> s:lbuffer uint8 (size 32)
-  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #P256 alg}
-  -> m:lbuffer uint8 mLen ->
-  Stack bool
-    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
-    (ensures fun h0 result h1 ->
-      assert_norm (pow2 32 < pow2 61);
-      assert_norm (pow2 32 < pow2 125);
-      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
-      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-      let r = nat_from_bytes_be (as_seq h1 r) in
-      let s = nat_from_bytes_be (as_seq h1 s) in
-      modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile P256 alg (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m))
+val ecdsa_verification_to_form: #c: curve 
+  -> pubKey: pointAffine8 c
+  -> pubKeyBuffer: lbuffer uint64 (size 2 *! getCoordinateLenU64 c) 
+  -> r: lbuffer uint8 (getCoordinateLenU c)
+  -> s: lbuffer uint8 (getCoordinateLenU c)
+  -> rBuffer: felem c -> sBuffer: felem c -> 
+  Stack unit 
+  (requires fun h -> live h pubKey /\ live h pubKeyBuffer /\ live h r /\ live h s /\ live h rBuffer /\ live h sBuffer /\
+    disjoint pubKey pubKeyBuffer /\ disjoint r rBuffer /\ disjoint s sBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc pubKeyBuffer; loc r; loc s; loc rBuffer; loc sBuffer])
+  (ensures fun h0 _ h1 -> modifies (loc pubKeyBuffer |+| loc rBuffer |+| loc sBuffer) h0 h1 /\
+    as_nat c h1 rBuffer == nat_from_bytes_be (as_seq h0 r) /\
+    as_nat c h1 sBuffer == nat_from_bytes_be (as_seq h0 s) /\ (
+    let len = getCoordinateLenU64 c in 
+    let pubKeyX = gsub pubKey (size 0) (getCoordinateLenU c) in
+    let pubKeyY = gsub pubKey (getCoordinateLenU c) (getCoordinateLenU c) in 
 
-let ecdsa_verification c alg pubKey r s mLen m =
-  assert_norm (pow2 32 < pow2 61);
-  assert_norm (pow2 32 < pow2 125);
+    let pFX = gsub pubKeyBuffer (size 0) len in 
+    let pFY = gsub pubKeyBuffer len len in 
+
+    as_nat c h1 pFX == nat_from_bytes_be (as_seq h0 pubKeyX) /\
+    as_nat c h1 pFY == nat_from_bytes_be (as_seq h0 pubKeyY)))
+
+
+let ecdsa_verification_to_form #c pubKey pubKeyBuffer r s rBuffer sBuffer = 
+  let h0 = ST.get() in 
+    let len = getCoordinateLenU64 c in 
+
+  let publicKeyFelemX = sub pubKeyBuffer (size 0) len in 
+  let publicKeyFelemY = sub pubKeyBuffer len len in 
+  
+  let pubKeyX = sub pubKey (size 0) (getCoordinateLenU c) in
+  let pubKeyY = sub pubKey (getCoordinateLenU c) (getCoordinateLenU c) in 
+    
+  toUint64ChangeEndian #c pubKeyX publicKeyFelemX;
+  toUint64ChangeEndian #c pubKeyY publicKeyFelemY;
+   
+  toUint64ChangeEndian #c r rBuffer;
+  toUint64ChangeEndian #c s sBuffer
+  
+
+
+inline_for_extraction
+val ecdsa_verification: #c: curve 
+  -> alg: hash_alg_ecdsa
+  -> pubKey: pointAffine8 c
+  -> r: lbuffer uint8 (getCoordinateLenU c)
+  -> s: lbuffer uint8 (getCoordinateLenU c)
+  -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
+  -> m: lbuffer uint8 mLen ->
+  Stack bool
+  (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m /\ (
+    match alg with |NoHash -> v mLen |Hash a -> v (hash_len a)) + v (getCoordinateLenU c) < pow2 32 /\
+    nat_from_bytes_be (as_seq h r) < getOrder #c /\ nat_from_bytes_be (as_seq h s) < getOrder #c /\ (
+    let pubKeyX = gsub pubKey (size 0) (getCoordinateLenU c) in
+    let pubKeyY = gsub pubKey (getCoordinateLenU c) (getCoordinateLenU c) in 
+    nat_from_bytes_be (as_seq h pubKeyX) < getPrime c /\ nat_from_bytes_be (as_seq h pubKeyY) < getPrime c) /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc r; loc s])
+  (ensures fun h0 result h1 -> modifies0 h0 h1 /\ (
+    let pubKeyX = gsub pubKey (size 0) (getCoordinateLenU c) in
+    let pubKeyY = gsub pubKey (getCoordinateLenU c) (getCoordinateLenU c) in 
+
+    let pFX = nat_from_bytes_be (as_seq h0 pubKeyX) in 
+    let pFY = nat_from_bytes_be (as_seq h0 pubKeyY) in 
+    
+    let r = nat_from_bytes_be (as_seq h0 r) in
+    let s = nat_from_bytes_be (as_seq h0 s) in
+    result == Spec.ECDSA.ecdsa_verification_agile c alg (pFX, pFY) r s  (v mLen) (as_seq h0 m)))
+
+
+let ecdsa_verification #c alg pubKey r s mLen m =
   push_frame();
   let h0 = ST.get() in 
-    let publicKeyAsFelem = create (size 8) (u64 0) in
-      let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in 
-      let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in 
-    let rAsFelem = create (size 4) (u64 0) in 
-    let sAsFelem = create (size 4) (u64 0) in 
-      let pubKeyX = sub pubKey (size 0) (size 32) in
-      let pubKeyY = sub pubKey (size 32) (size 32) in 
-      
-    toUint64ChangeEndian #c pubKeyX publicKeyFelemX;
-    toUint64ChangeEndian #c pubKeyY publicKeyFelemY;
-   
-    toUint64ChangeEndian #c r rAsFelem;
-    toUint64ChangeEndian #c s sAsFelem;
-
-  let h1 = ST.get() in 
-      lemma_core_0 c publicKeyFelemX h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  
-      lemma_core_0 c publicKeyFelemY h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY);
-
-      lemma_core_0 c rAsFelem h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 r);
-      lemma_core_0 c sAsFelem h1;
-      uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 s);
-
-    let result = ecdsa_verification_ #c alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
-    pop_frame();
-
-(*     changeEndianLemma #c (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
-    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
-    
-    changeEndianLemma #c (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
-    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
-    
-    changeEndianLemma #c (uints_from_bytes_be (as_seq h1 r));
-    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 r);
-    
-    changeEndianLemma #c (uints_from_bytes_be (as_seq h1 s));
-    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 s); *)
-
+    let len = getCoordinateLenU64 c in 
+    let tempBuffer = create (size 4 *! len) (u64 0) in 
+      let publicKeyAsFelem = sub tempBuffer (size 0) (size 2 *! len) in
+      let rAsFelem = sub tempBuffer (size 2 *! len) len in 
+      let sAsFelem = sub tempBuffer (size 3 *! len) len in 
+  ecdsa_verification_to_form pubKey publicKeyAsFelem r s rAsFelem sAsFelem;
+  let result = ecdsa_verification_ #c alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
+  pop_frame();
   result
