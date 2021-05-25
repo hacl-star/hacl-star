@@ -6,6 +6,8 @@ open Lib.IntTypes
 open Lib.LoopCombinators
 open Hacl.Spec.Bignum.Definitions
 
+module M = Hacl.Spec.Montgomery.Lemmas
+
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 (**
@@ -269,4 +271,5 @@ let bn_mod_inv_limb_lemma #t #nLen n =
   Math.Lemmas.pow2_modulo_modulo_lemma_1 (bn_v n) 2 (bits t);
   assert (v n0 % 2 = 1); // since bn_v n % 2 = 1
   mod_inv_limb_lemma n0;
-  assert ((1 + (bn_v n % pow2 (bits t)) * v mu) % pow2 (bits t) == 0)
+  assert ((1 + (bn_v n % pow2 (bits t)) * v mu) % pow2 (bits t) == 0);
+  M.mont_preconditions_n0 (bits t) (bn_v n) (v mu)

@@ -49,37 +49,96 @@ EXPORTS
   Hacl_Streaming_SHA2_update_512
   Hacl_Streaming_SHA2_finish_512
   Hacl_Streaming_SHA2_free_512
+  Hacl_Bignum_Base_mul_wide_add2_u32
   Hacl_Bignum_Base_mul_wide_add2_u64
+  Hacl_Bignum_Lib_bn_get_top_index_u32
   Hacl_Bignum_Lib_bn_get_top_index_u64
+  Hacl_Bignum_Addition_bn_add_eq_len_u32
+  Hacl_Bignum_Addition_bn_add_eq_len_u64
+  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32
+  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64
+  Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32
+  Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64
+  Hacl_Bignum_ModInvLimb_mod_inv_uint32
   Hacl_Bignum_ModInvLimb_mod_inv_uint64
   Hacl_Bignum256_add
   Hacl_Bignum256_sub
   Hacl_Bignum256_mul
-  Hacl_Bignum256_mod_precompr2
+  Hacl_Bignum256_sqr
   Hacl_Bignum256_mod
-  Hacl_Bignum256_mod_exp_raw_precompr2
-  Hacl_Bignum256_mod_exp_ct_precompr2
-  Hacl_Bignum256_mod_exp_raw
-  Hacl_Bignum256_mod_exp_ct
-  Hacl_Bignum256_new_precompr2
-  Hacl_Bignum256_mod_inv_prime_raw
+  Hacl_Bignum256_mod_exp_vartime
+  Hacl_Bignum256_mod_exp_consttime
+  Hacl_Bignum256_mod_inv_prime_vartime
+  Hacl_Bignum256_mont_ctx_init
+  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t_LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t_______LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t______
+  Hacl_Bignum256_mont_ctx_free
+  Hacl_Bignum256_mod_precomp
+  Hacl_Bignum256_mod_exp_vartime_precomp
+  Hacl_Bignum256_mod_exp_consttime_precomp
+  Hacl_Bignum256_mod_inv_prime_vartime_precomp
   Hacl_Bignum256_new_bn_from_bytes_be
+  Hacl_Bignum256_new_bn_from_bytes_le
   Hacl_Bignum256_bn_to_bytes_be
+  Hacl_Bignum256_bn_to_bytes_le
   Hacl_Bignum256_lt_mask
   Hacl_Bignum4096_add
   Hacl_Bignum4096_sub
   Hacl_Bignum4096_mul
-  Hacl_Bignum4096_mod_precompr2
+  Hacl_Bignum4096_sqr
   Hacl_Bignum4096_mod
-  Hacl_Bignum4096_mod_exp_raw_precompr2
-  Hacl_Bignum4096_mod_exp_ct_precompr2
-  Hacl_Bignum4096_mod_exp_raw
-  Hacl_Bignum4096_mod_exp_ct
-  Hacl_Bignum4096_new_precompr2
-  Hacl_Bignum4096_mod_inv_prime_raw
+  Hacl_Bignum4096_mod_exp_vartime
+  Hacl_Bignum4096_mod_exp_consttime
+  Hacl_Bignum4096_mod_inv_prime_vartime
+  Hacl_Bignum4096_mont_ctx_init
+  Hacl_Bignum4096_mont_ctx_free
+  Hacl_Bignum4096_mod_precomp
+  Hacl_Bignum4096_mod_exp_vartime_precomp
+  Hacl_Bignum4096_mod_exp_consttime_precomp
+  Hacl_Bignum4096_mod_inv_prime_vartime_precomp
   Hacl_Bignum4096_new_bn_from_bytes_be
+  Hacl_Bignum4096_new_bn_from_bytes_le
   Hacl_Bignum4096_bn_to_bytes_be
+  Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
+  Hacl_Bignum256_32_add
+  Hacl_Bignum256_32_sub
+  Hacl_Bignum256_32_mul
+  Hacl_Bignum256_32_sqr
+  Hacl_Bignum256_32_mod
+  Hacl_Bignum256_32_mod_exp_vartime
+  Hacl_Bignum256_32_mod_exp_consttime
+  Hacl_Bignum256_32_mod_inv_prime_vartime
+  Hacl_Bignum256_32_mont_ctx_init
+  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint32_t__uint32_t_LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint32_t__uint32_t_______LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint32_t__uint32_t______
+  Hacl_Bignum256_32_mont_ctx_free
+  Hacl_Bignum256_32_mod_precomp
+  Hacl_Bignum256_32_mod_exp_vartime_precomp
+  Hacl_Bignum256_32_mod_exp_consttime_precomp
+  Hacl_Bignum256_32_mod_inv_prime_vartime_precomp
+  Hacl_Bignum256_32_new_bn_from_bytes_be
+  Hacl_Bignum256_32_new_bn_from_bytes_le
+  Hacl_Bignum256_32_bn_to_bytes_be
+  Hacl_Bignum256_32_bn_to_bytes_le
+  Hacl_Bignum256_32_lt_mask
+  Hacl_Bignum4096_32_add
+  Hacl_Bignum4096_32_sub
+  Hacl_Bignum4096_32_mul
+  Hacl_Bignum4096_32_sqr
+  Hacl_Bignum4096_32_mod
+  Hacl_Bignum4096_32_mod_exp_vartime
+  Hacl_Bignum4096_32_mod_exp_consttime
+  Hacl_Bignum4096_32_mod_inv_prime_vartime
+  Hacl_Bignum4096_32_mont_ctx_init
+  Hacl_Bignum4096_32_mont_ctx_free
+  Hacl_Bignum4096_32_mod_precomp
+  Hacl_Bignum4096_32_mod_exp_vartime_precomp
+  Hacl_Bignum4096_32_mod_exp_consttime_precomp
+  Hacl_Bignum4096_32_mod_inv_prime_vartime_precomp
+  Hacl_Bignum4096_32_new_bn_from_bytes_be
+  Hacl_Bignum4096_32_new_bn_from_bytes_le
+  Hacl_Bignum4096_32_bn_to_bytes_be
+  Hacl_Bignum4096_32_bn_to_bytes_le
+  Hacl_Bignum4096_32_lt_mask
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
   Hacl_HMAC_DRBG___proj__State__item__k

@@ -226,7 +226,7 @@ let lemma_repeat_gen_blocks_multi_vec #inp_t w blocksize n hi_f inp a a_vec f f_
 // End of proof of lemma_repeat_gen_blocks_multi_vec
 ////////////////////////
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --retry 2"
 let lemma_repeat_gen_blocks_vec #inp_t #c w blocksize inp n a a_vec f l f_v l_v normalize_v acc_v0 =
   let len = length inp in
   let blocksize_v = w * blocksize in

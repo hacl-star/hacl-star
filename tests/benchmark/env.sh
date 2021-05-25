@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 nob_cpus() {
     echo "[+] Setting non-boot CPUs to status $1"

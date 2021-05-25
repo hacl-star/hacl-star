@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Platform-independent invocation of SCons
 # Inspired from the Everest script

@@ -77,13 +77,14 @@ Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
 static EverCrypt_Error_error_code
 create_in_chacha20_poly1305(EverCrypt_AEAD_state_s **dst, uint8_t *k)
 {
-  uint8_t *ek = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+  uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   EverCrypt_AEAD_state_s lit;
   lit.impl = Spec_Cipher_Expansion_Hacl_CHACHA20;
   lit.ek = ek;
   KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
   {
-    EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+    EverCrypt_AEAD_state_s
+    *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
     p[0U] = lit;
     memcpy(ek, k, (uint32_t)32U * sizeof (uint8_t));
     dst[0U] = p;
@@ -99,10 +100,10 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
-    uint8_t *ek = KRML_HOST_CALLOC((uint32_t)480U, sizeof (uint8_t));
+    uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)480U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + (uint32_t)176U;
     uint64_t scrut = aes128_key_expansion(k, keys_b);
@@ -112,7 +113,8 @@ create_in_aes128_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     lit.ek = ek;
     KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
     {
-      EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+      EverCrypt_AEAD_state_s
+      *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
       p[0U] = lit;
       *dst = p;
       return EverCrypt_Error_Success;
@@ -130,10 +132,10 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
   bool has_avx = EverCrypt_AutoConfig2_has_avx();
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
-    uint8_t *ek = KRML_HOST_CALLOC((uint32_t)544U, sizeof (uint8_t));
+    uint8_t *ek = (uint8_t *)KRML_HOST_CALLOC((uint32_t)544U, sizeof (uint8_t));
     uint8_t *keys_b = ek;
     uint8_t *hkeys_b = ek + (uint32_t)240U;
     uint64_t scrut = aes256_key_expansion(k, keys_b);
@@ -143,7 +145,8 @@ create_in_aes256_gcm(EverCrypt_AEAD_state_s **dst, uint8_t *k)
     lit.ek = ek;
     KRML_CHECK_SIZE(sizeof (EverCrypt_AEAD_state_s), (uint32_t)1U);
     {
-      EverCrypt_AEAD_state_s *p = KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
+      EverCrypt_AEAD_state_s
+      *p = (EverCrypt_AEAD_state_s *)KRML_HOST_MALLOC(sizeof (EverCrypt_AEAD_state_s));
       p[0U] = lit;
       *dst = p;
       return EverCrypt_Error_Success;
@@ -190,7 +193,7 @@ encrypt_aes128_gcm(
   uint8_t *tag
 )
 {
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -317,7 +320,7 @@ encrypt_aes256_gcm(
   uint8_t *tag
 )
 {
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -505,7 +508,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[480U] = { 0U };
@@ -659,7 +662,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm(
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[544U] = { 0U };
@@ -902,7 +905,7 @@ decrypt_aes128_gcm(
   uint8_t *dst
 )
 {
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -1041,7 +1044,7 @@ decrypt_aes256_gcm(
   uint8_t *dst
 )
 {
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (s == NULL)
   {
     return EverCrypt_Error_InvalidKey;
@@ -1262,7 +1265,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm(
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[480U] = { 0U };
@@ -1429,7 +1432,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm(
   bool has_sse = EverCrypt_AutoConfig2_has_sse();
   bool has_movbe = EverCrypt_AutoConfig2_has_movbe();
   bool has_aesni = EverCrypt_AutoConfig2_has_aesni();
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   if (has_aesni && has_pclmulqdq && has_avx && has_sse && has_movbe)
   {
     uint8_t ek[544U] = { 0U };

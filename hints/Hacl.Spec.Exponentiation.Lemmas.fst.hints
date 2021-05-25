@@ -1,8 +1,8 @@
 [
-  "Ê\u0015·6\u001bí∫œ¡œÇ´\u001e?\rj",
+  "˘9≥\u0018;`°\u000e\u000e9Íçè-bµ",
   [
     [
-      "Hacl.Spec.Exponentiation.Lemmas.oneM",
+      "Hacl.Spec.Exponentiation.Lemmas.mont_one",
       1,
       0,
       0,
@@ -13,10 +13,10 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "72a4ab2e025cef23acaa85eb85f6ba54"
+      "808ca7dea4eb3155a35da745170a91af"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mul",
       1,
       0,
       0,
@@ -27,35 +27,35 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "e39e2bc54b8a9ff1b8a520390d71960a"
+      "8a5029dbb0f33d6b617bd87c46d0776d"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_one_mont",
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_one",
       1,
       0,
       0,
       [ "@query" ],
       0,
-      "aff9d4acdc465430b5c8164d8f2f01ed"
+      "b4d2f3f66bf64b3484b39d8b72a7058e"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_one_mont",
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_one",
       2,
       0,
       0,
       [ "@query" ],
       0,
-      "fbd18e2618b5c06125dbf86d5c391d78"
+      "c28b05e369d44f71213f34273545a8e3"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_one_mont",
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_one",
       3,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.oneM",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_one",
         "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
         "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
@@ -65,44 +65,44 @@
         "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
       ],
       0,
-      "fabbd1da496209a412159ce408615441"
+      "0c49fdb5fb429f2e6d1235fb1091597b"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_fmul_assoc_mont",
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_mul_assoc",
       1,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul",
         "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
         "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "typing_Hacl.Spec.Exponentiation.Lemmas.fmul_mont"
+        "typing_Hacl.Spec.Exponentiation.Lemmas.mont_mul"
       ],
       0,
-      "b6ceb644ddbeffd04d9df522591f18cf"
+      "f7c075cf820fee77ad8db7546fb95d0e"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_group",
+      "Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_comm_monoid",
       1,
       0,
       0,
       [ "@query" ],
       0,
-      "8758c1029ad339ec52995bdd3e94d735"
+      "5a9d714da71eba5734c6de1a55a0a3ec"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_group",
+      "Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_comm_monoid",
       2,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul",
         "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
@@ -111,7 +111,7 @@
         "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
       ],
       0,
-      "8a5b9ddb6211f117fadb635079638830"
+      "0ac0026a7b76b8f0bad41de108b61db9"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.pow_nat_mont_is_pow",
@@ -127,7 +127,7 @@
         "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
       ],
       0,
-      "26586db90cc5dcaa767ca90282f49646"
+      "8efde86f5c5a4cd7a0bbb6f082f2ef03"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.pow_nat_mont_is_pow",
@@ -146,7 +146,7 @@
         "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
       ],
       0,
-      "fd4cbe7814f482479448187acb504813"
+      "59649a727e3a345ea15557eecf34499d"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.pow_nat_mont_is_pow",
@@ -159,33 +159,37 @@
         "binder_x_294bbd16ad656dcb9eba9c34cf7aac04_3",
         "binder_x_b4d162f27321ab34af882eb7d4efeb0d_2",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_4",
         "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
-        "binder_x_f26957a7e62b271a8736230b1e9c83c1_4",
-        "equality_tok_Prims.LexTop@tok",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_group",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.oneM",
-        "equation_Lib.Exponentiation.fmul", "equation_Lib.NatMod.nat_mod",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_comm_monoid",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_one",
+        "equation_Lib.Exponentiation.mul", "equation_Lib.Exponentiation.one",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
-        "interpretation_Tm_abs_8043e4a8d64039a018f0a54c1c55af00",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_Lib.Exponentiation.Mkexp_fmul",
+        "interpretation_Tm_abs_767452e6211eb45132bb0ad477208a19",
+        "interpretation_Tm_abs_bdd1351fbdaffcab615fdbdd8ed277ef",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_one",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Lib.Exponentiation.Mkexp_fmul",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_one",
         "refinement_interpretation_Tm_refine_30503e03c26a7ba3e6cfb5fd6efaf1df",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "token_correspondence_Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
-        "token_correspondence_Lib.Exponentiation.fmul",
+        "token_correspondence_Hacl.Spec.Exponentiation.Lemmas.mont_mul",
+        "token_correspondence_Lib.Exponentiation.mul",
+        "token_correspondence_Lib.Exponentiation.one",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "6875d95eaef7c347f7e8c243cbb8ed0f"
+      "f129d2ae4544eac76b6fde229763794e"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont",
@@ -194,7 +198,7 @@
       0,
       [ "@query" ],
       0,
-      "8e5494025f602500f63b38523323f974"
+      "0c78c4da7717ed5e255e93d37b36a838"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont",
@@ -203,7 +207,7 @@
       0,
       [ "@query" ],
       0,
-      "229ecb0c18be56b64e221b70ba59a1e2"
+      "088372f42bbff3d07e7ed629703f4d6d"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont",
@@ -217,81 +221,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "0950a89a7aeabaacacdd2503ea5ebbd1"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_before_to_mont",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
-      ],
-      0,
-      "07704b755c3b345f483ac91ca110a54c"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_before_to_mont",
-      2,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "6c406382e1c1ccec1e050dccea5f8910"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_before_to_mont",
-      3,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.oneM",
-        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
-      ],
-      0,
-      "3f19f15bd76fb2effc25908cbb1ea4ef"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_after_to_mont",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
-      ],
-      0,
-      "fc7714834cd06f4c3500de569962a0eb"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_after_to_mont",
-      2,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "fa3b1d67fd000f63a1f2fde71ab97428"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma_after_to_mont",
-      3,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.oneM",
-        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
-      ],
-      0,
-      "7edc2e6fde62142c7b513dc85212dca8"
+      "9920c4c5f58a0ac669980f19adb2d488"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma",
@@ -299,20 +229,13 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Prims.nat", "equation_Prims.nonzero", "equation_Prims.pos",
-        "int_inversion", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_7e0b9b2dbca36eab00de093c1b701c6d",
-        "refinement_interpretation_Tm_refine_baba3c4ff195e8afc82d572a0bec0709",
-        "typing_Prims.pow2"
+        "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
       ],
       0,
-      "e625a703aa234935bcb77a4088bc1380"
+      "846bd9c4edfd6e1f743654e088b5c651"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma",
@@ -331,7 +254,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "b036c0426336a688ed6b3b76da9c8e0a"
+      "0a1efa24f01fe9eabcdf228afb9aef97"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_lemma",
@@ -339,10 +262,12 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Lib.NatMod.pow.fuel_instrumented", "@query",
         "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont",
         "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
+        "equation_Prims.pos", "int_inversion",
+        "lemma_Lib.NatMod.lemma_pow_ge_zero", "primitive_Prims.op_Modulus",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
@@ -350,137 +275,41 @@
         "refinement_interpretation_Tm_refine_d093ed85dfadb407c50b8edbd11efe88"
       ],
       0,
-      "3a5e09271efd508eeb297590df6fc376"
+      "48a7132ca4c122d2eea2a0d6b6a53644"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.mont_pre",
+      "Hacl.Spec.Exponentiation.Lemmas.mont_one_ll",
       1,
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "a39e272f7b9f4ed30bf7f205ae06d5b5"
+      "4aadd30cae7cff19519fcf90170fa822"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.oneM_ll",
+      "Hacl.Spec.Exponentiation.Lemmas.mont_mul_ll",
       1,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "d02bb68af9f38804caec9144bdf28238"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.oneM_ll",
-      2,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "e3cc35dc6fe6d7ce8cdd5fda1be8f346"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.oneM_ll",
-      3,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
-        "equation_Prims.pos",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "refinement_interpretation_Tm_refine_2e8b8af4a8731cafcf92cad3ab6b0e99",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
-      ],
-      0,
-      "7840bcf893c180d5c59aed287bc81020"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.fmul_mont_ll",
-      1,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
-        "equation_Hacl.Spec.Montgomery.Lemmas.mont_mul",
-        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
-        "equation_Prims.pos",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "refinement_interpretation_Tm_refine_2e8b8af4a8731cafcf92cad3ab6b0e99",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "1ac9d154296696e65e8e070f9efef75c"
+      "ae4fc368148be9466e4b1fde655249b9"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_one_mont_ll",
-      1,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
-        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2e8b8af4a8731cafcf92cad3ab6b0e99",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
-      ],
-      0,
-      "3a12cd78494b83e2997944e42e196f5c"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_one_mont_ll",
-      2,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont_ll",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.oneM",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.oneM_ll",
-        "equation_Hacl.Spec.Montgomery.Lemmas.mont_mul",
-        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
-        "equation_Prims.pos",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "refinement_interpretation_Tm_refine_2e8b8af4a8731cafcf92cad3ab6b0e99",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
-      ],
-      0,
-      "d4d164d545549f7fe517db429839924a"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_fmul_assoc_mont_ll",
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_one_ll",
       1,
       0,
       0,
@@ -488,10 +317,11 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont_ll",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
-        "equation_Hacl.Spec.Montgomery.Lemmas.mont_mul",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul_ll",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_one",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_one_ll",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
         "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
         "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
@@ -499,17 +329,17 @@
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "refinement_interpretation_Tm_refine_2e8b8af4a8731cafcf92cad3ab6b0e99",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "typing_Hacl.Spec.Exponentiation.Lemmas.fmul_mont_ll"
+        "typing_Hacl.Spec.Exponentiation.Lemmas.mont_one_ll"
       ],
       0,
-      "5eb832bbfe9d4349d5cb63463026a827"
+      "0b6c3cc31d86913638ef1466c9c6c1b9"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.lemma_fmul_comm_mont_ll",
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_mul_ll_assoc",
       1,
       0,
       0,
@@ -517,41 +347,47 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont_ll",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
-        "equation_Hacl.Spec.Montgomery.Lemmas.mont_mul",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul_ll",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
         "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
         "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "refinement_interpretation_Tm_refine_2e8b8af4a8731cafcf92cad3ab6b0e99",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "typing_Hacl.Spec.Exponentiation.Lemmas.mont_mul_ll"
       ],
       0,
-      "108e138ffbe2a846c2a22b15193d9bef"
+      "72f8bc19351d4247a6bd52fbb8be631b"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_group_ll",
+      "Hacl.Spec.Exponentiation.Lemmas.lemma_mont_mul_ll_comm",
       1,
       0,
       0,
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
-        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul_ll",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_mul",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2e8b8af4a8731cafcf92cad3ab6b0e99",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "76979bdeb22f67636a6c993dbc86056d"
+      "8f8b85993e845533a8d56bd043ba67fe"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.pow_nat_mont_ll_is_pow_nat_mont",
@@ -562,7 +398,7 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
         "equation_Prims.pos", "equation_Prims.squash",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "lemma_FStar.UInt.pow2_values",
@@ -572,7 +408,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "873b24202cef9b55ef40e72d8b387fb4"
+      "948987f5663d36eac4b4e9f8a9665797"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.pow_nat_mont_ll_is_pow_nat_mont",
@@ -583,17 +419,17 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
         "equation_Prims.pos", "equation_Prims.squash",
         "function_token_typing_Prims.__cache_version_number__",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "projection_inverse_BoxInt_proj_0",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "c529a777450c6b38979ee2367b90da53"
+      "09efa225e3d1f9a446954ba1e5842835"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.pow_nat_mont_ll_is_pow_nat_mont",
@@ -611,129 +447,80 @@
         "binder_x_f26957a7e62b271a8736230b1e9c83c1_1",
         "binder_x_f26957a7e62b271a8736230b1e9c83c1_2",
         "binder_x_f50443036dac24cde27bbf95efe0aa4d_4",
-        "equality_tok_Prims.LexTop@tok",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.fmul_mont_ll",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_group",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_group_ll",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.oneM",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.oneM_ll",
-        "equation_Hacl.Spec.Montgomery.Lemmas.mont_mul",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_comm_monoid",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mk_nat_mont_ll_comm_monoid",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_mul_ll",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_one",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_one_ll",
         "equation_Hacl.Spec.Montgomery.Lemmas.mont_one",
-        "equation_Lib.Exponentiation.fmul",
-        "equation_Lib.Exponentiation.one", "equation_Lib.NatMod.nat_mod",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Hacl.Spec.Montgomery.Lemmas.to_mont",
+        "equation_Lib.Exponentiation.mul", "equation_Lib.Exponentiation.one",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
-        "interpretation_Tm_abs_8043e4a8d64039a018f0a54c1c55af00",
-        "interpretation_Tm_abs_e7b0793a93fa8dd7eb00cf2e34267add",
+        "interpretation_Tm_abs_767452e6211eb45132bb0ad477208a19",
+        "interpretation_Tm_abs_bdd1351fbdaffcab615fdbdd8ed277ef",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
-        "proj_equation_Lib.Exponentiation.Mkexp_fmul",
-        "proj_equation_Lib.Exponentiation.Mkexp_one",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_one",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "projection_inverse_Lib.Exponentiation.Mkexp_fmul",
-        "projection_inverse_Lib.Exponentiation.Mkexp_one",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_one",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "token_correspondence_Hacl.Spec.Exponentiation.Lemmas.fmul_mont",
-        "token_correspondence_Hacl.Spec.Exponentiation.Lemmas.fmul_mont_ll",
-        "token_correspondence_Lib.Exponentiation.fmul",
+        "token_correspondence_Hacl.Spec.Exponentiation.Lemmas.mont_mul",
+        "token_correspondence_Hacl.Spec.Exponentiation.Lemmas.mont_mul_ll",
+        "token_correspondence_Lib.Exponentiation.mul",
         "token_correspondence_Lib.Exponentiation.one",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "be71adecdf5868eeaf2d03c0267c1231"
+      "4f265e294601aa3c302619dde9d14862"
     ],
     [
       "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll",
       1,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "adf8ce36f5654842c97c8baecd4103d2"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll",
-      2,
-      0,
-      0,
-      [ "@query" ],
-      0,
-      "57ea1f4b08881452a6f8d8ce7b57f148"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll",
-      3,
       0,
       0,
       [
         "@MaxIFuel_assumption", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
-        "equation_Lib.NatMod.nat_mod", "equation_Prims.pos",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "refinement_interpretation_Tm_refine_2e8b8af4a8731cafcf92cad3ab6b0e99",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "3d58cbb7f1db135f786acd61e57bd13c"
+      "96dcc62f40e8d418b8d9568830911fbf"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma",
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_mod_lemma",
       1,
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Prims.squash", "int_inversion",
-        "l_and-interp", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_Multiply", "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "5d116e1013ef6f294eea6edffdb89af1"
+      "b996c1b5217c194de1be9b64bba3be06"
     ],
     [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma",
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_mod_lemma",
       2,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll",
-        "equation_Hacl.Spec.Montgomery.Lemmas.from_mont",
-        "equation_Hacl.Spec.Montgomery.Lemmas.mont_reduction",
-        "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Spec.RSAPSS.elem", "int_inversion",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_beb65d281c49d74d114c6a6b22df2641",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "typing_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll",
-        "typing_Spec.RSAPSS.fpow"
-      ],
-      0,
-      "2d917c5694ffb3de2653251553326bcf"
-    ],
-    [
-      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma",
-      3,
       0,
       0,
       [
@@ -741,8 +528,7 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll",
-        "equation_Hacl.Spec.Exponentiation.Lemmas.mont_pre",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
         "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
         "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
@@ -750,13 +536,131 @@
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
-        "refinement_interpretation_Tm_refine_2e8b8af4a8731cafcf92cad3ab6b0e99",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "d74eb27225bf5b01a088b511848842e3"
+      "187466bcd9413a2f843b14d17dbb0dd3"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc"
+      ],
+      0,
+      "6ce2fcdc3c6162bad4ccfea763d396a0"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll_lemma",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Exponentiation.Lemmas.mod_exp_mont_ll",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1a5fd007e4986c3ac54af51800bef9dc",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "1f42c4adb77e9c365ce259aba4fdf698"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.from_mont_exp_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Prims.l_and", "equation_Prims.pos",
+        "equation_Prims.squash", "l_and-interp",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "a65953325ca4f3b13fdace99d485afb6"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.from_mont_exp_lemma",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Lib.NatMod.pow.fuel_instrumented",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "lemma_Lib.NatMod.lemma_pow_ge_zero", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "81b4f43770d4b58676f9854ed21c98b7"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.pow_nat_mont_ll_mod_base",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Prims.squash", "int_inversion",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "16f81e59d9efaff71ec570f6cf030fe9"
+    ],
+    [
+      "Hacl.Spec.Exponentiation.Lemmas.pow_nat_mont_ll_mod_base",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Hacl.Spec.Montgomery.Lemmas.mont_pre",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.pos",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "projection_inverse_FStar.Pervasives.Native.Mktuple2__1",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "046303b8956a9e5a9b1b23b091826ce4"
     ]
   ]
 ]

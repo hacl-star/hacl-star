@@ -135,8 +135,8 @@ let update_state_mods_weaken (mods mods':mods_t) (s' s:vale_state) : Lemma
   update_state_mods_to mods' s' s
 
 let call_QPURE
-    (#a:Type0) (#cs:codes) (r:range) (msg:string) (pre:((unit -> GTot Type0) -> GTot Type0))
-    (l:unit -> PURE unit pre) (qcs:quickCodes a cs) (mods:mods_t) (k:vale_state -> a -> Type0) (s0:vale_state)
+    (#a:Type0) (#cs:codes) (r:range) (msg:string) (pre:((unit -> GTot Type0) -> GTot Type0){is_monotonic pre})
+    (l:unit -> PURE unit (as_pure_wp pre)) (qcs:quickCodes a cs) (mods:mods_t) (k:vale_state -> a -> Type0) (s0:vale_state)
   : Lemma
   (requires
     (forall (p:unit -> GTot Type0).{:pattern pre p}

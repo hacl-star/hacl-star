@@ -14,7 +14,7 @@
 #include "kremlin/internal/target.h"
 
 
-
+#include "FStar_UInt128.h"
 
 static inline void store128_le(uint8_t *x0, FStar_UInt128_uint128 x1);
 

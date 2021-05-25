@@ -44,6 +44,10 @@ detect_ocaml () {
 }
 
 check_no_bug81300 () {
+  if [[ "$cross_build" == "1" ]]; then
+    # We don't want to build anything with march=native
+    return 0
+  fi
   # Perform the check only if lib_intrinsics.h is present. In practice,
   # lib_intrinsics.h is present in all the directories which contain libintvector.h,
   # but mozilla. If lib_intrinsics.h is not present, assume there is no bug and
@@ -141,7 +145,7 @@ EOF
 # -------------------------
 
 detect_x64 () {
-  [[ $target_arch == "x86_64" ]]
+  [[ $target_arch == "x86_64" ]] || [[ $target_arch == "amd64" ]]
 }
 
 detect_x86 () {
@@ -168,7 +172,11 @@ int main () {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -I. -march=armv8-a+simd -c $file -o /dev/null
+  if [[ $target_arch == "aarch64" ]] && [[ $target_abi == "darwin" ]]; then
+    $CC $CROSS_CFLAGS -DHACL_CAN_COMPILE_VEC128 -I. -c $file -o /dev/null
+  else
+    $CC $CROSS_CFLAGS -DHACL_CAN_COMPILE_VEC128 -I. -march=armv8-a+simd -c $file -o /dev/null
+  fi
 }
 
 # We only detect the 64-bit version of the z-architecture (s390x).
@@ -189,6 +197,9 @@ show_help () {
   printf "                    Currently supported triples are:\n"
   printf "                    * aarch64-none-linux-android\n"
   printf "                    * aarch64-none-linux-gnu\n"
+  printf "                    * aarch64-apple-darwin\n"
+  printf "                    * aarch64-apple-ios\n"
+  printf "                    * x86_64-apple-ios-simulator\n"
   printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
   printf "    --disable-ocaml Disable OCAML bindings\n"
   printf "\n"
@@ -202,6 +213,7 @@ echo -n > config.h
 # Default arguments
 disable_ocaml=0
 disable_bzero=0
+cross_build=0
 
 # Parse command line arguments.
 all_args=("$@")
@@ -227,6 +239,7 @@ done
 # target_{arch,sys,abi} accordingly; otherwise, query the host via uname for
 # these parameteres and assume we don't do cross-compilation.
 if [ ! -z "$build_target" ]; then
+  cross_build=1
   echo "Doing cross build for $build_target. Make sure that your toolchain is configured properly."
   if [[ "$build_target" == "aarch64-none-linux-android" ]]; then
     # NOTE: We assume that the Android environment is set up correctly.
@@ -280,6 +293,30 @@ if [ ! -z "$build_target" ]; then
     target_sys=$(uname)
     target_abi="native"
     echo "MARCH = ia32" >> Makefile.config
+  elif [[ "$build_target" == "aarch64-apple-darwin" ]]; then
+    # Cross compiling for aarch64-apple-darwin (presumably on x86_64-apple-darwin).
+    target_arch="aarch64"
+    target_sys="apple"
+    target_abi="darwin"
+    # See https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary
+    CROSS_TARGET="-target arm64-apple-macos11"
+  elif [[ "$build_target" == "aarch64-apple-ios" ]]; then
+    # Cross compiling for aarch64-apple-ios
+    # (presumably on x86_64-apple-darwin or aarch64-apple-darwin).
+    target_arch="aarch64"
+    target_sys="apple"
+    target_abi="ios"
+    CROSS_TARGET="-target arm64-apple-ios"
+    CROSS_SYSROOT="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) -arch arm64"
+    # CROSS_INCLUDES="-I$SYSROOT/usr/include/"
+  elif [[ "$build_target" == "x86_64-apple-ios-simulator" ]]; then
+    # Cross compiling for x86_64-apple-ios (emulator only)
+    # (presumably on x86_64-apple-darwin).
+    target_arch="x86_64"
+    target_sys="apple"
+    target_abi="ios-simulator"
+    CROSS_TARGET="-target x86_64-apple-ios-simulator"
+    CROSS_SYSROOT="-isysroot $(xcrun --sdk iphonesimulator --show-sdk-path)"
   else
     show_help
     exit 0
@@ -370,12 +407,18 @@ if detect_ibmz; then
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_SYSTEMZ" >> config.h
   echo "... $build_target supports 128-bit z VSX"
   compile_vec128=true
-  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
+  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z15" >> Makefile.config
+  # In the case of IBMz, some of the vectorized functions are defined as
+  # inline static rather than as macros, meaning we need to compile all
+  # the files with the vector compilation options. Note that this is not
+  # a problem because we don't do cross-compilation for IBMz. Also note
+  # that we don't have support for vec256 for IBMz.
+  echo "CFLAGS += \$(CFLAGS_128)" >> Makefile.config
 fi
 
 if $compile_intrinsics; then
   echo "$build_target supports _addcarry_u64"
-  echo "#define EVERCRYPT_CAN_COMPILE_INTRINSICS 1" >> config.h
+  echo "#define HACL_CAN_COMPILE_INTRINSICS 1" >> config.h
 fi
 
 if ! $compile_vale; then
@@ -388,11 +431,11 @@ if ! $compile_vale; then
   echo "$build_target does not support legacy vale stubs"
   echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
 else
-  echo "#define EVERCRYPT_CAN_COMPILE_VALE 1" >> config.h
+  echo "#define HACL_CAN_COMPILE_VALE 1" >> config.h
 fi
 
 if $compile_inline_asm; then
-    echo "#define EVERCRYPT_CAN_COMPILE_INLINE_ASM 1" >> config.h
+    echo "#define HACL_CAN_COMPILE_INLINE_ASM 1" >> config.h
 fi
 
 if ! $compile_vec128; then
@@ -400,7 +443,7 @@ if ! $compile_vec128; then
   echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
 else
-  echo "#define EVERCRYPT_CAN_COMPILE_VEC128 1" >> config.h
+  echo "#define HACL_CAN_COMPILE_VEC128 1" >> config.h
 fi
 
 if ! $compile_vec256; then
@@ -408,7 +451,7 @@ if ! $compile_vec256; then
   echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec256 void *" >> config.h
 else
-  echo "#define EVERCRYPT_CAN_COMPILE_VEC256 1" >> config.h
+  echo "#define HACL_CAN_COMPILE_VEC256 1" >> config.h
 fi
 
 if ! detect_uint128; then
