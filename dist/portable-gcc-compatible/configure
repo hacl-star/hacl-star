@@ -407,7 +407,13 @@ if detect_ibmz; then
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_SYSTEMZ" >> config.h
   echo "... $build_target supports 128-bit z VSX"
   compile_vec128=true
-  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
+  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z15" >> Makefile.config
+  # In the case of IBMz, some of the vectorized functions are defined as
+  # inline static rather than as macros, meaning we need to compile all
+  # the files with the vector compilation options. Note that this is not
+  # a problem because we don't do cross-compilation for IBMz. Also note
+  # that we don't have support for vec256 for IBMz.
+  echo "CFLAGS += \$(CFLAGS_128)" >> Makefile.config
 fi
 
 if $compile_intrinsics; then
