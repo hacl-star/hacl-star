@@ -136,7 +136,7 @@ let getFirstWord i o =
   let inv h (j: nat) = live h i /\ live h o /\ modifies (loc o) h0 h /\ 
     lseq_as_nat (as_seq h o) == arithmetic_shift_right (lseq_as_nat (as_seq h0 i)) 521 % pow2 (64 * j) in 
 
-  Lib.Loops.for 0ul 8ul inv (fun j -> 
+  Lib.Loops.for 0ul 9ul inv (fun j -> 
     admit();
     let i0 = index i (size 8 *! size 1 +! j) in 
     let i1 = index i (size 8 *! size 1 +! size 1 +! j) in 
@@ -148,11 +148,49 @@ let getFirstWord i o =
     upd o j o0);
 
   let h1 = ST.get() in 
-    assert(lseq_as_nat (as_seq h1 o) == arithmetic_shift_right (lseq_as_nat (as_seq h0 i)) 521 % pow2 (64 * 8));
-    
+    assert(lseq_as_nat (as_seq h1 o) == arithmetic_shift_right (lseq_as_nat (as_seq h0 i)) 521 % pow2 (64 * 9));
+
+  let i8 = index i (size 8) in 
   let o8 = index o (size 8) in 
   let o8Updated = logand o8 (u64 0x1ff) in 
-  upd o (size 8) o8Updated
+  upd o (size 8) o8Updated;
+
+  let h2 = ST.get() in 
+  
+  calc (==) {lseq_as_nat (as_seq h2 o);
+    (==) {lemma_test (as_seq h2 o) 8}
+  lseq_as_nat (Lib.Sequence.sub (as_seq h2 o) 0 8) + pow2 (64 * 8) * lseq_as_nat (Lib.Sequence.sub (as_seq h2 o) 8 1);
+    (==) {lseq_as_nat_first (Lib.Sequence.sub (as_seq h2 o) 8 1)}
+  lseq_as_nat (Lib.Sequence.sub (as_seq h2 o) 0 8) + pow2 (64 * 8) * v o8Updated;
+    (==) {assert_norm (pow2 9 - 1 == 0x1ff); logand_mask o8 (u64 0x1ff) 9}
+  lseq_as_nat (Lib.Sequence.sub (as_seq h1 o) 0 8) + pow2 (64 * 8) * (v o8 % pow2 9);
+  };
+
+  getZeroWord0 (Lib.Sequence.sub (as_seq h1 o) 0 8) (v o8);
+  small_mod (lseq_as_nat (as_seq h2 o)) (pow2 521);
+
+
+  calc (==) {lseq_as_nat (as_seq h2 o);
+    (==) {}
+  lseq_as_nat (as_seq h2 o) % pow2 521;
+    (==) {}
+  (lseq_as_nat (Lib.Sequence.sub (as_seq h1 o) 0 8) + pow2 (64 * 8) * (v o8 % pow2 9)) % pow2 521;
+    (==) {modulo_scale_lemma (v o8) (pow2 (64 * 8)) (pow2 9)}
+  (lseq_as_nat (Lib.Sequence.sub (as_seq h1 o) 0 8) + (pow2 (64 * 8) * v o8 % (pow2 9 * pow2 (64 * 8)))) % pow2 521;  
+    (==) {pow2_plus 9 (64 * 8)}
+  (lseq_as_nat (Lib.Sequence.sub (as_seq h1 o) 0 8) + (pow2 (64 * 8) * v o8 % pow2 521)) % pow2 521;
+    (==) {lemma_mod_add_distr (lseq_as_nat (Lib.Sequence.sub (as_seq h1 o) 0 8)) (pow2 (64 * 8) * v o8) (pow2 521)}
+  (lseq_as_nat (Lib.Sequence.sub (as_seq h1 o) 0 8) + (pow2 (64 * 8) * v o8)) % pow2 521;   
+  (==) {lseq_as_nat_first (Lib.Sequence.sub (as_seq h1 o) 8 1); lemma_test (as_seq h1 o) 8}
+    lseq_as_nat (as_seq h1 o) % pow2 521;};
+
+  pow2_modulo_modulo_lemma_1 (arithmetic_shift_right (lseq_as_nat (as_seq h0 i)) 521) 521 (64 * 9);
+  
+  assert(lseq_as_nat (as_seq h2 o) == arithmetic_shift_right (lseq_as_nat (as_seq h0 i)) 521 % pow2 521);
+
+  admit()
+
+    
 
 
 
