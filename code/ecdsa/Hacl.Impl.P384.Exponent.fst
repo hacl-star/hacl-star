@@ -516,7 +516,12 @@ val exponent2: t0: felem P384 -> t3: felem P384 -> t4: felem P384 -> t5: felem P
   (requires fun h -> live h t0 /\ live h t3 /\ live h t4 /\ live h t5 /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t0; loc t3; loc t4; loc t5] /\ 
     as_nat_ h t0 < prime384 /\ as_nat_ h t3 < prime384 /\ as_nat_ h t4 < prime384 /\ as_nat_ h t5 < prime384)
-  (ensures fun h0 _ h1 -> True)
+  (ensures fun h0 _ h1 -> modifies (loc t0 |+| loc t3 |+| loc t4 |+| loc t5) h0 h1 /\ (
+    let t0D = fromDomain__ (as_nat_ h0 t0) in 
+    let t3D = fromDomain__ (as_nat_ h0 t3) in 
+    let t4D = fromDomain__ (as_nat_ h0 t4) in 
+    let t5D = fromDomain__ (as_nat_ h0 t5) in 
+    as_nat_ h1 t4 = toDomain__  (pow t0D (pow2 33) * pow t4D (pow2 225 + pow2 162 + pow2 99 + pow2 36) * t3D % prime384)))
 
 
 let exponent2 t0 t3 t4 t5  = 
@@ -665,12 +670,15 @@ let exponent2 t0 t3 t4 t5  =
     toDomain__ (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D (pow2_33) % prime384);};
 
   calc (==) {
-    as_nat_ h10 
-
-
-
-
-
+    as_nat_ h10 t4;
+  (==) {}
+    toDomain__ (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D (pow2_33) % prime384 * t3D % prime384);
+  (==) {lemma_mod_mul_distr_l (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D (pow2_33)) t3D prime384}
+    toDomain__ (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D (pow2_33) * t3D % prime384);
+  (==) {assert_by_tactic (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D (pow2_33) * t3D == 
+    pow t0D (pow2_33) * pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * t3D) canon}
+  toDomain__  (pow t0D (pow2_33) * pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * t3D % prime384);
+}
 
 
 (*t4 = i0 *)
@@ -680,20 +688,65 @@ val exponent3: t: felem P384 -> t1: felem P384 -> t4: felem P384 -> result: fele
   (requires fun h -> live h t /\ live h t1 /\ live h t4 /\ live h result /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t; loc t1; loc t4] /\
     as_nat_ h t < prime384 /\ as_nat_ h t1 < prime384 /\ as_nat_ h t4 < prime384)
-  (ensures fun h0 _ h1 -> modifies (loc t1 |+| loc t4 |+| loc result) h0 h1)
+  (ensures fun h0 _ h1 -> modifies (loc t1 |+| loc t4 |+| loc result) h0 h1 /\ (
+    let tD = fromDomain__ (as_nat_ h0 t) in 
+    let t1D = fromDomain__ (as_nat_ h0 t1) in 
+    let t4D = fromDomain__ (as_nat_ h0 t4) in
+    as_nat_ h1 result == toDomain__ (tD * pow t4D (pow2 96) * pow t1D 4 % prime384)
+  ))
 
 
 let exponent3 t t1 t4 result = 
+    let h0 = ST.get() in 
 (* i1 = m(n_sq(i0, 94), x30) *)
   fsquarePowN_dh #P384 (size 94) t4 ;
+    let h1 = ST.get() in 
   montgomery_multiplication_buffer_dh #P384 t4 t1 t4;
+    let h2 = ST.get() in 
 (* t4 = i1 *)
 
 (* i397    = n_sq(i1, 2) *)
-  fsquarePowN_dh #P384  (size 2) t4;
+  fsquarePowN_dh #P384 (size 2) t4;
+    let h3 = ST.get() in 
 
 (* r = m(t, i397) *)
-  montgomery_multiplication_buffer_dh #P384 t4 t result
+  montgomery_multiplication_buffer_dh #P384 t4 t result;
+    let h4 = ST.get() in 
+
+
+  let tD = fromDomain__ (as_nat_ h0 t) in 
+  let t1D = fromDomain__ (as_nat_ h0 t1) in 
+  let t4D = fromDomain__ (as_nat_ h0 t4) in 
+
+  let pow2_94 = pow2 94 in 
+  let pow2_96 = pow2 96 in 
+
+  calc (==) {as_nat_ h1 t4; (==) {}
+  toDomain__ (pow t4D pow2_94 % prime384);};
+
+  calc (==) {as_nat_ h2 t4; (==) {}
+    toDomain__ (pow t4D pow2_94 % prime384 * t1D % prime384);
+  (==) {lemma_mod_mul_distr_l (pow t4D pow2_94) t1D prime384}
+    toDomain__ (pow t4D pow2_94 * t1D % prime384);
+  };
+
+  calc (==) {as_nat_ h3 t4; (==) {}
+    toDomain__ (pow (pow t4D pow2_94 * t1D % prime384) 4 % prime384);
+  (==) {power_distributivity (pow t4D pow2_94 * t1D) 4 prime384}
+    toDomain__ (pow (pow t4D pow2_94 * t1D) 4 % prime384);
+  (==) {power_distributivity_2 (pow t4D pow2_94) t1D 4}
+    toDomain__ (pow (pow t4D pow2_94) 4 * pow t1D 4 % prime384);
+  (==) {power_mult t4D pow2_94 4}
+    toDomain__ (pow t4D (pow2_94 * pow2 2) * pow t1D 4 % prime384);
+  (==) {pow2_plus 94 2}
+    toDomain__ (pow t4D pow2_96 * pow t1D 4 % prime384);};
+
+  calc (==) {as_nat_ h4 result; (==) {}
+    toDomain__ (pow t4D pow2_96 * pow t1D 4 % prime384 * tD % prime384);
+  (==) {lemma_mod_mul_distr_l (pow t4D pow2_96 * pow t1D 4) tD prime384}
+    toDomain__ (pow t4D pow2_96 * pow t1D 4 * tD % prime384);
+  (==) {assert_by_tactic (pow t4D pow2_96 * pow t1D 4 * tD == tD * pow t4D pow2_96 * pow t1D 4) canon}
+    toDomain__ (tD * pow t4D pow2_96 * pow t1D 4 % prime384);}
 
 
 
