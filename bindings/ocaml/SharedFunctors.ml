@@ -211,7 +211,7 @@ module Make_Poly1305_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let mac ~key ~msg ~tag =
+  let mac_noalloc ~key ~msg ~tag =
     check_reqs Impl.reqs;
     (* Hacl.Impl.Poly1305.poly1305_mac_st *)
     assert (C.size tag = 16);
@@ -219,6 +219,10 @@ module Make_Poly1305_generic (C: Buffer)
     assert (C.disjoint tag msg);
     assert (C.disjoint key msg);
     Impl.mac (C.ctypes_buf tag) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf key)
+  let mac ~key ~msg =
+    let tag = C.make 16 in
+    mac_noalloc ~key ~msg ~tag;
+    tag
 end
 
 module Make_HMAC_generic (C: Buffer)
@@ -228,13 +232,17 @@ module Make_HMAC_generic (C: Buffer)
   end)
 = struct
   type bytes = C.t
-  let mac ~key ~msg ~tag =
+  let mac_noalloc ~key ~msg ~tag =
     (* Hacl.HMAC.compute_st *)
     assert (HashDefs.digest_len Impl.hash_alg = C.size tag);
     assert (C.disjoint tag key);
     HashDefs.check_key_len Impl.hash_alg (C.size key);
     HashDefs.check_key_len Impl.hash_alg (C.size msg);
     Impl.mac (C.ctypes_buf tag) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf msg) (C.size_uint32 msg)
+  let mac ~key ~msg =
+    let tag = C.make (HashDefs.digest_len Impl.hash_alg) in
+    mac_noalloc ~key ~msg ~tag;
+    tag
 end
 
 module Make_HKDF_generic (C: Buffer)
@@ -245,22 +253,32 @@ module Make_HKDF_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let extract ~salt ~ikm ~prk =
-    (* Hacl.HKDF.extract_st *)
-    assert (C.size prk = HashDefs.digest_len Impl.hash_alg);
-    assert (C.disjoint salt prk);
-    assert (C.disjoint ikm prk);
-    HashDefs.check_key_len Impl.hash_alg (C.size salt);
-    HashDefs.check_key_len Impl.hash_alg (C.size ikm);
-    Impl.extract (C.ctypes_buf prk) (C.ctypes_buf salt) (C.size_uint32 salt) (C.ctypes_buf ikm) (C.size_uint32 ikm)
-  let expand ~prk ~info ~okm =
-    (* Hacl.HKDF.expand_st *)
-    assert (C.size okm <= 255 * HashDefs.digest_len Impl.hash_alg);
-    assert (C.disjoint okm prk);
-    assert (HashDefs.digest_len Impl.hash_alg <= C.size prk);
-    HashDefs.(check_max_input_len Impl.hash_alg (digest_len Impl.hash_alg + block_len Impl.hash_alg + C.size info + 1));
-    HashDefs.check_key_len Impl.hash_alg (C.size prk);
-    Impl.expand (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
+  module Noalloc = struct
+    let extract ~salt ~ikm ~prk =
+      (* Hacl.HKDF.extract_st *)
+      assert (C.size prk = HashDefs.digest_len Impl.hash_alg);
+      assert (C.disjoint salt prk);
+      assert (C.disjoint ikm prk);
+      HashDefs.check_key_len Impl.hash_alg (C.size salt);
+      HashDefs.check_key_len Impl.hash_alg (C.size ikm);
+      Impl.extract (C.ctypes_buf prk) (C.ctypes_buf salt) (C.size_uint32 salt) (C.ctypes_buf ikm) (C.size_uint32 ikm)
+    let expand ~prk ~info ~okm =
+      (* Hacl.HKDF.expand_st *)
+      assert (C.size okm <= 255 * HashDefs.digest_len Impl.hash_alg);
+      assert (C.disjoint okm prk);
+      assert (HashDefs.digest_len Impl.hash_alg <= C.size prk);
+      HashDefs.(check_max_input_len Impl.hash_alg (digest_len Impl.hash_alg + block_len Impl.hash_alg + C.size info + 1));
+      HashDefs.check_key_len Impl.hash_alg (C.size prk);
+      Impl.expand (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
+  end
+  let extract ~salt ~ikm =
+    let prk = C.make (HashDefs.digest_len Impl.hash_alg) in
+    Noalloc.extract ~salt ~ikm ~prk;
+    prk
+  let expand ~prk ~info ~size =
+    let okm = C.make size in
+    Noalloc.expand ~prk ~info ~okm;
+    okm
 end
 
 module Make_ECDSA_generic (C: Buffer)

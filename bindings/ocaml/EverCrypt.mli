@@ -188,15 +188,24 @@ module HMAC : sig
   (** [is_supported_alg alg] returns true if the hashing algorithm [alg] is supported
       in the agile HMAC interface. *)
 
-  val mac : alg:HashDefs.alg -> key:bytes -> msg:bytes -> tag:bytes -> unit
-  (** [mac alg key msg tag] computes the HMAC of [msg] based on hashing algorithm [alg]
-      using key [key] and writes the result in [tag] *)
+  val mac : alg:HashDefs.alg -> key:bytes -> msg:bytes -> bytes
+  (** [mac alg key msg] computes the HMAC of [msg] based on hashing algorithm [alg]
+      using key [key]. *)
+
+  val mac_noalloc : alg:HashDefs.alg -> key:bytes -> msg:bytes -> tag:bytes -> unit
+  (** [mac_noalloc alg key msg tag] computes the HMAC of [msg] based on hashing algorithm [alg]
+      using key [key] and writes the result in [tag]. The `tag` buffer needs to satisfy
+      the size requirements for the output buffer. *)
 end
 (** Agile, multiplexing interface for HMAC
 
 The hashing algorithms currently supported are the same as for the {{!EverCrypt.Hash}agile hashing interface}:
-    - SHA-2 (SHA-224, SHA-256, SHA-384, SHA-512)
+    - SHA-2 (SHA-256, SHA-384, SHA-512)
     - BLAKE2 (BLAKE2b, BLAKE2s)
+
+      For HMAC with SHA2, the output buffer is the same size as the digest size of
+      the corresponding hash function (see {{!EverCrypt.Hash} here}). For HMAC with BLAKE2,
+      the output buffer is 64 bytes for BLAKE2b and 32 bytes for BLAKE2s.
 *)
 
 
@@ -227,8 +236,25 @@ module Poly1305 : MAC
 *)
 
 module HKDF : sig
-  val extract : alg:HashDefs.alg -> salt:bytes -> ikm:bytes -> prk:bytes -> unit
-  val expand : alg:HashDefs.alg -> prk:bytes -> info:bytes -> okm:bytes -> unit
+  val extract : alg:HashDefs.alg -> salt:bytes -> ikm:bytes -> bytes
+  (** [extract alg salt ikm] computes a pseudorandom key using hashing algorithm [alg] with
+      input key material [ikm] and salt [salt]. *)
+
+  val expand : alg:HashDefs.alg -> prk:bytes -> info:bytes -> size:int -> bytes
+  (** [expand alg prk info size] expands the pseudorandom key [prk] using hashing
+      algorithm [alg], taking the info string [info] into account and
+      returns a buffer of [size] bytes. *)
+
+  module Noalloc : sig
+    val extract : alg:HashDefs.alg -> salt:bytes -> ikm:bytes -> prk:bytes -> unit
+    (** [extract alg salt ikm prk] computes a pseudorandom key [prk] using
+        hashing algorithm [alg] with input key material [ikm] and salt [salt]. *)
+
+    val expand : alg:HashDefs.alg -> prk:bytes -> info:bytes -> okm:bytes -> unit
+    (** [expand alg prk info okm] expands the pseudorandom key [prk] using
+        hashing algorithm [alg], taking the info string [info] into account,
+        and writes the output key material in [okm]. *)
+  end
 end
 (** Agile, multiplexing interface for HKDF
 

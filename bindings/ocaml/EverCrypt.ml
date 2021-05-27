@@ -185,13 +185,17 @@ module HMAC = struct
   open EverCrypt_HMAC
   let is_supported_alg ~alg =
     everCrypt_HMAC_is_supported_alg (HashDefs.alg_definition alg)
-  let mac ~alg ~key ~msg ~tag=
+  let mac_noalloc ~alg ~key ~msg ~tag=
     (* Hacl.HMAC.compute_st *)
     assert (C.size tag = HashDefs.digest_len alg);
     assert (C.disjoint msg tag);
     HashDefs.check_key_len alg (C.size key);
     HashDefs.check_key_len alg (C.size msg);
     everCrypt_HMAC_compute (HashDefs.alg_definition alg) (C.ctypes_buf tag) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf msg) (C.size_uint32 msg)
+  let mac ~alg ~key ~msg =
+    let tag = C.make (HashDefs.digest_len alg) in
+    mac_noalloc ~alg ~key ~msg ~tag;
+    tag
 end
 
 module HMAC_SHA2_256 : MAC =
@@ -220,22 +224,32 @@ end)
 
 module HKDF = struct
   open EverCrypt_HKDF
-  let extract ~alg ~salt ~ikm ~prk =
-    (* Hacl.HKDF.extract_st *)
-    assert (C.size prk = HashDefs.digest_len alg);
-    assert (C.disjoint salt prk);
-    assert (C.disjoint ikm prk);
-    HashDefs.check_key_len alg (C.size salt);
-    HashDefs.check_key_len alg (C.size ikm);
-    everCrypt_HKDF_extract (HashDefs.alg_definition alg) (C.ctypes_buf prk) (C.ctypes_buf salt) (C.size_uint32 salt) (C.ctypes_buf ikm) (C.size_uint32 ikm)
-  let expand ~alg ~prk ~info ~okm =
-    (* Hacl.HKDF.expand_st *)
-    assert (C.size okm <= 255 * HashDefs.digest_len alg);
-    assert (C.disjoint okm prk);
-    assert (HashDefs.digest_len alg <= C.size prk);
-    HashDefs.(check_max_input_len alg (digest_len alg + block_len alg + C.size info + 1));
-    HashDefs.check_key_len alg (C.size prk);
-    everCrypt_HKDF_expand (HashDefs.alg_definition alg) (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
+  module Noalloc = struct
+    let extract ~alg ~salt ~ikm ~prk =
+      (* Hacl.HKDF.extract_st *)
+      assert (C.size prk = HashDefs.digest_len alg);
+      assert (C.disjoint salt prk);
+      assert (C.disjoint ikm prk);
+      HashDefs.check_key_len alg (C.size salt);
+      HashDefs.check_key_len alg (C.size ikm);
+      everCrypt_HKDF_extract (HashDefs.alg_definition alg) (C.ctypes_buf prk) (C.ctypes_buf salt) (C.size_uint32 salt) (C.ctypes_buf ikm) (C.size_uint32 ikm)
+    let expand ~alg ~prk ~info ~okm =
+      (* Hacl.HKDF.expand_st *)
+      assert (C.size okm <= 255 * HashDefs.digest_len alg);
+      assert (C.disjoint okm prk);
+      assert (HashDefs.digest_len alg <= C.size prk);
+      HashDefs.(check_max_input_len alg (digest_len alg + block_len alg + C.size info + 1));
+      HashDefs.check_key_len alg (C.size prk);
+      everCrypt_HKDF_expand (HashDefs.alg_definition alg) (C.ctypes_buf okm) (C.ctypes_buf prk) (C.size_uint32 prk) (C.ctypes_buf info) (C.size_uint32 info) (C.size_uint32 okm)
+  end
+  let extract ~alg ~salt ~ikm =
+    let prk = C.make (HashDefs.digest_len alg) in
+    Noalloc.extract ~alg ~salt ~ikm ~prk;
+    prk
+  let expand ~alg ~prk ~info ~size =
+    let okm = C.make size in
+    Noalloc.expand ~alg ~prk ~info ~okm;
+    okm
 end
 
 module HKDF_SHA2_256 : HKDF =

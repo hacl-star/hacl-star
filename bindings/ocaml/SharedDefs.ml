@@ -265,6 +265,7 @@ end
 module type HashFunction_generic = sig
 
   type bytes
+
   val hash : bytes -> bytes
   (** [hash pt] returns the hash of [pt]. *)
 
@@ -275,18 +276,21 @@ end
 module type MAC_generic = sig
   (** For Poly1305, buffers have the following size constraints:
       - [key]: 32 bytes
-      - [tag]: 16 bytes
+      - output buffer: 16 bytes
 
-      For HMAC with SHA2, [tag] needs to be the same size as the digest size of
-      the corresponding hash function (see {{!EverCrypt.Hash} here}).
-
-      For HMAC with BLAKE2, [tag] needs to be exactly 64 bytes for BLAKE2b
-      and 32 bytes for BLAKE2s.
+      For HMAC with SHA2, the output buffer is the same size as the digest size of
+      the corresponding hash function (see {{!EverCrypt.Hash} here}). For HMAC with BLAKE2,
+      the output buffer is 64 bytes for BLAKE2b and 32 bytes for BLAKE2s.
 *)
 
   type bytes
-  val mac : key:bytes -> msg:bytes -> tag:bytes -> unit
-  (** [mac key msg tag] computes the MAC of [msg] using key [key] and writes the result in [tag] *)
+
+  val mac : key:bytes -> msg:bytes -> bytes
+  (** [mac key msg] computes the MAC of [msg] using key [key]. *)
+
+  val mac_noalloc : key:bytes -> msg:bytes -> tag:bytes -> unit
+  (** [mac_noalloc key msg tag] computes the MAC of [msg] using key [key] and writes the result in [tag].
+      The `tag` buffer needs to satisfy the size requirements for the output buffer. *)
 end
 
 module type HKDF_generic = sig
@@ -298,13 +302,23 @@ module type HKDF_generic = sig
 
   type bytes
 
-  val extract: salt:bytes -> ikm:bytes -> prk:bytes -> unit
-  (** [extract salt ikm prk] computes a pseudorandom key [prk] using input key material [ikm] and
+  val extract: salt:bytes -> ikm:bytes -> bytes
+  (** [extract salt ikm] computes a pseudorandom key using input key material [ikm] and
       salt [salt]. *)
 
-  val expand: prk:bytes -> info:bytes -> okm:bytes -> unit
-  (** [expand prk info okm] expands the pseudorandom key [prk], taking the info string [info] into
-      account, and writes the output key material in [okm]. *)
+  val expand: prk:bytes -> info:bytes -> size:int -> bytes
+  (** [expand prk info size] expands the pseudorandom key [prk], taking the info string [info] into
+      account and returns a buffer of [size] bytes. *)
+
+  module Noalloc : sig
+    val extract: salt:bytes -> ikm:bytes -> prk:bytes -> unit
+    (** [extract salt ikm prk] computes a pseudorandom key [prk] using input key material [ikm] and
+        salt [salt]. *)
+
+    val expand: prk:bytes -> info:bytes -> okm:bytes -> unit
+    (** [expand prk info okm] expands the pseudorandom key [prk], taking the info string [info] into
+        account, and writes the output key material in [okm]. *)
+  end
 end
 
 module type ECDSA_generic = sig
