@@ -510,6 +510,7 @@ let lemma_exp2_9 t0D t4D =
   (==) {pow2_plus 192 33; pow2_plus 129 33; pow2_plus 66 33; pow2_plus 3 33}
     toDomain__ (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D pow2_33 % prime384);}
 
+
 inline_for_extraction noextract
 val exponent2: t0: felem P384 -> t3: felem P384 -> t4: felem P384 -> t5: felem P384 -> Stack unit 
   (requires fun h -> live h t0 /\ live h t3 /\ live h t4 /\ live h t5 /\
@@ -661,7 +662,13 @@ let exponent2 t0 t3 t4 t5  =
   calc (==) {
     as_nat_ h9 t4;
   (==) {lemma_exp2_9 t0D t4D}
-    toDomain__ (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D (pow2_33) % prime384);}
+    toDomain__ (pow t4D (pow2_225 + pow2_162 + pow2_99 + pow2_36) * pow t0D (pow2_33) % prime384);};
+
+  calc (==) {
+    as_nat_ h10 
+
+
+
 
 
 
