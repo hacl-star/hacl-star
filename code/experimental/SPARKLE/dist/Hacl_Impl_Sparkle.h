@@ -39,18 +39,7 @@ extern const uint32_t *Hacl_Impl_Sparkle_rcon_buffer;
 
 typedef uint32_t Hacl_Impl_Sparkle_branch_len;
 
-void Hacl_Impl_Sparkle_arx(uint32_t c, uint32_t *b);
-
-uint32_t Hacl_Impl_Sparkle_l1(uint32_t x);
-
-typedef struct Spec_SPARKLE2_branch1_s
-{
-  uint32_t fst;
-  uint32_t snd;
-}
-Spec_SPARKLE2_branch1;
-
-Spec_SPARKLE2_branch1 Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b);
+void Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b, uint32_t *tx, uint32_t *ty);
 
 void Hacl_Impl_Sparkle_xor_x(uint32_t l, uint32_t *b, uint32_t lty, uint32_t ltx);
 

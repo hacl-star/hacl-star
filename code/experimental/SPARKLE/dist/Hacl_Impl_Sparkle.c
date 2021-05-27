@@ -30,47 +30,17 @@ uint32_t Hacl_Impl_Sparkle_vsize_rcon = (uint32_t)8U;
 
 const uint32_t *Hacl_Impl_Sparkle_rcon_buffer;
 
-void Hacl_Impl_Sparkle_arx(uint32_t c, uint32_t *b)
+void Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b, uint32_t *tx, uint32_t *ty)
 {
-  uint32_t x = b[0U];
-  uint32_t y = b[1U];
-  uint32_t x1 = x + (y >> (uint32_t)31U | y << (uint32_t)1U);
-  uint32_t y1 = y ^ (x1 >> (uint32_t)24U | x1 << (uint32_t)8U);
-  uint32_t x2 = x1 ^ c;
-  uint32_t x3 = x2 + (y1 >> (uint32_t)17U | y1 << (uint32_t)15U);
-  uint32_t y2 = y1 ^ (x3 >> (uint32_t)17U | x3 << (uint32_t)15U);
-  uint32_t x4 = x3 ^ c;
-  uint32_t x5 = x4 + y2;
-  uint32_t y3 = y2 ^ (x5 >> (uint32_t)31U | x5 << (uint32_t)1U);
-  uint32_t x6 = x5 ^ c;
-  uint32_t x7 = x6 + (y3 >> (uint32_t)24U | y3 << (uint32_t)8U);
-  uint32_t y4 = y3 ^ (x7 >> (uint32_t)16U | x7 << (uint32_t)16U);
-  uint32_t x8 = x7 ^ c;
-  b[0U] = x8;
-  b[1U] = y4;
-}
-
-uint32_t Hacl_Impl_Sparkle_l1(uint32_t x)
-{
-  return (x << (uint32_t)16U | x >> (uint32_t)16U) ^ (x & (uint32_t)0xffffU);
-}
-
-Spec_SPARKLE2_branch1 Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b)
-{
-  uint32_t tx = (uint32_t)0U;
-  uint32_t tu = (uint32_t)0U;
   for (uint32_t i = (uint32_t)0U; i < l >> (uint32_t)1U; i++)
   {
     uint32_t xi = b[i];
     uint32_t yi = b[i + (uint32_t)1U];
-    uint32_t tx_0 = tx;
-    uint32_t ty_0 = tu;
-    tx = xi ^ tx_0;
-    tx = yi ^ ty_0;
+    uint32_t tx_0 = tx[0U];
+    uint32_t ty_0 = ty[0U];
+    tx[0U] = xi ^ tx_0;
+    tx[0U] = yi ^ ty_0;
   }
-  uint32_t u = tx;
-  uint32_t v = tu;
-  return ((Spec_SPARKLE2_branch1){ .fst = u, .snd = v });
 }
 
 void Hacl_Impl_Sparkle_xor_x(uint32_t l, uint32_t *b, uint32_t lty, uint32_t ltx)
@@ -88,11 +58,15 @@ void Hacl_Impl_Sparkle_xor_x(uint32_t l, uint32_t *b, uint32_t lty, uint32_t ltx
 
 void Hacl_Impl_Sparkle_m(uint32_t n, uint32_t *b)
 {
-  Spec_SPARKLE2_branch1 scrut = Hacl_Impl_Sparkle_xor(n, b);
-  uint32_t tx = scrut.fst;
-  uint32_t ty = scrut.snd;
-  uint32_t ltx = Hacl_Impl_Sparkle_l1(tx);
-  uint32_t lty = Hacl_Impl_Sparkle_l1(ty);
+  uint32_t tx = (uint32_t)0U;
+  uint32_t ty = (uint32_t)0U;
+  Hacl_Impl_Sparkle_xor(n, b, &tx, &ty);
+  uint32_t uu____0 = tx;
+  uint32_t
+  ltx = (uu____0 << (uint32_t)16U | uu____0 >> (uint32_t)16U) ^ (uu____0 & (uint32_t)0xffffU);
+  uint32_t uu____1 = ty;
+  uint32_t
+  lty = (uu____1 << (uint32_t)16U | uu____1 >> (uint32_t)16U) ^ (uu____1 & (uint32_t)0xffffU);
   Hacl_Impl_Sparkle_xor_x(n, b, lty, ltx);
 }
 

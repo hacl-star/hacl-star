@@ -26,9 +26,11 @@ let rcon_buffer: x: glbuffer uint32 vsize_rcon
 
 type branch_len =  n: size_t {v n = 1 \/ v n = 2 \/ v n = 3 \/ v n = 4 \/ v n = 6 \/ v n = 8}
 
+inline_for_extraction
 type branch branch_len = lbuffer uint32 (2ul *! branch_len)
 
 
+inline_for_extraction noextract
 val arx: uint32 -> branch1: branch 1ul -> Stack unit 
   (requires fun h -> live h branch1)
   (ensures fun h0 _ h1 -> modifies (loc branch1) h0 h1)
@@ -55,7 +57,7 @@ let arx c b =
   upd b (size 0) x;
   upd b (size 1) y
 
-
+inline_for_extraction noextract
 val l1: x:uint32 -> Tot uint32
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
@@ -97,23 +99,16 @@ let xor_step #l b tx ty i =
   upd tx (size 0) (yi ^. ty_0)
 
 
-val xor: #l: branch_len {v l % 2 == 0} -> b: branch l -> Stack (tuple2 uint32 uint32)
-    (requires fun h -> live h b)
-    (ensures fun h0 _ h1 -> modifies0 h0 h1)
+val xor: #l: branch_len {v l % 2 == 0} -> b: branch l-> tx: lbuffer uint32 (size 1) -> ty: lbuffer uint32 (size 1) ->  
+  Stack unit
+    (requires fun h -> live h b /\ live h ty /\ live h tx /\ disjoint tx ty)
+    (ensures fun h0 _ h1 -> modifies (loc tx |+| loc ty) h0 h1)
 
-let xor #l b = 
-  push_frame();
-    let h0 = ST.get() in 
-    let tx = create (size 1) (u32 0) in 
-    let tu = create (size 1) (u32 0) in  
+let xor #l b tx ty = 
+  let h0 = ST.get() in 
   Lib.Loops.for 0ul (l >>. 1ul) 
-    (fun h i ->live h b /\ live h tu /\ live h tx /\ disjoint tx tu /\ modifies (loc tx |+| loc tu) h0 h) 
-    (fun (i: size_t {v i < v l / 2}) -> xor_step b tx tu i);
-
-  let u = index #MUT #_ #1ul tx (size 0) in 
-  let v = index #MUT #_ #1ul tu (size 0) in 
-  pop_frame(); 
-  (u, v)
+    (fun h i ->live h b /\ live h ty /\ live h tx /\ disjoint tx ty /\ modifies (loc tx |+| loc ty) h0 h) 
+    (fun (i: size_t {v i < v l / 2}) -> xor_step b tx ty i)
     
 
 inline_for_extraction noextract
@@ -124,7 +119,8 @@ val xor_x_step: #l: branch_len -> b: branch l -> lty: uint32 -> ltx: uint32 -> i
 
 let xor_x_step #l b lty ltx i = 
   let xi, yi = getBranch #l b i in 
-  let xi_n, yi_n = xi ^. lty, yi ^. ltx in
+  let xi_n = xi ^. lty in
+  let yi_n = yi ^. ltx in
   setBranch i (xi_n, yi_n) b
 
 
@@ -141,6 +137,11 @@ val m: #l: branch_len {v l % 2 == 0} -> b: branch l -> Stack unit
   (ensures fun h0 _ h1 -> True)
 
 let m #n b = 
-  let tx, ty = xor #n b in 
-  let ltx, lty = l1 tx, l1 ty in
-  xor_x #n b lty ltx
+  push_frame();
+    let tx = create (size 1) (u32 0) in 
+    let ty = create (size 1) (u32 0) in 
+  xor #n b tx ty;
+  let ltx = l1 (index tx (size 0)) in
+  let lty = l1 (index ty (size 0)) in 
+  xor_x #n b lty ltx;
+  pop_frame()
