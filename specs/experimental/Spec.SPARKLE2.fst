@@ -101,7 +101,7 @@ let m #n b =
   xor_x #n b lty ltx
 
  
-
+(* AW: Imp: it rewrites rightBranch buffer *)
 val l: #n0: branch_len {n0 % 2 == 0} -> b: branch n0 -> branch n0
 
 let l #n0 b = 
@@ -109,15 +109,13 @@ let l #n0 b =
   let rightBranch: branch (n0 / 2) = sub #_ #(2 * n0) b n0 n0 in 
   let perm = m leftBranch in 
 
-  let seqEmpty = create n0 (u32 0) in 
-  
-  let l_test_step (#n: branch_len) (rightBranch : branch n) (perm: branch n) i branchResult : branch n = 
+  let l_test_step (#n: branch_len) (perm: branch n) i  (rightBranch : branch n) : branch n = 
   let xi, yi = getBranch i rightBranch in 
   let p0i, p1i = getBranch i perm in 
   let branchIUpd = xi ^. p0i, yi ^. p1i in
-  let s = setBranch #n ((i - 1) % n) branchIUpd branchResult in s in 
+  let s = setBranch #n ((i - 1) % n) branchIUpd rightBranch in s in 
 
-  let r = Lib.LoopCombinators.repeati (n0 / 2) (l_test_step rightBranch perm) seqEmpty in 
+  let r = Lib.LoopCombinators.repeati (n0 / 2) (l_test_step perm) rightBranch in 
   concat #_ #n0 #n0 r leftBranch
 
 
