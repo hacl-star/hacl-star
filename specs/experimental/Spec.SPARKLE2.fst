@@ -77,8 +77,7 @@ val xor: #n: branch_len -> b: branch n -> Tot branch1
 
 let xor #n b = 
   let xor_step (n : branch_len) b (index : nat {index + 1 < n}) (tx, ty) = 
-    let (xi, yi) = getBranch #n (index + 1) b in 
-    xi ^. tx, yi ^. ty in 
+    let (xi, yi) = getBranch #n (index + 1) b in xi ^. tx, yi ^. ty in 
   let zeroBranch = getBranch 0 b in 
   Lib.LoopCombinators.repeati (n - 1) (xor_step n b) zeroBranch
 
@@ -109,14 +108,38 @@ let l #n0 b =
   let rightBranch: branch (n0 / 2) = sub #_ #(2 * n0) b n0 n0 in 
   let perm = m leftBranch in 
 
-  let l_test_step (#n: branch_len) (perm: branch n) i  (rightBranch : branch n) : branch n = 
-  let xi, yi = getBranch i rightBranch in 
-  let p0i, p1i = getBranch i perm in 
-  let branchIUpd = xi ^. p0i, yi ^. p1i in
-  let s = setBranch #n ((i - 1) % n) branchIUpd rightBranch in s in 
+  let l_test_step (#n: branch_len) (rightBranch : branch_test n) (perm: branch_test n) i branchResult = 
+    let (xi, yi) = index #_ #n rightBranch i in 
+    let (p0i, p1i) = index #_ #n perm i in 
+    let branchIUpd = xi ^. p0i, yi ^. p1i in 
+    let s = upd #_ #n branchResult ((i - 1) % n) branchIUpd in s in  
 
-  let r = Lib.LoopCombinators.repeati (n0 / 2) (l_test_step perm) rightBranch in 
-  concat #_ #n0 #n0 r leftBranch
+  let r = Lib.LoopCombinators.repeati n (l_test_step rightBranch perm) seqEmpty in 
+  concat #_ #_ #n r leftBranch
+
+
+
+
+(* val l_test: #n0: branch_len -> #n: branch_len {n0 % 2 == 0 /\ n == n0 / 2} -> b: branch_test n0 -> branch_test n0
+
+let l_test #n0 #n b = 
+  let leftBranch = sub #_ #n0 b 0 n in 
+  let rightBranch = sub #_ #n0 b n n in 
+  let perm = m_test #n leftBranch in 
+
+
+  let seqEmpty = create n (u32 0, u32 0) in 
+
+  let l_test_step (#n: branch_len) (rightBranch : branch_test n) (perm: branch_test n) i branchResult = 
+    let (xi, yi) = index #_ #n rightBranch i in 
+    let (p0i, p1i) = index #_ #n perm i in 
+    let branchIUpd = xi ^. p0i, yi ^. p1i in 
+    let s = upd #_ #n branchResult ((i - 1) % n) branchIUpd in s in  
+
+  let r = Lib.LoopCombinators.repeati n (l_test_step rightBranch perm) seqEmpty in 
+  concat #_ #_ #n r leftBranch *)
+
+
 
 
 val add2: #n: branch_len {n >= 2} -> i: size_nat -> branch n -> Tot (branch n)
