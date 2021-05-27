@@ -137,7 +137,8 @@ let getFirstWord i o =
     lseq_as_nat (as_seq h o) == arithmetic_shift_right (lseq_as_nat (as_seq h0 i)) 521 % pow2 (64 * j) in 
 
   Lib.Loops.for 0ul 9ul inv (fun j -> 
-    admit();
+      let h0_ = ST.get() in 
+
     let i0 = index i (size 8 *! size 1 +! j) in 
     let i1 = index i (size 8 *! size 1 +! size 1 +! j) in 
     let i0 = shift_right i0 (size 9) in 
@@ -145,8 +146,37 @@ let getFirstWord i o =
     let i1U = Lib.IntTypes.shift_left i1 (size 55) in 
       shift_left_lemma i1 (size 55);
     let o0 = logxor i0 i1U in 
-    upd o j o0);
+    upd o j o0;
+      let h1_ = ST.get() in 
 
+    let j = v j in 
+    let a0 = as_seq h0_ o in 
+    let a1 = as_seq h1_ o in 
+    let ai = Lib.Sequence.sub a1 j (9 - j) in 
+
+    lseq_upperbound1 (as_seq h0_ o) j (9 - j);  
+    lemma_test (as_seq h0_ o) j; 
+    lemma_test (Lib.Sequence.sub (as_seq h0_ o) j (9 - j)) 1;
+    assert(lseq_as_nat (Lib.Sequence.sub a0 (j + 1) (9 - j - 1)) == 0);
+
+    assert(Lib.Sequence.sub a0 (j + 1) (9 - j - 1) == Lib.Sequence.sub a1 (j + 1) (9 - j - 1));
+    assume(lseq_as_nat (Lib.Sequence.sub a1 (j + 1) (9 - j - 1)) == 0);
+    
+    
+    calc (==) {lseq_as_nat a1;
+      (==) {lemma_test a1 j}
+    lseq_as_nat (Lib.Sequence.sub a0 0 j) + pow2 (64 * j) * lseq_as_nat ai;
+      (==) {lemma_test ai 1}
+    lseq_as_nat (Lib.Sequence.sub a0 0 j) + pow2 (64 * j) * lseq_as_nat (Lib.Sequence.sub ai 0 1);
+
+    };
+
+    admit()
+    
+    
+    );
+
+  admit();
   let h1 = ST.get() in 
     assert(lseq_as_nat (as_seq h1 o) == arithmetic_shift_right (lseq_as_nat (as_seq h0 i)) 521 % pow2 (64 * 9));
 

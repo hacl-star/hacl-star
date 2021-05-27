@@ -156,7 +156,7 @@ let rec lseq_upperbound2 #l a i =
   |_ -> lseq_upperbound2 #l a (i - 1); lseq_as_nat_definiton a (l - 1 + 1)
 
 
-val lseq_upperbound1: #l: size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC) l -> i: nat {i > 0 /\ i < l} 
+val lseq_upperbound1: #l: size_nat -> #t:inttype{unsigned t} -> a: lseq (uint_t t SEC) l -> i: nat {i >= 0 /\ i < l} 
   -> k: nat{k >= 0 && k <= l - i} -> Lemma 
   (requires lseq_as_nat a < pow2 (bits t * i))
   (ensures lseq_as_nat_ a i == lseq_as_nat_ a (i + k))
