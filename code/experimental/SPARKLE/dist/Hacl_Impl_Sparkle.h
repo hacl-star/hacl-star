@@ -31,20 +31,26 @@
 
 
 
+extern uint32_t Hacl_Impl_Sparkle_size_word;
+
+extern uint32_t Hacl_Impl_Sparkle_vsize_rcon;
+
+extern const uint32_t *Hacl_Impl_Sparkle_rcon_buffer;
+
 typedef uint32_t Hacl_Impl_Sparkle_branch_len;
 
 void Hacl_Impl_Sparkle_arx(uint32_t c, uint32_t *b);
 
 uint32_t Hacl_Impl_Sparkle_l1(uint32_t x);
 
-typedef struct K___uint32_t_uint32_t_s
+typedef struct Spec_SPARKLE2_branch1_s
 {
   uint32_t fst;
   uint32_t snd;
 }
-K___uint32_t_uint32_t;
+Spec_SPARKLE2_branch1;
 
-K___uint32_t_uint32_t Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b);
+Spec_SPARKLE2_branch1 Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b);
 
 
 #define __Hacl_Impl_Sparkle_H_DEFINED

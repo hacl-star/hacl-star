@@ -24,6 +24,12 @@
 
 #include "Hacl_Impl_Sparkle.h"
 
+uint32_t Hacl_Impl_Sparkle_size_word = (uint32_t)4U;
+
+uint32_t Hacl_Impl_Sparkle_vsize_rcon = (uint32_t)8U;
+
+const uint32_t *Hacl_Impl_Sparkle_rcon_buffer;
+
 void Hacl_Impl_Sparkle_arx(uint32_t c, uint32_t *b)
 {
   uint32_t x = b[0U];
@@ -49,7 +55,7 @@ uint32_t Hacl_Impl_Sparkle_l1(uint32_t x)
   return (x << (uint32_t)16U | x >> (uint32_t)16U) ^ (x & (uint32_t)0xffffU);
 }
 
-K___uint32_t_uint32_t Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b)
+Spec_SPARKLE2_branch1 Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b)
 {
   uint32_t tx = (uint32_t)0U;
   uint32_t tu = (uint32_t)0U;
@@ -64,6 +70,6 @@ K___uint32_t_uint32_t Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b)
   }
   uint32_t u = tx;
   uint32_t v = tu;
-  return ((K___uint32_t_uint32_t){ .fst = u, .snd = v });
+  return ((Spec_SPARKLE2_branch1){ .fst = u, .snd = v });
 }
 

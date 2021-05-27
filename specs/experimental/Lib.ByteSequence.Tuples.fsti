@@ -6,10 +6,11 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 
-
+noextract
 let size_nat_tuple = len:size_nat{2 <= len /\ len <= 14}
 
-inline_for_extraction
+
+inline_for_extraction noextract
 let ltuple (a:Type0) (len:size_nat_tuple) =
   match len with
   | 2 -> tuple2 a a
@@ -27,24 +28,27 @@ let ltuple (a:Type0) (len:size_nat_tuple) =
   | 14 -> tuple14 a a a a a a a a a a a a a a
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val expand: #a:Type0 -> #len:size_nat_tuple -> lseq a len -> ltuple a len
 
-inline_for_extraction
+inline_for_extraction noextract
 val collapse: #a:Type0 -> #len:size_nat_tuple -> zero:a -> ltuple a len -> lseq a len
 
-inline_for_extraction
+(* It didnot want to extract, so I commented it out for now *)
+
+(* inline_for_extraction noextract
 val ltuple_uints_to_bytes_le: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat_tuple
   -> ltuple (uint_t t l) len -> Tot (lbytes_l l (len * numbytes t))
 
-inline_for_extraction
+inline_for_extraction noextract
 val ltuple_uints_to_bytes_be: #t:inttype{unsigned t} -> #l:secrecy_level -> #len:size_nat_tuple
   -> ltuple (uint_t t l) len -> Tot (lbytes_l l (len * numbytes t))
 
-inline_for_extraction
+inline_for_extraction noextract
 val ltuple_uints_from_bytes_le: #t:inttype{unsigned t /\ ~(t == U1)} -> #l:secrecy_level -> #len:size_nat_tuple
   -> lbytes_l l (len * numbytes t) -> Tot (ltuple (uint_t t l) len)
 
-inline_for_extraction
+inline_for_extraction noextract
 val ltuple_uints_from_bytes_be: #t:inttype{unsigned t /\ ~(t == U1)} -> #l:secrecy_level -> #len:size_nat_tuple
   -> lbytes_l l (len * numbytes t) -> Tot (ltuple (uint_t t l) len)
+ *)

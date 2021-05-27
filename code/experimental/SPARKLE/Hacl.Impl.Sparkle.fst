@@ -7,7 +7,23 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
+open Spec.SPARKLE2
+
 #set-options " --z3rlimit 200"
+
+inline_for_extraction
+let size_word: size_t = 4ul
+
+inline_for_extraction
+let vsize_rcon: size_t = 8ul
+
+
+inline_for_extraction
+let rcon_buffer: x: glbuffer uint32 vsize_rcon 
+  {witnessed #uint32 #vsize_rcon x (Lib.Sequence.of_list rcon_list) /\ recallable x} =
+  createL_global rcon_list
+
+
 
 type branch_len =  n: size_t {v n = 1 \/ v n = 2 \/ v n = 3 \/ v n = 4 \/ v n = 6 \/ v n = 8}
 

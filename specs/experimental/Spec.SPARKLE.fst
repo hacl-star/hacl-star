@@ -145,7 +145,19 @@ let l_test #n0 #n b =
 
   let r = Lib.LoopCombinators.repeati n (l_test_step rightBranch perm) seqEmpty in 
   concat #_ #_ #n r leftBranch
-  
+
+
+val add2_test: i:size_nat -> branch_test 2 -> Tot (branch_test 2)
+
+let add2_test i b =
+  let (x0,y0) = getBranchI_test 0 b in 
+  let (x1,y1) = getBranchI_test 1 b in 
+  let y0 = y0 ^. rcon.[(i % vsize_rcon)] in
+  let y1 = y1 ^. (u32 i) in
+  let seqEmpty = Lib.Sequence.create 2 (u32 0, u32 0) in 
+  let s = upd seqEmpty 0 (x0, y0) in 
+  upd s 1 (x1, y1)
+
 
 (* AW: </TESTING FUNCTIONALITY> *)
 
@@ -255,6 +267,7 @@ let add2 i b =
 
 
 val sparkle256: steps:size_nat -> lbytes 32 -> Tot (lbytes 32)
+
 let sparkle256 steps input =
 
   let b0 = ltuple_uints_from_bytes_le (sub input 0 (2 * size_word)) in
@@ -296,6 +309,66 @@ let sparkle256 steps input =
   let input = update_sub input (6 * size_word) size_word bx3 in
   let input = update_sub input (7 * size_word) size_word by3 in
   input
+
+
+(* AW: TODO: some better name *) 
+val toBranch32: lbytes 32 -> branch_test 4
+
+let toBranch32 input = 
+  let b0 : lseq uint32 8 = uints_from_bytes_le #U32 #_ #8 input in 
+   (* admit();
+  let b1 = ltuple_uints_from_bytes_le (sub input (2 * size_word) (2 * size_word)) in
+  let b2 = ltuple_uints_from_bytes_le (sub input (4 * size_word) (2 * size_word)) in
+  let b3 = ltuple_uints_from_bytes_le (sub input (6 * size_word) (2 * size_word)) in *)
+  b0
+
+
+
+val sparkle256_test: steps:size_nat -> lbytes 32 -> Tot (lbytes 32)
+
+let sparkle256_test steps input =
+
+  let b0 = ltuple_uints_from_bytes_le (sub input 0 (2 * size_word)) in
+  let b1 = ltuple_uints_from_bytes_le (sub input (2 * size_word) (2 * size_word)) in
+  let b2 = ltuple_uints_from_bytes_le (sub input (4 * size_word) (2 * size_word)) in
+  let b3 = ltuple_uints_from_bytes_le (sub input (6 * size_word) (2 * size_word)) in
+
+  let (b0,b1,b2,b3) =
+    repeati steps (fun i (b0,b1,b2,b3) ->
+      let (b0,b1) = add2 i (b0,b1) in
+      let b0 = arx rcon.[0] b0 in
+      let b1 = arx rcon.[1] b1 in
+      let b2 = arx rcon.[2] b2 in
+      let b3 = arx rcon.[3] b3 in
+      l4 (b0,b1,b2,b3)
+  ) (b0,b1,b2,b3)
+  in
+
+  let x0, y0 = b0 in
+  let x1, y1 = b1 in
+  let x2, y2 = b2 in
+  let x3, y3 = b3 in
+
+  let bx0 = uint_to_bytes_be x0 in
+  let by0 = uint_to_bytes_be y0 in
+  let bx1 = uint_to_bytes_be x1 in
+  let by1 = uint_to_bytes_be y1 in
+  let bx2 = uint_to_bytes_be x2 in
+  let by2 = uint_to_bytes_be y2 in
+  let bx3 = uint_to_bytes_be x3 in
+  let by3 = uint_to_bytes_be y3 in
+
+  let input = update_sub input 0 size_word bx0 in
+  let input = update_sub input (1 * size_word) size_word by0 in
+  let input = update_sub input (2 * size_word) size_word bx1 in
+  let input = update_sub input (3 * size_word) size_word by1 in
+  let input = update_sub input (4 * size_word) size_word bx2 in
+  let input = update_sub input (5 * size_word) size_word by2 in
+  let input = update_sub input (6 * size_word) size_word bx3 in
+  let input = update_sub input (7 * size_word) size_word by3 in
+  input
+
+
 
 
 val sparkle384: steps:size_nat -> lbytes 48 -> Tot (lbytes 48)
