@@ -54,6 +54,8 @@ Spec_SPARKLE2_branch1 Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b);
 
 void Hacl_Impl_Sparkle_xor_x(uint32_t l, uint32_t *b, uint32_t lty, uint32_t ltx);
 
+void Hacl_Impl_Sparkle_m(uint32_t n, uint32_t *b);
+
 
 #define __Hacl_Impl_Sparkle_H_DEFINED
 #endif

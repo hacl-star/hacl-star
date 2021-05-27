@@ -136,3 +136,11 @@ let xor_x #l b lty ltx =
   Lib.Loops.for (0ul) (l >>. 1ul)  (fun h i -> live h b) (fun (i: size_t {v i < v l / 2})  -> xor_x_step b lty ltx i)
 
 
+val m: #l: branch_len {v l % 2 == 0} -> b: branch l -> Stack unit 
+  (requires fun h -> live h b)
+  (ensures fun h0 _ h1 -> True)
+
+let m #n b = 
+  let tx, ty = xor #n b in 
+  let ltx, lty = l1 tx, l1 ty in
+  xor_x #n b lty ltx
