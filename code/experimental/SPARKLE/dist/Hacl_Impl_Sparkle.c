@@ -73,3 +73,16 @@ Spec_SPARKLE2_branch1 Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b)
   return ((Spec_SPARKLE2_branch1){ .fst = u, .snd = v });
 }
 
+void Hacl_Impl_Sparkle_xor_x(uint32_t l, uint32_t *b, uint32_t lty, uint32_t ltx)
+{
+  for (uint32_t i = (uint32_t)0U; i < l >> (uint32_t)1U; i++)
+  {
+    uint32_t xi = b[i];
+    uint32_t yi = b[i + (uint32_t)1U];
+    uint32_t xi_n = xi ^ lty;
+    uint32_t yi_n = yi ^ ltx;
+    b[(uint32_t)2U * i] = xi_n;
+    b[(uint32_t)2U * i + (uint32_t)1U] = yi_n;
+  }
+}
+
