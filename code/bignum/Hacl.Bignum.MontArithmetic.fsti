@@ -21,6 +21,8 @@ module BM = Hacl.Bignum.Montgomery
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+val _align_fsti : unit
+
 inline_for_extraction noextract
 let lb (t:limb_t) =
   match t with

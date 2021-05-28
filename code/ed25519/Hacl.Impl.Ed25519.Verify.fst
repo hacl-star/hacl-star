@@ -129,7 +129,7 @@ let verify_inner_ public len msg signature tmp tmp' =
   let a' = sub tmp 0ul  20ul in
   let r' = sub tmp 20ul 20ul in
   let s  = sub tmp 40ul 5ul  in
-  (**) let h0 = get() in
+  (**) let h0 = ST.get() in
   Hacl.Impl.Load56.load_32_bytes s (sub signature 32ul 32ul);
   let b'' = Hacl.Impl.Ed25519.PointEqual.gte_q s in
   if b'' then false
