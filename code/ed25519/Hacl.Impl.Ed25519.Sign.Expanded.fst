@@ -83,12 +83,12 @@ let sign_ signature ks len msg tmp_bytes tmp_ints =
   let s'   = sub tmp_bytes 192ul 32ul in
   let tmp_public = sub tmp_bytes 96ul 32ul in
   let tmp_xsecret = sub tmp_bytes 224ul 64ul in
-  (**) let h0 = get() in
+  (**) let h0 = ST.get() in
 
   copy tmp_public (pk ks);
   copy tmp_xsecret (xsk ks);
 
-  (**) let h1 = get() in
+  (**) let h1 = ST.get() in
   (**) assert (as_seq h1 (gsub tmp_bytes 96ul 32ul) `Seq.equal` as_seq h0 (gsub ks 0ul 32ul));
   (**) assert (Seq.slice (as_seq h0 (gsub ks 32ul 64ul)) 0 32 `Seq.equal` as_seq h0 (gsub ks 32ul 32ul));
   (**) assert (as_seq h1 (gsub tmp_bytes 224ul 32ul) `Seq.equal` as_seq h0 (gsub ks 32ul 32ul));
