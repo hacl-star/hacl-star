@@ -481,3 +481,10 @@ let point_prime_to_coordinates (c: curve) (p:point_seq c) : GTot point_nat =
   lseq_as_nat (Lib.Sequence.sub p len len),
   lseq_as_nat (Lib.Sequence.sub p (len * 2) len)
   
+
+let point_seq_as_nat (c: curve) (p:point_seq c) : GTot (point_nat_prime #c) =
+  let len = uint_v (getCoordinateLenU64 c) in 
+  lseq_as_nat (Lib.Sequence.sub p 0 len),
+  lseq_as_nat (Lib.Sequence.sub p len len),
+  lseq_as_nat (Lib.Sequence.sub p (len * 2) len)
+  
