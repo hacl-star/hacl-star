@@ -79,20 +79,58 @@ let const_to_lbuffer #a #len (b:clbuffer a len{CB.qual_of (b <: cbuffer a) == CB
 let const_to_ilbuffer #a #len (b:glbuffer a len)  : r:ilbuffer a len =
   const_to_ibuffer #a b
 
-unfold let null (a: Type0) : lbuffer a (size 0) = B.null #a
+unfold let null (ty : buftype) (a : Type0) : buffer_t ty a =
+  match ty with
+  | IMMUT -> IB.inull #a
+  | MUT -> B.null #a
+  | CONST -> CB.null a
 
-//val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
+let g_is_null (#ty : buftype) (#a : Type0) (b : buffer_t ty a) : GTot bool =
+  match ty with
+  | IMMUT -> IB.g_is_null (b <: ibuffer a)
+  | MUT -> B.g_is_null (b <: buffer a)
+  | CONST -> B.g_is_null (CB.as_mbuf (b <: cbuffer a))
+
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
   match t with
   | MUT -> B.live h (b <: buffer a)
   | IMMUT -> IB.live h (b <: ibuffer a)
   | CONST -> CB.live h (b <: cbuffer a)
 
+let freeable (#ty : buftype) (#a : Type0) (b : buffer_t ty a) : GTot Type0 =
+  match ty with
+  | IMMUT -> IB.freeable (b <: ibuffer a)
+  | MUT -> B.freeable (b <: buffer a)
+  | CONST -> B.freeable (CB.as_mbuf (b <: cbuffer a))
+
 let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc =
   match t with
   | MUT -> B.loc_buffer (b <: buffer a)
   | IMMUT -> B.loc_buffer (b <: ibuffer a)
   | CONST -> CB.loc_buffer (b <: cbuffer a)
+
+let loc_addr_of_buffer (#ty : buftype) (#a : Type0) (b : buffer_t ty a) : GTot B.loc =
+  match ty with
+  | IMMUT -> IB.loc_addr_of_buffer (b <: ibuffer a)
+  | MUT -> B.loc_addr_of_buffer (b <: buffer a)
+  | CONST -> B.loc_addr_of_buffer (CB.as_mbuf (b <: cbuffer a))
+
+inline_for_extraction noextract
+let is_null (#ty : buftype) (#a : Type0) (b : buffer_t ty a) :
+  Stack bool
+  (requires (fun h -> live h b))
+  (ensures  (fun h y h' -> h == h' /\ y == g_is_null b)) =
+  match ty with
+  | IMMUT -> IB.is_null (b <: ibuffer a)
+  | MUT -> B.is_null (b <: buffer a)
+  | CONST -> CB.is_null (b <: cbuffer a)
+
+let get (#ty : buftype) (#a : Type0) (h : mem) (b : buffer_t ty a) (i : nat{i < length b}) :
+  GTot a =
+  match ty with
+  | IMMUT -> IB.get h (b <: ibuffer a) i
+  | MUT -> B.get h (b <: buffer a) i
+  | CONST -> B.get h (CB.as_mbuf (b <: cbuffer a)) i
 
 #set-options "--max_ifuel 0"
 
