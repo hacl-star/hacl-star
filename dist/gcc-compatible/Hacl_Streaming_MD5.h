@@ -40,22 +40,22 @@ extern "C" {
 #include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Hash.h"
 
-typedef Hacl_Streaming_SHA1_state_sha1 Hacl_Streaming_MD5_state_md5;
+typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_MD5_state_md5;
 
-Hacl_Streaming_SHA1_state_sha1 *Hacl_Streaming_MD5_legacy_create_in_md5();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_MD5_legacy_create_in_md5();
 
-void Hacl_Streaming_MD5_legacy_init_md5(Hacl_Streaming_SHA1_state_sha1 *s);
+void Hacl_Streaming_MD5_legacy_init_md5(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 void
 Hacl_Streaming_MD5_legacy_update_md5(
-  Hacl_Streaming_SHA1_state_sha1 *p,
+  Hacl_Streaming_SHA2_state_sha2_224 *p,
   uint8_t *data,
   uint32_t len
 );
 
-void Hacl_Streaming_MD5_legacy_finish_md5(Hacl_Streaming_SHA1_state_sha1 *p, uint8_t *dst);
+void Hacl_Streaming_MD5_legacy_finish_md5(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
 
-void Hacl_Streaming_MD5_legacy_free_md5(Hacl_Streaming_SHA1_state_sha1 *s);
+void Hacl_Streaming_MD5_legacy_free_md5(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 #if defined(__cplusplus)
 }

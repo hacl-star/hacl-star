@@ -40,27 +40,21 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 
-/* SNIPPET_START: Hacl_Streaming_SHA1_state_sha1 */
+/* SNIPPET_START: Hacl_Streaming_SHA2_state_sha2_224 */
 
-typedef struct Hacl_Streaming_SHA1_state_sha1_s
+typedef struct Hacl_Streaming_SHA2_state_sha2_224_s
 {
   uint32_t *block_state;
   uint8_t *buf;
   uint64_t total_len;
 }
-Hacl_Streaming_SHA1_state_sha1;
-
-/* SNIPPET_END: Hacl_Streaming_SHA1_state_sha1 */
-
-/* SNIPPET_START: Hacl_Streaming_SHA2_state_sha2_224 */
-
-typedef Hacl_Streaming_SHA1_state_sha1 Hacl_Streaming_SHA2_state_sha2_224;
+Hacl_Streaming_SHA2_state_sha2_224;
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_state_sha2_224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_state_sha2_256 */
 
-typedef Hacl_Streaming_SHA1_state_sha1 Hacl_Streaming_SHA2_state_sha2_256;
+typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA2_state_sha2_256;
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_state_sha2_256 */
 
@@ -84,63 +78,71 @@ typedef Hacl_Streaming_SHA2_state_sha2_384 Hacl_Streaming_SHA2_state_sha2_512;
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_create_in_224 */
 
-Hacl_Streaming_SHA1_state_sha1 *Hacl_Streaming_SHA2_create_in_224();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224();
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_init_224 */
 
-void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_SHA1_state_sha1 *s);
+void Hacl_Streaming_SHA2_init_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_init_224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_update_224 */
 
 void
-Hacl_Streaming_SHA2_update_224(Hacl_Streaming_SHA1_state_sha1 *p, uint8_t *data, uint32_t len);
+Hacl_Streaming_SHA2_update_224(
+  Hacl_Streaming_SHA2_state_sha2_224 *p,
+  uint8_t *data,
+  uint32_t len
+);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_update_224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_finish_224 */
 
-void Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_SHA1_state_sha1 *p, uint8_t *dst);
+void Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_finish_224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_free_224 */
 
-void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_SHA1_state_sha1 *s);
+void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_free_224 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_create_in_256 */
 
-Hacl_Streaming_SHA1_state_sha1 *Hacl_Streaming_SHA2_create_in_256();
+Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256();
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_create_in_256 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_init_256 */
 
-void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_SHA1_state_sha1 *s);
+void Hacl_Streaming_SHA2_init_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_init_256 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_update_256 */
 
 void
-Hacl_Streaming_SHA2_update_256(Hacl_Streaming_SHA1_state_sha1 *p, uint8_t *data, uint32_t len);
+Hacl_Streaming_SHA2_update_256(
+  Hacl_Streaming_SHA2_state_sha2_224 *p,
+  uint8_t *data,
+  uint32_t len
+);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_update_256 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_finish_256 */
 
-void Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_SHA1_state_sha1 *p, uint8_t *dst);
+void Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_finish_256 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA2_free_256 */
 
-void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_SHA1_state_sha1 *s);
+void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_SHA2_state_sha2_224 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA2_free_256 */
 
