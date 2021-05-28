@@ -1124,29 +1124,35 @@ static inline void store_56(u8 *out, u64 *b)
   store32_le(out + (u32)28U, b4_);
 }
 
-static inline void sha512_pre_msg(u8 *h, u8 *prefix, u32 len, u8 *input)
+static inline void sha512_pre_msg(u8 *hash, u8 *prefix, u32 len, u8 *input)
 {
-  KRML_CHECK_SIZE(sizeof (u8), len + (u32)32U);
-  {
-    u8 pre_msg[len + (u32)32U];
-    memset(pre_msg, 0U, (len + (u32)32U) * sizeof (u8));
-    memcpy(pre_msg, prefix, (u32)32U * sizeof (u8));
-    memcpy(pre_msg + (u32)32U, input, len * sizeof (u8));
-    Hacl_Hash_SHA2_hash_512(pre_msg, len + (u32)32U, h);
-  }
+  u8 buf[128U] = { 0U };
+  u64 block_state[8U] = { 0U };
+  Hacl_Streaming_SHA2_state_sha2_384
+  s = { .block_state = block_state, .buf = buf, .total_len = (u64)0U };
+  Hacl_Streaming_SHA2_state_sha2_384 p = s;
+  Hacl_Streaming_SHA2_state_sha2_384 *st;
+  Hacl_Hash_Core_SHA2_init_512(block_state);
+  st = &p;
+  Hacl_Streaming_SHA2_update_512(st, prefix, (u32)32U);
+  Hacl_Streaming_SHA2_update_512(st, input, len);
+  Hacl_Streaming_SHA2_finish_512(st, hash);
 }
 
-static inline void sha512_pre_pre2_msg(u8 *h, u8 *prefix, u8 *prefix2, u32 len, u8 *input)
+static inline void sha512_pre_pre2_msg(u8 *hash, u8 *prefix, u8 *prefix2, u32 len, u8 *input)
 {
-  KRML_CHECK_SIZE(sizeof (u8), len + (u32)64U);
-  {
-    u8 pre_msg[len + (u32)64U];
-    memset(pre_msg, 0U, (len + (u32)64U) * sizeof (u8));
-    memcpy(pre_msg, prefix, (u32)32U * sizeof (u8));
-    memcpy(pre_msg + (u32)32U, prefix2, (u32)32U * sizeof (u8));
-    memcpy(pre_msg + (u32)64U, input, len * sizeof (u8));
-    Hacl_Hash_SHA2_hash_512(pre_msg, len + (u32)64U, h);
-  }
+  u8 buf[128U] = { 0U };
+  u64 block_state[8U] = { 0U };
+  Hacl_Streaming_SHA2_state_sha2_384
+  s = { .block_state = block_state, .buf = buf, .total_len = (u64)0U };
+  Hacl_Streaming_SHA2_state_sha2_384 p = s;
+  Hacl_Streaming_SHA2_state_sha2_384 *st;
+  Hacl_Hash_Core_SHA2_init_512(block_state);
+  st = &p;
+  Hacl_Streaming_SHA2_update_512(st, prefix, (u32)32U);
+  Hacl_Streaming_SHA2_update_512(st, prefix2, (u32)32U);
+  Hacl_Streaming_SHA2_update_512(st, input, len);
+  Hacl_Streaming_SHA2_finish_512(st, hash);
 }
 
 static inline void sha512_modq_pre(u64 *out, u8 *prefix, u32 len, u8 *input)

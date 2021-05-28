@@ -22,14 +22,13 @@
  */
 
 
-#ifndef __Hacl_Streaming_MD5_H
-#define __Hacl_Streaming_MD5_H
+#ifndef __Hacl_Streaming_H
+#define __Hacl_Streaming_H
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
@@ -37,29 +36,24 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Streaming_SHA2.h"
+#include "Hacl_Kremlib.h"
 #include "Hacl_Hash.h"
 
-typedef Hacl_Streaming_SHA1_state_sha1 Hacl_Streaming_MD5_state_md5;
+typedef struct Hacl_Streaming_SHA2_state_sha2_384_s
+{
+  u64 *block_state;
+  u8 *buf;
+  u64 total_len;
+}
+Hacl_Streaming_SHA2_state_sha2_384;
 
-Hacl_Streaming_SHA1_state_sha1 *Hacl_Streaming_MD5_legacy_create_in_md5();
+void Hacl_Streaming_SHA2_update_512(Hacl_Streaming_SHA2_state_sha2_384 *p, u8 *data, u32 len);
 
-void Hacl_Streaming_MD5_legacy_init_md5(Hacl_Streaming_SHA1_state_sha1 *s);
-
-void
-Hacl_Streaming_MD5_legacy_update_md5(
-  Hacl_Streaming_SHA1_state_sha1 *p,
-  uint8_t *data,
-  uint32_t len
-);
-
-void Hacl_Streaming_MD5_legacy_finish_md5(Hacl_Streaming_SHA1_state_sha1 *p, uint8_t *dst);
-
-void Hacl_Streaming_MD5_legacy_free_md5(Hacl_Streaming_SHA1_state_sha1 *s);
+void Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_SHA2_state_sha2_384 *p, u8 *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Streaming_MD5_H_DEFINED
+#define __Hacl_Streaming_H_DEFINED
 #endif
