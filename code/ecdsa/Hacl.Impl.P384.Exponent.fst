@@ -1166,7 +1166,11 @@ let lemma_exponent_h3_t4_2 tD =
      
 
 
-val lemma_exponent_h3_t4: tD: nat -> Lemma (True)
+val lemma_exponent_h3_t4: tD: nat -> Lemma (
+  toDomain__  (pow (pow tD 7 % prime384) (pow2 33) * pow (pow tD (63 * (pow2 57 + pow2 51 + pow2 45 + pow2 39 + pow2 33 + pow2 25 + pow2 19 + pow2 13 + pow2 7 + pow2 1) + 3 * pow2 31 + 1) % prime384) (pow2 225 + pow2 162 + pow2 99 + pow2 36) * 
+  (pow tD (63 * (pow2 26 + pow2 20 + pow2 2 + pow2 14 + pow2 8) + 3) % prime384) % prime384) ==
+  toDomain__ ((pow tD (7 * pow2 33 + 63 * (pow2 282 + pow2 276 + pow2 270 + pow2 264 + pow2 258 + pow2 250 + pow2 244 + pow2 238 + pow2 232 + pow2 226 + pow2 219 + pow2 213 + pow2 207 + pow2 201 + pow2 195 + pow2 187 + pow2 181 + pow2 175 + pow2 169 + pow2 163 + pow2 156 + pow2 150 + pow2 144 + pow2 138 + pow2 132 + pow2 124 + pow2 118 + pow2 112 + pow2 106 + pow2 100 + pow2 93 + pow2 87 + pow2 81 + pow2 75 + pow2 69 + pow2 61 + pow2 55 + pow2 49 + pow2 43 + pow2 37 + pow2 26 + pow2 20 + pow2 2 + pow2 14 + pow2 8) + 3 * (pow2 256 + pow2 193 + pow2 130 + pow2 67 + 1) + pow2 225 + pow2 162 + pow2 99 + pow2 36) % prime384)))
+  
 
 let lemma_exponent_h3_t4 tD = 
   let pow2_7  = pow2 7 in 
@@ -1235,6 +1239,9 @@ let lemma_exponent_h3_t4 tD =
   let pow2_130 = pow2 130 in 
   let pow2_67 = pow2 67 in 
 
+  lemma_exponent_h3_t4_0 tD;
+
+
   calc (==) {toDomain__  ((
     pow (pow tD 7) (pow2_33) * 
     pow tD (63 * (pow2_26 + pow2_20 + pow2 2 + pow2_14 + pow2_8) + 3) * 
@@ -1263,14 +1270,26 @@ let lemma_exponent_h3_t4 tD =
     pow2_93 + pow2_87 + pow2_81 + pow2_75 + pow2_69 + pow2_61 + pow2_55 + pow2_49 + pow2_43 + pow2_37) + 
     3 * (pow2_256 + pow2_193 + pow2_130 + pow2_67) + pow2_225 + pow2_162 + pow2_99 + pow2_36) % prime384);
 
+  (==) {pow_plus tD (7 * pow2_33 + 63 * (pow2_26 + pow2_20 + pow2 2 + pow2_14 + pow2_8) + 3) (63 * (pow2_282 + pow2_276 + pow2_270 + pow2_264 + pow2_258 + pow2_250 + pow2_244 + pow2_238 + pow2_232 + pow2_226 + 
+    pow2_219 + pow2_213 + pow2_207 + pow2_201 + pow2_195 + pow2_187 + pow2_181 + pow2_175 + pow2_169 + pow2_163 + 
+    pow2_156 + pow2_150 + pow2_144 + pow2_138 + pow2_132 + pow2_124 + pow2_118 + pow2_112 + pow2_106 + pow2_100 + 
+    pow2_93 + pow2_87 + pow2_81 + pow2_75 + pow2_69 + pow2_61 + pow2_55 + pow2_49 + pow2_43 + pow2_37) + 
+    3 * (pow2_256 + pow2_193 + pow2_130 + pow2_67) + pow2_225 + pow2_162 + pow2_99 + pow2_36)}
 
-    
+
+  toDomain__ (
+    pow tD (7 * pow2_33 + 
+      63 * (pow2_282 + pow2_276 + pow2_270 + pow2_264 + pow2_258 + pow2_250 + pow2_244 + pow2_238 + pow2_232 + pow2_226 + pow2_219 + pow2_213 + pow2_207 + pow2_201 + pow2_195 + pow2_187 + pow2_181 + pow2_175 + pow2_169 + pow2_163 + pow2_156 + pow2_150 + pow2_144 + pow2_138 + pow2_132 + pow2_124 + pow2_118 + pow2_112 + pow2_106 + pow2_100 +  pow2_93 + pow2_87 + pow2_81 + pow2_75 + pow2_69 + pow2_61 + pow2_55 + pow2_49 + pow2_43 + pow2_37 + pow2_26 + pow2_20 + pow2 2 + pow2_14 + pow2_8) + 
+    3 * (pow2_256 + pow2_193 + pow2_130 + pow2_67 + 1) + pow2_225 + pow2_162 + pow2_99 + pow2_36) % prime384);};
 
 
-   }
+  assert(  toDomain__  (pow (pow tD 7 % prime384) (pow2 33) * pow (pow tD (63 * (pow2 57 + pow2 51 + pow2 45 + pow2 39 + pow2 33 + pow2 25 + pow2 19 + pow2 13 + pow2 7 + pow2 1) + 3 * pow2 31 + 1) % prime384) (pow2 225 + pow2 162 + pow2 99 + pow2 36) * 
+  (pow tD (63 * (pow2 26 + pow2 20 + pow2 2 + pow2 14 + pow2 8) + 3) % prime384) % prime384) ==
 
-
-
+  toDomain__ (
+    pow tD (7 * pow2_33 + 
+      63 * (pow2_282 + pow2_276 + pow2_270 + pow2_264 + pow2_258 + pow2_250 + pow2_244 + pow2_238 + pow2_232 + pow2_226 + pow2_219 + pow2_213 + pow2_207 + pow2_201 + pow2_195 + pow2_187 + pow2_181 + pow2_175 + pow2_169 + pow2_163 + pow2_156 + pow2_150 + pow2_144 + pow2_138 + pow2_132 + pow2_124 + pow2_118 + pow2_112 + pow2_106 + pow2_100 +  pow2_93 + pow2_87 + pow2_81 + pow2_75 + pow2_69 + pow2_61 + pow2_55 + pow2_49 + pow2_43 + pow2_37 + pow2_26 + pow2_20 + pow2 2 + pow2_14 + pow2_8) + 
+    3 * (pow2_256 + pow2_193 + pow2_130 + pow2_67 + 1) + pow2_225 + pow2_162 + pow2_99 + pow2_36) % prime384))
 
 
 
@@ -1338,19 +1357,33 @@ let exponent_p384 t result tempBuffer =
     (==) {lemma_exponent_h2_t4 tD}
   toDomain__ (pow tD (63 * (pow2_57 + pow2_51 + pow2_45 + pow2_39 + pow2_33 + pow2_25 + pow2_19 + pow2_13 + pow2_7 + pow2 1) + 3 * pow2_31 + 1) % prime384);};
 
+  let pow2_282 = pow2 282 in let pow2_276 = pow2 276 in let pow2_270 = pow2 270 in 
+  let pow2_264 = pow2 264 in let pow2_258 = pow2 258 in 
+  let pow2_250 = pow2 250 in 
+  let pow2_244 = pow2 244 in let pow2_238 = pow2 238 in 
+  let pow2_232 = pow2 232 in let pow2_226 = pow2 226 in let pow2_219 = pow2 219 in
+  let pow2_213 = pow2 213 in let pow2_207 = pow2 207 in let pow2_201 = pow2 201 in let pow2_195 = pow2 195 in 
+  let pow2_187 = pow2 187 in let pow2_181 = pow2 181 in let pow2_175 = pow2 175 in 
+  let pow2_169 = pow2 169 in let pow2_163 = pow2 163 in 
+  let pow2_156 = pow2 156 in 
+  let pow2_150 = pow2 150 in let pow2_144 = pow2 144 in 
+  let pow2_138 = pow2 138 in let pow2_132 = pow2 132 in let pow2_124 = pow2 124 in 
+  let pow2_118 = pow2 118 in let pow2_112 = pow2 112 in let pow2_106 = pow2 106 in let pow2_100 = pow2 100 in 
+  let pow2_93  = pow2 93  in let pow2_87 =  pow2 87 in  let pow2_81 =  pow2 81 in 
+  let pow2_75 = pow2 75 in 
+  let pow2_69 = pow2 69 in   let pow2_61 = pow2 61 in 
+  let pow2_55 = pow2 55 in   let pow2_49 = pow2 49 in  let pow2_43 = pow2 43 in 
+  let pow2_37 = pow2 37 in  let pow2_256 = pow2 256 in let pow2_193 = pow2 193 in let pow2_130 = pow2 130 in 
+  let pow2_67 = pow2 67 in 
+
+
   calc (==) {as_nat_ h3 t4; (==) {}
   toDomain__  (pow (pow tD 7 % prime384) (pow2_33) * pow ((pow tD (63 * (pow2_57 + pow2_51 + pow2_45 + pow2_39 + pow2_33 + pow2_25 + pow2_19 + pow2_13 + pow2_7 + pow2 1) + 3 * pow2_31 + 1) % prime384)) (pow2_225 + pow2_162 + pow2_99 + pow2_36) * ((pow tD (63 * (pow2_26 + pow2_20 + pow2 2 + pow2_14 + pow2_8) + 3) % prime384)) % prime384);
-  };
-
-
-  assert(  as_nat_ h3 t4 = toDomain__  (pow (pow tD 7 % prime384) (pow2 33) * pow ((pow tD (63 * (pow2_57 + pow2_51 + pow2_45 + pow2_39 + pow2_33 + pow2_25 + pow2_19 + pow2_13 + pow2_7 + pow2 1) + 3 * pow2_31 + 1) % prime384)) (pow2_225 + pow2_162 + pow2_99 + pow2_36) * ((pow tD (63 * (pow2_26 + pow2_20 + pow2 2 + pow2_14 + pow2_8) + 3) % prime384)) % prime384));
-
-
-
+    (==) {lemma_exponent_h3_t4 tD}
+  toDomain__ ((pow tD (7 * pow2_33 + 63 * (pow2_282 + pow2_276 + pow2_270 + pow2_264 + pow2_258 + pow2_250 + pow2_244 + pow2_238 + pow2_232 + pow2_226 + pow2_219 + pow2_213 + pow2_207 + pow2_201 + pow2_195 + pow2_187 + pow2_181 + pow2_175 + pow2_169 + pow2_163 + pow2_156 + pow2_150 + pow2_144 + pow2_138 + pow2_132 + pow2_124 + pow2_118 + pow2_112 + pow2_106 + pow2_100 + pow2_93 + pow2_87 + pow2_81 + pow2_75 + pow2_69 + pow2_61 + pow2_55 + pow2_49 + pow2_43 + pow2_37 + pow2_26 + pow2_20 + pow2 2 + pow2_14 + pow2_8) + 3 * (pow2_256 + pow2_193 + pow2_130 + pow2_67 + 1) + pow2_225 + pow2_162 + pow2_99 + pow2_36) % prime384));};
 
 
   assert(
-    let tD = fromDomain__ (as_nat_ h0 t) in 
     let t1D = fromDomain__ (as_nat_ h2 t1) in 
     let t4D = fromDomain__ (as_nat_ h3 t4) in
     as_nat_ h4 result == toDomain__ (tD * pow t4D (pow2 96) * pow t1D 4 % prime384));
