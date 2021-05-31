@@ -42,19 +42,19 @@ extern "C" {
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_state_sha1 */
 
-typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA1_state_sha1;
+typedef Hacl_Streaming_MD5_state_md5 Hacl_Streaming_SHA1_state_sha1;
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_state_sha1 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_create_in_sha1 */
 
-Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1();
+Hacl_Streaming_MD5_state_md5 *Hacl_Streaming_SHA1_legacy_create_in_sha1();
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_create_in_sha1 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_init_sha1 */
 
-void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
+void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_MD5_state_md5 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_init_sha1 */
 
@@ -62,7 +62,7 @@ void Hacl_Streaming_SHA1_legacy_init_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s)
 
 void
 Hacl_Streaming_SHA1_legacy_update_sha1(
-  Hacl_Streaming_SHA2_state_sha2_224 *p,
+  Hacl_Streaming_MD5_state_md5 *p,
   uint8_t *data,
   uint32_t len
 );
@@ -71,14 +71,13 @@ Hacl_Streaming_SHA1_legacy_update_sha1(
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_finish_sha1 */
 
-void
-Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8_t *dst);
+void Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_MD5_state_md5 *p, uint8_t *dst);
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_finish_sha1 */
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_free_sha1 */
 
-void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_SHA2_state_sha2_224 *s);
+void Hacl_Streaming_SHA1_legacy_free_sha1(Hacl_Streaming_MD5_state_md5 *s);
 
 /* SNIPPET_END: Hacl_Streaming_SHA1_legacy_free_sha1 */
 
