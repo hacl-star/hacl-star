@@ -116,6 +116,13 @@ let getCoordinateLenU64 curve =
   |_ -> 4ul
 
 
+inline_for_extraction noextract
+val getPointLenU64: c: curve -> Tot (a: size_t)
+
+let getPointLenU64 curve = 
+  getCoordinateLenU64 curve *. 3ul 
+
+
 (* the length of each coordinate of the point as uint8 *)
 inline_for_extraction noextract
 let getCoordinateLenU curve = getCoordinateLenU64 curve *! 8ul
@@ -123,7 +130,7 @@ let getCoordinateLenU curve = getCoordinateLenU64 curve *! 8ul
 let getCoordinateLen curve : pos = v (getCoordinateLenU curve)
 
 (* each point consists of three coordinates *)
-let getPointLen curve = getCoordinateLenU curve *! 2ul
+let getPointLen curve = getCoordinateLenU curve *! 3ul
 
 (* the expected scalar length *)
 
