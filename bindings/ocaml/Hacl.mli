@@ -80,17 +80,16 @@ module P256 : sig
   (** {1 Point validation} *)
 
   val valid_sk : sk:bytes -> bool
-    (** [valid_sk sk] checks if the contents of [sk] (32 bytes) can be used as a secret key or as a signing secret.
+    (** [valid_sk sk] checks if the contents of [sk] can be used as a secret key or as a signing secret.
     This is the case if 0 < [sk] < the order of the curve. *)
 
   val valid_pk : pk:bytes -> bool
-  (** [valid_pk pk] checks if the contents of [pk] (64 bytes) is a valid public key, as specified in {{: https://csrc.nist.gov/publications/detail/sp/800-56a/rev-3/final}NIST SP 800-56A}. *)
+  (** [valid_pk pk] checks if the contents of [pk] is a valid public key, as specified in {{: https://csrc.nist.gov/publications/detail/sp/800-56a/rev-3/final}NIST SP 800-56A}. *)
 
   (** {1 ECDH}
       ECDH key agreement protocol
   *)
 
-  (* TODO: consistent names with those in Curve25519? *)
   val dh_initiator : sk:bytes -> bytes option
   (** [dh_initiator sk] takes a 32-byte secret key [sk] and returns the corresponding
       64-byte public key. *)
@@ -231,6 +230,8 @@ module Keccak : sig
       does run some sanity checks for the parameters, users should be extremely careful
       if using the Keccak function directly. *)
 
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
   module Noalloc : sig
     val shake128 : msg:bytes -> digest:bytes -> unit
     (** [shake128 msg size] hashes [msg] using SHAKE-128 and returns a digest of [size] bytes. *)
@@ -275,14 +276,14 @@ Legacy algorithms, which are {b not suitable for cryptographic applications.} *)
 module MD5 : HashFunction [@@deprecated]
 (** Direct hashing with MD5
 
-{b This function should not be used for cryptographic applications! }
+{b This function should not be used for cryptographic applications!}
 
 The [digest] buffer must match the digest size of MD5, which is 16 bytes. *)
 
 module SHA1 : HashFunction [@@deprecated]
 (** Direct hashing with SHA-1
 
-{b This function should not be used for cryptographic applications! }
+{b This function should not be used for cryptographic applications!}
 
 The [digest] buffer must match the digest size of SHA-1, which is 20 bytes. *)
 
@@ -336,11 +337,10 @@ module NaCl : sig
       shared key on every function call.
   *)
 
-  (* TODO move this to NaCl.Easy.Noalloc *)
   val box_beforenm_noalloc : pk:bytes -> sk:bytes -> ck:bytes -> bool
   (** [box_beforenm_noalloc pk sk ck] is a version of [box_beforenm] which takes an additional argument [ck]
       where the result is written, returning `true` if it is successful, similar to the functions in
-      {!NaCl.Easy.Noalloc}.
+      {!NaCl.Easy.Noalloc} and {!NaCl.Detached}.
 
       Buffers [pk], [sk], and [ck] must be distinct.
   *)
@@ -352,7 +352,7 @@ module NaCl : sig
     val box : pt:bytes -> n:bytes -> pk:bytes -> sk:bytes -> bytes option
     (** [box pt n pk sk] authenticates and encrypts plaintext [pt] using public key [pk],
         secret key [sk], and nonce [n] and returns both the message authentication tag
-        in a single buffer if successful. *)
+        and the ciphertext in a single buffer if successful. *)
 
     val box_open : ct:bytes -> n:bytes -> pk:bytes -> sk:bytes -> bytes option
     (** [box_open ct n pk sk] attempts to verify and decrypt ciphertext [ct] using public key [pk],
@@ -363,8 +363,8 @@ module NaCl : sig
 
     val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> bytes option
     (** [box_afternm pt n ck] authenticates and encrypts [pt] using shared key [ck] and
-        nonce [n] and returns both the message authentication tag in a single buffer
-        if successful. *)
+        nonce [n] and returns both the message authentication tag and the ciphertext
+        in a single buffer if successful. *)
 
     val box_open_afternm : ct:bytes -> n:bytes -> ck:bytes -> bytes option
     (** [box_open ct n pk sk] attempts to verify and decrypt ciphertext [ct] using
@@ -379,7 +379,7 @@ module NaCl : sig
 
     val secretbox_open : ct:bytes -> n:bytes -> key:bytes -> bytes option
     (** [secretbox_open ct n key] attempts to verify and decrypt ciphertext [ct] using
-        secret key [key] and nonce [n] and and returns the plaintext if successful. *)
+        secret key [key] and nonce [n] and returns the plaintext if successful. *)
 
     (** {1 Noalloc} *)
 
@@ -534,7 +534,7 @@ module RandomBuffer : sig
 
 
 end
-(** A randomness function implemented with platform dependent code for Unix and Windows
+(** A randomness function implemented with platform-dependent code for Unix and Windows
 
     The [randombytes] function is handwritten, unverified C code.
     In Unix, it is implemented using the {{: https://man7.org/linux/man-pages/man2/getrandom.2.html} [getrandom]} syscall, with a fallback to [/dev/urandom].

@@ -278,7 +278,7 @@ module type MAC_generic = sig
       - [key]: 32 bytes
       - output buffer: 16 bytes
 
-      For HMAC with SHA2, the output buffer is the same size as the digest size of
+      For HMAC with SHA-2, the output buffer is the same size as the digest size of
       the corresponding hash function (see {{!EverCrypt.Hash} here}). For HMAC with BLAKE2,
       the output buffer is 64 bytes for BLAKE2b and 32 bytes for BLAKE2s.
 *)
@@ -310,6 +310,8 @@ module type HKDF_generic = sig
   (** [expand prk info size] expands the pseudorandom key [prk], taking the info string [info] into
       account and returns a buffer of [size] bytes. *)
 
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
   module Noalloc : sig
     val extract: salt:bytes -> ikm:bytes -> prk:bytes -> unit
     (** [extract salt ikm prk] computes a pseudorandom key [prk] using input key material [ikm] and
@@ -350,7 +352,6 @@ module type Blake2_generic = sig
 (** Buffers have the following size constraints:
     - [key]: <= 64 bytes for BLAKE2b, <= 32 bytes for BLAKE2s
     - [digest]: non-zero, <= 64 bytes for BLAKE2b, <= 32 bytes for BLAKE2s *)
-  (* TODO: review checks and write documentation for large  maximum buffer sizes *)
 
   type bytes
 

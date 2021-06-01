@@ -109,7 +109,7 @@ module Hash : sig
 
 (** {1 Streaming interface}
 
-    To use the agile streaming interface, users first need to initialise and internal state using {!init}.
+    To use the agile streaming interface, users first need to initialise an internal state using {!init}.
     The state will then need to be passed to every call to {!update} and {!finish}. Both {!update} and
     {!finish} can be called as many times as needed without invalidating the state.
     Users are not required to manually free the state.
@@ -245,6 +245,8 @@ module HKDF : sig
       algorithm [alg], taking the info string [info] into account and
       returns a buffer of [size] bytes. *)
 
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
   module Noalloc : sig
     val extract : alg:HashDefs.alg -> salt:bytes -> ikm:bytes -> prk:bytes -> unit
     (** [extract alg salt ikm prk] computes a pseudorandom key [prk] using
