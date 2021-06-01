@@ -210,12 +210,12 @@ module type EdDSA_generic = sig
   (** [secret_to_public sk] takes a secret key [sk] and returns the corresponding
       public key. *)
 
-  val sign : sk:bytes -> pt:bytes -> bytes
-  (** [sign sk pt] takes secret key [sk] and message [pt] and returns
+  val sign : sk:bytes -> msg:bytes -> bytes
+  (** [sign sk msg] takes secret key [sk] and message [msg] and returns
       the Ed25519 signature. *)
 
-  val verify : pk:bytes -> pt:bytes -> signature:bytes -> bool
-  (** [verify pk pt signature] takes public key [pk], message [pt] and verifies the
+  val verify : pk:bytes -> msg:bytes -> signature:bytes -> bool
+  (** [verify pk msg signature] takes public key [pk], message [msg] and verifies the
       Ed25519 signature, returning true if valid. *)
 
   (** {1 EdDSA Expanded Signing} *)
@@ -223,8 +223,8 @@ module type EdDSA_generic = sig
   val expand_keys : sk:bytes -> bytes
   (** [expand_keys sk] takes secret key [sk] and returns the expanded secret key. *)
 
-  val sign_expanded : ks:bytes -> pt:bytes -> bytes
-  (** [sign_expanded ks pt signature] takes expanded secret key [ks] and message [pt] and
+  val sign_expanded : ks:bytes -> msg:bytes -> bytes
+  (** [sign_expanded ks msg signature] takes expanded secret key [ks] and message [msg] and
       returns the Ed25519 signature. *)
 
   (** Versions of these functions which write their output in a buffer passed in as
@@ -244,8 +244,8 @@ module type EdDSA_generic = sig
     (** [secret_to_public sk pk] takes a secret key [sk] and writes the corresponding
         public key in [pk]. Buffers [pk] and [sk] must be distinct. *)
 
-    val sign : sk:bytes -> pt:bytes -> signature:bytes -> unit
-    (** [sign sk pt signature] takes secret key [sk] and message [pt] and writes
+    val sign : sk:bytes -> msg:bytes -> signature:bytes -> unit
+    (** [sign sk msg signature] takes secret key [sk] and message [msg] and writes
         the Ed25519 signature in [signature]. *)
 
     (** {1 EdDSA Expanded Signing}
@@ -256,8 +256,8 @@ module type EdDSA_generic = sig
     val expand_keys : sk:bytes -> ks:bytes -> unit
     (** [expand_keys sk ks] takes secret key [sk] and writes the expanded secret key in [ks]. *)
 
-    val sign_expanded : ks:bytes -> pt:bytes -> signature:bytes -> unit
-    (** [sign_expanded ks pt signature] takes expanded secret key [ks] and message [pt] and writes
+    val sign_expanded : ks:bytes -> msg:bytes -> signature:bytes -> unit
+    (** [sign_expanded ks msg signature] takes expanded secret key [ks] and message [msg] and writes
         the Ed25519 signature in [signature]. *)
   end
 end
@@ -267,10 +267,10 @@ module type HashFunction_generic = sig
   type bytes
 
   val hash : bytes -> bytes
-  (** [hash pt] returns the hash of [pt]. *)
+  (** [hash msg] returns the hash of [msg]. *)
 
-  val hash_noalloc : pt:bytes -> digest:bytes -> unit
-  (** [hash_noalloc pt digest] hashes [pt] and outputs the result in [digest]. *)
+  val hash_noalloc : msg:bytes -> digest:bytes -> unit
+  (** [hash_noalloc msg digest] hashes [msg] and outputs the result in [digest]. *)
 end
 
 module type MAC_generic = sig
@@ -326,22 +326,22 @@ module type ECDSA_generic = sig
       - [pk]: 64 bytes, corresponding to the "raw" representation of an elliptic curve point (see {!section:points})
       - [sk], [k]: 32 bytes
       - [signature]: 64 bytes
-      - [pt]: no size requirement for variants using SHA-2 hashing (see {!section:ecdsa})
+      - [msg]: no size requirement for variants using SHA-2 hashing (see {!section:ecdsa})
   *)
 
   type bytes
 
-  val sign : sk:bytes -> pt:bytes -> k:bytes -> bytes option
-  (** [sign sk pt k] attempts to sign the message [pt] with secret key [sk] and
+  val sign : sk:bytes -> msg:bytes -> k:bytes -> bytes option
+  (** [sign sk msg k] attempts to sign the message [msg] with secret key [sk] and
       signing secret [k] and returns the signature if successful. *)
 
-  val sign_noalloc : sk:bytes -> pt:bytes -> k:bytes -> signature:bytes -> bool
-  (** [sign_noalloc sk pt k signature] attempts to sign the message [pt] with secret key [sk] and
+  val sign_noalloc : sk:bytes -> msg:bytes -> k:bytes -> signature:bytes -> bool
+  (** [sign_noalloc sk msg k signature] attempts to sign the message [msg] with secret key [sk] and
       signing secret [k]. If successful, the signature is written in [signature] and the
       function returns true. *)
 
-  val verify : pk:bytes -> pt:bytes -> signature:bytes -> bool
-  (** [verify pk pt signature] checks the [signature] of [pt] using public key [pk] and returns
+  val verify : pk:bytes -> msg:bytes -> signature:bytes -> bool
+  (** [verify pk msg signature] checks the [signature] of [msg] using public key [pk] and returns
   true if it is valid. *)
 
 end
@@ -355,11 +355,11 @@ module type Blake2_generic = sig
   type bytes
 
   val hash : ?key:bytes -> bytes -> int -> bytes
-  (** [hash ?key pt size] hashes [pt] and returns a digest of length [size].
+  (** [hash ?key msg size] hashes [msg] and returns a digest of length [size].
       An optional [key] argument can be passed for keyed hashing. *)
 
-  val hash_noalloc : key:bytes -> pt:bytes -> digest:bytes -> unit
-  (** [hash_noalloc key pt digest] hashes [pt] and outputs the result in [digest].
+  val hash_noalloc : key:bytes -> msg:bytes -> digest:bytes -> unit
+  (** [hash_noalloc key msg digest] hashes [msg] and outputs the result in [digest].
       A non-empty [key] can be passed for keyed hashing. *)
 end
 

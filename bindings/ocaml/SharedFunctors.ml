@@ -116,12 +116,12 @@ module Make_EdDSA_generic (C: Buffer)
 = struct
   type bytes = C.t
   let max_size_t = pow2 32
-  let verify ~pk ~pt ~signature =
+  let verify ~pk ~msg ~signature =
     (* Hacl.Ed25519.verify *)
     assert (C.size pk = 32);
     assert (C.size signature = 64);
-    assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
-    Impl.verify (C.ctypes_buf pk) (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf signature)
+    assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
+    Impl.verify (C.ctypes_buf pk) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf signature)
   module Noalloc = struct
     let secret_to_public ~sk ~pk =
       (* Hacl.Ed25519.secret_to_public *)
@@ -129,40 +129,40 @@ module Make_EdDSA_generic (C: Buffer)
       assert (C.size sk = 32);
       assert (C.disjoint pk sk);
       Impl.secret_to_public (C.ctypes_buf pk) (C.ctypes_buf sk)
-    let sign ~sk ~pt ~signature =
+    let sign ~sk ~msg ~signature =
       (* Hacl.Ed25519.sign *)
       assert (C.size sk = 32);
       assert (C.size signature = 64);
-      assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
-      Impl.sign (C.ctypes_buf signature) (C.ctypes_buf sk) (C.size_uint32 pt) (C.ctypes_buf pt)
+      assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
+      Impl.sign (C.ctypes_buf signature) (C.ctypes_buf sk) (C.size_uint32 msg) (C.ctypes_buf msg)
     let expand_keys ~sk ~ks =
       (* Hacl.Ed25519.expand_keys *)
       assert (C.size ks = 96);
       assert (C.size sk = 32);
       assert (C.disjoint ks sk); (* VD: redundant for Bytes, since size is different *)
       Impl.expand_keys (C.ctypes_buf ks) (C.ctypes_buf sk)
-    let sign_expanded ~ks ~pt ~signature =
+    let sign_expanded ~ks ~msg ~signature =
       (* Hacl.Ed25519.sign_expanded *)
       assert (C.size ks = 96);
       assert (C.size signature = 64);
-      assert Z.(of_int (C.size pt) + ~$64 <= max_size_t);
-      Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 pt) (C.ctypes_buf pt)
+      assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
+      Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 msg) (C.ctypes_buf msg)
   end
   let secret_to_public ~sk =
     let pk = C.make 32 in
     Noalloc.secret_to_public ~sk ~pk;
     pk
-  let sign ~sk ~pt =
+  let sign ~sk ~msg =
     let signature = C.make 64 in
-    Noalloc.sign ~sk ~pt ~signature;
+    Noalloc.sign ~sk ~msg ~signature;
     signature
   let expand_keys ~sk =
     let ks = C.make 96 in
     Noalloc.expand_keys ~sk ~ks;
     ks
-  let sign_expanded ~ks ~pt =
+  let sign_expanded ~ks ~msg =
     let signature = C.make 64 in
-    Noalloc.sign_expanded ~ks ~pt ~signature;
+    Noalloc.sign_expanded ~ks ~msg ~signature;
     signature
 end
 
@@ -193,14 +193,14 @@ module Make_HashFunction_generic (C: Buffer)
     match alg with
     | Agile alg -> HashDefs.check_max_input_len alg len
     | _ -> ()
-  let hash_noalloc ~pt ~digest =
-    check_max_input_len Impl.hash_alg (C.size pt);
+  let hash_noalloc ~msg ~digest =
+    check_max_input_len Impl.hash_alg (C.size msg);
     assert (C.size digest = digest_len Impl.hash_alg);
-    assert (C.disjoint pt digest);
-    Impl.hash (C.ctypes_buf pt) (C.size_uint32 pt) (C.ctypes_buf digest)
-  let hash pt =
+    assert (C.disjoint msg digest);
+    Impl.hash (C.ctypes_buf msg) (C.size_uint32 msg) (C.ctypes_buf digest)
+  let hash msg =
     let digest = C.make (digest_len Impl.hash_alg) in
-    hash_noalloc ~pt ~digest;
+    hash_noalloc ~msg ~digest;
     digest
 end
 
@@ -298,29 +298,29 @@ module Make_ECDSA_generic (C: Buffer)
     else
       failwith "Unknown return value"
   let prime_p256_order = Z.of_string "115792089210356248762697446949407573529996955224135760342422259061068512044369"
-  let sign_noalloc ~sk ~pt ~k ~signature =
+  let sign_noalloc ~sk ~msg ~k ~signature =
     (* Hacl.Interface.P256.ECDSA.ecdsa_sign_p256_without_hash/sha2/sha384 *)
     assert (C.size signature = 64);
     assert (C.size sk = 32);
     assert (C.size k = 32);
-    assert (C.size pt >= Impl.min_msg_size);
-    assert (C.disjoint signature pt);
+    assert (C.size msg >= Impl.min_msg_size);
+    assert (C.disjoint signature msg);
     assert (C.z_compare sk prime_p256_order < 0);
     assert (C.z_compare k prime_p256_order < 0);
-    Impl.sign (C.ctypes_buf signature) (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf sk) (C.ctypes_buf k)
-  let sign ~sk ~pt ~k =
+    Impl.sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf sk) (C.ctypes_buf k)
+  let sign ~sk ~msg ~k =
     let signature = C.make 64 in
-    if sign_noalloc ~sk ~pt ~k ~signature then
+    if sign_noalloc ~sk ~msg ~k ~signature then
       Some signature
     else
       None
-  let verify ~pk ~pt ~signature =
+  let verify ~pk ~msg ~signature =
     (* Hacl.Interface.P256.ECDSA.ecdsa_verif_without_hash/sha2/sha384 *)
     assert (C.size signature = 64);
     assert (C.size pk = 64);
-    assert (C.size pt >= Impl.min_msg_size);
+    assert (C.size msg >= Impl.min_msg_size);
     let r, s = C.sub signature 0 32, C.sub signature 32 32 in
-    Impl.verify (C.size_uint32 pt) (C.ctypes_buf pt) (C.ctypes_buf pk) (C.ctypes_buf r) (C.ctypes_buf s)
+    Impl.verify (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf pk) (C.ctypes_buf r) (C.ctypes_buf s)
 end
 
 
@@ -331,23 +331,23 @@ module Make_Blake2b_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let hash_noalloc ~key ~pt ~digest =
+  let hash_noalloc ~key ~msg ~digest =
     check_reqs Impl.reqs;
     (* specs/Spec.Blake2.blake2b *)
     assert (C.size digest > 0 && C.size digest <= 64);
     assert (C.size key <= 64);
     if C.size key = 0 then
-      assert Z.(of_int (C.size pt) < pow2 128)
+      assert Z.(of_int (C.size msg) < pow2 128)
     else
-      assert Z.(of_int (C.size pt) + ~$128 < pow2 128);
-    assert (C.disjoint key pt);
+      assert Z.(of_int (C.size msg) + ~$128 < pow2 128);
+    assert (C.disjoint key msg);
     assert (C.disjoint key digest);
-    assert (C.disjoint pt digest);
-    Impl.blake2b (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
-  let hash ?(key = C.empty) pt size =
+    assert (C.disjoint msg digest);
+    Impl.blake2b (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 key) (C.ctypes_buf key)
+  let hash ?(key = C.empty) msg size =
     assert (size > 0 && size <= 64);
     let digest = C.make size in
-    hash_noalloc ~key ~pt ~digest;
+    hash_noalloc ~key ~msg ~digest;
     digest
 end
 
@@ -358,23 +358,23 @@ module Make_Blake2s_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let hash_noalloc ~key ~pt ~digest =
+  let hash_noalloc ~key ~msg ~digest =
     check_reqs Impl.reqs;
     (* specs/Spec.Blake2.blake2s *)
     assert (C.size digest > 0 && C.size digest <= 32);
     assert (C.size key <= 32);
     if C.size key = 0 then
-      assert Z.(of_int (C.size pt) < pow2 64)
+      assert Z.(of_int (C.size msg) < pow2 64)
     else
-      assert Z.(of_int (C.size pt) + ~$64 < pow2 64);
-    assert (C.disjoint key pt);
+      assert Z.(of_int (C.size msg) + ~$64 < pow2 64);
+    assert (C.disjoint key msg);
     assert (C.disjoint key digest);
-    assert (C.disjoint pt digest);
-    Impl.blake2s (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 key) (C.ctypes_buf key)
-  let hash ?(key = C.empty) pt size =
+    assert (C.disjoint msg digest);
+    Impl.blake2s (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 key) (C.ctypes_buf key)
+  let hash ?(key = C.empty) msg size =
     assert (size > 0 && size <= 32);
     let digest = C.make size in
-    hash_noalloc ~key ~pt ~digest;
+    hash_noalloc ~key ~msg ~digest;
     digest
 end
 

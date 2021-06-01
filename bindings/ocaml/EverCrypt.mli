@@ -100,11 +100,11 @@ module Hash : sig
 
 (** {1 Direct interface} *)
 
-  val hash : alg:HashDefs.alg -> pt:bytes -> bytes
-  (** [hash alg pt] hashes [pt] using algorithm [alg] and returns the digest. *)
+  val hash : alg:HashDefs.alg -> msg:bytes -> bytes
+  (** [hash alg msg] hashes [msg] using algorithm [alg] and returns the digest. *)
 
-  val hash_noalloc : alg:HashDefs.alg -> pt:bytes -> digest:bytes -> unit
-  (** [hash_noalloc alg pt digest] hashes [pt] using algorithm [alg] and outputs the
+  val hash_noalloc : alg:HashDefs.alg -> msg:bytes -> digest:bytes -> unit
+  (** [hash_noalloc alg msg digest] hashes [msg] using algorithm [alg] and outputs the
       result in [digest]. *)
 
 (** {1 Streaming interface}
@@ -124,8 +124,8 @@ module Hash : sig
   (** [init alg] allocates the internal state for algorithm [alg] and
       returns a {!t}. *)
 
-  val update : st:t -> pt:bytes -> unit
-  (** [update st pt] updates the internal state [st] with the contents of [pt]. *)
+  val update : st:t -> msg:bytes -> unit
+  (** [update st msg] updates the internal state [st] with the contents of [msg]. *)
 
   val finish : st:t -> bytes
   (** [finish st] returns the digest without invalidating the internal state [st]. *)

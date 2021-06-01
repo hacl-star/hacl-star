@@ -146,11 +146,11 @@ module Hash = struct
     let incr_len = ref Z.zero in
     Gc.finalise everCrypt_Hash_Incremental_free st;
     (alg, incr_len, st)
-  let update ~st:(alg, incr_len, t) ~pt =
-    check_max_input_len alg (C.size pt);
-    incr_len := Z.add !incr_len (Z.of_int (C.size pt));
+  let update ~st:(alg, incr_len, t) ~msg =
+    check_max_input_len alg (C.size msg);
+    incr_len := Z.add !incr_len (Z.of_int (C.size msg));
     assert (Z.lt !incr_len (max_input_len alg));
-    everCrypt_Hash_Incremental_update t (C.ctypes_buf pt) (C.size_uint32 pt)
+    everCrypt_Hash_Incremental_update t (C.ctypes_buf msg) (C.size_uint32 msg)
   let finish_noalloc ~st:(alg, _, t) ~digest =
     assert (C.size digest = digest_len alg);
     everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest)
@@ -158,14 +158,14 @@ module Hash = struct
     let digest = C.make (digest_len alg) in
     everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest);
     digest
-  let hash_noalloc ~alg ~pt ~digest =
-    check_max_input_len alg (C.size pt);
+  let hash_noalloc ~alg ~msg ~digest =
+    check_max_input_len alg (C.size msg);
     assert (C.size digest = digest_len alg);
-    assert (C.disjoint digest pt);
-    everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf digest) (C.ctypes_buf pt) (C.size_uint32 pt)
-  let hash ~alg ~pt =
+    assert (C.disjoint digest msg);
+    everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf digest) (C.ctypes_buf msg) (C.size_uint32 msg)
+  let hash ~alg ~msg =
     let digest = C.make (digest_len alg) in
-    hash_noalloc ~alg ~pt ~digest;
+    hash_noalloc ~alg ~msg ~digest;
     digest
 end
 

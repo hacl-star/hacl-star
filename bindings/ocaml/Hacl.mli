@@ -50,7 +50,7 @@ module P256 : sig
       - [pk]: 64 bytes, corresponding to the "raw" representation of an elliptic curve point (see {!section:points})
       - [sk], [k]: 32 bytes
       - [signature]: 64 bytes
-      - [pt]: depends on which hash function is being used (see {!section:ecdsa})
+      - [msg]: depends on which hash function is being used (see {!section:ecdsa})
   *)
 
   (** {1:points Point representation and conversions}
@@ -102,15 +102,15 @@ module P256 : sig
   (** {1:ecdsa ECDSA}
       ECDSA signing and signature verification functions
 
-      The [sign] and [verify] functions included in this module
-      take the digest of the message to be signed ([pt]), requiring users to use a cryptographic hash function
-      of their choosing before calling them. In this case, [pt] needs to be at least 32 bytes long.
+      For the [sign] and [verify] functions included in this module
+      [msg] is the digest of the message to be signed, requiring users to use a cryptographic hash function
+      of their choosing before calling them. In this case, [msg] needs to be at least 32 bytes long.
   *)
 
   include ECDSA
 
-  (** The functions in the other submodules take the unhashed message [pt] and first hash it using their corresponding
-      version of the SHA-2 hash function. In this case, there is no minimum size requirement for [pt]. *)
+  (** The functions in the other submodules take the unhashed message [msg] and first hash it using their corresponding
+      version of the SHA-2 hash function. In this case, there is no minimum size requirement for [msg]. *)
 
   module SHA2_256 : ECDSA
   module SHA2_384 : ECDSA
@@ -219,26 +219,26 @@ The [digest] buffer must match the digest size of SHA3-512, which is 64 bytes.
 *)
 
 module Keccak : sig
-  val shake128 : pt:bytes -> size:int -> bytes
-  (** [shake128 pt size] hashes [pt] using SHAKE-128 and returns a digest of [size] bytes. *)
+  val shake128 : msg:bytes -> size:int -> bytes
+  (** [shake128 msg size] hashes [msg] using SHAKE-128 and returns a digest of [size] bytes. *)
 
-  val shake256 : pt:bytes -> size:int -> bytes
-  (** [shake256 pt size] hashes [pt] using SHAKE-256 and returns a digest of [size] bytes. *)
+  val shake256 : msg:bytes -> size:int -> bytes
+  (** [shake256 msg size] hashes [msg] using SHAKE-256 and returns a digest of [size] bytes. *)
 
-  val keccak : rate:int -> capacity:int -> suffix:int -> pt:bytes -> size:int -> bytes
+  val keccak : rate:int -> capacity:int -> suffix:int -> msg:bytes -> size:int -> bytes
   (** Direct access to the general Keccak function, of which all the SHA-3 and SHAKE functions
       are {{:https://en.wikipedia.org/wiki/SHA-3#Instances}instances}. While the library
       does run some sanity checks for the parameters, users should be extremely careful
       if using the Keccak function directly. *)
 
   module Noalloc : sig
-    val shake128 : pt:bytes -> digest:bytes -> unit
-    (** [shake128 pt size] hashes [pt] using SHAKE-128 and returns a digest of [size] bytes. *)
+    val shake128 : msg:bytes -> digest:bytes -> unit
+    (** [shake128 msg size] hashes [msg] using SHAKE-128 and returns a digest of [size] bytes. *)
 
-    val shake256 : pt:bytes -> digest:bytes -> unit
-    (** [shake256 pt digest] hashes [pt] using SHAKE-256 and outputs the result in [digest]. *)
+    val shake256 : msg:bytes -> digest:bytes -> unit
+    (** [shake256 msg digest] hashes [msg] using SHAKE-256 and outputs the result in [digest]. *)
 
-    val keccak : rate:int -> capacity:int -> suffix:int -> pt:bytes -> digest:bytes -> unit
+    val keccak : rate:int -> capacity:int -> suffix:int -> msg:bytes -> digest:bytes -> unit
     (** Direct access to the general Keccak function, of which all the SHA-3 and SHAKE functions
         are {{:https://en.wikipedia.org/wiki/SHA-3#Instances}instances}. While the library
         does run some sanity checks for the parameters, users should be extremely careful

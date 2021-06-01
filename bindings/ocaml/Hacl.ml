@@ -125,32 +125,32 @@ end)
 
 module Keccak = struct
   module Noalloc = struct
-    let shake128 ~pt ~digest =
+    let shake128 ~msg ~digest =
       (* Hacl.SHA3.shake128_hacl *)
-      assert (C.disjoint pt digest);
-      Hacl_SHA3.hacl_SHA3_shake128_hacl (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 digest) (C.ctypes_buf digest)
-    let shake256 ~pt ~digest =
+      assert (C.disjoint msg digest);
+      Hacl_SHA3.hacl_SHA3_shake128_hacl (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 digest) (C.ctypes_buf digest)
+    let shake256 ~msg ~digest =
       (* Hacl.SHA3.shake256_hacl *)
-      assert (C.disjoint pt digest);
-      Hacl_SHA3.hacl_SHA3_shake256_hacl (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 digest) (C.ctypes_buf digest)
-    let keccak ~rate ~capacity ~suffix ~pt ~digest =
+      assert (C.disjoint msg digest);
+      Hacl_SHA3.hacl_SHA3_shake256_hacl (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 digest) (C.ctypes_buf digest)
+    let keccak ~rate ~capacity ~suffix ~msg ~digest =
       (* Hacl.Impl.SHA3.keccak *)
       assert (rate mod 8 = 0 && rate / 8 > 0 && rate <= 1600);
       assert (capacity + rate = 1600);
-      assert (C.disjoint pt digest);
-      Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (C.size_uint32 pt) (C.ctypes_buf pt) (UInt8.of_int suffix) (C.size_uint32 digest) (C.ctypes_buf digest)
+      assert (C.disjoint msg digest);
+      Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (C.size_uint32 msg) (C.ctypes_buf msg) (UInt8.of_int suffix) (C.size_uint32 digest) (C.ctypes_buf digest)
   end
-  let shake128 ~pt ~size =
+  let shake128 ~msg ~size =
     let digest = C.make size in
-    Noalloc.shake128 ~pt ~digest;
+    Noalloc.shake128 ~msg ~digest;
     digest
-  let shake256 ~pt ~size =
+  let shake256 ~msg ~size =
     let digest = C.make size in
-    Noalloc.shake256 ~pt ~digest;
+    Noalloc.shake256 ~msg ~digest;
     digest
-  let keccak ~rate ~capacity ~suffix ~pt ~size =
+  let keccak ~rate ~capacity ~suffix ~msg ~size =
     let digest = C.make size in
-    Noalloc.keccak ~rate ~capacity ~suffix ~pt ~digest;
+    Noalloc.keccak ~rate ~capacity ~suffix ~msg ~digest;
     digest
 end
 

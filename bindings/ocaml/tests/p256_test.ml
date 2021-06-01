@@ -54,10 +54,10 @@ module MakeTests (M: SharedDefs.ECDSA) = struct
       test_result Failure "Key generation";
 
     let signature = Test_utils.init_bytes 64 in
-    assert (M.sign_noalloc ~sk:v.sk ~pt:v.msg ~k:v.k ~signature);
+    assert (M.sign_noalloc ~sk:v.sk ~msg:v.msg ~k:v.k ~signature);
     if Bytes.equal signature v.expected_sig then
       begin
-        if M.verify ~pk:v.pk ~pt:v.msg ~signature then
+        if M.verify ~pk:v.pk ~msg:v.msg ~signature then
           test_result Success ""
         else
           test_result Failure "Verification"
@@ -75,11 +75,11 @@ module MakeTests (M: SharedDefs.ECDSA) = struct
         if not (Bytes.equal pk v.pk) then
           test_result Failure "Key generation";
 
-        match M.sign ~sk:v.sk ~pt:v.msg ~k:v.k with
+        match M.sign ~sk:v.sk ~msg:v.msg ~k:v.k with
         | Some signature ->
           if Bytes.equal signature v.expected_sig then
             begin
-              if M.verify ~pk:v.pk ~pt:v.msg ~signature then
+              if M.verify ~pk:v.pk ~msg:v.msg ~signature then
                 test_result Success ""
               else
                 test_result Failure "Verification"
