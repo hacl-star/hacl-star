@@ -124,21 +124,34 @@ module SHA3_512 : HashFunction =
 end)
 
 module Keccak = struct
-  let shake128 ~pt ~digest =
-    (* Hacl.SHA3.shake128_hacl *)
-    assert (C.disjoint pt digest);
-    Hacl_SHA3.hacl_SHA3_shake128_hacl (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 digest) (C.ctypes_buf digest)
-  let shake256 ~pt ~digest =
-    (* Hacl.SHA3.shake256_hacl *)
-    assert (C.disjoint pt digest);
-    Hacl_SHA3.hacl_SHA3_shake256_hacl (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 digest) (C.ctypes_buf digest)
-  let keccak ~rate ~capacity ~suffix ~pt ~digest =
-    (* Hacl.Impl.SHA3.keccak *)
-    assert (rate mod 8 = 0 && rate / 8 > 0 && rate <= 1600);
-    assert (capacity + rate = 1600);
-    assert (C.disjoint pt digest);
-    Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (C.size_uint32 pt) (C.ctypes_buf pt) (UInt8.of_int suffix) (C.size_uint32 digest) (C.ctypes_buf digest)
-
+  module Noalloc = struct
+    let shake128 ~pt ~digest =
+      (* Hacl.SHA3.shake128_hacl *)
+      assert (C.disjoint pt digest);
+      Hacl_SHA3.hacl_SHA3_shake128_hacl (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 digest) (C.ctypes_buf digest)
+    let shake256 ~pt ~digest =
+      (* Hacl.SHA3.shake256_hacl *)
+      assert (C.disjoint pt digest);
+      Hacl_SHA3.hacl_SHA3_shake256_hacl (C.size_uint32 pt) (C.ctypes_buf pt) (C.size_uint32 digest) (C.ctypes_buf digest)
+    let keccak ~rate ~capacity ~suffix ~pt ~digest =
+      (* Hacl.Impl.SHA3.keccak *)
+      assert (rate mod 8 = 0 && rate / 8 > 0 && rate <= 1600);
+      assert (capacity + rate = 1600);
+      assert (C.disjoint pt digest);
+      Hacl_SHA3.hacl_Impl_SHA3_keccak (UInt32.of_int rate) (UInt32.of_int capacity) (C.size_uint32 pt) (C.ctypes_buf pt) (UInt8.of_int suffix) (C.size_uint32 digest) (C.ctypes_buf digest)
+  end
+  let shake128 ~pt ~size =
+    let digest = C.make size in
+    Noalloc.shake128 ~pt ~digest;
+    digest
+  let shake256 ~pt ~size =
+    let digest = C.make size in
+    Noalloc.shake256 ~pt ~digest;
+    digest
+  let keccak ~rate ~capacity ~suffix ~pt ~size =
+    let digest = C.make size in
+    Noalloc.keccak ~rate ~capacity ~suffix ~pt ~digest;
+    digest
 end
 
 module SHA1 : HashFunction =

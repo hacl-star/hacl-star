@@ -13,6 +13,7 @@ type alg =
   | SHA3_256
   | SHA3_384
   | SHA3_512
+  | Keccak_256
   | BLAKE2b
   | BLAKE2s
   | SHA1
@@ -138,6 +139,15 @@ let blake2s_keyed_tests = [
   }
 ]
 
+(* Source: https://bob.nem.ninja/test-vectors.html *)
+let keccak256_test =
+  {
+    name = "Test 1";
+    alg = Keccak_256;
+    plaintext = Bytes.of_string "\xcc";
+    expected = Bytes.of_string "\xee\xad\x6d\xbf\xc7\x34\x0a\x56\xca\xed\xc0\x44\x69\x6a\x16\x88\x70\x54\x9a\x6a\x7f\x6f\x56\x96\x1e\x84\xa5\x4b\xd9\x97\x0b\x8a"
+  }
+
 
 let alg_definition = function
   | SHA2_224 -> HashDefs.SHA2_224
@@ -150,6 +160,7 @@ let alg_definition = function
   | MD5 -> HashDefs.Legacy HashDefs.MD5
   | _ -> failwith "Algorithm not supported in agile Hashing API"
 
+
 let output_len = function
   | SHA2_224
   | SHA3_224 -> 28
@@ -161,8 +172,10 @@ let output_len = function
   | SHA2_512
   | SHA3_512
   | BLAKE2b -> 64
+  | Keccak_256 -> 32
   | SHA1 -> 20
   | MD5 -> 16
+
 
 let test_agile (v: Bytes.t hash_test) =
   let test_result = test_result ("EverCrypt.Hash " ^ v.name)  in
@@ -187,6 +200,7 @@ let test_agile (v: Bytes.t hash_test) =
   else
     test_result Failure "incremental hash"
 
+
 let test_nonagile (n: string) (v: Bytes.t hash_test) hash hash_noalloc =
   let test_result = test_result (n ^ "." ^ v.name) in
   let digest = Test_utils.init_bytes (output_len v.alg) in
@@ -197,6 +211,7 @@ let test_nonagile (n: string) (v: Bytes.t hash_test) hash hash_noalloc =
     test_result Success ""
   else
     test_result Failure ""
+
 
 module MakeBlake2Tests (M: Blake2) = struct
   let test_nonagile_noalloc (v: Bytes.t blake2_keyed_test) t reqs =
@@ -228,30 +243,64 @@ module MakeBlake2Tests (M: Blake2) = struct
     List.iter (fun v -> test_nonagile v name reqs) tests
 end
 
+
 let test_keccak () =
   let v = test_sha3_256 in
   let test_result = test_result "Keccak/SHAKE" in
-  let sha3_256 = Hacl.Keccak.keccak ~rate:1088 ~capacity:512 ~suffix:(Char.code '\x06') in
+  let sha3_256 = Hacl.Keccak.keccak ~rate:1088 ~capacity:512 ~suffix:6 in
+  let digest = sha3_256 ~pt:v.plaintext ~size:32 in
+
+  let output_shake128 = Hacl.Keccak.shake128 ~pt:v.plaintext ~size:16 in
+
+  let keccak_shake_128 = Hacl.Keccak.keccak ~rate:1344 ~capacity:256 ~suffix:31 in
+  let output_keccak_shake_128 = keccak_shake_128 ~pt:v.plaintext ~size:16 in
+
+  let output_shake256 = Hacl.Keccak.shake256 ~pt:v.plaintext ~size:32 in
+
+  let keccak_shake_256 = Hacl.Keccak.keccak ~rate:1088 ~capacity:512 ~suffix:31 in
+  let output_keccak_shake_256 = keccak_shake_256 ~pt:v.plaintext ~size:32 in
+
+  let keccak_256 = Hacl.Keccak.keccak ~rate:1088 ~capacity:512 ~suffix:1 in
+  let output_keccak_256 = keccak_256 ~pt:keccak256_test.plaintext ~size:32 in
+
+  if Bytes.equal digest v.expected &&
+     Bytes.equal output_shake128 output_keccak_shake_128 &&
+     Bytes.equal output_shake256 output_keccak_shake_256 &&
+     Bytes.equal output_keccak_256 keccak256_test.expected then
+    test_result Success ""
+  else
+    test_result Failure ""
+
+
+let test_keccak_noalloc () =
+  let v = test_sha3_256 in
+  let test_result = test_result "Keccak/SHAKE (noalloc)" in
+  let sha3_256 = Hacl.Keccak.Noalloc.keccak ~rate:1088 ~capacity:512 ~suffix:6 in
   let digest = Test_utils.init_bytes 32 in
   sha3_256 ~pt:v.plaintext ~digest;
 
   let output_shake128 = Test_utils.init_bytes 16 in
-  Hacl.Keccak.shake128 ~pt:v.plaintext ~digest:output_shake128;
+  Hacl.Keccak.Noalloc.shake128 ~pt:v.plaintext ~digest:output_shake128;
 
-  let keccak_128 = Hacl.Keccak.keccak ~rate:1344 ~capacity:256 ~suffix:(Char.code '\x1f') in
-  let output_keccak_128 = Test_utils.init_bytes 16 in
-  keccak_128 ~pt:v.plaintext ~digest:output_keccak_128;
+  let keccak_shake_128 = Hacl.Keccak.Noalloc.keccak ~rate:1344 ~capacity:256 ~suffix:31 in
+  let output_keccak_shake_128 = Test_utils.init_bytes 16 in
+  keccak_shake_128 ~pt:v.plaintext ~digest:output_keccak_shake_128;
 
   let output_shake256 = Test_utils.init_bytes 32 in
-  Hacl.Keccak.shake256 ~pt:v.plaintext ~digest:output_shake256;
+  Hacl.Keccak.Noalloc.shake256 ~pt:v.plaintext ~digest:output_shake256;
 
-  let keccak_256 = Hacl.Keccak.keccak ~rate:1088 ~capacity:512 ~suffix:(Char.code '\x1f') in
+  let keccak_shake_256 = Hacl.Keccak.Noalloc.keccak ~rate:1088 ~capacity:512 ~suffix:31 in
+  let output_keccak_shake_256 = Test_utils.init_bytes 32 in
+  keccak_shake_256 ~pt:v.plaintext ~digest:output_keccak_shake_256;
+
+  let keccak_256 = Hacl.Keccak.Noalloc.keccak ~rate:1088 ~capacity:512 ~suffix:1 in
   let output_keccak_256 = Test_utils.init_bytes 32 in
-  keccak_256 ~pt:v.plaintext ~digest:output_keccak_256;
+  keccak_256 ~pt:keccak256_test.plaintext ~digest:output_keccak_256;
 
   if Bytes.equal digest v.expected &&
-     Bytes.equal output_shake128 output_keccak_128 &&
-     Bytes.equal output_shake256 output_keccak_256 then
+     Bytes.equal output_shake128 output_keccak_shake_128 &&
+     Bytes.equal output_shake256 output_keccak_shake_256 &&
+     Bytes.equal output_keccak_256 keccak256_test.expected then
     test_result Success ""
   else
     test_result Failure ""
@@ -296,4 +345,5 @@ let _ =
   let module Tests = MakeBlake2Tests (Hacl.Blake2s_128) in
   Tests.run_tests "BLAKE2s_128" blake2s_keyed_tests [VEC128];
 
-  test_keccak ()
+  test_keccak ();
+  test_keccak_noalloc ()

@@ -219,17 +219,31 @@ The [digest] buffer must match the digest size of SHA3-512, which is 64 bytes.
 *)
 
 module Keccak : sig
-  val shake128 : pt:bytes -> digest:bytes -> unit
-  (** [shake128 pt digest] hashes [pt] using SHAKE-128 and outputs the result in [digest]. *)
+  val shake128 : pt:bytes -> size:int -> bytes
+  (** [shake128 pt size] hashes [pt] using SHAKE-128 and returns a digest of [size] bytes. *)
 
-  val shake256 : pt:bytes -> digest:bytes -> unit
-  (** [shake256 pt digest] hashes [pt] using SHAKE-256 and outputs the result in [digest]. *)
+  val shake256 : pt:bytes -> size:int -> bytes
+  (** [shake256 pt size] hashes [pt] using SHAKE-256 and returns a digest of [size] bytes. *)
 
-  val keccak : rate:int -> capacity:int -> suffix:int -> pt:bytes -> digest:bytes -> unit
+  val keccak : rate:int -> capacity:int -> suffix:int -> pt:bytes -> size:int -> bytes
+  (** Direct access to the general Keccak function, of which all the SHA-3 and SHAKE functions
+      are {{:https://en.wikipedia.org/wiki/SHA-3#Instances}instances}. While the library
+      does run some sanity checks for the parameters, users should be extremely careful
+      if using the Keccak function directly. *)
+
+  module Noalloc : sig
+    val shake128 : pt:bytes -> digest:bytes -> unit
+    (** [shake128 pt size] hashes [pt] using SHAKE-128 and returns a digest of [size] bytes. *)
+
+    val shake256 : pt:bytes -> digest:bytes -> unit
+    (** [shake256 pt digest] hashes [pt] using SHAKE-256 and outputs the result in [digest]. *)
+
+    val keccak : rate:int -> capacity:int -> suffix:int -> pt:bytes -> digest:bytes -> unit
     (** Direct access to the general Keccak function, of which all the SHA-3 and SHAKE functions
         are {{:https://en.wikipedia.org/wiki/SHA-3#Instances}instances}. While the library
         does run some sanity checks for the parameters, users should be extremely careful
         if using the Keccak function directly. *)
+  end
 end
 (** SHAKE-128, SHAKE-256, and the general Keccak function
 
