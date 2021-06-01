@@ -9,10 +9,10 @@ open Lib.Sequence
 open Lib.Buffer
 
 module F56 = Hacl.Impl.BignumQ.Mul
+module Hash = Hacl.Streaming.SHA2
 
-#reset-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-//FIX
 val sha512_pre_msg:
     hash:lbuffer uint8 64ul
   -> prefix:lbuffer uint8 32ul
@@ -28,16 +28,20 @@ val sha512_pre_msg:
     )
 
 [@CInline]
-let sha512_pre_msg h prefix len input =
+let sha512_pre_msg hash prefix len input =
   push_frame ();
-  assert_norm(pow2 32 <= pow2 125 - 1);
-  let pre_msg = create (len +. 32ul) (u8 0) in
-  concat2 32ul prefix len input pre_msg;
-  Hacl.Hash.SHA2.hash_512_lib (len +. 32ul) pre_msg h;
+  let h0 = ST.get () in
+  let st = Hash.alloca_512 () in
+  Hash.update_512 st prefix 32ul;
+  Hash.update_512 st input len;
+  Hash.finish_512 st hash;
+  let h1 = ST.get () in
+  assert (as_seq h1 hash == Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512
+    (Seq.append (Seq.append (Seq.empty) (as_seq h0 prefix)) (as_seq h0 input)));
+  Seq.append_empty_l (as_seq h0 prefix);
   pop_frame ()
 
 
-//FIX
 val sha512_pre_pre2_msg:
     hash:lbuffer uint8 64ul
   -> prefix:lbuffer uint8 32ul
@@ -58,12 +62,15 @@ val sha512_pre_pre2_msg:
     )
 
 [@CInline]
-let sha512_pre_pre2_msg h prefix prefix2 len input =
+let sha512_pre_pre2_msg hash prefix prefix2 len input =
   push_frame ();
-  let pre_msg = create (len +. 64ul) (u8 0) in
-  assert_norm(pow2 32 <= pow2 125 - 1);
-  concat3 32ul prefix 32ul prefix2 len input pre_msg;
-  Hacl.Hash.SHA2.hash_512_lib (len +. 64ul) pre_msg h;
+  let h0 = ST.get () in
+  let st = Hash.alloca_512 () in
+  Hash.update_512 st prefix 32ul;
+  Hash.update_512 st prefix2 32ul;
+  Hash.update_512 st input len;
+  Hash.finish_512 st hash;
+  Seq.append_empty_l (as_seq h0 prefix);
   pop_frame ()
 
 
