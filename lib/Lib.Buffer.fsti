@@ -79,7 +79,7 @@ let const_to_lbuffer #a #len (b:clbuffer a len{CB.qual_of (b <: cbuffer a) == CB
 let const_to_ilbuffer #a #len (b:glbuffer a len)  : r:ilbuffer a len =
   const_to_ibuffer #a b
 
-unfold let null (ty : buftype) (a : Type0) : buffer_t ty a =
+unfold let null (#ty : buftype) (a : Type0) : buffer_t ty a =
   match ty with
   | IMMUT -> IB.inull #a
   | MUT -> B.null #a
