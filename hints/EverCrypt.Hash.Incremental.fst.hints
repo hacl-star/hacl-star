@@ -51,7 +51,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer"
       ],
       0,
-      "a901b73b64b01bec4d71776c174f8477"
+      "c4ca5dd442c295e61872ec10951cbccd"
     ],
     [
       "EverCrypt.Hash.Incremental.mk_words_state",
@@ -90,7 +90,7 @@
         "unit_typing"
       ],
       0,
-      "c1ea11eb7083692ad380e44f6a8669a4"
+      "7c8604a026319a74e7bf5a557ef17492"
     ],
     [
       "EverCrypt.Hash.Incremental.evercrypt_hash",
@@ -100,10 +100,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Spec.Hash.Definitions_interpretation_Tm_arrow_3ac874e39b1c409ba69a2358a6f73691",
-        "b2t_def", "bool_inversion",
-        "constructor_distinct_FStar.Integers.Signed",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565", "b2t_def",
+        "bool_inversion", "constructor_distinct_FStar.Integers.Signed",
         "constructor_distinct_FStar.Integers.W128",
         "constructor_distinct_FStar.Integers.W16",
         "constructor_distinct_FStar.Integers.W32",
@@ -206,7 +204,6 @@
         "equation_Spec.Hash.Definitions.to_blake_alg",
         "equation_Spec.Hash.Definitions.to_hash_alg",
         "equation_Spec.Hash.Definitions.word_length",
-        "equation_Spec.Hash.Definitions.word_t",
         "equation_Spec.Hash.Definitions.words_state",
         "equation_Spec.Hash.Incremental.hash",
         "equation_Spec.Hash.Incremental.hash_incremental",
@@ -222,7 +219,6 @@
         "fuel_guarded_inversion_Spec.Hash.Definitions.hash_alg",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.__cache_version_number__",
-        "function_token_typing_Spec.Hash.Definitions.words_state_",
         "int_inversion", "int_typing",
         "interpretation_Tm_abs_7db19245573865e2013f96b9787edb72",
         "interpretation_Tm_abs_b2e90973e02ca16cb7aa657b99901054",
@@ -304,17 +300,14 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__invariant",
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__s",
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__v",
-        "token_correspondence_Spec.Hash.Definitions.words_state_",
         "true_interp", "typing_EverCrypt.Hash.Incremental.block_len",
         "typing_EverCrypt.Hash.Incremental.hash_len",
         "typing_EverCrypt.Hash.state_s", "typing_FStar.Ghost.reveal",
-        "typing_FStar.Pervasives.Native.snd", "typing_FStar.Seq.Base.length",
-        "typing_FStar.UInt.fits", "typing_FStar.UInt.max_int",
+        "typing_FStar.Seq.Base.length", "typing_FStar.UInt.fits",
         "typing_FStar.UInt32.v", "typing_FStar.UInt64.v",
         "typing_Hacl.Streaming.MD.max_input_length64",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.cast",
-        "typing_Lib.IntTypes.maxint", "typing_Lib.IntTypes.minint",
-        "typing_Lib.IntTypes.mk_int",
+        "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
         "typing_Lib.IntTypes.op_At_Percent_Dot",
         "typing_Lib.IntTypes.unsigned", "typing_Lib.IntTypes.v",
         "typing_LowStar.Buffer.trivial_preorder",
@@ -323,11 +316,9 @@
         "typing_Spec.Blake2.wt",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Hash.Definitions.block_length",
-        "typing_Spec.Hash.Definitions.extra_state",
         "typing_Spec.Hash.Definitions.extra_state_int_type",
         "typing_Spec.Hash.Definitions.is_blake",
         "typing_Spec.Hash.Definitions.max_extra_state",
-        "typing_Spec.Hash.Definitions.word_t",
         "typing_Spec.Hash.Incremental.hash",
         "typing_Spec.Hash.Incremental.hash_incremental",
         "typing_Spec.Hash.Incremental.split_blocks",
@@ -340,7 +331,7 @@
         "typing_tok_Spec.Hash.Definitions.Blake2S@tok", "unit_inversion"
       ],
       0,
-      "cd81333fa792b5b17162623f8f3d7e13"
+      "3a069c5a2460eeb7af30ee9d3b3e24c6"
     ],
     [
       "EverCrypt.Hash.Incremental.create_in",
@@ -371,7 +362,7 @@
         "unit_typing"
       ],
       0,
-      "e264f6ee54013c368d8dce3f2ad39149"
+      "17e801abaa3b4a14378f01bf432e0cbf"
     ],
     [
       "EverCrypt.Hash.Incremental.init",
@@ -402,7 +393,7 @@
         "unit_typing"
       ],
       0,
-      "518c3feb945073f2f51d00b0d7568315"
+      "9d1a963d7de824d44301f8bb3ccbca2d"
     ],
     [
       "EverCrypt.Hash.Incremental.update",
@@ -432,7 +423,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "84853f1075f1788eb4d4cb2a2aa16021"
+      "1d017a8b01481387ea1bc52d26e594d9"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_st",
@@ -462,7 +453,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "c08d19a4c81bf52b6be63497c8d5b614"
+      "92d1231e6104f9589589939e02cb256d"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_md5",
@@ -493,7 +484,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "76b91a825aeb7fccd6cf797eca0440ee"
+      "6f38febc6a65daa4ba8d7f1b0a91476e"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha1",
@@ -524,7 +515,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "14cc047bf9ac7c81a8bc9a4a9ef27d04"
+      "cc4488115dae41ef6f16af38db18a341"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha224",
@@ -555,7 +546,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "bd23b0c44d175a8aad6954002fbfd0d1"
+      "b68d7be4c5ee8c4a775283d0303278c5"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha256",
@@ -586,7 +577,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "42fcd919c4441464a577f02962df2843"
+      "894e0426ecc1178d98154151b60e253e"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha384",
@@ -617,7 +608,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "c61880384865299af402e3b74a8082fc"
+      "65146f598e1c1956de3ed56f325eb0f5"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_sha512",
@@ -648,7 +639,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "19e97b41bfd44d976fdda14e1df87954"
+      "f578a8ffa13de5ade290db438b272fd0"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_blake2s",
@@ -679,7 +670,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "9ddf7ca465d009df984d15b607679469"
+      "07ccfb79e357b2cff226ecc41120d716"
     ],
     [
       "EverCrypt.Hash.Incremental.finish_blake2b",
@@ -710,7 +701,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "3877f9d51b2cee415452aa5f86032fe1"
+      "a05444b3c635cfc1b2a8f73710676cbe"
     ],
     [
       "EverCrypt.Hash.Incremental.alg_of_state",
@@ -740,7 +731,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "56383513fe9a0e10abd9e43b7472feee"
+      "7e3921b0c080d8cb601b2709b9537d02"
     ],
     [
       "EverCrypt.Hash.Incremental.finish",
@@ -770,7 +761,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "a7bb28efed880395cd3e0f48ac785197"
+      "b2c8acd39a4507ef54f1dc8fefd367b8"
     ],
     [
       "EverCrypt.Hash.Incremental.finish",
@@ -833,7 +824,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "e5ce41110b4dbd2438e9d4a9c5bf84fa"
+      "4874aceb9ee96fd10801ac82c439834c"
     ],
     [
       "EverCrypt.Hash.Incremental.state",
@@ -863,7 +854,7 @@
         "token_correspondence_Hacl.Streaming.Interface.__proj__Stateful__item__t"
       ],
       0,
-      "e1f38e9da930791fa46b23b450810b83"
+      "510912a7b1b8d96b8d35e0e5a701fbad"
     ]
   ]
 ]

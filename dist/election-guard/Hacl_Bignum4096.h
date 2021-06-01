@@ -34,6 +34,7 @@ extern "C" {
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+#include "kremlin/internal/builtin.h"
 
 
 #include "Hacl_Kremlib.h"
@@ -207,16 +208,14 @@ Heap-allocate and initialize a montgomery context.
   The caller will need to call Hacl_Bignum4096_mont_ctx_free on the return value
   to avoid memory leaks.
 */
-Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t
-*Hacl_Bignum4096_mont_ctx_init(uint64_t *n);
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum4096_mont_ctx_init(uint64_t *n);
 
 /*
 Deallocate the memory previously allocated by Hacl_Bignum4096_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
 */
-void
-Hacl_Bignum4096_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k);
+void Hacl_Bignum4096_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k);
 
 /*
 Write `a mod n` in `res`.
@@ -227,7 +226,7 @@ Write `a mod n` in `res`.
 */
 void
 Hacl_Bignum4096_mod_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint64_t *res
 );
@@ -253,7 +252,7 @@ Write `a ^ b mod n` in `res`.
 */
 void
 Hacl_Bignum4096_mod_exp_vartime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
@@ -281,7 +280,7 @@ Write `a ^ b mod n` in `res`.
 */
 void
 Hacl_Bignum4096_mod_exp_consttime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
@@ -302,7 +301,7 @@ Write `a ^ (-1) mod n` in `res`.
 */
 void
 Hacl_Bignum4096_mod_inv_prime_vartime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint64_t *res
 );
