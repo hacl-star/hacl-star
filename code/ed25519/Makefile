@@ -16,6 +16,7 @@ dist/libed25519.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
 HASH_BUNDLE=-bundle Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash]
+STREAMING_BUNDLE=-bundle Hacl.Streaming.*
 BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*'
 CURVE_BUNDLE=-bundle Hacl.Impl.Curve25519.Field51[rename=Hacl_Bignum25519_51] -static-header Hacl.Impl.Curve25519.Field51 \
 	-bundle Hacl.Curve25519_51,Hacl.Impl.Curve25519.Field51,Hacl.Impl.Curve25519.*[rename=Hacl_Curve25519]
@@ -23,7 +24,7 @@ CURVE_BUNDLE=-bundle Hacl.Impl.Curve25519.Field51[rename=Hacl_Bignum25519_51] -s
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libed25519.a \
 	-bundle Lib.PrintBuffer= \
-	$(BASE_FLAGS) $(HASH_BUNDLE) $(BLAKE2_BUNDLE) \
+	$(BASE_FLAGS) $(HASH_BUNDLE) $(STREAMING_BUNDLE) $(BLAKE2_BUNDLE) \
 	$(CURVE_BUNDLE) $(BIGNUM_BUNDLE) $(ED_BUNDLE) \
 	-tmpdir dist \
 	-no-prefix 'Hacl.Test.Ed25519' \

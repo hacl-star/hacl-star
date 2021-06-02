@@ -918,7 +918,8 @@ dist/ccf/Makefile.basic: \
     -bundle EverCrypt.Helpers \
     -bundle EverCrypt.Poly1305 \
     -bundle EverCrypt.Chacha20Poly1305 \
-    -bundle EverCrypt.AEAD
+    -bundle EverCrypt.AEAD \
+    -bundle EverCrypt.Ed25519
 dist/ccf/Makefile.basic: INTRINSIC_FLAGS=
 dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/vale/asm/aes-% dist/vale/poly1305-%,$(VALE_ASMS))
 dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
@@ -926,6 +927,7 @@ dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c 
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
 dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
+dist/ccf/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519
 dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS
