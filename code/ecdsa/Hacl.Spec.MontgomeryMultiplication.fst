@@ -524,4 +524,4 @@ let lemma_modular_multiplication_2_d #c a b =
 
 let lemma_pointAtInfInDomain #c x y z =
   lemmaFromDomain #c #DH z;
-  lemma_multiplication_not_mod_prime #c z
+  Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c z

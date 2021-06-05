@@ -53,7 +53,7 @@ let uploadOne #c gen b =
   copy zeroP gen 
   
 
-val generatePrecomputedTableRadix: #c: curve 
+val generatePrecomputedTableWNAF: #c: curve 
   -> generator: point c
   -> b: lbuffer uint64 (getPointLenU64 c *. lenPrecompWnaf) -> 
   Stack unit  
@@ -61,5 +61,53 @@ val generatePrecomputedTableRadix: #c: curve
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ post_precomp_wnaf #c (as_seq h1 b) (as_seq h0 generator))
 
 
-let generatePrecomputedTableRadix #c generator b = admit()
+let generatePrecomputedTableWNAF #c generator b = admit()
 
+
+val subborrow_u64: x:uint64 -> y:uint64 -> r:lbuffer uint64 (size 1) ->
+  Stack uint64
+  (requires fun h -> live h r)
+  (ensures  fun h0 c h1 -> modifies1 r h0 h1 /\ (let r = Seq.index (as_seq h1 r) 0 in v r - v c * pow2 64 == v x - v y))
+
+let subborrow_u64 x y r = 
+  admit();
+  let x1 = to_u128 x -. to_u128 y in 
+  let x2 = logand x1 (u128 0xffffffffffffffff) in 
+  let x3 = shift_right x1 (size 64) in
+  upd r (size 0) (to_u64 x2);
+  (u64 0) -. (to_u64 x3)
+
+
+open Lib.RawIntTypes
+
+
+assume val mod2w: d: uint8 -> Tot uint8
+
+
+val scalar_wnaf_step: #c: curve -> window: lbuffer uint8 (size 1) 
+  -> out: lbuffer uint8 (getScalarLen c +! 1ul) -> i: size_t {v i < v (getScalarLen c +! 1ul)} ->
+  Stack unit 
+    (requires fun h -> live h window)
+    (ensures fun h0 _ h1 -> True)
+
+let scalar_wnaf_step #c window out i = 
+  let window = index window (size 0) in 
+  let windowMod2 = u8_to_UInt8 (logand window 1uy) in
+  let windowMod2Zero = FStar.UInt8.eq windowMod2 (FStar.UInt8 .(0uy)) in 
+  let d = if windowMod2Zero then 0ul else mod2w window in 
+  upd out i d
+  
+
+
+
+
+val scalar_wnaf: #c: curve
+  -> out: lbuffer uint8 (getScalarLen c +! 1ul) 
+  -> scalar: scalar_t #MUT #c 
+  -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let scalar_wnaf #c out scalar = 
+  let windowStart = index scalar (getScalarLenBytes c -! 1ul) in 
+  ()

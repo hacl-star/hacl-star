@@ -16,7 +16,7 @@ open Spec.ECC.Curves
 open Hacl.Spec.MontgomeryMultiplication
 open FStar.Mul
 
-
+inline_for_extraction
 val point_add_c: #c: curve -> p: point c -> q: point c -> result: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
    Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 

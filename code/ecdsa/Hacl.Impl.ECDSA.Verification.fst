@@ -286,7 +286,8 @@ val ecdsa_verification_step5_2: #c: curve
 let ecdsa_verification_step5_2 #c result pubKeyAsPoint u1 u2 tempBuffer =
     let h0 = ST.get() in 
   push_frame(); 
-    let points = create (getCoordinateLenU64 c *! 6ul) (u64 0) in 
+    let len: FStar.UInt32.t = getCoordinateLenU64 c in 
+    let points = create (len *! 6ul) (u64 0) in 
     let h1 = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint;
   ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer; 
@@ -330,7 +331,8 @@ val ecdsa_verification_step5: #c: curve
 let ecdsa_verification_step5 #c x pubKeyAsPoint u1 u2 tempBuffer =
   let h0 = ST.get() in 
     push_frame();
-    let result = create (getCoordinateLenU64 c *! size 3) (u64 0) in
+        let len: FStar.UInt32.t = getCoordinateLenU64 c in 
+    let result = create (len *! size 3) (u64 0) in
   let h1 = ST.get() in 
       Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint;
   ecdsa_verification_step5_2 result pubKeyAsPoint u1 u2 tempBuffer;
@@ -341,7 +343,7 @@ let ecdsa_verification_step5 #c x pubKeyAsPoint u1 u2 tempBuffer =
   pop_frame();
   not resultIsPAI
 
-
+inline_for_extraction
 val ecdsa_verification_step45:  #c: curve 
   -> u1: scalar_t #MUT #c
   -> u2: scalar_t #MUT #c
@@ -429,7 +431,8 @@ let ecdsa_verification_core_ #c alg pubKeyAsPoint hashAsFelem r s mLen m x tempB
     assert_norm (pow2 32 < pow2 125);
     let h0 = ST.get() in 
   push_frame();
-    let tempBufferU8 = create (size 2 *! getCoordinateLenU c) (u8 0) in
+      let len: FStar.UInt32.t = getCoordinateLenU64 c in 
+    let tempBufferU8 = create (size 2 *! len) (u8 0) in
     let u1 = sub tempBufferU8 (size 0) (getCoordinateLenU c) in
     let u2 = sub tempBufferU8 (getCoordinateLenU c) (getCoordinateLenU c) in
   ecdsa_verification_step23 alg mLen m hashAsFelem;
@@ -439,7 +442,7 @@ let ecdsa_verification_core_ #c alg pubKeyAsPoint hashAsFelem r s mLen m x tempB
   pop_frame();
   r
 
-
+inline_for_extraction
 [@ (Comment "  This code is not side channel resistant")] 
 val ecdsa_verification_core: #c: curve 
   -> alg: hash_alg_ecdsa
@@ -485,7 +488,7 @@ let ecdsa_verification_core #c alg pubKey r s mLen m publicKeyBuffer hashAsFelem
       else cmp_felem_felem_bool #c x r
 
 
-[@ (Comment "  This code is not side channel resistant")] 
+inline_for_extraction
 val ecdsa_verification_: #c: curve 
   -> alg: hash_alg_ecdsa
   -> pubKey: pointAffine c

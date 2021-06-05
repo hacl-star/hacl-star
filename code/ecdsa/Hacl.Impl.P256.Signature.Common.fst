@@ -184,7 +184,7 @@ let isPointOnCurvePublic #c p =
   lemma_modular_multiplication_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % (getPrime c)) 
     (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % (getPrime c));
     
-  let r = compare_felem #c y2Buffer xBuffer in 
+  let r = cmp_felem_felem_u64 #c y2Buffer xBuffer in 
   let z = not (eq_0_u64 r) in 
   pop_frame();
   z

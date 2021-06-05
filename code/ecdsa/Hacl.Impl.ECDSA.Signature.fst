@@ -41,7 +41,7 @@ open Hacl.Spec.MontgomeryMultiplication
 (* 
 Let {\displaystyle z}z be the {\displaystyle L_{n}}L_{n} leftmost bits of {\displaystyle e}e, where {\displaystyle L_{n}}L_{n} is the bit length of the group order {\displaystyle n}n. (Note that {\displaystyle z}z can be greater than {\displaystyle n}n but not longer.[2])
 *)
-
+inline_for_extraction
 val ecdsa_signature_step12: 
   #c: curve 
   -> alg:hash_alg_ecdsa
@@ -125,7 +125,7 @@ let ecdsa_signature_step12 #c alg mLen m result =
 
 
 #push-options "--ifuel 1"
-
+inline_for_extraction
 val ecdsa_signature_step45: #c: curve
   -> x: felem c
   -> k: scalar_t #MUT #c
@@ -153,7 +153,7 @@ let ecdsa_signature_step45 #c x k tempBuffer =
 
 
 #pop-options
-
+inline_for_extraction
 val ecdsa_signature_step6: #c: curve -> result: felem c -> kFelem: felem c -> z: felem  c -> r: felem c -> da: felem c -> 
   Stack unit
   (requires fun h -> 
@@ -238,7 +238,8 @@ let ecdsa_signature_step6 #c result kFelem z r da =
    (==) {lemmaToDomainFromDomainModuloPrime #c #DSA ((r * da + z) * pow k (order - 2))}
      ((r * da + z) * pow k (order - 2)) % order;
   }
-
+  
+inline_for_extraction
 val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
   -> r: felem  c
   -> s: felem c
