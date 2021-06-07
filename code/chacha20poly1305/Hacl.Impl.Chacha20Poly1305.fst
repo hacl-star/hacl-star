@@ -201,12 +201,12 @@ val aead_decrypt: #w:field_spec -> aead_decrypt_st w
 [@ Meta.Attribute.specialize ]
 let aead_decrypt #w k n aadlen aad mlen m cipher mac =
   push_frame();
-  let h0 = get() in
+  let h0 = ST.get() in
   // Create a buffer to store the temporary mac
   let computed_mac = create 16ul (u8 0) in
   // Compute the expected mac using Poly1305
   derive_key_poly1305_do #w k n aadlen aad mlen cipher computed_mac;
-  let h1 = get() in
+  let h1 = ST.get() in
   let res =
     if lbytes_eq computed_mac mac then (
       assert (BSeq.lbytes_eq (as_seq h1 computed_mac) (as_seq h1 mac));

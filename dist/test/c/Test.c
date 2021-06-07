@@ -7991,12 +7991,12 @@ hmac_drbg_vectors_low176[255U] =
     (uint8_t)251U, (uint8_t)239U, (uint8_t)172U
   };
 
-typedef struct __Test_NoHeap_vec8_Test_NoHeap_vec8_s
+typedef struct __Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8_s
 {
   vec8 fst;
   vec8 snd;
 }
-__Test_NoHeap_vec8_Test_NoHeap_vec8;
+__Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8;
 
 typedef struct hmac_drbg_vector_s
 {
@@ -8006,7 +8006,7 @@ typedef struct hmac_drbg_vector_s
   vec8 f3;
   vec8 f4;
   vec8 f5;
-  __Test_NoHeap_vec8_Test_NoHeap_vec8 f6;
+  __Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8 f6;
   vec8 f7;
 }
 hmac_drbg_vector;

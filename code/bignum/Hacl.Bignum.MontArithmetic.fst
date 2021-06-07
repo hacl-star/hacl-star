@@ -28,6 +28,8 @@ friend Hacl.Spec.Bignum.MontArithmetic
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let _align_fsti = ()
+
 let bn_field_get_len #t k =
   let open LowStar.BufferOps in
   let k1 = !*k in
