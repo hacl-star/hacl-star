@@ -225,6 +225,7 @@ let montgomery_multiplication_reduction_dh #c t result = montgomery_multiplicati
 
 let montgomery_multiplication_reduction_dsa #c t result = montgomery_multiplication_reduction #c DSA t result
 
+
 inline_for_extraction noextract
 val montgomery_multiplication_buffer_by_one: #c: curve -> m: mode -> a: felem c -> result: felem c -> 
   Stack unit
@@ -260,7 +261,46 @@ let montgomery_multiplication_buffer_by_one #c m a result =
   lemmaFromDomain #c #m (as_nat c h0 a)
 
 
-let montgomery_multiplication_buffer_by_one_dh #c a result = montgomery_multiplication_buffer_by_one #c DH a result
+val montgomery_multiplication_buffer_by_one_dh_p256: a: felem P256 -> result: felem P256 -> 
+  Stack unit
+  (requires (fun h -> live h a /\ felem_eval P256 h a /\ live h result)) 
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    let prime = getPrime P256 in 
+    as_nat P256 h1 result = (as_nat P256 h0 a * modp_inv2_prime (pow2 (getPower P256)) prime) % prime /\
+    as_nat P256 h1 result = fromDomain_ #P256 #DH (as_nat P256 h0 a))))
+
+let montgomery_multiplication_buffer_by_one_dh_p256 a result = montgomery_multiplication_buffer_by_one #P256 DH a result
+
+
+val montgomery_multiplication_buffer_by_one_dh_p384: a: felem P384 -> result: felem P384 -> 
+  Stack unit
+  (requires (fun h -> live h a /\ felem_eval P384 h a /\ live h result)) 
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    let prime = getPrime P384 in 
+    as_nat P384 h1 result = (as_nat P384 h0 a * modp_inv2_prime (pow2 (getPower P384)) prime) % prime /\
+    as_nat P384 h1 result = fromDomain_ #P384 #DH (as_nat P384 h0 a))))
+
+let montgomery_multiplication_buffer_by_one_dh_p384 a result = montgomery_multiplication_buffer_by_one #P384 DH a result
+
+
+val montgomery_multiplication_buffer_by_one_dh_generic: a: felem Default -> result: felem Default -> 
+  Stack unit
+  (requires (fun h -> live h a /\ felem_eval Default h a /\ live h result)) 
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    let prime = getPrime Default in 
+    as_nat Default h1 result = (as_nat Default h0 a * modp_inv2_prime (pow2 (getPower Default)) prime) % prime /\
+    as_nat Default h1 result = fromDomain_ #Default #DH (as_nat Default h0 a))))
+
+let montgomery_multiplication_buffer_by_one_dh_generic a result = montgomery_multiplication_buffer_by_one #Default DH a result
+
+
+let montgomery_multiplication_buffer_by_one_dh #c a result = 
+  match c with 
+  |P256 -> montgomery_multiplication_buffer_by_one_dh_p256 a result
+  |P384 -> montgomery_multiplication_buffer_by_one_dh_p384 a result
+  |Default -> montgomery_multiplication_buffer_by_one_dh_generic a result
+
+
 
 let montgomery_multiplication_buffer_by_one_dsa #c a result = montgomery_multiplication_buffer_by_one #c DSA a result
 

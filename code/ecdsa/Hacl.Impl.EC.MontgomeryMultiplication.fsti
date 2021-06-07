@@ -36,7 +36,7 @@ val montgomery_multiplication_reduction_dsa: #c: curve
     as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c #DSA (wide_as_nat c h0 t))))
 
-[@CInline]
+inline_for_extraction noextract
 val montgomery_multiplication_buffer_by_one_dh: #c: curve -> a: felem c -> result: felem c -> 
   Stack unit
   (requires (fun h -> live h a /\ felem_eval c h a /\ live h result)) 
