@@ -21,7 +21,7 @@ friend Hacl.Spec.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"
 
-[@ CInline]
+inline_for_extraction noextract
 val cswap: #c: curve -> #m: mode -> bit:uint64{v bit <= 1} -> p: felem c -> q: felem c -> 
   Stack unit
   (requires fun h -> as_nat c h p < getModePrime m c /\ as_nat c h q < getModePrime m c /\ 

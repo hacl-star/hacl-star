@@ -34,7 +34,7 @@ let supportsReducedMultiplication #c =
   assert_norm (exp #(pow2 64) 1 (pow2 64 - 1) == 1);
   r
 
-[@CInline]
+inline_for_extraction noextract
 val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> t2: widefelem c -> 
   Stack unit
   (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
@@ -48,7 +48,7 @@ let montgomery_multiplication_round_w_k0 #c t t2 =
   short_mul_prime t1 t2;
   lemma_mult_lt_left (getPrime c) (wide_as_nat c h0 t % pow2 64) (pow2 64)
 
-[@CInline]
+inline_for_extraction noextract
 val montgomery_multiplication_round_k0: #c: curve -> k0: uint64 -> t: widefelem c -> 
   t2: widefelem c -> 
   Stack unit

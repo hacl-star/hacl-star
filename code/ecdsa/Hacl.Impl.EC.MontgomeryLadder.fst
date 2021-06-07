@@ -25,7 +25,7 @@ open Hacl.Spec.MontgomeryMultiplication
 
 #set-options " --z3rlimit 200"
 
-[@CInline]
+inline_for_extraction noextract
 val scalar_bit: #c: curve 
   -> #buf_type: buftype 
   -> s:lbuffer_t buf_type uint8 (getScalarLenBytes c) 
@@ -83,7 +83,7 @@ let lemma_point_as_nat #c h h1 p q =
   lemma_equal_lseq_equal_nat (as_seq h pZ) (as_seq h1 qZ)
 
 
-[@ CInline]
+inline_for_extraction noextract
 val cswap: #c: curve -> bit:uint64{v bit <= 1} -> p:point c -> q:point c-> 
   Stack unit
   (requires fun h -> live h p /\ live h q /\ eq_or_disjoint p q /\ point_eval c h p /\ point_eval c h q /\

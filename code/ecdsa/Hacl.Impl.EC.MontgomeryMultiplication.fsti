@@ -14,7 +14,7 @@ open Spec.ECC.Curves
 
 open FStar.Mul
 
-[@CInline]
+inline_for_extraction noextract
 val montgomery_multiplication_reduction_dh: #c: curve
   -> t: widefelem c 
   -> result: felem c -> 
