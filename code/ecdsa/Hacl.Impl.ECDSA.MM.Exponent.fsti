@@ -17,6 +17,7 @@ open Hacl.Spec.MontgomeryMultiplication
 
 #reset-options " --z3rlimit 200"
 
+inline_for_extraction noextract
 val montgomery_ladder_exponent: #c: curve -> a: felem c -> r: felem c -> Stack unit 
   (requires fun h -> live h a /\ live h r /\ as_nat c h a < getOrder #c)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc r) h0 h1 /\ (

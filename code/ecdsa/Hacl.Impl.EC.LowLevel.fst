@@ -407,8 +407,17 @@ let felem_add #c a b out =
     | Default -> felem_add_generic a b out
 
 
+inline_for_extraction noextract
+val felem_double_: #c: curve -> a: felem c -> out: felem c ->
+  Stack unit
+    (requires (fun h0 ->
+      live h0 a /\ live h0 out /\ eq_or_disjoint a out /\ as_nat c h0 a < getPrime c))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_nat c h1 out == (2 * as_nat c h0 a) % getPrime c /\
+      as_nat c h1 out == toDomain #c (2 * fromDomain #c (as_nat c h0 a) % getPrime c)))
 
-let felem_double #c arg1 out =
+let felem_double_ #c arg1 out =
   let h0 = ST.get() in
 
   let t = add_bn arg1 arg1 out in
@@ -416,6 +425,71 @@ let felem_double #c arg1 out =
 
   additionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg1);
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) + fromDomain #c (as_nat c h0 arg1))
+
+
+val felem_double_p256: a: felem P256 -> out: felem P256 ->
+  Stack unit
+    (requires (fun h0 ->
+      live h0 a /\ live h0 out /\ eq_or_disjoint a out /\ as_nat P256 h0 a < getPrime P256))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_nat P256 h1 out == (2 * as_nat P256 h0 a) % getPrime P256 /\
+      as_nat P256 h1 out == toDomain #P256 (2 * fromDomain #P256 (as_nat P256 h0 a) % getPrime P256)))
+
+let felem_double_p256 arg1 out =
+  let h0 = ST.get() in
+
+  let t = add_bn arg1 arg1 out in
+  reduction_prime_2prime_with_carry_cin t out out;
+
+  additionInDomain #P256 #DH (as_nat P256 h0 arg1) (as_nat P256 h0 arg1);
+  inDomain_mod_is_not_mod #P256 #DH (fromDomain #P256 (as_nat P256 h0 arg1) + fromDomain #P256 (as_nat P256 h0 arg1))
+
+
+val felem_double_p384: a: felem P384 -> out: felem P384 ->
+  Stack unit
+    (requires (fun h0 ->
+      live h0 a /\ live h0 out /\ eq_or_disjoint a out /\ as_nat P384 h0 a < getPrime P384))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_nat P384 h1 out == (2 * as_nat P384 h0 a) % getPrime P384 /\
+      as_nat P384 h1 out == toDomain #P384 (2 * fromDomain #P384 (as_nat P384 h0 a) % getPrime P384)))
+
+let felem_double_p384 arg1 out =
+  let h0 = ST.get() in
+
+  let t = add_bn arg1 arg1 out in
+  reduction_prime_2prime_with_carry_cin t out out;
+
+  additionInDomain #P384 #DH (as_nat P384 h0 arg1) (as_nat P384 h0 arg1);
+  inDomain_mod_is_not_mod #P384 #DH (fromDomain #P384 (as_nat P384 h0 arg1) + fromDomain #P384 (as_nat P384 h0 arg1))
+
+
+val felem_double_generic: a: felem Default -> out: felem Default ->
+  Stack unit
+    (requires (fun h0 ->
+      live h0 a /\ live h0 out /\ eq_or_disjoint a out /\ as_nat Default h0 a < getPrime Default))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_nat Default h1 out == (2 * as_nat Default h0 a) % getPrime Default /\
+      as_nat Default h1 out == toDomain #Default (2 * fromDomain #Default (as_nat Default h0 a) % getPrime Default)))
+
+let felem_double_generic arg1 out =
+  let h0 = ST.get() in
+
+  let t = add_bn arg1 arg1 out in
+  reduction_prime_2prime_with_carry_cin t out out;
+
+  additionInDomain #Default #DH (as_nat Default h0 arg1) (as_nat Default h0 arg1);
+  inDomain_mod_is_not_mod #Default #DH (fromDomain #Default (as_nat Default h0 arg1) + fromDomain #Default (as_nat Default h0 arg1))
+
+
+let felem_double #c arg1 out = 
+  match c with 
+  |P256 -> felem_double_p256 arg1 out
+  |P384 -> felem_double_p384 arg1 out
+  |Default -> felem_double_generic arg1 out
+
 
 #set-options "--fuel 1 --ifuel 1 --z3rlimit 200"
 
