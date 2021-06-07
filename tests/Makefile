@@ -77,13 +77,7 @@ curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 # this allows to work on and test the vectorized instructions without
 # rebuilding the whole HACL library.
 vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
-	$(CC) -I../lib/c $(CFLAGS) $(CFLAGS_128) $(LDFLAGS) \
-	-Wall -Wextra -Werror -std=c11 \
-	-Wno-unused-variable -Wno-unknown-warning-option -Wno-unused-but-set-variable \
-	-Wno-unused-parameter -Wno-infinite-recursion -g -fwrapv -D_BSD_SOURCE \
-	-D_DEFAULT_SOURCE -fPIC -Wno-unused -Wno-parentheses \
-	-Wno-deprecated-declarations -Wno-#warnings -Wno-error=cpp -Wno-cpp -g \
-	-std=gnu11 vec-128-test.c -o vec-128-test.exe
+	$(CC) -I../lib/c $(CFLAGS) $(CFLAGS_128) $(LDFLAGS) vec-128-test.c -o vec-128-test.exe
 
 %.exe: %.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto
