@@ -31,7 +31,7 @@ val fromForm: #c: curve -> i: felem c -> o: coordinateAffine8 c -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  
     as_seq h1 o == nat_to_bytes_be (v (getCoordinateLenU c)) (as_nat c h0 i))
 
-[@CInline]
+inline_for_extraction noextract
 val fromFormPoint: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o /\ point_eval c h i /\ (
     let xCoordinate, yCoordinate, _ = point_as_nat c h i in 
@@ -42,7 +42,7 @@ val fromFormPoint: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit
     as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateX_u64 /\
     as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateY_u64))
 
-[@CInline]
+inline_for_extraction noextract
 val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ (
@@ -54,13 +54,13 @@ val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit
     x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
 
 
-[@CInline]  
+inline_for_extraction noextract
 val isPointAtInfinityPublic: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\ point_eval c h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.ECC.isPointAtInfinity (point_as_nat c h0 p))
 
 
-[@CInline]
+inline_for_extraction noextract
 val isPointOnCurvePublic: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\ felem_eval c h (getX p) /\ felem_eval c h (getY p) /\ as_nat c h (getZ p) == 1)
   (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ r == isPointOnCurve #c (point_as_nat c h0 p))

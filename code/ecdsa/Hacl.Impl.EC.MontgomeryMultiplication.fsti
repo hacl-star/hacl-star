@@ -65,7 +65,7 @@ val montgomery_multiplication_buffer: #c: curve -> m: mode -> a: felem c -> b: f
     as_nat c h1 result = toDomain_ #c #m (fromDomain_ #c #m (as_nat c h0 a) * fromDomain_ #c #m (as_nat c h0 b) % prime) /\
     as_nat c h1 result = toDomain_ #c #m (fromDomain_ #c #m (as_nat c h0 a) * fromDomain_ #c #m (as_nat c h0 b)))))
 
-[@CInline]
+inline_for_extraction noextract
 val montgomery_multiplication_buffer_dh: #c: curve -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ 

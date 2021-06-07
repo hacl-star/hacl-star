@@ -44,7 +44,7 @@ open Hacl.Impl.EC.Masking
 #set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0"
 
 
-[@ (Comment "  This code is not side channel resistant")] 
+inline_for_extraction noextract
 val isMoreThanZeroLessThanOrderMinusOne: #c: curve -> f: felem c -> Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\

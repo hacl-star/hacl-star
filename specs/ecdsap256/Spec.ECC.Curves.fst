@@ -102,7 +102,7 @@ let getPrime curve : prime: pos {prime > 3 /\ FStar.Math.Euclid.is_prime prime /
   match curve with 
   |P256 -> prime256
   |P384 -> prime384
-  |_ -> prime384
+  |_ -> prime256
 
 
 (* the length of each coordinate of the point as uint64 *)
@@ -139,7 +139,7 @@ let getScalarLenWords curve : (a: FStar.UInt32.t {v a > 0}) =
   match curve with
   |P256 -> 4ul
   |P384 -> 6ul
-  |_ -> 1ul
+  |_ -> 4ul
 
 inline_for_extraction
 let getScalarLenBytes curve = 
@@ -178,7 +178,9 @@ inline_for_extraction
 let getOrderLen (c: curve) = 
   match c with
   | P256 -> 32ul
+  | P384 -> 48ul 
   | _ -> 32ul
+
 
 
 (* order of the curves *)

@@ -277,7 +277,57 @@ let montgomery_multiplication_buffer #c m a b result =
     let h1 = ST.get() in 
     lemma_domain #c #m (as_nat c h0 a) (as_nat c h0 b) (as_nat c h1 result)
 
-let montgomery_multiplication_buffer_dh #c a b result = montgomery_multiplication_buffer #c DH a b result
+
+val montgomery_multiplication_buffer_dh_p256: a: felem P256 -> b: felem P256 -> result: felem P256 ->  
+  Stack unit
+  (requires (fun h -> live h a /\ live h b /\ live h result /\ 
+    eq_or_disjoint a b /\ as_nat P256 h a < getModePrime DH P256 /\ as_nat P256 h b < pow2 (getPower P256)))
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P256 h1 result < getModePrime DH P256 /\ (
+    let prime = getModePrime DH P256 in 
+    as_nat P256 h1 result = (as_nat P256 h0 a * as_nat P256 h0 b * modp_inv2_prime (pow2 (getPower P256)) prime) % getPrime P256 /\
+    as_nat P256 h1 result = toDomain_ #P256 #DH (fromDomain_ #P256 #DH (as_nat P256 h0 a) * fromDomain_ #P256 #DH (as_nat P256 h0 b) % prime) /\
+    as_nat P256 h1 result = toDomain_ #P256 #DH (fromDomain_ #P256 #DH (as_nat P256 h0 a) * fromDomain_ #P256 #DH (as_nat P256 h0 b)))))
+
+let montgomery_multiplication_buffer_dh_p256 a b result = 
+    montgomery_multiplication_buffer #P256 DH a b result
+
+
+val montgomery_multiplication_buffer_dh_p384: a: felem P384 -> b: felem P384 -> result: felem P384 ->  
+  Stack unit
+  (requires (fun h -> live h a /\ live h b /\ live h result /\ 
+    eq_or_disjoint a b /\ as_nat P384 h a < getModePrime DH P384 /\ as_nat P384 h b < pow2 (getPower P384)))
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P384 h1 result < getModePrime DH P384 /\ (
+    let prime = getModePrime DH P384 in 
+    as_nat P384 h1 result = (as_nat P384 h0 a * as_nat P384 h0 b * modp_inv2_prime (pow2 (getPower P384)) prime) % getPrime P384 /\
+    as_nat P384 h1 result = toDomain_ #P384 #DH (fromDomain_ #P384 #DH (as_nat P384 h0 a) * fromDomain_ #P384 #DH (as_nat P384 h0 b) % prime) /\
+    as_nat P384 h1 result = toDomain_ #P384 #DH (fromDomain_ #P384 #DH (as_nat P384 h0 a) * fromDomain_ #P384 #DH (as_nat P384 h0 b)))))
+
+let montgomery_multiplication_buffer_dh_p384 a b result = 
+    montgomery_multiplication_buffer #P384 DH a b result
+
+
+val montgomery_multiplication_buffer_dh_generic: a: felem Default -> b: felem Default -> result: felem Default ->  
+  Stack unit
+  (requires (fun h -> live h a /\ live h b /\ live h result /\ 
+    eq_or_disjoint a b /\ as_nat Default h a < getModePrime DH Default /\ as_nat Default h b < pow2 (getPower Default)))
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat Default h1 result < getModePrime DH Default /\ (
+    let prime = getModePrime DH Default in 
+    as_nat Default h1 result = (as_nat Default h0 a * as_nat Default h0 b * modp_inv2_prime (pow2 (getPower Default)) prime) % getPrime Default /\
+    as_nat Default h1 result = toDomain_ #Default #DH (fromDomain_ #Default #DH (as_nat Default h0 a) * fromDomain_ #Default #DH (as_nat Default h0 b) % prime) /\
+    as_nat Default h1 result = toDomain_ #Default #DH (fromDomain_ #Default #DH (as_nat Default h0 a) * fromDomain_ #Default #DH (as_nat Default h0 b)))))
+
+let montgomery_multiplication_buffer_dh_generic a b result = 
+    montgomery_multiplication_buffer #Default DH a b result
+
+
+
+let montgomery_multiplication_buffer_dh #c a b result = 
+  match c with 
+  |P256 -> montgomery_multiplication_buffer_dh_p256 a b result
+  |P384 -> montgomery_multiplication_buffer_dh_p384 a b result
+  |Default -> montgomery_multiplication_buffer_dh_generic a b result
+
+
 
 let montgomery_multiplication_buffer_dsa #c a b result = montgomery_multiplication_buffer #c DSA a b result
 

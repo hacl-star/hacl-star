@@ -131,7 +131,7 @@ let fromDomain #c a = fromDomain_ #c #DH a
 
 let toDomain #c a = toDomain_ #c #DH a
 
-[@CInline]
+inline_for_extraction noextract
 val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
   Stack unit
     (requires (fun h0 ->

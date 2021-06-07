@@ -339,13 +339,73 @@ let reduction_prime_2prime #c x result =
   lseq_upperbound #(v (getCoordinateLenU64 c)) (as_seq h0 x);
   pop_frame()
 
+(** Field Addition **)
+inline_for_extraction
+val felem_add_: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
+  Stack unit
+    (requires (fun h0 ->
+      live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\
+      as_nat c h0 a < getPrime c /\ as_nat c h0 b < getPrime c))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_nat c h1 out == (as_nat c h0 a + as_nat c h0 b) % getPrime c /\
+      as_nat c h1 out == toDomain #c ((fromDomain #c (as_nat c h0 a) + fromDomain #c (as_nat c h0 b)) % getPrime c)))
 
-let felem_add #c arg1 arg2 out =
+let felem_add_ #c arg1 arg2 out =
   let h0 = ST.get() in
   let t = add_bn arg1 arg2 out in
   reduction_prime_2prime_with_carry_cin t out out;
   additionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg2);
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) + fromDomain #c (as_nat c h0 arg2))
+
+
+val felem_add_p256: a: felem P256 -> b: felem P256 -> out: felem P256 ->
+  Stack unit
+    (requires (fun h0 ->
+      live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\
+      as_nat P256 h0 a < getPrime P256 /\ as_nat P256 h0 b < getPrime P256))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_nat P256 h1 out == (as_nat P256 h0 a + as_nat P256 h0 b) % getPrime P256 /\
+      as_nat P256 h1 out == toDomain #P256 ((fromDomain #P256 (as_nat P256 h0 a) + fromDomain #P256 (as_nat P256 h0 b)) % getPrime P256)))
+
+
+let felem_add_p256 a b out = felem_add_ #P256 a b out
+
+val felem_add_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
+  Stack unit
+    (requires (fun h0 ->
+      live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\
+      as_nat P384 h0 a < getPrime P384 /\ as_nat P384 h0 b < getPrime P384))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_nat P384 h1 out == (as_nat P384 h0 a + as_nat P384 h0 b) % getPrime P384 /\
+      as_nat P384 h1 out == toDomain #P384 ((fromDomain #P384 (as_nat P384 h0 a) + fromDomain #P384 (as_nat P384 h0 b)) % getPrime P384)))
+
+
+let felem_add_p384 a b out = felem_add_ #P384 a b out
+
+
+val felem_add_generic: a: felem Default -> b: felem Default -> out: felem Default ->
+  Stack unit
+    (requires (fun h0 ->
+      live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\
+      as_nat Default h0 a < getPrime Default /\ as_nat Default h0 b < getPrime Default))
+    (ensures (fun h0 _ h1 ->
+      modifies (loc out) h0 h1 /\
+      as_nat Default h1 out == (as_nat Default h0 a + as_nat Default h0 b) % getPrime Default /\
+      as_nat Default h1 out == toDomain #Default ((fromDomain #Default (as_nat Default h0 a) + fromDomain #Default (as_nat Default h0 b)) % getPrime Default)))
+
+
+let felem_add_generic a b out = felem_add_ #Default a b out
+
+
+let felem_add #c a b out = 
+   match c with
+    | P256 -> felem_add_p256 a b out
+    | P384 -> felem_add_p384 a b out
+    | Default -> felem_add_generic a b out
+
 
 
 let felem_double #c arg1 out =

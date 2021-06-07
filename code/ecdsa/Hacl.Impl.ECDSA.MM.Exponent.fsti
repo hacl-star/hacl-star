@@ -25,6 +25,7 @@ val montgomery_ladder_exponent: #c: curve -> a: felem c -> r: felem c -> Stack u
     fromDomain_ #c #DSA (as_nat c h1 r) == r0D /\
     as_nat c h1 r < getOrder #c))
 
+inline_for_extraction noextract
 val fromDomainImpl: #c: curve -> a: felem c -> result: felem c -> Stack unit
   (requires fun h -> live h a /\ live h result /\ as_nat c h a < getOrder #c)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -35,6 +36,7 @@ val multPower: #c: curve -> a: felem c -> b: felem c ->  result: felem c -> Stac
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat c h1 result = (pow (as_nat c h0 a) (getOrder #c - 2) * as_nat c h0 b) % getOrder #c)
 
+inline_for_extraction noextract
 val multPowerPartial: #c: curve -> s: felem c -> a: felem c 
   -> b: felem c -> result: felem c -> Stack unit 
   (requires fun h -> live h a /\ live h b /\ live h result /\ as_nat c h a < getOrder #c /\ as_nat c h b < getOrder #c /\ (

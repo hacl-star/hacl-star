@@ -53,3 +53,6 @@ clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
 
 
+dist/test.exe: dist/Hacl_P256.o
+	$(CC) $(CFLAGS) $(HACL_HOME)/code/ecdsap256/dist/test.c  $^ \
+	-o ./dist/test.exe $@
