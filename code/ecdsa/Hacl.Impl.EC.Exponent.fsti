@@ -15,7 +15,7 @@ open Hacl.Impl.EC.LowLevel
 open Hacl.Spec.MontgomeryMultiplication
 
 (* disjoint a result comes from ML, tempBffer - from specific *)
-[@CInline]
+inline_for_extraction noextract
 val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *. 8ul) -> 
   Stack unit
   (requires fun h -> live h a /\ live h result /\ live h tempBuffer /\ disjoint tempBuffer result /\ disjoint a tempBuffer /\ as_nat c h a < getPrime c)
