@@ -916,12 +916,10 @@ Lib_IntVector_Intrinsics_vec128_store64_le(uint8_t *x0, Lib_IntVector_Intrinsics
   ((vector128)(vec_sld((vector128)(x0), (vector128)(x0), ((4-(x1))%4)*4)))
 
 #define Lib_IntVector_Intrinsics_vec128_shift_left64(x0, x1)            \
-  (((vector128)((vector128_64)vec_sl((vector128_64)(x0), (vector128_64){(unsigned long)(x1),(unsigned long)(x1)}))) & \
-   ((vector128)((vector128_64){0xffffffffffffffff << (x1), 0xffffffffffffffff << (x1)})))
-
+  ((vector128)((vector128_64)vec_sl((vector128_64)(x0), (vector128_64){(unsigned long)(x1),(unsigned long)(x1)}))
+ 
 #define Lib_IntVector_Intrinsics_vec128_shift_right64(x0, x1)         \
-  (((vector128)((vector128_64)vec_rl((vector128_64)(x0), (vector128_64){(unsigned long)(64-(x1)),(unsigned long)(64-(x1))}))) & \
-   ((vector128)((vector128_64){0xffffffffffffffff >> (x1), 0xffffffffffffffff >> (x1)})))
+  ((vector128)((vector128_64)vec_sr((vector128_64)(x0), (vector128_64){(unsigned long)(x1),(unsigned long)(x1)}))
 
 // Doesn't work with vec_splat_u64
 #define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1)          \
