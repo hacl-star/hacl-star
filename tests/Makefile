@@ -50,6 +50,11 @@ else
 TARGETS := $(filter-out curve64-%, $(TARGETS))
 endif
 
+# vec-128-test.c doesn't compile on ARM for some reason
+ifeq ($(TARGET_ARCHITECTURE),ARM)
+TARGETS := $(filter-out vec-128-test.exe, $(TARGETS))
+endif
+
 CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
