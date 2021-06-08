@@ -878,9 +878,19 @@ let _point_add_0 #c p q t12 =
   lemma_point_eval c h0 h1 p;
   lemma_point_eval c h0 h1 q 
   
+inline_for_extraction noextract
+val point_add_: #c: curve -> p: point c -> q: point c -> result: point c 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
+  Stack unit (requires fun h -> 
+    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
+    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
+    point_eval c h p /\ point_eval c h q)
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\
+    fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 q)))
 
 
-let point_add #c p q result tempBuffer = 
+let point_add_ #c p q result tempBuffer = 
   let h0 = ST.get() in 
   let t12 = sub tempBuffer (size 0) (size 12 *! getCoordinateLenU64 c) in 
   let t5 = sub tempBuffer (size 12 *! getCoordinateLenU64 c) (size 5 *! getCoordinateLenU64 c) in 
@@ -962,3 +972,48 @@ let point_add #c p q result tempBuffer =
     (==) {_ by (canon())}
     (hD * pzD * qzD) % prime;
   }
+
+
+val point_add_p256: p: point P256 -> q: point P256 -> result: point P256
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P256) -> 
+  Stack unit (requires fun h -> 
+    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
+    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
+    point_eval P256 h p /\ point_eval P256 h q)
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval P256 h1 result /\
+    fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == _point_add #P256 (fromDomainPoint #P256 #DH (point_as_nat P256 h0 p)) (fromDomainPoint #P256 #DH (point_as_nat P256 h0 q)))
+
+let point_add_p256 p q result tempBuffer = point_add_ #P256 p q result tempBuffer
+
+
+val point_add_p384: p: point P384 -> q: point P384 -> result: point P384
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P384) -> 
+  Stack unit (requires fun h -> 
+    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
+    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
+    point_eval P384 h p /\ point_eval P384 h q)
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval P384 h1 result /\
+    fromDomainPoint #P384 #DH (point_as_nat P384 h1 result) == _point_add #P384 (fromDomainPoint #P384 #DH (point_as_nat P384 h0 p)) (fromDomainPoint #P384 #DH (point_as_nat P384 h0 q)))
+
+let point_add_p384 p q result tempBuffer = point_add_ #P384 p q result tempBuffer
+
+val point_add_generic: p: point Default -> q: point Default -> result: point Default
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 Default) -> 
+  Stack unit (requires fun h -> 
+    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
+    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
+    point_eval Default h p /\ point_eval Default h q)
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval Default h1 result /\
+    fromDomainPoint #Default #DH (point_as_nat Default h1 result) == _point_add #Default (fromDomainPoint #Default #DH (point_as_nat Default h0 p)) (fromDomainPoint #Default #DH (point_as_nat Default h0 q)))
+
+let point_add_generic p q result tempBuffer = point_add_ #Default p q result tempBuffer
+
+
+let point_add #c p q result tempBuffer = 
+  match c with 
+  |P256 -> point_add_p256 p q result tempBuffer
+  |P384 -> point_add_p384 p q result tempBuffer
+  |Default -> point_add_generic p q result tempBuffer
