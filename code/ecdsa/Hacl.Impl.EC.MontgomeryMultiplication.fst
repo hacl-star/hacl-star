@@ -21,8 +21,7 @@ open Lib.Buffer
 
 
 #set-options "--z3rlimit 300"
-
-inline_for_extraction
+inline_for_extraction noextract
 val supportsReducedMultiplication: #c: curve -> 
   Tot  (r: bool {r ==> v (Hacl.Spec.Bignum.ModInv64.mod_inv_u64 (getLastWordPrime #c)) == 1})
 
@@ -120,7 +119,9 @@ let montgomery_multiplication_round_ #c m t t2 =
     let k0 = Hacl.Bignum.ModInv64.mod_inv_u64 (getLastWordOrder #c) in 
     montgomery_multiplication_round_dsa_ #c k0 t t2
   |DH -> 
-    match supportsReducedMultiplication #c with   
+    [@inline_let]
+    let r = normalize_term (supportsReducedMultiplication #c) in 
+    match r with   
     |true -> montgomery_multiplication_round_w_k0 t t2
     |false -> 
       let h0 = ST.get() in 
@@ -368,8 +369,54 @@ let montgomery_multiplication_buffer_dh #c a b result =
   |Default -> montgomery_multiplication_buffer_dh_generic a b result
 
 
+val montgomery_multiplication_buffer_dsa_p256: a: felem P256 -> b: felem P256 -> result: felem P256 ->  
+  Stack unit
+  (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat P256 h a < getModePrime DSA P256 /\  eq_or_disjoint a b /\
+    as_nat P256 h b < getModePrime DSA P256))
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P256 h1 result < getModePrime DSA P256 /\ (
+    let prime = getModePrime DSA P256 in 
+    as_nat P256 h1 result = (as_nat P256 h0 a * as_nat P256 h0 b * modp_inv2_prime (pow2 (getPower P256)) prime) % prime /\
+    as_nat P256 h1 result = toDomain_ #P256 #DSA (fromDomain_ #P256 #DSA (as_nat P256 h0 a) * fromDomain_ #P256 #DSA (as_nat P256 h0 b) % prime) /\
+    as_nat P256 h1 result = toDomain_ #P256 #DSA (fromDomain_ #P256 #DSA (as_nat P256 h0 a) * fromDomain_ #P256 #DSA (as_nat P256 h0 b)))))
 
-let montgomery_multiplication_buffer_dsa #c a b result = montgomery_multiplication_buffer #c DSA a b result
+let montgomery_multiplication_buffer_dsa_p256 a b result  = 
+  montgomery_multiplication_buffer #P256 DSA a b result
+
+
+val montgomery_multiplication_buffer_dsa_p384: a: felem P384 -> b: felem P384 -> result: felem P384 ->  
+  Stack unit
+  (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat P384 h a < getModePrime DSA P384 /\  eq_or_disjoint a b /\
+    as_nat P384 h b < getModePrime DSA P384))
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P384 h1 result < getModePrime DSA P384 /\ (
+    let prime = getModePrime DSA P384 in 
+    as_nat P384 h1 result = (as_nat P384 h0 a * as_nat P384 h0 b * modp_inv2_prime (pow2 (getPower P384)) prime) % prime /\
+    as_nat P384 h1 result = toDomain_ #P384 #DSA (fromDomain_ #P384 #DSA (as_nat P384 h0 a) * fromDomain_ #P384 #DSA (as_nat P384 h0 b) % prime) /\
+    as_nat P384 h1 result = toDomain_ #P384 #DSA (fromDomain_ #P384 #DSA (as_nat P384 h0 a) * fromDomain_ #P384 #DSA (as_nat P384 h0 b)))))
+
+let montgomery_multiplication_buffer_dsa_p384 a b result  = 
+  montgomery_multiplication_buffer #P384 DSA a b result
+
+val montgomery_multiplication_buffer_dsa_generic: a: felem Default -> b: felem Default -> result: felem Default ->  
+  Stack unit
+  (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat Default h a < getModePrime DSA Default /\  eq_or_disjoint a b /\
+    as_nat Default h b < getModePrime DSA Default))
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat Default h1 result < getModePrime DSA Default /\ (
+    let prime = getModePrime DSA Default in 
+    as_nat Default h1 result = (as_nat Default h0 a * as_nat P256 h0 b * modp_inv2_prime (pow2 (getPower P256)) prime) % prime /\
+    as_nat Default h1 result = toDomain_ #Default #DSA (fromDomain_ #Default #DSA (as_nat Default h0 a) * fromDomain_ #Default #DSA (as_nat Default h0 b) % prime) /\
+    as_nat Default h1 result = toDomain_ #Default #DSA (fromDomain_ #Default #DSA (as_nat Default h0 a) * fromDomain_ #Default #DSA (as_nat Default h0 b)))))
+
+let montgomery_multiplication_buffer_dsa_generic a b result  = 
+  montgomery_multiplication_buffer #Default DSA a b result
+
+
+
+let montgomery_multiplication_buffer_dsa #c a b result = 
+  match c with 
+  |P256 -> montgomery_multiplication_buffer_dh_p256 a b result
+  |P384 -> montgomery_multiplication_buffer_dh_p384 a b result
+  |Default -> montgomery_multiplication_buffer_dh_generic a b result
+
 
 
 let montgomery_square_buffer #c m a result = 
@@ -385,7 +432,51 @@ let montgomery_square_buffer #c m a result =
     lemma_domain #c #m (as_nat c h0 a) (as_nat c h0 a) (as_nat c h1 result)
 
 
-let montgomery_square_buffer_dh #c a result = montgomery_square_buffer #c DH a result
+val montgomery_square_buffer_dh_p256: a: felem P256 -> result: felem P256 ->  
+  Stack unit
+  (requires (fun h -> live h a /\ as_nat P256 h a < getModePrime DH P256 /\ live h result)) 
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P256 h1 result < getModePrime DH P256 /\ (
+    let prime = getModePrime DH P256 in 
+    as_nat P256 h1 result = (as_nat P256 h0 a * as_nat P256 h0 a * modp_inv2_prime (pow2 (getPower P256)) prime) % prime /\
+    as_nat P256 h1 result = toDomain_ #P256 #DH (fromDomain_ #P256 #DH (as_nat P256 h0 a) * fromDomain_ #P256 #DH (as_nat P256 h0 a) % prime) /\
+    as_nat P256 h1 result = toDomain_ #P256 #DH (fromDomain_ #P256 #DH (as_nat P256 h0 a) * fromDomain_ #P256 #DH (as_nat P256 h0 a)))))
+    
+
+let montgomery_square_buffer_dh_p256 a result = montgomery_square_buffer #P256 DH a result
+
+val montgomery_square_buffer_dh_p384: a: felem P384 -> result: felem P384 ->  
+  Stack unit
+  (requires (fun h -> live h a /\ as_nat P384 h a < getModePrime DH P384 /\ live h result)) 
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat P384 h1 result < getModePrime DH P384 /\ (
+    let prime = getModePrime DH P384 in 
+    as_nat P384 h1 result = (as_nat P384 h0 a * as_nat P384 h0 a * modp_inv2_prime (pow2 (getPower P384)) prime) % prime /\
+    as_nat P384 h1 result = toDomain_ #P384 #DH (fromDomain_ #P384 #DH (as_nat P384 h0 a) * fromDomain_ #P384 #DH (as_nat P384 h0 a) % prime) /\
+    as_nat P384 h1 result = toDomain_ #P384 #DH (fromDomain_ #P384 #DH (as_nat P384 h0 a) * fromDomain_ #P384 #DH (as_nat P384 h0 a)))))
+    
+
+let montgomery_square_buffer_dh_p384 a result = montgomery_square_buffer #P384 DH a result
+
+
+val montgomery_square_buffer_dh_generic: a: felem Default -> result: felem Default ->  
+  Stack unit
+  (requires (fun h -> live h a /\ as_nat Default h a < getModePrime DH Default /\ live h result)) 
+  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat Default h1 result < getModePrime DH Default /\ (
+    let prime = getModePrime DH Default in 
+    as_nat Default h1 result = (as_nat Default h0 a * as_nat Default h0 a * modp_inv2_prime (pow2 (getPower Default)) prime) % prime /\
+    as_nat Default h1 result = toDomain_ #Default #DH (fromDomain_ #Default #DH (as_nat Default h0 a) * fromDomain_ #Default #DH (as_nat Default h0 a) % prime) /\
+    as_nat Default h1 result = toDomain_ #Default #DH (fromDomain_ #Default #DH (as_nat Default h0 a) * fromDomain_ #Default #DH (as_nat Default h0 a)))))
+    
+
+let montgomery_square_buffer_dh_generic a result = montgomery_square_buffer #Default DH a result
+
+let montgomery_square_buffer_dh #c a result = 
+  match c with 
+  |P256 -> montgomery_square_buffer_dh_p256 a result
+  |P384 -> montgomery_square_buffer_dh_p384 a result
+  |Default -> montgomery_square_buffer_dh_generic a result
+
+
+
 
 let montgomery_square_buffer_dsa #c a result = montgomery_square_buffer #c DSA a result
 
@@ -422,7 +513,42 @@ let fsquarePowN #c m n a =
   inDomain_mod_is_not_mod #c #m (let k = fromDomain_ #c #m (as_nat c h0 a) in pow k (pow2 (v n)))
 
 
-let fsquarePowN_dh #c n a = fsquarePowN #c DH n a 
+val fsquarePowN_dh_p256: n: size_t -> a: felem P256 -> Stack unit 
+  (requires (fun h -> live h a /\ as_nat P256 h a < getModePrime DH P256)) 
+  (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
+    let k = fromDomain_ #P256 #DH (as_nat P256 h0 a) in 
+    as_nat P256 h1 a < getModePrime DH P256 /\ as_nat P256 h1 a = toDomain_ #P256 #DH (pow k (pow2 (v n)) % getModePrime DH P256))))
+
+let fsquarePowN_dh_p256 n a = fsquarePowN #P256 DH n a 
+
+
+val fsquarePowN_dh_p384: n: size_t -> a: felem P384 -> Stack unit 
+  (requires (fun h -> live h a /\ as_nat P384 h a < getModePrime DH P384)) 
+  (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
+    let k = fromDomain_ #P384 #DH (as_nat P384 h0 a) in 
+    as_nat P384 h1 a < getModePrime DH P384 /\ 
+    as_nat P384 h1 a = toDomain_ #P384 #DH (pow k (pow2 (v n)) % getModePrime DH P384))))
+
+let fsquarePowN_dh_p384 n a = fsquarePowN #P384 DH n a 
+
+
+val fsquarePowN_dh_generic: n: size_t -> a: felem Default -> Stack unit 
+  (requires (fun h -> live h a /\ as_nat Default h a < getModePrime DH Default)) 
+  (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
+    let k = fromDomain_ #Default #DH (as_nat Default h0 a) in 
+    as_nat Default h1 a < getModePrime DH Default /\ 
+    as_nat Default h1 a = toDomain_ #Default #DH (pow k (pow2 (v n)) % getModePrime DH Default))))
+
+let fsquarePowN_dh_generic n a = fsquarePowN #Default DH n a 
+
+let fsquarePowN_dh #c n a = 
+  match c with 
+  |P256 -> fsquarePowN_dh_p256 n a 
+  |P384 -> fsquarePowN_dh_p384 n a 
+  |Default -> fsquarePowN_dh_generic n a
+
+
+
 
 
 let fsquarePowN_dsa #c n a = fsquarePowN #c DSA n a 

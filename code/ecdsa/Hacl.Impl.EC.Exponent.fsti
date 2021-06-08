@@ -14,7 +14,7 @@ open Spec.ECC.Curves
 open Hacl.Impl.EC.LowLevel
 open Hacl.Spec.MontgomeryMultiplication
 
-(* disjoint a result comes from ML, tempBffer - from specific *)
+
 inline_for_extraction noextract
 val exponent: #c: curve -> a: felem c -> result: felem c -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *. 8ul) -> 
   Stack unit

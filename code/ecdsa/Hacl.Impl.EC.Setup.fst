@@ -167,7 +167,7 @@ let getLastWordPrime (#c: curve) : (r: uint64 {uint_v r == getPrime c % pow2 64 
   |P384 -> 
     lemmaLstLastWord p384_prime_list;
     normalize_term (List.Tot.Base.index p384_prime_list 0)
-  |_ -> admit()
+  |_ -> 1ul
   
 
 inline_for_extraction noextract

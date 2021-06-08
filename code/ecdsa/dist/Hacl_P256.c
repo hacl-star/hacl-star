@@ -736,81 +736,36 @@ static void montgomery_multiplication_buffer_by_one_dh_p256(uint64_t *a, uint64_
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
     uint64_t t2[(uint32_t)2U * len2];
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
-    if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-    {
-      uint64_t t1 = t[0U];
-      uint64_t temp = (uint64_t)0U;
-      uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-      uint64_t f1 = (uint64_t)0xffffffffU;
-      uint64_t f3 = (uint64_t)0xffffffff00000001U;
-      uint64_t *o0 = t2;
-      uint64_t *o1 = t2 + (uint32_t)1U;
-      uint64_t *o2 = t2 + (uint32_t)2U;
-      uint64_t *o3 = t2 + (uint32_t)3U;
-      uint64_t *o4 = t2 + (uint32_t)4U;
-      uint128_t res0 = (uint128_t)f0 * t1;
-      uint64_t l00 = (uint64_t)res0;
-      uint64_t h040 = (uint64_t)(res0 >> (uint32_t)64U);
-      o0[0U] = l00;
-      temp = h040;
-      uint64_t h0 = temp;
-      uint128_t res = (uint128_t)f1 * t1;
-      uint64_t l01 = (uint64_t)res;
-      uint64_t h041 = (uint64_t)(res >> (uint32_t)64U);
-      o1[0U] = l01;
-      temp = h041;
-      uint64_t l = o1[0U];
-      uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-      uint64_t h = temp;
-      o2[0U] = h + c1;
-      uint128_t res1 = (uint128_t)f3 * t1;
-      uint64_t l0 = (uint64_t)res1;
-      uint64_t h04 = (uint64_t)(res1 >> (uint32_t)64U);
-      o3[0U] = l0;
-      o4[0U] = h04;
-    }
-    else
-    {
-      uint64_t k0 = (uint64_t)1U;
-      uint64_t t1 = t[0U];
-      uint64_t y = (uint64_t)0U;
-      uint64_t temp = (uint64_t)0U;
-      uint128_t res0 = (uint128_t)t1 * k0;
-      uint64_t l00 = (uint64_t)res0;
-      uint64_t h04 = (uint64_t)(res0 >> (uint32_t)64U);
-      y = l00;
-      temp = h04;
-      uint64_t y_ = y;
-      uint64_t temp1 = (uint64_t)0U;
-      uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-      uint64_t f1 = (uint64_t)0xffffffffU;
-      uint64_t f3 = (uint64_t)0xffffffff00000001U;
-      uint64_t *o0 = t2;
-      uint64_t *o1 = t2 + (uint32_t)1U;
-      uint64_t *o2 = t2 + (uint32_t)2U;
-      uint64_t *o3 = t2 + (uint32_t)3U;
-      uint64_t *o4 = t2 + (uint32_t)4U;
-      uint128_t res1 = (uint128_t)f0 * y_;
-      uint64_t l01 = (uint64_t)res1;
-      uint64_t h050 = (uint64_t)(res1 >> (uint32_t)64U);
-      o0[0U] = l01;
-      temp1 = h050;
-      uint64_t h2 = temp1;
-      uint128_t res = (uint128_t)f1 * y_;
-      uint64_t l02 = (uint64_t)res;
-      uint64_t h051 = (uint64_t)(res >> (uint32_t)64U);
-      o1[0U] = l02;
-      temp1 = h051;
-      uint64_t l = o1[0U];
-      uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h2, o1);
-      uint64_t h3 = temp1;
-      o2[0U] = h3 + c1;
-      uint128_t res2 = (uint128_t)f3 * y_;
-      uint64_t l0 = (uint64_t)res2;
-      uint64_t h05 = (uint64_t)(res2 >> (uint32_t)64U);
-      o3[0U] = l0;
-      o4[0U] = h05;
-    }
+    uint64_t t10 = t[0U];
+    uint64_t temp = (uint64_t)0U;
+    uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+    uint64_t f1 = (uint64_t)0xffffffffU;
+    uint64_t f3 = (uint64_t)0xffffffff00000001U;
+    uint64_t *o0 = t2;
+    uint64_t *o1 = t2 + (uint32_t)1U;
+    uint64_t *o2 = t2 + (uint32_t)2U;
+    uint64_t *o3 = t2 + (uint32_t)3U;
+    uint64_t *o4 = t2 + (uint32_t)4U;
+    uint128_t res0 = (uint128_t)f0 * t10;
+    uint64_t l00 = (uint64_t)res0;
+    uint64_t h040 = (uint64_t)(res0 >> (uint32_t)64U);
+    o0[0U] = l00;
+    temp = h040;
+    uint64_t h0 = temp;
+    uint128_t res = (uint128_t)f1 * t10;
+    uint64_t l01 = (uint64_t)res;
+    uint64_t h041 = (uint64_t)(res >> (uint32_t)64U);
+    o1[0U] = l01;
+    temp = h041;
+    uint64_t l = o1[0U];
+    uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+    uint64_t h = temp;
+    o2[0U] = h + c1;
+    uint128_t res1 = (uint128_t)f3 * t10;
+    uint64_t l0 = (uint64_t)res1;
+    uint64_t h04 = (uint64_t)(res1 >> (uint32_t)64U);
+    o3[0U] = l0;
+    o4[0U] = h04;
     uint32_t len30 = (uint32_t)4U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
     uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
@@ -819,15 +774,15 @@ static void montgomery_multiplication_buffer_by_one_dh_p256(uint64_t *a, uint64_
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t210 = t2[(uint32_t)4U * i];
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-      uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
     }
     for (uint32_t i = k; i < len30; i++)
     {
@@ -930,128 +885,77 @@ static void montgomery_multiplication_buffer_by_one_dh_p384(uint64_t *a, uint64_
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
     uint64_t t2[(uint32_t)2U * len2];
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
-    if ((uint64_t)0xffffffffU == (uint64_t)0xffffffffffffffffU)
-    {
-      uint64_t t1 = t[0U];
-      uint64_t
-      p[6U] =
-        {
-          (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-          (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
-          (uint64_t)0xffffffffffffffffU
-        };
-      uint32_t len3 = (uint32_t)6U;
-      uint64_t bBuffer = t1;
-      uint64_t *partResult = t2;
-      uint32_t resLen = len3 + (uint32_t)1U;
-      memset(partResult, 0U, resLen * sizeof (uint64_t));
+    uint64_t k0 = (uint64_t)4294967297U;
+    uint64_t t10 = t[0U];
+    uint64_t y = (uint64_t)0U;
+    uint64_t temp = (uint64_t)0U;
+    uint128_t res = (uint128_t)t10 * k0;
+    uint64_t l0 = (uint64_t)res;
+    uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
+    y = l0;
+    temp = h04;
+    uint64_t y_ = y;
+    uint64_t
+    p[6U] =
       {
-        uint64_t uu____0 = (&bBuffer)[0U];
-        uint64_t *res_ = partResult;
-        uint64_t c = (uint64_t)0U;
-        uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)1U],
-              uu____0,
-              res_ + (uint32_t)4U * i + (uint32_t)1U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)2U],
-              uu____0,
-              res_ + (uint32_t)4U * i + (uint32_t)2U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)3U],
-              uu____0,
-              res_ + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len3; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[i], uu____0, res_ + i);
-        }
-        uint64_t r = c;
-        partResult[len3 + (uint32_t)0U] = r;
-      }
-    }
-    else
+        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
+      };
+    uint32_t len30 = (uint32_t)6U;
+    uint64_t bBuffer = y_;
+    uint64_t *partResult = t2;
+    uint32_t resLen = len30 + (uint32_t)1U;
+    memset(partResult, 0U, resLen * sizeof (uint64_t));
     {
-      uint64_t k0 = (uint64_t)4294967297U;
-      uint64_t t1 = t[0U];
-      uint64_t y = (uint64_t)0U;
-      uint64_t temp = (uint64_t)0U;
-      uint128_t res = (uint128_t)t1 * k0;
-      uint64_t l0 = (uint64_t)res;
-      uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
-      y = l0;
-      temp = h04;
-      uint64_t y_ = y;
-      uint64_t
-      p[6U] =
-        {
-          (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-          (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
-          (uint64_t)0xffffffffffffffffU
-        };
-      uint32_t len3 = (uint32_t)6U;
-      uint64_t bBuffer = y_;
-      uint64_t *partResult = t2;
-      uint32_t resLen = len3 + (uint32_t)1U;
-      memset(partResult, 0U, resLen * sizeof (uint64_t));
+      uint64_t uu____0 = (&bBuffer)[0U];
+      uint64_t *res_ = partResult;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
-        uint64_t uu____1 = (&bBuffer)[0U];
-        uint64_t *res_ = partResult;
-        uint64_t c = (uint64_t)0U;
-        uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)1U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)1U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)2U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)2U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)3U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len3; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[i], uu____1, res_ + i);
-        }
-        uint64_t r = c;
-        partResult[len3 + (uint32_t)0U] = r;
+        c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)1U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)2U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)3U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
       }
+      for (uint32_t i = k; i < len30; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[i], uu____0, res_ + i);
+      }
+      uint64_t r = c;
+      partResult[len30 + (uint32_t)0U] = r;
     }
-    uint32_t len30 = (uint32_t)6U * (uint32_t)2U;
+    uint32_t len31 = (uint32_t)6U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
-    uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+    uint32_t k = len31 / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t210 = t2[(uint32_t)4U * i];
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-      uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < len30; i++)
+    for (uint32_t i = k; i < len31; i++)
     {
       uint64_t t1 = t[i];
       uint64_t t21 = t2[i];
@@ -1150,130 +1054,79 @@ static void montgomery_multiplication_buffer_by_one_dh_generic(uint64_t *a, uint
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
     uint64_t t2[(uint32_t)2U * len2];
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
-    if (KRML_EABORT(void *, "") == (uint64_t)0xffffffffffffffffU)
-    {
-      uint64_t t1 = t[0U];
-      uint64_t
-      p[4U] =
-        {
-          (uint64_t)0xffffffffffffffffU,
-          (uint64_t)0xffffffffU,
-          (uint64_t)0U,
-          (uint64_t)0xffffffff00000001U
-        };
-      uint32_t len3 = (uint32_t)4U;
-      uint64_t bBuffer = t1;
-      uint64_t *partResult = t2;
-      uint32_t resLen = len3 + (uint32_t)1U;
-      memset(partResult, 0U, resLen * sizeof (uint64_t));
+    uint64_t k0 = mod_inv_u64((uint64_t)(uint32_t)1U);
+    uint64_t t10 = t[0U];
+    uint64_t y = (uint64_t)0U;
+    uint64_t temp = (uint64_t)0U;
+    uint128_t res = (uint128_t)t10 * k0;
+    uint64_t l0 = (uint64_t)res;
+    uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
+    y = l0;
+    temp = h04;
+    uint64_t y_ = y;
+    uint64_t
+    p[4U] =
       {
-        uint64_t uu____0 = (&bBuffer)[0U];
-        uint64_t *res_ = partResult;
-        uint64_t c = (uint64_t)0U;
-        uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)1U],
-              uu____0,
-              res_ + (uint32_t)4U * i + (uint32_t)1U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)2U],
-              uu____0,
-              res_ + (uint32_t)4U * i + (uint32_t)2U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)3U],
-              uu____0,
-              res_ + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len3; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[i], uu____0, res_ + i);
-        }
-        uint64_t r = c;
-        partResult[len3 + (uint32_t)0U] = r;
-      }
-    }
-    else
+        (uint64_t)0xffffffffffffffffU,
+        (uint64_t)0xffffffffU,
+        (uint64_t)0U,
+        (uint64_t)0xffffffff00000001U
+      };
+    uint32_t len30 = (uint32_t)4U;
+    uint64_t bBuffer = y_;
+    uint64_t *partResult = t2;
+    uint32_t resLen = len30 + (uint32_t)1U;
+    memset(partResult, 0U, resLen * sizeof (uint64_t));
     {
-      uint64_t k0 = mod_inv_u64(KRML_EABORT(uint64_t, ""));
-      uint64_t t1 = t[0U];
-      uint64_t y = (uint64_t)0U;
-      uint64_t temp = (uint64_t)0U;
-      uint128_t res = (uint128_t)t1 * k0;
-      uint64_t l0 = (uint64_t)res;
-      uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
-      y = l0;
-      temp = h04;
-      uint64_t y_ = y;
-      uint64_t
-      p[4U] =
-        {
-          (uint64_t)0xffffffffffffffffU,
-          (uint64_t)0xffffffffU,
-          (uint64_t)0U,
-          (uint64_t)0xffffffff00000001U
-        };
-      uint32_t len3 = (uint32_t)4U;
-      uint64_t bBuffer = y_;
-      uint64_t *partResult = t2;
-      uint32_t resLen = len3 + (uint32_t)1U;
-      memset(partResult, 0U, resLen * sizeof (uint64_t));
+      uint64_t uu____0 = (&bBuffer)[0U];
+      uint64_t *res_ = partResult;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
-        uint64_t uu____1 = (&bBuffer)[0U];
-        uint64_t *res_ = partResult;
-        uint64_t c = (uint64_t)0U;
-        uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)1U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)1U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)2U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)2U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)3U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len3; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[i], uu____1, res_ + i);
-        }
-        uint64_t r = c;
-        partResult[len3 + (uint32_t)0U] = r;
+        c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)1U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)2U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)3U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
       }
+      for (uint32_t i = k; i < len30; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[i], uu____0, res_ + i);
+      }
+      uint64_t r = c;
+      partResult[len30 + (uint32_t)0U] = r;
     }
-    uint32_t len30 = (uint32_t)4U * (uint32_t)2U;
+    uint32_t len31 = (uint32_t)4U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
-    uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+    uint32_t k = len31 / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t210 = t2[(uint32_t)4U * i];
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-      uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < len30; i++)
+    for (uint32_t i = k; i < len31; i++)
     {
       uint64_t t1 = t[i];
       uint64_t t21 = t2[i];
@@ -1363,81 +1216,36 @@ montgomery_multiplication_buffer_dh_p256(uint64_t *a, uint64_t *b, uint64_t *res
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
     uint64_t t2[(uint32_t)2U * len2];
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
-    if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-    {
-      uint64_t t1 = t[0U];
-      uint64_t temp = (uint64_t)0U;
-      uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-      uint64_t f1 = (uint64_t)0xffffffffU;
-      uint64_t f3 = (uint64_t)0xffffffff00000001U;
-      uint64_t *o0 = t2;
-      uint64_t *o1 = t2 + (uint32_t)1U;
-      uint64_t *o2 = t2 + (uint32_t)2U;
-      uint64_t *o3 = t2 + (uint32_t)3U;
-      uint64_t *o4 = t2 + (uint32_t)4U;
-      uint128_t res0 = (uint128_t)f0 * t1;
-      uint64_t l00 = (uint64_t)res0;
-      uint64_t h040 = (uint64_t)(res0 >> (uint32_t)64U);
-      o0[0U] = l00;
-      temp = h040;
-      uint64_t h0 = temp;
-      uint128_t res = (uint128_t)f1 * t1;
-      uint64_t l01 = (uint64_t)res;
-      uint64_t h041 = (uint64_t)(res >> (uint32_t)64U);
-      o1[0U] = l01;
-      temp = h041;
-      uint64_t l = o1[0U];
-      uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-      uint64_t h = temp;
-      o2[0U] = h + c1;
-      uint128_t res1 = (uint128_t)f3 * t1;
-      uint64_t l0 = (uint64_t)res1;
-      uint64_t h04 = (uint64_t)(res1 >> (uint32_t)64U);
-      o3[0U] = l0;
-      o4[0U] = h04;
-    }
-    else
-    {
-      uint64_t k0 = (uint64_t)1U;
-      uint64_t t1 = t[0U];
-      uint64_t y = (uint64_t)0U;
-      uint64_t temp = (uint64_t)0U;
-      uint128_t res0 = (uint128_t)t1 * k0;
-      uint64_t l00 = (uint64_t)res0;
-      uint64_t h04 = (uint64_t)(res0 >> (uint32_t)64U);
-      y = l00;
-      temp = h04;
-      uint64_t y_ = y;
-      uint64_t temp1 = (uint64_t)0U;
-      uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-      uint64_t f1 = (uint64_t)0xffffffffU;
-      uint64_t f3 = (uint64_t)0xffffffff00000001U;
-      uint64_t *o0 = t2;
-      uint64_t *o1 = t2 + (uint32_t)1U;
-      uint64_t *o2 = t2 + (uint32_t)2U;
-      uint64_t *o3 = t2 + (uint32_t)3U;
-      uint64_t *o4 = t2 + (uint32_t)4U;
-      uint128_t res1 = (uint128_t)f0 * y_;
-      uint64_t l01 = (uint64_t)res1;
-      uint64_t h050 = (uint64_t)(res1 >> (uint32_t)64U);
-      o0[0U] = l01;
-      temp1 = h050;
-      uint64_t h2 = temp1;
-      uint128_t res = (uint128_t)f1 * y_;
-      uint64_t l02 = (uint64_t)res;
-      uint64_t h051 = (uint64_t)(res >> (uint32_t)64U);
-      o1[0U] = l02;
-      temp1 = h051;
-      uint64_t l = o1[0U];
-      uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h2, o1);
-      uint64_t h3 = temp1;
-      o2[0U] = h3 + c1;
-      uint128_t res2 = (uint128_t)f3 * y_;
-      uint64_t l0 = (uint64_t)res2;
-      uint64_t h05 = (uint64_t)(res2 >> (uint32_t)64U);
-      o3[0U] = l0;
-      o4[0U] = h05;
-    }
+    uint64_t t10 = t[0U];
+    uint64_t temp = (uint64_t)0U;
+    uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+    uint64_t f1 = (uint64_t)0xffffffffU;
+    uint64_t f3 = (uint64_t)0xffffffff00000001U;
+    uint64_t *o0 = t2;
+    uint64_t *o1 = t2 + (uint32_t)1U;
+    uint64_t *o2 = t2 + (uint32_t)2U;
+    uint64_t *o3 = t2 + (uint32_t)3U;
+    uint64_t *o4 = t2 + (uint32_t)4U;
+    uint128_t res0 = (uint128_t)f0 * t10;
+    uint64_t l00 = (uint64_t)res0;
+    uint64_t h040 = (uint64_t)(res0 >> (uint32_t)64U);
+    o0[0U] = l00;
+    temp = h040;
+    uint64_t h0 = temp;
+    uint128_t res = (uint128_t)f1 * t10;
+    uint64_t l01 = (uint64_t)res;
+    uint64_t h041 = (uint64_t)(res >> (uint32_t)64U);
+    o1[0U] = l01;
+    temp = h041;
+    uint64_t l = o1[0U];
+    uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+    uint64_t h = temp;
+    o2[0U] = h + c1;
+    uint128_t res1 = (uint128_t)f3 * t10;
+    uint64_t l0 = (uint64_t)res1;
+    uint64_t h04 = (uint64_t)(res1 >> (uint32_t)64U);
+    o3[0U] = l0;
+    o4[0U] = h04;
     uint32_t len30 = (uint32_t)4U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
     uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
@@ -1446,15 +1254,15 @@ montgomery_multiplication_buffer_dh_p256(uint64_t *a, uint64_t *b, uint64_t *res
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t210 = t2[(uint32_t)4U * i];
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-      uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
     }
     for (uint32_t i = k; i < len30; i++)
     {
@@ -1591,128 +1399,77 @@ montgomery_multiplication_buffer_dh_p384(uint64_t *a, uint64_t *b, uint64_t *res
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
     uint64_t t2[(uint32_t)2U * len2];
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
-    if ((uint64_t)0xffffffffU == (uint64_t)0xffffffffffffffffU)
-    {
-      uint64_t t1 = t[0U];
-      uint64_t
-      p[6U] =
-        {
-          (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-          (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
-          (uint64_t)0xffffffffffffffffU
-        };
-      uint32_t len3 = (uint32_t)6U;
-      uint64_t bBuffer = t1;
-      uint64_t *partResult = t2;
-      uint32_t resLen = len3 + (uint32_t)1U;
-      memset(partResult, 0U, resLen * sizeof (uint64_t));
+    uint64_t k0 = (uint64_t)4294967297U;
+    uint64_t t10 = t[0U];
+    uint64_t y = (uint64_t)0U;
+    uint64_t temp = (uint64_t)0U;
+    uint128_t res = (uint128_t)t10 * k0;
+    uint64_t l0 = (uint64_t)res;
+    uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
+    y = l0;
+    temp = h04;
+    uint64_t y_ = y;
+    uint64_t
+    p[6U] =
       {
-        uint64_t uu____1 = (&bBuffer)[0U];
-        uint64_t *res_ = partResult;
-        uint64_t c = (uint64_t)0U;
-        uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)1U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)1U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)2U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)2U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)3U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len3; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[i], uu____1, res_ + i);
-        }
-        uint64_t r = c;
-        partResult[len3 + (uint32_t)0U] = r;
-      }
-    }
-    else
+        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
+      };
+    uint32_t len30 = (uint32_t)6U;
+    uint64_t bBuffer = y_;
+    uint64_t *partResult = t2;
+    uint32_t resLen = len30 + (uint32_t)1U;
+    memset(partResult, 0U, resLen * sizeof (uint64_t));
     {
-      uint64_t k0 = (uint64_t)4294967297U;
-      uint64_t t1 = t[0U];
-      uint64_t y = (uint64_t)0U;
-      uint64_t temp = (uint64_t)0U;
-      uint128_t res = (uint128_t)t1 * k0;
-      uint64_t l0 = (uint64_t)res;
-      uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
-      y = l0;
-      temp = h04;
-      uint64_t y_ = y;
-      uint64_t
-      p[6U] =
-        {
-          (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-          (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
-          (uint64_t)0xffffffffffffffffU
-        };
-      uint32_t len3 = (uint32_t)6U;
-      uint64_t bBuffer = y_;
-      uint64_t *partResult = t2;
-      uint32_t resLen = len3 + (uint32_t)1U;
-      memset(partResult, 0U, resLen * sizeof (uint64_t));
+      uint64_t uu____1 = (&bBuffer)[0U];
+      uint64_t *res_ = partResult;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
-        uint64_t uu____2 = (&bBuffer)[0U];
-        uint64_t *res_ = partResult;
-        uint64_t c = (uint64_t)0U;
-        uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____2, res_ + (uint32_t)4U * i);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)1U],
-              uu____2,
-              res_ + (uint32_t)4U * i + (uint32_t)1U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)2U],
-              uu____2,
-              res_ + (uint32_t)4U * i + (uint32_t)2U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)3U],
-              uu____2,
-              res_ + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len3; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[i], uu____2, res_ + i);
-        }
-        uint64_t r = c;
-        partResult[len3 + (uint32_t)0U] = r;
+        c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)1U],
+            uu____1,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)2U],
+            uu____1,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)3U],
+            uu____1,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
       }
+      for (uint32_t i = k; i < len30; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[i], uu____1, res_ + i);
+      }
+      uint64_t r = c;
+      partResult[len30 + (uint32_t)0U] = r;
     }
-    uint32_t len30 = (uint32_t)6U * (uint32_t)2U;
+    uint32_t len31 = (uint32_t)6U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
-    uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+    uint32_t k = len31 / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t210 = t2[(uint32_t)4U * i];
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-      uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < len30; i++)
+    for (uint32_t i = k; i < len31; i++)
     {
       uint64_t t1 = t[i];
       uint64_t t21 = t2[i];
@@ -1845,130 +1602,79 @@ montgomery_multiplication_buffer_dh_generic(uint64_t *a, uint64_t *b, uint64_t *
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
     uint64_t t2[(uint32_t)2U * len2];
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
-    if (KRML_EABORT(void *, "") == (uint64_t)0xffffffffffffffffU)
-    {
-      uint64_t t1 = t[0U];
-      uint64_t
-      p[4U] =
-        {
-          (uint64_t)0xffffffffffffffffU,
-          (uint64_t)0xffffffffU,
-          (uint64_t)0U,
-          (uint64_t)0xffffffff00000001U
-        };
-      uint32_t len3 = (uint32_t)4U;
-      uint64_t bBuffer = t1;
-      uint64_t *partResult = t2;
-      uint32_t resLen = len3 + (uint32_t)1U;
-      memset(partResult, 0U, resLen * sizeof (uint64_t));
+    uint64_t k0 = mod_inv_u64((uint64_t)(uint32_t)1U);
+    uint64_t t10 = t[0U];
+    uint64_t y = (uint64_t)0U;
+    uint64_t temp = (uint64_t)0U;
+    uint128_t res = (uint128_t)t10 * k0;
+    uint64_t l0 = (uint64_t)res;
+    uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
+    y = l0;
+    temp = h04;
+    uint64_t y_ = y;
+    uint64_t
+    p[4U] =
       {
-        uint64_t uu____1 = (&bBuffer)[0U];
-        uint64_t *res_ = partResult;
-        uint64_t c = (uint64_t)0U;
-        uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)1U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)1U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)2U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)2U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)3U],
-              uu____1,
-              res_ + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len3; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[i], uu____1, res_ + i);
-        }
-        uint64_t r = c;
-        partResult[len3 + (uint32_t)0U] = r;
-      }
-    }
-    else
+        (uint64_t)0xffffffffffffffffU,
+        (uint64_t)0xffffffffU,
+        (uint64_t)0U,
+        (uint64_t)0xffffffff00000001U
+      };
+    uint32_t len30 = (uint32_t)4U;
+    uint64_t bBuffer = y_;
+    uint64_t *partResult = t2;
+    uint32_t resLen = len30 + (uint32_t)1U;
+    memset(partResult, 0U, resLen * sizeof (uint64_t));
     {
-      uint64_t k0 = mod_inv_u64(KRML_EABORT(uint64_t, ""));
-      uint64_t t1 = t[0U];
-      uint64_t y = (uint64_t)0U;
-      uint64_t temp = (uint64_t)0U;
-      uint128_t res = (uint128_t)t1 * k0;
-      uint64_t l0 = (uint64_t)res;
-      uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
-      y = l0;
-      temp = h04;
-      uint64_t y_ = y;
-      uint64_t
-      p[4U] =
-        {
-          (uint64_t)0xffffffffffffffffU,
-          (uint64_t)0xffffffffU,
-          (uint64_t)0U,
-          (uint64_t)0xffffffff00000001U
-        };
-      uint32_t len3 = (uint32_t)4U;
-      uint64_t bBuffer = y_;
-      uint64_t *partResult = t2;
-      uint32_t resLen = len3 + (uint32_t)1U;
-      memset(partResult, 0U, resLen * sizeof (uint64_t));
+      uint64_t uu____1 = (&bBuffer)[0U];
+      uint64_t *res_ = partResult;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
-        uint64_t uu____2 = (&bBuffer)[0U];
-        uint64_t *res_ = partResult;
-        uint64_t c = (uint64_t)0U;
-        uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____2, res_ + (uint32_t)4U * i);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)1U],
-              uu____2,
-              res_ + (uint32_t)4U * i + (uint32_t)1U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)2U],
-              uu____2,
-              res_ + (uint32_t)4U * i + (uint32_t)2U);
-          c =
-            mul_carry_add_u64_st(c,
-              p[(uint32_t)4U * i + (uint32_t)3U],
-              uu____2,
-              res_ + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len3; i++)
-        {
-          c = mul_carry_add_u64_st(c, p[i], uu____2, res_ + i);
-        }
-        uint64_t r = c;
-        partResult[len3 + (uint32_t)0U] = r;
+        c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)1U],
+            uu____1,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)2U],
+            uu____1,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)3U],
+            uu____1,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
       }
+      for (uint32_t i = k; i < len30; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[i], uu____1, res_ + i);
+      }
+      uint64_t r = c;
+      partResult[len30 + (uint32_t)0U] = r;
     }
-    uint32_t len30 = (uint32_t)4U * (uint32_t)2U;
+    uint32_t len31 = (uint32_t)4U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
-    uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+    uint32_t k = len31 / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t210 = t2[(uint32_t)4U * i];
       c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-      uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < len30; i++)
+    for (uint32_t i = k; i < len31; i++)
     {
       uint64_t t1 = t[i];
       uint64_t t21 = t2[i];
@@ -2009,612 +1715,229 @@ montgomery_multiplication_buffer_dh_generic(uint64_t *a, uint64_t *b, uint64_t *
   }
 }
 
-static inline void
-montgomery_multiplication_buffer_dsa(
-  Spec_ECC_Curves_curve c,
-  uint64_t *a,
-  uint64_t *b,
-  uint64_t *result
-)
+static void montgomery_square_buffer_dh_p256(uint64_t *a, uint64_t *result)
 {
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
+  uint32_t len = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
   uint64_t t[(uint32_t)2U * len];
   memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  uint32_t len1;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len1 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len1 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len1 = (uint32_t)4U;
-      }
-  }
-  uint32_t resLen0 = len1 + len1;
-  memset(t, 0U, resLen0 * sizeof (uint64_t));
+  uint32_t len1 = (uint32_t)4U;
+  uint32_t resLen = len1 + len1;
+  memset(t, 0U, resLen * sizeof (uint64_t));
   for (uint32_t i0 = (uint32_t)0U; i0 < len1; i0++)
   {
-    uint64_t uu____0 = b[i0];
+    uint64_t *uu____0 = a;
+    uint64_t uu____1 = a[i0];
     uint64_t *res_ = t + i0;
-    uint64_t c1 = (uint64_t)0U;
-    uint32_t k = len1 / (uint32_t)4U * (uint32_t)4U;
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = i0 / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
-      c1 = mul_carry_add_u64_st(c1, a[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
-      c1 =
-        mul_carry_add_u64_st(c1,
-          a[(uint32_t)4U * i + (uint32_t)1U],
-          uu____0,
+      c = mul_carry_add_u64_st(c, uu____0[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+      c =
+        mul_carry_add_u64_st(c,
+          uu____0[(uint32_t)4U * i + (uint32_t)1U],
+          uu____1,
           res_ + (uint32_t)4U * i + (uint32_t)1U);
-      c1 =
-        mul_carry_add_u64_st(c1,
-          a[(uint32_t)4U * i + (uint32_t)2U],
-          uu____0,
+      c =
+        mul_carry_add_u64_st(c,
+          uu____0[(uint32_t)4U * i + (uint32_t)2U],
+          uu____1,
           res_ + (uint32_t)4U * i + (uint32_t)2U);
-      c1 =
-        mul_carry_add_u64_st(c1,
-          a[(uint32_t)4U * i + (uint32_t)3U],
-          uu____0,
+      c =
+        mul_carry_add_u64_st(c,
+          uu____0[(uint32_t)4U * i + (uint32_t)3U],
+          uu____1,
           res_ + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < len1; i++)
+    for (uint32_t i = k; i < i0; i++)
     {
-      c1 = mul_carry_add_u64_st(c1, a[i], uu____0, res_ + i);
+      c = mul_carry_add_u64_st(c, uu____0[i], uu____1, res_ + i);
     }
-    uint64_t r = c1;
-    t[len1 + i0] = r;
+    uint64_t r = c;
+    t[i0 + i0] = r;
   }
-  uint32_t len10;
-  switch (c)
+  uint64_t c0 = (uint64_t)0U;
+  uint32_t k0 = resLen / (uint32_t)4U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
   {
-    case Spec_ECC_Curves_P256:
-      {
-        len10 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len10 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len10 = (uint32_t)4U;
-      }
+    uint64_t t1 = t[(uint32_t)4U * i];
+    uint64_t t20 = t[(uint32_t)4U * i];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, t + (uint32_t)4U * i);
+    uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = t[(uint32_t)4U * i + (uint32_t)1U];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
+    uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = t[(uint32_t)4U * i + (uint32_t)2U];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
+    uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = t[(uint32_t)4U * i + (uint32_t)3U];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
   }
+  for (uint32_t i = k0; i < resLen; i++)
+  {
+    uint64_t t1 = t[i];
+    uint64_t t2 = t[i];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, t + i);
+  }
+  uint64_t uu____2 = c0;
+  KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
+  uint64_t tmp[resLen];
+  memset(tmp, 0U, resLen * sizeof (uint64_t));
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    uint128_t a2 = (uint128_t)a[i] * a[i];
+    tmp[(uint32_t)2U * i] = (uint64_t)a2;
+    tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
+  }
+  uint64_t c1 = (uint64_t)0U;
+  uint32_t k1 = resLen / (uint32_t)4U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = t[(uint32_t)4U * i];
+    uint64_t t20 = tmp[(uint32_t)4U * i];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, t + (uint32_t)4U * i);
+    uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
+    uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
+    uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
+  }
+  for (uint32_t i = k1; i < resLen; i++)
+  {
+    uint64_t t1 = t[i];
+    uint64_t t2 = tmp[i];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, t + i);
+  }
+  uint64_t uu____3 = c1;
+  uint32_t len10 = (uint32_t)4U;
   for (uint32_t i0 = (uint32_t)0U; i0 < len10; i0++)
   {
-    uint32_t len2;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len2 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len2 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len2 = (uint32_t)4U;
-        }
-    }
+    uint32_t len2 = (uint32_t)4U;
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
     uint64_t t2[(uint32_t)2U * len2];
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
-    uint64_t sw0;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          sw0 = (uint64_t)17562291160714782033U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          sw0 = (uint64_t)17072048233947408755U;
-          break;
-        }
-      default:
-        {
-          sw0 = KRML_EABORT(uint64_t, "");
-        }
-    }
-    uint64_t k0 = mod_inv_u64(sw0);
     uint64_t t10 = t[0U];
-    uint64_t y = (uint64_t)0U;
     uint64_t temp = (uint64_t)0U;
-    uint128_t res = (uint128_t)t10 * k0;
-    uint64_t l0 = (uint64_t)res;
-    uint64_t h03 = (uint64_t)(res >> (uint32_t)64U);
-    y = l0;
-    temp = h03;
-    uint64_t y_ = y;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          uint64_t
-          p[4U] =
-            {
-              (uint64_t)17562291160714782033U,
-              (uint64_t)13611842547513532036U,
-              (uint64_t)18446744073709551615U,
-              (uint64_t)18446744069414584320U
-            };
-          uint32_t len3;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len3 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len3 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len3 = (uint32_t)4U;
-              }
-          }
-          uint64_t bBuffer = y_;
-          uint64_t *partResult = t2;
-          uint32_t resLen = len3 + (uint32_t)1U;
-          memset(partResult, 0U, resLen * sizeof (uint64_t));
-          {
-            uint64_t uu____1 = (&bBuffer)[0U];
-            uint64_t *res_ = partResult;
-            uint64_t c1 = (uint64_t)0U;
-            uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-            for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-            {
-              c1 = mul_carry_add_u64_st(c1, p[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
-              c1 =
-                mul_carry_add_u64_st(c1,
-                  p[(uint32_t)4U * i + (uint32_t)1U],
-                  uu____1,
-                  res_ + (uint32_t)4U * i + (uint32_t)1U);
-              c1 =
-                mul_carry_add_u64_st(c1,
-                  p[(uint32_t)4U * i + (uint32_t)2U],
-                  uu____1,
-                  res_ + (uint32_t)4U * i + (uint32_t)2U);
-              c1 =
-                mul_carry_add_u64_st(c1,
-                  p[(uint32_t)4U * i + (uint32_t)3U],
-                  uu____1,
-                  res_ + (uint32_t)4U * i + (uint32_t)3U);
-            }
-            for (uint32_t i = k; i < len3; i++)
-            {
-              c1 = mul_carry_add_u64_st(c1, p[i], uu____1, res_ + i);
-            }
-            uint64_t r = c1;
-            partResult[len3 + (uint32_t)0U] = r;
-          }
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          uint64_t
-          p[6U] =
-            {
-              (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
-              (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
-              (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
-            };
-          uint32_t len3;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len3 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len3 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len3 = (uint32_t)4U;
-              }
-          }
-          uint64_t bBuffer = y_;
-          uint64_t *partResult = t2;
-          uint32_t resLen = len3 + (uint32_t)1U;
-          memset(partResult, 0U, resLen * sizeof (uint64_t));
-          {
-            uint64_t uu____2 = (&bBuffer)[0U];
-            uint64_t *res_ = partResult;
-            uint64_t c1 = (uint64_t)0U;
-            uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-            for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-            {
-              c1 = mul_carry_add_u64_st(c1, p[(uint32_t)4U * i], uu____2, res_ + (uint32_t)4U * i);
-              c1 =
-                mul_carry_add_u64_st(c1,
-                  p[(uint32_t)4U * i + (uint32_t)1U],
-                  uu____2,
-                  res_ + (uint32_t)4U * i + (uint32_t)1U);
-              c1 =
-                mul_carry_add_u64_st(c1,
-                  p[(uint32_t)4U * i + (uint32_t)2U],
-                  uu____2,
-                  res_ + (uint32_t)4U * i + (uint32_t)2U);
-              c1 =
-                mul_carry_add_u64_st(c1,
-                  p[(uint32_t)4U * i + (uint32_t)3U],
-                  uu____2,
-                  res_ + (uint32_t)4U * i + (uint32_t)3U);
-            }
-            for (uint32_t i = k; i < len3; i++)
-            {
-              c1 = mul_carry_add_u64_st(c1, p[i], uu____2, res_ + i);
-            }
-            uint64_t r = c1;
-            partResult[len3 + (uint32_t)0U] = r;
-          }
-          break;
-        }
-      default:
-        {
-          uint64_t
-          p[4U] =
-            {
-              (uint64_t)17562291160714782033U,
-              (uint64_t)13611842547513532036U,
-              (uint64_t)18446744073709551615U,
-              (uint64_t)18446744069414584320U
-            };
-          uint32_t len3;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len3 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len3 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len3 = (uint32_t)4U;
-              }
-          }
-          uint64_t bBuffer = y_;
-          uint64_t *partResult = t2;
-          uint32_t resLen = len3 + (uint32_t)1U;
-          memset(partResult, 0U, resLen * sizeof (uint64_t));
-          {
-            uint64_t uu____3 = (&bBuffer)[0U];
-            uint64_t *res_ = partResult;
-            uint64_t c1 = (uint64_t)0U;
-            uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-            for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-            {
-              c1 = mul_carry_add_u64_st(c1, p[(uint32_t)4U * i], uu____3, res_ + (uint32_t)4U * i);
-              c1 =
-                mul_carry_add_u64_st(c1,
-                  p[(uint32_t)4U * i + (uint32_t)1U],
-                  uu____3,
-                  res_ + (uint32_t)4U * i + (uint32_t)1U);
-              c1 =
-                mul_carry_add_u64_st(c1,
-                  p[(uint32_t)4U * i + (uint32_t)2U],
-                  uu____3,
-                  res_ + (uint32_t)4U * i + (uint32_t)2U);
-              c1 =
-                mul_carry_add_u64_st(c1,
-                  p[(uint32_t)4U * i + (uint32_t)3U],
-                  uu____3,
-                  res_ + (uint32_t)4U * i + (uint32_t)3U);
-            }
-            for (uint32_t i = k; i < len3; i++)
-            {
-              c1 = mul_carry_add_u64_st(c1, p[i], uu____3, res_ + i);
-            }
-            uint64_t r = c1;
-            partResult[len3 + (uint32_t)0U] = r;
-          }
-        }
-    }
-    uint32_t sw1;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          sw1 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          sw1 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          sw1 = (uint32_t)4U;
-        }
-    }
-    uint32_t len3 = sw1 * (uint32_t)2U;
-    uint64_t c1 = (uint64_t)0U;
-    uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
+    uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+    uint64_t f1 = (uint64_t)0xffffffffU;
+    uint64_t f3 = (uint64_t)0xffffffff00000001U;
+    uint64_t *o0 = t2;
+    uint64_t *o1 = t2 + (uint32_t)1U;
+    uint64_t *o2 = t2 + (uint32_t)2U;
+    uint64_t *o3 = t2 + (uint32_t)3U;
+    uint64_t *o4 = t2 + (uint32_t)4U;
+    uint128_t res0 = (uint128_t)f0 * t10;
+    uint64_t l00 = (uint64_t)res0;
+    uint64_t h040 = (uint64_t)(res0 >> (uint32_t)64U);
+    o0[0U] = l00;
+    temp = h040;
+    uint64_t h0 = temp;
+    uint128_t res = (uint128_t)f1 * t10;
+    uint64_t l01 = (uint64_t)res;
+    uint64_t h041 = (uint64_t)(res >> (uint32_t)64U);
+    o1[0U] = l01;
+    temp = h041;
+    uint64_t l = o1[0U];
+    uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+    uint64_t h = temp;
+    o2[0U] = h + c10;
+    uint128_t res1 = (uint128_t)f3 * t10;
+    uint64_t l0 = (uint64_t)res1;
+    uint64_t h04 = (uint64_t)(res1 >> (uint32_t)64U);
+    o3[0U] = l0;
+    o4[0U] = h04;
+    uint32_t len30 = (uint32_t)4U * (uint32_t)2U;
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t210 = t2[(uint32_t)4U * i];
-      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t210, t2 + (uint32_t)4U * i);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
       uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-      c1 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-          t11,
-          t211,
-          t2 + (uint32_t)4U * i + (uint32_t)1U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
       uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-      c1 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-          t12,
-          t212,
-          t2 + (uint32_t)4U * i + (uint32_t)2U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
       uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < len3; i++)
+    for (uint32_t i = k; i < len30; i++)
     {
       uint64_t t1 = t[i];
       uint64_t t21 = t2[i];
-      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t21, t2 + i);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
     }
-    uint64_t carry = c1;
-    uint32_t sw;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          sw = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          sw = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          sw = (uint32_t)4U;
-        }
-    }
-    uint32_t len30 = sw * (uint32_t)2U - (uint32_t)1U;
-    for (uint32_t i = (uint32_t)0U; i < len30; i++)
+    uint64_t carry = c;
+    uint32_t len3 = (uint32_t)7U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
     {
       uint64_t elem = t2[(uint32_t)1U + i];
       t[i] = elem;
     }
-    t[len30] = carry;
+    t[len3] = carry;
   }
-  uint32_t len2;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len2 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len2 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len2 = (uint32_t)4U;
-      }
-  }
+  uint32_t len2 = (uint32_t)4U;
   uint64_t cin = t[len2];
   uint64_t *x_ = t;
-  uint32_t len3;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len3 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len3 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len3 = (uint32_t)4U;
-      }
-  }
+  uint32_t len3 = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), len3);
   uint64_t tempBuffer[len3];
   memset(tempBuffer, 0U, len3 * sizeof (uint64_t));
   uint64_t tempBufferForSubborrow = (uint64_t)0U;
-  uint64_t carry0;
-  switch (c)
+  uint64_t
+  p[4U] =
+    {
+      (uint64_t)0xffffffffffffffffU,
+      (uint64_t)0xffffffffU,
+      (uint64_t)0U,
+      (uint64_t)0xffffffff00000001U
+    };
+  uint32_t len40 = (uint32_t)4U;
+  uint64_t c = (uint64_t)0U;
+  uint32_t k = len40 / (uint32_t)4U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
   {
-    case Spec_ECC_Curves_P256:
-      {
-        uint64_t
-        p[4U] =
-          {
-            (uint64_t)17562291160714782033U,
-            (uint64_t)13611842547513532036U,
-            (uint64_t)18446744073709551615U,
-            (uint64_t)18446744069414584320U
-          };
-        uint32_t len4;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              len4 = (uint32_t)4U;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              len4 = (uint32_t)6U;
-              break;
-            }
-          default:
-            {
-              len4 = (uint32_t)4U;
-            }
-        }
-        uint64_t c1 = (uint64_t)0U;
-        uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          uint64_t t1 = x_[(uint32_t)4U * i];
-          uint64_t t20 = p[(uint32_t)4U * i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, tempBuffer + (uint32_t)4U * i);
-          uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-          uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t10,
-              t21,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-          uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t11,
-              t22,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-          uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t12,
-              t2,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len4; i++)
-        {
-          uint64_t t1 = x_[i];
-          uint64_t t2 = p[i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-        }
-        uint64_t r = c1;
-        carry0 = r;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        uint64_t
-        p[6U] =
-          {
-            (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
-            (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
-            (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
-          };
-        uint32_t len4;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              len4 = (uint32_t)4U;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              len4 = (uint32_t)6U;
-              break;
-            }
-          default:
-            {
-              len4 = (uint32_t)4U;
-            }
-        }
-        uint64_t c1 = (uint64_t)0U;
-        uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          uint64_t t1 = x_[(uint32_t)4U * i];
-          uint64_t t20 = p[(uint32_t)4U * i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, tempBuffer + (uint32_t)4U * i);
-          uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-          uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t10,
-              t21,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-          uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t11,
-              t22,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-          uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t12,
-              t2,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len4; i++)
-        {
-          uint64_t t1 = x_[i];
-          uint64_t t2 = p[i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-        }
-        uint64_t r = c1;
-        carry0 = r;
-        break;
-      }
-    default:
-      {
-        carry0 = (uint64_t)0U;
-      }
+    uint64_t t1 = x_[(uint32_t)4U * i];
+    uint64_t t20 = p[(uint32_t)4U * i];
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, tempBuffer + (uint32_t)4U * i);
+    uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
+    c =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+        t10,
+        t21,
+        tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
+    uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
+    c =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+        t11,
+        t22,
+        tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
+    uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
+    c =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+        t12,
+        t2,
+        tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
   }
+  for (uint32_t i = k; i < len40; i++)
+  {
+    uint64_t t1 = x_[i];
+    uint64_t t2 = p[i];
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, tempBuffer + i);
+  }
+  uint64_t r = c;
+  uint64_t carry0 = r;
   uint64_t
   carry =
     Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
@@ -2622,24 +1945,7 @@ montgomery_multiplication_buffer_dsa(
       (uint64_t)0U,
       &tempBufferForSubborrow);
   uint64_t mask = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
-  uint32_t len4;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len4 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len4 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len4 = (uint32_t)4U;
-      }
-  }
+  uint32_t len4 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < len4; i++)
   {
     uint64_t x_i = tempBuffer[i];
@@ -2649,48 +1955,13 @@ montgomery_multiplication_buffer_dsa(
   }
 }
 
-static inline void
-montgomery_square_buffer_dh(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *result)
+static void montgomery_square_buffer_dh_p384(uint64_t *a, uint64_t *result)
 {
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
+  uint32_t len = (uint32_t)6U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
   uint64_t t[(uint32_t)2U * len];
   memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-  uint32_t len1;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len1 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len1 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len1 = (uint32_t)4U;
-      }
-  }
+  uint32_t len1 = (uint32_t)6U;
   uint32_t resLen0 = len1 + len1;
   memset(t, 0U, resLen0 * sizeof (uint64_t));
   for (uint32_t i0 = (uint32_t)0U; i0 < len1; i0++)
@@ -2698,58 +1969,58 @@ montgomery_square_buffer_dh(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *resu
     uint64_t *uu____0 = a;
     uint64_t uu____1 = a[i0];
     uint64_t *res_ = t + i0;
-    uint64_t c1 = (uint64_t)0U;
+    uint64_t c = (uint64_t)0U;
     uint32_t k = i0 / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
-      c1 = mul_carry_add_u64_st(c1, uu____0[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
-      c1 =
-        mul_carry_add_u64_st(c1,
+      c = mul_carry_add_u64_st(c, uu____0[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+      c =
+        mul_carry_add_u64_st(c,
           uu____0[(uint32_t)4U * i + (uint32_t)1U],
           uu____1,
           res_ + (uint32_t)4U * i + (uint32_t)1U);
-      c1 =
-        mul_carry_add_u64_st(c1,
+      c =
+        mul_carry_add_u64_st(c,
           uu____0[(uint32_t)4U * i + (uint32_t)2U],
           uu____1,
           res_ + (uint32_t)4U * i + (uint32_t)2U);
-      c1 =
-        mul_carry_add_u64_st(c1,
+      c =
+        mul_carry_add_u64_st(c,
           uu____0[(uint32_t)4U * i + (uint32_t)3U],
           uu____1,
           res_ + (uint32_t)4U * i + (uint32_t)3U);
     }
     for (uint32_t i = k; i < i0; i++)
     {
-      c1 = mul_carry_add_u64_st(c1, uu____0[i], uu____1, res_ + i);
+      c = mul_carry_add_u64_st(c, uu____0[i], uu____1, res_ + i);
     }
-    uint64_t r = c1;
+    uint64_t r = c;
     t[i0 + i0] = r;
   }
-  uint64_t c10 = (uint64_t)0U;
-  uint32_t k0 = resLen0 / (uint32_t)4U * (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+  uint64_t c0 = (uint64_t)0U;
+  uint32_t k1 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
   {
     uint64_t t1 = t[(uint32_t)4U * i];
     uint64_t t20 = t[(uint32_t)4U * i];
-    c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t20, t + (uint32_t)4U * i);
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, t + (uint32_t)4U * i);
     uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
     uint64_t t21 = t[(uint32_t)4U * i + (uint32_t)1U];
-    c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
     uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
     uint64_t t22 = t[(uint32_t)4U * i + (uint32_t)2U];
-    c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
     uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
     uint64_t t2 = t[(uint32_t)4U * i + (uint32_t)3U];
-    c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
   }
-  for (uint32_t i = k0; i < resLen0; i++)
+  for (uint32_t i = k1; i < resLen0; i++)
   {
     uint64_t t1 = t[i];
     uint64_t t2 = t[i];
-    c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t2, t + i);
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, t + i);
   }
-  uint64_t uu____2 = c10;
+  uint64_t uu____2 = c0;
   KRML_CHECK_SIZE(sizeof (uint64_t), resLen0);
   uint64_t tmp[resLen0];
   memset(tmp, 0U, resLen0 * sizeof (uint64_t));
@@ -2759,736 +2030,174 @@ montgomery_square_buffer_dh(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *resu
     tmp[(uint32_t)2U * i] = (uint64_t)a2;
     tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
   }
-  uint64_t c11 = (uint64_t)0U;
-  uint32_t k1 = resLen0 / (uint32_t)4U * (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
+  uint64_t c1 = (uint64_t)0U;
+  uint32_t k2 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < k2 / (uint32_t)4U; i++)
   {
     uint64_t t1 = t[(uint32_t)4U * i];
     uint64_t t20 = tmp[(uint32_t)4U * i];
-    c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t1, t20, t + (uint32_t)4U * i);
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, t + (uint32_t)4U * i);
     uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
     uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
-    c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
     uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
     uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
-    c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
     uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
     uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
-    c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
   }
-  for (uint32_t i = k1; i < resLen0; i++)
+  for (uint32_t i = k2; i < resLen0; i++)
   {
     uint64_t t1 = t[i];
     uint64_t t2 = tmp[i];
-    c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t1, t2, t + i);
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, t + i);
   }
-  uint64_t uu____3 = c11;
-  uint32_t len10;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len10 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len10 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len10 = (uint32_t)4U;
-      }
-  }
+  uint64_t uu____3 = c1;
+  uint32_t len10 = (uint32_t)6U;
   for (uint32_t i0 = (uint32_t)0U; i0 < len10; i0++)
   {
-    uint32_t len2;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len2 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len2 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len2 = (uint32_t)4U;
-        }
-    }
+    uint32_t len2 = (uint32_t)6U;
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
     uint64_t t2[(uint32_t)2U * len2];
     memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
-    uint64_t sw0;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          sw0 = (uint64_t)0xffffffffffffffffU;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          sw0 = (uint64_t)0xffffffffU;
-          break;
-        }
-      default:
-        {
-          sw0 = KRML_EABORT(uint64_t, "");
-        }
-    }
-    bool r = sw0 == (uint64_t)0xffffffffffffffffU;
-    if (r)
-    {
-      uint64_t t1 = t[0U];
-      switch (c)
+    uint64_t k0 = (uint64_t)4294967297U;
+    uint64_t t10 = t[0U];
+    uint64_t y = (uint64_t)0U;
+    uint64_t temp = (uint64_t)0U;
+    uint128_t res = (uint128_t)t10 * k0;
+    uint64_t l0 = (uint64_t)res;
+    uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
+    y = l0;
+    temp = h04;
+    uint64_t y_ = y;
+    uint64_t
+    p[6U] =
       {
-        case Spec_ECC_Curves_P256:
-          {
-            uint64_t temp = (uint64_t)0U;
-            uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-            uint64_t f1 = (uint64_t)0xffffffffU;
-            uint64_t f3 = (uint64_t)0xffffffff00000001U;
-            uint64_t *o0 = t2;
-            uint64_t *o1 = t2 + (uint32_t)1U;
-            uint64_t *o2 = t2 + (uint32_t)2U;
-            uint64_t *o3 = t2 + (uint32_t)3U;
-            uint64_t *o4 = t2 + (uint32_t)4U;
-            uint128_t res0 = (uint128_t)f0 * t1;
-            uint64_t l00 = (uint64_t)res0;
-            uint64_t h040 = (uint64_t)(res0 >> (uint32_t)64U);
-            o0[0U] = l00;
-            temp = h040;
-            uint64_t h0 = temp;
-            uint128_t res = (uint128_t)f1 * t1;
-            uint64_t l01 = (uint64_t)res;
-            uint64_t h041 = (uint64_t)(res >> (uint32_t)64U);
-            o1[0U] = l01;
-            temp = h041;
-            uint64_t l = o1[0U];
-            uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-            uint64_t h = temp;
-            o2[0U] = h + c1;
-            uint128_t res1 = (uint128_t)f3 * t1;
-            uint64_t l0 = (uint64_t)res1;
-            uint64_t h04 = (uint64_t)(res1 >> (uint32_t)64U);
-            o3[0U] = l0;
-            o4[0U] = h04;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            uint64_t
-            p[6U] =
-              {
-                (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-                (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
-                (uint64_t)0xffffffffffffffffU
-              };
-            uint32_t len3;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  len3 = (uint32_t)4U;
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  len3 = (uint32_t)6U;
-                  break;
-                }
-              default:
-                {
-                  len3 = (uint32_t)4U;
-                }
-            }
-            uint64_t bBuffer = t1;
-            uint64_t *partResult = t2;
-            uint32_t resLen = len3 + (uint32_t)1U;
-            memset(partResult, 0U, resLen * sizeof (uint64_t));
-            {
-              uint64_t uu____4 = (&bBuffer)[0U];
-              uint64_t *res_ = partResult;
-              uint64_t c1 = (uint64_t)0U;
-              uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-              for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-              {
-                c1 = mul_carry_add_u64_st(c1, p[(uint32_t)4U * i], uu____4, res_ + (uint32_t)4U * i);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)1U],
-                    uu____4,
-                    res_ + (uint32_t)4U * i + (uint32_t)1U);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)2U],
-                    uu____4,
-                    res_ + (uint32_t)4U * i + (uint32_t)2U);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)3U],
-                    uu____4,
-                    res_ + (uint32_t)4U * i + (uint32_t)3U);
-              }
-              for (uint32_t i = k; i < len3; i++)
-              {
-                c1 = mul_carry_add_u64_st(c1, p[i], uu____4, res_ + i);
-              }
-              uint64_t r0 = c1;
-              partResult[len3 + (uint32_t)0U] = r0;
-            }
-            break;
-          }
-        default:
-          {
-            uint64_t
-            p[4U] =
-              {
-                (uint64_t)0xffffffffffffffffU,
-                (uint64_t)0xffffffffU,
-                (uint64_t)0U,
-                (uint64_t)0xffffffff00000001U
-              };
-            uint32_t len3;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  len3 = (uint32_t)4U;
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  len3 = (uint32_t)6U;
-                  break;
-                }
-              default:
-                {
-                  len3 = (uint32_t)4U;
-                }
-            }
-            uint64_t bBuffer = t1;
-            uint64_t *partResult = t2;
-            uint32_t resLen = len3 + (uint32_t)1U;
-            memset(partResult, 0U, resLen * sizeof (uint64_t));
-            {
-              uint64_t uu____5 = (&bBuffer)[0U];
-              uint64_t *res_ = partResult;
-              uint64_t c1 = (uint64_t)0U;
-              uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-              for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-              {
-                c1 = mul_carry_add_u64_st(c1, p[(uint32_t)4U * i], uu____5, res_ + (uint32_t)4U * i);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)1U],
-                    uu____5,
-                    res_ + (uint32_t)4U * i + (uint32_t)1U);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)2U],
-                    uu____5,
-                    res_ + (uint32_t)4U * i + (uint32_t)2U);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)3U],
-                    uu____5,
-                    res_ + (uint32_t)4U * i + (uint32_t)3U);
-              }
-              for (uint32_t i = k; i < len3; i++)
-              {
-                c1 = mul_carry_add_u64_st(c1, p[i], uu____5, res_ + i);
-              }
-              uint64_t r0 = c1;
-              partResult[len3 + (uint32_t)0U] = r0;
-            }
-          }
-      }
-    }
-    else
+        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
+      };
+    uint32_t len30 = (uint32_t)6U;
+    uint64_t bBuffer = y_;
+    uint64_t *partResult = t2;
+    uint32_t resLen = len30 + (uint32_t)1U;
+    memset(partResult, 0U, resLen * sizeof (uint64_t));
     {
-      uint64_t k00;
-      switch (c)
+      uint64_t uu____4 = (&bBuffer)[0U];
+      uint64_t *res_ = partResult;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
-        case Spec_ECC_Curves_P256:
-          {
-            k00 = (uint64_t)1U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            k00 = (uint64_t)4294967297U;
-            break;
-          }
-        case Spec_ECC_Curves_Default:
-          {
-            uint64_t sw;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  sw = (uint64_t)0xffffffffffffffffU;
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  sw = (uint64_t)0xffffffffU;
-                  break;
-                }
-              default:
-                {
-                  sw = KRML_EABORT(uint64_t, "");
-                }
-            }
-            k00 = mod_inv_u64(sw);
-            break;
-          }
-        default:
-          {
-            KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-            KRML_HOST_EXIT(253U);
-          }
+        c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____4, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)1U],
+            uu____4,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)2U],
+            uu____4,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)3U],
+            uu____4,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
       }
-      uint64_t t1 = t[0U];
-      uint64_t y = (uint64_t)0U;
-      uint64_t temp = (uint64_t)0U;
-      uint128_t res0 = (uint128_t)t1 * k00;
-      uint64_t l00 = (uint64_t)res0;
-      uint64_t h04 = (uint64_t)(res0 >> (uint32_t)64U);
-      y = l00;
-      temp = h04;
-      uint64_t y_ = y;
-      switch (c)
+      for (uint32_t i = k; i < len30; i++)
       {
-        case Spec_ECC_Curves_P256:
-          {
-            uint64_t temp1 = (uint64_t)0U;
-            uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-            uint64_t f1 = (uint64_t)0xffffffffU;
-            uint64_t f3 = (uint64_t)0xffffffff00000001U;
-            uint64_t *o0 = t2;
-            uint64_t *o1 = t2 + (uint32_t)1U;
-            uint64_t *o2 = t2 + (uint32_t)2U;
-            uint64_t *o3 = t2 + (uint32_t)3U;
-            uint64_t *o4 = t2 + (uint32_t)4U;
-            uint128_t res1 = (uint128_t)f0 * y_;
-            uint64_t l01 = (uint64_t)res1;
-            uint64_t h050 = (uint64_t)(res1 >> (uint32_t)64U);
-            o0[0U] = l01;
-            temp1 = h050;
-            uint64_t h2 = temp1;
-            uint128_t res = (uint128_t)f1 * y_;
-            uint64_t l02 = (uint64_t)res;
-            uint64_t h051 = (uint64_t)(res >> (uint32_t)64U);
-            o1[0U] = l02;
-            temp1 = h051;
-            uint64_t l = o1[0U];
-            uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h2, o1);
-            uint64_t h3 = temp1;
-            o2[0U] = h3 + c1;
-            uint128_t res2 = (uint128_t)f3 * y_;
-            uint64_t l0 = (uint64_t)res2;
-            uint64_t h05 = (uint64_t)(res2 >> (uint32_t)64U);
-            o3[0U] = l0;
-            o4[0U] = h05;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            uint64_t
-            p[6U] =
-              {
-                (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-                (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
-                (uint64_t)0xffffffffffffffffU
-              };
-            uint32_t len3;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  len3 = (uint32_t)4U;
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  len3 = (uint32_t)6U;
-                  break;
-                }
-              default:
-                {
-                  len3 = (uint32_t)4U;
-                }
-            }
-            uint64_t bBuffer = y_;
-            uint64_t *partResult = t2;
-            uint32_t resLen = len3 + (uint32_t)1U;
-            memset(partResult, 0U, resLen * sizeof (uint64_t));
-            {
-              uint64_t uu____6 = (&bBuffer)[0U];
-              uint64_t *res_ = partResult;
-              uint64_t c1 = (uint64_t)0U;
-              uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-              for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-              {
-                c1 = mul_carry_add_u64_st(c1, p[(uint32_t)4U * i], uu____6, res_ + (uint32_t)4U * i);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)1U],
-                    uu____6,
-                    res_ + (uint32_t)4U * i + (uint32_t)1U);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)2U],
-                    uu____6,
-                    res_ + (uint32_t)4U * i + (uint32_t)2U);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)3U],
-                    uu____6,
-                    res_ + (uint32_t)4U * i + (uint32_t)3U);
-              }
-              for (uint32_t i = k; i < len3; i++)
-              {
-                c1 = mul_carry_add_u64_st(c1, p[i], uu____6, res_ + i);
-              }
-              uint64_t r0 = c1;
-              partResult[len3 + (uint32_t)0U] = r0;
-            }
-            break;
-          }
-        default:
-          {
-            uint64_t
-            p[4U] =
-              {
-                (uint64_t)0xffffffffffffffffU,
-                (uint64_t)0xffffffffU,
-                (uint64_t)0U,
-                (uint64_t)0xffffffff00000001U
-              };
-            uint32_t len3;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  len3 = (uint32_t)4U;
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  len3 = (uint32_t)6U;
-                  break;
-                }
-              default:
-                {
-                  len3 = (uint32_t)4U;
-                }
-            }
-            uint64_t bBuffer = y_;
-            uint64_t *partResult = t2;
-            uint32_t resLen = len3 + (uint32_t)1U;
-            memset(partResult, 0U, resLen * sizeof (uint64_t));
-            {
-              uint64_t uu____7 = (&bBuffer)[0U];
-              uint64_t *res_ = partResult;
-              uint64_t c1 = (uint64_t)0U;
-              uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-              for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-              {
-                c1 = mul_carry_add_u64_st(c1, p[(uint32_t)4U * i], uu____7, res_ + (uint32_t)4U * i);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)1U],
-                    uu____7,
-                    res_ + (uint32_t)4U * i + (uint32_t)1U);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)2U],
-                    uu____7,
-                    res_ + (uint32_t)4U * i + (uint32_t)2U);
-                c1 =
-                  mul_carry_add_u64_st(c1,
-                    p[(uint32_t)4U * i + (uint32_t)3U],
-                    uu____7,
-                    res_ + (uint32_t)4U * i + (uint32_t)3U);
-              }
-              for (uint32_t i = k; i < len3; i++)
-              {
-                c1 = mul_carry_add_u64_st(c1, p[i], uu____7, res_ + i);
-              }
-              uint64_t r0 = c1;
-              partResult[len3 + (uint32_t)0U] = r0;
-            }
-          }
+        c = mul_carry_add_u64_st(c, p[i], uu____4, res_ + i);
       }
+      uint64_t r = c;
+      partResult[len30 + (uint32_t)0U] = r;
     }
-    uint32_t sw1;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          sw1 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          sw1 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          sw1 = (uint32_t)4U;
-        }
-    }
-    uint32_t len3 = sw1 * (uint32_t)2U;
-    uint64_t c1 = (uint64_t)0U;
-    uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
+    uint32_t len31 = (uint32_t)6U * (uint32_t)2U;
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = len31 / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t210 = t2[(uint32_t)4U * i];
-      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t210, t2 + (uint32_t)4U * i);
-      uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-      c1 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-          t10,
-          t211,
-          t2 + (uint32_t)4U * i + (uint32_t)1U);
-      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-      c1 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-          t11,
-          t212,
-          t2 + (uint32_t)4U * i + (uint32_t)2U);
-      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k; i < len3; i++)
+    for (uint32_t i = k; i < len31; i++)
     {
       uint64_t t1 = t[i];
       uint64_t t21 = t2[i];
-      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t21, t2 + i);
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
     }
-    uint64_t carry = c1;
-    uint32_t sw;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          sw = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          sw = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          sw = (uint32_t)4U;
-        }
-    }
-    uint32_t len30 = sw * (uint32_t)2U - (uint32_t)1U;
-    for (uint32_t i = (uint32_t)0U; i < len30; i++)
+    uint64_t carry = c;
+    uint32_t len3 = (uint32_t)11U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
     {
       uint64_t elem = t2[(uint32_t)1U + i];
       t[i] = elem;
     }
-    t[len30] = carry;
+    t[len3] = carry;
   }
-  uint32_t len2;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len2 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len2 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len2 = (uint32_t)4U;
-      }
-  }
+  uint32_t len2 = (uint32_t)6U;
   uint64_t cin = t[len2];
   uint64_t *x_ = t;
-  uint32_t len3;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len3 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len3 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len3 = (uint32_t)4U;
-      }
-  }
+  uint32_t len3 = (uint32_t)6U;
   KRML_CHECK_SIZE(sizeof (uint64_t), len3);
   uint64_t tempBuffer[len3];
   memset(tempBuffer, 0U, len3 * sizeof (uint64_t));
   uint64_t tempBufferForSubborrow = (uint64_t)0U;
-  uint64_t carry0;
-  switch (c)
+  uint64_t
+  p[6U] =
+    {
+      (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+      (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
+    };
+  uint32_t len40 = (uint32_t)6U;
+  uint64_t c = (uint64_t)0U;
+  uint32_t k = len40 / (uint32_t)4U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
   {
-    case Spec_ECC_Curves_P256:
-      {
-        uint64_t
-        p[4U] =
-          {
-            (uint64_t)0xffffffffffffffffU,
-            (uint64_t)0xffffffffU,
-            (uint64_t)0U,
-            (uint64_t)0xffffffff00000001U
-          };
-        uint32_t len4;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              len4 = (uint32_t)4U;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              len4 = (uint32_t)6U;
-              break;
-            }
-          default:
-            {
-              len4 = (uint32_t)4U;
-            }
-        }
-        uint64_t c1 = (uint64_t)0U;
-        uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          uint64_t t1 = x_[(uint32_t)4U * i];
-          uint64_t t20 = p[(uint32_t)4U * i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, tempBuffer + (uint32_t)4U * i);
-          uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-          uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t10,
-              t21,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-          uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t11,
-              t22,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-          uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t12,
-              t2,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len4; i++)
-        {
-          uint64_t t1 = x_[i];
-          uint64_t t2 = p[i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-        }
-        uint64_t r = c1;
-        carry0 = r;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        uint64_t
-        p[6U] =
-          {
-            (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-            (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
-            (uint64_t)0xffffffffffffffffU
-          };
-        uint32_t len4;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              len4 = (uint32_t)4U;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              len4 = (uint32_t)6U;
-              break;
-            }
-          default:
-            {
-              len4 = (uint32_t)4U;
-            }
-        }
-        uint64_t c1 = (uint64_t)0U;
-        uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-        {
-          uint64_t t1 = x_[(uint32_t)4U * i];
-          uint64_t t20 = p[(uint32_t)4U * i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, tempBuffer + (uint32_t)4U * i);
-          uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-          uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t10,
-              t21,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-          uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t11,
-              t22,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-          uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
-          c1 =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-              t12,
-              t2,
-              tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-        }
-        for (uint32_t i = k; i < len4; i++)
-        {
-          uint64_t t1 = x_[i];
-          uint64_t t2 = p[i];
-          c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-        }
-        uint64_t r = c1;
-        carry0 = r;
-        break;
-      }
-    default:
-      {
-        carry0 = (uint64_t)0U;
-      }
+    uint64_t t1 = x_[(uint32_t)4U * i];
+    uint64_t t20 = p[(uint32_t)4U * i];
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, tempBuffer + (uint32_t)4U * i);
+    uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
+    c =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+        t10,
+        t21,
+        tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
+    uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
+    c =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+        t11,
+        t22,
+        tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
+    uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
+    c =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+        t12,
+        t2,
+        tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
   }
+  for (uint32_t i = k; i < len40; i++)
+  {
+    uint64_t t1 = x_[i];
+    uint64_t t2 = p[i];
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, tempBuffer + i);
+  }
+  uint64_t r = c;
+  uint64_t carry0 = r;
   uint64_t
   carry =
     Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
@@ -3496,24 +2205,7 @@ montgomery_square_buffer_dh(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *resu
       (uint64_t)0U,
       &tempBufferForSubborrow);
   uint64_t mask = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
-  uint32_t len4;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len4 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len4 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len4 = (uint32_t)4U;
-      }
-  }
+  uint32_t len4 = (uint32_t)6U;
   for (uint32_t i = (uint32_t)0U; i < len4; i++)
   {
     uint64_t x_i = tempBuffer[i];
@@ -3523,883 +2215,458 @@ montgomery_square_buffer_dh(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *resu
   }
 }
 
-static inline void fsquarePowN_dh(Spec_ECC_Curves_curve c, uint32_t n, uint64_t *a)
+static void montgomery_square_buffer_dh_generic(uint64_t *a, uint64_t *result)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
+  uint64_t t[(uint32_t)2U * len];
+  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
+  uint32_t len1 = (uint32_t)4U;
+  uint32_t resLen0 = len1 + len1;
+  memset(t, 0U, resLen0 * sizeof (uint64_t));
+  for (uint32_t i0 = (uint32_t)0U; i0 < len1; i0++)
+  {
+    uint64_t *uu____0 = a;
+    uint64_t uu____1 = a[i0];
+    uint64_t *res_ = t + i0;
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = i0 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    {
+      c = mul_carry_add_u64_st(c, uu____0[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+      c =
+        mul_carry_add_u64_st(c,
+          uu____0[(uint32_t)4U * i + (uint32_t)1U],
+          uu____1,
+          res_ + (uint32_t)4U * i + (uint32_t)1U);
+      c =
+        mul_carry_add_u64_st(c,
+          uu____0[(uint32_t)4U * i + (uint32_t)2U],
+          uu____1,
+          res_ + (uint32_t)4U * i + (uint32_t)2U);
+      c =
+        mul_carry_add_u64_st(c,
+          uu____0[(uint32_t)4U * i + (uint32_t)3U],
+          uu____1,
+          res_ + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k; i < i0; i++)
+    {
+      c = mul_carry_add_u64_st(c, uu____0[i], uu____1, res_ + i);
+    }
+    uint64_t r = c;
+    t[i0 + i0] = r;
+  }
+  uint64_t c0 = (uint64_t)0U;
+  uint32_t k1 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = t[(uint32_t)4U * i];
+    uint64_t t20 = t[(uint32_t)4U * i];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, t + (uint32_t)4U * i);
+    uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = t[(uint32_t)4U * i + (uint32_t)1U];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
+    uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = t[(uint32_t)4U * i + (uint32_t)2U];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
+    uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = t[(uint32_t)4U * i + (uint32_t)3U];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
+  }
+  for (uint32_t i = k1; i < resLen0; i++)
+  {
+    uint64_t t1 = t[i];
+    uint64_t t2 = t[i];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, t + i);
+  }
+  uint64_t uu____2 = c0;
+  KRML_CHECK_SIZE(sizeof (uint64_t), resLen0);
+  uint64_t tmp[resLen0];
+  memset(tmp, 0U, resLen0 * sizeof (uint64_t));
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    uint128_t a2 = (uint128_t)a[i] * a[i];
+    tmp[(uint32_t)2U * i] = (uint64_t)a2;
+    tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
+  }
+  uint64_t c1 = (uint64_t)0U;
+  uint32_t k2 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < k2 / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = t[(uint32_t)4U * i];
+    uint64_t t20 = tmp[(uint32_t)4U * i];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, t + (uint32_t)4U * i);
+    uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
+    uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
+    uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
+  }
+  for (uint32_t i = k2; i < resLen0; i++)
+  {
+    uint64_t t1 = t[i];
+    uint64_t t2 = tmp[i];
+    c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, t + i);
+  }
+  uint64_t uu____3 = c1;
+  uint32_t len10 = (uint32_t)4U;
+  for (uint32_t i0 = (uint32_t)0U; i0 < len10; i0++)
+  {
+    uint32_t len2 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
+    uint64_t t2[(uint32_t)2U * len2];
+    memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
+    uint64_t k0 = mod_inv_u64((uint64_t)(uint32_t)1U);
+    uint64_t t10 = t[0U];
+    uint64_t y = (uint64_t)0U;
+    uint64_t temp = (uint64_t)0U;
+    uint128_t res = (uint128_t)t10 * k0;
+    uint64_t l0 = (uint64_t)res;
+    uint64_t h04 = (uint64_t)(res >> (uint32_t)64U);
+    y = l0;
+    temp = h04;
+    uint64_t y_ = y;
+    uint64_t
+    p[4U] =
+      {
+        (uint64_t)0xffffffffffffffffU,
+        (uint64_t)0xffffffffU,
+        (uint64_t)0U,
+        (uint64_t)0xffffffff00000001U
+      };
+    uint32_t len30 = (uint32_t)4U;
+    uint64_t bBuffer = y_;
+    uint64_t *partResult = t2;
+    uint32_t resLen = len30 + (uint32_t)1U;
+    memset(partResult, 0U, resLen * sizeof (uint64_t));
+    {
+      uint64_t uu____4 = (&bBuffer)[0U];
+      uint64_t *res_ = partResult;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____4, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)1U],
+            uu____4,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)2U],
+            uu____4,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)3U],
+            uu____4,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < len30; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[i], uu____4, res_ + i);
+      }
+      uint64_t r = c;
+      partResult[len30 + (uint32_t)0U] = r;
+    }
+    uint32_t len31 = (uint32_t)4U * (uint32_t)2U;
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = len31 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = t[(uint32_t)4U * i];
+      uint64_t t210 = t2[(uint32_t)4U * i];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, t2 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, t2 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k; i < len31; i++)
+    {
+      uint64_t t1 = t[i];
+      uint64_t t21 = t2[i];
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
+    }
+    uint64_t carry = c;
+    uint32_t len3 = (uint32_t)7U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
+    {
+      uint64_t elem = t2[(uint32_t)1U + i];
+      t[i] = elem;
+    }
+    t[len3] = carry;
+  }
+  uint32_t len2 = (uint32_t)4U;
+  uint64_t cin = t[len2];
+  uint64_t *x_ = t;
+  uint32_t len3 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len3);
+  uint64_t tempBuffer[len3];
+  memset(tempBuffer, 0U, len3 * sizeof (uint64_t));
+  uint64_t tempBufferForSubborrow = (uint64_t)0U;
+  uint64_t carry0 = (uint64_t)0U;
+  uint64_t
+  carry =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
+      cin,
+      (uint64_t)0U,
+      &tempBufferForSubborrow);
+  uint64_t mask = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
+  uint32_t len4 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len4; i++)
+  {
+    uint64_t x_i = tempBuffer[i];
+    uint64_t y_i = x_[i];
+    uint64_t r_i = (y_i & mask) | (x_i & ~mask);
+    result[i] = r_i;
+  }
+}
+
+static void fsquarePowN_dh_p256(uint32_t n, uint64_t *a)
 {
   for (uint32_t i0 = (uint32_t)0U; i0 < n; i0++)
   {
-    uint32_t len;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len = (uint32_t)4U;
-        }
-    }
+    uint32_t len = (uint32_t)4U;
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
     uint64_t t[(uint32_t)2U * len];
     memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
-    uint32_t len1;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len1 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len1 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len1 = (uint32_t)4U;
-        }
-    }
-    uint32_t resLen0 = len1 + len1;
-    memset(t, 0U, resLen0 * sizeof (uint64_t));
+    uint32_t len1 = (uint32_t)4U;
+    uint32_t resLen = len1 + len1;
+    memset(t, 0U, resLen * sizeof (uint64_t));
     for (uint32_t i1 = (uint32_t)0U; i1 < len1; i1++)
     {
       uint64_t *uu____0 = a;
       uint64_t uu____1 = a[i1];
       uint64_t *res_ = t + i1;
-      uint64_t c1 = (uint64_t)0U;
+      uint64_t c = (uint64_t)0U;
       uint32_t k = i1 / (uint32_t)4U * (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
-        c1 = mul_carry_add_u64_st(c1, uu____0[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
-        c1 =
-          mul_carry_add_u64_st(c1,
+        c = mul_carry_add_u64_st(c, uu____0[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
             uu____0[(uint32_t)4U * i + (uint32_t)1U],
             uu____1,
             res_ + (uint32_t)4U * i + (uint32_t)1U);
-        c1 =
-          mul_carry_add_u64_st(c1,
+        c =
+          mul_carry_add_u64_st(c,
             uu____0[(uint32_t)4U * i + (uint32_t)2U],
             uu____1,
             res_ + (uint32_t)4U * i + (uint32_t)2U);
-        c1 =
-          mul_carry_add_u64_st(c1,
+        c =
+          mul_carry_add_u64_st(c,
             uu____0[(uint32_t)4U * i + (uint32_t)3U],
             uu____1,
             res_ + (uint32_t)4U * i + (uint32_t)3U);
       }
       for (uint32_t i = k; i < i1; i++)
       {
-        c1 = mul_carry_add_u64_st(c1, uu____0[i], uu____1, res_ + i);
+        c = mul_carry_add_u64_st(c, uu____0[i], uu____1, res_ + i);
       }
-      uint64_t r = c1;
+      uint64_t r = c;
       t[i1 + i1] = r;
     }
-    uint64_t c10 = (uint64_t)0U;
-    uint32_t k0 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+    uint64_t c0 = (uint64_t)0U;
+    uint32_t k0 = resLen / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
     {
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t20 = t[(uint32_t)4U * i];
-      c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t20, t + (uint32_t)4U * i);
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, t + (uint32_t)4U * i);
       uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t21 = t[(uint32_t)4U * i + (uint32_t)1U];
-      c10 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c10,
-          t10,
-          t21,
-          t + (uint32_t)4U * i + (uint32_t)1U);
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
       uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t22 = t[(uint32_t)4U * i + (uint32_t)2U];
-      c10 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c10,
-          t11,
-          t22,
-          t + (uint32_t)4U * i + (uint32_t)2U);
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
       uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t2 = t[(uint32_t)4U * i + (uint32_t)3U];
-      c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k0; i < resLen0; i++)
+    for (uint32_t i = k0; i < resLen; i++)
     {
       uint64_t t1 = t[i];
       uint64_t t2 = t[i];
-      c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t2, t + i);
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, t + i);
     }
-    uint64_t uu____2 = c10;
-    KRML_CHECK_SIZE(sizeof (uint64_t), resLen0);
-    uint64_t tmp[resLen0];
-    memset(tmp, 0U, resLen0 * sizeof (uint64_t));
+    uint64_t uu____2 = c0;
+    KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
+    uint64_t tmp[resLen];
+    memset(tmp, 0U, resLen * sizeof (uint64_t));
     for (uint32_t i = (uint32_t)0U; i < len1; i++)
     {
       uint128_t a2 = (uint128_t)a[i] * a[i];
       tmp[(uint32_t)2U * i] = (uint64_t)a2;
       tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
     }
-    uint64_t c11 = (uint64_t)0U;
-    uint32_t k1 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+    uint64_t c1 = (uint64_t)0U;
+    uint32_t k1 = resLen / (uint32_t)4U * (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
     {
       uint64_t t1 = t[(uint32_t)4U * i];
       uint64_t t20 = tmp[(uint32_t)4U * i];
-      c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t1, t20, t + (uint32_t)4U * i);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, t + (uint32_t)4U * i);
       uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
-      c11 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c11,
-          t10,
-          t21,
-          t + (uint32_t)4U * i + (uint32_t)1U);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
       uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
-      c11 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c11,
-          t11,
-          t22,
-          t + (uint32_t)4U * i + (uint32_t)2U);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
       uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
-      c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k1; i < resLen0; i++)
+    for (uint32_t i = k1; i < resLen; i++)
     {
       uint64_t t1 = t[i];
       uint64_t t2 = tmp[i];
-      c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t1, t2, t + i);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, t + i);
     }
-    uint64_t uu____3 = c11;
-    uint32_t len10;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len10 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len10 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len10 = (uint32_t)4U;
-        }
-    }
+    uint64_t uu____3 = c1;
+    uint32_t len10 = (uint32_t)4U;
     for (uint32_t i1 = (uint32_t)0U; i1 < len10; i1++)
     {
-      uint32_t len2;
-      switch (c)
-      {
-        case Spec_ECC_Curves_P256:
-          {
-            len2 = (uint32_t)4U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            len2 = (uint32_t)6U;
-            break;
-          }
-        default:
-          {
-            len2 = (uint32_t)4U;
-          }
-      }
+      uint32_t len2 = (uint32_t)4U;
       KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
       uint64_t t2[(uint32_t)2U * len2];
       memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
-      uint64_t sw0;
-      switch (c)
-      {
-        case Spec_ECC_Curves_P256:
-          {
-            sw0 = (uint64_t)0xffffffffffffffffU;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            sw0 = (uint64_t)0xffffffffU;
-            break;
-          }
-        default:
-          {
-            sw0 = KRML_EABORT(uint64_t, "");
-          }
-      }
-      bool r = sw0 == (uint64_t)0xffffffffffffffffU;
-      if (r)
-      {
-        uint64_t t1 = t[0U];
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              uint64_t temp = (uint64_t)0U;
-              uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-              uint64_t f1 = (uint64_t)0xffffffffU;
-              uint64_t f3 = (uint64_t)0xffffffff00000001U;
-              uint64_t *o0 = t2;
-              uint64_t *o1 = t2 + (uint32_t)1U;
-              uint64_t *o2 = t2 + (uint32_t)2U;
-              uint64_t *o3 = t2 + (uint32_t)3U;
-              uint64_t *o4 = t2 + (uint32_t)4U;
-              uint128_t res0 = (uint128_t)f0 * t1;
-              uint64_t l00 = (uint64_t)res0;
-              uint64_t h050 = (uint64_t)(res0 >> (uint32_t)64U);
-              o0[0U] = l00;
-              temp = h050;
-              uint64_t h0 = temp;
-              uint128_t res = (uint128_t)f1 * t1;
-              uint64_t l01 = (uint64_t)res;
-              uint64_t h051 = (uint64_t)(res >> (uint32_t)64U);
-              o1[0U] = l01;
-              temp = h051;
-              uint64_t l = o1[0U];
-              uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-              uint64_t h = temp;
-              o2[0U] = h + c1;
-              uint128_t res1 = (uint128_t)f3 * t1;
-              uint64_t l0 = (uint64_t)res1;
-              uint64_t h05 = (uint64_t)(res1 >> (uint32_t)64U);
-              o3[0U] = l0;
-              o4[0U] = h05;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              uint64_t
-              p[6U] =
-                {
-                  (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U,
-                  (uint64_t)0xfffffffffffffffeU, (uint64_t)0xffffffffffffffffU,
-                  (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-                };
-              uint32_t len3;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len3 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len3 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len3 = (uint32_t)4U;
-                  }
-              }
-              uint64_t bBuffer = t1;
-              uint64_t *partResult = t2;
-              uint32_t resLen = len3 + (uint32_t)1U;
-              memset(partResult, 0U, resLen * sizeof (uint64_t));
-              {
-                uint64_t uu____4 = (&bBuffer)[0U];
-                uint64_t *res_ = partResult;
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i],
-                      uu____4,
-                      res_ + (uint32_t)4U * i);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)1U],
-                      uu____4,
-                      res_ + (uint32_t)4U * i + (uint32_t)1U);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)2U],
-                      uu____4,
-                      res_ + (uint32_t)4U * i + (uint32_t)2U);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)3U],
-                      uu____4,
-                      res_ + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len3; i++)
-                {
-                  c1 = mul_carry_add_u64_st(c1, p[i], uu____4, res_ + i);
-                }
-                uint64_t r0 = c1;
-                partResult[len3 + (uint32_t)0U] = r0;
-              }
-              break;
-            }
-          default:
-            {
-              uint64_t
-              p[4U] =
-                {
-                  (uint64_t)0xffffffffffffffffU,
-                  (uint64_t)0xffffffffU,
-                  (uint64_t)0U,
-                  (uint64_t)0xffffffff00000001U
-                };
-              uint32_t len3;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len3 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len3 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len3 = (uint32_t)4U;
-                  }
-              }
-              uint64_t bBuffer = t1;
-              uint64_t *partResult = t2;
-              uint32_t resLen = len3 + (uint32_t)1U;
-              memset(partResult, 0U, resLen * sizeof (uint64_t));
-              {
-                uint64_t uu____5 = (&bBuffer)[0U];
-                uint64_t *res_ = partResult;
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i],
-                      uu____5,
-                      res_ + (uint32_t)4U * i);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)1U],
-                      uu____5,
-                      res_ + (uint32_t)4U * i + (uint32_t)1U);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)2U],
-                      uu____5,
-                      res_ + (uint32_t)4U * i + (uint32_t)2U);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)3U],
-                      uu____5,
-                      res_ + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len3; i++)
-                {
-                  c1 = mul_carry_add_u64_st(c1, p[i], uu____5, res_ + i);
-                }
-                uint64_t r0 = c1;
-                partResult[len3 + (uint32_t)0U] = r0;
-              }
-            }
-        }
-      }
-      else
-      {
-        uint64_t k00;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              k00 = (uint64_t)1U;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              k00 = (uint64_t)4294967297U;
-              break;
-            }
-          case Spec_ECC_Curves_Default:
-            {
-              uint64_t sw;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    sw = (uint64_t)0xffffffffffffffffU;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    sw = (uint64_t)0xffffffffU;
-                    break;
-                  }
-                default:
-                  {
-                    sw = KRML_EABORT(uint64_t, "");
-                  }
-              }
-              k00 = mod_inv_u64(sw);
-              break;
-            }
-          default:
-            {
-              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-              KRML_HOST_EXIT(253U);
-            }
-        }
-        uint64_t t1 = t[0U];
-        uint64_t y = (uint64_t)0U;
-        uint64_t temp = (uint64_t)0U;
-        uint128_t res0 = (uint128_t)t1 * k00;
-        uint64_t l00 = (uint64_t)res0;
-        uint64_t h05 = (uint64_t)(res0 >> (uint32_t)64U);
-        y = l00;
-        temp = h05;
-        uint64_t y_ = y;
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              uint64_t temp1 = (uint64_t)0U;
-              uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-              uint64_t f1 = (uint64_t)0xffffffffU;
-              uint64_t f3 = (uint64_t)0xffffffff00000001U;
-              uint64_t *o0 = t2;
-              uint64_t *o1 = t2 + (uint32_t)1U;
-              uint64_t *o2 = t2 + (uint32_t)2U;
-              uint64_t *o3 = t2 + (uint32_t)3U;
-              uint64_t *o4 = t2 + (uint32_t)4U;
-              uint128_t res1 = (uint128_t)f0 * y_;
-              uint64_t l01 = (uint64_t)res1;
-              uint64_t h060 = (uint64_t)(res1 >> (uint32_t)64U);
-              o0[0U] = l01;
-              temp1 = h060;
-              uint64_t h2 = temp1;
-              uint128_t res = (uint128_t)f1 * y_;
-              uint64_t l02 = (uint64_t)res;
-              uint64_t h061 = (uint64_t)(res >> (uint32_t)64U);
-              o1[0U] = l02;
-              temp1 = h061;
-              uint64_t l = o1[0U];
-              uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h2, o1);
-              uint64_t h3 = temp1;
-              o2[0U] = h3 + c1;
-              uint128_t res2 = (uint128_t)f3 * y_;
-              uint64_t l0 = (uint64_t)res2;
-              uint64_t h06 = (uint64_t)(res2 >> (uint32_t)64U);
-              o3[0U] = l0;
-              o4[0U] = h06;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              uint64_t
-              p[6U] =
-                {
-                  (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U,
-                  (uint64_t)0xfffffffffffffffeU, (uint64_t)0xffffffffffffffffU,
-                  (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-                };
-              uint32_t len3;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len3 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len3 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len3 = (uint32_t)4U;
-                  }
-              }
-              uint64_t bBuffer = y_;
-              uint64_t *partResult = t2;
-              uint32_t resLen = len3 + (uint32_t)1U;
-              memset(partResult, 0U, resLen * sizeof (uint64_t));
-              {
-                uint64_t uu____6 = (&bBuffer)[0U];
-                uint64_t *res_ = partResult;
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i],
-                      uu____6,
-                      res_ + (uint32_t)4U * i);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)1U],
-                      uu____6,
-                      res_ + (uint32_t)4U * i + (uint32_t)1U);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)2U],
-                      uu____6,
-                      res_ + (uint32_t)4U * i + (uint32_t)2U);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)3U],
-                      uu____6,
-                      res_ + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len3; i++)
-                {
-                  c1 = mul_carry_add_u64_st(c1, p[i], uu____6, res_ + i);
-                }
-                uint64_t r0 = c1;
-                partResult[len3 + (uint32_t)0U] = r0;
-              }
-              break;
-            }
-          default:
-            {
-              uint64_t
-              p[4U] =
-                {
-                  (uint64_t)0xffffffffffffffffU,
-                  (uint64_t)0xffffffffU,
-                  (uint64_t)0U,
-                  (uint64_t)0xffffffff00000001U
-                };
-              uint32_t len3;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len3 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len3 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len3 = (uint32_t)4U;
-                  }
-              }
-              uint64_t bBuffer = y_;
-              uint64_t *partResult = t2;
-              uint32_t resLen = len3 + (uint32_t)1U;
-              memset(partResult, 0U, resLen * sizeof (uint64_t));
-              {
-                uint64_t uu____7 = (&bBuffer)[0U];
-                uint64_t *res_ = partResult;
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i],
-                      uu____7,
-                      res_ + (uint32_t)4U * i);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)1U],
-                      uu____7,
-                      res_ + (uint32_t)4U * i + (uint32_t)1U);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)2U],
-                      uu____7,
-                      res_ + (uint32_t)4U * i + (uint32_t)2U);
-                  c1 =
-                    mul_carry_add_u64_st(c1,
-                      p[(uint32_t)4U * i + (uint32_t)3U],
-                      uu____7,
-                      res_ + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len3; i++)
-                {
-                  c1 = mul_carry_add_u64_st(c1, p[i], uu____7, res_ + i);
-                }
-                uint64_t r0 = c1;
-                partResult[len3 + (uint32_t)0U] = r0;
-              }
-            }
-        }
-      }
-      uint32_t sw1;
-      switch (c)
-      {
-        case Spec_ECC_Curves_P256:
-          {
-            sw1 = (uint32_t)4U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            sw1 = (uint32_t)6U;
-            break;
-          }
-        default:
-          {
-            sw1 = (uint32_t)4U;
-          }
-      }
-      uint32_t len3 = sw1 * (uint32_t)2U;
-      uint64_t c1 = (uint64_t)0U;
-      uint32_t k = len3 / (uint32_t)4U * (uint32_t)4U;
+      uint64_t t10 = t[0U];
+      uint64_t temp = (uint64_t)0U;
+      uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+      uint64_t f1 = (uint64_t)0xffffffffU;
+      uint64_t f3 = (uint64_t)0xffffffff00000001U;
+      uint64_t *o0 = t2;
+      uint64_t *o1 = t2 + (uint32_t)1U;
+      uint64_t *o2 = t2 + (uint32_t)2U;
+      uint64_t *o3 = t2 + (uint32_t)3U;
+      uint64_t *o4 = t2 + (uint32_t)4U;
+      uint128_t res0 = (uint128_t)f0 * t10;
+      uint64_t l00 = (uint64_t)res0;
+      uint64_t h050 = (uint64_t)(res0 >> (uint32_t)64U);
+      o0[0U] = l00;
+      temp = h050;
+      uint64_t h0 = temp;
+      uint128_t res = (uint128_t)f1 * t10;
+      uint64_t l01 = (uint64_t)res;
+      uint64_t h051 = (uint64_t)(res >> (uint32_t)64U);
+      o1[0U] = l01;
+      temp = h051;
+      uint64_t l = o1[0U];
+      uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+      uint64_t h = temp;
+      o2[0U] = h + c10;
+      uint128_t res1 = (uint128_t)f3 * t10;
+      uint64_t l0 = (uint64_t)res1;
+      uint64_t h05 = (uint64_t)(res1 >> (uint32_t)64U);
+      o3[0U] = l0;
+      o4[0U] = h05;
+      uint32_t len30 = (uint32_t)4U * (uint32_t)2U;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
         uint64_t t1 = t[(uint32_t)4U * i];
         uint64_t t210 = t2[(uint32_t)4U * i];
-        c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t210, t2 + (uint32_t)4U * i);
-        uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+        uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
         uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-        c1 =
-          Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-            t10,
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t11,
             t211,
             t2 + (uint32_t)4U * i + (uint32_t)1U);
-        uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
         uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-        c1 =
-          Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-            t11,
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t12,
             t212,
             t2 + (uint32_t)4U * i + (uint32_t)2U);
-        uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
         uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-        c1 =
-          Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-            t12,
-            t21,
-            t2 + (uint32_t)4U * i + (uint32_t)3U);
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k; i < len3; i++)
+      for (uint32_t i = k; i < len30; i++)
       {
         uint64_t t1 = t[i];
         uint64_t t21 = t2[i];
-        c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t21, t2 + i);
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
       }
-      uint64_t carry = c1;
-      uint32_t sw;
-      switch (c)
-      {
-        case Spec_ECC_Curves_P256:
-          {
-            sw = (uint32_t)4U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            sw = (uint32_t)6U;
-            break;
-          }
-        default:
-          {
-            sw = (uint32_t)4U;
-          }
-      }
-      uint32_t len30 = sw * (uint32_t)2U - (uint32_t)1U;
-      for (uint32_t i = (uint32_t)0U; i < len30; i++)
+      uint64_t carry = c;
+      uint32_t len3 = (uint32_t)7U;
+      for (uint32_t i = (uint32_t)0U; i < len3; i++)
       {
         uint64_t elem = t2[(uint32_t)1U + i];
         t[i] = elem;
       }
-      t[len30] = carry;
+      t[len3] = carry;
     }
-    uint32_t len2;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len2 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len2 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len2 = (uint32_t)4U;
-        }
-    }
+    uint32_t len2 = (uint32_t)4U;
     uint64_t cin = t[len2];
     uint64_t *x_ = t;
-    uint32_t len3;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len3 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len3 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len3 = (uint32_t)4U;
-        }
-    }
+    uint32_t len3 = (uint32_t)4U;
     KRML_CHECK_SIZE(sizeof (uint64_t), len3);
     uint64_t tempBuffer[len3];
     memset(tempBuffer, 0U, len3 * sizeof (uint64_t));
     uint64_t tempBufferForSubborrow = (uint64_t)0U;
-    uint64_t carry0;
-    switch (c)
+    uint64_t
+    p[4U] =
+      {
+        (uint64_t)0xffffffffffffffffU,
+        (uint64_t)0xffffffffU,
+        (uint64_t)0U,
+        (uint64_t)0xffffffff00000001U
+      };
+    uint32_t len40 = (uint32_t)4U;
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = len40 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
-      case Spec_ECC_Curves_P256:
-        {
-          uint64_t
-          p[4U] =
-            {
-              (uint64_t)0xffffffffffffffffU,
-              (uint64_t)0xffffffffU,
-              (uint64_t)0U,
-              (uint64_t)0xffffffff00000001U
-            };
-          uint32_t len4;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len4 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len4 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len4 = (uint32_t)4U;
-              }
-          }
-          uint64_t c1 = (uint64_t)0U;
-          uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-          for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-          {
-            uint64_t t1 = x_[(uint32_t)4U * i];
-            uint64_t t20 = p[(uint32_t)4U * i];
-            c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, tempBuffer + (uint32_t)4U * i);
-            uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-            uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
-            c1 =
-              Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                t10,
-                t21,
-                tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-            uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-            uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
-            c1 =
-              Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                t11,
-                t22,
-                tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-            uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-            uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
-            c1 =
-              Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                t12,
-                t2,
-                tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-          }
-          for (uint32_t i = k; i < len4; i++)
-          {
-            uint64_t t1 = x_[i];
-            uint64_t t2 = p[i];
-            c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-          }
-          uint64_t r = c1;
-          carry0 = r;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          uint64_t
-          p[6U] =
-            {
-              (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
-              (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
-              (uint64_t)0xffffffffffffffffU
-            };
-          uint32_t len4;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len4 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len4 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len4 = (uint32_t)4U;
-              }
-          }
-          uint64_t c1 = (uint64_t)0U;
-          uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-          for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-          {
-            uint64_t t1 = x_[(uint32_t)4U * i];
-            uint64_t t20 = p[(uint32_t)4U * i];
-            c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, tempBuffer + (uint32_t)4U * i);
-            uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-            uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
-            c1 =
-              Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                t10,
-                t21,
-                tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-            uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-            uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
-            c1 =
-              Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                t11,
-                t22,
-                tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-            uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-            uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
-            c1 =
-              Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                t12,
-                t2,
-                tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-          }
-          for (uint32_t i = k; i < len4; i++)
-          {
-            uint64_t t1 = x_[i];
-            uint64_t t2 = p[i];
-            c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-          }
-          uint64_t r = c1;
-          carry0 = r;
-          break;
-        }
-      default:
-        {
-          carry0 = (uint64_t)0U;
-        }
+      uint64_t t1 = x_[(uint32_t)4U * i];
+      uint64_t t20 = p[(uint32_t)4U * i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, tempBuffer + (uint32_t)4U * i);
+      uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t10,
+          t21,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t11,
+          t22,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t12,
+          t2,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
     }
+    for (uint32_t i = k; i < len40; i++)
+    {
+      uint64_t t1 = x_[i];
+      uint64_t t2 = p[i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, tempBuffer + i);
+    }
+    uint64_t r = c;
+    uint64_t carry0 = r;
     uint64_t
     carry =
       Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
@@ -4407,24 +2674,7 @@ static inline void fsquarePowN_dh(Spec_ECC_Curves_curve c, uint32_t n, uint64_t 
         (uint64_t)0U,
         &tempBufferForSubborrow);
     uint64_t mask = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
-    uint32_t len4;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len4 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len4 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len4 = (uint32_t)4U;
-        }
-    }
+    uint32_t len4 = (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < len4; i++)
     {
       uint64_t x_i = tempBuffer[i];
@@ -4435,2029 +2685,1041 @@ static inline void fsquarePowN_dh(Spec_ECC_Curves_curve c, uint32_t n, uint64_t 
   }
 }
 
-static inline void
-montgomery_ladder_power(
-  Spec_ECC_Curves_curve c,
-  Hacl_Spec_MontgomeryMultiplication_mode m,
-  uint64_t *a,
-  const uint8_t *scalar,
-  uint64_t *result
-)
+static void fsquarePowN_dh_p384(uint32_t n, uint64_t *a)
 {
-  uint32_t len;
-  switch (c)
+  for (uint32_t i0 = (uint32_t)0U; i0 < n; i0++)
   {
-    case Spec_ECC_Curves_P256:
+    uint32_t len = (uint32_t)6U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
+    uint64_t t[(uint32_t)2U * len];
+    memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
+    uint32_t len1 = (uint32_t)6U;
+    uint32_t resLen0 = len1 + len1;
+    memset(t, 0U, resLen0 * sizeof (uint64_t));
+    for (uint32_t i1 = (uint32_t)0U; i1 < len1; i1++)
+    {
+      uint64_t *uu____0 = a;
+      uint64_t uu____1 = a[i1];
+      uint64_t *res_ = t + i1;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = i1 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
-        len = (uint32_t)4U;
-        break;
+        c = mul_carry_add_u64_st(c, uu____0[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____0[(uint32_t)4U * i + (uint32_t)1U],
+            uu____1,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____0[(uint32_t)4U * i + (uint32_t)2U],
+            uu____1,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____0[(uint32_t)4U * i + (uint32_t)3U],
+            uu____1,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
       }
-    case Spec_ECC_Curves_P384:
+      for (uint32_t i = k; i < i1; i++)
       {
-        len = (uint32_t)6U;
-        break;
+        c = mul_carry_add_u64_st(c, uu____0[i], uu____1, res_ + i);
       }
-    default:
+      uint64_t r = c;
+      t[i1 + i1] = r;
+    }
+    uint64_t c0 = (uint64_t)0U;
+    uint32_t k1 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = t[(uint32_t)4U * i];
+      uint64_t t20 = t[(uint32_t)4U * i];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, t + (uint32_t)4U * i);
+      uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = t[(uint32_t)4U * i + (uint32_t)1U];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = t[(uint32_t)4U * i + (uint32_t)2U];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = t[(uint32_t)4U * i + (uint32_t)3U];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k1; i < resLen0; i++)
+    {
+      uint64_t t1 = t[i];
+      uint64_t t2 = t[i];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, t + i);
+    }
+    uint64_t uu____2 = c0;
+    KRML_CHECK_SIZE(sizeof (uint64_t), resLen0);
+    uint64_t tmp[resLen0];
+    memset(tmp, 0U, resLen0 * sizeof (uint64_t));
+    for (uint32_t i = (uint32_t)0U; i < len1; i++)
+    {
+      uint128_t a2 = (uint128_t)a[i] * a[i];
+      tmp[(uint32_t)2U * i] = (uint64_t)a2;
+      tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
+    }
+    uint64_t c1 = (uint64_t)0U;
+    uint32_t k2 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k2 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = t[(uint32_t)4U * i];
+      uint64_t t20 = tmp[(uint32_t)4U * i];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, t + (uint32_t)4U * i);
+      uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t10, t21, t + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t11, t22, t + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k2; i < resLen0; i++)
+    {
+      uint64_t t1 = t[i];
+      uint64_t t2 = tmp[i];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, t + i);
+    }
+    uint64_t uu____3 = c1;
+    uint32_t len10 = (uint32_t)6U;
+    for (uint32_t i1 = (uint32_t)0U; i1 < len10; i1++)
+    {
+      uint32_t len2 = (uint32_t)6U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len2);
+      uint64_t t2[(uint32_t)2U * len2];
+      memset(t2, 0U, (uint32_t)2U * len2 * sizeof (uint64_t));
+      uint64_t k0 = (uint64_t)4294967297U;
+      uint64_t t10 = t[0U];
+      uint64_t y = (uint64_t)0U;
+      uint64_t temp = (uint64_t)0U;
+      uint128_t res = (uint128_t)t10 * k0;
+      uint64_t l0 = (uint64_t)res;
+      uint64_t h05 = (uint64_t)(res >> (uint32_t)64U);
+      y = l0;
+      temp = h05;
+      uint64_t y_ = y;
+      uint64_t
+      p[6U] =
+        {
+          (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+          (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffffffffffU
+        };
+      uint32_t len30 = (uint32_t)6U;
+      uint64_t bBuffer = y_;
+      uint64_t *partResult = t2;
+      uint32_t resLen = len30 + (uint32_t)1U;
+      memset(partResult, 0U, resLen * sizeof (uint64_t));
       {
-        len = (uint32_t)4U;
+        uint64_t uu____4 = (&bBuffer)[0U];
+        uint64_t *res_ = partResult;
+        uint64_t c = (uint64_t)0U;
+        uint32_t k = len30 / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____4, res_ + (uint32_t)4U * i);
+          c =
+            mul_carry_add_u64_st(c,
+              p[(uint32_t)4U * i + (uint32_t)1U],
+              uu____4,
+              res_ + (uint32_t)4U * i + (uint32_t)1U);
+          c =
+            mul_carry_add_u64_st(c,
+              p[(uint32_t)4U * i + (uint32_t)2U],
+              uu____4,
+              res_ + (uint32_t)4U * i + (uint32_t)2U);
+          c =
+            mul_carry_add_u64_st(c,
+              p[(uint32_t)4U * i + (uint32_t)3U],
+              uu____4,
+              res_ + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < len30; i++)
+        {
+          c = mul_carry_add_u64_st(c, p[i], uu____4, res_ + i);
+        }
+        uint64_t r = c;
+        partResult[len30 + (uint32_t)0U] = r;
       }
+      uint32_t len31 = (uint32_t)6U * (uint32_t)2U;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len31 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = t[(uint32_t)4U * i];
+        uint64_t t210 = t2[(uint32_t)4U * i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+        uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t11,
+            t211,
+            t2 + (uint32_t)4U * i + (uint32_t)1U);
+        uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t12,
+            t212,
+            t2 + (uint32_t)4U * i + (uint32_t)2U);
+        uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < len31; i++)
+      {
+        uint64_t t1 = t[i];
+        uint64_t t21 = t2[i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
+      }
+      uint64_t carry = c;
+      uint32_t len3 = (uint32_t)11U;
+      for (uint32_t i = (uint32_t)0U; i < len3; i++)
+      {
+        uint64_t elem = t2[(uint32_t)1U + i];
+        t[i] = elem;
+      }
+      t[len3] = carry;
+    }
+    uint32_t len2 = (uint32_t)6U;
+    uint64_t cin = t[len2];
+    uint64_t *x_ = t;
+    uint32_t len3 = (uint32_t)6U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len3);
+    uint64_t tempBuffer[len3];
+    memset(tempBuffer, 0U, len3 * sizeof (uint64_t));
+    uint64_t tempBufferForSubborrow = (uint64_t)0U;
+    uint64_t
+    p[6U] =
+      {
+        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
+      };
+    uint32_t len40 = (uint32_t)6U;
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = len40 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = x_[(uint32_t)4U * i];
+      uint64_t t20 = p[(uint32_t)4U * i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, tempBuffer + (uint32_t)4U * i);
+      uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t10,
+          t21,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t11,
+          t22,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t12,
+          t2,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k; i < len40; i++)
+    {
+      uint64_t t1 = x_[i];
+      uint64_t t2 = p[i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, tempBuffer + i);
+    }
+    uint64_t r = c;
+    uint64_t carry0 = r;
+    uint64_t
+    carry =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
+        cin,
+        (uint64_t)0U,
+        &tempBufferForSubborrow);
+    uint64_t mask = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
+    uint32_t len4 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len4; i++)
+    {
+      uint64_t x_i = tempBuffer[i];
+      uint64_t y_i = x_[i];
+      uint64_t r_i = (y_i & mask) | (x_i & ~mask);
+      a[i] = r_i;
+    }
   }
+}
+
+static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uint64_t *result)
+{
+  uint32_t len = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t p[len];
   memset(p, 0U, len * sizeof (uint64_t));
-  switch (m)
-  {
-    case Hacl_Spec_MontgomeryMultiplication_DH:
-      {
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              p[0U] = (uint64_t)1U;
-              p[1U] = (uint64_t)18446744069414584320U;
-              p[2U] = (uint64_t)18446744073709551615U;
-              p[3U] = (uint64_t)4294967294U;
-              break;
-            }
-          case Spec_ECC_Curves_P384:
-            {
-              p[0U] = (uint64_t)18446744069414584321U;
-              p[1U] = (uint64_t)4294967295U;
-              p[2U] = (uint64_t)1U;
-              p[3U] = (uint64_t)0U;
-              p[4U] = (uint64_t)0U;
-              p[5U] = (uint64_t)0U;
-              break;
-            }
-          default:
-            {
-              uint32_t len1;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len1 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len1 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len1 = (uint32_t)4U;
-                  }
-              }
-              for (uint32_t i = (uint32_t)0U; i < len1; i++)
-              {
-                p[i] = (uint64_t)0U;
-              }
-              uint32_t len10;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len10 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len10 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len10 = (uint32_t)4U;
-                  }
-              }
-              KRML_CHECK_SIZE(sizeof (uint64_t), len10);
-              uint64_t tempBuffer[len10];
-              memset(tempBuffer, 0U, len10 * sizeof (uint64_t));
-              uint64_t tempBufferForSubborrow = (uint64_t)0U;
-              uint64_t carry0;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    uint64_t
-                    p1[4U] =
-                      {
-                        (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffU,
-                        (uint64_t)0U,
-                        (uint64_t)0xffffffff00000001U
-                      };
-                    uint32_t len2;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len2 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len2 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len2 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len2 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      uint64_t t1 = p[(uint32_t)4U * i];
-                      uint64_t t20 = p1[(uint32_t)4U * i];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t1,
-                          t20,
-                          tempBuffer + (uint32_t)4U * i);
-                      uint64_t t10 = p[(uint32_t)4U * i + (uint32_t)1U];
-                      uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t10,
-                          t21,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                      uint64_t t11 = p[(uint32_t)4U * i + (uint32_t)2U];
-                      uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t11,
-                          t22,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                      uint64_t t12 = p[(uint32_t)4U * i + (uint32_t)3U];
-                      uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t12,
-                          t2,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len2; i++)
-                    {
-                      uint64_t t1 = p[i];
-                      uint64_t t2 = p1[i];
-                      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                    }
-                    uint64_t r = c1;
-                    carry0 = r;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    uint64_t
-                    p1[6U] =
-                      {
-                        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U,
-                        (uint64_t)0xfffffffffffffffeU, (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-                      };
-                    uint32_t len2;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len2 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len2 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len2 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len2 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      uint64_t t1 = p[(uint32_t)4U * i];
-                      uint64_t t20 = p1[(uint32_t)4U * i];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t1,
-                          t20,
-                          tempBuffer + (uint32_t)4U * i);
-                      uint64_t t10 = p[(uint32_t)4U * i + (uint32_t)1U];
-                      uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t10,
-                          t21,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                      uint64_t t11 = p[(uint32_t)4U * i + (uint32_t)2U];
-                      uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t11,
-                          t22,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                      uint64_t t12 = p[(uint32_t)4U * i + (uint32_t)3U];
-                      uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t12,
-                          t2,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len2; i++)
-                    {
-                      uint64_t t1 = p[i];
-                      uint64_t t2 = p1[i];
-                      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                    }
-                    uint64_t r = c1;
-                    carry0 = r;
-                    break;
-                  }
-                default:
-                  {
-                    carry0 = (uint64_t)0U;
-                  }
-              }
-              uint64_t
-              carry =
-                Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
-                  (uint64_t)1U,
-                  (uint64_t)0U,
-                  &tempBufferForSubborrow);
-              uint64_t mask = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
-              uint32_t len2;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len2 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len2 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len2 = (uint32_t)4U;
-                  }
-              }
-              for (uint32_t i = (uint32_t)0U; i < len2; i++)
-              {
-                uint64_t x_i = tempBuffer[i];
-                uint64_t y_i = p[i];
-                uint64_t r_i = (y_i & mask) | (x_i & ~mask);
-                p[i] = r_i;
-              }
-            }
-        }
-        break;
-      }
-    case Hacl_Spec_MontgomeryMultiplication_DSA:
-      {
-        switch (c)
-        {
-          case Spec_ECC_Curves_P256:
-            {
-              p[0U] = (uint64_t)884452912994769583U;
-              p[1U] = (uint64_t)4834901526196019579U;
-              p[2U] = (uint64_t)0U;
-              p[3U] = (uint64_t)4294967295U;
-              break;
-            }
-          default:
-            {
-              uint32_t len1;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len1 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len1 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len1 = (uint32_t)4U;
-                  }
-              }
-              for (uint32_t i = (uint32_t)0U; i < len1; i++)
-              {
-                p[i] = (uint64_t)0U;
-              }
-              uint32_t len10;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len10 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len10 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len10 = (uint32_t)4U;
-                  }
-              }
-              KRML_CHECK_SIZE(sizeof (uint64_t), len10);
-              uint64_t tempBuffer[len10];
-              memset(tempBuffer, 0U, len10 * sizeof (uint64_t));
-              uint64_t tempBufferForSubborrow = (uint64_t)0U;
-              uint64_t carry0;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    uint64_t
-                    p1[4U] =
-                      {
-                        (uint64_t)17562291160714782033U,
-                        (uint64_t)13611842547513532036U,
-                        (uint64_t)18446744073709551615U,
-                        (uint64_t)18446744069414584320U
-                      };
-                    uint32_t len2;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len2 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len2 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len2 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len2 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      uint64_t t1 = p[(uint32_t)4U * i];
-                      uint64_t t20 = p1[(uint32_t)4U * i];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t1,
-                          t20,
-                          tempBuffer + (uint32_t)4U * i);
-                      uint64_t t10 = p[(uint32_t)4U * i + (uint32_t)1U];
-                      uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t10,
-                          t21,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                      uint64_t t11 = p[(uint32_t)4U * i + (uint32_t)2U];
-                      uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t11,
-                          t22,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                      uint64_t t12 = p[(uint32_t)4U * i + (uint32_t)3U];
-                      uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t12,
-                          t2,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len2; i++)
-                    {
-                      uint64_t t1 = p[i];
-                      uint64_t t2 = p1[i];
-                      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                    }
-                    uint64_t r = c1;
-                    carry0 = r;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    uint64_t
-                    p1[6U] =
-                      {
-                        (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
-                        (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
-                        (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
-                      };
-                    uint32_t len2;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len2 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len2 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len2 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len2 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      uint64_t t1 = p[(uint32_t)4U * i];
-                      uint64_t t20 = p1[(uint32_t)4U * i];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t1,
-                          t20,
-                          tempBuffer + (uint32_t)4U * i);
-                      uint64_t t10 = p[(uint32_t)4U * i + (uint32_t)1U];
-                      uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t10,
-                          t21,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                      uint64_t t11 = p[(uint32_t)4U * i + (uint32_t)2U];
-                      uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t11,
-                          t22,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                      uint64_t t12 = p[(uint32_t)4U * i + (uint32_t)3U];
-                      uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                      c1 =
-                        Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                          t12,
-                          t2,
-                          tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len2; i++)
-                    {
-                      uint64_t t1 = p[i];
-                      uint64_t t2 = p1[i];
-                      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                    }
-                    uint64_t r = c1;
-                    carry0 = r;
-                    break;
-                  }
-                default:
-                  {
-                    carry0 = (uint64_t)0U;
-                  }
-              }
-              uint64_t
-              carry =
-                Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
-                  (uint64_t)1U,
-                  (uint64_t)0U,
-                  &tempBufferForSubborrow);
-              uint64_t mask = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
-              uint32_t len2;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    len2 = (uint32_t)4U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    len2 = (uint32_t)6U;
-                    break;
-                  }
-                default:
-                  {
-                    len2 = (uint32_t)4U;
-                  }
-              }
-              for (uint32_t i = (uint32_t)0U; i < len2; i++)
-              {
-                uint64_t x_i = tempBuffer[i];
-                uint64_t y_i = p[i];
-                uint64_t r_i = (y_i & mask) | (x_i & ~mask);
-                p[i] = r_i;
-              }
-            }
-        }
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  uint32_t sw0;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw0 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw0 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw0 = (uint32_t)4U;
-      }
-  }
-  memcpy(a, result, sw0 * sizeof (uint64_t));
-  uint32_t scalarLen = Spec_ECC_Curves_getScalarLen(c);
+  p[0U] = (uint64_t)1U;
+  p[1U] = (uint64_t)18446744069414584320U;
+  p[2U] = (uint64_t)18446744073709551615U;
+  p[3U] = (uint64_t)4294967294U;
+  memcpy(a, result, (uint32_t)4U * sizeof (uint64_t));
+  uint32_t scalarLen = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256);
   for (uint32_t i0 = (uint32_t)0U; i0 < scalarLen; i0++)
   {
-    uint32_t bit0 = Spec_ECC_Curves_getScalarLen(c) - (uint32_t)1U - i0;
+    uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256) - (uint32_t)1U - i0;
     uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
     uint64_t mask = (uint64_t)0U - bit;
-    uint32_t len10;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len10 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len10 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len10 = (uint32_t)4U;
-        }
-    }
+    uint32_t len10 = (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < len10; i++)
     {
       uint64_t dummy = mask & (p[i] ^ a[i]);
       p[i] = p[i] ^ dummy;
       a[i] = a[i] ^ dummy;
     }
-    uint32_t len11;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len11 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len11 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len11 = (uint32_t)4U;
-        }
-    }
+    uint32_t len11 = (uint32_t)4U;
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len11);
     uint64_t t[(uint32_t)2U * len11];
     memset(t, 0U, (uint32_t)2U * len11 * sizeof (uint64_t));
-    uint32_t len20;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len20 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len20 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len20 = (uint32_t)4U;
-        }
-    }
+    uint32_t len20 = (uint32_t)4U;
     uint32_t resLen0 = len20 + len20;
     memset(t, 0U, resLen0 * sizeof (uint64_t));
     for (uint32_t i1 = (uint32_t)0U; i1 < len20; i1++)
     {
       uint64_t uu____0 = a[i1];
       uint64_t *res_ = t + i1;
-      uint64_t c1 = (uint64_t)0U;
+      uint64_t c = (uint64_t)0U;
       uint32_t k = len20 / (uint32_t)4U * (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
-        c1 = mul_carry_add_u64_st(c1, p[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
-        c1 =
-          mul_carry_add_u64_st(c1,
+        c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
             p[(uint32_t)4U * i + (uint32_t)1U],
             uu____0,
             res_ + (uint32_t)4U * i + (uint32_t)1U);
-        c1 =
-          mul_carry_add_u64_st(c1,
+        c =
+          mul_carry_add_u64_st(c,
             p[(uint32_t)4U * i + (uint32_t)2U],
             uu____0,
             res_ + (uint32_t)4U * i + (uint32_t)2U);
-        c1 =
-          mul_carry_add_u64_st(c1,
+        c =
+          mul_carry_add_u64_st(c,
             p[(uint32_t)4U * i + (uint32_t)3U],
             uu____0,
             res_ + (uint32_t)4U * i + (uint32_t)3U);
       }
       for (uint32_t i = k; i < len20; i++)
       {
-        c1 = mul_carry_add_u64_st(c1, p[i], uu____0, res_ + i);
+        c = mul_carry_add_u64_st(c, p[i], uu____0, res_ + i);
       }
-      uint64_t r = c1;
+      uint64_t r = c;
       t[len20 + i1] = r;
     }
-    uint32_t len21;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len21 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len21 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len21 = (uint32_t)4U;
-        }
-    }
+    uint32_t len21 = (uint32_t)4U;
     for (uint32_t i1 = (uint32_t)0U; i1 < len21; i1++)
     {
-      uint32_t len3;
-      switch (c)
-      {
-        case Spec_ECC_Curves_P256:
-          {
-            len3 = (uint32_t)4U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            len3 = (uint32_t)6U;
-            break;
-          }
-        default:
-          {
-            len3 = (uint32_t)4U;
-          }
-      }
+      uint32_t len3 = (uint32_t)4U;
       KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len3);
       uint64_t t2[(uint32_t)2U * len3];
       memset(t2, 0U, (uint32_t)2U * len3 * sizeof (uint64_t));
-      switch (m)
-      {
-        case Hacl_Spec_MontgomeryMultiplication_DSA:
-          {
-            uint64_t sw;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  sw = (uint64_t)17562291160714782033U;
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  sw = (uint64_t)17072048233947408755U;
-                  break;
-                }
-              default:
-                {
-                  sw = KRML_EABORT(uint64_t, "");
-                }
-            }
-            uint64_t k0 = mod_inv_u64(sw);
-            uint64_t t1 = t[0U];
-            uint64_t y = (uint64_t)0U;
-            uint64_t temp = (uint64_t)0U;
-            uint128_t res = (uint128_t)t1 * k0;
-            uint64_t l0 = (uint64_t)res;
-            uint64_t h07 = (uint64_t)(res >> (uint32_t)64U);
-            y = l0;
-            temp = h07;
-            uint64_t y_ = y;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  uint64_t
-                  p1[4U] =
-                    {
-                      (uint64_t)17562291160714782033U,
-                      (uint64_t)13611842547513532036U,
-                      (uint64_t)18446744073709551615U,
-                      (uint64_t)18446744069414584320U
-                    };
-                  uint32_t len4;
-                  switch (c)
-                  {
-                    case Spec_ECC_Curves_P256:
-                      {
-                        len4 = (uint32_t)4U;
-                        break;
-                      }
-                    case Spec_ECC_Curves_P384:
-                      {
-                        len4 = (uint32_t)6U;
-                        break;
-                      }
-                    default:
-                      {
-                        len4 = (uint32_t)4U;
-                      }
-                  }
-                  uint64_t bBuffer = y_;
-                  uint64_t *partResult = t2;
-                  uint32_t resLen = len4 + (uint32_t)1U;
-                  memset(partResult, 0U, resLen * sizeof (uint64_t));
-                  {
-                    uint64_t uu____1 = (&bBuffer)[0U];
-                    uint64_t *res_ = partResult;
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i],
-                          uu____1,
-                          res_ + (uint32_t)4U * i);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)1U],
-                          uu____1,
-                          res_ + (uint32_t)4U * i + (uint32_t)1U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)2U],
-                          uu____1,
-                          res_ + (uint32_t)4U * i + (uint32_t)2U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)3U],
-                          uu____1,
-                          res_ + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len4; i++)
-                    {
-                      c1 = mul_carry_add_u64_st(c1, p1[i], uu____1, res_ + i);
-                    }
-                    uint64_t r = c1;
-                    partResult[len4 + (uint32_t)0U] = r;
-                  }
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  uint64_t
-                  p1[6U] =
-                    {
-                      (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
-                      (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
-                      (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
-                    };
-                  uint32_t len4;
-                  switch (c)
-                  {
-                    case Spec_ECC_Curves_P256:
-                      {
-                        len4 = (uint32_t)4U;
-                        break;
-                      }
-                    case Spec_ECC_Curves_P384:
-                      {
-                        len4 = (uint32_t)6U;
-                        break;
-                      }
-                    default:
-                      {
-                        len4 = (uint32_t)4U;
-                      }
-                  }
-                  uint64_t bBuffer = y_;
-                  uint64_t *partResult = t2;
-                  uint32_t resLen = len4 + (uint32_t)1U;
-                  memset(partResult, 0U, resLen * sizeof (uint64_t));
-                  {
-                    uint64_t uu____2 = (&bBuffer)[0U];
-                    uint64_t *res_ = partResult;
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i],
-                          uu____2,
-                          res_ + (uint32_t)4U * i);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)1U],
-                          uu____2,
-                          res_ + (uint32_t)4U * i + (uint32_t)1U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)2U],
-                          uu____2,
-                          res_ + (uint32_t)4U * i + (uint32_t)2U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)3U],
-                          uu____2,
-                          res_ + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len4; i++)
-                    {
-                      c1 = mul_carry_add_u64_st(c1, p1[i], uu____2, res_ + i);
-                    }
-                    uint64_t r = c1;
-                    partResult[len4 + (uint32_t)0U] = r;
-                  }
-                  break;
-                }
-              default:
-                {
-                  uint64_t
-                  p1[4U] =
-                    {
-                      (uint64_t)17562291160714782033U,
-                      (uint64_t)13611842547513532036U,
-                      (uint64_t)18446744073709551615U,
-                      (uint64_t)18446744069414584320U
-                    };
-                  uint32_t len4;
-                  switch (c)
-                  {
-                    case Spec_ECC_Curves_P256:
-                      {
-                        len4 = (uint32_t)4U;
-                        break;
-                      }
-                    case Spec_ECC_Curves_P384:
-                      {
-                        len4 = (uint32_t)6U;
-                        break;
-                      }
-                    default:
-                      {
-                        len4 = (uint32_t)4U;
-                      }
-                  }
-                  uint64_t bBuffer = y_;
-                  uint64_t *partResult = t2;
-                  uint32_t resLen = len4 + (uint32_t)1U;
-                  memset(partResult, 0U, resLen * sizeof (uint64_t));
-                  {
-                    uint64_t uu____3 = (&bBuffer)[0U];
-                    uint64_t *res_ = partResult;
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i],
-                          uu____3,
-                          res_ + (uint32_t)4U * i);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)1U],
-                          uu____3,
-                          res_ + (uint32_t)4U * i + (uint32_t)1U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)2U],
-                          uu____3,
-                          res_ + (uint32_t)4U * i + (uint32_t)2U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)3U],
-                          uu____3,
-                          res_ + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len4; i++)
-                    {
-                      c1 = mul_carry_add_u64_st(c1, p1[i], uu____3, res_ + i);
-                    }
-                    uint64_t r = c1;
-                    partResult[len4 + (uint32_t)0U] = r;
-                  }
-                }
-            }
-            break;
-          }
-        case Hacl_Spec_MontgomeryMultiplication_DH:
-          {
-            uint64_t sw1;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  sw1 = (uint64_t)0xffffffffffffffffU;
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  sw1 = (uint64_t)0xffffffffU;
-                  break;
-                }
-              default:
-                {
-                  sw1 = KRML_EABORT(uint64_t, "");
-                }
-            }
-            bool r = sw1 == (uint64_t)0xffffffffffffffffU;
-            if (r)
-            {
-              uint64_t t1 = t[0U];
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    uint64_t temp = (uint64_t)0U;
-                    uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-                    uint64_t f1 = (uint64_t)0xffffffffU;
-                    uint64_t f3 = (uint64_t)0xffffffff00000001U;
-                    uint64_t *o0 = t2;
-                    uint64_t *o1 = t2 + (uint32_t)1U;
-                    uint64_t *o2 = t2 + (uint32_t)2U;
-                    uint64_t *o3 = t2 + (uint32_t)3U;
-                    uint64_t *o4 = t2 + (uint32_t)4U;
-                    uint128_t res0 = (uint128_t)f0 * t1;
-                    uint64_t l00 = (uint64_t)res0;
-                    uint64_t h080 = (uint64_t)(res0 >> (uint32_t)64U);
-                    o0[0U] = l00;
-                    temp = h080;
-                    uint64_t h0 = temp;
-                    uint128_t res = (uint128_t)f1 * t1;
-                    uint64_t l01 = (uint64_t)res;
-                    uint64_t h081 = (uint64_t)(res >> (uint32_t)64U);
-                    o1[0U] = l01;
-                    temp = h081;
-                    uint64_t l = o1[0U];
-                    uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-                    uint64_t h = temp;
-                    o2[0U] = h + c1;
-                    uint128_t res1 = (uint128_t)f3 * t1;
-                    uint64_t l0 = (uint64_t)res1;
-                    uint64_t h08 = (uint64_t)(res1 >> (uint32_t)64U);
-                    o3[0U] = l0;
-                    o4[0U] = h08;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    uint64_t
-                    p1[6U] =
-                      {
-                        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U,
-                        (uint64_t)0xfffffffffffffffeU, (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-                      };
-                    uint32_t len4;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len4 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len4 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len4 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t bBuffer = t1;
-                    uint64_t *partResult = t2;
-                    uint32_t resLen = len4 + (uint32_t)1U;
-                    memset(partResult, 0U, resLen * sizeof (uint64_t));
-                    {
-                      uint64_t uu____4 = (&bBuffer)[0U];
-                      uint64_t *res_ = partResult;
-                      uint64_t c1 = (uint64_t)0U;
-                      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                      {
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i],
-                            uu____4,
-                            res_ + (uint32_t)4U * i);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)1U],
-                            uu____4,
-                            res_ + (uint32_t)4U * i + (uint32_t)1U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)2U],
-                            uu____4,
-                            res_ + (uint32_t)4U * i + (uint32_t)2U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)3U],
-                            uu____4,
-                            res_ + (uint32_t)4U * i + (uint32_t)3U);
-                      }
-                      for (uint32_t i = k; i < len4; i++)
-                      {
-                        c1 = mul_carry_add_u64_st(c1, p1[i], uu____4, res_ + i);
-                      }
-                      uint64_t r0 = c1;
-                      partResult[len4 + (uint32_t)0U] = r0;
-                    }
-                    break;
-                  }
-                default:
-                  {
-                    uint64_t
-                    p1[4U] =
-                      {
-                        (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffU,
-                        (uint64_t)0U,
-                        (uint64_t)0xffffffff00000001U
-                      };
-                    uint32_t len4;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len4 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len4 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len4 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t bBuffer = t1;
-                    uint64_t *partResult = t2;
-                    uint32_t resLen = len4 + (uint32_t)1U;
-                    memset(partResult, 0U, resLen * sizeof (uint64_t));
-                    {
-                      uint64_t uu____5 = (&bBuffer)[0U];
-                      uint64_t *res_ = partResult;
-                      uint64_t c1 = (uint64_t)0U;
-                      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                      {
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i],
-                            uu____5,
-                            res_ + (uint32_t)4U * i);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)1U],
-                            uu____5,
-                            res_ + (uint32_t)4U * i + (uint32_t)1U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)2U],
-                            uu____5,
-                            res_ + (uint32_t)4U * i + (uint32_t)2U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)3U],
-                            uu____5,
-                            res_ + (uint32_t)4U * i + (uint32_t)3U);
-                      }
-                      for (uint32_t i = k; i < len4; i++)
-                      {
-                        c1 = mul_carry_add_u64_st(c1, p1[i], uu____5, res_ + i);
-                      }
-                      uint64_t r0 = c1;
-                      partResult[len4 + (uint32_t)0U] = r0;
-                    }
-                  }
-              }
-            }
-            else
-            {
-              uint64_t k0;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    k0 = (uint64_t)1U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    k0 = (uint64_t)4294967297U;
-                    break;
-                  }
-                case Spec_ECC_Curves_Default:
-                  {
-                    uint64_t sw;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          sw = (uint64_t)0xffffffffffffffffU;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          sw = (uint64_t)0xffffffffU;
-                          break;
-                        }
-                      default:
-                        {
-                          sw = KRML_EABORT(uint64_t, "");
-                        }
-                    }
-                    k0 = mod_inv_u64(sw);
-                    break;
-                  }
-                default:
-                  {
-                    KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-                    KRML_HOST_EXIT(253U);
-                  }
-              }
-              uint64_t t1 = t[0U];
-              uint64_t y = (uint64_t)0U;
-              uint64_t temp = (uint64_t)0U;
-              uint128_t res0 = (uint128_t)t1 * k0;
-              uint64_t l00 = (uint64_t)res0;
-              uint64_t h08 = (uint64_t)(res0 >> (uint32_t)64U);
-              y = l00;
-              temp = h08;
-              uint64_t y_ = y;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    uint64_t temp1 = (uint64_t)0U;
-                    uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-                    uint64_t f1 = (uint64_t)0xffffffffU;
-                    uint64_t f3 = (uint64_t)0xffffffff00000001U;
-                    uint64_t *o0 = t2;
-                    uint64_t *o1 = t2 + (uint32_t)1U;
-                    uint64_t *o2 = t2 + (uint32_t)2U;
-                    uint64_t *o3 = t2 + (uint32_t)3U;
-                    uint64_t *o4 = t2 + (uint32_t)4U;
-                    uint128_t res1 = (uint128_t)f0 * y_;
-                    uint64_t l01 = (uint64_t)res1;
-                    uint64_t h090 = (uint64_t)(res1 >> (uint32_t)64U);
-                    o0[0U] = l01;
-                    temp1 = h090;
-                    uint64_t h2 = temp1;
-                    uint128_t res = (uint128_t)f1 * y_;
-                    uint64_t l02 = (uint64_t)res;
-                    uint64_t h091 = (uint64_t)(res >> (uint32_t)64U);
-                    o1[0U] = l02;
-                    temp1 = h091;
-                    uint64_t l = o1[0U];
-                    uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h2, o1);
-                    uint64_t h3 = temp1;
-                    o2[0U] = h3 + c1;
-                    uint128_t res2 = (uint128_t)f3 * y_;
-                    uint64_t l0 = (uint64_t)res2;
-                    uint64_t h09 = (uint64_t)(res2 >> (uint32_t)64U);
-                    o3[0U] = l0;
-                    o4[0U] = h09;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    uint64_t
-                    p1[6U] =
-                      {
-                        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U,
-                        (uint64_t)0xfffffffffffffffeU, (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-                      };
-                    uint32_t len4;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len4 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len4 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len4 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t bBuffer = y_;
-                    uint64_t *partResult = t2;
-                    uint32_t resLen = len4 + (uint32_t)1U;
-                    memset(partResult, 0U, resLen * sizeof (uint64_t));
-                    {
-                      uint64_t uu____6 = (&bBuffer)[0U];
-                      uint64_t *res_ = partResult;
-                      uint64_t c1 = (uint64_t)0U;
-                      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                      {
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i],
-                            uu____6,
-                            res_ + (uint32_t)4U * i);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)1U],
-                            uu____6,
-                            res_ + (uint32_t)4U * i + (uint32_t)1U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)2U],
-                            uu____6,
-                            res_ + (uint32_t)4U * i + (uint32_t)2U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)3U],
-                            uu____6,
-                            res_ + (uint32_t)4U * i + (uint32_t)3U);
-                      }
-                      for (uint32_t i = k; i < len4; i++)
-                      {
-                        c1 = mul_carry_add_u64_st(c1, p1[i], uu____6, res_ + i);
-                      }
-                      uint64_t r0 = c1;
-                      partResult[len4 + (uint32_t)0U] = r0;
-                    }
-                    break;
-                  }
-                default:
-                  {
-                    uint64_t
-                    p1[4U] =
-                      {
-                        (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffU,
-                        (uint64_t)0U,
-                        (uint64_t)0xffffffff00000001U
-                      };
-                    uint32_t len4;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len4 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len4 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len4 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t bBuffer = y_;
-                    uint64_t *partResult = t2;
-                    uint32_t resLen = len4 + (uint32_t)1U;
-                    memset(partResult, 0U, resLen * sizeof (uint64_t));
-                    {
-                      uint64_t uu____7 = (&bBuffer)[0U];
-                      uint64_t *res_ = partResult;
-                      uint64_t c1 = (uint64_t)0U;
-                      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                      {
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i],
-                            uu____7,
-                            res_ + (uint32_t)4U * i);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)1U],
-                            uu____7,
-                            res_ + (uint32_t)4U * i + (uint32_t)1U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)2U],
-                            uu____7,
-                            res_ + (uint32_t)4U * i + (uint32_t)2U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)3U],
-                            uu____7,
-                            res_ + (uint32_t)4U * i + (uint32_t)3U);
-                      }
-                      for (uint32_t i = k; i < len4; i++)
-                      {
-                        c1 = mul_carry_add_u64_st(c1, p1[i], uu____7, res_ + i);
-                      }
-                      uint64_t r0 = c1;
-                      partResult[len4 + (uint32_t)0U] = r0;
-                    }
-                  }
-              }
-            }
-            break;
-          }
-        default:
-          {
-            KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-            KRML_HOST_EXIT(253U);
-          }
-      }
-      uint32_t sw1;
-      switch (c)
-      {
-        case Spec_ECC_Curves_P256:
-          {
-            sw1 = (uint32_t)4U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            sw1 = (uint32_t)6U;
-            break;
-          }
-        default:
-          {
-            sw1 = (uint32_t)4U;
-          }
-      }
-      uint32_t len4 = sw1 * (uint32_t)2U;
-      uint64_t c1 = (uint64_t)0U;
-      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
+      uint64_t t10 = t[0U];
+      uint64_t temp = (uint64_t)0U;
+      uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+      uint64_t f1 = (uint64_t)0xffffffffU;
+      uint64_t f3 = (uint64_t)0xffffffff00000001U;
+      uint64_t *o0 = t2;
+      uint64_t *o1 = t2 + (uint32_t)1U;
+      uint64_t *o2 = t2 + (uint32_t)2U;
+      uint64_t *o3 = t2 + (uint32_t)3U;
+      uint64_t *o4 = t2 + (uint32_t)4U;
+      uint128_t res0 = (uint128_t)f0 * t10;
+      uint64_t l00 = (uint64_t)res0;
+      uint64_t h080 = (uint64_t)(res0 >> (uint32_t)64U);
+      o0[0U] = l00;
+      temp = h080;
+      uint64_t h0 = temp;
+      uint128_t res = (uint128_t)f1 * t10;
+      uint64_t l01 = (uint64_t)res;
+      uint64_t h081 = (uint64_t)(res >> (uint32_t)64U);
+      o1[0U] = l01;
+      temp = h081;
+      uint64_t l = o1[0U];
+      uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+      uint64_t h = temp;
+      o2[0U] = h + c1;
+      uint128_t res1 = (uint128_t)f3 * t10;
+      uint64_t l0 = (uint64_t)res1;
+      uint64_t h08 = (uint64_t)(res1 >> (uint32_t)64U);
+      o3[0U] = l0;
+      o4[0U] = h08;
+      uint32_t len40 = (uint32_t)4U * (uint32_t)2U;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len40 / (uint32_t)4U * (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
         uint64_t t1 = t[(uint32_t)4U * i];
         uint64_t t210 = t2[(uint32_t)4U * i];
-        c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t210, t2 + (uint32_t)4U * i);
-        uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+        uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
         uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-        c1 =
-          Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-            t10,
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t11,
             t211,
             t2 + (uint32_t)4U * i + (uint32_t)1U);
-        uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
         uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-        c1 =
-          Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-            t11,
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t12,
             t212,
             t2 + (uint32_t)4U * i + (uint32_t)2U);
-        uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
         uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-        c1 =
-          Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-            t12,
-            t21,
-            t2 + (uint32_t)4U * i + (uint32_t)3U);
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k; i < len4; i++)
+      for (uint32_t i = k; i < len40; i++)
       {
         uint64_t t1 = t[i];
         uint64_t t21 = t2[i];
-        c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t21, t2 + i);
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
       }
-      uint64_t carry = c1;
-      uint32_t sw;
-      switch (c)
-      {
-        case Spec_ECC_Curves_P256:
-          {
-            sw = (uint32_t)4U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            sw = (uint32_t)6U;
-            break;
-          }
-        default:
-          {
-            sw = (uint32_t)4U;
-          }
-      }
-      uint32_t len40 = sw * (uint32_t)2U - (uint32_t)1U;
-      for (uint32_t i = (uint32_t)0U; i < len40; i++)
+      uint64_t carry = c;
+      uint32_t len4 = (uint32_t)7U;
+      for (uint32_t i = (uint32_t)0U; i < len4; i++)
       {
         uint64_t elem = t2[(uint32_t)1U + i];
         t[i] = elem;
       }
-      t[len40] = carry;
+      t[len4] = carry;
     }
-    switch (m)
+    uint32_t len3 = (uint32_t)4U;
+    uint64_t cin = t[len3];
+    uint64_t *x_0 = t;
+    uint32_t len40 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len40);
+    uint64_t tempBuffer[len40];
+    memset(tempBuffer, 0U, len40 * sizeof (uint64_t));
+    uint64_t tempBufferForSubborrow0 = (uint64_t)0U;
+    uint64_t
+    p10[4U] =
+      {
+        (uint64_t)0xffffffffffffffffU,
+        (uint64_t)0xffffffffU,
+        (uint64_t)0U,
+        (uint64_t)0xffffffff00000001U
+      };
+    uint32_t len50 = (uint32_t)4U;
+    uint64_t c0 = (uint64_t)0U;
+    uint32_t k0 = len50 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
     {
-      case Hacl_Spec_MontgomeryMultiplication_DH:
-        {
-          uint32_t len3;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len3 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len3 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len3 = (uint32_t)4U;
-              }
-          }
-          uint64_t cin = t[len3];
-          uint64_t *x_ = t;
-          uint32_t len4;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len4 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len4 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len4 = (uint32_t)4U;
-              }
-          }
-          KRML_CHECK_SIZE(sizeof (uint64_t), len4);
-          uint64_t tempBuffer[len4];
-          memset(tempBuffer, 0U, len4 * sizeof (uint64_t));
-          uint64_t tempBufferForSubborrow = (uint64_t)0U;
-          uint64_t carry0;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                uint64_t
-                p1[4U] =
-                  {
-                    (uint64_t)0xffffffffffffffffU,
-                    (uint64_t)0xffffffffU,
-                    (uint64_t)0U,
-                    (uint64_t)0xffffffff00000001U
-                  };
-                uint32_t len5;
-                switch (c)
-                {
-                  case Spec_ECC_Curves_P256:
-                    {
-                      len5 = (uint32_t)4U;
-                      break;
-                    }
-                  case Spec_ECC_Curves_P384:
-                    {
-                      len5 = (uint32_t)6U;
-                      break;
-                    }
-                  default:
-                    {
-                      len5 = (uint32_t)4U;
-                    }
-                }
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len5 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  uint64_t t1 = x_[(uint32_t)4U * i];
-                  uint64_t t20 = p1[(uint32_t)4U * i];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t1,
-                      t20,
-                      tempBuffer + (uint32_t)4U * i);
-                  uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-                  uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t10,
-                      t21,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                  uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-                  uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t11,
-                      t22,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                  uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t12,
-                      t2,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len5; i++)
-                {
-                  uint64_t t1 = x_[i];
-                  uint64_t t2 = p1[i];
-                  c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                }
-                uint64_t r = c1;
-                carry0 = r;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                uint64_t
-                p1[6U] =
-                  {
-                    (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U,
-                    (uint64_t)0xfffffffffffffffeU, (uint64_t)0xffffffffffffffffU,
-                    (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-                  };
-                uint32_t len5;
-                switch (c)
-                {
-                  case Spec_ECC_Curves_P256:
-                    {
-                      len5 = (uint32_t)4U;
-                      break;
-                    }
-                  case Spec_ECC_Curves_P384:
-                    {
-                      len5 = (uint32_t)6U;
-                      break;
-                    }
-                  default:
-                    {
-                      len5 = (uint32_t)4U;
-                    }
-                }
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len5 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  uint64_t t1 = x_[(uint32_t)4U * i];
-                  uint64_t t20 = p1[(uint32_t)4U * i];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t1,
-                      t20,
-                      tempBuffer + (uint32_t)4U * i);
-                  uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-                  uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t10,
-                      t21,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                  uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-                  uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t11,
-                      t22,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                  uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t12,
-                      t2,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len5; i++)
-                {
-                  uint64_t t1 = x_[i];
-                  uint64_t t2 = p1[i];
-                  c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                }
-                uint64_t r = c1;
-                carry0 = r;
-                break;
-              }
-            default:
-              {
-                carry0 = (uint64_t)0U;
-              }
-          }
-          uint64_t
-          carry =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
-              cin,
-              (uint64_t)0U,
-              &tempBufferForSubborrow);
-          uint64_t mask0 = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
-          uint32_t len5;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len5 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len5 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len5 = (uint32_t)4U;
-              }
-          }
-          for (uint32_t i = (uint32_t)0U; i < len5; i++)
-          {
-            uint64_t x_i = tempBuffer[i];
-            uint64_t y_i = x_[i];
-            uint64_t r_i = (y_i & mask0) | (x_i & ~mask0);
-            a[i] = r_i;
-          }
-          break;
-        }
-      case Hacl_Spec_MontgomeryMultiplication_DSA:
-        {
-          uint32_t len3;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len3 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len3 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len3 = (uint32_t)4U;
-              }
-          }
-          uint64_t cin = t[len3];
-          uint64_t *x_ = t;
-          uint32_t len4;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len4 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len4 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len4 = (uint32_t)4U;
-              }
-          }
-          KRML_CHECK_SIZE(sizeof (uint64_t), len4);
-          uint64_t tempBuffer[len4];
-          memset(tempBuffer, 0U, len4 * sizeof (uint64_t));
-          uint64_t tempBufferForSubborrow = (uint64_t)0U;
-          uint64_t carry0;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                uint64_t
-                p1[4U] =
-                  {
-                    (uint64_t)17562291160714782033U,
-                    (uint64_t)13611842547513532036U,
-                    (uint64_t)18446744073709551615U,
-                    (uint64_t)18446744069414584320U
-                  };
-                uint32_t len5;
-                switch (c)
-                {
-                  case Spec_ECC_Curves_P256:
-                    {
-                      len5 = (uint32_t)4U;
-                      break;
-                    }
-                  case Spec_ECC_Curves_P384:
-                    {
-                      len5 = (uint32_t)6U;
-                      break;
-                    }
-                  default:
-                    {
-                      len5 = (uint32_t)4U;
-                    }
-                }
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len5 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  uint64_t t1 = x_[(uint32_t)4U * i];
-                  uint64_t t20 = p1[(uint32_t)4U * i];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t1,
-                      t20,
-                      tempBuffer + (uint32_t)4U * i);
-                  uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-                  uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t10,
-                      t21,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                  uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-                  uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t11,
-                      t22,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                  uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t12,
-                      t2,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len5; i++)
-                {
-                  uint64_t t1 = x_[i];
-                  uint64_t t2 = p1[i];
-                  c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                }
-                uint64_t r = c1;
-                carry0 = r;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                uint64_t
-                p1[6U] =
-                  {
-                    (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
-                    (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
-                    (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
-                  };
-                uint32_t len5;
-                switch (c)
-                {
-                  case Spec_ECC_Curves_P256:
-                    {
-                      len5 = (uint32_t)4U;
-                      break;
-                    }
-                  case Spec_ECC_Curves_P384:
-                    {
-                      len5 = (uint32_t)6U;
-                      break;
-                    }
-                  default:
-                    {
-                      len5 = (uint32_t)4U;
-                    }
-                }
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len5 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  uint64_t t1 = x_[(uint32_t)4U * i];
-                  uint64_t t20 = p1[(uint32_t)4U * i];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t1,
-                      t20,
-                      tempBuffer + (uint32_t)4U * i);
-                  uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-                  uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t10,
-                      t21,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                  uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-                  uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t11,
-                      t22,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                  uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t12,
-                      t2,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len5; i++)
-                {
-                  uint64_t t1 = x_[i];
-                  uint64_t t2 = p1[i];
-                  c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                }
-                uint64_t r = c1;
-                carry0 = r;
-                break;
-              }
-            default:
-              {
-                carry0 = (uint64_t)0U;
-              }
-          }
-          uint64_t
-          carry =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
-              cin,
-              (uint64_t)0U,
-              &tempBufferForSubborrow);
-          uint64_t mask0 = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
-          uint32_t len5;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len5 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len5 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len5 = (uint32_t)4U;
-              }
-          }
-          for (uint32_t i = (uint32_t)0U; i < len5; i++)
-          {
-            uint64_t x_i = tempBuffer[i];
-            uint64_t y_i = x_[i];
-            uint64_t r_i = (y_i & mask0) | (x_i & ~mask0);
-            a[i] = r_i;
-          }
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
+      uint64_t t1 = x_0[(uint32_t)4U * i];
+      uint64_t t20 = p10[(uint32_t)4U * i];
+      c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, tempBuffer + (uint32_t)4U * i);
+      uint64_t t10 = x_0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p10[(uint32_t)4U * i + (uint32_t)1U];
+      c0 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+          t10,
+          t21,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = x_0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p10[(uint32_t)4U * i + (uint32_t)2U];
+      c0 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+          t11,
+          t22,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = x_0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p10[(uint32_t)4U * i + (uint32_t)3U];
+      c0 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+          t12,
+          t2,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
     }
-    uint32_t len12;
-    switch (c)
+    for (uint32_t i = k0; i < len50; i++)
     {
-      case Spec_ECC_Curves_P256:
-        {
-          len12 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len12 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len12 = (uint32_t)4U;
-        }
+      uint64_t t1 = x_0[i];
+      uint64_t t2 = p10[i];
+      c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, tempBuffer + i);
     }
+    uint64_t r = c0;
+    uint64_t carry0 = r;
+    uint64_t
+    carry =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
+        cin,
+        (uint64_t)0U,
+        &tempBufferForSubborrow0);
+    uint64_t mask0 = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
+    uint32_t len51 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len51; i++)
+    {
+      uint64_t x_i = tempBuffer[i];
+      uint64_t y_i = x_0[i];
+      uint64_t r_i = (y_i & mask0) | (x_i & ~mask0);
+      a[i] = r_i;
+    }
+    uint32_t len12 = (uint32_t)4U;
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len12);
     uint64_t t0[(uint32_t)2U * len12];
     memset(t0, 0U, (uint32_t)2U * len12 * sizeof (uint64_t));
-    uint32_t len2;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len2 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len2 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len2 = (uint32_t)4U;
-        }
-    }
-    uint32_t resLen1 = len2 + len2;
-    memset(t0, 0U, resLen1 * sizeof (uint64_t));
+    uint32_t len2 = (uint32_t)4U;
+    uint32_t resLen = len2 + len2;
+    memset(t0, 0U, resLen * sizeof (uint64_t));
     for (uint32_t i1 = (uint32_t)0U; i1 < len2; i1++)
     {
-      uint64_t *uu____8 = p;
-      uint64_t uu____9 = p[i1];
+      uint64_t *uu____1 = p;
+      uint64_t uu____2 = p[i1];
       uint64_t *res_ = t0 + i1;
-      uint64_t c1 = (uint64_t)0U;
+      uint64_t c = (uint64_t)0U;
       uint32_t k = i1 / (uint32_t)4U * (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
-        c1 = mul_carry_add_u64_st(c1, uu____8[(uint32_t)4U * i], uu____9, res_ + (uint32_t)4U * i);
-        c1 =
-          mul_carry_add_u64_st(c1,
-            uu____8[(uint32_t)4U * i + (uint32_t)1U],
-            uu____9,
+        c = mul_carry_add_u64_st(c, uu____1[(uint32_t)4U * i], uu____2, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____1[(uint32_t)4U * i + (uint32_t)1U],
+            uu____2,
             res_ + (uint32_t)4U * i + (uint32_t)1U);
-        c1 =
-          mul_carry_add_u64_st(c1,
-            uu____8[(uint32_t)4U * i + (uint32_t)2U],
-            uu____9,
+        c =
+          mul_carry_add_u64_st(c,
+            uu____1[(uint32_t)4U * i + (uint32_t)2U],
+            uu____2,
             res_ + (uint32_t)4U * i + (uint32_t)2U);
-        c1 =
-          mul_carry_add_u64_st(c1,
-            uu____8[(uint32_t)4U * i + (uint32_t)3U],
-            uu____9,
+        c =
+          mul_carry_add_u64_st(c,
+            uu____1[(uint32_t)4U * i + (uint32_t)3U],
+            uu____2,
             res_ + (uint32_t)4U * i + (uint32_t)3U);
       }
       for (uint32_t i = k; i < i1; i++)
       {
-        c1 = mul_carry_add_u64_st(c1, uu____8[i], uu____9, res_ + i);
+        c = mul_carry_add_u64_st(c, uu____1[i], uu____2, res_ + i);
       }
-      uint64_t r = c1;
-      t0[i1 + i1] = r;
+      uint64_t r0 = c;
+      t0[i1 + i1] = r0;
     }
-    uint64_t c10 = (uint64_t)0U;
-    uint32_t k0 = resLen1 / (uint32_t)4U * (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+    uint64_t c1 = (uint64_t)0U;
+    uint32_t k1 = resLen / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
     {
       uint64_t t1 = t0[(uint32_t)4U * i];
       uint64_t t20 = t0[(uint32_t)4U * i];
-      c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t20, t0 + (uint32_t)4U * i);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, t0 + (uint32_t)4U * i);
       uint64_t t10 = t0[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t21 = t0[(uint32_t)4U * i + (uint32_t)1U];
-      c10 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c10,
-          t10,
-          t21,
-          t0 + (uint32_t)4U * i + (uint32_t)1U);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t10, t21, t0 + (uint32_t)4U * i + (uint32_t)1U);
       uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t22 = t0[(uint32_t)4U * i + (uint32_t)2U];
-      c10 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c10,
-          t11,
-          t22,
-          t0 + (uint32_t)4U * i + (uint32_t)2U);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t11, t22, t0 + (uint32_t)4U * i + (uint32_t)2U);
       uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t2 = t0[(uint32_t)4U * i + (uint32_t)3U];
-      c10 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c10,
-          t12,
-          t2,
-          t0 + (uint32_t)4U * i + (uint32_t)3U);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t2, t0 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k0; i < resLen1; i++)
+    for (uint32_t i = k1; i < resLen; i++)
     {
       uint64_t t1 = t0[i];
       uint64_t t2 = t0[i];
-      c10 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, t1, t2, t0 + i);
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, t0 + i);
     }
-    uint64_t uu____10 = c10;
+    uint64_t uu____3 = c1;
+    KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
+    uint64_t tmp[resLen];
+    memset(tmp, 0U, resLen * sizeof (uint64_t));
+    for (uint32_t i = (uint32_t)0U; i < len2; i++)
+    {
+      uint128_t a2 = (uint128_t)p[i] * p[i];
+      tmp[(uint32_t)2U * i] = (uint64_t)a2;
+      tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
+    }
+    uint64_t c2 = (uint64_t)0U;
+    uint32_t k2 = resLen / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k2 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = t0[(uint32_t)4U * i];
+      uint64_t t20 = tmp[(uint32_t)4U * i];
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t20, t0 + (uint32_t)4U * i);
+      uint64_t t10 = t0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t10, t21, t0 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t11, t22, t0 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t12, t2, t0 + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k2; i < resLen; i++)
+    {
+      uint64_t t1 = t0[i];
+      uint64_t t2 = tmp[i];
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t2, t0 + i);
+    }
+    uint64_t uu____4 = c2;
+    uint32_t len22 = (uint32_t)4U;
+    for (uint32_t i1 = (uint32_t)0U; i1 < len22; i1++)
+    {
+      uint32_t len30 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len30);
+      uint64_t t2[(uint32_t)2U * len30];
+      memset(t2, 0U, (uint32_t)2U * len30 * sizeof (uint64_t));
+      uint64_t t10 = t0[0U];
+      uint64_t temp = (uint64_t)0U;
+      uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+      uint64_t f1 = (uint64_t)0xffffffffU;
+      uint64_t f3 = (uint64_t)0xffffffff00000001U;
+      uint64_t *o0 = t2;
+      uint64_t *o1 = t2 + (uint32_t)1U;
+      uint64_t *o2 = t2 + (uint32_t)2U;
+      uint64_t *o3 = t2 + (uint32_t)3U;
+      uint64_t *o4 = t2 + (uint32_t)4U;
+      uint128_t res0 = (uint128_t)f0 * t10;
+      uint64_t l00 = (uint64_t)res0;
+      uint64_t h080 = (uint64_t)(res0 >> (uint32_t)64U);
+      o0[0U] = l00;
+      temp = h080;
+      uint64_t h0 = temp;
+      uint128_t res = (uint128_t)f1 * t10;
+      uint64_t l01 = (uint64_t)res;
+      uint64_t h081 = (uint64_t)(res >> (uint32_t)64U);
+      o1[0U] = l01;
+      temp = h081;
+      uint64_t l = o1[0U];
+      uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+      uint64_t h = temp;
+      o2[0U] = h + c10;
+      uint128_t res1 = (uint128_t)f3 * t10;
+      uint64_t l0 = (uint64_t)res1;
+      uint64_t h08 = (uint64_t)(res1 >> (uint32_t)64U);
+      o3[0U] = l0;
+      o4[0U] = h08;
+      uint32_t len41 = (uint32_t)4U * (uint32_t)2U;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len41 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = t0[(uint32_t)4U * i];
+        uint64_t t210 = t2[(uint32_t)4U * i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+        uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t11,
+            t211,
+            t2 + (uint32_t)4U * i + (uint32_t)1U);
+        uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t12,
+            t212,
+            t2 + (uint32_t)4U * i + (uint32_t)2U);
+        uint64_t t13 = t0[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < len41; i++)
+      {
+        uint64_t t1 = t0[i];
+        uint64_t t21 = t2[i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
+      }
+      uint64_t carry1 = c;
+      uint32_t len4 = (uint32_t)7U;
+      for (uint32_t i = (uint32_t)0U; i < len4; i++)
+      {
+        uint64_t elem = t2[(uint32_t)1U + i];
+        t0[i] = elem;
+      }
+      t0[len4] = carry1;
+    }
+    uint32_t len30 = (uint32_t)4U;
+    uint64_t cin0 = t0[len30];
+    uint64_t *x_ = t0;
+    uint32_t len4 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len4);
+    uint64_t tempBuffer0[len4];
+    memset(tempBuffer0, 0U, len4 * sizeof (uint64_t));
+    uint64_t tempBufferForSubborrow = (uint64_t)0U;
+    uint64_t
+    p1[4U] =
+      {
+        (uint64_t)0xffffffffffffffffU,
+        (uint64_t)0xffffffffU,
+        (uint64_t)0U,
+        (uint64_t)0xffffffff00000001U
+      };
+    uint32_t len52 = (uint32_t)4U;
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = len52 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = x_[(uint32_t)4U * i];
+      uint64_t t20 = p1[(uint32_t)4U * i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, tempBuffer0 + (uint32_t)4U * i);
+      uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t10,
+          t21,
+          tempBuffer0 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t11,
+          t22,
+          tempBuffer0 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t12,
+          t2,
+          tempBuffer0 + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k; i < len52; i++)
+    {
+      uint64_t t1 = x_[i];
+      uint64_t t2 = p1[i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, tempBuffer0 + i);
+    }
+    uint64_t r0 = c;
+    uint64_t carry00 = r0;
+    uint64_t
+    carry1 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(carry00,
+        cin0,
+        (uint64_t)0U,
+        &tempBufferForSubborrow);
+    uint64_t mask1 = ~FStar_UInt64_eq_mask(carry1, (uint64_t)0U);
+    uint32_t len5 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len5; i++)
+    {
+      uint64_t x_i = tempBuffer0[i];
+      uint64_t y_i = x_[i];
+      uint64_t r_i = (y_i & mask1) | (x_i & ~mask1);
+      p[i] = r_i;
+    }
+    uint64_t mask2 = (uint64_t)0U - bit;
+    uint32_t len1 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len1; i++)
+    {
+      uint64_t dummy = mask2 & (p[i] ^ a[i]);
+      p[i] = p[i] ^ dummy;
+      a[i] = a[i] ^ dummy;
+    }
+  }
+  memcpy(result, p, (uint32_t)4U * sizeof (uint64_t));
+}
+
+static void montgomery_ladder_power_p384(uint64_t *a, const uint8_t *scalar, uint64_t *result)
+{
+  uint32_t len = (uint32_t)6U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t p[len];
+  memset(p, 0U, len * sizeof (uint64_t));
+  p[0U] = (uint64_t)18446744069414584321U;
+  p[1U] = (uint64_t)4294967295U;
+  p[2U] = (uint64_t)1U;
+  p[3U] = (uint64_t)0U;
+  p[4U] = (uint64_t)0U;
+  p[5U] = (uint64_t)0U;
+  memcpy(a, result, (uint32_t)6U * sizeof (uint64_t));
+  uint32_t scalarLen = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384);
+  for (uint32_t i0 = (uint32_t)0U; i0 < scalarLen; i0++)
+  {
+    uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384) - (uint32_t)1U - i0;
+    uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+    uint64_t mask = (uint64_t)0U - bit;
+    uint32_t len10 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len10; i++)
+    {
+      uint64_t dummy = mask & (p[i] ^ a[i]);
+      p[i] = p[i] ^ dummy;
+      a[i] = a[i] ^ dummy;
+    }
+    uint32_t len11 = (uint32_t)6U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len11);
+    uint64_t t[(uint32_t)2U * len11];
+    memset(t, 0U, (uint32_t)2U * len11 * sizeof (uint64_t));
+    uint32_t len20 = (uint32_t)6U;
+    uint32_t resLen0 = len20 + len20;
+    memset(t, 0U, resLen0 * sizeof (uint64_t));
+    for (uint32_t i1 = (uint32_t)0U; i1 < len20; i1++)
+    {
+      uint64_t uu____0 = a[i1];
+      uint64_t *res_ = t + i1;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len20 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)1U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)2U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)3U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < len20; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[i], uu____0, res_ + i);
+      }
+      uint64_t r = c;
+      t[len20 + i1] = r;
+    }
+    uint32_t len21 = (uint32_t)6U;
+    for (uint32_t i1 = (uint32_t)0U; i1 < len21; i1++)
+    {
+      uint32_t len3 = (uint32_t)6U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len3);
+      uint64_t t2[(uint32_t)2U * len3];
+      memset(t2, 0U, (uint32_t)2U * len3 * sizeof (uint64_t));
+      uint64_t k0 = (uint64_t)4294967297U;
+      uint64_t t10 = t[0U];
+      uint64_t y = (uint64_t)0U;
+      uint64_t temp = (uint64_t)0U;
+      uint128_t res = (uint128_t)t10 * k0;
+      uint64_t l0 = (uint64_t)res;
+      uint64_t h08 = (uint64_t)(res >> (uint32_t)64U);
+      y = l0;
+      temp = h08;
+      uint64_t y_ = y;
+      uint64_t
+      p1[6U] =
+        {
+          (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+          (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffffffffffU
+        };
+      uint32_t len40 = (uint32_t)6U;
+      uint64_t bBuffer = y_;
+      uint64_t *partResult = t2;
+      uint32_t resLen = len40 + (uint32_t)1U;
+      memset(partResult, 0U, resLen * sizeof (uint64_t));
+      {
+        uint64_t uu____1 = (&bBuffer)[0U];
+        uint64_t *res_ = partResult;
+        uint64_t c = (uint64_t)0U;
+        uint32_t k = len40 / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          c = mul_carry_add_u64_st(c, p1[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)1U],
+              uu____1,
+              res_ + (uint32_t)4U * i + (uint32_t)1U);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)2U],
+              uu____1,
+              res_ + (uint32_t)4U * i + (uint32_t)2U);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)3U],
+              uu____1,
+              res_ + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < len40; i++)
+        {
+          c = mul_carry_add_u64_st(c, p1[i], uu____1, res_ + i);
+        }
+        uint64_t r = c;
+        partResult[len40 + (uint32_t)0U] = r;
+      }
+      uint32_t len41 = (uint32_t)6U * (uint32_t)2U;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len41 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = t[(uint32_t)4U * i];
+        uint64_t t210 = t2[(uint32_t)4U * i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+        uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t11,
+            t211,
+            t2 + (uint32_t)4U * i + (uint32_t)1U);
+        uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t12,
+            t212,
+            t2 + (uint32_t)4U * i + (uint32_t)2U);
+        uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < len41; i++)
+      {
+        uint64_t t1 = t[i];
+        uint64_t t21 = t2[i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
+      }
+      uint64_t carry = c;
+      uint32_t len4 = (uint32_t)11U;
+      for (uint32_t i = (uint32_t)0U; i < len4; i++)
+      {
+        uint64_t elem = t2[(uint32_t)1U + i];
+        t[i] = elem;
+      }
+      t[len4] = carry;
+    }
+    uint32_t len3 = (uint32_t)6U;
+    uint64_t cin = t[len3];
+    uint64_t *x_0 = t;
+    uint32_t len40 = (uint32_t)6U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len40);
+    uint64_t tempBuffer[len40];
+    memset(tempBuffer, 0U, len40 * sizeof (uint64_t));
+    uint64_t tempBufferForSubborrow0 = (uint64_t)0U;
+    uint64_t
+    p10[6U] =
+      {
+        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
+      };
+    uint32_t len50 = (uint32_t)6U;
+    uint64_t c0 = (uint64_t)0U;
+    uint32_t k1 = len50 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = x_0[(uint32_t)4U * i];
+      uint64_t t20 = p10[(uint32_t)4U * i];
+      c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, tempBuffer + (uint32_t)4U * i);
+      uint64_t t10 = x_0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p10[(uint32_t)4U * i + (uint32_t)1U];
+      c0 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+          t10,
+          t21,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = x_0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p10[(uint32_t)4U * i + (uint32_t)2U];
+      c0 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+          t11,
+          t22,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = x_0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p10[(uint32_t)4U * i + (uint32_t)3U];
+      c0 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c0,
+          t12,
+          t2,
+          tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k1; i < len50; i++)
+    {
+      uint64_t t1 = x_0[i];
+      uint64_t t2 = p10[i];
+      c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, tempBuffer + i);
+    }
+    uint64_t r = c0;
+    uint64_t carry0 = r;
+    uint64_t
+    carry =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
+        cin,
+        (uint64_t)0U,
+        &tempBufferForSubborrow0);
+    uint64_t mask0 = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
+    uint32_t len51 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len51; i++)
+    {
+      uint64_t x_i = tempBuffer[i];
+      uint64_t y_i = x_0[i];
+      uint64_t r_i = (y_i & mask0) | (x_i & ~mask0);
+      a[i] = r_i;
+    }
+    uint32_t len12 = (uint32_t)6U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len12);
+    uint64_t t0[(uint32_t)2U * len12];
+    memset(t0, 0U, (uint32_t)2U * len12 * sizeof (uint64_t));
+    uint32_t len2 = (uint32_t)6U;
+    uint32_t resLen1 = len2 + len2;
+    memset(t0, 0U, resLen1 * sizeof (uint64_t));
+    for (uint32_t i1 = (uint32_t)0U; i1 < len2; i1++)
+    {
+      uint64_t *uu____2 = p;
+      uint64_t uu____3 = p[i1];
+      uint64_t *res_ = t0 + i1;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = i1 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        c = mul_carry_add_u64_st(c, uu____2[(uint32_t)4U * i], uu____3, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____2[(uint32_t)4U * i + (uint32_t)1U],
+            uu____3,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____2[(uint32_t)4U * i + (uint32_t)2U],
+            uu____3,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____2[(uint32_t)4U * i + (uint32_t)3U],
+            uu____3,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < i1; i++)
+      {
+        c = mul_carry_add_u64_st(c, uu____2[i], uu____3, res_ + i);
+      }
+      uint64_t r0 = c;
+      t0[i1 + i1] = r0;
+    }
+    uint64_t c1 = (uint64_t)0U;
+    uint32_t k2 = resLen1 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k2 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = t0[(uint32_t)4U * i];
+      uint64_t t20 = t0[(uint32_t)4U * i];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, t0 + (uint32_t)4U * i);
+      uint64_t t10 = t0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = t0[(uint32_t)4U * i + (uint32_t)1U];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t10, t21, t0 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = t0[(uint32_t)4U * i + (uint32_t)2U];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t11, t22, t0 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = t0[(uint32_t)4U * i + (uint32_t)3U];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t2, t0 + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k2; i < resLen1; i++)
+    {
+      uint64_t t1 = t0[i];
+      uint64_t t2 = t0[i];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, t0 + i);
+    }
+    uint64_t uu____4 = c1;
     KRML_CHECK_SIZE(sizeof (uint64_t), resLen1);
     uint64_t tmp[resLen1];
     memset(tmp, 0U, resLen1 * sizeof (uint64_t));
@@ -6467,1344 +3729,655 @@ montgomery_ladder_power(
       tmp[(uint32_t)2U * i] = (uint64_t)a2;
       tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
     }
-    uint64_t c11 = (uint64_t)0U;
-    uint32_t k1 = resLen1 / (uint32_t)4U * (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
+    uint64_t c2 = (uint64_t)0U;
+    uint32_t k3 = resLen1 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k3 / (uint32_t)4U; i++)
     {
       uint64_t t1 = t0[(uint32_t)4U * i];
       uint64_t t20 = tmp[(uint32_t)4U * i];
-      c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t1, t20, t0 + (uint32_t)4U * i);
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t20, t0 + (uint32_t)4U * i);
       uint64_t t10 = t0[(uint32_t)4U * i + (uint32_t)1U];
       uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
-      c11 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c11,
-          t10,
-          t21,
-          t0 + (uint32_t)4U * i + (uint32_t)1U);
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t10, t21, t0 + (uint32_t)4U * i + (uint32_t)1U);
       uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)2U];
       uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
-      c11 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c11,
-          t11,
-          t22,
-          t0 + (uint32_t)4U * i + (uint32_t)2U);
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t11, t22, t0 + (uint32_t)4U * i + (uint32_t)2U);
       uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)3U];
       uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
-      c11 =
-        Lib_IntTypes_Intrinsics_add_carry_u64(c11,
-          t12,
-          t2,
-          t0 + (uint32_t)4U * i + (uint32_t)3U);
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t12, t2, t0 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k1; i < resLen1; i++)
+    for (uint32_t i = k3; i < resLen1; i++)
     {
       uint64_t t1 = t0[i];
       uint64_t t2 = tmp[i];
-      c11 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, t1, t2, t0 + i);
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t2, t0 + i);
     }
-    uint64_t uu____11 = c11;
-    uint32_t len22;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          len22 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len22 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len22 = (uint32_t)4U;
-        }
-    }
+    uint64_t uu____5 = c2;
+    uint32_t len22 = (uint32_t)6U;
     for (uint32_t i1 = (uint32_t)0U; i1 < len22; i1++)
     {
-      uint32_t len3;
-      switch (c)
+      uint32_t len30 = (uint32_t)6U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len30);
+      uint64_t t2[(uint32_t)2U * len30];
+      memset(t2, 0U, (uint32_t)2U * len30 * sizeof (uint64_t));
+      uint64_t k0 = (uint64_t)4294967297U;
+      uint64_t t10 = t0[0U];
+      uint64_t y = (uint64_t)0U;
+      uint64_t temp = (uint64_t)0U;
+      uint128_t res = (uint128_t)t10 * k0;
+      uint64_t l0 = (uint64_t)res;
+      uint64_t h08 = (uint64_t)(res >> (uint32_t)64U);
+      y = l0;
+      temp = h08;
+      uint64_t y_ = y;
+      uint64_t
+      p1[6U] =
+        {
+          (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+          (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffffffffffU
+        };
+      uint32_t len41 = (uint32_t)6U;
+      uint64_t bBuffer = y_;
+      uint64_t *partResult = t2;
+      uint32_t resLen = len41 + (uint32_t)1U;
+      memset(partResult, 0U, resLen * sizeof (uint64_t));
       {
-        case Spec_ECC_Curves_P256:
-          {
-            len3 = (uint32_t)4U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            len3 = (uint32_t)6U;
-            break;
-          }
-        default:
-          {
-            len3 = (uint32_t)4U;
-          }
+        uint64_t uu____6 = (&bBuffer)[0U];
+        uint64_t *res_ = partResult;
+        uint64_t c = (uint64_t)0U;
+        uint32_t k = len41 / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          c = mul_carry_add_u64_st(c, p1[(uint32_t)4U * i], uu____6, res_ + (uint32_t)4U * i);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)1U],
+              uu____6,
+              res_ + (uint32_t)4U * i + (uint32_t)1U);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)2U],
+              uu____6,
+              res_ + (uint32_t)4U * i + (uint32_t)2U);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)3U],
+              uu____6,
+              res_ + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < len41; i++)
+        {
+          c = mul_carry_add_u64_st(c, p1[i], uu____6, res_ + i);
+        }
+        uint64_t r0 = c;
+        partResult[len41 + (uint32_t)0U] = r0;
       }
-      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len3);
-      uint64_t t2[(uint32_t)2U * len3];
-      memset(t2, 0U, (uint32_t)2U * len3 * sizeof (uint64_t));
-      switch (m)
-      {
-        case Hacl_Spec_MontgomeryMultiplication_DSA:
-          {
-            uint64_t sw;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  sw = (uint64_t)17562291160714782033U;
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  sw = (uint64_t)17072048233947408755U;
-                  break;
-                }
-              default:
-                {
-                  sw = KRML_EABORT(uint64_t, "");
-                }
-            }
-            uint64_t k00 = mod_inv_u64(sw);
-            uint64_t t1 = t0[0U];
-            uint64_t y = (uint64_t)0U;
-            uint64_t temp = (uint64_t)0U;
-            uint128_t res = (uint128_t)t1 * k00;
-            uint64_t l0 = (uint64_t)res;
-            uint64_t h07 = (uint64_t)(res >> (uint32_t)64U);
-            y = l0;
-            temp = h07;
-            uint64_t y_ = y;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  uint64_t
-                  p1[4U] =
-                    {
-                      (uint64_t)17562291160714782033U,
-                      (uint64_t)13611842547513532036U,
-                      (uint64_t)18446744073709551615U,
-                      (uint64_t)18446744069414584320U
-                    };
-                  uint32_t len4;
-                  switch (c)
-                  {
-                    case Spec_ECC_Curves_P256:
-                      {
-                        len4 = (uint32_t)4U;
-                        break;
-                      }
-                    case Spec_ECC_Curves_P384:
-                      {
-                        len4 = (uint32_t)6U;
-                        break;
-                      }
-                    default:
-                      {
-                        len4 = (uint32_t)4U;
-                      }
-                  }
-                  uint64_t bBuffer = y_;
-                  uint64_t *partResult = t2;
-                  uint32_t resLen = len4 + (uint32_t)1U;
-                  memset(partResult, 0U, resLen * sizeof (uint64_t));
-                  {
-                    uint64_t uu____12 = (&bBuffer)[0U];
-                    uint64_t *res_ = partResult;
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i],
-                          uu____12,
-                          res_ + (uint32_t)4U * i);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)1U],
-                          uu____12,
-                          res_ + (uint32_t)4U * i + (uint32_t)1U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)2U],
-                          uu____12,
-                          res_ + (uint32_t)4U * i + (uint32_t)2U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)3U],
-                          uu____12,
-                          res_ + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len4; i++)
-                    {
-                      c1 = mul_carry_add_u64_st(c1, p1[i], uu____12, res_ + i);
-                    }
-                    uint64_t r = c1;
-                    partResult[len4 + (uint32_t)0U] = r;
-                  }
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  uint64_t
-                  p1[6U] =
-                    {
-                      (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
-                      (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
-                      (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
-                    };
-                  uint32_t len4;
-                  switch (c)
-                  {
-                    case Spec_ECC_Curves_P256:
-                      {
-                        len4 = (uint32_t)4U;
-                        break;
-                      }
-                    case Spec_ECC_Curves_P384:
-                      {
-                        len4 = (uint32_t)6U;
-                        break;
-                      }
-                    default:
-                      {
-                        len4 = (uint32_t)4U;
-                      }
-                  }
-                  uint64_t bBuffer = y_;
-                  uint64_t *partResult = t2;
-                  uint32_t resLen = len4 + (uint32_t)1U;
-                  memset(partResult, 0U, resLen * sizeof (uint64_t));
-                  {
-                    uint64_t uu____13 = (&bBuffer)[0U];
-                    uint64_t *res_ = partResult;
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i],
-                          uu____13,
-                          res_ + (uint32_t)4U * i);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)1U],
-                          uu____13,
-                          res_ + (uint32_t)4U * i + (uint32_t)1U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)2U],
-                          uu____13,
-                          res_ + (uint32_t)4U * i + (uint32_t)2U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)3U],
-                          uu____13,
-                          res_ + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len4; i++)
-                    {
-                      c1 = mul_carry_add_u64_st(c1, p1[i], uu____13, res_ + i);
-                    }
-                    uint64_t r = c1;
-                    partResult[len4 + (uint32_t)0U] = r;
-                  }
-                  break;
-                }
-              default:
-                {
-                  uint64_t
-                  p1[4U] =
-                    {
-                      (uint64_t)17562291160714782033U,
-                      (uint64_t)13611842547513532036U,
-                      (uint64_t)18446744073709551615U,
-                      (uint64_t)18446744069414584320U
-                    };
-                  uint32_t len4;
-                  switch (c)
-                  {
-                    case Spec_ECC_Curves_P256:
-                      {
-                        len4 = (uint32_t)4U;
-                        break;
-                      }
-                    case Spec_ECC_Curves_P384:
-                      {
-                        len4 = (uint32_t)6U;
-                        break;
-                      }
-                    default:
-                      {
-                        len4 = (uint32_t)4U;
-                      }
-                  }
-                  uint64_t bBuffer = y_;
-                  uint64_t *partResult = t2;
-                  uint32_t resLen = len4 + (uint32_t)1U;
-                  memset(partResult, 0U, resLen * sizeof (uint64_t));
-                  {
-                    uint64_t uu____14 = (&bBuffer)[0U];
-                    uint64_t *res_ = partResult;
-                    uint64_t c1 = (uint64_t)0U;
-                    uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                    {
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i],
-                          uu____14,
-                          res_ + (uint32_t)4U * i);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)1U],
-                          uu____14,
-                          res_ + (uint32_t)4U * i + (uint32_t)1U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)2U],
-                          uu____14,
-                          res_ + (uint32_t)4U * i + (uint32_t)2U);
-                      c1 =
-                        mul_carry_add_u64_st(c1,
-                          p1[(uint32_t)4U * i + (uint32_t)3U],
-                          uu____14,
-                          res_ + (uint32_t)4U * i + (uint32_t)3U);
-                    }
-                    for (uint32_t i = k; i < len4; i++)
-                    {
-                      c1 = mul_carry_add_u64_st(c1, p1[i], uu____14, res_ + i);
-                    }
-                    uint64_t r = c1;
-                    partResult[len4 + (uint32_t)0U] = r;
-                  }
-                }
-            }
-            break;
-          }
-        case Hacl_Spec_MontgomeryMultiplication_DH:
-          {
-            uint64_t sw1;
-            switch (c)
-            {
-              case Spec_ECC_Curves_P256:
-                {
-                  sw1 = (uint64_t)0xffffffffffffffffU;
-                  break;
-                }
-              case Spec_ECC_Curves_P384:
-                {
-                  sw1 = (uint64_t)0xffffffffU;
-                  break;
-                }
-              default:
-                {
-                  sw1 = KRML_EABORT(uint64_t, "");
-                }
-            }
-            bool r = sw1 == (uint64_t)0xffffffffffffffffU;
-            if (r)
-            {
-              uint64_t t1 = t0[0U];
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    uint64_t temp = (uint64_t)0U;
-                    uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-                    uint64_t f1 = (uint64_t)0xffffffffU;
-                    uint64_t f3 = (uint64_t)0xffffffff00000001U;
-                    uint64_t *o0 = t2;
-                    uint64_t *o1 = t2 + (uint32_t)1U;
-                    uint64_t *o2 = t2 + (uint32_t)2U;
-                    uint64_t *o3 = t2 + (uint32_t)3U;
-                    uint64_t *o4 = t2 + (uint32_t)4U;
-                    uint128_t res0 = (uint128_t)f0 * t1;
-                    uint64_t l00 = (uint64_t)res0;
-                    uint64_t h080 = (uint64_t)(res0 >> (uint32_t)64U);
-                    o0[0U] = l00;
-                    temp = h080;
-                    uint64_t h0 = temp;
-                    uint128_t res = (uint128_t)f1 * t1;
-                    uint64_t l01 = (uint64_t)res;
-                    uint64_t h081 = (uint64_t)(res >> (uint32_t)64U);
-                    o1[0U] = l01;
-                    temp = h081;
-                    uint64_t l = o1[0U];
-                    uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-                    uint64_t h = temp;
-                    o2[0U] = h + c1;
-                    uint128_t res1 = (uint128_t)f3 * t1;
-                    uint64_t l0 = (uint64_t)res1;
-                    uint64_t h08 = (uint64_t)(res1 >> (uint32_t)64U);
-                    o3[0U] = l0;
-                    o4[0U] = h08;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    uint64_t
-                    p1[6U] =
-                      {
-                        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U,
-                        (uint64_t)0xfffffffffffffffeU, (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-                      };
-                    uint32_t len4;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len4 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len4 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len4 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t bBuffer = t1;
-                    uint64_t *partResult = t2;
-                    uint32_t resLen = len4 + (uint32_t)1U;
-                    memset(partResult, 0U, resLen * sizeof (uint64_t));
-                    {
-                      uint64_t uu____15 = (&bBuffer)[0U];
-                      uint64_t *res_ = partResult;
-                      uint64_t c1 = (uint64_t)0U;
-                      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                      {
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i],
-                            uu____15,
-                            res_ + (uint32_t)4U * i);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)1U],
-                            uu____15,
-                            res_ + (uint32_t)4U * i + (uint32_t)1U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)2U],
-                            uu____15,
-                            res_ + (uint32_t)4U * i + (uint32_t)2U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)3U],
-                            uu____15,
-                            res_ + (uint32_t)4U * i + (uint32_t)3U);
-                      }
-                      for (uint32_t i = k; i < len4; i++)
-                      {
-                        c1 = mul_carry_add_u64_st(c1, p1[i], uu____15, res_ + i);
-                      }
-                      uint64_t r0 = c1;
-                      partResult[len4 + (uint32_t)0U] = r0;
-                    }
-                    break;
-                  }
-                default:
-                  {
-                    uint64_t
-                    p1[4U] =
-                      {
-                        (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffU,
-                        (uint64_t)0U,
-                        (uint64_t)0xffffffff00000001U
-                      };
-                    uint32_t len4;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len4 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len4 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len4 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t bBuffer = t1;
-                    uint64_t *partResult = t2;
-                    uint32_t resLen = len4 + (uint32_t)1U;
-                    memset(partResult, 0U, resLen * sizeof (uint64_t));
-                    {
-                      uint64_t uu____16 = (&bBuffer)[0U];
-                      uint64_t *res_ = partResult;
-                      uint64_t c1 = (uint64_t)0U;
-                      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                      {
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i],
-                            uu____16,
-                            res_ + (uint32_t)4U * i);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)1U],
-                            uu____16,
-                            res_ + (uint32_t)4U * i + (uint32_t)1U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)2U],
-                            uu____16,
-                            res_ + (uint32_t)4U * i + (uint32_t)2U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)3U],
-                            uu____16,
-                            res_ + (uint32_t)4U * i + (uint32_t)3U);
-                      }
-                      for (uint32_t i = k; i < len4; i++)
-                      {
-                        c1 = mul_carry_add_u64_st(c1, p1[i], uu____16, res_ + i);
-                      }
-                      uint64_t r0 = c1;
-                      partResult[len4 + (uint32_t)0U] = r0;
-                    }
-                  }
-              }
-            }
-            else
-            {
-              uint64_t k00;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    k00 = (uint64_t)1U;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    k00 = (uint64_t)4294967297U;
-                    break;
-                  }
-                case Spec_ECC_Curves_Default:
-                  {
-                    uint64_t sw;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          sw = (uint64_t)0xffffffffffffffffU;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          sw = (uint64_t)0xffffffffU;
-                          break;
-                        }
-                      default:
-                        {
-                          sw = KRML_EABORT(uint64_t, "");
-                        }
-                    }
-                    k00 = mod_inv_u64(sw);
-                    break;
-                  }
-                default:
-                  {
-                    KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-                    KRML_HOST_EXIT(253U);
-                  }
-              }
-              uint64_t t1 = t0[0U];
-              uint64_t y = (uint64_t)0U;
-              uint64_t temp = (uint64_t)0U;
-              uint128_t res0 = (uint128_t)t1 * k00;
-              uint64_t l00 = (uint64_t)res0;
-              uint64_t h08 = (uint64_t)(res0 >> (uint32_t)64U);
-              y = l00;
-              temp = h08;
-              uint64_t y_ = y;
-              switch (c)
-              {
-                case Spec_ECC_Curves_P256:
-                  {
-                    uint64_t temp1 = (uint64_t)0U;
-                    uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-                    uint64_t f1 = (uint64_t)0xffffffffU;
-                    uint64_t f3 = (uint64_t)0xffffffff00000001U;
-                    uint64_t *o0 = t2;
-                    uint64_t *o1 = t2 + (uint32_t)1U;
-                    uint64_t *o2 = t2 + (uint32_t)2U;
-                    uint64_t *o3 = t2 + (uint32_t)3U;
-                    uint64_t *o4 = t2 + (uint32_t)4U;
-                    uint128_t res1 = (uint128_t)f0 * y_;
-                    uint64_t l01 = (uint64_t)res1;
-                    uint64_t h090 = (uint64_t)(res1 >> (uint32_t)64U);
-                    o0[0U] = l01;
-                    temp1 = h090;
-                    uint64_t h2 = temp1;
-                    uint128_t res = (uint128_t)f1 * y_;
-                    uint64_t l02 = (uint64_t)res;
-                    uint64_t h091 = (uint64_t)(res >> (uint32_t)64U);
-                    o1[0U] = l02;
-                    temp1 = h091;
-                    uint64_t l = o1[0U];
-                    uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h2, o1);
-                    uint64_t h3 = temp1;
-                    o2[0U] = h3 + c1;
-                    uint128_t res2 = (uint128_t)f3 * y_;
-                    uint64_t l0 = (uint64_t)res2;
-                    uint64_t h09 = (uint64_t)(res2 >> (uint32_t)64U);
-                    o3[0U] = l0;
-                    o4[0U] = h09;
-                    break;
-                  }
-                case Spec_ECC_Curves_P384:
-                  {
-                    uint64_t
-                    p1[6U] =
-                      {
-                        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U,
-                        (uint64_t)0xfffffffffffffffeU, (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-                      };
-                    uint32_t len4;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len4 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len4 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len4 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t bBuffer = y_;
-                    uint64_t *partResult = t2;
-                    uint32_t resLen = len4 + (uint32_t)1U;
-                    memset(partResult, 0U, resLen * sizeof (uint64_t));
-                    {
-                      uint64_t uu____17 = (&bBuffer)[0U];
-                      uint64_t *res_ = partResult;
-                      uint64_t c1 = (uint64_t)0U;
-                      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                      {
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i],
-                            uu____17,
-                            res_ + (uint32_t)4U * i);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)1U],
-                            uu____17,
-                            res_ + (uint32_t)4U * i + (uint32_t)1U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)2U],
-                            uu____17,
-                            res_ + (uint32_t)4U * i + (uint32_t)2U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)3U],
-                            uu____17,
-                            res_ + (uint32_t)4U * i + (uint32_t)3U);
-                      }
-                      for (uint32_t i = k; i < len4; i++)
-                      {
-                        c1 = mul_carry_add_u64_st(c1, p1[i], uu____17, res_ + i);
-                      }
-                      uint64_t r0 = c1;
-                      partResult[len4 + (uint32_t)0U] = r0;
-                    }
-                    break;
-                  }
-                default:
-                  {
-                    uint64_t
-                    p1[4U] =
-                      {
-                        (uint64_t)0xffffffffffffffffU,
-                        (uint64_t)0xffffffffU,
-                        (uint64_t)0U,
-                        (uint64_t)0xffffffff00000001U
-                      };
-                    uint32_t len4;
-                    switch (c)
-                    {
-                      case Spec_ECC_Curves_P256:
-                        {
-                          len4 = (uint32_t)4U;
-                          break;
-                        }
-                      case Spec_ECC_Curves_P384:
-                        {
-                          len4 = (uint32_t)6U;
-                          break;
-                        }
-                      default:
-                        {
-                          len4 = (uint32_t)4U;
-                        }
-                    }
-                    uint64_t bBuffer = y_;
-                    uint64_t *partResult = t2;
-                    uint32_t resLen = len4 + (uint32_t)1U;
-                    memset(partResult, 0U, resLen * sizeof (uint64_t));
-                    {
-                      uint64_t uu____18 = (&bBuffer)[0U];
-                      uint64_t *res_ = partResult;
-                      uint64_t c1 = (uint64_t)0U;
-                      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
-                      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                      {
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i],
-                            uu____18,
-                            res_ + (uint32_t)4U * i);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)1U],
-                            uu____18,
-                            res_ + (uint32_t)4U * i + (uint32_t)1U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)2U],
-                            uu____18,
-                            res_ + (uint32_t)4U * i + (uint32_t)2U);
-                        c1 =
-                          mul_carry_add_u64_st(c1,
-                            p1[(uint32_t)4U * i + (uint32_t)3U],
-                            uu____18,
-                            res_ + (uint32_t)4U * i + (uint32_t)3U);
-                      }
-                      for (uint32_t i = k; i < len4; i++)
-                      {
-                        c1 = mul_carry_add_u64_st(c1, p1[i], uu____18, res_ + i);
-                      }
-                      uint64_t r0 = c1;
-                      partResult[len4 + (uint32_t)0U] = r0;
-                    }
-                  }
-              }
-            }
-            break;
-          }
-        default:
-          {
-            KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-            KRML_HOST_EXIT(253U);
-          }
-      }
-      uint32_t sw1;
-      switch (c)
-      {
-        case Spec_ECC_Curves_P256:
-          {
-            sw1 = (uint32_t)4U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            sw1 = (uint32_t)6U;
-            break;
-          }
-        default:
-          {
-            sw1 = (uint32_t)4U;
-          }
-      }
-      uint32_t len4 = sw1 * (uint32_t)2U;
-      uint64_t c1 = (uint64_t)0U;
-      uint32_t k = len4 / (uint32_t)4U * (uint32_t)4U;
+      uint32_t len42 = (uint32_t)6U * (uint32_t)2U;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len42 / (uint32_t)4U * (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
       {
         uint64_t t1 = t0[(uint32_t)4U * i];
         uint64_t t210 = t2[(uint32_t)4U * i];
-        c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t210, t2 + (uint32_t)4U * i);
-        uint64_t t10 = t0[(uint32_t)4U * i + (uint32_t)1U];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+        uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)1U];
         uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
-        c1 =
-          Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-            t10,
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t11,
             t211,
             t2 + (uint32_t)4U * i + (uint32_t)1U);
-        uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)2U];
         uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
-        c1 =
-          Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-            t11,
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t12,
             t212,
             t2 + (uint32_t)4U * i + (uint32_t)2U);
-        uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t13 = t0[(uint32_t)4U * i + (uint32_t)3U];
         uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
-        c1 =
-          Lib_IntTypes_Intrinsics_add_carry_u64(c1,
-            t12,
-            t21,
-            t2 + (uint32_t)4U * i + (uint32_t)3U);
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k; i < len4; i++)
+      for (uint32_t i = k; i < len42; i++)
       {
         uint64_t t1 = t0[i];
         uint64_t t21 = t2[i];
-        c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t21, t2 + i);
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
       }
-      uint64_t carry = c1;
-      uint32_t sw;
-      switch (c)
-      {
-        case Spec_ECC_Curves_P256:
-          {
-            sw = (uint32_t)4U;
-            break;
-          }
-        case Spec_ECC_Curves_P384:
-          {
-            sw = (uint32_t)6U;
-            break;
-          }
-        default:
-          {
-            sw = (uint32_t)4U;
-          }
-      }
-      uint32_t len40 = sw * (uint32_t)2U - (uint32_t)1U;
-      for (uint32_t i = (uint32_t)0U; i < len40; i++)
+      uint64_t carry1 = c;
+      uint32_t len4 = (uint32_t)11U;
+      for (uint32_t i = (uint32_t)0U; i < len4; i++)
       {
         uint64_t elem = t2[(uint32_t)1U + i];
         t0[i] = elem;
       }
-      t0[len40] = carry;
+      t0[len4] = carry1;
     }
-    switch (m)
+    uint32_t len30 = (uint32_t)6U;
+    uint64_t cin0 = t0[len30];
+    uint64_t *x_ = t0;
+    uint32_t len4 = (uint32_t)6U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len4);
+    uint64_t tempBuffer0[len4];
+    memset(tempBuffer0, 0U, len4 * sizeof (uint64_t));
+    uint64_t tempBufferForSubborrow = (uint64_t)0U;
+    uint64_t
+    p1[6U] =
+      {
+        (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U, (uint64_t)0xfffffffffffffffeU,
+        (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
+      };
+    uint32_t len52 = (uint32_t)6U;
+    uint64_t c = (uint64_t)0U;
+    uint32_t k = len52 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
     {
-      case Hacl_Spec_MontgomeryMultiplication_DH:
-        {
-          uint32_t len3;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len3 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len3 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len3 = (uint32_t)4U;
-              }
-          }
-          uint64_t cin = t0[len3];
-          uint64_t *x_ = t0;
-          uint32_t len4;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len4 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len4 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len4 = (uint32_t)4U;
-              }
-          }
-          KRML_CHECK_SIZE(sizeof (uint64_t), len4);
-          uint64_t tempBuffer[len4];
-          memset(tempBuffer, 0U, len4 * sizeof (uint64_t));
-          uint64_t tempBufferForSubborrow = (uint64_t)0U;
-          uint64_t carry0;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                uint64_t
-                p1[4U] =
-                  {
-                    (uint64_t)0xffffffffffffffffU,
-                    (uint64_t)0xffffffffU,
-                    (uint64_t)0U,
-                    (uint64_t)0xffffffff00000001U
-                  };
-                uint32_t len5;
-                switch (c)
-                {
-                  case Spec_ECC_Curves_P256:
-                    {
-                      len5 = (uint32_t)4U;
-                      break;
-                    }
-                  case Spec_ECC_Curves_P384:
-                    {
-                      len5 = (uint32_t)6U;
-                      break;
-                    }
-                  default:
-                    {
-                      len5 = (uint32_t)4U;
-                    }
-                }
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len5 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  uint64_t t1 = x_[(uint32_t)4U * i];
-                  uint64_t t20 = p1[(uint32_t)4U * i];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t1,
-                      t20,
-                      tempBuffer + (uint32_t)4U * i);
-                  uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-                  uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t10,
-                      t21,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                  uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-                  uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t11,
-                      t22,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                  uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t12,
-                      t2,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len5; i++)
-                {
-                  uint64_t t1 = x_[i];
-                  uint64_t t2 = p1[i];
-                  c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                }
-                uint64_t r = c1;
-                carry0 = r;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                uint64_t
-                p1[6U] =
-                  {
-                    (uint64_t)0xffffffffU, (uint64_t)0xffffffff00000000U,
-                    (uint64_t)0xfffffffffffffffeU, (uint64_t)0xffffffffffffffffU,
-                    (uint64_t)0xffffffffffffffffU, (uint64_t)0xffffffffffffffffU
-                  };
-                uint32_t len5;
-                switch (c)
-                {
-                  case Spec_ECC_Curves_P256:
-                    {
-                      len5 = (uint32_t)4U;
-                      break;
-                    }
-                  case Spec_ECC_Curves_P384:
-                    {
-                      len5 = (uint32_t)6U;
-                      break;
-                    }
-                  default:
-                    {
-                      len5 = (uint32_t)4U;
-                    }
-                }
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len5 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  uint64_t t1 = x_[(uint32_t)4U * i];
-                  uint64_t t20 = p1[(uint32_t)4U * i];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t1,
-                      t20,
-                      tempBuffer + (uint32_t)4U * i);
-                  uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-                  uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t10,
-                      t21,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                  uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-                  uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t11,
-                      t22,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                  uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t12,
-                      t2,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len5; i++)
-                {
-                  uint64_t t1 = x_[i];
-                  uint64_t t2 = p1[i];
-                  c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                }
-                uint64_t r = c1;
-                carry0 = r;
-                break;
-              }
-            default:
-              {
-                carry0 = (uint64_t)0U;
-              }
-          }
-          uint64_t
-          carry =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
-              cin,
-              (uint64_t)0U,
-              &tempBufferForSubborrow);
-          uint64_t mask0 = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
-          uint32_t len5;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len5 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len5 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len5 = (uint32_t)4U;
-              }
-          }
-          for (uint32_t i = (uint32_t)0U; i < len5; i++)
-          {
-            uint64_t x_i = tempBuffer[i];
-            uint64_t y_i = x_[i];
-            uint64_t r_i = (y_i & mask0) | (x_i & ~mask0);
-            p[i] = r_i;
-          }
-          break;
-        }
-      case Hacl_Spec_MontgomeryMultiplication_DSA:
-        {
-          uint32_t len3;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len3 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len3 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len3 = (uint32_t)4U;
-              }
-          }
-          uint64_t cin = t0[len3];
-          uint64_t *x_ = t0;
-          uint32_t len4;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len4 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len4 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len4 = (uint32_t)4U;
-              }
-          }
-          KRML_CHECK_SIZE(sizeof (uint64_t), len4);
-          uint64_t tempBuffer[len4];
-          memset(tempBuffer, 0U, len4 * sizeof (uint64_t));
-          uint64_t tempBufferForSubborrow = (uint64_t)0U;
-          uint64_t carry0;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                uint64_t
-                p1[4U] =
-                  {
-                    (uint64_t)17562291160714782033U,
-                    (uint64_t)13611842547513532036U,
-                    (uint64_t)18446744073709551615U,
-                    (uint64_t)18446744069414584320U
-                  };
-                uint32_t len5;
-                switch (c)
-                {
-                  case Spec_ECC_Curves_P256:
-                    {
-                      len5 = (uint32_t)4U;
-                      break;
-                    }
-                  case Spec_ECC_Curves_P384:
-                    {
-                      len5 = (uint32_t)6U;
-                      break;
-                    }
-                  default:
-                    {
-                      len5 = (uint32_t)4U;
-                    }
-                }
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len5 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  uint64_t t1 = x_[(uint32_t)4U * i];
-                  uint64_t t20 = p1[(uint32_t)4U * i];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t1,
-                      t20,
-                      tempBuffer + (uint32_t)4U * i);
-                  uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-                  uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t10,
-                      t21,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                  uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-                  uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t11,
-                      t22,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                  uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t12,
-                      t2,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len5; i++)
-                {
-                  uint64_t t1 = x_[i];
-                  uint64_t t2 = p1[i];
-                  c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                }
-                uint64_t r = c1;
-                carry0 = r;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                uint64_t
-                p1[6U] =
-                  {
-                    (uint64_t)17072048233947408755U, (uint64_t)6348401684107011962U,
-                    (uint64_t)14367412456785391071U, (uint64_t)18446744073709551615U,
-                    (uint64_t)18446744073709551615U, (uint64_t)18446744073709551615U
-                  };
-                uint32_t len5;
-                switch (c)
-                {
-                  case Spec_ECC_Curves_P256:
-                    {
-                      len5 = (uint32_t)4U;
-                      break;
-                    }
-                  case Spec_ECC_Curves_P384:
-                    {
-                      len5 = (uint32_t)6U;
-                      break;
-                    }
-                  default:
-                    {
-                      len5 = (uint32_t)4U;
-                    }
-                }
-                uint64_t c1 = (uint64_t)0U;
-                uint32_t k = len5 / (uint32_t)4U * (uint32_t)4U;
-                for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
-                {
-                  uint64_t t1 = x_[(uint32_t)4U * i];
-                  uint64_t t20 = p1[(uint32_t)4U * i];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t1,
-                      t20,
-                      tempBuffer + (uint32_t)4U * i);
-                  uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
-                  uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t10,
-                      t21,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)1U);
-                  uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
-                  uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t11,
-                      t22,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)2U);
-                  uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
-                  uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-                  c1 =
-                    Lib_IntTypes_Intrinsics_sub_borrow_u64(c1,
-                      t12,
-                      t2,
-                      tempBuffer + (uint32_t)4U * i + (uint32_t)3U);
-                }
-                for (uint32_t i = k; i < len5; i++)
-                {
-                  uint64_t t1 = x_[i];
-                  uint64_t t2 = p1[i];
-                  c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, tempBuffer + i);
-                }
-                uint64_t r = c1;
-                carry0 = r;
-                break;
-              }
-            default:
-              {
-                carry0 = (uint64_t)0U;
-              }
-          }
-          uint64_t
-          carry =
-            Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
-              cin,
-              (uint64_t)0U,
-              &tempBufferForSubborrow);
-          uint64_t mask0 = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
-          uint32_t len5;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                len5 = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                len5 = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                len5 = (uint32_t)4U;
-              }
-          }
-          for (uint32_t i = (uint32_t)0U; i < len5; i++)
-          {
-            uint64_t x_i = tempBuffer[i];
-            uint64_t y_i = x_[i];
-            uint64_t r_i = (y_i & mask0) | (x_i & ~mask0);
-            p[i] = r_i;
-          }
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
+      uint64_t t1 = x_[(uint32_t)4U * i];
+      uint64_t t20 = p1[(uint32_t)4U * i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, tempBuffer0 + (uint32_t)4U * i);
+      uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t10,
+          t21,
+          tempBuffer0 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t11,
+          t22,
+          tempBuffer0 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
+      c =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(c,
+          t12,
+          t2,
+          tempBuffer0 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    uint64_t mask0 = (uint64_t)0U - bit;
-    uint32_t len1;
-    switch (c)
+    for (uint32_t i = k; i < len52; i++)
     {
-      case Spec_ECC_Curves_P256:
-        {
-          len1 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          len1 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          len1 = (uint32_t)4U;
-        }
+      uint64_t t1 = x_[i];
+      uint64_t t2 = p1[i];
+      c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, tempBuffer0 + i);
     }
+    uint64_t r0 = c;
+    uint64_t carry00 = r0;
+    uint64_t
+    carry1 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(carry00,
+        cin0,
+        (uint64_t)0U,
+        &tempBufferForSubborrow);
+    uint64_t mask1 = ~FStar_UInt64_eq_mask(carry1, (uint64_t)0U);
+    uint32_t len5 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len5; i++)
+    {
+      uint64_t x_i = tempBuffer0[i];
+      uint64_t y_i = x_[i];
+      uint64_t r_i = (y_i & mask1) | (x_i & ~mask1);
+      p[i] = r_i;
+    }
+    uint64_t mask2 = (uint64_t)0U - bit;
+    uint32_t len1 = (uint32_t)6U;
     for (uint32_t i = (uint32_t)0U; i < len1; i++)
     {
-      uint64_t dummy = mask0 & (p[i] ^ a[i]);
+      uint64_t dummy = mask2 & (p[i] ^ a[i]);
       p[i] = p[i] ^ dummy;
       a[i] = a[i] ^ dummy;
     }
   }
-  uint32_t sw;
-  switch (c)
+  memcpy(result, p, (uint32_t)6U * sizeof (uint64_t));
+}
+
+static void
+montgomery_ladder_power_generic(uint64_t *a, const uint8_t *scalar, uint64_t *result)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t p[len];
+  memset(p, 0U, len * sizeof (uint64_t));
+  uint32_t len10 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len10; i++)
   {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw = (uint32_t)4U;
-      }
+    p[i] = (uint64_t)0U;
   }
-  memcpy(result, p, sw * sizeof (uint64_t));
+  uint32_t len11 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11);
+  uint64_t tempBuffer[len11];
+  memset(tempBuffer, 0U, len11 * sizeof (uint64_t));
+  uint64_t tempBufferForSubborrow0 = (uint64_t)0U;
+  uint64_t carry00 = (uint64_t)0U;
+  uint64_t
+  carry =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(carry00,
+      (uint64_t)1U,
+      (uint64_t)0U,
+      &tempBufferForSubborrow0);
+  uint64_t mask0 = ~FStar_UInt64_eq_mask(carry, (uint64_t)0U);
+  uint32_t len20 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len20; i++)
+  {
+    uint64_t x_i = tempBuffer[i];
+    uint64_t y_i = p[i];
+    uint64_t r_i = (y_i & mask0) | (x_i & ~mask0);
+    p[i] = r_i;
+  }
+  memcpy(a, result, (uint32_t)4U * sizeof (uint64_t));
+  uint32_t scalarLen = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_Default);
+  for (uint32_t i0 = (uint32_t)0U; i0 < scalarLen; i0++)
+  {
+    uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_Default) - (uint32_t)1U - i0;
+    uint64_t bit = (uint64_t)(scalar[bit0 / (uint32_t)8U] >> bit0 % (uint32_t)8U & (uint8_t)1U);
+    uint64_t mask = (uint64_t)0U - bit;
+    uint32_t len12 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len12; i++)
+    {
+      uint64_t dummy = mask & (p[i] ^ a[i]);
+      p[i] = p[i] ^ dummy;
+      a[i] = a[i] ^ dummy;
+    }
+    uint32_t len13 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len13);
+    uint64_t t[(uint32_t)2U * len13];
+    memset(t, 0U, (uint32_t)2U * len13 * sizeof (uint64_t));
+    uint32_t len21 = (uint32_t)4U;
+    uint32_t resLen0 = len21 + len21;
+    memset(t, 0U, resLen0 * sizeof (uint64_t));
+    for (uint32_t i1 = (uint32_t)0U; i1 < len21; i1++)
+    {
+      uint64_t uu____0 = a[i1];
+      uint64_t *res_ = t + i1;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len21 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[(uint32_t)4U * i], uu____0, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)1U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)2U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            p[(uint32_t)4U * i + (uint32_t)3U],
+            uu____0,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < len21; i++)
+      {
+        c = mul_carry_add_u64_st(c, p[i], uu____0, res_ + i);
+      }
+      uint64_t r = c;
+      t[len21 + i1] = r;
+    }
+    uint32_t len22 = (uint32_t)4U;
+    for (uint32_t i1 = (uint32_t)0U; i1 < len22; i1++)
+    {
+      uint32_t len3 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len3);
+      uint64_t t2[(uint32_t)2U * len3];
+      memset(t2, 0U, (uint32_t)2U * len3 * sizeof (uint64_t));
+      uint64_t k0 = mod_inv_u64((uint64_t)(uint32_t)1U);
+      uint64_t t10 = t[0U];
+      uint64_t y = (uint64_t)0U;
+      uint64_t temp = (uint64_t)0U;
+      uint128_t res = (uint128_t)t10 * k0;
+      uint64_t l0 = (uint64_t)res;
+      uint64_t h08 = (uint64_t)(res >> (uint32_t)64U);
+      y = l0;
+      temp = h08;
+      uint64_t y_ = y;
+      uint64_t
+      p1[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len40 = (uint32_t)4U;
+      uint64_t bBuffer = y_;
+      uint64_t *partResult = t2;
+      uint32_t resLen = len40 + (uint32_t)1U;
+      memset(partResult, 0U, resLen * sizeof (uint64_t));
+      {
+        uint64_t uu____1 = (&bBuffer)[0U];
+        uint64_t *res_ = partResult;
+        uint64_t c = (uint64_t)0U;
+        uint32_t k = len40 / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          c = mul_carry_add_u64_st(c, p1[(uint32_t)4U * i], uu____1, res_ + (uint32_t)4U * i);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)1U],
+              uu____1,
+              res_ + (uint32_t)4U * i + (uint32_t)1U);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)2U],
+              uu____1,
+              res_ + (uint32_t)4U * i + (uint32_t)2U);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)3U],
+              uu____1,
+              res_ + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < len40; i++)
+        {
+          c = mul_carry_add_u64_st(c, p1[i], uu____1, res_ + i);
+        }
+        uint64_t r = c;
+        partResult[len40 + (uint32_t)0U] = r;
+      }
+      uint32_t len41 = (uint32_t)4U * (uint32_t)2U;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len41 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = t[(uint32_t)4U * i];
+        uint64_t t210 = t2[(uint32_t)4U * i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+        uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t11,
+            t211,
+            t2 + (uint32_t)4U * i + (uint32_t)1U);
+        uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t12,
+            t212,
+            t2 + (uint32_t)4U * i + (uint32_t)2U);
+        uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < len41; i++)
+      {
+        uint64_t t1 = t[i];
+        uint64_t t21 = t2[i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
+      }
+      uint64_t carry0 = c;
+      uint32_t len4 = (uint32_t)7U;
+      for (uint32_t i = (uint32_t)0U; i < len4; i++)
+      {
+        uint64_t elem = t2[(uint32_t)1U + i];
+        t[i] = elem;
+      }
+      t[len4] = carry0;
+    }
+    uint32_t len3 = (uint32_t)4U;
+    uint64_t cin = t[len3];
+    uint64_t *x_0 = t;
+    uint32_t len40 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len40);
+    uint64_t tempBuffer0[len40];
+    memset(tempBuffer0, 0U, len40 * sizeof (uint64_t));
+    uint64_t tempBufferForSubborrow1 = (uint64_t)0U;
+    uint64_t carry01 = (uint64_t)0U;
+    uint64_t
+    carry1 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(carry01,
+        cin,
+        (uint64_t)0U,
+        &tempBufferForSubborrow1);
+    uint64_t mask1 = ~FStar_UInt64_eq_mask(carry1, (uint64_t)0U);
+    uint32_t len50 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len50; i++)
+    {
+      uint64_t x_i = tempBuffer0[i];
+      uint64_t y_i = x_0[i];
+      uint64_t r_i = (y_i & mask1) | (x_i & ~mask1);
+      a[i] = r_i;
+    }
+    uint32_t len14 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len14);
+    uint64_t t0[(uint32_t)2U * len14];
+    memset(t0, 0U, (uint32_t)2U * len14 * sizeof (uint64_t));
+    uint32_t len2 = (uint32_t)4U;
+    uint32_t resLen1 = len2 + len2;
+    memset(t0, 0U, resLen1 * sizeof (uint64_t));
+    for (uint32_t i1 = (uint32_t)0U; i1 < len2; i1++)
+    {
+      uint64_t *uu____2 = p;
+      uint64_t uu____3 = p[i1];
+      uint64_t *res_ = t0 + i1;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = i1 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        c = mul_carry_add_u64_st(c, uu____2[(uint32_t)4U * i], uu____3, res_ + (uint32_t)4U * i);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____2[(uint32_t)4U * i + (uint32_t)1U],
+            uu____3,
+            res_ + (uint32_t)4U * i + (uint32_t)1U);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____2[(uint32_t)4U * i + (uint32_t)2U],
+            uu____3,
+            res_ + (uint32_t)4U * i + (uint32_t)2U);
+        c =
+          mul_carry_add_u64_st(c,
+            uu____2[(uint32_t)4U * i + (uint32_t)3U],
+            uu____3,
+            res_ + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < i1; i++)
+      {
+        c = mul_carry_add_u64_st(c, uu____2[i], uu____3, res_ + i);
+      }
+      uint64_t r = c;
+      t0[i1 + i1] = r;
+    }
+    uint64_t c0 = (uint64_t)0U;
+    uint32_t k1 = resLen1 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = t0[(uint32_t)4U * i];
+      uint64_t t20 = t0[(uint32_t)4U * i];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, t0 + (uint32_t)4U * i);
+      uint64_t t10 = t0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = t0[(uint32_t)4U * i + (uint32_t)1U];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, t0 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = t0[(uint32_t)4U * i + (uint32_t)2U];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, t0 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = t0[(uint32_t)4U * i + (uint32_t)3U];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, t0 + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k1; i < resLen1; i++)
+    {
+      uint64_t t1 = t0[i];
+      uint64_t t2 = t0[i];
+      c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, t0 + i);
+    }
+    uint64_t uu____4 = c0;
+    KRML_CHECK_SIZE(sizeof (uint64_t), resLen1);
+    uint64_t tmp[resLen1];
+    memset(tmp, 0U, resLen1 * sizeof (uint64_t));
+    for (uint32_t i = (uint32_t)0U; i < len2; i++)
+    {
+      uint128_t a2 = (uint128_t)p[i] * p[i];
+      tmp[(uint32_t)2U * i] = (uint64_t)a2;
+      tmp[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
+    }
+    uint64_t c1 = (uint64_t)0U;
+    uint32_t k2 = resLen1 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k2 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = t0[(uint32_t)4U * i];
+      uint64_t t20 = tmp[(uint32_t)4U * i];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, t0 + (uint32_t)4U * i);
+      uint64_t t10 = t0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = tmp[(uint32_t)4U * i + (uint32_t)1U];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t10, t21, t0 + (uint32_t)4U * i + (uint32_t)1U);
+      uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = tmp[(uint32_t)4U * i + (uint32_t)2U];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t11, t22, t0 + (uint32_t)4U * i + (uint32_t)2U);
+      uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = tmp[(uint32_t)4U * i + (uint32_t)3U];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t2, t0 + (uint32_t)4U * i + (uint32_t)3U);
+    }
+    for (uint32_t i = k2; i < resLen1; i++)
+    {
+      uint64_t t1 = t0[i];
+      uint64_t t2 = tmp[i];
+      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, t0 + i);
+    }
+    uint64_t uu____5 = c1;
+    uint32_t len23 = (uint32_t)4U;
+    for (uint32_t i1 = (uint32_t)0U; i1 < len23; i1++)
+    {
+      uint32_t len30 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len30);
+      uint64_t t2[(uint32_t)2U * len30];
+      memset(t2, 0U, (uint32_t)2U * len30 * sizeof (uint64_t));
+      uint64_t k0 = mod_inv_u64((uint64_t)(uint32_t)1U);
+      uint64_t t10 = t0[0U];
+      uint64_t y = (uint64_t)0U;
+      uint64_t temp = (uint64_t)0U;
+      uint128_t res = (uint128_t)t10 * k0;
+      uint64_t l0 = (uint64_t)res;
+      uint64_t h08 = (uint64_t)(res >> (uint32_t)64U);
+      y = l0;
+      temp = h08;
+      uint64_t y_ = y;
+      uint64_t
+      p1[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len41 = (uint32_t)4U;
+      uint64_t bBuffer = y_;
+      uint64_t *partResult = t2;
+      uint32_t resLen = len41 + (uint32_t)1U;
+      memset(partResult, 0U, resLen * sizeof (uint64_t));
+      {
+        uint64_t uu____6 = (&bBuffer)[0U];
+        uint64_t *res_ = partResult;
+        uint64_t c = (uint64_t)0U;
+        uint32_t k = len41 / (uint32_t)4U * (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+        {
+          c = mul_carry_add_u64_st(c, p1[(uint32_t)4U * i], uu____6, res_ + (uint32_t)4U * i);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)1U],
+              uu____6,
+              res_ + (uint32_t)4U * i + (uint32_t)1U);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)2U],
+              uu____6,
+              res_ + (uint32_t)4U * i + (uint32_t)2U);
+          c =
+            mul_carry_add_u64_st(c,
+              p1[(uint32_t)4U * i + (uint32_t)3U],
+              uu____6,
+              res_ + (uint32_t)4U * i + (uint32_t)3U);
+        }
+        for (uint32_t i = k; i < len41; i++)
+        {
+          c = mul_carry_add_u64_st(c, p1[i], uu____6, res_ + i);
+        }
+        uint64_t r = c;
+        partResult[len41 + (uint32_t)0U] = r;
+      }
+      uint32_t len42 = (uint32_t)4U * (uint32_t)2U;
+      uint64_t c = (uint64_t)0U;
+      uint32_t k = len42 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = t0[(uint32_t)4U * i];
+        uint64_t t210 = t2[(uint32_t)4U * i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
+        uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t11,
+            t211,
+            t2 + (uint32_t)4U * i + (uint32_t)1U);
+        uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+        c =
+          Lib_IntTypes_Intrinsics_add_carry_u64(c,
+            t12,
+            t212,
+            t2 + (uint32_t)4U * i + (uint32_t)2U);
+        uint64_t t13 = t0[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, t2 + (uint32_t)4U * i + (uint32_t)3U);
+      }
+      for (uint32_t i = k; i < len42; i++)
+      {
+        uint64_t t1 = t0[i];
+        uint64_t t21 = t2[i];
+        c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, t2 + i);
+      }
+      uint64_t carry0 = c;
+      uint32_t len4 = (uint32_t)7U;
+      for (uint32_t i = (uint32_t)0U; i < len4; i++)
+      {
+        uint64_t elem = t2[(uint32_t)1U + i];
+        t0[i] = elem;
+      }
+      t0[len4] = carry0;
+    }
+    uint32_t len30 = (uint32_t)4U;
+    uint64_t cin0 = t0[len30];
+    uint64_t *x_ = t0;
+    uint32_t len4 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len4);
+    uint64_t tempBuffer1[len4];
+    memset(tempBuffer1, 0U, len4 * sizeof (uint64_t));
+    uint64_t tempBufferForSubborrow = (uint64_t)0U;
+    uint64_t carry0 = (uint64_t)0U;
+    uint64_t
+    carry2 =
+      Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
+        cin0,
+        (uint64_t)0U,
+        &tempBufferForSubborrow);
+    uint64_t mask2 = ~FStar_UInt64_eq_mask(carry2, (uint64_t)0U);
+    uint32_t len5 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len5; i++)
+    {
+      uint64_t x_i = tempBuffer1[i];
+      uint64_t y_i = x_[i];
+      uint64_t r_i = (y_i & mask2) | (x_i & ~mask2);
+      p[i] = r_i;
+    }
+    uint64_t mask3 = (uint64_t)0U - bit;
+    uint32_t len1 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len1; i++)
+    {
+      uint64_t dummy = mask3 & (p[i] ^ a[i]);
+      p[i] = p[i] ^ dummy;
+      a[i] = a[i] ^ dummy;
+    }
+  }
+  memcpy(result, p, (uint32_t)4U * sizeof (uint64_t));
 }
 
 static inline void exponent_p384(uint64_t *t, uint64_t *result, uint64_t *tempBuffer)
@@ -7815,41 +4388,41 @@ static inline void exponent_p384(uint64_t *t, uint64_t *result, uint64_t *tempBu
   uint64_t *t3 = tempBuffer + (uint32_t)18U;
   uint64_t *t4 = tempBuffer + (uint32_t)24U;
   uint64_t *t5 = tempBuffer + (uint32_t)30U;
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t, t0);
+  montgomery_square_buffer_dh_p384(t, t0);
   montgomery_multiplication_buffer_dh_p384(t, t0, t0);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t0, t0);
+  montgomery_square_buffer_dh_p384(t0, t0);
   montgomery_multiplication_buffer_dh_p384(t, t0, t0);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t0, t1);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)2U, t1);
+  montgomery_square_buffer_dh_p384(t0, t1);
+  fsquarePowN_dh_p384((uint32_t)2U, t1);
   montgomery_multiplication_buffer_dh_p384(t0, t1, t1);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t1, t2);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)5U, t2);
+  montgomery_square_buffer_dh_p384(t1, t2);
+  fsquarePowN_dh_p384((uint32_t)5U, t2);
   montgomery_multiplication_buffer_dh_p384(t2, t1, t2);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t2, t3);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)11U, t3);
+  montgomery_square_buffer_dh_p384(t2, t3);
+  fsquarePowN_dh_p384((uint32_t)11U, t3);
   montgomery_multiplication_buffer_dh_p384(t2, t3, t2);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)6U, t2);
+  fsquarePowN_dh_p384((uint32_t)6U, t2);
   montgomery_multiplication_buffer_dh_p384(t2, t1, t1);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t1, t2);
+  montgomery_square_buffer_dh_p384(t1, t2);
   montgomery_multiplication_buffer_dh_p384(t2, t, t2);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t2, t3);
+  montgomery_square_buffer_dh_p384(t2, t3);
   montgomery_multiplication_buffer_dh_p384(t, t3, t3);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t3, t4);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)30U, t4);
+  montgomery_square_buffer_dh_p384(t3, t4);
+  fsquarePowN_dh_p384((uint32_t)30U, t4);
   montgomery_multiplication_buffer_dh_p384(t4, t2, t4);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t4, t5);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)62U, t5);
+  montgomery_square_buffer_dh_p384(t4, t5);
+  fsquarePowN_dh_p384((uint32_t)62U, t5);
   montgomery_multiplication_buffer_dh_p384(t4, t5, t4);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P384, t4, t5);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)125U, t5);
+  montgomery_square_buffer_dh_p384(t4, t5);
+  fsquarePowN_dh_p384((uint32_t)125U, t5);
   montgomery_multiplication_buffer_dh_p384(t4, t5, t4);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)3U, t4);
+  fsquarePowN_dh_p384((uint32_t)3U, t4);
   montgomery_multiplication_buffer_dh_p384(t4, t0, t4);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)33U, t4);
+  fsquarePowN_dh_p384((uint32_t)33U, t4);
   montgomery_multiplication_buffer_dh_p384(t4, t3, t4);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)94U, t4);
+  fsquarePowN_dh_p384((uint32_t)94U, t4);
   montgomery_multiplication_buffer_dh_p384(t4, t1, t4);
-  fsquarePowN_dh(Spec_ECC_Curves_P384, (uint32_t)2U, t4);
+  fsquarePowN_dh_p384((uint32_t)2U, t4);
   montgomery_multiplication_buffer_dh_p384(t4, t, result);
 }
 
@@ -7863,36 +4436,36 @@ static inline void exponent_p256(uint64_t *t, uint64_t *result, uint64_t *tempBu
   uint64_t *t5 = tempBuffer + (uint32_t)20U;
   uint64_t *t6 = tempBuffer + (uint32_t)24U;
   uint64_t *t7 = tempBuffer + (uint32_t)28U;
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t, t0);
+  montgomery_square_buffer_dh_p256(t, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t, t2);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t2, t0);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t0, t0);
+  montgomery_square_buffer_dh_p256(t2, t0);
+  montgomery_square_buffer_dh_p256(t0, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t2, t6);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t6, t0);
-  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)3U, t0);
+  montgomery_square_buffer_dh_p256(t6, t0);
+  fsquarePowN_dh_p256((uint32_t)3U, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t6, t7);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t7, t0);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t0, t0);
+  montgomery_square_buffer_dh_p256(t7, t0);
+  montgomery_square_buffer_dh_p256(t0, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t2, t1);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t1, t0);
-  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)9U, t0);
+  montgomery_square_buffer_dh_p256(t1, t0);
+  fsquarePowN_dh_p256((uint32_t)9U, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t1, t3);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t3, t0);
-  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)9U, t0);
+  montgomery_square_buffer_dh_p256(t3, t0);
+  fsquarePowN_dh_p256((uint32_t)9U, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t1, t4);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t4, t0);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t0, t0);
+  montgomery_square_buffer_dh_p256(t4, t0);
+  montgomery_square_buffer_dh_p256(t0, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t2, t5);
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, t5, t0);
-  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)31U, t0);
+  montgomery_square_buffer_dh_p256(t5, t0);
+  fsquarePowN_dh_p256((uint32_t)31U, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t, t0);
-  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)128U, t0);
+  fsquarePowN_dh_p256((uint32_t)128U, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t5, t0);
-  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)32U, t0);
+  fsquarePowN_dh_p256((uint32_t)32U, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t5, t0);
-  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)30U, t0);
+  fsquarePowN_dh_p256((uint32_t)30U, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t4, t0);
-  fsquarePowN_dh(Spec_ECC_Curves_P256, (uint32_t)2U, t0);
+  fsquarePowN_dh_p256((uint32_t)2U, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t, result);
 }
 
@@ -7954,8 +4527,52 @@ point_double(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result, uint64_t *t
   uint64_t *a0 = tmp;
   uint64_t *a1 = tmp + coordinateLen;
   uint64_t *alpha0 = tmp + (uint32_t)2U * coordinateLen;
-  montgomery_square_buffer_dh(c, pZ1, delta);
-  montgomery_square_buffer_dh(c, pY1, gamma);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(pZ1, delta);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(pZ1, delta);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(pZ1, delta);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(pY1, gamma);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(pY1, gamma);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(pY1, gamma);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   switch (c)
   {
     case Spec_ECC_Curves_P256:
@@ -8094,7 +4711,29 @@ point_double(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result, uint64_t *t
         KRML_HOST_EXIT(253U);
       }
   }
-  montgomery_square_buffer_dh(c, alpha, x3);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(alpha, x3);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(alpha, x3);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(alpha, x3);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   switch (c)
   {
     case Spec_ECC_Curves_P256:
@@ -8210,7 +4849,29 @@ point_double(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result, uint64_t *t
         KRML_HOST_EXIT(253U);
       }
   }
-  montgomery_square_buffer_dh(c, z3, z3);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(z3, z3);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(z3, z3);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(z3, z3);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   switch (c)
   {
     case Spec_ECC_Curves_P256:
@@ -8303,7 +4964,29 @@ point_double(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *result, uint64_t *t
         KRML_HOST_EXIT(253U);
       }
   }
-  montgomery_square_buffer_dh(c, gamma, gamma);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(gamma, gamma);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(gamma, gamma);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(gamma, gamma);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   switch (c)
   {
     case Spec_ECC_Curves_P256:
@@ -8640,8 +5323,52 @@ point_add(
       }
   }
   uint64_t *z1Cube = t4 + (uint32_t)3U * sw11;
-  montgomery_square_buffer_dh(c, qZ, z2Square);
-  montgomery_square_buffer_dh(c, pZ, z1Square);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(qZ, z2Square);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(qZ, z2Square);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(qZ, z2Square);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(pZ, z1Square);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(pZ, z1Square);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(pZ, z1Square);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   switch (c)
   {
     case Spec_ECC_Curves_P256:
@@ -8980,7 +5707,29 @@ point_add(
         KRML_HOST_EXIT(253U);
       }
   }
-  montgomery_square_buffer_dh(c, h0, temp);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(h0, temp);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(h0, temp);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(h0, temp);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   switch (c)
   {
     case Spec_ECC_Curves_P256:
@@ -9240,7 +5989,29 @@ point_add(
       }
   }
   uint64_t *twoUh = tempBuffer3 + (uint32_t)2U * sw30;
-  montgomery_square_buffer_dh(c, r0, rSquare);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(r0, rSquare);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(r0, rSquare);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(r0, rSquare);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   switch (c)
   {
     case Spec_ECC_Curves_P256:
@@ -12067,21 +8838,20 @@ static inline void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
           {
             case Spec_ECC_Curves_P256:
               {
-                sw0 = (uint64_t)0xffffffffffffffffU;
+                sw0 = (uint64_t)(void *)(uint64_t)0xffffffffffffffffU;
                 break;
               }
             case Spec_ECC_Curves_P384:
               {
-                sw0 = (uint64_t)0xffffffffU;
+                sw0 = (uint64_t)(void *)(uint64_t)0xffffffffU;
                 break;
               }
             default:
               {
-                sw0 = KRML_EABORT(uint64_t, "");
+                sw0 = (uint64_t)(void *)(uint32_t)1U;
               }
           }
-          bool r = sw0 == (uint64_t)0xffffffffffffffffU;
-          if (r)
+          if (FStar_UInt64_v(sw0) == (krml_checked_int_t)18446744073709551615)
           {
             uint64_t t1 = i[0U];
             switch (c)
@@ -12182,8 +8952,8 @@ static inline void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
                     {
                       c1 = mul_carry_add_u64_st(c1, p[i1], uu____0, res_ + i1);
                     }
-                    uint64_t r0 = c1;
-                    partResult[len4 + (uint32_t)0U] = r0;
+                    uint64_t r = c1;
+                    partResult[len4 + (uint32_t)0U] = r;
                   }
                   break;
                 }
@@ -12251,8 +9021,8 @@ static inline void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
                     {
                       c1 = mul_carry_add_u64_st(c1, p[i1], uu____1, res_ + i1);
                     }
-                    uint64_t r0 = c1;
-                    partResult[len4 + (uint32_t)0U] = r0;
+                    uint64_t r = c1;
+                    partResult[len4 + (uint32_t)0U] = r;
                   }
                 }
             }
@@ -12279,17 +9049,17 @@ static inline void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
                   {
                     case Spec_ECC_Curves_P256:
                       {
-                        sw = (uint64_t)0xffffffffffffffffU;
+                        sw = (uint64_t)(void *)(uint64_t)0xffffffffffffffffU;
                         break;
                       }
                     case Spec_ECC_Curves_P384:
                       {
-                        sw = (uint64_t)0xffffffffU;
+                        sw = (uint64_t)(void *)(uint64_t)0xffffffffU;
                         break;
                       }
                     default:
                       {
-                        sw = KRML_EABORT(uint64_t, "");
+                        sw = (uint64_t)(void *)(uint32_t)1U;
                       }
                   }
                   k0 = mod_inv_u64(sw);
@@ -12408,8 +9178,8 @@ static inline void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
                     {
                       c1 = mul_carry_add_u64_st(c1, p[i1], uu____2, res_ + i1);
                     }
-                    uint64_t r0 = c1;
-                    partResult[len4 + (uint32_t)0U] = r0;
+                    uint64_t r = c1;
+                    partResult[len4 + (uint32_t)0U] = r;
                   }
                   break;
                 }
@@ -12477,8 +9247,8 @@ static inline void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
                     {
                       c1 = mul_carry_add_u64_st(c1, p[i1], uu____3, res_ + i1);
                     }
-                    uint64_t r0 = c1;
-                    partResult[len4 + (uint32_t)0U] = r0;
+                    uint64_t r = c1;
+                    partResult[len4 + (uint32_t)0U] = r;
                   }
                 }
             }
@@ -12913,7 +9683,29 @@ norm(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t *temp
       }
   }
   uint64_t *t8 = tempBuffer + (uint32_t)3U * sw;
-  montgomery_square_buffer_dh(c, zf, z2f);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(zf, z2f);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(zf, z2f);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(zf, z2f);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   switch (c)
   {
     case Spec_ECC_Curves_P256:
@@ -12951,25 +9743,83 @@ norm(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t *temp
       }
     default:
       {
-        const uint8_t *sw4;
         switch (c)
         {
           case Spec_ECC_Curves_P256:
             {
-              sw4 = prime256_inverse_buffer;
+              const uint8_t *sw4;
+              switch (c)
+              {
+                case Spec_ECC_Curves_P256:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                    break;
+                  }
+                case Spec_ECC_Curves_P384:
+                  {
+                    sw4 = prime384_inverse_buffer;
+                    break;
+                  }
+                default:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                  }
+              }
+              montgomery_ladder_power_p256(z2f, sw4, z2f);
               break;
             }
           case Spec_ECC_Curves_P384:
             {
-              sw4 = prime384_inverse_buffer;
+              const uint8_t *sw4;
+              switch (c)
+              {
+                case Spec_ECC_Curves_P256:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                    break;
+                  }
+                case Spec_ECC_Curves_P384:
+                  {
+                    sw4 = prime384_inverse_buffer;
+                    break;
+                  }
+                default:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                  }
+              }
+              montgomery_ladder_power_p384(z2f, sw4, z2f);
+              break;
+            }
+          case Spec_ECC_Curves_Default:
+            {
+              const uint8_t *sw4;
+              switch (c)
+              {
+                case Spec_ECC_Curves_P256:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                    break;
+                  }
+                case Spec_ECC_Curves_P384:
+                  {
+                    sw4 = prime384_inverse_buffer;
+                    break;
+                  }
+                default:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                  }
+              }
+              montgomery_ladder_power_generic(z2f, sw4, z2f);
               break;
             }
           default:
             {
-              sw4 = prime256_inverse_buffer;
+              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
             }
         }
-        montgomery_ladder_power(c, Hacl_Spec_MontgomeryMultiplication_DH, z2f, sw4, z2f);
       }
   }
   switch (c)
@@ -12986,25 +9836,83 @@ norm(Spec_ECC_Curves_curve c, uint64_t *p, uint64_t *resultPoint, uint64_t *temp
       }
     default:
       {
-        const uint8_t *sw4;
         switch (c)
         {
           case Spec_ECC_Curves_P256:
             {
-              sw4 = prime256_inverse_buffer;
+              const uint8_t *sw4;
+              switch (c)
+              {
+                case Spec_ECC_Curves_P256:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                    break;
+                  }
+                case Spec_ECC_Curves_P384:
+                  {
+                    sw4 = prime384_inverse_buffer;
+                    break;
+                  }
+                default:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                  }
+              }
+              montgomery_ladder_power_p256(z3f, sw4, z3f);
               break;
             }
           case Spec_ECC_Curves_P384:
             {
-              sw4 = prime384_inverse_buffer;
+              const uint8_t *sw4;
+              switch (c)
+              {
+                case Spec_ECC_Curves_P256:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                    break;
+                  }
+                case Spec_ECC_Curves_P384:
+                  {
+                    sw4 = prime384_inverse_buffer;
+                    break;
+                  }
+                default:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                  }
+              }
+              montgomery_ladder_power_p384(z3f, sw4, z3f);
+              break;
+            }
+          case Spec_ECC_Curves_Default:
+            {
+              const uint8_t *sw4;
+              switch (c)
+              {
+                case Spec_ECC_Curves_P256:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                    break;
+                  }
+                case Spec_ECC_Curves_P384:
+                  {
+                    sw4 = prime384_inverse_buffer;
+                    break;
+                  }
+                default:
+                  {
+                    sw4 = prime256_inverse_buffer;
+                  }
+              }
+              montgomery_ladder_power_generic(z3f, sw4, z3f);
               break;
             }
           default:
             {
-              sw4 = prime256_inverse_buffer;
+              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EXIT(253U);
             }
         }
-        montgomery_ladder_power(c, Hacl_Spec_MontgomeryMultiplication_DH, z3f, sw4, z3f);
       }
   }
   switch (c)
@@ -14147,7 +11055,29 @@ verifyQValidCurvePoint(Spec_ECC_Curves_curve c, uint64_t *pubKey, uint64_t *temp
     oToZero0[i] = (uint64_t)0U;
   }
   reduction(c, multBuffer, y2Buffer);
-  montgomery_square_buffer_dh(c, y2Buffer, y2Buffer);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(y2Buffer, y2Buffer);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(y2Buffer, y2Buffer);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(y2Buffer, y2Buffer);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   uint32_t sz1;
   switch (c)
   {
@@ -14240,7 +11170,29 @@ verifyQValidCurvePoint(Spec_ECC_Curves_curve c, uint64_t *pubKey, uint64_t *temp
     oToZero1[i] = (uint64_t)0U;
   }
   reduction(c, multBuffer0, xToDomainBuffer);
-  montgomery_square_buffer_dh(c, xToDomainBuffer, xBuffer);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(xToDomainBuffer, xBuffer);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(xToDomainBuffer, xBuffer);
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        montgomery_square_buffer_dh_generic(xToDomainBuffer, xBuffer);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   switch (c)
   {
     case Spec_ECC_Curves_P256:
@@ -15272,7 +12224,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   uint64_t *zf = result1 + (uint32_t)8U;
   uint64_t *z2f = tempForNorm + (uint32_t)4U;
   uint64_t *t8 = tempForNorm + (uint32_t)3U * (uint32_t)4U;
-  montgomery_square_buffer_dh(Spec_ECC_Curves_P256, zf, z2f);
+  montgomery_square_buffer_dh_p256(zf, z2f);
   exponent_p256(z2f, z2f, t8);
   montgomery_multiplication_buffer_dh_p256(z2f, xf, z2f);
   montgomery_multiplication_buffer_by_one_dh_p256(z2f, r);
@@ -15355,7 +12307,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   KRML_CHECK_SIZE(sizeof (uint64_t), len24);
   uint64_t kInv[len24];
   memset(kInv, 0U, len24 * sizeof (uint64_t));
-  montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, r, privKeyAsFelem, rda);
+  montgomery_multiplication_buffer_dh_p256(r, privKeyAsFelem, rda);
   uint32_t len35 = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), len35);
   uint64_t one[len35];
@@ -15366,7 +12318,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   {
     one[i] = (uint64_t)0U;
   }
-  montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, one, hashAsFelem, zBuffer);
+  montgomery_multiplication_buffer_dh_p256(one, hashAsFelem, zBuffer);
   uint32_t len36 = (uint32_t)4U;
   uint64_t c2 = (uint64_t)0U;
   uint32_t k12 = len36 / (uint32_t)4U * (uint32_t)4U;
@@ -15471,12 +12423,8 @@ Hacl_P256_ecdsa_sign_p256_sha2(
     zBuffer[i] = r_i;
   }
   memcpy(kInv, kAsFelem, len24 * sizeof (uint64_t));
-  montgomery_ladder_power(Spec_ECC_Curves_P256,
-    Hacl_Spec_MontgomeryMultiplication_DSA,
-    kInv,
-    Hacl_Spec_ECDSA_Definition_prime256order_buffer,
-    kInv);
-  montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, zBuffer, kInv, s);
+  montgomery_ladder_power_p256(kInv, Hacl_Spec_ECDSA_Definition_prime256order_buffer, kInv);
+  montgomery_multiplication_buffer_dh_p256(zBuffer, kInv, s);
   uint64_t tmp1 = (uint64_t)18446744073709551615U;
   uint32_t len2 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < len2; i++)
@@ -15680,8 +12628,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
       };
     uint32_t len35 = (uint32_t)4U;
     uint64_t c0 = (uint64_t)0U;
-    uint32_t k1 = len35 / (uint32_t)4U * (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
+    uint32_t k0 = len35 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
     {
       uint64_t t1 = rAsFelem[(uint32_t)4U * i];
       uint64_t t20 = p0[(uint32_t)4U * i];
@@ -15708,7 +12656,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           t2,
           tempBuffer20 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k1; i < len35; i++)
+    for (uint32_t i = k0; i < len35; i++)
     {
       uint64_t t1 = rAsFelem[i];
       uint64_t t2 = p0[i];
@@ -15743,8 +12691,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
       };
     uint32_t len37 = (uint32_t)4U;
     uint64_t c1 = (uint64_t)0U;
-    uint32_t k2 = len37 / (uint32_t)4U * (uint32_t)4U;
-    for (uint32_t i = (uint32_t)0U; i < k2 / (uint32_t)4U; i++)
+    uint32_t k1 = len37 / (uint32_t)4U * (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < k1 / (uint32_t)4U; i++)
     {
       uint64_t t1 = sAsFelem[(uint32_t)4U * i];
       uint64_t t20 = p2[(uint32_t)4U * i];
@@ -15771,7 +12719,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           t2,
           tempBuffer21 + (uint32_t)4U * i + (uint32_t)3U);
     }
-    for (uint32_t i = k2; i < len37; i++)
+    for (uint32_t i = k1; i < len37; i++)
     {
       uint64_t t1 = sAsFelem[i];
       uint64_t t2 = p2[i];
@@ -15847,8 +12795,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         };
       uint32_t len51 = (uint32_t)4U;
       uint64_t c2 = (uint64_t)0U;
-      uint32_t k3 = len51 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k3 / (uint32_t)4U; i++)
+      uint32_t k2 = len51 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k2 / (uint32_t)4U; i++)
       {
         uint64_t t1 = hashAsFelem[(uint32_t)4U * i];
         uint64_t t20 = p3[(uint32_t)4U * i];
@@ -15875,7 +12823,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             tempBuffer22 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k3; i < len51; i++)
+      for (uint32_t i = k2; i < len51; i++)
       {
         uint64_t t1 = hashAsFelem[i];
         uint64_t t2 = p3[i];
@@ -15909,10 +12857,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
       {
         one[i] = (uint64_t)0U;
       }
-      montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, one, sAsFelem, inverseS);
-      montgomery_ladder_power(Spec_ECC_Curves_P256,
-        Hacl_Spec_MontgomeryMultiplication_DSA,
-        inverseS,
+      montgomery_multiplication_buffer_dh_p256(one, sAsFelem, inverseS);
+      montgomery_ladder_power_p256(inverseS,
         Hacl_Spec_ECDSA_Definition_prime256order_buffer,
         inverseS);
       uint32_t len43 = (uint32_t)4U;
@@ -15929,7 +12875,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
       {
         one0[i] = (uint64_t)0U;
       }
-      montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, one0, hashAsFelem, buffFromDB);
+      montgomery_multiplication_buffer_dh_p256(one0, hashAsFelem, buffFromDB);
       uint32_t len55 = (uint32_t)4U;
       KRML_CHECK_SIZE(sizeof (uint64_t), len55);
       uint64_t one1[len55];
@@ -15940,8 +12886,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
       {
         one1[i] = (uint64_t)0U;
       }
-      montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, one1, buffFromDB, buffFromDB);
-      montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, inverseS, buffFromDB, u11);
+      montgomery_multiplication_buffer_dh_p256(one1, buffFromDB, buffFromDB);
+      montgomery_multiplication_buffer_dh_p256(inverseS, buffFromDB, u11);
       uint32_t len44 = (uint32_t)4U;
       KRML_CHECK_SIZE(sizeof (uint64_t), len44);
       uint64_t buffFromDB0[len44];
@@ -15956,7 +12902,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
       {
         one2[i] = (uint64_t)0U;
       }
-      montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, one2, rAsFelem, buffFromDB0);
+      montgomery_multiplication_buffer_dh_p256(one2, rAsFelem, buffFromDB0);
       uint32_t len57 = (uint32_t)4U;
       KRML_CHECK_SIZE(sizeof (uint64_t), len57);
       uint64_t one3[len57];
@@ -15967,8 +12913,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
       {
         one3[i] = (uint64_t)0U;
       }
-      montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, one3, buffFromDB0, buffFromDB0);
-      montgomery_multiplication_buffer_dsa(Spec_ECC_Curves_P256, inverseS, buffFromDB0, u21);
+      montgomery_multiplication_buffer_dh_p256(one3, buffFromDB0, buffFromDB0);
+      montgomery_multiplication_buffer_dh_p256(inverseS, buffFromDB0, u21);
       uint32_t len45 = (uint32_t)4U;
       uint32_t lenByTwo4 = len45 >> (uint32_t)1U;
       for (uint32_t i = (uint32_t)0U; i < lenByTwo4; i++)
@@ -16070,8 +13016,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         t[i0 + i0] = r14;
       }
       uint64_t c3 = (uint64_t)0U;
-      uint32_t k4 = resLen0 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k4 / (uint32_t)4U; i++)
+      uint32_t k3 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k3 / (uint32_t)4U; i++)
       {
         uint64_t t1 = t[(uint32_t)4U * i];
         uint64_t t20 = t[(uint32_t)4U * i];
@@ -16094,7 +13040,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         uint64_t t2 = t[(uint32_t)4U * i + (uint32_t)3U];
         c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k4; i < resLen0; i++)
+      for (uint32_t i = k3; i < resLen0; i++)
       {
         uint64_t t1 = t[i];
         uint64_t t2 = t[i];
@@ -16111,8 +13057,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         tmp3[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
       }
       uint64_t c4 = (uint64_t)0U;
-      uint32_t k5 = resLen0 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k5 / (uint32_t)4U; i++)
+      uint32_t k4 = resLen0 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k4 / (uint32_t)4U; i++)
       {
         uint64_t t1 = t[(uint32_t)4U * i];
         uint64_t t20 = tmp3[(uint32_t)4U * i];
@@ -16135,7 +13081,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         uint64_t t2 = tmp3[(uint32_t)4U * i + (uint32_t)3U];
         c4 = Lib_IntTypes_Intrinsics_add_carry_u64(c4, t12, t2, t + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k5; i < resLen0; i++)
+      for (uint32_t i = k4; i < resLen0; i++)
       {
         uint64_t t1 = t[i];
         uint64_t t2 = tmp3[i];
@@ -16149,81 +13095,36 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len8);
         uint64_t t2[(uint32_t)2U * len8];
         memset(t2, 0U, (uint32_t)2U * len8 * sizeof (uint64_t));
-        if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-        {
-          uint64_t t1 = t[0U];
-          uint64_t temp = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res0 = (uint128_t)f0 * t1;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
-          o0[0U] = l00;
-          temp = h0120;
-          uint64_t h0 = temp;
-          uint128_t res = (uint128_t)f1 * t1;
-          uint64_t l01 = (uint64_t)res;
-          uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l01;
-          temp = h0121;
-          uint64_t l = o1[0U];
-          uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-          uint64_t h = temp;
-          o2[0U] = h + c10;
-          uint128_t res1 = (uint128_t)f3 * t1;
-          uint64_t l0 = (uint64_t)res1;
-          uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h012;
-        }
-        else
-        {
-          uint64_t k0 = (uint64_t)1U;
-          uint64_t t1 = t[0U];
-          uint64_t y = (uint64_t)0U;
-          uint64_t temp = (uint64_t)0U;
-          uint128_t res0 = (uint128_t)t1 * k0;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h012 = (uint64_t)(res0 >> (uint32_t)64U);
-          y = l00;
-          temp = h012;
-          uint64_t y_ = y;
-          uint64_t temp1 = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res1 = (uint128_t)f0 * y_;
-          uint64_t l01 = (uint64_t)res1;
-          uint64_t h0130 = (uint64_t)(res1 >> (uint32_t)64U);
-          o0[0U] = l01;
-          temp1 = h0130;
-          uint64_t h30 = temp1;
-          uint128_t res = (uint128_t)f1 * y_;
-          uint64_t l02 = (uint64_t)res;
-          uint64_t h0131 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l02;
-          temp1 = h0131;
-          uint64_t l = o1[0U];
-          uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h30, o1);
-          uint64_t h3 = temp1;
-          o2[0U] = h3 + c10;
-          uint128_t res2 = (uint128_t)f3 * y_;
-          uint64_t l0 = (uint64_t)res2;
-          uint64_t h013 = (uint64_t)(res2 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h013;
-        }
+        uint64_t t10 = t[0U];
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        uint128_t res0 = (uint128_t)f0 * t10;
+        uint64_t l00 = (uint64_t)res0;
+        uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
+        o0[0U] = l00;
+        temp = h0120;
+        uint64_t h0 = temp;
+        uint128_t res = (uint128_t)f1 * t10;
+        uint64_t l01 = (uint64_t)res;
+        uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
+        o1[0U] = l01;
+        temp = h0121;
+        uint64_t l = o1[0U];
+        uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c10;
+        uint128_t res1 = (uint128_t)f3 * t10;
+        uint64_t l0 = (uint64_t)res1;
+        uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
+        o3[0U] = l0;
+        o4[0U] = h012;
         uint32_t len90 = (uint32_t)4U * (uint32_t)2U;
         uint64_t c = (uint64_t)0U;
         uint32_t k = len90 / (uint32_t)4U * (uint32_t)4U;
@@ -16232,25 +13133,25 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           uint64_t t1 = t[(uint32_t)4U * i];
           uint64_t t210 = t2[(uint32_t)4U * i];
           c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-          uint64_t t10 = t[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
           uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t10,
+              t11,
               t211,
               t2 + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t11,
+              t12,
               t212,
               t2 + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
           uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t12,
+              t13,
               t21,
               t2 + (uint32_t)4U * i + (uint32_t)3U);
         }
@@ -16287,8 +13188,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         };
       uint32_t len100 = (uint32_t)4U;
       uint64_t c5 = (uint64_t)0U;
-      uint32_t k6 = len100 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k6 / (uint32_t)4U; i++)
+      uint32_t k5 = len100 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k5 / (uint32_t)4U; i++)
       {
         uint64_t t1 = x_0[(uint32_t)4U * i];
         uint64_t t20 = p10[(uint32_t)4U * i];
@@ -16315,7 +13216,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             tempBuffer23 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k6; i < len100; i++)
+      for (uint32_t i = k5; i < len100; i++)
       {
         uint64_t t1 = x_0[i];
         uint64_t t2 = p10[i];
@@ -16379,8 +13280,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         t0[i0 + i0] = r15;
       }
       uint64_t c6 = (uint64_t)0U;
-      uint32_t k7 = resLen1 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k7 / (uint32_t)4U; i++)
+      uint32_t k6 = resLen1 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k6 / (uint32_t)4U; i++)
       {
         uint64_t t1 = t0[(uint32_t)4U * i];
         uint64_t t20 = t0[(uint32_t)4U * i];
@@ -16407,7 +13308,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             t0 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k7; i < resLen1; i++)
+      for (uint32_t i = k6; i < resLen1; i++)
       {
         uint64_t t1 = t0[i];
         uint64_t t2 = t0[i];
@@ -16424,8 +13325,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         tmp4[(uint32_t)2U * i + (uint32_t)1U] = (uint64_t)(a2 >> (uint32_t)64U);
       }
       uint64_t c7 = (uint64_t)0U;
-      uint32_t k8 = resLen1 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k8 / (uint32_t)4U; i++)
+      uint32_t k7 = resLen1 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k7 / (uint32_t)4U; i++)
       {
         uint64_t t1 = t0[(uint32_t)4U * i];
         uint64_t t20 = tmp4[(uint32_t)4U * i];
@@ -16452,7 +13353,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             t0 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k8; i < resLen1; i++)
+      for (uint32_t i = k7; i < resLen1; i++)
       {
         uint64_t t1 = t0[i];
         uint64_t t2 = tmp4[i];
@@ -16466,81 +13367,36 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len80);
         uint64_t t2[(uint32_t)2U * len80];
         memset(t2, 0U, (uint32_t)2U * len80 * sizeof (uint64_t));
-        if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-        {
-          uint64_t t1 = t0[0U];
-          uint64_t temp = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res0 = (uint128_t)f0 * t1;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
-          o0[0U] = l00;
-          temp = h0120;
-          uint64_t h0 = temp;
-          uint128_t res = (uint128_t)f1 * t1;
-          uint64_t l01 = (uint64_t)res;
-          uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l01;
-          temp = h0121;
-          uint64_t l = o1[0U];
-          uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-          uint64_t h = temp;
-          o2[0U] = h + c10;
-          uint128_t res1 = (uint128_t)f3 * t1;
-          uint64_t l0 = (uint64_t)res1;
-          uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h012;
-        }
-        else
-        {
-          uint64_t k0 = (uint64_t)1U;
-          uint64_t t1 = t0[0U];
-          uint64_t y = (uint64_t)0U;
-          uint64_t temp = (uint64_t)0U;
-          uint128_t res0 = (uint128_t)t1 * k0;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h012 = (uint64_t)(res0 >> (uint32_t)64U);
-          y = l00;
-          temp = h012;
-          uint64_t y_ = y;
-          uint64_t temp1 = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res1 = (uint128_t)f0 * y_;
-          uint64_t l01 = (uint64_t)res1;
-          uint64_t h0130 = (uint64_t)(res1 >> (uint32_t)64U);
-          o0[0U] = l01;
-          temp1 = h0130;
-          uint64_t h30 = temp1;
-          uint128_t res = (uint128_t)f1 * y_;
-          uint64_t l02 = (uint64_t)res;
-          uint64_t h0131 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l02;
-          temp1 = h0131;
-          uint64_t l = o1[0U];
-          uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h30, o1);
-          uint64_t h3 = temp1;
-          o2[0U] = h3 + c10;
-          uint128_t res2 = (uint128_t)f3 * y_;
-          uint64_t l0 = (uint64_t)res2;
-          uint64_t h013 = (uint64_t)(res2 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h013;
-        }
+        uint64_t t10 = t0[0U];
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        uint128_t res0 = (uint128_t)f0 * t10;
+        uint64_t l00 = (uint64_t)res0;
+        uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
+        o0[0U] = l00;
+        temp = h0120;
+        uint64_t h0 = temp;
+        uint128_t res = (uint128_t)f1 * t10;
+        uint64_t l01 = (uint64_t)res;
+        uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
+        o1[0U] = l01;
+        temp = h0121;
+        uint64_t l = o1[0U];
+        uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c10;
+        uint128_t res1 = (uint128_t)f3 * t10;
+        uint64_t l0 = (uint64_t)res1;
+        uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
+        o3[0U] = l0;
+        o4[0U] = h012;
         uint32_t len91 = (uint32_t)4U * (uint32_t)2U;
         uint64_t c = (uint64_t)0U;
         uint32_t k = len91 / (uint32_t)4U * (uint32_t)4U;
@@ -16549,25 +13405,25 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           uint64_t t1 = t0[(uint32_t)4U * i];
           uint64_t t210 = t2[(uint32_t)4U * i];
           c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-          uint64_t t10 = t0[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)1U];
           uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t10,
+              t11,
               t211,
               t2 + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t11,
+              t12,
               t212,
               t2 + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t13 = t0[(uint32_t)4U * i + (uint32_t)3U];
           uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t12,
+              t13,
               t21,
               t2 + (uint32_t)4U * i + (uint32_t)3U);
         }
@@ -16604,8 +13460,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         };
       uint32_t len102 = (uint32_t)4U;
       uint64_t c8 = (uint64_t)0U;
-      uint32_t k9 = len102 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k9 / (uint32_t)4U; i++)
+      uint32_t k8 = len102 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k8 / (uint32_t)4U; i++)
       {
         uint64_t t1 = x_1[(uint32_t)4U * i];
         uint64_t t20 = p11[(uint32_t)4U * i];
@@ -16632,7 +13488,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             tempBuffer24 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k9; i < len102; i++)
+      for (uint32_t i = k8; i < len102; i++)
       {
         uint64_t t1 = x_1[i];
         uint64_t t2 = p11[i];
@@ -16701,81 +13557,36 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len81);
         uint64_t t2[(uint32_t)2U * len81];
         memset(t2, 0U, (uint32_t)2U * len81 * sizeof (uint64_t));
-        if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-        {
-          uint64_t t1 = t3[0U];
-          uint64_t temp = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res0 = (uint128_t)f0 * t1;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
-          o0[0U] = l00;
-          temp = h0120;
-          uint64_t h0 = temp;
-          uint128_t res = (uint128_t)f1 * t1;
-          uint64_t l01 = (uint64_t)res;
-          uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l01;
-          temp = h0121;
-          uint64_t l = o1[0U];
-          uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-          uint64_t h = temp;
-          o2[0U] = h + c10;
-          uint128_t res1 = (uint128_t)f3 * t1;
-          uint64_t l0 = (uint64_t)res1;
-          uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h012;
-        }
-        else
-        {
-          uint64_t k0 = (uint64_t)1U;
-          uint64_t t1 = t3[0U];
-          uint64_t y = (uint64_t)0U;
-          uint64_t temp = (uint64_t)0U;
-          uint128_t res0 = (uint128_t)t1 * k0;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h012 = (uint64_t)(res0 >> (uint32_t)64U);
-          y = l00;
-          temp = h012;
-          uint64_t y_ = y;
-          uint64_t temp1 = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res1 = (uint128_t)f0 * y_;
-          uint64_t l01 = (uint64_t)res1;
-          uint64_t h0130 = (uint64_t)(res1 >> (uint32_t)64U);
-          o0[0U] = l01;
-          temp1 = h0130;
-          uint64_t h30 = temp1;
-          uint128_t res = (uint128_t)f1 * y_;
-          uint64_t l02 = (uint64_t)res;
-          uint64_t h0131 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l02;
-          temp1 = h0131;
-          uint64_t l = o1[0U];
-          uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h30, o1);
-          uint64_t h3 = temp1;
-          o2[0U] = h3 + c10;
-          uint128_t res2 = (uint128_t)f3 * y_;
-          uint64_t l0 = (uint64_t)res2;
-          uint64_t h013 = (uint64_t)(res2 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h013;
-        }
+        uint64_t t10 = t3[0U];
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        uint128_t res0 = (uint128_t)f0 * t10;
+        uint64_t l00 = (uint64_t)res0;
+        uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
+        o0[0U] = l00;
+        temp = h0120;
+        uint64_t h0 = temp;
+        uint128_t res = (uint128_t)f1 * t10;
+        uint64_t l01 = (uint64_t)res;
+        uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
+        o1[0U] = l01;
+        temp = h0121;
+        uint64_t l = o1[0U];
+        uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c10;
+        uint128_t res1 = (uint128_t)f3 * t10;
+        uint64_t l0 = (uint64_t)res1;
+        uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
+        o3[0U] = l0;
+        o4[0U] = h012;
         uint32_t len92 = (uint32_t)4U * (uint32_t)2U;
         uint64_t c = (uint64_t)0U;
         uint32_t k = len92 / (uint32_t)4U * (uint32_t)4U;
@@ -16784,25 +13595,25 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           uint64_t t1 = t3[(uint32_t)4U * i];
           uint64_t t210 = t2[(uint32_t)4U * i];
           c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-          uint64_t t10 = t3[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t11 = t3[(uint32_t)4U * i + (uint32_t)1U];
           uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t10,
+              t11,
               t211,
               t2 + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = t3[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t12 = t3[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t11,
+              t12,
               t212,
               t2 + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = t3[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t13 = t3[(uint32_t)4U * i + (uint32_t)3U];
           uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t12,
+              t13,
               t21,
               t2 + (uint32_t)4U * i + (uint32_t)3U);
         }
@@ -16839,8 +13650,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         };
       uint32_t len104 = (uint32_t)4U;
       uint64_t c9 = (uint64_t)0U;
-      uint32_t k10 = len104 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k10 / (uint32_t)4U; i++)
+      uint32_t k9 = len104 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k9 / (uint32_t)4U; i++)
       {
         uint64_t t1 = x_2[(uint32_t)4U * i];
         uint64_t t20 = p12[(uint32_t)4U * i];
@@ -16867,7 +13678,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             tempBuffer25 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k10; i < len104; i++)
+      for (uint32_t i = k9; i < len104; i++)
       {
         uint64_t t1 = x_2[i];
         uint64_t t2 = p12[i];
@@ -16936,81 +13747,36 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len82);
         uint64_t t2[(uint32_t)2U * len82];
         memset(t2, 0U, (uint32_t)2U * len82 * sizeof (uint64_t));
-        if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-        {
-          uint64_t t1 = t4[0U];
-          uint64_t temp = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res0 = (uint128_t)f0 * t1;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
-          o0[0U] = l00;
-          temp = h0120;
-          uint64_t h0 = temp;
-          uint128_t res = (uint128_t)f1 * t1;
-          uint64_t l01 = (uint64_t)res;
-          uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l01;
-          temp = h0121;
-          uint64_t l = o1[0U];
-          uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-          uint64_t h = temp;
-          o2[0U] = h + c10;
-          uint128_t res1 = (uint128_t)f3 * t1;
-          uint64_t l0 = (uint64_t)res1;
-          uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h012;
-        }
-        else
-        {
-          uint64_t k0 = (uint64_t)1U;
-          uint64_t t1 = t4[0U];
-          uint64_t y = (uint64_t)0U;
-          uint64_t temp = (uint64_t)0U;
-          uint128_t res0 = (uint128_t)t1 * k0;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h012 = (uint64_t)(res0 >> (uint32_t)64U);
-          y = l00;
-          temp = h012;
-          uint64_t y_ = y;
-          uint64_t temp1 = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res1 = (uint128_t)f0 * y_;
-          uint64_t l01 = (uint64_t)res1;
-          uint64_t h0130 = (uint64_t)(res1 >> (uint32_t)64U);
-          o0[0U] = l01;
-          temp1 = h0130;
-          uint64_t h30 = temp1;
-          uint128_t res = (uint128_t)f1 * y_;
-          uint64_t l02 = (uint64_t)res;
-          uint64_t h0131 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l02;
-          temp1 = h0131;
-          uint64_t l = o1[0U];
-          uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h30, o1);
-          uint64_t h3 = temp1;
-          o2[0U] = h3 + c10;
-          uint128_t res2 = (uint128_t)f3 * y_;
-          uint64_t l0 = (uint64_t)res2;
-          uint64_t h013 = (uint64_t)(res2 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h013;
-        }
+        uint64_t t10 = t4[0U];
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        uint128_t res0 = (uint128_t)f0 * t10;
+        uint64_t l00 = (uint64_t)res0;
+        uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
+        o0[0U] = l00;
+        temp = h0120;
+        uint64_t h0 = temp;
+        uint128_t res = (uint128_t)f1 * t10;
+        uint64_t l01 = (uint64_t)res;
+        uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
+        o1[0U] = l01;
+        temp = h0121;
+        uint64_t l = o1[0U];
+        uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c10;
+        uint128_t res1 = (uint128_t)f3 * t10;
+        uint64_t l0 = (uint64_t)res1;
+        uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
+        o3[0U] = l0;
+        o4[0U] = h012;
         uint32_t len93 = (uint32_t)4U * (uint32_t)2U;
         uint64_t c = (uint64_t)0U;
         uint32_t k = len93 / (uint32_t)4U * (uint32_t)4U;
@@ -17019,25 +13785,25 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           uint64_t t1 = t4[(uint32_t)4U * i];
           uint64_t t210 = t2[(uint32_t)4U * i];
           c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-          uint64_t t10 = t4[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t11 = t4[(uint32_t)4U * i + (uint32_t)1U];
           uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t10,
+              t11,
               t211,
               t2 + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = t4[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t12 = t4[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t11,
+              t12,
               t212,
               t2 + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = t4[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t13 = t4[(uint32_t)4U * i + (uint32_t)3U];
           uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t12,
+              t13,
               t21,
               t2 + (uint32_t)4U * i + (uint32_t)3U);
         }
@@ -17074,8 +13840,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         };
       uint32_t len106 = (uint32_t)4U;
       uint64_t c10 = (uint64_t)0U;
-      uint32_t k11 = len106 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k11 / (uint32_t)4U; i++)
+      uint32_t k10 = len106 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k10 / (uint32_t)4U; i++)
       {
         uint64_t t1 = x_3[(uint32_t)4U * i];
         uint64_t t20 = p13[(uint32_t)4U * i];
@@ -17102,7 +13868,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             tempBuffer26 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k11; i < len106; i++)
+      for (uint32_t i = k10; i < len106; i++)
       {
         uint64_t t1 = x_3[i];
         uint64_t t2 = p13[i];
@@ -17171,81 +13937,36 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len83);
         uint64_t t2[(uint32_t)2U * len83];
         memset(t2, 0U, (uint32_t)2U * len83 * sizeof (uint64_t));
-        if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-        {
-          uint64_t t1 = t5[0U];
-          uint64_t temp = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res0 = (uint128_t)f0 * t1;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
-          o0[0U] = l00;
-          temp = h0120;
-          uint64_t h0 = temp;
-          uint128_t res = (uint128_t)f1 * t1;
-          uint64_t l01 = (uint64_t)res;
-          uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l01;
-          temp = h0121;
-          uint64_t l = o1[0U];
-          uint64_t c11 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-          uint64_t h = temp;
-          o2[0U] = h + c11;
-          uint128_t res1 = (uint128_t)f3 * t1;
-          uint64_t l0 = (uint64_t)res1;
-          uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h012;
-        }
-        else
-        {
-          uint64_t k0 = (uint64_t)1U;
-          uint64_t t1 = t5[0U];
-          uint64_t y = (uint64_t)0U;
-          uint64_t temp = (uint64_t)0U;
-          uint128_t res0 = (uint128_t)t1 * k0;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h012 = (uint64_t)(res0 >> (uint32_t)64U);
-          y = l00;
-          temp = h012;
-          uint64_t y_ = y;
-          uint64_t temp1 = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res1 = (uint128_t)f0 * y_;
-          uint64_t l01 = (uint64_t)res1;
-          uint64_t h0130 = (uint64_t)(res1 >> (uint32_t)64U);
-          o0[0U] = l01;
-          temp1 = h0130;
-          uint64_t h30 = temp1;
-          uint128_t res = (uint128_t)f1 * y_;
-          uint64_t l02 = (uint64_t)res;
-          uint64_t h0131 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l02;
-          temp1 = h0131;
-          uint64_t l = o1[0U];
-          uint64_t c11 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h30, o1);
-          uint64_t h3 = temp1;
-          o2[0U] = h3 + c11;
-          uint128_t res2 = (uint128_t)f3 * y_;
-          uint64_t l0 = (uint64_t)res2;
-          uint64_t h013 = (uint64_t)(res2 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h013;
-        }
+        uint64_t t10 = t5[0U];
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        uint128_t res0 = (uint128_t)f0 * t10;
+        uint64_t l00 = (uint64_t)res0;
+        uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
+        o0[0U] = l00;
+        temp = h0120;
+        uint64_t h0 = temp;
+        uint128_t res = (uint128_t)f1 * t10;
+        uint64_t l01 = (uint64_t)res;
+        uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
+        o1[0U] = l01;
+        temp = h0121;
+        uint64_t l = o1[0U];
+        uint64_t c11 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c11;
+        uint128_t res1 = (uint128_t)f3 * t10;
+        uint64_t l0 = (uint64_t)res1;
+        uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
+        o3[0U] = l0;
+        o4[0U] = h012;
         uint32_t len94 = (uint32_t)4U * (uint32_t)2U;
         uint64_t c = (uint64_t)0U;
         uint32_t k = len94 / (uint32_t)4U * (uint32_t)4U;
@@ -17254,25 +13975,25 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           uint64_t t1 = t5[(uint32_t)4U * i];
           uint64_t t210 = t2[(uint32_t)4U * i];
           c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-          uint64_t t10 = t5[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t11 = t5[(uint32_t)4U * i + (uint32_t)1U];
           uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t10,
+              t11,
               t211,
               t2 + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = t5[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t12 = t5[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t11,
+              t12,
               t212,
               t2 + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = t5[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t13 = t5[(uint32_t)4U * i + (uint32_t)3U];
           uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t12,
+              t13,
               t21,
               t2 + (uint32_t)4U * i + (uint32_t)3U);
         }
@@ -17309,8 +14030,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         };
       uint32_t len108 = (uint32_t)4U;
       uint64_t c11 = (uint64_t)0U;
-      uint32_t k12 = len108 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k12 / (uint32_t)4U; i++)
+      uint32_t k11 = len108 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k11 / (uint32_t)4U; i++)
       {
         uint64_t t1 = x_4[(uint32_t)4U * i];
         uint64_t t20 = p14[(uint32_t)4U * i];
@@ -17337,7 +14058,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             tempBuffer27 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k12; i < len108; i++)
+      for (uint32_t i = k11; i < len108; i++)
       {
         uint64_t t1 = x_4[i];
         uint64_t t2 = p14[i];
@@ -17406,81 +14127,36 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len84);
         uint64_t t2[(uint32_t)2U * len84];
         memset(t2, 0U, (uint32_t)2U * len84 * sizeof (uint64_t));
-        if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-        {
-          uint64_t t1 = t6[0U];
-          uint64_t temp = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res0 = (uint128_t)f0 * t1;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
-          o0[0U] = l00;
-          temp = h0120;
-          uint64_t h0 = temp;
-          uint128_t res = (uint128_t)f1 * t1;
-          uint64_t l01 = (uint64_t)res;
-          uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l01;
-          temp = h0121;
-          uint64_t l = o1[0U];
-          uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-          uint64_t h = temp;
-          o2[0U] = h + c12;
-          uint128_t res1 = (uint128_t)f3 * t1;
-          uint64_t l0 = (uint64_t)res1;
-          uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h012;
-        }
-        else
-        {
-          uint64_t k0 = (uint64_t)1U;
-          uint64_t t1 = t6[0U];
-          uint64_t y = (uint64_t)0U;
-          uint64_t temp = (uint64_t)0U;
-          uint128_t res0 = (uint128_t)t1 * k0;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h012 = (uint64_t)(res0 >> (uint32_t)64U);
-          y = l00;
-          temp = h012;
-          uint64_t y_ = y;
-          uint64_t temp1 = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res1 = (uint128_t)f0 * y_;
-          uint64_t l01 = (uint64_t)res1;
-          uint64_t h0130 = (uint64_t)(res1 >> (uint32_t)64U);
-          o0[0U] = l01;
-          temp1 = h0130;
-          uint64_t h30 = temp1;
-          uint128_t res = (uint128_t)f1 * y_;
-          uint64_t l02 = (uint64_t)res;
-          uint64_t h0131 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l02;
-          temp1 = h0131;
-          uint64_t l = o1[0U];
-          uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h30, o1);
-          uint64_t h3 = temp1;
-          o2[0U] = h3 + c12;
-          uint128_t res2 = (uint128_t)f3 * y_;
-          uint64_t l0 = (uint64_t)res2;
-          uint64_t h013 = (uint64_t)(res2 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h013;
-        }
+        uint64_t t10 = t6[0U];
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        uint128_t res0 = (uint128_t)f0 * t10;
+        uint64_t l00 = (uint64_t)res0;
+        uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
+        o0[0U] = l00;
+        temp = h0120;
+        uint64_t h0 = temp;
+        uint128_t res = (uint128_t)f1 * t10;
+        uint64_t l01 = (uint64_t)res;
+        uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
+        o1[0U] = l01;
+        temp = h0121;
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        uint128_t res1 = (uint128_t)f3 * t10;
+        uint64_t l0 = (uint64_t)res1;
+        uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
+        o3[0U] = l0;
+        o4[0U] = h012;
         uint32_t len95 = (uint32_t)4U * (uint32_t)2U;
         uint64_t c = (uint64_t)0U;
         uint32_t k = len95 / (uint32_t)4U * (uint32_t)4U;
@@ -17489,25 +14165,25 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           uint64_t t1 = t6[(uint32_t)4U * i];
           uint64_t t210 = t2[(uint32_t)4U * i];
           c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-          uint64_t t10 = t6[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t11 = t6[(uint32_t)4U * i + (uint32_t)1U];
           uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t10,
+              t11,
               t211,
               t2 + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = t6[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t12 = t6[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t11,
+              t12,
               t212,
               t2 + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = t6[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t13 = t6[(uint32_t)4U * i + (uint32_t)3U];
           uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t12,
+              t13,
               t21,
               t2 + (uint32_t)4U * i + (uint32_t)3U);
         }
@@ -17544,8 +14220,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         };
       uint32_t len1010 = (uint32_t)4U;
       uint64_t c12 = (uint64_t)0U;
-      uint32_t k13 = len1010 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k13 / (uint32_t)4U; i++)
+      uint32_t k12 = len1010 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k12 / (uint32_t)4U; i++)
       {
         uint64_t t1 = x_5[(uint32_t)4U * i];
         uint64_t t20 = p15[(uint32_t)4U * i];
@@ -17572,7 +14248,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             tempBuffer28 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k13; i < len1010; i++)
+      for (uint32_t i = k12; i < len1010; i++)
       {
         uint64_t t1 = x_5[i];
         uint64_t t2 = p15[i];
@@ -17641,81 +14317,36 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len85);
         uint64_t t2[(uint32_t)2U * len85];
         memset(t2, 0U, (uint32_t)2U * len85 * sizeof (uint64_t));
-        if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-        {
-          uint64_t t1 = t7[0U];
-          uint64_t temp = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res0 = (uint128_t)f0 * t1;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
-          o0[0U] = l00;
-          temp = h0120;
-          uint64_t h0 = temp;
-          uint128_t res = (uint128_t)f1 * t1;
-          uint64_t l01 = (uint64_t)res;
-          uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l01;
-          temp = h0121;
-          uint64_t l = o1[0U];
-          uint64_t c13 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-          uint64_t h = temp;
-          o2[0U] = h + c13;
-          uint128_t res1 = (uint128_t)f3 * t1;
-          uint64_t l0 = (uint64_t)res1;
-          uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h012;
-        }
-        else
-        {
-          uint64_t k0 = (uint64_t)1U;
-          uint64_t t1 = t7[0U];
-          uint64_t y = (uint64_t)0U;
-          uint64_t temp = (uint64_t)0U;
-          uint128_t res0 = (uint128_t)t1 * k0;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h012 = (uint64_t)(res0 >> (uint32_t)64U);
-          y = l00;
-          temp = h012;
-          uint64_t y_ = y;
-          uint64_t temp1 = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res1 = (uint128_t)f0 * y_;
-          uint64_t l01 = (uint64_t)res1;
-          uint64_t h0130 = (uint64_t)(res1 >> (uint32_t)64U);
-          o0[0U] = l01;
-          temp1 = h0130;
-          uint64_t h30 = temp1;
-          uint128_t res = (uint128_t)f1 * y_;
-          uint64_t l02 = (uint64_t)res;
-          uint64_t h0131 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l02;
-          temp1 = h0131;
-          uint64_t l = o1[0U];
-          uint64_t c13 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h30, o1);
-          uint64_t h3 = temp1;
-          o2[0U] = h3 + c13;
-          uint128_t res2 = (uint128_t)f3 * y_;
-          uint64_t l0 = (uint64_t)res2;
-          uint64_t h013 = (uint64_t)(res2 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h013;
-        }
+        uint64_t t10 = t7[0U];
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        uint128_t res0 = (uint128_t)f0 * t10;
+        uint64_t l00 = (uint64_t)res0;
+        uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
+        o0[0U] = l00;
+        temp = h0120;
+        uint64_t h0 = temp;
+        uint128_t res = (uint128_t)f1 * t10;
+        uint64_t l01 = (uint64_t)res;
+        uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
+        o1[0U] = l01;
+        temp = h0121;
+        uint64_t l = o1[0U];
+        uint64_t c13 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c13;
+        uint128_t res1 = (uint128_t)f3 * t10;
+        uint64_t l0 = (uint64_t)res1;
+        uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
+        o3[0U] = l0;
+        o4[0U] = h012;
         uint32_t len96 = (uint32_t)4U * (uint32_t)2U;
         uint64_t c = (uint64_t)0U;
         uint32_t k = len96 / (uint32_t)4U * (uint32_t)4U;
@@ -17724,25 +14355,25 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           uint64_t t1 = t7[(uint32_t)4U * i];
           uint64_t t210 = t2[(uint32_t)4U * i];
           c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-          uint64_t t10 = t7[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t11 = t7[(uint32_t)4U * i + (uint32_t)1U];
           uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t10,
+              t11,
               t211,
               t2 + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = t7[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t12 = t7[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t11,
+              t12,
               t212,
               t2 + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = t7[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t13 = t7[(uint32_t)4U * i + (uint32_t)3U];
           uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t12,
+              t13,
               t21,
               t2 + (uint32_t)4U * i + (uint32_t)3U);
         }
@@ -17779,8 +14410,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         };
       uint32_t len1012 = (uint32_t)4U;
       uint64_t c13 = (uint64_t)0U;
-      uint32_t k14 = len1012 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k14 / (uint32_t)4U; i++)
+      uint32_t k13 = len1012 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k13 / (uint32_t)4U; i++)
       {
         uint64_t t1 = x_6[(uint32_t)4U * i];
         uint64_t t20 = p16[(uint32_t)4U * i];
@@ -17807,7 +14438,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             tempBuffer29 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k14; i < len1012; i++)
+      for (uint32_t i = k13; i < len1012; i++)
       {
         uint64_t t1 = x_6[i];
         uint64_t t2 = p16[i];
@@ -17876,81 +14507,36 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len86);
         uint64_t t2[(uint32_t)2U * len86];
         memset(t2, 0U, (uint32_t)2U * len86 * sizeof (uint64_t));
-        if ((uint64_t)0xffffffffffffffffU == (uint64_t)0xffffffffffffffffU)
-        {
-          uint64_t t1 = t8[0U];
-          uint64_t temp = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res0 = (uint128_t)f0 * t1;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
-          o0[0U] = l00;
-          temp = h0120;
-          uint64_t h0 = temp;
-          uint128_t res = (uint128_t)f1 * t1;
-          uint64_t l01 = (uint64_t)res;
-          uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l01;
-          temp = h0121;
-          uint64_t l = o1[0U];
-          uint64_t c14 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-          uint64_t h = temp;
-          o2[0U] = h + c14;
-          uint128_t res1 = (uint128_t)f3 * t1;
-          uint64_t l0 = (uint64_t)res1;
-          uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h012;
-        }
-        else
-        {
-          uint64_t k0 = (uint64_t)1U;
-          uint64_t t1 = t8[0U];
-          uint64_t y = (uint64_t)0U;
-          uint64_t temp = (uint64_t)0U;
-          uint128_t res0 = (uint128_t)t1 * k0;
-          uint64_t l00 = (uint64_t)res0;
-          uint64_t h012 = (uint64_t)(res0 >> (uint32_t)64U);
-          y = l00;
-          temp = h012;
-          uint64_t y_ = y;
-          uint64_t temp1 = (uint64_t)0U;
-          uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-          uint64_t f1 = (uint64_t)0xffffffffU;
-          uint64_t f3 = (uint64_t)0xffffffff00000001U;
-          uint64_t *o0 = t2;
-          uint64_t *o1 = t2 + (uint32_t)1U;
-          uint64_t *o2 = t2 + (uint32_t)2U;
-          uint64_t *o3 = t2 + (uint32_t)3U;
-          uint64_t *o4 = t2 + (uint32_t)4U;
-          uint128_t res1 = (uint128_t)f0 * y_;
-          uint64_t l01 = (uint64_t)res1;
-          uint64_t h0130 = (uint64_t)(res1 >> (uint32_t)64U);
-          o0[0U] = l01;
-          temp1 = h0130;
-          uint64_t h30 = temp1;
-          uint128_t res = (uint128_t)f1 * y_;
-          uint64_t l02 = (uint64_t)res;
-          uint64_t h0131 = (uint64_t)(res >> (uint32_t)64U);
-          o1[0U] = l02;
-          temp1 = h0131;
-          uint64_t l = o1[0U];
-          uint64_t c14 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h30, o1);
-          uint64_t h3 = temp1;
-          o2[0U] = h3 + c14;
-          uint128_t res2 = (uint128_t)f3 * y_;
-          uint64_t l0 = (uint64_t)res2;
-          uint64_t h013 = (uint64_t)(res2 >> (uint32_t)64U);
-          o3[0U] = l0;
-          o4[0U] = h013;
-        }
+        uint64_t t10 = t8[0U];
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        uint128_t res0 = (uint128_t)f0 * t10;
+        uint64_t l00 = (uint64_t)res0;
+        uint64_t h0120 = (uint64_t)(res0 >> (uint32_t)64U);
+        o0[0U] = l00;
+        temp = h0120;
+        uint64_t h0 = temp;
+        uint128_t res = (uint128_t)f1 * t10;
+        uint64_t l01 = (uint64_t)res;
+        uint64_t h0121 = (uint64_t)(res >> (uint32_t)64U);
+        o1[0U] = l01;
+        temp = h0121;
+        uint64_t l = o1[0U];
+        uint64_t c14 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c14;
+        uint128_t res1 = (uint128_t)f3 * t10;
+        uint64_t l0 = (uint64_t)res1;
+        uint64_t h012 = (uint64_t)(res1 >> (uint32_t)64U);
+        o3[0U] = l0;
+        o4[0U] = h012;
         uint32_t len97 = (uint32_t)4U * (uint32_t)2U;
         uint64_t c = (uint64_t)0U;
         uint32_t k = len97 / (uint32_t)4U * (uint32_t)4U;
@@ -17959,25 +14545,25 @@ Hacl_P256_ecdsa_verif_p256_sha2(
           uint64_t t1 = t8[(uint32_t)4U * i];
           uint64_t t210 = t2[(uint32_t)4U * i];
           c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, t2 + (uint32_t)4U * i);
-          uint64_t t10 = t8[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t11 = t8[(uint32_t)4U * i + (uint32_t)1U];
           uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t10,
+              t11,
               t211,
               t2 + (uint32_t)4U * i + (uint32_t)1U);
-          uint64_t t11 = t8[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t12 = t8[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t11,
+              t12,
               t212,
               t2 + (uint32_t)4U * i + (uint32_t)2U);
-          uint64_t t12 = t8[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t13 = t8[(uint32_t)4U * i + (uint32_t)3U];
           uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
           c =
             Lib_IntTypes_Intrinsics_add_carry_u64(c,
-              t12,
+              t13,
               t21,
               t2 + (uint32_t)4U * i + (uint32_t)3U);
         }
@@ -18014,8 +14600,8 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         };
       uint32_t len1014 = (uint32_t)4U;
       uint64_t c14 = (uint64_t)0U;
-      uint32_t k0 = len1014 / (uint32_t)4U * (uint32_t)4U;
-      for (uint32_t i = (uint32_t)0U; i < k0 / (uint32_t)4U; i++)
+      uint32_t k14 = len1014 / (uint32_t)4U * (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < k14 / (uint32_t)4U; i++)
       {
         uint64_t t1 = x_[(uint32_t)4U * i];
         uint64_t t20 = p1[(uint32_t)4U * i];
@@ -18042,7 +14628,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
             t2,
             tempBuffer210 + (uint32_t)4U * i + (uint32_t)3U);
       }
-      for (uint32_t i = k0; i < len1014; i++)
+      for (uint32_t i = k14; i < len1014; i++)
       {
         uint64_t t1 = x_[i];
         uint64_t t2 = p1[i];

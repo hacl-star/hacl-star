@@ -25,7 +25,7 @@ val montgomery_multiplication_reduction_dh: #c: curve
     as_nat c h1 result = (wide_as_nat c h0 t * modp_inv2_prime (pow2 (getPower c)) prime) % prime /\
     as_nat c h1 result = fromDomain_ #c #DH (wide_as_nat c h0 t))))
 
-[@CInline]
+inline_for_extraction noextract
 val montgomery_multiplication_reduction_dsa: #c: curve
   -> t: widefelem c 
   -> result: felem c -> 
@@ -76,7 +76,7 @@ val montgomery_multiplication_buffer_dh: #c: curve -> a: felem c -> b: felem c -
     as_nat c h1 result = toDomain_ #c #DH (fromDomain_ #c #DH (as_nat c h0 a) * fromDomain_ #c #DH (as_nat c h0 b) % prime) /\
     as_nat c h1 result = toDomain_ #c #DH (fromDomain_ #c #DH (as_nat c h0 a) * fromDomain_ #c #DH (as_nat c h0 b)))))
 
-[@CInline]
+inline_for_extraction noextract
 val montgomery_multiplication_buffer_dsa: #c: curve -> a: felem c -> b: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat c h a < getModePrime DSA c /\  eq_or_disjoint a b /\
@@ -97,7 +97,7 @@ val montgomery_square_buffer: #c: curve -> m: mode -> a: felem c -> result: fele
     as_nat c h1 result = toDomain_ #c #m (fromDomain_ #c #m (as_nat c h0 a) * fromDomain_ #c #m (as_nat c h0 a) % prime) /\
     as_nat c h1 result = toDomain_ #c #m (fromDomain_ #c #m (as_nat c h0 a) * fromDomain_ #c #m (as_nat c h0 a)))))
 
-[@CInline]
+inline_for_extraction noextract
 val montgomery_square_buffer_dh: #c: curve -> a: felem c -> result: felem c ->  
   Stack unit
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime DH c /\ live h result)) 
@@ -117,7 +117,7 @@ val montgomery_square_buffer_dsa: #c: curve -> a: felem c -> result: felem c ->
     as_nat c h1 result = toDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 a) % prime) /\
     as_nat c h1 result = toDomain_ #c #DSA (fromDomain_ #c #DSA (as_nat c h0 a) * fromDomain_ #c #DSA (as_nat c h0 a)))))
 
-[@CInline]
+inline_for_extraction noextract
 val fsquarePowN_dh: #c: curve -> n: size_t -> a: felem c -> Stack unit 
   (requires (fun h -> live h a /\ as_nat c h a < getModePrime DH c)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (

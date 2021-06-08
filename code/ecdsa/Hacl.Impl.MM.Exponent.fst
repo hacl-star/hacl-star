@@ -140,7 +140,22 @@ let upload_one_montg_form #c #m b =
   |DSA -> Hacl.Impl.ECDSA.LowLevel.upload_one_montg_form b
 
 
-let montgomery_ladder_power #c #m a scalar result = 
+inline_for_extraction noextract
+val montgomery_ladder_power_: #c: curve -> #m: mode -> a: felem c 
+  -> scalar: glbuffer uint8 (getCoordinateLenU c) -> result: felem c -> 
+  Stack unit 
+  (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat c h a < getModePrime m c /\
+    disjoint a scalar)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\ 
+    as_nat c h1 result < getModePrime m c /\ (
+    let r0D = pow_spec #c #m (as_seq h0 scalar) (fromDomain_ #c #m (as_nat c h0 a)) in 
+    let k = fromDomain_ #c #m (as_nat c h0 a) in 
+    let scalar = as_seq h0 scalar in 
+    let prime = getModePrime m c in 
+    as_nat c h1 result = toDomain_ #c #m ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar)) % prime) /\ 
+    r0D == fromDomain_ #c #m (as_nat c h1 result)))
+
+let montgomery_ladder_power_ #c #m a scalar result = 
   push_frame(); 
   let len = getCoordinateLenU64 c in 
   let p = create len (u64 0) in  
@@ -163,3 +178,63 @@ let montgomery_ladder_power #c #m a scalar result =
 
   pop_frame()  
 
+
+
+val montgomery_ladder_power_p256: a: felem P256
+  -> scalar: glbuffer uint8 (getCoordinateLenU P256) -> result: felem P256 -> 
+  Stack unit 
+  (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat P256 h a < getModePrime DH P256 /\
+    disjoint a scalar)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\ 
+    as_nat P256 h1 result < getModePrime DH P256 /\ (
+    let r0D = pow_spec #P256 #DH (as_seq h0 scalar) (fromDomain_ #P256 #DH (as_nat P256 h0 a)) in 
+    let k = fromDomain_ #P256 #DH (as_nat P256 h0 a) in 
+    let scalar = as_seq h0 scalar in 
+    let prime = getModePrime DH P256 in 
+    as_nat P256 h1 result = toDomain_ #P256 #DH ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar)) % prime) /\ 
+    r0D == fromDomain_ #P256 #DH (as_nat P256 h1 result)))
+
+
+let montgomery_ladder_power_p256 a scalar result = montgomery_ladder_power_ #P256 #DH a scalar result
+
+
+val montgomery_ladder_power_p384: a: felem P384
+  -> scalar: glbuffer uint8 (getCoordinateLenU P384) -> result: felem P384 -> 
+  Stack unit 
+  (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat P384 h a < getModePrime DH P384 /\
+    disjoint a scalar)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\ 
+    as_nat P384 h1 result < getModePrime DH P384 /\ (
+    let r0D = pow_spec #P384 #DH (as_seq h0 scalar) (fromDomain_ #P384 #DH (as_nat P384 h0 a)) in 
+    let k = fromDomain_ #P384 #DH (as_nat P384 h0 a) in 
+    let scalar = as_seq h0 scalar in 
+    let prime = getModePrime DH P384 in 
+    as_nat P384 h1 result = toDomain_ #P384 #DH ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar)) % prime) /\ 
+    r0D == fromDomain_ #P384 #DH (as_nat P384 h1 result)))
+
+
+let montgomery_ladder_power_p384 a scalar result = montgomery_ladder_power_ #P384 #DH a scalar result
+
+
+val montgomery_ladder_power_generic: a: felem Default
+  -> scalar: glbuffer uint8 (getCoordinateLenU Default) -> result: felem Default -> 
+  Stack unit 
+  (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat Default h a < getModePrime DH Default /\
+    disjoint a scalar)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\ 
+    as_nat Default h1 result < getModePrime DH Default /\ (
+    let r0D = pow_spec #Default #DH (as_seq h0 scalar) (fromDomain_ #Default #DH (as_nat Default h0 a)) in 
+    let k = fromDomain_ #Default #DH (as_nat Default h0 a) in 
+    let scalar = as_seq h0 scalar in 
+    let prime = getModePrime DH Default in 
+    as_nat Default h1 result = toDomain_ #Default #DH ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar)) % prime) /\ 
+    r0D == fromDomain_ #Default #DH (as_nat Default h1 result)))
+
+
+let montgomery_ladder_power_generic a scalar result = montgomery_ladder_power_ #Default #DH a scalar result
+
+let montgomery_ladder_power #c a scalar result = 
+  match c with 
+  |P256 -> montgomery_ladder_power_p256 a scalar result
+  |P384 -> montgomery_ladder_power_p384 a scalar result
+  |Default -> montgomery_ladder_power_generic a scalar result
