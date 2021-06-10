@@ -13,7 +13,7 @@ open Spec.ECC.Curves
 
 open Hacl.Impl.EC.PointAdd
 open Hacl.Impl.P.PointAdd.Aux
-open Hacl.Impl.EC.PointDouble
+open Hacl.Impl.EC.NIST.PointDouble
 
 open Lib.Loops
 
@@ -143,7 +143,7 @@ let pointAddAsAdd #c p q = ()
 
 val pointAddAsDouble: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
   (requires (True))
-  (ensures (pointAdd p p == _point_double p))
+  (ensures (pointAdd p p == _point_double_nist p))
 
 let pointAddAsDouble #c p q = ()
 

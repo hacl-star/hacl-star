@@ -7142,7 +7142,7 @@ static inline void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
                 sw0 = (uint64_t)(void *)(uint32_t)1U;
               }
           }
-          if (FStar_UInt64_v(sw0) == (krml_checked_int_t)18446744073709551615)
+          if ((sw0) == (krml_checked_int_t)18446744073709551615)
           {
             uint64_t t1 = i[0U];
             switch (c)

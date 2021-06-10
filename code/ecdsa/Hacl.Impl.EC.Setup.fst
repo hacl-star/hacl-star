@@ -546,3 +546,30 @@ inline_for_extraction
 let order_u8_buffer (#c: curve): (x: glbuffer uint8 (getCoordinateLenU c)
   {witnessed #uint8 #(getCoordinateLenU c) x (Lib.Sequence.of_list (prime_inverse_list c)) /\ recallable x}) = 
   prime256_order_
+
+
+
+inline_for_extraction noextract
+val uploadA: #c: curve -> a: felem c -> Stack unit
+  (requires fun h -> live h a)
+  (ensures fun h0 _ h1 ->
+    let prime = getPrime c in 
+    modifies (loc a) h0 h1 /\ 
+    as_nat c h1 a == toDomain_ #c #DH (aCoordinate #c % prime) /\
+    as_nat c h1 a < prime
+  )
+
+let uploadA #c a = 
+  match c with 
+    |P256 -> 
+      upd a (size 0) (u64 18446744073709551612);
+      upd a (size 1) (u64 17179869183);
+      upd a (size 2) (u64 0);
+      upd a (size 3) (u64 18446744056529682436);
+      
+      let prime = getPrime c in 
+      lemmaToDomain #c #DH (aCoordinate #c % prime);
+      assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256)
+
+    |P384 -> 
+      admit()

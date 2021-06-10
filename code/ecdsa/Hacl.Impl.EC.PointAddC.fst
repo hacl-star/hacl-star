@@ -14,7 +14,7 @@ open FStar.Math.Lemmas
 open Hacl.Impl.EC.Masking
 open Hacl.Spec.EC.Definition
 
-open Hacl.Impl.EC.PointDouble
+open Hacl.Impl.EC.NIST.PointDouble
 open Hacl.Impl.EC.PointAdd
 
 open Spec.ECC.Curves

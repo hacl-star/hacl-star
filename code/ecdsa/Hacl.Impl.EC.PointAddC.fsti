@@ -27,8 +27,8 @@ val point_add_c: #c: curve -> p: point c -> q: point c -> result: point c
    (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
      let pD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
      let qD = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
-     if pointEqual #c pD qD then 
-       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_double #c pD
+(*      if pointEqual #c pD qD then 
+       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_double_nist #c pD
      else
-       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c pD qD /\
+       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c pD qD /\ *)
      fromDomainPoint #c #DH (point_as_nat c h1 result) == pointAdd #c pD qD))
