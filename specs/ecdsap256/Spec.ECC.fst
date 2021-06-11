@@ -500,9 +500,14 @@ let rec scalar_as_nat_ #c s i =
   let bit = ith_bit s (v (getScalarLen c) - i) in 
   scalar_as_nat_ #c s (i - 1) * 2 + uint_to_nat bit 
 
-
-
 #push-options "--fuel 1 --ifuel 1 --z3rlimit 100"
+
+val scalar_as_nat_zero: #c: curve -> s: scalar_bytes #c ->  Lemma (scalar_as_nat_ s 0 == 0)
+
+let scalar_as_nat_zero #c s = ()
+
+
+
 
 val scalar_as_nat_def: #c: curve -> s: scalar_bytes #c -> i: nat {i > 0 /\ i <= v (getScalarLen c)} -> Lemma (
   scalar_as_nat_ #c s i == 2 * scalar_as_nat_ #c s (i - 1) + uint_to_nat (ith_bit s (v (getScalarLen c) - i)))

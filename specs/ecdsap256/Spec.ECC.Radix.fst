@@ -17,6 +17,8 @@ open Spec.ECC.Curves
 open Spec.ECC
 
 
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+
 let radix = 4
 
 val getPrecomputedPoint: #c: curve -> p: point_nat_prime #c -> i: nat -> 
@@ -51,29 +53,62 @@ assume val pred0: #c: curve -> x: point_nat_prime #c -> s: scalar_bytes #c ->
   p: point_nat_prime #c -> i: nat {i < v (getScalarLen c)} ->
   Lemma (True)
 
-val lemma_predicate0:  #c: curve -> s: scalar_bytes #c -> p: point_nat_prime #c -> 
-  Lemma (True)
+val lemma_predicate0: #c: curve -> s: scalar_bytes #c -> p0: point_nat_prime #c -> 
+  Lemma (
+    let len = v (getScalarLen c) / 4  in 
+    let f = _ml_step #c s p0 in
+    let pred (i: nat) p : Type0 = (
+      let scalar = scalar_as_nat s in 
+      let partialScalar = scalar % (pow2 (4 * i)) in 
+      pointEqual p (point_mult #c partialScalar p0)) in 
+    forall (i: nat {i < len}) (x: point_nat_prime #c). 
+    pred i x ==> pred (i + 1) (f i x))
 
-let lemma_predicate0 #c s p = 
+let lemma_predicate0 #c s p0 = 
   let pred = pred0 #c in
+  admit();
   Classical.forall_intro_4 pred
 
 
-val radix_spec: #c: curve -> s: scalar_bytes #c 
+val scalar_as_nat_upperbound_: #c: curve -> s: scalar_bytes #c ->
+  i: nat {i >= 0 /\ i <= v (getScalarLen c)} ->
+  Lemma (scalar_as_nat_ s i < pow2 i)
+
+let scalar_as_nat_upperbound_ #c s i = 
+  match i with 
+  |0 -> scalar_as_nat_zero s
+  |_ -> admit()
+
+
+val lemma_scalar_as_nat_upperbound: #c: curve -> s: scalar_bytes #c -> Lemma (scalar_as_nat s < pow2 (v (getScalarLen c)))
+
+let lemma_scalar_as_nat_upperbound #c s = scalar_as_nat_upperbound_ s (v (getScalarLen c))
+
+
+val radix_spec: #c: curve -> s: scalar_bytes #c {v (getScalarLen c) % 4 == 0}
   -> i: point_nat_prime #c
   -> r: point_nat_prime #c {
-    (* r == repeati (v (getScalarLen c)) (_ml_step #c s) i /\ *)
+    r == repeati (v (getScalarLen c) / 4) (_ml_step #c s i) i /\
     pointEqual r (point_mult (scalar_as_nat #c s) i)}
 
 
-let radix_spec #c s i = 
-  let len : nat  = v (getScalarLen c) in 
+let radix_spec #c s p0 = 
+  let len : nat  = v (getScalarLen c) / 4 in 
   
-  let pred i r = True in
+  let pred (i: nat {i <= len}) p : Type0 = (
+    let scalar = scalar_as_nat s in 
+    let partialScalar = scalar % (pow2 (4 * i)) in 
+    pointEqual p (point_mult #c partialScalar p0)) in 
     
-  let f = _ml_step #c s i in 
+  let f = _ml_step #c s p0 in 
+  
+  lemma_predicate0 s p0;
+    assume (pred 0 p0);
+  let r = repeati_inductive' #(point_nat_prime #c) len pred f p0 in 
 
-  lemma_predicate0 s i;
-  admit();
-  repeati_inductive' #(point_nat_prime #c) len pred f i
+  lemma_scalar_as_nat_upperbound #c s;
+  small_mod (scalar_as_nat s) (pow2 (v (getScalarLen c)));
+  r
+
+
 
