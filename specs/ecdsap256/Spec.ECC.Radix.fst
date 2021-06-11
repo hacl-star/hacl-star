@@ -55,11 +55,11 @@ assume val pred0: #c: curve -> x: point_nat_prime #c -> s: scalar_bytes #c ->
 
 val lemma_predicate0: #c: curve -> s: scalar_bytes #c -> p0: point_nat_prime #c -> 
   Lemma (
-    let len = v (getScalarLen c) / 4  in 
+    let len = (v (getScalarLen c) - 1) / 4  in 
     let f = _ml_step #c s p0 in
     let pred (i: nat) p : Type0 = (
       let scalar = scalar_as_nat s in 
-      let partialScalar = scalar % (pow2 (4 * i)) in 
+      let partialScalar = scalar % (pow2 (4 * (i + 1))) in 
       pointEqual p (point_mult #c partialScalar p0)) in 
     forall (i: nat {i < len}) (x: point_nat_prime #c). 
     pred i x ==> pred (i + 1) (f i x))
@@ -88,23 +88,26 @@ let lemma_scalar_as_nat_upperbound #c s = scalar_as_nat_upperbound_ s (v (getSca
 val radix_spec: #c: curve -> s: scalar_bytes #c {v (getScalarLen c) % 4 == 0}
   -> i: point_nat_prime #c
   -> r: point_nat_prime #c {
-    r == repeati (v (getScalarLen c) / 4) (_ml_step #c s i) i /\
+    let pointStart = getPrecomputedPoint i (scalar_as_nat s % pow2 4) in 
+    r == repeati ((v (getScalarLen c) - 1) / 4) (_ml_step #c s i) pointStart /\ 
     pointEqual r (point_mult (scalar_as_nat #c s) i)}
 
 
 let radix_spec #c s p0 = 
-  let len : nat  = v (getScalarLen c) / 4 in 
+  let scalarNat = scalar_as_nat s in 
+  let pointToStart = getPrecomputedPoint p0 (scalarNat % pow2 4) in 
+
+  let len =  (v (getScalarLen c) - 1) / 4 in 
   
   let pred (i: nat {i <= len}) p : Type0 = (
     let scalar = scalar_as_nat s in 
-    let partialScalar = scalar % (pow2 (4 * i)) in 
+    let partialScalar = scalar % (pow2 (4 * (i + 1))) in 
     pointEqual p (point_mult #c partialScalar p0)) in 
-    
+
   let f = _ml_step #c s p0 in 
   
-  lemma_predicate0 s p0;
-    assume (pred 0 p0);
-  let r = repeati_inductive' #(point_nat_prime #c) len pred f p0 in 
+  lemma_predicate0 s p0; 
+  let r = repeati_inductive' #(point_nat_prime #c) len pred f pointToStart in 
 
   lemma_scalar_as_nat_upperbound #c s;
   small_mod (scalar_as_nat s) (pow2 (v (getScalarLen c)));
