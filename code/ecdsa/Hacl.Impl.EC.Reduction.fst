@@ -89,6 +89,7 @@ let ml_reduction #c a b result =
     lemma_mod_mul_distr_r a b prime;
     assert(as_nat c h2 result =  a * (b % prime) % prime)
 
+
 inline_for_extraction noextract
 val ml_reduction1: #c: curve -> r: widefelem c -> result: felem c -> Stack unit 
   (requires fun h -> live h result /\ live h r /\ wide_as_nat c h r < getPrime c * pow2 (getPower c) /\ eq_or_disjoint r result) 
@@ -138,9 +139,17 @@ let ml_reduction1 #c r result =
        (wide_as_nat c h0 r) % prime;}
 
 
+
+val ml_reduction_generic: r: widefelem Default -> result: felem Default -> Stack unit 
+  (requires fun h -> live h result /\ live h r /\ wide_as_nat Default h r < getPrime Default * pow2 (getPower Default) /\ eq_or_disjoint r result) 
+  (ensures fun h0 _ h1 -> as_nat Default h1 result = wide_as_nat Default h0 r % getPrime Default /\ modifies (loc result |+| loc r) h0 h1)
+
+
+let ml_reduction_generic r result = ml_reduction1 #Default r result
+
+
 let reduction #c i o =
   match c with 
     |P256 -> solinas_reduction_impl_p256 i o 
     |P384 -> solinas_reduction_impl_p384 i o
-    |Default -> admit(); reduction_p521 i o
-    |_ -> ml_reduction1 i o
+    |Default -> ml_reduction1 i o

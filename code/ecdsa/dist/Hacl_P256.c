@@ -4588,16 +4588,20 @@ static void point_double_generic(uint64_t *p, uint64_t *result, uint64_t *tempBu
   uint64_t *pY1 = p + coordinateLen;
   uint64_t *pZ1 = p + (uint32_t)2U * coordinateLen;
   uint64_t *a0 = tmp;
-  uint64_t *a1 = tmp + coordinateLen;
   uint64_t *alpha0 = tmp + (uint32_t)2U * coordinateLen;
   montgomery_square_buffer_dh_generic(pZ1, delta);
   montgomery_square_buffer_dh_generic(pY1, gamma);
   montgomery_multiplication_buffer_dh_generic(pX1, gamma, beta);
-  felem_sub_generic(pX1, delta, a0);
-  felem_add_generic(pX1, delta, a1);
-  montgomery_multiplication_buffer_dh_generic(a0, a1, alpha0);
+  alpha0[0U] = (uint64_t)18446744073709551612U;
+  alpha0[1U] = (uint64_t)17179869183U;
+  alpha0[2U] = (uint64_t)0U;
+  alpha0[3U] = (uint64_t)18446744056529682436U;
+  montgomery_square_buffer_dh_generic(delta, a0);
+  montgomery_multiplication_buffer_dh_generic(alpha0, a0, a0);
+  montgomery_square_buffer_dh_generic(pX1, alpha0);
   felem_add_generic(alpha0, alpha0, alpha);
   felem_add_generic(alpha0, alpha, alpha);
+  felem_add_generic(alpha, a0, alpha);
   montgomery_square_buffer_dh_generic(alpha, x3);
   felem_add_generic(beta, beta, fourBeta);
   felem_add_generic(fourBeta, fourBeta, fourBeta);
@@ -5091,200 +5095,6 @@ static void point_add_generic(uint64_t *p, uint64_t *q, uint64_t *result, uint64
   memcpy(result, x3_out, (uint32_t)4U * sizeof (uint64_t));
   memcpy(result + (uint32_t)4U, y3_out, (uint32_t)4U * sizeof (uint64_t));
   memcpy(result + (uint32_t)8U, z3_out, (uint32_t)4U * sizeof (uint64_t));
-}
-
-static inline void
-montgomery_ladder(
-  Spec_ECC_Curves_curve c,
-  Lib_Buffer_buftype a,
-  uint64_t *p,
-  uint64_t *q,
-  void *scalar,
-  uint64_t *tempBuffer
-)
-{
-  uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(c);
-  for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
-  {
-    uint32_t bit0 = Spec_ECC_Curves_getScalarLen(c) - (uint32_t)1U - i0;
-    uint8_t sw0;
-    switch (a)
-    {
-      case Lib_Buffer_MUT:
-        {
-          uint32_t sw;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                sw = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                sw = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                sw = (uint32_t)4U;
-              }
-          }
-          sw0 = ((uint8_t *)scalar)[sw * (uint32_t)8U - (uint32_t)1U - bit0 / (uint32_t)8U];
-          break;
-        }
-      case Lib_Buffer_IMMUT:
-        {
-          uint32_t sw;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                sw = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                sw = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                sw = (uint32_t)4U;
-              }
-          }
-          sw0 = ((uint8_t *)scalar)[sw * (uint32_t)8U - (uint32_t)1U - bit0 / (uint32_t)8U];
-          break;
-        }
-      case Lib_Buffer_CONST:
-        {
-          uint32_t sw;
-          switch (c)
-          {
-            case Spec_ECC_Curves_P256:
-              {
-                sw = (uint32_t)4U;
-                break;
-              }
-            case Spec_ECC_Curves_P384:
-              {
-                sw = (uint32_t)6U;
-                break;
-              }
-            default:
-              {
-                sw = (uint32_t)4U;
-              }
-          }
-          sw0 = ((const uint8_t *)scalar)[sw * (uint32_t)8U - (uint32_t)1U - bit0 / (uint32_t)8U];
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
-    }
-    uint64_t bit = (uint64_t)(sw0 >> bit0 % (uint32_t)8U & (uint8_t)1U);
-    uint64_t mask = (uint64_t)0U - bit;
-    uint32_t sw1;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          sw1 = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          sw1 = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          sw1 = (uint32_t)4U;
-        }
-    }
-    uint32_t len = sw1 * (uint32_t)3U;
-    for (uint32_t i = (uint32_t)0U; i < len; i++)
-    {
-      uint64_t dummy = mask & (p[i] ^ q[i]);
-      p[i] = p[i] ^ dummy;
-      q[i] = q[i] ^ dummy;
-    }
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          point_add_p256(p, q, q, tempBuffer);
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          point_add_p384(p, q, q, tempBuffer);
-          break;
-        }
-      case Spec_ECC_Curves_Default:
-        {
-          point_add_generic(p, q, q, tempBuffer);
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
-    }
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          point_double_p256(p, p, tempBuffer);
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          point_double_p384(p, p, tempBuffer);
-          break;
-        }
-      case Spec_ECC_Curves_Default:
-        {
-          point_double_generic(p, p, tempBuffer);
-          break;
-        }
-      default:
-        {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-          KRML_HOST_EXIT(253U);
-        }
-    }
-    uint64_t mask0 = (uint64_t)0U - bit;
-    uint32_t sw;
-    switch (c)
-    {
-      case Spec_ECC_Curves_P256:
-        {
-          sw = (uint32_t)4U;
-          break;
-        }
-      case Spec_ECC_Curves_P384:
-        {
-          sw = (uint32_t)6U;
-          break;
-        }
-      default:
-        {
-          sw = (uint32_t)4U;
-        }
-    }
-    uint32_t len0 = sw * (uint32_t)3U;
-    for (uint32_t i = (uint32_t)0U; i < len0; i++)
-    {
-      uint64_t dummy = mask0 & (p[i] ^ q[i]);
-      p[i] = p[i] ^ dummy;
-      q[i] = q[i] ^ dummy;
-    }
-  }
 }
 
 static void reduction_p521(uint64_t *i)
@@ -7142,7 +6952,7 @@ static inline void reduction(Spec_ECC_Curves_curve c, uint64_t *i, uint64_t *o)
                 sw0 = (uint64_t)(void *)(uint32_t)1U;
               }
           }
-          if ((sw0) == (krml_checked_int_t)18446744073709551615)
+          if (FStar_UInt64_v(sw0) == (krml_checked_int_t)18446744073709551615)
           {
             uint64_t t1 = i[0U];
             switch (c)
@@ -8449,27 +8259,27 @@ scalarMultiplicationWithoutNorm(
   }
   uint64_t *q = tempBuffer;
   uint64_t *buff = tempBuffer + (uint32_t)3U * len;
-  uint32_t len1;
+  uint32_t len10;
   switch (c)
   {
     case Spec_ECC_Curves_P256:
       {
-        len1 = (uint32_t)4U;
+        len10 = (uint32_t)4U;
         break;
       }
     case Spec_ECC_Curves_P384:
       {
-        len1 = (uint32_t)6U;
+        len10 = (uint32_t)6U;
         break;
       }
     default:
       {
-        len1 = (uint32_t)4U;
+        len10 = (uint32_t)4U;
       }
   }
   uint64_t *x = q;
-  uint64_t *y = q + len1;
-  uint64_t *z = q + (uint32_t)2U * len1;
+  uint64_t *y = q + len10;
+  uint64_t *z = q + (uint32_t)2U * len10;
   uint32_t len20;
   switch (c)
   {
@@ -8536,30 +8346,30 @@ scalarMultiplicationWithoutNorm(
   {
     z[i] = (uint64_t)0U;
   }
-  uint32_t len10;
+  uint32_t len11;
   switch (c)
   {
     case Spec_ECC_Curves_P256:
       {
-        len10 = (uint32_t)4U;
+        len11 = (uint32_t)4U;
         break;
       }
     case Spec_ECC_Curves_P384:
       {
-        len10 = (uint32_t)6U;
+        len11 = (uint32_t)6U;
         break;
       }
     default:
       {
-        len10 = (uint32_t)4U;
+        len11 = (uint32_t)4U;
       }
   }
   uint64_t *p_x = p;
-  uint64_t *p_y = p + len10;
-  uint64_t *p_z = p + (uint32_t)2U * len10;
+  uint64_t *p_y = p + len11;
+  uint64_t *p_z = p + (uint32_t)2U * len11;
   uint64_t *r_x = result;
-  uint64_t *r_y = result + len10;
-  uint64_t *r_z = result + (uint32_t)2U * len10;
+  uint64_t *r_y = result + len11;
+  uint64_t *r_z = result + (uint32_t)2U * len11;
   uint32_t len2;
   switch (c)
   {
@@ -8755,7 +8565,119 @@ scalarMultiplicationWithoutNorm(
     oToZero[i] = (uint64_t)0U;
   }
   reduction(c, multBuffer1, r_z);
-  montgomery_ladder(c, Lib_Buffer_MUT, q, result, scalar, buff);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256);
+        for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+        {
+          uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256) - (uint32_t)1U - i0;
+          uint64_t
+          bit =
+            (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
+            * (uint32_t)8U
+            - (uint32_t)1U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          uint64_t mask = (uint64_t)0U - bit;
+          uint32_t len12 = (uint32_t)12U;
+          for (uint32_t i = (uint32_t)0U; i < len12; i++)
+          {
+            uint64_t dummy = mask & (q[i] ^ result[i]);
+            q[i] = q[i] ^ dummy;
+            result[i] = result[i] ^ dummy;
+          }
+          point_add_p256(q, result, result, buff);
+          point_double_p256(q, q, buff);
+          uint64_t mask0 = (uint64_t)0U - bit;
+          uint32_t len1 = (uint32_t)12U;
+          for (uint32_t i = (uint32_t)0U; i < len1; i++)
+          {
+            uint64_t dummy = mask0 & (q[i] ^ result[i]);
+            q[i] = q[i] ^ dummy;
+            result[i] = result[i] ^ dummy;
+          }
+        }
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384);
+        for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+        {
+          uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384) - (uint32_t)1U - i0;
+          uint64_t
+          bit =
+            (uint64_t)(((uint8_t *)scalar)[(uint32_t)6U
+            * (uint32_t)8U
+            - (uint32_t)1U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          uint64_t mask = (uint64_t)0U - bit;
+          uint32_t len12 = (uint32_t)18U;
+          for (uint32_t i = (uint32_t)0U; i < len12; i++)
+          {
+            uint64_t dummy = mask & (q[i] ^ result[i]);
+            q[i] = q[i] ^ dummy;
+            result[i] = result[i] ^ dummy;
+          }
+          point_add_p384(q, result, result, buff);
+          point_double_p384(q, q, buff);
+          uint64_t mask0 = (uint64_t)0U - bit;
+          uint32_t len1 = (uint32_t)18U;
+          for (uint32_t i = (uint32_t)0U; i < len1; i++)
+          {
+            uint64_t dummy = mask0 & (q[i] ^ result[i]);
+            q[i] = q[i] ^ dummy;
+            result[i] = result[i] ^ dummy;
+          }
+        }
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_Default);
+        for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+        {
+          uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_Default) - (uint32_t)1U - i0;
+          uint64_t
+          bit =
+            (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
+            * (uint32_t)8U
+            - (uint32_t)1U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          uint64_t mask = (uint64_t)0U - bit;
+          uint32_t len12 = (uint32_t)12U;
+          for (uint32_t i = (uint32_t)0U; i < len12; i++)
+          {
+            uint64_t dummy = mask & (q[i] ^ result[i]);
+            q[i] = q[i] ^ dummy;
+            result[i] = result[i] ^ dummy;
+          }
+          point_add_generic(q, result, result, buff);
+          point_double_generic(q, q, buff);
+          uint64_t mask0 = (uint64_t)0U - bit;
+          uint32_t len1 = (uint32_t)12U;
+          for (uint32_t i = (uint32_t)0U; i < len1; i++)
+          {
+            uint64_t dummy = mask0 & (q[i] ^ result[i]);
+            q[i] = q[i] ^ dummy;
+            result[i] = result[i] ^ dummy;
+          }
+        }
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
   uint32_t sw;
   switch (c)
   {
@@ -8805,27 +8727,27 @@ secretToPublicWithoutNorm(
   }
   uint64_t *q = tempBuffer;
   uint64_t *buff = tempBuffer + (uint32_t)3U * len;
-  uint32_t len1;
+  uint32_t len10;
   switch (c)
   {
     case Spec_ECC_Curves_P256:
       {
-        len1 = (uint32_t)4U;
+        len10 = (uint32_t)4U;
         break;
       }
     case Spec_ECC_Curves_P384:
       {
-        len1 = (uint32_t)6U;
+        len10 = (uint32_t)6U;
         break;
       }
     default:
       {
-        len1 = (uint32_t)4U;
+        len10 = (uint32_t)4U;
       }
   }
   uint64_t *x = result;
-  uint64_t *y = result + len1;
-  uint64_t *z = result + (uint32_t)2U * len1;
+  uint64_t *y = result + len10;
+  uint64_t *z = result + (uint32_t)2U * len10;
   uint32_t len2;
   switch (c)
   {
@@ -8937,7 +8859,119 @@ secretToPublicWithoutNorm(
         
       }
   }
-  montgomery_ladder(c, Lib_Buffer_MUT, result, q, scalar, buff);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256);
+        for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+        {
+          uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256) - (uint32_t)1U - i0;
+          uint64_t
+          bit =
+            (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
+            * (uint32_t)8U
+            - (uint32_t)1U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          uint64_t mask = (uint64_t)0U - bit;
+          uint32_t len11 = (uint32_t)12U;
+          for (uint32_t i = (uint32_t)0U; i < len11; i++)
+          {
+            uint64_t dummy = mask & (result[i] ^ q[i]);
+            result[i] = result[i] ^ dummy;
+            q[i] = q[i] ^ dummy;
+          }
+          point_add_p256(result, q, q, buff);
+          point_double_p256(result, result, buff);
+          uint64_t mask0 = (uint64_t)0U - bit;
+          uint32_t len1 = (uint32_t)12U;
+          for (uint32_t i = (uint32_t)0U; i < len1; i++)
+          {
+            uint64_t dummy = mask0 & (result[i] ^ q[i]);
+            result[i] = result[i] ^ dummy;
+            q[i] = q[i] ^ dummy;
+          }
+        }
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384);
+        for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+        {
+          uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384) - (uint32_t)1U - i0;
+          uint64_t
+          bit =
+            (uint64_t)(((uint8_t *)scalar)[(uint32_t)6U
+            * (uint32_t)8U
+            - (uint32_t)1U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          uint64_t mask = (uint64_t)0U - bit;
+          uint32_t len11 = (uint32_t)18U;
+          for (uint32_t i = (uint32_t)0U; i < len11; i++)
+          {
+            uint64_t dummy = mask & (result[i] ^ q[i]);
+            result[i] = result[i] ^ dummy;
+            q[i] = q[i] ^ dummy;
+          }
+          point_add_p384(result, q, q, buff);
+          point_double_p384(result, result, buff);
+          uint64_t mask0 = (uint64_t)0U - bit;
+          uint32_t len1 = (uint32_t)18U;
+          for (uint32_t i = (uint32_t)0U; i < len1; i++)
+          {
+            uint64_t dummy = mask0 & (result[i] ^ q[i]);
+            result[i] = result[i] ^ dummy;
+            q[i] = q[i] ^ dummy;
+          }
+        }
+        break;
+      }
+    case Spec_ECC_Curves_Default:
+      {
+        uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_Default);
+        for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+        {
+          uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_Default) - (uint32_t)1U - i0;
+          uint64_t
+          bit =
+            (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
+            * (uint32_t)8U
+            - (uint32_t)1U
+            - bit0 / (uint32_t)8U]
+            >> bit0 % (uint32_t)8U
+            & (uint8_t)1U);
+          uint64_t mask = (uint64_t)0U - bit;
+          uint32_t len11 = (uint32_t)12U;
+          for (uint32_t i = (uint32_t)0U; i < len11; i++)
+          {
+            uint64_t dummy = mask & (result[i] ^ q[i]);
+            result[i] = result[i] ^ dummy;
+            q[i] = q[i] ^ dummy;
+          }
+          point_add_generic(result, q, q, buff);
+          point_double_generic(result, result, buff);
+          uint64_t mask0 = (uint64_t)0U - bit;
+          uint32_t len1 = (uint32_t)12U;
+          for (uint32_t i = (uint32_t)0U; i < len1; i++)
+          {
+            uint64_t dummy = mask0 & (result[i] ^ q[i]);
+            result[i] = result[i] ^ dummy;
+            q[i] = q[i] ^ dummy;
+          }
+        }
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
 }
 
 static inline bool
@@ -9738,27 +9772,27 @@ verifyQValidCurvePoint(Spec_ECC_Curves_curve c, uint64_t *pubKey, uint64_t *temp
     }
     uint64_t *q = tempBuffer;
     uint64_t *buff = tempBuffer + (uint32_t)3U * len22;
-    uint32_t len3;
+    uint32_t len30;
     switch (c)
     {
       case Spec_ECC_Curves_P256:
         {
-          len3 = (uint32_t)4U;
+          len30 = (uint32_t)4U;
           break;
         }
       case Spec_ECC_Curves_P384:
         {
-          len3 = (uint32_t)6U;
+          len30 = (uint32_t)6U;
           break;
         }
       default:
         {
-          len3 = (uint32_t)4U;
+          len30 = (uint32_t)4U;
         }
     }
     uint64_t *x = q;
-    uint64_t *y = q + len3;
-    uint64_t *z = q + (uint32_t)2U * len3;
+    uint64_t *y = q + len30;
+    uint64_t *z = q + (uint32_t)2U * len30;
     uint32_t len40;
     switch (c)
     {
@@ -9825,30 +9859,30 @@ verifyQValidCurvePoint(Spec_ECC_Curves_curve c, uint64_t *pubKey, uint64_t *temp
     {
       z[i] = (uint64_t)0U;
     }
-    uint32_t len30;
+    uint32_t len31;
     switch (c)
     {
       case Spec_ECC_Curves_P256:
         {
-          len30 = (uint32_t)4U;
+          len31 = (uint32_t)4U;
           break;
         }
       case Spec_ECC_Curves_P384:
         {
-          len30 = (uint32_t)6U;
+          len31 = (uint32_t)6U;
           break;
         }
       default:
         {
-          len30 = (uint32_t)4U;
+          len31 = (uint32_t)4U;
         }
     }
     uint64_t *p_x = pBuffer;
-    uint64_t *p_y = pBuffer + len30;
-    uint64_t *p_z = pBuffer + (uint32_t)2U * len30;
+    uint64_t *p_y = pBuffer + len31;
+    uint64_t *p_z = pBuffer + (uint32_t)2U * len31;
     uint64_t *r_x = multResult;
-    uint64_t *r_y = multResult + len30;
-    uint64_t *r_z = multResult + (uint32_t)2U * len30;
+    uint64_t *r_y = multResult + len31;
+    uint64_t *r_z = multResult + (uint32_t)2U * len31;
     uint32_t len4;
     switch (c)
     {
@@ -10044,7 +10078,120 @@ verifyQValidCurvePoint(Spec_ECC_Curves_curve c, uint64_t *pubKey, uint64_t *temp
       oToZero[i] = (uint64_t)0U;
     }
     reduction(c, multBuffer3, r_z);
-    montgomery_ladder(c, Lib_Buffer_CONST, q, multResult, (void *)prime256_order_, buff);
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256);
+          for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+          {
+            uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256) - (uint32_t)1U - i0;
+            uint64_t
+            bit =
+              (uint64_t)(prime256_order_[(uint32_t)4U
+              * (uint32_t)8U
+              - (uint32_t)1U
+              - bit0 / (uint32_t)8U]
+              >> bit0 % (uint32_t)8U
+              & (uint8_t)1U);
+            uint64_t mask = (uint64_t)0U - bit;
+            uint32_t len32 = (uint32_t)12U;
+            for (uint32_t i = (uint32_t)0U; i < len32; i++)
+            {
+              uint64_t dummy = mask & (q[i] ^ multResult[i]);
+              q[i] = q[i] ^ dummy;
+              multResult[i] = multResult[i] ^ dummy;
+            }
+            point_add_p256(q, multResult, multResult, buff);
+            point_double_p256(q, q, buff);
+            uint64_t mask0 = (uint64_t)0U - bit;
+            uint32_t len3 = (uint32_t)12U;
+            for (uint32_t i = (uint32_t)0U; i < len3; i++)
+            {
+              uint64_t dummy = mask0 & (q[i] ^ multResult[i]);
+              q[i] = q[i] ^ dummy;
+              multResult[i] = multResult[i] ^ dummy;
+            }
+          }
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384);
+          for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+          {
+            uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384) - (uint32_t)1U - i0;
+            uint64_t
+            bit =
+              (uint64_t)(prime256_order_[(uint32_t)6U
+              * (uint32_t)8U
+              - (uint32_t)1U
+              - bit0 / (uint32_t)8U]
+              >> bit0 % (uint32_t)8U
+              & (uint8_t)1U);
+            uint64_t mask = (uint64_t)0U - bit;
+            uint32_t len32 = (uint32_t)18U;
+            for (uint32_t i = (uint32_t)0U; i < len32; i++)
+            {
+              uint64_t dummy = mask & (q[i] ^ multResult[i]);
+              q[i] = q[i] ^ dummy;
+              multResult[i] = multResult[i] ^ dummy;
+            }
+            point_add_p384(q, multResult, multResult, buff);
+            point_double_p384(q, q, buff);
+            uint64_t mask0 = (uint64_t)0U - bit;
+            uint32_t len3 = (uint32_t)18U;
+            for (uint32_t i = (uint32_t)0U; i < len3; i++)
+            {
+              uint64_t dummy = mask0 & (q[i] ^ multResult[i]);
+              q[i] = q[i] ^ dummy;
+              multResult[i] = multResult[i] ^ dummy;
+            }
+          }
+          break;
+        }
+      case Spec_ECC_Curves_Default:
+        {
+          uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_Default);
+          for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+          {
+            uint32_t
+            bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_Default) - (uint32_t)1U - i0;
+            uint64_t
+            bit =
+              (uint64_t)(prime256_order_[(uint32_t)4U
+              * (uint32_t)8U
+              - (uint32_t)1U
+              - bit0 / (uint32_t)8U]
+              >> bit0 % (uint32_t)8U
+              & (uint8_t)1U);
+            uint64_t mask = (uint64_t)0U - bit;
+            uint32_t len32 = (uint32_t)12U;
+            for (uint32_t i = (uint32_t)0U; i < len32; i++)
+            {
+              uint64_t dummy = mask & (q[i] ^ multResult[i]);
+              q[i] = q[i] ^ dummy;
+              multResult[i] = multResult[i] ^ dummy;
+            }
+            point_add_generic(q, multResult, multResult, buff);
+            point_double_generic(q, q, buff);
+            uint64_t mask0 = (uint64_t)0U - bit;
+            uint32_t len3 = (uint32_t)12U;
+            for (uint32_t i = (uint32_t)0U; i < len3; i++)
+            {
+              uint64_t dummy = mask0 & (q[i] ^ multResult[i]);
+              q[i] = q[i] ^ dummy;
+              multResult[i] = multResult[i] ^ dummy;
+            }
+          }
+          break;
+        }
+      default:
+        {
+          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EXIT(253U);
+        }
+    }
     norm(c, q, multResult, buff);
     uint32_t len12;
     switch (c)
@@ -12995,7 +13142,51 @@ Hacl_P256_ecdsa_verif_p256_sha2(
       bool equalXAndY = equalX && equalY;
       if (equalXAndY)
       {
-        point_double_p256(p4, result, tempBuffer17);
+        uint32_t len615 = (uint32_t)4U;
+        uint64_t *pY = p4 + len615;
+        uint64_t *pZ = p4 + (uint32_t)2U * len615;
+        uint64_t *x3 = result;
+        uint64_t *y3 = result + len615;
+        uint64_t *z3 = result + (uint32_t)2U * len615;
+        uint64_t *delta = tempBuffer17;
+        uint64_t *gamma = tempBuffer17 + len615;
+        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len615;
+        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len615;
+        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len615;
+        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len615;
+        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len615;
+        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len615;
+        uint32_t coordinateLen = (uint32_t)4U;
+        uint64_t *pX1 = p4;
+        uint64_t *pY1 = p4 + coordinateLen;
+        uint64_t *pZ1 = p4 + (uint32_t)2U * coordinateLen;
+        uint64_t *a0 = tmp;
+        uint64_t *a1 = tmp + coordinateLen;
+        uint64_t *alpha0 = tmp + (uint32_t)2U * coordinateLen;
+        montgomery_square_buffer_dh_p256(pZ1, delta);
+        montgomery_square_buffer_dh_p256(pY1, gamma);
+        montgomery_multiplication_buffer_dh_p256(pX1, gamma, beta);
+        felem_sub_p256(pX1, delta, a0);
+        felem_add_p256(pX1, delta, a1);
+        montgomery_multiplication_buffer_dh_p256(a0, a1, alpha0);
+        felem_add_p256(alpha0, alpha0, alpha);
+        felem_add_p256(alpha0, alpha, alpha);
+        montgomery_square_buffer_dh_p256(alpha, x3);
+        felem_add_p256(beta, beta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, eightBeta);
+        felem_sub_p256(x3, eightBeta, x3);
+        felem_add_p256(pY, pZ, z3);
+        montgomery_square_buffer_dh_p256(z3, z3);
+        felem_sub_p256(z3, gamma, z3);
+        felem_sub_p256(z3, delta, z3);
+        felem_sub_p256(fourBeta, x3, y3);
+        montgomery_multiplication_buffer_dh_p256(alpha, y3, y3);
+        montgomery_square_buffer_dh_p256(gamma, gamma);
+        felem_add_p256(gamma, gamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_sub_p256(y3, eightGamma, y3);
       }
       else
       {
@@ -13159,7 +13350,37 @@ uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
   resultBuffer[9U] = (uint64_t)0xffffffff00000000U;
   resultBuffer[10U] = (uint64_t)0xffffffffffffffffU;
   resultBuffer[11U] = (uint64_t)0xfffffffeU;
-  montgomery_ladder(Spec_ECC_Curves_P256, Lib_Buffer_MUT, q, resultBuffer, (void *)scalar, buff);
+  uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256);
+  for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+  {
+    uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256) - (uint32_t)1U - i0;
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - bit0 / (uint32_t)8U]
+      >> bit0 % (uint32_t)8U
+      & (uint8_t)1U);
+    uint64_t mask = (uint64_t)0U - bit;
+    uint32_t len21 = (uint32_t)12U;
+    for (uint32_t i = (uint32_t)0U; i < len21; i++)
+    {
+      uint64_t dummy = mask & (q[i] ^ resultBuffer[i]);
+      q[i] = q[i] ^ dummy;
+      resultBuffer[i] = resultBuffer[i] ^ dummy;
+    }
+    point_add_p256(q, resultBuffer, resultBuffer, buff);
+    point_double_p256(q, q, buff);
+    uint64_t mask0 = (uint64_t)0U - bit;
+    uint32_t len2 = (uint32_t)12U;
+    for (uint32_t i = (uint32_t)0U; i < len2; i++)
+    {
+      uint64_t dummy = mask0 & (q[i] ^ resultBuffer[i]);
+      q[i] = q[i] ^ dummy;
+      resultBuffer[i] = resultBuffer[i] ^ dummy;
+    }
+  }
   norm(Spec_ECC_Curves_P256, q, resultBuffer, buff);
   uint32_t len11 = (uint32_t)4U;
   uint32_t start = len11 * (uint32_t)2U;
@@ -13264,7 +13485,37 @@ uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar)
   resultBuffer[15U] = (uint64_t)0U;
   resultBuffer[16U] = (uint64_t)0U;
   resultBuffer[17U] = (uint64_t)0U;
-  montgomery_ladder(Spec_ECC_Curves_P384, Lib_Buffer_MUT, q, resultBuffer, (void *)scalar, buff);
+  uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384);
+  for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+  {
+    uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384) - (uint32_t)1U - i0;
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)6U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - bit0 / (uint32_t)8U]
+      >> bit0 % (uint32_t)8U
+      & (uint8_t)1U);
+    uint64_t mask = (uint64_t)0U - bit;
+    uint32_t len21 = (uint32_t)18U;
+    for (uint32_t i = (uint32_t)0U; i < len21; i++)
+    {
+      uint64_t dummy = mask & (q[i] ^ resultBuffer[i]);
+      q[i] = q[i] ^ dummy;
+      resultBuffer[i] = resultBuffer[i] ^ dummy;
+    }
+    point_add_p384(q, resultBuffer, resultBuffer, buff);
+    point_double_p384(q, q, buff);
+    uint64_t mask0 = (uint64_t)0U - bit;
+    uint32_t len2 = (uint32_t)18U;
+    for (uint32_t i = (uint32_t)0U; i < len2; i++)
+    {
+      uint64_t dummy = mask0 & (q[i] ^ resultBuffer[i]);
+      q[i] = q[i] ^ dummy;
+      resultBuffer[i] = resultBuffer[i] ^ dummy;
+    }
+  }
   norm(Spec_ECC_Curves_P384, q, resultBuffer, buff);
   uint32_t len11 = (uint32_t)6U;
   uint32_t start = len11 * (uint32_t)2U;
@@ -13461,7 +13712,37 @@ uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
       oToZero[i] = (uint64_t)0U;
     }
     reduction(Spec_ECC_Curves_P256, multBuffer1, r_z);
-    montgomery_ladder(Spec_ECC_Curves_P256, Lib_Buffer_MUT, q, rF, (void *)scalar, buff);
+    uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256);
+    for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+    {
+      uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P256) - (uint32_t)1U - i0;
+      uint64_t
+      bit =
+        (uint64_t)(scalar[(uint32_t)4U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - bit0 / (uint32_t)8U]
+        >> bit0 % (uint32_t)8U
+        & (uint8_t)1U);
+      uint64_t mask = (uint64_t)0U - bit;
+      uint32_t len34 = (uint32_t)12U;
+      for (uint32_t i = (uint32_t)0U; i < len34; i++)
+      {
+        uint64_t dummy = mask & (q[i] ^ rF[i]);
+        q[i] = q[i] ^ dummy;
+        rF[i] = rF[i] ^ dummy;
+      }
+      point_add_p256(q, rF, rF, buff);
+      point_double_p256(q, q, buff);
+      uint64_t mask0 = (uint64_t)0U - bit;
+      uint32_t len3 = (uint32_t)12U;
+      for (uint32_t i = (uint32_t)0U; i < len3; i++)
+      {
+        uint64_t dummy = mask0 & (q[i] ^ rF[i]);
+        q[i] = q[i] ^ dummy;
+        rF[i] = rF[i] ^ dummy;
+      }
+    }
     norm(Spec_ECC_Curves_P256, q, rF, buff);
     uint32_t len23 = (uint32_t)4U;
     uint32_t start = len23 * (uint32_t)2U;
@@ -13664,7 +13945,37 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
       oToZero[i] = (uint64_t)0U;
     }
     reduction(Spec_ECC_Curves_P384, multBuffer1, r_z);
-    montgomery_ladder(Spec_ECC_Curves_P384, Lib_Buffer_MUT, q, rF, (void *)scalar, buff);
+    uint32_t cycleLoop = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384);
+    for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+    {
+      uint32_t bit0 = Spec_ECC_Curves_getScalarLen(Spec_ECC_Curves_P384) - (uint32_t)1U - i0;
+      uint64_t
+      bit =
+        (uint64_t)(scalar[(uint32_t)6U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - bit0 / (uint32_t)8U]
+        >> bit0 % (uint32_t)8U
+        & (uint8_t)1U);
+      uint64_t mask = (uint64_t)0U - bit;
+      uint32_t len34 = (uint32_t)18U;
+      for (uint32_t i = (uint32_t)0U; i < len34; i++)
+      {
+        uint64_t dummy = mask & (q[i] ^ rF[i]);
+        q[i] = q[i] ^ dummy;
+        rF[i] = rF[i] ^ dummy;
+      }
+      point_add_p384(q, rF, rF, buff);
+      point_double_p384(q, q, buff);
+      uint64_t mask0 = (uint64_t)0U - bit;
+      uint32_t len3 = (uint32_t)18U;
+      for (uint32_t i = (uint32_t)0U; i < len3; i++)
+      {
+        uint64_t dummy = mask0 & (q[i] ^ rF[i]);
+        q[i] = q[i] ^ dummy;
+        rF[i] = rF[i] ^ dummy;
+      }
+    }
     norm(Spec_ECC_Curves_P384, q, rF, buff);
     uint32_t len23 = (uint32_t)6U;
     uint32_t start = len23 * (uint32_t)2U;

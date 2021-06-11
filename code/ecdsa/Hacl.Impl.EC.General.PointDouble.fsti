@@ -17,7 +17,6 @@ open Hacl.Spec.MontgomeryMultiplication
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0" 
 
-
 inline_for_extraction noextract
 val point_double: #c: curve -> p: point c -> result: point c 
   -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 c *! 17ul) 

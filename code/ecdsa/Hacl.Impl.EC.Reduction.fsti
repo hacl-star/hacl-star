@@ -16,7 +16,7 @@ open Spec.ECC.Curves
 open Hacl.Spec.EC.Definition
 open FStar.Mul
 
-[@CInline]
+inline_for_extraction noextract
 val reduction: #c: curve 
   -> i: lbuffer uint64 (getCoordinateLenU64 c *. 2ul) 
   -> o: lbuffer uint64 (getCoordinateLenU64 c) -> 

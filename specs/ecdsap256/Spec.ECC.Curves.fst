@@ -146,6 +146,7 @@ let getScalarLenBytes curve =
   getScalarLenWords curve *. 8ul
 
 (* the scalar length in bits *)
+inline_for_extraction
 let getScalarLen (c: curve) = getScalarLenBytes c *! 8ul
 
 

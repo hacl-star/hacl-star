@@ -13,7 +13,7 @@ open Spec.ECC.Curves
 
 open Hacl.Impl.EC.PointAdd
 open Hacl.Impl.P.PointAdd.Aux
-open Hacl.Impl.EC.NIST.PointDouble
+open Hacl.Impl.EC.PointDouble
 
 open Lib.Loops
 
@@ -286,8 +286,9 @@ let mlStepAsPointAdd #c p0 pk p qk q s i =
     else 
       pointEqual p_i (point_mult #c (scalar_as_nat_ s (i + 1)) p0) /\ pointEqual q_i (point_mult #c (scalar_as_nat_ s (i + 1) + 1) p0))
 
-[@CInline]
-val montgomery_ladder: #c: curve -> #buf_type: buftype -> p: point c -> q: point c ->
+
+inline_for_extraction noextract
+val montgomery_ladder_: #c: curve -> #buf_type: buftype -> p: point c -> q: point c ->
   scalar: lbuffer_t buf_type uint8 (getScalarLenBytes c) -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c)  -> 
   Stack unit
@@ -308,7 +309,7 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype -> p: point c -> q: point
     pointEqual pD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) q0D)))
 
 
-let montgomery_ladder #c #a p q scalar tempBuffer =  
+let montgomery_ladder_ #c #a p q scalar tempBuffer =  
   let h0 = ST.get() in 
 
   [@inline_let]
@@ -349,3 +350,33 @@ let montgomery_ladder #c #a p q scalar tempBuffer =
       (scalar_as_nat_ #c (as_seq h0 scalar) (v i)) (fromDomainPoint #c #DH (point_as_nat c h2 p)) 
       (scalar_as_nat_ #c (as_seq h0 scalar) (v i) + 1) (fromDomainPoint #c #DH (point_as_nat c h2 q)) (as_seq h0 scalar) (v i)
   )
+
+
+inline_for_extraction noextract
+val montgomery_ladder: #c: curve -> #buf_type: buftype -> p: point c -> q: point c ->
+  scalar: lbuffer_t buf_type uint8 (getScalarLenBytes c) -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c)  -> 
+  Stack unit
+  (requires fun h -> live h p /\ live h q /\ live h scalar /\  live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
+    point_eval c h p /\ point_eval c h q /\ (
+    let pD = fromDomainPoint #c #DH (point_as_nat c h p) in 
+    let qD = fromDomainPoint #c #DH (point_as_nat c h q) in 
+    pointEqual #c pD (point_mult #c 0 qD) /\ ~ (pointEqual #c pD qD)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\
+    point_eval c h1 p /\ point_eval c h1 q /\ ( 
+    let p0D = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+    let q0D = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
+    let pD = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
+    let qD = fromDomainPoint #c #DH (point_as_nat c h1 q) in 
+    let r0, r1 = montgomery_ladder_spec_left (as_seq h0 scalar) (p0D, q0D) in 
+    (r0, r1) == (pD, qD)  /\
+    pointEqual pD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) q0D)))
+
+
+let montgomery_ladder #c p q scalar tempBuffer = 
+  match c with 
+  |P256 -> montgomery_ladder_ #P256 p q scalar tempBuffer
+  |P384 -> montgomery_ladder_ #P384 p q scalar tempBuffer
+  |Default -> montgomery_ladder_ #Default p q scalar tempBuffer
+  
