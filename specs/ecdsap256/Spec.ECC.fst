@@ -162,7 +162,7 @@ let _point_add #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : po
 
 let pointAdd #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
   if pointEqual p q then 
-    _point_double_nist p 
+    _point_double p 
   else
     _point_add p q
 
@@ -207,6 +207,11 @@ assume val curve_commutativity_lemma: #c: curve -> p: point_nat_prime #c -> q: p
 assume val curve_compatibility_with_translation_lemma: #c: curve -> p: point_nat_prime #c -> p1: point_nat_prime #c {pointEqual p p1}
   -> q: point_nat_prime #c -> 
   Lemma (pointEqual (pointAdd p q) (pointAdd p1 q))
+
+(* order is the smallest number such that P * order == 0 *)
+
+assume val curve_order_is_the_smallest: #c: curve -> p: point_nat_prime #c -> Lemma
+  (forall (n: nat {repeat n (fun x -> pointAdd #c p x) p == pointAtInfinity}). n >= getOrder #c)
 
 (* order * P == 0 *)
 assume val curve_multiplication_by_order: #c: curve -> i: int {(i + 1) % getOrder #c = 0} -> p: point_nat_prime -> 
