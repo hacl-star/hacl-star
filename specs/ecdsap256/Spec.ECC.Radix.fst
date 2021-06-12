@@ -123,10 +123,10 @@ let curve_distributivity #c p0 a q = admit()
 
 val pointAddNotEqual:  #c: curve -> 
   p0: point_nat_prime #c ->
-  a: nat ->
+  a: nat -> 
   q: point_nat_prime #c {pointEqual q (point_mult a p0)} ->
-  b: nat {a < b /\ a < getOrder #c /\ b < getOrder #c} -> 
-  r: point_nat_prime #c {pointEqual q (point_mult b p0)} -> 
+  b: nat {(a < b \/ (a == 0 /\ b == 0))  /\ a < getOrder #c /\ b < getOrder #c} -> 
+  r: point_nat_prime #c {pointEqual r (point_mult b p0)} -> 
   Lemma (if isPointAtInfinity q && isPointAtInfinity r then pointEqual (_point_add q r) (pointAdd q r) else ~ (pointEqual q r))
 
 let pointAddNotEqual #c p0 a q b r = 
@@ -159,6 +159,8 @@ let pointAddNotEqual #c p0 a q b r =
   end
 
 
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+
 
 let pred0 #c x s p0 i =
   let scalar = scalar_as_nat s in 
@@ -177,20 +179,20 @@ let pred0 #c x s p0 i =
     let pointPrecomputed = getPrecomputedPoint p0 si in 
     let pRadixed = getPointDoubleNTimes x radix in 
 
-    if (isPointAtInfinity pointPrecomputed && isPointAtInfinity pRadixed) then 
-      pointAddDoubleWithTwoPointInfinity pointPrecomputed pRadixed
-    else 
-      assume( ~ (pointEqual pointPrecomputed pRadixed));
-      
     assume (pointEqual pRadixed (point_mult (pow2 radix * partialScalar) p0));
-
-    assert(pointEqual p (pointAdd pointPrecomputed pRadixed));
 
     assert(pointEqual pointPrecomputed (point_mult si p0));
     assert(pointEqual pRadixed (point_mult (pow2 radix) x));
 
 
-    
+    let a : nat = si in 
+    let b : nat = pow2 radix * partialScalar in 
+    let order = getOrder #c in 
+    let q = pointPrecomputed in 
+
+    assume ((a < b \/ (a == 0 /\ b == 0)) /\ b < order);
+
+    pointAddNotEqual p0 a pointPrecomputed b pRadixed;
     lemmaApplPointAdd p0 si pointPrecomputed (pow2 radix * partialScalar) pRadixed;
 
     let a = scalar / (pow2 (l - (i + 2) * radix)) in 
