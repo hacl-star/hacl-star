@@ -111,23 +111,24 @@ val pred0: #c: curve -> x: point_nat_prime #c
       pointEqual p (point_mult #c partialScalar p0)) in
     pred i x ==> pred (i + 1) (f i x))
 
-
-val curve_distributivity: #c: curve ->
-  p0: point_nat_prime #c 
-  -> a: nat {a > getOrder #c /\ a < 2 * getOrder #c} 
+val curve_distributivity: #c: curve -> p0: point_nat_prime #c 
+  -> a: nat  
   -> q: point_nat_prime #c {pointEqual q (point_mult a p0)}
   -> Lemma (pointEqual q (point_mult (a % getOrder #c) p0))
 
-let curve_distributivity #c p0 a q = admit()
+let curve_distributivity #c p0 a q = lemma_scalar_reduce p0 a
 
 
 val pointAddNotEqual:  #c: curve -> 
   p0: point_nat_prime #c ->
   a: nat -> 
   q: point_nat_prime #c {pointEqual q (point_mult a p0)} ->
-  b: nat {(a < b \/ (a == 0 /\ b == 0))  /\ a < getOrder #c /\ b < getOrder #c} -> 
+  b: nat -> 
   r: point_nat_prime #c {pointEqual r (point_mult b p0)} -> 
-  Lemma (if isPointAtInfinity q && isPointAtInfinity r then pointEqual (_point_add q r) (pointAdd q r) else ~ (pointEqual q r))
+  Lemma 
+  (requires ((a < b \/ isPointAtInfinity r) /\ a < getOrder #c))
+  (ensures (if isPointAtInfinity q && isPointAtInfinity r then pointEqual (_point_add q r) (pointAdd q r) else ~ (pointEqual q r)))
+  
 
 let pointAddNotEqual #c p0 a q b r = 
   if isPointAtInfinity q && isPointAtInfinity r then 
@@ -159,8 +160,41 @@ let pointAddNotEqual #c p0 a q b r =
   end
 
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+val curve_multiplication_distributivity: 
+  #c: curve ->
+  p0: point_nat_prime #c ->
+  a: nat -> 
+  q: point_nat_prime #c {pointEqual q (point_mult a p0)} ->
+  b: nat -> 
+  r: point_nat_prime #c {pointEqual r (point_mult b q)} -> 
+  Lemma (pointEqual r (point_mult (a * b) p0))
 
+
+let rec curve_multiplication_distributivity #c p0 a q b r = 
+  match b with 
+  |0 -> 
+    point_mult_0 q 0; 
+    point_mult_0 p0 0
+  |_ -> 
+    let r1 = (point_mult (b - 1) q) in 
+    curve_multiplication_distributivity #c p0 a q (b - 1) r1;
+    let a_1 = point_mult (a * (b - 1)) p0 in 
+    let a0 = point_mult (a * b) p0 in 
+
+    curve_compatibility_with_translation_lemma q (point_mult a p0) a_1;
+    assert(pointEqual (pointAdd q a_1) (pointAdd (point_mult a p0) a_1));
+    lemmaApplPointAdd p0 a (point_mult a p0) (a * (b - 1)) a_1;
+
+    let open FStar.Tactics in 
+    let open FStar.Tactics.Canon in 
+    assert_by_tactic (a + (a * (b - 1)) == a * b) canon;
+    assert(pointEqual (pointAdd (point_mult a p0) a_1) a0);
+    curve_commutativity_lemma q a_1;
+    point_mult_1 q; 
+    lemmaApplPointAdd q (b - 1) r1 1 q;
+
+    curve_compatibility_with_translation_lemma r1 (point_mult (a * (b - 1)) p0) q
+ 
 
 let pred0 #c x s p0 i =
   let scalar = scalar_as_nat s in 
@@ -179,20 +213,34 @@ let pred0 #c x s p0 i =
     let pointPrecomputed = getPrecomputedPoint p0 si in 
     let pRadixed = getPointDoubleNTimes x radix in 
 
-    assume (pointEqual pRadixed (point_mult (pow2 radix * partialScalar) p0));
+    curve_multiplication_distributivity #c p0 partialScalar x (pow2 radix) pRadixed;
 
-    assert(pointEqual pointPrecomputed (point_mult si p0));
-    assert(pointEqual pRadixed (point_mult (pow2 radix) x));
-
-
-    let a : nat = si in 
     let b : nat = pow2 radix * partialScalar in 
     let order = getOrder #c in 
     let q = pointPrecomputed in 
 
-    assume ((a < b \/ (a == 0 /\ b == 0)) /\ b < order);
 
-    pointAddNotEqual p0 a pointPrecomputed b pRadixed;
+    if si > 0 && partialScalar > 0 then 
+      assert(si < b)
+    else
+      begin
+	assert(si = 0 || partialScalar = 0);
+	  if si = 0 then 
+	    if partialScalar = 0 then 
+	      begin
+		point_mult_0 p0 0;
+		assert(isPointAtInfinity pointPrecomputed /\ isPointAtInfinity pRadixed)
+	      end
+	    else 
+	      begin
+		assert(si < b)
+	      end
+	  else
+	    begin
+	    point_mult_0 p0 0
+	    end end;
+
+    pointAddNotEqual p0 si pointPrecomputed b pRadixed;
     lemmaApplPointAdd p0 si pointPrecomputed (pow2 radix * partialScalar) pRadixed;
 
     let a = scalar / (pow2 (l - (i + 2) * radix)) in 
@@ -202,8 +250,7 @@ let pred0 #c x s p0 i =
     end
 
 
-
-val lemma_predicate0: #c: curve -> s: scalar_bytes #c -> p0: point_nat_prime #c -> 
+val lemma_predicate0: #c: curve -> s: scalar_bytes #c  {scalar_as_nat s < getOrder #c}  -> p0: point_nat_prime #c -> 
   Lemma (
     let l = v (getScalarLen c) in 
     let len =  (l / radix) - 1 in 
@@ -214,15 +261,15 @@ val lemma_predicate0: #c: curve -> s: scalar_bytes #c -> p0: point_nat_prime #c 
       let scalar = scalar_as_nat s in 
       let partialScalar = arithmetic_shift_right scalar (l - (i + 1) * radix) in  
       pointEqual p (point_mult #c partialScalar p0)) in 
-    forall (i: nat {i < len}) (x: point_nat_prime #c). 
-    pred i x ==> pred (i + 1) (f i x))
+  
+  forall (i: nat {i < len}) (x: point_nat_prime #c). pred i x ==> pred (i + 1) (f i x))
 
 let lemma_predicate0 #c s p0 = 
   let pred = pred0 #c in
   Classical.forall_intro_4 pred
 
 
-val radix_spec: #c: curve -> s: scalar_bytes #c {v (getScalarLen c) % radix == 0}
+val radix_spec: #c: curve -> s: scalar_bytes #c {v (getScalarLen c) % radix == 0 /\ scalar_as_nat s < getOrder #c}
   -> i: point_nat_prime #c
   -> r: point_nat_prime #c {
     let pointStart = getPrecomputedPoint i (scalar_as_nat s % pow2 radix) in 
@@ -254,4 +301,4 @@ let radix_spec #c s p0 =
   r
 
 
-
+#pop-options
