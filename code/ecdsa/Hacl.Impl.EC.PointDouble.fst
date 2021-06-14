@@ -21,7 +21,7 @@ open Hacl.Impl.EC.NIST.PointDouble
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0" 
 
 
-
+[@CInline]
 val point_double_p256: p: point P256 -> result: point P256
   -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 P256 *! 17ul) 
   -> Stack unit
@@ -33,7 +33,7 @@ val point_double_p256: p: point P256 -> result: point P256
 
 let point_double_p256 p result tempBuffer = Hacl.Impl.EC.NIST.PointDouble.point_double #P256 p result tempBuffer
 
-
+[@CInline]
 val point_double_p384: p: point P384 -> result: point P384
   -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 P384 *! 17ul) 
   -> Stack unit
@@ -45,7 +45,7 @@ val point_double_p384: p: point P384 -> result: point P384
 
 let point_double_p384 p result tempBuffer = Hacl.Impl.EC.NIST.PointDouble.point_double #P384 p result tempBuffer
 
-
+[@CInline]
 val point_double_generic: p: point Default -> result: point Default 
 -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 Default *! 17ul) 
   -> Stack unit

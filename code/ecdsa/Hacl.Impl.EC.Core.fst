@@ -599,7 +599,7 @@ let secretToPublicWithoutNorm_ #c result scalar tempBuffer =
   uploadStartPointsS2P result q; 
   montgomery_ladder result q scalar buff
 
-
+[@CInline]
 val secretToPublicWithoutNorm_p256: result: point P256
   -> scalar: scalar_t #MUT #P256
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) ->
@@ -613,6 +613,7 @@ val secretToPublicWithoutNorm_p256: result: point P256
 
 let secretToPublicWithoutNorm_p256 = secretToPublicWithoutNorm_ #P256
 
+[@CInline]
 val secretToPublicWithoutNorm_p384: result: point P384
   -> scalar: scalar_t #MUT #P384
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) ->
@@ -626,7 +627,7 @@ val secretToPublicWithoutNorm_p384: result: point P384
 
 let secretToPublicWithoutNorm_p384 = secretToPublicWithoutNorm_ #P384
 
-
+[@CInline]
 val secretToPublicWithoutNorm_generic: result: point Default
   -> scalar: scalar_t #MUT #Default
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 Default) ->

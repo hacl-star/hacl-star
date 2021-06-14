@@ -20,7 +20,7 @@ open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P256.Compression
 open Hacl.Spec.MontgomeryMultiplication
 
-[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
+(* [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
   \n The private key and the nonce are expected to be less than the curve order.")]
 val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) 
@@ -47,7 +47,7 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
     ))    
-
+ *)
 
 (*)
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
@@ -148,7 +148,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
   )
 *)
 
-[@ (Comment " This code is not side-channel resistant.
+(* [@ (Comment " This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
 val ecdsa_verif_p256_sha2:
@@ -168,7 +168,7 @@ val ecdsa_verif_p256_sha2:
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification_agile P256 (Spec.ECDSA.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
     )
-
+ *)
 (*
 [@ (Comment " This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
@@ -389,7 +389,7 @@ val ecp256dh_i:
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
-
+(* 
 val ecp384dh_i:
     result:lbuffer uint8 (size 96)
   -> scalar:lbuffer uint8 (size 48)
@@ -403,7 +403,7 @@ val ecp384dh_i:
     r == flag /\
     as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
     as_seq h1 (gsub result (size 48) (size 48)) == pointY)
-
+ *)
 
 
 (*
@@ -412,7 +412,7 @@ val ecp384dh_i:
   ")]
 *)
 
-
+(* 
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
@@ -462,7 +462,7 @@ val ecp384dh_r:
 
 (* 
 
-
+ *)
 
 
 val uploadp256: unit -> Stack unit 

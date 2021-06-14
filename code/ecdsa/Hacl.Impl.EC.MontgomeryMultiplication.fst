@@ -33,7 +33,7 @@ let supportsReducedMultiplication #c =
   assert_norm (exp #(pow2 64) 1 (pow2 64 - 1) == 1);
   r
 
-inline_for_extraction noextract
+
 val montgomery_multiplication_round_w_k0: #c: curve -> t: widefelem c -> t2: widefelem c -> 
   Stack unit
   (requires fun h -> live h t /\ live h t2 /\ wide_as_nat c h t2 = 0)
@@ -261,7 +261,7 @@ let montgomery_multiplication_buffer_by_one #c m a result =
   
   lemmaFromDomain #c #m (as_nat c h0 a)
 
-
+[@CInline]
 val montgomery_multiplication_buffer_by_one_dh_p256: a: felem P256 -> result: felem P256 -> 
   Stack unit
   (requires (fun h -> live h a /\ felem_eval P256 h a /\ live h result)) 
@@ -272,7 +272,7 @@ val montgomery_multiplication_buffer_by_one_dh_p256: a: felem P256 -> result: fe
 
 let montgomery_multiplication_buffer_by_one_dh_p256 a result = montgomery_multiplication_buffer_by_one #P256 DH a result
 
-
+[@CInline]
 val montgomery_multiplication_buffer_by_one_dh_p384: a: felem P384 -> result: felem P384 -> 
   Stack unit
   (requires (fun h -> live h a /\ felem_eval P384 h a /\ live h result)) 
@@ -283,7 +283,7 @@ val montgomery_multiplication_buffer_by_one_dh_p384: a: felem P384 -> result: fe
 
 let montgomery_multiplication_buffer_by_one_dh_p384 a result = montgomery_multiplication_buffer_by_one #P384 DH a result
 
-
+[@CInline]
 val montgomery_multiplication_buffer_by_one_dh_generic: a: felem Default -> result: felem Default -> 
   Stack unit
   (requires (fun h -> live h a /\ felem_eval Default h a /\ live h result)) 
@@ -318,7 +318,7 @@ let montgomery_multiplication_buffer #c m a b result =
     let h1 = ST.get() in 
     lemma_domain #c #m (as_nat c h0 a) (as_nat c h0 b) (as_nat c h1 result)
 
-
+[@CInline]
 val montgomery_multiplication_buffer_dh_p256: a: felem P256 -> b: felem P256 -> result: felem P256 ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ 
@@ -332,7 +332,7 @@ val montgomery_multiplication_buffer_dh_p256: a: felem P256 -> b: felem P256 -> 
 let montgomery_multiplication_buffer_dh_p256 a b result = 
     montgomery_multiplication_buffer #P256 DH a b result
 
-
+[@CInline]
 val montgomery_multiplication_buffer_dh_p384: a: felem P384 -> b: felem P384 -> result: felem P384 ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ 
@@ -346,7 +346,7 @@ val montgomery_multiplication_buffer_dh_p384: a: felem P384 -> b: felem P384 -> 
 let montgomery_multiplication_buffer_dh_p384 a b result = 
     montgomery_multiplication_buffer #P384 DH a b result
 
-
+[@CInline]
 val montgomery_multiplication_buffer_dh_generic: a: felem Default -> b: felem Default -> result: felem Default ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ 
@@ -368,7 +368,7 @@ let montgomery_multiplication_buffer_dh #c a b result =
   |P384 -> montgomery_multiplication_buffer_dh_p384 a b result
   |Default -> montgomery_multiplication_buffer_dh_generic a b result
 
-
+[@CInline]
 val montgomery_multiplication_buffer_dsa_p256: a: felem P256 -> b: felem P256 -> result: felem P256 ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat P256 h a < getModePrime DSA P256 /\  eq_or_disjoint a b /\
@@ -382,7 +382,7 @@ val montgomery_multiplication_buffer_dsa_p256: a: felem P256 -> b: felem P256 ->
 let montgomery_multiplication_buffer_dsa_p256 a b result  = 
   montgomery_multiplication_buffer #P256 DSA a b result
 
-
+[@CInline]
 val montgomery_multiplication_buffer_dsa_p384: a: felem P384 -> b: felem P384 -> result: felem P384 ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat P384 h a < getModePrime DSA P384 /\  eq_or_disjoint a b /\
@@ -396,6 +396,7 @@ val montgomery_multiplication_buffer_dsa_p384: a: felem P384 -> b: felem P384 ->
 let montgomery_multiplication_buffer_dsa_p384 a b result  = 
   montgomery_multiplication_buffer #P384 DSA a b result
 
+[@CInline]
 val montgomery_multiplication_buffer_dsa_generic: a: felem Default -> b: felem Default -> result: felem Default ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat Default h a < getModePrime DSA Default /\  eq_or_disjoint a b /\
@@ -431,7 +432,7 @@ let montgomery_square_buffer #c m a result =
     let h1 = ST.get() in
     lemma_domain #c #m (as_nat c h0 a) (as_nat c h0 a) (as_nat c h1 result)
 
-
+[@CInline]
 val montgomery_square_buffer_dh_p256: a: felem P256 -> result: felem P256 ->  
   Stack unit
   (requires (fun h -> live h a /\ as_nat P256 h a < getModePrime DH P256 /\ live h result)) 
@@ -444,6 +445,7 @@ val montgomery_square_buffer_dh_p256: a: felem P256 -> result: felem P256 ->
 
 let montgomery_square_buffer_dh_p256 a result = montgomery_square_buffer #P256 DH a result
 
+[@CInline]
 val montgomery_square_buffer_dh_p384: a: felem P384 -> result: felem P384 ->  
   Stack unit
   (requires (fun h -> live h a /\ as_nat P384 h a < getModePrime DH P384 /\ live h result)) 
@@ -456,7 +458,7 @@ val montgomery_square_buffer_dh_p384: a: felem P384 -> result: felem P384 ->
 
 let montgomery_square_buffer_dh_p384 a result = montgomery_square_buffer #P384 DH a result
 
-
+[@CInline]
 val montgomery_square_buffer_dh_generic: a: felem Default -> result: felem Default ->  
   Stack unit
   (requires (fun h -> live h a /\ as_nat Default h a < getModePrime DH Default /\ live h result)) 
@@ -512,7 +514,7 @@ let fsquarePowN #c m n a =
   
   inDomain_mod_is_not_mod #c #m (let k = fromDomain_ #c #m (as_nat c h0 a) in pow k (pow2 (v n)))
 
-
+[@CInline]
 val fsquarePowN_dh_p256: n: size_t -> a: felem P256 -> Stack unit 
   (requires (fun h -> live h a /\ as_nat P256 h a < getModePrime DH P256)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
@@ -521,7 +523,7 @@ val fsquarePowN_dh_p256: n: size_t -> a: felem P256 -> Stack unit
 
 let fsquarePowN_dh_p256 n a = fsquarePowN #P256 DH n a 
 
-
+[@CInline]
 val fsquarePowN_dh_p384: n: size_t -> a: felem P384 -> Stack unit 
   (requires (fun h -> live h a /\ as_nat P384 h a < getModePrime DH P384)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
@@ -531,7 +533,7 @@ val fsquarePowN_dh_p384: n: size_t -> a: felem P384 -> Stack unit
 
 let fsquarePowN_dh_p384 n a = fsquarePowN #P384 DH n a 
 
-
+[@CInline]
 val fsquarePowN_dh_generic: n: size_t -> a: felem Default -> Stack unit 
   (requires (fun h -> live h a /\ as_nat Default h a < getModePrime DH Default)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (

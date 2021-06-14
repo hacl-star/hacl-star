@@ -452,16 +452,25 @@ let montgomery_ladder_ #c p q scalar tempBuffer =
   
 *)
 
+[@CInline]
 let montgomery_ladderP256L = montgomery_ladder_ #P256 #MUT
+[@CInline]
 let montgomery_ladderP256I = montgomery_ladder_ #P256 #IMMUT
+[@CInline]
 let montgomery_ladderP256C = montgomery_ladder_ #P256 #CONST
 
+[@CInline]
 let montgomery_ladderP384L = montgomery_ladder_ #P384 #MUT
+[@CInline]
 let montgomery_ladderP384I = montgomery_ladder_ #P384 #IMMUT
+[@CInline]
 let montgomery_ladderP384C = montgomery_ladder_ #P384 #CONST
 
+[@CInline]
 let montgomery_ladderGenL = montgomery_ladder_ #Default #MUT
+[@CInline]
 let montgomery_ladderGenI = montgomery_ladder_ #Default #IMMUT
+[@CInline]
 let montgomery_ladderGenC = montgomery_ladder_ #Default #CONST
 
 

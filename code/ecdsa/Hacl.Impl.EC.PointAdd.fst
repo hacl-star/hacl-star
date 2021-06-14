@@ -973,7 +973,7 @@ let point_add_ #c p q result tempBuffer =
     (hD * pzD * qzD) % prime;
   }
 
-
+[@CInline]
 val point_add_p256: p: point P256 -> q: point P256 -> result: point P256
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P256) -> 
   Stack unit (requires fun h -> 
@@ -986,7 +986,7 @@ val point_add_p256: p: point P256 -> q: point P256 -> result: point P256
 
 let point_add_p256 p q result tempBuffer = point_add_ #P256 p q result tempBuffer
 
-
+[@CInline]
 val point_add_p384: p: point P384 -> q: point P384 -> result: point P384
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P384) -> 
   Stack unit (requires fun h -> 
@@ -999,6 +999,7 @@ val point_add_p384: p: point P384 -> q: point P384 -> result: point P384
 
 let point_add_p384 p q result tempBuffer = point_add_ #P384 p q result tempBuffer
 
+[@CInline]
 val point_add_generic: p: point Default -> q: point Default -> result: point Default
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 Default) -> 
   Stack unit (requires fun h -> 

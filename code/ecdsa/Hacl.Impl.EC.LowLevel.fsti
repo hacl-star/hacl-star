@@ -203,7 +203,7 @@ val scalar_bit: #c: curve -> #buf_type: buftype
   (ensures  fun h0 r h1 -> h0 == h1 /\ r == Spec.ECDSA.ith_bit_power #c (as_seq h0 s) (v n) /\
     v r <= 1)
 
-inline_for_extraction noextract
+
 val mul_atomic: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1)
   -> temp: lbuffer uint64 (size 1) ->
   Stack unit

@@ -358,7 +358,7 @@ let felem_add_ #c arg1 arg2 out =
   additionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg2);
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) + fromDomain #c (as_nat c h0 arg2))
 
-
+[@CInline]
 val felem_add_p256: a: felem P256 -> b: felem P256 -> out: felem P256 ->
   Stack unit
     (requires (fun h0 ->
@@ -372,6 +372,7 @@ val felem_add_p256: a: felem P256 -> b: felem P256 -> out: felem P256 ->
 
 let felem_add_p256 a b out = felem_add_ #P256 a b out
 
+[@CInline]
 val felem_add_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
   Stack unit
     (requires (fun h0 ->
@@ -385,7 +386,7 @@ val felem_add_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
 
 let felem_add_p384 a b out = felem_add_ #P384 a b out
 
-
+[@CInline]
 val felem_add_generic: a: felem Default -> b: felem Default -> out: felem Default ->
   Stack unit
     (requires (fun h0 ->
@@ -426,7 +427,7 @@ let felem_double_ #c arg1 out =
   additionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg1);
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) + fromDomain #c (as_nat c h0 arg1))
 
-
+[@CInline]
 val felem_double_p256: a: felem P256 -> out: felem P256 ->
   Stack unit
     (requires (fun h0 ->
@@ -438,7 +439,7 @@ val felem_double_p256: a: felem P256 -> out: felem P256 ->
 
 let felem_double_p256 arg1 out = felem_double_ #P256 arg1 out
 
-
+[@CInline]
 val felem_double_p384: a: felem P384 -> out: felem P384 ->
   Stack unit
     (requires (fun h0 ->
@@ -450,7 +451,7 @@ val felem_double_p384: a: felem P384 -> out: felem P384 ->
 
 let felem_double_p384 arg1 out = felem_double_ #P384 arg1 out
 
-
+[@CInline]
 val felem_double_generic: a: felem Default -> out: felem Default ->
   Stack unit
     (requires (fun h0 ->
@@ -517,7 +518,7 @@ let felem_sub_ #c arg1 arg2 out =
   substractionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg2); 
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) - fromDomain #c (as_nat c h0 arg2))
 
-
+[@CInline]
 val felem_sub_p256: a: felem P256 -> b: felem P256 -> out: felem P256 ->
   Stack unit
   (requires (fun h0 ->
@@ -529,7 +530,7 @@ val felem_sub_p256: a: felem P256 -> b: felem P256 -> out: felem P256 ->
 
 let felem_sub_p256 a b out = felem_sub_ #P256 a b out
 
-
+[@CInline]
 val felem_sub_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
   Stack unit
   (requires (fun h0 ->
@@ -541,7 +542,7 @@ val felem_sub_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
 
 let felem_sub_p384 a b out = felem_sub_ #P384 a b out
 
-
+[@CInline]
 val felem_sub_generic: a: felem Default -> b: felem Default -> out: felem Default ->
   Stack unit
   (requires (fun h0 ->

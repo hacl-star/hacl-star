@@ -29,9 +29,9 @@ open Hacl.Impl.ECDSA.Signature
 open Hacl.Impl.ECDSA.Verification
 
 
-let ecdsa_sign_p256_sha2 result mLen m privKey k = 
+(* let ecdsa_sign_p256_sha2 result mLen m privKey k = 
   ecdsa_signature #P256 (Hash SHA2_256) result mLen m privKey k
-
+ *)
 (*)
   let ecdsa_sign_p256_sha384 result mLen m privKey k = 
   ecdsa_signature P256 (Hash SHA2_384) result mLen m privKey k
@@ -43,9 +43,9 @@ let ecdsa_sign_p256_without_hash result mLen m privKey k =
   ecdsa_signature P256 NoHash result mLen m privKey k
 
 *)
-let ecdsa_verif_p256_sha2 mLen m pubKey r s = 
+(* let ecdsa_verif_p256_sha2 mLen m pubKey r s = 
   ecdsa_verification #P256 (Hash SHA2_256) pubKey r s mLen m
-
+ *)
 (*)
 let ecdsa_verif_p256_sha384 mLen m pubKey r s = 
   ecdsa_verification P256 (Hash SHA2_384) pubKey r s mLen m
@@ -79,14 +79,14 @@ let compression_compressed_form b result =
  *)
 let ecp256dh_i result scalar = Hacl.Impl.EC.DH.ecp256dh_i P256 result scalar
 
-let ecp384dh_i result scalar = Hacl.Impl.EC.DH.ecp256dh_i P384 result scalar
+(* let ecp384dh_i result scalar = Hacl.Impl.EC.DH.ecp256dh_i P384 result scalar
 
 
 let ecp256dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P256 result pubKey scalar
 
 let ecp384dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P384 result pubKey scalar
 
-
+ *)
 (* inline_for_extraction
 class curve_test = {
   len: (a: size_t {v a > 0})

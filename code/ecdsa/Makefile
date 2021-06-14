@@ -15,7 +15,7 @@ include ../../Makefile.local
 FSTAR_ROOTS = Hacl.P256.fst
 # P256_BUNDLE=-bundle Hacl.Impl.P256.PointDouble=Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 
-#BASE_FLAGS+= -funroll-loops 4
+# BASE_FLAGS+= -funroll-loops 1
 
 CFLAGS += -I ../../../lib/c -I . -march=native -mtune=native -O3
 export CFLAGS
@@ -24,7 +24,6 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(P256_BUNDLE) \
 	  -tmpdir dist \
 	  -fbuiltin-uint128 \
-	  -funroll-loops 12 \
 	  -add-include '"lib_intrinsics.h"' \
 	  -no-prefix 'Hacl.Test.ECDSA' \
 	  -skip-compilation
