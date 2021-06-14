@@ -351,6 +351,120 @@ let montgomery_ladder_ #c #a p q scalar tempBuffer =
       (scalar_as_nat_ #c (as_seq h0 scalar) (v i) + 1) (fromDomainPoint #c #DH (point_as_nat c h2 q)) (as_seq h0 scalar) (v i)
   )
 
+(*
+val montgomery_ladder_p256: #buf_type: buftype -> p: point P256 -> q: point P256 ->
+  scalar: lbuffer_t buf_type uint8 (getScalarLenBytes P256) -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P256)  -> 
+  Stack unit
+  (requires fun h -> live h p /\ live h q /\ live h scalar /\  live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
+    point_eval P256 h p /\ point_eval P256 h q /\ (
+    let pD = fromDomainPoint #P256 #DH (point_as_nat P256 h p) in 
+    let qD = fromDomainPoint #P256 #DH (point_as_nat P256 h q) in 
+    pointEqual #P256 pD (point_mult #P256 0 qD) /\ ~ (pointEqual #P256 pD qD)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\
+    point_eval P256 h1 p /\ point_eval P256 h1 q /\ ( 
+    let p0D = fromDomainPoint #P256 #DH (point_as_nat P256 h0 p) in 
+    let q0D = fromDomainPoint #P256 #DH (point_as_nat P256 h0 q) in 
+    let pD = fromDomainPoint #P256 #DH (point_as_nat P256 h1 p) in 
+    let qD = fromDomainPoint #P256 #DH (point_as_nat P256 h1 q) in 
+    let r0, r1 = montgomery_ladder_spec_left (as_seq h0 scalar) (p0D, q0D) in 
+    (r0, r1) == (pD, qD)  /\
+    pointEqual pD (point_mult #P256 (scalar_as_nat #P256 (as_seq h0 scalar)) q0D)))
+
+
+let montgomery_ladder_p256 = montgomery_ladder__ #P256
+
+
+val montgomery_ladder_generic: #buf_type: buftype -> p: point Default -> q: point Default ->
+  scalar: lbuffer_t buf_type uint8 (getScalarLenBytes Default) -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 Default)  -> 
+  Stack unit
+  (requires fun h -> live h p /\ live h q /\ live h scalar /\  live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
+    point_eval Default h p /\ point_eval Default h q /\ (
+    let pD = fromDomainPoint #Default #DH (point_as_nat Default h p) in 
+    let qD = fromDomainPoint #Default #DH (point_as_nat Default h q) in 
+    pointEqual #Default pD (point_mult #Default 0 qD) /\ ~ (pointEqual #Default pD qD)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\
+    point_eval Default h1 p /\ point_eval Default h1 q /\ ( 
+    let p0D = fromDomainPoint #Default #DH (point_as_nat Default h0 p) in 
+    let q0D = fromDomainPoint #Default #DH (point_as_nat Default h0 q) in 
+    let pD = fromDomainPoint #Default #DH (point_as_nat Default h1 p) in 
+    let qD = fromDomainPoint #Default #DH (point_as_nat Default h1 q) in 
+    let r0, r1 = montgomery_ladder_spec_left (as_seq h0 scalar) (p0D, q0D) in 
+    (r0, r1) == (pD, qD)  /\
+    pointEqual pD (point_mult #Default (scalar_as_nat #Default (as_seq h0 scalar)) q0D)))
+
+
+let montgomery_ladder_generic = montgomery_ladder__ #Default
+
+
+val montgomery_ladder_p384: #buf_type: buftype -> p: point P384 -> q: point P384 ->
+  scalar: lbuffer_t buf_type uint8 (getScalarLenBytes P384) -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P384)  -> 
+  Stack unit
+  (requires fun h -> live h p /\ live h q /\ live h scalar /\  live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
+    point_eval P384 h p /\ point_eval P384 h q /\ (
+    let pD = fromDomainPoint #P384 #DH (point_as_nat P384 h p) in 
+    let qD = fromDomainPoint #P384 #DH (point_as_nat P384 h q) in 
+    pointEqual #P384 pD (point_mult #P384 0 qD) /\ ~ (pointEqual #P384 pD qD)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\
+    point_eval P384 h1 p /\ point_eval P384 h1 q /\ ( 
+    let p0D = fromDomainPoint #P384 #DH (point_as_nat P384 h0 p) in 
+    let q0D = fromDomainPoint #P384 #DH (point_as_nat P384 h0 q) in 
+    let pD = fromDomainPoint #P384 #DH (point_as_nat P384 h1 p) in 
+    let qD = fromDomainPoint #P384 #DH (point_as_nat P384 h1 q) in 
+    let r0, r1 = montgomery_ladder_spec_left (as_seq h0 scalar) (p0D, q0D) in 
+    (r0, r1) == (pD, qD)  /\
+    pointEqual pD (point_mult #P384 (scalar_as_nat #P384 (as_seq h0 scalar)) q0D)))
+
+
+let montgomery_ladder_p384 = montgomery_ladder__ #P384
+
+inline_for_extraction 
+val montgomery_ladder_: #c: curve -> #buf_type: buftype -> p: point c -> q: point c ->
+  scalar: lbuffer_t buf_type uint8 (getScalarLenBytes c) -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c)  -> 
+  Stack unit
+  (requires fun h -> live h p /\ live h q /\ live h scalar /\  live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
+    point_eval c h p /\ point_eval c h q /\ (
+    let pD = fromDomainPoint #c #DH (point_as_nat c h p) in 
+    let qD = fromDomainPoint #c #DH (point_as_nat c h q) in 
+    pointEqual #c pD (point_mult #c 0 qD) /\ ~ (pointEqual #c pD qD)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc q |+| loc tempBuffer) h0 h1 /\
+    point_eval c h1 p /\ point_eval c h1 q /\ ( 
+    let p0D = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+    let q0D = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
+    let pD = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
+    let qD = fromDomainPoint #c #DH (point_as_nat c h1 q) in 
+    let r0, r1 = montgomery_ladder_spec_left (as_seq h0 scalar) (p0D, q0D) in 
+    (r0, r1) == (pD, qD)  /\
+    pointEqual pD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) q0D)))
+
+let montgomery_ladder_ #c p q scalar tempBuffer = 
+  match c with 
+  |P256 -> montgomery_ladder_p256 p q scalar tempBuffer
+  |P384 -> montgomery_ladder_p384 p q scalar tempBuffer
+  |Default -> montgomery_ladder_generic p q scalar tempBuffer
+  
+*)
+
+let montgomery_ladderP256L = montgomery_ladder_ #P256 #MUT
+let montgomery_ladderP256I = montgomery_ladder_ #P256 #IMMUT
+let montgomery_ladderP256C = montgomery_ladder_ #P256 #CONST
+
+let montgomery_ladderP384L = montgomery_ladder_ #P384 #MUT
+let montgomery_ladderP384I = montgomery_ladder_ #P384 #IMMUT
+let montgomery_ladderP384C = montgomery_ladder_ #P384 #CONST
+
+let montgomery_ladderGenL = montgomery_ladder_ #Default #MUT
+let montgomery_ladderGenI = montgomery_ladder_ #Default #IMMUT
+let montgomery_ladderGenC = montgomery_ladder_ #Default #CONST
+
+
 
 inline_for_extraction noextract
 val montgomery_ladder: #c: curve -> #buf_type: buftype -> p: point c -> q: point c ->
@@ -374,9 +488,21 @@ val montgomery_ladder: #c: curve -> #buf_type: buftype -> p: point c -> q: point
     pointEqual pD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) q0D)))
 
 
-let montgomery_ladder #c p q scalar tempBuffer = 
+let montgomery_ladder #c #b p q scalar tempBuffer = 
   match c with 
-  |P256 -> montgomery_ladder_ #P256 p q scalar tempBuffer
-  |P384 -> montgomery_ladder_ #P384 p q scalar tempBuffer
-  |Default -> montgomery_ladder_ #Default p q scalar tempBuffer
+    |P256 -> begin
+      match b with 
+      |MUT -> montgomery_ladderP256L p q scalar tempBuffer
+      |IMMUT -> montgomery_ladderP256I p q scalar tempBuffer
+      |CONST -> montgomery_ladderP256C p q scalar tempBuffer end
+    |P384 -> begin
+      match b with  
+      |MUT -> montgomery_ladderP384L p q scalar tempBuffer
+      |IMMUT -> montgomery_ladderP384I p q scalar tempBuffer
+      |CONST -> montgomery_ladderP384C p q scalar tempBuffer end
+    |Default -> begin
+      match b with 
+      |MUT -> montgomery_ladderGenL p q scalar tempBuffer
+      |IMMUT -> montgomery_ladderGenI p q scalar tempBuffer
+      |CONST -> montgomery_ladderGenC p q scalar tempBuffer end
   

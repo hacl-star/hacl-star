@@ -279,7 +279,17 @@ let isOrderCorrect #c p tempBuffer =
     result
 
 
-let verifyQValidCurvePoint #c pubKey tempBuffer = 
+inline_for_extraction noextract
+val verifyQValidCurvePoint_: #c: curve -> pubKey: point c 
+  -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
+  Stack bool
+  (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat c h (getZ pubKey) == 1)
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
+    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
+
+let verifyQValidCurvePoint_ #c pubKey tempBuffer = 
     let h0 = ST.get() in 
   let coordinatesValid = isCoordinateValid pubKey in 
   if not coordinatesValid then false else begin
@@ -292,6 +302,47 @@ let verifyQValidCurvePoint #c pubKey tempBuffer =
 	orderCorrect 
       else true in 
     coordinatesValid && belongsToCurve && orderCorrect end
+
+
+val verifyQValidCurvePoint_p256: pubKey: point P256 
+  -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) -> 
+  Stack bool
+  (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat P256 h (getZ pubKey) == 1)
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let p = as_nat P256 h0 (getX pubKey),  as_nat P256 h0 (getY pubKey), as_nat P256 h0 (getZ pubKey) in 
+    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #P256 p))
+
+let verifyQValidCurvePoint_p256 = verifyQValidCurvePoint_ #P256
+
+val verifyQValidCurvePoint_p384: pubKey: point P384
+  -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) -> 
+  Stack bool
+  (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat P384 h (getZ pubKey) == 1)
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let p = as_nat P384 h0 (getX pubKey),  as_nat P384 h0 (getY pubKey), as_nat P384 h0 (getZ pubKey) in 
+    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #P384 p))
+
+let verifyQValidCurvePoint_p384 = verifyQValidCurvePoint_ #P384
+
+
+val verifyQValidCurvePoint_generic: pubKey: point Default
+  -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 Default) -> 
+  Stack bool
+  (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat Default h (getZ pubKey) == 1)
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let p = as_nat Default h0 (getX pubKey),  as_nat Default h0 (getY pubKey), as_nat Default h0 (getZ pubKey) in 
+    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #Default p))
+
+let verifyQValidCurvePoint_generic = verifyQValidCurvePoint_ #Default
+
+let verifyQValidCurvePoint #c = 
+  match c with 
+  |P256 -> verifyQValidCurvePoint_p256
+  |P384 -> verifyQValidCurvePoint_p384
+  |Default -> verifyQValidCurvePoint_generic
 
 
 let verifyQ #c pubKey = 

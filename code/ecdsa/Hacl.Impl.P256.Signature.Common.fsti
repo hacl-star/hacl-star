@@ -65,8 +65,7 @@ val isPointOnCurvePublic: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\ felem_eval c h (getX p) /\ felem_eval c h (getY p) /\ as_nat c h (getZ p) == 1)
   (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ r == isPointOnCurve #c (point_as_nat c h0 p))
 
-
-[@CInline]
+inline_for_extraction noextract
 val verifyQValidCurvePoint: #c: curve -> pubKey: point c 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
   Stack bool

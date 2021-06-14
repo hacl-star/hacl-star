@@ -196,8 +196,19 @@ let lemma_norm #c pD r =
   }
 
 
+inline_for_extraction noextract
+val norm_: #c: curve -> p: point c -> resultPoint: point c -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> Stack unit
+  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval c h p /\
+    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
+  (ensures fun h0 _ h1 -> point_eval c h1 resultPoint /\
+    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
+    let resultPoint = point_as_nat c h1 resultPoint in 
+    let pointD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+    let pointNorm = _norm #c pointD in
+    pointNorm == resultPoint))
 
-let norm #c p resultPoint tempBuffer = 
+let norm_ #c p resultPoint tempBuffer = 
   [@inline_let]
   let len = getCoordinateLenU64 c in 
 
@@ -224,6 +235,54 @@ let norm #c p resultPoint tempBuffer =
 
   lemma_norm #c
     (fromDomainPoint #c #DH (point_as_nat c h0 p)) (point_as_nat c h1 resultPoint)
+
+
+val norm_p256: p: point P256 -> resultPoint: point P256 -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P256) -> Stack unit
+  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval P256 h p /\
+    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
+  (ensures fun h0 _ h1 -> point_eval P256 h1 resultPoint /\
+    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
+    let resultPoint = point_as_nat P256 h1 resultPoint in 
+    let pointD = fromDomainPoint #P256 #DH (point_as_nat P256 h0 p) in 
+    let pointNorm = _norm #P256 pointD in
+    pointNorm == resultPoint))
+
+let norm_p256 = norm_ #P256 
+
+
+val norm_p384: p: point P384 -> resultPoint: point P384 -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P384) -> Stack unit
+  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval P384 h p /\
+    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
+  (ensures fun h0 _ h1 -> point_eval P384 h1 resultPoint /\
+    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
+    let resultPoint = point_as_nat P384 h1 resultPoint in 
+    let pointD = fromDomainPoint #P384 #DH (point_as_nat P384 h0 p) in 
+    let pointNorm = _norm #P384 pointD in
+    pointNorm == resultPoint))
+
+let norm_p384 = norm_ #P384 
+
+
+val norm_generic: p: point Default -> resultPoint: point Default -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 Default) -> Stack unit
+  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval Default h p /\
+    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
+  (ensures fun h0 _ h1 -> point_eval Default h1 resultPoint /\
+    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
+    let resultPoint = point_as_nat Default h1 resultPoint in 
+    let pointD = fromDomainPoint #Default #DH (point_as_nat Default h0 p) in 
+    let pointNorm = _norm #Default pointD in
+    pointNorm == resultPoint))
+
+let norm_generic = norm_ #Default 
+
+let norm #c p resultPoint = 
+  match c with 
+  |P256 -> norm_p256 p resultPoint
+  |P384 -> norm_p384 p resultPoint
+  |Default -> norm_generic p resultPoint
 
 
 let normX #c p result tempBuffer = 
@@ -392,13 +451,81 @@ let scalarMultiplication #c #buf_type p result scalar tempBuffer =
 
 #pop-options 
 
-let scalarMultiplicationWithoutNorm #c p result scalar tempBuffer = 
+inline_for_extraction noextract
+val scalarMultiplicationWithoutNorm_: #c: curve -> p: point c -> result: point c 
+  -> scalar: scalar_t #MUT #c
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
+  Stack unit
+  (requires fun h -> point_eval c h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
+    ~ (isPointAtInfinity (point_as_nat c h p)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
+    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
+    let p = point_as_nat c h0 p in point_mult_0 #c p 0; 
+    let rN, _ = montgomery_ladder_spec_left #c (as_seq h0 scalar) (pointAtInfinity, p) in 
+    rN == p1)) 
+    
+let scalarMultiplicationWithoutNorm_ #c p result scalar tempBuffer = 
     let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in
-  scalar_multiplication_t_0 #c #MUT q p result scalar buff; 
+  normalize_term (scalar_multiplication_t_0 #c #MUT q p result scalar buff); 
   copy_point q result
+
+val scalarMultiplicationWithoutNorm_p256: p: point P256 -> result: point P256
+  -> scalar: scalar_t #MUT #P256
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) ->
+  Stack unit
+  (requires fun h -> point_eval P256 h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
+    ~ (isPointAtInfinity (point_as_nat P256 h p)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval P256 h1 result /\ (
+    let p1 = fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) in 
+    let p = point_as_nat P256 h0 p in point_mult_0 #P256 p 0; 
+    let rN, _ = montgomery_ladder_spec_left #P256 (as_seq h0 scalar) (pointAtInfinity, p) in 
+    rN == p1)) 
+
+let scalarMultiplicationWithoutNorm_p256 = scalarMultiplicationWithoutNorm_ #P256
+
+
+val scalarMultiplicationWithoutNorm_p384: p: point P384 -> result: point P384
+  -> scalar: scalar_t #MUT #P384
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) ->
+  Stack unit
+  (requires fun h -> point_eval P384 h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
+    ~ (isPointAtInfinity (point_as_nat P384 h p)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval P384 h1 result /\ (
+    let p1 = fromDomainPoint #P384 #DH (point_as_nat P384 h1 result) in 
+    let p = point_as_nat P384 h0 p in point_mult_0 #P384 p 0; 
+    let rN, _ = montgomery_ladder_spec_left #P384 (as_seq h0 scalar) (pointAtInfinity, p) in 
+    rN == p1)) 
+
+let scalarMultiplicationWithoutNorm_p384 = scalarMultiplicationWithoutNorm_ #P384
+
+val scalarMultiplicationWithoutNorm_generic: p: point Default -> result: point Default
+  -> scalar: scalar_t #MUT #Default
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 Default) ->
+  Stack unit
+  (requires fun h -> point_eval Default h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
+    ~ (isPointAtInfinity (point_as_nat Default h p)))
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval Default h1 result /\ (
+    let p1 = fromDomainPoint #Default #DH (point_as_nat Default h1 result) in 
+    let p = point_as_nat Default h0 p in point_mult_0 #Default p 0; 
+    let rN, _ = montgomery_ladder_spec_left #Default (as_seq h0 scalar) (pointAtInfinity, p) in 
+    rN == p1)) 
+
+let scalarMultiplicationWithoutNorm_generic = scalarMultiplicationWithoutNorm_ #Default
+
+
+let scalarMultiplicationWithoutNorm #c = 
+  match c with 
+  |P256 -> scalarMultiplicationWithoutNorm_p256
+  |P384 -> scalarMultiplicationWithoutNorm_p384
+  |Default -> scalarMultiplicationWithoutNorm_generic
+
 
 inline_for_extraction noextract
 val uploadStartPointsS2P: #c: curve -> q: point c -> result: point c -> Stack unit 
@@ -452,10 +579,70 @@ let secretToPublic #c result scalar tempBuffer =
   norm q result buff
 
 
-let secretToPublicWithoutNorm #c result scalar tempBuffer = 
+inline_for_extraction noextract
+val secretToPublicWithoutNorm_: #c: curve -> result: point c 
+  -> scalar: scalar_t #MUT #c
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
+  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
+  (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
+    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 result) in point_mult_0 (basePoint #c) 0;
+    let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, basePoint #c) in 
+    p1 == rN))  
+
+
+let secretToPublicWithoutNorm_ #c result scalar tempBuffer = 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
 
   uploadStartPointsS2P result q; 
   montgomery_ladder result q scalar buff
+
+
+val secretToPublicWithoutNorm_p256: result: point P256
+  -> scalar: scalar_t #MUT #P256
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) ->
+  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
+  (ensures fun h0 _ h1 -> point_eval P256 h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
+    let p1 = fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) in point_mult_0 (basePoint #P256) 0;
+    let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, basePoint #P256) in 
+    p1 == rN))  
+
+
+let secretToPublicWithoutNorm_p256 = secretToPublicWithoutNorm_ #P256
+
+val secretToPublicWithoutNorm_p384: result: point P384
+  -> scalar: scalar_t #MUT #P384
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) ->
+  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
+  (ensures fun h0 _ h1 -> point_eval P384 h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
+    let p1 = fromDomainPoint #P384 #DH (point_as_nat P384 h1 result) in point_mult_0 (basePoint #P384) 0;
+    let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, basePoint #P384) in 
+    p1 == rN))  
+
+
+let secretToPublicWithoutNorm_p384 = secretToPublicWithoutNorm_ #P384
+
+
+val secretToPublicWithoutNorm_generic: result: point Default
+  -> scalar: scalar_t #MUT #Default
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 Default) ->
+  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
+  (ensures fun h0 _ h1 -> point_eval Default h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
+    let p1 = fromDomainPoint #Default #DH (point_as_nat Default h1 result) in point_mult_0 (basePoint #Default) 0;
+    let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, basePoint #Default) in 
+    p1 == rN))  
+
+
+let secretToPublicWithoutNorm_generic = secretToPublicWithoutNorm_ #Default
+
+
+let secretToPublicWithoutNorm #c = 
+  match c with 
+  |P256 -> secretToPublicWithoutNorm_p256
+  |P384 -> secretToPublicWithoutNorm_p384
+  |Default -> secretToPublicWithoutNorm_generic

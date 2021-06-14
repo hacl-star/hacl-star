@@ -63,7 +63,8 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
     (if Spec.ECC.isPointAtInfinity (xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0) /\ 
     (if Spec.ECC.isPointAtInfinity (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
 
-[@CInline]
+
+inline_for_extraction noextract
 val norm: #c: curve -> p: point c -> resultPoint: point c -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> Stack unit
   (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval c h p /\
@@ -74,6 +75,9 @@ val norm: #c: curve -> p: point c -> resultPoint: point c ->
     let pointD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
     let pointNorm = _norm #c pointD in
     pointNorm == resultPoint))
+
+
+
 
 inline_for_extraction noextract
 val normX: #c: curve -> p: point c -> result: felem c 
@@ -101,7 +105,7 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype
     let pD = scalar_multiplication  (as_seq h0 scalar) (point_as_nat c h0 p) in 
     pD == point_as_nat c h1 result))
 
-[@CInline]
+inline_for_extraction noextract
 val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
@@ -126,6 +130,7 @@ val secretToPublic: #c: curve -> result: point c
     let r = secret_to_public #c (as_seq h0 scalar) in 
     p == r))
 
+inline_for_extraction noextract
 val secretToPublicWithoutNorm: #c: curve -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
