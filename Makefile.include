@@ -23,8 +23,8 @@ endif
 
 # TODO: no more separate variable definitions?
 LIB_DIR		= $(HACL_HOME)/lib
-SPECS_DIR 	= $(HACL_HOME)/specs $(addprefix $(HACL_HOME)/specs/,lemmas tests drbg ecdsap256 frodo)
-CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash hmac hkdf drbg hpke sha3 ecdsap256 poly1305 streaming \
+SPECS_DIR 	= $(HACL_HOME)/specs $(addprefix $(HACL_HOME)/specs/,lemmas tests drbg ecdsa frodo)
+CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash hmac hkdf drbg hpke sha3 ecdsa poly1305 streaming \
   blake2 chacha20 chacha20poly1305 curve25519 tests ed25519 salsa20 nacl-box meta frodo fallback bignum rsapss ffdhe)
 EVERCRYPT_DIRS  = $(addprefix $(HACL_HOME)/providers/,evercrypt evercrypt/fst test test/vectors evercrypt/config/$(EVERCRYPT_CONFIG))
 MERKLE_DIRS	= $(HACL_HOME)/secure_api/merkle_tree
