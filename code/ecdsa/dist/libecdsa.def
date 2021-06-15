@@ -1,23 +1,15 @@
 LIBRARY libecdsa
 
 EXPORTS
-  Hacl_Bignum_Base_mul_wide_add_u32
-  Hacl_Bignum_Base_mul_wide_add_u64
-  Hacl_Bignum_Base_mul_wide_add2_u32
-  Hacl_Bignum_Base_mul_wide_add2_u64
   Hacl_Impl_EC_LowLevel_mul_p256
-  Hacl_Bignum_Convert_bn_from_bytes_be_uint32
-  Hacl_Bignum_Convert_bn_from_bytes_be_uint64
-  Hacl_Bignum_Convert_bn_from_bytes_le_uint32
-  Hacl_Bignum_Convert_bn_from_bytes_le_uint64
-  Hacl_Bignum_Convert_bn_to_bytes_be_uint32
-  Hacl_Bignum_Convert_bn_to_bytes_be_uint64
-  Hacl_Bignum_Convert_bn_to_bytes_le_uint32
-  Hacl_Bignum_Convert_bn_to_bytes_le_uint64
   Hacl_Bignum_Addition_bn_sub_eq_len_u32
   Hacl_Bignum_Addition_bn_sub_eq_len_u64
   Hacl_Bignum_Addition_bn_add_eq_len_u32
   Hacl_Bignum_Addition_bn_add_eq_len_u64
+  Hacl_Bignum_Base_mul_wide_add_u32
+  Hacl_Bignum_Base_mul_wide_add_u64
+  Hacl_Bignum_Base_mul_wide_add2_u32
+  Hacl_Bignum_Base_mul_wide_add2_u64
   Hacl_Bignum_Multiplication_bn_mul_u32
   Hacl_Bignum_Multiplication_bn_mul_u64
   Hacl_Bignum_Multiplication_bn_sqr_u32
@@ -28,3 +20,11 @@ EXPORTS
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64
   Hacl_Bignum_Lib_bn_get_top_index_u32
   Hacl_Bignum_Lib_bn_get_top_index_u64
+  Hacl_Bignum_Convert_bn_from_bytes_be_uint32
+  Hacl_Bignum_Convert_bn_from_bytes_be_uint64
+  Hacl_Bignum_Convert_bn_from_bytes_le_uint32
+  Hacl_Bignum_Convert_bn_from_bytes_le_uint64
+  Hacl_Bignum_Convert_bn_to_bytes_be_uint32
+  Hacl_Bignum_Convert_bn_to_bytes_be_uint64
+  Hacl_Bignum_Convert_bn_to_bytes_le_uint32
+  Hacl_Bignum_Convert_bn_to_bytes_le_uint64
