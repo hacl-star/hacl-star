@@ -23,8 +23,7 @@ inline_for_extraction noextract
 val mul: #c: curve -> f: felem c -> r: felem c -> out: widefelem c ->
   Stack unit
     (requires fun h -> live h out /\ live h f /\ live h r /\ disjoint r out /\ disjoint f out /\ eq_or_disjoint f r)
-    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-      wide_as_nat c h1 out = as_nat c h0 r * as_nat c h0 f)
+    (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 )
 
 
 val mul_p256: f: felem P256 -> r: felem P256 -> out: widefelem P256 ->
