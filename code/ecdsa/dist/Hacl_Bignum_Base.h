@@ -32,14 +32,17 @@
 
 #include "Hacl_Kremlib.h"
 
-static inline uint64_t
-Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out)
-{
-  uint64_t out0 = out[0U];
-  uint128_t res = (uint128_t)a * b + (uint128_t)c_in + (uint128_t)out0;
-  out[0U] = (uint64_t)res;
-  return (uint64_t)(res >> (uint32_t)64U);
-}
+uint32_t
+Hacl_Bignum_Base_mul_wide_add_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out);
+
+uint64_t
+Hacl_Bignum_Base_mul_wide_add_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out);
+
+uint32_t
+Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out);
+
+uint64_t
+Hacl_Bignum_Base_mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out);
 
 
 #define __Hacl_Bignum_Base_H_DEFINED

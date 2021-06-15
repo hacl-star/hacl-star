@@ -10,7 +10,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 open Hacl.Spec.EC.Definition
-open Hacl.EC.Lemmas
+(* open Hacl.EC.Lemmas *)
 
 open Spec.ECC
 open Spec.ECC.Curves
@@ -21,20 +21,20 @@ open FStar.Mul
 
 open FStar.Tactics
 open FStar.Tactics.Canon
-
+(* 
 open Hacl.Impl.P256.LowLevel
 open Hacl.Impl.P384.LowLevel
 open Hacl.Impl.EC.Masking
-
+ *)
 open Lib.IntTypes.Intrinsics
-open Hacl.Impl.EC.LowLevel.Lemmas
+(* open Hacl.Impl.EC.LowLevel.Lemmas *)
 
 
 open Lib.Loops
 
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
-
+(* 
 let uploadZeroImpl #c f =
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
@@ -562,117 +562,9 @@ let felem_sub #c a b out =
   |Default -> felem_sub_generic a b out
 
 
-
+ *)
 let mul #c f r out =
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   bn_mul len len f r out;
   Hacl.Spec.Bignum.bn_mul_lemma (as_seq h0 f) (as_seq h0 r)
-
-
-let shiftLeftWord #c i o =
-  let len = getCoordinateLenU64 c in 
-  let oToZero = sub o (size 0) len in 
-  let oToCopy = sub o len len in 
-  copy oToCopy i;
-  uploadZeroImpl #c oToZero;
-    let h1 = ST.get() in
-  lemma_test (as_seq h1 o)  (v (getCoordinateLenU64 c))
-
-
-let mod64 #c a =
-  let h0 = ST.get() in 
-  lemma_lseq_1 #(v (getCoordinateLenU64 c *! 2ul)) (as_seq h0 a) (v (getCoordinateLenU64 c *! 2ul));
-  index a (size 0)
-
-
-
-#push-options "--fuel 2"
-
-let shift1_with_carry #c t out carry = 
-  let h0 = ST.get() in 
-  let len = getCoordinateLenU64 c *! 2ul -! 1ul in 
-  let inv h (i: nat { i <= uint_v len}) = 
-    live h t /\ live h out /\ modifies (loc out) h0 h /\  (
-    lseq_as_nat_ #(v len + 1) (as_seq h0 t) (i + 1) / pow2 64 == lseq_as_nat_ #(v len + 1) (as_seq h out) i) 
-  in 
-
-  lseq_as_nat_last #(v len + 1) (as_seq h0 out);
-
-  for 0ul len inv 
-  (fun i -> 
-
-    let h0_ = ST.get() in 
-    let elem = index t (size 1 +! i) in 
-    upd out i elem;
-    let h1_ = ST.get() in 
-
-    lemma_lseq_as_seq_as_forall (as_seq h0_ out) (as_seq h1_ out) (v i);
-
-    lseq_as_nat_definiton #(v len + 1) (as_seq h1_ out) (v i + 1);
-    lseq_as_nat_definiton #(v len + 1) (as_seq h1_ t) (v i + 2);
-
-    pow2_plus (64 * (v i)) 64;
-    
-    let open FStar.Tactics in 
-    let open FStar.Tactics.Canon in 
-
-    assert_by_tactic (pow2 64 * pow2 (64 * (v i)) * v (Lib.Sequence.index (as_seq h1_ t) (v i + 1)) == 
-    pow2 (64 * v i) * v (Lib.Sequence.index (as_seq h1_ t) (v i + 1)) * pow2 64) canon;
-    
-    lemma_div_plus (lseq_as_nat_ (as_seq h1_ t) (v i + 1)) (pow2 (64 * v i) * v (Lib.Sequence.index (as_seq h1_ t) (v i + 1)))
-  (pow2 64));
-
-
-  let h2 = ST.get() in 
-  upd out len carry;  
-
-  let h3 = ST.get() in 
-  lemma_lseq_as_seq_as_forall (as_seq h2 out) (as_seq h3 out) (v len - 1);
-  lseq_as_nat_definiton (as_seq h3 out) (v len + 1);
-  pow2_plus (getPower c * 2 - 64) 64
-
-
-let upload_one_montg_form #c b =
-  match c with 
-  |P256 -> 
-    upd b (size 0) (u64 1);
-    upd b (size 1) (u64 18446744069414584320);
-    upd b (size 2) (u64 18446744073709551615);
-    upd b (size 3) (u64 4294967294);
-    lemmaToDomain #P256 #DH 1;
-      let h1 = ST.get() in 
-    lemma_lseq_nat_instant_4 (as_seq h1 b); 
-    assert_norm(1 + 18446744069414584320 * pow2 64 + 18446744073709551615 * pow2 (2 * 64) + 4294967294 * pow2 (3 * 64) == pow2 256 % getPrime P256)
-  |P384 -> 
-    upd b (size 0) (u64 18446744069414584321);
-    upd b (size 1) (u64 4294967295);
-    upd b (size 2) (u64 1);
-    upd b (size 3) (u64 0);
-    upd b (size 4) (u64 0);
-    upd b (size 5) (u64 0);
-    lemmaToDomain #P384 #DH 1;
-      let h1 = ST.get() in 
-    assert_norm(18446744069414584321 + 4294967295 * pow2 64 + 1 * pow2 64 * pow2 64 == pow2 384 % getPrime P384);
-    lemma_lseq_nat_instant_6 (as_seq h1 b)
-  |_ -> 
-    uploadZeroImpl b; 
-    reduction_prime_2prime_with_carry_cin #c (u64 1) b b;
-    lemmaToDomain #c #DH 1
-    
-#pop-options
-
-
-let scalar_bit #c #buf_type s n =
-  let h0 = ST.get () in
-  mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (v n / 8)) >>. (n %. 8ul)) 1ul;
-  assert_norm (1 = pow2 1 - 1); 
-  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
-  to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
-
-
-let mul_atomic x y result temp = 
-  let res = mul64_wide x y in 
-  let l0, h0 = to_u64 res, to_u64 (res >>. 64ul) in 
-  upd result (size 0) l0;
-  upd temp (size 0) h0

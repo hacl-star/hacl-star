@@ -32,16 +32,11 @@
 
 
 
-#define Spec_Hash_Definitions_SHA2_224 0
-#define Spec_Hash_Definitions_SHA2_256 1
-#define Spec_Hash_Definitions_SHA2_384 2
-#define Spec_Hash_Definitions_SHA2_512 3
-#define Spec_Hash_Definitions_SHA1 4
-#define Spec_Hash_Definitions_MD5 5
-#define Spec_Hash_Definitions_Blake2S 6
-#define Spec_Hash_Definitions_Blake2B 7
+#define Spec_ECC_Curves_P256 0
+#define Spec_ECC_Curves_P384 1
+#define Spec_ECC_Curves_Default 2
 
-typedef uint8_t Spec_Hash_Definitions_hash_alg;
+typedef uint8_t Spec_ECC_Curves_curve;
 
 
 #define __Hacl_Spec_H_DEFINED

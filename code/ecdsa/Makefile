@@ -12,14 +12,14 @@ test: all
 # Defines rules for producing .checked, .krml, .depend, etc.
 include ../../Makefile.local
 
-FSTAR_ROOTS = Hacl.P256.fst
+FSTAR_ROOTS = Hacl.Impl.EC.LowLevel.fsti
 # P256_BUNDLE=-bundle Hacl.Impl.P256.PointDouble=Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 
 CFLAGS += -I ../../../lib/c -I . -march=native -mtune=native -O3
 export CFLAGS
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(P256_BUNDLE) \
+	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS)  \
 	  -tmpdir dist \
 	  -fbuiltin-uint128 \
 	  -add-include '"lib_intrinsics.h"' \
