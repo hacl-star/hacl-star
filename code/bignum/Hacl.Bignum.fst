@@ -51,7 +51,6 @@ let bn_karatsuba_mul #t len a b res =
   Hacl.Spec.Bignum.bn_karatsuba_mul_lemma (as_seq h0 a) (as_seq h0 b);
   Hacl.Bignum.Karatsuba.bn_karatsuba_mul len a b res
 
-[@@strict_on_arguments [1; 2]]
 let bn_mul #t aLen bLen a b res =
   Hacl.Bignum.Multiplication.bn_mul aLen a bLen b res
 

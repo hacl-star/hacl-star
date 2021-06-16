@@ -1,15 +1,17 @@
 LIBRARY libecdsa
 
 EXPORTS
+  FStar_Pervasives_delta_only
+  FStar_Pervasives_norm
+  Hacl_Bignum_Base_mul_wide_add_u32
+  Hacl_Bignum_Base_mul_wide_add_u64
+  Hacl_Bignum_Base_mul_wide_add2_u32
+  Hacl_Bignum_Base_mul_wide_add2_u64
   Hacl_Impl_EC_LowLevel_mul_p256
   Hacl_Bignum_Addition_bn_sub_eq_len_u32
   Hacl_Bignum_Addition_bn_sub_eq_len_u64
   Hacl_Bignum_Addition_bn_add_eq_len_u32
   Hacl_Bignum_Addition_bn_add_eq_len_u64
-  Hacl_Bignum_Base_mul_wide_add_u32
-  Hacl_Bignum_Base_mul_wide_add_u64
-  Hacl_Bignum_Base_mul_wide_add2_u32
-  Hacl_Bignum_Base_mul_wide_add2_u64
   Hacl_Bignum_Multiplication_bn_mul_u32
   Hacl_Bignum_Multiplication_bn_mul_u64
   Hacl_Bignum_Multiplication_bn_sqr_u32
