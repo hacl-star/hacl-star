@@ -156,9 +156,9 @@ bool test_ecdh()
     memcpy(pk, publicKeyX1,  32);
     memcpy(pk+32, publicKeyY1,  32);
        
-    // bool successDHR = Hacl_P256_ecp256dh_r(result, pk, privateKey);
-    // ok = ok && successDHR;
-    // ok = ok && compare_and_print(32, result, expectedResult);
+    bool successDHR = Hacl_P256_ecp256dh_r(result, pk, privateKey);
+    ok = ok && compare_and_print(32, result, expectedResult);
+    ok = ok && successDHR;
 
 
     return ok;
@@ -226,33 +226,33 @@ void master_branch_test()
     };
 
 
-	// uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	
-	// memcpy(pk, publicKeyX1,  32);
-	// memcpy(pk+32, publicKeyY1,  32);
+	memcpy(pk, publicKeyX1,  32);
+	memcpy(pk+32, publicKeyY1,  32);
 
-	// for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_r(result, pk, privateKey);
+	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_r(result, pk, privateKey);
 
 
-	// t1 = clock();
- //  	a = cpucycles_begin();
+	t1 = clock();
+  	a = cpucycles_begin();
 
- //  	for (int j = 0; j < ROUNDS; j++)
-	// 	Hacl_P256_ecp256dh_r(result, pk, privateKey);
+  	for (int j = 0; j < ROUNDS; j++)
+		Hacl_P256_ecp256dh_r(result, pk, privateKey);
 	
-	// b = cpucycles_end();
+	b = cpucycles_end();
 	
-	// t2 = clock();
-	// clock_t tdiff6 = t2 - t1;
+	t2 = clock();
+	clock_t tdiff6 = t2 - t1;
 
-	// double timeLadderR = (((double)tdiff6) / CLOCKS_PER_SEC);
-	// double nsigsLadderR = ((double)ROUNDS) / timeLadderR;
-	// printf("HACL P-256 ECDH [Scalar Multiplication] PERF Ladder \n");
-	// printf("ECDH %8.2f mul/s\n",nsigsLadderR);
+	double timeLadderR = (((double)tdiff6) / CLOCKS_PER_SEC);
+	double nsigsLadderR = ((double)ROUNDS) / timeLadderR;
+	printf("HACL P-256 ECDH [Scalar Multiplication] PERF Ladder \n");
+	printf("ECDH %8.2f mul/s\n",nsigsLadderR);
 
-	// cycles cdiff6 = b - a;
- //  	printf("cycles per function call:  %" PRIu64 " \n \n",(uint64_t)cdiff6/ROUNDS);
+	cycles cdiff6 = b - a;
+  	printf("cycles per function call:  %" PRIu64 " \n \n",(uint64_t)cdiff6/ROUNDS);
 
 }
 

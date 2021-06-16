@@ -3,7 +3,7 @@
 # test, a Low* test, or just a binary archive (like libcurve.a).
 
 CC = gcc-9
-CFLAGS += -I . -march=native -mtune=native -O2 -Wunused-variable
+CFLAGS += -I . -march=native -mtune=native -O3 -Wunused-variable
 CProfiling += -pg
 
 export CFLAGS
