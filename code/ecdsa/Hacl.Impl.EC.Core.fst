@@ -29,7 +29,13 @@ open Spec.ECC.Curves
 
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0" 
 
-let toDomain #c value result = 
+inline_for_extraction noextract 
+val toDomain_t: #c: curve -> value: felem c -> result: felem c -> Stack unit 
+  (requires fun h -> felem_eval c h value /\ live h value /\ live h result /\ eq_or_disjoint value result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result = toDomain #c (as_nat c h0 value) /\ 
+    felem_eval c h1 result)
+
+let toDomain_t #c value result = 
   push_frame();
     let h0 = ST.get() in 
     let len = getCoordinateLenU64 c in 
@@ -39,9 +45,44 @@ let toDomain #c value result =
     lemmaToDomain #c #DH (as_nat c h0 value);
   pop_frame()  
 
+[@CInline]
+let toDomain_p256 = toDomain_t #P256 
+[@CInline]
+let toDomain_p384 = toDomain_t #P384
+[@CInline]
+let toDomain_generic = toDomain_t #Default
 
-let fromDomain f result = 
+let toDomain #c value result = 
+  match c with 
+  |P256 -> toDomain_p256 value result
+  |P384 -> toDomain_p384 value result
+  |Default -> toDomain_generic value result
+
+
+inline_for_extraction
+val fromDomain_t: #c: curve -> f: felem c -> result: felem c -> Stack unit 
+  (requires fun h -> live h f /\ live h result /\ felem_eval c h f)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    as_nat c h1 result = (as_nat c h0 f * modp_inv2 #c (pow2 (getPower c))) % getPrime c /\ 
+    as_nat c h1 result = fromDomain #c (as_nat c h0 f))
+
+let fromDomain_t f result = 
   montgomery_multiplication_buffer_by_one_dh f result  
+
+[@CInline]
+let fromDomain_p256 = fromDomain_t #P256 
+[@CInline]
+let fromDomain_p384 = fromDomain_t #P384
+[@CInline]
+let fromDomain_generic = fromDomain_t #Default
+
+let fromDomain #c value result = 
+  match c with 
+  |P256 -> fromDomain_p256 value result
+  |P384 -> fromDomain_p384 value result
+  |Default -> fromDomain_generic value result
+
+
 
 
 let pointToDomain #c p result = 
@@ -236,46 +277,11 @@ let norm_ #c p resultPoint tempBuffer =
   lemma_norm #c
     (fromDomainPoint #c #DH (point_as_nat c h0 p)) (point_as_nat c h1 resultPoint)
 
-
-val norm_p256: p: point P256 -> resultPoint: point P256 -> 
-  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P256) -> Stack unit
-  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval P256 h p /\
-    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
-  (ensures fun h0 _ h1 -> point_eval P256 h1 resultPoint /\
-    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
-    let resultPoint = point_as_nat P256 h1 resultPoint in 
-    let pointD = fromDomainPoint #P256 #DH (point_as_nat P256 h0 p) in 
-    let pointNorm = _norm #P256 pointD in
-    pointNorm == resultPoint))
-
+[@CInline]
 let norm_p256 = norm_ #P256 
-
-
-val norm_p384: p: point P384 -> resultPoint: point P384 -> 
-  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P384) -> Stack unit
-  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval P384 h p /\
-    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
-  (ensures fun h0 _ h1 -> point_eval P384 h1 resultPoint /\
-    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
-    let resultPoint = point_as_nat P384 h1 resultPoint in 
-    let pointD = fromDomainPoint #P384 #DH (point_as_nat P384 h0 p) in 
-    let pointNorm = _norm #P384 pointD in
-    pointNorm == resultPoint))
-
+[@CInline]
 let norm_p384 = norm_ #P384 
-
-
-val norm_generic: p: point Default -> resultPoint: point Default -> 
-  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 Default) -> Stack unit
-  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval Default h p /\
-    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
-  (ensures fun h0 _ h1 -> point_eval Default h1 resultPoint /\
-    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
-    let resultPoint = point_as_nat Default h1 resultPoint in 
-    let pointD = fromDomainPoint #Default #DH (point_as_nat Default h0 p) in 
-    let pointNorm = _norm #Default pointD in
-    pointNorm == resultPoint))
-
+[@CInline]
 let norm_generic = norm_ #Default 
 
 let norm #c p resultPoint = 

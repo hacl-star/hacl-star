@@ -18,7 +18,7 @@ open Hacl.EC.Lemmas
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 inline_for_extraction noextract
-val copy_conditional: #c: curve 
+val copy_conditional_: #c: curve 
   -> out: felem c
   -> x: felem c
   -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
@@ -26,8 +26,7 @@ val copy_conditional: #c: curve
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
     if uint_v mask = 0 then as_nat c h1 out == as_nat c h0 out else as_nat c h1 out == as_nat c h0 x)) 
 
-
-let copy_conditional #c out x mask = 
+let copy_conditional_ #c out x mask = 
   let h0 = ST.get() in
   
   let len = getCoordinateLenU64 c in 
@@ -63,15 +62,38 @@ let copy_conditional #c out x mask =
     Lib.Sequence.eq_intro (as_seq h0 x) (as_seq h1 out);
     lemma_lseq_as_seq_as_forall_lr (as_seq h0 x) (as_seq h1 out) (v (getCoordinateLenU64 c)) end
 
+[@CInline]
+let copy_conditional_p256 = copy_conditional_ #P256
+[@CInline]
+let copy_conditional_p384 = copy_conditional_ #P384
+[@CInline]
+let copy_conditional_generic = copy_conditional_ #Default
+
 inline_for_extraction noextract
-val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
+val copy_conditional: #c: curve 
+  -> out: felem c
+  -> x: felem c
+  -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
+  (requires fun h -> live h out /\ live h x /\ disjoint x out)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
+    if uint_v mask = 0 then as_nat c h1 out == as_nat c h0 out else as_nat c h1 out == as_nat c h0 x)) 
+
+let copy_conditional #c out x mask = 
+  match c with 
+  |P256 -> copy_conditional_p256 out x mask
+  |P384 -> copy_conditional_p384 out x mask
+  |Default -> copy_conditional_generic out x mask
+
+
+inline_for_extraction noextract
+val cmovznz4_: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
   Stack unit
   (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)
   (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ (
     if uint_v cin = 0 then as_nat c h1 result == as_nat c h0 x 
     else as_nat c h1 result == as_nat c h0 y))
 
-let cmovznz4 #c cin x y r =
+let cmovznz4_ #c cin x y r =
   let h0 = ST.get() in
   let mask = neq_mask cin (u64 0) in
   
@@ -106,6 +128,27 @@ let cmovznz4 #c cin x y r =
   else begin
     Lib.Sequence.eq_intro (as_seq h0 y) (as_seq h1 r);
     lemma_lseq_as_seq_as_forall_lr (as_seq h0 y) (as_seq h1 r) (v (getCoordinateLenU64 c)) end
+
+[@CInline]
+let cmovznz4_p256 = cmovznz4_ #P256
+[@CInline]
+let cmovznz4_p384 = cmovznz4_ #P384
+[@CInline]
+let cmovznz4_generic = cmovznz4_ #Default
+
+inline_for_extraction noextract
+val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
+  Stack unit
+  (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)
+  (ensures fun h0 _ h1 -> modifies1 result h0 h1 /\ (
+    if uint_v cin = 0 then as_nat c h1 result == as_nat c h0 x 
+    else as_nat c h1 result == as_nat c h0 y))
+
+let cmovznz4 #c cin x y result = 
+  match c with 
+  |P256 -> cmovznz4_p256 cin x y result
+  |P384 -> cmovznz4_p384 cin x y result
+  |Default -> cmovznz4_generic cin x y result
 
 
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})

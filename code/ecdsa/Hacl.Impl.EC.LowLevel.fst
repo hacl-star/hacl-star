@@ -248,7 +248,10 @@ let _shortened_mul #c a b result =
 
 let short_mul_prime #c b result = 
   match c with
-  | P256 -> shortened_mul_prime256 b result
+  | P256 -> 
+    uploadZeroImpl #c result;
+    uploadZeroImpl #c (sub result (getCoordinateLenU64 c) (getCoordinateLenU64 c));
+    shortened_mul_prime256 b result
   | P384 -> 
     push_frame();
     let p = createL p384_prime_list in 

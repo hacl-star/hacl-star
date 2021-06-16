@@ -123,10 +123,3 @@ val fsquarePowN_dh: #c: curve -> n: size_t -> a: felem c -> Stack unit
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
     let k = fromDomain_ #c #DH (as_nat c h0 a) in 
     as_nat c h1 a < getModePrime DH c /\ as_nat c h1 a = toDomain_ #c #DH (pow k (pow2 (v n)) % getModePrime DH c))))
-
-[@CInline]
-val fsquarePowN_dsa: #c: curve -> n: size_t -> a: felem c -> Stack unit 
-  (requires (fun h -> live h a /\ as_nat c h a < getModePrime DSA c)) 
-  (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
-    let k = fromDomain_ #c #DSA (as_nat c h0 a) in 
-    as_nat c h1 a < getModePrime DSA c /\ as_nat c h1 a = toDomain_ #c #DSA (pow k (pow2 (v n)) % getModePrime DSA c))))

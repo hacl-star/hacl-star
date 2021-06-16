@@ -146,13 +146,13 @@ let lemma_change_endian #c a b =
 let changeEndian_u8 len n = nat_from_bytes_be (nat_to_bytes_le #SEC len n)
 
 inline_for_extraction noextract
-val toUint64ChangeEndian: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
+val toUint64ChangeEndian_: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1  /\
     nat_from_bytes_be (as_seq h0 i) == as_nat c h1 o /\
     changedEndian_  #(v (getCoordinateLenU64 c))  (as_seq h1 o) (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
 
-let toUint64ChangeEndian #c i o = 
+let toUint64ChangeEndian_ #c i o = 
     let h0 = ST.get() in 
     let open Lib.ByteSequence in 
   let len : FStar.UInt32.t = getCoordinateLenU64 c in 
@@ -162,3 +162,25 @@ let toUint64ChangeEndian #c i o =
   
   lemma_lseq_nat_from_bytes_test #c (as_seq h1 o) (uints_from_bytes_be (as_seq h0 i));
   uints_from_bytes_be_nat_lemma #U64 #_ #(v (getCoordinateLenU64 c)) (as_seq h0 i)
+
+
+[@CInline]
+let toUint64ChangeEndian_p256 = toUint64ChangeEndian_ #P256
+[@CInline]
+let toUint64ChangeEndian_p384 = toUint64ChangeEndian_ #P384
+[@CInline]
+let toUint64ChangeEndian_generic = toUint64ChangeEndian_ #Default
+
+
+inline_for_extraction noextract
+val toUint64ChangeEndian: #c: curve -> i: lbuffer uint8 (getCoordinateLenU c) -> o: felem c -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1  /\
+    nat_from_bytes_be (as_seq h0 i) == as_nat c h1 o /\
+    changedEndian_  #(v (getCoordinateLenU64 c))  (as_seq h1 o) (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 i)))
+
+let toUint64ChangeEndian #c i o = 
+  match c with
+  | P256 -> toUint64ChangeEndian_p256 i o
+  | P384 -> toUint64ChangeEndian_p384 i o
+  | Default -> toUint64ChangeEndian_generic i o   

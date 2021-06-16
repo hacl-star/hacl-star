@@ -21,8 +21,8 @@ open FStar.Mul
 open Lib.Loops
 open Hacl.Spec.EC.Definition
 
-open Hacl.Spec.ECDSA.Definition
-open Hacl.Impl.MM.Exponent
+open Hacl.Impl.ECDSA.Setup
+open Hacl.Impl.EC.MM.Exponent
 
 
 #set-options " --z3rlimit 200 --max_fuel 0 --max_ifuel 0"

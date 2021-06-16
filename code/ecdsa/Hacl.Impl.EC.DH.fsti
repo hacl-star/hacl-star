@@ -11,7 +11,7 @@ open Spec.ECC
 open Spec.ECC.Curves
 open Spec.DH
 open Hacl.Spec.EC.Definition
-open Hacl.Spec.ECDSA.Definition
+open Hacl.Impl.ECDSA.Setup
 
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel  0"

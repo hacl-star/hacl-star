@@ -125,7 +125,7 @@ let add_dep_prime_p256 x t result =
 
   cc
 
-inline_for_extraction noextract
+[@CInline]
 val mul64: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1) -> temp: lbuffer uint64 (size 1) ->
   Stack unit (requires fun h -> live h result /\ live h temp /\ disjoint result temp)
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc temp) h0 h1 /\ (

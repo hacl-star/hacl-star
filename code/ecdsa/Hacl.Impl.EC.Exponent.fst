@@ -30,7 +30,7 @@ open Hacl.Impl.P521.Exponent
 
 open Hacl.Impl.EC.Setup
 
-open Hacl.Impl.MM.Exponent
+open Hacl.Impl.EC.MM.Exponent
 open Lib.ByteSequence 
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"

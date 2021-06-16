@@ -1,4 +1,4 @@
-module Hacl.Spec.ECDSA.Definition
+module Hacl.Impl.ECDSA.Setup
 
 open Lib.IntTypes
 open Lib.ByteSequence
@@ -22,7 +22,7 @@ open Hacl.Impl.EC.Setup
 
 #set-options "--z3rlimit 100"
 
-inline_for_extraction
+inline_for_extraction noextract
 let p256_order_inverse_list: x: list uint8 {List.Tot.length x == v (getScalarLenBytes P256) /\ 
   lst_as_nat x == getOrder #P256 - 2} = 
   [@inline_let]
@@ -35,8 +35,7 @@ let p256_order_inverse_list: x: list uint8 {List.Tot.length x == v (getScalarLen
     admit();
     x
 
-
-inline_for_extraction
+inline_for_extraction noextract
 let p384_order_inverse_list: x: list uint8 {List.Tot.length x == v (getScalarLenBytes P384) /\ 
   lst_as_nat x == getOrder #P384 - 2} = 
   [@inline_let]
@@ -61,7 +60,7 @@ let order_inverse_list (c: curve): x: list uint8 {List.Tot.length x == v (getSca
   |_ -> admit(); []
 
 
-inline_for_extraction
+
 let prime256order_buffer: x: glbuffer uint8 32ul {witnessed #uint8 #(size 32) x (Lib.Sequence.of_list (order_inverse_list P256)) /\ recallable x} = 
   createL_global (p256_order_inverse_list)
 
@@ -69,8 +68,7 @@ inline_for_extraction
 let prime384order_buffer: x: glbuffer uint8 48ul {witnessed #uint8 #(size 48) x (Lib.Sequence.of_list (order_inverse_list P384)) /\ recallable x} = 
   createL_global (p384_order_inverse_list)
 
-
-inline_for_extraction
+inline_for_extraction noextract
 let order_inverse_buffer (#c: curve): x: glbuffer uint8 (getCoordinateLenU c) {
   witnessed #uint8 #(getCoordinateLenU c) x (Lib.Sequence.of_list (order_inverse_list c)) /\ recallable x} = 
   match c with 

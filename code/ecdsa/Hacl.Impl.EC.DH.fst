@@ -12,7 +12,6 @@ open Spec.ECC
 open Spec.ECDSA
 open Hacl.Spec.EC.Definition
 open Spec.DH
-open Hacl.Spec.ECDSA.Definition
 open Hacl.EC.Lemmas
 
 open Hacl.Impl.EC.LowLevel 

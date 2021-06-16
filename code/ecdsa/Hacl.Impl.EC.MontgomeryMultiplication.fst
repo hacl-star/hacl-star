@@ -131,7 +131,7 @@ let montgomery_multiplication_round_ #c m t t2 =
 
 inline_for_extraction noextract
 val montgomery_multiplication_round: #c: curve -> m: mode -> t: widefelem c 
-  -> round: widefelem c -> 
+  -> round: widefelem c -> t2: lbuffer uint64 (size 2 *! getCoordinateLenU64 c) ->
   Stack unit 
   (requires fun h -> live h t /\ live h round /\ eq_or_disjoint t round)
   (ensures fun h0 _ h1 -> modifies (loc round) h0 h1 /\ (
@@ -141,10 +141,12 @@ val montgomery_multiplication_round: #c: curve -> m: mode -> t: widefelem c
     let prime = getModePrime m c in  
     wide_as_nat c h1 round = (wide_as_nat c h0 t + prime * (((wide_as_nat c h0 t % pow2 64) * v k0) % pow2 64)) / pow2 64))
 
-let montgomery_multiplication_round #c m t round =
+let montgomery_multiplication_round #c m t round t2 =
   push_frame(); 
     let len = getCoordinateLenU64 c in  
-    let t2 = create (size 2 *! len) (u64 0) in 
+
+    (* let t2 = create (size 2 *! len) (u64 0) in  *)
+    
     lemma_create_zero_buffer #U64 (2 * v len) c;
     montgomery_multiplication_round_ #c m t t2;
     let carry = add_long_bn t t2 t2 in 
@@ -179,7 +181,10 @@ val montgomery_multiplication_reduction: #c: curve
 
 let montgomery_multiplication_reduction #c m t result = 
   let h0 = ST.get() in 
-  let len = getCoordinateLenU64 c in 
+  push_frame();
+  
+    let len = getCoordinateLenU64 c in 
+  let t2 = create (size 2 *! len) (u64 0) in 
   
   let inv h (i: nat { i <= uint_v (getCoordinateLenU64 c)}) = 
     let prime = getModePrime m c in  
@@ -196,7 +201,7 @@ let montgomery_multiplication_reduction #c m t result =
 
   for 0ul len inv (fun i -> 
     let h0_ = ST.get() in
-    montgomery_multiplication_round #c m t t; 
+    montgomery_multiplication_round #c m t t t2; 
     let h1_ = ST.get() in
 
     let a0 = wide_as_nat c h0 t in 
@@ -217,6 +222,8 @@ let montgomery_multiplication_reduction #c m t result =
     lemma_mm_reduction #c #m a0 (v i));
 
   let h2 = ST.get() in 
+  pop_frame();
+
   lemma_up_bound0 #c #m (wide_as_nat c h0 t) (wide_as_nat c h2 t); 
   reduction_prime_2prime_with_carry #c #m t result; 
   lemmaFromDomain #c #m (wide_as_nat c h0 t)
@@ -261,45 +268,10 @@ let montgomery_multiplication_buffer_by_one #c m a result =
   
   lemmaFromDomain #c #m (as_nat c h0 a)
 
-[@CInline]
-val montgomery_multiplication_buffer_by_one_dh_p256: a: felem P256 -> result: felem P256 -> 
-  Stack unit
-  (requires (fun h -> live h a /\ felem_eval P256 h a /\ live h result)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
-    let prime = getPrime P256 in 
-    as_nat P256 h1 result = (as_nat P256 h0 a * modp_inv2_prime (pow2 (getPower P256)) prime) % prime /\
-    as_nat P256 h1 result = fromDomain_ #P256 #DH (as_nat P256 h0 a))))
-
-let montgomery_multiplication_buffer_by_one_dh_p256 a result = montgomery_multiplication_buffer_by_one #P256 DH a result
-
-[@CInline]
-val montgomery_multiplication_buffer_by_one_dh_p384: a: felem P384 -> result: felem P384 -> 
-  Stack unit
-  (requires (fun h -> live h a /\ felem_eval P384 h a /\ live h result)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
-    let prime = getPrime P384 in 
-    as_nat P384 h1 result = (as_nat P384 h0 a * modp_inv2_prime (pow2 (getPower P384)) prime) % prime /\
-    as_nat P384 h1 result = fromDomain_ #P384 #DH (as_nat P384 h0 a))))
-
-let montgomery_multiplication_buffer_by_one_dh_p384 a result = montgomery_multiplication_buffer_by_one #P384 DH a result
-
-[@CInline]
-val montgomery_multiplication_buffer_by_one_dh_generic: a: felem Default -> result: felem Default -> 
-  Stack unit
-  (requires (fun h -> live h a /\ felem_eval Default h a /\ live h result)) 
-  (ensures (fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
-    let prime = getPrime Default in 
-    as_nat Default h1 result = (as_nat Default h0 a * modp_inv2_prime (pow2 (getPower Default)) prime) % prime /\
-    as_nat Default h1 result = fromDomain_ #Default #DH (as_nat Default h0 a))))
-
-let montgomery_multiplication_buffer_by_one_dh_generic a result = montgomery_multiplication_buffer_by_one #Default DH a result
 
 
 let montgomery_multiplication_buffer_by_one_dh #c a result = 
-  match c with 
-  |P256 -> montgomery_multiplication_buffer_by_one_dh_p256 a result
-  |P384 -> montgomery_multiplication_buffer_by_one_dh_p384 a result
-  |Default -> montgomery_multiplication_buffer_by_one_dh_generic a result
+  montgomery_multiplication_buffer_by_one #c DH a result
 
 
 
@@ -503,7 +475,7 @@ let fsquarePowN #c m n a =
   
   for (size 0) n (inv h0) (fun x -> 
     let h0_ = ST.get() in 
-     montgomery_square_buffer m a a;
+     montgomery_square_buffer_dh a a;
      let k = fromDomain_ #c #m (as_nat c h0 a) in  
      inDomain_mod_is_not_mod #c #m (fromDomain_ #c #m (as_nat c h0_ a) * fromDomain_ #c #m (as_nat c h0_ a)); 
      lemmaFromDomainToDomainModuloPrime #c #m (let k = fromDomain_ #c #m (as_nat c h0 a) in pow k (pow2 (v x)));
@@ -515,7 +487,7 @@ let fsquarePowN #c m n a =
   
   inDomain_mod_is_not_mod #c #m (let k = fromDomain_ #c #m (as_nat c h0 a) in pow k (pow2 (v n)))
 
-[@CInline]
+(* [@CInline]
 val fsquarePowN_dh_p256: n: size_t -> a: felem P256 -> Stack unit 
   (requires (fun h -> live h a /\ as_nat P256 h a < getModePrime DH P256)) 
   (ensures (fun h0 _ h1 -> modifies (loc a) h0 h1 /\ (
@@ -543,15 +515,5 @@ val fsquarePowN_dh_generic: n: size_t -> a: felem Default -> Stack unit
     as_nat Default h1 a = toDomain_ #Default #DH (pow k (pow2 (v n)) % getModePrime DH Default))))
 
 let fsquarePowN_dh_generic n a = fsquarePowN #Default DH n a 
-
-let fsquarePowN_dh #c n a = 
-  match c with 
-  |P256 -> fsquarePowN_dh_p256 n a 
-  |P384 -> fsquarePowN_dh_p384 n a 
-  |Default -> fsquarePowN_dh_generic n a
-
-
-
-
-
-let fsquarePowN_dsa #c n a = fsquarePowN #c DSA n a 
+ *)
+let fsquarePowN_dh #c n a = fsquarePowN #c DH n a

@@ -54,7 +54,19 @@ let fromForm #c i o =
   uints_to_bytes_be_nat_lemma #U64 #SEC (v (getCoordinateLenU64 c)) (as_nat c h0 i)
 
 
-let fromFormPoint #c i o = 
+inline_for_extraction noextract
+val fromFormPoint_: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ point_eval c h i /\ (
+    let xCoordinate, yCoordinate, _ = point_as_nat c h i in 
+    xCoordinate < pow2 (getPower c) /\ yCoordinate < pow2 (getPower c)))
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\ (
+    let coordinateX_u64, coordinateY_u64, _ = point_as_nat c h0 i in 
+    let coordinateX_u8, coordinateY_u8 = getXAff8 #c o, getYAff8 #c o in
+    as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateX_u64 /\
+    as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateY_u64))
+
+
+let fromFormPoint_ #c i o = 
   let len = getCoordinateLenU64 c in 
   let scalarLen = getCoordinateLenU c in 
   
@@ -66,6 +78,21 @@ let fromFormPoint #c i o =
 
   fromForm #c resultBufferX resultX;
   fromForm #c resultBufferY resultY
+
+[@CInline]
+let fromFormPoint_p256 = fromFormPoint_ #P256 
+[@CInline]
+let fromFormPoint_p384 = fromFormPoint_ #P384 
+[@CInline]
+let fromFormPoint_generic = fromFormPoint_ #Default 
+
+let fromFormPoint #c i o = 
+  match c with 
+  |P256 -> fromFormPoint_p256 i o 
+  |P384 -> fromFormPoint_p384 i o
+  |Default -> fromFormPoint_generic i o 
+
+
 
 
 inline_for_extraction noextract
@@ -82,8 +109,19 @@ let toForm #c i o =
   uints_from_bytes_be_nat_lemma #U64 #_ #(v (getCoordinateLenU64 c))  (as_seq h0 i);
   lemma_lseq_nat_from_bytes (as_seq h1 o)
 
+
+inline_for_extraction noextract
+val toFormPoint_: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ (
+    let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (getXAff8 i))  in 
+    let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (getYAff8 i)) in 
+    let x, y, z = as_nat c h1 (getX o), as_nat c h1 (getY o), as_nat c h1 (getZ o) in  
+    let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
+    x == pointScalarXSeq /\ y == pointScalarYSeq /\ z == 1 /\
+    x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
       
-let toFormPoint #c i o = 
+let toFormPoint_ #c i o = 
   let len = getCoordinateLenU64 c in 
   let coordLen = getCoordinateLenU c in 
   
@@ -99,6 +137,18 @@ let toFormPoint #c i o =
   toForm #c pointScalarY pointY;
   uploadOneImpl #c pointZ
 
+[@CInline]
+let toFormPoint_p256 = toFormPoint_ #P256
+[@CInline]
+let toFormPoint_p384 = toFormPoint_ #P384
+[@CInline]
+let toFormPoint_generic = toFormPoint_ #Default
+
+let toFormPoint #c i o = 
+  match c with 
+  |P256 -> toFormPoint_p256 i o 
+  |P384 -> toFormPoint_p384 i o 
+  |Default -> toFormPoint_generic i o 
 
 
 inline_for_extraction noextract
@@ -169,7 +219,12 @@ let isPointAtInfinityPublic #c p =
   isZero_uint64_nCT #c zCoordinate 
 
 
-let isPointOnCurvePublic #c p = 
+inline_for_extraction noextract
+val isPointOnCurvePublic_: #c: curve -> p: point c -> Stack bool
+  (requires fun h -> live h p /\ felem_eval c h (getX p) /\ felem_eval c h (getY p) /\ as_nat c h (getZ p) == 1)
+  (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ r == isPointOnCurve #c (point_as_nat c h0 p))
+
+let isPointOnCurvePublic_ #c p = 
   push_frame(); 
   let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
   let y2Buffer = create sz (u64 0) in 
@@ -188,6 +243,22 @@ let isPointOnCurvePublic #c p =
   let z = not (eq_0_u64 r) in 
   pop_frame();
   z
+
+[@CInline]
+let isPointOnCurvePublic_p256 = isPointOnCurvePublic_ #P256
+[@CInline]
+let isPointOnCurvePublic_p384 = isPointOnCurvePublic_ #P384
+[@CInline]
+let isPointOnCurvePublic_generic = isPointOnCurvePublic_ #Default
+
+
+let isPointOnCurvePublic #c p = 
+  match c with 
+  |P256 -> isPointOnCurvePublic_p256 p
+  |P384 -> isPointOnCurvePublic_p384 p 
+  |Default -> isPointOnCurvePublic_generic p 
+
+
 
 inline_for_extraction noextract
 val isCoordinateValid: #c: curve -> p: point c -> Stack bool 
@@ -296,12 +367,13 @@ let verifyQValidCurvePoint_ #c pubKey tempBuffer =
     let h1 = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKey;
     let belongsToCurve = isPointOnCurvePublic pubKey in 
-    let orderCorrect = 
-      if not (isPrimeGroup c) then 
-	let orderCorrect = isOrderCorrect pubKey tempBuffer in 
-	orderCorrect 
-      else true in 
-    coordinatesValid && belongsToCurve && orderCorrect end
+
+    [@inline_let]
+    let r = normalize_term (isPrimeGroup c) in 
+    match r with 
+    |true -> coordinatesValid && belongsToCurve
+    |false -> let orderCorrect = isOrderCorrect pubKey tempBuffer in coordinatesValid && belongsToCurve && orderCorrect
+  end
 
 
 val verifyQValidCurvePoint_p256: pubKey: point P256 

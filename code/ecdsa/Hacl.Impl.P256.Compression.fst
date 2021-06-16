@@ -13,7 +13,6 @@ open Hacl.Impl.EC.Arithmetics
 
 open Hacl.Impl.EC.LowLevel.RawCmp
 open Hacl.EC.Lemmas
-open Hacl.Spec.ECDSA.Definition
 
 open Hacl.Spec.MontgomeryMultiplication
 

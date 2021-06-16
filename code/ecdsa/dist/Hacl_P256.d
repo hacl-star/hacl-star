@@ -7,4 +7,4 @@
  kremlin/internal/fstar_int.h kremlin/internal/compat.h \
  kremlin/internal/FStar_UInt_8_16_32_64.h \
  kremlin/internal/LowStar_Endianness.h kremlin/lowstar_endianness.h \
- lib_intrinsics.h Hacl_Kremlib.h
+ lib_intrinsics.h Hacl_Kremlib.h Hacl_Hash_SHA2.h Hacl_Hash_Core_SHA2.h

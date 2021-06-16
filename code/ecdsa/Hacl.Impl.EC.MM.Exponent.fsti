@@ -1,4 +1,4 @@
-module Hacl.Impl.MM.Exponent
+module Hacl.Impl.EC.MM.Exponent
 
 open FStar.HyperStack.All
 open FStar.HyperStack

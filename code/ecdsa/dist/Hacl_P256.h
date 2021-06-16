@@ -31,6 +31,26 @@
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Hash_SHA2.h"
+
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
+uint64_t
+Hacl_P256_ecdsa_sign_p256_sha2(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
 
 uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 

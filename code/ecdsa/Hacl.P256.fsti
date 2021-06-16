@@ -16,11 +16,11 @@ open Hacl.Spec.EC.Definition
 open Spec.Hash.Definitions
 
 open Spec.DH
-open Hacl.Spec.ECDSA.Definition
 open Hacl.Impl.P256.Compression
 open Hacl.Spec.MontgomeryMultiplication
 
-(* [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
+
+[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
   \n The private key and the nonce are expected to be less than the curve order.")]
 val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) 
@@ -47,8 +47,7 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
     ))    
- *)
-
+  
 (*)
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
@@ -406,13 +405,10 @@ val ecp384dh_i:
  *)
 
 
-(*
+
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
-  ")]
-*)
-
-(* 
+  ")] 
 val ecp256dh_r:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
@@ -439,7 +435,7 @@ val ecp256dh_r:
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")]
-*)
+
 
 
 val ecp384dh_r:

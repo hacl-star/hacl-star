@@ -1,8 +1,6 @@
 LIBRARY libecdsa
 
 EXPORTS
-  Hacl_P256_ecp256dh_i
-  Hacl_P256_ecp256dh_r
   Hacl_Hash_Definitions_word_len
   Hacl_Hash_Definitions_block_len
   Hacl_Hash_Definitions_hash_word_len
@@ -35,6 +33,9 @@ EXPORTS
   Hacl_Hash_SHA2_hash_256
   Hacl_Hash_SHA2_hash_384
   Hacl_Hash_SHA2_hash_512
+  Hacl_P256_ecdsa_sign_p256_sha2
+  Hacl_P256_ecp256dh_i
+  Hacl_P256_ecp256dh_r
   Hacl_Impl_Blake2_Core_uu___is_M32
   Hacl_Impl_Blake2_Core_uu___is_M128
   Hacl_Impl_Blake2_Core_uu___is_M256
