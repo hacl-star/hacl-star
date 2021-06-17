@@ -52,6 +52,160 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *k
 );
 
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
+uint64_t
+Hacl_P256_ecdsa_sign_p256_sha384(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
+
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
+uint64_t
+Hacl_P256_ecdsa_sign_p256_sha512(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
+
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order. 
+  
+ The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
+*/
+uint64_t
+Hacl_P256_ecdsa_sign_p256_without_hash(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+);
+
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
+bool
+Hacl_P256_ecdsa_verif_p256_sha2(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
+
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
+bool
+Hacl_P256_ecdsa_verif_p256_sha384(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
+
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
+bool
+Hacl_P256_ecdsa_verif_p256_sha512(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
+
+/*
+This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification.
+  
+ The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
+*/
+bool
+Hacl_P256_ecdsa_verif_without_hash(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
+
+/*
+ Public key verification function. 
+  
+ This code is not side-channel resistant.
+  
+ Input: pub(lic)Key: uint8[64]. 
+  
+ Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
+ Verify that the public key is not the “point at infinity”, represented as O. 
+ Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
+ Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
+ Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  
+ The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+*/
+bool Hacl_P256_verify_q(uint8_t *pubKey);
+
 uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
 /*

@@ -271,12 +271,32 @@ let cmp_felem_felem_u64 #c a b =
 
 
 inline_for_extraction noextract
+val cmp_felem_felem_bool_: #c: curve -> a: felem c -> b: felem c -> Stack bool
+  (requires fun h -> live h a /\ live h b)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
+    if as_nat c h0 a = as_nat c h0 b then r == true else r == false))
+
+let cmp_felem_felem_bool_ #c a b = 
+  let r = lognot (cmp_felem_felem_u64 a b) in
+    lognot_lemma (cmp_felem_felem_u64 a b);   
+  Hacl.Impl.EC.LowLevel.RawCmp.unsafe_bool_of_u64 r
+
+[@CInline]
+let cmp_felem_felem_bool_p256 = cmp_felem_felem_bool_ #P256
+[@CInline]
+let cmp_felem_felem_bool_p384 = cmp_felem_felem_bool_ #P384
+[@CInline]
+let cmp_felem_felem_bool_generic = cmp_felem_felem_bool_ #Default
+
+
+inline_for_extraction noextract
 val cmp_felem_felem_bool: #c: curve -> a: felem c -> b: felem c -> Stack bool
   (requires fun h -> live h a /\ live h b)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
     if as_nat c h0 a = as_nat c h0 b then r == true else r == false))
 
 let cmp_felem_felem_bool #c a b = 
-  let r = lognot (cmp_felem_felem_u64 a b) in
-    lognot_lemma (cmp_felem_felem_u64 a b);   
-  Hacl.Impl.EC.LowLevel.RawCmp.unsafe_bool_of_u64 r
+  match c with 
+  |P256 -> cmp_felem_felem_bool_p256 a b 
+  |P384 -> cmp_felem_felem_bool_p384 a b 
+  |Default -> cmp_felem_felem_bool_generic a b

@@ -58,6 +58,35 @@ static inline void cmovznz4_p256(uint64_t cin, uint64_t *x, uint64_t *y, uint64_
   }
 }
 
+static inline bool cmp_felem_felem_bool_p256(uint64_t *a, uint64_t *b)
+{
+  uint64_t tmp1 = (uint64_t)0U;
+  tmp1 = (uint64_t)18446744073709551615U;
+  uint32_t len0 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len0; i++)
+  {
+    uint64_t a_i = a[i];
+    uint64_t b_i = b[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, b_i);
+    uint64_t tmp0 = tmp1;
+    tmp1 = r_i & tmp0;
+  }
+  uint64_t r = ~tmp1;
+  uint64_t tmp = (uint64_t)0U;
+  tmp = (uint64_t)18446744073709551615U;
+  uint32_t len = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t a_i = a[i];
+    uint64_t b_i = b[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, b_i);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t uu____0 = tmp;
+  return r == (uint64_t)0U;
+}
+
 static inline uint64_t mul_wide_add2_u64(uint64_t a, uint64_t b, uint64_t c_in, uint64_t *out)
 {
   uint64_t out0 = out[0U];
@@ -97,6 +126,27 @@ bn_add_eq_len_u64(uint32_t aLen, uint64_t *a, uint64_t *b, uint64_t *res)
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
   }
   return c;
+}
+
+static inline uint64_t mod_inv_uint64(uint64_t n0)
+{
+  uint64_t alpha = (uint64_t)9223372036854775808U;
+  uint64_t beta = n0;
+  uint64_t ub = (uint64_t)0U;
+  uint64_t vb = (uint64_t)0U;
+  ub = (uint64_t)1U;
+  vb = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  {
+    uint64_t us = ub;
+    uint64_t vs = vb;
+    uint64_t u_is_odd = (uint64_t)0U - (us & (uint64_t)1U);
+    uint64_t beta_if_u_is_odd = beta & u_is_odd;
+    ub = ((us ^ beta_if_u_is_odd) >> (uint32_t)1U) + (us & beta_if_u_is_odd);
+    uint64_t alpha_if_u_is_odd = alpha & u_is_odd;
+    vb = (vs >> (uint32_t)1U) + alpha_if_u_is_odd;
+  }
+  return vb;
 }
 
 static inline void felem_add_p256(uint64_t *a, uint64_t *b, uint64_t *out)
@@ -311,6 +361,145 @@ static inline void felem_sub_p256(uint64_t *a, uint64_t *b, uint64_t *out)
   uint64_t r = cc3;
 }
 
+static void mul_atomic(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
+{
+  uint128_t res = (uint128_t)x * y;
+  uint64_t l0 = (uint64_t)res;
+  uint64_t h0 = (uint64_t)(res >> (uint32_t)64U);
+  result[0U] = l0;
+  temp[0U] = h0;
+}
+
+static inline void reduction_prime_2prime_order_p256(uint64_t *x, uint64_t *result)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t tempBuffer[len];
+  memset(tempBuffer, 0U, len * sizeof (uint64_t));
+  uint64_t
+  p[4U] =
+    {
+      (uint64_t)17562291160714782033U,
+      (uint64_t)13611842547513532036U,
+      (uint64_t)18446744073709551615U,
+      (uint64_t)18446744069414584320U
+    };
+  uint32_t len1 = (uint32_t)4U;
+  uint64_t c = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < len1 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = x[(uint32_t)4U * i];
+    uint64_t t20 = p[(uint32_t)4U * i];
+    uint64_t *res_i0 = tempBuffer + (uint32_t)4U * i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, res_i0);
+    uint64_t t10 = x[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = tempBuffer + (uint32_t)4U * i + (uint32_t)1U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, res_i1);
+    uint64_t t11 = x[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = tempBuffer + (uint32_t)4U * i + (uint32_t)2U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, res_i2);
+    uint64_t t12 = x[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = tempBuffer + (uint32_t)4U * i + (uint32_t)3U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, res_i);
+  }
+  for (uint32_t i = len1 / (uint32_t)4U * (uint32_t)4U; i < len1; i++)
+  {
+    uint64_t t1 = x[i];
+    uint64_t t2 = p[i];
+    uint64_t *res_i = tempBuffer + i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, res_i);
+  }
+  uint64_t r = c;
+  uint64_t r0 = r;
+  cmovznz4_p256(r0, tempBuffer, x, result);
+}
+
+static void felem_add_ecdsa_P256(uint64_t *arg1, uint64_t *arg2, uint64_t *out)
+{
+  uint32_t len0 = (uint32_t)4U;
+  uint64_t c0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < len0 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = arg1[(uint32_t)4U * i];
+    uint64_t t20 = arg2[(uint32_t)4U * i];
+    uint64_t *res_i0 = out + (uint32_t)4U * i;
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, res_i0);
+    uint64_t t10 = arg1[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = arg2[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = out + (uint32_t)4U * i + (uint32_t)1U;
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, res_i1);
+    uint64_t t11 = arg1[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = arg2[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = out + (uint32_t)4U * i + (uint32_t)2U;
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, res_i2);
+    uint64_t t12 = arg1[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = arg2[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = out + (uint32_t)4U * i + (uint32_t)3U;
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, res_i);
+  }
+  for (uint32_t i = len0 / (uint32_t)4U * (uint32_t)4U; i < len0; i++)
+  {
+    uint64_t t1 = arg1[i];
+    uint64_t t2 = arg2[i];
+    uint64_t *res_i = out + i;
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, res_i);
+  }
+  uint64_t t = c0;
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t tempBuffer[len];
+  memset(tempBuffer, 0U, len * sizeof (uint64_t));
+  uint64_t tempBufferForSubborrow = (uint64_t)0U;
+  uint64_t
+  p[4U] =
+    {
+      (uint64_t)17562291160714782033U,
+      (uint64_t)13611842547513532036U,
+      (uint64_t)18446744073709551615U,
+      (uint64_t)18446744069414584320U
+    };
+  uint32_t len1 = (uint32_t)4U;
+  uint64_t c = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < len1 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = out[(uint32_t)4U * i];
+    uint64_t t20 = p[(uint32_t)4U * i];
+    uint64_t *res_i0 = tempBuffer + (uint32_t)4U * i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, res_i0);
+    uint64_t t10 = out[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = tempBuffer + (uint32_t)4U * i + (uint32_t)1U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, res_i1);
+    uint64_t t11 = out[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = tempBuffer + (uint32_t)4U * i + (uint32_t)2U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, res_i2);
+    uint64_t t12 = out[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = tempBuffer + (uint32_t)4U * i + (uint32_t)3U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, res_i);
+  }
+  for (uint32_t i = len1 / (uint32_t)4U * (uint32_t)4U; i < len1; i++)
+  {
+    uint64_t t1 = out[i];
+    uint64_t t2 = p[i];
+    uint64_t *res_i = tempBuffer + i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, res_i);
+  }
+  uint64_t r = c;
+  uint64_t carry0 = r;
+  uint64_t
+  carry =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
+      t,
+      (uint64_t)0U,
+      &tempBufferForSubborrow);
+  cmovznz4_p256(carry, tempBuffer, out, out);
+}
+
 static inline void
 montgomery_multiplication_buffer_dh_p256(uint64_t *a, uint64_t *b, uint64_t *result)
 {
@@ -357,16 +546,17 @@ montgomery_multiplication_buffer_dh_p256(uint64_t *a, uint64_t *b, uint64_t *res
   for (uint32_t i0 = (uint32_t)0U; i0 < len10; i0++)
   {
     uint64_t t10 = t[0U];
+    uint64_t *uu____0 = t2;
     uint32_t len30 = (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < len30; i++)
     {
-      t2[i] = (uint64_t)0U;
+      uu____0[i] = (uint64_t)0U;
     }
-    uint64_t *uu____0 = t2 + (uint32_t)4U;
+    uint64_t *uu____1 = t2 + (uint32_t)4U;
     uint32_t len31 = (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < len31; i++)
     {
-      uu____0[i] = (uint64_t)0U;
+      uu____1[i] = (uint64_t)0U;
     }
     uint64_t temp = (uint64_t)0U;
     uint64_t f0 = (uint64_t)0xffffffffffffffffU;
@@ -477,6 +667,203 @@ montgomery_multiplication_buffer_dh_p256(uint64_t *a, uint64_t *b, uint64_t *res
   cmovznz4_p256(carry, tempBuffer, x_, result);
 }
 
+static inline void
+montgomery_multiplication_buffer_dsa_p256(uint64_t *a, uint64_t *b, uint64_t *result)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
+  uint64_t t[(uint32_t)2U * len];
+  memset(t, 0U, (uint32_t)2U * len * sizeof (uint64_t));
+  uint32_t len1 = (uint32_t)4U;
+  uint32_t resLen0 = len1 + len1;
+  memset(t, 0U, resLen0 * sizeof (uint64_t));
+  for (uint32_t i0 = (uint32_t)0U; i0 < len1; i0++)
+  {
+    uint64_t bj = b[i0];
+    uint64_t *res_j = t + i0;
+    uint64_t c = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len1 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t a_i = a[(uint32_t)4U * i];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+      c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+      uint64_t a_i0 = a[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+      c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+      uint64_t a_i1 = a[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+      c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+      uint64_t a_i2 = a[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+      c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+    }
+    for (uint32_t i = len1 / (uint32_t)4U * (uint32_t)4U; i < len1; i++)
+    {
+      uint64_t a_i = a[i];
+      uint64_t *res_i = res_j + i;
+      c = mul_wide_add2_u64(a_i, bj, c, res_i);
+    }
+    uint64_t r = c;
+    t[len1 + i0] = r;
+  }
+  uint32_t len10 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len10);
+  uint64_t t2[(uint32_t)2U * len10];
+  memset(t2, 0U, (uint32_t)2U * len10 * sizeof (uint64_t));
+  for (uint32_t i0 = (uint32_t)0U; i0 < len10; i0++)
+  {
+    uint64_t k0 = mod_inv_uint64((uint64_t)17562291160714782033U);
+    uint64_t t10 = t[0U];
+    uint64_t y = (uint64_t)0U;
+    uint64_t temp = (uint64_t)0U;
+    mul_atomic(t10, k0, &y, &temp);
+    uint64_t y_ = y;
+    uint64_t *uu____0 = t2;
+    uint32_t len30 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len30; i++)
+    {
+      uu____0[i] = (uint64_t)0U;
+    }
+    uint64_t *uu____1 = t2 + (uint32_t)4U;
+    uint32_t len31 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len31; i++)
+    {
+      uu____1[i] = (uint64_t)0U;
+    }
+    uint64_t
+    p[4U] =
+      {
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
+      };
+    uint32_t len32 = (uint32_t)4U;
+    uint64_t bBuffer = y_;
+    uint64_t *partResult = t2;
+    uint32_t resLen = len32 + (uint32_t)1U;
+    memset(partResult, 0U, resLen * sizeof (uint64_t));
+    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)1U; i1++)
+    {
+      uint64_t bj = (&bBuffer)[i1];
+      uint64_t *res_j = partResult + i1;
+      uint64_t c = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len32 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t a_i = p[(uint32_t)4U * i];
+        uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+        c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+        uint64_t a_i0 = p[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+        c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+        uint64_t a_i1 = p[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+        c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+        uint64_t a_i2 = p[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+        c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+      }
+      for (uint32_t i = len32 / (uint32_t)4U * (uint32_t)4U; i < len32; i++)
+      {
+        uint64_t a_i = p[i];
+        uint64_t *res_i = res_j + i;
+        c = mul_wide_add2_u64(a_i, bj, c, res_i);
+      }
+      uint64_t r = c;
+      partResult[len32 + i1] = r;
+    }
+    uint32_t len33 = (uint32_t)4U * (uint32_t)2U;
+    uint64_t c = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len33 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = t[(uint32_t)4U * i];
+      uint64_t t210 = t2[(uint32_t)4U * i];
+      uint64_t *res_i0 = t2 + (uint32_t)4U * i;
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+      uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = t2 + (uint32_t)4U * i + (uint32_t)1U;
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+      uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = t2 + (uint32_t)4U * i + (uint32_t)2U;
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+      uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = t2 + (uint32_t)4U * i + (uint32_t)3U;
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+    }
+    for (uint32_t i = len33 / (uint32_t)4U * (uint32_t)4U; i < len33; i++)
+    {
+      uint64_t t1 = t[i];
+      uint64_t t21 = t2[i];
+      uint64_t *res_i = t2 + i;
+      c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+    }
+    uint64_t carry = c;
+    uint32_t len3 = (uint32_t)7U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
+    {
+      uint64_t elem = t2[(uint32_t)1U + i];
+      t[i] = elem;
+    }
+    t[len3] = carry;
+  }
+  uint32_t len2 = (uint32_t)4U;
+  uint64_t cin = t[len2];
+  uint64_t *x_ = t;
+  uint32_t len3 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len3);
+  uint64_t tempBuffer[len3];
+  memset(tempBuffer, 0U, len3 * sizeof (uint64_t));
+  uint64_t tempBufferForSubborrow = (uint64_t)0U;
+  uint64_t
+  p[4U] =
+    {
+      (uint64_t)17562291160714782033U,
+      (uint64_t)13611842547513532036U,
+      (uint64_t)18446744073709551615U,
+      (uint64_t)18446744069414584320U
+    };
+  uint32_t len4 = (uint32_t)4U;
+  uint64_t c = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < len4 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = x_[(uint32_t)4U * i];
+    uint64_t t210 = p[(uint32_t)4U * i];
+    uint64_t *res_i0 = tempBuffer + (uint32_t)4U * i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t210, res_i0);
+    uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t211 = p[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = tempBuffer + (uint32_t)4U * i + (uint32_t)1U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t211, res_i1);
+    uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t212 = p[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = tempBuffer + (uint32_t)4U * i + (uint32_t)2U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t212, res_i2);
+    uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = tempBuffer + (uint32_t)4U * i + (uint32_t)3U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t21, res_i);
+  }
+  for (uint32_t i = len4 / (uint32_t)4U * (uint32_t)4U; i < len4; i++)
+  {
+    uint64_t t1 = x_[i];
+    uint64_t t21 = p[i];
+    uint64_t *res_i = tempBuffer + i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t21, res_i);
+  }
+  uint64_t r = c;
+  uint64_t carry0 = r;
+  uint64_t
+  carry =
+    Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
+      cin,
+      (uint64_t)0U,
+      &tempBufferForSubborrow);
+  cmovznz4_p256(carry, tempBuffer, x_, result);
+}
+
 static inline void montgomery_square_buffer_dh_p256(uint64_t *a, uint64_t *result)
 {
   uint32_t len = (uint32_t)4U;
@@ -536,16 +923,17 @@ static inline void montgomery_square_buffer_dh_p256(uint64_t *a, uint64_t *resul
   for (uint32_t i0 = (uint32_t)0U; i0 < len10; i0++)
   {
     uint64_t t10 = t[0U];
+    uint64_t *uu____0 = t2;
     uint32_t len30 = (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < len30; i++)
     {
-      t2[i] = (uint64_t)0U;
+      uu____0[i] = (uint64_t)0U;
     }
-    uint64_t *uu____0 = t2 + (uint32_t)4U;
+    uint64_t *uu____1 = t2 + (uint32_t)4U;
     uint32_t len31 = (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < len31; i++)
     {
-      uu____0[i] = (uint64_t)0U;
+      uu____1[i] = (uint64_t)0U;
     }
     uint64_t temp = (uint64_t)0U;
     uint64_t f0 = (uint64_t)0xffffffffffffffffU;
@@ -656,17 +1044,18 @@ static inline void montgomery_square_buffer_dh_p256(uint64_t *a, uint64_t *resul
   cmovznz4_p256(carry, tempBuffer, x_, result);
 }
 
-static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uint64_t *result)
+static inline void
+montgomery_ladder_power_p256_dsa(uint64_t *a, const uint8_t *scalar, uint64_t *result)
 {
   uint32_t len = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
   uint64_t p[len];
   memset(p, 0U, len * sizeof (uint64_t));
-  p[0U] = (uint64_t)1U;
-  p[1U] = (uint64_t)18446744069414584320U;
-  p[2U] = (uint64_t)18446744073709551615U;
-  p[3U] = (uint64_t)4294967294U;
-  memcpy(a, result, (uint32_t)4U * sizeof (uint64_t));
+  p[0U] = (uint64_t)884452912994769583U;
+  p[1U] = (uint64_t)4834901526196019579U;
+  p[2U] = (uint64_t)0U;
+  p[3U] = (uint64_t)4294967295U;
+  memcpy(result, a, (uint32_t)4U * sizeof (uint64_t));
   uint32_t scalarLen = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U;
   for (uint32_t i0 = (uint32_t)0U; i0 < scalarLen; i0++)
   {
@@ -722,38 +1111,69 @@ static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uin
     memset(t20, 0U, (uint32_t)2U * len21 * sizeof (uint64_t));
     for (uint32_t i1 = (uint32_t)0U; i1 < len21; i1++)
     {
+      uint64_t k0 = mod_inv_uint64((uint64_t)17562291160714782033U);
       uint64_t t10 = t[0U];
+      uint64_t y = (uint64_t)0U;
+      uint64_t temp = (uint64_t)0U;
+      mul_atomic(t10, k0, &y, &temp);
+      uint64_t y_ = y;
+      uint64_t *uu____0 = t20;
       uint32_t len40 = (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < len40; i++)
       {
-        t20[i] = (uint64_t)0U;
+        uu____0[i] = (uint64_t)0U;
       }
-      uint64_t *uu____0 = t20 + (uint32_t)4U;
+      uint64_t *uu____1 = t20 + (uint32_t)4U;
       uint32_t len41 = (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < len41; i++)
       {
-        uu____0[i] = (uint64_t)0U;
+        uu____1[i] = (uint64_t)0U;
       }
-      uint64_t temp = (uint64_t)0U;
-      uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-      uint64_t f1 = (uint64_t)0xffffffffU;
-      uint64_t f3 = (uint64_t)0xffffffff00000001U;
-      uint64_t *o0 = t20;
-      uint64_t *o1 = t20 + (uint32_t)1U;
-      uint64_t *o2 = t20 + (uint32_t)2U;
-      uint64_t *o3 = t20 + (uint32_t)3U;
-      uint64_t *o4 = t20 + (uint32_t)4U;
-      mul64(f0, t10, o0, &temp);
-      uint64_t h0 = temp;
-      mul64(f1, t10, o1, &temp);
-      uint64_t l = o1[0U];
-      uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-      uint64_t h = temp;
-      o2[0U] = h + c1;
-      mul64(f3, t10, o3, o4);
-      uint32_t len42 = (uint32_t)4U * (uint32_t)2U;
+      uint64_t
+      p1[4U] =
+        {
+          (uint64_t)17562291160714782033U,
+          (uint64_t)13611842547513532036U,
+          (uint64_t)18446744073709551615U,
+          (uint64_t)18446744069414584320U
+        };
+      uint32_t len42 = (uint32_t)4U;
+      uint64_t bBuffer = y_;
+      uint64_t *partResult = t20;
+      uint32_t resLen = len42 + (uint32_t)1U;
+      memset(partResult, 0U, resLen * sizeof (uint64_t));
+      for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)1U; i2++)
+      {
+        uint64_t bj = (&bBuffer)[i2];
+        uint64_t *res_j = partResult + i2;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len42 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = p1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = p1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = p1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = p1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len42 / (uint32_t)4U * (uint32_t)4U; i < len42; i++)
+        {
+          uint64_t a_i = p1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r = c;
+        partResult[len42 + i2] = r;
+      }
+      uint32_t len43 = (uint32_t)4U * (uint32_t)2U;
       uint64_t c = (uint64_t)0U;
-      for (uint32_t i = (uint32_t)0U; i < len42 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      for (uint32_t i = (uint32_t)0U; i < len43 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
       {
         uint64_t t1 = t[(uint32_t)4U * i];
         uint64_t t210 = t20[(uint32_t)4U * i];
@@ -772,7 +1192,7 @@ static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uin
         uint64_t *res_i = t20 + (uint32_t)4U * i + (uint32_t)3U;
         c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
       }
-      for (uint32_t i = len42 / (uint32_t)4U * (uint32_t)4U; i < len42; i++)
+      for (uint32_t i = len43 / (uint32_t)4U * (uint32_t)4U; i < len43; i++)
       {
         uint64_t t1 = t[i];
         uint64_t t21 = t20[i];
@@ -799,10 +1219,10 @@ static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uin
     uint64_t
     p10[4U] =
       {
-        (uint64_t)0xffffffffffffffffU,
-        (uint64_t)0xffffffffU,
-        (uint64_t)0U,
-        (uint64_t)0xffffffff00000001U
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
       };
     uint32_t len50 = (uint32_t)4U;
     uint64_t c1 = (uint64_t)0U;
@@ -846,8 +1266,8 @@ static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uin
     uint64_t t0[(uint32_t)2U * len12];
     memset(t0, 0U, (uint32_t)2U * len12 * sizeof (uint64_t));
     uint32_t len2 = (uint32_t)4U;
-    uint32_t resLen = len2 + len2;
-    memset(t0, 0U, resLen * sizeof (uint64_t));
+    uint32_t resLen1 = len2 + len2;
+    memset(t0, 0U, resLen1 * sizeof (uint64_t));
     for (uint32_t i1 = (uint32_t)0U; i1 < len2; i1++)
     {
       uint64_t *ab = p;
@@ -878,10 +1298,10 @@ static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uin
       uint64_t r0 = c;
       t0[i1 + i1] = r0;
     }
-    uint64_t c0 = bn_add_eq_len_u64(resLen, t0, t0, t0);
-    KRML_CHECK_SIZE(sizeof (uint64_t), resLen);
-    uint64_t tmp[resLen];
-    memset(tmp, 0U, resLen * sizeof (uint64_t));
+    uint64_t c0 = bn_add_eq_len_u64(resLen1, t0, t0, t0);
+    KRML_CHECK_SIZE(sizeof (uint64_t), resLen1);
+    uint64_t tmp[resLen1];
+    memset(tmp, 0U, resLen1 * sizeof (uint64_t));
     for (uint32_t i = (uint32_t)0U; i < len2; i++)
     {
       uint128_t res = (uint128_t)p[i] * p[i];
@@ -890,45 +1310,76 @@ static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uin
       tmp[(uint32_t)2U * i] = lo;
       tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
     }
-    uint64_t c10 = bn_add_eq_len_u64(resLen, t0, tmp, t0);
+    uint64_t c10 = bn_add_eq_len_u64(resLen1, t0, tmp, t0);
     uint32_t len22 = (uint32_t)4U;
     KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len22);
     uint64_t t2[(uint32_t)2U * len22];
     memset(t2, 0U, (uint32_t)2U * len22 * sizeof (uint64_t));
     for (uint32_t i1 = (uint32_t)0U; i1 < len22; i1++)
     {
+      uint64_t k0 = mod_inv_uint64((uint64_t)17562291160714782033U);
       uint64_t t10 = t0[0U];
+      uint64_t y = (uint64_t)0U;
+      uint64_t temp = (uint64_t)0U;
+      mul_atomic(t10, k0, &y, &temp);
+      uint64_t y_ = y;
+      uint64_t *uu____2 = t2;
       uint32_t len41 = (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < len41; i++)
       {
-        t2[i] = (uint64_t)0U;
+        uu____2[i] = (uint64_t)0U;
       }
-      uint64_t *uu____1 = t2 + (uint32_t)4U;
+      uint64_t *uu____3 = t2 + (uint32_t)4U;
       uint32_t len42 = (uint32_t)4U;
       for (uint32_t i = (uint32_t)0U; i < len42; i++)
       {
-        uu____1[i] = (uint64_t)0U;
+        uu____3[i] = (uint64_t)0U;
       }
-      uint64_t temp = (uint64_t)0U;
-      uint64_t f0 = (uint64_t)0xffffffffffffffffU;
-      uint64_t f1 = (uint64_t)0xffffffffU;
-      uint64_t f3 = (uint64_t)0xffffffff00000001U;
-      uint64_t *o0 = t2;
-      uint64_t *o1 = t2 + (uint32_t)1U;
-      uint64_t *o2 = t2 + (uint32_t)2U;
-      uint64_t *o3 = t2 + (uint32_t)3U;
-      uint64_t *o4 = t2 + (uint32_t)4U;
-      mul64(f0, t10, o0, &temp);
-      uint64_t h0 = temp;
-      mul64(f1, t10, o1, &temp);
-      uint64_t l = o1[0U];
-      uint64_t c11 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
-      uint64_t h = temp;
-      o2[0U] = h + c11;
-      mul64(f3, t10, o3, o4);
-      uint32_t len43 = (uint32_t)4U * (uint32_t)2U;
+      uint64_t
+      p1[4U] =
+        {
+          (uint64_t)17562291160714782033U,
+          (uint64_t)13611842547513532036U,
+          (uint64_t)18446744073709551615U,
+          (uint64_t)18446744069414584320U
+        };
+      uint32_t len43 = (uint32_t)4U;
+      uint64_t bBuffer = y_;
+      uint64_t *partResult = t2;
+      uint32_t resLen = len43 + (uint32_t)1U;
+      memset(partResult, 0U, resLen * sizeof (uint64_t));
+      for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)1U; i2++)
+      {
+        uint64_t bj = (&bBuffer)[i2];
+        uint64_t *res_j = partResult + i2;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len43 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = p1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = p1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = p1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = p1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len43 / (uint32_t)4U * (uint32_t)4U; i < len43; i++)
+        {
+          uint64_t a_i = p1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r0 = c;
+        partResult[len43 + i2] = r0;
+      }
+      uint32_t len44 = (uint32_t)4U * (uint32_t)2U;
       uint64_t c = (uint64_t)0U;
-      for (uint32_t i = (uint32_t)0U; i < len43 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      for (uint32_t i = (uint32_t)0U; i < len44 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
       {
         uint64_t t1 = t0[(uint32_t)4U * i];
         uint64_t t210 = t2[(uint32_t)4U * i];
@@ -947,7 +1398,7 @@ static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uin
         uint64_t *res_i = t2 + (uint32_t)4U * i + (uint32_t)3U;
         c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
       }
-      for (uint32_t i = len43 / (uint32_t)4U * (uint32_t)4U; i < len43; i++)
+      for (uint32_t i = len44 / (uint32_t)4U * (uint32_t)4U; i < len44; i++)
       {
         uint64_t t1 = t0[i];
         uint64_t t21 = t2[i];
@@ -974,10 +1425,10 @@ static void montgomery_ladder_power_p256(uint64_t *a, const uint8_t *scalar, uin
     uint64_t
     p1[4U] =
       {
-        (uint64_t)0xffffffffffffffffU,
-        (uint64_t)0xffffffffU,
-        (uint64_t)0U,
-        (uint64_t)0xffffffff00000001U
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
       };
     uint32_t len5 = (uint32_t)4U;
     uint64_t c = (uint64_t)0U;
@@ -1921,16 +2372,17 @@ static inline void fromDomain_p256(uint64_t *f, uint64_t *result)
   for (uint32_t i0 = (uint32_t)0U; i0 < len1; i0++)
   {
     uint64_t t10 = t[0U];
+    uint64_t *uu____0 = t2;
     uint32_t len30 = (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < len30; i++)
     {
-      t2[i] = (uint64_t)0U;
+      uu____0[i] = (uint64_t)0U;
     }
-    uint64_t *uu____0 = t2 + (uint32_t)4U;
+    uint64_t *uu____1 = t2 + (uint32_t)4U;
     uint32_t len31 = (uint32_t)4U;
     for (uint32_t i = (uint32_t)0U; i < len31; i++)
     {
-      uu____0[i] = (uint64_t)0U;
+      uu____1[i] = (uint64_t)0U;
     }
     uint64_t temp = (uint64_t)0U;
     uint64_t f0 = (uint64_t)0xffffffffffffffffU;
@@ -2085,6 +2537,50 @@ static inline void norm_p256(uint64_t *p, uint64_t *resultPoint, uint64_t *tempB
     resultZ[i] = (uint64_t)0U;
   }
   copy_conditional_p256(resultZ, zeroBuffer, bit);
+}
+
+static void
+scalarMultiplicationWithoutNorm_p256(
+  uint64_t *p,
+  uint64_t *result,
+  void *scalar,
+  uint64_t *tempBuffer
+)
+{
+  uint32_t len = (uint32_t)4U;
+  uint64_t *q = tempBuffer;
+  uint64_t *buff = tempBuffer + (uint32_t)3U * len;
+  uint32_t len1 = (uint32_t)4U;
+  uint64_t *x = q;
+  uint64_t *y = q + len1;
+  uint64_t *z = q + (uint32_t)2U * len1;
+  uint32_t len2 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len2; i++)
+  {
+    x[i] = (uint64_t)0U;
+  }
+  uint32_t len20 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len20; i++)
+  {
+    y[i] = (uint64_t)0U;
+  }
+  uint32_t len21 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len21; i++)
+  {
+    z[i] = (uint64_t)0U;
+  }
+  uint32_t len10 = (uint32_t)4U;
+  uint64_t *p_x = p;
+  uint64_t *p_y = p + len10;
+  uint64_t *p_z = p + (uint32_t)2U * len10;
+  uint64_t *r_x = result;
+  uint64_t *r_y = result + len10;
+  uint64_t *r_z = result + (uint32_t)2U * len10;
+  toDomain_p256(p_x, r_x);
+  toDomain_p256(p_y, r_y);
+  toDomain_p256(p_z, r_z);
+  montgomery_ladderP256L(q, result, (uint8_t *)scalar, buff);
+  memcpy(result, q, (uint32_t)12U * sizeof (uint64_t));
 }
 
 static inline void
@@ -2392,49 +2888,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   uint8_t *mHashRPart = mHash;
   Hacl_Hash_SHA2_hash_256(m, mLen, mHashHPart);
   toUint64ChangeEndian_p256(mHashRPart, hashAsFelem);
-  uint32_t len30 = (uint32_t)4U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), len30);
-  uint64_t tempBuffer1[len30];
-  memset(tempBuffer1, 0U, len30 * sizeof (uint64_t));
-  uint64_t
-  p0[4U] =
-    {
-      (uint64_t)17562291160714782033U,
-      (uint64_t)13611842547513532036U,
-      (uint64_t)18446744073709551615U,
-      (uint64_t)18446744069414584320U
-    };
-  uint32_t len40 = (uint32_t)4U;
-  uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < len40 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
-  {
-    uint64_t t1 = hashAsFelem[(uint32_t)4U * i];
-    uint64_t t20 = p0[(uint32_t)4U * i];
-    uint64_t *res_i0 = tempBuffer1 + (uint32_t)4U * i;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res_i0);
-    uint64_t t10 = hashAsFelem[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = p0[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = tempBuffer1 + (uint32_t)4U * i + (uint32_t)1U;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t10, t21, res_i1);
-    uint64_t t11 = hashAsFelem[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = p0[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = tempBuffer1 + (uint32_t)4U * i + (uint32_t)2U;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t11, t22, res_i2);
-    uint64_t t12 = hashAsFelem[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = p0[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = tempBuffer1 + (uint32_t)4U * i + (uint32_t)3U;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t12, t2, res_i);
-  }
-  for (uint32_t i = len40 / (uint32_t)4U * (uint32_t)4U; i < len40; i++)
-  {
-    uint64_t t1 = hashAsFelem[i];
-    uint64_t t2 = p0[i];
-    uint64_t *res_i = tempBuffer1 + i;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res_i);
-  }
-  uint64_t r1 = c0;
-  uint64_t r10 = r1;
-  cmovznz4_p256(r10, tempBuffer1, hashAsFelem, hashAsFelem);
+  reduction_prime_2prime_order_p256(hashAsFelem, hashAsFelem);
   uint32_t len21 = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len21);
   uint64_t result1[(uint32_t)3U * len21];
@@ -2449,52 +2903,10 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   exponent_p256(z2f, z2f, t8);
   montgomery_multiplication_buffer_dh_p256(z2f, xf, z2f);
   fromDomain_p256(z2f, r);
-  uint32_t len31 = (uint32_t)4U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), len31);
-  uint64_t tempBuffer10[len31];
-  memset(tempBuffer10, 0U, len31 * sizeof (uint64_t));
-  uint64_t
-  p1[4U] =
-    {
-      (uint64_t)17562291160714782033U,
-      (uint64_t)13611842547513532036U,
-      (uint64_t)18446744073709551615U,
-      (uint64_t)18446744069414584320U
-    };
-  uint32_t len41 = (uint32_t)4U;
-  uint64_t c1 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < len41 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
-  {
-    uint64_t t1 = r[(uint32_t)4U * i];
-    uint64_t t20 = p1[(uint32_t)4U * i];
-    uint64_t *res_i0 = tempBuffer10 + (uint32_t)4U * i;
-    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, res_i0);
-    uint64_t t10 = r[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = tempBuffer10 + (uint32_t)4U * i + (uint32_t)1U;
-    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t10, t21, res_i1);
-    uint64_t t11 = r[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = p1[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = tempBuffer10 + (uint32_t)4U * i + (uint32_t)2U;
-    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t11, t22, res_i2);
-    uint64_t t12 = r[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = p1[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = tempBuffer10 + (uint32_t)4U * i + (uint32_t)3U;
-    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t12, t2, res_i);
-  }
-  for (uint32_t i = len41 / (uint32_t)4U * (uint32_t)4U; i < len41; i++)
-  {
-    uint64_t t1 = r[i];
-    uint64_t t2 = p1[i];
-    uint64_t *res_i = tempBuffer10 + i;
-    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res_i);
-  }
-  uint64_t r11 = c1;
-  uint64_t r12 = r11;
-  cmovznz4_p256(r12, tempBuffer10, r, r);
+  reduction_prime_2prime_order_p256(r, r);
   uint64_t tmp = (uint64_t)18446744073709551615U;
-  uint32_t len32 = (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < len32; i++)
+  uint32_t len30 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len30; i++)
   {
     uint64_t a_i = r[i];
     uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
@@ -2512,100 +2924,22 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   KRML_CHECK_SIZE(sizeof (uint64_t), len22);
   uint64_t kInv[len22];
   memset(kInv, 0U, len22 * sizeof (uint64_t));
-  montgomery_multiplication_buffer_dh_p256(r, privKeyAsFelem, rda);
-  uint32_t len33 = (uint32_t)4U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), len33);
-  uint64_t one[len33];
-  memset(one, 0U, len33 * sizeof (uint64_t));
+  montgomery_multiplication_buffer_dsa_p256(r, privKeyAsFelem, rda);
+  uint32_t len3 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len3);
+  uint64_t one[len3];
+  memset(one, 0U, len3 * sizeof (uint64_t));
   one[0U] = (uint64_t)1U;
-  uint32_t len42 = (uint32_t)4U;
-  for (uint32_t i = (uint32_t)1U; i < len42; i++)
+  uint32_t len4 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len4; i++)
   {
     one[i] = (uint64_t)0U;
   }
-  montgomery_multiplication_buffer_dh_p256(one, hashAsFelem, zBuffer);
-  uint32_t len34 = (uint32_t)4U;
-  uint64_t c2 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < len34 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
-  {
-    uint64_t t1 = rda[(uint32_t)4U * i];
-    uint64_t t20 = zBuffer[(uint32_t)4U * i];
-    uint64_t *res_i0 = zBuffer + (uint32_t)4U * i;
-    c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t20, res_i0);
-    uint64_t t10 = rda[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = zBuffer[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = zBuffer + (uint32_t)4U * i + (uint32_t)1U;
-    c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t10, t21, res_i1);
-    uint64_t t11 = rda[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = zBuffer[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = zBuffer + (uint32_t)4U * i + (uint32_t)2U;
-    c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t11, t22, res_i2);
-    uint64_t t12 = rda[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = zBuffer[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = zBuffer + (uint32_t)4U * i + (uint32_t)3U;
-    c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t12, t2, res_i);
-  }
-  for (uint32_t i = len34 / (uint32_t)4U * (uint32_t)4U; i < len34; i++)
-  {
-    uint64_t t1 = rda[i];
-    uint64_t t2 = zBuffer[i];
-    uint64_t *res_i = zBuffer + i;
-    c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t2, res_i);
-  }
-  uint64_t t = c2;
-  uint32_t len3 = (uint32_t)4U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), len3);
-  uint64_t tempBuffer11[len3];
-  memset(tempBuffer11, 0U, len3 * sizeof (uint64_t));
-  uint64_t tempBufferForSubborrow = (uint64_t)0U;
-  uint64_t
-  p[4U] =
-    {
-      (uint64_t)17562291160714782033U,
-      (uint64_t)13611842547513532036U,
-      (uint64_t)18446744073709551615U,
-      (uint64_t)18446744069414584320U
-    };
-  uint32_t len4 = (uint32_t)4U;
-  uint64_t c = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < len4 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
-  {
-    uint64_t t1 = zBuffer[(uint32_t)4U * i];
-    uint64_t t20 = p[(uint32_t)4U * i];
-    uint64_t *res_i0 = tempBuffer11 + (uint32_t)4U * i;
-    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, res_i0);
-    uint64_t t10 = zBuffer[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = tempBuffer11 + (uint32_t)4U * i + (uint32_t)1U;
-    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, res_i1);
-    uint64_t t11 = zBuffer[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = tempBuffer11 + (uint32_t)4U * i + (uint32_t)2U;
-    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, res_i2);
-    uint64_t t12 = zBuffer[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = tempBuffer11 + (uint32_t)4U * i + (uint32_t)3U;
-    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, res_i);
-  }
-  for (uint32_t i = len4 / (uint32_t)4U * (uint32_t)4U; i < len4; i++)
-  {
-    uint64_t t1 = zBuffer[i];
-    uint64_t t2 = p[i];
-    uint64_t *res_i = tempBuffer11 + i;
-    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, res_i);
-  }
-  uint64_t r13 = c;
-  uint64_t carry0 = r13;
-  uint64_t
-  carry =
-    Lib_IntTypes_Intrinsics_sub_borrow_u64(carry0,
-      t,
-      (uint64_t)0U,
-      &tempBufferForSubborrow);
-  cmovznz4_p256(carry, tempBuffer11, zBuffer, zBuffer);
+  montgomery_multiplication_buffer_dsa_p256(one, hashAsFelem, zBuffer);
+  felem_add_ecdsa_P256(rda, zBuffer, zBuffer);
   memcpy(kInv, kAsFelem, len22 * sizeof (uint64_t));
-  montgomery_ladder_power_p256(kInv, prime256order_buffer, kInv);
-  montgomery_multiplication_buffer_dh_p256(zBuffer, kInv, s);
+  montgomery_ladder_power_p256_dsa(kInv, prime256order_buffer, kInv);
+  montgomery_multiplication_buffer_dsa_p256(zBuffer, kInv, s);
   uint64_t tmp1 = (uint64_t)18446744073709551615U;
   uint32_t len2 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < len2; i++)
@@ -2649,6 +2983,7484 @@ Hacl_P256_ecdsa_sign_p256_sha2(
     store64_be(resultS + i * (uint32_t)8U, s[i]);
   }
   return (uint64_t)flag;
+}
+
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
+uint64_t
+Hacl_P256_ecdsa_sign_p256_sha384(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t r[len];
+  memset(r, 0U, len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t s[len];
+  memset(s, 0U, len * sizeof (uint64_t));
+  uint8_t *resultR = result;
+  uint8_t *resultS = result + (uint32_t)32U;
+  uint64_t privKeyAsFelem[4U] = { 0U };
+  toUint64ChangeEndian_p256(privKey, privKeyAsFelem);
+  uint32_t len10 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len10);
+  uint64_t hashAsFelem[len10];
+  memset(hashAsFelem, 0U, len10 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len10);
+  uint64_t tempBuffer[(uint32_t)20U * len10];
+  memset(tempBuffer, 0U, (uint32_t)20U * len10 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len10);
+  uint64_t kAsFelem[len10];
+  memset(kAsFelem, 0U, len10 * sizeof (uint64_t));
+  toUint64ChangeEndian_p256(k, kAsFelem);
+  uint32_t sz_hash = (uint32_t)48U;
+  uint32_t len20 = sz_hash + (uint32_t)32U;
+  KRML_CHECK_SIZE(sizeof (uint8_t), len20);
+  uint8_t mHash[len20];
+  memset(mHash, 0U, len20 * sizeof (uint8_t));
+  uint8_t *mHashHPart = mHash;
+  uint8_t *mHashRPart = mHash;
+  Hacl_Hash_SHA2_hash_384(m, mLen, mHashHPart);
+  toUint64ChangeEndian_p256(mHashRPart, hashAsFelem);
+  reduction_prime_2prime_order_p256(hashAsFelem, hashAsFelem);
+  uint32_t len21 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len21);
+  uint64_t result1[(uint32_t)3U * len21];
+  memset(result1, 0U, (uint32_t)3U * len21 * sizeof (uint64_t));
+  uint64_t *tempForNorm = tempBuffer;
+  secretToPublicWithoutNorm_p256(result1, (void *)k, tempBuffer);
+  uint64_t *xf = result1;
+  uint64_t *zf = result1 + (uint32_t)8U;
+  uint64_t *z2f = tempForNorm + (uint32_t)4U;
+  uint64_t *t8 = tempForNorm + (uint32_t)3U * (uint32_t)4U;
+  montgomery_square_buffer_dh_p256(zf, z2f);
+  exponent_p256(z2f, z2f, t8);
+  montgomery_multiplication_buffer_dh_p256(z2f, xf, z2f);
+  fromDomain_p256(z2f, r);
+  reduction_prime_2prime_order_p256(r, r);
+  uint64_t tmp = (uint64_t)18446744073709551615U;
+  uint32_t len30 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len30; i++)
+  {
+    uint64_t a_i = r[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t step5Flag = tmp;
+  uint32_t len22 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len22);
+  uint64_t rda[len22];
+  memset(rda, 0U, len22 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len22);
+  uint64_t zBuffer[len22];
+  memset(zBuffer, 0U, len22 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len22);
+  uint64_t kInv[len22];
+  memset(kInv, 0U, len22 * sizeof (uint64_t));
+  montgomery_multiplication_buffer_dsa_p256(r, privKeyAsFelem, rda);
+  uint32_t len3 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len3);
+  uint64_t one[len3];
+  memset(one, 0U, len3 * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
+  uint32_t len4 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len4; i++)
+  {
+    one[i] = (uint64_t)0U;
+  }
+  montgomery_multiplication_buffer_dsa_p256(one, hashAsFelem, zBuffer);
+  felem_add_ecdsa_P256(rda, zBuffer, zBuffer);
+  memcpy(kInv, kAsFelem, len22 * sizeof (uint64_t));
+  montgomery_ladder_power_p256_dsa(kInv, prime256order_buffer, kInv);
+  montgomery_multiplication_buffer_dsa_p256(zBuffer, kInv, s);
+  uint64_t tmp1 = (uint64_t)18446744073709551615U;
+  uint32_t len2 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len2; i++)
+  {
+    uint64_t a_i = s[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp1;
+    tmp1 = r_i & tmp0;
+  }
+  uint64_t sIsZero = tmp1;
+  uint64_t flagU64 = step5Flag | sIsZero;
+  bool flag = flagU64 == (uint64_t)0U;
+  uint32_t len1 = (uint32_t)4U;
+  uint32_t lenByTwo = len1 >> (uint32_t)1U;
+  for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
+  {
+    uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+    uint64_t left = r[i];
+    uint64_t right = r[lenRight];
+    r[i] = right;
+    r[lenRight] = left;
+  }
+  uint32_t len11 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len11; i++)
+  {
+    store64_be(resultR + i * (uint32_t)8U, r[i]);
+  }
+  uint32_t len12 = (uint32_t)4U;
+  uint32_t lenByTwo0 = len12 >> (uint32_t)1U;
+  for (uint32_t i = (uint32_t)0U; i < lenByTwo0; i++)
+  {
+    uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+    uint64_t left = s[i];
+    uint64_t right = s[lenRight];
+    s[i] = right;
+    s[lenRight] = left;
+  }
+  uint32_t len13 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len13; i++)
+  {
+    store64_be(resultS + i * (uint32_t)8U, s[i]);
+  }
+  return (uint64_t)flag;
+}
+
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order.
+*/
+uint64_t
+Hacl_P256_ecdsa_sign_p256_sha512(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t r[len];
+  memset(r, 0U, len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t s[len];
+  memset(s, 0U, len * sizeof (uint64_t));
+  uint8_t *resultR = result;
+  uint8_t *resultS = result + (uint32_t)32U;
+  uint64_t privKeyAsFelem[4U] = { 0U };
+  toUint64ChangeEndian_p256(privKey, privKeyAsFelem);
+  uint32_t len10 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len10);
+  uint64_t hashAsFelem[len10];
+  memset(hashAsFelem, 0U, len10 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len10);
+  uint64_t tempBuffer[(uint32_t)20U * len10];
+  memset(tempBuffer, 0U, (uint32_t)20U * len10 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len10);
+  uint64_t kAsFelem[len10];
+  memset(kAsFelem, 0U, len10 * sizeof (uint64_t));
+  toUint64ChangeEndian_p256(k, kAsFelem);
+  uint32_t sz_hash = (uint32_t)64U;
+  uint32_t len20 = sz_hash + (uint32_t)32U;
+  KRML_CHECK_SIZE(sizeof (uint8_t), len20);
+  uint8_t mHash[len20];
+  memset(mHash, 0U, len20 * sizeof (uint8_t));
+  uint8_t *mHashHPart = mHash;
+  uint8_t *mHashRPart = mHash;
+  Hacl_Hash_SHA2_hash_512(m, mLen, mHashHPart);
+  toUint64ChangeEndian_p256(mHashRPart, hashAsFelem);
+  reduction_prime_2prime_order_p256(hashAsFelem, hashAsFelem);
+  uint32_t len21 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len21);
+  uint64_t result1[(uint32_t)3U * len21];
+  memset(result1, 0U, (uint32_t)3U * len21 * sizeof (uint64_t));
+  uint64_t *tempForNorm = tempBuffer;
+  secretToPublicWithoutNorm_p256(result1, (void *)k, tempBuffer);
+  uint64_t *xf = result1;
+  uint64_t *zf = result1 + (uint32_t)8U;
+  uint64_t *z2f = tempForNorm + (uint32_t)4U;
+  uint64_t *t8 = tempForNorm + (uint32_t)3U * (uint32_t)4U;
+  montgomery_square_buffer_dh_p256(zf, z2f);
+  exponent_p256(z2f, z2f, t8);
+  montgomery_multiplication_buffer_dh_p256(z2f, xf, z2f);
+  fromDomain_p256(z2f, r);
+  reduction_prime_2prime_order_p256(r, r);
+  uint64_t tmp = (uint64_t)18446744073709551615U;
+  uint32_t len30 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len30; i++)
+  {
+    uint64_t a_i = r[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t step5Flag = tmp;
+  uint32_t len22 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len22);
+  uint64_t rda[len22];
+  memset(rda, 0U, len22 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len22);
+  uint64_t zBuffer[len22];
+  memset(zBuffer, 0U, len22 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len22);
+  uint64_t kInv[len22];
+  memset(kInv, 0U, len22 * sizeof (uint64_t));
+  montgomery_multiplication_buffer_dsa_p256(r, privKeyAsFelem, rda);
+  uint32_t len3 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len3);
+  uint64_t one[len3];
+  memset(one, 0U, len3 * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
+  uint32_t len4 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len4; i++)
+  {
+    one[i] = (uint64_t)0U;
+  }
+  montgomery_multiplication_buffer_dsa_p256(one, hashAsFelem, zBuffer);
+  felem_add_ecdsa_P256(rda, zBuffer, zBuffer);
+  memcpy(kInv, kAsFelem, len22 * sizeof (uint64_t));
+  montgomery_ladder_power_p256_dsa(kInv, prime256order_buffer, kInv);
+  montgomery_multiplication_buffer_dsa_p256(zBuffer, kInv, s);
+  uint64_t tmp1 = (uint64_t)18446744073709551615U;
+  uint32_t len2 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len2; i++)
+  {
+    uint64_t a_i = s[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp1;
+    tmp1 = r_i & tmp0;
+  }
+  uint64_t sIsZero = tmp1;
+  uint64_t flagU64 = step5Flag | sIsZero;
+  bool flag = flagU64 == (uint64_t)0U;
+  uint32_t len1 = (uint32_t)4U;
+  uint32_t lenByTwo = len1 >> (uint32_t)1U;
+  for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
+  {
+    uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+    uint64_t left = r[i];
+    uint64_t right = r[lenRight];
+    r[i] = right;
+    r[lenRight] = left;
+  }
+  uint32_t len11 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len11; i++)
+  {
+    store64_be(resultR + i * (uint32_t)8U, r[i]);
+  }
+  uint32_t len12 = (uint32_t)4U;
+  uint32_t lenByTwo0 = len12 >> (uint32_t)1U;
+  for (uint32_t i = (uint32_t)0U; i < lenByTwo0; i++)
+  {
+    uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+    uint64_t left = s[i];
+    uint64_t right = s[lenRight];
+    s[i] = right;
+    s[lenRight] = left;
+  }
+  uint32_t len13 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len13; i++)
+  {
+    store64_be(resultS + i * (uint32_t)8U, s[i]);
+  }
+  return (uint64_t)flag;
+}
+
+/*
+ Input: result buffer: uint8[64], 
+ m buffer: uint8 [mLen], 
+ priv(ate)Key: uint8[32], 
+ k (nonce): uint32[32]. 
+  
+ Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
+  
+ The private key and the nonce are expected to be less than the curve order. 
+  
+ The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
+*/
+uint64_t
+Hacl_P256_ecdsa_sign_p256_without_hash(
+  uint8_t *result,
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *privKey,
+  uint8_t *k
+)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t r[len];
+  memset(r, 0U, len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len);
+  uint64_t s[len];
+  memset(s, 0U, len * sizeof (uint64_t));
+  uint8_t *resultR = result;
+  uint8_t *resultS = result + (uint32_t)32U;
+  uint64_t privKeyAsFelem[4U] = { 0U };
+  toUint64ChangeEndian_p256(privKey, privKeyAsFelem);
+  uint32_t len10 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len10);
+  uint64_t hashAsFelem[len10];
+  memset(hashAsFelem, 0U, len10 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len10);
+  uint64_t tempBuffer[(uint32_t)20U * len10];
+  memset(tempBuffer, 0U, (uint32_t)20U * len10 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len10);
+  uint64_t kAsFelem[len10];
+  memset(kAsFelem, 0U, len10 * sizeof (uint64_t));
+  toUint64ChangeEndian_p256(k, kAsFelem);
+  uint32_t sz_hash = mLen;
+  uint32_t len20 = sz_hash + (uint32_t)32U;
+  KRML_CHECK_SIZE(sizeof (uint8_t), len20);
+  uint8_t mHash[len20];
+  memset(mHash, 0U, len20 * sizeof (uint8_t));
+  uint8_t *mHashHPart = mHash;
+  uint8_t *mHashRPart = mHash;
+  memcpy(mHashHPart, m, sz_hash * sizeof (uint8_t));
+  toUint64ChangeEndian_p256(mHashRPart, hashAsFelem);
+  reduction_prime_2prime_order_p256(hashAsFelem, hashAsFelem);
+  uint32_t len21 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len21);
+  uint64_t result1[(uint32_t)3U * len21];
+  memset(result1, 0U, (uint32_t)3U * len21 * sizeof (uint64_t));
+  uint64_t *tempForNorm = tempBuffer;
+  secretToPublicWithoutNorm_p256(result1, (void *)k, tempBuffer);
+  uint64_t *xf = result1;
+  uint64_t *zf = result1 + (uint32_t)8U;
+  uint64_t *z2f = tempForNorm + (uint32_t)4U;
+  uint64_t *t8 = tempForNorm + (uint32_t)3U * (uint32_t)4U;
+  montgomery_square_buffer_dh_p256(zf, z2f);
+  exponent_p256(z2f, z2f, t8);
+  montgomery_multiplication_buffer_dh_p256(z2f, xf, z2f);
+  fromDomain_p256(z2f, r);
+  reduction_prime_2prime_order_p256(r, r);
+  uint64_t tmp = (uint64_t)18446744073709551615U;
+  uint32_t len30 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len30; i++)
+  {
+    uint64_t a_i = r[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t step5Flag = tmp;
+  uint32_t len22 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len22);
+  uint64_t rda[len22];
+  memset(rda, 0U, len22 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len22);
+  uint64_t zBuffer[len22];
+  memset(zBuffer, 0U, len22 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len22);
+  uint64_t kInv[len22];
+  memset(kInv, 0U, len22 * sizeof (uint64_t));
+  montgomery_multiplication_buffer_dsa_p256(r, privKeyAsFelem, rda);
+  uint32_t len3 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len3);
+  uint64_t one[len3];
+  memset(one, 0U, len3 * sizeof (uint64_t));
+  one[0U] = (uint64_t)1U;
+  uint32_t len4 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len4; i++)
+  {
+    one[i] = (uint64_t)0U;
+  }
+  montgomery_multiplication_buffer_dsa_p256(one, hashAsFelem, zBuffer);
+  felem_add_ecdsa_P256(rda, zBuffer, zBuffer);
+  memcpy(kInv, kAsFelem, len22 * sizeof (uint64_t));
+  montgomery_ladder_power_p256_dsa(kInv, prime256order_buffer, kInv);
+  montgomery_multiplication_buffer_dsa_p256(zBuffer, kInv, s);
+  uint64_t tmp1 = (uint64_t)18446744073709551615U;
+  uint32_t len2 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len2; i++)
+  {
+    uint64_t a_i = s[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp1;
+    tmp1 = r_i & tmp0;
+  }
+  uint64_t sIsZero = tmp1;
+  uint64_t flagU64 = step5Flag | sIsZero;
+  bool flag = flagU64 == (uint64_t)0U;
+  uint32_t len1 = (uint32_t)4U;
+  uint32_t lenByTwo = len1 >> (uint32_t)1U;
+  for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
+  {
+    uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+    uint64_t left = r[i];
+    uint64_t right = r[lenRight];
+    r[i] = right;
+    r[lenRight] = left;
+  }
+  uint32_t len11 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len11; i++)
+  {
+    store64_be(resultR + i * (uint32_t)8U, r[i]);
+  }
+  uint32_t len12 = (uint32_t)4U;
+  uint32_t lenByTwo0 = len12 >> (uint32_t)1U;
+  for (uint32_t i = (uint32_t)0U; i < lenByTwo0; i++)
+  {
+    uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+    uint64_t left = s[i];
+    uint64_t right = s[lenRight];
+    s[i] = right;
+    s[lenRight] = left;
+  }
+  uint32_t len13 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len13; i++)
+  {
+    store64_be(resultS + i * (uint32_t)8U, s[i]);
+  }
+  return (uint64_t)flag;
+}
+
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
+bool
+Hacl_P256_ecdsa_verif_p256_sha2(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * len);
+  uint64_t tempBuffer[(uint32_t)4U * len];
+  memset(tempBuffer, 0U, (uint32_t)4U * len * sizeof (uint64_t));
+  uint64_t *publicKeyAsFelem = tempBuffer;
+  uint64_t *rAsFelem = tempBuffer + (uint32_t)2U * len;
+  uint64_t *sAsFelem = tempBuffer + (uint32_t)3U * len;
+  uint32_t len1 = (uint32_t)4U;
+  uint64_t *publicKeyFelemX = publicKeyAsFelem;
+  uint64_t *publicKeyFelemY = publicKeyAsFelem + len1;
+  uint8_t *pubKeyX = pubKey;
+  uint8_t *pubKeyY = pubKey + (uint32_t)32U;
+  toUint64ChangeEndian_p256(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian_p256(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian_p256(r, rAsFelem);
+  toUint64ChangeEndian_p256(s, sAsFelem);
+  uint32_t len11 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11 * (uint32_t)20U);
+  uint64_t tempBuffer1[len11 * (uint32_t)20U];
+  memset(tempBuffer1, 0U, len11 * (uint32_t)20U * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11);
+  uint64_t hashAsFelem[len11];
+  memset(hashAsFelem, 0U, len11 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11);
+  uint64_t x[len11];
+  memset(x, 0U, len11 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11 * (uint32_t)3U);
+  uint64_t publicKeyBuffer[len11 * (uint32_t)3U];
+  memset(publicKeyBuffer, 0U, len11 * (uint32_t)3U * sizeof (uint64_t));
+  uint32_t len20 = (uint32_t)4U;
+  uint32_t lengthXY = len20 * (uint32_t)2U;
+  uint64_t *partPoint = publicKeyBuffer;
+  uint64_t *zCoordinate = publicKeyBuffer + lengthXY;
+  memcpy(partPoint, publicKeyAsFelem, lengthXY * sizeof (uint64_t));
+  zCoordinate[0U] = (uint64_t)1U;
+  uint32_t len30 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len30; i++)
+  {
+    zCoordinate[i] = (uint64_t)0U;
+  }
+  bool publicKeyCorrect = verifyQValidCurvePoint_p256(publicKeyBuffer);
+  bool r1;
+  if (publicKeyCorrect == false)
+  {
+    r1 = false;
+  }
+  else
+  {
+    uint32_t len21 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len21);
+    uint64_t tempBuffer20[len21];
+    memset(tempBuffer20, 0U, len21 * sizeof (uint64_t));
+    uint64_t
+    p0[4U] =
+      {
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
+      };
+    uint32_t len31 = (uint32_t)4U;
+    uint64_t c1 = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len31 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = rAsFelem[(uint32_t)4U * i];
+      uint64_t t20 = p0[(uint32_t)4U * i];
+      uint64_t *res_i0 = tempBuffer20 + (uint32_t)4U * i;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, res_i0);
+      uint64_t t10 = rAsFelem[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = tempBuffer20 + (uint32_t)4U * i + (uint32_t)1U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t10, t21, res_i1);
+      uint64_t t11 = rAsFelem[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = tempBuffer20 + (uint32_t)4U * i + (uint32_t)2U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t11, t22, res_i2);
+      uint64_t t12 = rAsFelem[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = tempBuffer20 + (uint32_t)4U * i + (uint32_t)3U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t12, t2, res_i);
+    }
+    for (uint32_t i = len31 / (uint32_t)4U * (uint32_t)4U; i < len31; i++)
+    {
+      uint64_t t1 = rAsFelem[i];
+      uint64_t t2 = p0[i];
+      uint64_t *res_i = tempBuffer20 + i;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res_i);
+    }
+    uint64_t r10 = c1;
+    uint64_t carry = r10;
+    bool less = carry == (uint64_t)1U;
+    uint64_t tmp1 = (uint64_t)18446744073709551615U;
+    uint32_t len32 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len32; i++)
+    {
+      uint64_t a_i = rAsFelem[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp1;
+      tmp1 = r_i & tmp0;
+    }
+    uint64_t f = tmp1;
+    bool more = f == (uint64_t)0xffffffffffffffffU;
+    bool isRCorrect = less && !more;
+    uint32_t len2 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len2);
+    uint64_t tempBuffer21[len2];
+    memset(tempBuffer21, 0U, len2 * sizeof (uint64_t));
+    uint64_t
+    p2[4U] =
+      {
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
+      };
+    uint32_t len33 = (uint32_t)4U;
+    uint64_t c2 = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len33 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = sAsFelem[(uint32_t)4U * i];
+      uint64_t t20 = p2[(uint32_t)4U * i];
+      uint64_t *res_i0 = tempBuffer21 + (uint32_t)4U * i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t20, res_i0);
+      uint64_t t10 = sAsFelem[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p2[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = tempBuffer21 + (uint32_t)4U * i + (uint32_t)1U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t10, t21, res_i1);
+      uint64_t t11 = sAsFelem[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p2[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = tempBuffer21 + (uint32_t)4U * i + (uint32_t)2U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t11, t22, res_i2);
+      uint64_t t12 = sAsFelem[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p2[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = tempBuffer21 + (uint32_t)4U * i + (uint32_t)3U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t12, t2, res_i);
+    }
+    for (uint32_t i = len33 / (uint32_t)4U * (uint32_t)4U; i < len33; i++)
+    {
+      uint64_t t1 = sAsFelem[i];
+      uint64_t t2 = p2[i];
+      uint64_t *res_i = tempBuffer21 + i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t2, res_i);
+    }
+    uint64_t r11 = c2;
+    uint64_t carry0 = r11;
+    bool less0 = carry0 == (uint64_t)1U;
+    uint64_t tmp2 = (uint64_t)18446744073709551615U;
+    uint32_t len3 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
+    {
+      uint64_t a_i = sAsFelem[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp2;
+      tmp2 = r_i & tmp0;
+    }
+    uint64_t f2 = tmp2;
+    bool more0 = f2 == (uint64_t)0xffffffffffffffffU;
+    bool isSCorrect = less0 && !more0;
+    bool step1 = isRCorrect && isSCorrect;
+    if (step1 == false)
+    {
+      r1 = false;
+    }
+    else
+    {
+      uint32_t len22 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * len22);
+      uint8_t tempBufferU8[(uint32_t)2U * len22];
+      memset(tempBufferU8, 0U, (uint32_t)2U * len22 * sizeof (uint8_t));
+      uint8_t *u1 = tempBufferU8;
+      uint8_t *u2 = tempBufferU8 + (uint32_t)32U;
+      uint32_t sz_hash = (uint32_t)32U;
+      uint32_t len34 = sz_hash + (uint32_t)32U;
+      KRML_CHECK_SIZE(sizeof (uint8_t), len34);
+      uint8_t mHash[len34];
+      memset(mHash, 0U, len34 * sizeof (uint8_t));
+      uint8_t *mHashHPart = mHash;
+      uint8_t *mHashRPart = mHash;
+      Hacl_Hash_SHA2_hash_256(m, mLen, mHashHPart);
+      toUint64ChangeEndian_p256(mHashRPart, hashAsFelem);
+      reduction_prime_2prime_order_p256(hashAsFelem, hashAsFelem);
+      uint32_t len35 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len35);
+      uint64_t tempBuffer2[(uint32_t)3U * len35];
+      memset(tempBuffer2, 0U, (uint32_t)3U * len35 * sizeof (uint64_t));
+      uint64_t *inverseS = tempBuffer2;
+      uint64_t *u11 = tempBuffer2 + len35;
+      uint64_t *u21 = tempBuffer2 + (uint32_t)2U * len35;
+      uint32_t len40 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len40);
+      uint64_t one[len40];
+      memset(one, 0U, len40 * sizeof (uint64_t));
+      one[0U] = (uint64_t)1U;
+      uint32_t len50 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len50; i++)
+      {
+        one[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one, sAsFelem, inverseS);
+      montgomery_ladder_power_p256_dsa(inverseS, prime256order_buffer, inverseS);
+      uint32_t len41 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len41);
+      uint64_t buffFromDB[len41];
+      memset(buffFromDB, 0U, len41 * sizeof (uint64_t));
+      uint32_t len51 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len51);
+      uint64_t one0[len51];
+      memset(one0, 0U, len51 * sizeof (uint64_t));
+      one0[0U] = (uint64_t)1U;
+      uint32_t len60 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len60; i++)
+      {
+        one0[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one0, hashAsFelem, buffFromDB);
+      uint32_t len52 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len52);
+      uint64_t one1[len52];
+      memset(one1, 0U, len52 * sizeof (uint64_t));
+      one1[0U] = (uint64_t)1U;
+      uint32_t len61 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len61; i++)
+      {
+        one1[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one1, buffFromDB, buffFromDB);
+      montgomery_multiplication_buffer_dsa_p256(inverseS, buffFromDB, u11);
+      uint32_t len42 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len42);
+      uint64_t buffFromDB0[len42];
+      memset(buffFromDB0, 0U, len42 * sizeof (uint64_t));
+      uint32_t len53 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len53);
+      uint64_t one2[len53];
+      memset(one2, 0U, len53 * sizeof (uint64_t));
+      one2[0U] = (uint64_t)1U;
+      uint32_t len62 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len62; i++)
+      {
+        one2[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one2, rAsFelem, buffFromDB0);
+      uint32_t len54 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len54);
+      uint64_t one3[len54];
+      memset(one3, 0U, len54 * sizeof (uint64_t));
+      one3[0U] = (uint64_t)1U;
+      uint32_t len63 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len63; i++)
+      {
+        one3[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one3, buffFromDB0, buffFromDB0);
+      montgomery_multiplication_buffer_dsa_p256(inverseS, buffFromDB0, u21);
+      uint32_t len43 = (uint32_t)4U;
+      uint32_t lenByTwo = len43 >> (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
+      {
+        uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+        uint64_t left = u11[i];
+        uint64_t right = u11[lenRight];
+        u11[i] = right;
+        u11[lenRight] = left;
+      }
+      uint32_t len44 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len44; i++)
+      {
+        store64_be(u1 + i * (uint32_t)8U, u11[i]);
+      }
+      uint32_t len45 = (uint32_t)4U;
+      uint32_t lenByTwo0 = len45 >> (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < lenByTwo0; i++)
+      {
+        uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+        uint64_t left = u21[i];
+        uint64_t right = u21[lenRight];
+        u21[i] = right;
+        u21[lenRight] = left;
+      }
+      uint32_t len46 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len46; i++)
+      {
+        store64_be(u2 + i * (uint32_t)8U, u21[i]);
+      }
+      uint32_t len36 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len36 * (uint32_t)3U);
+      uint64_t result[len36 * (uint32_t)3U];
+      memset(result, 0U, len36 * (uint32_t)3U * sizeof (uint64_t));
+      uint32_t len4 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len4 * (uint32_t)6U);
+      uint64_t points[len4 * (uint32_t)6U];
+      memset(points, 0U, len4 * (uint32_t)6U * sizeof (uint64_t));
+      uint64_t *pointU1G = points;
+      uint64_t *pointU2Q = points + (uint32_t)12U;
+      secretToPublicWithoutNorm_p256(pointU1G, (void *)u1, tempBuffer1);
+      scalarMultiplicationWithoutNorm_p256(publicKeyBuffer, pointU2Q, (void *)u2, tempBuffer1);
+      uint64_t *tempBuffer17 = tempBuffer1;
+      uint64_t *p = points;
+      uint64_t *q = points + (uint32_t)12U;
+      uint32_t len55 = (uint32_t)4U;
+      uint64_t *sq_z1 = tempBuffer17;
+      uint64_t *tr_z1 = tempBuffer17 + len55;
+      uint64_t *sq_z2 = tempBuffer17 + (uint32_t)2U * len55;
+      uint64_t *tr_z2 = tempBuffer17 + (uint32_t)3U * len55;
+      uint64_t *x1 = p;
+      uint64_t *y1 = p + len55;
+      uint64_t *z1 = p + (uint32_t)2U * len55;
+      uint64_t *x2 = q;
+      uint64_t *y2 = q + len55;
+      uint64_t *z2 = q + (uint32_t)2U * len55;
+      uint32_t len6 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len6);
+      uint64_t t[(uint32_t)2U * len6];
+      memset(t, 0U, (uint32_t)2U * len6 * sizeof (uint64_t));
+      uint32_t len70 = (uint32_t)4U;
+      uint32_t resLen0 = len70 + len70;
+      memset(t, 0U, resLen0 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len70; i0++)
+      {
+        uint64_t *ab = z1;
+        uint64_t a_j = z1[i0];
+        uint64_t *res_j = t + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = ab[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i0);
+          uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+          uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+          uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, a_j, c, res_i);
+        }
+        for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+        {
+          uint64_t a_i = ab[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i);
+        }
+        uint64_t r12 = c;
+        t[i0 + i0] = r12;
+      }
+      uint64_t c00 = bn_add_eq_len_u64(resLen0, t, t, t);
+      KRML_CHECK_SIZE(sizeof (uint64_t), resLen0);
+      uint64_t tmp3[resLen0];
+      memset(tmp3, 0U, resLen0 * sizeof (uint64_t));
+      for (uint32_t i = (uint32_t)0U; i < len70; i++)
+      {
+        uint128_t res = (uint128_t)z1[i] * z1[i];
+        uint64_t hi = (uint64_t)(res >> (uint32_t)64U);
+        uint64_t lo = (uint64_t)res;
+        tmp3[(uint32_t)2U * i] = lo;
+        tmp3[(uint32_t)2U * i + (uint32_t)1U] = hi;
+      }
+      uint64_t c10 = bn_add_eq_len_u64(resLen0, t, tmp3, t);
+      uint32_t len71 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len71);
+      uint64_t t20[(uint32_t)2U * len71];
+      memset(t20, 0U, (uint32_t)2U * len71 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len71; i0++)
+      {
+        uint64_t t10 = t[0U];
+        uint64_t *uu____0 = t20;
+        uint32_t len90 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len90; i++)
+        {
+          uu____0[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____1 = t20 + (uint32_t)4U;
+        uint32_t len91 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len91; i++)
+        {
+          uu____1[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t20;
+        uint64_t *o1 = t20 + (uint32_t)1U;
+        uint64_t *o2 = t20 + (uint32_t)2U;
+        uint64_t *o3 = t20 + (uint32_t)3U;
+        uint64_t *o4 = t20 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c11 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c11;
+        mul64(f3, t10, o3, o4);
+        uint32_t len92 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len92 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t[(uint32_t)4U * i];
+          uint64_t t210 = t20[(uint32_t)4U * i];
+          uint64_t *res_i0 = t20 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t20[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t20 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t20[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t20 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t20[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t20 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len92 / (uint32_t)4U * (uint32_t)4U; i < len92; i++)
+        {
+          uint64_t t1 = t[i];
+          uint64_t t21 = t20[i];
+          uint64_t *res_i = t20 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry1 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t20[(uint32_t)1U + i];
+          t[i] = elem;
+        }
+        t[len9] = carry1;
+      }
+      uint32_t len8 = (uint32_t)4U;
+      uint64_t cin = t[len8];
+      uint64_t *x_0 = t;
+      uint32_t len90 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len90);
+      uint64_t tempBuffer22[len90];
+      memset(tempBuffer22, 0U, len90 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow0 = (uint64_t)0U;
+      uint64_t
+      p10[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len100 = (uint32_t)4U;
+      uint64_t c3 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len100 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_0[(uint32_t)4U * i];
+        uint64_t t210 = p10[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer22 + (uint32_t)4U * i;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t210, res_i0);
+        uint64_t t10 = x_0[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p10[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer22 + (uint32_t)4U * i + (uint32_t)1U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t10, t211, res_i1);
+        uint64_t t11 = x_0[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p10[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer22 + (uint32_t)4U * i + (uint32_t)2U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t11, t212, res_i2);
+        uint64_t t12 = x_0[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p10[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer22 + (uint32_t)4U * i + (uint32_t)3U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t12, t21, res_i);
+      }
+      for (uint32_t i = len100 / (uint32_t)4U * (uint32_t)4U; i < len100; i++)
+      {
+        uint64_t t1 = x_0[i];
+        uint64_t t21 = p10[i];
+        uint64_t *res_i = tempBuffer22 + i;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t21, res_i);
+      }
+      uint64_t r12 = c3;
+      uint64_t carry00 = r12;
+      uint64_t
+      carry1 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry00,
+          cin,
+          (uint64_t)0U,
+          &tempBufferForSubborrow0);
+      cmovznz4_p256(carry1, tempBuffer22, x_0, sq_z1);
+      uint32_t len64 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len64);
+      uint64_t t0[(uint32_t)2U * len64];
+      memset(t0, 0U, (uint32_t)2U * len64 * sizeof (uint64_t));
+      uint32_t len72 = (uint32_t)4U;
+      uint32_t resLen1 = len72 + len72;
+      memset(t0, 0U, resLen1 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len72; i0++)
+      {
+        uint64_t *ab = z2;
+        uint64_t a_j = z2[i0];
+        uint64_t *res_j = t0 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = ab[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i0);
+          uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+          uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+          uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, a_j, c, res_i);
+        }
+        for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+        {
+          uint64_t a_i = ab[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i);
+        }
+        uint64_t r13 = c;
+        t0[i0 + i0] = r13;
+      }
+      uint64_t c0 = bn_add_eq_len_u64(resLen1, t0, t0, t0);
+      KRML_CHECK_SIZE(sizeof (uint64_t), resLen1);
+      uint64_t tmp4[resLen1];
+      memset(tmp4, 0U, resLen1 * sizeof (uint64_t));
+      for (uint32_t i = (uint32_t)0U; i < len72; i++)
+      {
+        uint128_t res = (uint128_t)z2[i] * z2[i];
+        uint64_t hi = (uint64_t)(res >> (uint32_t)64U);
+        uint64_t lo = (uint64_t)res;
+        tmp4[(uint32_t)2U * i] = lo;
+        tmp4[(uint32_t)2U * i + (uint32_t)1U] = hi;
+      }
+      uint64_t c11 = bn_add_eq_len_u64(resLen1, t0, tmp4, t0);
+      uint32_t len73 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len73);
+      uint64_t t22[(uint32_t)2U * len73];
+      memset(t22, 0U, (uint32_t)2U * len73 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len73; i0++)
+      {
+        uint64_t t10 = t0[0U];
+        uint64_t *uu____2 = t22;
+        uint32_t len91 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len91; i++)
+        {
+          uu____2[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____3 = t22 + (uint32_t)4U;
+        uint32_t len92 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len92; i++)
+        {
+          uu____3[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t22;
+        uint64_t *o1 = t22 + (uint32_t)1U;
+        uint64_t *o2 = t22 + (uint32_t)2U;
+        uint64_t *o3 = t22 + (uint32_t)3U;
+        uint64_t *o4 = t22 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len93 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len93 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t0[(uint32_t)4U * i];
+          uint64_t t210 = t22[(uint32_t)4U * i];
+          uint64_t *res_i0 = t22 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t22[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t22 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t22[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t22 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t0[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t22[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t22 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len93 / (uint32_t)4U * (uint32_t)4U; i < len93; i++)
+        {
+          uint64_t t1 = t0[i];
+          uint64_t t21 = t22[i];
+          uint64_t *res_i = t22 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry2 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t22[(uint32_t)1U + i];
+          t0[i] = elem;
+        }
+        t0[len9] = carry2;
+      }
+      uint32_t len80 = (uint32_t)4U;
+      uint64_t cin0 = t0[len80];
+      uint64_t *x_1 = t0;
+      uint32_t len91 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len91);
+      uint64_t tempBuffer23[len91];
+      memset(tempBuffer23, 0U, len91 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow1 = (uint64_t)0U;
+      uint64_t
+      p11[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len101 = (uint32_t)4U;
+      uint64_t c4 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len101 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_1[(uint32_t)4U * i];
+        uint64_t t210 = p11[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer23 + (uint32_t)4U * i;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t1, t210, res_i0);
+        uint64_t t10 = x_1[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p11[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer23 + (uint32_t)4U * i + (uint32_t)1U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t10, t211, res_i1);
+        uint64_t t11 = x_1[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p11[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer23 + (uint32_t)4U * i + (uint32_t)2U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t11, t212, res_i2);
+        uint64_t t12 = x_1[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p11[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer23 + (uint32_t)4U * i + (uint32_t)3U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t12, t21, res_i);
+      }
+      for (uint32_t i = len101 / (uint32_t)4U * (uint32_t)4U; i < len101; i++)
+      {
+        uint64_t t1 = x_1[i];
+        uint64_t t21 = p11[i];
+        uint64_t *res_i = tempBuffer23 + i;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t1, t21, res_i);
+      }
+      uint64_t r13 = c4;
+      uint64_t carry01 = r13;
+      uint64_t
+      carry2 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry01,
+          cin0,
+          (uint64_t)0U,
+          &tempBufferForSubborrow1);
+      cmovznz4_p256(carry2, tempBuffer23, x_1, sq_z2);
+      uint32_t len65 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len65);
+      uint64_t t3[(uint32_t)2U * len65];
+      memset(t3, 0U, (uint32_t)2U * len65 * sizeof (uint64_t));
+      uint32_t len74 = (uint32_t)4U;
+      uint32_t resLen2 = len74 + len74;
+      memset(t3, 0U, resLen2 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len74; i0++)
+      {
+        uint64_t bj = z1[i0];
+        uint64_t *res_j = t3 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len74 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len74 / (uint32_t)4U * (uint32_t)4U; i < len74; i++)
+        {
+          uint64_t a_i = sq_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r14 = c;
+        t3[len74 + i0] = r14;
+      }
+      uint32_t len75 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len75);
+      uint64_t t23[(uint32_t)2U * len75];
+      memset(t23, 0U, (uint32_t)2U * len75 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len75; i0++)
+      {
+        uint64_t t10 = t3[0U];
+        uint64_t *uu____4 = t23;
+        uint32_t len92 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len92; i++)
+        {
+          uu____4[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____5 = t23 + (uint32_t)4U;
+        uint32_t len93 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len93; i++)
+        {
+          uu____5[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t23;
+        uint64_t *o1 = t23 + (uint32_t)1U;
+        uint64_t *o2 = t23 + (uint32_t)2U;
+        uint64_t *o3 = t23 + (uint32_t)3U;
+        uint64_t *o4 = t23 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len94 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len94 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t3[(uint32_t)4U * i];
+          uint64_t t210 = t23[(uint32_t)4U * i];
+          uint64_t *res_i0 = t23 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t3[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t23[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t23 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t3[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t23[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t23 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t3[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t23[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t23 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len94 / (uint32_t)4U * (uint32_t)4U; i < len94; i++)
+        {
+          uint64_t t1 = t3[i];
+          uint64_t t21 = t23[i];
+          uint64_t *res_i = t23 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry3 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t23[(uint32_t)1U + i];
+          t3[i] = elem;
+        }
+        t3[len9] = carry3;
+      }
+      uint32_t len81 = (uint32_t)4U;
+      uint64_t cin1 = t3[len81];
+      uint64_t *x_2 = t3;
+      uint32_t len92 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len92);
+      uint64_t tempBuffer24[len92];
+      memset(tempBuffer24, 0U, len92 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow2 = (uint64_t)0U;
+      uint64_t
+      p12[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len102 = (uint32_t)4U;
+      uint64_t c5 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len102 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_2[(uint32_t)4U * i];
+        uint64_t t210 = p12[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer24 + (uint32_t)4U * i;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t1, t210, res_i0);
+        uint64_t t10 = x_2[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p12[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer24 + (uint32_t)4U * i + (uint32_t)1U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t10, t211, res_i1);
+        uint64_t t11 = x_2[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p12[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer24 + (uint32_t)4U * i + (uint32_t)2U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t11, t212, res_i2);
+        uint64_t t12 = x_2[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p12[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer24 + (uint32_t)4U * i + (uint32_t)3U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t12, t21, res_i);
+      }
+      for (uint32_t i = len102 / (uint32_t)4U * (uint32_t)4U; i < len102; i++)
+      {
+        uint64_t t1 = x_2[i];
+        uint64_t t21 = p12[i];
+        uint64_t *res_i = tempBuffer24 + i;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t1, t21, res_i);
+      }
+      uint64_t r14 = c5;
+      uint64_t carry02 = r14;
+      uint64_t
+      carry3 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry02,
+          cin1,
+          (uint64_t)0U,
+          &tempBufferForSubborrow2);
+      cmovznz4_p256(carry3, tempBuffer24, x_2, tr_z1);
+      uint32_t len66 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len66);
+      uint64_t t4[(uint32_t)2U * len66];
+      memset(t4, 0U, (uint32_t)2U * len66 * sizeof (uint64_t));
+      uint32_t len76 = (uint32_t)4U;
+      uint32_t resLen3 = len76 + len76;
+      memset(t4, 0U, resLen3 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len76; i0++)
+      {
+        uint64_t bj = z2[i0];
+        uint64_t *res_j = t4 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len76 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len76 / (uint32_t)4U * (uint32_t)4U; i < len76; i++)
+        {
+          uint64_t a_i = sq_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r15 = c;
+        t4[len76 + i0] = r15;
+      }
+      uint32_t len77 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len77);
+      uint64_t t24[(uint32_t)2U * len77];
+      memset(t24, 0U, (uint32_t)2U * len77 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len77; i0++)
+      {
+        uint64_t t10 = t4[0U];
+        uint64_t *uu____6 = t24;
+        uint32_t len93 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len93; i++)
+        {
+          uu____6[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____7 = t24 + (uint32_t)4U;
+        uint32_t len94 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len94; i++)
+        {
+          uu____7[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t24;
+        uint64_t *o1 = t24 + (uint32_t)1U;
+        uint64_t *o2 = t24 + (uint32_t)2U;
+        uint64_t *o3 = t24 + (uint32_t)3U;
+        uint64_t *o4 = t24 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len95 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len95 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t4[(uint32_t)4U * i];
+          uint64_t t210 = t24[(uint32_t)4U * i];
+          uint64_t *res_i0 = t24 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t4[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t24[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t24 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t4[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t24[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t24 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t4[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t24[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t24 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len95 / (uint32_t)4U * (uint32_t)4U; i < len95; i++)
+        {
+          uint64_t t1 = t4[i];
+          uint64_t t21 = t24[i];
+          uint64_t *res_i = t24 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry4 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t24[(uint32_t)1U + i];
+          t4[i] = elem;
+        }
+        t4[len9] = carry4;
+      }
+      uint32_t len82 = (uint32_t)4U;
+      uint64_t cin2 = t4[len82];
+      uint64_t *x_3 = t4;
+      uint32_t len93 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len93);
+      uint64_t tempBuffer25[len93];
+      memset(tempBuffer25, 0U, len93 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow3 = (uint64_t)0U;
+      uint64_t
+      p13[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len103 = (uint32_t)4U;
+      uint64_t c6 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len103 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_3[(uint32_t)4U * i];
+        uint64_t t210 = p13[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer25 + (uint32_t)4U * i;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t1, t210, res_i0);
+        uint64_t t10 = x_3[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p13[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer25 + (uint32_t)4U * i + (uint32_t)1U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t10, t211, res_i1);
+        uint64_t t11 = x_3[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p13[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer25 + (uint32_t)4U * i + (uint32_t)2U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t11, t212, res_i2);
+        uint64_t t12 = x_3[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p13[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer25 + (uint32_t)4U * i + (uint32_t)3U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t12, t21, res_i);
+      }
+      for (uint32_t i = len103 / (uint32_t)4U * (uint32_t)4U; i < len103; i++)
+      {
+        uint64_t t1 = x_3[i];
+        uint64_t t21 = p13[i];
+        uint64_t *res_i = tempBuffer25 + i;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t1, t21, res_i);
+      }
+      uint64_t r15 = c6;
+      uint64_t carry03 = r15;
+      uint64_t
+      carry4 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry03,
+          cin2,
+          (uint64_t)0U,
+          &tempBufferForSubborrow3);
+      cmovznz4_p256(carry4, tempBuffer25, x_3, tr_z2);
+      uint32_t len67 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len67);
+      uint64_t t5[(uint32_t)2U * len67];
+      memset(t5, 0U, (uint32_t)2U * len67 * sizeof (uint64_t));
+      uint32_t len78 = (uint32_t)4U;
+      uint32_t resLen4 = len78 + len78;
+      memset(t5, 0U, resLen4 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len78; i0++)
+      {
+        uint64_t bj = x2[i0];
+        uint64_t *res_j = t5 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len78 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len78 / (uint32_t)4U * (uint32_t)4U; i < len78; i++)
+        {
+          uint64_t a_i = sq_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r16 = c;
+        t5[len78 + i0] = r16;
+      }
+      uint32_t len79 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len79);
+      uint64_t t25[(uint32_t)2U * len79];
+      memset(t25, 0U, (uint32_t)2U * len79 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len79; i0++)
+      {
+        uint64_t t10 = t5[0U];
+        uint64_t *uu____8 = t25;
+        uint32_t len94 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len94; i++)
+        {
+          uu____8[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____9 = t25 + (uint32_t)4U;
+        uint32_t len95 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len95; i++)
+        {
+          uu____9[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t25;
+        uint64_t *o1 = t25 + (uint32_t)1U;
+        uint64_t *o2 = t25 + (uint32_t)2U;
+        uint64_t *o3 = t25 + (uint32_t)3U;
+        uint64_t *o4 = t25 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len96 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len96 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t5[(uint32_t)4U * i];
+          uint64_t t210 = t25[(uint32_t)4U * i];
+          uint64_t *res_i0 = t25 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t5[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t25[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t25 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t5[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t25[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t25 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t5[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t25[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t25 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len96 / (uint32_t)4U * (uint32_t)4U; i < len96; i++)
+        {
+          uint64_t t1 = t5[i];
+          uint64_t t21 = t25[i];
+          uint64_t *res_i = t25 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry5 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t25[(uint32_t)1U + i];
+          t5[i] = elem;
+        }
+        t5[len9] = carry5;
+      }
+      uint32_t len83 = (uint32_t)4U;
+      uint64_t cin3 = t5[len83];
+      uint64_t *x_4 = t5;
+      uint32_t len94 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len94);
+      uint64_t tempBuffer26[len94];
+      memset(tempBuffer26, 0U, len94 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow4 = (uint64_t)0U;
+      uint64_t
+      p14[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len104 = (uint32_t)4U;
+      uint64_t c7 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len104 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_4[(uint32_t)4U * i];
+        uint64_t t210 = p14[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer26 + (uint32_t)4U * i;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t1, t210, res_i0);
+        uint64_t t10 = x_4[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p14[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer26 + (uint32_t)4U * i + (uint32_t)1U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t10, t211, res_i1);
+        uint64_t t11 = x_4[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p14[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer26 + (uint32_t)4U * i + (uint32_t)2U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t11, t212, res_i2);
+        uint64_t t12 = x_4[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p14[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer26 + (uint32_t)4U * i + (uint32_t)3U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t12, t21, res_i);
+      }
+      for (uint32_t i = len104 / (uint32_t)4U * (uint32_t)4U; i < len104; i++)
+      {
+        uint64_t t1 = x_4[i];
+        uint64_t t21 = p14[i];
+        uint64_t *res_i = tempBuffer26 + i;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t1, t21, res_i);
+      }
+      uint64_t r16 = c7;
+      uint64_t carry04 = r16;
+      uint64_t
+      carry5 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry04,
+          cin3,
+          (uint64_t)0U,
+          &tempBufferForSubborrow4);
+      cmovznz4_p256(carry5, tempBuffer26, x_4, sq_z1);
+      uint32_t len68 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len68);
+      uint64_t t6[(uint32_t)2U * len68];
+      memset(t6, 0U, (uint32_t)2U * len68 * sizeof (uint64_t));
+      uint32_t len710 = (uint32_t)4U;
+      uint32_t resLen5 = len710 + len710;
+      memset(t6, 0U, resLen5 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len710; i0++)
+      {
+        uint64_t bj = x1[i0];
+        uint64_t *res_j = t6 + i0;
+        uint64_t c = (uint64_t)0U;
+        for
+        (uint32_t
+          i = (uint32_t)0U;
+          i
+          < len710 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
+          i++)
+        {
+          uint64_t a_i = sq_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len710 / (uint32_t)4U * (uint32_t)4U; i < len710; i++)
+        {
+          uint64_t a_i = sq_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r17 = c;
+        t6[len710 + i0] = r17;
+      }
+      uint32_t len711 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len711);
+      uint64_t t26[(uint32_t)2U * len711];
+      memset(t26, 0U, (uint32_t)2U * len711 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len711; i0++)
+      {
+        uint64_t t10 = t6[0U];
+        uint64_t *uu____10 = t26;
+        uint32_t len95 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len95; i++)
+        {
+          uu____10[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____11 = t26 + (uint32_t)4U;
+        uint32_t len96 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len96; i++)
+        {
+          uu____11[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t26;
+        uint64_t *o1 = t26 + (uint32_t)1U;
+        uint64_t *o2 = t26 + (uint32_t)2U;
+        uint64_t *o3 = t26 + (uint32_t)3U;
+        uint64_t *o4 = t26 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len97 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len97 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t6[(uint32_t)4U * i];
+          uint64_t t210 = t26[(uint32_t)4U * i];
+          uint64_t *res_i0 = t26 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t6[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t26[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t26 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t6[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t26[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t26 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t6[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t26[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t26 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len97 / (uint32_t)4U * (uint32_t)4U; i < len97; i++)
+        {
+          uint64_t t1 = t6[i];
+          uint64_t t21 = t26[i];
+          uint64_t *res_i = t26 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry6 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t26[(uint32_t)1U + i];
+          t6[i] = elem;
+        }
+        t6[len9] = carry6;
+      }
+      uint32_t len84 = (uint32_t)4U;
+      uint64_t cin4 = t6[len84];
+      uint64_t *x_5 = t6;
+      uint32_t len95 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len95);
+      uint64_t tempBuffer27[len95];
+      memset(tempBuffer27, 0U, len95 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow5 = (uint64_t)0U;
+      uint64_t
+      p15[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len105 = (uint32_t)4U;
+      uint64_t c8 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len105 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_5[(uint32_t)4U * i];
+        uint64_t t210 = p15[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer27 + (uint32_t)4U * i;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t1, t210, res_i0);
+        uint64_t t10 = x_5[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p15[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer27 + (uint32_t)4U * i + (uint32_t)1U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t10, t211, res_i1);
+        uint64_t t11 = x_5[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p15[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer27 + (uint32_t)4U * i + (uint32_t)2U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t11, t212, res_i2);
+        uint64_t t12 = x_5[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p15[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer27 + (uint32_t)4U * i + (uint32_t)3U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t12, t21, res_i);
+      }
+      for (uint32_t i = len105 / (uint32_t)4U * (uint32_t)4U; i < len105; i++)
+      {
+        uint64_t t1 = x_5[i];
+        uint64_t t21 = p15[i];
+        uint64_t *res_i = tempBuffer27 + i;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t1, t21, res_i);
+      }
+      uint64_t r17 = c8;
+      uint64_t carry05 = r17;
+      uint64_t
+      carry6 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry05,
+          cin4,
+          (uint64_t)0U,
+          &tempBufferForSubborrow5);
+      cmovznz4_p256(carry6, tempBuffer27, x_5, sq_z2);
+      uint32_t len69 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len69);
+      uint64_t t7[(uint32_t)2U * len69];
+      memset(t7, 0U, (uint32_t)2U * len69 * sizeof (uint64_t));
+      uint32_t len712 = (uint32_t)4U;
+      uint32_t resLen6 = len712 + len712;
+      memset(t7, 0U, resLen6 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len712; i0++)
+      {
+        uint64_t bj = y2[i0];
+        uint64_t *res_j = t7 + i0;
+        uint64_t c = (uint64_t)0U;
+        for
+        (uint32_t
+          i = (uint32_t)0U;
+          i
+          < len712 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
+          i++)
+        {
+          uint64_t a_i = tr_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = tr_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = tr_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = tr_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len712 / (uint32_t)4U * (uint32_t)4U; i < len712; i++)
+        {
+          uint64_t a_i = tr_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r18 = c;
+        t7[len712 + i0] = r18;
+      }
+      uint32_t len713 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len713);
+      uint64_t t27[(uint32_t)2U * len713];
+      memset(t27, 0U, (uint32_t)2U * len713 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len713; i0++)
+      {
+        uint64_t t10 = t7[0U];
+        uint64_t *uu____12 = t27;
+        uint32_t len96 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len96; i++)
+        {
+          uu____12[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____13 = t27 + (uint32_t)4U;
+        uint32_t len97 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len97; i++)
+        {
+          uu____13[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t27;
+        uint64_t *o1 = t27 + (uint32_t)1U;
+        uint64_t *o2 = t27 + (uint32_t)2U;
+        uint64_t *o3 = t27 + (uint32_t)3U;
+        uint64_t *o4 = t27 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len98 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len98 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t7[(uint32_t)4U * i];
+          uint64_t t210 = t27[(uint32_t)4U * i];
+          uint64_t *res_i0 = t27 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t7[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t27[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t27 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t7[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t27[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t27 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t7[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t27[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t27 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len98 / (uint32_t)4U * (uint32_t)4U; i < len98; i++)
+        {
+          uint64_t t1 = t7[i];
+          uint64_t t21 = t27[i];
+          uint64_t *res_i = t27 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry7 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t27[(uint32_t)1U + i];
+          t7[i] = elem;
+        }
+        t7[len9] = carry7;
+      }
+      uint32_t len85 = (uint32_t)4U;
+      uint64_t cin5 = t7[len85];
+      uint64_t *x_6 = t7;
+      uint32_t len96 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len96);
+      uint64_t tempBuffer28[len96];
+      memset(tempBuffer28, 0U, len96 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow6 = (uint64_t)0U;
+      uint64_t
+      p16[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len106 = (uint32_t)4U;
+      uint64_t c9 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len106 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_6[(uint32_t)4U * i];
+        uint64_t t210 = p16[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer28 + (uint32_t)4U * i;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t1, t210, res_i0);
+        uint64_t t10 = x_6[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p16[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer28 + (uint32_t)4U * i + (uint32_t)1U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t10, t211, res_i1);
+        uint64_t t11 = x_6[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p16[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer28 + (uint32_t)4U * i + (uint32_t)2U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t11, t212, res_i2);
+        uint64_t t12 = x_6[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p16[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer28 + (uint32_t)4U * i + (uint32_t)3U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t12, t21, res_i);
+      }
+      for (uint32_t i = len106 / (uint32_t)4U * (uint32_t)4U; i < len106; i++)
+      {
+        uint64_t t1 = x_6[i];
+        uint64_t t21 = p16[i];
+        uint64_t *res_i = tempBuffer28 + i;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t1, t21, res_i);
+      }
+      uint64_t r18 = c9;
+      uint64_t carry06 = r18;
+      uint64_t
+      carry7 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry06,
+          cin5,
+          (uint64_t)0U,
+          &tempBufferForSubborrow6);
+      cmovznz4_p256(carry7, tempBuffer28, x_6, tr_z1);
+      uint32_t len610 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len610);
+      uint64_t t8[(uint32_t)2U * len610];
+      memset(t8, 0U, (uint32_t)2U * len610 * sizeof (uint64_t));
+      uint32_t len7 = (uint32_t)4U;
+      uint32_t resLen = len7 + len7;
+      memset(t8, 0U, resLen * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len7; i0++)
+      {
+        uint64_t bj = y1[i0];
+        uint64_t *res_j = t8 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len7 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = tr_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = tr_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = tr_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = tr_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len7 / (uint32_t)4U * (uint32_t)4U; i < len7; i++)
+        {
+          uint64_t a_i = tr_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r19 = c;
+        t8[len7 + i0] = r19;
+      }
+      uint32_t len714 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len714);
+      uint64_t t2[(uint32_t)2U * len714];
+      memset(t2, 0U, (uint32_t)2U * len714 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len714; i0++)
+      {
+        uint64_t t10 = t8[0U];
+        uint64_t *uu____14 = t2;
+        uint32_t len97 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len97; i++)
+        {
+          uu____14[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____15 = t2 + (uint32_t)4U;
+        uint32_t len98 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len98; i++)
+        {
+          uu____15[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len99 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len99 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t8[(uint32_t)4U * i];
+          uint64_t t210 = t2[(uint32_t)4U * i];
+          uint64_t *res_i0 = t2 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t8[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t2 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t8[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t2 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t8[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t2 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len99 / (uint32_t)4U * (uint32_t)4U; i < len99; i++)
+        {
+          uint64_t t1 = t8[i];
+          uint64_t t21 = t2[i];
+          uint64_t *res_i = t2 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry8 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t2[(uint32_t)1U + i];
+          t8[i] = elem;
+        }
+        t8[len9] = carry8;
+      }
+      uint32_t len86 = (uint32_t)4U;
+      uint64_t cin6 = t8[len86];
+      uint64_t *x_ = t8;
+      uint32_t len9 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len9);
+      uint64_t tempBuffer29[len9];
+      memset(tempBuffer29, 0U, len9 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow = (uint64_t)0U;
+      uint64_t
+      p1[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len10 = (uint32_t)4U;
+      uint64_t c = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len10 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_[(uint32_t)4U * i];
+        uint64_t t210 = p1[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer29 + (uint32_t)4U * i;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t210, res_i0);
+        uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p1[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer29 + (uint32_t)4U * i + (uint32_t)1U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t211, res_i1);
+        uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p1[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer29 + (uint32_t)4U * i + (uint32_t)2U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t212, res_i2);
+        uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer29 + (uint32_t)4U * i + (uint32_t)3U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t21, res_i);
+      }
+      for (uint32_t i = len10 / (uint32_t)4U * (uint32_t)4U; i < len10; i++)
+      {
+        uint64_t t1 = x_[i];
+        uint64_t t21 = p1[i];
+        uint64_t *res_i = tempBuffer29 + i;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t21, res_i);
+      }
+      uint64_t r19 = c;
+      uint64_t carry07 = r19;
+      uint64_t
+      carry8 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry07,
+          cin6,
+          (uint64_t)0U,
+          &tempBufferForSubborrow);
+      cmovznz4_p256(carry8, tempBuffer29, x_, tr_z2);
+      bool equalX = cmp_felem_felem_bool_p256(sq_z1, sq_z2);
+      bool equalY = cmp_felem_felem_bool_p256(tr_z1, tr_z2);
+      bool equalXAndY = equalX && equalY;
+      if (equalXAndY)
+      {
+        uint32_t len611 = (uint32_t)4U;
+        uint64_t *pY = p + len611;
+        uint64_t *pZ = p + (uint32_t)2U * len611;
+        uint64_t *x3 = result;
+        uint64_t *y3 = result + len611;
+        uint64_t *z3 = result + (uint32_t)2U * len611;
+        uint64_t *delta = tempBuffer17;
+        uint64_t *gamma = tempBuffer17 + len611;
+        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len611;
+        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len611;
+        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len611;
+        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len611;
+        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len611;
+        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len611;
+        uint32_t coordinateLen = (uint32_t)4U;
+        uint64_t *pX1 = p;
+        uint64_t *pY1 = p + coordinateLen;
+        uint64_t *pZ1 = p + (uint32_t)2U * coordinateLen;
+        uint64_t *a0 = tmp;
+        uint64_t *a1 = tmp + coordinateLen;
+        uint64_t *alpha0 = tmp + (uint32_t)2U * coordinateLen;
+        montgomery_square_buffer_dh_p256(pZ1, delta);
+        montgomery_square_buffer_dh_p256(pY1, gamma);
+        montgomery_multiplication_buffer_dh_p256(pX1, gamma, beta);
+        felem_sub_p256(pX1, delta, a0);
+        felem_add_p256(pX1, delta, a1);
+        montgomery_multiplication_buffer_dh_p256(a0, a1, alpha0);
+        felem_add_p256(alpha0, alpha0, alpha);
+        felem_add_p256(alpha0, alpha, alpha);
+        montgomery_square_buffer_dh_p256(alpha, x3);
+        felem_add_p256(beta, beta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, eightBeta);
+        felem_sub_p256(x3, eightBeta, x3);
+        felem_add_p256(pY, pZ, z3);
+        montgomery_square_buffer_dh_p256(z3, z3);
+        felem_sub_p256(z3, gamma, z3);
+        felem_sub_p256(z3, delta, z3);
+        felem_sub_p256(fourBeta, x3, y3);
+        montgomery_multiplication_buffer_dh_p256(alpha, y3, y3);
+        montgomery_square_buffer_dh_p256(gamma, gamma);
+        felem_add_p256(gamma, gamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_sub_p256(y3, eightGamma, y3);
+      }
+      else
+      {
+        point_add_p256(p, q, result, tempBuffer17);
+      }
+      norm_p256(result, result, tempBuffer17);
+      uint32_t len47 = (uint32_t)4U;
+      uint64_t *zCoordinate0 = result + (uint32_t)2U * len47;
+      uint64_t tmp = (uint64_t)18446744073709551615U;
+      uint32_t len5 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len5; i++)
+      {
+        uint64_t a_i = zCoordinate0[i];
+        uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+        uint64_t tmp0 = tmp;
+        tmp = r_i & tmp0;
+      }
+      uint64_t f0 = tmp;
+      bool resultIsPAI = f0 == (uint64_t)0xffffffffffffffffU;
+      uint64_t *xCoordinateSum = result;
+      memcpy(x, xCoordinateSum, (uint32_t)4U * sizeof (uint64_t));
+      reduction_prime_2prime_order_p256(x, x);
+      bool r110 = !resultIsPAI;
+      bool state = r110;
+      if (state == false)
+      {
+        r1 = false;
+      }
+      else
+      {
+        r1 = cmp_felem_felem_bool_p256(x, rAsFelem);
+      }
+    }
+  }
+  bool result = r1;
+  return result;
+}
+
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
+bool
+Hacl_P256_ecdsa_verif_p256_sha384(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * len);
+  uint64_t tempBuffer[(uint32_t)4U * len];
+  memset(tempBuffer, 0U, (uint32_t)4U * len * sizeof (uint64_t));
+  uint64_t *publicKeyAsFelem = tempBuffer;
+  uint64_t *rAsFelem = tempBuffer + (uint32_t)2U * len;
+  uint64_t *sAsFelem = tempBuffer + (uint32_t)3U * len;
+  uint32_t len1 = (uint32_t)4U;
+  uint64_t *publicKeyFelemX = publicKeyAsFelem;
+  uint64_t *publicKeyFelemY = publicKeyAsFelem + len1;
+  uint8_t *pubKeyX = pubKey;
+  uint8_t *pubKeyY = pubKey + (uint32_t)32U;
+  toUint64ChangeEndian_p256(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian_p256(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian_p256(r, rAsFelem);
+  toUint64ChangeEndian_p256(s, sAsFelem);
+  uint32_t len11 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11 * (uint32_t)20U);
+  uint64_t tempBuffer1[len11 * (uint32_t)20U];
+  memset(tempBuffer1, 0U, len11 * (uint32_t)20U * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11);
+  uint64_t hashAsFelem[len11];
+  memset(hashAsFelem, 0U, len11 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11);
+  uint64_t x[len11];
+  memset(x, 0U, len11 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11 * (uint32_t)3U);
+  uint64_t publicKeyBuffer[len11 * (uint32_t)3U];
+  memset(publicKeyBuffer, 0U, len11 * (uint32_t)3U * sizeof (uint64_t));
+  uint32_t len20 = (uint32_t)4U;
+  uint32_t lengthXY = len20 * (uint32_t)2U;
+  uint64_t *partPoint = publicKeyBuffer;
+  uint64_t *zCoordinate = publicKeyBuffer + lengthXY;
+  memcpy(partPoint, publicKeyAsFelem, lengthXY * sizeof (uint64_t));
+  zCoordinate[0U] = (uint64_t)1U;
+  uint32_t len30 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len30; i++)
+  {
+    zCoordinate[i] = (uint64_t)0U;
+  }
+  bool publicKeyCorrect = verifyQValidCurvePoint_p256(publicKeyBuffer);
+  bool r1;
+  if (publicKeyCorrect == false)
+  {
+    r1 = false;
+  }
+  else
+  {
+    uint32_t len21 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len21);
+    uint64_t tempBuffer20[len21];
+    memset(tempBuffer20, 0U, len21 * sizeof (uint64_t));
+    uint64_t
+    p0[4U] =
+      {
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
+      };
+    uint32_t len31 = (uint32_t)4U;
+    uint64_t c1 = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len31 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = rAsFelem[(uint32_t)4U * i];
+      uint64_t t20 = p0[(uint32_t)4U * i];
+      uint64_t *res_i0 = tempBuffer20 + (uint32_t)4U * i;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, res_i0);
+      uint64_t t10 = rAsFelem[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = tempBuffer20 + (uint32_t)4U * i + (uint32_t)1U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t10, t21, res_i1);
+      uint64_t t11 = rAsFelem[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = tempBuffer20 + (uint32_t)4U * i + (uint32_t)2U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t11, t22, res_i2);
+      uint64_t t12 = rAsFelem[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = tempBuffer20 + (uint32_t)4U * i + (uint32_t)3U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t12, t2, res_i);
+    }
+    for (uint32_t i = len31 / (uint32_t)4U * (uint32_t)4U; i < len31; i++)
+    {
+      uint64_t t1 = rAsFelem[i];
+      uint64_t t2 = p0[i];
+      uint64_t *res_i = tempBuffer20 + i;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res_i);
+    }
+    uint64_t r10 = c1;
+    uint64_t carry = r10;
+    bool less = carry == (uint64_t)1U;
+    uint64_t tmp1 = (uint64_t)18446744073709551615U;
+    uint32_t len32 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len32; i++)
+    {
+      uint64_t a_i = rAsFelem[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp1;
+      tmp1 = r_i & tmp0;
+    }
+    uint64_t f = tmp1;
+    bool more = f == (uint64_t)0xffffffffffffffffU;
+    bool isRCorrect = less && !more;
+    uint32_t len2 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len2);
+    uint64_t tempBuffer21[len2];
+    memset(tempBuffer21, 0U, len2 * sizeof (uint64_t));
+    uint64_t
+    p2[4U] =
+      {
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
+      };
+    uint32_t len33 = (uint32_t)4U;
+    uint64_t c2 = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len33 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = sAsFelem[(uint32_t)4U * i];
+      uint64_t t20 = p2[(uint32_t)4U * i];
+      uint64_t *res_i0 = tempBuffer21 + (uint32_t)4U * i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t20, res_i0);
+      uint64_t t10 = sAsFelem[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p2[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = tempBuffer21 + (uint32_t)4U * i + (uint32_t)1U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t10, t21, res_i1);
+      uint64_t t11 = sAsFelem[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p2[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = tempBuffer21 + (uint32_t)4U * i + (uint32_t)2U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t11, t22, res_i2);
+      uint64_t t12 = sAsFelem[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p2[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = tempBuffer21 + (uint32_t)4U * i + (uint32_t)3U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t12, t2, res_i);
+    }
+    for (uint32_t i = len33 / (uint32_t)4U * (uint32_t)4U; i < len33; i++)
+    {
+      uint64_t t1 = sAsFelem[i];
+      uint64_t t2 = p2[i];
+      uint64_t *res_i = tempBuffer21 + i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t2, res_i);
+    }
+    uint64_t r11 = c2;
+    uint64_t carry0 = r11;
+    bool less0 = carry0 == (uint64_t)1U;
+    uint64_t tmp2 = (uint64_t)18446744073709551615U;
+    uint32_t len3 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
+    {
+      uint64_t a_i = sAsFelem[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp2;
+      tmp2 = r_i & tmp0;
+    }
+    uint64_t f2 = tmp2;
+    bool more0 = f2 == (uint64_t)0xffffffffffffffffU;
+    bool isSCorrect = less0 && !more0;
+    bool step1 = isRCorrect && isSCorrect;
+    if (step1 == false)
+    {
+      r1 = false;
+    }
+    else
+    {
+      uint32_t len22 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * len22);
+      uint8_t tempBufferU8[(uint32_t)2U * len22];
+      memset(tempBufferU8, 0U, (uint32_t)2U * len22 * sizeof (uint8_t));
+      uint8_t *u1 = tempBufferU8;
+      uint8_t *u2 = tempBufferU8 + (uint32_t)32U;
+      uint32_t sz_hash = (uint32_t)48U;
+      uint32_t len34 = sz_hash + (uint32_t)32U;
+      KRML_CHECK_SIZE(sizeof (uint8_t), len34);
+      uint8_t mHash[len34];
+      memset(mHash, 0U, len34 * sizeof (uint8_t));
+      uint8_t *mHashHPart = mHash;
+      uint8_t *mHashRPart = mHash;
+      Hacl_Hash_SHA2_hash_384(m, mLen, mHashHPart);
+      toUint64ChangeEndian_p256(mHashRPart, hashAsFelem);
+      reduction_prime_2prime_order_p256(hashAsFelem, hashAsFelem);
+      uint32_t len35 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len35);
+      uint64_t tempBuffer2[(uint32_t)3U * len35];
+      memset(tempBuffer2, 0U, (uint32_t)3U * len35 * sizeof (uint64_t));
+      uint64_t *inverseS = tempBuffer2;
+      uint64_t *u11 = tempBuffer2 + len35;
+      uint64_t *u21 = tempBuffer2 + (uint32_t)2U * len35;
+      uint32_t len40 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len40);
+      uint64_t one[len40];
+      memset(one, 0U, len40 * sizeof (uint64_t));
+      one[0U] = (uint64_t)1U;
+      uint32_t len50 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len50; i++)
+      {
+        one[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one, sAsFelem, inverseS);
+      montgomery_ladder_power_p256_dsa(inverseS, prime256order_buffer, inverseS);
+      uint32_t len41 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len41);
+      uint64_t buffFromDB[len41];
+      memset(buffFromDB, 0U, len41 * sizeof (uint64_t));
+      uint32_t len51 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len51);
+      uint64_t one0[len51];
+      memset(one0, 0U, len51 * sizeof (uint64_t));
+      one0[0U] = (uint64_t)1U;
+      uint32_t len60 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len60; i++)
+      {
+        one0[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one0, hashAsFelem, buffFromDB);
+      uint32_t len52 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len52);
+      uint64_t one1[len52];
+      memset(one1, 0U, len52 * sizeof (uint64_t));
+      one1[0U] = (uint64_t)1U;
+      uint32_t len61 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len61; i++)
+      {
+        one1[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one1, buffFromDB, buffFromDB);
+      montgomery_multiplication_buffer_dsa_p256(inverseS, buffFromDB, u11);
+      uint32_t len42 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len42);
+      uint64_t buffFromDB0[len42];
+      memset(buffFromDB0, 0U, len42 * sizeof (uint64_t));
+      uint32_t len53 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len53);
+      uint64_t one2[len53];
+      memset(one2, 0U, len53 * sizeof (uint64_t));
+      one2[0U] = (uint64_t)1U;
+      uint32_t len62 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len62; i++)
+      {
+        one2[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one2, rAsFelem, buffFromDB0);
+      uint32_t len54 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len54);
+      uint64_t one3[len54];
+      memset(one3, 0U, len54 * sizeof (uint64_t));
+      one3[0U] = (uint64_t)1U;
+      uint32_t len63 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len63; i++)
+      {
+        one3[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one3, buffFromDB0, buffFromDB0);
+      montgomery_multiplication_buffer_dsa_p256(inverseS, buffFromDB0, u21);
+      uint32_t len43 = (uint32_t)4U;
+      uint32_t lenByTwo = len43 >> (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
+      {
+        uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+        uint64_t left = u11[i];
+        uint64_t right = u11[lenRight];
+        u11[i] = right;
+        u11[lenRight] = left;
+      }
+      uint32_t len44 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len44; i++)
+      {
+        store64_be(u1 + i * (uint32_t)8U, u11[i]);
+      }
+      uint32_t len45 = (uint32_t)4U;
+      uint32_t lenByTwo0 = len45 >> (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < lenByTwo0; i++)
+      {
+        uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+        uint64_t left = u21[i];
+        uint64_t right = u21[lenRight];
+        u21[i] = right;
+        u21[lenRight] = left;
+      }
+      uint32_t len46 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len46; i++)
+      {
+        store64_be(u2 + i * (uint32_t)8U, u21[i]);
+      }
+      uint32_t len36 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len36 * (uint32_t)3U);
+      uint64_t result[len36 * (uint32_t)3U];
+      memset(result, 0U, len36 * (uint32_t)3U * sizeof (uint64_t));
+      uint32_t len4 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len4 * (uint32_t)6U);
+      uint64_t points[len4 * (uint32_t)6U];
+      memset(points, 0U, len4 * (uint32_t)6U * sizeof (uint64_t));
+      uint64_t *pointU1G = points;
+      uint64_t *pointU2Q = points + (uint32_t)12U;
+      secretToPublicWithoutNorm_p256(pointU1G, (void *)u1, tempBuffer1);
+      scalarMultiplicationWithoutNorm_p256(publicKeyBuffer, pointU2Q, (void *)u2, tempBuffer1);
+      uint64_t *tempBuffer17 = tempBuffer1;
+      uint64_t *p = points;
+      uint64_t *q = points + (uint32_t)12U;
+      uint32_t len55 = (uint32_t)4U;
+      uint64_t *sq_z1 = tempBuffer17;
+      uint64_t *tr_z1 = tempBuffer17 + len55;
+      uint64_t *sq_z2 = tempBuffer17 + (uint32_t)2U * len55;
+      uint64_t *tr_z2 = tempBuffer17 + (uint32_t)3U * len55;
+      uint64_t *x1 = p;
+      uint64_t *y1 = p + len55;
+      uint64_t *z1 = p + (uint32_t)2U * len55;
+      uint64_t *x2 = q;
+      uint64_t *y2 = q + len55;
+      uint64_t *z2 = q + (uint32_t)2U * len55;
+      uint32_t len6 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len6);
+      uint64_t t[(uint32_t)2U * len6];
+      memset(t, 0U, (uint32_t)2U * len6 * sizeof (uint64_t));
+      uint32_t len70 = (uint32_t)4U;
+      uint32_t resLen0 = len70 + len70;
+      memset(t, 0U, resLen0 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len70; i0++)
+      {
+        uint64_t *ab = z1;
+        uint64_t a_j = z1[i0];
+        uint64_t *res_j = t + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = ab[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i0);
+          uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+          uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+          uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, a_j, c, res_i);
+        }
+        for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+        {
+          uint64_t a_i = ab[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i);
+        }
+        uint64_t r12 = c;
+        t[i0 + i0] = r12;
+      }
+      uint64_t c00 = bn_add_eq_len_u64(resLen0, t, t, t);
+      KRML_CHECK_SIZE(sizeof (uint64_t), resLen0);
+      uint64_t tmp3[resLen0];
+      memset(tmp3, 0U, resLen0 * sizeof (uint64_t));
+      for (uint32_t i = (uint32_t)0U; i < len70; i++)
+      {
+        uint128_t res = (uint128_t)z1[i] * z1[i];
+        uint64_t hi = (uint64_t)(res >> (uint32_t)64U);
+        uint64_t lo = (uint64_t)res;
+        tmp3[(uint32_t)2U * i] = lo;
+        tmp3[(uint32_t)2U * i + (uint32_t)1U] = hi;
+      }
+      uint64_t c10 = bn_add_eq_len_u64(resLen0, t, tmp3, t);
+      uint32_t len71 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len71);
+      uint64_t t20[(uint32_t)2U * len71];
+      memset(t20, 0U, (uint32_t)2U * len71 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len71; i0++)
+      {
+        uint64_t t10 = t[0U];
+        uint64_t *uu____0 = t20;
+        uint32_t len90 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len90; i++)
+        {
+          uu____0[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____1 = t20 + (uint32_t)4U;
+        uint32_t len91 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len91; i++)
+        {
+          uu____1[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t20;
+        uint64_t *o1 = t20 + (uint32_t)1U;
+        uint64_t *o2 = t20 + (uint32_t)2U;
+        uint64_t *o3 = t20 + (uint32_t)3U;
+        uint64_t *o4 = t20 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c11 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c11;
+        mul64(f3, t10, o3, o4);
+        uint32_t len92 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len92 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t[(uint32_t)4U * i];
+          uint64_t t210 = t20[(uint32_t)4U * i];
+          uint64_t *res_i0 = t20 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t20[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t20 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t20[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t20 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t20[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t20 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len92 / (uint32_t)4U * (uint32_t)4U; i < len92; i++)
+        {
+          uint64_t t1 = t[i];
+          uint64_t t21 = t20[i];
+          uint64_t *res_i = t20 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry1 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t20[(uint32_t)1U + i];
+          t[i] = elem;
+        }
+        t[len9] = carry1;
+      }
+      uint32_t len8 = (uint32_t)4U;
+      uint64_t cin = t[len8];
+      uint64_t *x_0 = t;
+      uint32_t len90 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len90);
+      uint64_t tempBuffer22[len90];
+      memset(tempBuffer22, 0U, len90 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow0 = (uint64_t)0U;
+      uint64_t
+      p10[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len100 = (uint32_t)4U;
+      uint64_t c3 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len100 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_0[(uint32_t)4U * i];
+        uint64_t t210 = p10[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer22 + (uint32_t)4U * i;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t210, res_i0);
+        uint64_t t10 = x_0[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p10[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer22 + (uint32_t)4U * i + (uint32_t)1U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t10, t211, res_i1);
+        uint64_t t11 = x_0[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p10[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer22 + (uint32_t)4U * i + (uint32_t)2U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t11, t212, res_i2);
+        uint64_t t12 = x_0[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p10[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer22 + (uint32_t)4U * i + (uint32_t)3U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t12, t21, res_i);
+      }
+      for (uint32_t i = len100 / (uint32_t)4U * (uint32_t)4U; i < len100; i++)
+      {
+        uint64_t t1 = x_0[i];
+        uint64_t t21 = p10[i];
+        uint64_t *res_i = tempBuffer22 + i;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t21, res_i);
+      }
+      uint64_t r12 = c3;
+      uint64_t carry00 = r12;
+      uint64_t
+      carry1 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry00,
+          cin,
+          (uint64_t)0U,
+          &tempBufferForSubborrow0);
+      cmovznz4_p256(carry1, tempBuffer22, x_0, sq_z1);
+      uint32_t len64 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len64);
+      uint64_t t0[(uint32_t)2U * len64];
+      memset(t0, 0U, (uint32_t)2U * len64 * sizeof (uint64_t));
+      uint32_t len72 = (uint32_t)4U;
+      uint32_t resLen1 = len72 + len72;
+      memset(t0, 0U, resLen1 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len72; i0++)
+      {
+        uint64_t *ab = z2;
+        uint64_t a_j = z2[i0];
+        uint64_t *res_j = t0 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = ab[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i0);
+          uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+          uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+          uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, a_j, c, res_i);
+        }
+        for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+        {
+          uint64_t a_i = ab[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i);
+        }
+        uint64_t r13 = c;
+        t0[i0 + i0] = r13;
+      }
+      uint64_t c0 = bn_add_eq_len_u64(resLen1, t0, t0, t0);
+      KRML_CHECK_SIZE(sizeof (uint64_t), resLen1);
+      uint64_t tmp4[resLen1];
+      memset(tmp4, 0U, resLen1 * sizeof (uint64_t));
+      for (uint32_t i = (uint32_t)0U; i < len72; i++)
+      {
+        uint128_t res = (uint128_t)z2[i] * z2[i];
+        uint64_t hi = (uint64_t)(res >> (uint32_t)64U);
+        uint64_t lo = (uint64_t)res;
+        tmp4[(uint32_t)2U * i] = lo;
+        tmp4[(uint32_t)2U * i + (uint32_t)1U] = hi;
+      }
+      uint64_t c11 = bn_add_eq_len_u64(resLen1, t0, tmp4, t0);
+      uint32_t len73 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len73);
+      uint64_t t22[(uint32_t)2U * len73];
+      memset(t22, 0U, (uint32_t)2U * len73 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len73; i0++)
+      {
+        uint64_t t10 = t0[0U];
+        uint64_t *uu____2 = t22;
+        uint32_t len91 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len91; i++)
+        {
+          uu____2[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____3 = t22 + (uint32_t)4U;
+        uint32_t len92 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len92; i++)
+        {
+          uu____3[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t22;
+        uint64_t *o1 = t22 + (uint32_t)1U;
+        uint64_t *o2 = t22 + (uint32_t)2U;
+        uint64_t *o3 = t22 + (uint32_t)3U;
+        uint64_t *o4 = t22 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len93 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len93 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t0[(uint32_t)4U * i];
+          uint64_t t210 = t22[(uint32_t)4U * i];
+          uint64_t *res_i0 = t22 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t22[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t22 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t22[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t22 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t0[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t22[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t22 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len93 / (uint32_t)4U * (uint32_t)4U; i < len93; i++)
+        {
+          uint64_t t1 = t0[i];
+          uint64_t t21 = t22[i];
+          uint64_t *res_i = t22 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry2 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t22[(uint32_t)1U + i];
+          t0[i] = elem;
+        }
+        t0[len9] = carry2;
+      }
+      uint32_t len80 = (uint32_t)4U;
+      uint64_t cin0 = t0[len80];
+      uint64_t *x_1 = t0;
+      uint32_t len91 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len91);
+      uint64_t tempBuffer23[len91];
+      memset(tempBuffer23, 0U, len91 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow1 = (uint64_t)0U;
+      uint64_t
+      p11[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len101 = (uint32_t)4U;
+      uint64_t c4 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len101 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_1[(uint32_t)4U * i];
+        uint64_t t210 = p11[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer23 + (uint32_t)4U * i;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t1, t210, res_i0);
+        uint64_t t10 = x_1[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p11[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer23 + (uint32_t)4U * i + (uint32_t)1U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t10, t211, res_i1);
+        uint64_t t11 = x_1[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p11[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer23 + (uint32_t)4U * i + (uint32_t)2U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t11, t212, res_i2);
+        uint64_t t12 = x_1[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p11[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer23 + (uint32_t)4U * i + (uint32_t)3U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t12, t21, res_i);
+      }
+      for (uint32_t i = len101 / (uint32_t)4U * (uint32_t)4U; i < len101; i++)
+      {
+        uint64_t t1 = x_1[i];
+        uint64_t t21 = p11[i];
+        uint64_t *res_i = tempBuffer23 + i;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t1, t21, res_i);
+      }
+      uint64_t r13 = c4;
+      uint64_t carry01 = r13;
+      uint64_t
+      carry2 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry01,
+          cin0,
+          (uint64_t)0U,
+          &tempBufferForSubborrow1);
+      cmovznz4_p256(carry2, tempBuffer23, x_1, sq_z2);
+      uint32_t len65 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len65);
+      uint64_t t3[(uint32_t)2U * len65];
+      memset(t3, 0U, (uint32_t)2U * len65 * sizeof (uint64_t));
+      uint32_t len74 = (uint32_t)4U;
+      uint32_t resLen2 = len74 + len74;
+      memset(t3, 0U, resLen2 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len74; i0++)
+      {
+        uint64_t bj = z1[i0];
+        uint64_t *res_j = t3 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len74 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len74 / (uint32_t)4U * (uint32_t)4U; i < len74; i++)
+        {
+          uint64_t a_i = sq_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r14 = c;
+        t3[len74 + i0] = r14;
+      }
+      uint32_t len75 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len75);
+      uint64_t t23[(uint32_t)2U * len75];
+      memset(t23, 0U, (uint32_t)2U * len75 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len75; i0++)
+      {
+        uint64_t t10 = t3[0U];
+        uint64_t *uu____4 = t23;
+        uint32_t len92 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len92; i++)
+        {
+          uu____4[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____5 = t23 + (uint32_t)4U;
+        uint32_t len93 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len93; i++)
+        {
+          uu____5[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t23;
+        uint64_t *o1 = t23 + (uint32_t)1U;
+        uint64_t *o2 = t23 + (uint32_t)2U;
+        uint64_t *o3 = t23 + (uint32_t)3U;
+        uint64_t *o4 = t23 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len94 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len94 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t3[(uint32_t)4U * i];
+          uint64_t t210 = t23[(uint32_t)4U * i];
+          uint64_t *res_i0 = t23 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t3[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t23[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t23 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t3[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t23[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t23 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t3[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t23[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t23 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len94 / (uint32_t)4U * (uint32_t)4U; i < len94; i++)
+        {
+          uint64_t t1 = t3[i];
+          uint64_t t21 = t23[i];
+          uint64_t *res_i = t23 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry3 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t23[(uint32_t)1U + i];
+          t3[i] = elem;
+        }
+        t3[len9] = carry3;
+      }
+      uint32_t len81 = (uint32_t)4U;
+      uint64_t cin1 = t3[len81];
+      uint64_t *x_2 = t3;
+      uint32_t len92 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len92);
+      uint64_t tempBuffer24[len92];
+      memset(tempBuffer24, 0U, len92 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow2 = (uint64_t)0U;
+      uint64_t
+      p12[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len102 = (uint32_t)4U;
+      uint64_t c5 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len102 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_2[(uint32_t)4U * i];
+        uint64_t t210 = p12[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer24 + (uint32_t)4U * i;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t1, t210, res_i0);
+        uint64_t t10 = x_2[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p12[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer24 + (uint32_t)4U * i + (uint32_t)1U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t10, t211, res_i1);
+        uint64_t t11 = x_2[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p12[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer24 + (uint32_t)4U * i + (uint32_t)2U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t11, t212, res_i2);
+        uint64_t t12 = x_2[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p12[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer24 + (uint32_t)4U * i + (uint32_t)3U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t12, t21, res_i);
+      }
+      for (uint32_t i = len102 / (uint32_t)4U * (uint32_t)4U; i < len102; i++)
+      {
+        uint64_t t1 = x_2[i];
+        uint64_t t21 = p12[i];
+        uint64_t *res_i = tempBuffer24 + i;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t1, t21, res_i);
+      }
+      uint64_t r14 = c5;
+      uint64_t carry02 = r14;
+      uint64_t
+      carry3 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry02,
+          cin1,
+          (uint64_t)0U,
+          &tempBufferForSubborrow2);
+      cmovznz4_p256(carry3, tempBuffer24, x_2, tr_z1);
+      uint32_t len66 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len66);
+      uint64_t t4[(uint32_t)2U * len66];
+      memset(t4, 0U, (uint32_t)2U * len66 * sizeof (uint64_t));
+      uint32_t len76 = (uint32_t)4U;
+      uint32_t resLen3 = len76 + len76;
+      memset(t4, 0U, resLen3 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len76; i0++)
+      {
+        uint64_t bj = z2[i0];
+        uint64_t *res_j = t4 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len76 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len76 / (uint32_t)4U * (uint32_t)4U; i < len76; i++)
+        {
+          uint64_t a_i = sq_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r15 = c;
+        t4[len76 + i0] = r15;
+      }
+      uint32_t len77 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len77);
+      uint64_t t24[(uint32_t)2U * len77];
+      memset(t24, 0U, (uint32_t)2U * len77 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len77; i0++)
+      {
+        uint64_t t10 = t4[0U];
+        uint64_t *uu____6 = t24;
+        uint32_t len93 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len93; i++)
+        {
+          uu____6[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____7 = t24 + (uint32_t)4U;
+        uint32_t len94 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len94; i++)
+        {
+          uu____7[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t24;
+        uint64_t *o1 = t24 + (uint32_t)1U;
+        uint64_t *o2 = t24 + (uint32_t)2U;
+        uint64_t *o3 = t24 + (uint32_t)3U;
+        uint64_t *o4 = t24 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len95 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len95 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t4[(uint32_t)4U * i];
+          uint64_t t210 = t24[(uint32_t)4U * i];
+          uint64_t *res_i0 = t24 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t4[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t24[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t24 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t4[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t24[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t24 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t4[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t24[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t24 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len95 / (uint32_t)4U * (uint32_t)4U; i < len95; i++)
+        {
+          uint64_t t1 = t4[i];
+          uint64_t t21 = t24[i];
+          uint64_t *res_i = t24 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry4 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t24[(uint32_t)1U + i];
+          t4[i] = elem;
+        }
+        t4[len9] = carry4;
+      }
+      uint32_t len82 = (uint32_t)4U;
+      uint64_t cin2 = t4[len82];
+      uint64_t *x_3 = t4;
+      uint32_t len93 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len93);
+      uint64_t tempBuffer25[len93];
+      memset(tempBuffer25, 0U, len93 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow3 = (uint64_t)0U;
+      uint64_t
+      p13[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len103 = (uint32_t)4U;
+      uint64_t c6 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len103 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_3[(uint32_t)4U * i];
+        uint64_t t210 = p13[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer25 + (uint32_t)4U * i;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t1, t210, res_i0);
+        uint64_t t10 = x_3[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p13[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer25 + (uint32_t)4U * i + (uint32_t)1U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t10, t211, res_i1);
+        uint64_t t11 = x_3[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p13[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer25 + (uint32_t)4U * i + (uint32_t)2U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t11, t212, res_i2);
+        uint64_t t12 = x_3[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p13[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer25 + (uint32_t)4U * i + (uint32_t)3U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t12, t21, res_i);
+      }
+      for (uint32_t i = len103 / (uint32_t)4U * (uint32_t)4U; i < len103; i++)
+      {
+        uint64_t t1 = x_3[i];
+        uint64_t t21 = p13[i];
+        uint64_t *res_i = tempBuffer25 + i;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t1, t21, res_i);
+      }
+      uint64_t r15 = c6;
+      uint64_t carry03 = r15;
+      uint64_t
+      carry4 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry03,
+          cin2,
+          (uint64_t)0U,
+          &tempBufferForSubborrow3);
+      cmovznz4_p256(carry4, tempBuffer25, x_3, tr_z2);
+      uint32_t len67 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len67);
+      uint64_t t5[(uint32_t)2U * len67];
+      memset(t5, 0U, (uint32_t)2U * len67 * sizeof (uint64_t));
+      uint32_t len78 = (uint32_t)4U;
+      uint32_t resLen4 = len78 + len78;
+      memset(t5, 0U, resLen4 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len78; i0++)
+      {
+        uint64_t bj = x2[i0];
+        uint64_t *res_j = t5 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len78 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len78 / (uint32_t)4U * (uint32_t)4U; i < len78; i++)
+        {
+          uint64_t a_i = sq_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r16 = c;
+        t5[len78 + i0] = r16;
+      }
+      uint32_t len79 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len79);
+      uint64_t t25[(uint32_t)2U * len79];
+      memset(t25, 0U, (uint32_t)2U * len79 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len79; i0++)
+      {
+        uint64_t t10 = t5[0U];
+        uint64_t *uu____8 = t25;
+        uint32_t len94 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len94; i++)
+        {
+          uu____8[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____9 = t25 + (uint32_t)4U;
+        uint32_t len95 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len95; i++)
+        {
+          uu____9[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t25;
+        uint64_t *o1 = t25 + (uint32_t)1U;
+        uint64_t *o2 = t25 + (uint32_t)2U;
+        uint64_t *o3 = t25 + (uint32_t)3U;
+        uint64_t *o4 = t25 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len96 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len96 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t5[(uint32_t)4U * i];
+          uint64_t t210 = t25[(uint32_t)4U * i];
+          uint64_t *res_i0 = t25 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t5[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t25[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t25 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t5[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t25[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t25 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t5[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t25[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t25 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len96 / (uint32_t)4U * (uint32_t)4U; i < len96; i++)
+        {
+          uint64_t t1 = t5[i];
+          uint64_t t21 = t25[i];
+          uint64_t *res_i = t25 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry5 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t25[(uint32_t)1U + i];
+          t5[i] = elem;
+        }
+        t5[len9] = carry5;
+      }
+      uint32_t len83 = (uint32_t)4U;
+      uint64_t cin3 = t5[len83];
+      uint64_t *x_4 = t5;
+      uint32_t len94 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len94);
+      uint64_t tempBuffer26[len94];
+      memset(tempBuffer26, 0U, len94 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow4 = (uint64_t)0U;
+      uint64_t
+      p14[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len104 = (uint32_t)4U;
+      uint64_t c7 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len104 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_4[(uint32_t)4U * i];
+        uint64_t t210 = p14[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer26 + (uint32_t)4U * i;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t1, t210, res_i0);
+        uint64_t t10 = x_4[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p14[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer26 + (uint32_t)4U * i + (uint32_t)1U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t10, t211, res_i1);
+        uint64_t t11 = x_4[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p14[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer26 + (uint32_t)4U * i + (uint32_t)2U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t11, t212, res_i2);
+        uint64_t t12 = x_4[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p14[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer26 + (uint32_t)4U * i + (uint32_t)3U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t12, t21, res_i);
+      }
+      for (uint32_t i = len104 / (uint32_t)4U * (uint32_t)4U; i < len104; i++)
+      {
+        uint64_t t1 = x_4[i];
+        uint64_t t21 = p14[i];
+        uint64_t *res_i = tempBuffer26 + i;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t1, t21, res_i);
+      }
+      uint64_t r16 = c7;
+      uint64_t carry04 = r16;
+      uint64_t
+      carry5 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry04,
+          cin3,
+          (uint64_t)0U,
+          &tempBufferForSubborrow4);
+      cmovznz4_p256(carry5, tempBuffer26, x_4, sq_z1);
+      uint32_t len68 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len68);
+      uint64_t t6[(uint32_t)2U * len68];
+      memset(t6, 0U, (uint32_t)2U * len68 * sizeof (uint64_t));
+      uint32_t len710 = (uint32_t)4U;
+      uint32_t resLen5 = len710 + len710;
+      memset(t6, 0U, resLen5 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len710; i0++)
+      {
+        uint64_t bj = x1[i0];
+        uint64_t *res_j = t6 + i0;
+        uint64_t c = (uint64_t)0U;
+        for
+        (uint32_t
+          i = (uint32_t)0U;
+          i
+          < len710 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
+          i++)
+        {
+          uint64_t a_i = sq_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len710 / (uint32_t)4U * (uint32_t)4U; i < len710; i++)
+        {
+          uint64_t a_i = sq_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r17 = c;
+        t6[len710 + i0] = r17;
+      }
+      uint32_t len711 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len711);
+      uint64_t t26[(uint32_t)2U * len711];
+      memset(t26, 0U, (uint32_t)2U * len711 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len711; i0++)
+      {
+        uint64_t t10 = t6[0U];
+        uint64_t *uu____10 = t26;
+        uint32_t len95 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len95; i++)
+        {
+          uu____10[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____11 = t26 + (uint32_t)4U;
+        uint32_t len96 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len96; i++)
+        {
+          uu____11[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t26;
+        uint64_t *o1 = t26 + (uint32_t)1U;
+        uint64_t *o2 = t26 + (uint32_t)2U;
+        uint64_t *o3 = t26 + (uint32_t)3U;
+        uint64_t *o4 = t26 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len97 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len97 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t6[(uint32_t)4U * i];
+          uint64_t t210 = t26[(uint32_t)4U * i];
+          uint64_t *res_i0 = t26 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t6[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t26[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t26 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t6[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t26[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t26 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t6[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t26[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t26 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len97 / (uint32_t)4U * (uint32_t)4U; i < len97; i++)
+        {
+          uint64_t t1 = t6[i];
+          uint64_t t21 = t26[i];
+          uint64_t *res_i = t26 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry6 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t26[(uint32_t)1U + i];
+          t6[i] = elem;
+        }
+        t6[len9] = carry6;
+      }
+      uint32_t len84 = (uint32_t)4U;
+      uint64_t cin4 = t6[len84];
+      uint64_t *x_5 = t6;
+      uint32_t len95 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len95);
+      uint64_t tempBuffer27[len95];
+      memset(tempBuffer27, 0U, len95 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow5 = (uint64_t)0U;
+      uint64_t
+      p15[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len105 = (uint32_t)4U;
+      uint64_t c8 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len105 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_5[(uint32_t)4U * i];
+        uint64_t t210 = p15[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer27 + (uint32_t)4U * i;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t1, t210, res_i0);
+        uint64_t t10 = x_5[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p15[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer27 + (uint32_t)4U * i + (uint32_t)1U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t10, t211, res_i1);
+        uint64_t t11 = x_5[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p15[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer27 + (uint32_t)4U * i + (uint32_t)2U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t11, t212, res_i2);
+        uint64_t t12 = x_5[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p15[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer27 + (uint32_t)4U * i + (uint32_t)3U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t12, t21, res_i);
+      }
+      for (uint32_t i = len105 / (uint32_t)4U * (uint32_t)4U; i < len105; i++)
+      {
+        uint64_t t1 = x_5[i];
+        uint64_t t21 = p15[i];
+        uint64_t *res_i = tempBuffer27 + i;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t1, t21, res_i);
+      }
+      uint64_t r17 = c8;
+      uint64_t carry05 = r17;
+      uint64_t
+      carry6 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry05,
+          cin4,
+          (uint64_t)0U,
+          &tempBufferForSubborrow5);
+      cmovznz4_p256(carry6, tempBuffer27, x_5, sq_z2);
+      uint32_t len69 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len69);
+      uint64_t t7[(uint32_t)2U * len69];
+      memset(t7, 0U, (uint32_t)2U * len69 * sizeof (uint64_t));
+      uint32_t len712 = (uint32_t)4U;
+      uint32_t resLen6 = len712 + len712;
+      memset(t7, 0U, resLen6 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len712; i0++)
+      {
+        uint64_t bj = y2[i0];
+        uint64_t *res_j = t7 + i0;
+        uint64_t c = (uint64_t)0U;
+        for
+        (uint32_t
+          i = (uint32_t)0U;
+          i
+          < len712 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
+          i++)
+        {
+          uint64_t a_i = tr_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = tr_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = tr_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = tr_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len712 / (uint32_t)4U * (uint32_t)4U; i < len712; i++)
+        {
+          uint64_t a_i = tr_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r18 = c;
+        t7[len712 + i0] = r18;
+      }
+      uint32_t len713 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len713);
+      uint64_t t27[(uint32_t)2U * len713];
+      memset(t27, 0U, (uint32_t)2U * len713 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len713; i0++)
+      {
+        uint64_t t10 = t7[0U];
+        uint64_t *uu____12 = t27;
+        uint32_t len96 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len96; i++)
+        {
+          uu____12[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____13 = t27 + (uint32_t)4U;
+        uint32_t len97 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len97; i++)
+        {
+          uu____13[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t27;
+        uint64_t *o1 = t27 + (uint32_t)1U;
+        uint64_t *o2 = t27 + (uint32_t)2U;
+        uint64_t *o3 = t27 + (uint32_t)3U;
+        uint64_t *o4 = t27 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len98 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len98 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t7[(uint32_t)4U * i];
+          uint64_t t210 = t27[(uint32_t)4U * i];
+          uint64_t *res_i0 = t27 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t7[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t27[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t27 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t7[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t27[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t27 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t7[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t27[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t27 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len98 / (uint32_t)4U * (uint32_t)4U; i < len98; i++)
+        {
+          uint64_t t1 = t7[i];
+          uint64_t t21 = t27[i];
+          uint64_t *res_i = t27 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry7 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t27[(uint32_t)1U + i];
+          t7[i] = elem;
+        }
+        t7[len9] = carry7;
+      }
+      uint32_t len85 = (uint32_t)4U;
+      uint64_t cin5 = t7[len85];
+      uint64_t *x_6 = t7;
+      uint32_t len96 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len96);
+      uint64_t tempBuffer28[len96];
+      memset(tempBuffer28, 0U, len96 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow6 = (uint64_t)0U;
+      uint64_t
+      p16[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len106 = (uint32_t)4U;
+      uint64_t c9 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len106 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_6[(uint32_t)4U * i];
+        uint64_t t210 = p16[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer28 + (uint32_t)4U * i;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t1, t210, res_i0);
+        uint64_t t10 = x_6[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p16[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer28 + (uint32_t)4U * i + (uint32_t)1U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t10, t211, res_i1);
+        uint64_t t11 = x_6[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p16[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer28 + (uint32_t)4U * i + (uint32_t)2U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t11, t212, res_i2);
+        uint64_t t12 = x_6[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p16[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer28 + (uint32_t)4U * i + (uint32_t)3U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t12, t21, res_i);
+      }
+      for (uint32_t i = len106 / (uint32_t)4U * (uint32_t)4U; i < len106; i++)
+      {
+        uint64_t t1 = x_6[i];
+        uint64_t t21 = p16[i];
+        uint64_t *res_i = tempBuffer28 + i;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t1, t21, res_i);
+      }
+      uint64_t r18 = c9;
+      uint64_t carry06 = r18;
+      uint64_t
+      carry7 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry06,
+          cin5,
+          (uint64_t)0U,
+          &tempBufferForSubborrow6);
+      cmovznz4_p256(carry7, tempBuffer28, x_6, tr_z1);
+      uint32_t len610 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len610);
+      uint64_t t8[(uint32_t)2U * len610];
+      memset(t8, 0U, (uint32_t)2U * len610 * sizeof (uint64_t));
+      uint32_t len7 = (uint32_t)4U;
+      uint32_t resLen = len7 + len7;
+      memset(t8, 0U, resLen * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len7; i0++)
+      {
+        uint64_t bj = y1[i0];
+        uint64_t *res_j = t8 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len7 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = tr_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = tr_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = tr_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = tr_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len7 / (uint32_t)4U * (uint32_t)4U; i < len7; i++)
+        {
+          uint64_t a_i = tr_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r19 = c;
+        t8[len7 + i0] = r19;
+      }
+      uint32_t len714 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len714);
+      uint64_t t2[(uint32_t)2U * len714];
+      memset(t2, 0U, (uint32_t)2U * len714 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len714; i0++)
+      {
+        uint64_t t10 = t8[0U];
+        uint64_t *uu____14 = t2;
+        uint32_t len97 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len97; i++)
+        {
+          uu____14[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____15 = t2 + (uint32_t)4U;
+        uint32_t len98 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len98; i++)
+        {
+          uu____15[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len99 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len99 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t8[(uint32_t)4U * i];
+          uint64_t t210 = t2[(uint32_t)4U * i];
+          uint64_t *res_i0 = t2 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t8[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t2 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t8[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t2 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t8[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t2 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len99 / (uint32_t)4U * (uint32_t)4U; i < len99; i++)
+        {
+          uint64_t t1 = t8[i];
+          uint64_t t21 = t2[i];
+          uint64_t *res_i = t2 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry8 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t2[(uint32_t)1U + i];
+          t8[i] = elem;
+        }
+        t8[len9] = carry8;
+      }
+      uint32_t len86 = (uint32_t)4U;
+      uint64_t cin6 = t8[len86];
+      uint64_t *x_ = t8;
+      uint32_t len9 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len9);
+      uint64_t tempBuffer29[len9];
+      memset(tempBuffer29, 0U, len9 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow = (uint64_t)0U;
+      uint64_t
+      p1[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len10 = (uint32_t)4U;
+      uint64_t c = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len10 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_[(uint32_t)4U * i];
+        uint64_t t210 = p1[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer29 + (uint32_t)4U * i;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t210, res_i0);
+        uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p1[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer29 + (uint32_t)4U * i + (uint32_t)1U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t211, res_i1);
+        uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p1[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer29 + (uint32_t)4U * i + (uint32_t)2U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t212, res_i2);
+        uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer29 + (uint32_t)4U * i + (uint32_t)3U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t21, res_i);
+      }
+      for (uint32_t i = len10 / (uint32_t)4U * (uint32_t)4U; i < len10; i++)
+      {
+        uint64_t t1 = x_[i];
+        uint64_t t21 = p1[i];
+        uint64_t *res_i = tempBuffer29 + i;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t21, res_i);
+      }
+      uint64_t r19 = c;
+      uint64_t carry07 = r19;
+      uint64_t
+      carry8 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry07,
+          cin6,
+          (uint64_t)0U,
+          &tempBufferForSubborrow);
+      cmovznz4_p256(carry8, tempBuffer29, x_, tr_z2);
+      bool equalX = cmp_felem_felem_bool_p256(sq_z1, sq_z2);
+      bool equalY = cmp_felem_felem_bool_p256(tr_z1, tr_z2);
+      bool equalXAndY = equalX && equalY;
+      if (equalXAndY)
+      {
+        uint32_t len611 = (uint32_t)4U;
+        uint64_t *pY = p + len611;
+        uint64_t *pZ = p + (uint32_t)2U * len611;
+        uint64_t *x3 = result;
+        uint64_t *y3 = result + len611;
+        uint64_t *z3 = result + (uint32_t)2U * len611;
+        uint64_t *delta = tempBuffer17;
+        uint64_t *gamma = tempBuffer17 + len611;
+        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len611;
+        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len611;
+        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len611;
+        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len611;
+        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len611;
+        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len611;
+        uint32_t coordinateLen = (uint32_t)4U;
+        uint64_t *pX1 = p;
+        uint64_t *pY1 = p + coordinateLen;
+        uint64_t *pZ1 = p + (uint32_t)2U * coordinateLen;
+        uint64_t *a0 = tmp;
+        uint64_t *a1 = tmp + coordinateLen;
+        uint64_t *alpha0 = tmp + (uint32_t)2U * coordinateLen;
+        montgomery_square_buffer_dh_p256(pZ1, delta);
+        montgomery_square_buffer_dh_p256(pY1, gamma);
+        montgomery_multiplication_buffer_dh_p256(pX1, gamma, beta);
+        felem_sub_p256(pX1, delta, a0);
+        felem_add_p256(pX1, delta, a1);
+        montgomery_multiplication_buffer_dh_p256(a0, a1, alpha0);
+        felem_add_p256(alpha0, alpha0, alpha);
+        felem_add_p256(alpha0, alpha, alpha);
+        montgomery_square_buffer_dh_p256(alpha, x3);
+        felem_add_p256(beta, beta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, eightBeta);
+        felem_sub_p256(x3, eightBeta, x3);
+        felem_add_p256(pY, pZ, z3);
+        montgomery_square_buffer_dh_p256(z3, z3);
+        felem_sub_p256(z3, gamma, z3);
+        felem_sub_p256(z3, delta, z3);
+        felem_sub_p256(fourBeta, x3, y3);
+        montgomery_multiplication_buffer_dh_p256(alpha, y3, y3);
+        montgomery_square_buffer_dh_p256(gamma, gamma);
+        felem_add_p256(gamma, gamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_sub_p256(y3, eightGamma, y3);
+      }
+      else
+      {
+        point_add_p256(p, q, result, tempBuffer17);
+      }
+      norm_p256(result, result, tempBuffer17);
+      uint32_t len47 = (uint32_t)4U;
+      uint64_t *zCoordinate0 = result + (uint32_t)2U * len47;
+      uint64_t tmp = (uint64_t)18446744073709551615U;
+      uint32_t len5 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len5; i++)
+      {
+        uint64_t a_i = zCoordinate0[i];
+        uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+        uint64_t tmp0 = tmp;
+        tmp = r_i & tmp0;
+      }
+      uint64_t f0 = tmp;
+      bool resultIsPAI = f0 == (uint64_t)0xffffffffffffffffU;
+      uint64_t *xCoordinateSum = result;
+      memcpy(x, xCoordinateSum, (uint32_t)4U * sizeof (uint64_t));
+      reduction_prime_2prime_order_p256(x, x);
+      bool r110 = !resultIsPAI;
+      bool state = r110;
+      if (state == false)
+      {
+        r1 = false;
+      }
+      else
+      {
+        r1 = cmp_felem_felem_bool_p256(x, rAsFelem);
+      }
+    }
+  }
+  bool result = r1;
+  return result;
+}
+
+/*
+ This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification. 
+*/
+bool
+Hacl_P256_ecdsa_verif_p256_sha512(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * len);
+  uint64_t tempBuffer[(uint32_t)4U * len];
+  memset(tempBuffer, 0U, (uint32_t)4U * len * sizeof (uint64_t));
+  uint64_t *publicKeyAsFelem = tempBuffer;
+  uint64_t *rAsFelem = tempBuffer + (uint32_t)2U * len;
+  uint64_t *sAsFelem = tempBuffer + (uint32_t)3U * len;
+  uint32_t len1 = (uint32_t)4U;
+  uint64_t *publicKeyFelemX = publicKeyAsFelem;
+  uint64_t *publicKeyFelemY = publicKeyAsFelem + len1;
+  uint8_t *pubKeyX = pubKey;
+  uint8_t *pubKeyY = pubKey + (uint32_t)32U;
+  toUint64ChangeEndian_p256(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian_p256(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian_p256(r, rAsFelem);
+  toUint64ChangeEndian_p256(s, sAsFelem);
+  uint32_t len11 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11 * (uint32_t)20U);
+  uint64_t tempBuffer1[len11 * (uint32_t)20U];
+  memset(tempBuffer1, 0U, len11 * (uint32_t)20U * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11);
+  uint64_t hashAsFelem[len11];
+  memset(hashAsFelem, 0U, len11 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11);
+  uint64_t x[len11];
+  memset(x, 0U, len11 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11 * (uint32_t)3U);
+  uint64_t publicKeyBuffer[len11 * (uint32_t)3U];
+  memset(publicKeyBuffer, 0U, len11 * (uint32_t)3U * sizeof (uint64_t));
+  uint32_t len20 = (uint32_t)4U;
+  uint32_t lengthXY = len20 * (uint32_t)2U;
+  uint64_t *partPoint = publicKeyBuffer;
+  uint64_t *zCoordinate = publicKeyBuffer + lengthXY;
+  memcpy(partPoint, publicKeyAsFelem, lengthXY * sizeof (uint64_t));
+  zCoordinate[0U] = (uint64_t)1U;
+  uint32_t len30 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len30; i++)
+  {
+    zCoordinate[i] = (uint64_t)0U;
+  }
+  bool publicKeyCorrect = verifyQValidCurvePoint_p256(publicKeyBuffer);
+  bool r1;
+  if (publicKeyCorrect == false)
+  {
+    r1 = false;
+  }
+  else
+  {
+    uint32_t len21 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len21);
+    uint64_t tempBuffer20[len21];
+    memset(tempBuffer20, 0U, len21 * sizeof (uint64_t));
+    uint64_t
+    p0[4U] =
+      {
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
+      };
+    uint32_t len31 = (uint32_t)4U;
+    uint64_t c1 = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len31 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = rAsFelem[(uint32_t)4U * i];
+      uint64_t t20 = p0[(uint32_t)4U * i];
+      uint64_t *res_i0 = tempBuffer20 + (uint32_t)4U * i;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, res_i0);
+      uint64_t t10 = rAsFelem[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = tempBuffer20 + (uint32_t)4U * i + (uint32_t)1U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t10, t21, res_i1);
+      uint64_t t11 = rAsFelem[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = tempBuffer20 + (uint32_t)4U * i + (uint32_t)2U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t11, t22, res_i2);
+      uint64_t t12 = rAsFelem[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = tempBuffer20 + (uint32_t)4U * i + (uint32_t)3U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t12, t2, res_i);
+    }
+    for (uint32_t i = len31 / (uint32_t)4U * (uint32_t)4U; i < len31; i++)
+    {
+      uint64_t t1 = rAsFelem[i];
+      uint64_t t2 = p0[i];
+      uint64_t *res_i = tempBuffer20 + i;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res_i);
+    }
+    uint64_t r10 = c1;
+    uint64_t carry = r10;
+    bool less = carry == (uint64_t)1U;
+    uint64_t tmp1 = (uint64_t)18446744073709551615U;
+    uint32_t len32 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len32; i++)
+    {
+      uint64_t a_i = rAsFelem[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp1;
+      tmp1 = r_i & tmp0;
+    }
+    uint64_t f = tmp1;
+    bool more = f == (uint64_t)0xffffffffffffffffU;
+    bool isRCorrect = less && !more;
+    uint32_t len2 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len2);
+    uint64_t tempBuffer21[len2];
+    memset(tempBuffer21, 0U, len2 * sizeof (uint64_t));
+    uint64_t
+    p2[4U] =
+      {
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
+      };
+    uint32_t len33 = (uint32_t)4U;
+    uint64_t c2 = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len33 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = sAsFelem[(uint32_t)4U * i];
+      uint64_t t20 = p2[(uint32_t)4U * i];
+      uint64_t *res_i0 = tempBuffer21 + (uint32_t)4U * i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t20, res_i0);
+      uint64_t t10 = sAsFelem[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p2[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = tempBuffer21 + (uint32_t)4U * i + (uint32_t)1U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t10, t21, res_i1);
+      uint64_t t11 = sAsFelem[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p2[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = tempBuffer21 + (uint32_t)4U * i + (uint32_t)2U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t11, t22, res_i2);
+      uint64_t t12 = sAsFelem[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p2[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = tempBuffer21 + (uint32_t)4U * i + (uint32_t)3U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t12, t2, res_i);
+    }
+    for (uint32_t i = len33 / (uint32_t)4U * (uint32_t)4U; i < len33; i++)
+    {
+      uint64_t t1 = sAsFelem[i];
+      uint64_t t2 = p2[i];
+      uint64_t *res_i = tempBuffer21 + i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t2, res_i);
+    }
+    uint64_t r11 = c2;
+    uint64_t carry0 = r11;
+    bool less0 = carry0 == (uint64_t)1U;
+    uint64_t tmp2 = (uint64_t)18446744073709551615U;
+    uint32_t len3 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
+    {
+      uint64_t a_i = sAsFelem[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp2;
+      tmp2 = r_i & tmp0;
+    }
+    uint64_t f2 = tmp2;
+    bool more0 = f2 == (uint64_t)0xffffffffffffffffU;
+    bool isSCorrect = less0 && !more0;
+    bool step1 = isRCorrect && isSCorrect;
+    if (step1 == false)
+    {
+      r1 = false;
+    }
+    else
+    {
+      uint32_t len22 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * len22);
+      uint8_t tempBufferU8[(uint32_t)2U * len22];
+      memset(tempBufferU8, 0U, (uint32_t)2U * len22 * sizeof (uint8_t));
+      uint8_t *u1 = tempBufferU8;
+      uint8_t *u2 = tempBufferU8 + (uint32_t)32U;
+      uint32_t sz_hash = (uint32_t)64U;
+      uint32_t len34 = sz_hash + (uint32_t)32U;
+      KRML_CHECK_SIZE(sizeof (uint8_t), len34);
+      uint8_t mHash[len34];
+      memset(mHash, 0U, len34 * sizeof (uint8_t));
+      uint8_t *mHashHPart = mHash;
+      uint8_t *mHashRPart = mHash;
+      Hacl_Hash_SHA2_hash_512(m, mLen, mHashHPart);
+      toUint64ChangeEndian_p256(mHashRPart, hashAsFelem);
+      reduction_prime_2prime_order_p256(hashAsFelem, hashAsFelem);
+      uint32_t len35 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len35);
+      uint64_t tempBuffer2[(uint32_t)3U * len35];
+      memset(tempBuffer2, 0U, (uint32_t)3U * len35 * sizeof (uint64_t));
+      uint64_t *inverseS = tempBuffer2;
+      uint64_t *u11 = tempBuffer2 + len35;
+      uint64_t *u21 = tempBuffer2 + (uint32_t)2U * len35;
+      uint32_t len40 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len40);
+      uint64_t one[len40];
+      memset(one, 0U, len40 * sizeof (uint64_t));
+      one[0U] = (uint64_t)1U;
+      uint32_t len50 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len50; i++)
+      {
+        one[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one, sAsFelem, inverseS);
+      montgomery_ladder_power_p256_dsa(inverseS, prime256order_buffer, inverseS);
+      uint32_t len41 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len41);
+      uint64_t buffFromDB[len41];
+      memset(buffFromDB, 0U, len41 * sizeof (uint64_t));
+      uint32_t len51 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len51);
+      uint64_t one0[len51];
+      memset(one0, 0U, len51 * sizeof (uint64_t));
+      one0[0U] = (uint64_t)1U;
+      uint32_t len60 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len60; i++)
+      {
+        one0[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one0, hashAsFelem, buffFromDB);
+      uint32_t len52 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len52);
+      uint64_t one1[len52];
+      memset(one1, 0U, len52 * sizeof (uint64_t));
+      one1[0U] = (uint64_t)1U;
+      uint32_t len61 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len61; i++)
+      {
+        one1[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one1, buffFromDB, buffFromDB);
+      montgomery_multiplication_buffer_dsa_p256(inverseS, buffFromDB, u11);
+      uint32_t len42 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len42);
+      uint64_t buffFromDB0[len42];
+      memset(buffFromDB0, 0U, len42 * sizeof (uint64_t));
+      uint32_t len53 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len53);
+      uint64_t one2[len53];
+      memset(one2, 0U, len53 * sizeof (uint64_t));
+      one2[0U] = (uint64_t)1U;
+      uint32_t len62 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len62; i++)
+      {
+        one2[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one2, rAsFelem, buffFromDB0);
+      uint32_t len54 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len54);
+      uint64_t one3[len54];
+      memset(one3, 0U, len54 * sizeof (uint64_t));
+      one3[0U] = (uint64_t)1U;
+      uint32_t len63 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len63; i++)
+      {
+        one3[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one3, buffFromDB0, buffFromDB0);
+      montgomery_multiplication_buffer_dsa_p256(inverseS, buffFromDB0, u21);
+      uint32_t len43 = (uint32_t)4U;
+      uint32_t lenByTwo = len43 >> (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
+      {
+        uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+        uint64_t left = u11[i];
+        uint64_t right = u11[lenRight];
+        u11[i] = right;
+        u11[lenRight] = left;
+      }
+      uint32_t len44 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len44; i++)
+      {
+        store64_be(u1 + i * (uint32_t)8U, u11[i]);
+      }
+      uint32_t len45 = (uint32_t)4U;
+      uint32_t lenByTwo0 = len45 >> (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < lenByTwo0; i++)
+      {
+        uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+        uint64_t left = u21[i];
+        uint64_t right = u21[lenRight];
+        u21[i] = right;
+        u21[lenRight] = left;
+      }
+      uint32_t len46 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len46; i++)
+      {
+        store64_be(u2 + i * (uint32_t)8U, u21[i]);
+      }
+      uint32_t len36 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len36 * (uint32_t)3U);
+      uint64_t result[len36 * (uint32_t)3U];
+      memset(result, 0U, len36 * (uint32_t)3U * sizeof (uint64_t));
+      uint32_t len4 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len4 * (uint32_t)6U);
+      uint64_t points[len4 * (uint32_t)6U];
+      memset(points, 0U, len4 * (uint32_t)6U * sizeof (uint64_t));
+      uint64_t *pointU1G = points;
+      uint64_t *pointU2Q = points + (uint32_t)12U;
+      secretToPublicWithoutNorm_p256(pointU1G, (void *)u1, tempBuffer1);
+      scalarMultiplicationWithoutNorm_p256(publicKeyBuffer, pointU2Q, (void *)u2, tempBuffer1);
+      uint64_t *tempBuffer17 = tempBuffer1;
+      uint64_t *p = points;
+      uint64_t *q = points + (uint32_t)12U;
+      uint32_t len55 = (uint32_t)4U;
+      uint64_t *sq_z1 = tempBuffer17;
+      uint64_t *tr_z1 = tempBuffer17 + len55;
+      uint64_t *sq_z2 = tempBuffer17 + (uint32_t)2U * len55;
+      uint64_t *tr_z2 = tempBuffer17 + (uint32_t)3U * len55;
+      uint64_t *x1 = p;
+      uint64_t *y1 = p + len55;
+      uint64_t *z1 = p + (uint32_t)2U * len55;
+      uint64_t *x2 = q;
+      uint64_t *y2 = q + len55;
+      uint64_t *z2 = q + (uint32_t)2U * len55;
+      uint32_t len6 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len6);
+      uint64_t t[(uint32_t)2U * len6];
+      memset(t, 0U, (uint32_t)2U * len6 * sizeof (uint64_t));
+      uint32_t len70 = (uint32_t)4U;
+      uint32_t resLen0 = len70 + len70;
+      memset(t, 0U, resLen0 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len70; i0++)
+      {
+        uint64_t *ab = z1;
+        uint64_t a_j = z1[i0];
+        uint64_t *res_j = t + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = ab[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i0);
+          uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+          uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+          uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, a_j, c, res_i);
+        }
+        for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+        {
+          uint64_t a_i = ab[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i);
+        }
+        uint64_t r12 = c;
+        t[i0 + i0] = r12;
+      }
+      uint64_t c00 = bn_add_eq_len_u64(resLen0, t, t, t);
+      KRML_CHECK_SIZE(sizeof (uint64_t), resLen0);
+      uint64_t tmp3[resLen0];
+      memset(tmp3, 0U, resLen0 * sizeof (uint64_t));
+      for (uint32_t i = (uint32_t)0U; i < len70; i++)
+      {
+        uint128_t res = (uint128_t)z1[i] * z1[i];
+        uint64_t hi = (uint64_t)(res >> (uint32_t)64U);
+        uint64_t lo = (uint64_t)res;
+        tmp3[(uint32_t)2U * i] = lo;
+        tmp3[(uint32_t)2U * i + (uint32_t)1U] = hi;
+      }
+      uint64_t c10 = bn_add_eq_len_u64(resLen0, t, tmp3, t);
+      uint32_t len71 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len71);
+      uint64_t t20[(uint32_t)2U * len71];
+      memset(t20, 0U, (uint32_t)2U * len71 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len71; i0++)
+      {
+        uint64_t t10 = t[0U];
+        uint64_t *uu____0 = t20;
+        uint32_t len90 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len90; i++)
+        {
+          uu____0[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____1 = t20 + (uint32_t)4U;
+        uint32_t len91 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len91; i++)
+        {
+          uu____1[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t20;
+        uint64_t *o1 = t20 + (uint32_t)1U;
+        uint64_t *o2 = t20 + (uint32_t)2U;
+        uint64_t *o3 = t20 + (uint32_t)3U;
+        uint64_t *o4 = t20 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c11 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c11;
+        mul64(f3, t10, o3, o4);
+        uint32_t len92 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len92 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t[(uint32_t)4U * i];
+          uint64_t t210 = t20[(uint32_t)4U * i];
+          uint64_t *res_i0 = t20 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t20[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t20 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t20[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t20 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t20[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t20 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len92 / (uint32_t)4U * (uint32_t)4U; i < len92; i++)
+        {
+          uint64_t t1 = t[i];
+          uint64_t t21 = t20[i];
+          uint64_t *res_i = t20 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry1 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t20[(uint32_t)1U + i];
+          t[i] = elem;
+        }
+        t[len9] = carry1;
+      }
+      uint32_t len8 = (uint32_t)4U;
+      uint64_t cin = t[len8];
+      uint64_t *x_0 = t;
+      uint32_t len90 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len90);
+      uint64_t tempBuffer22[len90];
+      memset(tempBuffer22, 0U, len90 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow0 = (uint64_t)0U;
+      uint64_t
+      p10[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len100 = (uint32_t)4U;
+      uint64_t c3 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len100 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_0[(uint32_t)4U * i];
+        uint64_t t210 = p10[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer22 + (uint32_t)4U * i;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t210, res_i0);
+        uint64_t t10 = x_0[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p10[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer22 + (uint32_t)4U * i + (uint32_t)1U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t10, t211, res_i1);
+        uint64_t t11 = x_0[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p10[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer22 + (uint32_t)4U * i + (uint32_t)2U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t11, t212, res_i2);
+        uint64_t t12 = x_0[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p10[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer22 + (uint32_t)4U * i + (uint32_t)3U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t12, t21, res_i);
+      }
+      for (uint32_t i = len100 / (uint32_t)4U * (uint32_t)4U; i < len100; i++)
+      {
+        uint64_t t1 = x_0[i];
+        uint64_t t21 = p10[i];
+        uint64_t *res_i = tempBuffer22 + i;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t21, res_i);
+      }
+      uint64_t r12 = c3;
+      uint64_t carry00 = r12;
+      uint64_t
+      carry1 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry00,
+          cin,
+          (uint64_t)0U,
+          &tempBufferForSubborrow0);
+      cmovznz4_p256(carry1, tempBuffer22, x_0, sq_z1);
+      uint32_t len64 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len64);
+      uint64_t t0[(uint32_t)2U * len64];
+      memset(t0, 0U, (uint32_t)2U * len64 * sizeof (uint64_t));
+      uint32_t len72 = (uint32_t)4U;
+      uint32_t resLen1 = len72 + len72;
+      memset(t0, 0U, resLen1 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len72; i0++)
+      {
+        uint64_t *ab = z2;
+        uint64_t a_j = z2[i0];
+        uint64_t *res_j = t0 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = ab[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i0);
+          uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+          uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+          uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, a_j, c, res_i);
+        }
+        for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+        {
+          uint64_t a_i = ab[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i);
+        }
+        uint64_t r13 = c;
+        t0[i0 + i0] = r13;
+      }
+      uint64_t c0 = bn_add_eq_len_u64(resLen1, t0, t0, t0);
+      KRML_CHECK_SIZE(sizeof (uint64_t), resLen1);
+      uint64_t tmp4[resLen1];
+      memset(tmp4, 0U, resLen1 * sizeof (uint64_t));
+      for (uint32_t i = (uint32_t)0U; i < len72; i++)
+      {
+        uint128_t res = (uint128_t)z2[i] * z2[i];
+        uint64_t hi = (uint64_t)(res >> (uint32_t)64U);
+        uint64_t lo = (uint64_t)res;
+        tmp4[(uint32_t)2U * i] = lo;
+        tmp4[(uint32_t)2U * i + (uint32_t)1U] = hi;
+      }
+      uint64_t c11 = bn_add_eq_len_u64(resLen1, t0, tmp4, t0);
+      uint32_t len73 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len73);
+      uint64_t t22[(uint32_t)2U * len73];
+      memset(t22, 0U, (uint32_t)2U * len73 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len73; i0++)
+      {
+        uint64_t t10 = t0[0U];
+        uint64_t *uu____2 = t22;
+        uint32_t len91 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len91; i++)
+        {
+          uu____2[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____3 = t22 + (uint32_t)4U;
+        uint32_t len92 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len92; i++)
+        {
+          uu____3[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t22;
+        uint64_t *o1 = t22 + (uint32_t)1U;
+        uint64_t *o2 = t22 + (uint32_t)2U;
+        uint64_t *o3 = t22 + (uint32_t)3U;
+        uint64_t *o4 = t22 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len93 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len93 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t0[(uint32_t)4U * i];
+          uint64_t t210 = t22[(uint32_t)4U * i];
+          uint64_t *res_i0 = t22 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t22[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t22 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t22[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t22 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t0[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t22[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t22 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len93 / (uint32_t)4U * (uint32_t)4U; i < len93; i++)
+        {
+          uint64_t t1 = t0[i];
+          uint64_t t21 = t22[i];
+          uint64_t *res_i = t22 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry2 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t22[(uint32_t)1U + i];
+          t0[i] = elem;
+        }
+        t0[len9] = carry2;
+      }
+      uint32_t len80 = (uint32_t)4U;
+      uint64_t cin0 = t0[len80];
+      uint64_t *x_1 = t0;
+      uint32_t len91 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len91);
+      uint64_t tempBuffer23[len91];
+      memset(tempBuffer23, 0U, len91 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow1 = (uint64_t)0U;
+      uint64_t
+      p11[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len101 = (uint32_t)4U;
+      uint64_t c4 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len101 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_1[(uint32_t)4U * i];
+        uint64_t t210 = p11[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer23 + (uint32_t)4U * i;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t1, t210, res_i0);
+        uint64_t t10 = x_1[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p11[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer23 + (uint32_t)4U * i + (uint32_t)1U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t10, t211, res_i1);
+        uint64_t t11 = x_1[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p11[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer23 + (uint32_t)4U * i + (uint32_t)2U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t11, t212, res_i2);
+        uint64_t t12 = x_1[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p11[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer23 + (uint32_t)4U * i + (uint32_t)3U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t12, t21, res_i);
+      }
+      for (uint32_t i = len101 / (uint32_t)4U * (uint32_t)4U; i < len101; i++)
+      {
+        uint64_t t1 = x_1[i];
+        uint64_t t21 = p11[i];
+        uint64_t *res_i = tempBuffer23 + i;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t1, t21, res_i);
+      }
+      uint64_t r13 = c4;
+      uint64_t carry01 = r13;
+      uint64_t
+      carry2 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry01,
+          cin0,
+          (uint64_t)0U,
+          &tempBufferForSubborrow1);
+      cmovznz4_p256(carry2, tempBuffer23, x_1, sq_z2);
+      uint32_t len65 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len65);
+      uint64_t t3[(uint32_t)2U * len65];
+      memset(t3, 0U, (uint32_t)2U * len65 * sizeof (uint64_t));
+      uint32_t len74 = (uint32_t)4U;
+      uint32_t resLen2 = len74 + len74;
+      memset(t3, 0U, resLen2 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len74; i0++)
+      {
+        uint64_t bj = z1[i0];
+        uint64_t *res_j = t3 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len74 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len74 / (uint32_t)4U * (uint32_t)4U; i < len74; i++)
+        {
+          uint64_t a_i = sq_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r14 = c;
+        t3[len74 + i0] = r14;
+      }
+      uint32_t len75 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len75);
+      uint64_t t23[(uint32_t)2U * len75];
+      memset(t23, 0U, (uint32_t)2U * len75 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len75; i0++)
+      {
+        uint64_t t10 = t3[0U];
+        uint64_t *uu____4 = t23;
+        uint32_t len92 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len92; i++)
+        {
+          uu____4[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____5 = t23 + (uint32_t)4U;
+        uint32_t len93 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len93; i++)
+        {
+          uu____5[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t23;
+        uint64_t *o1 = t23 + (uint32_t)1U;
+        uint64_t *o2 = t23 + (uint32_t)2U;
+        uint64_t *o3 = t23 + (uint32_t)3U;
+        uint64_t *o4 = t23 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len94 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len94 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t3[(uint32_t)4U * i];
+          uint64_t t210 = t23[(uint32_t)4U * i];
+          uint64_t *res_i0 = t23 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t3[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t23[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t23 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t3[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t23[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t23 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t3[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t23[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t23 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len94 / (uint32_t)4U * (uint32_t)4U; i < len94; i++)
+        {
+          uint64_t t1 = t3[i];
+          uint64_t t21 = t23[i];
+          uint64_t *res_i = t23 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry3 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t23[(uint32_t)1U + i];
+          t3[i] = elem;
+        }
+        t3[len9] = carry3;
+      }
+      uint32_t len81 = (uint32_t)4U;
+      uint64_t cin1 = t3[len81];
+      uint64_t *x_2 = t3;
+      uint32_t len92 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len92);
+      uint64_t tempBuffer24[len92];
+      memset(tempBuffer24, 0U, len92 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow2 = (uint64_t)0U;
+      uint64_t
+      p12[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len102 = (uint32_t)4U;
+      uint64_t c5 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len102 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_2[(uint32_t)4U * i];
+        uint64_t t210 = p12[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer24 + (uint32_t)4U * i;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t1, t210, res_i0);
+        uint64_t t10 = x_2[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p12[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer24 + (uint32_t)4U * i + (uint32_t)1U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t10, t211, res_i1);
+        uint64_t t11 = x_2[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p12[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer24 + (uint32_t)4U * i + (uint32_t)2U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t11, t212, res_i2);
+        uint64_t t12 = x_2[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p12[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer24 + (uint32_t)4U * i + (uint32_t)3U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t12, t21, res_i);
+      }
+      for (uint32_t i = len102 / (uint32_t)4U * (uint32_t)4U; i < len102; i++)
+      {
+        uint64_t t1 = x_2[i];
+        uint64_t t21 = p12[i];
+        uint64_t *res_i = tempBuffer24 + i;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t1, t21, res_i);
+      }
+      uint64_t r14 = c5;
+      uint64_t carry02 = r14;
+      uint64_t
+      carry3 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry02,
+          cin1,
+          (uint64_t)0U,
+          &tempBufferForSubborrow2);
+      cmovznz4_p256(carry3, tempBuffer24, x_2, tr_z1);
+      uint32_t len66 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len66);
+      uint64_t t4[(uint32_t)2U * len66];
+      memset(t4, 0U, (uint32_t)2U * len66 * sizeof (uint64_t));
+      uint32_t len76 = (uint32_t)4U;
+      uint32_t resLen3 = len76 + len76;
+      memset(t4, 0U, resLen3 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len76; i0++)
+      {
+        uint64_t bj = z2[i0];
+        uint64_t *res_j = t4 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len76 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len76 / (uint32_t)4U * (uint32_t)4U; i < len76; i++)
+        {
+          uint64_t a_i = sq_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r15 = c;
+        t4[len76 + i0] = r15;
+      }
+      uint32_t len77 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len77);
+      uint64_t t24[(uint32_t)2U * len77];
+      memset(t24, 0U, (uint32_t)2U * len77 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len77; i0++)
+      {
+        uint64_t t10 = t4[0U];
+        uint64_t *uu____6 = t24;
+        uint32_t len93 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len93; i++)
+        {
+          uu____6[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____7 = t24 + (uint32_t)4U;
+        uint32_t len94 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len94; i++)
+        {
+          uu____7[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t24;
+        uint64_t *o1 = t24 + (uint32_t)1U;
+        uint64_t *o2 = t24 + (uint32_t)2U;
+        uint64_t *o3 = t24 + (uint32_t)3U;
+        uint64_t *o4 = t24 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len95 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len95 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t4[(uint32_t)4U * i];
+          uint64_t t210 = t24[(uint32_t)4U * i];
+          uint64_t *res_i0 = t24 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t4[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t24[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t24 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t4[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t24[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t24 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t4[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t24[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t24 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len95 / (uint32_t)4U * (uint32_t)4U; i < len95; i++)
+        {
+          uint64_t t1 = t4[i];
+          uint64_t t21 = t24[i];
+          uint64_t *res_i = t24 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry4 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t24[(uint32_t)1U + i];
+          t4[i] = elem;
+        }
+        t4[len9] = carry4;
+      }
+      uint32_t len82 = (uint32_t)4U;
+      uint64_t cin2 = t4[len82];
+      uint64_t *x_3 = t4;
+      uint32_t len93 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len93);
+      uint64_t tempBuffer25[len93];
+      memset(tempBuffer25, 0U, len93 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow3 = (uint64_t)0U;
+      uint64_t
+      p13[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len103 = (uint32_t)4U;
+      uint64_t c6 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len103 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_3[(uint32_t)4U * i];
+        uint64_t t210 = p13[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer25 + (uint32_t)4U * i;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t1, t210, res_i0);
+        uint64_t t10 = x_3[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p13[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer25 + (uint32_t)4U * i + (uint32_t)1U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t10, t211, res_i1);
+        uint64_t t11 = x_3[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p13[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer25 + (uint32_t)4U * i + (uint32_t)2U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t11, t212, res_i2);
+        uint64_t t12 = x_3[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p13[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer25 + (uint32_t)4U * i + (uint32_t)3U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t12, t21, res_i);
+      }
+      for (uint32_t i = len103 / (uint32_t)4U * (uint32_t)4U; i < len103; i++)
+      {
+        uint64_t t1 = x_3[i];
+        uint64_t t21 = p13[i];
+        uint64_t *res_i = tempBuffer25 + i;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t1, t21, res_i);
+      }
+      uint64_t r15 = c6;
+      uint64_t carry03 = r15;
+      uint64_t
+      carry4 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry03,
+          cin2,
+          (uint64_t)0U,
+          &tempBufferForSubborrow3);
+      cmovznz4_p256(carry4, tempBuffer25, x_3, tr_z2);
+      uint32_t len67 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len67);
+      uint64_t t5[(uint32_t)2U * len67];
+      memset(t5, 0U, (uint32_t)2U * len67 * sizeof (uint64_t));
+      uint32_t len78 = (uint32_t)4U;
+      uint32_t resLen4 = len78 + len78;
+      memset(t5, 0U, resLen4 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len78; i0++)
+      {
+        uint64_t bj = x2[i0];
+        uint64_t *res_j = t5 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len78 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len78 / (uint32_t)4U * (uint32_t)4U; i < len78; i++)
+        {
+          uint64_t a_i = sq_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r16 = c;
+        t5[len78 + i0] = r16;
+      }
+      uint32_t len79 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len79);
+      uint64_t t25[(uint32_t)2U * len79];
+      memset(t25, 0U, (uint32_t)2U * len79 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len79; i0++)
+      {
+        uint64_t t10 = t5[0U];
+        uint64_t *uu____8 = t25;
+        uint32_t len94 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len94; i++)
+        {
+          uu____8[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____9 = t25 + (uint32_t)4U;
+        uint32_t len95 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len95; i++)
+        {
+          uu____9[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t25;
+        uint64_t *o1 = t25 + (uint32_t)1U;
+        uint64_t *o2 = t25 + (uint32_t)2U;
+        uint64_t *o3 = t25 + (uint32_t)3U;
+        uint64_t *o4 = t25 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len96 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len96 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t5[(uint32_t)4U * i];
+          uint64_t t210 = t25[(uint32_t)4U * i];
+          uint64_t *res_i0 = t25 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t5[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t25[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t25 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t5[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t25[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t25 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t5[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t25[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t25 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len96 / (uint32_t)4U * (uint32_t)4U; i < len96; i++)
+        {
+          uint64_t t1 = t5[i];
+          uint64_t t21 = t25[i];
+          uint64_t *res_i = t25 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry5 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t25[(uint32_t)1U + i];
+          t5[i] = elem;
+        }
+        t5[len9] = carry5;
+      }
+      uint32_t len83 = (uint32_t)4U;
+      uint64_t cin3 = t5[len83];
+      uint64_t *x_4 = t5;
+      uint32_t len94 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len94);
+      uint64_t tempBuffer26[len94];
+      memset(tempBuffer26, 0U, len94 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow4 = (uint64_t)0U;
+      uint64_t
+      p14[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len104 = (uint32_t)4U;
+      uint64_t c7 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len104 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_4[(uint32_t)4U * i];
+        uint64_t t210 = p14[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer26 + (uint32_t)4U * i;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t1, t210, res_i0);
+        uint64_t t10 = x_4[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p14[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer26 + (uint32_t)4U * i + (uint32_t)1U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t10, t211, res_i1);
+        uint64_t t11 = x_4[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p14[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer26 + (uint32_t)4U * i + (uint32_t)2U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t11, t212, res_i2);
+        uint64_t t12 = x_4[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p14[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer26 + (uint32_t)4U * i + (uint32_t)3U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t12, t21, res_i);
+      }
+      for (uint32_t i = len104 / (uint32_t)4U * (uint32_t)4U; i < len104; i++)
+      {
+        uint64_t t1 = x_4[i];
+        uint64_t t21 = p14[i];
+        uint64_t *res_i = tempBuffer26 + i;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t1, t21, res_i);
+      }
+      uint64_t r16 = c7;
+      uint64_t carry04 = r16;
+      uint64_t
+      carry5 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry04,
+          cin3,
+          (uint64_t)0U,
+          &tempBufferForSubborrow4);
+      cmovznz4_p256(carry5, tempBuffer26, x_4, sq_z1);
+      uint32_t len68 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len68);
+      uint64_t t6[(uint32_t)2U * len68];
+      memset(t6, 0U, (uint32_t)2U * len68 * sizeof (uint64_t));
+      uint32_t len710 = (uint32_t)4U;
+      uint32_t resLen5 = len710 + len710;
+      memset(t6, 0U, resLen5 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len710; i0++)
+      {
+        uint64_t bj = x1[i0];
+        uint64_t *res_j = t6 + i0;
+        uint64_t c = (uint64_t)0U;
+        for
+        (uint32_t
+          i = (uint32_t)0U;
+          i
+          < len710 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
+          i++)
+        {
+          uint64_t a_i = sq_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len710 / (uint32_t)4U * (uint32_t)4U; i < len710; i++)
+        {
+          uint64_t a_i = sq_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r17 = c;
+        t6[len710 + i0] = r17;
+      }
+      uint32_t len711 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len711);
+      uint64_t t26[(uint32_t)2U * len711];
+      memset(t26, 0U, (uint32_t)2U * len711 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len711; i0++)
+      {
+        uint64_t t10 = t6[0U];
+        uint64_t *uu____10 = t26;
+        uint32_t len95 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len95; i++)
+        {
+          uu____10[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____11 = t26 + (uint32_t)4U;
+        uint32_t len96 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len96; i++)
+        {
+          uu____11[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t26;
+        uint64_t *o1 = t26 + (uint32_t)1U;
+        uint64_t *o2 = t26 + (uint32_t)2U;
+        uint64_t *o3 = t26 + (uint32_t)3U;
+        uint64_t *o4 = t26 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len97 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len97 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t6[(uint32_t)4U * i];
+          uint64_t t210 = t26[(uint32_t)4U * i];
+          uint64_t *res_i0 = t26 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t6[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t26[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t26 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t6[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t26[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t26 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t6[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t26[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t26 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len97 / (uint32_t)4U * (uint32_t)4U; i < len97; i++)
+        {
+          uint64_t t1 = t6[i];
+          uint64_t t21 = t26[i];
+          uint64_t *res_i = t26 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry6 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t26[(uint32_t)1U + i];
+          t6[i] = elem;
+        }
+        t6[len9] = carry6;
+      }
+      uint32_t len84 = (uint32_t)4U;
+      uint64_t cin4 = t6[len84];
+      uint64_t *x_5 = t6;
+      uint32_t len95 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len95);
+      uint64_t tempBuffer27[len95];
+      memset(tempBuffer27, 0U, len95 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow5 = (uint64_t)0U;
+      uint64_t
+      p15[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len105 = (uint32_t)4U;
+      uint64_t c8 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len105 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_5[(uint32_t)4U * i];
+        uint64_t t210 = p15[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer27 + (uint32_t)4U * i;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t1, t210, res_i0);
+        uint64_t t10 = x_5[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p15[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer27 + (uint32_t)4U * i + (uint32_t)1U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t10, t211, res_i1);
+        uint64_t t11 = x_5[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p15[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer27 + (uint32_t)4U * i + (uint32_t)2U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t11, t212, res_i2);
+        uint64_t t12 = x_5[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p15[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer27 + (uint32_t)4U * i + (uint32_t)3U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t12, t21, res_i);
+      }
+      for (uint32_t i = len105 / (uint32_t)4U * (uint32_t)4U; i < len105; i++)
+      {
+        uint64_t t1 = x_5[i];
+        uint64_t t21 = p15[i];
+        uint64_t *res_i = tempBuffer27 + i;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t1, t21, res_i);
+      }
+      uint64_t r17 = c8;
+      uint64_t carry05 = r17;
+      uint64_t
+      carry6 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry05,
+          cin4,
+          (uint64_t)0U,
+          &tempBufferForSubborrow5);
+      cmovznz4_p256(carry6, tempBuffer27, x_5, sq_z2);
+      uint32_t len69 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len69);
+      uint64_t t7[(uint32_t)2U * len69];
+      memset(t7, 0U, (uint32_t)2U * len69 * sizeof (uint64_t));
+      uint32_t len712 = (uint32_t)4U;
+      uint32_t resLen6 = len712 + len712;
+      memset(t7, 0U, resLen6 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len712; i0++)
+      {
+        uint64_t bj = y2[i0];
+        uint64_t *res_j = t7 + i0;
+        uint64_t c = (uint64_t)0U;
+        for
+        (uint32_t
+          i = (uint32_t)0U;
+          i
+          < len712 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
+          i++)
+        {
+          uint64_t a_i = tr_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = tr_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = tr_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = tr_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len712 / (uint32_t)4U * (uint32_t)4U; i < len712; i++)
+        {
+          uint64_t a_i = tr_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r18 = c;
+        t7[len712 + i0] = r18;
+      }
+      uint32_t len713 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len713);
+      uint64_t t27[(uint32_t)2U * len713];
+      memset(t27, 0U, (uint32_t)2U * len713 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len713; i0++)
+      {
+        uint64_t t10 = t7[0U];
+        uint64_t *uu____12 = t27;
+        uint32_t len96 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len96; i++)
+        {
+          uu____12[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____13 = t27 + (uint32_t)4U;
+        uint32_t len97 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len97; i++)
+        {
+          uu____13[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t27;
+        uint64_t *o1 = t27 + (uint32_t)1U;
+        uint64_t *o2 = t27 + (uint32_t)2U;
+        uint64_t *o3 = t27 + (uint32_t)3U;
+        uint64_t *o4 = t27 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len98 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len98 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t7[(uint32_t)4U * i];
+          uint64_t t210 = t27[(uint32_t)4U * i];
+          uint64_t *res_i0 = t27 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t7[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t27[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t27 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t7[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t27[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t27 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t7[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t27[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t27 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len98 / (uint32_t)4U * (uint32_t)4U; i < len98; i++)
+        {
+          uint64_t t1 = t7[i];
+          uint64_t t21 = t27[i];
+          uint64_t *res_i = t27 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry7 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t27[(uint32_t)1U + i];
+          t7[i] = elem;
+        }
+        t7[len9] = carry7;
+      }
+      uint32_t len85 = (uint32_t)4U;
+      uint64_t cin5 = t7[len85];
+      uint64_t *x_6 = t7;
+      uint32_t len96 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len96);
+      uint64_t tempBuffer28[len96];
+      memset(tempBuffer28, 0U, len96 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow6 = (uint64_t)0U;
+      uint64_t
+      p16[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len106 = (uint32_t)4U;
+      uint64_t c9 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len106 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_6[(uint32_t)4U * i];
+        uint64_t t210 = p16[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer28 + (uint32_t)4U * i;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t1, t210, res_i0);
+        uint64_t t10 = x_6[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p16[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer28 + (uint32_t)4U * i + (uint32_t)1U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t10, t211, res_i1);
+        uint64_t t11 = x_6[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p16[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer28 + (uint32_t)4U * i + (uint32_t)2U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t11, t212, res_i2);
+        uint64_t t12 = x_6[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p16[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer28 + (uint32_t)4U * i + (uint32_t)3U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t12, t21, res_i);
+      }
+      for (uint32_t i = len106 / (uint32_t)4U * (uint32_t)4U; i < len106; i++)
+      {
+        uint64_t t1 = x_6[i];
+        uint64_t t21 = p16[i];
+        uint64_t *res_i = tempBuffer28 + i;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t1, t21, res_i);
+      }
+      uint64_t r18 = c9;
+      uint64_t carry06 = r18;
+      uint64_t
+      carry7 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry06,
+          cin5,
+          (uint64_t)0U,
+          &tempBufferForSubborrow6);
+      cmovznz4_p256(carry7, tempBuffer28, x_6, tr_z1);
+      uint32_t len610 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len610);
+      uint64_t t8[(uint32_t)2U * len610];
+      memset(t8, 0U, (uint32_t)2U * len610 * sizeof (uint64_t));
+      uint32_t len7 = (uint32_t)4U;
+      uint32_t resLen = len7 + len7;
+      memset(t8, 0U, resLen * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len7; i0++)
+      {
+        uint64_t bj = y1[i0];
+        uint64_t *res_j = t8 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len7 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = tr_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = tr_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = tr_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = tr_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len7 / (uint32_t)4U * (uint32_t)4U; i < len7; i++)
+        {
+          uint64_t a_i = tr_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r19 = c;
+        t8[len7 + i0] = r19;
+      }
+      uint32_t len714 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len714);
+      uint64_t t2[(uint32_t)2U * len714];
+      memset(t2, 0U, (uint32_t)2U * len714 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len714; i0++)
+      {
+        uint64_t t10 = t8[0U];
+        uint64_t *uu____14 = t2;
+        uint32_t len97 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len97; i++)
+        {
+          uu____14[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____15 = t2 + (uint32_t)4U;
+        uint32_t len98 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len98; i++)
+        {
+          uu____15[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len99 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len99 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t8[(uint32_t)4U * i];
+          uint64_t t210 = t2[(uint32_t)4U * i];
+          uint64_t *res_i0 = t2 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t8[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t2 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t8[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t2 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t8[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t2 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len99 / (uint32_t)4U * (uint32_t)4U; i < len99; i++)
+        {
+          uint64_t t1 = t8[i];
+          uint64_t t21 = t2[i];
+          uint64_t *res_i = t2 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry8 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t2[(uint32_t)1U + i];
+          t8[i] = elem;
+        }
+        t8[len9] = carry8;
+      }
+      uint32_t len86 = (uint32_t)4U;
+      uint64_t cin6 = t8[len86];
+      uint64_t *x_ = t8;
+      uint32_t len9 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len9);
+      uint64_t tempBuffer29[len9];
+      memset(tempBuffer29, 0U, len9 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow = (uint64_t)0U;
+      uint64_t
+      p1[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len10 = (uint32_t)4U;
+      uint64_t c = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len10 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_[(uint32_t)4U * i];
+        uint64_t t210 = p1[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer29 + (uint32_t)4U * i;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t210, res_i0);
+        uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p1[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer29 + (uint32_t)4U * i + (uint32_t)1U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t211, res_i1);
+        uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p1[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer29 + (uint32_t)4U * i + (uint32_t)2U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t212, res_i2);
+        uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer29 + (uint32_t)4U * i + (uint32_t)3U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t21, res_i);
+      }
+      for (uint32_t i = len10 / (uint32_t)4U * (uint32_t)4U; i < len10; i++)
+      {
+        uint64_t t1 = x_[i];
+        uint64_t t21 = p1[i];
+        uint64_t *res_i = tempBuffer29 + i;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t21, res_i);
+      }
+      uint64_t r19 = c;
+      uint64_t carry07 = r19;
+      uint64_t
+      carry8 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry07,
+          cin6,
+          (uint64_t)0U,
+          &tempBufferForSubborrow);
+      cmovznz4_p256(carry8, tempBuffer29, x_, tr_z2);
+      bool equalX = cmp_felem_felem_bool_p256(sq_z1, sq_z2);
+      bool equalY = cmp_felem_felem_bool_p256(tr_z1, tr_z2);
+      bool equalXAndY = equalX && equalY;
+      if (equalXAndY)
+      {
+        uint32_t len611 = (uint32_t)4U;
+        uint64_t *pY = p + len611;
+        uint64_t *pZ = p + (uint32_t)2U * len611;
+        uint64_t *x3 = result;
+        uint64_t *y3 = result + len611;
+        uint64_t *z3 = result + (uint32_t)2U * len611;
+        uint64_t *delta = tempBuffer17;
+        uint64_t *gamma = tempBuffer17 + len611;
+        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len611;
+        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len611;
+        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len611;
+        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len611;
+        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len611;
+        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len611;
+        uint32_t coordinateLen = (uint32_t)4U;
+        uint64_t *pX1 = p;
+        uint64_t *pY1 = p + coordinateLen;
+        uint64_t *pZ1 = p + (uint32_t)2U * coordinateLen;
+        uint64_t *a0 = tmp;
+        uint64_t *a1 = tmp + coordinateLen;
+        uint64_t *alpha0 = tmp + (uint32_t)2U * coordinateLen;
+        montgomery_square_buffer_dh_p256(pZ1, delta);
+        montgomery_square_buffer_dh_p256(pY1, gamma);
+        montgomery_multiplication_buffer_dh_p256(pX1, gamma, beta);
+        felem_sub_p256(pX1, delta, a0);
+        felem_add_p256(pX1, delta, a1);
+        montgomery_multiplication_buffer_dh_p256(a0, a1, alpha0);
+        felem_add_p256(alpha0, alpha0, alpha);
+        felem_add_p256(alpha0, alpha, alpha);
+        montgomery_square_buffer_dh_p256(alpha, x3);
+        felem_add_p256(beta, beta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, eightBeta);
+        felem_sub_p256(x3, eightBeta, x3);
+        felem_add_p256(pY, pZ, z3);
+        montgomery_square_buffer_dh_p256(z3, z3);
+        felem_sub_p256(z3, gamma, z3);
+        felem_sub_p256(z3, delta, z3);
+        felem_sub_p256(fourBeta, x3, y3);
+        montgomery_multiplication_buffer_dh_p256(alpha, y3, y3);
+        montgomery_square_buffer_dh_p256(gamma, gamma);
+        felem_add_p256(gamma, gamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_sub_p256(y3, eightGamma, y3);
+      }
+      else
+      {
+        point_add_p256(p, q, result, tempBuffer17);
+      }
+      norm_p256(result, result, tempBuffer17);
+      uint32_t len47 = (uint32_t)4U;
+      uint64_t *zCoordinate0 = result + (uint32_t)2U * len47;
+      uint64_t tmp = (uint64_t)18446744073709551615U;
+      uint32_t len5 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len5; i++)
+      {
+        uint64_t a_i = zCoordinate0[i];
+        uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+        uint64_t tmp0 = tmp;
+        tmp = r_i & tmp0;
+      }
+      uint64_t f0 = tmp;
+      bool resultIsPAI = f0 == (uint64_t)0xffffffffffffffffU;
+      uint64_t *xCoordinateSum = result;
+      memcpy(x, xCoordinateSum, (uint32_t)4U * sizeof (uint64_t));
+      reduction_prime_2prime_order_p256(x, x);
+      bool r110 = !resultIsPAI;
+      bool state = r110;
+      if (state == false)
+      {
+        r1 = false;
+      }
+      else
+      {
+        r1 = cmp_felem_felem_bool_p256(x, rAsFelem);
+      }
+    }
+  }
+  bool result = r1;
+  return result;
+}
+
+/*
+This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification.
+  
+ The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
+*/
+bool
+Hacl_P256_ecdsa_verif_without_hash(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * len);
+  uint64_t tempBuffer[(uint32_t)4U * len];
+  memset(tempBuffer, 0U, (uint32_t)4U * len * sizeof (uint64_t));
+  uint64_t *publicKeyAsFelem = tempBuffer;
+  uint64_t *rAsFelem = tempBuffer + (uint32_t)2U * len;
+  uint64_t *sAsFelem = tempBuffer + (uint32_t)3U * len;
+  uint32_t len1 = (uint32_t)4U;
+  uint64_t *publicKeyFelemX = publicKeyAsFelem;
+  uint64_t *publicKeyFelemY = publicKeyAsFelem + len1;
+  uint8_t *pubKeyX = pubKey;
+  uint8_t *pubKeyY = pubKey + (uint32_t)32U;
+  toUint64ChangeEndian_p256(pubKeyX, publicKeyFelemX);
+  toUint64ChangeEndian_p256(pubKeyY, publicKeyFelemY);
+  toUint64ChangeEndian_p256(r, rAsFelem);
+  toUint64ChangeEndian_p256(s, sAsFelem);
+  uint32_t len11 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11 * (uint32_t)20U);
+  uint64_t tempBuffer1[len11 * (uint32_t)20U];
+  memset(tempBuffer1, 0U, len11 * (uint32_t)20U * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11);
+  uint64_t hashAsFelem[len11];
+  memset(hashAsFelem, 0U, len11 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11);
+  uint64_t x[len11];
+  memset(x, 0U, len11 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), len11 * (uint32_t)3U);
+  uint64_t publicKeyBuffer[len11 * (uint32_t)3U];
+  memset(publicKeyBuffer, 0U, len11 * (uint32_t)3U * sizeof (uint64_t));
+  uint32_t len20 = (uint32_t)4U;
+  uint32_t lengthXY = len20 * (uint32_t)2U;
+  uint64_t *partPoint = publicKeyBuffer;
+  uint64_t *zCoordinate = publicKeyBuffer + lengthXY;
+  memcpy(partPoint, publicKeyAsFelem, lengthXY * sizeof (uint64_t));
+  zCoordinate[0U] = (uint64_t)1U;
+  uint32_t len30 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len30; i++)
+  {
+    zCoordinate[i] = (uint64_t)0U;
+  }
+  bool publicKeyCorrect = verifyQValidCurvePoint_p256(publicKeyBuffer);
+  bool r1;
+  if (publicKeyCorrect == false)
+  {
+    r1 = false;
+  }
+  else
+  {
+    uint32_t len21 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len21);
+    uint64_t tempBuffer20[len21];
+    memset(tempBuffer20, 0U, len21 * sizeof (uint64_t));
+    uint64_t
+    p0[4U] =
+      {
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
+      };
+    uint32_t len31 = (uint32_t)4U;
+    uint64_t c1 = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len31 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = rAsFelem[(uint32_t)4U * i];
+      uint64_t t20 = p0[(uint32_t)4U * i];
+      uint64_t *res_i0 = tempBuffer20 + (uint32_t)4U * i;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, res_i0);
+      uint64_t t10 = rAsFelem[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p0[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = tempBuffer20 + (uint32_t)4U * i + (uint32_t)1U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t10, t21, res_i1);
+      uint64_t t11 = rAsFelem[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p0[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = tempBuffer20 + (uint32_t)4U * i + (uint32_t)2U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t11, t22, res_i2);
+      uint64_t t12 = rAsFelem[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p0[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = tempBuffer20 + (uint32_t)4U * i + (uint32_t)3U;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t12, t2, res_i);
+    }
+    for (uint32_t i = len31 / (uint32_t)4U * (uint32_t)4U; i < len31; i++)
+    {
+      uint64_t t1 = rAsFelem[i];
+      uint64_t t2 = p0[i];
+      uint64_t *res_i = tempBuffer20 + i;
+      c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res_i);
+    }
+    uint64_t r10 = c1;
+    uint64_t carry = r10;
+    bool less = carry == (uint64_t)1U;
+    uint64_t tmp1 = (uint64_t)18446744073709551615U;
+    uint32_t len32 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len32; i++)
+    {
+      uint64_t a_i = rAsFelem[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp1;
+      tmp1 = r_i & tmp0;
+    }
+    uint64_t f = tmp1;
+    bool more = f == (uint64_t)0xffffffffffffffffU;
+    bool isRCorrect = less && !more;
+    uint32_t len2 = (uint32_t)4U;
+    KRML_CHECK_SIZE(sizeof (uint64_t), len2);
+    uint64_t tempBuffer21[len2];
+    memset(tempBuffer21, 0U, len2 * sizeof (uint64_t));
+    uint64_t
+    p2[4U] =
+      {
+        (uint64_t)17562291160714782033U,
+        (uint64_t)13611842547513532036U,
+        (uint64_t)18446744073709551615U,
+        (uint64_t)18446744069414584320U
+      };
+    uint32_t len33 = (uint32_t)4U;
+    uint64_t c2 = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len33 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = sAsFelem[(uint32_t)4U * i];
+      uint64_t t20 = p2[(uint32_t)4U * i];
+      uint64_t *res_i0 = tempBuffer21 + (uint32_t)4U * i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t20, res_i0);
+      uint64_t t10 = sAsFelem[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t t21 = p2[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = tempBuffer21 + (uint32_t)4U * i + (uint32_t)1U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t10, t21, res_i1);
+      uint64_t t11 = sAsFelem[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t t22 = p2[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = tempBuffer21 + (uint32_t)4U * i + (uint32_t)2U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t11, t22, res_i2);
+      uint64_t t12 = sAsFelem[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t t2 = p2[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = tempBuffer21 + (uint32_t)4U * i + (uint32_t)3U;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t12, t2, res_i);
+    }
+    for (uint32_t i = len33 / (uint32_t)4U * (uint32_t)4U; i < len33; i++)
+    {
+      uint64_t t1 = sAsFelem[i];
+      uint64_t t2 = p2[i];
+      uint64_t *res_i = tempBuffer21 + i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t2, res_i);
+    }
+    uint64_t r11 = c2;
+    uint64_t carry0 = r11;
+    bool less0 = carry0 == (uint64_t)1U;
+    uint64_t tmp2 = (uint64_t)18446744073709551615U;
+    uint32_t len34 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len34; i++)
+    {
+      uint64_t a_i = sAsFelem[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp2;
+      tmp2 = r_i & tmp0;
+    }
+    uint64_t f2 = tmp2;
+    bool more0 = f2 == (uint64_t)0xffffffffffffffffU;
+    bool isSCorrect = less0 && !more0;
+    bool step1 = isRCorrect && isSCorrect;
+    if (step1 == false)
+    {
+      r1 = false;
+    }
+    else
+    {
+      uint32_t len22 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint8_t), (uint32_t)2U * len22);
+      uint8_t tempBufferU8[(uint32_t)2U * len22];
+      memset(tempBufferU8, 0U, (uint32_t)2U * len22 * sizeof (uint8_t));
+      uint8_t *u1 = tempBufferU8;
+      uint8_t *u2 = tempBufferU8 + (uint32_t)32U;
+      uint32_t sz_hash = mLen;
+      uint32_t len3 = sz_hash + (uint32_t)32U;
+      KRML_CHECK_SIZE(sizeof (uint8_t), len3);
+      uint8_t mHash[len3];
+      memset(mHash, 0U, len3 * sizeof (uint8_t));
+      uint8_t *mHashHPart = mHash;
+      uint8_t *mHashRPart = mHash;
+      memcpy(mHashHPart, m, sz_hash * sizeof (uint8_t));
+      toUint64ChangeEndian_p256(mHashRPart, hashAsFelem);
+      reduction_prime_2prime_order_p256(hashAsFelem, hashAsFelem);
+      uint32_t len35 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len35);
+      uint64_t tempBuffer2[(uint32_t)3U * len35];
+      memset(tempBuffer2, 0U, (uint32_t)3U * len35 * sizeof (uint64_t));
+      uint64_t *inverseS = tempBuffer2;
+      uint64_t *u11 = tempBuffer2 + len35;
+      uint64_t *u21 = tempBuffer2 + (uint32_t)2U * len35;
+      uint32_t len40 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len40);
+      uint64_t one[len40];
+      memset(one, 0U, len40 * sizeof (uint64_t));
+      one[0U] = (uint64_t)1U;
+      uint32_t len50 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len50; i++)
+      {
+        one[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one, sAsFelem, inverseS);
+      montgomery_ladder_power_p256_dsa(inverseS, prime256order_buffer, inverseS);
+      uint32_t len41 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len41);
+      uint64_t buffFromDB[len41];
+      memset(buffFromDB, 0U, len41 * sizeof (uint64_t));
+      uint32_t len51 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len51);
+      uint64_t one0[len51];
+      memset(one0, 0U, len51 * sizeof (uint64_t));
+      one0[0U] = (uint64_t)1U;
+      uint32_t len60 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len60; i++)
+      {
+        one0[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one0, hashAsFelem, buffFromDB);
+      uint32_t len52 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len52);
+      uint64_t one1[len52];
+      memset(one1, 0U, len52 * sizeof (uint64_t));
+      one1[0U] = (uint64_t)1U;
+      uint32_t len61 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len61; i++)
+      {
+        one1[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one1, buffFromDB, buffFromDB);
+      montgomery_multiplication_buffer_dsa_p256(inverseS, buffFromDB, u11);
+      uint32_t len42 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len42);
+      uint64_t buffFromDB0[len42];
+      memset(buffFromDB0, 0U, len42 * sizeof (uint64_t));
+      uint32_t len53 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len53);
+      uint64_t one2[len53];
+      memset(one2, 0U, len53 * sizeof (uint64_t));
+      one2[0U] = (uint64_t)1U;
+      uint32_t len62 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len62; i++)
+      {
+        one2[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one2, rAsFelem, buffFromDB0);
+      uint32_t len54 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len54);
+      uint64_t one3[len54];
+      memset(one3, 0U, len54 * sizeof (uint64_t));
+      one3[0U] = (uint64_t)1U;
+      uint32_t len63 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)1U; i < len63; i++)
+      {
+        one3[i] = (uint64_t)0U;
+      }
+      montgomery_multiplication_buffer_dsa_p256(one3, buffFromDB0, buffFromDB0);
+      montgomery_multiplication_buffer_dsa_p256(inverseS, buffFromDB0, u21);
+      uint32_t len43 = (uint32_t)4U;
+      uint32_t lenByTwo = len43 >> (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < lenByTwo; i++)
+      {
+        uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+        uint64_t left = u11[i];
+        uint64_t right = u11[lenRight];
+        u11[i] = right;
+        u11[lenRight] = left;
+      }
+      uint32_t len44 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len44; i++)
+      {
+        store64_be(u1 + i * (uint32_t)8U, u11[i]);
+      }
+      uint32_t len45 = (uint32_t)4U;
+      uint32_t lenByTwo0 = len45 >> (uint32_t)1U;
+      for (uint32_t i = (uint32_t)0U; i < lenByTwo0; i++)
+      {
+        uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i;
+        uint64_t left = u21[i];
+        uint64_t right = u21[lenRight];
+        u21[i] = right;
+        u21[lenRight] = left;
+      }
+      uint32_t len46 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len46; i++)
+      {
+        store64_be(u2 + i * (uint32_t)8U, u21[i]);
+      }
+      uint32_t len36 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len36 * (uint32_t)3U);
+      uint64_t result[len36 * (uint32_t)3U];
+      memset(result, 0U, len36 * (uint32_t)3U * sizeof (uint64_t));
+      uint32_t len4 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len4 * (uint32_t)6U);
+      uint64_t points[len4 * (uint32_t)6U];
+      memset(points, 0U, len4 * (uint32_t)6U * sizeof (uint64_t));
+      uint64_t *pointU1G = points;
+      uint64_t *pointU2Q = points + (uint32_t)12U;
+      secretToPublicWithoutNorm_p256(pointU1G, (void *)u1, tempBuffer1);
+      scalarMultiplicationWithoutNorm_p256(publicKeyBuffer, pointU2Q, (void *)u2, tempBuffer1);
+      uint64_t *tempBuffer17 = tempBuffer1;
+      uint64_t *p = points;
+      uint64_t *q = points + (uint32_t)12U;
+      uint32_t len55 = (uint32_t)4U;
+      uint64_t *sq_z1 = tempBuffer17;
+      uint64_t *tr_z1 = tempBuffer17 + len55;
+      uint64_t *sq_z2 = tempBuffer17 + (uint32_t)2U * len55;
+      uint64_t *tr_z2 = tempBuffer17 + (uint32_t)3U * len55;
+      uint64_t *x1 = p;
+      uint64_t *y1 = p + len55;
+      uint64_t *z1 = p + (uint32_t)2U * len55;
+      uint64_t *x2 = q;
+      uint64_t *y2 = q + len55;
+      uint64_t *z2 = q + (uint32_t)2U * len55;
+      uint32_t len6 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len6);
+      uint64_t t[(uint32_t)2U * len6];
+      memset(t, 0U, (uint32_t)2U * len6 * sizeof (uint64_t));
+      uint32_t len70 = (uint32_t)4U;
+      uint32_t resLen0 = len70 + len70;
+      memset(t, 0U, resLen0 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len70; i0++)
+      {
+        uint64_t *ab = z1;
+        uint64_t a_j = z1[i0];
+        uint64_t *res_j = t + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = ab[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i0);
+          uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+          uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+          uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, a_j, c, res_i);
+        }
+        for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+        {
+          uint64_t a_i = ab[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i);
+        }
+        uint64_t r12 = c;
+        t[i0 + i0] = r12;
+      }
+      uint64_t c00 = bn_add_eq_len_u64(resLen0, t, t, t);
+      KRML_CHECK_SIZE(sizeof (uint64_t), resLen0);
+      uint64_t tmp3[resLen0];
+      memset(tmp3, 0U, resLen0 * sizeof (uint64_t));
+      for (uint32_t i = (uint32_t)0U; i < len70; i++)
+      {
+        uint128_t res = (uint128_t)z1[i] * z1[i];
+        uint64_t hi = (uint64_t)(res >> (uint32_t)64U);
+        uint64_t lo = (uint64_t)res;
+        tmp3[(uint32_t)2U * i] = lo;
+        tmp3[(uint32_t)2U * i + (uint32_t)1U] = hi;
+      }
+      uint64_t c10 = bn_add_eq_len_u64(resLen0, t, tmp3, t);
+      uint32_t len71 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len71);
+      uint64_t t20[(uint32_t)2U * len71];
+      memset(t20, 0U, (uint32_t)2U * len71 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len71; i0++)
+      {
+        uint64_t t10 = t[0U];
+        uint64_t *uu____0 = t20;
+        uint32_t len90 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len90; i++)
+        {
+          uu____0[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____1 = t20 + (uint32_t)4U;
+        uint32_t len91 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len91; i++)
+        {
+          uu____1[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t20;
+        uint64_t *o1 = t20 + (uint32_t)1U;
+        uint64_t *o2 = t20 + (uint32_t)2U;
+        uint64_t *o3 = t20 + (uint32_t)3U;
+        uint64_t *o4 = t20 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c11 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c11;
+        mul64(f3, t10, o3, o4);
+        uint32_t len92 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len92 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t[(uint32_t)4U * i];
+          uint64_t t210 = t20[(uint32_t)4U * i];
+          uint64_t *res_i0 = t20 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t20[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t20 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t20[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t20 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t20[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t20 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len92 / (uint32_t)4U * (uint32_t)4U; i < len92; i++)
+        {
+          uint64_t t1 = t[i];
+          uint64_t t21 = t20[i];
+          uint64_t *res_i = t20 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry1 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t20[(uint32_t)1U + i];
+          t[i] = elem;
+        }
+        t[len9] = carry1;
+      }
+      uint32_t len8 = (uint32_t)4U;
+      uint64_t cin = t[len8];
+      uint64_t *x_0 = t;
+      uint32_t len90 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len90);
+      uint64_t tempBuffer22[len90];
+      memset(tempBuffer22, 0U, len90 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow0 = (uint64_t)0U;
+      uint64_t
+      p10[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len100 = (uint32_t)4U;
+      uint64_t c3 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len100 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_0[(uint32_t)4U * i];
+        uint64_t t210 = p10[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer22 + (uint32_t)4U * i;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t210, res_i0);
+        uint64_t t10 = x_0[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p10[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer22 + (uint32_t)4U * i + (uint32_t)1U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t10, t211, res_i1);
+        uint64_t t11 = x_0[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p10[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer22 + (uint32_t)4U * i + (uint32_t)2U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t11, t212, res_i2);
+        uint64_t t12 = x_0[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p10[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer22 + (uint32_t)4U * i + (uint32_t)3U;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t12, t21, res_i);
+      }
+      for (uint32_t i = len100 / (uint32_t)4U * (uint32_t)4U; i < len100; i++)
+      {
+        uint64_t t1 = x_0[i];
+        uint64_t t21 = p10[i];
+        uint64_t *res_i = tempBuffer22 + i;
+        c3 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c3, t1, t21, res_i);
+      }
+      uint64_t r12 = c3;
+      uint64_t carry00 = r12;
+      uint64_t
+      carry1 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry00,
+          cin,
+          (uint64_t)0U,
+          &tempBufferForSubborrow0);
+      cmovznz4_p256(carry1, tempBuffer22, x_0, sq_z1);
+      uint32_t len64 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len64);
+      uint64_t t0[(uint32_t)2U * len64];
+      memset(t0, 0U, (uint32_t)2U * len64 * sizeof (uint64_t));
+      uint32_t len72 = (uint32_t)4U;
+      uint32_t resLen1 = len72 + len72;
+      memset(t0, 0U, resLen1 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len72; i0++)
+      {
+        uint64_t *ab = z2;
+        uint64_t a_j = z2[i0];
+        uint64_t *res_j = t0 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = ab[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i0);
+          uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+          uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+          uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, a_j, c, res_i);
+        }
+        for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+        {
+          uint64_t a_i = ab[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, a_j, c, res_i);
+        }
+        uint64_t r13 = c;
+        t0[i0 + i0] = r13;
+      }
+      uint64_t c0 = bn_add_eq_len_u64(resLen1, t0, t0, t0);
+      KRML_CHECK_SIZE(sizeof (uint64_t), resLen1);
+      uint64_t tmp4[resLen1];
+      memset(tmp4, 0U, resLen1 * sizeof (uint64_t));
+      for (uint32_t i = (uint32_t)0U; i < len72; i++)
+      {
+        uint128_t res = (uint128_t)z2[i] * z2[i];
+        uint64_t hi = (uint64_t)(res >> (uint32_t)64U);
+        uint64_t lo = (uint64_t)res;
+        tmp4[(uint32_t)2U * i] = lo;
+        tmp4[(uint32_t)2U * i + (uint32_t)1U] = hi;
+      }
+      uint64_t c11 = bn_add_eq_len_u64(resLen1, t0, tmp4, t0);
+      uint32_t len73 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len73);
+      uint64_t t22[(uint32_t)2U * len73];
+      memset(t22, 0U, (uint32_t)2U * len73 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len73; i0++)
+      {
+        uint64_t t10 = t0[0U];
+        uint64_t *uu____2 = t22;
+        uint32_t len91 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len91; i++)
+        {
+          uu____2[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____3 = t22 + (uint32_t)4U;
+        uint32_t len92 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len92; i++)
+        {
+          uu____3[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t22;
+        uint64_t *o1 = t22 + (uint32_t)1U;
+        uint64_t *o2 = t22 + (uint32_t)2U;
+        uint64_t *o3 = t22 + (uint32_t)3U;
+        uint64_t *o4 = t22 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len93 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len93 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t0[(uint32_t)4U * i];
+          uint64_t t210 = t22[(uint32_t)4U * i];
+          uint64_t *res_i0 = t22 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t0[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t22[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t22 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t0[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t22[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t22 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t0[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t22[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t22 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len93 / (uint32_t)4U * (uint32_t)4U; i < len93; i++)
+        {
+          uint64_t t1 = t0[i];
+          uint64_t t21 = t22[i];
+          uint64_t *res_i = t22 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry2 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t22[(uint32_t)1U + i];
+          t0[i] = elem;
+        }
+        t0[len9] = carry2;
+      }
+      uint32_t len80 = (uint32_t)4U;
+      uint64_t cin0 = t0[len80];
+      uint64_t *x_1 = t0;
+      uint32_t len91 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len91);
+      uint64_t tempBuffer23[len91];
+      memset(tempBuffer23, 0U, len91 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow1 = (uint64_t)0U;
+      uint64_t
+      p11[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len101 = (uint32_t)4U;
+      uint64_t c4 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len101 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_1[(uint32_t)4U * i];
+        uint64_t t210 = p11[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer23 + (uint32_t)4U * i;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t1, t210, res_i0);
+        uint64_t t10 = x_1[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p11[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer23 + (uint32_t)4U * i + (uint32_t)1U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t10, t211, res_i1);
+        uint64_t t11 = x_1[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p11[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer23 + (uint32_t)4U * i + (uint32_t)2U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t11, t212, res_i2);
+        uint64_t t12 = x_1[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p11[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer23 + (uint32_t)4U * i + (uint32_t)3U;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t12, t21, res_i);
+      }
+      for (uint32_t i = len101 / (uint32_t)4U * (uint32_t)4U; i < len101; i++)
+      {
+        uint64_t t1 = x_1[i];
+        uint64_t t21 = p11[i];
+        uint64_t *res_i = tempBuffer23 + i;
+        c4 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c4, t1, t21, res_i);
+      }
+      uint64_t r13 = c4;
+      uint64_t carry01 = r13;
+      uint64_t
+      carry2 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry01,
+          cin0,
+          (uint64_t)0U,
+          &tempBufferForSubborrow1);
+      cmovznz4_p256(carry2, tempBuffer23, x_1, sq_z2);
+      uint32_t len65 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len65);
+      uint64_t t3[(uint32_t)2U * len65];
+      memset(t3, 0U, (uint32_t)2U * len65 * sizeof (uint64_t));
+      uint32_t len74 = (uint32_t)4U;
+      uint32_t resLen2 = len74 + len74;
+      memset(t3, 0U, resLen2 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len74; i0++)
+      {
+        uint64_t bj = z1[i0];
+        uint64_t *res_j = t3 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len74 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len74 / (uint32_t)4U * (uint32_t)4U; i < len74; i++)
+        {
+          uint64_t a_i = sq_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r14 = c;
+        t3[len74 + i0] = r14;
+      }
+      uint32_t len75 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len75);
+      uint64_t t23[(uint32_t)2U * len75];
+      memset(t23, 0U, (uint32_t)2U * len75 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len75; i0++)
+      {
+        uint64_t t10 = t3[0U];
+        uint64_t *uu____4 = t23;
+        uint32_t len92 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len92; i++)
+        {
+          uu____4[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____5 = t23 + (uint32_t)4U;
+        uint32_t len93 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len93; i++)
+        {
+          uu____5[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t23;
+        uint64_t *o1 = t23 + (uint32_t)1U;
+        uint64_t *o2 = t23 + (uint32_t)2U;
+        uint64_t *o3 = t23 + (uint32_t)3U;
+        uint64_t *o4 = t23 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len94 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len94 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t3[(uint32_t)4U * i];
+          uint64_t t210 = t23[(uint32_t)4U * i];
+          uint64_t *res_i0 = t23 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t3[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t23[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t23 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t3[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t23[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t23 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t3[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t23[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t23 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len94 / (uint32_t)4U * (uint32_t)4U; i < len94; i++)
+        {
+          uint64_t t1 = t3[i];
+          uint64_t t21 = t23[i];
+          uint64_t *res_i = t23 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry3 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t23[(uint32_t)1U + i];
+          t3[i] = elem;
+        }
+        t3[len9] = carry3;
+      }
+      uint32_t len81 = (uint32_t)4U;
+      uint64_t cin1 = t3[len81];
+      uint64_t *x_2 = t3;
+      uint32_t len92 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len92);
+      uint64_t tempBuffer24[len92];
+      memset(tempBuffer24, 0U, len92 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow2 = (uint64_t)0U;
+      uint64_t
+      p12[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len102 = (uint32_t)4U;
+      uint64_t c5 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len102 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_2[(uint32_t)4U * i];
+        uint64_t t210 = p12[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer24 + (uint32_t)4U * i;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t1, t210, res_i0);
+        uint64_t t10 = x_2[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p12[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer24 + (uint32_t)4U * i + (uint32_t)1U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t10, t211, res_i1);
+        uint64_t t11 = x_2[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p12[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer24 + (uint32_t)4U * i + (uint32_t)2U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t11, t212, res_i2);
+        uint64_t t12 = x_2[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p12[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer24 + (uint32_t)4U * i + (uint32_t)3U;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t12, t21, res_i);
+      }
+      for (uint32_t i = len102 / (uint32_t)4U * (uint32_t)4U; i < len102; i++)
+      {
+        uint64_t t1 = x_2[i];
+        uint64_t t21 = p12[i];
+        uint64_t *res_i = tempBuffer24 + i;
+        c5 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c5, t1, t21, res_i);
+      }
+      uint64_t r14 = c5;
+      uint64_t carry02 = r14;
+      uint64_t
+      carry3 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry02,
+          cin1,
+          (uint64_t)0U,
+          &tempBufferForSubborrow2);
+      cmovznz4_p256(carry3, tempBuffer24, x_2, tr_z1);
+      uint32_t len66 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len66);
+      uint64_t t4[(uint32_t)2U * len66];
+      memset(t4, 0U, (uint32_t)2U * len66 * sizeof (uint64_t));
+      uint32_t len76 = (uint32_t)4U;
+      uint32_t resLen3 = len76 + len76;
+      memset(t4, 0U, resLen3 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len76; i0++)
+      {
+        uint64_t bj = z2[i0];
+        uint64_t *res_j = t4 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len76 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len76 / (uint32_t)4U * (uint32_t)4U; i < len76; i++)
+        {
+          uint64_t a_i = sq_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r15 = c;
+        t4[len76 + i0] = r15;
+      }
+      uint32_t len77 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len77);
+      uint64_t t24[(uint32_t)2U * len77];
+      memset(t24, 0U, (uint32_t)2U * len77 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len77; i0++)
+      {
+        uint64_t t10 = t4[0U];
+        uint64_t *uu____6 = t24;
+        uint32_t len93 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len93; i++)
+        {
+          uu____6[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____7 = t24 + (uint32_t)4U;
+        uint32_t len94 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len94; i++)
+        {
+          uu____7[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t24;
+        uint64_t *o1 = t24 + (uint32_t)1U;
+        uint64_t *o2 = t24 + (uint32_t)2U;
+        uint64_t *o3 = t24 + (uint32_t)3U;
+        uint64_t *o4 = t24 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len95 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len95 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t4[(uint32_t)4U * i];
+          uint64_t t210 = t24[(uint32_t)4U * i];
+          uint64_t *res_i0 = t24 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t4[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t24[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t24 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t4[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t24[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t24 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t4[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t24[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t24 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len95 / (uint32_t)4U * (uint32_t)4U; i < len95; i++)
+        {
+          uint64_t t1 = t4[i];
+          uint64_t t21 = t24[i];
+          uint64_t *res_i = t24 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry4 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t24[(uint32_t)1U + i];
+          t4[i] = elem;
+        }
+        t4[len9] = carry4;
+      }
+      uint32_t len82 = (uint32_t)4U;
+      uint64_t cin2 = t4[len82];
+      uint64_t *x_3 = t4;
+      uint32_t len93 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len93);
+      uint64_t tempBuffer25[len93];
+      memset(tempBuffer25, 0U, len93 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow3 = (uint64_t)0U;
+      uint64_t
+      p13[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len103 = (uint32_t)4U;
+      uint64_t c6 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len103 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_3[(uint32_t)4U * i];
+        uint64_t t210 = p13[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer25 + (uint32_t)4U * i;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t1, t210, res_i0);
+        uint64_t t10 = x_3[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p13[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer25 + (uint32_t)4U * i + (uint32_t)1U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t10, t211, res_i1);
+        uint64_t t11 = x_3[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p13[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer25 + (uint32_t)4U * i + (uint32_t)2U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t11, t212, res_i2);
+        uint64_t t12 = x_3[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p13[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer25 + (uint32_t)4U * i + (uint32_t)3U;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t12, t21, res_i);
+      }
+      for (uint32_t i = len103 / (uint32_t)4U * (uint32_t)4U; i < len103; i++)
+      {
+        uint64_t t1 = x_3[i];
+        uint64_t t21 = p13[i];
+        uint64_t *res_i = tempBuffer25 + i;
+        c6 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c6, t1, t21, res_i);
+      }
+      uint64_t r15 = c6;
+      uint64_t carry03 = r15;
+      uint64_t
+      carry4 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry03,
+          cin2,
+          (uint64_t)0U,
+          &tempBufferForSubborrow3);
+      cmovznz4_p256(carry4, tempBuffer25, x_3, tr_z2);
+      uint32_t len67 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len67);
+      uint64_t t5[(uint32_t)2U * len67];
+      memset(t5, 0U, (uint32_t)2U * len67 * sizeof (uint64_t));
+      uint32_t len78 = (uint32_t)4U;
+      uint32_t resLen4 = len78 + len78;
+      memset(t5, 0U, resLen4 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len78; i0++)
+      {
+        uint64_t bj = x2[i0];
+        uint64_t *res_j = t5 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len78 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = sq_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len78 / (uint32_t)4U * (uint32_t)4U; i < len78; i++)
+        {
+          uint64_t a_i = sq_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r16 = c;
+        t5[len78 + i0] = r16;
+      }
+      uint32_t len79 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len79);
+      uint64_t t25[(uint32_t)2U * len79];
+      memset(t25, 0U, (uint32_t)2U * len79 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len79; i0++)
+      {
+        uint64_t t10 = t5[0U];
+        uint64_t *uu____8 = t25;
+        uint32_t len94 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len94; i++)
+        {
+          uu____8[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____9 = t25 + (uint32_t)4U;
+        uint32_t len95 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len95; i++)
+        {
+          uu____9[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t25;
+        uint64_t *o1 = t25 + (uint32_t)1U;
+        uint64_t *o2 = t25 + (uint32_t)2U;
+        uint64_t *o3 = t25 + (uint32_t)3U;
+        uint64_t *o4 = t25 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len96 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len96 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t5[(uint32_t)4U * i];
+          uint64_t t210 = t25[(uint32_t)4U * i];
+          uint64_t *res_i0 = t25 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t5[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t25[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t25 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t5[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t25[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t25 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t5[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t25[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t25 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len96 / (uint32_t)4U * (uint32_t)4U; i < len96; i++)
+        {
+          uint64_t t1 = t5[i];
+          uint64_t t21 = t25[i];
+          uint64_t *res_i = t25 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry5 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t25[(uint32_t)1U + i];
+          t5[i] = elem;
+        }
+        t5[len9] = carry5;
+      }
+      uint32_t len83 = (uint32_t)4U;
+      uint64_t cin3 = t5[len83];
+      uint64_t *x_4 = t5;
+      uint32_t len94 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len94);
+      uint64_t tempBuffer26[len94];
+      memset(tempBuffer26, 0U, len94 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow4 = (uint64_t)0U;
+      uint64_t
+      p14[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len104 = (uint32_t)4U;
+      uint64_t c7 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len104 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_4[(uint32_t)4U * i];
+        uint64_t t210 = p14[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer26 + (uint32_t)4U * i;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t1, t210, res_i0);
+        uint64_t t10 = x_4[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p14[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer26 + (uint32_t)4U * i + (uint32_t)1U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t10, t211, res_i1);
+        uint64_t t11 = x_4[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p14[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer26 + (uint32_t)4U * i + (uint32_t)2U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t11, t212, res_i2);
+        uint64_t t12 = x_4[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p14[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer26 + (uint32_t)4U * i + (uint32_t)3U;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t12, t21, res_i);
+      }
+      for (uint32_t i = len104 / (uint32_t)4U * (uint32_t)4U; i < len104; i++)
+      {
+        uint64_t t1 = x_4[i];
+        uint64_t t21 = p14[i];
+        uint64_t *res_i = tempBuffer26 + i;
+        c7 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c7, t1, t21, res_i);
+      }
+      uint64_t r16 = c7;
+      uint64_t carry04 = r16;
+      uint64_t
+      carry5 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry04,
+          cin3,
+          (uint64_t)0U,
+          &tempBufferForSubborrow4);
+      cmovznz4_p256(carry5, tempBuffer26, x_4, sq_z1);
+      uint32_t len68 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len68);
+      uint64_t t6[(uint32_t)2U * len68];
+      memset(t6, 0U, (uint32_t)2U * len68 * sizeof (uint64_t));
+      uint32_t len710 = (uint32_t)4U;
+      uint32_t resLen5 = len710 + len710;
+      memset(t6, 0U, resLen5 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len710; i0++)
+      {
+        uint64_t bj = x1[i0];
+        uint64_t *res_j = t6 + i0;
+        uint64_t c = (uint64_t)0U;
+        for
+        (uint32_t
+          i = (uint32_t)0U;
+          i
+          < len710 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
+          i++)
+        {
+          uint64_t a_i = sq_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = sq_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = sq_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = sq_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len710 / (uint32_t)4U * (uint32_t)4U; i < len710; i++)
+        {
+          uint64_t a_i = sq_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r17 = c;
+        t6[len710 + i0] = r17;
+      }
+      uint32_t len711 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len711);
+      uint64_t t26[(uint32_t)2U * len711];
+      memset(t26, 0U, (uint32_t)2U * len711 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len711; i0++)
+      {
+        uint64_t t10 = t6[0U];
+        uint64_t *uu____10 = t26;
+        uint32_t len95 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len95; i++)
+        {
+          uu____10[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____11 = t26 + (uint32_t)4U;
+        uint32_t len96 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len96; i++)
+        {
+          uu____11[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t26;
+        uint64_t *o1 = t26 + (uint32_t)1U;
+        uint64_t *o2 = t26 + (uint32_t)2U;
+        uint64_t *o3 = t26 + (uint32_t)3U;
+        uint64_t *o4 = t26 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len97 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len97 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t6[(uint32_t)4U * i];
+          uint64_t t210 = t26[(uint32_t)4U * i];
+          uint64_t *res_i0 = t26 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t6[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t26[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t26 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t6[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t26[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t26 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t6[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t26[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t26 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len97 / (uint32_t)4U * (uint32_t)4U; i < len97; i++)
+        {
+          uint64_t t1 = t6[i];
+          uint64_t t21 = t26[i];
+          uint64_t *res_i = t26 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry6 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t26[(uint32_t)1U + i];
+          t6[i] = elem;
+        }
+        t6[len9] = carry6;
+      }
+      uint32_t len84 = (uint32_t)4U;
+      uint64_t cin4 = t6[len84];
+      uint64_t *x_5 = t6;
+      uint32_t len95 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len95);
+      uint64_t tempBuffer27[len95];
+      memset(tempBuffer27, 0U, len95 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow5 = (uint64_t)0U;
+      uint64_t
+      p15[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len105 = (uint32_t)4U;
+      uint64_t c8 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len105 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_5[(uint32_t)4U * i];
+        uint64_t t210 = p15[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer27 + (uint32_t)4U * i;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t1, t210, res_i0);
+        uint64_t t10 = x_5[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p15[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer27 + (uint32_t)4U * i + (uint32_t)1U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t10, t211, res_i1);
+        uint64_t t11 = x_5[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p15[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer27 + (uint32_t)4U * i + (uint32_t)2U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t11, t212, res_i2);
+        uint64_t t12 = x_5[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p15[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer27 + (uint32_t)4U * i + (uint32_t)3U;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t12, t21, res_i);
+      }
+      for (uint32_t i = len105 / (uint32_t)4U * (uint32_t)4U; i < len105; i++)
+      {
+        uint64_t t1 = x_5[i];
+        uint64_t t21 = p15[i];
+        uint64_t *res_i = tempBuffer27 + i;
+        c8 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c8, t1, t21, res_i);
+      }
+      uint64_t r17 = c8;
+      uint64_t carry05 = r17;
+      uint64_t
+      carry6 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry05,
+          cin4,
+          (uint64_t)0U,
+          &tempBufferForSubborrow5);
+      cmovznz4_p256(carry6, tempBuffer27, x_5, sq_z2);
+      uint32_t len69 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len69);
+      uint64_t t7[(uint32_t)2U * len69];
+      memset(t7, 0U, (uint32_t)2U * len69 * sizeof (uint64_t));
+      uint32_t len712 = (uint32_t)4U;
+      uint32_t resLen6 = len712 + len712;
+      memset(t7, 0U, resLen6 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len712; i0++)
+      {
+        uint64_t bj = y2[i0];
+        uint64_t *res_j = t7 + i0;
+        uint64_t c = (uint64_t)0U;
+        for
+        (uint32_t
+          i = (uint32_t)0U;
+          i
+          < len712 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
+          i++)
+        {
+          uint64_t a_i = tr_z1[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = tr_z1[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = tr_z1[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = tr_z1[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len712 / (uint32_t)4U * (uint32_t)4U; i < len712; i++)
+        {
+          uint64_t a_i = tr_z1[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r18 = c;
+        t7[len712 + i0] = r18;
+      }
+      uint32_t len713 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len713);
+      uint64_t t27[(uint32_t)2U * len713];
+      memset(t27, 0U, (uint32_t)2U * len713 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len713; i0++)
+      {
+        uint64_t t10 = t7[0U];
+        uint64_t *uu____12 = t27;
+        uint32_t len96 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len96; i++)
+        {
+          uu____12[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____13 = t27 + (uint32_t)4U;
+        uint32_t len97 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len97; i++)
+        {
+          uu____13[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t27;
+        uint64_t *o1 = t27 + (uint32_t)1U;
+        uint64_t *o2 = t27 + (uint32_t)2U;
+        uint64_t *o3 = t27 + (uint32_t)3U;
+        uint64_t *o4 = t27 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len98 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len98 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t7[(uint32_t)4U * i];
+          uint64_t t210 = t27[(uint32_t)4U * i];
+          uint64_t *res_i0 = t27 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t7[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t27[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t27 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t7[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t27[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t27 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t7[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t27[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t27 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len98 / (uint32_t)4U * (uint32_t)4U; i < len98; i++)
+        {
+          uint64_t t1 = t7[i];
+          uint64_t t21 = t27[i];
+          uint64_t *res_i = t27 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry7 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t27[(uint32_t)1U + i];
+          t7[i] = elem;
+        }
+        t7[len9] = carry7;
+      }
+      uint32_t len85 = (uint32_t)4U;
+      uint64_t cin5 = t7[len85];
+      uint64_t *x_6 = t7;
+      uint32_t len96 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len96);
+      uint64_t tempBuffer28[len96];
+      memset(tempBuffer28, 0U, len96 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow6 = (uint64_t)0U;
+      uint64_t
+      p16[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len106 = (uint32_t)4U;
+      uint64_t c9 = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len106 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_6[(uint32_t)4U * i];
+        uint64_t t210 = p16[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer28 + (uint32_t)4U * i;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t1, t210, res_i0);
+        uint64_t t10 = x_6[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p16[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer28 + (uint32_t)4U * i + (uint32_t)1U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t10, t211, res_i1);
+        uint64_t t11 = x_6[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p16[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer28 + (uint32_t)4U * i + (uint32_t)2U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t11, t212, res_i2);
+        uint64_t t12 = x_6[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p16[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer28 + (uint32_t)4U * i + (uint32_t)3U;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t12, t21, res_i);
+      }
+      for (uint32_t i = len106 / (uint32_t)4U * (uint32_t)4U; i < len106; i++)
+      {
+        uint64_t t1 = x_6[i];
+        uint64_t t21 = p16[i];
+        uint64_t *res_i = tempBuffer28 + i;
+        c9 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c9, t1, t21, res_i);
+      }
+      uint64_t r18 = c9;
+      uint64_t carry06 = r18;
+      uint64_t
+      carry7 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry06,
+          cin5,
+          (uint64_t)0U,
+          &tempBufferForSubborrow6);
+      cmovznz4_p256(carry7, tempBuffer28, x_6, tr_z1);
+      uint32_t len610 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len610);
+      uint64_t t8[(uint32_t)2U * len610];
+      memset(t8, 0U, (uint32_t)2U * len610 * sizeof (uint64_t));
+      uint32_t len7 = (uint32_t)4U;
+      uint32_t resLen = len7 + len7;
+      memset(t8, 0U, resLen * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len7; i0++)
+      {
+        uint64_t bj = y1[i0];
+        uint64_t *res_j = t8 + i0;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len7 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t a_i = tr_z2[(uint32_t)4U * i];
+          uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i0);
+          uint64_t a_i0 = tr_z2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+          c = mul_wide_add2_u64(a_i0, bj, c, res_i1);
+          uint64_t a_i1 = tr_z2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+          c = mul_wide_add2_u64(a_i1, bj, c, res_i2);
+          uint64_t a_i2 = tr_z2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+          c = mul_wide_add2_u64(a_i2, bj, c, res_i);
+        }
+        for (uint32_t i = len7 / (uint32_t)4U * (uint32_t)4U; i < len7; i++)
+        {
+          uint64_t a_i = tr_z2[i];
+          uint64_t *res_i = res_j + i;
+          c = mul_wide_add2_u64(a_i, bj, c, res_i);
+        }
+        uint64_t r19 = c;
+        t8[len7 + i0] = r19;
+      }
+      uint32_t len714 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len714);
+      uint64_t t2[(uint32_t)2U * len714];
+      memset(t2, 0U, (uint32_t)2U * len714 * sizeof (uint64_t));
+      for (uint32_t i0 = (uint32_t)0U; i0 < len714; i0++)
+      {
+        uint64_t t10 = t8[0U];
+        uint64_t *uu____14 = t2;
+        uint32_t len97 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len97; i++)
+        {
+          uu____14[i] = (uint64_t)0U;
+        }
+        uint64_t *uu____15 = t2 + (uint32_t)4U;
+        uint32_t len98 = (uint32_t)4U;
+        for (uint32_t i = (uint32_t)0U; i < len98; i++)
+        {
+          uu____15[i] = (uint64_t)0U;
+        }
+        uint64_t temp = (uint64_t)0U;
+        uint64_t f0 = (uint64_t)0xffffffffffffffffU;
+        uint64_t f1 = (uint64_t)0xffffffffU;
+        uint64_t f3 = (uint64_t)0xffffffff00000001U;
+        uint64_t *o0 = t2;
+        uint64_t *o1 = t2 + (uint32_t)1U;
+        uint64_t *o2 = t2 + (uint32_t)2U;
+        uint64_t *o3 = t2 + (uint32_t)3U;
+        uint64_t *o4 = t2 + (uint32_t)4U;
+        mul64(f0, t10, o0, &temp);
+        uint64_t h0 = temp;
+        mul64(f1, t10, o1, &temp);
+        uint64_t l = o1[0U];
+        uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l, h0, o1);
+        uint64_t h = temp;
+        o2[0U] = h + c12;
+        mul64(f3, t10, o3, o4);
+        uint32_t len99 = (uint32_t)4U * (uint32_t)2U;
+        uint64_t c = (uint64_t)0U;
+        for (uint32_t i = (uint32_t)0U; i < len99 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = t8[(uint32_t)4U * i];
+          uint64_t t210 = t2[(uint32_t)4U * i];
+          uint64_t *res_i0 = t2 + (uint32_t)4U * i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t210, res_i0);
+          uint64_t t11 = t8[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t t211 = t2[(uint32_t)4U * i + (uint32_t)1U];
+          uint64_t *res_i1 = t2 + (uint32_t)4U * i + (uint32_t)1U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t211, res_i1);
+          uint64_t t12 = t8[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t212 = t2[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = t2 + (uint32_t)4U * i + (uint32_t)2U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t212, res_i2);
+          uint64_t t13 = t8[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t t21 = t2[(uint32_t)4U * i + (uint32_t)3U];
+          uint64_t *res_i = t2 + (uint32_t)4U * i + (uint32_t)3U;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t13, t21, res_i);
+        }
+        for (uint32_t i = len99 / (uint32_t)4U * (uint32_t)4U; i < len99; i++)
+        {
+          uint64_t t1 = t8[i];
+          uint64_t t21 = t2[i];
+          uint64_t *res_i = t2 + i;
+          c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t21, res_i);
+        }
+        uint64_t carry8 = c;
+        uint32_t len9 = (uint32_t)7U;
+        for (uint32_t i = (uint32_t)0U; i < len9; i++)
+        {
+          uint64_t elem = t2[(uint32_t)1U + i];
+          t8[i] = elem;
+        }
+        t8[len9] = carry8;
+      }
+      uint32_t len86 = (uint32_t)4U;
+      uint64_t cin6 = t8[len86];
+      uint64_t *x_ = t8;
+      uint32_t len9 = (uint32_t)4U;
+      KRML_CHECK_SIZE(sizeof (uint64_t), len9);
+      uint64_t tempBuffer29[len9];
+      memset(tempBuffer29, 0U, len9 * sizeof (uint64_t));
+      uint64_t tempBufferForSubborrow = (uint64_t)0U;
+      uint64_t
+      p1[4U] =
+        {
+          (uint64_t)0xffffffffffffffffU,
+          (uint64_t)0xffffffffU,
+          (uint64_t)0U,
+          (uint64_t)0xffffffff00000001U
+        };
+      uint32_t len10 = (uint32_t)4U;
+      uint64_t c = (uint64_t)0U;
+      for (uint32_t i = (uint32_t)0U; i < len10 / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      {
+        uint64_t t1 = x_[(uint32_t)4U * i];
+        uint64_t t210 = p1[(uint32_t)4U * i];
+        uint64_t *res_i0 = tempBuffer29 + (uint32_t)4U * i;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t210, res_i0);
+        uint64_t t10 = x_[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t211 = p1[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = tempBuffer29 + (uint32_t)4U * i + (uint32_t)1U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t211, res_i1);
+        uint64_t t11 = x_[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t t212 = p1[(uint32_t)4U * i + (uint32_t)2U];
+        uint64_t *res_i2 = tempBuffer29 + (uint32_t)4U * i + (uint32_t)2U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t212, res_i2);
+        uint64_t t12 = x_[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t t21 = p1[(uint32_t)4U * i + (uint32_t)3U];
+        uint64_t *res_i = tempBuffer29 + (uint32_t)4U * i + (uint32_t)3U;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t21, res_i);
+      }
+      for (uint32_t i = len10 / (uint32_t)4U * (uint32_t)4U; i < len10; i++)
+      {
+        uint64_t t1 = x_[i];
+        uint64_t t21 = p1[i];
+        uint64_t *res_i = tempBuffer29 + i;
+        c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t21, res_i);
+      }
+      uint64_t r19 = c;
+      uint64_t carry07 = r19;
+      uint64_t
+      carry8 =
+        Lib_IntTypes_Intrinsics_sub_borrow_u64(carry07,
+          cin6,
+          (uint64_t)0U,
+          &tempBufferForSubborrow);
+      cmovznz4_p256(carry8, tempBuffer29, x_, tr_z2);
+      bool equalX = cmp_felem_felem_bool_p256(sq_z1, sq_z2);
+      bool equalY = cmp_felem_felem_bool_p256(tr_z1, tr_z2);
+      bool equalXAndY = equalX && equalY;
+      if (equalXAndY)
+      {
+        uint32_t len611 = (uint32_t)4U;
+        uint64_t *pY = p + len611;
+        uint64_t *pZ = p + (uint32_t)2U * len611;
+        uint64_t *x3 = result;
+        uint64_t *y3 = result + len611;
+        uint64_t *z3 = result + (uint32_t)2U * len611;
+        uint64_t *delta = tempBuffer17;
+        uint64_t *gamma = tempBuffer17 + len611;
+        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len611;
+        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len611;
+        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len611;
+        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len611;
+        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len611;
+        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len611;
+        uint32_t coordinateLen = (uint32_t)4U;
+        uint64_t *pX1 = p;
+        uint64_t *pY1 = p + coordinateLen;
+        uint64_t *pZ1 = p + (uint32_t)2U * coordinateLen;
+        uint64_t *a0 = tmp;
+        uint64_t *a1 = tmp + coordinateLen;
+        uint64_t *alpha0 = tmp + (uint32_t)2U * coordinateLen;
+        montgomery_square_buffer_dh_p256(pZ1, delta);
+        montgomery_square_buffer_dh_p256(pY1, gamma);
+        montgomery_multiplication_buffer_dh_p256(pX1, gamma, beta);
+        felem_sub_p256(pX1, delta, a0);
+        felem_add_p256(pX1, delta, a1);
+        montgomery_multiplication_buffer_dh_p256(a0, a1, alpha0);
+        felem_add_p256(alpha0, alpha0, alpha);
+        felem_add_p256(alpha0, alpha, alpha);
+        montgomery_square_buffer_dh_p256(alpha, x3);
+        felem_add_p256(beta, beta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, fourBeta);
+        felem_add_p256(fourBeta, fourBeta, eightBeta);
+        felem_sub_p256(x3, eightBeta, x3);
+        felem_add_p256(pY, pZ, z3);
+        montgomery_square_buffer_dh_p256(z3, z3);
+        felem_sub_p256(z3, gamma, z3);
+        felem_sub_p256(z3, delta, z3);
+        felem_sub_p256(fourBeta, x3, y3);
+        montgomery_multiplication_buffer_dh_p256(alpha, y3, y3);
+        montgomery_square_buffer_dh_p256(gamma, gamma);
+        felem_add_p256(gamma, gamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_add_p256(eightGamma, eightGamma, eightGamma);
+        felem_sub_p256(y3, eightGamma, y3);
+      }
+      else
+      {
+        point_add_p256(p, q, result, tempBuffer17);
+      }
+      norm_p256(result, result, tempBuffer17);
+      uint32_t len47 = (uint32_t)4U;
+      uint64_t *zCoordinate0 = result + (uint32_t)2U * len47;
+      uint64_t tmp = (uint64_t)18446744073709551615U;
+      uint32_t len5 = (uint32_t)4U;
+      for (uint32_t i = (uint32_t)0U; i < len5; i++)
+      {
+        uint64_t a_i = zCoordinate0[i];
+        uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+        uint64_t tmp0 = tmp;
+        tmp = r_i & tmp0;
+      }
+      uint64_t f0 = tmp;
+      bool resultIsPAI = f0 == (uint64_t)0xffffffffffffffffU;
+      uint64_t *xCoordinateSum = result;
+      memcpy(x, xCoordinateSum, (uint32_t)4U * sizeof (uint64_t));
+      reduction_prime_2prime_order_p256(x, x);
+      bool r110 = !resultIsPAI;
+      bool state = r110;
+      if (state == false)
+      {
+        r1 = false;
+      }
+      else
+      {
+        r1 = cmp_felem_felem_bool_p256(x, rAsFelem);
+      }
+    }
+  }
+  bool result = r1;
+  return result;
+}
+
+/*
+ Public key verification function. 
+  
+ This code is not side-channel resistant.
+  
+ Input: pub(lic)Key: uint8[64]. 
+  
+ Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
+ Verify that the public key is not the “point at infinity”, represented as O. 
+ Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
+ Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
+ Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  
+ The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+*/
+bool Hacl_P256_verify_q(uint8_t *pubKey)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len);
+  uint64_t tempBuffer[(uint32_t)20U * len];
+  memset(tempBuffer, 0U, (uint32_t)20U * len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t publicKeyJ[(uint32_t)3U * len];
+  memset(publicKeyJ, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  toFormPoint_p256(pubKey, publicKeyJ);
+  bool r = verifyQValidCurvePoint_p256(publicKeyJ);
+  return r;
 }
 
 uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)

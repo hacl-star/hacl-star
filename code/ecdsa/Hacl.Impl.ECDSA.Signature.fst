@@ -16,7 +16,6 @@ open Hacl.EC.Lemmas
 
 open FStar.Mul
 open FStar.Math.Lemmas
-
 open Hacl.Hash.SHA2
 
 open Spec.ECC
@@ -177,7 +176,7 @@ let ecdsa_signature_step6 #c result kFelem z r da =
     let h0 = ST.get() in 
   montgomery_multiplication_buffer_dsa #c r da rda;
   fromDomainImpl z zBuffer; 
-  felem_add #c rda zBuffer zBuffer;
+  felem_add_ecdsa #c rda zBuffer zBuffer;
   copy kInv kFelem;
   montgomery_ladder_exponent #c kInv kInv; 
   montgomery_multiplication_buffer_dsa zBuffer kInv result;

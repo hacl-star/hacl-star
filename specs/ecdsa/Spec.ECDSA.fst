@@ -385,7 +385,7 @@ let hashSpec c alg mLen m =
   changeEndian_u8 (getCoordinateLen c) (Lib.ByteSequence.nat_from_intseq_le message % pow2 (getPower c))
 
 
-val ecdsa_verification_agile:
+val ecdsa_verification:
   c: curve 
   -> alg: hash_alg_ecdsa
   -> publicKey:tuple2 nat nat 
@@ -395,7 +395,7 @@ val ecdsa_verification_agile:
   -> m:lseq uint8 mLen
   -> bool
 
-let ecdsa_verification_agile c alg publicKey r s mLen m =
+let ecdsa_verification c alg publicKey r s mLen m =
   allow_inversion hash_alg_ecdsa; 
   let order = getOrder #c in 
   let publicJacobian = toJacobianCoordinates publicKey in

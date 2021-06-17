@@ -29,7 +29,7 @@ open Hacl.Impl.EC.MM.Exponent
 
 let montgomery_ladder_exponent #c a r = 
   recall_contents (order_inverse_buffer #c) (prime_order_inverse_seq #c);
-  montgomery_ladder_power #c #DSA a (order_inverse_buffer #c) r
+  montgomery_ladder_power_dsa #c a (order_inverse_buffer #c) r
 
 let fromDomainImpl #c a result = 
   let h0 = ST.get() in 

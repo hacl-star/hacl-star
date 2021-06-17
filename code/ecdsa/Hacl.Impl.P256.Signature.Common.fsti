@@ -75,7 +75,7 @@ val verifyQValidCurvePoint: #c: curve -> pubKey: point c
     let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
     ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
 
-
+inline_for_extraction noextract
 val verifyQ: #c: curve -> pubKey: pointAffine8 c -> Stack bool
   (requires fun h -> live h pubKey)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ (

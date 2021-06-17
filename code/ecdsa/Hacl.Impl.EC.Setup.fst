@@ -317,7 +317,7 @@ let getK0 c =
   match c with 
   |P256 -> Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb_lemma (getLastWordPrime #P256); (u64 1)
   |P384 -> Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb_lemma (getLastWordPrime #P384); (u64 4294967297)
-  |Default -> Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb (getLastWordPrime #c)
+  |Default -> Hacl.Bignum.ModInvLimb.mod_inv_limb (getLastWordPrime #c)
 
 
 inline_for_extraction noextract
@@ -516,7 +516,8 @@ let uploadBasePoint #c p =
 
 
 inline_for_extraction noextract
-let order_u8_list (c: curve) : x: list uint8 {List.Tot.length x == v (getCoordinateLenU P256) /\ lst_as_nat x == getPrime P256 - 2} = 
+let order_u8_list (c: curve) : x: list uint8 {List.Tot.length x == v (getCoordinateLenU P256)
+ /\ lst_as_nat x == getPrime P256 - 2} = 
   [@inline_let]
   let x = [
     u8 253; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255; u8 255;

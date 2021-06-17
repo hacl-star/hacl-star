@@ -82,16 +82,17 @@ val sub_bn_prime: #c: curve -> x: felem c -> result: felem c ->
     else
       as_nat c h0 x < getPrime c))
 
+
 inline_for_extraction noextract
 val short_mul_prime: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
-  (requires fun h -> live h result /\ wide_as_nat c h result = 0)
+  (requires fun h -> live h result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     getPrime c * uint_v b = wide_as_nat c h1 result /\
     wide_as_nat c h1 result < (pow2 (getPower c))  * pow2 64)
 
 inline_for_extraction noextract
 val short_mul_order: #c: curve -> b: uint64 -> result: widefelem c -> Stack unit
-  (requires fun h -> live h result /\ wide_as_nat c h result = 0)
+  (requires fun h -> live h result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     getOrder #c * uint_v b = wide_as_nat c h1 result /\
     wide_as_nat c h1 result < (pow2 (getPower c)) * pow2 64)

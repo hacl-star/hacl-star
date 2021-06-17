@@ -28,16 +28,31 @@ val _montgomery_ladder_power: #c: curve -> #m: mode -> a: felem c -> b: felem c
     as_nat c h1 a < getModePrime m c /\ as_nat c h1 b < getModePrime m c))
 
 inline_for_extraction noextract
-val montgomery_ladder_power: #c: curve -> #m: mode -> a: felem c 
+val montgomery_ladder_power_dh: #c: curve -> a: felem c 
   -> scalar: glbuffer uint8 (getCoordinateLenU c) -> result: felem c -> 
   Stack unit 
-  (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat c h a < getModePrime m c /\
-    disjoint a scalar)
+  (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat c h a < getModePrime DH c /\
+    disjoint a scalar /\ disjoint a result)
   (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\ 
-    as_nat c h1 result < getModePrime m c /\ (
-    let r0D = pow_spec #c #m (as_seq h0 scalar) (fromDomain_ #c #m (as_nat c h0 a)) in 
-    let k = fromDomain_ #c #m (as_nat c h0 a) in 
+    as_nat c h1 result < getModePrime DH c /\ (
+    let r0D = pow_spec #c #DH (as_seq h0 scalar) (fromDomain_ #c #DH (as_nat c h0 a)) in 
+    let k = fromDomain_ #c #DH (as_nat c h0 a) in 
     let scalar = as_seq h0 scalar in 
-    let prime = getModePrime m c in 
-    as_nat c h1 result = toDomain_ #c #m ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar)) % prime) /\ 
-    r0D == fromDomain_ #c #m (as_nat c h1 result)))
+    let prime = getModePrime DH c in 
+    as_nat c h1 result = toDomain_ #c #DH ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar)) % prime) /\ 
+    r0D == fromDomain_ #c #DH (as_nat c h1 result)))
+
+inline_for_extraction noextract
+val montgomery_ladder_power_dsa: #c: curve -> a: felem c 
+  -> scalar: glbuffer uint8 (getCoordinateLenU c) -> result: felem c -> 
+  Stack unit 
+  (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat c h a < getModePrime DSA c /\
+    disjoint a scalar /\ disjoint a result)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\ 
+    as_nat c h1 result < getModePrime DSA c /\ (
+    let r0D = pow_spec #c #DSA (as_seq h0 scalar) (fromDomain_ #c #DSA (as_nat c h0 a)) in 
+    let k = fromDomain_ #c #DSA (as_nat c h0 a) in 
+    let scalar = as_seq h0 scalar in 
+    let prime = getModePrime DSA c in 
+    as_nat c h1 result = toDomain_ #c #DSA ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar)) % prime) /\ 
+    r0D == fromDomain_ #c #DSA (as_nat c h1 result)))

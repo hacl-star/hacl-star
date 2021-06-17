@@ -91,7 +91,14 @@ let reduction_prime_2prime_with_carry #c x result  =
   reduction_prime_2prime_with_carry_cin cin x_ result
 
 
-let reduction_prime_2prime_order #c x result  =
+inline_for_extraction noextract
+val reduction_prime_2prime_order_: #c: curve -> x: felem c -> result: felem c -> 
+  Stack unit 
+  (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result == as_nat c h0 x % getOrder #c)  
+
+
+let reduction_prime_2prime_order_ #c x result  =
    push_frame();
   let len = getCoordinateLenU64 c in
   let tempBuffer = create len (u64 0) in
@@ -105,13 +112,51 @@ let reduction_prime_2prime_order #c x result  =
   pop_frame()
 
 
-let felem_add #c arg1 arg2 out =
+[@CInline]
+let reduction_prime_2prime_order_p256 = reduction_prime_2prime_order_ #P256
+
+[@CInline]
+let reduction_prime_2prime_order_p384 = reduction_prime_2prime_order_ #P384
+
+[@CInline]
+let reduction_prime_2prime_order_generic = reduction_prime_2prime_order_ #Default
+
+
+let reduction_prime_2prime_order #c x result = 
+  match c with 
+  |P256 -> reduction_prime_2prime_order_p256 x result
+  |P384 -> reduction_prime_2prime_order_p384 x result
+  |Default -> reduction_prime_2prime_order_generic x result
+
+
+inline_for_extraction noextract
+val felem_add_ecdsa_: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
+  Stack unit
+  (requires (fun h0 ->
+    live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\
+    as_nat c h0 a < getOrder #c /\ as_nat c h0 b < getOrder #c))
+  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_nat c h1 out == (as_nat c h0 a + as_nat c h0 b) % getOrder #c /\
+    as_nat c h1 out == toDomain_ #c #DSA ((fromDomain_ #c #DSA (as_nat c h0 a) + fromDomain_ #c #DSA (as_nat c h0 b)) % getOrder #c)))
+
+let felem_add_ecdsa_ #c arg1 arg2 out =
   let h0 = ST.get() in
   let t = add_bn arg1 arg2 out in
   reduction_prime_2prime_with_carry_cin t out out;
   
   additionInDomain #c #DSA (as_nat c h0 arg1) (as_nat c h0 arg2);
   inDomain_mod_is_not_mod #c #DSA (fromDomain_ #c #DSA (as_nat c h0 arg1) + fromDomain_ #c #DSA (as_nat c h0 arg2))
+
+
+let felem_add_ecdsa_P256 = felem_add_ecdsa_ #P256
+let felem_add_ecdsa_P384 = felem_add_ecdsa_ #P384
+let felem_add_ecdsa_generic = felem_add_ecdsa_ #Default
+
+let felem_add_ecdsa #c a b o = 
+  match c with
+  | P256 -> felem_add_ecdsa_P256 a b o
+  | P384 -> felem_add_ecdsa_P384 a b o
+  | Default -> felem_add_ecdsa_generic a b o 
 
 
 let upload_one_montg_form #c b = 

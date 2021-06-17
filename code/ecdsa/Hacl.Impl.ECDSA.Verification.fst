@@ -468,7 +468,7 @@ val ecdsa_verification_core: #c: curve
     let pubKeyY = as_nat c h0 (getYAff pubKey) in
     let r = as_nat c h0 r in
     let s = as_nat c h0 s in
-    result == Spec.ECDSA.ecdsa_verification_agile c alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m)))
+    result == Spec.ECDSA.ecdsa_verification c alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m)))
 
 
 
@@ -508,7 +508,7 @@ val ecdsa_verification_: #c: curve
     let pubKeyY = as_nat c h0 (getYAff pubKey) in
     let r = as_nat c h0 r in
     let s = as_nat c h0 s in
-    result == Spec.ECDSA.ecdsa_verification_agile c alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m)))
+    result == Spec.ECDSA.ecdsa_verification c alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m)))
 
 let ecdsa_verification_ #c alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
@@ -600,7 +600,7 @@ val ecdsa_verification: #c: curve
     
     let r = nat_from_bytes_be (as_seq h0 r) in
     let s = nat_from_bytes_be (as_seq h0 s) in
-    result == Spec.ECDSA.ecdsa_verification_agile c alg (pFX, pFY) r s  (v mLen) (as_seq h0 m)))
+    result == Spec.ECDSA.ecdsa_verification c alg (pFX, pFY) r s  (v mLen) (as_seq h0 m)))
 
 
 let ecdsa_verification #c alg pubKey r s mLen m =

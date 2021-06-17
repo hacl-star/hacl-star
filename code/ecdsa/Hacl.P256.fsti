@@ -48,13 +48,10 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
       flag == flagSpec 
     ))    
   
-(*)
+
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
   \n The private key and the nonce are expected to be less than the curve order.")]
-
-
-
 val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
   privKey: lbuffer uint8 (size 32) -> 
   k: lbuffer uint8 (size 32) -> 
@@ -72,20 +69,17 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile P256 (Spec.ECDSA.Hash SHA2_384) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature P256 (Spec.ECDSA.Hash SHA2_384) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
     )    
   )
 
-(*
+
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
   \n The private key and the nonce are expected to be less than the curve order.")]
-*)
-
-
 val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64) 
   -> mLen: size_t 
   -> m: lbuffer uint8 mLen 
@@ -105,21 +99,17 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile P256 (Spec.ECDSA.Hash SHA2_512) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature P256 (Spec.ECDSA.Hash SHA2_512) (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in 
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
     )    
   )
 
-(*
 [@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: uint64, where 0 stands for the correct signature generation. All the other values mean that an error has occurred. 
   \n The private key and the nonce are expected to be less than the curve order. 
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
-*)
-
-
 val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64) 
   -> mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length #P256 Spec.ECDSA.NoHash}
   -> m: lbuffer uint8 mLen
@@ -139,15 +129,14 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
      (assert_norm (pow2 32 < pow2 61);
       let resultR = gsub result (size 0) (size 32) in 
       let resultS = gsub result (size 32) (size 32) in 
-      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature_agile P256 Spec.ECDSA.NoHash (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in  
+      let r, s, flagSpec = Spec.ECDSA.ecdsa_signature P256 Spec.ECDSA.NoHash (uint_v mLen) (as_seq h0 m) (as_seq h0 privKey) (as_seq h0 k) in  
       as_seq h1 resultR == nat_to_bytes_be 32 r /\
       as_seq h1 resultS == nat_to_bytes_be 32 s /\
       flag == flagSpec 
     )    
   )
-*)
 
-(* [@ (Comment " This code is not side-channel resistant.
+[@ (Comment " This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
 val ecdsa_verif_p256_sha2:
@@ -165,16 +154,12 @@ val ecdsa_verif_p256_sha2:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile P256 (Spec.ECDSA.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+      result == Spec.ECDSA.ecdsa_verification P256 (Spec.ECDSA.Hash SHA2_256) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
     )
- *)
-(*
+
 [@ (Comment " This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
-*)
-
-(*)
 val ecdsa_verif_p256_sha384:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -190,16 +175,13 @@ val ecdsa_verif_p256_sha384:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile P256 (Spec.ECDSA.Hash SHA2_384) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+      result == Spec.ECDSA.ecdsa_verification P256 (Spec.ECDSA.Hash SHA2_384) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
    )
 
-(*
+
 [@ (Comment " This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
-*)
-
-
 val ecdsa_verif_p256_sha512:
     mLen: size_t
   -> m: lbuffer uint8 mLen
@@ -215,17 +197,14 @@ val ecdsa_verif_p256_sha512:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile P256 (Spec.ECDSA.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
+      result == Spec.ECDSA.ecdsa_verification P256 (Spec.ECDSA.Hash SHA2_512) (publicKeyX, publicKeyY) r s (v mLen) (as_seq h0 m)
    )
 
-(*
+
 [@ (Comment "This code is not side-channel resistant.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
-*)
-
-
 val ecdsa_verif_without_hash:
   mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length #P256 Spec.ECDSA.NoHash}
   -> m:lbuffer uint8 mLen
@@ -241,19 +220,15 @@ val ecdsa_verif_without_hash:
       let r = nat_from_bytes_be (as_seq h1 r) in
       let s = nat_from_bytes_be (as_seq h1 s) in
       modifies0 h0 h1 /\
-      result == Spec.ECDSA.ecdsa_verification_agile P256 Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
+      result == Spec.ECDSA.ecdsa_verification P256 Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
    )
 
-(*
+
 [@ (Comment " Public key verification function. 
   \n This code is not side-channel resistant.
   \n Input: pub(lic)Key: uint8[64]. 
   \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
   \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/")]
-*)
-
-
-
 val verify_q: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool
@@ -267,6 +242,7 @@ val verify_q:
       )
     )
 
+(*)
 (*
 [@ (Comment " There and further we introduce notions of compressed point and not compressed point. 
   \n We denote || as byte concatenation. 

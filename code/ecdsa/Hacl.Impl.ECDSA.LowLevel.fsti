@@ -28,7 +28,7 @@ val reduction_prime_2prime_order: #c: curve -> x: felem c -> result: felem c ->
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result == as_nat c h0 x % getOrder #c)  
 
 inline_for_extraction noextract
-val felem_add: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
+val felem_add_ecdsa: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
   Stack unit
   (requires (fun h0 ->
     live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\

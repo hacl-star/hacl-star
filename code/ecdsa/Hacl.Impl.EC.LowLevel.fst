@@ -246,11 +246,14 @@ let _shortened_mul #c a b result =
 
   pop_frame()
 
+
 let short_mul_prime #c b result = 
+  uploadZeroImpl #c (sub result (size 0) (getCoordinateLenU64 c));
+  uploadZeroImpl #c (sub result (getCoordinateLenU64 c) (getCoordinateLenU64 c));
+  let h0 = ST.get() in 
+  assume (wide_as_nat c h0 result == 0);
   match c with
   | P256 -> 
-    uploadZeroImpl #c result;
-    uploadZeroImpl #c (sub result (getCoordinateLenU64 c) (getCoordinateLenU64 c));
     shortened_mul_prime256 b result
   | P384 -> 
     push_frame();
@@ -267,6 +270,10 @@ let short_mul_prime #c b result =
 
 
 let short_mul_order #c b result = 
+  uploadZeroImpl #c (sub result (size 0) (getCoordinateLenU64 c));
+  uploadZeroImpl #c (sub result (getCoordinateLenU64 c) (getCoordinateLenU64 c));
+    let h0 = ST.get() in 
+  assume (wide_as_nat c h0 result == 0);
   match c with
   | P256 ->     
 	 push_frame();

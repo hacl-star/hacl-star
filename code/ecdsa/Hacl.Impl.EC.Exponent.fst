@@ -60,12 +60,12 @@ let exponent #c a result tempBuffer =
   |P384 -> exponent_p384 a result tempBuffer
   |_ -> 
     recall_contents (prime_inverse_buffer #c) (Lib.Sequence.of_list (prime_inverse_list c));
-    montgomery_ladder_power #c #DH a (prime_inverse_buffer #c) result;
+    montgomery_ladder_power_dh #c a (prime_inverse_buffer #c) result;
     lemma_list_nat_from_bytes (prime_inverse_list c) (List.Tot.length (prime_inverse_list c))
 
 
 let square_root #c a result = 
   recall_contents (sqPower_buffer #c) (Lib.Sequence.of_list (sqPower_list #c));
-  montgomery_ladder_power #c #DH a (sqPower_buffer #c) result;
+  montgomery_ladder_power_dh #c a (sqPower_buffer #c) result;
   lemma_list_nat_from_bytes (sqPower_list #c) (List.Tot.length (sqPower_list #c))
 
