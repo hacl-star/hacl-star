@@ -29,7 +29,7 @@ let hstore56_le out off x =
   let b8 = sub out off 8ul in
   lemma_uint_to_bytes_le_preserves_value x;
   uint_to_bytes_le b8 x;
-  let h1 = get() in
+  let h1 = ST.get() in
   calc (==) {
     v x <: nat;
     (==) { Math.Lemmas.small_mod (v x) (pow2 56) }
@@ -121,7 +121,7 @@ let store_56 out b =
   hstore56_le out 14ul b2;
   hstore56_le out 21ul b3;
   uint_to_bytes_le (sub out 28ul 4ul) b4';
-  let h1 = get() in
+  let h1 = ST.get() in
   assert (Seq.equal (Seq.slice (as_seq h1 out) 0 7) (as_seq h1 (gsub out 0ul 7ul)));
   assert (Seq.equal (Seq.slice (as_seq h1 out) 7 14) (as_seq h1 (gsub out 7ul 7ul)));
   assert (Seq.equal (Seq.slice (as_seq h1 out) 14 21) (as_seq h1 (gsub out 14ul 7ul)));

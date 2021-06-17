@@ -50,6 +50,11 @@ else
 TARGETS := $(filter-out curve64-%, $(TARGETS))
 endif
 
+# vec-128-test.c doesn't compile on ARM for some reason
+ifeq ($(TARGET_ARCHITECTURE),ARM)
+TARGETS := $(filter-out vec-128-test.exe, $(TARGETS))
+endif
+
 CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
@@ -58,8 +63,6 @@ CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
 all: $(TARGETS)
 
 test: $(patsubst %.exe,%.test,$(TARGETS))
-
-arm: chacha20-arm-test.test poly1305-arm-test.test blake2-arm-test.test curve25519-arm-test.test
 
 # Dependency
 
@@ -79,7 +82,7 @@ curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 # this allows to work on and test the vectorized instructions without
 # rebuilding the whole HACL library.
 vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
-	cc -I../lib/c -O3 $(CFLAGS) $(CFLAGS_128) vec-128-test.c -o vec-128-test.exe
+	$(CC) -I../lib/c $(CFLAGS) $(CFLAGS_128) $(LDFLAGS) vec-128-test.c -o vec-128-test.exe
 
 %.exe: %.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto

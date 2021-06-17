@@ -138,7 +138,7 @@ let point_double_ out p tmp =
   let y3 = gety out in
   let z3 = getz out in
   let t3 = gett out in
-  let h0 = get()in
+  let h0 = ST.get()in
   point_double_step_1 p tmp;
   point_double_step_2 p tmp;
   fmul x3 tmp4 tmp6;

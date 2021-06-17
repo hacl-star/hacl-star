@@ -29,7 +29,7 @@ val swap_conditional_step:
 
 [@CInline]
 let swap_conditional_step a' b' a b swap =
-  let h0 = get() in
+  let h0 = ST.get() in
   let a0 = a.(0ul) in
   let a1 = a.(1ul) in
   let a2 = a.(2ul) in
@@ -65,7 +65,7 @@ let swap_conditional_step a' b' a b swap =
   b'.(3ul) <- b3 ^. x3;
   a'.(4ul) <- a4 ^. x4;
   b'.(4ul) <- b4 ^. x4;
-  let h1 = get() in
+  let h1 = ST.get() in
   let lemma_ones () : Lemma
     (requires v swap == pow2 64 - 1)
     (ensures as_seq h1 a' == as_seq h0 b /\ as_seq h1 b' == as_seq h0 a)

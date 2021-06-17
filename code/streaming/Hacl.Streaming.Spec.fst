@@ -58,19 +58,18 @@ val mod_trans_lem (a : nat) (b c : pos) :
   Lemma (requires (a % b = 0 /\ b % c = 0))
   (ensures (a % c = 0))
 
-#push-options "--z3rlimit 400"
-#restart-solver
 let mod_trans_lem a b c =
-  Math.Lemmas.lemma_div_mod a b;
-  Math.Lemmas.lemma_div_mod b c;
-  Math.Lemmas.lemma_div_mod a c;
+  let open FStar.Math.Lemmas in
+
+  div_exact_r a b;
+  div_exact_r b c;
+
   assert(a = b * (a / b));
   assert(b = c * (b / c));
   assert(a = (c * (b / c)) * (a / (c * (b / c))));
   assert(a = c * (((b / c)) * (a / (c * (b / c)))));
-  Math.Lemmas.cancel_mul_mod (((b / c)) * (a / (c * (b / c)))) c;
+  cancel_mul_mod (((b / c)) * (a / (c * (b / c)))) c;
   assert(a % c = 0)
-#pop-options
 
 /// Returns the number of blocks to process
 #push-options "--z3cliopt smt.arith.nl=false"

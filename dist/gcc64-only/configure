@@ -179,9 +179,14 @@ EOF
   fi
 }
 
-# We only detect the 64-bit version of the z-architecture (s390x).
-detect_ibmz () {
+# We only detect the 64-bit version of the SystemZ architecture (s390x).
+detect_systemz () {
   [[ $target_arch == "s390x" ]]
+}
+
+# We only detect the 64-bit version of the PowerPC architecture
+detect_powerpc () {
+  [[ $target_arch == "ppc64le" ]]
 }
 
 
@@ -202,6 +207,7 @@ show_help () {
   printf "                    * x86_64-apple-ios-simulator\n"
   printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
   printf "    --disable-ocaml Disable OCAML bindings\n"
+  printf "    --enable-power9 Enable Power ISA v3.0 instruction set for PowerPC architecture\n"
   printf "\n"
 }
 
@@ -213,6 +219,7 @@ echo -n > config.h
 # Default arguments
 disable_ocaml=0
 disable_bzero=0
+enable_power9=0
 cross_build=0
 
 # Parse command line arguments.
@@ -222,6 +229,7 @@ while [ $# -gt 0 ]; do
         -target) build_target="$2"; shift ;;
         --disable-ocaml) disable_ocaml=1 ;;
         --disable-bzero) disable_bzero=1 ;;
+        --enable-power9) enable_power9=1 ;;
         --help) show_help; exit 0 ;;
         *) show_help; exit 2 ;;
     esac
@@ -401,7 +409,7 @@ if detect_x86 || detect_x64; then
   fi
 fi
 
-if detect_ibmz; then
+if detect_systemz; then
   echo "... detected z platform"
   echo "TARGET_ARCHITECTURE = SystemZ" >> Makefile.config
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_SYSTEMZ" >> config.h
@@ -414,6 +422,21 @@ if detect_ibmz; then
   # a problem because we don't do cross-compilation for IBMz. Also note
   # that we don't have support for vec256 for IBMz.
   echo "CFLAGS += \$(CFLAGS_128)" >> Makefile.config
+fi
+
+# TODO: try to enable the intrinsics
+if detect_powerpc; then
+  echo "... detected PowerPC platform"
+  echo "... $build_target supports 128-bit Power VSX"
+  echo "TARGET_ARCHITECTURE = PowerPC64" >> Makefile.config
+  echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_POWERPC64" >> config.h
+  compile_vec128=true
+  if [[ "$enable_power9" == "1" ]]; then
+    echo "... enable Power ISA v3.0 instruction set"
+    echo "CFLAGS_128 = -mpowerpc64 -mabi=altivec -mpower9-vector" >> Makefile.config
+  else
+    echo "CFLAGS_128 = -mpowerpc64 -mabi=altivec" >> Makefile.config
+  fi
 fi
 
 if $compile_intrinsics; then
