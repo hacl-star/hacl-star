@@ -175,8 +175,8 @@ module type Curve25519_generic = sig
   (** [ecdh sk pk] takes a 32-byte secret key [sk] and another party's 32-byte public
       key and returns the 32-byte ECDH shared key. *)
 
-  val scalarmult : scalar:bytes -> input:bytes -> bytes
-  (** [scalarmult scalar input] performs X25519 scalar multiplication. Buffers
+  val scalarmult : scalar:bytes -> point:bytes -> bytes
+  (** [scalarmult scalar point] performs scalar multiplication over the curve. Buffers
       are 32-byte long and must be distinct. *)
 
   (** Versions of these functions which write their output in a buffer passed in as
@@ -191,8 +191,8 @@ module type Curve25519_generic = sig
         key and writes the 32-byte ECDH shared key in [shared]. Buffer [shared] must be distinct from
         [pk] and [sk]. *)
 
-    val scalarmult : scalar:bytes -> input:bytes -> result:bytes -> unit
-    (** [scalarmult scalar input result] performs X25519 scalar multiplication. All buffers
+    val scalarmult : scalar:bytes -> point:bytes -> result:bytes -> unit
+    (** [scalarmult scalar point] performs scalar multiplication over the curve. Buffers
         are 32-byte long and must be distinct. *)
   end
 end

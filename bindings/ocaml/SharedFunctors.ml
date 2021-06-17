@@ -70,15 +70,15 @@ module Make_Curve25519_generic (C: Buffer)
       assert (C.size pk = 32);
       assert (C.size sk = 32);
       Impl.secret_to_public (C.ctypes_buf pk) (C.ctypes_buf sk)
-    let scalarmult ~scalar ~input ~result =
+    let scalarmult ~scalar ~point ~result =
       check_reqs Impl.reqs;
       (* Hacl.Impl.Curve25519.Generic.scalarmult_st *)
       assert (C.disjoint result scalar);
-      assert (C.disjoint result input);
+      assert (C.disjoint result point);
       assert (C.size result = 32);
       assert (C.size scalar = 32);
-      assert (C.size input = 32);
-      Impl.scalarmult (C.ctypes_buf result) (C.ctypes_buf scalar) (C.ctypes_buf input)
+      assert (C.size point = 32);
+      Impl.scalarmult (C.ctypes_buf result) (C.ctypes_buf scalar) (C.ctypes_buf point)
     let ecdh ~sk ~pk ~shared =
       check_reqs Impl.reqs;
       (* Hacl.Impl.Curve25519.Generic.ecdh_st *)
@@ -93,9 +93,9 @@ module Make_Curve25519_generic (C: Buffer)
     let pk = C.make 32 in
     Noalloc.secret_to_public ~sk ~pk;
     pk
-  let scalarmult ~scalar ~input =
+  let scalarmult ~scalar ~point =
     let result = C.make 32 in
-    Noalloc.scalarmult ~scalar ~input ~result;
+    Noalloc.scalarmult ~scalar ~point ~result;
     result
   let ecdh ~sk ~pk =
     let shared = C.make 32 in
