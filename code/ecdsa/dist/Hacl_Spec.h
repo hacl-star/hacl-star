@@ -30,13 +30,13 @@
 #include "lib_intrinsics.h"
 
 
+#include "Hacl_Kremlib.h"
+#include "Hacl_Lib.h"
 
+#define Prims_Nil 0
+#define Prims_Cons 1
 
-#define Spec_ECC_Curves_P256 0
-#define Spec_ECC_Curves_P384 1
-#define Spec_ECC_Curves_Default 2
-
-typedef uint8_t Spec_ECC_Curves_curve;
+typedef uint8_t Prims_list__any_tags;
 
 
 #define __Hacl_Spec_H_DEFINED
