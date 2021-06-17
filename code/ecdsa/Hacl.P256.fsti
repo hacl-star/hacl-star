@@ -343,12 +343,10 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
   )
 
 
-(*
+*)
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")]
-*)
- *)
 
 val ecp256dh_i:
     result:lbuffer uint8 (size 64)
@@ -364,7 +362,6 @@ val ecp256dh_i:
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
-(* 
 val ecp384dh_i:
     result:lbuffer uint8 (size 96)
   -> scalar:lbuffer uint8 (size 48)
@@ -378,8 +375,6 @@ val ecp384dh_i:
     r == flag /\
     as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
     as_seq h1 (gsub result (size 48) (size 48)) == pointY)
- *)
-
 
 
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
@@ -404,15 +399,9 @@ val ecp256dh_r:
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
-
-
-
-(*
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")]
-
-
 
 val ecp384dh_r:
     result:lbuffer uint8 (size 96)
@@ -431,17 +420,3 @@ val ecp384dh_r:
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
       as_seq h1 (gsub result (size 48) (size 48)) == pointY)
-
-(* 
-
- *)
-
-
-val uploadp256: unit -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> modifies0 h0 h1)
-
-val uploadpsmth: unit -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> modifies0 h0 h1)
- *)
