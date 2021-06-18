@@ -40,6 +40,15 @@ val fromDomainPoint: #c: curve -> #m: mode -> a: point_nat ->
 
 
 noextract
+val fromDomainPointAffine: #c: curve
+  -> a: point_affine_nat_prime #c {let x, y = a in x < getPrime c /\ y < getPrime c} ->
+  Tot (r: point_affine_nat_prime #c {
+    let x, y = a in
+    let x3, y3 = r in 
+    x3 == fromDomain_ #c #DH x /\ y3 == fromDomain_ #c #DH y})
+
+
+noextract
 val toDomain_: #c: curve -> #m: mode -> a: int -> Tot nat
 
 val lemmaFromDomain: #c: curve -> #m: mode -> a: int -> Lemma (fromDomain_ #c #m a == a * modp_inv2_prime (pow2 (getPower c)) (getModePrime m c) % getModePrime m c)

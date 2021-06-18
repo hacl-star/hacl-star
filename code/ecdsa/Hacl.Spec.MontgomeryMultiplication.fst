@@ -22,6 +22,12 @@ let fromDomainPoint #c #m a =
   fromDomain_ #c #m x, fromDomain_ #c #m y, fromDomain_ #c #m z
 
 
+let fromDomainPointAffine #c a = 
+  let x, y = a in 
+  fromDomain_ #c #DH x, fromDomain_ #c #DH y
+  
+
+
 let toDomain_ #c #m a = a * pow2 (getPower c) % getModePrime m c
 
 let lemmaFromDomain a = ()

@@ -621,7 +621,7 @@ static inline void felem_sub_p384(uint64_t *a, uint64_t *b, uint64_t *out)
   uint64_t r0 = r;
 }
 
-static void mul_atomic(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
+static inline void mul_atomic(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
 {
   uint128_t res = (uint128_t)x * y;
   uint64_t l0 = (uint64_t)res;
@@ -677,7 +677,7 @@ static inline void reduction_prime_2prime_order_p256(uint64_t *x, uint64_t *resu
   cmovznz4_p256(r0, tempBuffer, x, result);
 }
 
-static void felem_add_ecdsa_P256(uint64_t *arg1, uint64_t *arg2, uint64_t *out)
+static inline void felem_add_ecdsa_P256(uint64_t *arg1, uint64_t *arg2, uint64_t *out)
 {
   uint32_t len0 = (uint32_t)4U;
   uint64_t c0 = (uint64_t)0U;
@@ -4515,7 +4515,7 @@ static inline void norm_p384(uint64_t *p, uint64_t *resultPoint, uint64_t *tempB
   copy_conditional_p384(resultZ, zeroBuffer, bit);
 }
 
-static void
+static inline void
 scalarMultiplicationWithoutNorm_p256(
   uint64_t *p,
   uint64_t *result,
@@ -5015,6 +5015,11 @@ prime256order_buffer[32U] =
     (uint8_t)255U
   };
 
+static inline void montgomery_ladder_exponent_dsa_p256(uint64_t *a, uint64_t *r)
+{
+  montgomery_ladder_power_p256_dsa(a, prime256order_buffer, r);
+}
+
 /*
  Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
@@ -5115,7 +5120,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
   montgomery_multiplication_buffer_dsa_p256(one, hashAsFelem, zBuffer);
   felem_add_ecdsa_P256(rda, zBuffer, zBuffer);
   memcpy(kInv, kAsFelem, len22 * sizeof (uint64_t));
-  montgomery_ladder_power_p256_dsa(kInv, prime256order_buffer, kInv);
+  montgomery_ladder_exponent_dsa_p256(kInv, kInv);
   montgomery_multiplication_buffer_dsa_p256(zBuffer, kInv, s);
   uint64_t tmp1 = (uint64_t)18446744073709551615U;
   uint32_t len2 = (uint32_t)4U;
@@ -5262,7 +5267,7 @@ Hacl_P256_ecdsa_sign_p256_sha384(
   montgomery_multiplication_buffer_dsa_p256(one, hashAsFelem, zBuffer);
   felem_add_ecdsa_P256(rda, zBuffer, zBuffer);
   memcpy(kInv, kAsFelem, len22 * sizeof (uint64_t));
-  montgomery_ladder_power_p256_dsa(kInv, prime256order_buffer, kInv);
+  montgomery_ladder_exponent_dsa_p256(kInv, kInv);
   montgomery_multiplication_buffer_dsa_p256(zBuffer, kInv, s);
   uint64_t tmp1 = (uint64_t)18446744073709551615U;
   uint32_t len2 = (uint32_t)4U;
@@ -5409,7 +5414,7 @@ Hacl_P256_ecdsa_sign_p256_sha512(
   montgomery_multiplication_buffer_dsa_p256(one, hashAsFelem, zBuffer);
   felem_add_ecdsa_P256(rda, zBuffer, zBuffer);
   memcpy(kInv, kAsFelem, len22 * sizeof (uint64_t));
-  montgomery_ladder_power_p256_dsa(kInv, prime256order_buffer, kInv);
+  montgomery_ladder_exponent_dsa_p256(kInv, kInv);
   montgomery_multiplication_buffer_dsa_p256(zBuffer, kInv, s);
   uint64_t tmp1 = (uint64_t)18446744073709551615U;
   uint32_t len2 = (uint32_t)4U;
@@ -5558,7 +5563,7 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
   montgomery_multiplication_buffer_dsa_p256(one, hashAsFelem, zBuffer);
   felem_add_ecdsa_P256(rda, zBuffer, zBuffer);
   memcpy(kInv, kAsFelem, len22 * sizeof (uint64_t));
-  montgomery_ladder_power_p256_dsa(kInv, prime256order_buffer, kInv);
+  montgomery_ladder_exponent_dsa_p256(kInv, kInv);
   montgomery_multiplication_buffer_dsa_p256(zBuffer, kInv, s);
   uint64_t tmp1 = (uint64_t)18446744073709551615U;
   uint32_t len2 = (uint32_t)4U;
@@ -5823,7 +5828,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
         one[i] = (uint64_t)0U;
       }
       montgomery_multiplication_buffer_dsa_p256(one, sAsFelem, inverseS);
-      montgomery_ladder_power_p256_dsa(inverseS, prime256order_buffer, inverseS);
+      montgomery_ladder_exponent_dsa_p256(inverseS, inverseS);
       uint32_t len41 = (uint32_t)4U;
       KRML_CHECK_SIZE(sizeof (uint64_t), len41);
       uint64_t buffFromDB[len41];
@@ -7574,7 +7579,7 @@ Hacl_P256_ecdsa_verif_p256_sha384(
         one[i] = (uint64_t)0U;
       }
       montgomery_multiplication_buffer_dsa_p256(one, sAsFelem, inverseS);
-      montgomery_ladder_power_p256_dsa(inverseS, prime256order_buffer, inverseS);
+      montgomery_ladder_exponent_dsa_p256(inverseS, inverseS);
       uint32_t len41 = (uint32_t)4U;
       KRML_CHECK_SIZE(sizeof (uint64_t), len41);
       uint64_t buffFromDB[len41];
@@ -9325,7 +9330,7 @@ Hacl_P256_ecdsa_verif_p256_sha512(
         one[i] = (uint64_t)0U;
       }
       montgomery_multiplication_buffer_dsa_p256(one, sAsFelem, inverseS);
-      montgomery_ladder_power_p256_dsa(inverseS, prime256order_buffer, inverseS);
+      montgomery_ladder_exponent_dsa_p256(inverseS, inverseS);
       uint32_t len41 = (uint32_t)4U;
       KRML_CHECK_SIZE(sizeof (uint64_t), len41);
       uint64_t buffFromDB[len41];
@@ -11078,7 +11083,7 @@ Hacl_P256_ecdsa_verif_without_hash(
         one[i] = (uint64_t)0U;
       }
       montgomery_multiplication_buffer_dsa_p256(one, sAsFelem, inverseS);
-      montgomery_ladder_power_p256_dsa(inverseS, prime256order_buffer, inverseS);
+      montgomery_ladder_exponent_dsa_p256(inverseS, inverseS);
       uint32_t len41 = (uint32_t)4U;
       KRML_CHECK_SIZE(sizeof (uint64_t), len41);
       uint64_t buffFromDB[len41];

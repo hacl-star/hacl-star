@@ -33,16 +33,23 @@ let copy_conditional_u64 x out mask =
   lemma_xor_copy_cond out_0 x mask;
   upd out (size 0) r_0
   
+(*
+ #buf_type: buftype
+  -> p: point c -> q: point c 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
+  -> scalar: lbuffer_t buf_type uint8 (getScalarLenBytes c)
+*)
 
 
 inline_for_extraction noextract
-val copy_conditional_: #c: curve 
+val copy_conditional_: #c: curve -> #buf_type: buftype
   -> out: felem c
-  -> x: felem c
+  -> x: lbuffer_t buf_type uint64 (getCoordinateLenU64 c)
   -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x /\ disjoint x out)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
-    if uint_v mask = 0 then as_nat c h1 out == as_nat c h0 out else as_nat c h1 out == as_nat c h0 x)) 
+    if uint_v mask = 0 then as_nat c h1 out == lseq_as_nat (as_seq h0 out) else as_nat c h1 out == lseq_as_nat (as_seq h0 x))) 
+
 
 let copy_conditional_ #c out x mask = 
   let h0 = ST.get() in
@@ -80,27 +87,55 @@ let copy_conditional_ #c out x mask =
     Lib.Sequence.eq_intro (as_seq h0 x) (as_seq h1 out);
     lemma_lseq_as_seq_as_forall_lr (as_seq h0 x) (as_seq h1 out) (v (getCoordinateLenU64 c)) end
 
+
 [@CInline]
-let copy_conditional_p256 = copy_conditional_ #P256
+let copy_conditional_p256_l = copy_conditional_ #P256 #MUT
 [@CInline]
-let copy_conditional_p384 = copy_conditional_ #P384
+let copy_conditional_p384_l = copy_conditional_ #P384 #MUT
 [@CInline]
-let copy_conditional_generic = copy_conditional_ #Default
+let copy_conditional_generic_l = copy_conditional_ #Default #MUT
+
+[@CInline]
+let copy_conditional_p256_i = copy_conditional_ #P256 #IMMUT
+[@CInline]
+let copy_conditional_p384_i = copy_conditional_ #P384 #IMMUT
+[@CInline]
+let copy_conditional_generic_i = copy_conditional_ #Default #IMMUT
+
+[@CInline]
+let copy_conditional_p256_c = copy_conditional_ #P256 #CONST
+[@CInline]
+let copy_conditional_p384_c = copy_conditional_ #P384 #CONST
+[@CInline]
+let copy_conditional_generic_c = copy_conditional_ #Default #CONST
+
 
 inline_for_extraction noextract
-val copy_conditional: #c: curve 
+val copy_conditional: #c: curve -> #buf_type: buftype
   -> out: felem c
-  -> x: felem c
+  -> x: lbuffer_t buf_type uint64 (getCoordinateLenU64 c)
   -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
   (requires fun h -> live h out /\ live h x /\ disjoint x out)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
-    if uint_v mask = 0 then as_nat c h1 out == as_nat c h0 out else as_nat c h1 out == as_nat c h0 x)) 
+    if uint_v mask = 0 then as_nat c h1 out == lseq_as_nat (as_seq h0 out) else as_nat c h1 out == lseq_as_nat (as_seq h0 x))) 
 
-let copy_conditional #c out x mask = 
+let copy_conditional #c #b out x mask = 
   match c with 
-  |P256 -> copy_conditional_p256 out x mask
-  |P384 -> copy_conditional_p384 out x mask
-  |Default -> copy_conditional_generic out x mask
+    |P256 -> begin
+      match b with 
+	|MUT -> copy_conditional_p256_l out x mask
+	|IMMUT -> copy_conditional_p256_i out x mask
+	|CONST -> copy_conditional_p256_c out x mask end
+    |P384 -> begin
+      match b with 
+	|MUT -> copy_conditional_p384_l out x mask
+	|IMMUT -> copy_conditional_p384_i out x mask
+	|CONST -> copy_conditional_p384_c out x mask end
+    |Default -> begin
+      match b with 
+	|MUT -> copy_conditional_generic_l out x mask
+	|IMMUT -> copy_conditional_generic_i out x mask
+	|CONST -> copy_conditional_generic_c out x mask end
 
 
 inline_for_extraction noextract

@@ -475,6 +475,14 @@ noextract
 let point_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (point_nat_prime #c) = 
   point_x_as_nat c h e, point_y_as_nat c h e, point_z_as_nat c h e
 
+noextract
+let point_affine_as_nat (c: curve) (h: mem) (e: pointAffine c {let x, y = getXAff e, getYAff e in 
+  felem_eval c h x /\ felem_eval c h y}) : GTot (point_affine_nat_prime #c) = 
+  let x : a: nat {a < getPrime c} = as_nat c h (getXAff e) in 
+  let y : a: nat {a < getPrime c} = as_nat c h (getYAff e) in 
+  x, y
+  
+
 let point_prime_to_coordinates (c: curve) (p:point_seq c) : GTot point_nat =
   let len = uint_v (getCoordinateLenU64 c) in 
   lseq_as_nat (Lib.Sequence.sub p 0 len),
