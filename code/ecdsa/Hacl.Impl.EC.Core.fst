@@ -492,6 +492,7 @@ val scalarMultiplicationWithoutNorm_p256: p: point P256 -> result: point P256
     let rN, _ = montgomery_ladder_spec_left #P256 (as_seq h0 scalar) (pointAtInfinity, p) in 
     rN == p1)) 
 
+[@CInline]
 let scalarMultiplicationWithoutNorm_p256 = scalarMultiplicationWithoutNorm_ #P256
 
 
@@ -508,6 +509,7 @@ val scalarMultiplicationWithoutNorm_p384: p: point P384 -> result: point P384
     let rN, _ = montgomery_ladder_spec_left #P384 (as_seq h0 scalar) (pointAtInfinity, p) in 
     rN == p1)) 
 
+[@CInline]
 let scalarMultiplicationWithoutNorm_p384 = scalarMultiplicationWithoutNorm_ #P384
 
 val scalarMultiplicationWithoutNorm_generic: p: point Default -> result: point Default
@@ -523,6 +525,7 @@ val scalarMultiplicationWithoutNorm_generic: p: point Default -> result: point D
     let rN, _ = montgomery_ladder_spec_left #Default (as_seq h0 scalar) (pointAtInfinity, p) in 
     rN == p1)) 
 
+[@CInline]
 let scalarMultiplicationWithoutNorm_generic = scalarMultiplicationWithoutNorm_ #Default
 
 

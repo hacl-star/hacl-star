@@ -680,7 +680,7 @@ let scalar_bit #c #buf_type s n =
   assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1));
   to_u64 ((s.(n /. 8ul) >>. (n %. 8ul)) &. u8 1)
 
-
+[@CInline]
 let mul_atomic x y result temp = 
   let res = mul64_wide x y in 
   let l0, h0 = to_u64 res, to_u64 (res >>. 64ul) in 

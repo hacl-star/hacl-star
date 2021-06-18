@@ -27,9 +27,34 @@ open Hacl.Impl.EC.MM.Exponent
 
 #set-options " --z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
-let montgomery_ladder_exponent #c a r = 
+inline_for_extraction noextract
+val montgomery_ladder_exponent_: #c: curve -> a: felem c -> r: felem c -> Stack unit 
+  (requires fun h -> live h a /\ live h r /\ as_nat c h a < getOrder #c)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc r) h0 h1 /\ (
+    let b_ = fromDomain_ #c #DSA (as_nat c h0 a) in 
+    let r0D = exponent_spec #c b_ in 
+    fromDomain_ #c #DSA (as_nat c h1 r) == r0D /\
+    as_nat c h1 r < getOrder #c))
+
+let montgomery_ladder_exponent_ #c a r = 
   recall_contents (order_inverse_buffer #c) (prime_order_inverse_seq #c);
   montgomery_ladder_power_dsa #c a (order_inverse_buffer #c) r
+
+[@CInline]
+let montgomery_ladder_exponent_dsa_p256 = montgomery_ladder_exponent_ #P256
+[@CInline]
+let montgomery_ladder_exponent_dsa_p384 = montgomery_ladder_exponent_ #P384
+[@CInline]
+let montgomery_ladder_exponent_dsa_generic = montgomery_ladder_exponent_ #Default
+
+
+let montgomery_ladder_exponent #c a r = 
+  match c with 
+  |P256 -> montgomery_ladder_exponent_dsa_p256 a r
+  |P384 -> montgomery_ladder_exponent_dsa_p384 a r 
+  |Default -> montgomery_ladder_exponent_dsa_generic a r
+
+
 
 let fromDomainImpl #c a result = 
   let h0 = ST.get() in 

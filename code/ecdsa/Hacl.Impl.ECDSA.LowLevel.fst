@@ -147,9 +147,11 @@ let felem_add_ecdsa_ #c arg1 arg2 out =
   additionInDomain #c #DSA (as_nat c h0 arg1) (as_nat c h0 arg2);
   inDomain_mod_is_not_mod #c #DSA (fromDomain_ #c #DSA (as_nat c h0 arg1) + fromDomain_ #c #DSA (as_nat c h0 arg2))
 
-
+[@CInline]
 let felem_add_ecdsa_P256 = felem_add_ecdsa_ #P256
+[@CInline]
 let felem_add_ecdsa_P384 = felem_add_ecdsa_ #P384
+[@CInline]
 let felem_add_ecdsa_generic = felem_add_ecdsa_ #Default
 
 let felem_add_ecdsa #c a b o = 

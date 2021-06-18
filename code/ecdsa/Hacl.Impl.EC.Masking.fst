@@ -18,6 +18,24 @@ open Hacl.EC.Lemmas
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 inline_for_extraction noextract
+val copy_conditional_u64: x: uint64 -> out: lbuffer uint64 (size 1) 
+  -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1}  -> 
+  Stack unit 
+  (requires fun h -> live h out)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
+    let out1 = Lib.Sequence.index (as_seq h1 out) 0 in 
+    let out0 = Lib.Sequence.index (as_seq h0 out) 0 in 
+    if v mask = 0 then v out0 == v out1 else v out1 == v x))
+
+let copy_conditional_u64 x out mask = 
+  let out_0 = index out (size 0) in 
+  let r_0 = logxor out_0 (logand mask (logxor out_0 x)) in 
+  lemma_xor_copy_cond out_0 x mask;
+  upd out (size 0) r_0
+  
+
+
+inline_for_extraction noextract
 val copy_conditional_: #c: curve 
   -> out: felem c
   -> x: felem c
@@ -300,3 +318,16 @@ let cmp_felem_felem_bool #c a b =
   |P256 -> cmp_felem_felem_bool_p256 a b 
   |P384 -> cmp_felem_felem_bool_p384 a b 
   |Default -> cmp_felem_felem_bool_generic a b
+
+
+inline_for_extraction noextract
+val cmovznz01: #t:inttype{unsigned t} -> #l:secrecy_level -> a: uint_t t l 
+  -> b: uint_t t l -> mask: uint_t t l {uint_v mask = 0 \/ uint_v mask = 1} -> 
+  Tot (r: uint_t t l {if uint_v mask = 0 then uint_v r = v a else uint_v r = v b} )
+
+let cmovznz01 a b mask = 
+  admit();
+  let mask = (u64 0) -. mask in 
+  admit();
+  lemma_xor_copy_cond a b mask;
+  logxor a (logand mask (logxor a b))

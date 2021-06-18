@@ -21,25 +21,12 @@ open Hacl.EC.Lemmas
 
 open FStar.Mul
 open Hacl.Spec.MontgomeryMultiplication
+open Hacl.Impl.EC.Masking.ScalarAccess
 
 
 #set-options " --z3rlimit 200"
 
 inline_for_extraction noextract
-val scalar_bit: #c: curve 
-  -> #buf_type: buftype 
-  -> s:lbuffer_t buf_type uint8 (getScalarLenBytes c) 
-  -> n:size_t{v n < v (getScalarLen c)}
-  -> Stack uint64
-    (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ r == ith_bit #c (as_seq h0 s) (v n) /\ v r <= 1)
-
-let scalar_bit #c #buf_type s n =
-  let h0 = ST.get () in
-  assert_norm (1 = pow2 1 - 1);
-  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1)); 
-  to_u64 ((s.(getScalarLenBytes c -. 1ul -. n /. 8ul) >>. (n %. 8ul)) &. u8 1)
-
 
 val swap: #c: curve ->  p: point_seq c -> q: point_seq c -> 
   Tot (r: tuple2 (point_seq c) (point_seq c) {let pNew, qNew = r in pNew == q /\ qNew == p})
@@ -245,7 +232,7 @@ val montgomery_ladder_step: #c: curve -> #buf_type: buftype
 
 let montgomery_ladder_step #c #buf_type r0 r1 tempBuffer scalar i = 
   let bit0 = getScalarLen c -! 1ul -! i in 
-  let bit = scalar_bit scalar bit0 in 
+  let bit = getScalarBit_leftEndian scalar bit0 in 
   _montgomery_ladder_step #c #buf_type r0 r1 tempBuffer bit
   
 
