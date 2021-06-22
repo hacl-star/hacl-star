@@ -269,8 +269,12 @@ module type HashFunction_generic = sig
   val hash : bytes -> bytes
   (** [hash msg] returns the hash of [msg]. *)
 
-  val hash_noalloc : msg:bytes -> digest:bytes -> unit
-  (** [hash_noalloc msg digest] hashes [msg] and outputs the result in [digest]. *)
+  (** Version of this function which writes its output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+    val hash : msg:bytes -> digest:bytes -> unit
+    (** [hash msg digest] hashes [msg] and outputs the result in [digest]. *)
+  end
 end
 
 module type MAC_generic = sig
@@ -288,9 +292,13 @@ module type MAC_generic = sig
   val mac : key:bytes -> msg:bytes -> bytes
   (** [mac key msg] computes the MAC of [msg] using key [key]. *)
 
-  val mac_noalloc : key:bytes -> msg:bytes -> tag:bytes -> unit
-  (** [mac_noalloc key msg tag] computes the MAC of [msg] using key [key] and writes the result in [tag].
-      The `tag` buffer needs to satisfy the size requirements for the output buffer. *)
+  (** Version of this function which writes its output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+    val mac : key:bytes -> msg:bytes -> tag:bytes -> unit
+    (** [mac key msg tag] computes the MAC of [msg] using key [key] and writes the result in [tag].
+        The `tag` buffer needs to satisfy the size requirements for the output buffer. *)
+  end
 end
 
 module type HKDF_generic = sig
@@ -337,15 +345,18 @@ module type ECDSA_generic = sig
   (** [sign sk msg k] attempts to sign the message [msg] with secret key [sk] and
       signing secret [k] and returns the signature if successful. *)
 
-  val sign_noalloc : sk:bytes -> msg:bytes -> k:bytes -> signature:bytes -> bool
-  (** [sign_noalloc sk msg k signature] attempts to sign the message [msg] with secret key [sk] and
-      signing secret [k]. If successful, the signature is written in [signature] and the
-      function returns true. *)
-
   val verify : pk:bytes -> msg:bytes -> signature:bytes -> bool
   (** [verify pk msg signature] checks the [signature] of [msg] using public key [pk] and returns
   true if it is valid. *)
 
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+    val sign : sk:bytes -> msg:bytes -> k:bytes -> signature:bytes -> bool
+    (** [sign sk msg k signature] attempts to sign the message [msg] with secret key [sk] and
+        signing secret [k]. If successful, the signature is written in [signature] and the
+        function returns true. *)
+  end
 end
 
 module type Blake2_generic = sig
@@ -359,9 +370,13 @@ module type Blake2_generic = sig
   (** [hash ?key msg size] hashes [msg] and returns a digest of length [size].
       An optional [key] argument can be passed for keyed hashing. *)
 
-  val hash_noalloc : key:bytes -> msg:bytes -> digest:bytes -> unit
-  (** [hash_noalloc key msg digest] hashes [msg] and outputs the result in [digest].
-      A non-empty [key] can be passed for keyed hashing. *)
+  (** Version of this function which writes its output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+    val hash : key:bytes -> msg:bytes -> digest:bytes -> unit
+    (** [hash key msg digest] hashes [msg] and outputs the result in [digest].
+        A non-empty [key] can be passed for keyed hashing. *)
+  end
 end
 
 module type Chacha20_Poly1305 = Chacha20_Poly1305_generic with type bytes = CBytes.t

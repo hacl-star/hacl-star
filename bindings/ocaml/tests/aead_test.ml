@@ -129,33 +129,8 @@ module MakeTests (M: Chacha20_Poly1305) = struct
     test_nonagile chacha20poly1305_test name reqs
 end
 
-let test_random_noalloc () =
-  let test_result = test_result "Hacl.RandomBuffer.randombytes_noalloc" in
-  let buf = Test_utils.init_bytes 256 in
-  if Hacl.RandomBuffer.randombytes_noalloc ~out:buf then
-    test_result Success ""
-  else
-    test_result Failure ""
-
-let test_random () =
-  let test_result = test_result "Hacl.RandomBuffer.randombytes" in
-  if Option.is_some (Hacl.RandomBuffer.randombytes ~size:128) then
-    test_result Success ""
-  else
-    test_result Failure ""
 
 let _ =
-  Printf.printf "SHAEXT: %b\n" (has_feature SHAEXT);
-  Printf.printf "AES_NI: %b\n" (has_feature AES_NI);
-  Printf.printf "PCLMULQDQ: %b\n" (has_feature PCLMULQDQ);
-  Printf.printf "VEC256: %b\n" (has_feature VEC256);
-  Printf.printf "VEC128: %b\n" (has_feature VEC128);
-  Printf.printf "BMI2: %b\n" (has_feature BMI2);
-  Printf.printf "ADX: %b\n" (has_feature ADX);
-  Printf.printf "SSE: %b\n" (has_feature SSE);
-  Printf.printf "MOVBE: %b\n" (has_feature MOVBE);
-  Printf.printf "RDRAND: %b\n" (has_feature RDRAND);
-
   test_agile_noalloc chacha20poly1305_test;
   test_agile chacha20poly1305_test;
 
@@ -169,7 +144,4 @@ let _ =
   Tests.run_tests "Hacl.Chacha20_Poly1305_128" [VEC128];
 
   let module Tests = MakeTests (Hacl.Chacha20_Poly1305_256) in
-  Tests.run_tests "Hacl.Chacha20_Poly1305_256" [VEC256];
-
-  test_random_noalloc ();
-  test_random ()
+  Tests.run_tests "Hacl.Chacha20_Poly1305_256" [VEC256]

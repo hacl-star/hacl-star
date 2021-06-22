@@ -136,7 +136,16 @@ module Ed25519 : EdDSA =
 module Hash = struct
   open HashDefs
   open EverCrypt_Hash
-
+  module Noalloc = struct
+    let hash ~alg ~msg ~digest =
+      check_max_input_len alg (C.size msg);
+      assert (C.size digest = digest_len alg);
+      assert (C.disjoint digest msg);
+      everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf digest) (C.ctypes_buf msg) (C.size_uint32 msg)
+    let finish ~st:(alg, _, t) ~digest =
+      assert (C.size digest = digest_len alg);
+      everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest)
+  end
   type t = alg * Z.t ref * hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ ptr
   let init ~alg =
     Lazy.force at_exit_full_major;
@@ -151,21 +160,13 @@ module Hash = struct
     incr_len := Z.add !incr_len (Z.of_int (C.size msg));
     assert (Z.lt !incr_len (max_input_len alg));
     everCrypt_Hash_Incremental_update t (C.ctypes_buf msg) (C.size_uint32 msg)
-  let finish_noalloc ~st:(alg, _, t) ~digest =
-    assert (C.size digest = digest_len alg);
-    everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest)
-  let finish ~st:(alg, _, t) =
+  let finish ~st:(alg, incr_len, t) =
     let digest = C.make (digest_len alg) in
-    everCrypt_Hash_Incremental_finish t (C.ctypes_buf digest);
+    Noalloc.finish ~st:(alg, incr_len, t) ~digest;
     digest
-  let hash_noalloc ~alg ~msg ~digest =
-    check_max_input_len alg (C.size msg);
-    assert (C.size digest = digest_len alg);
-    assert (C.disjoint digest msg);
-    everCrypt_Hash_hash (alg_definition alg) (C.ctypes_buf digest) (C.ctypes_buf msg) (C.size_uint32 msg)
   let hash ~alg ~msg =
     let digest = C.make (digest_len alg) in
-    hash_noalloc ~alg ~msg ~digest;
+    Noalloc.hash ~alg ~msg ~digest;
     digest
 end
 
@@ -185,16 +186,18 @@ module HMAC = struct
   open EverCrypt_HMAC
   let is_supported_alg ~alg =
     everCrypt_HMAC_is_supported_alg (HashDefs.alg_definition alg)
-  let mac_noalloc ~alg ~key ~msg ~tag=
-    (* Hacl.HMAC.compute_st *)
-    assert (C.size tag = HashDefs.digest_len alg);
-    assert (C.disjoint msg tag);
-    HashDefs.check_key_len alg (C.size key);
-    HashDefs.check_key_len alg (C.size msg);
-    everCrypt_HMAC_compute (HashDefs.alg_definition alg) (C.ctypes_buf tag) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf msg) (C.size_uint32 msg)
+  module Noalloc = struct
+    let mac ~alg ~key ~msg ~tag=
+      (* Hacl.HMAC.compute_st *)
+      assert (C.size tag = HashDefs.digest_len alg);
+      assert (C.disjoint msg tag);
+      HashDefs.check_key_len alg (C.size key);
+      HashDefs.check_key_len alg (C.size msg);
+      everCrypt_HMAC_compute (HashDefs.alg_definition alg) (C.ctypes_buf tag) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf msg) (C.size_uint32 msg)
+  end
   let mac ~alg ~key ~msg =
     let tag = C.make (HashDefs.digest_len alg) in
-    mac_noalloc ~alg ~key ~msg ~tag;
+    Noalloc.mac ~alg ~key ~msg ~tag;
     tag
 end
 
@@ -275,12 +278,16 @@ module HKDF_SHA2_512 : HKDF =
 
 module DRBG = struct
   open EverCrypt_DRBG
-
   type t = everCrypt_DRBG_state_s ptr
+  module Noalloc = struct
+    let generate ?(additional_input=Bytes.empty) st output =
+      (* EverCrypt.DRBG.generate_st *)
+      assert (C.disjoint output additional_input);
+      everCrypt_DRBG_generate (C.ctypes_buf output) st (C.size_uint32 output) (C.ctypes_buf additional_input) (C.size_uint32 additional_input)
+  end
   let is_supported_alg alg =
     (* as defined in Spec.HMAC_DRBG, excluding SHA-1 *)
     alg = HashDefs.SHA2_256 || alg = HashDefs.SHA2_384 || alg = HashDefs.SHA2_512
-
   let instantiate ?(personalization_string=Bytes.empty) alg =
     (* EverCrypt.DRBG.instantiate_st *)
     if is_supported_alg alg then
@@ -292,13 +299,9 @@ module DRBG = struct
         None
     else
       None
-  let generate_noalloc ?(additional_input=Bytes.empty) st output =
-    (* EverCrypt.DRBG.generate_st *)
-    assert (C.disjoint output additional_input);
-    everCrypt_DRBG_generate (C.ctypes_buf output) st (C.size_uint32 output) (C.ctypes_buf additional_input) (C.size_uint32 additional_input)
   let generate ?(additional_input=Bytes.empty) st size =
     let output = C.make size in
-    if generate_noalloc ~additional_input st output then
+    if Noalloc.generate ~additional_input st output then
       Some output
     else
       None

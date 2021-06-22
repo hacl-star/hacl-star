@@ -182,7 +182,7 @@ let test_agile (v: Bytes.t hash_test) =
   let alg = alg_definition v.alg in
   let digest = Test_utils.init_bytes (output_len v.alg) in
 
-  Hash.hash_noalloc ~alg ~msg:v.msg ~digest;
+  Hash.Noalloc.hash ~alg ~msg:v.msg ~digest;
   let digest2 = Hash.hash ~alg ~msg:v.msg in
   if Bytes.equal digest v.expected &&
      Bytes.equal digest2 v.expected then
@@ -192,7 +192,7 @@ let test_agile (v: Bytes.t hash_test) =
 
   let st = Hash.init ~alg:(alg_definition v.alg) in
   Hash.update ~st ~msg:v.msg;
-  Hash.finish_noalloc ~st ~digest;
+  Hash.Noalloc.finish ~st ~digest;
   let digest2 = Hash.finish ~st in
   if Bytes.equal digest v.expected &&
      Bytes.equal digest2 v.expected then
@@ -218,7 +218,7 @@ module MakeBlake2Tests (M: Blake2) = struct
     let test_result = test_result (t ^ " (noalloc) " ^ v.name) in
     if supports reqs then begin
       let output = Test_utils.init_bytes (Bytes.length v.expected) in
-      M.hash_noalloc ~key:v.key ~msg:v.msg ~digest:output;
+      M.Noalloc.hash ~key:v.key ~msg:v.msg ~digest:output;
       if Bytes.equal output v.expected then
         test_result Success ""
       else
@@ -314,24 +314,24 @@ let _ =
   test_agile test_blake2b;
   test_agile test_blake2s;
 
-  test_nonagile "Hacl" test_sha2_224 Hacl.SHA2_224.hash Hacl.SHA2_224.hash_noalloc;
-  test_nonagile "Hacl" test_sha2_256 Hacl.SHA2_256.hash Hacl.SHA2_256.hash_noalloc;
-  test_nonagile "Hacl" test_sha2_384 Hacl.SHA2_384.hash Hacl.SHA2_384.hash_noalloc;
-  test_nonagile "Hacl" test_sha2_512 Hacl.SHA2_512.hash Hacl.SHA2_512.hash_noalloc;
+  test_nonagile "Hacl" test_sha2_224 Hacl.SHA2_224.hash Hacl.SHA2_224.Noalloc.hash;
+  test_nonagile "Hacl" test_sha2_256 Hacl.SHA2_256.hash Hacl.SHA2_256.Noalloc.hash;
+  test_nonagile "Hacl" test_sha2_384 Hacl.SHA2_384.hash Hacl.SHA2_384.Noalloc.hash;
+  test_nonagile "Hacl" test_sha2_512 Hacl.SHA2_512.hash Hacl.SHA2_512.Noalloc.hash;
 
-  test_nonagile "Hacl" test_sha3_224 Hacl.SHA3_224.hash Hacl.SHA3_224.hash_noalloc;
-  test_nonagile "Hacl" test_sha3_256 Hacl.SHA3_256.hash Hacl.SHA3_256.hash_noalloc;
-  test_nonagile "Hacl" test_sha3_384 Hacl.SHA3_384.hash Hacl.SHA3_384.hash_noalloc;
-  test_nonagile "Hacl" test_sha3_512 Hacl.SHA3_512.hash Hacl.SHA3_512.hash_noalloc;
+  test_nonagile "Hacl" test_sha3_224 Hacl.SHA3_224.hash Hacl.SHA3_224.Noalloc.hash;
+  test_nonagile "Hacl" test_sha3_256 Hacl.SHA3_256.hash Hacl.SHA3_256.Noalloc.hash;
+  test_nonagile "Hacl" test_sha3_384 Hacl.SHA3_384.hash Hacl.SHA3_384.Noalloc.hash;
+  test_nonagile "Hacl" test_sha3_512 Hacl.SHA3_512.hash Hacl.SHA3_512.Noalloc.hash;
 
-  test_nonagile "EverCrypt" test_sha2_224 EverCrypt.SHA2_224.hash EverCrypt.SHA2_224.hash_noalloc;
-  test_nonagile "EverCrypt" test_sha2_256 EverCrypt.SHA2_256.hash EverCrypt.SHA2_256.hash_noalloc;
+  test_nonagile "EverCrypt" test_sha2_224 EverCrypt.SHA2_224.hash EverCrypt.SHA2_224.Noalloc.hash;
+  test_nonagile "EverCrypt" test_sha2_256 EverCrypt.SHA2_256.hash EverCrypt.SHA2_256.Noalloc.hash;
 
   test_agile test_sha1;
   test_agile test_md5;
 
-  test_nonagile "Hacl" test_sha1 Hacl.SHA1.hash Hacl.SHA1.hash_noalloc;
-  test_nonagile "Hacl" test_md5 Hacl.MD5.hash Hacl.MD5.hash_noalloc;
+  test_nonagile "Hacl" test_sha1 Hacl.SHA1.hash Hacl.SHA1.Noalloc.hash;
+  test_nonagile "Hacl" test_md5 Hacl.MD5.hash Hacl.MD5.Noalloc.hash;
 
   let module Tests = MakeBlake2Tests (Hacl.Blake2b_32) in
   Tests.run_tests "BLAKE2b_32" blake2b_keyed_tests [];

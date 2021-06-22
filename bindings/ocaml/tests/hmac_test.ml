@@ -48,7 +48,7 @@ module MakeTests (M: SharedDefs.MAC) = struct
   let test_noalloc (v: Bytes.t hmac_test) name =
       let test_result = test_result (name ^ " (noalloc) " ^ v.name) in
       let tag = Test_utils.init_bytes (Bytes.length v.expected) in
-      M.mac_noalloc ~key:v.key ~msg:v.msg ~tag;
+      M.Noalloc.mac ~key:v.key ~msg:v.msg ~tag;
       if Bytes.equal tag v.expected then
         test_result Success ""
       else
@@ -73,7 +73,7 @@ let test_agile (v: Bytes.t hmac_test) =
   let tag = Test_utils.init_bytes (Bytes.length v.expected) in
 
   if EverCrypt.HMAC.is_supported_alg ~alg:v.alg then begin
-    EverCrypt.HMAC.mac_noalloc ~alg:v.alg ~key:v.key ~msg:v.msg ~tag;
+    EverCrypt.HMAC.Noalloc.mac ~alg:v.alg ~key:v.key ~msg:v.msg ~tag;
     if Bytes.equal tag v.expected then
       test_result Success ""
     else

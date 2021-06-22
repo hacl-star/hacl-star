@@ -41,12 +41,12 @@ let secretbox_tests = [
 
 let test_box (v: Bytes.t box_test) =
   let test_result = Test_utils.test_result ("Hacl.NaCl.Easy box " ^ v.name) in
-  (match Hacl.NaCl.Easy.box ~pt:v.pt ~n:v.n ~pk:v.pk ~sk:v.sk with
+  (match Hacl.NaCl.box ~pt:v.pt ~n:v.n ~pk:v.pk ~sk:v.sk with
   | Some ct -> (
       if not (Bytes.equal ct v.expected_ct) then
         test_result Failure "Ciphertext mismatch"
       else
-        match Hacl.NaCl.Easy.box_open ~ct ~n:v.n ~pk:v.pk ~sk:v.sk with
+        match Hacl.NaCl.box_open ~ct ~n:v.n ~pk:v.pk ~sk:v.sk with
         | Some pt ->
           if not (Bytes.equal pt v.pt) then
             test_result Failure "Decrypted plaintext mismatch"
@@ -63,12 +63,12 @@ let test_box (v: Bytes.t box_test) =
   | Some ck -> (
     test_result Success "";
     let test_result = Test_utils.test_result ("Hacl.NaCl.Easy box_afternm " ^ v.name) in
-    match Hacl.NaCl.Easy.box_afternm ~pt:v.pt ~n:v.n ~ck with
+    match Hacl.NaCl.box_afternm ~pt:v.pt ~n:v.n ~ck with
     | Some ct -> (
       if not (Bytes.equal ct v.expected_ct) then
         test_result Failure "Ciphertext mismatch"
       else
-        match Hacl.NaCl.Easy.box_open_afternm ~ct ~n:v.n ~ck with
+        match Hacl.NaCl.box_open_afternm ~ct ~n:v.n ~ck with
         | Some pt ->
           if not (Bytes.equal pt v.pt) then
             test_result Failure "Decrypted plaintext mismatch"
@@ -88,11 +88,11 @@ let test_box_noalloc (v: Bytes.t box_test) =
   let test_result = Test_utils.test_result ("Hacl.NaCl.Easy.Noalloc box " ^ v.name) in
   let ct = Test_utils.init_bytes (Bytes.length v.pt + 16) in
   let pt = Test_utils.init_bytes (Bytes.length v.pt) in
-  if Hacl.NaCl.Easy.Noalloc.box ~pt:v.pt ~n:v.n ~pk:v.pk ~sk:v.sk ~ct then
+  if Hacl.NaCl.Noalloc.Easy.box ~pt:v.pt ~n:v.n ~pk:v.pk ~sk:v.sk ~ct then
     if not (Bytes.equal ct v.expected_ct) then
       test_result Failure "ciphertext mismatch"
     else
-    if Hacl.NaCl.Easy.Noalloc.box_open ~ct ~n:v.n ~pk:v.pk ~sk:v.sk ~pt then
+    if Hacl.NaCl.Noalloc.Easy.box_open ~ct ~n:v.n ~pk:v.pk ~sk:v.sk ~pt then
       if not (Bytes.equal pt v.pt) then
         test_result Failure "decrypted plaintext mismatch"
       else
@@ -102,16 +102,16 @@ let test_box_noalloc (v: Bytes.t box_test) =
   else
     test_result Failure "Encryption failed";
 
-  let test_result = Test_utils.test_result ("Hacl.NaCl.Detached box " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Noalloc.Detached box " ^ v.name) in
   let pt = Test_utils.init_bytes (Bytes.length v.pt) in
   let ct_detached = Test_utils.init_bytes (Bytes.length v.pt) in
   let tag = Test_utils.init_bytes 16 in
-  if Hacl.NaCl.Detached.box ~pt:v.pt ~n:v.n ~pk:v.pk ~sk:v.sk ~ct:ct_detached ~tag then
+  if Hacl.NaCl.Noalloc.Detached.box ~pt:v.pt ~n:v.n ~pk:v.pk ~sk:v.sk ~ct:ct_detached ~tag then
     let combined_ct = Bytes.of_string @@ (Bytes.to_string tag) ^ (Bytes.to_string ct_detached) in
     if not (Bytes.equal combined_ct v.expected_ct) then
       test_result Failure "ciphertext mismatch"
     else
-    if Hacl.NaCl.Detached.box_open ~ct:ct_detached ~tag ~n:v.n ~pk:v.pk ~sk:v.sk ~pt then
+    if Hacl.NaCl.Noalloc.Detached.box_open ~ct:ct_detached ~tag ~n:v.n ~pk:v.pk ~sk:v.sk ~pt then
       if not (Bytes.equal pt v.pt) then
         test_result Failure "decrypted plaintext mismatch"
       else
@@ -123,7 +123,7 @@ let test_box_noalloc (v: Bytes.t box_test) =
 
   let test_result = Test_utils.test_result ("Hacl.NaCl.box_beforenm_noalloc " ^ v.name) in
   let ck = Test_utils.init_bytes 32 in
-  if Hacl.NaCl.box_beforenm_noalloc ~pk:v.pk ~sk:v.sk ~ck then
+  if Hacl.NaCl.Noalloc.box_beforenm ~pk:v.pk ~sk:v.sk ~ck then
     test_result Success ""
   else
     test_result Failure "";
@@ -131,11 +131,11 @@ let test_box_noalloc (v: Bytes.t box_test) =
   let test_result = Test_utils.test_result ("Hacl.NaCl.Easy.Noalloc box_afternm " ^ v.name) in
   Bytes.fill ct 0 (Bytes.length ct) '\x00';
   Bytes.fill pt 0 (Bytes.length pt) '\x00';
-  if Hacl.NaCl.Easy.Noalloc.box_afternm ~pt:v.pt ~n:v.n ~ck ~ct then
+  if Hacl.NaCl.Noalloc.Easy.box_afternm ~pt:v.pt ~n:v.n ~ck ~ct then
     if not (Bytes.equal ct v.expected_ct) then
       test_result Failure "ciphertext mismatch"
     else
-    if Hacl.NaCl.Easy.Noalloc.box_open_afternm ~ct ~n:v.n ~ck ~pt then
+    if Hacl.NaCl.Noalloc.Easy.box_open_afternm ~ct ~n:v.n ~ck ~pt then
       if not (Bytes.equal pt v.pt) then
         test_result Failure "decrypted plaintext mismatch"
       else
@@ -145,16 +145,16 @@ let test_box_noalloc (v: Bytes.t box_test) =
   else
     test_result Failure "Encryption failed";
 
-  let test_result = Test_utils.test_result ("Hacl.NaCl.Detached box_afternm " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Noalloc.Detached box_afternm " ^ v.name) in
   Bytes.fill ct_detached 0 (Bytes.length ct_detached) '\x00';
   Bytes.fill tag 0 (Bytes.length tag) '\x00';
   Bytes.fill pt 0 (Bytes.length pt) '\x00';
-  if Hacl.NaCl.Detached.box_afternm ~pt:v.pt ~n:v.n ~ck ~ct:ct_detached ~tag then
+  if Hacl.NaCl.Noalloc.Detached.box_afternm ~pt:v.pt ~n:v.n ~ck ~ct:ct_detached ~tag then
     let combined_ct = Bytes.of_string @@ (Bytes.to_string tag) ^ (Bytes.to_string ct_detached) in
     if not (Bytes.equal combined_ct v.expected_ct) then
       test_result Failure "ciphertext mismatch"
     else
-    if Hacl.NaCl.Detached.box_open_afternm ~ct:ct_detached ~tag ~n:v.n ~ck ~pt then
+    if Hacl.NaCl.Noalloc.Detached.box_open_afternm ~ct:ct_detached ~tag ~n:v.n ~ck ~pt then
       if not (Bytes.equal pt v.pt) then
         test_result Failure "decrypted plaintext mismatch"
       else
@@ -167,12 +167,12 @@ let test_box_noalloc (v: Bytes.t box_test) =
 
 let test_secretbox (v: Bytes.t secretbox_test) =
   let test_result = Test_utils.test_result ("Hacl.NaCl.Easy secretbox " ^ v.name) in
-  match Hacl.NaCl.Easy.secretbox ~pt:v.pt ~n:v.n ~key:v.key with
+  match Hacl.NaCl.secretbox ~pt:v.pt ~n:v.n ~key:v.key with
   | Some ct -> (
       if not (Bytes.equal ct v.expected_ct) then
         test_result Failure "ciphertext mismatch"
       else
-        match Hacl.NaCl.Easy.secretbox_open ~ct ~n:v.n ~key:v.key with
+        match Hacl.NaCl.secretbox_open ~ct ~n:v.n ~key:v.key with
         | Some pt ->
           if not (Bytes.equal pt v.pt) then
             test_result Failure "decrypted plaintext mismatch"
@@ -189,11 +189,11 @@ let test_secretbox_noalloc (v: Bytes.t secretbox_test) =
   let test_result = Test_utils.test_result ("Hacl.NaCl.Easy.Noalloc secretbox " ^ v.name) in
   let ct = Test_utils.init_bytes (Bytes.length v.pt + 16) in
   let pt = Test_utils.init_bytes (Bytes.length v.pt) in
-  if Hacl.NaCl.Easy.Noalloc.secretbox ~pt:v.pt ~n:v.n ~key:v.key ~ct then
+  if Hacl.NaCl.Noalloc.Easy.secretbox ~pt:v.pt ~n:v.n ~key:v.key ~ct then
     if not (Bytes.equal ct v.expected_ct) then
       test_result Failure "ciphertext mismatch"
     else
-    if Hacl.NaCl.Easy.Noalloc.secretbox_open ~ct ~n:v.n ~key:v.key ~pt then
+    if Hacl.NaCl.Noalloc.Easy.secretbox_open ~ct ~n:v.n ~key:v.key ~pt then
       if not (Bytes.equal pt v.pt) then
         test_result Failure "decrypted plaintext mismatch"
       else
@@ -203,15 +203,15 @@ let test_secretbox_noalloc (v: Bytes.t secretbox_test) =
   else
     test_result Failure "Encryption failed";
 
-  let test_result = Test_utils.test_result ("Hacl.NaCl.Detached secretbox " ^ v.name) in
+  let test_result = Test_utils.test_result ("Hacl.NaCl.Noalloc.Detached secretbox " ^ v.name) in
   let ct_detached = Test_utils.init_bytes (Bytes.length v.pt) in
   let tag = Test_utils.init_bytes 16 in
-  if Hacl.NaCl.Detached.secretbox ~pt:v.pt ~n:v.n ~key:v.key ~ct:ct_detached ~tag then
+  if Hacl.NaCl.Noalloc.Detached.secretbox ~pt:v.pt ~n:v.n ~key:v.key ~ct:ct_detached ~tag then
     let combined_ct = Bytes.of_string @@ (Bytes.to_string tag) ^ (Bytes.to_string ct_detached) in
     if not (Bytes.equal combined_ct v.expected_ct) then
       test_result Failure "ciphertext mismatch"
     else
-    if Hacl.NaCl.Detached.secretbox_open ~ct:ct_detached ~tag ~n:v.n ~key:v.key ~pt then
+    if Hacl.NaCl.Noalloc.Detached.secretbox_open ~ct:ct_detached ~tag ~n:v.n ~key:v.key ~pt then
       if not (Bytes.equal pt v.pt) then
         test_result Failure "decrypted plaintext mismatch"
       else

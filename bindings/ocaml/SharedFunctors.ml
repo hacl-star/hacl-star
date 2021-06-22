@@ -193,14 +193,16 @@ module Make_HashFunction_generic (C: Buffer)
     match alg with
     | Agile alg -> HashDefs.check_max_input_len alg len
     | _ -> ()
-  let hash_noalloc ~msg ~digest =
-    check_max_input_len Impl.hash_alg (C.size msg);
-    assert (C.size digest = digest_len Impl.hash_alg);
-    assert (C.disjoint msg digest);
-    Impl.hash (C.ctypes_buf msg) (C.size_uint32 msg) (C.ctypes_buf digest)
+  module Noalloc = struct
+    let hash ~msg ~digest =
+      check_max_input_len Impl.hash_alg (C.size msg);
+      assert (C.size digest = digest_len Impl.hash_alg);
+      assert (C.disjoint msg digest);
+      Impl.hash (C.ctypes_buf msg) (C.size_uint32 msg) (C.ctypes_buf digest)
+  end
   let hash msg =
     let digest = C.make (digest_len Impl.hash_alg) in
-    hash_noalloc ~msg ~digest;
+    Noalloc.hash ~msg ~digest;
     digest
 end
 
@@ -211,17 +213,19 @@ module Make_Poly1305_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let mac_noalloc ~key ~msg ~tag =
-    check_reqs Impl.reqs;
-    (* Hacl.Impl.Poly1305.poly1305_mac_st *)
-    assert (C.size tag = 16);
-    assert (C.size key = 32);
-    assert (C.disjoint tag msg);
-    assert (C.disjoint key msg);
-    Impl.mac (C.ctypes_buf tag) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf key)
+  module Noalloc = struct
+    let mac ~key ~msg ~tag =
+      check_reqs Impl.reqs;
+      (* Hacl.Impl.Poly1305.poly1305_mac_st *)
+      assert (C.size tag = 16);
+      assert (C.size key = 32);
+      assert (C.disjoint tag msg);
+      assert (C.disjoint key msg);
+      Impl.mac (C.ctypes_buf tag) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf key)
+  end
   let mac ~key ~msg =
     let tag = C.make 16 in
-    mac_noalloc ~key ~msg ~tag;
+    Noalloc.mac ~key ~msg ~tag;
     tag
 end
 
@@ -232,16 +236,18 @@ module Make_HMAC_generic (C: Buffer)
   end)
 = struct
   type bytes = C.t
-  let mac_noalloc ~key ~msg ~tag =
-    (* Hacl.HMAC.compute_st *)
-    assert (HashDefs.digest_len Impl.hash_alg = C.size tag);
-    assert (C.disjoint tag key);
-    HashDefs.check_key_len Impl.hash_alg (C.size key);
-    HashDefs.check_key_len Impl.hash_alg (C.size msg);
-    Impl.mac (C.ctypes_buf tag) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf msg) (C.size_uint32 msg)
+  module Noalloc = struct
+    let mac ~key ~msg ~tag =
+      (* Hacl.HMAC.compute_st *)
+      assert (HashDefs.digest_len Impl.hash_alg = C.size tag);
+      assert (C.disjoint tag key);
+      HashDefs.check_key_len Impl.hash_alg (C.size key);
+      HashDefs.check_key_len Impl.hash_alg (C.size msg);
+      Impl.mac (C.ctypes_buf tag) (C.ctypes_buf key) (C.size_uint32 key) (C.ctypes_buf msg) (C.size_uint32 msg)
+  end
   let mac ~key ~msg =
     let tag = C.make (HashDefs.digest_len Impl.hash_alg) in
-    mac_noalloc ~key ~msg ~tag;
+    Noalloc.mac ~key ~msg ~tag;
     tag
 end
 
@@ -298,19 +304,21 @@ module Make_ECDSA_generic (C: Buffer)
     else
       failwith "Unknown return value"
   let prime_p256_order = Z.of_string "115792089210356248762697446949407573529996955224135760342422259061068512044369"
-  let sign_noalloc ~sk ~msg ~k ~signature =
-    (* Hacl.Interface.P256.ECDSA.ecdsa_sign_p256_without_hash/sha2/sha384 *)
-    assert (C.size signature = 64);
-    assert (C.size sk = 32);
-    assert (C.size k = 32);
-    assert (C.size msg >= Impl.min_msg_size);
-    assert (C.disjoint signature msg);
-    assert (C.z_compare sk prime_p256_order < 0);
-    assert (C.z_compare k prime_p256_order < 0);
-    Impl.sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf sk) (C.ctypes_buf k)
+  module Noalloc = struct
+    let sign ~sk ~msg ~k ~signature =
+      (* Hacl.Interface.P256.ECDSA.ecdsa_sign_p256_without_hash/sha2/sha384 *)
+      assert (C.size signature = 64);
+      assert (C.size sk = 32);
+      assert (C.size k = 32);
+      assert (C.size msg >= Impl.min_msg_size);
+      assert (C.disjoint signature msg);
+      assert (C.z_compare sk prime_p256_order < 0);
+      assert (C.z_compare k prime_p256_order < 0);
+      Impl.sign (C.ctypes_buf signature) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf sk) (C.ctypes_buf k)
+  end
   let sign ~sk ~msg ~k =
     let signature = C.make 64 in
-    if sign_noalloc ~sk ~msg ~k ~signature then
+    if Noalloc.sign ~sk ~msg ~k ~signature then
       Some signature
     else
       None
@@ -331,23 +339,25 @@ module Make_Blake2b_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let hash_noalloc ~key ~msg ~digest =
-    check_reqs Impl.reqs;
-    (* specs/Spec.Blake2.blake2b *)
-    assert (C.size digest > 0 && C.size digest <= 64);
-    assert (C.size key <= 64);
-    if C.size key = 0 then
-      assert Z.(of_int (C.size msg) < pow2 128)
-    else
-      assert Z.(of_int (C.size msg) + ~$128 < pow2 128);
-    assert (C.disjoint key msg);
-    assert (C.disjoint key digest);
-    assert (C.disjoint msg digest);
-    Impl.blake2b (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 key) (C.ctypes_buf key)
+  module Noalloc = struct
+    let hash ~key ~msg ~digest =
+      check_reqs Impl.reqs;
+      (* specs/Spec.Blake2.blake2b *)
+      assert (C.size digest > 0 && C.size digest <= 64);
+      assert (C.size key <= 64);
+      if C.size key = 0 then
+        assert Z.(of_int (C.size msg) < pow2 128)
+      else
+        assert Z.(of_int (C.size msg) + ~$128 < pow2 128);
+      assert (C.disjoint key msg);
+      assert (C.disjoint key digest);
+      assert (C.disjoint msg digest);
+      Impl.blake2b (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 key) (C.ctypes_buf key)
+  end
   let hash ?(key = C.empty) msg size =
     assert (size > 0 && size <= 64);
     let digest = C.make size in
-    hash_noalloc ~key ~msg ~digest;
+    Noalloc.hash ~key ~msg ~digest;
     digest
 end
 
@@ -358,23 +368,25 @@ module Make_Blake2s_generic (C: Buffer)
      end)
 = struct
   type bytes = C.t
-  let hash_noalloc ~key ~msg ~digest =
-    check_reqs Impl.reqs;
-    (* specs/Spec.Blake2.blake2s *)
-    assert (C.size digest > 0 && C.size digest <= 32);
-    assert (C.size key <= 32);
-    if C.size key = 0 then
-      assert Z.(of_int (C.size msg) < pow2 64)
-    else
-      assert Z.(of_int (C.size msg) + ~$64 < pow2 64);
-    assert (C.disjoint key msg);
-    assert (C.disjoint key digest);
-    assert (C.disjoint msg digest);
-    Impl.blake2s (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 key) (C.ctypes_buf key)
+  module Noalloc = struct
+    let hash ~key ~msg ~digest =
+      check_reqs Impl.reqs;
+      (* specs/Spec.Blake2.blake2s *)
+      assert (C.size digest > 0 && C.size digest <= 32);
+      assert (C.size key <= 32);
+      if C.size key = 0 then
+        assert Z.(of_int (C.size msg) < pow2 64)
+      else
+        assert Z.(of_int (C.size msg) + ~$64 < pow2 64);
+      assert (C.disjoint key msg);
+      assert (C.disjoint key digest);
+      assert (C.disjoint msg digest);
+      Impl.blake2s (C.size_uint32 digest) (C.ctypes_buf digest) (C.size_uint32 msg) (C.ctypes_buf msg) (C.size_uint32 key) (C.ctypes_buf key)
+  end
   let hash ?(key = C.empty) msg size =
     assert (size > 0 && size <= 32);
     let digest = C.make size in
-    hash_noalloc ~key ~msg ~digest;
+    Noalloc.hash ~key ~msg ~digest;
     digest
 end
 

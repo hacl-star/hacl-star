@@ -24,7 +24,7 @@ module MakeTests (M: SharedDefs.MAC) = struct
       let test_result = test_result (name ^ " (noalloc) " ^ v.name) in
       if supports reqs then begin
         let tag = Test_utils.init_bytes 16 in
-        M.mac_noalloc ~key:v.key ~msg:v.msg ~tag;
+        M.Noalloc.mac ~key:v.key ~msg:v.msg ~tag;
         if Bytes.equal tag v.expected then
           test_result Success ""
         else

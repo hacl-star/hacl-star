@@ -10,8 +10,8 @@ let test name alg =
     if EverCrypt.DRBG.reseed st ~additional_input:(init_bytes 128) then
       let output1 = init_bytes 1024 in
       let output2 = init_bytes 1024 in
-      if EverCrypt.DRBG.generate_noalloc st output1 ~additional_input:(init_bytes 128) &&
-         EverCrypt.DRBG.generate_noalloc st output2 then
+      if EverCrypt.DRBG.Noalloc.generate st output1 ~additional_input:(init_bytes 128) &&
+         EverCrypt.DRBG.Noalloc.generate st output2 then
         assert (output1 <> output2)
       else
         test_result Failure "Generation failure (noalloc)"

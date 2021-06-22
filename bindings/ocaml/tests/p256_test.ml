@@ -41,20 +41,55 @@ let tests_compression = [
   }
 ]
 
+let test_noalloc (v: Bytes.t ecdsa_test) t =
+  let test_result = test_result (t ^ " (noalloc) " ^ v.name) in
+  let pk = Test_utils.init_bytes 64 in
+  assert (Hacl.P256.valid_sk ~sk:v.sk);
+  if not (Hacl.P256.Noalloc.dh_initiator ~sk:v.sk ~pk) then
+    test_result Failure "DH initiator";
+  assert (Hacl.P256.valid_pk ~pk);
+  if not (Bytes.equal pk v.pk) then
+    test_result Failure "Key generation";
+    let signature = Test_utils.init_bytes 64 in
+    assert (Hacl.P256.Noalloc.sign ~sk:v.sk ~msg:v.msg ~k:v.k ~signature);
+    if Bytes.equal signature v.expected_sig then
+      begin
+        if Hacl.P256.verify ~pk:v.pk ~msg:v.msg ~signature then
+          test_result Success ""
+        else
+          test_result Failure "Verification"
+      end
+    else
+      test_result Failure "Signing"
+
+
+let test (v: Bytes.t ecdsa_test) t =
+  let test_result = test_result (t ^ " " ^ v.name) in
+  assert (Hacl.P256.valid_sk ~sk:v.sk);
+  match Hacl.P256.dh_initiator ~sk:v.sk with
+  | Some pk -> begin
+      assert (Hacl.P256.valid_pk ~pk);
+      if not (Bytes.equal pk v.pk) then
+        test_result Failure "Key generation";
+      match Hacl.P256.sign ~sk:v.sk ~msg:v.msg ~k:v.k with
+      | Some signature ->
+        if Bytes.equal signature v.expected_sig then
+          begin
+            if Hacl.P256.verify ~pk:v.pk ~msg:v.msg ~signature then
+              test_result Success ""
+            else
+              test_result Failure "Verification"
+          end
+      | None ->
+        test_result Failure "Signing"
+    end
+  | None -> test_result Failure "DH initiator"
+
 module MakeTests (M: SharedDefs.ECDSA) = struct
   let test_noalloc (v: Bytes.t ecdsa_test) t =
     let test_result = test_result (t ^ " (noalloc) " ^ v.name) in
-
-    let pk = Test_utils.init_bytes 64 in
-    assert (Hacl.P256.valid_sk ~sk:v.sk);
-    if not (Hacl.P256.Noalloc.dh_initiator ~sk:v.sk ~pk) then
-      test_result Failure "DH initiator";
-    assert (Hacl.P256.valid_pk ~pk);
-    if not (Bytes.equal pk v.pk) then
-      test_result Failure "Key generation";
-
     let signature = Test_utils.init_bytes 64 in
-    assert (M.sign_noalloc ~sk:v.sk ~msg:v.msg ~k:v.k ~signature);
+    assert (M.Noalloc.sign ~sk:v.sk ~msg:v.msg ~k:v.k ~signature);
     if Bytes.equal signature v.expected_sig then
       begin
         if M.verify ~pk:v.pk ~msg:v.msg ~signature then
@@ -67,29 +102,19 @@ module MakeTests (M: SharedDefs.ECDSA) = struct
 
   let test (v: Bytes.t ecdsa_test) t =
     let test_result = test_result (t ^ " " ^ v.name) in
+    match M.sign ~sk:v.sk ~msg:v.msg ~k:v.k with
+    | Some signature ->
+      if Bytes.equal signature v.expected_sig then
+        begin
+          if M.verify ~pk:v.pk ~msg:v.msg ~signature then
+            test_result Success ""
+          else
+            test_result Failure "Verification"
+        end
+    | None ->
+      test_result Failure "Signing"
 
-    assert (Hacl.P256.valid_sk ~sk:v.sk);
-    match Hacl.P256.dh_initiator ~sk:v.sk with
-    | Some pk -> begin
-        assert (Hacl.P256.valid_pk ~pk);
-        if not (Bytes.equal pk v.pk) then
-          test_result Failure "Key generation";
-
-        match M.sign ~sk:v.sk ~msg:v.msg ~k:v.k with
-        | Some signature ->
-          if Bytes.equal signature v.expected_sig then
-            begin
-              if M.verify ~pk:v.pk ~msg:v.msg ~signature then
-                test_result Success ""
-              else
-                test_result Failure "Verification"
-            end
-        | None ->
-          test_result Failure "Signing"
-      end
-    | None -> test_result Failure "DH initiator"
-
-  let run_tests name tests =
+let run_tests name tests =
     List.iter (fun v -> test_noalloc v name) tests;
     List.iter (fun v -> test v name) tests
 end
@@ -148,11 +173,11 @@ let test_p256_compression (v: Bytes.t compression_test) =
 
 
 let _ =
-  let module Tests = MakeTests (Hacl.P256) in
-  Tests.run_tests "Hacl.P256" tests;
-
   let module Tests = MakeTests (Hacl.P256.SHA2_256) in
   Tests.run_tests "Hacl.P256_SHA_256" tests_sha256;
+
+  List.iter (fun v -> test_noalloc v "Hacl.P256 (noalloc)") tests;
+  List.iter (fun v -> test v "Hacl.P256") tests;
 
   List.iter test_p256_compression_noalloc tests_compression;
   List.iter test_p256_compression tests_compression

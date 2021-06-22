@@ -103,10 +103,6 @@ module Hash : sig
   val hash : alg:HashDefs.alg -> msg:bytes -> bytes
   (** [hash alg msg] hashes [msg] using algorithm [alg] and returns the digest. *)
 
-  val hash_noalloc : alg:HashDefs.alg -> msg:bytes -> digest:bytes -> unit
-  (** [hash_noalloc alg msg digest] hashes [msg] using algorithm [alg] and outputs the
-      result in [digest]. *)
-
 (** {1 Streaming interface}
 
     To use the agile streaming interface, users first need to initialise an internal state using {!init}.
@@ -130,10 +126,22 @@ module Hash : sig
   val finish : st:t -> bytes
   (** [finish st] returns the digest without invalidating the internal state [st]. *)
 
-  val finish_noalloc : st:t -> digest:bytes -> unit
-  (** [finish_noalloc st digest] writes a digest in [digest], without invalidating the
-      internal state [st]. *)
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
 
+    (** {1 Direct interface} *)
+
+    val hash : alg:HashDefs.alg -> msg:bytes -> digest:bytes -> unit
+    (** [hash alg msg digest] hashes [msg] using algorithm [alg] and outputs the
+        result in [digest]. *)
+
+    (** {1 Streaming interface} *)
+
+    val finish : st:t -> digest:bytes -> unit
+    (** [finish st digest] writes a digest in [digest], without invalidating the
+        internal state [st]. *)
+  end
 end
 (** Agile, multiplexing hashing interface, exposing 4 variants of SHA-2
     (SHA-224, SHA-256, SHA-384, SHA-512), BLAKE2, and 2 legacy algorithms (SHA-1, MD5).
@@ -192,10 +200,14 @@ module HMAC : sig
   (** [mac alg key msg] computes the HMAC of [msg] based on hashing algorithm [alg]
       using key [key]. *)
 
-  val mac_noalloc : alg:HashDefs.alg -> key:bytes -> msg:bytes -> tag:bytes -> unit
-  (** [mac_noalloc alg key msg tag] computes the HMAC of [msg] based on hashing algorithm [alg]
-      using key [key] and writes the result in [tag]. The `tag` buffer needs to satisfy
-      the size requirements for the output buffer. *)
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+    val mac : alg:HashDefs.alg -> key:bytes -> msg:bytes -> tag:bytes -> unit
+    (** [mac alg key msg tag] computes the HMAC of [msg] based on hashing algorithm [alg]
+        using key [key] and writes the result in [tag]. The `tag` buffer needs to satisfy
+        the size requirements for the output buffer. *)
+  end
 end
 (** Agile, multiplexing interface for HMAC
 
@@ -294,20 +306,24 @@ module DRBG : sig
   (** [generate ?additional_input st size] takes optional [additional_input], a state [st] and
       [size], the desired number of random bytes, and returns such a buffer if successful. *)
 
-  val generate_noalloc : ?additional_input: bytes -> t -> bytes -> bool
-  (** [generate ?additional_input st output] takes an optional [additional_input], a state [st] and
-      an output buffer [output], which will be filled with random bytes if successful. *)
-
   val reseed : ?additional_input: bytes -> t -> bool
   (** [reseed ?additional_input st] attempts to reseed [st], using the optional [additional_input]
       and returns true if successful. *)
+
+  (** Versions of these functions which write their output in a buffer passed in as
+      an argument *)
+  module Noalloc : sig
+    val generate : ?additional_input: bytes -> t -> bytes -> bool
+    (** [generate ?additional_input st output] takes an optional [additional_input], a state [st] and
+        an output buffer [output], which will be filled with random bytes if successful. *)
+  end
 end
 (** Agile, multiplexing interface for HMAC-DRBG
 
     The supported hashing algorithms are SHA2-256, SHA2-384, SHA2-512.
 
     Users first need to instantiate an internal state with a compatible hashing algorithm and an
-    optional but recommended personalization string. The [generate] or [generate_noalloc] functions
+    optional but recommended personalization string. The [generate] or [Noalloc.generate] functions
     can then be called any number of times.
 
     Users have the possibility to reseed, but it is not required.
