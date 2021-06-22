@@ -22,6 +22,10 @@ let pointAtInfinity #c : point_nat_prime #c  = (0, 0, 0)
 let isPointAtInfinity (p:point_nat) =
   let (_, _, z) = p in z = 0
 
+let isPointAtInfinityAffine (p:point_affine_nat) =
+  let (x, y) = p in x = 0 && y = 0
+
+
 noextract
 let _point_double_nist #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
   let prime = getPrime curve in 
@@ -158,6 +162,34 @@ let _point_add #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : po
       (x2, y2, z2)
     else
       (x3, y3, z3)
+
+
+noextract
+let _point_add_mixed #curve (p:point_nat_prime #curve) (q:point_affine_nat_prime #curve) : point_nat_prime #curve =
+  let prime = getPrime curve in 
+  let (x1, y1, z1) = p in
+  let (x2, y2) = q in
+
+  let z1z1 = z1 * z1 in
+
+  let u2 = x2 * z1z1 % prime in
+  let s2 = y2 * z1 * z1z1 % prime in
+
+  let h = (u2 - x1) % prime in
+  let r = (s2 - y1) % prime in
+
+  let rr = r * r in
+  let hh = h * h in
+  let hhh = h * h * h in
+
+  let x3 = (rr - hhh - 2 * x1 * hh) % prime in
+  let y3 = (r * (x1 * hh - x3) - y1 * hhh) % prime in
+  let z3 = (h * z1 * 1) % prime in
+  if z1 = 0 then
+    (x2, y2, 1)
+  else
+    (x3, y3, z3)
+
 
 
 let pointAdd #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =

@@ -15,7 +15,7 @@ test.exe: test.c Hacl_Hash_Core_SHA2.o Hacl_Hash_SHA2.o Hacl_P256.o
 
 
 
-profile: test.c Hacl_P256.o
+profile: test.c Hacl_Hash_Core_SHA2.o Hacl_Hash_SHA2.o Hacl_P256.o 
 	$(CC) $(CFLAGS) $(CProfiling) \
 	$^ \
 	-o test.exe	

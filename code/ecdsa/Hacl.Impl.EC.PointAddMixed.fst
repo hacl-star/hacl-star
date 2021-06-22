@@ -1,4 +1,5 @@
 module Hacl.Impl.EC.PointAddMixed
+
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -22,29 +23,29 @@ open Hacl.Spec.MontgomeryMultiplication
 open FStar.Mul
 
 open Hacl.Impl.P.PointAdd.Aux
+open Hacl.Impl.EC.MixedPA.MM
 
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"  
 
-
-
 inline_for_extraction noextract 
-val pointAffineIsNotZero: #c: curve -> #buf_type : buftype ->  p: lbuffer_t buf_type uint64 (size 8) -> Stack uint64
-  (requires fun h -> live h p)
-  (ensures fun h0 r h1 -> modifies0 h0 h1)
+val pointAffineIsNotZero: #c: curve -> p: pointAffine c -> Stack uint64
+  (requires fun h -> live h p /\ point_aff_eval c h p)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (v r == 0 \/ v r == pow2 64 - 1) /\ (
+    v r == pow2 64 - 1 <==> isPointAtInfinityAffine (point_affine_as_nat c h0 p)))
 
 let pointAffineIsNotZero #c p = 
-  let x = sub p (size 0) (size 4) in 
-  let y = sub p (size 4) (size 4) in 
+  let len = getCoordinateLenU64 c in 
+  
+  let x = sub p (size 0) len in 
+  let y = sub p len len in 
 
   let xZero = isZero_uint64_CT #c x in 
   let yZero = isZero_uint64_CT #c y in 
 
-(*   let xZero = eq_felem_0_u64 (global_to_comparable x) in 
-  let yZero = eq_felem_0_u64 (global_to_comparable y) in  *)
-
   logand_lemma xZero yZero;
   logand xZero yZero
+
 
 
 inline_for_extraction noextract
@@ -54,9 +55,8 @@ val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z
     live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h mask /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc x3_out; loc y3_out; loc z3_out; loc p; loc mask])
   (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out) h0 h1 /\ (
-    let mask = point_z_as_nat c h0 mask in 
     let x, y, z = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in
-    if mask = 0 then
+    if point_z_as_nat c h0 mask = 0 then
       as_nat c h1 x3_out == x /\
       as_nat c h1 y3_out == y /\ 
       as_nat c h1 z3_out == z
@@ -83,20 +83,31 @@ let copy_point_conditional #c x3_out y3_out z3_out p maskPoint =
 
 
 inline_for_extraction noextract
-val copy_point_conditional1: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c ->  p: point c -> mask: felem c ->
+val copy_point_conditional1: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c -> p: point c 
+  -> q: pointAffine c ->
   Stack unit
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
+  (requires fun h -> point_eval c h p /\ point_aff_eval c h q /\
+    live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h q /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc x3_out; loc y3_out; loc z3_out; loc p; loc q])
+  (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out) h0 h1 /\ point_aff_eval c h0 q /\ (
+    let len = getCoordinateLenU64 c in 
+    let x, y, z = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in
+    if isPointAtInfinityAffine (point_affine_as_nat c h0 q) then
+      as_nat c h1 x3_out == x /\
+      as_nat c h1 y3_out == y /\ 
+      as_nat c h1 z3_out == z
+    else 
+      as_nat c h1 x3_out == as_nat c h0 x3_out /\ 
+      as_nat c h1 y3_out == as_nat c h0 y3_out /\ 
+      as_nat c h1 z3_out == as_nat c h0 z3_out))
 
 
-let copy_point_conditional1 #c x3_out y3_out z3_out p mask = 
+let copy_point_conditional1 #c x3_out y3_out z3_out p q = 
   [@inline_let]
   let len = getCoordinateLenU64 c in 
 
-(*   let x3_out = sub result (size 0) len in 
-  let y3_out = sub result len len in 
-  let z3_out = sub result (2ul *! len) len in
- *)
+  let mask = pointAffineIsNotZero #c q in 
+
   let p_x = sub p (size 0) len in 
   let p_y = sub p len len in 
   let p_z = sub p (size 2 *! len) len in 
@@ -104,8 +115,6 @@ let copy_point_conditional1 #c x3_out y3_out z3_out p mask =
   copy_conditional x3_out p_x mask;
   copy_conditional y3_out p_y mask;
   copy_conditional z3_out p_z mask
-
-
 
 
 inline_for_extraction noextract 
@@ -145,21 +154,17 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
 
   let h0 = ST.get() in 
 
-  upd z2Square (size 0) (u64 0x000000300000000);
+  montgomery_multiplication_buffer_by_one_mixed #c z2Square;
+
+(*   upd z2Square (size 0) (u64 0x000000300000000);
   upd z2Square (size 1) (u64 0x00000001FFFFFFFE);
   upd z2Square (size 2) (u64 0xFFFFFFFD00000002);
-  upd z2Square (size 3) (u64 0xFFFFFFFE00000003);
-
-  upd z2Cube (size 0) (u64 0x0000000CFFFFFFF7);
-  upd z2Cube (size 1) (u64 0xFFFFFFF800000007); 
-  upd z2Cube (size 2) (u64 0xFFFFFFFB0000000F);
-  upd z2Cube (size 3) (u64 0x00000005FFFFFFFF);
-
+  upd z2Square (size 3) (u64 0xFFFFFFFE00000003); *)
 
   (* montgomery_square_buffer_dh #c qZ z2Square;  *)
   montgomery_square_buffer_dh #c pZ z1Square;
 
-  (* montgomery_multiplication_buffer_dh #c z2Square qZ z2Cube; *)
+  montgomery_multiplication_buffer_by_one_dh #c z2Square z2Cube;
   montgomery_multiplication_buffer_dh #c z1Square pZ z1Cube;
 
   montgomery_multiplication_buffer_dh #c z2Square pX u1;
@@ -450,7 +455,7 @@ let computeZ3_point_add #c p q h t5 =
 inline_for_extraction noextract
 val copy_result_point_add: #c: curve 
   -> t5: lbuffer uint64 (size 5 *! (getCoordinateLenU64 c)) 
-  -> p: point c -> q: point c -> result: point c ->
+  -> p: point c -> q: pointAffine c -> result: point c ->
   Stack unit 
   (requires fun h -> live h t5 /\ live h p /\ live h q /\ live h result /\
     eq_or_disjoint p result /\ disjoint t5 result /\ 
@@ -483,8 +488,10 @@ let copy_result_point_add #c t5 p q result =
   let z3_out = sub t5 (size 2 *! len) len in 
 
   copy_point_conditional x3_out y3_out z3_out q p;
-  let mask = pointAffineIsNotZero #c q in 
-  copy_point_conditional1 x3_out y3_out z3_out p mask;
+
+
+
+  copy_point_conditional1 x3_out y3_out z3_out p q;
 
 
   (* copy_point_conditional x3_out y3_out z3_out p q; *)

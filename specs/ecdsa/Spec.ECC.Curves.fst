@@ -27,6 +27,9 @@ let rec exp #n a b =
 
 let point_nat = tuple3 nat nat nat
 
+let point_affine_nat = tuple2 nat nat
+
+
 noextract
 val pow: a:nat -> b:nat -> nat
 
@@ -202,6 +205,9 @@ let nat_prime #curve = n:nat{n < getPrime curve}
 
 let point_nat_prime #curve = 
   p: point_nat{let (a, b, c) = p in a < getPrime curve /\ b < getPrime curve /\ c < getPrime curve}
+
+let point_affine_nat_prime #curve = 
+  p: point_affine_nat{let (a, b) = p in a < getPrime curve /\ b < getPrime curve}
 
 
 noextract
