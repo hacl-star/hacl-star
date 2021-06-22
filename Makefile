@@ -152,6 +152,7 @@ mozilla-ci-unstaged: compile-mozilla test-c
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged doc-wasm
+	$(MAKE) doc-ocaml
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
 
@@ -835,6 +836,9 @@ test-bindings-ocaml: compile-gcc-compatible
 	    cd dist/gcc-compatible && make install-hacl-star-raw ; \
 	fi
 	cd bindings/ocaml && $(LD_EXTRA) dune runtest
+
+doc-ocaml: test-bindings-ocaml
+	dune build @doc
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
