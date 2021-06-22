@@ -85,33 +85,44 @@ let getScalar_4 #a scalar i =
   result
 
 
-val getPointPrecomputedMixed: #c: curve -> scalar: lbuffer uint8 (size 32) -> 
-  i:size_t{v i < 256} -> pointToAdd: lbuffer uint64 (size 8) ->
-  Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-
-
 open Hacl.Impl.EC.Precomputed
 
+inline_for_extraction noextract
+val getPointPrecomputedMixed_: #c: curve -> scalar: lbuffer uint8 (size 32) -> 
+  i:size_t{v i < 64} -> pointToAdd: lbuffer uint64 (size 8) ->
+  Stack unit 
+  (requires fun h -> live h scalar /\ live h pointToAdd)
+  (ensures fun h0 _ h1 -> True)
 
-let getPointPrecomputedMixed #c scalar i pointToAdd = 
-  let bits: uint32 = getScalar_4 scalar i in 
-
-  let pointToAdd = create (size 8) (u64 0) in 
-
-  let invK h (k: nat) = True in 
-  Lib.Loops.for 0ul 16ul invK
-  (fun k -> 
+let getPointPrecomputedMixed_ #c scalar i pointToAdd = 
+  push_frame();
+    let bits: uint32 = getScalar_4 scalar i in
+    let invK h (k: nat) = True in 
+    Lib.Loops.for 0ul 16ul invK
+    (fun k -> 
+      recall_contents points_radix_16 (Lib.Sequence.of_list points_radix_16_list_p256);
       let mask = eq_mask (to_u64 bits) (to_u64 k) in 
-      (* eq_mask_lemma d (to_u64 k);  *)
-	
-      let lut_cmb_x = sub (points_radix_16 #c) (k *! 8) (size 4) in 
-      let lut_cmb_y = sub (points_radix_16 #c) (k *! 8 +! (size 4)) (size 4) in 
+      let lut_cmb_x = sub points_radix_16 (k *! 8ul) (size 4) in 
+      let lut_cmb_y = sub points_radix_16 (k *! 8ul +! (size 4)) (size 4) in 
 
+      admit();
       copy_conditional #c (sub pointToAdd (size 0) (size 4)) lut_cmb_x mask;
-      copy_conditional #c (sub pointToAdd (size 4) (size 4)) lut_cmb_y mask
-    )
+      copy_conditional #c (sub pointToAdd (size 4) (size 4)) lut_cmb_y mask);
+  pop_frame()
+
+
+let getPointPrecomputedMixed_p256 = getPointPrecomputedMixed_ #P256
+
+
+inline_for_extraction noextract
+val getPointPrecomputedMixed: #c: curve -> scalar: lbuffer uint8 (size 32) -> 
+  i:size_t{v i < 64} -> pointToAdd: lbuffer uint64 (size 8) ->
+  Stack unit 
+  (requires fun h -> live h scalar /\ live h pointToAdd)
+  (ensures fun h0 _ h1 -> True)
+
+let getPointPrecomputedMixed scalar i pointToAdd = getPointPrecomputedMixed_p256 scalar i pointToAdd
+
 
 
 
@@ -136,10 +147,10 @@ let montgomery_ladder_step_radix_precomputed #c p tempBuffer scalar i =
   point_double p p tempBuffer;
   point_double p p tempBuffer;
   point_double p p tempBuffer;
-  point_double p p tempBuffer (*;
+  point_double p p tempBuffer;
 
   
-  Hacl.Impl.P256.MixedPointAdd.point_add_mixed p pointToAdd p tempBuffer *)
+  Hacl.Impl.EC.PointAddMixed.point_add_mixed p pointToAdd p tempBuffer
 
 
 
@@ -155,9 +166,9 @@ let montgomery_ladder_2_precomputed #c #a p scalar tempBuffer =
  let h0 = ST.get() in 
   let inv h (i: nat {i <= 64}) = True in 
 
- 
+  recall_contents points_radix_16 (Lib.Sequence.of_list points_radix_16_list_p256);
   let bits: uint32 = getScalar_4 scalar 0 in 
-  let pointToStart = sub (points_radix_16 #c) (bits *. size 8) (size 8) in 
+  let pointToStart = sub (points_radix_16) (bits *. size 8) (size 8) in 
 
   copy (sub p (size 0) (size 8)) pointToStart;
 

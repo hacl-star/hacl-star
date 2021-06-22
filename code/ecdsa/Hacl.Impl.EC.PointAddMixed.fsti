@@ -16,7 +16,6 @@ open Hacl.Spec.MontgomeryMultiplication
 
 let fromDomain #c = fromDomain_ #c #DH
 
-
 inline_for_extraction noextract
 val point_add_mixed: #c: curve -> p: point c -> q: pointAffine c -> result: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 

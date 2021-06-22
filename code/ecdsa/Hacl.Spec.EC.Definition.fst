@@ -456,6 +456,11 @@ let getYAff8 #c p = gsub p (getCoordinateLenU c) (getCoordinateLenU c)
 let point_eval (c: curve) (h:mem) (p:point c) = 
   let x, y, z = getX p, getY p, getZ p in 
   felem_eval c h x /\ felem_eval c h y /\ felem_eval c h z 
+
+
+let point_aff_eval (c: curve) (h:mem) (p:pointAffine c) = 
+  let x, y = getXAff p, getYAff p in 
+  felem_eval c h x /\ felem_eval c h y
   
 
 noextract 
@@ -469,6 +474,16 @@ let point_y_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (a
 noextract 
 let point_z_as_nat (c: curve) (h: mem) (e: point c {point_eval c h e}) : GTot (a: nat {a < getPrime c}) = 
   as_nat c h (getZ e)
+
+
+noextract 
+let point_affine_x_as_nat (c: curve) (h: mem) (e: pointAffine c {point_aff_eval c h e}) : GTot (a: nat {a < getPrime c}) = 
+  as_nat c h (getXAff e)
+
+noextract 
+let point_affine_y_as_nat (c: curve) (h: mem) (e: pointAffine c {point_aff_eval c h e}) : GTot (a: nat {a < getPrime c}) = 
+  as_nat c h (getYAff e)
+
 
 
 noextract

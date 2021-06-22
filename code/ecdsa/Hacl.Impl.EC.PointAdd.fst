@@ -536,7 +536,6 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c
       z3 == toDomain #c (pzD * qzD * hD % prime))))
 
 
-
 let _point_add_if_second_branch_impl #c result p q x3hCube t5 = 
   [@inline_let]
   let len = getCoordinateLenU64 c in 

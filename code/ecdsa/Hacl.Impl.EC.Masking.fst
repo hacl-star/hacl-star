@@ -219,10 +219,10 @@ let eq1_u64 a =
 
 
 inline_for_extraction noextract
-val isZero_uint64_CT: #c: curve -> f: felem c -> Stack uint64
+val isZero_uint64_CT: #c: curve -> #buf_type: buftype -> f: lbuffer_t buf_type uint64 (getCoordinateLenU64 c) -> Stack uint64
   (requires fun h -> live h f)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\
-    (if as_nat c h0 f = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
+    (if lseq_as_nat (as_seq h0 f) = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0))
     
 
 let isZero_uint64_CT #c f =

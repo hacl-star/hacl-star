@@ -13,7 +13,7 @@ open FStar.Mul
 open Spec.ECC.Curves
 
 
-inline_for_extraction noextract
+inline_for_extraction
 let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128} =
   let open FStar.Mul in 
   [@inline_let]
@@ -73,17 +73,9 @@ let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128} =
 
 
 inline_for_extraction
-let points_radix_16_p256: x: glbuffer uint64 128ul 
+let points_radix_16: x: glbuffer uint64 128ul 
   {witnessed #uint64 #(size 128) x (Lib.Sequence.of_list points_radix_16_list_p256) /\ recallable x} = 
   createL_global points_radix_16_list_p256
-
-
-
-inline_for_extraction
-let points_radix_16 (#c: curve) : x: glbuffer uint64 128ul 
-  {witnessed #uint64 #(size 128) x (Lib.Sequence.of_list points_radix_16_list_p256) /\ recallable x} = 
-  match c with 
-  |P256 -> points_radix_16_list_p256
 
  
 
