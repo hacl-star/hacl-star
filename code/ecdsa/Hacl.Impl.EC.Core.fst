@@ -424,12 +424,8 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: poi
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let pD = point_as_nat c h1 result in 
     scalar_multiplication (as_seq h0 scalar) (point_as_nat c h0 p) == pD))
-(*
-val size_cuttable_scalar_mult: #c: curve -> 
-  Lemma (let len = getCoordinateLenU64 c in  (v (size 3 *! len) + v (size 17 *! len) <= v (size 20 *! len)))
 
-let size_cuttable_scalar_mult #c = ()
-*)
+
 
 let scalarMultiplication_t #c #t p result scalar tempBuffer  = 
     let h0 = ST.get() in 

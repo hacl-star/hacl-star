@@ -203,8 +203,13 @@ let getOrder (#c: curve) : (a: pos{a > pow2 64 /\ a < pow2 (getPower c) /\ pow2 
 
 let nat_prime #curve = n:nat{n < getPrime curve}
 
+
 let point_nat_prime #curve = 
   p: point_nat{let (a, b, c) = p in a < getPrime curve /\ b < getPrime curve /\ c < getPrime curve}
+
+let point_nat_prime_precomputed #curve = 
+  p: point_nat{let (a, b, c) = p in a < getPrime curve /\ b < getPrime curve /\ c < getPrime curve}
+
 
 let point_affine_nat_prime #curve = 
   p: point_affine_nat{let (a, b) = p in a < getPrime curve /\ b < getPrime curve}
