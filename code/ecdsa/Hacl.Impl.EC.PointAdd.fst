@@ -579,8 +579,8 @@ let _point_add0 #c p q t12 =
   move_from_jacobian_coordinates p q t12;
   compute_common_params_point_add t12;
   let h1 = ST.get() in
-  lemma_point_eval c h0 h1 p;
-  lemma_point_eval c h0 h1 q 
+  lemma_coord_eval c h0 h1 p;
+  lemma_coord_eval c h0 h1 q 
 
 
 inline_for_extraction noextract

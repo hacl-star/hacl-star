@@ -23,6 +23,7 @@ open Hacl.Spec.MontgomeryMultiplication
 open FStar.Mul
 
 open Hacl.Impl.P.PointAdd.Aux
+open Hacl.Impl.P.PointAddMixed.Aux
 open Hacl.Impl.EC.MixedPA.MM
 
 
@@ -47,49 +48,54 @@ let pointAffineIsNotZero #c p =
   logand xZero yZero
 
 
-
-inline_for_extraction noextract
-val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c -> p: point c -> mask: point c ->
+val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c 
+  -> p: pointAffine c -> mask: point c -> temp : felem c ->
   Stack unit
-  (requires fun h -> point_eval c h mask /\ point_eval c h p /\
-    live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h mask /\ 
+  (requires fun h -> point_eval c h mask /\ point_aff_eval c h p /\ 
+    felem_eval c h x3_out /\ felem_eval c h y3_out /\ felem_eval c h z3_out /\
+    disjoint temp z3_out /\ disjoint temp x3_out /\ disjoint temp y3_out /\ disjoint temp p /\ 
+    live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h mask /\ live h temp /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc x3_out; loc y3_out; loc z3_out; loc p; loc mask])
-  (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out) h0 h1 /\ (
-    let x, y, z = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in
-    if point_z_as_nat c h0 mask = 0 then
+  (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out |+| loc temp) h0 h1 /\
+    felem_eval c h1 x3_out /\ felem_eval c h1 y3_out /\ felem_eval c h1 z3_out /\ (
+    let x, y = point_affine_x_as_nat c h0 p, point_affine_y_as_nat c h0 p in
+    if isPointAtInfinity (point_as_nat c h0 mask) then
       as_nat c h1 x3_out == x /\
       as_nat c h1 y3_out == y /\ 
-      as_nat c h1 z3_out == z
+      as_nat c h1 z3_out == 1
     else 
       as_nat c h1 x3_out == as_nat c h0 x3_out /\ 
-      as_nat c h1 y3_out == as_nat c h0 y3_out /\ 
-      as_nat c h1 z3_out == as_nat c h0 z3_out))
+      as_nat c h1 y3_out == as_nat c h0 y3_out /\
+      as_nat c h1 z3_out == as_nat c h0 z3_out)) 
 
 
-let copy_point_conditional #c x3_out y3_out z3_out p maskPoint = 
+let copy_point_conditional #c x3_out y3_out z3_out p maskPoint temp = 
+  let h0 = ST.get() in 
   [@inline_let]
   let len = getCoordinateLenU64 c in 
-  
+
   let z = sub maskPoint (size 2 *! len) len in 
   let mask = isZero_uint64_CT #c z in 
   
   let p_x = sub p (size 0) len in 
   let p_y = sub p len len in 
-  let p_z = sub p (size 2 *! len) len in 
 
+  uploadOneImpl #c temp;
+  
   copy_conditional x3_out p_x mask;
   copy_conditional y3_out p_y mask;
-  copy_conditional z3_out p_z mask
+  copy_conditional z3_out temp mask
 
 
-inline_for_extraction noextract
 val copy_point_conditional1: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c -> p: point c 
   -> q: pointAffine c ->
   Stack unit
   (requires fun h -> point_eval c h p /\ point_aff_eval c h q /\
+    felem_eval c h x3_out /\ felem_eval c h y3_out /\ felem_eval c h z3_out /\ 
     live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h q /\
     LowStar.Monotonic.Buffer.all_disjoint [loc x3_out; loc y3_out; loc z3_out; loc p; loc q])
-  (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out) h0 h1 /\ point_aff_eval c h0 q /\ (
+  (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out) h0 h1 /\ point_aff_eval c h0 q /\
+    felem_eval c h1 x3_out /\ felem_eval c h1 y3_out /\ felem_eval c h1 z3_out /\ (
     let len = getCoordinateLenU64 c in 
     let x, y, z = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in
     if isPointAtInfinityAffine (point_affine_as_nat c h0 q) then
@@ -117,20 +123,19 @@ let copy_point_conditional1 #c x3_out y3_out z3_out p q =
   copy_conditional z3_out p_z mask
 
 
+
 inline_for_extraction noextract 
 val _move_from_jacobian_coordinates: #c: curve -> u1: felem c -> u2: felem c -> 
-  s1: felem c -> s2: felem c -> p: point c -> q: point c -> 
+  s1: felem c -> s2: felem c -> p: point c -> q: pointAffine c -> 
   tempBuffer4: lbuffer uint64 (size 4 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h ->  
     live h u1 /\ live h u2 /\ live h s1 /\ live h s2 /\ live h tempBuffer4 /\ live h p /\ 
-    live h q /\ point_eval c h p /\ point_eval c h q /\
+    live h q /\ point_eval c h p /\ point_aff_eval c h q /\
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer4; loc p; loc q; loc u1; loc u2; loc s1; loc s2])
   (ensures fun h0 _ h1 ->  
     modifies (loc u1 |+| loc u2 |+| loc s1 |+| loc s2 |+| loc tempBuffer4) h0 h1 /\
-    u1Invariant #c h0 h1 u1 p q /\
-    u2Invariant #c h0 h1 u2 p q /\ 
-    s1Invariant #c h0 h1 s1 p q /\
-    s2Invariant #c h0 h1 s2 p q)
+    u1Invariant #c h0 h1 u1 p /\ u2Invariant #c h0 h1 u2 p q /\
+    s1Invariant #c h0 h1 s1 p /\ s2Invariant #c h0 h1 s2 p q)
 
 
 let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer = 
@@ -145,7 +150,6 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
 
   let qX = sub q (size 0) len in 
   let qY = sub q len len in 
-  (* let qZ = sub q (size 2 *! len) len in   *)
 
   let z2Square = sub tempBuffer (size 0) len in 
   let z1Square = sub tempBuffer len len in 
@@ -155,13 +159,6 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
   let h0 = ST.get() in 
 
   montgomery_multiplication_buffer_by_one_mixed #c z2Square;
-
-(*   upd z2Square (size 0) (u64 0x000000300000000);
-  upd z2Square (size 1) (u64 0x00000001FFFFFFFE);
-  upd z2Square (size 2) (u64 0xFFFFFFFD00000002);
-  upd z2Square (size 3) (u64 0xFFFFFFFE00000003); *)
-
-  (* montgomery_square_buffer_dh #c qZ z2Square;  *)
   montgomery_square_buffer_dh #c pZ z1Square;
 
   montgomery_multiplication_buffer_by_one_dh #c z2Square z2Cube;
@@ -173,29 +170,42 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
   montgomery_multiplication_buffer_dh #c z2Cube pY s1;
   montgomery_multiplication_buffer_dh #c z1Cube qY s2;
 
-  let prime = getPrime c in ()
+  let h1 = ST.get() in 
+
+  let prime = getPrime c in 
   
-(*   let fromDomain = fromDomain #c in 
+  let fromDomain = fromDomain #c in 
   let toDomain = toDomain #c in   
   let as_nat = as_nat c in 
 
   let pxD = fromDomain (as_nat h0 pX) in 
-  let qxD = fromDomain (as_nat h0 qX) in 
+  let qxD = fromDomain (point_affine_x_as_nat c h0 q) in 
 
   let pyD = fromDomain (as_nat h0 pY) in 
-  let qyD = fromDomain (as_nat h0 qY) in 
+  let qyD = fromDomain (point_affine_y_as_nat c h0 q) in 
 
   let pzD = fromDomain (as_nat h0 pZ) in 
-  let qzD = fromDomain (as_nat h0 qZ) in 
+  let oD = fromDomain 1 in 
+  let oDD = fromDomain oD in 
 
 
-  calc (==)
-  {
-    toDomain ((qzD * qzD % prime) * pxD % prime);
-    (==) {lemma_mod_mul_distr_l (qzD * qzD) pxD prime}
-    toDomain (qzD * qzD * pxD % prime);
-  };  
-    
+  calc (==) {as_nat h1 u1; 
+    (==) {}
+    toDomain (fromDomain oD * pxD % prime);
+    (==) {lemmaFromDomain #c #DH oD}
+    toDomain ((oD * 1 * modp_inv2_prime (pow2 (getPower c)) prime % prime) * pxD % prime);
+    (==) {assert_by_tactic (oD * 1 * modp_inv2_prime (pow2 (getPower c)) prime ==
+    oD * (1 * modp_inv2_prime (pow2 (getPower c)) prime)) canon}
+    toDomain ((oD * (1 * modp_inv2_prime (pow2 (getPower c)) prime) % prime) * pxD % prime);
+    (==) {lemma_mod_mul_distr_r oD (1 * modp_inv2_prime (pow2 (getPower c)) prime) prime}
+    toDomain ((oD * (1 * modp_inv2_prime (pow2 (getPower c)) prime % prime) % prime) * pxD % prime);
+    (==) {lemmaFromDomain #c #DH 1} 
+    toDomain ((oD * oD % prime) * pxD % prime);
+    (==) {lemma_mod_mul_distr_l (oD * oD) pxD prime}
+    toDomain (oD * oD * pxD % prime);
+  };
+
+  let k = modp_inv2_prime (pow2 (getPower c)) prime in 
 
   calc (==)
   {
@@ -203,41 +213,57 @@ let _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q tempBuffer =
     (==) {lemma_mod_mul_distr_l (pzD * pzD) qxD prime}
     toDomain (pzD * pzD * qxD % prime);
   };
-
-
-  calc (==)
+ 
+  calc (==) 
   {
-    toDomain (((qzD * qzD % prime) * qzD % prime) * pyD % prime);
-    (==) {lemma_mod_mul_distr_l (qzD * qzD) qzD prime}
-    toDomain ((qzD * qzD * qzD % prime) * pyD % prime);
-    (==) {lemma_mod_mul_distr_l (qzD * qzD * qzD) pyD prime}
-    toDomain (qzD * qzD * qzD * pyD % prime);
+    as_nat h1 s1;
+    (==) {}
+    toDomain (fromDomain oDD * pyD % prime);
+    (==) {lemmaFromDomain #c #DH oDD}
+    toDomain (fromDomain oD * k % prime * pyD % prime);
+    (==) {lemmaFromDomain #c #DH oD}
+    toDomain (oD * k % prime * k % prime * pyD % prime);
+    (==) {assert_by_tactic (oD * 1 * k == oD * (1 * k)) canon}
+    toDomain (oD * (1 * k) % prime * k % prime * pyD % prime);
+    (==) {lemma_mod_mul_distr_r oD (1 * k) prime}
+    toDomain (oD * (1 * k % prime) % prime * k % prime * pyD % prime);
+    (==) {lemmaFromDomain #c #DH 1}
+    toDomain (oD * oD % prime * (1 * k) % prime * pyD % prime);
+    (==) {lemma_mod_mul_distr_r (oD * oD % prime) (1 * k) prime}
+    toDomain (oD * oD % prime * (1 * k % prime) % prime * pyD % prime);
+    (==) {lemmaFromDomain #c #DH 1}
+    toDomain (oD * oD % prime * oD % prime * pyD % prime);
+    (==) {lemma_mod_mul_distr_l (oD * oD) oD prime}
+    toDomain (oD * oD * oD % prime * pyD % prime);
+    (==) {lemma_mod_mul_distr_l (oD * oD * oD) pyD prime}
+    toDomain (oD * oD * oD * pyD % prime);
   };
 
   calc (==) 
   {
+    as_nat h1 s2;
+    (==) {}
     toDomain (((pzD * pzD % prime) * pzD % prime) * qyD % prime);
     (==) {lemma_mod_mul_distr_l (pzD * pzD) pzD prime}
     toDomain(((pzD * pzD) * pzD % prime) * qyD % prime);
     (==) {lemma_mod_mul_distr_l (pzD * pzD * pzD) qyD prime}
-    toDomain(pzD * pzD * pzD * qyD % prime);
+    toDomain (pzD * pzD * pzD * qyD % prime);
   }
- *)
+
+
 
 inline_for_extraction noextract 
-val move_from_jacobian_coordinates: #c: curve -> p: point c -> q: point c -> 
+val move_from_jacobian_coordinates: #c: curve -> p: point c -> q: pointAffine c -> 
   t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h -> 
     live h t12 /\ live h p /\ live h q /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t12; loc p; loc q] /\ 
-    point_eval c h p /\ point_eval c h q)
+    point_eval c h p /\ point_aff_eval c h q)
   (ensures fun h0 _ h1 -> 
     let u1, u2, s1, s2, _, _, _, _ = getU1HCube t12 in 
     modifies (loc t12) h0 h1 /\ (
-    u1Invariant #c h0 h1 u1 p q /\
-    u2Invariant #c h0 h1 u2 p q /\ 
-    s1Invariant #c h0 h1 s1 p q /\
-    s2Invariant #c h0 h1 s2 p q))
+    u1Invariant #c h0 h1 u1 p /\ u2Invariant #c h0 h1 u2 p q /\ 
+    s1Invariant #c h0 h1 s1 p /\ s2Invariant #c h0 h1 s2 p q))
 
 
 let move_from_jacobian_coordinates #c p q t12 = 
@@ -252,6 +278,7 @@ let move_from_jacobian_coordinates #c p q t12 =
   let s2 = sub t12 (size 7 *! len) len in 
 
   _move_from_jacobian_coordinates #c u1 u2 s1 s2 p q t4
+
 
 
 inline_for_extraction noextract
@@ -414,43 +441,59 @@ let computeY3_point_add #c s1 hCube uh r tempBuffer5 =
 
 
 inline_for_extraction noextract 
-val computeZ3_point_add: #c: curve -> p: point c -> q: point c ->
+val computeZ3_point_add: #c: curve -> p: point c ->
   h: felem c -> t5: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
   Stack unit 
   (requires fun h0 -> 
-    live h0 t5 /\ live h0 p /\ live h0 q /\ live h0 h /\ 
-    disjoint t5 p /\ disjoint t5 h /\ disjoint t5 q /\ eq_or_disjoint p q /\
-    point_eval c h0 p /\ point_eval c h0 q /\ felem_eval c h0 h)
+    live h0 t5 /\ live h0 p /\ live h0 h /\ 
+    disjoint t5 p /\ disjoint t5 h /\
+    point_eval c h0 p /\  felem_eval c h0 h)
   (ensures fun h0 _ h1 -> modifies (loc t5) h0 h1 /\ (
     let len = getCoordinateLenU64 c in 
-    let z1, z2 = getZ p, getZ q in 
+    let z1 = getZ p in
     let x3, y3, z3 = getXYZ #c t5 in 
     as_nat c h0 x3 == as_nat c h1 x3 /\
     as_nat c h0 y3 == as_nat c h1 y3 /\
-    z3Invariant #c h0 h1 z3 z1 z2 h))
+    z3Invariant #c h0 h1 z3 z1 h))
 
-let computeZ3_point_add #c p q h t5 = 
+let computeZ3_point_add #c p h t5 = 
     let h0 = ST.get() in 
   [@inline_let]
   let len = getCoordinateLenU64 c in 
 
   let z1 = sub p (size 2 *! len) len in 
-  (* let z2 = sub q (size 2 *! len) len in  *)
   let z3 = sub t5 (size 2 *! len) len in 
   
   let z1z2 = sub t5 (size 3 *! len) len in 
 
   montgomery_multiplication_buffer_by_one_dh #c z1 z1z2;
-  montgomery_multiplication_buffer_dh #c z1z2 h z3 
+  montgomery_multiplication_buffer_dh #c z1z2 h z3;
 
-(* 
+  let h1 = ST.get() in 
+
+  let hD = fromDomain #c (as_nat c h0 h) in 
+  let z1D = fromDomain #c (as_nat c h0 z1) in 
+  
+  let prime = getPrime c in 
+  let k = modp_inv2_prime (pow2 (getPower c)) prime in 
+
+
   calc (==)
   {
-    toDomain #c ((fromDomain #c (as_nat c h0 z1) * fromDomain #c (as_nat c h0 z2) % getPrime c) * fromDomain #c (as_nat c h0 h) % getPrime c);
-    (==) {lemma_mod_mul_distr_l (fromDomain #c (as_nat c h0 z1) * fromDomain #c (as_nat c h0 z2)) (fromDomain #c (as_nat c h0 h)) (getPrime c)}
-    toDomain #c (fromDomain #c (as_nat c h0 z1) * fromDomain #c (as_nat c h0 z2) * fromDomain #c (as_nat c h0 h) % getPrime c);}
+    as_nat c h1 z3;
+    (==) {}
+    toDomain #c (fromDomain #c z1D * hD % prime);
+    (==) {lemmaFromDomain #c #DH z1D}
+    toDomain #c (z1D * (1 * k) % prime * hD % prime);
+    (==) {lemma_mod_mul_distr_r z1D (1 * k) prime}
+    toDomain #c (z1D * (1 * k % prime) % prime * hD % prime);
+    (==) {lemmaFromDomain #c #DH 1}
+    toDomain #c (z1D * fromDomain #c 1 % prime * hD % prime);
+    (==) {lemma_mod_mul_distr_l (z1D * fromDomain #c 1) hD prime}
+    toDomain #c (z1D * fromDomain #c 1 * hD % prime);
+    
+  }
 
- *)
 
 inline_for_extraction noextract
 val copy_result_point_add: #c: curve 
@@ -459,19 +502,25 @@ val copy_result_point_add: #c: curve
   Stack unit 
   (requires fun h -> live h t5 /\ live h p /\ live h q /\ live h result /\
     eq_or_disjoint p result /\ disjoint t5 result /\ 
-    point_eval c h q /\ point_eval c h p /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc t5; loc p; loc q])
+    point_aff_eval c h q /\ point_eval c h p /\ (
+    
+    let len = getCoordinateLenU64 c in 
+    let x3_out = gsub t5 (size 0) len in 
+    let y3_out = gsub t5 len len in 
+    let z3_out = gsub t5 (size 2 *! len) len in 
+    felem_eval c h x3_out /\ felem_eval c h y3_out /\ felem_eval c h z3_out /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc t5; loc p; loc q]))
   (ensures fun h0 _ h1 -> 
     let x3_out, y3_out, z3_out = getXYZ #c t5 in 
     modifies (loc t5 |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
-    if point_z_as_nat c h0 q = 0 then 
+    if isPointAtInfinityAffine (point_affine_as_nat c h0 q) then
       point_x_as_nat c h1 result == point_x_as_nat c h0 p /\
       point_y_as_nat c h1 result == point_y_as_nat c h0 p /\ 
       point_z_as_nat c h1 result == point_z_as_nat c h0 p
     else if point_z_as_nat c h0 p = 0 then 
-      point_x_as_nat c h1 result == point_x_as_nat c h0 q /\
-      point_y_as_nat c h1 result == point_y_as_nat c h0 q /\ 
-      point_z_as_nat c h1 result == point_z_as_nat c h0 q
+      point_x_as_nat c h1 result == point_affine_x_as_nat c h0 q /\
+      point_y_as_nat c h1 result == point_affine_y_as_nat c h0 q /\ 
+      point_z_as_nat c h1 result == 1
     else 
       point_x_as_nat c h1 result == as_nat c h0 x3_out /\ 
       point_y_as_nat c h1 result == as_nat c h0 y3_out /\ 
@@ -487,22 +536,20 @@ let copy_result_point_add #c t5 p q result =
   let y3_out = sub t5 len len in 
   let z3_out = sub t5 (size 2 *! len) len in 
 
-  copy_point_conditional x3_out y3_out z3_out q p;
+  let temp = sub t5 (size 3 *! len) len in 
 
-
-
+  copy_point_conditional x3_out y3_out z3_out q p temp;
   copy_point_conditional1 x3_out y3_out z3_out p q;
 
-
-  (* copy_point_conditional x3_out y3_out z3_out p q; *)
-  concat3 len x3_out len y3_out len z3_out result;
-  admit()
+  copy (sub result (size 0) len) x3_out;
+  copy (sub result len len) y3_out;
+  copy (sub result (size 2 *! len) len) z3_out
 
 
 
 inline_for_extraction noextract
 val computeXYZ: #c: curve -> result: point c 
-  -> p: point c -> q: point c 
+  -> p: point c -> q: pointAffine c 
   -> u1: felem c -> u2: felem c -> s1: felem c -> s2: felem c 
   -> r: felem c -> h: felem c -> uh: felem c -> hCube: felem c 
   -> t5 : lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
@@ -510,7 +557,7 @@ val computeXYZ: #c: curve -> result: point c
   (requires fun h0 -> 
     live h0 result /\ live h0 t5 /\ live h0 p /\ live h0 q /\ live h0 u1 /\ live h0 u2 /\ live h0 s1 /\ live h0 s2 /\ 
     live h0 r /\ live h0 h /\ live h0 uh /\ live h0 hCube /\
-    point_eval c h0 p /\ point_eval c h0 q /\ 
+    point_eval c h0 p /\ point_aff_eval c h0 q /\ 
     eq_or_disjoint p q /\ eq_or_disjoint s1 hCube /\ 
     felem_eval c h0 r /\ felem_eval c h0 s1 /\ felem_eval c h0 h /\ 
     uhInvariant #c h0 uh h u1 /\ hCubeInvariant #c h0 hCube h /\
@@ -522,10 +569,10 @@ val computeXYZ: #c: curve -> result: point c
 
     let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
     let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-    let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
+    let qX, qY = point_affine_x_as_nat c h0 q, point_affine_y_as_nat c h0 q in 
 
     let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
-    let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
+    let qxD, qyD = fromDomain #c qX, fromDomain #c qY in 
     let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
 
     let rD = fromDomain #c (as_nat c h0 r) in  
@@ -534,32 +581,30 @@ val computeXYZ: #c: curve -> result: point c
     let u1D = fromDomain #c (as_nat c h0 u1) in  
 
     point_eval c h1 result /\ (
-    if qzD = 0 then 
+    if qxD = 0 && qyD = 0 then 
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
     else if pzD = 0 then 
-      x3D == qxD /\  y3D == qyD /\ z3D == qzD
+      x3D == qxD /\  y3D == qyD /\ z3D == 1
     else 
       x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
       y3 == toDomain #c (((hD * hD * u1D - fromDomain #c x3) * rD - s1D * hD * hD * hD) % prime) /\
-      z3 == toDomain #c (pzD * qzD * hD % prime))))
+      z3 == toDomain #c (pzD * fromDomain #c 1 * hD % prime))))
 
 let computeXYZ #c result p q u1 u2 s1 s2 r h uh hCube t5 = 
-    let h0 = ST.get() in
     let h0 = ST.get() in 
   computex3_point_add #c hCube uh r t5; 
-  computeY3_point_add #c s1 hCube uh r t5;
+  computeY3_point_add #c s1 hCube uh r t5; 
     let h1 = ST.get() in 
-    lemma_coord_eval c h0 h1 p;
-    lemma_coord_eval c h0 h1 q;
-  computeZ3_point_add #c p q h t5;
+    lemma_coord_eval c h0 h1 p; 
+    lemma_coord_affine_eval c h0 h1 q; 
+  computeZ3_point_add #c p h t5;
     let h2 = ST.get() in
     lemma_coord_eval c h1 h2 p;
-    lemma_coord_eval c h1 h2 q; 
+    lemma_coord_affine_eval c h1 h2 q; 
   copy_result_point_add t5 p q result;
-    let h3 = ST.get() in
-    lemma_coord_eval c h0 h1 p;
-    lemma_coord_eval c h0 h1 q;
-    lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h2 h3
+    let h3 = ST.get() in 
+    lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h2 h3;
+    admit()
 
 
 inline_for_extraction noextract
@@ -625,17 +670,17 @@ let _point_add_if_second_branch_impl #c result p q x3hCube t5 =
 
 
 inline_for_extraction noextract
-val _point_add0: #c: curve -> p: point c -> q: point c -> t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
+val _point_add0: #c: curve -> p: point c -> q: pointAffine c 
+  -> t12: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> 
   Stack unit 
   (requires fun h0 -> live h0 p /\ live h0 q /\ live h0 t12 /\
     LowStar.Monotonic.Buffer.all_disjoint [loc t12; loc p; loc q] /\ 
-    point_eval c h0 p /\ point_eval c h0 q)
+    point_eval c h0 p /\ point_aff_eval c h0 q)
   (ensures fun h0 _ h1 -> 
-    modifies (loc t12) h0 h1 /\ point_eval c h1 p /\ point_eval c h1 q /\  (
-    let u1, u2, s1, s2, h, r, uh, hCube = getU1HCube t12 in 
-    
-    u1Invariant #c h0 h1 u1 p q /\ u2Invariant #c h0 h1 u2 p q /\ 
-    s1Invariant #c h0 h1 s1 p q /\ s2Invariant #c h0 h1 s2 p q /\ 
+    modifies (loc t12) h0 h1 /\ (
+    let u1, u2, s1, s2, h, r, uh, hCube = getU1HCube t12 in  
+    u1Invariant #c h0 h1 u1 p /\ u2Invariant #c h0 h1 u2 p q /\ 
+    s1Invariant #c h0 h1 s1 p /\ s2Invariant #c h0 h1 s2 p q /\ 
     hInvariant #c h1 h u1 u2 /\ rInvariant #c h1 r s1 s2 /\
     uhInvariant #c h1 uh h u1 /\ hCubeInvariant #c h1 hCube h))
       
@@ -646,9 +691,9 @@ let _point_add0 #c p q t12 =
   
   move_from_jacobian_coordinates p q t12;
   compute_common_params_point_add t12;
-  let h1 = ST.get() in
-  lemma_point_eval c h0 h1 p;
-  lemma_point_eval c h0 h1 q 
+  let h1 = ST.get() in 
+  lemma_coord_eval c h0 h1 p;
+  lemma_coord_affine_eval c h0 h1 q 
 
 
 inline_for_extraction noextract

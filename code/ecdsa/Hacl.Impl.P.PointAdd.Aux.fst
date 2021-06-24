@@ -1,6 +1,5 @@
 module Hacl.Impl.P.PointAdd.Aux
 
-
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -82,27 +81,31 @@ let getU1HCube #c tempBuffer12 =
 
 
 let u1Invariant (#c: curve) (h0: mem) (h1: mem) (u1: felem c) (p: point c) (q: point c)  =  
+  point_eval c h0 p /\ point_eval c h0 q /\ (
   let pxD = fromDomain #c (point_x_as_nat c h0 p) in 
   let qzD = fromDomain #c (point_z_as_nat c h0 q) in 
-  felem_eval c h1 u1 /\ as_nat c h1 u1 == toDomain #c (qzD * qzD * pxD % getPrime c)
+  felem_eval c h1 u1 /\ as_nat c h1 u1 == toDomain #c (qzD * qzD * pxD % getPrime c))
 
 
 let u2Invariant (#c: curve) (h0: mem) (h1: mem) (u2: felem c) (p: point c) (q: point c)  =  
+  point_eval c h0 p /\ point_eval c h0 q /\ (
   let pzD = fromDomain #c (point_z_as_nat c h0 p) in 
   let qxD = fromDomain #c (point_x_as_nat c h0 q) in 
-  felem_eval c h1 u2 /\ as_nat c h1 u2 == toDomain #c (pzD * pzD * qxD % getPrime c)
+  felem_eval c h1 u2 /\ as_nat c h1 u2 == toDomain #c (pzD * pzD * qxD % getPrime c))
 
 
 let s1Invariant (#c: curve) (h0: mem) (h1: mem) (s1: felem c) (p: point c) (q: point c)  = 
+  point_eval c h0 p /\ point_eval c h0 q /\ (
   let pyD = fromDomain #c (point_y_as_nat c h0 p) in 
   let qzD = fromDomain #c (point_z_as_nat c h0 q) in 
-  felem_eval c h1 s1 /\ as_nat c h1 s1 == toDomain #c (qzD * qzD * qzD * pyD % getPrime c)
+  felem_eval c h1 s1 /\ as_nat c h1 s1 == toDomain #c (qzD * qzD * qzD * pyD % getPrime c))
 
 
 let s2Invariant (#c: curve) (h0: mem) (h1: mem) (s2: felem c) (p: point c) (q: point c)  = 
+  point_eval c h0 p /\ point_eval c h0 q /\ (
   let pzD = fromDomain #c (point_z_as_nat c h0 p) in 
   let qyD = fromDomain #c (point_y_as_nat c h0 q) in 
-  felem_eval c h1 s2 /\ as_nat c h1 s2 == toDomain #c (pzD * pzD * pzD * qyD % getPrime c)
+  felem_eval c h1 s2 /\ as_nat c h1 s2 == toDomain #c (pzD * pzD * pzD * qyD % getPrime c))
 
 
 let hInvariant (#c: curve) (h0: mem) (h: felem c) (u1: felem c) (u2: felem c) = 
@@ -159,32 +162,12 @@ let y3Invariant (#c: curve) (h0: mem) (h1: mem) (y3: felem c) (s1: felem c) (hCu
   as_nat c h1 y3 = toDomain #c (((uhD - x3D) * rD - s1D * hCubeD) % getPrime c)
 
 
-
-
 let z3Invariant (#c: curve) (h0: mem) (h1: mem) (z3: felem c) (z1: felem c) (z2: felem c) (h: felem c) = 
   let z1D = fromDomain #c (as_nat c h0 z1) in 
   let z2D = fromDomain #c (as_nat c h0 z2) in 
   let hD = fromDomain #c (as_nat c h0 h) in 
   felem_eval c h1 z3 /\ 
   as_nat c h1 z3 == toDomain #c (z1D * z2D * hD % getPrime c)
-
-
-
-val point_x_modifies_lemma: c: curve -> h0: mem -> h1 : mem -> q: point c -> 
-  Lemma (requires (point_eval c h0 q /\ as_seq h0 q == as_seq h1 q))
-  (ensures (point_x_as_nat c h0 q == point_x_as_nat c h1 q))
-
-let point_x_modifies_lemma c h0 h1 q = ()
-
-val point_y_modifies_lemma: c: curve -> h0: mem -> h1 : mem -> q: point c -> 
-  Lemma (requires (point_eval c h0 q /\as_seq h0 q == as_seq h1 q))
-  (ensures (point_y_as_nat c h0 q == point_y_as_nat c h1 q))
-
-let point_y_modifies_lemma c h0 h1 q = ()
-
-val lemma_point_eval: c: curve -> h0: mem -> h1: mem -> p: point c -> Lemma
-  (requires (point_eval c h0 p /\ as_seq h0 p == as_seq h1 p))
-  (ensures (point_eval c h1 p))
 
 
 val lemma_getZ_noChangeInState: c: curve -> h0: mem -> h1: mem -> p: point c -> 
@@ -206,12 +189,6 @@ val lemma_coord_eval: c: curve -> h0: mem -> h1 : mem -> p: point c ->
     point_y_as_nat c h0 p == point_y_as_nat c h1 p /\
     point_z_as_nat c h0 p == point_z_as_nat c h1 p))  
 
-
-let lemma_point_eval c h0 h1 p = 
-  point_x_modifies_lemma c h0 h1 p;
-  point_y_modifies_lemma c h0 h1 p
-
-
 let lemma_coord_eval c h0 h1 p = 
   let len = getCoordinateLenU64 c in 
   let f = gsub p (size 2 *! len) len in 
@@ -225,30 +202,6 @@ val lemma_point_eval_if_zero: c: curve -> p: point c -> h: mem -> Lemma
 let lemma_point_eval_if_zero c p h = ()
 
 
-val lemma_point_add_if_0: #c: curve -> p: point c -> result: point c 
-  -> h0: mem {point_eval c h0 p} 
-  -> h2: mem {point_eval c h2 result}
-  -> 
-  Lemma (	
-    (point_x_as_nat c h2 result == point_x_as_nat c h0 p <==> fromDomain #c (point_x_as_nat c h2 result) == fromDomain #c (point_x_as_nat c h0 p)) /\
-    (point_x_as_nat c h2 result == point_x_as_nat c h0 p <==> fromDomain #c (point_x_as_nat c h2 result) == fromDomain #c (point_x_as_nat c h0 p)) /\
-    (point_x_as_nat c h2 result == point_x_as_nat c h0 p <==> fromDomain #c (point_x_as_nat c h2 result) == fromDomain #c (point_x_as_nat c h0 p)))
-
-
-let lemma_point_add_if_0 #c p result h0 h2 = 
-  lemmaFromDomain #c #DH (point_x_as_nat c h0 p);
-  lemmaFromDomain #c #DH (point_x_as_nat c h2 result);
-  Hacl.Impl.EC.Math.lemma_modular_multiplication #c (point_x_as_nat c h0 p) (point_x_as_nat c h2 result);
-
-  lemmaFromDomain #c #DH (point_y_as_nat c h0 p);
-  lemmaFromDomain #c #DH (point_y_as_nat c h2 result);
-  Hacl.Impl.EC.Math.lemma_modular_multiplication #c (point_y_as_nat c h0 p) (point_y_as_nat c h2 result);
-
-  lemmaFromDomain #c #DH (point_z_as_nat c h2 result);
-  Hacl.Impl.EC.Math.lemma_modular_multiplication #c (point_z_as_nat c h0 p) (point_z_as_nat c h2 result)
-
-
-
 val lemma_point_add_if: #c: curve -> p: point c -> q: point c  -> result: point c
   -> t5: lbuffer uint64 (size 5 *! getCoordinateLenU64 c) 
   -> u1: felem c -> u2: felem c -> s1: felem c -> s2: felem c 
@@ -258,7 +211,7 @@ val lemma_point_add_if: #c: curve -> p: point c -> q: point c  -> result: point 
     (requires (
     let z1, z2 = getZ p, getZ q in 
     let x3_out, y3_out, z3_out = getXYZ #c t5 in 
-    point_eval c h0 p /\ point_eval c h0 q /\ 
+    point_eval c h0 p /\ point_eval c h0 q /\ point_eval c h2 result /\
     
     uhInvariant #c h0 uh h u1 /\
     hCubeInvariant #c h0 hCube h /\
@@ -319,12 +272,9 @@ let lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h1 h2 =
   let qxD, qyD, qzD = fromDomain qX, fromDomain qY, fromDomain qZ in 
   let x3D, y3D, z3D = fromDomain x3, fromDomain y3, fromDomain z3 in 
 
-  lemma_point_add_if_0 #c p result h0 h2;
-  lemma_point_add_if_0 #c q result h0 h2;
 
-
-(*   Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 q);
-  Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 p); *)
+  Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 q);
+  Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c (point_z_as_nat c h0 p); 
 
   lemmaFromDomain #c #DH (point_z_as_nat c h0 p);
   lemmaFromDomain #c #DH (point_z_as_nat c h0 q);
