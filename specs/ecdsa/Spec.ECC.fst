@@ -165,30 +165,37 @@ let _point_add #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : po
 
 
 noextract
-let _point_add_mixed #curve (p:point_nat_prime #curve) (q:point_affine_nat_prime #curve) : point_nat_prime #curve =
+let _point_add_mixed #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
   let prime = getPrime curve in 
   let (x1, y1, z1) = p in
-  let (x2, y2) = q in
+  let (x2, y2, z2) = q in
 
+  let z2z2 = z2 * z2 in
   let z1z1 = z1 * z1 in
 
+  let u1 = x1 * z2z2 % prime in
   let u2 = x2 * z1z1 % prime in
+
+  let s1 = y1 * z2 * z2z2 % prime in
   let s2 = y2 * z1 * z1z1 % prime in
 
-  let h = (u2 - x1) % prime in
-  let r = (s2 - y1) % prime in
+  let h = (u2 - u1) % prime in
+  let r = (s2 - s1) % prime in
 
   let rr = r * r in
   let hh = h * h in
   let hhh = h * h * h in
 
-  let x3 = (rr - hhh - 2 * x1 * hh) % prime in
-  let y3 = (r * (x1 * hh - x3) - y1 * hhh) % prime in
-  let z3 = (h * z1 * 1) % prime in
-  if z1 = 0 then
-    (x2, y2, 1)
+  let x3 = (rr - hhh - 2 * u1 * hh) % prime in
+  let y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime in
+  let z3 = (h * z1 * z2) % prime in
+  if isPointAtInfinityAffine (x2, y2) then
+    (x1, y1, z1)
   else
-    (x3, y3, z3)
+    if z1 = 0 then
+      (x2, y2, z2)
+    else
+      (x3, y3, z3)
 
 
 

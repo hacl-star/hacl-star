@@ -399,8 +399,7 @@ let l_main #c a h0 =
 
 
 
-val l0: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> h0: mem -> p: point c 
-  -> q: point c ->
+val l0: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> h0: mem -> 
   Lemma (
     let a0 = gsub a (size 0) (size 8 *! getCoordinateLenU64 c) in 
     let a1 = gsub a (size 8 *! getCoordinateLenU64 c) (size 4 *! getCoordinateLenU64 c) in 
@@ -410,7 +409,8 @@ val l0: #c: curve -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) -> h0:
     u1_ == u1 /\ u2_ == u2 /\ s1_ == s1 /\ s2_ == s2 /\ h_ == h /\ r_ == r /\ uh_ == uh /\ 
       hCube_ == hCube)
 
-let l0 #c a h0 p q = l_main #c a h0 
+let l0 #c a h0 = l_main #c a h0 
+
 
 val lemma_disjoint_invariant: #c: curve 
   -> a: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) 

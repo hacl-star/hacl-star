@@ -580,15 +580,14 @@ val computeXYZ: #c: curve -> result: point c
     let s1D = fromDomain #c (as_nat c h0 s1) in 
     let u1D = fromDomain #c (as_nat c h0 u1) in  
 
-    point_eval c h1 result /\ (
     if qxD = 0 && qyD = 0 then 
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
     else if pzD = 0 then 
-      x3D == qxD /\  y3D == qyD /\ z3D == 1
+      x3D == qxD /\  y3D == qyD /\ z3D == fromDomain #c 1
     else 
       x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
       y3 == toDomain #c (((hD * hD * u1D - fromDomain #c x3) * rD - s1D * hD * hD * hD) % prime) /\
-      z3 == toDomain #c (pzD * fromDomain #c 1 * hD % prime))))
+      z3 == toDomain #c (pzD * fromDomain #c 1 * hD % prime)))
 
 let computeXYZ #c result p q u1 u2 s1 s2 r h uh hCube t5 = 
     let h0 = ST.get() in 
@@ -603,31 +602,29 @@ let computeXYZ #c result p q u1 u2 s1 s2 r h uh hCube t5 =
     lemma_coord_affine_eval c h1 h2 q; 
   copy_result_point_add t5 p q result;
     let h3 = ST.get() in 
-    lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h2 h3;
-    admit()
+    lemma_point_add_if #c p q result t5 u1 u2 s1 s2 r h uh hCube h0 h2 h3
 
 
 inline_for_extraction noextract
 val _point_add_if_second_branch_impl: #c: curve -> result: point c 
-  -> p: point c -> q: point c 
+  -> p: point c -> q: pointAffine c 
   -> x3hCube: lbuffer uint64 (size 12 *! getCoordinateLenU64 c) 
   -> t5 : lbuffer uint64 (size 5 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h0 -> 
     let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube x3hCube in
     live h0 result /\ live h0 p /\ live h0 q /\ live h0 x3hCube /\ live h0 t5 /\ 
-    point_eval c h0 p /\ point_eval c h0 q /\
+    point_eval c h0 p /\ point_aff_eval c h0 q /\
     eq_or_disjoint p result /\ disjoint result t5 /\ disjoint p q /\
     disjoint t5 x3hCube /\  disjoint t5 p /\ disjoint t5 q /\
     felem_eval c h0 r /\ felem_eval c h0 s1 /\ felem_eval c h0 h /\ 
     uhInvariant #c h0 uh h u1 /\ hCubeInvariant #c h0 hCube h)
   (ensures fun h0 _ h1 -> modifies (loc t5 |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
     let prime = getPrime c in 
-
     let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube x3hCube in 
   
     let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
     let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-    let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
+    let qX, qY, qZ = point_affine_x_as_nat c h0 q, point_affine_y_as_nat c h0 q, 1 in 
 
     let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
     let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
@@ -637,16 +634,15 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c
     let hD = fromDomain #c (as_nat c h0 h) in 
     let s1D = fromDomain #c (as_nat c h0 s1) in 
     let u1D = fromDomain #c (as_nat c h0 u1) in  
-
-    point_eval c h1 result /\ (
-    if qzD = 0 then 
+    
+    if qxD = 0 && qyD = 0 then 
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
     else if pzD = 0 then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
       x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
       y3 == toDomain #c (((hD * hD * u1D - fromDomain  #c x3) * rD - s1D * hD * hD * hD) % prime) /\
-      z3 == toDomain #c (pzD * qzD * hD % prime))))
+      z3 == toDomain #c (pzD * qzD * hD % prime)))
 
 
 let _point_add_if_second_branch_impl #c result p q x3hCube t5 = 
@@ -654,7 +650,7 @@ let _point_add_if_second_branch_impl #c result p q x3hCube t5 =
   let len = getCoordinateLenU64 c in 
   let h0 = ST.get() in 
 
-  l0 #c x3hCube h0 p q;
+  l0 #c x3hCube h0;
 
   let h = sub x3hCube (size 8 *! len) len in 
   let r = sub x3hCube (size 9 *! len) len in 
@@ -697,15 +693,18 @@ let _point_add0 #c p q t12 =
 
 
 inline_for_extraction noextract
-val point_add_mixed_: #c: curve -> p: point c -> q: point c -> result: point c 
+val point_add_mixed_: #c: curve -> p: point c -> q: pointAffine c -> result: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h -> 
     live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
     eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
     disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
-    point_eval c h p /\ point_eval c h q)
-  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\
-    fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 q)))
+    point_eval c h p /\ point_aff_eval c h q)
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
+    let qX, qY, qZ = point_affine_x_as_nat c h0 q, point_affine_y_as_nat c h0 q, 1 in 
+    let qD = fromDomainPoint #c #DH (qX, qY, qZ) in 
+    fromDomainPoint #c #DH (point_as_nat c h1 result) == 
+    _point_add_mixed #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) qD))
 
 
 let point_add_mixed_ #c p q result tempBuffer = 
@@ -715,22 +714,21 @@ let point_add_mixed_ #c p q result tempBuffer =
   
   _point_add0 #c p q t12;
   let h1 = ST.get() in 
+    lemma_coord_eval c h0 h1 p;
+    lemma_coord_affine_eval c h0 h1 q;
   _point_add_if_second_branch_impl result p q t12 t5;
-  
+
   let h2 = ST.get() in 
-  lemma_coord_eval c h0 h1 p;
-  lemma_coord_eval c h0 h1 q;
 
   let prime = getPrime c in 
 
   let x3, y3, z3 = point_x_as_nat c h2 result, point_y_as_nat c h2 result, point_z_as_nat c h2 result in
   let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-  let qX, qY, qZ = point_x_as_nat c h0 q, point_y_as_nat c h0 q, point_z_as_nat c h0 q in 
+  let qX, qY, qZ = point_affine_x_as_nat c h0 q, point_affine_y_as_nat c h0 q, 1 in 
 
   let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
   let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
   let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
-
 
   calc (==)
   {
@@ -788,10 +786,86 @@ let point_add_mixed_ #c p q result tempBuffer =
     (pzD * qzD * hD % prime);
     (==) {_ by (canon())}
     (hD * pzD * qzD) % prime;
-  }
+  };
+
+  assert( 
+    let z1z1 = pzD * pzD in 
+    let z2z2 = qzD * qzD in 
+    let u1D = pxD * z2z2 % prime in
+    let u2D = qxD * z1z1 % prime in    
+
+    let s1D = pyD * qzD * (qzD * qzD) % prime in 
+    let s2D = qyD * pzD * (pzD * pzD) % prime in 
+      
+    let hD = (u2D - u1D) % prime in
+    let rD = (s2D - s1D) % prime in
+    
+    if qxD = 0 && qyD = 0 then 
+      x3D == pxD /\ y3D == pyD /\ z3D == pzD
+    else if pzD = 0 then 
+      x3D == qxD /\  y3D == qyD /\ z3D == qzD
+    else 
+      x3D == (((rD * rD) - (hD * hD * hD) - (2 * u1D * (hD * hD))) % prime) /\ 
+      y3D == ((rD * (u1D * (hD * hD) - fromDomain  #c x3) - s1D * (hD * hD * hD)) % prime) /\
+      z3D == (hD * pzD * qzD % prime))
+
+[@CInline]
+val point_add_mixed_p256: p: point P256 -> q: pointAffine P256 -> result: point P256
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P256) -> 
+  Stack unit (requires fun h -> 
+    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
+    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
+    point_eval P256 h p /\ point_aff_eval P256 h q)
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval P256 h1 result /\ (
+    let qX, qY, qZ = point_affine_x_as_nat P256 h0 q, point_affine_y_as_nat P256 h0 q, 1 in 
+    let qD = fromDomainPoint #P256 #DH (qX, qY, qZ) in 
+    fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == 
+    _point_add_mixed #P256 (fromDomainPoint #P256 #DH (point_as_nat P256 h0 p)) qD))
 
 
 let point_add_mixed_p256 = point_add_mixed_ #P256
 
 
-let point_add_mixed #c p q result tempBuffer = point_add_mixed_p256 p q result tempBuffer
+[@CInline]
+val point_add_mixed_p384: p: point P384 -> q: pointAffine P384 -> result: point P384
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P384) -> 
+  Stack unit (requires fun h -> 
+    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
+    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
+    point_eval P384 h p /\ point_aff_eval P384 h q)
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval P384 h1 result /\ (
+    let qX, qY, qZ = point_affine_x_as_nat P384 h0 q, point_affine_y_as_nat P384 h0 q, 1 in 
+    let qD = fromDomainPoint #P384 #DH (qX, qY, qZ) in 
+    fromDomainPoint #P384 #DH (point_as_nat P384 h1 result) == 
+    _point_add_mixed #P384 (fromDomainPoint #P384 #DH (point_as_nat P384 h0 p)) qD))
+
+
+let point_add_mixed_p384 = point_add_mixed_ #P384
+
+
+[@CInline]
+val point_add_mixed_generic: p: point Default -> q: pointAffine Default -> result: point Default
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 Default) -> 
+  Stack unit (requires fun h -> 
+    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
+    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
+    point_eval Default h p /\ point_aff_eval Default h q)
+  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval Default h1 result /\ (
+    let qX, qY, qZ = point_affine_x_as_nat Default h0 q, point_affine_y_as_nat Default h0 q, 1 in 
+    let qD = fromDomainPoint #Default #DH (qX, qY, qZ) in 
+    fromDomainPoint #Default #DH (point_as_nat Default h1 result) == 
+    _point_add_mixed #Default (fromDomainPoint #Default #DH (point_as_nat Default h0 p)) qD))
+
+
+let point_add_mixed_generic = point_add_mixed_ #Default
+
+
+
+let point_add_mixed #c p q result tempBuffer = 
+  match c with 
+  |P256 -> point_add_mixed_p256 p q result tempBuffer
+  |P384 -> point_add_mixed_p384 p q result tempBuffer
+  |Default -> point_add_mixed_generic p q result tempBuffer

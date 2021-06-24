@@ -541,7 +541,7 @@ let _point_add_if_second_branch_impl #c result p q x3hCube t5 =
   let len = getCoordinateLenU64 c in 
   let h0 = ST.get() in 
 
-  l0 #c x3hCube h0 p q;
+  l0 #c x3hCube h0;
 
   let h = sub x3hCube (size 8 *! len) len in 
   let r = sub x3hCube (size 9 *! len) len in 
