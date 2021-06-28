@@ -1,6 +1,5 @@
 module Hacl.Impl.EC.ScalarMult.Radix
 
-
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -17,7 +16,13 @@ open Hacl.Spec.EC.Definition
 open Hacl.Impl.EC.PointDouble
 
 
+open Hacl.Spec.MontgomeryMultiplication
+
 #set-options " --z3rlimit 200"
+
+open Hacl.Impl.EC.Masking.ScalarAccess
+open Hacl.Impl.EC.Precomputed
+
 
 
 
@@ -35,7 +40,7 @@ val montgomery_ladder_step_radix_precomputed: #c: curve ->
 
 
 let montgomery_ladder_step_radix_precomputed #c p tempBuffer scalar i =  
-  let bits: uint32 = getScalar_4 scalar i in 
+  let bits = getScalar_4_byBit #c scalar i in 
 
   let pointToAdd = create (size 8) (u64 0) in 
   getPointPrecomputedMixed #c scalar i pointToAdd;
@@ -63,7 +68,7 @@ let montgomery_ladder_2_precomputed #c #a p scalar tempBuffer =
   let inv h (i: nat {i <= 64}) = True in 
 
   recall_contents points_radix_16 (Lib.Sequence.of_list points_radix_16_list_p256);
-  let bits: uint32 = getScalar_4 scalar 0 in 
+  let bits = getScalar_4_byBit #c scalar 0 in 
   let pointToStart = sub (points_radix_16) (bits *. size 8) (size 8) in 
 
   copy (sub p (size 0) (size 8)) pointToStart;
@@ -96,9 +101,9 @@ val scalar_multiplication_t_0: #c: curve -> #t:buftype -> q: point c -> p: point
     pD == r0))
 
 
-let scalar_multiplication_t_0 #c q p result scalar tempBuffer = 
-  uploadStartPoints q p result; 
-  montgomery_ladder q result scalar tempBuffer
+let scalar_multiplication_t_0 #c q p result scalar tempBuffer = ()
+  (* uploadStartPoints q p result;  *)
+  (* montgomery_ladder q result scalar tempBuffer *)
 
 
 inline_for_extraction noextract
@@ -117,7 +122,7 @@ val secretToPublic_0: #c: curve -> #t: buftype -> q: point c -> result: point c 
 
 
 let secretToPublic_0 #c q result scalar tempBuffer = 
-  uploadStartPointsS2P q result; 
+  (* uploadStartPointsS2P q result;  *)
 (*   montgomery_ladder q result scalar tempBuffer *)
-  Hacl.Impl.EC.Masking.ScalarAccess.montgomery_ladder_2_precomputed result scalar tempBuffer;
+  montgomery_ladder_2_precomputed result scalar tempBuffer;
   copy q result
