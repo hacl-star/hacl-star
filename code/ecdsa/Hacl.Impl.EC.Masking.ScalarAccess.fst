@@ -77,8 +77,8 @@ val get_high_part: a:uint64 -> r:uint32{uint_v r == uint_v a / pow2 32}
 let get_high_part a = to_u32 (shift_right a (size 32))
 
 inline_for_extraction noextract
-val get_high_part_24: a:uint32 -> r:uint32{uint_v r == uint_v a / pow2 8}
-let get_high_part_24 a = to_u32 (shift_right a (size 8))
+val get_high_part_28: a:uint32 -> r:uint32{uint_v r == uint_v a / pow2 4}
+let get_high_part_28 a = to_u32 (shift_right a (size 4))
 
 
 inline_for_extraction noextract
@@ -87,8 +87,8 @@ let get_low_part a = to_u32 a
 
 
 inline_for_extraction noextract
-val get_low_part_8: a:uint32 -> r:uint8{uint_v r == uint_v a % pow2 8}
-let get_low_part_8 a = to_u8 a
+val get_low_part_4: a:uint32 -> r:uint8{uint_v r == uint_v a % pow2 4}
+let get_low_part_4 a = logand_mask a (u32 0xf) 4; to_u8 (logand a (u32 0xf))
 
 
 val append_uint: #n1:nat -> #n2:nat
@@ -123,14 +123,14 @@ let to_vec_low_high a =
   to_vec_append #32 #32 (a % pow2 32) (a / pow2 32)
 
 
-val to_vec_low_high_8: a:UInt.uint_t 32 -> Lemma ( 
-  FStar.Math.Lemmas.pow2_minus 32 8; 
-  UInt.to_vec a == Seq.append (UInt.to_vec #24 (a / pow2 8)) (UInt.to_vec #8 (a % pow2 8)))
+val to_vec_low_high_4: a:UInt.uint_t 32 -> Lemma ( 
+  FStar.Math.Lemmas.pow2_minus 32 4; 
+  UInt.to_vec a == Seq.append (UInt.to_vec #28 (a / pow2 4)) (UInt.to_vec #4 (a % pow2 4)))
 
-let to_vec_low_high_8 a =
-  FStar.Math.Lemmas.pow2_minus 32 8; 
-  assert (a == append_uint #8 #24 (a % pow2 8) (a / pow2 8));
-  to_vec_append #8 #24 (a % pow2 8) (a / pow2 8)
+let to_vec_low_high_4 a =
+  FStar.Math.Lemmas.pow2_minus 32 4; 
+  assert (a == append_uint #4 #28 (a % pow2 4) (a / pow2 4));
+  to_vec_append #4 #28 (a % pow2 4) (a / pow2 4)
 
 
 val logand_vec_append (#n1 #n2: pos) (a1 b1: BV.bv_t n1) (a2 b2: BV.bv_t n2) :
@@ -254,24 +254,24 @@ let rec lemma_logand_zero n =
 
  
 val lemma_and_both_parts_32: a: uint32 -> b: uint32 -> Lemma (
-  let a0, a1 = get_low_part_8 a, get_high_part_24 a in 
-  let b0, b1 = get_low_part_8 b, get_high_part_24 b in 
-  v (logand a1 b1) * pow2 8 + v (logand a0 b0) == v (logand a b))
+  let a0, a1 = get_low_part_4 a, get_high_part_28 a in 
+  let b0, b1 = get_low_part_4 b, get_high_part_28 b in 
+  v (logand a1 b1) * pow2 4 + v (logand a0 b0) == v (logand a b))
 
 let lemma_and_both_parts_32 a b = 
-  to_vec_low_high_8 (v a);
-  to_vec_low_high_8 (v b);
+  to_vec_low_high_4 (v a);
+  to_vec_low_high_4 (v b);
 
-  FStar.Math.Lemmas.pow2_minus 32 8; 
+  FStar.Math.Lemmas.pow2_minus 32 4; 
   
-  let a0, a1 = get_low_part_8 a, get_high_part_24 a in 
-  let b0, b1 = get_low_part_8 b, get_high_part_24 b in 
+  let a0, a1 = get_low_part_4 a, get_high_part_28 a in 
+  let b0, b1 = get_low_part_4 b, get_high_part_28 b in 
 
-  let a0_ = UInt.to_vec #8 (v a0) in
-  let a1_ = UInt.to_vec #24 (v a1) in
+  let a0_ = UInt.to_vec #4 (v a0) in
+  let a1_ = UInt.to_vec #28 (v a1) in
 
-  let b0_ = UInt.to_vec #8 (v b0) in
-  let b1_ = UInt.to_vec #24 (v b1) in
+  let b0_ = UInt.to_vec #4 (v b0) in
+  let b1_ = UInt.to_vec #28 (v b1) in
 
   logand_vec_append a1_ b1_ a0_ b0_;
 
@@ -286,22 +286,42 @@ let lemma_and_both_parts_32 a b =
   logand_spec a0 b0;
   logand_spec a1 b1;
 
-  let zero = UInt.to_vec #8 0 in 
+  let zero = UInt.to_vec #4 0 in 
 
-  to_vec_append #24 #8 (v a1) 0;
-  to_vec_append #24 #8 (v b1) 0;
-  logand_vec_append zero zero  (UInt.to_vec #24 (v a1)) (UInt.to_vec #24 (v b1));
+  to_vec_append #28 #4 (v a1) 0;
+  to_vec_append #28 #4 (v b1) 0;
+
+
+  logand_vec_append zero zero  (UInt.to_vec #28 (v a1)) (UInt.to_vec #28 (v b1));
 
   calc (==) {
-    UInt.from_vec (BV.logand_vec #32 (Seq.append zero (UInt.to_vec #24 (v a1))) (Seq.append zero (UInt.to_vec #24 (v b1))));
+    UInt.from_vec (BV.logand_vec #32 (Seq.append zero (UInt.to_vec #28 (v a1))) (Seq.append zero (UInt.to_vec #28 (v b1))));
       (==) {}
-    UInt.from_vec (Seq.append (BV.logand_vec zero zero) (BV.logand_vec (UInt.to_vec #24 (v a1)) (UInt.to_vec #24 (v b1))));
-      (==) {lemma_logand_zero 8}
-    UInt.from_vec (zero_extend_vec #24 #8 (BV.logand_vec (UInt.to_vec #24 (v a1)) (UInt.to_vec #24 (v b1))));
-      (==) {lemma_zero_extend #24 #8 (UInt.from_vec (BV.logand_vec (UInt.to_vec #24 (v a1)) (UInt.to_vec #24 (v b1))))}
-    UInt.from_vec #24 (BV.logand_vec (UInt.to_vec #24 (v a1)) (UInt.to_vec #24 (v b1)));  
+    UInt.from_vec (Seq.append (BV.logand_vec zero zero) (BV.logand_vec (UInt.to_vec #28 (v a1)) (UInt.to_vec #28 (v b1))));
+      (==) {lemma_logand_zero 4}
+    UInt.from_vec (zero_extend_vec #28 #4 (BV.logand_vec (UInt.to_vec #28 (v a1)) (UInt.to_vec #28 (v b1))));
+      (==) {lemma_zero_extend #28 #4 (UInt.from_vec (BV.logand_vec (UInt.to_vec #28 (v a1)) (UInt.to_vec #28 (v b1))))}
+    UInt.from_vec #28 (BV.logand_vec (UInt.to_vec #28 (v a1)) (UInt.to_vec #28 (v b1)));  
   };
+
+
+  let zero = UInt.to_vec #4 0 in 
+
+  to_vec_append #4 #4 (v a0) 0;
+  to_vec_append #4 #4 (v b0) 0;
   
+  logand_vec_append zero zero  (UInt.to_vec #4 (v a0)) (UInt.to_vec #4 (v b0));
+
+  calc (==) {
+    UInt.from_vec (BV.logand_vec #8 (Seq.append zero (UInt.to_vec #4 (v a0))) (Seq.append zero (UInt.to_vec #4 (v b0))));
+      (==) {}
+    UInt.from_vec (Seq.append (BV.logand_vec zero zero) (BV.logand_vec (UInt.to_vec #4 (v a0)) (UInt.to_vec #4 (v b0))));
+      (==) {lemma_logand_zero 4}
+    UInt.from_vec (zero_extend_vec #4 #4 (BV.logand_vec (UInt.to_vec #4 (v a0)) (UInt.to_vec #4 (v b0))));
+      (==) {lemma_zero_extend #4 #4 (UInt.from_vec (BV.logand_vec (UInt.to_vec #4 (v a0)) (UInt.to_vec #4 (v b0))))}
+    UInt.from_vec #4 (BV.logand_vec (UInt.to_vec #4 (v a0)) (UInt.to_vec #4 (v b0)));
+  };
+
 
   UInt.append_lemma (BV.logand_vec a1_ b1_) (BV.logand_vec a0_ b0_)
 
@@ -348,10 +368,9 @@ let getScalar_4 #a scalar i =
       assert(v mask = 0xf0);
       assert(v result = v result0 / pow2 4);
       lemma_and_both_parts_32 word mask;
-      assert(v result0 == v (logand (get_high_part_16 word) (get_high_part_16 mask)) * pow2 16 + v (logand (get_low_part_16 word) (get_low_part_16 mask))); 
+      assume(v result0 == v (logand (get_high_part_24 word) (get_high_part_24 mask)) * pow2 8 + v (logand (get_low_part_8 word) (get_low_part_8 mask)));
 
-
-      assert(v (get_high_part_16 mask) == 0xf)
+      assert(v (get_low_part_8 mask) == 0)
       
       
       
