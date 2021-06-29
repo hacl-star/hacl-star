@@ -166,7 +166,7 @@ let secret_to_public k =
   _norm q
 
 
-val isPointOnCurve: point_nat_prime -> bool
+val isPointOnCurve: point_nat -> bool
 let isPointOnCurve p =
   let (x, y, z) = p in
   (y * y) % prime =

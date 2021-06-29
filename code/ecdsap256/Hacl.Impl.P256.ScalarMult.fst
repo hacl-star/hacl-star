@@ -27,8 +27,8 @@ open Hacl.Impl.P256.LowLevel.RawCmp
 
 val isCoordinateValidPrivate: p: point -> Stack uint64
   (requires fun h -> live h p /\ point_z_as_nat h p == 1)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ 
-    v r == pow2 64 - 1 <==> (point_x_as_nat h0 p < prime256 && point_y_as_nat h0 p < prime256 && point_z_as_nat h0 p < prime256))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (v r = 0 \/ v r == ones_v U64) /\ (
+    v r == pow2 64 - 1 <==> (point_x_as_nat h0 p < prime256 && point_y_as_nat h0 p < prime256 && point_z_as_nat h0 p < prime256)))
 
 let isCoordinateValidPrivate p = 
   push_frame();
@@ -50,12 +50,35 @@ let isCoordinateValidPrivate p =
   r  
 
 
+assume val isPointOnCurvePrivate: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack uint64
+  (requires fun h -> live h p)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (v r = 0 \/ v r == ones_v U64) /\ (
+    let point = as_nat h1 (gsub p (size 0) (size 4)), as_nat h1 (gsub p (size 4) (size 4)), as_nat h1 (gsub p (size 8) (size 4)) in 
+    v r == pow2 64 - 1 <==> isPointOnCurve point))
 
 
-(*
 
-[@ (Comment "  The pub(lic)_key input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over this variable.")] 
+
+
+val verifyQValidCurvePointPrivate: pubKeyAsPoint:point
+  -> tempBuffer:lbuffer uint64 (size 100) -> Stack uint64
+  (requires fun h -> 
+    live h pubKeyAsPoint /\
+    live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKeyAsPoint; loc tempBuffer] /\
+    point_z_as_nat h pubKeyAsPoint == 1)
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (v r = 0 \/ v r == ones_v U64) /\ (
+    v r == pow2 64 - 1 <==> verifyQValidCurvePointSpec (point_prime_to_coordinates (as_seq h0 pubKeyAsPoint))))
+
+
+let verifyQValidCurvePointPrivate pubKeyAsPoint tempBuffer =  
+  let coordinatesValid = isCoordinateValidPrivate pubKeyAsPoint in 
+  let belongsToCurve = isPointOnCurvePrivate pubKeyAsPoint tempBuffer in 
+  logand_lemma coordinatesValid belongsToCurve;
+  logand coordinatesValid belongsToCurve
+
+
+
 val _ecp256scalar_mult:
     result:lbuffer uint64 (size 12) 
   -> pubKey:lbuffer uint64 (size 8) 
@@ -82,13 +105,16 @@ val _ecp256scalar_mult:
 	uint_v r = 0))))
 
 
+#push-options "--ifuel 10 --fuel 10"
+
 let _ecp256scalar_mult result pubKey scalar =
   push_frame();
   let tempBuffer = create (size 100) (u64 0) in
   let publicKeyBuffer = create (size 12) (u64 0) in
   bufferToJac pubKey publicKeyBuffer;
-  let publicKeyCorrect = verifyQValidCurvePoint publicKeyBuffer tempBuffer in
-  if publicKeyCorrect then
+  let publicKeyCorrect_u64 = verifyQValidCurvePointPrivate publicKeyBuffer tempBuffer in
+  let publicKeyCorrect = Hacl.Impl.P256.LowLevel.RawCmp.unsafe_bool_of_u64 publicKeyCorrect_u64 in
+  if not publicKeyCorrect then
     begin
     scalarMultiplication publicKeyBuffer result scalar tempBuffer;
     let flag = isPointAtInfinityPrivate result in
