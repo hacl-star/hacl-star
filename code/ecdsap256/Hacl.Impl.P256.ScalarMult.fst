@@ -12,15 +12,16 @@ open Spec.P256
 open Spec.ECDSA
 open Spec.P256.Definitions
 open Hacl.Spec.P256.Felem
-open Spec.DH
-open Spec.ECDSAP256.Definition
-open Spec.P256.Lemmas
 
 open Hacl.Impl.P256.LowLevel 
-open Hacl.Impl.P256.Core
 open Hacl.Impl.P256.Signature.Common
 open Hacl.Impl.P256.LowLevel.PrimeSpecific
-open Hacl.Impl.P256.LowLevel.RawCmp
+
+open FStar.Math.Lemmas
+
+open FStar.Mul
+
+friend Hacl.Impl.P256.Signature.Common
 
 
 #set-options " --z3rlimit 200 --ifuel 0 --fuel 0"
@@ -50,15 +51,80 @@ let isCoordinateValidPrivate p =
   r  
 
 
-assume val isPointOnCurvePrivate: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack uint64
-  (requires fun h -> live h p)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (v r = 0 \/ v r == ones_v U64) /\ (
+val isPointOnCurvePrivate: p: point -> tempBuffer: lbuffer uint64 (size 100) -> Stack uint64
+  (requires fun h -> live h p /\ live h tempBuffer /\ disjoint p tempBuffer)
+  (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (v r = 0 \/ v r == ones_v U64) /\ (
     let point = as_nat h1 (gsub p (size 0) (size 4)), as_nat h1 (gsub p (size 4) (size 4)), as_nat h1 (gsub p (size 8) (size 4)) in 
     v r == pow2 64 - 1 <==> isPointOnCurve point))
 
+let isPointOnCurvePrivate p tempBuffer = 
+  let y2Buffer = sub tempBuffer (size 0) (size 4) in 
+  let xBuffer = sub tempBuffer (size 4) (size 4)  in 
+  let h0 = ST.get() in 
+  let x = sub p (size 0) (size 4) in 
+  let y = sub p (size 4) (size 4) in 
 
+  reduction_prime_2prime_impl y y2Buffer;
+  reduction_prime_2prime_impl x xBuffer;
+  
+  y_2 y2Buffer y2Buffer;
+  xcube_minus_x xBuffer xBuffer;
 
+  lemma_modular_multiplication_p256_2_d ((as_nat h0 y) * (as_nat h0 y) % prime256) 
+    (let x_ = as_nat h0 x in (x_ * x_ * x_ - 3 * x_ + Spec.P256.bCoordinateP256) % prime256);
 
+  let h1 = ST.get() in 
+  let r = compare_felem y2Buffer xBuffer in 
+
+  let open FStar.Tactics in 
+  let open FStar.Tactics.Canon in 
+
+  calc (==) {
+    (as_nat h0 y % prime256) * (as_nat h0 y % prime256) % prime256;
+    (==) {lemma_mod_mul_distr_l (as_nat h0 y) (as_nat h0 y % prime256) prime256}
+    as_nat h0 y * (as_nat h0 y % prime256) % prime256;
+    (==) {lemma_mod_mul_distr_r (as_nat h0 y) (as_nat h0 y) prime256}
+    as_nat h0 y * as_nat h0 y % prime256;
+  };
+
+  calc (==) {
+    ((as_nat h0 x % prime256) * (as_nat h0 x % prime256) * (as_nat h0 x % prime256) - 3 * (as_nat h0 x % prime256) + Spec.P256.bCoordinateP256) % prime256;
+    (==) {
+      lemma_mod_sub_distr ((as_nat h0 x % prime256) * (as_nat h0 x % prime256) * (as_nat h0 x % prime256) + Spec.P256.bCoordinateP256) (3 * (as_nat h0 x % prime256)) prime256;
+      lemma_mod_mul_distr_r 3 (as_nat h0 x) prime256;
+      lemma_mod_sub_distr ((as_nat h0 x % prime256) * (as_nat h0 x % prime256) * (as_nat h0 x % prime256) + Spec.P256.bCoordinateP256) (3 * (as_nat h0 x)) prime256
+    }
+    ((as_nat h0 x % prime256) * (as_nat h0 x % prime256) * (as_nat h0 x % prime256) - (3 * as_nat h0 x) + Spec.P256.bCoordinateP256) % prime256;
+    (==) {lemma_mod_add_distr (- (3 * as_nat h0 x) + Spec.P256.bCoordinateP256) ((as_nat h0 x % prime256) * (as_nat h0 x % prime256) * (as_nat h0 x % prime256)) prime256}
+    ((as_nat h0 x % prime256) * (as_nat h0 x % prime256) * (as_nat h0 x % prime256) % prime256 - (3 * as_nat h0 x) + Spec.P256.bCoordinateP256) % prime256;
+    (==) {
+      assert_by_tactic ((as_nat h0 x % prime256) * (as_nat h0 x % prime256) * (as_nat h0 x % prime256)  == 
+      (as_nat h0 x % prime256) * ((as_nat h0 x % prime256) * (as_nat h0 x % prime256))) canon;
+      
+      lemma_mod_mul_distr_l (as_nat h0 x) ((as_nat h0 x % prime256) * (as_nat h0 x % prime256)) prime256}
+  
+    (as_nat h0 x * ((as_nat h0 x % prime256) * (as_nat h0 x % prime256)) % prime256 - (3 * as_nat h0 x) + Spec.P256.bCoordinateP256) % prime256;
+
+    (==) {
+      assert_by_tactic (as_nat h0 x * ((as_nat h0 x % prime256) * (as_nat h0 x % prime256)) == 
+	(as_nat h0 x % prime256 * (as_nat h0 x * (as_nat h0 x % prime256)))) canon;
+      lemma_mod_mul_distr_l (as_nat h0 x) (as_nat h0 x * (as_nat h0 x % prime256)) prime256}
+
+    (as_nat h0 x * (as_nat h0 x * (as_nat h0 x % prime256)) % prime256 - (3 * as_nat h0 x) + Spec.P256.bCoordinateP256) % prime256;
+
+    (==) {
+      assert_by_tactic (as_nat h0 x * (as_nat h0 x * (as_nat h0 x % prime256)) == (as_nat h0 x % prime256) * (as_nat h0 x * as_nat h0 x)) canon;
+      lemma_mod_mul_distr_l (as_nat h0 x) (as_nat h0 x * as_nat h0 x) prime256;
+      assert_by_tactic ((as_nat h0 x) * (as_nat h0 x * as_nat h0 x) == as_nat h0 x * as_nat h0 x * as_nat h0 x) canon
+    }
+
+    ((as_nat h0 x * as_nat h0 x * as_nat h0 x) % prime256 - (3 * as_nat h0 x) + Spec.P256.bCoordinateP256) % prime256;
+    (==) {lemma_mod_add_distr (- (3 * as_nat h0 x) + Spec.P256.bCoordinateP256) (as_nat h0 x * as_nat h0 x * as_nat h0 x) prime256}
+    (as_nat h0 x * as_nat h0 x * as_nat h0 x - (3 * as_nat h0 x) + Spec.P256.bCoordinateP256) % prime256;
+    };
+  r
+
+  
 
 val verifyQValidCurvePointPrivate: pubKeyAsPoint:point
   -> tempBuffer:lbuffer uint64 (size 100) -> Stack uint64
@@ -105,8 +171,6 @@ val _ecp256scalar_mult:
 	uint_v r = 0))))
 
 
-#push-options "--ifuel 10 --fuel 10"
-
 let _ecp256scalar_mult result pubKey scalar =
   push_frame();
   let tempBuffer = create (size 100) (u64 0) in
@@ -126,3 +190,54 @@ let _ecp256scalar_mult result pubKey scalar =
     pop_frame();
     u64 18446744073709551615
     end
+
+
+let ecp256scalar_mult result pubKey scalar =
+  push_frame();
+  let h0 = ST.get() in
+  let resultBufferFelem = create (size 12) (u64 0) in
+  let resultBufferFelemX = sub resultBufferFelem (size 0) (size 4) in
+  let resultBufferFelemY = sub resultBufferFelem (size 4) (size 4) in
+  let resultX = sub result (size 0) (size 32) in
+  let resultY = sub result (size 32) (size 32) in
+
+  let publicKeyAsFelem = create (size 8) (u64 0) in
+  let publicKeyFelemX = sub publicKeyAsFelem (size 0) (size 4) in
+  let publicKeyFelemY = sub publicKeyAsFelem (size 4) (size 4) in
+  let pubKeyX = sub pubKey (size 0) (size 32) in
+  let pubKeyY = sub pubKey (size 32) (size 32) in
+
+  toUint64ChangeEndian pubKeyX publicKeyFelemX;
+  toUint64ChangeEndian pubKeyY publicKeyFelemY;
+
+  let h1 = ST.get() in
+  lemma_core_0 publicKeyFelemX h1;
+  changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyX));
+  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyX);
+
+  lemma_core_0 publicKeyFelemY h1;
+  changeEndianLemma (uints_from_bytes_be (as_seq h0 pubKeyY));
+  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 pubKeyY);
+
+  let flag = _ecp256scalar_mult resultBufferFelem publicKeyAsFelem scalar in
+
+  let h2 = ST.get() in
+  
+  changeEndian resultBufferFelemX;
+  changeEndian resultBufferFelemY;
+  toUint8 resultBufferFelemX resultX;
+  toUint8 resultBufferFelemY resultY;
+
+  lemma_core_0 resultBufferFelemX h2;
+  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemX);
+  changeEndian_le_be (as_nat h2 resultBufferFelemX);
+
+  lemma_core_0 resultBufferFelemY h2;
+  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h2 resultBufferFelemY);
+  changeEndian_le_be (as_nat h2 resultBufferFelemY);
+
+  pop_frame();
+  
+  let open Hacl.Impl.P256.LowLevel.RawCmp in 
+  unsafe_bool_of_u64  flag
+
