@@ -20,6 +20,8 @@ open FStar.Mul
 
 module BV = FStar.BitVector
 
+open FStar.Math.Lemmas
+
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
@@ -256,7 +258,8 @@ let rec lemma_logand_zero n =
 val lemma_and_both_parts_32: a: uint32 -> b: uint32 -> Lemma (
   let a0, a1 = get_low_part_4 a, get_high_part_28 a in 
   let b0, b1 = get_low_part_4 b, get_high_part_28 b in 
-  v (logand a1 b1) * pow2 4 + v (logand a0 b0) == v (logand a b))
+  v (logand a1 b1) * pow2 4 + v (logand a0 b0) == v (logand a b) /\ 
+  UInt.logand #32 (v a1) (v b1) * pow2 4 + UInt.logand #4 (v a0) (v b0) == v (logand a b))
 
 let lemma_and_both_parts_32 a b = 
   to_vec_low_high_4 (v a);
@@ -326,6 +329,7 @@ let lemma_and_both_parts_32 a b =
   UInt.append_lemma (BV.logand_vec a1_ b1_) (BV.logand_vec a0_ b0_)
 
 
+#push-options "--fuel 0 --ifuel 0 --z3rlimit 300"
 
 val getScalar_4: #c: curve
   -> #buf_type: buftype 
@@ -335,10 +339,13 @@ val getScalar_4: #c: curve
   (requires fun h -> live h s)
   (ensures fun h0 r h1 -> 
     let radix = 4 in 
-    let s = as_seq h0 s in 
-    v r == FStar.Math.Lib.arithmetic_shift_right (scalar_as_nat #c s) (radix * v i) % pow2 radix)
+    v r == FStar.Math.Lib.arithmetic_shift_right (scalar_as_nat #c (as_seq h0 s)) (v (getScalarLen c) - (v i + 1) * radix) % pow2 radix)
 
-let getScalar_4 #a scalar i = 
+assume val lemma_index_scalar_as_nat: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} ->
+  Lemma (v (Lib.Sequence.index s i) == scalar_as_nat #c s / pow2 (v (getScalarLen c) - (i + 1) * 8) % pow2 8)
+
+
+let getScalar_4 #c scalar i = 
   let h0 = ST.get() in
   
   let half = shift_right i 1ul in 
@@ -355,35 +362,53 @@ let getScalar_4 #a scalar i =
   let result = shift_right result0 shiftMask in 
 
   let index = v i in 
-  assert(v half = index / 2);
-  assert(v word = v (Lib.Sequence.index (as_seq h0 scalar) (index / 2)));
-  
-  assert(if index % 2 = 0 then v mask = 0xf0 else v mask = 0x0f);
-  assert(if index % 2 = 0 then v shiftMask = 4 else v shiftMask = 0);
 
   if index % 2 = 0 then 
     begin
       logand_spec word mask;
-      assert(v result0 = logand_v (v word) (v mask));
-      assert(v mask = 0xf0);
-      assert(v result = v result0 / pow2 4);
       lemma_and_both_parts_32 word mask;
-      assume(v result0 == v (logand (get_high_part_24 word) (get_high_part_24 mask)) * pow2 8 + v (logand (get_low_part_8 word) (get_low_part_8 mask)));
+      UInt.logand_lemma_1 #4 (v (get_low_part_4 word));
+      UInt.logand_mask #32 (v word / pow2 4) 4; 
+      assert (v result ==  (v (Lib.Sequence.index (as_seq h0 scalar) (index / 2)) / pow2 4) % pow2 4);
 
-      assert(v (get_low_part_8 mask) == 0)
-      
-      
-      
+      let s = as_seq h0 scalar in 
+      calc (==) {
+	v result;
+	   (==) {lemma_index_scalar_as_nat #c s (index / 2)}
+	((scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index + 2) * 4) % pow2 8) / pow2 4) % pow2 4; 
+	  (==) {pow2_modulo_division_lemma_1 (scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index + 2) * 4)) 4 8}
+	((scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index + 2) * 4) / pow2 4) % pow2 4) % pow2 4;
+	  (==) {lemma_mod_twice ((scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index + 2) * 4) / pow2 4)) (pow2 4)}
+	(scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index + 2) * 4) / pow2 4) % pow2 4; };
+
+      calc (==) {
+	(scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index + 2) * 4) / pow2 4);
+	(==) {division_multiplication_lemma (scalar_as_nat #c s) (pow2 (v (getScalarLen c) - (index + 2) * 4)) (pow2 4)}
+	scalar_as_nat #c s / (pow2 (v (getScalarLen c) - (v i + 2) * 4) * pow2 4);
+	(==) {pow2_plus (v (getScalarLen c) - (v i + 2) * 4) 4} 
+	scalar_as_nat #c s / (pow2 (v (getScalarLen c) - (v i + 1) * 4));}
+
       end
   else
     begin
-      assert(v mask = 0x0f);
+
       logand_mask word mask 4;
-      assert(v result0 = v word % pow2 4);
-      assert(v result = v (Lib.Sequence.index (as_seq h0 scalar) (index / 2)) % pow2 4)
+      assert(v result = v (Lib.Sequence.index (as_seq h0 scalar) (index / 2)) % pow2 4);
+      
+      let s = as_seq h0 scalar in 
+
+      calc (==) {
+	v result;
+      (==) {}
+	v (Lib.Sequence.index (as_seq h0 scalar) (index / 2)) % pow2 4;
+      (==) {lemma_index_scalar_as_nat #c s (index / 2)}
+	(scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index / 2 + 1) * 8) % pow2 8) % pow2 4;
+      (==) {euclidean_division_definition index 2}
+	(scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index + 1) * 4) % pow2 8) % pow2 4;
+      (==) {pow2_modulo_modulo_lemma_1 (scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index + 1) * 4)) 4 8}
+      	scalar_as_nat #c s / pow2 (v (getScalarLen c) - (index + 1) * 4) % pow2 4; }
     end;
 
-  admit();
   result
 
 
