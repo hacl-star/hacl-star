@@ -47,6 +47,14 @@ let bufferToJac p result =
 #pop-options
 
 
+let bufferToJacUpdate result = 
+  upd result (size 8) (u64 1);
+  upd result (size 9) (u64 0);
+  upd result (size 10) (u64 0);
+  upd result (size 11) (u64 0)
+
+
+
 inline_for_extraction noextract
 val y_2: y: felem -> r: felem -> Stack unit
   (requires fun h -> as_nat h y < prime /\ live h y /\ live h r /\ eq_or_disjoint y r)

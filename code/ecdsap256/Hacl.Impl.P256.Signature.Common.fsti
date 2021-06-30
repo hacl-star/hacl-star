@@ -32,10 +32,21 @@ val bufferToJac: p:lbuffer uint64 (size 8) -> result:point -> Stack unit
      let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
      x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
 
+inline_for_extraction noextract
+val bufferToJacUpdate: result: point -> Stack unit
+  (requires fun h -> live h result)
+  (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat h1 (gsub result (size 8) (size 4)) == 1 /\ (
+    let x = as_nat h0 (gsub result (size 0) (size 4)) in
+    let y = as_nat h0 (gsub result (size 4) (size 4)) in
+    let x3, y3, z3 = point_x_as_nat h1 result, point_y_as_nat h1 result, point_z_as_nat h1 result in
+    let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x, y) in
+    x3 == pointJacX /\ y3 == pointJacY /\ z3 == pointJacZ))
+
+
 
 [@ (Comment "   The input of the function is considered to be public,
 thus this code is not secret independent with respect to the operations done over the input.")] 
-
 val isPointAtInfinityPublic: p:point -> Stack bool
   (requires fun h -> live h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
