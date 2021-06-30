@@ -433,9 +433,7 @@ if detect_powerpc; then
   compile_vec128=true
   if [[ "$enable_power9" == "1" ]]; then
     echo "... enable Power ISA v3.0 instruction set"
-    echo "CFLAGS_128 = -mpowerpc64 -mabi=altivec -mpower9-vector" >> Makefile.config
-  else
-    echo "CFLAGS_128 = -mpowerpc64 -mabi=altivec" >> Makefile.config
+    echo "CFLAGS_128 = -mcpu=power9" >> Makefile.config
   fi
 fi
 
