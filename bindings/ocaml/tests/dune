@@ -1,5 +1,6 @@
 (tests
- (names aead_test
+ (names config_test
+        aead_test
         curve25519_test
         ed25519_test
         hash_test
@@ -8,7 +9,6 @@
         hkdf_test
         nacl_test
         drbg_test
-        blake2_test
         p256_test)
  (libraries hacl-star)
  (preprocessor_deps config.h)
