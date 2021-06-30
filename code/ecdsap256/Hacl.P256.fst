@@ -81,3 +81,5 @@ let ecp256dh_r result pubKey scalar = Hacl.Impl.P256.DH.ecp256dh_r result pubKey
 
 let is_more_than_zero_less_than_order x =
   Hacl.Impl.P256.Signature.Common.isMoreThanZeroLessThanOrder x
+
+let ecp256scalar_mult result pubKey scalar = Hacl.Impl.P256.ScalarMult.ecp256scalar_mult result pubKey scalar
