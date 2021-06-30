@@ -14,7 +14,7 @@ open Spec.P256
 
 let prime = prime256
 
-#set-options "--z3rlimit 100"  
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"  
 
        
 val lemma_pointAddToSpecification: 
@@ -24,42 +24,31 @@ val lemma_pointAddToSpecification:
   u1: nat -> u2: nat -> s1: nat -> s2: nat -> 
   h: nat -> r: nat -> 
   Lemma
-    (requires (    
-      let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in 
+  (requires (    
+    let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in 
 
-      let u1D, u2D = fromDomain_ u1, fromDomain_ u2 in 
-      let s1D, s2D = fromDomain_ s1, fromDomain_ s2 in 
-      let rD = fromDomain_ r in    
-      let hD = fromDomain_ h in 
+    let u1D, u2D = fromDomain_ u1, fromDomain_ u2 in 
+    let s1D, s2D = fromDomain_ s1, fromDomain_ s2 in 
+    let rD = fromDomain_ r in    
+    let hD = fromDomain_ h in 
      
-      u1 == toDomain_ (qzD * qzD * pxD % prime256) /\
-      u2 == toDomain_ (pzD * pzD * qxD % prime256) /\
-      s1 == toDomain_ (qzD * qzD * qzD * pyD % prime256) /\
-      s2 == toDomain_ (pzD * pzD * pzD * qyD % prime256) /\
-      
-      h == toDomain_ ((u2D - u1D) % prime256) /\
-      r == toDomain_ ((s2D - s1D) % prime256) /\
-      (
-	if qzD = 0 then 
-	  fromDomain_ x3 == pxD /\ fromDomain_ y3 == pyD /\ fromDomain_ z3 == pzD
-	else if pzD = 0 then 
-	    fromDomain_ x3 == qxD /\  fromDomain_ y3 == qyD /\  fromDomain_ z3 == qzD 
-	else
-	    x3 == toDomain_ ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\
-	    y3 == toDomain_ (((hD * hD * u1D - x3D) * rD - s1D * hD*hD*hD) % prime) /\
-	    z3 == toDomain_ ((pzD * qzD * hD) % prime)
-	)
-      )
-  )
-  (ensures 
-  (    
+    u1 == toDomain_ (qzD * qzD * pxD % prime256) /\ u2 == toDomain_ (pzD * pzD * qxD % prime256) /\
+    s1 == toDomain_ (qzD * qzD * qzD * pyD % prime256) /\ s2 == toDomain_ (pzD * pzD * pzD * qyD % prime256) /\
+    h == toDomain_ ((u2D - u1D) % prime256) /\ r == toDomain_ ((s2D - s1D) % prime256) /\ (
+    if qzD = 0 then 
+      fromDomain_ x3 == pxD /\ fromDomain_ y3 == pyD /\ fromDomain_ z3 == pzD
+    else if pzD = 0 then 
+      fromDomain_ x3 == qxD /\  fromDomain_ y3 == qyD /\  fromDomain_ z3 == qzD 
+    else
+      x3 == toDomain_ ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\
+      y3 == toDomain_ (((hD * hD * u1D - x3D) * rD - s1D * hD*hD*hD) % prime) /\
+      z3 == toDomain_ ((pzD * qzD * hD) % prime))))
+  (ensures (    
     let x3D, y3D, z3D = fromDomain_ x3, fromDomain_ y3, fromDomain_ z3 in 
     let (xN, yN, zN) = _point_add (pxD, pyD, pzD) (qxD, qyD, qzD) in
     let u1D = fromDomain_ u1 in let u2D = fromDomain_ u2 in 
     let s1D = fromDomain_ s1 in let s2D = fromDomain_ s2 in 
-    xN == x3D /\  yN == y3D /\ zN == z3D
-  )
-)
+    xN == x3D /\  yN == y3D /\ zN == z3D))
 
 let lemma_pointAddToSpecification x1D y1D z1D x2D y2D z2D x3 y3 z3  u1 u2 s1 s2 h r = 
   let open FStar.Tactics in 
@@ -78,27 +67,6 @@ let lemma_pointAddToSpecification x1D y1D z1D x2D y2D z2D x3 y3 z3  u1 u2 s1 s2 
   let pxD, pyD, pzD = x1D, y1D, z1D in 
   let qxD, qyD, qzD = x2D, y2D, z2D in 
 
-     assert(
-        
-
-      u1 == toDomain_ (z2D * z2D * pxD % prime256) /\
-      u2 == toDomain_ (pzD * pzD * qxD % prime256) /\
-      s1 == toDomain_ (qzD * qzD * qzD * pyD % prime256) /\
-      s2 == toDomain_ (pzD * pzD * pzD * qyD % prime256) /\
-      
-      h == toDomain_ ((u2D - u1D) % prime256) /\
-      r == toDomain_ ((s2D - s1D) % prime256) /\
-      (
-	if qzD = 0 then 
-	   x3D == pxD /\ y3D == pyD /\  z3D == pzD
-	else if pzD = 0 then 
-	     x3D == qxD /\ y3D == qyD /\ z3D == qzD 
-	else
-	    x3 == toDomain_ ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\
-	    y3 == toDomain_ (((hD * hD * u1D - x3D) * rD - s1D * hD * hD * hD) % prime) /\
-	    z3 == toDomain_ ((pzD * qzD * hD) % prime)
-	)
-      );
 
     let (xN, yN, zN) = _point_add (x1D, y1D, z1D) (x2D, y2D, z2D) in 
 
