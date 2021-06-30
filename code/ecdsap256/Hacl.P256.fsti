@@ -404,8 +404,10 @@ val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
   )
 
 
-
-inline_for_extraction noextract
+[@ (Comment "
+  \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
+  \n Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
+  ")]
 val ecp256scalar_mult:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
