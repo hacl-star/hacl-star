@@ -244,7 +244,8 @@ val ecdsa_verif_without_hash:
   thus this code is not secret independent with respect to the operations done over the input.
   \n Input: pub(lic)Key: uint8[64]. 
   \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
-  \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/")]
+  \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+  \n The check for correctness of the order was removed because the curve is prime. ")]
 val verify_q: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool
@@ -457,3 +458,23 @@ val point_add8: result: lbuffer uint8 (size 64) -> p: lbuffer uint8 (size 64) ->
     as_seq h1 (gsub result (size 0) (size 32)) == nat_to_bytes_be 32 resultX /\
     as_seq h1 (gsub result (size 32) (size 32)) == nat_to_bytes_be 32 resultY))
 
+
+
+[@ (Comment " Public key verification function. 
+  \n  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
+  \n Input: pub(lic)Key: uint8[64]. 
+  \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+  \n The check for correctness of the order was removed because the curve is prime.")]
+
+inline_for_extraction noextract
+val verifyQPrivate: 
+  pubKey: lbuffer uint8 (size 64) ->
+  Stack bool
+  (requires fun h -> live h pubKey)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ (
+    let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in 
+    let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
+    let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in 
+    r == not (Spec.ECDSA.verifyQValidCurvePointSpec pkJ)))

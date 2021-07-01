@@ -209,6 +209,8 @@ Hacl_P256_ecdsa_verif_without_hash(
  Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
   
  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+  
+ The check for correctness of the order was removed because the curve is prime. 
 */
 bool Hacl_P256_verify_q(uint8_t *pubKey);
 

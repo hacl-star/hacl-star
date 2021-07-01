@@ -86,3 +86,6 @@ let ecp256scalar_mult result pubKey scalar = Hacl.Impl.P256.ScalarMult.ecp256sca
 
 
 let point_add8 result p q = Hacl.Impl.P256.PointAdd8.point_add8 result p q
+
+
+let verifyQPrivate pubKey = Hacl.Impl.P256.ScalarMult.verifyQPrivate pubKey

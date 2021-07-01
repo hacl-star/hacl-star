@@ -14,7 +14,7 @@ open Spec.P256
 
 let prime = prime256
 
-#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"  
+#set-options "--z3rlimit 200 --fuel 0 --ifuel 0"  
 
        
 val lemma_pointAddToSpecification: 

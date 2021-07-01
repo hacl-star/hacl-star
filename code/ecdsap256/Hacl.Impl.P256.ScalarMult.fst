@@ -22,6 +22,7 @@ open FStar.Math.Lemmas
 open FStar.Mul
 
 friend Hacl.Impl.P256.Signature.Common
+friend Hacl.Impl.P256.PointAdd8
 
 
 #set-options " --z3rlimit 200 --ifuel 0 --fuel 0"
@@ -143,6 +144,38 @@ let verifyQValidCurvePointPrivate pubKeyAsPoint tempBuffer =
   logand_lemma coordinatesValid belongsToCurve;
   logand coordinatesValid belongsToCurve
 
+
+let verifyQPrivate pubKey = 
+  push_frame();
+  let h0 = ST.get() in
+  let pubKeyX = sub pubKey (size 0) (size 32) in 
+  let pubKeyY = sub pubKey (size 32) (size 32) in 
+  
+  let tempBuffer = create (size 112) (u64 0) in 
+    let tempBufferV = sub tempBuffer (size 0) (size 100) in 
+    let publicKeyJ = sub tempBuffer (size 100) (size 12) in  
+      let publicKeyX = sub tempBuffer (size 100) (size 4) in 
+      let publicKeyY = sub tempBuffer (size 104) (size 4) in 
+
+  toUint64ChangeEndian pubKeyX publicKeyX;
+  toUint64ChangeEndian pubKeyY publicKeyY;
+  let h1 = ST.get() in 
+  
+    lemma_core_0 publicKeyX h1;
+    uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyX);  
+    lemma_core_0 publicKeyY h1;
+    uints_from_bytes_le_nat_lemma #U64 #SEC #4 (as_seq h1 pubKeyY); 
+
+    changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))));
+    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 0) (size 32)));
+				  
+    changeEndianLemma (uints_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))));
+    uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 (gsub pubKey (size 32) (size 32)));
+
+  bufferToJacUpdate publicKeyJ;
+  let r = verifyQValidCurvePointPrivate publicKeyJ tempBufferV in 
+  pop_frame();
+  Hacl.Impl.P256.LowLevel.RawCmp.unsafe_bool_of_u64 r
 
 
 val _ecp256scalar_mult:
