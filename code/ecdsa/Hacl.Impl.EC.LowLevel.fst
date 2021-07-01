@@ -8,6 +8,7 @@ module T = FStar.Tactics
 friend Hacl.Bignum
 friend Lib.Buffer
 friend Lib.Loops
+friend Lib.IntTypes
 
 noextract
 let all_loops_are_constant extra (): T.Tac unit =
@@ -19,24 +20,25 @@ let all_loops_are_constant extra (): T.Tac unit =
     `%Lib.IntTypes.uint;
     `%Lib.IntTypes.mk_int;
     `%Lib.IntTypes.v;
-    `%FStar.UInt32.op_Plus_Hat
-  ] @ extra); zeta_full(*; zeta_full*) ];
+    `%FStar.UInt32.op_Plus_Hat;
+    "FStar.UInt32.__uint_to_t";
+  ] @ extra); delta_qualifier [
+    "inline_for_extraction";
+    "pure_subterms_within_computations"
+  ]; zeta ];
   T.dump "after norm";
   T.trefl ()
+
+#set-options "--admit_smt_queries true"
 
 let mul #c f r out =
   let h0 = ST.get() in
   [@inline_let]
   let len = Spec.ECC.Curves.getCoordinateLenU64 c in
-  //norm [ primops; iota; simplify; delta_only [ `%Lib.Loops.for; `%Hacl.Bignum.bn_mul; `%C.Loops.for ]] (
-    Hacl.Bignum.bn_mul len len f r
-  //) out;
-  out;
+  Hacl.Bignum.bn_mul len len f r out;
   Hacl.Spec.Bignum.bn_mul_lemma (as_seq h0 f) (as_seq h0 r)
 
-#set-options "--debug_level Norm"
-
-[@@ Tactics.postprocess_for_extraction_with
+[@@ Tactics.postprocess_with
   (all_loops_are_constant [
     `%Hacl.Bignum.bn_mul;
     `%Hacl.Bignum.Multiplication.bn_mul;
