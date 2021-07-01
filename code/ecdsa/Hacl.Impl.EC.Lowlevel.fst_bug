@@ -1,0 +1,61 @@
+(* Move this file to Hacl.Impl.EC.LowLevel and run:
+
+  make ../../obj/Hacl_Impl_EC_LowLevel.ml
+
+  and look at the output.
+*)
+
+module Hacl.Impl.EC.LowLevel
+
+open Lib.Buffer
+module T = FStar.Tactics
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
+
+noextract
+let all_loops_are_constant extra (): T.Tac unit =
+  Tactics.norm [ primops; iota; simplify; delta_only ([
+    `%Lib.Loops.for;
+    `%Lib.Buffer.loop1;
+    `%C.Loops.for;
+    `%Lib.IntTypes.size;
+    `%Lib.IntTypes.uint;
+    `%Lib.IntTypes.mk_int;
+    `%Lib.IntTypes.v;
+    `%FStar.UInt32.op_Plus_Hat
+  ] @ extra); zeta (*; zeta_full*) ];
+  T.dump "after norm";
+  T.trefl ()
+
+let mul #c f r out =
+  let h0 = ST.get() in
+  [@inline_let]
+  let len = Spec.ECC.Curves.getCoordinateLenU64 c in
+  //norm [ primops; iota; simplify; delta_only [ `%Lib.Loops.for; `%Hacl.Bignum.bn_mul; `%C.Loops.for ]] (
+    Hacl.Bignum.bn_mul len len f r
+  //) out;
+  out;
+  Hacl.Spec.Bignum.bn_mul_lemma (as_seq h0 f) (as_seq h0 r)
+
+(*[@@ Tactics.postprocess_for_extraction_with
+  (all_loops_are_constant [
+    `%Hacl.Bignum.bn_mul;
+    `%Hacl.Bignum.Multiplication.bn_mul;
+    `%mul
+  ]) ]*)
+let mul_p256 f r out =
+  norm [ primops; iota; simplify; delta_only ([
+    `%Lib.Loops.for;
+    `%Lib.Buffer.loop1;
+    `%C.Loops.for;
+    `%Lib.IntTypes.size;
+    `%Lib.IntTypes.uint;
+    `%Lib.IntTypes.mk_int;
+    `%Lib.IntTypes.v;
+    `%FStar.UInt32.op_Plus_Hat
+  ] @ [
+    `%Hacl.Bignum.bn_mul;
+    `%Hacl.Bignum.Multiplication.bn_mul;
+    `%mul
+  ]); zeta (*; zeta_full*) ] (
+  mul #P256 f r) out

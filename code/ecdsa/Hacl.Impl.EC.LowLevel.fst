@@ -5,6 +5,7 @@ module T = FStar.Tactics
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
+(* To debug in the interactive mode, uncomment this *)
 friend Hacl.Bignum
 friend Lib.Buffer
 friend Lib.Loops
@@ -38,6 +39,7 @@ let mul #c f r out =
   Hacl.Bignum.bn_mul len len f r out;
   Hacl.Spec.Bignum.bn_mul_lemma (as_seq h0 f) (as_seq h0 r)
 
+(* TODO: replace with postprocess_for_extraction_with once done *)
 [@@ Tactics.postprocess_with
   (all_loops_are_constant [
     `%Hacl.Bignum.bn_mul;
@@ -46,3 +48,6 @@ let mul #c f r out =
   ]) ]
 let mul_p256 f r out =
   mul #P256 f r out
+
+(* For the "OCaml code contains calls to norm" bug, see
+Hacl.Impl.EC.LowLevel.fst_bug and instructions in there *)
