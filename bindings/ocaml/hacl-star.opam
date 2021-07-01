@@ -14,9 +14,13 @@ depends: [
   "hacl-star-raw" {= version}
   "zarith"
   "cppo" {build}
+  "odoc" {with-doc}
 ]
 build: [
-  ["dune" "build" "-p" name "-j" jobs]
+  [
+    "dune" "build" "-p" name "-j" jobs
+    "@doc" {with-doc}
+  ]
 ]
 run-test: [
   ["dune" "runtest" "-p" name "-j" jobs]
