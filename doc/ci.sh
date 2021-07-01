@@ -23,6 +23,9 @@ cp -R _build/html/* $1
 mkdir -p $1/javascript_doc
 cp -R ../dist/wasm/doc/out/* $1/javascript_doc
 
+mkdir -p $1/ocaml_doc
+cp -R ../bindings/ocaml/_build/default/_doc/_html/* $1/ocaml_doc
+
 cd $1
 rm -rf static && mv _static static
 rm -rf images && mv _images images
