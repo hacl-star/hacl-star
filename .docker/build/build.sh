@@ -178,8 +178,10 @@ function refresh_doc() {
 function refresh_hacl_hints_dist() {
     # We should not generate hints when building on Windows
     if [[ "$OS" != "Windows_NT" ]]; then
-        if [[ $branchname == "master" ]] ; then
+        if [[ ${branchname##refs/heads/} == "master" ]] ; then
           refresh_doc
+        else
+          echo "Branch is $branchname, not regenerating doc"
         fi
         refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "hints"
     fi
