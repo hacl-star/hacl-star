@@ -24,6 +24,7 @@ friend Hacl.Impl.P256.Core
 
 #set-options "--z3rlimit 150 --ifuel 0 --fuel 0" 
 
+inline_for_extraction noextract
 val _point_add8: p: point -> q: point -> result: point -> tempBuffer: lbuffer uint64 (size 88) -> 
   Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ live h tempBuffer /\
     eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
@@ -48,7 +49,7 @@ let _point_add8 p q result tempBuffer =
   point_add p q result tempBuffer;
   norm result result tempBuffer
 
-
+inline_for_extraction noextract
 val toForm: i: lbuffer uint8 (size 32) -> o: felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o /\ Lib.ByteSequence.nat_from_bytes_be (as_seq h i) < prime256)
   (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\ 
@@ -137,33 +138,6 @@ let fromFormPoint i o =
 
   fromForm iX oX;
   fromForm iY oY
-
-
-val point_add8: result: lbuffer uint8 (size 64) -> p: lbuffer uint8 (size 64) -> q: lbuffer uint8 (size 64) -> 
-  Stack unit 
-  (requires fun h -> live h result /\ live h p /\ live h q /\ (
-    let pX = gsub p (size 0) (size 32) in 
-    let pY = gsub p (size 32) (size 32) in 
-    let qX = gsub q (size 0) (size 32) in 
-    let qY = gsub q (size 32) (size 32) in
-    
-    Lib.ByteSequence.nat_from_bytes_be (as_seq h pX) < prime256 /\ 
-    Lib.ByteSequence.nat_from_bytes_be (as_seq h pY) < prime256 /\
-    Lib.ByteSequence.nat_from_bytes_be (as_seq h qX) < prime256 /\
-    Lib.ByteSequence.nat_from_bytes_be (as_seq h qY) < prime256))
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
-    let open Lib.ByteSequence in 
-    let pX = nat_from_bytes_be (as_seq h0 (gsub p (size 0) (size 32))) in 
-    let pY = nat_from_bytes_be (as_seq h0 (gsub p (size 32) (size 32))) in
-    let pK = Spec.P256.toJacobianCoordinates (pX, pY) in 
-    
-    let qX = nat_from_bytes_be (as_seq h0 (gsub q (size 0) (size 32))) in 
-    let qY = nat_from_bytes_be (as_seq h0 (gsub q (size 32) (size 32))) in
-    let qK = Spec.P256.toJacobianCoordinates (qX, qY) in 
-    let resultX, resultY, _ = Spec.P256._norm (Spec.P256._point_add pK qK) in 
-    
-    as_seq h1 (gsub result (size 0) (size 32)) == nat_to_bytes_be 32 resultX /\
-    as_seq h1 (gsub result (size 32) (size 32)) == nat_to_bytes_be 32 resultY))
 
 
 let point_add8 result p q = 

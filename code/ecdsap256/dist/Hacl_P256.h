@@ -296,6 +296,18 @@ bool Hacl_P256_is_more_than_zero_less_than_order(uint8_t *x);
 */
 bool Hacl_P256_ecp256scalar_mult(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
+/*
+
+  
+ Input: result: uint8[64], 
+ point p: uint8[64], 
+ point q: uint8[64].
+  
+ Output: void, result = P + Q
+  
+*/
+void Hacl_P256_point_add8(uint8_t *result, uint8_t *p, uint8_t *q);
+
 
 #define __Hacl_P256_H_DEFINED
 #endif

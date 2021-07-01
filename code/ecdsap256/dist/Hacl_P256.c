@@ -3229,3 +3229,54 @@ bool Hacl_P256_ecp256scalar_mult(uint8_t *result, uint8_t *pubKey, uint8_t *scal
   return flag == (uint64_t)0U;
 }
 
+/*
+
+  
+ Input: result: uint8[64], 
+ point p: uint8[64], 
+ point q: uint8[64].
+  
+ Output: void, result = P + Q
+  
+*/
+void Hacl_P256_point_add8(uint8_t *result, uint8_t *p, uint8_t *q)
+{
+  uint64_t tempBuffer[124U] = { 0U };
+  uint64_t *pU64 = tempBuffer;
+  uint64_t *qU64 = tempBuffer + (uint32_t)12U;
+  uint64_t *resultU64 = tempBuffer + (uint32_t)24U;
+  uint64_t *tB88 = tempBuffer + (uint32_t)36U;
+  uint64_t *pU64X = pU64;
+  uint64_t *pU64Y0 = pU64 + (uint32_t)4U;
+  uint8_t *pX0 = p;
+  uint8_t *pY0 = p + (uint32_t)32U;
+  toUint64ChangeEndian(pX0, pU64X);
+  toUint64ChangeEndian(pY0, pU64Y0);
+  pU64[8U] = (uint64_t)1U;
+  pU64[9U] = (uint64_t)0U;
+  pU64[10U] = (uint64_t)0U;
+  pU64[11U] = (uint64_t)0U;
+  uint64_t *pU64X0 = qU64;
+  uint64_t *pU64Y = qU64 + (uint32_t)4U;
+  uint8_t *pX = q;
+  uint8_t *pY = q + (uint32_t)32U;
+  toUint64ChangeEndian(pX, pU64X0);
+  toUint64ChangeEndian(pY, pU64Y);
+  qU64[8U] = (uint64_t)1U;
+  qU64[9U] = (uint64_t)0U;
+  qU64[10U] = (uint64_t)0U;
+  qU64[11U] = (uint64_t)0U;
+  pointToDomain(pU64, pU64);
+  pointToDomain(qU64, qU64);
+  point_add(pU64, qU64, resultU64, tB88);
+  norm(resultU64, resultU64, tB88);
+  uint64_t *iX = resultU64;
+  uint64_t *iY = resultU64 + (uint32_t)4U;
+  uint8_t *oX = result;
+  uint8_t *oY = result + (uint32_t)32U;
+  changeEndian(iX);
+  toUint8(iX, oX);
+  changeEndian(iY);
+  toUint8(iY, oY);
+}
+
