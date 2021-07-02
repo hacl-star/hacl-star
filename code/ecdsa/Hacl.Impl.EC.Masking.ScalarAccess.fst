@@ -58,15 +58,10 @@ let getScalarBit_l #c #b s n =
       if i > v n then v temp0 == v (ith_bit (as_seq h0 s) (v n)) else True)) in 
 
   for 0ul (getScalarLen c) inv (fun i -> 
-    let h0_ = ST.get() in 
-    
     let bit = getScalarBit_leftEndian s n in 
-    assert(bit == ith_bit (as_seq h0 s) (v n));
-      
     let mask = eq_mask (size_to_uint64 n) (size_to_uint64 i) in 
       eq_mask_lemma (size_to_uint64 n) (size_to_uint64 i);
-    copy_conditional_u64 bit temp mask
-  );
+    copy_conditional_u64 bit temp mask);
 
   let result = index temp (size 0) in
   let h1 = ST.get() in 
@@ -228,7 +223,6 @@ let rec lemma_zero_extend #n #n2 a =
     UInt.zero_from_vec_lemma #(n2 - 1)
     
 
-
 val lemma_logand_zero: n: pos -> Lemma (let zero = UInt.to_vec #n 0 in BV.logand_vec zero zero = Seq.create n false)
 
 let rec lemma_logand_zero n = 
@@ -329,7 +323,9 @@ let lemma_and_both_parts_32 a b =
   UInt.append_lemma (BV.logand_vec a1_ b1_) (BV.logand_vec a0_ b0_)
 
 
-#push-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+assume val lemma_index_scalar_as_nat: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} ->
+  Lemma (v (Lib.Sequence.index s i) == scalar_as_nat #c s / pow2 (v (getScalarLen c) - (i + 1) * 8) % pow2 8)
+
 
 val getScalar_4: #c: curve
   -> #buf_type: buftype 
@@ -337,12 +333,9 @@ val getScalar_4: #c: curve
   -> i: size_t {v i < v (getScalarLenBytes c) * 2} -> 
   Stack uint32
   (requires fun h -> live h s)
-  (ensures fun h0 r h1 -> 
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
     let radix = 4 in 
-    v r == FStar.Math.Lib.arithmetic_shift_right (scalar_as_nat #c (as_seq h0 s)) (v (getScalarLen c) - (v i + 1) * radix) % pow2 radix)
-
-assume val lemma_index_scalar_as_nat: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} ->
-  Lemma (v (Lib.Sequence.index s i) == scalar_as_nat #c s / pow2 (v (getScalarLen c) - (i + 1) * 8) % pow2 8)
+    v r == FStar.Math.Lib.arithmetic_shift_right (scalar_as_nat #c (as_seq h0 s)) (v (getScalarLen c) - (v i + 1) * radix) % pow2 radix))
 
 
 let getScalar_4 #c scalar i = 
@@ -412,24 +405,72 @@ let getScalar_4 #c scalar i =
   result
 
 
+assume val lemma_xor_of_4: bit0: uint64 {v bit0 <= 1} -> bit1: uint64 {v bit1 <= 1} 
+  -> bit2: uint64 {v bit2 <= 1} -> bit3: uint64 {v bit3 <= 1} -> 
+  Lemma (logxor_v (logxor_v (v bit0 * 8) (v bit1 * 4)) (logxor_v #U64 (v bit2 * 2) (v bit3)) == v bit0 * 8 + v bit1 * 4 + v bit2 * 2 + v bit3)
+  
+
 inline_for_extraction noextract
 val getScalar_4_byBit: #c: curve
   -> #buf_type: buftype 
   -> s: scalar_t #buf_type #c
   -> i: size_t {v i < v (getScalarLenBytes c) * 2} -> 
   Stack uint64
-    (requires fun h -> live h s)
-    (ensures fun h0 _ h1 -> True)
-
+  (requires fun h -> live h s)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
+    let radix = 4 in 
+    v r == FStar.Math.Lib.arithmetic_shift_right (scalar_as_nat #c (as_seq h0 s)) (v (getScalarLen c) - (v i + 1) * radix) % pow2 radix))
 
 let getScalar_4_byBit #c s i = 
+  let h0 = ST.get() in 
   let bit = getScalarLen c -! 1ul -! (shift_left i 2ul) in 
   
   let bit0 = shift_left (getScalarBit_leftEndian s bit) 3ul in 
   let bit1 = shift_left (getScalarBit_leftEndian s (bit -! 1ul)) 2ul in 
   let bit2 = shift_left (getScalarBit_leftEndian s (bit -! 2ul)) 1ul in 
   let bit3 = shift_left (getScalarBit_leftEndian s (bit -! 3ul)) 0ul in 
-  logxor (logxor bit0 bit1) (logxor bit2 bit3)
+
+  let r = logxor (logxor bit0 bit1) (logxor bit2 bit3) in 
+
+
+  let l = v (getScalarLen c) in 
+  
+  assert(v bit0 = v (ith_bit (as_seq h0 s) (l - 1 - 4 * v i)) * 8);
+  assert(v bit1 = v (ith_bit (as_seq h0 s) (l - 1 - 4 * v i - 1)) * 4);
+  assert(v bit2 = v (ith_bit (as_seq h0 s) (l - 1 - 4 * v i - 2)) * 2);
+  assert(v bit3 = v (ith_bit (as_seq h0 s) (l - 1 - 4 * v i - 3)));
+
+  logxor_spec bit0 bit1;
+  logxor_spec bit2 bit3;
+  logxor_spec (logxor bit0 bit1) (logxor bit2 bit3);
+  lemma_xor_of_4 
+    (ith_bit (as_seq h0 s) (l - 1 - 4 * v i))
+    (ith_bit (as_seq h0 s) (l - 1 - 4 * v i - 1)) 
+    (ith_bit (as_seq h0 s) (l - 1 - 4 * v i - 2))
+    (ith_bit (as_seq h0 s) (l - 1 - 4 * v i - 3));
+
+  assert(v r = logxor_v (logxor_v (v bit0) (v bit1)) (logxor_v (v bit2) (v bit3)));
+
+  scalar_as_nat_def #c (as_seq h0 s) (4 * v i + 1);
+  scalar_as_nat_def #c (as_seq h0 s) (4 * v i + 2);
+  
+  assert(scalar_as_nat_ #c (as_seq h0 s) (4 * v i + 2) == (
+    let bit1 = v (ith_bit (as_seq h0 s) (l - 1 - 4 * v i - 1)) in 
+    2 * scalar_as_nat_ #c (as_seq h0 s) (4 * v i + 1) + bit1));
+  
+  assert(scalar_as_nat_ (as_seq h0 s) (4 * v i + 1) == (
+    let bit0 = v (ith_bit (as_seq h0 s) (l - 1 - 4 * v i)) in 
+    scalar_as_nat_ #c (as_seq h0 s) (4 * v i) * 2 + bit0)); 
+
+
+
+
+
+  assert(v r == v (ith_bit (as_seq h0 s) (l - 1 - 4 * v i)) * 8 + v bit1 + v bit2 + v bit3);
+
+  admit();
+  r
+
 
 
 
