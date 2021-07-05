@@ -139,7 +139,7 @@ let fill_elems4 #t #a h0 n output refl footprint spec impl =
   Loops.eq_repeat_right (v n / 4 * 4) (v n) (S.generate_elem_a t a (v n))
     (S.generate_elem_f (v n) (spec h0)) (refl h1 (4 * v k), as_seq h1 (gsub output 0ul (4ul *! k)));
 
-  Lib.Loops.for (4ul *! k) n inv
+  Lib.Loops.for (k *! 4ul) n inv
   (fun i ->
     impl i;
     let h = ST.get () in

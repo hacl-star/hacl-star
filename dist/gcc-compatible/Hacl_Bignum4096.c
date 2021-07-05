@@ -1003,7 +1003,7 @@ bool Hacl_Bignum4096_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *r
         uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
       }
-      for (uint32_t i = (uint32_t)4U * rLen / (uint32_t)4U; i < rLen; i++)
+      for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
       {
         uint64_t t1 = a1[i];
         uint64_t *res_i = res1 + i;
@@ -1205,7 +1205,7 @@ Hacl_Bignum4096_mod_inv_prime_vartime_precomp(
       uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
     }
-    for (uint32_t i = (uint32_t)4U * rLen / (uint32_t)4U; i < rLen; i++)
+    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
     {
       uint64_t t1 = a1[i];
       uint64_t *res_i = res1 + i;

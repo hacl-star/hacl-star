@@ -128,7 +128,7 @@ bn_slow_precomp(
       uint32_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, qj, c, res_i);
     }
-    for (uint32_t i = (uint32_t)4U * len / (uint32_t)4U; i < len; i++)
+    for (uint32_t i = len / (uint32_t)4U * (uint32_t)4U; i < len; i++)
     {
       uint32_t a_i = n[i];
       uint32_t *res_i = res_j0 + i;
@@ -379,7 +379,7 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
         uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
       }
-      for (uint32_t i = (uint32_t)4U * rLen / (uint32_t)4U; i < rLen; i++)
+      for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
       {
         uint32_t t1 = a1[i];
         uint32_t *res_i = res1 + i;
@@ -612,7 +612,7 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
       uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
     }
-    for (uint32_t i = (uint32_t)4U * rLen / (uint32_t)4U; i < rLen; i++)
+    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
     {
       uint32_t t1 = a1[i];
       uint32_t *res_i = res1 + i;

@@ -210,7 +210,7 @@ Hacl_GenericField64_sub(
     uint64_t *res_i = cM + (uint32_t)4U * i + (uint32_t)3U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t12, t2, res_i);
   }
-  for (uint32_t i = (uint32_t)4U * k1.len / (uint32_t)4U; i < k1.len; i++)
+  for (uint32_t i = k1.len / (uint32_t)4U * (uint32_t)4U; i < k1.len; i++)
   {
     uint64_t t1 = aM[i];
     uint64_t t2 = bM[i];
@@ -241,7 +241,7 @@ Hacl_GenericField64_sub(
     uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
   }
-  for (uint32_t i = (uint32_t)4U * k1.len / (uint32_t)4U; i < k1.len; i++)
+  for (uint32_t i = k1.len / (uint32_t)4U * (uint32_t)4U; i < k1.len; i++)
   {
     uint64_t t1 = cM[i];
     uint64_t t2 = k1.n[i];
@@ -647,7 +647,7 @@ Hacl_GenericField64_inverse(
       uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
     }
-    for (uint32_t i = (uint32_t)4U * rLen / (uint32_t)4U; i < rLen; i++)
+    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
     {
       uint64_t t1 = a1[i];
       uint64_t *res_i = res1 + i;

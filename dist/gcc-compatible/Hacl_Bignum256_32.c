@@ -262,7 +262,7 @@ void Hacl_Bignum256_32_sqr(uint32_t *a, uint32_t *res)
       uint32_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, a_j, c, res_i);
     }
-    for (uint32_t i = (uint32_t)4U * i0 / (uint32_t)4U; i < i0; i++)
+    for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
     {
       uint32_t a_i = ab[i];
       uint32_t *res_i = res_j + i;
@@ -481,7 +481,7 @@ static inline void amont_sqr(uint32_t *n, uint32_t nInv_u64, uint32_t *aM, uint3
       uint32_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, a_j, c1, res_i);
     }
-    for (uint32_t i = (uint32_t)4U * i0 / (uint32_t)4U; i < i0; i++)
+    for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
     {
       uint32_t a_i = ab[i];
       uint32_t *res_i = res_j + i;
@@ -1131,7 +1131,7 @@ bool Hacl_Bignum256_32_mod_inv_prime_vartime(uint32_t *n, uint32_t *a, uint32_t 
         uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
       }
-      for (uint32_t i = (uint32_t)4U * rLen / (uint32_t)4U; i < rLen; i++)
+      for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
       {
         uint32_t t1 = a1[i];
         uint32_t *res_i = res1 + i;
@@ -1332,7 +1332,7 @@ Hacl_Bignum256_32_mod_inv_prime_vartime_precomp(
       uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
     }
-    for (uint32_t i = (uint32_t)4U * rLen / (uint32_t)4U; i < rLen; i++)
+    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
     {
       uint32_t t1 = a1[i];
       uint32_t *res_i = res1 + i;
