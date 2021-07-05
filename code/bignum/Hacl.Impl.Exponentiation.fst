@@ -909,6 +909,7 @@ val lexp_fw_gen:
 let lexp_fw_gen #a_t len ctx_len k lmul_acc_pow_a_bits_l lmul_acc_pow_a_bits_c ctx a bLen bBits b acc l =
   push_frame ();
   Math.Lemmas.pow2_lt_compat 32 (v l);
+  [@inline_let]
   let table_len = 1ul <<. l in
   assert (v table_len == pow2 (v l));
   Math.Lemmas.pow2_le_compat (v l) 1;
