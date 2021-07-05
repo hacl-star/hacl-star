@@ -113,7 +113,7 @@ bn_slow_precomp(
     uint64_t qj = mu * a1[i0];
     uint64_t *res_j0 = a1 + i0;
     uint64_t c = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < len / (uint32_t)4U; i++)
     {
       uint64_t a_i = n[(uint32_t)4U * i];
       uint64_t *res_i0 = res_j0 + (uint32_t)4U * i;
@@ -128,7 +128,7 @@ bn_slow_precomp(
       uint64_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, qj, c, res_i);
     }
-    for (uint32_t i = len / (uint32_t)4U * (uint32_t)4U; i < len; i++)
+    for (uint32_t i = (uint32_t)4U * len / (uint32_t)4U; i < len; i++)
     {
       uint64_t a_i = n[i];
       uint64_t *res_i = res_j0 + i;
@@ -364,7 +364,7 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
       uint64_t *a1 = n + (uint32_t)1U;
       uint64_t *res1 = n2 + (uint32_t)1U;
       uint64_t c = c0;
-      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
       {
         uint64_t t1 = a1[(uint32_t)4U * i];
         uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -379,7 +379,7 @@ bool Hacl_Bignum64_mod_inv_prime_vartime(uint32_t len, uint64_t *n, uint64_t *a,
         uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
       }
-      for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+      for (uint32_t i = (uint32_t)4U * rLen / (uint32_t)4U; i < rLen; i++)
       {
         uint64_t t1 = a1[i];
         uint64_t *res_i = res1 + i;
@@ -597,7 +597,7 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
     uint64_t *a1 = k1.n + (uint32_t)1U;
     uint64_t *res1 = n2 + (uint32_t)1U;
     uint64_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -612,7 +612,7 @@ Hacl_Bignum64_mod_inv_prime_vartime_precomp(
       uint64_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, (uint64_t)0U, res_i);
     }
-    for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
+    for (uint32_t i = (uint32_t)4U * rLen / (uint32_t)4U; i < rLen; i++)
     {
       uint64_t t1 = a1[i];
       uint64_t *res_i = res1 + i;
