@@ -886,7 +886,7 @@ Hacl_Blake2s_32_blake2s_update_last(
 )
 {
   uint8_t b[64U] = { 0U };
-  uint8_t *last = d + len - rem;
+  uint8_t *last = d + (len - rem);
   uint64_t totlen;
   memcpy(b, last, rem * sizeof (uint8_t));
   totlen = prev + (uint64_t)len;
@@ -932,7 +932,7 @@ blake2s_update_blocks(
 
 inline void Hacl_Blake2s_32_blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
 {
-  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)4U;
+  uint32_t double_row = (uint32_t)2U * ((uint32_t)4U * (uint32_t)4U);
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   {
     uint8_t b[double_row];

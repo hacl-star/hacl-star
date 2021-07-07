@@ -68,15 +68,15 @@ uint32_t Hacl_Bignum4096_32_add(uint32_t *a, uint32_t *b, uint32_t *res)
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t1, t20, res_i0);
     uint32_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
     uint32_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
-    uint32_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+    uint32_t *res_i1 = res + ((uint32_t)4U * i + (uint32_t)1U);
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t10, t21, res_i1);
     uint32_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
     uint32_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
-    uint32_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+    uint32_t *res_i2 = res + ((uint32_t)4U * i + (uint32_t)2U);
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t11, t22, res_i2);
     uint32_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
-    uint32_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+    uint32_t *res_i = res + ((uint32_t)4U * i + (uint32_t)3U);
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t12, t2, res_i);
   }
   for (uint32_t i = (uint32_t)128U; i < (uint32_t)128U; i++)
@@ -107,15 +107,15 @@ uint32_t Hacl_Bignum4096_32_sub(uint32_t *a, uint32_t *b, uint32_t *res)
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, t20, res_i0);
     uint32_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
     uint32_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
-    uint32_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+    uint32_t *res_i1 = res + ((uint32_t)4U * i + (uint32_t)1U);
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, t21, res_i1);
     uint32_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
     uint32_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
-    uint32_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+    uint32_t *res_i2 = res + ((uint32_t)4U * i + (uint32_t)2U);
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, t22, res_i2);
     uint32_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
-    uint32_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+    uint32_t *res_i = res + ((uint32_t)4U * i + (uint32_t)3U);
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, t2, res_i);
   }
   for (uint32_t i = (uint32_t)128U; i < (uint32_t)128U; i++)
@@ -139,15 +139,15 @@ static inline void add_mod_n(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t *re
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, t1, t20, res_i0);
     uint32_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
     uint32_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
-    uint32_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+    uint32_t *res_i1 = res + ((uint32_t)4U * i + (uint32_t)1U);
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, t10, t21, res_i1);
     uint32_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
     uint32_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
-    uint32_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+    uint32_t *res_i2 = res + ((uint32_t)4U * i + (uint32_t)2U);
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, t11, t22, res_i2);
     uint32_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
-    uint32_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+    uint32_t *res_i = res + ((uint32_t)4U * i + (uint32_t)3U);
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, t12, t2, res_i);
   }
   for (uint32_t i = (uint32_t)128U; i < (uint32_t)128U; i++)
@@ -168,15 +168,15 @@ static inline void add_mod_n(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t *re
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, t20, res_i0);
     uint32_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
     uint32_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-    uint32_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+    uint32_t *res_i1 = tmp + ((uint32_t)4U * i + (uint32_t)1U);
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, t21, res_i1);
     uint32_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
     uint32_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-    uint32_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+    uint32_t *res_i2 = tmp + ((uint32_t)4U * i + (uint32_t)2U);
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, t22, res_i2);
     uint32_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-    uint32_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+    uint32_t *res_i = tmp + ((uint32_t)4U * i + (uint32_t)3U);
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, t2, res_i);
   }
   for (uint32_t i = (uint32_t)128U; i < (uint32_t)128U; i++)
@@ -246,13 +246,13 @@ static inline void reduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t *
       uint32_t *res_i0 = res_j0 + (uint32_t)4U * i;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c1, res_i0);
       uint32_t a_i0 = n[(uint32_t)4U * i + (uint32_t)1U];
-      uint32_t *res_i1 = res_j0 + (uint32_t)4U * i + (uint32_t)1U;
+      uint32_t *res_i1 = res_j0 + ((uint32_t)4U * i + (uint32_t)1U);
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i0, qj, c1, res_i1);
       uint32_t a_i1 = n[(uint32_t)4U * i + (uint32_t)2U];
-      uint32_t *res_i2 = res_j0 + (uint32_t)4U * i + (uint32_t)2U;
+      uint32_t *res_i2 = res_j0 + ((uint32_t)4U * i + (uint32_t)2U);
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i1, qj, c1, res_i2);
       uint32_t a_i2 = n[(uint32_t)4U * i + (uint32_t)3U];
-      uint32_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
+      uint32_t *res_i = res_j0 + ((uint32_t)4U * i + (uint32_t)3U);
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, qj, c1, res_i);
     }
     for (uint32_t i = (uint32_t)128U; i < (uint32_t)128U; i++)
@@ -263,7 +263,7 @@ static inline void reduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t *
     }
     uint32_t r = c1;
     uint32_t c10 = r;
-    uint32_t *resb = c + (uint32_t)128U + i0;
+    uint32_t *resb = c + ((uint32_t)128U + i0);
     uint32_t res_j = c[(uint32_t)128U + i0];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, c10, res_j, resb);
   }
@@ -279,15 +279,15 @@ static inline void reduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t *
     c1 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c1, t1, t20, res_i0);
     uint32_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
     uint32_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-    uint32_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+    uint32_t *res_i1 = tmp + ((uint32_t)4U * i + (uint32_t)1U);
     c1 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c1, t10, t21, res_i1);
     uint32_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
     uint32_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-    uint32_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+    uint32_t *res_i2 = tmp + ((uint32_t)4U * i + (uint32_t)2U);
     c1 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c1, t11, t22, res_i2);
     uint32_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-    uint32_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+    uint32_t *res_i = tmp + ((uint32_t)4U * i + (uint32_t)3U);
     c1 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c1, t12, t2, res_i);
   }
   for (uint32_t i = (uint32_t)128U; i < (uint32_t)128U; i++)
@@ -321,13 +321,13 @@ static inline void areduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t 
       uint32_t *res_i0 = res_j0 + (uint32_t)4U * i;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c1, res_i0);
       uint32_t a_i0 = n[(uint32_t)4U * i + (uint32_t)1U];
-      uint32_t *res_i1 = res_j0 + (uint32_t)4U * i + (uint32_t)1U;
+      uint32_t *res_i1 = res_j0 + ((uint32_t)4U * i + (uint32_t)1U);
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i0, qj, c1, res_i1);
       uint32_t a_i1 = n[(uint32_t)4U * i + (uint32_t)2U];
-      uint32_t *res_i2 = res_j0 + (uint32_t)4U * i + (uint32_t)2U;
+      uint32_t *res_i2 = res_j0 + ((uint32_t)4U * i + (uint32_t)2U);
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i1, qj, c1, res_i2);
       uint32_t a_i2 = n[(uint32_t)4U * i + (uint32_t)3U];
-      uint32_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
+      uint32_t *res_i = res_j0 + ((uint32_t)4U * i + (uint32_t)3U);
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, qj, c1, res_i);
     }
     for (uint32_t i = (uint32_t)128U; i < (uint32_t)128U; i++)
@@ -338,7 +338,7 @@ static inline void areduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t 
     }
     uint32_t r = c1;
     uint32_t c10 = r;
-    uint32_t *resb = c + (uint32_t)128U + i0;
+    uint32_t *resb = c + ((uint32_t)128U + i0);
     uint32_t res_j = c[(uint32_t)128U + i0];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, c10, res_j, resb);
   }
@@ -390,13 +390,13 @@ bn_slow_precomp(uint32_t *n, uint32_t mu, uint32_t *r2, uint32_t *a, uint32_t *r
       uint32_t *res_i0 = res_j0 + (uint32_t)4U * i;
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c, res_i0);
       uint32_t a_i0 = n[(uint32_t)4U * i + (uint32_t)1U];
-      uint32_t *res_i1 = res_j0 + (uint32_t)4U * i + (uint32_t)1U;
+      uint32_t *res_i1 = res_j0 + ((uint32_t)4U * i + (uint32_t)1U);
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i0, qj, c, res_i1);
       uint32_t a_i1 = n[(uint32_t)4U * i + (uint32_t)2U];
-      uint32_t *res_i2 = res_j0 + (uint32_t)4U * i + (uint32_t)2U;
+      uint32_t *res_i2 = res_j0 + ((uint32_t)4U * i + (uint32_t)2U);
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i1, qj, c, res_i2);
       uint32_t a_i2 = n[(uint32_t)4U * i + (uint32_t)3U];
-      uint32_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
+      uint32_t *res_i = res_j0 + ((uint32_t)4U * i + (uint32_t)3U);
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, qj, c, res_i);
     }
     for (uint32_t i = (uint32_t)128U; i < (uint32_t)128U; i++)
@@ -407,7 +407,7 @@ bn_slow_precomp(uint32_t *n, uint32_t mu, uint32_t *r2, uint32_t *a, uint32_t *r
     }
     uint32_t r = c;
     uint32_t c1 = r;
-    uint32_t *resb = a1 + (uint32_t)128U + i0;
+    uint32_t *resb = a1 + ((uint32_t)128U + i0);
     uint32_t res_j = a1[(uint32_t)128U + i0];
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, c1, res_j, resb);
   }
@@ -584,14 +584,11 @@ exp_vartime_precomp(
   uint32_t tmp[256U] = { 0U };
   memcpy(tmp, r2, (uint32_t)128U * sizeof (uint32_t));
   reduction(n, mu, tmp, resM);
-  uint32_t table_len = (uint32_t)16U;
-  KRML_CHECK_SIZE(sizeof (uint32_t), table_len * (uint32_t)128U);
-  uint32_t *table = alloca(table_len * (uint32_t)128U * sizeof (uint32_t));
-  memset(table, 0U, table_len * (uint32_t)128U * sizeof (uint32_t));
+  uint32_t table[2048U] = { 0U };
   memcpy(table, resM, (uint32_t)128U * sizeof (uint32_t));
   uint32_t *t1 = table + (uint32_t)128U;
   memcpy(t1, aM, (uint32_t)128U * sizeof (uint32_t));
-  for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
     uint32_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)128U;
     uint32_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)128U;
@@ -721,14 +718,11 @@ exp_consttime_precomp(
   uint32_t tmp[256U] = { 0U };
   memcpy(tmp, r2, (uint32_t)128U * sizeof (uint32_t));
   reduction(n, mu, tmp, resM);
-  uint32_t table_len = (uint32_t)16U;
-  KRML_CHECK_SIZE(sizeof (uint32_t), table_len * (uint32_t)128U);
-  uint32_t *table = alloca(table_len * (uint32_t)128U * sizeof (uint32_t));
-  memset(table, 0U, table_len * (uint32_t)128U * sizeof (uint32_t));
+  uint32_t table[2048U] = { 0U };
   memcpy(table, resM, (uint32_t)128U * sizeof (uint32_t));
   uint32_t *t1 = table + (uint32_t)128U;
   memcpy(t1, aM, (uint32_t)128U * sizeof (uint32_t));
-  for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
     uint32_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)128U;
     uint32_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)128U;
@@ -756,7 +750,7 @@ exp_consttime_precomp(
     uint32_t bits_l = ite & mask_l;
     uint32_t a_bits_l[128U] = { 0U };
     memcpy(a_bits_l, table, (uint32_t)128U * sizeof (uint32_t));
-    for (uint32_t i2 = (uint32_t)0U; i2 < table_len - (uint32_t)1U; i2++)
+    for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)15U; i2++)
     {
       uint32_t c = FStar_UInt32_eq_mask(bits_l, i2 + (uint32_t)1U);
       uint32_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)128U;
@@ -794,7 +788,7 @@ exp_consttime_precomp(
     uint32_t bits_c0 = bits_c;
     uint32_t a_bits_c[128U] = { 0U };
     memcpy(a_bits_c, table, (uint32_t)128U * sizeof (uint32_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < table_len - (uint32_t)1U; i1++)
+    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)15U; i1++)
     {
       uint32_t c1 = FStar_UInt32_eq_mask(bits_c0, i1 + (uint32_t)1U);
       uint32_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)128U;
@@ -990,19 +984,19 @@ bool Hacl_Bignum4096_32_mod_inv_prime_vartime(uint32_t *n, uint32_t *a, uint32_t
       uint32_t *a1 = n + (uint32_t)1U;
       uint32_t *res1 = n2 + (uint32_t)1U;
       uint32_t c = c0;
-      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
       {
         uint32_t t1 = a1[(uint32_t)4U * i];
         uint32_t *res_i0 = res1 + (uint32_t)4U * i;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i0);
         uint32_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
-        uint32_t *res_i1 = res1 + (uint32_t)4U * i + (uint32_t)1U;
+        uint32_t *res_i1 = res1 + ((uint32_t)4U * i + (uint32_t)1U);
         c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, (uint32_t)0U, res_i1);
         uint32_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
-        uint32_t *res_i2 = res1 + (uint32_t)4U * i + (uint32_t)2U;
+        uint32_t *res_i2 = res1 + ((uint32_t)4U * i + (uint32_t)2U);
         c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, (uint32_t)0U, res_i2);
         uint32_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
-        uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
+        uint32_t *res_i = res1 + ((uint32_t)4U * i + (uint32_t)3U);
         c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
       }
       for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
@@ -1191,19 +1185,19 @@ Hacl_Bignum4096_32_mod_inv_prime_vartime_precomp(
     uint32_t *a1 = k1.n + (uint32_t)1U;
     uint32_t *res1 = n2 + (uint32_t)1U;
     uint32_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
     {
       uint32_t t1 = a1[(uint32_t)4U * i];
       uint32_t *res_i0 = res1 + (uint32_t)4U * i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i0);
       uint32_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
-      uint32_t *res_i1 = res1 + (uint32_t)4U * i + (uint32_t)1U;
+      uint32_t *res_i1 = res1 + ((uint32_t)4U * i + (uint32_t)1U);
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, (uint32_t)0U, res_i1);
       uint32_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
-      uint32_t *res_i2 = res1 + (uint32_t)4U * i + (uint32_t)2U;
+      uint32_t *res_i2 = res1 + ((uint32_t)4U * i + (uint32_t)2U);
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, (uint32_t)0U, res_i2);
       uint32_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
-      uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
+      uint32_t *res_i = res1 + ((uint32_t)4U * i + (uint32_t)3U);
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
     }
     for (uint32_t i = rLen / (uint32_t)4U * (uint32_t)4U; i < rLen; i++)
@@ -1264,7 +1258,7 @@ uint32_t *Hacl_Bignum4096_32_new_bn_from_bytes_be(uint32_t len, uint8_t *b)
   KRML_CHECK_SIZE(sizeof (uint8_t), tmpLen);
   uint8_t *tmp = alloca(tmpLen * sizeof (uint8_t));
   memset(tmp, 0U, tmpLen * sizeof (uint8_t));
-  memcpy(tmp + tmpLen - len, b, len * sizeof (uint8_t));
+  memcpy(tmp + (tmpLen - len), b, len * sizeof (uint8_t));
   for (uint32_t i = (uint32_t)0U; i < bnLen; i++)
   {
     uint32_t *os = res2;
@@ -1342,7 +1336,7 @@ void Hacl_Bignum4096_32_bn_to_bytes_be(uint32_t *b, uint8_t *res)
   {
     store32_be(tmp + i * numb, b[bnLen - i - (uint32_t)1U]);
   }
-  memcpy(res, tmp + tmpLen - (uint32_t)512U, (uint32_t)512U * sizeof (uint8_t));
+  memcpy(res, tmp + (tmpLen - (uint32_t)512U), (uint32_t)512U * sizeof (uint8_t));
 }
 
 /*

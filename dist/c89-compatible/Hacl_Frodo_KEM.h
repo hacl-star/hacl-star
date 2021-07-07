@@ -532,7 +532,7 @@ Hacl_Impl_Frodo_Pack_frodo_pack(
         FStar_UInt128_shift_left(FStar_UInt128_uint64_to_uint128((uint64_t)a7), (uint32_t)0U * d));
     uint8_t *src;
     store128_be(v16, templong);
-    src = v16 + (uint32_t)16U - d;
+    src = v16 + ((uint32_t)16U - d);
     memcpy(r, src, d * sizeof (uint8_t));
   }
 }
@@ -556,7 +556,7 @@ Hacl_Impl_Frodo_Pack_frodo_unpack(
     uint8_t src[16U] = { 0U };
     FStar_UInt128_uint128 u;
     FStar_UInt128_uint128 templong;
-    memcpy(src + (uint32_t)16U - d, b1, d * sizeof (uint8_t));
+    memcpy(src + ((uint32_t)16U - d), b1, d * sizeof (uint8_t));
     u = load128_be(src);
     templong = u;
     r[0U] =

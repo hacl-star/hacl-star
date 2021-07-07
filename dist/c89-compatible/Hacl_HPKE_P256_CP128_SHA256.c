@@ -153,15 +153,17 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseI(
               uu____4[0U] = (uint8_t)0U;
               uu____4[1U] = (uint8_t)3U;
               memcpy(context + (uint32_t)7U, o_pkE, (uint32_t)65U * sizeof (uint8_t));
-              memcpy(context + (uint32_t)7U + (uint32_t)65U, pkR, (uint32_t)65U * sizeof (uint8_t));
-              memcpy(context + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U,
+              memcpy(context + ((uint32_t)7U + (uint32_t)65U),
+                pkR,
+                (uint32_t)65U * sizeof (uint8_t));
+              memcpy(context + ((uint32_t)7U + (uint32_t)65U + (uint32_t)65U),
                 default_pkI,
                 (uint32_t)65U * sizeof (uint8_t));
-              pskhash_b = context + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U;
+              pskhash_b = context + ((uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U);
               memcpy(pskhash_b, pskID_hash, (uint32_t)32U * sizeof (uint8_t));
               output_info =
                 context
-                + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U + (uint32_t)32U;
+                + ((uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U + (uint32_t)32U);
               memcpy(output_info, info_hash, (uint32_t)32U * sizeof (uint8_t));
               Hacl_HKDF_extract_sha2_256(secret, default_psk, (uint32_t)32U, zz, (uint32_t)65U);
               info_key = tmp + (uint32_t)2U;
@@ -319,15 +321,17 @@ Hacl_HPKE_P256_CP128_SHA256_setupBaseR(
               uu____4[0U] = (uint8_t)0U;
               uu____4[1U] = (uint8_t)3U;
               memcpy(context + (uint32_t)7U, pkE, (uint32_t)65U * sizeof (uint8_t));
-              memcpy(context + (uint32_t)7U + (uint32_t)65U, pkR, (uint32_t)65U * sizeof (uint8_t));
-              memcpy(context + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U,
+              memcpy(context + ((uint32_t)7U + (uint32_t)65U),
+                pkR,
+                (uint32_t)65U * sizeof (uint8_t));
+              memcpy(context + ((uint32_t)7U + (uint32_t)65U + (uint32_t)65U),
                 default_pkI,
                 (uint32_t)65U * sizeof (uint8_t));
-              pskhash_b = context + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U;
+              pskhash_b = context + ((uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U);
               memcpy(pskhash_b, pskID_hash, (uint32_t)32U * sizeof (uint8_t));
               output_info =
                 context
-                + (uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U + (uint32_t)32U;
+                + ((uint32_t)7U + (uint32_t)65U + (uint32_t)65U + (uint32_t)65U + (uint32_t)32U);
               memcpy(output_info, info_hash, (uint32_t)32U * sizeof (uint8_t));
               Hacl_HKDF_extract_sha2_256(secret, default_psk, (uint32_t)32U, zz, (uint32_t)65U);
               info_key = tmp + (uint32_t)2U;
@@ -405,7 +409,7 @@ Hacl_HPKE_P256_CP128_SHA256_openBase(
       clen - (uint32_t)16U,
       output,
       c,
-      c + clen - (uint32_t)16U);
+      c + (clen - (uint32_t)16U));
   uint32_t z = res1 | res2;
   return z;
 }

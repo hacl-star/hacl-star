@@ -364,7 +364,7 @@ Hacl_Hash_Blake2b_256_finish_blake2b_256(
   uint8_t *dst
 )
 {
-  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
+  uint32_t double_row = (uint32_t)2U * ((uint32_t)4U * (uint32_t)8U);
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   {
     uint8_t b[double_row];
@@ -1233,7 +1233,7 @@ Hacl_Blake2b_256_blake2b_update_last(
 )
 {
   uint8_t b[128U] = { 0U };
-  uint8_t *last = d + len - rem;
+  uint8_t *last = d + (len - rem);
   FStar_UInt128_uint128 totlen;
   memcpy(b, last, rem * sizeof (uint8_t));
   totlen = FStar_UInt128_add_mod(prev, FStar_UInt128_uint64_to_uint128((uint64_t)len));
@@ -1284,7 +1284,7 @@ Hacl_Blake2b_256_blake2b_finish(
   Lib_IntVector_Intrinsics_vec256 *hash
 )
 {
-  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
+  uint32_t double_row = (uint32_t)2U * ((uint32_t)4U * (uint32_t)8U);
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   {
     uint8_t b[double_row];

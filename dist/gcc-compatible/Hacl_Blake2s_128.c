@@ -206,7 +206,7 @@ Hacl_Hash_Blake2s_128_finish_blake2s_128(
   uint8_t *dst
 )
 {
-  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)4U;
+  uint32_t double_row = (uint32_t)2U * ((uint32_t)4U * (uint32_t)4U);
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   uint8_t b[double_row];
   memset(b, 0U, double_row * sizeof (uint8_t));
@@ -709,7 +709,7 @@ Hacl_Blake2s_128_blake2s_update_last(
 )
 {
   uint8_t b[64U] = { 0U };
-  uint8_t *last = d + len - rem;
+  uint8_t *last = d + (len - rem);
   memcpy(b, last, rem * sizeof (uint8_t));
   uint64_t totlen = prev + (uint64_t)len;
   blake2s_update_block(wv, hash, true, totlen, b);
@@ -751,7 +751,7 @@ Hacl_Blake2s_128_blake2s_finish(
   Lib_IntVector_Intrinsics_vec128 *hash
 )
 {
-  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)4U;
+  uint32_t double_row = (uint32_t)2U * ((uint32_t)4U * (uint32_t)4U);
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   uint8_t b[double_row];
   memset(b, 0U, double_row * sizeof (uint8_t));

@@ -376,10 +376,10 @@ static void pad_256(uint64_t len, uint8_t *dst)
   *dst3 =
     dst
     +
-      (uint32_t)1U
+      ((uint32_t)1U
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
-        % (uint32_t)64U;
+        % (uint32_t)64U);
   store64_be(dst3, len << (uint32_t)3U);
 }
 
@@ -406,13 +406,13 @@ static void pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
   *dst3 =
     dst
     +
-      (uint32_t)1U
+      ((uint32_t)1U
       +
         ((uint32_t)256U
         -
           ((uint32_t)17U
           + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
-        % (uint32_t)128U;
+        % (uint32_t)128U);
   FStar_UInt128_uint128 len_ = FStar_UInt128_shift_left(len, (uint32_t)3U);
   store128_be(dst3, len_);
 }
@@ -440,13 +440,13 @@ static void pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
   *dst3 =
     dst
     +
-      (uint32_t)1U
+      ((uint32_t)1U
       +
         ((uint32_t)256U
         -
           ((uint32_t)17U
           + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
-        % (uint32_t)128U;
+        % (uint32_t)128U);
   FStar_UInt128_uint128 len_ = FStar_UInt128_shift_left(len, (uint32_t)3U);
   store128_be(dst3, len_);
 }
@@ -839,10 +839,10 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
   *dst3 =
     dst
     +
-      (uint32_t)1U
+      ((uint32_t)1U
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
-        % (uint32_t)64U;
+        % (uint32_t)64U);
   store64_be(dst3, len << (uint32_t)3U);
 }
 
@@ -1360,7 +1360,7 @@ instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -1370,7 +1370,7 @@ instantiate(
         memset(v, (uint8_t)1U, (uint32_t)20U * sizeof (uint8_t));
         ctr[0U] = (uint32_t)1U;
         uint32_t
-        input_len = (uint32_t)21U + entropy_input_len + nonce_len + personalization_string_len;
+        input_len = (uint32_t)21U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1389,7 +1389,7 @@ instantiate(
         if (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
         {
           uint32_t
-          input_len0 = (uint32_t)21U + entropy_input_len + nonce_len + personalization_string_len;
+          input_len0 = (uint32_t)21U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1418,7 +1418,7 @@ instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -1428,7 +1428,7 @@ instantiate(
         memset(v, (uint8_t)1U, (uint32_t)32U * sizeof (uint8_t));
         ctr[0U] = (uint32_t)1U;
         uint32_t
-        input_len = (uint32_t)33U + entropy_input_len + nonce_len + personalization_string_len;
+        input_len = (uint32_t)33U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1447,7 +1447,7 @@ instantiate(
         if (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
         {
           uint32_t
-          input_len0 = (uint32_t)33U + entropy_input_len + nonce_len + personalization_string_len;
+          input_len0 = (uint32_t)33U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1476,7 +1476,7 @@ instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -1486,7 +1486,7 @@ instantiate(
         memset(v, (uint8_t)1U, (uint32_t)48U * sizeof (uint8_t));
         ctr[0U] = (uint32_t)1U;
         uint32_t
-        input_len = (uint32_t)49U + entropy_input_len + nonce_len + personalization_string_len;
+        input_len = (uint32_t)49U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1505,7 +1505,7 @@ instantiate(
         if (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
         {
           uint32_t
-          input_len0 = (uint32_t)49U + entropy_input_len + nonce_len + personalization_string_len;
+          input_len0 = (uint32_t)49U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1534,7 +1534,7 @@ instantiate(
           (entropy_input_len + nonce_len + personalization_string_len) * sizeof (uint8_t));
         memcpy(seed_material, entropy_input, entropy_input_len * sizeof (uint8_t));
         memcpy(seed_material + entropy_input_len, nonce, nonce_len * sizeof (uint8_t));
-        memcpy(seed_material + entropy_input_len + nonce_len,
+        memcpy(seed_material + (entropy_input_len + nonce_len),
           personalization_string,
           personalization_string_len * sizeof (uint8_t));
         uint8_t *k = st.k;
@@ -1544,7 +1544,7 @@ instantiate(
         memset(v, (uint8_t)1U, (uint32_t)64U * sizeof (uint8_t));
         ctr[0U] = (uint32_t)1U;
         uint32_t
-        input_len = (uint32_t)65U + entropy_input_len + nonce_len + personalization_string_len;
+        input_len = (uint32_t)65U + (entropy_input_len + nonce_len + personalization_string_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1563,7 +1563,7 @@ instantiate(
         if (entropy_input_len + nonce_len + personalization_string_len != (uint32_t)0U)
         {
           uint32_t
-          input_len0 = (uint32_t)65U + entropy_input_len + nonce_len + personalization_string_len;
+          input_len0 = (uint32_t)65U + (entropy_input_len + nonce_len + personalization_string_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1617,7 +1617,7 @@ reseed(
         uint8_t *k = uu____0.k;
         uint8_t *v = uu____0.v;
         uint32_t *ctr = uu____0.reseed_counter;
-        uint32_t input_len = (uint32_t)21U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = (uint32_t)21U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1635,7 +1635,7 @@ reseed(
         memcpy(k, k_, (uint32_t)20U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != (uint32_t)0U)
         {
-          uint32_t input_len0 = (uint32_t)21U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = (uint32_t)21U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1670,7 +1670,7 @@ reseed(
         uint8_t *k = uu____1.k;
         uint8_t *v = uu____1.v;
         uint32_t *ctr = uu____1.reseed_counter;
-        uint32_t input_len = (uint32_t)33U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = (uint32_t)33U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1688,7 +1688,7 @@ reseed(
         memcpy(k, k_, (uint32_t)32U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != (uint32_t)0U)
         {
-          uint32_t input_len0 = (uint32_t)33U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = (uint32_t)33U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1723,7 +1723,7 @@ reseed(
         uint8_t *k = uu____2.k;
         uint8_t *v = uu____2.v;
         uint32_t *ctr = uu____2.reseed_counter;
-        uint32_t input_len = (uint32_t)49U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = (uint32_t)49U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1741,7 +1741,7 @@ reseed(
         memcpy(k, k_, (uint32_t)48U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != (uint32_t)0U)
         {
-          uint32_t input_len0 = (uint32_t)49U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = (uint32_t)49U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));
@@ -1776,7 +1776,7 @@ reseed(
         uint8_t *k = uu____3.k;
         uint8_t *v = uu____3.v;
         uint32_t *ctr = uu____3.reseed_counter;
-        uint32_t input_len = (uint32_t)65U + entropy_input_len + additional_input_input_len;
+        uint32_t input_len = (uint32_t)65U + (entropy_input_len + additional_input_input_len);
         KRML_CHECK_SIZE(sizeof (uint8_t), input_len);
         uint8_t input0[input_len];
         memset(input0, 0U, input_len * sizeof (uint8_t));
@@ -1794,7 +1794,7 @@ reseed(
         memcpy(k, k_, (uint32_t)64U * sizeof (uint8_t));
         if (entropy_input_len + additional_input_input_len != (uint32_t)0U)
         {
-          uint32_t input_len0 = (uint32_t)65U + entropy_input_len + additional_input_input_len;
+          uint32_t input_len0 = (uint32_t)65U + (entropy_input_len + additional_input_input_len);
           KRML_CHECK_SIZE(sizeof (uint8_t), input_len0);
           uint8_t input[input_len0];
           memset(input, 0U, input_len0 * sizeof (uint8_t));

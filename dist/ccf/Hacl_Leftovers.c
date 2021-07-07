@@ -507,7 +507,7 @@ blake2b_update_last(
 )
 {
   uint8_t b[128U] = { 0U };
-  uint8_t *last = d + len - rem;
+  uint8_t *last = d + (len - rem);
   memcpy(b, last, rem * sizeof (uint8_t));
   uint128_t totlen = prev + (uint128_t)(uint64_t)len;
   blake2b_update_block(wv, hash, true, totlen, b);
@@ -551,7 +551,7 @@ blake2b_update_blocks(
 
 static inline void blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash)
 {
-  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)8U;
+  uint32_t double_row = (uint32_t)2U * ((uint32_t)4U * (uint32_t)8U);
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   uint8_t b[double_row];
   memset(b, 0U, double_row * sizeof (uint8_t));
@@ -1085,7 +1085,7 @@ blake2s_update_last(
 )
 {
   uint8_t b[64U] = { 0U };
-  uint8_t *last = d + len - rem;
+  uint8_t *last = d + (len - rem);
   memcpy(b, last, rem * sizeof (uint8_t));
   uint64_t totlen = prev + (uint64_t)len;
   blake2s_update_block(wv, hash, true, totlen, b);
@@ -1122,7 +1122,7 @@ blake2s_update_blocks(
 
 static inline void blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash)
 {
-  uint32_t double_row = (uint32_t)2U * (uint32_t)4U * (uint32_t)4U;
+  uint32_t double_row = (uint32_t)2U * ((uint32_t)4U * (uint32_t)4U);
   KRML_CHECK_SIZE(sizeof (uint8_t), double_row);
   uint8_t b[double_row];
   memset(b, 0U, double_row * sizeof (uint8_t));

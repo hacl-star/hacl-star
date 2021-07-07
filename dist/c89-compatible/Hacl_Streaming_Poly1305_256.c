@@ -333,7 +333,7 @@ Hacl_Streaming_Poly1305_256_finish(
       {
         ite0 = r % (uint32_t)16U;
       }
-      buf_last = buf_1 + r - ite0;
+      buf_last = buf_1 + (r - ite0);
       buf_multi = buf_1;
       if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
       {

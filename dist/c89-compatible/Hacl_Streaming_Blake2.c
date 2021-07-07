@@ -608,7 +608,7 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
           {
             ite0 = r % (uint32_t)64U;
           }
-          buf_last = buf_1 + r - ite0;
+          buf_last = buf_1 + (r - ite0);
           buf_multi = buf_1;
           if
           (
@@ -1274,7 +1274,7 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
           {
             ite0 = r % (uint32_t)128U;
           }
-          buf_last = buf_1 + r - ite0;
+          buf_last = buf_1 + (r - ite0);
           buf_multi = buf_1;
           if
           (
@@ -1940,7 +1940,7 @@ Hacl_Streaming_Blake2_blake2s_32_with_key_finish(
           {
             ite0 = r % (uint32_t)64U;
           }
-          buf_last = buf_1 + r - ite0;
+          buf_last = buf_1 + (r - ite0);
           buf_multi = buf_1;
           if
           (
@@ -2610,7 +2610,7 @@ Hacl_Streaming_Blake2_blake2b_32_with_key_finish(
           {
             ite0 = r % (uint32_t)128U;
           }
-          buf_last = buf_1 + r - ite0;
+          buf_last = buf_1 + (r - ite0);
           buf_multi = buf_1;
           if
           (

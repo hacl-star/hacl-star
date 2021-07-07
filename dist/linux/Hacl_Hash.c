@@ -697,7 +697,7 @@ static u64 update_blake2s_32(u32 *s, u64 totlen, u8 *block)
 
 void Hacl_Hash_Core_Blake2_finish_blake2s_32(u32 *s, u64 ev, u8 *dst)
 {
-  u32 double_row = (u32)2U * (u32)4U * (u32)4U;
+  u32 double_row = (u32)2U * ((u32)4U * (u32)4U);
   KRML_CHECK_SIZE(sizeof (u8), double_row);
   {
     u8 b[double_row];
@@ -1398,7 +1398,7 @@ static uint128_t update_blake2b_32(u64 *s, uint128_t totlen, u8 *block)
 
 void Hacl_Hash_Core_Blake2_finish_blake2b_32(u64 *s, uint128_t ev, u8 *dst)
 {
-  u32 double_row = (u32)2U * (u32)4U * (u32)8U;
+  u32 double_row = (u32)2U * ((u32)4U * (u32)8U);
   KRML_CHECK_SIZE(sizeof (u8), double_row);
   {
     u8 b[double_row];
@@ -4692,7 +4692,7 @@ void Hacl_Hash_Core_MD5_legacy_pad(u64 len, u8 *dst)
     for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
       dst2[i] = (u8)0U;
   }
-  dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
+  dst3 = dst + ((u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U);
   store64_le(dst3, len << (u32)3U);
 }
 
@@ -4887,7 +4887,7 @@ void Hacl_Hash_Core_SHA1_legacy_pad(u64 len, u8 *dst)
     for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
       dst2[i] = (u8)0U;
   }
-  dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
+  dst3 = dst + ((u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U);
   store64_be(dst3, len << (u32)3U);
 }
 
@@ -5619,7 +5619,7 @@ void Hacl_Hash_Core_SHA2_pad_224(u64 len, u8 *dst)
     for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
       dst2[i] = (u8)0U;
   }
-  dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
+  dst3 = dst + ((u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U);
   store64_be(dst3, len << (u32)3U);
 }
 
@@ -5635,7 +5635,7 @@ void Hacl_Hash_Core_SHA2_pad_256(u64 len, u8 *dst)
     for (i = (u32)0U; i < ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U; i++)
       dst2[i] = (u8)0U;
   }
-  dst3 = dst + (u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U;
+  dst3 = dst + ((u32)1U + ((u32)128U - ((u32)9U + (u32)(len % (u64)(u32)64U))) % (u32)64U);
   store64_be(dst3, len << (u32)3U);
 }
 
@@ -5659,7 +5659,7 @@ void Hacl_Hash_Core_SHA2_pad_384(uint128_t len, u8 *dst)
   }
   dst3 =
     dst
-    + (u32)1U + ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
+    + ((u32)1U + ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U);
   len_ = len << (u32)3U;
   store128_be(dst3, len_);
 }
@@ -5684,7 +5684,7 @@ void Hacl_Hash_Core_SHA2_pad_512(uint128_t len, u8 *dst)
   }
   dst3 =
     dst
-    + (u32)1U + ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U;
+    + ((u32)1U + ((u32)256U - ((u32)17U + (u32)((uint64_t)len % (u64)(u32)128U))) % (u32)128U);
   len_ = len << (u32)3U;
   store128_be(dst3, len_);
 }

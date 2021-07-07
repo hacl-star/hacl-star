@@ -568,7 +568,7 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
   {
     ite0 = r % (uint32_t)64U;
   }
-  uint8_t *buf_last = buf_1 + r - ite0;
+  uint8_t *buf_last = buf_1 + (r - ite0);
   uint8_t *buf_multi = buf_1;
   uint32_t ite1;
   if
@@ -1189,7 +1189,7 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
   {
     ite0 = r % (uint32_t)128U;
   }
-  uint8_t *buf_last = buf_1 + r - ite0;
+  uint8_t *buf_last = buf_1 + (r - ite0);
   uint8_t *buf_multi = buf_1;
   uint32_t ite1;
   if
@@ -1810,7 +1810,7 @@ Hacl_Streaming_Blake2_blake2s_32_with_key_finish(
   {
     ite0 = r % (uint32_t)64U;
   }
-  uint8_t *buf_last = buf_1 + r - ite0;
+  uint8_t *buf_last = buf_1 + (r - ite0);
   uint8_t *buf_multi = buf_1;
   uint32_t ite1;
   if
@@ -2435,7 +2435,7 @@ Hacl_Streaming_Blake2_blake2b_32_with_key_finish(
   {
     ite0 = r % (uint32_t)128U;
   }
-  uint8_t *buf_last = buf_1 + r - ite0;
+  uint8_t *buf_last = buf_1 + (r - ite0);
   uint8_t *buf_multi = buf_1;
   uint32_t ite1;
   if

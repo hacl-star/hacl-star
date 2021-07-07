@@ -283,7 +283,7 @@ Hacl_Streaming_SHA1_legacy_finish_sha1(Hacl_Streaming_SHA2_state_sha2_224 *p, ui
     {
       ite = r % (uint32_t)64U;
     }
-    buf_last = buf_1 + r - ite;
+    buf_last = buf_1 + (r - ite);
     buf_multi = buf_1;
     Hacl_Hash_SHA1_legacy_update_multi(tmp_block_state, buf_multi, (uint32_t)0U);
     prev_len_last = total_len - (uint64_t)r;
