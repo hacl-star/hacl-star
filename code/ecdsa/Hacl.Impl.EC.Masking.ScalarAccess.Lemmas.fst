@@ -510,5 +510,106 @@ let rec scalar_as_sub_radix4 #c s i =
 
 
 
-assume val lemma_index_scalar_as_nat: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} ->
-  Lemma (v (Lib.Sequence.index s i) == scalar_as_nat #c s / pow2 (v (getScalarLen c) - (i + 1) * 8) % pow2 8)
+val lemma_index_as_ith_: a: nat {a < pow2 8} 
+  -> a7: nat {a7 = a / pow2 7 % 2} 
+  -> a6: nat {a6 = a / pow2 6 % 2} 
+  -> a5: nat {a5 = a / pow2 5 % 2} 
+  -> a4: nat {a4 = a / pow2 4 % 2} 
+  -> a3: nat {a3 = a / pow2 3 % 2} 
+  -> a2: nat {a2 = a / pow2 2 % 2} 
+  -> a1: nat {a1 = a / pow2 1 % 2} 
+  -> a0: nat {a0 = a / pow2 0 % 2} 
+  -> Lemma (a = a7 * pow2 7 + a6 * pow2 6 + a5 * pow2 5 + a4 * pow2 4 + a3 * pow2 3 + a2 * pow2 2 + a1 * pow2 1 + a0 * pow2 0)
+
+
+let lemma_index_as_ith_ a a7 a6 a5 a4 a3 a2 a1 a0 = 
+  euclidean_division_definition a (pow2 7);
+  lemma_div_lt_nat a 8 7;
+  small_mod (a / pow2 7) 2;
+
+  euclidean_division_definition (a % pow2 7) (pow2 6);
+  pow2_modulo_division_lemma_1 a 6 7;
+  pow2_modulo_modulo_lemma_1 a 6 7;
+
+  euclidean_division_definition (a % pow2 6) (pow2 5);
+  pow2_modulo_division_lemma_1 a 5 6;
+  pow2_modulo_modulo_lemma_1 a 5 6;
+
+  euclidean_division_definition (a % pow2 5) (pow2 4);
+  pow2_modulo_division_lemma_1 a 4 5;
+  pow2_modulo_modulo_lemma_1 a 4 5;
+
+  euclidean_division_definition (a % pow2 4) (pow2 3);
+  pow2_modulo_division_lemma_1 a 3 4;
+  pow2_modulo_modulo_lemma_1 a 3 4;
+
+  euclidean_division_definition (a % pow2 3) (pow2 2);
+  pow2_modulo_division_lemma_1 a 2 3;
+  pow2_modulo_modulo_lemma_1 a 2 3;
+
+  euclidean_division_definition (a % pow2 2) (pow2 1);
+  pow2_modulo_division_lemma_1 a 1 2;
+  pow2_modulo_modulo_lemma_1 a 1 2;
+
+  euclidean_division_definition (a % pow2 1) (pow2 0);
+  pow2_modulo_division_lemma_1 a 0 1;
+  pow2_modulo_modulo_lemma_1 a 0 1
+
+
+val lemma_index_as_ith: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} -> 
+  Lemma (
+    let l = v (getScalarLen c) in 
+    v (Lib.Sequence.index s i) == 
+    pow2 0 * v (ith_bit s (l - 8 * i - 8)) + 
+    pow2 1 * v (ith_bit s (l - 8 * i - 7)) + 
+    pow2 2 * v (ith_bit s (l - 8 * i - 6)) + 
+    pow2 3 * v (ith_bit s (l - 8 * i - 5)) + 
+    pow2 4 * v (ith_bit s (l - 8 * i - 4)) +
+    pow2 5 * v (ith_bit s (l - 8 * i - 3)) + 
+    pow2 6 * v (ith_bit s (l - 8 * i - 2)) + 
+    pow2 7 * v (ith_bit s (l - 8 * i - 1)))
+
+
+let lemma_index_as_ith #c s i = 
+  let l = v (getScalarLen c) in 
+
+  
+  logand_mask (Lib.Sequence.index s i >>. size 7) (u8 1) 1;
+  logand_mask (Lib.Sequence.index s i >>. size 6) (u8 1) 1;
+  logand_mask (Lib.Sequence.index s i >>. size 5) (u8 1) 1;
+  logand_mask (Lib.Sequence.index s i >>. size 4) (u8 1) 1;
+  logand_mask (Lib.Sequence.index s i >>. size 3) (u8 1) 1;
+  logand_mask (Lib.Sequence.index s i >>. size 2) (u8 1) 1;
+  logand_mask (Lib.Sequence.index s i >>. size 1) (u8 1) 1;
+  logand_mask (Lib.Sequence.index s i >>. size 0) (u8 1) 1;
+
+  let a7 = v (ith_bit s (l - 8 * i - 1)) in 
+  let a6 = v (ith_bit s (l - 8 * i - 2)) in 
+  let a5 = v (ith_bit s (l - 8 * i - 3)) in 
+  let a4 = v (ith_bit s (l - 8 * i - 4)) in 
+  let a3 = v (ith_bit s (l - 8 * i - 5)) in 
+  let a2 = v (ith_bit s (l - 8 * i - 6)) in 
+  let a1 = v (ith_bit s (l - 8 * i - 7)) in 
+  let a0 = v (ith_bit s (l - 8 * i - 8)) in 
+
+  assert(a7 ==  v (Lib.Sequence.index s i) / pow2 7 % 2);
+  assert(a6 ==  v (Lib.Sequence.index s i) / pow2 6 % 2); 
+  assert(a5 ==  v (Lib.Sequence.index s i) / pow2 5 % 2);
+  assert(a4 ==  v (Lib.Sequence.index s i) / pow2 4 % 2);
+  assert(a3 ==  v (Lib.Sequence.index s i) / pow2 3 % 2);
+  assert(a2 ==  v (Lib.Sequence.index s i) / pow2 2 % 2);
+  assert(a1 ==  v (Lib.Sequence.index s i) / pow2 1 % 2);
+  assert(a0 ==  v (Lib.Sequence.index s i) / pow2 0 % 2); 
+
+  assert (v (Lib.Sequence.index s i) < pow2 8);
+  
+  lemma_index_as_ith_ (v (Lib.Sequence.index s i)) a7 a6 a5 a4 a3 a2 a1 a0
+
+
+val lemma_index_scalar_as_nat: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} ->
+  Lemma (v (Lib.Sequence.index s i) == scalar_as_nat #c s / pow2 (v (getScalarLen c) - i - 8) % pow2 8)
+
+let lemma_index_scalar_as_nat #c s i = 
+  let l = v (getScalarLen c) in 
+  lemma_index_as_ith #c s i;
+  assume (v (Lib.Sequence.index s i) == scalar_as_nat #c s / pow2 (v (getScalarLen c) - i - 8) % pow2 8)
