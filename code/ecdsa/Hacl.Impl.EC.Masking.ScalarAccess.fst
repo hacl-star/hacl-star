@@ -159,6 +159,7 @@ val getScalar_4_byBit: #c: curve
     let radix = 4 in 
     v r == FStar.Math.Lib.arithmetic_shift_right (scalar_as_nat #c (as_seq h0 s)) (v (getScalarLen c) - (v i + 1) * radix) % pow2 radix))
 
+
 let getScalar_4_byBit #c s i = 
   let h0 = ST.get() in 
   let bit = getScalarLen c -! 1ul -! (shift_left i 2ul) in 
@@ -193,6 +194,7 @@ let getScalar_4_byBit #c s i =
   scalar_as_nat_def #c (as_seq h0 s) (4 * v i + 4);
 
   scalar_as_sub_radix4 (as_seq h0 s) (v i); 
+
   r
 
 

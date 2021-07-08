@@ -672,19 +672,26 @@ let lemma_index_scalar_as_nat #c s i =
 #pop-options
 
 
-val scalar_as_sub_radix4: #c: curve -> s: scalar_bytes #c -> i: nat {4 * i + 4 <= v (getScalarLen c)} -> 
-  Lemma (let l = v (getScalarLen c) in 
-  (scalar_as_nat s / pow2 (l - (i + 1) * 4)) % pow2 4 == scalar_as_nat_ #c s (4 * i + 4) - 16 * scalar_as_nat_ #c s (4 * i))
+val scalar_as_sub_radix4: #c: curve -> s: scalar_bytes #c -> i: nat {(i + 1) * 4 <= v (getScalarLen c)} -> 
+  Lemma ((let l = v (getScalarLen c) in 
+  (scalar_as_nat s / pow2 (l - (i + 1) * 4)) % pow2 4 == scalar_as_nat_ #c s (4 * i + 4) - 16 * scalar_as_nat_ #c s (4 * i))) 
 
-let rec scalar_as_sub_radix4 #c s i =
+let scalar_as_sub_radix4 #c s i =
   let l = v (getScalarLen c) in 
-  match i with 
-  |0 ->
-    scalar_as_nat_zero #c s;  
-    scalar_as_nat_def #c s 4;
-    scalar_as_nat_def #c s l;
-    test s 4;
-    scalar_as_nat_upperbound s 4;
-    small_mod (scalar_as_nat_ #c s 4) (pow2 4)
-  |_ -> admit()
+  test s ((i + 1) * 4);
+ 
+  scalar_as_nat_def s (4 * i + 4); 
+  scalar_as_nat_def s (4 * i + 3); 
+  scalar_as_nat_def s (4 * i + 2); 
+  scalar_as_nat_def s (4 * i + 1); 
+  
+  modulo_addition_lemma (8 * v (ith_bit s (l - (4 * i + 1))) + 
+    4 * v (ith_bit s (l - (4 * i + 2))) + 
+    2 * v (ith_bit s (l - (4 * i + 3))) + 
+    v (ith_bit s (l - (4 * i + 4)))) (pow2 4) (scalar_as_nat_ s (4 * i));
 
+  small_mod (
+    8 * v (ith_bit s (l - (4 * i + 1))) + 
+    4 * v (ith_bit s (l - (4 * i + 2))) + 
+    2 * v (ith_bit s (l - (4 * i + 3))) + 
+    v (ith_bit s (l - (4 * i + 4)))) (pow2 4)
