@@ -17,6 +17,7 @@ open FStar.Math.Lemmas
 
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
+
 inline_for_extraction noextract
 val get_high_part: a:uint64 -> r:uint32{uint_v r == uint_v a / pow2 32}
 let get_high_part a = to_u32 (shift_right a (size 32))
@@ -264,16 +265,162 @@ let lemma_and_both_parts_32 a b =
       (==) {lemma_logand_zero 4}
     UInt.from_vec (zero_extend_vec #4 #4 (BV.logand_vec (UInt.to_vec #4 (v a0)) (UInt.to_vec #4 (v b0))));
       (==) {lemma_zero_extend #4 #4 (UInt.from_vec (BV.logand_vec (UInt.to_vec #4 (v a0)) (UInt.to_vec #4 (v b0))))}
-    UInt.from_vec #4 (BV.logand_vec (UInt.to_vec #4 (v a0)) (UInt.to_vec #4 (v b0)));
-  };
-
-
+    UInt.from_vec #4 (BV.logand_vec (UInt.to_vec #4 (v a0)) (UInt.to_vec #4 (v b0)));};
   UInt.append_lemma (BV.logand_vec a1_ b1_) (BV.logand_vec a0_ b0_)
 
 
-assume val lemma_xor_of_4: bit0: uint64 {v bit0 <= 1} -> bit1: uint64 {v bit1 <= 1} 
-  -> bit2: uint64 {v bit2 <= 1} -> bit3: uint64 {v bit3 <= 1} -> 
+val lemma_xor_of_4: bit0: uint64 {v bit0 <= 1} -> bit1: uint64 {v bit1 <= 1} -> bit2: uint64 {v bit2 <= 1} -> bit3: uint64 {v bit3 <= 1} -> 
   Lemma (logxor_v (logxor_v (v bit0 * 8) (v bit1 * 4)) (logxor_v #U64 (v bit2 * 2) (v bit3)) == v bit0 * 8 + v bit1 * 4 + v bit2 * 2 + v bit3)
+
+
+
+val get_high_part_n: #n: pos {n < 64} -> a:uint64 -> r:uint64 {uint_v r == uint_v a / pow2 n}
+
+let get_high_part_n #n a = shift_right a (size n)
+
+
+val get_low_part_n: #n: pos {n < 64} -> a:uint64 -> r:uint64 {uint_v r == uint_v a % pow2 n}
+
+let get_low_part_n #n a =
+  pow2_lt_compat 64 n;
+  let mask = u64 (pow2 n - 1) in 
+  logand_mask a mask n;
+  to_u64 (logand a mask)
+
+
+val to_vec_low_high_n: #n: pos {n < 64} -> a:UInt.uint_t 64 -> Lemma ( 
+  lemma_div_lt_nat a 64 n;
+  UInt.to_vec a == Seq.append (UInt.to_vec #(64 - n) (a / pow2 n)) (UInt.to_vec #n (a % pow2 n)))
+
+let to_vec_low_high_n #n a =
+  lemma_div_lt_nat a 64 n;
+  assert (a == append_uint #n #(64 - n) (a % pow2 n) (a / pow2 n));
+  to_vec_append #n #(64 - n) (a % pow2 n) (a / pow2 n)
+
+
+val logxor_vec_append (#n1 #n2: pos) (a1 b1: BV.bv_t n1) (a2 b2: BV.bv_t n2) :
+  Lemma (Seq.append (BV.logxor_vec a1 b1) (BV.logxor_vec a2 b2) ==
+         BV.logxor_vec #(n1 + n2) (FStar.Seq.append a1 a2) (FStar.Seq.append b1 b2))
+
+let logxor_vec_append #n1 #n2 a1 b1 a2 b2 =
+  Seq.lemma_eq_intro (Seq.append (BV.logxor_vec a1 b1) (BV.logxor_vec a2 b2))
+                     (BV.logxor_vec #(n1 + n2) (Seq.append a1 a2) (Seq.append b1 b2))
+
+val lemma_xor_zero:
+  #n: pos {n < 64}
+  -> low: uint64{v (get_high_part_n #n low) == 0}
+  -> high: uint64{v (get_low_part_n #n high) == 0}
+  -> Lemma (v (logxor low high) = v high + v low)
+
+
+let lemma_xor_zero #n a b = 
+  to_vec_low_high_n #n (v a);
+  to_vec_low_high_n #n (v b);
+
+  let l1: pos = 64 - n in 
+  
+  FStar.Math.Lemmas.pow2_minus 64 n; 
+
+  let a0, a1 = get_low_part_n #n a, get_high_part_n #n a in 
+  let b0, b1 = get_low_part_n #n b, get_high_part_n #n b in 
+
+  lemma_div_lt_nat (v b) 64 n;
+
+  let a0_, a1_ = UInt.to_vec #n (v a0), UInt.to_vec #l1 (v a1) in
+  let b0_, b1_ = UInt.to_vec #n (v b0), UInt.to_vec #l1 (v b1) in
+
+
+  logxor_vec_append #l1 #n a1_ b1_ a0_ b0_;
+  
+  assert(Seq.append (BV.logxor_vec #l1 a1_ b1_) (BV.logxor_vec #n a0_ b0_) == BV.logxor_vec #64 (Seq.append a1_ a0_) (Seq.append b1_ b0_));
+
+  assert(UInt.from_vec #64 (Seq.append a1_ a0_) == v a1 * pow2 n + v a0);
+  assert(UInt.from_vec #64 (Seq.append b1_ b0_) == v b1 * pow2 n + v b0);
+
+  assert(UInt.from_vec #64 (Seq.append a1_ a0_) == v a0);
+  assert(UInt.from_vec #64 (Seq.append b1_ b0_) == v b1 * pow2 n);   
+
+  assert(Seq.append a1_ a0_ == UInt.to_vec #64 (v a0));
+  assert(Seq.append b1_ b0_ == UInt.to_vec #64 (v b1 * pow2 n)); 
+
+  logxor_spec a b;
+
+  assert(UInt.from_vec #64 (Seq.append (BV.logxor_vec #l1 a1_ b1_) (BV.logxor_vec #n a0_ b0_)) == v (logxor a b));
+
+  UInt.append_lemma (BV.logxor_vec #l1 a1_ b1_) (BV.logxor_vec #n a0_ b0_);
+
+  assert(UInt.from_vec #64 (Seq.append (BV.logxor_vec #l1 a1_ b1_) (BV.logxor_vec #n a0_ b0_)) ==
+    UInt.from_vec (BV.logxor_vec #l1 (UInt.to_vec #l1 (v a1)) (UInt.to_vec #l1 (v b1))) * pow2 n + 
+    UInt.from_vec (BV.logxor_vec #n a0_ b0_));
+
+  assert(UInt.from_vec #64 (Seq.append (BV.logxor_vec #l1 a1_ b1_) (BV.logxor_vec #n a0_ b0_)) ==
+    UInt.logxor #l1 0 (v b1) * pow2 n + UInt.logxor #n (v a0) 0);
+
+  UInt.logxor_lemma_1 #l1 (v b1);
+  UInt.logxor_commutative #l1 (v b1) 0;
+
+  UInt.logxor_lemma_1 #n (v a0);
+  UInt.logxor_commutative #n (v a0) 0;
+
+  assert(UInt.from_vec #64 (Seq.append (BV.logxor_vec #l1 a1_ b1_) (BV.logxor_vec #n a0_ b0_)) == v b + v a)
+
+
+
+val lemma_xor_n: 
+  #n: pos {n < 32} ->
+  high: uint64 {v (get_low_part_n #n high) == 0} -> 
+  low:  uint64 {v (get_high_part_n #n low) == 0} -> 
+  Lemma (FStar.UInt.logxor #64 (v high) (v low) = v high + v low /\ FStar.UInt.logxor #64 (v low) (v high) = v high + v low)
+
+let lemma_xor_n #n a b = 
+  lemma_xor_zero #n b a; 
+  logxor_spec b a;
+  FStar.UInt.logxor_commutative #64 (v b) (v a)
+
+
+let lemma_xor_of_4 bit0 bit1 bit2 bit3 = 
+  let open FStar.UInt in 
+  let open FStar.BitVector in 
+    FStar.UInt.logxor_lemma_1 #64 0;
+    FStar.UInt.logxor_lemma_1 #64 1;
+    FStar.UInt.logxor_lemma_1 #64 2;
+    FStar.UInt.logxor_lemma_1 #64 3;
+    FStar.UInt.logxor_lemma_1 #64 4;
+    FStar.UInt.logxor_lemma_1 #64 8;
+    FStar.UInt.logxor_lemma_1 #64 12;
+
+    FStar.UInt.logxor_commutative #64 0 1; 
+    FStar.UInt.logxor_commutative #64 0 2; 
+    FStar.UInt.logxor_commutative #64 0 3; 
+    FStar.UInt.logxor_commutative #64 0 4; 
+
+  lemma_xor_n #1 (u64 2) (u64 1);
+    assert_norm(1 / pow2 62 == 0);
+    assert_norm(2 / pow2 62 == 0);
+    assert_norm(3 / pow2 62 == 0);
+  lemma_xor_n #2 (u64 4) (u64 1);
+  lemma_xor_n #2 (u64 4) (u64 2);
+  lemma_xor_n #2 (u64 4) (u64 3);
+
+  assert_norm(1 / pow2 61 == 0);
+  assert_norm(2 / pow2 61 == 0);
+  assert_norm(3 / pow2 61 == 0);
+  assert_norm(4 / pow2 61 == 0);
+    
+  lemma_xor_n #3 (u64 8) (u64 1);
+  lemma_xor_n #3 (u64 8) (u64 2);
+  lemma_xor_n #3 (u64 8) (u64 3);
+  lemma_xor_n #3 (u64 8) (u64 4);
+
+
+  assert_norm(1 / pow2 60 == 0);
+  assert_norm(2 / pow2 60 == 0);
+  assert_norm(3 / pow2 60 == 0);
+  
+  lemma_xor_n #2 (u64 12) (u64 1);
+  lemma_xor_n #2 (u64 12) (u64 2);
+  lemma_xor_n #2 (u64 12) (u64 3)
+    
 
 
 val scalar_as_nat_upperbound: #c: curve -> s: scalar_bytes #c -> i: nat {i <= v (getScalarLen c)} -> Lemma
