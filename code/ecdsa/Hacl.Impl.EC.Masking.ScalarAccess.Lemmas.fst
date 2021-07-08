@@ -1,11 +1,6 @@
 module Hacl.Impl.EC.Masking.ScalarAccess.Lemmas
 
-open FStar.HyperStack.All
-open FStar.HyperStack
-module ST = FStar.HyperStack.ST
-
 open Lib.IntTypes
-open Lib.Buffer
 
 open Spec.ECC
 open Spec.ECC.Curves
@@ -492,23 +487,6 @@ let rec test #c s i =
     test_ #c s (v (getScalarLen c) - i)
 
 
-val scalar_as_sub_radix4: #c: curve -> s: scalar_bytes #c -> i: nat {4 * i + 4 <= v (getScalarLen c)} -> 
-  Lemma (let l = v (getScalarLen c) in 
-  (scalar_as_nat s / pow2 (l - (i + 1) * 4)) % pow2 4 == scalar_as_nat_ #c s (4 * i + 4) - 16 * scalar_as_nat_ #c s (4 * i))
-
-let rec scalar_as_sub_radix4 #c s i =
-  let l = v (getScalarLen c) in 
-  match i with 
-  |0 ->
-    scalar_as_nat_zero #c s;  
-    scalar_as_nat_def #c s 4;
-    scalar_as_nat_def #c s l;
-    test s 4;
-    scalar_as_nat_upperbound s 4;
-    small_mod (scalar_as_nat_ #c s 4) (pow2 4)
-  |_ -> admit()
-
-
 
 val lemma_index_as_ith_: a: nat {a < pow2 8} 
   -> a7: nat {a7 = a / pow2 7 % 2} 
@@ -605,11 +583,108 @@ let lemma_index_as_ith #c s i =
   
   lemma_index_as_ith_ (v (Lib.Sequence.index s i)) a7 a6 a5 a4 a3 a2 a1 a0
 
+val lemma_index_scalar_as_nat__: a: nat ->
+  a7: nat -> a6: nat -> a5: nat -> a4: nat -> a3: nat -> a2: nat -> a1: nat -> a0: nat ->
+  Lemma (pow2 4 * (pow2 4 * a + pow2 3 * a7 + pow2 2 * a6 + pow2 1 * a5 + a4) + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0 == pow2 8 * a + pow2 7 * a7 + pow2 6 * a6 + pow2 5 * a5 + pow2 4 * a4  + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0)
+
+let lemma_index_scalar_as_nat__ a a7 a6 a5 a4 a3 a2 a1 a0 = 
+  pow2_plus 4 4;
+  pow2_plus 4 3;
+  pow2_plus 4 2;
+  pow2_plus 4 1
+
+
+#push-options "--z3rlimit 1000"
+
+val lemma_index_scalar_as_nat_: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} -> Lemma (  
+  let l = v (getScalarLen c) in 
+  let a7 = v (ith_bit s (l - 8 * i - 1)) in 
+  let a6 = v (ith_bit s (l - 8 * i - 2)) in 
+  let a5 = v (ith_bit s (l - 8 * i - 3)) in 
+  let a4 = v (ith_bit s (l - 8 * i - 4)) in 
+  let a3 = v (ith_bit s (l - 8 * i - 5)) in 
+  let a2 = v (ith_bit s (l - 8 * i - 6)) in 
+  let a1 = v (ith_bit s (l - 8 * i - 7)) in 
+  let a0 = v (ith_bit s (l - 8 * i - 8)) in 
+  scalar_as_nat_ s (8 * i + 8) == pow2 8 * scalar_as_nat_ s (8 * i) + a0 + 2 * a1 + pow2 2 * a2 + pow2 3 * a3 + pow2 4 * a4 + pow2 5 * a5 + pow2 6 * a6 + pow2 7 * a7)
+
+let lemma_index_scalar_as_nat_ #c s i = 
+  let l = v (getScalarLen c) in 
+  
+  let a7 = v (ith_bit s (l - 8 * i - 1)) in 
+  let a6 = v (ith_bit s (l - 8 * i - 2)) in 
+  let a5 = v (ith_bit s (l - 8 * i - 3)) in 
+  let a4 = v (ith_bit s (l - 8 * i - 4)) in 
+  let a3 = v (ith_bit s (l - 8 * i - 5)) in 
+  let a2 = v (ith_bit s (l - 8 * i - 6)) in 
+  let a1 = v (ith_bit s (l - 8 * i - 7)) in 
+  let a0 = v (ith_bit s (l - 8 * i - 8)) in
+
+  calc (==) {
+    scalar_as_nat_ s (8 * i + 4);
+  (==) {scalar_as_nat_def s (8 * i + 4)}
+    2 * scalar_as_nat_ s (8 * i + 3) + a4; 
+  (==) {scalar_as_nat_def s (8 * i + 3); pow2_double_mult 1}
+    pow2 2 * scalar_as_nat_ s (8 * i + 2) + pow2 1 * a5 + a4; 
+  (==) {scalar_as_nat_def s (8 * i + 2); pow2_double_mult 2}
+    pow2 3 * scalar_as_nat_ s (8 * i + 1) + pow2 2 * a6 + pow2 1 * a5 + a4; 
+  (==) {scalar_as_nat_def s (8 * i + 1); pow2_double_mult 3}
+    pow2 4 * scalar_as_nat_ s (8 * i) + pow2 3 * a7 + pow2 2 * a6 + pow2 1 * a5 + a4;
+  };
+
+  calc (==) {
+    scalar_as_nat_ s (8 * i + 8); 
+  (==) {scalar_as_nat_def s (8 * i + 8)}
+    2 * scalar_as_nat_ s (8 * i + 7) + a0;
+  (==) {scalar_as_nat_def s (8 * i + 7); pow2_double_mult 1}
+    pow2 2 * scalar_as_nat_ s (8 * i + 6) + pow2 1 * a1 + a0;
+  (==) {scalar_as_nat_def s (8 * i + 6); pow2_double_mult 2}
+    pow2 3 * scalar_as_nat_ s (8 * i + 5) + pow2 2 * a2 + pow2 1 * a1 + a0;
+  (==) {scalar_as_nat_def s (8 * i + 5); pow2_double_mult 3}
+    pow2 4 * scalar_as_nat_ s (8 * i + 4) + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0;
+  (==) {}
+    pow2 4 * (pow2 4 * scalar_as_nat_ s (8 * i) + pow2 3 * a7 + pow2 2 * a6 + pow2 1 * a5 + a4) + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0;
+  (==) {lemma_index_scalar_as_nat__ (scalar_as_nat_ s (8 * i)) a7 a6 a5 a4 a3 a2 a1 a0}
+    pow2 8 * scalar_as_nat_ s (8 * i) + pow2 7 * a7 + pow2 6 * a6 + pow2 5 * a5 + pow2 4 * a4 + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0;}
+
 
 val lemma_index_scalar_as_nat: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} ->
-  Lemma (v (Lib.Sequence.index s i) == scalar_as_nat #c s / pow2 (v (getScalarLen c) - i - 8) % pow2 8)
+  Lemma (v (Lib.Sequence.index s i) == scalar_as_nat #c s / pow2 (v (getScalarLen c) - 8 * (i + 1)) % pow2 8)
 
 let lemma_index_scalar_as_nat #c s i = 
   let l = v (getScalarLen c) in 
   lemma_index_as_ith #c s i;
-  assume (v (Lib.Sequence.index s i) == scalar_as_nat #c s / pow2 (v (getScalarLen c) - i - 8) % pow2 8)
+
+  let a7 = v (ith_bit s (l - 8 * i - 1)) in 
+  let a6 = v (ith_bit s (l - 8 * i - 2)) in 
+  let a5 = v (ith_bit s (l - 8 * i - 3)) in 
+  let a4 = v (ith_bit s (l - 8 * i - 4)) in 
+  let a3 = v (ith_bit s (l - 8 * i - 5)) in 
+  let a2 = v (ith_bit s (l - 8 * i - 6)) in 
+  let a1 = v (ith_bit s (l - 8 * i - 7)) in 
+  let a0 = v (ith_bit s (l - 8 * i - 8)) in 
+
+  lemma_index_scalar_as_nat_ s i;
+  lemma_mod_sub (scalar_as_nat_ s (8 * i + 8)) (pow2 8) (scalar_as_nat_ s (8 * i));
+  test #c s (8 * i + 8);
+  small_mod (v (Lib.Sequence.index s i)) (pow2 8)
+
+#pop-options
+
+
+val scalar_as_sub_radix4: #c: curve -> s: scalar_bytes #c -> i: nat {4 * i + 4 <= v (getScalarLen c)} -> 
+  Lemma (let l = v (getScalarLen c) in 
+  (scalar_as_nat s / pow2 (l - (i + 1) * 4)) % pow2 4 == scalar_as_nat_ #c s (4 * i + 4) - 16 * scalar_as_nat_ #c s (4 * i))
+
+let rec scalar_as_sub_radix4 #c s i =
+  let l = v (getScalarLen c) in 
+  match i with 
+  |0 ->
+    scalar_as_nat_zero #c s;  
+    scalar_as_nat_def #c s 4;
+    scalar_as_nat_def #c s l;
+    test s 4;
+    scalar_as_nat_upperbound s 4;
+    small_mod (scalar_as_nat_ #c s 4) (pow2 4)
+  |_ -> admit()
+

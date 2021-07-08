@@ -147,6 +147,7 @@ let getScalar_4 #c scalar i =
 
   result
 
+
 inline_for_extraction noextract
 val getScalar_4_byBit: #c: curve
   -> #buf_type: buftype 
