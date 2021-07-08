@@ -282,7 +282,7 @@ void Hacl_Streaming_SHA2_finish_224(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8
     {
       ite = r % (uint32_t)64U;
     }
-    buf_last = buf_1 + (r - ite);
+    buf_last = buf_1 + r - ite;
     buf_multi = buf_1;
     Hacl_Hash_SHA2_update_multi_224(tmp_block_state, buf_multi, (uint32_t)0U);
     prev_len_last = total_len - (uint64_t)r;
@@ -559,7 +559,7 @@ void Hacl_Streaming_SHA2_finish_256(Hacl_Streaming_SHA2_state_sha2_224 *p, uint8
     {
       ite = r % (uint32_t)64U;
     }
-    buf_last = buf_1 + (r - ite);
+    buf_last = buf_1 + r - ite;
     buf_multi = buf_1;
     Hacl_Hash_SHA2_update_multi_256(tmp_block_state, buf_multi, (uint32_t)0U);
     prev_len_last = total_len - (uint64_t)r;
@@ -836,7 +836,7 @@ void Hacl_Streaming_SHA2_finish_384(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8
     {
       ite = r % (uint32_t)128U;
     }
-    buf_last = buf_1 + (r - ite);
+    buf_last = buf_1 + r - ite;
     buf_multi = buf_1;
     Hacl_Hash_SHA2_update_multi_384(tmp_block_state, buf_multi, (uint32_t)0U);
     prev_len_last = total_len - (uint64_t)r;
@@ -1116,7 +1116,7 @@ void Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_SHA2_state_sha2_384 *p, uint8
     {
       ite = r % (uint32_t)128U;
     }
-    buf_last = buf_1 + (r - ite);
+    buf_last = buf_1 + r - ite;
     buf_multi = buf_1;
     Hacl_Hash_SHA2_update_multi_512(tmp_block_state, buf_multi, (uint32_t)0U);
     prev_len_last = total_len - (uint64_t)r;

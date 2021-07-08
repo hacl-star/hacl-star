@@ -1755,7 +1755,7 @@ EverCrypt_Hash_Incremental_finish_md5(
         {
           ite = r % EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_MD5);
         }
-        buf_last = buf_1 + (r - ite);
+        buf_last = buf_1 + r - ite;
         buf_multi = buf_1;
         EverCrypt_Hash_update_multi2(&tmp_block_state, prev_len, buf_multi, (uint32_t)0U);
         prev_len_last = total_len - (uint64_t)r;
@@ -1823,7 +1823,7 @@ EverCrypt_Hash_Incremental_finish_sha1(
         {
           ite = r % EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_SHA1);
         }
-        buf_last = buf_1 + (r - ite);
+        buf_last = buf_1 + r - ite;
         buf_multi = buf_1;
         EverCrypt_Hash_update_multi2(&tmp_block_state, prev_len, buf_multi, (uint32_t)0U);
         prev_len_last = total_len - (uint64_t)r;
@@ -1891,7 +1891,7 @@ EverCrypt_Hash_Incremental_finish_sha224(
         {
           ite = r % EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_SHA2_224);
         }
-        buf_last = buf_1 + (r - ite);
+        buf_last = buf_1 + r - ite;
         buf_multi = buf_1;
         EverCrypt_Hash_update_multi2(&tmp_block_state, prev_len, buf_multi, (uint32_t)0U);
         prev_len_last = total_len - (uint64_t)r;
@@ -1959,7 +1959,7 @@ EverCrypt_Hash_Incremental_finish_sha256(
         {
           ite = r % EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_SHA2_256);
         }
-        buf_last = buf_1 + (r - ite);
+        buf_last = buf_1 + r - ite;
         buf_multi = buf_1;
         EverCrypt_Hash_update_multi2(&tmp_block_state, prev_len, buf_multi, (uint32_t)0U);
         prev_len_last = total_len - (uint64_t)r;
@@ -2027,7 +2027,7 @@ EverCrypt_Hash_Incremental_finish_sha384(
         {
           ite = r % EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_SHA2_384);
         }
-        buf_last = buf_1 + (r - ite);
+        buf_last = buf_1 + r - ite;
         buf_multi = buf_1;
         EverCrypt_Hash_update_multi2(&tmp_block_state, prev_len, buf_multi, (uint32_t)0U);
         prev_len_last = total_len - (uint64_t)r;
@@ -2095,7 +2095,7 @@ EverCrypt_Hash_Incremental_finish_sha512(
         {
           ite = r % EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_SHA2_512);
         }
-        buf_last = buf_1 + (r - ite);
+        buf_last = buf_1 + r - ite;
         buf_multi = buf_1;
         EverCrypt_Hash_update_multi2(&tmp_block_state, prev_len, buf_multi, (uint32_t)0U);
         prev_len_last = total_len - (uint64_t)r;
@@ -2163,7 +2163,7 @@ EverCrypt_Hash_Incremental_finish_blake2s(
         {
           ite = r % EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_Blake2S);
         }
-        buf_last = buf_1 + (r - ite);
+        buf_last = buf_1 + r - ite;
         buf_multi = buf_1;
         EverCrypt_Hash_update_multi2(&tmp_block_state, prev_len, buf_multi, (uint32_t)0U);
         prev_len_last = total_len - (uint64_t)r;
@@ -2231,7 +2231,7 @@ EverCrypt_Hash_Incremental_finish_blake2b(
         {
           ite = r % EverCrypt_Hash_Incremental_block_len(Spec_Hash_Definitions_Blake2B);
         }
-        buf_last = buf_1 + (r - ite);
+        buf_last = buf_1 + r - ite;
         buf_multi = buf_1;
         EverCrypt_Hash_update_multi2(&tmp_block_state, prev_len, buf_multi, (uint32_t)0U);
         prev_len_last = total_len - (uint64_t)r;

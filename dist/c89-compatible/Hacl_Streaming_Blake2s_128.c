@@ -567,7 +567,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish(
           {
             ite0 = r % (uint32_t)64U;
           }
-          buf_last = buf_1 + (r - ite0);
+          buf_last = buf_1 + r - ite0;
           buf_multi = buf_1;
           if
           (
@@ -1268,7 +1268,7 @@ Hacl_Streaming_Blake2s_128_blake2s_128_with_key_finish(
           {
             ite0 = r % (uint32_t)64U;
           }
-          buf_last = buf_1 + (r - ite0);
+          buf_last = buf_1 + r - ite0;
           buf_multi = buf_1;
           if
           (
