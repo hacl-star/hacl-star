@@ -226,7 +226,16 @@ function refresh_hints_dist() {
 
     clean_build_dist || return 1
 
-    git commit --allow-empty -m "[CI] $msg"
+    # If no changes were staged, then exit.
+    # From: https://stackoverflow.com/a/2659808
+    if git diff-index --quiet --cached HEAD -- ; then
+        return 0
+    fi
+
+    # Commit. This will fail if the commit is empty,
+    # but that scenario should be ruled out by the test above
+    git commit -m "[CI] $msg"
+
     # Memorize that commit
     commit=$(git rev-parse HEAD)
     # Drop any other files that were modified as part of the build (e.g.
