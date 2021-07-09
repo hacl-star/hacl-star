@@ -271,7 +271,7 @@ pss_encode(
           uint32_t emLen;
           uint32_t dbLen;
           hash(a, m1 + (uint32_t)8U, msgLen, msg);
-          memcpy(m1 + ((uint32_t)8U + hLen), salt, saltLen * sizeof (uint8_t));
+          memcpy(m1 + (uint32_t)8U + hLen, salt, saltLen * sizeof (uint8_t));
           hash(a, m1Hash, m1Len, m1);
           emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
           dbLen = emLen - hLen - (uint32_t)1U;
@@ -282,7 +282,7 @@ pss_encode(
             {
               uint32_t last_before_salt = dbLen - saltLen - (uint32_t)1U;
               db[last_before_salt] = (uint8_t)1U;
-              memcpy(db + (last_before_salt + (uint32_t)1U), salt, saltLen * sizeof (uint8_t));
+              memcpy(db + last_before_salt + (uint32_t)1U, salt, saltLen * sizeof (uint8_t));
               KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
               {
                 uint8_t dbMask[dbLen];
@@ -411,7 +411,7 @@ pss_verify(
                           uint8_t m1[m1Len];
                           memset(m1, 0U, m1Len * sizeof (uint8_t));
                           hash(a, m1 + (uint32_t)8U, msgLen, msg);
-                          memcpy(m1 + ((uint32_t)8U + hLen), salt, saltLen * sizeof (uint8_t));
+                          memcpy(m1 + (uint32_t)8U + hLen, salt, saltLen * sizeof (uint8_t));
                           hash(a, m1Hash0, m1Len, m1);
                           {
                             uint8_t res0 = (uint8_t)255U;
@@ -450,7 +450,7 @@ load_pkey(uint32_t modBits, uint32_t eBits, uint8_t *nb, uint8_t *eb, uint64_t *
   uint32_t nLen = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
   uint64_t *n = pkey;
   uint64_t *r2 = pkey + nLen;
-  uint64_t *e = pkey + (nLen + nLen);
+  uint64_t *e = pkey + nLen + nLen;
   uint64_t m0;
   uint64_t m1;
   uint64_t m;
@@ -548,8 +548,8 @@ Hacl_RSAPSS_rsapss_sign(
                   uint32_t eLen = (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
                   uint64_t *n = skey;
                   uint64_t *r2 = skey + nLen2;
-                  uint64_t *e = skey + (nLen2 + nLen2);
-                  uint64_t *d = skey + (nLen2 + nLen2 + eLen);
+                  uint64_t *e = skey + nLen2 + nLen2;
+                  uint64_t *d = skey + nLen2 + nLen2 + eLen;
                   uint64_t mu = Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]);
                   Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64((modBits
                     - (uint32_t)1U)
@@ -658,7 +658,7 @@ Hacl_RSAPSS_rsapss_verify(
             uint32_t nLen2 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
             uint64_t *n = pkey;
             uint64_t *r2 = pkey + nLen2;
-            uint64_t *e = pkey + (nLen2 + nLen2);
+            uint64_t *e = pkey + nLen2 + nLen2;
             uint64_t acc = (uint64_t)0U;
             {
               uint32_t i;
@@ -788,7 +788,7 @@ uint64_t
         uint32_t nLen1 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
         uint64_t *n = pkey2;
         uint64_t *r2 = pkey2 + nLen1;
-        uint64_t *e = pkey2 + (nLen1 + nLen1);
+        uint64_t *e = pkey2 + nLen1 + nLen1;
         Hacl_Bignum_Convert_bn_from_bytes_be_uint64(nbLen, nb, n);
         Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64((modBits - (uint32_t)1U)
           / (uint32_t)64U
@@ -884,7 +884,7 @@ uint64_t
           uint32_t nLen2 = (modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
           uint64_t *n = pkey;
           uint64_t *r2 = pkey + nLen2;
-          uint64_t *e = pkey + (nLen2 + nLen2);
+          uint64_t *e = pkey + nLen2 + nLen2;
           Hacl_Bignum_Convert_bn_from_bytes_be_uint64(nbLen1, nb, n);
           Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64((modBits - (uint32_t)1U)
             / (uint32_t)64U
@@ -934,20 +934,20 @@ Hacl_RSAPSS_rsapss_skey_sign(
   KRML_CHECK_SIZE(sizeof (uint64_t),
     (uint32_t)2U
     * ((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
-    + ((eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
-    + ((dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U));
+    + (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U
+    + (dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U);
   {
     uint64_t
     skey[(uint32_t)2U
     * ((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
-    + ((eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
-    + ((dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)];
+    + (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U
+    + (dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U];
     memset(skey,
       0U,
       ((uint32_t)2U
       * ((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
-      + ((eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
-      + ((dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U))
+      + (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U
+      + (dBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
       * sizeof (uint64_t));
     {
       bool b = load_skey(modBits, eBits, dBits, nb, eb, db, skey);
@@ -987,17 +987,17 @@ Hacl_RSAPSS_rsapss_pkey_verify(
   KRML_CHECK_SIZE(sizeof (uint64_t),
     (uint32_t)2U
     * ((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
-    + ((eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U));
+    + (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U);
   {
     uint64_t
     pkey[(uint32_t)2U
     * ((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
-    + ((eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)];
+    + (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U];
     memset(pkey,
       0U,
       ((uint32_t)2U
       * ((modBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
-      + ((eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U))
+      + (eBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U)
       * sizeof (uint64_t));
     {
       bool b = load_pkey(modBits, eBits, nb, eb, pkey);

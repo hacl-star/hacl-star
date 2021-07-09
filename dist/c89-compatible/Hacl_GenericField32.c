@@ -220,17 +220,17 @@ Hacl_GenericField32_sub(
       {
         uint32_t t10 = aM[(uint32_t)4U * i + (uint32_t)1U];
         uint32_t t21 = bM[(uint32_t)4U * i + (uint32_t)1U];
-        uint32_t *res_i1 = cM + ((uint32_t)4U * i + (uint32_t)1U);
+        uint32_t *res_i1 = cM + (uint32_t)4U * i + (uint32_t)1U;
         c2 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c2, t10, t21, res_i1);
         {
           uint32_t t11 = aM[(uint32_t)4U * i + (uint32_t)2U];
           uint32_t t22 = bM[(uint32_t)4U * i + (uint32_t)2U];
-          uint32_t *res_i2 = cM + ((uint32_t)4U * i + (uint32_t)2U);
+          uint32_t *res_i2 = cM + (uint32_t)4U * i + (uint32_t)2U;
           c2 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c2, t11, t22, res_i2);
           {
             uint32_t t12 = aM[(uint32_t)4U * i + (uint32_t)3U];
             uint32_t t2 = bM[(uint32_t)4U * i + (uint32_t)3U];
-            uint32_t *res_i = cM + ((uint32_t)4U * i + (uint32_t)3U);
+            uint32_t *res_i = cM + (uint32_t)4U * i + (uint32_t)3U;
             c2 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c2, t12, t2, res_i);
           }
         }
@@ -267,17 +267,17 @@ Hacl_GenericField32_sub(
           {
             uint32_t t10 = cM[(uint32_t)4U * i + (uint32_t)1U];
             uint32_t t21 = k1.n[(uint32_t)4U * i + (uint32_t)1U];
-            uint32_t *res_i1 = tmp + ((uint32_t)4U * i + (uint32_t)1U);
+            uint32_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
             c3 = Lib_IntTypes_Intrinsics_add_carry_u32(c3, t10, t21, res_i1);
             {
               uint32_t t11 = cM[(uint32_t)4U * i + (uint32_t)2U];
               uint32_t t22 = k1.n[(uint32_t)4U * i + (uint32_t)2U];
-              uint32_t *res_i2 = tmp + ((uint32_t)4U * i + (uint32_t)2U);
+              uint32_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
               c3 = Lib_IntTypes_Intrinsics_add_carry_u32(c3, t11, t22, res_i2);
               {
                 uint32_t t12 = cM[(uint32_t)4U * i + (uint32_t)3U];
                 uint32_t t2 = k1.n[(uint32_t)4U * i + (uint32_t)3U];
-                uint32_t *res_i = tmp + ((uint32_t)4U * i + (uint32_t)3U);
+                uint32_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
                 c3 = Lib_IntTypes_Intrinsics_add_carry_u32(c3, t12, t2, res_i);
               }
             }
@@ -779,15 +779,15 @@ Hacl_GenericField32_inverse(
             c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i0);
             {
               uint32_t t10 = a1[(uint32_t)4U * i + (uint32_t)1U];
-              uint32_t *res_i1 = res1 + ((uint32_t)4U * i + (uint32_t)1U);
+              uint32_t *res_i1 = res1 + (uint32_t)4U * i + (uint32_t)1U;
               c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t10, (uint32_t)0U, res_i1);
               {
                 uint32_t t11 = a1[(uint32_t)4U * i + (uint32_t)2U];
-                uint32_t *res_i2 = res1 + ((uint32_t)4U * i + (uint32_t)2U);
+                uint32_t *res_i2 = res1 + (uint32_t)4U * i + (uint32_t)2U;
                 c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t11, (uint32_t)0U, res_i2);
                 {
                   uint32_t t12 = a1[(uint32_t)4U * i + (uint32_t)3U];
-                  uint32_t *res_i = res1 + ((uint32_t)4U * i + (uint32_t)3U);
+                  uint32_t *res_i = res1 + (uint32_t)4U * i + (uint32_t)3U;
                   c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, (uint32_t)0U, res_i);
                 }
               }

@@ -195,7 +195,7 @@ Hacl_Impl_SHA3_squeeze(
 {
   uint32_t outBlocks = outputByteLen / rateInBytes;
   uint32_t remOut = outputByteLen % rateInBytes;
-  uint8_t *last = output + (outputByteLen - remOut);
+  uint8_t *last = output + outputByteLen - remOut;
   uint8_t *blocks = output;
   for (uint32_t i = (uint32_t)0U; i < outBlocks; i++)
   {

@@ -203,7 +203,7 @@ void Hacl_Streaming_SHA2_finish_512(Hacl_Streaming_SHA2_state_sha2_384 *p, u8 *d
       ite = (u32)128U;
     else
       ite = r % (u32)128U;
-    buf_last = buf_1 + (r - ite);
+    buf_last = buf_1 + r - ite;
     buf_multi = buf_1;
     Hacl_Hash_SHA2_update_multi_512(tmp_block_state, buf_multi, (u32)0U);
     prev_len_last = total_len - (u64)r;

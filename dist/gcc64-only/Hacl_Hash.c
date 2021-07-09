@@ -2992,10 +2992,10 @@ void Hacl_Hash_Core_MD5_legacy_pad(uint64_t len, uint8_t *dst)
   *dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
-        % (uint32_t)64U);
+        % (uint32_t)64U;
   store64_le(dst3, len << (uint32_t)3U);
 }
 
@@ -3207,10 +3207,10 @@ void Hacl_Hash_Core_SHA1_legacy_pad(uint64_t len, uint8_t *dst)
   *dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
-        % (uint32_t)64U);
+        % (uint32_t)64U;
   store64_be(dst3, len << (uint32_t)3U);
 }
 
@@ -3958,10 +3958,10 @@ void Hacl_Hash_Core_SHA2_pad_224(uint64_t len, uint8_t *dst)
   *dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
-        % (uint32_t)64U);
+        % (uint32_t)64U;
   store64_be(dst3, len << (uint32_t)3U);
 }
 
@@ -3983,10 +3983,10 @@ void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst)
   *dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
-        % (uint32_t)64U);
+        % (uint32_t)64U;
   store64_be(dst3, len << (uint32_t)3U);
 }
 
@@ -4010,10 +4010,10 @@ void Hacl_Hash_Core_SHA2_pad_384(uint128_t len, uint8_t *dst)
   *dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
-        % (uint32_t)128U);
+        % (uint32_t)128U;
   uint128_t len_ = len << (uint32_t)3U;
   store128_be(dst3, len_);
 }
@@ -4038,10 +4038,10 @@ void Hacl_Hash_Core_SHA2_pad_512(uint128_t len, uint8_t *dst)
   *dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)256U - ((uint32_t)17U + (uint32_t)((uint64_t)len % (uint64_t)(uint32_t)128U)))
-        % (uint32_t)128U);
+        % (uint32_t)128U;
   uint128_t len_ = len << (uint32_t)3U;
   store128_be(dst3, len_);
 }

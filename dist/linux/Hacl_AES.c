@@ -1386,7 +1386,7 @@ static void mixColumns(uint8_t *state)
 static void addRoundKey_(uint8_t *state, uint8_t *w, uint32_t round, uint32_t c)
 {
   uint8_t *target = state + (uint32_t)4U * c;
-  uint8_t *subkey = w + ((uint32_t)16U * round + (uint32_t)4U * c);
+  uint8_t *subkey = w + (uint32_t)16U * round + (uint32_t)4U * c;
   target[0U] = target[0U] ^ subkey[0U];
   target[1U] = target[1U] ^ subkey[1U];
   target[2U] = target[2U] ^ subkey[2U];
@@ -1460,7 +1460,7 @@ static uint8_t rcon(uint32_t i, uint8_t tmp)
 
 static void keyExpansion_aux_0(uint8_t *w, uint8_t *temp, uint8_t *sbox1, uint32_t j)
 {
-  memcpy(temp, w + ((uint32_t)4U * j - (uint32_t)4U), (uint32_t)4U * sizeof (uint8_t));
+  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof (uint8_t));
   if (j % (uint32_t)8U == (uint32_t)0U)
   {
     rotWord(temp);
@@ -2968,7 +2968,7 @@ static void mixColumns0(uint8_t *state)
 static void addRoundKey_0(uint8_t *state, uint8_t *w, uint32_t round, uint32_t c)
 {
   uint8_t *target = state + (uint32_t)4U * c;
-  uint8_t *subkey = w + ((uint32_t)16U * round + (uint32_t)4U * c);
+  uint8_t *subkey = w + (uint32_t)16U * round + (uint32_t)4U * c;
   target[0U] = target[0U] ^ subkey[0U];
   target[1U] = target[1U] ^ subkey[1U];
   target[2U] = target[2U] ^ subkey[2U];
@@ -3042,7 +3042,7 @@ static uint8_t rcon0(uint32_t i, uint8_t tmp)
 
 static void keyExpansion_aux_00(uint8_t *w, uint8_t *temp, uint8_t *sbox1, uint32_t j)
 {
-  memcpy(temp, w + ((uint32_t)4U * j - (uint32_t)4U), (uint32_t)4U * sizeof (uint8_t));
+  memcpy(temp, w + (uint32_t)4U * j - (uint32_t)4U, (uint32_t)4U * sizeof (uint8_t));
   if (j % (uint32_t)4U == (uint32_t)0U)
   {
     rotWord0(temp);

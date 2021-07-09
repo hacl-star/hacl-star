@@ -511,10 +511,10 @@ static void pad_224(uint64_t len, uint8_t *dst)
   dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
-        % (uint32_t)64U);
+        % (uint32_t)64U;
   store64_be(dst3, len << (uint32_t)3U);
 }
 
@@ -542,10 +542,10 @@ static void pad_256(uint64_t len, uint8_t *dst)
   dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
-        % (uint32_t)64U);
+        % (uint32_t)64U;
   store64_be(dst3, len << (uint32_t)3U);
 }
 
@@ -577,13 +577,13 @@ static void pad_384(FStar_UInt128_uint128 len, uint8_t *dst)
   dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)256U
         -
           ((uint32_t)17U
           + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
-        % (uint32_t)128U);
+        % (uint32_t)128U;
   len_ = FStar_UInt128_shift_left(len, (uint32_t)3U);
   store128_be(dst3, len_);
 }
@@ -616,13 +616,13 @@ static void pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
   dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)256U
         -
           ((uint32_t)17U
           + (uint32_t)(FStar_UInt128_uint128_to_uint64(len) % (uint64_t)(uint32_t)128U)))
-        % (uint32_t)128U);
+        % (uint32_t)128U;
   len_ = FStar_UInt128_shift_left(len, (uint32_t)3U);
   store128_be(dst3, len_);
 }
@@ -1131,10 +1131,10 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
   dst3 =
     dst
     +
-      ((uint32_t)1U
+      (uint32_t)1U
       +
         ((uint32_t)128U - ((uint32_t)9U + (uint32_t)(len % (uint64_t)(uint32_t)64U)))
-        % (uint32_t)64U);
+        % (uint32_t)64U;
   store64_be(dst3, len << (uint32_t)3U);
 }
 

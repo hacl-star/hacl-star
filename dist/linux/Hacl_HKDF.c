@@ -36,7 +36,7 @@ void Hacl_HKDF_expand_sha2_256(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infol
     {
       u8 *text0 = text + tlen;
       u8 *tag = text;
-      u8 *ctr = text + (tlen + infolen);
+      u8 *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (u8));
       {
         u32 i;
@@ -83,7 +83,7 @@ void Hacl_HKDF_expand_sha2_512(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 infol
     {
       u8 *text0 = text + tlen;
       u8 *tag = text;
-      u8 *ctr = text + (tlen + infolen);
+      u8 *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (u8));
       {
         u32 i;
@@ -130,7 +130,7 @@ void Hacl_HKDF_expand_blake2s_32(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 inf
     {
       u8 *text0 = text + tlen;
       u8 *tag = text;
-      u8 *ctr = text + (tlen + infolen);
+      u8 *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (u8));
       {
         u32 i;
@@ -177,7 +177,7 @@ void Hacl_HKDF_expand_blake2b_32(u8 *okm, u8 *prk, u32 prklen, u8 *info, u32 inf
     {
       u8 *text0 = text + tlen;
       u8 *tag = text;
-      u8 *ctr = text + (tlen + infolen);
+      u8 *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (u8));
       {
         u32 i;

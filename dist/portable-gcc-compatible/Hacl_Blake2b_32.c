@@ -540,7 +540,7 @@ Hacl_Blake2b_32_blake2b_update_last(
 )
 {
   uint8_t b[128U] = { 0U };
-  uint8_t *last = d + (len - rem);
+  uint8_t *last = d + len - rem;
   memcpy(b, last, rem * sizeof (uint8_t));
   FStar_UInt128_uint128
   totlen = FStar_UInt128_add_mod(prev, FStar_UInt128_uint64_to_uint128((uint64_t)len));

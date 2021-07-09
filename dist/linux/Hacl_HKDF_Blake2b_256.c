@@ -44,7 +44,7 @@ Hacl_HKDF_Blake2b_256_expand_blake2b_256(
     {
       u8 *text0 = text + tlen;
       u8 *tag = text;
-      u8 *ctr = text + (tlen + infolen);
+      u8 *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (u8));
       {
         u32 i;

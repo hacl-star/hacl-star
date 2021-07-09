@@ -1160,7 +1160,7 @@ Hacl_Blake2s_128_blake2s_update_last(
 )
 {
   u8 b[64U] = { 0U };
-  u8 *last = d + (len - rem);
+  u8 *last = d + len - rem;
   u64 totlen;
   memcpy(b, last, rem * sizeof (u8));
   totlen = prev + (u64)len;

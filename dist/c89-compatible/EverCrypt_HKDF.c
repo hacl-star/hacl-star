@@ -44,7 +44,7 @@ EverCrypt_HKDF_expand_sha1(
     {
       uint8_t *text0 = text + tlen;
       uint8_t *tag = text;
-      uint8_t *ctr = text + (tlen + infolen);
+      uint8_t *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (uint8_t));
       {
         uint32_t i;
@@ -114,7 +114,7 @@ EverCrypt_HKDF_expand_sha2_256(
     {
       uint8_t *text0 = text + tlen;
       uint8_t *tag = text;
-      uint8_t *ctr = text + (tlen + infolen);
+      uint8_t *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (uint8_t));
       {
         uint32_t i;
@@ -184,7 +184,7 @@ EverCrypt_HKDF_expand_sha2_384(
     {
       uint8_t *text0 = text + tlen;
       uint8_t *tag = text;
-      uint8_t *ctr = text + (tlen + infolen);
+      uint8_t *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (uint8_t));
       {
         uint32_t i;
@@ -254,7 +254,7 @@ EverCrypt_HKDF_expand_sha2_512(
     {
       uint8_t *text0 = text + tlen;
       uint8_t *tag = text;
-      uint8_t *ctr = text + (tlen + infolen);
+      uint8_t *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (uint8_t));
       {
         uint32_t i;
@@ -324,7 +324,7 @@ EverCrypt_HKDF_expand_blake2s(
     {
       uint8_t *text0 = text + tlen;
       uint8_t *tag = text;
-      uint8_t *ctr = text + (tlen + infolen);
+      uint8_t *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (uint8_t));
       {
         uint32_t i;
@@ -394,7 +394,7 @@ EverCrypt_HKDF_expand_blake2b(
     {
       uint8_t *text0 = text + tlen;
       uint8_t *tag = text;
-      uint8_t *ctr = text + (tlen + infolen);
+      uint8_t *ctr = text + tlen + infolen;
       memcpy(text + tlen, info, infolen * sizeof (uint8_t));
       {
         uint32_t i;

@@ -277,7 +277,7 @@ Hacl_Streaming_Poly1305_32_finish(
   {
     ite = r % (uint32_t)16U;
   }
-  uint8_t *buf_last = buf_1 + (r - ite);
+  uint8_t *buf_last = buf_1 + r - ite;
   uint8_t *buf_multi = buf_1;
   Hacl_Poly1305_32_poly1305_update(tmp_block_state, (uint32_t)0U, buf_multi);
   Hacl_Poly1305_32_poly1305_update(tmp_block_state, r, buf_last);
