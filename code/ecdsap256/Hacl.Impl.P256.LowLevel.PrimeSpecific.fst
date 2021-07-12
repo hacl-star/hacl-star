@@ -258,3 +258,37 @@ let p256_sub arg1 arg2 out =
     substractionInDomain (felem_seq_as_nat (as_seq h0 arg1)) (felem_seq_as_nat (as_seq h0 arg2));
     inDomain_mod_is_not_mod (fromDomain_ (felem_seq_as_nat (as_seq h0 arg1)) - fromDomain_ (felem_seq_as_nat (as_seq h0 arg2)))
 
+
+val p256_sub_zero: arg2: felem -> out: felem -> temp: felem -> Stack unit 
+  (requires fun h0 -> live h0 out /\ live h0 arg2 /\ live h0 temp /\ disjoint out temp /\ disjoint arg2 temp /\
+    eq_or_disjoint arg2 out /\ as_nat h0 arg2 < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc out |+| loc temp) h0 h1 /\ 
+    as_nat h1 out == (0 - as_nat h0 arg2) % prime256 /\
+    as_nat h1 out == toDomain_ ((fromDomain_ 0 - fromDomain_ (as_nat h0 arg2)) % prime256))  
+
+let p256_sub_zero arg2 out temp = 
+  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
+  let h0 = ST.get() in 
+  
+  uploadZeroImpl temp;
+  let t = sub4 temp arg2 out in 
+  
+    let h1 = ST.get() in 
+    lemma_t_computation2 t;
+  let t0 = (u64 0) -. t in 
+  let t1 = ((u64 0) -. t) >>. (size 32) in 
+  let t2 = u64 0 in 
+  let t3 = t -. (t <<. (size 32)) in 
+    modulo_addition_lemma (0 - as_nat h0 arg2) prime256 1;
+  let c = add4_variables out (u64 0)  t0 t1 t2 t3 out in 
+  
+  let h2 = ST.get() in 
+  modulo_lemma (as_nat h2 out) prime256;
+  substractionInDomain 0 (felem_seq_as_nat (as_seq h0 arg2));
+  inDomain_mod_is_not_mod (fromDomain_ 0  - fromDomain_ (as_nat h0 arg2));
+
+  let h3 = ST.get() in 
+  assert(as_nat h2 out == (0 - as_nat h0 arg2) % prime256);
+  assert(as_nat h2 out == toDomain_ ((fromDomain_ 0 - fromDomain_ (as_nat h0 arg2)) % prime256))
+  
+
