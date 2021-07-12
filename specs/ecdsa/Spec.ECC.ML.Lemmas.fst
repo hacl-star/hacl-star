@@ -7,6 +7,7 @@ open Lib.LoopCombinators
 open Spec.ECC.Curves
 open Spec.ECC
 
+open FStar.Math
 open FStar.Math.Lemmas
 open FStar.Mul
 
@@ -53,6 +54,8 @@ val point_mult_1: #c: curve ->p: point_nat_prime #c ->  Lemma (point_mult #c 1 p
 let point_mult_1 #c p = eq_repeat0 (fun x -> pointAdd #c p x) p 
 
 
+#push-options "--fuel 1"
+
 val point_mult_ext: #c: curve -> i: int -> p: point_nat_prime #c -> Lemma (
   let f = (fun x -> pointAdd #c p x) in  
   pointEqual (f (point_mult #c i p)) (point_mult #c (i + 1) p))
@@ -71,6 +74,8 @@ let point_mult_ext #c i p =
       unfold_repeat (getOrder #c) f p ((i - 1) % getOrder #c);
       lemma_mod_add_distr 1 (i - 1) (getOrder #c)
     end
+
+#pop-options
 
 
 val lemma_scalar_reduce: #c: curve -> p: point_nat_prime #c -> pk: int -> Lemma (point_mult pk p == point_mult #c (pk % getOrder #c) p)
@@ -144,7 +149,6 @@ let rec lemma_point_add_minus_plus_same_value #curve p0 pk qk i =
       assert(pointEqual a (f c))
     end;
 
-    admit();
     point_mult_def (qk + i - 1) p0;
     point_mult_def (qk + i) p0;
     unfold_repeat o f p0 ((qk + i - 1 - 1) % o);
@@ -157,11 +161,20 @@ let rec lemma_point_add_minus_plus_same_value #curve p0 pk qk i =
       end
     else begin 
       curve_multiplication_by_order #curve ((qk + i - 1 - 1) % o) p0;
-      lemma_mod_add_distr 1 (qk + i - 1) o;
-      eq_repeat0 f p0;
-      assert (pointEqual d (f b))
-    end;
+      lemma_mod_twice (qk + i - 1 - 1) o;
+      point_mult_def (qk + i - 1) p0;
+      
 
+      lemma_mod_add_distr 1 (qk + i - 1) o;
+      lemma_mod_add_distr 1 (qk + i - 2) o;
+      eq_repeat0 f p0;
+
+      point_mult_0 p0 (qk + i - 1);
+      point_mult_ext (qk + i - 1) p0;
+
+      assert (pointEqual ((point_mult (qk + i) p0)) p0)
+
+    end;
     curve_compatibility_with_translation_lemma a (f c) b;
     curve_compatibility_with_translation_lemma d (f b) c;
     curve_commutativity_lemma #curve d c;
