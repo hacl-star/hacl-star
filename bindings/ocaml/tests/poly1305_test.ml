@@ -13,28 +13,53 @@ let tests = [
   }
 ]
 
+
 let validate_test (v: Bytes.t poly1305_test) =
   assert (Bytes.length v.key = 32);
   assert (Bytes.length v.expected = 16)
 
-let test (v: Bytes.t poly1305_test) t mac reqs =
-  let test_result = test_result (t ^ " " ^ v.name) in
 
-  if supports reqs then begin
-    let tag = Test_utils.init_bytes 16 in
+module MakeTests (M: SharedDefs.MAC) = struct
+  let test_noalloc (v: Bytes.t poly1305_test) name reqs =
+      let test_result = test_result (name ^ " (noalloc) " ^ v.name) in
+      if supports reqs then begin
+        let tag = Test_utils.init_bytes 16 in
+        M.Noalloc.mac ~key:v.key ~msg:v.msg ~tag;
+        if Bytes.equal tag v.expected then
+          test_result Success ""
+        else
+          test_result Failure "MAC mismatch"
+      end else
+        test_result Skipped "Required CPU feature not detected"
 
-    mac tag v.key v.msg;
+  let test (v: Bytes.t poly1305_test) name reqs =
+      let test_result = test_result (name ^ " " ^ v.name) in
+      if supports reqs then begin
+        let tag = M.mac ~key:v.key ~msg:v.msg in
+        if Bytes.equal tag v.expected then
+          test_result Success ""
+        else
+          test_result Failure "MAC mismatch"
+      end else
+        test_result Skipped "Required CPU feature not detected"
 
-    if Bytes.compare tag v.expected = 0 then
-      test_result Success ""
-    else
-      test_result Failure ""
-  end else
-    test_result Skipped "Required CPU feature not detected"
+  let run_tests name reqs =
+    List.iter (fun v -> test v name reqs) tests;
+    List.iter (fun v -> test_noalloc v name reqs) tests
+end
+
 
 let _ =
   List.iter validate_test tests;
-  List.iter (fun v -> test v "Hacl.Poly1305_32" Hacl.Poly1305_32.mac []) tests;
-  List.iter (fun v -> test v "Hacl.Poly1305_128" Hacl.Poly1305_128.mac [VEC128]) tests;
-  List.iter (fun v -> test v "Hacl.Poly1305_256" Hacl.Poly1305_256.mac [VEC256]) tests;
-  List.iter (fun v -> test v "EverCrypt.Poly1305" EverCrypt.Poly1305.mac []) tests
+
+  let module Tests = MakeTests (Hacl.Poly1305_32) in
+  Tests.run_tests "Hacl.Poly1305_32" [];
+
+  let module Tests = MakeTests (Hacl.Poly1305_128) in
+  Tests.run_tests "Hacl.Poly1305_128" [VEC128];
+
+  let module Tests = MakeTests (Hacl.Poly1305_256) in
+  Tests.run_tests "Hacl.Poly1305_256" [VEC256];
+
+  let module Tests = MakeTests (EverCrypt.Poly1305) in
+  Tests.run_tests "EverCrypt.Poly1305" []

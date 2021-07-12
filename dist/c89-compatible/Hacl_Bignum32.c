@@ -125,7 +125,7 @@ bn_slow_precomp(
             uint32_t c = (uint32_t)0U;
             {
               uint32_t i;
-              for (i = (uint32_t)0U; i < len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+              for (i = (uint32_t)0U; i < len / (uint32_t)4U; i++)
               {
                 uint32_t a_i = n[(uint32_t)4U * i];
                 uint32_t *res_i0 = res_j0 + (uint32_t)4U * i;
@@ -457,12 +457,7 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
                       uint32_t c = c0;
                       {
                         uint32_t i;
-                        for
-                        (i
-                          = (uint32_t)0U;
-                          i
-                          < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U;
-                          i++)
+                        for (i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
                         {
                           uint32_t t1 = a1[(uint32_t)4U * i];
                           uint32_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -745,7 +740,7 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
         uint32_t c = c0;
         {
           uint32_t i;
-          for (i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+          for (i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
           {
             uint32_t t1 = a1[(uint32_t)4U * i];
             uint32_t *res_i0 = res1 + (uint32_t)4U * i;

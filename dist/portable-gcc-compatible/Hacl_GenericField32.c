@@ -221,7 +221,7 @@ Hacl_GenericField32_sub(
   uint32_t len1 = Hacl_GenericField32_field_get_len(k);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k1 = *k;
   uint32_t c0 = (uint32_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < k1.len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+  for (uint32_t i = (uint32_t)0U; i < k1.len / (uint32_t)4U; i++)
   {
     uint32_t t1 = aM[(uint32_t)4U * i];
     uint32_t t20 = bM[(uint32_t)4U * i];
@@ -252,7 +252,7 @@ Hacl_GenericField32_sub(
   uint32_t tmp[k1.len];
   memset(tmp, 0U, k1.len * sizeof (uint32_t));
   uint32_t c = (uint32_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < k1.len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+  for (uint32_t i = (uint32_t)0U; i < k1.len / (uint32_t)4U; i++)
   {
     uint32_t t1 = cM[(uint32_t)4U * i];
     uint32_t t20 = k1.n[(uint32_t)4U * i];
@@ -428,14 +428,13 @@ Hacl_GenericField32_exp_consttime(
       bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
     }
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, k1.n, k1.mu, k1.r2, resM);
-    uint32_t table_len = (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint32_t), table_len * len1);
-    uint32_t table[table_len * len1];
-    memset(table, 0U, table_len * len1 * sizeof (uint32_t));
+    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)16U * len1);
+    uint32_t table[(uint32_t)16U * len1];
+    memset(table, 0U, (uint32_t)16U * len1 * sizeof (uint32_t));
     memcpy(table, resM, len1 * sizeof (uint32_t));
     uint32_t *t1 = table + len1;
     memcpy(t1, aMc, len1 * sizeof (uint32_t));
-    for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
     {
       uint32_t *t11 = table + (i + (uint32_t)1U) * len1;
       uint32_t *t2 = table + (i + (uint32_t)2U) * len1;
@@ -465,7 +464,7 @@ Hacl_GenericField32_exp_consttime(
       uint32_t a_bits_l[len1];
       memset(a_bits_l, 0U, len1 * sizeof (uint32_t));
       memcpy(a_bits_l, table, len1 * sizeof (uint32_t));
-      for (uint32_t i2 = (uint32_t)0U; i2 < table_len - (uint32_t)1U; i2++)
+      for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)15U; i2++)
       {
         uint32_t c = FStar_UInt32_eq_mask(bits_l, i2 + (uint32_t)1U);
         uint32_t *res_j = table + (i2 + (uint32_t)1U) * len1;
@@ -505,7 +504,7 @@ Hacl_GenericField32_exp_consttime(
       uint32_t a_bits_c[len1];
       memset(a_bits_c, 0U, len1 * sizeof (uint32_t));
       memcpy(a_bits_c, table, len1 * sizeof (uint32_t));
-      for (uint32_t i1 = (uint32_t)0U; i1 < table_len - (uint32_t)1U; i1++)
+      for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)15U; i1++)
       {
         uint32_t c1 = FStar_UInt32_eq_mask(bits_c0, i1 + (uint32_t)1U);
         uint32_t *res_j = table + (i1 + (uint32_t)1U) * len1;
@@ -586,14 +585,13 @@ Hacl_GenericField32_exp_vartime(
       bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
     }
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, k1.n, k1.mu, k1.r2, resM);
-    uint32_t table_len = (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint32_t), table_len * len1);
-    uint32_t table[table_len * len1];
-    memset(table, 0U, table_len * len1 * sizeof (uint32_t));
+    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)16U * len1);
+    uint32_t table[(uint32_t)16U * len1];
+    memset(table, 0U, (uint32_t)16U * len1 * sizeof (uint32_t));
     memcpy(table, resM, len1 * sizeof (uint32_t));
     uint32_t *t1 = table + len1;
     memcpy(t1, aMc, len1 * sizeof (uint32_t));
-    for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
     {
       uint32_t *t11 = table + (i + (uint32_t)1U) * len1;
       uint32_t *t2 = table + (i + (uint32_t)2U) * len1;
@@ -688,7 +686,7 @@ Hacl_GenericField32_inverse(
     uint32_t *a1 = k1.n + (uint32_t)1U;
     uint32_t *res1 = n2 + (uint32_t)1U;
     uint32_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
     {
       uint32_t t1 = a1[(uint32_t)4U * i];
       uint32_t *res_i0 = res1 + (uint32_t)4U * i;

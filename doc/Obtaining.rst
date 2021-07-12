@@ -97,11 +97,17 @@ The KReMLin compiler auto-generates ``ocaml-ctypes`` bindings for HACL*. On top
 of these "raw" bindings, we add a high-level wrapper that uses functors, shares
 type signatures, performs run-time checks and offers a much more idiomatic API.
 
-The former can be installed by running ``make install-hacl-star-raw`` in
-``dist/gcc-compatible``. The latter can be installed by running ``dune build &&
-dune install`` in ``bindings/ocaml``.
+They are both available as opam packages and can be installed using
+``opam install hacl-star`` or, to get the low-level bindings only,
+``opam install hacl-star-raw``.
 
-We expect these to be available in OPAM soon.
+From source, the low-level bindings can be installed by running
+``make install-hacl-star-raw`` in ``dist/gcc-compatible``. Then, the high-level
+wrapper can be installed by running ``dune build && dune install`` in
+``bindings/ocaml``.
+
+Documentation for the high-level API is available `here
+<https://hacl-star.github.io/ocaml_doc/>`_.
 
 JavaScript
 ^^^^^^^^^^

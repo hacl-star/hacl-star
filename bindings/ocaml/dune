@@ -7,6 +7,10 @@
  (preprocess (action (run %{bin:cppo} %{input-file})))
  (flags (:standard -warn-error -3)))
 
+(documentation
+ (package hacl-star)
+  (mld_files index))
+
 (rule (targets config.h) (deps)
  (action
   (bash "cp $(ocamlfind query hacl-star-raw)/config.h .")))

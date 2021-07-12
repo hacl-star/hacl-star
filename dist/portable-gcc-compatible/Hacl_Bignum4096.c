@@ -639,14 +639,11 @@ exp_vartime_precomp(
   uint64_t tmp[128U] = { 0U };
   memcpy(tmp, r2, (uint32_t)64U * sizeof (uint64_t));
   reduction(n, mu, tmp, resM);
-  uint32_t table_len = (uint32_t)16U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), table_len * (uint32_t)64U);
-  uint64_t table[table_len * (uint32_t)64U];
-  memset(table, 0U, table_len * (uint32_t)64U * sizeof (uint64_t));
+  uint64_t table[1024U] = { 0U };
   memcpy(table, resM, (uint32_t)64U * sizeof (uint64_t));
   uint64_t *t1 = table + (uint32_t)64U;
   memcpy(t1, aM, (uint32_t)64U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
     uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)64U;
     uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)64U;
@@ -780,14 +777,11 @@ exp_consttime_precomp(
   uint64_t tmp[128U] = { 0U };
   memcpy(tmp, r2, (uint32_t)64U * sizeof (uint64_t));
   reduction(n, mu, tmp, resM);
-  uint32_t table_len = (uint32_t)16U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), table_len * (uint32_t)64U);
-  uint64_t table[table_len * (uint32_t)64U];
-  memset(table, 0U, table_len * (uint32_t)64U * sizeof (uint64_t));
+  uint64_t table[1024U] = { 0U };
   memcpy(table, resM, (uint32_t)64U * sizeof (uint64_t));
   uint64_t *t1 = table + (uint32_t)64U;
   memcpy(t1, aM, (uint32_t)64U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
     uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)64U;
     uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)64U;
@@ -815,7 +809,7 @@ exp_consttime_precomp(
     uint64_t bits_l = ite & mask_l;
     uint64_t a_bits_l[64U] = { 0U };
     memcpy(a_bits_l, table, (uint32_t)64U * sizeof (uint64_t));
-    for (uint32_t i2 = (uint32_t)0U; i2 < table_len - (uint32_t)1U; i2++)
+    for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)15U; i2++)
     {
       uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
       uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)64U;
@@ -853,7 +847,7 @@ exp_consttime_precomp(
     uint64_t bits_c0 = bits_c;
     uint64_t a_bits_c[64U] = { 0U };
     memcpy(a_bits_c, table, (uint32_t)64U * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < table_len - (uint32_t)1U; i1++)
+    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)15U; i1++)
     {
       uint64_t c1 = FStar_UInt64_eq_mask(bits_c0, (uint64_t)(i1 + (uint32_t)1U));
       uint64_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)64U;
@@ -1072,7 +1066,7 @@ bool Hacl_Bignum4096_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *r
       uint64_t *a1 = n + (uint32_t)1U;
       uint64_t *res1 = n2 + (uint32_t)1U;
       uint64_t c = c0;
-      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
       {
         uint64_t t1 = a1[(uint32_t)4U * i];
         uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -1298,7 +1292,7 @@ Hacl_Bignum4096_mod_inv_prime_vartime_precomp(
     uint64_t *a1 = k1.n + (uint32_t)1U;
     uint64_t *res1 = n2 + (uint32_t)1U;
     uint64_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       uint64_t *res_i0 = res1 + (uint32_t)4U * i;

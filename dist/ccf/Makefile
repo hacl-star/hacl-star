@@ -213,5 +213,9 @@ install-hacl-star-raw: dllocamlevercrypt.$(SO)
          libevercrypt.a libevercrypt.$(SO) ocamlevercrypt.cma ocamlevercrypt.cmxa ocamlevercrypt.a \
          libocamlevercrypt.a dllocamlevercrypt.$(SO) config.h
 
+.PHONY: install-ocaml
+install-ocaml: install-hacl-star-raw
+	cd ../../bindings/ocaml && dune build && dune install
+
 endif
 endif

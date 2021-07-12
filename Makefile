@@ -151,7 +151,7 @@ mozilla-ci-unstaged: compile-mozilla test-c
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged doc-wasm
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged doc-wasm doc-ocaml
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
 
@@ -835,6 +835,9 @@ test-bindings-ocaml: compile-gcc-compatible
 	    cd dist/gcc-compatible && make install-hacl-star-raw ; \
 	fi
 	cd bindings/ocaml && $(LD_EXTRA) dune runtest
+
+doc-ocaml: test-bindings-ocaml
+	cd bindings/ocaml && $(LD_EXTRA) dune build @doc
 
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
