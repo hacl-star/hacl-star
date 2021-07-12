@@ -31,6 +31,11 @@ let basePoint : point_nat_prime =
    1)
 
 
+let _point_inverse (p:point_nat_prime) : point_nat_prime =
+  let x, y, z = p in
+  let minusY = (0 - y) % prime in 
+  (x, minusY, z)
+
 
 let _point_double (p:point_nat_prime) : point_nat_prime =
   let x, y, z = p in
