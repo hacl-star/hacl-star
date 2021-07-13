@@ -68,6 +68,18 @@ module Bindings(F:Cstubs.FOREIGN) =
            ((ptr uint64_t) @->
               ((ptr uint64_t) @->
                  ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+    let hacl_Bignum_bn_sub_mod_n_u32 =
+      foreign "Hacl_Bignum_bn_sub_mod_n_u32"
+        (uint32_t @->
+           ((ptr uint32_t) @->
+              ((ptr uint32_t) @->
+                 ((ptr uint32_t) @-> ((ptr uint32_t) @-> (returning void))))))
+    let hacl_Bignum_bn_sub_mod_n_u64 =
+      foreign "Hacl_Bignum_bn_sub_mod_n_u64"
+        (uint32_t @->
+           ((ptr uint64_t) @->
+              ((ptr uint64_t) @->
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
     let hacl_Bignum_ModInvLimb_mod_inv_uint32 =
       foreign "Hacl_Bignum_ModInvLimb_mod_inv_uint32"
         (uint32_t @-> (returning uint32_t))

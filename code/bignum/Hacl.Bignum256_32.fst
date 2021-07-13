@@ -17,9 +17,11 @@ let add: BN.bn_add_eq_len_st t_limbs n_limbs =
 let sub: BN.bn_sub_eq_len_st t_limbs n_limbs =
   BN.bn_sub_eq_len n_limbs
 
-[@CInline]
-let add_mod_n: BN.bn_add_mod_n_st t_limbs n_limbs =
+let add_mod: BN.bn_add_mod_n_st t_limbs n_limbs =
   BN.bn_add_mod_n n_limbs
+
+let sub_mod: BN.bn_sub_mod_n_st t_limbs n_limbs =
+  BN.bn_sub_mod_n n_limbs
 
 let mul (a:lbignum t_limbs n_limbs) : BN.bn_karatsuba_mul_st t_limbs n_limbs a =
   BN.bn_mul n_limbs n_limbs a
@@ -33,7 +35,8 @@ instance bn_inst: BN.bn t_limbs = {
   BN.len = n_limbs;
   BN.add;
   BN.sub;
-  BN.add_mod_n;
+  BN.add_mod_n = add_mod;
+  BN.sub_mod_n = sub_mod;
   BN.mul;
   BN.sqr
 }
@@ -166,3 +169,5 @@ let bn_to_bytes_be = Hacl.Bignum.Convert.mk_bn_to_bytes_be n_bytes
 let bn_to_bytes_le = Hacl.Bignum.Convert.mk_bn_to_bytes_le n_bytes
 
 let lt_mask = BN.bn_lt_mask n_limbs
+
+let eq_mask = BN.bn_eq_mask n_limbs

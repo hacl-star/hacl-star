@@ -104,6 +104,17 @@ let bn_add_mod_n_ (#t:limb_t) (len:size_t{v len > 0}) : bn_add_mod_n_st t len =
   | U32 -> bn_add_mod_n_u32 len
   | U64 -> bn_add_mod_n_u64 len
 
+[@CInline]
+let bn_sub_mod_n_u32 (len:size_t{v len > 0}) : bn_sub_mod_n_st U32 len = bn_sub_mod_n len
+[@CInline]
+let bn_sub_mod_n_u64 (len:size_t{v len > 0}) : bn_sub_mod_n_st U64 len = bn_sub_mod_n len
+
+inline_for_extraction noextract
+let bn_sub_mod_n_ (#t:limb_t) (len:size_t{v len > 0}) : bn_sub_mod_n_st t len =
+  match t with
+  | U32 -> bn_sub_mod_n_u32 len
+  | U64 -> bn_sub_mod_n_u64 len
+
 /// This is a default implementation that *will* generate code depending on
 /// `len` at run-time! Only use if you want to generate run-time generic
 /// functions!
@@ -112,6 +123,7 @@ let mk_runtime_bn (t:limb_t) (len:meta_len t) : bn t = {
   add = Hacl.Bignum.Addition.bn_add_eq_len_u len;
   sub = Hacl.Bignum.Addition.bn_sub_eq_len_u len;
   add_mod_n = bn_add_mod_n_ len;
+  sub_mod_n = bn_sub_mod_n_ len;
   mul = bn_karatsuba_mul len;
   sqr = bn_karatsuba_sqr len;
 }
