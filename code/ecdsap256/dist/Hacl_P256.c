@@ -472,6 +472,17 @@ static void p256_sub(uint64_t *arg1, uint64_t *arg2, uint64_t *out)
   uint64_t c = add4_variables(out, (uint64_t)0U, t0, t1, t2, t3, out);
 }
 
+static void p256_sub_zero(uint64_t *arg2, uint64_t *out, uint64_t *temp)
+{
+  uploadZeroImpl(temp);
+  uint64_t t = sub4(temp, arg2, out);
+  uint64_t t0 = (uint64_t)0U - t;
+  uint64_t t1 = ((uint64_t)0U - t) >> (uint32_t)32U;
+  uint64_t t2 = (uint64_t)0U;
+  uint64_t t3 = t - (t << (uint32_t)32U);
+  uint64_t c = add4_variables(out, (uint64_t)0U, t0, t1, t2, t3, out);
+}
+
 static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *result)
 {
   uint64_t t[8U] = { 0U };
@@ -1061,36 +1072,6 @@ static void exponent(uint64_t *a, uint64_t *result, uint64_t *tempBuffer)
   memcpy(result, buffer_result1, (uint32_t)4U * sizeof (uint64_t));
 }
 
-static void cube(uint64_t *a, uint64_t *result)
-{
-  montgomery_square_buffer(a, result);
-  montgomery_multiplication_buffer(result, a, result);
-}
-
-static void multByTwo(uint64_t *a, uint64_t *out)
-{
-  p256_add(a, a, out);
-}
-
-static void multByThree(uint64_t *a, uint64_t *result)
-{
-  multByTwo(a, result);
-  p256_add(a, result, result);
-}
-
-static void multByFour(uint64_t *a, uint64_t *result)
-{
-  multByTwo(a, result);
-  multByTwo(result, result);
-}
-
-static void multByEight(uint64_t *a, uint64_t *result)
-{
-  multByTwo(a, result);
-  multByTwo(result, result);
-  multByTwo(result, result);
-}
-
 static uint64_t store_high_low_u(uint32_t high, uint32_t low)
 {
   uint64_t as_uint64_high = (uint64_t)high;
@@ -1234,6 +1215,36 @@ static void solinas_reduction_impl(uint64_t *i, uint64_t *o)
   p256_sub(o, t61, o);
   p256_sub(o, t71, o);
   p256_sub(o, t81, o);
+}
+
+static void cube(uint64_t *a, uint64_t *result)
+{
+  montgomery_square_buffer(a, result);
+  montgomery_multiplication_buffer(result, a, result);
+}
+
+static void multByTwo(uint64_t *a, uint64_t *out)
+{
+  p256_add(a, a, out);
+}
+
+static void multByThree(uint64_t *a, uint64_t *result)
+{
+  multByTwo(a, result);
+  p256_add(a, result, result);
+}
+
+static void multByFour(uint64_t *a, uint64_t *result)
+{
+  multByTwo(a, result);
+  multByTwo(result, result);
+}
+
+static void multByEight(uint64_t *a, uint64_t *result)
+{
+  multByTwo(a, result);
+  multByTwo(result, result);
+  multByTwo(result, result);
 }
 
 static void
@@ -2035,6 +2046,28 @@ static bool isMoreThanZeroLessThanOrder(uint8_t *x)
   uint64_t notMore = ~more;
   uint64_t result = less & notMore;
   return ~result == (uint64_t)0U;
+}
+
+static void copyH(uint64_t *a, uint64_t *b)
+{
+  uint64_t a0 = a[0U];
+  uint64_t a1 = a[1U];
+  uint64_t a2 = a[2U];
+  uint64_t a3 = a[3U];
+  b[0U] = a0;
+  b[1U] = a1;
+  b[2U] = a2;
+  b[3U] = a3;
+}
+
+static void point_inv(uint64_t *p, uint64_t *result, uint64_t *tempBuffer)
+{
+  uint64_t *temp4 = tempBuffer;
+  uint64_t *yP = p + (uint32_t)4U;
+  uint64_t *yResult = result + (uint32_t)4U;
+  p256_sub_zero(yP, yResult, temp4);
+  copyH(p, result);
+  copyH(p + (uint32_t)8U, result + (uint32_t)8U);
 }
 
 static uint64_t isCoordinateValidPrivate(uint64_t *p)
@@ -3271,6 +3304,72 @@ void Hacl_P256_point_add8(uint8_t *result, uint8_t *p, uint8_t *q)
   pointToDomain(pU64, pU64);
   pointToDomain(qU64, qU64);
   point_add(pU64, qU64, resultU64, tB88);
+  norm(resultU64, resultU64, tB88);
+  uint64_t *iX = resultU64;
+  uint64_t *iY = resultU64 + (uint32_t)4U;
+  uint8_t *oX = result;
+  uint8_t *oY = result + (uint32_t)32U;
+  changeEndian(iX);
+  toUint8(iX, oX);
+  changeEndian(iY);
+  toUint8(iY, oY);
+}
+
+/*
+ Public key verification function. 
+  
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
+  
+ Input: pub(lic)Key: uint8[64]. 
+  
+ Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
+ Verify that the public key is not the “point at infinity”, represented as O. 
+ Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
+ Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
+ Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  
+ The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+  
+ The check for correctness of the order was removed because the curve is prime.
+*/
+bool Hacl_P256_verifyQPrivate(uint8_t *pubKey)
+{
+  uint8_t *pubKeyX = pubKey;
+  uint8_t *pubKeyY = pubKey + (uint32_t)32U;
+  uint64_t tempBuffer[112U] = { 0U };
+  uint64_t *tempBufferV = tempBuffer;
+  uint64_t *publicKeyJ = tempBuffer + (uint32_t)100U;
+  uint64_t *publicKeyX = tempBuffer + (uint32_t)100U;
+  uint64_t *publicKeyY = tempBuffer + (uint32_t)104U;
+  toUint64ChangeEndian(pubKeyX, publicKeyX);
+  toUint64ChangeEndian(pubKeyY, publicKeyY);
+  publicKeyJ[8U] = (uint64_t)1U;
+  publicKeyJ[9U] = (uint64_t)0U;
+  publicKeyJ[10U] = (uint64_t)0U;
+  publicKeyJ[11U] = (uint64_t)0U;
+  uint64_t r = verifyQValidCurvePointPrivate(publicKeyJ, tempBufferV);
+  return r == (uint64_t)0U;
+}
+
+void Hacl_P256_point_inv8(uint8_t *result, uint8_t *p)
+{
+  uint64_t tempBuffer[112U] = { 0U };
+  uint64_t *pU64 = tempBuffer;
+  uint64_t *resultU64 = tempBuffer + (uint32_t)12U;
+  uint64_t *tB88 = tempBuffer + (uint32_t)24U;
+  uint64_t *pU64X = pU64;
+  uint64_t *pU64Y = pU64 + (uint32_t)4U;
+  uint8_t *pX = p;
+  uint8_t *pY = p + (uint32_t)32U;
+  toUint64ChangeEndian(pX, pU64X);
+  toUint64ChangeEndian(pY, pU64Y);
+  pU64[8U] = (uint64_t)1U;
+  pU64[9U] = (uint64_t)0U;
+  pU64[10U] = (uint64_t)0U;
+  pU64[11U] = (uint64_t)0U;
+  pointToDomain(pU64, pU64);
+  point_inv(pU64, resultU64, tB88);
   norm(resultU64, resultU64, tB88);
   uint64_t *iX = resultU64;
   uint64_t *iY = resultU64 + (uint32_t)4U;

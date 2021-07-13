@@ -310,6 +310,28 @@ bool Hacl_P256_ecp256scalar_mult(uint8_t *result, uint8_t *pubKey, uint8_t *scal
 */
 void Hacl_P256_point_add8(uint8_t *result, uint8_t *p, uint8_t *q);
 
+/*
+ Public key verification function. 
+  
+  The input of the function is considered to be public, 
+  thus this code is not secret independent with respect to the operations done over the input.
+  
+ Input: pub(lic)Key: uint8[64]. 
+  
+ Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
+ Verify that the public key is not the “point at infinity”, represented as O. 
+ Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
+ Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
+ Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  
+ The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+  
+ The check for correctness of the order was removed because the curve is prime.
+*/
+bool Hacl_P256_verifyQPrivate(uint8_t *pubKey);
+
+void Hacl_P256_point_inv8(uint8_t *result, uint8_t *p);
+
 
 #define __Hacl_P256_H_DEFINED
 #endif
