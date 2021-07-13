@@ -74,7 +74,7 @@ val sub: BN.bn_sub_eq_len_st t_limbs n_limbs
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • a < n
-  • b < n "]
+  • b < n"]
 val add_mod: BN.bn_add_mod_n_st t_limbs n_limbs
 
 [@@ Comment "Write `(a - b) mod n` in `res`.
@@ -84,7 +84,7 @@ val add_mod: BN.bn_add_mod_n_st t_limbs n_limbs
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • a < n
-  • b < n "]
+  • b < n"]
 val sub_mod: BN.bn_sub_mod_n_st t_limbs n_limbs
 
 [@@ Comment "Write `a * b` in `res`.
@@ -127,7 +127,7 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n "]
+   • a < n"]
 val mod_exp_vartime: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
@@ -147,7 +147,7 @@ val mod_exp_vartime: BS.bn_mod_exp_safe_st t_limbs n_limbs
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n "]
+   • a < n"]
 val mod_exp_consttime: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
@@ -162,7 +162,7 @@ val mod_exp_consttime: BS.bn_mod_exp_safe_st t_limbs n_limbs
   • n % 2 = 1
   • 1 < n
   • 0 < a
-  • a < n "]
+  • a < n"]
 val mod_inv_prime_vartime: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
 
 [@@ CPrologue
@@ -211,7 +211,7 @@ val mod_precomp: BS.bn_mod_slow_ctx_st t_limbs n_limbs
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n "]
+  • a < n"]
 val mod_exp_vartime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
@@ -230,7 +230,7 @@ val mod_exp_vartime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n "]
+  • a < n"]
 val mod_exp_consttime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
@@ -242,7 +242,7 @@ val mod_exp_consttime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
   preconditions are observed.
   • n is a prime
   • 0 < a
-  • a < n "]
+  • a < n"]
 val mod_inv_prime_vartime_precomp: BS.bn_mod_inv_prime_ctx_st t_limbs n_limbs
 
 [@@ CPrologue
