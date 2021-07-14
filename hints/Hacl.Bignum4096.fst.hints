@@ -1,5 +1,5 @@
 [
-  "$äCÂá\u0017ù\u0013X-S^}_€î",
+  "˛ÂÇd\u001dı@h\u0011}ú\u001cjF\u001a◊",
   [
     [
       "Hacl.Bignum4096.n_limbs",
@@ -38,7 +38,7 @@
         "typing_FStar.UInt32.uint_to_t"
       ],
       0,
-      "ea564499ac99205f2b698a0ff3fb6ede"
+      "457cf90593cfb6b274af28fd8756cbb6"
     ],
     [
       "Hacl.Bignum4096.n_bytes",
@@ -78,7 +78,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "3133be62d700d065306bf61cb14750a2"
+      "d8762c9cb0c83a9a63b9678635093e36"
     ],
     [
       "Hacl.Bignum4096.uu___0",
@@ -144,7 +144,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "823e2f6ea9ae708ee46ac97300bc59b0"
+      "b70b71433786f547e6613d82fad89cb0"
     ],
     [
       "Hacl.Bignum4096.uu___1",
@@ -203,16 +203,43 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7895aa5b6456efd23a14270099870fd7"
+      "2d360094ad55658d348e2eb561c92f80"
     ],
     [
-      "Hacl.Bignum4096.add_mod_n",
+      "Hacl.Bignum4096.add_mod",
       1,
-      2,
-      1,
+      0,
+      0,
       [ "@query" ],
       0,
-      "3ecb1a7c1511c61bb2e0971dfb5aaf09"
+      "5b5f01cba47f7d6d64eaa7e06fb4e9af"
+    ],
+    [
+      "Hacl.Bignum4096.add_mod",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "6cb2f607f3e8ab290951849adc2b3bea"
+    ],
+    [
+      "Hacl.Bignum4096.sub_mod",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "07f8c83859af87803c17bb52ac5efbe0"
+    ],
+    [
+      "Hacl.Bignum4096.sub_mod",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "08ca8cb9d1a20aec0bd0e05e3ec0317d"
     ],
     [
       "Hacl.Bignum4096.mul",
@@ -234,7 +261,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "2c340d1194a2cbd183824aa794ec41d0"
+      "1cd06bbebf0d661c11a595ed208ce619"
     ],
     [
       "Hacl.Bignum4096.mul",
@@ -271,7 +298,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "ad98cea7c801fe9f626b6b407b41ffde"
+      "a2ffe7c596ffb9db5af22e7ccee501fd"
     ],
     [
       "Hacl.Bignum4096.sqr",
@@ -328,7 +355,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "1e109f7620b1b86a370c1eaaf5508651"
+      "17377062524c94c516ece243991e5dd6"
     ],
     [
       "Hacl.Bignum4096.sqr",
@@ -364,7 +391,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "99883168e07e332b1008e7fd193cc3c7"
+      "2209e3f92278016e24086c353e10addf"
     ],
     [
       "Hacl.Bignum4096.reduction",
@@ -403,7 +430,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "ef578051e3f01994775fadab20378a7c"
+      "e0e1a8ace50273c53b85218a102ac070"
     ],
     [
       "Hacl.Bignum4096.areduction",
@@ -442,7 +469,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "d97fbc1b6abfca6c3a04280d6c1fe0b5"
+      "19344fe7c793d38ac1cb48ea978c25e6"
     ],
     [
       "Hacl.Bignum4096.mod",
@@ -499,7 +526,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "b3df8f77e3c547c462f3371cfccd409a"
+      "06bf468eacea51533600bfb7cc95e170"
     ],
     [
       "Hacl.Bignum4096.exp_vartime_precomp",
@@ -543,7 +570,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "49157095e36c4a51194b0a09d73fe0a3"
+      "67c553b5d55d89654005cef07c202e1e"
     ],
     [
       "Hacl.Bignum4096.exp_consttime_precomp",
@@ -587,7 +614,7 @@
         "typing_FStar.UInt.fits"
       ],
       0,
-      "5e2139368e9d8e81fcab38116c9af42d"
+      "d539617d5f809a409b64e18a2d0ff438"
     ],
     [
       "Hacl.Bignum4096.mod_precomp",
@@ -637,7 +664,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "b638528f70f09f42dc8045aaa65aed5e"
+      "8f6e037cf1a80aa089910ca87e5bcd7e"
     ],
     [
       "Hacl.Bignum4096.mod_precomp",
@@ -661,7 +688,7 @@
         "typing_Hacl.Bignum4096.t_limbs"
       ],
       0,
-      "cfa00a4a2e30468711448adba6bbcff7"
+      "926e30b50c1ce355db225498e50ecb33"
     ],
     [
       "Hacl.Bignum4096.mod_exp_vartime_precomp",
@@ -710,7 +737,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "6a8e69f1b8495e909c8acf27d906e918"
+      "2676f0b740bd9af71f21da6f5862fb47"
     ],
     [
       "Hacl.Bignum4096.mod_exp_vartime_precomp",
@@ -734,7 +761,7 @@
         "typing_Hacl.Bignum4096.t_limbs"
       ],
       0,
-      "99a42b68841e1b445fb00913cd7e8afa"
+      "a96b8201e62133a77d871cd420ccc58d"
     ],
     [
       "Hacl.Bignum4096.mod_exp_consttime_precomp",
@@ -780,7 +807,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "42ab8c34eae0d2a3b50298366972e6cc"
+      "89c40bbb36dcc8b5eaa30807c6482991"
     ],
     [
       "Hacl.Bignum4096.mod_exp_consttime_precomp",
@@ -804,7 +831,7 @@
         "typing_Hacl.Bignum4096.t_limbs"
       ],
       0,
-      "2a3114392bd259b083fdcc373b85db9d"
+      "8b940d595d10986058ca34c79917b169"
     ],
     [
       "Hacl.Bignum4096.mod_inv_prime_vartime_precomp",
@@ -828,7 +855,7 @@
         "typing_Hacl.Bignum4096.t_limbs"
       ],
       0,
-      "1a945b9b50029e30fa1e85b80c2198a1"
+      "3e7c4d3ef4061d1780d986265131fd88"
     ],
     [
       "Hacl.Bignum4096.bn_to_bytes_be",
@@ -889,7 +916,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "089be4fa586a2a884d43d07aefce85f5"
+      "d03683ee272db8e48d78523a5fe7525a"
     ],
     [
       "Hacl.Bignum4096.bn_to_bytes_be",
@@ -950,7 +977,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "914a4b3c6bcd1b2d8b79eddd1e7de153"
+      "ea0d060bf8a9cf2bdc367094b96af45d"
     ],
     [
       "Hacl.Bignum4096.bn_to_bytes_le",
@@ -1011,7 +1038,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e9a08a867e04c1456e208c4fdcf359eb"
+      "4deb370954e6409aab464b7cb250fedf"
     ],
     [
       "Hacl.Bignum4096.bn_to_bytes_le",
@@ -1072,7 +1099,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "b7a8c3ce01a9370957f939b8d30a1b1b"
+      "119c3c6cf7d071afec0a67df2ef42073"
     ]
   ]
 ]

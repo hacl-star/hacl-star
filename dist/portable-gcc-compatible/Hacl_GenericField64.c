@@ -48,7 +48,7 @@ Check whether this library will work for a modulus `n`.
   The function returns false if any of the following preconditions are violated,
   true otherwise.
   • n % 2 = 1
-  • 1 < n 
+  • 1 < n
 */
 bool Hacl_GenericField64_field_modulus_check(uint32_t len, uint64_t *n)
 {
@@ -220,72 +220,7 @@ Hacl_GenericField64_sub(
 {
   uint32_t len1 = Hacl_GenericField64_field_get_len(k);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
-  uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < k1.len / (uint32_t)4U; i++)
-  {
-    uint64_t t1 = aM[(uint32_t)4U * i];
-    uint64_t t20 = bM[(uint32_t)4U * i];
-    uint64_t *res_i0 = cM + (uint32_t)4U * i;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res_i0);
-    uint64_t t10 = aM[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = bM[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = cM + (uint32_t)4U * i + (uint32_t)1U;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t10, t21, res_i1);
-    uint64_t t11 = aM[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = bM[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = cM + (uint32_t)4U * i + (uint32_t)2U;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t11, t22, res_i2);
-    uint64_t t12 = aM[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = bM[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = cM + (uint32_t)4U * i + (uint32_t)3U;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t12, t2, res_i);
-  }
-  for (uint32_t i = k1.len / (uint32_t)4U * (uint32_t)4U; i < k1.len; i++)
-  {
-    uint64_t t1 = aM[i];
-    uint64_t t2 = bM[i];
-    uint64_t *res_i = cM + i;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res_i);
-  }
-  uint64_t c00 = c0;
-  KRML_CHECK_SIZE(sizeof (uint64_t), k1.len);
-  uint64_t tmp[k1.len];
-  memset(tmp, 0U, k1.len * sizeof (uint64_t));
-  uint64_t c = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < k1.len / (uint32_t)4U; i++)
-  {
-    uint64_t t1 = cM[(uint32_t)4U * i];
-    uint64_t t20 = k1.n[(uint32_t)4U * i];
-    uint64_t *res_i0 = tmp + (uint32_t)4U * i;
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t20, res_i0);
-    uint64_t t10 = cM[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = k1.n[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t21, res_i1);
-    uint64_t t11 = cM[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = k1.n[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t22, res_i2);
-    uint64_t t12 = cM[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = k1.n[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
-  }
-  for (uint32_t i = k1.len / (uint32_t)4U * (uint32_t)4U; i < k1.len; i++)
-  {
-    uint64_t t1 = cM[i];
-    uint64_t t2 = k1.n[i];
-    uint64_t *res_i = tmp + i;
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
-  }
-  uint64_t c1 = c;
-  uint64_t c2 = (uint64_t)0U - c00;
-  for (uint32_t i = (uint32_t)0U; i < k1.len; i++)
-  {
-    uint64_t *os = cM;
-    uint64_t x = (c2 & tmp[i]) | (~c2 & cM[i]);
-    os[i] = x;
-  }
+  Hacl_Bignum_bn_sub_mod_n_u64(len1, k1.n, aM, bM, cM);
 }
 
 /* SNIPPET_END: Hacl_GenericField64_sub */
@@ -370,7 +305,7 @@ Write `aM ^ b mod n` in `resM`.
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • b < pow2 bBits 
+  • b < pow2 bBits
 */
 void
 Hacl_GenericField64_exp_consttime(
@@ -540,7 +475,7 @@ Write `aM ^ b mod n` in `resM`.
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • b < pow2 bBits 
+  • b < pow2 bBits
 */
 void
 Hacl_GenericField64_exp_vartime(
@@ -664,7 +599,7 @@ Write `aM ^ (-1) mod n` in `aInvM`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • n is a prime
-  • 0 < aM 
+  • 0 < aM
 */
 void
 Hacl_GenericField64_inverse(
