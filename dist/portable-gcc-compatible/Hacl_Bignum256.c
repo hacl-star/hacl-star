@@ -132,9 +132,19 @@ uint64_t Hacl_Bignum256_sub(uint64_t *a, uint64_t *b, uint64_t *res)
 
 /* SNIPPET_END: Hacl_Bignum256_sub */
 
-/* SNIPPET_START: add_mod_n */
+/* SNIPPET_START: Hacl_Bignum256_add_mod */
 
-static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
+/*
+Write `(a + b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum256_add_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
@@ -202,7 +212,89 @@ static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *re
   }
 }
 
-/* SNIPPET_END: add_mod_n */
+/* SNIPPET_END: Hacl_Bignum256_add_mod */
+
+/* SNIPPET_START: Hacl_Bignum256_sub_mod */
+
+/*
+Write `(a - b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum256_sub_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
+{
+  uint64_t c0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
+  {
+    uint64_t t1 = a[(uint32_t)4U * i];
+    uint64_t t20 = b[(uint32_t)4U * i];
+    uint64_t *res_i0 = res + (uint32_t)4U * i;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res_i0);
+    uint64_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t10, t21, res_i1);
+    uint64_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t11, t22, res_i2);
+    uint64_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t12, t2, res_i);
+  }
+  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
+  {
+    uint64_t t1 = a[i];
+    uint64_t t2 = b[i];
+    uint64_t *res_i = res + i;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res_i);
+  }
+  uint64_t c00 = c0;
+  uint64_t tmp[4U] = { 0U };
+  uint64_t c = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
+  {
+    uint64_t t1 = res[(uint32_t)4U * i];
+    uint64_t t20 = n[(uint32_t)4U * i];
+    uint64_t *res_i0 = tmp + (uint32_t)4U * i;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t20, res_i0);
+    uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t21, res_i1);
+    uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t22, res_i2);
+    uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
+  }
+  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
+  {
+    uint64_t t1 = res[i];
+    uint64_t t2 = n[i];
+    uint64_t *res_i = tmp + i;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
+  }
+  uint64_t c1 = c;
+  uint64_t c2 = (uint64_t)0U - c00;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & tmp[i]) | (~c2 & res[i]);
+    os[i] = x;
+  }
+}
+
+/* SNIPPET_END: Hacl_Bignum256_sub_mod */
 
 /* SNIPPET_START: Hacl_Bignum256_mul */
 
@@ -314,7 +406,7 @@ static inline void precompr2(uint32_t nBits, uint64_t *n, uint64_t *res)
   res[i] = res[i] | (uint64_t)1U << j;
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)512U - nBits; i0++)
   {
-    add_mod_n(n, res, res, res);
+    Hacl_Bignum256_add_mod(n, res, res, res);
   }
 }
 
@@ -614,7 +706,7 @@ Write `a mod n` in `res`.
   The function returns false if any of the following preconditions are violated,
   true otherwise.
    • 1 < n
-   • n % 2 = 1 
+   • n % 2 = 1
 */
 bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res)
 {
@@ -1059,7 +1151,7 @@ Write `a ^ b mod n` in `res`.
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum256_mod_exp_vartime(
@@ -1106,7 +1198,7 @@ Write `a ^ b mod n` in `res`.
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum256_mod_exp_consttime(
@@ -1148,7 +1240,7 @@ Write `a ^ (-1) mod n` in `res`.
   • n % 2 = 1
   • 1 < n
   • 0 < a
-  • a < n 
+  • a < n
 */
 bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *res)
 {
@@ -1340,7 +1432,7 @@ Write `a ^ b mod n` in `res`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum256_mod_exp_vartime_precomp(
@@ -1376,7 +1468,7 @@ Write `a ^ b mod n` in `res`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum256_mod_exp_consttime_precomp(
@@ -1405,7 +1497,7 @@ Write `a ^ (-1) mod n` in `res`.
   preconditions are observed.
   • n is a prime
   • 0 < a
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum256_mod_inv_prime_vartime_precomp(
@@ -1625,8 +1717,9 @@ void Hacl_Bignum256_bn_to_bytes_le(uint64_t *b, uint8_t *res)
 
 
 /*
-Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
- otherwise returns 0.
+Returns 2^64 - 1 if a < b, otherwise returns 0.
+
+ The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
 */
 uint64_t Hacl_Bignum256_lt_mask(uint64_t *a, uint64_t *b)
 {
@@ -1641,4 +1734,25 @@ uint64_t Hacl_Bignum256_lt_mask(uint64_t *a, uint64_t *b)
 }
 
 /* SNIPPET_END: Hacl_Bignum256_lt_mask */
+
+/* SNIPPET_START: Hacl_Bignum256_eq_mask */
+
+/*
+Returns 2^64 - 1 if a = b, otherwise returns 0.
+
+ The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
+*/
+uint64_t Hacl_Bignum256_eq_mask(uint64_t *a, uint64_t *b)
+{
+  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(a[i], b[i]);
+    mask = uu____0 & mask;
+  }
+  uint64_t mask1 = mask;
+  return mask1;
+}
+
+/* SNIPPET_END: Hacl_Bignum256_eq_mask */
 
