@@ -63,6 +63,26 @@ val add: BN.bn_add_eq_len_st t_limbs n_limbs
   The arguments a, b and res are meant to be 256-bit bignums, i.e. uint32_t[8]"]
 val sub: BN.bn_sub_eq_len_st t_limbs n_limbs
 
+[@@ Comment "Write `(a + b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 256-bit bignums, i.e. uint32_t[8].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n"]
+val add_mod: BN.bn_add_mod_n_st t_limbs n_limbs
+
+[@@ Comment "Write `(a - b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 256-bit bignums, i.e. uint32_t[8].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n"]
+val sub_mod: BN.bn_sub_mod_n_st t_limbs n_limbs
+
 [@@ Comment "Write `a * b` in `res`.
 
   The arguments a and b are meant to be 256-bit bignums, i.e. uint32_t[8].
@@ -83,7 +103,7 @@ val sqr: a:lbignum t_limbs n_limbs -> BN.bn_karatsuba_sqr_st t_limbs n_limbs a
   The function returns false if any of the following preconditions are violated,
   true otherwise.
    • 1 < n
-   • n % 2 = 1 "]
+   • n % 2 = 1"]
 val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
@@ -103,7 +123,7 @@ val mod: BS.bn_mod_slow_safe_st t_limbs n_limbs
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n "]
+   • a < n"]
 val mod_exp_vartime: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
@@ -123,7 +143,7 @@ val mod_exp_vartime: BS.bn_mod_exp_safe_st t_limbs n_limbs
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n "]
+   • a < n"]
 val mod_exp_consttime: BS.bn_mod_exp_safe_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
@@ -138,7 +158,7 @@ val mod_exp_consttime: BS.bn_mod_exp_safe_st t_limbs n_limbs
   • n % 2 = 1
   • 1 < n
   • 0 < a
-  • a < n "]
+  • a < n"]
 val mod_inv_prime_vartime: BS.bn_mod_inv_prime_safe_st t_limbs n_limbs
 
 [@@ CPrologue
@@ -187,7 +207,7 @@ val mod_precomp: BS.bn_mod_slow_ctx_st t_limbs n_limbs
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n "]
+  • a < n"]
 val mod_exp_vartime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
@@ -206,7 +226,7 @@ val mod_exp_vartime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n "]
+  • a < n"]
 val mod_exp_consttime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
@@ -218,7 +238,7 @@ val mod_exp_consttime_precomp: BS.bn_mod_exp_ctx_st t_limbs n_limbs
   preconditions are observed.
   • n is a prime
   • 0 < a
-  • a < n "]
+  • a < n"]
 val mod_inv_prime_vartime_precomp: BS.bn_mod_inv_prime_ctx_st t_limbs n_limbs
 
 [@@ CPrologue
@@ -264,7 +284,12 @@ val bn_to_bytes_le: Hacl.Bignum.Convert.bn_to_bytes_le_st t_limbs n_bytes
 "\n/***************/
 /* Comparisons */
 /***************/\n";
-Comment
-"Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
- otherwise returns 0."]
+Comment "Returns 2^32 - 1 if a < b, otherwise returns 0.
+
+ The arguments a and b are meant to be 256-bit bignums, i.e. uint32_t[8]."]
 val lt_mask: BN.bn_lt_mask_st t_limbs n_limbs
+
+[@@ Comment "Returns 2^32 - 1 if a = b, otherwise returns 0.
+
+ The arguments a and b are meant to be 256-bit bignums, i.e. uint32_t[8]."]
+val eq_mask: BN.bn_eq_mask_st t_limbs n_limbs

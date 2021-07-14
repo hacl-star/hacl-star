@@ -44,6 +44,26 @@ val add: len:BN.meta_len t_limbs -> BN.bn_add_eq_len_st t_limbs len
   The arguments a, b and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len]"]
 val sub: len:BN.meta_len t_limbs -> BN.bn_sub_eq_len_st t_limbs len
 
+[@@ Comment "Write `(a + b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n"]
+val add_mod: len:BN.meta_len t_limbs -> BN.bn_add_mod_n_st t_limbs len
+
+[@@ Comment "Write `(a - b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint64_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n"]
+val sub_mod: len:BN.meta_len t_limbs -> BN.bn_sub_mod_n_st t_limbs len
+
 [@@ Comment "Write `a * b` in `res`.
 
   The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len].
@@ -84,7 +104,7 @@ val mod: len:BN.meta_len t_limbs -> BS.bn_mod_slow_safe_st t_limbs len
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n "]
+   • a < n"]
 val mod_exp_vartime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs len
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
@@ -104,7 +124,7 @@ val mod_exp_vartime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs le
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n "]
+   • a < n"]
 val mod_exp_consttime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs len
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
@@ -120,7 +140,7 @@ val mod_exp_consttime: len:BN.meta_len t_limbs -> BS.bn_mod_exp_safe_st t_limbs 
   • n % 2 = 1
   • 1 < n
   • 0 < a
-  • a < n "]
+  • a < n"]
 val mod_inv_prime_vartime: len:BN.meta_len t_limbs -> BS.bn_mod_inv_prime_safe_st t_limbs len
 
 [@@ CPrologue
@@ -169,7 +189,7 @@ val mod_precomp: len:Ghost.erased _ -> BS.bn_mod_slow_ctx_st t_limbs len
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n "]
+  • a < n"]
 val mod_exp_vartime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limbs len
 
 [@@ Comment "Write `a ^ b mod n` in `res`.
@@ -188,7 +208,7 @@ val mod_exp_vartime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limbs 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n "]
+  • a < n"]
 val mod_exp_consttime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limbs len
 
 [@@ Comment "Write `a ^ (-1) mod n` in `res`.
@@ -200,7 +220,7 @@ val mod_exp_consttime_precomp: len:Ghost.erased _ -> BS.bn_mod_exp_ctx_st t_limb
   preconditions are observed.
   • n is a prime
   • 0 < a
-  • a < n "]
+  • a < n"]
 val mod_inv_prime_vartime_precomp: len:Ghost.erased _ -> BS.bn_mod_inv_prime_ctx_st t_limbs len
 
 [@@ CPrologue
@@ -246,7 +266,12 @@ val bn_to_bytes_le: len:_ -> Hacl.Bignum.Convert.bn_to_bytes_le_st t_limbs len
 "\n/***************/
 /* Comparisons */
 /***************/\n";
-Comment
-"Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
- otherwise returns 0."]
-val lt_mask: len:BN.meta_len t_limbs -> BN.bn_lt_mask_st t_limbs len
+Comment "Returns 2^64 - 1 if a < b, otherwise returns 0.
+
+ The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len]."]
+val lt_mask: len:_ -> BN.bn_lt_mask_st t_limbs len
+
+[@@ Comment "Returns 2^64 - 1 if a = b, otherwise returns 0.
+
+ The arguments a and b are meant to be `len` limbs in size, i.e. uint64_t[len]."]
+val eq_mask: len:_ -> BN.bn_eq_mask_st t_limbs len
