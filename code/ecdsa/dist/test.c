@@ -383,8 +383,8 @@ int main()
 
     if (test_ecdh () == false)
         printf("%s\n", "WRONG"); 
-    if (test_ecdsa () == false)
-        printf("%s\n", "WRONG"); 
+    // if (test_ecdsa () == false)
+    //     printf("%s\n", "WRONG"); 
 
 
 	master_branch_test();
