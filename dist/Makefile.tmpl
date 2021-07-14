@@ -35,7 +35,7 @@ endif
 # TODO: Makefile.config: configure; ./$<
 # TODO: include Makefile.config
 UNAME		?= $(shell uname)
-MARCH		?= $(shell uname -m)
+MARCH		?= $(shell uname -m | sed 's/amd64/x86_64/')
 ifeq ($(UNAME),Darwin)
   VARIANT	= -darwin
   SO		= so
@@ -52,7 +52,7 @@ else ifeq ($(OS),Windows_NT)
   LDFLAGS	= -Wl,--out-implib,libevercrypt.dll.a
 else ifeq ($(UNAME),FreeBSD)
   CFLAGS	+= -fPIC
-  VARIANT	= -freebsd
+  VARIANT	= -linux
   SO 		= so
 endif
 
