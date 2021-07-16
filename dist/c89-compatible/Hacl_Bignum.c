@@ -1135,7 +1135,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   }
 }
 
-inline void
+void
 Hacl_Bignum_bn_add_mod_n_u32(
   uint32_t len1,
   uint32_t *n,
@@ -1246,7 +1246,7 @@ Hacl_Bignum_bn_add_mod_n_u32(
   }
 }
 
-inline void
+void
 Hacl_Bignum_bn_add_mod_n_u64(
   uint32_t len1,
   uint64_t *n,
@@ -1357,7 +1357,7 @@ Hacl_Bignum_bn_add_mod_n_u64(
   }
 }
 
-inline void
+void
 Hacl_Bignum_bn_sub_mod_n_u32(
   uint32_t len1,
   uint32_t *n,
@@ -1468,7 +1468,7 @@ Hacl_Bignum_bn_sub_mod_n_u32(
   }
 }
 
-inline void
+void
 Hacl_Bignum_bn_sub_mod_n_u64(
   uint32_t len1,
   uint64_t *n,
