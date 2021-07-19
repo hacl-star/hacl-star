@@ -1,21 +1,22 @@
 opam-version: "2.0"
 name: "hacl-star"
 version: "0.4.0"
+synopsis: "OCaml API for EverCrypt/HACL*"
 maintainer: "Victor Dumitrescu <victor.dumitrescu@nomadic-labs.com>"
 authors: [ "Project Everest" ]
-homepage: "https://hacl-star.github.io/"
-bug-reports: "https://github.com/project-everest/hacl-star/issues"
-dev-repo: "git+https://github.com/project-everest/hacl-star.git"
 license: "Apache-2.0"
-synopsis: "OCaml API for EverCrypt/HACL*"
+homepage: "https://hacl-star.github.io/"
+doc: "https://hacl-star.github.io/ocaml_doc"
+bug-reports: "https://github.com/project-everest/hacl-star/issues"
 depends: [
-  "ocaml" { >= "4.05.0" }
+  "ocaml" { >= "4.08.0" }
   "dune" {>= "1.2"}
   "hacl-star-raw" {= version}
   "zarith"
   "cppo" {build}
   "odoc" {with-doc}
 ]
+available: os-family != "bsd"
 build: [
   [
     "dune" "build" "-p" name "-j" jobs
@@ -25,3 +26,4 @@ build: [
 run-test: [
   ["dune" "runtest" "-p" name "-j" jobs]
 ]
+dev-repo: "git+https://github.com/project-everest/hacl-star.git"
