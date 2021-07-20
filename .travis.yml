@@ -3,8 +3,10 @@ jobs:
   include:
     - name: freebsd / full tests / ocaml 4.12.0 / ocaml tests
       os: freebsd
+      addons:
+        pkg:
+          - ocaml-opam
       install:
-        - pkg install ocaml-opam
         - opam init --yes --bare
         - opam switch create 4.12.0 --yes
         - eval $(opam config env)
