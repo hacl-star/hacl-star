@@ -12,6 +12,20 @@ if [[ $CC == "" ]]; then
   CC=cc
 fi
 
+my_mktemp () {
+  local name=$1
+  local ext=$2
+  local f=$(mktemp --suffix=$ext /tmp/$name.XXXXXXX)
+  if [[ $f == "" ]]; then
+    local f=$(mktemp -p . --suffix=$ext $name.XXXXXXX)
+  fi
+  echo $f
+}
+
+my_mktemp_c () {
+  my_mktemp $1 .c
+}
+
 # Helpers to help do feature or bug detection
 # -------------------------------------------
 
@@ -53,13 +67,8 @@ check_no_bug81300 () {
   # but mozilla. If lib_intrinsics.h is not present, assume there is no bug and
   # return success.
   if [ -f lib_intrinsics.h ]; then
-  local out=$(mktemp /tmp/testbug81300.XXXXXXX)
-  if [[ $out == "" ]]; then
-    echo "! could not create temporary file to run test for bug 81300"
-    return 1
-  else
-    local file=${out}.c
-  fi
+  local out=$(my_mktemp testbug81300)
+  local file=$out.c
   cat > $file <<EOF
 #include <inttypes.h>
 #include <stdio.h>
@@ -108,13 +117,7 @@ EOF
 }
 
 detect_uint128 () {
-  local out=$(mktemp /tmp/testint128.XXXXXXX)
-  if [[ $out == "" ]]; then
-    echo "! could not create temporary file to run test for unsigned __int128"
-    return 1
-  else
-    local file=${out}.c
-  fi
+  local file=$(my_mktemp_c testint128)
   echo "unsigned __int128 x = 0;" > $file
   $CC $CROSS_CFLAGS -c $file -o /dev/null
 }
@@ -139,13 +142,7 @@ detect_broken_xcode () {
 }
 
 check_explicit_bzero () {
-  local out=$(mktemp /tmp/testbzero.XXXXXXX)
-  if [[ $out == "" ]]; then
-    echo "! could not create temporary file to run test for explicit_bzero"
-    return 1
-  else
-    local file=${out}.c
-  fi
+  local file=$(my_mktemp_c testbzero)
   cat > $file <<EOF
 #include <string.h>
 
@@ -177,13 +174,7 @@ detect_arm () {
 }
 
 detect_arm_neon () {
-  local out=$(mktemp /tmp/testvec128.XXXXXXX)
-  if [[ $out == "" ]]; then
-    echo "! could not create temporary file to run test for ARM NEON"
-    return 1
-  else
-    local file=${out}.c
-  fi
+  local file=$(my_mktemp_c testvec128)
   cat > $file <<EOF
 #include <libintvector.h>
 
