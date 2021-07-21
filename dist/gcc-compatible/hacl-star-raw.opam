@@ -26,7 +26,7 @@ x-ci-accept-failures: [
   "oraclelinux-7" # Default C compiler is too old
 ]
 available: [
-  os-family != "bsd"
+  os = "freebsd" | os-family != "bsd"
 ]
 build: [
   ["./configure"]
