@@ -130,6 +130,11 @@ let fill_elems4 #t #a h0 n output refl footprint spec impl =
   B.modifies_buffer_elim (B.gsub #t output k (n -! k)) (footprint (v k) |+| loc tmp) h0 h1;
   assert (modifies (footprint (v k) |+| loc (gsub output 0ul k)) h0 h1);
 
+  // SH: this term should be eliminated at extraction time, but sometimes it is
+  // not (in particular in Hacl.Impl.EC.LowLevel.fst, which leads to a bug
+  // at extraction). As a temporary fix, we insert `inline_let` while investigating
+  // the source of the problem in the normalizer.
+  [@inline_let]
   let inv (h:mem) (i:nat{v k <= i /\ i <= v n}) =
     modifies (footprint i |+| loc (gsub output 0ul (size i))) h0 h /\
    (let (c, res) = Loops.repeat_right (v n / 4 * 4) i (S.generate_elem_a t a (v n))
