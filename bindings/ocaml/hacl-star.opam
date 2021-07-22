@@ -20,7 +20,9 @@ depends: [
   "cppo" {build}
   "odoc" {with-doc}
 ]
-available: os-family != "bsd"
+available: [
+  os = "freebsd" | os-family != "bsd"
+]
 build: [
   [
     "dune" "build" "-p" name "-j" jobs
