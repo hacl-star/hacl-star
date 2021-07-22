@@ -347,7 +347,7 @@ Hacl_Hash_Blake2b_256_finish_blake2b_256(
   u8 *dst
 )
 {
-  u32 double_row = (u32)2U * (u32)4U * (u32)8U;
+  u32 double_row = (u32)2U * ((u32)4U * (u32)8U);
   KRML_CHECK_SIZE(sizeof (u8), double_row);
   {
     u8 b[double_row];
@@ -1204,7 +1204,7 @@ blake2b_update_blocks(
 inline void
 Hacl_Blake2b_256_blake2b_finish(u32 nn, u8 *output, Lib_IntVector_Intrinsics_vec256 *hash)
 {
-  u32 double_row = (u32)2U * (u32)4U * (u32)8U;
+  u32 double_row = (u32)2U * ((u32)4U * (u32)8U);
   KRML_CHECK_SIZE(sizeof (u8), double_row);
   {
     u8 b[double_row];

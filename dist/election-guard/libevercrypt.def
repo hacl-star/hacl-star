@@ -63,6 +63,8 @@ EXPORTS
   Hacl_Bignum_ModInvLimb_mod_inv_uint64
   Hacl_Bignum256_add
   Hacl_Bignum256_sub
+  Hacl_Bignum256_add_mod
+  Hacl_Bignum256_sub_mod
   Hacl_Bignum256_mul
   Hacl_Bignum256_sqr
   Hacl_Bignum256_mod
@@ -81,8 +83,11 @@ EXPORTS
   Hacl_Bignum256_bn_to_bytes_be
   Hacl_Bignum256_bn_to_bytes_le
   Hacl_Bignum256_lt_mask
+  Hacl_Bignum256_eq_mask
   Hacl_Bignum4096_add
   Hacl_Bignum4096_sub
+  Hacl_Bignum4096_add_mod
+  Hacl_Bignum4096_sub_mod
   Hacl_Bignum4096_mul
   Hacl_Bignum4096_sqr
   Hacl_Bignum4096_mod
@@ -100,8 +105,11 @@ EXPORTS
   Hacl_Bignum4096_bn_to_bytes_be
   Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
+  Hacl_Bignum4096_eq_mask
   Hacl_Bignum256_32_add
   Hacl_Bignum256_32_sub
+  Hacl_Bignum256_32_add_mod
+  Hacl_Bignum256_32_sub_mod
   Hacl_Bignum256_32_mul
   Hacl_Bignum256_32_sqr
   Hacl_Bignum256_32_mod
@@ -120,8 +128,11 @@ EXPORTS
   Hacl_Bignum256_32_bn_to_bytes_be
   Hacl_Bignum256_32_bn_to_bytes_le
   Hacl_Bignum256_32_lt_mask
+  Hacl_Bignum256_32_eq_mask
   Hacl_Bignum4096_32_add
   Hacl_Bignum4096_32_sub
+  Hacl_Bignum4096_32_add_mod
+  Hacl_Bignum4096_32_sub_mod
   Hacl_Bignum4096_32_mul
   Hacl_Bignum4096_32_sqr
   Hacl_Bignum4096_32_mod
@@ -139,6 +150,7 @@ EXPORTS
   Hacl_Bignum4096_32_bn_to_bytes_be
   Hacl_Bignum4096_32_bn_to_bytes_le
   Hacl_Bignum4096_32_lt_mask
+  Hacl_Bignum4096_32_eq_mask
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
   Hacl_HMAC_DRBG___proj__State__item__k
