@@ -158,7 +158,11 @@ let mk_gcmalloc_of_list (uniq: gensym) (arg: term) (l:int) (t: option term):
   let uniq, name = fresh uniq in
   let fv: fv = pack_fv name in
   let t: term = match t with None -> pack Tv_Unknown | Some t -> t in
-  let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
+  let lb = pack_lb ({lb_fv = fv;
+                       lb_us = [];
+                       lb_typ = t;
+                       lb_def = def}) in
+  let se: sigelt = pack_sigelt (Sg_Let false [lb]) in
   uniq, se, mk_e_app (`LB) [mk_uint32 l; pack (Tv_FVar fv)]
 
 noextract
@@ -222,13 +226,20 @@ and lowstarize_tuple (uniq: gensym) (es: list term): Tac (gensym * list sigelt *
 noextract
 let lowstarize_toplevel src dst: Tac decls =
   // lookup_typ does not lookup a type but any arbitrary term, hence the name
-  let str = lookup_typ (top_env ()) (cur_module () @ [ src ]) in
+  let fv = cur_module () @ [ src ] in
+  let str = lookup_typ (top_env ()) fv  in
   let str = must str in
-  let def = match inspect_sigelt str with Sg_Let _ _ _ _ def -> def | _ -> fail "must" in
+  let def = match inspect_sigelt str with
+            | Sg_Let _ lbs -> let lbv = lookup_lb_view lbs fv in lbv.lb_def
+	    | _ -> fail "must" in
   let _, ses, def = lowstarize_expr (dst, 0) def in
   let fv: fv = pack_fv (cur_module () @ [ dst ]) in
   let t: term = pack Tv_Unknown in
-  let se: sigelt = pack_sigelt (Sg_Let false fv [] t def) in
+  let lb = pack_lb ({lb_fv = fv;
+                     lb_us = [];
+                     lb_typ = t;
+                     lb_def = def}) in
+  let se: sigelt = pack_sigelt (Sg_Let false [lb]) in
   normalize_term (ses @ [ se ])
 
 
