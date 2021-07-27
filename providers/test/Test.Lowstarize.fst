@@ -233,7 +233,7 @@ let lowstarize_toplevel src dst: Tac decls =
             | Sg_Let _ lbs -> let lbv = lookup_lb_view lbs fv in lbv.lb_def
 	    | _ -> fail "must" in
   let _, ses, def = lowstarize_expr (dst, 0) def in
-  let fv: fv = pack_fv (cur_module () @ [ dst ]) in
+  let fv = pack_fv (cur_module () @ [ dst ]) in
   let t: term = pack Tv_Unknown in
   let lb = pack_lb ({lb_fv = fv;
                      lb_us = [];
