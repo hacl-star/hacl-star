@@ -229,3 +229,5 @@ val secretToPublicWithoutNorm: result: point -> scalar: lbuffer uint8 (size 32) 
 	let p1 = fromDomainPoint(point_prime_to_coordinates (as_seq h1 result)) in 
 	let rN, _ = montgomery_ladder_spec (as_seq h0 scalar) ((0, 0, 0), basePoint) in 
 	rN == p1))  
+
+

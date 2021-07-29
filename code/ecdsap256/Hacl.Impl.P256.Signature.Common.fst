@@ -336,3 +336,50 @@ let isMoreThanZeroLessThanOrder x =
 
   let open Hacl.Impl.P256.LowLevel.RawCmp in 
   unsafe_bool_of_u64 (lognot result)
+
+
+
+
+
+let toForm i o = 
+  let open Lib.ByteSequence in 
+    let h0 = ST.get() in 
+  toUint64ChangeEndian i o;
+    let h1 = ST.get() in 
+  lemma_core_0 o h1;
+  Spec.ECDSA.changeEndianLemma (uints_from_bytes_be (as_seq h0 i));
+  uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h1 i)
+
+
+let toFormPoint i o = 
+  let pU64X = sub o (size 0) (size 4) in
+  let pU64Y = sub o (size 4) (size 4) in
+  let pX = sub i (size 0) (size 32) in
+  let pY = sub i (size 32) (size 32) in
+
+  toForm pX pU64X;
+  toForm pY pU64Y;
+  Hacl.Impl.P256.Signature.Common.bufferToJacUpdate o
+
+
+let fromForm i o = 
+  let open Lib.ByteSequence in 
+  let h0 = ST.get() in
+  changeEndian i;
+    let h1 = ST.get() in 
+  toUint8 i o;
+  lemma_core_0 i h0;
+  lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h0 i);
+  Spec.ECDSA.changeEndian_le_be (as_nat h0 i)
+
+
+let fromFormPoint i o = 
+  let iX = sub i (size 0) (size 4) in 
+  let iY = sub i (size 4) (size 4) in 
+
+  let oX = sub o (size 0) (size 32) in 
+  let oY = sub o (size 32) (size 32) in 
+
+  fromForm iX oX;
+  fromForm iY oY
+

@@ -103,3 +103,55 @@ val isMoreThanZeroLessThanOrder: x: lbuffer uint8 (size 32) -> Stack bool
       r <==> (scalar > 0 && scalar < prime_p256_order)
     )
   )
+
+
+
+inline_for_extraction noextract
+val toForm: i: lbuffer uint8 (size 32) -> o: felem -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ Lib.ByteSequence.nat_from_bytes_be (as_seq h i) < prime256)
+  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\ 
+    as_nat h1 o == Lib.ByteSequence.nat_from_bytes_be (as_seq h0 i) /\
+    as_nat h1 o < prime)
+
+
+inline_for_extraction noextract
+val toFormPoint: p: lbuffer uint8 (size 64) -> o: point -> Stack unit 
+  (requires fun h -> live h p /\ live h o /\ disjoint p o /\ (
+    let pX = gsub p (size 0) (size 32) in 
+    let pY = gsub p (size 32) (size 32) in 
+    Lib.ByteSequence.nat_from_bytes_be (as_seq h pX) < prime256 /\
+    Lib.ByteSequence.nat_from_bytes_be (as_seq h pY) < prime256))
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ (
+    let pX, pY = gsub p (size 0) (size 32), gsub p (size 32) (size 32) in
+    let rX, rY, rZ = gsub o (size 0) (size 4),  gsub o (size 4) (size 4), gsub o (size 8) (size 4) in 
+
+    as_nat h1 rX == Lib.ByteSequence.nat_from_bytes_be (as_seq h0 pX) /\
+    as_nat h1 rY == Lib.ByteSequence.nat_from_bytes_be (as_seq h0 pY) /\
+
+    (as_nat h1 rX, as_nat h1 rY, as_nat h1 rZ) == 
+      Spec.P256.toJacobianCoordinates (Lib.ByteSequence.nat_from_bytes_be (as_seq h0 pX), Lib.ByteSequence.nat_from_bytes_be (as_seq h0 pY)) /\
+    as_nat h1 rX < prime /\ as_nat h1 rY < prime /\ as_nat h1 rZ == 1))
+
+
+inline_for_extraction noextract
+val fromForm: i: felem -> o: lbuffer uint8 (size 32) -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ as_nat h i < prime256)
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\  
+    as_seq h1 o == Lib.ByteSequence.nat_to_bytes_be 32 (as_nat h0 i))
+
+
+inline_for_extraction noextract
+val fromFormPoint: i: point -> o: lbuffer uint8 (size 64) -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ (
+    let iX = gsub i (size 0) (size 4) in 
+    let iY = gsub i (size 4) (size 4) in 
+    as_nat h iX < prime256 /\ as_nat h iY < prime256))
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\ (
+    let iX = gsub i (size 0) (size 4) in 
+    let iY = gsub i (size 4) (size 4) in 
+
+    let oX = gsub o (size 0) (size 32) in 
+    let oY = gsub o (size 32) (size 32) in 
+
+    as_seq h1 oX == Lib.ByteSequence.nat_to_bytes_be 32 (as_nat h0 iX) /\ 
+    as_seq h1 oY == Lib.ByteSequence.nat_to_bytes_be 32 (as_nat h0 iY)))
