@@ -825,7 +825,7 @@ blake2b_update_blocks(u32 len, u64 *wv, u64 *hash, uint128_t prev, u8 *blocks)
 
 inline void Hacl_Blake2b_32_blake2b_finish(u32 nn, u8 *output, u64 *hash)
 {
-  u32 double_row = (u32)2U * (u32)4U * (u32)8U;
+  u32 double_row = (u32)2U * ((u32)4U * (u32)8U);
   KRML_CHECK_SIZE(sizeof (u8), double_row);
   {
     u8 b[double_row];

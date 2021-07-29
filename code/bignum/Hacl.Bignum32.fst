@@ -26,6 +26,12 @@ let add len a b res =
 let sub len a b res =
   (ke len).BE.bn.BN.sub a b res
 
+let add_mod len n a b res =
+  (ke len).BE.bn.BN.add_mod_n n a b res
+
+let sub_mod len n a b res =
+  (ke len).BE.bn.BN.sub_mod_n n a b res
+
 let mul len a b res =
   (ke len).BE.bn.BN.mul a b res
 
@@ -85,3 +91,6 @@ let bn_to_bytes_le len b res =
 
 let lt_mask len a b =
   BN.bn_lt_mask len a b
+
+let eq_mask len a b =
+  BN.bn_eq_mask len a b

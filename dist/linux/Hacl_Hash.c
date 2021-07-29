@@ -697,7 +697,7 @@ static u64 update_blake2s_32(u32 *s, u64 totlen, u8 *block)
 
 void Hacl_Hash_Core_Blake2_finish_blake2s_32(u32 *s, u64 ev, u8 *dst)
 {
-  u32 double_row = (u32)2U * (u32)4U * (u32)4U;
+  u32 double_row = (u32)2U * ((u32)4U * (u32)4U);
   KRML_CHECK_SIZE(sizeof (u8), double_row);
   {
     u8 b[double_row];
@@ -1398,7 +1398,7 @@ static uint128_t update_blake2b_32(u64 *s, uint128_t totlen, u8 *block)
 
 void Hacl_Hash_Core_Blake2_finish_blake2b_32(u64 *s, uint128_t ev, u8 *dst)
 {
-  u32 double_row = (u32)2U * (u32)4U * (u32)8U;
+  u32 double_row = (u32)2U * ((u32)4U * (u32)8U);
   KRML_CHECK_SIZE(sizeof (u8), double_row);
   {
     u8 b[double_row];

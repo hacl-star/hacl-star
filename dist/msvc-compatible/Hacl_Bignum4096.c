@@ -128,7 +128,17 @@ uint64_t Hacl_Bignum4096_sub(uint64_t *a, uint64_t *b, uint64_t *res)
   return c;
 }
 
-static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
+/*
+Write `(a + b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum4096_add_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
@@ -197,6 +207,84 @@ static inline void add_mod_n(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *re
 }
 
 /*
+Write `(a - b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum4096_sub_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
+{
+  uint64_t c0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint64_t t1 = a[(uint32_t)4U * i];
+    uint64_t t20 = b[(uint32_t)4U * i];
+    uint64_t *res_i0 = res + (uint32_t)4U * i;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res_i0);
+    uint64_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t10, t21, res_i1);
+    uint64_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t11, t22, res_i2);
+    uint64_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t12, t2, res_i);
+  }
+  for (uint32_t i = (uint32_t)64U; i < (uint32_t)64U; i++)
+  {
+    uint64_t t1 = a[i];
+    uint64_t t2 = b[i];
+    uint64_t *res_i = res + i;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res_i);
+  }
+  uint64_t c00 = c0;
+  uint64_t tmp[64U] = { 0U };
+  uint64_t c = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint64_t t1 = res[(uint32_t)4U * i];
+    uint64_t t20 = n[(uint32_t)4U * i];
+    uint64_t *res_i0 = tmp + (uint32_t)4U * i;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t20, res_i0);
+    uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t21, res_i1);
+    uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t22, res_i2);
+    uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
+  }
+  for (uint32_t i = (uint32_t)64U; i < (uint32_t)64U; i++)
+  {
+    uint64_t t1 = res[i];
+    uint64_t t2 = n[i];
+    uint64_t *res_i = tmp + i;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
+  }
+  uint64_t c1 = c;
+  uint64_t c2 = (uint64_t)0U - c00;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & tmp[i]) | (~c2 & res[i]);
+    os[i] = x;
+  }
+}
+
+/*
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -228,7 +316,7 @@ static inline void precompr2(uint32_t nBits, uint64_t *n, uint64_t *res)
   res[i] = res[i] | (uint64_t)1U << j;
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)8192U - nBits; i0++)
   {
-    add_mod_n(n, res, res, res);
+    Hacl_Bignum4096_add_mod(n, res, res, res);
   }
 }
 
@@ -585,14 +673,11 @@ exp_vartime_precomp(
   uint64_t tmp[128U] = { 0U };
   memcpy(tmp, r2, (uint32_t)64U * sizeof (uint64_t));
   reduction(n, mu, tmp, resM);
-  uint32_t table_len = (uint32_t)16U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), table_len * (uint32_t)64U);
-  uint64_t *table = alloca(table_len * (uint32_t)64U * sizeof (uint64_t));
-  memset(table, 0U, table_len * (uint32_t)64U * sizeof (uint64_t));
+  uint64_t table[1024U] = { 0U };
   memcpy(table, resM, (uint32_t)64U * sizeof (uint64_t));
   uint64_t *t1 = table + (uint32_t)64U;
   memcpy(t1, aM, (uint32_t)64U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
     uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)64U;
     uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)64U;
@@ -722,14 +807,11 @@ exp_consttime_precomp(
   uint64_t tmp[128U] = { 0U };
   memcpy(tmp, r2, (uint32_t)64U * sizeof (uint64_t));
   reduction(n, mu, tmp, resM);
-  uint32_t table_len = (uint32_t)16U;
-  KRML_CHECK_SIZE(sizeof (uint64_t), table_len * (uint32_t)64U);
-  uint64_t *table = alloca(table_len * (uint32_t)64U * sizeof (uint64_t));
-  memset(table, 0U, table_len * (uint32_t)64U * sizeof (uint64_t));
+  uint64_t table[1024U] = { 0U };
   memcpy(table, resM, (uint32_t)64U * sizeof (uint64_t));
   uint64_t *t1 = table + (uint32_t)64U;
   memcpy(t1, aM, (uint32_t)64U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
     uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)64U;
     uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)64U;
@@ -757,7 +839,7 @@ exp_consttime_precomp(
     uint64_t bits_l = ite & mask_l;
     uint64_t a_bits_l[64U] = { 0U };
     memcpy(a_bits_l, table, (uint32_t)64U * sizeof (uint64_t));
-    for (uint32_t i2 = (uint32_t)0U; i2 < table_len - (uint32_t)1U; i2++)
+    for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)15U; i2++)
     {
       uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
       uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)64U;
@@ -795,7 +877,7 @@ exp_consttime_precomp(
     uint64_t bits_c0 = bits_c;
     uint64_t a_bits_c[64U] = { 0U };
     memcpy(a_bits_c, table, (uint32_t)64U * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < table_len - (uint32_t)1U; i1++)
+    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)15U; i1++)
     {
       uint64_t c1 = FStar_UInt64_eq_mask(bits_c0, (uint64_t)(i1 + (uint32_t)1U));
       uint64_t *res_j = table + (i1 + (uint32_t)1U) * (uint32_t)64U;
@@ -863,7 +945,7 @@ Write `a ^ b mod n` in `res`.
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum4096_mod_exp_vartime(
@@ -906,7 +988,7 @@ Write `a ^ b mod n` in `res`.
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum4096_mod_exp_consttime(
@@ -944,7 +1026,7 @@ Write `a ^ (-1) mod n` in `res`.
   • n % 2 = 1
   • 1 < n
   • 0 < a
-  • a < n 
+  • a < n
 */
 bool Hacl_Bignum4096_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *res)
 {
@@ -994,7 +1076,7 @@ bool Hacl_Bignum4096_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *r
       uint64_t *a1 = n + (uint32_t)1U;
       uint64_t *res1 = n2 + (uint32_t)1U;
       uint64_t c = c0;
-      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+      for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
       {
         uint64_t t1 = a1[(uint32_t)4U * i];
         uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -1120,7 +1202,7 @@ Write `a ^ b mod n` in `res`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum4096_mod_exp_vartime_precomp(
@@ -1152,7 +1234,7 @@ Write `a ^ b mod n` in `res`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum4096_mod_exp_consttime_precomp(
@@ -1177,7 +1259,7 @@ Write `a ^ (-1) mod n` in `res`.
   preconditions are observed.
   • n is a prime
   • 0 < a
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum4096_mod_inv_prime_vartime_precomp(
@@ -1196,7 +1278,7 @@ Hacl_Bignum4096_mod_inv_prime_vartime_precomp(
     uint64_t *a1 = k1.n + (uint32_t)1U;
     uint64_t *res1 = n2 + (uint32_t)1U;
     uint64_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
     {
       uint64_t t1 = a1[(uint32_t)4U * i];
       uint64_t *res_i0 = res1 + (uint32_t)4U * i;
@@ -1377,8 +1459,9 @@ void Hacl_Bignum4096_bn_to_bytes_le(uint64_t *b, uint8_t *res)
 
 
 /*
-Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
- otherwise returns 0.
+Returns 2^64 - 1 if a < b, otherwise returns 0.
+
+ The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
 */
 uint64_t Hacl_Bignum4096_lt_mask(uint64_t *a, uint64_t *b)
 {
@@ -1390,5 +1473,22 @@ uint64_t Hacl_Bignum4096_lt_mask(uint64_t *a, uint64_t *b)
     acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
   }
   return acc;
+}
+
+/*
+Returns 2^64 - 1 if a = b, otherwise returns 0.
+
+ The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
+*/
+uint64_t Hacl_Bignum4096_eq_mask(uint64_t *a, uint64_t *b)
+{
+  uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(a[i], b[i]);
+    mask = uu____0 & mask;
+  }
+  uint64_t mask1 = mask;
+  return mask1;
 }
 

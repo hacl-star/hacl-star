@@ -142,7 +142,7 @@ static inline uint64_t ffdhe_check_pk(Spec_FFDHE_ffdhe_alg a, uint64_t *pk_n, ui
         uint64_t c = c0;
         {
           uint32_t i;
-          for (i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+          for (i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
           {
             uint64_t t1 = a1[(uint32_t)4U * i];
             uint64_t *res_i0 = res1 + (uint32_t)4U * i;
