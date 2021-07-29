@@ -90,4 +90,4 @@ let point_add8 result p q = Hacl.Impl.P256.PointAdd8.point_add8 result p q
 
 let verifyQPrivate pubKey = Hacl.Impl.P256.ScalarMult.verifyQPrivate pubKey
 
-let point_inv8 result p = Hacl.Impl.P256.PointInverse.point_inv8 result p
+let point_inv result p = Hacl.Impl.P256.PointInverse.point_inv result p

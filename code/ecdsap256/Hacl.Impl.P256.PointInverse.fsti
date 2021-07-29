@@ -15,22 +15,24 @@ open Spec.P256.Definitions
 open Hacl.Spec.P256.Felem
 open Spec.P256.MontgomeryMultiplication
 
-inline_for_extraction noextract
-val point_inv8: result: lbuffer uint8 (size 64) -> p: lbuffer uint8 (size 64) ->
-  Stack unit 
-  (requires fun h -> live h result /\ live h p /\ (
-    let pX = gsub p (size 0) (size 32) in 
-    let pY = gsub p (size 32) (size 32) in 
-    
-    Lib.ByteSequence.nat_from_bytes_be (as_seq h pX) < prime256 /\ 
-    Lib.ByteSequence.nat_from_bytes_be (as_seq h pY) < prime256))
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
-    let open Lib.ByteSequence in 
-    let pX = nat_from_bytes_be (as_seq h0 (gsub p (size 0) (size 32))) in 
-    let pY = nat_from_bytes_be (as_seq h0 (gsub p (size 32) (size 32))) in
-    let pK = Spec.P256.toJacobianCoordinates (pX, pY) in 
-    let resultX, resultY, _ = Spec.P256._norm (Spec.P256._point_inverse pK) in 
-    
-    as_seq h1 (gsub result (size 0) (size 32)) == nat_to_bytes_be 32 resultX /\
-    as_seq h1 (gsub result (size 32) (size 32)) == nat_to_bytes_be 32 resultY))
+
+val point_inv: p: point -> result: point -> Stack unit
+  (requires fun h -> live h p /\ live h result /\
+    eq_or_disjoint p result /\
+    as_nat h (gsub p (size 8) (size 4)) < prime /\ 
+    as_nat h (gsub p (size 0) (size 4)) < prime /\ 
+    as_nat h (gsub p (size 4) (size 4)) < prime)
+  (ensures fun h0 _ h1 -> modifies (loc result)  h0 h1 /\  
+    as_nat h1 (gsub result (size 8) (size 4)) < prime /\ 
+    as_nat h1 (gsub result (size 0) (size 4)) < prime /\ 
+    as_nat h1 (gsub result (size 4) (size 4)) < prime /\ (
+  
+    let x, y, z = gsub p (size 0) (size 4),  gsub p (size 4) (size 4), gsub p (size 8) (size 4) in 
+    let x3, y3, z3 = gsub result (size 0) (size 4), gsub result (size 4) (size 4), gsub result (size 8) (size 4) in 
+      
+    let xD, yD, zD = fromDomain_ (as_nat h0 x), fromDomain_ (as_nat h0 y), fromDomain_ (as_nat h0 z) in 
+    let x3D, y3D, z3D = fromDomain_ (as_nat h1 x3), fromDomain_ (as_nat h1 y3), fromDomain_ (as_nat h1 z3) in
+      
+    let xN, yN, zN = _point_inverse (xD, yD, zD) in 
+    x3D == xN /\ y3D == yN /\ z3D == zN)) 
 
