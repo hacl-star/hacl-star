@@ -35,14 +35,14 @@ val point_to_bin: p: point -> result: lbuffer uint8 (size 64) -> tempBuffer: lbu
   (requires fun h -> live h p /\ live h result /\ live h tempBuffer /\ disjoint tempBuffer p /\ disjoint p result /\
     point_x_as_nat h p < prime /\
     point_y_as_nat h p < prime /\
-    point_z_as_nat h p < prime 
-  )
-  (ensures fun h0 _ h1 -> True)
+    point_z_as_nat h p < prime)
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1)
 
 
 let point_to_bin p result tempBuffer = 
+    let h0 = ST.get() in 
   norm p p tempBuffer;
+    let h1 = ST.get() in 
   let isPointAtInfinityResult = isPointAtInfinityPrivate p in 
-  pointFromDomain p p;
   fromFormPoint p result; 
   isPointAtInfinityResult
