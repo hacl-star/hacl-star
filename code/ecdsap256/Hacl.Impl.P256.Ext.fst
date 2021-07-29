@@ -19,15 +19,10 @@ open Hacl.Impl.P256.Signature.Common
 
 
 open FStar.Mul
+open Spec.P256.MontgomeryMultiplication
 
 
 #set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0" 
-
-(** 
-The function takes as input a point as a buffer of uint64.
-It normalises the point and writes it down to a uint8 buffer.
-I think. 
-**)
 
 
 val point_to_bin: p: point -> result: lbuffer uint8 (size 64) -> tempBuffer: lbuffer uint64 (size 88) ->
@@ -36,38 +31,22 @@ val point_to_bin: p: point -> result: lbuffer uint8 (size 64) -> tempBuffer: lbu
     point_x_as_nat h p < prime /\
     point_y_as_nat h p < prime /\
     point_z_as_nat h p < prime)
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1)
+  (ensures fun h0 r h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ (
+    let pointD = fromDomainPoint (point_prime_to_coordinates (as_seq h0 p)) in 
+    let pointNormX, pointNormY, pointNormZ = _norm pointD in 
+  
+    let oX = gsub result (size 0) (size 32) in 
+    let oY = gsub result (size 32) (size 32) in 
+
+    as_seq h1 oX == Lib.ByteSequence.nat_to_bytes_be 32 pointNormX /\ 
+    as_seq h1 oY == Lib.ByteSequence.nat_to_bytes_be 32 pointNormY /\ (
+    if Spec.P256.isPointAtInfinity pointD then uint_v r = maxint U64 else uint_v r = 0)))
 
 
 let point_to_bin p result tempBuffer = 
-    let h0 = ST.get() in 
   norm p p tempBuffer;
-    let h1 = ST.get() in 
   let isPointAtInfinityResult = isPointAtInfinityPrivate p in 
   fromFormPoint p result; 
   isPointAtInfinityResult
 
 
-(** 
-The function takes as input a point as a buffer of uint64.
-It moves it out of domaine, normalises the point and writes it down to a uint8 buffer.
-Disclaimer: I am not sure whether the function is useful, but let it stay. 
-**)
-
-val point_to_bin_2: p: point -> result: lbuffer uint8 (size 64) -> tempBuffer: lbuffer uint64 (size 88) ->
-  Stack uint64 
-  (requires fun h -> live h p /\ live h result /\ live h tempBuffer /\ disjoint tempBuffer p /\ disjoint p result /\
-    point_x_as_nat h p < prime /\
-    point_y_as_nat h p < prime /\
-    point_z_as_nat h p < prime)
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1)
-
-
-let point_to_bin_2 p result tempBuffer = 
-    let h0 = ST.get() in 
-  norm p p tempBuffer;
-    let h1 = ST.get() in 
-  let isPointAtInfinityResult = isPointAtInfinityPrivate p in 
-  pointFromDomain p p;
-  fromFormPoint p result; 
-  isPointAtInfinityResult
