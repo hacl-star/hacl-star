@@ -364,11 +364,19 @@ let encrypt_expand_aes_gcm (i: vale_impl): encrypt_expand_st false (alg_of_vale_
   pop_frame ();
   Success
 
+(* Small trick: we write a partial match. Kremlin will extract it to a macro
+   if then else, where the else branch makes the program exit - this is safer
+   then always returning UnsupportedAlgorithm, because the user might not testg
+   the return value (which is always supposed to be Success *)
 let encrypt_expand_aes128_gcm_no_check : encrypt_expand_st false AES128_GCM =
-  encrypt_expand_aes_gcm Vale_AES128
+  fun k iv iv_len ad ad_len plain plain_len cipher tag ->
+  match EverCrypt.TargetConfig.hacl_can_compile_vale with
+  | true -> encrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len plain plain_len cipher tag
 
 let encrypt_expand_aes256_gcm_no_check : encrypt_expand_st false AES256_GCM =
-  encrypt_expand_aes_gcm Vale_AES256
+  fun k iv iv_len ad ad_len plain plain_len cipher tag ->
+  match EverCrypt.TargetConfig.hacl_can_compile_vale with
+  | true -> encrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len plain plain_len cipher tag
 
 let encrypt_expand_aes128_gcm : encrypt_expand_st true AES128_GCM =
   fun k iv iv_len ad ad_len plain plain_len cipher tag  ->
