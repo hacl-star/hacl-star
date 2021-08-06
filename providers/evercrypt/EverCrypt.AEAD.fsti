@@ -498,9 +498,22 @@ let decrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
       | _ -> False
       end)
 
-inline_for_extraction noextract
+/// See the comments for the encryption functions.
+
+[@@ Comment "WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support AESGCM, it will compile it to a function which makes the
+  program exit."]
 val decrypt_expand_aes128_gcm_no_check: decrypt_expand_st false AES128_GCM
-inline_for_extraction noextract
+
+[@@ Comment "WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support AESGCM, it will compile it to a function which makes the
+  program exit."]
 val decrypt_expand_aes256_gcm_no_check: decrypt_expand_st false AES256_GCM
 
 /// This function takes a key, expands it and performs decryption.

@@ -370,13 +370,19 @@ let encrypt_expand_aes_gcm (i: vale_impl): encrypt_expand_st false (alg_of_vale_
    the return value (which is always supposed to be Success *)
 let encrypt_expand_aes128_gcm_no_check : encrypt_expand_st false AES128_GCM =
   fun k iv iv_len ad ad_len plain plain_len cipher tag ->
-  match EverCrypt.TargetConfig.hacl_can_compile_vale with
-  | true -> encrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len plain plain_len cipher tag
+//  match EverCrypt.TargetConfig.hacl_can_compile_vale with
+//  | true -> encrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len plain plain_len cipher tag
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    encrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len plain plain_len cipher tag
+  else UnsupportedAlgorithm
 
 let encrypt_expand_aes256_gcm_no_check : encrypt_expand_st false AES256_GCM =
   fun k iv iv_len ad ad_len plain plain_len cipher tag ->
-  match EverCrypt.TargetConfig.hacl_can_compile_vale with
-  | true -> encrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len plain plain_len cipher tag
+//  match EverCrypt.TargetConfig.hacl_can_compile_vale with
+//  | true -> encrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len plain plain_len cipher tag
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    encrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len plain plain_len cipher tag
+  else UnsupportedAlgorithm
 
 let encrypt_expand_aes128_gcm : encrypt_expand_st true AES128_GCM =
   fun k iv iv_len ad ad_len plain plain_len cipher tag  ->
@@ -621,10 +627,20 @@ let decrypt_expand_aes_gcm (i: vale_impl): decrypt_expand_st false (alg_of_vale_
   r
 
 let decrypt_expand_aes128_gcm_no_check : decrypt_expand_st false AES128_GCM =
-  decrypt_expand_aes_gcm Vale_AES128
+  // TODO: make the implementation always fail in the else branch
+  fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    decrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len cipher cipher_len tag dst
+  else
+    UnsupportedAlgorithm
 
 let decrypt_expand_aes256_gcm_no_check : decrypt_expand_st false AES256_GCM =
-  decrypt_expand_aes_gcm Vale_AES256
+  // TODO: make the implementation always fail in the else branch
+  fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    decrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len cipher cipher_len tag dst
+  else
+    UnsupportedAlgorithm
 
 let decrypt_expand_aes128_gcm : decrypt_expand_st true AES128_GCM =
   fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
