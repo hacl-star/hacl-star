@@ -362,12 +362,14 @@ let encrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
 /// fallback C implementation. The two functions below guard the reference to the
 /// X64 AES-GCM code behind a test of `EverCrypt.TargetConfig.hacl_can_compile_vale`,
 /// which gets extracted to a preprocessor test, so that we can always compile them.
+/// In case the code is compiled on a system which doesn't support Vale, the functions
+/// are compiled in such a way that they make the program exit cleanly.
 
 [@@ Comment "WARNING: this function doesn't perform any dynamic
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
   for cross-compilation: if you compile it on a system which doesn't
-  support AESGCM, it will compile it to a function which makes the
+  support Vale, it will compile it to a function which makes the
   program exit."]
 val encrypt_expand_aes128_gcm_no_check: encrypt_expand_st false AES128_GCM
 
@@ -375,7 +377,7 @@ val encrypt_expand_aes128_gcm_no_check: encrypt_expand_st false AES128_GCM
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
   for cross-compilation: if you compile it on a system which doesn't
-  support AESGCM, it will compile it to a function which makes the
+  support Vale, it will compile it to a function which makes the
   program exit."]
 val encrypt_expand_aes256_gcm_no_check: encrypt_expand_st false AES256_GCM
 
@@ -504,7 +506,7 @@ let decrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
   for cross-compilation: if you compile it on a system which doesn't
-  support AESGCM, it will compile it to a function which makes the
+  support Vale, it will compile it to a function which makes the
   program exit."]
 val decrypt_expand_aes128_gcm_no_check: decrypt_expand_st false AES128_GCM
 
@@ -512,7 +514,7 @@ val decrypt_expand_aes128_gcm_no_check: decrypt_expand_st false AES128_GCM
   hardware check. You MUST make sure your hardware supports the
   implementation of AESGCM. Besides, this function was not designed
   for cross-compilation: if you compile it on a system which doesn't
-  support AESGCM, it will compile it to a function which makes the
+  support Vale, it will compile it to a function which makes the
   program exit."]
 val decrypt_expand_aes256_gcm_no_check: decrypt_expand_st false AES256_GCM
 
