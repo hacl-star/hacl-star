@@ -365,10 +365,18 @@ let encrypt_expand_aes_gcm (i: vale_impl): encrypt_expand_st false (alg_of_vale_
   Success
 
 let encrypt_expand_aes128_gcm_no_check : encrypt_expand_st false AES128_GCM =
-  encrypt_expand_aes_gcm Vale_AES128
+  fun k iv iv_len ad ad_len plain plain_len cipher tag ->
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    encrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len plain plain_len cipher tag
+  else
+    LowStar.Failure.failwith "EverCrypt was compiled on a system which doesn't support Vale"
 
 let encrypt_expand_aes256_gcm_no_check : encrypt_expand_st false AES256_GCM =
-  encrypt_expand_aes_gcm Vale_AES256
+  fun k iv iv_len ad ad_len plain plain_len cipher tag ->
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    encrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len plain plain_len cipher tag
+  else
+    LowStar.Failure.failwith "EverCrypt was compiled on a system which doesn't support Vale"
 
 let encrypt_expand_aes128_gcm : encrypt_expand_st true AES128_GCM =
   fun k iv iv_len ad ad_len plain plain_len cipher tag  ->
@@ -613,10 +621,18 @@ let decrypt_expand_aes_gcm (i: vale_impl): decrypt_expand_st false (alg_of_vale_
   r
 
 let decrypt_expand_aes128_gcm_no_check : decrypt_expand_st false AES128_GCM =
-  decrypt_expand_aes_gcm Vale_AES128
+  fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    decrypt_expand_aes_gcm Vale_AES128 k iv iv_len ad ad_len cipher cipher_len tag dst
+  else
+    LowStar.Failure.failwith "EverCrypt was compiled on a system which doesn't support Vale"
 
 let decrypt_expand_aes256_gcm_no_check : decrypt_expand_st false AES256_GCM =
-  decrypt_expand_aes_gcm Vale_AES256
+  fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
+    decrypt_expand_aes_gcm Vale_AES256 k iv iv_len ad ad_len cipher cipher_len tag dst
+  else
+    LowStar.Failure.failwith "EverCrypt was compiled on a system which doesn't support Vale"
 
 let decrypt_expand_aes128_gcm : decrypt_expand_st true AES128_GCM =
   fun k iv iv_len ad ad_len cipher cipher_len tag dst ->
