@@ -359,15 +359,26 @@ let encrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
           False)
 
 /// It's a little difficult to deal with AES-GCM cleanly because we're missing a
-/// fallback C implementation. The two functions below cannot appear in the code
-/// of EverCrypt, as they don't perform a runtime check and as such,
-/// unconditionally contain a link-time reference to the X64 AES-GCM code (which
-/// breaks the build on ARM. So, they're marked as inline_for_extraction,
-/// meaning clients can still call them, but then it's their problem to deal
-/// with dangling symbols on non-X64 targets.
-inline_for_extraction noextract
+/// fallback C implementation. The two functions below guard the reference to the
+/// X64 AES-GCM code behind a test of `EverCrypt.TargetConfig.hacl_can_compile_vale`,
+/// which gets extracted to a preprocessor test, so that we can always compile them.
+/// In case the code is compiled on a system which doesn't support Vale, the functions
+/// are compiled in such a way that they make the program exit cleanly.
+
+[@@ Comment "WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit."]
 val encrypt_expand_aes128_gcm_no_check: encrypt_expand_st false AES128_GCM
-inline_for_extraction noextract
+
+[@@ Comment "WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit."]
 val encrypt_expand_aes256_gcm_no_check: encrypt_expand_st false AES256_GCM
 
 /// Those functions take a key, expand it then perform encryption. They do not
@@ -489,9 +500,22 @@ let decrypt_expand_st (does_runtime_check: bool) (a: supported_alg) =
       | _ -> False
       end)
 
-inline_for_extraction noextract
+/// See the comments for the encryption functions.
+
+[@@ Comment "WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit."]
 val decrypt_expand_aes128_gcm_no_check: decrypt_expand_st false AES128_GCM
-inline_for_extraction noextract
+
+[@@ Comment "WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit."]
 val decrypt_expand_aes256_gcm_no_check: decrypt_expand_st false AES256_GCM
 
 /// This function takes a key, expands it and performs decryption.
