@@ -17,7 +17,6 @@ open Spec.P256.MontgomeryMultiplication
 
 open FStar.Mul 
 
-
 #set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 val copyH: a: felem -> b: felem -> Stack unit 

@@ -359,7 +359,7 @@ let toFormPoint i o =
 
   toForm pX pU64X;
   toForm pY pU64Y;
-  Hacl.Impl.P256.Signature.Common.bufferToJacUpdate o
+  bufferToJacUpdate o
 
 
 let fromForm i o = 
@@ -382,4 +382,3 @@ let fromFormPoint i o =
 
   fromForm iX oX;
   fromForm iY oY
-

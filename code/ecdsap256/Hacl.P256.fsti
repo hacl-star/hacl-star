@@ -477,17 +477,20 @@ val verifyQPrivate:
     let pkJ = Spec.P256.toJacobianCoordinates (publicKeyX, publicKeyY) in 
     r == not (Spec.ECDSA.verifyQValidCurvePointSpec pkJ)))
 
+(*)
+open Hacl.Spec.P256.Felem
+
 
 val point_inv: p: point -> result: point -> Stack unit
   (requires fun h -> live h p /\ live h result /\
     eq_or_disjoint p result /\
-    as_nat h (gsub p (size 8) (size 4)) < prime /\ 
-    as_nat h (gsub p (size 0) (size 4)) < prime /\ 
-    as_nat h (gsub p (size 4) (size 4)) < prime)
+    as_nat h (gsub p (size 8) (size 4)) < prime256 /\ 
+    as_nat h (gsub p (size 0) (size 4)) < prime256 /\ 
+    as_nat h (gsub p (size 4) (size 4)) < prime256)
   (ensures fun h0 _ h1 -> modifies (loc result)  h0 h1 /\  
-    as_nat h1 (gsub result (size 8) (size 4)) < prime /\ 
-    as_nat h1 (gsub result (size 0) (size 4)) < prime /\ 
-    as_nat h1 (gsub result (size 4) (size 4)) < prime /\ (
+    as_nat h1 (gsub result (size 8) (size 4)) < prime256 /\ 
+    as_nat h1 (gsub result (size 0) (size 4)) < prime256 /\ 
+    as_nat h1 (gsub result (size 4) (size 4)) < prime256 /\ (
   
     let x, y, z = gsub p (size 0) (size 4),  gsub p (size 4) (size 4), gsub p (size 8) (size 4) in 
     let x3, y3, z3 = gsub result (size 0) (size 4), gsub result (size 4) (size 4), gsub result (size 8) (size 4) in 

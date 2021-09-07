@@ -15,7 +15,9 @@ open Spec.P256.MontgomeryMultiplication
 open Spec.P256.MontgomeryMultiplication.PointAdd
 open FStar.Mul
 
-open Hacl.Impl.P256.Core
+open Hacl.Impl.P256.Signature.Common
+(* 
+open Hacl.Impl.P256.Core *)
 open Hacl.Impl.P256.PointAdd
 open Hacl.Impl.P256.LowLevel
 

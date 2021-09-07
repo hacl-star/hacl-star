@@ -15,8 +15,8 @@ open Hacl.Spec.P256.Felem
 open Spec.P256
 
 open Hacl.Impl.P256.Core
-open Hacl.Impl.P256.Signature.Common
-
+(* 
+open Hacl.Impl.P256.Signature.Common? *)
 
 open FStar.Mul
 open Spec.P256.MontgomeryMultiplication
@@ -24,7 +24,7 @@ open Spec.P256.MontgomeryMultiplication
 
 #set-options "--z3rlimit 150 --max_fuel 0 --max_ifuel 0" 
 
-
+(* 
 val point_to_bin: p: point -> result: lbuffer uint8 (size 64) ->
   Stack uint64 
   (requires fun h -> live h p /\ live h result /\ disjoint p result /\
@@ -47,5 +47,5 @@ let point_to_bin p result =
   isPointAtInfinityResult
 
 
-
+ *)
 
