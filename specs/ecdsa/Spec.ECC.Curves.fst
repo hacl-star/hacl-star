@@ -75,7 +75,6 @@ let modp_inv2_prime (x: int) (p: nat {p > 3}) : Tot (elem p) = modp_inv_prime p 
 type curve = 
   |P256
   |P384
-  |Default
 
 
 let invert_state_s (a: curve): Lemma
@@ -101,11 +100,9 @@ let prime384: (a: pos {a > 3 && a < pow2 384}) =
 
 inline_for_extraction
 let getPrime curve : prime: pos {prime > 3 /\ FStar.Math.Euclid.is_prime prime /\ prime > pow2 64} = 
-  admit();
   match curve with 
-  |P256 -> prime256
-  |P384 -> prime384
-  |_ -> prime256
+  |P256 -> admit(); prime256
+  |P384 -> admit(); prime384
 
 
 (* the length of each coordinate of the point as uint64 *)
@@ -120,7 +117,7 @@ let getCoordinateLenU64 curve =
 
 
 inline_for_extraction noextract
-val getPointLenU64: c: curve -> Tot (a: size_t)
+val getPointLenU64: c: curve -> Tot size_t
 
 let getPointLenU64 curve = 
   getCoordinateLenU64 curve *. 3ul 
@@ -162,6 +159,7 @@ let getPowerU curve : (a: UInt32.t {
   |P256 ->  assert_norm (pow2 256 < 2 * getPrime P256); 256ul
   |P384 ->  admit(); 384ul
   |_ -> admit(); 256ul
+
 
 let getPower curve : a: nat {
   getPrime curve < pow2 a /\ 

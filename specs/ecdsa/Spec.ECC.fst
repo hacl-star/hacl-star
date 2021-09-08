@@ -79,7 +79,6 @@ let _point_double #curve (p: point_nat_prime) : point_nat_prime #curve =
   match curve with 
   |P256 -> _point_double_nist p 
   |P384 -> _point_double_nist p
-  |Default -> _point_double_general p
 
 
 
@@ -356,6 +355,7 @@ let rec lemma_point_add_minus_plus_same_value #curve p0 pk qk i =
     curve_point_at_infinity_property #curve p0;
     curve_commutativity_lemma pointAtInfinity p0;
 
+    admit(); 
     if ((pk - i - 1) % o + 1) < o then 
       begin
 	small_mod (((pk - i - 1) % o + 1)) o;
