@@ -704,7 +704,7 @@ val point_add_p384: p: point P384 -> q: point P384 -> result: point P384
 
 let point_add_p384 p q result tempBuffer = point_add_ #P384 p q result tempBuffer
 
-[@CInline]
+(* [@CInline]
 val point_add_generic: p: point Default -> q: point Default -> result: point Default
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 Default) -> 
   Stack unit (requires fun h -> 
@@ -717,9 +717,9 @@ val point_add_generic: p: point Default -> q: point Default -> result: point Def
 
 let point_add_generic p q result tempBuffer = point_add_ #Default p q result tempBuffer
 
-
+ *)
 let point_add #c p q result tempBuffer = 
   match c with 
   |P256 -> point_add_p256 p q result tempBuffer
   |P384 -> point_add_p384 p q result tempBuffer
-  |Default -> point_add_generic p q result tempBuffer
+  (* |Default -> point_add_generic p q result tempBuffer *)

@@ -453,14 +453,14 @@ let montgomery_ladderP384I = montgomery_ladder_ #P384 #IMMUT
 [@CInline]
 let montgomery_ladderP384C = montgomery_ladder_ #P384 #CONST
 
-[@CInline]
+(* [@CInline]
 let montgomery_ladderGenL = montgomery_ladder_ #Default #MUT
 [@CInline]
 let montgomery_ladderGenI = montgomery_ladder_ #Default #IMMUT
 [@CInline]
 let montgomery_ladderGenC = montgomery_ladder_ #Default #CONST
 
-
+ *)
 
 inline_for_extraction noextract
 val montgomery_ladder: #c: curve -> #buf_type: buftype -> p: point c -> q: point c ->
@@ -496,9 +496,10 @@ let montgomery_ladder #c #b p q scalar tempBuffer =
       |MUT -> montgomery_ladderP384L p q scalar tempBuffer
       |IMMUT -> montgomery_ladderP384I p q scalar tempBuffer
       |CONST -> montgomery_ladderP384C p q scalar tempBuffer end
-    |Default -> begin
+(*     |Default -> begin
       match b with 
       |MUT -> montgomery_ladderGenL p q scalar tempBuffer
       |IMMUT -> montgomery_ladderGenI p q scalar tempBuffer
       |CONST -> montgomery_ladderGenC p q scalar tempBuffer end
   
+ *)

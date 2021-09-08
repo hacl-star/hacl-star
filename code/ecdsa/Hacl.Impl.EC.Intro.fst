@@ -167,9 +167,9 @@ let toUint64ChangeEndian_ #c i o =
 [@CInline]
 let toUint64ChangeEndian_p256 = toUint64ChangeEndian_ #P256
 [@CInline]
-let toUint64ChangeEndian_p384 = toUint64ChangeEndian_ #P384
+let toUint64ChangeEndian_p384 = toUint64ChangeEndian_ #P384(* 
 [@CInline]
-let toUint64ChangeEndian_generic = toUint64ChangeEndian_ #Default
+let toUint64ChangeEndian_generic = toUint64ChangeEndian_ #Default *)
 
 
 inline_for_extraction noextract
@@ -183,4 +183,4 @@ let toUint64ChangeEndian #c i o =
   match c with
   | P256 -> toUint64ChangeEndian_p256 i o
   | P384 -> toUint64ChangeEndian_p384 i o
-  | Default -> toUint64ChangeEndian_generic i o   
+  (* | Default -> toUint64ChangeEndian_generic i o  /  *)

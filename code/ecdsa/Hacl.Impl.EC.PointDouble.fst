@@ -45,7 +45,7 @@ val point_double_p384: p: point P384 -> result: point P384
 
 let point_double_p384 p result tempBuffer = Hacl.Impl.EC.NIST.PointDouble.point_double #P384 p result tempBuffer
 
-[@CInline]
+(* [@CInline]
 val point_double_generic: p: point Default -> result: point Default 
 -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 Default *! 17ul) 
   -> Stack unit
@@ -56,7 +56,7 @@ val point_double_generic: p: point Default -> result: point Default
     fromDomainPoint #Default #DH (point_as_nat Default h1 result) == _point_double #Default (fromDomainPoint #Default #DH (point_as_nat Default h0 p))))
 
 let point_double_generic p result tempBuffer = Hacl.Impl.EC.General.PointDouble.point_double #Default p result tempBuffer
-
+ *)
 inline_for_extraction noextract
 val point_double: #c: curve -> p: point c -> result: point c 
   -> tempBuffer: lbuffer uint64  (getCoordinateLenU64 c *! 17ul) 
@@ -72,5 +72,5 @@ let point_double #c p result tempBuffer =
   match c with 
   |P256 -> point_double_p256 p result tempBuffer
   |P384 -> point_double_p384 p result tempBuffer
-  |Default -> point_double_generic p result tempBuffer
+  (* |Default -> point_double_generic p result tempBuffer *)
 

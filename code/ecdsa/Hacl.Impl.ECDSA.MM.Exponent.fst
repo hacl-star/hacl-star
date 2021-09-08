@@ -44,15 +44,16 @@ let montgomery_ladder_exponent_ #c a r =
 let montgomery_ladder_exponent_dsa_p256 = montgomery_ladder_exponent_ #P256
 [@CInline]
 let montgomery_ladder_exponent_dsa_p384 = montgomery_ladder_exponent_ #P384
-[@CInline]
+
+(* [@CInline]
 let montgomery_ladder_exponent_dsa_generic = montgomery_ladder_exponent_ #Default
 
-
+ *)
 let montgomery_ladder_exponent #c a r = 
   match c with 
   |P256 -> montgomery_ladder_exponent_dsa_p256 a r
   |P384 -> montgomery_ladder_exponent_dsa_p384 a r 
-  |Default -> montgomery_ladder_exponent_dsa_generic a r
+  (* |Default -> montgomery_ladder_exponent_dsa_generic a r *)
 
 
 

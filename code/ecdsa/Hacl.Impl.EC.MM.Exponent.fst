@@ -199,16 +199,16 @@ let montgomery_ladder_power_p256_dh a scalar result = montgomery_ladder_power_ #
 
 [@CInline]
 let montgomery_ladder_power_p384_dh a scalar result = montgomery_ladder_power_ #P384 #DH a scalar result
-[@CInline]
+(* [@CInline]
 let montgomery_ladder_power_generic_dh a scalar result = montgomery_ladder_power_ #Default #DH a scalar result
-
+ *)
 
 let montgomery_ladder_power_dh #c a scalar result = 
   match c with 
   |P256 -> montgomery_ladder_power_p256_dh a scalar result
   |P384 -> montgomery_ladder_power_p384_dh a scalar result
-  |Default -> montgomery_ladder_power_generic_dh a scalar result
-
+(*   |Default -> montgomery_ladder_power_generic_dh a scalar result
+ *)
 
 val montgomery_ladder_power_p256_dsa: a: felem P256
   -> scalar: glbuffer uint8 (getCoordinateLenU P256) -> result: felem P256 -> 
@@ -230,12 +230,12 @@ let montgomery_ladder_power_p256_dsa a scalar result = montgomery_ladder_power_ 
 
 [@CInline]
 let montgomery_ladder_power_p384_dsa a scalar result = montgomery_ladder_power_ #P384 #DSA a scalar result
-[@CInline]
+(* [@CInline]
 let montgomery_ladder_power_generic_dsa a scalar result = montgomery_ladder_power_ #Default #DSA a scalar result
 
-
+ *)
 let montgomery_ladder_power_dsa #c a scalar result = 
   match c with   
   |P256 -> montgomery_ladder_power_p256_dsa a scalar result
   |P384 -> montgomery_ladder_power_p384_dsa a scalar result
-  |Default -> montgomery_ladder_power_generic_dsa a scalar result
+  (* |Default -> montgomery_ladder_power_generic_dsa a scalar result *)

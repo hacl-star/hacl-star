@@ -318,7 +318,7 @@ val montgomery_multiplication_buffer_dh_p384: a: felem P384 -> b: felem P384 -> 
 
 let montgomery_multiplication_buffer_dh_p384 a b result = 
     montgomery_multiplication_buffer #P384 DH a b result
-
+(* 
 [@CInline]
 val montgomery_multiplication_buffer_dh_generic: a: felem Default -> b: felem Default -> result: felem Default ->  
   Stack unit
@@ -333,13 +333,13 @@ val montgomery_multiplication_buffer_dh_generic: a: felem Default -> b: felem De
 let montgomery_multiplication_buffer_dh_generic a b result = 
     montgomery_multiplication_buffer #Default DH a b result
 
-
+ *)
 
 let montgomery_multiplication_buffer_dh #c a b result = 
   match c with 
   |P256 -> montgomery_multiplication_buffer_dh_p256 a b result
   |P384 -> montgomery_multiplication_buffer_dh_p384 a b result
-  |Default -> montgomery_multiplication_buffer_dh_generic a b result
+  (* |Default -> montgomery_multiplication_buffer_dh_generic a b result *)
 
 [@CInline]
 val montgomery_multiplication_buffer_dsa_p256: a: felem P256 -> b: felem P256 -> result: felem P256 ->  
@@ -369,7 +369,7 @@ val montgomery_multiplication_buffer_dsa_p384: a: felem P384 -> b: felem P384 ->
 let montgomery_multiplication_buffer_dsa_p384 a b result  = 
   montgomery_multiplication_buffer #P384 DSA a b result
 
-[@CInline]
+(* [@CInline]
 val montgomery_multiplication_buffer_dsa_generic: a: felem Default -> b: felem Default -> result: felem Default ->  
   Stack unit
   (requires (fun h -> live h a /\ live h b /\ live h result /\ as_nat Default h a < getModePrime DSA Default /\  eq_or_disjoint a b /\
@@ -384,12 +384,12 @@ let montgomery_multiplication_buffer_dsa_generic a b result  =
   montgomery_multiplication_buffer #Default DSA a b result
 
 
-
+ *)
 let montgomery_multiplication_buffer_dsa #c a b result = 
   match c with 
   |P256 -> montgomery_multiplication_buffer_dsa_p256 a b result
   |P384 -> montgomery_multiplication_buffer_dsa_p384 a b result
-  |Default -> montgomery_multiplication_buffer_dsa_generic a b result
+  (* |Default -> montgomery_multiplication_buffer_dsa_generic a b result *)
 
 
 
@@ -411,17 +411,17 @@ let montgomery_square_buffer_dh_p256 a result = montgomery_square_buffer #P256 D
 [@CInline]
 let montgomery_square_buffer_dh_p384 a result = montgomery_square_buffer #P384 DH a result
 
-[@CInline]
+(* [@CInline]
 let montgomery_square_buffer_dh_generic a result = montgomery_square_buffer #Default DH a result
-
+ *)
 
 let montgomery_square_buffer_dh #c a result = 
   match c with 
   |P256 -> montgomery_square_buffer_dh_p256 a result
   |P384 -> montgomery_square_buffer_dh_p384 a result
-  |Default -> montgomery_square_buffer_dh_generic a result
+(*   |Default -> montgomery_square_buffer_dh_generic a result
 
-
+ *)
 let montgomery_square_buffer_dsa #c a result = montgomery_square_buffer #c DSA a result
 
 

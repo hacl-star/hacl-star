@@ -118,15 +118,15 @@ let reduction_prime_2prime_order_p256 = reduction_prime_2prime_order_ #P256
 [@CInline]
 let reduction_prime_2prime_order_p384 = reduction_prime_2prime_order_ #P384
 
-[@CInline]
-let reduction_prime_2prime_order_generic = reduction_prime_2prime_order_ #Default
+(* [@CInline]
+let reduction_prime_2prime_order_generic = reduction_prime_2prime_order_ #Default *)
 
 
 let reduction_prime_2prime_order #c x result = 
   match c with 
   |P256 -> reduction_prime_2prime_order_p256 x result
   |P384 -> reduction_prime_2prime_order_p384 x result
-  |Default -> reduction_prime_2prime_order_generic x result
+  (* |Default -> reduction_prime_2prime_order_generic x result *)
 
 
 inline_for_extraction noextract
@@ -151,14 +151,14 @@ let felem_add_ecdsa_ #c arg1 arg2 out =
 let felem_add_ecdsa_P256 = felem_add_ecdsa_ #P256
 [@CInline]
 let felem_add_ecdsa_P384 = felem_add_ecdsa_ #P384
-[@CInline]
+(* [@CInline]
 let felem_add_ecdsa_generic = felem_add_ecdsa_ #Default
-
+ *)
 let felem_add_ecdsa #c a b o = 
   match c with
   | P256 -> felem_add_ecdsa_P256 a b o
   | P384 -> felem_add_ecdsa_P384 a b o
-  | Default -> felem_add_ecdsa_generic a b o 
+  (* | Default -> felem_add_ecdsa_generic a b o  *)
 
 
 let upload_one_montg_form #c b = 

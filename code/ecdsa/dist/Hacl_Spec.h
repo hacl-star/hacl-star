@@ -45,7 +45,6 @@ typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
 #define Spec_ECC_Curves_P256 0
 #define Spec_ECC_Curves_P384 1
-#define Spec_ECC_Curves_Default 2
 
 typedef uint8_t Spec_ECC_Curves_curve;
 

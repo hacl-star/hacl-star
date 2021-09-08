@@ -26,7 +26,7 @@ open Hacl.Impl.EC.MontgomeryMultiplication
 
 open Hacl.Impl.P256.Exponent
 open Hacl.Impl.P384.Exponent
-open Hacl.Impl.P521.Exponent
+(* open Hacl.Impl.P521.Exponent *)
 
 open Hacl.Impl.EC.Setup
 
@@ -34,6 +34,7 @@ open Hacl.Impl.EC.MM.Exponent
 open Lib.ByteSequence 
 
 #set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
+
 
 val lemma_list_nat_from_bytes: a: list uint8 { List.Tot.length a <= max_size_t} -> 
   i: nat {i > 0 /\ i <= List.Tot.length a} ->

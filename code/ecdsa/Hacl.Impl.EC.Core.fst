@@ -49,14 +49,14 @@ let toDomain_t #c value result =
 let toDomain_p256 = toDomain_t #P256 
 [@CInline]
 let toDomain_p384 = toDomain_t #P384
-[@CInline]
-let toDomain_generic = toDomain_t #Default
+(* [@CInline]
+let toDomain_generic = toDomain_t #Default *)
 
 let toDomain #c value result = 
   match c with 
   |P256 -> toDomain_p256 value result
   |P384 -> toDomain_p384 value result
-  |Default -> toDomain_generic value result
+(*   |Default -> toDomain_generic value result *)
 
 
 inline_for_extraction
@@ -73,14 +73,14 @@ let fromDomain_t f result =
 let fromDomain_p256 = fromDomain_t #P256 
 [@CInline]
 let fromDomain_p384 = fromDomain_t #P384
-[@CInline]
-let fromDomain_generic = fromDomain_t #Default
+(* [@CInline]
+let fromDomain_generic = fromDomain_t #Default *)
 
 let fromDomain #c value result = 
   match c with 
   |P256 -> fromDomain_p256 value result
   |P384 -> fromDomain_p384 value result
-  |Default -> fromDomain_generic value result
+  (* |Default -> fromDomain_generic value result *)
 
 
 
@@ -281,14 +281,14 @@ let norm_ #c p resultPoint tempBuffer =
 let norm_p256 = norm_ #P256 
 [@CInline]
 let norm_p384 = norm_ #P384 
-[@CInline]
-let norm_generic = norm_ #Default 
+(* [@CInline]
+let norm_generic = norm_ #Default  *)
 
 let norm #c p resultPoint = 
   match c with 
   |P256 -> norm_p256 p resultPoint
   |P384 -> norm_p384 p resultPoint
-  |Default -> norm_generic p resultPoint
+  (* |Default -> norm_generic p resultPoint *)
 
 
 let normX #c p result tempBuffer = 
@@ -508,7 +508,7 @@ val scalarMultiplicationWithoutNorm_p384: p: point P384 -> result: point P384
 [@CInline]
 let scalarMultiplicationWithoutNorm_p384 = scalarMultiplicationWithoutNorm_ #P384
 
-val scalarMultiplicationWithoutNorm_generic: p: point Default -> result: point Default
+(* val scalarMultiplicationWithoutNorm_generic: p: point Default -> result: point Default
   -> scalar: scalar_t #MUT #Default
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 Default) ->
   Stack unit
@@ -523,13 +523,13 @@ val scalarMultiplicationWithoutNorm_generic: p: point Default -> result: point D
 
 [@CInline]
 let scalarMultiplicationWithoutNorm_generic = scalarMultiplicationWithoutNorm_ #Default
-
+ *)
 
 let scalarMultiplicationWithoutNorm #c = 
   match c with 
   |P256 -> scalarMultiplicationWithoutNorm_p256
   |P384 -> scalarMultiplicationWithoutNorm_p384
-  |Default -> scalarMultiplicationWithoutNorm_generic
+  (* |Default -> scalarMultiplicationWithoutNorm_generic *)
 
 
 inline_for_extraction noextract
@@ -633,7 +633,7 @@ val secretToPublicWithoutNorm_p384: result: point P384
 
 
 let secretToPublicWithoutNorm_p384 = secretToPublicWithoutNorm_ #P384
-
+(* 
 [@CInline]
 val secretToPublicWithoutNorm_generic: result: point Default
   -> scalar: scalar_t #MUT #Default
@@ -646,11 +646,11 @@ val secretToPublicWithoutNorm_generic: result: point Default
     p1 == rN))  
 
 
-let secretToPublicWithoutNorm_generic = secretToPublicWithoutNorm_ #Default
+let secretToPublicWithoutNorm_generic = secretToPublicWithoutNorm_ #Default *)
 
 
 let secretToPublicWithoutNorm #c = 
   match c with 
   |P256 -> secretToPublicWithoutNorm_p256
   |P384 -> secretToPublicWithoutNorm_p384
-  |Default -> secretToPublicWithoutNorm_generic
+  (* |Default -> secretToPublicWithoutNorm_generic *)

@@ -92,23 +92,28 @@ let copy_conditional_ #c out x mask =
 let copy_conditional_p256_l = copy_conditional_ #P256 #MUT
 [@CInline]
 let copy_conditional_p384_l = copy_conditional_ #P384 #MUT
+(*
 [@CInline]
-let copy_conditional_generic_l = copy_conditional_ #Default #MUT
+let copy_conditional_generic_l = copy_conditional_ #Default #MUT *)
 
 [@CInline]
 let copy_conditional_p256_i = copy_conditional_ #P256 #IMMUT
 [@CInline]
 let copy_conditional_p384_i = copy_conditional_ #P384 #IMMUT
+(*
 [@CInline]
 let copy_conditional_generic_i = copy_conditional_ #Default #IMMUT
+*)
+
 
 [@CInline]
 let copy_conditional_p256_c = copy_conditional_ #P256 #CONST
 [@CInline]
 let copy_conditional_p384_c = copy_conditional_ #P384 #CONST
+(* 
 [@CInline]
 let copy_conditional_generic_c = copy_conditional_ #Default #CONST
-
+*)
 
 inline_for_extraction noextract
 val copy_conditional: #c: curve -> #buf_type: buftype
@@ -131,11 +136,11 @@ let copy_conditional #c #b out x mask =
 	|MUT -> copy_conditional_p384_l out x mask
 	|IMMUT -> copy_conditional_p384_i out x mask
 	|CONST -> copy_conditional_p384_c out x mask end
-    |Default -> begin
+    (*|Default -> begin
       match b with 
 	|MUT -> copy_conditional_generic_l out x mask
 	|IMMUT -> copy_conditional_generic_i out x mask
-	|CONST -> copy_conditional_generic_c out x mask end
+	|CONST -> copy_conditional_generic_c out x mask end *)
 
 
 inline_for_extraction noextract
@@ -186,8 +191,11 @@ let cmovznz4_ #c cin x y r =
 let cmovznz4_p256 = cmovznz4_ #P256
 [@CInline]
 let cmovznz4_p384 = cmovznz4_ #P384
+(*
 [@CInline]
 let cmovznz4_generic = cmovznz4_ #Default
+
+*)
 
 inline_for_extraction noextract
 val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
@@ -200,8 +208,8 @@ val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: fe
 let cmovznz4 #c cin x y result = 
   match c with 
   |P256 -> cmovznz4_p256 cin x y result
-  |P384 -> cmovznz4_p384 cin x y result
-  |Default -> cmovznz4_generic cin x y result
+  |P384 -> cmovznz4_p384 cin x y result (*
+  |Default -> cmovznz4_generic cin x y result *)
 
 
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
@@ -338,8 +346,11 @@ let cmp_felem_felem_bool_ #c a b =
 let cmp_felem_felem_bool_p256 = cmp_felem_felem_bool_ #P256
 [@CInline]
 let cmp_felem_felem_bool_p384 = cmp_felem_felem_bool_ #P384
+
+(*
 [@CInline]
 let cmp_felem_felem_bool_generic = cmp_felem_felem_bool_ #Default
+*)
 
 
 inline_for_extraction noextract
@@ -352,7 +363,7 @@ let cmp_felem_felem_bool #c a b =
   match c with 
   |P256 -> cmp_felem_felem_bool_p256 a b 
   |P384 -> cmp_felem_felem_bool_p384 a b 
-  |Default -> cmp_felem_felem_bool_generic a b
+  (* |Default -> cmp_felem_felem_bool_generic a b *)
 
 
 inline_for_extraction noextract

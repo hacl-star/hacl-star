@@ -57,18 +57,6 @@ static inline void copy_conditional_p384_l(uint64_t *out, uint64_t *x, uint64_t 
   }
 }
 
-static inline void copy_conditional_generic_l(uint64_t *out, uint64_t *x, uint64_t mask)
-{
-  uint32_t len = (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint64_t x_i = x[i];
-    uint64_t out_i = out[i];
-    uint64_t r_i = out_i ^ (mask & (out_i ^ x_i));
-    out[i] = r_i;
-  }
-}
-
 static inline void copy_conditional_p256_c(uint64_t *out, const uint64_t *x, uint64_t mask)
 {
   uint32_t len = (uint32_t)4U;
@@ -175,27 +163,6 @@ bn_add_eq_len_u64(uint32_t aLen, uint64_t *a, uint64_t *b, uint64_t *res)
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
   }
   return c;
-}
-
-static inline uint64_t mod_inv_uint64(uint64_t n0)
-{
-  uint64_t alpha = (uint64_t)9223372036854775808U;
-  uint64_t beta = n0;
-  uint64_t ub = (uint64_t)0U;
-  uint64_t vb = (uint64_t)0U;
-  ub = (uint64_t)1U;
-  vb = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
-  {
-    uint64_t us = ub;
-    uint64_t vs = vb;
-    uint64_t u_is_odd = (uint64_t)0U - (us & (uint64_t)1U);
-    uint64_t beta_if_u_is_odd = beta & u_is_odd;
-    ub = ((us ^ beta_if_u_is_odd) >> (uint32_t)1U) + (us & beta_if_u_is_odd);
-    uint64_t alpha_if_u_is_odd = alpha & u_is_odd;
-    vb = (vs >> (uint32_t)1U) + alpha_if_u_is_odd;
-  }
-  return vb;
 }
 
 static inline void felem_add_p256(uint64_t *a, uint64_t *b, uint64_t *out)
@@ -782,6 +749,27 @@ static inline void felem_add_ecdsa_P256(uint64_t *arg1, uint64_t *arg2, uint64_t
       (uint64_t)0U,
       &tempBufferForSubborrow);
   cmovznz4_p256(carry, tempBuffer, out, out);
+}
+
+static inline uint64_t mod_inv_uint64(uint64_t n0)
+{
+  uint64_t alpha = (uint64_t)9223372036854775808U;
+  uint64_t beta = n0;
+  uint64_t ub = (uint64_t)0U;
+  uint64_t vb = (uint64_t)0U;
+  ub = (uint64_t)1U;
+  vb = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
+  {
+    uint64_t us = ub;
+    uint64_t vs = vb;
+    uint64_t u_is_odd = (uint64_t)0U - (us & (uint64_t)1U);
+    uint64_t beta_if_u_is_odd = beta & u_is_odd;
+    ub = ((us ^ beta_if_u_is_odd) >> (uint32_t)1U) + (us & beta_if_u_is_odd);
+    uint64_t alpha_if_u_is_odd = alpha & u_is_odd;
+    vb = (vs >> (uint32_t)1U) + alpha_if_u_is_odd;
+  }
+  return vb;
 }
 
 static inline void
@@ -2763,11 +2751,6 @@ copy_point_conditional(
         copy_conditional_p384_l(x3_out, p_x, mask);
         break;
       }
-    case Spec_ECC_Curves_Default:
-      {
-        copy_conditional_generic_l(x3_out, p_x, mask);
-        break;
-      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2786,11 +2769,6 @@ copy_point_conditional(
         copy_conditional_p384_l(y3_out, p_y, mask);
         break;
       }
-    case Spec_ECC_Curves_Default:
-      {
-        copy_conditional_generic_l(y3_out, p_y, mask);
-        break;
-      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2807,11 +2785,6 @@ copy_point_conditional(
     case Spec_ECC_Curves_P384:
       {
         copy_conditional_p384_l(z3_out, temp, mask);
-        break;
-      }
-    case Spec_ECC_Curves_Default:
-      {
-        copy_conditional_generic_l(z3_out, temp, mask);
         break;
       }
     default:
@@ -2958,11 +2931,6 @@ copy_point_conditional1(
         copy_conditional_p384_l(x3_out, p_x, mask);
         break;
       }
-    case Spec_ECC_Curves_Default:
-      {
-        copy_conditional_generic_l(x3_out, p_x, mask);
-        break;
-      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -2981,11 +2949,6 @@ copy_point_conditional1(
         copy_conditional_p384_l(y3_out, p_y, mask);
         break;
       }
-    case Spec_ECC_Curves_Default:
-      {
-        copy_conditional_generic_l(y3_out, p_y, mask);
-        break;
-      }
     default:
       {
         KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
@@ -3002,11 +2965,6 @@ copy_point_conditional1(
     case Spec_ECC_Curves_P384:
       {
         copy_conditional_p384_l(z3_out, p_z, mask);
-        break;
-      }
-    case Spec_ECC_Curves_Default:
-      {
-        copy_conditional_generic_l(z3_out, p_z, mask);
         break;
       }
     default:

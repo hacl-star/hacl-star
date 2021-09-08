@@ -65,12 +65,12 @@ let montgomery_multiplication_buffer_by_one_mixed_p256 = montgomery_multiplicati
 
 let montgomery_multiplication_buffer_by_one_mixed_p384 = montgomery_multiplication_buffer_by_one_mixed_ #P384
 
-let montgomery_multiplication_buffer_by_one_mixed_general = montgomery_multiplication_buffer_by_one_mixed_ #Default
+(* let montgomery_multiplication_buffer_by_one_mixed_general = montgomery_multiplication_buffer_by_one_mixed_ #Default
 
-
+ *)
 let montgomery_multiplication_buffer_by_one_mixed #c result = 
   match c with 
   |P256 -> montgomery_multiplication_buffer_by_one_mixed_p256 result
   |P384 -> montgomery_multiplication_buffer_by_one_mixed_p384 result
-  |Default -> montgomery_multiplication_buffer_by_one_mixed_general result
+  (* |Default -> montgomery_multiplication_buffer_by_one_mixed_general result *)
   

@@ -16,7 +16,7 @@ open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.SolinasReduction.P384
 open Hacl.Impl.SolinasReduction.P256
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Hacl.Impl.EC.P521.Reduction
+(* open Hacl.Impl.EC.P521.Reduction *)
 
 open Hacl.Spec.EC.Definition
 open FStar.Mul
@@ -139,17 +139,17 @@ let ml_reduction1 #c r result =
        (wide_as_nat c h0 r) % prime;}
 
 
-
+(* 
 val ml_reduction_generic: r: widefelem Default -> result: felem Default -> Stack unit 
   (requires fun h -> live h result /\ live h r /\ wide_as_nat Default h r < getPrime Default * pow2 (getPower Default) /\ eq_or_disjoint r result) 
   (ensures fun h0 _ h1 -> as_nat Default h1 result = wide_as_nat Default h0 r % getPrime Default /\ modifies (loc result |+| loc r) h0 h1)
 
 
 let ml_reduction_generic r result = ml_reduction1 #Default r result
-
+ *)
 
 let reduction #c i o =
   match c with 
     |P256 -> solinas_reduction_impl_p256 i o 
     |P384 -> solinas_reduction_impl_p384 i o
-    |Default -> ml_reduction1 i o
+    (* |Default -> ml_reduction1 i o *)

@@ -396,7 +396,7 @@ val felem_add_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
 
 let felem_add_p384 a b out = felem_add_ #P384 a b out
 
-[@CInline]
+(* [@CInline]
 val felem_add_generic: a: felem Default -> b: felem Default -> out: felem Default ->
   Stack unit
     (requires (fun h0 ->
@@ -408,14 +408,14 @@ val felem_add_generic: a: felem Default -> b: felem Default -> out: felem Defaul
       as_nat Default h1 out == toDomain #Default ((fromDomain #Default (as_nat Default h0 a) + fromDomain #Default (as_nat Default h0 b)) % getPrime Default)))
 
 
-let felem_add_generic a b out = felem_add_ #Default a b out
+let felem_add_generic a b out = felem_add_ #Default a b out *)
 
 
 let felem_add #c a b out = 
    match c with
     | P256 -> felem_add_p256 a b out
     | P384 -> felem_add_p384 a b out
-    | Default -> felem_add_generic a b out
+    (* | Default -> felem_add_generic a b out *)
 
 
 inline_for_extraction noextract
@@ -461,7 +461,7 @@ val felem_double_p384: a: felem P384 -> out: felem P384 ->
 
 let felem_double_p384 arg1 out = felem_double_ #P384 arg1 out
 
-[@CInline]
+(* [@CInline]
 val felem_double_generic: a: felem Default -> out: felem Default ->
   Stack unit
     (requires (fun h0 ->
@@ -471,14 +471,14 @@ val felem_double_generic: a: felem Default -> out: felem Default ->
       as_nat Default h1 out == (2 * as_nat Default h0 a) % getPrime Default /\
       as_nat Default h1 out == toDomain #Default (2 * fromDomain #Default (as_nat Default h0 a) % getPrime Default)))
 
-let felem_double_generic arg1 out = felem_double_ #Default arg1 out
+let felem_double_generic arg1 out = felem_double_ #Default arg1 out *)
 
 
 let felem_double #c arg1 out = 
   match c with 
   |P256 -> felem_double_p256 arg1 out
   |P384 -> felem_double_p384 arg1 out
-  |Default -> felem_double_generic arg1 out
+  (* |Default -> felem_double_generic arg1 out *)
 
 
 #set-options "--fuel 1 --ifuel 1 --z3rlimit 200"
@@ -552,7 +552,7 @@ val felem_sub_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
 
 let felem_sub_p384 a b out = felem_sub_ #P384 a b out
 
-[@CInline]
+(* [@CInline]
 val felem_sub_generic: a: felem Default -> b: felem Default -> out: felem Default ->
   Stack unit
   (requires (fun h0 ->
@@ -563,13 +563,13 @@ val felem_sub_generic: a: felem Default -> b: felem Default -> out: felem Defaul
     as_nat Default h1 out == toDomain #Default ((fromDomain #Default (as_nat Default h0 a) - fromDomain #Default (as_nat Default h0 b)) % getPrime Default)))
 
 let felem_sub_generic a b out = felem_sub_ #Default a b out
-
+ *)
 
 let felem_sub #c a b out = 
   match c with 
   |P256 -> felem_sub_p256 a b out
   |P384 -> felem_sub_p384 a b out
-  |Default -> felem_sub_generic a b out
+  (* |Default -> felem_sub_generic a b out *)
 
 
 
@@ -665,10 +665,10 @@ let upload_one_montg_form #c b =
       let h1 = ST.get() in 
     assert_norm(18446744069414584321 + 4294967295 * pow2 64 + 1 * pow2 64 * pow2 64 == pow2 384 % getPrime P384);
     lemma_lseq_nat_instant_6 (as_seq h1 b)
-  |_ -> 
+(*   |_ -> 
     uploadZeroImpl b; 
     reduction_prime_2prime_with_carry_cin #c (u64 1) b b;
-    lemmaToDomain #c #DH 1
+    lemmaToDomain #c #DH 1 *)
     
 #pop-options
 

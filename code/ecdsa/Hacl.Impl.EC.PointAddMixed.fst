@@ -845,7 +845,7 @@ val point_add_mixed_p384: p: point P384 -> q: pointAffine P384 -> result: point 
 let point_add_mixed_p384 = point_add_mixed_ #P384
 
 
-[@CInline]
+(* [@CInline]
 val point_add_mixed_generic: p: point Default -> q: pointAffine Default -> result: point Default
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 Default) -> 
   Stack unit (requires fun h -> 
@@ -861,11 +861,11 @@ val point_add_mixed_generic: p: point Default -> q: pointAffine Default -> resul
 
 
 let point_add_mixed_generic = point_add_mixed_ #Default
-
+ *)
 
 
 let point_add_mixed #c p q result tempBuffer = 
   match c with 
   |P256 -> point_add_mixed_p256 p q result tempBuffer
   |P384 -> point_add_mixed_p384 p q result tempBuffer
-  |Default -> point_add_mixed_generic p q result tempBuffer
+  (* |Default -> point_add_mixed_generic p q result tempBuffer *)

@@ -317,7 +317,7 @@ let getK0 c =
   match c with 
   |P256 -> Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb_lemma (getLastWordPrime #P256); (u64 1)
   |P384 -> Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb_lemma (getLastWordPrime #P384); (u64 4294967297)
-  |Default -> Hacl.Bignum.ModInvLimb.mod_inv_limb (getLastWordPrime #c)
+  (*|Default -> Hacl.Bignum.ModInvLimb.mod_inv_limb (getLastWordPrime #c) *)
 
 
 inline_for_extraction noextract
@@ -581,7 +581,7 @@ let uploadA #c a =
       let prime = getPrime c in 
       lemmaToDomain #c #DH (aCoordinate #c % prime);
       assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256)
-    |Default ->
+    (*|Default ->
       upd a (size 0) (u64 18446744073709551612);
       upd a (size 1) (u64 17179869183);
       upd a (size 2) (u64 0);
@@ -589,5 +589,5 @@ let uploadA #c a =
       
       let prime = getPrime c in 
       lemmaToDomain #c #DH (aCoordinate #c % prime);
-      assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256)
+      assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256) *)
 

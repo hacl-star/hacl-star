@@ -83,14 +83,15 @@ let fromFormPoint_ #c i o =
 let fromFormPoint_p256 = fromFormPoint_ #P256 
 [@CInline]
 let fromFormPoint_p384 = fromFormPoint_ #P384 
-[@CInline]
-let fromFormPoint_generic = fromFormPoint_ #Default 
+
+(* [@CInline]
+let fromFormPoint_generic = fromFormPoint_ #Default  *)
 
 let fromFormPoint #c i o = 
   match c with 
   |P256 -> fromFormPoint_p256 i o 
   |P384 -> fromFormPoint_p384 i o
-  |Default -> fromFormPoint_generic i o 
+  (* |Default -> fromFormPoint_generic i o  *)
 
 
 
@@ -141,14 +142,14 @@ let toFormPoint_ #c i o =
 let toFormPoint_p256 = toFormPoint_ #P256
 [@CInline]
 let toFormPoint_p384 = toFormPoint_ #P384
-[@CInline]
-let toFormPoint_generic = toFormPoint_ #Default
+(* [@CInline]
+let toFormPoint_generic = toFormPoint_ #Default *)
 
 let toFormPoint #c i o = 
   match c with 
   |P256 -> toFormPoint_p256 i o 
   |P384 -> toFormPoint_p384 i o 
-  |Default -> toFormPoint_generic i o 
+  (* |Default -> toFormPoint_generic i o  *)
 
 
 inline_for_extraction noextract
@@ -248,15 +249,15 @@ let isPointOnCurvePublic_ #c p =
 let isPointOnCurvePublic_p256 = isPointOnCurvePublic_ #P256
 [@CInline]
 let isPointOnCurvePublic_p384 = isPointOnCurvePublic_ #P384
-[@CInline]
+(* [@CInline]
 let isPointOnCurvePublic_generic = isPointOnCurvePublic_ #Default
-
+ *)
 
 let isPointOnCurvePublic #c p = 
   match c with 
   |P256 -> isPointOnCurvePublic_p256 p
   |P384 -> isPointOnCurvePublic_p384 p 
-  |Default -> isPointOnCurvePublic_generic p 
+  (* |Default -> isPointOnCurvePublic_generic p  *)
 
 
 
@@ -399,7 +400,7 @@ val verifyQValidCurvePoint_p384: pubKey: point P384
 let verifyQValidCurvePoint_p384 = verifyQValidCurvePoint_ #P384
 
 
-val verifyQValidCurvePoint_generic: pubKey: point Default
+(* val verifyQValidCurvePoint_generic: pubKey: point Default
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 Default) -> 
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
@@ -408,13 +409,13 @@ val verifyQValidCurvePoint_generic: pubKey: point Default
     let p = as_nat Default h0 (getX pubKey),  as_nat Default h0 (getY pubKey), as_nat Default h0 (getZ pubKey) in 
     ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #Default p))
 
-let verifyQValidCurvePoint_generic = verifyQValidCurvePoint_ #Default
+let verifyQValidCurvePoint_generic = verifyQValidCurvePoint_ #Default *)
 
 let verifyQValidCurvePoint #c = 
   match c with 
   |P256 -> verifyQValidCurvePoint_p256
   |P384 -> verifyQValidCurvePoint_p384
-  |Default -> verifyQValidCurvePoint_generic
+  (* |Default -> verifyQValidCurvePoint_generic *)
 
 
 let verifyQ #c pubKey = 
