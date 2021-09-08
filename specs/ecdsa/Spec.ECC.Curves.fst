@@ -98,11 +98,22 @@ let prime384: (a: pos {a > 3 && a < pow2 384}) =
   pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1
 
 
+
+(*
+proof that the values are primes in Sage: 
+>> is_prime(2**256 - 2**224 + 2**192 + 2**96 -1)
+True
+
+>> is_prime(2**384 - 2**128 - 2**96 + 2**32 - 1) 
+True
+
+*)
+
 inline_for_extraction
 let getPrime curve : prime: pos {prime > 3 /\ FStar.Math.Euclid.is_prime prime /\ prime > pow2 64} = 
   match curve with 
-  |P256 -> admit(); prime256
-  |P384 -> admit(); prime384
+  |P256 -> assert_norm(prime256 > pow2 64); assume (FStar.Math.Euclid.is_prime prime256); prime256
+  |P384 -> assert_norm(prime384 > pow2 64); assume (FStar.Math.Euclid.is_prime prime384);  prime384
 
 
 (* the length of each coordinate of the point as uint64 *)
@@ -157,8 +168,7 @@ let getPowerU curve : (a: UInt32.t {
   pow2 (v a) < 2 * getPrime curve}) = 
   match curve with 
   |P256 ->  assert_norm (pow2 256 < 2 * getPrime P256); 256ul
-  |P384 ->  admit(); 384ul
-  |_ -> admit(); 256ul
+  |P384 ->  assert_norm (pow2 384 < 2 * getPrime P384); 384ul
 
 
 let getPower curve : a: nat {
@@ -186,16 +196,33 @@ let getOrderLen (c: curve) =
 
 
 (* order of the curves *)
+
+(* proof of primarity in Sage: 
+>>is_prime(0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551)
+True
+
+>> is_prime(0xffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973)
+True
+*)
+
+
 inline_for_extraction
 let getOrder (#c: curve) : (a: pos{a > pow2 64 /\ a < pow2 (getPower c) /\ pow2 (getPower c) < 2 * a /\ FStar.Math.Euclid.is_prime a /\ pow2 (getPower c) % a <> 0}) =
-  admit();
   match c with 
-  |P256 -> assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369 < pow2 (getPower P256));
-  115792089210356248762697446949407573529996955224135760342422259061068512044369
-  |P384 -> 
-    assert_norm (39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643 < pow2 (getPower P384));
-39402006196394479212279040100143613805079739270465446667946905279627659399113263569398956308152294913554433653942643
-
+  |P256 -> 
+    let orderp256 = 0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551 in 
+    assert_norm(orderp256 > pow2 64);
+    assert_norm(orderp256 < pow2 (getPower P256));
+    assert_norm(2 * orderp256 > pow2 (getPower P256));
+    assume(FStar.Math.Euclid.is_prime orderp256);
+    orderp256
+  |P384 ->     
+    let orderp384 = 0xffffffffffffffffffffffffffffffffffffffffffffffffc7634d81f4372ddf581a0db248b0a77aecec196accc52973 in 
+    assert_norm(orderp384 > pow2 64);
+    assert_norm(orderp384 < pow2 (getPower P384));
+    assert_norm(2 * orderp384 > pow2 (getPower P384));
+    assume(FStar.Math.Euclid.is_prime orderp384);
+    orderp384
 
 
 
