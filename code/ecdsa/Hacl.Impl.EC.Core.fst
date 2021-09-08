@@ -386,6 +386,7 @@ let uploadStartPoints #c q p result =
   let x, y, z = point_as_nat c h2 result in 
   lemma_pointAtInfInDomain #c x y z
 
+
 inline_for_extraction noextract
 val scalar_multiplication_t_0: #c: curve -> #t:buftype -> q: point c -> p: point c -> result: point c -> 
   scalar: scalar_t #t #c -> 
@@ -436,6 +437,7 @@ let scalarMultiplication_t #c #t p result scalar tempBuffer  =
   norm q result buff; 
   let i1 = point_as_nat c h0 p in 
     point_mult0_is_infinity i1
+
 
 inline_for_extraction noextract
 let scalarMultiplicationL #c = scalarMultiplication_t #c #MUT
@@ -570,8 +572,8 @@ val secretToPublic_0: #c: curve -> #t: buftype -> q: point c -> result: point c 
 
 
 let secretToPublic_0 #c q result scalar tempBuffer = 
-  (* uploadStartPointsS2P q result;  *)
-(*   montgomery_ladder q result scalar tempBuffer *)
+ (*) uploadStartPointsS2P q result;  
+  montgomery_ladder q result scalar tempBuffer *)
   Hacl.Impl.EC.ScalarMult.Radix.montgomery_ladder_2_precomputed result scalar tempBuffer;
   copy q result
 
@@ -605,6 +607,7 @@ let secretToPublicWithoutNorm_ #c result scalar tempBuffer =
 
   uploadStartPointsS2P result q; 
   montgomery_ladder result q scalar buff
+
 
 [@CInline]
 val secretToPublicWithoutNorm_p256: result: point P256

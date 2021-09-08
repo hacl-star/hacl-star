@@ -13,9 +13,6 @@ open FStar.Mul
 open Spec.ECC.Curves
 
 
-
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
-
 inline_for_extraction
 let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128} =
   let open FStar.Mul in 
@@ -74,38 +71,12 @@ let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128} =
     x
 
 
-let points_radix_16_list (c: curve) : x: list uint64 {
-  List.Tot.length x == v (16ul *! 2ul *! getCoordinateLenU64 c)} =
-  match c with 
-  |P256 -> points_radix_16_list_p256
-  |_ -> admit()
-
-
 
 inline_for_extraction
-let points_radix_p256_16: x: glbuffer uint64 (128ul)
+let points_radix_16: x: glbuffer uint64 128ul 
   {witnessed #uint64 #(size 128) x (Lib.Sequence.of_list points_radix_16_list_p256) /\ recallable x} = 
   createL_global points_radix_16_list_p256
 
-open Hacl.Spec.EC.Definition
-open Spec.ECC
-open Hacl.Spec.MontgomeryMultiplication
-
-
-inline_for_extraction
-let points_radix_16_buffer (#c: curve): 
-  (x: glbuffer uint64 (16ul *! 2ul *! getCoordinateLenU64 c) {
-    witnessed #uint64 #(16ul *! 2ul *! getCoordinateLenU64 c) x (Lib.Sequence.of_list (points_radix_16_list c)) /\ 
-    recallable x /\ (
-    let len = v (getCoordinateLenU64 c) in 
-    let points_radix_16_seq = Lib.Sequence.of_list (points_radix_16_list c) in
-    forall (i: nat {i < 16}). 
-      let pointX = lseq_as_nat (Lib.Sequence.sub points_radix_16_seq (i * (2 * len)) len) in 
-      let pointY = lseq_as_nat (Lib.Sequence.sub points_radix_16_seq (i * (2 * len) + len) len) in 
-      pointX < getPrime c /\ pointY < getPrime c /\
-      pointEqual (fromDomainPoint #c #DH (pointX, pointY, 1)) == pointEqual (point_mult i (basePoint #c)))}) = 
-  match c with 
-  |P256 -> admit(); points_radix_p256_16
-  |_ -> admit()
+ 
 
 

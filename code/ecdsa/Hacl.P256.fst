@@ -77,7 +77,10 @@ let compression_compressed_form b result =
  *)
 
 let ecp256dh_i result scalar = Hacl.Impl.EC.DH.ecp256dh_i P256 result scalar
+
 let ecp384dh_i result scalar = Hacl.Impl.EC.DH.ecp256dh_i P384 result scalar
+
 let ecp256dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P256 result pubKey scalar
+
 let ecp384dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P384 result pubKey scalar
 

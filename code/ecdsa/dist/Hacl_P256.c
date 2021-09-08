@@ -3709,7 +3709,7 @@ point_add_mixed_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempB
 
 static const
 uint64_t
-points_radix_p256_16[128U] =
+points_radix_16[128U] =
   {
     (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U,
     (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x1fb38ab1388ad777U, (uint64_t)0x1dfee06615fa309dU,
@@ -3866,13 +3866,10 @@ static void getPointPrecomputedMixed_p256(void *scalar, uint32_t i, uint64_t *po
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)16U; i0++)
   {
     uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits, (uint64_t)i0);
-    uint32_t lenPoint = (uint32_t)8U;
-    uint32_t lenCoordinate = (uint32_t)4U;
-    uint32_t pointLen = (uint32_t)2U * lenCoordinate;
-    const uint64_t *lut_cmb_x = points_radix_p256_16 + i0 * lenPoint * pointLen;
-    const uint64_t *lut_cmb_y = points_radix_p256_16 + i0 * lenPoint * pointLen + lenCoordinate;
+    const uint64_t *lut_cmb_x = points_radix_16 + i0 * (uint32_t)8U;
+    const uint64_t *lut_cmb_y = points_radix_16 + i0 * (uint32_t)8U + (uint32_t)4U;
     copy_conditional_p256_c(pointToAdd, lut_cmb_x, mask);
-    copy_conditional_p256_c(pointToAdd + lenCoordinate, lut_cmb_y, mask);
+    copy_conditional_p256_c(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
   }
 }
 
@@ -14024,9 +14021,7 @@ uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
     & (uint8_t)1U)
     << (uint32_t)0U;
   uint64_t bits = (bit0 ^ bit1) ^ (bit2 ^ bit3);
-  const
-  uint64_t
-  *pointToStart = points_radix_p256_16 + (uint32_t)(bits * (uint64_t)(uint32_t)8U);
+  const uint64_t *pointToStart = points_radix_16 + (uint32_t)(bits * (uint64_t)(uint32_t)8U);
   memcpy(resultBuffer, (uint64_t *)pointToStart, (uint32_t)8U * sizeof (uint64_t));
   resultBuffer[8U] = (uint64_t)1U;
   resultBuffer[9U] = (uint64_t)0U;
@@ -14119,9 +14114,7 @@ uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar)
     & (uint8_t)1U)
     << (uint32_t)0U;
   uint64_t bits = (bit0 ^ bit1) ^ (bit2 ^ bit3);
-  const
-  uint64_t
-  *pointToStart = points_radix_p256_16 + (uint32_t)(bits * (uint64_t)(uint32_t)8U);
+  const uint64_t *pointToStart = points_radix_16 + (uint32_t)(bits * (uint64_t)(uint32_t)8U);
   memcpy(resultBuffer, (uint64_t *)pointToStart, (uint32_t)8U * sizeof (uint64_t));
   resultBuffer[8U] = (uint64_t)1U;
   resultBuffer[9U] = (uint64_t)0U;
