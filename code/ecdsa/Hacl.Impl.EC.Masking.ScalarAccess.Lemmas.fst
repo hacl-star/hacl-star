@@ -32,9 +32,11 @@ val get_low_part_4: a:uint32 -> r:uint8{uint_v r == uint_v a % pow2 4}
 let get_low_part_4 a = logand_mask a (u32 0xf) 4; to_u8 (logand a (u32 0xf))
 
 
+noextract
 val append_uint: #n1:nat -> #n2:nat
   -> num1:UInt.uint_t n1 -> num2:UInt.uint_t n2 -> UInt.uint_t (n1 + n2)
 
+noextract
 val shift_bound: #n:nat -> num:UInt.uint_t n -> n':nat ->
   Lemma (num * pow2 n' <= pow2 (n' + n) - pow2 n')
 
@@ -48,6 +50,7 @@ let append_uint #n1 #n2 num1 num2 =
   shift_bound num2 n1;
   num1 + num2 * pow2 n1
 
+noextract
 val to_vec_append : #n1:pos-> #n2:pos -> num1:UInt.uint_t n1 -> num2:UInt.uint_t n2 ->
   Lemma (UInt.to_vec (append_uint num1 num2) ==
          Seq.append (UInt.to_vec num2) (UInt.to_vec num1))
@@ -55,6 +58,7 @@ val to_vec_append : #n1:pos-> #n2:pos -> num1:UInt.uint_t n1 -> num2:UInt.uint_t
 let to_vec_append #n1 #n2 num1 num2 =
   UInt.append_lemma (UInt.to_vec num2) (UInt.to_vec num1)
 
+noextract
 val to_vec_low_high: a:UInt.uint_t 64 -> Lemma
   (UInt.to_vec a ==
    Seq.append (UInt.to_vec #32 (a / pow2 32)) (UInt.to_vec #32 (a % pow2 32)))
@@ -63,7 +67,7 @@ let to_vec_low_high a =
   assert (a == append_uint #32 #32 (a % pow2 32) (a / pow2 32));
   to_vec_append #32 #32 (a % pow2 32) (a / pow2 32)
 
-
+noextract
 val to_vec_low_high_4: a:UInt.uint_t 32 -> Lemma ( 
   FStar.Math.Lemmas.pow2_minus 32 4; 
   UInt.to_vec a == Seq.append (UInt.to_vec #28 (a / pow2 4)) (UInt.to_vec #4 (a % pow2 4)))
@@ -73,7 +77,7 @@ let to_vec_low_high_4 a =
   assert (a == append_uint #4 #28 (a % pow2 4) (a / pow2 4));
   to_vec_append #4 #28 (a % pow2 4) (a / pow2 4)
 
-
+noextract
 val logand_vec_append (#n1 #n2: pos) (a1 b1: BV.bv_t n1) (a2 b2: BV.bv_t n2) :
   Lemma (Seq.append (BV.logand_vec a1 b1) (BV.logand_vec a2 b2) ==
          BV.logand_vec #(n1 + n2) (FStar.Seq.append a1 a2) (FStar.Seq.append b1 b2))
@@ -82,7 +86,7 @@ let logand_vec_append #n1 #n2 a1 b1 a2 b2 =
   Seq.lemma_eq_intro (Seq.append (BV.logand_vec a1 b1) (BV.logand_vec a2 b2))
                      (BV.logand_vec #(n1 + n2) (Seq.append a1 a2) (Seq.append b1 b2))
 
-
+noextract
 val lemma_and_both_parts: a: uint64 -> b: uint64 -> Lemma (
   let a0, a1 = get_low_part a, get_high_part a in 
   let b0, b1 = get_low_part b, get_high_part b in 
@@ -133,12 +137,13 @@ let lemma_and_both_parts a b =
   UInt.append_lemma (BV.logand_vec a1_ b1_) (BV.logand_vec a0_ b0_);
   assert(v (logand a1 b1) * pow2 32 + v (logand a0 b0) == v (logand a b))
 
-
+noextract
 let zero_extend_vec (#n:pos) (#n2: nat) (a:BitVector.bv_t n): Tot (BitVector.bv_t (n + n2)) = Seq.append (Seq.create n2 false) a
 
+noextract
 let zero_extend (#n:pos) (#n2: nat) (a:UInt.uint_t n): Tot (UInt.uint_t (n+n2)) = UInt.from_vec (zero_extend_vec (UInt.to_vec #n a))
 
-
+noextract
 val lemma_zero_extend: #n:pos -> #n2: pos -> a:UInt.uint_t n ->
   Lemma (zero_extend #n #n2 a = a)
 
@@ -167,6 +172,7 @@ let rec lemma_zero_extend #n #n2 a =
 
 #push-options "--fuel 1"
 
+noextract
 val lemma_logand_zero: n: pos -> Lemma (let zero = UInt.to_vec #n 0 in BV.logand_vec zero zero = Seq.create n false)
 
 let rec lemma_logand_zero n = 
@@ -192,7 +198,7 @@ let rec lemma_logand_zero n =
 
 #pop-options
 
- 
+noextract
 val lemma_and_both_parts_32: a: uint32 -> b: uint32 -> Lemma (
   let a0, a1 = get_low_part_4 a, get_high_part_28 a in 
   let b0, b1 = get_low_part_4 b, get_high_part_28 b in 
@@ -268,12 +274,12 @@ val lemma_xor_of_4: bit0: uint64 {v bit0 <= 1} -> bit1: uint64 {v bit1 <= 1} -> 
   Lemma (logxor_v (logxor_v (v bit0 * 8) (v bit1 * 4)) (logxor_v #U64 (v bit2 * 2) (v bit3)) == v bit0 * 8 + v bit1 * 4 + v bit2 * 2 + v bit3)
 
 
-
+noextract
 val get_high_part_n: #n: pos {n < 64} -> a:uint64 -> r:uint64 {uint_v r == uint_v a / pow2 n}
 
 let get_high_part_n #n a = shift_right a (size n)
 
-
+noextract
 val get_low_part_n: #n: pos {n < 64} -> a:uint64 -> r:uint64 {uint_v r == uint_v a % pow2 n}
 
 let get_low_part_n #n a =
