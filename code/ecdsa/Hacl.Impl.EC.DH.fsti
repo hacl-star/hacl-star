@@ -12,12 +12,14 @@ open Spec.ECC.Curves
 open Spec.DH
 open Hacl.Spec.EC.Definition
 open Hacl.Impl.ECDSA.Setup
+open Hacl.Impl.EC.Core
 
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel  0"
 
 inline_for_extraction noextract
-val ecp256dh_i_ml: c: curve 
+val ecp256dh_i: c: curve 
+  -> l: ladder 
   -> result: pointAffine8 c
   -> s: scalar_t #MUT #c 
   -> Stack bool
@@ -26,18 +28,6 @@ val ecp256dh_i_ml: c: curve
     let pointX, pointY, flag = ecp256_dh_i #c (as_seq h0 s) in
     let x, y = as_seq h1 (getXAff8 result), as_seq h1 (getYAff8 result) in 
     pointX == x /\ pointY == y /\ r == flag))
-
-inline_for_extraction noextract
-val ecp256dh_i_radix: c: curve 
-  -> result: pointAffine8 c
-  -> s: scalar_t #MUT #c 
-  -> Stack bool
-  (requires fun h -> live h result /\ live h s /\ disjoint result s)
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
-    let pointX, pointY, flag = ecp256_dh_i #c (as_seq h0 s) in
-    let x, y = as_seq h1 (getXAff8 result), as_seq h1 (getYAff8 result) in 
-    pointX == x /\ pointY == y /\ r == flag))
-
 
 
 val lemma_zero_point_zero_coordinates: c: curve -> h: mem -> p: point c -> 

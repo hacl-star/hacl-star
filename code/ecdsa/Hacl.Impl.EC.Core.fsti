@@ -17,6 +17,11 @@ open FStar.Mul
 
 #set-options "--z3rlimit 100" 
 
+type ladder = 
+  |ML
+  |Radix
+
+
 inline_for_extraction noextract 
 val toDomain: #c: curve -> value: felem c -> result: felem c -> Stack unit 
   (requires fun h -> felem_eval c h value /\ live h value /\ live h result /\ eq_or_disjoint value result)
@@ -121,7 +126,7 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c
     
 
 inline_for_extraction noextract
-val secretToPublic_ml: #c: curve -> result: point c 
+val secretToPublic: #c: curve -> #l: ladder -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
@@ -130,19 +135,6 @@ val secretToPublic_ml: #c: curve -> result: point c
     let p = point_as_nat c h1 result in 
     let r = secret_to_public #c (as_seq h0 scalar) in 
     p == r))
-
-
-inline_for_extraction noextract
-val secretToPublic_radix: #c: curve -> result: point c 
-  -> scalar: scalar_t #MUT #c
-  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
-  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
-    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
-  (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
-    let p = point_as_nat c h1 result in 
-    let r = secret_to_public #c (as_seq h0 scalar) in 
-    p == r))
-
 
 
 inline_for_extraction noextract

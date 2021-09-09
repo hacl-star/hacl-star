@@ -27,6 +27,7 @@ open Spec.Hash.Definitions
 
 open Hacl.Impl.ECDSA.Signature
 open Hacl.Impl.ECDSA.Verification
+open Hacl.Impl.EC.Core
 
 
 let ecdsa_sign_p256_sha2 result mLen m privKey k = 
@@ -76,12 +77,12 @@ let compression_compressed_form b result =
 
  *)
 
-let ecp256dh_i_ml result scalar = Hacl.Impl.EC.DH.ecp256dh_i_ml P256 result scalar
+let ecp256dh_i_ml result scalar = Hacl.Impl.EC.DH.ecp256dh_i P256 ML result scalar
 
-let ecp256dh_i_radix result scalar = Hacl.Impl.EC.DH.ecp256dh_i_radix P256 result scalar
+let ecp256dh_i_radix result scalar = Hacl.Impl.EC.DH.ecp256dh_i P256 Radix result scalar
 
 
-let ecp384dh_i result scalar = Hacl.Impl.EC.DH.ecp256dh_i_ml P384 result scalar
+let ecp384dh_i result scalar = Hacl.Impl.EC.DH.ecp256dh_i P384 ML result scalar
 
 let ecp256dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P256 result pubKey scalar
 
