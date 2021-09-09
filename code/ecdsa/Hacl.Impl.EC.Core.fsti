@@ -119,8 +119,9 @@ val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c
     let rN, _ = montgomery_ladder_spec_left #c (as_seq h0 scalar) (pointAtInfinity, p) in 
     rN == p1)) 
     
+
 inline_for_extraction noextract
-val secretToPublic: #c: curve -> result: point c 
+val secretToPublic_ml: #c: curve -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
@@ -129,6 +130,20 @@ val secretToPublic: #c: curve -> result: point c
     let p = point_as_nat c h1 result in 
     let r = secret_to_public #c (as_seq h0 scalar) in 
     p == r))
+
+
+inline_for_extraction noextract
+val secretToPublic_radix: #c: curve -> result: point c 
+  -> scalar: scalar_t #MUT #c
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
+  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
+  (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
+    let p = point_as_nat c h1 result in 
+    let r = secret_to_public #c (as_seq h0 scalar) in 
+    p == r))
+
+
 
 inline_for_extraction noextract
 val secretToPublicWithoutNorm: #c: curve -> result: point c 

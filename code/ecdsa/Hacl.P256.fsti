@@ -348,7 +348,7 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")]
 
-val ecp256dh_i:
+val ecp256dh_i_ml:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
   -> Stack uint64
@@ -361,6 +361,27 @@ val ecp256dh_i:
     r == flag /\
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+
+
+[@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
+  \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  ")]
+
+val ecp256dh_i_radix:
+    result:lbuffer uint8 (size 64)
+  -> scalar:lbuffer uint8 (size 32)
+  -> Stack uint64
+  (requires fun h ->
+    live h result /\ live h scalar /\ 
+    disjoint result scalar)
+  (ensures fun h0 r h1 ->
+    let pointX, pointY, flag = ecp256_dh_i #P256 (as_seq h0 scalar) in
+    modifies (loc result) h0 h1 /\
+    r == flag /\
+    as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
+    as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+
+
 
 val ecp384dh_i:
     result:lbuffer uint8 (size 96)

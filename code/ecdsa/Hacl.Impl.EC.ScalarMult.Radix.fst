@@ -122,7 +122,7 @@ val secretToPublic_0: #c: curve -> #t: buftype -> q: point c -> result: point c 
 
 
 let secretToPublic_0 #c q result scalar tempBuffer = 
-  (* uploadStartPointsS2P q result;  *)
-(*   montgomery_ladder q result scalar tempBuffer *)
-  montgomery_ladder_2_precomputed result scalar tempBuffer;
+(*   uploadStartPointsS2P q result; 
+  montgomery_ladder q result scalar tempBuffer
+ *)  montgomery_ladder_2_precomputed result scalar tempBuffer;
   copy q result

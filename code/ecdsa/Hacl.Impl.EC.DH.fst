@@ -25,7 +25,7 @@ open Hacl.Impl.EC.Intro
 
 open FStar.Mul 
 inline_for_extraction noextract
-val ecp256_dh_i_: #c: curve -> resultBuffer: point c 
+val ecp256_dh_i_ml_: #c: curve -> resultBuffer: point c 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) 
   -> scalar: scalar_t #MUT #c -> result: pointAffine8 c -> 
   Stack bool
@@ -38,9 +38,8 @@ val ecp256_dh_i_: #c: curve -> resultBuffer: point c
     let scalarX, scalarY = as_seq h1 (coordinateX_u8), as_seq h1 (coordinateY_u8) in 
     pointX == scalarX /\ pointY == scalarY /\ r == flag))
 
-
-let ecp256_dh_i_ #c resultBuffer tempBuffer scalar result = 
-  secretToPublic #c resultBuffer scalar tempBuffer;
+let ecp256_dh_i_ml_ #c resultBuffer tempBuffer scalar result = 
+  secretToPublic_ml #c resultBuffer scalar tempBuffer;
     let h1 = ST.get() in 
   let r = isPointAtInfinityPrivate #c resultBuffer in 
     let h2 = ST.get() in 
@@ -51,15 +50,54 @@ let ecp256_dh_i_ #c resultBuffer tempBuffer scalar result =
   unsafe_bool_of_u64 r
 
 
-let ecp256dh_i c result scalar =
+inline_for_extraction noextract
+val ecp256_dh_i_radix_: #c: curve -> resultBuffer: point c 
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) 
+  -> scalar: scalar_t #MUT #c -> result: pointAffine8 c -> 
+  Stack bool
+  (requires fun h -> live h resultBuffer /\ live h tempBuffer /\ live h scalar /\ live h result /\
+    disjoint resultBuffer result /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc resultBuffer])
+  (ensures fun h0 r h1 -> modifies (loc result |+| loc tempBuffer |+| loc resultBuffer) h0 h1 /\ (
+    let pointX, pointY, flag = ecp256_dh_i #c (as_seq h0 scalar) in 
+    let coordinateX_u8, coordinateY_u8 = getXAff8 #c result, getYAff8 #c result in
+    let scalarX, scalarY = as_seq h1 (coordinateX_u8), as_seq h1 (coordinateY_u8) in 
+    pointX == scalarX /\ pointY == scalarY /\ r == flag))
+
+let ecp256_dh_i_radix_ #c resultBuffer tempBuffer scalar result = 
+  secretToPublic_radix #c resultBuffer scalar tempBuffer;
+    let h1 = ST.get() in 
+  let r = isPointAtInfinityPrivate #c resultBuffer in 
+    let h2 = ST.get() in 
+  fromFormPoint #c resultBuffer result;
+  Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 resultBuffer;
+
+  let open Hacl.Impl.EC.LowLevel.RawCmp in 
+  unsafe_bool_of_u64 r
+
+
+
+let ecp256dh_i_ml c result scalar =
   push_frame();
   let len = getCoordinateLenU64 c in 
   let tempBuffer = create (size 20 *! len) (u64 0) in
   let resultBuffer = create (size 3 *! len) (u64 0) in
     let h0 = ST.get() in 
-  let flag = ecp256_dh_i_ resultBuffer tempBuffer scalar result in 
+  let flag = ecp256_dh_i_ml_ resultBuffer tempBuffer scalar result in 
   pop_frame();
   flag
+
+let ecp256dh_i_radix c result scalar =
+  push_frame();
+  let len = getCoordinateLenU64 c in 
+  let tempBuffer = create (size 20 *! len) (u64 0) in
+  let resultBuffer = create (size 3 *! len) (u64 0) in
+    let h0 = ST.get() in 
+  let flag = ecp256_dh_i_radix_ resultBuffer tempBuffer scalar result in 
+  pop_frame();
+  flag
+
+
 
 [@ (Comment "  This code is not side channel resistant on pubKey")]
 inline_for_extraction noextract

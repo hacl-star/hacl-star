@@ -556,6 +556,8 @@ let uploadStartPointsS2P #c q result =
     let x, y, z = point_as_nat c h2 result in 
     lemma_pointAtInfInDomain #c x y z
 
+
+
 inline_for_extraction noextract
 val secretToPublic_0: #c: curve -> #t: buftype -> q: point c -> result: point c -> 
   scalar: lbuffer_t t uint8 (getScalarLenBytes c) -> 
@@ -578,7 +580,9 @@ let secretToPublic_0 #c q result scalar tempBuffer =
   copy q result
 
 
-let secretToPublic #c result scalar tempBuffer = 
+
+
+let secretToPublic_ml #c result scalar tempBuffer = 
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in
@@ -586,6 +590,18 @@ let secretToPublic #c result scalar tempBuffer =
 
   secretToPublic_0 q result scalar buff;
   norm q result buff
+
+
+let secretToPublic_radix #c result scalar tempBuffer = 
+  let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c in 
+  let q = sub tempBuffer (size 0) (size 3 *! len) in
+  let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
+
+  secretToPublic_0 q result scalar buff;
+  norm q result buff
+
+
 
 
 inline_for_extraction noextract

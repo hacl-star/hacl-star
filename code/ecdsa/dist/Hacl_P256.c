@@ -13965,7 +13965,107 @@ bool Hacl_P256_verify_q(uint8_t *pubKey)
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
+uint64_t Hacl_P256_ecp256dh_i_ml(uint8_t *result, uint8_t *scalar)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len);
+  uint64_t tempBuffer[(uint32_t)20U * len];
+  memset(tempBuffer, 0U, (uint32_t)20U * len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t resultBuffer[(uint32_t)3U * len];
+  memset(resultBuffer, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  uint32_t len1 = (uint32_t)4U;
+  uint64_t *q = tempBuffer;
+  uint64_t *buff = tempBuffer + (uint32_t)3U * len1;
+  uint32_t
+  bit =
+    (uint32_t)4U
+    * (uint32_t)8U
+    * (uint32_t)8U
+    - (uint32_t)1U
+    - ((uint32_t)(krml_checked_int_t)0 << (uint32_t)2U);
+  uint64_t
+  bit0 =
+    (uint64_t)(scalar[(uint32_t)4U
+    * (uint32_t)8U
+    - (uint32_t)1U
+    - bit / (uint32_t)8U]
+    >> bit % (uint32_t)8U
+    & (uint8_t)1U)
+    << (uint32_t)3U;
+  uint64_t
+  bit1 =
+    (uint64_t)(scalar[(uint32_t)4U
+    * (uint32_t)8U
+    - (uint32_t)1U
+    - (bit - (uint32_t)1U) / (uint32_t)8U]
+    >> (bit - (uint32_t)1U) % (uint32_t)8U
+    & (uint8_t)1U)
+    << (uint32_t)2U;
+  uint64_t
+  bit2 =
+    (uint64_t)(scalar[(uint32_t)4U
+    * (uint32_t)8U
+    - (uint32_t)1U
+    - (bit - (uint32_t)2U) / (uint32_t)8U]
+    >> (bit - (uint32_t)2U) % (uint32_t)8U
+    & (uint8_t)1U)
+    << (uint32_t)1U;
+  uint64_t
+  bit3 =
+    (uint64_t)(scalar[(uint32_t)4U
+    * (uint32_t)8U
+    - (uint32_t)1U
+    - (bit - (uint32_t)3U) / (uint32_t)8U]
+    >> (bit - (uint32_t)3U) % (uint32_t)8U
+    & (uint8_t)1U)
+    << (uint32_t)0U;
+  uint64_t bits = (bit0 ^ bit1) ^ (bit2 ^ bit3);
+  const uint64_t *pointToStart = points_radix_16 + (uint32_t)(bits * (uint64_t)(uint32_t)8U);
+  memcpy(resultBuffer, (uint64_t *)pointToStart, (uint32_t)8U * sizeof (uint64_t));
+  resultBuffer[8U] = (uint64_t)1U;
+  resultBuffer[9U] = (uint64_t)0U;
+  resultBuffer[10U] = (uint64_t)0U;
+  resultBuffer[11U] = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)1U; i < (uint32_t)64U; i++)
+  {
+    uint64_t pointToAdd[8U] = { 0U };
+    getPointPrecomputedMixed_p256((void *)scalar, i, pointToAdd);
+    point_double_p256(resultBuffer, resultBuffer, buff);
+    point_double_p256(resultBuffer, resultBuffer, buff);
+    point_double_p256(resultBuffer, resultBuffer, buff);
+    point_double_p256(resultBuffer, resultBuffer, buff);
+    point_add_mixed_p256(resultBuffer, pointToAdd, resultBuffer, buff);
+  }
+  memcpy(q, resultBuffer, (uint32_t)12U * sizeof (uint64_t));
+  norm_p256(q, resultBuffer, buff);
+  uint32_t len10 = (uint32_t)4U;
+  uint32_t start = len10 * (uint32_t)2U;
+  uint64_t *zCoordinate = resultBuffer + start;
+  uint64_t tmp = (uint64_t)18446744073709551615U;
+  uint32_t len2 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len2; i++)
+  {
+    uint64_t a_i = zCoordinate[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t r = tmp;
+  uint64_t r0 = r;
+  fromFormPoint_p256(resultBuffer, result);
+  bool flag = r0 == (uint64_t)0U;
+  return (uint64_t)flag;
+}
+
+/*
+ Input: result: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  
+*/
+uint64_t Hacl_P256_ecp256dh_i_radix(uint8_t *result, uint8_t *scalar)
 {
   uint32_t len = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len);
