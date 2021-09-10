@@ -66,6 +66,7 @@ let ecp256dh_i c l result scalar =
 [@ (Comment "  This code is not side channel resistant on pubKey")]
 inline_for_extraction noextract
 val _ecp256dh_r: #c: curve 
+  -> #l: ladder 
   -> result: point c
   -> pubKey: point c
   -> scalar: scalar_t #MUT #c -> 
@@ -89,19 +90,19 @@ val _ecp256dh_r: #c: curve
 	r == true) end))
 
 
-let _ecp256dh_r #c result pubKey scalar =
+let _ecp256dh_r #c #l result pubKey scalar =
     let h0 = ST.get() in 
   push_frame();
     let len = getCoordinateLenU64 c in 
     let tempBuffer = create (size 20 *! len) (u64 0) in
     let h1 = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_getZ_noChangeInState c h0 h1 pubKey;
-  let publicKeyCorrect = verifyQValidCurvePoint #c pubKey tempBuffer in 
+  let publicKeyCorrect = verifyQValidCurvePoint #c #l pubKey tempBuffer in 
   if publicKeyCorrect then
     begin
         let h2 = ST.get() in 
 	Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h2 pubKey;
-	scalarMultiplication #c #MUT pubKey result scalar tempBuffer; 
+	scalarMultiplication #c #MUT #l pubKey result scalar tempBuffer; 
 	  let h3 = ST.get() in 
 	let flag = isPointAtInfinityPrivate #c result in 
 	pop_frame();
@@ -127,7 +128,7 @@ let lemma_zero_point_zero_coordinates c h p =
   Hacl.Impl.P.PointAdd.Aux.lemma_point_eval_if_zero c p h
 
 inline_for_extraction noextract
-val ecp256_dh_r_: #c: curve -> result: pointAffine8 c 
+val ecp256_dh_r_: #c: curve -> #l: ladder -> result: pointAffine8 c 
   -> pubKey: pointAffine8 c 
   -> scalar: scalar_t #MUT #c
   -> pkF: point c
@@ -144,18 +145,18 @@ val ecp256_dh_r_: #c: curve -> result: pointAffine8 c
     let resultX, resultY = as_seq h1 (getXAff8 result), as_seq h1 (getYAff8 result) in 
     r == flag /\ resultX == pointX /\ resultY == pointY))
 
-let ecp256_dh_r_ #c result pubKey scalar pkF rF = 
+let ecp256_dh_r_ #c #l result pubKey scalar pkF rF = 
     let h0 = ST.get() in 
   toFormPoint pubKey pkF; 
     let h1 = ST.get() in 
   Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 rF; 
-  let flag = _ecp256dh_r #c rF pkF scalar in 
+  let flag = _ecp256dh_r #c #l rF pkF scalar in 
   fromFormPoint rF result; 
   flag
 
 
 
-let ecp256dh_r #c result pubKey scalar =
+let ecp256dh_r #c #l result pubKey scalar =
   let h0 = ST.get() in 
   push_frame();
     let len = getCoordinateLenU64 c in 
@@ -166,7 +167,7 @@ let ecp256dh_r #c result pubKey scalar =
 
     lemma_create_zero_buffer #U64 (3 * v len) c;
     lemma_zero_point_zero_coordinates c h1 rF;
-  let flag = ecp256_dh_r_ #c result pubKey scalar pkF rF in 
+  let flag = ecp256_dh_r_ #c #l result pubKey scalar pkF rF in 
 
   pop_frame();
   flag

@@ -389,9 +389,10 @@ let scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer =
   match l with 
   |ML -> begin
     let q = sub tempBuffer (size 0) (size 3 *! len) in 
+    let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
     uploadStartPoints q p result; 
-    montgomery_ladder q result scalar tempBuffer;
-    copy q result
+    montgomery_ladder q result scalar buff;
+    copy_point q result
     end
   |Radix -> 
     pointToDomain #c p result;
@@ -404,7 +405,7 @@ let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 p 0
 
 
 inline_for_extraction
-val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: point c -> 
+val scalarMultiplication_t: #c: curve -> #t:buftype -> #l: ladder -> p: point c -> result: point c -> 
   scalar: scalar_t #t #c -> 
   tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
@@ -418,33 +419,33 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: poi
 
 
 
-let scalarMultiplication_t #c #t p result scalar tempBuffer  = 
+let scalarMultiplication_t #c #t #l p result scalar tempBuffer  = 
     let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
-  scalar_multiplication_t_0 #c #t #Radix p result scalar tempBuffer; 
+  scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer; 
   norm result result tempBuffer; 
   let i1 = point_as_nat c h0 p in 
     point_mult0_is_infinity i1
 
 
 inline_for_extraction noextract
-let scalarMultiplicationL #c = scalarMultiplication_t #c #MUT
-let scalarMultiplicationI #c = scalarMultiplication_t #c #IMMUT
+let scalarMultiplicationL #c #l = scalarMultiplication_t #c #MUT #l
+let scalarMultiplicationI #c #l  = scalarMultiplication_t #c #IMMUT #l
 inline_for_extraction noextract
-let scalarMultiplicationC #c = scalarMultiplication_t #c #CONST
+let scalarMultiplicationC #c #l = scalarMultiplication_t #c #CONST #l
 
 #push-options "--ifuel 1"
 
-let scalarMultiplication #c #buf_type p result scalar tempBuffer = 
+let scalarMultiplication #c #buf_type #l p result scalar tempBuffer = 
   match buf_type with 
-  |MUT -> scalarMultiplicationL #c p result scalar tempBuffer 
-  |IMMUT -> scalarMultiplicationI #c p result scalar tempBuffer
-  |CONST -> scalarMultiplicationC #c p result scalar tempBuffer
+  |MUT -> scalarMultiplicationL #c #l p result scalar tempBuffer 
+  |IMMUT -> scalarMultiplicationI #c #l p result scalar tempBuffer
+  |CONST -> scalarMultiplicationC #c #l p result scalar tempBuffer
 
 #pop-options 
 
 inline_for_extraction noextract
-val scalarMultiplicationWithoutNorm_: #c: curve -> p: point c -> result: point c 
+val scalarMultiplicationWithoutNorm_: #c: curve -> #l: ladder -> p: point c -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
@@ -457,15 +458,25 @@ val scalarMultiplicationWithoutNorm_: #c: curve -> p: point c -> result: point c
     let rN, _ = montgomery_ladder_spec_left #c (as_seq h0 scalar) (pointAtInfinity, p) in 
     rN == p1)) 
     
-let scalarMultiplicationWithoutNorm_ #c p result scalar tempBuffer = 
-    let h0 = ST.get() in 
+
+let scalarMultiplicationWithoutNorm_ #c #l p result scalar tempBuffer = 
+      let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c in 
+  scalar_multiplication_t_0 #c #MUT #l p result scalar tempBuffer 
+(*   norm result result tempBuffer; 
+  let i1 = point_as_nat c h0 p in 
+    point_mult0_is_infinity i1 *)
+
+
+(*     let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in
-  normalize_term (scalar_multiplication_t_0 #c #MUT #Radix p result scalar buff); 
-  copy_point q result
+  normalize_term (scalar_multiplication_t_0 #c #MUT #l p result scalar buff) *)
+  (* copy_point q result *)
 
-val scalarMultiplicationWithoutNorm_p256: p: point P256 -> result: point P256
+
+val scalarMultiplicationWithoutNorm_p256: #l: ladder -> p: point P256 -> result: point P256
   -> scalar: scalar_t #MUT #P256
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) ->
   Stack unit
@@ -479,10 +490,10 @@ val scalarMultiplicationWithoutNorm_p256: p: point P256 -> result: point P256
     rN == p1)) 
 
 [@CInline]
-let scalarMultiplicationWithoutNorm_p256 = scalarMultiplicationWithoutNorm_ #P256
+let scalarMultiplicationWithoutNorm_p256 #l = scalarMultiplicationWithoutNorm_ #P256 #l
 
 
-val scalarMultiplicationWithoutNorm_p384: p: point P384 -> result: point P384
+val scalarMultiplicationWithoutNorm_p384: #l: ladder -> p: point P384 -> result: point P384
   -> scalar: scalar_t #MUT #P384
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) ->
   Stack unit
@@ -515,10 +526,10 @@ let scalarMultiplicationWithoutNorm_p384 = scalarMultiplicationWithoutNorm_ #P38
 let scalarMultiplicationWithoutNorm_generic = scalarMultiplicationWithoutNorm_ #Default
  *)
 
-let scalarMultiplicationWithoutNorm #c = 
+let scalarMultiplicationWithoutNorm #c #l = 
   match c with 
-  |P256 -> scalarMultiplicationWithoutNorm_p256
-  |P384 -> scalarMultiplicationWithoutNorm_p384
+  |P256 -> scalarMultiplicationWithoutNorm_p256 #l
+  |P384 -> scalarMultiplicationWithoutNorm_p384 #l
   (* |Default -> scalarMultiplicationWithoutNorm_generic *)
 
 
@@ -545,31 +556,6 @@ let uploadStartPointsS2P #c q result =
     lemma_pointAtInfInDomain #c x y z
 
 
-(* 
-inline_for_extraction noextract
-val secretToPublic_0: #c: curve -> #t: buftype -> q: point c -> result: point c -> 
-  scalar: lbuffer_t t uint8 (getScalarLenBytes c) -> 
-  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
-  Stack unit 
-  (requires fun h -> live h q /\ live h result /\ live h scalar /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc q; loc tempBuffer; loc scalar] /\
-    disjoint q result /\ disjoint result tempBuffer /\ disjoint result scalar)
-  (ensures fun h0 _ h1 -> modifies (loc q |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 q /\ (
-    let i1 = basePoint #c in 
-    point_mult_0 i1 0; 
-    let pD = fromDomainPoint #c #DH (point_as_nat c h1 q) in
-    let r0, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity , i1) in pD == r0))
-
-
-let secretToPublic_0 #c q result scalar tempBuffer = 
- (*) uploadStartPointsS2P q result;  
-  montgomery_ladder q result scalar tempBuffer *)
-  Hacl.Impl.EC.ScalarMult.Radix.montgomery_ladder_2_precomputed result scalar tempBuffer;
-  copy q result
-
- *)
-
-
 let secretToPublic #c #l result scalar tempBuffer = 
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
@@ -578,7 +564,8 @@ let secretToPublic #c #l result scalar tempBuffer =
   match l with 
   |ML -> 
     begin
-      secretToPublic_0 q result scalar buff;
+      uploadStartPointsS2P q result; 
+      montgomery_ladder q result scalar buff;
       norm q result buff
     end
   |Radix  -> 
@@ -589,7 +576,7 @@ let secretToPublic #c #l result scalar tempBuffer =
 
 
 inline_for_extraction noextract
-val secretToPublicWithoutNorm_: #c: curve -> result: point c 
+val secretToPublicWithoutNorm_: #c: curve -> #l: ladder -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
@@ -600,17 +587,28 @@ val secretToPublicWithoutNorm_: #c: curve -> result: point c
     p1 == rN))  
 
 
-let secretToPublicWithoutNorm_ #c result scalar tempBuffer = 
+let secretToPublicWithoutNorm_ #c #l result scalar tempBuffer = 
+  let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
-
-  uploadStartPointsS2P result q; 
-  montgomery_ladder result q scalar buff
+  match l with 
+  |ML -> 
+    begin
+      uploadStartPointsS2P q result; 
+      montgomery_ladder q result scalar buff;
+      copy_point q result
+      (* norm q result buff *)
+    end
+  |Radix  -> 
+    begin
+      secretToPublic_0 q result scalar buff
+      (* norm q result buff *)
+    end
 
 
 [@CInline]
-val secretToPublicWithoutNorm_p256: result: point P256
+val secretToPublicWithoutNorm_p256: #l: ladder -> result: point P256
   -> scalar: scalar_t #MUT #P256
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
@@ -621,10 +619,11 @@ val secretToPublicWithoutNorm_p256: result: point P256
     p1 == rN))  
 
 
-let secretToPublicWithoutNorm_p256 = secretToPublicWithoutNorm_ #P256
+let secretToPublicWithoutNorm_p256 #l = secretToPublicWithoutNorm_ #P256 #l
+
 
 [@CInline]
-val secretToPublicWithoutNorm_p384: result: point P384
+val secretToPublicWithoutNorm_p384: #l: ladder -> result: point P384
   -> scalar: scalar_t #MUT #P384
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
@@ -635,7 +634,7 @@ val secretToPublicWithoutNorm_p384: result: point P384
     p1 == rN))  
 
 
-let secretToPublicWithoutNorm_p384 = secretToPublicWithoutNorm_ #P384
+let secretToPublicWithoutNorm_p384 #l = secretToPublicWithoutNorm_ #P384 #l
 (* 
 [@CInline]
 val secretToPublicWithoutNorm_generic: result: point Default
@@ -652,8 +651,8 @@ val secretToPublicWithoutNorm_generic: result: point Default
 let secretToPublicWithoutNorm_generic = secretToPublicWithoutNorm_ #Default *)
 
 
-let secretToPublicWithoutNorm #c = 
+let secretToPublicWithoutNorm #c #l = 
   match c with 
-  |P256 -> secretToPublicWithoutNorm_p256
-  |P384 -> secretToPublicWithoutNorm_p384
+  |P256 -> secretToPublicWithoutNorm_p256 #l
+  |P384 -> secretToPublicWithoutNorm_p384 #l
   (* |Default -> secretToPublicWithoutNorm_generic *)

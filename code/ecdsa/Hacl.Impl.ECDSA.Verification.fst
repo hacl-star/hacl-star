@@ -180,6 +180,7 @@ let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 p 0
 
 inline_for_extraction noextract
 val ecdsa_verification_step5_0: #c: curve 
+  -> #l: ladder 
   -> points:lbuffer uint64 (getCoordinateLenU64 c *! 6ul)
   -> pubKeyAsPoint: point c
   -> u1: scalar_t #MUT #c
@@ -202,14 +203,14 @@ val ecdsa_verification_step5_0: #c: curve
     fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D))))
     
 
-let ecdsa_verification_step5_0 #c points pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5_0 #c #l points pubKeyAsPoint u1 u2 tempBuffer =
     let h0 = ST.get() in 
     let pointU1G = sub points (size 0) (getCoordinateLenU64 c *! 3ul) in
     let pointU2Q = sub points (getCoordinateLenU64 c *! 3ul) (getCoordinateLenU64 c *! 3ul) in
-  secretToPublicWithoutNorm #c pointU1G u1 tempBuffer; 
+  secretToPublicWithoutNorm #c #l pointU1G u1 tempBuffer; 
     let h1 = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint; 
-  scalarMultiplicationWithoutNorm pubKeyAsPoint pointU2Q u2 tempBuffer;
+  scalarMultiplicationWithoutNorm #c #l pubKeyAsPoint pointU2Q u2 tempBuffer;
     let h2 = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 pointU1G
 
@@ -264,6 +265,7 @@ let ecdsa_verification_step5_1 #c points result tempBuffer =
 
 inline_for_extraction noextract
 val ecdsa_verification_step5_2: #c: curve 
+  -> #l: ladder 
   -> result: point c
   -> pubKeyAsPoint: point c
   -> u1: scalar_t #MUT #c
@@ -283,14 +285,14 @@ val ecdsa_verification_step5_2: #c: curve
     point_as_nat c h1 result == _norm (pointAdd #c u1D u2D)))
 
 
-let ecdsa_verification_step5_2 #c result pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5_2 #c #l result pubKeyAsPoint u1 u2 tempBuffer =
     let h0 = ST.get() in 
   push_frame(); 
     let len: FStar.UInt32.t = getCoordinateLenU64 c in 
     let points = create (len *! 6ul) (u64 0) in 
     let h1 = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint;
-  ecdsa_verification_step5_0 points pubKeyAsPoint u1 u2 tempBuffer; 
+  ecdsa_verification_step5_0 #c #l points pubKeyAsPoint u1 u2 tempBuffer; 
     let h2 = ST.get() in 
       assume(
 	let p, q = getU1U2 #c points in 
@@ -306,6 +308,7 @@ let ecdsa_verification_step5_2 #c result pubKeyAsPoint u1 u2 tempBuffer =
 
 inline_for_extraction noextract
 val ecdsa_verification_step5: #c: curve 
+  -> #l: ladder
   -> x: felem c
   -> pubKeyAsPoint: point c
   -> u1: scalar_t #MUT #c
@@ -328,14 +331,14 @@ val ecdsa_verification_step5: #c: curve
     isPointAtInfinityState = not (isPointAtInfinity normSum)))
     
 
-let ecdsa_verification_step5 #c x pubKeyAsPoint u1 u2 tempBuffer =
+let ecdsa_verification_step5 #c #l x pubKeyAsPoint u1 u2 tempBuffer =
   let h0 = ST.get() in 
     push_frame();
         let len: FStar.UInt32.t = getCoordinateLenU64 c in 
     let result = create (len *! size 3) (u64 0) in
   let h1 = ST.get() in 
       Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint;
-  ecdsa_verification_step5_2 result pubKeyAsPoint u1 u2 tempBuffer;
+  ecdsa_verification_step5_2 #c #l result pubKeyAsPoint u1 u2 tempBuffer;
   let resultIsPAI = isPointAtInfinityPublic #c result in
   let xCoordinateSum = sub result (size 0) (getCoordinateLenU64 c) in
   copy x xCoordinateSum;
@@ -343,8 +346,10 @@ let ecdsa_verification_step5 #c x pubKeyAsPoint u1 u2 tempBuffer =
   pop_frame();
   not resultIsPAI
 
+
 inline_for_extraction
-val ecdsa_verification_step45:  #c: curve 
+val ecdsa_verification_step45: #c: curve 
+  -> #l: ladder 
   -> u1: scalar_t #MUT #c
   -> u2: scalar_t #MUT #c
   -> r: felem c
@@ -376,17 +381,18 @@ val ecdsa_verification_step45:  #c: curve
     isPAI = not (isPointAtInfinity normSum)))
 
 
-let ecdsa_verification_step45 #c u1 u2 r s hash x pubKeyAsPoint tempBuffer = 
+let ecdsa_verification_step45 #c #l u1 u2 r s hash x pubKeyAsPoint tempBuffer = 
     let h0 = ST.get() in 
   ecdsa_verification_step4 u1 u2 r s hash;
     let h1 = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint;
-  ecdsa_verification_step5 x pubKeyAsPoint u1 u2 tempBuffer
+  ecdsa_verification_step5 #c #l x pubKeyAsPoint u1 u2 tempBuffer
 
 
 
 inline_for_extraction
 val ecdsa_verification_core_ :#c: curve 
+  -> #l: ladder 
   -> alg: hash_alg_ecdsa
   -> pubKeyAsPoint: point c
   -> hashAsFelem: felem c
@@ -426,7 +432,7 @@ val ecdsa_verification_core_ :#c: curve
     isPointAtInfinityState = not (isPointAtInfinity normSum)))
 
 
-let ecdsa_verification_core_ #c alg pubKeyAsPoint hashAsFelem r s mLen m x tempBuffer =
+let ecdsa_verification_core_ #c #l alg pubKeyAsPoint hashAsFelem r s mLen m x tempBuffer =
     assert_norm (pow2 32 < pow2 61 - 1);
     assert_norm (pow2 32 < pow2 125);
     let h0 = ST.get() in 
@@ -438,13 +444,14 @@ let ecdsa_verification_core_ #c alg pubKeyAsPoint hashAsFelem r s mLen m x tempB
   ecdsa_verification_step23 alg mLen m hashAsFelem;
     let h1 = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint;
-  let r = ecdsa_verification_step45 u1 u2 r s hashAsFelem x pubKeyAsPoint tempBuffer in
+  let r = ecdsa_verification_step45 #c #l u1 u2 r s hashAsFelem x pubKeyAsPoint tempBuffer in
   pop_frame();
   r
 
 inline_for_extraction
 [@ (Comment "  This code is not side channel resistant")] 
 val ecdsa_verification_core: #c: curve 
+  -> #l: ladder 
   -> alg: hash_alg_ecdsa
   -> pubKey: pointAffine c
   -> r: felem c
@@ -472,10 +479,10 @@ val ecdsa_verification_core: #c: curve
 
 
 
-let ecdsa_verification_core #c alg pubKey r s mLen m publicKeyBuffer hashAsFelem x tempBuffer = 
+let ecdsa_verification_core #c #l alg pubKey r s mLen m publicKeyBuffer hashAsFelem x tempBuffer = 
   bufferToJac #c pubKey publicKeyBuffer; 
     let h0 = ST.get() in 
-  let publicKeyCorrect = verifyQValidCurvePoint #c publicKeyBuffer tempBuffer in
+  let publicKeyCorrect = verifyQValidCurvePoint #c #l publicKeyBuffer tempBuffer in
   if publicKeyCorrect = false then false
   else 
     let step1 = ecdsa_verification_step1 #c r s in
@@ -483,13 +490,14 @@ let ecdsa_verification_core #c alg pubKey r s mLen m publicKeyBuffer hashAsFelem
     else
 	let h1 = ST.get() in 
       Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 publicKeyBuffer; 
-      let state = ecdsa_verification_core_ #c alg publicKeyBuffer hashAsFelem r s mLen m x tempBuffer in 
+      let state = ecdsa_verification_core_ #c #l alg publicKeyBuffer hashAsFelem r s mLen m x tempBuffer in 
       if state = false then false
       else cmp_felem_felem_bool #c x r
 
 
 inline_for_extraction
 val ecdsa_verification_: #c: curve 
+  -> #l: ladder
   -> alg: hash_alg_ecdsa
   -> pubKey: pointAffine c
   -> r: felem c
@@ -510,7 +518,7 @@ val ecdsa_verification_: #c: curve
     let s = as_nat c h0 s in
     result == Spec.ECDSA.ecdsa_verification c alg (pubKeyX, pubKeyY) r s (v mLen) (as_seq h0 m)))
 
-let ecdsa_verification_ #c alg pubKey r s mLen m =
+let ecdsa_verification_ #c #l alg pubKey r s mLen m =
   assert_norm (pow2 32 < pow2 61);
   assert_norm (pow2 32 < pow2 125);
   let h0 = ST.get() in 
@@ -525,7 +533,7 @@ let ecdsa_verification_ #c alg pubKey r s mLen m =
     lemma_create_zero_buffer #U64 (3 * v len) c;
     Hacl.Impl.EC.DH.lemma_zero_point_zero_coordinates c h1 publicKeyBuffer;
 
-  let r = ecdsa_verification_core alg pubKey r s mLen m publicKeyBuffer hashAsFelem x tempBuffer in
+  let r = ecdsa_verification_core #c #l alg pubKey r s mLen m publicKeyBuffer hashAsFelem x tempBuffer in
   pop_frame();
     let h2 = ST.get() in 
     assert(modifies0 h0 h2);
@@ -534,6 +542,7 @@ let ecdsa_verification_ #c alg pubKey r s mLen m =
 
 inline_for_extraction
 val ecdsa_verification_to_form: #c: curve 
+  -> #l: ladder 
   -> pubKey: pointAffine8 c
   -> pubKeyBuffer: lbuffer uint64 (size 2 *! getCoordinateLenU64 c) 
   -> r: lbuffer uint8 (getCoordinateLenU c)
@@ -557,7 +566,7 @@ val ecdsa_verification_to_form: #c: curve
     as_nat c h1 pFY == nat_from_bytes_be (as_seq h0 pubKeyY)))
 
 
-let ecdsa_verification_to_form #c pubKey pubKeyBuffer r s rBuffer sBuffer = 
+let ecdsa_verification_to_form #c #l pubKey pubKeyBuffer r s rBuffer sBuffer = 
   let h0 = ST.get() in 
     let len = getCoordinateLenU64 c in 
 
@@ -577,6 +586,7 @@ let ecdsa_verification_to_form #c pubKey pubKeyBuffer r s rBuffer sBuffer =
 
 inline_for_extraction
 val ecdsa_verification: #c: curve 
+  -> #l: ladder 
   -> alg: hash_alg_ecdsa
   -> pubKey: pointAffine8 c
   -> r: lbuffer uint8 (getCoordinateLenU c)
@@ -603,7 +613,7 @@ val ecdsa_verification: #c: curve
     result == Spec.ECDSA.ecdsa_verification c alg (pFX, pFY) r s  (v mLen) (as_seq h0 m)))
 
 
-let ecdsa_verification #c alg pubKey r s mLen m =
+let ecdsa_verification #c #l alg pubKey r s mLen m =
   push_frame();
   let h0 = ST.get() in 
     let len = getCoordinateLenU64 c in 
@@ -611,7 +621,7 @@ let ecdsa_verification #c alg pubKey r s mLen m =
       let publicKeyAsFelem = sub tempBuffer (size 0) (size 2 *! len) in
       let rAsFelem = sub tempBuffer (size 2 *! len) len in 
       let sAsFelem = sub tempBuffer (size 3 *! len) len in 
-  ecdsa_verification_to_form pubKey publicKeyAsFelem r s rAsFelem sAsFelem;
-  let result = ecdsa_verification_ #c alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
+  ecdsa_verification_to_form #c #l pubKey publicKeyAsFelem r s rAsFelem sAsFelem;
+  let result = ecdsa_verification_ #c #l alg publicKeyAsFelem rAsFelem sAsFelem mLen m in 
   pop_frame();
   result

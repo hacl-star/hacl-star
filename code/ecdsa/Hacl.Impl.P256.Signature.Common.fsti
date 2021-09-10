@@ -10,6 +10,7 @@ open Lib.Buffer
 open Spec.ECC
 open Spec.ECC.Curves
 open Hacl.Spec.EC.Definition
+open Hacl.Impl.EC.Core
 
 open Spec.ECDSA
 open FStar.Mul
@@ -65,8 +66,9 @@ val isPointOnCurvePublic: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\ felem_eval c h (getX p) /\ felem_eval c h (getY p) /\ as_nat c h (getZ p) == 1)
   (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ r == isPointOnCurve #c (point_as_nat c h0 p))
 
+
 inline_for_extraction noextract
-val verifyQValidCurvePoint: #c: curve -> pubKey: point c 
+val verifyQValidCurvePoint: #c: curve -> #l: ladder -> pubKey: point c 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
@@ -75,8 +77,9 @@ val verifyQValidCurvePoint: #c: curve -> pubKey: point c
     let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
     ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
 
+
 inline_for_extraction noextract
-val verifyQ: #c: curve -> pubKey: pointAffine8 c -> Stack bool
+val verifyQ: #c: curve -> #l: ladder -> pubKey: pointAffine8 c -> Stack bool
   (requires fun h -> live h pubKey)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ (
     let publicKeyX = nat_from_bytes_be (as_seq h1 (getXAff8 pubKey)) in 

@@ -290,7 +290,7 @@ let isCoordinateValid #c p =
   r  
 
 inline_for_extraction
-val multByOrder: #c: curve {isPrimeGroup c == false} -> result: point c ->  p: point c -> 
+val multByOrder: #c: curve {isPrimeGroup c == false} -> #l: ladder -> result: point c ->  p: point c -> 
   tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack unit 
   (requires fun h -> 
     live h p /\ live h result /\ live h tempBuffer /\ point_eval c h p /\
@@ -299,12 +299,13 @@ val multByOrder: #c: curve {isPrimeGroup c == false} -> result: point c ->  p: p
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
     scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
 
-let multByOrder #c result p tempBuffer =
+let multByOrder #c #l result p tempBuffer =
   recall_contents (order_u8_buffer #c) (Lib.Sequence.of_list (order_u8_list c));
-  scalarMultiplication #c #CONST p result (order_u8_buffer #c) tempBuffer
+  scalarMultiplication #c #CONST #l p result (order_u8_buffer #c) tempBuffer
+
 
 inline_for_extraction noextract
-val multByOrder2: #c: curve {isPrimeGroup c == false} -> result: point c -> p: point c
+val multByOrder2: #c: curve {isPrimeGroup c == false} -> #l: ladder -> result: point c -> p: point c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack unit 
   (requires fun h -> 
     live h p /\ live h result /\ live h tempBuffer /\ point_eval c h p /\
@@ -313,7 +314,7 @@ val multByOrder2: #c: curve {isPrimeGroup c == false} -> result: point c -> p: p
   (ensures fun h0 _ h1  -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
     scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
 
-let multByOrder2 #c result p tempBuffer = 
+let multByOrder2 #c #l result p tempBuffer = 
     let h0 = ST.get() in 
   push_frame();
     let len = getCoordinateLenU64 c in 
@@ -321,14 +322,14 @@ let multByOrder2 #c result p tempBuffer =
     let h = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h p;
   copy_point p pBuffer;
-  multByOrder result pBuffer tempBuffer;
+  multByOrder #c #l result pBuffer tempBuffer;
   pop_frame()  
     
 
 
 [@ (Comment "  This code is not side channel resistant")]
 inline_for_extraction noextract
-val isOrderCorrect: #c: curve {isPrimeGroup c == false}  -> p: point c 
+val isOrderCorrect: #c: curve {isPrimeGroup c == false} -> #l: ladder -> p: point c 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack bool
   (requires fun h -> 
     live h p /\ live h tempBuffer /\ point_eval c h p /\
@@ -338,21 +339,21 @@ val isOrderCorrect: #c: curve {isPrimeGroup c == false}  -> p: point c
     let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) in 
      r == Spec.ECC.isPointAtInfinity pointMultOrder))
 
-let isOrderCorrect #c p tempBuffer = 
+let isOrderCorrect #c #l p tempBuffer = 
     let h0 = ST.get() in 
   push_frame(); 
     let len = getCoordinateLenU64 c in 
     let multResult = create (size 3 *! len) (u64 0) in 
     let h = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h p;
-    multByOrder2 multResult p tempBuffer;
+    multByOrder2 #c #l multResult p tempBuffer;
     let result = isPointAtInfinityPublic #c multResult in  
   pop_frame();
     result
 
 
 inline_for_extraction noextract
-val verifyQValidCurvePoint_: #c: curve -> pubKey: point c 
+val verifyQValidCurvePoint_: #c: curve -> #l: ladder -> pubKey: point c 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
@@ -361,7 +362,7 @@ val verifyQValidCurvePoint_: #c: curve -> pubKey: point c
     let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
     ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
 
-let verifyQValidCurvePoint_ #c pubKey tempBuffer = 
+let verifyQValidCurvePoint_ #c #l pubKey tempBuffer = 
     let h0 = ST.get() in 
   let coordinatesValid = isCoordinateValid pubKey in 
   if not coordinatesValid then false else begin
@@ -373,11 +374,11 @@ let verifyQValidCurvePoint_ #c pubKey tempBuffer =
     let r = normalize_term (isPrimeGroup c) in 
     match r with 
     |true -> coordinatesValid && belongsToCurve
-    |false -> let orderCorrect = isOrderCorrect pubKey tempBuffer in coordinatesValid && belongsToCurve && orderCorrect
+    |false -> let orderCorrect = isOrderCorrect #c #l pubKey tempBuffer in coordinatesValid && belongsToCurve && orderCorrect
   end
 
 
-val verifyQValidCurvePoint_p256: pubKey: point P256 
+val verifyQValidCurvePoint_p256: #l: ladder -> pubKey: point P256 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) -> 
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
@@ -388,7 +389,8 @@ val verifyQValidCurvePoint_p256: pubKey: point P256
 
 let verifyQValidCurvePoint_p256 = verifyQValidCurvePoint_ #P256
 
-val verifyQValidCurvePoint_p384: pubKey: point P384
+
+val verifyQValidCurvePoint_p384: #l: ladder -> pubKey: point P384
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) -> 
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
@@ -411,14 +413,14 @@ let verifyQValidCurvePoint_p384 = verifyQValidCurvePoint_ #P384
 
 let verifyQValidCurvePoint_generic = verifyQValidCurvePoint_ #Default *)
 
-let verifyQValidCurvePoint #c = 
+let verifyQValidCurvePoint #c #l = 
   match c with 
-  |P256 -> verifyQValidCurvePoint_p256
-  |P384 -> verifyQValidCurvePoint_p384
+  |P256 -> verifyQValidCurvePoint_p256 #l
+  |P384 -> verifyQValidCurvePoint_p384 #l
   (* |Default -> verifyQValidCurvePoint_generic *)
 
 
-let verifyQ #c pubKey = 
+let verifyQ #c #l pubKey = 
   push_frame();
     let h0 = ST.get() in
     let len = getCoordinateLenU64 c in 
@@ -427,6 +429,6 @@ let verifyQ #c pubKey =
     let publicKeyJ = create (size 3 *! len) (u64 0) in 
 
   toFormPoint pubKey publicKeyJ; 
-  let r = verifyQValidCurvePoint #c publicKeyJ tempBuffer in 
+  let r = verifyQValidCurvePoint #c #l publicKeyJ tempBuffer in 
   pop_frame();
   r

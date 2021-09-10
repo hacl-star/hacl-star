@@ -126,7 +126,7 @@ let ecdsa_signature_step12 #c alg mLen m result =
 
 #push-options "--ifuel 1"
 inline_for_extraction
-val ecdsa_signature_step45: #c: curve
+val ecdsa_signature_step45: #c: curve -> #l: ladder 
   -> x: felem c
   -> k: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
@@ -140,12 +140,12 @@ val ecdsa_signature_step45: #c: curve
     as_nat c h1 x == xN % getOrder #c /\ (
     if as_nat c h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0)))
 
-let ecdsa_signature_step45 #c x k tempBuffer = 
+let ecdsa_signature_step45 #c #l x k tempBuffer = 
   push_frame();
     let len = getCoordinateLenU64 c in 
     let result = create (size 3 *! len) (u64 0) in 
     let tempForNorm = sub tempBuffer (size 0) (size 17 *! len) in 
-    secretToPublicWithoutNorm #c result k tempBuffer; 
+    secretToPublicWithoutNorm #c #l result k tempBuffer; 
     normX #c result x tempForNorm;
     reduction_prime_2prime_order x x;
   pop_frame();
@@ -240,7 +240,7 @@ let ecdsa_signature_step6 #c result kFelem z r da =
   }
   
 inline_for_extraction
-val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
+val ecdsa_signature_core: #c: curve -> #l: ladder -> alg: hash_alg_ecdsa
   -> r: felem  c
   -> s: felem c
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
@@ -269,7 +269,7 @@ val ecdsa_signature_core: #c: curve -> alg: hash_alg_ecdsa
       uint_v flag == 0)))
 
 
-let ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k = 
+let ecdsa_signature_core #c #l alg r s mLen m privKeyAsFelem k = 
   push_frame();
   let h0 = ST.get() in 
     let len : FStar.UInt32.t = getCoordinateLenU64 c in 
@@ -279,7 +279,7 @@ let ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k =
     
   toUint64ChangeEndian #c k kAsFelem; 
   ecdsa_signature_step12 #c alg mLen m hashAsFelem; 
-  let step5Flag = ecdsa_signature_step45 #c r k tempBuffer in 
+  let step5Flag = ecdsa_signature_step45 #c #l r k tempBuffer in 
   ecdsa_signature_step6 #c s kAsFelem hashAsFelem r privKeyAsFelem; 
   let sIsZero = isZero_uint64_CT #c s in 
   logor_lemma step5Flag sIsZero;
@@ -288,7 +288,7 @@ let ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k =
 
 
 inline_for_extraction noextract
-val ecdsa_signature_: #c: curve -> alg : hash_alg_ecdsa 
+val ecdsa_signature_: #c: curve -> #l: ladder -> alg : hash_alg_ecdsa 
   -> privKey: scalar_t #MUT #c 
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
   -> m: lbuffer uint8 mLen 
@@ -306,11 +306,11 @@ val ecdsa_signature_: #c: curve -> alg : hash_alg_ecdsa
     as_nat c h1 r < pow2 (getPower c) /\ as_nat c h1 s < pow2 (getPower c) /\
     as_nat c h1 r == r_ /\ as_nat c h1 s == s_ /\  f == flag))
 
-let ecdsa_signature_ #c alg privKey mLen m k r s = 
+let ecdsa_signature_ #c #l alg privKey mLen m k r s = 
   push_frame();
     let privKeyAsFelem = create (getCoordinateLenU64 c) (u64 0) in 
   toUint64ChangeEndian #c privKey privKeyAsFelem; 
-  let flagU64 = ecdsa_signature_core #c alg r s mLen m privKeyAsFelem k in
+  let flagU64 = ecdsa_signature_core #c #l alg r s mLen m privKeyAsFelem k in
   let open Hacl.Impl.EC.LowLevel.RawCmp in 
   pop_frame();
   unsafe_bool_of_u64 flagU64
@@ -318,6 +318,7 @@ let ecdsa_signature_ #c alg privKey mLen m k r s =
 
 inline_for_extraction noextract
 val ecdsa_signature: #c: curve 
+  -> #l: ladder 
   -> alg: hash_alg_ecdsa 
   -> result: pointAffine8 c
   -> mLen: size_t {v mLen >= Spec.ECDSA.min_input_length #c alg}
@@ -342,7 +343,7 @@ val ecdsa_signature: #c: curve
     flag == flagSpec))
 
 
-let ecdsa_signature #c alg result mLen m privKey k = 
+let ecdsa_signature #c #l alg result mLen m privKey k = 
   push_frame();
   let h0 = ST.get() in 
     let len: FStar.UInt32.t = getCoordinateLenU64 c in 
@@ -351,7 +352,7 @@ let ecdsa_signature #c alg result mLen m privKey k =
     let resultR = sub result (size 0) (getCoordinateLenU c) in 
     let resultS = sub result (getCoordinateLenU c) (getCoordinateLenU c) in 
 
-  let flag = ecdsa_signature_ #c alg privKey mLen m k r s in
+  let flag = ecdsa_signature_ #c #l alg privKey mLen m k r s in
   let h1 = ST.get() in 
   fromForm #c r resultR;
   fromForm #c s resultS;

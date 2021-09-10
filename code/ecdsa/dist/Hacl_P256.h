@@ -236,7 +236,18 @@ uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar);
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+uint64_t Hacl_P256_ecp256dh_r_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+/*
+ This code is not side channel resistant on pub_key. 
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  
+*/
+uint64_t Hacl_P256_ecp256dh_r_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 /*
  This code is not side channel resistant on pub_key. 

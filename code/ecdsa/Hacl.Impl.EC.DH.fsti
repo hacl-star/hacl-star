@@ -37,6 +37,7 @@ val lemma_zero_point_zero_coordinates: c: curve -> h: mem -> p: point c ->
 
 inline_for_extraction noextract
 val ecp256dh_r: #c: curve 
+  -> #l: ladder 
   -> result: pointAffine8 c
   -> pubKey: pointAffine8 c
   -> scalar: scalar_t #MUT #c 

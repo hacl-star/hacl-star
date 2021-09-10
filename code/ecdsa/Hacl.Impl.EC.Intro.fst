@@ -135,7 +135,7 @@ val lemma_change_endian: #c: curve -> #l: size_nat {l > 0}
   -> a: Lib.Sequence.lseq uint64 l
   -> b: Lib.Sequence.lseq uint64 l -> 
   Lemma 
-  (requires (Hacl.Impl.EC.Intro.changedEndian_  #l a b))
+  (requires (changedEndian_  #l a b))
   (ensures (nat_from_intseq_le a == nat_from_intseq_be b))
 
 let lemma_change_endian #c a b = 

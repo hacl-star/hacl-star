@@ -92,7 +92,7 @@ val normX: #c: curve -> p: point c -> result: felem c
 
 
 inline_for_extraction noextract
-val scalarMultiplication: #c: curve -> #buf_type: buftype 
+val scalarMultiplication: #c: curve -> #buf_type: buftype -> #l: ladder
   -> p: point c
   -> result: point c 
   -> scalar: scalar_t #buf_type #c
@@ -106,7 +106,7 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype
     pD == point_as_nat c h1 result))
 
 inline_for_extraction noextract
-val scalarMultiplicationWithoutNorm: #c: curve -> p: point c -> result: point c 
+val scalarMultiplicationWithoutNorm: #c: curve  -> #l: ladder -> p: point c -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
@@ -133,7 +133,7 @@ val secretToPublic: #c: curve -> #l: ladder -> result: point c
 
 
 inline_for_extraction noextract
-val secretToPublicWithoutNorm: #c: curve -> result: point c 
+val secretToPublicWithoutNorm: #c: curve -> #l: ladder ->  result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
