@@ -686,3 +686,29 @@ let mul_atomic x y result temp =
   let l0, h0 = to_u64 res, to_u64 (res >>. 64ul) in 
   upd result (size 0) l0;
   upd temp (size 0) h0
+
+
+
+
+let copy_point #c p result = 
+  let h0 = ST.get() in 
+    copy result p;
+  let h1 = ST.get() in 
+    lemma_equal_lseq_equal_nat (as_seq h0 p) (as_seq h1 result);
+
+    let xP = as_seq h0 (getX p) in 
+    let yP = as_seq h0 (getY p) in 
+    let zP = as_seq h0 (getZ p) in 
+    
+    let xR = as_seq h1 (getX result) in 
+    let yR = as_seq h1 (getY result) in 
+    let zR = as_seq h1 (getZ result) in 
+
+
+    assert(as_seq h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) == 
+      as_seq h1 (gsub result (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)));
+
+    lemma_equal_lseq_equal_nat xP xR;
+    lemma_equal_lseq_equal_nat yP yR;
+    lemma_equal_lseq_equal_nat zP zR
+ 

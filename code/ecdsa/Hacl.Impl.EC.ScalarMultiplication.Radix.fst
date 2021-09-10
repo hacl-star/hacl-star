@@ -1,6 +1,6 @@
- module Hacl.Impl.EC.ScalarMultiplication.Radix
+module Hacl.Impl.EC.ScalarMultiplication.Radix
 
-(*open FStar.HyperStack.All
+open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
@@ -39,4 +39,3 @@ val generatePrecomputedTableRadix: #c: curve
 
 
 let generatePrecomputedTableRadix #c generator b = admit()
- *)

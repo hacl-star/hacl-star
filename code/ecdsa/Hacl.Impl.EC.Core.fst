@@ -122,29 +122,6 @@ let pointFromDomain #c p result =
   fromDomain #c p_z r_z
 
 
-let copy_point #c p result = 
-  let h0 = ST.get() in 
-    copy result p;
-  let h1 = ST.get() in 
-    lemma_equal_lseq_equal_nat (as_seq h0 p) (as_seq h1 result);
-
-    let xP = as_seq h0 (getX p) in 
-    let yP = as_seq h0 (getY p) in 
-    let zP = as_seq h0 (getZ p) in 
-    
-    let xR = as_seq h1 (getX result) in 
-    let yR = as_seq h1 (getY result) in 
-    let zR = as_seq h1 (getZ result) in 
-
-
-    assert(as_seq h0 (gsub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)) == 
-      as_seq h1 (gsub result (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c)));
-
-    lemma_equal_lseq_equal_nat xP xR;
-    lemma_equal_lseq_equal_nat yP yR;
-    lemma_equal_lseq_equal_nat zP zR
- 
-
 let getPower2 c = pow2 (getPower c)
 
 
@@ -392,24 +369,33 @@ let uploadStartPoints #c q p result =
 
 
 inline_for_extraction noextract
-val scalar_multiplication_t_0: #c: curve -> #t:buftype -> q: point c -> p: point c -> result: point c -> 
+val scalar_multiplication_t_0: #c: curve -> #t:buftype -> #l : ladder ->  p: point c -> result: point c -> 
   scalar: scalar_t #t #c -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
   Stack unit 
-  (requires fun h -> live h q /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+  (requires fun h -> True (* live h q /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
     disjoint q result /\ eq_or_disjoint p result /\ disjoint result tempBuffer /\ disjoint result scalar /\
-    point_eval c h p /\ ~ (isPointAtInfinity (point_as_nat c h p)))
-  (ensures fun h0 _ h1 -> modifies (loc q |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 q /\ (
+    point_eval c h p /\ ~ (isPointAtInfinity (point_as_nat c h p)) *))
+  (ensures fun h0 _ h1 -> True (* modifies (loc q |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 q /\ (
     let i1 = point_as_nat c h0 p in point_mult_0 i1 0; 
     let pD = fromDomainPoint #c #DH (point_as_nat c h1 q) in
     let r0, r1 = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, i1) in 
-    pD == r0))
+    pD == r0 *))
 
 
-let scalar_multiplication_t_0 #c q p result scalar tempBuffer = 
-  uploadStartPoints q p result; 
-  montgomery_ladder q result scalar tempBuffer
+let scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer = 
+    let len = getCoordinateLenU64 c in 
+  match l with 
+  |ML -> begin
+    let q = sub tempBuffer (size 0) (size 3 *! len) in 
+    uploadStartPoints q p result; 
+    montgomery_ladder q result scalar tempBuffer;
+    copy q result
+    end
+  |Radix -> 
+    pointToDomain #c p result;
+    Hacl.Impl.EC.ScalarMult.Radix.scalar_multiplication_t_0 #c result result scalar tempBuffer
 
 
 val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c -> Lemma (point_mult #c 0 p == pointAtInfinity)
@@ -435,10 +421,8 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> p: point c -> result: poi
 let scalarMultiplication_t #c #t p result scalar tempBuffer  = 
     let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
-  let q = sub tempBuffer (size 0) (size 3 *! len) in 
-  let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in
-  scalar_multiplication_t_0 #c #t q p result scalar buff; 
-  norm q result buff; 
+  scalar_multiplication_t_0 #c #t #Radix p result scalar tempBuffer; 
+  norm result result tempBuffer; 
   let i1 = point_as_nat c h0 p in 
     point_mult0_is_infinity i1
 
@@ -478,7 +462,7 @@ let scalarMultiplicationWithoutNorm_ #c p result scalar tempBuffer =
   let len = getCoordinateLenU64 c in 
   let q = sub tempBuffer (size 0) (size 3 *! len) in 
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in
-  normalize_term (scalar_multiplication_t_0 #c #MUT q p result scalar buff); 
+  normalize_term (scalar_multiplication_t_0 #c #MUT #Radix p result scalar buff); 
   copy_point q result
 
 val scalarMultiplicationWithoutNorm_p256: p: point P256 -> result: point P256
