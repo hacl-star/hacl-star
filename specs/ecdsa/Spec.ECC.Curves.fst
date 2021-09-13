@@ -90,7 +90,7 @@ let invert_state_s (a: curve): Lemma
 let prime256: (a: pos {a > 3 && a < pow2 256}) =
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 > 3);
   assert_norm (pow2 256 - pow2 224 + pow2 192 + pow2 96 -1 < pow2 256);
-  pow2 256 - pow2 224 + pow2 192 + pow2 96 -1
+  pow2 256 - pow2 224 + pow2 192 + pow2 96 - 1
 
 let prime384: (a: pos {a > 3 && a < pow2 384}) = 
   assert_norm(pow2 384 - pow2 128 - pow2 96 + pow2 32 - 1 > 3);
@@ -259,7 +259,10 @@ let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (r: int {r < prime}) =
 
 (* a coordinate of the curve *)
 inline_for_extraction
-let aCoordinate (#c: curve) = -3 
+let aCoordinate #curve = 
+  match curve with 
+  |P256 -> 0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc
+  |P384 -> 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000fffffffc
 
 (* b coordinate of the curve *)
 inline_for_extraction
@@ -267,7 +270,8 @@ let bCoordinate #curve : (a: nat {a < (getPrime curve)}) =
   match curve with 
   |P256 -> assert_norm (41058363725152142129326129780047268409114441015993725554835256314039467401291 < getPrime P256);
     41058363725152142129326129780047268409114441015993725554835256314039467401291
-  |P384 -> assert_norm (27580193559959705877849011840389048093056905856361568521428707301988689241309860865136260764883745107765439761230575 < getPrime P384); 27580193559959705877849011840389048093056905856361568521428707301988689241309860865136260764883745107765439761230575
+  |P384 -> assert_norm (0xb3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef < getPrime P384); 
+    0xb3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef
 
 
 inline_for_extraction

@@ -33,29 +33,6 @@ open FStar.Mul
 
 
 
-inline_for_extraction noextract
-val uploadB: #c: curve -> b: felem c -> Stack unit 
-  (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> 
-    let prime = getPrime c in 
-    modifies (loc b) h0 h1 /\ as_nat c h1 b < prime /\ 
-    as_nat c h1 b == toDomain_ #c #DH (bCoordinate #c)
-  )
-
-let uploadB #c b = 
-  match c with 
-  |P256 -> 
-    upd b (size 0) (u64 15608596021259845087);
-    upd b (size 1) (u64 12461466548982526096);
-    upd b (size 2) (u64 16546823903870267094);
-    upd b (size 3) (u64 15866188208926050356);
-
-    lemmaToDomain #c #DH (bCoordinate #c);
-    assert_norm (15608596021259845087 + 12461466548982526096 * pow2 64 + 16546823903870267094 * pow2 64 * pow2 64 + 15866188208926050356 * pow2 64 * pow2 64 * pow2 64 == (bCoordinate #P256 * pow2 256 % prime256))
-  |P384 -> 
-    admit()
-
-
 val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 -> Stack unit 
   (requires fun h -> live h x /\ live h result /\ as_nat c h x < prime256 /\ disjoint x result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\

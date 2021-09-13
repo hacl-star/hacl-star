@@ -13,6 +13,7 @@ open Spec.ECC
 open Spec.ECC.Curves
 open FStar.Mul
 
+
 noextract 
 val lst_as_nat_: #t:inttype{unsigned t} -> a: list (uint_t t SEC) -> i: nat {i <= List.Tot.Base.length a} -> Tot nat
 
@@ -549,45 +550,85 @@ let order_u8_buffer (#c: curve): (x: glbuffer uint8 (getCoordinateLenU c)
   prime256_order_
 
 
-
 inline_for_extraction noextract
 val uploadA: #c: curve -> a: felem c -> Stack unit
   (requires fun h -> live h a)
-  (ensures fun h0 _ h1 ->
-    let prime = getPrime c in 
-    modifies (loc a) h0 h1 /\ 
-    as_nat c h1 a == toDomain_ #c #DH (aCoordinate #c % prime) /\
-    as_nat c h1 a < prime
-  )
+  (ensures fun h0 _ h1 -> modifies (loc a) h0 h1 /\ 
+    as_nat c h1 a == toDomain_ #c #DH (aCoordinate #c % getPrime c) /\
+    as_nat c h1 a == toDomain_ #c #DH (aCoordinate #c) /\
+    as_nat c h1 a < getPrime c)
 
 let uploadA #c a = 
   match c with 
-    |P256 -> 
-      upd a (size 0) (u64 18446744073709551612);
-      upd a (size 1) (u64 17179869183);
-      upd a (size 2) (u64 0);
-      upd a (size 3) (u64 18446744056529682436);
-      
-      let prime = getPrime c in 
-      lemmaToDomain #c #DH (aCoordinate #c % prime);
-      assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256)
+  |P256 -> 
+    upd a (size 0) (u64 18446744073709551612);
+    upd a (size 1) (u64 17179869183);
+    upd a (size 2) (u64 0);
+    upd a (size 3) (u64 18446744056529682436);
 
-    |P384 -> 
-            upd a (size 0) (u64 18446744073709551612);
-      upd a (size 1) (u64 17179869183);
-      upd a (size 2) (u64 0);
-      upd a (size 3) (u64 18446744056529682436);
-      
-      let prime = getPrime c in 
-      lemmaToDomain #c #DH (aCoordinate #c % prime);
-      assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256)
-    (*|Default ->
-      upd a (size 0) (u64 18446744073709551612);
-      upd a (size 1) (u64 17179869183);
-      upd a (size 2) (u64 0);
-      upd a (size 3) (u64 18446744056529682436);
-      
-      let prime = getPrime c in 
-      lemmaToDomain #c #DH (aCoordinate #c % prime);
-      assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 64 * pow2 64 * pow2 64 = (aCoordinate #P256 % prime256) * pow2 256 % prime256) *)
+    let prime = getPrime c in  
+    lemmaToDomain #c #DH (aCoordinate #c % prime);
+    lemmaToDomain #c #DH (aCoordinate #c);
+    
+    assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 (64 * 3) = aCoordinate #P256 * pow2 256 % prime256);
 
+    lemma_mod_mul_distr_l (aCoordinate #P256) (pow2 256) prime; 
+    let h1 = ST.get() in 
+    Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 a)
+    
+  |P384 -> 
+    upd a (size 0) (u64 0x3fffffffc);
+    upd a (size 1) (u64 0xfffffffc00000000);
+    upd a (size 2) (u64 0xfffffffffffffffb);
+    upd a (size 3) (u64 0xffffffffffffffff);
+    upd a (size 4) (u64 0xffffffffffffffff);
+    upd a (size 5) (u64 0xffffffffffffffff);
+
+    let prime = getPrime c in  
+    lemmaToDomain #c #DH (aCoordinate #c % prime);
+    lemmaToDomain #c #DH (aCoordinate #c);
+    
+    assert_norm(
+      0x3fffffffc + 0xfffffffc00000000 * pow2 64 + 0xfffffffffffffffb * pow2 (64 * 2) + 
+      0xffffffffffffffff * pow2 (64 * 3) + 0xffffffffffffffff * pow2 (64 * 4) + 0xffffffffffffffff * pow2 (64 * 5) =
+      aCoordinate #P384 * pow2 384 % prime384);
+
+    lemma_mod_mul_distr_l (aCoordinate #P384) (pow2 384) prime; 
+    let h1 = ST.get() in 
+    Hacl.Impl.P384.LowLevel.lemma_lseq_nat_instant_6 (as_seq h1 a)
+
+
+inline_for_extraction noextract
+val uploadB: #c: curve -> b: felem c -> Stack unit 
+  (requires fun h -> live h b)
+  (ensures fun h0 _ h1 -> 
+    modifies (loc b) h0 h1 /\ as_nat c h1 b < getPrime c /\ 
+    as_nat c h1 b == toDomain_ #c #DH (bCoordinate #c))
+
+
+let uploadB #c b = 
+  match c with 
+  |P256 -> 
+    upd b (size 0) (u64 15608596021259845087);
+    upd b (size 1) (u64 12461466548982526096);
+    upd b (size 2) (u64 16546823903870267094);
+    upd b (size 3) (u64 15866188208926050356);
+    
+    assert_norm (15608596021259845087 + 12461466548982526096 * pow2 64 + 16546823903870267094 * pow2 (64 * 2) + 15866188208926050356 * pow2 (64 * 3) == (bCoordinate #P256 * pow2 256 % prime256));
+    lemmaToDomain #c #DH (bCoordinate #c);
+
+    let h1 = ST.get() in 
+     Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 b)
+  |P384 -> 
+    upd b (size 0) (u64 0x81188719d412dcc);
+    upd b (size 1) (u64 0xf729add87a4c32ec);
+    upd b (size 2) (u64 0x77f2209b1920022e);
+    upd b (size 3) (u64 0xe3374bee94938ae2);
+    upd b (size 4) (u64 0xb62b21f41f022094);	
+    upd b (size 5) (u64 0xcd08114b604fbff9);
+
+    assert_norm (0x81188719d412dcc + 0xf729add87a4c32ec * pow2 64 + 0x77f2209b1920022e * pow2 (64 * 2) + 0xe3374bee94938ae2 * pow2 (64 * 3) + 0xb62b21f41f022094 * pow2 (64 * 4) + 0xcd08114b604fbff9 * pow2 (64 * 5)  == (bCoordinate #P384 * pow2 384 % prime384));
+    lemmaToDomain #c #DH (bCoordinate #c);
+
+    let h1 = ST.get() in 
+     Hacl.Impl.P384.LowLevel.lemma_lseq_nat_instant_6 (as_seq h1 b)
