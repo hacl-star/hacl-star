@@ -566,13 +566,12 @@ let uploadA #c a =
     upd a (size 2) (u64 0);
     upd a (size 3) (u64 18446744056529682436);
 
-    let prime = getPrime c in  
-    lemmaToDomain #c #DH (aCoordinate #c % prime);
+    lemmaToDomain #c #DH (aCoordinate #c % getPrime c);
     lemmaToDomain #c #DH (aCoordinate #c);
     
     assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 (64 * 3) = aCoordinate #P256 * pow2 256 % prime256);
 
-    lemma_mod_mul_distr_l (aCoordinate #P256) (pow2 256) prime; 
+    lemma_mod_mul_distr_l (aCoordinate #P256) (pow2 256) (getPrime c); 
     let h1 = ST.get() in 
     Hacl.Impl.P256.LowLevel.lemma_lseq_nat_instant_4 (as_seq h1 a)
     
@@ -584,16 +583,15 @@ let uploadA #c a =
     upd a (size 4) (u64 0xffffffffffffffff);
     upd a (size 5) (u64 0xffffffffffffffff);
 
-    let prime = getPrime c in  
-    lemmaToDomain #c #DH (aCoordinate #c % prime);
+    lemmaToDomain #c #DH (aCoordinate #c % getPrime c);
     lemmaToDomain #c #DH (aCoordinate #c);
     
     assert_norm(
       0x3fffffffc + 0xfffffffc00000000 * pow2 64 + 0xfffffffffffffffb * pow2 (64 * 2) + 
       0xffffffffffffffff * pow2 (64 * 3) + 0xffffffffffffffff * pow2 (64 * 4) + 0xffffffffffffffff * pow2 (64 * 5) =
-      aCoordinate #P384 * pow2 384 % prime384);
+      aCoordinate #P384 * pow2 384 % getPrime c);
 
-    lemma_mod_mul_distr_l (aCoordinate #P384) (pow2 384) prime; 
+    lemma_mod_mul_distr_l (aCoordinate #P384) (pow2 384) (getPrime c); 
     let h1 = ST.get() in 
     Hacl.Impl.P384.LowLevel.lemma_lseq_nat_instant_6 (as_seq h1 a)
 

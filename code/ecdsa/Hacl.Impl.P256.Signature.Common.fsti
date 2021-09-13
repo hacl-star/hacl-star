@@ -43,6 +43,12 @@ val fromFormPoint: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit
     as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateX_u64 /\
     as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateY_u64))
 
+
+inline_for_extraction noextract
+val toForm: #c: curve -> i: coordinateAffine8 c -> o: felem c -> Stack unit
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat c h1 o == nat_from_bytes_be (as_seq h0 i))
+
 inline_for_extraction noextract
 val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o)

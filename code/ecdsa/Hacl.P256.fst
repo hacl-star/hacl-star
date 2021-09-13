@@ -6,19 +6,10 @@ module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
 open Lib.Buffer
-open Lib.ByteSequence
 
 open Spec.DH
-(* open Hacl.Spec.ECDSA.Definition *)
-
-open Lib.IntTypes
-open Lib.Buffer
-open Lib.ByteSequence
-
-open FStar.Mul
 
 open Spec.ECC
-(* open Spec.ECC.Lemmas *)
 open Hacl.Spec.EC.Definition
 
 open Spec.ECDSA
@@ -43,6 +34,8 @@ let ecdsa_sign_p256_without_hash result mLen m privKey k =
   ecdsa_signature #P256 #ML NoHash result mLen m privKey k
 
 
+
+
 let ecdsa_verif_p256_sha2 mLen m pubKey r s = 
   ecdsa_verification #P256 #ML (Hash SHA2_256) pubKey r s mLen m
 
@@ -56,26 +49,27 @@ let ecdsa_verif_without_hash mLen m pubKey r s  =
    ecdsa_verification #P256 #ML NoHash pubKey r s mLen m
 
 
+
 let verify_q pubKey = 
     Hacl.Impl.P256.Signature.Common.verifyQ #P256 #ML pubKey
 
-(*)
-let decompression_not_compressed_form b result = 
+
+
+let decompression_not_compressed_form_p256 b result = 
   Hacl.Impl.P256.Compression.decompressionNotCompressedForm #P256 b result
 
-let decompression_compressed_form b result = 
+let decompression_compressed_form_p256 b result = 
   Hacl.Impl.P256.Compression.decompressionCompressedForm #P256 b result
 
 
-
-let compression_not_compressed_form b result = 
+let compression_not_compressed_form_p256 b result = 
   Hacl.Impl.P256.Compression.compressionNotCompressedForm #P256 b result
 
-let compression_compressed_form b result = 
+let compression_compressed_form_p256 b result = 
   Hacl.Impl.P256.Compression.compressionCompressedForm #P256 b result
 
 
- *)
+
 
 let ecp256dh_i_ml result scalar = Hacl.Impl.EC.DH.ecp256dh_i P256 ML result scalar
 

@@ -95,12 +95,6 @@ let fromFormPoint #c i o =
 
 
 
-
-inline_for_extraction noextract
-val toForm: #c: curve -> i: coordinateAffine8 c -> o: felem c -> Stack unit
-  (requires fun h -> live h i /\ live h o /\ disjoint i o)
-  (ensures  fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_nat c h1 o == nat_from_bytes_be (as_seq h0 i))
-
 let toForm #c i o = 
   let open Lib.ByteSequence in 
     let h0 = ST.get() in 

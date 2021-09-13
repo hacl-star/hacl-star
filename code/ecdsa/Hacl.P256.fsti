@@ -11,7 +11,6 @@ open Lib.ByteSequence
 open FStar.Mul
 open Spec.ECC
 open Spec.ECC.Curves
-(* open Spec.ECC.Lemmas *)
 open Hacl.Spec.EC.Definition
 open Spec.Hash.Definitions
 
@@ -242,8 +241,8 @@ val verify_q:
       )
     )
 
-(*)
-(*
+
+
 [@ (Comment " There and further we introduce notions of compressed point and not compressed point. 
   \n We denote || as byte concatenation. 
   \n A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
@@ -252,102 +251,89 @@ val verify_q:
   \n \n Input: a point in not compressed form (uint8[65]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
  ")]
-*)
-
-
-val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val decompression_not_compressed_form_p256: b: notCompressedForm P256 -> result: lbuffer uint8 (getCoordinateLenU P256 *! 2ul) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
-    (
-      let id = Lib.Sequence.index (as_seq h0 b) 0 in 
-      let x = Lib.Sequence.sub (as_seq h0 b) 1 32 in 
-      let xResult = Lib.Sequence.sub (as_seq h1 result) 0 32 in 
-      let y = Lib.Sequence.sub (as_seq h0 b) 33 32 in 
-      let yResult = Lib.Sequence.sub (as_seq h1 result) 32 32 in 
-      if uint_v id = 4 then 
-	r == true /\ x == xResult /\ y == yResult
-      else 
-	r == false
-    )
-)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+    let len = getCoordinateLen P256 in 
+    
+    let id = Lib.Sequence.index (as_seq h0 b) 0 in 
+    let x = Lib.Sequence.sub (as_seq h0 b) 1 len in 
+    let y = Lib.Sequence.sub (as_seq h0 b) (len + 1) len in 
 
-(*
+    let xResult = Lib.Sequence.sub (as_seq h1 result) 0 len in 
+    let yResult = Lib.Sequence.sub (as_seq h1 result) len len in 
+    if uint_v id = 4 then 
+       r == true /\ x == xResult /\ y == yResult
+    else 
+      r == false))
+
+
 [@ (Comment " Input: a point in compressed form (uint8[33]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
  ")]
-*)
-
-val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val decompression_compressed_form_p256: b: compressedForm P256
+  -> result: lbuffer uint8 (getCoordinateLenU P256 *! 2ul) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
-  (ensures fun h0 r h1 -> 
-    (
-      let id = Lib.Sequence.index (as_seq h0 b) 0 in 
-      let xSequence = Lib.Sequence.sub (as_seq h0 b) 1 32 in 
-      let x =  Lib.ByteSequence.nat_from_bytes_be xSequence in 
-      if uint_v id = 2 || uint_v id = 3 then
-        if x < prime256 then 
-          r == true /\ 
-        (
-          let y = 
-            let sq = sq_root_spec #P256 (((x * x * x + aCoordinate #P256 * x + bCoordinate #P256) % prime256)) in 
-              if (uint_v id) % 2 = (sq % 2) then 
-                sq
-              else
-              (0 - sq) % prime256 
-          in 
-          as_seq h1 (gsub result (size 0) (size 32)) == xSequence /\
-          as_seq h1 (gsub result (size 32) (size 32)) == Lib.ByteSequence.nat_to_bytes_be 32 y)
-        else 
-          r == false
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+    let len = getCoordinateLen P256 in 
+    let prime = getPrime P256 in 
+    
+    let id = Lib.Sequence.index (as_seq h0 b) 0 in 
+    let xSequence = Lib.Sequence.sub (as_seq h0 b) 1 len in 
+    let x =  Lib.ByteSequence.nat_from_bytes_be xSequence in 
+
+    if uint_v id = 2 || uint_v id = 3 then
+      if x < prime then 
+        r == true /\ (
+        let y = 
+        let sq = sq_root_spec #P256 #DH (((x * x * x + aCoordinate #P256 * x + bCoordinate #P256) % prime)) in 
+        if (uint_v id) % 2 = sq % 2 then 
+          sq
+        else
+          (0 - sq) % prime in 
+        as_seq h1 (gsub result (size 0) (getCoordinateLenU P256)) == xSequence /\
+        as_seq h1 (gsub result (getCoordinateLenU P256) (getCoordinateLenU P256)) == Lib.ByteSequence.nat_to_bytes_be len y)
       else 
         r == false
-    ) /\
-    modifies (loc result) h0 h1
-  )
+    else 
+      r == false))
 
-(*
+
 [@ (Comment " Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[65]).")]
-*)
+val compression_not_compressed_form_p256: b: lbuffer uint8 (getCoordinateLenU P256 *! 2ul) 
+  -> result: notCompressedForm P256 -> Stack unit 
+  (requires fun h -> live h b /\ live h result /\ disjoint b result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    let len = getCoordinateLen P256  in
+    
+    let id = Lib.Sequence.index (as_seq h1 result) 0 in 
+    let x = Lib.Sequence.sub (as_seq h0 b) 0 len in 
+    let y = Lib.Sequence.sub (as_seq h0 b) len len in 
+    
+    let xResult = Lib.Sequence.sub (as_seq h1 result) 1 len in 
+    let yResult = Lib.Sequence.sub (as_seq h1 result) (1 + len) len in 
+    uint_v id == 4 /\ xResult == x /\ yResult == y))
 
 
-val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
-  Stack unit 
-    (requires fun h -> live h b /\ live h result /\ disjoint b result)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      (
-        let id = Lib.Sequence.index (as_seq h1 result) 0 in 
-        let x = Lib.Sequence.sub (as_seq h0 b) 0 32 in 
-        let xResult = Lib.Sequence.sub (as_seq h1 result) 1 32 in 
-        let y = Lib.Sequence.sub (as_seq h0 b) 32 32 in 
-        let yResult = Lib.Sequence.sub (as_seq h1 result) 33 32 in 
-        uint_v id == 4 /\ xResult == x /\ yResult == y  
-      )
-    )
-
-(*
 [@ (Comment " Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[33]).")]
-*)
-
-val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
+val compression_compressed_form_p256: b: lbuffer uint8 (getCoordinateLenU P256 *! 2ul) -> result: compressedForm P256 -> 
   Stack unit 
-    (requires fun h -> live h b /\ live h result /\ disjoint b result)
-    (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-      (
-        let identifier = Lib.Sequence.index (as_seq h1 result) 0 in 
-        let x = Lib.Sequence.sub (as_seq h0 b) 0 32 in 
-        let xResult = Lib.Sequence.sub (as_seq h1 result) 1 32 in 
-        let y = Lib.Sequence.sub (as_seq h0 b) 32 32 in 
-        uint_v identifier == (Lib.ByteSequence.nat_from_intseq_be y % pow2 1)  + 2 /\
-        x == xResult  
-      )  
-  )
+  (requires fun h -> live h b /\ live h result /\ disjoint b result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    let len = getCoordinateLen P256 in
+    
+    let identifier = Lib.Sequence.index (as_seq h1 result) 0 in 
+    let x = Lib.Sequence.sub (as_seq h0 b) 0 len in 
+    let y = Lib.Sequence.sub (as_seq h0 b) len len in 
+    let xResult = Lib.Sequence.sub (as_seq h1 result) 1 len in 
+    uint_v identifier == (Lib.ByteSequence.nat_from_intseq_be y % pow2 1) + 2 /\
+    x == xResult))
 
 
-*)
+
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")]
-
 val ecp256dh_i_ml:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -366,7 +352,6 @@ val ecp256dh_i_ml:
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")]
-
 val ecp256dh_i_radix:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -443,10 +428,9 @@ val ecp256dh_r_radix:
 
 
 
-[@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
+[@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[96], \n pub(lic)Key: uint8[96], \n scalar: uint8[48].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")]
-
 val ecp384dh_r:
     result:lbuffer uint8 (size 96)
   -> pubKey:lbuffer uint8 (size 96)

@@ -112,7 +112,6 @@ let computeYFromX #c x result sign =
 
 
 
-
 let decompressionNotCompressedForm #c b result = 
   let h0 = ST.get() in 
   let compressionIdentifier = index b (size 0) in
@@ -125,14 +124,12 @@ let decompressionNotCompressedForm #c b result =
 inline_for_extraction noextract
 val lessThanPrime: #c: curve -> f: felem c -> Stack bool
   (requires fun h -> live h f)
-  (ensures fun h0 r h1 ->
-    let prime = getPrime c in 
-    modifies0 h0 h1 /\ r = (as_nat c h0 f < prime))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r = (as_nat c h0 f < getPrime c))
 
 let lessThanPrime #c f = 
   push_frame();
     let len = getCoordinateLenU64 c in 
-    let tempBuffer = create c (u64 0) in 
+    let tempBuffer = create len (u64 0) in 
     recall_contents (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
     let carry = sub_bn_prime f tempBuffer in 
     let less = eq_u64_nCT carry (u64 1) in 
@@ -154,9 +151,6 @@ let isIdentifierCorrect compressedIdentifier =
   u8_to_UInt8 isIdentifierCorrect = 255uy
 
 
-
-#push-options "--z3rlimit 500"
-
 let decompressionCompressedForm #c b result = 
   push_frame();
     let h0 = ST.get() in 
@@ -168,17 +162,11 @@ let decompressionCompressedForm #c b result =
     let flag = isIdentifierCorrect compressedIdentifier in 
     if flag then 
     begin
-
-      let x = sub b (size 1) (getCoordinateLen c) in 
+      let x = sub b (size 1) (getCoordinateLenU c) in 
       copy (sub result (size 0) (getCoordinateLenU c)) x;
-      toUint64ChangeEndian #c x t0;
+      Hacl.Impl.P256.Signature.Common.toForm x t0;
 	let h1 = ST.get() in 
-      lemma_core_0 c t0 h1;
-
       let lessThanPrimeXCoordinate = lessThanPrime #c t0 in 
-      (* changeEndianLemma #c (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x)); *)
-	Lib.ByteSequence.uints_from_bytes_be_nat_lemma #U64 #_ #4 (as_seq h0 x);
-
       if not (lessThanPrimeXCoordinate) then 
 	begin
 	  pop_frame();
@@ -187,46 +175,12 @@ let decompressionCompressedForm #c b result =
       else 
 	begin 
 	  toDomain #c t0 t0;
-	  lemmaToDomain #c #DH (as_nat c h1 t0);
-	    let h2 = ST.get() in 
-      (* This is the function from Spec*)
-	    (* assert(as_nat c h2 t0 =  (toDomain_ #c (Lib.ByteSequence.nat_from_intseq_le (changeEndian #c (Lib.ByteSequence.uints_from_bytes_be (as_seq h0 x)))))); *)
-
+	    lemmaToDomain #c #DH (as_nat c h1 t0);
 	  let identifierBit = to_u64 (logand compressedIdentifier (u8 1)) in 
-	  logand_mask compressedIdentifier (u8 1) 1;
+	    logand_mask compressedIdentifier (u8 1) 1;
 	  computeYFromX #c t0 t1 identifierBit;
-	  lemmaToDomainFromDomain #c #DH (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
-
-	    let h3 = ST.get() in 
-	    assert(    
-	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
-	      let sqRootWithoutSign = sq_root_spec #c #DH (((xD * xD * xD + Spec.ECC.Curves.aCoordinate #P256 * xD + Spec.ECC.Curves.bCoordinate #P256) % prime256)) in 
-	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
-		 as_nat c h3 t1 = sqRootWithoutSign 
-	      else
-		as_nat c h3 t1 = (0 - sqRootWithoutSign) % prime256);
-    
-	  changeEndian #c t1;
-	  toUint8 #c t1 (sub result (getCoordinateLenU c) (getCoordinateLenU c)); 
-	   let h5 = ST.get() in 
-     (*  This is the function from Spec *)
-	   (* assert(as_seq h5 (gsub result (size 32) (size 32)) == Lib.ByteSequence.uints_to_bytes_be (changeEndian #c (as_seq h3 t1))); *)
-
-	  lemma_core_0 c t1 h3;
-	  
-	  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h3 t1);
-	  (* changeEndian_le_be #c (as_nat c h3 t1); *)
-	  
-	  assert(   
-	      let xD = Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x) in 
-	      let sqRootWithoutSign = sq_root_spec #c #DH (((xD * xD * xD + Spec.ECC.Curves.aCoordinate #P256 * xD + Spec.ECC.Curves.bCoordinate #P256) % prime256)) in 
-	      let to = as_seq h5 (gsub result (size 32) (size 32)) in 
-	      if sqRootWithoutSign  % pow2 1 = uint_v identifierBit then
-		 to == Lib.ByteSequence.nat_to_bytes_be 32 sqRootWithoutSign 
-	      else
-		to == Lib.ByteSequence.nat_to_bytes_be 32 ((0 - sqRootWithoutSign) % prime256)); 
-
-
+	    lemmaToDomainFromDomain #c #DH (Lib.ByteSequence.nat_from_intseq_be (as_seq h0 x));
+	  Hacl.Impl.P256.Signature.Common.fromForm #c t1 (sub result (getCoordinateLenU c) (getCoordinateLenU c));
 	  pop_frame(); 
 	  true
 	end
@@ -236,8 +190,6 @@ let decompressionCompressedForm #c b result =
       pop_frame();
       false
     end
-
-#pop-options
 
 
 let compressionNotCompressedForm #c b result = 
@@ -250,12 +202,10 @@ let compressionNotCompressedForm #c b result =
 let compressionCompressedForm #c b result = 
   let open Lib.ByteSequence in 
     let h0 = ST.get() in 
-    
   let y = sub b (getCoordinateLenU c) (getCoordinateLenU c) in
     lemma_uint_to_bytes_be_preserves_value (Lib.Sequence.index (as_seq h0 y) 0);
     lemma_nat_from_to_intseq_be_preserves_value (getCoordinateLen c) (as_seq h0 y);
-
-  
+    
   let lastWordY = index y (getCoordinateLenU c -! 1ul) in 
   let lastBitY = logand lastWordY (u8 1) in 
     logand_mask lastWordY (u8 1) 1;
@@ -264,5 +214,5 @@ let compressionCompressedForm #c b result =
   copy (sub result (size 1) (getCoordinateLenU c)) (sub b (size 0) (getCoordinateLenU c)) ;
   
   upd result (size 0) identifier;
-    index_nat_to_intseq_be #U8 #SEC 32 (nat_from_bytes_be (as_seq h0 y)) 0;
+    index_nat_to_intseq_be #U8 #SEC (getCoordinateLen c) (nat_from_bytes_be (as_seq h0 y)) 0;
     pow2_modulo_modulo_lemma_1 (nat_from_intseq_be (as_seq h0 y)) 1 8

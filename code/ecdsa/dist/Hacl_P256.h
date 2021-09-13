@@ -208,6 +208,46 @@ Hacl_P256_ecdsa_verif_without_hash(
 bool Hacl_P256_verify_q(uint8_t *pubKey);
 
 /*
+ There and further we introduce notions of compressed point and not compressed point. 
+  
+ We denote || as byte concatenation. 
+  
+ A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
+  
+ A not Compressed point is a point representation as follows: 0x4 || x || y.
+
+  
+ 
+ Input: a point in not compressed form (uint8[65]), 
+ result: uint8[64] (internal point representation).
+  
+ Output: bool, where true stands for the correct decompression.
+ 
+*/
+bool Hacl_P256_decompression_not_compressed_form_p256(uint8_t *b, uint8_t *result);
+
+/*
+ Input: a point in compressed form (uint8[33]), 
+ result: uint8[64] (internal point representation).
+  
+ Output: bool, where true stands for the correct decompression.
+ 
+*/
+bool Hacl_P256_decompression_compressed_form_p256(uint8_t *b, uint8_t *result);
+
+/*
+ Input: a point buffer (internal representation: uint8[64]), 
+ result: a point in not compressed form (uint8[65]).
+*/
+void Hacl_P256_compression_not_compressed_form_p256(uint8_t *b, uint8_t *result);
+
+/*
+ Input: a point buffer (internal representation: uint8[64]), 
+ result: a point in not compressed form (uint8[33]).
+*/
+void Hacl_P256_compression_compressed_form_p256(uint8_t *b, uint8_t *result);
+
+/*
  Input: result: uint8[64], 
  scalar: uint8[32].
   
@@ -251,9 +291,9 @@ uint64_t Hacl_P256_ecp256dh_r_radix(uint8_t *result, uint8_t *pubKey, uint8_t *s
 
 /*
  This code is not side channel resistant on pub_key. 
- Input: result: uint8[64], 
- pub(lic)Key: uint8[64], 
- scalar: uint8[32].
+ Input: result: uint8[96], 
+ pub(lic)Key: uint8[96], 
+ scalar: uint8[48].
   
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
