@@ -63,6 +63,36 @@ uint32_t Hacl_Bignum32_sub(uint32_t len, uint32_t *a, uint32_t *b, uint32_t *res
 }
 
 /*
+Write `(a + b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum32_add_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *b, uint32_t *res)
+{
+  Hacl_Bignum_bn_add_mod_n_u32(len, n, a, b, res);
+}
+
+/*
+Write `(a - b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be `len` limbs in size, i.e. uint32_t[len].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum32_sub_mod(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *b, uint32_t *res)
+{
+  Hacl_Bignum_bn_sub_mod_n_u32(len, n, a, b, res);
+}
+
+/*
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be `len` limbs in size, i.e. uint32_t[len].
@@ -227,7 +257,7 @@ Write `a ^ b mod n` in `res`.
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum32_mod_exp_vartime(
@@ -270,7 +300,7 @@ Write `a ^ b mod n` in `res`.
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum32_mod_exp_consttime(
@@ -309,7 +339,7 @@ Write `a ^ (-1) mod n` in `res`.
   • n % 2 = 1
   • 1 < n
   • 0 < a
-  • a < n 
+  • a < n
 */
 bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a, uint32_t *res)
 {
@@ -499,7 +529,7 @@ Write `a ^ b mod n` in `res`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum32_mod_exp_vartime_precomp(
@@ -540,7 +570,7 @@ Write `a ^ b mod n` in `res`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum32_mod_exp_consttime_precomp(
@@ -574,7 +604,7 @@ Write `a ^ (-1) mod n` in `res`.
   preconditions are observed.
   • n is a prime
   • 0 < a
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum32_mod_inv_prime_vartime_precomp(
@@ -785,8 +815,9 @@ void Hacl_Bignum32_bn_to_bytes_le(uint32_t len, uint32_t *b, uint8_t *res)
 
 
 /*
-Returns 2 ^ 32 - 1 if and only if the argument a is strictly less than the argument b,
- otherwise returns 0.
+Returns 2^32 - 1 if a < b, otherwise returns 0.
+
+ The arguments a and b are meant to be `len` limbs in size, i.e. uint32_t[len].
 */
 uint32_t Hacl_Bignum32_lt_mask(uint32_t len, uint32_t *a, uint32_t *b)
 {
@@ -798,5 +829,22 @@ uint32_t Hacl_Bignum32_lt_mask(uint32_t len, uint32_t *a, uint32_t *b)
     acc = (beq & acc) | (~beq & ((blt & (uint32_t)0xFFFFFFFFU) | (~blt & (uint32_t)0U)));
   }
   return acc;
+}
+
+/*
+Returns 2^32 - 1 if a = b, otherwise returns 0.
+
+ The arguments a and b are meant to be `len` limbs in size, i.e. uint32_t[len].
+*/
+uint32_t Hacl_Bignum32_eq_mask(uint32_t len, uint32_t *a, uint32_t *b)
+{
+  uint32_t mask = (uint32_t)0xFFFFFFFFU;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint32_t uu____0 = FStar_UInt32_eq_mask(a[i], b[i]);
+    mask = uu____0 & mask;
+  }
+  uint32_t mask1 = mask;
+  return mask1;
 }
 

@@ -169,6 +169,32 @@ Hacl_Bignum_bn_add_mod_n_u64(
 
 /* SNIPPET_END: Hacl_Bignum_bn_add_mod_n_u64 */
 
+/* SNIPPET_START: Hacl_Bignum_bn_sub_mod_n_u32 */
+
+void
+Hacl_Bignum_bn_sub_mod_n_u32(
+  uint32_t len1,
+  uint32_t *n,
+  uint32_t *a,
+  uint32_t *b,
+  uint32_t *res
+);
+
+/* SNIPPET_END: Hacl_Bignum_bn_sub_mod_n_u32 */
+
+/* SNIPPET_START: Hacl_Bignum_bn_sub_mod_n_u64 */
+
+void
+Hacl_Bignum_bn_sub_mod_n_u64(
+  uint32_t len1,
+  uint64_t *n,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *res
+);
+
+/* SNIPPET_END: Hacl_Bignum_bn_sub_mod_n_u64 */
+
 /* SNIPPET_START: Hacl_Bignum_ModInvLimb_mod_inv_uint32 */
 
 uint32_t Hacl_Bignum_ModInvLimb_mod_inv_uint32(uint32_t n0);
