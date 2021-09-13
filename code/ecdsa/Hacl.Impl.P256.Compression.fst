@@ -29,24 +29,20 @@ open Hacl.Impl.EC.Core
 
 open FStar.Mul
 
-#set-options "--z3rlimit 100 --ifuel 0 --fuel 0"
-
+#set-options "--z3rlimit 200 --ifuel 0 --fuel 0"
 
 
 val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 -> Stack unit 
-  (requires fun h -> live h x /\ live h result /\ as_nat c h x < prime256 /\ disjoint x result)
+  (requires fun h -> live h x /\ live h result /\ as_nat c h x < getPrime c /\ disjoint x result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
-    as_nat c h1 result < prime256 /\
-    (
-      let xD = fromDomain_ #c #DH (as_nat c h0 x) in 
-      let sqRootWithoutSign = sq_root_spec #c #DH (((xD * xD * xD + aCoordinate #P256 * xD + bCoordinate #P256) % prime256)) in 
-      
-      if sqRootWithoutSign  % pow2 1 = uint_v sign then
-	as_nat c h1 result = sqRootWithoutSign 
-      else
-	as_nat c h1 result = (0 - sqRootWithoutSign) % prime256
-  )
-)
+    as_nat c h1 result < getPrime c /\ (
+    let prime = getPrime c in 
+    let xD = fromDomain_ #c #DH (as_nat c h0 x) in 
+    let sqRootWithoutSign = sq_root_spec #c #DH (((xD * xD * xD + aCoordinate #c * xD + bCoordinate #c) % prime)) in 
+    if sqRootWithoutSign % pow2 1 = uint_v sign then
+      as_nat c h1 result = sqRootWithoutSign 
+    else
+      as_nat c h1 result = (0 - sqRootWithoutSign) % prime))
 
 
 let computeYFromX #c x result sign = 
@@ -61,60 +57,60 @@ let computeYFromX #c x result sign =
     uploadB #c bCoordinateBuffer;
     
     montgomery_multiplication_buffer_dh aCoordinateBuffer x aCoordinateBuffer;
-  cube x result;
+    cube x result;
     felem_add result aCoordinateBuffer result;
     felem_add result bCoordinateBuffer result;
 
     uploadZeroImpl #c aCoordinateBuffer; 
 
-  let h6 = ST.get() in 
+  let h1 = ST.get() in 
   
-    lemmaFromDomain #c #DH (as_nat c h6 aCoordinateBuffer);
-    assert_norm (0 * modp_inv2 #P256 (pow2 256) % prime256 == 0);
+    lemmaFromDomain #c #DH (as_nat c h1 aCoordinateBuffer);
+    Hacl.Impl.EC.MontgomeryMultiplication.Lemmas.fromDomain_zero #c; 
     square_root result result;
 
-  let h7 = ST.get() in 
+  let h2 = ST.get() in 
   
-    lemmaFromDomainToDomain #c #DH (as_nat c h7 result);
+    lemmaFromDomainToDomain #c #DH (as_nat c h2 result);
     fromDomain result result; 
-
-  let h8 = ST.get() in 
     felem_sub aCoordinateBuffer result bCoordinateBuffer; 
 
-  let h9 = ST.get() in 
+  let h3 = ST.get() in 
 
     let word = index result (size 0) in 
     let bitToCheck = logand word (u64 1) in 
       logand_mask word (u64 1) 1;
-
     let flag = eq_mask bitToCheck sign in 
       eq_mask_lemma bitToCheck sign;
 
-    let h10 = ST.get() in 
+  let h4 = ST.get() in 
 
     cmovznz4 flag bCoordinateBuffer result result;
-
-    lemma_core_0 c result h10;
-    Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value 4 (as_seq h10 result);
-    Lib.ByteSequence.index_nat_to_intseq_le #U64 #SEC 4 (as_nat c h10 result) 0;
-    
-    pow2_modulo_modulo_lemma_1 (as_nat c h10 result) 1 64;
-
-    assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h9);
+    assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h3);
     pop_frame();
 
+  let len = v (getCoordinateLenU64 c) in 
+
+  lemma_core_0 c result h4;
+  Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value len (as_seq h4 result);
+  Lib.ByteSequence.index_nat_to_intseq_le #U64 #SEC len (as_nat c h4 result) 0;
+
+
   let x_ = fromDomain_ #c #DH (as_nat c h0 x) in
+  let prime = getPrime c in 
 
   calc (==) {
-    ((((x_ * x_ * x_ % prime256 + ((Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256)) % prime256) + Spec.ECC.Curves.bCoordinate #P256) % prime256);
-    (==) {lemma_mod_add_distr (bCoordinate #P256) (x_ * x_ * x_ % prime256 + ((Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256)) prime256}
-     ((x_ * x_ * x_ % prime256 + (Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256 + Spec.ECC.Curves.bCoordinate #P256) % prime256);
-    (==) {lemma_mod_add_distr ((Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256 + Spec.ECC.Curves.bCoordinate #P256) (x_ * x_ * x_) prime256}
-     ((x_ * x_ * x_ + (Spec.ECC.Curves.aCoordinate #P256 % prime256) * x_ % prime256 + Spec.ECC.Curves.bCoordinate #P256) % prime256); 
-    (==) {lemma_mod_mul_distr_l (aCoordinate #P256) x_ prime256}
-    ((x_ * x_ * x_ + Spec.ECC.Curves.aCoordinate #P256 * x_ % prime256 + Spec.ECC.Curves.bCoordinate #P256) % prime256); 
-    (==) {lemma_mod_add_distr (x_ * x_ * x_ + bCoordinate #P256) (aCoordinate #P256 * x_) prime256}
-    ((x_ * x_ * x_ + Spec.ECC.Curves.aCoordinate #P256 * x_ + Spec.ECC.Curves.bCoordinate #P256) % prime256); }
+       ((((x_ * x_ * x_ % prime + Spec.ECC.Curves.aCoordinate #c % prime * x_ % prime) % prime) + Spec.ECC.Curves.bCoordinate #c) % prime);
+    (==) {lemma_mod_add_distr (bCoordinate #c) (x_ * x_ * x_ % prime + ((Spec.ECC.Curves.aCoordinate #c % prime) * x_ % prime)) prime}
+      ((x_ * x_ * x_ % prime + (Spec.ECC.Curves.aCoordinate #c % prime) * x_ % prime + Spec.ECC.Curves.bCoordinate #c) % prime);
+    (==) {lemma_mod_add_distr ((Spec.ECC.Curves.aCoordinate #c % prime) * x_ % prime + Spec.ECC.Curves.bCoordinate #c) (x_ * x_ * x_) prime}
+      ((x_ * x_ * x_ + (Spec.ECC.Curves.aCoordinate #c % prime) * x_ % prime + Spec.ECC.Curves.bCoordinate #c) % prime); 
+    (==) {lemma_mod_mul_distr_l (aCoordinate #c) x_ prime}
+      ((x_ * x_ * x_ + Spec.ECC.Curves.aCoordinate #c * x_ % prime + Spec.ECC.Curves.bCoordinate #c) % prime); 
+    (==) {lemma_mod_add_distr (x_ * x_ * x_ + bCoordinate #c) (aCoordinate #c * x_) prime}
+      ((x_ * x_ * x_ + Spec.ECC.Curves.aCoordinate #c * x_ + Spec.ECC.Curves.bCoordinate #c) % prime); }
+
+
 
 
 let decompressionNotCompressedForm #c b result = 

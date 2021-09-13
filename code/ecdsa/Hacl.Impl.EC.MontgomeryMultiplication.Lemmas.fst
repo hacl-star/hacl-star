@@ -270,3 +270,10 @@ let lemma_domain #c #m a b k =
     toDomain_ #c #m (fromDomain_ #c #m a * fromDomain_ #c #m b % prime);};
 
     inDomain_mod_is_not_mod #c #m (fromDomain_ #c #m a * fromDomain_ #c #m b) 
+
+
+val fromDomain_zero: #c: curve -> Lemma (fromDomain_ #c #DH 0 == 0)
+
+let fromDomain_zero #c = 
+  lemmaFromDomain #c #DH 0;
+  Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c 0

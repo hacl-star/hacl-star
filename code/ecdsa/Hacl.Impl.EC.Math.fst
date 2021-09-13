@@ -61,22 +61,6 @@ let euclid n a b r s =
   }
 
 
-noextract
-let prime_p256_order:pos =
-  assert_norm (115792089210356248762697446949407573529996955224135760342422259061068512044369> 0);
-  115792089210356248762697446949407573529996955224135760342422259061068512044369
-
-
-val lemma_l_ferm: unit -> Lemma
-  (let r = modp_inv2_prime (pow2 256) prime_p256_order in
-  (pow r (prime_p256_order - 1) % prime_p256_order == 1))
-
-let lemma_l_ferm () =
-  let r = modp_inv2_prime (pow2 256) prime_p256_order in
-  assert_norm (exp #prime_p256_order (modp_inv2_prime (pow2 256) prime_p256_order) (prime_p256_order - 1)  == 1);
-  lemma_pow_mod_n_is_fpow prime_p256_order r (prime_p256_order - 1)
-  
-
 private val lemma_a_not_zero_b_not_zero_mod_not_zero_: p: nat {Math.Euclid.is_prime p} -> a: nat {a % p <> 0} -> b: nat {b % p <> 0} ->
   Lemma (requires a * b <> 0)
   (ensures a * b % p <> 0)
