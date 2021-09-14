@@ -901,6 +901,31 @@ dist/linux/Makefile.basic: CURVE_BUNDLE = \
   -no-prefix Hacl.Impl.Curve25519.Field64.Vale \
   -drop Hacl_Curve_Leftovers
 
+# Ed25519 standalone
+# ------------------
+
+dist/ed25519/Makefile.basic: BUNDLE_FLAGS = \
+  -bundle 'Hacl.Ed25519,Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519[rename=Hacl_Ed25519]' \
+  $(BIGNUM_BUNDLE) \
+  -bundle Hacl.Impl.Curve25519.Field51[rename=Hacl_Bignum25519_51] -static-header Hacl.Impl.Curve25519.Field51 \
+  -bundle Hacl.Curve25519_51,Hacl.Impl.Curve25519.Field51[rename=Hacl_Curve25519_51] \
+  -bundle Hacl.Hash.* \
+  -bundle EverCrypt.Ed25519= \
+  -bundle Hacl.Streaming.SHA2=
+dist/ed25519/Makefile.basic: DEFAULT_FLAGS += \
+  -bundle '\*[rename=Should_not_be_here]' \
+  -add-include '"kremlin/internal/builtin.h"'
+dist/ed25519/Makefile.basic: INTRINSIC_FLAGS =
+dist/ed25519/Makefile.basic: VALE_ASMS =
+dist/ed25519/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
+dist/ed25519/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
+dist/ed25519/Makefile.basic: HAND_WRITTEN_FILES =
+dist/ed25519/Makefile.basic: HAND_WRITTEN_H_FILES =
+dist/ed25519/Makefile.basic: HACL_OLD_FILES =
+dist/ed25519/Makefile.basic: TARGETCONFIG_FLAGS =
+
+
+
 # CCF distribution
 # ----------------
 #
