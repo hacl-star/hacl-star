@@ -228,7 +228,7 @@ val ecdsa_verif_without_hash:
   \n Input: pub(lic)Key: uint8[64]. 
   \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
   \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/")]
-val verify_q: 
+val verify_q_public: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool
     (requires fun h -> live h pubKey)
@@ -386,7 +386,7 @@ val ecp384dh_i:
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")] 
-val ecp256dh_r_ml:
+val ecp256dh_r_public_ml:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -408,7 +408,7 @@ val ecp256dh_r_ml:
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   ")] 
-val ecp256dh_r_radix:
+val ecp256dh_r_public_radix:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -425,6 +425,45 @@ val ecp256dh_r_radix:
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+
+
+val ecp256dh_r_private_ml:
+    result:lbuffer uint8 (size 64)
+  -> pubKey:lbuffer uint8 (size 64)
+  -> scalar:lbuffer uint8 (size 32)
+  -> Stack uint64
+    (requires fun h ->
+      live h result /\ live h pubKey /\ live h scalar /\
+      disjoint result pubKey /\ disjoint result scalar)
+    (ensures fun h0 r h1 ->
+      let pubKeyX = gsub pubKey (size 0) (size 32) in
+      let pubKeyY = gsub pubKey (size 32) (size 32) in
+      let pointX, pointY, flag =
+        ecp256_dh_r #P256 (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
+      r == flag /\
+      modifies (loc result) h0 h1 /\
+      as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
+      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+
+
+val ecp256dh_r_private_radix:
+    result:lbuffer uint8 (size 64)
+  -> pubKey:lbuffer uint8 (size 64)
+  -> scalar:lbuffer uint8 (size 32)
+  -> Stack uint64
+    (requires fun h ->
+      live h result /\ live h pubKey /\ live h scalar /\
+      disjoint result pubKey /\ disjoint result scalar)
+    (ensures fun h0 r h1 ->
+      let pubKeyX = gsub pubKey (size 0) (size 32) in
+      let pubKeyY = gsub pubKey (size 32) (size 32) in
+      let pointX, pointY, flag =
+        ecp256_dh_r #P256 (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
+      r == flag /\
+      modifies (loc result) h0 h1 /\
+      as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
+      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+
 
 
 

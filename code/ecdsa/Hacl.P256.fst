@@ -50,8 +50,8 @@ let ecdsa_verif_without_hash mLen m pubKey r s  =
 
 
 
-let verify_q pubKey = 
-    Hacl.Impl.P256.Signature.Common.verifyQ #P256 #ML pubKey
+let verify_q_public pubKey = 
+    Hacl.Impl.P256.Signature.Common.verifyQ_public #P256 #ML pubKey
 
 
 
@@ -78,10 +78,15 @@ let ecp256dh_i_radix result scalar = Hacl.Impl.EC.DH.ecp256dh_i P256 Radix resul
 
 let ecp384dh_i result scalar = Hacl.Impl.EC.DH.ecp256dh_i P384 ML result scalar
 
-let ecp256dh_r_ml result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P256 #ML result pubKey scalar
 
-let ecp256dh_r_radix result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P256 #Radix result pubKey scalar
+let ecp256dh_r_public_ml result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r_public #P256 #ML result pubKey scalar
+
+let ecp256dh_r_public_radix result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r_public #P256 #Radix result pubKey scalar
+
+let ecp256dh_r_private_ml result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r_private #P256 #ML result pubKey scalar
+
+let ecp256dh_r_private_radix result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r_private #P256 #Radix result pubKey scalar
 
 
-let ecp384dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r #P384 #ML result pubKey scalar
+let ecp384dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r_private #P384 #ML result pubKey scalar
 

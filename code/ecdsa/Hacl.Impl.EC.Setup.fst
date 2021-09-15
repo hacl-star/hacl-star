@@ -569,7 +569,9 @@ let uploadA #c a =
     lemmaToDomain #c #DH (aCoordinate #c % getPrime c);
     lemmaToDomain #c #DH (aCoordinate #c);
     
-    assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 (64 * 3) = aCoordinate #P256 * pow2 256 % prime256);
+    assert_norm(18446744073709551612 + 17179869183 * pow2 64 + 18446744056529682436 * pow2 (64 * 3) = 0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc * pow2 256 % prime256);
+
+    assert_norm(aCoordinate #P256 % prime256 == 0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc);
 
     lemma_mod_mul_distr_l (aCoordinate #P256) (pow2 256) (getPrime c); 
     let h1 = ST.get() in 
@@ -589,7 +591,12 @@ let uploadA #c a =
     assert_norm(
       0x3fffffffc + 0xfffffffc00000000 * pow2 64 + 0xfffffffffffffffb * pow2 (64 * 2) + 
       0xffffffffffffffff * pow2 (64 * 3) + 0xffffffffffffffff * pow2 (64 * 4) + 0xffffffffffffffff * pow2 (64 * 5) =
-      aCoordinate #P384 * pow2 384 % getPrime c);
+      0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffffffc0000000000000003fffffffc);
+
+    assert_norm(0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffffffc0000000000000003fffffffc == 
+    0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000fffffffc * pow2 384 % getPrime P384);
+
+    assert_norm(aCoordinate #P384 % getPrime P384 == 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000fffffffc);
 
     lemma_mod_mul_distr_l (aCoordinate #P384) (pow2 384) (getPrime c); 
     let h1 = ST.get() in 

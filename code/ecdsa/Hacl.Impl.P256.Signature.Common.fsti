@@ -62,19 +62,19 @@ val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit
 
 
 inline_for_extraction noextract
-val isPointAtInfinityPublic: #c: curve -> p: point c -> Stack bool
+val isPointAtInfinity_public: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\ point_eval c h p)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.ECC.isPointAtInfinity (point_as_nat c h0 p))
 
 
 inline_for_extraction noextract
-val isPointOnCurvePublic: #c: curve -> p: point c -> Stack bool
+val isPointOnCurve: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\ felem_eval c h (getX p) /\ felem_eval c h (getY p) /\ as_nat c h (getZ p) == 1)
   (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ r == isPointOnCurve #c (point_as_nat c h0 p))
 
 
 inline_for_extraction noextract
-val verifyQValidCurvePoint: #c: curve -> #l: ladder -> pubKey: point c 
+val verifyQValidCurvePoint_private: #c: curve -> #l: ladder -> pubKey: point c 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
@@ -85,7 +85,18 @@ val verifyQValidCurvePoint: #c: curve -> #l: ladder -> pubKey: point c
 
 
 inline_for_extraction noextract
-val verifyQ: #c: curve -> #l: ladder -> pubKey: pointAffine8 c -> Stack bool
+val verifyQValidCurvePoint_public: #c: curve -> #l: ladder -> pubKey: point c 
+  -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
+  Stack bool
+  (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat c h (getZ pubKey) == 1)
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
+    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
+
+
+inline_for_extraction noextract
+val verifyQ_public: #c: curve -> #l: ladder -> pubKey: pointAffine8 c -> Stack bool
   (requires fun h -> live h pubKey)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ (
     let publicKeyX = nat_from_bytes_be (as_seq h1 (getXAff8 pubKey)) in 

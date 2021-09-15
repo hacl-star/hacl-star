@@ -41,12 +41,18 @@ EXPORTS
   Hacl_P256_ecdsa_verif_p256_sha384
   Hacl_P256_ecdsa_verif_p256_sha512
   Hacl_P256_ecdsa_verif_without_hash
-  Hacl_P256_verify_q
+  Hacl_P256_verify_q_public
+  Hacl_P256_decompression_not_compressed_form_p256
+  Hacl_P256_decompression_compressed_form_p256
+  Hacl_P256_compression_not_compressed_form_p256
+  Hacl_P256_compression_compressed_form_p256
   Hacl_P256_ecp256dh_i_ml
   Hacl_P256_ecp256dh_i_radix
   Hacl_P256_ecp384dh_i
-  Hacl_P256_ecp256dh_r_ml
-  Hacl_P256_ecp256dh_r_radix
+  Hacl_P256_ecp256dh_r_public_ml
+  Hacl_P256_ecp256dh_r_public_radix
+  Hacl_P256_ecp256dh_r_private_ml
+  Hacl_P256_ecp256dh_r_private_radix
   Hacl_P256_ecp384dh_r
   Hacl_Impl_Blake2_Core_uu___is_M32
   Hacl_Impl_Blake2_Core_uu___is_M128
