@@ -36,7 +36,22 @@ val lemma_zero_point_zero_coordinates: c: curve -> h: mem -> p: point c ->
     
 
 inline_for_extraction noextract
-val ecp256dh_r: #c: curve 
+val ecp256dh_r_public: #c: curve 
+  -> #l: ladder 
+  -> result: pointAffine8 c
+  -> pubKey: pointAffine8 c
+  -> scalar: scalar_t #MUT #c 
+  -> Stack bool
+  (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ disjoint result pubKey /\ disjoint result scalar)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+    let pubKeyX, pubKeyY = getXAff8 pubKey, getYAff8 pubKey in
+    let pointX, pointY, flag = ecp256_dh_r #c (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
+    let resultX, resultY = as_seq h1 (getXAff8 result), as_seq h1 (getYAff8 result) in 
+    r == flag /\ resultX == pointX /\ resultY == pointY))
+
+
+inline_for_extraction noextract
+val ecp256dh_r_private: #c: curve 
   -> #l: ladder 
   -> result: pointAffine8 c
   -> pubKey: pointAffine8 c

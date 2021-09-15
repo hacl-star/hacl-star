@@ -7025,7 +7025,7 @@ static inline void toFormPoint_p384(uint8_t *i, uint64_t *o)
   }
 }
 
-static inline bool isPointOnCurvePublic_p256(uint64_t *p)
+static inline bool isPointOnCurve_p256(uint64_t *p)
 {
   uint32_t sz = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), sz);
@@ -7074,7 +7074,7 @@ static inline bool isPointOnCurvePublic_p256(uint64_t *p)
   return !(r == (uint64_t)0U);
 }
 
-static inline bool isPointOnCurvePublic_p384(uint64_t *p)
+static inline bool isPointOnCurve_p384(uint64_t *p)
 {
   uint32_t sz = (uint32_t)6U;
   KRML_CHECK_SIZE(sizeof (uint64_t), sz);
@@ -7125,7 +7125,7 @@ static inline bool isPointOnCurvePublic_p384(uint64_t *p)
   return !(r == (uint64_t)0U);
 }
 
-static bool verifyQValidCurvePoint_p256(uint64_t *pubKey)
+static bool verifyQValidCurvePoint_public_p256(uint64_t *pubKey)
 {
   uint32_t len = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
@@ -7216,11 +7216,11 @@ static bool verifyQValidCurvePoint_p256(uint64_t *pubKey)
   {
     return false;
   }
-  bool belongsToCurve = isPointOnCurvePublic_p256(pubKey);
+  bool belongsToCurve = isPointOnCurve_p256(pubKey);
   return coordinatesValid && belongsToCurve;
 }
 
-static bool verifyQValidCurvePoint_p384(uint64_t *pubKey)
+static bool verifyQValidCurvePoint_public_p384(uint64_t *pubKey)
 {
   uint32_t len = (uint32_t)6U;
   KRML_CHECK_SIZE(sizeof (uint64_t), len);
@@ -7307,7 +7307,7 @@ static bool verifyQValidCurvePoint_p384(uint64_t *pubKey)
   {
     return false;
   }
-  bool belongsToCurve = isPointOnCurvePublic_p384(pubKey);
+  bool belongsToCurve = isPointOnCurve_p384(pubKey);
   return coordinatesValid && belongsToCurve;
 }
 
@@ -8228,7 +8228,7 @@ Hacl_P256_ecdsa_verif_p256_sha2(
   {
     zCoordinate[i] = (uint64_t)0U;
   }
-  bool publicKeyCorrect = verifyQValidCurvePoint_p256(publicKeyBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(publicKeyBuffer);
   bool r1;
   if (publicKeyCorrect == false)
   {
@@ -9961,7 +9961,7 @@ Hacl_P256_ecdsa_verif_p256_sha384(
   {
     zCoordinate[i] = (uint64_t)0U;
   }
-  bool publicKeyCorrect = verifyQValidCurvePoint_p256(publicKeyBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(publicKeyBuffer);
   bool r1;
   if (publicKeyCorrect == false)
   {
@@ -11694,7 +11694,7 @@ Hacl_P256_ecdsa_verif_p256_sha512(
   {
     zCoordinate[i] = (uint64_t)0U;
   }
-  bool publicKeyCorrect = verifyQValidCurvePoint_p256(publicKeyBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(publicKeyBuffer);
   bool r1;
   if (publicKeyCorrect == false)
   {
@@ -13429,7 +13429,7 @@ Hacl_P256_ecdsa_verif_without_hash(
   {
     zCoordinate[i] = (uint64_t)0U;
   }
-  bool publicKeyCorrect = verifyQValidCurvePoint_p256(publicKeyBuffer);
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(publicKeyBuffer);
   bool r1;
   if (publicKeyCorrect == false)
   {
@@ -15118,7 +15118,7 @@ Hacl_P256_ecdsa_verif_without_hash(
   
  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
 */
-bool Hacl_P256_verify_q(uint8_t *pubKey)
+bool Hacl_P256_verify_q_public(uint8_t *pubKey)
 {
   uint32_t len = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len);
@@ -15128,7 +15128,7 @@ bool Hacl_P256_verify_q(uint8_t *pubKey)
   uint64_t publicKeyJ[(uint32_t)3U * len];
   memset(publicKeyJ, 0U, (uint32_t)3U * len * sizeof (uint64_t));
   toFormPoint_p256(pubKey, publicKeyJ);
-  bool r = verifyQValidCurvePoint_p256(publicKeyJ);
+  bool r = verifyQValidCurvePoint_public_p256(publicKeyJ);
   return r;
 }
 
@@ -15532,7 +15532,7 @@ uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar)
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp256dh_r_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+uint64_t Hacl_P256_ecp256dh_r_public_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 {
   uint32_t len = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
@@ -15546,7 +15546,7 @@ uint64_t Hacl_P256_ecp256dh_r_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scal
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len1);
   uint64_t tempBuffer[(uint32_t)20U * len1];
   memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
-  bool publicKeyCorrect = verifyQValidCurvePoint_p256(pkF);
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(pkF);
   bool flag;
   if (publicKeyCorrect)
   {
@@ -15619,7 +15619,7 @@ uint64_t Hacl_P256_ecp256dh_r_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scal
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp256dh_r_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+uint64_t Hacl_P256_ecp256dh_r_public_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 {
   uint32_t len = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
@@ -15633,7 +15633,247 @@ uint64_t Hacl_P256_ecp256dh_r_radix(uint8_t *result, uint8_t *pubKey, uint8_t *s
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len1);
   uint64_t tempBuffer[(uint32_t)20U * len1];
   memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
-  bool publicKeyCorrect = verifyQValidCurvePoint_p256(pkF);
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(pkF);
+  uint64_t bufferPrecomputed[192U];
+  bool flag;
+  if (publicKeyCorrect)
+  {
+    uint32_t len4 = (uint32_t)4U;
+    uint64_t *p_x = pkF;
+    uint64_t *p_y = pkF + len4;
+    uint64_t *p_z = pkF + (uint32_t)2U * len4;
+    uint64_t *r_x = rF;
+    uint64_t *r_y = rF + len4;
+    uint64_t *r_z = rF + (uint32_t)2U * len4;
+    toDomain_p256(p_x, r_x);
+    toDomain_p256(p_y, r_y);
+    toDomain_p256(p_z, r_z);
+    uint64_t init = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
+    {
+      bufferPrecomputed[i] = init;
+    }
+    generatePrecomputedTable(Spec_ECC_Curves_P256, bufferPrecomputed, rF, tempBuffer);
+    uint32_t
+    bit = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (uint32_t)(uint64_t)0U;
+    uint64_t
+    bit00 =
+      (uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - bit / (uint32_t)8U]
+      >> bit % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)3U;
+    uint64_t
+    bit10 =
+      (uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (bit - (uint32_t)1U) / (uint32_t)8U]
+      >> (bit - (uint32_t)1U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)2U;
+    uint64_t
+    bit20 =
+      (uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (bit - (uint32_t)2U) / (uint32_t)8U]
+      >> (bit - (uint32_t)2U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)1U;
+    uint64_t
+    bit30 =
+      (uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (bit - (uint32_t)3U) / (uint32_t)8U]
+      >> (bit - (uint32_t)3U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)0U;
+    uint64_t bits = (bit00 ^ bit10) ^ (bit20 ^ bit30);
+    uint64_t *pointToStart = bufferPrecomputed + (uint32_t)(bits * (uint64_t)(uint32_t)12U);
+    memcpy(rF, pointToStart, (uint32_t)12U * sizeof (uint64_t));
+    for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
+    {
+      uint32_t
+      bit4 = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (i0 << (uint32_t)2U);
+      uint64_t
+      bit0 =
+        (uint64_t)(scalar[(uint32_t)4U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - bit4 / (uint32_t)8U]
+        >> bit4 % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)3U;
+      uint64_t
+      bit1 =
+        (uint64_t)(scalar[(uint32_t)4U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (bit4 - (uint32_t)1U) / (uint32_t)8U]
+        >> (bit4 - (uint32_t)1U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)2U;
+      uint64_t
+      bit2 =
+        (uint64_t)(scalar[(uint32_t)4U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (bit4 - (uint32_t)2U) / (uint32_t)8U]
+        >> (bit4 - (uint32_t)2U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)1U;
+      uint64_t
+      bit3 =
+        (uint64_t)(scalar[(uint32_t)4U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (bit4 - (uint32_t)3U) / (uint32_t)8U]
+        >> (bit4 - (uint32_t)3U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)0U;
+      uint64_t bits1 = (bit0 ^ bit1) ^ (bit2 ^ bit3);
+      uint64_t pointToAdd[12U] = { 0U };
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      {
+        uint64_t mask = FStar_UInt64_eq_mask(bits1, (uint64_t)i);
+        uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
+        uint64_t
+        *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;
+        uint64_t
+        *lut_cmb_z = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)8U;
+        copy_conditional_p256_l(pointToAdd, lut_cmb_x, mask);
+        copy_conditional_p256_l(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
+        copy_conditional_p256_l(pointToAdd + (uint32_t)8U, lut_cmb_z, mask);
+      }
+      point_double_p256(rF, rF, tempBuffer);
+      point_double_p256(rF, rF, tempBuffer);
+      point_double_p256(rF, rF, tempBuffer);
+      point_double_p256(rF, rF, tempBuffer);
+      point_add_p256(pointToAdd, rF, rF, tempBuffer);
+    }
+    norm_p256(rF, rF, tempBuffer);
+    uint32_t len2 = (uint32_t)4U;
+    uint32_t start = len2 * (uint32_t)2U;
+    uint64_t *zCoordinate = rF + start;
+    uint64_t tmp = (uint64_t)18446744073709551615U;
+    uint32_t len3 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
+    {
+      uint64_t a_i = zCoordinate[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp;
+      tmp = r_i & tmp0;
+    }
+    uint64_t r = tmp;
+    uint64_t flag0 = r;
+    flag = flag0 == (uint64_t)0U;
+  }
+  else
+  {
+    flag = false;
+  }
+  fromFormPoint_p256(rF, result);
+  bool flag0 = flag;
+  return (uint64_t)flag0;
+}
+
+uint64_t Hacl_P256_ecp256dh_r_private_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t rF[(uint32_t)3U * len];
+  memset(rF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t pkF[(uint32_t)3U * len];
+  memset(pkF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  toFormPoint_p256(pubKey, pkF);
+  uint32_t len1 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len1);
+  uint64_t tempBuffer[(uint32_t)20U * len1];
+  memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(pkF);
+  bool flag;
+  if (publicKeyCorrect)
+  {
+    uint32_t len30 = (uint32_t)4U;
+    uint64_t *q = tempBuffer;
+    uint64_t *buff = tempBuffer + (uint32_t)3U * len30;
+    uint32_t len4 = (uint32_t)4U;
+    uint64_t *x = q;
+    uint64_t *y = q + len4;
+    uint64_t *z = q + (uint32_t)2U * len4;
+    uint32_t len5 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len5; i++)
+    {
+      x[i] = (uint64_t)0U;
+    }
+    uint32_t len50 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len50; i++)
+    {
+      y[i] = (uint64_t)0U;
+    }
+    uint32_t len51 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len51; i++)
+    {
+      z[i] = (uint64_t)0U;
+    }
+    uint32_t len40 = (uint32_t)4U;
+    uint64_t *p_x = pkF;
+    uint64_t *p_y = pkF + len40;
+    uint64_t *p_z = pkF + (uint32_t)2U * len40;
+    uint64_t *r_x = rF;
+    uint64_t *r_y = rF + len40;
+    uint64_t *r_z = rF + (uint32_t)2U * len40;
+    toDomain_p256(p_x, r_x);
+    toDomain_p256(p_y, r_y);
+    toDomain_p256(p_z, r_z);
+    montgomery_ladderP256L(q, rF, scalar, buff);
+    memcpy(rF, q, (uint32_t)12U * sizeof (uint64_t));
+    norm_p256(rF, rF, tempBuffer);
+    uint32_t len2 = (uint32_t)4U;
+    uint32_t start = len2 * (uint32_t)2U;
+    uint64_t *zCoordinate = rF + start;
+    uint64_t tmp = (uint64_t)18446744073709551615U;
+    uint32_t len3 = (uint32_t)4U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
+    {
+      uint64_t a_i = zCoordinate[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp;
+      tmp = r_i & tmp0;
+    }
+    uint64_t r = tmp;
+    uint64_t flag0 = r;
+    flag = flag0 == (uint64_t)0U;
+  }
+  else
+  {
+    flag = false;
+  }
+  fromFormPoint_p256(rF, result);
+  bool flag0 = flag;
+  return (uint64_t)flag0;
+}
+
+uint64_t Hacl_P256_ecp256dh_r_private_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t rF[(uint32_t)3U * len];
+  memset(rF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t pkF[(uint32_t)3U * len];
+  memset(pkF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  toFormPoint_p256(pubKey, pkF);
+  uint32_t len1 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len1);
+  uint64_t tempBuffer[(uint32_t)20U * len1];
+  memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(pkF);
   uint64_t bufferPrecomputed[192U];
   bool flag;
   if (publicKeyCorrect)
@@ -15804,7 +16044,7 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len1);
   uint64_t tempBuffer[(uint32_t)20U * len1];
   memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
-  bool publicKeyCorrect = verifyQValidCurvePoint_p384(pkF);
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p384(pkF);
   bool flag;
   if (publicKeyCorrect)
   {

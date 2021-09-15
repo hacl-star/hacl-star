@@ -205,7 +205,7 @@ Hacl_P256_ecdsa_verif_without_hash(
   
  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
 */
-bool Hacl_P256_verify_q(uint8_t *pubKey);
+bool Hacl_P256_verify_q_public(uint8_t *pubKey);
 
 /*
  There and further we introduce notions of compressed point and not compressed point. 
@@ -276,7 +276,7 @@ uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar);
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp256dh_r_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+uint64_t Hacl_P256_ecp256dh_r_public_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 /*
  This code is not side channel resistant on pub_key. 
@@ -287,7 +287,11 @@ uint64_t Hacl_P256_ecp256dh_r_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scal
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp256dh_r_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+uint64_t Hacl_P256_ecp256dh_r_public_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+uint64_t Hacl_P256_ecp256dh_r_private_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+uint64_t Hacl_P256_ecp256dh_r_private_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 /*
  This code is not side channel resistant on pub_key. 

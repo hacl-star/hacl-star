@@ -250,7 +250,6 @@ let modp_inv2_pow #curve (x: nat) : Tot (elem (getPrime curve)) =
   pow x (prime - 2) % prime
 
 
-
 noextract
 let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (r: int {r < prime}) =
   let p = x % prime in 
@@ -259,10 +258,11 @@ let min_one_prime (prime: pos {prime > 3}) (x: int) : Tot (r: int {r < prime}) =
 
 (* a coordinate of the curve *)
 inline_for_extraction
-let aCoordinate #curve = 
+let aCoordinate #curve : int = 
   match curve with 
-  |P256 -> 0xffffffff00000001000000000000000000000000fffffffffffffffffffffffc
-  |P384 -> 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeffffffff0000000000000000fffffffc
+  |P256 -> -3
+  |P384 -> -3
+
 
 (* b coordinate of the curve *)
 inline_for_extraction

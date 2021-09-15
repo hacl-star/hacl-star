@@ -212,6 +212,14 @@ let cmovznz4 #c cin x y result =
   |Default -> cmovznz4_generic cin x y result *)
 
 
+inline_for_extraction noextract
+val eq_u64_CT: a: uint64 -> b: uint64 -> Tot (r: uint64 {if uint_v a = uint_v b then uint_v r == pow2 64 - 1 else uint_v r == 0})
+
+let eq_u64_CT a b = 
+  eq_mask_lemma a b;
+  eq_mask a b
+
+
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
 
 val eq1_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == 0 else uint_v r == pow2 64 - 1})

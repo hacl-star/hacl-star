@@ -29,7 +29,7 @@ open Hacl.Impl.EC.Masking
 open Hacl.Impl.EC.Intro
 
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
 
 let bufferToJac #c p result = 
     let h0 = ST.get() in 
@@ -208,62 +208,64 @@ let xcube_minus_x #c x r =
     lemma_xcube2 #c x_
 
 
-let isPointAtInfinityPublic #c p =  
+let isPointAtInfinity_public #c p =  
   let len = getCoordinateLenU64 c in 
   let zCoordinate = sub p (size 2 *! len) len in 
   isZero_uint64_nCT #c zCoordinate 
 
 
 inline_for_extraction noextract
-val isPointOnCurvePublic_: #c: curve -> p: point c -> Stack bool
+val isPointOnCurve_: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\ felem_eval c h (getX p) /\ felem_eval c h (getY p) /\ as_nat c h (getZ p) == 1)
-  (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ r == isPointOnCurve #c (point_as_nat c h0 p))
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == isPointOnCurve #c (point_as_nat c h0 p))
 
-let isPointOnCurvePublic_ #c p = 
-  push_frame(); 
-  let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
-  let y2Buffer = create sz (u64 0) in 
-  let xBuffer = create sz (u64 0) in 
+let isPointOnCurve_ #c p = 
   let h0 = ST.get() in 
-  let x = sub p (size 0) sz in 
-  let y = sub p sz sz in
-  
-  y_2 #c y y2Buffer;
-  xcube_minus_x #c x xBuffer;
-
-  lemma_modular_multiplication_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % (getPrime c)) 
-    (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % (getPrime c));
+  push_frame(); 
+    let sz: FStar.UInt32.t = getCoordinateLenU64 c in 
+    let y2Buffer = create sz (u64 0) in 
+    let xBuffer = create sz (u64 0) in 
+    let x = sub p (size 0) sz in 
+    let y = sub p sz sz in
     
-  let r = cmp_felem_felem_u64 #c y2Buffer xBuffer in 
-  let z = not (eq_0_u64 r) in 
-  pop_frame();
+    y_2 #c y y2Buffer;
+    xcube_minus_x #c x xBuffer;
+
+    lemma_modular_multiplication_2_d #c ((as_nat c h0 y) * (as_nat c h0 y) % (getPrime c)) 
+      (let x_ = as_nat c h0 x in (x_ * x_ * x_ - 3 * x_ + bCoordinate #c) % (getPrime c));
+      
+    let r = cmp_felem_felem_u64 #c y2Buffer xBuffer in 
+    let z = not (eq_0_u64 r) in 
+  pop_frame(); 
   z
 
+
+
 [@CInline]
-let isPointOnCurvePublic_p256 = isPointOnCurvePublic_ #P256
+let isPointOnCurve_p256 = isPointOnCurve_ #P256
 [@CInline]
-let isPointOnCurvePublic_p384 = isPointOnCurvePublic_ #P384
+let isPointOnCurve_p384 = isPointOnCurve_ #P384
 (* [@CInline]
 let isPointOnCurvePublic_generic = isPointOnCurvePublic_ #Default
  *)
 
-let isPointOnCurvePublic #c p = 
+let isPointOnCurve #c p = 
   match c with 
-  |P256 -> isPointOnCurvePublic_p256 p
-  |P384 -> isPointOnCurvePublic_p384 p 
+  |P256 -> isPointOnCurve_p256 p
+  |P384 -> isPointOnCurve_p384 p 
   (* |Default -> isPointOnCurvePublic_generic p  *)
 
 
 
 inline_for_extraction noextract
-val isCoordinateValid: #c: curve -> p: point c -> Stack bool 
+val isCoordinateValid_public: #c: curve -> p: point c -> Stack bool 
   (requires fun h -> live h p /\ as_nat c h (getZ p) == 1)
   (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ (
     let prime = getPrime c in
     r == (as_nat c h0 (getX p) < prime && as_nat c h0 (getY p) < prime && as_nat c h0 (getZ p) < prime)))
 
 
-let isCoordinateValid #c p = 
+let isCoordinateValid_public #c p = 
   push_frame();
 
   let len = getCoordinateLenU64 c in 
@@ -282,6 +284,37 @@ let isCoordinateValid #c p =
   let r = lessX && lessY in
   pop_frame();
   r  
+
+
+inline_for_extraction noextract
+val isCoordinateValid_private: #c: curve -> p: point c -> Stack bool 
+  (requires fun h -> live h p /\ as_nat c h (getZ p) == 1)
+  (ensures fun h0 r h1 ->  modifies0 h0 h1 /\ (
+    let prime = getPrime c in
+    r == (as_nat c h0 (getX p) < prime && as_nat c h0 (getY p) < prime && as_nat c h0 (getZ p) < prime)))
+
+
+let isCoordinateValid_private #c p = 
+  push_frame();
+
+  let len = getCoordinateLenU64 c in 
+  let tempBuffer = create len (u64 0) in 
+  recall_contents #_ #(getCoordinateLenU64 c) (prime_buffer #c) (Lib.Sequence.of_list (prime_list c));
+  
+  let x = sub p (size 0) len in 
+  let y = sub p len len in 
+  
+  let carryX = sub_bn_prime #c x tempBuffer in
+  let carryY = sub_bn_prime #c y tempBuffer in 
+  
+  let lessX = eq_u64_CT carryX (u64 1) in   
+  let lessY = eq_u64_CT carryY (u64 1) in 
+
+  let r = logand lessX lessY in
+  pop_frame();
+  let z = not (eq_0_u64 r) in 
+  z
+
 
 inline_for_extraction
 val multByOrder: #c: curve {isPrimeGroup c == false} -> #l: ladder -> result: point c ->  p: point c -> 
@@ -323,7 +356,7 @@ let multByOrder2 #c #l result p tempBuffer =
 
 [@ (Comment "  This code is not side channel resistant")]
 inline_for_extraction noextract
-val isOrderCorrect: #c: curve {isPrimeGroup c == false} -> #l: ladder -> p: point c 
+val isOrderCorrect_public: #c: curve {isPrimeGroup c == false} -> #l: ladder -> p: point c 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack bool
   (requires fun h -> 
     live h p /\ live h tempBuffer /\ point_eval c h p /\
@@ -333,7 +366,7 @@ val isOrderCorrect: #c: curve {isPrimeGroup c == false} -> #l: ladder -> p: poin
     let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) in 
      r == Spec.ECC.isPointAtInfinity pointMultOrder))
 
-let isOrderCorrect #c #l p tempBuffer = 
+let isOrderCorrect_public #c #l p tempBuffer = 
     let h0 = ST.get() in 
   push_frame(); 
     let len = getCoordinateLenU64 c in 
@@ -341,13 +374,40 @@ let isOrderCorrect #c #l p tempBuffer =
     let h = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h p;
     multByOrder2 #c #l multResult p tempBuffer;
-    let result = isPointAtInfinityPublic #c multResult in  
+    let result = isPointAtInfinity_public #c multResult in  
   pop_frame();
     result
 
 
+
+[@ (Comment "  This code is not side channel resistant")]
 inline_for_extraction noextract
-val verifyQValidCurvePoint_: #c: curve -> #l: ladder -> pubKey: point c 
+val isOrderCorrect_private: #c: curve {isPrimeGroup c == false} -> #l: ladder -> p: point c 
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack bool
+  (requires fun h -> 
+    live h p /\ live h tempBuffer /\ point_eval c h p /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; ] /\
+    ~ (isPointAtInfinity (point_as_nat c h p)))
+  (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) in 
+     r == Spec.ECC.isPointAtInfinity pointMultOrder))
+
+let isOrderCorrect_private #c #l p tempBuffer = 
+    let h0 = ST.get() in 
+  push_frame(); 
+    let len = getCoordinateLenU64 c in 
+    let multResult = create (size 3 *! len) (u64 0) in 
+    let h = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h p;
+    multByOrder2 #c #l multResult p tempBuffer;
+    let r = isPointAtInfinityPrivate #c multResult in  
+  pop_frame();
+    let z = not (eq_0_u64 r) in 
+    z
+
+
+inline_for_extraction noextract
+val verifyQValidCurvePoint_public_: #c: curve -> #l: ladder -> pubKey: point c 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
@@ -356,23 +416,59 @@ val verifyQValidCurvePoint_: #c: curve -> #l: ladder -> pubKey: point c
     let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
     ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
 
-let verifyQValidCurvePoint_ #c #l pubKey tempBuffer = 
+let verifyQValidCurvePoint_public_ #c #l pubKey tempBuffer = 
     let h0 = ST.get() in 
-  let coordinatesValid = isCoordinateValid pubKey in 
+  let coordinatesValid = isCoordinateValid_public pubKey in 
   if not coordinatesValid then false else begin
     let h1 = ST.get() in 
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKey;
-    let belongsToCurve = isPointOnCurvePublic pubKey in 
+    let belongsToCurve = isPointOnCurve #c pubKey in 
 
     [@inline_let]
     let r = normalize_term (isPrimeGroup c) in 
     match r with 
     |true -> coordinatesValid && belongsToCurve
-    |false -> let orderCorrect = isOrderCorrect #c #l pubKey tempBuffer in coordinatesValid && belongsToCurve && orderCorrect
+    |false -> let orderCorrect = isOrderCorrect_public #c #l pubKey tempBuffer in coordinatesValid && belongsToCurve && orderCorrect
   end
 
 
-val verifyQValidCurvePoint_p256: #l: ladder -> pubKey: point P256 
+inline_for_extraction noextract
+val verifyQValidCurvePoint_private_: #c: curve -> #l: ladder -> pubKey: point c 
+  -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> 
+  Stack bool
+  (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat c h (getZ pubKey) == 1)
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
+    ~ (isPointAtInfinity p) /\ r <==> verifyQValidCurvePointSpec #c p))
+
+let verifyQValidCurvePoint_private_ #c #l pubKey tempBuffer = 
+    let h0 = ST.get() in 
+  let coordinatesValid = isCoordinateValid_private pubKey in 
+  if not coordinatesValid then false else begin
+    let h1 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKey;
+    let belongsToCurve = isPointOnCurve_ pubKey in 
+
+    [@inline_let]
+    let r = normalize_term (isPrimeGroup c) in 
+    match r with 
+    |true -> coordinatesValid && belongsToCurve
+    |false -> let orderCorrect = isOrderCorrect_private #c #l pubKey tempBuffer in coordinatesValid && belongsToCurve && orderCorrect
+  end
+
+
+let verifyQValidCurvePoint_private_p256 #l = verifyQValidCurvePoint_private_ #P256 #l
+
+let verifyQValidCurvePoint_private_p384 #l = verifyQValidCurvePoint_private_ #P384 #l
+
+let verifyQValidCurvePoint_private #c #l = 
+  match c with 
+  |P256 -> verifyQValidCurvePoint_private_p256 #l
+  |P384 -> verifyQValidCurvePoint_private_p384 #l
+
+
+val verifyQValidCurvePoint_public_p256: #l: ladder -> pubKey: point P256 
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) -> 
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
@@ -381,10 +477,10 @@ val verifyQValidCurvePoint_p256: #l: ladder -> pubKey: point P256
     let p = as_nat P256 h0 (getX pubKey),  as_nat P256 h0 (getY pubKey), as_nat P256 h0 (getZ pubKey) in 
     ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #P256 p))
 
-let verifyQValidCurvePoint_p256 = verifyQValidCurvePoint_ #P256
+let verifyQValidCurvePoint_public_p256 = verifyQValidCurvePoint_public_ #P256
 
 
-val verifyQValidCurvePoint_p384: #l: ladder -> pubKey: point P384
+val verifyQValidCurvePoint_public_p384: #l: ladder -> pubKey: point P384
   -> tempBuffer:lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) -> 
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
@@ -393,7 +489,7 @@ val verifyQValidCurvePoint_p384: #l: ladder -> pubKey: point P384
     let p = as_nat P384 h0 (getX pubKey),  as_nat P384 h0 (getY pubKey), as_nat P384 h0 (getZ pubKey) in 
     ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #P384 p))
 
-let verifyQValidCurvePoint_p384 = verifyQValidCurvePoint_ #P384
+let verifyQValidCurvePoint_public_p384 = verifyQValidCurvePoint_public_ #P384
 
 
 (* val verifyQValidCurvePoint_generic: pubKey: point Default
@@ -407,14 +503,14 @@ let verifyQValidCurvePoint_p384 = verifyQValidCurvePoint_ #P384
 
 let verifyQValidCurvePoint_generic = verifyQValidCurvePoint_ #Default *)
 
-let verifyQValidCurvePoint #c #l = 
+let verifyQValidCurvePoint_public #c #l = 
   match c with 
-  |P256 -> verifyQValidCurvePoint_p256 #l
-  |P384 -> verifyQValidCurvePoint_p384 #l
+  |P256 -> verifyQValidCurvePoint_public_p256 #l
+  |P384 -> verifyQValidCurvePoint_public_p384 #l
   (* |Default -> verifyQValidCurvePoint_generic *)
 
 
-let verifyQ #c #l pubKey = 
+let verifyQ_public #c #l pubKey = 
   push_frame();
     let h0 = ST.get() in
     let len = getCoordinateLenU64 c in 
@@ -422,7 +518,7 @@ let verifyQ #c #l pubKey =
     let tempBuffer = create (size 20 *! len) (u64 0) in 
     let publicKeyJ = create (size 3 *! len) (u64 0) in 
 
-  toFormPoint pubKey publicKeyJ; 
-  let r = verifyQValidCurvePoint #c #l publicKeyJ tempBuffer in 
+  toFormPoint #c pubKey publicKeyJ; 
+  let r = verifyQValidCurvePoint_public #c #l publicKeyJ tempBuffer in 
   pop_frame();
   r

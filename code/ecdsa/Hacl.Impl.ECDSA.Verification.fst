@@ -339,7 +339,7 @@ let ecdsa_verification_step5 #c #l x pubKeyAsPoint u1 u2 tempBuffer =
   let h1 = ST.get() in 
       Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pubKeyAsPoint;
   ecdsa_verification_step5_2 #c #l result pubKeyAsPoint u1 u2 tempBuffer;
-  let resultIsPAI = isPointAtInfinityPublic #c result in
+  let resultIsPAI = isPointAtInfinity_public #c result in
   let xCoordinateSum = sub result (size 0) (getCoordinateLenU64 c) in
   copy x xCoordinateSum;
   reduction_prime_2prime_order x x;
@@ -482,7 +482,7 @@ val ecdsa_verification_core: #c: curve
 let ecdsa_verification_core #c #l alg pubKey r s mLen m publicKeyBuffer hashAsFelem x tempBuffer = 
   bufferToJac #c pubKey publicKeyBuffer; 
     let h0 = ST.get() in 
-  let publicKeyCorrect = verifyQValidCurvePoint #c #l publicKeyBuffer tempBuffer in
+  let publicKeyCorrect = verifyQValidCurvePoint_public #c #l publicKeyBuffer tempBuffer in
   if publicKeyCorrect = false then false
   else 
     let step1 = ecdsa_verification_step1 #c r s in

@@ -172,7 +172,7 @@ bool test_ecdh()
     memcpy(pk, publicKeyX1,  32);
     memcpy(pk+32, publicKeyY1,  32);
        
-    bool successDHR = Hacl_P256_ecp256dh_r_ml(result, pk, privateKey);
+    bool successDHR = Hacl_P256_ecp256dh_r_private_ml(result, pk, privateKey);
     ok = ok && compare_and_print(32, result, expectedResult);
     ok = ok && successDHR;
 
@@ -186,7 +186,7 @@ bool test_ecdh()
     memcpy(pk, publicKeyX1,  32);
     memcpy(pk+32, publicKeyY1,  32);
        
-    successDHR = Hacl_P256_ecp256dh_r_radix(result, pk, privateKey);
+    successDHR = Hacl_P256_ecp256dh_r_private_radix(result, pk, privateKey);
     ok = ok && compare_and_print(32, result, expectedResult);
     ok = ok && successDHR;
 
@@ -263,14 +263,14 @@ void master_branch_test()
 	memcpy(pk+32, publicKeyY1,  32);
 
 	for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_r_ml(result, pk, privateKey);
+		Hacl_P256_ecp256dh_r_private_ml(result, pk, privateKey);
 
 
 	t1 = clock();
   	a = cpucycles_begin();
 
   	for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_r_ml(result, pk, privateKey);
+		Hacl_P256_ecp256dh_r_private_ml(result, pk, privateKey);
 	
 	b = cpucycles_end();
 	
