@@ -146,13 +146,13 @@ let add_dep_prime #c x t result =
   match c with
   |P256 -> begin add_dep_prime_p256 x t result end 
   |P384 -> begin add_dep_prime_p384 x t result end
-  |_ -> begin 
+  (*|_ -> begin 
     push_frame();
     assume (getPrime c == prime256);
     let p = createL p256_prime_list in 
       lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_prime_list);
     let r = _add_dep_prime x p t result in 
-      pop_frame(); r end
+      pop_frame(); r end *)
 
 
 let sub_bn #c x y result =
@@ -181,7 +181,7 @@ let sub_bn_order #c x result =
     lseq_upperbound (as_seq h0 x);
     lseq_upperbound (as_seq h1 result);
       pop_frame(); r
-  |_ -> admit(); u64 0
+  (*|_ -> admit(); u64 0 *)
 
 
 let sub_bn_prime #c x result =
@@ -203,7 +203,7 @@ let sub_bn_prime #c x result =
     lseq_upperbound (as_seq h0 x);
     lseq_upperbound (as_seq h1 result);
       pop_frame(); r
-  |_ -> admit(); u64 0
+ (* |_ -> admit(); u64 0 *)
 
 
 val lemma_zero_lseq: #l0: size_nat -> #l1: size_nat -> a: Lib.Sequence.lseq uint64 l0 -> b: Lib.Sequence.lseq uint64 l1 
@@ -261,12 +261,12 @@ let short_mul_prime #c b result =
     lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p384_prime_list);
     _shortened_mul p b result;
     pop_frame()
-  | _ -> admit();
+ (* | _ -> admit();
     push_frame();
     let p = createL p256_prime_list in 
     lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_prime_list);
     _shortened_mul p b result;
-    pop_frame()
+    pop_frame() *)
 
 
 let short_mul_order #c b result = 
@@ -287,12 +287,12 @@ let short_mul_order #c b result =
     lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p384_order_list);
     _shortened_mul p b result;
       pop_frame()
-  | _ -> admit();
+  (*| _ -> admit();
       push_frame();
     let p = createL p256_order_list in 
     lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_order_list);
     _shortened_mul p b result;
-      pop_frame()
+      pop_frame() *)
 
 
 let square_bn #c x result = 
@@ -570,6 +570,43 @@ let felem_sub #c a b out =
   |P256 -> felem_sub_p256 a b out
   |P384 -> felem_sub_p384 a b out
   (* |Default -> felem_sub_generic a b out *)
+
+
+let felem_sub_zero #c arg2 out =  
+  uploadZeroImpl out;
+    let h0 = ST.get() in  
+  let t = sub_bn out arg2 out in
+    let h1 = ST.get() in 
+    lseq_upperbound (as_seq h0 out);
+    lseq_upperbound (as_seq h0 arg2);
+    lseq_upperbound (as_seq h1 out);
+
+  let r = add_dep_prime #c out t out in 
+    let h2 = ST.get() in
+
+  modulo_addition_lemma (as_nat c h0 out - as_nat c h0 arg2) (getPrime c) 1;
+
+  assert(
+    let prime = getPrime c in 
+    if as_nat c h0 out - as_nat c h0 arg2 >= 0 then
+      begin
+	modulo_lemma (as_nat c h0 out - as_nat c h0 arg2) prime;
+	as_nat c h2 out == (as_nat c h0 out - as_nat c h0 arg2) % prime
+      end
+    else
+      begin
+	lseq_upperbound (as_seq h2 out);
+	lemma_mod_plus (as_nat c h2 out) (v r) (pow2 (getPower c));
+	lemma_mod_plus (as_nat c h0 out - as_nat c h0 arg2 + prime) 1 (pow2 (getPower c));
+	modulo_lemma (as_nat c h2 out) (pow2 (getPower c));
+	modulo_lemma (as_nat c h0 out - as_nat c h0 arg2 + prime) (pow2 (getPower c));
+	modulo_lemma (as_nat c h2 out) prime; 
+	as_nat c h2 out == (as_nat c h0 out - as_nat c h0 arg2) % prime
+      end);
+
+  substractionInDomain #c #DH (as_nat c h0 out) (as_nat c h0 arg2); 
+  inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 out) - fromDomain #c (as_nat c h0 arg2))
+
 
 
 
