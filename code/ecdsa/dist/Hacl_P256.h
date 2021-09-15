@@ -304,6 +304,13 @@ uint64_t Hacl_P256_ecp256dh_r_private_radix(uint8_t *result, uint8_t *pubKey, ui
 */
 uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
+/*
+Other exposed primitives
+*/
+void Hacl_P256_point_add_out(uint64_t *p, uint64_t *q, uint64_t *result);
+
+void Hacl_P256_point_inv(uint64_t *p, uint64_t *result);
+
 
 #define __Hacl_P256_H_DEFINED
 #endif

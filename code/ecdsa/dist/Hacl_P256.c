@@ -3439,7 +3439,7 @@ static inline void toUint64ChangeEndian_p384(uint8_t *i, uint64_t *o)
   }
 }
 
-static inline void montgomery_multiplication_buffer_by_one_mixed_p256(uint64_t *result)
+static void montgomery_multiplication_buffer_by_one_mixed_p256(uint64_t *result)
 {
   uint32_t len = (uint32_t)4U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)2U * len);
@@ -3580,7 +3580,7 @@ static inline void montgomery_multiplication_buffer_by_one_mixed_p256(uint64_t *
   cmovznz4_p256(carry, tempBuffer, x_, result);
 }
 
-static inline void
+static void
 copy_point_conditional(
   Spec_ECC_Curves_curve c,
   uint64_t *x3_out,
@@ -3736,7 +3736,7 @@ copy_point_conditional(
   }
 }
 
-static  inline void
+static void
 copy_point_conditional1(
   Spec_ECC_Curves_curve c,
   uint64_t *x3_out,
@@ -4403,7 +4403,7 @@ static inline void point_double_p384(uint64_t *p, uint64_t *result, uint64_t *te
   felem_sub_p384(y3, eightGamma, y3);
 }
 
-static inline void getPointPrecomputedMixed_p256(void *scalar, uint32_t i, uint64_t *pointToAdd)
+static void getPointPrecomputedMixed_p256(void *scalar, uint32_t i, uint64_t *pointToAdd)
 {
   uint32_t half = i >> (uint32_t)1U;
   uint32_t word = (uint32_t)((uint8_t *)scalar)[half];
@@ -16106,5 +16106,70 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   fromFormPoint_p384(rF, result);
   bool flag0 = flag;
   return (uint64_t)flag0;
+}
+
+/*
+Other exposed primitives
+*/
+void Hacl_P256_point_add_out(uint64_t *p, uint64_t *q, uint64_t *result)
+{
+  uint64_t tempBuffer[68U] = { 0U };
+  point_add_p256(p, q, result, tempBuffer);
+}
+
+void Hacl_P256_point_inv(uint64_t *p, uint64_t *result)
+{
+  uint32_t len = (uint32_t)4U;
+  uint64_t *yP = p + len;
+  uint64_t *yResult = result + len;
+  uint32_t len1 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    yResult[i] = (uint64_t)0U;
+  }
+  uint32_t len10 = (uint32_t)4U;
+  uint64_t c = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < len10 / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = yResult[(uint32_t)4U * i];
+    uint64_t t20 = yP[(uint32_t)4U * i];
+    uint64_t *res_i0 = yResult + (uint32_t)4U * i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, res_i0);
+    uint64_t t10 = yResult[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = yP[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = yResult + (uint32_t)4U * i + (uint32_t)1U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, res_i1);
+    uint64_t t11 = yResult[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = yP[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = yResult + (uint32_t)4U * i + (uint32_t)2U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, res_i2);
+    uint64_t t12 = yResult[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = yP[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = yResult + (uint32_t)4U * i + (uint32_t)3U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, res_i);
+  }
+  for (uint32_t i = len10 / (uint32_t)4U * (uint32_t)4U; i < len10; i++)
+  {
+    uint64_t t1 = yResult[i];
+    uint64_t t2 = yP[i];
+    uint64_t *res_i = yResult + i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, res_i);
+  }
+  uint64_t t = c;
+  uint64_t y0 = (uint64_t)0U - t;
+  uint64_t y1 = ((uint64_t)0U - t) >> (uint32_t)32U;
+  uint64_t y2 = (uint64_t)0U;
+  uint64_t y3 = t - (t << (uint32_t)32U);
+  uint64_t *r0 = yResult;
+  uint64_t *r1 = yResult + (uint32_t)1U;
+  uint64_t *r2 = yResult + (uint32_t)2U;
+  uint64_t *r3 = yResult + (uint32_t)3U;
+  uint64_t cc = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, yResult[0U], y0, r0);
+  uint64_t cc1 = Lib_IntTypes_Intrinsics_add_carry_u64(cc, yResult[1U], y1, r1);
+  uint64_t cc2 = Lib_IntTypes_Intrinsics_add_carry_u64(cc1, yResult[2U], y2, r2);
+  uint64_t cc3 = Lib_IntTypes_Intrinsics_add_carry_u64(cc2, yResult[3U], y3, r3);
+  uint64_t r = cc3;
+  memcpy(result, p, len * sizeof (uint64_t));
+  memcpy(result + (uint32_t)8U, p + (uint32_t)8U, (uint32_t)4U * sizeof (uint64_t));
 }
 

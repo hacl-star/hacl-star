@@ -75,11 +75,16 @@ let _point_double_koblitz #curve (p: point_nat_prime #curve) : point_nat_prime #
 
 
 noextract
-let _point_double #curve (p: point_nat_prime) : point_nat_prime #curve = 
+let _point_double #curve (p: point_nat_prime #curve) = 
   match curve with 
   |P256 -> _point_double_nist p 
   |P384 -> _point_double_nist p
 
+
+let _point_inverse #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
+  let x, y, z = p in
+  let minusY = (0 - y) % getPrime curve in 
+  (x, minusY, z)
 
 
  let _norm #curve (p:point_nat_prime #curve) : (point_nat_prime #curve) =
