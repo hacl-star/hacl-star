@@ -723,3 +723,19 @@ let point_add #c p q result tempBuffer =
   |P256 -> point_add_p256 p q result tempBuffer
   |P384 -> point_add_p384 p q result tempBuffer
   (* |Default -> point_add_generic p q result tempBuffer *)
+
+
+let point_add_out #c p q result = 
+  let h0 = ST.get() in 
+  push_frame();
+    let tempBuffer = create (size 17 *! getCoordinateLenU64 c) (u64 0) in 
+    let h1 = ST.get() in 
+    lemma_coord_eval c h0 h1 q;
+    lemma_coord_eval c h0 h1 p;
+    point_add p q result tempBuffer;
+  let h2 = ST.get() in 
+  pop_frame();
+  let h3 = ST.get() in 
+    lemma_coord_eval c h2 h3 result
+
+  

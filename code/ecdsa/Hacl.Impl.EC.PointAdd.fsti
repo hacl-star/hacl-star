@@ -26,3 +26,12 @@ val point_add: #c: curve -> p: point c -> q: point c -> result: point c
     point_eval c h p /\ point_eval c h q)
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\
     fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 q)))
+
+
+inline_for_extraction noextract
+val point_add_out: #c: curve -> p: point c -> q: point c -> result: point c -> 
+  Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
+    point_eval c h p /\ point_eval c h q)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\
+    fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 q)))
