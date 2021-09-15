@@ -487,3 +487,13 @@ val ecp384dh_r:
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
       as_seq h1 (gsub result (size 48) (size 48)) == pointY)
+
+
+[@ (Comment "Other exposed primitives")]
+inline_for_extraction noextract
+val point_add_out: p: point P256 -> q: point P256 -> result: point P256 -> 
+  Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
+    point_eval P256 h p /\ point_eval P256 h q)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval P256 h1 result /\
+    fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == _point_add #P256 (fromDomainPoint #P256 #DH (point_as_nat P256 h0 p)) (fromDomainPoint #P256 #DH (point_as_nat P256 h0 q)))

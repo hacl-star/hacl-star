@@ -210,13 +210,13 @@ void master_branch_test()
 	memset(scalar,'P',SIZE);
 	
   	for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_i_ml(result, scalar);
+		Hacl_P256_ecp256dh_i_radix(result, scalar);
 
 	t1 = clock();
   	a = cpucycles_begin();
 
   	for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_i_ml(result, scalar);
+		Hacl_P256_ecp256dh_i_radix(result, scalar);
 	
 	b = cpucycles_end();
 	
@@ -263,14 +263,14 @@ void master_branch_test()
 	memcpy(pk+32, publicKeyY1,  32);
 
 	for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_r_private_ml(result, pk, privateKey);
+		Hacl_P256_ecp256dh_r_private_radix(result, pk, privateKey);
 
 
 	t1 = clock();
   	a = cpucycles_begin();
 
   	for (int j = 0; j < ROUNDS; j++)
-		Hacl_P256_ecp256dh_r_private_ml(result, pk, privateKey);
+		Hacl_P256_ecp256dh_r_private_radix(result, pk, privateKey);
 	
 	b = cpucycles_end();
 	
@@ -426,7 +426,7 @@ int main()
         printf("%s\n", "WRONG"); 
 
 
-	// master_branch_test();
+	master_branch_test();
 }
 
 // #include <inttypes.h>

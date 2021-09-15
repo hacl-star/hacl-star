@@ -90,3 +90,5 @@ let ecp256dh_r_private_radix result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r_p
 
 let ecp384dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r_private #P384 #ML result pubKey scalar
 
+
+let point_add_out = Hacl.Impl.EC.PointAdd.point_add_out
