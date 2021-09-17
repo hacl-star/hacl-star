@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Blake2b_32_H
-#define __Hacl_Blake2b_32_H
+#ifndef __Hacl_Hash_SHA1_H
+#define __Hacl_Hash_SHA1_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -38,54 +38,28 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Blake2s_32.h"
-#include "Lib_Memzero0.h"
-#include "Hacl_Impl_Blake2_Constants.h"
+
+void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s);
+
+void Hacl_Hash_Core_SHA1_legacy_update(uint32_t *h, uint8_t *l);
+
+void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
+
+void Hacl_Hash_SHA1_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
 void
-Hacl_Blake2b_32_blake2b_init(
-  uint64_t *wv,
-  uint64_t *hash,
-  uint32_t kk,
-  uint8_t *k,
-  uint32_t nn
+Hacl_Hash_SHA1_legacy_update_last(
+  uint32_t *s,
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
 );
 
-void
-Hacl_Blake2b_32_blake2b_update_multi(
-  uint32_t len,
-  uint64_t *wv,
-  uint64_t *hash,
-  FStar_UInt128_uint128 prev,
-  uint8_t *blocks,
-  uint32_t nb
-);
-
-void
-Hacl_Blake2b_32_blake2b_update_last(
-  uint32_t len,
-  uint64_t *wv,
-  uint64_t *hash,
-  FStar_UInt128_uint128 prev,
-  uint32_t rem,
-  uint8_t *d
-);
-
-void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
-
-void
-Hacl_Blake2b_32_blake2b(
-  uint32_t nn,
-  uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
-);
+void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Blake2b_32_H_DEFINED
+#define __Hacl_Hash_SHA1_H_DEFINED
 #endif

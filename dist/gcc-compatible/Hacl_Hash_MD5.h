@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Impl_Blake2_H
-#define __Hacl_Impl_Blake2_H
+#ifndef __Hacl_Hash_MD5_H
+#define __Hacl_Hash_MD5_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -37,17 +37,29 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Kremlib.h"
 
+void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s);
 
-#define Hacl_Impl_Blake2_Core_M32 0
-#define Hacl_Impl_Blake2_Core_M128 1
-#define Hacl_Impl_Blake2_Core_M256 2
+void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x);
 
-typedef uint8_t Hacl_Impl_Blake2_Core_m_spec;
+void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst);
+
+void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
+
+void
+Hacl_Hash_MD5_legacy_update_last(
+  uint32_t *s,
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+void Hacl_Hash_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Impl_Blake2_H_DEFINED
+#define __Hacl_Hash_MD5_H_DEFINED
 #endif

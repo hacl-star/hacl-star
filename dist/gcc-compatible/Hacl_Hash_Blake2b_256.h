@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Blake2s_32_H
-#define __Hacl_Blake2s_32_H
+#ifndef __Hacl_Hash_Blake2b_256_H
+#define __Hacl_Hash_Blake2b_256_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -42,30 +42,74 @@ extern "C" {
 #include "Hacl_Impl_Blake2_Constants.h"
 
 void
-Hacl_Blake2s_32_blake2s_init(
-  uint32_t *wv,
-  uint32_t *hash,
+Hacl_Hash_Blake2b_256_finish_blake2b_256(
+  Lib_IntVector_Intrinsics_vec256 *s,
+  FStar_UInt128_uint128 ev,
+  uint8_t *dst
+);
+
+FStar_UInt128_uint128
+Hacl_Hash_Blake2b_256_update_multi_blake2b_256(
+  Lib_IntVector_Intrinsics_vec256 *s,
+  FStar_UInt128_uint128 ev,
+  uint8_t *blocks,
+  uint32_t n_blocks
+);
+
+typedef struct K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t__s
+{
+  uint32_t fst;
+  uint32_t snd;
+  uint32_t thd;
+  uint8_t *f3;
+  uint8_t *f4;
+}
+K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_;
+
+typedef struct K___uint32_t_uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+  uint32_t thd;
+}
+K___uint32_t_uint32_t_uint32_t;
+
+FStar_UInt128_uint128
+Hacl_Hash_Blake2b_256_update_last_blake2b_256(
+  Lib_IntVector_Intrinsics_vec256 *s,
+  FStar_UInt128_uint128 ev,
+  FStar_UInt128_uint128 prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
+
+void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
+
+void
+Hacl_Blake2b_256_blake2b_init(
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
   uint32_t kk,
   uint8_t *k,
   uint32_t nn
 );
 
 void
-Hacl_Blake2s_32_blake2s_update_multi(
+Hacl_Blake2b_256_blake2b_update_multi(
   uint32_t len,
-  uint32_t *wv,
-  uint32_t *hash,
-  uint64_t prev,
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  FStar_UInt128_uint128 prev,
   uint8_t *blocks,
   uint32_t nb
 );
 
 void
-Hacl_Blake2s_32_blake2s_update_last(
+Hacl_Blake2b_256_blake2b_update_last(
   uint32_t len,
-  uint32_t *wv,
-  uint32_t *hash,
-  uint64_t prev,
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  FStar_UInt128_uint128 prev,
   uint32_t rem,
   uint8_t *d
 );
@@ -77,10 +121,15 @@ typedef struct K___uint32_t_uint32_t_s
 }
 K___uint32_t_uint32_t;
 
-void Hacl_Blake2s_32_blake2s_finish(uint32_t nn, uint8_t *output, uint32_t *hash);
+void
+Hacl_Blake2b_256_blake2b_finish(
+  uint32_t nn,
+  uint8_t *output,
+  Lib_IntVector_Intrinsics_vec256 *hash
+);
 
 void
-Hacl_Blake2s_32_blake2s(
+Hacl_Blake2b_256_blake2b(
   uint32_t nn,
   uint8_t *output,
   uint32_t ll,
@@ -93,5 +142,5 @@ Hacl_Blake2s_32_blake2s(
 }
 #endif
 
-#define __Hacl_Blake2s_32_H_DEFINED
+#define __Hacl_Hash_Blake2b_256_H_DEFINED
 #endif
