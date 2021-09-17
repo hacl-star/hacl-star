@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Blake2s_128_H
-#define __Hacl_Blake2s_128_H
+#ifndef __Hacl_Hash_Blake2s_128_H
+#define __Hacl_Hash_Blake2s_128_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -38,10 +38,9 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Blake2s_32.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash.h"
+#include "Hacl_Hash_Blake2b_256.h"
 
 void
 Hacl_Hash_Blake2s_128_finish_blake2s_128(
@@ -119,5 +118,5 @@ Hacl_Blake2s_128_blake2s(
 }
 #endif
 
-#define __Hacl_Blake2s_128_H_DEFINED
+#define __Hacl_Hash_Blake2s_128_H_DEFINED
 #endif

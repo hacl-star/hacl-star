@@ -8,7 +8,9 @@
 extern "C" {
 #include <EverCrypt_Hash.h>
 #ifdef HAVE_HACL
-#include <Hacl_Hash.h>
+#include <Hacl_Hash_MD5.h>
+#include <Hacl_Hash_SHA1.h>
+#include <Hacl_Hash_SHA2.h>
 #include <Hacl_SHA3.h>
 #endif
 }
