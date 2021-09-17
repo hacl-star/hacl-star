@@ -769,8 +769,6 @@ Hacl_Hash_SHA2_update_last_512(
   Hacl_Hash_SHA2_update_multi_512(s, tmp, tmp_len / (uint32_t)128U);
 }
 
-typedef uint32_t *___uint32_t____;
-
 void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t

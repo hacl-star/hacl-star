@@ -1173,6 +1173,8 @@ Hacl_Hash_MD5_legacy_update_last(
   Hacl_Hash_MD5_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
 
+typedef uint32_t *___uint32_t____;
+
 void Hacl_Hash_MD5_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t

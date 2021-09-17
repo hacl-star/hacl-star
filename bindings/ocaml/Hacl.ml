@@ -13,26 +13,26 @@ module Lib_RandomBuffer_System = Lib_RandomBuffer_System_bindings.Bindings(Lib_R
 module Hacl_Chacha20Poly1305_32 = Hacl_Chacha20Poly1305_32_bindings.Bindings(Hacl_Chacha20Poly1305_32_stubs)
 module Hacl_Curve25519_51 = Hacl_Curve25519_51_bindings.Bindings(Hacl_Curve25519_51_stubs)
 module Hacl_Ed25519 = Hacl_Ed25519_bindings.Bindings(Hacl_Ed25519_stubs)
-module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)
 module Hacl_SHA3 = Hacl_SHA3_bindings.Bindings(Hacl_SHA3_stubs)
 module Hacl_HMAC = Hacl_HMAC_bindings.Bindings(Hacl_HMAC_stubs)
 module Hacl_Poly1305_32 = Hacl_Poly1305_32_bindings.Bindings(Hacl_Poly1305_32_stubs)
 module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
-module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs)
-module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
+module Hacl_Hash_Blake2 = Hacl_Hash_Blake2_bindings.Bindings(Hacl_Hash_Blake2_stubs)
+module Hacl_Blake2b_32 = Hacl_Hash_Blake2
+module Hacl_Blake2s_32 = Hacl_Hash_Blake2
 module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
 
 #ifdef HACL_CAN_COMPILE_VEC128
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
 module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
-module Hacl_Blake2s_128 = Hacl_Blake2s_128_bindings.Bindings(Hacl_Blake2s_128_stubs)
+module Hacl_Blake2s_128 = Hacl_Hash_Blake2s_128_bindings.Bindings(Hacl_Hash_Blake2s_128_stubs)
 #endif
 
 #ifdef HACL_CAN_COMPILE_VEC256
 module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
 module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
-module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
+module Hacl_Blake2b_256 = Hacl_Hash_Blake2b_256_bindings.Bindings(Hacl_Hash_Blake2b_256_stubs)
 #endif
 
 #ifdef HACL_CAN_COMPILE_VALE

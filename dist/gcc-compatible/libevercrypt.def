@@ -3,29 +3,10 @@ LIBRARY libevercrypt
 EXPORTS
   Spec_Cipher_Expansion_cipher_alg_of_impl
   LowStar_Vector_new_capacity
-  Hacl_Hash_Core_SHA2_init_224
-  Hacl_Hash_Core_SHA2_init_256
-  Hacl_Hash_Core_SHA2_init_384
-  Hacl_Hash_Core_SHA2_init_512
-  Hacl_Hash_Core_SHA2_update_384
-  Hacl_Hash_Core_SHA2_update_512
-  Hacl_Hash_Core_SHA2_pad_256
-  Hacl_Hash_Core_SHA2_finish_224
-  Hacl_Hash_Core_SHA2_finish_256
-  Hacl_Hash_Core_SHA2_finish_384
-  Hacl_Hash_Core_SHA2_finish_512
-  Hacl_Hash_SHA2_update_multi_224
-  Hacl_Hash_SHA2_update_multi_256
-  Hacl_Hash_SHA2_update_multi_384
-  Hacl_Hash_SHA2_update_multi_512
-  Hacl_Hash_SHA2_update_last_224
-  Hacl_Hash_SHA2_update_last_256
-  Hacl_Hash_SHA2_update_last_384
-  Hacl_Hash_SHA2_update_last_512
-  Hacl_Hash_SHA2_hash_224
-  Hacl_Hash_SHA2_hash_256
-  Hacl_Hash_SHA2_hash_384
-  Hacl_Hash_SHA2_hash_512
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
   Hacl_Hash_Blake2b_256_finish_blake2b_256
   Hacl_Hash_Blake2b_256_update_multi_blake2b_256
   Hacl_Hash_Blake2b_256_update_last_blake2b_256
@@ -76,6 +57,29 @@ EXPORTS
   Hacl_Hash_SHA1_legacy_update_multi
   Hacl_Hash_SHA1_legacy_update_last
   Hacl_Hash_SHA1_legacy_hash
+  Hacl_Hash_Core_SHA2_init_224
+  Hacl_Hash_Core_SHA2_init_256
+  Hacl_Hash_Core_SHA2_init_384
+  Hacl_Hash_Core_SHA2_init_512
+  Hacl_Hash_Core_SHA2_update_384
+  Hacl_Hash_Core_SHA2_update_512
+  Hacl_Hash_Core_SHA2_pad_256
+  Hacl_Hash_Core_SHA2_finish_224
+  Hacl_Hash_Core_SHA2_finish_256
+  Hacl_Hash_Core_SHA2_finish_384
+  Hacl_Hash_Core_SHA2_finish_512
+  Hacl_Hash_SHA2_update_multi_224
+  Hacl_Hash_SHA2_update_multi_256
+  Hacl_Hash_SHA2_update_multi_384
+  Hacl_Hash_SHA2_update_multi_512
+  Hacl_Hash_SHA2_update_last_224
+  Hacl_Hash_SHA2_update_last_256
+  Hacl_Hash_SHA2_update_last_384
+  Hacl_Hash_SHA2_update_last_512
+  Hacl_Hash_SHA2_hash_224
+  Hacl_Hash_SHA2_hash_256
+  Hacl_Hash_SHA2_hash_384
+  Hacl_Hash_SHA2_hash_512
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
