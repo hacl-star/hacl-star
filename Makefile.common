@@ -100,10 +100,12 @@ CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
   $(CURVE_BUNDLE_BASE) -bundle Hacl.Curve25519_64_Local
 
 # First, match the Blake2 stuff
-BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants \
+BLAKE2_BUNDLE_BASE= \
+  -bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants \
+  -bundle 'Hacl.Blake2b_32+Hacl.Blake2s_32=Hacl.Hash.Blake2,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2]'
+BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
   -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_256] \
   -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_128] \
-  -bundle 'Hacl.Blake2b_32+Hacl.Blake2s_32=Hacl.Hash.Blake2,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2]'
 HASH_BUNDLE= \
   -bundle Hacl.Hash.MD5=Hacl.Hash.Core.MD5 \
   -bundle Hacl.Hash.SHA1=Hacl.Hash.Core.SHA1 \

@@ -770,9 +770,8 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
-dist/wasm/Makefile.basic: BLAKE2_BUNDLE = \
-  -bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*' \
-  -bundle 'Hacl.Blake2s_128,Hacl.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
+dist/wasm/Makefile.basic: BLAKE2_BUNDLE = $(BLAKE2_BUNDLE_BASE) \
+  -bundle 'Hacl.Hash.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2b_256,Hacl.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
