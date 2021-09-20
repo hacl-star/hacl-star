@@ -258,6 +258,10 @@ var HaclWasm = (function() {
     } else {
       var func_name = proto.module + "_" + proto.name;
     }
+    if (!(proto.module in Module))
+      throw new Error(proto.module + " is not in Module");
+    if (!(func_name in Module[proto.module]))
+      throw new Error(func_name + " is not in Module["+proto.module+"]");
     var call_return = Module[proto.module][func_name](
       ...args_pointers.map(function(x) {
         return x.value;

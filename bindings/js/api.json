@@ -406,8 +406,8 @@
   },
   "SHA2": {
     "hash_512": {
-      "module": "Hacl_Hash",
-      "name": "SHA2_hash_512",
+      "module": "Hacl_Hash_SHA2",
+      "name": "hash_512",
       "args": [{
           "name": "input",
           "kind": "input",
@@ -444,8 +444,8 @@
       }
     },
     "hash_384": {
-      "module": "Hacl_Hash",
-      "name": "SHA2_hash_384",
+      "module": "Hacl_Hash_SHA2",
+      "name": "hash_384",
       "args": [{
           "name": "input",
           "kind": "input",
@@ -482,8 +482,8 @@
       }
     },
     "hash_256": {
-      "module": "Hacl_Hash",
-      "name": "SHA2_hash_256",
+      "module": "Hacl_Hash_SHA2",
+      "name": "hash_256",
       "args": [{
           "name": "input",
           "kind": "input",
@@ -522,8 +522,9 @@
   },
   "Blake2": {
     "blake2b": {
-      "module": "Hacl_Blake2b_32",
-      "name": "blake2b",
+      "module": "Hacl_Hash_Blake2",
+      "custom_module_name": true,
+      "name": "Hacl_Blake2b_32_blake2b",
       "args": [{
           "type": "int",
           "kind": "input",
@@ -578,8 +579,9 @@
       }
     },
     "blake2s": {
-      "module": "Hacl_Blake2s_32",
-      "name": "blake2s",
+      "module": "Hacl_Hash_Blake2",
+      "custom_module_name": true,
+      "name": "Hacl_Blake2s_32_blake2s",
       "args": [{
           "type": "int",
           "kind": "input",
