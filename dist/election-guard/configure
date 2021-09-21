@@ -15,11 +15,12 @@ fi
 my_mktemp () {
   local name=$1
   local ext=$2
-  local f=$(mktemp --suffix=$ext /tmp/$name.XXXXXXX)
+  # Note: --suffix is not POSIX, doesn't work on OSX
+  local f=$(mktemp /tmp/$name.XXXXXXX)
   if [[ $f == "" ]]; then
-    local f=$(mktemp -p . --suffix=$ext $name.XXXXXXX)
+    local f=$(mktemp -p . $name.XXXXXXX)
   fi
-  echo $f
+  echo $f.ext
 }
 
 my_mktemp_c () {

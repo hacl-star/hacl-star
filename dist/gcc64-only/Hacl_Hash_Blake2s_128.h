@@ -40,7 +40,7 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash_Blake2b_256.h"
+#include "Hacl_Hash_Blake2.h"
 
 void
 Hacl_Hash_Blake2s_128_finish_blake2s_128(

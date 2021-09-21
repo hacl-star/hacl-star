@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash_Blake2b_256.h"
 
 #define Hacl_Impl_Blake2_Core_M32 0
 #define Hacl_Impl_Blake2_Core_M128 1
@@ -72,6 +71,24 @@ Hacl_Hash_Blake2_update_multi_blake2b_32(
   uint8_t *blocks,
   uint32_t n_blocks
 );
+
+typedef struct K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t__s
+{
+  uint32_t fst;
+  uint32_t snd;
+  uint32_t thd;
+  uint8_t *f3;
+  uint8_t *f4;
+}
+K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_;
+
+typedef struct K___uint32_t_uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+  uint32_t thd;
+}
+K___uint32_t_uint32_t_uint32_t;
 
 uint64_t
 Hacl_Hash_Blake2_update_last_blake2s_32(
@@ -123,6 +140,13 @@ Hacl_Blake2b_32_blake2b_update_last(
   uint32_t rem,
   uint8_t *d
 );
+
+typedef struct K___uint32_t_uint32_t_s
+{
+  uint32_t fst;
+  uint32_t snd;
+}
+K___uint32_t_uint32_t;
 
 void Hacl_Blake2b_32_blake2b_finish(uint32_t nn, uint8_t *output, uint64_t *hash);
 
