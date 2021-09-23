@@ -305,17 +305,17 @@ let point_add_c #c p q result tempBuffer =
   let y2 = sub q len len in 
   let z2 = sub q (size 2 *! len) len in 
 
-  montgomery_square_buffer #c DH z1 sq_z1;
-  montgomery_square_buffer #c DH z2 sq_z2;
+  montgomery_square_buffer_dh #c z1 sq_z1;
+  montgomery_square_buffer_dh #c z2 sq_z2;
 
-  montgomery_multiplication_buffer #c DH sq_z1 z1 tr_z1;
-  montgomery_multiplication_buffer #c DH sq_z2 z2 tr_z2;
+  montgomery_multiplication_buffer_dh #c sq_z1 z1 tr_z1;
+  montgomery_multiplication_buffer_dh #c sq_z2 z2 tr_z2;
 
-  montgomery_multiplication_buffer #c DH sq_z1 x2 sq_z1;
-  montgomery_multiplication_buffer #c DH sq_z2 x1 sq_z2;
+  montgomery_multiplication_buffer_dh #c sq_z1 x2 sq_z1;
+  montgomery_multiplication_buffer_dh #c sq_z2 x1 sq_z2;
 
-  montgomery_multiplication_buffer #c DH tr_z1 y2 tr_z1;
-  montgomery_multiplication_buffer #c DH tr_z2 y1 tr_z2;
+  montgomery_multiplication_buffer_dh #c tr_z1 y2 tr_z1;
+  montgomery_multiplication_buffer_dh #c tr_z2 y1 tr_z2;
 
     let h2 = ST.get() in 
 
@@ -369,3 +369,19 @@ let point_add_c #c p q result tempBuffer =
   assert_by_tactic ((z1D * z1D * z1D) * y2D == y2D * (z1D * z1D * z1D)) canon;
   assert_by_tactic ((z2D * z2D * z2D) * y1D == y1D * (z2D * z2D * z2D)) canon
 
+
+
+let point_add_c_out #c p q result = 
+  let h0 = ST.get() in 
+  push_frame();
+    let tempBuffer = create (size 17 *! getCoordinateLenU64 c) (u64 0) in 
+    let h1 = ST.get() in 
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 q;
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
+    point_add_c p q result tempBuffer;
+  let h2 = ST.get() in 
+  pop_frame();
+  let h3 = ST.get() in 
+     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
+
+  

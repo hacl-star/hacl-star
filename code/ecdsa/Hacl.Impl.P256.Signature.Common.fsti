@@ -103,3 +103,13 @@ val verifyQ_public: #c: curve -> #l: ladder -> pubKey: pointAffine8 c -> Stack b
     let publicKeyY = nat_from_bytes_be (as_seq h1 (getYAff8 pubKey)) in
     let pkJ = Spec.ECC.toJacobianCoordinates (publicKeyX, publicKeyY) in 
     r == verifyQValidCurvePointSpec #c pkJ))
+
+
+inline_for_extraction noextract
+val verifyQ_private: #c: curve -> #l: ladder -> pubKey: pointAffine8 c -> Stack bool
+  (requires fun h -> live h pubKey)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ (
+    let publicKeyX = nat_from_bytes_be (as_seq h1 (getXAff8 pubKey)) in 
+    let publicKeyY = nat_from_bytes_be (as_seq h1 (getYAff8 pubKey)) in
+    let pkJ = Spec.ECC.toJacobianCoordinates (publicKeyX, publicKeyY) in 
+    r == verifyQValidCurvePointSpec #c pkJ))

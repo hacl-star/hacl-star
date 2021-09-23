@@ -208,6 +208,21 @@ Hacl_P256_ecdsa_verif_without_hash(
 bool Hacl_P256_verify_q_public(uint8_t *pubKey);
 
 /*
+ Public key verification function. 
+  
+ Input: pub(lic)Key: uint8[64]. 
+  
+ Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
+ Verify that the public key is not the “point at infinity”, represented as O. 
+ Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
+ Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
+ Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  
+ The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+*/
+bool Hacl_P256_verify_q_private(uint8_t *pubKey);
+
+/*
  There and further we introduce notions of compressed point and not compressed point. 
   
  We denote || as byte concatenation. 
@@ -307,7 +322,8 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 /*
 Other exposed primitives 
  
-Point addition not complete
+Complete point addition.
+Not side-channel resistant
 */
 void Hacl_P256_point_add_out(uint64_t *p, uint64_t *q, uint64_t *result);
 
@@ -316,9 +332,25 @@ Point inverse
 */
 void Hacl_P256_point_inv(uint64_t *p, uint64_t *result);
 
+/*
+Moves a point to correct endian form + uint64
+*/
 void Hacl_P256_point_toForm(uint8_t *i, uint64_t *o);
 
+/*
+Moves a point from correct endian form + uint8
+*/
 void Hacl_P256_point_fromForm(uint64_t *i, uint8_t *o);
+
+/*
+Moves a point to domain
+*/
+void Hacl_P256_point_toDomain(uint64_t *p, uint64_t *result);
+
+/*
+From domain + to affine
+*/
+void Hacl_P256_point_norm(uint64_t *p, uint64_t *result);
 
 
 #define __Hacl_P256_H_DEFINED
