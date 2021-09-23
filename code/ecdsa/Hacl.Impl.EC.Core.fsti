@@ -18,7 +18,7 @@ open FStar.Mul
 #set-options "--z3rlimit 100" 
 
 type ladder = 
-  |ML
+  |MontLadder
   |Radix
 
 
@@ -116,8 +116,9 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype -> #l: ladder
     let pD = scalar_multiplication  (as_seq h0 scalar) (point_as_nat c h0 p) in 
     pD == point_as_nat c h1 result))
 
+
 inline_for_extraction noextract
-val scalarMultiplicationWithoutNorm: #c: curve  -> #l: ladder -> p: point c -> result: point c 
+val scalarMultiplicationWithoutNorm: #c: curve ->  #l: ladder ->  p: point c -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
@@ -129,7 +130,7 @@ val scalarMultiplicationWithoutNorm: #c: curve  -> #l: ladder -> p: point c -> r
     let p = point_as_nat c h0 p in point_mult_0 #c p 0; 
     let rN, _ = montgomery_ladder_spec_left #c (as_seq h0 scalar) (pointAtInfinity, p) in 
     rN == p1)) 
-    
+
 
 inline_for_extraction noextract
 val secretToPublic: #c: curve -> #l: ladder -> result: point c 

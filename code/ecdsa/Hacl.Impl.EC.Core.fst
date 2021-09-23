@@ -401,7 +401,7 @@ val scalar_multiplication_t_0: #c: curve -> #t:buftype -> #l : ladder ->  p: poi
 let scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer = 
     let len = getCoordinateLenU64 c in 
   match l with 
-  |ML -> begin
+  |MontLadder -> begin
     let q = sub tempBuffer (size 0) (size 3 *! len) in 
     let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
     uploadStartPoints q p result; 
@@ -489,39 +489,16 @@ let scalarMultiplicationWithoutNorm_ #c #l p result scalar tempBuffer =
   normalize_term (scalar_multiplication_t_0 #c #MUT #l p result scalar buff) *)
   (* copy_point q result *)
 
-
-val scalarMultiplicationWithoutNorm_p256: #l: ladder -> p: point P256 -> result: point P256
-  -> scalar: scalar_t #MUT #P256
-  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) ->
-  Stack unit
-  (requires fun h -> point_eval P256 h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    ~ (isPointAtInfinity (point_as_nat P256 h p)))
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval P256 h1 result /\ (
-    let p1 = fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) in 
-    let p = point_as_nat P256 h0 p in point_mult_0 #P256 p 0; 
-    let rN, _ = montgomery_ladder_spec_left #P256 (as_seq h0 scalar) (pointAtInfinity, p) in 
-    rN == p1)) 
+[@CInline]
+let scalarMultiplicationWithoutNorm_p256_ml  = scalarMultiplicationWithoutNorm_ #P256 #MontLadder
+[@CInline]
+let scalarMultiplicationWithoutNorm_p384_ml = scalarMultiplicationWithoutNorm_ #P384 #MontLadder
 
 [@CInline]
-let scalarMultiplicationWithoutNorm_p256 #l = scalarMultiplicationWithoutNorm_ #P256 #l
-
-
-val scalarMultiplicationWithoutNorm_p384: #l: ladder -> p: point P384 -> result: point P384
-  -> scalar: scalar_t #MUT #P384
-  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) ->
-  Stack unit
-  (requires fun h -> point_eval P384 h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    ~ (isPointAtInfinity (point_as_nat P384 h p)))
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval P384 h1 result /\ (
-    let p1 = fromDomainPoint #P384 #DH (point_as_nat P384 h1 result) in 
-    let p = point_as_nat P384 h0 p in point_mult_0 #P384 p 0; 
-    let rN, _ = montgomery_ladder_spec_left #P384 (as_seq h0 scalar) (pointAtInfinity, p) in 
-    rN == p1)) 
-
+let scalarMultiplicationWithoutNorm_p256_radix  = scalarMultiplicationWithoutNorm_ #P256 #Radix
 [@CInline]
-let scalarMultiplicationWithoutNorm_p384 = scalarMultiplicationWithoutNorm_ #P384
+let scalarMultiplicationWithoutNorm_p384_radix = scalarMultiplicationWithoutNorm_ #P384 #Radix
+
 
 (* val scalarMultiplicationWithoutNorm_generic: p: point Default -> result: point Default
   -> scalar: scalar_t #MUT #Default
@@ -542,9 +519,18 @@ let scalarMultiplicationWithoutNorm_generic = scalarMultiplicationWithoutNorm_ #
 
 let scalarMultiplicationWithoutNorm #c #l = 
   match c with 
-  |P256 -> scalarMultiplicationWithoutNorm_p256 #l
-  |P384 -> scalarMultiplicationWithoutNorm_p384 #l
-  (* |Default -> scalarMultiplicationWithoutNorm_generic *)
+  |P256 -> begin
+    match l with 
+    |MontLadder -> scalarMultiplicationWithoutNorm_p256_ml
+    |Radix -> scalarMultiplicationWithoutNorm_p256_radix
+  end
+  |P384 -> 
+    begin
+      match l with 
+      |MontLadder -> scalarMultiplicationWithoutNorm_p384_ml
+      |Radix -> scalarMultiplicationWithoutNorm_p384_radix
+    end
+
 
 
 inline_for_extraction noextract
@@ -576,7 +562,7 @@ let secretToPublic #c #l result scalar tempBuffer =
   let q = sub tempBuffer (size 0) (size 3 *! len) in
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
   match l with 
-  |ML -> 
+  |MontLadder -> 
     begin
       uploadStartPointsS2P q result; 
       montgomery_ladder q result scalar buff;
@@ -607,7 +593,7 @@ let secretToPublicWithoutNorm_ #c #l result scalar tempBuffer =
   let q = sub tempBuffer (size 0) (size 3 *! len) in
   let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
   match l with 
-  |ML -> 
+  |MontLadder -> 
     begin
       uploadStartPointsS2P q result; 
       montgomery_ladder q result scalar buff;
@@ -620,35 +606,16 @@ let secretToPublicWithoutNorm_ #c #l result scalar tempBuffer =
       (* norm q result buff *)
     end
 
-
 [@CInline]
-val secretToPublicWithoutNorm_p256: #l: ladder -> result: point P256
-  -> scalar: scalar_t #MUT #P256
-  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P256) ->
-  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
-    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
-  (ensures fun h0 _ h1 -> point_eval P256 h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
-    let p1 = fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) in point_mult_0 (basePoint #P256) 0;
-    let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, basePoint #P256) in 
-    p1 == rN))  
-
-
-let secretToPublicWithoutNorm_p256 #l = secretToPublicWithoutNorm_ #P256 #l
-
-
+let secretToPublicWithoutNorm_p256_ml = secretToPublicWithoutNorm_ #P256 #MontLadder
 [@CInline]
-val secretToPublicWithoutNorm_p384: #l: ladder -> result: point P384
-  -> scalar: scalar_t #MUT #P384
-  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 P384) ->
-  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
-    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
-  (ensures fun h0 _ h1 -> point_eval P384 h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
-    let p1 = fromDomainPoint #P384 #DH (point_as_nat P384 h1 result) in point_mult_0 (basePoint #P384) 0;
-    let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, basePoint #P384) in 
-    p1 == rN))  
+let secretToPublicWithoutNorm_p384_ml = secretToPublicWithoutNorm_ #P384 #MontLadder
+[@CInline]
+let secretToPublicWithoutNorm_p256_radix = secretToPublicWithoutNorm_ #P256 #Radix
+[@CInline]
+let secretToPublicWithoutNorm_p384_radix = secretToPublicWithoutNorm_ #P384 #Radix
 
 
-let secretToPublicWithoutNorm_p384 #l = secretToPublicWithoutNorm_ #P384 #l
 (* 
 [@CInline]
 val secretToPublicWithoutNorm_generic: result: point Default
@@ -667,6 +634,14 @@ let secretToPublicWithoutNorm_generic = secretToPublicWithoutNorm_ #Default *)
 
 let secretToPublicWithoutNorm #c #l = 
   match c with 
-  |P256 -> secretToPublicWithoutNorm_p256 #l
-  |P384 -> secretToPublicWithoutNorm_p384 #l
-  (* |Default -> secretToPublicWithoutNorm_generic *)
+  |P256 -> begin
+    match l with 
+    |MontLadder -> secretToPublicWithoutNorm_p256_ml
+    |Radix -> secretToPublicWithoutNorm_p256_radix
+  end
+  |P384 -> 
+    begin
+      match l with 
+      |MontLadder -> secretToPublicWithoutNorm_p384_ml
+      |Radix -> secretToPublicWithoutNorm_p384_radix
+    end
