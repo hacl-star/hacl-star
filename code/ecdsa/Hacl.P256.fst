@@ -54,6 +54,11 @@ let verify_q_public pubKey =
     Hacl.Impl.P256.Signature.Common.verifyQ_public #P256 #ML pubKey
 
 
+let verify_q_private pubKey = 
+    Hacl.Impl.P256.Signature.Common.verifyQ_private #P256 #ML pubKey
+
+
+
 
 let decompression_not_compressed_form_p256 b result = 
   Hacl.Impl.P256.Compression.decompressionNotCompressedForm #P256 b result
@@ -98,3 +103,7 @@ let point_inv p result = Hacl.Impl.EC.PointInverse.point_inv #P256 p result
 let point_toForm i o = Hacl.Impl.P256.Signature.Common.toFormPoint i o
 
 let point_fromForm i o = Hacl.Impl.P256.Signature.Common.fromFormPoint i o 
+
+let point_toDomain p result = Hacl.Impl.EC.Core.pointToDomain p result
+
+let point_norm p result = Hacl.Impl.EC.Core.norm p result

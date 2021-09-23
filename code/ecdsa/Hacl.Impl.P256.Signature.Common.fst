@@ -522,3 +522,17 @@ let verifyQ_public #c #l pubKey =
   let r = verifyQValidCurvePoint_public #c #l publicKeyJ tempBuffer in 
   pop_frame();
   r
+
+
+let verifyQ_private #c #l pubKey = 
+  push_frame();
+    let h0 = ST.get() in
+    let len = getCoordinateLenU64 c in 
+    
+    let tempBuffer = create (size 20 *! len) (u64 0) in 
+    let publicKeyJ = create (size 3 *! len) (u64 0) in 
+
+  toFormPoint #c pubKey publicKeyJ; 
+  let r = verifyQValidCurvePoint_private #c #l publicKeyJ tempBuffer in 
+  pop_frame();
+  r

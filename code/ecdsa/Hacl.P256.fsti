@@ -242,6 +242,25 @@ val verify_q_public:
     )
 
 
+[@ (Comment " Public key verification function. 
+  \n Input: pub(lic)Key: uint8[64]. 
+  \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/")]
+val verify_q_private: 
+  pubKey: lbuffer uint8 (size 64) ->
+  Stack bool
+    (requires fun h -> live h pubKey)
+    (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+      (
+        let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in 
+        let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
+        let pkJ = Spec.ECC.toJacobianCoordinates (publicKeyX, publicKeyY) in 
+        r == Spec.ECDSA.verifyQValidCurvePointSpec #P256 pkJ
+      )
+    )
+
+
+
 
 [@ (Comment " There and further we introduce notions of compressed point and not compressed point. 
   \n We denote || as byte concatenation. 
@@ -507,6 +526,7 @@ val point_inv: p: point P256 -> result: point P256 -> Stack unit
     fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == _point_inverse #P256 (fromDomainPoint #P256 #DH (point_as_nat P256 h0 p)))
 
 
+[@ (Comment "Moves a point to correct endian form + uint64")]
 val point_toForm: i: pointAffine8 P256 -> o: point P256 -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ (
@@ -518,6 +538,7 @@ val point_toForm: i: pointAffine8 P256 -> o: point P256 -> Stack unit
     x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
 
 
+[@ (Comment "Moves a point from correct endian form + uint8")]
 val point_fromForm: i: point P256 -> o: pointAffine8 P256 -> Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o /\ point_eval P256 h i /\ (
     let xCoordinate, yCoordinate, _ = point_as_nat P256 h i in 
@@ -527,3 +548,27 @@ val point_fromForm: i: point P256 -> o: pointAffine8 P256 -> Stack unit
     let coordinateX_u8, coordinateY_u8 = getXAff8 #P256 o, getYAff8 #P256 o in
     as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen P256) coordinateX_u64 /\
     as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen P256) coordinateY_u64))
+
+
+[@ (Comment "Moves a point to domain")]
+val point_toDomain: p: point P256 -> result: point P256 -> Stack unit 
+  (requires fun h -> live h p /\ live h result /\ eq_or_disjoint p result /\ point_eval P256 h p)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
+    point_eval P256 h1 result /\ point_eval P256 h1 p /\
+    point_x_as_nat P256 h1 result == toDomain_ #P256 #DH (point_x_as_nat P256 h0 p) /\
+    point_y_as_nat P256 h1 result == toDomain_ #P256 #DH (point_y_as_nat P256 h0 p) /\
+    point_z_as_nat P256 h1 result == toDomain_ #P256 #DH (point_z_as_nat P256 h0 p))
+
+
+
+[@ (Comment "From domain + to affine")]
+val point_norm: p: point P256 -> resultPoint: point P256 -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P256) -> Stack unit
+  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval P256 h p /\
+    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
+  (ensures fun h0 _ h1 -> point_eval P256 h1 resultPoint /\
+    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
+    let resultPoint = point_as_nat P256 h1 resultPoint in 
+    let pointD = fromDomainPoint #P256 #DH (point_as_nat P256 h0 p) in 
+    let pointNorm = _norm #P256 pointD in
+    pointNorm == resultPoint))

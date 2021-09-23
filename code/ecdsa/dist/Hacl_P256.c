@@ -7125,6 +7125,146 @@ static inline bool isPointOnCurve_p384(uint64_t *p)
   return !(r == (uint64_t)0U);
 }
 
+static bool verifyQValidCurvePoint_private_p256(uint64_t *pubKey)
+{
+  uint32_t len0 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len0);
+  uint64_t tempBuffer1[len0];
+  memset(tempBuffer1, 0U, len0 * sizeof (uint64_t));
+  uint64_t *x0 = pubKey;
+  uint64_t *y0 = pubKey + len0;
+  uint64_t
+  p0[4U] =
+    {
+      (uint64_t)0xffffffffffffffffU,
+      (uint64_t)0xffffffffU,
+      (uint64_t)0U,
+      (uint64_t)0xffffffff00000001U
+    };
+  uint32_t len10 = (uint32_t)4U;
+  uint64_t c0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < len10 / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = x0[(uint32_t)4U * i];
+    uint64_t t20 = p0[(uint32_t)4U * i];
+    uint64_t *res_i0 = tempBuffer1 + (uint32_t)4U * i;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res_i0);
+    uint64_t t10 = x0[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = p0[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = tempBuffer1 + (uint32_t)4U * i + (uint32_t)1U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t10, t21, res_i1);
+    uint64_t t11 = x0[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = p0[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = tempBuffer1 + (uint32_t)4U * i + (uint32_t)2U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t11, t22, res_i2);
+    uint64_t t12 = x0[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = p0[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = tempBuffer1 + (uint32_t)4U * i + (uint32_t)3U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t12, t2, res_i);
+  }
+  for (uint32_t i = len10 / (uint32_t)4U * (uint32_t)4U; i < len10; i++)
+  {
+    uint64_t t1 = x0[i];
+    uint64_t t2 = p0[i];
+    uint64_t *res_i = tempBuffer1 + i;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res_i);
+  }
+  uint64_t r = c0;
+  uint64_t carryX = r;
+  uint64_t
+  p[4U] =
+    {
+      (uint64_t)0xffffffffffffffffU,
+      (uint64_t)0xffffffffU,
+      (uint64_t)0U,
+      (uint64_t)0xffffffff00000001U
+    };
+  uint32_t len1 = (uint32_t)4U;
+  uint64_t c = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < len1 / (uint32_t)4U; i++)
+  {
+    uint64_t t1 = y0[(uint32_t)4U * i];
+    uint64_t t20 = p[(uint32_t)4U * i];
+    uint64_t *res_i0 = tempBuffer1 + (uint32_t)4U * i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, res_i0);
+    uint64_t t10 = y0[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = p[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = tempBuffer1 + (uint32_t)4U * i + (uint32_t)1U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, res_i1);
+    uint64_t t11 = y0[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = p[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = tempBuffer1 + (uint32_t)4U * i + (uint32_t)2U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, res_i2);
+    uint64_t t12 = y0[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = p[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = tempBuffer1 + (uint32_t)4U * i + (uint32_t)3U;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, res_i);
+  }
+  for (uint32_t i = len1 / (uint32_t)4U * (uint32_t)4U; i < len1; i++)
+  {
+    uint64_t t1 = y0[i];
+    uint64_t t2 = p[i];
+    uint64_t *res_i = tempBuffer1 + i;
+    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, res_i);
+  }
+  uint64_t r0 = c;
+  uint64_t carryY = r0;
+  uint64_t lessX = FStar_UInt64_eq_mask(carryX, (uint64_t)1U);
+  uint64_t lessY = FStar_UInt64_eq_mask(carryY, (uint64_t)1U);
+  uint64_t r1 = lessX & lessY;
+  bool coordinatesValid = !(r1 == (uint64_t)0U);
+  if (!coordinatesValid)
+  {
+    return false;
+  }
+  uint32_t sz = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), sz);
+  uint64_t y2Buffer[sz];
+  memset(y2Buffer, 0U, sz * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), sz);
+  uint64_t xBuffer[sz];
+  memset(xBuffer, 0U, sz * sizeof (uint64_t));
+  uint64_t *x = pubKey;
+  uint64_t *y = pubKey + sz;
+  toDomain_p256(y, y2Buffer);
+  montgomery_square_buffer_dh_p256(y2Buffer, y2Buffer);
+  uint32_t sz1 = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), sz1);
+  uint64_t xToDomainBuffer[sz1];
+  memset(xToDomainBuffer, 0U, sz1 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), sz1);
+  uint64_t minusThreeXBuffer[sz1];
+  memset(minusThreeXBuffer, 0U, sz1 * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), sz1);
+  uint64_t b_constant[sz1];
+  memset(b_constant, 0U, sz1 * sizeof (uint64_t));
+  toDomain_p256(x, xToDomainBuffer);
+  montgomery_square_buffer_dh_p256(xToDomainBuffer, xBuffer);
+  montgomery_multiplication_buffer_dh_p256(xBuffer, xToDomainBuffer, xBuffer);
+  felem_add_p256(xToDomainBuffer, xToDomainBuffer, minusThreeXBuffer);
+  felem_add_p256(xToDomainBuffer, minusThreeXBuffer, minusThreeXBuffer);
+  felem_sub_p256(xBuffer, minusThreeXBuffer, xBuffer);
+  b_constant[0U] = (uint64_t)15608596021259845087U;
+  b_constant[1U] = (uint64_t)12461466548982526096U;
+  b_constant[2U] = (uint64_t)16546823903870267094U;
+  b_constant[3U] = (uint64_t)15866188208926050356U;
+  felem_add_p256(xBuffer, b_constant, xBuffer);
+  uint64_t tmp = (uint64_t)0U;
+  tmp = (uint64_t)18446744073709551615U;
+  uint32_t len = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t a_i = y2Buffer[i];
+    uint64_t b_i = xBuffer[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, b_i);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t r2 = tmp;
+  bool belongsToCurve = !(r2 == (uint64_t)0U);
+  return coordinatesValid && belongsToCurve;
+}
+
 static bool verifyQValidCurvePoint_public_p256(uint64_t *pubKey)
 {
   uint32_t len = (uint32_t)4U;
@@ -15133,6 +15273,33 @@ bool Hacl_P256_verify_q_public(uint8_t *pubKey)
 }
 
 /*
+ Public key verification function. 
+  
+ Input: pub(lic)Key: uint8[64]. 
+  
+ Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
+ Verify that the public key is not the “point at infinity”, represented as O. 
+ Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
+ Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
+ Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
+  
+ The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
+*/
+bool Hacl_P256_verify_q_private(uint8_t *pubKey)
+{
+  uint32_t len = (uint32_t)4U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len);
+  uint64_t tempBuffer[(uint32_t)20U * len];
+  memset(tempBuffer, 0U, (uint32_t)20U * len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t publicKeyJ[(uint32_t)3U * len];
+  memset(publicKeyJ, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  toFormPoint_p256(pubKey, publicKeyJ);
+  bool r = verifyQValidCurvePoint_private_p256(publicKeyJ);
+  return r;
+}
+
+/*
  There and further we introduce notions of compressed point and not compressed point. 
   
  We denote || as byte concatenation. 
@@ -16178,13 +16345,44 @@ void Hacl_P256_point_inv(uint64_t *p, uint64_t *result)
   memcpy(result + (uint32_t)8U, p + (uint32_t)8U, (uint32_t)4U * sizeof (uint64_t));
 }
 
+/*
+Moves a point to correct endian form + uint64
+*/
 void Hacl_P256_point_toForm(uint8_t *i, uint64_t *o)
 {
   toFormPoint_p256(i, o);
 }
 
+/*
+Moves a point from correct endian form + uint8
+*/
 void Hacl_P256_point_fromForm(uint64_t *i, uint8_t *o)
 {
   fromFormPoint_p256(i, o);
+}
+
+/*
+Moves a point to domain
+*/
+void Hacl_P256_point_toDomain(uint64_t *p, uint64_t *result)
+{
+  uint32_t len = (uint32_t)4U;
+  uint64_t *p_x = p;
+  uint64_t *p_y = p + len;
+  uint64_t *p_z = p + (uint32_t)2U * len;
+  uint64_t *r_x = result;
+  uint64_t *r_y = result + len;
+  uint64_t *r_z = result + (uint32_t)2U * len;
+  toDomain_p256(p_x, r_x);
+  toDomain_p256(p_y, r_y);
+  toDomain_p256(p_z, r_z);
+}
+
+/*
+From domain + to affine
+*/
+void (*Hacl_P256_point_norm(uint64_t *p, uint64_t *result))(uint64_t *x0)
+{
+  return norm_p256(p, result) , (void *)0U;
 }
 
