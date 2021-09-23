@@ -77,6 +77,17 @@ val norm: #c: curve -> p: point c -> resultPoint: point c ->
     pointNorm == resultPoint))
 
 
+inline_for_extraction noextract
+val norm_out: #c: curve -> p: point c -> resultPoint: point c -> Stack unit
+  (requires fun h -> live h p /\ live h resultPoint /\ point_eval c h p)
+  (ensures fun h0 _ h1 -> point_eval c h1 resultPoint /\
+    modifies (loc resultPoint) h0 h1 /\ (
+    let resultPoint = point_as_nat c h1 resultPoint in 
+    let pointD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+    let pointNorm = _norm #c pointD in
+    pointNorm == resultPoint))
+
+
 
 
 inline_for_extraction noextract

@@ -509,13 +509,16 @@ val ecp384dh_r:
 
 
 [@ (Comment "Other exposed primitives \n 
-Point addition not complete")]
+Complete point addition.
+Not side-channel resistant")]
 val point_add_out: p: point P256 -> q: point P256 -> result: point P256 -> 
   Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ 
     eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
     point_eval P256 h p /\ point_eval P256 h q)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval P256 h1 result /\
-    fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == _point_add #P256 (fromDomainPoint #P256 #DH (point_as_nat P256 h0 p)) (fromDomainPoint #P256 #DH (point_as_nat P256 h0 q)))
+   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval P256 h1 result /\ (
+     let pD = fromDomainPoint #P256 #DH (point_as_nat P256 h0 p) in 
+     let qD = fromDomainPoint #P256 #DH (point_as_nat P256 h0 q) in 
+     fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == pointAdd #P256 pD qD))
 
 
 
@@ -562,12 +565,9 @@ val point_toDomain: p: point P256 -> result: point P256 -> Stack unit
 
 
 [@ (Comment "From domain + to affine")]
-val point_norm: p: point P256 -> resultPoint: point P256 -> 
-  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P256) -> Stack unit
-  (requires fun h -> live h p /\ live h resultPoint /\ live h tempBuffer /\ point_eval P256 h p /\
-    disjoint p tempBuffer /\ disjoint tempBuffer resultPoint) 
-  (ensures fun h0 _ h1 -> point_eval P256 h1 resultPoint /\
-    modifies (loc tempBuffer |+| loc resultPoint) h0 h1 /\ (
+val point_norm: p: point P256 -> resultPoint: point P256 ->  Stack unit
+  (requires fun h -> live h p /\ live h resultPoint /\ point_eval P256 h p) 
+  (ensures fun h0 _ h1 -> point_eval P256 h1 resultPoint /\ modifies (loc resultPoint) h0 h1 /\ (
     let resultPoint = point_as_nat P256 h1 resultPoint in 
     let pointD = fromDomainPoint #P256 #DH (point_as_nat P256 h0 p) in 
     let pointNorm = _norm #P256 pointD in

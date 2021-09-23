@@ -265,11 +265,25 @@ let norm_p384 = norm_ #P384
 (* [@CInline]
 let norm_generic = norm_ #Default  *)
 
-let norm #c p resultPoint = 
+let norm #c p resultPoint tempBuffer = 
   match c with 
-  |P256 -> norm_p256 p resultPoint
-  |P384 -> norm_p384 p resultPoint
+  |P256 -> norm_p256 p resultPoint tempBuffer
+  |P384 -> norm_p384 p resultPoint tempBuffer
   (* |Default -> norm_generic p resultPoint *)
+
+
+let norm_out #c p result = 
+  let h0 = ST.get() in 
+  push_frame();
+    let tempBuffer = create (size 17 *! getCoordinateLenU64 c) (u64 0) in 
+    let h1 = ST.get() in 
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
+    norm p result tempBuffer;
+  let h2 = ST.get() in 
+  pop_frame();
+  let h3 = ST.get() in 
+     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
+
 
 
 let normX #c p result tempBuffer = 
