@@ -16109,7 +16109,9 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 }
 
 /*
-Other exposed primitives
+Other exposed primitives 
+ 
+Point addition not complete
 */
 void Hacl_P256_point_add_out(uint64_t *p, uint64_t *q, uint64_t *result)
 {
@@ -16117,6 +16119,9 @@ void Hacl_P256_point_add_out(uint64_t *p, uint64_t *q, uint64_t *result)
   point_add_p256(p, q, result, tempBuffer);
 }
 
+/*
+Point inverse
+*/
 void Hacl_P256_point_inv(uint64_t *p, uint64_t *result)
 {
   uint32_t len = (uint32_t)4U;
@@ -16171,5 +16176,15 @@ void Hacl_P256_point_inv(uint64_t *p, uint64_t *result)
   uint64_t r = cc3;
   memcpy(result, p, len * sizeof (uint64_t));
   memcpy(result + (uint32_t)8U, p + (uint32_t)8U, (uint32_t)4U * sizeof (uint64_t));
+}
+
+void Hacl_P256_point_toForm(uint8_t *i, uint64_t *o)
+{
+  toFormPoint_p256(i, o);
+}
+
+void Hacl_P256_point_fromForm(uint64_t *i, uint8_t *o)
+{
+  fromFormPoint_p256(i, o);
 }
 

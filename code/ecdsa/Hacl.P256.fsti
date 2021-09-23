@@ -489,7 +489,8 @@ val ecp384dh_r:
       as_seq h1 (gsub result (size 48) (size 48)) == pointY)
 
 
-[@ (Comment "Other exposed primitives")]
+[@ (Comment "Other exposed primitives \n 
+Point addition not complete")]
 val point_add_out: p: point P256 -> q: point P256 -> result: point P256 -> 
   Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ 
     eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
@@ -498,8 +499,31 @@ val point_add_out: p: point P256 -> q: point P256 -> result: point P256 ->
     fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == _point_add #P256 (fromDomainPoint #P256 #DH (point_as_nat P256 h0 p)) (fromDomainPoint #P256 #DH (point_as_nat P256 h0 q)))
 
 
+
+[@ (Comment "Point inverse")]
 val point_inv: p: point P256 -> result: point P256 -> Stack unit
   (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_eval P256 h p)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval P256 h1 result /\
     fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == _point_inverse #P256 (fromDomainPoint #P256 #DH (point_as_nat P256 h0 p)))
 
+
+val point_toForm: i: pointAffine8 P256 -> o: point P256 -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ (
+    let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (getXAff8 i))  in 
+    let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (getYAff8 i)) in 
+    let x, y, z = as_nat P256 h1 (getX o), as_nat P256 h1 (getY o), as_nat P256 h1 (getZ o) in  
+    let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
+    x == pointScalarXSeq /\ y == pointScalarYSeq /\ z == 1 /\
+    x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
+
+
+val point_fromForm: i: point P256 -> o: pointAffine8 P256 -> Stack unit 
+  (requires fun h -> live h i /\ live h o /\ disjoint i o /\ point_eval P256 h i /\ (
+    let xCoordinate, yCoordinate, _ = point_as_nat P256 h i in 
+    xCoordinate < pow2 (getPower P256) /\ yCoordinate < pow2 (getPower P256)))
+  (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\ (
+    let coordinateX_u64, coordinateY_u64, _ = point_as_nat P256 h0 i in 
+    let coordinateX_u8, coordinateY_u8 = getXAff8 #P256 o, getYAff8 #P256 o in
+    as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen P256) coordinateX_u64 /\
+    as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen P256) coordinateY_u64))
