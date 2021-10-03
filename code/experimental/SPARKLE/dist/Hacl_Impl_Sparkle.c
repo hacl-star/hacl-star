@@ -70,3 +70,29 @@ void Hacl_Impl_Sparkle_m(uint32_t n, uint32_t *b)
   Hacl_Impl_Sparkle_xor_x(n, b, lty, ltx);
 }
 
+typedef struct branch1_s
+{
+  uint32_t fst;
+  uint32_t snd;
+}
+branch1;
+
+void Hacl_Impl_Sparkle_l_step(uint32_t n, uint32_t *perm, uint32_t i, uint32_t *rightBranch)
+{
+  uint32_t xi = rightBranch[i];
+  uint32_t yi = rightBranch[i + (uint32_t)1U];
+  uint32_t p0i = perm[i];
+  uint32_t p1i = perm[i + (uint32_t)1U];
+  branch1 branchIUpd = { .fst = xi ^ p0i, .snd = yi ^ p1i };
+  uint32_t index = n >> (uint32_t)1U | n << (uint32_t)31U;
+  uint32_t x = branchIUpd.fst;
+  uint32_t y = branchIUpd.snd;
+  rightBranch[(uint32_t)2U * index] = x;
+  rightBranch[(uint32_t)2U * index + (uint32_t)1U] = y;
+}
+
+void Hacl_Impl_Sparkle_sparkle256(uint32_t steps, uint8_t *i, uint8_t *o)
+{
+  
+}
+

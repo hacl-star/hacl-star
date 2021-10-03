@@ -99,47 +99,24 @@ let m #n b =
   let ltx, lty = l1 tx, l1 ty in
   xor_x #n b lty ltx
 
- 
-(* AW: Imp: it rewrites rightBranch buffer *)
-val l: #n0: branch_len {n0 % 2 == 0} -> b: branch n0 -> branch n0
+
+val l: #n: branch_len {n % 2 == 0} -> b: branch n -> branch n
 
 let l #n0 b = 
   let leftBranch: branch (n0 / 2)  = sub #_ #(2 * n0) b 0 n0 in 
   let rightBranch: branch (n0 / 2) = sub #_ #(2 * n0) b n0 n0 in 
   let perm = m leftBranch in 
-
-  let l_test_step (#n: branch_len) (rightBranch : branch_test n) (perm: branch_test n) i branchResult = 
-    let (xi, yi) = index #_ #n rightBranch i in 
-    let (p0i, p1i) = index #_ #n perm i in 
+  
+  let seqEmpty: branch (n0 / 2) = create n0 (u32 0) in 
+  
+  let l_step (#n: branch_len) (rightBranch : branch n) (perm: branch n) (i:nat {i < n}) (branchResult : branch n) : branch n = 
+    let (xi, yi) = getBranch i rightBranch in 
+    let (p0i, p1i) = getBranch i perm in 
     let branchIUpd = xi ^. p0i, yi ^. p1i in 
-    let s = upd #_ #n branchResult ((i - 1) % n) branchIUpd in s in  
+    let s = setBranch #n ((i - 1) % n) branchIUpd branchResult in s in  
 
-  let r = Lib.LoopCombinators.repeati n (l_test_step rightBranch perm) seqEmpty in 
-  concat #_ #_ #n r leftBranch
-
-
-
-
-(* val l_test: #n0: branch_len -> #n: branch_len {n0 % 2 == 0 /\ n == n0 / 2} -> b: branch_test n0 -> branch_test n0
-
-let l_test #n0 #n b = 
-  let leftBranch = sub #_ #n0 b 0 n in 
-  let rightBranch = sub #_ #n0 b n n in 
-  let perm = m_test #n leftBranch in 
-
-
-  let seqEmpty = create n (u32 0, u32 0) in 
-
-  let l_test_step (#n: branch_len) (rightBranch : branch_test n) (perm: branch_test n) i branchResult = 
-    let (xi, yi) = index #_ #n rightBranch i in 
-    let (p0i, p1i) = index #_ #n perm i in 
-    let branchIUpd = xi ^. p0i, yi ^. p1i in 
-    let s = upd #_ #n branchResult ((i - 1) % n) branchIUpd in s in  
-
-  let r = Lib.LoopCombinators.repeati n (l_test_step rightBranch perm) seqEmpty in 
-  concat #_ #_ #n r leftBranch *)
-
-
+  let r = Lib.LoopCombinators.repeati (n0 / 2) (l_step rightBranch perm) seqEmpty in 
+  concat #_ #n0 #n0 r leftBranch
 
 
 val add2: #n: branch_len {n >= 2} -> i: size_nat -> branch n -> Tot (branch n)
@@ -205,9 +182,9 @@ let sparkle384 steps input =
   fromBranch #6 permB
 
 
-val sparkle_i_forgot_what_is_next: steps: size_nat -> lbytes 64 -> Tot (lbytes 64)
+val sparkle512: steps: size_nat -> lbytes 64 -> Tot (lbytes 64)
 
-let sparkle_i_forgot_what_is_next steps input = 
+let sparkle512 steps input = 
   let b = toBranch input in 
   let permB = mainLoop b steps in 
   fromBranch #8 permB

@@ -5,6 +5,7 @@ open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
+open Lib.ByteBuffer
 open Lib.Buffer
 
 open Spec.SPARKLE2
@@ -126,15 +127,18 @@ let xor_x_step #l b lty ltx i =
 
 val xor_x: #l: branch_len -> b: branch l -> lty: uint32 -> ltx: uint32 -> Stack unit 
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> True)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
   
 let xor_x #l b lty ltx = 
-  Lib.Loops.for (0ul) (l >>. 1ul)  (fun h i -> live h b) (fun (i: size_t {v i < v l / 2})  -> xor_x_step b lty ltx i)
+  let h0 = ST.get() in 
+  Lib.Loops.for (0ul) (l >>. 1ul)  
+    (fun h i -> live h b /\ modifies (loc b) h0 h) 
+    (fun (i: size_t {v i < v l / 2})  -> xor_x_step b lty ltx i)
 
 
 val m: #l: branch_len {v l % 2 == 0} -> b: branch l -> Stack unit 
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> True)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
 
 let m #n b = 
   push_frame();
@@ -145,3 +149,27 @@ let m #n b =
   let lty = l1 (index ty (size 0)) in 
   xor_x #n b lty ltx;
   pop_frame()
+
+
+
+val l_step: (#n: branch_len) -> (perm: branch n) -> i: size_t {v i < v n / 2} -> (rightBranch : branch n) -> Stack unit 
+  (requires fun h -> live h perm /\ live h rightBranch)
+  (ensures fun h0 _ h1 -> modifies (loc rightBranch) h0 h1)
+
+let l_step #n perm i rightBranch = 
+  let xi, yi = getBranch rightBranch i in 
+  let p0i, p1i = getBranch perm i in 
+  let branchIUpd = xi ^. p0i, yi ^. p1i in
+  
+  let index = rotate_right n 1ul in 
+  setBranch #n index branchIUpd rightBranch;
+  
+  admit()
+
+
+val sparkle256: steps: size_t -> i: lbuffer (uint8) (size 32) -> o: lbuffer (uint8) (size 32) ->
+  Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let sparkle256 steps i o = ()
