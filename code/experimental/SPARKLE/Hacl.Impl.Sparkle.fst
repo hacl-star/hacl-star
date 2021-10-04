@@ -19,7 +19,6 @@ inline_for_extraction
 let vsize_rcon: size_t = 8ul
 
 
-inline_for_extraction
 let rcon: x: glbuffer uint32 vsize_rcon 
   {witnessed #uint32 #vsize_rcon x (Lib.Sequence.of_list rcon_list) /\ recallable x} =
   createL_global rcon_list
@@ -69,7 +68,7 @@ val getBranch: #l: branch_len -> b: branch l -> i: size_t {v i <= v l / 2} ->
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
-let getBranch #l b i =  Lib.Buffer.index b i, Lib.Buffer.index b (i +! 1ul)
+let getBranch #l b i =  Lib.Buffer.index b (2ul *! i), Lib.Buffer.index b (2ul *! i +! 1ul)
 
 
 inline_for_extraction noextract 
@@ -97,8 +96,8 @@ let xor_step #l b tx ty i =
   let tx_0 = index tx (size 0) in 
   let ty_0 = index ty (size 0) in 
   upd tx (size 0) (xi ^. tx_0);
-  upd tx (size 0) (yi ^. ty_0)
-
+  upd ty (size 0) (yi ^. ty_0)
+  
 
 val xor: #l: branch_len -> b: branch l-> tx: lbuffer uint32 (size 1) -> ty: lbuffer uint32 (size 1) ->  
   Stack unit
@@ -191,15 +190,17 @@ val add2: #n: branch_len {v n >= 4} -> i: size_t -> b:branch n -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
 
 let add2 #n i b = 
-  let (x0, y0) = getBranch #n b (size 0) in 
-  recall_contents rcon (Lib.Sequence.of_list rcon_list); 
-  let (x1,y1) =  getBranch #n b (size 1) in 
 
-  (* let y0 = y0 ^. index rcon (size (i % vsize_rcon)) in *)  
+  recall_contents rcon (Lib.Sequence.of_list rcon_list); 
+
+  let (x0, y0) = getBranch #n b (size 0) in 
+  let (x1, y1) = getBranch #n b (size 1) in 
+
   let i0 = logand i (size 7) in 
     logand_mask i (size 7) 3; 
   let y0 = y0 ^. index rcon i0 in
-  let y1 = y1 ^. (to_u32 i0) in
+  let y1 = y1 ^. (to_u32 i) in
+ 
   setBranch (size 0) (x0, y0) b;
   setBranch #n (size 1) (x1, y1) b
 
@@ -228,7 +229,7 @@ val arx_n_step: #n: branch_len -> i: size_t {v i < v n / 2} -> b: branch n ->
   (ensures fun h0 _ h1 -> True)
 
 let arx_n_step #n i b = 
-  let branchI = sub b (size 2 *! (n -. 1ul)) (size 2) in 
+  let branchI = sub b (size 2 *! i) (size 2) in 
     recall_contents rcon (Lib.Sequence.of_list rcon_list); 
   let rcon_i = index rcon i in 
   arx rcon_i branchI

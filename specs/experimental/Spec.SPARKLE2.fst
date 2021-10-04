@@ -17,11 +17,11 @@ inline_for_extraction
 let vsize_rcon: size_nat = 8
 
 inline_for_extraction
-let rcon_list: List.Tot.llist uint32 vsize_rcon =
+let rcon_list: x:list uint32 =
   [@inline_let]
-  let l = List.Tot.map u32 [
-    0xB7E15162; 0xBF715880; 0x38B4DA56; 0x324E7738;
-    0xBB1185EB; 0x4F7C7B57; 0xCFBFA1C8; 0xC2B3293D] in
+  let l =  [
+    u32 0xB7E15162; u32 0xBF715880; u32 0x38B4DA56; u32 0x324E7738;
+    u32 0xBB1185EB; u32 0x4F7C7B57; u32 0xCFBFA1C8; u32 0xC2B3293D] in
   assert_norm(List.Tot.length l == vsize_rcon);
   l
 
@@ -152,7 +152,7 @@ val arx_n: #n: branch_len -> branch n -> branch n
 let arx_n #n b = Lib.LoopCombinators.repeati n arx_n_step b
 
 
-val mainLoop_step: #n: branch_len {n >= 2 /\ n % 2 == 0 } ->  i: size_nat -> branch n -> branch n
+val mainLoop_step: #n: branch_len {n % 2 == 0 } ->  i: size_nat -> branch n -> branch n
 
 let mainLoop_step #n i b = 
   let branchZeroMod = add2 i b in 
@@ -160,7 +160,7 @@ let mainLoop_step #n i b =
   l branchZeroMod
 
 
-val mainLoop: #n: branch_len {n >= 2 /\ n % 2 == 0} -> branch n -> steps: size_nat -> branch n 
+val mainLoop: #n: branch_len {n % 2 == 0} -> branch n -> steps: size_nat -> branch n 
 
 let mainLoop #n b steps = 
   Lib.LoopCombinators.repeati steps mainLoop_step b

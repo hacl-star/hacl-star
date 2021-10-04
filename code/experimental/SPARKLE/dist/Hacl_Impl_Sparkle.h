@@ -35,7 +35,7 @@ extern uint32_t Hacl_Impl_Sparkle_size_word;
 
 extern uint32_t Hacl_Impl_Sparkle_vsize_rcon;
 
-extern const uint32_t *Hacl_Impl_Sparkle_rcon;
+extern const uint32_t Hacl_Impl_Sparkle_rcon[8U];
 
 typedef uint32_t Hacl_Impl_Sparkle_branch_len;
 
