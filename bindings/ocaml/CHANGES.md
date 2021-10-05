@@ -1,3 +1,6 @@
+## 0.4.2
+- Fix for bug impacting performance
+
 ## 0.4.1
 - Support for FreeBSD
 - Build fixes
