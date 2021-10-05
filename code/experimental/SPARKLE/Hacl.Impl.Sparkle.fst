@@ -26,8 +26,18 @@ let rcon: x: glbuffer uint32 vsize_rcon
 
 type branch_len =  n: size_t {v n = 1 \/ v n = 2 \/ v n = 3 \/ v n = 4 \/ v n = 6 \/ v n = 8}
 
-inline_for_extraction
+(*
+  the buffer looks like a branch_len number of tuples + extra space that is a branch_len / 2 of tuples
+
+  [branch0][branch1][branch2][branch3][extra0][extra2]
+*)
+
+inline_for_extraction noextract
 type branch branch_len = lbuffer uint32 (2ul *! branch_len)
+
+inline_for_extraction noextract
+type state branch_len = branch (2ul *! branch_len)
+
 
 
 val arx: uint32 -> b: branch 1ul -> Stack unit 
@@ -62,24 +72,26 @@ val l1: x:uint32 -> Tot uint32
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
 
+open FStar.Mul
+
 inline_for_extraction noextract
-val getBranch: #l: branch_len -> b: branch l -> i: size_t {v i <= v l / 2} -> 
+val getBranch: #n: branch_len -> b: branch n -> i: size_t {2 * v i <= v n} -> 
   Stack (tuple2 uint32 uint32)
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
-let getBranch #l b i =  Lib.Buffer.index b (2ul *! i), Lib.Buffer.index b (2ul *! i +! 1ul)
+let getBranch #l b i =  
+  Lib.Buffer.index b (2ul *! i), Lib.Buffer.index b (2ul *! i +! 1ul)
 
 
 inline_for_extraction noextract 
-val setBranch: #n: branch_len -> i: size_t {v i <= v n / 2} -> branch1 -> b: branch n -> 
+val setBranch: #n: branch_len -> i: size_t {2 * v i <= v n} -> branch1 -> b: branch n -> 
   Stack unit 
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)  
 
 let setBranch #n i (x, y) b =
-  upd #uint32 b (2ul *. i) x;
-  upd #uint32 b (2ul *. i +. 1ul) y
+  upd #uint32 b (2ul *! i) x; upd #uint32 b (2ul *! i +! 1ul) y
 
 
 inline_for_extraction noextract
@@ -99,7 +111,8 @@ let xor_step #l b tx ty i =
   upd ty (size 0) (yi ^. ty_0)
   
 
-val xor: #l: branch_len -> b: branch l-> tx: lbuffer uint32 (size 1) -> ty: lbuffer uint32 (size 1) ->  
+(* tx && ty are used to store the xor result *)
+val xor: #l: branch_len -> b: branch l -> tx: lbuffer uint32 (size 1) -> ty: lbuffer uint32 (size 1) ->  
   Stack unit
     (requires fun h -> live h b /\ live h ty /\ live h tx /\ disjoint tx ty)
     (ensures fun h0 _ h1 -> modifies (loc tx |+| loc ty) h0 h1)
@@ -112,30 +125,31 @@ let xor #l b tx ty =
     
 
 inline_for_extraction noextract
-val xor_x_step: #l: branch_len -> b: branch l -> lty: uint32 -> ltx: uint32 -> i: size_t {v i <= v l / 2} -> 
+val xor_x_step: #n: branch_len -> b: state n -> lty: uint32 -> ltx: uint32 -> i: size_t {2 * v i + 1 < v n} -> 
   Stack unit 
     (requires fun h -> live h b)
     (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
 
-let xor_x_step #l b lty ltx i = 
-  let xi, yi = getBranch #l b i in 
+let xor_x_step #n b lty ltx i = 
+  let xi, yi = getBranch #(2ul *. n) b i in 
   let xi_n = xi ^. lty in
   let yi_n = yi ^. ltx in
-  setBranch i (xi_n, yi_n) b
+  setBranch (i +! n) (xi_n, yi_n) b
 
 
-val xor_x: #l: branch_len -> b: branch l -> lty: uint32 -> ltx: uint32 -> Stack unit 
+val xor_x: #n: branch_len -> b: state n -> lty: uint32 -> ltx: uint32 -> Stack unit 
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
   
-let xor_x #l b lty ltx = 
+let xor_x #n b lty ltx = 
   let h0 = ST.get() in 
-  Lib.Loops.for (0ul) (l >>. 1ul)  
+  Lib.Loops.for (0ul) (n >>. 1ul)  
     (fun h i -> live h b /\ modifies (loc b) h0 h) 
-    (fun (i: size_t {v i <= v l / 2}) -> xor_x_step b lty ltx i)
+    (fun (i: size_t {2 * v i + 1 < v n}) -> xor_x_step b lty ltx i)
 
 
-val m: #l: branch_len -> b: branch l -> Stack unit 
+inline_for_extraction noextract
+val m: #l: branch_len -> b: state l -> Stack unit 
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
 
@@ -148,23 +162,21 @@ let m #n b =
     let ltx = l1 (index tx (size 0)) in
     let lty = l1 (index ty (size 0)) in 
     xor_x #n b lty ltx;
+    
   pop_frame()
 
 
-val l_step: #n: branch_len -> perm: branch n -> i: size_t {v i <= v n / 2} -> (rightBranch : branch n) -> Stack unit 
+inline_for_extraction
+val l_step: #n: branch_len -> perm: branch n -> i: size_t {2 * v i + 1 < v n * 3} 
+  -> rightBranch: branch n -> Stack unit 
   (requires fun h -> live h perm /\ live h rightBranch)
-  (ensures fun h0 _ h1 -> modifies (loc rightBranch) h0 h1)
+  (ensures fun h0 _ h1 -> modifies (loc perm) h0 h1)
 
-let l_step #n perm i rightBranch = 
-  let xi, yi = getBranch rightBranch i in 
+let l_step #n perm i result = 
+  let xi, yi = getBranch result i in 
   let p0i, p1i = getBranch perm i in 
   let branchIUpd = xi ^. p0i, yi ^. p1i in
-  
-  let index = rotate_right n 1ul in 
-  
-  assume (v index  <= v n / 2);
-  
-  setBranch #n index branchIUpd rightBranch
+  setBranch #n i branchIUpd perm
 
 
 val l: #n: branch_len {v n % 2 == 0} -> b: branch n -> Stack unit 
@@ -172,16 +184,25 @@ val l: #n: branch_len {v n % 2 == 0} -> b: branch n -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
 
 let l #n b = 
+  let h0 = ST.get() in 
   let leftBranch = sub b (size 0) n in 
   let rightBranch = sub b n n in 
-
-  let index : branch_len = (n >>. 1ul) in 
-  let perm = m #index leftBranch in 
-
- (* assume (v (n >>. 1ul) == v n /  *)
+  let result = sub b (2ul *! n) n in 
+ 
+  m #n b;
+  
   Lib.Loops.for 0ul (n >>. 1ul) 
-  (fun h i -> live h b)
-  (fun (i: size_t {v i <= v n / 2}) -> l_step #(n >>. 1ul) rightBranch i perm)
+    (fun h i -> live h b /\ modifies (loc b) h0 h)
+    (fun (i: size_t {v i <= v n}) -> l_step #n result i rightBranch); 
+
+  Lib.Loops.for 0ul (n >>. 1ul)
+    (fun h i -> live h b /\ modifies (loc b) h0 h)
+    (fun (i: size_t {v i <= v n}) -> setBranch #n i (getBranch #n leftBranch i) rightBranch);
+
+  Lib.Loops.for 0ul (n >>. 1ul)
+    (fun h i -> live h b /\ modifies (loc b) h0 h)
+    (fun (i: size_t {v i <= v n}) -> setBranch #n i (getBranch #n leftBranch i) rightBranch)
+
 
 
 
@@ -207,7 +228,7 @@ let add2 #n i b =
 
 val toBranch: #n: branch_len -> i: lbuffer uint8 (size 8 *! n) -> o: branch n -> 
   Stack unit 
-  (requires fun h -> True)
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> True)
 
 let toBranch #n i o = 
@@ -216,11 +237,11 @@ let toBranch #n i o =
 
 val fromBranch: #n: branch_len -> i: branch n -> o: lbuffer uint8 (size 8 *! n) -> 
   Stack unit 
-  (requires fun h -> True)
+  (requires fun h -> live h i /\ live h o /\ disjoint i o)
   (ensures fun h0 _ h1 -> True)
 
 let fromBranch #n i o = 
-  uints_to_bytes_le (n *! 2ul) o i
+  uints_to_bytes_le (2ul *! n) o i
 
 
 val arx_n_step: #n: branch_len -> i: size_t {v i < v n / 2} -> b: branch n -> 
@@ -258,7 +279,7 @@ let mainLoop_step #n i b =
   l #n b
 
 
-val mainLoop: #n: branch_len {n >= 2 /\ n % 2 == 0} -> b: branch n -> steps: size_t -> 
+val mainLoop: #n: branch_len {v n >= 4 /\ v n % 2 == 0} -> b: branch n -> steps: size_t -> 
   Stack unit 
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
@@ -266,18 +287,18 @@ val mainLoop: #n: branch_len {n >= 2 /\ n % 2 == 0} -> b: branch n -> steps: siz
 let mainLoop #n b steps = 
   Lib.Loops.for 0ul steps
   (fun h i -> live h b)
-  (fun (i: size_t {v i < v n / 2}) -> mainLoop_step i b)
+  (fun (i: size_t) -> mainLoop_step i b)
 
 
 val sparkle256: steps: size_t -> i: lbuffer (uint8) (size 32) -> o: lbuffer (uint8) (size 32) ->
   Stack unit 
-  (requires fun h -> True)
+  (requires fun h -> live h i /\ live h o)
   (ensures fun h0 _ h1 -> True)
 
 let sparkle256 steps i o =
   push_frame();
-    let temp = create (size 4) (u32 0) in 
-    toBranch #4 i temp;
-    mainLoop #4 temp steps;
-    fromBranch #4 steps o; 
+    let temp = create (size 12) (u32 0) in 
+    toBranch #(size 4) i temp;
+    mainLoop #(size 4) temp steps;
+    fromBranch #(size 4) temp o; 
   pop_frame()

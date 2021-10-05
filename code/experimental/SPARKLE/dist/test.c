@@ -49,7 +49,7 @@ int main(int argc, char const *argv[])
 	compare_and_print(32, expected_output, expected_output);
 
 
-	// Hacl_Impl_Sparkle_sparkle256(32, input_hacl, output_hacl);
+	Hacl_Impl_Sparkle_sparkle256(32, input_hacl, output_hacl);
 
 
 	printf("%s\n", "Input");

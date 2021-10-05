@@ -43,11 +43,9 @@ void Hacl_Impl_Sparkle_arx(uint32_t c, uint32_t *b);
 
 void Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b, uint32_t *tx, uint32_t *ty);
 
-void Hacl_Impl_Sparkle_xor_x(uint32_t l, uint32_t *b, uint32_t lty, uint32_t ltx);
+void Hacl_Impl_Sparkle_xor_x(uint32_t n, uint32_t *b, uint32_t lty, uint32_t ltx);
 
-void Hacl_Impl_Sparkle_m(uint32_t n, uint32_t *b);
-
-void Hacl_Impl_Sparkle_l_step(uint32_t n, uint32_t *perm, uint32_t i, uint32_t *rightBranch);
+void Hacl_Impl_Sparkle_l_step(uint32_t n, uint32_t *perm, uint32_t i, uint32_t *result);
 
 void Hacl_Impl_Sparkle_l(uint32_t n, uint32_t *b);
 

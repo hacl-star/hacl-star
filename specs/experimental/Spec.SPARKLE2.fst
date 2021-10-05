@@ -17,7 +17,7 @@ inline_for_extraction
 let vsize_rcon: size_nat = 8
 
 inline_for_extraction
-let rcon_list: x:list uint32 =
+let rcon_list: x:list uint32 {List.Tot.length x == vsize_rcon} =
   [@inline_let]
   let l =  [
     u32 0xB7E15162; u32 0xBF715880; u32 0x38B4DA56; u32 0x324E7738;
