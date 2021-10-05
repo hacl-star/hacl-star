@@ -12,14 +12,18 @@
 
 #include "Hacl_Impl_Sparkle.h"
 #include "test_implementation.c"
-#include "test_implementation_1.c"
-
 
 #include <stdint.h>
 #include <string.h>
 #include <stdint.h>
 
 
+
+static inline void print(size_t len, uint8_t* comp) {
+  for (size_t i = 0; i < len; i++)
+    printf("%02x",comp[i]);
+  printf("\n");
+}
 
 
 
@@ -32,30 +36,21 @@ int main(int argc, char const *argv[])
 	sparkle(expected_output, 4, 32);
 
 	printf("%s\n", "Expected input");
-	compare_and_print(32, input, input);
+	print(32, input);
 	printf("%s\n", "Expected output");
-	compare_and_print(32, expected_output, expected_output);
+	print(32, expected_output);
 
 
 	uint8_t* input_hacl = (uint8_t*) malloc (sizeof (uint8_t) * 32);
 	uint8_t* output_hacl = (uint8_t*) malloc (sizeof (uint8_t) * 32);
 
-	memcpy(expected_output, input, 32);
-	sparkle_modified1(expected_output, 4, 32);
-
-	printf("%s\n", "Expected input");
-	compare_and_print(32, input, input);
-	printf("%s\n", "Expected output");
-	compare_and_print(32, expected_output, expected_output);
-
 
 	Hacl_Impl_Sparkle_sparkle256(32, input_hacl, output_hacl);
 
-
 	printf("%s\n", "Input");
-	compare_and_print(32, input_hacl, input_hacl);
+	compare_and_print(32, input, input_hacl);
 	printf("%s\n", "Output");
-	compare_and_print(32, output_hacl, output_hacl);
+	compare_and_print(32, expected_output, output_hacl);
 
 	return 0;
 }

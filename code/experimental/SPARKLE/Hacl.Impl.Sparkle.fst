@@ -201,7 +201,11 @@ let l #n b =
 
   Lib.Loops.for 0ul (n >>. 1ul)
     (fun h i -> live h b /\ modifies (loc b) h0 h)
-    (fun (i: size_t {v i <= v n}) -> setBranch #n i (getBranch #n leftBranch i) rightBranch)
+    (fun (i: size_t {v i <= v n}) -> 
+        let index = Lib.RawIntTypes.size_to_UInt32 (i -. 1ul) in 
+        let k =  Lib.RawIntTypes.size_to_UInt32 (n >>. 1ul) in 
+        let j = FStar.UInt32.rem index k in 
+        setBranch #n j (getBranch #n result i) leftBranch)
 
 
 

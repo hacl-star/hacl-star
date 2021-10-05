@@ -138,10 +138,13 @@ void Hacl_Impl_Sparkle_l(uint32_t n, uint32_t *b)
   }
   for (uint32_t i = (uint32_t)0U; i < n >> (uint32_t)1U; i++)
   {
-    uint32_t x = leftBranch[(uint32_t)2U * i];
-    uint32_t y = leftBranch[(uint32_t)2U * i + (uint32_t)1U];
-    rightBranch[(uint32_t)2U * i] = x;
-    rightBranch[(uint32_t)2U * i + (uint32_t)1U] = y;
+    uint32_t index = i - (uint32_t)1U;
+    uint32_t k = n >> (uint32_t)1U;
+    uint32_t j = index % k;
+    uint32_t x = result[(uint32_t)2U * i];
+    uint32_t y = result[(uint32_t)2U * i + (uint32_t)1U];
+    leftBranch[(uint32_t)2U * j] = x;
+    leftBranch[(uint32_t)2U * j + (uint32_t)1U] = y;
   }
 }
 
