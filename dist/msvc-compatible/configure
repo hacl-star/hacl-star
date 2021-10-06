@@ -108,7 +108,7 @@ int main() {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DCOMPILE_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
+  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DHACL_CAN_COMPILE_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
   $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
   diff $out.test $out.ref
   else
