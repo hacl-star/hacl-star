@@ -238,7 +238,7 @@ val init_cpu_flags: unit -> Stack unit
     B.modifies (fp_cpu_flags ()) h0 h1))
 
 let init_cpu_flags () =
-  if EverCrypt.TargetConfig.evercrypt_can_compile_vale then
+  if EverCrypt.TargetConfig.hacl_can_compile_vale then
     if SC.vale then begin
       init_aesni_flags ();
       init_shaext_flags ();

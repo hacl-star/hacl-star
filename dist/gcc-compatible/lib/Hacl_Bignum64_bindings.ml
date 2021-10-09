@@ -15,6 +15,18 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint32_t @->
            ((ptr uint64_t) @->
               ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning uint64_t)))))
+    let hacl_Bignum64_add_mod =
+      foreign "Hacl_Bignum64_add_mod"
+        (uint32_t @->
+           ((ptr uint64_t) @->
+              ((ptr uint64_t) @->
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
+    let hacl_Bignum64_sub_mod =
+      foreign "Hacl_Bignum64_sub_mod"
+        (uint32_t @->
+           ((ptr uint64_t) @->
+              ((ptr uint64_t) @->
+                 ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))))
     let hacl_Bignum64_mul =
       foreign "Hacl_Bignum64_mul"
         (uint32_t @->
@@ -91,6 +103,10 @@ module Bindings(F:Cstubs.FOREIGN) =
         (uint32_t @-> ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void))))
     let hacl_Bignum64_lt_mask =
       foreign "Hacl_Bignum64_lt_mask"
+        (uint32_t @->
+           ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning uint64_t))))
+    let hacl_Bignum64_eq_mask =
+      foreign "Hacl_Bignum64_eq_mask"
         (uint32_t @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning uint64_t))))
   end

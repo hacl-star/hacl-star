@@ -12,6 +12,8 @@ HACL_HOME ?= .
 
 OUTPUT_DIR=$(HACL_HOME)/obj
 
+CFLAGS += -DHACL_CAN_COMPILE_INTRINSICS -DHACL_CAN_COMPILE_VALE -DHACL_CAN_COMPILE_INLINE_ASM -DHACL_CAN_COMPILE_VEC128 -DHACL_CAN_COMPILE_VEC256
+
 # This uses the definition of ALL_HACL_DIRS, and transitively includes
 # Makefile.include
 include $(HACL_HOME)/Makefile.common

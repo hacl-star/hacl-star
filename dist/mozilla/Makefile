@@ -35,7 +35,7 @@ endif
 # TODO: Makefile.config: configure; ./$<
 # TODO: include Makefile.config
 UNAME		?= $(shell uname)
-MARCH		?= $(shell uname -m)
+MARCH		?= $(shell uname -m | sed 's/amd64/x86_64/')
 ifeq ($(UNAME),Darwin)
   VARIANT	= -darwin
   SO		= so
@@ -52,7 +52,7 @@ else ifeq ($(OS),Windows_NT)
   LDFLAGS	= -Wl,--out-implib,libevercrypt.dll.a
 else ifeq ($(UNAME),FreeBSD)
   CFLAGS	+= -fPIC
-  VARIANT	= -freebsd
+  VARIANT	= -linux
   SO 		= so
 endif
 
@@ -89,8 +89,8 @@ include Makefile.basic
 
 CFLAGS		+= -Wno-parentheses -Wno-deprecated-declarations -Wno-\#warnings -Wno-error=cpp -Wno-cpp -g -std=gnu11 -O3
 
-Hacl_Poly1305_128.o Hacl_Streaming_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o Hacl_Blake2s_128.o Hacl_HMAC_Blake2s_128.o Hacl_HKDF_Blake2s_128.o Hacl_Streaming_Blake2s_128.o: CFLAGS += $(CFLAGS_128)
-Hacl_Poly1305_256.o Hacl_Streaming_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_Blake2b_256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_Streaming_Blake2b_256.o: CFLAGS += $(CFLAGS_256)
+Hacl_Poly1305_128.o Hacl_Streaming_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Chacha20Poly1305_128.o Hacl_Hash_Blake2s_128.o Hacl_HMAC_Blake2s_128.o Hacl_HKDF_Blake2s_128.o Hacl_Streaming_Blake2s_128.o: CFLAGS += $(CFLAGS_128)
+Hacl_Poly1305_256.o Hacl_Streaming_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_Hash_Blake2b_256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_Streaming_Blake2b_256.o: CFLAGS += $(CFLAGS_256)
 
 all: libevercrypt.$(SO)
 
@@ -212,6 +212,10 @@ install-hacl-star-raw: dllocamlevercrypt.$(SO)
 	ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) \
          libevercrypt.a libevercrypt.$(SO) ocamlevercrypt.cma ocamlevercrypt.cmxa ocamlevercrypt.a \
          libocamlevercrypt.a dllocamlevercrypt.$(SO) config.h
+
+.PHONY: install-ocaml
+install-ocaml: install-hacl-star-raw
+	cd ../../bindings/ocaml && dune build && dune install
 
 endif
 endif

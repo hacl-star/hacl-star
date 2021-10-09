@@ -1,5 +1,5 @@
 [
-  ";\u000fŒÝzð\u007f\u0012¡©reõ}fÍ",
+  "\u0015Žû\f\bÝ\f\u001ef, Ø»fqÏ",
   [
     [
       "Hacl.Bignum256.n_limbs",
@@ -43,7 +43,7 @@
         "typing_FStar.UInt32.uint_to_t"
       ],
       0,
-      "b8d861351936f04062423f442456a7f4"
+      "aaa9f4ef5084fed0d290fcf0c0ba0608"
     ],
     [
       "Hacl.Bignum256.n_bytes",
@@ -80,7 +80,7 @@
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum256.n_limbs"
       ],
       0,
-      "381c414068563df662fbeecfd2738abd"
+      "c6424d79f2b1ad5a2d31a894a1e8111c"
     ],
     [
       "Hacl.Bignum256.uu___0",
@@ -141,7 +141,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "03bf107a46697bce313515a0bbb769fa"
+      "63c4a485da8f07bf654790151605facb"
     ],
     [
       "Hacl.Bignum256.uu___1",
@@ -191,16 +191,43 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "824703e43f85b6f3c8b3912840f3f86a"
+      "92719d46dd120cfb1eb5094703f4342a"
     ],
     [
-      "Hacl.Bignum256.add_mod_n",
+      "Hacl.Bignum256.add_mod",
       1,
       0,
       0,
       [ "@query" ],
       0,
-      "beacba9d8e440bf3ea5befa05a1d7546"
+      "01915c2ad0ceee89f88bbe012de2a56b"
+    ],
+    [
+      "Hacl.Bignum256.add_mod",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "3ede4e152452b95d55484ef4083a29be"
+    ],
+    [
+      "Hacl.Bignum256.sub_mod",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "b7c18be0cbd1490eba0cc09703e40319"
+    ],
+    [
+      "Hacl.Bignum256.sub_mod",
+      2,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "e439aa2836a58191be0c3c7fb95c9fc5"
     ],
     [
       "Hacl.Bignum256.mul",
@@ -222,7 +249,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "24fa38cc0402da4a7e6497505ff08146"
+      "92a3546c8139d0b7c713aae429102ca8"
     ],
     [
       "Hacl.Bignum256.mul",
@@ -256,7 +283,7 @@
         "typing_Hacl.Bignum256.n_limbs"
       ],
       0,
-      "72f1d303653b63755b997581d1b1a811"
+      "27a0400882291aeef724bc7b13f04f0f"
     ],
     [
       "Hacl.Bignum256.sqr",
@@ -309,7 +336,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "5450075c8f40904aaded7e24de9dc40d"
+      "e1950fcd5447ff49261c9930a0b4f6af"
     ],
     [
       "Hacl.Bignum256.sqr",
@@ -343,7 +370,7 @@
         "typing_Hacl.Bignum256.n_limbs"
       ],
       0,
-      "ca94c64b4752fe01a0116728f8e0b86d"
+      "266b7a2767870e399e944e4cdfa1efa6"
     ],
     [
       "Hacl.Bignum256.reduction",
@@ -380,7 +407,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1eec3352882940dba1a823f76f09bdfb"
+      "e8e3733dbff46095adceeb1676cfa6d7"
     ],
     [
       "Hacl.Bignum256.areduction",
@@ -417,7 +444,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "8e4fe0c8c773ee1b5b1aaf88d0887410"
+      "94a64351d6b094f669ca8e4842383189"
     ],
     [
       "Hacl.Bignum256.mod",
@@ -472,7 +499,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "62b7a30d8c33cc9bd13bc1686d9eb66f"
+      "1826d888098ffe36e784952d617cb82e"
     ],
     [
       "Hacl.Bignum256.exp_vartime_precomp",
@@ -510,7 +537,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "b55a3e8097ab6965b55dfa8e11e0021f"
+      "ac097d9972e6f89a69d8578745d5b82a"
     ],
     [
       "Hacl.Bignum256.exp_consttime_precomp",
@@ -548,7 +575,7 @@
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec"
       ],
       0,
-      "82826154e5d54d94249965ac2bde47f1"
+      "fabc7dab32054b91505de6b43c4eb5b3"
     ],
     [
       "Hacl.Bignum256.mod_precomp",
@@ -595,7 +622,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c205e94a48051f2ad47e55f8a6458d7b"
+      "5f82d742c563223fadcfcf53758e04a0"
     ],
     [
       "Hacl.Bignum256.mod_precomp",
@@ -619,7 +646,7 @@
         "typing_Hacl.Bignum256.t_limbs"
       ],
       0,
-      "988d05fcb1c74d5cbec29e16ed4d2f6d"
+      "d66d16ac59d0d3c99e488d6c29b21bad"
     ],
     [
       "Hacl.Bignum256.mod_exp_vartime_precomp",
@@ -669,7 +696,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "dc1d1f81ef96d7e54506f23b847e5e41"
+      "223222eda682a38180f44ebd5b49e121"
     ],
     [
       "Hacl.Bignum256.mod_exp_vartime_precomp",
@@ -684,16 +711,16 @@
         "equation_Hacl.Bignum.meta_len", "equation_Hacl.Bignum256.t_limbs",
         "equation_Hacl.Spec.Bignum.Definitions.limb",
         "equation_Lib.Buffer.lbuffer_t", "lemma_FStar.Ghost.reveal_hide",
-        "refinement_interpretation_Tm_refine_5d9db0f6b2c1395eb795da6279e2db89",
-        "refinement_interpretation_Tm_refine_61f05f0dc4a51b23d87de2d91efcfe1e",
+        "refinement_interpretation_Tm_refine_0aac1da9aae9c647301fdeaa1c24069e",
+        "refinement_interpretation_Tm_refine_3b48d6ea114508df72087f0b79224292",
+        "refinement_interpretation_Tm_refine_81412dc85c86049df33b387f032e27a6",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_af6ec1c80bb087699cafaeab39d94a57",
-        "refinement_interpretation_Tm_refine_b4a7a99fa10744d265eba6db78940cdb",
+        "refinement_interpretation_Tm_refine_af8156b8a4496ca7f95865eff60e107b",
         "typing_Hacl.Bignum.meta_len", "typing_Hacl.Bignum256.n_limbs",
         "typing_Hacl.Bignum256.t_limbs"
       ],
       0,
-      "e0b21fedf4aa1672ce8a07900362962d"
+      "6654722f5c1c0aa47a72ebd297eea646"
     ],
     [
       "Hacl.Bignum256.mod_exp_consttime_precomp",
@@ -721,7 +748,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "7a6b1a504a4682678a7f2f1d5145a10b"
+      "330804ef80d543db1451c90ed7d77751"
     ],
     [
       "Hacl.Bignum256.mod_exp_consttime_precomp",
@@ -736,16 +763,16 @@
         "equation_Hacl.Bignum.meta_len", "equation_Hacl.Bignum256.t_limbs",
         "equation_Hacl.Spec.Bignum.Definitions.limb",
         "equation_Lib.Buffer.lbuffer_t", "lemma_FStar.Ghost.reveal_hide",
-        "refinement_interpretation_Tm_refine_5d9db0f6b2c1395eb795da6279e2db89",
-        "refinement_interpretation_Tm_refine_61f05f0dc4a51b23d87de2d91efcfe1e",
+        "refinement_interpretation_Tm_refine_0aac1da9aae9c647301fdeaa1c24069e",
+        "refinement_interpretation_Tm_refine_3b48d6ea114508df72087f0b79224292",
+        "refinement_interpretation_Tm_refine_81412dc85c86049df33b387f032e27a6",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_af6ec1c80bb087699cafaeab39d94a57",
-        "refinement_interpretation_Tm_refine_b4a7a99fa10744d265eba6db78940cdb",
+        "refinement_interpretation_Tm_refine_af8156b8a4496ca7f95865eff60e107b",
         "typing_Hacl.Bignum.meta_len", "typing_Hacl.Bignum256.n_limbs",
         "typing_Hacl.Bignum256.t_limbs"
       ],
       0,
-      "8414366d405001152fbd14ce0f404cee"
+      "7e90b31baea038efd7112ae371619dda"
     ],
     [
       "Hacl.Bignum256.mod_inv_prime_vartime_precomp",
@@ -769,7 +796,7 @@
         "typing_Hacl.Bignum256.t_limbs"
       ],
       0,
-      "262b9d10b925a620b902abf976c54116"
+      "6e454070f4faa9687a5edc2a18e201a9"
     ],
     [
       "Hacl.Bignum256.bn_to_bytes_be",
@@ -829,7 +856,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "78d19b70a2327ba93ee7b5c653a5c9c5"
+      "a0aad0e3f62c782f95f171c46786e43a"
     ],
     [
       "Hacl.Bignum256.bn_to_bytes_be",
@@ -889,7 +916,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "9386316c4e28a8583402763c9e1acec3"
+      "1f7d3ffbf1462b742965be8553a1ed5c"
     ],
     [
       "Hacl.Bignum256.bn_to_bytes_le",
@@ -949,7 +976,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "1942e9740519c12b4720879d447b98b5"
+      "dcca3c48191ccd1c3b963de94b6d2297"
     ],
     [
       "Hacl.Bignum256.bn_to_bytes_le",
@@ -1009,7 +1036,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "f3e1affc65469bd3e0a196b9ab0ab03a"
+      "c9c30a4a2fb3d108fd9886cd513f26ab"
     ]
   ]
 ]

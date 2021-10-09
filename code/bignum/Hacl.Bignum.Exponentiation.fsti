@@ -20,8 +20,8 @@ inline_for_extraction noextract
 let bn_check_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> a:lbignum t len
-  -> bBits:size_t{0 < v bBits /\ bits t * v (blocks bBits (size (bits t))) <= max_size_t}
-  -> b:lbignum t (blocks bBits (size (bits t))) ->
+  -> bBits:size_t{bits t * v (blocks0 bBits (size (bits t))) <= max_size_t}
+  -> b:lbignum t (blocks0 bBits (size (bits t))) ->
   Stack (limb t)
   (requires fun h ->
     live h n /\ live h a /\ live h b)
@@ -39,8 +39,8 @@ let bn_mod_exp_precomp_st (t:limb_t) (len:BN.meta_len t) =
   -> mu:limb t
   -> r2:lbignum t len
   -> a:lbignum t len
-  -> bBits:size_t{v bBits > 0}
-  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> bBits:size_t
+  -> b:lbignum t (blocks0 bBits (size (bits t)))
   -> res:lbignum t len ->
   Stack unit
   (requires fun h ->
@@ -120,8 +120,8 @@ let bn_mod_exp_precompr2_st (t:limb_t) (len:BN.meta_len t) =
     n:lbignum t len
   -> r2:lbignum t len
   -> a:lbignum t len
-  -> bBits:size_t{v bBits > 0}
-  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> bBits:size_t
+  -> b:lbignum t (blocks0 bBits (size (bits t)))
   -> res:lbignum t len ->
   Stack unit
   (requires fun h ->
@@ -147,8 +147,8 @@ let bn_mod_exp_st (t:limb_t) (len:BN.meta_len t) =
     nBits:size_t
   -> n:lbignum t len
   -> a:lbignum t len
-  -> bBits:size_t{0 < v bBits /\ bits t * v (blocks bBits (size (bits t))) <= max_size_t}
-  -> b:lbignum t (blocks bBits (size (bits t)))
+  -> bBits:size_t{bits t * v (blocks0 bBits (size (bits t))) <= max_size_t}
+  -> b:lbignum t (blocks0 bBits (size (bits t)))
   -> res:lbignum t len ->
   Stack unit
   (requires fun h ->

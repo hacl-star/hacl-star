@@ -13,6 +13,16 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_Bignum4096_sub"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning uint64_t))))
+    let hacl_Bignum4096_add_mod =
+      foreign "Hacl_Bignum4096_add_mod"
+        ((ptr uint64_t) @->
+           ((ptr uint64_t) @->
+              ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))
+    let hacl_Bignum4096_sub_mod =
+      foreign "Hacl_Bignum4096_sub_mod"
+        ((ptr uint64_t) @->
+           ((ptr uint64_t) @->
+              ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))))
     let hacl_Bignum4096_mul =
       foreign "Hacl_Bignum4096_mul"
         ((ptr uint64_t) @->
@@ -82,5 +92,8 @@ module Bindings(F:Cstubs.FOREIGN) =
         ((ptr uint64_t) @-> (ocaml_bytes @-> (returning void)))
     let hacl_Bignum4096_lt_mask =
       foreign "Hacl_Bignum4096_lt_mask"
+        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning uint64_t)))
+    let hacl_Bignum4096_eq_mask =
+      foreign "Hacl_Bignum4096_eq_mask"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning uint64_t)))
   end

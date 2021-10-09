@@ -32,7 +32,7 @@ friend Hacl.Bignum.Montgomery
 
 let bn_check_mod_exp #t len n a bBits b =
   let m0 = BM.bn_check_modulus n in
-  let bLen = blocks bBits (size (bits t)) in
+  let bLen = blocks0 bBits (size (bits t)) in
   let m1 =
     if bBits <. size (bits t) *! bLen
     then BN.bn_lt_pow2_mask bLen b bBits

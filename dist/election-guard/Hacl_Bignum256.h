@@ -34,6 +34,7 @@ extern "C" {
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+#include "kremlin/internal/builtin.h"
 
 
 #include "Hacl_Kremlib.h"
@@ -80,6 +81,30 @@ Write `a - b mod 2^256` in `res`.
 uint64_t Hacl_Bignum256_sub(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /*
+Write `(a + b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum256_add_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res);
+
+/*
+Write `(a - b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 256-bit bignums, i.e. uint64_t[4].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum256_sub_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res);
+
+/*
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
@@ -104,7 +129,7 @@ Write `a mod n` in `res`.
   The function returns false if any of the following preconditions are violated,
   true otherwise.
    • 1 < n
-   • n % 2 = 1 
+   • n % 2 = 1
 */
 bool Hacl_Bignum256_mod(uint64_t *n, uint64_t *a, uint64_t *res);
 
@@ -125,9 +150,8 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < bBits
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum256_mod_exp_vartime(
@@ -155,9 +179,8 @@ Write `a ^ b mod n` in `res`.
   true otherwise.
    • n % 2 = 1
    • 1 < n
-   • 0 < bBits
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum256_mod_exp_consttime(
@@ -181,18 +204,18 @@ Write `a ^ (-1) mod n` in `res`.
   • n % 2 = 1
   • 1 < n
   • 0 < a
-  • a < n 
+  • a < n
 */
 bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *res);
 
-typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t_s
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s
 {
   uint32_t len;
   uint64_t *n;
   uint64_t mu;
   uint64_t *r2;
 }
-Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t;
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64;
 
 
 /**********************************************/
@@ -213,16 +236,14 @@ Heap-allocate and initialize a montgomery context.
   The caller will need to call Hacl_Bignum256_mont_ctx_free on the return value
   to avoid memory leaks.
 */
-Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t
-*Hacl_Bignum256_mont_ctx_init(uint64_t *n);
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum256_mont_ctx_init(uint64_t *n);
 
 /*
 Deallocate the memory previously allocated by Hacl_Bignum256_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum256_mont_ctx_init.
 */
-void
-Hacl_Bignum256_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k);
+void Hacl_Bignum256_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k);
 
 /*
 Write `a mod n` in `res`.
@@ -233,7 +254,7 @@ Write `a mod n` in `res`.
 */
 void
 Hacl_Bignum256_mod_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint64_t *res
 );
@@ -254,13 +275,12 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < bBits
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum256_mod_exp_vartime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
@@ -283,13 +303,12 @@ Write `a ^ b mod n` in `res`.
 
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
-  • 0 < bBits
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum256_mod_exp_consttime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
@@ -306,11 +325,11 @@ Write `a ^ (-1) mod n` in `res`.
   preconditions are observed.
   • n is a prime
   • 0 < a
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum256_mod_inv_prime_vartime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint64_t *res
 );
@@ -370,10 +389,18 @@ void Hacl_Bignum256_bn_to_bytes_le(uint64_t *b, uint8_t *res);
 
 
 /*
-Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
- otherwise returns 0.
+Returns 2^64 - 1 if a < b, otherwise returns 0.
+
+ The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
 */
 uint64_t Hacl_Bignum256_lt_mask(uint64_t *a, uint64_t *b);
+
+/*
+Returns 2^64 - 1 if a = b, otherwise returns 0.
+
+ The arguments a and b are meant to be 256-bit bignums, i.e. uint64_t[4].
+*/
+uint64_t Hacl_Bignum256_eq_mask(uint64_t *a, uint64_t *b);
 
 #if defined(__cplusplus)
 }

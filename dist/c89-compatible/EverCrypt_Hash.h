@@ -37,12 +37,15 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Hash_MD5.h"
 #include "Hacl_Kremlib.h"
+#include "Hacl_Hash_SHA1.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Vale.h"
-#include "Hacl_Hash.h"
+#include "Hacl_Hash_SHA2.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Spec.h"
+#include "Hacl_Hash_Blake2.h"
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 

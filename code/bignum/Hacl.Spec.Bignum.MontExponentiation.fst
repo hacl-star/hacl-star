@@ -104,8 +104,8 @@ let bn_exp_mont_st (t:limb_t) (len:BN.bn_len t) =
     n:lbignum t len
   -> mu:limb t{BM.bn_mont_pre n mu}
   -> aM:bn_mont_t n
-  -> bBits:size_pos
-  -> b:lbignum t (blocks bBits (bits t)){bn_v b < pow2 bBits} ->
+  -> bBits:size_nat
+  -> b:lbignum t (blocks0 bBits (bits t)){bn_v b < pow2 bBits} ->
   Pure (bn_mont_t n)
   (requires True)
   (ensures  fun resM ->

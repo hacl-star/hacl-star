@@ -71,7 +71,7 @@ Check whether this library will work for a modulus `n`.
   The function returns false if any of the following preconditions are violated,
   true otherwise.
   • n % 2 = 1
-  • 1 < n 
+  • 1 < n
 */
 bool Hacl_GenericField64_field_modulus_check(uint32_t len, uint64_t *n);
 
@@ -258,9 +258,8 @@ Write `aM ^ b mod n` in `resM`.
   execution time than exp_vartime.
 
   Before calling this function, the caller will need to ensure that the following
-  preconditions are observed.
-  • 0 < bBits
-  • b < pow2 bBits 
+  precondition is observed.
+  • b < pow2 bBits
 */
 void
 Hacl_GenericField64_exp_consttime(
@@ -290,9 +289,8 @@ Write `aM ^ b mod n` in `resM`.
   exp_consttime function for constant-time variant.
 
   Before calling this function, the caller will need to ensure that the following
-  preconditions are observed.
-  • 0 < bBits
-  • b < pow2 bBits 
+  precondition is observed.
+  • b < pow2 bBits
 */
 void
 Hacl_GenericField64_exp_vartime(
@@ -316,7 +314,7 @@ Write `aM ^ (-1) mod n` in `aInvM`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • n is a prime
-  • 0 < aM 
+  • 0 < aM
 */
 void
 Hacl_GenericField64_inverse(

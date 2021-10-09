@@ -427,6 +427,48 @@ EverCrypt_AEAD_encrypt(
   uint8_t *cipher
 );
 
+/*
+WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit.
+*/
+extern EverCrypt_Error_error_code
+EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *plain,
+  uint32_t plain_len,
+  uint8_t *cipher,
+  uint8_t *tag
+);
+
+/*
+WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit.
+*/
+extern EverCrypt_Error_error_code
+EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *plain,
+  uint32_t plain_len,
+  uint8_t *cipher,
+  uint8_t *tag
+);
+
 extern EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt_expand_aes128_gcm(
   uint8_t *k,
@@ -491,6 +533,48 @@ EverCrypt_AEAD_decrypt(
   uint32_t cipher,
   uint8_t *cipher_len,
   uint8_t *tag
+);
+
+/*
+WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit.
+*/
+extern EverCrypt_Error_error_code
+EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *cipher,
+  uint32_t cipher_len,
+  uint8_t *tag,
+  uint8_t *dst
+);
+
+/*
+WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit.
+*/
+extern EverCrypt_Error_error_code
+EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *cipher,
+  uint32_t cipher_len,
+  uint8_t *tag,
+  uint8_t *dst
 );
 
 extern EverCrypt_Error_error_code

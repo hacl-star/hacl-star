@@ -136,6 +136,7 @@ let bn_mul_st (t:limb_t) =
 inline_for_extraction noextract
 val bn_mul: #t:limb_t -> bn_mul_st t
 let bn_mul #t aLen a bLen b res =
+  [@inline_let]
   let resLen = aLen +! bLen in
   memset res (uint #t 0) resLen;
   let h0 = ST.get () in
@@ -206,6 +207,7 @@ inline_for_extraction noextract
 val bn_sqr: #t:limb_t -> bn_sqr_st t
 let bn_sqr #t aLen a res =
   push_frame ();
+  [@inline_let]
   let resLen = aLen +! aLen in
   memset res (uint #t 0) resLen;
   let h0 = ST.get () in

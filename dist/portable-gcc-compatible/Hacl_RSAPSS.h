@@ -39,7 +39,7 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
-#include "Hacl_Hash.h"
+#include "Hacl_Hash_SHA2.h"
 #include "Hacl_Spec.h"
 
 /* SNIPPET_START: Hacl_RSAPSS_rsapss_sign */
@@ -51,7 +51,7 @@ Hacl_RSAPSS_rsapss_sign(
   uint32_t eBits,
   uint32_t dBits,
   uint64_t *skey,
-  uint32_t sLen,
+  uint32_t saltLen,
   uint8_t *salt,
   uint32_t msgLen,
   uint8_t *msg,
@@ -68,8 +68,8 @@ Hacl_RSAPSS_rsapss_verify(
   uint32_t modBits,
   uint32_t eBits,
   uint64_t *pkey,
-  uint32_t sLen,
-  uint32_t k,
+  uint32_t saltLen,
+  uint32_t sgntLen,
   uint8_t *sgnt,
   uint32_t msgLen,
   uint8_t *msg
@@ -109,7 +109,7 @@ Hacl_RSAPSS_rsapss_skey_sign(
   uint8_t *nb,
   uint8_t *eb,
   uint8_t *db,
-  uint32_t sLen,
+  uint32_t saltLen,
   uint8_t *salt,
   uint32_t msgLen,
   uint8_t *msg,
@@ -127,8 +127,8 @@ Hacl_RSAPSS_rsapss_pkey_verify(
   uint32_t eBits,
   uint8_t *nb,
   uint8_t *eb,
-  uint32_t sLen,
-  uint32_t k,
+  uint32_t saltLen,
+  uint32_t sgntLen,
   uint8_t *sgnt,
   uint32_t msgLen,
   uint8_t *msg

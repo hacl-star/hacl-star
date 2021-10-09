@@ -107,8 +107,8 @@ val bn_field_one: #t:limb_t -> k:bn_mont_ctx t{bn_mont_ctx_inv k} ->
 noextract
 let bn_field_exp_st (t:limb_t) (k:bn_mont_ctx t{bn_mont_ctx_inv k}) =
     aM:bn_mont_nat k
-  -> bBits:size_pos
-  -> b:lbignum t (blocks bBits (bits t)) ->
+  -> bBits:size_nat
+  -> b:lbignum t (blocks0 bBits (bits t)) ->
   Pure (bn_mont_nat k)
   (requires bn_v b < pow2 bBits)
   (ensures  fun cM ->

@@ -11,7 +11,7 @@ Algorithm            Portable C                Intel ASM                   Agile
 ===================  ========================  ==========================  ===========
 **AEAD**
 AES-GCM                                        ✔︎ (AES-NI + CLMUL)          ✔︎
-Chacha20-Poly1305    ✔︎ (+ AVX,AVX2)                                        ✔︎
+Chacha20-Poly1305    ✔︎ (+ 128-bit, 256-bit)                                ✔︎
 
 **ECDH**
 Curve25519           ✔︎                         ✔︎ (BMI2 + ADX)
@@ -24,27 +24,29 @@ P-256                ✔︎
 **Hashes**
 MD5                  ✔︎                                                     ✔︎
 SHA1                 ✔︎                                                     ✔︎
-SHA2-224,256         ✔︎                         ✔︎ (SHAEXT)                 ✔︎
+SHA2-224,256         ✔︎                         ✔︎ (SHAEXT)                  ✔︎
 SHA2-384,512         ✔︎                                                     ✔︎
 SHA3                 ✔︎
-Blake2               ✔︎ (+ AVX,AVX2)
+Blake2               ✔︎ (+ 128-bit, 256-bit)
 
 **Key Derivation**
-HKDF                 ✔︎                         ✔︎ (see notes below)        ✔︎
+HKDF                 ✔︎                         ✔︎ (see notes below)         ✔︎
 
 **Ciphers**
-Chacha20             ✔︎ (+ AVX,AVX2)
+Chacha20             ✔︎ (+ 128-bit, 256-bit)
 AES-128,256                                    ✔︎ (AES-NI + CLMUL)
 
 **MACS**
 HMAC                 ✔︎                         ✔︎ (see notes below)         ✔︎
-Poly1305             ✔︎ (+ AVX,AVX2)            ✔︎ (X64)
+Poly1305             ✔︎ (+ 128-bit, 256-bit)    ✔︎ (X64)
 ===================  ========================  ==========================  ===========
 
 Points of interest:
 
-- Some C implementations also have verified vectorized versions optimized for
-  Intel AVX and AVX2 using compiler intrinsics (there is no inline assembly)
+- Some C implementations also have verified vectorized versions using compiler
+  intrinsics (there is no inline assembly).
+  The 128-bit implementations are supported on Intel AVX, ARM Neon, and recent
+  Power8 and IBM Z platforms. The 256-bit implementations are supported on Intel AVX2.
 - MD5 and SHA1 are provided for legacy purposes and backwards-compatibility
   (e.g. TLS applications); no particular effort has been made to make them
   efficient
