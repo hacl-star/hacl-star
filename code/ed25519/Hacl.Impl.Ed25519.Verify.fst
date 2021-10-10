@@ -5,11 +5,12 @@ open FStar.HyperStack.All
 open FStar.Mul
 
 open Lib.IntTypes
-open Lib.Sequence
-open Lib.ByteSequence
 open Lib.Buffer
 
 open Hacl.Bignum25519
+
+module LSeq = Lib.Sequence
+module BSeq = Lib.ByteSequence
 
 module F51 = Hacl.Impl.Ed25519.Field51
 module PM = Hacl.Impl.Ed25519.Ladder
@@ -28,10 +29,10 @@ val verify_step_1:
       live h r /\ live h msg /\ live h rs /\ live h public /\
       disjoint msg r /\ disjoint rs r /\ disjoint public r)
     (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\
-     as_seq h1 r == nat_to_bytes_le 32 (
+     as_seq h1 r == BSeq.nat_to_bytes_le 32 (
       Spec.Ed25519.sha512_modq (64 + v len)
-        (concat #uint8 #64 #(v len)
-          (concat #uint8 #32 #32
+        (LSeq.concat #uint8 #64 #(v len)
+          (LSeq.concat #uint8 #32 #32
             (as_seq h0 rs)
             (as_seq h0 public))
           (as_seq h0 msg)
@@ -46,7 +47,7 @@ let verify_step_1 r msg len rs public =
 
 
 inline_for_extraction noextract
-val verify_step_2':
+val verify_step_2:
     s:lbuffer uint8 32ul
   -> h':lbuffer uint8 32ul
   -> a':point
@@ -63,7 +64,7 @@ val verify_step_2':
       Spec.Ed25519.to_aff_point (F51.point_eval h1 exp_d) ==
       Spec.Ed25519.(to_aff_point (point_negate_mul_double_g (as_seq h0 s) (as_seq h0 h') (F51.point_eval h0 a')))))
 
-let verify_step_2' s h' a' tmp =
+let verify_step_2 s h' a' tmp =
   let a_neg = sub tmp 0ul 20ul in
   let exp_d = sub tmp 20ul 20ul in
   let h0 = ST.get () in
@@ -75,7 +76,7 @@ let verify_step_2' s h' a' tmp =
 
 #push-options "--z3rlimit 150"
 inline_for_extraction noextract
-val verify_step_2:
+val verify_step_3:
     s:lbuffer uint8 32ul
   -> h':lbuffer uint8 32ul
   -> a':point
@@ -92,10 +93,10 @@ val verify_step_2:
         let exp_d = point_negate_mul_double_g (as_seq h0 s) (as_seq h0 h') (F51.point_eval h0 a') in
         point_equal exp_d (F51.point_eval h0 r')))
     )
-let verify_step_2 s h' a' r' =
+let verify_step_3 s h' a' r' =
   push_frame();
   let tmp = create 40ul (u64 0) in
-  verify_step_2' s h' a' tmp;
+  verify_step_2 s h' a' tmp;
   let exp_d = sub tmp 20ul 20ul in
   let b = Hacl.Impl.Ed25519.PointEqual.point_equal exp_d r' in
   let h0 = ST.get () in
@@ -108,7 +109,7 @@ let verify_step_2 s h' a' r' =
 
 
 inline_for_extraction noextract
-val verify_inner_:
+val verify_step4:
     public:lbuffer uint8 32ul
   -> len:size_t{v len + 64 <= max_size_t}
   -> msg:lbuffer uint8 len
@@ -133,7 +134,7 @@ val verify_inner_:
 
 #push-options "--z3rlimit 200"
 
-let verify_inner_ public len msg signature tmp tmp' =
+let verify_step4 public len msg signature tmp tmp' =
   let rs = sub signature 0ul 32ul in
   let a' = sub tmp 0ul  20ul in
   let r' = sub tmp 20ul 20ul in
@@ -144,12 +145,12 @@ let verify_inner_ public len msg signature tmp tmp' =
   if b'' then false
   else (
     verify_step_1 tmp' len msg rs public;
-    (**) lemma_nat_from_to_bytes_le_preserves_value (slice #uint8 #64 (as_seq h0 signature) 32 64) 32;
-    verify_step_2 (sub signature 32ul 32ul) tmp' a' r')
+    (**) BSeq.lemma_nat_from_to_bytes_le_preserves_value (LSeq.slice #uint8 #64 (as_seq h0 signature) 32 64) 32;
+    verify_step_3 (sub signature 32ul 32ul) tmp' a' r')
 
 
 inline_for_extraction noextract
-val verify_:
+val verify_step5:
     public:lbuffer uint8 32ul
   -> len:size_t{v len + 64 <= max_size_t}
   -> msg:lbuffer uint8 len
@@ -167,11 +168,9 @@ val verify_:
       z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
     )
 
-let verify_ public msg len signature tmp tmp' =
+let verify_step5 public msg len signature tmp tmp' =
   let a' = sub tmp 0ul  20ul in
   let r' = sub tmp 20ul 20ul in
-  let s  = sub tmp 40ul 5ul  in
-  let h'  = tmp' in
   let b = Hacl.Impl.Ed25519.PointDecompress.point_decompress a' public in
   let h0 = ST.get () in
   Spec.Ed25519.Lemmas.point_decompress_lemma (as_seq h0 public);
@@ -180,9 +179,9 @@ let verify_ public msg len signature tmp tmp' =
     let rs = sub signature 0ul 32ul in
     let b' = Hacl.Impl.Ed25519.PointDecompress.point_decompress r' rs in
     Spec.Ed25519.Lemmas.point_decompress_lemma (as_seq h0 rs);
-    if b' then (
-      verify_inner_ public msg len signature tmp tmp'
-    ) else false
+    if b' then
+      verify_step4 public msg len signature tmp tmp'
+    else false
   ) else false in
   res
 
@@ -205,6 +204,6 @@ let verify public msg len signature =
   push_frame();
   let tmp = create 45ul (u64 0) in
   let tmp' = create 32ul (u8 0) in
-  let res = verify_ public msg len signature tmp tmp' in
+  let res = verify_step5 public msg len signature tmp tmp' in
   pop_frame();
   res

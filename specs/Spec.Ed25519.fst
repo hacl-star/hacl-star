@@ -96,12 +96,10 @@ let point_negate_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:ext_point_c) : ex
 
 let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
   let h = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512 secret in
-  let h_low : lbytes 32 = slice #uint8 #64 h 0 32 in
-  let h_high : lbytes 32 = slice #uint8 #64 h 32 64 in
-  let h_low0 : uint8  = index #uint8 #32 h_low 0 in
-  let h_low31 = index #uint8 #32 h_low 31 in
-  let h_low = h_low.[ 0] <- index #uint8 #32 h_low 0 &. u8 0xf8 in
-  let h_low = h_low.[31] <- (index #uint8 #32 h_low 31 &. u8 127) |. u8 64 in
+  let h_low : lbytes 32 = slice h 0 32 in
+  let h_high : lbytes 32 = slice h 32 64 in
+  let h_low = h_low.[ 0] <- h_low.[0] &. u8 0xf8 in
+  let h_low = h_low.[31] <- (h_low.[31] &. u8 127) |. u8 64 in
   h_low, h_high
 
 
@@ -112,27 +110,20 @@ let secret_to_public (secret:lbytes 32) =
 
 let expand_keys (secret:lbytes 32) : (lbytes 32 & lbytes 32 & lbytes 32) =
   let s, prefix = secret_expand secret in
-  let pub = secret_to_public secret in
+  let pub = point_compress (point_mul_g s) in
   pub, s, prefix
 
 
 val sign_expanded:
-    pub:lbytes 32
-  -> s:lbytes 32
-  -> prefix:lbytes 32
-  -> msg:bytes{64 + length msg <= max_size_t} ->
-  lbytes 64
-
+  pub:lbytes 32 -> s:lbytes 32 -> prefix:lbytes 32 -> msg:bytes{64 + length msg <= max_size_t} -> lbytes 64
 let sign_expanded pub s prefix msg =
   let len = length msg in
-  let r = sha512_modq (32 + len) (concat #uint8 #32 #(length msg) prefix msg) in
+  let r = sha512_modq (32 + len) (concat prefix msg) in
   let r' = point_mul_g (nat_to_bytes_le 32 r) in
   let rs = point_compress r' in
-  let h = sha512_modq (64 + len)
-    (concat #uint8 #64 #(length msg) (concat #uint8 #32 #32 rs pub) msg)
-  in
+  let h = sha512_modq (64 + len) (concat (concat rs pub) msg) in
   let s = (r + (h * nat_from_bytes_le s) % q) % q in
-  concat #uint8 #32 #32 rs (nat_to_bytes_le 32 s)
+  concat #_ #32 #32 rs (nat_to_bytes_le 32 s)
 
 
 val sign: secret:lbytes 32 -> msg:bytes{64 + length msg <= max_size_t} -> lbytes 64
@@ -141,29 +132,22 @@ let sign secret msg =
   sign_expanded pub s prefix msg
 
 
-val verify:
-    public:lbytes 32
-  -> msg:bytes{64 + length msg <= max_size_t}
-  -> signature:lbytes 64 ->
-  bool
-
+val verify: public:lbytes 32 -> msg:bytes{64 + length msg <= max_size_t} -> signature:lbytes 64 -> bool
 let verify public msg signature =
   let len = length msg in
   let a' = point_decompress public in
   match a' with
   | None -> false
   | Some a' -> (
-    let rs = slice #uint8 #64 signature 0 32 in
+    let rs = slice signature 0 32 in
     let r' = point_decompress rs in
     match r' with
     | None -> false
     | Some r' -> (
-      let s = nat_from_bytes_le (slice #uint8 #64 signature 32 64) in
+      let s = nat_from_bytes_le (slice signature 32 64) in
       if s >= q then false
       else (
-        let h = sha512_modq (64 + len)
-	  (concat #uint8 #64 #(length msg) (concat #uint8 #32 #32 rs public) msg)
-	in
+        let h = sha512_modq (64 + len) (concat (concat rs public) msg) in
         let sb = nat_to_bytes_le 32 s in
         let hb = nat_to_bytes_le 32 h in
 
