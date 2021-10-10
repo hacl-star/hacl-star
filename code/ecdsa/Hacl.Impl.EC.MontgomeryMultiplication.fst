@@ -23,12 +23,13 @@ open Lib.Buffer
 #set-options "--z3rlimit 300"
 inline_for_extraction noextract
 val supportsReducedMultiplication: #c: curve -> 
-  Tot  (r: bool {r ==> v (Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb (getLastWordPrime #c)) == 1})
+  Tot  (r: bool {r <==> v (Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb (getLastWordPrime #c)) == 1})
 
 let supportsReducedMultiplication #c = 
   let open Lib.RawIntTypes in 
   let r = FStar.UInt64.eq (Lib.RawIntTypes.u64_to_UInt64 (getLastWordPrime #c)) 0xffffffffffffffffuL in 
   Hacl.Spec.Bignum.ModInvLimb.mod_inv_limb_lemma (getLastWordPrime #c);
+  
   lemma_mod_sub_distr 0 (getPrime c) (pow2 64);
   assert_norm (exp #(pow2 64) 1 (pow2 64 - 1) == 1);
   r
