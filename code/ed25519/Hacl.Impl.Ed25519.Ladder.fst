@@ -11,6 +11,7 @@ open Hacl.Bignum25519
 module F51 = Hacl.Impl.Ed25519.Field51
 
 module LSeq = Lib.Sequence
+module BSeq = Lib.ByteSequence
 module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
@@ -172,7 +173,10 @@ let point_mul result scalar q =
   let h0 = ST.get () in
   push_frame ();
   let bscalar = create 4ul (u64 0) in
-  BC.mk_bn_from_bytes_le 32ul scalar bscalar;
+  Lib.ByteBuffer.uints_from_bytes_le bscalar scalar;
+  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar);
+  let h1 = ST.get () in
+  assert (as_seq h1 bscalar == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar));
   SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar);
 
   make_point_inf result;
@@ -228,12 +232,18 @@ let point_mul_double_vartime result scalar1 q1 scalar2 q2 =
   let h0 = ST.get () in
   push_frame ();
   let bscalar1 = create 4ul (u64 0) in
-  BC.mk_bn_from_bytes_le 32ul scalar1 bscalar1;
+  Lib.ByteBuffer.uints_from_bytes_le bscalar1 scalar1;
+  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar1);
   SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar1);
 
   let bscalar2 = create 4ul (u64 0) in
-  BC.mk_bn_from_bytes_le 32ul scalar2 bscalar2;
+  Lib.ByteBuffer.uints_from_bytes_le bscalar2 scalar2;
+  SC.bn_from_bytes_le_is_uints_from_bytes_le #U64 32 (as_seq h0 scalar2);
   SC.bn_from_bytes_le_lemma #U64 32 (as_seq h0 scalar2);
+
+  let h1 = ST.get () in
+  assert (as_seq h1 bscalar1 == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar1));
+  assert (as_seq h1 bscalar2 == SC.bn_from_bytes_le #U64 32 (as_seq h0 scalar2));
 
   make_point_inf result;
   ME.lexp_double_fw_vartime 20ul 0ul mk_ed25519_concrete_ops (null uint64) q1 4ul 256ul bscalar1 q2 bscalar2 result 4ul;
