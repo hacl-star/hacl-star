@@ -182,7 +182,28 @@ This code is not side-channel resistant.
  The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
 */
 bool
-Hacl_P256_ecdsa_verif_without_hash(
+Hacl_P256_ecdsa_verif_without_hash_ml(
+  uint32_t mLen,
+  uint8_t *m,
+  uint8_t *pubKey,
+  uint8_t *r,
+  uint8_t *s
+);
+
+/*
+This code is not side-channel resistant.
+  
+ Input: m buffer: uint8 [mLen], 
+ pub(lic)Key: uint8[64], 
+ r: uint8[32], 
+ s: uint8[32]. 
+  
+ Output: bool, where true stands for the correct signature verification.
+  
+ The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
+*/
+bool
+Hacl_P256_ecdsa_verif_without_hash_radix(
   uint32_t mLen,
   uint8_t *m,
   uint8_t *pubKey,

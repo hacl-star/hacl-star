@@ -45,8 +45,11 @@ let ecdsa_verif_p256_sha384 mLen m pubKey r s =
 let ecdsa_verif_p256_sha512 mLen m pubKey r s = 
   ecdsa_verification #P256 #MontLadder (Hash SHA2_512) pubKey r s mLen m
 
-let ecdsa_verif_without_hash mLen m pubKey r s  =
+let ecdsa_verif_without_hash_ml mLen m pubKey r s  =
    ecdsa_verification #P256 #MontLadder NoHash pubKey r s mLen m
+
+let ecdsa_verif_without_hash_radix mLen m pubKey r s  =
+   ecdsa_verification #P256 #Radix NoHash pubKey r s mLen m
 
 
 

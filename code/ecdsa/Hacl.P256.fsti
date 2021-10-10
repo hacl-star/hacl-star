@@ -204,7 +204,7 @@ val ecdsa_verif_p256_sha512:
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
-val ecdsa_verif_without_hash:
+val ecdsa_verif_without_hash_ml:
   mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length #P256 Spec.ECDSA.NoHash}
   -> m:lbuffer uint8 mLen
   -> pubKey:lbuffer uint8 (size 64)
@@ -221,6 +221,31 @@ val ecdsa_verif_without_hash:
       modifies0 h0 h1 /\
       result == Spec.ECDSA.ecdsa_verification P256 Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
    )
+
+
+[@ (Comment "This code is not side-channel resistant.
+  \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
+  \n Output: bool, where true stands for the correct signature verification.
+  \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
+val ecdsa_verif_without_hash_radix:
+  mLen: size_t {uint_v mLen >= Spec.ECDSA.min_input_length #P256 Spec.ECDSA.NoHash}
+  -> m:lbuffer uint8 mLen
+  -> pubKey:lbuffer uint8 (size 64)
+  -> r:lbuffer uint8 (size 32)
+  -> s:lbuffer uint8 (size 32)
+  -> 
+  Stack bool
+    (requires fun h -> live h pubKey /\ live h r /\ live h s /\ live h m)
+    (ensures fun h0 result h1 ->
+      let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in
+      let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
+      let r = nat_from_bytes_be (as_seq h1 r) in
+      let s = nat_from_bytes_be (as_seq h1 s) in
+      modifies0 h0 h1 /\
+      result == Spec.ECDSA.ecdsa_verification P256 Spec.ECDSA.NoHash (publicKeyX, publicKeyY) r s (v mLen)  (as_seq h0 m)
+   )
+
+
 
 
 [@ (Comment " Public key verification function. 
