@@ -11,13 +11,11 @@ open Spec.ECC
 open Spec.ECC.Curves
 open Spec.ECDSA.Lemmas
 
-module Def = Spec.Hash.Definitions
-
 open FStar.Math.Lemmas
 open FStar.Math.Lib
 
 
-#set-options "--z3rlimit 200"
+#set-options "--ifuel 0 --fuel 0 --z3rlimit 100"
 
 val ith_bit_power: #c: curve -> k: scalar_bytes #c -> i:nat{i < v (getScalarLen c)}
   -> t:uint64 {(v t == 0 \/ v t == 1) /\ v t == nat_from_intseq_le k / pow2 i % 2}
@@ -112,7 +110,7 @@ val lemma_even: #c: curve
 
 let lemma_even #c index k =
   let number = nat_from_bytes_le k in
-  let n = (getPower c)  - index in
+  let n = v (getScalarLen c) - index in
   FStar.Math.Lemmas.pow2_double_mult n;
   lemma_div_def (number / pow2 n) 2;
   FStar.Math.Lemmas.division_multiplication_lemma number (pow2 n) 2
@@ -138,9 +136,33 @@ let lemma_odd #c index k =
           2 * arithmetic_shift_right number (n + 1) + 1)
 
 
-val lemma_exponen_spec: #c: curve -> k:lseq uint8 (getCoordinateLen c)
-  -> start:tuple2 (nat_prime #c) (nat_prime #c) {let st0, st1 = start in st0 == 1}
-  -> index:nat{index <= getPower c} ->
+#push-options "--fuel 1"
+
+val lemma_exponen_spec_0: #c: curve -> k:lseq uint8 (getCoordinateLen c)
+  -> start: tuple2 (elem (getOrder #c)) (elem (getOrder #c)) 
+    {let st0, st1 = start in st0 == 1} ->
+  Lemma (
+    let start0, start1 = start in
+    let number = nat_from_bytes_le k in
+    let f0, f1 = Lib.LoopCombinators.repeati 0 (_exp_step #c k) start in
+    f0 == pow start1 (arithmetic_shift_right number (getPower c)) % getOrder #c /\
+    f1 == pow start1 (arithmetic_shift_right number (getPower c) + 1) % getOrder #c
+  )
+
+let lemma_exponen_spec_0 #c k start =
+  let st0, st1 = start in
+  let number = nat_from_bytes_le k in
+  assert (arithmetic_shift_right number (getPower c) == number / pow2 (getPower c));
+  FStar.Math.Lemmas.lemma_div_lt_nat number (getPower c) (getPower c);
+  assert (arithmetic_shift_right number (getPower c) == 0);
+  Lib.LoopCombinators.eq_repeati0 (getPower c) (_exp_step #c k) start
+
+#pop-options
+
+
+val lemma_exponen_spec: #c: curve -> k: lseq uint8 (getCoordinateLen c)
+  -> start: tuple2 (elem (getOrder #c)) (elem (getOrder #c))  {let st0, st1 = start in st0 == 1}
+  -> index: nat{index <= getPower c} ->
   Lemma (
     let start0, start1 = start in
     let number = nat_from_bytes_le k in
@@ -150,32 +172,8 @@ val lemma_exponen_spec: #c: curve -> k:lseq uint8 (getCoordinateLen c)
     f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getOrder #c
   )
 
-#push-options "--fuel 1"
-
-val lemma_exponen_spec_0: #c: curve -> k:lseq uint8 (getCoordinateLen c)
-  -> start:tuple2 (nat_prime #c) (nat_prime #c) {let st0, st1 = start in st0 == 1} ->
-  Lemma (
-    let start0, start1 = start in
-    let number = nat_from_bytes_le k in
-    let newIndex = getPower c in
-    let f0, f1 = Lib.LoopCombinators.repeati 0 (_exp_step #c k) start in
-    f0 == pow start1 (arithmetic_shift_right number newIndex) % getOrder #c /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getOrder #c
-  )
-
-let lemma_exponen_spec_0 #c k start =
-  let st0, st1 = start in
-  let number = nat_from_bytes_le k in
-  assert (arithmetic_shift_right number (getPower c) == number / pow2 (getPower c));
-  FStar.Math.Lemmas.lemma_div_lt_nat number (getPower c) (getPower c);
-  assert (arithmetic_shift_right number (getPower c) == 0);
-  Lib.LoopCombinators.eq_repeati0 (getPower c) (_exp_step #c k) start;
-  admit()
-
-#pop-options
 
 let rec lemma_exponen_spec #c k start index =
-  admit();
   let prime_order = getOrder #c in 
   let power = getPower c in 
   let f = _exp_step #c k in
