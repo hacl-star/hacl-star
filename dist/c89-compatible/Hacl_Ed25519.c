@@ -619,51 +619,6 @@ point_mul_double_vartime(
             Hacl_Impl_Ed25519_PointAdd_point_add(t2, t11, q2);
           }
         }
-        if (!((uint32_t)0U == (uint32_t)0U))
-        {
-          uint64_t tmp[20U] = { 0U };
-          uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
-          uint32_t i0 = (uint32_t)4U;
-          uint32_t j0 = (uint32_t)0U;
-          uint64_t p10 = bscalar1[i0] >> j0;
-          uint64_t ite0;
-          if (i0 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j0)
-          {
-            ite0 = p10 | bscalar1[i0 + (uint32_t)1U] << ((uint32_t)64U - j0);
-          }
-          else
-          {
-            ite0 = p10;
-          }
-          {
-            uint64_t bits_c = ite0 & mask_l;
-            uint32_t bits_l32 = (uint32_t)bits_c;
-            uint64_t *a_bits_l = table1 + bits_l32 * (uint32_t)20U;
-            memcpy(result, a_bits_l, (uint32_t)20U * sizeof (uint64_t));
-            {
-              uint64_t mask_l0 = (uint64_t)16U - (uint64_t)1U;
-              uint32_t i = (uint32_t)4U;
-              uint32_t j = (uint32_t)0U;
-              uint64_t p1 = bscalar2[i] >> j;
-              uint64_t ite;
-              if (i + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
-              {
-                ite = p1 | bscalar2[i + (uint32_t)1U] << ((uint32_t)64U - j);
-              }
-              else
-              {
-                ite = p1;
-              }
-              {
-                uint64_t bits_c0 = ite & mask_l0;
-                uint32_t bits_l320 = (uint32_t)bits_c0;
-                uint64_t *a_bits_l0 = table2 + bits_l320 * (uint32_t)20U;
-                memcpy(tmp, a_bits_l0, (uint32_t)20U * sizeof (uint64_t));
-                Hacl_Impl_Ed25519_PointAdd_point_add(result, result, tmp);
-              }
-            }
-          }
-        }
         {
           uint32_t i;
           for (i = (uint32_t)0U; i < (uint32_t)64U; i++)

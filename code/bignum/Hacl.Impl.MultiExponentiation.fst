@@ -287,7 +287,7 @@ val lexp_double_fw_gen_:
 
 let lexp_double_fw_gen_ #a_t len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc =
   assert (v (bBits %. l) == v bBits % v l);
-  if bBits %. l <>. 0ul then
+  if bBits %. l <> 0ul then
     lexp_double_fw_acc0 len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc;
 
   lexp_double_fw_loop #a_t len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc

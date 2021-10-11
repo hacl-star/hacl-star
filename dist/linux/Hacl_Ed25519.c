@@ -605,43 +605,6 @@ point_mul_double_vartime(u64 *result, u8 *scalar1, u64 *q1, u8 *scalar2, u64 *q2
             Hacl_Impl_Ed25519_PointAdd_point_add(t2, t11, q2);
           }
         }
-        if (!((u32)0U == (u32)0U))
-        {
-          u64 tmp[20U] = { 0U };
-          u64 mask_l = (u64)16U - (u64)1U;
-          u32 i0 = (u32)4U;
-          u32 j0 = (u32)0U;
-          u64 p10 = bscalar1[i0] >> j0;
-          u64 ite0;
-          if (i0 + (u32)1U < (u32)4U && (u32)0U < j0)
-            ite0 = p10 | bscalar1[i0 + (u32)1U] << ((u32)64U - j0);
-          else
-            ite0 = p10;
-          {
-            u64 bits_c = ite0 & mask_l;
-            u32 bits_l32 = (u32)bits_c;
-            u64 *a_bits_l = table1 + bits_l32 * (u32)20U;
-            memcpy(result, a_bits_l, (u32)20U * sizeof (u64));
-            {
-              u64 mask_l0 = (u64)16U - (u64)1U;
-              u32 i = (u32)4U;
-              u32 j = (u32)0U;
-              u64 p1 = bscalar2[i] >> j;
-              u64 ite;
-              if (i + (u32)1U < (u32)4U && (u32)0U < j)
-                ite = p1 | bscalar2[i + (u32)1U] << ((u32)64U - j);
-              else
-                ite = p1;
-              {
-                u64 bits_c0 = ite & mask_l0;
-                u32 bits_l320 = (u32)bits_c0;
-                u64 *a_bits_l0 = table2 + bits_l320 * (u32)20U;
-                memcpy(tmp, a_bits_l0, (u32)20U * sizeof (u64));
-                Hacl_Impl_Ed25519_PointAdd_point_add(result, result, tmp);
-              }
-            }
-          }
-        }
         {
           u32 i;
           for (i = (u32)0U; i < (u32)64U; i++)
