@@ -385,30 +385,38 @@ let uploadStartPoints #c q p result =
 inline_for_extraction noextract
 val scalar_multiplication_t_0: #c: curve -> #t:buftype -> #l : ladder ->  p: point c -> result: point c -> 
   scalar: scalar_t #t #c -> 
-  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit 
-  (requires fun h -> True (* live h q /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc q; loc tempBuffer; loc scalar] /\
-    disjoint q result /\ eq_or_disjoint p result /\ disjoint result tempBuffer /\ disjoint result scalar /\
-    point_eval c h p /\ ~ (isPointAtInfinity (point_as_nat c h p)) *))
-  (ensures fun h0 _ h1 -> True (* modifies (loc q |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 q /\ (
-    let i1 = point_as_nat c h0 p in point_mult_0 i1 0; 
-    let pD = fromDomainPoint #c #DH (point_as_nat c h1 q) in
-    let r0, r1 = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, i1) in 
-    pD == r0 *))
-
+  (requires fun h ->  live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p;  loc tempBuffer; loc scalar] /\
+    eq_or_disjoint p result /\ disjoint result tempBuffer /\ disjoint result scalar /\
+    point_eval c h p /\ ~ (isPointAtInfinity (point_as_nat c h p)))
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
+    let p0 = point_as_nat c h0 p in 
+    let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in
+    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0)))
+    
 
 let scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer = 
-    let len = getCoordinateLenU64 c in 
+  let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c in 
   match l with 
   |MontLadder -> begin
-    let q = sub tempBuffer (size 0) (size 3 *! len) in 
-    let buff = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
-    uploadStartPoints q p result; 
-    montgomery_ladder q result scalar buff;
-    copy_point q result
+    push_frame();
+      let q = sub tempBuffer (size 0) (size 3 *! len) in 
+      let temp = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
+	let h1 = ST.get() in 
+	Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
+      uploadStartPoints q p result; 
+      montgomery_ladder q result scalar temp; 
+      copy_point q result; 
+	let h2 = ST.get() in 
+	pop_frame();
+	let h3 = ST.get() in 
+	Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
     end
   |Radix -> 
+    admit(); 
     pointToDomain #c p result;
     Hacl.Impl.EC.ScalarMult.Radix.scalar_multiplication_t_0 #c result result scalar tempBuffer
 
@@ -428,8 +436,35 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> #l: ladder -> p: point c 
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\ point_eval c h p /\
     ~ (isPointAtInfinity (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
-    let pD = point_as_nat c h1 result in 
-    scalar_multiplication (as_seq h0 scalar) (point_as_nat c h0 p) == pD))
+    let p0 = point_as_nat c h0 p in 
+    let qD = point_as_nat c h1 result in
+    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0)))
+
+
+val exp_of_one: a: pos { a > 1} -> b: pos ->  Lemma (exp #a 1 b == 1)
+
+let rec exp_of_one a b = 
+  match b with 
+  |1 -> assert_norm (exp #a 1 1 == 1)
+  |_ -> 
+    exp_of_one a (b - 1);
+    lemma_pow_mod_n_is_fpow a 1 (b - 1); 
+    pow_plus 1 (b - 1) 1;
+    lemma_mod_mul_distr_l (pow 1 (b - 1)) (pow 1 1) a;
+    power_one 1;
+    lemma_pow_mod_n_is_fpow a 1 b
+
+
+val norm_twice_lemma: #c: curve ->  a: point_nat_prime -> q: point_nat_prime -> Lemma (pointEqual a q ==> pointEqual (_norm #c a) q)
+
+let norm_twice_lemma #c p q =
+  let prime = getPrime c in  
+  calc (==) {
+    modp_inv_prime prime (1 % prime);
+  (==) {small_mod 1 prime} 
+    modp_inv_prime prime 1;
+  (==) {exp_of_one prime (prime - 2)}
+    1;}
 
 
 
@@ -437,9 +472,10 @@ let scalarMultiplication_t #c #t #l p result scalar tempBuffer  =
     let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer; 
-  norm result result tempBuffer; 
-  let i1 = point_as_nat c h0 p in 
-    point_mult0_is_infinity i1
+    let h1 = ST.get() in 
+  let t = sub tempBuffer (size 0) (size 17 *! len) in 
+  norm result result t; 
+    norm_twice_lemma #c (fromDomainPoint #c #DH (point_as_nat c h1 result)) (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) (point_as_nat c h0 p))
 
 
 inline_for_extraction noextract

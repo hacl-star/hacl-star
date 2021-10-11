@@ -21,6 +21,13 @@ type ladder =
   |MontLadder
   |Radix
 
+let invert_state_s (a: ladder): Lemma
+  (requires True)
+  (ensures (inversion ladder))
+  [SMTPat (ladder) ]
+  = allow_inversion (ladder)
+
+
 
 inline_for_extraction noextract 
 val toDomain: #c: curve -> value: felem c -> result: felem c -> Stack unit 

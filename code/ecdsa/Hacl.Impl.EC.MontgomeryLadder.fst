@@ -27,7 +27,6 @@ open Hacl.Impl.EC.Masking.ScalarAccess
 #set-options " --z3rlimit 200"
 
 inline_for_extraction noextract
-
 val swap: #c: curve ->  p: point_seq c -> q: point_seq c -> 
   Tot (r: tuple2 (point_seq c) (point_seq c) {let pNew, qNew = r in pNew == q /\ qNew == p})
 
@@ -134,6 +133,7 @@ val pointAddAsDouble: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #
 
 let pointAddAsDouble #c p q = ()
 
+
 inline_for_extraction
 val point_add_as_spec: #c: curve -> p: point c -> q: point c -> result: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
@@ -160,6 +160,7 @@ let point_add_as_spec #c p q result tempBuffer =
     (let qX, qY, qZ = point_as_nat c h0 q in fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ);
   lemma_coord_eval c h0 h1 p
   
+
 inline_for_extraction
 val montgomery_ladder_step1: #c : curve -> p: point c -> q: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> Stack unit
@@ -183,6 +184,7 @@ let montgomery_ladder_step1 #c p q tempBuffer =
   lemma_coord_eval c h1 h2 q;
   pointAddAsDouble #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 p));
   curve_point_equality #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) (fromDomainPoint #c #DH (point_as_nat c h0 q))
+
 
 inline_for_extraction
 val _montgomery_ladder_step: #c: curve -> #buf_type: buftype
@@ -212,6 +214,7 @@ let _montgomery_ladder_step #c #buf_type r0 r1 tempBuffer bit =
   montgomery_ladder_step1 r0 r1 tempBuffer;
   cswap bit r0 r1
     
+
 inline_for_extraction
 val montgomery_ladder_step: #c: curve -> #buf_type: buftype
   -> p: point c -> q: point c 

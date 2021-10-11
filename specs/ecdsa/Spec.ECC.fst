@@ -568,14 +568,6 @@ let scalar_as_nat #c s = scalar_as_nat_ #c s (v (getScalarLen c))
 
 
 
-val montgomery_ladder_spec_left: #c: curve -> s: scalar_bytes #c 
-  -> i: tuple2 (point_nat_prime #c) (point_nat_prime #c) {let i0, i1 = i in pointEqual i0 (point_mult #c 0 i1)} 
-  -> r: tuple2 (point_nat_prime #c) (point_nat_prime #c) {
-    let r0, r1 = r in let i0, i1 = i in
-    r == repeati (v (getScalarLen c)) (_ml_step #c s) i /\
-    pointEqual r0 (point_mult (scalar_as_nat #c s) i1)}
-
-
 val pred0: #c: curve -> x: tuple2 (point_nat_prime #c) (point_nat_prime #c) -> s: scalar_bytes ->
   p: tuple2 (point_nat_prime #c) (point_nat_prime #c) -> i: nat {i < v (getScalarLen c)} ->
   Lemma (
@@ -616,6 +608,12 @@ let lemma_predicate0 #c s p =
   Classical.forall_intro_4 pred
 
 
+val montgomery_ladder_spec_left: #c: curve -> s: scalar_bytes #c 
+  -> i: tuple2 (point_nat_prime #c) (point_nat_prime #c) {let i0, i1 = i in pointEqual i0 (point_mult #c 0 i1)} 
+  -> r: tuple2 (point_nat_prime #c) (point_nat_prime #c) {
+    let r0, r1 = r in let i0, i1 = i in
+    r == repeati (v (getScalarLen c)) (_ml_step #c s) i /\
+    pointEqual r0 (point_mult (scalar_as_nat #c s) i1)}
 
 let montgomery_ladder_spec_left #c s (p0, q0) = 
   let len : nat  = v (getScalarLen c) in 
@@ -641,14 +639,10 @@ val scalar_multiplication: #c: curve -> scalar_bytes #c ->
   point_nat_prime #c 
 
 let scalar_multiplication #c k p =
-  point_mult_0 p 0; 
-  let q, f = montgomery_ladder_spec_left k (pointAtInfinity, p) in
-  _norm #c q
+  point_mult (scalar_as_nat #c k) p
 
 val secret_to_public: #c: curve -> scalar_bytes #c -> point_nat_prime #c
 
 let secret_to_public #c k =
-  point_mult_0 (basePoint #c) 0;
-  let q, f = montgomery_ladder_spec_left #c k (pointAtInfinity, (basePoint #c)) in
-  _norm #c q
+  point_mult (scalar_as_nat #c k) (basePoint #c)
 
