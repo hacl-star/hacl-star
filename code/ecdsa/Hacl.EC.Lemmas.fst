@@ -15,96 +15,9 @@ open Spec.ECDSA.Lemmas
 
 open FStar.Math.Lemmas
 
-open Lib.Buffer
-open FStar.HyperStack.All
-open FStar.HyperStack
-
-
 open Spec.ECC
 
 #set-options " --z3rlimit 200" 
-
-val lemma_scalar_ith: c: curve -> sc: lbytes (v (getScalarLenBytes c)) -> k:nat{k < v (getScalarLenBytes c)} ->
-  Lemma (v sc.[k] == nat_from_intseq_le sc / pow2 (8 * k) % pow2 8)
-
-let lemma_scalar_ith c sc k =
-  index_nat_to_intseq_le #U8 #SEC (v (getScalarLenBytes c)) (nat_from_intseq_le sc) k;
-  nat_from_intseq_le_inj sc (nat_to_intseq_le (v (getScalarLenBytes c)) (nat_from_intseq_le sc))
-
-
-val lemma_equ_felem: a: nat {a < pow2 64} 
-  -> b: nat {b < pow2 64} 
-  -> c: nat {c < pow2 64} 
-  -> d: nat {d < pow2 64} 
-  -> a1: nat {a1 < pow2 64} 
-  -> b1: nat {b1 < pow2 64} 
-  -> c1: nat {c1 < pow2 64} 
-  -> d1: nat {d1 < pow2 64} -> 
-  Lemma 
-    (requires (
-      a + b * pow2 64 + c * pow2 64 * pow2 64 + d *  pow2 64 * pow2 64 * pow2 64 == 
-      a1 + b1 * pow2 64 + c1 * pow2 64 * pow2 64  + d1 *  pow2 64 * pow2 64 * pow2 64))
-    (ensures (a == a1 /\ b == b1 /\ c == c1 /\ d == d1))
-
-let lemma_equ_felem a b c d  a1 b1 c1 d1  = 
-  assert(a = a1 + b1 * pow2 64 + c1 * pow2 128 + d1 * pow2 192 -  b * pow2 64 - c * pow2 128 - d * pow2 192);
-  assert(a == a1);
-  assert(b == b1);
-  assert(c == c1);
-  assert(d == d1)
-
-
-val lemma_eq_funct: #c: curve -> a: felem_seq c -> b: felem_seq c -> Lemma
-   (requires (felem_seq_as_nat c a == felem_seq_as_nat c b))
-   (ensures (a == b))
-
-let lemma_eq_funct a b = 
-  let a0 = Lib.Sequence.index a 0 in 
-  let a1 = Lib.Sequence.index a 1 in 
-  let a2 = Lib.Sequence.index a 2 in 
-  let a3 = Lib.Sequence.index a 3 in 
-
-  let b0 = Lib.Sequence.index b 0 in 
-  let b1 = Lib.Sequence.index b 1 in 
-  let b2 = Lib.Sequence.index b 2 in 
-  let b3 = Lib.Sequence.index b 3 in 
-
-  assert_norm (pow2 64 * pow2 64 = pow2 128);
-  assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-
-  lemma_equ_felem (uint_v a0) (uint_v a1) (uint_v a2) (uint_v a3) (uint_v b0) (uint_v b1) (uint_v b2) (uint_v b3);
-  
-  assert(Lib.Sequence.equal a b)
-
-
-val lemma_eq_funct_: #c: curve -> a: felem_seq c -> b: felem_seq c -> Lemma
-   (if felem_seq_as_nat c a = felem_seq_as_nat c b then a == b else True)
-
-let lemma_eq_funct_ #c a b = 
-  if felem_seq_as_nat c a = felem_seq_as_nat c b then 
-    lemma_eq_funct a b 
-
-
-val lemma_core_0: c: curve -> a:felem c -> h:mem
-  -> Lemma (nat_from_intseq_le (as_seq h a) == as_nat c h a)
-
-let lemma_core_0 c a h = 
-  match c with 
-  |P256 -> 
-  let k = as_seq h a in 
-  let z = nat_from_intseq_le k in 
-    nat_from_intseq_le_slice_lemma k 1;
-    nat_from_intseq_le_lemma0 (Seq.slice k 0 1);
-  let k1 = Seq.slice k 1 4 in 
-    nat_from_intseq_le_slice_lemma #_ #_ #3 k1 1;
-    nat_from_intseq_le_lemma0 (Seq.slice k1 0 1);
-  let k2 = Seq.slice k1 1 3 in 
-    nat_from_intseq_le_slice_lemma #_ #_ #2 k2 1;
-    nat_from_intseq_le_lemma0 (Seq.slice k2 0 1);
-    nat_from_intseq_le_lemma0 (Seq.slice k2 1 2)
-  |P384 -> admit()
-
-
 
 (*This code is taken from Curve25519, written by Polubelova M *)
 val lemma_cswap2_step:
@@ -184,10 +97,10 @@ val lemma_xor_copy_cond: a: uint64 -> b: uint64 -> mask: uint64{uint_v mask = 0 
 let lemma_xor_copy_cond a b mask = 
   let fst = logxor a b in 
   let snd = logand mask fst in 
-    logand_lemma mask fst;
+    logxor_lemma a b;
+    Lib.IntTypes.logand_lemma mask fst; 
   let thrd = logxor a snd in    
-    logxor_lemma a snd;
-    logxor_lemma a b
+    logxor_lemma a snd
 
 
 val power_zero: a: nat -> Lemma (pow a 0 == 1)
@@ -208,7 +121,6 @@ val power_one_2: a: nat -> Lemma (pow a 1 == a)
 let power_one_2 a = ()
 
 
-noextract
 val pow_plus: a: nat -> b: nat -> c: nat -> 
   Lemma (ensures (pow a b * pow a c = pow a (b + c))) 
   (decreases b)
@@ -219,7 +131,6 @@ let rec pow_plus a b c =
   | _ -> pow_plus a (b - 1) c
 
 
-noextract
 val power_distributivity: a: nat -> b: nat -> c: pos -> Lemma ((pow (a % c) b) % c = (pow a b) % c)
 
 let rec power_distributivity a b c =
@@ -251,7 +162,6 @@ let rec power_distributivity_2 a b c =
     }
 
 
-noextract
 val power_mult: a: nat -> b: nat -> c: nat -> Lemma (pow (pow a b) c == pow a (b * c))
 
 let rec power_mult a b c = 
@@ -278,9 +188,9 @@ val lemma_pow_unfold: a: nat -> b: pos -> Lemma (a * pow a (b - 1) == pow a b)
 let lemma_pow_unfold a b = ()
 
 
-val lemma_mul_associativity_3: a: nat -> b: nat -> c: nat -> Lemma (a * b * c == a * c * b)
+(* val lemma_mul_associativity_3: a: nat -> b: nat -> c: nat -> Lemma (a * b * c == a * c * b)
 let lemma_mul_associativity_3 a b c = ()
-
+ *)
 
 val lemma_pow_double: a: nat -> b: nat -> Lemma (pow (a * a) b == pow a (b + b))
 

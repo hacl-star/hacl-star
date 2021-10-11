@@ -13,7 +13,7 @@ open Spec.ECC
 open Hacl.Spec.EC.Definition
 
 open Spec.ECDSA
-open Hacl.Impl.P256.Compression
+open Hacl.Impl.EC.Compression
 open Spec.Hash.Definitions
 
 open Hacl.Impl.ECDSA.Signature
@@ -64,17 +64,17 @@ let verify_q_private pubKey =
 
 
 let decompression_not_compressed_form_p256 b result = 
-  Hacl.Impl.P256.Compression.decompressionNotCompressedForm #P256 b result
+  Hacl.Impl.EC.Compression.decompressionNotCompressedForm #P256 b result
 
 let decompression_compressed_form_p256 b result = 
-  Hacl.Impl.P256.Compression.decompressionCompressedForm #P256 b result
+  Hacl.Impl.EC.Compression.decompressionCompressedForm #P256 b result
 
 
 let compression_not_compressed_form_p256 b result = 
-  Hacl.Impl.P256.Compression.compressionNotCompressedForm #P256 b result
+  Hacl.Impl.EC.Compression.compressionNotCompressedForm #P256 b result
 
 let compression_compressed_form_p256 b result = 
-  Hacl.Impl.P256.Compression.compressionCompressedForm #P256 b result
+  Hacl.Impl.EC.Compression.compressionCompressedForm #P256 b result
 
 
 

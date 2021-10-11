@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Compression
+module Hacl.Impl.EC.Compression
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -14,15 +14,10 @@ open Hacl.Impl.EC.Arithmetics
 open Hacl.Impl.EC.LowLevel.RawCmp
 open Hacl.EC.Lemmas
 
-open Hacl.Spec.MontgomeryMultiplication
-
-open Hacl.Spec.EC.Definition
 open Hacl.Impl.EC.Masking
 open Hacl.Impl.EC.Setup
-open Hacl.Impl.EC.Intro
 
 open FStar.Math.Lemmas
-
 
 open Hacl.Impl.EC.MontgomeryMultiplication
 open Hacl.Impl.EC.Core
@@ -89,9 +84,10 @@ let computeYFromX #c x result sign =
     assert(modifies (loc aCoordinateBuffer |+| loc bCoordinateBuffer |+| loc result) h0 h3);
     pop_frame();
 
+
   let len = v (getCoordinateLenU64 c) in 
 
-  lemma_core_0 c result h4;
+  Hacl.Impl.EC.Intro.lemma_lseq_nat_from_bytes (as_seq h4 result);
   Lib.ByteSequence.lemma_nat_from_to_intseq_le_preserves_value len (as_seq h4 result);
   Lib.ByteSequence.index_nat_to_intseq_le #U64 #SEC len (as_nat c h4 result) 0;
 

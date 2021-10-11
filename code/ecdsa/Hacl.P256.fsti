@@ -15,7 +15,7 @@ open Hacl.Spec.EC.Definition
 open Spec.Hash.Definitions
 
 open Spec.DH
-open Hacl.Impl.P256.Compression
+open Hacl.Impl.EC.Compression
 open Hacl.Spec.MontgomeryMultiplication
 
 

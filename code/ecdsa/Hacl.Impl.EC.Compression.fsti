@@ -1,4 +1,4 @@
-module Hacl.Impl.P256.Compression
+module Hacl.Impl.EC.Compression
 
 open FStar.HyperStack.All
 open FStar.HyperStack
