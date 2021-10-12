@@ -120,8 +120,10 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype -> #l: ladder
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
     ~ (isPointAtInfinity (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
-    let pD = scalar_multiplication  (as_seq h0 scalar) (point_as_nat c h0 p) in 
-    pD == point_as_nat c h1 result))
+    let p0 = point_as_nat c h0 p in 
+    let qD = point_as_nat c h1 result in
+    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
+    pointEqual qD (scalar_multiplication (as_seq h0 scalar) p0)))
 
 
 inline_for_extraction noextract
@@ -132,11 +134,10 @@ val scalarMultiplicationWithoutNorm: #c: curve ->  #l: ladder ->  p: point c -> 
   (requires fun h -> point_eval c h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
     ~ (isPointAtInfinity (point_as_nat c h p)))
-  (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
-    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
-    let p = point_as_nat c h0 p in point_mult_0 #c p 0; 
-    let rN, _ = montgomery_ladder_spec_left #c (as_seq h0 scalar) (pointAtInfinity, p) in 
-    rN == p1)) 
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
+    let p0 = point_as_nat c h0 p in 
+    let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in
+    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0)))
 
 
 inline_for_extraction noextract
@@ -146,9 +147,10 @@ val secretToPublic: #c: curve -> #l: ladder -> result: point c
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
-    let p = point_as_nat c h1 result in 
-    let r = secret_to_public #c (as_seq h0 scalar) in 
-    p == r))
+    let p0 = basePoint #c in 
+    let qD = point_as_nat c h1 result in
+    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
+    pointEqual qD (secret_to_public (as_seq h0 scalar))))
 
 
 inline_for_extraction noextract
@@ -158,6 +160,7 @@ val secretToPublicWithoutNorm: #c: curve -> #l: ladder ->  result: point c
   Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
-    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 result) in point_mult_0 (basePoint #c) 0;
-    let rN, _ = montgomery_ladder_spec_left (as_seq h0 scalar) (pointAtInfinity, basePoint #c) in 
-    p1 == rN))  
+    let p0 = basePoint #c in 
+    let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in
+    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
+    pointEqual qD (secret_to_public (as_seq h0 scalar))))
