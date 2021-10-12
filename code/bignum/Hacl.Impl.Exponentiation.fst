@@ -467,10 +467,11 @@ val bn_get_bits_l:
     v r == S.get_bits_l (v bBits) (BD.bn_v h0 b) (v l) (v i))
 
 let bn_get_bits_l #b_t bLen bBits b l i =
+  assert (v (bBits -! bBits %. l) = v bBits - v bBits % v l);
+  let bk = bBits -! bBits %. l in
+
   Math.Lemmas.lemma_mult_le_left (v l) (v i + 1) (v bBits / v l);
   assert (v l * (v i + 1) <= v l * (v bBits / v l));
-  let bk = bBits -! bBits %. l in
-  assert (v bk == v bBits - v bBits % v l);
   assert (v (bk -! l *! i -! l) == v bk - v l * v i - v l);
 
   let h0 = ST.get () in
