@@ -66,7 +66,7 @@ let montgomery_ladder_2_precomputed #c #a p scalar tempBuffer =
  let h0 = ST.get() in 
   let inv h (i: nat {i <= 64}) = True in 
 
-  recall_contents (points_radix_16 #c) (Lib.Sequence.of_list points_radix_16_list_p256);
+  recall_contents (points_radix_16 #c) (Lib.Sequence.of_list (points_radix_16_list c));
   let bits = getScalar_4_byBit #c scalar 0 in 
   let pointToStart = sub (points_radix_16 #c) (bits *. size 8) (size 8) in 
 

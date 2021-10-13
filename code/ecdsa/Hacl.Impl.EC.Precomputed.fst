@@ -15,11 +15,55 @@ open Spec.ECC.Curves
 open Hacl.Spec.EC.Definition
 open Hacl.Spec.MontgomeryMultiplication
 
+open Hacl.Impl.EC.Masking
+open Hacl.Impl.EC.Masking.ScalarAccess 
+open Hacl.Impl.P256.LowLevel
+
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 inline_for_extraction
-let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128} =
-  let open FStar.Mul in 
-  [@inline_let]
+let getPointI_affine (c: curve) (b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c) * 2 * 16) {
+    forall (i: nat {i < 16}).   
+      let l = v (getCoordinateLenU64 c) in
+      lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime c /\
+      lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime c}) 
+    (i: nat {i < 16}) :  point_affine_nat_prime #c = 
+    
+  let l = v (getCoordinateLenU64 c) in 
+  let x = lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) in 
+  let y = lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) in 
+  (x, y)
+
+
+inline_for_extraction
+let getPointI_jac (c: curve) (b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c) * 2 * 16) {
+    forall (i: nat {i < 16}).   
+      let l = v (getCoordinateLenU64 c) in
+      lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime c /\
+      lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime c}) 
+    (i: nat {i < 16}) :  point_nat_prime #c = 
+  let l = v (getCoordinateLenU64 c) in 
+  let x = lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) in 
+  let y = lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) in 
+  (x, y, 1)
+
+
+inline_for_extraction
+let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128 /\ (
+  let b = Lib.Sequence.of_list x in (
+  forall (i: nat {i < 16}).
+    let l = v (getCoordinateLenU64 P256) in
+    lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime P256 /\
+    lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime P256) /\ (      
+  let p0 = getPointI_affine P256 b 0 in 
+  isPointAtInfinityAffine p0 /\ (
+    forall (i: nat {i > 0 /\ i < 16}). 
+    let p0_i = point_mult #P256 i (basePoint #P256) in  
+    let pi_fromDomain = fromDomainPoint #P256 #DH (getPointI_jac P256 b i) in 
+    pointEqual pi_fromDomain p0_i)))} =
+
+  [@inline_let] 
   let x = [ 
     u64 0x0; u64 0x0; u64 0x0; u64 0x0; 
     u64 0x0; u64 0x0; u64 0x0; u64 0x0; 
@@ -71,7 +115,24 @@ let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128} =
   ] in 
   
     assert_norm(List.Tot.length x == 128);
-    x
+  
+    assume (forall (i: nat {i < 16}).   
+      let b = Lib.Sequence.of_list x in 
+      let l = v (getCoordinateLenU64 P256) in
+      lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime P256 /\
+      lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime P256);
+
+    assume (
+      let b = Lib.Sequence.of_list x in 
+      let p0 = getPointI_affine P256 b 0 in 
+      isPointAtInfinityAffine p0 /\ (
+      forall (i: nat {i > 0 /\ i < 16}). 
+	let p0_i = point_mult #P256 i (basePoint #P256) in  
+	let pi_fromDomain = fromDomainPoint #P256 #DH (getPointI_jac P256 b i) in 
+	pointEqual pi_fromDomain p0_i));
+
+  x
+
 
 inline_for_extraction
 let points_radix_16_list_p384: x:list uint64 {List.Tot.length x == 192} =
@@ -123,9 +184,13 @@ let points_radix_16_list_p384: x:list uint64 {List.Tot.length x == 192} =
     u64 0x66ae2a548bc58d5e; u64 0x412abebd62151597; u64 0xd295fe4b80e00d9f; u64 0x5db83d9f8bec48c0; u64 0x330869a025cc0464; u64 0xf3a45cc28e5fa579; 
     u64 0xb68395811ed3f011; u64 0x6abe3da17b5b49d2; u64 0x52df9a125384e282; u64 0xdbe01aa7dbefcf5a; u64 0x659954ee1ddfc5c3; u64 0x4e958f32b1188c4e; 
 
+    u64 0x2797876f470b54c5; u64 0x4c6a43a656cf0b9c; u64 0xeebca5ad676ed03b; u64 0xae9208e7f7df959c; u64 0xd69f061b3079e553; u64 0xb81dba28e358689b; 
+    u64 0x9b04ff9bdbe5cb49; u64 0x3b03c307686324ee; u64 0xe867901e57c05305; u64 0xaec776b3efdf9a57; u64 0x2efb6e881128ec96; u64 0xd86d8452f015fd7b; 
+
+
 
   ] in 
-    assert_norm(List.Tot.length x == 128);
+    assert_norm(List.Tot.length x == 192);
     x
 
 
@@ -134,24 +199,6 @@ let points_radix_16_list (c: curve) : x: list uint64 {List.Tot.length x == v (ge
   match c with
   | P256 -> points_radix_16_list_p256
   | P384 -> points_radix_16_list_p384
-
-
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
-
-inline_for_extraction
-let getPointI_affine (c: curve) (b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c) * 2 * 16)) (i: nat {i < 16}) : (point_affine_nat_prime #c) = 
-  let l = v (getCoordinateLenU64 c) in 
-  let x = lseq_as_nat (Lib.Sequence.sub b (2 * l) l) in 
-  let y = lseq_as_nat (Lib.Sequence.sub b (2 * l + l) l) in 
-  (x, y)
-
-
-inline_for_extraction
-let getPointI_jac (c: curve) (b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c) * 2 * 16)) (i: nat {i < 16}) : (point_nat_prime #c) = 
-  let l = v (getCoordinateLenU64 c) in 
-  let x = lseq_as_nat (Lib.Sequence.sub b (2 * l) l) in 
-  let y = lseq_as_nat (Lib.Sequence.sub b (2 * l + l) l) in 
-  (x, y, 1)
 
 
 inline_for_extraction
@@ -199,8 +246,6 @@ let points_radix_16 (#c: curve): x: glbuffer uint64 (getCoordinateLenU64 c *! 2u
   | P384 -> points_radix_16_p384
 
 
-open Hacl.Impl.EC.Masking
-open Hacl.Impl.EC.Masking.ScalarAccess 
 
 
 inline_for_extraction noextract
@@ -216,18 +261,27 @@ let getPointPrecomputedMixed_ #c scalar i pointToAdd =
   Lib.Loops.for 0ul 16ul invK
     (fun k -> 
       admit(); 
-      recall_contents (points_radix_16 #c) (Lib.Sequence.of_list points_radix_16_list_p256);
+      recall_contents (points_radix_16 #c) (Lib.Sequence.of_list (points_radix_16_list c));
       let mask = eq_mask (to_u64 bits) (to_u64 k) in 
-      let lut_cmb_x = sub (points_radix_16 #c) (k *! 8ul) (size 4) in 
-      let lut_cmb_y = sub (points_radix_16 #c) (k *! 8ul +! (size 4)) (size 4) in 
+      let len = getCoordinateLenU64 c in 
+      
+      let lut_cmb_x = sub (points_radix_16 #c) (k *! len *! 2) len in 
+      let lut_cmb_y = sub (points_radix_16 #c) (k *! len *! 2 +! len) len in 
 
+  
       admit();
-      copy_conditional #c (sub pointToAdd (size 0) (size 4)) lut_cmb_x mask;
-      copy_conditional #c (sub pointToAdd (size 4) (size 4)) lut_cmb_y mask
+      copy_conditional #c (sub pointToAdd (size 0) len) lut_cmb_x mask;
+      copy_conditional #c (sub pointToAdd len len) lut_cmb_y mask
    )
 
 
+inline_for_extraction 
 let getPointPrecomputedMixed_p256 = getPointPrecomputedMixed_ #P256
+
+inline_for_extraction 
+let getPointPrecomputedMixed_p384 = getPointPrecomputedMixed_ #P384
+
+
 
 
 inline_for_extraction noextract
@@ -237,8 +291,8 @@ val getPointPrecomputedMixed: #c: curve -> scalar: lbuffer uint8 (size 32) ->
   (requires fun h -> live h scalar /\ live h pointToAdd)
   (ensures fun h0 _ h1 -> True)
 
-let getPointPrecomputedMixed scalar i pointToAdd = getPointPrecomputedMixed_p256 scalar i pointToAdd
-
+let getPointPrecomputedMixed #c scalar i pointToAdd =
+  getPointPrecomputedMixed_ #c scalar i pointToAdd
 
 (* 
 prime = 2**256 - 2**224 + 2**192 + 2**96 -1
@@ -287,6 +341,58 @@ def printf(p):
     print("\n")
     
 for i in range (1, 16):
+    pxD = (i * G).xy()[0]
+    pyD = (i * G).xy()[1]
+    printf (toFakeAffine((toD (pxD), toD (pyD))))  *)
+
+
+(* prime = 2^384 - 2^128 - 2^96 + 2^32 - 1
+power = 384
+len = 6
+
+
+def norm(p):    
+    x, y, z = p
+    z2i = power_mod(z * z, -1, prime)
+    z3i = power_mod(z * z * z, -1, prime)
+    return ((x * z2i) % prime, (y * z3i) % prime, 1)
+
+def toD(x):
+    return x * power_mod (2 ** power, 1, prime) % prime
+
+def fromD(x):
+    return x * power_mod (2 ** power, prime - 2, prime) % prime
+
+def toFakeAffine(p):
+    x, y = p 
+    multiplier = power_mod (2 ** power, prime - 2, prime) 
+    x = x * multiplier * multiplier % prime
+    y = y * multiplier * multiplier * multiplier % prime
+    return (x, y)
+
+p256 = 2^384 - 2^128 - 2^96 + 2^32 - 1
+a256 = p256 - 3
+b256 = 0xb3312fa7e23ee7e4988e056be3f82d19181d9c6efe8141120314088f5013875ac656398d8a2ed19d2a85c8edd3ec2aef
+
+gx = 0xaa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7
+gy = 0x3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5f
+FF = GF(p256)
+
+EC = EllipticCurve([FF(a256), FF(b256)])
+
+G = EC(FF(gx), FF(gy))
+
+import __future__ 
+def printf(p):
+    x, y = p 
+    for i in range(len):
+        print("u64 " + str(hex((Integer(x) >> (i * 64)) % 2 ** 64)) + "; ", end = "")
+    print("")
+    for i in range(len):
+        print("u64 " + str (hex((Integer(y) >> (i * 64)) % 2 ** 64)) + "; ", end = "")
+    print("\n")
+    
+for i in range (1, 17):
     pxD = (i * G).xy()[0]
     pyD = (i * G).xy()[1]
     printf (toFakeAffine((toD (pxD), toD (pyD))))  *)
