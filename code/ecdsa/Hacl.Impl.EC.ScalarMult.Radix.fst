@@ -17,43 +17,40 @@ open Hacl.Spec.EC.Definition
 open Hacl.Impl.EC.PointAdd
 open Hacl.Impl.EC.PointDouble
 
-
 open Hacl.Spec.MontgomeryMultiplication
-
-#set-options " --z3rlimit 200"
 
 open Hacl.Impl.EC.Masking.ScalarAccess
 open Hacl.Impl.EC.Precomputed
 
+open FStar.Mul
 
-
+#set-options " --z3rlimit 200"
 
 
 [@ CInline]
 inline_for_extraction noextract  
-val montgomery_ladder_step_radix_precomputed: #c: curve ->
-  p: point c -> tempBuffer: lbuffer uint64 (size 88) -> 
-  scalar:  lbuffer uint8 (size 32)-> 
-  i:size_t{v i < 256} -> 
+val scalar_mult_step_radix_precomputed: #c: curve -> #buf_type: buftype -> 
+  p: point c -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
+  scalar: scalar_t #buf_type #c -> 
+  i: size_t{v i < v (getScalarLenBytes c) * 2} -> 
   Stack unit
-  (requires fun h -> live h p /\live h tempBuffer /\ live h scalar /\
+  (requires fun h -> live h p /\ live h tempBuffer /\ live h scalar /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
   (ensures fun h0 _ h1 -> True)
 
 
-let montgomery_ladder_step_radix_precomputed #c p tempBuffer scalar i =  
-  let bits = getScalar_4_byBit #c scalar i in 
-
-  let pointToAdd = create (size 8) (u64 0) in 
-  getPointPrecomputedMixed #c scalar i pointToAdd;
+let scalar_mult_step_radix_precomputed #c p tempBuffer scalar i = 
+  push_frame(); 
+    let pointToAdd = create (size 8) (u64 0) in 
+    getPointPrecomputedMixed #c scalar i pointToAdd;
   
-  point_double p p tempBuffer;
-  point_double p p tempBuffer;
-  point_double p p tempBuffer;
-  point_double p p tempBuffer;
-
-  
-  Hacl.Impl.EC.PointAddMixed.point_add_mixed p pointToAdd p tempBuffer
+    point_double p p tempBuffer;
+    point_double p p tempBuffer;
+    point_double p p tempBuffer;
+    point_double p p tempBuffer;
+    
+    Hacl.Impl.EC.PointAddMixed.point_add_mixed #c p pointToAdd p tempBuffer;
+  pop_frame()
 
 
 
@@ -69,9 +66,9 @@ let montgomery_ladder_2_precomputed #c #a p scalar tempBuffer =
  let h0 = ST.get() in 
   let inv h (i: nat {i <= 64}) = True in 
 
-  recall_contents points_radix_16 (Lib.Sequence.of_list points_radix_16_list_p256);
+  recall_contents (points_radix_16 #c) (Lib.Sequence.of_list points_radix_16_list_p256);
   let bits = getScalar_4_byBit #c scalar 0 in 
-  let pointToStart = sub (points_radix_16) (bits *. size 8) (size 8) in 
+  let pointToStart = sub (points_radix_16 #c) (bits *. size 8) (size 8) in 
 
   copy (sub p (size 0) (size 8)) pointToStart;
 
@@ -83,7 +80,7 @@ let montgomery_ladder_2_precomputed #c #a p scalar tempBuffer =
 
   for 1ul 64ul inv 
     (fun i -> let h2 = ST.get() in
-      montgomery_ladder_step_radix_precomputed p tempBuffer scalar i
+      scalar_mult_step_radix_precomputed p tempBuffer scalar i
     )
 
 

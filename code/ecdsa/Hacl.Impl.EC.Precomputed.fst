@@ -10,7 +10,10 @@ open Lib.Loops
 
 open FStar.Mul
 
+open Spec.ECC
 open Spec.ECC.Curves
+open Hacl.Spec.EC.Definition
+open Hacl.Spec.MontgomeryMultiplication
 
 
 inline_for_extraction
@@ -70,13 +73,220 @@ let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128} =
     assert_norm(List.Tot.length x == 128);
     x
 
+inline_for_extraction
+let points_radix_16_list_p384: x:list uint64 {List.Tot.length x == 192} =
+  let open FStar.Mul in 
+  [@inline_let]
+  let x = [ 
+    u64 0x0; u64 0x0; u64 0x0; u64 0x0; u64 0x0; u64 0x0; 
+    u64 0x0; u64 0x0; u64 0x0; u64 0x0; u64 0x0; u64 0x0; 
+
+    u64 0x32f2345cb5536b82; u64 0x33ba95da2f7d6018; u64 0xf2cd7729b1c03094; u64 0x3159972fc3a90663; u64 0x5827e6777fec9ce6; u64 0x1af1e42821b04e1b; 
+    u64 0xbbacc6d281184b31; u64 0x5a08d98b36984428; u64 0x73ba86bb86816030; u64 0xe77b3c32da8c0cac; u64 0x594336a7bc787585; u64 0x7d25d16cde0af6c9; 
+
+    u64 0xf1540d582ba14b3e; u64 0x2e3457f23145b756; u64 0x3fe78dcc087cfd43; u64 0x281a423b111add53; u64 0xbd34e442a5114f1c; u64 0x3b519f3bffa3978d; 
+    u64 0xb88dcc2161eb298a; u64 0x61a90c2284e4289f; u64 0x2c1a11d9238a73e1; u64 0x5bee7ef92b222947; u64 0x5cdb1c54277a3dc4; u64 0x4e0243249bf36fae; 
+
+    u64 0x4ee989be21361f68; u64 0xafd40863847e1ec; u64 0x2c512f43cd83f0ff; u64 0xe48b4b50ed78fcc3; u64 0x9541b91d4a92a8a5; u64 0xfc09b8fb23ad6b1d; 
+    u64 0xf10aa9975383b952; u64 0xde9ab5738926a227; u64 0x1f2ee4602710dc9e; u64 0x8ba5023a9baeb840; u64 0x237652a714d6dd45; u64 0x462295d6123091d3; 
+
+    u64 0xcab20eb810602def; u64 0x8c395f33a87dd002; u64 0x2fec596c5924beac; u64 0x682b74489f1cf1e5; u64 0x490bd9a2564c7a1a; u64 0xe97a69779470060d; 
+    u64 0xa2fd0fe85652626; u64 0xe6da1173a40f9c1b; u64 0x551f5e01228d56d1; u64 0xe3e4e92afae58eb9; u64 0xe84baf3a410bc2a9; u64 0x38e40f38ce54b806; 
+
+    u64 0x575a03d904682c6; u64 0x3b1c513a911da1ec; u64 0x49244a4f32b54168; u64 0x5fd53f7cff693ebb; u64 0x92d0bb818421982d; u64 0x23cb51b8f5e404c0; 
+    u64 0xe0a4c79de35bdc02; u64 0x42d14e31fad23659; u64 0x6b0b27c04f9f727e; u64 0x7452f7a9b46ead0f; u64 0x733ea8f242b7beaf; u64 0xfb39049721dbccc5; 
+
+    u64 0x78bb9234f4efc52a; u64 0xb56de919acfc6e2e; u64 0x54feff0dea1c5ac8; u64 0xf7f299a34c38d68d; u64 0xa93c60d72804559f; u64 0x77fab5c23575c358; 
+    u64 0x5efe3510a7dc82ff; u64 0x46c8fb1ee3434f87; u64 0x876eed877fc1935d; u64 0xb15f5e53c659cefc; u64 0x606d48b09f2bccac; u64 0xf22b90835d568517; 
+
+    u64 0x4f57743cf3bbac55; u64 0x4f9f2fe49f19163c; u64 0x6bdfec70bbccb8af; u64 0xa651335f997c464d; u64 0x8f36ca3ea1f36e3d; u64 0x952f13f0b537981a; 
+    u64 0x104dcf1b8ee3d83; u64 0x8aaea513ca0e5d27; u64 0x1b2cd544ccda849e; u64 0xe33a5040a6289fe; u64 0xce9de30ce002e4d0; u64 0x14c32c89a73fd5e4; 
+
+    u64 0xf090393c563e511; u64 0x5d8fa7fb0ec9bbe6; u64 0xe14f207dc35fafc4; u64 0x4b69913b7770786; u64 0xe34d1b9807020105; u64 0xd7903931ccb65bbb; 
+    u64 0x3ab44699c02a01a9; u64 0x13d57fc62b0f2ea5; u64 0xc3d135b66a95a394; u64 0x4d688cce33b6be17; u64 0xbe8737a518b6672f; u64 0x726e41af1eb169c0; 
+
+    u64 0x41e3b3b2fe071c07; u64 0xdce07b75aa81d5d; u64 0x15bed0d8277456eb; u64 0x859db561a9bc0549; u64 0x2ad498c4f890452d; u64 0x10f2e86e0016a959; 
+    u64 0x7519a47788194f3e; u64 0xea6411ae90c18dbf; u64 0xd510fed966098490; u64 0xbc8209e3702df180; u64 0xa12cbebc3e867526; u64 0xd8b1128d8c00435d; 
+
+    u64 0x49b697ef353ba3b1; u64 0xbb54d2dbd6337dc9; u64 0xf48e5c8f3650059c; u64 0xe2b84c30b1a6d015; u64 0x6881c5bca729c88a; u64 0x2c80d8fd0ff92862; 
+    u64 0x980fd9f699f80d77; u64 0x4e170e65491f0011; u64 0xdc39f58060a114d8; u64 0x3e7ae1d658c0cd11; u64 0x58a4abc6363ed354; u64 0x33bce3bfde927b1b; 
+
+    u64 0x7bde77c8369a96f4; u64 0xad5993213577c683; u64 0x84029d386008bc1f; u64 0xf43fbc907cd9ea43; u64 0x79bee143a07c79fc; u64 0xfb21145d864cf408; 
+    u64 0x5c980d203d789624; u64 0x56d8efff9e4100ff; u64 0xd212b18ba6da272b; u64 0x35ee5bf1ba5cc6f; u64 0x6ccb4f5ddc611c25; u64 0x597bc89d74c6b1e1; 
+
+    u64 0x587f56751011395b; u64 0x7dbfba72b6d7edc9; u64 0x96bf46bbd4bf0e99; u64 0x77c9edabdc002fe0; u64 0x21bd69abe9421c26; u64 0x9de64f0b69c7dea9; 
+    u64 0xcac40052cd7ab9fd; u64 0xe3288f7d04655922; u64 0x28d68b3bbb9a5f1c; u64 0x7988bc2bdfe219b4; u64 0xbbe3020d9eb46c29; u64 0x6b81bbb979c673d7; 
+
+    u64 0x8860adb3cf4aa41; u64 0xaca9865403f1fb16; u64 0xaee8454ec4f735a2; u64 0xf2b875cd172e48f1; u64 0x989a2846aed5c186; u64 0x4907d727452e53e3; 
+    u64 0xeec235cc38d73f5c; u64 0xdd072b3a970422a2; u64 0xc72d3adc399428f2; u64 0x273501e954467443; u64 0x120a7e861eb2319b; u64 0xe3d4ddf9d3e69a3a; 
+
+    u64 0x66ae2a548bc58d5e; u64 0x412abebd62151597; u64 0xd295fe4b80e00d9f; u64 0x5db83d9f8bec48c0; u64 0x330869a025cc0464; u64 0xf3a45cc28e5fa579; 
+    u64 0xb68395811ed3f011; u64 0x6abe3da17b5b49d2; u64 0x52df9a125384e282; u64 0xdbe01aa7dbefcf5a; u64 0x659954ee1ddfc5c3; u64 0x4e958f32b1188c4e; 
+
+
+  ] in 
+    assert_norm(List.Tot.length x == 128);
+    x
 
 
 inline_for_extraction
-let points_radix_16: x: glbuffer uint64 128ul 
-  {witnessed #uint64 #(size 128) x (Lib.Sequence.of_list points_radix_16_list_p256) /\ recallable x} = 
+let points_radix_16_list (c: curve) : x: list uint64 {List.Tot.length x == v (getCoordinateLenU64 c *! 2ul *! 16ul)} =
+  match c with
+  | P256 -> points_radix_16_list_p256
+  | P384 -> points_radix_16_list_p384
+
+
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
+
+inline_for_extraction
+let getPointI_affine (c: curve) (b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c) * 2 * 16)) (i: nat {i < 16}) : (point_affine_nat_prime #c) = 
+  let l = v (getCoordinateLenU64 c) in 
+  let x = lseq_as_nat (Lib.Sequence.sub b (2 * l) l) in 
+  let y = lseq_as_nat (Lib.Sequence.sub b (2 * l + l) l) in 
+  (x, y)
+
+
+inline_for_extraction
+let getPointI_jac (c: curve) (b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c) * 2 * 16)) (i: nat {i < 16}) : (point_nat_prime #c) = 
+  let l = v (getCoordinateLenU64 c) in 
+  let x = lseq_as_nat (Lib.Sequence.sub b (2 * l) l) in 
+  let y = lseq_as_nat (Lib.Sequence.sub b (2 * l + l) l) in 
+  (x, y, 1)
+
+
+inline_for_extraction
+let points_radix_16_p256: x: glbuffer uint64 128ul {
+  witnessed #uint64 #(size 128) x (Lib.Sequence.of_list points_radix_16_list_p256) /\ recallable x /\ (
+  let buffer_as_seq = Lib.Sequence.of_list (points_radix_16_list_p256) in 
+  let p0 = getPointI_affine P256 buffer_as_seq 0 in 
+  isPointAtInfinityAffine p0 /\ (
+  forall (i: nat {i < 16 /\ i > 0}). 
+    let p0_i = point_mult #P256 i (basePoint #P256) in  
+    let pi_fromDomain = fromDomainPoint #P256 #DH (getPointI_jac P256 buffer_as_seq i) in 
+    pointEqual pi_fromDomain p0_i))} =
+  admit();
   createL_global points_radix_16_list_p256
 
- 
 
 
+let points_radix_16_p384: x: glbuffer uint64 192ul 
+  {witnessed #uint64 #(size 192) x (Lib.Sequence.of_list points_radix_16_list_p384) /\ recallable x /\ (
+  let buffer_as_seq = Lib.Sequence.of_list (points_radix_16_list_p384) in 
+  let p0 = getPointI_affine P384 buffer_as_seq 0 in
+  isPointAtInfinityAffine p0 /\ (
+  forall (i: nat {i < 16 /\ i > 0}). 
+    let p0_i = point_mult #P384 i basePoint in 
+    let pi_fromDomain = fromDomainPoint #P384 #DH (getPointI_jac P384 buffer_as_seq i) in 
+    pointEqual pi_fromDomain p0_i))} = 
+    
+  admit();
+  createL_global points_radix_16_list_p384
+
+
+inline_for_extraction
+let points_radix_16 (#c: curve): x: glbuffer uint64 (getCoordinateLenU64 c *! 2ul *! 16ul) {
+ witnessed #uint64 #(getCoordinateLenU64 c *! 2ul *! 16ul) x (Lib.Sequence.of_list (points_radix_16_list c)) /\ 
+ recallable x /\ (
+  let buffer_as_seq = Lib.Sequence.of_list (points_radix_16_list c) in 
+  let p0 = getPointI_affine c buffer_as_seq 0 in
+  isPointAtInfinityAffine p0 /\ (
+  forall (i: nat {i < 16 /\ i > 0}). 
+    let p0_i = point_mult #c i basePoint in 
+    let pi_fromDomain = fromDomainPoint #c #DH (getPointI_jac c buffer_as_seq i) in 
+    pointEqual pi_fromDomain p0_i))} = 
+  match c with 
+  | P256 -> points_radix_16_p256
+  | P384 -> points_radix_16_p384
+
+
+open Hacl.Impl.EC.Masking
+open Hacl.Impl.EC.Masking.ScalarAccess 
+
+
+inline_for_extraction noextract
+val getPointPrecomputedMixed_: #c: curve -> scalar: scalar_t #MUT #c -> 
+  i:size_t {v i < v (getScalarLenBytes c) * 2} -> pointToAdd: pointAffine c ->
+  Stack unit 
+  (requires fun h -> live h scalar /\ live h pointToAdd)
+  (ensures fun h0 _ h1 -> True)
+
+let getPointPrecomputedMixed_ #c scalar i pointToAdd = 
+  let bits = getScalar_4 scalar i in 
+  let invK h (k: nat) = True in 
+  Lib.Loops.for 0ul 16ul invK
+    (fun k -> 
+      admit(); 
+      recall_contents (points_radix_16 #c) (Lib.Sequence.of_list points_radix_16_list_p256);
+      let mask = eq_mask (to_u64 bits) (to_u64 k) in 
+      let lut_cmb_x = sub (points_radix_16 #c) (k *! 8ul) (size 4) in 
+      let lut_cmb_y = sub (points_radix_16 #c) (k *! 8ul +! (size 4)) (size 4) in 
+
+      admit();
+      copy_conditional #c (sub pointToAdd (size 0) (size 4)) lut_cmb_x mask;
+      copy_conditional #c (sub pointToAdd (size 4) (size 4)) lut_cmb_y mask
+   )
+
+
+let getPointPrecomputedMixed_p256 = getPointPrecomputedMixed_ #P256
+
+
+inline_for_extraction noextract
+val getPointPrecomputedMixed: #c: curve -> scalar: lbuffer uint8 (size 32) -> 
+  i:size_t{v i < 64} -> pointToAdd: lbuffer uint64 (size 8) ->
+  Stack unit 
+  (requires fun h -> live h scalar /\ live h pointToAdd)
+  (ensures fun h0 _ h1 -> True)
+
+let getPointPrecomputedMixed scalar i pointToAdd = getPointPrecomputedMixed_p256 scalar i pointToAdd
+
+
+(* 
+prime = 2**256 - 2**224 + 2**192 + 2**96 -1
+
+def norm(p):    
+    x, y, z = p
+    z2i = power_mod(z * z, -1, prime)
+    z3i = power_mod(z * z * z, -1, prime)
+    return ((x * z2i) % prime, (y * z3i) % prime, 1)
+
+def toD(x):
+    return x * power_mod (2 ** 256, 1, prime) % prime
+
+def fromD(x):
+    return x * power_mod (2 ** 256, prime - 2, prime) % prime
+
+def toFakeAffine(p):
+    x, y = p 
+    multiplier = power_mod (2 ** 256, prime - 2, prime) 
+    x = x * multiplier * multiplier % prime
+    y = y * multiplier * multiplier * multiplier % prime
+    return (x, y)
+
+p256 = 0xFFFFFFFF00000001000000000000000000000000FFFFFFFFFFFFFFFFFFFFFFFF
+a256 = p256 - 3
+b256 = 0x5AC635D8AA3A93E7B3EBBD55769886BC651D06B0CC53B0F63BCE3C3E27D2604B
+gx = 0x6B17D1F2E12C4247F8BCE6E563A440F277037D812DEB33A0F4A13945D898C296
+gy = 0x4FE342E2FE1A7F9B8EE7EB4A7C0F9E162BCE33576B315ECECBB6406837BF51F5
+qq = 0xFFFFFFFF00000000FFFFFFFFFFFFFFFFBCE6FAADA7179E84F3B9CAC2FC632551
+FF = GF(p256)
+
+EC = EllipticCurve([FF(a256), FF(b256)])
+
+EC.set_order(qq)
+
+G = EC(FF(gx), FF(gy))
+
+import __future__ 
+def printf(p):
+    x, y = p 
+    for i in range(4):
+        print(str(hex((Integer(x) >> (i * 64)) % 2 ** 64)) + "U; ", end = "")
+    print("")
+    for i in range(4):
+        print(str (hex((Integer(y) >> (i * 64)) % 2 ** 64)) + "U; ", end = "")
+    print("\n")
+    
+for i in range (1, 16):
+    pxD = (i * G).xy()[0]
+    pyD = (i * G).xy()[1]
+    printf (toFakeAffine((toD (pxD), toD (pyD))))  *)
