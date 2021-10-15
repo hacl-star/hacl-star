@@ -7510,13 +7510,12 @@ secretToPublicWithoutNorm_p256_radix(uint64_t *result, void *scalar, uint64_t *t
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
-      uint32_t len1 = (uint32_t)4U;
-      const uint64_t *lut_cmb_x = points_radix_16_p256 + i * len1 * (uint32_t)(krml_checked_int_t)2;
-      const
-      uint64_t
-      *lut_cmb_y = points_radix_16_p256 + i * len1 * (uint32_t)(krml_checked_int_t)2 + len1;
-      copy_conditional_p256_c(pointToAdd, lut_cmb_x, mask);
-      copy_conditional_p256_c(pointToAdd + len1, lut_cmb_y, mask);
+      const uint64_t *lut_cmb_x = points_radix_16_p256 + (uint32_t)8U * i;
+      const uint64_t *lut_cmb_y = points_radix_16_p256 + (uint32_t)8U * i + (uint32_t)4U;
+      uint64_t *pointToAddX = pointToAdd;
+      uint64_t *pointToAddY = pointToAdd + (uint32_t)4U;
+      copy_conditional_p256_c(pointToAddX, lut_cmb_x, mask);
+      copy_conditional_p256_c(pointToAddY, lut_cmb_y, mask);
     }
     point_double_p256(result, result, buff);
     point_double_p256(result, result, buff);
@@ -11423,13 +11422,12 @@ uint64_t Hacl_P256_ecp256dh_i_radix(uint8_t *result, uint8_t *scalar)
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
-      uint32_t len2 = (uint32_t)4U;
-      const uint64_t *lut_cmb_x = points_radix_16_p256 + i * len2 * (uint32_t)(krml_checked_int_t)2;
-      const
-      uint64_t
-      *lut_cmb_y = points_radix_16_p256 + i * len2 * (uint32_t)(krml_checked_int_t)2 + len2;
-      copy_conditional_p256_c(pointToAdd, lut_cmb_x, mask);
-      copy_conditional_p256_c(pointToAdd + len2, lut_cmb_y, mask);
+      const uint64_t *lut_cmb_x = points_radix_16_p256 + (uint32_t)8U * i;
+      const uint64_t *lut_cmb_y = points_radix_16_p256 + (uint32_t)8U * i + (uint32_t)4U;
+      uint64_t *pointToAddX = pointToAdd;
+      uint64_t *pointToAddY = pointToAdd + (uint32_t)4U;
+      copy_conditional_p256_c(pointToAddX, lut_cmb_x, mask);
+      copy_conditional_p256_c(pointToAddY, lut_cmb_y, mask);
     }
     point_double_p256(resultBuffer, resultBuffer, buff);
     point_double_p256(resultBuffer, resultBuffer, buff);
@@ -11536,13 +11534,12 @@ uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar)
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
-      uint32_t len2 = (uint32_t)6U;
-      const uint64_t *lut_cmb_x = points_radix_16_p384 + i * len2 * (uint32_t)(krml_checked_int_t)2;
-      const
-      uint64_t
-      *lut_cmb_y = points_radix_16_p384 + i * len2 * (uint32_t)(krml_checked_int_t)2 + len2;
-      copy_conditional_p384_c(pointToAdd, lut_cmb_x, mask);
-      copy_conditional_p384_c(pointToAdd + len2, lut_cmb_y, mask);
+      const uint64_t *lut_cmb_x = points_radix_16_p384 + (uint32_t)12U * i;
+      const uint64_t *lut_cmb_y = points_radix_16_p384 + (uint32_t)12U * i + (uint32_t)6U;
+      uint64_t *pointToAddX = pointToAdd;
+      uint64_t *pointToAddY = pointToAdd + (uint32_t)6U;
+      copy_conditional_p384_c(pointToAddX, lut_cmb_x, mask);
+      copy_conditional_p384_c(pointToAddY, lut_cmb_y, mask);
     }
     point_double_p384(resultBuffer, resultBuffer, buff);
     point_double_p384(resultBuffer, resultBuffer, buff);
