@@ -769,10 +769,19 @@ let update_small #index c i t t' p data len =
     U64.v total_len <= c.max_input_length i /\
     S.equal (B.as_seq h1 buf) (B.as_seq h2 buf) /\
     B.as_seq h1 buf == B.as_seq h2 buf /\
-    S.equal (S.slice (B.as_seq h1 buf) 0 (S.length rest)) rest /\
-    S.equal (S.slice (B.as_seq h2 buf) 0 (S.length rest)) rest
+    S.equal (S.slice (B.as_seq h1 buf) 0 (S.length rest)) rest
   );
-
+  begin
+    let b = S.append (G.reveal seen_) (B.as_seq h0 data) in
+    let blocks, rest = split_at_last c i b in
+    calc (==) {
+      rest;
+    (==) { }
+      S.slice (B.as_seq h1 buf) 0 (S.length rest);
+    (==) { }
+      S.slice (B.as_seq h2 buf) 0 (S.length rest);
+    }
+  end;
   assert (seen c i h2 p `S.equal` (S.append (G.reveal seen_) (B.as_seq h0 data)));
   assert (footprint c i h0 p == footprint c i h2 p);
   assert (equal_domains h00 h2);
