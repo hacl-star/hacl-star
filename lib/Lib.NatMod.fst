@@ -38,6 +38,12 @@ let rec lemma_pow_nat_is_pow a b =
     () end
 
 
+let lemma_pow_one b =
+  let k = mk_nat_comm_monoid in
+  LE.lemma_pow_one k b;
+  lemma_pow_nat_is_pow 1 b
+
+
 let lemma_pow_add x n m =
   let k = mk_nat_comm_monoid in
   LE.lemma_pow_add k x n m;
@@ -94,7 +100,7 @@ let rec lemma_pow_mod_base a b n =
 
 
 
-let lemma_one_mod #m a = ()
+let lemma_mul_mod_one #m a = ()
 
 let lemma_mul_mod_assoc #m a b c =
   calc (==) {
@@ -201,3 +207,152 @@ let rec lemma_pow_nat_mod_is_pow #n a b =
       (==) { LE.lemma_pow_unfold k a b }
       LE.pow k a b;
       }; () end
+
+
+let lemma_add_mod_one #m a =
+  Math.Lemmas.small_mod a m
+
+
+let lemma_add_mod_assoc #m a b c =
+  calc (==) {
+    add_mod (add_mod a b) c;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_l (a + b) c m }
+    ((a + b) + c) % m;
+    (==) { }
+    (a + (b + c)) % m;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r a (b + c) m }
+    add_mod a (add_mod b c);
+  }
+
+
+let lemma_add_mod_comm #m a b = ()
+
+
+let lemma_mod_distributivity_add_right #m a b c =
+  calc (==) {
+    mul_mod a (add_mod b c);
+    (==) { }
+    a * ((b + c) % m) % m;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r a (b + c) m }
+    a * (b + c) % m;
+    (==) { Math.Lemmas.distributivity_add_right a b c }
+    (a * b + a * c) % m;
+    (==) { Math.Lemmas.modulo_distributivity (a * b) (a * c) m }
+    add_mod (mul_mod a b) (mul_mod a c);
+    }
+
+
+let lemma_mod_distributivity_add_left #m a b c =
+  lemma_mod_distributivity_add_right c a b
+
+
+let lemma_mod_distributivity_sub_right #m a b c =
+  calc (==) {
+    mul_mod a (sub_mod b c);
+    (==) { }
+    a * ((b - c) % m) % m;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r a (b - c) m }
+    a * (b - c) % m;
+    (==) { Math.Lemmas.distributivity_sub_right a b c }
+    (a * b - a * c) % m;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_l (a * b) (- a * c) m }
+    (mul_mod a b - a * c) % m;
+    (==) { Math.Lemmas.lemma_mod_sub_distr (mul_mod a b) (a * c) m }
+    sub_mod (mul_mod a b) (mul_mod a c);
+    }
+
+
+let lemma_mod_distributivity_sub_left #m a b c =
+  lemma_mod_distributivity_sub_right c a b
+
+
+let lemma_inv_mod_both #m a b =
+  let p1 = pow a (m - 2) in
+  let p2 = pow b (m - 2) in
+
+  calc (==) {
+    mul_mod (inv_mod a) (inv_mod b);
+    (==) { lemma_pow_mod #m a (m - 2); lemma_pow_mod #m b (m - 2) }
+    p1 % m * (p2 % m) % m;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l p1 (p2 % m) m }
+    p1 * (p2 % m) % m;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r p1 p2 m }
+    p1 * p2 % m;
+    (==) { lemma_pow_mul_base a b (m - 2) }
+    pow (a * b) (m - 2) % m;
+    (==) { lemma_pow_mod_base (a * b) (m - 2) m }
+    pow (mul_mod a b) (m - 2) % m;
+    (==) { lemma_pow_mod #m (mul_mod a b) (m - 2) }
+    inv_mod (mul_mod a b);
+    }
+
+
+#push-options "--fuel 1"
+val pow_eq: a:nat -> n:nat -> Lemma (Fermat.pow a n == pow a n)
+let rec pow_eq a n =
+  if n = 0 then ()
+  else pow_eq a (n - 1)
+#pop-options
+
+
+let lemma_div_mod_prime #m a =
+  Math.Lemmas.small_mod a m;
+  assert (a == a % m);
+  assert (a <> 0 /\ a % m <> 0);
+
+  calc (==) {
+    pow_mod #m a (m - 2) * a % m;
+    (==) { lemma_pow_mod #m a (m - 2) }
+    pow a (m - 2) % m * a % m;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (pow a (m - 2)) a m }
+    pow a (m - 2) * a % m;
+    (==) { lemma_pow1 a; lemma_pow_add a (m - 2) 1 }
+    pow a (m - 1) % m;
+    (==) { pow_eq a (m - 1) }
+    Fermat.pow a (m - 1) % m;
+    (==) { Fermat.fermat_alt m a }
+    1;
+    }
+
+
+let lemma_div_mod_prime_one #m a =
+  lemma_pow_mod #m 1 (m - 2);
+  lemma_pow_one (m - 2);
+  Math.Lemmas.small_mod 1 m
+
+
+let lemma_div_mod_prime_cancel #m a b c =
+  calc (==) {
+    mul_mod (mul_mod a c) (inv_mod (mul_mod c b));
+    (==) { lemma_inv_mod_both c b }
+    mul_mod (mul_mod a c) (mul_mod (inv_mod c) (inv_mod b));
+    (==) { lemma_mul_mod_assoc (mul_mod a c) (inv_mod c) (inv_mod b) }
+    mul_mod (mul_mod (mul_mod a c) (inv_mod c)) (inv_mod b);
+    (==) { lemma_mul_mod_assoc a c (inv_mod c) }
+    mul_mod (mul_mod a (mul_mod c (inv_mod c))) (inv_mod b);
+    (==) { lemma_div_mod_prime c }
+    mul_mod (mul_mod a 1) (inv_mod b);
+    (==) { Math.Lemmas.small_mod a m }
+    mul_mod a (inv_mod b);
+    }
+
+
+let lemma_div_mod_prime_to_one_denominator #m a b c d =
+  calc (==) {
+    mul_mod (div_mod a c) (div_mod b d);
+    (==) { }
+    mul_mod (mul_mod a (inv_mod c)) (mul_mod b (inv_mod d));
+    (==) {
+      lemma_mul_mod_comm #m b (inv_mod d);
+      lemma_mul_mod_assoc #m (mul_mod a (inv_mod c)) (inv_mod d) b }
+    mul_mod (mul_mod (mul_mod a (inv_mod c)) (inv_mod d)) b;
+    (==) { lemma_mul_mod_assoc #m a (inv_mod c) (inv_mod d) }
+    mul_mod (mul_mod a (mul_mod (inv_mod c) (inv_mod d))) b;
+    (==) { lemma_inv_mod_both c d }
+    mul_mod (mul_mod a (inv_mod (mul_mod c d))) b;
+    (==) {
+      lemma_mul_mod_assoc #m a (inv_mod (mul_mod c d)) b;
+      lemma_mul_mod_comm #m (inv_mod (mul_mod c d)) b;
+      lemma_mul_mod_assoc #m a b (inv_mod (mul_mod c d)) }
+    mul_mod (mul_mod a b) (inv_mod (mul_mod c d));
+    }
