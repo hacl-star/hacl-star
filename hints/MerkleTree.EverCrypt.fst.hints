@@ -87,8 +87,6 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
-        "MerkleTree.New.High_interpretation_Tm_ghost_arrow_0120f9c3971dfb07d3ae21de70f35b29",
-        "MerkleTree.Spec_interpretation_Tm_ghost_arrow_c8d0d4ba83f86d009153aeb71f24bf67",
         "assumption_FStar.Monotonic.HyperHeap.Mod_set_def", "b2t_def",
         "bool_inversion", "bool_typing",
         "constructor_distinct_FStar.Integers.W64",
@@ -106,7 +104,6 @@
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
-        "equation_EverCrypt.Hash.footprint",
         "equation_EverCrypt.Hash.repr_with_counter",
         "equation_FStar.HyperStack.ST.equal_domains",
         "equation_FStar.HyperStack.ST.equal_stack_domains",
@@ -140,12 +137,9 @@
         "equation_MerkleTree.Low.Datastructures.hash_r_repr",
         "equation_MerkleTree.Low.Datastructures.hash_size_t",
         "equation_MerkleTree.Low.Datastructures.hreg",
-        "equation_MerkleTree.New.High.hash",
         "equation_MerkleTree.New.High.sha256_compress",
-        "equation_MerkleTree.Spec.hash",
-        "equation_MerkleTree.Spec.hash_fun_t",
         "equation_MerkleTree.Spec.sha256_compress", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.pos", "equation_Spec.AES.gf8",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
         "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
@@ -157,17 +151,15 @@
         "equation_Spec.Hash.Definitions.state_word_length",
         "equation_Spec.Hash.Definitions.word_length",
         "equation_Spec.Hash.Definitions.words_state",
+        "equation_Spec.Hash.Definitions.words_state_",
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_LowStar.Buffer.trivial_preorder",
-        "function_token_typing_MerkleTree.New.High.sha256_compress",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
         "int_typing",
         "interpretation_Tm_abs_612136ee4143d24977831c80e4f470a1",
-        "kinding_Spec.Hash.Definitions.hash_alg@tok",
-        "lemma_FStar.Ghost.reveal_hide",
         "lemma_FStar.HyperStack.ST.lemma_equal_domains_trans",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_all_regions_elim",
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
@@ -181,7 +173,6 @@
         "lemma_FStar.Seq.Base.lemma_eq_intro",
         "lemma_FStar.Seq.Base.lemma_eq_refl",
         "lemma_FStar.Seq.Base.lemma_index_app2",
-        "lemma_FStar.Seq.Base.lemma_index_slice",
         "lemma_FStar.Seq.Base.lemma_len_append",
         "lemma_FStar.Seq.Base.lemma_len_slice",
         "lemma_FStar.Seq.Properties.slice_is_empty",
@@ -237,7 +228,6 @@
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_1322c17051ac796bcc246eda099844d9",
-        "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_3daf37ab3cd19c1e74e63f8f5e0fb16a",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
@@ -247,7 +237,6 @@
         "refinement_interpretation_Tm_refine_5542011d20872a6178aad9a072f1b686",
         "refinement_interpretation_Tm_refine_5cbd49ac88b684625921e39f6eb19e85",
         "refinement_interpretation_Tm_refine_64007e4a8c187c3787ce4f8705e9db35",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_ac201cf927190d39c033967b63cb957b",
@@ -261,7 +250,6 @@
         "refinement_interpretation_Tm_refine_f57294c296d1d065e6beb1a639e52532",
         "refinement_interpretation_Tm_refine_f63e058f9631c11993f3ef0430296051",
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "token_correspondence_FStar.Ghost.reveal",
         "token_correspondence_LowStar.Regional.__proj__Rgl__item__r_inv",
         "token_correspondence_LowStar.Regional.__proj__Rgl__item__r_repr",
         "token_correspondence_MerkleTree.Low.Datastructures.hash_r_inv",
@@ -297,8 +285,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union",
-        "typing_LowStar.Monotonic.Buffer.mnull",
-        "typing_MerkleTree.Spec.hash_fun_t", "typing_Spec.AES.gf8",
+        "typing_LowStar.Monotonic.Buffer.mnull", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred", "typing_Spec.Agile.Hash.init",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Hash.Definitions.block_length",
@@ -308,7 +295,7 @@
         "unit_typing"
       ],
       0,
-      "67c759cfec544c6a5f8a30622f6e0048"
+      "0d26286ac116df21af62f32ab43e7a2a"
     ],
     [
       "MerkleTree.EverCrypt.mt_create",
@@ -373,7 +360,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "08271d53e9febe96b37412343e344443"
+      "405b04e68281e6ad629308f9aee5268d"
     ],
     [
       "MerkleTree.EverCrypt.mt_create",
@@ -420,7 +407,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "2e531ccb716ac77a5cf595878b7893d9"
+      "eb411b43d68236a1092e54c9c77778a2"
     ],
     [
       "MerkleTree.EverCrypt.mt_create",
@@ -491,7 +478,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "a18e85d6ce139aec8025263494ee16a6"
+      "c8f66a8d3a6491bac0f70787a4038f7c"
     ]
   ]
 ]
