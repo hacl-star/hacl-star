@@ -114,10 +114,10 @@ val make_point_inf:
     Spec.Ed25519.aff_point_at_infinity)
 
 let make_point_inf b =
-  let x = sub b 0ul 5ul in
-  let y = sub b 5ul 5ul in
-  let z = sub b 10ul 5ul in
-  let t = sub b 15ul 5ul in
+  let x = getx b in
+  let y = gety b in
+  let z = getz b in
+  let t = gett b in
   make_zero x;
   make_one y;
   make_one z;
@@ -152,7 +152,10 @@ let make_g g =
     Hacl.Spec.Curve25519.Field51.Definition.as_nat5 (u64 0x0006666666666658, u64 0x0004cccccccccccc, u64 0x0001999999999999, u64 0x0003333333333333, u64 0x0006666666666666) %
       Spec.Curve25519.prime);
   (**) assert_norm (Mktuple4?._4 Spec.Ed25519.g ==
-    Hacl.Spec.Curve25519.Field51.Definition.as_nat5 (u64 0x00068ab3a5b7dda3, u64 0x00000eea2a5eadbb, u64 0x0002af8df483c27e, u64 0x000332b375274732, u64 0x00067875f0fd78b7) % Spec.Curve25519.prime)
+    Hacl.Spec.Curve25519.Field51.Definition.as_nat5 (u64 0x00068ab3a5b7dda3, u64 0x00000eea2a5eadbb, u64 0x0002af8df483c27e, u64 0x000332b375274732, u64 0x00067875f0fd78b7) % Spec.Curve25519.prime);
+  let h1 = ST.get () in
+  assert (F51.point_inv_t h1 g);
+  assert (F51.point_eval h1 g == Spec.Ed25519.g)
 
 
 val point_mul:
