@@ -24,7 +24,7 @@ let isPointAtInfinity (p:point_nat) =
 
 let isPointAtInfinityAffine (p:point_affine_nat) =
   let (x, y) = p in x = 0 && y = 0
-
+  
 
 noextract
 let _point_double_nist #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
