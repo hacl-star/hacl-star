@@ -469,14 +469,21 @@ val bn_get_bits_l:
 let bn_get_bits_l #b_t bLen bBits b l i =
   assert (v (bBits -! bBits %. l) = v bBits - v bBits % v l);
   let bk = bBits -! bBits %. l in
+  assert (v bk == v bBits - v bBits % v l);
 
   Math.Lemmas.lemma_mult_le_left (v l) (v i + 1) (v bBits / v l);
-  assert (v l * (v i + 1) <= v l * (v bBits / v l));
+  assert (v l * (v i + 1) <= v bk);
   assert (v (bk -! l *! i -! l) == v bk - v l * v i - v l);
 
+  [@ inline_let]
+  let k = bk -! l *! i -! l in
+  assert (v k == v bk - v l * v i - v l);
+  Math.Lemmas.lemma_div_le (v k) (v bBits - 1) (bits b_t);
+  assert (v k / bits b_t < v bLen);
+
   let h0 = ST.get () in
-  SN.bn_get_bits_lemma (as_seq h0 b) (v bk - v l * v i - v l) (v l);
-  BN.bn_get_bits bLen b (bk -! l *! i -! l) l
+  SN.bn_get_bits_lemma (as_seq h0 b) (v k) (v l);
+  BN.bn_get_bits bLen b k l
 
 
 inline_for_extraction noextract
@@ -494,9 +501,15 @@ val bn_get_bits_c:
 
 let bn_get_bits_c #b_t bLen bBits b l =
   let h0 = ST.get () in
-  assert (v (bBits /. l *! l) == v bBits /v l * v l);
-  SN.bn_get_bits_lemma (as_seq h0 b) (v bBits /v l * v l) (v l);
-  BN.bn_get_bits bLen b (bBits /. l *! l) l
+  assert (v (bBits /. l *! l) == v bBits / v l * v l);
+  [@ inline_let]
+  let i = bBits /. l *! l in
+  assert (v i == v bBits / v l * v l);
+  assert (v i <= v bBits - 1);
+  Math.Lemmas.lemma_div_le (v i) (v bBits - 1) (bits b_t);
+  assert (v i / bits b_t < v bLen);
+  SN.bn_get_bits_lemma (as_seq h0 b) (v i) (v l);
+  BN.bn_get_bits bLen b i l
 
 
 inline_for_extraction noextract
