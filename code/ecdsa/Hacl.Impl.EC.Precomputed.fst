@@ -55,13 +55,11 @@ let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128 /\ (
   forall (i: nat {i < 16}).
     let l = v (getCoordinateLenU64 P256) in
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime P256 /\
-    lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime P256) /\ (      
-  let p0 = getPointI_affine P256 b 0 in 
-  isPointAtInfinityAffine p0 /\ (
-    forall (i: nat {i > 0 /\ i < 16}). 
-    let p0_i = point_mult #P256 i (basePoint #P256) in  
+    lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime P256) /\ (  
+    forall (i: nat {i < 16}). 
+    let p0_i = point_mult #P256 #Jacobian i (basePoint #P256) in  
     let pi_fromDomain = fromDomainPoint #P256 #DH (getPointI_jac P256 b i) in 
-    pointEqual pi_fromDomain p0_i)))} =
+    pointEqual pi_fromDomain p0_i))} =
 
   [@inline_let] 
   let x = [ 
@@ -123,11 +121,9 @@ let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128 /\ (
       lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime P256);
 
     assume (
-      let b = Lib.Sequence.of_list x in 
-      let p0 = getPointI_affine P256 b 0 in 
-      isPointAtInfinityAffine p0 /\ (
+      let b = Lib.Sequence.of_list x in (
       forall (i: nat {i > 0 /\ i < 16}). 
-	let p0_i = point_mult #P256 i (basePoint #P256) in  
+	let p0_i = point_mult #P256 #Jacobian i (basePoint #P256) in  
 	let pi_fromDomain = fromDomainPoint #P256 #DH (getPointI_jac P256 b i) in 
 	pointEqual pi_fromDomain p0_i));
 
@@ -141,12 +137,10 @@ let points_radix_16_list_p384: x:list uint64 {List.Tot.length x == 192 /\ (
     let l = v (getCoordinateLenU64 P384) in
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime P384 /\
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime P384) /\ (      
-  let p0 = getPointI_affine P384 b 0 in 
-  isPointAtInfinityAffine p0 /\ (
-    forall (i: nat {i > 0 /\ i < 16}). 
-    let p0_i = point_mult #P384 i (basePoint #P384) in  
+    forall (i: nat {i < 16}). 
+    let p0_i = point_mult #P384 #Jacobian i (basePoint #P384) in  
     let pi_fromDomain = fromDomainPoint #P384 #DH (getPointI_jac P384 b i) in 
-    pointEqual pi_fromDomain p0_i)))} =
+    pointEqual pi_fromDomain p0_i))} =
   let open FStar.Mul in 
   [@inline_let]
   let x = [ 
@@ -210,11 +204,9 @@ let points_radix_16_list_p384: x:list uint64 {List.Tot.length x == 192 /\ (
       lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime P384);
 
     assume (
-      let b = Lib.Sequence.of_list x in 
-      let p0 = getPointI_affine P384 b 0 in 
-      isPointAtInfinityAffine p0 /\ (
-      forall (i: nat {i > 0 /\ i < 16}). 
-	let p0_i = point_mult #P384 i (basePoint #P384) in  
+      let b = Lib.Sequence.of_list x in (
+      forall (i: nat { i < 16}). 
+	let p0_i = point_mult #P384 #Jacobian i (basePoint #P384) in  
 	let pi_fromDomain = fromDomainPoint #P384 #DH (getPointI_jac P384 b i) in 
 	pointEqual pi_fromDomain p0_i));
     x
@@ -227,12 +219,10 @@ let points_radix_16_list (c: curve) : x: list uint64 {List.Tot.length x == v (ge
     let l = v (getCoordinateLenU64 c) in
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime c /\
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime c) /\ (      
-  let p0 = getPointI_affine c b 0 in 
-  isPointAtInfinityAffine p0 /\ (
     forall (i: nat {i > 0 /\ i < 16}). 
-    let p0_i = point_mult #c i (basePoint #c) in  
+    let p0_i = point_mult #c #Jacobian i (basePoint #c) in  
     let pi_fromDomain = fromDomainPoint #c #DH (getPointI_jac c b i) in 
-    pointEqual pi_fromDomain p0_i)))} =
+    pointEqual pi_fromDomain p0_i))} =
   match c with
   | P256 -> points_radix_16_list_p256
   | P384 -> points_radix_16_list_p384
@@ -299,17 +289,17 @@ val getPointPrecomputedMixed_step: #c: curve -> i: size_t {v i < 16}
   Stack unit 
   (requires fun h -> live h pointToAdd)
   (ensures fun h0 _ h1 -> modifies (loc pointToAdd) h0 h1 /\ (
-    v mask = pow2 64 - 1 ==> (
-      let len = getCoordinateLenU64 c in 
+    let len = getCoordinateLenU64 c in 
       let pointToAddX = gsub pointToAdd (size 0) len in 
       let pointToAddY = gsub pointToAdd len len in 
-     
+    if v mask = pow2 64 - 1 then
       let pointPrecomputedJacobian =  toJacobianCoordinates (as_nat c h1 pointToAddX, as_nat c h1 pointToAddY) in 
       let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
    
       felem_eval c h1 pointToAddX /\ felem_eval c h1 pointToAddY /\ (
-      (v i = 0) ==> isPointAtInfinityAffine (as_nat c h1 pointToAddX, as_nat c h1 pointToAddY)) /\ (
-      (v i > 0 /\ v i < 16) ==> pointEqual pi_fromDomain (point_mult #c (v i) (basePoint #c))))))
+      (v i < 16) ==> pointEqual pi_fromDomain (point_mult #c #Jacobian (v i) (basePoint #c)))
+    else
+      as_nat c h0 pointToAddX == as_nat c h1 pointToAddX /\ as_nat c h0 pointToAddY == as_nat c h1 pointToAddY))
 
 
 let getPointPrecomputedMixed_step #c k pointToAdd mask  = 
@@ -324,41 +314,39 @@ let getPointPrecomputedMixed_step #c k pointToAdd mask  =
 
 
 inline_for_extraction noextract
-val getPointPrecomputedMixed_: #c: curve -> scalar: scalar_t #MUT #c -> 
+val getPointPrecomputedMixed: #c: curve -> scalar: scalar_t #MUT #c -> 
   i:size_t {v i < v (getScalarLenBytes c) * 2} -> pointToAdd: pointAffine c ->
   Stack unit 
   (requires fun h -> live h scalar /\ live h pointToAdd)
-  (ensures fun h0 _ h1 -> modifies (loc pointToAdd) h0 h1)
+  (ensures fun h0 _ h1 -> modifies (loc pointToAdd) h0 h1 /\ point_aff_eval c h1 pointToAdd /\ (
+    let pointPrecomputedJacobian = toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd) in 
+    let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
+    let scalar = scalar_as_nat (as_seq h0 scalar) in 
+    let bits = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (v i + 1) * 4) % pow2 4 in
+    pointEqual pi_fromDomain (point_mult #c #Jacobian bits (basePoint #c))))
+    
 
-let getPointPrecomputedMixed_ #c scalar i pointToAdd = 
+let getPointPrecomputedMixed #c scalar i pointToAdd = 
     let h0 = ST.get() in 
   let bits = getScalar_4 scalar i in 
-  let invK h (k: nat) = live h pointToAdd /\ modifies (loc pointToAdd) h0 h in 
+  let invK h (k: nat) = live h pointToAdd /\ modifies (loc pointToAdd) h0 h /\ (
+      let len = getCoordinateLenU64 c in 
+      let pointToAddX = gsub pointToAdd (size 0) len in 
+      let pointToAddY = gsub pointToAdd len len in 
+   if k > v bits then
+      let pointPrecomputedJacobian = toJacobianCoordinates (as_nat c h pointToAddX, as_nat c h pointToAddY) in 
+      let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
+      felem_eval c h pointToAddX /\ felem_eval c h pointToAddY /\ 
+      pointEqual pi_fromDomain (point_mult #c #Jacobian (v bits) (basePoint #c))
+    else
+      as_nat c h0 pointToAddX == as_nat c h pointToAddX /\ as_nat c h0 pointToAddY == as_nat c h pointToAddY) in 
+
   Lib.Loops.for 0ul 16ul invK
     (fun k ->
       let mask = eq_mask (to_u64 bits) (to_u64 k) in 
       getPointPrecomputedMixed_step #c k pointToAdd mask
    )
 
-
-inline_for_extraction 
-let getPointPrecomputedMixed_p256 = getPointPrecomputedMixed_ #P256
-
-inline_for_extraction 
-let getPointPrecomputedMixed_p384 = getPointPrecomputedMixed_ #P384
-
-
-
-
-inline_for_extraction noextract
-val getPointPrecomputedMixed: #c: curve -> scalar: lbuffer uint8 (size 32) -> 
-  i:size_t{v i < 64} -> pointToAdd: lbuffer uint64 (size 8) ->
-  Stack unit 
-  (requires fun h -> live h scalar /\ live h pointToAdd)
-  (ensures fun h0 _ h1 -> True)
-
-let getPointPrecomputedMixed #c scalar i pointToAdd =
-  getPointPrecomputedMixed_ #c scalar i pointToAdd
 
 (* 
 prime = 2**256 - 2**224 + 2**192 + 2**96 -1

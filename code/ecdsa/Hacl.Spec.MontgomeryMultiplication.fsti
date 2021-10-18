@@ -128,5 +128,5 @@ val lemma_modular_multiplication_2_d: #c: curve ->
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
 val lemma_pointAtInfInDomain: #c: curve -> x: nat -> y: nat -> z: nat {z < getPrime c} -> 
   Lemma (
-    isPointAtInfinity (x, y, z) == 
-    isPointAtInfinity ((fromDomain_ #c #DH x), (fromDomain_ #c #DH y), (fromDomain_ #c #DH z)))
+    isPointAtInfinity #Jacobian (x, y, z) == 
+    isPointAtInfinity #Jacobian ((fromDomain_ #c #DH x), (fromDomain_ #c #DH y), (fromDomain_ #c #DH z)))
