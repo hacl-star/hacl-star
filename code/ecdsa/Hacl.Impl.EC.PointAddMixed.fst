@@ -33,7 +33,7 @@ inline_for_extraction noextract
 val pointAffineIsNotZero: #c: curve -> p: pointAffine c -> Stack uint64
   (requires fun h -> live h p /\ point_aff_eval c h p)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (v r == 0 \/ v r == pow2 64 - 1) /\ (
-    v r == pow2 64 - 1 <==> isPointAtInfinityAffine (point_affine_as_nat c h0 p)))
+    v r == pow2 64 - 1 <==> isPointAtInfinity #Affine (toJacobianCoordinates (point_affine_as_nat c h0 p))))
 
 let pointAffineIsNotZero #c p = 
   let len = getCoordinateLenU64 c in 
@@ -59,7 +59,7 @@ val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z
   (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out |+| loc temp) h0 h1 /\
     felem_eval c h1 x3_out /\ felem_eval c h1 y3_out /\ felem_eval c h1 z3_out /\ (
     let x, y = point_affine_x_as_nat c h0 p, point_affine_y_as_nat c h0 p in
-    if isPointAtInfinity (point_as_nat c h0 mask) then
+    if isPointAtInfinity #Jacobian (point_as_nat c h0 mask) then
       as_nat c h1 x3_out == x /\
       as_nat c h1 y3_out == y /\ 
       as_nat c h1 z3_out == 1
@@ -76,7 +76,7 @@ let copy_point_conditional #c x3_out y3_out z3_out p maskPoint temp =
 
   let z = sub maskPoint (size 2 *! len) len in 
   let mask = isZero_uint64_CT #c z in 
-  
+
   let p_x = sub p (size 0) len in 
   let p_y = sub p len len in 
 
@@ -98,7 +98,7 @@ val copy_point_conditional1: #c: curve -> x3_out: felem c -> y3_out: felem c -> 
     felem_eval c h1 x3_out /\ felem_eval c h1 y3_out /\ felem_eval c h1 z3_out /\ (
     let len = getCoordinateLenU64 c in 
     let x, y, z = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in
-    if isPointAtInfinityAffine (point_affine_as_nat c h0 q) then
+    if isPointAtInfinity #Affine (toJacobianCoordinates (point_affine_as_nat c h0 q)) then
       as_nat c h1 x3_out == x /\
       as_nat c h1 y3_out == y /\ 
       as_nat c h1 z3_out == z
@@ -513,11 +513,11 @@ val copy_result_point_add: #c: curve
   (ensures fun h0 _ h1 -> 
     let x3_out, y3_out, z3_out = getXYZ #c t5 in 
     modifies (loc t5 |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
-    if isPointAtInfinityAffine (point_affine_as_nat c h0 q) then
+    if isPointAtInfinity #Affine (toJacobianCoordinates (point_affine_as_nat c h0 q)) then
       point_x_as_nat c h1 result == point_x_as_nat c h0 p /\
       point_y_as_nat c h1 result == point_y_as_nat c h0 p /\ 
       point_z_as_nat c h1 result == point_z_as_nat c h0 p
-    else if point_z_as_nat c h0 p = 0 then 
+    else if isPointAtInfinity #Jacobian (point_as_nat c h0 p) then 
       point_x_as_nat c h1 result == point_affine_x_as_nat c h0 q /\
       point_y_as_nat c h1 result == point_affine_y_as_nat c h0 q /\ 
       point_z_as_nat c h1 result == 1
@@ -561,29 +561,28 @@ val computeXYZ: #c: curve -> result: point c
     eq_or_disjoint p q /\ eq_or_disjoint s1 hCube /\ 
     felem_eval c h0 r /\ felem_eval c h0 s1 /\ felem_eval c h0 h /\ 
     uhInvariant #c h0 uh h u1 /\ hCubeInvariant #c h0 hCube h /\
-    
     eq_or_disjoint p result /\ disjoint result t5 /\ disjoint p q /\ disjoint hCube t5 /\ disjoint uh t5 /\ disjoint r t5 /\ 
     disjoint t5 s1 /\ disjoint t5 h /\ disjoint t5 p /\ disjoint t5 q)
   (ensures fun h0 _ h1 -> modifies (loc t5 |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
     let prime = getPrime c in 
 
-    let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
-    let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-    let qX, qY = point_affine_x_as_nat c h0 q, point_affine_y_as_nat c h0 q in 
+    let x3, y3, z3 = point_as_nat c h1 result in
+    let p = point_as_nat c h0 p in 
+    let q = toJacobianCoordinates (point_affine_as_nat c h0 q) in 
 
-    let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
-    let qxD, qyD = fromDomain #c qX, fromDomain #c qY in 
-    let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
+    let pxD, pyD, pzD = fromDomainPoint #c #DH p in 
+    let qxD, qyD, qzD = fromDomainPoint #c #DH q in 
+    let x3D, y3D, z3D = fromDomainPoint #c #DH (x3, y3, z3) in 
 
     let rD = fromDomain #c (as_nat c h0 r) in  
     let hD = fromDomain #c (as_nat c h0 h) in 
     let s1D = fromDomain #c (as_nat c h0 s1) in 
     let u1D = fromDomain #c (as_nat c h0 u1) in  
 
-    if qxD = 0 && qyD = 0 then 
+    if isPointAtInfinity #Affine (fromDomainPoint #c #DH q) then
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
-    else if pzD = 0 then 
-      x3D == qxD /\  y3D == qyD /\ z3D == fromDomain #c 1
+    else if isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p) then 
+      x3D ==  qxD /\  y3D == qyD /\ z3D == qzD
     else 
       x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
       y3 == toDomain #c (((hD * hD * u1D - fromDomain #c x3) * rD - s1D * hD * hD * hD) % prime) /\
@@ -622,22 +621,23 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c
     let prime = getPrime c in 
     let  u1, u2, s1, s2, h, r, uh, hCube = getU1HCube x3hCube in 
   
-    let x3, y3, z3 = point_x_as_nat c h1 result, point_y_as_nat c h1 result, point_z_as_nat c h1 result in
-    let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-    let qX, qY, qZ = point_affine_x_as_nat c h0 q, point_affine_y_as_nat c h0 q, 1 in 
+    let x3, y3, z3 = point_as_nat c h1 result in
+    let p = point_as_nat c h0 p in 
+    let q = toJacobianCoordinates (point_affine_as_nat c h0 q) in 
 
-    let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
-    let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
-    let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
+    let pxD, pyD, pzD = fromDomainPoint #c #DH p in 
+    let qxD, qyD, qzD = fromDomainPoint #c #DH q in 
+    let x3D, y3D, z3D = fromDomainPoint #c #DH (x3, y3, z3) in 
+
 
     let rD = fromDomain #c (as_nat c h0 r) in  
     let hD = fromDomain #c (as_nat c h0 h) in 
     let s1D = fromDomain #c (as_nat c h0 s1) in 
     let u1D = fromDomain #c (as_nat c h0 u1) in  
     
-    if qxD = 0 && qyD = 0 then 
+    if isPointAtInfinity #Affine (fromDomainPoint #c #DH q) then 
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
-    else if pzD = 0 then 
+    else if isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p) then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
       x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
@@ -697,14 +697,13 @@ val point_add_mixed_: #c: curve -> p: point c -> q: pointAffine c -> result: poi
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
   Stack unit (requires fun h -> 
     live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
-    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
-    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
+    eq_or_disjoint p result /\ disjoint p q /\ disjoint p tempBuffer /\ 
+    disjoint q tempBuffer /\ disjoint q result /\ disjoint result tempBuffer /\  
     point_eval c h p /\ point_aff_eval c h q)
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
-    let qX, qY, qZ = point_affine_x_as_nat c h0 q, point_affine_y_as_nat c h0 q, 1 in 
-    let qD = fromDomainPoint #c #DH (qX, qY, qZ) in 
-    fromDomainPoint #c #DH (point_as_nat c h1 result) == 
-    _point_add_mixed #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) qD))
+    let qD = fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h0 q)) in 
+    let pD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+    fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c #Affine pD qD))
 
 
 let point_add_mixed_ #c p q result tempBuffer = 
@@ -722,13 +721,14 @@ let point_add_mixed_ #c p q result tempBuffer =
 
   let prime = getPrime c in 
 
-  let x3, y3, z3 = point_x_as_nat c h2 result, point_y_as_nat c h2 result, point_z_as_nat c h2 result in
-  let pX, pY, pZ = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in 
-  let qX, qY, qZ = point_affine_x_as_nat c h0 q, point_affine_y_as_nat c h0 q, 1 in 
+  let x3, y3, z3 = point_as_nat c h2 result in
+  let p = point_as_nat c h0 p in 
+  let q = toJacobianCoordinates (point_affine_as_nat c h0 q) in 
 
-  let pxD, pyD, pzD = fromDomain #c pX, fromDomain #c pY, fromDomain #c pZ in 
-  let qxD, qyD, qzD = fromDomain #c qX, fromDomain #c qY, fromDomain #c qZ in 
-  let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
+  let pxD, pyD, pzD = fromDomainPoint #c #DH p in 
+  let qxD, qyD, qzD = fromDomainPoint #c #DH q in 
+  let x3D, y3D, z3D = fromDomainPoint #c #DH (x3, y3, z3) in 
+
 
   calc (==)
   {
@@ -800,72 +800,24 @@ let point_add_mixed_ #c p q result tempBuffer =
     let hD = (u2D - u1D) % prime in
     let rD = (s2D - s1D) % prime in
     
-    if qxD = 0 && qyD = 0 then 
+    if isPointAtInfinity #Affine (fromDomainPoint #c #DH q) then 
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
-    else if pzD = 0 then 
+    else if isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p) then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
       x3D == (((rD * rD) - (hD * hD * hD) - (2 * u1D * (hD * hD))) % prime) /\ 
       y3D == ((rD * (u1D * (hD * hD) - fromDomain  #c x3) - s1D * (hD * hD * hD)) % prime) /\
       z3D == (hD * pzD * qzD % prime))
 
+
 [@CInline]
-val point_add_mixed_p256: p: point P256 -> q: pointAffine P256 -> result: point P256
-  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P256) -> 
-  Stack unit (requires fun h -> 
-    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
-    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
-    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
-    point_eval P256 h p /\ point_aff_eval P256 h q)
-  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval P256 h1 result /\ (
-    let qX, qY, qZ = point_affine_x_as_nat P256 h0 q, point_affine_y_as_nat P256 h0 q, 1 in 
-    let qD = fromDomainPoint #P256 #DH (qX, qY, qZ) in 
-    fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == 
-    _point_add_mixed #P256 (fromDomainPoint #P256 #DH (point_as_nat P256 h0 p)) qD))
-
-
 let point_add_mixed_p256 = point_add_mixed_ #P256
 
-
 [@CInline]
-val point_add_mixed_p384: p: point P384 -> q: pointAffine P384 -> result: point P384
-  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 P384) -> 
-  Stack unit (requires fun h -> 
-    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
-    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
-    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
-    point_eval P384 h p /\ point_aff_eval P384 h q)
-  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval P384 h1 result /\ (
-    let qX, qY, qZ = point_affine_x_as_nat P384 h0 q, point_affine_y_as_nat P384 h0 q, 1 in 
-    let qD = fromDomainPoint #P384 #DH (qX, qY, qZ) in 
-    fromDomainPoint #P384 #DH (point_as_nat P384 h1 result) == 
-    _point_add_mixed #P384 (fromDomainPoint #P384 #DH (point_as_nat P384 h0 p)) qD))
-
-
 let point_add_mixed_p384 = point_add_mixed_ #P384
-
-
-(* [@CInline]
-val point_add_mixed_generic: p: point Default -> q: pointAffine Default -> result: point Default
-  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 Default) -> 
-  Stack unit (requires fun h -> 
-    live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
-    eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
-    disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\  
-    point_eval Default h p /\ point_aff_eval Default h q)
-  (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval Default h1 result /\ (
-    let qX, qY, qZ = point_affine_x_as_nat Default h0 q, point_affine_y_as_nat Default h0 q, 1 in 
-    let qD = fromDomainPoint #Default #DH (qX, qY, qZ) in 
-    fromDomainPoint #Default #DH (point_as_nat Default h1 result) == 
-    _point_add_mixed #Default (fromDomainPoint #Default #DH (point_as_nat Default h0 p)) qD))
-
-
-let point_add_mixed_generic = point_add_mixed_ #Default
- *)
 
 
 let point_add_mixed #c p q result tempBuffer = 
   match c with 
   |P256 -> point_add_mixed_p256 p q result tempBuffer
   |P384 -> point_add_mixed_p384 p q result tempBuffer
-  (* |Default -> point_add_mixed_generic p q result tempBuffer *)

@@ -32,8 +32,8 @@ let pointAtInfinity #c : point_nat_prime #c  = (0, 0, 0)
 
 let isPointAtInfinity #coordSyst (p:point_nat) =
   match coordSyst with 
-  |Affine -> let (_, _, z) = p in z = 0
-  |Jacobian -> let (x, y, _) = p in x = 0 && y = 0
+  |Jacobian -> let (_, _, z) = p in z = 0
+  |Affine -> let (x, y, _) = p in x = 0 && y = 0
 
 
 
