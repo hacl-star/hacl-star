@@ -6,13 +6,19 @@ open Lib.Sequence
 open Lib.ByteSequence
 
 module M = Lib.NatMod
+module LE = Lib.Exponentiation
+module SE = Spec.Exponentiation
+
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
 (**
  K256: https://en.bitcoin.it/wiki/Secp256k1
  ECDSA: https://en.bitcoin.it/wiki/Elliptic_Curve_Digital_Signature_Algorithm
+ https://www.hyperelliptic.org/EFD/g1p/auto-shortw.html
 *)
+
+///  Finite field
 
 let prime : (p:pos{p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F}) =
   assert_norm (24 < pow2 256 - 0x1000003D1);
@@ -36,6 +42,7 @@ let finv (x:elem) : elem = M.pow_mod #prime x (prime - 2)
 let ( /% ) (x y:elem) = x *% finv y
 
 
+///  Elliptic curve
 
 let aff_point = elem & elem        // Affine point
 let proj_point = elem & elem & elem // Projective coordinates
@@ -51,17 +58,6 @@ let g : proj_point = (g_x, g_y, one)
 // Group order
 let q : pos =
   0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
-
-//let aff_point_at_inf : aff_point = (zero, zero)
-let point_at_inf : proj_point = (zero, one, zero)
-
-// TODO: handle point at inf
-// let to_aff_point (p:proj_point) : aff_point =
-//   let (x, y, z) = p in
-//   (x /% z, y /% z)
-
-// let to_proj_point (p:aff_point) : proj_point =
-//   let (x, y) = p in (x, y, one)
 
 let point_add (p:proj_point) (q:proj_point) : proj_point =
   let x1, y1, z1 = p in
@@ -101,21 +97,87 @@ let point_double (p:proj_point) : proj_point =
 
 let point_negate (p:proj_point) : proj_point =
   let x, y, z = p in
-  (x, (-y) % prime, z)
+  x, (-y) % prime, z
 
 
-// TODO: return proj_point?
+let is_proj_point_at_inf (p:proj_point) : bool =
+  let (_, _, z) = p in z = zero
+
+let aff_point_at_inf : aff_point = (zero, zero) // not on the curve!
+let point_at_inf : proj_point = (zero, one, zero)
+
+
+let to_aff_point (p:proj_point) : aff_point =
+  let (x, y, z) = p in
+  (x /% z, y /% z)
+
+let to_proj_point (p:aff_point) : proj_point =
+  let (x, y) = p in (x, y, one)
+
 assume
-val point_mul_g (a:lbytes 32) : aff_point
+val aff_point_add (p:aff_point) (y:aff_point) : aff_point
+
+assume
+val aff_point_at_inf_lemma : p:aff_point ->
+  Lemma (aff_point_add p aff_point_at_inf  = p)
+
+assume
+val aff_point_add_assoc_lemma : p:aff_point -> q:aff_point -> s:aff_point ->
+  Lemma (aff_point_add (aff_point_add p q) s == aff_point_add p (aff_point_add q s))
+
+assume
+val aff_point_add_comm_lemma : p:aff_point -> q:aff_point ->
+  Lemma (aff_point_add p q = aff_point_add q p)
+
+
+let mk_k256_cm : LE.comm_monoid aff_point = {
+  LE.one = aff_point_at_inf;
+  LE.mul = aff_point_add;
+  LE.lemma_one = aff_point_at_inf_lemma;
+  LE.lemma_mul_assoc = aff_point_add_assoc_lemma;
+  LE.lemma_mul_comm = aff_point_add_comm_lemma;
+}
+
+let mk_to_k256_cm : SE.to_comm_monoid proj_point = {
+  SE.a_spec = aff_point;
+  SE.comm_monoid = mk_k256_cm;
+  SE.refl = to_aff_point;
+}
+
+val point_at_inf_c: SE.one_st proj_point mk_to_k256_cm
+let point_at_inf_c _ =
+  assume (to_aff_point point_at_inf = aff_point_at_inf);
+  point_at_inf
+
+val point_add_c : SE.mul_st proj_point mk_to_k256_cm
+let point_add_c p q =
+  assume (to_aff_point (point_add p q) == aff_point_add (to_aff_point p) (to_aff_point q));
+  point_add p q
+
+val point_double_c : SE.sqr_st proj_point mk_to_k256_cm
+let point_double_c p =
+  assume (to_aff_point (point_double p) == aff_point_add (to_aff_point p) (to_aff_point p));
+  point_double p
+
+
+let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
+  SE.to = mk_to_k256_cm;
+  SE.one = point_at_inf_c;
+  SE.mul = point_add_c;
+  SE.sqr = point_double_c;
+}
+
+
 // [a]G
+let point_mul_g (a:lbytes 32) : proj_point =
+  SE.exp_fw mk_k256_concrete_ops g 256 (nat_from_bytes_be a) 4
 
-assume
-val point_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:aff_point) : aff_point
 // [a1]G + [a2]P
+let point_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:proj_point) : proj_point =
+  SE.exp_double_fw mk_k256_concrete_ops g 256 (nat_from_bytes_be a1) p (nat_from_bytes_be a2) 4
 
-assume
-val is_aff_point_at_inf (p:aff_point) : bool
 
+///  ECDSA
 
 val ecdsa_sign_hashq:
     z:nat{z < q}
@@ -127,7 +189,8 @@ let ecdsa_sign_hashq z private_key k =
   let d_a = nat_from_bytes_be private_key in
   let kinv = M.pow_mod #q (nat_from_bytes_be k) (q - 2) in
 
-  let x, y = point_mul_g k in
+  let x, y = to_aff_point (point_mul_g k) in
+
   let r = x % q in
   let s = kinv * (z + r * d_a) % q in
 
@@ -153,10 +216,12 @@ let ecdsa_verify_hashq z public_key r s =
       let sinv = M.pow_mod #q s (q - 2) in
       let u1 = z * sinv % q in
       let u2 = r * sinv % q in
-      let x, y = point_mul_double_g (nat_to_bytes_be 32 u1) (nat_to_bytes_be 32 u2) public_key in
+      let (_X, _Y, _Z) = point_mul_double_g (nat_to_bytes_be 32 u1) (nat_to_bytes_be 32 u2) (to_proj_point public_key) in
 
-      if (is_aff_point_at_inf (x, y)) then false
-      else if x % q = r then true else false
+      if (is_proj_point_at_inf (_X, _Y, _Z)) then false
+      else begin
+	let (x, y) = to_aff_point (_X, _Y, _Z) in
+	if x % q = r then true else false end
     end
   end
 
@@ -183,12 +248,12 @@ let ecdsa_sign_sha256 msgLen msg private_key k =
 
 
 val ecdsa_verify_sha256:
-    msgLen:size_nat
-  -> msg:lbytes msgLen
+    msg_len:size_nat
+  -> msg:lbytes msg_len
   -> public_key:aff_point
   -> r:nat -> s:nat ->
   bool
 
-let ecdsa_verify_sha256 msgLen msg public_key r s =
-  let z = sha256_modq msgLen msg in
+let ecdsa_verify_sha256 msg_len msg public_key r s =
+  let z = sha256_modq msg_len msg in
   ecdsa_verify_hashq z public_key r s
