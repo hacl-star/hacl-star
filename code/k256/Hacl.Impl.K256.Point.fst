@@ -1,0 +1,63 @@
+module Hacl.Impl.K256.Point
+
+open FStar.HyperStack
+open FStar.HyperStack.ST
+open FStar.Mul
+
+open Lib.IntTypes
+open Lib.Buffer
+
+module ST = FStar.HyperStack.ST
+
+open Hacl.K256.Field
+
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
+// (_X, _Y, _Z)
+// felem = lbuffer uint64 4ul
+inline_for_extraction noextract
+let point = lbuffer uint64 12ul
+
+
+inline_for_extraction noextract
+let getx (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 0ul 4ul /\ h0 == h1)
+  = sub p 0ul 4ul
+
+inline_for_extraction noextract
+let gety (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 4ul 4ul /\ h0 == h1)
+  = sub p 4ul 4ul
+
+inline_for_extraction noextract
+let getz (p:point) : Stack felem
+  (requires fun h -> live h p)
+  (ensures fun h0 f h1 -> f == gsub p 8ul 4ul /\ h0 == h1)
+  = sub p 8ul 4ul
+
+noextract
+let point_inv (h:mem) (p:point) =
+  fe_lt_prime h (gsub p 0ul 4ul) /\
+  fe_lt_prime h (gsub p 4ul 4ul) /\
+  fe_lt_prime h (gsub p 8ul 4ul)
+
+
+noextract
+let point_as_nat3 (h:mem) (p:point) =
+  (as_nat h (gsub p 0ul 4ul),
+   as_nat h (gsub p 4ul 4ul),
+   as_nat h (gsub p 8ul 4ul))
+
+noextract
+let point_as_nat3_proj (h:mem) (p:point{point_inv h p}) : GTot Spec.K256.proj_point =
+  (as_nat h (gsub p 0ul 4ul),
+   as_nat h (gsub p 4ul 4ul),
+   as_nat h (gsub p 8ul 4ul))
+
+noextract
+let point_eval (h:mem) (p:point) =
+  (feval h (gsub p 0ul 4ul),
+   feval h (gsub p 4ul 4ul),
+   feval h (gsub p 8ul 4ul))

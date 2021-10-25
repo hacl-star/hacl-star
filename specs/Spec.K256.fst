@@ -103,6 +103,7 @@ let point_negate (p:proj_point) : proj_point =
 let is_proj_point_at_inf (p:proj_point) : bool =
   let (_, _, z) = p in z = zero
 
+// TODO: add `is_point_on_curve`
 let aff_point_at_inf : aff_point = (zero, zero) // not on the curve!
 let point_at_inf : proj_point = (zero, one, zero)
 
@@ -176,39 +177,53 @@ let point_mul_g (a:lbytes 32) : proj_point =
 let point_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:proj_point) : proj_point =
   SE.exp_double_fw mk_k256_concrete_ops g 256 (nat_from_bytes_be a1) p (nat_from_bytes_be a2) 4
 
-
 ///  ECDSA
 
-val ecdsa_sign_hashq:
-    z:nat{z < q}
+let scalar_t = s:lbytes 32{nat_from_bytes_be s < q}
+
+// TODO: add `secret_to_public`?
+
+// TODO: check that 0 < `private_key` < q?
+val ecdsa_sign_hashed_msg:
+     m:lbytes 32
   -> private_key:lbytes 32
   -> k:lbytes 32{0 < nat_from_bytes_be k /\ nat_from_bytes_be k < q} ->
-  tuple3 nat nat bool
+  tuple3 scalar_t scalar_t bool
 
-let ecdsa_sign_hashq z private_key k =
+let ecdsa_sign_hashed_msg m private_key k =
+  let z = nat_from_bytes_be m % q in
   let d_a = nat_from_bytes_be private_key in
-  let kinv = M.pow_mod #q (nat_from_bytes_be k) (q - 2) in
 
-  let x, y = to_aff_point (point_mul_g k) in
+  let (_X, _Y, _Z) = point_mul_g k in
+  let x = _X /% _Z in (* or (x, y) = to_aff_point (_X, _Y, _Z) *)
 
   let r = x % q in
+  let kinv = M.pow_mod #q (nat_from_bytes_be k) (q - 2) in
   let s = kinv * (z + r * d_a) % q in
 
+  let rb = nat_to_bytes_be 32 r in
+  let sb = nat_to_bytes_be 32 s in
+
   if r = 0 || s = 0 then
-    r, s, false
+    rb, sb, false
   else
-    r, s, true
+    rb, sb, true
 
 
-val ecdsa_verify_hashq:
-    z:nat{z < q}
+// TODO: check that `public_key` is a point on the curve
+val ecdsa_verify_hashed_msg:
+     m:lbytes 32
   -> public_key:aff_point
-  -> r:nat -> s:nat ->
+  -> rb:lbytes 32 -> sb:lbytes 32 ->
   bool
 
-let ecdsa_verify_hashq z public_key r s =
+let ecdsa_verify_hashed_msg m public_key rb sb =
+  let r = nat_from_bytes_be rb in
+  let s = nat_from_bytes_be sb in
+  let z = nat_from_bytes_be m % q in
+
   assert_norm (q < pow2 256);
-  // TODO: verify that `public_key` is a point on the curve?
+
   if not (0 < r && r < q) then false
   else begin
     if not (0 < s && s < q) then false
@@ -216,23 +231,20 @@ let ecdsa_verify_hashq z public_key r s =
       let sinv = M.pow_mod #q s (q - 2) in
       let u1 = z * sinv % q in
       let u2 = r * sinv % q in
-      let (_X, _Y, _Z) = point_mul_double_g (nat_to_bytes_be 32 u1) (nat_to_bytes_be 32 u2) (to_proj_point public_key) in
+      let (_X, _Y, _Z) =
+	point_mul_double_g (nat_to_bytes_be 32 u1) (nat_to_bytes_be 32 u2) (to_proj_point public_key) in
 
       if (is_proj_point_at_inf (_X, _Y, _Z)) then false
       else begin
-	let (x, y) = to_aff_point (_X, _Y, _Z) in
+	let x = _X /% _Z in (* TODO: optimize, as we don't need to compute a field inverse *)
 	if x % q = r then true else false end
     end
   end
 
 
 
-// TODO: agile?
 let _:_:unit{Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32} =
-  assert_norm (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32)
-
-let sha256_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
-  nat_from_bytes_be (Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 s) % q
+ assert_norm (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32)
 
 
 val ecdsa_sign_sha256:
@@ -240,20 +252,20 @@ val ecdsa_sign_sha256:
   -> msg:lbytes msgLen
   -> private_key:lbytes 32
   -> k:lbytes 32{0 < nat_from_bytes_be k /\ nat_from_bytes_be k < q} ->
-  tuple3 nat nat bool
+  tuple3 scalar_t scalar_t bool
 
 let ecdsa_sign_sha256 msgLen msg private_key k =
-  let z = sha256_modq msgLen msg in
-  ecdsa_sign_hashq z private_key k
+  let m = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
+  ecdsa_sign_hashed_msg m private_key k
 
 
 val ecdsa_verify_sha256:
     msg_len:size_nat
   -> msg:lbytes msg_len
   -> public_key:aff_point
-  -> r:nat -> s:nat ->
+  -> r:lbytes 32 -> s:lbytes 32 ->
   bool
 
 let ecdsa_verify_sha256 msg_len msg public_key r s =
-  let z = sha256_modq msg_len msg in
-  ecdsa_verify_hashq z public_key r s
+  let m = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
+  ecdsa_verify_hashed_msg m public_key r s

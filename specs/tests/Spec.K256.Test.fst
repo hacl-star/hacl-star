@@ -120,7 +120,7 @@ let test_verify () : FStar.All.ML bool =
     if not (pk_x < prime && pk_y < prime) then false
     else
       ecdsa_verify_sha256 6 msg (pk_x, pk_y)
-      (nat_from_bytes_be sgnt_r) (nat_from_bytes_be sgnt_s) in
+      sgnt_r sgnt_s in
 
   if verify
   then begin IO.print_string "Test K256 ecdsa verification: Success!\n"; true end
@@ -151,18 +151,15 @@ let test_sign_and_verify () : FStar.All.ML bool =
   let k_nat = nat_from_bytes_be k in
   let is_k_valid = 0 < k_nat && k_nat < q in
 
-  let z = nat_from_bytes_be m % q in
-
   let verify =
   if not (is_pk_valid && is_k_valid) then false
   else begin
-    let (r, s, v) = ecdsa_sign_hashq z sk k in
-    let sgnt_r = nat_from_bytes_be sgnt_r in
-    let sgnt_s = nat_from_bytes_be sgnt_s in
-    let is_r_valid = r = sgnt_r in
-    let is_s_valid = s = sgnt_s in
+    let (r, s, v) = ecdsa_sign_hashed_msg m sk k in
+    let is_r_valid = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) r sgnt_r in
+    let is_s_valid = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) s sgnt_s in
     let is_sgnt_valid = is_r_valid && is_s_valid in
-    let verify_sgnt = ecdsa_verify_hashq z (pk_x, pk_y) sgnt_r sgnt_s in
+
+    let verify_sgnt = ecdsa_verify_hashed_msg m (pk_x, pk_y) sgnt_r sgnt_s in
     verify_sgnt && is_sgnt_valid end in
 
   if verify
