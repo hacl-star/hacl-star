@@ -101,7 +101,7 @@ let ab_minus_cd a b c d tmp =
   fsub c tmp c
 
 
-
+inline_for_extraction noextract
 val point_add_no_alloc (out p q:point) (tmp:lbuffer uint64 (9ul *! nlimb)) : Stack unit
   (requires fun h ->
     live h out /\ live h p /\ live h q /\ live h tmp /\
@@ -206,6 +206,7 @@ val point_add (out p q:point) : Stack unit
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ point_inv h1 out /\
     point_as_nat3_proj h1 out == S.point_add (point_as_nat3_proj h0 p) (point_as_nat3_proj h0 q))
 
+[@CInline]
 let point_add out p q =
   push_frame ();
   let tmp = create (9ul *! nlimb) (u64 0) in
