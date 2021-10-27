@@ -150,9 +150,11 @@ let test_sign_and_verify () : FStar.All.ML bool =
   let is_pk_valid = pk_x < prime && pk_y < prime in
   let k_nat = nat_from_bytes_be k in
   let is_k_valid = 0 < k_nat && k_nat < q in
+  let sk_nat = nat_from_bytes_be sk in
+  let is_sk_valid = 0 < sk_nat && sk_nat < q in
 
   let verify =
-  if not (is_pk_valid && is_k_valid) then false
+  if not (is_pk_valid && is_k_valid && is_sk_valid) then false
   else begin
     let (r, s, v) = ecdsa_sign_hashed_msg m sk k in
     let is_r_valid = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) r sgnt_r in

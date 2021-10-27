@@ -26,38 +26,34 @@ let prime : (p:pos{p = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
   assert_norm (pow2 256 - 0x1000003D1 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F);
   pow2 256 - 0x1000003D1
 
-let elem = x:nat{x < prime}
-let zero : elem = 0
-let one  : elem = 1
+let felem = x:nat{x < prime}
+let zero : felem = 0
+let one  : felem = 1
 
-let fadd (x y:elem) : elem = (x + y) % prime
-let fsub (x y:elem) : elem = (x - y) % prime
-let fmul (x y:elem) : elem = (x * y) % prime
+let fadd (x y:felem) : felem = (x + y) % prime
+let fsub (x y:felem) : felem = (x - y) % prime
+let fmul (x y:felem) : felem = (x * y) % prime
 
 let ( +% ) = fadd
 let ( -% ) = fsub
 let ( *% ) = fmul
 
-let finv (x:elem) : elem = M.pow_mod #prime x (prime - 2)
-let ( /% ) (x y:elem) = x *% finv y
+let finv (x:felem) : felem = M.pow_mod #prime x (prime - 2)
+let ( /% ) (x y:felem) = x *% finv y
 
 
 ///  Elliptic curve
 
-let aff_point = elem & elem        // Affine point
-let proj_point = elem & elem & elem // Projective coordinates
+let aff_point = felem & felem        // Affine point
+let proj_point = felem & felem & felem // Projective coordinates
 
 // y * y = x * x * x + b
-let b : elem = 7
+let b : felem = 7
 
 // Base point
-let g_x : elem = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
-let g_y : elem = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
+let g_x : felem = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
+let g_y : felem = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
 let g : proj_point = (g_x, g_y, one)
-
-// Group order
-let q : pos =
-  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
 
 let point_add (p:proj_point) (q:proj_point) : proj_point =
   let x1, y1, z1 = p in
@@ -177,17 +173,28 @@ let point_mul_g (a:lbytes 32) : proj_point =
 let point_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:proj_point) : proj_point =
   SE.exp_double_fw mk_k256_concrete_ops g 256 (nat_from_bytes_be a1) p (nat_from_bytes_be a2) 4
 
-///  ECDSA
+///  Scalar field
+
+// Group order
+let q : q:pos{q < pow2 256} =
+  assert_norm (0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141 < pow2 256);
+  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
+
+let qelem = x:nat{x < q}
+let qadd (x y:qelem) : qelem = (x + y) % q
+let qmul (x y:qelem) : qelem = (x * y) % q
+let qinv (x:qelem) : qelem = M.pow_mod #q x (q - 2)
 
 let scalar_t = s:lbytes 32{nat_from_bytes_be s < q}
 
+///  ECDSA with a prehashed message
+
 // TODO: add `secret_to_public`?
 
-// TODO: check that 0 < `private_key` < q?
 val ecdsa_sign_hashed_msg:
      m:lbytes 32
-  -> private_key:lbytes 32
-  -> k:lbytes 32{0 < nat_from_bytes_be k /\ nat_from_bytes_be k < q} ->
+  -> private_key:scalar_t{0 < nat_from_bytes_be private_key}
+  -> k:scalar_t{0 < nat_from_bytes_be k} ->
   tuple3 scalar_t scalar_t bool
 
 let ecdsa_sign_hashed_msg m private_key k =
@@ -198,8 +205,8 @@ let ecdsa_sign_hashed_msg m private_key k =
   let x = _X /% _Z in (* or (x, y) = to_aff_point (_X, _Y, _Z) *)
 
   let r = x % q in
-  let kinv = M.pow_mod #q (nat_from_bytes_be k) (q - 2) in
-  let s = kinv * (z + r * d_a) % q in
+  let kinv = qinv (nat_from_bytes_be k) in
+  let s = qmul kinv (qadd z (qmul r d_a)) in
 
   let rb = nat_to_bytes_be 32 r in
   let sb = nat_to_bytes_be 32 s in
@@ -228,9 +235,9 @@ let ecdsa_verify_hashed_msg m public_key rb sb =
   else begin
     if not (0 < s && s < q) then false
     else begin
-      let sinv = M.pow_mod #q s (q - 2) in
-      let u1 = z * sinv % q in
-      let u2 = r * sinv % q in
+      let sinv = qinv s in
+      let u1 = qmul z sinv in
+      let u2 = qmul r sinv in
       let (_X, _Y, _Z) =
 	point_mul_double_g (nat_to_bytes_be 32 u1) (nat_to_bytes_be 32 u2) (to_proj_point public_key) in
 
@@ -242,6 +249,7 @@ let ecdsa_verify_hashed_msg m public_key rb sb =
   end
 
 
+///  ECDSA
 
 let _:_:unit{Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32} =
  assert_norm (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32)
@@ -250,8 +258,8 @@ let _:_:unit{Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_2
 val ecdsa_sign_sha256:
     msgLen:size_nat
   -> msg:lbytes msgLen
-  -> private_key:lbytes 32
-  -> k:lbytes 32{0 < nat_from_bytes_be k /\ nat_from_bytes_be k < q} ->
+  -> private_key:scalar_t{0 < nat_from_bytes_be private_key}
+  -> k:scalar_t{0 < nat_from_bytes_be k} ->
   tuple3 scalar_t scalar_t bool
 
 let ecdsa_sign_sha256 msgLen msg private_key k =
