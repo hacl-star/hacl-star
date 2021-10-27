@@ -22,10 +22,13 @@ module BD = Hacl.Bignum.Definitions
 *)
 
 inline_for_extraction noextract
-let felem = lbuffer uint64 4ul
+let nlimb = 4ul
+
+inline_for_extraction noextract
+let felem = lbuffer uint64 nlimb
 
 noextract
-let as_nat (h:mem) (e:felem) : GTot nat = BD.bn_v #U64 #4ul h e
+let as_nat (h:mem) (e:felem) : GTot nat = BD.bn_v #U64 #nlimb h e
 
 noextract
 let feval (h:mem) (e:felem) : GTot S.elem = as_nat h e % S.prime
@@ -38,7 +41,7 @@ inline_for_extraction noextract
 val create_felem: unit -> StackInline felem
   (requires fun h -> True)
   (ensures  fun h0 f h1 ->
-    stack_allocated f h0 h1 (LSeq.create 4 (u64 0)) /\
+    stack_allocated f h0 h1 (LSeq.create (v nlimb) (u64 0)) /\
     as_nat h1 f == 0)
 
 
@@ -80,7 +83,7 @@ val copy_felem (f1 f2:felem) : Stack unit
     as_seq h1 f1 == as_seq h0 f2)
 
 
-val times_3b (out f:felem) : Stack unit
+val fmul_3b (out f:felem) : Stack unit
   (requires fun h ->
     live h f /\ live h out /\ eq_or_disjoint out f /\
     fe_lt_prime h f)
@@ -89,7 +92,7 @@ val times_3b (out f:felem) : Stack unit
     fe_lt_prime h1 out)
 
 
-val times_24b (out f:felem) : Stack unit
+val fmul_24b (out f:felem) : Stack unit
   (requires fun h ->
     live h f /\ live h out /\ eq_or_disjoint out f /\
     fe_lt_prime h f)
@@ -98,7 +101,7 @@ val times_24b (out f:felem) : Stack unit
     fe_lt_prime h1 out)
 
 
-val times_small_num (out f:felem) (num:uint64) : Stack unit
+val fmul_small_num (out f:felem) (num:uint64) : Stack unit
   (requires fun h -> v num <= 8 /\ // a maximum value for point addition and doubling
     live h f /\ live h out /\ eq_or_disjoint out f /\
     fe_lt_prime h f)
