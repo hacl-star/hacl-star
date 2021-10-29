@@ -115,16 +115,28 @@ assume
 val aff_point_add (p:aff_point) (y:aff_point) : aff_point
 
 assume
-val aff_point_at_inf_lemma : p:aff_point ->
-  Lemma (aff_point_add p aff_point_at_inf  = p)
+val aff_point_at_inf_lemma (p:aff_point) :
+  Lemma (aff_point_add p aff_point_at_inf = p)
 
 assume
-val aff_point_add_assoc_lemma : p:aff_point -> q:aff_point -> s:aff_point ->
+val aff_point_add_assoc_lemma (p q s:aff_point) :
   Lemma (aff_point_add (aff_point_add p q) s == aff_point_add p (aff_point_add q s))
 
 assume
-val aff_point_add_comm_lemma : p:aff_point -> q:aff_point ->
+val aff_point_add_comm_lemma (p q:aff_point) :
   Lemma (aff_point_add p q = aff_point_add q p)
+
+assume
+val to_aff_point_at_infinity_lemma: unit ->
+  Lemma (to_aff_point point_at_inf == aff_point_at_inf)
+
+assume
+val to_aff_point_add_lemma (p q:proj_point) :
+  Lemma (to_aff_point (point_add p q) == aff_point_add (to_aff_point p) (to_aff_point q))
+
+assume
+val to_aff_point_double_lemma (p:proj_point) :
+  Lemma (to_aff_point (point_double p) == aff_point_add (to_aff_point p) (to_aff_point p))
 
 
 let mk_k256_cm : LE.comm_monoid aff_point = {
@@ -143,19 +155,18 @@ let mk_to_k256_cm : SE.to_comm_monoid proj_point = {
 
 val point_at_inf_c: SE.one_st proj_point mk_to_k256_cm
 let point_at_inf_c _ =
-  assume (to_aff_point point_at_inf = aff_point_at_inf);
+  to_aff_point_at_infinity_lemma ();
   point_at_inf
 
 val point_add_c : SE.mul_st proj_point mk_to_k256_cm
 let point_add_c p q =
-  assume (to_aff_point (point_add p q) == aff_point_add (to_aff_point p) (to_aff_point q));
+  to_aff_point_add_lemma p q;
   point_add p q
 
 val point_double_c : SE.sqr_st proj_point mk_to_k256_cm
 let point_double_c p =
-  assume (to_aff_point (point_double p) == aff_point_add (to_aff_point p) (to_aff_point p));
+  to_aff_point_double_lemma p;
   point_double p
-
 
 let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
   SE.to = mk_to_k256_cm;
@@ -165,13 +176,23 @@ let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
 }
 
 
+// [a]P
+let point_mul (a:lbytes 32) (p:proj_point) : proj_point =
+  let out = SE.exp_fw mk_k256_concrete_ops p 256 (nat_from_bytes_be a) 4 in
+  assert (to_aff_point out ==
+    LE.exp_fw #aff_point mk_k256_cm (to_aff_point p) 256 (nat_from_bytes_be a) 4);
+  out
+
+// [a1]P1 + [a2]P2
+let point_mul_double (a1:lbytes 32) (p1:proj_point) (a2:lbytes 32) (p2:proj_point) : proj_point =
+  SE.exp_double_fw mk_k256_concrete_ops p1 256 (nat_from_bytes_be a1) p2 (nat_from_bytes_be a2) 4
+
 // [a]G
-let point_mul_g (a:lbytes 32) : proj_point =
-  SE.exp_fw mk_k256_concrete_ops g 256 (nat_from_bytes_be a) 4
+let point_mul_g (a:lbytes 32) : proj_point = point_mul a g
 
 // [a1]G + [a2]P
 let point_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:proj_point) : proj_point =
-  SE.exp_double_fw mk_k256_concrete_ops g 256 (nat_from_bytes_be a1) p (nat_from_bytes_be a2) 4
+  point_mul_double a1 g a2 p
 
 ///  Scalar field
 
@@ -184,6 +205,9 @@ let qelem = x:nat{x < q}
 let qadd (x y:qelem) : qelem = (x + y) % q
 let qmul (x y:qelem) : qelem = (x * y) % q
 let qinv (x:qelem) : qelem = M.pow_mod #q x (q - 2)
+
+let ( +^ ) = qadd
+let ( *^ ) = qmul
 
 let scalar_t = s:lbytes 32{nat_from_bytes_be s < q}
 
@@ -206,7 +230,7 @@ let ecdsa_sign_hashed_msg m private_key k =
 
   let r = x % q in
   let kinv = qinv (nat_from_bytes_be k) in
-  let s = qmul kinv (qadd z (qmul r d_a)) in
+  let s = kinv *^ (z +^ r *^ d_a) in
 
   let rb = nat_to_bytes_be 32 r in
   let sb = nat_to_bytes_be 32 s in
@@ -236,8 +260,8 @@ let ecdsa_verify_hashed_msg m public_key rb sb =
     if not (0 < s && s < q) then false
     else begin
       let sinv = qinv s in
-      let u1 = qmul z sinv in
-      let u2 = qmul r sinv in
+      let u1 = z *^ sinv in
+      let u2 = r *^ sinv in
       let (_X, _Y, _Z) =
 	point_mul_double_g (nat_to_bytes_be 32 u1) (nat_to_bytes_be 32 u2) (to_proj_point public_key) in
 

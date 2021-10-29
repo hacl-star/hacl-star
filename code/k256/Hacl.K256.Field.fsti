@@ -31,10 +31,25 @@ noextract
 let as_nat (h:mem) (e:felem) : GTot nat = BD.bn_v #U64 #nlimb h e
 
 noextract
-let feval (h:mem) (e:felem) : GTot S.elem = as_nat h e % S.prime
+let feval (h:mem) (e:felem) : GTot S.felem = as_nat h e % S.prime
 
 noextract
 let fe_lt_prime (h:mem) (e:felem) = as_nat h e < S.prime
+
+inline_for_extraction noextract
+let felem4 = uint64 & uint64 & uint64 & uint64
+
+noextract
+let as_nat4 (f:felem4) =
+  let (f0, f1, f2, f3) = f in
+  v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192
+
+
+inline_for_extraction noextract
+val make_u64_4 (out:felem) (f0 f1 f2 f3:uint64) : Stack unit
+  (requires fun h -> live h out)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ fe_lt_prime h1 out /\
+    as_nat h1 out == as_nat4 (f0, f1, f2, f3))
 
 
 inline_for_extraction noextract

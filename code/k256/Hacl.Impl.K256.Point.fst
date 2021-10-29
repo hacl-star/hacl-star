@@ -8,6 +8,10 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
+module LSeq = Lib.Sequence
+module SD = Hacl.Spec.Bignum.Definitions
+
+module S = Spec.K256
 
 open Hacl.K256.Field
 
@@ -35,25 +39,37 @@ let getz (p:point) : Stack felem
   (requires fun h -> live h p)
   (ensures fun h0 f h1 -> f == gsub p (2ul *! nlimb) nlimb /\ h0 == h1)
   = sub p (2ul *! nlimb) nlimb
- 
+
+
+noextract
+let point_inv_lseq (p:LSeq.lseq uint64 12) =
+  SD.bn_v (LSeq.sub p 0 4) < S.prime /\
+  SD.bn_v (LSeq.sub p 4 4) < S.prime /\
+  SD.bn_v (LSeq.sub p 8 4) < S.prime
+
 noextract
 let point_inv (h:mem) (p:point) =
-  fe_lt_prime h (gsub p 0ul nlimb) /\
-  fe_lt_prime h (gsub p nlimb nlimb) /\
-  fe_lt_prime h (gsub p (2ul *! nlimb) nlimb)
+  point_inv_lseq (as_seq h p)
 
+noextract
+let point_as_nat3_lseq (p:LSeq.lseq uint64 12) =
+  (SD.bn_v (LSeq.sub p 0 4),
+   SD.bn_v (LSeq.sub p 4 4),
+   SD.bn_v (LSeq.sub p 8 4))
 
 noextract
 let point_as_nat3 (h:mem) (p:point) =
-  (as_nat h (gsub p 0ul nlimb),
-   as_nat h (gsub p nlimb nlimb),
-   as_nat h (gsub p (2ul *! nlimb) nlimb))
+  point_as_nat3_lseq (as_seq h p)
+
+noextract
+let point_as_nat3_proj_lseq (p:LSeq.lseq uint64 12{point_inv_lseq p}) : GTot Spec.K256.proj_point =
+  (SD.bn_v (LSeq.sub p 0 4),
+   SD.bn_v (LSeq.sub p 4 4),
+   SD.bn_v (LSeq.sub p 8 4))
 
 noextract
 let point_as_nat3_proj (h:mem) (p:point{point_inv h p}) : GTot Spec.K256.proj_point =
-  (as_nat h (gsub p 0ul nlimb),
-   as_nat h (gsub p nlimb nlimb),
-   as_nat h (gsub p (2ul *! nlimb) nlimb))
+  point_as_nat3_proj_lseq (as_seq h p)
 
 noextract
 let point_eval (h:mem) (p:point) =

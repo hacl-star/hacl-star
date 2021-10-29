@@ -105,7 +105,7 @@ inline_for_extraction noextract
 val point_add_no_alloc (out p q:point) (tmp:lbuffer uint64 (9ul *! nlimb)) : Stack unit
   (requires fun h ->
     live h out /\ live h p /\ live h q /\ live h tmp /\
-    disjoint out p /\ disjoint out q /\ eq_or_disjoint p q /\
+    eq_or_disjoint out p /\ eq_or_disjoint out q /\ eq_or_disjoint p q /\
     disjoint p tmp /\ disjoint q tmp /\ disjoint out tmp /\
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc out |+| loc tmp) h0 h1 /\ point_inv h1 out /\
@@ -201,7 +201,7 @@ let point_add_no_alloc out p q tmp =
 val point_add (out p q:point) : Stack unit
   (requires fun h ->
     live h out /\ live h p /\ live h q /\
-    disjoint out p /\ disjoint out q /\ eq_or_disjoint p q /\
+    eq_or_disjoint out p /\ eq_or_disjoint out q /\ eq_or_disjoint p q /\
     point_inv h p /\ point_inv h q)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ point_inv h1 out /\
     point_as_nat3_proj h1 out == S.point_add (point_as_nat3_proj h0 p) (point_as_nat3_proj h0 q))
