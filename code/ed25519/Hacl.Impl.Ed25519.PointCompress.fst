@@ -135,7 +135,7 @@ val point_compress_:
   Stack unit
     (requires fun h -> live h tmp /\ live h p /\ disjoint tmp p /\ F51.point_inv_t h p)
     (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\ (
-      let zinv = Spec.Ed25519.modp_inv (F51.fevalh h0 (gsub p 10ul 5ul)) in
+      let zinv = Spec.Ed25519.finv (F51.fevalh h0 (gsub p 10ul 5ul)) in
       let x = Spec.Curve25519.fmul (F51.fevalh h0 (gsub p 0ul 5ul)) zinv in
       let y = Spec.Curve25519.fmul (F51.fevalh h0 (gsub p 5ul 5ul)) zinv in
       F51.mul_inv_t h1 (gsub tmp 10ul 5ul) /\
@@ -150,6 +150,9 @@ let point_compress_ tmp p =
   let py   = gety p in
   let pz   = getz p in
 
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.fpow_is_pow_mod
+    (F51.fevalh h0 pz) (Spec.Curve25519.prime - 2);
   inverse zinv pz;
   fmul x px zinv;
   reduce x;

@@ -3,16 +3,10 @@ LIBRARY libevercrypt
 EXPORTS
   Spec_Cipher_Expansion_cipher_alg_of_impl
   LowStar_Vector_new_capacity
-  Hacl_Blake2s_32_blake2s_init
-  Hacl_Blake2s_32_blake2s_update_multi
-  Hacl_Blake2s_32_blake2s_update_last
-  Hacl_Blake2s_32_blake2s_finish
-  Hacl_Blake2s_32_blake2s
-  Hacl_Blake2b_32_blake2b_init
-  Hacl_Blake2b_32_blake2b_update_multi
-  Hacl_Blake2b_32_blake2b_update_last
-  Hacl_Blake2b_32_blake2b_finish
-  Hacl_Blake2b_32_blake2b
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
   Hacl_Hash_Core_Blake2_update_blake2s_32
   Hacl_Hash_Core_Blake2_finish_blake2s_32
   Hacl_Hash_Core_Blake2_update_blake2b_32
@@ -23,52 +17,16 @@ EXPORTS
   Hacl_Hash_Blake2_update_last_blake2b_32
   Hacl_Hash_Blake2_hash_blake2s_32
   Hacl_Hash_Blake2_hash_blake2b_32
-  Hacl_Hash_MD5_legacy_update_multi
-  Hacl_Hash_MD5_legacy_update_last
-  Hacl_Hash_MD5_legacy_hash
-  Hacl_Hash_Core_MD5_legacy_init
-  Hacl_Hash_Core_MD5_legacy_update
-  Hacl_Hash_Core_MD5_legacy_pad
-  Hacl_Hash_Core_MD5_legacy_finish
-  Hacl_Hash_SHA1_legacy_update_multi
-  Hacl_Hash_SHA1_legacy_update_last
-  Hacl_Hash_SHA1_legacy_hash
-  Hacl_Hash_Core_SHA1_legacy_init
-  Hacl_Hash_Core_SHA1_legacy_update
-  Hacl_Hash_Core_SHA1_legacy_pad
-  Hacl_Hash_Core_SHA1_legacy_finish
-  Hacl_Hash_SHA2_update_multi_224
-  Hacl_Hash_SHA2_update_multi_256
-  Hacl_Hash_SHA2_update_multi_384
-  Hacl_Hash_SHA2_update_multi_512
-  Hacl_Hash_SHA2_update_last_224
-  Hacl_Hash_SHA2_update_last_256
-  Hacl_Hash_SHA2_update_last_384
-  Hacl_Hash_SHA2_update_last_512
-  Hacl_Hash_SHA2_hash_224
-  Hacl_Hash_SHA2_hash_256
-  Hacl_Hash_SHA2_hash_384
-  Hacl_Hash_SHA2_hash_512
-  Hacl_Hash_Core_SHA2_init_224
-  Hacl_Hash_Core_SHA2_init_256
-  Hacl_Hash_Core_SHA2_init_384
-  Hacl_Hash_Core_SHA2_init_512
-  Hacl_Hash_Core_SHA2_update_224
-  Hacl_Hash_Core_SHA2_update_256
-  Hacl_Hash_Core_SHA2_update_384
-  Hacl_Hash_Core_SHA2_update_512
-  Hacl_Hash_Core_SHA2_pad_224
-  Hacl_Hash_Core_SHA2_pad_256
-  Hacl_Hash_Core_SHA2_pad_384
-  Hacl_Hash_Core_SHA2_pad_512
-  Hacl_Hash_Core_SHA2_finish_224
-  Hacl_Hash_Core_SHA2_finish_256
-  Hacl_Hash_Core_SHA2_finish_384
-  Hacl_Hash_Core_SHA2_finish_512
-  Hacl_Hash_Definitions_word_len
-  Hacl_Hash_Definitions_block_len
-  Hacl_Hash_Definitions_hash_word_len
-  Hacl_Hash_Definitions_hash_len
+  Hacl_Blake2b_32_blake2b_init
+  Hacl_Blake2b_32_blake2b_update_multi
+  Hacl_Blake2b_32_blake2b_update_last
+  Hacl_Blake2b_32_blake2b_finish
+  Hacl_Blake2b_32_blake2b
+  Hacl_Blake2s_32_blake2s_init
+  Hacl_Blake2s_32_blake2s_update_multi
+  Hacl_Blake2s_32_blake2s_update_last
+  Hacl_Blake2s_32_blake2s_finish
+  Hacl_Blake2s_32_blake2s
   Hacl_Hash_Blake2b_256_finish_blake2b_256
   Hacl_Hash_Blake2b_256_update_multi_blake2b_256
   Hacl_Hash_Blake2b_256_update_last_blake2b_256
@@ -87,6 +45,41 @@ EXPORTS
   Hacl_Blake2s_128_blake2s_update_last
   Hacl_Blake2s_128_blake2s_finish
   Hacl_Blake2s_128_blake2s
+  Hacl_Hash_Core_MD5_legacy_init
+  Hacl_Hash_Core_MD5_legacy_update
+  Hacl_Hash_Core_MD5_legacy_finish
+  Hacl_Hash_MD5_legacy_update_multi
+  Hacl_Hash_MD5_legacy_update_last
+  Hacl_Hash_MD5_legacy_hash
+  Hacl_Hash_Core_SHA1_legacy_init
+  Hacl_Hash_Core_SHA1_legacy_update
+  Hacl_Hash_Core_SHA1_legacy_finish
+  Hacl_Hash_SHA1_legacy_update_multi
+  Hacl_Hash_SHA1_legacy_update_last
+  Hacl_Hash_SHA1_legacy_hash
+  Hacl_Hash_Core_SHA2_init_224
+  Hacl_Hash_Core_SHA2_init_256
+  Hacl_Hash_Core_SHA2_init_384
+  Hacl_Hash_Core_SHA2_init_512
+  Hacl_Hash_Core_SHA2_update_384
+  Hacl_Hash_Core_SHA2_update_512
+  Hacl_Hash_Core_SHA2_pad_256
+  Hacl_Hash_Core_SHA2_finish_224
+  Hacl_Hash_Core_SHA2_finish_256
+  Hacl_Hash_Core_SHA2_finish_384
+  Hacl_Hash_Core_SHA2_finish_512
+  Hacl_Hash_SHA2_update_multi_224
+  Hacl_Hash_SHA2_update_multi_256
+  Hacl_Hash_SHA2_update_multi_384
+  Hacl_Hash_SHA2_update_multi_512
+  Hacl_Hash_SHA2_update_last_224
+  Hacl_Hash_SHA2_update_last_256
+  Hacl_Hash_SHA2_update_last_384
+  Hacl_Hash_SHA2_update_last_512
+  Hacl_Hash_SHA2_hash_224
+  Hacl_Hash_SHA2_hash_256
+  Hacl_Hash_SHA2_hash_384
+  Hacl_Hash_SHA2_hash_512
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -260,9 +253,9 @@ EXPORTS
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
   Hacl_Streaming_SHA2_create_in_224
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t_____LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t___________LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t__________
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
   Hacl_Streaming_SHA2_init_224
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t_____LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t___________LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t__________
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
   Hacl_Streaming_SHA2_update_224
   Hacl_Streaming_SHA2_finish_224
   Hacl_Streaming_SHA2_free_224
@@ -548,7 +541,7 @@ EXPORTS
   Hacl_HPKE_Curve51_CP128_SHA512_openBase
   Hacl_GenericField32_field_modulus_check
   Hacl_GenericField32_field_init
-  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint32_t__uint32_t_LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint32_t__uint32_t_______LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint32_t__uint32_t______
+  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint32_t__uint32_t
   Hacl_GenericField32_field_free
   Hacl_GenericField32_field_get_len
   Hacl_GenericField32_to_field
@@ -572,7 +565,7 @@ EXPORTS
   Hacl_Bignum256_mod_exp_consttime
   Hacl_Bignum256_mod_inv_prime_vartime
   Hacl_Bignum256_mont_ctx_init
-  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t_LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t_______LowStar_Buffer_trivial_preorder_Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t______
+  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t
   Hacl_Bignum256_mont_ctx_free
   Hacl_Bignum256_mod_precomp
   Hacl_Bignum256_mod_exp_vartime_precomp

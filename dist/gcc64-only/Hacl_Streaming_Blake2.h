@@ -38,10 +38,8 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Blake2s_32.h"
-#include "Hacl_Blake2b_32.h"
 #include "Hacl_Spec.h"
-#include "Hacl_Impl_Blake2.h"
+#include "Hacl_Hash_Blake2.h"
 
 uint32_t
 Hacl_Streaming_Blake2_blocks_state_len(Spec_Blake2_alg a, Hacl_Impl_Blake2_Core_m_spec m);
