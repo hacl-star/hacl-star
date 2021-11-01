@@ -283,13 +283,6 @@ let undiag (#a:alg) (wv:state a) : state a =
 inline_for_extraction
 let gather_row (#a:alg) (m:block_w a) (i0 i1 i2 i3:sigma_elt_t) : row a =
   create_row m.[v i0] m.[v i1] m.[v i2] m.[v i3]
-(*  let nb = size_word a in
-  let u0 = uint_from_bytes_le #(wt a) #SEC (sub m (v i0*nb) nb) in
-  let u1 = uint_from_bytes_le #(wt a) #SEC (sub m (v i1*nb) nb) in
-  let u2 = uint_from_bytes_le #(wt a) #SEC (sub m (v i2*nb) nb) in
-  let u3 = uint_from_bytes_le #(wt a) #SEC (sub m (v i3*nb) nb) in
-  create_row u0 u1 u2 u3
-*)
 
 val gather_state: a:alg -> m:block_w a -> start:nat{start <= 144} -> state a
 let gather_state a m start =
@@ -468,26 +461,37 @@ let blake2_init_hash a kk nn =
   let s_iv = createL [r0';r1;r0;r1] in
   s_iv
 
-(*
-val blake2_init:
+val blake2_update_key:
     a:alg
   -> kk:size_nat{kk <= max_key a}
   -> k:lbytes kk
-  -> nn:size_nat{1 <= nn /\ nn <= max_output a}
-  -> ll:nat ->
+  -> ll:nat
+  -> s:state a ->
   Tot (state a)
-
-let blake2_init a kk k nn ll =
-  let key_block = create (size_block a) (u8 0) in
-  let s = blake2_init_hash a kk nn in
+let blake2_update_key a kk k ll s =
   if kk = 0 then s
-  else if ll > 0 then begin
+  else
+    let key_block = create (size_block a) (u8 0) in
     let key_block = update_sub key_block 0 kk k in
-    blake2_update_block a false (size_block a) key_block s end
-  else begin
-    let key_block = update_sub key_block 0 kk k in
-    blake2_update_block a true (size_block a) key_block s end
-*)
+    if ll = 0 then
+      blake2_update_block a true (size_block a) key_block s
+    else
+      blake2_update_block a false (size_block a) key_block s
+
+val blake2_update:
+    a:alg
+  -> kk:size_nat{kk <= max_key a}
+  -> k:lbytes kk
+  -> d:bytes{if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a}
+  -> s:state a ->
+  Tot (state a)
+let blake2_update a kk k d s =
+  let ll = length d in
+  let s = blake2_update_key a kk k ll s in
+  if ll = 0 then s
+  else if kk > 0 then
+    blake2_update_blocks a (size_block a) d s
+  else blake2_update_blocks a 0 d s
 
 val blake2_finish:
     a:alg
@@ -507,38 +511,7 @@ val blake2:
   -> nn:size_nat{1 <= nn /\ nn <= max_output a} ->
   Tot (lbytes nn)
 
-(* TODO: SH: this definition is awkward to use because of the multiplication.
- * Wouldn't it be possible to simply write the following?
- * [if kk = 0 then 0 else size_block a]
- * It is actually shorter and clearer. *)
-let compute_prev0 a kk =
-  let kn = if kk = 0 then 0 else 1 in
-  let prev0 = kn * (size_block a) in
-  prev0
-
-val blake2_update:
-    a:alg
-  -> kk:size_nat{kk <= max_key a}
-  -> k:lbytes kk
-  -> d:bytes{if kk = 0 then length d <= max_limb a else length d + (size_block a) <= max_limb a}
-  -> s:state a ->
-  Tot (state a)
-let blake2_update a kk k d s =
-  let ll = length d in
-  if kk = 0 then
-    blake2_update_blocks a 0 d s
-  else if ll = 0 then
-    let key_block = create (size_block a) (u8 0) in
-    let key_block = update_sub key_block 0 kk k in
-    blake2_update_block a true (size_block a) key_block s
-  else
-    let key_block = create (size_block a) (u8 0) in
-    let key_block = update_sub key_block 0 kk k in
-    let s = blake2_update_block a false (size_block a) key_block s in
-    blake2_update_blocks a (size_block a) d s
-
 let blake2 a d kk k nn =
-  let prev0 = compute_prev0 a kk in
   let s = blake2_init_hash a kk nn in
   let s = blake2_update a kk k d s in
   blake2_finish a s nn
