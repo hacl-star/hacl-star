@@ -13,7 +13,7 @@ module BSeq = Lib.ByteSequence
 module S = Spec.K256
 
 module BD = Hacl.Bignum.Definitions
-
+module F = Hacl.K256.Field
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -22,27 +22,27 @@ module BD = Hacl.Bignum.Definitions
 *)
 
 inline_for_extraction noextract
-let nlimb = 4ul
+let qnlimb = 4ul
 
 inline_for_extraction noextract
-let qelem = lbuffer uint64 nlimb
+let qelem = lbuffer uint64 qnlimb
 
 noextract
-let as_nat (h:mem) (e:qelem) : GTot nat = BD.bn_v #U64 #nlimb h e
+let qas_nat (h:mem) (e:qelem) : GTot nat = BD.bn_v #U64 #qnlimb h e
 
 noextract
-let qeval (h:mem) (e:qelem) : GTot S.qelem = as_nat h e % S.q
+let qeval (h:mem) (e:qelem) : GTot S.qelem = qas_nat h e % S.q
 
 noextract
-let qe_lt_q (h:mem) (e:qelem) = as_nat h e < S.q
+let qe_lt_q (h:mem) (e:qelem) = qas_nat h e < S.q
 
 
 inline_for_extraction noextract
 val create_qelem: unit -> StackInline qelem
   (requires fun h -> True)
   (ensures  fun h0 f h1 ->
-    stack_allocated f h0 h1 (LSeq.create (v nlimb) (u64 0)) /\
-    as_nat h1 f == 0)
+    stack_allocated f h0 h1 (LSeq.create (v qnlimb) (u64 0)) /\
+    qas_nat h1 f == 0)
 
 
 val load_qelem: f:qelem -> b:lbuffer uint8 32ul -> Stack unit
@@ -50,14 +50,21 @@ val load_qelem: f:qelem -> b:lbuffer uint8 32ul -> Stack unit
     live h f /\ live h b /\ disjoint f b /\
     BSeq.nat_from_bytes_be (as_seq h b) < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
-    as_nat h1 f == BSeq.nat_from_bytes_be (as_seq h0 b))
+    qas_nat h1 f == BSeq.nat_from_bytes_be (as_seq h0 b))
 
 
-val load_felem_modq (out: qelem) (b:lbuffer uint8 32ul) : Stack unit
+val load_qelem_modq: f:qelem -> b:lbuffer uint8 32ul -> Stack unit
   (requires fun h ->
-    live h out /\ live h b /\ eq_or_disjoint out b)
+    live h f /\ live h b /\ disjoint f b)
+  (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
+    qas_nat h1 f == BSeq.nat_from_bytes_be (as_seq h0 b) % S.q)
+
+
+val qelem_from_felem: out:qelem -> f:F.felem -> Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ eq_or_disjoint out f)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == BSeq.nat_from_bytes_be (as_seq h0 b) % S.q /\
+    qas_nat h1 out == F.as_nat h0 f % S.q /\
     qe_lt_q h1 out)
 
 
@@ -66,7 +73,7 @@ val store_qelem: b:lbuffer uint8 32ul -> f:qelem -> Stack unit
     live h b /\ live h f /\ disjoint f b /\
     qe_lt_q h f)
   (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
-    as_seq h1 b == BSeq.nat_to_bytes_be 32 (as_nat h0 f))
+    as_seq h1 b == BSeq.nat_to_bytes_be 32 (qas_nat h0 f))
 
 
 inline_for_extraction noextract
@@ -77,13 +84,20 @@ val copy_qelem (f1 f2: qelem) : Stack unit
     as_seq h1 f1 == as_seq h0 f2)
 
 
+inline_for_extraction noextract
+val is_qelem_zero_vartime (f:qelem) : Stack bool
+  (requires fun h -> live h f)
+  (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
+    m == (qas_nat h0 f = 0))
+
+
 val qadd (out f1 f2: qelem) : Stack unit
   (requires fun h ->
     live h out /\ live h f1 /\ live h f2 /\
     eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
     qe_lt_q h f1 /\ qe_lt_q h f2)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == S.qadd (as_nat h0 f1) (as_nat h0 f2) /\
+    qas_nat h1 out == S.qadd (qas_nat h0 f1) (qas_nat h0 f2) /\
     qe_lt_q h1 out)
 
 
@@ -93,7 +107,7 @@ val qmul (out f1 f2: qelem) : Stack unit
     eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
     qe_lt_q h f1 /\ qe_lt_q h f2)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == S.qmul (as_nat h0 f1) (as_nat h0 f2) /\
+    qas_nat h1 out == S.qmul (qas_nat h0 f1) (qas_nat h0 f2) /\
     qe_lt_q h1 out)
 
 
@@ -102,5 +116,5 @@ val qinv (out f: qelem) : Stack unit
     live h out /\ live h f /\ eq_or_disjoint out f /\
     qe_lt_q h f)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == S.qinv (as_nat h0 f)  /\
+    qas_nat h1 out == S.qinv (qas_nat h0 f)  /\
     qe_lt_q h1 out)

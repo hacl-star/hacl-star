@@ -222,14 +222,13 @@ val ecdsa_sign_hashed_msg:
   tuple3 scalar_t scalar_t bool
 
 let ecdsa_sign_hashed_msg m private_key k =
+  let _X, _Y, _Z = point_mul_g k in
+  let x = _X /% _Z in (* or (x, y) = to_aff_point (_X, _Y, _Z) *)
+  let r = x % q in
+
   let z = nat_from_bytes_be m % q in
   let d_a = nat_from_bytes_be private_key in
-
-  let (_X, _Y, _Z) = point_mul_g k in
-  let x = _X /% _Z in (* or (x, y) = to_aff_point (_X, _Y, _Z) *)
-
-  let r = x % q in
-  let kinv = qinv (nat_from_bytes_be k) in
+  let kinv = qinv (nat_from_bytes_be k) in  
   let s = kinv *^ (z +^ r *^ d_a) in
 
   let rb = nat_to_bytes_be 32 r in
@@ -245,12 +244,12 @@ let ecdsa_sign_hashed_msg m private_key k =
 val ecdsa_verify_hashed_msg:
      m:lbytes 32
   -> public_key:aff_point
-  -> rb:lbytes 32 -> sb:lbytes 32 ->
+  -> r:lbytes 32 -> s:lbytes 32 ->
   bool
 
-let ecdsa_verify_hashed_msg m public_key rb sb =
-  let r = nat_from_bytes_be rb in
-  let s = nat_from_bytes_be sb in
+let ecdsa_verify_hashed_msg m public_key r s =
+  let r = nat_from_bytes_be r in
+  let s = nat_from_bytes_be s in
   let z = nat_from_bytes_be m % q in
 
   assert_norm (q < pow2 256);
@@ -262,7 +261,7 @@ let ecdsa_verify_hashed_msg m public_key rb sb =
       let sinv = qinv s in
       let u1 = z *^ sinv in
       let u2 = r *^ sinv in
-      let (_X, _Y, _Z) =
+      let _X, _Y, _Z =
 	point_mul_double_g (nat_to_bytes_be 32 u1) (nat_to_bytes_be 32 u2) (to_proj_point public_key) in
 
       if (is_proj_point_at_inf (_X, _Y, _Z)) then false
@@ -280,13 +279,13 @@ let _:_:unit{Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_2
 
 
 val ecdsa_sign_sha256:
-    msgLen:size_nat
-  -> msg:lbytes msgLen
+    msg_len:size_nat
+  -> msg:lbytes msg_len
   -> private_key:scalar_t{0 < nat_from_bytes_be private_key}
   -> k:scalar_t{0 < nat_from_bytes_be k} ->
   tuple3 scalar_t scalar_t bool
 
-let ecdsa_sign_sha256 msgLen msg private_key k =
+let ecdsa_sign_sha256 msg_len msg private_key k =
   let m = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
   ecdsa_sign_hashed_msg m private_key k
 
