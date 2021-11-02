@@ -469,13 +469,12 @@ val blake2_update_key:
   -> s:state a ->
   Tot (state a)
 let blake2_update_key a kk k ll s =
+  let key_block = create (size_block a) (u8 0) in
+  let key_block = update_sub key_block 0 kk k in
   if kk = 0 then s
-  else
-    let key_block = create (size_block a) (u8 0) in
-    let key_block = update_sub key_block 0 kk k in
-    if ll = 0 then
+  else if ll = 0 then
       blake2_update_block a true (size_block a) key_block s
-    else
+  else
       blake2_update_block a false (size_block a) key_block s
 
 val blake2_update:
