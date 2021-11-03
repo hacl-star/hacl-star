@@ -175,7 +175,6 @@ type sigma_elt_t = n:size_t{size_v n < 16}
 type list_sigma_t = l:list sigma_elt_t{List.Tot.length l == 160}
 
 [@"opaque_to_smt"]
-
 let list_sigma: list_sigma_t =
   [@inline_let]
   let l : list sigma_elt_t = [
@@ -461,9 +460,10 @@ let blake2_init_hash a kk nn =
   let s_iv = createL [r0';r1;r0;r1] in
   s_iv
 
+/// This function must be called only if the key is non empty (see the precondition)
 val blake2_update_key:
     a:alg
-  -> kk:size_nat{kk <= max_key a}
+  -> kk:size_nat{0 < kk /\ kk <= max_key a}
   -> k:lbytes kk
   -> ll:nat
   -> s:state a ->
@@ -471,8 +471,7 @@ val blake2_update_key:
 let blake2_update_key a kk k ll s =
   let key_block = create (size_block a) (u8 0) in
   let key_block = update_sub key_block 0 kk k in
-  if kk = 0 then s
-  else if ll = 0 then
+  if ll = 0 then
       blake2_update_block a true (size_block a) key_block s
   else
       blake2_update_block a false (size_block a) key_block s
@@ -486,10 +485,10 @@ val blake2_update:
   Tot (state a)
 let blake2_update a kk k d s =
   let ll = length d in
-  let s = blake2_update_key a kk k ll s in
-  if ll = 0 then s
-  else if kk > 0 then
-    blake2_update_blocks a (size_block a) d s
+  if kk > 0 then
+     let s = blake2_update_key a kk k ll s in
+     if ll = 0 then s // Skip update_last if ll = 0 (but kk > 0)
+     else blake2_update_blocks a (size_block a) d s
   else blake2_update_blocks a 0 d s
 
 val blake2_finish:
