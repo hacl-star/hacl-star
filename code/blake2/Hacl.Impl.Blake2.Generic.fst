@@ -689,7 +689,7 @@ inline_for_extraction noextract
 let blake2_update_key_st (al:Spec.alg) (ms:m_spec) =
     wv:state_p al ms
   -> hash: state_p al ms
-  -> kk: size_t{v kk <= Spec.max_key al}
+  -> kk: size_t{v kk > 0 /\ v kk <= Spec.max_key al}
   -> k: lbuffer uint8 kk
   -> ll: size_t ->
   Stack unit
@@ -715,8 +715,7 @@ let blake2_update_key #al #ms blake2_update_block wv hash kk k ll =
     (fun key_block ->
       update_sub key_block 0ul kk k;
       let h1 = ST.get() in
-      if kk =. 0ul then ()
-      else if ll =. 0ul then
+      if ll =. 0ul then
          blake2_update_block wv hash true lb key_block
       else
          blake2_update_block wv hash false lb key_block)
@@ -750,10 +749,10 @@ let blake2_update #al #ms blake2_update_key blake2_update_blocks
                   wv hash kk k ll d =
     let lb = size_to_limb al (size_block al) in
     assert (v lb = Spec.size_block al);
-    blake2_update_key wv hash kk k ll;
-    if ll =. 0ul then ()
-    else if kk >. 0ul then
-      blake2_update_blocks wv hash lb d
+    if kk >. 0ul then (
+      blake2_update_key wv hash kk k ll;
+      if ll =. 0ul then ()
+      else blake2_update_blocks wv hash lb d)
     else blake2_update_blocks wv hash (size_to_limb al 0ul) d
 
 
