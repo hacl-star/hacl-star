@@ -711,7 +711,7 @@ let split_at_last_rest_eq (#index : Type0) (c: block index)
 // This rlimit is a bit crazy, but this proof is not stable. It usually
 // goes through fast, but a high rlimit is a security against regression failures.
 #restart-solver
-#push-options "--z3rlimit 200 --z3cliopt smt.arith.nl=false"
+#push-options "--z3rlimit 200 --z3cliopt smt.arith.nl=false --quake 1/5"
 let update_small #index c i t t' p data len =
   [@inline_let] let _ = c.state.invariant_loc_in_footprint #i in
   [@inline_let] let _ = c.key.invariant_loc_in_footprint #i in
