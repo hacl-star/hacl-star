@@ -122,6 +122,20 @@ let point_eval (h:mem) (p:point) =
    feval h (gsub p nlimb nlimb),
    feval h (gsub p (2ul *! nlimb) nlimb))
 
+///  Create a point
+
+inline_for_extraction noextract
+val create_point: unit -> StackInline point
+  (requires fun h -> True)
+  (ensures  fun h0 f h1 ->
+    stack_allocated f h0 h1 (LSeq.create (3 * v nlimb) (u64 0)))
+    //point_inv h1 f /\
+    //point_as_nat3_proj h1 f == (S.zero, S.zero, S.zero))
+
+let create_point () =
+  create (3ul *! nlimb) (u64 0)
+
+
 ///  Conversion functions between affine and projective coordinates
 
 inline_for_extraction noextract
@@ -138,3 +152,13 @@ let to_proj_point p aff_p =
   copy x1 x2;
   copy y1 y2;
   set_one z1
+
+
+inline_for_extraction noextract
+val is_proj_point_at_inf_vartime: p:point -> Stack bool
+  (requires fun h -> live h p /\ point_inv h p)
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    b = S.is_proj_point_at_inf (point_as_nat3_proj h0 p))
+
+let is_proj_point_at_inf_vartime p =
+  is_felem_zero_vartime (getz p)

@@ -53,6 +53,14 @@ val load_qelem: f:qelem -> b:lbuffer uint8 32ul -> Stack unit
     qas_nat h1 f == BSeq.nat_from_bytes_be (as_seq h0 b))
 
 
+val load_qelem_vartime: f:qelem -> b:lbuffer uint8 32ul -> Stack bool
+  (requires fun h ->
+    live h f /\ live h b /\ disjoint f b)
+  (ensures  fun h0 m h1 -> modifies (loc f) h0 h1 /\
+   (let b_nat = BSeq.nat_from_bytes_be (as_seq h0 b) in
+    qas_nat h1 f == b_nat /\ m = (0 < b_nat && b_nat < S.q)))
+
+
 val load_qelem_modq: f:qelem -> b:lbuffer uint8 32ul -> Stack unit
   (requires fun h ->
     live h f /\ live h b /\ disjoint f b)
@@ -89,6 +97,14 @@ val is_qelem_zero_vartime (f:qelem) : Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
     m == (qas_nat h0 f = 0))
+
+
+inline_for_extraction noextract
+val is_qelem_eq_vartime (f1 f2:qelem) : Stack bool
+  (requires fun h ->
+    live h f1 /\ live h f2 /\ qe_lt_q h f1 /\ qe_lt_q h f2)
+  (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
+    m == (qas_nat h0 f1 = qas_nat h0 f2))
 
 
 val qadd (out f1 f2: qelem) : Stack unit

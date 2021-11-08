@@ -41,6 +41,22 @@ let ( *% ) = fmul
 let finv (x:felem) : felem = M.pow_mod #prime x (prime - 2)
 let ( /% ) (x y:felem) = x *% finv y
 
+///  Scalar field
+
+// Group order
+let q : q:pos{q < pow2 256} =
+  assert_norm (0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141 < pow2 256);
+  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
+
+let qelem = x:nat{x < q}
+let qadd (x y:qelem) : qelem = (x + y) % q
+let qmul (x y:qelem) : qelem = (x * y) % q
+let qinv (x:qelem) : qelem = M.pow_mod #q x (q - 2)
+
+let ( +^ ) = qadd
+let ( *^ ) = qmul
+
+let scalar_t = s:lbytes 32{nat_from_bytes_be s < q}
 
 ///  Elliptic curve
 
@@ -175,41 +191,22 @@ let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
   SE.sqr = point_double_c;
 }
 
-
 // [a]P
-let point_mul (a:lbytes 32) (p:proj_point) : proj_point =
-  let out = SE.exp_fw mk_k256_concrete_ops p 256 (nat_from_bytes_be a) 4 in
-  assert (to_aff_point out ==
-    LE.exp_fw #aff_point mk_k256_cm (to_aff_point p) 256 (nat_from_bytes_be a) 4);
+let point_mul (a:qelem) (p:proj_point) : proj_point =
+  let out = SE.exp_fw mk_k256_concrete_ops p 256 a 4 in
+  assert (to_aff_point out == LE.exp_fw #aff_point mk_k256_cm (to_aff_point p) 256 a 4);
   out
 
 // [a1]P1 + [a2]P2
-let point_mul_double (a1:lbytes 32) (p1:proj_point) (a2:lbytes 32) (p2:proj_point) : proj_point =
-  SE.exp_double_fw mk_k256_concrete_ops p1 256 (nat_from_bytes_be a1) p2 (nat_from_bytes_be a2) 4
+let point_mul_double (a1:qelem) (p1:proj_point) (a2:qelem) (p2:proj_point) : proj_point =
+  SE.exp_double_fw mk_k256_concrete_ops p1 256 a1 p2 a2 4
 
 // [a]G
-let point_mul_g (a:lbytes 32) : proj_point = point_mul a g
+let point_mul_g (a:qelem) : proj_point = point_mul a g
 
 // [a1]G + [a2]P
-let point_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:proj_point) : proj_point =
+let point_mul_double_g (a1:qelem) (a2:qelem) (p:proj_point) : proj_point =
   point_mul_double a1 g a2 p
-
-///  Scalar field
-
-// Group order
-let q : q:pos{q < pow2 256} =
-  assert_norm (0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141 < pow2 256);
-  0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
-
-let qelem = x:nat{x < q}
-let qadd (x y:qelem) : qelem = (x + y) % q
-let qmul (x y:qelem) : qelem = (x * y) % q
-let qinv (x:qelem) : qelem = M.pow_mod #q x (q - 2)
-
-let ( +^ ) = qadd
-let ( *^ ) = qmul
-
-let scalar_t = s:lbytes 32{nat_from_bytes_be s < q}
 
 ///  ECDSA with a prehashed message
 
@@ -222,13 +219,15 @@ val ecdsa_sign_hashed_msg:
   tuple3 scalar_t scalar_t bool
 
 let ecdsa_sign_hashed_msg m private_key k =
-  let _X, _Y, _Z = point_mul_g k in
+  let k_q = nat_from_bytes_be k in
+  let d_a = nat_from_bytes_be private_key in
+  let z = nat_from_bytes_be m % q in
+
+  let _X, _Y, _Z = point_mul_g k_q in
   let x = _X /% _Z in (* or (x, y) = to_aff_point (_X, _Y, _Z) *)
   let r = x % q in
 
-  let z = nat_from_bytes_be m % q in
-  let d_a = nat_from_bytes_be private_key in
-  let kinv = qinv (nat_from_bytes_be k) in  
+  let kinv = qinv k_q in
   let s = kinv *^ (z +^ r *^ d_a) in
 
   let rb = nat_to_bytes_be 32 r in
@@ -252,25 +251,29 @@ let ecdsa_verify_hashed_msg m public_key r s =
   let s = nat_from_bytes_be s in
   let z = nat_from_bytes_be m % q in
 
+  let is_r_valid = 0 < r && r < q in
+  let is_s_valid = 0 < s && s < q in
+
   assert_norm (q < pow2 256);
 
-  if not (0 < r && r < q) then false
+  if not (is_r_valid && is_s_valid) then false
   else begin
-    if not (0 < s && s < q) then false
+    let sinv = qinv s in
+    let u1 = z *^ sinv in
+    let u2 = r *^ sinv in
+    let _X, _Y, _Z = point_mul_double_g u1 u2 (to_proj_point public_key) in
+
+    let x = _X /% _Z in (* TODO: optimize, as we don't need to compute a field inverse *)
+    x % q = r end
+
+(*  if _Z = 0 then x = 0 and r <> 0, i.e., we return `false` anyway
+
+    if (is_proj_point_at_inf (_X, _Y, _Z)) then false
     else begin
-      let sinv = qinv s in
-      let u1 = z *^ sinv in
-      let u2 = r *^ sinv in
-      let _X, _Y, _Z =
-	point_mul_double_g (nat_to_bytes_be 32 u1) (nat_to_bytes_be 32 u2) (to_proj_point public_key) in
-
-      if (is_proj_point_at_inf (_X, _Y, _Z)) then false
-      else begin
-	let x = _X /% _Z in (* TODO: optimize, as we don't need to compute a field inverse *)
-	if x % q = r then true else false end
+      let x = _X /% _Z in
+      x % q = r
     end
-  end
-
+*)
 
 ///  ECDSA
 

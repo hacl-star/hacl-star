@@ -84,6 +84,13 @@ val set_zero: f:felem -> Stack unit
 
 
 inline_for_extraction noextract
+val is_felem_zero_vartime: f:felem -> Stack bool
+  (requires fun h -> live h f)
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    b = (as_nat h0 f = 0))
+
+
+inline_for_extraction noextract
 val set_one: f:felem -> Stack unit
   (requires fun h -> live h f)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\

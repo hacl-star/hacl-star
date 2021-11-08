@@ -24,6 +24,7 @@ module SC = Hacl.Spec.Bignum.Convert
 module S = Spec.K256
 
 open Hacl.K256.Field
+open Hacl.K256.Scalar
 open Hacl.Impl.K256.Point
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -124,71 +125,51 @@ let make_g g =
 
 
 // TODO: fix extraction for bn_from_bytes_le/be
-val point_mul: out:point -> scalar:lbuffer uint8 32ul -> q:point -> Stack unit
+val point_mul: out:point -> scalar:qelem -> q:point -> Stack unit
   (requires fun h ->
     live h out /\ live h scalar /\ live h q /\
     disjoint out q /\ disjoint out scalar /\ disjoint q scalar /\
-    point_inv h q)
+    point_inv h q /\ qas_nat h scalar < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_as_nat3_proj h1 out) ==
-    S.to_aff_point (S.point_mul (as_seq h0 scalar) (point_as_nat3_proj h0 q)))
+    S.to_aff_point (S.point_mul (qas_nat h0 scalar) (point_as_nat3_proj h0 q)))
 
 [@CInline]
 let point_mul out scalar q =
-  let h0 = ST.get () in
-  push_frame ();
-  let bscalar = create 4ul (u64 0) in
-  BC.bn_from_bytes_be 32ul scalar bscalar;
-  SC.bn_from_bytes_be_lemma #U64 32 (as_seq h0 scalar);
-
   make_point_at_inf out;
-  BE.lexp_fw_consttime 12ul 0ul mk_k256_concrete_ops (null uint64) q 4ul 256ul bscalar out 4ul;
-  pop_frame ()
+  BE.lexp_fw_consttime 12ul 0ul mk_k256_concrete_ops (null uint64) q 4ul 256ul scalar out 4ul
 
 
 val point_mul_double_vartime:
-    out:point
-  -> scalar1:lbuffer uint8 32ul
-  -> q1:point
-  -> scalar2:lbuffer uint8 32ul
-  -> q2:point ->
-  Stack unit
+  out:point -> scalar1:qelem -> q1:point -> scalar2:qelem -> q2:point -> Stack unit
   (requires fun h ->
     live h out /\ live h scalar1 /\ live h q1 /\ live h scalar2 /\ live h q2 /\
     disjoint q1 out /\ disjoint q2 out /\ disjoint q1 q2 /\
-    point_inv h q1 /\ point_inv h q2)
+    disjoint scalar1 out /\ disjoint scalar2 out /\
+    point_inv h q1 /\ point_inv h q2 /\
+    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_as_nat3_proj h1 out) ==
     S.to_aff_point (S.point_mul_double
-      (as_seq h0 scalar1) (point_as_nat3_proj h0 q1)
-      (as_seq h0 scalar2) (point_as_nat3_proj h0 q2)))
+      (qas_nat h0 scalar1) (point_as_nat3_proj h0 q1)
+      (qas_nat h0 scalar2) (point_as_nat3_proj h0 q2)))
 
 [@CInline]
 let point_mul_double_vartime out scalar1 q1 scalar2 q2 =
-  let h0 = ST.get () in
-  push_frame ();
-  let bscalar1 = create 4ul (u64 0) in
-  BC.bn_from_bytes_be 32ul scalar1 bscalar1;
-  SC.bn_from_bytes_be_lemma #U64 32 (as_seq h0 scalar1);
-
-  let bscalar2 = create 4ul (u64 0) in
-  BC.bn_from_bytes_be 32ul scalar2 bscalar2;
-  SC.bn_from_bytes_be_lemma #U64 32 (as_seq h0 scalar2);
-
   make_point_at_inf out;
-  ME.lexp_double_fw_vartime 12ul 0ul mk_k256_concrete_ops (null uint64) q1 4ul 256ul bscalar1 q2 bscalar2 out 4ul;
-  pop_frame ()
+  ME.lexp_double_fw_vartime 12ul 0ul mk_k256_concrete_ops (null uint64) q1 4ul 256ul scalar1 q2 scalar2 out 4ul
 
 
-val point_mul_g: out:point -> scalar:lbuffer uint8 32ul -> Stack unit
+val point_mul_g: out:point -> scalar:qelem -> Stack unit
   (requires fun h ->
-    live h scalar /\ live h out /\ disjoint out scalar)
+    live h scalar /\ live h out /\ disjoint out scalar /\
+    qas_nat h scalar < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_as_nat3_proj h1 out) ==
-    S.to_aff_point (S.point_mul_g (as_seq h0 scalar)))
+    S.to_aff_point (S.point_mul_g (qas_nat h0 scalar)))
 
 [@CInline]
 let point_mul_g out scalar =
@@ -199,21 +180,17 @@ let point_mul_g out scalar =
   pop_frame ()
 
 
-val point_mul_g_double_vartime:
-    out:point
-  -> scalar1:lbuffer uint8 32ul
-  -> scalar2:lbuffer uint8 32ul
-  -> q2:point ->
+val point_mul_g_double_vartime: out:point -> scalar1:qelem -> scalar2:qelem -> q2:point ->
   Stack unit
   (requires fun h ->
     live h out /\ live h scalar1 /\ live h scalar2 /\ live h q2 /\
-    disjoint q2 out /\
-    point_inv h q2)
+    disjoint q2 out /\ disjoint out scalar1 /\ disjoint out scalar2 /\
+    point_inv h q2 /\ qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_as_nat3_proj h1 out) ==
     S.to_aff_point (S.point_mul_double_g
-      (as_seq h0 scalar1) (as_seq h0 scalar2) (point_as_nat3_proj h0 q2)))
+      (qas_nat h0 scalar1) (qas_nat h0 scalar2) (point_as_nat3_proj h0 q2)))
 
 [@CInline]
 let point_mul_g_double_vartime out scalar1 scalar2 q2 =
