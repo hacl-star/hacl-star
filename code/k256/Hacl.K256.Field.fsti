@@ -46,10 +46,16 @@ let as_nat4 (f:felem4) =
 
 
 inline_for_extraction noextract
-val make_u64_4 (out:felem) (f0 f1 f2 f3:uint64) : Stack unit
+val make_u64_4 (out:felem) (f:felem4) : Stack unit
   (requires fun h -> live h out)
-  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ fe_lt_prime h1 out /\
-    as_nat h1 out == as_nat4 (f0, f1, f2, f3))
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_nat h1 out == as_nat4 f)
+
+
+inline_for_extraction noextract
+val make_prime_k256: unit -> Pure felem4
+  (requires True)
+  (ensures  fun r -> as_nat4 r = S.prime)
 
 
 inline_for_extraction noextract
@@ -59,7 +65,7 @@ val create_felem: unit -> StackInline felem
     stack_allocated f h0 h1 (LSeq.create (v nlimb) (u64 0)) /\
     as_nat h1 f == 0)
 
-
+// not used
 val load_felem: f:felem -> b:lbuffer uint8 32ul -> Stack unit
   (requires fun h ->
     live h f /\ live h b /\ disjoint f b /\
@@ -67,7 +73,7 @@ val load_felem: f:felem -> b:lbuffer uint8 32ul -> Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
     as_nat h1 f == BSeq.nat_from_bytes_be (as_seq h0 b))
 
-
+// not used
 val store_felem: b:lbuffer uint8 32ul -> f:felem -> Stack unit
   (requires fun h ->
     live h b /\ live h f /\ disjoint f b /\
@@ -84,25 +90,28 @@ val set_zero: f:felem -> Stack unit
 
 
 inline_for_extraction noextract
-val is_felem_zero_vartime: f:felem -> Stack bool
-  (requires fun h -> live h f)
-  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
-    b = (as_nat h0 f = 0))
-
-
-inline_for_extraction noextract
 val set_one: f:felem -> Stack unit
   (requires fun h -> live h f)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
     as_nat h1 f == 1)
 
-
+// not used
 inline_for_extraction noextract
 val copy_felem (f1 f2:felem) : Stack unit
   (requires fun h ->
     live h f1 /\ live h f2 /\ disjoint f1 f2)
   (ensures  fun h0 _ h1 -> modifies (loc f1) h0 h1 /\
     as_seq h1 f1 == as_seq h0 f2)
+
+
+// num = 3; 2; 8
+val fmul_small_num (out f:felem) (num:uint64) : Stack unit
+  (requires fun h -> // v num <= 8 is a maximum value for point addition and doubling
+    live h f /\ live h out /\ eq_or_disjoint out f /\
+    fe_lt_prime h f)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    as_nat h1 out = S.fmul (v num) (as_nat h0 f) /\
+    fe_lt_prime h1 out)
 
 
 val fmul_3b (out f:felem) : Stack unit
@@ -120,15 +129,6 @@ val fmul_24b (out f:felem) : Stack unit
     fe_lt_prime h f)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_nat h1 out = S.fmul (S.fmul 24 S.b) (as_nat h0 f) /\
-    fe_lt_prime h1 out)
-
-
-val fmul_small_num (out f:felem) (num:uint64) : Stack unit
-  (requires fun h -> v num <= 8 /\ // a maximum value for point addition and doubling
-    live h f /\ live h out /\ eq_or_disjoint out f /\
-    fe_lt_prime h f)
-  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out = S.fmul (v num) (as_nat h0 f) /\
     fe_lt_prime h1 out)
 
 
@@ -173,7 +173,7 @@ val fsqr (out f: felem) : Stack unit
 
 val finv (out f: felem) : Stack unit
   (requires fun h ->
-    live h out /\ live h f /\ eq_or_disjoint out f /\
+    live h out /\ live h f /\ disjoint out f /\
     fe_lt_prime h f)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_nat h1 out == S.finv (as_nat h0 f)  /\

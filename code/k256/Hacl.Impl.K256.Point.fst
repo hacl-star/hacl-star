@@ -152,13 +152,3 @@ let to_proj_point p aff_p =
   copy x1 x2;
   copy y1 y2;
   set_one z1
-
-
-inline_for_extraction noextract
-val is_proj_point_at_inf_vartime: p:point -> Stack bool
-  (requires fun h -> live h p /\ point_inv h p)
-  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
-    b = S.is_proj_point_at_inf (point_as_nat3_proj h0 p))
-
-let is_proj_point_at_inf_vartime p =
-  is_felem_zero_vartime (getz p)

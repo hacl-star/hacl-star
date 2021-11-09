@@ -97,29 +97,26 @@ val make_g: g:point -> Stack unit
 
 let make_g g =
   let gx, gy, gz = getx g, gety g, getz g in
-  make_u64_4 gx
-    (u64 0x59f2815b16f81798)
-    (u64 0x029bfcdb2dce28d9)
-    (u64 0x55a06295ce870b07)
-    (u64 0x79be667ef9dcbbac);
 
-  assert_norm (S.g_x == as_nat4
-    (u64 0x59f2815b16f81798,
-     u64 0x029bfcdb2dce28d9,
-     u64 0x55a06295ce870b07,
-     u64 0x79be667ef9dcbbac));
+  [@inline_let]
+  let x =
+   (u64 0x59f2815b16f81798,
+    u64 0x029bfcdb2dce28d9,
+    u64 0x55a06295ce870b07,
+    u64 0x79be667ef9dcbbac) in
 
-  make_u64_4 gy
-    (u64 0x9c47d08ffb10d4b8)
-    (u64 0xfd17b448a6855419)
-    (u64 0x5da4fbfc0e1108a8)
-    (u64 0x483ada7726a3c465);
+  assert_norm (S.g_x == as_nat4 x);
+  make_u64_4 gx x;
 
-  assert_norm (S.g_y == as_nat4
-    (u64 0x9c47d08ffb10d4b8,
-     u64 0xfd17b448a6855419,
-     u64 0x5da4fbfc0e1108a8,
-     u64 0x483ada7726a3c465));
+  [@inline_let]
+  let y =
+   (u64 0x9c47d08ffb10d4b8,
+    u64 0xfd17b448a6855419,
+    u64 0x5da4fbfc0e1108a8,
+    u64 0x483ada7726a3c465) in
+
+  assert_norm (S.g_y == as_nat4 y);
+  make_u64_4 gy y;
 
   set_one gz
 

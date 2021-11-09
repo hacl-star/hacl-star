@@ -84,6 +84,7 @@ val store_qelem: b:lbuffer uint8 32ul -> f:qelem -> Stack unit
     as_seq h1 b == BSeq.nat_to_bytes_be 32 (qas_nat h0 f))
 
 
+// not used
 inline_for_extraction noextract
 val copy_qelem (f1 f2: qelem) : Stack unit
   (requires fun h ->
