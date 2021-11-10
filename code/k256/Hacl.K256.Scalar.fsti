@@ -38,11 +38,35 @@ let qe_lt_q (h:mem) (e:qelem) = qas_nat h e < S.q
 
 
 inline_for_extraction noextract
+let qelem4 = uint64 & uint64 & uint64 & uint64
+
+noextract
+let qas_nat4 (f:qelem4) =
+  let (f0, f1, f2, f3) = f in
+  v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192
+
+
+inline_for_extraction noextract
 val create_qelem: unit -> StackInline qelem
   (requires fun h -> True)
   (ensures  fun h0 f h1 ->
     stack_allocated f h0 h1 (LSeq.create (v qnlimb) (u64 0)) /\
     qas_nat h1 f == 0)
+
+
+inline_for_extraction noextract
+val is_qelem_zero_vartime (f:qelem) : Stack bool
+  (requires fun h -> live h f)
+  (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
+    m == (qas_nat h0 f = 0))
+
+
+inline_for_extraction noextract
+val is_qelem_eq_vartime (f1 f2:qelem) : Stack bool
+  (requires fun h ->
+    live h f1 /\ live h f2 /\ qe_lt_q h f1 /\ qe_lt_q h f2)
+  (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
+    m == (qas_nat h0 f1 = qas_nat h0 f2))
 
 
 val load_qelem: f:qelem -> b:lbuffer uint8 32ul -> Stack unit
@@ -93,21 +117,6 @@ val copy_qelem (f1 f2: qelem) : Stack unit
     as_seq h1 f1 == as_seq h0 f2)
 
 
-inline_for_extraction noextract
-val is_qelem_zero_vartime (f:qelem) : Stack bool
-  (requires fun h -> live h f)
-  (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
-    m == (qas_nat h0 f = 0))
-
-
-inline_for_extraction noextract
-val is_qelem_eq_vartime (f1 f2:qelem) : Stack bool
-  (requires fun h ->
-    live h f1 /\ live h f2 /\ qe_lt_q h f1 /\ qe_lt_q h f2)
-  (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
-    m == (qas_nat h0 f1 = qas_nat h0 f2))
-
-
 val qadd (out f1 f2: qelem) : Stack unit
   (requires fun h ->
     live h out /\ live h f1 /\ live h f2 /\
@@ -130,7 +139,7 @@ val qmul (out f1 f2: qelem) : Stack unit
 
 val qinv (out f: qelem) : Stack unit
   (requires fun h ->
-    live h out /\ live h f /\ eq_or_disjoint out f /\
+    live h out /\ live h f /\ disjoint out f /\
     qe_lt_q h f)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     qas_nat h1 out == S.qinv (qas_nat h0 f)  /\

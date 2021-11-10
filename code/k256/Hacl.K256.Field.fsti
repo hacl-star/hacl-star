@@ -65,7 +65,6 @@ val create_felem: unit -> StackInline felem
     stack_allocated f h0 h1 (LSeq.create (v nlimb) (u64 0)) /\
     as_nat h1 f == 0)
 
-// not used
 val load_felem: f:felem -> b:lbuffer uint8 32ul -> Stack unit
   (requires fun h ->
     live h f /\ live h b /\ disjoint f b /\

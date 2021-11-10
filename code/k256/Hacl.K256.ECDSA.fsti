@@ -11,23 +11,15 @@ module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
-module BD = Hacl.Bignum.Definitions
-
 module S = Spec.K256
 
-open Hacl.K256.Field
-open Hacl.Impl.K256.Point
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
+let lbytes32 = lbuffer uint8 32ul
 
-val ecdsa_sign_hashed_msg:
-    r:lbuffer uint8 32ul
-  -> s:lbuffer uint8 32ul
-  -> m:lbuffer uint8 32ul
-  -> private_key:lbuffer uint8 32ul
-  -> k:lbuffer uint8 32ul ->
-  Stack bool
+val ecdsa_sign_hashed_msg (r s m private_key k:lbytes32) : Stack bool
   (requires fun h ->
     live h m /\ live h private_key /\ live h k /\
     live h r /\ live h s /\ disjoint r s /\
@@ -41,31 +33,20 @@ val ecdsa_sign_hashed_msg:
      as_seq h1 r == r_s /\ as_seq h1 s == s_s /\ b == b_s))
 
 
-// TODO: take a public_key as an array of bytes?
-val ecdsa_verify_hashed_msg:
-    m:lbuffer uint8 32ul
-  -> public_key:aff_point
-  -> r:lbuffer uint8 32ul
-  -> s:lbuffer uint8 32ul ->
-  Stack bool
+val ecdsa_verify_hashed_msg (m public_key_x public_key_y r s:lbytes32) : Stack bool
   (requires fun h ->
-    live h m /\ live h public_key /\
+    live h m /\ live h public_key_x /\ live h public_key_y /\
     live h r /\ live h s /\ disjoint r s /\
 
-    aff_point_inv h public_key)
+   (let pk_x = BSeq.nat_from_bytes_be (as_seq h public_key_x) in
+    let pk_y = BSeq.nat_from_bytes_be (as_seq h public_key_y) in
+    pk_x < S.prime /\ pk_y < S.prime))
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
     b == S.ecdsa_verify_hashed_msg (as_seq h0 m)
-      (aff_point_as_nat2_aff h0 public_key) (as_seq h0 r) (as_seq h0 s))
+      (as_seq h0 public_key_x) (as_seq h0 public_key_y) (as_seq h0 r) (as_seq h0 s))
 
 
-val ecdsa_sign_sha256:
-    r:lbuffer uint8 32ul
-  -> s:lbuffer uint8 32ul
-  -> msg_len:size_t
-  -> msg:lbuffer uint8 msg_len
-  -> private_key:lbuffer uint8 32ul
-  -> k:lbuffer uint8 32ul ->
-  Stack bool
+val ecdsa_sign_sha256 (r s:lbytes32) (msg_len:size_t) (msg:lbuffer uint8 msg_len) (private_key k:lbytes32) : Stack bool
   (requires fun h ->
     live h msg /\ live h private_key /\ live h k /\
     live h r /\ live h s /\ disjoint r s /\
@@ -79,18 +60,14 @@ val ecdsa_sign_sha256:
      as_seq h1 r == r_s /\ as_seq h1 s == s_s /\ b == b_s))
 
 
-val ecdsa_verify_sha256:
-    msg_len:size_t
-  -> msg:lbuffer uint8 msg_len
-  -> public_key:aff_point
-  -> r:lbuffer uint8 32ul
-  -> s:lbuffer uint8 32ul ->
-  Stack bool
+val ecdsa_verify_sha256 (msg_len:size_t) (msg:lbuffer uint8 msg_len) (public_key_x public_key_y r s:lbytes32) : Stack bool
   (requires fun h ->
-    live h msg /\ live h public_key /\
+    live h msg /\ live h public_key_x /\ live h public_key_y /\
     live h r /\ live h s /\ disjoint r s /\
 
-    aff_point_inv h public_key)
+   (let pk_x = BSeq.nat_from_bytes_be (as_seq h public_key_x) in
+    let pk_y = BSeq.nat_from_bytes_be (as_seq h public_key_y) in
+    pk_x < S.prime /\ pk_y < S.prime))
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
     b == S.ecdsa_verify_sha256 (v msg_len) (as_seq h0 msg)
-      (aff_point_as_nat2_aff h0 public_key) (as_seq h0 r) (as_seq h0 s))
+      (as_seq h0 public_key_x) (as_seq h0 public_key_y) (as_seq h0 r) (as_seq h0 s))

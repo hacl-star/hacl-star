@@ -242,11 +242,15 @@ let ecdsa_sign_hashed_msg m private_key k =
 // TODO: check that `public_key` is a point on the curve
 val ecdsa_verify_hashed_msg:
      m:lbytes 32
-  -> public_key:aff_point
+  -> public_key_x:lbytes 32{nat_from_bytes_be public_key_x < prime}
+  -> public_key_y:lbytes 32{nat_from_bytes_be public_key_y < prime}
   -> r:lbytes 32 -> s:lbytes 32 ->
   bool
 
-let ecdsa_verify_hashed_msg m public_key r s =
+let ecdsa_verify_hashed_msg m public_key_x public_key_y r s =
+  let pk_x = nat_from_bytes_be public_key_x in
+  let pk_y = nat_from_bytes_be public_key_y in
+
   let r = nat_from_bytes_be r in
   let s = nat_from_bytes_be s in
   let z = nat_from_bytes_be m % q in
@@ -261,7 +265,7 @@ let ecdsa_verify_hashed_msg m public_key r s =
     let sinv = qinv s in
     let u1 = z *^ sinv in
     let u2 = r *^ sinv in
-    let _X, _Y, _Z = point_mul_double_g u1 u2 (to_proj_point public_key) in
+    let _X, _Y, _Z = point_mul_double_g u1 u2 (pk_x, pk_y, one) in
 
     let x = _X /% _Z in (* TODO: optimize, as we don't need to compute a field inverse *)
     x % q = r end
@@ -296,10 +300,11 @@ let ecdsa_sign_sha256 msg_len msg private_key k =
 val ecdsa_verify_sha256:
     msg_len:size_nat
   -> msg:lbytes msg_len
-  -> public_key:aff_point
+  -> public_key_x:lbytes 32{nat_from_bytes_be public_key_x < prime}
+  -> public_key_y:lbytes 32{nat_from_bytes_be public_key_y < prime}
   -> r:lbytes 32 -> s:lbytes 32 ->
   bool
 
-let ecdsa_verify_sha256 msg_len msg public_key r s =
+let ecdsa_verify_sha256 msg_len msg public_key_x public_key_y r s =
   let m = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
-  ecdsa_verify_hashed_msg m public_key r s
+  ecdsa_verify_hashed_msg m public_key_x public_key_y r s

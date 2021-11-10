@@ -9,8 +9,9 @@ open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
-module SD = Hacl.Spec.Bignum.Definitions
+module BSeq = Lib.ByteSequence
 
+module SD = Hacl.Spec.Bignum.Definitions
 module S = Spec.K256
 
 open Hacl.K256.Field
@@ -139,16 +140,26 @@ let create_point () =
 ///  Conversion functions between affine and projective coordinates
 
 inline_for_extraction noextract
-val to_proj_point: p:point -> aff_p:aff_point -> Stack unit
+val to_proj_point (p:point) (x y:lbuffer uint8 32ul) : Stack unit
   (requires fun h ->
-    live h p /\ live h aff_p /\ disjoint p aff_p /\
-    aff_point_inv h aff_p)
-  (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_inv h1 p /\
-    point_as_nat3_proj h1 p == S.to_proj_point (aff_point_as_nat2_aff h0 aff_p))
+    live h p /\ live h x /\ live h y /\ disjoint p x /\ disjoint p y /\
 
-let to_proj_point p aff_p =
+    BSeq.nat_from_bytes_be (as_seq h x) < S.prime /\
+    BSeq.nat_from_bytes_be (as_seq h y) < S.prime)
+  (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_inv h1 p /\
+    point_as_nat3_proj h1 p ==
+     (BSeq.nat_from_bytes_be (as_seq h0 x),
+      BSeq.nat_from_bytes_be (as_seq h0 y),
+      S.one))
+
+let to_proj_point p x y =
+  push_frame ();
+  let x2 = create nlimb (u64 0) in
+  let y2 = create nlimb (u64 0) in
+  load_felem x2 x;
+  load_felem y2 y;
   let x1, y1, z1 = getx p, gety p, getz p in
-  let x2, y2 = aff_getx aff_p, aff_gety aff_p in
   copy x1 x2;
   copy y1 y2;
-  set_one z1
+  set_one z1;
+  pop_frame ()

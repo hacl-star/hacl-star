@@ -103,11 +103,18 @@ let create_felem () =
   SD.bn_eval_zeroes #U64 (v nlimb) (v nlimb);
   create nlimb (u64 0)
 
-// not used
-let load_felem f b = admit()
+
+let load_felem f b =
+  let h0 = ST.get () in
+  SN.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
+  BN.bn_from_bytes_be 32ul b f
+
 
 // not used
-let store_felem b f = admit()
+let store_felem b f =
+  let h0 = ST.get () in
+  SN.bn_to_bytes_be_lemma #U64 32 (as_seq h0 f);
+  BN.bn_to_bytes_be 32ul f b
 
 
 let set_zero f =
@@ -122,7 +129,7 @@ let set_one f =
   SN.bn_from_uint_lemma (v nlimb) (u64 1)
 
 // not used
-let copy_felem f1 f2 = admit()
+let copy_felem f1 f2 = copy f1 f2
 
 
 let fmul_small_num out f1 num =
