@@ -1,0 +1,19 @@
+module Hacl.Impl.Sparkle
+
+open FStar.HyperStack.All
+open FStar.HyperStack
+module ST = FStar.HyperStack.ST
+
+open Lib.IntTypes
+open Lib.Buffer
+
+#reset-options " --z3rlimit 200"
+
+open Lib.IntTypes
+open Lib.Buffer
+
+[@ CInline]
+val cswap: bit:uint64{v bit <= 1} -> p:uint64 -> q:uint64
+  -> Stack unit
+    (requires fun h -> True)
+    (ensures  fun h0 _ h1 -> True)
