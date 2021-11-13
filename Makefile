@@ -272,14 +272,17 @@ FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_SOURCE_DIRS)) \
 
 ifndef NODEPEND
 ifndef MAKE_RESTARTS
-# Note that the --extract argument only controls what is extracted for OCaml,
+# Note that the --extract 'OCaml:...' argument controls what is extracted for OCaml,
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
+# For Kremlin, we use --extract 'Kremlin:*' to extract everything and let krml
+# decide what to keep based on reachability and bundling
 .fstar-depend-%: .FORCE
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer +C -C.String -C.Failure' > $@ && \
+	    --extract 'Kremlin:*' \
+	    --extract 'OCaml:-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer +C -C.String -C.Failure' > $@ && \
 	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 

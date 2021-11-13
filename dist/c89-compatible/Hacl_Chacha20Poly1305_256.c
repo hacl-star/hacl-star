@@ -1056,7 +1056,10 @@ poly1305_do_256(
     {
       poly1305_padded_256(ctx, aadlen, aad);
     }
-    poly1305_padded_256(ctx, mlen, m);
+    if (mlen != (uint32_t)0U)
+    {
+      poly1305_padded_256(ctx, mlen, m);
+    }
     store64_le(block, (uint64_t)aadlen);
     store64_le(block + (uint32_t)8U, (uint64_t)mlen);
     pre = ctx + (uint32_t)5U;

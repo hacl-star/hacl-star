@@ -12,19 +12,24 @@ if [[ $CC == "" ]]; then
   CC=cc
 fi
 
-my_mktemp () {
+my_mktemp_dir () {
   local name=$1
-  local ext=$2
-  # Note: --suffix is not POSIX, doesn't work on OSX
-  local f=$(mktemp /tmp/$name.XXXXXXX)
-  if [[ $f == "" ]]; then
-    local f=$(mktemp -p . $name.XXXXXXX)
+  # Note: --suffix is not POSIX, doesn't work on OSX.
+  # Also on OSX, the XXXXXXX pattern cannot be followed by anything else.
+  local dir=$(mktemp -d /tmp/$name-XXXXXXX)
+  if [[ $dir == "" ]]; then
+    # Note: -p doesn't work on OSX, all tests will fail in case there is no
+    # permission to write to /tmp
+    local dir=$(mktemp -d -p . $name-XXXXXXX)
   fi
-  echo $f.ext
+  echo $dir
 }
 
 my_mktemp_c () {
-  my_mktemp $1 .c
+  local name=$1
+  local dir=$(my_mktemp_dir $name)
+  local file=$dir/$name.c
+  echo $file
 }
 
 # Helpers to help do feature or bug detection
@@ -68,8 +73,9 @@ check_no_bug81300 () {
   # but mozilla. If lib_intrinsics.h is not present, assume there is no bug and
   # return success.
   if [ -f lib_intrinsics.h ]; then
-  local out=$(my_mktemp testbug81300)
-  local file=$out.c
+  local dir=$(my_mktemp_dir testbug81300)
+  local file=$dir/testbug81300.c
+  local out=$dir/testbug81300.out
   cat > $file <<EOF
 #include <inttypes.h>
 #include <stdio.h>

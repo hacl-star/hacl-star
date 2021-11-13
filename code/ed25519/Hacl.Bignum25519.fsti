@@ -227,7 +227,7 @@ val inverse:
     )
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
       F51.felem_fits h1 out (1, 2, 1, 1, 1) /\
-      F51.fevalh h1 out == Spec.Ed25519.modp_inv (F51.fevalh h0 a)
+      F51.fevalh h1 out == SC.fpow (F51.fevalh h0 a) (SC.prime - 2)
     )
 
 val reduce:

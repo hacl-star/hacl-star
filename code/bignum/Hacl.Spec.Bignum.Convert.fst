@@ -457,3 +457,43 @@ let bn_to_bytes_le_lemma #t len b =
 
   Classical.forall_intro aux;
   eq_intro (nat_to_intseq_le #U8 #SEC len (bn_v b)) res
+
+
+val bn_from_bytes_le_is_uints_from_bytes_le:
+    #t:limb_t
+  -> len:size_pos{numbytes t * (blocks len (numbytes t)) <= max_size_t /\ len % numbytes t = 0}
+  -> b:lseq uint8 len ->
+  Lemma (bn_from_bytes_le #t len b == uints_from_bytes_le b)
+
+let bn_from_bytes_le_is_uints_from_bytes_le #t len b =
+  let lp = bn_from_bytes_le #t len b in
+  let rp = uints_from_bytes_le #t #SEC #(len / numbytes t) b in
+  //uints_from_bytes_le_nat_lemma #t #SEC #(len / numbytes t) b;
+  //assert (nat_from_intseq_le rp == nat_from_bytes_le b);
+
+  //bn_from_bytes_le_lemma #t len b;
+  //assert (bn_v lp == nat_from_bytes_le b);
+  //assert (nat_from_intseq_le rp == bn_v lp);
+  assert (bn_v rp == bn_v lp);
+  bn_eval_inj (len / numbytes t) rp lp
+
+
+val bn_from_bytes_be_is_uints_from_bytes_be:
+    #t:limb_t
+  -> len:size_pos{numbytes t * (blocks len (numbytes t)) <= max_size_t /\ len % numbytes t = 0}
+  -> b:lseq uint8 len ->
+  Lemma (reverse (bn_from_bytes_be #t len b) == uints_from_bytes_be b)
+
+let bn_from_bytes_be_is_uints_from_bytes_be #t len b =
+  let lp = bn_from_bytes_be #t len b in
+  let rp = uints_from_bytes_be #t #SEC #(len / numbytes t) b in
+  uints_from_bytes_be_nat_lemma #t #SEC #(len / numbytes t) b;
+  assert (nat_from_intseq_be rp == nat_from_bytes_be b);
+
+  bn_from_bytes_be_lemma #t len b;
+  assert (bn_v lp == nat_from_bytes_be b);
+
+  bn_v_is_nat_from_intseq_be_lemma (len / numbytes t) lp;
+  assert (bn_v lp == nat_from_intseq_be (reverse lp));
+  assert (nat_from_intseq_be rp == nat_from_intseq_be (reverse lp));
+  nat_from_intseq_be_inj rp (reverse lp)
