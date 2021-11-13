@@ -48,7 +48,7 @@ NMake-compatible makefile).
 .. note::
 
   The ``gcc-compatible`` distribution also features OCaml bindings to our code.
-  These require a valid OCaml setup, including packages ctypes, ctypes-foreign
+  These require a valid OCaml setup, including packages ctypes
   and bigstring, usually obtained via OPAM. You can easily disable building
   these bindings by removing the ``lib_gen`` directory in
   ``dist/gcc-compatible``.
