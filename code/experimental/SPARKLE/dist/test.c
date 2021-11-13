@@ -46,7 +46,7 @@ int main(int argc, char const *argv[])
     uint8_t* input_hacl = (uint8_t*) malloc (sizeof (uint8_t) * 32);
     uint8_t* output_hacl = (uint8_t*) malloc (sizeof (uint8_t) * 32);
 
-    Hacl_Impl_Sparkle_sparkle256(32, input_hacl, output_hacl);
+    Hacl_Impl_Sparkle_sparkle256(1000, input_hacl, output_hacl);
     printf("%s\n", "Input");
     compare_and_print(32, input, input_hacl);
     printf("%s\n", "Output");
@@ -56,7 +56,7 @@ int main(int argc, char const *argv[])
 
 
     for (int j = 0; j < ROUNDS; j++)
-        sparkle(expected_output, 4, 32);
+        sparkle(expected_output, 4, 1000);
     
 
 	cycles a,b;
@@ -66,7 +66,7 @@ int main(int argc, char const *argv[])
     a = cpucycles_begin();
 
     for (int j = 0; j < ROUNDS; j++)
-    	sparkle(expected_output, 4, 32);
+    	sparkle(expected_output, 4, 10000);
     
     b = cpucycles_end();
     t2 = clock();
@@ -83,13 +83,13 @@ int main(int argc, char const *argv[])
 
 
     for (int j = 0; j < ROUNDS; j++)
-        Hacl_Impl_Sparkle_sparkle256(32, output_hacl, output_hacl);
+        Hacl_Impl_Sparkle_sparkle256(1000, output_hacl, output_hacl);
 
 	t1 = clock();
     a = cpucycles_begin();
 
     for (int j = 0; j < ROUNDS; j++)
-    	Hacl_Impl_Sparkle_sparkle256(32, output_hacl, output_hacl);
+    	Hacl_Impl_Sparkle_sparkle256(10000, output_hacl, output_hacl);
     
     b = cpucycles_end();
     t2 = clock();
