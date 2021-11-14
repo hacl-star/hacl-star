@@ -9,6 +9,8 @@ open Lib.ByteBuffer
 open Lib.Buffer
 
 open Spec.SPARKLE2
+open FStar.Mul
+
 
 #set-options " --z3rlimit 200"
 
@@ -29,53 +31,23 @@ type branch_len =  n: size_t {v n = 1 \/ v n = 2 \/ v n = 3 \/ v n = 4 \/ v n = 
 inline_for_extraction noextract
 type branch branch_len = lbuffer uint32 (2ul *! branch_len)
 
-inline_for_extraction noextract
-val arx: uint32 -> b: tuple2 uint32 uint32 -> Stack (tuple2 uint32 uint32) 
-  (requires fun h -> true)
-  (ensures fun h0 _ h1 -> True)
-    
-let arx c (x, y) = 
-
-  let x = x +. (y >>>. 31ul) in
-  let y = y ^. (x >>>. 24ul) in
-  let x = x ^. c in
-
-  let x = x +. (y >>>. 17ul) in
-  let y = y ^. (x >>>. 17ul) in
-  let x = x ^. c in
-
-  let x = x +. y in
-  let y = y ^. (x >>>. 31ul) in
-  let x = x ^. c in
-
-  let x = x +. (y >>>. 24ul) in
-  let y = y ^. (x >>>. 16ul) in
-  let x = x ^. c in
-  (x, y)
-
-
-inline_for_extraction noextract
-val l1: x:uint32 -> Tot uint32
-let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
-
-
-open FStar.Mul
 
 inline_for_extraction noextract
 val getBranch: #n: branch_len -> b: branch n -> i: size_t{v i < v n} -> 
   Stack (tuple2 uint32 uint32)
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies0 h0 h1)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.SPARKLE2.getBranch #(v n) (v i) (as_seq h0 b))
 
 let getBranch #l b i =  
   Lib.Buffer.index b (2ul *! i), Lib.Buffer.index b (2ul *! i +! 1ul)
 
 
 inline_for_extraction noextract 
-val setBranch: #n: branch_len -> i: size_t {v i < v n} -> branch1 -> b: branch n -> 
+val setBranch: #n: branch_len -> i: size_t {v i < v n} -> b0: branch1 -> b: branch n -> 
   Stack unit 
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)  
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ 
+    as_seq h1 b == Spec.SPARKLE2.setBranch #(v n) (v i) b0 (as_seq h0 b))
 
 let setBranch #n i (x, y) b =
   upd #uint32 b (2ul *! i) x; upd #uint32 b (2ul *! i +! 1ul) y
@@ -85,10 +57,15 @@ inline_for_extraction noextract
 val xor_step: #l: branch_len -> b: branch l
   -> tx: lbuffer uint32 (size 1) 
   -> ty: lbuffer uint32 (size 1) 
-   -> i: size_t {v i <= v l / 2} ->
+  -> i: size_t {v i <= v l / 2} ->
   Stack unit
-    (requires fun h -> live h b /\ live h tx /\ live h ty /\ disjoint tx ty)
-    (ensures fun h0 _ h1 -> modifies (loc tx |+| loc ty) h0 h1)
+  (requires fun h -> live h b /\ live h tx /\ live h ty /\ disjoint tx ty)
+  (ensures fun h0 _ h1 -> modifies (loc tx |+| loc ty) h0 h1 /\ (
+    let tx_0 = Lib.Sequence.index (as_seq h0 tx) 0 in 
+    let ty_0 = Lib.Sequence.index (as_seq h0 ty) 0 in 
+    let tx_1: uint32 = Lib.Sequence.index (as_seq h1 tx) 0 in 
+    let ty_1: uint32 = Lib.Sequence.index (as_seq h1 ty) 0 in  
+    (tx_1, ty_1) == Spec.SPARKLE2.xor_step #(v l) (as_seq h0 b) (v i) (tx_0, ty_0)))
 
 let xor_step #l b tx ty i = 
   let xi, yi = getBranch b i in 
@@ -96,20 +73,43 @@ let xor_step #l b tx ty i =
   let ty_0 = index ty (size 0) in 
   upd tx (size 0) (xi ^. tx_0);
   upd ty (size 0) (yi ^. ty_0)
-  
-inline_for_extraction noextract
-(* tx && ty are used to store the xor result *)
-val xor: #l: branch_len -> b: branch l -> tx: lbuffer uint32 (size 1) -> ty: lbuffer uint32 (size 1) ->  
-  Stack unit
-    (requires fun h -> live h b /\ live h ty /\ live h tx /\ disjoint tx ty)
-    (ensures fun h0 _ h1 -> modifies (loc tx |+| loc ty) h0 h1)
 
-let xor #l b tx ty = 
+
+inline_for_extraction
+val xor: #l: branch_len -> b: branch l -> Stack (tuple2 uint32 uint32)
+    (requires fun h -> live h b)
+    (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.SPARKLE2.xor #(v l) (as_seq h0 b))
+
+let xor #l b = 
+  push_frame();
+    let tx = create (size 1) (u32 0) in 
+    let ty = create (size 1) (u32 0) in 
   let h0 = ST.get() in 
-  Lib.Loops.for 0ul (l >>. 1ul) 
-    (fun h i -> live h b /\ live h ty /\ live h tx /\ disjoint tx ty /\ modifies (loc tx |+| loc ty) h0 h) 
-    (fun (i: size_t {v i <= v l / 2}) -> xor_step b tx ty i)
+  let inv h (i: nat {i <= v l / 2})  = live h b /\ live h ty /\ live h tx /\ 
+    disjoint tx ty /\ disjoint tx b /\ disjoint ty b /\
+    modifies (loc tx |+| loc ty) h0 h /\ (
+      let tx_0 = Lib.Sequence.index (as_seq h0 tx) 0 in 
+      let ty_0 = Lib.Sequence.index (as_seq h0 ty) 0 in 
+      let tx_1: uint32 = Lib.Sequence.index (as_seq h tx) 0 in 
+      let ty_1: uint32 = Lib.Sequence.index (as_seq h ty) 0 in  
+      (tx_1, ty_1) == 
+	Lib.LoopCombinators.repeati #(tuple2 uint32 uint32) i (Spec.SPARKLE2.xor_step #(v l) (as_seq h0 b)) (tx_0, ty_0)) in 
+  Lib.LoopCombinators.eq_repeati0 (v l / 2 + 1) (Spec.SPARKLE2.xor_step #(v l) (as_seq h0 b)) (
+    Lib.Sequence.index (as_seq h0 tx) 0, Lib.Sequence.index (as_seq h0 ty) 0);
     
+  Lib.Loops.for 0ul (l >>. 1ul) inv
+    (fun (i: size_t {v i < v l / 2}) -> 
+      xor_step b tx ty i;
+      let f = Spec.SPARKLE2.xor_step #(v l) (as_seq h0 b) in 
+      
+      let tx_0 = Lib.Sequence.index (as_seq h0 tx) 0 in 
+      let ty_0 = Lib.Sequence.index (as_seq h0 ty) 0 in 
+      Lib.LoopCombinators.unfold_repeati (v l / 2 + 1) f (tx_0, ty_0) (v i));
+  let r0, r1 = index tx (size 0), index ty (size 0) in 
+  pop_frame();
+  r0, r1
+
+
 inline_for_extraction noextract
 val xor_3: i0: tuple2 uint32 uint32  -> i1: tuple2 uint32 uint32  -> i2: tuple2 uint32 uint32 -> 
   Stack (tuple2 uint32 uint32) 
@@ -128,16 +128,8 @@ val m: #l: branch_len -> b: branch l ->  Stack (tuple2 uint32 uint32)
   (ensures fun h0 r h1 -> modifies (loc b) h0 h1)
 
 let m #n b = 
-  push_frame();
-    let tx = create (size 1) (u32 0) in 
-    let ty = create (size 1) (u32 0) in 
-    
-    xor #n b tx ty;
-    let ltx = l1 (index tx (size 0)) in
-    let lty = l1 (index ty (size 0)) in 
-    
-  pop_frame();
-  (ltx, lty)
+  let ltx, lty = xor #n b in 
+  (l1 ltx, l1 lty)
 
 
 inline_for_extraction
