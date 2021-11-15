@@ -1,4 +1,4 @@
-module Hacl.Impl.Sparkle
+module Hacl.Impl.Sparkle1_test
 
 open FStar.HyperStack.All
 open FStar.HyperStack
@@ -9,10 +9,9 @@ open Lib.ByteBuffer
 open Lib.Buffer
 
 open Spec.SPARKLE2
-open FStar.Mul
-
 
 #set-options " --z3rlimit 200"
+
 
 inline_for_extraction
 let size_word: size_t = 4ul
@@ -53,6 +52,7 @@ let setBranch #n i (x, y) b =
   upd #uint32 b (2ul *! i) x; upd #uint32 b (2ul *! i +! 1ul) y
 
 
+inline_for_extraction noextract
 val xor_step: #l: branch_len -> b: branch l
   -> tx: lbuffer uint32 (size 1) 
   -> ty: lbuffer uint32 (size 1) 
@@ -74,6 +74,7 @@ let xor_step #l b tx ty i =
   upd ty (size 0) (yi ^. ty_0)
 
 
+inline_for_extraction
 val xor: #l: branch_len -> b: branch l -> Stack (tuple2 uint32 uint32)
     (requires fun h -> live h b)
     (ensures fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.SPARKLE2.xor #(v l) (as_seq h0 b))
@@ -108,83 +109,85 @@ let xor #l b =
   r0, r1
 
 
+open FStar.Mul
 
-val m: #l: branch_len -> b: branch l ->  Stack (tuple2 uint32 uint32)
+inline_for_extraction noextract
+val xor_x_step: #n: branch_len -> b: branch n -> lty: uint32 -> ltx: uint32 -> i: size_t {2 * v i + 1 < v n} -> 
+  Stack unit 
+    (requires fun h -> live h b)
+    (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
+
+let xor_x_step #n b lty ltx i = 
+  let xi, yi = getBranch #(2ul *. n) b i in 
+  let xi_n = xi ^. lty in
+  let yi_n = yi ^. ltx in
+  setBranch (i +! n) (xi_n, yi_n) b
+
+
+val xor_x: #n: branch_len -> b: branch n -> lty: uint32 -> ltx: uint32 -> Stack unit 
   (requires fun h -> live h b)
-  (ensures fun h0 r h1 -> modifies (loc b) h0 h1)
-
-let m #n b = 
-  let ltx, lty = xor #n b in 
-  (l1 ltx, l1 lty)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
+  
+let xor_x #n b lty ltx = 
+  let h0 = ST.get() in 
+  Lib.Loops.for (0ul) (n >>. 1ul)  
+    (fun h i -> live h b /\ modifies (loc b) h0 h) 
+    (fun (i: size_t {2 * v i + 1 < v n}) -> xor_x_step b lty ltx i)
 
 
 inline_for_extraction noextract
-val xor_3: i0: tuple2 uint32 uint32  -> i1: tuple2 uint32 uint32  -> i2: tuple2 uint32 uint32 -> 
-  Stack (tuple2 uint32 uint32) 
-    (requires fun h -> true)
-    (ensures fun h0 _ h1 -> modifies0 h0 h1)
+val m: #l: branch_len -> b: branch l -> Stack unit 
+  (requires fun h -> live h b)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
 
-let xor_3 (i0x, i0y) (i1x, i1y) (i2x, i2y)  = 
-  let o0_x = i0x ^. i1x ^. i2x in 
-  let o0_y = i0y ^. i1y ^. i2y in   
-  o0_x, o0_y
-
-
+let m #n b = 
+    let ltx, lty = xor #n b  in 
+    xor_x #n b lty ltx
 
 inline_for_extraction
-val l_step: #n: branch_len -> perm: branch n -> i: size_t {2 * v i <= v n} 
+val l_step: #n: branch_len -> perm: branch n -> i: size_t {2 * v i + 1 < v n * 3} 
   -> rightBranch: branch n -> Stack unit 
   (requires fun h -> live h perm /\ live h rightBranch)
   (ensures fun h0 _ h1 -> modifies (loc perm) h0 h1)
 
 let l_step #n perm i result = 
   let xi, yi = getBranch result i in 
-  let p0i, p1i = getBranch perm i in
+  let p0i, p1i = getBranch perm i in 
   let branchIUpd = xi ^. p0i, yi ^. p1i in
   setBranch #n i branchIUpd perm
 
-inline_for_extraction noextract
+
 val l: #n: branch_len {v n % 2 == 0} -> b: branch n -> Stack unit 
   (requires fun h -> live h b)
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
-
 
 let l #n b = 
   let h0 = ST.get() in 
   let leftBranch = sub b (size 0) n in 
   let rightBranch = sub b n n in 
-
-  let ltx, lty = m #n b in 
-
-  push_frame(); 
-  let x0 = create (size 1) (u32 0) in 
-  let y0 = create (size 1) (u32 0) in
-
-  upd x0 (size 0) (index b (size 0)); 
-  upd y0 (size 0) (index b (size 1));
-
-  Lib.Loops.for 0ul ((n -! 2ul) >>. 1ul)
-    (fun h i -> live h b /\ modifies (loc b) h0 h)
-    (fun (i: size_t) ->
-      assert(v i < v ( n  >>. 2ul)) ;
-      admit(); 
-      assume (v (i +. 1ul +. (n >>. 1ul)) < v n);
-      let branch_j_nb = getBranch #n b (i +. 1ul +. (n >>. 1ul)) in 
-	admit(); 
-      let branch_j = getBranch #n b (i +. 1ul) in 
-      let b0 = xor_3 branch_j_nb branch_j (lty, ltx) in
-      setBranch #n i b0 b;
-      setBranch #n (i +. 1ul +. (n >>. 1ul)) (getBranch #n b (i +. 1ul)) b);
-  admit();
+  let result = sub b (2ul *! n) n in 
+ 
+  m #n b;
   
-    let x0 = index x0 (size 0) in 
-    let y0 = index y0 (size 0) in 
-    let last0 = xor_3 (getBranch #n b (n >>. 1ul)) (x0, y0) (lty, ltx) in 
-    setBranch #n ((n >>. 1ul) -. 1ul) last0 b;
-    setBranch #n (n >>. 1ul) (x0, y0) b;
-  pop_frame()
+  Lib.Loops.for 0ul (n >>. 1ul) 
+    (fun h i -> live h b /\ modifies (loc b) h0 h)
+    (fun (i: size_t {v i <= v n}) -> l_step #n result i rightBranch); 
 
-inline_for_extraction noextract
+  Lib.Loops.for 0ul (n >>. 1ul)
+    (fun h i -> live h b /\ modifies (loc b) h0 h)
+    (fun (i: size_t {v i <= v n}) -> setBranch #n i (getBranch #n leftBranch i) rightBranch);
+
+  Lib.Loops.for 0ul (n >>. 1ul)
+    (fun h i -> live h b /\ modifies (loc b) h0 h)
+    (fun (i: size_t {v i <= v n}) -> 
+        let index = Lib.RawIntTypes.size_to_UInt32 (i -. 1ul) in 
+        let k =  Lib.RawIntTypes.size_to_UInt32 (n >>. 1ul) in 
+        let j = FStar.UInt32.rem index k in 
+        setBranch #n j (getBranch #n result i) leftBranch)
+
+
+
+
 val add2: #n: branch_len {v n >= 4} -> i: size_t -> b:branch n -> Stack unit 
   (requires fun h -> live h b) 
   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
@@ -204,7 +207,7 @@ let add2 #n i b =
   setBranch (size 0) (x0, y0) b;
   setBranch #n (size 1) (x1, y1) b
 
-inline_for_extraction noextract
+
 val toBranch: #n: branch_len -> i: lbuffer uint8 (size 8 *! n) -> o: branch n -> 
   Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
@@ -213,7 +216,7 @@ val toBranch: #n: branch_len -> i: lbuffer uint8 (size 8 *! n) -> o: branch n ->
 let toBranch #n i o = 
   uints_from_bytes_le o i 
 
-inline_for_extraction noextract
+
 val fromBranch: #n: branch_len -> i: branch n -> o: lbuffer uint8 (size 8 *! n) -> 
   Stack unit 
   (requires fun h -> live h i /\ live h o /\ disjoint i o)

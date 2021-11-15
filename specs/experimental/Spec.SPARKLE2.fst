@@ -57,7 +57,6 @@ let arx c b =
 
 
 inline_for_extraction noextract
-val l1: x:uint32 -> Tot uint32
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
 
@@ -82,14 +81,14 @@ let xor #n b =
   Lib.LoopCombinators.repeati #(tuple2 uint32 uint32) (n / 2) (Spec.SPARKLE2.xor_step #n b) (u32 0, u32 0)
 
 
-val xor_x: #n: branch_len -> b: branch n -> lty: uint32 -> ltx: uint32 -> branch n
+let xor_x_step (#n: branch_len) (lty, ltx) (index : nat {index < n}) (b : branch n) (o: branch n) = 
+  let xi, yi = getBranch #n index b in 
+  let xi_n, yi_n = xi ^. lty, yi ^. ltx in
+  setBranch #n index (xi_n, yi_n) o
 
 let xor_x #n b lty ltx = 
-  let xor_x_step (#n: branch_len) (lty, ltx) (index : nat {index < n}) (b : branch n) = 
-    let xi, yi = getBranch #n index b in 
-    let xi_n, yi_n = xi ^. lty, yi ^. ltx in
-    let s = setBranch index (xi_n, yi_n) b in s in
-  Lib.LoopCombinators.repeati n (xor_x_step #n (lty, ltx)) b
+  let s = Lib.Sequence.create (2 * n) (u32 0) in  
+  Lib.LoopCombinators.repeati n (fun i -> xor_x_step #n (lty, ltx) i s) b
 
 
 val m: #n: branch_len -> branch n -> Tot (branch n)
@@ -100,21 +99,20 @@ let m #n b =
   xor_x #n b lty ltx
 
 
+let l_step (#n: branch_len) (m : branch n) (rightBranch: branch n) (i:nat {i < n}) : branch n = 
+  let (xi, yi) = getBranch i rightBranch in 
+  let (p0i, p1i) = getBranch i m in 
+  let branchIUpd = xi ^. p0i, yi ^. p1i in 
+  setBranch #n ((i - 1) % n) branchIUpd m
+
+
 val l: #n: branch_len {n % 2 == 0} -> b: branch n -> branch (n/2)
 
 let l #n0 b = 
   let leftBranch: branch (n0 / 2)  = sub #_ #(2 * n0) b 0 n0 in 
   let rightBranch: branch (n0 / 2) = sub #_ #(2 * n0) b n0 n0 in 
   let tempBranch = m leftBranch in 
-  
   let seqEmpty: branch (n0 / 2) = create n0 (u32 0) in 
-  
-  let l_step (#n: branch_len) (m : branch n) (rightBranch: branch n) (i:nat {i < n}) : branch n = 
-    let (xi, yi) = getBranch i rightBranch in 
-    let (p0i, p1i) = getBranch i m in 
-    let branchIUpd = xi ^. p0i, yi ^. p1i in 
-    let s = setBranch #n ((i - 1) % n) branchIUpd m in s in  
-
   Lib.LoopCombinators.repeati (n0 / 2) (fun i branch -> l_step rightBranch branch i) tempBranch
 
 
@@ -189,79 +187,4 @@ let sparkle512 steps input =
   fromBranch #8 permB
 
 
-assume val computeTmpXTmpY: unit -> tuple2 uint32 uint32
-
-val test: #n: nat{n = 4} -> state: branch n -> Lemma (  
-  let tmpX, tmpY = computeTmpXTmpY() in 
-    let f =  (fun (i: nat {i < n / 4}) state ->
-      let j = (i + 1) in 
-      let j_n, j_n1 = getBranch (j + n / 2) state in 
-      let state_j, state_j1 = getBranch j state in
-      let state0_x = j_n ^. state_j ^. tmpY in 
-      let state0_y = j_n1 ^. state_j1 ^. tmpX in 
-      let state0 = setBranch i (state0_x, state0_y) state in
-      let state1 = setBranch (j + n / 2) (state_j, state_j1) state in state1) in 
-    repeati (n / 4) f state == (
-      let j_n, j_n1 = getBranch 3 state in 
-      let state_j, state_j1 = getBranch 1 state in
-      let state0_x = j_n ^. state_j ^. tmpY in 
-      let state0_y = j_n1 ^. state_j1 ^. tmpX in 
-      let state0 = setBranch 0 (state0_x, state0_y) state in
-      setBranch 3 (state_j, state_j1) state))
-
-
-let test #n state = 
-  let tmpX, tmpY = computeTmpXTmpY() in 
-  let f =  (fun (i: nat {i < n / 4}) state ->
-    let j = (i + 1) in 
-    let j_n, j_n1 = getBranch (j + n / 2) state in 
-    let state_j, state_j1 = getBranch j state in
-    let state0_x = j_n ^. state_j ^. tmpY in 
-    let state0_y = j_n1 ^. state_j1 ^. tmpX in 
-    let state0 = setBranch i (state0_x, state0_y) state in
-    let state1 = setBranch (j + n / 2) (state_j, state_j1) state in state1) in 
-  unfold_repeati (n/4) f state (n/4 - 1);
-  eq_repeati0 (n/4) f state
-
-
 #set-options "--z3rlimit 100"
-
-
-val test1: #n: branch_len {n == 4} -> state: branch n -> Tot unit
-
-let test1 #n state_init = 
-  let x0, y0 = getBranch 0 state_init in 
-  let tmpX, tmpY = computeTmpXTmpY() in 
-  let f =  (fun (i: nat {i < n/4}) state ->
-    let j = (i + 1) * 2 in 
-    let j_n, j_n1 = getBranch ((j + n) / 2) state in 
-    let state_j, state_j1 = getBranch (j / 2) state in
-    let state0_x = j_n ^. state_j ^. tmpY in 
-    let state0_y = j_n1 ^. state_j1 ^. tmpX in 
-    let state0 = setBranch ((j - 2) / 2) (state0_x, state0_y) state in
-    let state1 = setBranch ((j + n) / 2) (state_j, state_j1) state in state1) in 
-  let stateRepeat = repeati (n / 4) f state_init in 
-
-  let state_n, state_n1 = getBranch (n / 2) stateRepeat in 
-  let state0 = setBranch ((n - 2) / 2) (state_n ^. x0 ^. tmpY, state_n1 ^. y0 ^. tmpX) stateRepeat in 
-  let stateWithout = setBranch (n / 2) (x0, y0) state0 in 
-
-
-  test #n state_init; 
-
-   let x3, y3 = getBranch 3 state_init in 
-   let x1, y1 = getBranch 1 state_init in
-   let state0_x = x3 ^. x1 ^. tmpY in 
-   let state0_y = y3 ^. y3 ^. tmpX in 
-   let state0 = setBranch 0 (state0_x, state0_y) state_init in
-   let state1 = setBranch 3 (x1, y1) state_init in 
-   let x2, y2 = getBranch 2 stateRepeat in 
-   let state0 = setBranch 1 (x2 ^. x0 ^. tmpY, y2 ^. y0 ^. tmpX) stateRepeat in 
-   let stateWith = setBranch 2 (x0, y0) state0 in 
-
-  assert(stateWithout == stateWith);
-
-
-  admit()
-  
-
