@@ -409,12 +409,12 @@ let ecdsa_verification c alg publicKey r s mLen m =
       let u1 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * hashNat % order) in
       let u2 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * r % order) in 
 
-      point_mult_0  #c #Jacobian  (basePoint #c) 0;
-      point_mult_0 #c #Jacobian publicJacobian 0;
+      point_mult_0  #c  (basePoint #c) 0;
+      point_mult_0 #c publicJacobian 0;
       let u1D, _ = montgomery_ladder_spec_left #c u1 (pointAtInfinity, basePoint #c) in
       let u2D, _ = montgomery_ladder_spec_left #c u2 (pointAtInfinity, publicJacobian) in
 
-      let sumPoints = pointAdd #c #Jacobian u1D u2D in
+      let sumPoints = pointAdd #c u1D u2D in
       let pointNorm = _norm #c sumPoints in
       let x, y, z = pointNorm in
       if isPointAtInfinity #Jacobian pointNorm then false else x % order = r
