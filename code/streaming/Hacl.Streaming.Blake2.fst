@@ -136,7 +136,7 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful unit =
       B.blit (state_to_lbuffer src_b) 0ul (state_to_lbuffer dst_b) 0ul
              U32.(4ul *^ row_len a m))
 
-// TODO: this is not necessary anymore, as well as stateful_key_t and stateful_key.
+// Rk.: this is not necessary anymore, as well as stateful_key_t and stateful_key.
 // We keep those definitions here, though, because they may be useful in the future.
 inline_for_extraction noextract
 let key_size_ty (a : alg) = key_size:nat{0 <= key_size /\ key_size <= Spec.max_key a}
