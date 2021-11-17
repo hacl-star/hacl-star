@@ -115,7 +115,10 @@ let point_negate (p:proj_point) : proj_point =
 let is_proj_point_at_inf (p:proj_point) : bool =
   let (_, _, z) = p in z = zero
 
-// TODO: add `is_point_on_curve`
+
+let is_on_curve (p:aff_point) =
+  let x, y = p in y *% y = x *% x *% x +% b
+
 let aff_point_at_inf : aff_point = (zero, zero) // not on the curve!
 let point_at_inf : proj_point = (zero, one, zero)
 
@@ -126,6 +129,7 @@ let to_aff_point (p:proj_point) : aff_point =
 
 let to_proj_point (p:aff_point) : proj_point =
   let (x, y) = p in (x, y, one)
+
 
 assume
 val aff_point_add (p:aff_point) (y:aff_point) : aff_point
@@ -191,6 +195,7 @@ let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
   SE.sqr = point_double_c;
 }
 
+
 // [a]P
 let point_mul (a:qelem) (p:proj_point) : proj_point =
   let out = SE.exp_fw mk_k256_concrete_ops p 256 a 4 in
@@ -239,18 +244,20 @@ let ecdsa_sign_hashed_msg m private_key k =
     rb, sb, true
 
 
-// TODO: check that `public_key` is a point on the curve
-val ecdsa_verify_hashed_msg:
-     m:lbytes 32
-  -> public_key_x:lbytes 32{nat_from_bytes_be public_key_x < prime}
-  -> public_key_y:lbytes 32{nat_from_bytes_be public_key_y < prime}
-  -> r:lbytes 32 -> s:lbytes 32 ->
-  bool
+val is_public_key_valid (pk_x pk_y:lbytes 32) : tuple3 nat nat bool
+let is_public_key_valid pk_x pk_y =
+  let pk_x = nat_from_bytes_be pk_x in
+  let pk_y = nat_from_bytes_be pk_y in
+  let is_x_valid = 0 < pk_x && pk_x < prime in
+  let is_y_valid = 0 < pk_y && pk_y < prime in
+  let is_xy_on_curve =
+    if is_x_valid && is_y_valid then is_on_curve (pk_x, pk_y) else false in
+  pk_x, pk_y, is_xy_on_curve
 
+
+val ecdsa_verify_hashed_msg (m public_key_x public_key_y r s:lbytes 32) : bool
 let ecdsa_verify_hashed_msg m public_key_x public_key_y r s =
-  let pk_x = nat_from_bytes_be public_key_x in
-  let pk_y = nat_from_bytes_be public_key_y in
-
+  let pk_x, pk_y, is_xy_on_curve = is_public_key_valid public_key_x public_key_y in
   let r = nat_from_bytes_be r in
   let s = nat_from_bytes_be s in
   let z = nat_from_bytes_be m % q in
@@ -258,17 +265,17 @@ let ecdsa_verify_hashed_msg m public_key_x public_key_y r s =
   let is_r_valid = 0 < r && r < q in
   let is_s_valid = 0 < s && s < q in
 
-  assert_norm (q < pow2 256);
-
-  if not (is_r_valid && is_s_valid) then false
+  if not (is_xy_on_curve && is_r_valid && is_s_valid) then false
   else begin
+    assert_norm (q < pow2 256);
     let sinv = qinv s in
     let u1 = z *^ sinv in
     let u2 = r *^ sinv in
     let _X, _Y, _Z = point_mul_double_g u1 u2 (pk_x, pk_y, one) in
-
     let x = _X /% _Z in (* TODO: optimize, as we don't need to compute a field inverse *)
-    x % q = r end
+    x % q = r
+  end
+
 
 (*  if _Z = 0 then x = 0 and r <> 0, i.e., we return `false` anyway
 
@@ -297,13 +304,9 @@ let ecdsa_sign_sha256 msg_len msg private_key k =
   ecdsa_sign_hashed_msg m private_key k
 
 
-val ecdsa_verify_sha256:
-    msg_len:size_nat
-  -> msg:lbytes msg_len
-  -> public_key_x:lbytes 32{nat_from_bytes_be public_key_x < prime}
-  -> public_key_y:lbytes 32{nat_from_bytes_be public_key_y < prime}
-  -> r:lbytes 32 -> s:lbytes 32 ->
-  bool
+val ecdsa_verify_sha256
+  (msg_len:size_nat) (msg:lbytes msg_len)
+  (public_key_x public_key_y r s:lbytes 32) : bool
 
 let ecdsa_verify_sha256 msg_len msg public_key_x public_key_y r s =
   let m = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in

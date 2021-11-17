@@ -20,6 +20,7 @@ module AM = Hacl.Bignum.AlmostMontgomery
 module BI = Hacl.Bignum.ModInv
 module BE = Hacl.Bignum.Exponentiation
 module BM = Hacl.Bignum.Montgomery
+module BB = Hacl.Bignum.Base
 
 module SN = Hacl.Spec.Bignum
 module SD = Hacl.Spec.Bignum.Definitions
@@ -54,6 +55,27 @@ let make_prime_k256 () =
 
   assert_norm (as_nat4 r = S.prime);
   r
+
+
+let make_b_k256 () =
+  [@inline_let]
+  let r = (u64 0x7, u64 0, u64 0, u64 0) in
+  assert_norm (as_nat4 r = S.b);
+  r
+
+
+let is_felem_zero_vartime f =
+  let h0 = ST.get () in
+  let m = BN.bn_is_zero_mask nlimb f in
+  SN.bn_is_zero_mask_lemma (as_seq h0 f);
+  BB.unsafe_bool_of_limb m
+
+
+let is_felem_eq_vartime f1 f2 =
+  let h0 = ST.get () in
+  let m = BN.bn_eq_mask nlimb f1 f2 in
+  SN.bn_eq_mask_lemma (as_seq h0 f1) (as_seq h0 f2);
+  BB.unsafe_bool_of_limb m
 
 
 // needed for Montgomery arithmetic
@@ -110,6 +132,24 @@ let load_felem f b =
   BN.bn_from_bytes_be 32ul b f
 
 
+let load_felem_vartime f b =
+  push_frame ();
+  let n = create nlimb (u64 0) in
+  make_u64_4 n (make_prime_k256 ());
+
+  let h0 = ST.get () in
+  SN.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
+  BN.bn_from_bytes_be 32ul b f;
+  let h1 = ST.get () in
+
+  let is_zero = is_felem_zero_vartime f in
+  let is_lt_p = BN.bn_lt_mask nlimb f n in
+  SN.bn_lt_mask_lemma (as_seq h1 f) (as_seq h1 n);
+  let is_lt_p_b = BB.unsafe_bool_of_limb is_lt_p in
+  pop_frame ();
+  not is_zero && is_lt_p_b
+
+
 // not used
 let store_felem b f =
   let h0 = ST.get () in
@@ -131,7 +171,6 @@ let set_one f =
 // not used
 let copy_felem f1 f2 = copy f1 f2
 
-
 let fmul_small_num out f1 num =
   push_frame ();
   let f2 = create nlimb (u64 0) in
@@ -149,13 +188,13 @@ let fmul_small_num out f1 num =
 
 let fmul_3b out f =
   [@inline_let]
-  let b3 = u64 (S.b * 3) in
+  let b3 = normalize_term (u64 (S.b * 3)) in
   fmul_small_num out f b3
 
 
 let fmul_24b out f =
   [@inline_let]
-  let b24 = u64 (S.b * 24) in
+  let b24 = normalize_term (u64 (S.b * 24)) in
   fmul_small_num out f b24
 
 

@@ -36,11 +36,7 @@ val ecdsa_sign_hashed_msg (r s m private_key k:lbytes32) : Stack bool
 val ecdsa_verify_hashed_msg (m public_key_x public_key_y r s:lbytes32) : Stack bool
   (requires fun h ->
     live h m /\ live h public_key_x /\ live h public_key_y /\
-    live h r /\ live h s /\ disjoint r s /\
-
-   (let pk_x = BSeq.nat_from_bytes_be (as_seq h public_key_x) in
-    let pk_y = BSeq.nat_from_bytes_be (as_seq h public_key_y) in
-    pk_x < S.prime /\ pk_y < S.prime))
+    live h r /\ live h s /\ disjoint r s)
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
     b == S.ecdsa_verify_hashed_msg (as_seq h0 m)
       (as_seq h0 public_key_x) (as_seq h0 public_key_y) (as_seq h0 r) (as_seq h0 s))
@@ -63,11 +59,7 @@ val ecdsa_sign_sha256 (r s:lbytes32) (msg_len:size_t) (msg:lbuffer uint8 msg_len
 val ecdsa_verify_sha256 (msg_len:size_t) (msg:lbuffer uint8 msg_len) (public_key_x public_key_y r s:lbytes32) : Stack bool
   (requires fun h ->
     live h msg /\ live h public_key_x /\ live h public_key_y /\
-    live h r /\ live h s /\ disjoint r s /\
-
-   (let pk_x = BSeq.nat_from_bytes_be (as_seq h public_key_x) in
-    let pk_y = BSeq.nat_from_bytes_be (as_seq h public_key_y) in
-    pk_x < S.prime /\ pk_y < S.prime))
+    live h r /\ live h s /\ disjoint r s)
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
     b == S.ecdsa_verify_sha256 (v msg_len) (as_seq h0 msg)
       (as_seq h0 public_key_x) (as_seq h0 public_key_y) (as_seq h0 r) (as_seq h0 s))

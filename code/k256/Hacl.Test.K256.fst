@@ -11,6 +11,7 @@ module K256 = Hacl.K256.ECDSA
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+inline_for_extraction noextract
 val u8: n:nat{n < 0x100} -> uint8
 let u8 n = u8 n
 
