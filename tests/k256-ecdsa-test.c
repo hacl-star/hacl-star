@@ -26,9 +26,9 @@ bool print_test(
 ){
   printf("K256 ECDSA verify Result:\n");
   bool ver = Hacl_K256_ECDSA_ecdsa_verify_sha256(msg_len, msg, pk_x, pk_y, sgnt_r, sgnt_s);
-  if (ver = valid) printf("Success! %d \n", id);
+  if (ver == valid) printf("Success! %d \n", id);
   else printf("Failed %d \n", id);
-  return (ver = valid);
+  return (ver == valid);
 }
 
 
