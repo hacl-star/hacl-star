@@ -71,6 +71,7 @@ int main() {
     Hacl_Streaming_Blake2_blake2s_32_no_key_update(s, v->input, 8);
     Hacl_Streaming_Blake2_blake2s_32_no_key_update(s, v->input+8, 8);
     Hacl_Streaming_Blake2_blake2s_32_no_key_update(s, v->input+16, 16);
+    Hacl_Streaming_Blake2_blake2s_32_no_key_update(s, v->input+32, v->input_len - 32);
     Hacl_Streaming_Blake2_blake2s_32_no_key_finish(s, tag);
     ok &= compare_and_print(32, tag, v->expected);
 
