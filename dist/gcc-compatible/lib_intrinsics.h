@@ -18,17 +18,31 @@
 
 #include "Hacl_IntTypes_Intrinsics.h"
 
-#define Lib_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4) \
-  (Hacl_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4))
+#if (TARGET_ARCHITECTURE == TARGET_ARCHITECTURE_ID_ARM8) && defined(HACL_CAN_COMPILE_VEC128) //second one redundant?
+
+#include "arm8_intrinsics.h"
+
+#define Lib_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4) \
+  (uint128_t_add_carry_u64(x1, x2, x3, x4))
+
+#define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4) \
+  (uint128_t_sub_borrow_u64(x1, x2, x3, x4))
+
+#else
 
 #define Lib_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4) \
   (Hacl_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4))
 
-#define Lib_IntTypes_Intrinsics_sub_borrow_u32(x1, x2, x3, x4) \
-  (Hacl_IntTypes_Intrinsics_sub_borrow_u32(x1, x2, x3, x4))
-
 #define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4) \
   (Hacl_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4))
+
+#endif // defined(HACL_CAN_COMPILE_VEC128)
+
+#define Lib_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4) \
+  (Hacl_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4))
+
+#define Lib_IntTypes_Intrinsics_sub_borrow_u32(x1, x2, x3, x4) \
+  (Hacl_IntTypes_Intrinsics_sub_borrow_u32(x1, x2, x3, x4))
 
 #else
 
