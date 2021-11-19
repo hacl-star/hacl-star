@@ -63,13 +63,15 @@ Hacl_Hash_Blake2s_128_update_last_blake2s_128(
 
 void Hacl_Hash_Blake2s_128_hash_blake2s_128(u8 *input, u32 input_len, u8 *dst);
 
+void Hacl_Blake2s_128_blake2s_init(Lib_IntVector_Intrinsics_vec128 *hash, u32 kk, u32 nn);
+
 void
-Hacl_Blake2s_128_blake2s_init(
+Hacl_Blake2s_128_blake2s_update_key(
   Lib_IntVector_Intrinsics_vec128 *wv,
   Lib_IntVector_Intrinsics_vec128 *hash,
   u32 kk,
   u8 *k,
-  u32 nn
+  u32 ll
 );
 
 void

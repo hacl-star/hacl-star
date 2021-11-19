@@ -1094,15 +1094,8 @@ blake2b_update_block(
 }
 
 inline void
-Hacl_Blake2b_256_blake2b_init(
-  Lib_IntVector_Intrinsics_vec256 *wv,
-  Lib_IntVector_Intrinsics_vec256 *hash,
-  u32 kk,
-  u8 *k,
-  u32 nn
-)
+Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, u32 kk, u32 nn)
 {
-  u8 b[128U] = { 0U };
   Lib_IntVector_Intrinsics_vec256 *r0 = hash + (u32)0U * (u32)1U;
   Lib_IntVector_Intrinsics_vec256 *r1 = hash + (u32)1U * (u32)1U;
   Lib_IntVector_Intrinsics_vec256 *r2 = hash + (u32)2U * (u32)1U;
@@ -1123,15 +1116,24 @@ Hacl_Blake2b_256_blake2b_init(
   iv0_ = iv0 ^ ((u64)0x01010000U ^ (kk_shift_8 ^ (u64)nn));
   r0[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0_, iv1, iv2, iv3);
   r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
-  if (!(kk == (u32)0U))
-  {
-    memcpy(b, k, kk * sizeof (u8));
-    {
-      uint128_t totlen = (uint128_t)(u64)(u32)0U + (uint128_t)(u64)(u32)128U;
-      u8 *b1 = b + (u32)0U * (u32)128U;
-      blake2b_update_block(wv, hash, false, totlen, b1);
-    }
-  }
+}
+
+inline void
+Hacl_Blake2b_256_blake2b_update_key(
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  u32 kk,
+  u8 *k,
+  u32 ll
+)
+{
+  uint128_t lb = (uint128_t)(u64)(u32)128U;
+  u8 b[128U] = { 0U };
+  memcpy(b, k, kk * sizeof (u8));
+  if (ll == (u32)0U)
+    blake2b_update_block(wv, hash, true, lb, b);
+  else
+    blake2b_update_block(wv, hash, false, lb, b);
   Lib_Memzero0_memzero(b, (u32)128U * sizeof (b[0U]));
 }
 
@@ -1201,6 +1203,30 @@ blake2b_update_blocks(
   }
 }
 
+static inline void
+blake2b_update(
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  u32 kk,
+  u8 *k,
+  u32 ll,
+  u8 *d
+)
+{
+  uint128_t lb = (uint128_t)(u64)(u32)128U;
+  if (kk > (u32)0U)
+  {
+    Hacl_Blake2b_256_blake2b_update_key(wv, hash, kk, k, ll);
+    if (!(ll == (u32)0U))
+    {
+      blake2b_update_blocks(ll, wv, hash, lb, d);
+      return;
+    }
+    return;
+  }
+  blake2b_update_blocks(ll, wv, hash, (uint128_t)(u64)(u32)0U, d);
+}
+
 inline void
 Hacl_Blake2b_256_blake2b_finish(u32 nn, u8 *output, Lib_IntVector_Intrinsics_vec256 *hash)
 {
@@ -1236,26 +1262,19 @@ void Hacl_Blake2b_256_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
       for (_i = 0U; _i < stlen; ++_i)
         b[_i] = stzero;
     }
+    KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), stlen);
     {
-      uint128_t prev0;
-      if (kk == (u32)0U)
-        prev0 = (uint128_t)(u64)(u32)0U;
-      else
-        prev0 = (uint128_t)(u64)(u32)128U;
-      KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), stlen);
+      Lib_IntVector_Intrinsics_vec256 b1[stlen];
       {
-        Lib_IntVector_Intrinsics_vec256 b1[stlen];
-        {
-          u32 _i;
-          for (_i = 0U; _i < stlen; ++_i)
-            b1[_i] = stzero;
-        }
-        Hacl_Blake2b_256_blake2b_init(b1, b, kk, k, nn);
-        blake2b_update_blocks(ll, b1, b, prev0, d);
-        Hacl_Blake2b_256_blake2b_finish(nn, output, b);
-        Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-        Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
+        u32 _i;
+        for (_i = 0U; _i < stlen; ++_i)
+          b1[_i] = stzero;
       }
+      Hacl_Blake2b_256_blake2b_init(b, kk, nn);
+      blake2b_update(b1, b, kk, k, ll, d);
+      Hacl_Blake2b_256_blake2b_finish(nn, output, b);
+      Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
+      Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
     }
   }
 }

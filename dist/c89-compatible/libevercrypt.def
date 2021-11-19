@@ -17,11 +17,13 @@ EXPORTS
   Hacl_Hash_Blake2_hash_blake2s_32
   Hacl_Hash_Blake2_hash_blake2b_32
   Hacl_Blake2b_32_blake2b_init
+  Hacl_Blake2b_32_blake2b_update_key
   Hacl_Blake2b_32_blake2b_update_multi
   Hacl_Blake2b_32_blake2b_update_last
   Hacl_Blake2b_32_blake2b_finish
   Hacl_Blake2b_32_blake2b
   Hacl_Blake2s_32_blake2s_init
+  Hacl_Blake2s_32_blake2s_update_key
   Hacl_Blake2s_32_blake2s_update_multi
   Hacl_Blake2s_32_blake2s_update_last
   Hacl_Blake2s_32_blake2s_finish
@@ -31,6 +33,7 @@ EXPORTS
   Hacl_Hash_Blake2b_256_update_last_blake2b_256
   Hacl_Hash_Blake2b_256_hash_blake2b_256
   Hacl_Blake2b_256_blake2b_init
+  Hacl_Blake2b_256_blake2b_update_key
   Hacl_Blake2b_256_blake2b_update_multi
   Hacl_Blake2b_256_blake2b_update_last
   Hacl_Blake2b_256_blake2b_finish
@@ -40,6 +43,7 @@ EXPORTS
   Hacl_Hash_Blake2s_128_update_last_blake2s_128
   Hacl_Hash_Blake2s_128_hash_blake2s_128
   Hacl_Blake2s_128_blake2s_init
+  Hacl_Blake2s_128_blake2s_update_key
   Hacl_Blake2s_128_blake2s_update_multi
   Hacl_Blake2s_128_blake2s_update_last
   Hacl_Blake2s_128_blake2s_finish
@@ -407,26 +411,11 @@ EXPORTS
   Hacl_Streaming_Blake2_blake2b_32_no_key_update
   Hacl_Streaming_Blake2_blake2b_32_no_key_finish
   Hacl_Streaming_Blake2_blake2b_32_no_key_free
-  Hacl_Streaming_Blake2_blake2s_32_with_key_create_in
-  Hacl_Streaming_Blake2_blake2s_32_with_key_init
-  Hacl_Streaming_Blake2_blake2s_32_with_key_update
-  Hacl_Streaming_Blake2_blake2s_32_with_key_finish
-  Hacl_Streaming_Blake2_blake2s_32_with_key_free
-  Hacl_Streaming_Blake2_blake2b_32_with_key_create_in
-  Hacl_Streaming_Blake2_blake2b_32_with_key_init
-  Hacl_Streaming_Blake2_blake2b_32_with_key_update
-  Hacl_Streaming_Blake2_blake2b_32_with_key_finish
-  Hacl_Streaming_Blake2_blake2b_32_with_key_free
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free
   Hacl_Frodo640_crypto_kem_keypair
   Hacl_Frodo640_crypto_kem_enc
   Hacl_Frodo640_crypto_kem_dec
@@ -435,11 +424,6 @@ EXPORTS
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_create_in
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_update
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_finish
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_free
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt

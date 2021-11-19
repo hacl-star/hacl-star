@@ -87,15 +87,22 @@ void Hacl_Hash_Blake2s_128_hash_blake2s_128(uint8_t *input, uint32_t input_len, 
 /* SNIPPET_START: Hacl_Blake2s_128_blake2s_init */
 
 void
-Hacl_Blake2s_128_blake2s_init(
+Hacl_Blake2s_128_blake2s_init(Lib_IntVector_Intrinsics_vec128 *hash, uint32_t kk, uint32_t nn);
+
+/* SNIPPET_END: Hacl_Blake2s_128_blake2s_init */
+
+/* SNIPPET_START: Hacl_Blake2s_128_blake2s_update_key */
+
+void
+Hacl_Blake2s_128_blake2s_update_key(
   Lib_IntVector_Intrinsics_vec128 *wv,
   Lib_IntVector_Intrinsics_vec128 *hash,
   uint32_t kk,
   uint8_t *k,
-  uint32_t nn
+  uint32_t ll
 );
 
-/* SNIPPET_END: Hacl_Blake2s_128_blake2s_init */
+/* SNIPPET_END: Hacl_Blake2s_128_blake2s_update_key */
 
 /* SNIPPET_START: Hacl_Blake2s_128_blake2s_update_multi */
 
