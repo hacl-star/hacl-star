@@ -95,5 +95,8 @@ vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
 %.test: %.exe
 	./$<
 
+gen_arm8_intrinsics_vectors:
+	python3 gen_vectors/gen_arm8_intrinsics_vectors.py
+
 clean:
 	rm -f *.exe
