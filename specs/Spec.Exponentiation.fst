@@ -86,59 +86,33 @@ let rec exp_pow2_lemma_loop #t k a b i =
 let exp_pow2_lemma #t k a b =
   exp_pow2_lemma_loop k a b b
 
+#push-options "--fuel 1"
+let pow_eq0 #t k a = ()
 
-val precomp_table_lemma_loop: #t:Type0 -> k:concrete_ops t -> a:t ->
-  table_len:size_nat{1 < table_len} -> table:lseq t table_len -> i:nat{i <= table_len - 2} -> Lemma
-  (requires
-    k.to.refl table.[0] == S.pow k.to.cm (k.to.refl a) 0 /\
-    k.to.refl table.[1] == S.pow k.to.cm (k.to.refl a) 1)
-  (ensures
-   (let table = Loops.repeati i (precomp_table_f k a table_len) table in
-    (forall (j:nat{j < i + 2}). k.to.refl table.[j] == S.pow k.to.cm (k.to.refl a) j)))
+let pow_eq1 #t k a =
+  assert (pow k a 1 == k.mul a (pow k a 0));
+  pow_eq0 k a;
+  assert (pow k a 1 == k.mul a (one ()));
+  lemma_one a
 
-let rec precomp_table_lemma_loop #t k a table_len table i =
-  if i = 0 then
-    Loops.eq_repeati0 i (precomp_table_f k a table_len) table
-  else begin
-    let table1 = Loops.repeati (i - 1) (precomp_table_f k a table_len) table in
-    Loops.unfold_repeati i (precomp_table_f k a table_len) table (i - 1);
-    precomp_table_lemma_loop k a table_len table (i - 1);
-    assert ((forall (j:nat{j < i + 1}). k.to.refl table1.[j] == S.pow k.to.cm (k.to.refl a) j));
-    let table = table1.[i + 1] <- k.mul table1.[i] a in
-    assert ((forall (j:nat{j < i + 1}). k.to.refl table.[j] == S.pow k.to.cm (k.to.refl a) j));
+let pow_unfold #t k a i = ()
 
-    S.lemma_pow_add k.to.cm (k.to.refl a) i 1;
-    S.lemma_pow1 k.to.cm (k.to.refl a);
-    assert ((forall (j:nat{j < i + 2}). k.to.refl table.[j] == S.pow k.to.cm (k.to.refl a) j));
-    () end
-
-
-val precomp_table_lemma: #t:Type0 -> k:concrete_ops t -> a:t -> table_len:size_nat{1 < table_len} ->
-  Lemma (let table = precomp_table k a table_len in
-    (forall (i:nat{i < table_len}). k.to.refl table.[i] == S.pow k.to.cm (k.to.refl a) i))
-
-let precomp_table_lemma #t k a table_len =
-  let table = create table_len (k.one ()) in
-  let table = table.[0] <- one () in
-  let table = table.[1] <- a in
-  S.lemma_pow0 k.to.cm (k.to.refl a);
-  S.lemma_pow1 k.to.cm (k.to.refl a);
-  precomp_table_lemma_loop k a table_len table (table_len - 2)
+let rec pow_lemma #t k a b =
+  if b = 0 then ()
+  else pow_lemma k a (b - 1)
+#pop-options
 
 
 val exp_fw_lemma_loop: #t:Type -> k:concrete_ops t
   -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos
-  -> table_len:size_nat{1 < table_len /\ table_len = pow2 l} -> table:lseq t table_len
-  -> acc0:t -> i:nat{i <= bBits / l} -> Lemma
-  (requires
-    (forall (i:nat{i < table_len}). k.to.refl table.[i] == S.pow k.to.cm (k.to.refl a) i))
-  (ensures
-    (let acc = Loops.repeati i (exp_fw_f k a bBits b l table_len table) acc0 in
-     let accs = Loops.repeati i (S.exp_fw_f k.to.cm (k.to.refl a) bBits b l) (k.to.refl acc0) in
-     k.to.refl acc == accs))
+  -> acc0:t -> i:nat{i <= bBits / l} ->
+  Lemma (
+    let acc = Loops.repeati i (exp_fw_f k a bBits b l) acc0 in
+    let accs = Loops.repeati i (S.exp_fw_f k.to.cm (k.to.refl a) bBits b l) (k.to.refl acc0) in
+    k.to.refl acc == accs)
 
-let rec exp_fw_lemma_loop #t k a bBits b l table_len table acc0 i =
-  let f0 = exp_fw_f k a bBits b l table_len table in
+let rec exp_fw_lemma_loop #t k a bBits b l acc0 i =
+  let f0 = exp_fw_f k a bBits b l in
   let f1 = S.exp_fw_f k.to.cm (k.to.refl a) bBits b l in
 
   if i = 0 then begin
@@ -146,39 +120,37 @@ let rec exp_fw_lemma_loop #t k a bBits b l table_len table acc0 i =
     Loops.eq_repeati0 i f1 (k.to.refl acc0) end
   else begin
     let acc1 = Loops.repeati (i - 1) f0 acc0 in
-    exp_fw_lemma_loop #t k a bBits b l table_len table acc0 (i - 1);
+    let bits_l1 = S.get_bits_l bBits b l (i - 1) in
+    exp_fw_lemma_loop #t k a bBits b l acc0 (i - 1);
     Loops.unfold_repeati i f0 acc0 (i - 1);
     Loops.unfold_repeati i f1 (k.to.refl acc0) (i - 1);
-    exp_pow2_lemma k acc1 l end
+    exp_pow2_lemma k acc1 l;
+    pow_lemma k a bits_l1 end
 
 
 let exp_fw_lemma #t k a bBits b l =
-  Math.Lemmas.pow2_lt_compat 32 l;
-  Math.Lemmas.pow2_lt_compat l 0;
-  let table_len : size_nat = pow2 l in
-  precomp_table_lemma k a table_len;
-  let table = precomp_table k a table_len in
+  let acc0 =
+    if bBits % l = 0 then one ()
+    else begin
+      let bits_c = S.get_ith_lbits bBits b (bBits / l * l) l in
+      pow_lemma k a bits_c;
+      pow k a bits_c end in
 
-  let acc0 = if bBits % l = 0 then one () else exp_fw_acc0 k a bBits b l table_len table in
-  exp_fw_lemma_loop #t k a bBits b l table_len table acc0 (bBits / l)
+  exp_fw_lemma_loop #t k a bBits b l acc0 (bBits / l)
 
 
 val exp_double_fw_lemma_loop: #t:Type -> k:concrete_ops t
   -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
   -> a2:t -> b2:nat{b2 < pow2 bBits} -> l:pos
-  -> table_len:size_nat{1 < table_len /\ table_len = pow2 l}
-  -> table1:lseq t table_len -> table2:lseq t table_len
-  -> acc0:t -> i:nat{i <= bBits / l} -> Lemma
-  (requires
-    (forall (i:nat{i < table_len}). k.to.refl table1.[i] == S.pow k.to.cm (k.to.refl a1) i) /\
-    (forall (i:nat{i < table_len}). k.to.refl table2.[i] == S.pow k.to.cm (k.to.refl a2) i))
-  (ensures
-    (let acc = Loops.repeati i (exp_double_fw_f k a1 bBits b1 a2 b2 l table_len table1 table2) acc0 in
-     let accs = Loops.repeati i (S.exp_double_fw_f k.to.cm (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l) (k.to.refl acc0) in
-     k.to.refl acc == accs))
+  -> acc0:t -> i:nat{i <= bBits / l} ->
+  Lemma
+   (let acc = Loops.repeati i (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in
+    let accs = Loops.repeati i
+      (S.exp_double_fw_f k.to.cm (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l) (k.to.refl acc0) in
+    k.to.refl acc == accs)
 
-let rec exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l table_len table1 table2 acc0 i =
-  let f0 = exp_double_fw_f k a1 bBits b1 a2 b2 l table_len table1 table2 in
+let rec exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l acc0 i =
+  let f0 = exp_double_fw_f k a1 bBits b1 a2 b2 l in
   let f1 = S.exp_double_fw_f k.to.cm (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l in
 
   if i = 0 then begin
@@ -186,23 +158,26 @@ let rec exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l table_len table1 table
     Loops.eq_repeati0 i f1 (k.to.refl acc0) end
   else begin
     let acc1 = Loops.repeati (i - 1) f0 acc0 in
-    exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l table_len table1 table2 acc0 (i - 1);
+    let bits_l1 = S.get_bits_l bBits b1 l (i - 1) in
+    let bits_l2 = S.get_bits_l bBits b2 l (i - 1) in
+    exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l acc0 (i - 1);
     Loops.unfold_repeati i f0 acc0 (i - 1);
     Loops.unfold_repeati i f1 (k.to.refl acc0) (i - 1);
-    exp_pow2_lemma k acc1 l end
+    exp_pow2_lemma k acc1 l;
+    pow_lemma k a1 bits_l1;
+    pow_lemma k a2 bits_l2 end
 
 
 let exp_double_fw_lemma #t k a1 bBits b1 a2 b2 l =
-  Math.Lemmas.pow2_lt_compat 32 l;
-  Math.Lemmas.pow2_lt_compat l 0;
-  let table_len : size_nat = pow2 l in
-  precomp_table_lemma k a1 table_len;
-  precomp_table_lemma k a2 table_len;
-  let table1 = precomp_table k a1 table_len in
-  let table2 = precomp_table k a2 table_len in
-
   let acc0 =
     if bBits % l = 0 then one ()
-    else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l table_len table1 table2 in
+    else begin
+      let bits_c1 = S.get_ith_lbits bBits b1 (bBits / l * l) l in
+      let bits_c2 = S.get_ith_lbits bBits b2 (bBits / l * l) l in
+      let acc_a1 = pow k a1 bits_c1 in
+      let acc_a2 = pow k a2 bits_c2 in
+      pow_lemma k a1 bits_c1;
+      pow_lemma k a2 bits_c2;
+      k.mul acc_a1 acc_a2 end in
 
-  exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l table_len table1 table2 acc0 (bBits / l)
+  exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l acc0 (bBits / l)

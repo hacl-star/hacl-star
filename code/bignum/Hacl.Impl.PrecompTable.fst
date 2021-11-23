@@ -82,34 +82,3 @@ let table_select_consttime #t len table_len table i res =
       (PT.table_select_f (v len) (v table_len) (as_seq h0 table) i) (as_seq h1 res) (v j);
     table_select_consttime_f len table_len table i j res);
   PT.table_select_lemma (v len) (v table_len) (as_seq h0 table) i
-
-
-inline_for_extraction noextract
-let table_get_st (t:limb_t) (len:size_t{v len > 0}) =
-    table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
-  -> table:lbuffer (uint_t t SEC) (table_len *! len)
-  -> i:uint_t t SEC{v i < v table_len}
-  -> tmp:lbuffer (uint_t t SEC) len ->
-  Stack unit
-  (requires fun h ->
-    (v i + 1) * v len <= v table_len * v len /\
-    live h table /\ live h tmp /\ disjoint table tmp)
-  (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
-    as_seq h1 tmp == LSeq.sub (as_seq h0 table) (v i * v len) (v len))
-
-
-inline_for_extraction noextract
-val table_get_vartime: #t:limb_t -> len:size_t{v len > 0} -> table_get_st t len
-let table_get_vartime #t len table_len table i tmp =
-  let i32 = Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 i))) in
-  assert (v i32 == v i /\ v i < v table_len);
-  assert (v (i32 *! len) == v i32 * v len);
-
-  let a_i = sub table (i32 *! len) len in
-  copy tmp a_i
-
-
-inline_for_extraction noextract
-val table_get_consttime: #t:limb_t -> len:size_t{v len > 0} -> table_get_st t len
-let table_get_consttime #a_t len table_len table bits_l tmp =
-  table_select_consttime len table_len table bits_l tmp

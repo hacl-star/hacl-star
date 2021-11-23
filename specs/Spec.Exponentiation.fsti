@@ -15,7 +15,7 @@ class to_cm (t:Type) = {
   a_spec: Type;
   cm: S.comm_monoid a_spec;
   refl: x:t -> a_spec;
-  }
+}
 
 
 inline_for_extraction
@@ -45,7 +45,8 @@ class concrete_ops (t:Type) = {
   one: one_st t to;
   mul: mul_st t to;
   sqr: sqr_st t to;
-  }
+  lemma_one: a:t -> Lemma (mul a (one ()) == a);
+}
 
 
 let exp_rl_f (#t:Type) (k:concrete_ops t)
@@ -96,101 +97,87 @@ val exp_pow2_lemma: #t:Type -> k:concrete_ops t -> a:t -> b:nat ->
   Lemma (k.to.refl (exp_pow2 k a b) == S.exp_pow2 k.to.cm (k.to.refl a) b)
 
 
-let precomp_table_f (#t:Type0) (k:concrete_ops t) (a:t)
-  (table_len:size_nat{1 < table_len}) (i:nat{i < table_len - 2}) (table:lseq t table_len) : lseq t table_len
- =
-  table.[i + 2] <- k.mul table.[i + 1] a
+let rec pow (#t:Type) (k:concrete_ops t) (a:t) (b:nat) : t =
+  if b = 0 then k.one ()
+  else k.mul a (pow k a (b - 1))
 
 
-let precomp_table (#t:Type0) (k:concrete_ops t) (a:t) (table_len:size_nat{1 < table_len}) : lseq t table_len =
-  let table = create table_len (k.one ()) in
-  let table = table.[0] <- one () in
-  let table = table.[1] <- a in
+val pow_eq0: #t:Type -> k:concrete_ops t -> a:t ->
+  Lemma (pow k a 0 == k.one ())
 
-  Loops.repeati (table_len - 2) (precomp_table_f k a table_len) table
+val pow_eq1: #t:Type -> k:concrete_ops t -> a:t ->
+  Lemma (pow k a 1 == a)
+
+val pow_unfold: #t:Type -> k:concrete_ops t -> a:t -> i:pos ->
+  Lemma (pow k a i == k.mul a (pow k a (i - 1)))
+
+val pow_lemma: #t:Type -> k:concrete_ops t -> a:t -> b:nat ->
+  Lemma (k.to.refl (pow k a b) == S.pow k.to.cm (k.to.refl a) b)
 
 
 let exp_fw_acc0 (#t:Type0) (k:concrete_ops t) (a:t)
-  (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos{bBits % l <> 0})
-  (table_len:size_nat{table_len == pow2 l}) (table:lseq t table_len) : t
+  (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos{bBits % l <> 0}) : t
  =
   let bits_c = S.get_ith_lbits bBits b (bBits / l * l) l in
-  table.[bits_c]
+  pow k a bits_c
 
 
 let mul_acc_pow_a_bits_l (#t:Type) (k:concrete_ops t) (a:t)
-  (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos)
-  (table_len:size_nat{table_len == pow2 l}) (table:lseq t table_len)
-  (i:nat{i < bBits / l}) (acc:t) : t
+  (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) (i:nat{i < bBits / l}) (acc:t) : t
  =
   let bits_l = S.get_bits_l bBits b l i in
-  k.mul acc table.[bits_l]
+  k.mul acc (pow k a bits_l)
 
 
 let exp_fw_f (#t:Type) (k:concrete_ops t) (a:t)
   (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos)
-  (table_len:size_nat{table_len == pow2 l}) (table:lseq t table_len)
   (i:nat{i < bBits / l}) (acc:t) : t
  =
   let acc1 = exp_pow2 k acc l in
-  mul_acc_pow_a_bits_l k a bBits b l table_len table i acc1
+  mul_acc_pow_a_bits_l k a bBits b l i acc1
 
 
-let exp_fw (#t:Type) (k:concrete_ops t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos{l < 32}) : t =
-  Math.Lemmas.pow2_lt_compat 32 l;
-  Math.Lemmas.pow2_lt_compat l 0;
-  let table_len : size_nat = pow2 l in
-  let table = precomp_table k a table_len in
-
-  let acc0 = if bBits % l = 0 then one () else exp_fw_acc0 k a bBits b l table_len table in
-  Loops.repeati (bBits / l) (exp_fw_f k a bBits b l table_len table) acc0
+let exp_fw (#t:Type) (k:concrete_ops t) (a:t) (bBits:nat) (b:nat{b < pow2 bBits}) (l:pos) : t =
+  let acc0 = if bBits % l = 0 then one () else exp_fw_acc0 k a bBits b l in
+  Loops.repeati (bBits / l) (exp_fw_f k a bBits b l) acc0
 
 
-val exp_fw_lemma: #t:Type -> k:concrete_ops t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos{l < 32} ->
+val exp_fw_lemma: #t:Type -> k:concrete_ops t -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos ->
   Lemma (k.to.refl (exp_fw k a bBits b l) == S.exp_fw k.to.cm (k.to.refl a) bBits b l)
 
 
 let exp_double_fw_acc0 (#t:Type) (k:concrete_ops t)
   (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
-  (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos{bBits % l <> 0})
-  (table_len:size_nat{table_len == pow2 l}) (table1:lseq t table_len) (table2:lseq t table_len) : t
+  (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos{bBits % l <> 0}) : t
  =
-  let acc_a1 = exp_fw_acc0 k a1 bBits b1 l table_len table1 in
-  let acc_a2 = exp_fw_acc0 k a2 bBits b2 l table_len table2 in
+  let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
+  let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
   k.mul acc_a1 acc_a2
 
 
 let exp_double_fw_f (#t:Type) (k:concrete_ops t)
   (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
   (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos)
-  (table_len:size_nat{table_len == pow2 l}) (table1:lseq t table_len) (table2:lseq t table_len)
   (i:nat{i < bBits / l}) (acc:t) : t
  =
-  let acc1 = exp_fw_f k a1 bBits b1 l table_len table1 i acc in
-  mul_acc_pow_a_bits_l k a2 bBits b2 l table_len table2 i acc1
+  let acc1 = exp_fw_f k a1 bBits b1 l i acc in
+  mul_acc_pow_a_bits_l k a2 bBits b2 l i acc1
 
 
 let exp_double_fw (#t:Type) (k:concrete_ops t)
   (a1:t) (bBits:nat) (b1:nat{b1 < pow2 bBits})
-  (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos{l < 32}) : t
+  (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos) : t
  =
-
-  Math.Lemmas.pow2_lt_compat 32 l;
-  Math.Lemmas.pow2_lt_compat l 0;
-  let table_len : size_nat = pow2 l in
-  let table1 = precomp_table k a1 table_len in
-  let table2 = precomp_table k a2 table_len in
-
   let acc0 =
     if bBits % l = 0 then one ()
-    else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l table_len table1 table2 in
+    else exp_double_fw_acc0 k a1 bBits b1 a2 b2 l in
 
   Loops.repeati (bBits / l)
-    (exp_double_fw_f k a1 bBits b1 a2 b2 l table_len table1 table2) acc0
+    (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0
 
 
 val exp_double_fw_lemma: #t:Type -> k:concrete_ops t
   -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
-  -> a2:t -> b2:nat{b2 < pow2 bBits} -> l:pos{l < 32} ->
+  -> a2:t -> b2:nat{b2 < pow2 bBits} -> l:pos ->
   Lemma (k.to.refl (exp_double_fw k a1 bBits b1 a2 b2 l) ==
     S.exp_double_fw k.to.cm (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l)
