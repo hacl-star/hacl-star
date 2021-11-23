@@ -209,17 +209,17 @@ val lprecomp_table_mul:
     disjoint ti ctx /\ disjoint ti res /\ disjoint ctx res /\
     k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h ti) /\
-    k.to.refl (as_seq h ti) == SE.pow k.to.concr_ops (k.to.refl (as_seq h a)) (v i + 1))
+    k.to.refl (as_seq h ti) == SE.pow k.to.concr_ops (k.to.refl (as_seq h a)) (v i))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
-    k.to.refl (as_seq h1 res) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v i + 2))
+    k.to.refl (as_seq h1 res) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v i + 1))
 
 let lprecomp_table_mul #a_t len ctx_len k ctx a i ti res =
   let h0 = ST.get () in
   k.lmul ctx a ti res;
   let h1 = ST.get () in
   assert (k.to.refl (as_seq h1 res) == k.to.concr_ops.SE.mul (k.to.refl (as_seq h0 a)) (k.to.refl (as_seq h0 ti)));
-  SE.pow_unfold k.to.concr_ops (k.to.refl (as_seq h0 a)) (v i + 2)
+  SE.pow_unfold k.to.concr_ops (k.to.refl (as_seq h0 a)) (v i + 1)
 
 
 #push-options "--z3rlimit 150"
@@ -298,41 +298,41 @@ val lprecomp_table_f:
   -> ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
-  -> i:size_t{v i < v table_len - 2}
+  -> i:size_t{v i < v table_len - 1}
   -> table:lbuffer (uint_t a_t SEC) (table_len *! len) ->
   Stack unit
   (requires fun h ->
     live h a /\ live h table /\ live h ctx /\
     disjoint a table /\ disjoint ctx table /\ disjoint a ctx /\
     k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
-    (forall (j:nat{j <= v i + 1}).
+    (forall (j:nat{j <= v i}).
       precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
   (ensures  fun h0 _ h1 -> modifies (loc table) h0 h1 /\
-    (forall (j:nat{j <= v i + 2}).
+    (forall (j:nat{j <= v i + 1}).
       precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j))
 
 #push-options "--z3rlimit 300"
 let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
+  Math.Lemmas.lemma_mult_le_right (v len) (v i + 1) (v table_len);
   Math.Lemmas.lemma_mult_le_right (v len) (v i + 2) (v table_len);
-  Math.Lemmas.lemma_mult_le_right (v len) (v i + 3) (v table_len);
+  assert (v (i *! len) == v i * v len);
   assert (v ((i +! 1ul) *! len) == (v i + 1) * v len);
-  assert (v ((i +! 2ul) *! len) == (v i + 2) * v len);
 
   let h0 = ST.get () in
-  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v i + 1));
-  let t1 = sub table ((i +! 1ul) *! len) len in
-  let t2 = sub table ((i +! 2ul) *! len) len in
+  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v i));
+  let t1 = sub table (i *! len) len in
+  let t2 = sub table ((i +! 1ul) *! len) len in
   lprecomp_table_mul len ctx_len k ctx a i t1 t2;
   let h1 = ST.get () in
-  B.modifies_buffer_elim (B.gsub #(uint_t a_t SEC) table 0ul ((i +! 2ul) *! len)) (loc t2) h0 h1;
-  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) (v i + 2));
+  B.modifies_buffer_elim (B.gsub #(uint_t a_t SEC) table 0ul ((i +! 1ul) *! len)) (loc t2) h0 h1;
+  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) (v i + 1));
   LSeq.eq_intro
-    (LSeq.sub (as_seq h0 table) 0 ((v i + 2) * v len))
-    (LSeq.sub (as_seq h1 table) 0 ((v i + 2) * v len));
+    (LSeq.sub (as_seq h0 table) 0 ((v i + 1) * v len))
+    (LSeq.sub (as_seq h1 table) 0 ((v i + 1) * v len));
 
-  assert (forall (j:nat{j <= v i + 1}).
+  assert (forall (j:nat{j <= v i}).
     precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) j);
-  precomp_table_inv_lemma len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (as_seq h1 table) (v i + 2);
+  precomp_table_inv_lemma len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (as_seq h1 table) (v i + 1);
   assert (forall (j:nat{j <= v i + 1}).
     precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j)
 #pop-options
@@ -369,18 +369,16 @@ let lprecomp_table #a_t len ctx_len k ctx a table_len table =
   LSeq.eq_intro (as_seq h0 t0) (as_seq h1 t0);
   assert (k.to.linv (as_seq h1 t0) /\ k.to.linv (as_seq h1 t1));
   SE.pow_eq0 k.to.concr_ops (k.to.refl (as_seq h0 a));
-  SE.pow_eq1 k.to.concr_ops (k.to.refl (as_seq h0 a));
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) 0);
-  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) 1);
 
   [@ inline_let]
-  let inv h (i:nat{i <= v table_len - 2}) =
+  let inv h (i:nat{i <= v table_len - 1}) =
     modifies (loc table) h1 h /\
-    (forall (j:nat{j < i + 2}).
+    (forall (j:nat{j < i + 1}).
       precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j) in
 
 
-  Lib.Loops.for 0ul (table_len -! 2ul) inv
+  Lib.Loops.for 0ul (table_len -! 1ul) inv
   (fun j ->
     lprecomp_table_f #a_t len ctx_len k ctx a table_len j table)
 

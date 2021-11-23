@@ -89,12 +89,6 @@ let exp_pow2_lemma #t k a b =
 #push-options "--fuel 1"
 let pow_eq0 #t k a = ()
 
-let pow_eq1 #t k a =
-  assert (pow k a 1 == k.mul a (pow k a 0));
-  pow_eq0 k a;
-  assert (pow k a 1 == k.mul a (one ()));
-  lemma_one a
-
 let pow_unfold #t k a i = ()
 
 let rec pow_lemma #t k a b =

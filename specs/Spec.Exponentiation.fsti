@@ -45,7 +45,6 @@ class concrete_ops (t:Type) = {
   one: one_st t to;
   mul: mul_st t to;
   sqr: sqr_st t to;
-  lemma_one: a:t -> Lemma (mul a (one ()) == a);
 }
 
 
@@ -104,9 +103,6 @@ let rec pow (#t:Type) (k:concrete_ops t) (a:t) (b:nat) : t =
 
 val pow_eq0: #t:Type -> k:concrete_ops t -> a:t ->
   Lemma (pow k a 0 == k.one ())
-
-val pow_eq1: #t:Type -> k:concrete_ops t -> a:t ->
-  Lemma (pow k a 1 == a)
 
 val pow_unfold: #t:Type -> k:concrete_ops t -> a:t -> i:pos ->
   Lemma (pow k a i == k.mul a (pow k a (i - 1)))
