@@ -24,7 +24,7 @@ unfold
 let bn_mont_t (#t:limb_t) (#len:BN.bn_len t) (n:lbignum t len) =
   x:lbignum t len{bn_v x < bn_v n}
 
-let mk_to_nat_mont_ll_comm_monoid
+let mk_to_nat_mont_ll_cm
   (#t:limb_t)
   (#len:BN.bn_len t)
   (n:lbignum t len)
@@ -42,7 +42,7 @@ val bn_mont_one:
   -> #len:BN.bn_len t
   -> n:lbignum t len
   -> mu:limb t{BM.bn_mont_pre n mu} ->
-  SE.one_st (bn_mont_t n) (mk_to_nat_mont_ll_comm_monoid n mu)
+  SE.one_st (bn_mont_t n) (mk_to_nat_mont_ll_cm n mu)
 
 let bn_mont_one #t #len n mu _ =
   BM.bn_precomp_r2_mod_n_lemma 0 n;
@@ -56,7 +56,7 @@ val bn_mont_mul:
   -> #len:BN.bn_len t
   -> n:lbignum t len
   -> mu:limb t{BM.bn_mont_pre n mu} ->
-  SE.mul_st (bn_mont_t n) (mk_to_nat_mont_ll_comm_monoid n mu)
+  SE.mul_st (bn_mont_t n) (mk_to_nat_mont_ll_cm n mu)
 
 let bn_mont_mul #t #len n mu aM bM =
   BM.bn_mont_mul_lemma n mu aM bM;
@@ -68,7 +68,7 @@ val bn_mont_sqr:
   -> #len:BN.bn_len t
   -> n:lbignum t len
   -> mu:limb t{BM.bn_mont_pre n mu} ->
-  SE.sqr_st (bn_mont_t n) (mk_to_nat_mont_ll_comm_monoid n mu)
+  SE.sqr_st (bn_mont_t n) (mk_to_nat_mont_ll_cm n mu)
 
 let bn_mont_sqr #t #len n mu aM =
   BM.bn_mont_sqr_lemma n mu aM;
@@ -82,7 +82,7 @@ let mk_bn_mont_concrete_ops
   (mu:limb t{BM.bn_mont_pre n mu})
   : SE.concrete_ops (bn_mont_t n) =
 {
-  SE.to = mk_to_nat_mont_ll_comm_monoid n mu;
+  SE.to = mk_to_nat_mont_ll_cm n mu;
   SE.one = bn_mont_one #t #len n mu;
   SE.mul = bn_mont_mul #t #len n mu;
   SE.sqr = bn_mont_sqr #t #len n mu;
