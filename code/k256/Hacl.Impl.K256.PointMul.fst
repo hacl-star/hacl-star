@@ -35,13 +35,13 @@ unfold
 let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
 unfold
-let refl (p:LSeq.lseq uint64 12{point_inv_lseq p}) : GTot S.aff_point =
-  S.to_aff_point (point_as_nat3_proj_lseq p)
+let refl (p:LSeq.lseq uint64 12{point_inv_lseq p}) : GTot S.proj_point =
+  point_as_nat3_proj_lseq p
 
 inline_for_extraction noextract
-let mk_to_k256_cm : BE.to_comm_monoid U64 12ul 0ul = {
-  BE.a_spec = S.aff_point;
-  BE.comm_monoid = S.mk_k256_cm;
+let mk_to_k256_concrete_ops : BE.to_concrete_ops U64 12ul 0ul = {
+  BE.t_spec = S.proj_point;
+  BE.concr_ops = S.mk_k256_concrete_ops;
   BE.linv_ctx = linv_ctx;
   BE.linv = point_inv_lseq;
   BE.refl = refl;
@@ -49,24 +49,20 @@ let mk_to_k256_cm : BE.to_comm_monoid U64 12ul 0ul = {
 
 
 inline_for_extraction noextract
-val point_add : BE.lmul_st U64 12ul 0ul mk_to_k256_cm
+val point_add : BE.lmul_st U64 12ul 0ul mk_to_k256_concrete_ops
 let point_add ctx x y xy =
-  let h0 = ST.get () in
-  S.to_aff_point_add_lemma (point_as_nat3_proj h0 x) (point_as_nat3_proj h0 y);
   Hacl.Impl.K256.PointAdd.point_add xy x y
 
 
 inline_for_extraction noextract
-val point_double : BE.lsqr_st U64 12ul 0ul mk_to_k256_cm
+val point_double : BE.lsqr_st U64 12ul 0ul mk_to_k256_concrete_ops
 let point_double ctx x xx =
-  let h0 = ST.get () in
-  S.to_aff_point_double_lemma (point_as_nat3_proj h0 x);
   Hacl.Impl.K256.PointDouble.point_double xx x
 
 
 inline_for_extraction noextract
 let mk_k256_concrete_ops : BE.concrete_ops U64 12ul 0ul = {
-  BE.to = mk_to_k256_cm;
+  BE.to = mk_to_k256_concrete_ops;
   BE.lmul = point_add;
   BE.lsqr = point_double;
 }
@@ -77,15 +73,13 @@ inline_for_extraction noextract
 val make_point_at_inf: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\
-    S.to_aff_point (point_as_nat3_proj h1 p) == S.aff_point_at_inf)
+    point_inv h1 p /\ point_as_nat3_proj h1 p == S.point_at_inf)
 
 let make_point_at_inf p =
   let px, py, pz = getx p, gety p, getz p in
   set_zero px;
   set_one py;
-  set_zero pz;
-  S.to_aff_point_at_infinity_lemma ()
+  set_zero pz
 
 
 inline_for_extraction noextract
@@ -129,8 +123,8 @@ val point_mul: out:point -> scalar:qelem -> q:point -> Stack unit
     point_inv h q /\ qas_nat h scalar < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
-    S.to_aff_point (point_as_nat3_proj h1 out) ==
-    S.to_aff_point (S.point_mul (qas_nat h0 scalar) (point_as_nat3_proj h0 q)))
+    point_as_nat3_proj h1 out ==
+    S.point_mul (qas_nat h0 scalar) (point_as_nat3_proj h0 q))
 
 [@CInline]
 let point_mul out scalar q =
@@ -148,10 +142,10 @@ val point_mul_double_vartime:
     qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
-    S.to_aff_point (point_as_nat3_proj h1 out) ==
-    S.to_aff_point (S.point_mul_double
+    point_as_nat3_proj h1 out ==
+    S.point_mul_double
       (qas_nat h0 scalar1) (point_as_nat3_proj h0 q1)
-      (qas_nat h0 scalar2) (point_as_nat3_proj h0 q2)))
+      (qas_nat h0 scalar2) (point_as_nat3_proj h0 q2))
 
 [@CInline]
 let point_mul_double_vartime out scalar1 q1 scalar2 q2 =
@@ -165,8 +159,7 @@ val point_mul_g: out:point -> scalar:qelem -> Stack unit
     qas_nat h scalar < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
-    S.to_aff_point (point_as_nat3_proj h1 out) ==
-    S.to_aff_point (S.point_mul_g (qas_nat h0 scalar)))
+    point_as_nat3_proj h1 out == S.point_mul_g (qas_nat h0 scalar))
 
 [@CInline]
 let point_mul_g out scalar =
@@ -185,9 +178,9 @@ val point_mul_g_double_vartime: out:point -> scalar1:qelem -> scalar2:qelem -> q
     point_inv h q2 /\ qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
-    S.to_aff_point (point_as_nat3_proj h1 out) ==
-    S.to_aff_point (S.point_mul_double_g
-      (qas_nat h0 scalar1) (qas_nat h0 scalar2) (point_as_nat3_proj h0 q2)))
+    point_as_nat3_proj h1 out ==
+    S.point_mul_double_g
+      (qas_nat h0 scalar1) (qas_nat h0 scalar2) (point_as_nat3_proj h0 q2))
 
 [@CInline]
 let point_mul_g_double_vartime out scalar1 scalar2 q2 =

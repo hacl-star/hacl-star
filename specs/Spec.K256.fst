@@ -167,9 +167,9 @@ let mk_k256_cm : LE.comm_monoid aff_point = {
   LE.lemma_mul_comm = aff_point_add_comm_lemma;
 }
 
-let mk_to_k256_cm : SE.to_comm_monoid proj_point = {
+let mk_to_k256_cm : SE.to_cm proj_point = {
   SE.a_spec = aff_point;
-  SE.comm_monoid = mk_k256_cm;
+  SE.cm = mk_k256_cm;
   SE.refl = to_aff_point;
 }
 
@@ -198,9 +198,7 @@ let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
 
 // [a]P
 let point_mul (a:qelem) (p:proj_point) : proj_point =
-  let out = SE.exp_fw mk_k256_concrete_ops p 256 a 4 in
-  assert (to_aff_point out == LE.exp_fw #aff_point mk_k256_cm (to_aff_point p) 256 a 4);
-  out
+  SE.exp_fw mk_k256_concrete_ops p 256 a 4
 
 // [a1]P1 + [a2]P2
 let point_mul_double (a1:qelem) (p1:proj_point) (a2:qelem) (p2:proj_point) : proj_point =
