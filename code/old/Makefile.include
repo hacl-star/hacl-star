@@ -104,7 +104,7 @@ include $(FSTAR_HOME)/ulib/ml/Makefile.include
 # OCaml
 #
 
-OCAMLOPT:=$(OCAMLOPT) -thread -package batteries,zarith,stdint -w -20-26-3-8-58
+OCAMLOPT:=$(OCAMLOPT) -package batteries,zarith,stdint -w -20-26-3-8-58
 OCAML_OPTIONS=-fsopt "--lax" -fsopt "--codegen OCaml" -fsopt "--no_location_info"
 
 #

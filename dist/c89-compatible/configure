@@ -58,7 +58,7 @@ detect_ocaml () {
     return 1
   fi
   # Detect packages
-  for p in ctypes ctypes.foreign; do
+  for p in ctypes; do
     detect_ocamlfind $p || return 1
   done
 }

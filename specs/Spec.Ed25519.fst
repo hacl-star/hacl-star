@@ -44,29 +44,29 @@ let mk_ed25519_comm_monoid: LE.comm_monoid aff_point_c = {
   }
 
 let ext_point_c = p:ext_point{point_inv p}
-let mk_to_ed25519_comm_monoid : SE.to_comm_monoid ext_point_c = {
+let mk_to_ed25519_cm : SE.to_cm ext_point_c = {
   SE.a_spec = aff_point_c;
-  SE.comm_monoid = mk_ed25519_comm_monoid;
+  SE.cm = mk_ed25519_comm_monoid;
   SE.refl = (fun (x:ext_point_c) -> to_aff_point x);
   }
 
-val point_at_inifinity_c: SE.one_st ext_point_c mk_to_ed25519_comm_monoid
+val point_at_inifinity_c: SE.one_st ext_point_c mk_to_ed25519_cm
 let point_at_inifinity_c _ =
   EL.to_aff_point_at_infinity_lemma ();
   point_at_infinity
 
-val point_add_c: SE.mul_st ext_point_c mk_to_ed25519_comm_monoid
+val point_add_c: SE.mul_st ext_point_c mk_to_ed25519_cm
 let point_add_c p q =
   EL.to_aff_point_add_lemma p q;
   point_add p q
 
-val point_double_c: SE.sqr_st ext_point_c mk_to_ed25519_comm_monoid
+val point_double_c: SE.sqr_st ext_point_c mk_to_ed25519_cm
 let point_double_c p =
   EL.to_aff_point_double_lemma p;
   point_double p
 
 let mk_ed25519_concrete_ops : SE.concrete_ops ext_point_c = {
-  SE.to = mk_to_ed25519_comm_monoid;
+  SE.to = mk_to_ed25519_cm;
   SE.one = point_at_inifinity_c;
   SE.mul = point_add_c;
   SE.sqr = point_double_c;
