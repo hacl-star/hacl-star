@@ -61,8 +61,8 @@ val verify_step_2:
     (ensures fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
      (let exp_d = gsub tmp 20ul 20ul in
       F51.point_inv_t h1 exp_d /\ PM.inv_ext_point (as_seq h1 exp_d) /\
-      Spec.Ed25519.to_aff_point (F51.point_eval h1 exp_d) ==
-      Spec.Ed25519.(to_aff_point (point_negate_mul_double_g (as_seq h0 s) (as_seq h0 h') (F51.point_eval h0 a')))))
+      F51.point_eval h1 exp_d ==
+      Spec.Ed25519.(point_negate_mul_double_g (as_seq h0 s) (as_seq h0 h') (F51.point_eval h0 a'))))
 
 let verify_step_2 s h' a' tmp =
   let a_neg = sub tmp 0ul 20ul in
@@ -99,11 +99,6 @@ let verify_step_3 s h' a' r' =
   verify_step_2 s h' a' tmp;
   let exp_d = sub tmp 20ul 20ul in
   let b = Hacl.Impl.Ed25519.PointEqual.point_equal exp_d r' in
-  let h0 = ST.get () in
-  Spec.Ed25519.Lemmas.point_equal_lemma
-    (F51.point_eval h0 exp_d)
-    (Spec.Ed25519.point_negate_mul_double_g (as_seq h0 s) (as_seq h0 h') (F51.point_eval h0 a'))
-    (F51.point_eval h0 r');
   pop_frame();
   b
 

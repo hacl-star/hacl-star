@@ -138,8 +138,7 @@ val mk_point_at_inf: p:F51.point ->
   (requires fun h -> live h p)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     F51.point_inv_t h1 p /\ ML.inv_ext_point (as_seq h1 p) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 p) ==
-    Spec.Ed25519.aff_point_at_infinity)
+    F51.point_eval h1 p == Spec.Ed25519.point_at_inifinity_c ())
 
 let mk_point_at_inf p =
   Hacl.Impl.Ed25519.Ladder.make_point_inf p
@@ -150,7 +149,7 @@ val mk_base_point: p:F51.point ->
   (requires fun h -> live h p)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
     F51.point_inv_t h1 p /\ ML.inv_ext_point (as_seq h1 p) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 p) == SE.aff_g)
+    F51.point_eval h1 p == SE.g)
 
 let mk_base_point p =
   Spec.Ed25519.Lemmas.g_is_on_curve ();
@@ -164,8 +163,7 @@ val point_negate: p:F51.point -> out:F51.point ->
     F51.point_inv_t h p /\ ML.inv_ext_point (as_seq h p))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     F51.point_inv_t h1 out /\ ML.inv_ext_point (as_seq h1 out) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 out) ==
-    Spec.Ed25519.aff_point_negate (Spec.Ed25519.to_aff_point (F51.point_eval h0 p)))
+    F51.point_eval h1 out == Spec.Ed25519.point_negate (F51.point_eval h0 p))
 
 let point_negate p out =
   let h0 = ST.get () in
@@ -182,10 +180,8 @@ val point_add: p:F51.point -> q:F51.point -> out:F51.point ->
     F51.point_inv_t h q /\ ML.inv_ext_point (as_seq h q))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     F51.point_inv_t h1 out /\ ML.inv_ext_point (as_seq h1 out) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 out) ==
-    SE.aff_point_add
-      (Spec.Ed25519.to_aff_point (F51.point_eval h0 p))
-      (Spec.Ed25519.to_aff_point (F51.point_eval h0 q)))
+    F51.point_eval h1 out ==
+    SE.point_add (F51.point_eval h0 p) (F51.point_eval h0 q))
 
 let point_add p q out =
   let h0 = ST.get () in
@@ -204,8 +200,8 @@ val point_mul: scalar:lbuffer uint8 32ul -> p:F51.point -> out:F51.point ->
     F51.point_inv_t h p /\ ML.inv_ext_point (as_seq h p))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     F51.point_inv_t h1 out /\ ML.inv_ext_point (as_seq h1 out) /\
-    Spec.Ed25519.to_aff_point (F51.point_eval h1 out) ==
-    Spec.Ed25519.to_aff_point (SE.point_mul (as_seq h0 scalar) (F51.point_eval h0 p)))
+    F51.point_eval h1 out ==
+    SE.point_mul (as_seq h0 scalar) (F51.point_eval h0 p))
 
 let point_mul scalar p out =
   Hacl.Impl.Ed25519.Ladder.point_mul out scalar p
