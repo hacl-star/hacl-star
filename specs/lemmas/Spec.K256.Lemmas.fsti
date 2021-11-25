@@ -33,6 +33,7 @@ val to_aff_point_double_lemma (p:proj_point) :
   Lemma (to_aff_point (point_double p) == aff_point_add (to_aff_point p) (to_aff_point p))
 
 
+// works when q < prime /\ prime < 2 * q
 val ecdsa_verify_avoid_finv: p:proj_point{not (is_proj_point_at_inf p)} -> r:nat{0 < r /\ r < q} ->
   Lemma (let _X, _Y, _Z = p in
     (_X /% _Z % q = r) <==> ((r *% _Z = _X) || (r + q < prime && (r + q) *% _Z = _X)))
