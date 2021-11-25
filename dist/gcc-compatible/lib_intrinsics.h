@@ -18,7 +18,10 @@
 
 #include "Hacl_IntTypes_Intrinsics.h"
 
-#if (TARGET_ARCHITECTURE == TARGET_ARCHITECTURE_ID_ARM8) && defined(HACL_CAN_COMPILE_VEC128) //second one redundant?
+/* in principle TARGET_ARCHITECTURE_ID_ARM8 should also imply */
+/* HACL_CAN_COMPILE_VEC128, but we're checking both for precaution */
+#if (TARGET_ARCHITECTURE == TARGET_ARCHITECTURE_ID_ARM8) \
+  && defined(HACL_CAN_COMPILE_VEC128)
 
 #include "arm8_intrinsics.h"
 

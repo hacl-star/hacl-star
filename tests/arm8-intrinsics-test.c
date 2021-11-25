@@ -18,6 +18,44 @@ int main () {
   uint64_t r, r2, cout, cout2;
   bool passed = true;
 
+  for (int i = 0; i < num_vectors; ++i) {
+    r = 0U;
+    r2 = 0U;
+    cout = uint128_t_add_carry_u64
+      (cin_vectors[i], a_vectors[i], b_vectors[i], &r);
+    cout2 = Hacl_IntTypes_Intrinsics_add_carry_u64
+      (cin_vectors[i],a_vectors[i], b_vectors[i], &r2);
+    if (!(r == r2 && cout == cout2 &&
+          r == addcarry_res_vectors[i] &&
+          cout == addcarry_cout_vectors[i])) {
+      printf("Test failed for %" PRIu64 " and %" PRIu64 " \
+with carry %" PRIu64 ":\n\
+Hacl_IntTypes_Intrinsics_add_carry_u64: res %" PRIu64 ", carry %" PRIu64 "\n\
+uint128_t_add_carry:                    res %" PRIu64 ", carry %" PRIu64 "\n",
+             a_vectors[i], b_vectors[i], cin_vectors[i], r2, cout2, r, cout);
+      passed = false;
+    }
+
+    r = 0U;
+    r2 = 0U;
+    cout = uint128_t_sub_borrow_u64
+      (cin_vectors[i], a_vectors[i], b_vectors[i], &r);
+    cout2 = Hacl_IntTypes_Intrinsics_sub_borrow_u64
+      (cin_vectors[i],a_vectors[i], b_vectors[i], &r2);
+    if (!(r == r2 && cout == cout2 &&
+          r == subborrow_res_vectors[i] &&
+          cout == subborrow_cout_vectors[i])) {
+      printf("Test failed for %" PRIu64 " and %" PRIu64 " \
+with carry %" PRIu64 ":\n\
+Hacl_IntTypes_Intrinsics_sub_borrow_u64: res %" PRIu64 ", carry %" PRIu64 "\n\
+uint128_t_sub_borrow:                    res %" PRIu64 ", carry %" PRIu64 "\n",
+             a_vectors[i], b_vectors[i], cin_vectors[i], r2, cout2, r, cout);
+      passed = false;
+    }
+  }
+
+  /* currently neither the timings nor the cpucycle counts are reliable */
+  /* on ARM, so these outputs are not meaningful at the moment */
   cycles c1, c2;
   clock_t t1, t2;
 
@@ -71,42 +109,6 @@ int main () {
              time_intrinsics_sub_borrow_u64,
              cycles_intrinsics_sub_borrow_u64);
 
-
-  for (int i = 0; i < num_vectors; ++i) {
-    r = 0U;
-    r2 = 0U;
-    cout = uint128_t_add_carry_u64
-      (cin_vectors[i], a_vectors[i], b_vectors[i], &r);
-    cout2 = Hacl_IntTypes_Intrinsics_add_carry_u64
-      (cin_vectors[i],a_vectors[i], b_vectors[i], &r2);
-    if (!(r == r2 && cout == cout2 &&
-          r == addcarry_res_vectors[i] &&
-          cout == addcarry_cout_vectors[i])) {
-      printf("Test failed for %" PRIu64 " and %" PRIu64 " \
-with carry %" PRIu64 ":\n\
-Hacl_IntTypes_Intrinsics_add_carry_u64: res %" PRIu64 ", carry %" PRIu64 "\n\
-uint128_t_add_carry:                    res %" PRIu64 ", carry %" PRIu64 "\n",
-             a_vectors[i], b_vectors[i], cin_vectors[i], r2, cout2, r, cout);
-      passed = false;
-    }
-
-    r = 0U;
-    r2 = 0U;
-    cout = uint128_t_sub_borrow_u64
-      (cin_vectors[i], a_vectors[i], b_vectors[i], &r);
-    cout2 = Hacl_IntTypes_Intrinsics_sub_borrow_u64
-      (cin_vectors[i],a_vectors[i], b_vectors[i], &r2);
-    if (!(r == r2 && cout == cout2 &&
-          r == subborrow_res_vectors[i] &&
-          cout == subborrow_cout_vectors[i])) {
-      printf("Test failed for %" PRIu64 " and %" PRIu64 " \
-with carry %" PRIu64 ":\n\
-Hacl_IntTypes_Intrinsics_sub_borrow_u64: res %" PRIu64 ", carry %" PRIu64 "\n\
-uint128_t_sub_borrow:                    res %" PRIu64 ", carry %" PRIu64 "\n",
-             a_vectors[i], b_vectors[i], cin_vectors[i], r2, cout2, r, cout);
-      passed = false;
-    }
-  }
   if (passed)
     return EXIT_SUCCESS;
   else
