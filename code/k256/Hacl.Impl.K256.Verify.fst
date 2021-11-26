@@ -14,6 +14,7 @@ module BSeq = Lib.ByteSequence
 module BD = Hacl.Bignum.Definitions
 
 module S = Spec.K256
+module KL = Spec.K256.Lemmas
 
 open Hacl.K256.Field
 open Hacl.K256.Scalar
@@ -74,10 +75,55 @@ let ecdsa_verify_qelem res p z r s =
 
 
 inline_for_extraction noextract
+val fmul_eq_vartime (r z x: felem) : Stack bool
+  (requires fun h ->
+    live h r /\ live h z /\ live h x /\ eq_or_disjoint r z /\
+    fe_lt_prime h r /\ fe_lt_prime h z /\ fe_lt_prime h x)
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    b == (S.fmul (as_nat h0 r) (as_nat h0 z) = as_nat h0 x))
+
+let fmul_eq_vartime r z x =
+  push_frame ();
+  let tmp = create_felem () in
+  fmul tmp r z;
+  let b = is_felem_eq_vartime tmp x in
+  pop_frame ();
+  b
+
+
+inline_for_extraction noextract
+val ecdsa_verify_avoid_finv: p:point -> r:qelem -> Stack bool
+  (requires fun h ->
+    live h p /\ live h r /\ disjoint p r /\
+    point_inv h p /\ qe_lt_q h r /\ 0 < qas_nat h r /\
+    not (S.is_proj_point_at_inf (point_as_nat3_proj h p)))
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    (let (_X, _Y, _Z) = point_as_nat3_proj h0 p in
+     b <==> (S.fmul _X (S.finv _Z) % S.q = qas_nat h0 r)))
+
+let ecdsa_verify_avoid_finv p r =
+  push_frame ();
+  let h0 = ST.get () in
+  let x, y, z = getx p, gety p, getz p in
+  let is_rz_x = fmul_eq_vartime r z x in
+
+  let tmp = create_felem () in
+  make_u64_4 tmp (make_order_k256 ());
+  let is_tmp_lt_p = add_vartime tmp r tmp in
+  let is_tmpz_x = if is_tmp_lt_p then fmul_eq_vartime tmp z x else false in
+
+  let res = is_rz_x || is_tmpz_x in
+  KL.ecdsa_verify_avoid_finv (point_as_nat3_proj h0 p) (qas_nat h0 r);
+  pop_frame ();
+  res
+
+
+inline_for_extraction noextract
 val ecdsa_verify_qelem_aff (pk_x pk_y:felem) (z r s:qelem) : Stack bool
   (requires fun h ->
     live h pk_x /\ live h pk_y /\ live h z /\ live h r /\ live h s /\
-    qas_nat h z < S.q /\ qas_nat h r < S.q /\ qas_nat h s < S.q /\
+    qas_nat h z < S.q /\ qas_nat h s < S.q /\
+    0 < qas_nat h r /\ qas_nat h r < S.q /\
     fe_lt_prime h pk_x /\ fe_lt_prime h pk_y)
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
    (let sinv = S.qinv (qas_nat h0 s) in
@@ -85,23 +131,20 @@ val ecdsa_verify_qelem_aff (pk_x pk_y:felem) (z r s:qelem) : Stack bool
     let u2 = S.qmul (qas_nat h0 r) sinv in
     let p = (as_nat h0 pk_x, as_nat h0 pk_y, S.one) in
     let _X, _Y, _Z = S.point_mul_double_g u1 u2 p in
-    b = (S.fmul _X (S.finv _Z) % S.q = (qas_nat h0 r))))
+    b <==> (if S.is_proj_point_at_inf (_X, _Y, _Z) then false
+      else S.fmul _X (S.finv _Z) % S.q = qas_nat h0 r)))
 
 let ecdsa_verify_qelem_aff pk_x pk_y z r s =
   push_frame ();
   let p = create_point () in
   let res = create_point () in
-  let zinv = create_felem () in
-  let xq = create_qelem () in
 
   to_proj_point p pk_x pk_y;
   ecdsa_verify_qelem res p z r s;
-  let _X, _Y, _Z = getx res, gety res, getz res in
 
-  finv zinv _Z;
-  fmul zinv _X zinv;
-  qelem_from_felem xq zinv;
-  let b = is_qelem_eq_vartime xq r in
+  let b =
+    if is_proj_point_at_inf_vartime res then false
+    else ecdsa_verify_avoid_finv res r in
   pop_frame ();
   b
 

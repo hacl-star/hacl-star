@@ -57,6 +57,18 @@ let make_prime_k256 () =
   r
 
 
+let make_order_k256 () =
+  [@inline_let]
+  let r =
+   (u64 0xbfd25e8cd0364141,
+    u64 0xbaaedce6af48a03b,
+    u64 0xfffffffffffffffe,
+    u64 0xffffffffffffffff) in
+
+  assert_norm (as_nat4 r = S.q);
+  r
+
+
 let make_b_k256 () =
   [@inline_let]
   let r = (u64 0x7, u64 0, u64 0, u64 0) in
@@ -196,6 +208,32 @@ let fmul_24b out f =
   [@inline_let]
   let b24 = normalize_term (u64 (S.b * 24)) in
   fmul_small_num out f b24
+
+
+let add_vartime out f1 f2 =
+  push_frame ();
+  let h0 = ST.get () in
+  let n = create_felem () in
+  let c = BN.bn_add_eq_len nlimb f1 f2 out in
+  make_u64_4 n (make_prime_k256 ());
+  let h1 = ST.get () in
+
+  SN.bn_add_lemma (as_seq h0 f1) (as_seq h0 f2);
+  assert (v c * pow2 256 + as_nat h1 out == as_nat h0 f1 + as_nat h0 f2);
+  let res =
+    if BB.unsafe_bool_of_limb0 c then begin
+      let is_lt_p = BN.bn_lt_mask nlimb out n in
+      SN.bn_lt_mask_lemma (as_seq h1 out) (as_seq h1 n);
+      BB.unsafe_bool_of_limb is_lt_p end
+    else false in
+
+  Math.Lemmas.modulo_addition_lemma (as_nat h1 out) (pow2 256) (v c);
+  SD.bn_eval_bound (as_seq h1 out) 4;
+  Math.Lemmas.small_mod (as_nat h1 out) (pow2 256);
+  assert (as_nat h1 out == (as_nat h0 f1 + as_nat h0 f2) % pow2 256);
+
+  pop_frame ();
+  res
 
 
 let fadd out f1 f2 =

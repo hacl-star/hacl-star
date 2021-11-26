@@ -39,6 +39,11 @@ int main() {
                      vectors[i].sgnt_r,vectors[i].sgnt_s,vectors[i].id,vectors[i].valid);
   }
 
+  if (ok)
+    printf ("\n Success :) \n");
+  else
+    printf ("\n Failed :( \n");
+
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
 }

@@ -59,6 +59,12 @@ val make_prime_k256: unit -> Pure felem4
 
 
 inline_for_extraction noextract
+val make_order_k256: unit -> Pure felem4
+  (requires True)
+  (ensures  fun r -> as_nat4 r = S.q)
+
+
+inline_for_extraction noextract
 val make_b_k256: unit -> Pure felem4
   (requires True)
   (ensures  fun r -> as_nat4 r = S.b)
@@ -166,7 +172,17 @@ val fmul_24b (out f:felem) : Stack unit
     fe_lt_prime h1 out)
 
 
-val fadd (out f1 f2: felem) : Stack unit
+val add_vartime (out f1 f2:felem) : Stack bool
+  (requires fun h ->
+    live h out /\ live h f1 /\ live h f2 /\
+    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
+    fe_lt_prime h f1 /\ fe_lt_prime h f2)
+  (ensures  fun h0 b h1 -> modifies (loc out) h0 h1 /\
+    as_nat h1 out == (as_nat h0 f1 + as_nat h0 f2) % pow2 256 /\
+    b == (as_nat h0 f1 + as_nat h0 f2 < S.prime))
+
+
+val fadd (out f1 f2:felem) : Stack unit
   (requires fun h ->
     live h out /\ live h f1 /\ live h f2 /\
     eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
