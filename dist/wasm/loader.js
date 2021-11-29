@@ -449,7 +449,7 @@ function reserve(mem, size) {
   let m32 = new Uint32Array(mem.buffer);
   let p = m32[0];
   m32[0] += size;
-  my_print("Reserved memory area 0x"+p32(p)+"..0x"+p32(m32[0]));
+  // my_print("Reserved memory area 0x"+p32(p)+"..0x"+p32(m32[0]));
   return p;
 }
 
