@@ -87,15 +87,22 @@ void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, 
 /* SNIPPET_START: Hacl_Blake2b_256_blake2b_init */
 
 void
-Hacl_Blake2b_256_blake2b_init(
+Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);
+
+/* SNIPPET_END: Hacl_Blake2b_256_blake2b_init */
+
+/* SNIPPET_START: Hacl_Blake2b_256_blake2b_update_key */
+
+void
+Hacl_Blake2b_256_blake2b_update_key(
   Lib_IntVector_Intrinsics_vec256 *wv,
   Lib_IntVector_Intrinsics_vec256 *hash,
   uint32_t kk,
   uint8_t *k,
-  uint32_t nn
+  uint32_t ll
 );
 
-/* SNIPPET_END: Hacl_Blake2b_256_blake2b_init */
+/* SNIPPET_END: Hacl_Blake2b_256_blake2b_update_key */
 
 /* SNIPPET_START: Hacl_Blake2b_256_blake2b_update_multi */
 

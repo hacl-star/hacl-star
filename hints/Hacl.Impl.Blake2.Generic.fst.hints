@@ -127,7 +127,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "2b50c3eeb1f73a1bc3162bc3220382c4"
+      "e5f74675ab65ab3e5cc791393e4d5da7"
     ],
     [
       "Hacl.Impl.Blake2.Generic.get_sigma",
@@ -213,7 +213,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "c28ef244a94bc443aa8de8ae506f141d"
+      "07249a4a6c7787e8e0686f2620a1f3da"
     ],
     [
       "Hacl.Impl.Blake2.Generic.get_sigma_sub",
@@ -249,7 +249,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "36dc7c705c87edfe5a1486f906ca033f"
+      "74ae9cbd6e5ce6574597c4de073969ea"
     ],
     [
       "Hacl.Impl.Blake2.Generic.rounds_t",
@@ -309,7 +309,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "cafdeb78bcc666f1ca8b9a2a72fcba07"
+      "fcaf863e8c17bf68e66382abea3d24c9"
     ],
     [
       "Hacl.Impl.Blake2.Generic.size_to_word",
@@ -352,7 +352,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok", "unit_typing"
       ],
       0,
-      "9cd75958602689202291f5b964b06a4a"
+      "2fdf5eb1c67e81fc10b81c8380f50ce1"
     ],
     [
       "Hacl.Impl.Blake2.Generic.size_to_limb",
@@ -603,7 +603,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "73005e96bf6b2a78af2d5310d0acbcd2"
+      "bf0a613438c3300a935072578e27ab14"
     ],
     [
       "Hacl.Impl.Blake2.Generic.g2",
@@ -719,7 +719,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "44c9c5ea957e4d3d888d39646f0fb1d1"
+      "4eee444201b97aeb19ea54420d5134ef"
     ],
     [
       "Hacl.Impl.Blake2.Generic.g2z",
@@ -787,7 +787,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "8a12b009b46e8cd7f0c274f4580fb72a"
+      "db7f2c13e3a284139a3e04cc0a5b32a0"
     ],
     [
       "Hacl.Impl.Blake2.Generic.blake2_mixing",
@@ -1979,7 +1979,7 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Blake2.Blake2B",
         "constructor_distinct_Spec.Blake2.Blake2S",
-        "data_typing_intro_Hacl.Impl.Blake2.Core.M128@tok",
+        "data_typing_intro_Hacl.Impl.Blake2.Core.M256@tok",
         "data_typing_intro_Spec.Blake2.Blake2B@tok",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
@@ -2844,6 +2844,7 @@
         "lemma_LowStar.Monotonic.Buffer.as_addr_gsub",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.frameOf_gsub",
+        "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
@@ -2894,6 +2895,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_6ddec8e4f641a98735489723790fd54b",
         "refinement_interpretation_Tm_refine_74f0b423bc2980159fa8351b096bae11",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_80c81b6f576b5df50b0d5422474506ba",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_85273ee37145e8dacb631d58b854e75b",
@@ -2906,6 +2908,7 @@
         "refinement_kinding_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "token_correspondence_Lib.Buffer.as_seq",
         "token_correspondence_Lib.Buffer.op_Brack_Lens_Access",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_FStar.Monotonic.HyperHeap.mod_set",
         "typing_FStar.Monotonic.HyperHeap.rid",
         "typing_FStar.Monotonic.HyperHeap.rid_freeable",
@@ -3985,7 +3988,6 @@
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
         "lemma_LowStar.Monotonic.Buffer.frameOf_gsub",
         "lemma_LowStar.Monotonic.Buffer.lemma_live_equal_mem_domains",
-        "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.live_region_frameOf",
@@ -4434,7 +4436,6 @@
         "typing_LowStar.Monotonic.Buffer.frameOf",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_addresses",
-        "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union",

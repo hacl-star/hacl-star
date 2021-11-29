@@ -605,7 +605,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "4cbbad5c06f821341ed23b3ac9711151"
+      "af1f03d6e164078a455f361bf68d95e5"
     ],
     [
       "EverCrypt.Hash.frame_invariant",
@@ -2650,20 +2650,29 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_FStar.Integers.W16",
+        "constructor_distinct_FStar.Integers.W32",
         "constructor_distinct_FStar.Integers.W8",
+        "constructor_distinct_FStar.Integers.Winfinite",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.SEC",
+        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
         "data_typing_intro_FStar.Pervasives.Native.Mktuple2@tok",
+        "equality_tok_FStar.Integers.W16@tok",
+        "equality_tok_FStar.Integers.W32@tok",
         "equality_tok_FStar.Integers.W8@tok",
+        "equality_tok_FStar.Integers.Winfinite@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
+        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
@@ -2713,7 +2722,7 @@
         "function_token_typing_Lib.IntTypes.uint8", "int_typing",
         "interpretation_Tm_abs_c5cfacc785df376403b58f49cdaf22b6",
         "lemma_FStar.Seq.Base.lemma_len_append",
-        "lemma_Lib.IntTypes.v_injective",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.v_injective",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
         "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
@@ -2722,6 +2731,7 @@
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Integers.Signed__0",
+        "projection_inverse_FStar.Integers.Unsigned__0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__a",
         "projection_inverse_Prims.Mkdtuple2__1",
         "projection_inverse_Spec.GaloisField.GF_t",
@@ -2755,7 +2765,7 @@
         "unit_typing"
       ],
       0,
-      "5623be6e5e7374a925ccac0265cf2149"
+      "918547cc0620aca505527d07d91c7e27"
     ],
     [
       "EverCrypt.Hash.update_last_st",
@@ -3174,7 +3184,7 @@
         "typing_tok_Spec.Blake2.Blake2B@tok", "unit_typing"
       ],
       0,
-      "992f97ce8f3e0997715ef06de10cf728"
+      "e98cd1bc02215b58c1559d29e22b35a2"
     ],
     [
       "EverCrypt.Hash.update_last_with_internal_st",

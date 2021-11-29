@@ -171,16 +171,22 @@ void Hacl_Hash_Blake2_hash_blake2b_32(uint8_t *input, uint32_t input_len, uint8_
 
 /* SNIPPET_START: Hacl_Blake2b_32_blake2b_init */
 
+void Hacl_Blake2b_32_blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);
+
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_init */
+
+/* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_key */
+
 void
-Hacl_Blake2b_32_blake2b_init(
+Hacl_Blake2b_32_blake2b_update_key(
   uint64_t *wv,
   uint64_t *hash,
   uint32_t kk,
   uint8_t *k,
-  uint32_t nn
+  uint32_t ll
 );
 
-/* SNIPPET_END: Hacl_Blake2b_32_blake2b_init */
+/* SNIPPET_END: Hacl_Blake2b_32_blake2b_update_key */
 
 /* SNIPPET_START: Hacl_Blake2b_32_blake2b_update_multi */
 
@@ -243,16 +249,22 @@ Hacl_Blake2b_32_blake2b(
 
 /* SNIPPET_START: Hacl_Blake2s_32_blake2s_init */
 
+void Hacl_Blake2s_32_blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn);
+
+/* SNIPPET_END: Hacl_Blake2s_32_blake2s_init */
+
+/* SNIPPET_START: Hacl_Blake2s_32_blake2s_update_key */
+
 void
-Hacl_Blake2s_32_blake2s_init(
+Hacl_Blake2s_32_blake2s_update_key(
   uint32_t *wv,
   uint32_t *hash,
   uint32_t kk,
   uint8_t *k,
-  uint32_t nn
+  uint32_t ll
 );
 
-/* SNIPPET_END: Hacl_Blake2s_32_blake2s_init */
+/* SNIPPET_END: Hacl_Blake2s_32_blake2s_update_key */
 
 /* SNIPPET_START: Hacl_Blake2s_32_blake2s_update_multi */
 
