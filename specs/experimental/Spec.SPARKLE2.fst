@@ -10,9 +10,6 @@ open Lib.ByteSequence.Tuples
 #set-options "--z3rlimit 15"
 
 
-let size_word: size_nat = 4
-
-
 inline_for_extraction
 let vsize_rcon: size_nat = 8
 
@@ -27,9 +24,11 @@ let rcon_list: x:list uint32 {List.Tot.length x == vsize_rcon} =
 
 let rcon: lseq uint32 vsize_rcon  = createL rcon_list
 
+
 type branch_len =  n: nat {n = 1 \/ n = 2 \/ n = 3 \/ n = 4 \/ n = 6 \/ n = 8}
 
 type branch1 = (uint32 & uint32)
+
 
 inline_for_extraction noextract
 val arx: c:uint32 -> branch1 -> Tot branch1
@@ -81,39 +80,37 @@ let xor #n b =
   Lib.LoopCombinators.repeati #(tuple2 uint32 uint32) (n / 2) (Spec.SPARKLE2.xor_step #n b) (u32 0, u32 0)
 
 
-let xor_x_step (#n: branch_len) (lty, ltx) (index : nat {index < n}) (b : branch n) (o: branch n) = 
-  let xi, yi = getBranch #n index b in 
+let xor_x_step (#n: branch_len) (lty, ltx)  (b : branch n) (i : nat {i < n}) (temp: branch n) = 
+  let xi, yi = getBranch #n i b in 
   let xi_n, yi_n = xi ^. lty, yi ^. ltx in
-  setBranch #n index (xi_n, yi_n) o
-
-let xor_x #n b lty ltx = 
-  let s = Lib.Sequence.create (2 * n) (u32 0) in  
-  Lib.LoopCombinators.repeati n (fun i -> xor_x_step #n (lty, ltx) i s) b
+  setBranch #n i (xi_n, yi_n) temp
 
 
-val m: #n: branch_len -> branch n -> Tot (branch n)
+let xor_x (#n : branch_len) b (lty, ltx) (temp: branch n) : branch n = 
+  Lib.LoopCombinators.repeati (n / 2) (xor_x_step #n (lty, ltx) b) temp
 
-let m #n b = 
+
+let m #n b temp = 
   let tx, ty = xor #n b in 
   let ltx, lty = l1 tx, l1 ty in
-  xor_x #n b lty ltx
+  xor_x #n b (lty, ltx) temp
 
 
-let l_step (#n: branch_len) (m : branch n) (rightBranch: branch n) (i:nat {i < n}) : branch n = 
-  let (xi, yi) = getBranch i rightBranch in 
+let l_step (#n: branch_len) (m : branch n) (right: branch n) (i:nat {i < n}) : branch n = 
+  let (xi, yi) = getBranch i right in 
   let (p0i, p1i) = getBranch i m in 
   let branchIUpd = xi ^. p0i, yi ^. p1i in 
-  setBranch #n ((i - 1) % n) branchIUpd m
+  setBranch #n i branchIUpd m
 
 
 val l: #n: branch_len {n % 2 == 0} -> b: branch n -> branch (n/2)
 
-let l #n0 b = 
-  let leftBranch: branch (n0 / 2)  = sub #_ #(2 * n0) b 0 n0 in 
-  let rightBranch: branch (n0 / 2) = sub #_ #(2 * n0) b n0 n0 in 
+let l #n b = 
+  let s = Lib.Sequence.create n (u32 0) in  
+  let leftBranch: branch (n / 2)  = sub #_ #(2 * n) b 0 n in 
+  let rightBranch: branch (n / 2) = sub #_ #(2 * n) b n n in 
   let tempBranch = m leftBranch in 
-  let seqEmpty: branch (n0 / 2) = create n0 (u32 0) in 
-  Lib.LoopCombinators.repeati (n0 / 2) (fun i branch -> l_step rightBranch branch i) tempBranch
+  Lib.LoopCombinators.repeati (n / 2) (fun i branch -> l_step rightBranch branch i) s
 
 
 val add2: #n: branch_len {n >= 2} -> i: size_nat -> branch n -> Tot (branch n)
@@ -136,7 +133,7 @@ val fromBranch: #n: branch_len -> branch n -> lbytes (8 * n)
 let fromBranch #n input = uints_to_bytes_le #_ #_ #(2 * n) input
 
 
-val arx_n_step: #n: branch_len -> i: size_nat {i < n} -> branch n-> branch n
+val arx_n_step: #n: branch_len -> i: size_nat {i < n} -> branch n -> branch n
 
 let arx_n_step #n i b = 
   let branchI = getBranch i b in 
