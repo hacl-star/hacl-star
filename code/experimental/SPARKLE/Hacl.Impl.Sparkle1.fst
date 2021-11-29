@@ -286,24 +286,58 @@ inline_for_extraction noextract
 val mainLoop: #n: branch_len -> b: branch n -> steps: size_t -> 
   Stack unit 
   (requires fun h -> live h b)
-  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1)
+  (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\ as_seq h1 b == Spec.SPARKLE2.mainLoop #(v n) (as_seq h0 b) (v steps))
 
 let mainLoop #n b steps = 
   let h0 = ST.get() in 
+  Lib.LoopCombinators.eq_repeati0 (v steps) (Spec.SPARKLE2.mainLoop_step #(v n)) (as_seq h0 b);
   Lib.Loops.for 0ul steps
-    (fun h i -> live h b /\ modifies (loc b) h0 h)
-    (fun (i: size_t) -> mainLoop_step i b)
+    (fun h i -> live h b /\ modifies (loc b) h0 h /\ 
+      as_seq h b == Spec.SPARKLE2.mainLoop #(v n) (as_seq h0 b) i)
+    (fun (i: size_t) -> mainLoop_step i b; 
+      Lib.LoopCombinators.unfold_repeati (v n) (Spec.SPARKLE2.mainLoop_step #(v n)) (as_seq h0 b) (v i))
 
 
 val sparkle256: steps: size_t -> i: lbuffer (uint8) (size 32) -> o: lbuffer (uint8) (size 32) ->
   Stack unit 
   (requires fun h -> live h i /\ live h o)
-  (ensures fun h0 _ h1 -> True)
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_seq h1 o == Spec.SPARKLE2.sparkle256 (v steps) (as_seq h0 i))
 
 let sparkle256 steps i o =
   push_frame();
-    let temp = create (size 12) (u32 0) in 
-    toBranch #(size 4) i temp;
-    mainLoop #(size 4) temp steps;
-    fromBranch #(size 4) temp o; 
+    let len = size 4 in 
+    let temp = create (len *. 2ul) (u32 0) in 
+    toBranch #len i temp;
+    mainLoop #len temp steps;
+    fromBranch #len temp o; 
+  pop_frame()
+
+
+val sparkle384: steps: size_t -> i: lbuffer (uint8) (size 48) -> o: lbuffer (uint8) (size 48) ->
+  Stack unit 
+  (requires fun h -> live h i /\ live h o)
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_seq h1 o == Spec.SPARKLE2.sparkle384 (v steps) (as_seq h0 i))
+
+let sparkle384 steps i o =
+  push_frame();
+    let len = size 6 in 
+    let temp = create (len *. 2ul) (u32 0) in 
+    toBranch #len i temp;
+    mainLoop #len temp steps;
+    fromBranch #len temp o; 
+  pop_frame()
+
+
+val sparkle512: steps: size_t -> i: lbuffer (uint8) (size 64) -> o: lbuffer (uint8) (size 64) ->
+  Stack unit 
+  (requires fun h -> live h i /\ live h o)
+  (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\ as_seq h1 o == Spec.SPARKLE2.sparkle512 (v steps) (as_seq h0 i))
+
+let sparkle512 steps i o =
+  push_frame();
+    let len = size 8 in 
+    let temp = create (len *. 2ul) (u32 0) in 
+    toBranch #len i temp;
+    mainLoop #len temp steps;
+    fromBranch #len temp o; 
   pop_frame()
