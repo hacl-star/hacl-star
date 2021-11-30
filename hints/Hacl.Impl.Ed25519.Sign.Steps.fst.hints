@@ -50,7 +50,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "78e73a6da6efa5f3fffb1a4724477cdf"
+      "e4cb452bb4485c3910a76e6e38a93342"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.point_mul_g_compress",
@@ -232,7 +232,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "2411a3dac63a4c96b49522d01164c749"
+      "b0462cbf07cfc7a95836116b882f8407"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_2",
@@ -292,7 +292,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "53f0a73866aaf4396db0b45a87a81a71"
+      "461f10e9dabfe36916544ba7a0e47960"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_2",
@@ -369,7 +369,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "27aea25c59f72915b5e99d88f85858f0"
+      "7e8ec6d2d874bef93a216655d46b2354"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_3",
@@ -497,7 +497,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "006b59fd902a4ea600c279557c3f847f"
+      "b812e6ae0f94304614b9c2d1424d8577"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_3",
@@ -685,7 +685,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_384@tok"
       ],
       0,
-      "24fa43d96392d2cf68c2c715a12548c8"
+      "3bc1d962c2bbde35b459f143e298bc82"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_4",
@@ -750,7 +750,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "0040c5e3eaab990c9e10707501b42189"
+      "5aeb9a807cebda95fd21e617016b8755"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_4",
@@ -846,7 +846,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e5a24b801a919d526683fcd1ae886dac"
+      "dcba55ae1229861c9a45afc256b63c49"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_5",
@@ -899,7 +899,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7bdbfb51992d253ce0d852c5ce7da2dc"
+      "d99aabc2b2a0d9c1a9686f2994838c3e"
     ],
     [
       "Hacl.Impl.Ed25519.Sign.Steps.sign_step_5",
@@ -980,8 +980,9 @@
         "equation_Lib.Sequence.to_seq", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.Ed25519.q", "equation_Spec.GaloisField.gf",
+        "equation_Prims.pos", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.Ed25519.q",
+        "equation_Spec.GaloisField.gf",
         "equation_Spec.Hash.Definitions.state_word_length",
         "equation_Spec.Hash.Definitions.word_t",
         "function_token_typing_FStar.Monotonic.Heap.heap",
@@ -1031,6 +1032,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5d3ac41f4bdd4729b18b8bd04533c855",
         "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7f16c7b57ef8bef37e694fdc293f58a5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_8f51ca6f308454b2cbcbc3b375eb70ff",
@@ -1061,8 +1063,8 @@
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.as_seq",
         "typing_LowStar.Monotonic.Buffer.len",
-        "typing_LowStar.Monotonic.Buffer.loc_buffer", "typing_Spec.AES.gf8",
-        "typing_Spec.Ed25519.q",
+        "typing_LowStar.Monotonic.Buffer.loc_buffer", "typing_Prims.pow2",
+        "typing_Spec.AES.gf8", "typing_Spec.Ed25519.q",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_Spec.Hash.Definitions.word_t",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
