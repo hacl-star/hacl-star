@@ -474,6 +474,30 @@ let test11_expected : lbytes 32 =
 
 (*** Blake2b test vectors: *)
 
+let test0_plaintext_list  = List.Tot.map u8_from_UInt8 [
+]
+
+let test0_plaintext : lbytes 0 =
+  assert_norm (List.Tot.length test0_plaintext_list = 0);
+  of_list test0_plaintext_list
+
+let test0_key_list  = List.Tot.map u8_from_UInt8 [
+  0x00uy; 0x01uy; 0x02uy; 0x03uy; 0x04uy; 0x05uy; 0x06uy; 0x07uy; 0x08uy; 0x09uy; 0x0auy; 0x0buy; 0x0cuy; 0x0duy; 0x0euy; 0x0fuy; 0x10uy; 0x11uy; 0x12uy; 0x13uy; 0x14uy; 0x15uy; 0x16uy; 0x17uy; 0x18uy; 0x19uy; 0x1auy; 0x1buy; 0x1cuy; 0x1duy; 0x1euy; 0x1fuy; 0x20uy; 0x21uy; 0x22uy; 0x23uy; 0x24uy; 0x25uy; 0x26uy; 0x27uy; 0x28uy; 0x29uy; 0x2auy; 0x2buy; 0x2cuy; 0x2duy; 0x2euy; 0x2fuy; 0x30uy; 0x31uy; 0x32uy; 0x33uy; 0x34uy; 0x35uy; 0x36uy; 0x37uy; 0x38uy; 0x39uy; 0x3auy; 0x3buy; 0x3cuy; 0x3duy; 0x3euy; 0x3fuy
+]
+
+let test0_key : lbytes 64 =
+  assert_norm (List.Tot.length test0_key_list = 64);
+  of_list test0_key_list
+
+let test0_expected_list = List.Tot.map u8_from_UInt8 [
+0x10uy; 0xebuy; 0xb6uy; 0x77uy; 0x00uy; 0xb1uy; 0x86uy; 0x8euy; 0xfbuy; 0x44uy; 0x17uy; 0x98uy; 0x7auy; 0xcfuy; 0x46uy; 0x90uy; 0xaeuy; 0x9duy; 0x97uy; 0x2fuy; 0xb7uy; 0xa5uy; 0x90uy; 0xc2uy; 0xf0uy; 0x28uy; 0x71uy; 0x79uy; 0x9auy; 0xaauy; 0x47uy; 0x86uy; 0xb5uy; 0xe9uy; 0x96uy; 0xe8uy; 0xf0uy; 0xf4uy; 0xebuy; 0x98uy; 0x1fuy; 0xc2uy; 0x14uy; 0xb0uy; 0x05uy; 0xf4uy; 0x2duy; 0x2fuy; 0xf4uy; 0x23uy; 0x34uy; 0x99uy; 0x39uy; 0x16uy; 0x53uy; 0xdfuy; 0x7auy; 0xefuy; 0xcbuy; 0xc1uy; 0x3fuy; 0xc5uy; 0x15uy; 0x68uy
+]
+
+let test0_expected : lbytes 64 =
+  assert_norm (List.Tot.length test0_expected_list = 64);
+  of_list test0_expected_list
+
+
 (* test12_plaintext = "000102030405060708090A0B0C0D0E0F101112131415161718191A1B1C1D1E1F202122232425262728292A2B2C2D2E2F303132333435363738393A3B3C3D3E3F404142434445464748494A4B4C4D4E4F505152535455565758595A5B5C5D5E5F606162636465666768696A6B6C6D6E6F707172737475767778797A7B7C7D7E" *)
 let test12_plaintext_list = List.Tot.map u8_from_UInt8 [
   0x00uy;  0x01uy;  0x02uy;  0x03uy;  0x04uy;  0x05uy;  0x06uy;  0x07uy;  0x08uy;  0x09uy; 
@@ -828,6 +852,7 @@ let test () =
   let result10 = blake2s_test 10 test10_plaintext test10_key test10_expected in
   let result11 = blake2s_test 11 test11_plaintext test11_key test11_expected in
 
+  let result0 = blake2b_test 0 test0_plaintext test0_key test0_expected in
   let result5 = blake2b_test 5 test5_plaintext emp_key test5_expected in
   let result6 = blake2b_test 6 test6_plaintext test6_key test6_expected in
   let result12 = blake2b_test 12 test12_plaintext test12_key test12_expected in
@@ -839,7 +864,7 @@ let test () =
   //
   // RESULT
   //
-  if result1 && result2 && result3 && result4 && result5 && result6 &&
+  if result0 && result1 && result2 && result3 && result4 && result5 && result6 &&
      result7 && result8 && result9 && result10 && result11 && result12 &&
      result13 && result14 && result15 && result16 then
   begin IO.print_string "\n\nAll tests successful !\n"; true end

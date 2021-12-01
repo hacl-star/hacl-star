@@ -37,6 +37,9 @@ module Bindings(F:Cstubs.FOREIGN) =
         (ocaml_bytes @-> (uint32_t @-> (ocaml_bytes @-> (returning void))))
     let hacl_Blake2b_32_blake2b_init =
       foreign "Hacl_Blake2b_32_blake2b_init"
+        ((ptr uint64_t) @-> (uint32_t @-> (uint32_t @-> (returning void))))
+    let hacl_Blake2b_32_blake2b_update_key =
+      foreign "Hacl_Blake2b_32_blake2b_update_key"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @->
               (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))
@@ -52,6 +55,9 @@ module Bindings(F:Cstubs.FOREIGN) =
                     (uint32_t @-> (ocaml_bytes @-> (returning void)))))))
     let hacl_Blake2s_32_blake2s_init =
       foreign "Hacl_Blake2s_32_blake2s_init"
+        ((ptr uint32_t) @-> (uint32_t @-> (uint32_t @-> (returning void))))
+    let hacl_Blake2s_32_blake2s_update_key =
+      foreign "Hacl_Blake2s_32_blake2s_update_key"
         ((ptr uint32_t) @->
            ((ptr uint32_t) @->
               (uint32_t @-> (ocaml_bytes @-> (uint32_t @-> (returning void))))))

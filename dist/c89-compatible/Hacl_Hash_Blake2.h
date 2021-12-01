@@ -117,13 +117,15 @@ void Hacl_Hash_Blake2_hash_blake2s_32(uint8_t *input, uint32_t input_len, uint8_
 
 void Hacl_Hash_Blake2_hash_blake2b_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
+void Hacl_Blake2b_32_blake2b_init(uint64_t *hash, uint32_t kk, uint32_t nn);
+
 void
-Hacl_Blake2b_32_blake2b_init(
+Hacl_Blake2b_32_blake2b_update_key(
   uint64_t *wv,
   uint64_t *hash,
   uint32_t kk,
   uint8_t *k,
-  uint32_t nn
+  uint32_t ll
 );
 
 void
@@ -165,13 +167,15 @@ Hacl_Blake2b_32_blake2b(
   uint8_t *k
 );
 
+void Hacl_Blake2s_32_blake2s_init(uint32_t *hash, uint32_t kk, uint32_t nn);
+
 void
-Hacl_Blake2s_32_blake2s_init(
+Hacl_Blake2s_32_blake2s_update_key(
   uint32_t *wv,
   uint32_t *hash,
   uint32_t kk,
   uint8_t *k,
-  uint32_t nn
+  uint32_t ll
 );
 
 void

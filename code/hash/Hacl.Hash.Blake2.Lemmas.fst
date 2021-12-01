@@ -17,7 +17,7 @@ module B2 = Spec.Blake2
 
 let blake2_init_no_key_is_agile (a : hash_alg{is_blake a}) :
   Lemma(
-    ((Spec.Blake2.blake2_init (to_blake_alg a) 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a))
+    ((Spec.Blake2.blake2_init_hash (to_blake_alg a) 0 (Spec.Blake2.max_output (to_blake_alg a))
       <: words_state' a),
       Spec.Agile.Hash.nat_to_extra_state a 0) ==
       Spec.Agile.Hash.init a) = ()

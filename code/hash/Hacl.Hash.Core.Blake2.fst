@@ -16,7 +16,7 @@ friend Spec.Agile.Hash
 #push-options "--ifuel 0 --fuel 0"
 
 let mk_init a m s =
-  Impl.blake2_init_hash #(to_blake_alg a) #m s (size 0)
+  Impl.blake2_init #(to_blake_alg a) #m s (size 0)
                         (size (Spec.max_output (to_blake_alg a)));
   initial_extra_state a
 

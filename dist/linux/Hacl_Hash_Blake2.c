@@ -3729,9 +3729,8 @@ static inline void blake2b_update_block(u64 *wv, u64 *hash, bool flag, uint128_t
   }
 }
 
-inline void Hacl_Blake2b_32_blake2b_init(u64 *wv, u64 *hash, u32 kk, u8 *k, u32 nn)
+inline void Hacl_Blake2b_32_blake2b_init(u64 *hash, u32 kk, u32 nn)
 {
-  u8 b[128U] = { 0U };
   u64 *r0 = hash + (u32)0U * (u32)4U;
   u64 *r1 = hash + (u32)1U * (u32)4U;
   u64 *r2 = hash + (u32)2U * (u32)4U;
@@ -3764,15 +3763,17 @@ inline void Hacl_Blake2b_32_blake2b_init(u64 *wv, u64 *hash, u32 kk, u8 *k, u32 
   r1[1U] = iv5;
   r1[2U] = iv6;
   r1[3U] = iv7;
-  if (!(kk == (u32)0U))
-  {
-    memcpy(b, k, kk * sizeof (u8));
-    {
-      uint128_t totlen = (uint128_t)(u64)(u32)0U + (uint128_t)(u64)(u32)128U;
-      u8 *b1 = b + (u32)0U * (u32)128U;
-      blake2b_update_block(wv, hash, false, totlen, b1);
-    }
-  }
+}
+
+inline void Hacl_Blake2b_32_blake2b_update_key(u64 *wv, u64 *hash, u32 kk, u8 *k, u32 ll)
+{
+  uint128_t lb = (uint128_t)(u64)(u32)128U;
+  u8 b[128U] = { 0U };
+  memcpy(b, k, kk * sizeof (u8));
+  if (ll == (u32)0U)
+    blake2b_update_block(wv, hash, true, lb, b);
+  else
+    blake2b_update_block(wv, hash, false, lb, b);
   Lib_Memzero0_memzero(b, (u32)128U * sizeof (b[0U]));
 }
 
@@ -3836,6 +3837,22 @@ blake2b_update_blocks(u32 len, u64 *wv, u64 *hash, uint128_t prev, u8 *blocks)
   }
 }
 
+static inline void blake2b_update(u64 *wv, u64 *hash, u32 kk, u8 *k, u32 ll, u8 *d)
+{
+  uint128_t lb = (uint128_t)(u64)(u32)128U;
+  if (kk > (u32)0U)
+  {
+    Hacl_Blake2b_32_blake2b_update_key(wv, hash, kk, k, ll);
+    if (!(ll == (u32)0U))
+    {
+      blake2b_update_blocks(ll, wv, hash, lb, d);
+      return;
+    }
+    return;
+  }
+  blake2b_update_blocks(ll, wv, hash, (uint128_t)(u64)(u32)0U, d);
+}
+
 inline void Hacl_Blake2b_32_blake2b_finish(u32 nn, u8 *output, u64 *hash)
 {
   u32 double_row = (u32)2U * ((u32)4U * (u32)8U);
@@ -3878,26 +3895,19 @@ void Hacl_Blake2b_32_blake2b(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
       for (_i = 0U; _i < stlen; ++_i)
         b[_i] = stzero;
     }
+    KRML_CHECK_SIZE(sizeof (u64), stlen);
     {
-      uint128_t prev0;
-      if (kk == (u32)0U)
-        prev0 = (uint128_t)(u64)(u32)0U;
-      else
-        prev0 = (uint128_t)(u64)(u32)128U;
-      KRML_CHECK_SIZE(sizeof (u64), stlen);
+      u64 b1[stlen];
       {
-        u64 b1[stlen];
-        {
-          u32 _i;
-          for (_i = 0U; _i < stlen; ++_i)
-            b1[_i] = stzero;
-        }
-        Hacl_Blake2b_32_blake2b_init(b1, b, kk, k, nn);
-        blake2b_update_blocks(ll, b1, b, prev0, d);
-        Hacl_Blake2b_32_blake2b_finish(nn, output, b);
-        Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-        Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
+        u32 _i;
+        for (_i = 0U; _i < stlen; ++_i)
+          b1[_i] = stzero;
       }
+      Hacl_Blake2b_32_blake2b_init(b, kk, nn);
+      blake2b_update(b1, b, kk, k, ll, d);
+      Hacl_Blake2b_32_blake2b_finish(nn, output, b);
+      Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
+      Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
     }
   }
 }
@@ -4594,9 +4604,8 @@ static inline void blake2s_update_block(u32 *wv, u32 *hash, bool flag, u64 totle
   }
 }
 
-inline void Hacl_Blake2s_32_blake2s_init(u32 *wv, u32 *hash, u32 kk, u8 *k, u32 nn)
+inline void Hacl_Blake2s_32_blake2s_init(u32 *hash, u32 kk, u32 nn)
 {
-  u8 b[64U] = { 0U };
   u32 *r0 = hash + (u32)0U * (u32)4U;
   u32 *r1 = hash + (u32)1U * (u32)4U;
   u32 *r2 = hash + (u32)2U * (u32)4U;
@@ -4629,15 +4638,17 @@ inline void Hacl_Blake2s_32_blake2s_init(u32 *wv, u32 *hash, u32 kk, u8 *k, u32 
   r1[1U] = iv5;
   r1[2U] = iv6;
   r1[3U] = iv7;
-  if (!(kk == (u32)0U))
-  {
-    memcpy(b, k, kk * sizeof (u8));
-    {
-      u64 totlen = (u64)(u32)0U + (u64)(u32)64U;
-      u8 *b1 = b + (u32)0U * (u32)64U;
-      blake2s_update_block(wv, hash, false, totlen, b1);
-    }
-  }
+}
+
+inline void Hacl_Blake2s_32_blake2s_update_key(u32 *wv, u32 *hash, u32 kk, u8 *k, u32 ll)
+{
+  u64 lb = (u64)(u32)64U;
+  u8 b[64U] = { 0U };
+  memcpy(b, k, kk * sizeof (u8));
+  if (ll == (u32)0U)
+    blake2s_update_block(wv, hash, true, lb, b);
+  else
+    blake2s_update_block(wv, hash, false, lb, b);
   Lib_Memzero0_memzero(b, (u32)64U * sizeof (b[0U]));
 }
 
@@ -4686,6 +4697,22 @@ static inline void blake2s_update_blocks(u32 len, u32 *wv, u32 *hash, u64 prev, 
   }
 }
 
+static inline void blake2s_update(u32 *wv, u32 *hash, u32 kk, u8 *k, u32 ll, u8 *d)
+{
+  u64 lb = (u64)(u32)64U;
+  if (kk > (u32)0U)
+  {
+    Hacl_Blake2s_32_blake2s_update_key(wv, hash, kk, k, ll);
+    if (!(ll == (u32)0U))
+    {
+      blake2s_update_blocks(ll, wv, hash, lb, d);
+      return;
+    }
+    return;
+  }
+  blake2s_update_blocks(ll, wv, hash, (u64)(u32)0U, d);
+}
+
 inline void Hacl_Blake2s_32_blake2s_finish(u32 nn, u8 *output, u32 *hash)
 {
   u32 double_row = (u32)2U * ((u32)4U * (u32)4U);
@@ -4728,26 +4755,19 @@ void Hacl_Blake2s_32_blake2s(u32 nn, u8 *output, u32 ll, u8 *d, u32 kk, u8 *k)
       for (_i = 0U; _i < stlen; ++_i)
         b[_i] = stzero;
     }
+    KRML_CHECK_SIZE(sizeof (u32), stlen);
     {
-      u64 prev0;
-      if (kk == (u32)0U)
-        prev0 = (u64)(u32)0U;
-      else
-        prev0 = (u64)(u32)64U;
-      KRML_CHECK_SIZE(sizeof (u32), stlen);
+      u32 b1[stlen];
       {
-        u32 b1[stlen];
-        {
-          u32 _i;
-          for (_i = 0U; _i < stlen; ++_i)
-            b1[_i] = stzero;
-        }
-        Hacl_Blake2s_32_blake2s_init(b1, b, kk, k, nn);
-        blake2s_update_blocks(ll, b1, b, prev0, d);
-        Hacl_Blake2s_32_blake2s_finish(nn, output, b);
-        Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
-        Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
+        u32 _i;
+        for (_i = 0U; _i < stlen; ++_i)
+          b1[_i] = stzero;
       }
+      Hacl_Blake2s_32_blake2s_init(b, kk, nn);
+      blake2s_update(b1, b, kk, k, ll, d);
+      Hacl_Blake2s_32_blake2s_finish(nn, output, b);
+      Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
+      Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));
     }
   }
 }
