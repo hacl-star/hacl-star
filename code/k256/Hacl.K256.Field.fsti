@@ -219,12 +219,3 @@ val fsqr (out f: felem) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_nat h1 out == S.fmul (as_nat h0 f) (as_nat h0 f) /\
     fe_lt_prime h1 out)
-
-
-val finv (out f: felem) : Stack unit
-  (requires fun h ->
-    live h out /\ live h f /\ disjoint out f /\
-    fe_lt_prime h f)
-  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == S.finv (as_nat h0 f)  /\
-    fe_lt_prime h1 out)

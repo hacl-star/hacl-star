@@ -12,6 +12,7 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 module BD = Hacl.Bignum.Definitions
+module FI = Hacl.Impl.K256.Finv
 
 module S = Spec.K256
 
@@ -43,7 +44,7 @@ let ecdsa_sign_r r k =
   point_mul_g p k; // p = [k]G
   let x, y, z = getx p, gety p, getz p in
 
-  finv tmp z; // tmp = zinv
+  FI.finv tmp z; // tmp = zinv
   fmul tmp x tmp; // tmp = aff_x = x *% zinv
   qelem_from_felem r tmp; // r = aff_x % S.q
   pop_frame ()

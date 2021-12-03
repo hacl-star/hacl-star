@@ -198,3 +198,10 @@ let finv_lemma f =
   fsquare_times_lemma r2 2;
   lemma_pow_pow_mod_mul f 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff0b 0x4 0x1;
   assert (r == M.pow f 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2d % S.prime)
+
+
+val finv_is_finv_lemma: f:S.felem -> Lemma (finv f == S.finv f)
+let finv_is_finv_lemma f =
+  finv_lemma f;
+  assert (finv f == M.pow f (S.prime - 2) % S.prime);
+  M.lemma_pow_mod #S.prime f (S.prime - 2)

@@ -17,14 +17,10 @@ module BD = Hacl.Bignum.Definitions
 module BN = Hacl.Bignum
 module BR = Hacl.Bignum.ModReduction
 module AM = Hacl.Bignum.AlmostMontgomery
-module BI = Hacl.Bignum.ModInv
-module BE = Hacl.Bignum.Exponentiation
-module BM = Hacl.Bignum.Montgomery
 module BB = Hacl.Bignum.Base
 
 module SN = Hacl.Spec.Bignum
 module SD = Hacl.Spec.Bignum.Definitions
-
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -277,19 +273,4 @@ let fsqr out f =
   SN.bn_sqr_lemma (as_seq h0 f);
 
   modp out tmp;
-  pop_frame ()
-
-
-let finv out f =
-  push_frame ();
-  let n = create nlimb (u64 0) in
-  make_u64_4 n (make_prime_k256 ());
-  let r2 = create 4ul (u64 0) in
-  make_u64_4 r2 (make_r2_modp ());
-  let mu = make_mu0 () in
-  let n2 = create nlimb (u64 0) in
-  BI.bn_mod_inv_prime_n2 nlimb n n2;
-
-  BE.bn_mod_exp_fw_vartime_precomp
-    (BM.mk_runtime_mont nlimb) 4ul n mu r2 f 256ul n2 out;
   pop_frame ()

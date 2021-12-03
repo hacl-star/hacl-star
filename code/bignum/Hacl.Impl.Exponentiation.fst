@@ -150,6 +150,25 @@ let lexp_mont_ladder_swap_consttime #a_t len ctx_len k ctx a bLen bBits b acc =
   pop_frame ()
 
 
+let lexp_pow2 #a_t len ctx_len k ctx a b res =
+  copy res a;
+  let h0 = ST.get () in
+  [@ inline_let]
+  let refl1 i : GTot k.to.t_spec = k.to.refl (as_seq h0 res) in
+
+  [@ inline_let]
+  let inv h (i:nat{i <= v b}) =
+    modifies (loc res) h0 h /\
+    k.to.linv (as_seq h res) /\
+    k.to.refl (as_seq h res) == Loops.repeat i k.to.concr_ops.SE.sqr (refl1 0) in
+
+  Loops.eq_repeat0 k.to.concr_ops.SE.sqr (refl1 0);
+  Lib.Loops.for 0ul b inv
+  (fun j ->
+    Loops.unfold_repeat (v b) k.to.concr_ops.SE.sqr (refl1 0) (v j);
+    k.lsqr ctx res res)
+
+
 let lexp_pow_in_place #a_t len ctx_len k ctx acc b =
   let h0 = ST.get () in
   [@ inline_let]

@@ -152,6 +152,25 @@ val lexp_mont_ladder_swap_consttime:
 
 
 inline_for_extraction noextract
+val lexp_pow2:
+    #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len
+  -> ctx:lbuffer (uint_t a_t SEC) ctx_len
+  -> a:lbuffer (uint_t a_t SEC) len
+  -> b:size_t
+  -> res:lbuffer (uint_t a_t SEC) len ->
+  Stack unit
+  (requires fun h ->
+    live h res /\ live h ctx /\ live h a /\
+    disjoint res ctx /\ disjoint a ctx /\ disjoint a res /\
+    k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\ k.to.linv (as_seq h1 res) /\
+    k.to.refl (as_seq h1 res) == SE.exp_pow2 k.to.concr_ops (k.to.refl (as_seq h0 a)) (v b))
+
+
+inline_for_extraction noextract
 val lexp_pow_in_place:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
