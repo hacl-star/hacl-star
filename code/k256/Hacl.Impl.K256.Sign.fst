@@ -12,7 +12,9 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 module BD = Hacl.Bignum.Definitions
+
 module FI = Hacl.Impl.K256.Finv
+module QI = Hacl.Impl.K256.Qinv
 
 module S = Spec.K256
 
@@ -76,7 +78,7 @@ let ecdsa_sign_s s k r m private_key =
 
   load_qelem_modq z m; // z = m % S.q
   load_qelem d_a private_key; // d_a = private_key
-  qinv kinv k;
+  QI.qinv kinv k;
 
   qmul s r d_a; // s = r * d_a
   qadd s z s; // s = z + s

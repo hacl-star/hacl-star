@@ -13,6 +13,8 @@ module BSeq = Lib.ByteSequence
 
 module BD = Hacl.Bignum.Definitions
 
+module QI = Hacl.Impl.K256.Qinv
+
 module S = Spec.K256
 module KL = Spec.K256.Lemmas
 
@@ -67,7 +69,7 @@ let ecdsa_verify_qelem res p z r s =
   let u1 = create_qelem () in
   let u2 = create_qelem () in
 
-  qinv sinv s;
+  QI.qinv sinv s;
   qmul u1 z sinv;
   qmul u2 r sinv;
   point_mul_g_double_vartime res u1 u2 p;
