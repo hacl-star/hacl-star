@@ -158,15 +158,15 @@ let m #n b temp  =
 
 
 inline_for_extraction
-val l_step: #n: branch_len -> m: branch n -> i: size_t {v i < v n} -> right: branch n -> Stack unit 
+val l_step: #n: branch_len -> right: branch n -> i: size_t {v i < v n} -> m: branch n -> Stack unit 
   (requires fun h -> live h m /\ live h right)
   (ensures fun h0 _ h1 -> modifies (loc m) h0 h1 /\ 
-    as_seq h1 m == Spec.SPARKLE2.l_step #(v n) (as_seq h0 m) (as_seq h0 right) (v i))
+    as_seq h1 m == Spec.SPARKLE2.l0_step #(v n) (as_seq h0 right) (v i) (as_seq h0 m))
 
-let l_step #n m i right = 
+let l_step #n right i m = 
   let xi, yi = getBranch right i in 
   let p0i, p1i = getBranch m i in 
-  let branchIUpd = xi ^. p0i, yi ^. p1i in
+  let branchIUpd = p0i ^. xi, p1i ^. yi in
   setBranch i branchIUpd m
 
 
@@ -176,25 +176,43 @@ val l: #n: branch_len {v n % 2 == 0} -> b: branch n -> Stack unit
 
 let l #n b = 
   push_frame(); 
-  let h0 = ST.get() in
     let result : branch (n >>. 1ul) = create n (u32 0) in 
-    let leftBranch : branch (n >>. 1ul) = sub b (size 0) n in 
-    let rightBranch : branch (n >>. 1ul) = sub b n n in
+    let left : branch (n >>. 1ul) = sub b (size 0) n in 
+    let right : branch (n >>. 1ul) = sub b n n in
+ 
+  m left result;
 
-  m leftBranch result;
+  let h0 = ST.get() in
+  let inv0 h (i: nat {i <= v n / 2}) = 
+    let f0 = Spec.SPARKLE2.l0_step #(v n / 2) (as_seq h0 right) in 
+    live h result /\ live h right /\ modifies (loc result) h0 h /\ disjoint result right /\
+    as_seq h result == Lib.LoopCombinators.repeati i f0 (as_seq h0 result) in 
 
-  Lib.Loops.for 0ul (n >>. 1ul) 
-    (fun h i -> live h result /\ live h rightBranch /\ modifies (loc result) h0 h)
-    (fun (i: size_t {v i < v n / 2}) -> l_step result i rightBranch); 
+  Lib.LoopCombinators.eq_repeati0 (v n / 2) (Spec.SPARKLE2.l0_step #(v n / 2) (as_seq h0 right)) (as_seq h0 result);
+  Lib.Loops.for 0ul (n >>. 1ul) inv0 
+    (fun (i: size_t {v i < v n / 2}) -> 
+      l_step right i result;
+      let f = Spec.SPARKLE2.l0_step #(v n / 2) (as_seq h0 right) in 
+      Lib.LoopCombinators.unfold_repeati (v n / 2) f (as_seq h0 result) (v i)); 
+    
 
   let h1 = ST.get() in 
-  assert(modifies (loc result) h0 h1);
-  
+  Lib.LoopCombinators.eq_repeati0 (v n / 2) (l1_step #(v n / 2) (as_seq h1 left)) (as_seq h1 right);
+
   Lib.Loops.for 0ul (n >>. 1ul)
-    (fun h i -> live h rightBranch /\ modifies (loc b) h1 h)
+    (fun h i -> live h right /\ modifies (loc right) h1 h /\ disjoint left right /\ (
+      let f1 = l1_step #(v n / 2) (as_seq h1 left) in 
+      as_seq h right == Lib.LoopCombinators.repeati i f1 (as_seq h1 right)))
+
     (fun (i: size_t {v i < v n / 2}) -> 
-      let left_i = getBranch leftBranch i in 
-      setBranch i left_i rightBranch);
+      let h0_ = ST.get() in 
+
+      let left_i = getBranch left i in 
+      setBranch i left_i right;
+      
+      let f = l1_step #(v n / 2) (as_seq h0_ left) in 
+      Lib.LoopCombinators.unfold_repeati (v n / 2) f (as_seq h1 right) (v i));
+      
 
   let h2 = ST.get() in 
   Lib.Loops.for 0ul (n >>. 1ul)
@@ -203,9 +221,9 @@ let l #n b =
         let index = Lib.RawIntTypes.size_to_UInt32 (i -. 1ul) in 
         let k =  Lib.RawIntTypes.size_to_UInt32 (n >>. 1ul) in 
         let j = FStar.UInt32.rem index k in 
-        setBranch j (getBranch result i) leftBranch);
+        setBranch j (getBranch result i) left);
   pop_frame()
-  
+
 
 val add2: #n: branch_len {v n > 1} -> i: size_t -> b:branch n -> Stack unit 
   (requires fun h -> live h b) 

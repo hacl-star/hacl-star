@@ -38,7 +38,7 @@ Spec_SPARKLE2_branch1 Hacl_Impl_Sparkle1_xor(uint32_t l, uint32_t *b)
 {
   uint32_t tx = (uint32_t)0U;
   uint32_t ty = (uint32_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < l >> (uint32_t)1U; i++)
+  for (uint32_t i = (uint32_t)0U; i < l; i++)
   {
     uint32_t xi = b[(uint32_t)2U * i];
     uint32_t yi = b[(uint32_t)2U * i + (uint32_t)1U];
@@ -55,7 +55,7 @@ Spec_SPARKLE2_branch1 Hacl_Impl_Sparkle1_xor(uint32_t l, uint32_t *b)
 void
 Hacl_Impl_Sparkle1_xor_x(uint32_t n, uint32_t *b, uint32_t lty, uint32_t ltx, uint32_t *temp)
 {
-  for (uint32_t i = (uint32_t)0U; i < n >> (uint32_t)1U; i++)
+  for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
     uint32_t xi = b[(uint32_t)2U * i];
     uint32_t yi = b[(uint32_t)2U * i + (uint32_t)1U];
@@ -66,29 +66,11 @@ Hacl_Impl_Sparkle1_xor_x(uint32_t n, uint32_t *b, uint32_t lty, uint32_t ltx, ui
   }
 }
 
-void Hacl_Impl_Sparkle1_l_step(uint32_t n, uint32_t *m1, uint32_t i, uint32_t *right)
+void Hacl_Impl_Sparkle1_m(uint32_t n, uint32_t *b, uint32_t *temp)
 {
-  uint32_t xi = right[(uint32_t)2U * i];
-  uint32_t yi = right[(uint32_t)2U * i + (uint32_t)1U];
-  uint32_t p0i = m1[(uint32_t)2U * i];
-  uint32_t p1i = m1[(uint32_t)2U * i + (uint32_t)1U];
-  Spec_SPARKLE2_branch1 branchIUpd = { .fst = xi ^ p0i, .snd = yi ^ p1i };
-  uint32_t x = branchIUpd.fst;
-  uint32_t y = branchIUpd.snd;
-  m1[(uint32_t)2U * i] = x;
-  m1[(uint32_t)2U * i + (uint32_t)1U] = y;
-}
-
-void Hacl_Impl_Sparkle1_l(uint32_t n, uint32_t *b)
-{
-  KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)2U * n);
-  uint32_t result[(uint32_t)2U * n];
-  memset(result, 0U, (uint32_t)2U * n * sizeof (uint32_t));
-  uint32_t *leftBranch = b;
-  uint32_t *rightBranch = b + n;
   uint32_t tx = (uint32_t)0U;
   uint32_t ty = (uint32_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < n >> (uint32_t)1U; i++)
+  for (uint32_t i = (uint32_t)0U; i < n; i++)
   {
     uint32_t xi = b[(uint32_t)2U * i];
     uint32_t yi = b[(uint32_t)2U * i + (uint32_t)1U];
@@ -106,14 +88,37 @@ void Hacl_Impl_Sparkle1_l(uint32_t n, uint32_t *b)
     b,
     (lty << (uint32_t)16U | lty >> (uint32_t)16U) ^ (lty & (uint32_t)0xffffU),
     (ltx << (uint32_t)16U | ltx >> (uint32_t)16U) ^ (ltx & (uint32_t)0xffffU),
-    result);
+    temp);
+}
+
+void Hacl_Impl_Sparkle1_l_step(uint32_t n, uint32_t *right, uint32_t i, uint32_t *m1)
+{
+  uint32_t xi = right[(uint32_t)2U * i];
+  uint32_t yi = right[(uint32_t)2U * i + (uint32_t)1U];
+  uint32_t p0i = m1[(uint32_t)2U * i];
+  uint32_t p1i = m1[(uint32_t)2U * i + (uint32_t)1U];
+  Spec_SPARKLE2_branch1 branchIUpd = { .fst = p0i ^ xi, .snd = p1i ^ yi };
+  uint32_t x = branchIUpd.fst;
+  uint32_t y = branchIUpd.snd;
+  m1[(uint32_t)2U * i] = x;
+  m1[(uint32_t)2U * i + (uint32_t)1U] = y;
+}
+
+void Hacl_Impl_Sparkle1_l(uint32_t n, uint32_t *b)
+{
+  KRML_CHECK_SIZE(sizeof (uint32_t), n);
+  uint32_t result[n];
+  memset(result, 0U, n * sizeof (uint32_t));
+  uint32_t *left = b;
+  uint32_t *right = b + n;
+  Hacl_Impl_Sparkle1_m(n >> (uint32_t)1U, left, result);
   for (uint32_t i = (uint32_t)0U; i < n >> (uint32_t)1U; i++)
   {
-    uint32_t xi = rightBranch[(uint32_t)2U * i];
-    uint32_t yi = rightBranch[(uint32_t)2U * i + (uint32_t)1U];
+    uint32_t xi = right[(uint32_t)2U * i];
+    uint32_t yi = right[(uint32_t)2U * i + (uint32_t)1U];
     uint32_t p0i = result[(uint32_t)2U * i];
     uint32_t p1i = result[(uint32_t)2U * i + (uint32_t)1U];
-    Spec_SPARKLE2_branch1 branchIUpd = { .fst = xi ^ p0i, .snd = yi ^ p1i };
+    Spec_SPARKLE2_branch1 branchIUpd = { .fst = p0i ^ xi, .snd = p1i ^ yi };
     uint32_t x = branchIUpd.fst;
     uint32_t y = branchIUpd.snd;
     result[(uint32_t)2U * i] = x;
@@ -121,10 +126,12 @@ void Hacl_Impl_Sparkle1_l(uint32_t n, uint32_t *b)
   }
   for (uint32_t i = (uint32_t)0U; i < n >> (uint32_t)1U; i++)
   {
-    uint32_t x = leftBranch[(uint32_t)2U * i];
-    uint32_t y = leftBranch[(uint32_t)2U * i + (uint32_t)1U];
-    rightBranch[(uint32_t)2U * i] = x;
-    rightBranch[(uint32_t)2U * i + (uint32_t)1U] = y;
+    Spec_SPARKLE2_branch1
+    left_i = { .fst = left[(uint32_t)2U * i], .snd = left[(uint32_t)2U * i + (uint32_t)1U] };
+    uint32_t x = left_i.fst;
+    uint32_t y = left_i.snd;
+    right[(uint32_t)2U * i] = x;
+    right[(uint32_t)2U * i + (uint32_t)1U] = y;
   }
   for (uint32_t i = (uint32_t)0U; i < n >> (uint32_t)1U; i++)
   {
@@ -133,8 +140,8 @@ void Hacl_Impl_Sparkle1_l(uint32_t n, uint32_t *b)
     uint32_t j = index % k;
     uint32_t x = result[(uint32_t)2U * i];
     uint32_t y = result[(uint32_t)2U * i + (uint32_t)1U];
-    leftBranch[(uint32_t)2U * j] = x;
-    leftBranch[(uint32_t)2U * j + (uint32_t)1U] = y;
+    left[(uint32_t)2U * j] = x;
+    left[(uint32_t)2U * j + (uint32_t)1U] = y;
   }
 }
 

@@ -77,17 +77,17 @@ let xor_step (#n : branch_len) b (index : nat{index < n}) (tx, ty) =
   xi ^. tx, yi ^. ty 
 
 let xor #n b = 
-  Lib.LoopCombinators.repeati #(tuple2 uint32 uint32) (n / 2) (Spec.SPARKLE2.xor_step #n b) (u32 0, u32 0)
+  Lib.LoopCombinators.repeati #(tuple2 uint32 uint32) n (Spec.SPARKLE2.xor_step #n b) (u32 0, u32 0)
 
 
 let xor_x_step (#n: branch_len) (lty, ltx)  (b : branch n) (i : nat {i < n}) (temp: branch n) = 
   let xi, yi = getBranch #n i b in 
   let xi_n, yi_n = xi ^. lty, yi ^. ltx in
-  setBranch #n i (xi_n, yi_n) temp
+  setBranch i (xi_n, yi_n) temp
 
 
 let xor_x (#n : branch_len) b (lty, ltx) (temp: branch n) : branch n = 
-  Lib.LoopCombinators.repeati (n / 2) (xor_x_step #n (lty, ltx) b) temp
+  Lib.LoopCombinators.repeati n (xor_x_step #n (lty, ltx) b) temp
 
 
 let m #n b temp = 
@@ -96,24 +96,29 @@ let m #n b temp =
   xor_x #n b (lty, ltx) temp
 
 
-let l_step (#n: branch_len) (m : branch n) (right: branch n) (i:nat {i < n}) : branch n = 
+let l0_step (#n: branch_len) (right : branch n) (i:nat {i < n}) (m: branch n) : branch n = 
   let (xi, yi) = getBranch i right in 
   let (p0i, p1i) = getBranch i m in 
-  let branchIUpd = xi ^. p0i, yi ^. p1i in 
+  let branchIUpd = p0i ^. xi, p1i ^. yi in 
   setBranch #n i branchIUpd m
 
 
-val l: #n: branch_len {n % 2 == 0} -> b: branch n -> branch (n/2)
+let l1_step (#n: branch_len) (right: branch n)  (i: nat {i < n}) (left: branch n)  = 
+  setBranch #n i (Spec.SPARKLE2.getBranch #n i right) left
+
+
+val l: #n: branch_len {n % 2 == 0} -> b: branch n -> branch n
 
 let l #n b = 
+  admit();
   let s = Lib.Sequence.create n (u32 0) in  
   let leftBranch: branch (n / 2)  = sub #_ #(2 * n) b 0 n in 
   let rightBranch: branch (n / 2) = sub #_ #(2 * n) b n n in 
   let tempBranch = m leftBranch in 
-  Lib.LoopCombinators.repeati (n / 2) (fun i branch -> l_step rightBranch branch i) s
+  Lib.LoopCombinators.repeati n (fun i branch -> l0_step rightBranch i branch) s
 
 
-val add2: #n: branch_len {n >= 2} -> i: size_nat -> branch n -> Tot (branch n)
+val add2: #n: branch_len {n > 1} -> i: size_nat -> branch n -> Tot (branch n)
 
 let add2 #n i b =
   let (x0,y0) = getBranch 0 b in 
@@ -146,7 +151,7 @@ val arx_n: #n: branch_len -> branch n -> branch n
 let arx_n #n b = Lib.LoopCombinators.repeati n arx_n_step b
 
 
-val mainLoop_step: #n: branch_len {n % 2 == 0 } ->  i: size_nat -> branch n -> branch n
+val mainLoop_step: #n: branch_len {n % 2 == 0} -> i: size_nat -> branch n -> branch n
 
 let mainLoop_step #n i b = 
   let branchZeroMod = add2 i b in 
@@ -183,5 +188,3 @@ let sparkle512 steps input =
   let permB = mainLoop b steps in 
   fromBranch #8 permB
 
-
-#set-options "--z3rlimit 100"
