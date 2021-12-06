@@ -103,19 +103,29 @@ let l0_step (#n: branch_len) (right : branch n) (i:nat {i < n}) (m: branch n) : 
   setBranch #n i branchIUpd m
 
 
-let l1_step (#n: branch_len) (right: branch n)  (i: nat {i < n}) (left: branch n)  = 
-  setBranch #n i (Spec.SPARKLE2.getBranch #n i right) left
+let l1_step (#n: branch_len) (left: branch n)  (i: nat {i < n}) (right: branch n) = 
+  setBranch #n i (Spec.SPARKLE2.getBranch #n i left) right
+
+
+let l2_step (#n: branch_len) (result: branch n) (i: nat {i < n}) (left: branch n) = 
+  let j = (i - 1) % pow2 32 % n in 
+  setBranch j (getBranch i result) left
 
 
 val l: #n: branch_len {n % 2 == 0} -> b: branch n -> branch n
 
 let l #n b = 
-  admit();
-  let s = Lib.Sequence.create n (u32 0) in  
-  let leftBranch: branch (n / 2)  = sub #_ #(2 * n) b 0 n in 
-  let rightBranch: branch (n / 2) = sub #_ #(2 * n) b n n in 
-  let tempBranch = m leftBranch in 
-  Lib.LoopCombinators.repeati n (fun i branch -> l0_step rightBranch i branch) s
+  let temp = Lib.Sequence.create #uint32 n (u32 0) in  
+  let left = sub #uint32 #(2 * n) b 0 n in 
+  let right = sub #uint32 #(2 * n) b n n in 
+  
+  let temp0 = m #(n / 2) left temp in 
+  
+  let temp1 = Lib.LoopCombinators.repeati #(branch (n / 2)) (n / 2) (l0_step #(n / 2) right) temp0 in 
+  let right = Lib.LoopCombinators.repeati #(branch (n / 2)) (n / 2) (l1_step #(n / 2) left) right in 
+  let left = Lib.LoopCombinators.repeati #(branch (n / 2)) (n / 2) (l2_step #(n / 2) temp1) left in 
+
+  concat #uint32 #n #n left right
 
 
 val add2: #n: branch_len {n > 1} -> i: size_nat -> branch n -> Tot (branch n)
@@ -154,9 +164,9 @@ let arx_n #n b = Lib.LoopCombinators.repeati n arx_n_step b
 val mainLoop_step: #n: branch_len {n % 2 == 0} -> i: size_nat -> branch n -> branch n
 
 let mainLoop_step #n i b = 
-  let branchZeroMod = add2 i b in 
-  let arxedBranch = arx_n branchZeroMod in 
-  l branchZeroMod
+  let branchZeroMod = add2 #n i b in 
+  let arxedBranch = arx_n #n branchZeroMod in 
+  l #n arxedBranch
 
 
 val mainLoop: #n: branch_len {n % 2 == 0} -> branch n -> steps: size_nat -> branch n 

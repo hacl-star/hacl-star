@@ -32,6 +32,7 @@ int main(int argc, char const *argv[])
 
 	uint32_t* input = (uint32_t*) malloc (sizeof (uint32_t) * 8);
 	uint32_t* expected_output = (uint32_t*) malloc (sizeof (uint32_t) * 8);
+    input[1] = 1;
 	memcpy(expected_output, input, 32);
 
     sparkle(expected_output, 4, 32);
@@ -45,6 +46,8 @@ int main(int argc, char const *argv[])
 
     uint8_t* input_hacl = (uint8_t*) malloc (sizeof (uint8_t) * 32);
     uint8_t* output_hacl = (uint8_t*) malloc (sizeof (uint8_t) * 32);
+
+    input_hacl[4] = 1;
 
     Hacl_Impl_Sparkle1_sparkle256(32, input_hacl, output_hacl);
     printf("%s\n", "Input");

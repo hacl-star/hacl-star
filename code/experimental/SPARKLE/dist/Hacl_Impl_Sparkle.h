@@ -31,19 +31,43 @@
 
 
 
-extern uint32_t Hacl_Impl_Sparkle_size_word;
-
 extern uint32_t Hacl_Impl_Sparkle_vsize_rcon;
 
 extern const uint32_t Hacl_Impl_Sparkle_rcon[8U];
 
 typedef uint32_t Hacl_Impl_Sparkle_branch_len;
 
-void Hacl_Impl_Sparkle_l_step(uint32_t n, uint32_t *perm, uint32_t i, uint32_t *result);
+typedef struct Spec_SPARKLE2_branch1_s
+{
+  uint32_t fst;
+  uint32_t snd;
+}
+Spec_SPARKLE2_branch1;
+
+Spec_SPARKLE2_branch1 Hacl_Impl_Sparkle_xor(uint32_t l, uint32_t *b);
+
+void
+Hacl_Impl_Sparkle_xor_x(uint32_t n, uint32_t *b, uint32_t lty, uint32_t ltx, uint32_t *temp);
+
+void Hacl_Impl_Sparkle_m(uint32_t n, uint32_t *b, uint32_t *temp);
+
+void Hacl_Impl_Sparkle_l_step(uint32_t n, uint32_t *right, uint32_t i, uint32_t *m1);
+
+void Hacl_Impl_Sparkle_l(uint32_t n, uint32_t *b);
+
+void Hacl_Impl_Sparkle_add2(uint32_t n, uint32_t i, uint32_t *b);
+
+void Hacl_Impl_Sparkle_toBranch(uint32_t n, uint8_t *i, uint32_t *o);
+
+void Hacl_Impl_Sparkle_fromBranch(uint32_t n, uint32_t *i, uint8_t *o);
 
 void Hacl_Impl_Sparkle_arx_n_step(uint32_t n, uint32_t i, uint32_t *b);
 
 void Hacl_Impl_Sparkle_sparkle256(uint32_t steps, uint8_t *i, uint8_t *o);
+
+void Hacl_Impl_Sparkle_sparkle384(uint32_t steps, uint8_t *i, uint8_t *o);
+
+void Hacl_Impl_Sparkle_sparkle512(uint32_t steps, uint8_t *i, uint8_t *o);
 
 
 #define __Hacl_Impl_Sparkle_H_DEFINED

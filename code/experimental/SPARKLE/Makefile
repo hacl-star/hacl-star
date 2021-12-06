@@ -18,10 +18,10 @@ CFLAGS += -I ../../../lib/c -I . -march=native -mtune=native -O3
 export CFLAGS
 
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
-	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS)\
+	$(KRML) $^ -o libecdsa.a $(BASE_FLAGS) $(SPARKLE_BUNDLE)\
 	  -tmpdir dist \
 	  -fbuiltin-uint128 \
-	  -funroll-loops 12 \
+	  -funroll-loops 4 \
 	  -skip-compilation
 
 # An archive with all the compiled code in this directory.
