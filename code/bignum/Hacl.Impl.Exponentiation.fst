@@ -20,6 +20,7 @@ module BN = Hacl.Bignum
 module SN = Hacl.Spec.Bignum
 module BB = Hacl.Bignum.Base
 module SB = Hacl.Spec.Bignum.Base
+module PT = Hacl.Spec.PrecompTable
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -398,20 +399,16 @@ val table_select_consttime_f:
   (requires fun h ->
     live h table /\ live h acc /\ disjoint table acc)
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
-    (Math.Lemmas.lemma_mult_le_right (v len) (v j + 2) (v table_len);
-     let res_j = gsub table ((j +! 1ul) *! len) len in
-     as_seq h1 acc == (if v i = v j + 1 then as_seq h0 res_j else as_seq h0 acc)))
+    as_seq h1 acc ==
+    PT.table_select_f (v len) (v table_len) (as_seq h0 table) i (v j) (as_seq h0 acc))
 
 let table_select_consttime_f #a_t len table_len table i j acc =
-  let h0 = ST.get () in
   let c = eq_mask i (BB.size_to_limb (j +! 1ul)) in
-  assert (v c == (if v i = v j + 1 then ones_v a_t else 0));
 
   Math.Lemmas.lemma_mult_le_right (v len) (v j + 2) (v table_len);
   assert (v ((j +! 1ul) *! len) == (v j + 1) * v len);
   let res_j = sub table ((j +! 1ul) *! len) len in
-  map2T len acc (BB.mask_select c) res_j acc;
-  SB.lseq_mask_select_lemma (as_seq h0 res_j) (as_seq h0 acc) c
+  map2T len acc (BB.mask_select c) res_j acc
 
 
 inline_for_extraction noextract
@@ -429,7 +426,6 @@ val table_select_consttime:
    (Math.Lemmas.lemma_mult_le_right (v len) (v i + 1) (v table_len);
     as_seq h1 res == LSeq.sub (as_seq h0 table) (v i * v len) (v len)))
 
-#restart-solver
 let table_select_consttime #a_t len table_len table i res =
   let h0 = ST.get () in
   copy res (sub table 0ul len);
@@ -442,18 +438,17 @@ let table_select_consttime #a_t len table_len table i res =
   let inv h (j:nat{j <= v table_len - 1}) =
     modifies (loc res) h0 h /\
     as_seq h res ==
-    (if j >= v i then LSeq.sub (as_seq h0 table) (v i * v len) (v len) else as_seq h1 res) in
+    Loops.repeati j
+      (PT.table_select_f (v len) (v table_len) (as_seq h0 table) i) (as_seq h1 res) in
 
+  Loops.eq_repeati0 (v table_len - 1)
+    (PT.table_select_f (v len) (v table_len) (as_seq h0 table) i) (as_seq h1 res);
   Lib.Loops.for 0ul (table_len -! 1ul) inv
   (fun j ->
-    let h2 = ST.get () in
-    assert (inv h2 (v j));
-    table_select_consttime_f len table_len table i j res;
-    let h3 = ST.get () in
-    //assert (as_seq h3 res ==
-      //(if v i = v j + 1 then LSeq.sub (as_seq h0 table) (v i * v len) (v len) else as_seq h2 res));
-    assert (inv h3 (v j + 1))
-    )
+    Loops.unfold_repeati (v j + 1)
+      (PT.table_select_f (v len) (v table_len) (as_seq h0 table) i) (as_seq h1 res) (v j);
+    table_select_consttime_f len table_len table i j res);
+  PT.table_select_lemma (v len) (v table_len) (as_seq h0 table) i
 
 //////////////////////////////////////////////////////////
 
@@ -914,6 +909,7 @@ val lexp_fw_gen:
 let lexp_fw_gen #a_t len ctx_len k lmul_acc_pow_a_bits_l lmul_acc_pow_a_bits_c ctx a bLen bBits b acc l =
   push_frame ();
   Math.Lemmas.pow2_lt_compat 32 (v l);
+  [@inline_let]
   let table_len = 1ul <<. l in
   assert (v table_len == pow2 (v l));
   Math.Lemmas.pow2_le_compat (v l) 1;

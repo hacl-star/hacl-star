@@ -133,9 +133,7 @@ let mk_bn_get_top_index #t len b =
   res
 
 
-[@CInline]
 let bn_get_top_index_u32 len: bn_get_top_index_st U32 len = mk_bn_get_top_index #U32 len
-[@CInline]
 let bn_get_top_index_u64 len: bn_get_top_index_st U64 len = mk_bn_get_top_index #U64 len
 
 

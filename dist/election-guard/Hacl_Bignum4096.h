@@ -34,6 +34,7 @@ extern "C" {
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+#include "kremlin/internal/builtin.h"
 
 
 #include "Hacl_Kremlib.h"
@@ -85,6 +86,30 @@ Write `a - b mod 2^4096` in `res`.
 uint64_t Hacl_Bignum4096_sub(uint64_t *a, uint64_t *b, uint64_t *res);
 
 /*
+Write `(a + b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum4096_add_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res);
+
+/*
+Write `(a - b) mod n` in `res`.
+
+  The arguments a, b, n and the outparam res are meant to be 4096-bit bignums, i.e. uint64_t[64].
+
+  Before calling this function, the caller will need to ensure that the following
+  preconditions are observed.
+  • a < n
+  • b < n
+*/
+void Hacl_Bignum4096_sub_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res);
+
+/*
 Write `a * b` in `res`.
 
   The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
@@ -131,7 +156,7 @@ Write `a ^ b mod n` in `res`.
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum4096_mod_exp_vartime(
@@ -160,7 +185,7 @@ Write `a ^ b mod n` in `res`.
    • n % 2 = 1
    • 1 < n
    • b < pow2 bBits
-   • a < n 
+   • a < n
 */
 bool
 Hacl_Bignum4096_mod_exp_consttime(
@@ -184,7 +209,7 @@ Write `a ^ (-1) mod n` in `res`.
   • n % 2 = 1
   • 1 < n
   • 0 < a
-  • a < n 
+  • a < n
 */
 bool Hacl_Bignum4096_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *res);
 
@@ -207,16 +232,14 @@ Heap-allocate and initialize a montgomery context.
   The caller will need to call Hacl_Bignum4096_mont_ctx_free on the return value
   to avoid memory leaks.
 */
-Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t
-*Hacl_Bignum4096_mont_ctx_init(uint64_t *n);
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_Bignum4096_mont_ctx_init(uint64_t *n);
 
 /*
 Deallocate the memory previously allocated by Hacl_Bignum4096_mont_ctx_init.
 
   The argument k is a montgomery context obtained through Hacl_Bignum4096_mont_ctx_init.
 */
-void
-Hacl_Bignum4096_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k);
+void Hacl_Bignum4096_mont_ctx_free(Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k);
 
 /*
 Write `a mod n` in `res`.
@@ -227,7 +250,7 @@ Write `a mod n` in `res`.
 */
 void
 Hacl_Bignum4096_mod_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint64_t *res
 );
@@ -249,11 +272,11 @@ Write `a ^ b mod n` in `res`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum4096_mod_exp_vartime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
@@ -277,11 +300,11 @@ Write `a ^ b mod n` in `res`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • b < pow2 bBits
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum4096_mod_exp_consttime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint32_t bBits,
   uint64_t *b,
@@ -298,11 +321,11 @@ Write `a ^ (-1) mod n` in `res`.
   preconditions are observed.
   • n is a prime
   • 0 < a
-  • a < n 
+  • a < n
 */
 void
 Hacl_Bignum4096_mod_inv_prime_vartime_precomp(
-  Hacl_Bignum_MontArithmetic_bn_mont_ctx____uint64_t__uint64_t *k,
+  Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *k,
   uint64_t *a,
   uint64_t *res
 );
@@ -362,10 +385,18 @@ void Hacl_Bignum4096_bn_to_bytes_le(uint64_t *b, uint8_t *res);
 
 
 /*
-Returns 2 ^ 64 - 1 if and only if the argument a is strictly less than the argument b,
- otherwise returns 0.
+Returns 2^64 - 1 if a < b, otherwise returns 0.
+
+ The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
 */
 uint64_t Hacl_Bignum4096_lt_mask(uint64_t *a, uint64_t *b);
+
+/*
+Returns 2^64 - 1 if a = b, otherwise returns 0.
+
+ The arguments a and b are meant to be 4096-bit bignums, i.e. uint64_t[64].
+*/
+uint64_t Hacl_Bignum4096_eq_mask(uint64_t *a, uint64_t *b);
 
 #if defined(__cplusplus)
 }

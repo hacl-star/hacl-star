@@ -1090,32 +1090,40 @@ static inline void store_56(uint8_t *out, uint64_t *b)
   store32_le(out + (uint32_t)28U, b4_);
 }
 
-static inline void sha512_pre_msg(uint8_t *h, uint8_t *prefix, uint32_t len, uint8_t *input)
+static inline void sha512_pre_msg(uint8_t *hash, uint8_t *prefix, uint32_t len, uint8_t *input)
 {
-  KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)32U);
-  uint8_t pre_msg[len + (uint32_t)32U];
-  memset(pre_msg, 0U, (len + (uint32_t)32U) * sizeof (uint8_t));
-  memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (uint8_t));
-  memcpy(pre_msg + (uint32_t)32U, input, len * sizeof (uint8_t));
-  Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)32U, h);
+  uint8_t buf[128U] = { 0U };
+  uint64_t block_state[8U] = { 0U };
+  Hacl_Streaming_SHA2_state_sha2_384
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  Hacl_Streaming_SHA2_state_sha2_384 p = s;
+  Hacl_Hash_Core_SHA2_init_512(block_state);
+  Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
+  Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
+  Hacl_Streaming_SHA2_update_512(st, input, len);
+  Hacl_Streaming_SHA2_finish_512(st, hash);
 }
 
 static inline void
 sha512_pre_pre2_msg(
-  uint8_t *h,
+  uint8_t *hash,
   uint8_t *prefix,
   uint8_t *prefix2,
   uint32_t len,
   uint8_t *input
 )
 {
-  KRML_CHECK_SIZE(sizeof (uint8_t), len + (uint32_t)64U);
-  uint8_t pre_msg[len + (uint32_t)64U];
-  memset(pre_msg, 0U, (len + (uint32_t)64U) * sizeof (uint8_t));
-  memcpy(pre_msg, prefix, (uint32_t)32U * sizeof (uint8_t));
-  memcpy(pre_msg + (uint32_t)32U, prefix2, (uint32_t)32U * sizeof (uint8_t));
-  memcpy(pre_msg + (uint32_t)64U, input, len * sizeof (uint8_t));
-  Hacl_Hash_SHA2_hash_512(pre_msg, len + (uint32_t)64U, h);
+  uint8_t buf[128U] = { 0U };
+  uint64_t block_state[8U] = { 0U };
+  Hacl_Streaming_SHA2_state_sha2_384
+  s = { .block_state = block_state, .buf = buf, .total_len = (uint64_t)0U };
+  Hacl_Streaming_SHA2_state_sha2_384 p = s;
+  Hacl_Hash_Core_SHA2_init_512(block_state);
+  Hacl_Streaming_SHA2_state_sha2_384 *st = &p;
+  Hacl_Streaming_SHA2_update_512(st, prefix, (uint32_t)32U);
+  Hacl_Streaming_SHA2_update_512(st, prefix2, (uint32_t)32U);
+  Hacl_Streaming_SHA2_update_512(st, input, len);
+  Hacl_Streaming_SHA2_finish_512(st, hash);
 }
 
 static inline void

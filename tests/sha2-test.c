@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdbool.h>
-#include "Hacl_Hash.h"
+#include "Hacl_Hash_SHA2.h"
 #include <openssl/sha.h>
 
 #include "sha2_vectors.h"

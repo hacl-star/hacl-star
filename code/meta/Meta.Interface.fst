@@ -227,10 +227,12 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
     else
       let _ = print (st.indent ^ "Visiting " ^ string_of_name f_name) in
       match inspect_sigelt f with
-      | Sg_Let r _ _ f_typ f_body ->
+      | Sg_Let r lbs ->
         if r then
           fail ("user error: " ^  string_of_name f_name ^ " is recursive");
-
+        let lbv = lookup_lb_view lbs f_name in
+        let f_body = lbv.lb_def in
+        let f_typ = lbv.lb_typ in
         let original_opts = sigelt_opts f in
 
         // Build a new function with proper parameters
@@ -298,7 +300,11 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
         print (st.indent ^ "  let " ^ string_of_name f_typ_name ^ ": " ^
           term_to_string f_typ_typ ^ " = " ^
           term_to_string f_typ);
-        let se_t = pack_sigelt (Sg_Let false (pack_fv f_typ_name) [] f_typ_typ f_typ) in
+        let lb = pack_lb ({lb_fv = pack_fv f_typ_name;
+                           lb_us = [];
+                           lb_typ = f_typ_typ;
+                           lb_def = f_typ}) in
+        let se_t = pack_sigelt (Sg_Let false [lb]) in
         let se_t = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se_t in
         let se_t = match original_opts with
           | Some original_opts -> add_check_with original_opts se_t
@@ -316,18 +322,20 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             | _ -> ""
           in
           let quote_string s : Tac term = pack (Tv_Const (C_String s)) in
-          pack_sigelt (Sg_Let
-            false
-            (pack_fv (suffix_name f_name "_higher_debug_print"))
-            []
-            (`unit)
-            (`(let x: unit =
+          let lb = pack_lb ({lb_fv =
+             pack_fv (suffix_name f_name "_higher_debug_print");
+                             lb_us = [];
+                             lb_typ = (`unit);
+                             lb_def =
+             (`(let x: unit =
               _ by (
                 print (`#(quote_string msg) ^ " " ^
                        (`#(quote_string (string_of_name new_name))) ^
                        `#(quote_string deps));
                 exact tm_unit) in
-              x)))
+              x))}) in
+
+          pack_sigelt (Sg_Let false [lb])
         in
 
         // Fast-path; just register the function as being a specialize node
@@ -373,7 +381,11 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
             | _ ->
                 mk_tot_arr new_binders (app_inv f_typ)
           in
-          let se = pack_sigelt (Sg_Let false (pack_fv new_name) [] new_typ new_body) in
+          let lb = pack_lb ({lb_fv = pack_fv new_name;
+                           lb_us = [];
+                           lb_typ = new_typ;
+                           lb_def = new_body}) in
+          let se = pack_sigelt (Sg_Let false [lb]) in
           let se = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se in
           let se = match original_opts with
             | Some original_opts -> add_check_with original_opts se

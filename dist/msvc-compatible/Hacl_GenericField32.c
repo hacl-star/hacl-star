@@ -46,7 +46,7 @@ Check whether this library will work for a modulus `n`.
   The function returns false if any of the following preconditions are violated,
   true otherwise.
   • n % 2 = 1
-  • 1 < n 
+  • 1 < n
 */
 bool Hacl_GenericField32_field_modulus_check(uint32_t len, uint32_t *n)
 {
@@ -190,72 +190,7 @@ Hacl_GenericField32_sub(
 {
   uint32_t len1 = Hacl_GenericField32_field_get_len(k);
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 k1 = *k;
-  uint32_t c0 = (uint32_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < k1.len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
-  {
-    uint32_t t1 = aM[(uint32_t)4U * i];
-    uint32_t t20 = bM[(uint32_t)4U * i];
-    uint32_t *res_i0 = cM + (uint32_t)4U * i;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c0, t1, t20, res_i0);
-    uint32_t t10 = aM[(uint32_t)4U * i + (uint32_t)1U];
-    uint32_t t21 = bM[(uint32_t)4U * i + (uint32_t)1U];
-    uint32_t *res_i1 = cM + (uint32_t)4U * i + (uint32_t)1U;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c0, t10, t21, res_i1);
-    uint32_t t11 = aM[(uint32_t)4U * i + (uint32_t)2U];
-    uint32_t t22 = bM[(uint32_t)4U * i + (uint32_t)2U];
-    uint32_t *res_i2 = cM + (uint32_t)4U * i + (uint32_t)2U;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c0, t11, t22, res_i2);
-    uint32_t t12 = aM[(uint32_t)4U * i + (uint32_t)3U];
-    uint32_t t2 = bM[(uint32_t)4U * i + (uint32_t)3U];
-    uint32_t *res_i = cM + (uint32_t)4U * i + (uint32_t)3U;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c0, t12, t2, res_i);
-  }
-  for (uint32_t i = k1.len / (uint32_t)4U * (uint32_t)4U; i < k1.len; i++)
-  {
-    uint32_t t1 = aM[i];
-    uint32_t t2 = bM[i];
-    uint32_t *res_i = cM + i;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c0, t1, t2, res_i);
-  }
-  uint32_t c00 = c0;
-  KRML_CHECK_SIZE(sizeof (uint32_t), k1.len);
-  uint32_t *tmp = alloca(k1.len * sizeof (uint32_t));
-  memset(tmp, 0U, k1.len * sizeof (uint32_t));
-  uint32_t c = (uint32_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < k1.len / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
-  {
-    uint32_t t1 = cM[(uint32_t)4U * i];
-    uint32_t t20 = k1.n[(uint32_t)4U * i];
-    uint32_t *res_i0 = tmp + (uint32_t)4U * i;
-    c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t1, t20, res_i0);
-    uint32_t t10 = cM[(uint32_t)4U * i + (uint32_t)1U];
-    uint32_t t21 = k1.n[(uint32_t)4U * i + (uint32_t)1U];
-    uint32_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
-    c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t10, t21, res_i1);
-    uint32_t t11 = cM[(uint32_t)4U * i + (uint32_t)2U];
-    uint32_t t22 = k1.n[(uint32_t)4U * i + (uint32_t)2U];
-    uint32_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
-    c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t11, t22, res_i2);
-    uint32_t t12 = cM[(uint32_t)4U * i + (uint32_t)3U];
-    uint32_t t2 = k1.n[(uint32_t)4U * i + (uint32_t)3U];
-    uint32_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
-    c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t12, t2, res_i);
-  }
-  for (uint32_t i = k1.len / (uint32_t)4U * (uint32_t)4U; i < k1.len; i++)
-  {
-    uint32_t t1 = cM[i];
-    uint32_t t2 = k1.n[i];
-    uint32_t *res_i = tmp + i;
-    c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t1, t2, res_i);
-  }
-  uint32_t c1 = c;
-  uint32_t c2 = (uint32_t)0U - c00;
-  for (uint32_t i = (uint32_t)0U; i < k1.len; i++)
-  {
-    uint32_t *os = cM;
-    uint32_t x = (c2 & tmp[i]) | (~c2 & cM[i]);
-    os[i] = x;
-  }
+  Hacl_Bignum_bn_sub_mod_n_u32(len1, k1.n, aM, bM, cM);
 }
 
 /*
@@ -324,7 +259,7 @@ Write `aM ^ b mod n` in `resM`.
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • b < pow2 bBits 
+  • b < pow2 bBits
 */
 void
 Hacl_GenericField32_exp_consttime(
@@ -382,14 +317,13 @@ Hacl_GenericField32_exp_consttime(
       bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
     }
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, k1.n, k1.mu, k1.r2, resM);
-    uint32_t table_len = (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint32_t), table_len * len1);
-    uint32_t *table = alloca(table_len * len1 * sizeof (uint32_t));
-    memset(table, 0U, table_len * len1 * sizeof (uint32_t));
+    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)16U * len1);
+    uint32_t *table = alloca((uint32_t)16U * len1 * sizeof (uint32_t));
+    memset(table, 0U, (uint32_t)16U * len1 * sizeof (uint32_t));
     memcpy(table, resM, len1 * sizeof (uint32_t));
     uint32_t *t1 = table + len1;
     memcpy(t1, aMc, len1 * sizeof (uint32_t));
-    for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
     {
       uint32_t *t11 = table + (i + (uint32_t)1U) * len1;
       uint32_t *t2 = table + (i + (uint32_t)2U) * len1;
@@ -419,7 +353,7 @@ Hacl_GenericField32_exp_consttime(
       uint32_t *a_bits_l = alloca(len1 * sizeof (uint32_t));
       memset(a_bits_l, 0U, len1 * sizeof (uint32_t));
       memcpy(a_bits_l, table, len1 * sizeof (uint32_t));
-      for (uint32_t i2 = (uint32_t)0U; i2 < table_len - (uint32_t)1U; i2++)
+      for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)15U; i2++)
       {
         uint32_t c = FStar_UInt32_eq_mask(bits_l, i2 + (uint32_t)1U);
         uint32_t *res_j = table + (i2 + (uint32_t)1U) * len1;
@@ -459,7 +393,7 @@ Hacl_GenericField32_exp_consttime(
       uint32_t *a_bits_c = alloca(len1 * sizeof (uint32_t));
       memset(a_bits_c, 0U, len1 * sizeof (uint32_t));
       memcpy(a_bits_c, table, len1 * sizeof (uint32_t));
-      for (uint32_t i1 = (uint32_t)0U; i1 < table_len - (uint32_t)1U; i1++)
+      for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)15U; i1++)
       {
         uint32_t c1 = FStar_UInt32_eq_mask(bits_c0, i1 + (uint32_t)1U);
         uint32_t *res_j = table + (i1 + (uint32_t)1U) * len1;
@@ -491,7 +425,7 @@ Write `aM ^ b mod n` in `resM`.
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • b < pow2 bBits 
+  • b < pow2 bBits
 */
 void
 Hacl_GenericField32_exp_vartime(
@@ -536,14 +470,13 @@ Hacl_GenericField32_exp_vartime(
       bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
     }
     Hacl_Bignum_Montgomery_bn_from_mont_u32(len1, k1.n, k1.mu, k1.r2, resM);
-    uint32_t table_len = (uint32_t)16U;
-    KRML_CHECK_SIZE(sizeof (uint32_t), table_len * len1);
-    uint32_t *table = alloca(table_len * len1 * sizeof (uint32_t));
-    memset(table, 0U, table_len * len1 * sizeof (uint32_t));
+    KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)16U * len1);
+    uint32_t *table = alloca((uint32_t)16U * len1 * sizeof (uint32_t));
+    memset(table, 0U, (uint32_t)16U * len1 * sizeof (uint32_t));
     memcpy(table, resM, len1 * sizeof (uint32_t));
     uint32_t *t1 = table + len1;
     memcpy(t1, aMc, len1 * sizeof (uint32_t));
-    for (uint32_t i = (uint32_t)0U; i < table_len - (uint32_t)2U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
     {
       uint32_t *t11 = table + (i + (uint32_t)1U) * len1;
       uint32_t *t2 = table + (i + (uint32_t)2U) * len1;
@@ -612,7 +545,7 @@ Write `aM ^ (-1) mod n` in `aInvM`.
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • n is a prime
-  • 0 < aM 
+  • 0 < aM
 */
 void
 Hacl_GenericField32_inverse(
@@ -634,7 +567,7 @@ Hacl_GenericField32_inverse(
     uint32_t *a1 = k1.n + (uint32_t)1U;
     uint32_t *res1 = n2 + (uint32_t)1U;
     uint32_t c = c0;
-    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U * (uint32_t)4U / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
     {
       uint32_t t1 = a1[(uint32_t)4U * i];
       uint32_t *res_i0 = res1 + (uint32_t)4U * i;

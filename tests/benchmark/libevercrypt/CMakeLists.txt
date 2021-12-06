@@ -35,13 +35,17 @@ add_library(evercrypt STATIC
   ${EVERCRYPT_SRC_DIR}/Hacl_Curve25519_64.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Curve25519_64_Slow.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Ed25519.c
-  ${EVERCRYPT_SRC_DIR}/Hacl_Hash.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Streaming_SHA2.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Hash_MD5.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Hash_SHA1.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Hash_SHA2.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Hash_Blake2.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Kremlib.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Poly1305_32.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Poly1305_128.c
   ${EVERCRYPT_SRC_DIR}/Hacl_Poly1305_256.c
-  ${EVERCRYPT_SRC_DIR}/Hacl_Blake2s_32.c
-  ${EVERCRYPT_SRC_DIR}/Hacl_Blake2b_32.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Hash_Blake2s_128.c
+  ${EVERCRYPT_SRC_DIR}/Hacl_Hash_Blake2b_256.c
   ${EVERCRYPT_SRC_DIR}/Hacl_SHA3.c
   ${EVERCRYPT_SRC_DIR}/Lib_PrintBuffer.c
   ${EVERCRYPT_SRC_DIR}/Lib_Memzero0.c

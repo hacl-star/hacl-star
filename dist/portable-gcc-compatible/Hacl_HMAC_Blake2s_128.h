@@ -38,7 +38,7 @@ extern "C" {
 
 
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Blake2s_128.h"
+#include "Hacl_Hash_Blake2s_128.h"
 
 /* SNIPPET_START: Hacl_HMAC_Blake2s_128_compute_blake2s_128 */
 

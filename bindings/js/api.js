@@ -258,6 +258,10 @@ var HaclWasm = (function() {
     } else {
       var func_name = proto.module + "_" + proto.name;
     }
+    if (!(proto.module in Module))
+      throw new Error(proto.module + " is not in Module");
+    if (!(func_name in Module[proto.module]))
+      throw new Error(func_name + " is not in Module["+proto.module+"]");
     var call_return = Module[proto.module][func_name](
       ...args_pointers.map(function(x) {
         return x.value;
@@ -290,10 +294,6 @@ var HaclWasm = (function() {
     throw "Unimplemented !";
   };
 
-  var checkObj = {
-    checkIfInitialized: checkIfInitialized,
-  };
-
   var api_obj = {};
 
   // Creating object by mapping from api.json structure
@@ -303,14 +303,24 @@ var HaclWasm = (function() {
         api_obj[key_module] = {};
       }
       api_obj[key_module][key_func] = function(...args) {
-        return checkIfInitialized().then(function() {
-          return callWithProto(api_json[key_module][key_func], args);
-        });
+        if (isInitialized === false) {
+          throw 'Uninitialized';
+        };
+        return callWithProto(api_json[key_module][key_func], args);
       };
     });
   });
 
-  return Object.assign(checkObj, api_obj);
+  var getInitializedHaclModule = async function () {
+    await checkIfInitialized();
+    return api_obj;
+  };
+
+  var checkObj = {
+    getInitializedHaclModule: getInitializedHaclModule,
+  };
+
+  return checkObj;
 })();
 
 if (typeof module !== "undefined") {

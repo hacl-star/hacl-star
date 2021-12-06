@@ -30,7 +30,7 @@ val gte_q:
 
 [@CInline]
 let gte_q s =
-  let h0 = get() in
+  let h0 = ST.get() in
   let s0 = s.(0ul) in
   let s1 = s.(1ul) in
   let s2 = s.(2ul) in
@@ -205,7 +205,7 @@ let eq a b =
   assert_norm(pow2 153 = 0x200000000000000000000000000000000000000);
   assert_norm(pow2 204 = 0x1000000000000000000000000000000000000000000000000000);
   assert_norm(pow2 255 - 19 = 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed);
-  let h0 = get() in
+  let h0 = ST.get() in
   lemma_equality1 (v a0) (v a1) (v a2) (v a3) (v a4) (v b0) (v b1) (v b2) (v b3) (v b4);
   let open Lib.RawIntTypes in
   let open FStar.UInt64 in
@@ -239,7 +239,7 @@ let point_equal_1 p q tmp =
   let qxpz = sub tmp 5ul 5ul in
   let pyqz = sub tmp 10ul 5ul in
   let qypz = sub tmp 15ul 5ul in
-  let h0 = get() in
+  let h0 = ST.get() in
   fmul pxqz (getx p) (getz q);
   reduce pxqz;
   fmul qxpz (getx q) (getz p);

@@ -16,20 +16,33 @@ EXPORTS
   Hacl_Hash_Blake2_update_last_blake2b_32
   Hacl_Hash_Blake2_hash_blake2s_32
   Hacl_Hash_Blake2_hash_blake2b_32
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
+  Hacl_Hash_Core_MD5_legacy_init
+  Hacl_Hash_Core_MD5_legacy_update
+  Hacl_Hash_Core_MD5_legacy_finish
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
-  Hacl_Hash_Core_MD5_legacy_init
-  Hacl_Hash_Core_MD5_legacy_update
-  Hacl_Hash_Core_MD5_legacy_pad
-  Hacl_Hash_Core_MD5_legacy_finish
+  Hacl_Hash_Core_SHA1_legacy_init
+  Hacl_Hash_Core_SHA1_legacy_update
+  Hacl_Hash_Core_SHA1_legacy_finish
   Hacl_Hash_SHA1_legacy_update_multi
   Hacl_Hash_SHA1_legacy_update_last
   Hacl_Hash_SHA1_legacy_hash
-  Hacl_Hash_Core_SHA1_legacy_init
-  Hacl_Hash_Core_SHA1_legacy_update
-  Hacl_Hash_Core_SHA1_legacy_pad
-  Hacl_Hash_Core_SHA1_legacy_finish
+  Hacl_Hash_Core_SHA2_init_224
+  Hacl_Hash_Core_SHA2_init_256
+  Hacl_Hash_Core_SHA2_init_384
+  Hacl_Hash_Core_SHA2_init_512
+  Hacl_Hash_Core_SHA2_update_384
+  Hacl_Hash_Core_SHA2_update_512
+  Hacl_Hash_Core_SHA2_pad_256
+  Hacl_Hash_Core_SHA2_finish_224
+  Hacl_Hash_Core_SHA2_finish_256
+  Hacl_Hash_Core_SHA2_finish_384
+  Hacl_Hash_Core_SHA2_finish_512
   Hacl_Hash_SHA2_update_multi_224
   Hacl_Hash_SHA2_update_multi_256
   Hacl_Hash_SHA2_update_multi_384
@@ -42,26 +55,6 @@ EXPORTS
   Hacl_Hash_SHA2_hash_256
   Hacl_Hash_SHA2_hash_384
   Hacl_Hash_SHA2_hash_512
-  Hacl_Hash_Core_SHA2_init_224
-  Hacl_Hash_Core_SHA2_init_256
-  Hacl_Hash_Core_SHA2_init_384
-  Hacl_Hash_Core_SHA2_init_512
-  Hacl_Hash_Core_SHA2_update_224
-  Hacl_Hash_Core_SHA2_update_256
-  Hacl_Hash_Core_SHA2_update_384
-  Hacl_Hash_Core_SHA2_update_512
-  Hacl_Hash_Core_SHA2_pad_224
-  Hacl_Hash_Core_SHA2_pad_256
-  Hacl_Hash_Core_SHA2_pad_384
-  Hacl_Hash_Core_SHA2_pad_512
-  Hacl_Hash_Core_SHA2_finish_224
-  Hacl_Hash_Core_SHA2_finish_256
-  Hacl_Hash_Core_SHA2_finish_384
-  Hacl_Hash_Core_SHA2_finish_512
-  Hacl_Hash_Definitions_word_len
-  Hacl_Hash_Definitions_block_len
-  Hacl_Hash_Definitions_hash_word_len
-  Hacl_Hash_Definitions_hash_len
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -181,16 +174,9 @@ EXPORTS
   Hacl_Impl_Curve25519_Field51_fsqr2
   Hacl_Impl_Curve25519_Field51_store_felem
   Hacl_Impl_Curve25519_Field51_cswap2
-  Hacl_Curve25519_51_fsquare_times
-  Hacl_Curve25519_51_finv
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_Ed25519_sign
-  Hacl_Ed25519_verify
-  Hacl_Ed25519_secret_to_public
-  Hacl_Ed25519_expand_keys
-  Hacl_Ed25519_sign_expanded
   Hacl_Poly1305_32_poly1305_mac
   Hacl_NaCl_crypto_secretbox_detached
   Hacl_NaCl_crypto_secretbox_open_detached
@@ -303,11 +289,6 @@ EXPORTS
   Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
-  EverCrypt_Ed25519_sign
-  EverCrypt_Ed25519_verify
-  EverCrypt_Ed25519_secret_to_public
-  EverCrypt_Ed25519_expand_keys
-  EverCrypt_Ed25519_sign_expanded
   EverCrypt_HMAC_compute_sha1
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384

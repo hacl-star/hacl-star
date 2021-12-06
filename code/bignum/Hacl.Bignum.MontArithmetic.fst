@@ -28,6 +28,8 @@ friend Hacl.Spec.Bignum.MontArithmetic
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+let _align_fsti = ()
+
 let bn_field_get_len #t k =
   let open LowStar.BufferOps in
   let k1 = !*k in
@@ -105,7 +107,7 @@ let bn_field_sub #t km k aM bM cM =
   let open LowStar.BufferOps in
   let k1 = !*k in
   let h0 = ST.get () in
-  BN.bn_sub_mod_n k1.len k1.n aM bM cM;
+  km.BM.bn.BN.sub_mod_n k1.n aM bM cM;
   let h1 = ST.get () in
   assert (as_seq h1 cM == S.bn_field_sub (as_pctx h0 k) (as_seq h0 aM) (as_seq h0 bM))
 
