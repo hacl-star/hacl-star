@@ -152,6 +152,7 @@ let create_qelem () =
   create qnlimb (u64 0)
 
 
+[@CInline]
 let is_qelem_zero_vartime f =
   let h0 = ST.get () in
   let m = BN.bn_is_zero_mask qnlimb f in
@@ -159,6 +160,7 @@ let is_qelem_zero_vartime f =
   BB.unsafe_bool_of_limb m
 
 
+[@CInline]
 let is_qelem_eq_vartime f1 f2 =
   let h0 = ST.get () in
   let m = BN.bn_eq_mask qnlimb f1 f2 in
@@ -166,12 +168,14 @@ let is_qelem_eq_vartime f1 f2 =
   BB.unsafe_bool_of_limb m
 
 
+[@CInline]
 let load_qelem f b =
   let h0 = ST.get () in
   SN.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
   BN.bn_from_bytes_be 32ul b f
 
 
+[@CInline]
 let load_qelem_vartime f b =
   push_frame ();
   let n = create qnlimb (u64 0) in
@@ -190,6 +194,7 @@ let load_qelem_vartime f b =
   not is_zero && is_lt_q_b
 
 
+[@CInline]
 let load_qelem_modq f b =
   let h0 = ST.get () in
   SN.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
@@ -197,19 +202,14 @@ let load_qelem_modq f b =
   modq_short f f
 
 
-let qelem_from_felem out f =
-  modq_short out f
-
-
+[@CInline]
 let store_qelem b f =
   let h0 = ST.get () in
   SN.bn_to_bytes_be_lemma #U64 32 (as_seq h0 f);
   BN.bn_to_bytes_be 32ul f b
 
 
-// not used
-let copy_qelem f1 f2 = copy f1 f2
-
+[@CInline]
 let qadd out f1 f2 =
   push_frame ();
   let n = create qnlimb (u64 0) in
@@ -221,6 +221,7 @@ let qadd out f1 f2 =
   pop_frame ()
 
 
+[@CInline]
 let qmul out f1 f2 =
   push_frame ();
   let h0 = ST.get () in

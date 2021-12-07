@@ -29,7 +29,7 @@ open Hacl.Impl.K256.PointMul
 inline_for_extraction noextract
 let lbytes32 = lbuffer uint8 32ul
 
-inline_for_extraction noextract
+
 val is_public_key_valid (pk_x pk_y:lbytes32) (fpk_x fpk_y:felem) : Stack bool
   (requires fun h ->
     live h pk_x /\ live h pk_y /\ live h fpk_x /\ live h fpk_y /\
@@ -39,6 +39,7 @@ val is_public_key_valid (pk_x pk_y:lbytes32) (fpk_x fpk_y:felem) : Stack bool
     (as_nat h1 fpk_x, as_nat h1 fpk_y, b) ==
       S.is_public_key_valid (as_seq h0 pk_x) (as_seq h0 pk_y))
 
+[@CInline]
 let is_public_key_valid pk_x pk_y fpk_x fpk_y =
   let is_x_valid = load_felem_vartime fpk_x pk_x in
   let is_y_valid = load_felem_vartime fpk_y pk_y in
@@ -76,7 +77,6 @@ let ecdsa_verify_qelem res p z r s =
   pop_frame ()
 
 
-inline_for_extraction noextract
 val fmul_eq_vartime (r z x: felem) : Stack bool
   (requires fun h ->
     live h r /\ live h z /\ live h x /\ eq_or_disjoint r z /\
@@ -84,6 +84,7 @@ val fmul_eq_vartime (r z x: felem) : Stack bool
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
     b == (S.fmul (as_nat h0 r) (as_nat h0 z) = as_nat h0 x))
 
+[@CInline]
 let fmul_eq_vartime r z x =
   push_frame ();
   let tmp = create_felem () in
@@ -106,15 +107,25 @@ val ecdsa_verify_avoid_finv: p:point -> r:qelem -> Stack bool
 let ecdsa_verify_avoid_finv p r =
   push_frame ();
   let h0 = ST.get () in
-  let x, y, z = getx p, gety p, getz p in
-  let is_rz_x = fmul_eq_vartime r z x in
-
+  let r_bytes = create 32ul (u8 0) in
+  let r_fe = create_felem () in
   let tmp = create_felem () in
-  make_u64_4 tmp (make_order_k256 ());
-  let is_tmp_lt_p = add_vartime tmp r tmp in
-  let is_tmpz_x = if is_tmp_lt_p then fmul_eq_vartime tmp z x else false in
 
-  let res = is_rz_x || is_tmpz_x in
+  store_qelem r_bytes r;
+  load_felem r_fe r_bytes;
+
+  let x, y, z = getx p, gety p, getz p in
+  let is_rz_x = fmul_eq_vartime r_fe z x in
+  let res =
+    if not is_rz_x then begin
+     let is_r_lt_p_m_q = is_felem_lt_prime_minus_order_vartime r_fe in
+     if is_r_lt_p_m_q then begin
+       make_u64_4 tmp (make_order_k256 ());
+       fadd tmp r tmp;
+       fmul_eq_vartime tmp z x end
+     else false end
+    else true in
+
   KL.ecdsa_verify_avoid_finv (point_as_nat3_proj h0 p) (qas_nat h0 r);
   pop_frame ();
   res

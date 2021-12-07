@@ -72,6 +72,7 @@ let make_b_k256 () =
   r
 
 
+[@CInline]
 let is_felem_zero_vartime f =
   let h0 = ST.get () in
   let m = BN.bn_is_zero_mask nlimb f in
@@ -79,10 +80,41 @@ let is_felem_zero_vartime f =
   BB.unsafe_bool_of_limb m
 
 
+[@CInline]
 let is_felem_eq_vartime f1 f2 =
   let h0 = ST.get () in
   let m = BN.bn_eq_mask nlimb f1 f2 in
   SN.bn_eq_mask_lemma (as_seq h0 f1) (as_seq h0 f2);
+  BB.unsafe_bool_of_limb m
+
+
+inline_for_extraction noextract
+val make_prime_minus_order_k256: unit -> Pure felem4
+  (requires True)
+  (ensures  fun r -> as_nat4 r == S.prime - S.q)
+
+let make_prime_minus_order_k256 () =
+  [@inline_let]
+  let r =
+   (u64 0x402da1722fc9baee,
+    u64 0x4551231950b75fc4,
+    u64 0x1,
+    u64 0x0) in
+
+  assert_norm (as_nat4 r = S.prime - S.q);
+  r
+
+
+[@CInline]
+let is_felem_lt_prime_minus_order_vartime f =
+  push_frame ();
+  let n = create nlimb (u64 0) in
+  make_u64_4 n (make_prime_minus_order_k256 ());
+
+  let h0 = ST.get () in
+  let m = BN.bn_lt_mask nlimb f n in
+  SN.bn_lt_mask_lemma (as_seq h0 f) (as_seq h0 n);
+  pop_frame ();
   BB.unsafe_bool_of_limb m
 
 
@@ -134,12 +166,14 @@ let create_felem () =
   create nlimb (u64 0)
 
 
+[@CInline]
 let load_felem f b =
   let h0 = ST.get () in
   SN.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
   BN.bn_from_bytes_be 32ul b f
 
 
+[@CInline]
 let load_felem_vartime f b =
   push_frame ();
   let n = create nlimb (u64 0) in
@@ -152,13 +186,13 @@ let load_felem_vartime f b =
 
   let is_zero = is_felem_zero_vartime f in
   let is_lt_p = BN.bn_lt_mask nlimb f n in
-  SN.bn_lt_mask_lemma (as_seq h1 f) (as_seq h1 n);
+  SN.bn_lt_mask_lemma (as_seq h1 f) (as_seq h0 n);
   let is_lt_p_b = BB.unsafe_bool_of_limb is_lt_p in
   pop_frame ();
   not is_zero && is_lt_p_b
 
 
-// not used
+[@CInline]
 let store_felem b f =
   let h0 = ST.get () in
   SN.bn_to_bytes_be_lemma #U64 32 (as_seq h0 f);
@@ -179,6 +213,7 @@ let set_one f =
 // not used
 let copy_felem f1 f2 = copy f1 f2
 
+[@CInline]
 let fmul_small_num out f1 num =
   push_frame ();
   let f2 = create nlimb (u64 0) in
@@ -206,32 +241,7 @@ let fmul_24b out f =
   fmul_small_num out f b24
 
 
-let add_vartime out f1 f2 =
-  push_frame ();
-  let h0 = ST.get () in
-  let n = create_felem () in
-  let c = BN.bn_add_eq_len nlimb f1 f2 out in
-  make_u64_4 n (make_prime_k256 ());
-  let h1 = ST.get () in
-
-  SN.bn_add_lemma (as_seq h0 f1) (as_seq h0 f2);
-  assert (v c * pow2 256 + as_nat h1 out == as_nat h0 f1 + as_nat h0 f2);
-  let res =
-    if BB.unsafe_bool_of_limb0 c then begin
-      let is_lt_p = BN.bn_lt_mask nlimb out n in
-      SN.bn_lt_mask_lemma (as_seq h1 out) (as_seq h1 n);
-      BB.unsafe_bool_of_limb is_lt_p end
-    else false in
-
-  Math.Lemmas.modulo_addition_lemma (as_nat h1 out) (pow2 256) (v c);
-  SD.bn_eval_bound (as_seq h1 out) 4;
-  Math.Lemmas.small_mod (as_nat h1 out) (pow2 256);
-  assert (as_nat h1 out == (as_nat h0 f1 + as_nat h0 f2) % pow2 256);
-
-  pop_frame ();
-  res
-
-
+[@CInline]
 let fadd out f1 f2 =
   push_frame ();
   let n = create nlimb (u64 0) in
@@ -243,6 +253,7 @@ let fadd out f1 f2 =
   pop_frame ()
 
 
+[@CInline]
 let fsub out f1 f2 =
   push_frame ();
   let n = create nlimb (u64 0) in
@@ -254,6 +265,7 @@ let fsub out f1 f2 =
   pop_frame ()
 
 
+[@CInline]
 let fmul out f1 f2 =
   push_frame ();
   let h0 = ST.get () in
@@ -265,6 +277,7 @@ let fmul out f1 f2 =
   pop_frame ()
 
 
+[@CInline]
 let fsqr out f =
   push_frame ();
   let h0 = ST.get () in

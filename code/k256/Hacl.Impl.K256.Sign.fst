@@ -42,13 +42,16 @@ val ecdsa_sign_r (r k:qelem) : Stack unit
 let ecdsa_sign_r r k =
   push_frame ();
   let tmp = create_felem () in
+  let x_bytes = create 32ul (u8 0) in
+
   let p = create_point () in
   point_mul_g p k; // p = [k]G
   let x, y, z = getx p, gety p, getz p in
 
   FI.finv tmp z; // tmp = zinv
   fmul tmp x tmp; // tmp = aff_x = x *% zinv
-  qelem_from_felem r tmp; // r = aff_x % S.q
+  store_felem x_bytes tmp;
+  load_qelem_modq r x_bytes; // r = aff_x % S.q
   pop_frame ()
 
 

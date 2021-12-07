@@ -70,19 +70,24 @@ val make_b_k256: unit -> Pure felem4
   (ensures  fun r -> as_nat4 r = S.b)
 
 
-inline_for_extraction noextract
 val is_felem_zero_vartime (f:felem) : Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
     m == (as_nat h0 f = 0))
 
 
-inline_for_extraction noextract
 val is_felem_eq_vartime (f1 f2:felem) : Stack bool
   (requires fun h ->
     live h f1 /\ live h f2 /\ fe_lt_prime h f1 /\ fe_lt_prime h f2)
   (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
     m == (as_nat h0 f1 = as_nat h0 f2))
+
+
+// needed for ecdsa-verify when q < p < 2q
+val is_felem_lt_prime_minus_order_vartime (f:felem) : Stack bool
+  (requires fun h -> live h f /\ fe_lt_prime h f)
+  (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
+    m == (as_nat h0 f < S.prime - S.q))
 
 
 inline_for_extraction noextract
@@ -93,7 +98,6 @@ val create_felem: unit -> StackInline felem
     as_nat h1 f == 0)
 
 
-inline_for_extraction noextract
 val load_felem: f:felem -> b:lbuffer uint8 32ul -> Stack unit
   (requires fun h ->
     live h f /\ live h b /\ disjoint f b /\
@@ -102,7 +106,6 @@ val load_felem: f:felem -> b:lbuffer uint8 32ul -> Stack unit
     as_nat h1 f == BSeq.nat_from_bytes_be (as_seq h0 b))
 
 
-inline_for_extraction noextract
 val load_felem_vartime: f:felem -> b:lbuffer uint8 32ul -> Stack bool
   (requires fun h ->
     live h f /\ live h b /\ disjoint f b)
@@ -111,8 +114,6 @@ val load_felem_vartime: f:felem -> b:lbuffer uint8 32ul -> Stack bool
     as_nat h1 f == b_nat /\ m = (0 < b_nat && b_nat < S.prime)))
 
 
-// not used
-inline_for_extraction noextract
 val store_felem: b:lbuffer uint8 32ul -> f:felem -> Stack unit
   (requires fun h ->
     live h b /\ live h f /\ disjoint f b /\
@@ -154,6 +155,7 @@ val fmul_small_num (out f:felem) (num:uint64) : Stack unit
     fe_lt_prime h1 out)
 
 
+inline_for_extraction noextract
 val fmul_3b (out f:felem) : Stack unit
   (requires fun h ->
     live h f /\ live h out /\ eq_or_disjoint out f /\
@@ -163,6 +165,7 @@ val fmul_3b (out f:felem) : Stack unit
     fe_lt_prime h1 out)
 
 
+inline_for_extraction noextract
 val fmul_24b (out f:felem) : Stack unit
   (requires fun h ->
     live h f /\ live h out /\ eq_or_disjoint out f /\
@@ -170,16 +173,6 @@ val fmul_24b (out f:felem) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_nat h1 out = S.fmul (S.fmul 24 S.b) (as_nat h0 f) /\
     fe_lt_prime h1 out)
-
-
-val add_vartime (out f1 f2:felem) : Stack bool
-  (requires fun h ->
-    live h out /\ live h f1 /\ live h f2 /\
-    eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
-    fe_lt_prime h f1 /\ fe_lt_prime h f2)
-  (ensures  fun h0 b h1 -> modifies (loc out) h0 h1 /\
-    as_nat h1 out == (as_nat h0 f1 + as_nat h0 f2) % pow2 256 /\
-    b == (as_nat h0 f1 + as_nat h0 f2 < S.prime))
 
 
 val fadd (out f1 f2:felem) : Stack unit
