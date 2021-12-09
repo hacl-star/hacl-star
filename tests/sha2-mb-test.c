@@ -177,6 +177,7 @@ int main()
   double tdiff2v = (double)(t2 - t1);
 #endif
 
+#if defined(HACL_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     for (int j = 0; j < ROUNDS; j++) {
       Hacl_SHA2_Vec256_sha256_8(plain,plain+32,plain+64,plain+96,plain+128,plain+160,plain+192,plain+224,SIZE,plain,plain,plain,plain,plain,plain,plain,plain);
@@ -192,7 +193,7 @@ int main()
   }
   double cdiff2v8 = b - a;
   double tdiff2v8 = (double)(t2 - t1);
-
+#endif
 
   for (int j = 0; j < ROUNDS; j++) {
     Hacl_SHA2_Scalar32_sha512(plain,SIZE,plain);
@@ -209,6 +210,7 @@ int main()
   double tdiff1 = (double)(t2 - t1);
 
 
+#if defined(HACL_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     for (int j = 0; j < ROUNDS; j++) {
       Hacl_SHA2_Vec256_sha512_4(plain,plain+64,plain+128,plain+192,SIZE,plain,plain,plain,plain);
@@ -224,6 +226,7 @@ int main()
   }
   double cdiff2 = b - a;
   double tdiff2 = (double)(t2 - t1);
+#endif
 
   uint8_t res = plain[0];
   uint64_t count = ROUNDS * SIZE;
@@ -234,15 +237,19 @@ int main()
   printf("VEC4 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2v,cdiff2v);
 #endif
 
+#if defined(HACL_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("VEC8 SHA2-256 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2v8,cdiff2v8);
   }
+#endif
   printf ("\n\n");
   printf("NEW SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff1,cdiff1);
 
+#if defined(HACL_CAN_COMPILE_VEC256)
   if (EverCrypt_AutoConfig2_has_avx2()) {
     printf("VEC4 SHA2-512 (32-bit) PERF: %d\n",(int)res); print_time(count,tdiff2,cdiff2);
   }
+#endif
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
