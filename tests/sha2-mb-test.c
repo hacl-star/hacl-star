@@ -74,10 +74,11 @@ bool print_test4_512(uint8_t* in, uint8_t* in1, uint8_t* in2, uint8_t* in3, int 
   uint8_t comp2[64] = {0};
   uint8_t comp3[64] = {0};
 
+  bool ok = true;
 #if defined(HACL_CAN_COMPILE_VEC256)
   Hacl_SHA2_Vec256_sha512_4(comp,comp1,comp2,comp3,in_len,in,in1,in2,in3);
   printf("VEC4 SHA2-512 (32-bit) Result:\n");
-  bool ok = print_result(comp, exp,64);
+  ok = print_result(comp, exp,64);
   ok = print_result(comp1,exp1,64) && ok;
   ok = print_result(comp2,exp2,64) && ok;
   ok = print_result(comp3,exp3,64) && ok;
@@ -98,10 +99,11 @@ bool print_test8(uint8_t* in, uint8_t* in1, uint8_t* in2, uint8_t* in3, uint8_t*
   uint8_t comp6[32] = {0};
   uint8_t comp7[32] = {0};
 
+  bool ok = true;
 #if defined(HACL_CAN_COMPILE_VEC256)
   Hacl_SHA2_Vec256_sha256_8(comp,comp1,comp2,comp3,comp4,comp5,comp6,comp7,in_len,in,in1,in2,in3,in4,in5,in6,in7);
   printf("VEC8 SHA2-256 (32-bit) Result:\n");
-  bool ok = print_result(comp, exp,32);
+  ok = print_result(comp, exp,32);
   ok = print_result(comp1,exp1,32) && ok;
   ok = print_result(comp2,exp2,32) && ok;
   ok = print_result(comp3,exp3,32) && ok;
