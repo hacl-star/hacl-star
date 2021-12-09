@@ -10,6 +10,10 @@ open Lib.Sequence
 val blocks: x:size_pos -> m:size_pos -> Tot (r:size_pos{x <= m * r})
 let blocks x m = (x - 1) / m + 1
 
+val blocks0: x:size_nat -> m:size_pos -> Tot (r:size_pos{x <= m * r})
+let blocks0 x m = if x = 0 then 1 else (x - 1) / m + 1
+
+
 inline_for_extraction noextract
 let limb_t = t:inttype{t = U32 \/ t = U64}
 inline_for_extraction noextract

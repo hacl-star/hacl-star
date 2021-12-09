@@ -21,23 +21,54 @@ let tests = [
   }
 ]
 
-let test (v: Bytes.t ed25519_test) t sign verify =
-  let test_result = test_result (t ^ " " ^ v.name) in
+module MakeTests (M: SharedDefs.EdDSA) = struct
+  let test_noalloc (v: Bytes.t ed25519_test) t =
+    let test_result = test_result (t ^ ".Noalloc " ^ v.name) in
 
-  let signature = Test_utils.init_bytes 64 in
+    let signature = Test_utils.init_bytes 64 in
+    let pk = Test_utils.init_bytes 32 in
+    M.Noalloc.secret_to_public ~sk:v.sk ~pk;
+    if not (Bytes.equal pk v.pk) then
+      test_result Failure "secret_to_public failure";
 
-  sign signature v.sk v.msg;
-  if Bytes.compare signature v.expected_sig = 0 then
-    begin
-      if verify v.pk v.msg signature then
-        test_result Success ""
-      else
-        test_result Failure "verification"
-    end
-  else
-    test_result Failure "signing"
+    M.Noalloc.sign ~sk:v.sk ~msg:v.msg ~signature;
+    if Bytes.equal signature v.expected_sig then
+      begin
+        if M.verify ~pk:v.pk ~msg:v.msg ~signature then
+          test_result Success ""
+        else
+          test_result Failure "verification"
+      end
+    else
+      test_result Failure "signing"
 
-(* TODO: tests for secret_to_public, expand_keys, sign_expanded *)
+  let test (v: Bytes.t ed25519_test) t =
+    let test_result = test_result (t ^ " " ^ v.name) in
+
+    let pk = M.secret_to_public ~sk:v.sk in
+    if not (Bytes.equal pk v.pk) then
+      test_result Failure "secret_to_public failure";
+
+    let signature = M.sign ~sk:v.sk ~msg:v.msg in
+    if Bytes.equal signature v.expected_sig then
+      begin
+        if M.verify ~pk:v.pk ~msg:v.msg ~signature then
+          test_result Success ""
+        else
+          test_result Failure "verification"
+      end
+    else
+      test_result Failure "signing"
+
+  let run_tests name =
+    List.iter (fun v -> test_noalloc v name) tests;
+    List.iter (fun v -> test v name) tests
+end
+
+(* TODO: tests for expand_keys, sign_expanded *)
 let _ =
-  List.iter (fun v -> test v "Hacl.Ed25519" Hacl.Ed25519.sign Hacl.Ed25519.verify) tests;
-  List.iter (fun v -> test v "EverCrypt.Ed25519" EverCrypt.Ed25519.sign EverCrypt.Ed25519.verify) tests
+  let module Tests = MakeTests (EverCrypt.Ed25519) in
+  Tests.run_tests "EverCrypt.Ed25519";
+
+  let module Tests = MakeTests (Hacl.Ed25519) in
+  Tests.run_tests "Hacl.Ed25519"

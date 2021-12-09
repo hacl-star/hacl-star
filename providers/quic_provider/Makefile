@@ -40,7 +40,7 @@ else
         ARCH = osx
     else
 	EXTRA_PATH = LD_LIBRARY_PATH=$(OPENSSL_HOME):../../dist/mitls:.:$(LD_LIBRARY_PATH)
-        EXTRA_OPTS = -thread -ccopt -fPIC
+        EXTRA_OPTS = -ccopt -fPIC
         ARCH = x86_64
     endif
 endif

@@ -1,6 +1,7 @@
 module Hacl.HMAC_DRBG
 
 open FStar.HyperStack.ST
+module ST = FStar.HyperStack.ST
 
 open Spec.Hash.Definitions
 
@@ -44,7 +45,7 @@ val update_round: #a:supported_alg
     modifies2 k v h0 h1)
 
 let update_round #a hmac len data n k v =
-  let h0 = get() in
+  let h0 = ST.get() in
   push_frame();
   let input_len = hash_len a +! 1ul +! len in
   let input = create input_len (u8 0) in
@@ -52,7 +53,7 @@ let update_round #a hmac len data n k v =
   copy k' v;
   if len <> 0ul then copy (sub input (hash_len a +! 1ul) len) data;
   input.(hash_len a) <- n;
-  let h1 = get() in
+  let h1 = ST.get() in
   assert (Seq.equal (as_seq h1 input)
                     (Seq.append (as_seq h0 v) (Seq.cons n (as_seq h0 data))));
   S.hmac_input_bound a;
@@ -157,7 +158,7 @@ let mk_instantiate #a hmac st
   nonce_len nonce
   personalization_string_len personalization_string
 =
-  let h0 = get () in
+  let h0 = ST.get () in
   push_frame();
   let seed_material = create (entropy_input_len +! nonce_len +! personalization_string_len) (u8 0) in
   copy (sub seed_material 0ul entropy_input_len) entropy_input;
@@ -166,7 +167,7 @@ let mk_instantiate #a hmac st
   let State k v ctr = st in
   memset k (u8 0) (hash_len a);
   memset v (u8 1) (hash_len a);
-  let h1 = get () in
+  let h1 = ST.get () in
   assert (Seq.equal (as_seq h1 seed_material)
     (Seq.append (as_seq h0 entropy_input) (Seq.append (as_seq h0 nonce)
       (as_seq h0 personalization_string))));
@@ -211,12 +212,12 @@ let mk_reseed #a hmac st
   entropy_input_len entropy_input
   additional_input_len additional_input
 =
-  let h0 = get () in
+  let h0 = ST.get () in
   push_frame();
   let seed_material = create (entropy_input_len +! additional_input_len) (u8 0) in
   copy (sub seed_material 0ul entropy_input_len) entropy_input;
   copy (sub seed_material entropy_input_len additional_input_len) additional_input;
-  let h1 = get () in
+  let h1 = ST.get () in
   LSeq.eq_intro (as_seq h1 seed_material)
                 LSeq.(as_seq h0 entropy_input @| as_seq h0 additional_input);
   let State k v ctr: state a = st in
@@ -267,7 +268,7 @@ let mk_generate #a hmac output st n additional_input_len additional_input =
     let refl h i = as_seq h v in
     [@inline_let]
     let spec h0 = S.generate_loop a (as_seq h0 k) (uint_v max) in
-    let h0 = get () in
+    let h0 = ST.get () in
     fill_blocks h0 (hash_len a) max out a_spec refl (fun i -> loc v) spec
       (fun i ->
         LSeq.unfold_generate_blocks
@@ -277,11 +278,11 @@ let mk_generate #a hmac output st n additional_input_len additional_input =
       );
     if max *! hash_len a <. n then
       begin
-      let h1 = get () in
+      let h1 = ST.get () in
       let block = sub output (max *! hash_len a) (n -! (max *! hash_len a)) in
       hmac v k (hash_len a) v (hash_len a);
       copy block (sub v 0ul (n -! (max *! hash_len a)));
-      let h2 = get () in
+      let h2 = ST.get () in
       LSeq.eq_intro (as_seq h2 output)
                     (as_seq h1 out `LSeq.op_At_Bar` as_seq h2 block)
       end;

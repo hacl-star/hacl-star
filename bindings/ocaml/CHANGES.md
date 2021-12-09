@@ -1,3 +1,20 @@
+## 0.4.3
+- Improved performance for Ed25519 (#486)
+
+## 0.4.2
+- Fix for bug impacting performance
+
+## 0.4.1
+- Support for FreeBSD
+- Build fixes
+
+## 0.4.0
+- Complete documentation
+- Redesigned API:
+  * by default, functions return result buffer instead of taking them as arguments
+  * arguments are now labeled
+- Improvements to runtime checks, unit tests
+
 ## 0.3.2
 - Build fixes addressing performance and compatibility issues
 

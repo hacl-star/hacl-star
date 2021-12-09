@@ -136,6 +136,8 @@ let stateful_blake2 (a : alg) (m : m_spec) : I.stateful unit =
       B.blit (state_to_lbuffer src_b) 0ul (state_to_lbuffer dst_b) 0ul
              U32.(4ul *^ row_len a m))
 
+// Rk.: this is not necessary anymore, as well as stateful_key_t and stateful_key.
+// We keep those definitions here, though, because they may be useful in the future.
 inline_for_extraction noextract
 let key_size_ty (a : alg) = key_size:nat{0 <= key_size /\ key_size <= Spec.max_key a}
 
@@ -234,9 +236,7 @@ let max_total_hash_length (a : alg) :
 #pop-options
 
 noextract
-let max_input_length (a : alg) (key_size : nat) : nat =
-  if key_size = 0 then max_total_hash_length a
-  else max_total_hash_length a - Spec.size_block a
+let max_input_length (a : alg) : nat = max_total_hash_length a
 
 inline_for_extraction noextract
 let block (a : alg) = (block: S.seq uint8 { S.length block = Spec.size_block a })
@@ -250,102 +250,76 @@ let output_size (a : alg) : nat = Spec.max_output a
 inline_for_extraction noextract
 let output_len (a : alg) = U32.uint_to_t (output_size a)
 
-/// The prevlen parameter computed by the streaming functor and given to ``update_multi``
-/// or ``update_last`` is equal to the length of the data processed so far (without the
-/// key). In the case of blake2, however, we also need to count the key (if it is not
-/// an empty seq) in the total length of processed data.
-inline_for_extraction noextract
-let blake2_prevlength (a : alg) (key_size : nat) (prevlen : nat) : nat =
-  if key_size = 0 then prevlen else prevlen + Spec.size_block a
-
-noextract
-let blake2_prevlength_add_right_eq (a : alg) (key_size : nat) (prevlen len : nat) :
-  Lemma(
-    blake2_prevlength a key_size prevlen + len = blake2_prevlength a key_size (prevlen + len))
-  = ()
-
 /// Same function as above but with low-level types
 inline_for_extraction noextract
-let blake2_prevlen_ (a : alg) (key_len : U32.t)
-                    (prevlen : U64.t { U64.v prevlen <= max_input_length a (U32.v key_len) }) :
-  x:U64.t  { U64.v x = blake2_prevlength a (U32.v key_len) (U64.v prevlen) } =
-  if U32.(key_len =^ 0ul) then prevlen
-  else U64.(prevlen +^ FStar.Int.Cast.uint32_to_uint64 (block_len a))
-
-inline_for_extraction noextract
-let blake2_prevlen (a : alg) (key_len : U32.t)
-                   (prevlen : U64.t{ U64.v prevlen <= max_input_length a (U32.v key_len) }) :
+let blake2_prevlen (a : alg)
+                   (prevlen : U64.t{ U64.v prevlen <= max_input_length a}) :
   x:Spec.limb_t a {
-    Lib.IntTypes.uint_v x = blake2_prevlength a (U32.v key_len) (U64.v prevlen) } =
+    Lib.IntTypes.uint_v x = U64.v prevlen } =
   let open Lib.IntTypes in
   match a with
-  | Spec.Blake2S -> to_u64 #U64 #PUB (blake2_prevlen_ a key_len prevlen)
+  | Spec.Blake2S -> to_u64 #U64 #PUB prevlen
   | Spec.Blake2B ->
-    [@inline_let] let x : uint64 = to_u64 #U64 #PUB (blake2_prevlen_ a key_len prevlen) in
+    [@inline_let] let x : uint64 = to_u64 #U64 #PUB prevlen in
     Lib.IntTypes.cast U128 SEC x
 
 noextract
-let init_s (#a : alg) (#key_size : key_size_ty a) ()
-           (key : Seq.lseq uint8 key_size) :
+let init_s (a : alg) () :
   Tot (t a) =
-  Spec.blake2_init a key_size key (output_size a)
+  Spec.blake2_init_hash a 0 (output_size a)
 
 noextract
-let update_multi_s (#a : alg) (key_size : key_size_ty a) () (acc : t a)
+let update_multi_s (#a : alg) () (acc : t a)
                    (prevlen : nat{prevlen % Spec.size_block a = 0})
-                   (input : Seq.seq uint8{ prevlen + S.length input <= max_input_length a key_size /\
+                   (input : Seq.seq uint8{ prevlen + S.length input <= max_input_length a /\
                                            S.length input % Spec.size_block a = 0 }) :
   Tot (t a) =
-  let es = Hash.nat_to_extra_state (to_hash_alg a) (blake2_prevlength a key_size prevlen) in
+  let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen in
   let s = (acc, es) in
   fst (Agile.update_multi (to_hash_alg a) s input)
 
 noextract
-let update_last_s (#a : alg) (key_size : key_size_ty a) () (acc : t a)
+let update_last_s (#a : alg) () (acc : t a)
                   (prevlen : nat{prevlen % Spec.size_block a = 0})
-                  (input : Seq.seq uint8{ S.length input + prevlen <= max_input_length a key_size /\
+                  (input : Seq.seq uint8{ S.length input + prevlen <= max_input_length a /\
                                           S.length input <= Spec.size_block a }) :
   Tot (t a) =
-  let es = Hash.nat_to_extra_state (to_hash_alg a) (blake2_prevlength a key_size prevlen) in
+  let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen in
   let s = (acc, es) in
   fst (Spec.Hash.Incremental.update_last (to_hash_alg a) s prevlen input)
 
 noextract
-let finish_s (#a : alg) (#key_size : key_size_ty a) ()
-             (key : S.seq uint8{S.length key = key_size}) (acc : t a) :
+let finish_s (#a : alg) () (acc : t a) :
   output : S.seq uint8 { S.length output = U32.v (output_len a) } =
   (* The extra state is actually not used, so we initialize it to a dummy value *)
   let s = (acc, Hash.nat_to_extra_state (to_hash_alg a) 0) in
   Spec.Hash.PadFinish.finish (to_hash_alg a) s
 
 noextract
-let spec_s (a : alg) (#key_size : key_size_ty a) ()
-           (key : S.seq uint8{S.length key = key_size})
-           (input : S.seq uint8{S.length input <= max_input_length a key_size}) = 
-  Spec.blake2 a input key_size key (output_size a)
+let spec_s (a : alg) () (_key : unit)
+           (input : S.seq uint8{S.length input <= max_input_length a}) = 
+  Spec.blake2 a input 0 Seq.empty (output_size a)
 
 /// Interlude for spec proofs
 /// =====================================
 noextract
 val update_multi_zero:
   #a : alg ->
-  key_size : key_size_ty a ->
   i:index ->
   acc:t a ->
   prevlen:nat{prevlen % Spec.size_block a = 0} ->
   Lemma
-  (requires (prevlen <= max_input_length a key_size))
-  (ensures (update_multi_s #a key_size i acc prevlen S.empty == acc))
+  (requires (prevlen <= max_input_length a))
+  (ensures (update_multi_s #a i acc prevlen S.empty == acc))
 
-let update_multi_zero #a key_size () acc prevlen =
-  let es = Hash.nat_to_extra_state (to_hash_alg a) (blake2_prevlength a key_size prevlen) in
+let update_multi_zero #a () acc prevlen =
+  let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen in
   let s = (acc, es) in
   Spec.Hash.Lemmas.update_multi_zero (to_hash_alg a) s
 
 noextract
 val update_multi_associative:
   #a : alg ->
-  key_size : key_size_ty a ->
   i:index ->
   acc: t a ->
   prevlen1:nat ->
@@ -357,17 +331,17 @@ val update_multi_associative:
     prevlen1 % Spec.size_block a = 0 /\
     S.length input1 % Spec.size_block a = 0 /\
     S.length input2 % Spec.size_block a = 0 /\
-    prevlen1 + S.length input1 + S.length input2 <= max_input_length a key_size /\
+    prevlen1 + S.length input1 + S.length input2 <= max_input_length a /\
     prevlen2 = prevlen1 + S.length input1))
   (ensures (
     let input = S.append input1 input2 in
     S.length input % Spec.size_block a = 0 /\
     prevlen2 % Spec.size_block a = 0 /\
-    update_multi_s key_size i (update_multi_s key_size i acc prevlen1 input1) prevlen2 input2 ==
-      update_multi_s key_size i acc prevlen1 input))
+    update_multi_s i (update_multi_s i acc prevlen1 input1) prevlen2 input2 ==
+      update_multi_s i acc prevlen1 input))
 
-let update_multi_associative #a key_size () acc prevlen1 prevlen2 input1 input2 =
-  let es = Hash.nat_to_extra_state (to_hash_alg a) (blake2_prevlength a key_size prevlen1) in
+let update_multi_associative #a () acc prevlen1 prevlen2 input1 input2 =
+  let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen1 in
   let s = (acc, es) in
   Spec.Hash.Lemmas.update_multi_associative (to_hash_alg a) s input1 input2;
   Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq (to_hash_alg a) s input1;
@@ -378,11 +352,8 @@ let update_multi_associative #a key_size () acc prevlen1 prevlen2 input1 input2 
 noextract
 val blake2_hash_incremental_s :
   a : alg ->
-  no_key : bool ->
-  key_size : key_size_t a no_key ->
   i:index ->
-  key: I.((k a no_key key_size).t ()) ->
-  input:S.seq uint8 { S.length input <= max_input_length a (U32.v key_size) } ->
+  input:S.seq uint8 { S.length input <= max_input_length a} ->
   output:S.seq uint8 { S.length output = output_size a }
 
 noextract
@@ -392,14 +363,14 @@ let size_block_props (a : Spec.alg) :
     Spec.size_block a > 0) = ()
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let blake2_hash_incremental_s a no_key key_size i key input =
+let blake2_hash_incremental_s a i input =
   (**) size_block_props a;
   (**) Math.Lemmas.modulo_lemma 0 (Spec.size_block a);
   let bs, l = Spec.Hash.Incremental.split_blocks (to_hash_alg a) input in
-  let acc1 = init_s #a #(U32.v key_size) i key in
-  let acc2 = update_multi_s #a (U32.v key_size) i acc1 0 bs in
-  let acc3 = update_last_s #a (U32.v key_size) i acc2 (S.length bs) l in
-  let acc4 = finish_s #a #(U32.v key_size) i key acc3 in
+  let acc1 = init_s a i in
+  let acc2 = update_multi_s #a i acc1 0 bs in
+  let acc3 = update_last_s #a i acc2 (S.length bs) l in
+  let acc4 = finish_s #a i acc3 in
   acc4
 #pop-options
 
@@ -409,64 +380,52 @@ let blake2_hash_incremental_s a no_key key_size i key input =
 noextract
 val blake2_hash_incremental_s_is_hash_incremental :
   a : alg ->
-  no_key : bool ->
-  key_size : key_size_t a no_key ->
   i:index ->
-  key: I.((k a no_key key_size).t ()) ->
-  input:S.seq uint8 { S.length input <= max_input_length a (U32.v key_size) } ->
+  input:S.seq uint8 { S.length input <= max_input_length a } ->
   Lemma(
-    blake2_hash_incremental_s a no_key key_size i key input ==
-      Spec.Hash.Incremental.blake2_hash_incremental (to_hash_alg a) (U32.v key_size) key input)
+    blake2_hash_incremental_s a i input ==
+      Spec.Hash.Incremental.blake2_hash_incremental (to_hash_alg a) input)
 
 noextract
 let init_s_blake2_init_eq
   (a : alg)
-  (no_key : bool)
-  (key_size : key_size_t a no_key)
-  (i:index)
-  (key: I.((k a no_key key_size).t ())) :
+  (i:index) :
   Lemma(
-    (init_s #a #(U32.v key_size) i key,
-     Hash.nat_to_extra_state (to_hash_alg a) (blake2_prevlength a (U32.v key_size) 0)) ==
-      Spec.Hash.Incremental.blake2_init (to_hash_alg a) (U32.v key_size) key) =
+    (init_s a i,
+     Hash.nat_to_extra_state (to_hash_alg a) 0) ==
+      Spec.Hash.Incremental.blake2_init (to_hash_alg a)) =
   ()
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let blake2_hash_incremental_s_is_hash_incremental a no_key key_size i key input =
+let blake2_hash_incremental_s_is_hash_incremental a i input =
   size_block_props a;
   Math.Lemmas.modulo_lemma 0 (Spec.size_block a);
   let bs, l = Spec.Hash.Incremental.split_blocks (to_hash_alg a) input in
-  let acc1 = init_s #a #(U32.v key_size) i key in
-  let acc2 = update_multi_s (U32.v key_size) i acc1 0 bs in
-  let acc3 = update_last_s (U32.v key_size) i acc2 (S.length bs) l in
-  let acc4 = finish_s #a #(U32.v key_size) i key acc3 in
-  assert(acc4 == blake2_hash_incremental_s a no_key key_size i key input); (* sanity check *)
-  let s1 = Spec.Hash.Incremental.blake2_init (to_hash_alg a) (U32.v key_size) key in
+  let acc1 = init_s a i in
+  let acc2 = update_multi_s i acc1 0 bs in
+  let acc3 = update_last_s i acc2 (S.length bs) l in
+  let acc4 = finish_s #a i acc3 in
+  assert(acc4 == blake2_hash_incremental_s a i input); (* sanity check *)
+  let s1 = Spec.Hash.Incremental.blake2_init (to_hash_alg a) in
   let s2 = Agile.update_multi (to_hash_alg a) s1 bs in
   let prevlen = S.length bs in (* dummy value: this variable is actually not used *)
   let s3 = Spec.Hash.Incremental.update_last (to_hash_alg a) s2 prevlen l in
   let s4 = Spec.Hash.PadFinish.finish (to_hash_alg a) s3 in
-  let s4' =
-    Spec.Hash.Incremental.blake2_hash_incremental (to_hash_alg a) (U32.v key_size) key input in
+  let s4' = Spec.Hash.Incremental.blake2_hash_incremental (to_hash_alg a) input in
   assert(s4 == s4'); (* sanity check *)
   (* The proof *)
   (* 1 *)
-  let es1 = Hash.nat_to_extra_state (to_hash_alg a) (blake2_prevlength a (U32.v key_size) 0) in
+  let es1 = Hash.nat_to_extra_state (to_hash_alg a) 0 in
   let s1' = (acc1, es1) in
-  init_s_blake2_init_eq a no_key key_size i key;
+  init_s_blake2_init_eq a i;
   assert(s1' == s1);
   (* 2 *)
   Spec.Hash.Incremental.Lemmas.update_multi_extra_state_eq (to_hash_alg a) s1 bs;
-  Spec.Hash.Lemmas.extra_state_v_of_nat (to_hash_alg a) (blake2_prevlength a (U32.v key_size) 0);
+  Spec.Hash.Lemmas.extra_state_v_of_nat (to_hash_alg a) 0;
   assert(Hash.extra_state_v es1 + S.length bs <= Hash.max_extra_state (to_hash_alg a));
   Spec.Hash.Lemmas.extra_state_add_nat_bound_lem2 #(to_hash_alg a) es1 (S.length bs);
-  let es2 = Hash.nat_to_extra_state (to_hash_alg a)
-                                    (blake2_prevlength a (U32.v key_size) (S.length bs)) in
+  let es2 = Hash.nat_to_extra_state (to_hash_alg a) (S.length bs) in
   let s2' = (acc2, es2) in
-  blake2_prevlength_add_right_eq a (U32.v key_size) 0 (S.length bs);
-  Math.Lemmas.add_zero_left_is_same (S.length bs);
-  assert(blake2_prevlength a (U32.v key_size) 0 + S.length bs =
-         blake2_prevlength a (U32.v key_size) (S.length bs));
   assert(s2' == s2);
   (* 3 *)
   let es3 = Hash.nat_to_extra_state (to_hash_alg a) 0 in
@@ -480,84 +439,75 @@ let blake2_hash_incremental_s_is_hash_incremental a no_key key_size i key input 
 noextract
 val spec_is_incremental:
   a : alg ->
-  no_key : bool ->
-  key_size : key_size_t a no_key ->
   i:index ->
-  key: I.((k a no_key key_size).t ()) ->
-  input:S.seq uint8 { S.length input <= max_input_length a (U32.v key_size) } ->
+  input:S.seq uint8 { S.length input <= max_input_length a } ->
   Lemma (
     (**) size_block_props a;
     (**) Math.Lemmas.modulo_lemma 0 (Spec.size_block a);
     let bs, l = Lib.UpdateMulti.split_at_last_lazy (U32.v (block_len a)) input in
-    let hash0 = init_s #a #(U32.v key_size) i key in
-    let hash1 = update_multi_s (U32.v key_size) i hash0 0 bs in
-    let hash2 = update_last_s (U32.v key_size) i hash1 (S.length bs) l in
-    let hash3 = finish_s #a #(U32.v key_size) i key hash2 in
-    hash3 `S.equal` spec_s a #(U32.v key_size) i key input)
+    let hash0 = init_s a i in
+    let hash1 = update_multi_s i hash0 0 bs in
+    let hash2 = update_last_s i hash1 (S.length bs) l in
+    let hash3 = finish_s #a i hash2 in
+    hash3 `S.equal` spec_s a i () input)
 #pop-options
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let spec_is_incremental a no_key key_size i key input =
-  blake2_hash_incremental_s_is_hash_incremental a no_key key_size i key input;
+let spec_is_incremental a i input =
+  blake2_hash_incremental_s_is_hash_incremental a i input;
   (**) size_block_props a;
-  Spec.Hash.Incremental.blake2_is_hash_incremental (to_hash_alg a) (U32.v key_size) key input
+  Spec.Hash.Incremental.blake2_is_hash_incremental (to_hash_alg a) input
 #pop-options
 
 noextract
 val update_multi_eq :
   #a : alg ->
-  key_size : key_size_ty a ->
   nb : nat ->
   acc : t a ->
   prevlen : nat {prevlen % Spec.size_block a = 0 } ->
   blocks : S.seq uint8 ->
   Lemma
     (requires (
-      prevlen + S.length blocks <= max_input_length a key_size /\
-      blake2_prevlength a key_size prevlen + S.length blocks <= Hash.max_extra_state (to_hash_alg a) /\
+      prevlen + S.length blocks <= max_input_length a /\
+      prevlen + S.length blocks <= Hash.max_extra_state (to_hash_alg a) /\
       S.length blocks = Hash.block_length (to_hash_alg a) * nb))
     (ensures (
-      let prevlen' = blake2_prevlength a key_size prevlen in
-      update_multi_s key_size () acc prevlen blocks ==
+      update_multi_s () acc prevlen blocks ==
         Loops.repeati #(Hash.words_state' (to_hash_alg a)) nb
-                       (Spec.blake2_update1 a prevlen' blocks) acc))
+                       (Spec.blake2_update1 a prevlen blocks) acc))
 
-let update_multi_eq #a key_size nb acc prevlen blocks =
+let update_multi_eq #a nb acc prevlen blocks =
   let blocks', _ = Seq.split blocks (nb * Hash.block_length (to_hash_alg a)) in
   assert(blocks' `Seq.equal` blocks);
-  let prevlen' = blake2_prevlength a key_size prevlen in
-  let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen' in
+  let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen in
   Spec.Hash.Incremental.repeati_blake2_update1_is_update_multi (to_hash_alg a)
-                                                               nb prevlen'
+                                                               nb prevlen
                                                                blocks acc;
   Spec.Hash.Lemmas.extra_state_add_nat_bound_lem1 #(to_hash_alg a) es (S.length blocks);
   assert(
-    Hash.nat_to_extra_state (to_hash_alg a) (prevlen' + S.length blocks) ==
+    Hash.nat_to_extra_state (to_hash_alg a) (prevlen + S.length blocks) ==
     Hash.extra_state_add_nat #(to_hash_alg a) es (S.length blocks))
 
 noextract
 val update_last_eq :
   #a : alg ->
-  key_size : key_size_ty a ->
   prevlen : nat{prevlen % Hash.block_length (to_hash_alg a) = 0} ->
   last : S.seq uint8 {S.length last <= Hash.block_length (to_hash_alg a) /\
-                      prevlen + S.length last <= max_input_length a key_size} ->
+                      prevlen + S.length last <= max_input_length a} ->
   acc : t a ->
   Lemma
   (ensures (
-    let prevlen' = blake2_prevlength a key_size prevlen in
-    Spec.blake2_update_last a prevlen' (S.length last) last acc ==
-      update_last_s key_size () acc prevlen last))
+    Spec.blake2_update_last a prevlen (S.length last) last acc ==
+      update_last_s () acc prevlen last))
 
 /// TODO: make stable - this proof was checked with quake and sometimes (very rarely) loops
-let update_last_eq #a key_size prevlen last acc =
+let update_last_eq #a prevlen last acc =
   (* Checking how to unfold the ``update_last_s`` definition *)
-  let prevlen' = blake2_prevlength a key_size prevlen in
-  let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen' in
+  let es = Hash.nat_to_extra_state (to_hash_alg a) prevlen in
   let s = acc, es in
-  let s' = Spec.Hash.Incremental.update_last_blake (to_hash_alg a) s prevlen' last in
+  let s' = Spec.Hash.Incremental.update_last_blake (to_hash_alg a) s prevlen last in
   (* TODO: SH: if accf is defined before s', the proof loops at the definition of s' *)
-  let accf = update_last_s key_size () acc prevlen last in
+  let accf = update_last_s () acc prevlen last in
   assert(accf == fst s');
   (* Make sure the blocks decomposition is what we expect *)
   let blocks, last_block, rem = Spec.Hash.Incremental.last_split_blake (to_hash_alg a) last in
@@ -609,15 +559,13 @@ val mk_update_multi:
   a : alg ->
   m : valid_m_spec a ->
   update_multi : blake2_update_multi_st a m ->
-  no_key : bool ->
-  key_size : key_size_t a no_key ->
   (i:G.erased index -> (
   let i = G.reveal i in
   s:s a m ->
   prevlen:U64.t { U64.v prevlen % U32.v (block_len a) = 0 } ->
   blocks:B.buffer uint8 { B.length blocks % U32.v (block_len a) = 0 } ->
   len: U32.t { U32.v len = B.length blocks /\
-               U64.v prevlen + U32.v len <= max_input_length a (U32.v key_size) } ->
+               U64.v prevlen + U32.v len <= max_input_length a } ->
   ST.Stack unit
   (requires fun h0 ->
     let state = stateful_blake2 a m in
@@ -629,12 +577,12 @@ val mk_update_multi:
     B.(modifies (state.I.footprint #i h0 s) h0 h1) /\
     state.I.footprint #i h0 s == state.I.footprint #i h1 s /\
     state.I.invariant #i h1 s /\
-    state.I.v i h1 s == update_multi_s #a (U32.v key_size) i (state.I.v i h0 s) (U64.v prevlen)
-                                                  (B.as_seq h0 blocks) /\
+    state.I.v i h1 s == update_multi_s #a i (state.I.v i h0 s) (U64.v prevlen)
+                                          (B.as_seq h0 blocks) /\
     (state.I.freeable #i h0 s ==> state.I.freeable #i h1 s))))
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let mk_update_multi a m update_multi no_key key_size i acc prevlen blocks len =
+let mk_update_multi a m update_multi i acc prevlen blocks len =
   (**) size_block_props a;
   [@inline_let] let wv = get_wv acc in
   [@inline_let] let h = get_state_p acc in
@@ -642,7 +590,7 @@ let mk_update_multi a m update_multi no_key key_size i acc prevlen blocks len =
   let nb = U32.(len /^ block_len a) in
   (**) Math.Lemmas.div_exact_r (U32.v len) (U32.v (block_len a));
   (**) Math.Lemmas.multiply_fractions (U32.v len) (U32.v (block_len a));
-  [@inline_let] let prevlen' = blake2_prevlen a key_size prevlen in
+  [@inline_let] let prevlen' = blake2_prevlen a prevlen in
   (**) assert(Lib.Buffer.disjoint wv h);
   update_multi #len wv h prevlen' blocks nb;
   (**) let h3 = ST.get () in
@@ -653,9 +601,9 @@ let mk_update_multi a m update_multi no_key key_size i acc prevlen blocks len =
   (**)                  (s_v h0 acc));
   (**) state_types_equalities a;
   (**) assert(Spec.Blake2.state a == Hash.words_state' (to_hash_alg a));
-  (**) update_multi_eq (U32.v key_size) (U32.v nb) (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 blocks);
-  (**) assert(Lib.IntTypes.uint_v prevlen' = blake2_prevlength a (U32.v key_size) (U64.v prevlen));
-  (**) assert(s_v h3 acc == update_multi_s (U32.v key_size) () (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 blocks));
+  (**) update_multi_eq (U32.v nb) (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 blocks);
+  (**) assert(Lib.IntTypes.uint_v prevlen' = U64.v prevlen);
+  (**) assert(s_v h3 acc == update_multi_s () (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 blocks));
   (**) assert(B.(modifies ((stateful_blake2 a m).I.footprint #() h0 acc) h0 h3))
 #pop-options
 
@@ -664,8 +612,6 @@ val mk_update_last:
   a : alg ->
   m : valid_m_spec a ->
   update_last : blake2_update_last_st a m ->
-  no_key : bool ->
-  key_size : key_size_t a no_key ->
   (i: G.erased index -> (
   let i = G.reveal i in
   s:s a m ->
@@ -674,7 +620,7 @@ val mk_update_last:
   last_len:U32.t{
     last_len = B.len last /\
     U32.v last_len <= U32.v (block_len a) /\
-    U64.v prevlen + U32.v last_len <= max_input_length a (U32.v key_size)} ->
+    U64.v prevlen + U32.v last_len <= max_input_length a} ->
   ST.Stack unit
   (requires fun h0 ->
     let state = stateful_blake2 a m in
@@ -684,28 +630,29 @@ val mk_update_last:
   (ensures fun h0 _ h1 ->
     let state = stateful_blake2 a m in
     state.I.invariant #i h1 s /\
-    state.I.v i h1 s == update_last_s #a (U32.v key_size) i (state.I.v i h0 s)
+    state.I.v i h1 s == update_last_s #a i (state.I.v i h0 s)
                                       (U64.v prevlen) (B.as_seq h0 last) /\
     B.(modifies (state.I.footprint #i h0 s) h0 h1) /\
     state.I.footprint #i h0 s == state.I.footprint #i h1 s /\
     (state.I.freeable #i h0 s ==> state.I.freeable #i h1 s))))
 
 /// TODO: after analysis with quake, this proof sometimes loops
+#restart-solver
 #push-options "--ifuel 1 --z3cliopt smt.arith.nl=false"
-let mk_update_last a m update_last no_key key_size i acc prevlen last last_len =
+let mk_update_last a m update_last i acc prevlen last last_len =
   (**) size_block_props a;
   [@inline_let] let wv = get_wv acc in
   [@inline_let] let h = get_state_p acc in
   (**) let h0 = ST.get () in
   (**) assert_norm(U64.v prevlen + U32.v last_len <= Spec.Blake2.max_limb a);
   [@inline_let]
-  let prevlen' = blake2_prevlen a key_size prevlen in
+  let prevlen' = blake2_prevlen a prevlen in
   (**) assert((U64.v prevlen) % Hash.block_length (to_hash_alg a) = 0);
   (**) assert(B.length last <= Hash.block_length (to_hash_alg a));
-  (**) assert(U64.v prevlen + B.length last <= max_input_length a (U32.v key_size));
+  (**) assert(U64.v prevlen + B.length last <= max_input_length a);
   update_last #last_len wv h prevlen' last_len last;
   (* TODO: SH: if not put at the proper place, this call makes the proof loop or randomly fail *)
-  (**) update_last_eq (U32.v key_size) (U64.v prevlen) (B.as_seq h0 last) (s_v h0 acc);
+  (**) update_last_eq (U64.v prevlen) (B.as_seq h0 last) (s_v h0 acc);
   (**) let h2 = ST.get () in
   (**) assert(
   (**)   Core.state_v h2 h ==
@@ -713,7 +660,7 @@ let mk_update_last a m update_last no_key key_size i acc prevlen last last_len =
   (**)                               (B.as_seq h0 last)
   (**)                               (Core.state_v h0 h));
   (**) assert(s_v h2 acc ==
-  (**)   update_last_s (U32.v key_size) () (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 last))
+  (**)   update_last_s () (s_v h0 acc) (U64.v prevlen) (B.as_seq h0 last))
 #pop-options
 
 let blocks_state_len (a : alg) (m : valid_m_spec a) :
@@ -733,49 +680,45 @@ let blake2 (a : alg) (m : valid_m_spec a)
            (init : blake2_init_st a m)
            (update_multi : blake2_update_multi_st a m)
            (update_last : blake2_update_last_st a m)
-           (finish : blake2_finish_st a m)
-           (no_key : bool) (key_size : key_size_t a no_key) :
+           (finish : blake2_finish_st a m) :
   I.block unit =
   I.Block
     I.Erased (* key management *)
     
-    (stateful_blake2 a m) (* state *)
-    (k a no_key key_size) (* key *)
+    (stateful_blake2 a m)     (* state *)
+    (I.stateful_unused unit)  (* key *)
     
-    (fun () -> max_input_length a (Spec.max_key a)) (* max_input_length *)
+    (fun () -> max_input_length a ) (* max_input_length *)
     (fun () -> output_len a) (* output_len *)
     (fun () -> block_len a) (* block_len *)
     (fun () -> blocks_state_len a m) (* blocks_state_len *)
     
-    (fun () k -> init_s #a #(U32.v key_size) () k) (* init_s *)
-    (fun () acc prevlen input -> update_multi_s (U32.v key_size) () acc prevlen input) (* update_multi_s *)
-    (fun () acc prevlen input -> update_last_s (U32.v key_size) () acc prevlen input) (* update_last_s *)
-    (fun () k acc -> finish_s #a #(U32.v key_size) () k acc) (* finish_s *)
-    (fun () -> spec_s a #(U32.v key_size) ()) (* spec_s *)
+    (fun () _k -> init_s a ()) (* init_s *)
+    (fun () acc prevlen input -> update_multi_s () acc prevlen input) (* update_multi_s *)
+    (fun () acc prevlen input -> update_last_s () acc prevlen input) (* update_last_s *)
+    (fun () _k acc -> finish_s #a () acc) (* finish_s *)
+    (fun () -> spec_s a ()) (* spec_s *)
 
     (* update_multi_zero *)
-    (fun () prevlen acc -> update_multi_zero (U32.v key_size) () prevlen acc)
+    (fun () prevlen acc -> update_multi_zero () prevlen acc)
     (* update_multi_associative *)
     (fun () acc prevlen1 prevlen2 input1 input2 ->
-      update_multi_associative (U32.v key_size) () acc prevlen1 prevlen2 input1 input2)
-    (fun () k input -> spec_is_incremental a no_key key_size () k input) (* spec_is_incremental *)
+      update_multi_associative () acc prevlen1 prevlen2 input1 input2)
+    (fun () _k input -> spec_is_incremental a () input) (* spec_is_incremental *)
     (fun _ acc -> ()) (* index_of_state *)
 
     (* init *)
     (fun _ key acc ->
       [@inline_let] let wv = get_wv acc in
       [@inline_let] let h = get_state_p acc in
-      [@inline_let]
-      let key : b:B.buffer uint8{B.length b = U32.v key_size} =
-        if no_key then B.null #uint8 else key in
-      init wv h key_size key (output_len a))
+      init h (Lib.IntTypes.size 0) (output_len a))
 
     (* update_multi *)
-    (fun _ acc prevlen blocks len -> mk_update_multi a m update_multi no_key key_size () acc prevlen blocks len)
+    (fun _ acc prevlen blocks len -> mk_update_multi a m update_multi () acc prevlen blocks len)
 
     (* update_last *)
     (fun _ acc prevlen last last_len ->
-      mk_update_last a m update_last no_key key_size () acc prevlen last last_len)
+      mk_update_last a m update_last () acc prevlen last last_len)
 
     (* finish *)
     (fun _ k acc dst ->
@@ -787,156 +730,76 @@ let blake2 (a : alg) (m : valid_m_spec a)
 /// Introducing intermediate definitions for the instantiation
 
 inline_for_extraction noextract
-let blake2s_32 (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
+let blake2s_32 =
   blake2 Spec.Blake2S M32 Blake2s32.blake2s_init Blake2s32.blake2s_update_multi
-         Blake2s32.blake2s_update_last Blake2s32.blake2s_finish no_key key_size 
+         Blake2s32.blake2s_update_last Blake2s32.blake2s_finish
 
 inline_for_extraction noextract
-let blake2b_32 (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+let blake2b_32 =
   blake2 Spec.Blake2B M32 Blake2b32.blake2b_init Blake2b32.blake2b_update_multi
-         Blake2b32.blake2b_update_last Blake2b32.blake2b_finish no_key key_size
+         Blake2b32.blake2b_update_last Blake2b32.blake2b_finish
 
+/// We don't use a key for streaming blake2: it is thus the unit typeclass
 inline_for_extraction noextract
-let optional_key_blake2s (no_key : bool) (key_size : key_size_t Spec.Blake2S no_key) =
-  (I.optional_key () I.Erased (k Spec.Blake2S no_key key_size))
-
-inline_for_extraction noextract
-let optional_key_blake2b (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
-  (I.optional_key () I.Erased (k Spec.Blake2B no_key key_size))
+let unit_key = I.optional_key () I.Erased (I.stateful_unused unit)
 
 /// Type abbreviations - makes Kremlin use pretty names in the generated code
 
 let blake2s_32_block_state = s Spec.Blake2S M32
 let blake2b_32_block_state = s Spec.Blake2B M32
-// The key parameters have no importance for the extracted state definitions
-let blake2s_32_state = F.state_s (blake2s_32 true 0ul) () (s Spec.Blake2S M32) (optional_key_blake2s true 0ul)
-let blake2b_32_state = F.state_s (blake2b_32 true 0ul) () (s Spec.Blake2B M32) (optional_key_blake2b true 0ul)
+let blake2s_32_state = F.state_s blake2s_32 () (s Spec.Blake2S M32) unit_key
+let blake2b_32_state = F.state_s blake2b_32 () (s Spec.Blake2B M32) unit_key
 
 /// The incremental hash functions instantiations. Note that we can't write a
 /// generic one, because the normalization then performed by Kremlin explodes.
 
-/// First, the functions which don't use a key
+/// All those implementations are for non-keyed hash.
 
 inline_for_extraction noextract
-let blake2s_32_no_key_alloca =
-  F.alloca (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
-           (optional_key_blake2s true 0ul)
+let blake2s_32_alloca =
+  F.alloca blake2s_32 () (s Spec.Blake2S M32) unit_key
 
 [@ (Comment "  State allocation function when there is no key")]
 let blake2s_32_no_key_create_in =
-  F.create_in (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
-              (optional_key_blake2s true 0ul)
+  F.create_in blake2s_32 () (s Spec.Blake2S M32) unit_key
 
 [@ (Comment "  (Re-)initialization function when there is no key")]
 let blake2s_32_no_key_init =
-  F.init (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
-         (optional_key_blake2s true 0ul)
+  F.init blake2s_32 () (s Spec.Blake2S M32) unit_key
 
 [@ (Comment "  Update function when there is no key")]
 let blake2s_32_no_key_update =
-  F.update (blake2s_32 true 0ul) (G.hide ()) (s Spec.Blake2S M32)
-           (optional_key_blake2s true 0ul)
+  F.update blake2s_32 (G.hide ()) (s Spec.Blake2S M32) unit_key
 
 [@ (Comment "  Finish function when there is no key")]
 let blake2s_32_no_key_finish =
-  F.mk_finish (blake2s_32 true 0ul) () (s Spec.Blake2S M32)
-              (optional_key_blake2s true 0ul)
+  F.mk_finish blake2s_32 () (s Spec.Blake2S M32) unit_key
 
 [@ (Comment "  Free state function when there is no key")]
 let blake2s_32_no_key_free =
-  F.free (blake2s_32 true 0ul) (G.hide ()) (s Spec.Blake2S M32)
-         (optional_key_blake2s true 0ul)
+  F.free blake2s_32 (G.hide ()) (s Spec.Blake2S M32) unit_key
 
 inline_for_extraction noextract
 [@ (Comment "  State allocation function when there is no key")]
 let blake2b_32_no_key_alloca =
-  F.alloca (blake2b_32 true 0ul) () (s Spec.Blake2B M32)
-           (optional_key_blake2b true 0ul)
+  F.alloca blake2b_32 () (s Spec.Blake2B M32) unit_key
 
 [@ (Comment "  State allocation function when there is no key")]
 let blake2b_32_no_key_create_in =
-  F.create_in (blake2b_32 true 0ul) () (s Spec.Blake2B M32)
-              (optional_key_blake2b true 0ul)
+  F.create_in blake2b_32 () (s Spec.Blake2B M32) unit_key
 
 [@ (Comment "  (Re)-initialization function when there is no key")]
 let blake2b_32_no_key_init =
-  F.init (blake2b_32 true 0ul) () (s Spec.Blake2B M32)
-              (optional_key_blake2b true 0ul)
+  F.init blake2b_32 () (s Spec.Blake2B M32) unit_key
 
 [@ (Comment "  Update function when there is no key")]
 let blake2b_32_no_key_update =
-  F.update (blake2b_32 true 0ul) (G.hide ()) (s Spec.Blake2B M32)
-           (optional_key_blake2b true 0ul)
+  F.update blake2b_32 (G.hide ()) (s Spec.Blake2B M32) unit_key
 
 [@ (Comment "  Finish function when there is no key")]
 let blake2b_32_no_key_finish =
-  F.mk_finish (blake2b_32 true 0ul) () (s Spec.Blake2B M32)
-              (optional_key_blake2b true 0ul)
+  F.mk_finish blake2b_32 () (s Spec.Blake2B M32) unit_key
 
 [@ (Comment "  Free state function when there is no key")]
 let blake2b_32_no_key_free =
-  F.free (blake2b_32 true 0ul) (G.hide ()) (s Spec.Blake2B M32)
-         (optional_key_blake2b true 0ul)
-
-/// Second, the functions which may use a key
-
-inline_for_extraction noextract
-[@ (Comment "  State allocation function when using a (potentially null) key")]
-let blake2s_32_with_key_alloca (key_size : key_size_t Spec.Blake2S false) =
-  F.alloca (blake2s_32 false key_size) () (s Spec.Blake2S M32)
-           (optional_key_blake2s false key_size)
-
-[@ (Comment "  State allocation function when using a (potentially null) key")]
-let blake2s_32_with_key_create_in (key_size : key_size_t Spec.Blake2S false) =
-  F.create_in (blake2s_32 false key_size) () (s Spec.Blake2S M32)
-              (optional_key_blake2s false key_size)
-
-[@ (Comment "  (Re-)initialization function when using a (potentially null) key")]
-let blake2s_32_with_key_init (key_size : key_size_t Spec.Blake2S false) =
-  F.init (blake2s_32 false key_size) () (s Spec.Blake2S M32)
-              (optional_key_blake2s false key_size)
-
-[@ (Comment "  Update function when using a (potentially null) key")]
-let blake2s_32_with_key_update (key_size : key_size_t Spec.Blake2S false) =
-  F.update (blake2s_32 false key_size) (G.hide ()) (s Spec.Blake2S M32)
-           (optional_key_blake2s false key_size)
-
-[@ (Comment "  Finish function when using a (potentially null) key")]
-let blake2s_32_with_key_finish (key_size : key_size_t Spec.Blake2S false) =
-  F.mk_finish (blake2s_32 false key_size) () (s Spec.Blake2S M32)
-              (optional_key_blake2s false key_size)
-
-[@ (Comment "  Free state function when using a (potentially null) key")]
-let blake2s_32_with_key_free (key_size : key_size_t Spec.Blake2S false) =
-  F.free (blake2s_32 false key_size) (G.hide ()) (s Spec.Blake2S M32)
-         (optional_key_blake2s false key_size)
-
-inline_for_extraction noextract
-let blake2b_32_with_key_alloca (key_size : key_size_t Spec.Blake2B false) =
-  F.alloca (blake2b_32 false key_size) () (s Spec.Blake2B M32)
-              (optional_key_blake2b false key_size)
-
-[@ (Comment "  State allocation function when using a (potentially null) key")]
-let blake2b_32_with_key_create_in (key_size : key_size_t Spec.Blake2B false) =
-  F.create_in (blake2b_32 false key_size) () (s Spec.Blake2B M32)
-              (optional_key_blake2b false key_size)
-
-[@ (Comment "  (Re-)initialization function when using a (potentially null) key")]
-let blake2b_32_with_key_init (key_size : key_size_t Spec.Blake2B false) =
-  F.init (blake2b_32 false key_size) () (s Spec.Blake2B M32)
-              (optional_key_blake2b false key_size)
-
-[@ (Comment "  Update function when using a (potentially null) key")]
-let blake2b_32_with_key_update (key_size : key_size_t Spec.Blake2B false) =
-  F.update (blake2b_32 false key_size) (G.hide ()) (s Spec.Blake2B M32)
-           (optional_key_blake2b false key_size)
-
-[@ (Comment "  Finish function when using a (potentially null) key")]
-let blake2b_32_with_key_finish (key_size : key_size_t Spec.Blake2B false) =
-  F.mk_finish (blake2b_32 false key_size) () (s Spec.Blake2B M32)
-              (optional_key_blake2b false key_size)
-
-[@ (Comment "  Free state function when using a (potentially null) key")]
-let blake2b_32_with_key_free (key_size : key_size_t Spec.Blake2B false) =
-  F.free (blake2b_32 false key_size) (G.hide ()) (s Spec.Blake2B M32)
-         (optional_key_blake2b false key_size)
+  F.free blake2b_32 (G.hide ()) (s Spec.Blake2B M32) unit_key

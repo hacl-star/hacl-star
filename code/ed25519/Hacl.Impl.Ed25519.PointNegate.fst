@@ -23,7 +23,6 @@ val point_negate: p:F51.point -> out:F51.point ->
     F51.point_inv_t h1 out /\
     F51.point_eval h1 out == SC.((-x1) % prime, y1, z1, (-t1) % prime)))
 
-[@CInline]
 let point_negate p out =
   push_frame ();
   let zero = create 5ul (u64 0) in

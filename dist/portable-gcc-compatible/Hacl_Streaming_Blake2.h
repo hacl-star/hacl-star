@@ -38,10 +38,8 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Blake2s_32.h"
-#include "Hacl_Blake2b_32.h"
 #include "Hacl_Spec.h"
-#include "Hacl_Impl_Blake2.h"
+#include "Hacl_Hash_Blake2.h"
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blocks_state_len */
 
@@ -203,138 +201,6 @@ Hacl_Streaming_Blake2_blake2b_32_no_key_finish(
 void Hacl_Streaming_Blake2_blake2b_32_no_key_free(Hacl_Streaming_Blake2_blake2b_32_state *s1);
 
 /* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_no_key_free */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_with_key_create_in */
-
-/*
-  State allocation function when using a (potentially null) key
-*/
-Hacl_Streaming_Blake2_blake2s_32_state
-*Hacl_Streaming_Blake2_blake2s_32_with_key_create_in(uint32_t key_size, uint8_t *k1);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_with_key_create_in */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_with_key_init */
-
-/*
-  (Re-)initialization function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2_blake2s_32_with_key_init(
-  uint32_t key_size,
-  uint8_t *k1,
-  Hacl_Streaming_Blake2_blake2s_32_state *s1
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_with_key_init */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_with_key_update */
-
-/*
-  Update function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2_blake2s_32_with_key_update(
-  uint32_t key_size,
-  Hacl_Streaming_Blake2_blake2s_32_state *p,
-  uint8_t *data,
-  uint32_t len
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_with_key_update */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_with_key_finish */
-
-/*
-  Finish function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2_blake2s_32_with_key_finish(
-  uint32_t key_size,
-  Hacl_Streaming_Blake2_blake2s_32_state *p,
-  uint8_t *dst
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_with_key_finish */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_with_key_free */
-
-/*
-  Free state function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2_blake2s_32_with_key_free(
-  uint32_t key_size,
-  Hacl_Streaming_Blake2_blake2s_32_state *s1
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_with_key_free */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_with_key_create_in */
-
-/*
-  State allocation function when using a (potentially null) key
-*/
-Hacl_Streaming_Blake2_blake2b_32_state
-*Hacl_Streaming_Blake2_blake2b_32_with_key_create_in(uint32_t key_size, uint8_t *k1);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_with_key_create_in */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_with_key_init */
-
-/*
-  (Re-)initialization function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2_blake2b_32_with_key_init(
-  uint32_t key_size,
-  uint8_t *k1,
-  Hacl_Streaming_Blake2_blake2b_32_state *s1
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_with_key_init */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_with_key_update */
-
-/*
-  Update function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2_blake2b_32_with_key_update(
-  uint32_t key_size,
-  Hacl_Streaming_Blake2_blake2b_32_state *p,
-  uint8_t *data,
-  uint32_t len
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_with_key_update */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_with_key_finish */
-
-/*
-  Finish function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2_blake2b_32_with_key_finish(
-  uint32_t key_size,
-  Hacl_Streaming_Blake2_blake2b_32_state *p,
-  uint8_t *dst
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_with_key_finish */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_with_key_free */
-
-/*
-  Free state function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2_blake2b_32_with_key_free(
-  uint32_t key_size,
-  Hacl_Streaming_Blake2_blake2b_32_state *s1
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_with_key_free */
 
 #if defined(__cplusplus)
 }

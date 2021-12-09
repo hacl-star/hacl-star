@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "2ed3ec142879733ab421cec2fd7fe173"
+      "92d1a26a5101c916de24232f965d32dc"
     ],
     [
       "Vale.Transformers.PeepHole.peephole_correct",
@@ -34,7 +34,7 @@
         "typing_Vale.Transformers.PeepHole.__proj__Mkpre_peephole__item__ph"
       ],
       0,
-      "c4b287ec15faa505467a1947b69e213b"
+      "4a49d33ca471f52771034781d75dbdc8"
     ],
     [
       "Vale.Transformers.PeepHole.coerce_to_normal",
@@ -43,7 +43,7 @@
       0,
       [ "@query" ],
       0,
-      "3d4bc1c64fe113d4e7e3a77fa36986cf"
+      "05154a75a7b95d41935f971750dba377"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_update_to_valid_destination_keeps_it_as_valid_src",
@@ -196,7 +196,7 @@
         "typing_Vale.X64.Machine_Semantics_s.valid_src_operand64_and_taint"
       ],
       0,
-      "fcdd3f7102e6f1b7dbd1c71bf7f838b2"
+      "11a6d8ee911bcbb8960365538a0ad052"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_double_update_reg",
@@ -271,7 +271,39 @@
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "71bf9c5d40cb8305a69cb41f6e7f471a"
+      "881d7c3d1d7edc9147e20a379e6e4ca3"
+    ],
+    [
+      "Vale.Transformers.PeepHole.lemma_double_update_reg",
+      2,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
+        "equation_Vale.Def.Words_s.natN", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "525179099b611fb0573df081635e9024"
+    ],
+    [
+      "Vale.Transformers.PeepHole.lemma_double_update_reg",
+      3,
+      1,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.X64.Machine_s.reg_64",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c365eb902b454950de62fba701d9049d",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "9d29e9956c6591c8f683d569b38cafc2"
     ]
   ]
 ]

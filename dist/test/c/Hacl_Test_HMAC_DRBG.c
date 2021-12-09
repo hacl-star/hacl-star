@@ -4687,12 +4687,12 @@ typedef struct vec8_s
 }
 vec8;
 
-typedef struct __Hacl_Test_HMAC_DRBG_vec8_Hacl_Test_HMAC_DRBG_vec8_s
+typedef struct __Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8_s
 {
   vec8 fst;
   vec8 snd;
 }
-__Hacl_Test_HMAC_DRBG_vec8_Hacl_Test_HMAC_DRBG_vec8;
+__Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8;
 
 typedef struct vector_s
 {
@@ -4702,7 +4702,7 @@ typedef struct vector_s
   vec8 f3;
   vec8 f4;
   vec8 f5;
-  __Hacl_Test_HMAC_DRBG_vec8_Hacl_Test_HMAC_DRBG_vec8 f6;
+  __Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8 f6;
   vec8 f7;
 }
 vector;

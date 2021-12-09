@@ -3,16 +3,10 @@ LIBRARY libevercrypt
 EXPORTS
   Spec_Cipher_Expansion_cipher_alg_of_impl
   LowStar_Vector_new_capacity
-  Hacl_Blake2s_32_blake2s_init
-  Hacl_Blake2s_32_blake2s_update_multi
-  Hacl_Blake2s_32_blake2s_update_last
-  Hacl_Blake2s_32_blake2s_finish
-  Hacl_Blake2s_32_blake2s
-  Hacl_Blake2b_32_blake2b_init
-  Hacl_Blake2b_32_blake2b_update_multi
-  Hacl_Blake2b_32_blake2b_update_last
-  Hacl_Blake2b_32_blake2b_finish
-  Hacl_Blake2b_32_blake2b
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
   Hacl_Hash_Core_Blake2_update_blake2s_32
   Hacl_Hash_Core_Blake2_finish_blake2s_32
   Hacl_Hash_Core_Blake2_update_blake2b_32
@@ -23,20 +17,61 @@ EXPORTS
   Hacl_Hash_Blake2_update_last_blake2b_32
   Hacl_Hash_Blake2_hash_blake2s_32
   Hacl_Hash_Blake2_hash_blake2b_32
+  Hacl_Blake2b_32_blake2b_init
+  Hacl_Blake2b_32_blake2b_update_key
+  Hacl_Blake2b_32_blake2b_update_multi
+  Hacl_Blake2b_32_blake2b_update_last
+  Hacl_Blake2b_32_blake2b_finish
+  Hacl_Blake2b_32_blake2b
+  Hacl_Blake2s_32_blake2s_init
+  Hacl_Blake2s_32_blake2s_update_key
+  Hacl_Blake2s_32_blake2s_update_multi
+  Hacl_Blake2s_32_blake2s_update_last
+  Hacl_Blake2s_32_blake2s_finish
+  Hacl_Blake2s_32_blake2s
+  Hacl_Hash_Blake2b_256_finish_blake2b_256
+  Hacl_Hash_Blake2b_256_update_multi_blake2b_256
+  Hacl_Hash_Blake2b_256_update_last_blake2b_256
+  Hacl_Hash_Blake2b_256_hash_blake2b_256
+  Hacl_Blake2b_256_blake2b_init
+  Hacl_Blake2b_256_blake2b_update_key
+  Hacl_Blake2b_256_blake2b_update_multi
+  Hacl_Blake2b_256_blake2b_update_last
+  Hacl_Blake2b_256_blake2b_finish
+  Hacl_Blake2b_256_blake2b
+  Hacl_Hash_Blake2s_128_finish_blake2s_128
+  Hacl_Hash_Blake2s_128_update_multi_blake2s_128
+  Hacl_Hash_Blake2s_128_update_last_blake2s_128
+  Hacl_Hash_Blake2s_128_hash_blake2s_128
+  Hacl_Blake2s_128_blake2s_init
+  Hacl_Blake2s_128_blake2s_update_key
+  Hacl_Blake2s_128_blake2s_update_multi
+  Hacl_Blake2s_128_blake2s_update_last
+  Hacl_Blake2s_128_blake2s_finish
+  Hacl_Blake2s_128_blake2s
+  Hacl_Hash_Core_MD5_legacy_init
+  Hacl_Hash_Core_MD5_legacy_update
+  Hacl_Hash_Core_MD5_legacy_finish
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
-  Hacl_Hash_Core_MD5_legacy_init
-  Hacl_Hash_Core_MD5_legacy_update
-  Hacl_Hash_Core_MD5_legacy_pad
-  Hacl_Hash_Core_MD5_legacy_finish
+  Hacl_Hash_Core_SHA1_legacy_init
+  Hacl_Hash_Core_SHA1_legacy_update
+  Hacl_Hash_Core_SHA1_legacy_finish
   Hacl_Hash_SHA1_legacy_update_multi
   Hacl_Hash_SHA1_legacy_update_last
   Hacl_Hash_SHA1_legacy_hash
-  Hacl_Hash_Core_SHA1_legacy_init
-  Hacl_Hash_Core_SHA1_legacy_update
-  Hacl_Hash_Core_SHA1_legacy_pad
-  Hacl_Hash_Core_SHA1_legacy_finish
+  Hacl_Hash_Core_SHA2_init_224
+  Hacl_Hash_Core_SHA2_init_256
+  Hacl_Hash_Core_SHA2_init_384
+  Hacl_Hash_Core_SHA2_init_512
+  Hacl_Hash_Core_SHA2_update_384
+  Hacl_Hash_Core_SHA2_update_512
+  Hacl_Hash_Core_SHA2_pad_256
+  Hacl_Hash_Core_SHA2_finish_224
+  Hacl_Hash_Core_SHA2_finish_256
+  Hacl_Hash_Core_SHA2_finish_384
+  Hacl_Hash_Core_SHA2_finish_512
   Hacl_Hash_SHA2_update_multi_224
   Hacl_Hash_SHA2_update_multi_256
   Hacl_Hash_SHA2_update_multi_384
@@ -49,44 +84,6 @@ EXPORTS
   Hacl_Hash_SHA2_hash_256
   Hacl_Hash_SHA2_hash_384
   Hacl_Hash_SHA2_hash_512
-  Hacl_Hash_Core_SHA2_init_224
-  Hacl_Hash_Core_SHA2_init_256
-  Hacl_Hash_Core_SHA2_init_384
-  Hacl_Hash_Core_SHA2_init_512
-  Hacl_Hash_Core_SHA2_update_224
-  Hacl_Hash_Core_SHA2_update_256
-  Hacl_Hash_Core_SHA2_update_384
-  Hacl_Hash_Core_SHA2_update_512
-  Hacl_Hash_Core_SHA2_pad_224
-  Hacl_Hash_Core_SHA2_pad_256
-  Hacl_Hash_Core_SHA2_pad_384
-  Hacl_Hash_Core_SHA2_pad_512
-  Hacl_Hash_Core_SHA2_finish_224
-  Hacl_Hash_Core_SHA2_finish_256
-  Hacl_Hash_Core_SHA2_finish_384
-  Hacl_Hash_Core_SHA2_finish_512
-  Hacl_Hash_Definitions_word_len
-  Hacl_Hash_Definitions_block_len
-  Hacl_Hash_Definitions_hash_word_len
-  Hacl_Hash_Definitions_hash_len
-  Hacl_Hash_Blake2b_256_finish_blake2b_256
-  Hacl_Hash_Blake2b_256_update_multi_blake2b_256
-  Hacl_Hash_Blake2b_256_update_last_blake2b_256
-  Hacl_Hash_Blake2b_256_hash_blake2b_256
-  Hacl_Blake2b_256_blake2b_init
-  Hacl_Blake2b_256_blake2b_update_multi
-  Hacl_Blake2b_256_blake2b_update_last
-  Hacl_Blake2b_256_blake2b_finish
-  Hacl_Blake2b_256_blake2b
-  Hacl_Hash_Blake2s_128_finish_blake2s_128
-  Hacl_Hash_Blake2s_128_update_multi_blake2s_128
-  Hacl_Hash_Blake2s_128_update_last_blake2s_128
-  Hacl_Hash_Blake2s_128_hash_blake2s_128
-  Hacl_Blake2s_128_blake2s_init
-  Hacl_Blake2s_128_blake2s_update_multi
-  Hacl_Blake2s_128_blake2s_update_last
-  Hacl_Blake2s_128_blake2s_finish
-  Hacl_Blake2s_128_blake2s
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -194,25 +191,51 @@ EXPORTS
   Hacl_Salsa20_salsa20_decrypt
   Hacl_Salsa20_salsa20_key_block0
   Hacl_Salsa20_hsalsa20
+  Hacl_Bignum_Base_mul_wide_add_u64
+  Hacl_Bignum_Base_mul_wide_add2_u32
+  Hacl_Bignum_Base_mul_wide_add2_u64
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64
   Hacl_Bignum_Convert_bn_to_bytes_be_uint64
-  Hacl_Bignum_Base_mul_wide_add_u64
-  Hacl_Bignum_Base_mul_wide_add2_u64
+  Hacl_Bignum_Lib_bn_get_top_index_u32
   Hacl_Bignum_Lib_bn_get_top_index_u64
+  Hacl_Bignum_Addition_bn_sub_eq_len_u32
   Hacl_Bignum_Addition_bn_sub_eq_len_u64
+  Hacl_Bignum_Addition_bn_add_eq_len_u32
   Hacl_Bignum_Addition_bn_add_eq_len_u64
-  Hacl_Bignum_Multiplication_bn_mul_u64
-  Hacl_Bignum_Multiplication_bn_sqr_u64
+  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint32
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64
+  Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64
+  Hacl_Bignum_bn_add_mod_n_u32
   Hacl_Bignum_bn_add_mod_n_u64
+  Hacl_Bignum_bn_sub_mod_n_u32
+  Hacl_Bignum_bn_sub_mod_n_u64
+  Hacl_Bignum_ModInvLimb_mod_inv_uint32
   Hacl_Bignum_ModInvLimb_mod_inv_uint64
+  Hacl_Bignum_Montgomery_bn_check_modulus_u32
+  Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32
+  Hacl_Bignum_Montgomery_bn_mont_reduction_u32
+  Hacl_Bignum_Montgomery_bn_to_mont_u32
+  Hacl_Bignum_Montgomery_bn_from_mont_u32
+  Hacl_Bignum_Montgomery_bn_mont_mul_u32
+  Hacl_Bignum_Montgomery_bn_mont_sqr_u32
+  Hacl_Bignum_Montgomery_bn_check_modulus_u64
   Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64
   Hacl_Bignum_Montgomery_bn_mont_reduction_u64
+  Hacl_Bignum_Montgomery_bn_to_mont_u64
+  Hacl_Bignum_Montgomery_bn_from_mont_u64
   Hacl_Bignum_Montgomery_bn_mont_mul_u64
   Hacl_Bignum_Montgomery_bn_mont_sqr_u64
-  Hacl_Bignum_Exponentiation_bn_mod_exp_raw_precompr2_u64
-  Hacl_Bignum_Exponentiation_bn_mod_exp_fw_ct_precompr2_u64
+  Hacl_Bignum_Exponentiation_bn_check_mod_exp_u32
+  Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32
+  Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32
+  Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_u32
+  Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u32
+  Hacl_Bignum_Exponentiation_bn_check_mod_exp_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_u64
+  Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u64
   Hacl_Curve25519_64_Slow_scalarmult
   Hacl_Curve25519_64_Slow_secret_to_public
   Hacl_Curve25519_64_Slow_ecdh
@@ -233,6 +256,28 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
+  Hacl_Streaming_SHA2_create_in_224
+  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Streaming_SHA2_init_224
+  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t____
+  Hacl_Streaming_SHA2_update_224
+  Hacl_Streaming_SHA2_finish_224
+  Hacl_Streaming_SHA2_free_224
+  Hacl_Streaming_SHA2_create_in_256
+  Hacl_Streaming_SHA2_init_256
+  Hacl_Streaming_SHA2_update_256
+  Hacl_Streaming_SHA2_finish_256
+  Hacl_Streaming_SHA2_free_256
+  Hacl_Streaming_SHA2_create_in_384
+  Hacl_Streaming_SHA2_init_384
+  Hacl_Streaming_SHA2_update_384
+  Hacl_Streaming_SHA2_finish_384
+  Hacl_Streaming_SHA2_free_384
+  Hacl_Streaming_SHA2_create_in_512
+  Hacl_Streaming_SHA2_init_512
+  Hacl_Streaming_SHA2_update_512
+  Hacl_Streaming_SHA2_finish_512
+  Hacl_Streaming_SHA2_free_512
   Hacl_Bignum25519_reduce_513
   Hacl_Bignum25519_inverse
   Hacl_Bignum25519_load_51
@@ -420,18 +465,12 @@ EXPORTS
   Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u32
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
-  Hacl_Impl_RSAPSS_MGF_hash_len
-  Hacl_Impl_RSAPSS_Keys_check_modulus_u64
-  Hacl_Impl_RSAPSS_Keys_check_exponent_u64
-  Hacl_Impl_RSAPSS_Padding_pss_encode
-  Hacl_Impl_RSAPSS_Padding_pss_verify
   Hacl_RSAPSS_rsapss_sign
   Hacl_RSAPSS_rsapss_verify
   Hacl_RSAPSS_new_rsapss_load_pkey
   Hacl_RSAPSS_new_rsapss_load_skey
   Hacl_RSAPSS_rsapss_skey_sign
   Hacl_RSAPSS_rsapss_pkey_verify
-  Hacl_Impl_FFDHE_ffdhe_len
   Hacl_FFDHE_ffdhe_len
   Hacl_FFDHE_new_ffdhe_precomp_p
   Hacl_FFDHE_ffdhe_secret_to_public_precomp
@@ -449,48 +488,11 @@ EXPORTS
   Hacl_Streaming_Blake2_blake2b_32_no_key_update
   Hacl_Streaming_Blake2_blake2b_32_no_key_finish
   Hacl_Streaming_Blake2_blake2b_32_no_key_free
-  Hacl_Streaming_Blake2_blake2s_32_with_key_create_in
-  Hacl_Streaming_Blake2_blake2s_32_with_key_init
-  Hacl_Streaming_Blake2_blake2s_32_with_key_update
-  Hacl_Streaming_Blake2_blake2s_32_with_key_finish
-  Hacl_Streaming_Blake2_blake2s_32_with_key_free
-  Hacl_Streaming_Blake2_blake2b_32_with_key_create_in
-  Hacl_Streaming_Blake2_blake2b_32_with_key_init
-  Hacl_Streaming_Blake2_blake2b_32_with_key_update
-  Hacl_Streaming_Blake2_blake2b_32_with_key_finish
-  Hacl_Streaming_Blake2_blake2b_32_with_key_free
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_init
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_update
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_finish
   Hacl_Streaming_Blake2b_256_blake2b_256_no_key_free
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_create_in
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_init
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_update
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_finish
-  Hacl_Streaming_Blake2b_256_blake2b_256_with_key_free
-  Hacl_Streaming_SHA2_create_in_224
-  LowStar_BufferOps_op_Bang_Star__Hacl_Streaming_Functor_state_s__uint32_t_____LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t___________LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t__________
-  Hacl_Streaming_SHA2_init_224
-  LowStar_BufferOps_op_Star_Equals__Hacl_Streaming_Functor_state_s__uint32_t_____LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t___________LowStar_Buffer_trivial_preorder_Hacl_Streaming_Functor_state_s__uint32_t__________
-  Hacl_Streaming_SHA2_update_224
-  Hacl_Streaming_SHA2_finish_224
-  Hacl_Streaming_SHA2_free_224
-  Hacl_Streaming_SHA2_create_in_256
-  Hacl_Streaming_SHA2_init_256
-  Hacl_Streaming_SHA2_update_256
-  Hacl_Streaming_SHA2_finish_256
-  Hacl_Streaming_SHA2_free_256
-  Hacl_Streaming_SHA2_create_in_384
-  Hacl_Streaming_SHA2_init_384
-  Hacl_Streaming_SHA2_update_384
-  Hacl_Streaming_SHA2_finish_384
-  Hacl_Streaming_SHA2_free_384
-  Hacl_Streaming_SHA2_create_in_512
-  Hacl_Streaming_SHA2_init_512
-  Hacl_Streaming_SHA2_update_512
-  Hacl_Streaming_SHA2_finish_512
-  Hacl_Streaming_SHA2_free_512
   Hacl_Frodo640_crypto_kem_keypair
   Hacl_Frodo640_crypto_kem_enc
   Hacl_Frodo640_crypto_kem_dec
@@ -499,11 +501,6 @@ EXPORTS
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_update
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_finish
   Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_create_in
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_update
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_finish
-  Hacl_Streaming_Blake2s_128_blake2s_128_with_key_free
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt
@@ -526,34 +523,66 @@ EXPORTS
   Hacl_HPKE_Curve51_CP128_SHA512_setupBaseR
   Hacl_HPKE_Curve51_CP128_SHA512_sealBase
   Hacl_HPKE_Curve51_CP128_SHA512_openBase
+  Hacl_GenericField32_field_modulus_check
+  Hacl_GenericField32_field_init
+  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint32_t__uint32_t
+  Hacl_GenericField32_field_free
+  Hacl_GenericField32_field_get_len
+  Hacl_GenericField32_to_field
+  Hacl_GenericField32_from_field
+  Hacl_GenericField32_add
+  Hacl_GenericField32_sub
+  Hacl_GenericField32_mul
+  Hacl_GenericField32_sqr
+  Hacl_GenericField32_one
+  Hacl_GenericField32_exp_consttime
+  Hacl_GenericField32_exp_vartime
+  Hacl_GenericField32_inverse
   Hacl_Bignum256_add
   Hacl_Bignum256_sub
+  Hacl_Bignum256_add_mod
+  Hacl_Bignum256_sub_mod
   Hacl_Bignum256_mul
-  Hacl_Bignum256_mod_precompr2
+  Hacl_Bignum256_sqr
   Hacl_Bignum256_mod
-  Hacl_Bignum256_mod_exp_raw_precompr2
-  Hacl_Bignum256_mod_exp_ct_precompr2
-  Hacl_Bignum256_mod_exp_raw
-  Hacl_Bignum256_mod_exp_ct
-  Hacl_Bignum256_new_precompr2
-  Hacl_Bignum256_mod_inv_prime_raw
+  Hacl_Bignum256_mod_exp_vartime
+  Hacl_Bignum256_mod_exp_consttime
+  Hacl_Bignum256_mod_inv_prime_vartime
+  Hacl_Bignum256_mont_ctx_init
+  LowStar_BufferOps_op_Bang_Star__Hacl_Bignum_MontArithmetic_bn_mont_ctx___uint64_t__uint64_t
+  Hacl_Bignum256_mont_ctx_free
+  Hacl_Bignum256_mod_precomp
+  Hacl_Bignum256_mod_exp_vartime_precomp
+  Hacl_Bignum256_mod_exp_consttime_precomp
+  Hacl_Bignum256_mod_inv_prime_vartime_precomp
   Hacl_Bignum256_new_bn_from_bytes_be
+  Hacl_Bignum256_new_bn_from_bytes_le
   Hacl_Bignum256_bn_to_bytes_be
+  Hacl_Bignum256_bn_to_bytes_le
   Hacl_Bignum256_lt_mask
+  Hacl_Bignum256_eq_mask
   Hacl_Bignum4096_add
   Hacl_Bignum4096_sub
+  Hacl_Bignum4096_add_mod
+  Hacl_Bignum4096_sub_mod
   Hacl_Bignum4096_mul
-  Hacl_Bignum4096_mod_precompr2
+  Hacl_Bignum4096_sqr
   Hacl_Bignum4096_mod
-  Hacl_Bignum4096_mod_exp_raw_precompr2
-  Hacl_Bignum4096_mod_exp_ct_precompr2
-  Hacl_Bignum4096_mod_exp_raw
-  Hacl_Bignum4096_mod_exp_ct
-  Hacl_Bignum4096_new_precompr2
-  Hacl_Bignum4096_mod_inv_prime_raw
+  Hacl_Bignum4096_mod_exp_vartime
+  Hacl_Bignum4096_mod_exp_consttime
+  Hacl_Bignum4096_mod_inv_prime_vartime
+  Hacl_Bignum4096_mont_ctx_init
+  Hacl_Bignum4096_mont_ctx_free
+  Hacl_Bignum4096_mod_precomp
+  Hacl_Bignum4096_mod_exp_vartime_precomp
+  Hacl_Bignum4096_mod_exp_consttime_precomp
+  Hacl_Bignum4096_mod_inv_prime_vartime_precomp
   Hacl_Bignum4096_new_bn_from_bytes_be
+  Hacl_Bignum4096_new_bn_from_bytes_le
   Hacl_Bignum4096_bn_to_bytes_be
+  Hacl_Bignum4096_bn_to_bytes_le
   Hacl_Bignum4096_lt_mask
+  Hacl_Bignum4096_eq_mask
   Hacl_Chacha20_Vec32_chacha20_encrypt_32
   Hacl_Chacha20_Vec32_chacha20_decrypt_32
   EverCrypt_Ed25519_sign
@@ -561,15 +590,32 @@ EXPORTS
   EverCrypt_Ed25519_secret_to_public
   EverCrypt_Ed25519_expand_keys
   EverCrypt_Ed25519_sign_expanded
+  Hacl_Bignum4096_32_add
+  Hacl_Bignum4096_32_sub
+  Hacl_Bignum4096_32_add_mod
+  Hacl_Bignum4096_32_sub_mod
+  Hacl_Bignum4096_32_mul
+  Hacl_Bignum4096_32_sqr
+  Hacl_Bignum4096_32_mod
+  Hacl_Bignum4096_32_mod_exp_vartime
+  Hacl_Bignum4096_32_mod_exp_consttime
+  Hacl_Bignum4096_32_mod_inv_prime_vartime
+  Hacl_Bignum4096_32_mont_ctx_init
+  Hacl_Bignum4096_32_mont_ctx_free
+  Hacl_Bignum4096_32_mod_precomp
+  Hacl_Bignum4096_32_mod_exp_vartime_precomp
+  Hacl_Bignum4096_32_mod_exp_consttime_precomp
+  Hacl_Bignum4096_32_mod_inv_prime_vartime_precomp
+  Hacl_Bignum4096_32_new_bn_from_bytes_be
+  Hacl_Bignum4096_32_new_bn_from_bytes_le
+  Hacl_Bignum4096_32_bn_to_bytes_be
+  Hacl_Bignum4096_32_bn_to_bytes_le
+  Hacl_Bignum4096_32_lt_mask
+  Hacl_Bignum4096_32_eq_mask
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseI
   Hacl_HPKE_Curve64_CP128_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP128_SHA512_sealBase
   Hacl_HPKE_Curve64_CP128_SHA512_openBase
-  Hacl_FFDHE4096_new_ffdhe_precomp_p
-  Hacl_FFDHE4096_ffdhe_secret_to_public_precomp
-  Hacl_FFDHE4096_ffdhe_secret_to_public
-  Hacl_FFDHE4096_ffdhe_shared_secret_precomp
-  Hacl_FFDHE4096_ffdhe_shared_secret
   Hacl_HPKE_P256_CP128_SHA256_setupBaseI
   Hacl_HPKE_P256_CP128_SHA256_setupBaseR
   Hacl_HPKE_P256_CP128_SHA256_sealBase
@@ -588,6 +634,20 @@ EXPORTS
   Hacl_HMAC_Blake2s_128_compute_blake2s_128
   Hacl_HKDF_Blake2s_128_expand_blake2s_128
   Hacl_HKDF_Blake2s_128_extract_blake2s_128
+  Hacl_GenericField64_field_modulus_check
+  Hacl_GenericField64_field_init
+  Hacl_GenericField64_field_free
+  Hacl_GenericField64_field_get_len
+  Hacl_GenericField64_to_field
+  Hacl_GenericField64_from_field
+  Hacl_GenericField64_add
+  Hacl_GenericField64_sub
+  Hacl_GenericField64_mul
+  Hacl_GenericField64_sqr
+  Hacl_GenericField64_one
+  Hacl_GenericField64_exp_consttime
+  Hacl_GenericField64_exp_vartime
+  Hacl_GenericField64_inverse
   Hacl_Streaming_Poly1305_256_create_in
   Hacl_Streaming_Poly1305_256_init
   Hacl_Streaming_Poly1305_256_update
@@ -605,6 +665,28 @@ EXPORTS
   Hacl_Streaming_Poly1305_128_update
   Hacl_Streaming_Poly1305_128_finish
   Hacl_Streaming_Poly1305_128_free
+  Hacl_Bignum32_add
+  Hacl_Bignum32_sub
+  Hacl_Bignum32_add_mod
+  Hacl_Bignum32_sub_mod
+  Hacl_Bignum32_mul
+  Hacl_Bignum32_sqr
+  Hacl_Bignum32_mod
+  Hacl_Bignum32_mod_exp_vartime
+  Hacl_Bignum32_mod_exp_consttime
+  Hacl_Bignum32_mod_inv_prime_vartime
+  Hacl_Bignum32_mont_ctx_init
+  Hacl_Bignum32_mont_ctx_free
+  Hacl_Bignum32_mod_precomp
+  Hacl_Bignum32_mod_exp_vartime_precomp
+  Hacl_Bignum32_mod_exp_consttime_precomp
+  Hacl_Bignum32_mod_inv_prime_vartime_precomp
+  Hacl_Bignum32_new_bn_from_bytes_be
+  Hacl_Bignum32_new_bn_from_bytes_le
+  Hacl_Bignum32_bn_to_bytes_be
+  Hacl_Bignum32_bn_to_bytes_le
+  Hacl_Bignum32_lt_mask
+  Hacl_Bignum32_eq_mask
   Hacl_HPKE_Curve51_CP128_SHA256_setupBaseI
   Hacl_HPKE_Curve51_CP128_SHA256_setupBaseR
   Hacl_HPKE_Curve51_CP128_SHA256_sealBase
@@ -613,6 +695,28 @@ EXPORTS
   Hacl_HPKE_Curve64_CP128_SHA256_setupBaseR
   Hacl_HPKE_Curve64_CP128_SHA256_sealBase
   Hacl_HPKE_Curve64_CP128_SHA256_openBase
+  Hacl_Bignum256_32_add
+  Hacl_Bignum256_32_sub
+  Hacl_Bignum256_32_add_mod
+  Hacl_Bignum256_32_sub_mod
+  Hacl_Bignum256_32_mul
+  Hacl_Bignum256_32_sqr
+  Hacl_Bignum256_32_mod
+  Hacl_Bignum256_32_mod_exp_vartime
+  Hacl_Bignum256_32_mod_exp_consttime
+  Hacl_Bignum256_32_mod_inv_prime_vartime
+  Hacl_Bignum256_32_mont_ctx_init
+  Hacl_Bignum256_32_mont_ctx_free
+  Hacl_Bignum256_32_mod_precomp
+  Hacl_Bignum256_32_mod_exp_vartime_precomp
+  Hacl_Bignum256_32_mod_exp_consttime_precomp
+  Hacl_Bignum256_32_mod_inv_prime_vartime_precomp
+  Hacl_Bignum256_32_new_bn_from_bytes_be
+  Hacl_Bignum256_32_new_bn_from_bytes_le
+  Hacl_Bignum256_32_bn_to_bytes_be
+  Hacl_Bignum256_32_bn_to_bytes_le
+  Hacl_Bignum256_32_lt_mask
+  Hacl_Bignum256_32_eq_mask
   Hacl_Chacha20Poly1305_32_aead_encrypt
   Hacl_Chacha20Poly1305_32_aead_decrypt
   Hacl_HPKE_Curve51_CP32_SHA256_setupBaseI
@@ -640,6 +744,28 @@ EXPORTS
   Hacl_HPKE_P256_CP32_SHA256_setupBaseR
   Hacl_HPKE_P256_CP32_SHA256_sealBase
   Hacl_HPKE_P256_CP32_SHA256_openBase
+  Hacl_Bignum64_add
+  Hacl_Bignum64_sub
+  Hacl_Bignum64_add_mod
+  Hacl_Bignum64_sub_mod
+  Hacl_Bignum64_mul
+  Hacl_Bignum64_sqr
+  Hacl_Bignum64_mod
+  Hacl_Bignum64_mod_exp_vartime
+  Hacl_Bignum64_mod_exp_consttime
+  Hacl_Bignum64_mod_inv_prime_vartime
+  Hacl_Bignum64_mont_ctx_init
+  Hacl_Bignum64_mont_ctx_free
+  Hacl_Bignum64_mod_precomp
+  Hacl_Bignum64_mod_exp_vartime_precomp
+  Hacl_Bignum64_mod_exp_consttime_precomp
+  Hacl_Bignum64_mod_inv_prime_vartime_precomp
+  Hacl_Bignum64_new_bn_from_bytes_be
+  Hacl_Bignum64_new_bn_from_bytes_le
+  Hacl_Bignum64_bn_to_bytes_be
+  Hacl_Bignum64_bn_to_bytes_le
+  Hacl_Bignum64_lt_mask
+  Hacl_Bignum64_eq_mask
   Hacl_Frodo64_crypto_kem_keypair
   Hacl_Frodo64_crypto_kem_enc
   Hacl_Frodo64_crypto_kem_dec
@@ -664,12 +790,6 @@ EXPORTS
   Hacl_HPKE_Curve64_CP32_SHA512_setupBaseR
   Hacl_HPKE_Curve64_CP32_SHA512_sealBase
   Hacl_HPKE_Curve64_CP32_SHA512_openBase
-  Hacl_RSAPSS2048_SHA256_rsapss_sign
-  Hacl_RSAPSS2048_SHA256_rsapss_verify
-  Hacl_RSAPSS2048_SHA256_new_rsapss_load_pkey
-  Hacl_RSAPSS2048_SHA256_new_rsapss_load_skey
-  Hacl_RSAPSS2048_SHA256_rsapss_skey_sign
-  Hacl_RSAPSS2048_SHA256_rsapss_pkey_verify
   Hacl_EC_Ed25519_mk_felem_zero
   Hacl_EC_Ed25519_mk_felem_one
   Hacl_EC_Ed25519_felem_add
@@ -698,11 +818,15 @@ EXPORTS
   EverCrypt_AEAD_alg_of_state
   EverCrypt_AEAD_create_in
   EverCrypt_AEAD_encrypt
+  EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check
+  EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check
   EverCrypt_AEAD_encrypt_expand_aes128_gcm
   EverCrypt_AEAD_encrypt_expand_aes256_gcm
   EverCrypt_AEAD_encrypt_expand_chacha20_poly1305
   EverCrypt_AEAD_encrypt_expand
   EverCrypt_AEAD_decrypt
+  EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check
+  EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check
   EverCrypt_AEAD_decrypt_expand_aes128_gcm
   EverCrypt_AEAD_decrypt_expand_aes256_gcm
   EverCrypt_AEAD_decrypt_expand_chacha20_poly1305

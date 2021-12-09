@@ -178,8 +178,10 @@ function refresh_doc() {
 function refresh_hacl_hints_dist() {
     # We should not generate hints when building on Windows
     if [[ "$OS" != "Windows_NT" ]]; then
-        if [[ $branchname == "master" ]] ; then
+        if [[ ${branchname##refs/heads/} == "master" ]] ; then
           refresh_doc
+        else
+          echo "Branch is $branchname, not regenerating doc"
         fi
         refresh_hints_dist "git@github.com:mitls/hacl-star.git" "true" "regenerate hints and dist" "hints"
     fi
@@ -224,7 +226,16 @@ function refresh_hints_dist() {
 
     clean_build_dist || return 1
 
-    git commit --allow-empty -m "[CI] $msg"
+    # If no changes were staged, then exit.
+    # From: https://stackoverflow.com/a/2659808
+    if git diff-index --quiet --cached HEAD -- ; then
+        return 0
+    fi
+
+    # Commit. This will fail if the commit is empty,
+    # but that scenario should be ruled out by the test above
+    git commit -m "[CI] $msg"
+
     # Memorize that commit
     commit=$(git rev-parse HEAD)
     # Drop any other files that were modified as part of the build (e.g.

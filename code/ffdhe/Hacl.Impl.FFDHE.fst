@@ -77,7 +77,10 @@ inline_for_extraction noextract
 let ffdhe_bn_from_g_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) =
   g_n:lbignum t (blocks len (size (numbytes t))) ->
   Stack unit
-  (requires fun h -> live h g_n /\ v len = S.ffdhe_len a /\
+  (requires fun h ->
+    live h g_n /\
+
+    v len = S.ffdhe_len a /\
     as_seq h g_n == LSeq.create (v (blocks len (size (numbytes t)))) (uint #t 0))
   (ensures  fun h0 _ h1 -> modifies (loc g_n) h0 h1 /\
     bn_v h1 g_n == BSeq.nat_from_bytes_be (S.Mk_ffdhe_params?.ffdhe_g (S.get_ffdhe_params a)))
@@ -108,17 +111,26 @@ let ffdhe_bn_from_g #t a len g_n =
 
 
 inline_for_extraction noextract
+let ffdhe_precomp_inv (#t:limb_t) (#len:size_nat{0 < len /\ len + len <= max_size_t})
+  (a:S.ffdhe_alg) (p_r2_n:SD.lbignum t (len + len))
+ =
+  let p_n = LSeq.sub p_r2_n 0 len in
+  let r2_n = LSeq.sub p_r2_n len len in
+  SD.bn_v p_n == BSeq.nat_from_bytes_be (S.Mk_ffdhe_params?.ffdhe_p (S.get_ffdhe_params a)) /\
+  0 < SD.bn_v p_n /\ SD.bn_v r2_n == pow2 (2 * bits t * len) % SD.bn_v p_n
+
+
+inline_for_extraction noextract
 let ffdhe_precomp_p_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) (ke:BE.exp t) =
   let nLen = blocks len (size (numbytes t)) in
   p_r2_n:lbignum t (nLen +! nLen) ->
   Stack unit
-  (requires fun h -> v len = S.ffdhe_len a /\
-    ke.BE.mont.BM.bn.BN.len == nLen /\ live h p_r2_n)
+  (requires fun h ->
+    live h p_r2_n /\
+
+    v len = S.ffdhe_len a /\ ke.BE.bn.BN.len == nLen)
   (ensures  fun h0 _ h1 -> modifies (loc p_r2_n) h0 h1 /\
-   (let p_n = gsub p_r2_n 0ul nLen in
-    let r2_n = gsub p_r2_n nLen nLen in
-    bn_v h1 p_n == BSeq.nat_from_bytes_be (S.Mk_ffdhe_params?.ffdhe_p (S.get_ffdhe_params a)) /\
-    0 < bn_v h1 p_n /\ bn_v h1 r2_n == pow2 (2 * bits t * v nLen) % bn_v h1 p_n))
+    ffdhe_precomp_inv #t #(v nLen) a (as_seq h1 p_r2_n))
 
 
 inline_for_extraction noextract
@@ -144,7 +156,7 @@ let ffdhe_precomp_p #t a len ke p_r2_n =
   assert (bn_v h1 p_n == BSeq.nat_from_bytes_be (as_seq h0 p_s));
   S.ffdhe_p_lemma a;
   Lemmas.ffdhe_p_bits_lemma a;
-  ke.BE.mont.BM.precomp (8ul *! len -! 1ul) p_n r2_n;
+  ke.BE.precompr2 (8ul *! len -! 1ul) p_n r2_n;
   SM.bn_precomp_r2_mod_n_lemma (8 * v len - 1) (as_seq h1 p_n);
   pop_frame ()
 
@@ -154,19 +166,17 @@ let new_ffdhe_precomp_p_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) (ke:BE.exp 
   let nLen = blocks len (size (numbytes t)) in
   r:HS.rid ->
   ST (B.buffer (limb t))
-  (requires fun h -> v len = S.ffdhe_len a /\
-    ke.BE.mont.BM.bn.BN.len == nLen /\
-    ST.is_eternal_region r)
+  (requires fun h ->
+    ST.is_eternal_region r /\
+
+    v len = S.ffdhe_len a /\ ke.BE.bn.BN.len == nLen)
   (ensures  fun h0 res h1 ->
     B.(modifies loc_none h0 h1) /\
     not (B.g_is_null res) ==> (
       B.len res == nLen +! nLen /\
       B.(fresh_loc (loc_buffer res) h0 h1) /\
       B.(loc_includes (loc_region_only false r) (loc_buffer res)) /\
-     (let p_n = gsub (res <: lbignum t (nLen +! nLen)) 0ul nLen in
-      let r2_n = gsub (res <: lbignum t (nLen +! nLen)) nLen nLen in
-      bn_v h1 p_n == BSeq.nat_from_bytes_be (S.Mk_ffdhe_params?.ffdhe_p (S.get_ffdhe_params a)) /\
-      0 < bn_v h1 p_n /\ bn_v h1 r2_n == pow2 (2 * bits t * v nLen) % bn_v h1 p_n)))
+      ffdhe_precomp_inv #t #(v nLen) a (as_seq h1 (res <: lbignum t (nLen +! nLen)))))
 
 
 inline_for_extraction noextract
@@ -206,15 +216,15 @@ let ffdhe_compute_exp_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) (ke:BE.exp t)
   -> b_n:lbignum t nLen
   -> res:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> v len == S.ffdhe_len a /\
-    ke.BE.mont.BM.bn.BN.len == nLen /\
+  (requires fun h ->
     live h p_r2_n /\ live h sk_n /\ live h b_n /\ live h res /\
-    disjoint p_r2_n res /\ disjoint sk_n res /\ disjoint b_n res /\ disjoint p_r2_n b_n /\
-    disjoint p_r2_n sk_n /\
-   (let p_n = gsub p_r2_n 0ul nLen in let r2_n = gsub p_r2_n nLen nLen in
-    bn_v h p_n == BSeq.nat_from_bytes_be (S.Mk_ffdhe_params?.ffdhe_p (S.get_ffdhe_params a)) /\
-    0 < bn_v h p_n /\ bn_v h r2_n == pow2 (2 * bits t * v nLen) % bn_v h p_n /\
-    bn_v h b_n < bn_v h p_n - 1 /\ 1 < bn_v h sk_n))
+    disjoint p_r2_n res /\ disjoint sk_n res /\ disjoint b_n res /\
+    disjoint p_r2_n b_n /\ disjoint p_r2_n sk_n /\
+
+    v len == S.ffdhe_len a /\ ke.BE.bn.BN.len == nLen /\
+    ffdhe_precomp_inv #t #(v nLen) a (as_seq h p_r2_n) /\
+    bn_v h b_n < bn_v h (gsub p_r2_n 0ul nLen) - 1 /\
+    1 < bn_v h sk_n)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
    (S.ffdhe_p_lemma a;
     let res_n = Lib.NatMod.pow_mod #(bn_v h0 (gsub p_r2_n 0ul nLen)) (bn_v h0 b_n) (bn_v h0 sk_n) in
@@ -246,7 +256,7 @@ let ffdhe_compute_exp #t a len ke p_r2_n sk_n b_n res =
   Math.Lemmas.pow2_lt_compat 32 14;
 
   SD.bn_eval_bound #t (as_seq h1 sk_n) (v nLen);
-  ke.BE.ct_mod_exp_fw_precomp p_n b_n (size (bits t) *! nLen) sk_n 4ul r2_n res_n; //b_n ^ sk_n % p_n
+  BE.mk_bn_mod_exp_precompr2 nLen ke.BE.exp_ct_precomp p_n r2_n b_n (size (bits t) *! nLen) sk_n res_n; //b_n ^ sk_n % p_n
 
   let h2 = ST.get () in
   BN.bn_to_bytes_be len res_n res;
@@ -262,16 +272,16 @@ let ffdhe_secret_to_public_precomp_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) 
   -> sk:lbuffer uint8 len
   -> pk:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> v len == S.ffdhe_len a /\
-    ke.BE.mont.BM.bn.BN.len == nLen /\
+  (requires fun h ->
     live h sk /\ live h pk /\ live h p_r2_n /\
     disjoint sk pk /\ disjoint sk p_r2_n /\ disjoint pk p_r2_n /\
+
+    v len == S.ffdhe_len a /\ ke.BE.bn.BN.len == nLen /\
     1 < Lib.ByteSequence.nat_from_bytes_be (as_seq h sk) /\
-   (let p_n = gsub p_r2_n 0ul nLen in let r2_n = gsub p_r2_n nLen nLen in
-    bn_v h p_n == BSeq.nat_from_bytes_be (S.Mk_ffdhe_params?.ffdhe_p (S.get_ffdhe_params a)) /\
-    0 < bn_v h p_n /\ bn_v h r2_n == pow2 (2 * bits t * v nLen) % bn_v h p_n))
+    ffdhe_precomp_inv #t #(v nLen) a (as_seq h p_r2_n))
   (ensures  fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
     as_seq h1 pk == S.ffdhe_secret_to_public a (as_seq h0 sk))
+
 
 //TODO: pass sBits?
 inline_for_extraction noextract
@@ -305,12 +315,15 @@ let ffdhe_secret_to_public_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) (ke:BE.e
     sk:lbuffer uint8 len
   -> pk:lbuffer uint8 len ->
   Stack unit
-  (requires fun h -> v len == S.ffdhe_len a /\
-    ke.BE.mont.BM.bn.BN.len == blocks len (size (numbytes t)) /\
+  (requires fun h ->
     live h sk /\ live h pk /\ disjoint sk pk /\
+
+    v len == S.ffdhe_len a /\
+    ke.BE.bn.BN.len == blocks len (size (numbytes t)) /\
     1 < Lib.ByteSequence.nat_from_bytes_be (as_seq h sk))
   (ensures  fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
     as_seq h1 pk == S.ffdhe_secret_to_public a (as_seq h0 sk))
+
 
 //TODO: pass sBits?
 inline_for_extraction noextract
@@ -339,8 +352,10 @@ let ffdhe_check_pk_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) =
     pk_n:lbignum t nLen
   -> p_n:lbignum t nLen ->
   Stack (limb t)
-  (requires fun h -> v len = S.ffdhe_len a /\
+  (requires fun h ->
     live h pk_n /\ live h p_n /\ disjoint pk_n p_n /\
+
+    v len = S.ffdhe_len a /\
     bn_v h p_n == BSeq.nat_from_bytes_be (S.Mk_ffdhe_params?.ffdhe_p (S.get_ffdhe_params a)))
   (ensures  fun h0 m h1 -> modifies0 h0 h1 /\
    v m == (if (1 < bn_v h0 pk_n && bn_v h0 pk_n < bn_v h0 p_n - 1) then v (ones t SEC) else 0))
@@ -384,15 +399,14 @@ let ffdhe_shared_secret_precomp_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) (ke
   -> pk:lbuffer uint8 len
   -> ss:lbuffer uint8 len ->
   Stack (limb t)
-  (requires fun h -> v len = S.ffdhe_len a /\
-    ke.BE.mont.BM.bn.BN.len == nLen /\
+  (requires fun h ->
     live h sk /\ live h pk /\ live h ss /\ live h p_r2_n /\
     disjoint sk pk /\ disjoint sk ss /\ disjoint pk ss /\
     disjoint p_r2_n ss /\ disjoint p_r2_n pk /\ disjoint p_r2_n sk /\
+
+    v len = S.ffdhe_len a /\ ke.BE.bn.BN.len == nLen /\
     1 < Lib.ByteSequence.nat_from_bytes_be (as_seq h sk) /\
-   (let p_n = gsub p_r2_n 0ul nLen in let r2_n = gsub p_r2_n nLen nLen in
-    bn_v h p_n == BSeq.nat_from_bytes_be (S.Mk_ffdhe_params?.ffdhe_p (S.get_ffdhe_params a)) /\
-    0 < bn_v h p_n /\ bn_v h r2_n == pow2 (2 * bits t * v nLen) % bn_v h p_n))
+    ffdhe_precomp_inv #t #(v nLen) a (as_seq h p_r2_n))
   (ensures  fun h0 m h1 -> modifies (loc ss) h0 h1 /\
    (let ss_s = S.ffdhe_shared_secret a (as_seq h0 sk) (as_seq h0 pk) in
     if v m = v (ones t SEC) then Some? ss_s /\ as_seq h1 ss == Some?.v ss_s else None? ss_s))
@@ -434,10 +448,12 @@ let ffdhe_shared_secret_st (t:limb_t) (a:S.ffdhe_alg) (len:size_pos) (ke:BE.exp 
   -> pk:lbuffer uint8 len
   -> ss:lbuffer uint8 len ->
   Stack (limb t)
-  (requires fun h -> v len = S.ffdhe_len a /\
-    ke.BE.mont.BM.bn.BN.len == blocks len (size (numbytes t)) /\
+  (requires fun h ->
     live h sk /\ live h pk /\ live h ss /\
     disjoint sk pk /\ disjoint sk ss /\ disjoint pk ss /\
+
+    v len = S.ffdhe_len a /\
+    ke.BE.bn.BN.len == blocks len (size (numbytes t)) /\
     1 < Lib.ByteSequence.nat_from_bytes_be (as_seq h sk))
   (ensures  fun h0 m h1 -> modifies (loc ss) h0 h1 /\
    (let ss_s = S.ffdhe_shared_secret a (as_seq h0 sk) (as_seq h0 pk) in

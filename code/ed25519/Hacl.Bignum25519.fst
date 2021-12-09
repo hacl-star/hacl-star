@@ -92,7 +92,6 @@ let carry51 l cin =
   (l' &. mask_51, l' >>. 51ul)
 
 
-[@CInline]
 let reduce_513 a =
   let (f0, f1, f2, f3, f4) = (a.(0ul), a.(1ul), a.(2ul), a.(3ul), a.(4ul)) in
   let tmp0, c0 = carry51 #9 f0 (u64 0) in
@@ -125,7 +124,7 @@ let fmul output input input2 =
 
 [@CInline]
 let times_2 out a =
-  (**) let h0 = get() in
+  (**) let h0 = ST.get() in
   let a0 = a.(0ul) in
   let a1 = a.(1ul) in
   let a2 = a.(2ul) in
@@ -138,7 +137,7 @@ let times_2 out a =
   let o4 = u64 2 *. a4 in
   make_u64_5 out o0 o1 o2 o3 o4;
 
-  (**) let h1 = get() in
+  (**) let h1 = ST.get() in
   (**) assert (S51.felem_fits1 a0 1);
   (**) assert (F51.felem_fits h1 out (2, 4, 2, 2, 2));
 
@@ -233,7 +232,6 @@ let fsquare_times_inplace output count =
   pop_frame()
 
 
-[@CInline]
 let inverse out a =
   push_frame();
   let tmp = create 10ul (u128 0) in
@@ -250,7 +248,6 @@ let reduce out =
   make_u64_5 out f0 f1 f2 f3 f4
 
 
-[@CInline]
 let load_51 output input =
   push_frame ();
   let u64s = create 4ul (u64 0) in
@@ -279,7 +276,6 @@ let load_51 output input =
   pop_frame ()
 
 
-[@CInline]
 let store_51 output input =
   let h0 = ST.get () in
   push_frame ();

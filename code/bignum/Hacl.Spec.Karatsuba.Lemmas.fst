@@ -51,6 +51,8 @@ val lemma_middle_karatsuba: a0:nat -> a1:nat -> b0:nat -> b1:nat ->
     let t45 = if s0 = s1 then t01 - t23 else t01 + t23 in
     t45 == a0 * b1 + a1 * b0)
 
+#push-options "--z3rlimit 100"
+#restart-solver
 let lemma_middle_karatsuba a0 a1 b0 b1 =
   let s0, t0 = sign_abs a0 a1 in
   let s1, t1 = sign_abs b0 b1 in
@@ -61,7 +63,7 @@ let lemma_middle_karatsuba a0 a1 b0 b1 =
     assert (t45 = a0 * b0 + a1 * b1 - (a0 - a1) * (b0 - b1))
   else
     assert (t45 = a0 * b0 + a1 * b1 + (a1 - a0) * (b0 - b1))
-
+#pop-options
 
 val lemma_karatsuba: pbits:pos -> aLen:nat{aLen % 2 = 0} -> a0:nat -> a1:nat -> b0:nat -> b1:nat -> Lemma
   (let aLen2 = aLen / 2 in
@@ -70,6 +72,8 @@ val lemma_karatsuba: pbits:pos -> aLen:nat{aLen % 2 = 0} -> a0:nat -> a1:nat -> 
    let b = b1 * p + b0 in
    a1 * b1 * pow2 (pbits * aLen) + (a0 * b1 + a1 * b0) * pow2 (pbits * aLen2) + a0 * b0 == a * b)
 
+#push-options "--z3rlimit_factor 4"
+// TODO: use canon tactic for this lemma?
 let lemma_karatsuba pbits aLen a0 a1 b0 b1 =
   let aLen2 = aLen / 2 in
   let p = pow2 (pbits * aLen2) in
@@ -97,6 +101,7 @@ let lemma_karatsuba pbits aLen a0 a1 b0 b1 =
     (==) { Math.Lemmas.distributivity_add_left (a1 * b0) (a0 * b1) p }
     a1 * b1 * pow2 (pbits * aLen) + (a1 * b0 + a0 * b1) * p + a0 * b0;
    }
+#pop-options
 
 
 val karatsuba:

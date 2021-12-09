@@ -28,7 +28,7 @@
 
 static inline uint64_t add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
 {
-  #if EVERCRYPT_CAN_COMPILE_INLINE_ASM
+  #if HACL_CAN_COMPILE_INLINE_ASM
   return add_scalar(out, f1, f2);
   #else
   uint64_t scrut = add_scalar_e(out, f1, f2);
@@ -42,7 +42,7 @@ static inline uint64_t add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
 
 static inline void fadd0(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
-  #if EVERCRYPT_CAN_COMPILE_INLINE_ASM
+  #if HACL_CAN_COMPILE_INLINE_ASM
   fadd(out, f1, f2);
   #else
   uint64_t uu____0 = fadd_e(out, f1, f2);
@@ -55,7 +55,7 @@ static inline void fadd0(uint64_t *out, uint64_t *f1, uint64_t *f2)
 
 static inline void fsub0(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
-  #if EVERCRYPT_CAN_COMPILE_INLINE_ASM
+  #if HACL_CAN_COMPILE_INLINE_ASM
   fsub(out, f1, f2);
   #else
   uint64_t uu____0 = fsub_e(out, f1, f2);
@@ -68,7 +68,7 @@ static inline void fsub0(uint64_t *out, uint64_t *f1, uint64_t *f2)
 
 static inline void fmul0(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tmp)
 {
-  #if EVERCRYPT_CAN_COMPILE_INLINE_ASM
+  #if HACL_CAN_COMPILE_INLINE_ASM
   fmul(out, f1, f2, tmp);
   #else
   uint64_t uu____0 = fmul_e(tmp, f1, out, f2);
@@ -81,7 +81,7 @@ static inline void fmul0(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tm
 
 static inline void fmul20(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tmp)
 {
-  #if EVERCRYPT_CAN_COMPILE_INLINE_ASM
+  #if HACL_CAN_COMPILE_INLINE_ASM
   fmul2(out, f1, f2, tmp);
   #else
   uint64_t uu____0 = fmul2_e(tmp, f1, out, f2);
@@ -94,7 +94,7 @@ static inline void fmul20(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *t
 
 static inline void fmul_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
 {
-  #if EVERCRYPT_CAN_COMPILE_INLINE_ASM
+  #if HACL_CAN_COMPILE_INLINE_ASM
   fmul_scalar(out, f1, f2);
   #else
   uint64_t uu____0 = fmul_scalar_e(out, f1, f2);
@@ -107,7 +107,7 @@ static inline void fmul_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
 
 static inline void fsqr0(uint64_t *out, uint64_t *f1, uint64_t *tmp)
 {
-  #if EVERCRYPT_CAN_COMPILE_INLINE_ASM
+  #if HACL_CAN_COMPILE_INLINE_ASM
   fsqr(out, f1, tmp);
   #else
   uint64_t uu____0 = fsqr_e(tmp, f1, out);
@@ -120,7 +120,7 @@ static inline void fsqr0(uint64_t *out, uint64_t *f1, uint64_t *tmp)
 
 static inline void fsqr20(uint64_t *out, uint64_t *f, uint64_t *tmp)
 {
-  #if EVERCRYPT_CAN_COMPILE_INLINE_ASM
+  #if HACL_CAN_COMPILE_INLINE_ASM
   fsqr2(out, f, tmp);
   #else
   uint64_t uu____0 = fsqr2_e(tmp, f, out);
@@ -133,7 +133,7 @@ static inline void fsqr20(uint64_t *out, uint64_t *f, uint64_t *tmp)
 
 static inline void cswap20(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
-  #if EVERCRYPT_CAN_COMPILE_INLINE_ASM
+  #if HACL_CAN_COMPILE_INLINE_ASM
   cswap2(bit, p1, p2);
   #else
   uint64_t uu____0 = cswap2_e(bit, p1, p2);

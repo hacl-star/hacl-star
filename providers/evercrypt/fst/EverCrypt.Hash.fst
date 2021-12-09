@@ -186,7 +186,7 @@ let k224_256 =
 let update_multi_256 s ev blocks n =
   let has_shaext = AC.has_shaext () in
   let has_sse = AC.has_sse () in
-  if EverCrypt.TargetConfig.evercrypt_can_compile_vale && (SC.vale && has_shaext && has_sse) then begin
+  if EverCrypt.TargetConfig.hacl_can_compile_vale && (SC.vale && has_shaext && has_sse) then begin
     let n = Int.Cast.Full.uint32_to_uint64 n in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;
@@ -370,12 +370,14 @@ let update_last_with_internal_st (a : alg) =
 inline_for_extraction noextract
 val update_last_blake2s : update_last_with_internal_st Blake2S
 
+#push-options "--fuel 0 --ifuel 1"
 let update_last_blake2s p prev_len last last_len =
   [@inline_let] let ev = prev_len in
   let x:Lib.IntTypes.uint_t Lib.IntTypes.U64 Lib.IntTypes.SEC =
     update_last_64 Blake2S Hacl.Hash.Blake2.update_last_blake2s_32 p ev
                    prev_len last last_len in
   ()
+#pop-options
 
 inline_for_extraction noextract
 val update_last_blake2b : update_last_with_internal_st Blake2B

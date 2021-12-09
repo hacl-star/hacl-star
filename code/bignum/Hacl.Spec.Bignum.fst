@@ -75,6 +75,45 @@ let bn_add_mod_n_lemma #t #len n a b =
   bn_add_lemma a b;
   bn_reduce_once_lemma n c0 res0
 
+
+let bn_sub_mod_n #t #len n a b =
+  let c0, res0 = bn_sub a b in
+  let c1, res1 = bn_add res0 n in
+  let c = uint #t 0 -. c0 in
+  map2 (mask_select c) res1 res0
+
+
+let bn_sub_mod_n_lemma #t #len n a b =
+  let c0, res0 = bn_sub a b in
+  bn_sub_lemma a b;
+  assert (bn_v res0 - v c0 * pow2 (bits t * len) == bn_v a - bn_v b);
+  let c1, res1 = bn_add res0 n in
+  let c = uint #t 0 -. c0 in
+  assert (v c == 0 \/ v c == v (ones t SEC));
+  let res = map2 (mask_select c) res1 res0 in
+  lseq_mask_select_lemma res1 res0 c;
+
+  if v c0 = 0 then begin
+    assert (bn_v res0 == bn_v a - bn_v b);
+    Math.Lemmas.small_mod (bn_v res0) (bn_v n);
+    assert (bn_v res == (bn_v a - bn_v b) % bn_v n);
+    () end
+  else begin
+    bn_add_lemma res0 n;
+    assert (bn_v res1 + v c1 * pow2 (bits t * len) == bn_v res0 + bn_v n);
+
+    bn_eval_bound res0 len;
+    bn_eval_bound res1 len;
+    bn_eval_bound n len;
+    assert (v c0 - v c1 = 0);
+    assert (bn_v res1 == bn_v a - bn_v b + bn_v n);
+    assert (bn_v res1 < bn_v n);
+    Math.Lemmas.modulo_addition_lemma (bn_v a - bn_v b) (bn_v n) 1;
+    Math.Lemmas.small_mod (bn_v res1) (bn_v n);
+    assert (bn_v res == (bn_v a - bn_v b) % bn_v n);
+    () end
+
+
 let bn_mul1 #t #aLen a b1 =
   Hacl.Spec.Bignum.Multiplication.bn_mul1 a b1
 

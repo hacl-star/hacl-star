@@ -24,7 +24,7 @@ val x_mod_2:
       v z == F51.as_nat h0 x % 2
     )
 let x_mod_2 x =
-  (**) let h0 = get() in
+  (**) let h0 = ST.get() in
   let x0 = x.(0ul) in
   let z  = x0 &. u64 1 in
   mod_mask_lemma x0 1ul;
@@ -74,7 +74,7 @@ val add_sign:
       nat_from_bytes_le (as_seq h1 out) == nat_from_bytes_le (as_seq h0 out) + pow2 255 * (v x)
     )
 let add_sign out x =
-  (**) let h0 = get() in
+  (**) let h0 = ST.get() in
   let xbyte = to_u8 x in
   let o31 = out.(31ul) in
   (**) FStar.Math.Lemmas.lemma_mult_le_left (pow2 7) (v x) 1;
@@ -82,7 +82,7 @@ let add_sign out x =
   (**) assert_norm (pow2 7 < pow2 8);
   (**) assert (v (xbyte <<. 7ul) == pow2 7 * (v x));
   out.(31ul) <- o31 +. (xbyte <<. 7ul);
-  (**) let h1 = get() in
+  (**) let h1 = ST.get() in
   (**) calc (==) {
   (**)   nat_from_intseq_le (as_seq h1 out) <: nat;
   (**)   (==) { nat_from_intseq_le_slice_lemma (as_seq h1 out) 31 }
@@ -135,7 +135,7 @@ val point_compress_:
   Stack unit
     (requires fun h -> live h tmp /\ live h p /\ disjoint tmp p /\ F51.point_inv_t h p)
     (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\ (
-      let zinv = Spec.Ed25519.modp_inv (F51.fevalh h0 (gsub p 10ul 5ul)) in
+      let zinv = Spec.Ed25519.finv (F51.fevalh h0 (gsub p 10ul 5ul)) in
       let x = Spec.Curve25519.fmul (F51.fevalh h0 (gsub p 0ul 5ul)) zinv in
       let y = Spec.Curve25519.fmul (F51.fevalh h0 (gsub p 5ul 5ul)) zinv in
       F51.mul_inv_t h1 (gsub tmp 10ul 5ul) /\
@@ -150,6 +150,9 @@ let point_compress_ tmp p =
   let py   = gety p in
   let pz   = getz p in
 
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.fpow_is_pow_mod
+    (F51.fevalh h0 pz) (Spec.Curve25519.prime - 2);
   inverse zinv pz;
   fmul x px zinv;
   reduce x;
@@ -166,7 +169,6 @@ val point_compress:
       as_seq h1 out == Spec.Ed25519.point_compress (F51.point_eval h0 p)
     )
 
-[@CInline]
 let point_compress z p =
   push_frame();
   let tmp  = create 15ul (u64 0) in
@@ -179,7 +181,7 @@ let point_compress z p =
   store_51 z out;
   add_sign z b;
 
-  (**) let h3 = get() in
+  (**) let h3 = ST.get() in
   (**) lemma_nat_from_to_bytes_le_preserves_value (as_seq h3 z) 32;
   (**) lemma_nat_to_from_bytes_le_preserves_value (as_seq h3 z) 32 (F51.fevalh h3 out);
 

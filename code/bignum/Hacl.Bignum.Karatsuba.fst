@@ -248,13 +248,11 @@ let bn_karatsuba_mul_open #t (self: unit -> bn_karatsuba_mul_st t) len a b tmp r
 
 
 val bn_karatsuba_mul_uint32 : unit -> bn_karatsuba_mul_st U32
-[@CInline]
 let rec bn_karatsuba_mul_uint32 () aLen a b tmp res =
   bn_karatsuba_mul_open bn_karatsuba_mul_uint32 aLen a b tmp res
 
 
 val bn_karatsuba_mul_uint64 : unit -> bn_karatsuba_mul_st U64
-[@CInline]
 let rec bn_karatsuba_mul_uint64 () aLen a b tmp res =
   bn_karatsuba_mul_open bn_karatsuba_mul_uint64 aLen a b tmp res
 
@@ -369,13 +367,11 @@ let bn_karatsuba_sqr_open #t (self: unit -> bn_karatsuba_sqr_st t) len a tmp res
 
 
 val bn_karatsuba_sqr_uint32 : unit -> bn_karatsuba_sqr_st U32
-[@CInline]
 let rec bn_karatsuba_sqr_uint32 () aLen a tmp res =
   bn_karatsuba_sqr_open bn_karatsuba_sqr_uint32 aLen a tmp res
 
 
 val bn_karatsuba_sqr_uint64 : unit -> bn_karatsuba_sqr_st U64
-[@CInline]
 let rec bn_karatsuba_sqr_uint64 () aLen a tmp res =
   bn_karatsuba_sqr_open bn_karatsuba_sqr_uint64 aLen a tmp res
 

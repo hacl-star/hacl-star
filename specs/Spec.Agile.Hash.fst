@@ -15,8 +15,8 @@ let init a =
       Spec.MD5.init
   | SHA1 ->
       Spec.SHA1.init
-  | Blake2S -> Spec.Blake2.blake2_init Spec.Blake2.Blake2S 0 Seq.empty 32, u64 0
-  | Blake2B -> Spec.Blake2.blake2_init Spec.Blake2.Blake2B 0 Seq.empty 64, u128 0
+  | Blake2S -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2S 0 32, u64 0
+  | Blake2B -> Spec.Blake2.blake2_init_hash Spec.Blake2.Blake2B 0 64, u128 0
 
 let update a =
   match a with
