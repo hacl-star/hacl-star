@@ -118,7 +118,6 @@ let fill_blocks4 #t #a h0 n4 output refl footprint spec impl =
       refl h2 (4 * v i + 4) == c3 /\
       (LSeq.eq_intro res res1; res1 `LSeq.equal` res))
   )
-#pop-options
 
 
 inline_for_extraction noextract
