@@ -51,6 +51,8 @@ val lemma_middle_karatsuba: a0:nat -> a1:nat -> b0:nat -> b1:nat ->
     let t45 = if s0 = s1 then t01 - t23 else t01 + t23 in
     t45 == a0 * b1 + a1 * b0)
 
+#push-options "--z3rlimit 100"
+#restart-solver
 let lemma_middle_karatsuba a0 a1 b0 b1 =
   let s0, t0 = sign_abs a0 a1 in
   let s1, t1 = sign_abs b0 b1 in
@@ -61,7 +63,7 @@ let lemma_middle_karatsuba a0 a1 b0 b1 =
     assert (t45 = a0 * b0 + a1 * b1 - (a0 - a1) * (b0 - b1))
   else
     assert (t45 = a0 * b0 + a1 * b1 + (a1 - a0) * (b0 - b1))
-
+#pop-options
 
 val lemma_karatsuba: pbits:pos -> aLen:nat{aLen % 2 = 0} -> a0:nat -> a1:nat -> b0:nat -> b1:nat -> Lemma
   (let aLen2 = aLen / 2 in
