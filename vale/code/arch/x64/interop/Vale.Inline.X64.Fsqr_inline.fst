@@ -70,7 +70,7 @@ let fsqr_post : VSig.vale_post fsqr_dom =
 
 let fsqr_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
-  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR12 || r = rR13 || r = rR14 || r = rR15 then true
+  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR13 || r = rR14 || r = rR15 then true
   else false
 
 let fsqr_xmms_modified = fun _ -> false
@@ -169,7 +169,7 @@ let fsqr out f1 tmp =
     let (x, _) = lowstar_Fsqr_normal_t out f1 tmp () in
     ()
 
-let fsqr_comments : list string = 
+let fsqr_comments : list string =
   ["Computes the square of a field element: out <- f * f";
    "Uses the 8-element buffer tmp for intermediate results"]
 
@@ -282,7 +282,7 @@ let fsqr2 out f1 tmp =
     let (x, _) = lowstar_Fsqr2_normal_t out f1 tmp () in
     ()
 
-let fsqr2_comments : list string = 
+let fsqr2_comments : list string =
   ["Computes two field squarings:";
    "  out[0] <- f[0] * f[0]";
    "  out[1] <- f[1] * f[1]";
