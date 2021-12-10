@@ -28,7 +28,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "30e7aaa830b420fceaa7ef5604e1b889"
+      "9a4a09a06e2b6a0e098768db0cb704c4"
     ],
     [
       "Spec.SHA2.Lemmas.shuffle_core_",
@@ -63,7 +63,7 @@
         "typing_Spec.SHA2.k0", "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "afb8e1ca5bbae3af3f54c982761a9704"
+      "7d2affbbcd75478673fb7a40d110b2f2"
     ],
     [
       "Spec.SHA2.Lemmas.shuffle_aux",
@@ -77,7 +77,7 @@
         "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "c689403cc500d94ca5fd9bc7217607e3"
+      "992c02503533ab0f09b33904aa217b25"
     ],
     [
       "Spec.SHA2.Lemmas.shuffle_is_shuffle_pre",
@@ -94,8 +94,15 @@
         "Spec.Loops_interpretation_Tm_arrow_991012978bfe18b65525b7a05d6a8a37",
         "Spec.SHA2_interpretation_Tm_arrow_046d31b7ca1b5af90ba995ae3917b5cb",
         "Spec.SHA2_interpretation_Tm_arrow_5114bb93a23375880e0690cfe93800b7",
-        "bool_inversion", "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Prims.pos",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.sha2_alg",
@@ -106,7 +113,9 @@
         "equation_Spec.SHA2.block_w", "equation_Spec.SHA2.counter",
         "equation_Spec.SHA2.k_w", "equation_Spec.SHA2.shuffle_core_pre_",
         "equation_Spec.SHA2.shuffle_pre", "equation_Spec.SHA2.size_k_w",
-        "equation_Spec.SHA2.ws_pre_", "equation_Spec.SHA2.ws_pre_inner",
+        "equation_Spec.SHA2.ws0_pre_inner", "equation_Spec.SHA2.ws_pre_",
+        "equation_Spec.SHA2.ws_pre_inner",
+        "equation_Spec.SHA2.wsi_pre_inner",
         "equation_with_fuel_Spec.Loops.repeat_range.fuel_instrumented",
         "equation_with_fuel_Spec.SHA2.Lemmas.ws_aux.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
@@ -158,7 +167,7 @@
         "typing_Spec.SHA2.ws_pre", "well-founded-ordering-on-nat"
       ],
       0,
-      "e13a3d74aaebf6e86bab22fe1573ea20"
+      "9c4f27742c0bbbe79c715146154344e4"
     ],
     [
       "Spec.SHA2.Lemmas.update_aux",
@@ -204,7 +213,7 @@
         "unit_typing"
       ],
       0,
-      "b281bffef8583346ac72ef6bc5c5b0d2"
+      "eb260c8cde10e0c96503ec086a66d55a"
     ],
     [
       "Spec.SHA2.Lemmas.update_is_update_pre",
@@ -267,7 +276,7 @@
         "typing_Spec.SHA2.size_k_w", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "44bfb2e5a050488bf50d84919161ed02"
+      "2192452ebb10d9b0bcf5286bacd9fa12"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -296,7 +305,7 @@
         "refinement_interpretation_Tm_refine_ee7f9ad7b411394a04a1e8bcaa63b394"
       ],
       0,
-      "9a86444114ba48e66fb79cf13bb8ad1d"
+      "c1324597beb65aab6aa656157c2ed268"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -419,7 +428,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "080a7b56f6dfb75b19b4be610e227dc3"
+      "06ff6433e9594749282aca6a91759859"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -447,7 +456,7 @@
         "refinement_interpretation_Tm_refine_f7a8f8340b3c54b659acfc982cbf3004"
       ],
       0,
-      "c8da27bdb788e4bf3678ca53e9a6251d"
+      "1b256ff0dd44879db9d5089a180a52e9"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -476,7 +485,7 @@
         "refinement_interpretation_Tm_refine_f7a8f8340b3c54b659acfc982cbf3004"
       ],
       0,
-      "036e2f89ce8642d1f517aaaedf51ce40"
+      "c9c6e339dfd981feb2c2bf7b9b835145"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -546,7 +555,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "9c885111a17c0baba46bd782b0684e8a"
+      "15f6dab3ab373205c14f1617292db5d8"
     ]
   ]
 ]
