@@ -365,3 +365,37 @@ let rec index_generate_blocks #t len max n f i =
     Seq.lemma_index_app2 s s' i;
     mod_prop len (n-1) i
     end
+
+#push-options "--using_facts_from '+FStar.UInt.pow2_values'"
+
+let create2 #a x0 x1 =
+  let l = [x0; x1] in
+  assert_norm (List.Tot.length l = 2);
+  createL l
+
+let create2_lemma #a x0 x1 =
+  Seq.elim_of_list [x0; x1]
+
+let create4 #a x0 x1 x2 x3 =
+  let l = [x0; x1; x2; x3] in
+  assert_norm (List.Tot.length l = 4);
+  createL l
+
+let create4_lemma #a x0 x1 x2 x3 =
+  Seq.elim_of_list [x0; x1; x2; x3]
+
+let create8 #a x0 x1 x2 x3 x4 x5 x6 x7 =
+  let l = [x0; x1; x2; x3; x4; x5; x6; x7] in
+  assert_norm (List.Tot.length l = 8);
+  createL l
+
+let create8_lemma #a x0 x1 x2 x3 x4 x5 x6 x7 =
+  Seq.elim_of_list [x0; x1; x2; x3; x4; x5; x6; x7]
+
+let create16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 =
+  let l = [x0; x1; x2; x3; x4; x5; x6; x7; x8; x9; x10; x11; x12; x13; x14; x15] in
+  assert_norm (List.Tot.length l = 16);
+  createL l
+
+let create16_lemma #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 =
+  Seq.elim_of_list [x0; x1; x2; x3; x4; x5; x6; x7; x8; x9; x10; x11; x12; x13; x14; x15]

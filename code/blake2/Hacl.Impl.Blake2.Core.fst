@@ -68,7 +68,7 @@ let state_v (#a:Spec.alg) (#m:m_spec) (h:mem) (st:state_p a m) : GTot (Spec.stat
   let r1 = row_v h (g_rowi st 1ul) in
   let r2 = row_v h (g_rowi st 2ul) in
   let r3 = row_v h (g_rowi st 3ul) in
-  create4 r0 r1 r2 r3
+  Lib.Sequence.create4 r0 r1 r2 r3
 
 #push-options "--z3rlimit 100"
 let state_v_eq_lemma #a #m h0 h1 st1 st2 =
@@ -220,7 +220,7 @@ let create_row #a #m r w0 w1 w2 w3 =
     r.(2ul) <- w2;
     r.(3ul) <- w3;
     let h1 = ST.get() in
-    Lib.Sequence.eq_intro (as_seq h1 r) (create4 w0 w1 w2 w3)
+    Lib.Sequence.eq_intro (as_seq h1 r) (Lib.Sequence.create4 w0 w1 w2 w3)
 
 noextract inline_for_extraction
 let load_row #a #m r ws = create_row r ws.(0ul) ws.(1ul) ws.(2ul) ws.(3ul)

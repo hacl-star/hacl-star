@@ -112,7 +112,8 @@ let fill_blocks4 #t #a h0 n4 output refl footprint spec impl =
       let c1, e1 = spec h0 (4 * v i + 1) c0 in
       let c2, e2 = spec h0 (4 * v i + 2) c1 in
       let c3, e3 = spec h0 (4 * v i + 3) c2 in
-      let res = Lib.IntVector.create4 e0 e1 e2 e3 in
+      let res = LSeq.create4 e0 e1 e2 e3 in
+      LSeq.create4_lemma e0 e1 e2 e3;
       let res1 = LSeq.sub (as_seq h2 output) (4 * v i) 4 in
       refl h2 (4 * v i + 4) == c3 /\
       (LSeq.eq_intro res res1; res1 `LSeq.equal` res))
