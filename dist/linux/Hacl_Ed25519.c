@@ -431,11 +431,11 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(u64 *result, u8 *scalar, u64 *q)
     memcpy(t1, q, (u32)20U * sizeof (u64));
     {
       u32 i;
-      for (i = (u32)0U; i < (u32)14U; i++)
+      for (i = (u32)0U; i < (u32)15U; i++)
       {
-        u64 *t11 = table + (i + (u32)1U) * (u32)20U;
-        u64 *t2 = table + (i + (u32)2U) * (u32)20U;
-        Hacl_Impl_Ed25519_PointAdd_point_add(t2, t11, q);
+        u64 *t11 = table + i * (u32)20U;
+        u64 *t2 = table + (i + (u32)1U) * (u32)20U;
+        Hacl_Impl_Ed25519_PointAdd_point_add(t2, q, t11);
       }
     }
     {
@@ -583,11 +583,11 @@ point_mul_double_vartime(u64 *result, u8 *scalar1, u64 *q1, u8 *scalar2, u64 *q2
       memcpy(t10, q1, (u32)20U * sizeof (u64));
       {
         u32 i;
-        for (i = (u32)0U; i < (u32)14U; i++)
+        for (i = (u32)0U; i < (u32)15U; i++)
         {
-          u64 *t11 = table1 + (i + (u32)1U) * (u32)20U;
-          u64 *t2 = table1 + (i + (u32)2U) * (u32)20U;
-          Hacl_Impl_Ed25519_PointAdd_point_add(t2, t11, q1);
+          u64 *t11 = table1 + i * (u32)20U;
+          u64 *t2 = table1 + (i + (u32)1U) * (u32)20U;
+          Hacl_Impl_Ed25519_PointAdd_point_add(t2, q1, t11);
         }
       }
       {
@@ -598,11 +598,11 @@ point_mul_double_vartime(u64 *result, u8 *scalar1, u64 *q1, u8 *scalar2, u64 *q2
         memcpy(t1, q2, (u32)20U * sizeof (u64));
         {
           u32 i;
-          for (i = (u32)0U; i < (u32)14U; i++)
+          for (i = (u32)0U; i < (u32)15U; i++)
           {
-            u64 *t11 = table2 + (i + (u32)1U) * (u32)20U;
-            u64 *t2 = table2 + (i + (u32)2U) * (u32)20U;
-            Hacl_Impl_Ed25519_PointAdd_point_add(t2, t11, q2);
+            u64 *t11 = table2 + i * (u32)20U;
+            u64 *t2 = table2 + (i + (u32)1U) * (u32)20U;
+            Hacl_Impl_Ed25519_PointAdd_point_add(t2, q2, t11);
           }
         }
         {

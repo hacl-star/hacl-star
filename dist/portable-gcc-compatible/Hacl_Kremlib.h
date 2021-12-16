@@ -89,6 +89,13 @@ FStar_UInt128_add_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 
 /* SNIPPET_END: FStar_UInt128_add_mod */
 
+/* SNIPPET_START: FStar_UInt128_sub_mod */
+
+static inline FStar_UInt128_uint128
+FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+
+/* SNIPPET_END: FStar_UInt128_sub_mod */
+
 /* SNIPPET_START: FStar_UInt128_logor */
 
 static inline FStar_UInt128_uint128

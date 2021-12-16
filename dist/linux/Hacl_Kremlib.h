@@ -38,10 +38,6 @@ extern "C" {
 
 
 
-static inline u32 FStar_UInt32_eq_mask(u32 a, u32 b);
-
-static inline u32 FStar_UInt32_gte_mask(u32 a, u32 b);
-
 static inline u8 FStar_UInt8_eq_mask(u8 a, u8 b);
 
 static inline u64 FStar_UInt64_eq_mask(u64 a, u64 b);
@@ -53,6 +49,8 @@ static inline u16 FStar_UInt16_eq_mask(u16 a, u16 b);
 static inline uint128_t FStar_UInt128_add(uint128_t a, uint128_t b);
 
 static inline uint128_t FStar_UInt128_add_mod(uint128_t a, uint128_t b);
+
+static inline uint128_t FStar_UInt128_sub_mod(uint128_t a, uint128_t b);
 
 static inline uint128_t FStar_UInt128_logor(uint128_t a, uint128_t b);
 
