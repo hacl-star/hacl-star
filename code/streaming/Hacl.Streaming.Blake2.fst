@@ -756,7 +756,7 @@ let blake2b_32_state = F.state_s blake2b_32 () (s Spec.Blake2B M32) unit_key
 /// All those implementations are for non-keyed hash.
 
 inline_for_extraction noextract
-let blake2s_32_alloca =
+let blake2s_32_no_key_alloca =
   F.alloca blake2s_32 () (s Spec.Blake2S M32) unit_key
 
 [@ (Comment "  State allocation function when there is no key")]
