@@ -69,6 +69,56 @@ let is_felem_ge_prime_vartime5 ((f0,f1,f2,f3,f4): felem5) : bool =
 
 
 inline_for_extraction noextract
+let is_felem_lt_vartime5 ((a0,a1,a2,a3,a4): felem5) ((b0,b1,b2,b3,b4): felem5) : bool =
+  let open Lib.RawIntTypes in
+  if u64_to_UInt64 a4 <. u64_to_UInt64 b4 then true
+  else begin
+    if u64_to_UInt64 a4 >. u64_to_UInt64 b4 then false
+    else begin
+      if u64_to_UInt64 a3 <. u64_to_UInt64 b3 then true
+      else begin
+        if u64_to_UInt64 a3 >. u64_to_UInt64 b3 then false
+        else begin
+          if u64_to_UInt64 a2 <. u64_to_UInt64 b2 then true
+          else begin
+            if u64_to_UInt64 a2 >. u64_to_UInt64 b2 then false
+            else begin
+              if u64_to_UInt64 a1 <. u64_to_UInt64 b1 then true
+              else begin
+                if u64_to_UInt64 a1 >. u64_to_UInt64 b1 then false
+                else u64_to_UInt64 a0 <. u64_to_UInt64 b0
+              end
+            end
+          end
+        end
+      end
+    end
+  end
+
+
+inline_for_extraction noextract
+let is_felem_lt_prime_minus_order_vartime5 ((f0,f1,f2,f3,f4): felem5) : bool =
+  let open Lib.RawIntTypes in
+  if u64_to_UInt64 f4 >. 0uL then false
+  else begin
+    if u64_to_UInt64 f3 >. 0uL then false
+    else begin
+      if u64_to_UInt64 f2 <. 0x1455123uL then true
+      else begin
+        if u64_to_UInt64 f2 >. 0x1455123uL then false
+        else begin
+          if u64_to_UInt64 f1 <. 0x1950b75fc4402uL then true
+          else begin
+            if u64_to_UInt64 f1 >. 0x1950b75fc4402uL then false
+            else u64_to_UInt64 f0 <. 0xda1722fc9baeeuL
+          end
+        end
+      end
+    end
+  end
+
+
+inline_for_extraction noextract
 let is_felem_eq_vartime5 ((a0,a1,a2,a3,a4): felem5) ((b0,b1,b2,b3,b4): felem5) : bool =
   let open Lib.RawIntTypes in
   u64_to_UInt64 a0 =. u64_to_UInt64 b0 &&
@@ -90,13 +140,7 @@ let normalize_weak5 ((t0,t1,t2,t3,t4):felem5) : felem5 =
   (t0,t1,t2,t3,t4)
 
 
-assume
-val normalize_weak5_lemma: f:felem5 ->
-  Lemma (let r = normalize_weak5 f in
-    as_nat5 r == as_nat5 f % S.prime /\
-    felem_fits5 r (1,1,1,1,2))
-
-
+inline_for_extraction noextract
 let subtract_p5 ((t0,t1,t2,t3,t4):felem5) : felem5 =
   let m4 = eq_mask t4 mask48 in
   //let m3 = eq_mask t3 mask52 in
@@ -138,7 +182,6 @@ val normalize5_lemma: f:felem5 ->
 
 
 // TODO
-// is_felem_lt_prime_minus_order_vartime
 // fsub5
 // fmul5
 // fsqr5

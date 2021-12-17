@@ -8,7 +8,7 @@ module S = Spec.K256
 include Hacl.Spec.K256.Field52.Definitions
 include Hacl.Spec.K256.Field52
 
-#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+#set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 ///  Load and store functions
 
@@ -330,7 +330,6 @@ let lemma_a_mul_c_plus_b_mul_c_mul_d a b c d =
 let mul15_lemma m1 m2 f c =
   let (f0,f1,f2,f3,f4) = f in
   let (mf0,mf1,mf2,mf3,mf4) = m1 in
-  let (o0,o1,o2,o3,o4) = mul15 f c in
   mul15_lemma1 mf0 m2 f0 c;
   mul15_lemma1 mf1 m2 f1 c;
   mul15_lemma1 mf2 m2 f2 c;
@@ -338,8 +337,6 @@ let mul15_lemma m1 m2 f c =
   mul15_lemma_last1 mf4 m2 f4 c;
 
   calc (==) {
-    as_nat5 (o0,o1,o2,o3,o4);
-    (==) { }
     v f0 * v c + v f1 * v c * pow52 + v f2 * v c * pow104 + v f3 * v c * pow156 + v f4 * v c * pow208;
     (==) { lemma_a_mul_c_plus_b_mul_c_mul_d (v f0) (v c) (v f1) pow52 }
     v c * (v f0 + v f1 * pow52) + v f2 * v c * pow104 + v f3 * v c * pow156 + v f4 * v c * pow208;
@@ -349,7 +346,7 @@ let mul15_lemma m1 m2 f c =
     v c * (v f0 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156) + v f4 * v c * pow208;
     (==) { lemma_a_mul_c_plus_b_mul_c_mul_d (v f0 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156) (v c) (v f4) pow208 }
     v c * (v f0 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156 + v f4 * pow208);
-    }
+  }
 
 
 let fmul15_lemma m1 m2 f c =
@@ -430,5 +427,279 @@ let is_felem_ge_prime_vartime5_lemma f =
   lemma_as_nat_bound f
 
 
+let is_felem_lt_vartime5_lemma f1 f2 = ()
+
+
+let is_felem_lt_prime_minus_order_vartime5_lemma f =
+  assert_norm (S.prime - S.q =
+    0xda1722fc9baee + 0x1950b75fc4402 * pow52 + 0x1455123 * pow104)
+
+
 let is_felem_eq_vartime5_lemma f1 f2 =
   if as_nat5 f1 = as_nat5 f2 then as_nat_inj f1 f2
+
+#set-options "--ifuel 0"
+
+val lemma_prime : unit -> Lemma (pow2 256 % S.prime = 0x1000003D1)
+let lemma_prime () = ()
+
+
+val lemma_a_plus_b_mul_pow256 (a b:nat) :
+  Lemma ((a + b * pow2 256) % S.prime == (a + b * 0x1000003D1) % S.prime)
+
+let lemma_a_plus_b_mul_pow256 a b =
+  calc (==) {
+    (a + b * pow2 256) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r a (b * pow2 256) S.prime }
+    (a + b * pow2 256 % S.prime) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r b (pow2 256) S.prime }
+    (a + b * (pow2 256 % S.prime) % S.prime) % S.prime;
+    (==) { lemma_prime () }
+    (a + b * 0x1000003D1 % S.prime) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r a (b * 0x1000003D1) S.prime }
+    (a +b * 0x1000003D1) % S.prime;
+  }
+
+
+val as_nat_mod_prime (t0 t1 t2 t3 t4:nat) : Lemma
+  ((t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 * pow208) % S.prime =
+   (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + (t4 % pow2 48) * pow208 + t4 / pow2 48 * 0x1000003D1) % S.prime)
+
+let as_nat_mod_prime t0 t1 t2 t3 t4 =
+  calc (==) {
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 * pow208) % S.prime;
+    (==) { Math.Lemmas.euclidean_division_definition t4 (pow2 48) }
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + (t4 / pow2 48 * pow2 48 + t4 % pow2 48) * pow208) % S.prime;
+    (==) { Math.Lemmas.distributivity_add_left (t4 / pow2 48 * pow2 48) (t4 % pow2 48) pow208 }
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 / pow2 48 * pow2 48 * pow208 + t4 % pow2 48 * pow208) % S.prime;
+    (==) {
+      Math.Lemmas.paren_mul_right (t4 / pow2 48) (pow2 48) pow208;
+      Math.Lemmas.pow2_plus 48 208 }
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 / pow2 48 * pow2 256 + t4 % pow2 48 * pow208) % S.prime;
+    (==) { lemma_a_plus_b_mul_pow256 (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 % pow2 48 * pow208) (t4 / pow2 48) }
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 % pow2 48 * pow208 + t4 / pow2 48 * 0x1000003D1) % S.prime;
+  }
+
+
+inline_for_extraction noextract
+let last_carry_mod_prime5 ((t0,t1,t2,t3,t4):felem5) : felem5 =
+  let x = t4 >>. 48ul in let t4 = t4 &. mask48 in
+  let t0 = t0 +. x *. u64 0x1000003D1 in
+  (t0,t1,t2,t3,t4)
+
+
+val last_carry_mod_prime5_lemma: m:scale64_5 -> f:felem5 -> Lemma
+  (requires (let (m0,m1,m2,m3,m4) = m in
+    m0 + 1 <= 4096 /\ felem_fits5 f m))
+  (ensures
+   (let r = last_carry_mod_prime5 f in
+    let (m0,m1,m2,m3,m4) = m in
+    as_nat5 r % S.prime == as_nat5 f % S.prime /\
+    felem_fits5 r (m0+1,m1,m2,m3,1)))
+
+let last_carry_mod_prime5_lemma m f =
+  let r = last_carry_mod_prime5 f in
+  let (m0,m1,m2,m3,m4) = m in
+  let (t0,t1,t2,t3,t4) = f in
+
+  let x = t4 >>. 48ul in let t4' = t4 &. mask48 in
+  assert_norm (v mask48 = pow2 48 - 1);
+  mod_mask_lemma t4 48ul;
+  assert (v (mod_mask #U64 #SEC 48ul) == v mask48);
+  assert (v t4' = v t4 % pow2 48);
+  assert (felem_fits_last1 t4' 1);
+
+  assert (v x = v t4 / pow2 48);
+  Math.Lemmas.lemma_div_lt (v t4) 64 48;
+  assert (v x < pow2 16);
+  Math.Lemmas.lemma_mult_lt_right 0x1000003D1 (v x) (pow2 16);
+  assert_norm (pow2 16 * 0x1000003D1 < max52);
+  assert (v t0 + v x * 0x1000003D1 < (m0 + 1) * max52);
+  Math.Lemmas.lemma_mult_le_right max52 (m0 + 1) 4096;
+  assert_norm (4096 * max52 < pow2 64);
+  Math.Lemmas.small_mod (v t0 + v x * 0x1000003D1) (pow2 64);
+  let t0' = t0 +. x *. u64 0x1000003D1 in
+  assert (v t0' = v t0 + v x * 0x1000003D1);
+  assert (felem_fits1 t0' (m0 + 1));
+
+  assert (as_nat5 r =
+    v t0 + v t4 / pow2 48 * 0x1000003D1 + v t1 * pow52 + v t2 * pow104 +
+    v t3 * pow156 + (v t4 % pow2 48) * pow208);
+
+  as_nat_mod_prime (v t0) (v t1) (v t2) (v t3) (v t4);
+  assert (as_nat5 r % S.prime == as_nat5 f % S.prime)
+
+
+val lemma_carry52: m1:scale64 -> m2:scale64 -> a:uint64 -> b:uint64 -> Lemma
+  (requires felem_fits1 a m1 /\ felem_fits1 b m2 /\ m1 + 1 <= 4096)
+  (ensures
+    (let c = a +. (b >>. 52ul) in let d = b &. mask52 in
+     felem_fits1 d 1 /\ felem_fits1 c (m1 + 1) /\
+     v d = v b % pow2 52 /\ v c = v a + (v b / pow2 52)))
+
+let lemma_carry52 m1 m2 a b =
+  let c = a +. (b >>. 52ul) in let d = b &. mask52 in
+
+  assert_norm (v mask52 = pow2 52 - 1);
+  mod_mask_lemma b 52ul;
+  assert (v (mod_mask #U64 #SEC 52ul) == v mask52);
+  assert (v d = v b % pow2 52);
+  assert (felem_fits1 d 1);
+
+  Math.Lemmas.lemma_div_lt (v b) 64 52;
+  assert (v b / pow2 52 < pow2 12);
+  assert (v a + v b / pow2 52 <= m1 * max52 + pow2 12);
+  assert_norm (pow2 12 < max52);
+  assert (v a + v b / pow2 52 < (m1 + 1) * max52);
+  Math.Lemmas.lemma_mult_le_right max52 (m1 + 1) 4096;
+  assert_norm (4096 * max52 < pow2 64);
+  Math.Lemmas.small_mod (v a + v b / pow2 52) (pow2 64);
+  assert (v c = v a + v b / pow2 52);
+  assert (felem_fits1 c (m1 + 1))
+
+
+val lemma_carry_last52: m1:scale64_last -> m2:scale64 -> a:uint64 -> b:uint64 -> Lemma
+  (requires felem_fits_last1 a m1 /\ felem_fits1 b m2 /\ m1 + 1 <= 65536)
+  (ensures
+    (let c = a +. (b >>. 52ul) in let d = b &. mask52 in
+     felem_fits1 d 1 /\ felem_fits_last1 c (m1 + 1) /\
+     v d = v b % pow2 52 /\ v c = v a + (v b / pow2 52)))
+
+let lemma_carry_last52 m1 m2 a b =
+  let c = a +. (b >>. 52ul) in let d = b &. mask52 in
+
+  assert_norm (v mask52 = pow2 52 - 1);
+  mod_mask_lemma b 52ul;
+  assert (v (mod_mask #U64 #SEC 52ul) == v mask52);
+  assert (v d = v b % pow2 52);
+  assert (felem_fits1 d 1);
+
+  Math.Lemmas.lemma_div_lt (v b) 64 52;
+  assert (v b / pow2 52 < pow2 12);
+  assert (v a + v b / pow2 52 <= m1 * max48 + pow2 12);
+  assert_norm (pow2 12 < max48);
+  assert (v a + v b / pow2 52 < (m1 + 1) * max48);
+  Math.Lemmas.lemma_mult_le_right max48 (m1 + 1) 65536;
+  assert_norm (65536 * max48 < pow2 64);
+  Math.Lemmas.small_mod (v a + v b / pow2 52) (pow2 64);
+  assert (v c = v a + v b / pow2 52);
+  assert (felem_fits_last1 c (m1 + 1))
+
+
+inline_for_extraction noextract
+let carry_round5 ((t0,t1,t2,t3,t4):felem5) : felem5 =
+  let t1 = t1 +. (t0 >>. 52ul) in let t0 = t0 &. mask52 in
+  let t2 = t2 +. (t1 >>. 52ul) in let t1 = t1 &. mask52 in
+  let t3 = t3 +. (t2 >>. 52ul) in let t2 = t2 &. mask52 in
+  let t4 = t4 +. (t3 >>. 52ul) in let t3 = t3 &. mask52 in
+  (t0,t1,t2,t3,t4)
+
+
+val lemma_a_mod_52_mul_b (a b:nat) :
+  Lemma ((a % pow2 52) * pow2 b = a * pow2 b - a / pow2 52 * pow2 (b + 52))
+
+let lemma_a_mod_52_mul_b a b =
+  calc (==) {
+    (a % pow2 52) * pow2 b;
+    (==) { Math.Lemmas.euclidean_division_definition a (pow2 52) }
+    (a - a / pow2 52 * pow2 52) * pow2 b;
+    (==) { Math.Lemmas.distributivity_sub_left a (a / pow2 52 * pow2 52) (pow2 b) }
+    a * pow2 b - a / pow2 52 * pow2 52 * pow2 b;
+    (==) { Math.Lemmas.paren_mul_right (a / pow2 52) (pow2 52) (pow2 b); Math.Lemmas.pow2_plus 52 b }
+    a * pow2 b - a / pow2 52 * pow2 (52 + b);
+  }
+
+
+val lemma_simplify_carry_round (t0 t1 t2 t3 t4:nat) : Lemma
+ (let a = t1 + t0 / pow2 52 in
+  let b = t2 + a / pow2 52 in
+  let c = t3 + b / pow2 52 in
+  let d = t4 + c / pow2 52 in
+  t0 % pow2 52 + (a % pow2 52) * pow52 + (b % pow2 52) * pow104 +
+  (c % pow2 52) * pow156 + d * pow208 ==
+  t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 * pow208)
+
+let lemma_simplify_carry_round t0 t1 t2 t3 t4 =
+  let a = t1 + t0 / pow2 52 in
+  let b = t2 + a / pow2 52 in
+  let c = t3 + b / pow2 52 in
+  let d = t4 + c / pow2 52 in
+
+  calc (==) {
+    t0 % pow2 52 + (a % pow2 52) * pow52 + (b % pow2 52) * pow104 + (c % pow2 52) * pow156 + d * pow208;
+    (==) { lemma_a_mod_52_mul_b a 52 }
+    t0 % pow2 52 + (t1 + t0 / pow2 52) * pow52 - a / pow52 * pow104 + (b % pow2 52) * pow104 + (c % pow2 52) * pow156 + d * pow208;
+    (==) { Math.Lemmas.distributivity_add_left t1 (t0 / pow2 52) pow52; Math.Lemmas.euclidean_division_definition t0 (pow2 52) }
+    t0 + t1 * pow52 - a / pow52 * pow104 + (b % pow2 52) * pow104 + (c % pow2 52) * pow156 + d * pow208;
+    (==) { lemma_a_mod_52_mul_b b 104 }
+    t0 + t1 * pow52 - a / pow52 * pow104 + (t2 + a / pow2 52) * pow104 - b / pow2 52 * pow156 + (c % pow2 52) * pow156 + d * pow208;
+    (==) { Math.Lemmas.distributivity_add_left t2 (a / pow2 52) pow104 }
+    t0 + t1 * pow52 + t2 * pow104 - b / pow2 52 * pow156 + (c % pow2 52) * pow156 + d * pow208;
+    (==) { lemma_a_mod_52_mul_b c 156 }
+    t0 + t1 * pow52 + t2 * pow104 - b / pow2 52 * pow156 + (t3 + b / pow2 52) * pow156 - c / pow2 52 * pow208 + d * pow208;
+    (==) { Math.Lemmas.distributivity_add_left t3 (b / pow2 52) pow156 }
+    t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 - c / pow2 52 * pow208 + (t4 + c / pow2 52) * pow208;
+    (==) { Math.Lemmas.distributivity_add_left t4 (c / pow2 52) pow208 }
+    t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 * pow208;
+  }
+
+
+val carry_round_after_last_carry_mod_prime5_lemma: m:scale64_5 -> f:felem5 -> Lemma
+  (requires (let (m0,m1,m2,m3,m4) = m in
+    m1 + 1 <= 4096 /\ m2 + 1 <= 4096 /\ m3 + 1 <= 4096 /\ m4 = 1 /\
+    felem_fits5 f (m0,m1,m2,m3,1)))
+  (ensures (let r = carry_round5 f in
+    as_nat5 r == as_nat5 f /\ felem_fits5 r (1,1,1,1,2)))
+
+let carry_round_after_last_carry_mod_prime5_lemma m f =
+  let (m0,m1,m2,m3,m4) = m in
+  let (t0,t1,t2,t3,t4) = f in //(m0,m1,m2,m3,1)
+
+  let t1' = t1 +. (t0 >>. 52ul) in let t0' = t0 &. mask52 in
+  lemma_carry52 m1 m0 t1 t0;
+  assert (felem_fits1 t1' (m1 + 1));
+  assert (felem_fits1 t0' 1);
+  assert (v t0' = v t0 % pow2 52);
+  assert (v t1' = v t1 + v t0 / pow2 52);
+
+  let t2' = t2 +. (t1' >>. 52ul) in let t1'' = t1' &. mask52 in
+  lemma_carry52 m2 (m1 + 1) t2 t1';
+  assert (felem_fits1 t2' (m2 + 1));
+  assert (felem_fits1 t1'' 1);
+  assert (v t1'' = v t1' % pow2 52);
+  assert (v t2' = v t2 + v t1' / pow2 52);
+
+  let t3' = t3 +. (t2' >>. 52ul) in let t2'' = t2' &. mask52 in
+  lemma_carry52 m3 (m2 + 1) t3 t2';
+  assert (felem_fits1 t3' (m3 + 1));
+  assert (felem_fits1 t2'' 1);
+  assert (v t2'' = v t2' % pow2 52);
+  assert (v t3' = v t3 + v t2' / pow2 52);
+
+  let t4' = t4 +. (t3' >>. 52ul) in let t3'' = t3' &. mask52 in
+  lemma_carry_last52 m4 (m3 + 1) t4 t3';
+  assert (felem_fits_last1 t4' (m4 + 1));
+  assert (felem_fits1 t3'' 1);
+  assert (v t3'' = v t3' % pow2 52);
+  assert (v t4' = v t4 + v t3' / pow2 52);
+
+  lemma_simplify_carry_round (v t0) (v t1) (v t2) (v t3) (v t4);
+  let r = carry_round5 f in
+  assert ((t0',t1'',t2'',t3'',t4') == r);
+  assert (as_nat5 r == as_nat5 f);
+  assert (felem_fits5 r (1,1,1,1,2))
+
+
+let normalize_weak5_lemma m f =
+  let (m0,m1,m2,m3,m4) = m in
+
+  let f1 = last_carry_mod_prime5 f in
+  last_carry_mod_prime5_lemma m f;
+  assert (as_nat5 f1 % S.prime = as_nat5 f % S.prime);
+  assert (felem_fits5 f1 (m0+1,m1,m2,m3,1));
+
+  let f2 = carry_round5 f1 in
+  carry_round_after_last_carry_mod_prime5_lemma (m0+1,m1,m2,m3,1) f1;
+  assert (as_nat5 f2 == as_nat5 f1);
+  assert (felem_fits5 f2 (1,1,1,1,2));
+  assert (f2 == normalize_weak5 f)
