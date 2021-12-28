@@ -37,11 +37,10 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "EverCrypt_HMAC.h"
-#include "Lib_Memzero0.h"
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC_DRBG.h"
+#include "EverCrypt_HMAC.h"
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
 

@@ -78,8 +78,6 @@ static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
 
 static inline FStar_UInt128_uint128 load128_be(uint8_t *x0);
 
-uint32_t LowStar_Vector_new_capacity(uint32_t cap);
-
 #if defined(__cplusplus)
 }
 #endif

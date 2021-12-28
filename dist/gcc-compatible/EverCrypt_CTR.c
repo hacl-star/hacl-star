@@ -24,6 +24,10 @@
 
 #include "EverCrypt_CTR.h"
 
+#include "internal/Vale.h"
+#include "internal/Hacl_Spec.h"
+#include "internal/Hacl_Chacha20.h"
+
 typedef struct EverCrypt_CTR_state_s_s
 {
   Spec_Cipher_Expansion_impl i;

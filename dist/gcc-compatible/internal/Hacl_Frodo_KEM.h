@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Lib_Memzero0_H
-#define __Lib_Memzero0_H
+#ifndef __internal_Hacl_Frodo_KEM_H
+#define __internal_Hacl_Frodo_KEM_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -37,13 +37,14 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "internal/Hacl_Kremlib.h"
+#include "../Hacl_Frodo_KEM.h"
 
-
-extern void Lib_Memzero0_memzero(void *x0, uint64_t x1);
+void randombytes_(uint32_t len, uint8_t *res);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Lib_Memzero0_H_DEFINED
+#define __internal_Hacl_Frodo_KEM_H_DEFINED
 #endif

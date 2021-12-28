@@ -24,6 +24,9 @@
 
 #include "Hacl_Frodo64.h"
 
+#include "internal/Lib_Memzero0.h"
+#include "internal/Hacl_Frodo_KEM.h"
+
 /*
  this variant is used only for testing purposes!
  */

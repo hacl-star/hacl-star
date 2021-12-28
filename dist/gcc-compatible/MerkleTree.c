@@ -24,6 +24,8 @@
 
 #include "MerkleTree.h"
 
+#include "internal/Hacl_Kremlib.h"
+
 static uint8_t *hash_r_alloc(uint32_t s)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), s);

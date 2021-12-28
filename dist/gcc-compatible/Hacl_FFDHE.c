@@ -24,6 +24,9 @@
 
 #include "Hacl_FFDHE.h"
 
+#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Bignum.h"
+
 static inline uint32_t ffdhe_len(Spec_FFDHE_ffdhe_alg a)
 {
   switch (a)

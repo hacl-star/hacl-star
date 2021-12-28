@@ -24,6 +24,9 @@
 
 #include "Hacl_Frodo640.h"
 
+#include "internal/Lib_Memzero0.h"
+#include "internal/Hacl_Frodo_KEM.h"
+
 uint32_t Hacl_Frodo640_crypto_bytes = (uint32_t)16U;
 
 uint32_t Hacl_Frodo640_crypto_publickeybytes = (uint32_t)9616U;

@@ -24,6 +24,8 @@
 
 #include "EverCrypt_DRBG.h"
 
+#include "internal/Lib_Memzero0.h"
+
 uint32_t EverCrypt_DRBG_reseed_interval = (uint32_t)1024U;
 
 uint32_t EverCrypt_DRBG_max_output_length = (uint32_t)65536U;

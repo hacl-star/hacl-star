@@ -24,6 +24,12 @@
 
 #include "EverCrypt_Hash.h"
 
+#include "internal/Vale.h"
+#include "internal/Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_MD5.h"
+#include "internal/Hacl_Hash_Blake2.h"
+
 C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___)
 {
   switch (uu___)
