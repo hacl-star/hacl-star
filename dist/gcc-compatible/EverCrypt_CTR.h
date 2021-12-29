@@ -47,36 +47,6 @@ typedef struct EverCrypt_CTR_state_s_s EverCrypt_CTR_state_s;
 bool
 EverCrypt_CTR_uu___is_State(Spec_Agile_Cipher_cipher_alg a, EverCrypt_CTR_state_s projectee);
 
-Spec_Cipher_Expansion_impl
-EverCrypt_CTR___proj__State__item__i(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-);
-
-uint8_t
-*EverCrypt_CTR___proj__State__item__iv(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-);
-
-uint32_t
-EverCrypt_CTR___proj__State__item__iv_len(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-);
-
-uint8_t
-*EverCrypt_CTR___proj__State__item__xkey(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-);
-
-uint32_t
-EverCrypt_CTR___proj__State__item__ctr(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-);
-
 typedef uint8_t EverCrypt_CTR_uint8;
 
 uint8_t EverCrypt_CTR_xor8(uint8_t a, uint8_t b);
