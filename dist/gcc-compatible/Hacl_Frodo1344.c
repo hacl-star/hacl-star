@@ -24,7 +24,6 @@
 
 #include "Hacl_Frodo1344.h"
 
-#include "internal/Lib_Memzero0.h"
 #include "internal/Hacl_Frodo_KEM.h"
 
 uint32_t Hacl_Frodo1344_crypto_bytes = (uint32_t)32U;

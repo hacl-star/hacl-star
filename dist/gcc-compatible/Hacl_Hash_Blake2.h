@@ -37,6 +37,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Lib_Memzero0.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 

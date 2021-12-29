@@ -37,6 +37,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Lib_Memzero0.h"
 #include "Hacl_Kremlib.h"
 
 extern const uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];

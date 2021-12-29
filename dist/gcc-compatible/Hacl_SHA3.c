@@ -24,7 +24,7 @@
 
 #include "Hacl_SHA3.h"
 
-#include "internal/Lib_Memzero0.h"
+
 
 const
 uint32_t

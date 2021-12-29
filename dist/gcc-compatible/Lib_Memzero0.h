@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Lib_Memzero0_H
-#define __internal_Lib_Memzero0_H
+#ifndef __Lib_Memzero0_H
+#define __Lib_Memzero0_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -45,5 +45,5 @@ extern void Lib_Memzero0_memzero(void *x0, uint64_t x1);
 }
 #endif
 
-#define __internal_Lib_Memzero0_H_DEFINED
+#define __Lib_Memzero0_H_DEFINED
 #endif

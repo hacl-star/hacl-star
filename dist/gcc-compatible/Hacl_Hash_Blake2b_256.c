@@ -24,7 +24,6 @@
 
 #include "internal/Hacl_Hash_Blake2b_256.h"
 
-#include "internal/Lib_Memzero0.h"
 #include "internal/Hacl_Kremlib.h"
 #include "internal/Hacl_Hash_Blake2.h"
 

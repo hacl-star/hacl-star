@@ -20,7 +20,7 @@
 #include <limits.h>
 #include <inttypes.h>
 
-#include "internal/Lib_Memzero0.h"
+#include "Lib_Memzero0.h"
 #include "kremlin/internal/target.h"
 
 /* The F* formalization talks about the number of elements in the array. The C
