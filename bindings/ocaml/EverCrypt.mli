@@ -27,6 +27,20 @@ end
 (** {2 Agile interface } *)
 
 module AEAD : sig
+(** Agile, multiplexing AEAD interface exposing AES128-GCM, AES256-GCM, and Chacha20-Poly1305
+
+    To use the agile AEAD interface, users first need to initialise an internal state
+    using {!init}. This state will then need to be passed to every call to {!encrypt}
+    and {!decrypt}. It can be reused as many times as needed.
+    Users are not required to manually free the state.
+
+    The [tag] buffer must be 16 bytes long. For [key] and [iv], each algorithm
+    has different constraints:
+    - AES128-GCM: [key] = 16 bytes , [iv] > 0 bytes
+    - AES256-GCM: [key] = 32 bytes, [iv] > 0 bytes
+    - Chacha20-Poly1305: [key] = 32 bytes, [iv] = 12 bytes
+*)
+
   type t
 
   val init : alg:AEADDefs.alg -> key:bytes -> t Error.result
@@ -58,19 +72,6 @@ module AEAD : sig
         which, if successful, will contain the decrypted [ct]. *)
   end
 end
-(** Agile, multiplexing AEAD interface exposing AES128-GCM, AES256-GCM, and Chacha20-Poly1305
-
-    To use the agile AEAD interface, users first need to initialise an internal state
-    using {!init}. This state will then need to be passed to every call to {!encrypt}
-    and {!decrypt}. It can be reused as many times as needed.
-    Users are not required to manually free the state.
-
-    The [tag] buffer must be 16 bytes long. For [key] and [iv], each algorithm
-    has different constraints:
-    - AES128-GCM: [key] = 16 bytes , [iv] > 0 bytes
-    - AES256-GCM: [key] = 32 bytes, [iv] > 0 bytes
-    - Chacha20-Poly1305: [key] = 32 bytes, [iv] = 12 bytes
-*)
 
 
 (** {2 Chacha20-Poly1305} *)
