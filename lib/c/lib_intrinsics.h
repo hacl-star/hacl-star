@@ -18,7 +18,7 @@
 
 #include "Hacl_IntTypes_Intrinsics.h"
 
-#if defined(HACL_CAN_COMPILE_VEC128)
+#if defined(HACL_CAN_COMPILE_UINT128)
 
 #include "Hacl_IntTypes_Intrinsics_128.h"
 
@@ -36,7 +36,7 @@
 #define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4) \
   (Hacl_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4))
 
-#endif // defined(HACL_CAN_COMPILE_VEC128)
+#endif // defined(HACL_CAN_COMPILE_UINT128)
 
 #define Lib_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4) \
   (Hacl_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4))

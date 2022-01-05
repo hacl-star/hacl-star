@@ -9,27 +9,7 @@ open Lib.Buffer
 
 open FStar.Mul
 
-#set-options "--fuel 0 --ifuel 1 --z3rlimit 200"
-
-inline_for_extraction noextract
-val cast_to : t:inttype{t = U32 \/ t = U64} ->
-  t':inttype{if t = U32 then t' = U64 else t' = U128} ->
-  (u1:int_t t SEC
-  -> u2:int_t t' SEC{v u2 == v u1 @%. t'})
-let cast_to t t' =
-  match t with
-  | U32 -> cast U64 SEC
-  | U64 -> cast U128 SEC
-
-inline_for_extraction noextract
-val cast_from : t:inttype{t = U64 \/ t = U128} ->
-  t':inttype{if t = U64 then t' = U32 else t' = U64} ->
-  (u1:int_t t SEC
-  -> u2:int_t t' SEC{v u2 == v u1 @%. t'})
-let cast_from t t' =
-  match t with
-  | U64 -> cast U32 SEC
-  | U128 -> cast U64 SEC
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 100"
 
 inline_for_extraction noextract
 let add_carry_st (t:inttype{t = U32 \/ t = U64}) =
@@ -44,31 +24,12 @@ let add_carry_st (t:inttype{t = U32 \/ t = U64}) =
     (let r = Seq.index (as_seq h1 r) 0 in
     v r + v c * pow2 (bits t) == v x + v y + v cin))
 
-inline_for_extraction noextract
-val add_carry:
-  t:inttype{t = U32 \/ t = U64} ->
-  t':inttype{if t = U32 then t' = U64 else t' = U128} ->
-  shift_bits:UInt32.t{if t = U32 then shift_bits == 32ul else shift_bits == 64ul} ->
-  add_carry_st t
-let add_carry t t' shift_bits cin x y r =
-  let res = cast_to t t' x +. cast_to t t' cin +. cast_to t t'  y in
-  assert (v res == (v x @%. t') + (v cin @%. t') + (v y @%. t'));
-  let c = cast_from t' t (res >>. shift_bits) in
-  assert (v c == 0 \/ v c == 1);
-  r.(0ul) <- cast_from t' t res;
-  c
-
 val add_carry_u32: add_carry_st U32
-let add_carry_u32 = add_carry U32 U64 32ul
-
-
-inline_for_extraction noextract
-val to_uint : t:inttype{t = U32 \/ t = U64} ->
-  (n:range_t t -> u:int_t t SEC{v u == n})
-let to_uint t =
-  match t with
-  | U32 -> u32
-  | U64 -> u64
+let add_carry_u32 cin x y r =
+  let res = to_u64 x +. to_u64 cin +. to_u64 y in
+  let c = to_u32 (res >>. 32ul) in
+  r.(0ul) <- to_u32 res;
+  c
 
 inline_for_extraction noextract
 let sub_borrow_st (t:inttype{t = U32 \/ t = U64}) =
@@ -83,38 +44,26 @@ let sub_borrow_st (t:inttype{t = U32 \/ t = U64}) =
     (let r = Seq.index (as_seq h1 r) 0 in
     v r - v c * pow2 (bits t) == v x - v y - v cin))
 
-#push-options "--z3rlimit 600"
+val sub_borrow_u32: sub_borrow_st U32
+let sub_borrow_u32 cin x y r =
+  let res = to_u64 x -. to_u64 y -. to_u64 cin in
+  assert (v res == ((v x - v y) % pow2 64 - v cin) % pow2 64);
+  Math.Lemmas.lemma_mod_add_distr (- v cin) (v x - v y) (pow2 64);
+  assert (v res == (v x - v y - v cin) % pow2 64);
 
-inline_for_extraction noextract
-val sub_borrow:
-  t:inttype{t = U32 \/ t = U64} ->
-  t':inttype{if t = U32 then t' = U64 else t' = U128} ->
-  shift_bits:UInt32.t{if t = U32 then shift_bits == 32ul else shift_bits == 64ul} ->
-  p:UInt32.t{if t = U32 then p == 64ul else p == 128ul} ->
-  sub_borrow_st t
-let sub_borrow t t' shift_bits p cin x y r =
-  let res = cast_to t t' x -. cast_to t t' y -. cast_to t t' cin in
-  assert (v res == ((v x - v y) % pow2 (v p) - v cin) % pow2 (v p));
-  assert (v res == (((v x - v y) @%. t') - v cin) @%. t');
-  Math.Lemmas.lemma_mod_add_distr (- v cin) (v x - v y) (pow2 (v p));
-  assert (v res == (v x - v y - v cin) @%. t');
+  assert (v res % pow2 32 = (v x - v y - v cin) % pow2 64 % pow2 32);
+  Math.Lemmas.pow2_modulo_modulo_lemma_1 (v x - v y - v cin) 32 64;
+  assert (v res % pow2 32 = (v x - v y - v cin) % pow2 32);
 
-  assert (v res % pow2 (v shift_bits) = (v x - v y - v cin) % pow2 (v p) % pow2 (v shift_bits));
-  Math.Lemmas.pow2_modulo_modulo_lemma_1 (v x - v y - v cin) (v shift_bits) (v p);
-  assert (v res % pow2 (v shift_bits) = (v x - v y - v cin) % pow2 (v shift_bits));
-
-  let c = cast_from t' t (res >>. shift_bits) &. (to_uint t 1) in
+  let c = to_u32 (res >>. 32ul) &. u32 1 in
   assert_norm (pow2 1 = 2);
-  mod_mask_lemma (cast_from t' t (res >>. shift_bits)) 1ul;
-  assert (v ((mk_int #t #SEC 1 <<. 1ul) -! mk_int 1) == 1);
-  assert (v c = v res / pow2 (v shift_bits) % pow2 1);
+  mod_mask_lemma (to_u32 (res >>. 32ul)) 1ul;
+  assert (v ((mk_int #U32 #SEC 1 <<. 1ul) -! mk_int 1) == 1);
+  assert (v c = v res / pow2 32 % pow2 1);
 
-  r.(0ul) <- cast_from t' t res;
+  r.(0ul) <- to_u32 res;
   assert (v c = (if 0 <= v x - v y - v cin then 0 else 1));
   c
-
-val sub_borrow_u32: sub_borrow_st U32
-let sub_borrow_u32 = sub_borrow U32 U64 32ul 64ul
 
 
 (* Fallback versions of add_carry_u64 and sub_borrow_u64 for platforms which
