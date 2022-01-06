@@ -501,6 +501,8 @@ if ! detect_uint128; then
   # defining KRML_VERIFIED_UINT128.
   echo "$CC $CROSS_CFLAGS does not support unsigned __int128 -- using a fallback verified implementation"
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
+else
+  echo "#define HACL_CAN_COMPILE_UINT128 1" >> config.h
 fi
 
 if [[ "$disable_ocaml" == "1" ]] || ! detect_ocaml; then
