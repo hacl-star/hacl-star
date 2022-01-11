@@ -58,6 +58,9 @@ static inline FStar_UInt128_uint128
 FStar_UInt128_add_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 
 static inline FStar_UInt128_uint128
+FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+
+static inline FStar_UInt128_uint128
 FStar_UInt128_logor(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 
 static inline FStar_UInt128_uint128

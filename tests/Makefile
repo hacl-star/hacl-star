@@ -10,7 +10,7 @@ KREMLIN_HOME?=../dist/kremlin
 USER_CFLAGS?=
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
-TARGETS := $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c)))
+TARGETS := $(filter-out uint128-%, $(filter-out gf128-%, $(patsubst %.c,%.exe,$(wildcard *.c))))
 
 # The idea of this Makefile is that each test is enabled depending on whether
 # the required features for it have been detected by the configure script. The
@@ -53,6 +53,9 @@ endif
 # vec-128-test.c doesn't compile on ARM for some reason
 ifeq ($(TARGET_ARCHITECTURE),ARM)
 TARGETS := $(filter-out vec-128-test.exe, $(TARGETS))
+ifeq ($(COMPILE_VEC128),1)
+TARGETS += uint128-intrinsics-test.exe
+endif
 endif
 
 CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
@@ -91,6 +94,9 @@ vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
 
 %.test: %.exe
 	./$<
+
+gen_uint128_intrinsics_vectors:
+	python3 gen_vectors/gen_uint128_intrinsics_vectors.py
 
 clean:
 	rm -f *.exe
