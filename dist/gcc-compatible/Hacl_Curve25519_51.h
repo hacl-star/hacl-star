@@ -40,16 +40,6 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum25519_51.h"
 
-void
-Hacl_Curve25519_51_fsquare_times(
-  uint64_t *o,
-  uint64_t *inp,
-  FStar_UInt128_uint128 *tmp,
-  uint32_t n
-);
-
-void Hacl_Curve25519_51_finv(uint64_t *o, uint64_t *i, FStar_UInt128_uint128 *tmp);
-
 void Hacl_Curve25519_51_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
 void Hacl_Curve25519_51_secret_to_public(uint8_t *pub, uint8_t *priv);

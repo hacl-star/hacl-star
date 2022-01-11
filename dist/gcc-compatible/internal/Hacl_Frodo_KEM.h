@@ -22,45 +22,29 @@
  */
 
 
-#include "EverCrypt_Vale.h"
+#ifndef __internal_Hacl_Frodo_KEM_H
+#define __internal_Hacl_Frodo_KEM_H
 
-uint8_t *__proj__Mkgcm_args__item__plain(gcm_args projectee)
-{
-  return projectee.plain;
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
+
+
+#include "internal/Hacl_Kremlib.h"
+#include "../Hacl_Frodo_KEM.h"
+
+void randombytes_(uint32_t len, uint8_t *res);
+
+#if defined(__cplusplus)
 }
+#endif
 
-uint64_t __proj__Mkgcm_args__item__plain_len(gcm_args projectee)
-{
-  return projectee.plain_len;
-}
-
-uint8_t *__proj__Mkgcm_args__item__aad(gcm_args projectee)
-{
-  return projectee.aad;
-}
-
-uint64_t __proj__Mkgcm_args__item__aad_len(gcm_args projectee)
-{
-  return projectee.aad_len;
-}
-
-uint8_t *__proj__Mkgcm_args__item__iv(gcm_args projectee)
-{
-  return projectee.iv;
-}
-
-uint8_t *__proj__Mkgcm_args__item__expanded_key(gcm_args projectee)
-{
-  return projectee.expanded_key;
-}
-
-uint8_t *__proj__Mkgcm_args__item__cipher(gcm_args projectee)
-{
-  return projectee.cipher;
-}
-
-uint8_t *__proj__Mkgcm_args__item__tag(gcm_args projectee)
-{
-  return projectee.tag;
-}
-
+#define __internal_Hacl_Frodo_KEM_H_DEFINED
+#endif

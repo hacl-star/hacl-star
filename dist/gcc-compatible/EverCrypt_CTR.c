@@ -24,6 +24,10 @@
 
 #include "EverCrypt_CTR.h"
 
+#include "internal/Vale.h"
+#include "internal/Hacl_Spec.h"
+#include "internal/Hacl_Chacha20.h"
+
 typedef struct EverCrypt_CTR_state_s_s
 {
   Spec_Cipher_Expansion_impl i;
@@ -38,51 +42,6 @@ bool
 EverCrypt_CTR_uu___is_State(Spec_Agile_Cipher_cipher_alg a, EverCrypt_CTR_state_s projectee)
 {
   return true;
-}
-
-Spec_Cipher_Expansion_impl
-EverCrypt_CTR___proj__State__item__i(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.i;
-}
-
-uint8_t
-*EverCrypt_CTR___proj__State__item__iv(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.iv;
-}
-
-uint32_t
-EverCrypt_CTR___proj__State__item__iv_len(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.iv_len;
-}
-
-uint8_t
-*EverCrypt_CTR___proj__State__item__xkey(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.xkey;
-}
-
-uint32_t
-EverCrypt_CTR___proj__State__item__ctr(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.ctr;
 }
 
 uint8_t EverCrypt_CTR_xor8(uint8_t a, uint8_t b)

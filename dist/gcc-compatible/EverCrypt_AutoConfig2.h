@@ -37,7 +37,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Vale.h"
+
 
 bool EverCrypt_AutoConfig2_has_shaext();
 

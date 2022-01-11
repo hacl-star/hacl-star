@@ -37,8 +37,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Bignum.h"
+
 
 typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s
 {

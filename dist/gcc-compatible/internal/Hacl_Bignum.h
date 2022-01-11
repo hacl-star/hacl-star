@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Bignum_H
-#define __Hacl_Bignum_H
+#ifndef __internal_Hacl_Bignum_H
+#define __internal_Hacl_Bignum_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -38,6 +38,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "internal/Hacl_Kremlib.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum_Base.h"
 
@@ -363,5 +364,5 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_u64(
 }
 #endif
 
-#define __Hacl_Bignum_H_DEFINED
+#define __internal_Hacl_Bignum_H_DEFINED
 #endif

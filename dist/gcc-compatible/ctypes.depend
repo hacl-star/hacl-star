@@ -257,9 +257,9 @@ lib_gen/EverCrypt_HKDF_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.c
 lib/Hacl_HMAC_DRBG_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
 lib_gen/Hacl_HMAC_DRBG_gen.cmx: lib/Hacl_HMAC_DRBG_bindings.cmx
 lib_gen/Hacl_HMAC_DRBG_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/Hacl_HMAC_DRBG_bindings.cmx lib_gen/Hacl_HMAC_DRBG_gen.cmx 
-lib/EverCrypt_DRBG_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_HMAC_DRBG_bindings.cmx lib/Hacl_HMAC_DRBG_stubs.cmx 
+lib/EverCrypt_DRBG_bindings.cmx: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx 
 lib_gen/EverCrypt_DRBG_gen.cmx: lib/EverCrypt_DRBG_bindings.cmx
-lib_gen/EverCrypt_DRBG_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/Hacl_HMAC_DRBG_bindings.cmx lib/Hacl_HMAC_DRBG_stubs.cmx lib/Hacl_HMAC_DRBG_c_stubs.o lib/EverCrypt_DRBG_bindings.cmx lib_gen/EverCrypt_DRBG_gen.cmx 
+lib_gen/EverCrypt_DRBG_gen.exe: lib/Hacl_Spec_bindings.cmx lib/Hacl_Spec_stubs.cmx lib/Hacl_Spec_c_stubs.o lib/EverCrypt_DRBG_bindings.cmx lib_gen/EverCrypt_DRBG_gen.cmx 
 lib/EverCrypt_Poly1305_bindings.cmx: 
 lib_gen/EverCrypt_Poly1305_gen.cmx: lib/EverCrypt_Poly1305_bindings.cmx
 lib_gen/EverCrypt_Poly1305_gen.exe: lib/EverCrypt_Poly1305_bindings.cmx lib_gen/EverCrypt_Poly1305_gen.cmx 

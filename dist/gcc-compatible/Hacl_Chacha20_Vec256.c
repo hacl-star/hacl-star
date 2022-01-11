@@ -24,6 +24,8 @@
 
 #include "Hacl_Chacha20_Vec256.h"
 
+#include "internal/Hacl_Chacha20.h"
+
 static inline void double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
 {
   st[0U] = Lib_IntVector_Intrinsics_vec256_add32(st[0U], st[4U]);

@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Vale_H
-#define __Vale_H
+#ifndef __internal_Vale_H
+#define __internal_Vale_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -213,5 +213,5 @@ gctr256_bytes(
 }
 #endif
 
-#define __Vale_H_DEFINED
+#define __internal_Vale_H_DEFINED
 #endif
