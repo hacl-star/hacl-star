@@ -137,9 +137,10 @@ function dummyModule(funcs, globals) {
 }
 
 let mkWasmSupport = (mem) => ({
-  WasmSupport_trap: () => {
+  WasmSupport_trap: (s) => {
     dump(mem, 2*1024);
-    my_print("Run-time trap, e.g. zero-sized array or abort.");
+    my_print(stringAtAddr(mem, addr));
+    my_print("Run-time trap, e.g. zero-sized array or abort. See error message above.");
     throw new Error();
   }
 });
@@ -448,15 +449,7 @@ function propagate(module_name, imports, instance) {
 function reserve(mem, size) {
   let m32 = new Uint32Array(mem.buffer);
   let p = m32[0];
-  let curr = mem.byteLength;
-  let want = p + size;
-  if (want > curr) {
-    // The number of WebAssembly pages you want to grow the memory by (each one is 64KiB in size).
-    let need = Math.ceil((want - curr) / (64 * 1024)) + 1;
-    // One extra page for suitable stack space.
-    mem.grow(need);
-  }
-  m32[0] = want;
+  m32[0] += size;
   // my_print("Reserved memory area 0x"+p32(p)+"..0x"+p32(m32[0]));
   return p;
 }

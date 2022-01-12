@@ -622,9 +622,12 @@ REQUIRED_BUNDLES = \
   -bundle Hacl.Impl.Poly1305.Fields \
   -bundle 'EverCrypt.Spec.*'
 
+REQUIRED_DROP =
+  -drop EverCrypt.TargetConfig
+
 REQUIRED_FLAGS	= \
   $(REQUIRED_BUNDLES) \
-  -drop EverCrypt.TargetConfig \
+  $(REQUIRED_DROP) \
   -library 'Vale.Stdcalls.*' \
   -no-prefix 'Vale.Stdcalls.*' \
   -static-header 'Vale.Inline.*' \
@@ -791,7 +794,10 @@ dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum4096_32,Hacl.Bignum256_32,Hacl.Bignum4096,Hacl.Bignum256,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
 dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE
-dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
+dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle EverCrypt.TargetConfig \
+  -bundle EverCrypt.Hash.Incremental=EverCrypt.Hash[rename=EverCrypt_Hash] \
+  -bundle 'EverCrypt,EverCrypt.*'
+dist/wasm/Makefile.basic: REQUIRED_DROP =
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
 	cp -f $(filter-out %.basic,$^) $(dir $@)
