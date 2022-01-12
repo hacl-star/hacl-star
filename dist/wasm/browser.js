@@ -78,12 +78,12 @@ function main({ reserve, dump, my_print, hex }, scope) {
   let block_buffer = internal_hash_state + 32;
 
   // Debug
-  console.log("incremental_state", incremental_state);
-  console.log("block_state", block_state);
-  console.log("internal_hash_state", internal_hash_state);
-  console.log("block_buffer", block_buffer);
-  window.m8 = mem8;
-  window.m32 = mem32;
+  // console.log("incremental_state", incremental_state);
+  // console.log("block_state", block_state);
+  // console.log("internal_hash_state", internal_hash_state);
+  // console.log("block_buffer", block_buffer);
+  // window.m8 = mem8;
+  // window.m32 = mem32;
 
   // Construct the object graph.
   mem32[incremental_state/4] = block_state;

@@ -622,7 +622,7 @@ REQUIRED_BUNDLES = \
   -bundle Hacl.Impl.Poly1305.Fields \
   -bundle 'EverCrypt.Spec.*'
 
-REQUIRED_DROP =
+REQUIRED_DROP = \
   -drop EverCrypt.TargetConfig
 
 REQUIRED_FLAGS	= \
