@@ -567,10 +567,6 @@ old-%:
 	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
 	  ,[OLD-MAKE $*],obj/old-$*)
 
-# This is all legacy. Some notes:
-HACL_OLD_FILES=\
-  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
-
 
 ########################################
 # Distributions of EverCrypt and HACL* #
@@ -733,7 +729,6 @@ WASM_FLAGS	=\
 dist/wasm/Makefile.basic: VALE_ASMS =
 dist/wasm/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/wasm/Makefile.basic: HAND_WRITTEN_H_FILES =
-dist/wasm/Makefile.basic: HACL_OLD_FILES =
 dist/wasm/Makefile.basic: HAND_WRITTEN_FILES =
 dist/wasm/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/wasm/Makefile.basic: INTRINSIC_FLAGS =
@@ -856,6 +851,11 @@ dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
 # -----
 dist/mitls/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 dist/mitls/Makefile.basic: LEGACY_BUNDLE =
+# This is a broken AES... used by the (awful) EverCrypt.fst which in turns calls
+# EverCrypt.HACL.fsti which in turns calls (via C #ifdefs) Crypto.Symmetric.AES
+dist/mitls/Makefile.basic: HACL_OLD_FILES = \
+  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
+
 
 # Not passed to kremlin, meaning that they don't end up in the Makefile.basic
 # list of C source files. They're added manually in dist/Makefile (see ifneq
@@ -871,7 +871,6 @@ dist/mitls/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
 # - Use C89 versions of ancient HACL code
 dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
 dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
-dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
 
 # Linux distribution (not compiled on CI)
 # ---------------------------------------
@@ -939,7 +938,6 @@ dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/vale/
 dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
-dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/ccf/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519
 dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
@@ -974,7 +972,6 @@ dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
 dist/election-guard/Makefile.basic: INTRINSIC_FLAGS =
 dist/election-guard/Makefile.basic: VALE_ASMS =
 dist/election-guard/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/election-guard/Makefile.basic: HACL_OLD_FILES =
 dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/evercrypt_vale_stubs.c %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
 dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
 dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
@@ -1020,7 +1017,6 @@ dist/mozilla/Makefile.basic: \
 dist/mozilla/Makefile.basic: VALE_ASMS := $(filter dist/vale/curve25519-%,$(VALE_ASMS))
 dist/mozilla/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter %/libintvector.h,$(HAND_WRITTEN_H_FILES))
-dist/mozilla/Makefile.basic: HACL_OLD_FILES =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_FILES =
 dist/mozilla/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
@@ -1045,7 +1041,6 @@ dist/merkle-tree/Makefile.basic: \
 dist/merkle-tree/Makefile.basic: VALE_ASMS =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_H_FILES =
-dist/merkle-tree/Makefile.basic: HACL_OLD_FILES =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_FILES =
 dist/merkle-tree/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
