@@ -108,7 +108,7 @@ function main({ reserve, dump, my_print, hex }, scope) {
   console.log("STREAMING: finish");
   let dst = reserve(mem, 32);
   scope.EverCrypt_Hash.EverCrypt_Hash_Incremental_finish(incremental_state, dst);
-  console.log("Hash is:", hex(m8, dst, 32));
+  console.log("Hash is:", hex(mem8, dst, 32));
   mem32[0] = sp;
   mem32[0] = sp0;
 
