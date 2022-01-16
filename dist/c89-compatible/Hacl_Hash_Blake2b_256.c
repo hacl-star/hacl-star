@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Hash_Blake2b_256.h"
+#include "internal/Hacl_Hash_Blake2b_256.h"
+
+#include "internal/Hacl_Hash_Blake2.h"
 
 static FStar_UInt128_uint128
 update_blake2b_256(

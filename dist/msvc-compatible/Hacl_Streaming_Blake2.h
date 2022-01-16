@@ -37,8 +37,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
+#include "Hacl_Kremlib.h"
 #include "Hacl_Hash_Blake2.h"
 
 uint32_t

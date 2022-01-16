@@ -37,41 +37,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Hacl_SHA2_Generic.h"
-
-/* SNIPPET_START: K____uint8_t___uint8_t_ */
-
-typedef struct K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  uint8_t *snd;
-}
-K____uint8_t___uint8_t_;
-
-/* SNIPPET_END: K____uint8_t___uint8_t_ */
-
-/* SNIPPET_START: K____uint8_t__K____uint8_t___uint8_t_ */
-
-typedef struct K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  K____uint8_t___uint8_t_ snd;
-}
-K____uint8_t__K____uint8_t___uint8_t_;
-
-/* SNIPPET_END: K____uint8_t__K____uint8_t___uint8_t_ */
-
-/* SNIPPET_START: K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ */
-
-typedef struct K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
-
-/* SNIPPET_END: K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ */
+#include "Hacl_Kremlib.h"
 
 /* SNIPPET_START: Hacl_SHA2_Vec256_sha224_8 */
 
@@ -122,18 +89,6 @@ Hacl_SHA2_Vec256_sha256_8(
 );
 
 /* SNIPPET_END: Hacl_SHA2_Vec256_sha256_8 */
-
-/* SNIPPET_START: K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ */
-
-typedef struct
-K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ fst;
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
-
-/* SNIPPET_END: K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ */
 
 /* SNIPPET_START: Hacl_SHA2_Vec256_sha384_4 */
 

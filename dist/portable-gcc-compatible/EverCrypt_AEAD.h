@@ -37,12 +37,10 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "EverCrypt_Chacha20Poly1305.h"
-#include "Vale.h"
-#include "EverCrypt_AutoConfig2.h"
-#include "EverCrypt_Error.h"
 #include "Hacl_Spec.h"
+#include "EverCrypt_Error.h"
+#include "EverCrypt_Chacha20Poly1305.h"
+#include "EverCrypt_AutoConfig2.h"
 
 /* SNIPPET_START: EverCrypt_AEAD_state_s */
 
@@ -55,20 +53,6 @@ typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
 bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
 
 /* SNIPPET_END: EverCrypt_AEAD_uu___is_Ek */
-
-/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__impl */
-
-Spec_Cipher_Expansion_impl
-EverCrypt_AEAD___proj__Ek__item__impl(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
-
-/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__impl */
-
-/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__ek */
-
-uint8_t
-*EverCrypt_AEAD___proj__Ek__item__ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
-
-/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__ek */
 
 /* SNIPPET_START: EverCrypt_AEAD_alg_of_state */
 

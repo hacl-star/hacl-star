@@ -38,8 +38,8 @@ extern "C" {
 
 
 #include "Hacl_Streaming_Blake2.h"
-#include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
+#include "Hacl_Kremlib.h"
 #include "Hacl_Hash_Blake2b_256.h"
 #include "Hacl_Hash_Blake2.h"
 

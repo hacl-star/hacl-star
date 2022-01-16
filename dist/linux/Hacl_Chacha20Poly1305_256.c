@@ -24,6 +24,8 @@
 
 #include "Hacl_Chacha20Poly1305_256.h"
 
+#include "internal/Hacl_Poly1305_256.h"
+
 static inline void poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, u32 len, u8 *text)
 {
   u32 n = len / (u32)16U;

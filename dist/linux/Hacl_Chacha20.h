@@ -38,8 +38,6 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 
-extern const u32 Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
-
 void Hacl_Chacha20_chacha20_encrypt(u32 len, u8 *out, u8 *text, u8 *key, u8 *n, u32 ctr);
 
 void Hacl_Chacha20_chacha20_decrypt(u32 len, u8 *out, u8 *cipher, u8 *key, u8 *n, u32 ctr);

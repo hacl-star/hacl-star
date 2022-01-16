@@ -37,7 +37,6 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
 
 /* SNIPPET_START: Hacl_Chacha20_Vec32_chacha20_encrypt_32 */

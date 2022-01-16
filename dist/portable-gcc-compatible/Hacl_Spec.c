@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Spec.h"
+#include "internal/Hacl_Spec.h"
+
+
 
 /* SNIPPET_START: Spec_Cipher_Expansion_cipher_alg_of_impl */
 

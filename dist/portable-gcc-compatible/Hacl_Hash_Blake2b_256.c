@@ -22,7 +22,10 @@
  */
 
 
-#include "Hacl_Hash_Blake2b_256.h"
+#include "internal/Hacl_Hash_Blake2b_256.h"
+
+#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Hash_Blake2.h"
 
 /* SNIPPET_START: update_blake2b_256 */
 

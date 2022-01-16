@@ -36,7 +36,6 @@ extern "C" {
 #include <stdbool.h>
 
 
-#include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
 
 void

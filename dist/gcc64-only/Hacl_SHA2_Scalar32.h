@@ -37,9 +37,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Hacl_SHA2_Generic.h"
-#include "Hacl_SHA2_Vec256.h"
+#include "Hacl_Kremlib.h"
 
 void Hacl_SHA2_Scalar32_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input);
 

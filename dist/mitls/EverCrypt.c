@@ -24,6 +24,8 @@
 
 #include "EverCrypt.h"
 
+#include "internal/EverCrypt_OpenSSL.h"
+
 uint32_t EverCrypt_random_init()
 {
   if (EverCrypt_AutoConfig2_wants_openssl())
@@ -69,13 +71,13 @@ typedef struct EverCrypt_aes128_key_s_s
   union {
     FStar_Dyn_dyn case_AES128_OPENSSL;
     FStar_Dyn_dyn case_AES128_BCRYPT;
-    struct 
+    struct
     {
       uint8_t *w;
       uint8_t *sbox;
     }
     case_AES128_VALE;
-    struct 
+    struct
     {
       uint8_t *w;
       uint8_t *sbox;
@@ -95,19 +97,6 @@ bool EverCrypt_uu___is_AES128_OPENSSL(EverCrypt_aes128_key_s projectee)
   return false;
 }
 
-FStar_Dyn_dyn EverCrypt___proj__AES128_OPENSSL__item__st(EverCrypt_aes128_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES128_OPENSSL)
-  {
-    return projectee.case_AES128_OPENSSL;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
 bool EverCrypt_uu___is_AES128_BCRYPT(EverCrypt_aes128_key_s projectee)
 {
   if (projectee.tag == EverCrypt_AES128_BCRYPT)
@@ -115,19 +104,6 @@ bool EverCrypt_uu___is_AES128_BCRYPT(EverCrypt_aes128_key_s projectee)
     return true;
   }
   return false;
-}
-
-FStar_Dyn_dyn EverCrypt___proj__AES128_BCRYPT__item__st(EverCrypt_aes128_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES128_BCRYPT)
-  {
-    return projectee.case_AES128_BCRYPT;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
 }
 
 bool EverCrypt_uu___is_AES128_VALE(EverCrypt_aes128_key_s projectee)
@@ -139,32 +115,6 @@ bool EverCrypt_uu___is_AES128_VALE(EverCrypt_aes128_key_s projectee)
   return false;
 }
 
-uint8_t *EverCrypt___proj__AES128_VALE__item__w(EverCrypt_aes128_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES128_VALE)
-  {
-    return projectee.case_AES128_VALE.w;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
-uint8_t *EverCrypt___proj__AES128_VALE__item__sbox(EverCrypt_aes128_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES128_VALE)
-  {
-    return projectee.case_AES128_VALE.sbox;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
 bool EverCrypt_uu___is_AES128_HACL(EverCrypt_aes128_key_s projectee)
 {
   if (projectee.tag == EverCrypt_AES128_HACL)
@@ -172,32 +122,6 @@ bool EverCrypt_uu___is_AES128_HACL(EverCrypt_aes128_key_s projectee)
     return true;
   }
   return false;
-}
-
-uint8_t *EverCrypt___proj__AES128_HACL__item__w(EverCrypt_aes128_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES128_HACL)
-  {
-    return projectee.case_AES128_HACL.w;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
-uint8_t *EverCrypt___proj__AES128_HACL__item__sbox(EverCrypt_aes128_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES128_HACL)
-  {
-    return projectee.case_AES128_HACL.sbox;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
 }
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
@@ -351,7 +275,7 @@ typedef struct EverCrypt_aes256_key_s_s
   union {
     FStar_Dyn_dyn case_AES256_OPENSSL;
     FStar_Dyn_dyn case_AES256_BCRYPT;
-    struct 
+    struct
     {
       uint8_t *w;
       uint8_t *sbox;
@@ -371,19 +295,6 @@ bool EverCrypt_uu___is_AES256_OPENSSL(EverCrypt_aes256_key_s projectee)
   return false;
 }
 
-FStar_Dyn_dyn EverCrypt___proj__AES256_OPENSSL__item__st(EverCrypt_aes256_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES256_OPENSSL)
-  {
-    return projectee.case_AES256_OPENSSL;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
 bool EverCrypt_uu___is_AES256_BCRYPT(EverCrypt_aes256_key_s projectee)
 {
   if (projectee.tag == EverCrypt_AES256_BCRYPT)
@@ -393,19 +304,6 @@ bool EverCrypt_uu___is_AES256_BCRYPT(EverCrypt_aes256_key_s projectee)
   return false;
 }
 
-FStar_Dyn_dyn EverCrypt___proj__AES256_BCRYPT__item__st(EverCrypt_aes256_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES256_BCRYPT)
-  {
-    return projectee.case_AES256_BCRYPT;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
 bool EverCrypt_uu___is_AES256_HACL(EverCrypt_aes256_key_s projectee)
 {
   if (projectee.tag == EverCrypt_AES256_HACL)
@@ -413,32 +311,6 @@ bool EverCrypt_uu___is_AES256_HACL(EverCrypt_aes256_key_s projectee)
     return true;
   }
   return false;
-}
-
-uint8_t *EverCrypt___proj__AES256_HACL__item__w(EverCrypt_aes256_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES256_HACL)
-  {
-    return projectee.case_AES256_HACL.w;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
-uint8_t *EverCrypt___proj__AES256_HACL__item__sbox(EverCrypt_aes256_key_s projectee)
-{
-  if (projectee.tag == EverCrypt_AES256_HACL)
-  {
-    return projectee.case_AES256_HACL.sbox;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
 }
 
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")

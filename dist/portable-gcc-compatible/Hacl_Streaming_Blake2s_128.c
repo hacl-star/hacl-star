@@ -24,6 +24,8 @@
 
 #include "Hacl_Streaming_Blake2s_128.h"
 
+
+
 /* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_create_in */
 
 /*

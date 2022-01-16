@@ -36,52 +36,9 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
+#include "Hacl_Kremlib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-
-void Hacl_Hash_Core_Blake2_finish_blake2s_32(u32 *s, u64 ev, u8 *dst);
-
-void Hacl_Hash_Core_Blake2_finish_blake2b_32(u64 *s, uint128_t ev, u8 *dst);
-
-u64 Hacl_Hash_Blake2_update_multi_blake2s_32(u32 *s, u64 ev, u8 *blocks, u32 n_blocks);
-
-uint128_t
-Hacl_Hash_Blake2_update_multi_blake2b_32(u64 *s, uint128_t ev, u8 *blocks, u32 n_blocks);
-
-typedef struct K___u32_u32_u32__u8___u8__s
-{
-  u32 fst;
-  u32 snd;
-  u32 thd;
-  u8 *f3;
-  u8 *f4;
-}
-K___u32_u32_u32__u8___u8_;
-
-typedef struct K___u32_u32_u32_s
-{
-  u32 fst;
-  u32 snd;
-  u32 thd;
-}
-K___u32_u32_u32;
-
-u64
-Hacl_Hash_Blake2_update_last_blake2s_32(u32 *s, u64 ev, u64 prev_len, u8 *input, u32 input_len);
-
-uint128_t
-Hacl_Hash_Blake2_update_last_blake2b_32(
-  u64 *s,
-  uint128_t ev,
-  uint128_t prev_len,
-  u8 *input,
-  u32 input_len
-);
-
-void Hacl_Hash_Blake2_hash_blake2s_32(u8 *input, u32 input_len, u8 *dst);
-
-void Hacl_Hash_Blake2_hash_blake2b_32(u8 *input, u32 input_len, u8 *dst);
 
 void Hacl_Blake2b_32_blake2b_init(u64 *hash, u32 kk, u32 nn);
 
@@ -106,13 +63,6 @@ Hacl_Blake2b_32_blake2b_update_last(
   u32 rem,
   u8 *d
 );
-
-typedef struct K___u32_u32_s
-{
-  u32 fst;
-  u32 snd;
-}
-K___u32_u32;
 
 void Hacl_Blake2b_32_blake2b_finish(u32 nn, u8 *output, u64 *hash);
 

@@ -24,6 +24,8 @@
 
 #include "Hacl_Streaming_Poly1305_256.h"
 
+
+
 /* SNIPPET_START: Hacl_Streaming_Poly1305_256_create_in */
 
 Hacl_Streaming_Poly1305_256_poly1305_256_state

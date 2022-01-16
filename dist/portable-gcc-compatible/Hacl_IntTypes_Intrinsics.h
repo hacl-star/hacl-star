@@ -37,7 +37,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
+
 
 /* SNIPPET_START: Hacl_IntTypes_Intrinsics_add_carry_u32 */
 

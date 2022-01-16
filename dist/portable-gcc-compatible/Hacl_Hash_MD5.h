@@ -39,24 +39,6 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 
-/* SNIPPET_START: Hacl_Hash_Core_MD5_legacy_init */
-
-void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s);
-
-/* SNIPPET_END: Hacl_Hash_Core_MD5_legacy_init */
-
-/* SNIPPET_START: Hacl_Hash_Core_MD5_legacy_update */
-
-void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x);
-
-/* SNIPPET_END: Hacl_Hash_Core_MD5_legacy_update */
-
-/* SNIPPET_START: Hacl_Hash_Core_MD5_legacy_finish */
-
-void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst);
-
-/* SNIPPET_END: Hacl_Hash_Core_MD5_legacy_finish */
-
 /* SNIPPET_START: Hacl_Hash_MD5_legacy_update_multi */
 
 void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);

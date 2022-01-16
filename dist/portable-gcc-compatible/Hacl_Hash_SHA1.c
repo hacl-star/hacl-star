@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_SHA1.h"
+
+
 
 /* SNIPPET_START: _h0 */
 

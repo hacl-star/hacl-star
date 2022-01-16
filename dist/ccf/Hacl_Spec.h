@@ -61,9 +61,6 @@ typedef uint8_t Spec_Agile_Cipher_cipher_alg;
 
 typedef uint8_t Spec_Cipher_Expansion_impl;
 
-Spec_Agile_Cipher_cipher_alg
-Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
-
 #if defined(__cplusplus)
 }
 #endif

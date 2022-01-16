@@ -24,6 +24,8 @@
 
 #include "Hacl_Streaming_Poly1305_32.h"
 
+
+
 /* SNIPPET_START: Hacl_Streaming_Poly1305_32_create_in */
 
 Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_create_in(uint8_t *k)

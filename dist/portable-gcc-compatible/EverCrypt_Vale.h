@@ -69,54 +69,6 @@ gcm_args;
 
 /* SNIPPET_END: gcm_args */
 
-/* SNIPPET_START: __proj__Mkgcm_args__item__plain */
-
-uint8_t *__proj__Mkgcm_args__item__plain(gcm_args projectee);
-
-/* SNIPPET_END: __proj__Mkgcm_args__item__plain */
-
-/* SNIPPET_START: __proj__Mkgcm_args__item__plain_len */
-
-uint64_t __proj__Mkgcm_args__item__plain_len(gcm_args projectee);
-
-/* SNIPPET_END: __proj__Mkgcm_args__item__plain_len */
-
-/* SNIPPET_START: __proj__Mkgcm_args__item__aad */
-
-uint8_t *__proj__Mkgcm_args__item__aad(gcm_args projectee);
-
-/* SNIPPET_END: __proj__Mkgcm_args__item__aad */
-
-/* SNIPPET_START: __proj__Mkgcm_args__item__aad_len */
-
-uint64_t __proj__Mkgcm_args__item__aad_len(gcm_args projectee);
-
-/* SNIPPET_END: __proj__Mkgcm_args__item__aad_len */
-
-/* SNIPPET_START: __proj__Mkgcm_args__item__iv */
-
-uint8_t *__proj__Mkgcm_args__item__iv(gcm_args projectee);
-
-/* SNIPPET_END: __proj__Mkgcm_args__item__iv */
-
-/* SNIPPET_START: __proj__Mkgcm_args__item__expanded_key */
-
-uint8_t *__proj__Mkgcm_args__item__expanded_key(gcm_args projectee);
-
-/* SNIPPET_END: __proj__Mkgcm_args__item__expanded_key */
-
-/* SNIPPET_START: __proj__Mkgcm_args__item__cipher */
-
-uint8_t *__proj__Mkgcm_args__item__cipher(gcm_args projectee);
-
-/* SNIPPET_END: __proj__Mkgcm_args__item__cipher */
-
-/* SNIPPET_START: __proj__Mkgcm_args__item__tag */
-
-uint8_t *__proj__Mkgcm_args__item__tag(gcm_args projectee);
-
-/* SNIPPET_END: __proj__Mkgcm_args__item__tag */
-
 /* SNIPPET_START: old_aes128_key_expansion */
 
 extern void __stdcall old_aes128_key_expansion(uint8_t *key_ptr, uint8_t *expanded_key_ptr);

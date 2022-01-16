@@ -24,6 +24,8 @@
 
 #include "Hacl_HMAC_Blake2s_128.h"
 
+#include "internal/Hacl_Hash_Blake2s_128.h"
+
 typedef struct ___Lib_IntVector_Intrinsics_vec128__uint64_t_s
 {
   Lib_IntVector_Intrinsics_vec128 *fst;

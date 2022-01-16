@@ -69,7 +69,7 @@ endif
 # EverCrypt.OpenSSL, in case the static configuration doesn't call into
 # OpenSSL, then EverCrypt_OpenSSL.h is not generated, meaning if the header
 # doesn't exist we are not intend to compile against OpenSSL.
-ifneq (,$(wildcard EverCrypt_OpenSSL.h))
+ifneq (,$(wildcard internal/EverCrypt_OpenSSL.h))
   CFLAGS	+= -I $(OPENSSL_HOME)/include
   LDFLAGS 	+= -L$(OPENSSL_HOME) -lcrypto
 ifneq ($(OS),Windows_NT)
@@ -78,7 +78,7 @@ endif
   SOURCES	+= evercrypt_openssl.c
 endif
 
-ifneq (,$(wildcard EverCrypt_BCrypt.h))
+ifneq (,$(wildcard internal/EverCrypt_BCrypt.h))
   LDFLAGS	+= -lbcrypt
   SOURCES	+= evercrypt_bcrypt.c
 endif

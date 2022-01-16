@@ -22,7 +22,11 @@
  */
 
 
-#include "Hacl_HMAC.h"
+#include "internal/Hacl_HMAC.h"
+
+#include "internal/Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_Blake2.h"
 
 void
 Hacl_HMAC_legacy_compute_sha1(

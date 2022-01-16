@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Hash_Blake2s_128.h"
+#include "internal/Hacl_Hash_Blake2s_128.h"
+
+#include "internal/Hacl_Hash_Blake2.h"
 
 static u64 update_blake2s_128(Lib_IntVector_Intrinsics_vec128 *s, u64 totlen, u8 *block)
 {

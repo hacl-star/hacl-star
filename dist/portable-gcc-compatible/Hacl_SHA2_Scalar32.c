@@ -24,6 +24,8 @@
 
 #include "Hacl_SHA2_Scalar32.h"
 
+#include "internal/Hacl_SHA2_Vec256.h"
+
 /* SNIPPET_START: sha224_update1 */
 
 static inline void sha224_update1(uint8_t *block, uint32_t *hash)

@@ -24,6 +24,9 @@
 
 #include "Hacl_Bignum256.h"
 
+#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Bignum.h"
+
 /* SNIPPET_START: Hacl_Bignum256_add */
 
 /*******************************************************************************

@@ -24,6 +24,8 @@
 
 #include "Hacl_Poly1305_32.h"
 
+#include "internal/Hacl_Kremlib.h"
+
 /* SNIPPET_START: Hacl_Poly1305_32_blocklen */
 
 uint32_t Hacl_Poly1305_32_blocklen = (uint32_t)16U;

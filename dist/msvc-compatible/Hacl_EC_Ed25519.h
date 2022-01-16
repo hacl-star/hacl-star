@@ -39,7 +39,6 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum25519_51.h"
-#include "Hacl_Ed25519.h"
 
 void Hacl_EC_Ed25519_mk_felem_zero(uint64_t *b);
 

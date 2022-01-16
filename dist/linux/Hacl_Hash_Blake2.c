@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Hash_Blake2.h"
+#include "internal/Hacl_Hash_Blake2.h"
+
+
 
 static u64 update_blake2s_32(u32 *s, u64 totlen, u8 *block)
 {
