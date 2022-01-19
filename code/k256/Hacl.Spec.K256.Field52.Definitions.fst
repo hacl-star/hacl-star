@@ -101,10 +101,15 @@ let ( ** ) (x y:nat5) : nat5 =
 
 
 noextract
-let max52 = pow2 52 - 1
+let max52 : pos =
+  assert_norm (pow2 52 - 1 > 0);
+  pow2 52 - 1
 
 noextract
-let max48 = pow2 48 - 1
+let max48 : pos =
+  assert_norm (pow2 48 - 1 > 0);
+  pow2 48 - 1
+
 
 let felem_fits1 (x:uint64) (m:scale64) =
   v x <= m * max52

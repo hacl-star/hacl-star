@@ -167,7 +167,7 @@ let normalize_weak5 ((t0,t1,t2,t3,t4):felem5) : felem5 =
 
 
 inline_for_extraction noextract
-let normalize5 (f0,f1,f2,f3,f4) : felem5 =
+let normalize5 ((f0,f1,f2,f3,f4):felem5) : felem5 =
   let (t0,t1,t2,t3,t4) = normalize_weak5 (f0,f1,f2,f3,f4) in
   let x, (r0,r1,r2,r3,r4) = minus_x_mul_pow2_256 (t0,t1,t2,t3,t4) in
   let is_ge_p_m = is_felem_ge_prime5 (r0,r1,r2,r3,r4) in // as_nat r >= S.prime
@@ -178,7 +178,72 @@ let normalize5 (f0,f1,f2,f3,f4) : felem5 =
   (k0,k1,k2,k3,k4)
 
 
+inline_for_extraction noextract
+let fmul5 ((a0,a1,a2,a3,a4):felem5) ((b0,b1,b2,b3,b4):felem5) : felem5 =
+  let r = u64 0x1000003D10 in
+
+  let d0 = mul64_wide a0 b3
+       +. mul64_wide a1 b2
+       +. mul64_wide a2 b1
+       +. mul64_wide a3 b0 in
+
+  let c0 = mul64_wide a4 b4 in
+  let d1 = d0 +. mul64_wide r (to_u64 c0) in let c1 = to_u64 (c0 >>. 64ul) in
+  let t3 = to_u64 d1 &. mask52 in let d2 = d1 >>. 52ul in
+
+  let d3 = d2
+       +. mul64_wide a0 b4
+       +. mul64_wide a1 b3
+       +. mul64_wide a2 b2
+       +. mul64_wide a3 b1
+       +. mul64_wide a4 b0 in
+
+  let d4 = d3 +. mul64_wide (r <<. 12ul) c1 in
+  let t4 = to_u64 d4 &. mask52 in let d5 = d4 >>. 52ul in
+  let tx = t4 >>. 48ul in let t4' = t4 &. mask48 in
+
+  let c2 = mul64_wide a0 b0 in
+
+  let d6 = d5
+       +. mul64_wide a1 b4
+       +. mul64_wide a2 b3
+       +. mul64_wide a3 b2
+       +. mul64_wide a4 b1 in
+
+  let u0 = to_u64 d6 &. mask52 in let d7 = d6 >>. 52ul in
+  let u0' = tx |. (u0 <<. 4ul) in
+  let c3 = c2 +. mul64_wide u0' (r >>. 4ul) in
+  let r0 = to_u64 c3 &. mask52 in let c4 = c3 >>. 52ul in
+
+  let c5 = c4
+       +. mul64_wide a0 b1
+       +. mul64_wide a1 b0 in
+
+  let d8 = d7
+       +. mul64_wide a2 b4
+       +. mul64_wide a3 b3
+       +. mul64_wide a4 b2 in
+
+  let c6 = c5 +. mul64_wide (to_u64 d8 &. mask52) r in let d9 = d8 >>. 52ul in
+  let r1 = to_u64 c6 &. mask52 in let c7 = c6 >>. 52ul in
+
+  let c8 = c7
+       +. mul64_wide a0 b2
+       +. mul64_wide a1 b1
+       +. mul64_wide a2 b0 in
+
+  let d10 = d9
+       +. mul64_wide a3 b4
+       +. mul64_wide a4 b3 in
+
+  let c9 = c8 +. mul64_wide r (to_u64 d10) in let d11 = to_u64 (d10 >>. 64ul) in
+  let r2 = to_u64 c9 &. mask52 in let c10 = c9 >>. 52ul in
+  let c11 = c10 +. mul64_wide (r <<. 12ul) d11 +. to_u128 t3 in
+  let r3 = to_u64 c11 &. mask52 in let c12 = to_u64 (c11 >>. 52ul) in
+  let r4 = c12 +. t4' in
+  (r0,r1,r2,r3,r4)
+
+
 // TODO
 // fsub5
-// fmul5
 // fsqr5

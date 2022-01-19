@@ -14,20 +14,6 @@ module LD = Hacl.Spec.K256.Field52.Definitions.Lemmas
 
 ///  Normalize-weak
 
-val lemma_small_sub_mod: a:nat -> n:pos -> Lemma
-  (requires n <= a /\ a < 2 * n)
-  (ensures  a % n = a - n)
-
-let lemma_small_sub_mod a n =
-  calc (==) {
-    a % n;
-    (==) { Math.Lemmas.sub_div_mod_1 a n }
-    (a - n) % n;
-    (==) { Math.Lemmas.small_mod (a - n) n }
-    a - n;
-    }
-
-
 val lemma_a_mod_52_mul_b (a b:nat) :
   Lemma ((a % pow2 52) * pow2 b = a * pow2 b - a / pow2 52 * pow2 (b + 52))
 
@@ -60,11 +46,7 @@ let minus_x_mul_pow2_256_lemma m f =
   let (t0,t1,t2,t3,t4) = f in
 
   let x = t4 >>. 48ul in let t4' = t4 &. mask48 in
-  assert_norm (v mask48 = pow2 48 - 1);
-  mod_mask_lemma t4 48ul;
-  assert (v (mod_mask #U64 #SEC 48ul) == v mask48);
-  assert (v t4' = v t4 % pow2 48);
-  assert (felem_fits_last1 t4' 1);
+  LD.lemma_mask48 t4;
 
   let r = (t0,t1,t2,t3,t4') in
   calc (==) { // as_nat5 f
@@ -80,84 +62,6 @@ let minus_x_mul_pow2_256_lemma m f =
   };
 
   Math.Lemmas.lemma_div_lt (v t4) 64 48
-
-
-val lemma_carry52: m1:scale64 -> m2:scale64 -> a:uint64 -> b:uint64 -> Lemma
-  (requires felem_fits1 a m1 /\ felem_fits1 b m2 /\ m1 + 1 <= 4096)
-  (ensures
-    (let c = a +. (b >>. 52ul) in let d = b &. mask52 in
-     felem_fits1 d 1 /\ felem_fits1 c (m1 + 1) /\
-     v d = v b % pow2 52 /\ v c = v a + v b / pow2 52))
-
-let lemma_carry52 m1 m2 a b =
-  let c = a +. (b >>. 52ul) in let d = b &. mask52 in
-
-  assert_norm (v mask52 = pow2 52 - 1);
-  mod_mask_lemma b 52ul;
-  assert (v (mod_mask #U64 #SEC 52ul) == v mask52);
-  assert (v d = v b % pow2 52);
-  assert (felem_fits1 d 1);
-
-  Math.Lemmas.lemma_div_lt (v b) 64 52;
-  assert (v b / pow2 52 < pow2 12);
-  assert (v a + v b / pow2 52 <= m1 * max52 + pow2 12);
-  assert_norm (pow2 12 < max52);
-  assert (v a + v b / pow2 52 < (m1 + 1) * max52);
-  Math.Lemmas.lemma_mult_le_right max52 (m1 + 1) 4096;
-  assert_norm (4096 * max52 < pow2 64);
-  Math.Lemmas.small_mod (v a + v b / pow2 52) (pow2 64);
-  assert (v c = v a + v b / pow2 52);
-  assert (felem_fits1 c (m1 + 1))
-
-
-val lemma_carry_last52: m1:scale64_last -> m2:scale64 -> a:uint64 -> b:uint64 -> Lemma
-  (requires felem_fits_last1 a m1 /\ felem_fits1 b m2 /\ m1 + 1 <= 65536)
-  (ensures
-    (let c = a +. (b >>. 52ul) in let d = b &. mask52 in
-     felem_fits1 d 1 /\ felem_fits_last1 c (m1 + 1) /\
-     v d = v b % pow2 52 /\ v c = v a + v b / pow2 52))
-
-let lemma_carry_last52 m1 m2 a b =
-  let c = a +. (b >>. 52ul) in let d = b &. mask52 in
-
-  assert_norm (v mask52 = pow2 52 - 1);
-  mod_mask_lemma b 52ul;
-  assert (v (mod_mask #U64 #SEC 52ul) == v mask52);
-  assert (v d = v b % pow2 52);
-  assert (felem_fits1 d 1);
-
-  Math.Lemmas.lemma_div_lt (v b) 64 52;
-  assert (v b / pow2 52 < pow2 12);
-  assert (v a + v b / pow2 52 <= m1 * max48 + pow2 12);
-  assert_norm (pow2 12 < max48);
-  assert (v a + v b / pow2 52 < (m1 + 1) * max48);
-  Math.Lemmas.lemma_mult_le_right max48 (m1 + 1) 65536;
-  assert_norm (65536 * max48 < pow2 64);
-  Math.Lemmas.small_mod (v a + v b / pow2 52) (pow2 64);
-  assert (v c = v a + v b / pow2 52);
-  assert (felem_fits_last1 c (m1 + 1))
-
-
-val carry_last_small_mod_lemma: t4:uint64 -> t3':uint64 -> Lemma
-  (requires felem_fits_last1 t4 1 /\
-    v (t4 +. (t3' >>. 52ul)) == v t4 + v t3' / pow2 52)
-  (ensures  (let r = t4 +. (t3' >>. 52ul) in
-    felem_fits_last1 r 2 /\
-    v r < v t4 + pow2 12 /\ (v r >= pow2 48 ==> v r % pow2 48 < pow2 12)))
-
-let carry_last_small_mod_lemma t4 t3' =
-  let r = t4 +. (t3' >>. 52ul) in
-  assert (v r = v t4 + v t3' / pow2 52);
-  Math.Lemmas.lemma_div_lt (v t3') 64 52;
-  assert (v r < pow2 48 - 1 + pow2 12);
-
-  Math.Lemmas.pow2_lt_compat 48 12;
-  assert (felem_fits_last1 r 2);
-
-  if v r >= pow2 48 then begin
-    lemma_small_sub_mod (v t4 + v t3' / pow2 52) (pow2 48);
-    assert (v r % pow2 48 = v t4 + v t3' / pow2 52 - pow2 48);
-    assert (v r % pow2 48 < pow2 12) end
 
 
 val lemma_simplify_carry_round (t0 t1 t2 t3 t4:nat) : Lemma
@@ -208,33 +112,33 @@ let carry_round_after_last_carry_mod_prime5_lemma m f =
   let (t0,t1,t2,t3,t4) = f in //(m0,m1,m2,m3,1)
 
   let t1' = t1 +. (t0 >>. 52ul) in let t0' = t0 &. mask52 in
-  lemma_carry52 m1 m0 t1 t0;
+  LD.lemma_carry52 m1 m0 t1 t0;
   assert (felem_fits1 t1' (m1 + 1));
   assert (felem_fits1 t0' 1);
   assert (v t0' = v t0 % pow2 52);
   assert (v t1' = v t1 + v t0 / pow2 52);
 
   let t2' = t2 +. (t1' >>. 52ul) in let t1'' = t1' &. mask52 in
-  lemma_carry52 m2 (m1 + 1) t2 t1';
+  LD.lemma_carry52 m2 (m1 + 1) t2 t1';
   assert (felem_fits1 t2' (m2 + 1));
   assert (felem_fits1 t1'' 1);
   assert (v t1'' = v t1' % pow2 52);
   assert (v t2' = v t2 + v t1' / pow2 52);
 
   let t3' = t3 +. (t2' >>. 52ul) in let t2'' = t2' &. mask52 in
-  lemma_carry52 m3 (m2 + 1) t3 t2';
+  LD.lemma_carry52 m3 (m2 + 1) t3 t2';
   assert (felem_fits1 t3' (m3 + 1));
   assert (felem_fits1 t2'' 1);
   assert (v t2'' = v t2' % pow2 52);
   assert (v t3' = v t3 + v t2' / pow2 52);
 
   let t4' = t4 +. (t3' >>. 52ul) in let t3'' = t3' &. mask52 in
-  lemma_carry_last52 m4 (m3 + 1) t4 t3';
+  LD.lemma_carry_last52 m4 (m3 + 1) t4 t3';
   assert (felem_fits_last1 t4' (m4 + 1));
   assert (felem_fits1 t3'' 1);
   assert (v t3'' = v t3' % pow2 52);
   assert (v t4' = v t4 + v t3' / pow2 52);
-  carry_last_small_mod_lemma t4 t3';
+  LD.carry_last_small_mod_lemma t4 t3';
 
   lemma_simplify_carry_round (v t0) (v t1) (v t2) (v t3) (v t4);
   let r = carry_round5 f in

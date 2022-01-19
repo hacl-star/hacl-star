@@ -15,6 +15,21 @@ let lemma_prime () = ()
 val lemma_pow2_256_minus_prime : unit -> Lemma (pow2 256 - S.prime = 0x1000003D1)
 let lemma_pow2_256_minus_prime () = ()
 
+val lemma_pow2_260_mod_prime: unit -> Lemma (pow2 260 % S.prime = 0x1000003D10)
+let lemma_pow2_260_mod_prime () =
+  calc (==) {
+    pow2 260 % S.prime;
+    (==) { Math.Lemmas.pow2_plus 256 4 }
+    pow2 256 * pow2 4 % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (pow2 256) (pow2 4) S.prime }
+    (pow2 256 % S.prime) * pow2 4 % S.prime;
+    (==) { lemma_prime () }
+    0x1000003D1 * pow2 4 % S.prime;
+    (==) { assert_norm (0x1000003D1 * pow2 4 = 0x1000003D10) }
+    0x1000003D10 % S.prime;
+    (==) { Math.Lemmas.small_mod 0x1000003D10 S.prime }
+    0x1000003D10;
+  }
 
 
 val lemma_as_nat_bound_f4_lt_powa: f:felem5 -> a:nat -> Lemma
@@ -142,3 +157,165 @@ let lemma_div_pow48 t4 =
     assert (v t4 / pow2 48 <= 1);
     Math.Lemmas.lemma_div_le (pow2 48) (v t4) (pow2 48);
     assert (1 <= v t4 / pow2 48) end
+
+
+val lemma_mask52: a:uint64 ->
+  Lemma (let r = a &. mask52 in
+    v r = v a % pow2 52 /\ felem_fits1 r 1)
+
+let lemma_mask52 a =
+  let r = a &. mask52 in
+  assert_norm (v mask52 = pow2 52 - 1);
+  mod_mask_lemma a 52ul;
+  assert (v (mod_mask #U64 #SEC 52ul) == v mask52);
+  assert (v r = v a % pow2 52);
+  assert (felem_fits1 r 1)
+
+
+val lemma_mask48: a:uint64 ->
+  Lemma (let r = a &. mask48 in
+    v r = v a % pow2 48 /\ felem_fits_last1 r 1)
+
+let lemma_mask48 a =
+  let r = a &. mask48 in
+  assert_norm (v mask48 = pow2 48 - 1);
+  mod_mask_lemma a 48ul;
+  assert (v (mod_mask #U64 #SEC 48ul) == v mask48);
+  assert (v r = v a % pow2 48);
+  assert (felem_fits_last1 r 1)
+
+
+val lemma_add_rsh52: m1:scale64 -> m2:scale64 -> a:uint64 -> b:uint64 -> Lemma
+  (requires felem_fits1 a m1 /\ felem_fits1 b m2 /\ m1 + 1 <= 4096)
+  (ensures (let c = a +. (b >>. 52ul) in
+     felem_fits1 c (m1 + 1) /\ v c = v a + v b / pow2 52))
+
+let lemma_add_rsh52 m1 m2 a b =
+  let c = a +. (b >>. 52ul) in
+  Math.Lemmas.lemma_div_lt (v b) 64 52;
+  assert (v b / pow2 52 < pow2 12);
+  assert (v a + v b / pow2 52 <= m1 * max52 + pow2 12);
+  assert_norm (pow2 12 < max52);
+  assert (v a + v b / pow2 52 < (m1 + 1) * max52);
+  Math.Lemmas.lemma_mult_le_right max52 (m1 + 1) 4096;
+  assert_norm (4096 * max52 < pow2 64);
+  Math.Lemmas.small_mod (v a + v b / pow2 52) (pow2 64);
+  assert (v c = v a + v b / pow2 52);
+  assert (felem_fits1 c (m1 + 1))
+
+
+val lemma_add_rsh52_last: m1:scale64_last -> m2:scale64 -> a:uint64 -> b:uint64 -> Lemma
+  (requires felem_fits_last1 a m1 /\ felem_fits1 b m2 /\ m1 + 1 <= 65536)
+  (ensures (let c = a +. (b >>. 52ul) in
+    felem_fits_last1 c (m1 + 1) /\ v c = v a + v b / pow2 52))
+
+let lemma_add_rsh52_last m1 m2 a b =
+  let c = a +. (b >>. 52ul) in
+  Math.Lemmas.lemma_div_lt (v b) 64 52;
+  assert (v b / pow2 52 < pow2 12);
+  assert (v a + v b / pow2 52 <= m1 * max48 + pow2 12);
+  assert_norm (pow2 12 < max48);
+  assert (v a + v b / pow2 52 < (m1 + 1) * max48);
+  Math.Lemmas.lemma_mult_le_right max48 (m1 + 1) 65536;
+  assert_norm (65536 * max48 < pow2 64);
+  Math.Lemmas.small_mod (v a + v b / pow2 52) (pow2 64);
+  assert (v c = v a + v b / pow2 52);
+  assert (felem_fits_last1 c (m1 + 1))
+
+
+val lemma_carry52: m1:scale64 -> m2:scale64 -> a:uint64 -> b:uint64 -> Lemma
+  (requires felem_fits1 a m1 /\ felem_fits1 b m2 /\ m1 + 1 <= 4096)
+  (ensures
+    (let c = a +. (b >>. 52ul) in let d = b &. mask52 in
+     felem_fits1 d 1 /\ felem_fits1 c (m1 + 1) /\
+     v d = v b % pow2 52 /\ v c = v a + v b / pow2 52))
+
+let lemma_carry52 m1 m2 a b =
+  lemma_mask52 b;
+  lemma_add_rsh52 m1 m2 a b
+
+
+val lemma_carry_last52: m1:scale64_last -> m2:scale64 -> a:uint64 -> b:uint64 -> Lemma
+  (requires felem_fits_last1 a m1 /\ felem_fits1 b m2 /\ m1 + 1 <= 65536)
+  (ensures
+    (let c = a +. (b >>. 52ul) in let d = b &. mask52 in
+     felem_fits1 d 1 /\ felem_fits_last1 c (m1 + 1) /\
+     v d = v b % pow2 52 /\ v c = v a + v b / pow2 52))
+
+let lemma_carry_last52 m1 m2 a b =
+  let c = a +. (b >>. 52ul) in let d = b &. mask52 in
+  lemma_mask52 b;
+  lemma_add_rsh52_last m1 m2 a b
+
+
+val lemma_small_sub_mod: a:nat -> n:pos -> Lemma
+  (requires n <= a /\ a < 2 * n)
+  (ensures  a % n = a - n)
+
+let lemma_small_sub_mod a n =
+  calc (==) {
+    a % n;
+    (==) { Math.Lemmas.sub_div_mod_1 a n }
+    (a - n) % n;
+    (==) { Math.Lemmas.small_mod (a - n) n }
+    a - n;
+  }
+
+
+val carry_last_small_mod_lemma: t4:uint64 -> t3':uint64 -> Lemma
+  (requires felem_fits_last1 t4 1 /\
+    v (t4 +. (t3' >>. 52ul)) == v t4 + v t3' / pow2 52)
+  (ensures  (let r = t4 +. (t3' >>. 52ul) in
+    felem_fits_last1 r 2 /\
+    v r < v t4 + pow2 12 /\ (v r >= pow2 48 ==> v r % pow2 48 < pow2 12)))
+
+let carry_last_small_mod_lemma t4 t3' =
+  let r = t4 +. (t3' >>. 52ul) in
+  assert (v r = v t4 + v t3' / pow2 52);
+  Math.Lemmas.lemma_div_lt (v t3') 64 52;
+  assert (v r < pow2 48 - 1 + pow2 12);
+
+  Math.Lemmas.pow2_lt_compat 48 12;
+  assert (felem_fits_last1 r 2);
+
+  if v r >= pow2 48 then begin
+    lemma_small_sub_mod (v r) (pow2 48);
+    assert (v r % pow2 48 = v r - pow2 48);
+    assert (v r % pow2 48 < pow2 12) end
+
+
+val lemma_a_plus_b_mul_pow256 (a b:int) :
+  Lemma ((a + b * pow2 256) % S.prime == (a + b * 0x1000003D1) % S.prime)
+
+let lemma_a_plus_b_mul_pow256 a b =
+  calc (==) {
+    (a + b * pow2 256) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r a (b * pow2 256) S.prime }
+    (a + b * pow2 256 % S.prime) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_r b (pow2 256) S.prime }
+    (a + b * (pow2 256 % S.prime) % S.prime) % S.prime;
+    (==) { lemma_prime () }
+    (a + b * 0x1000003D1 % S.prime) % S.prime;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r a (b * 0x1000003D1) S.prime }
+    (a +b * 0x1000003D1) % S.prime;
+  }
+
+
+val as_nat_mod_prime (t0 t1 t2 t3 t4:int) : Lemma
+  ((t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 * pow208) % S.prime =
+   (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + (t4 % pow2 48) * pow208 + t4 / pow2 48 * 0x1000003D1) % S.prime)
+
+let as_nat_mod_prime t0 t1 t2 t3 t4 =
+  calc (==) {
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 * pow208) % S.prime;
+    (==) { Math.Lemmas.euclidean_division_definition t4 (pow2 48) }
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + (t4 / pow2 48 * pow2 48 + t4 % pow2 48) * pow208) % S.prime;
+    (==) { Math.Lemmas.distributivity_add_left (t4 / pow2 48 * pow2 48) (t4 % pow2 48) pow208 }
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 / pow2 48 * pow2 48 * pow208 + t4 % pow2 48 * pow208) % S.prime;
+    (==) {
+      Math.Lemmas.paren_mul_right (t4 / pow2 48) (pow2 48) pow208;
+      Math.Lemmas.pow2_plus 48 208 }
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 / pow2 48 * pow2 256 + t4 % pow2 48 * pow208) % S.prime;
+    (==) { lemma_a_plus_b_mul_pow256 (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 % pow2 48 * pow208) (t4 / pow2 48) }
+    (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 % pow2 48 * pow208 + t4 / pow2 48 * 0x1000003D1) % S.prime;
+  }
