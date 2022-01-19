@@ -22,7 +22,11 @@
  */
 
 
-#include "Hacl_Ed25519.h"
+#include "internal/Hacl_Ed25519.h"
+
+#include "internal/Hacl_Streaming.h"
+#include "internal/Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Curve25519_51.h"
 
 static inline void fsum(u64 *a, u64 *b)
 {

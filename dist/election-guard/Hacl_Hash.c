@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Hash.h"
+#include "internal/Hacl_Hash.h"
+
+
 
 static uint32_t
 h224[8U] =

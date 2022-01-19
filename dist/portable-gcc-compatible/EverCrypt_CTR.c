@@ -24,6 +24,10 @@
 
 #include "EverCrypt_CTR.h"
 
+#include "internal/Vale.h"
+#include "internal/Hacl_Spec.h"
+#include "internal/Hacl_Chacha20.h"
+
 /* SNIPPET_START: EverCrypt_CTR_state_s */
 
 typedef struct EverCrypt_CTR_state_s_s
@@ -47,71 +51,6 @@ EverCrypt_CTR_uu___is_State(Spec_Agile_Cipher_cipher_alg a, EverCrypt_CTR_state_
 }
 
 /* SNIPPET_END: EverCrypt_CTR_uu___is_State */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__i */
-
-Spec_Cipher_Expansion_impl
-EverCrypt_CTR___proj__State__item__i(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.i;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__i */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__iv */
-
-uint8_t
-*EverCrypt_CTR___proj__State__item__iv(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.iv;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__iv */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__iv_len */
-
-uint32_t
-EverCrypt_CTR___proj__State__item__iv_len(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.iv_len;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__iv_len */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__xkey */
-
-uint8_t
-*EverCrypt_CTR___proj__State__item__xkey(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.xkey;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__xkey */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__ctr */
-
-uint32_t
-EverCrypt_CTR___proj__State__item__ctr(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.ctr;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__ctr */
 
 /* SNIPPET_START: EverCrypt_CTR_xor8 */
 

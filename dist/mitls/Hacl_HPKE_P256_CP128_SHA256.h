@@ -37,10 +37,9 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_P256.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Chacha20Poly1305_128.h"
 #include "Hacl_HKDF.h"
+#include "Hacl_Chacha20Poly1305_128.h"
 
 uint32_t
 Hacl_HPKE_P256_CP128_SHA256_setupBaseI(

@@ -36,7 +36,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
+
 
 static inline u32 Hacl_IntTypes_Intrinsics_add_carry_u32(u32 cin, u32 x, u32 y, u32 *r)
 {

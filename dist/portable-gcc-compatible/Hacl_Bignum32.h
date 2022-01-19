@@ -39,7 +39,6 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_GenericField32.h"
-#include "Hacl_Bignum.h"
 #include "Hacl_Bignum_Base.h"
 
 /* SNIPPET_START: Hacl_Bignum32_pbn_mont_ctx_u32 */

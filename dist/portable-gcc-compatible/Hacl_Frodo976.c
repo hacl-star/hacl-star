@@ -24,6 +24,8 @@
 
 #include "Hacl_Frodo976.h"
 
+#include "internal/Hacl_Frodo_KEM.h"
+
 /* SNIPPET_START: Hacl_Frodo976_crypto_bytes */
 
 uint32_t Hacl_Frodo976_crypto_bytes = (uint32_t)24U;

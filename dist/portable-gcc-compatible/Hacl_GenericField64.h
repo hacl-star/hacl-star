@@ -37,8 +37,6 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Bignum.h"
 #include "Hacl_Bignum256.h"
 
 /* SNIPPET_START: Hacl_GenericField64_pbn_mont_ctx_u64 */

@@ -38,10 +38,6 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 
-void Hacl_Hash_Core_SHA1_legacy_init(u32 *s);
-
-void Hacl_Hash_Core_SHA1_legacy_finish(u32 *s, u8 *dst);
-
 void Hacl_Hash_SHA1_legacy_update_multi(u32 *s, u8 *blocks, u32 n_blocks);
 
 void Hacl_Hash_SHA1_legacy_update_last(u32 *s, u64 prev_len, u8 *input, u32 input_len);

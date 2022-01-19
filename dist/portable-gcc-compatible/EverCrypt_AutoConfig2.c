@@ -24,6 +24,8 @@
 
 #include "EverCrypt_AutoConfig2.h"
 
+#include "internal/Vale.h"
+
 /* SNIPPET_START: cpu_has_shaext */
 
 static bool cpu_has_shaext[1U] = { false };
@@ -255,7 +257,7 @@ bool EverCrypt_AutoConfig2_wants_bcrypt()
 
 void EverCrypt_AutoConfig2_recall()
 {
-  
+
 }
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_recall */

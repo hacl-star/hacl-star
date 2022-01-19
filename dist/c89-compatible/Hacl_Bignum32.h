@@ -39,7 +39,6 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_GenericField32.h"
-#include "Hacl_Bignum.h"
 #include "Hacl_Bignum_Base.h"
 
 typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_Bignum32_pbn_mont_ctx_u32;

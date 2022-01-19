@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Curve25519_51.h"
+#include "internal/Hacl_Curve25519_51.h"
+
+#include "internal/Hacl_Kremlib.h"
 
 /* SNIPPET_START: g25519 */
 

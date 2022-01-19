@@ -37,10 +37,10 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_Spec.h"
 #include "Hacl_SHA3.h"
+#include "Hacl_Kremlib.h"
 
 static inline void
 Hacl_Keccak_shake128_4x(
@@ -424,8 +424,6 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344(
     }
   }
 }
-
-void randombytes_(uint32_t len, uint8_t *res);
 
 static inline void
 Hacl_Impl_Frodo_Pack_frodo_pack(

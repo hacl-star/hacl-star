@@ -24,6 +24,8 @@
 
 #include "EverCrypt_DRBG.h"
 
+
+
 /* SNIPPET_START: EverCrypt_DRBG_reseed_interval */
 
 uint32_t EverCrypt_DRBG_reseed_interval = (uint32_t)1024U;
@@ -120,27 +122,6 @@ EverCrypt_DRBG_uu___is_SHA1_s(
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA1_s */
 
-/* SNIPPET_START: EverCrypt_DRBG___proj__SHA1_s__item___0 */
-
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA1_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-)
-{
-  if (projectee.tag == EverCrypt_DRBG_SHA1_s)
-  {
-    return projectee.case_SHA1_s;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
-/* SNIPPET_END: EverCrypt_DRBG___proj__SHA1_s__item___0 */
-
 /* SNIPPET_START: EverCrypt_DRBG_uu___is_SHA2_256_s */
 
 bool
@@ -157,27 +138,6 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
 }
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_256_s */
-
-/* SNIPPET_START: EverCrypt_DRBG___proj__SHA2_256_s__item___0 */
-
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA2_256_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-)
-{
-  if (projectee.tag == EverCrypt_DRBG_SHA2_256_s)
-  {
-    return projectee.case_SHA2_256_s;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
-/* SNIPPET_END: EverCrypt_DRBG___proj__SHA2_256_s__item___0 */
 
 /* SNIPPET_START: EverCrypt_DRBG_uu___is_SHA2_384_s */
 
@@ -196,27 +156,6 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_384_s */
 
-/* SNIPPET_START: EverCrypt_DRBG___proj__SHA2_384_s__item___0 */
-
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA2_384_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-)
-{
-  if (projectee.tag == EverCrypt_DRBG_SHA2_384_s)
-  {
-    return projectee.case_SHA2_384_s;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
-/* SNIPPET_END: EverCrypt_DRBG___proj__SHA2_384_s__item___0 */
-
 /* SNIPPET_START: EverCrypt_DRBG_uu___is_SHA2_512_s */
 
 bool
@@ -233,27 +172,6 @@ EverCrypt_DRBG_uu___is_SHA2_512_s(
 }
 
 /* SNIPPET_END: EverCrypt_DRBG_uu___is_SHA2_512_s */
-
-/* SNIPPET_START: EverCrypt_DRBG___proj__SHA2_512_s__item___0 */
-
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA2_512_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-)
-{
-  if (projectee.tag == EverCrypt_DRBG_SHA2_512_s)
-  {
-    return projectee.case_SHA2_512_s;
-  }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
-    __FILE__,
-    __LINE__,
-    "unreachable (pattern matches are exhaustive in F*)");
-  KRML_HOST_EXIT(255U);
-}
-
-/* SNIPPET_END: EverCrypt_DRBG___proj__SHA2_512_s__item___0 */
 
 /* SNIPPET_START: EverCrypt_DRBG_create */
 

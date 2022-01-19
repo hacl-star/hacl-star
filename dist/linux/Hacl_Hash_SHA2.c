@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Hash_SHA2.h"
+
+
 
 static u32
 h256[8U] =

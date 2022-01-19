@@ -37,9 +37,9 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Poly1305_256.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Chacha20_Vec256.h"
-#include "Hacl_Poly1305_256.h"
 
 void
 Hacl_Chacha20Poly1305_256_aead_encrypt(

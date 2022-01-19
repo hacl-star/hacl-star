@@ -37,7 +37,7 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Chacha20.h"
+
 
 void
 EverCrypt_Cipher_chacha20(

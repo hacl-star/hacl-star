@@ -37,29 +37,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Hacl_SHA2_Generic.h"
-
-typedef struct K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  uint8_t *snd;
-}
-K____uint8_t___uint8_t_;
-
-typedef struct K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  K____uint8_t___uint8_t_ snd;
-}
-K____uint8_t__K____uint8_t___uint8_t_;
-
-typedef struct K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
+#include "Hacl_Kremlib.h"
 
 void
 Hacl_SHA2_Vec256_sha224_8(
@@ -102,14 +81,6 @@ Hacl_SHA2_Vec256_sha256_8(
   uint8_t *input6,
   uint8_t *input7
 );
-
-typedef struct
-K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ fst;
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
 
 void
 Hacl_SHA2_Vec256_sha384_4(

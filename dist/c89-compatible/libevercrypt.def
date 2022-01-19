@@ -119,21 +119,13 @@ EXPORTS
   EverCrypt_AutoConfig2_has_vec256
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
-  EverCrypt_Hash___proj__MD5_s__item__p
   EverCrypt_Hash_uu___is_SHA1_s
-  EverCrypt_Hash___proj__SHA1_s__item__p
   EverCrypt_Hash_uu___is_SHA2_224_s
-  EverCrypt_Hash___proj__SHA2_224_s__item__p
   EverCrypt_Hash_uu___is_SHA2_256_s
-  EverCrypt_Hash___proj__SHA2_256_s__item__p
   EverCrypt_Hash_uu___is_SHA2_384_s
-  EverCrypt_Hash___proj__SHA2_384_s__item__p
   EverCrypt_Hash_uu___is_SHA2_512_s
-  EverCrypt_Hash___proj__SHA2_512_s__item__p
   EverCrypt_Hash_uu___is_Blake2S_s
-  EverCrypt_Hash___proj__Blake2S_s__item__p
   EverCrypt_Hash_uu___is_Blake2B_s
-  EverCrypt_Hash___proj__Blake2B_s__item__p
   EverCrypt_Hash_alg_of_state
   EverCrypt_Hash_create_in
   EverCrypt_Hash_create
@@ -331,11 +323,6 @@ EXPORTS
   EverCrypt_Error_uu___is_InvalidIVLength
   EverCrypt_Error_uu___is_DecodeError
   EverCrypt_CTR_uu___is_State
-  EverCrypt_CTR___proj__State__item__i
-  EverCrypt_CTR___proj__State__item__iv
-  EverCrypt_CTR___proj__State__item__iv_len
-  EverCrypt_CTR___proj__State__item__xkey
-  EverCrypt_CTR___proj__State__item__ctr
   EverCrypt_CTR_xor8
   EverCrypt_CTR_alg_of_state
   EverCrypt_CTR_create_in
@@ -748,8 +735,6 @@ EXPORTS
   EverCrypt_Chacha20Poly1305_aead_encrypt
   EverCrypt_Chacha20Poly1305_aead_decrypt
   EverCrypt_AEAD_uu___is_Ek
-  EverCrypt_AEAD___proj__Ek__item__impl
-  EverCrypt_AEAD___proj__Ek__item__ek
   EverCrypt_AEAD_alg_of_state
   EverCrypt_AEAD_create_in
   EverCrypt_AEAD_encrypt
@@ -793,22 +778,15 @@ EXPORTS
   EverCrypt_HKDF_hkdf_extract
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
-  Hacl_HMAC_DRBG___proj__State__item__k
-  Hacl_HMAC_DRBG___proj__State__item__v
-  Hacl_HMAC_DRBG___proj__State__item__reseed_counter
   Hacl_HMAC_DRBG_create_in
   Hacl_HMAC_DRBG_instantiate
   Hacl_HMAC_DRBG_reseed
   Hacl_HMAC_DRBG_generate
   EverCrypt_DRBG_min_length
   EverCrypt_DRBG_uu___is_SHA1_s
-  EverCrypt_DRBG___proj__SHA1_s__item___0
   EverCrypt_DRBG_uu___is_SHA2_256_s
-  EverCrypt_DRBG___proj__SHA2_256_s__item___0
   EverCrypt_DRBG_uu___is_SHA2_384_s
-  EverCrypt_DRBG___proj__SHA2_384_s__item___0
   EverCrypt_DRBG_uu___is_SHA2_512_s
-  EverCrypt_DRBG___proj__SHA2_512_s__item___0
   EverCrypt_DRBG_create
   EverCrypt_DRBG_instantiate_sha1
   EverCrypt_DRBG_instantiate_sha2_256
@@ -835,11 +813,3 @@ EXPORTS
   EverCrypt_Curve25519_scalarmult
   EverCrypt_Curve25519_ecdh
   EverCrypt_Cipher_chacha20
-  __proj__Mkgcm_args__item__plain
-  __proj__Mkgcm_args__item__plain_len
-  __proj__Mkgcm_args__item__aad
-  __proj__Mkgcm_args__item__aad_len
-  __proj__Mkgcm_args__item__iv
-  __proj__Mkgcm_args__item__expanded_key
-  __proj__Mkgcm_args__item__cipher
-  __proj__Mkgcm_args__item__tag

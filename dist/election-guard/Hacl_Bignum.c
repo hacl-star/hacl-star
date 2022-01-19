@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Bignum.h"
+#include "internal/Hacl_Bignum.h"
+
+
 
 inline uint32_t
 Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out)

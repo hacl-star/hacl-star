@@ -24,6 +24,8 @@
 
 #include "Hacl_Streaming_SHA2.h"
 
+#include "internal/Hacl_Hash_SHA2.h"
+
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224()
 {
   uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));

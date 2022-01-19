@@ -24,6 +24,8 @@
 
 #include "Hacl_Chacha20Poly1305_32.h"
 
+
+
 static inline void poly1305_padded_32(uint64_t *ctx, uint32_t len, uint8_t *text)
 {
   uint32_t n = len / (uint32_t)16U;

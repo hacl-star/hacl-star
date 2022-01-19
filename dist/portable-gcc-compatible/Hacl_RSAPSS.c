@@ -24,6 +24,9 @@
 
 #include "Hacl_RSAPSS.h"
 
+#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Bignum.h"
+
 /* SNIPPET_START: hash_len */
 
 static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)

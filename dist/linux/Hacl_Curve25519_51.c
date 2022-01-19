@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Curve25519_51.h"
+#include "internal/Hacl_Curve25519_51.h"
+
+
 
 static const u8 g25519[32U] = { (u8)9U };
 

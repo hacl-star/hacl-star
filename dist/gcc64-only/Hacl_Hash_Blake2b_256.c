@@ -22,7 +22,10 @@
  */
 
 
-#include "Hacl_Hash_Blake2b_256.h"
+#include "internal/Hacl_Hash_Blake2b_256.h"
+
+#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Hash_Blake2.h"
 
 static uint128_t
 update_blake2b_256(Lib_IntVector_Intrinsics_vec256 *s, uint128_t totlen, uint8_t *block)

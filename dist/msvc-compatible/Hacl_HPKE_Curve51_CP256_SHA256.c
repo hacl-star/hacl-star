@@ -24,6 +24,8 @@
 
 #include "Hacl_HPKE_Curve51_CP256_SHA256.h"
 
+#include "internal/Hacl_Kremlib.h"
+
 uint32_t
 Hacl_HPKE_Curve51_CP256_SHA256_setupBaseI(
   uint8_t *o_pkE,

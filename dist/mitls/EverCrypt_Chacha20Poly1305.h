@@ -37,10 +37,10 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "EverCrypt_AutoConfig2.h"
-#include "Hacl_Chacha20Poly1305_128.h"
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "Hacl_Chacha20Poly1305_256.h"
+#include "Hacl_Chacha20Poly1305_128.h"
+#include "EverCrypt_AutoConfig2.h"
 
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(

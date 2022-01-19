@@ -36,11 +36,11 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "EverCrypt_HMAC.h"
-#include "Hacl_Leftovers.h"
-#include "Lib_Memzero0.h"
 #include "Lib_RandomBuffer_System.h"
+#include "Lib_Memzero0.h"
 #include "Hacl_Spec.h"
+#include "Hacl_Leftovers.h"
+#include "EverCrypt_HMAC.h"
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
 
@@ -71,20 +71,8 @@ EverCrypt_DRBG_uu___is_SHA1_s(
   EverCrypt_DRBG_state_s projectee
 );
 
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA1_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-);
-
 bool
 EverCrypt_DRBG_uu___is_SHA2_256_s(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-);
-
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA2_256_s__item___0(
   Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
@@ -95,20 +83,8 @@ EverCrypt_DRBG_uu___is_SHA2_384_s(
   EverCrypt_DRBG_state_s projectee
 );
 
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA2_384_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-);
-
 bool
 EverCrypt_DRBG_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-);
-
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA2_512_s__item___0(
   Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );

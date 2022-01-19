@@ -24,6 +24,9 @@
 
 #include "EverCrypt_AEAD.h"
 
+#include "internal/Vale.h"
+#include "internal/Hacl_Kremlib.h"
+
 /* SNIPPET_START: EverCrypt_AEAD_state_s */
 
 typedef struct EverCrypt_AEAD_state_s_s
@@ -43,26 +46,6 @@ bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s pro
 }
 
 /* SNIPPET_END: EverCrypt_AEAD_uu___is_Ek */
-
-/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__impl */
-
-Spec_Cipher_Expansion_impl
-EverCrypt_AEAD___proj__Ek__item__impl(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
-{
-  return projectee.impl;
-}
-
-/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__impl */
-
-/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__ek */
-
-uint8_t
-*EverCrypt_AEAD___proj__Ek__item__ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
-{
-  return projectee.ek;
-}
-
-/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__ek */
 
 /* SNIPPET_START: EverCrypt_AEAD_alg_of_state */
 

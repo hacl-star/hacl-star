@@ -24,6 +24,8 @@
 
 #include "Hacl_Bignum32.h"
 
+#include "internal/Hacl_Bignum.h"
+
 /*******************************************************************************
 
 A verified bignum library.

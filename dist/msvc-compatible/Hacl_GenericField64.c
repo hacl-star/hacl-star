@@ -24,6 +24,9 @@
 
 #include "Hacl_GenericField64.h"
 
+#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Bignum.h"
+
 /*******************************************************************************
 
 A verified field arithmetic library.

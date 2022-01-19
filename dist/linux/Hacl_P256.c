@@ -24,6 +24,8 @@
 
 #include "Hacl_P256.h"
 
+#include "internal/Hacl_Spec.h"
+
 static u64 isZero_uint64_CT(u64 *f)
 {
   u64 a0 = f[0U];

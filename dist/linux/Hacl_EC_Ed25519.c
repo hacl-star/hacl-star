@@ -24,6 +24,8 @@
 
 #include "Hacl_EC_Ed25519.h"
 
+#include "internal/Hacl_Ed25519.h"
+
 void Hacl_EC_Ed25519_mk_felem_zero(u64 *b)
 {
   b[0U] = (u64)0U;

@@ -37,8 +37,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_HMAC.h"
 #include "Hacl_Spec.h"
+#include "Hacl_HMAC.h"
 
 /* SNIPPET_START: Hacl_HMAC_DRBG_supported_alg */
 
@@ -100,36 +100,6 @@ bool
 Hacl_HMAC_DRBG_uu___is_State(Spec_Hash_Definitions_hash_alg a, Hacl_HMAC_DRBG_state projectee);
 
 /* SNIPPET_END: Hacl_HMAC_DRBG_uu___is_State */
-
-/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__k */
-
-uint8_t
-*Hacl_HMAC_DRBG___proj__State__item__k(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-);
-
-/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__k */
-
-/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__v */
-
-uint8_t
-*Hacl_HMAC_DRBG___proj__State__item__v(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-);
-
-/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__v */
-
-/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
-
-uint32_t
-*Hacl_HMAC_DRBG___proj__State__item__reseed_counter(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-);
-
-/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
 
 /* SNIPPET_START: Hacl_HMAC_DRBG_create_in */
 

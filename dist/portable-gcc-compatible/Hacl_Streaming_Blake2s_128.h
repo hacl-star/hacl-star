@@ -38,8 +38,8 @@ extern "C" {
 
 
 #include "Hacl_Streaming_Blake2.h"
-#include "Hacl_Hash_Blake2s_128.h"
 #include "Hacl_Spec.h"
+#include "Hacl_Hash_Blake2s_128.h"
 #include "Hacl_Hash_Blake2.h"
 
 /* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_block_state */

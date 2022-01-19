@@ -37,7 +37,6 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Chacha20.h"
 #include "Hacl_Kremlib.h"
 
 void

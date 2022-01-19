@@ -22,7 +22,10 @@
  */
 
 
-#include "Hacl_P256.h"
+#include "internal/Hacl_P256.h"
+
+#include "internal/Hacl_Spec.h"
+#include "internal/Hacl_Kremlib.h"
 
 static uint64_t isZero_uint64_CT(uint64_t *f)
 {

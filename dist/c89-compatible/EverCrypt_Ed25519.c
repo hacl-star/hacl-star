@@ -24,6 +24,8 @@
 
 #include "EverCrypt_Ed25519.h"
 
+
+
 void EverCrypt_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint32_t len, uint8_t *msg)
 {
   Hacl_Ed25519_sign(signature, secret, len, msg);
