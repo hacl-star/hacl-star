@@ -39,37 +39,6 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 
-/* SNIPPET_START: Hacl_Impl_Chacha20_Vec_chacha20_constants */
-
-extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
-
-/* SNIPPET_END: Hacl_Impl_Chacha20_Vec_chacha20_constants */
-
-/* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_init */
-
-void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
-
-/* SNIPPET_END: Hacl_Impl_Chacha20_chacha20_init */
-
-/* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_encrypt_block */
-
-void
-Hacl_Impl_Chacha20_chacha20_encrypt_block(
-  uint32_t *ctx,
-  uint8_t *out,
-  uint32_t incr,
-  uint8_t *text
-);
-
-/* SNIPPET_END: Hacl_Impl_Chacha20_chacha20_encrypt_block */
-
-/* SNIPPET_START: Hacl_Impl_Chacha20_chacha20_update */
-
-void
-Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text);
-
-/* SNIPPET_END: Hacl_Impl_Chacha20_chacha20_update */
-
 /* SNIPPET_START: Hacl_Chacha20_chacha20_encrypt */
 
 void

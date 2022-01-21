@@ -176,10 +176,10 @@ let shuffle_core_pre = shuffle_core_pre_
 (* Scheduling function *)
 
 (* Incremental Version *)
-let ws_pre_inner (a:sha2_alg) (block:block_w a) (i:nat{i < size_k_w a}) (ws:k_w a) : k_w a =
-    if i < block_word_length then
+let ws0_pre_inner (a:sha2_alg) (block:block_w a) (i:nat{i < block_word_length}) (ws:k_w a) : k_w a =
       Seq.upd ws i (Seq.index block i)
-    else
+
+let wsi_pre_inner (a:sha2_alg) (i:nat{i >= block_word_length /\ i < size_k_w a}) (ws:k_w a) : k_w a =
       let t16 = ws.[i - 16] in
       let t15 = ws.[i - 15] in
       let t7  = ws.[i - 7] in
@@ -188,6 +188,12 @@ let ws_pre_inner (a:sha2_alg) (block:block_w a) (i:nat{i < size_k_w a}) (ws:k_w 
       let s0 = _sigma0 a t15 in
       Seq.upd ws i (s1 +. t7 +. s0 +. t16)
 
+let ws_pre_inner (a:sha2_alg) (block:block_w a) (i:nat{i < size_k_w a}) (ws:k_w a) : k_w a =
+    if i < block_word_length then
+      ws0_pre_inner a block i ws
+    else
+      wsi_pre_inner a i ws
+     
 let ws_pre_ (a:sha2_alg) (block:block_w a) : k_w a =
   Lib.LoopCombinators.repeati (size_k_w a) (ws_pre_inner a block) (Seq.create (size_k_w a) (to_word a 0))
 

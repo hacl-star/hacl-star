@@ -37,8 +37,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_HMAC.h"
 #include "Hacl_Spec.h"
+#include "Hacl_HMAC.h"
 
 typedef Spec_Hash_Definitions_hash_alg Hacl_HMAC_DRBG_supported_alg;
 
@@ -64,24 +64,6 @@ Hacl_HMAC_DRBG_state;
 
 bool
 Hacl_HMAC_DRBG_uu___is_State(Spec_Hash_Definitions_hash_alg a, Hacl_HMAC_DRBG_state projectee);
-
-uint8_t
-*Hacl_HMAC_DRBG___proj__State__item__k(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-);
-
-uint8_t
-*Hacl_HMAC_DRBG___proj__State__item__v(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-);
-
-uint32_t
-*Hacl_HMAC_DRBG___proj__State__item__reseed_counter(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-);
 
 Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a);
 

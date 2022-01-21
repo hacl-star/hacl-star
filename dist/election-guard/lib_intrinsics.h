@@ -18,19 +18,33 @@
 
 #include "Hacl_IntTypes_Intrinsics.h"
 
-#define Lib_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4) \
-  (Hacl_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4))
+#if defined(HACL_CAN_COMPILE_UINT128)
+
+#include "Hacl_IntTypes_Intrinsics_128.h"
+
+#define Lib_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4) \
+  (Hacl_IntTypes_Intrinsics_128_add_carry_u64(x1, x2, x3, x4))
+
+#define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4) \
+  (Hacl_IntTypes_Intrinsics_128_sub_borrow_u64(x1, x2, x3, x4))
+
+#else
 
 #define Lib_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4) \
   (Hacl_IntTypes_Intrinsics_add_carry_u64(x1, x2, x3, x4))
 
-#define Lib_IntTypes_Intrinsics_sub_borrow_u32(x1, x2, x3, x4) \
-  (Hacl_IntTypes_Intrinsics_sub_borrow_u32(x1, x2, x3, x4))
-
 #define Lib_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4) \
   (Hacl_IntTypes_Intrinsics_sub_borrow_u64(x1, x2, x3, x4))
 
-#else
+#endif // defined(HACL_CAN_COMPILE_UINT128)
+
+#define Lib_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4) \
+  (Hacl_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4))
+
+#define Lib_IntTypes_Intrinsics_sub_borrow_u32(x1, x2, x3, x4) \
+  (Hacl_IntTypes_Intrinsics_sub_borrow_u32(x1, x2, x3, x4))
+
+#else // !defined(HACL_CAN_COMPILE_INTRINSICS)
 
 #define Lib_IntTypes_Intrinsics_add_carry_u32(x1, x2, x3, x4) \
   (_addcarry_u32(x1, x2, x3, (unsigned int *) x4))

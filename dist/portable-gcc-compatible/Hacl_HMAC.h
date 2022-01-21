@@ -38,10 +38,9 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Hash_SHA1.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Hash_Blake2.h"
+#include "Hacl_Hash_SHA1.h"
 
 /* SNIPPET_START: Hacl_HMAC_legacy_compute_sha1 */
 
@@ -95,17 +94,6 @@ Hacl_HMAC_compute_sha2_512(
 
 /* SNIPPET_END: Hacl_HMAC_compute_sha2_512 */
 
-/* SNIPPET_START: K____uint32_t__uint64_t */
-
-typedef struct K____uint32_t__uint64_t_s
-{
-  uint32_t *fst;
-  uint64_t snd;
-}
-K____uint32_t__uint64_t;
-
-/* SNIPPET_END: K____uint32_t__uint64_t */
-
 /* SNIPPET_START: Hacl_HMAC_compute_blake2s_32 */
 
 void
@@ -118,17 +106,6 @@ Hacl_HMAC_compute_blake2s_32(
 );
 
 /* SNIPPET_END: Hacl_HMAC_compute_blake2s_32 */
-
-/* SNIPPET_START: K____uint64_t__FStar_UInt128_uint128 */
-
-typedef struct K____uint64_t__FStar_UInt128_uint128_s
-{
-  uint64_t *fst;
-  FStar_UInt128_uint128 snd;
-}
-K____uint64_t__FStar_UInt128_uint128;
-
-/* SNIPPET_END: K____uint64_t__FStar_UInt128_uint128 */
 
 /* SNIPPET_START: Hacl_HMAC_compute_blake2b_32 */
 

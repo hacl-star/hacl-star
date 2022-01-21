@@ -24,6 +24,8 @@
 
 #include "Hacl_Chacha20_Vec32.h"
 
+#include "internal/Hacl_Chacha20.h"
+
 static inline void double_round_32(uint32_t *st)
 {
   uint32_t std0;

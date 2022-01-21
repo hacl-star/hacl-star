@@ -37,8 +37,6 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Bignum.h"
 #include "Hacl_Spec.h"
 #include "Hacl_Impl_FFDHE_Constants.h"
 

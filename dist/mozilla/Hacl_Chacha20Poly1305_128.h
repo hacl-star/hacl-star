@@ -36,9 +36,9 @@ extern "C" {
 #include <stdbool.h>
 
 
+#include "Hacl_Poly1305_128.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Chacha20_Vec128.h"
-#include "Hacl_Poly1305_128.h"
 
 void
 Hacl_Chacha20Poly1305_128_aead_encrypt(

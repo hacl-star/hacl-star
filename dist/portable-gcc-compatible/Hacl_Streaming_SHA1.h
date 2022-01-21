@@ -37,8 +37,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Hash_SHA1.h"
 #include "Hacl_Streaming_SHA2.h"
+#include "Hacl_Hash_SHA1.h"
 
 /* SNIPPET_START: Hacl_Streaming_SHA1_state_sha1 */
 

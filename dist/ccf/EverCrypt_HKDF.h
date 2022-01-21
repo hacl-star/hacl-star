@@ -36,8 +36,8 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "EverCrypt_HMAC.h"
 #include "Hacl_Spec.h"
+#include "EverCrypt_HMAC.h"
 
 void
 EverCrypt_HKDF_expand_sha1(

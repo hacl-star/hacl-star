@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Streaming.h"
+#include "internal/Hacl_Streaming.h"
+
+#include "internal/Hacl_Hash_SHA2.h"
 
 void Hacl_Streaming_SHA2_update_512(Hacl_Streaming_SHA2_state_sha2_384 *p, u8 *data, u32 len)
 {

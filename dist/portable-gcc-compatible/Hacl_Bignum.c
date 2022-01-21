@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Bignum.h"
+#include "internal/Hacl_Bignum.h"
+
+#include "internal/Hacl_Kremlib.h"
 
 /* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
 

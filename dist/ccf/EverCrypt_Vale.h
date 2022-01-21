@@ -56,22 +56,6 @@ typedef struct gcm_args_s
 }
 gcm_args;
 
-uint8_t *__proj__Mkgcm_args__item__plain(gcm_args projectee);
-
-uint64_t __proj__Mkgcm_args__item__plain_len(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__aad(gcm_args projectee);
-
-uint64_t __proj__Mkgcm_args__item__aad_len(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__iv(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__expanded_key(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__cipher(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__tag(gcm_args projectee);
-
 extern void __stdcall old_aes128_key_expansion(uint8_t *key_ptr, uint8_t *expanded_key_ptr);
 
 extern void __stdcall old_gcm128_encrypt(gcm_args *uu___);

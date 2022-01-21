@@ -69,8 +69,10 @@ procedure Fmul(
         inA_in := rsi;
         dst_in := r15;
         inB_in := rcx;
+    reads
+        r15;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14; r15;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14;
         efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
@@ -260,8 +262,10 @@ procedure Fmul2(
         inA_in := rsi;
         dst_in := r15;
         inB_in := rcx;
+    reads
+        r15;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14; r15;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14;
         efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
@@ -493,8 +497,10 @@ procedure Fsqr(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64)
         tmp_in := rdi;
         inA_in := rsi;
         dst_in := r12;
+    reads
+        r12;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14; r15;
         efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;
@@ -667,8 +673,10 @@ procedure Fsqr2(ghost tmp_b:buffer64, ghost inA_b:buffer64, ghost dst_b:buffer64
         tmp_in := rdi;
         inA_in := rsi;
         dst_in := r12;
+    reads
+        r12;
     modifies
-        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r12; r13; r14; r15;
+        rax; rbx; rcx; rdx; rdi; rsi; r8; r9; r10; r11; r13; r14; r15;
         efl; heap0; memLayout;
     requires
         adx_enabled && bmi2_enabled;

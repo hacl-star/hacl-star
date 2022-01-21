@@ -303,7 +303,7 @@ The [digest] buffer must match the digest size of SHA-1, which is 20 bytes. *)
 (** {1 MACs}
 Message authentication codes
 
-{{!mac}Multiplexing interfaces} for these algorithms are also available.
+{{!EverCrypt.mac}Multiplexing interfaces} for these algorithms are also available.
 *)
 
 (** {2 HMAC} *)
@@ -357,10 +357,11 @@ module NaCl : sig
       on every function call. *)
 
   val box_beforenm : pk:bytes -> sk:bytes -> bytes option
-  (** [box_beforenm pk sk] precomputes a 32-byte {{!section:curve}X25519 shared key} [ck] using one party's
-      32-byte public key [pk] and the other party's 32-byte secret key [sk]. The shared key
-      can then be used in the Box precomputation interface ([box_afternm] and [box_open_afternm] functions)
-      in both {!Easy} and {!Detached}. *)
+  (** [box_beforenm pk sk] precomputes a 32-byte {{!section:curve}X25519 shared key} [ck]
+      using one party's 32-byte public key [pk] and the other party's 32-byte secret key [sk].
+      The shared key can then be used in the Box precomputation interface: {!box_afternm} and
+      {!box_open_afternm}, or their equivalent functions in {!module-Noalloc.Easy} and
+      {!module-Noalloc.Detached}). *)
 
   val box_afternm : pt:bytes -> n:bytes -> ck:bytes -> bytes option
   (** [box_afternm pt n ck] authenticates and encrypts [pt] using shared key [ck] and

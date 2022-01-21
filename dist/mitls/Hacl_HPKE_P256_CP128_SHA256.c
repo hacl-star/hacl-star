@@ -24,6 +24,8 @@
 
 #include "Hacl_HPKE_P256_CP128_SHA256.h"
 
+#include "internal/Hacl_P256.h"
+
 uint32_t
 Hacl_HPKE_P256_CP128_SHA256_setupBaseI(
   uint8_t *o_pkE,

@@ -24,6 +24,8 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
+
+
 u32 Hacl_HMAC_DRBG_reseed_interval = (u32)1024U;
 
 u32 Hacl_HMAC_DRBG_max_output_length = (u32)65536U;
@@ -66,33 +68,6 @@ bool
 Hacl_HMAC_DRBG_uu___is_State(Spec_Hash_Definitions_hash_alg a, Hacl_HMAC_DRBG_state projectee)
 {
   return true;
-}
-
-u8
-*Hacl_HMAC_DRBG___proj__State__item__k(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-)
-{
-  return projectee.k;
-}
-
-u8
-*Hacl_HMAC_DRBG___proj__State__item__v(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-)
-{
-  return projectee.v;
-}
-
-u32
-*Hacl_HMAC_DRBG___proj__State__item__reseed_counter(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-)
-{
-  return projectee.reseed_counter;
 }
 
 Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)

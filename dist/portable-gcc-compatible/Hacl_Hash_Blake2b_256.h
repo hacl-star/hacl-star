@@ -37,65 +37,29 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
+#include "Hacl_Kremlib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash_Blake2.h"
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_256_finish_blake2b_256 */
-
-void
-Hacl_Hash_Blake2b_256_finish_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  FStar_UInt128_uint128 ev,
-  uint8_t *dst
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_256_finish_blake2b_256 */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_256_update_multi_blake2b_256 */
-
-FStar_UInt128_uint128
-Hacl_Hash_Blake2b_256_update_multi_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  FStar_UInt128_uint128 ev,
-  uint8_t *blocks,
-  uint32_t n_blocks
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_256_update_multi_blake2b_256 */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_256_update_last_blake2b_256 */
-
-FStar_UInt128_uint128
-Hacl_Hash_Blake2b_256_update_last_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  FStar_UInt128_uint128 ev,
-  FStar_UInt128_uint128 prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_256_update_last_blake2b_256 */
-
-/* SNIPPET_START: Hacl_Hash_Blake2b_256_hash_blake2b_256 */
-
-void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
-
-/* SNIPPET_END: Hacl_Hash_Blake2b_256_hash_blake2b_256 */
 
 /* SNIPPET_START: Hacl_Blake2b_256_blake2b_init */
 
 void
-Hacl_Blake2b_256_blake2b_init(
+Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);
+
+/* SNIPPET_END: Hacl_Blake2b_256_blake2b_init */
+
+/* SNIPPET_START: Hacl_Blake2b_256_blake2b_update_key */
+
+void
+Hacl_Blake2b_256_blake2b_update_key(
   Lib_IntVector_Intrinsics_vec256 *wv,
   Lib_IntVector_Intrinsics_vec256 *hash,
   uint32_t kk,
   uint8_t *k,
-  uint32_t nn
+  uint32_t ll
 );
 
-/* SNIPPET_END: Hacl_Blake2b_256_blake2b_init */
+/* SNIPPET_END: Hacl_Blake2b_256_blake2b_update_key */
 
 /* SNIPPET_START: Hacl_Blake2b_256_blake2b_update_multi */
 

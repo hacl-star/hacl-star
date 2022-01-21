@@ -37,11 +37,10 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_HKDF.h"
-#include "Hacl_Chacha20Poly1305_32.h"
 #include "Hacl_Curve25519_51.h"
+#include "Hacl_Chacha20Poly1305_32.h"
 
 uint32_t
 Hacl_HPKE_Curve51_CP32_SHA256_setupBaseI(

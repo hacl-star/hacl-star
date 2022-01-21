@@ -37,7 +37,6 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
 
@@ -402,31 +401,6 @@ extern uint32_t MerkleTree_Low_merkle_tree_size_lg;
 
 bool MerkleTree_Low_uu___is_MT(MerkleTree_Low_merkle_tree projectee);
 
-uint32_t MerkleTree_Low___proj__MT__item__hash_size(MerkleTree_Low_merkle_tree projectee);
-
-uint64_t MerkleTree_Low___proj__MT__item__offset(MerkleTree_Low_merkle_tree projectee);
-
-uint32_t MerkleTree_Low___proj__MT__item__i(MerkleTree_Low_merkle_tree projectee);
-
-uint32_t MerkleTree_Low___proj__MT__item__j(MerkleTree_Low_merkle_tree projectee);
-
-LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low___proj__MT__item__hs(MerkleTree_Low_merkle_tree projectee);
-
-bool MerkleTree_Low___proj__MT__item__rhs_ok(MerkleTree_Low_merkle_tree projectee);
-
-LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low___proj__MT__item__rhs(MerkleTree_Low_merkle_tree projectee);
-
-uint8_t *MerkleTree_Low___proj__MT__item__mroot(MerkleTree_Low_merkle_tree projectee);
-
-void
-(*MerkleTree_Low___proj__MT__item__hash_fun(MerkleTree_Low_merkle_tree projectee))(
-  uint8_t *x0,
-  uint8_t *x1,
-  uint8_t *x2
-);
-
 typedef MerkleTree_Low_merkle_tree *MerkleTree_Low_mt_p;
 
 typedef const MerkleTree_Low_merkle_tree *MerkleTree_Low_const_mt_p;
@@ -458,11 +432,6 @@ MerkleTree_Low_merkle_tree
 );
 
 bool MerkleTree_Low_uu___is_Path(MerkleTree_Low_path projectee);
-
-uint32_t MerkleTree_Low___proj__Path__item__hash_size(MerkleTree_Low_path projectee);
-
-LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low___proj__Path__item__hashes(MerkleTree_Low_path projectee);
 
 typedef MerkleTree_Low_path *MerkleTree_Low_path_p;
 

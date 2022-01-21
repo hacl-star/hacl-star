@@ -55,6 +55,8 @@ static inline uint128_t FStar_UInt128_add(uint128_t a, uint128_t b);
 
 static inline uint128_t FStar_UInt128_add_mod(uint128_t a, uint128_t b);
 
+static inline uint128_t FStar_UInt128_sub_mod(uint128_t a, uint128_t b);
+
 static inline uint128_t FStar_UInt128_logor(uint128_t a, uint128_t b);
 
 static inline uint128_t FStar_UInt128_shift_left(uint128_t a, uint32_t s);
@@ -72,8 +74,6 @@ static inline void store128_le(uint8_t *x0, uint128_t x1);
 static inline void store128_be(uint8_t *x0, uint128_t x1);
 
 static inline uint128_t load128_be(uint8_t *x0);
-
-uint32_t LowStar_Vector_new_capacity(uint32_t cap);
 
 #if defined(__cplusplus)
 }

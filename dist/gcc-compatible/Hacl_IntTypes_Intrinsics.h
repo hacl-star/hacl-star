@@ -37,15 +37,23 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
+
 
 static inline uint32_t
 Hacl_IntTypes_Intrinsics_add_carry_u32(uint32_t cin, uint32_t x, uint32_t y, uint32_t *r)
 {
-  uint32_t res = x + cin + y;
-  uint32_t
-  c = (~FStar_UInt32_gte_mask(res, x) | (FStar_UInt32_eq_mask(res, x) & cin)) & (uint32_t)1U;
-  r[0U] = res;
+  uint64_t res = (uint64_t)x + (uint64_t)cin + (uint64_t)y;
+  uint32_t c = (uint32_t)(res >> (uint32_t)32U);
+  r[0U] = (uint32_t)res;
+  return c;
+}
+
+static inline uint32_t
+Hacl_IntTypes_Intrinsics_sub_borrow_u32(uint32_t cin, uint32_t x, uint32_t y, uint32_t *r)
+{
+  uint64_t res = (uint64_t)x - (uint64_t)y - (uint64_t)cin;
+  uint32_t c = (uint32_t)(res >> (uint32_t)32U) & (uint32_t)1U;
+  r[0U] = (uint32_t)res;
   return c;
 }
 
@@ -55,19 +63,6 @@ Hacl_IntTypes_Intrinsics_add_carry_u64(uint64_t cin, uint64_t x, uint64_t y, uin
   uint64_t res = x + cin + y;
   uint64_t
   c = (~FStar_UInt64_gte_mask(res, x) | (FStar_UInt64_eq_mask(res, x) & cin)) & (uint64_t)1U;
-  r[0U] = res;
-  return c;
-}
-
-static inline uint32_t
-Hacl_IntTypes_Intrinsics_sub_borrow_u32(uint32_t cin, uint32_t x, uint32_t y, uint32_t *r)
-{
-  uint32_t res = x - y - cin;
-  uint32_t
-  c =
-    ((FStar_UInt32_gte_mask(res, x) & ~FStar_UInt32_eq_mask(res, x))
-    | (FStar_UInt32_eq_mask(res, x) & cin))
-    & (uint32_t)1U;
   r[0U] = res;
   return c;
 }

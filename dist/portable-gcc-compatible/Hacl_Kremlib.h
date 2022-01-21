@@ -89,6 +89,13 @@ FStar_UInt128_add_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 
 /* SNIPPET_END: FStar_UInt128_add_mod */
 
+/* SNIPPET_START: FStar_UInt128_sub_mod */
+
+static inline FStar_UInt128_uint128
+FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+
+/* SNIPPET_END: FStar_UInt128_sub_mod */
+
 /* SNIPPET_START: FStar_UInt128_logor */
 
 static inline FStar_UInt128_uint128
@@ -145,12 +152,6 @@ static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
 static inline FStar_UInt128_uint128 load128_be(uint8_t *x0);
 
 /* SNIPPET_END: load128_be */
-
-/* SNIPPET_START: LowStar_Vector_new_capacity */
-
-uint32_t LowStar_Vector_new_capacity(uint32_t cap);
-
-/* SNIPPET_END: LowStar_Vector_new_capacity */
 
 #if defined(__cplusplus)
 }

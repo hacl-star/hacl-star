@@ -39,7 +39,6 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Vale.h"
 
 /* SNIPPET_START: Hacl_Curve25519_64_scalarmult */
 

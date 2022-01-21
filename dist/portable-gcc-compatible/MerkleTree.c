@@ -24,6 +24,8 @@
 
 #include "MerkleTree.h"
 
+#include "internal/Hacl_Kremlib.h"
+
 /* SNIPPET_START: hash_r_alloc */
 
 static uint8_t *hash_r_alloc(uint32_t s)
@@ -867,94 +869,6 @@ bool MerkleTree_Low_uu___is_MT(MerkleTree_Low_merkle_tree projectee)
 
 /* SNIPPET_END: MerkleTree_Low_uu___is_MT */
 
-/* SNIPPET_START: MerkleTree_Low___proj__MT__item__hash_size */
-
-uint32_t MerkleTree_Low___proj__MT__item__hash_size(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.hash_size;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__MT__item__hash_size */
-
-/* SNIPPET_START: MerkleTree_Low___proj__MT__item__offset */
-
-uint64_t MerkleTree_Low___proj__MT__item__offset(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.offset;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__MT__item__offset */
-
-/* SNIPPET_START: MerkleTree_Low___proj__MT__item__i */
-
-uint32_t MerkleTree_Low___proj__MT__item__i(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.i;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__MT__item__i */
-
-/* SNIPPET_START: MerkleTree_Low___proj__MT__item__j */
-
-uint32_t MerkleTree_Low___proj__MT__item__j(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.j;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__MT__item__j */
-
-/* SNIPPET_START: MerkleTree_Low___proj__MT__item__hs */
-
-LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low___proj__MT__item__hs(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.hs;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__MT__item__hs */
-
-/* SNIPPET_START: MerkleTree_Low___proj__MT__item__rhs_ok */
-
-bool MerkleTree_Low___proj__MT__item__rhs_ok(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.rhs_ok;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__MT__item__rhs_ok */
-
-/* SNIPPET_START: MerkleTree_Low___proj__MT__item__rhs */
-
-LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low___proj__MT__item__rhs(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.rhs;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__MT__item__rhs */
-
-/* SNIPPET_START: MerkleTree_Low___proj__MT__item__mroot */
-
-uint8_t *MerkleTree_Low___proj__MT__item__mroot(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.mroot;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__MT__item__mroot */
-
-/* SNIPPET_START: MerkleTree_Low___proj__MT__item__hash_fun */
-
-void
-(*MerkleTree_Low___proj__MT__item__hash_fun(MerkleTree_Low_merkle_tree projectee))(
-  uint8_t *x0,
-  uint8_t *x1,
-  uint8_t *x2
-)
-{
-  return projectee.hash_fun;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__MT__item__hash_fun */
-
 /* SNIPPET_START: MerkleTree_Low_merkle_tree_conditions */
 
 bool
@@ -1434,25 +1348,6 @@ bool MerkleTree_Low_uu___is_Path(MerkleTree_Low_path projectee)
 }
 
 /* SNIPPET_END: MerkleTree_Low_uu___is_Path */
-
-/* SNIPPET_START: MerkleTree_Low___proj__Path__item__hash_size */
-
-uint32_t MerkleTree_Low___proj__Path__item__hash_size(MerkleTree_Low_path projectee)
-{
-  return projectee.hash_size;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__Path__item__hash_size */
-
-/* SNIPPET_START: MerkleTree_Low___proj__Path__item__hashes */
-
-LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low___proj__Path__item__hashes(MerkleTree_Low_path projectee)
-{
-  return projectee.hashes;
-}
-
-/* SNIPPET_END: MerkleTree_Low___proj__Path__item__hashes */
 
 /* SNIPPET_START: MerkleTree_Low_init_path */
 

@@ -37,11 +37,10 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
-#include "Vale.h"
-#include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Poly1305_256.h"
 #include "Hacl_Poly1305_128.h"
+#include "EverCrypt_AutoConfig2.h"
 
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
 

@@ -38,26 +38,9 @@ extern "C" {
 #include "kremlin/internal/target.h"
 
 
+#include "Hacl_Spec.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Spec.h"
-
-void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
-
-void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i);
-
-void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o);
-
-uint64_t Hacl_Impl_P256_Core_isPointAtInfinityPrivate(uint64_t *p);
-
-void
-Hacl_Impl_P256_Core_secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
-
-/*
-  The pub(lic)_key input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over this variable.
-*/
-uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar);
 
 /*
  Input: result buffer: uint8[64], 
