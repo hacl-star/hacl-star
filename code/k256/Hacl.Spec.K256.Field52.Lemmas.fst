@@ -11,6 +11,7 @@ include Hacl.Spec.K256.Field52
 module LD = Hacl.Spec.K256.Field52.Definitions.Lemmas
 module L1 = Hacl.Spec.K256.Field52.Lemmas1
 module L2 = Hacl.Spec.K256.Field52.Lemmas2
+module L3 = Hacl.Spec.K256.Field52.Lemmas3
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
@@ -90,3 +91,11 @@ let normalize_weak5_lemma m f =
 
 let normalize5_lemma m f =
   L2.normalize5_lemma m f
+
+
+let fmul5_lemma a b =
+  L3.fmul5_lemma a b
+
+
+let fsqr5_lemma a =
+  L3.fsqr5_lemma a
