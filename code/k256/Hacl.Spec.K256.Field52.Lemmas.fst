@@ -240,137 +240,17 @@ let fnegate5_lemma m a x =
   assert (as_nat5 r = 2 * v x * S.prime - as_nat5 a)
 
 
-// val lemma_mul_add (mc:nat) (a b c:uint64) : Lemma
-//   (requires
-//     v a <= max52 /\ v c <= mc * max52 /\
-//     v b + mc <= 4096)
-//   (ensures (let r = a *. b +. c in
-//     v r = v a * v b + v c /\
-//     felem_fits1 r (v b + mc)))
-
-// let lemma_mul_add mc a b c =
-//   let r = a *. b +. c in
-//   Math.Lemmas.lemma_mult_le_right (v b) (v a) max52;
-//   assert (v a * v b + v c <= max52 * v b + mc * max52);
-//   Math.Lemmas.swap_mul max52 (v b);
-//   Math.Lemmas.distributivity_add_left (v b) mc max52;
-//   assert (v a * v b + v c <= (v b + mc) * max52);
-//   Math.Lemmas.lemma_mult_le_right max52 (v b + mc) 4096;
-//   assert_norm (4096 * max52 < pow2 64);
-//   Math.Lemmas.small_mod (v a * v b + v c) (pow2 64);
-//   assert (v r = v a * v b + v c);
-//   assert (v r <= (v b + mc) * max52);
-//   assert (felem_fits1 r (v b + mc))
+let sub5_lemma ma mb a b x =
+  let (ma0,ma1,ma2,ma3,ma4) = ma in
+  let xn = v x in
+  let r = fnegate5 b x in
+  fnegate5_lemma mb b x;
+  let o = add5 a r in
+  add5_lemma ma (2*xn,2*xn,2*xn,2*xn,2*xn) a r
 
 
-// val lemma_mul_add_last (mc:nat) (a b c:uint64) : Lemma
-//   (requires
-//     v a <= max48 /\ v c <= mc * max48 /\
-//     v b + mc <= 65536)
-//   (ensures (let r = a *. b +. c in
-//     v r = v a * v b + v c /\
-//     felem_fits_last1 r (v b + mc)))
-
-// let lemma_mul_add_last mc a b c =
-//   let r = a *. b +. c in
-//   Math.Lemmas.lemma_mult_le_right (v b) (v a) max48;
-//   assert (v a * v b + v c <= max48 * v b + mc * max48);
-//   Math.Lemmas.swap_mul max48 (v b);
-//   Math.Lemmas.distributivity_add_left (v b) mc max48;
-//   assert (v a * v b + v c <= (v b + mc) * max48);
-//   Math.Lemmas.lemma_mult_le_right max48 (v b + mc) 65536;
-//   assert_norm (65536 * max48 < pow2 64);
-//   Math.Lemmas.small_mod (v a * v b + v c) (pow2 64);
-//   assert (v r = v a * v b + v c);
-//   assert (v r <= (v b + mc) * max48);
-//   assert (felem_fits_last1 r (v b + mc))
-
-
-// val fadd_x_primes_lemma: m:scale64_5 -> a:felem5 -> x:uint64 -> Lemma
-//   (requires (let (m0,m1,m2,m3,m4) = m in let xn = v x in
-//     m0 + xn <= 4096 /\ m1 + xn <= 4096 /\
-//     m2 + xn <= 4096 /\ m3 + xn <= 4096 /\
-//     m4 + xn <= 65536 /\
-//     felem_fits5 a m))
-//   (ensures (let xn = v x in
-//     let (m0,m1,m2,m3,m4) = m in
-//     let (a0,a1,a2,a3,a4) = a in
-//     let r = fadd_x_primes a x in
-//     let (r0,r1,r2,r3,r4) = r in
-//     v r0 = 0xffffefffffc2f * v x + v a0 /\
-//     v r1 = 0xfffffffffffff * v x + v a1 /\
-//     v r2 = 0xfffffffffffff * v x + v a2 /\
-//     v r3 = 0xfffffffffffff * v x + v a3 /\
-//     v r4 = 0xffffffffffff * v x + v a4 /\
-//     as_nat5 r == S.prime * xn + as_nat5 a /\
-//     felem_fits5 r (m0+xn, m1+xn, m2+xn, m3+xn, m4+xn)))
-
-// let fadd_x_primes_lemma m a x =
-//   let (m0,m1,m2,m3,m4) = m in let xn = v x in
-//   let (a0,a1,a2,a3,a4) = a in
-//   let r0 = u64 0xffffefffffc2f *. x +. a0 in
-//   assert_norm (0xffffefffffc2f <= max52);
-//   lemma_mul_add m0 (u64 0xffffefffffc2f) x a0;
-//   assert (v r0 = 0xffffefffffc2f * v x + v a0);
-
-//   let r1 = u64 0xfffffffffffff *. x +. a1 in
-//   assert_norm (0xfffffffffffff <= max52);
-//   lemma_mul_add m1 (u64 0xfffffffffffff) x a1;
-//   assert (v r1 = 0xfffffffffffff * v x + v a1);
-
-//   let r2 = u64 0xfffffffffffff *. x +. a2 in
-//   lemma_mul_add m2 (u64 0xfffffffffffff) x a2;
-//   assert (v r2 = 0xfffffffffffff * v x + v a2);
-
-//   let r3 = u64 0xfffffffffffff *. x +. a3 in
-//   lemma_mul_add m3 (u64 0xfffffffffffff) x a3;
-//   assert (v r3 = 0xfffffffffffff * v x + v a3);
-
-//   let r4 = u64 0xffffffffffff *. x +. a4 in
-//   assert_norm (0xffffffffffff <= max48);
-//   lemma_mul_add_last m4 (u64 0xffffffffffff) x a4;
-//   assert (v r4 = 0xffffffffffff * v x + v a4);
-
-//   let r = (r0,r1,r2,r3,r4) in
-//   assert (felem_fits5 r (m0+xn, m1+xn, m2+xn, m3+xn, m4+xn));
-
-//   calc (==) {
-//     0xffffefffffc2f * v x + v a0 +
-//     (0xfffffffffffff * v x + v a1) * pow52 +
-//     (0xfffffffffffff * v x + v a2) * pow104 +
-//     (0xfffffffffffff * v x + v a3) * pow156 +
-//     (0xffffffffffff * v x + v a4) * pow208;
-//   (==) {
-//     Math.Lemmas.swap_mul 0xffffefffffc2f (v x);
-//     Math.Lemmas.swap_mul 0xfffffffffffff (v x);
-//     Math.Lemmas.distributivity_add_left (v x * 0xfffffffffffff) (v a1) pow52 }
-//     v x * 0xffffefffffc2f + v a0 +
-//     v x * 0xfffffffffffff * pow52 + v a1 * pow52 +
-//     (0xfffffffffffff * v x + v a2) * pow104 +
-//     (0xfffffffffffff * v x + v a3) * pow156 +
-//     (0xffffffffffff * v x + v a4) * pow208;
-//   (==) {
-//     Math.Lemmas.swap_mul 0xfffffffffffff (v x);
-//     Math.Lemmas.distributivity_add_left (v x * 0xfffffffffffff) (v a2) pow104;
-//     Math.Lemmas.distributivity_add_left (v x * 0xfffffffffffff) (v a3) pow156 }
-//     v x * 0xffffefffffc2f + v a0 +
-//     v x * 0xfffffffffffff * pow52 + v a1 * pow52 +
-//     v x * 0xfffffffffffff * pow104 + v a2 * pow104 +
-//     v x * 0xfffffffffffff * pow156 + v a3 * pow156 +
-//     (0xffffffffffff * v x + v a4) * pow208;
-//   (==) {
-//     Math.Lemmas.swap_mul 0xffffffffffff (v x);
-//     Math.Lemmas.distributivity_add_left (v x * 0xffffffffffff) (v a4) pow208 }
-//     v x * 0xffffefffffc2f + v a0 +
-//     v x * 0xfffffffffffff * pow52 + v a1 * pow52 +
-//     v x * 0xfffffffffffff * pow104 + v a2 * pow104 +
-//     v x * 0xfffffffffffff * pow156 + v a3 * pow156 +
-//     v x * 0xffffffffffff * pow208 + v a4 * pow208;
-//   (==) { L4.lemma_distr5_pow52 (v x) 0xffffefffffc2f 0xfffffffffffff 0xfffffffffffff 0xfffffffffffff 0xffffffffffff }
-//     as_nat5 a +
-//     v x * (0xffffefffffc2f + 0xfffffffffffff * pow52 +
-//     0xfffffffffffff * pow104 + 0xfffffffffffff * pow156 +  0xffffffffffff * pow208);
-//   (==) { assert_norm (0xffffefffffc2f + 0xfffffffffffff * pow52 +
-//     0xfffffffffffff * pow104 + 0xfffffffffffff * pow156 +  0xffffffffffff * pow208 = S.prime) }
-//     as_nat5 a + v x * S.prime;
-//   }
+let fsub5_lemma ma mb a b x =
+  let r = fsub5 a b x in let xn = v x in
+  sub5_lemma ma mb a b x;
+  assert (as_nat5 r % S.prime = (as_nat5 a - as_nat5 b + 2 * xn * S.prime) % S.prime);
+  Math.Lemmas.lemma_mod_plus (as_nat5 a - as_nat5 b) (2 * xn) S.prime

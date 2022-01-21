@@ -103,3 +103,33 @@ val fsqr5_lemma: a:felem5 -> Lemma
   (ensures (let res = fsqr5 a in
     as_nat5 res % S.prime == as_nat5 a * as_nat5 a % S.prime  /\
     felem_fits5 res (1,1,1,1,2)))
+
+
+val sub5_lemma (ma mb:scale64_5) (a b:felem5) (x:uint64) : Lemma
+  (requires (let xn = v x in
+    let (ma0,ma1,ma2,ma3,ma4) = ma in
+    let (mb0,mb1,mb2,mb3,mb4) = mb in 2 * xn <= 4096 /\
+    mb0 <= xn /\ mb1 <= xn /\ mb2 <= xn /\ mb3 <= xn /\ mb4 <= xn /\
+    ma0+2*xn <= 4096 /\ ma1+2*xn <= 4096 /\
+    ma2+2*xn <= 4096 /\ ma3+2*xn <= 4096 /\
+    ma4+2*xn <= 65536 /\
+    felem_fits5 a ma /\ felem_fits5 b mb))
+  (ensures (let r = fsub5 a b x in let xn = v x in
+    let (ma0,ma1,ma2,ma3,ma4) = ma in
+    as_nat5 r = as_nat5 a + 2 * xn * S.prime - as_nat5 b /\
+    felem_fits5 r (ma0+2*xn,ma1+2*xn,ma2+2*xn,ma3+2*xn,ma4+2*xn)))
+
+
+val fsub5_lemma (ma mb:scale64_5) (a b:felem5) (x:uint64) : Lemma
+  (requires (let xn = v x in
+    let (ma0,ma1,ma2,ma3,ma4) = ma in
+    let (mb0,mb1,mb2,mb3,mb4) = mb in 2 * xn <= 4096 /\
+    mb0 <= xn /\ mb1 <= xn /\ mb2 <= xn /\ mb3 <= xn /\ mb4 <= xn /\
+    ma0+2*xn <= 4096 /\ ma1+2*xn <= 4096 /\
+    ma2+2*xn <= 4096 /\ ma3+2*xn <= 4096 /\
+    ma4+2*xn <= 65536 /\
+    felem_fits5 a ma /\ felem_fits5 b mb))
+  (ensures (let r = fsub5 a b x in let xn = v x in
+    let (ma0,ma1,ma2,ma3,ma4) = ma in
+    as_nat5 r % S.prime = (as_nat5 a - as_nat5 b) % S.prime /\
+    felem_fits5 r (ma0+2*xn,ma1+2*xn,ma2+2*xn,ma3+2*xn,ma4+2*xn)))

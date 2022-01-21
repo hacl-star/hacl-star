@@ -288,22 +288,7 @@ let fnegate5 ((a0,a1,a2,a3,a4):felem5) (m:uint64) : felem5 =
   (r0,r1,r2,r3,r4)
 
 
-// inline_for_extraction noextract
-// let fadd_x_primes ((a0,a1,a2,a3,a4):felem5) (x:uint64) : felem5 =
-//   let r0 = u64 0xffffefffffc2f *. x +. a0 in
-//   let r1 = u64 0xfffffffffffff *. x +. a1 in
-//   let r2 = u64 0xfffffffffffff *. x +. a2 in
-//   let r3 = u64 0xfffffffffffff *. x +. a3 in
-//   let r4 = u64 0xffffffffffff *. x +. a4 in
-//   (r0,r1,r2,r3,r4)
-
-
-// inline_for_extraction noextract
-// let fsub5 ((a0,a1,a2,a3,a4):felem5) ((b0,b1,b2,b3,b4):felem5) (x:uint64) : felem5 =
-//   let (r0,r1,r2,r3,r4) = fadd_x_primes (a0,a1,a2,a3,a4) x in
-//   let o0 = r0 -. b0 in
-//   let o1 = r1 -. b1 in
-//   let o2 = r2 -. b2 in
-//   let o3 = r3 -. b3 in
-//   let o4 = r4 -. b4 in
-//   (o0,o1,o2,o3,o4)
+inline_for_extraction noextract
+let fsub5 ((a0,a1,a2,a3,a4):felem5) ((b0,b1,b2,b3,b4):felem5) (x:uint64) : felem5 =
+  let (r0,r1,r2,r3,r4) = fnegate5 (b0,b1,b2,b3,b4) x in
+  add5 (a0,a1,a2,a3,a4) (r0,r1,r2,r3,r4)
