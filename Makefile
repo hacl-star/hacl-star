@@ -129,10 +129,6 @@ endif
 test: test-staged
 test-unstaged: test-handwritten test-c test-ml vale_testInline test-wasm test-bindings-ocaml
 
-ifneq ($(OS),Windows_NT)
-test-unstaged: test-benchmark
-endif
-
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
@@ -141,9 +137,6 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
-
-test-benchmark: all-unstaged
-	$(MAKE) -C tests/benchmark all
 
 mozilla-ci: mozilla-ci-staged
 mozilla-ci-unstaged: compile-mozilla test-c
