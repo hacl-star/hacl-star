@@ -101,10 +101,10 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
       ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #srcx #tx xb)) (ME.loc_buffer (as_vale_immbuffer #srcy #ty yb))
     | (| TD_Buffer srcx tx _, xb |), (| TD_Buffer srcy ty _, yb |) ->
       ME.loc_disjoint (ME.loc_buffer (as_vale_buffer #srcx #tx xb)) (ME.loc_buffer (as_vale_buffer #srcy #ty yb)) \/
-      eq3 xb yb
+      xb === yb
     | (| TD_ImmBuffer srcx tx _, xb |), (| TD_ImmBuffer srcy ty _, yb |) ->
       ME.loc_disjoint (ME.loc_buffer (as_vale_immbuffer #srcx #tx xb)) (ME.loc_buffer (as_vale_immbuffer #srcy #ty yb)) \/
-      eq3 xb yb
+      xb === yb
     | _ -> True
 
 [@__reduce__]
