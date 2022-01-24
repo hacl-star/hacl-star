@@ -348,10 +348,13 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
   )
 
 
-[@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
-  \n Output: bool, where True stands for the correct key generation. 
-  \n False means that an error has occurred (possibly that the result respresents point at infinity). 
-  ")]
+[@ (Comment "Convert a private key into an uncompressed public key.
+
+  Input: `scalar`, the private key, of type `uint8[32]`.
+  Output: `result`, the public key, of type `uint8[64]`.
+  Returns:
+  - `true`, for success, meaning the public key is not a point at infinity
+  - `false`, otherwise.")]
 val ecp256dh_i:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)

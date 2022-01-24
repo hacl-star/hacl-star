@@ -2953,13 +2953,13 @@ void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result)
 }
 
 /*
- Input: result: uint8[64], 
- scalar: uint8[32].
-  
- Output: bool, where True stands for the correct key generation. 
-  
- False means that an error has occurred (possibly that the result respresents point at infinity). 
-  
+Convert a private key into an uncompressed public key.
+
+  Input: `scalar`, the private key, of type `uint8[32]`.
+  Output: `result`, the public key, of type `uint8[64]`.
+  Returns:
+  - `true`, for success, meaning the public key is not a point at infinity
+  - `false`, otherwise.
 */
 bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
 {
