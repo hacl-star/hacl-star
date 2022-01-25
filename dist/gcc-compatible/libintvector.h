@@ -773,7 +773,8 @@ void Lib_IntVector_Intrinsics_vec128_store64_le(const uint8_t *x0, vector128 x1)
 
 #define Lib_IntVector_Intrinsics_vec128_shift_right32(x0, x1)         \
   (((vector128)((vector128_32)vec_rli((vector128_32)(x0), (unsigned int)(32-(x1))))) & \
-   ((vector128)((vector128_32){0xffffffff >> (x1), 0xffffffff >> (x1)})))
+   ((vector128)((vector128_32){0xffffffff >> (x1), 0xffffffff >> (x1), \
+                               0xffffffff >> (x1), 0xffffffff >> (x1)})))
 
 /* Doesn't work with vec_splat_u64 */
 #define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1)          \
