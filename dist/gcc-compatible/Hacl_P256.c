@@ -2939,8 +2939,12 @@ void Hacl_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result)
 }
 
 /*
- Input: a point buffer (internal representation: uint8[64]), 
- result: a point in not compressed form (uint8[33]).
+Convert from internal representation to 33-byte compressed form.
+
+  Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
+  Output: `result`, a point in compressed form, of type `uint8[33]`
+
+  `b` and `result` MUST NOT overlap.
 */
 void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result)
 {
@@ -2960,6 +2964,8 @@ Convert a private key into an uncompressed public key.
   Returns:
   - `true`, for success, meaning the public key is not a point at infinity
   - `false`, otherwise.
+
+  `scalar` and `result` MUST NOT overlap.
 */
 bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar)
 {

@@ -332,7 +332,12 @@ val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCo
     )
 
 
-[@ (Comment " Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[33]).")]
+[@ (Comment "Convert from internal representation to 33-byte compressed form.
+
+  Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
+  Output: `result`, a point in compressed form, of type `uint8[33]`
+
+  `b` and `result` MUST NOT overlap.")]
 val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
@@ -354,7 +359,9 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
   Output: `result`, the public key, of type `uint8[64]`.
   Returns:
   - `true`, for success, meaning the public key is not a point at infinity
-  - `false`, otherwise.")]
+  - `false`, otherwise.
+
+  `scalar` and `result` MUST NOT overlap.")]
 val ecp256dh_i:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
