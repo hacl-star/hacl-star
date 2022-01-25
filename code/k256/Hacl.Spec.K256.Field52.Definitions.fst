@@ -72,7 +72,7 @@ let as_nat5 (f:felem5) : nat =
   v f0 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156 + v f4 * pow208
 
 noextract
-let feval (f:felem5) : S.felem = as_nat5 f % S.prime
+let feval5 (f:felem5) : S.felem = as_nat5 f % S.prime
 
 
 let scale64 = x:nat{x <= 4096}

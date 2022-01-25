@@ -184,6 +184,8 @@ let fsub out f1 f2 x =
 
 [@CInline]
 let fmul out f1 f2 =
+  let h0 = ST.get () in
+  BL.fmul5_lemma1 (as_felem5 h0 f1) (as_felem5 h0 f2);
   make_u52_5 out (BI.fmul5
     (f1.(0ul), f1.(1ul), f1.(2ul), f1.(3ul), f1.(4ul))
     (f2.(0ul), f2.(1ul), f2.(2ul), f2.(3ul), f2.(4ul)))
@@ -191,4 +193,16 @@ let fmul out f1 f2 =
 
 [@CInline]
 let fsqr out f =
+  let h0 = ST.get () in
+  BL.fsqr5_lemma1 (as_felem5 h0 f);
   make_u52_5 out (BI.fsqr5 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)))
+
+
+[@CInline]
+let fnormalize_weak out f =
+  make_u52_5 out (BI.normalize_weak5 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)))
+
+
+[@CInline]
+let fnormalize out f =
+  make_u52_5 out (BI.normalize5 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)))

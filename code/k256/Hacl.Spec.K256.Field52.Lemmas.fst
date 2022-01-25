@@ -97,9 +97,23 @@ let normalize5_lemma m f =
 let fmul5_lemma a b =
   L3.fmul5_lemma a b
 
+let fmul5_lemma1 a b =
+  let r = fmul5 a b in
+  L3.fmul5_lemma a b;
+  assert (as_nat5 r % S.prime == as_nat5 a * as_nat5 b % S.prime);
+  Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 a) (as_nat5 b) S.prime;
+  Math.Lemmas.lemma_mod_mul_distr_r (feval5 a) (as_nat5 b) S.prime
+
 
 let fsqr5_lemma a =
   L3.fsqr5_lemma a
+
+let fsqr5_lemma1 a =
+  let r = fsqr5 a in
+  L3.fsqr5_lemma a;
+  assert (as_nat5 r % S.prime == as_nat5 a * as_nat5 a % S.prime);
+  Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 a) (as_nat5 a) S.prime;
+  Math.Lemmas.lemma_mod_mul_distr_r (feval5 a) (as_nat5 a) S.prime
 
 
 val lemma_mul_sub (mc:nat) (a b c:uint64) : Lemma
@@ -253,4 +267,7 @@ let fsub5_lemma ma mb a b x =
   let r = fsub5 a b x in let xn = v x in
   sub5_lemma ma mb a b x;
   assert (as_nat5 r % S.prime = (as_nat5 a - as_nat5 b + 2 * xn * S.prime) % S.prime);
-  Math.Lemmas.lemma_mod_plus (as_nat5 a - as_nat5 b) (2 * xn) S.prime
+  Math.Lemmas.lemma_mod_plus (as_nat5 a - as_nat5 b) (2 * xn) S.prime;
+  assert (as_nat5 r % S.prime = (as_nat5 a - as_nat5 b) % S.prime);
+  Math.Lemmas.lemma_mod_plus_distr_l (as_nat5 a) (- as_nat5 b) S.prime;
+  Math.Lemmas.lemma_mod_sub_distr (feval5 a) (as_nat5 b) S.prime
