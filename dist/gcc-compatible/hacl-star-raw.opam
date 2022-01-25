@@ -20,7 +20,8 @@ depends: [
   "conf-which" {build}
 ]
 available: [
-  os = "freebsd" | os-family != "bsd"
+  arch != "ppc64" & arch != "ppc32" &
+  (os = "freebsd" | os-family != "bsd")
 ]
 x-ci-accept-failures: [
   "centos-7" # Default C compiler is too old
