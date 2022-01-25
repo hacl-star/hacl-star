@@ -5,9 +5,56 @@ open Lib.IntTypes
 
 open Hacl.Spec.K256.Field52.Definitions
 
+module LSeq = Lib.Sequence
+module BSeq = Lib.ByteSequence
+
 module S = Spec.K256
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
+
+val unfold_nat_from_uint64_four: b:LSeq.lseq uint64 4 ->
+  Lemma (BSeq.nat_from_intseq_be b ==
+    v (LSeq.index b 3) + v (LSeq.index b 2) * pow2 64 +
+    v (LSeq.index b 1) * pow2 128 + v (LSeq.index b 0) * pow2 192)
+
+let unfold_nat_from_uint64_four b =
+  let b0 = v (LSeq.index b 0) in
+  let b1 = v (LSeq.index b 1) in
+  let b2 = v (LSeq.index b 2) in
+  let b3 = v (LSeq.index b 3) in
+
+  let res = BSeq.nat_from_intseq_be b in
+  BSeq.nat_from_intseq_be_slice_lemma b 3;
+  BSeq.nat_from_intseq_be_lemma0 (Seq.slice b 3 4);
+  assert (res == b3 + pow2 64 * (BSeq.nat_from_intseq_be (Seq.slice b 0 3)));
+
+  BSeq.nat_from_intseq_be_slice_lemma #U64 #SEC #3 (Seq.slice b 0 3) 2;
+  BSeq.nat_from_intseq_be_lemma0 (Seq.slice b 2 3);
+  assert (BSeq.nat_from_intseq_be (Seq.slice b 0 3) == b2 + pow2 64 * (BSeq.nat_from_intseq_be (Seq.slice b 0 2)));
+
+  BSeq.nat_from_intseq_be_slice_lemma #U64 #SEC #2 (Seq.slice b 0 2) 1;
+  BSeq.nat_from_intseq_be_lemma0 (Seq.slice b 1 2);
+  assert (BSeq.nat_from_intseq_be (Seq.slice b 0 2) == b1 + pow2 64 * (BSeq.nat_from_intseq_be (Seq.slice b 0 1)));
+
+  BSeq.nat_from_intseq_be_lemma0 (Seq.slice b 0 1);
+  assert (res == b3 + pow2 64 * (b2 + pow2 64 * (b1 + pow2 64 * b0)));
+  calc (==) {
+    b3 + pow2 64 * (b2 + pow2 64 * (b1 + pow2 64 * b0));
+    (==) {
+      Math.Lemmas.distributivity_add_right (pow2 64) b1 (pow2 64 * b0);
+      Math.Lemmas.paren_mul_right (pow2 64) (pow2 64) b0;
+      Math.Lemmas.pow2_plus 64 64 }
+    b3 + pow2 64 * (b2 + pow2 64 * b1 + pow2 128 * b0);
+    (==) {
+      Math.Lemmas.distributivity_add_right (pow2 64) b2 (pow2 64 * b1 + pow2 128 * b0);
+      Math.Lemmas.distributivity_add_right (pow2 64) (pow2 64 * b1) (pow2 128 * b0) }
+    b3 + pow2 64 * b2 + pow2 64 * (pow2 64 * b1) + pow2 64 * (pow2 128 * b0);
+    (==) { Math.Lemmas.paren_mul_right (pow2 64) (pow2 64) b1; Math.Lemmas.pow2_plus 64 64 }
+    b3 + pow2 64 * b2 + pow2 128 * b1 + pow2 64 * (pow2 128 * b0);
+    (==) { Math.Lemmas.paren_mul_right (pow2 64) (pow2 128) b0; Math.Lemmas.pow2_plus 128 64 }
+    b3 + pow2 64 * b2 + pow2 128 * b1 + pow2 192 * b0;
+    }
+
 
 val lemma_prime : unit -> Lemma (pow2 256 % S.prime = 0x1000003D1)
 let lemma_prime () = ()
