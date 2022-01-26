@@ -14,7 +14,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "1f6c780a363fdb8994b2579aa69ba731"
+      "b843d6c313cf7079cdf0c33edca3bd57"
     ],
     [
       "Vale.Wrapper.X64.GCM_IV.length_aux",
@@ -61,7 +61,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "ba050972550de347e2b504e8712198d5"
+      "6bbaa7e9bc5eb18cca3bfbd3cba578fe"
     ],
     [
       "Vale.Wrapper.X64.GCM_IV.length_aux5",
@@ -99,7 +99,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "03465c0a281a0e4eea23cdc03ff36d5c"
+      "d2d10720f99ab310bd0ced07034e983f"
     ],
     [
       "Vale.Wrapper.X64.GCM_IV.compute_iv_stdcall'",
@@ -169,7 +169,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "b62d02500200f8b048b6010a718dbfec"
+      "48a2667834b8d5e127bb674efdbc942f"
     ],
     [
       "Vale.Wrapper.X64.GCM_IV.compute_iv_stdcall'",
@@ -209,6 +209,7 @@
         "equation_LowStar.BufferView.Down.buffer",
         "equation_LowStar.Monotonic.Buffer.disjoint",
         "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.AES.GCM_s.supported_iv_LE",
         "equation_Vale.AES.X64.GCMencryptOpt.va_ens_Compute_iv_stdcall",
         "equation_Vale.AES.X64.GCMencryptOpt.va_req_Compute_iv_stdcall",
@@ -231,6 +232,8 @@
         "equation_Vale.Stdcalls.X64.GCM_IV.code_compute_iv",
         "equation_Vale.Stdcalls.X64.GCM_IV.uint64",
         "equation_Vale.Wrapper.X64.GCM_IV.wrap_slice",
+        "equation_Vale.X64.CPU_Features_s.avx_enabled",
+        "equation_Vale.X64.CPU_Features_s.avx_xcr0",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.validDstAddrs",
@@ -295,11 +298,11 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_69cb7dd8382e21efa2a02ab2c136d832",
         "refinement_interpretation_Tm_refine_83bd940927020bb51199658f6752ed80",
-        "refinement_interpretation_Tm_refine_89b598c24990ad4358b22d1baaf2ad8c",
         "refinement_interpretation_Tm_refine_8f53c9bd715d5bf10798304ebe2c54e8",
         "refinement_interpretation_Tm_refine_9744057097014367b0c03516a197f9bf",
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_da0827926683e6011c32c1d58adaa05f",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_kinding_Tm_refine_8f53c9bd715d5bf10798304ebe2c54e8",
         "token_correspondence_Vale.Interop.X64.__proj__Rel__item__of_arg",
@@ -321,7 +324,9 @@
         "typing_Vale.Interop.X64.arg_reg_stdcall",
         "typing_Vale.Interop.X64.max_stdcall",
         "typing_Vale.Wrapper.X64.GCM_IV.wrap_slice",
-        "typing_Vale.X64.CPU_Features_s.sse4_1_enabled",
+        "typing_Vale.X64.CPU_Features_s.avx_cpuid_enabled",
+        "typing_Vale.X64.CPU_Features_s.avx_enabled",
+        "typing_Vale.X64.CPU_Features_s.avx_xcr0",
         "typing_Vale.X64.CPU_Features_s.sse_enabled",
         "typing_Vale.X64.Memory.buffer_as_seq",
         "typing_Vale.X64.Memory.buffer_length",
@@ -333,7 +338,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "73c9fff597a9ddf798f83b360e63f4af"
+      "b1f9458aaa615cad6e675ee9b45b79aa"
     ],
     [
       "Vale.Wrapper.X64.GCM_IV.lemma_slice_uv_extra",
@@ -455,7 +460,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "c33424231d196a239813c0ac18390c64"
+      "8904377ceb801f7d992acb3e110abbdb"
     ],
     [
       "Vale.Wrapper.X64.GCM_IV.lemma_slice_sub",
@@ -536,7 +541,7 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "3ba63f62a5def9569d25fd323b3f4b41"
+      "817e01bcb44c1a7b12fc535a4dc77eba"
     ],
     [
       "Vale.Wrapper.X64.GCM_IV.lemma_same_seq_same_buffer_read",
@@ -609,7 +614,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "318193f2531897e6cf852604f5d4aa10"
+      "5a5261b20dce188f36a02372783bea8c"
     ],
     [
       "Vale.Wrapper.X64.GCM_IV.compute_iv",
@@ -658,7 +663,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "240d82ae1bab5e1ddd09cbe7907de572"
+      "7ea255dcda10a3ae0da54faa963555ab"
     ],
     [
       "Vale.Wrapper.X64.GCM_IV.compute_iv",
@@ -840,7 +845,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "4ec4d5a733509f7e2f2ad17199707db9"
+      "b3f3d9c4731d64b5e3d2505a96833430"
     ]
   ]
 ]

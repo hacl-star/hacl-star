@@ -15,7 +15,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "eb87d06153fcddf482ad0a89be6dde55"
+      "a9e6df00cebf2fb83002aa12c453b2b6"
     ],
     [
       "Vale.Poly1305.Util.poly1305_heap_blocks",
@@ -29,7 +29,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "97369e74a257f559efbbdf71223c8d51"
+      "d85a59c38aced87d345dcb39d1c875ce"
     ],
     [
       "Vale.Poly1305.Util.reveal_poly1305_heap_blocks",
@@ -45,7 +45,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "1874b27d53699a9302349595a784dfb5"
+      "3e5a438e6531cd6f0df0530b10a430b5"
     ],
     [
       "Vale.Poly1305.Util.reveal_poly1305_heap_blocks",
@@ -63,7 +63,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "ee7863af5d32430cdf4ed9bac25112c8"
+      "a3d1b9b69687eabc963f0d73d8a1763c"
     ],
     [
       "Vale.Poly1305.Util.seqTo128",
@@ -81,7 +81,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "a9e44edfeccb5764535502e26fd0fd6b"
+      "c998dfac9c132cf637e664f8c2b991b2"
     ],
     [
       "Vale.Poly1305.Util.lemma_poly1305_heap_hash_blocks_alt",
@@ -97,7 +97,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "6a6294731347e36c33f436df0b0464e5"
+      "18495fde1b0f18d313cbdb120a793e65"
     ],
     [
       "Vale.Poly1305.Util.lemma_poly1305_heap_hash_blocks_alt",
@@ -113,7 +113,7 @@
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c"
       ],
       0,
-      "9c839a0cf4a9c7b6663f4f8405a8f984"
+      "a7e62e4c7074e2d32979a1f8d286bf39"
     ],
     [
       "Vale.Poly1305.Util.lemma_poly1305_heap_hash_blocks_alt",
@@ -127,15 +127,15 @@
         "@fuel_irrelevance_Vale.Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
         "@fuel_irrelevance_Vale.Poly1305.Util.poly1305_heap_blocks_.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_8f6e895a49590f9a95c242bbf7466dd9_3",
         "binder_x_ae567c2fb75be05905677af440075565_0",
         "binder_x_ae567c2fb75be05905677af440075565_1",
         "binder_x_ae567c2fb75be05905677af440075565_2",
         "binder_x_ae567c2fb75be05905677af440075565_5",
         "binder_x_cc373e5bcef412662ac4930a7f26229e_4",
-        "binder_x_cf3c3635190a0c52f1f984c8b6ea3674_3",
-        "constructor_distinct_Vale.Interop.Types.TUInt64",
-        "equality_tok_Prims.LexTop@tok",
-        "equality_tok_Vale.Interop.Types.TUInt64@tok", "equation_Prims.nat",
+        "constructor_distinct_Vale.Arch.HeapTypes_s.TUInt64",
+        "equality_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.Poly1305.Util.seqTo128",
         "equation_Vale.Poly1305.Util.t_seqTo128",
         "equation_Vale.X64.Memory.base_typ_as_vale_type",
@@ -152,11 +152,11 @@
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_6791b8c8c173ce145264368678ab6852",
-        "typing_tok_Vale.Interop.Types.TUInt64@tok",
+        "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "51cb01a6afaea0ed325531a76cb75141"
+      "c2bebd7e35746057327c01c5bef2475f"
     ],
     [
       "Vale.Poly1305.Util.buffers_readable",
@@ -171,7 +171,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "c73cd9208b8887a1c8613d545d623d63"
+      "fc0bff196558a86297417f8a871c24e1"
     ],
     [
       "Vale.Poly1305.Util.lemma_equal_blocks",
@@ -188,8 +188,8 @@
         "binder_x_ae567c2fb75be05905677af440075565_0",
         "binder_x_ae567c2fb75be05905677af440075565_1",
         "binder_x_ae567c2fb75be05905677af440075565_2",
-        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_5",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_5", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "equation_with_fuel_Vale.Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_Equality",
@@ -200,7 +200,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "3b05961181900f50b4aa3351e6597da3"
+      "4fe20067ad90c5ba6b6e84f2a85a08aa"
     ],
     [
       "Vale.Poly1305.Util.lemma_append_blocks",
@@ -213,7 +213,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "71bfd10f46e4e4c3e2f6e628cab7e5e6"
+      "3273bcf6fe5a55a1d68419ea92f95371"
     ],
     [
       "Vale.Poly1305.Util.lemma_append_blocks",
@@ -223,11 +223,11 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_81eea01de9a743f87afd186b8d5a90ac"
+        "refinement_interpretation_Tm_refine_2db6a1c38cc5caaadefeec37d31e7952",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "5af5435de6a258af6215370a3f413f23"
+      "3d5654f3853ce62ddc64ba48b3ea9992"
     ],
     [
       "Vale.Poly1305.Util.lemma_append_blocks",
@@ -246,8 +246,8 @@
         "binder_x_ae567c2fb75be05905677af440075565_1",
         "binder_x_ae567c2fb75be05905677af440075565_2",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_6",
-        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_7",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_7", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "equation_with_fuel_Vale.Poly1305.Spec_s.poly1305_hash_blocks.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_Equality",
@@ -259,7 +259,7 @@
         "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "c2adff8aa5748a311008849c38588d36"
+      "4a4db78f53fcb114c7ea267de9d4e8ed"
     ]
   ]
 ]
