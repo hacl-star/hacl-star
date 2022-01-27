@@ -49,7 +49,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "486aab96c6fba4947ca51569cbc56e96"
+      "ef4507dd9689dda09b8c9f537589764a"
     ],
     [
       "Vale.Wrapper.X64.GCTR.wrap_slice",
@@ -65,7 +65,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "1c1bc60f3b800769ae1460d7545cdf8d"
+      "c53878f9aafec13045c50b8d75e2c05e"
     ],
     [
       "Vale.Wrapper.X64.GCTR.length_aux3",
@@ -103,7 +103,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "e8c2708d1cbb11428e6c5dad3bac602a"
+      "995d18a53c47113a250ffc011d6891f4"
     ],
     [
       "Vale.Wrapper.X64.GCTR.gctr128_bytes_stdcall'",
@@ -154,7 +154,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "cb9f804b327c541e237ff1e4d75401ee"
+      "93d4a0160aa0e4a2fb0ddcd4b2be86f6"
     ],
     [
       "Vale.Wrapper.X64.GCTR.gctr256_bytes_stdcall'",
@@ -205,7 +205,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "b1dbed7357e20cfa07395f9e1653c619"
+      "242f56ffdad0865e99b0ce299b9c13f3"
     ],
     [
       "Vale.Wrapper.X64.GCTR.length_aux",
@@ -243,7 +243,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "635cad604533b0201df246fa527d7b02"
+      "ef2bf788a4868c337bad45a474d462dc"
     ],
     [
       "Vale.Wrapper.X64.GCTR.length_aux2",
@@ -281,7 +281,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "857be891df8e78a1c664d385f16240ad"
+      "47d47d14703ce4088383976f77090e12"
     ],
     [
       "Vale.Wrapper.X64.GCTR.gctr128_bytes_stdcall'",
@@ -321,6 +321,7 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.BufferView.Down.buffer",
         "equation_LowStar.Monotonic.Buffer.disjoint", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.AES.AES_s.is_aes_key_LE",
         "equation_Vale.AES.X64.GCTR.va_ens_Gctr_bytes_stdcall",
         "equation_Vale.AES.X64.GCTR.va_req_Gctr_bytes_stdcall",
@@ -345,6 +346,8 @@
         "equation_Vale.Stdcalls.X64.GCTR.code_gctr128",
         "equation_Vale.Stdcalls.X64.GCTR.uint64",
         "equation_Vale.Wrapper.X64.GCTR.wrap_slice",
+        "equation_Vale.X64.CPU_Features_s.avx_enabled",
+        "equation_Vale.X64.CPU_Features_s.avx_xcr0",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.validDstAddrs",
@@ -442,7 +445,9 @@
         "typing_Vale.Interop.X64.arg_reg_stdcall",
         "typing_Vale.Interop.X64.max_stdcall",
         "typing_Vale.Wrapper.X64.GCTR.wrap_slice",
-        "typing_Vale.X64.CPU_Features_s.sse4_1_enabled",
+        "typing_Vale.X64.CPU_Features_s.avx_cpuid_enabled",
+        "typing_Vale.X64.CPU_Features_s.avx_enabled",
+        "typing_Vale.X64.CPU_Features_s.avx_xcr0",
         "typing_Vale.X64.CPU_Features_s.sse_enabled",
         "typing_Vale.X64.Memory.buffer_as_seq",
         "typing_Vale.X64.Memory.buffer_length",
@@ -455,7 +460,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "74e2f03132acdb80decb9acf8cd6f5fe"
+      "c3fad53f83c58a81d97d419cb5c938cb"
     ],
     [
       "Vale.Wrapper.X64.GCTR.gctr256_bytes_stdcall'",
@@ -495,6 +500,7 @@
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.BufferView.Down.buffer",
         "equation_LowStar.Monotonic.Buffer.disjoint", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.AES.X64.GCTR.va_ens_Gctr_bytes_stdcall",
         "equation_Vale.AES.X64.GCTR.va_req_Gctr_bytes_stdcall",
         "equation_Vale.AsLowStar.LowStarSig.arg_as_nat64",
@@ -518,6 +524,8 @@
         "equation_Vale.Stdcalls.X64.GCTR.code_gctr256",
         "equation_Vale.Stdcalls.X64.GCTR.uint64",
         "equation_Vale.Wrapper.X64.GCTR.wrap_slice",
+        "equation_Vale.X64.CPU_Features_s.avx_enabled",
+        "equation_Vale.X64.CPU_Features_s.avx_xcr0",
         "equation_Vale.X64.CPU_Features_s.sse_enabled",
         "equation_Vale.X64.Decls.va_require_total",
         "equation_Vale.X64.Decls.validDstAddrs",
@@ -615,7 +623,9 @@
         "typing_Vale.Interop.X64.arg_reg_stdcall",
         "typing_Vale.Interop.X64.max_stdcall",
         "typing_Vale.Wrapper.X64.GCTR.wrap_slice",
-        "typing_Vale.X64.CPU_Features_s.sse4_1_enabled",
+        "typing_Vale.X64.CPU_Features_s.avx_cpuid_enabled",
+        "typing_Vale.X64.CPU_Features_s.avx_enabled",
+        "typing_Vale.X64.CPU_Features_s.avx_xcr0",
         "typing_Vale.X64.CPU_Features_s.sse_enabled",
         "typing_Vale.X64.Memory.buffer_as_seq",
         "typing_Vale.X64.Memory.buffer_length",
@@ -628,7 +638,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "59634544e3ef5e6742f455627f2b50c2"
+      "e284a9f78c7b4a59de9a0debba2b3941"
     ],
     [
       "Vale.Wrapper.X64.GCTR.length_aux4",
@@ -666,7 +676,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "67fe582af6d44bf8f055f9b2eb82cb29"
+      "8f28eabcbac802d4067d7bd555299178"
     ],
     [
       "Vale.Wrapper.X64.GCTR.length_aux6",
@@ -712,7 +722,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "77c8f09f6b2abd59b7e3415f8b4cab97"
+      "e0672645fa22d2fec19ecf2af4dce40e"
     ],
     [
       "Vale.Wrapper.X64.GCTR.lemma_slice_uv_extra",
@@ -819,7 +829,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt8@tok"
       ],
       0,
-      "e0d140be1f5190244f955d5644958cef"
+      "933733da4223d611e6a50001456eb213"
     ],
     [
       "Vale.Wrapper.X64.GCTR.lemma_slice_sub",
@@ -893,7 +903,7 @@
         "typing_LowStar.Monotonic.Buffer.length"
       ],
       0,
-      "13d8334f7f6161628da849aa451b4356"
+      "112ba09686bcc903cd9bf8296e7196b5"
     ],
     [
       "Vale.Wrapper.X64.GCTR.lemma_identical_uv",
@@ -944,7 +954,7 @@
         "typing_Vale.Interop.Views.up_view128"
       ],
       0,
-      "02c57a41de946f50cf29ff30d8c382e6"
+      "c1373cb8cb1e4555bca575a7037efc4e"
     ],
     [
       "Vale.Wrapper.X64.GCTR.math_cast_aux",
@@ -966,7 +976,7 @@
         "typing_FStar.Int.Cast.uint64_to_uint32", "typing_FStar.UInt64.v"
       ],
       0,
-      "bdd819913b3220d010ef4d912a09ca61"
+      "3298d4f5ed92fd664e0dfb46285c983f"
     ],
     [
       "Vale.Wrapper.X64.GCTR.bytes_to_quad_size_st",
@@ -983,7 +993,7 @@
         "projection_inverse_FStar.Integers.Signed__0"
       ],
       0,
-      "f407dcb7c6bfcc736c8d1e83015e2c49"
+      "d9c454a731ef2c38d5700ee7ccdcf3b0"
     ],
     [
       "Vale.Wrapper.X64.GCTR.bytes_to_quad_size_st",
@@ -1035,7 +1045,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "b9ae20e86f539315fc9eb3b1e3be88d3"
+      "2df1832b67a76eb5e3ef4202a6808aa8"
     ],
     [
       "Vale.Wrapper.X64.GCTR.gctr_bytes_stdcall128",
@@ -1250,7 +1260,7 @@
         "typing_Vale.X64.CPU_Features_s.sse_enabled"
       ],
       0,
-      "7d11b3676b10f604d56df3ac1999800c"
+      "2a099a786861fb78146c9935a1f33868"
     ],
     [
       "Vale.Wrapper.X64.GCTR.gctr_bytes_stdcall256",
@@ -1465,7 +1475,7 @@
         "typing_Vale.X64.CPU_Features_s.sse_enabled"
       ],
       0,
-      "a257bd91756d74e1d1dd70546c2597f6"
+      "fc9d34a2a2f1c7f2ce99f037a532907a"
     ]
   ]
 ]

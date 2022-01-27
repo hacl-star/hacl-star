@@ -4,14 +4,14 @@
     [
       "Spec.SHA2.Lemmas.ws_aux",
       1,
-      2,
-      1,
+      0,
+      0,
       [
         "@MaxIFuel_assumption", "@query",
         "binder_x_59b2d428076bb38589a6dedda766d453_0",
         "binder_x_85decfae964c037c5c6457b0b5c08210_2",
         "binder_x_f3b82d8a229016ce22c360cbadda84ec_1", "bool_inversion",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.sha2_alg",
@@ -28,7 +28,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "6bb9d686163f95223cb2f1a187e5969c"
+      "1d3706bf2857fd4403f874754dec96d6"
     ],
     [
       "Spec.SHA2.Lemmas.shuffle_core_",
@@ -63,7 +63,7 @@
         "typing_Spec.SHA2.k0", "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "2128b6b6fcdc19a17d7cf04e0e4ecaa7"
+      "4e18bac01bb8fced6a988606f2648961"
     ],
     [
       "Spec.SHA2.Lemmas.shuffle_aux",
@@ -77,7 +77,7 @@
         "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "a72c832d7c03059060e7cc480a3cd311"
+      "697aed92cd1790c015821ab23ce88485"
     ],
     [
       "Spec.SHA2.Lemmas.shuffle_is_shuffle_pre",
@@ -94,15 +94,8 @@
         "Spec.Loops_interpretation_Tm_arrow_991012978bfe18b65525b7a05d6a8a37",
         "Spec.SHA2_interpretation_Tm_arrow_046d31b7ca1b5af90ba995ae3917b5cb",
         "Spec.SHA2_interpretation_Tm_arrow_5114bb93a23375880e0690cfe93800b7",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U128",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "bool_inversion", "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals", "equation_Prims.pos",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.sha2_alg",
@@ -161,13 +154,13 @@
         "typing_FStar.Seq.Base.index", "typing_Prims.pow2",
         "typing_Spec.Hash.Definitions.is_sha2",
         "typing_Spec.Hash.Definitions.word",
-        "typing_Spec.Loops.repeat_range", "typing_Spec.SHA2.Lemmas.ws",
-        "typing_Spec.SHA2._sigma0", "typing_Spec.SHA2._sigma1",
-        "typing_Spec.SHA2.size_k_w", "typing_Spec.SHA2.word_n",
-        "typing_Spec.SHA2.ws_pre", "well-founded-ordering-on-nat"
+        "typing_Spec.Loops.repeat_range", "typing_Spec.SHA2._sigma0",
+        "typing_Spec.SHA2._sigma1", "typing_Spec.SHA2.size_k_w",
+        "typing_Spec.SHA2.word_n", "typing_Spec.SHA2.ws_pre",
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "b1e77caa0117c4ac6a0d9b24fa351295"
+      "c96d5f13c80d25ad1f427c1b03ea9227"
     ],
     [
       "Spec.SHA2.Lemmas.update_aux",
@@ -213,7 +206,7 @@
         "unit_typing"
       ],
       0,
-      "a1ee99d5d2c55310cecab6070efe9715"
+      "1d96a2b108d6b2d819b35fda6e60dc19"
     ],
     [
       "Spec.SHA2.Lemmas.update_is_update_pre",
@@ -276,7 +269,7 @@
         "typing_Spec.SHA2.size_k_w", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1bab1715b79937c7e54aa600d3ed6f71"
+      "a58b65401c3dd82d7427496262997023"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -305,7 +298,7 @@
         "refinement_interpretation_Tm_refine_ee7f9ad7b411394a04a1e8bcaa63b394"
       ],
       0,
-      "569de45504211a19c0acef82222e8656"
+      "224689ac711746a403fe631f8e488fb6"
     ],
     [
       "Spec.SHA2.Lemmas.update_224_256",
@@ -343,7 +336,8 @@
         "equation_FStar.Seq.Properties.tail", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Spec.Hash.Definitions.block_length",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
+        "equation_Spec.Hash.Definitions.block_length",
         "equation_Spec.Hash.Definitions.block_word_length",
         "equation_Spec.Hash.Definitions.bytes",
         "equation_Spec.Hash.Definitions.extra_state",
@@ -394,13 +388,13 @@
         "refinement_interpretation_Tm_refine_16da5dd636ef303f4b4402f063fe1ef3",
         "refinement_interpretation_Tm_refine_2801c1e1667dbb239114d4de7b9c8f12",
         "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
+        "refinement_interpretation_Tm_refine_2e6dd3ae88ee785d58db44cc637fd6c3",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_4444a3fcdb0b66c16dddc6b78f54c41e",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_571d9f74016be5357787170b42ecf913",
         "refinement_interpretation_Tm_refine_64a4c553d45c7c33f2342589a14783c9",
         "refinement_interpretation_Tm_refine_778cda52ca3898c9d0220c148d4775e7",
-        "refinement_interpretation_Tm_refine_7b94510ed25c9b0afdecf49c0409ec5b",
         "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_c7fd27793ec1dae0cb682593d434ce63",
@@ -428,7 +422,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "0ec70c6c6e51799c3d84f9cea5d9ea0c"
+      "7a4e237742a04fdb3736fc72d5e2cacd"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -456,7 +450,7 @@
         "refinement_interpretation_Tm_refine_f7a8f8340b3c54b659acfc982cbf3004"
       ],
       0,
-      "9eaa3b3252db2ebee607befa2daa7d23"
+      "f3629862b70ea734f0af265059d765c2"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -485,7 +479,7 @@
         "refinement_interpretation_Tm_refine_f7a8f8340b3c54b659acfc982cbf3004"
       ],
       0,
-      "39d4b248c4fb7e567a6a425403e92499"
+      "422a8712896f353d25cc263338accecf"
     ],
     [
       "Spec.SHA2.Lemmas.update_multi_224_256",
@@ -555,7 +549,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "5d548a710b303afe654d36986d164500"
+      "5d399afbcae245c9e1a95830b089b15e"
     ]
   ]
 ]
