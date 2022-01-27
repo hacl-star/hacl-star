@@ -90,8 +90,8 @@ val normalize5_lemma: m:scale64_5 -> f:felem5 -> Lemma
 
 val fmul5_lemma: a:felem5 -> b:felem5 -> Lemma
   (requires
-    felem_fits5 a (8,8,8,8,8) /\
-    felem_fits5 b (8,8,8,8,8))
+    felem_fits5 a (64,64,64,64,64) /\
+    felem_fits5 b (64,64,64,64,64))
   (ensures (let res = fmul5 a b in
     as_nat5 res % S.prime == as_nat5 a * as_nat5 b % S.prime  /\
     felem_fits5 res (1,1,1,1,2)))
@@ -99,8 +99,8 @@ val fmul5_lemma: a:felem5 -> b:felem5 -> Lemma
 
 val fmul5_lemma1: a:felem5 -> b:felem5 -> Lemma
   (requires
-    felem_fits5 a (8,8,8,8,8) /\
-    felem_fits5 b (8,8,8,8,8))
+    felem_fits5 a (64,64,64,64,64) /\
+    felem_fits5 b (64,64,64,64,64))
   (ensures (let res = fmul5 a b in
     feval5 res == feval5 a * feval5 b % S.prime  /\
     felem_fits5 res (1,1,1,1,2)))
@@ -108,7 +108,7 @@ val fmul5_lemma1: a:felem5 -> b:felem5 -> Lemma
 
 val fsqr5_lemma: a:felem5 -> Lemma
   (requires
-    felem_fits5 a (8,8,8,8,8))
+    felem_fits5 a (64,64,64,64,64))
   (ensures (let res = fsqr5 a in
     as_nat5 res % S.prime == as_nat5 a * as_nat5 a % S.prime  /\
     felem_fits5 res (1,1,1,1,2)))
@@ -116,7 +116,7 @@ val fsqr5_lemma: a:felem5 -> Lemma
 
 val fsqr5_lemma1: a:felem5 -> Lemma
   (requires
-    felem_fits5 a (8,8,8,8,8))
+    felem_fits5 a (64,64,64,64,64))
   (ensures (let res = fsqr5 a in
     feval5 res == feval5 a * feval5 a % S.prime  /\
     felem_fits5 res (1,1,1,1,2)))

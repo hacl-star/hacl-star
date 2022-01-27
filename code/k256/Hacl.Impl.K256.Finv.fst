@@ -18,8 +18,6 @@ module BL = Hacl.Spec.K256.Field52.Lemmas
 
 module BE = Hacl.Impl.Exponentiation
 
-include Hacl.Spec.K256.Field52.Definitions
-
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 unfold

@@ -167,7 +167,6 @@ let copy_felem f1 f2 = copy f1 f2
 let fmul_small_num out f num =
   make_u52_5 out (BI.mul15 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)) num)
 
-
 [@CInline]
 let fadd out f1 f2 =
   make_u52_5 out (BI.add5
@@ -206,3 +205,23 @@ let fnormalize_weak out f =
 [@CInline]
 let fnormalize out f =
   make_u52_5 out (BI.normalize5 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)))
+
+
+let fmul_3b_normalize_weak out f =
+  let h0 = ST.get () in
+  fmul_small_num out f (u64 21);
+  let h1 = ST.get () in
+  BL.fmul15_lemma (9,9,9,9,10) 21 (as_felem5 h0 f) (u64 21);
+  assert (felem_fits5 (as_felem5 h1 out) (189,189,189,189,210));
+  fnormalize_weak out out;
+  BL.normalize_weak5_lemma (189,189,189,189,210) (as_felem5 h1 out)
+
+
+let fmul_8_normalize_weak out f =
+  let h0 = ST.get () in
+  fmul_small_num out f (u64 8);
+  let h1 = ST.get () in
+  BL.fmul15_lemma (1,1,1,1,2) 8 (as_felem5 h0 f) (u64 8);
+  assert (felem_fits5 (as_felem5 h1 out) (8,8,8,8,16));
+  fnormalize_weak out out;
+  BL.normalize_weak5_lemma (8,8,8,8,16) (as_felem5 h1 out)

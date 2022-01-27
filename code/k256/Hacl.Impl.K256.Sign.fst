@@ -23,6 +23,9 @@ open Hacl.K256.Scalar
 open Hacl.Impl.K256.Point
 open Hacl.Impl.K256.PointMul
 
+module BI = Hacl.Spec.K256.Field52
+module BL = Hacl.Spec.K256.Field52.Lemmas
+
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
@@ -50,6 +53,12 @@ let ecdsa_sign_r r k =
 
   FI.finv tmp z; // tmp = zinv
   fmul tmp x tmp; // tmp = aff_x = x *% zinv
+  let h1 = ST.get () in
+  //assert (inv_lazy_reduced2 h1 tmp);
+  fnormalize tmp tmp;
+  let h2 = ST.get () in
+  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h1 tmp);
+
   store_felem x_bytes tmp;
   load_qelem_modq r x_bytes; // r = aff_x % S.q
   pop_frame ()

@@ -215,8 +215,8 @@ val fmul (out f1 f2: felem) : Stack unit
   (requires fun h ->
     live h out /\ live h f1 /\ live h f2 /\
     eq_or_disjoint out f1 /\ eq_or_disjoint out f2 /\ eq_or_disjoint f1 f2 /\
-    felem_fits5 (as_felem5 h f1) (8,8,8,8,8) /\
-    felem_fits5 (as_felem5 h f2) (8,8,8,8,8))
+    felem_fits5 (as_felem5 h f1) (64,64,64,64,64) /\
+    felem_fits5 (as_felem5 h f2) (64,64,64,64,64))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     feval h1 out == feval h0 f1 * feval h0 f2 % S.prime /\
     inv_lazy_reduced2 h1 out)
@@ -225,7 +225,7 @@ val fmul (out f1 f2: felem) : Stack unit
 val fsqr (out f: felem) : Stack unit
   (requires fun h ->
     live h out /\ live h f /\ eq_or_disjoint out f /\
-    felem_fits5 (as_felem5 h f) (8,8,8,8,8))
+    felem_fits5 (as_felem5 h f) (64,64,64,64,64))
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     feval h1 out == feval h0 f * feval h0 f % S.prime /\
     inv_lazy_reduced2 h1 out)
@@ -243,3 +243,23 @@ val fnormalize (out f: felem) : Stack unit
     live h out /\ live h f /\ eq_or_disjoint out f)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_felem5 h1 out == BI.normalize5 (as_felem5 h0 f))
+
+
+inline_for_extraction noextract
+val fmul_3b_normalize_weak (out f:felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ eq_or_disjoint out f /\
+    felem_fits5 (as_felem5 h f) (9,9,9,9,10))
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    feval h1 out == S.fmul (S.fmul 3 S.b) (feval h0 f) /\
+    inv_lazy_reduced2 h1 out)
+
+
+inline_for_extraction noextract
+val fmul_8_normalize_weak (out f:felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ eq_or_disjoint out f /\
+    inv_lazy_reduced2 h f)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    feval h1 out == S.fmul 8 (feval h0 f) /\
+    inv_lazy_reduced2 h1 out)
