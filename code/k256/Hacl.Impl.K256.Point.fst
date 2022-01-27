@@ -62,12 +62,6 @@ let point_inv (h:mem) (p:point) =
   inv_lazy_reduced2 h (gsub p 5ul 5ul) /\
   inv_lazy_reduced2 h (gsub p 10ul 5ul)
 
-inline_for_extraction noextract
-let point_nat (h:mem) (p:point) =
- (as_nat h (gsub p 0ul 5ul),
-  as_nat h (gsub p 5ul 5ul),
-  as_nat h (gsub p 10ul 5ul))
-
 
 inline_for_extraction noextract
 let point_eval_lseq (p:LSeq.lseq uint64 15) : GTot S.proj_point =
@@ -102,7 +96,7 @@ val to_proj_point (p:point) (x y:felem) : Stack unit
     live h p /\ live h x /\ live h y /\ disjoint p x /\ disjoint p y /\
     inv_lazy_reduced2 h x /\ inv_lazy_reduced2 h y)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_inv h1 p /\
-    point_nat h1 p == (as_nat h0 x, as_nat h0 y, S.one))
+    point_eval h1 p == (feval h0 x, feval h0 y, S.one))
 
 let to_proj_point p x y =
   let x1, y1, z1 = getx p, gety p, getz p in
@@ -118,7 +112,7 @@ val is_on_curve_vartime (x y:felem) : Stack bool
   (requires fun h -> live h x /\ live h y /\
     inv_fully_reduced h x /\ inv_fully_reduced h y)
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
-    b == S.is_on_curve (as_nat h0 x, as_nat h0 y))
+    b == S.is_on_curve (feval h0 x, feval h0 y))
 
 let is_on_curve_vartime x y =
   push_frame ();
@@ -130,19 +124,13 @@ let is_on_curve_vartime x y =
   fsqr y2 y;
   fsqr x3 x;
   fmul x3 x3 x;
-  let h0 = ST.get () in
-  //assert (feval h0 y2 == S.fmul (feval h y) (feval h y));
-  assert (felem_fits5 (as_felem5 h0 y2) (1,1,1,1,2));
-
-  //assert (feval h0 x3 == S.fmul (S.fmul (feval h x) (feval h x)) (feval h x));
-  assert (felem_fits5 (as_felem5 h0 x3) (1,1,1,1,2));
-
   make_u52_5 b (make_b_k256 ());
-  let h0' = ST.get () in
-  assert (as_nat h0' b == S.b);
-  assert (felem_fits5 (as_felem5 h0' b) (1,1,1,1,1));
+  let h0 = ST.get () in
+  assert (inv_lazy_reduced2 h0 y2);
+  assert (inv_lazy_reduced2 h0 x3);
+  assert (inv_fully_reduced h0 b);
 
-  BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,1) (as_felem5 h0 x3) (as_felem5 h0' b);
+  BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,1) (as_felem5 h0 x3) (as_felem5 h0 b);
   fadd x3 x3 b;
   let h1 = ST.get () in
   assert (felem_fits5 (as_felem5 h1 x3) (2,2,2,2,3));
@@ -150,7 +138,7 @@ let is_on_curve_vartime x y =
   fnormalize x3 x3;
   fnormalize y2 y2;
   BL.normalize5_lemma (2,2,2,2,3) (as_felem5 h1 x3);
-  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h1 y2);
+  BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h0 y2);
 
   let res = is_felem_eq_vartime y2 x3 in
   pop_frame ();

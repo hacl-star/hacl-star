@@ -8,10 +8,7 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
-
-module BD = Hacl.Bignum.Definitions
 
 module FI = Hacl.Impl.K256.Finv
 module QI = Hacl.Impl.K256.Qinv
@@ -23,7 +20,6 @@ open Hacl.K256.Scalar
 open Hacl.Impl.K256.Point
 open Hacl.Impl.K256.PointMul
 
-module BI = Hacl.Spec.K256.Field52
 module BL = Hacl.Spec.K256.Field52.Lemmas
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
