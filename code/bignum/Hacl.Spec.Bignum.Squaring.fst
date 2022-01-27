@@ -275,7 +275,7 @@ let bn_sqr_inductive #t #aLen a k =
     let acc1 = bn_sqr_f a i acci in
     assert (acc1 == repeati (i + 1) (bn_sqr_f a) acc0);
     bn_sqr_f_lemma a i acci;
-    assert (forall (i0:nat{i + i + 2 < i0 /\ i0 < aLen + aLen}). index acc1 i0 == index acci i0);
+    assert (forall (i0:nat{i + i + 2 < i0 /\ i0 < aLen + aLen}). index acc1 i0 == index acc0 i0);
     acc1)
   acc0
 
@@ -352,19 +352,12 @@ let rec bn_sqr_loop_lemma #t #aLen a i =
   else begin
     let p1 = pow2 (pbits * (i + i - 1)) in
     let p2 = pow2 (pbits * (i + i - 2)) in
+    let p3 = pow2 (pbits * (i - 1)) in
     let acc1 : lbignum t (aLen + aLen) = repeati (i - 1) (bn_sqr_f a) bn_zero in
     let tmp1 : lbignum t (aLen + aLen) = repeati (i - 1) (bn_sqr_diag_f a) bn_zero in
 
     unfold_repeati i (bn_sqr_f a) bn_zero (i - 1);
     assert (acc == bn_sqr_f a (i - 1) acc1);
-
-    calc (==) {
-      eval_ resLen acc (i + i);
-      (==) { bn_eval_unfold_i acc (i + i) }
-      eval_ resLen acc (i + i - 1) + v acc.[i + i - 1] * p1;
-      (==) { bn_sqr_f_lemma a (i - 1) acc1 }
-      eval_ resLen acc1 (i + i - 2) + eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (pbits * (i - 1)) + v acc.[i + i - 1] * p1;
-      };
 
     bn_sqr_f_lemma a (i - 1) acc1;
     assert (acc.[i + i - 1] == acc1.[i + i - 1]);
@@ -374,14 +367,18 @@ let rec bn_sqr_loop_lemma #t #aLen a i =
     calc (==) {
       2 * eval_ resLen acc (i + i) + eval_ resLen tmp (i + i);
       (==) { bn_sqr_diag_loop_step a i }
-      2 * eval_ resLen acc (i + i) + eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
-      (==) { }
-      2 * eval_ resLen acc1 (i + i - 2) + 2 * eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (pbits * (i - 1)) +
+      2 * eval_ resLen acc (i + i) + eval_ resLen tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
+      (==) { bn_eval_unfold_i acc (i + i) }
+      2 * (eval_ resLen acc (i + i - 1) + v acc.[i + i - 1] * p1) +
+      eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
+      (==) { bn_sqr_f_lemma a (i - 1) acc1 }
+      2 * (eval_ resLen acc1 (i + i - 2) + eval_ aLen a (i - 1) * v a.[i - 1] * p3) +
+      eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
+      (==) { Math.Lemmas.distributivity_add_right 2 (eval_ resLen acc1 (i + i - 2)) (eval_ aLen a (i - 1) * v a.[i - 1] * p3) }
+      2 * eval_ resLen acc1 (i + i - 2) + 2 * eval_ aLen a (i - 1) * v a.[i - 1] * p3 +
       eval_ (aLen + aLen) tmp1 (i + i - 2) + v a.[i - 1] * v a.[i - 1] * p2;
       (==) { bn_sqr_loop_lemma a (i - 1) }
-      eval_ aLen a (i - 1) * eval_ aLen a (i - 1) +
-      2 * eval_ aLen a (i - 1) * v a.[i - 1] * pow2 (pbits * (i - 1)) +
-      v a.[i - 1] * v a.[i - 1] * p2;
+      eval_ aLen a (i - 1) * eval_ aLen a (i - 1) + 2 * eval_ aLen a (i - 1) * v a.[i - 1] * p3 + v a.[i - 1] * v a.[i - 1] * p2;
       (==) { bn_eval_square a i }
       eval_ aLen a i * eval_ aLen a i;
     }; () end
