@@ -29,7 +29,7 @@
 #include <stdint.h>
 
 static inline void print_debug_uint32_t(const char *msg, uint32_t x) {
-  printf(">> %s: %x08U\n", msg, x);
+  printf(">> %s: 0x%x\n", msg, x);
 }
 
 static inline void print_debug_uint64_t(const  char *msg, uint64_t x) {
