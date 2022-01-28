@@ -15,7 +15,7 @@ open FStar.Integers
 
 friend Lib.IntTypes
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 let poly1305_vale
     (dst:B.buffer UInt8.t { B.length dst = 16 })
     (src:B.buffer UInt8.t)
@@ -51,6 +51,7 @@ let poly1305_vale
     Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
     Vale.Wrapper.X64.Poly.x64_poly1305 ctx src (FStar.Int.Cast.Full.uint32_to_uint64 len) 1UL;
     let h2 = ST.get () in
+    assert (B.length src == 8 * Vale.Poly1305.Util.readable_words (Seq.length (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src))));
     Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1 h2 ctx src
       (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src))
       (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 key));

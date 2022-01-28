@@ -14,7 +14,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "460d7dd3400ce68d9cddf19ab4c8a81d"
+      "5ff09a493b48ea4089ab9382515adbb7"
     ],
     [
       "Vale.Transformers.PeepHole.peephole_correct",
@@ -34,7 +34,7 @@
         "typing_Vale.Transformers.PeepHole.__proj__Mkpre_peephole__item__ph"
       ],
       0,
-      "5232c4c0d49ef3b3c5bf116aa53bd502"
+      "51c06c3be9265b52620ab5fef4c18b3d"
     ],
     [
       "Vale.Transformers.PeepHole.num_ins_in_code",
@@ -64,7 +64,7 @@
         "subterm_ordering_Vale.X64.Machine_s.While"
       ],
       0,
-      "e0340910a5246ede6024d0b72f187373"
+      "a1559718789c4fc456d8113964b3d5be"
     ],
     [
       "Vale.Transformers.PeepHole.num_ins_in_code",
@@ -84,7 +84,7 @@
         "subterm_ordering_Prims.Cons"
       ],
       0,
-      "cd861ef8c96f3c1dee303554a7394117"
+      "eb5938a77a2910411773b968ac2f6f5c"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_num_ins_in_codes_append",
@@ -117,7 +117,7 @@
         "typing_Vale.Transformers.PeepHole.num_ins_in_codes"
       ],
       0,
-      "c3e1472773c2edd8452ece6bcd0d9179"
+      "101f8f4bbb2fa47239de5a27cc1307f7"
     ],
     [
       "Vale.Transformers.PeepHole.pull_instructions_from_codes",
@@ -136,7 +136,7 @@
         "kinding_Prims.list@tok", "lemma_FStar.Pervasives.invertOption"
       ],
       0,
-      "5fb79ff5b831167a36bb3d782032d8bc"
+      "3990f049b917a88affeadb72f1e449df"
     ],
     [
       "Vale.Transformers.PeepHole.pull_instructions_from_codes",
@@ -154,13 +154,11 @@
         "@fuel_irrelevance_Vale.Transformers.PeepHole.num_ins_in_code.fuel_instrumented",
         "@fuel_irrelevance_Vale.Transformers.PeepHole.num_ins_in_codes.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "Prims_pretyping_e4836109f73687024ac3edd113084865",
         "binder_x_69b3af25a4334715774d1242034fc6f2_0",
-        "binder_x_f26957a7e62b271a8736230b1e9c83c1_1", "bool_inversion",
-        "bool_typing", "constructor_distinct_FStar.Pervasives.Native.None",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_1",
+        "constructor_distinct_FStar.Pervasives.Native.None",
         "constructor_distinct_FStar.Pervasives.Native.Some",
-        "constructor_distinct_Prims.Cons", "constructor_distinct_Prims.Nil",
-        "constructor_distinct_Tm_unit",
+        "constructor_distinct_Prims.Nil",
         "constructor_distinct_Vale.X64.Machine_s.Block",
         "constructor_distinct_Vale.X64.Machine_s.IfElse",
         "constructor_distinct_Vale.X64.Machine_s.Ins",
@@ -171,9 +169,9 @@
         "disc_equation_Vale.X64.Machine_s.Block",
         "disc_equation_Vale.X64.Machine_s.IfElse",
         "disc_equation_Vale.X64.Machine_s.Ins",
-        "disc_equation_Vale.X64.Machine_s.While",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Vale.X64.Bytes_Code_s.code_t",
+        "disc_equation_Vale.X64.Machine_s.While", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals", "equation_Prims.pos",
+        "equation_Vale.X64.Bytes_Code_s.code_t",
         "equation_Vale.X64.Bytes_Code_s.codes_t",
         "equation_Vale.X64.Decls.ins", "equation_Vale.X64.Decls.ocmp",
         "equation_Vale.X64.Machine_Semantics_s.code",
@@ -201,9 +199,8 @@
         "projection_inverse_FStar.Pervasives.Native.None_a",
         "projection_inverse_FStar.Pervasives.Native.Some_a",
         "projection_inverse_FStar.Pervasives.Native.Some_v",
-        "projection_inverse_Prims.Cons_a",
         "projection_inverse_Prims.Cons_hd",
-        "projection_inverse_Prims.Cons_tl", "projection_inverse_Prims.Nil_a",
+        "projection_inverse_Prims.Cons_tl",
         "projection_inverse_Vale.X64.Machine_s.Block_block",
         "projection_inverse_Vale.X64.Machine_s.Block_t_ins",
         "projection_inverse_Vale.X64.Machine_s.Block_t_ocmp",
@@ -222,16 +219,15 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_77a7ca92c1a2fe6770bb4573a450e23b",
-        "token_correspondence_Vale.Transformers.InstructionReorder.num_blocks_in_codes.fuel_instrumented",
         "token_correspondence_Vale.Transformers.PeepHole.num_ins_in_code.fuel_instrumented",
         "typing_FStar.List.Tot.Base.append",
         "typing_Vale.Transformers.InstructionReorder.num_blocks_in_codes",
         "typing_Vale.Transformers.PeepHole.num_ins_in_codes",
         "typing_Vale.Transformers.PeepHole.pull_instructions_from_codes",
-        "typing_tok_Prims.LexTop@tok", "well-founded-ordering-on-nat"
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "ca26d036e77c1d96c9321ea70b45c5e0"
+      "9804584b33b69ac6e95ffde23703ad31"
     ],
     [
       "Vale.Transformers.PeepHole.wrap_instructions",
@@ -246,7 +242,7 @@
         "fuel_guarded_inversion_Prims.list", "subterm_ordering_Prims.Cons"
       ],
       0,
-      "2fff06a3319d6277dbb8cdc593aeffd2"
+      "fab107373ffafcecd805a803f1087a16"
     ],
     [
       "Vale.Transformers.PeepHole.apply_peephole_to_codes",
@@ -257,16 +253,16 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Vale.Transformers.PeepHole.num_ins_in_codes.fuel_instrumented",
         "@fuel_irrelevance_Vale.Transformers.PeepHole.num_ins_in_codes.fuel_instrumented",
-        "@query", "Prims_pretyping_e4836109f73687024ac3edd113084865",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "Vale.Transformers.PeepHole_interpretation_Tm_arrow_66d5817f40439558e3cb160ddb3dfc8d",
         "binder_x_5a90b144a8bba2eba7f8b447c7aac61c_0",
-        "binder_x_69b3af25a4334715774d1242034fc6f2_1", "bool_inversion",
-        "bool_typing", "constructor_distinct_Prims.Cons",
+        "binder_x_69b3af25a4334715774d1242034fc6f2_1",
+        "constructor_distinct_Prims.Cons",
         "data_elim_Vale.Transformers.PeepHole.Mkpre_peephole",
         "disc_equation_FStar.Pervasives.Native.None",
         "disc_equation_FStar.Pervasives.Native.Some",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.Transformers.PeepHole.peephole",
         "equation_Vale.X64.Bytes_Code_s.codes_t",
         "equation_Vale.X64.Machine_Semantics_s.code",
@@ -275,10 +271,14 @@
         "equation_with_fuel_Vale.Transformers.PeepHole.num_ins_in_codes.fuel_instrumented",
         "fuel_guarded_inversion_Prims.list",
         "fuel_guarded_inversion_Vale.Transformers.PeepHole.pre_peephole",
+        "function_token_typing_Prims.__cache_version_number__",
+        "function_token_typing_Vale.X64.Machine_Semantics_s.codes",
         "function_token_typing_Vale.X64.Machine_Semantics_s.ins",
-        "int_inversion", "kinding_Prims.list@tok",
-        "lemma_FStar.Pervasives.invertOption",
+        "int_inversion", "int_typing",
+        "kinding_FStar.Pervasives.Native.tuple2@tok",
+        "kinding_Prims.list@tok", "lemma_FStar.Pervasives.invertOption",
         "proj_equation_Vale.Transformers.PeepHole.Mkpre_peephole_ph",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_FStar.Pervasives.Native.Some_v",
@@ -290,12 +290,12 @@
         "subterm_ordering_Prims.Cons",
         "token_correspondence_Vale.Transformers.PeepHole.__proj__Mkpre_peephole__item__ph",
         "token_correspondence_Vale.Transformers.PeepHole.num_ins_in_code.fuel_instrumented",
-        "typing_FStar.Pervasives.Native.uu___is_Some",
+        "token_correspondence_Vale.Transformers.PeepHole.num_ins_in_codes.fuel_instrumented",
         "typing_Vale.Transformers.PeepHole.num_ins_in_codes",
-        "typing_tok_Prims.LexTop@tok", "well-founded-ordering-on-nat"
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "65894e6d3da12387e7391d9e03e46327"
+      "4a99cebd76d22a4f2d40f337ad4ebda2"
     ],
     [
       "Vale.Transformers.PeepHole.apply_peephole_to_code",
@@ -306,22 +306,20 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Vale.Transformers.PeepHole.num_ins_in_code.fuel_instrumented",
         "@fuel_irrelevance_Vale.Transformers.PeepHole.num_ins_in_code.fuel_instrumented",
-        "@query", "Prims_pretyping_e4836109f73687024ac3edd113084865",
+        "@query",
         "Vale.Transformers.PeepHole_interpretation_Tm_arrow_66d5817f40439558e3cb160ddb3dfc8d",
         "binder_x_5a90b144a8bba2eba7f8b447c7aac61c_0",
-        "binder_x_97ef5ff619e486c846fe112d821f649f_1", "bool_inversion",
-        "bool_typing", "constructor_distinct_Vale.X64.Machine_s.IfElse",
+        "binder_x_97ef5ff619e486c846fe112d821f649f_1",
+        "constructor_distinct_Vale.X64.Machine_s.IfElse",
         "constructor_distinct_Vale.X64.Machine_s.While",
         "data_elim_Vale.Transformers.PeepHole.Mkpre_peephole",
         "data_typing_intro_Prims.Cons@tok",
         "data_typing_intro_Prims.Nil@tok",
-        "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
         "disc_equation_Vale.X64.Machine_s.Block",
         "disc_equation_Vale.X64.Machine_s.IfElse",
         "disc_equation_Vale.X64.Machine_s.Ins",
-        "disc_equation_Vale.X64.Machine_s.While",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "disc_equation_Vale.X64.Machine_s.While", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.Transformers.PeepHole.peephole",
         "equation_Vale.X64.Bytes_Code_s.code_t",
         "equation_Vale.X64.Decls.ins", "equation_Vale.X64.Decls.ocmp",
@@ -335,6 +333,7 @@
         "int_inversion", "int_typing", "kinding_Prims.list@tok",
         "lemma_FStar.Pervasives.invertOption",
         "proj_equation_Vale.Transformers.PeepHole.Mkpre_peephole_ph",
+        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Vale.X64.Machine_s.IfElse_ifCond",
         "projection_inverse_Vale.X64.Machine_s.IfElse_ifFalse",
@@ -352,10 +351,10 @@
         "token_correspondence_Vale.Transformers.PeepHole.__proj__Mkpre_peephole__item__ph",
         "token_correspondence_Vale.Transformers.PeepHole.num_ins_in_code.fuel_instrumented",
         "typing_Vale.Transformers.PeepHole.num_ins_in_code",
-        "typing_tok_Prims.LexTop@tok", "well-founded-ordering-on-nat"
+        "well-founded-ordering-on-nat"
       ],
       0,
-      "70c763eadbe860b95395771ee0bb53b3"
+      "d40f91a2c854868b10579954146e2b02"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_wrap_instructions",
@@ -436,7 +435,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_ins"
       ],
       0,
-      "291d2e40d7354cd8ecb8da3edba53107"
+      "70780b278743cf79ed588ffb1b3fd195"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_pull_instructions_from_codes",
@@ -463,7 +462,7 @@
         "typing_Vale.X64.Machine_Semantics_s.machine_eval_codes"
       ],
       0,
-      "3ef4bcd79835afe2a04ee98c974c9a21"
+      "e75bd11b607353308c63881c4663c9a4"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_pull_instructions_from_codes",
@@ -504,7 +503,8 @@
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "disc_equation_Vale.X64.Machine_s.Block",
         "disc_equation_Vale.X64.Machine_s.Ins", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.pos", "equation_Prims.squash",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
+        "equation_Prims.pos", "equation_Prims.squash",
         "equation_Vale.Transformers.InstructionReorder.equiv_states",
         "equation_Vale.X64.Bytes_Code_s.code_t",
         "equation_Vale.X64.Bytes_Code_s.codes_t",
@@ -584,7 +584,7 @@
         "unit_inversion", "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "1694a6680c688c0ea209af88c6d220d2"
+      "8918cdb821e68b783b93b84333fed27e"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_apply_peephole_to_codes",
@@ -621,7 +621,7 @@
         "disc_equation_FStar.Pervasives.Native.None",
         "disc_equation_FStar.Pervasives.Native.Some",
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
-        "equation_Prims.nat",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.Transformers.InstructionReorder.equiv_states",
         "equation_Vale.Transformers.PeepHole.peephole",
         "equation_Vale.Transformers.PeepHole.peephole_correct",
@@ -634,6 +634,7 @@
         "equation_Vale.X64.Machine_Semantics_s.ocmp",
         "equation_with_fuel_Vale.Transformers.PeepHole.apply_peephole_to_codes.fuel_instrumented",
         "equation_with_fuel_Vale.Transformers.PeepHole.num_ins_in_codes.fuel_instrumented",
+        "equation_with_fuel_Vale.Transformers.PeepHole.wrap_instructions.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Machine_Semantics_s.machine_eval_code.fuel_instrumented",
         "equation_with_fuel_Vale.X64.Machine_Semantics_s.machine_eval_codes.fuel_instrumented",
         "fuel_guarded_inversion_FStar.Pervasives.Native.option",
@@ -680,7 +681,7 @@
         "unit_inversion", "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "57a6e2920168b2913a3217badbca4c25"
+      "f89922f1450de83c97c67651472f05d4"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_apply_peephole_to_code",
@@ -722,6 +723,7 @@
         "disc_equation_Vale.X64.Machine_s.Ins",
         "disc_equation_Vale.X64.Machine_s.While",
         "equation_FStar.Pervasives.Native.snd", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.Transformers.InstructionReorder.equiv_states",
         "equation_Vale.Transformers.PeepHole.peephole",
         "equation_Vale.Transformers.PeepHole.peephole_correct",
@@ -805,7 +807,7 @@
         "unit_inversion", "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "96de9e40d21b7f355b4f17305cd822e1"
+      "b3de1bd31442bb71ece4e901b770bab3"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_apply_peephole_to_code",
@@ -836,6 +838,7 @@
         "data_elim_Vale.X64.Machine_s.While",
         "disc_equation_FStar.Pervasives.Native.Some",
         "disc_equation_Vale.X64.Machine_s.While", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.Transformers.InstructionReorder.equiv_states",
         "equation_Vale.Transformers.PeepHole.peephole",
         "equation_Vale.X64.Bytes_Code_s.code_t",
@@ -879,7 +882,7 @@
         "unit_inversion", "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "d92555c2388d64dfb3e043551be62d97"
+      "92ce0dff109a74c3e2b5dbec252e9912"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_peephole_transform",
@@ -996,7 +999,7 @@
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_stack"
       ],
       0,
-      "5d3b7482837db0eb593a6029051de37b"
+      "c94aef0fb83f19040e0b063f8a3e332e"
     ],
     [
       "Vale.Transformers.PeepHole.coerce_to_normal",
@@ -1005,7 +1008,7 @@
       0,
       [ "@query" ],
       0,
-      "8dfc85cc54b79b2bbf910a8983a881ca"
+      "32c6cdc19dfeaaac5d9fa5e0be7780b9"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_update_to_valid_destination_keeps_it_as_valid_src",
@@ -1160,7 +1163,7 @@
         "typing_Vale.X64.Machine_Semantics_s.valid_src_operand64_and_taint"
       ],
       0,
-      "93210b582945ddcea6feee52e31162e2"
+      "bfca515bbf05aed4b05df96ac189a609"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_double_update_reg",
@@ -1235,7 +1238,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.Public@tok"
       ],
       0,
-      "cdf79f8dbb76f7846859f73ce18981af"
+      "ad1e3021e93df28537d17434f2bb3908"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_double_update_reg",
@@ -1251,7 +1254,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "a71247e5a732e824270f1c731acd6340"
+      "bc7a2dcafa4b9d2ec1ec0f676bba6d8a"
     ],
     [
       "Vale.Transformers.PeepHole.lemma_double_update_reg",
@@ -1267,7 +1270,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "e1d89ea2dcd2a80f27922de70743e3b1"
+      "f84ac63fddd3e3e2def0072f04f236cd"
     ]
   ]
 ]

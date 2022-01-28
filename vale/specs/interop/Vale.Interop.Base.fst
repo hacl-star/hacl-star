@@ -228,7 +228,7 @@ let disjoint_or_eq_1 (a:arg) (b:arg) =
       disjoint_not_eq xb yb
     | (| TD_Buffer srcx tx {taint=tntx}, xb |), (| TD_Buffer srcy ty {taint=tnty}, yb |)
     | (| TD_ImmBuffer srcx tx {taint=tntx}, xb |), (| TD_ImmBuffer srcy ty {taint=tnty}, yb |) ->
-      disjoint_not_eq xb yb \/ (eq3 xb yb /\ tntx == tnty /\ tx == ty /\ srcx == srcy)
+      disjoint_not_eq xb yb \/ (xb === yb /\ tntx == tnty /\ tx == ty /\ srcx == srcy)
     | _ -> True
 
 [@__reduce__]
