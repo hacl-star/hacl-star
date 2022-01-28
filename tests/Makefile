@@ -88,7 +88,7 @@ vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
 	$(CC) -I../lib/c $(CFLAGS) $(CFLAGS_128) $(LDFLAGS) vec-128-test.c -o vec-128-test.exe
 
 %.exe: %.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a ../code/k256/dist/libk256.a -o $@ -lcrypto
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto
 
 # Running tests
 
