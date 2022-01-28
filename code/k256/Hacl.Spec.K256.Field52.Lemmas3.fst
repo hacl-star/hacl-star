@@ -65,9 +65,11 @@ let lemma_four_mul64_wide a0 a1 a2 a3 b0 b1 b2 b3 =
   Math.Lemmas.small_mod (v a0 * v b3 + v a1 * v b2 + v a2 * v b1 + v a3 * v b0) (pow2 128)
 
 
-val lemma_16_max52_max48: unit -> Lemma (16 * (max52 * max48) < max52 * max52)
-let lemma_16_max52_max48 () =
-  assert_norm (16 * (max52 * max48) < max52 * max52)
+val lemma_16_max52_max48: a:pos -> Lemma ((a * 16) * (max52 * max48) <= a * (max52 * max52))
+let lemma_16_max52_max48 a =
+  assert_norm (16 * (max52 * max48) <= max52 * max52);
+  Math.Lemmas.paren_mul_right a 16 (max52 * max48);
+  Math.Lemmas.lemma_mult_le_left a (16 * (max52 * max48)) (max52 * max52)
 
 
 val lemma_add_five_mul64_wide (md:nat) (d:uint128) (a0 a1 a2 a3 a4 b0 b1 b2 b3 b4:uint64) : Lemma
@@ -85,6 +87,9 @@ val lemma_add_five_mul64_wide (md:nat) (d:uint128) (a0 a1 a2 a3 a4 b0 b1 b2 b3 b
     v d1 <= 12801 * (max52 * max52)))
 
 let lemma_add_five_mul64_wide md d a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
+  assert_norm (16385 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   lemma_bound_mul64_wide 64 64 max52 max48 a0 b4;
   lemma_bound_mul64_wide 64 64 max52 max52 a1 b3;
   lemma_bound_mul64_wide 64 64 max52 max52 a2 b2;
@@ -93,8 +98,8 @@ let lemma_add_five_mul64_wide md d a0 a1 a2 a3 a4 b0 b1 b2 b3 b4 =
   Math.Lemmas.swap_mul max52 max48;
   assert (v d + v a0 * v b4 + v a1 * v b3 + v a2 * v b2 + v a3 * v b1 + v a4 * v b0 <=
     md * max52 + 8192 * (max52 * max48) + 12288 * (max52 * max52));
-  lemma_16_max52_max48 ();
-  assert_norm (md * max52 + 8192 * (max52 * max48) + 12288 * (max52 * max52) <= 12801 * (max52 * max52));
+  lemma_16_max52_max48 512;
+  assert (md * max52 + 8192 * (max52 * max48) + 12288 * (max52 * max52) <= 12801 * (max52 * max52));
   assert_norm (12801 * (max52 * max52) < pow2 128);
 
   Math.Lemmas.small_mod (v d + v a0 * v b4) (pow2 128);
@@ -118,14 +123,17 @@ val lemma_add_four_mul64_wide (md:nat) (d:uint128) (a1 a2 a3 a4 b1 b2 b3 b4:uint
     v d1 <= 8705 * (max52 * max52)))
 
 let lemma_add_four_mul64_wide md d a1 a2 a3 a4 b1 b2 b3 b4 =
+  assert_norm (12802 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   lemma_bound_mul64_wide 64 64 max52 max48 a1 b4;
   lemma_bound_mul64_wide 64 64 max52 max52 a2 b3;
   lemma_bound_mul64_wide 64 64 max52 max52 a3 b2;
   lemma_bound_mul64_wide 64 64 max48 max52 a4 b1;
   assert (v d + v a1 * v b4 + v a2 * v b3 + v a3 * v b2 + v a4 * v b1 <=
     md * max52 + 8192 * (max52 * max48) + 8192 * (max52 * max52));
-  lemma_16_max52_max48 ();
-  assert_norm (md * max52 + 8192 * (max52 * max48) + 8192 * (max52 * max52) <= 8705 * (max52 * max52));
+  lemma_16_max52_max48 512;
+  assert (md * max52 + 8192 * (max52 * max48) + 8192 * (max52 * max52) <= 8705 * (max52 * max52));
   assert_norm (8705 * (max52 * max52) < pow2 128);
 
   Math.Lemmas.small_mod (v d + v a1 * v b4) (pow2 128);
@@ -146,11 +154,14 @@ val lemma_add_three_mul64_wide52 (md:nat) (d:uint128) (a0 a1 a2 b0 b1 b2:uint64)
     v d1 <= 12289 * (max52 * max52)))
 
 let lemma_add_three_mul64_wide52 md d a0 a1 a2 b0 b1 b2 =
+  assert_norm (8194 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   lemma_bound_mul64_wide 64 64 max52 max52 a0 b2;
   lemma_bound_mul64_wide 64 64 max52 max52 a1 b1;
   lemma_bound_mul64_wide 64 64 max52 max52 a2 b0;
   assert (v d + v a0 * v b2 + v a1 * v b1 + v a2 * v b0 <= md * max52 + 12288 * (max52 * max52));
-  assert_norm (md * max52 + 12288 * (max52 * max52) <= 12289 * (max52 * max52));
+  assert (md * max52 + 12288 * (max52 * max52) <= 12289 * (max52 * max52));
   assert_norm (12289 * (max52 * max52) < pow2 128);
 
   Math.Lemmas.small_mod (v d + v a0 * v b2) (pow2 128);
@@ -170,6 +181,9 @@ val lemma_add_three_mul64_wide (md:nat) (d:uint128) (a2 a3 a4 b2 b3 b4:uint64) :
     v d1 <= 4609 * (max52 * max52)))
 
 let lemma_add_three_mul64_wide md d a2 a3 a4 b2 b3 b4 =
+  assert_norm (8705 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   lemma_bound_mul64_wide 64 64 max52 max48 a2 b4;
   lemma_bound_mul64_wide 64 64 max52 max52 a3 b3;
   lemma_bound_mul64_wide 64 64 max48 max52 a4 b2;
@@ -177,8 +191,8 @@ let lemma_add_three_mul64_wide md d a2 a3 a4 b2 b3 b4 =
   Math.Lemmas.swap_mul max52 max48;
   assert (v d + v a2 * v b4 + v a3 * v b3 + v a4 * v b2 <=
     md * max52 + 8192 * (max52 * max48) + 4096 * (max52 * max52));
-  lemma_16_max52_max48 ();
-  assert_norm (md * max52 + 8192 * (max52 * max48) + 4096 * (max52 * max52) <= 4609 * (max52 * max52));
+  lemma_16_max52_max48 512;
+  assert (md * max52 + 8192 * (max52 * max48) + 4096 * (max52 * max52) <= 4609 * (max52 * max52));
   assert_norm (4609 * (max52 * max52) < pow2 128);
 
   Math.Lemmas.small_mod (v d + v a2 * v b4) (pow2 128);
@@ -197,10 +211,13 @@ val lemma_add_two_mul64_wide52 (md:nat) (d:uint128) (a0 a1 b0 b1:uint64) : Lemma
     v d1 <= 8193 * (max52 * max52)))
 
 let lemma_add_two_mul64_wide52 md d a0 a1 b0 b1 =
+  assert_norm (4097 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   lemma_bound_mul64_wide 64 64 max52 max52 a0 b1;
   lemma_bound_mul64_wide 64 64 max52 max52 a1 b0;
   assert (v d + v a0 * v b1 + v a1 * v b0 <= md * max52 + 8192 * (max52 * max52));
-  assert_norm (md * max52 + 8192 * (max52 * max52) <= 8193 * (max52 * max52));
+  assert (md * max52 + 8192 * (max52 * max52) <= 8193 * (max52 * max52));
   assert_norm (md * max52 + 8192 * (max52 * max52) < pow2 128);
   Math.Lemmas.small_mod (v d + v a0 * v b1) (pow2 128);
   Math.Lemmas.small_mod (v d + v a0 * v b1 + v a1 * v b0) (pow2 128)
@@ -217,12 +234,15 @@ val lemma_add_two_mul64_wide (md:nat) (d:uint128) (a3 a4 b3 b4:uint64) : Lemma
     v d1 <= 513 * (max52 * max52)))
 
 let lemma_add_two_mul64_wide md d a3 a4 b3 b4 =
+  assert_norm (8193 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   lemma_bound_mul64_wide 64 64 max52 max48 a3 b4;
   lemma_bound_mul64_wide 64 64 max48 max52 a4 b3;
   Math.Lemmas.swap_mul max52 max48;
   assert (v d + v a3 * v b4 + v a4 * v b3 <= md * max52 + 8192 * (max52 * max48));
-  lemma_16_max52_max48 ();
-  assert_norm (md * max52 + 8192 * (max52 * max48) <= 513 * (max52 * max52));
+  lemma_16_max52_max48 512;
+  assert (md * max52 + 8192 * (max52 * max48) <= 513 * (max52 * max52));
   assert_norm (513 * (max52 * max52) < pow2 128);
   Math.Lemmas.small_mod (v d + v a3 * v b4) (pow2 128);
   Math.Lemmas.small_mod (v d + v a3 * v b4 + v a4 * v b3) (pow2 128)
@@ -759,6 +779,9 @@ val lemma_add_five_sqr64_wide (md:nat) (d:uint128) (a0 a1 a2 a3 a4:uint64) : Lem
     v d1 <= 12801 * (max52 * max52)))
 
 let lemma_add_five_sqr64_wide md d a0 a1 a2 a3 a4 =
+  assert_norm (16385 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   assert_norm (max48 < max52);
   lemma_mul_by2 64 max48 a4;
   lemma_mul_by2 64 max52 a1;
@@ -766,16 +789,23 @@ let lemma_add_five_sqr64_wide md d a0 a1 a2 a3 a4 =
   lemma_bound_mul64_wide 64 128 max52 max48 a0 (a4 *. u64 2);
   lemma_bound_mul64_wide 128 64 max52 max52 (a1 *. u64 2) a3;
   lemma_bound_mul64_wide 64 64 max52 max52 a2 a2;
-  //Math.Lemmas.swap_mul max52 max48;
   assert (v d + v a0 * (v a4 * 2) + v a1 * 2 * v a3 + v a2 * v a2 <=
     md * max52 + 8192 * (max52 * max48) + 12288 * (max52 * max52));
-  lemma_16_max52_max48 ();
-  assert_norm (md * max52 + 8192 * (max52 * max48) + 12288 * (max52 * max52) <= 12801 * (max52 * max52));
+  lemma_16_max52_max48 512;
+  assert (md * max52 + 8192 * (max52 * max48) + 12288 * (max52 * max52) <= 12801 * (max52 * max52));
   assert_norm (12801 * (max52 * max52) < pow2 128);
 
   Math.Lemmas.small_mod (v d + v a0 * (v a4 * 2)) (pow2 128);
-  Math.Lemmas.small_mod (v d + v a0 * (v a4 * 2) + (v a1 * 2) * v a3) (pow2 128);
-  Math.Lemmas.small_mod (v d + v a0 * (v a4 * 2) + (v a1 * 2) * v a3 + v a2 * v a2) (pow2 128)
+  Math.Lemmas.small_mod (v d + v a0 * (v a4 * 2) + v a1 * 2 * v a3) (pow2 128);
+  Math.Lemmas.small_mod (v d + v a0 * (v a4 * 2) + v a1 * 2 * v a3 + v a2 * v a2) (pow2 128);
+
+  calc (==) {
+    v d + v a0 * (v a4 * 2) + v a1 * 2 * v a3 + v a2 * v a2;
+    (==) { Math.Lemmas.swap_mul (v a1) 2 }
+    v d + v a0 * (v a4 * 2) + v a1 * v a3 + v a1 * v a3 + v a2 * v a2;
+    (==) { Math.Lemmas.paren_mul_right (v a0) (v a4) 2 }
+    v d + v a0 * v a4 + v a0 * v a4 + v a1 * v a3 + v a1 * v a3 + v a2 * v a2;
+  }
 
 
 val lemma_add_four_sqr64_wide (md:nat) (d:uint128) (a1 a2 a3 a4:uint64) : Lemma
@@ -789,6 +819,10 @@ val lemma_add_four_sqr64_wide (md:nat) (d:uint128) (a1 a2 a3 a4:uint64) : Lemma
     v d1 <= 8705 * (max52 * max52)))
 
 let lemma_add_four_sqr64_wide md d a1 a2 a3 a4 =
+  let d1 = d +. mul64_wide a1 (a4 *. u64 2) +. mul64_wide (a2 *. u64 2) a3 in
+  assert_norm (12802 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   assert_norm (max48 < max52);
   lemma_mul_by2 64 max48 a4;
   lemma_mul_by2 64 max52 a2;
@@ -797,12 +831,21 @@ let lemma_add_four_sqr64_wide md d a1 a2 a3 a4 =
   lemma_bound_mul64_wide 128 64 max52 max52 (a2 *. u64 2) a3;
   assert (v d + v a1 * (v a4 * 2) + v a2 * 2 * v a3 <=
     md * max52 + 8192 * (max52 * max48) + 8192 * (max52 * max52));
-  lemma_16_max52_max48 ();
-  assert_norm (md * max52 + 8192 * (max52 * max48) + 8192 * (max52 * max52) <= 8705 * (max52 * max52));
+  lemma_16_max52_max48 512;
+  assert (md * max52 + 8192 * (max52 * max48) + 8192 * (max52 * max52) <= 8705 * (max52 * max52));
   assert_norm (8705 * (max52 * max52) < pow2 128);
 
   Math.Lemmas.small_mod (v d + v a1 * (2 * v a4)) (pow2 128);
-  Math.Lemmas.small_mod (v d + v a1 * (2 * v a4) + (v a2 * 2) * v a3) (pow2 128)
+  Math.Lemmas.small_mod (v d + v a1 * (2 * v a4) + (v a2 * 2) * v a3) (pow2 128);
+
+  calc (==) {
+    v d + v a1 * (2 * v a4) + (v a2 * 2) * v a3;
+    (==) { Math.Lemmas.swap_mul (v a2) 2 }
+    v d + v a1 * (2 * v a4) + v a2 * v a3 + v a2 * v a3;
+    (==) { Math.Lemmas.paren_mul_right (v a1) 2 (v a4); Math.Lemmas.swap_mul (v a1) 2 }
+    v d + v a1 * v a4 + v a1 * v a4 + v a2 * v a3 + v a2 * v a3;
+    };
+  assert (v d1 = v d + v a1 * v a4 + v a1 * v a4 + v a2 * v a3 + v a2 * v a3)
 
 
 val lemma_add_two_sqr64_wide52 (md:nat) (d:uint128) (a0 a1:uint64) : Lemma
@@ -815,10 +858,13 @@ val lemma_add_two_sqr64_wide52 (md:nat) (d:uint128) (a0 a1:uint64) : Lemma
     v d1 <= 8193 * (max52 * max52)))
 
 let lemma_add_two_sqr64_wide52 md d a0 a1 =
+  assert_norm (4097 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   lemma_mul_by2 64 max52 a0;
   lemma_bound_mul64_wide 128 64 max52 max52 (a0 *. u64 2) a1;
   assert (v d + v a0 * 2 * v a1 <= md * max52 + 8192 * (max52 * max52));
-  assert_norm (md * max52 + 8192 * (max52 * max52) <= 8193 * (max52 * max52));
+  assert (md * max52 + 8192 * (max52 * max52) <= 8193 * (max52 * max52));
   assert_norm (md * max52 + 8192 * (max52 * max52) < pow2 128);
   Math.Lemmas.small_mod (v d + v a0 * 2 * v a1) (pow2 128)
 
@@ -834,6 +880,9 @@ val lemma_add_three_sqr64_wide (md:nat) (d:uint128) (a2 a3 a4:uint64) : Lemma
     v d1 <= 4609 * (max52 * max52)))
 
 let lemma_add_three_sqr64_wide md d a2 a3 a4 =
+  assert_norm (8705 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   assert_norm (max48 < max52);
   lemma_mul_by2 64 max48 a4;
 
@@ -842,8 +891,8 @@ let lemma_add_three_sqr64_wide md d a2 a3 a4 =
 
   assert (v d + v a2 * (v a4 * 2) + v a3 * v a3 <=
     md * max52 + 8192 * (max52 * max48) + 4096 * (max52 * max52));
-  lemma_16_max52_max48 ();
-  assert_norm (md * max52 + 8192 * (max52 * max48) + 4096 * (max52 * max52) <= 4609 * (max52 * max52));
+  lemma_16_max52_max48 512;
+  assert (md * max52 + 8192 * (max52 * max48) + 4096 * (max52 * max52) <= 4609 * (max52 * max52));
   assert_norm (4609 * (max52 * max52) < pow2 128);
 
   Math.Lemmas.small_mod (v d + v a2 * (v a4 * 2)) (pow2 128);
@@ -861,12 +910,15 @@ val lemma_add_three_sqr64_wide52 (md:nat) (d:uint128) (a0 a1 a2:uint64) : Lemma
     v d1 <= 12289 * (max52 * max52)))
 
 let lemma_add_three_sqr64_wide52 md d a0 a1 a2 =
+  assert_norm (8194 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   lemma_mul_by2 64 max52 a0;
 
   lemma_bound_mul64_wide 128 64 max52 max52 (a0 *. u64 2) a2;
   lemma_bound_mul64_wide 64 64 max52 max52 a1 a1;
   assert (v d + v a0 * v a2 + v a1 * v a1 + v a2 * v a0 <= md * max52 + 12288 * (max52 * max52));
-  assert_norm (md * max52 + 12288 * (max52 * max52) <= 12289 * (max52 * max52));
+  assert (md * max52 + 12288 * (max52 * max52) <= 12289 * (max52 * max52));
   assert_norm (12289 * (max52 * max52) < pow2 128);
 
   Math.Lemmas.small_mod (v d + v a0 * 2 * v a2) (pow2 128);
@@ -883,13 +935,16 @@ val lemma_add_two_sqr64_wide (md:nat) (d:uint128) (a3 a4:uint64) : Lemma
     v d1 <= 513 * (max52 * max52)))
 
 let lemma_add_two_sqr64_wide md d a3 a4 =
+  assert_norm (64193 < max52);
+  Math.Lemmas.lemma_mult_lt_right max52 md max52;
+
   assert_norm (max48 < max52);
   lemma_mul_by2 64 max48 a4;
 
   lemma_bound_mul64_wide 64 128 max52 max48 a3 (a4 *. u64 2);
   assert (v d + v a3 * (v a4 * 2) <= md * max52 + 8192 * (max52 * max48));
-  lemma_16_max52_max48 ();
-  assert_norm (md * max52 + 8192 * (max52 * max48) <= 513 * (max52 * max52));
+  lemma_16_max52_max48 512;
+  assert (md * max52 + 8192 * (max52 * max48) <= 513 * (max52 * max52));
   assert_norm (513 * (max52 * max52) < pow2 128);
   Math.Lemmas.small_mod (v d + v a3 * (v a4 * 2)) (pow2 128)
 

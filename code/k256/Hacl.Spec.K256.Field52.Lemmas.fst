@@ -59,8 +59,8 @@ let is_felem_ge_prime_vartime5_lemma f =
     u64 0xffffffffffff) in
   assert_norm (S.prime = as_nat5 p);
   assert_norm (0xffffefffffc2f <= max52);
-  assert_norm (0xfffffffffffff <= max52);
-  assert_norm (0xffffffffffff <= max48);
+  assert_norm (0xfffffffffffff = max52);
+  assert_norm (0xffffffffffff = max48);
   assert (felem_fits5 p (1,1,1,1,1));
   //LD.lemma_as_nat_decompose f;
   //LD.lemma_as_nat_decompose p;

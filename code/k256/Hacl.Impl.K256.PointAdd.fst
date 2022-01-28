@@ -128,6 +128,41 @@ let ab_minus_cd a b c d tmp =
   BL.normalize_weak5_lemma (5,5,5,5,6) (as_felem5 h2 c)
 
 
+inline_for_extraction noextract
+val yy_mp_bzz3 (zz yy tmp1 yy_m_bzz3 yy_p_bzz3:felem) : Stack unit
+  (requires fun h ->
+    live h zz /\ live h yy /\ live h tmp1 /\
+    live h yy_m_bzz3 /\ live h yy_p_bzz3 /\
+    disjoint zz yy /\ disjoint zz tmp1 /\ disjoint zz yy_m_bzz3 /\
+    disjoint zz yy_p_bzz3 /\ disjoint yy tmp1 /\ disjoint yy yy_m_bzz3 /\
+    disjoint yy yy_p_bzz3 /\ disjoint tmp1 yy_m_bzz3 /\
+    disjoint tmp1 yy_p_bzz3 /\ disjoint yy_m_bzz3 yy_p_bzz3 /\
+
+    inv_lazy_reduced2 h zz /\ inv_lazy_reduced2 h yy)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc tmp1 |+| loc yy_m_bzz3 |+| loc yy_p_bzz3) h0 h1 /\
+    (let bzz3 = S.fmul (S.fmul 3 S.b) (feval h0 zz) in
+    feval h1 yy_m_bzz3 = S.fsub (feval h0 yy) bzz3 /\
+    feval h1 yy_p_bzz3 = S.fadd (feval h0 yy) bzz3 /\
+    felem_fits5 (as_felem5 h1 yy_m_bzz3) (5,5,5,5,6) /\
+    felem_fits5 (as_felem5 h1 yy_p_bzz3) (2,2,2,2,4)))
+
+let yy_mp_bzz3 zz yy tmp1 yy_m_bzz3 yy_p_bzz3 =
+  fmul_3b_normalize_weak tmp1 zz; //tmp1 = bzz3 = (3*b)*zz
+  let h1 = ST.get () in
+  // assert (felem_fits5 (as_felem5 h1 tmp1) (1,1,1,1,2));
+
+  fsub yy_m_bzz3 yy tmp1 (u64 2); //yy_m_bzz3 = yy-bzz3
+  let h2 = ST.get () in
+  BL.fsub5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h1 yy) (as_felem5 h1 tmp1) (u64 2);
+  // assert (felem_fits5 (as_felem5 h5 yy_m_bzz3) (5,5,5,5,6));
+
+  fadd yy_p_bzz3 yy tmp1; //yy_p_bzz3 = yy+bzz3
+  let h3 = ST.get () in
+  BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h1 yy) (as_felem5 h1 tmp1)
+  // assert (felem_fits5 (as_felem5 h6 yy_p_bzz3) (2,2,2,2,4));
+
+
 #set-options "--z3rlimit 300"
 
 inline_for_extraction noextract
@@ -176,19 +211,7 @@ let point_add_no_alloc out p q tmp =
   // assert (felem_fits5 (as_felem5 h2 yz_pairs) (9,9,9,9,10));
   // assert (felem_fits5 (as_felem5 h2 xz_pairs) (9,9,9,9,10));
 
-  fmul_3b_normalize_weak tmp1 zz; //tmp1 = bzz3 = (3*b)*zz
-  let h3 = ST.get () in
-  // assert (felem_fits5 (as_felem5 h3 tmp1) (1,1,1,1,2));
-
-  fsub yy_m_bzz3 yy tmp1 (u64 2); //yy_m_bzz3 = yy-bzz3
-  let h5 = ST.get () in
-  BL.fsub5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h3 yy) (as_felem5 h3 tmp1) (u64 2);
-  // assert (felem_fits5 (as_felem5 h5 yy_m_bzz3) (5,5,5,5,6));
-
-  fadd yy_p_bzz3 yy tmp1; //yy_p_bzz3 = yy+bzz3
-  let h6 = ST.get () in
-  BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,2) (as_felem5 h3 yy) (as_felem5 h3 tmp1);
-  // assert (felem_fits5 (as_felem5 h6 yy_p_bzz3) (2,2,2,2,4));
+  yy_mp_bzz3 zz yy tmp1 yy_m_bzz3 yy_p_bzz3;
 
   fmul_3b_normalize_weak x3 yz_pairs; //x3 = byz3 = (3*b)*yz_pairs
   let h7 = ST.get () in

@@ -335,19 +335,19 @@ let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
   Math.Lemmas.lemma_mult_le_right (v len) (v i + 1) (v table_len);
   Math.Lemmas.lemma_mult_le_right (v len) (v i + 2) (v table_len);
   assert (v (i *! len) == v i * v len);
-  assert (v ((i +! 1ul) *! len) == (v i + 1) * v len);
+  assert (v (i *! len +! len) == v i * v len + v len);
 
   let h0 = ST.get () in
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v i));
   let t1 = sub table (i *! len) len in
-  let t2 = sub table ((i +! 1ul) *! len) len in
+  let t2 = sub table (i *! len +! len) len in
   lprecomp_table_mul len ctx_len k ctx a i t1 t2;
   let h1 = ST.get () in
-  B.modifies_buffer_elim (B.gsub #(uint_t a_t SEC) table 0ul ((i +! 1ul) *! len)) (loc t2) h0 h1;
+  B.modifies_buffer_elim (B.gsub #(uint_t a_t SEC) table 0ul (i *! len +! len)) (loc t2) h0 h1;
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) (v i + 1));
   LSeq.eq_intro
-    (LSeq.sub (as_seq h0 table) 0 ((v i + 1) * v len))
-    (LSeq.sub (as_seq h1 table) 0 ((v i + 1) * v len));
+    (LSeq.sub (as_seq h0 table) 0 (v i * v len + v len))
+    (LSeq.sub (as_seq h1 table) 0 (v i * v len + v len));
 
   assert (forall (j:nat{j <= v i}).
     precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) j);
