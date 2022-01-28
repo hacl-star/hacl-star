@@ -779,7 +779,7 @@ dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum4096_32,Hacl.Bignum256_32,Hacl.Bignum4096,Hacl.Bignum256,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64
-dist/wasm/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA=Hacl.Impl.K256.*,Hacl.K256.*
+dist/wasm/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
 dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
@@ -896,7 +896,7 @@ dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAG
 dist/linux/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/linux/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
 dist/linux/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum4096_32,Hacl.Bignum256_32,Hacl.Bignum4096,Hacl.Bignum256,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64
-dist/linux/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA=Hacl.Impl.K256.*,Hacl.K256.*
+dist/linux/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*
 dist/linux/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
 dist/linux/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
 dist/linux/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
@@ -939,7 +939,7 @@ dist/ccf/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/ccf/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519
 dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/ccf/Makefile.basic: K256_BUNDLE=-bundle Hacl.K256.ECDSA=Hacl.Impl.K256.*,Hacl.K256.*
+dist/ccf/Makefile.basic: K256_BUNDLE=-bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*
 dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS
 dist/ccf/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
 dist/ccf/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum4096_32,Hacl.Bignum256_32,Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64,Hacl.Bignum.*,Hacl.Bignum
@@ -1002,7 +1002,7 @@ dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.Impl.SHA3,Hacl.SHA3
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/mozilla/Makefile.basic: K256_BUNDLE= -bundle Hacl.K256.ECDSA=Hacl.Impl.K256.*,Hacl.K256.*
+dist/mozilla/Makefile.basic: K256_BUNDLE= -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*
 dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS
 dist/mozilla/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
 dist/mozilla/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum256_32,Hacl.Bignum4096_32,Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64,Hacl.Bignum.*,Hacl.Bignum
