@@ -668,12 +668,20 @@ typedef vector128_8 vector128;
 #define Lib_IntVector_Intrinsics_vec128_load32_le(x)                 \
   (vector128) ((vector128_32) vec_revb(*((vector128_32*) (const uint8_t*)(x))))
 
+#define Lib_IntVector_Intrinsics_vec128_load32_be(x)                 \
+  (vector128) (*((vector128_32*) (const uint8_t*)(x)))
+
 #define Lib_IntVector_Intrinsics_vec128_load64_le(x)                 \
-  (vector128) ((vector128_64) vec_revb(*((vector128_64*) (const uint8_t*)(x)))) 
+  (vector128) ((vector128_64) vec_revb(*((vector128_64*) (const uint8_t*)(x))))
 
 static inline
 void Lib_IntVector_Intrinsics_vec128_store32_le(const uint8_t *x0, vector128 x1) {
   *((vector128_32*)x0) = vec_revb((vector128_32) x1);
+}
+
+static inline
+void Lib_IntVector_Intrinsics_vec128_store32_be(const uint8_t *x0, vector128 x1) {
+  *((vector128_32*)x0) = (vector128_32) x1;
 }
 
 static inline
@@ -763,6 +771,11 @@ void Lib_IntVector_Intrinsics_vec128_store64_le(const uint8_t *x0, vector128 x1)
   (((vector128)((vector128_64)vec_rli((vector128_64)(x0), (unsigned long)(64-(x1))))) & \
    ((vector128)((vector128_64){0xffffffffffffffff >> (x1), 0xffffffffffffffff >> (x1)})))
 
+#define Lib_IntVector_Intrinsics_vec128_shift_right32(x0, x1)         \
+  (((vector128)((vector128_32)vec_rli((vector128_32)(x0), (unsigned int)(32-(x1))))) & \
+   ((vector128)((vector128_32){0xffffffff >> (x1), 0xffffffff >> (x1), \
+                               0xffffffff >> (x1), 0xffffffff >> (x1)})))
+
 /* Doesn't work with vec_splat_u64 */
 #define Lib_IntVector_Intrinsics_vec128_smul64(x0, x1)          \
   ((vector128)(Lib_IntVector_Intrinsics_vec128_mul64(x0,((vector128_64){(unsigned long long)(x1),(unsigned long long)(x1)}))))
@@ -770,8 +783,11 @@ void Lib_IntVector_Intrinsics_vec128_store64_le(const uint8_t *x0, vector128 x1)
 #define Lib_IntVector_Intrinsics_vec128_sub64(x0, x1)   \
   ((vector128)((vector128_64)(x0) - (vector128_64)(x1)))
 
-#define Lib_IntVector_Intrinsics_vec128_xor(x0, x1)  \
-  ((vector128)(vec_xor((vector128)(x0), (vector128)(x1))))
+static inline
+vector128 Lib_IntVector_Intrinsics_vec128_xor(vector128 x0, vector128 x1) {
+  return ((vector128)(vec_xor((vector128)(x0), (vector128)(x1))));
+}
+
 
 #define Lib_IntVector_Intrinsics_vec128_zero \
   ((vector128){})
@@ -814,7 +830,7 @@ typedef vector128_8 vector128;
 
 #define Lib_IntVector_Intrinsics_vec128_add64(x0, x1)           \
   ((vector128)((vector128_64)(((vector128_64)(x0)) + ((vector128_64)(x1)))))
-  
+
 #define Lib_IntVector_Intrinsics_vec128_and(x0, x1)             \
   ((vector128)(vec_and((vector128)(x0),(vector128)(x1))))
 
@@ -885,7 +901,7 @@ typedef vector128_8 vector128;
 
 #define Lib_IntVector_Intrinsics_vec128_shift_left64(x0, x1)            \
   ((vector128)((vector128_64)vec_sl((vector128_64)(x0), (vector128_64){(unsigned long)(x1),(unsigned long)(x1)})))
- 
+
 #define Lib_IntVector_Intrinsics_vec128_shift_right64(x0, x1)         \
   ((vector128)((vector128_64)vec_sr((vector128_64)(x0), (vector128_64){(unsigned long)(x1),(unsigned long)(x1)})))
 
