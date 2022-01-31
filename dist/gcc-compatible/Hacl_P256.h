@@ -42,8 +42,29 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash_SHA2.h"
 
+
+/*******************************************************************************
+
+ECDSA and ECDH functions over the P-256 NIST curve.
+
+This module implements signing and verification, key validation, conversions
+between various point representations, and ECDH key agreement.
+
+*******************************************************************************/
+
+/**************/
+/* Signatures */
+/**************/
+
 /*
- Input: result buffer: uint8[64], 
+  The standard strongly encourages the user to hash the input before signing
+  it. Therefore, we recommend using one of the signature variants below.
+*/
+
+/*
+Combined SHA2-256 and P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -62,7 +83,9 @@ Hacl_P256_ecdsa_sign_p256_sha2(
 );
 
 /*
- Input: result buffer: uint8[64], 
+Combined SHA2-384 and P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -81,7 +104,9 @@ Hacl_P256_ecdsa_sign_p256_sha384(
 );
 
 /*
- Input: result buffer: uint8[64], 
+Combined SHA2-512 and P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -100,7 +125,19 @@ Hacl_P256_ecdsa_sign_p256_sha512(
 );
 
 /*
- Input: result buffer: uint8[64], 
+P256 signature WITHOUT hashing.
+
+This is NOT RECOMMENDED. Please use of the combined hash-and-sign functions
+above.
+
+The argument `m` MUST be at least 32 bytes (i.e. `mLen >= 32`).
+
+NOTE: The equivalent functions in OpenSSL and Fiat-Crypto both accept inputs
+smaller than 32 bytes. These libraries left-pad the input with enough zeroes to
+reach the minimum 32 byte size. Clients who need behavior identical to OpenSSL
+need to perform the left-padding themselves.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -119,6 +156,11 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
   uint8_t *privKey,
   uint8_t *k
 );
+
+
+/****************/
+/* Verification */
+/****************/
 
 /*
  The input of the function is considered to be public, 
@@ -202,8 +244,15 @@ Hacl_P256_ecdsa_verif_without_hash(
   uint8_t *s
 );
 
+
+/******************/
+/* Key validation */
+/******************/
+
+
 /*
- Public key verification function. 
+Validate a public key.
+
   
   The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
@@ -220,14 +269,26 @@ Hacl_P256_ecdsa_verif_without_hash(
 */
 bool Hacl_P256_verify_q(uint8_t *pubKey);
 
+
+/*****************************************/
+/* Point representations and conversions */
+/*****************************************/
+
 /*
- There and further we introduce notions of compressed point and not compressed point. 
-  
- We denote || as byte concatenation. 
-  
- A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
-  
- A not Compressed point is a point representation as follows: 0x4 || x || y.
+  Elliptic curve points have 2 32-byte coordinates (x, y) and can be represented in 3 ways:
+
+  - "raw" form (64 bytes): the concatenation of the 2 coordinates, also known as "internal"
+  - "compressed" form (33 bytes): the first byte is either  or , followed by x
+  - "uncompressed" form (65 bytes): the first byte is always  4, followed by the "raw" form
+
+  For all of the conversation functions below, the input and output MUST NOT overlap.
+*/
+
+
+/*
+Convert 65-byte uncompressed to raw.
+
+This function effectively strips the first byte of the uncompressed representation.
 
   
  
@@ -240,7 +301,9 @@ bool Hacl_P256_verify_q(uint8_t *pubKey);
 bool Hacl_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result);
 
 /*
- Input: a point in compressed form (uint8[33]), 
+Convert 33-byte compressed to raw.
+
+Input: a point in compressed form (uint8[33]), 
  result: uint8[64] (internal point representation).
   
  Output: bool, where true stands for the correct decompression.
@@ -249,23 +312,31 @@ bool Hacl_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result);
 bool Hacl_P256_decompression_compressed_form(uint8_t *b, uint8_t *result);
 
 /*
- Input: a point buffer (internal representation: uint8[64]), 
+Convert raw to 65-byte uncompressed.
+
+This function effectively prepends a 0x04 byte.
+
+Input: a point buffer (internal representation: uint8[64]), 
  result: a point in not compressed form (uint8[65]).
 */
 void Hacl_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result);
 
 /*
-Convert from internal representation to 33-byte compressed form.
+Convert raw to 33-byte compressed.
 
   Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
   Output: `result`, a point in compressed form, of type `uint8[33]`
 
-  `b` and `result` MUST NOT overlap.
 */
 void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result);
 
+
+/******************/
+/* ECDH agreement */
+/******************/
+
 /*
-Convert a private key into an uncompressed public key.
+Convert a private key into a raw public key.
 
   Input: `scalar`, the private key, of type `uint8[32]`.
   Output: `result`, the public key, of type `uint8[64]`.
@@ -278,7 +349,11 @@ Convert a private key into an uncompressed public key.
 bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 
 /*
- 
+ECDH key agreement.
+
+This function takes a 32-byte secret key, another party's 64-byte raw public
+key, and computeds the 64-byte ECDH shared key.
+
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
   
@@ -291,8 +366,16 @@ bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 */
 bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
+
+/******************/
+/* Key validation */
+/******************/
+
+
 /*
- Input: scalar: uint8[32].
+Validate a private key.
+
+Input: scalar: uint8[32].
   
  Output: bool, where true stands for the scalar to be more than 0 and less than order.
 */
