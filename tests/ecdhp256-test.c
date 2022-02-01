@@ -65,6 +65,10 @@ bool test_nist()
 	return ok;
 }
 
+#define Hacl_P256_decompression_not_compressed_form Hacl_P256_uncompressed_to_raw
+#define Hacl_P256_decompression_compressed_form Hacl_P256_compressed_to_raw
+#define Hacl_P256_compression_not_compressed_form Hacl_P256_raw_to_uncompressed
+#define Hacl_P256_compression_compressed_form Hacl_P256_raw_to_compressed
 
 bool test_compression()
 {
