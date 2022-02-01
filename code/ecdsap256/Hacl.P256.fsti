@@ -186,7 +186,13 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
 [@@ CPrologue "
 /****************/
 /* Verification */
-/****************/";
+/****************/
+
+/*
+  The user MUST validate the public key using `verify_q` before calling any of the
+  verification functions.
+*/
+";
 
 (Comment " The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
@@ -451,6 +457,9 @@ val ecp256dh_i:
 
 This function takes a 32-byte secret key, another party's 64-byte raw public
 key, and computeds the 64-byte ECDH shared key.
+
+The user MUST validate keys with `is_more_than_zero_less_than_order` and
+`verify_q`.
 
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.

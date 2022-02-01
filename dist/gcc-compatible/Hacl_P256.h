@@ -127,7 +127,7 @@ Hacl_P256_ecdsa_sign_p256_sha512(
 /*
 P256 signature WITHOUT hashing.
 
-This is NOT RECOMMENDED. Please use the combined hash-and-sign functions
+This is NOT RECOMMENDED. Please use of the combined hash-and-sign functions
 above.
 
 The argument `m` MUST be at least 32 bytes (i.e. `mLen >= 32`).
@@ -161,6 +161,12 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
 /****************/
 /* Verification */
 /****************/
+
+/*
+  The user MUST validate the public key using `verify_q` before calling any of the
+  verification functions.
+*/
+
 
 /*
  The input of the function is considered to be public, 
@@ -352,7 +358,10 @@ bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 ECDH key agreement.
 
 This function takes a 32-byte secret key, another party's 64-byte raw public
-key, and computes the 64-byte ECDH shared key.
+key, and computeds the 64-byte ECDH shared key.
+
+The user MUST validate keys with `is_more_than_zero_less_than_order` and
+`verify_q`.
 
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
