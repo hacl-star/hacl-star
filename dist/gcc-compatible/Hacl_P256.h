@@ -352,7 +352,7 @@ bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
 ECDH key agreement.
 
 This function takes a 32-byte secret key, another party's 64-byte raw public
-key, and computeds the 64-byte ECDH shared key.
+key, and computes the 64-byte ECDH shared key.
 
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
