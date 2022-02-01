@@ -127,7 +127,7 @@ Hacl_P256_ecdsa_sign_p256_sha512(
 /*
 P256 signature WITHOUT hashing.
 
-This is NOT RECOMMENDED. Please use of the combined hash-and-sign functions
+This is NOT RECOMMENDED. Please use the combined hash-and-sign functions
 above.
 
 The argument `m` MUST be at least 32 bytes (i.e. `mLen >= 32`).
