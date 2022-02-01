@@ -57,7 +57,7 @@ module P256 : sig
       Elliptic curve points have 2 32-byte coordinates {i (x, y)} and can be represented in 3 ways:
       - "raw" form (64 bytes): the concatenation of the 2 coordinates
       - "compressed" form (33 bytes): the first byte is either [\x02] or [\x03], followed
-      by {i y}
+      by {i x}
       - "uncompressed" form (65 bytes): the first byte is always [\04], followed by the "raw" form
 
       These functions convert points between these representations:

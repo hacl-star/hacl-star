@@ -163,7 +163,7 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
 /****************/
 
 /*
-  The user MUST validate the public key using `verify_q` before calling any of the
+  The user MUST validate the public key before calling any of the
   verification functions.
 */
 
@@ -273,7 +273,16 @@ Validate a public key.
   
  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
 */
-bool Hacl_P256_verify_q(uint8_t *pubKey);
+bool Hacl_P256_validate_public_key(uint8_t *pubKey);
+
+/*
+Validate a private key.
+
+Input: scalar: uint8[32].
+  
+ Output: bool, where true stands for the scalar to be more than 0 and less than order.
+*/
+bool Hacl_P256_validate_private_key(uint8_t *x);
 
 
 /*****************************************/
@@ -304,7 +313,7 @@ This function effectively strips the first byte of the uncompressed representati
  Output: bool, where true stands for the correct decompression.
  
 */
-bool Hacl_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result);
+bool Hacl_P256_uncompressed_to_raw(uint8_t *b, uint8_t *result);
 
 /*
 Convert 33-byte compressed to raw.
@@ -315,7 +324,7 @@ Input: a point in compressed form (uint8[33]),
  Output: bool, where true stands for the correct decompression.
  
 */
-bool Hacl_P256_decompression_compressed_form(uint8_t *b, uint8_t *result);
+bool Hacl_P256_compressed_to_raw(uint8_t *b, uint8_t *result);
 
 /*
 Convert raw to 65-byte uncompressed.
@@ -325,7 +334,7 @@ This function effectively prepends a 0x04 byte.
 Input: a point buffer (internal representation: uint8[64]), 
  result: a point in not compressed form (uint8[65]).
 */
-void Hacl_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result);
+void Hacl_P256_raw_to_uncompressed(uint8_t *b, uint8_t *result);
 
 /*
 Convert raw to 33-byte compressed.
@@ -334,7 +343,7 @@ Convert raw to 33-byte compressed.
   Output: `result`, a point in compressed form, of type `uint8[33]`
 
 */
-void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result);
+void Hacl_P256_raw_to_compressed(uint8_t *b, uint8_t *result);
 
 
 /******************/
@@ -352,7 +361,7 @@ Convert a private key into a raw public key.
 
   `scalar` and `result` MUST NOT overlap.
 */
-bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+bool Hacl_P256_dh_initiator(uint8_t *result, uint8_t *scalar);
 
 /*
 ECDH key agreement.
@@ -360,8 +369,7 @@ ECDH key agreement.
 This function takes a 32-byte secret key, another party's 64-byte raw public
 key, and computeds the 64-byte ECDH shared key.
 
-The user MUST validate keys with `is_more_than_zero_less_than_order` and
-`verify_q`.
+The user MUST validate keys both private and public keys.
 
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
@@ -373,22 +381,7 @@ The user MUST validate keys with `is_more_than_zero_less_than_order` and
  Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   
 */
-bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
-
-
-/******************/
-/* Key validation */
-/******************/
-
-
-/*
-Validate a private key.
-
-Input: scalar: uint8[32].
-  
- Output: bool, where true stands for the scalar to be more than 0 and less than order.
-*/
-bool Hacl_P256_is_more_than_zero_less_than_order(uint8_t *x);
+bool Hacl_P256_dh_responder(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 #if defined(__cplusplus)
 }

@@ -189,7 +189,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
 /****************/
 
 /*
-  The user MUST validate the public key using `verify_q` before calling any of the
+  The user MUST validate the public key before calling any of the
   verification functions.
 */
 ";
@@ -291,14 +291,14 @@ val ecdsa_verif_without_hash:
 /* Key validation */
 /******************/
 ";
-(Comment "Validate a public key.
+Comment "Validate a public key.
 
   \n  The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   \n Input: pub(lic)Key: uint8[64]. 
   \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
-  \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/")]
-val verify_q: 
+  \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/"]
+val validate_public_key: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool
     (requires fun h -> live h pubKey)
@@ -310,6 +310,19 @@ val verify_q:
         r == Spec.ECDSA.verifyQValidCurvePointSpec pkJ
       )
     )
+
+[@@ Comment "Validate a private key.
+
+Input: scalar: uint8[32].
+  \n Output: bool, where true stands for the scalar to be more than 0 and less than order."]
+val validate_private_key: x: lbuffer uint8 (size 32) -> Stack bool
+  (requires fun h -> live h x)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    (
+      let scalar = nat_from_bytes_be (as_seq h0 x) in 
+      r <==> (scalar > 0 && scalar < prime_p256_order)
+    )
+  )
 
 [@@ CPrologue "
 /*****************************************/
@@ -333,7 +346,7 @@ This function effectively strips the first byte of the uncompressed representati
   \n \n Input: a point in not compressed form (uint8[65]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
  ")]
-val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val uncompressed_to_raw: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
     (
@@ -355,7 +368,7 @@ val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer u
 Input: a point in compressed form (uint8[33]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
  ")]
-val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val compressed_to_raw: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> 
     (
@@ -389,7 +402,7 @@ val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (s
 This function effectively prepends a 0x04 byte.
 
 Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[65]).")]
-val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
+val raw_to_uncompressed: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -409,7 +422,7 @@ val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCo
   Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
   Output: `result`, a point in compressed form, of type `uint8[33]`
 ")]
-val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
+val raw_to_compressed: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -438,7 +451,7 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
   - `false`, otherwise.
 
   `scalar` and `result` MUST NOT overlap.")]
-val ecp256dh_i:
+val dh_initiator:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
   -> Stack bool
@@ -458,15 +471,14 @@ val ecp256dh_i:
 This function takes a 32-byte secret key, another party's 64-byte raw public
 key, and computeds the 64-byte ECDH shared key.
 
-The user MUST validate keys with `is_more_than_zero_less_than_order` and
-`verify_q`.
+The user MUST validate keys both private and public keys.
 
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
   \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   ")]
-val ecp256dh_r:
+val dh_responder:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -483,21 +495,3 @@ val ecp256dh_r:
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
-
-[@@ CPrologue "
-/******************/
-/* Key validation */
-/******************/
-";
-(Comment "Validate a private key.
-
-Input: scalar: uint8[32].
-  \n Output: bool, where true stands for the scalar to be more than 0 and less than order.")]
-val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
-  (requires fun h -> live h x)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    (
-      let scalar = nat_from_bytes_be (as_seq h0 x) in 
-      r <==> (scalar > 0 && scalar < prime_p256_order)
-    )
-  )
