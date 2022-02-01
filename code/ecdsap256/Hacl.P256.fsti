@@ -34,11 +34,11 @@ between various point representations, and ECDH key agreement.
 /**************/
 
 /*
-  The standard strongly encourages the user to hash the input before signing
-  it. Therefore, we recommend using one of the signature variants below.
+  Per the standard, a hash function *shall* be used. Therefore, we recommend
+  using one of the three combined hash-and-sign variants.
 */";
 
-Comment "Combined SHA2-256 and P256 signature function.
+Comment "Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
@@ -72,7 +72,7 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
   )
 
 
-[@ (Comment "Combined SHA2-384 and P256 signature function.
+[@ (Comment "Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
@@ -104,7 +104,7 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
   )
 
 
-[@ (Comment "Combined SHA2-512 and P256 signature function.
+[@ (Comment "Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
@@ -138,10 +138,10 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
   )
 
 
-[@ (Comment "P256 signature WITHOUT hashing.
+[@ (Comment "P256 signature WITHOUT hashing first.
 
-This is NOT RECOMMENDED. Please use of the combined hash-and-sign functions
-above.
+This function is intended to receive a hash of the input. For convenience, we
+recommend using one of the hash-and-sign combined functions above.
 
 The argument `m` MUST be at least 32 bytes (i.e. `mLen >= 32`).
 
@@ -189,8 +189,7 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
 /****************/
 
 /*
-  The user MUST validate the public key before calling any of the
-  verification functions.
+  Verify a message signature. These functions internally validate the public key using validate_public_key.
 */
 ";
 
@@ -311,7 +310,7 @@ val validate_public_key:
       )
     )
 
-[@@ Comment "Validate a private key.
+[@@ Comment "Validate a private key, e.g. prior to signing.
 
 Input: scalar: uint8[32].
   \n Output: bool, where true stands for the scalar to be more than 0 and less than order."]
@@ -341,7 +340,7 @@ val validate_private_key: x: lbuffer uint8 (size 32) -> Stack bool
 ";
  (Comment "Convert 65-byte uncompressed to raw.
 
-This function effectively strips the first byte of the uncompressed representation.
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
   \n \n Input: a point in not compressed form (uint8[65]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
@@ -364,6 +363,8 @@ val uncompressed_to_raw: b: notCompressedForm -> result: lbuffer uint8 (size 64)
 
 
 [@ (Comment "Convert 33-byte compressed to raw.
+
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
 Input: a point in compressed form (uint8[33]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
@@ -444,6 +445,8 @@ val raw_to_compressed: b: lbuffer uint8 (size 64) -> result: compressedForm ->
 
 (Comment "Convert a private key into a raw public key.
 
+This function performs no key validation.
+
   Input: `scalar`, the private key, of type `uint8[32]`.
   Output: `result`, the public key, of type `uint8[64]`.
   Returns:
@@ -471,7 +474,7 @@ val dh_initiator:
 This function takes a 32-byte secret key, another party's 64-byte raw public
 key, and computeds the 64-byte ECDH shared key.
 
-The user MUST validate keys both private and public keys.
+This function ONLY validates the public key.
 
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.

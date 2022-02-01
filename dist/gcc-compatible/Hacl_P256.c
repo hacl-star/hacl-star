@@ -2492,12 +2492,12 @@ between various point representations, and ECDH key agreement.
 /**************/
 
 /*
-  The standard strongly encourages the user to hash the input before signing
-  it. Therefore, we recommend using one of the signature variants below.
+  Per the standard, a hash function *shall* be used. Therefore, we recommend
+  using one of the three combined hash-and-sign variants.
 */
 
 /*
-Combined SHA2-256 and P256 signature function.
+Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
@@ -2542,7 +2542,7 @@ Hacl_P256_ecdsa_sign_p256_sha2(
 }
 
 /*
-Combined SHA2-384 and P256 signature function.
+Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
@@ -2587,7 +2587,7 @@ Hacl_P256_ecdsa_sign_p256_sha384(
 }
 
 /*
-Combined SHA2-512 and P256 signature function.
+Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
 
 Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
@@ -2632,10 +2632,10 @@ Hacl_P256_ecdsa_sign_p256_sha512(
 }
 
 /*
-P256 signature WITHOUT hashing.
+P256 signature WITHOUT hashing first.
 
-This is NOT RECOMMENDED. Please use of the combined hash-and-sign functions
-above.
+This function is intended to receive a hash of the input. For convenience, we
+recommend using one of the hash-and-sign combined functions above.
 
 The argument `m` MUST be at least 32 bytes (i.e. `mLen >= 32`).
 
@@ -2692,8 +2692,7 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
 /****************/
 
 /*
-  The user MUST validate the public key before calling any of the
-  verification functions.
+  Verify a message signature. These functions internally validate the public key using validate_public_key.
 */
 
 
@@ -2914,7 +2913,7 @@ bool Hacl_P256_validate_public_key(uint8_t *pubKey)
 }
 
 /*
-Validate a private key.
+Validate a private key, e.g. prior to signing.
 
 Input: scalar: uint8[32].
   
@@ -2944,7 +2943,7 @@ bool Hacl_P256_validate_private_key(uint8_t *x)
 /*
 Convert 65-byte uncompressed to raw.
 
-This function effectively strips the first byte of the uncompressed representation.
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
   
  
@@ -2967,6 +2966,8 @@ bool Hacl_P256_uncompressed_to_raw(uint8_t *b, uint8_t *result)
 
 /*
 Convert 33-byte compressed to raw.
+
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
 Input: a point in compressed form (uint8[33]), 
  result: uint8[64] (internal point representation).
@@ -3048,6 +3049,8 @@ void Hacl_P256_raw_to_compressed(uint8_t *b, uint8_t *result)
 /*
 Convert a private key into a raw public key.
 
+This function performs no key validation.
+
   Input: `scalar`, the private key, of type `uint8[32]`.
   Output: `result`, the public key, of type `uint8[64]`.
   Returns:
@@ -3079,7 +3082,7 @@ ECDH key agreement.
 This function takes a 32-byte secret key, another party's 64-byte raw public
 key, and computeds the 64-byte ECDH shared key.
 
-The user MUST validate keys both private and public keys.
+This function ONLY validates the public key.
 
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
