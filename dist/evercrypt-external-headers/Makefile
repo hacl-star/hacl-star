@@ -209,8 +209,13 @@ dllocamlevercrypt.$(SO): ocamlevercrypt.cmxa ocamlevercrypt.cma
 	ocamlmklib -o ocamlevercrypt $(ALL_C_STUBS) -L. -L$(STUBLIBS_PATH) -levercrypt
 
 install-hacl-star-raw: dllocamlevercrypt.$(SO)
-	ocamlfind remove hacl-star-raw || true && \
-         ocamlfind install hacl-star-raw META $(CTYPES_ML) $(CTYPES_CMX) $(CTYPES_CMO) $(CTYPES_CMI) \
+	ocamlfind remove hacl-star-raw || true
+	ocamlfind install hacl-star-raw META
+	ocamlfind install -add hacl-star-raw $(CTYPES_ML)
+	ocamlfind install -add hacl-star-raw $(CTYPES_CMX)
+	ocamlfind install -add hacl-star-raw $(CTYPES_CMO)
+	ocamlfind install -add hacl-star-raw $(CTYPES_CMI)
+	ocamlfind install -add hacl-star-raw \
          libevercrypt.a libevercrypt.$(SO) ocamlevercrypt.cma ocamlevercrypt.cmxa ocamlevercrypt.a \
          libocamlevercrypt.a dllocamlevercrypt.$(SO) config.h
 

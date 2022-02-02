@@ -436,7 +436,7 @@ if detect_systemz; then
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_SYSTEMZ" >> config.h
   echo "... $build_target supports 128-bit z VSX"
   compile_vec128=true
-  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z15" >> Makefile.config
+  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=native" >> Makefile.config
   # In the case of IBMz, some of the vectorized functions are defined as
   # inline static rather than as macros, meaning we need to compile all
   # the files with the vector compilation options. Note that this is not
