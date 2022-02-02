@@ -1739,9 +1739,9 @@
         ]
       }
     },
-    "verify_q": {
+    "validate_public_key": {
       "module": "Hacl_P256",
-      "name": "verify_q",
+      "name": "validate_public_key",
       "args": [{
           "name": "pubKey",
           "kind": "input",
@@ -1762,9 +1762,9 @@
         ]
       }
     },
-    "decompression_not_compressed_form": {
+    "uncompressed_to_raw": {
       "module": "Hacl_P256",
-      "name": "decompression_not_compressed_form",
+      "name": "uncompressed_to_raw",
       "args": [{
           "name": "b",
           "kind": "input",
@@ -1792,9 +1792,9 @@
         ]
       }
     },
-    "decompression_compressed_form": {
+    "compressed_to_raw": {
       "module": "Hacl_P256",
-      "name": "decompression_compressed_form",
+      "name": "compressed_to_raw",
       "args": [{
           "name": "b",
           "kind": "input",
@@ -1822,9 +1822,9 @@
         ]
       }
     },
-    "compression_not_compressed_form": {
+    "raw_to_uncompressed": {
       "module": "Hacl_P256",
-      "name": "compression_not_compressed_form",
+      "name": "raw_to_uncompressed",
       "args": [{
           "name": "b",
           "kind": "input",
@@ -1849,9 +1849,9 @@
         "type": "void"
       }
     },
-    "compression_compressed_form": {
+    "raw_to_compressed": {
       "module": "Hacl_P256",
-      "name": "compression_compressed_form",
+      "name": "raw_to_compressed",
       "args": [{
           "name": "b",
           "kind": "input",
@@ -1878,7 +1878,7 @@
     },
     "dh_initiator": {
       "module": "Hacl_P256",
-      "name": "ecp256dh_i",
+      "name": "dh_initiator",
       "args": [{
           "name": "result",
           "kind": "output",
@@ -1908,7 +1908,7 @@
     },
     "dh_responder": {
       "module": "Hacl_P256",
-      "name": "ecp256dh_r",
+      "name": "dh_responder",
       "args": [{
           "name": "result",
           "kind": "output",
@@ -1946,9 +1946,9 @@
         ]
       }
     },
-    "is_more_than_zero_less_than_order": {
+    "validate_private_key": {
       "module": "Hacl_P256",
-      "name": "is_more_than_zero_less_than_order",
+      "name": "validate_private_key",
       "args": [{
           "name": "pubKey",
           "kind": "input",

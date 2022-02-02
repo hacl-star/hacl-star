@@ -70,27 +70,28 @@ module Bindings(F:Cstubs.FOREIGN) =
            (ocaml_bytes @->
               (ocaml_bytes @->
                  (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))))
-    let hacl_P256_verify_q =
-      foreign "Hacl_P256_verify_q" (ocaml_bytes @-> (returning bool))
-    let hacl_P256_decompression_not_compressed_form =
-      foreign "Hacl_P256_decompression_not_compressed_form"
-        (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
-    let hacl_P256_decompression_compressed_form =
-      foreign "Hacl_P256_decompression_compressed_form"
-        (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
-    let hacl_P256_compression_not_compressed_form =
-      foreign "Hacl_P256_compression_not_compressed_form"
-        (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))
-    let hacl_P256_compression_compressed_form =
-      foreign "Hacl_P256_compression_compressed_form"
-        (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))
-    let hacl_P256_ecp256dh_i =
-      foreign "Hacl_P256_ecp256dh_i"
-        (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
-    let hacl_P256_ecp256dh_r =
-      foreign "Hacl_P256_ecp256dh_r"
-        (ocaml_bytes @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))
-    let hacl_P256_is_more_than_zero_less_than_order =
-      foreign "Hacl_P256_is_more_than_zero_less_than_order"
+    let hacl_P256_validate_public_key =
+      foreign "Hacl_P256_validate_public_key"
         (ocaml_bytes @-> (returning bool))
+    let hacl_P256_validate_private_key =
+      foreign "Hacl_P256_validate_private_key"
+        (ocaml_bytes @-> (returning bool))
+    let hacl_P256_uncompressed_to_raw =
+      foreign "Hacl_P256_uncompressed_to_raw"
+        (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
+    let hacl_P256_compressed_to_raw =
+      foreign "Hacl_P256_compressed_to_raw"
+        (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
+    let hacl_P256_raw_to_uncompressed =
+      foreign "Hacl_P256_raw_to_uncompressed"
+        (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))
+    let hacl_P256_raw_to_compressed =
+      foreign "Hacl_P256_raw_to_compressed"
+        (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))
+    let hacl_P256_dh_initiator =
+      foreign "Hacl_P256_dh_initiator"
+        (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
+    let hacl_P256_dh_responder =
+      foreign "Hacl_P256_dh_responder"
+        (ocaml_bytes @-> (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))
   end
