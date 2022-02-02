@@ -374,39 +374,39 @@ module P256 = struct
     end)
   module Noalloc = struct
     let raw_to_compressed ~p ~result =
-      (* Hacl.P256.compression_compressed_form *)
+      (* Hacl.P256.raw_to_compressed *)
       assert (C.size p = 64);
       assert (C.size result = 33);
-      Hacl_P256.hacl_P256_compression_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+      Hacl_P256.hacl_P256_raw_to_compressed (C.ctypes_buf p) (C.ctypes_buf result)
     let raw_to_uncompressed ~p ~result =
-      (* Hacl.P256.compression_not_compressed_form *)
+      (* Hacl.P256.raw_to_uncompressed *)
       assert (C.size p = 64);
       assert (C.size result = 65);
-      Hacl_P256.hacl_P256_compression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+      Hacl_P256.hacl_P256_raw_to_uncompressed (C.ctypes_buf p) (C.ctypes_buf result)
     let compressed_to_raw ~p ~result =
-      (* Hacl.P256.decompression_compressed_form *)
+      (* Hacl.P256.compressed_to_raw *)
       assert (C.size p = 33);
       assert (C.size result = 64);
-      Hacl_P256.hacl_P256_decompression_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+      Hacl_P256.hacl_P256_compressed_to_raw (C.ctypes_buf p) (C.ctypes_buf result)
     let uncompressed_to_raw ~p ~result =
-      (* Hacl.P256.decompression_not_compressed_form *)
+      (* Hacl.P256.uncompressed_to_raw *)
       assert (C.size p = 65);
       assert (C.size result = 64);
-      Hacl_P256.hacl_P256_decompression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+      Hacl_P256.hacl_P256_uncompressed_to_raw (C.ctypes_buf p) (C.ctypes_buf result)
     let dh_initiator ~sk ~pk =
-      (* Hacl.P256.ecp256dh_i *)
+      (* Hacl.P256.dh_initiator *)
       assert (C.size pk = 64);
       assert (C.size sk = 32);
       assert (C.disjoint pk sk);
-      Hacl_P256.hacl_P256_ecp256dh_i (C.ctypes_buf pk) (C.ctypes_buf sk)
+      Hacl_P256.hacl_P256_dh_initiator (C.ctypes_buf pk) (C.ctypes_buf sk)
     let dh_responder ~sk ~pk ~shared =
-      (* Hacl.P256.ecp256dh_r *)
+      (* Hacl.P256.dh_responder *)
       assert (C.size shared = 64);
       assert (C.size pk = 64);
       assert (C.size sk = 32);
       assert (C.disjoint shared sk);
       assert (C.disjoint shared pk);
-      Hacl_P256.hacl_P256_ecp256dh_r (C.ctypes_buf shared) (C.ctypes_buf pk) (C.ctypes_buf sk)
+      Hacl_P256.hacl_P256_dh_responder (C.ctypes_buf shared) (C.ctypes_buf pk) (C.ctypes_buf sk)
     let sign = NoHash.Noalloc.sign
   end
   let raw_to_compressed p =
@@ -442,13 +442,13 @@ module P256 = struct
     else
       None
   let valid_sk ~sk =
-    (* Hacl.P256.is_more_than_zero_less_than_order *)
+    (* Hacl.P256.validate_private_key *)
     assert (C.size sk = 32);
-    Hacl_P256.hacl_P256_is_more_than_zero_less_than_order (C.ctypes_buf sk)
+    Hacl_P256.hacl_P256_validate_private_key (C.ctypes_buf sk)
   let valid_pk ~pk =
-    (* Hacl.P256.verify_q *)
+    (* Hacl.P256.validate_public_key *)
     assert (C.size pk = 64);
-    Hacl_P256.hacl_P256_verify_q (C.ctypes_buf pk)
+    Hacl_P256.hacl_P256_validate_public_key (C.ctypes_buf pk)
   let sign = NoHash.sign
   let verify = NoHash.verify
   module SHA2_256 = Make_ECDSA (struct
