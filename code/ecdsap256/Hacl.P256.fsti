@@ -332,8 +332,8 @@ val validate_private_key: x: lbuffer uint8 (size 32) -> Stack bool
   Elliptic curve points have 2 32-byte coordinates (x, y) and can be represented in 3 ways:
 
   - \"raw\" form (64 bytes): the concatenation of the 2 coordinates, also known as \"internal\"
-  - \"compressed\" form (33 bytes): the first byte is either \x02 or \x03, followed by x
-  - \"uncompressed\" form (65 bytes): the first byte is always \04, followed by the \"raw\" form
+  - \"compressed\" form (33 bytes): first the sign byte of y (either 0x02 or 0x03), followed by x
+  - \"uncompressed\" form (65 bytes): first a constant byte (always 0x04), followed by the \"raw\" form
 
   For all of the conversation functions below, the input and output MUST NOT overlap.
 */
