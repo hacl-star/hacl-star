@@ -31,7 +31,7 @@
         "typing_tok_Spec.Blake2.Blake2S@tok"
       ],
       0,
-      "b4c746239e43d07cecdf028812033966"
+      "1f124bf8809cb1e39715d45a3b92b28a"
     ],
     [
       "Hacl.Impl.Blake2.Generic.get_iv",
@@ -761,7 +761,9 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Blake2.Blake2S",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
@@ -2967,7 +2969,6 @@
         "@MaxIFuel_assumption", "@query", "bool_inversion",
         "constructor_distinct_Spec.Blake2.Blake2S",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Spec.Blake2.Blake2S@tok",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.v",
@@ -3921,7 +3922,6 @@
         "@MaxIFuel_assumption", "@query", "bool_inversion",
         "constructor_distinct_Spec.Blake2.Blake2S",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Spec.Blake2.Blake2S@tok",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.v",
