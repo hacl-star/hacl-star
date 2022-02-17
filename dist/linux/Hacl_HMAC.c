@@ -27,7 +27,11 @@
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_Blake2.h"
-
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 void Hacl_HMAC_legacy_compute_sha1(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 data_len)
 {
   u32 l = (u32)64U;

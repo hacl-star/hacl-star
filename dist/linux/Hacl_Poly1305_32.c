@@ -25,7 +25,11 @@
 #include "Hacl_Poly1305_32.h"
 
 
-
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 u32 Hacl_Poly1305_32_blocklen = (u32)16U;
 
 void Hacl_Poly1305_32_poly1305_init(u64 *ctx, u8 *key)

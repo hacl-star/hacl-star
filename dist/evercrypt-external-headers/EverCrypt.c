@@ -25,7 +25,10 @@
 #include "EverCrypt.h"
 
 
-
+#include <inttypes.h>
+#include <stdbool.h>
+#include <kremlin/internal/types.h>
+#include <kremlin/internal/target.h>
 typedef struct EverCrypt_aes128_key_s_s
 {
   EverCrypt_aes128_key_s_tags tag;

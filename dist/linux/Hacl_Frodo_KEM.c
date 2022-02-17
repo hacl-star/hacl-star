@@ -25,7 +25,11 @@
 #include "internal/Hacl_Frodo_KEM.h"
 
 
-
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 void randombytes_(u32 len, u8 *res)
 {
   bool b = Lib_RandomBuffer_System_randombytes(res, len);

@@ -25,7 +25,12 @@
 #include "EverCrypt.h"
 
 #include "internal/EverCrypt_OpenSSL.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 uint32_t EverCrypt_random_init()
 {
   if (EverCrypt_AutoConfig2_wants_openssl())

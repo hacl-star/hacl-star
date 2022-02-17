@@ -25,7 +25,12 @@
 #include "Hacl_Streaming_Blake2b_256.h"
 
 
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /* SNIPPET_START: Hacl_Streaming_Blake2b_256_blake2b_256_no_key_create_in */
 
 /*

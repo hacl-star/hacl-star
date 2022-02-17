@@ -25,7 +25,10 @@
 #include "MerkleTree.h"
 
 
-
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 static uint32_t max_uint32 = (uint32_t)4294967295U;
 
 static uint32_t resize_ratio = (uint32_t)2U;

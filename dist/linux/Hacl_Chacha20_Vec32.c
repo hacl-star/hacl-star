@@ -25,7 +25,11 @@
 #include "Hacl_Chacha20_Vec32.h"
 
 #include "internal/Hacl_Chacha20.h"
-
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 static inline void double_round_32(u32 *st)
 {
   u32 std0;

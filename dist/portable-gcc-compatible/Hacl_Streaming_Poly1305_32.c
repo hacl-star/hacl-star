@@ -25,7 +25,12 @@
 #include "Hacl_Streaming_Poly1305_32.h"
 
 
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /* SNIPPET_START: Hacl_Streaming_Poly1305_32_create_in */
 
 Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_create_in(uint8_t *k)

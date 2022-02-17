@@ -25,7 +25,12 @@
 #include "internal/Hacl_Curve25519_51.h"
 
 #include "internal/Hacl_Kremlib.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /* SNIPPET_START: g25519 */
 
 static const uint8_t g25519[32U] = { (uint8_t)9U };

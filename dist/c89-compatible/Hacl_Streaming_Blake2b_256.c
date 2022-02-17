@@ -25,7 +25,12 @@
 #include "Hacl_Streaming_Blake2b_256.h"
 
 
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /*
   State allocation function when there is no key
 */

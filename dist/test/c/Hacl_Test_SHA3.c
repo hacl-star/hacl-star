@@ -25,7 +25,7 @@
 #include "Hacl_Test_SHA3.h"
 
 
-
+#include "kremlib.h"
 #define MUT 0
 #define IMMUT 1
 #define CONST 2

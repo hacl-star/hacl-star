@@ -25,7 +25,11 @@
 #include "Hacl_NaCl.h"
 
 
-
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 static void secretbox_init(u8 *xkeys, u8 *k, u8 *n)
 {
   u8 *subkey = xkeys;

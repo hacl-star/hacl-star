@@ -25,7 +25,11 @@
 #include "internal/Hacl_Hash_SHA2.h"
 
 
-
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 static u32
 h256[8U] =
   {

@@ -26,7 +26,13 @@
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Kremlib.h"
-
+#include "evercrypt_targetconfig.h"
+#include "lib_intrinsics.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /* SNIPPET_START: isZero_uint64_CT */
 
 static uint64_t isZero_uint64_CT(uint64_t *f)

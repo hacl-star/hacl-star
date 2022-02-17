@@ -25,7 +25,12 @@
 #include "Hacl_EC_Ed25519.h"
 
 #include "internal/Hacl_Ed25519.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /* SNIPPET_START: Hacl_EC_Ed25519_mk_felem_zero */
 
 void Hacl_EC_Ed25519_mk_felem_zero(uint64_t *b)

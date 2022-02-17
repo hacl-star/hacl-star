@@ -25,6 +25,11 @@
 #include "internal/Vale.h"
 
 
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 typedef uint64_t als_ret;
 

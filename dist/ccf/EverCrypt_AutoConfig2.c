@@ -25,7 +25,11 @@
 #include "EverCrypt_AutoConfig2.h"
 
 #include "internal/Vale.h"
-
+#include "evercrypt_targetconfig.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 static bool cpu_has_shaext[1U] = { false };
 
 static bool cpu_has_aesni[1U] = { false };

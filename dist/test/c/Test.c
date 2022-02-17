@@ -25,7 +25,8 @@
 #include "Test.h"
 
 
-
+#include "kremlib.h"
+#include "kremlin/internal/compat.h"
 #define SHA2_224 0
 #define SHA2_256 1
 #define SHA2_384 2

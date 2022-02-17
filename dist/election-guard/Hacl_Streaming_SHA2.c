@@ -25,7 +25,12 @@
 #include "Hacl_Streaming_SHA2.h"
 
 #include "internal/Hacl_Hash.h"
-
+#include "evercrypt_targetconfig.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
+#include "kremlin/internal/builtin.h"
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224()
 {
   uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));

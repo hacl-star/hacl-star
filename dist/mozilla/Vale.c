@@ -25,6 +25,9 @@
 #include "internal/Vale.h"
 
 
-
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include <stdbool.h>
 typedef uint64_t als_ret;
 

@@ -25,7 +25,12 @@
 #include "Hacl_Streaming_MD5.h"
 
 #include "internal/Hacl_Hash_MD5.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /* SNIPPET_START: Hacl_Streaming_MD5_legacy_create_in_md5 */
 
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_MD5_legacy_create_in_md5()

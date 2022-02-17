@@ -25,7 +25,11 @@
 #include "Hacl_HKDF_Blake2s_128.h"
 
 
-
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 void
 Hacl_HKDF_Blake2s_128_expand_blake2s_128(
   u8 *okm,

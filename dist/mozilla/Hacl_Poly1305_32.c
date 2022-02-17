@@ -25,7 +25,10 @@
 #include "Hacl_Poly1305_32.h"
 
 
-
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include <stdbool.h>
 uint32_t Hacl_Poly1305_32_blocklen = (uint32_t)16U;
 
 void Hacl_Poly1305_32_poly1305_init(uint64_t *ctx, uint8_t *key)

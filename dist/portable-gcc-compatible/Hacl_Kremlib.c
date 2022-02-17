@@ -25,7 +25,12 @@
 #include "internal/Hacl_Kremlib.h"
 
 
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /* SNIPPET_START: max_uint32 */
 
 static uint32_t max_uint32 = (uint32_t)4294967295U;

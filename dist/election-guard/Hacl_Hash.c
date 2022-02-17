@@ -25,7 +25,12 @@
 #include "internal/Hacl_Hash.h"
 
 
-
+#include "evercrypt_targetconfig.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
+#include "kremlin/internal/builtin.h"
 static uint32_t
 h224[8U] =
   {

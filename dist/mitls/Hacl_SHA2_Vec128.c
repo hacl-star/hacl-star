@@ -25,7 +25,12 @@
 #include "Hacl_SHA2_Vec128.h"
 
 #include "internal/Hacl_SHA2_Vec256.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 static inline void
 sha224_update4(
   K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ block,

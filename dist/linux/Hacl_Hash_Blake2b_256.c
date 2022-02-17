@@ -25,7 +25,11 @@
 #include "internal/Hacl_Hash_Blake2b_256.h"
 
 #include "internal/Hacl_Hash_Blake2.h"
-
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 static uint128_t
 update_blake2b_256(Lib_IntVector_Intrinsics_vec256 *s, uint128_t totlen, u8 *block)
 {

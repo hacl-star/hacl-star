@@ -25,7 +25,7 @@
 #include "Hacl_AES.h"
 
 
-
+#include "kremlib.h"
 static uint8_t multiply(uint8_t a, uint8_t b)
 {
   return

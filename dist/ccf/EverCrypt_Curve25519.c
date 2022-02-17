@@ -25,7 +25,11 @@
 #include "EverCrypt_Curve25519.h"
 
 
-
+#include "evercrypt_targetconfig.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 static inline bool has_adx_bmi2()
 {
   bool has_bmi2 = EverCrypt_AutoConfig2_has_bmi2();

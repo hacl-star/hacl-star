@@ -25,7 +25,12 @@
 #include "Hacl_Chacha20_Vec256.h"
 
 #include "internal/Hacl_Chacha20.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /* SNIPPET_START: double_round_256 */
 
 static inline void double_round_256(Lib_IntVector_Intrinsics_vec256 *st)
