@@ -25,12 +25,7 @@
 #include "Hacl_Chacha20_Vec32.h"
 
 #include "internal/Hacl_Chacha20.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static inline void double_round_32(uint32_t *st)
 {
   st[0U] = st[0U] + st[4U];

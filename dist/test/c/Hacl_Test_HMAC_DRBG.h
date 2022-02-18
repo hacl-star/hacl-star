@@ -24,11 +24,11 @@
 
 #ifndef __Hacl_Test_HMAC_DRBG_H
 #define __Hacl_Test_HMAC_DRBG_H
-
-
-
-
 #include "kremlib.h"
+
+
+
+
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 
 static inline FStar_UInt128_uint128

@@ -25,12 +25,7 @@
 #include "internal/Hacl_Frodo_KEM.h"
 
 #include "internal/Hacl_Kremlib.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 void randombytes_(uint32_t len, uint8_t *res)
 {
   bool b = Lib_RandomBuffer_System_randombytes(res, len);

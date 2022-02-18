@@ -29,7 +29,11 @@
 extern "C" {
 #endif
 
-
+#include "evercrypt_targetconfig.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 
 
 #include "Hacl_Spec.h"
@@ -39,11 +43,7 @@ extern "C" {
 #include "Hacl_Hash_SHA1.h"
 #include "Hacl_Hash_MD5.h"
 #include "EverCrypt_AutoConfig2.h"
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
 C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___);

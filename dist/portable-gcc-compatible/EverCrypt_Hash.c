@@ -29,12 +29,7 @@
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_MD5.h"
 #include "internal/Hacl_Hash_Blake2.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /* SNIPPET_START: EverCrypt_Hash_string_of_alg */
 
 C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___)

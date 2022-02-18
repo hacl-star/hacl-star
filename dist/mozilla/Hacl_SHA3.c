@@ -25,10 +25,7 @@
 #include "Hacl_SHA3.h"
 
 #include "internal/Hacl_Lib.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include <stdbool.h>
+
 const
 uint32_t
 Hacl_Impl_SHA3_keccak_rotc[24U] =

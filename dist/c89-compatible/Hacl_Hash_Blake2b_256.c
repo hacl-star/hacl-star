@@ -25,12 +25,7 @@
 #include "internal/Hacl_Hash_Blake2b_256.h"
 
 #include "internal/Hacl_Hash_Blake2.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static FStar_UInt128_uint128
 update_blake2b_256(
   Lib_IntVector_Intrinsics_vec256 *s,

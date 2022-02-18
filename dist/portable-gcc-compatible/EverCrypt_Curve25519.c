@@ -25,12 +25,7 @@
 #include "EverCrypt_Curve25519.h"
 
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /* SNIPPET_START: has_adx_bmi2 */
 
 static inline bool has_adx_bmi2()

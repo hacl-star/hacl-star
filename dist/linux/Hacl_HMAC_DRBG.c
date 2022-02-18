@@ -25,11 +25,7 @@
 #include "Hacl_HMAC_DRBG.h"
 
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 u32 Hacl_HMAC_DRBG_reseed_interval = (u32)1024U;
 
 u32 Hacl_HMAC_DRBG_max_output_length = (u32)65536U;

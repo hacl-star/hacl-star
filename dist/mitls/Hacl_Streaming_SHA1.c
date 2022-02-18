@@ -25,12 +25,7 @@
 #include "Hacl_Streaming_SHA1.h"
 
 #include "internal/Hacl_Hash_SHA1.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1()
 {
   uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));

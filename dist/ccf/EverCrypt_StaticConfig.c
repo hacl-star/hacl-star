@@ -25,11 +25,7 @@
 #include "EverCrypt_StaticConfig.h"
 
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 bool EverCrypt_StaticConfig_hacl = true;
 
 bool EverCrypt_StaticConfig_vale = true;

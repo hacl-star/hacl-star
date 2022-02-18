@@ -25,11 +25,7 @@
 #include "EverCrypt_HKDF.h"
 
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 void
 EverCrypt_HKDF_expand_sha1(
   uint8_t *okm,

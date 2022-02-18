@@ -26,13 +26,7 @@
 
 #include "internal/Vale.h"
 #include "internal/Hacl_Kremlib.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "curve25519-inline.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /* SNIPPET_START: add_scalar0 */
 
 static inline uint64_t add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)

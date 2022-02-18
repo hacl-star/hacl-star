@@ -29,17 +29,17 @@
 extern "C" {
 #endif
 
-
-
-
-#include "internal/Hacl_Leftovers.h"
-#include "internal/Hacl_Kremlib.h"
-#include "../Hacl_Hash_Base.h"
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "internal/Hacl_Leftovers.h"
+#include "internal/Hacl_Kremlib.h"
+#include "../Hacl_Hash_Base.h"
+
 uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block);
 
 void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *dst);

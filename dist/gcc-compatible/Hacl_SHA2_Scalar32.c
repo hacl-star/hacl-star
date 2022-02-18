@@ -25,12 +25,7 @@
 #include "Hacl_SHA2_Scalar32.h"
 
 #include "internal/Hacl_SHA2_Vec256.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static inline void sha224_update1(uint8_t *block, uint32_t *hash)
 {
   uint32_t hash_old[8U] = { 0U };

@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-
-
-
-#include "../Hacl_Poly1305_256.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "../Hacl_Poly1305_256.h"
+
 /* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_256_load_acc4 */
 
 void

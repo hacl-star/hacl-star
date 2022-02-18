@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-
-
-
-
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 static const
 uint32_t
 Hacl_Impl_SHA2_Generic_h224[8U] =

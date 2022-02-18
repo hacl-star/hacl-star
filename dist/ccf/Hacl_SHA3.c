@@ -25,11 +25,7 @@
 #include "Hacl_SHA3.h"
 
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 const
 uint32_t
 Hacl_Impl_SHA3_keccak_rotc[24U] =

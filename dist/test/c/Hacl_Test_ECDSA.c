@@ -25,8 +25,7 @@
 #include "Hacl_Test_ECDSA.h"
 
 
-#include "kremlib.h"
-#include "lib_intrinsics.h"
+
 extern void C_String_print(C_String_t uu___);
 
 

@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
-
-
-
-
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 void
 EverCrypt_Cipher_chacha20(
   uint32_t len,

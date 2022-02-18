@@ -25,11 +25,7 @@
 #include "Hacl_EC_Ed25519.h"
 
 #include "internal/Hacl_Ed25519.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 void Hacl_EC_Ed25519_mk_felem_zero(u64 *b)
 {
   b[0U] = (u64)0U;

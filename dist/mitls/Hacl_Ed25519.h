@@ -29,19 +29,19 @@
 extern "C" {
 #endif
 
-
-
-
-#include "Hacl_Streaming_SHA2.h"
-#include "Hacl_Kremlib.h"
-#include "Hacl_Hash_SHA2.h"
-#include "Hacl_Bignum25519_51.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "Hacl_Streaming_SHA2.h"
+#include "Hacl_Kremlib.h"
+#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Bignum25519_51.h"
+
 void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *priv, uint32_t len, uint8_t *msg);
 
 bool Hacl_Ed25519_verify(uint8_t *pub, uint32_t len, uint8_t *msg, uint8_t *signature);

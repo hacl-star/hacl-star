@@ -29,7 +29,12 @@
 extern "C" {
 #endif
 
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 
 
 #include "Hacl_Spec.h"
@@ -38,12 +43,7 @@ extern "C" {
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
 #include "EverCrypt_Hash.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /* SNIPPET_START: EverCrypt_HMAC_compute_sha1 */
 
 void

@@ -29,19 +29,19 @@
 extern "C" {
 #endif
 
-
-
-
-#include "Hacl_Chacha20Poly1305_32.h"
-#include "EverCrypt_Vale.h"
-#include "EverCrypt_Hacl.h"
-#include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "Hacl_Chacha20Poly1305_32.h"
+#include "EverCrypt_Vale.h"
+#include "EverCrypt_Hacl.h"
+#include "EverCrypt_AutoConfig2.h"
+
 uint32_t EverCrypt_random_init();
 
 void EverCrypt_random_sample(uint32_t len, uint8_t *out);

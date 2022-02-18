@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
-
-
-
-#include "../Hacl_Spec.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "../Hacl_Spec.h"
+
 #define Spec_ECDSA_NoHash 0
 #define Spec_ECDSA_Hash 1
 

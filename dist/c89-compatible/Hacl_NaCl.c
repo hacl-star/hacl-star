@@ -25,12 +25,7 @@
 #include "Hacl_NaCl.h"
 
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static void secretbox_init(uint8_t *xkeys, uint8_t *k, uint8_t *n)
 {
   uint8_t *subkey = xkeys;

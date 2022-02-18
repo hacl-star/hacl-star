@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
-
-
-
-#include "../Hacl_Hash_SHA1.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "../Hacl_Hash_SHA1.h"
+
 void Hacl_Hash_Core_SHA1_legacy_init(u32 *s);
 
 void Hacl_Hash_Core_SHA1_legacy_finish(u32 *s, u8 *dst);

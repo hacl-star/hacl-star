@@ -25,12 +25,7 @@
 #include "MerkleTree.h"
 
 #include "internal/Hacl_Kremlib.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static uint8_t *hash_r_alloc(uint32_t s)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), s);

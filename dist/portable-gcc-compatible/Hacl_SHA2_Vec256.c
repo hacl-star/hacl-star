@@ -25,12 +25,7 @@
 #include "internal/Hacl_SHA2_Vec256.h"
 
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /* SNIPPET_START: ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ */
 
 typedef struct ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s

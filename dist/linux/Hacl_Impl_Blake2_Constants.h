@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
-
-
-
-
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 static const
 u32
 Hacl_Impl_Blake2_Constants_sigmaTable[160U] =

@@ -25,11 +25,7 @@
 #include "internal/Hacl_Poly1305.h"
 
 #include "internal/Hacl_Kremlib.h"
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static void poly1305_init(uint64_t *ctx, uint8_t *key)
 {
   uint64_t *acc = ctx;

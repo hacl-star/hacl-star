@@ -25,12 +25,7 @@
 #include "Hacl_P256.h"
 
 #include "internal/Hacl_Spec.h"
-#include "lib_intrinsics.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static u64 isZero_uint64_CT(u64 *f)
 {
   u64 a0 = f[0U];

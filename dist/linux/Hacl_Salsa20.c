@@ -25,11 +25,7 @@
 #include "Hacl_Salsa20.h"
 
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static inline void quarter_round(u32 *st, u32 a, u32 b, u32 c, u32 d)
 {
   u32 sta0 = st[b];

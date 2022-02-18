@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-
-
-
-
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 bool EverCrypt_AutoConfig2_has_shaext();
 
 bool EverCrypt_AutoConfig2_has_aesni();

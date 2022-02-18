@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-
-
-
-
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 #define EverCrypt_Error_Success 0
 #define EverCrypt_Error_UnsupportedAlgorithm 1
 #define EverCrypt_Error_InvalidKey 2

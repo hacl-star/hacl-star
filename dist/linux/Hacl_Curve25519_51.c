@@ -25,11 +25,7 @@
 #include "internal/Hacl_Curve25519_51.h"
 
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static const u8 g25519[32U] = { (u8)9U };
 
 static void point_add_and_double(u64 *q, u64 *p01_tmp1, uint128_t *tmp2)

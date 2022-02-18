@@ -25,12 +25,7 @@
 #include "EverCrypt_DRBG.h"
 
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 uint32_t EverCrypt_DRBG_reseed_interval = (uint32_t)1024U;
 
 uint32_t EverCrypt_DRBG_max_output_length = (uint32_t)65536U;

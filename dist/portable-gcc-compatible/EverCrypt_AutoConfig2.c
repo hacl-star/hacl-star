@@ -25,12 +25,7 @@
 #include "EverCrypt_AutoConfig2.h"
 
 #include "internal/Vale.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /* SNIPPET_START: cpu_has_shaext */
 
 static bool cpu_has_shaext[1U] = { false };

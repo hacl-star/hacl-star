@@ -25,12 +25,7 @@
 #include "Hacl_GenericField64.h"
 
 #include "internal/Hacl_Bignum.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /*******************************************************************************
 
 A verified field arithmetic library.

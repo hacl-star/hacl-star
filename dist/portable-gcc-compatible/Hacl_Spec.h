@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-
-
-
-
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 /* SNIPPET_START: Spec_Blake2_alg */
 
 #define Spec_Blake2_Blake2S 0

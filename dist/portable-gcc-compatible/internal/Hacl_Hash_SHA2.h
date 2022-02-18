@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-
-
-
-#include "../Hacl_Hash_SHA2.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "../Hacl_Hash_SHA2.h"
+
 /* SNIPPET_START: Hacl_Hash_Core_SHA2_init_224 */
 
 void Hacl_Hash_Core_SHA2_init_224(uint32_t *s);

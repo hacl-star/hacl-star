@@ -25,12 +25,7 @@
 #include "internal/Hacl_HMAC.h"
 
 #include "internal/Hacl_Hash.h"
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-#include "kremlin/internal/builtin.h"
+
 void
 Hacl_HMAC_legacy_compute_sha1(
   uint8_t *dst,

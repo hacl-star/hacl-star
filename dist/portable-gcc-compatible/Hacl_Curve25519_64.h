@@ -29,10 +29,6 @@
 extern "C" {
 #endif
 
-
-
-
-#include "Hacl_Kremlib.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "curve25519-inline.h"
@@ -40,6 +36,10 @@ extern "C" {
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "Hacl_Kremlib.h"
+
 /* SNIPPET_START: Hacl_Curve25519_64_scalarmult */
 
 void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);

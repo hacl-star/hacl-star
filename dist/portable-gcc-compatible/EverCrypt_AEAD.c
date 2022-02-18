@@ -26,12 +26,7 @@
 
 #include "internal/Vale.h"
 #include "internal/Hacl_Kremlib.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /* SNIPPET_START: EverCrypt_AEAD_state_s */
 
 typedef struct EverCrypt_AEAD_state_s_s

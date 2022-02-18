@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
-
-
-
-
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 extern bool EverCrypt_StaticConfig_hacl;
 
 extern bool EverCrypt_StaticConfig_vale;

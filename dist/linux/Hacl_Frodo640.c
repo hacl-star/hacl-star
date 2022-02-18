@@ -25,11 +25,7 @@
 #include "Hacl_Frodo640.h"
 
 #include "internal/Hacl_Frodo_KEM.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 u32 Hacl_Frodo640_crypto_bytes = (u32)16U;
 
 u32 Hacl_Frodo640_crypto_publickeybytes = (u32)9616U;

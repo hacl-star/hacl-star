@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-
-
-
-
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 typedef uint8_t EverCrypt_Helpers_uint8_t;
 
 typedef uint16_t EverCrypt_Helpers_uint16_t;

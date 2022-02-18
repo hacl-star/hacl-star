@@ -25,11 +25,7 @@
 #include "Hacl_Frodo64.h"
 
 #include "internal/Hacl_Frodo_KEM.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /*
  this variant is used only for testing purposes!
  */

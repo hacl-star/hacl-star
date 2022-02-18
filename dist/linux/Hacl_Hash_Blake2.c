@@ -25,11 +25,7 @@
 #include "internal/Hacl_Hash_Blake2.h"
 
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static u64 update_blake2s_32(u32 *s, u64 totlen, u8 *block)
 {
   u32 wv[16U] = { 0U };

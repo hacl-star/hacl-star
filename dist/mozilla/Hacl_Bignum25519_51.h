@@ -29,14 +29,14 @@
 extern "C" {
 #endif
 
-
-
-
-#include "Hacl_Kremlib.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include <stdbool.h>
+
+
+#include "Hacl_Kremlib.h"
+
 static inline void Hacl_Impl_Curve25519_Field51_fadd(uint64_t *out, uint64_t *f1, uint64_t *f2)
 {
   uint64_t f10 = f1[0U];

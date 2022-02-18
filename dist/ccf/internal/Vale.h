@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
-
-
-
-
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 
 extern uint64_t fadd_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);

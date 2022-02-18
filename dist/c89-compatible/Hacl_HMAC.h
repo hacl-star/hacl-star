@@ -29,19 +29,19 @@
 extern "C" {
 #endif
 
-
-
-
-#include "Hacl_Kremlib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash_SHA2.h"
-#include "Hacl_Hash_SHA1.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "Hacl_Kremlib.h"
+#include "Hacl_Impl_Blake2_Constants.h"
+#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Hash_SHA1.h"
+
 void
 Hacl_HMAC_legacy_compute_sha1(
   uint8_t *dst,

@@ -26,12 +26,7 @@
 
 #include "internal/Hacl_Poly1305_128.h"
 #include "internal/Hacl_Kremlib.h"
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 /* SNIPPET_START: poly1305_padded_128 */
 
 static inline void

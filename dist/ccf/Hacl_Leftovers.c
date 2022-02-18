@@ -25,11 +25,7 @@
 #include "internal/Hacl_Leftovers.h"
 
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 static inline void
 blake2b_update_block(uint64_t *wv, uint64_t *hash, bool flag, uint128_t totlen, uint8_t *d)
 {

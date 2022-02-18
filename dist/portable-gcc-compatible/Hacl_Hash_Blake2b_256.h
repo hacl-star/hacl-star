@@ -29,18 +29,18 @@
 extern "C" {
 #endif
 
-
-
-
-#include "Lib_Memzero0.h"
-#include "Hacl_Kremlib.h"
-#include "Hacl_Impl_Blake2_Constants.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "Lib_Memzero0.h"
+#include "Hacl_Kremlib.h"
+#include "Hacl_Impl_Blake2_Constants.h"
+
 /* SNIPPET_START: Hacl_Blake2b_256_blake2b_init */
 
 void

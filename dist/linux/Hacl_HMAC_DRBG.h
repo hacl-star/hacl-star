@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
-
-
-
-#include "Hacl_Spec.h"
-#include "Hacl_HMAC.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
+
+
+#include "Hacl_Spec.h"
+#include "Hacl_HMAC.h"
+
 typedef Spec_Hash_Definitions_hash_alg Hacl_HMAC_DRBG_supported_alg;
 
 extern u32 Hacl_HMAC_DRBG_reseed_interval;
