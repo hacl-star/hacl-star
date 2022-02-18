@@ -635,7 +635,7 @@ REQUIRED_FLAGS	= \
   $(BASE_FLAGS)
 
 # Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
-TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
+TARGET_H_INCLUDE = -add-early-include '"kremlin/internal/target.h"'
 
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
@@ -969,7 +969,7 @@ dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/evercry
 dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
 dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
   -bundle '\*[rename=Should_not_be_here]' \
-  -falloca -ftail-calls -fc89 -add-include '"kremlin/internal/builtin.h"'
+  -falloca -ftail-calls -fc89 -add-early-include '"kremlin/internal/builtin.h"'
 
 # Mozilla distribution
 # --------------------
@@ -1012,7 +1012,7 @@ dist/mozilla/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter %/libintvector.h,$
 dist/mozilla/Makefile.basic: HAND_WRITTEN_FILES =
 dist/mozilla/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
-dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
+dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-early-include '<stdbool.h>'
 
 # Portable distribution
 # ---------------------
@@ -1098,10 +1098,10 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -bundle EverCrypt+EverCrypt.AEAD+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
 	  -library EverCrypt,EverCrypt.* \
-	  -add-include '<inttypes.h>' \
-	  -add-include '<stdbool.h>' \
-	  -add-include '<kremlin/internal/types.h>' \
-	  -add-include '<kremlin/internal/target.h>' \
+	  -add-early-include '<inttypes.h>' \
+	  -add-early-include '<stdbool.h>' \
+	  -add-early-include '<kremlin/internal/types.h>' \
+	  -add-early-include '<kremlin/internal/target.h>' \
 	  -header dist/LICENSE.txt \
 	  -skip-compilation \
 	  -fextern-c \
@@ -1124,7 +1124,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -minimal -add-include '"kremlib.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
-dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
+dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"kremlin/internal/compat.h"'
 
 dist/test/c/Hacl_Test_ECDSA.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-include '"lib_intrinsics.h"'
 
