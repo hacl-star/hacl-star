@@ -26,7 +26,9 @@ val mk_update_multi:
   update_multi_st (|a, m|)
 
 val update_multi_blake2s_32: update_multi_st (|Blake2S, Blake2.M32|)
+val update_multi_blake2s_128: update_multi_st (|Blake2S, Blake2.M128|)
 val update_multi_blake2b_32: update_multi_st (|Blake2B, Blake2.M32|)
+val update_multi_blake2b_256: update_multi_st (|Blake2B, Blake2.M256|)
 
 noextract inline_for_extraction
 val mk_update_last:
@@ -36,7 +38,9 @@ val mk_update_last:
   update_last_st (|a, m|)
 
 val update_last_blake2s_32: update_last_st (|Blake2S, Blake2.M32|)
+val update_last_blake2s_128: update_last_st (|Blake2S, Blake2.M128|)
 val update_last_blake2b_32: update_last_st (|Blake2B, Blake2.M32|)
+val update_last_blake2b_256: update_last_st (|Blake2B, Blake2.M256|)
 
 noextract inline_for_extraction
 val mk_hash:
@@ -46,4 +50,6 @@ val mk_hash:
   hash_st a
 
 val hash_blake2s_32: hash_st Blake2S
+val hash_blake2s_128: hash_st Blake2S
 val hash_blake2b_32: hash_st Blake2B
+val hash_blake2b_256: hash_st Blake2B
