@@ -10,16 +10,15 @@ open Lib.Buffer
 module ST = FStar.HyperStack.ST
 module BSeq = Lib.ByteSequence
 
-module QI = Hacl.Impl.K256.Qinv
-
 module S = Spec.K256
 module KL = Spec.K256.Lemmas
 
 open Hacl.K256.Field
-open Hacl.K256.Scalar
 open Hacl.Impl.K256.Point
 open Hacl.Impl.K256.PointMul
 
+module QA = Hacl.K256.Scalar
+module QI = Hacl.Impl.K256.Qinv
 module BI = Hacl.Spec.K256.Field52
 module BL = Hacl.Spec.K256.Field52.Lemmas
 
@@ -52,27 +51,27 @@ let is_public_key_valid pk_x pk_y fpk_x fpk_y =
 
 
 inline_for_extraction noextract
-val ecdsa_verify_qelem (res p:point) (z r s:qelem) : Stack unit
+val ecdsa_verify_qelem (res p:point) (z r s:QA.qelem) : Stack unit
   (requires fun h ->
     live h res /\ live h p /\ live h z /\ live h r /\ live h s /\
     disjoint res p /\ point_inv h p /\
-    qas_nat h z < S.q /\ qas_nat h r < S.q /\ qas_nat h s < S.q)
+    QA.qas_nat h z < S.q /\ QA.qas_nat h r < S.q /\ QA.qas_nat h s < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\ point_inv h1 res /\
-   (let sinv = S.qinv (qas_nat h0 s) in
-    let u1 = S.qmul (qas_nat h0 z) sinv in
-    let u2 = S.qmul (qas_nat h0 r) sinv in
+   (let sinv = S.qinv (QA.qas_nat h0 s) in
+    let u1 = S.qmul (QA.qas_nat h0 z) sinv in
+    let u2 = S.qmul (QA.qas_nat h0 r) sinv in
     S.to_aff_point (point_eval h1 res) ==
     S.to_aff_point (S.point_mul_double_g u1 u2 (point_eval h0 p))))
 
 let ecdsa_verify_qelem res p z r s =
   push_frame ();
-  let sinv = create_qelem () in
-  let u1 = create_qelem () in
-  let u2 = create_qelem () in
+  let sinv = QA.create_qelem () in
+  let u1 = QA.create_qelem () in
+  let u2 = QA.create_qelem () in
 
   QI.qinv sinv s;
-  qmul u1 z sinv;
-  qmul u2 r sinv;
+  QA.qmul u1 z sinv;
+  QA.qmul u2 r sinv;
   point_mul_g_double_vartime res u1 u2 p;
   pop_frame ()
 
@@ -101,14 +100,14 @@ let fmul_eq_vartime r z x =
 
 
 inline_for_extraction noextract
-val ecdsa_verify_avoid_finv: p:point -> r:qelem -> Stack bool
+val ecdsa_verify_avoid_finv: p:point -> r:QA.qelem -> Stack bool
   (requires fun h ->
     live h p /\ live h r /\ disjoint p r /\
-    point_inv h p /\ qe_lt_q h r /\ 0 < qas_nat h r /\
+    point_inv h p /\ QA.qe_lt_q h r /\ 0 < QA.qas_nat h r /\
     not (S.is_proj_point_at_inf (point_eval h p)))
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
     (let (_X, _Y, _Z) = point_eval h0 p in
-     b <==> (S.fmul _X (S.finv _Z) % S.q = qas_nat h0 r)))
+     b <==> (S.fmul _X (S.finv _Z) % S.q = QA.qas_nat h0 r)))
 
 let ecdsa_verify_avoid_finv p r =
   let h0 = ST.get () in
@@ -120,7 +119,7 @@ let ecdsa_verify_avoid_finv p r =
   let tmp_q = create_felem () in
   let tmp_x = create_felem () in
 
-  store_qelem r_bytes r;
+  QA.store_qelem r_bytes r;
   load_felem r_fe r_bytes;
   let h1 = ST.get () in
   //assert (inv_fully_reduced h1 r_fe);
@@ -151,28 +150,28 @@ let ecdsa_verify_avoid_finv p r =
     else true in
 
   pop_frame ();
-  KL.ecdsa_verify_avoid_finv (point_eval h0 p) (qas_nat h0 r);
-  assert (res <==> (S.fmul (feval h0 x) (S.finv (feval h0 z)) % S.q = qas_nat h0 r));
+  KL.ecdsa_verify_avoid_finv (point_eval h0 p) (QA.qas_nat h0 r);
+  assert (res <==> (S.fmul (feval h0 x) (S.finv (feval h0 z)) % S.q = QA.qas_nat h0 r));
   let h5 = ST.get () in
   assert (modifies0 h0 h5);
   res
 
 
 inline_for_extraction noextract
-val ecdsa_verify_qelem_aff (pk_x pk_y:felem) (z r s:qelem) : Stack bool
+val ecdsa_verify_qelem_aff (pk_x pk_y:felem) (z r s:QA.qelem) : Stack bool
   (requires fun h ->
     live h pk_x /\ live h pk_y /\ live h z /\ live h r /\ live h s /\
-    qas_nat h z < S.q /\ qas_nat h s < S.q /\
-    0 < qas_nat h r /\ qas_nat h r < S.q /\
+    QA.qas_nat h z < S.q /\ QA.qas_nat h s < S.q /\
+    0 < QA.qas_nat h r /\ QA.qas_nat h r < S.q /\
     inv_fully_reduced h pk_x /\ inv_fully_reduced h pk_y)
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
-   (let sinv = S.qinv (qas_nat h0 s) in
-    let u1 = S.qmul (qas_nat h0 z) sinv in
-    let u2 = S.qmul (qas_nat h0 r) sinv in
+   (let sinv = S.qinv (QA.qas_nat h0 s) in
+    let u1 = S.qmul (QA.qas_nat h0 z) sinv in
+    let u2 = S.qmul (QA.qas_nat h0 r) sinv in
     let p = (feval h0 pk_x, feval h0 pk_y, S.one) in
     let _X, _Y, _Z = S.point_mul_double_g u1 u2 p in
     b <==> (if S.is_proj_point_at_inf (_X, _Y, _Z) then false
-      else S.fmul _X (S.finv _Z) % S.q = qas_nat h0 r)))
+      else S.fmul _X (S.finv _Z) % S.q = QA.qas_nat h0 r)))
 
 let ecdsa_verify_qelem_aff pk_x pk_y z r s =
   push_frame ();
@@ -204,14 +203,14 @@ let ecdsa_verify_hashed_msg m public_key_x public_key_y r s =
   let pk_x = create_felem () in
   let pk_y = create_felem () in
 
-  let r_q = create_qelem () in
-  let s_q = create_qelem () in
-  let z = create_qelem () in
+  let r_q = QA.create_qelem () in
+  let s_q = QA.create_qelem () in
+  let z = QA.create_qelem () in
 
   let is_xy_on_curve = is_public_key_valid public_key_x public_key_y pk_x pk_y in
-  let is_r_valid = load_qelem_vartime r_q r in
-  let is_s_valid = load_qelem_vartime s_q s in
-  load_qelem_modq z m;
+  let is_r_valid = QA.load_qelem_vartime r_q r in
+  let is_s_valid = QA.load_qelem_vartime s_q s in
+  QA.load_qelem_modq z m;
 
   let h0 = ST.get () in
   let res =

@@ -47,6 +47,19 @@ let qas_nat4 (f:qelem4) =
 
 
 inline_for_extraction noextract
+val make_u64_4 (out:qelem) (f:qelem4) : Stack unit
+  (requires fun h -> live h out)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qas_nat h1 out == qas_nat4 f)
+
+
+inline_for_extraction noextract
+val make_order_k256: unit -> Pure qelem4
+  (requires True)
+  (ensures  fun r -> qas_nat4 r = S.q)
+
+
+inline_for_extraction noextract
 val create_qelem: unit -> StackInline qelem
   (requires fun h -> True)
   (ensures  fun h0 f h1 ->
@@ -107,6 +120,20 @@ val qadd (out f1 f2: qelem) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     qas_nat h1 out == S.qadd (qas_nat h0 f1) (qas_nat h0 f2) /\
     qe_lt_q h1 out)
+
+
+// needed for Montgomery arithmetic
+inline_for_extraction noextract
+val make_r2_modq: unit -> Pure qelem4
+  (requires True)
+  (ensures  fun r -> qas_nat4 r = pow2 512 % S.q)
+
+
+// needed for Montgomery arithmetic
+inline_for_extraction noextract
+val make_mu0 : unit -> Pure uint64
+  (requires True)
+  (ensures  fun mu -> (1 + S.q * v mu) % pow2 64 = 0)
 
 
 val qmul (out f1 f2: qelem) : Stack unit
