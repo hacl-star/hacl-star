@@ -329,7 +329,7 @@ Hacl_GenericField32_exp_consttime(
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
     {
       uint32_t *t11 = table + i * len1;
-      uint32_t *t2 = table + (i + (uint32_t)1U) * len1;
+      uint32_t *t2 = table + i * len1 + len1;
       Hacl_Bignum_Montgomery_bn_mont_mul_u32(len1, k1.n, k1.mu, aMc, t11, t2);
     }
     if (bBits % (uint32_t)4U != (uint32_t)0U)
@@ -472,7 +472,7 @@ Hacl_GenericField32_exp_vartime(
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
     {
       uint32_t *t11 = table + i * len1;
-      uint32_t *t2 = table + (i + (uint32_t)1U) * len1;
+      uint32_t *t2 = table + i * len1 + len1;
       Hacl_Bignum_Montgomery_bn_mont_mul_u32(len1, k1.n, k1.mu, aMc, t11, t2);
     }
     if (bBits % (uint32_t)4U != (uint32_t)0U)

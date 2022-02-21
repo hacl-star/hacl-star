@@ -381,7 +381,7 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint6
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
     uint64_t *t11 = table + i * (uint32_t)20U;
-    uint64_t *t2 = table + (i + (uint32_t)1U) * (uint32_t)20U;
+    uint64_t *t2 = table + i * (uint32_t)20U + (uint32_t)20U;
     Hacl_Impl_Ed25519_PointAdd_point_add(t2, q, t11);
   }
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
@@ -512,7 +512,7 @@ point_mul_double_vartime(
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
     uint64_t *t11 = table1 + i * (uint32_t)20U;
-    uint64_t *t2 = table1 + (i + (uint32_t)1U) * (uint32_t)20U;
+    uint64_t *t2 = table1 + i * (uint32_t)20U + (uint32_t)20U;
     Hacl_Impl_Ed25519_PointAdd_point_add(t2, q1, t11);
   }
   uint64_t table2[320U] = { 0U };
@@ -522,7 +522,7 @@ point_mul_double_vartime(
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
     uint64_t *t11 = table2 + i * (uint32_t)20U;
-    uint64_t *t2 = table2 + (i + (uint32_t)1U) * (uint32_t)20U;
+    uint64_t *t2 = table2 + i * (uint32_t)20U + (uint32_t)20U;
     Hacl_Impl_Ed25519_PointAdd_point_add(t2, q2, t11);
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)

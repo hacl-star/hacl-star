@@ -683,7 +683,7 @@ exp_vartime_precomp(
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
     uint64_t *t11 = table + i * (uint32_t)64U;
-    uint64_t *t2 = table + (i + (uint32_t)1U) * (uint32_t)64U;
+    uint64_t *t2 = table + i * (uint32_t)64U + (uint32_t)64U;
     amont_mul(n, mu, aM, t11, t2);
   }
   if (bBits % (uint32_t)4U != (uint32_t)0U)
@@ -813,7 +813,7 @@ exp_consttime_precomp(
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
     uint64_t *t11 = table + i * (uint32_t)64U;
-    uint64_t *t2 = table + (i + (uint32_t)1U) * (uint32_t)64U;
+    uint64_t *t2 = table + i * (uint32_t)64U + (uint32_t)64U;
     amont_mul(n, mu, aM, t11, t2);
   }
   if (bBits % (uint32_t)4U != (uint32_t)0U)
