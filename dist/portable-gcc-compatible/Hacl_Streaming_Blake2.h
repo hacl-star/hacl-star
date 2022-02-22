@@ -29,18 +29,18 @@
 extern "C" {
 #endif
 
+
+
+
+#include "Hacl_Spec.h"
+#include "Hacl_Kremlib.h"
+#include "Hacl_Hash_Blake2.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-#include "Hacl_Spec.h"
-#include "Hacl_Kremlib.h"
-#include "Hacl_Hash_Blake2.h"
-
 /* SNIPPET_START: Hacl_Streaming_Blake2_blocks_state_len */
 
 uint32_t

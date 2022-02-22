@@ -24,12 +24,12 @@
 
 #ifndef __Hacl_Test_ECDSA_H
 #define __Hacl_Test_ECDSA_H
+
+
+
+
 #include "kremlib.h"
 #include "lib_intrinsics.h"
-
-
-
-
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 
 exit_code main();

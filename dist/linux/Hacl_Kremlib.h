@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
+
+
+
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-
-
 static inline u8 FStar_UInt8_eq_mask(u8 a, u8 b);
 
 static inline u64 FStar_UInt64_eq_mask(u64 a, u64 b);
