@@ -1,4 +1,4 @@
-module Spec.SPARKLE2
+module Spec.SPARKLE
 
 open FStar.Mul
 open Lib.IntTypes
