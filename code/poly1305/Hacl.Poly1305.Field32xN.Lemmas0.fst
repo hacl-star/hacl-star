@@ -60,7 +60,19 @@ let smul_add_mod_lemma #m1 #m2 #m3 a b c =
   FStar.Math.Lemmas.modulo_lemma (c + a * b) (pow2 64)
 
 
-#set-options "--initial_ifuel 1 --max_ifuel 1"
+val add5_lemma1: ma:scale64 -> mb:scale64 -> a:uint64 -> b:uint64 -> Lemma
+  (requires v a <= ma * max26 /\ v b <= mb * max26 /\ ma + mb <= 64)
+  (ensures  v (a +. b) == v a + v b /\ v (a +. b) <= (ma + mb) * max26)
+
+let add5_lemma1 ma mb a b =
+  assert (v a + v b <= (ma + mb) * max26);
+  Math.Lemmas.lemma_mult_le_right max26 (ma + mb) 64;
+  assert (v a + v b <= 64 * max26);
+  assert_norm (64 * max26 < pow2 32);
+  Math.Lemmas.small_mod (v a + v b) (pow2 32)
+
+
+#set-options "--ifuel 1"
 
 val fadd5_eval_lemma_i:
     #w:lanes
@@ -69,25 +81,24 @@ val fadd5_eval_lemma_i:
   -> i:nat{i < w} ->
   Lemma ((feval5 (fadd5 f1 f2)).[i] == pfadd (feval5 f1).[i] (feval5 f2).[i])
 
-#push-options "--z3rlimit 100 --admit_smt_queries true"
 let fadd5_eval_lemma_i #w f1 f2 i =
   let o = fadd5 f1 f2 in
   let (f10, f11, f12, f13, f14) = as_tup64_i f1 i in
   let (f20, f21, f22, f23, f24) = as_tup64_i f2 i in
   let (o0, o1, o2, o3, o4) = as_tup64_i o i in
 
-  FStar.Math.Lemmas.modulo_lemma (v f10 + v f20) (pow2 64);
-  FStar.Math.Lemmas.modulo_lemma (v f11 + v f21) (pow2 64);
-  FStar.Math.Lemmas.modulo_lemma (v f12 + v f20) (pow2 64);
-  FStar.Math.Lemmas.modulo_lemma (v f13 + v f23) (pow2 64);
-  FStar.Math.Lemmas.modulo_lemma (v f14 + v f24) (pow2 64);
+  add5_lemma1 2 1 f10 f20;
+  add5_lemma1 2 1 f11 f21;
+  add5_lemma1 2 1 f12 f22;
+  add5_lemma1 2 1 f13 f23;
+  add5_lemma1 2 1 f14 f24;
   assert (as_nat5 (o0, o1, o2, o3, o4) ==
     as_nat5 (f10, f11, f12, f13, f14) + as_nat5 (f20, f21, f22, f23, f24));
   FStar.Math.Lemmas.lemma_mod_plus_distr_l
     (as_nat5 (f10, f11, f12, f13, f14)) (as_nat5 (f20, f21, f22, f23, f24)) prime;
   FStar.Math.Lemmas.lemma_mod_plus_distr_r
     (as_nat5 (f10, f11, f12, f13, f14) % prime) (as_nat5 (f20, f21, f22, f23, f24)) prime
-#pop-options
+
 
 val smul_felem5_fits_lemma_i:
     #w:lanes
