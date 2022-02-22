@@ -27,10 +27,6 @@
 #include <tmmintrin.h>
 #include <smmintrin.h>
 
-#if defined(_MSC_VER)
-  #include <intrin.h> 
-#endif
-
 typedef __m128i Lib_IntVector_Intrinsics_vec128;
 
 #define Lib_IntVector_Intrinsics_ni_aes_enc(x0, x1) \
