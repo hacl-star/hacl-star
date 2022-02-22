@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
+
+
+
+#include "Hacl_Kremlib.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-#include "Hacl_Kremlib.h"
-
 void Hacl_Hash_SHA2_update_multi_224(u32 *s, u8 *blocks, u32 n_blocks);
 
 void Hacl_Hash_SHA2_update_multi_256(u32 *s, u8 *blocks, u32 n_blocks);

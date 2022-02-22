@@ -29,16 +29,16 @@
 extern "C" {
 #endif
 
+
+
+
+#include "../Hacl_SHA2_Vec256.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-#include "../Hacl_SHA2_Vec256.h"
-
 /* SNIPPET_START: K____uint8_t___uint8_t_ */
 
 typedef struct K____uint8_t___uint8_t__s
