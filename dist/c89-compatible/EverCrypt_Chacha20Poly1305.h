@@ -29,19 +29,19 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 
 
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "Hacl_Chacha20Poly1305_256.h"
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "EverCrypt_AutoConfig2.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,
