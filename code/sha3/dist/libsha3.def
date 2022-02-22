@@ -1,0 +1,18 @@
+LIBRARY libsha3
+
+EXPORTS
+  Hacl_Impl_SHA3_rotl
+  Hacl_Impl_SHA3_state_permute
+  Hacl_Impl_SHA3_loadState
+  Hacl_Impl_SHA3_storeState
+  Hacl_Impl_SHA3_absorb_last
+  Hacl_Impl_SHA3_absorb_inner
+  Hacl_Impl_SHA3_absorb
+  Hacl_Impl_SHA3_squeeze
+  Hacl_Impl_SHA3_keccak
+  Hacl_SHA3_shake128_hacl
+  Hacl_SHA3_shake256_hacl
+  Hacl_SHA3_sha3_224
+  Hacl_SHA3_sha3_256
+  Hacl_SHA3_sha3_384
+  Hacl_SHA3_sha3_512
