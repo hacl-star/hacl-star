@@ -29,52 +29,28 @@
 extern "C" {
 #endif
 
+
+
+
+#include "Lib_Memzero0.h"
+#include "Hacl_Kremlib.h"
+#include "Hacl_Impl_Blake2_Constants.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-#include "Hacl_Kremlib.h"
-#include "Lib_Memzero0.h"
-#include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash_Blake2.h"
+void
+Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn);
 
 void
-Hacl_Hash_Blake2b_256_finish_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  uint128_t ev,
-  uint8_t *dst
-);
-
-uint128_t
-Hacl_Hash_Blake2b_256_update_multi_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  uint128_t ev,
-  uint8_t *blocks,
-  uint32_t n_blocks
-);
-
-uint128_t
-Hacl_Hash_Blake2b_256_update_last_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  uint128_t ev,
-  uint128_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
-
-void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
-
-void
-Hacl_Blake2b_256_blake2b_init(
+Hacl_Blake2b_256_blake2b_update_key(
   Lib_IntVector_Intrinsics_vec256 *wv,
   Lib_IntVector_Intrinsics_vec256 *hash,
   uint32_t kk,
   uint8_t *k,
-  uint32_t nn
+  uint32_t ll
 );
 
 void

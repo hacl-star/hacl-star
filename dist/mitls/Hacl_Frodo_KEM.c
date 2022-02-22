@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Frodo_KEM.h"
+#include "internal/Hacl_Frodo_KEM.h"
+
+#include "internal/Hacl_Kremlib.h"
 
 void randombytes_(uint32_t len, uint8_t *res)
 {

@@ -22,7 +22,10 @@
  */
 
 
-#include "Hacl_Hash_Blake2b_256.h"
+#include "internal/Hacl_Hash_Blake2b_256.h"
+
+#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Hash_Blake2.h"
 
 static FStar_UInt128_uint128
 update_blake2b_256(
@@ -663,15 +666,8 @@ blake2b_update_block(
 }
 
 inline void
-Hacl_Blake2b_256_blake2b_init(
-  Lib_IntVector_Intrinsics_vec256 *wv,
-  Lib_IntVector_Intrinsics_vec256 *hash,
-  uint32_t kk,
-  uint8_t *k,
-  uint32_t nn
-)
+Hacl_Blake2b_256_blake2b_init(Lib_IntVector_Intrinsics_vec256 *hash, uint32_t kk, uint32_t nn)
 {
-  uint8_t b[128U] = { 0U };
   Lib_IntVector_Intrinsics_vec256 *r0 = hash + (uint32_t)0U * (uint32_t)1U;
   Lib_IntVector_Intrinsics_vec256 *r1 = hash + (uint32_t)1U * (uint32_t)1U;
   Lib_IntVector_Intrinsics_vec256 *r2 = hash + (uint32_t)2U * (uint32_t)1U;
@@ -690,15 +686,27 @@ Hacl_Blake2b_256_blake2b_init(
   uint64_t iv0_ = iv0 ^ ((uint64_t)0x01010000U ^ (kk_shift_8 ^ (uint64_t)nn));
   r0[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv0_, iv1, iv2, iv3);
   r1[0U] = Lib_IntVector_Intrinsics_vec256_load64s(iv4, iv5, iv6, iv7);
-  if (!(kk == (uint32_t)0U))
+}
+
+inline void
+Hacl_Blake2b_256_blake2b_update_key(
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t ll
+)
+{
+  FStar_UInt128_uint128 lb = FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U);
+  uint8_t b[128U] = { 0U };
+  memcpy(b, k, kk * sizeof (uint8_t));
+  if (ll == (uint32_t)0U)
   {
-    memcpy(b, k, kk * sizeof (uint8_t));
-    FStar_UInt128_uint128
-    totlen =
-      FStar_UInt128_add_mod(FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)0U),
-        FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U));
-    uint8_t *b1 = b + (uint32_t)0U * (uint32_t)128U;
-    blake2b_update_block(wv, hash, false, totlen, b1);
+    blake2b_update_block(wv, hash, true, lb, b);
+  }
+  else
+  {
+    blake2b_update_block(wv, hash, false, lb, b);
   }
   Lib_Memzero0_memzero(b, (uint32_t)128U * sizeof (b[0U]));
 }
@@ -771,6 +779,34 @@ blake2b_update_blocks(
   Hacl_Blake2b_256_blake2b_update_last(len, wv, hash, prev, rem, blocks);
 }
 
+static inline void
+blake2b_update(
+  Lib_IntVector_Intrinsics_vec256 *wv,
+  Lib_IntVector_Intrinsics_vec256 *hash,
+  uint32_t kk,
+  uint8_t *k,
+  uint32_t ll,
+  uint8_t *d
+)
+{
+  FStar_UInt128_uint128 lb = FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U);
+  if (kk > (uint32_t)0U)
+  {
+    Hacl_Blake2b_256_blake2b_update_key(wv, hash, kk, k, ll);
+    if (!(ll == (uint32_t)0U))
+    {
+      blake2b_update_blocks(ll, wv, hash, lb, d);
+      return;
+    }
+    return;
+  }
+  blake2b_update_blocks(ll,
+    wv,
+    hash,
+    FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)0U),
+    d);
+}
+
 inline void
 Hacl_Blake2b_256_blake2b_finish(
   uint32_t nn,
@@ -809,21 +845,12 @@ Hacl_Blake2b_256_blake2b(
   Lib_IntVector_Intrinsics_vec256 *b = alloca(stlen * sizeof (Lib_IntVector_Intrinsics_vec256));
   for (uint32_t _i = 0U; _i < stlen; ++_i)
     b[_i] = stzero;
-  FStar_UInt128_uint128 prev0;
-  if (kk == (uint32_t)0U)
-  {
-    prev0 = FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)0U);
-  }
-  else
-  {
-    prev0 = FStar_UInt128_uint64_to_uint128((uint64_t)(uint32_t)128U);
-  }
   KRML_CHECK_SIZE(sizeof (Lib_IntVector_Intrinsics_vec256), stlen);
   Lib_IntVector_Intrinsics_vec256 *b1 = alloca(stlen * sizeof (Lib_IntVector_Intrinsics_vec256));
   for (uint32_t _i = 0U; _i < stlen; ++_i)
     b1[_i] = stzero;
-  Hacl_Blake2b_256_blake2b_init(b1, b, kk, k, nn);
-  blake2b_update_blocks(ll, b1, b, prev0, d);
+  Hacl_Blake2b_256_blake2b_init(b, kk, nn);
+  blake2b_update(b1, b, kk, k, ll, d);
   Hacl_Blake2b_256_blake2b_finish(nn, output, b);
   Lib_Memzero0_memzero(b1, stlen * sizeof (b1[0U]));
   Lib_Memzero0_memzero(b, stlen * sizeof (b[0U]));

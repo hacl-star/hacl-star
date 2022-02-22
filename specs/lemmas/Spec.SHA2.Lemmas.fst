@@ -158,8 +158,35 @@ let update_224_256 hash block =
     reveal_opaque (`%ws) ws;
     assert_norm (block_w SHA2_256 == block_w SHA2_224);
     assert_norm (size_k_w SHA2_256 == size_k_w SHA2_224);
-    assert_norm (_sigma1 SHA2_256 == _sigma1 SHA2_224);
-    assert_norm (_sigma0 SHA2_256 == _sigma0 SHA2_224);
+
+    (*
+     * The code earlier was doing assert_norm (_sigma0 SHA2_256 == _sigma0 SHA2_224)
+     *
+     * This is a bit suboptimal, since assert_norm is a heavy hammer,
+     *   it also ends up unfolding `==`, which means the equality is not
+     *   reduced in F*, rather the query for proving equality of two
+     *   lambda terms reaches Z3 -- once that happens we are at the mercy of
+     *   hashconsing etc. to prove the equality
+     *
+     * Instead, if we do controlled normalization, we can prove the equality
+     *   within F*
+     *)
+
+    let steps = [iota; primops; simplify; delta_only [
+      `%_sigma0; `%_sigma1; `%op0; `%word; `%word_t;
+      `%__proj__Mkops__item__e5; `%op224_256; `%__proj__Mkops__item__e3;
+      `%__proj__Mkops__item__e4;
+      `%Spec.SHA2.op_Hat_Dot; `%Spec.SHA2.op_Greater_Greater_Dot;
+      `%Spec.SHA2.op_Greater_Greater_Greater_Dot ]] in
+
+    assert (norm steps (_sigma0 SHA2_256) == norm steps (_sigma0 SHA2_224));
+    assert (norm steps (_sigma1 SHA2_256) == norm steps (_sigma1 SHA2_224));
+
+    norm_spec steps (_sigma0 SHA2_256);
+    norm_spec steps (_sigma0 SHA2_224);
+    norm_spec steps (_sigma1 SHA2_256);
+    norm_spec steps (_sigma1 SHA2_224);
+
     // assert_norm (word_add_mod SHA2_256 == word_add_mod SHA2_224);
     if t < block_word_length then
       ()

@@ -29,29 +29,41 @@
 extern "C" {
 #endif
 
+
+
+
+
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-#include "Hacl_Kremlib.h"
-
 /* SNIPPET_START: Hacl_IntTypes_Intrinsics_add_carry_u32 */
 
 static inline uint32_t
 Hacl_IntTypes_Intrinsics_add_carry_u32(uint32_t cin, uint32_t x, uint32_t y, uint32_t *r)
 {
-  uint32_t res = x + cin + y;
-  uint32_t
-  c = (~FStar_UInt32_gte_mask(res, x) | (FStar_UInt32_eq_mask(res, x) & cin)) & (uint32_t)1U;
-  r[0U] = res;
+  uint64_t res = (uint64_t)x + (uint64_t)cin + (uint64_t)y;
+  uint32_t c = (uint32_t)(res >> (uint32_t)32U);
+  r[0U] = (uint32_t)res;
   return c;
 }
 
 /* SNIPPET_END: Hacl_IntTypes_Intrinsics_add_carry_u32 */
+
+/* SNIPPET_START: Hacl_IntTypes_Intrinsics_sub_borrow_u32 */
+
+static inline uint32_t
+Hacl_IntTypes_Intrinsics_sub_borrow_u32(uint32_t cin, uint32_t x, uint32_t y, uint32_t *r)
+{
+  uint64_t res = (uint64_t)x - (uint64_t)y - (uint64_t)cin;
+  uint32_t c = (uint32_t)(res >> (uint32_t)32U) & (uint32_t)1U;
+  r[0U] = (uint32_t)res;
+  return c;
+}
+
+/* SNIPPET_END: Hacl_IntTypes_Intrinsics_sub_borrow_u32 */
 
 /* SNIPPET_START: Hacl_IntTypes_Intrinsics_add_carry_u64 */
 
@@ -66,23 +78,6 @@ Hacl_IntTypes_Intrinsics_add_carry_u64(uint64_t cin, uint64_t x, uint64_t y, uin
 }
 
 /* SNIPPET_END: Hacl_IntTypes_Intrinsics_add_carry_u64 */
-
-/* SNIPPET_START: Hacl_IntTypes_Intrinsics_sub_borrow_u32 */
-
-static inline uint32_t
-Hacl_IntTypes_Intrinsics_sub_borrow_u32(uint32_t cin, uint32_t x, uint32_t y, uint32_t *r)
-{
-  uint32_t res = x - y - cin;
-  uint32_t
-  c =
-    ((FStar_UInt32_gte_mask(res, x) & ~FStar_UInt32_eq_mask(res, x))
-    | (FStar_UInt32_eq_mask(res, x) & cin))
-    & (uint32_t)1U;
-  r[0U] = res;
-  return c;
-}
-
-/* SNIPPET_END: Hacl_IntTypes_Intrinsics_sub_borrow_u32 */
 
 /* SNIPPET_START: Hacl_IntTypes_Intrinsics_sub_borrow_u64 */
 

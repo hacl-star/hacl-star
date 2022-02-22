@@ -24,6 +24,8 @@
 
 #include "Hacl_Streaming_SHA1.h"
 
+#include "internal/Hacl_Hash_SHA1.h"
+
 /* SNIPPET_START: Hacl_Streaming_SHA1_legacy_create_in_sha1 */
 
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1()

@@ -29,82 +29,16 @@
 extern "C" {
 #endif
 
+
+
+
+#include "Hacl_Kremlib.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-#include "Hacl_Kremlib.h"
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_init_224 */
-
-void Hacl_Hash_Core_SHA2_init_224(uint32_t *s);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_init_224 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_init_256 */
-
-void Hacl_Hash_Core_SHA2_init_256(uint32_t *s);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_init_256 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_init_384 */
-
-void Hacl_Hash_Core_SHA2_init_384(uint64_t *s);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_init_384 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_init_512 */
-
-void Hacl_Hash_Core_SHA2_init_512(uint64_t *s);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_init_512 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_update_384 */
-
-void Hacl_Hash_Core_SHA2_update_384(uint64_t *hash, uint8_t *block);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_update_384 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_update_512 */
-
-void Hacl_Hash_Core_SHA2_update_512(uint64_t *hash, uint8_t *block);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_update_512 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_pad_256 */
-
-void Hacl_Hash_Core_SHA2_pad_256(uint64_t len, uint8_t *dst);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_pad_256 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_finish_224 */
-
-void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_224 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_finish_256 */
-
-void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_256 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_finish_384 */
-
-void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_384 */
-
-/* SNIPPET_START: Hacl_Hash_Core_SHA2_finish_512 */
-
-void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst);
-
-/* SNIPPET_END: Hacl_Hash_Core_SHA2_finish_512 */
-
 /* SNIPPET_START: Hacl_Hash_SHA2_update_multi_224 */
 
 void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);

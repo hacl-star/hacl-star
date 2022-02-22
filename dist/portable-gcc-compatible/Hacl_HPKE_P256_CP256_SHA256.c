@@ -24,6 +24,8 @@
 
 #include "Hacl_HPKE_P256_CP256_SHA256.h"
 
+#include "internal/Hacl_P256.h"
+
 /* SNIPPET_START: Hacl_HPKE_P256_CP256_SHA256_setupBaseI */
 
 uint32_t

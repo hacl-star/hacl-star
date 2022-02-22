@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Poly1305_128.h"
+#include "internal/Hacl_Poly1305_128.h"
+
+
 
 /* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_128_load_acc2 */
 

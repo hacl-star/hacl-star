@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
+
+
+
+
 #include "libintvector.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-
-
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2
@@ -48,18 +48,6 @@ extern "C" {
 #define Spec_Hash_Definitions_Blake2B 7
 
 typedef u8 Spec_Hash_Definitions_hash_alg;
-
-#define Spec_ECDSA_NoHash 0
-#define Spec_ECDSA_Hash 1
-
-typedef u8 Spec_ECDSA_hash_alg_ecdsa_tags;
-
-typedef struct Spec_ECDSA_hash_alg_ecdsa_s
-{
-  Spec_ECDSA_hash_alg_ecdsa_tags tag;
-  Spec_Hash_Definitions_hash_alg _0;
-}
-Spec_ECDSA_hash_alg_ecdsa;
 
 #define Spec_Frodo_Params_SHAKE128 0
 #define Spec_Frodo_Params_AES128 1

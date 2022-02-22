@@ -1,0 +1,385 @@
+[
+  "Z\\clÎ>ý­„\rèG†\u001dãP",
+  [
+    [
+      "Lib.NTuple.ntuple_",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "binder_x_fbb855052fbcadaa14f24d60952144ef_1",
+        "equation_Lib.NTuple.flen", "equation_Prims.pos", "int_inversion",
+        "int_typing", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "090d2eb126995a37707c0f8ea8e48ed6"
+    ],
+    [
+      "Lib.NTuple.rest",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NTuple.flen",
+        "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1b4848855b5d2f9c3d08284de9c11606",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "b08863b612f88ab0f701467280ce8ae0"
+    ],
+    [
+      "Lib.NTuple.index_fst_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NTuple.flen",
+        "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "210d25e703adbd92899d46f8ed2114c0"
+    ],
+    [
+      "Lib.NTuple.to_lseq",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "4740436ad3fc4366627be18787716bea"
+    ],
+    [
+      "Lib.NTuple.to_lseq_index",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NTuple.flen",
+        "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "7572c0cacb514844c443e12e8fc9777d"
+    ],
+    [
+      "Lib.NTuple.from_lseq",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "d8eb1c72e562aa0cc07b7b6daae01253"
+    ],
+    [
+      "Lib.NTuple.concat",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NTuple.flen",
+        "equation_Prims.pos", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_e462e220c28fc5966eaaa66bb715a454"
+      ],
+      0,
+      "b667d2e8c802b2f63d3439a66b81d472"
+    ],
+    [
+      "Lib.NTuple.concat_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "equation_Lib.NTuple.flen", "equation_Prims.l_and",
+        "equation_Prims.nat", "equation_Prims.pos", "equation_Prims.squash",
+        "int_inversion", "l_and-interp", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "e412d49cdd9d770de1e5be3e46311191"
+    ],
+    [
+      "Lib.NTuple.eq_intro",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "f8ad0336257fc31be407df30f63efe52"
+    ],
+    [
+      "Lib.NTuple.upd_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.eqtype",
+        "equation_Prims.nat", "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
+      ],
+      0,
+      "6fc96b46001c131607c1e7b3fb43cfa1"
+    ],
+    [
+      "Lib.NTuple.index_sub_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_285de3f46ec1a5e86f45b940cbcd115e",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "26a6429234b5a20fc55e1cece754df61"
+    ],
+    [
+      "Lib.NTuple.index_update_sub_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_GreaterThanOrEqual",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_285de3f46ec1a5e86f45b940cbcd115e",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "618efac615d83948825b5607b2e51bf6"
+    ],
+    [
+      "Lib.NTuple.ntup1",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "equation_Lib.NTuple.flen", "equation_Lib.NTuple.ntuple",
+        "function_token_typing_Prims.__cache_version_number__",
+        "primitive_Prims.op_Equality",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_bded595d5c675d20923ebf7eee58cd50"
+      ],
+      0,
+      "f63c07d51de49c83ebb52d659e3a7d5d"
+    ],
+    [
+      "Lib.NTuple.ntup1_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_bded595d5c675d20923ebf7eee58cd50"
+      ],
+      0,
+      "43b68825c2aa0134d74a67ab233dedd2"
+    ],
+    [
+      "Lib.NTuple.tup1",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NTuple.flen",
+        "equation_Lib.NTuple.ntuple", "primitive_Prims.op_Equality",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_bded595d5c675d20923ebf7eee58cd50"
+      ],
+      0,
+      "72f0f45f88f1b51d4c0e17f5a7d26729"
+    ],
+    [
+      "Lib.NTuple.tup1_lemma",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_bded595d5c675d20923ebf7eee58cd50"
+      ],
+      0,
+      "f41a2f096c011af79b5b198536f82933"
+    ],
+    [
+      "Lib.NTuple.ntup4",
+      1,
+      2,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U32", "equation_Lib.NTuple.flen",
+        "equation_Lib.NTuple.ntuple",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
+        "function_token_typing_Prims.__cache_version_number__",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_528b876405e78507cc8ed31848385919"
+      ],
+      0,
+      "0851e52324e21e2e17363ebc98239948"
+    ],
+    [
+      "Lib.NTuple.ntup4_lemma",
+      1,
+      2,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_528b876405e78507cc8ed31848385919"
+      ],
+      0,
+      "9daaa9541bdb3b7b812e82c2757b127d"
+    ],
+    [
+      "Lib.NTuple.tup4",
+      1,
+      4,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Lib.NTuple.ntuple_.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.NTuple.flen", "equation_Lib.NTuple.ntuple",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Lib.NTuple.ntuple_.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.pow2_2",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_528b876405e78507cc8ed31848385919",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "token_correspondence_FStar.Pervasives.Native.tuple2@tok",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "4a6923daf2604972cb7eb67b8ed8909d"
+    ],
+    [
+      "Lib.NTuple.tup4_lemma",
+      1,
+      2,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_528b876405e78507cc8ed31848385919"
+      ],
+      0,
+      "12997180cadc447303c643675adeadf1"
+    ],
+    [
+      "Lib.NTuple.ntup8",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U32", "equation_Lib.NTuple.flen",
+        "equation_Lib.NTuple.ntuple",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
+        "function_token_typing_Prims.__cache_version_number__",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_364e1096c6c138c9cc72351b5e5f6f33",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f"
+      ],
+      0,
+      "e8455d6dc4b6a01d676dee5127a27ccb"
+    ],
+    [
+      "Lib.NTuple.ntup8_lemma",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_364e1096c6c138c9cc72351b5e5f6f33"
+      ],
+      0,
+      "db080384b02de938a144f5ae2ed05205"
+    ],
+    [
+      "Lib.NTuple.tup8",
+      1,
+      8,
+      8,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Lib.NTuple.ntuple_.fuel_instrumented",
+        "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.NTuple.flen", "equation_Lib.NTuple.ntuple",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_with_fuel_Lib.NTuple.ntuple_.fuel_instrumented",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.pow2_2",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_364e1096c6c138c9cc72351b5e5f6f33",
+        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "token_correspondence_Prims.pow2.fuel_instrumented",
+        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+      ],
+      0,
+      "6d1907db1667152a217dc8dea68ba5e6"
+    ],
+    [
+      "Lib.NTuple.tup8_lemma",
+      1,
+      2,
+      1,
+      [
+        "@MaxIFuel_assumption", "@query", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_364e1096c6c138c9cc72351b5e5f6f33"
+      ],
+      0,
+      "9d7ef8cf9d50822eec86eca2030ced0b"
+    ]
+  ]
+]

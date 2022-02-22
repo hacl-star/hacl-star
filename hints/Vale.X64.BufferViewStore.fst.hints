@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "1bb6cc236d4d2f105e7ab8a86674e76d"
+      "0404e3fba55655bc8879c174533a4ea4"
     ],
     [
       "Vale.X64.BufferViewStore.map_aux",
@@ -17,7 +17,7 @@
       1,
       [ "@query" ],
       0,
-      "f34abb43b45c2d195e9fb05dcf4060de"
+      "99f56156a14cf27bf30bc06600f9ef59"
     ],
     [
       "Vale.X64.BufferViewStore.get64_aux",
@@ -27,7 +27,7 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_1910ef5262f2ee8e712b6609a232b1ea",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "FStar.UInt8_interpretation_Tm_arrow_3777b5a630a36e62279f05e8abae7a72",
@@ -58,6 +58,7 @@
         "equation_Vale.Lib.Seqs_s.seq_map",
         "function_token_typing_FStar.Seq.Base.index",
         "function_token_typing_FStar.UInt8.v",
+        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val64",
         "function_token_typing_Vale.Def.Types_s.le_nat64_to_bytes",
@@ -127,7 +128,7 @@
         "typing_Vale.Lib.Seqs_s.seq_map"
       ],
       0,
-      "cfa8681b2d8ada271621e52f04f737b4"
+      "81cd92f3477c4ad9fb2514f6333a1006"
     ],
     [
       "Vale.X64.BufferViewStore.get128_aux",
@@ -137,7 +138,7 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_1910ef5262f2ee8e712b6609a232b1ea",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "FStar.UInt8_interpretation_Tm_arrow_3777b5a630a36e62279f05e8abae7a72",
@@ -166,11 +167,11 @@
         "fuel_guarded_inversion_Vale.Def.Words_s.four",
         "function_token_typing_FStar.Seq.Base.index",
         "function_token_typing_FStar.UInt8.v",
+        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val128",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val32",
         "function_token_typing_Vale.Def.Types_s.le_quad32_to_bytes",
-        "function_token_typing_Vale.Def.Words.Four_s.nat_to_four",
         "function_token_typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE",
         "function_token_typing_Vale.Def.Words_s.nat32",
         "function_token_typing_Vale.Def.Words_s.nat8",
@@ -226,7 +227,7 @@
         "typing_Vale.Def.Words_s.natN", "typing_Vale.Interop.Views.put128"
       ],
       0,
-      "f9bce3b922c4d4c04dc670527bdd415b"
+      "13f2faf50f6bfc0a4b9fd7de16785489"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap64",
@@ -289,7 +290,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "aad1bd9abc447a964fdc89f115f7cf14"
+      "3480a28624785a5918948acf3035c627"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap64",
@@ -430,7 +431,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "dd36187b42299931623399d9982af662"
+      "7592b5db110231765456b218a4a8a351"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap128",
@@ -485,7 +486,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "b3f8a21e37ad19741ea4648b4ca790b3"
+      "aab3a7d2e8c8be6d1368fa456f7a16f3"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap128",
@@ -633,7 +634,7 @@
         "typing_Vale.Interop.Views.put128"
       ],
       0,
-      "7093d6c7ce069ff11b10361665705bac"
+      "ce8d884d52df324d409086bc815475ed"
     ]
   ]
 ]

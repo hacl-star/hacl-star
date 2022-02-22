@@ -24,6 +24,8 @@
 
 #include "EverCrypt_Cipher.h"
 
+#include "internal/Hacl_Chacha20.h"
+
 void
 EverCrypt_Cipher_chacha20(
   uint32_t len,

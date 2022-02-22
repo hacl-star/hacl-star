@@ -29,16 +29,15 @@
 extern "C" {
 #endif
 
+
+
+
+#include "Hacl_Kremlib.h"
 #include "curve25519-inline.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include <stdbool.h>
-
-
-#include "Hacl_Kremlib.h"
-#include "Vale.h"
-
 void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
 void Hacl_Curve25519_64_secret_to_public(uint8_t *pub, uint8_t *priv);

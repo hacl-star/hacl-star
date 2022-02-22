@@ -29,21 +29,15 @@
 extern "C" {
 #endif
 
+
+
+
+#include "Hacl_Kremlib.h"
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-#include "Hacl_Kremlib.h"
-
-void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s);
-
-void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x);
-
-void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst);
-
 void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
 void

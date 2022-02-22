@@ -29,6 +29,12 @@
 extern "C" {
 #endif
 
+
+
+
+#include "Hacl_Spec.h"
+#include "Hacl_Kremlib.h"
+#include "Hacl_Hash_SHA2.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 #include "libintvector.h"
@@ -36,57 +42,31 @@ extern "C" {
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-#include "Hacl_Kremlib.h"
-#include "Hacl_Hash_SHA2.h"
-#include "Hacl_Spec.h"
-
-/* SNIPPET_START: Hacl_Impl_P256_LowLevel_toUint8 */
-
-void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
-
-/* SNIPPET_END: Hacl_Impl_P256_LowLevel_toUint8 */
-
-/* SNIPPET_START: Hacl_Impl_P256_LowLevel_changeEndian */
-
-void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i);
-
-/* SNIPPET_END: Hacl_Impl_P256_LowLevel_changeEndian */
-
-/* SNIPPET_START: Hacl_Impl_P256_LowLevel_toUint64ChangeEndian */
-
-void Hacl_Impl_P256_LowLevel_toUint64ChangeEndian(uint8_t *i, uint64_t *o);
-
-/* SNIPPET_END: Hacl_Impl_P256_LowLevel_toUint64ChangeEndian */
-
-/* SNIPPET_START: Hacl_Impl_P256_Core_isPointAtInfinityPrivate */
-
-uint64_t Hacl_Impl_P256_Core_isPointAtInfinityPrivate(uint64_t *p);
-
-/* SNIPPET_END: Hacl_Impl_P256_Core_isPointAtInfinityPrivate */
-
-/* SNIPPET_START: Hacl_Impl_P256_Core_secretToPublic */
-
-void
-Hacl_Impl_P256_Core_secretToPublic(uint64_t *result, uint8_t *scalar, uint64_t *tempBuffer);
-
-/* SNIPPET_END: Hacl_Impl_P256_Core_secretToPublic */
-
-/* SNIPPET_START: Hacl_Impl_P256_DH__ecp256dh_r */
-
-/*
-  The pub(lic)_key input of the function is considered to be public, 
-  thus this code is not secret independent with respect to the operations done over this variable.
-*/
-uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar);
-
-/* SNIPPET_END: Hacl_Impl_P256_DH__ecp256dh_r */
-
 /* SNIPPET_START: Hacl_P256_ecdsa_sign_p256_sha2 */
 
+
+/*******************************************************************************
+
+ECDSA and ECDH functions over the P-256 NIST curve.
+
+This module implements signing and verification, key validation, conversions
+between various point representations, and ECDH key agreement.
+
+*******************************************************************************/
+
+/**************/
+/* Signatures */
+/**************/
+
 /*
- Input: result buffer: uint8[64], 
+  Per the standard, a hash function *shall* be used. Therefore, we recommend
+  using one of the three combined hash-and-sign variants.
+*/
+
+/*
+Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -109,7 +89,9 @@ Hacl_P256_ecdsa_sign_p256_sha2(
 /* SNIPPET_START: Hacl_P256_ecdsa_sign_p256_sha384 */
 
 /*
- Input: result buffer: uint8[64], 
+Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -132,7 +114,9 @@ Hacl_P256_ecdsa_sign_p256_sha384(
 /* SNIPPET_START: Hacl_P256_ecdsa_sign_p256_sha512 */
 
 /*
- Input: result buffer: uint8[64], 
+Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -155,7 +139,19 @@ Hacl_P256_ecdsa_sign_p256_sha512(
 /* SNIPPET_START: Hacl_P256_ecdsa_sign_p256_without_hash */
 
 /*
- Input: result buffer: uint8[64], 
+P256 signature WITHOUT hashing first.
+
+This function is intended to receive a hash of the input. For convenience, we
+recommend using one of the hash-and-sign combined functions above.
+
+The argument `m` MUST be at least 32 bytes (i.e. `mLen >= 32`).
+
+NOTE: The equivalent functions in OpenSSL and Fiat-Crypto both accept inputs
+smaller than 32 bytes. These libraries left-pad the input with enough zeroes to
+reach the minimum 32 byte size. Clients who need behavior identical to OpenSSL
+need to perform the left-padding themselves.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -178,6 +174,16 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
 /* SNIPPET_END: Hacl_P256_ecdsa_sign_p256_without_hash */
 
 /* SNIPPET_START: Hacl_P256_ecdsa_verif_p256_sha2 */
+
+
+/****************/
+/* Verification */
+/****************/
+
+/*
+  Verify a message signature. These functions internally validate the public key using validate_public_key.
+*/
+
 
 /*
  The input of the function is considered to be public, 
@@ -275,10 +281,17 @@ Hacl_P256_ecdsa_verif_without_hash(
 
 /* SNIPPET_END: Hacl_P256_ecdsa_verif_without_hash */
 
-/* SNIPPET_START: Hacl_P256_verify_q */
+/* SNIPPET_START: Hacl_P256_validate_public_key */
+
+
+/******************/
+/* Key validation */
+/******************/
+
 
 /*
- Public key verification function. 
+Validate a public key.
+
   
   The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
@@ -293,20 +306,45 @@ Hacl_P256_ecdsa_verif_without_hash(
   
  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
 */
-bool Hacl_P256_verify_q(uint8_t *pubKey);
+bool Hacl_P256_validate_public_key(uint8_t *pubKey);
 
-/* SNIPPET_END: Hacl_P256_verify_q */
+/* SNIPPET_END: Hacl_P256_validate_public_key */
 
-/* SNIPPET_START: Hacl_P256_decompression_not_compressed_form */
+/* SNIPPET_START: Hacl_P256_validate_private_key */
 
 /*
- There and further we introduce notions of compressed point and not compressed point. 
+Validate a private key, e.g. prior to signing.
+
+Input: scalar: uint8[32].
   
- We denote || as byte concatenation. 
-  
- A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
-  
- A not Compressed point is a point representation as follows: 0x4 || x || y.
+ Output: bool, where true stands for the scalar to be more than 0 and less than order.
+*/
+bool Hacl_P256_validate_private_key(uint8_t *x);
+
+/* SNIPPET_END: Hacl_P256_validate_private_key */
+
+/* SNIPPET_START: Hacl_P256_uncompressed_to_raw */
+
+
+/*****************************************/
+/* Point representations and conversions */
+/*****************************************/
+
+/*
+  Elliptic curve points have 2 32-byte coordinates (x, y) and can be represented in 3 ways:
+
+  - "raw" form (64 bytes): the concatenation of the 2 coordinates, also known as "internal"
+  - "compressed" form (33 bytes): first the sign byte of y (either 0x02 or 0x03), followed by x
+  - "uncompressed" form (65 bytes): first a constant byte (always 0x04), followed by the "raw" form
+
+  For all of the conversation functions below, the input and output MUST NOT overlap.
+*/
+
+
+/*
+Convert 65-byte uncompressed to raw.
+
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
   
  
@@ -316,62 +354,88 @@ bool Hacl_P256_verify_q(uint8_t *pubKey);
  Output: bool, where true stands for the correct decompression.
  
 */
-bool Hacl_P256_decompression_not_compressed_form(uint8_t *b, uint8_t *result);
+bool Hacl_P256_uncompressed_to_raw(uint8_t *b, uint8_t *result);
 
-/* SNIPPET_END: Hacl_P256_decompression_not_compressed_form */
+/* SNIPPET_END: Hacl_P256_uncompressed_to_raw */
 
-/* SNIPPET_START: Hacl_P256_decompression_compressed_form */
+/* SNIPPET_START: Hacl_P256_compressed_to_raw */
 
 /*
- Input: a point in compressed form (uint8[33]), 
+Convert 33-byte compressed to raw.
+
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
+
+Input: a point in compressed form (uint8[33]), 
  result: uint8[64] (internal point representation).
   
  Output: bool, where true stands for the correct decompression.
  
 */
-bool Hacl_P256_decompression_compressed_form(uint8_t *b, uint8_t *result);
+bool Hacl_P256_compressed_to_raw(uint8_t *b, uint8_t *result);
 
-/* SNIPPET_END: Hacl_P256_decompression_compressed_form */
+/* SNIPPET_END: Hacl_P256_compressed_to_raw */
 
-/* SNIPPET_START: Hacl_P256_compression_not_compressed_form */
+/* SNIPPET_START: Hacl_P256_raw_to_uncompressed */
 
 /*
- Input: a point buffer (internal representation: uint8[64]), 
+Convert raw to 65-byte uncompressed.
+
+This function effectively prepends a 0x04 byte.
+
+Input: a point buffer (internal representation: uint8[64]), 
  result: a point in not compressed form (uint8[65]).
 */
-void Hacl_P256_compression_not_compressed_form(uint8_t *b, uint8_t *result);
+void Hacl_P256_raw_to_uncompressed(uint8_t *b, uint8_t *result);
 
-/* SNIPPET_END: Hacl_P256_compression_not_compressed_form */
+/* SNIPPET_END: Hacl_P256_raw_to_uncompressed */
 
-/* SNIPPET_START: Hacl_P256_compression_compressed_form */
+/* SNIPPET_START: Hacl_P256_raw_to_compressed */
 
 /*
- Input: a point buffer (internal representation: uint8[64]), 
- result: a point in not compressed form (uint8[33]).
+Convert raw to 33-byte compressed.
+
+  Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
+  Output: `result`, a point in compressed form, of type `uint8[33]`
+
 */
-void Hacl_P256_compression_compressed_form(uint8_t *b, uint8_t *result);
+void Hacl_P256_raw_to_compressed(uint8_t *b, uint8_t *result);
 
-/* SNIPPET_END: Hacl_P256_compression_compressed_form */
+/* SNIPPET_END: Hacl_P256_raw_to_compressed */
 
-/* SNIPPET_START: Hacl_P256_ecp256dh_i */
+/* SNIPPET_START: Hacl_P256_dh_initiator */
+
+
+/******************/
+/* ECDH agreement */
+/******************/
 
 /*
- Input: result: uint8[64], 
- scalar: uint8[32].
-  
- Output: bool, where True stands for the correct key generation. 
-  
- False means that an error has occurred (possibly that the result respresents point at infinity). 
-  
+Convert a private key into a raw public key.
+
+This function performs no key validation.
+
+  Input: `scalar`, the private key, of type `uint8[32]`.
+  Output: `result`, the public key, of type `uint8[64]`.
+  Returns:
+  - `true`, for success, meaning the public key is not a point at infinity
+  - `false`, otherwise.
+
+  `scalar` and `result` MUST NOT overlap.
 */
-bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
+bool Hacl_P256_dh_initiator(uint8_t *result, uint8_t *scalar);
 
-/* SNIPPET_END: Hacl_P256_ecp256dh_i */
+/* SNIPPET_END: Hacl_P256_dh_initiator */
 
-/* SNIPPET_START: Hacl_P256_ecp256dh_r */
+/* SNIPPET_START: Hacl_P256_dh_responder */
 
 /*
- 
+ECDH key agreement.
+
+This function takes a 32-byte secret key, another party's 64-byte raw public
+key, and computeds the 64-byte ECDH shared key.
+
+This function ONLY validates the public key.
+
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
   
@@ -382,20 +446,9 @@ bool Hacl_P256_ecp256dh_i(uint8_t *result, uint8_t *scalar);
  Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   
 */
-bool Hacl_P256_ecp256dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+bool Hacl_P256_dh_responder(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
-/* SNIPPET_END: Hacl_P256_ecp256dh_r */
-
-/* SNIPPET_START: Hacl_P256_is_more_than_zero_less_than_order */
-
-/*
- Input: scalar: uint8[32].
-  
- Output: bool, where true stands for the scalar to be more than 0 and less than order.
-*/
-bool Hacl_P256_is_more_than_zero_less_than_order(uint8_t *x);
-
-/* SNIPPET_END: Hacl_P256_is_more_than_zero_less_than_order */
+/* SNIPPET_END: Hacl_P256_dh_responder */
 
 #if defined(__cplusplus)
 }

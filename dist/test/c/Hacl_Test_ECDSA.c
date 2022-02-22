@@ -24,10 +24,33 @@
 
 #include "Hacl_Test_ECDSA.h"
 
+
+
 extern void C_String_print(C_String_t uu___);
 
+
+/*******************************************************************************
+
+ECDSA and ECDH functions over the P-256 NIST curve.
+
+This module implements signing and verification, key validation, conversions
+between various point representations, and ECDH key agreement.
+
+*******************************************************************************/
+
+/**************/
+/* Signatures */
+/**************/
+
 /*
- Input: result buffer: uint8[64], 
+  Per the standard, a hash function *shall* be used. Therefore, we recommend
+  using one of the three combined hash-and-sign variants.
+*/
+
+/*
+Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -46,7 +69,9 @@ Hacl_P256_ecdsa_sign_p256_sha2(
 );
 
 /*
- Input: result buffer: uint8[64], 
+Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -65,7 +90,9 @@ Hacl_P256_ecdsa_sign_p256_sha384(
 );
 
 /*
- Input: result buffer: uint8[64], 
+Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -82,6 +109,16 @@ Hacl_P256_ecdsa_sign_p256_sha512(
   uint8_t *privKey,
   uint8_t *k
 );
+
+
+/****************/
+/* Verification */
+/****************/
+
+/*
+  Verify a message signature. These functions internally validate the public key using validate_public_key.
+*/
+
 
 /*
  The input of the function is considered to be public, 

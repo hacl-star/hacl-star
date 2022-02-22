@@ -102,7 +102,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "58fd72ace60732e351d4e018af45d060"
+      "1653ca2c47218298a56e6bb7d1382b32"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.lemma_equality1",
@@ -119,7 +119,7 @@
         "refinement_interpretation_Tm_refine_a62b3c06e1a0d7fc333ce8199c4c9c1e"
       ],
       0,
-      "e50cbf2f13dd10989b9e373083f7a88c"
+      "5db48bdbda6307fe614ad8036a6d05ff"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.eq",
@@ -218,7 +218,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "026e952dfc44b64cb9a8eda0038fddcf"
+      "c188c74c7b41dfdae49f497df5b1685e"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal_1",
@@ -329,7 +329,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "22f4bc75a7aa5046490767d042fec73c"
+      "b2229c5d32099ea1e525ff6efeb83619"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal_2",
@@ -345,7 +345,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "ae36aaf596a6f36eda57f898771a914a"
+      "11a5d6a47a6a6d246a2aba390ac8e8d8"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal_2",
@@ -459,7 +459,7 @@
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "537261e36e404811f1b9d480e0a9a252"
+      "a6922f6d506891a138fdcd92bbe0d8b5"
     ],
     [
       "Hacl.Impl.Ed25519.PointEqual.point_equal",
@@ -527,7 +527,7 @@
         "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Curve25519.elem",
         "equation_Spec.Curve25519.op_Star_Percent",
-        "equation_Spec.Ed25519.point_equal",
+        "equation_Spec.Ed25519.PointOps.point_equal",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64",
         "function_token_typing_Prims.int",
@@ -598,6 +598,7 @@
         "refinement_interpretation_Tm_refine_1cc6c9f8558dddb337b6c1187115cd6a",
         "refinement_interpretation_Tm_refine_365abba901205a01d0ef28ebf2198c47",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
@@ -636,12 +637,13 @@
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
         "typing_LowStar.Monotonic.Buffer.loc_none",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
-        "typing_LowStar.Monotonic.Buffer.loc_union", "typing_Prims.pow2",
-        "typing_Spec.Ed25519.point_equal", "typing_tok_Lib.Buffer.MUT@tok",
-        "typing_tok_Lib.IntTypes.U64@tok"
+        "typing_LowStar.Monotonic.Buffer.loc_union",
+        "typing_LowStar.Monotonic.Buffer.mgsub", "typing_Prims.pow2",
+        "typing_Spec.Ed25519.PointOps.point_equal",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "8b27cfeac66551de519be1bd1d12c171"
+      "69956794ee8c5dfbea20c5edd8a799bc"
     ]
   ]
 ]

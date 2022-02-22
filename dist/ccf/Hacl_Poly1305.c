@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Poly1305.h"
+#include "internal/Hacl_Poly1305.h"
+
+#include "internal/Hacl_Kremlib.h"
 
 static void poly1305_init(uint64_t *ctx, uint8_t *key)
 {
