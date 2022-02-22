@@ -3,7 +3,7 @@ HACL_HOME=../../../
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
 
-CC = gcc-9.1
+# CC = gcc-9.1
 all: dist/libsparkle.a
 
 

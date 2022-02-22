@@ -8,7 +8,7 @@ open Lib.IntTypes
 open Lib.ByteBuffer
 open Lib.Buffer
 
-open Spec.SPARKLE2
+open Spec.SPARKLE
 
 
 #set-options " --z3rlimit 200 --ifuel 0 --fuel 0"

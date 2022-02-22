@@ -1,4 +1,4 @@
-module Spec.SPARKLE
+module Spec.SPARKLE2
 
 open FStar.Mul
 open Lib.IntTypes
@@ -10,39 +10,29 @@ open Lib.ByteSequence.Tuples
 #set-options "--z3rlimit 15"
 
 
-let size_word: size_nat = 4
-
-
 inline_for_extraction
 let vsize_rcon: size_nat = 8
 
 inline_for_extraction
-let rcon_list: List.Tot.llist uint32 vsize_rcon =
+let rcon_list: x:list uint32 {List.Tot.length x == vsize_rcon} =
   [@inline_let]
-  let l = List.Tot.map u32 [
-    0xB7E15162; 0xBF715880; 0x38B4DA56; 0x324E7738;
-    0xBB1185EB; 0x4F7C7B57; 0xCFBFA1C8; 0xC2B3293D] in
+  let l =  [
+    u32 0xB7E15162; u32 0xBF715880; u32 0x38B4DA56; u32 0x324E7738;
+    u32 0xBB1185EB; u32 0x4F7C7B57; u32 0xCFBFA1C8; u32 0xC2B3293D] in
   assert_norm(List.Tot.length l == vsize_rcon);
   l
 
 let rcon: lseq uint32 vsize_rcon  = createL rcon_list
 
+
 type branch_len =  n: nat {n = 1 \/ n = 2 \/ n = 3 \/ n = 4 \/ n = 6 \/ n = 8}
 
 type branch1 = (uint32 & uint32)
 
-val branch: branch_len -> Type0
-let branch n =
-  match n with
-  | 1 -> branch1
-  | 2 -> branch1 & branch1
-  | 3 -> branch1 & branch1 & branch1
-  | 4 -> branch1 & branch1 & branch1 & branch1
-  | 6 -> branch1 & branch1 & branch1 & branch1 & branch1 & branch1
-  | 8 -> branch1 & branch1 & branch1 & branch1 & branch1 & branch1 & branch1 & branch1
 
-
+inline_for_extraction noextract
 val arx: c:uint32 -> branch1 -> Tot branch1
+
 let arx c b =
   let x, y = b in
 
@@ -65,491 +55,146 @@ let arx c b =
   x,y
 
 
-val l1: x:uint32 -> Tot uint32
+inline_for_extraction noextract
 let l1 x = (x <<<. size 16)  ^. (x &. (u32 0xffff))
 
-assume val getBranchI: #n: branch_len -> i: nat {i < n} -> branch n -> uint32 & uint32
 
-val xor: #n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch n -> Tot (tuple2 uint32 uint32)
+type branch (n: nat) = branch_n: seq uint32 {Seq.Base.length branch_n == n * 2}
+
+
+val getBranch: #n: branch_len -> i: nat {i < n} -> branch n -> branch1
+let getBranch #n i b = Seq.Base.index b (2 * i), Seq.Base.index b (2 * i + 1)
+
+
+val setBranch: #n: branch_len -> i: nat {i < n} -> branch1 -> branch n -> branch n
+let setBranch #n i (x, y) b =
+  let b = upd #uint32 #(2 * n) b (2 * i) x in 
+  upd #uint32 #(2 * n) b (2 * i + 1) y
+
+
+let xor_step (#n : branch_len) b (index : nat{index < n}) (tx, ty) = 
+  let (xi, yi) = getBranch #n index b in 
+  xi ^. tx, yi ^. ty 
 
 let xor #n b = 
-  let xor_step n b index (u, v) = 
-  let (xi, yi) = getBranchI index b in 
-  xi ^. u, yi ^. v in 
-  
-  let zeroBranch = getBranchI 0 b in 
-  Lib.LoopCombinators.repeati (n - 1) (xor_step n b) zeroBranch
-
-val xor_x: n: nat {n == 2 \/ n == 3 \/ n == 4} -> b: branch n -> lu: uint32 -> lv: uint32 -> Tot (branch n)
-
-let xor_x n b lu lv = 
-  match n with 
-  |2 -> let (x0, y0), (x1, y1) = (b <: branch 2) in ((x0 ^. lu), (y0 ^. lv)), ((x0 ^. lu), (y1 ^. lv))
-  |_ -> admit()
+  Lib.LoopCombinators.repeati #(tuple2 uint32 uint32) n (Spec.SPARKLE2.xor_step #n b) (u32 0, u32 0)
 
 
-
-(* AW: <TESTING FUNCTIONALITY> *)
-type branch_test (n: nat) = branch_n: seq branch1 {Seq.Base.length branch_n == n}
-
-val getBranchI_test: #n: branch_len -> i: nat {i < n} -> branch_test n -> uint32 & uint32
-
-let getBranchI_test #n i b = Seq.Base.index b i
-
-val xor_test: #n: branch_len -> b: branch_test n -> Tot (tuple2 uint32 uint32)
-
-let xor_test #n b = 
-  let xor_step (n : branch_len) b (index : nat {index + 1 < n}) (tx, ty) = 
-    let (xi, yi) = getBranchI_test #n (index + 1) b in 
-    xi ^. tx, yi ^. ty in 
-    
-  let zeroBranch = getBranchI_test 0 b in 
-  Lib.LoopCombinators.repeati (n - 1) (xor_step n b) zeroBranch
+let xor_x_step (#n: branch_len) (lty, ltx)  (b : branch n) (i : nat {i < n}) (temp: branch n) = 
+  let xi, yi = getBranch #n i b in 
+  let xi_n, yi_n = xi ^. lty, yi ^. ltx in
+  setBranch i (xi_n, yi_n) temp
 
 
-val xor_x_test: #n: branch_len -> b: branch_test n -> lty: uint32 -> ltx: uint32 -> branch_test n
-
-let xor_x_test #n b lty ltx = 
-  let xor_x_step (n: branch_len) (lty, ltx) (index : nat {index < n}) (b : branch_test n) = 
-    let xi, yi = getBranchI_test #n index b in 
-    let xi_n, yi_n = xi ^. lty, yi ^. ltx in 
-    let s = upd #_ #n b index (xi_n, yi_n) in s in
-  Lib.LoopCombinators.repeati n (xor_x_step n (lty, ltx)) b
+let xor_x (#n : branch_len) b (lty, ltx) (temp: branch n) : branch n = 
+  Lib.LoopCombinators.repeati n (xor_x_step #n (lty, ltx) b) temp
 
 
-val m_test: #n: branch_len -> branch_test n -> Tot (branch_test n)
-
-let m_test #n b = 
-  let tx, ty = xor_test #n b in 
+let m #n b temp = 
+  let tx, ty = xor #n b in 
   let ltx, lty = l1 tx, l1 ty in
-  xor_x_test #n b lty ltx
+  xor_x #n b (lty, ltx) temp
 
 
+let l0_step (#n: branch_len) (right : branch n) (i:nat {i < n}) (m: branch n) : branch n = 
+  let (xi, yi) = getBranch i right in 
+  let (p0i, p1i) = getBranch i m in 
+  let branchIUpd = p0i ^. xi, p1i ^. yi in 
+  setBranch #n i branchIUpd m
 
 
-val l_test: #n0: branch_len -> #n: branch_len {n0 % 2 == 0 /\ n == n0 / 2} -> b: branch_test n0 -> branch_test n0
-
-let l_test #n0 #n b = 
-  let leftBranch = sub #_ #n0 b 0 n in 
-  let rightBranch = sub #_ #n0 b n n in 
-  let perm = m_test #n leftBranch in 
+let l1_step (#n: branch_len) (left: branch n)  (i: nat {i < n}) (right: branch n) = 
+  setBranch #n i (Spec.SPARKLE2.getBranch #n i left) right
 
 
-  let seqEmpty = create n (u32 0, u32 0) in 
-
-  let l_test_step (#n: branch_len) (rightBranch : branch_test n) (perm: branch_test n) i branchResult = 
-    let (xi, yi) = index #_ #n rightBranch i in 
-    let (p0i, p1i) = index #_ #n perm i in 
-    let branchIUpd = xi ^. p0i, yi ^. p1i in 
-    let s = upd #_ #n branchResult ((i - 1) % n) branchIUpd in s in  
-
-  let r = Lib.LoopCombinators.repeati n (l_test_step rightBranch perm) seqEmpty in 
-  concat #_ #_ #n r leftBranch
+let l2_step (#n: branch_len) (result: branch n) (i: nat {i < n}) (left: branch n) = 
+  let j = (i - 1) % pow2 32 % n in 
+  setBranch j (getBranch i result) left
 
 
-val add2_test: i:size_nat -> branch_test 2 -> Tot (branch_test 2)
+val l: #n: branch_len {n % 2 == 0} -> b: branch n -> branch n
 
-let add2_test i b =
-  let (x0,y0) = getBranchI_test 0 b in 
-  let (x1,y1) = getBranchI_test 1 b in 
-  let y0 = y0 ^. rcon.[(i % vsize_rcon)] in
-  let y1 = y1 ^. (u32 i) in
-  let seqEmpty = Lib.Sequence.create 2 (u32 0, u32 0) in 
-  let s = upd seqEmpty 0 (x0, y0) in 
-  upd s 1 (x1, y1)
-
-
-(* AW: </TESTING FUNCTIONALITY> *)
-
-
-val m: #n: nat {n == 2 \/ n == 3 \/ n == 4} -> branch n -> Tot (branch n)
-
-let m n b = 
-  let u, v = xor #n b in 
-  let lu, lv = l1 u, l1 v in
-  xor_x n b lu lv
+let l #n b = 
+  let temp = Lib.Sequence.create #uint32 n (u32 0) in  
+  let left = sub #uint32 #(2 * n) b 0 n in 
+  let right = sub #uint32 #(2 * n) b n n in 
   
+  let temp0 = m #(n / 2) left temp in 
+  
+  let temp1 = Lib.LoopCombinators.repeati #(branch (n / 2)) (n / 2) (l0_step #(n / 2) right) temp0 in 
+  let right = Lib.LoopCombinators.repeati #(branch (n / 2)) (n / 2) (l1_step #(n / 2) left) right in 
+  let left = Lib.LoopCombinators.repeati #(branch (n / 2)) (n / 2) (l2_step #(n / 2) temp1) left in 
 
-val m2: (branch 2) -> Tot (branch 2)
-
-let m2 b =
-  let (x0, x1), (y0, y1) = b in
-  let v = x0 ^. x1 in 
-  let u = y0 ^. y1 in
-  let u, v = xor #2 b in 
-  let lu = l1 u in
-  let lv = l1 v in
-  let t0 = x0 ^. lu in
-  let t1 = x1 ^. lu in
-  let w0 = y0 ^. lv in
-  let w1 = y1 ^. lv in
-  (t0,w0), (t1,w1)
+  concat #uint32 #n #n left right
 
 
-val m3: branch 3 -> Tot (branch 3)
-let m3 b =
-  let b0,b1,b2 = b in
-  let x0,y0 = b0 in
-  let x1,y1 = b1 in
-  let x2,y2 = b2 in
-  let u = y0 ^. y1 ^. y2 in
-  let v = x0 ^. x1 ^. x2 in
-  let lu = l1 u in
-  let lv = l1 v in
-  let t0 = x0 ^. lu in
-  let t1 = x1 ^. lu in
-  let t2 = x2 ^. lu in
-  let w0 = y0 ^. lv in
-  let w1 = y1 ^. lv in
-  let w2 = y2 ^. lv in
-  (t0,w0), (t1,w1), (t2,w2)
+val add2: #n: branch_len {n > 1} -> i: size_nat -> branch n -> Tot (branch n)
 
-
-val m4: branch 4 -> Tot (branch 4)
-let m4 b =
-  let b0,b1,b2,b3 = b in
-  let x0,y0 = b0 in
-  let x1,y1 = b1 in
-  let x2,y2 = b2 in
-  let x3,y3 = b3 in
-  let u = y0 ^. y1 ^. y2 ^. y3 in
-  let v = x0 ^. x1 ^. x2 ^. x3 in
-  let lu = l1 u in
-  let lv = l1 v in
-  let t0 = x0 ^. lu in
-  let t1 = x1 ^. lu in
-  let t2 = x2 ^. lu in
-  let t3 = x3 ^. lu in
-  let w0 = y0 ^. lv in
-  let w1 = y1 ^. lv in
-  let w2 = y2 ^. lv in
-  let w3 = y3 ^. lv in
-  (t0,w0), (t1,w1), (t2,w2), (t3,w3)
-
-
-val l4: branch 4 -> Tot (branch 4)
-let l4 b =
-  let (b0,b1,b2,b3) = b in
-  let (p0,p1) = m2 (b0,b1) in
-  let o0 = (fst b3 ^. fst p1), (snd b3 ^. snd p1) in
-  let o1 = (fst b2 ^. fst p0), (snd b2 ^. snd p0) in
-  (o0,o1,b0,b1)
-
-
-val l6: branch 6 -> Tot (branch 6)
-let l6 b =
-  let (b0,b1,b2,b3,b4,b5) = b in
-  let (p0,p1,p2) = m3 (b0,b1,b2) in
-  let o0 = (fst b4 ^. fst p1), (snd b4 ^. snd p1) in
-  let o1 = (fst b5 ^. fst p2), (snd b5 ^. snd p2) in
-  let o2 = (fst b3 ^. fst p0), (snd b3 ^. snd p0) in
-  (o0,o1,o2,b0,b1,b2)
-
-
-val l8: branch 8 -> Tot (branch 8)
-let l8 b =
-  let (b0,b1,b2,b3,b4,b5,b6,b7) = b in
-  let (p0,p1,p2,p3) = m4 (b0,b1,b2,b3) in
-  let o0 = (fst b5 ^. fst p1), (snd b5 ^. snd p1) in
-  let o1 = (fst b6 ^. fst p2), (snd b6 ^. snd p2) in
-  let o2 = (fst b7 ^. fst p3), (snd b7 ^. snd p3) in
-  let o3 = (fst b4 ^. fst p0), (snd b4 ^. snd p0) in
-  (o0,o1,o2,o3,b0,b1,b2,b3)
-
-
-val add2: i:size_nat -> branch 2 -> Tot (branch 2)
-let add2 i b =
-  let ((x0,y0),(x1,y1)) = b in
+let add2 #n i b =
+  let (x0,y0) = getBranch 0 b in 
+  let (x1,y1) = getBranch 1 b in 
   let y0 = y0 ^. rcon.[(i % vsize_rcon)] in
   let y1 = y1 ^. (u32 i) in
-  (x0,y0),(x1,y1)
+  let b = setBranch 0 (x0, y0) b in setBranch 1 (x1, y1) b
 
 
+val toBranch: #n: branch_len -> lbytes (8 * n) -> branch n
 
-val sparkle256: steps:size_nat -> lbytes 32 -> Tot (lbytes 32)
-
-let sparkle256 steps input =
-
-  let b0 = ltuple_uints_from_bytes_le (sub input 0 (2 * size_word)) in
-  let b1 = ltuple_uints_from_bytes_le (sub input (2 * size_word) (2 * size_word)) in
-  let b2 = ltuple_uints_from_bytes_le (sub input (4 * size_word) (2 * size_word)) in
-  let b3 = ltuple_uints_from_bytes_le (sub input (6 * size_word) (2 * size_word)) in
-
-  let (b0,b1,b2,b3) =
-    repeati steps (fun i (b0,b1,b2,b3) ->
-      let (b0,b1) = add2 i (b0,b1) in
-      let b0 = arx rcon.[0] b0 in
-      let b1 = arx rcon.[1] b1 in
-      let b2 = arx rcon.[2] b2 in
-      let b3 = arx rcon.[3] b3 in
-      l4 (b0,b1,b2,b3)
-  ) (b0,b1,b2,b3)
-  in
-
-  let x0, y0 = b0 in
-  let x1, y1 = b1 in
-  let x2, y2 = b2 in
-  let x3, y3 = b3 in
-
-  let bx0 = uint_to_bytes_be x0 in
-  let by0 = uint_to_bytes_be y0 in
-  let bx1 = uint_to_bytes_be x1 in
-  let by1 = uint_to_bytes_be y1 in
-  let bx2 = uint_to_bytes_be x2 in
-  let by2 = uint_to_bytes_be y2 in
-  let bx3 = uint_to_bytes_be x3 in
-  let by3 = uint_to_bytes_be y3 in
-
-  let input = update_sub input 0 size_word bx0 in
-  let input = update_sub input (1 * size_word) size_word by0 in
-  let input = update_sub input (2 * size_word) size_word bx1 in
-  let input = update_sub input (3 * size_word) size_word by1 in
-  let input = update_sub input (4 * size_word) size_word bx2 in
-  let input = update_sub input (5 * size_word) size_word by2 in
-  let input = update_sub input (6 * size_word) size_word bx3 in
-  let input = update_sub input (7 * size_word) size_word by3 in
-  input
+let toBranch #n input = uints_from_bytes_le #_ #_ #(2 * n) input
 
 
-(* AW: TODO: some better name *) 
-val toBranch32: lbytes 32 -> branch_test 4
+val fromBranch: #n: branch_len -> branch n -> lbytes (8 * n)
 
-let toBranch32 input = 
-  let b0 : lseq uint32 8 = uints_from_bytes_le #U32 #_ #8 input in 
-   (* admit();
-  let b1 = ltuple_uints_from_bytes_le (sub input (2 * size_word) (2 * size_word)) in
-  let b2 = ltuple_uints_from_bytes_le (sub input (4 * size_word) (2 * size_word)) in
-  let b3 = ltuple_uints_from_bytes_le (sub input (6 * size_word) (2 * size_word)) in *)
-  b0
+let fromBranch #n input = uints_to_bytes_le #_ #_ #(2 * n) input
 
 
+val arx_n_step: #n: branch_len -> i: size_nat {i < n} -> branch n -> branch n
 
-val sparkle256_test: steps:size_nat -> lbytes 32 -> Tot (lbytes 32)
-
-let sparkle256_test steps input =
-
-  let b0 = ltuple_uints_from_bytes_le (sub input 0 (2 * size_word)) in
-  let b1 = ltuple_uints_from_bytes_le (sub input (2 * size_word) (2 * size_word)) in
-  let b2 = ltuple_uints_from_bytes_le (sub input (4 * size_word) (2 * size_word)) in
-  let b3 = ltuple_uints_from_bytes_le (sub input (6 * size_word) (2 * size_word)) in
-
-  let (b0,b1,b2,b3) =
-    repeati steps (fun i (b0,b1,b2,b3) ->
-      let (b0,b1) = add2 i (b0,b1) in
-      let b0 = arx rcon.[0] b0 in
-      let b1 = arx rcon.[1] b1 in
-      let b2 = arx rcon.[2] b2 in
-      let b3 = arx rcon.[3] b3 in
-      l4 (b0,b1,b2,b3)
-  ) (b0,b1,b2,b3)
-  in
-
-  let x0, y0 = b0 in
-  let x1, y1 = b1 in
-  let x2, y2 = b2 in
-  let x3, y3 = b3 in
-
-  let bx0 = uint_to_bytes_be x0 in
-  let by0 = uint_to_bytes_be y0 in
-  let bx1 = uint_to_bytes_be x1 in
-  let by1 = uint_to_bytes_be y1 in
-  let bx2 = uint_to_bytes_be x2 in
-  let by2 = uint_to_bytes_be y2 in
-  let bx3 = uint_to_bytes_be x3 in
-  let by3 = uint_to_bytes_be y3 in
-
-  let input = update_sub input 0 size_word bx0 in
-  let input = update_sub input (1 * size_word) size_word by0 in
-  let input = update_sub input (2 * size_word) size_word bx1 in
-  let input = update_sub input (3 * size_word) size_word by1 in
-  let input = update_sub input (4 * size_word) size_word bx2 in
-  let input = update_sub input (5 * size_word) size_word by2 in
-  let input = update_sub input (6 * size_word) size_word bx3 in
-  let input = update_sub input (7 * size_word) size_word by3 in
-  input
+let arx_n_step #n i b = 
+  let branchI = getBranch i b in 
+  let bi = arx rcon.[i] branchI in 
+  setBranch i bi b 
 
 
+val arx_n: #n: branch_len -> branch n -> branch n 
+
+let arx_n #n b = Lib.LoopCombinators.repeati n arx_n_step b
 
 
-val sparkle384: steps:size_nat -> lbytes 48 -> Tot (lbytes 48)
-let sparkle384 steps input =
-  let bx0 = sub input 0 size_word in
-  let by0 = sub input (1 * size_word) size_word in
-  let bx1 = sub input (2 * size_word) size_word in
-  let by1 = sub input (3 * size_word) size_word in
-  let bx2 = sub input (4 * size_word) size_word in
-  let by2 = sub input (5 * size_word) size_word in
-  let bx3 = sub input (6 * size_word) size_word in
-  let by3 = sub input (7 * size_word) size_word in
-  let bx4 = sub input (8 * size_word) size_word in
-  let by4 = sub input (9 * size_word) size_word in
-  let bx5 = sub input (10 * size_word) size_word in
-  let by5 = sub input (11 * size_word) size_word in
-  let x0 = uint_from_bytes_le bx0 in
-  let y0 = uint_from_bytes_le by0 in
-  let x1 = uint_from_bytes_le bx1 in
-  let y1 = uint_from_bytes_le by1 in
-  let x2 = uint_from_bytes_le bx2 in
-  let y2 = uint_from_bytes_le by2 in
-  let x3 = uint_from_bytes_le bx3 in
-  let y3 = uint_from_bytes_le by3 in
-  let x4 = uint_from_bytes_le bx4 in
-  let y4 = uint_from_bytes_le by4 in
-  let x5 = uint_from_bytes_le bx5 in
-  let y5 = uint_from_bytes_le by5 in
+val mainLoop_step: #n: branch_len {n % 2 == 0} -> i: size_nat -> branch n -> branch n
 
-  let b0 = x0, y0 in
-  let b1 = x1, y1 in
-  let b2 = x2, y2 in
-  let b3 = x3, y3 in
-  let b4 = x4, y4 in
-  let b5 = x5, y5 in
-
-  let (b0,b1,b2,b3,b4,b5) =
-    repeati steps (fun i (b0,b1,b2,b3,b4,b5) ->
-      let (b0,b1) = add2 i (b0,b1) in
-      let b0 = arx rcon.[0] b0 in
-      let b1 = arx rcon.[1] b1 in
-      let b2 = arx rcon.[2] b2 in
-      let b3 = arx rcon.[3] b3 in
-      let b4 = arx rcon.[4] b4 in
-      let b5 = arx rcon.[5] b5 in
-      l6 (b0,b1,b2,b3,b4,b5)
-  ) (b0,b1,b2,b3,b4,b5)
-  in
-
-  let x0, y0 = b0 in
-  let x1, y1 = b1 in
-  let x2, y2 = b2 in
-  let x3, y3 = b3 in
-  let x4, y4 = b4 in
-  let x5, y5 = b5 in
-
-  let bx0 = uint_to_bytes_be x0 in
-  let by0 = uint_to_bytes_be y0 in
-  let bx1 = uint_to_bytes_be x1 in
-  let by1 = uint_to_bytes_be y1 in
-  let bx2 = uint_to_bytes_be x2 in
-  let by2 = uint_to_bytes_be y2 in
-  let bx3 = uint_to_bytes_be x3 in
-  let by3 = uint_to_bytes_be y3 in
-  let bx4 = uint_to_bytes_be x4 in
-  let by4 = uint_to_bytes_be y4 in
-  let bx5 = uint_to_bytes_be x5 in
-  let by5 = uint_to_bytes_be y5 in
-  let input = update_sub input 0 size_word bx0 in
-  let input = update_sub input (1 * size_word) size_word by0 in
-  let input = update_sub input (2 * size_word) size_word bx1 in
-  let input = update_sub input (3 * size_word) size_word by1 in
-  let input = update_sub input (4 * size_word) size_word bx2 in
-  let input = update_sub input (5 * size_word) size_word by2 in
-  let input = update_sub input (6 * size_word) size_word bx3 in
-  let input = update_sub input (7 * size_word) size_word by3 in
-  let input = update_sub input (8 * size_word) size_word bx4 in
-  let input = update_sub input (9 * size_word) size_word by4 in
-  let input = update_sub input (10 * size_word) size_word bx5 in
-  let input = update_sub input (11 * size_word) size_word by5 in
-  input
+let mainLoop_step #n i b = 
+  let branchZeroMod = add2 #n i b in 
+  let arxedBranch = arx_n #n branchZeroMod in 
+  l #n arxedBranch
 
 
-val sparkle512: steps:size_nat -> lbytes 64 -> Tot (lbytes 64)
-let sparkle512 steps input =
-  let bx0 = sub input 0 size_word in
-  let by0 = sub input (1 * size_word) size_word in
-  let bx1 = sub input (2 * size_word) size_word in
-  let by1 = sub input (3 * size_word) size_word in
-  let bx2 = sub input (4 * size_word) size_word in
-  let by2 = sub input (5 * size_word) size_word in
-  let bx3 = sub input (6 * size_word) size_word in
-  let by3 = sub input (7 * size_word) size_word in
-  let bx4 = sub input (8 * size_word) size_word in
-  let by4 = sub input (9 * size_word) size_word in
-  let bx5 = sub input (10 * size_word) size_word in
-  let by5 = sub input (11 * size_word) size_word in
-  let bx6 = sub input (12 * size_word) size_word in
-  let by6 = sub input (13 * size_word) size_word in
-  let bx7 = sub input (14 * size_word) size_word in
-  let by7 = sub input (15 * size_word) size_word in
-  let x0 = uint_from_bytes_le bx0 in
-  let y0 = uint_from_bytes_le by0 in
-  let x1 = uint_from_bytes_le bx1 in
-  let y1 = uint_from_bytes_le by1 in
-  let x2 = uint_from_bytes_le bx2 in
-  let y2 = uint_from_bytes_le by2 in
-  let x3 = uint_from_bytes_le bx3 in
-  let y3 = uint_from_bytes_le by3 in
-  let x4 = uint_from_bytes_le bx4 in
-  let y4 = uint_from_bytes_le by4 in
-  let x5 = uint_from_bytes_le bx5 in
-  let y5 = uint_from_bytes_le by5 in
-  let x6 = uint_from_bytes_le bx6 in
-  let y6 = uint_from_bytes_le by6 in
-  let x7 = uint_from_bytes_le bx7 in
-  let y7 = uint_from_bytes_le by7 in
+val mainLoop: #n: branch_len {n % 2 == 0} -> branch n -> steps: size_nat -> branch n 
 
-  let b0 = x0, y0 in
-  let b1 = x1, y1 in
-  let b2 = x2, y2 in
-  let b3 = x3, y3 in
-  let b4 = x4, y4 in
-  let b5 = x5, y5 in
-  let b6 = x6, y6 in
-  let b7 = x7, y7 in
+let mainLoop #n b steps = 
+  Lib.LoopCombinators.repeati steps mainLoop_step b
 
-  let (b0,b1,b2,b3,b4,b5,b6,b7) =
-    repeati steps (fun i (b0,b1,b2,b3,b4,b5,b6,b7) ->
-      let (b0,b1) = add2 i (b0,b1) in
-      let b0 = arx rcon.[0] b0 in
-      let b1 = arx rcon.[1] b1 in
-      let b2 = arx rcon.[2] b2 in
-      let b3 = arx rcon.[3] b3 in
-      let b4 = arx rcon.[4] b4 in
-      let b5 = arx rcon.[5] b5 in
-      let b6 = arx rcon.[6] b6 in
-      let b7 = arx rcon.[7] b7 in
-      l8 (b0,b1,b2,b3,b4,b5,b6,b7)
-  ) (b0,b1,b2,b3,b4,b5,b6,b7)
-  in
 
-  let x0, y0 = b0 in
-  let x1, y1 = b1 in
-  let x2, y2 = b2 in
-  let x3, y3 = b3 in
-  let x4, y4 = b4 in
-  let x5, y5 = b5 in
-  let x6, y6 = b6 in
-  let x7, y7 = b7 in
+val sparkle256: steps: size_nat -> lbytes 32 -> Tot (lbytes 32)
 
-  let bx0 = uint_to_bytes_be x0 in
-  let by0 = uint_to_bytes_be y0 in
-  let bx1 = uint_to_bytes_be x1 in
-  let by1 = uint_to_bytes_be y1 in
-  let bx2 = uint_to_bytes_be x2 in
-  let by2 = uint_to_bytes_be y2 in
-  let bx3 = uint_to_bytes_be x3 in
-  let by3 = uint_to_bytes_be y3 in
-  let bx4 = uint_to_bytes_be x4 in
-  let by4 = uint_to_bytes_be y4 in
-  let bx5 = uint_to_bytes_be x5 in
-  let by5 = uint_to_bytes_be y5 in
-  let bx6 = uint_to_bytes_be x6 in
-  let by6 = uint_to_bytes_be y6 in
-  let bx7 = uint_to_bytes_be x7 in
-  let by7 = uint_to_bytes_be y7 in
-  let input = update_sub input 0 size_word bx0 in
-  let input = update_sub input (1 * size_word) size_word by0 in
-  let input = update_sub input (2 * size_word) size_word bx1 in
-  let input = update_sub input (3 * size_word) size_word by1 in
-  let input = update_sub input (4 * size_word) size_word bx2 in
-  let input = update_sub input (5 * size_word) size_word by2 in
-  let input = update_sub input (6 * size_word) size_word bx3 in
-  let input = update_sub input (7 * size_word) size_word by3 in
-  let input = update_sub input (8 * size_word) size_word bx4 in
-  let input = update_sub input (9 * size_word) size_word by4 in
-  let input = update_sub input (10 * size_word) size_word bx5 in
-  let input = update_sub input (11 * size_word) size_word by5 in
-  let input = update_sub input (12 * size_word) size_word bx6 in
-  let input = update_sub input (13 * size_word) size_word by6 in
-  let input = update_sub input (14 * size_word) size_word bx7 in
-  let input = update_sub input (15 * size_word) size_word by7 in
-  input
+let sparkle256 steps input = 
+  let b = toBranch input in 
+  let permB = mainLoop b steps in 
+  fromBranch #4 permB
+
+
+val sparkle384: steps: size_nat -> lbytes 48 -> Tot (lbytes 48)
+
+let sparkle384 steps input = 
+  let b = toBranch input in 
+  let permB = mainLoop b steps in 
+  fromBranch #6 permB
+
+
+val sparkle512: steps: size_nat -> lbytes 64 -> Tot (lbytes 64)
+
+let sparkle512 steps input = 
+  let b = toBranch input in 
+  let permB = mainLoop b steps in 
+  fromBranch #8 permB
+

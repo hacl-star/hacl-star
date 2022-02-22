@@ -1,0 +1,1 @@
+This code was primarily written by Benjamin Beurdouche (Mozilla) and Anna Weine (Mozilla).
