@@ -69,7 +69,7 @@ val fadd5_eval_lemma_i:
   -> i:nat{i < w} ->
   Lemma ((feval5 (fadd5 f1 f2)).[i] == pfadd (feval5 f1).[i] (feval5 f2).[i])
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --admit_smt_queries true"
 let fadd5_eval_lemma_i #w f1 f2 i =
   let o = fadd5 f1 f2 in
   let (f10, f11, f12, f13, f14) = as_tup64_i f1 i in

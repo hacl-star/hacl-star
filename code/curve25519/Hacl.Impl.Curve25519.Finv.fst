@@ -135,7 +135,7 @@ val finv1:
     fsquare_times_inv h0 i)
   (ensures  fun h0 _ h1 ->
     modifies (loc t1 |+| loc tmp) h0 h1 /\
-   (let as : felem s = gsub t1 0ul (nlimb s) in
+   (let as0 : felem s = gsub t1 0ul (nlimb s) in
     let bs : felem s = gsub t1 (nlimb s) (nlimb s) in
     let a = S.fsquare_times (feval h0 i) 1 in
     let t0 = S.fsquare_times a 2 in
@@ -145,7 +145,7 @@ val finv1:
     let b = P.fmul t0 b in
     let t0 = S.fsquare_times b 5 in
     let b = P.fmul t0 b in
-    feval h1 as == a /\ fsquare_times_inv h1 as /\
+    feval h1 as0 == a /\ fsquare_times_inv h1 as0 /\
     feval h1 bs == b /\ fsquare_times_inv h1 bs))
 
 [@ Meta.Attribute.inline_ ]
@@ -173,12 +173,12 @@ val finv2:
   Stack unit
   (requires fun h0 ->
     live h0 t1 /\ live h0 tmp /\ disjoint t1 tmp /\
-   (let as : felem s = gsub t1 0ul (nlimb s) in
+   (let as0 : felem s = gsub t1 0ul (nlimb s) in
     let bs : felem s = gsub t1 (nlimb s) (nlimb s) in
-    fsquare_times_inv h0 as /\ fsquare_times_inv h0 bs))
+    fsquare_times_inv h0 as0 /\ fsquare_times_inv h0 bs))
   (ensures  fun h0 _ h1 ->
     modifies (loc t1 |+| loc tmp) h0 h1 /\
-   (let as : felem s = gsub t1 0ul (nlimb s) in
+   (let as0 : felem s = gsub t1 0ul (nlimb s) in
     let bs : felem s = gsub t1 (nlimb s) (nlimb s) in
     let cs : felem s = gsub t1 (2ul *! nlimb s) (nlimb s) in
     let t0 = S.fsquare_times (feval h0 bs) 10 in
@@ -189,7 +189,7 @@ val finv2:
     let b = P.fmul t0 (feval h0 bs) in
     let t0 = S.fsquare_times b 50 in
     let c = P.fmul t0 b in
-    feval h1 as == feval h0 as /\ fsquare_times_inv h1 as /\
+    feval h1 as0 == feval h0 as0 /\ fsquare_times_inv h1 as0 /\
     feval h1 bs == b /\ fsquare_times_inv h1 bs /\
     feval h1 cs == c /\ fsquare_times_inv h1 cs))
 
@@ -218,14 +218,14 @@ val finv3:
   Stack unit
   (requires fun h0 ->
     live h0 t1 /\ live h0 tmp /\ disjoint t1 tmp /\
-   (let as : felem s = gsub t1 0ul (nlimb s) in
+   (let as0 : felem s = gsub t1 0ul (nlimb s) in
     let bs : felem s = gsub t1 (nlimb s) (nlimb s) in
     let cs : felem s = gsub t1 (2ul *! nlimb s) (nlimb s) in
-    fsquare_times_inv h0 as /\ fsquare_times_inv h0 bs /\
+    fsquare_times_inv h0 as0 /\ fsquare_times_inv h0 bs /\
     fsquare_times_inv h0 cs))
   (ensures  fun h0 _ h1 ->
     modifies (loc t1 |+| loc tmp) h0 h1 /\
-   (let as : felem s = gsub t1 0ul (nlimb s) in
+   (let as0 : felem s = gsub t1 0ul (nlimb s) in
     let bs : felem s = gsub t1 (nlimb s) (nlimb s) in
     let cs : felem s = gsub t1 (2ul *! nlimb s) (nlimb s) in
     let ts0 : felem s = gsub t1 (3ul *! nlimb s) (nlimb s) in
@@ -234,7 +234,7 @@ val finv3:
     let t0 = S.fsquare_times t0 50 in
     let t0 = P.fmul t0 (feval h0 bs) in
     let t0 = S.fsquare_times t0 5 in
-    feval h1 as == feval h0 as /\ fsquare_times_inv h1 as /\
+    feval h1 as0 == feval h0 as0 /\ fsquare_times_inv h1 as0 /\
     feval h1 ts0 == t0 /\ fsquare_times_inv h1 ts0))
 
 [@ Meta.Attribute.inline_ ]

@@ -400,27 +400,27 @@ let lemma_instr_write_output_implicit_only_writes
 #pop-options
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_unchanged_at'_mem (as:locations) (a:location) (s1 s2:machine_state) :
+let rec lemma_unchanged_at'_mem (as0:locations) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
-        (unchanged_at' as s1 s2) /\
-        (L.mem a as)))
+        (unchanged_at' as0 s1 s2) /\
+        (L.mem a as0)))
     (ensures (
         (eval_location a s1 == eval_location a s2 \/ not s1.ms_ok))) =
-  match as with
+  match as0 with
   | [_] -> ()
   | x :: xs ->
     if a = x then () else
     lemma_unchanged_at'_mem xs a s1 s2
 #pop-options
 
-let rec lemma_unchanged_except_not_mem (as:locations) (a:location) :
+let rec lemma_unchanged_except_not_mem (as0:locations) (a:location) :
   Lemma
     (requires (
-        (not (L.mem a as))))
+        (not (L.mem a as0))))
     (ensures (
-        !!(disjoint_location_from_locations a as))) =
-  match as with
+        !!(disjoint_location_from_locations a as0))) =
+  match as0 with
   | [] -> ()
   | x :: xs -> lemma_unchanged_except_not_mem xs a
 
@@ -924,14 +924,14 @@ let rec lemma_constant_intersect_belongs_to_writes_union
     )
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_state) :
+let rec lemma_unchanged_at_mem (as0:list location) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
-        (unchanged_at as s1 s2) /\
-        (L.mem a as)))
+        (unchanged_at as0 s1 s2) /\
+        (L.mem a as0)))
     (ensures (
         (eval_location a s1 == eval_location a s2))) =
-  match as with
+  match as0 with
   | [_] -> ()
   | x :: xs ->
     if a = x then () else
