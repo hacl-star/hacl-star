@@ -1,5 +1,5 @@
-call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -host_arch=amd64 -arch=amd64
-call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsDevCmd.bat" -test
+call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -host_arch=amd64 -arch=amd64
+call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat" -test
 cd dist/msvc-compatible
 cl *.c /I ../kremlin/include /I . /I ../kremlin/kremlib/dist/minimal /c /DHACL_CAN_COMPILE_INTRINSICS /DHACL_CAN_COMPILE_VALE /DHACL_CAN_COMPILE_VEC128 /DHACL_CAN_COMPILE_VEC256 || goto :error
 for /F %%i in ('dir /b *-x86_64-msvc.asm') do (
