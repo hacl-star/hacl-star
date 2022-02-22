@@ -7,9 +7,8 @@
  * properly brought into scope. Users can either run the configure script, or
  * write a config.h themselves and put it under version control. */
 #if __has_include("config.h")
- #include "config.h"
+#include "config.h"
 #endif
-
 
 /* # DEBUGGING:
  * ============
@@ -937,7 +936,6 @@ typedef vector128_8 vector128;
 // If libintvector_debug.h exists, use it to debug the current implementations.
 // Note that some flags must be enabled for the debugging to be effective:
 // see libintvector_debug.h for more details.
-
 #if __has_include("libintvector_debug.h")
 #include "libintvector_debug.h"
 #endif
