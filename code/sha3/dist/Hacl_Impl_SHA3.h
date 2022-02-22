@@ -46,6 +46,8 @@ void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 
 void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res);
 
+void Hacl_Impl_SHA3_absorb_next(uint64_t *s, uint32_t rateInBytes);
+
 void
 Hacl_Impl_SHA3_absorb_last(
   uint8_t delimitedSuffix,
