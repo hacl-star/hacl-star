@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
+
+
+
+
 #include "evercrypt_targetconfig.h"
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
 #include <string.h>
 #include "kremlin/internal/target.h"
-
-
-
-
 extern void aes128_key_expansion_sbox(uint8_t *key, uint8_t *w, uint8_t *sbox);
 
 extern void
