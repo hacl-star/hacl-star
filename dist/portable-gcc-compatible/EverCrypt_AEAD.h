@@ -29,19 +29,19 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
+
 
 
 #include "Hacl_Spec.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_Chacha20Poly1305.h"
 #include "EverCrypt_AutoConfig2.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include <string.h>
+#include "kremlin/internal/target.h"
 /* SNIPPET_START: EverCrypt_AEAD_state_s */
 
 typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
