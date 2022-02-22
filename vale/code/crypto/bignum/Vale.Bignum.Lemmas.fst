@@ -47,7 +47,7 @@ let rec lemma_sum_pow_seq_bound_rec (#n:nat) (s:seq (natN n)) (i:nat{i <= length
 let rec lemma_sum_pow_seq_bound #n s =
   lemma_sum_pow_seq_bound_rec s (length s)
 
-let lemma_seq_add_is_norm #n as bs c0 i =
+let lemma_seq_add_is_norm #n as0 bs c0 i =
   ()
 
 #push-options "--z3cliopt smt.arith.nl=true"
@@ -62,37 +62,37 @@ let lemma_add_lo_mul_right #n a b c m =
   reveal_add_lo_all ()
 #pop-options
 
-let rec lemma_seq_add_rec (#n:nat) (as bs:seq (natN n)) (c0:nat1) (i:nat) : Lemma
-  (requires i <= length as /\ length bs == length as)
+let rec lemma_seq_add_rec (#n:nat) (as0 bs:seq (natN n)) (c0:nat1) (i:nat) : Lemma
+  (requires i <= length as0 /\ length bs == length as0)
   (ensures (
-    let xs = fst (seq_add as bs c0) in
-    let ci = seq_add_c as bs c0 i in
-    sum_pow_seq_left xs i + last_carry n i ci == sum_pow_seq_left as i + sum_pow_seq_left bs i + c0
+    let xs = fst (seq_add as0 bs c0) in
+    let ci = seq_add_c as0 bs c0 i in
+    sum_pow_seq_left xs i + last_carry n i ci == sum_pow_seq_left as0 i + sum_pow_seq_left bs i + c0
   ))
   (decreases i)
   =
   if (i > 0) then (
-    let xs = fst (seq_add as bs c0) in
-    let ci = seq_add_c as bs c0 i in
+    let xs = fst (seq_add as0 bs c0) in
+    let ci = seq_add_c as0 bs c0 i in
     let i' = i - 1 in
-    let ci' = seq_add_c as bs c0 i' in
+    let ci' = seq_add_c as0 bs c0 i' in
     calc (==) {
       sum_pow_seq_left xs i + last_carry n i ci;
       == {}
       xs.[i'] * pow_int n i' + sum_pow_seq_left xs i' + last_carry n i ci;
-      == {lemma_seq_add_rec as bs c0 i'}
-      xs.[i'] * pow_int n i' + sum_pow_seq_left as i' + sum_pow_seq_left bs i' + c0 - last_carry n i' ci' + last_carry n i ci;
+      == {lemma_seq_add_rec as0 bs c0 i'}
+      xs.[i'] * pow_int n i' + sum_pow_seq_left as0 i' + sum_pow_seq_left bs i' + c0 - last_carry n i' ci' + last_carry n i ci;
       == {
         reveal_add_hi_all ();
         lemma_last_carry_mul n i' ci';
-        lemma_add_lo_mul_right as.[i'] bs.[i'] ci' (pow_int n i')
+        lemma_add_lo_mul_right as0.[i'] bs.[i'] ci' (pow_int n i')
       }
-      sum_pow_seq_left as i + sum_pow_seq_left bs i + c0;
+      sum_pow_seq_left as0 i + sum_pow_seq_left bs i + c0;
     }
   )
 
-let lemma_seq_add #n as bs c0 =
-  lemma_seq_add_rec as bs c0 (length as)
+let lemma_seq_add #n as0 bs c0 =
+  lemma_seq_add_rec as0 bs c0 (length as0)
 
 #push-options "--z3rlimit 100 --z3cliopt smt.arith.nl=true --max_ifuel 0"
 #restart-solver
