@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "../Hacl_Chacha20.h"
 #include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
 
 void

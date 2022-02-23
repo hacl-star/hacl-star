@@ -29,7 +29,10 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "Hacl_Poly1305_256.h"
@@ -37,10 +40,6 @@ extern "C" {
 #include "Hacl_Chacha20_Vec256.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 void
 Hacl_Chacha20Poly1305_256_aead_encrypt(
   uint8_t *k,

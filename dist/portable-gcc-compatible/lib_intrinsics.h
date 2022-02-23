@@ -2,8 +2,10 @@
 
 #include <sys/types.h>
 
+#if defined(__has_include)
 #if __has_include("config.h")
 #include "config.h"
+#endif
 #endif
 
 #if defined(HACL_CAN_COMPILE_INTRINSICS)

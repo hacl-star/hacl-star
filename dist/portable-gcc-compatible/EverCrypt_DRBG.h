@@ -29,7 +29,10 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "Lib_RandomBuffer_System.h"
@@ -39,10 +42,6 @@ extern "C" {
 #include "EverCrypt_HMAC.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 /* SNIPPET_START: EverCrypt_DRBG_supported_alg */
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;

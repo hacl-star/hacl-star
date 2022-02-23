@@ -29,7 +29,10 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "internal/Hacl_Kremlib.h"
@@ -38,10 +41,6 @@ extern "C" {
 #include "../Hacl_Ed25519.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 void Hacl_Bignum25519_reduce_513(uint64_t *a);
 
 void Hacl_Bignum25519_inverse(uint64_t *out, uint64_t *a);

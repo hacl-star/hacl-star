@@ -29,14 +29,14 @@
 extern "C" {
 #endif
 
-
-
-
-
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include <stdbool.h>
+
+
+
+
 extern void TestLib_touch(int32_t uu___);
 
 extern void TestLib_check(bool uu___);

@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "../Hacl_Chacha20.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 extern const u32 Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
 
 #if defined(__cplusplus)
