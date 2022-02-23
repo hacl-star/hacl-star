@@ -391,14 +391,14 @@ val absorb_next:
 let absorb_next s rateInBytes =
   let h0 = ST.get() in
   let spec _ h1 = as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes) /\ live h1 s in
-  salloc1 h0 rateInBytes (u8 0) (Ghost.hide (loc s)) spec
+  salloc1 h0 200ul (u8 0) (Ghost.hide (loc s)) spec
     (fun nextBlock ->
       nextBlock.(rateInBytes -! 1ul) <- u8 0x80;
       loadState rateInBytes nextBlock s;
       state_permute s
     )
 
-inline_for_extraction noextract
+inline_for_extraction 
 val absorb_last:
     delimitedSuffix:byte_t
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
@@ -418,7 +418,7 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
     as_seq h1 s ==
     S.absorb_last delimitedSuffix (v rateInBytes) (v rem) (as_seq h0 input) (as_seq h0 s) /\
     live h1 s in
-  salloc1 h0 rateInBytes (u8 0) (Ghost.hide (loc s)) spec
+  salloc1 h0 200ul (u8 0) (Ghost.hide (loc s)) spec
     (fun lastBlock ->
       let open Lib.RawIntTypes in
        update_sub lastBlock (size 0) rem input;
@@ -429,7 +429,7 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
       then state_permute s;
       absorb_next s rateInBytes)
 
-inline_for_extraction noextract
+inline_for_extraction
 val absorb_inner:
     rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> block:lbuffer uint8 rateInBytes
