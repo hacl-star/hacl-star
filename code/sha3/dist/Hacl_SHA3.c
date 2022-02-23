@@ -43,25 +43,20 @@ Hacl_SHA3_shake128_hacl(
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t *last0 = input + nb * rateInBytes;
-  uint32_t rateInBytes1 = (uint32_t)144U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b[rateInBytes1];
-  memset(b, 0U, rateInBytes1 * sizeof (uint8_t));
+  uint8_t b[144U] = { 0U };
   memcpy(b, last0, rem * sizeof (uint8_t));
   b[rem] = (uint8_t)0x1FU;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b, s);
-  if (!((uint8_t)0U == (uint8_t)0U) && rem == rateInBytes1 - (uint32_t)1U)
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b, s);
+  if (!((uint8_t)0U == (uint8_t)0U) && rem == (uint32_t)144U - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b1[rateInBytes1];
-  memset(b1, 0U, rateInBytes1 * sizeof (uint8_t));
-  b1[rateInBytes1 - (uint32_t)1U] = (uint8_t)0x80U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b1, s);
+  uint8_t b1[144U] = { 0U };
+  b1[143U] = (uint8_t)0x80U;
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b1, s);
   Hacl_Impl_SHA3_state_permute(s);
-  Lib_Memzero0_memzero(b1, rateInBytes1 * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, rateInBytes1 * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)144U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)144U * sizeof (b[0U]));
   uint32_t outBlocks = outputByteLen / rateInBytes;
   uint32_t remOut = outputByteLen % rateInBytes;
   uint8_t *last = output + outputByteLen - remOut;
@@ -93,25 +88,20 @@ Hacl_SHA3_shake256_hacl(
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t *last0 = input + nb * rateInBytes;
-  uint32_t rateInBytes1 = (uint32_t)144U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b[rateInBytes1];
-  memset(b, 0U, rateInBytes1 * sizeof (uint8_t));
+  uint8_t b[144U] = { 0U };
   memcpy(b, last0, rem * sizeof (uint8_t));
   b[rem] = (uint8_t)0x1FU;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b, s);
-  if (!((uint8_t)0U == (uint8_t)0U) && rem == rateInBytes1 - (uint32_t)1U)
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b, s);
+  if (!((uint8_t)0U == (uint8_t)0U) && rem == (uint32_t)144U - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b1[rateInBytes1];
-  memset(b1, 0U, rateInBytes1 * sizeof (uint8_t));
-  b1[rateInBytes1 - (uint32_t)1U] = (uint8_t)0x80U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b1, s);
+  uint8_t b1[144U] = { 0U };
+  b1[143U] = (uint8_t)0x80U;
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b1, s);
   Hacl_Impl_SHA3_state_permute(s);
-  Lib_Memzero0_memzero(b1, rateInBytes1 * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, rateInBytes1 * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)144U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)144U * sizeof (b[0U]));
   uint32_t outBlocks = outputByteLen / rateInBytes;
   uint32_t remOut = outputByteLen % rateInBytes;
   uint8_t *last = output + outputByteLen - remOut;
@@ -137,25 +127,20 @@ void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t *last0 = input + nb * rateInBytes;
-  uint32_t rateInBytes1 = (uint32_t)144U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b[rateInBytes1];
-  memset(b, 0U, rateInBytes1 * sizeof (uint8_t));
+  uint8_t b[144U] = { 0U };
   memcpy(b, last0, rem * sizeof (uint8_t));
   b[rem] = (uint8_t)0x06U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b, s);
-  if (!((uint8_t)0U == (uint8_t)0U) && rem == rateInBytes1 - (uint32_t)1U)
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b, s);
+  if (!((uint8_t)0U == (uint8_t)0U) && rem == (uint32_t)144U - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b1[rateInBytes1];
-  memset(b1, 0U, rateInBytes1 * sizeof (uint8_t));
-  b1[rateInBytes1 - (uint32_t)1U] = (uint8_t)0x80U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b1, s);
+  uint8_t b1[144U] = { 0U };
+  b1[143U] = (uint8_t)0x80U;
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b1, s);
   Hacl_Impl_SHA3_state_permute(s);
-  Lib_Memzero0_memzero(b1, rateInBytes1 * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, rateInBytes1 * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)144U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)144U * sizeof (b[0U]));
   uint32_t outBlocks = (uint32_t)28U / rateInBytes;
   uint32_t remOut = (uint32_t)28U % rateInBytes;
   uint8_t *last = output + (uint32_t)28U - remOut;
@@ -181,25 +166,20 @@ void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t *last0 = input + nb * rateInBytes;
-  uint32_t rateInBytes1 = (uint32_t)144U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b[rateInBytes1];
-  memset(b, 0U, rateInBytes1 * sizeof (uint8_t));
+  uint8_t b[144U] = { 0U };
   memcpy(b, last0, rem * sizeof (uint8_t));
   b[rem] = (uint8_t)0x06U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b, s);
-  if (!((uint8_t)0U == (uint8_t)0U) && rem == rateInBytes1 - (uint32_t)1U)
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b, s);
+  if (!((uint8_t)0U == (uint8_t)0U) && rem == (uint32_t)144U - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b1[rateInBytes1];
-  memset(b1, 0U, rateInBytes1 * sizeof (uint8_t));
-  b1[rateInBytes1 - (uint32_t)1U] = (uint8_t)0x80U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b1, s);
+  uint8_t b1[144U] = { 0U };
+  b1[143U] = (uint8_t)0x80U;
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b1, s);
   Hacl_Impl_SHA3_state_permute(s);
-  Lib_Memzero0_memzero(b1, rateInBytes1 * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, rateInBytes1 * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)144U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)144U * sizeof (b[0U]));
   uint32_t outBlocks = (uint32_t)32U / rateInBytes;
   uint32_t remOut = (uint32_t)32U % rateInBytes;
   uint8_t *last = output + (uint32_t)32U - remOut;
@@ -225,25 +205,20 @@ void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t *last0 = input + nb * rateInBytes;
-  uint32_t rateInBytes1 = (uint32_t)144U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b[rateInBytes1];
-  memset(b, 0U, rateInBytes1 * sizeof (uint8_t));
+  uint8_t b[144U] = { 0U };
   memcpy(b, last0, rem * sizeof (uint8_t));
   b[rem] = (uint8_t)0x06U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b, s);
-  if (!((uint8_t)0U == (uint8_t)0U) && rem == rateInBytes1 - (uint32_t)1U)
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b, s);
+  if (!((uint8_t)0U == (uint8_t)0U) && rem == (uint32_t)144U - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b1[rateInBytes1];
-  memset(b1, 0U, rateInBytes1 * sizeof (uint8_t));
-  b1[rateInBytes1 - (uint32_t)1U] = (uint8_t)0x80U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b1, s);
+  uint8_t b1[144U] = { 0U };
+  b1[143U] = (uint8_t)0x80U;
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b1, s);
   Hacl_Impl_SHA3_state_permute(s);
-  Lib_Memzero0_memzero(b1, rateInBytes1 * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, rateInBytes1 * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)144U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)144U * sizeof (b[0U]));
   uint32_t outBlocks = (uint32_t)48U / rateInBytes;
   uint32_t remOut = (uint32_t)48U % rateInBytes;
   uint8_t *last = output + (uint32_t)48U - remOut;
@@ -269,25 +244,20 @@ void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t *last0 = input + nb * rateInBytes;
-  uint32_t rateInBytes1 = (uint32_t)144U;
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b[rateInBytes1];
-  memset(b, 0U, rateInBytes1 * sizeof (uint8_t));
+  uint8_t b[144U] = { 0U };
   memcpy(b, last0, rem * sizeof (uint8_t));
   b[rem] = (uint8_t)0x06U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b, s);
-  if (!((uint8_t)0U == (uint8_t)0U) && rem == rateInBytes1 - (uint32_t)1U)
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b, s);
+  if (!((uint8_t)0U == (uint8_t)0U) && rem == (uint32_t)144U - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
-  KRML_CHECK_SIZE(sizeof (uint8_t), rateInBytes1);
-  uint8_t b1[rateInBytes1];
-  memset(b1, 0U, rateInBytes1 * sizeof (uint8_t));
-  b1[rateInBytes1 - (uint32_t)1U] = (uint8_t)0x80U;
-  Hacl_Impl_SHA3_loadState(rateInBytes1, b1, s);
+  uint8_t b1[144U] = { 0U };
+  b1[143U] = (uint8_t)0x80U;
+  Hacl_Impl_SHA3_loadState((uint32_t)144U, b1, s);
   Hacl_Impl_SHA3_state_permute(s);
-  Lib_Memzero0_memzero(b1, rateInBytes1 * sizeof (b1[0U]));
-  Lib_Memzero0_memzero(b, rateInBytes1 * sizeof (b[0U]));
+  Lib_Memzero0_memzero(b1, (uint32_t)144U * sizeof (b1[0U]));
+  Lib_Memzero0_memzero(b, (uint32_t)144U * sizeof (b[0U]));
   uint32_t outBlocks = (uint32_t)64U / rateInBytes;
   uint32_t remOut = (uint32_t)64U % rateInBytes;
   uint8_t *last = output + (uint32_t)64U - remOut;
