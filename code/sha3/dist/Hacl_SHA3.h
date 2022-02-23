@@ -31,6 +31,7 @@
 
 
 #include "Hacl_Impl_SHA3.h"
+#include "Hacl_Lib.h"
 
 void
 Hacl_SHA3_shake128_hacl(

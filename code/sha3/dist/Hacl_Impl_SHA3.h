@@ -46,20 +46,36 @@ void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 
 void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res);
 
-#define Hacl_Impl_SHA3_SHA3_224 0
-#define Hacl_Impl_SHA3_SHA3_256 1
-#define Hacl_Impl_SHA3_SHA3_384 2
-#define Hacl_Impl_SHA3_SHA3_512 3
+#define FStar_Pervasives_Native_None 0
+#define FStar_Pervasives_Native_Some 1
 
-typedef uint8_t Hacl_Impl_SHA3_version;
+typedef uint8_t FStar_Pervasives_Native_option__uint8_t_tags;
+
+typedef struct FStar_Pervasives_Native_option__uint8_t_s
+{
+  FStar_Pervasives_Native_option__uint8_t_tags tag;
+  uint8_t v;
+}
+FStar_Pervasives_Native_option__uint8_t;
+
+#define Hacl_Impl_SHA3_SHA3_224 0
+#define Hacl_Impl_SHA3_Generic 1
+
+typedef uint8_t Hacl_Impl_SHA3_version_tags;
+
+typedef struct Hacl_Impl_SHA3_version_s
+{
+  Hacl_Impl_SHA3_version_tags tag;
+  FStar_Pervasives_Native_option__uint8_t _0;
+}
+Hacl_Impl_SHA3_version;
 
 bool Hacl_Impl_SHA3_uu___is_SHA3_224(Hacl_Impl_SHA3_version projectee);
 
-bool Hacl_Impl_SHA3_uu___is_SHA3_256(Hacl_Impl_SHA3_version projectee);
+bool Hacl_Impl_SHA3_uu___is_Generic(Hacl_Impl_SHA3_version projectee);
 
-bool Hacl_Impl_SHA3_uu___is_SHA3_384(Hacl_Impl_SHA3_version projectee);
-
-bool Hacl_Impl_SHA3_uu___is_SHA3_512(Hacl_Impl_SHA3_version projectee);
+FStar_Pervasives_Native_option__uint8_t
+Hacl_Impl_SHA3___proj__Generic__item___0(Hacl_Impl_SHA3_version projectee);
 
 void
 Hacl_Impl_SHA3_absorb_last_224(
@@ -72,16 +88,6 @@ Hacl_Impl_SHA3_absorb_last_224(
 void Hacl_Impl_SHA3_absorb_inner(uint32_t rateInBytes, uint8_t *block, uint64_t *s);
 
 void
-Hacl_Impl_SHA3_absorb(
-  Hacl_Impl_SHA3_version sha,
-  uint64_t *s,
-  uint32_t rateInBytes,
-  uint32_t inputByteLen,
-  uint8_t *input,
-  uint8_t delimitedSuffix
-);
-
-void
 Hacl_Impl_SHA3_squeeze(
   uint64_t *s,
   uint32_t rateInBytes,
@@ -91,7 +97,6 @@ Hacl_Impl_SHA3_squeeze(
 
 void
 Hacl_Impl_SHA3_keccak(
-  Hacl_Impl_SHA3_version sha,
   uint32_t rate,
   uint32_t capacity,
   uint32_t inputByteLen,
