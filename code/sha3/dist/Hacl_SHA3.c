@@ -32,7 +32,8 @@ Hacl_SHA3_shake128_hacl(
   uint8_t *output
 )
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)1344U,
+  Hacl_Impl_SHA3_keccak(Hacl_Impl_SHA3_SHA3_224,
+    (uint32_t)1344U,
     (uint32_t)256U,
     inputByteLen,
     input,
@@ -49,7 +50,8 @@ Hacl_SHA3_shake256_hacl(
   uint8_t *output
 )
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)1088U,
+  Hacl_Impl_SHA3_keccak(Hacl_Impl_SHA3_SHA3_224,
+    (uint32_t)1088U,
     (uint32_t)512U,
     inputByteLen,
     input,
@@ -60,7 +62,8 @@ Hacl_SHA3_shake256_hacl(
 
 void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)1152U,
+  Hacl_Impl_SHA3_keccak(Hacl_Impl_SHA3_SHA3_224,
+    (uint32_t)1152U,
     (uint32_t)448U,
     inputByteLen,
     input,
@@ -71,7 +74,8 @@ void Hacl_SHA3_sha3_224(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 
 void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)1088U,
+  Hacl_Impl_SHA3_keccak(Hacl_Impl_SHA3_SHA3_224,
+    (uint32_t)1088U,
     (uint32_t)512U,
     inputByteLen,
     input,
@@ -82,7 +86,8 @@ void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 
 void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)832U,
+  Hacl_Impl_SHA3_keccak(Hacl_Impl_SHA3_SHA3_224,
+    (uint32_t)832U,
     (uint32_t)768U,
     inputByteLen,
     input,
@@ -93,7 +98,8 @@ void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 
 void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output)
 {
-  Hacl_Impl_SHA3_keccak((uint32_t)576U,
+  Hacl_Impl_SHA3_keccak(Hacl_Impl_SHA3_SHA3_224,
+    (uint32_t)576U,
     (uint32_t)1024U,
     inputByteLen,
     input,

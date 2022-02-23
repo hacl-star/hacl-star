@@ -46,12 +46,24 @@ void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 
 void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res);
 
-void Hacl_Impl_SHA3_absorb_next(uint64_t *s, uint32_t rateInBytes);
+#define Hacl_Impl_SHA3_SHA3_224 0
+#define Hacl_Impl_SHA3_SHA3_256 1
+#define Hacl_Impl_SHA3_SHA3_384 2
+#define Hacl_Impl_SHA3_SHA3_512 3
+
+typedef uint8_t Hacl_Impl_SHA3_version;
+
+bool Hacl_Impl_SHA3_uu___is_SHA3_224(Hacl_Impl_SHA3_version projectee);
+
+bool Hacl_Impl_SHA3_uu___is_SHA3_256(Hacl_Impl_SHA3_version projectee);
+
+bool Hacl_Impl_SHA3_uu___is_SHA3_384(Hacl_Impl_SHA3_version projectee);
+
+bool Hacl_Impl_SHA3_uu___is_SHA3_512(Hacl_Impl_SHA3_version projectee);
 
 void
-Hacl_Impl_SHA3_absorb_last(
+Hacl_Impl_SHA3_absorb_last_224(
   uint8_t delimitedSuffix,
-  uint32_t rateInBytes,
   uint32_t rem,
   uint8_t *input,
   uint64_t *s
@@ -61,6 +73,7 @@ void Hacl_Impl_SHA3_absorb_inner(uint32_t rateInBytes, uint8_t *block, uint64_t 
 
 void
 Hacl_Impl_SHA3_absorb(
+  Hacl_Impl_SHA3_version sha,
   uint64_t *s,
   uint32_t rateInBytes,
   uint32_t inputByteLen,
@@ -78,6 +91,7 @@ Hacl_Impl_SHA3_squeeze(
 
 void
 Hacl_Impl_SHA3_keccak(
+  Hacl_Impl_SHA3_version sha,
   uint32_t rate,
   uint32_t capacity,
   uint32_t inputByteLen,
