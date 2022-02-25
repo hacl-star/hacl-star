@@ -377,6 +377,28 @@ let storeState rateInBytes s res =
       copy res (sub block 0ul rateInBytes)
     )
 
+(* 
+   Lemma_equivalence_state_rate proves that it is equivalent
+   to allocate a bigger temporary buffer and then use a part of it 
+   compared to allocation of the exact size buffer
+*)
+
+val lemma_equiv_alloc_bigger_state: a:size_t{v a > 0 /\ v a <= 200} 
+  -> Lemma (
+    let input0 = Lib.Sequence.create #uint8 (v a) (u8 0) in
+    let nextBlock_1 = Lib.Sequence.create #uint8 200 (u8 0) in 
+    let input1 = Lib.Sequence.sub #uint8 #200 nextBlock_1 0 (v a) in 
+    input0 == input1)
+
+let lemma_equiv_alloc_bigger_state a  = 
+  let input0 = Lib.Sequence.create #uint8 (v a) (u8 0) in
+  
+  let nextBlock_1 = Lib.Sequence.create #uint8 200 (u8 0) in 
+  let input1 = Lib.Sequence.sub #uint8 #200 nextBlock_1 0 (v a) in 
+
+  Seq.lemma_eq_intro input0 input1
+
+
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
 inline_for_extraction noextract
@@ -392,11 +414,13 @@ let absorb_next s rateInBytes =
   let h0 = ST.get() in
   let spec _ h1 = as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes) /\ live h1 s in
   salloc1 h0 200ul (u8 0) (Ghost.hide (loc s)) spec
-    (fun nextBlock ->
+    (fun tempBlock ->
+      let nextBlock = sub tempBlock (size 0) rateInBytes in 
       nextBlock.(rateInBytes -! 1ul) <- u8 0x80;
       loadState rateInBytes nextBlock s;
-      state_permute s
-    )
+      state_permute s;
+      lemma_equiv_alloc_bigger_state rateInBytes)
+
 
 inline_for_extraction 
 val absorb_last:
@@ -419,15 +443,17 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
     S.absorb_last delimitedSuffix (v rateInBytes) (v rem) (as_seq h0 input) (as_seq h0 s) /\
     live h1 s in
   salloc1 h0 200ul (u8 0) (Ghost.hide (loc s)) spec
-    (fun lastBlock ->
+    (fun temp ->
       let open Lib.RawIntTypes in
-       update_sub lastBlock (size 0) rem input;
+      let lastBlock = sub temp (size 0) rateInBytes in 
+      update_sub lastBlock (size 0) rem input;
       lastBlock.(rem) <- byte_to_uint8 delimitedSuffix;
       loadState rateInBytes lastBlock s;
       if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
          (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. 1ul))
       then state_permute s;
-      absorb_next s rateInBytes)
+      absorb_next s rateInBytes;
+      lemma_equiv_alloc_bigger_state rateInBytes)
 
 inline_for_extraction
 val absorb_inner:

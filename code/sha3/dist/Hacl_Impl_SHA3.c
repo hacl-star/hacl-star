@@ -628,16 +628,18 @@ Hacl_Impl_SHA3_absorb_last(
 )
 {
   uint8_t b[200U] = { 0U };
-  memcpy(b, input, rem * sizeof (uint8_t));
-  b[rem] = delimitedSuffix;
-  Hacl_Impl_SHA3_loadState(rateInBytes, b, s);
+  uint8_t *lastBlock = b;
+  memcpy(lastBlock, input, rem * sizeof (uint8_t));
+  lastBlock[rem] = delimitedSuffix;
+  Hacl_Impl_SHA3_loadState(rateInBytes, lastBlock, s);
   if (!((delimitedSuffix & (uint8_t)0x80U) == (uint8_t)0U) && rem == rateInBytes - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t b1[200U] = { 0U };
-  b1[rateInBytes - (uint32_t)1U] = (uint8_t)0x80U;
-  Hacl_Impl_SHA3_loadState(rateInBytes, b1, s);
+  uint8_t *nextBlock = b1;
+  nextBlock[rateInBytes - (uint32_t)1U] = (uint8_t)0x80U;
+  Hacl_Impl_SHA3_loadState(rateInBytes, nextBlock, s);
   Hacl_Impl_SHA3_state_permute(s);
   Lib_Memzero0_memzero(b1, (uint32_t)200U * sizeof (b1[0U]));
   Lib_Memzero0_memzero(b, (uint32_t)200U * sizeof (b[0U]));
@@ -668,16 +670,18 @@ Hacl_Impl_SHA3_absorb(
   }
   uint8_t *last = input + nb * rateInBytes;
   uint8_t b[200U] = { 0U };
-  memcpy(b, last, rem * sizeof (uint8_t));
-  b[rem] = delimitedSuffix;
-  Hacl_Impl_SHA3_loadState(rateInBytes, b, s);
+  uint8_t *lastBlock = b;
+  memcpy(lastBlock, last, rem * sizeof (uint8_t));
+  lastBlock[rem] = delimitedSuffix;
+  Hacl_Impl_SHA3_loadState(rateInBytes, lastBlock, s);
   if (!((delimitedSuffix & (uint8_t)0x80U) == (uint8_t)0U) && rem == rateInBytes - (uint32_t)1U)
   {
     Hacl_Impl_SHA3_state_permute(s);
   }
   uint8_t b1[200U] = { 0U };
-  b1[rateInBytes - (uint32_t)1U] = (uint8_t)0x80U;
-  Hacl_Impl_SHA3_loadState(rateInBytes, b1, s);
+  uint8_t *nextBlock = b1;
+  nextBlock[rateInBytes - (uint32_t)1U] = (uint8_t)0x80U;
+  Hacl_Impl_SHA3_loadState(rateInBytes, nextBlock, s);
   Hacl_Impl_SHA3_state_permute(s);
   Lib_Memzero0_memzero(b1, (uint32_t)200U * sizeof (b1[0U]));
   Lib_Memzero0_memzero(b, (uint32_t)200U * sizeof (b[0U]));
