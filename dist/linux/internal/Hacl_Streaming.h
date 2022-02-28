@@ -29,17 +29,16 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "internal/Hacl_Hash_SHA2.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Hash_SHA2.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 typedef struct Hacl_Streaming_SHA2_state_sha2_384_s
 {
   u64 *block_state;

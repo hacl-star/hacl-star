@@ -641,11 +641,11 @@ let rec lemma_constant_on_execution_mem
     )
 #pop-options
 
-let rec lemma_disjoint_location_from_locations_mem1 (a:location) (as:locations) :
+let rec lemma_disjoint_location_from_locations_mem1 (a:location) (as0:locations) :
   Lemma
-    (requires (not (L.mem a as)))
-    (ensures (!!(disjoint_location_from_locations a as))) =
-  match as with
+    (requires (not (L.mem a as0)))
+    (ensures (!!(disjoint_location_from_locations a as0))) =
+  match as0 with
   | [] -> ()
   | x :: xs -> lemma_disjoint_location_from_locations_mem1 a xs
 
@@ -694,14 +694,14 @@ let rec lemma_value_of_const_loc_mem (c:locations_with_values) (l:location_eq) (
   if dfst x = l then () else lemma_value_of_const_loc_mem xs l v
 
 #push-options "--initial_fuel 2 --max_fuel 2 --initial_ifuel 1 --max_ifuel 1"
-let rec lemma_unchanged_at_mem (as:list location) (a:location) (s1 s2:machine_state) :
+let rec lemma_unchanged_at_mem (as0:list location) (a:location) (s1 s2:machine_state) :
   Lemma
     (requires (
-        (unchanged_at as s1 s2) /\
-        (L.mem a as)))
+        (unchanged_at as0 s1 s2) /\
+        (L.mem a as0)))
     (ensures (
         (eval_location a s1 == eval_location a s2))) =
-  match as with
+  match as0 with
   | [_] -> ()
   | x :: xs ->
     if a = x then () else
@@ -782,22 +782,22 @@ let lemma_unchanged_at_combine (a1 a2:locations) (c1 c2:locations_with_values) (
   in
   aux [] a1 [] a2
 
-let lemma_unchanged_except_same_transitive (as:list location) (s1 s2 s3:machine_state) :
+let lemma_unchanged_except_same_transitive (as0:list location) (s1 s2 s3:machine_state) :
   Lemma
     (requires (
-        (unchanged_except as s1 s2) /\
-        (unchanged_except as s2 s3)))
+        (unchanged_except as0 s1 s2) /\
+        (unchanged_except as0 s2 s3)))
     (ensures (
-        (unchanged_except as s1 s3))) = ()
+        (unchanged_except as0 s1 s3))) = ()
 
-let rec lemma_unchanged_at_and_except (as:list location) (s1 s2:machine_state) :
+let rec lemma_unchanged_at_and_except (as0:list location) (s1 s2:machine_state) :
   Lemma
     (requires (
-        (unchanged_at as s1 s2) /\
-        (unchanged_except as s1 s2)))
+        (unchanged_at as0 s1 s2) /\
+        (unchanged_except as0 s1 s2)))
     (ensures (
         (unchanged_except [] s1 s2))) =
-  match as with
+  match as0 with
   | [] -> ()
   | x :: xs ->
     lemma_unchanged_at_and_except xs s1 s2
@@ -1566,9 +1566,9 @@ let rec wrap_diveinat (p:nat) (l:transformation_hints) : transformation_hints =
    See https://github.com/FStarLang/FStar/pull/1822. *)
 val split3: #a:Type -> l:list a -> i:nat{i < L.length l} -> Tot (list a * a * list a)
 let split3 #a l i =
-  let a, as = L.splitAt i l in
+  let a, as0 = L.splitAt i l in
   L.lemma_splitAt_snd_length i l;
-  let b :: c = as in
+  let b :: c = as0 in
   a, b, c
 
 let rec is_empty_code (c:code) : bool =

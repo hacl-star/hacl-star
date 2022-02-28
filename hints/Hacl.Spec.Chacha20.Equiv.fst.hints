@@ -507,7 +507,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "e0147ef2a707aeff3bcbe8880fac77f6"
+      "e81fc3b2dd853079971e0854ad88359a"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.line_lemma_i",
@@ -665,7 +665,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "29df0bfe1212d605f0e0454096386cf0"
+      "9df986b746e0070c00d954caff3b6777"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.quarter_round_lemma_i",
@@ -1755,7 +1755,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "5b3d532bf2d985ee7844d7197b387eed"
+      "834b74ebd138c875fe25aac342154da0"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_i_div_w4",
@@ -2656,10 +2656,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "Spec.Chacha20_interpretation_Tm_arrow_4b33d7ce430158ea8a765f054f81aab2",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
@@ -2668,32 +2666,22 @@
         "equation_Hacl.Spec.Chacha20.Vec.counter",
         "equation_Hacl.Spec.Chacha20.Vec.key",
         "equation_Hacl.Spec.Chacha20.Vec.lanes",
-        "equation_Hacl.Spec.Chacha20.Vec.nonce",
         "equation_Hacl.Spec.Chacha20.Vec.setup1",
         "equation_Hacl.Spec.Chacha20.Vec.size_block",
         "equation_Hacl.Spec.Chacha20.Vec.size_key",
-        "equation_Hacl.Spec.Chacha20.Vec.size_nonce",
         "equation_Hacl.Spec.Chacha20.Vec.transpose_state",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
         "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.numbytes",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint32",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntVector.width",
         "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
         "equation_Lib.Sequence.seq", "equation_Prims.nat",
         "equation_Spec.AES.elem", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.Chacha20.block",
-        "equation_Spec.Chacha20.chacha20_add_counter",
-        "equation_Spec.Chacha20.chacha20_core",
-        "equation_Spec.Chacha20.chacha20_encrypt_block",
         "equation_Spec.Chacha20.chacha20_init",
-        "equation_Spec.Chacha20.counter", "equation_Spec.Chacha20.rounds",
-        "equation_Spec.Chacha20.shuffle",
+        "equation_Spec.Chacha20.counter",
         "equation_Spec.Chacha20.size_block",
-        "equation_Spec.Chacha20.size_key",
-        "equation_Spec.Chacha20.size_nonce", "equation_Spec.Chacha20.state",
-        "equation_Spec.Chacha20.sum_state",
+        "equation_Spec.Chacha20.size_key", "equation_Spec.Chacha20.state",
         "equation_Spec.GaloisField.felem", "equation_Spec.GaloisField.gf",
-        "function_token_typing_Lib.IntTypes.uint32",
         "function_token_typing_Spec.AES.elem",
         "function_token_typing_Spec.Chacha20.state", "int_inversion",
         "int_typing", "lemma_FStar.Seq.Base.lemma_eq_elim",
@@ -2701,22 +2689,16 @@
         "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
-        "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_00db4a5c18abaae9a3787937e850b5f3",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
-        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_42301dcb830ffc7b7fa39e72eb736b5b",
         "refinement_interpretation_Tm_refine_50745f4abd3b1f3a36148d2dfd3f8dde",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_87f4f4d27aa724cb70fe8fdc53664aca",
         "refinement_interpretation_Tm_refine_8f5bacb69a016785e5356e99e7760edf",
-        "refinement_interpretation_Tm_refine_90cd95ca0632502fc3300a400d8c5438",
-        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
@@ -2725,18 +2707,12 @@
         "typing_Hacl.Spec.Chacha20.Vec.chacha20_init",
         "typing_Hacl.Spec.Chacha20.Vec.setup1",
         "typing_Hacl.Spec.Chacha20.Vec.transpose_state",
-        "typing_Lib.IntTypes.add_mod", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.mk_int", "typing_Lib.Sequence.index",
-        "typing_Lib.Sequence.upd", "typing_Spec.AES.gf8",
+        "typing_Lib.Sequence.index", "typing_Spec.AES.gf8",
         "typing_Spec.Chacha20.chacha20_encrypt_block",
-        "typing_Spec.Chacha20.rounds", "typing_Spec.Chacha20.sum_state",
-        "typing_Spec.Chacha20.xor_block",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "55106c4d558482ffe64fce55b5169ed7"
+      "271d59cb74c3e4ca389c52e771493d81"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_map_blocks_multi_vec_equiv_pre_k",
@@ -4030,7 +4006,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "4e618bb61796d50919cbd999348a9240"
+      "c4a825ca2b01242c704517bf174fe90c"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.chacha20_map_blocks_vec_equiv_pre_k",
@@ -4169,7 +4145,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "6c6f8e06a8fc85a78f76022e5172f493"
+      "82dc87954e79848323ac89cce65e218f"
     ],
     [
       "Hacl.Spec.Chacha20.Equiv.lemma_chacha20_vec_equiv",

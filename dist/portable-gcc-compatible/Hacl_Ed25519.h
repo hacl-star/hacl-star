@@ -29,7 +29,10 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "Hacl_Streaming_SHA2.h"
@@ -38,10 +41,6 @@ extern "C" {
 #include "Hacl_Bignum25519_51.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 /* SNIPPET_START: Hacl_Ed25519_sign */
 
 void Hacl_Ed25519_sign(uint8_t *signature, uint8_t *priv, uint32_t len, uint8_t *msg);

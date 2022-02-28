@@ -29,7 +29,10 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "Lib_Memzero0.h"
@@ -37,10 +40,6 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 typedef struct Hacl_HMAC_DRBG_state_s
 {
   uint8_t *k;

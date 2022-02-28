@@ -24,12 +24,11 @@
 
 #ifndef __Test_H
 #define __Test_H
-
+#include "kremlin/internal/compat.h"
 
 
 
 #include "kremlib.h"
-#include "kremlin/internal/compat.h"
 exit_code main();
 
 

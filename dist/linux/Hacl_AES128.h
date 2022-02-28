@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 extern void Hacl_AES128_aes128_key_expansion(u8 *key, u8 *expanded_key);
 
 extern void Hacl_AES128_aes128_encrypt_block(u16 *cipher, u16 *plain, u8 *expanded_key);

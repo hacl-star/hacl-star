@@ -29,7 +29,10 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "Lib_Memzero0.h"
@@ -37,10 +40,6 @@ extern "C" {
 #include "Hacl_SHA3.h"
 #include "Hacl_Frodo_KEM.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 extern u32 Hacl_Frodo1344_crypto_bytes;
 
 extern u32 Hacl_Frodo1344_crypto_publickeybytes;

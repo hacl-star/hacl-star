@@ -29,7 +29,10 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "internal/Hacl_Spec.h"
@@ -38,10 +41,6 @@ extern "C" {
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 /* SNIPPET_START: Hacl_Impl_P256_LowLevel_toUint8 */
 
 void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);

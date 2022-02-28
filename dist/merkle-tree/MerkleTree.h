@@ -29,14 +29,14 @@
 extern "C" {
 #endif
 
-
-
-
-
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
+
+
+
+
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 
 typedef struct LowStar_Vector_vector_str___uint8_t__s

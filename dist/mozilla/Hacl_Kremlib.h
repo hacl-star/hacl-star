@@ -29,14 +29,14 @@
 extern "C" {
 #endif
 
-
-
-
-
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include <stdbool.h>
+
+
+
+
 static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
 
 static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);

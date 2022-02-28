@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-
+#include <string.h>
+#include "kremlin/internal/types.h"
+#include "kremlin/lowstar_endianness.h"
+#include "kremlin/internal/target.h"
 
 
 #include "Hacl_Spec.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
 u32 Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
 
 u32 Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);
