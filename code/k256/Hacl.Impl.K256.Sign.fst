@@ -21,6 +21,7 @@ open Hacl.Impl.K256.Point
 open Hacl.Impl.K256.PointMul
 
 module BL = Hacl.Spec.K256.Field52.Lemmas
+module BB = Hacl.Bignum.Base
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -121,8 +122,10 @@ let ecdsa_sign_hashed_msg r s m private_key k =
   store_qelem r r_q;
   store_qelem s s_q;
 
-  let is_r_zero = is_qelem_zero_vartime r_q in
-  let is_s_zero = is_qelem_zero_vartime s_q in
-  let b =  if is_r_zero || is_s_zero then false else true in
+  let is_r_zero = is_qelem_zero r_q in
+  let is_s_zero = is_qelem_zero s_q in
+  let b =
+    if BB.unsafe_bool_of_limb is_r_zero || BB.unsafe_bool_of_limb is_s_zero
+    then false else true in
   pop_frame ();
   b

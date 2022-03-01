@@ -52,12 +52,6 @@ val is_felem_ge_prime_vartime5_lemma: f:felem5 -> Lemma
   (requires felem_fits5 f (1,1,1,1,1))
   (ensures  is_felem_ge_prime_vartime5 f == (as_nat5 f >= S.prime))
 
-
-val is_felem_lt_vartime5_lemma: f1:felem5 -> f2:felem5 -> Lemma
-  (requires felem_fits5 f1 (1,1,1,1,1) /\ felem_fits5 f2 (1,1,1,1,1))
-  (ensures  is_felem_lt_vartime5 f1 f2 == (as_nat5 f1 < as_nat5 f2))
-
-
 val is_felem_lt_prime_minus_order_vartime5_lemma: f:felem5 -> Lemma
   (requires felem_fits5 f (1,1,1,1,1))
   (ensures  is_felem_lt_prime_minus_order_vartime5 f == (as_nat5 f < S.prime - S.q))

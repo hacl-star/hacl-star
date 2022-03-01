@@ -60,8 +60,7 @@ val ecdsa_verify_qelem (res p:point) (z r s:QA.qelem) : Stack unit
    (let sinv = S.qinv (QA.qas_nat h0 s) in
     let u1 = S.qmul (QA.qas_nat h0 z) sinv in
     let u2 = S.qmul (QA.qas_nat h0 r) sinv in
-    S.to_aff_point (point_eval h1 res) ==
-    S.to_aff_point (S.point_mul_double_g u1 u2 (point_eval h0 p))))
+    point_eval h1 res == S.point_mul_double_g u1 u2 (point_eval h0 p)))
 
 let ecdsa_verify_qelem res p z r s =
   push_frame ();

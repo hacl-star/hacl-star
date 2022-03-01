@@ -24,12 +24,9 @@ module BB = Hacl.Bignum.Base
 module SN = Hacl.Spec.Bignum
 module SD = Hacl.Spec.Bignum.Definitions
 
+include Hacl.Spec.K256.Scalar
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
-
-(**
-  This is a naive implementation of field arithmetic for testing purposes
-*)
 
 
 let make_u64_4 out (f0, f1, f2, f3) =
@@ -38,11 +35,7 @@ let make_u64_4 out (f0, f1, f2, f3) =
   out.(2ul) <- f2;
   out.(3ul) <- f3;
   let h = ST.get () in
-  SD.bn_eval_unfold_i (as_seq h out) 4;
-  SD.bn_eval_unfold_i (as_seq h out) 3;
-  SD.bn_eval_unfold_i (as_seq h out) 2;
-  SD.bn_eval_unfold_i (as_seq h out) 1;
-  SD.bn_eval0 (as_seq h out)
+  qas_nat4_is_qas_nat (as_seq h out)
 
 
 let make_order_k256 () =
@@ -154,22 +147,33 @@ let create_qelem () =
   create qnlimb (u64 0)
 
 
-(* TODO: make bn_is_zero vartime *)
+[@CInline]
+let is_qelem_zero f =
+  let h0 = ST.get () in
+  SN.bn_is_zero_mask_lemma (as_seq h0 f);
+  BN.bn_is_zero_mask qnlimb f
+
+
 [@CInline]
 let is_qelem_zero_vartime f =
-  let h0 = ST.get () in
-  let m = BN.bn_is_zero_mask qnlimb f in
-  SN.bn_is_zero_mask_lemma (as_seq h0 f);
-  BB.unsafe_bool_of_limb m
+  let h = ST.get () in
+  qas_nat4_is_qas_nat (as_seq h f);
+
+  let (f0,f1,f2,f3) = (f.(0ul), f.(1ul), f.(2ul), f.(3ul)) in
+  is_qelem_zero_vartime4_lemma (f0,f1,f2,f3);
+  is_qelem_zero_vartime4 (f0,f1,f2,f3)
 
 
-(* TODO: make is_qelem_eq vartime *)
 [@CInline]
 let is_qelem_eq_vartime f1 f2 =
-  let h0 = ST.get () in
-  let m = BN.bn_eq_mask qnlimb f1 f2 in
-  SN.bn_eq_mask_lemma (as_seq h0 f1) (as_seq h0 f2);
-  BB.unsafe_bool_of_limb m
+  let h = ST.get () in
+  qas_nat4_is_qas_nat (as_seq h f1);
+  qas_nat4_is_qas_nat (as_seq h f2);
+
+  let (a0,a1,a2,a3) = (f1.(0ul), f1.(1ul), f1.(2ul), f1.(3ul)) in
+  let (b0,b1,b2,b3) = (f2.(0ul), f2.(1ul), f2.(2ul), f2.(3ul)) in
+  is_qelem_eq_vartime4_lemma (a0,a1,a2,a3) (b0,b1,b2,b3);
+  is_qelem_eq_vartime4 (a0,a1,a2,a3) (b0,b1,b2,b3)
 
 
 [@CInline]
@@ -179,23 +183,16 @@ let load_qelem f b =
   BN.bn_from_bytes_be 32ul b f
 
 
-(* TODO: make bn_lt_mask vartime *)
 [@CInline]
 let load_qelem_vartime f b =
-  push_frame ();
-  let n = create qnlimb (u64 0) in
-  make_u64_4 n (make_order_k256 ());
+  load_qelem f b;
 
-  let h0 = ST.get () in
-  SN.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
-  BN.bn_from_bytes_be 32ul b f;
-  let h1 = ST.get () in
-
+  let h = ST.get () in
+  qas_nat4_is_qas_nat (as_seq h f);
   let is_zero = is_qelem_zero_vartime f in
-  let is_lt_q = BN.bn_lt_mask qnlimb f n in
-  SN.bn_lt_mask_lemma (as_seq h1 f) (as_seq h1 n);
-  let is_lt_q_b = BB.unsafe_bool_of_limb is_lt_q in
-  pop_frame ();
+  let (a0,a1,a2,a3) = (f.(0ul), f.(1ul), f.(2ul), f.(3ul)) in
+  let is_lt_q_b = is_qelem_lt_q_vartime4 (a0,a1,a2,a3) in
+  is_qelem_lt_q_vartime4_lemma (a0,a1,a2,a3);
   not is_zero && is_lt_q_b
 
 
@@ -203,9 +200,7 @@ let load_qelem_vartime f b =
 let load_qelem_modq f b =
   push_frame ();
   let tmp = create qnlimb (u64 0) in
-  let h0 = ST.get () in
-  SN.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
-  BN.bn_from_bytes_be 32ul b f;
+  load_qelem f b;
   copy tmp f;
   modq_short f tmp;
   pop_frame ()

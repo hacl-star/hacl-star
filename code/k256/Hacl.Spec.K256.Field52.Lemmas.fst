@@ -68,9 +68,6 @@ let is_felem_ge_prime_vartime5_lemma f =
   LD.lemma_as_nat_bound p
 
 
-let is_felem_lt_vartime5_lemma f1 f2 = ()
-
-
 let is_felem_lt_prime_minus_order_vartime5_lemma f =
   assert_norm (S.prime - S.q =
     0xda1722fc9baee + 0x1950b75fc4402 * pow52 + 0x1455123 * pow104)
@@ -142,6 +139,15 @@ let lemma_mul_sub mc a b c =
   assert (felem_fits1 r (2 * v b))
 
 
+val lemma_ab_lt_cd (a b c d:nat) : Lemma
+  (requires a <= c /\ b <= d)
+  (ensures a * b <= c * d)
+
+let lemma_ab_lt_cd a b c d =
+  Math.Lemmas.lemma_mult_le_left a b d;
+  Math.Lemmas.lemma_mult_le_right d a c
+
+
 val lemma_mul_sub_last (mc:nat) (a b c:uint64) : Lemma
   (requires
     v a <= max48 /\ max48 <= v a * 2 /\ v c <= mc * max48 /\
@@ -152,19 +158,19 @@ val lemma_mul_sub_last (mc:nat) (a b c:uint64) : Lemma
 
 let lemma_mul_sub_last mc a b c =
   let r = a *. u64 2 *. b -. c in
-  assert (v c <= mc * max48);
-  Math.Lemmas.lemma_mult_le_left mc max48 (v a * 2);
-  Math.Lemmas.lemma_mult_le_right (v a * 2) mc (v b);
-  assert (mc * max48 <= v b * (v a * 2));
-  assert (v c <= v a * 2 * v b);
 
+  assert (v c <= mc * max48);
+  lemma_ab_lt_cd mc max48 (v b) (v a * 2);
+  assert (v c <= v b * (v a * 2));
+
+  assert (v a * 2 * v b - v c <= v a * 2 * v b);
   Math.Lemmas.paren_mul_right (v a) 2 (v b);
-  Math.Lemmas.lemma_mult_le_right (2 * v b) (v a) max48;
-  assert (v a * 2 * v b - v c <= max48 * (2 * v b));
-  Math.Lemmas.lemma_mult_le_left max48 (2 * v b) 65536;
+  lemma_ab_lt_cd (v a) (2 * v b) max48 65536;
   assert_norm (65536 * max48 < pow2 64);
   Math.Lemmas.small_mod (v a * 2 * v b - v c) (pow2 64);
   assert (v r = v a * 2 * v b - v c);
+
+  lemma_ab_lt_cd (v a) (2 * v b) max48 (2 * v b);
   assert (felem_fits_last1 r (2 * v b))
 
 
