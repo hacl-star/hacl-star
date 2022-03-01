@@ -29,11 +29,9 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
@@ -41,7 +39,8 @@ extern "C" {
 #include "Hacl_Kremlib.h"
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 typedef struct EverCrypt_CTR_state_s_s EverCrypt_CTR_state_s;
 
 bool

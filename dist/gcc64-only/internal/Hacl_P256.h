@@ -29,19 +29,18 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "lib_intrinsics.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Kremlib.h"
 #include "../Hacl_P256.h"
-
+#include "evercrypt_targetconfig.h"
+#include "lib_intrinsics.h"
+#include "libintvector.h"
 void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
 
 void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i);

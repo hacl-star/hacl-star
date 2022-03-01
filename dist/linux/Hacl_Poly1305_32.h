@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "Hacl_Kremlib.h"
-
+#include "libintvector.h"
 extern u32 Hacl_Poly1305_32_blocklen;
 
 typedef u64 *Hacl_Poly1305_32_poly1305_ctx;

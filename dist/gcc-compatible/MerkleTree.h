@@ -29,17 +29,16 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 typedef struct LowStar_Vector_vector_str___uint8_t__s
 {
   uint32_t sz;

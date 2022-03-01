@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 
-
+#include "libintvector.h"
 extern void Lib_PrintBuffer_print_bytes(u32 len, u8 *buf);
 
 extern void Lib_PrintBuffer_print_compare(u32 len, u8 *buf0, u8 *buf1);

@@ -29,17 +29,16 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include <stdbool.h>
 
 
 #include "Hacl_Poly1305_256.h"
 #include "Hacl_Kremlib.h"
 #include "Hacl_Chacha20_Vec256.h"
-
+#include "libintvector.h"
 void
 Hacl_Chacha20Poly1305_256_aead_encrypt(
   uint8_t *k,

@@ -157,8 +157,8 @@ let upd_taint_map_arg (a:arg) (tm:taint_map) : GTot taint_map =
 let init_taint : taint_map = fun r -> Public
 
 [@__reduce__]
-let mk_taint (as:arg_list_sb) (tm:taint_map) : GTot taint_map =
-  List.fold_right_gtot as upd_taint_map_arg init_taint
+let mk_taint (args:arg_list_sb) (tm:taint_map) : GTot taint_map =
+  List.fold_right_gtot args upd_taint_map_arg init_taint
 
 let taint_of_arg (a:arg) =
   let (| tag, x |) = a in

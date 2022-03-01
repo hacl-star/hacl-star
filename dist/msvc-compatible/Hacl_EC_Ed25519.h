@@ -29,17 +29,16 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum25519_51.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 void Hacl_EC_Ed25519_mk_felem_zero(uint64_t *b);
 
 void Hacl_EC_Ed25519_mk_felem_one(uint64_t *b);

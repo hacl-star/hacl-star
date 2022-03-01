@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
 KRML_DEPRECATED("random_crypto")
 
 extern bool Lib_RandomBuffer_System_randombytes(uint8_t *buf, uint32_t len);

@@ -29,17 +29,16 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 typedef Spec_Hash_Definitions_hash_alg Hacl_HMAC_DRBG_supported_alg;
 
 extern uint32_t Hacl_HMAC_DRBG_reseed_interval;

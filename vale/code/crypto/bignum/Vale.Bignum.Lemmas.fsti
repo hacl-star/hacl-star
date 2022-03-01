@@ -6,25 +6,25 @@ open Vale.Def.Words_s
 open Vale.Bignum.Defs
 unfold let (.[]) = Seq.index
 
-let rec seq_add_c (#n:nat) (as bs:seq (natN n)) (c0:nat1) (i:nat) : Pure nat1
-  (requires length as == length bs /\ i <= length as)
+let rec seq_add_c (#n:nat) (as0 bs:seq (natN n)) (c0:nat1) (i:nat) : Pure nat1
+  (requires length as0 == length bs /\ i <= length as0)
   (ensures fun _ -> True)
   =
-  if i = 0 then c0 else add_hi as.[i - 1] bs.[i - 1] (seq_add_c as bs c0 (i - 1))
+  if i = 0 then c0 else add_hi as0.[i - 1] bs.[i - 1] (seq_add_c as0 bs c0 (i - 1))
 
-let seq_add_i (#n:nat) (as bs:seq (natN n)) (c0:nat1) (i:nat) : Pure (natN n)
-  (requires length as == length bs /\ i < length as)
+let seq_add_i (#n:nat) (as0 bs:seq (natN n)) (c0:nat1) (i:nat) : Pure (natN n)
+  (requires length as0 == length bs /\ i < length as0)
   (ensures fun _ -> True)
   =
-  add_lo as.[i] bs.[i] (seq_add_c as bs c0 i)
+  add_lo as0.[i] bs.[i] (seq_add_c as0 bs c0 i)
 
-// as + bs
-let seq_add (#n:nat) (as bs:seq (natN n)) (c0:nat1) : Pure (seq (natN n) & nat1)
-  (requires length as == length bs)
-  (ensures fun (xs, _) -> length xs == length as)
+// as0 + bs
+let seq_add (#n:nat) (as0 bs:seq (natN n)) (c0:nat1) : Pure (seq (natN n) & nat1)
+  (requires length as0 == length bs)
+  (ensures fun (xs, _) -> length xs == length as0)
   =
-  let f (i:nat{i < length as}) = seq_add_i as bs c0 i in
-  (init (length as) f, seq_add_c as bs c0 (length as))
+  let f (i:nat{i < length as0}) = seq_add_i as0 bs c0 i in
+  (init (length as0) f, seq_add_c as0 bs c0 (length as0))
 
 let last_carry (a b:nat) (c:nat1) : int =
   if c = 0 then 0 else pow_int a b
@@ -59,33 +59,33 @@ val lemma_pow_nat (a:nat) (b:nat) : Lemma (0 <= pow_int a b)
 val lemma_sum_pow_seq_bound (#n:nat) (s:seq (natN n)) : Lemma
   (ensures 0 <= sum_pow_seq s /\ sum_pow_seq s < pow_int n (length s))
 
-let rec seq_add_is (#n:nat) (as bs:seq (natN n)) (c0:nat1) (i:nat) : Pure Type0
-  (requires length as == length bs /\ i <= length as)
+let rec seq_add_is (#n:nat) (as0 bs:seq (natN n)) (c0:nat1) (i:nat) : Pure Type0
+  (requires length as0 == length bs /\ i <= length as0)
   (ensures fun _ -> True)
   =
   if i = 0 then True else
-  seq_add_is as bs c0 (i - 1) /\ (fst (seq_add as bs c0)).[i - 1] == seq_add_i as bs c0 (i - 1)
+  seq_add_is as0 bs c0 (i - 1) /\ (fst (seq_add as0 bs c0)).[i - 1] == seq_add_i as0 bs c0 (i - 1)
 
-unfold let seq_add_is_norm (#n:nat) (as bs:seq (natN n)) (c0:nat1) (i:nat) : Pure Type0
-  (requires length as == length bs /\ i <= length as)
+unfold let seq_add_is_norm (#n:nat) (as0 bs:seq (natN n)) (c0:nat1) (i:nat) : Pure Type0
+  (requires length as0 == length bs /\ i <= length as0)
   (ensures fun _ -> True)
   =
-  norm [iota; zeta; primops; delta_only [`%seq_add_is]] (seq_add_is as bs c0 i)
+  norm [iota; zeta; primops; delta_only [`%seq_add_is]] (seq_add_is as0 bs c0 i)
 
-val lemma_seq_add_is_norm (#n:nat) (as bs:seq (natN n)) (c0:nat1) (i:nat) : Lemma
-  (requires length as == length bs /\ i <= length as)
-  (ensures seq_add_is as bs c0 i == seq_add_is_norm as bs c0 i)
+val lemma_seq_add_is_norm (#n:nat) (as0 bs:seq (natN n)) (c0:nat1) (i:nat) : Lemma
+  (requires length as0 == length bs /\ i <= length as0)
+  (ensures seq_add_is as0 bs c0 i == seq_add_is_norm as0 bs c0 i)
 
 val lemma_last_carry_mul (a b:nat) (c:nat1) : Lemma (last_carry a b c == c * pow_int a b)
 
 val lemma_add_lo_mul_right (#n:nat) (a b:natN n) (c:nat1) (m:int) : Lemma
   (add_lo a b c * m == (let x = a * m + b * m + c * m in if a + b + c < n then x else x - n * m))
 
-val lemma_seq_add (#n:nat) (as bs:seq (natN n)) (c0:nat1) : Lemma
-  (requires length bs == length as)
+val lemma_seq_add (#n:nat) (as0 bs:seq (natN n)) (c0:nat1) : Lemma
+  (requires length bs == length as0)
   (ensures (
-    let (xs, ci) = seq_add as bs c0 in
-    sum_pow_seq xs + last_carry n (length as) ci == sum_pow_seq as + sum_pow_seq bs + c0
+    let (xs, ci) = seq_add as0 bs c0 in
+    sum_pow_seq xs + last_carry n (length as0) ci == sum_pow_seq as0 + sum_pow_seq bs + c0
   ))
 
 val lemma_seq_scale_carry (#n:nat) (a:natN n) (bs:seq (natN n)) (d:natN n) : Lemma

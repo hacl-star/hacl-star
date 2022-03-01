@@ -29,11 +29,9 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
@@ -41,7 +39,8 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_SHA3.h"
 #include "Hacl_Kremlib.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 static inline void
 Hacl_Keccak_shake128_4x(
   uint32_t input_len,

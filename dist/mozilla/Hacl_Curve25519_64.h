@@ -29,10 +29,9 @@
 extern "C" {
 #endif
 
-#include "curve25519-inline.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include <stdbool.h>
 
 

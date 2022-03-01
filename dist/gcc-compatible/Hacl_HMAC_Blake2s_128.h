@@ -29,16 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "Hacl_Impl_Blake2_Constants.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 void
 Hacl_HMAC_Blake2s_128_compute_blake2s_128(
   uint8_t *dst,

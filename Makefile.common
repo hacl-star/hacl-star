@@ -83,9 +83,9 @@ BASE_FLAGS = \
   -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*,LowStar.*[rename=Hacl_Kremlib] \
   -bundle 'Meta.*' \
   -minimal \
-  -add-include '"kremlin/internal/types.h"' \
-  -add-include '"kremlin/lowstar_endianness.h"' \
-  -add-include '<string.h>' \
+  -add-early-include '<string.h>' \
+  -add-early-include '"kremlin/internal/types.h"' \
+  -add-early-include '"kremlin/lowstar_endianness.h"' \
   -header $(HACL_HOME)/dist/LICENSE.txt
 
 CURVE_BUNDLE_SLOW= \

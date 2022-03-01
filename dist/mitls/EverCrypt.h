@@ -29,11 +29,9 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
@@ -41,7 +39,8 @@ extern "C" {
 #include "EverCrypt_Vale.h"
 #include "EverCrypt_Hacl.h"
 #include "EverCrypt_AutoConfig2.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 uint32_t EverCrypt_random_init();
 
 void EverCrypt_random_sample(uint32_t len, uint8_t *out);

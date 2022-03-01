@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "../Hacl_Leftovers.h"
-
+#include "evercrypt_targetconfig.h"
 void
 Hacl_Blake2b_32_blake2b(
   uint32_t nn,

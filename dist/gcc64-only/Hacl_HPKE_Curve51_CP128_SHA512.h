@@ -29,11 +29,9 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
@@ -41,7 +39,8 @@ extern "C" {
 #include "Hacl_HKDF.h"
 #include "Hacl_Curve25519_51.h"
 #include "Hacl_Chacha20Poly1305_128.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 uint32_t
 Hacl_HPKE_Curve51_CP128_SHA512_setupBaseI(
   uint8_t *o_pkE,

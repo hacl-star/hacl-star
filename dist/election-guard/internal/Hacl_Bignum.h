@@ -29,17 +29,16 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "lib_intrinsics.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 #include "kremlin/internal/builtin.h"
 
 
 #include "Hacl_Kremlib.h"
-
+#include "evercrypt_targetconfig.h"
+#include "lib_intrinsics.h"
 uint32_t
 Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out);
 
