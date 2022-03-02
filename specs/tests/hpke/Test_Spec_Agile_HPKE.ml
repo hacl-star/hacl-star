@@ -106,10 +106,26 @@ let rec run_encryptions cs enc_ctx js_list =
       let nonce      = get_bytes js "nonce" in
       let plaintext  = get_bytes js "pt" in
   
-      match HPKE.context_seal cs enc_ctx aad plaintext with None -> Error "Seal failed"
+      match HPKE.context_seal cs enc_ctx aad plaintext with
+        None -> Error "Seal failed"
       | Some (new_enc_ctx, comp_ciphertext) ->
           if not (comp_ciphertext = ciphertext) then Error "Ciphertexts differ"
           else run_encryptions cs new_enc_ctx cons
+
+let rec run_decryptions cs dec_ctx js_list =
+  match js_list with
+    [] -> Ok dec_ctx
+  | js::cons ->
+      let aad        = get_bytes js "aad" in
+      let ciphertext = get_bytes js "ct" in
+      let nonce      = get_bytes js "nonce" in
+      let plaintext  = get_bytes js "pt" in
+  
+      match HPKE.context_open cs dec_ctx aad ciphertext with
+        None -> Error "Open failed"
+      | Some (new_dec_ctx, comp_plaintext) ->
+          if not (comp_plaintext = plaintext) then Error "Plaintexts differ"
+          else run_decryptions cs new_dec_ctx cons
 
 let rec run_exports cs enc_ctx js_list =
   match js_list with
@@ -216,19 +232,29 @@ let rec run_testcase i js =
                               else Error "encap seems fine. Error in key_schedule?"
                         end
                       else
-                        (* if there are any in the json, do encryptions using the context *)
+                        (* if there are any in the json, test encryptions and decryptions using the context *)
                         let encryptions = js |> member "encryptions" |> to_list in
                         print_string (" #enc: " ^ Int.to_string (List.length encryptions) ^ " ");
+
                         match run_encryptions cs comp_enc_ctx encryptions with
                           Error e -> print_string (e ^ " "); Error e
                         | Ok _ ->
-                            print_string ("enc OK" );
-                            (* do exports using the context *)
-                            let exports = js |> member "exports" |> to_list in
-                            print_string (" #exp: " ^ Int.to_string (List.length exports) ^ " ");
-                            match run_exports cs comp_enc_ctx exports with
+                            print_string ("enc OK. ");
+
+                            match run_decryptions cs comp_enc_ctx encryptions with
                               Error e -> print_string (e ^ " "); Error e
-                            | Ok b -> Ok b)
+                            | Ok _ ->
+                                print_string ("dec OK. ");
+
+                                (* do exports using the context *)
+                                let exports = js |> member "exports" |> to_list in
+                                print_string (" #exp: " ^ Int.to_string (List.length exports) ^ " ");
+                                match run_exports cs comp_enc_ctx exports with
+                                  Error e -> print_string (e ^ " "); Error e
+                                | Ok b -> 
+                                    print_string (" OK. ");
+
+                                    Ok b)
 
 
 let (main : unit) =
