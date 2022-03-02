@@ -49,7 +49,6 @@ let suite_id_kem cs =
   Seq.append label_KEM (id_kem cs)
 
 val suite_id_hpke: cs:ciphersuite -> Tot (lbytes size_suite_id_hpke)
-// TODO This should already be in big endian each
 let suite_id_hpke cs =
   Seq.append label_HPKE (id_kem cs @| id_kdf cs @| id_aead cs)
 
@@ -61,22 +60,42 @@ let id_of_mode m =
   | Auth -> create 1 (u8 2)
   | AuthPSK -> create 1 (u8 3)
 
-//[@"opaque_to_smt"]
-//let labeled_extract_pred_ikm (a:Hash.algorithm) (label:bytes) (ikm:bytes) (consts:nat) =
-//   Seq.length label_version + Seq.length label + Seq.length ikm + Spec.Hash.Definitions.block_length a + consts <= Spec.Hash.Definitions.max_input_length a
+val labeled_extract:
+    a:hash_algorithm
+  -> suite_id:bytes
+  -> salt:bytes
+  -> label:bytes
+  -> ikm:bytes ->
+  Pure (lbytes (Spec.Hash.Definitions.hash_length a))
+    (requires
+      Spec.Agile.HMAC.keysized a (Seq.length salt) /\
+      labeled_extract_ikm_length_pred a (Seq.length suite_id + Seq.length label + Seq.length ikm))
+    (ensures fun _ -> True)
 
-//let labeled_extract_pred_ikm_elim (a:Hash.algorithm) (label:bytes) (ikm:bytes) (consts:nat) :Lemma
-//  (requires labeled_extract_pred_ikm a label ikm consts)
-//  (ensures Seq.length label_version + Seq.length label + Seq.length ikm + Spec.Hash.Definitions.block_length a + consts <= Spec.Hash.Definitions.max_input_length a)
-//= ()
-////  assert (Seq.length label_version + Seq.length label + Seq.length ikm + Spec.Hash.Definitions.block_length a + consts <= Spec.Hash.Definitions.max_input_length a) by (FStar.Tactics.fail "foobar")
+
+
 
 let labeled_extract a suite_id salt label ikm =
-//  labeled_extract_pred_ikm_elim a label ikm 0;
   let labeled_ikm1 = Seq.append label_version suite_id in
   let labeled_ikm2 = Seq.append labeled_ikm1 label in
   let labeled_ikm3 = Seq.append labeled_ikm2 ikm in
   HKDF.extract a salt labeled_ikm3
+
+val labeled_expand:
+    a:hash_algorithm
+  -> suite_id:bytes
+  -> prk:bytes
+  -> label:bytes
+  -> info:bytes
+  -> l:size_nat ->
+  Pure (lbytes l)
+    (requires
+      Spec.Hash.Definitions.hash_length a <= Seq.length prk /\
+      Spec.Agile.HMAC.keysized a (Seq.length prk) /\
+      labeled_expand_info_length_pred a (Seq.length suite_id + Seq.length label + Seq.length info) /\
+      HKDF.expand_output_length_pred a l)
+    (ensures fun _ -> True)
+
 
 let labeled_expand a suite_id prk label info l =
   let labeled_info1 = nat_to_bytes_be 2 l in
@@ -106,13 +125,13 @@ let extract_and_expand cs dh kem_context =
   let eae_prk = labeled_extract (kem_hash_of_cs cs) (suite_id_kem cs) lbytes_empty label_eae_prk dh in
   labeled_expand (kem_hash_of_cs cs) (suite_id_kem cs) eae_prk label_shared_secret kem_context (size_kem_key cs)
 
-let deserialize_public_key cs pk = match curve_of_cs cs with
+let deserialize_public_key cs pk = match kem_dh_of_cs cs with
   | DH.DH_Curve25519 -> pk
   // Extract the point coordinates by removing the first representation byte
   | DH.DH_P256 -> sub pk 1 64
 
 
-let serialize_public_key cs pk = match curve_of_cs cs with
+let serialize_public_key cs pk = match kem_dh_of_cs cs with
   | DH.DH_Curve25519 -> pk
   // Add the first representation byte to the point coordinates
   | DH.DH_P256 -> create 1 (u8 4) @| pk
@@ -128,9 +147,8 @@ let rec dkp_nist_p cs dkp_prk counter =
     if (v counter) = 255 then None
     else dkp_nist_p cs dkp_prk (counter +! (u8 1))
   else
-    match DH.secret_to_public (curve_of_cs cs) bytes with
+    match DH.secret_to_public (kem_dh_of_cs cs) bytes with
     | Some pk -> Some (bytes, serialize_public_key cs pk)
-    // TODO Could we prove that secret_to_public will not return None in this branch?
     | None ->
       if (v counter) = 255 then None
       else dkp_nist_p cs dkp_prk (counter +! (u8 1))
@@ -138,19 +156,19 @@ let rec dkp_nist_p cs dkp_prk counter =
 
 
 let derive_key_pair cs ikm =
-  match curve_of_cs cs with
+  match kem_dh_of_cs cs with
   | DH.DH_Curve25519 -> begin
     let dkp_prk = labeled_extract (kem_hash_of_cs cs) (suite_id_kem cs) lbytes_empty label_dkp_prk ikm in
     let sk = labeled_expand (kem_hash_of_cs cs) (suite_id_kem cs) dkp_prk label_sk lbytes_empty (size_dh_key cs) in
-    match DH.secret_to_public (curve_of_cs cs) sk with
+    match DH.secret_to_public (kem_dh_of_cs cs) sk with
     | Some pk -> Some (sk, serialize_public_key cs pk)
     end
   | DH.DH_P256 ->
     let dkp_prk = labeled_extract (kem_hash_of_cs cs) (suite_id_kem cs) lbytes_empty label_dkp_prk ikm in
     dkp_nist_p cs dkp_prk (u8 0)
 
-val prepare_dh: cs:ciphersuite -> DH.serialized_point (curve_of_cs cs) -> Tot (lbytes 32)
-let prepare_dh cs dh = match (curve_of_cs cs) with
+val prepare_dh: cs:ciphersuite -> DH.serialized_point (kem_dh_of_cs cs) -> Tot (lbytes 32)
+let prepare_dh cs dh = match (kem_dh_of_cs cs) with
   | DH.DH_Curve25519 -> serialize_public_key cs dh
   | DH.DH_P256 -> sub dh 0 32
 
@@ -158,16 +176,16 @@ let prepare_dh cs dh = match (curve_of_cs cs) with
 val encap:
     cs:ciphersuite
   -> skE:key_dh_secret_s cs
-  -> pkR:DH.serialized_point (curve_of_cs cs) ->
+  -> pkR:DH.serialized_point (kem_dh_of_cs cs) ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
 #set-options "--z3rlimit 300 --fuel 0 --ifuel 2"
 let encap cs skE pkR =
-  match DH.secret_to_public (curve_of_cs cs) skE with
+  match DH.secret_to_public (kem_dh_of_cs cs) skE with
   | None -> None
   | Some pkE ->
     let enc = serialize_public_key cs pkE in
-    match DH.dh (curve_of_cs cs) skE pkR with
+    match DH.dh (kem_dh_of_cs cs) skE pkR with
     | None -> None
     | Some dh ->
       let pkRm = serialize_public_key cs pkR in
@@ -188,10 +206,10 @@ val decap:
 #set-options "--z3rlimit 300 --fuel 0 --ifuel 2"
 let decap cs enc skR =
   let pkE = deserialize_public_key cs enc in
-  match DH.dh (curve_of_cs cs) skR pkE with
+  match DH.dh (kem_dh_of_cs cs) skR pkE with
   | None -> None
   | Some dh ->
-    match DH.secret_to_public (curve_of_cs cs) skR with
+    match DH.secret_to_public (kem_dh_of_cs cs) skR with
     | None -> None
     | Some pkR ->
       let pkRm = serialize_public_key cs pkR in
@@ -202,24 +220,22 @@ let decap cs enc skR =
       let shared_secret = extract_and_expand cs dhm kem_context in
       Some (shared_secret)
 
-// TODO Correctness lemma for encap/decap?
-
 val auth_encap:
     cs:ciphersuite
   -> skE:key_dh_secret_s cs
-  -> pkR:DH.serialized_point (curve_of_cs cs)
+  -> pkR:DH.serialized_point (kem_dh_of_cs cs)
   -> skS:key_dh_secret_s cs ->
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#set-options "--z3rlimit 1000 --fuel 0 --ifuel 4"
+#set-options "--z3rlimit 1000 --fuel 0 --ifuel 2"
 let auth_encap cs skE pkR skS =
-  match DH.secret_to_public (curve_of_cs cs) skE with
+  match DH.secret_to_public (kem_dh_of_cs cs) skE with
   | None -> None
   | Some pkE ->
-    match DH.dh (curve_of_cs cs) skE pkR with
+    match DH.dh (kem_dh_of_cs cs) skE pkR with
     | None -> None
     | Some es ->
-      match DH.dh (curve_of_cs cs) skS pkR with
+      match DH.dh (kem_dh_of_cs cs) skS pkR with
       | None -> None
       | Some ss ->
         let esm = prepare_dh cs es in
@@ -227,7 +243,7 @@ let auth_encap cs skE pkR skS =
         // TODO Do not put 32 literally
         let dh = concat #uint8 #32 #32 esm ssm in
         let enc = serialize_public_key cs pkE in
-        match DH.secret_to_public (curve_of_cs cs) skS with
+        match DH.secret_to_public (kem_dh_of_cs cs) skS with
         | None -> None
         | Some pkS ->
           let pkSm = serialize_public_key cs pkS in
@@ -248,22 +264,22 @@ val auth_decap:
     cs: ciphersuite
   -> enc: key_dh_public_s cs
   -> skR: key_dh_secret_s cs
-  -> pkS: DH.serialized_point (curve_of_cs cs) ->
+  -> pkS: DH.serialized_point (kem_dh_of_cs cs) ->
   Tot (option (key_kem_s cs))
 
 #set-options "--z3rlimit 1000 --fuel 0 --ifuel 4"
 let auth_decap cs enc skR pkS =
   let pkE = deserialize_public_key cs enc in
-  match DH.dh (curve_of_cs cs) skR pkE with
+  match DH.dh (kem_dh_of_cs cs) skR pkE with
   | None -> None
   | Some es ->
-    match DH.dh (curve_of_cs cs) skR pkS with
+    match DH.dh (kem_dh_of_cs cs) skR pkS with
     | None -> None
     | Some ss ->
       let esm = prepare_dh cs es in
       let ssm = prepare_dh cs ss in
       let dh = concat #uint8 #32 #32 esm ssm in
-      match DH.secret_to_public (curve_of_cs cs) skR with
+      match DH.secret_to_public (kem_dh_of_cs cs) skR with
       | None -> None
       | Some pkR ->
         let pkRm = serialize_public_key cs pkR in
@@ -283,20 +299,6 @@ let auth_decap cs enc skR pkS =
 let default_psk = lbytes_empty
 let default_psk_id = lbytes_empty
 
-
-/// def VerifyPSKInputs(mode, psk, psk_id):
-///   got_psk = (psk != default_psk)
-///   if got_psk != (psk_id != default_psk_id):
-///     raise Exception("Inconsistent PSK inputs")
-///
-///   if got_psk and (mode in [mode_base, mode_auth]):
-///     raise Exception("PSK input provided when not needed")
-///   if not got_psk and (mode in [mode_psk, mode_auth_psk]):
-///     raise Exception("Missing required PSK input")///
-///
-/// BB. Implementing this function should not be necessary for us.
-///     We are filtering those using our option type in `ks_derive`.
-
 val build_context:
     cs:ciphersuite
   -> m:mode
@@ -310,27 +312,6 @@ let build_context cs m psk_id_hash info_hash =
   let context = Seq.append context info_hash in
   context
 
-// TODO This could go into hacl-star/lib/Lib.ByteSequence?
-//      However, it should be noted that this function leaks
-//      if the two lbytes have the same length or not, i.e.
-//      it is not constant time. lbytes_eq seems to be.
-let lbytes_equal (#l1:nat) (#l2:size_nat) (b1:bytes{Seq.length b1 = l1}) (b2:lbytes l2) : bool =
-  if not (Seq.length b1 = Seq.length b2) then false else
-  lbytes_eq #l2 b1 b2
-
-(* // TODO use heterogenous equality *)
-(* // TODO replace got_psk and got_psk_id by match on an option type? *)
-(* let verify_psk_inputs (cs:ciphersuite) (m:mode) (psk:psk_s cs) (psk_id:psk_id_s cs) : bool = *)
-(*   let got_psk = not (lbytes_equal #(Seq.length psk) #(size_kdf cs) psk (default_psk cs)) in *)
-(*   let got_psk_id = not (lbytes_equal #(Seq.length psk_id) #0 psk_id (default_psk_id cs)) in *)
-(*   if not (got_psk = got_psk_id) then false else // Inconsistent PSK inputs *)
-(*   match (m, got_psk) with *)
-(*   | (Base, true) -> false     // PSK input provided when not needed *)
-(*   | (Auth, true) -> false     // PSK input provided when not needed *)
-(*   | (PSK, false) -> false     // Missing required PSK input *)
-(*   | (AuthPSK, false) -> false // Missing required PSK input *)
-(*   | _ -> true *)
-
 let verify_psk_inputs (cs:ciphersuite) (m:mode) (opsk:option(psk_s cs & psk_id_s cs)) : bool =
   match (m, opsk) with
   | Base, None -> true
@@ -338,6 +319,9 @@ let verify_psk_inputs (cs:ciphersuite) (m:mode) (opsk:option(psk_s cs & psk_id_s
   | Auth, None -> true
   | AuthPSK, Some _ -> true
   | _, _ -> false
+
+// key and nonce are zero-length if AEAD is Export-Only
+let encryption_context (cs:ciphersuite) = key_aead_s cs & nonce_aead_s cs & seq_aead_s cs & exporter_secret_s cs
 
 val key_schedule:
     cs:ciphersuite
@@ -363,15 +347,12 @@ let key_schedule cs m shared_secret info opsk =
   let exporter_secret = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_exp context (size_kdf cs) in
 
   if is_valid_not_export_only_ciphersuite cs then (
-//    assert (encryption_context cs == encryption_context_full cs);
     let key = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_key context (size_aead_key cs) in
     let base_nonce = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_base_nonce context (size_aead_nonce cs) in
     (key, base_nonce, 0, exporter_secret)
 
   ) else (
     (* if AEAD is Export-Only, then skip computation of key and base_nonce *)
-//    assert (encryption_context cs == encryption_context_export_only cs);
-//    assert (encryption_context cs == lbytes (size_kdf cs));
     assert (size_aead_key cs = 0);
     assert (size_aead_nonce cs = 0);
     (lbytes_empty, lbytes_empty, 0, exporter_secret))
@@ -409,11 +390,9 @@ let context_compute_nonce cs ctx seq =
 
 let context_increment_seq cs ctx =
   let seq = seq_of_ctx cs ctx in
-//  let key, base_nonce, seq, exporter_secret = ctx in
-  if seq = max_seq cs then None else // TODO this should be a pre-condition. “no need for dynamic checks in the Pure world”
+  if seq = max_seq cs then None else
   Some (set_seq cs ctx (seq + 1))
 
-// TODO In the spec world, I could enforce a pre-condition on ctx.seq
 let context_seal cs ctx aad pt =
   let key = key_of_ctx cs ctx in
   let seq = seq_of_ctx cs ctx in
@@ -446,7 +425,7 @@ let setupBaseS cs skE pkR info =
     Some (enc, enc_ctx)
 
 let setupBaseR cs enc skR info =
-  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
+  let pkR = DH.secret_to_public (kem_dh_of_cs cs) skR in
   let shared_secret = decap cs enc skR in
   match pkR, shared_secret with
   | Some pkR, Some shared_secret ->
@@ -494,7 +473,7 @@ let setupPSKS cs skE pkR info psk psk_id =
     Some (enc, enc_ctx)
 
 let setupPSKR cs enc skR info psk psk_id =
-  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
+  let pkR = DH.secret_to_public (kem_dh_of_cs cs) skR in
   let shared_secret = decap cs enc skR in
   match pkR, shared_secret with
   | Some pkR, Some shared_secret ->
@@ -541,7 +520,7 @@ let setupAuthS cs skE pkR info skS =
     Some (enc, enc_ctx)
 
 let setupAuthR cs enc skR info pkS =
-  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
+  let pkR = DH.secret_to_public (kem_dh_of_cs cs) skR in
   let shared_secret = auth_decap cs enc skR pkS in
   match pkR, shared_secret with
   | Some pkR, Some shared_secret ->
@@ -588,7 +567,7 @@ let setupAuthPSKS cs skE pkR info psk psk_id skS =
     Some (enc, enc_ctx)
 
 let setupAuthPSKR cs enc skR info psk psk_id pkS =
-  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
+  let pkR = DH.secret_to_public (kem_dh_of_cs cs) skR in
   let shared_secret = auth_decap cs enc skR pkS in
   match pkR, shared_secret with
   | Some pkR, Some shared_secret ->
