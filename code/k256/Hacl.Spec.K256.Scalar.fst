@@ -3,8 +3,11 @@ module Hacl.Spec.K256.Scalar
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
+open Lib.ByteSequence
 
 module SD = Hacl.Spec.Bignum.Definitions
+module SB = Hacl.Spec.Bignum
+module BB = Hacl.Spec.Bignum.Base
 
 module S = Spec.K256
 
@@ -12,6 +15,8 @@ module S = Spec.K256
 
 inline_for_extraction noextract
 let qelem4 = uint64 & uint64 & uint64 & uint64
+inline_for_extraction noextract
+let qelem_lseq = lseq uint64 4
 
 noextract
 let qas_nat4 (f:qelem4) =
@@ -19,14 +24,21 @@ let qas_nat4 (f:qelem4) =
   v f0 + v f1 * pow2 64 + v f2 * pow2 128 + v f3 * pow2 192
 
 
-val qas_nat4_is_qas_nat (f:lseq uint64 4) :
-  Lemma (SD.bn_v f == qas_nat4 (f.[0], f.[1], f.[2], f.[3]))
-let qas_nat4_is_qas_nat f =
-  SD.bn_eval_unfold_i f 4;
-  SD.bn_eval_unfold_i f 3;
-  SD.bn_eval_unfold_i f 2;
-  SD.bn_eval_unfold_i f 1;
-  SD.bn_eval0 f
+inline_for_extraction noextract
+val make_pow2_256_minus_order_k256: unit -> Pure qelem4
+  (requires True)
+  (ensures  fun r -> qas_nat4 r = pow2 256 - S.q)
+
+let make_pow2_256_minus_order_k256 () =
+  [@inline_let]
+  let r =
+   (u64 0x402da1732fc9bebf,
+    u64 0x4551231950b75fc4,
+    u64 0x1,
+    u64 0x0) in
+
+  assert_norm (qas_nat4 r = pow2 256 - S.q);
+  r
 
 
 inline_for_extraction noextract
@@ -66,37 +78,75 @@ let is_qelem_eq_vartime4 ((a0,a1,a2,a3): qelem4) ((b0,b1,b2,b3): qelem4) : bool 
   u64_to_UInt64 a3 =. u64_to_UInt64 b3
 
 
-val qas_nat4_inj (f1 f2:qelem4) : Lemma
-  (requires qas_nat4 f1 = qas_nat4 f2)
-  (ensures
-   (let (a0,a1,a2,a3) = f1 in
-    let (b0,b1,b2,b3) = f2 in
-    a0 == b0 /\ a1 == b1 /\ a2 == b2 /\ a3 == b3))
+noextract
+val mod_short_lseq: a:qelem_lseq -> qelem_lseq
+let mod_short_lseq a =
+  let (t0,t1,t2,t3) = make_pow2_256_minus_order_k256 () in
+  let tmp = create4 t0 t1 t2 t3 in
+  let c, out = SB.bn_add a tmp in
 
-let qas_nat4_inj f1 f2 =
-  let (a0,a1,a2,a3) = f1 in
-  let (b0,b1,b2,b3) = f2 in
-  let bf1 = create4 a0 a1 a2 a3 in
-  let bf2 = create4 b0 b1 b2 b3 in
-  qas_nat4_is_qas_nat bf1;
-  qas_nat4_is_qas_nat bf2;
-  SD.bn_eval_inj 4 bf1 bf2
+  let mask = u64 0 -. c in
+  map2 (BB.mask_select mask) out a
 
 
-#push-options "--ifuel 1"
-val is_qelem_zero_vartime4_lemma: f:qelem4 ->
-  Lemma (is_qelem_zero_vartime4 f == (qas_nat4 f = 0))
-let is_qelem_zero_vartime4_lemma f = ()
+noextract
+val mul_pow2_256_minus_q_lseq:
+  len:size_nat -> resLen:size_nat{2 + len <= resLen}
+  -> a:lseq uint64 len -> BB.carry U64 & lseq uint64 resLen
 
-val is_qelem_lt_q_vartime4_lemma: f:qelem4 ->
-  Lemma (is_qelem_lt_q_vartime4 f == (qas_nat4 f < S.q))
+let mul_pow2_256_minus_q_lseq len resLen a =
+  let t0 = u64 0x402da1732fc9bebf in
+  let t1 = u64 0x4551231950b75fc4 in
+  let t01 = create2 t0 t1 in
 
-let is_qelem_lt_q_vartime4_lemma f =
-  assert_norm (0xbfd25e8cd0364141 + 0xbaaedce6af48a03b * pow2 64 +
-    0xfffffffffffffffe * pow2 128 + 0xffffffffffffffff * pow2 192 = S.q)
+  // TODO:replace bn_mul with bn_mul1 + bn_mul1_lshift_add?
+  let m0 = SB.bn_mul a t01 in // a * t01
+  let m1 = create resLen (u64 0) in
+  let m1 = update_sub m1 2 len a in // a * t2 * pow2 128
+  SB.bn_add m1 m0 // a * SECP256K1_N_C
 
-val is_qelem_eq_vartime4_lemma: f1:qelem4 -> f2:qelem4 ->
-  Lemma (is_qelem_eq_vartime4 f1 f2 == (qas_nat4 f1 = qas_nat4 f2))
-let is_qelem_eq_vartime4_lemma f1 f2 =
-  if qas_nat4 f1 = qas_nat4 f2 then qas_nat4_inj f1 f2
-#pop-options
+
+noextract
+val mul_pow2_256_minus_q_lseq_add:
+  len:size_nat -> resLen:size_nat{2 + len <= resLen /\ 4 <= resLen}
+  -> a:lseq uint64 len -> e:lseq uint64 4 -> BB.carry U64 & lseq uint64 resLen
+
+let mul_pow2_256_minus_q_lseq_add len resLen a e =
+  let _, m = mul_pow2_256_minus_q_lseq len resLen a in // a * SECP256K1_N_C
+  SB.bn_add m e // e + a * SECP256K1_N_C
+
+
+noextract
+val mod_lseq_before_final: a:lseq uint64 8 -> BB.carry U64 & qelem_lseq
+let mod_lseq_before_final a =
+  // Reduce 512 bits into 385.
+  // m[0..6] = a[0..3] + a[4..7] * SECP256K1_N_C.
+
+  // Reduce 385 bits into 258.
+  // p[0..4] = m[0..3] + m[4..6] * SECP256K1_N_C.
+
+  // Reduce 258 bits into 256.
+  // c, r[0..3] = p[0..3] + p[4] * SECP256K1_N_C.
+
+  // Final reduction of r.
+  // secp256k1_scalar_reduce(r, c + secp256k1_scalar_check_overflow(r));
+
+  // 385 // 64 = 7
+  let _, m = mul_pow2_256_minus_q_lseq_add 4 7 (sub a 4 4) (sub a 0 4) in // a[0..3] + a[4..7] * SECP256K1_N_C
+  // 258 // 64 = 5
+  let _, p = mul_pow2_256_minus_q_lseq_add 3 5 (sub m 4 3) (sub m 0 4) in // m[0..3] + m[4..6] * SECP256K1_N_C
+  mul_pow2_256_minus_q_lseq_add 1 4 (sub p 4 1) (sub p 0 4) // p[0..3] + p[4] * SECP256K1_N_C
+
+
+noextract
+val mod_lseq: a:lseq uint64 8 -> qelem_lseq
+let mod_lseq a =
+  let c0, r = mod_lseq_before_final a in
+
+  [@inline_let]
+  let (t0,t1,t2,t3) = make_pow2_256_minus_order_k256 () in
+  let tmp = create4 t0 t1 t2 t3 in
+  let c1, out = SB.bn_add r tmp in
+
+  let mask = u64 0 -. (c0 +. c1) in
+  map2 (BB.mask_select mask) out r

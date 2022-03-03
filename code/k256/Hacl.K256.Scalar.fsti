@@ -13,7 +13,6 @@ module BSeq = Lib.ByteSequence
 module S = Spec.K256
 
 module BD = Hacl.Bignum.Definitions
-module F = Hacl.K256.Field
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -47,7 +46,8 @@ inline_for_extraction noextract
 val make_u64_4 (out:qelem) (f:qelem4) : Stack unit
   (requires fun h -> live h out)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    qas_nat h1 out == qas_nat4 f)
+    qas_nat h1 out == qas_nat4 f /\
+    (let (f0,f1,f2,f3) = f in as_seq h1 out == LSeq.create4 f0 f1 f2 f3))
 
 
 inline_for_extraction noextract
@@ -125,20 +125,6 @@ val qadd (out f1 f2: qelem) : Stack unit
     qe_lt_q h1 out)
 
 
-// needed for Montgomery arithmetic
-inline_for_extraction noextract
-val make_r2_modq: unit -> Pure qelem4
-  (requires True)
-  (ensures  fun r -> qas_nat4 r = pow2 512 % S.q)
-
-
-// needed for Montgomery arithmetic
-inline_for_extraction noextract
-val make_mu0 : unit -> Pure uint64
-  (requires True)
-  (ensures  fun mu -> (1 + S.q * v mu) % pow2 64 = 0)
-
-
 val qmul (out f1 f2: qelem) : Stack unit
   (requires fun h ->
     live h out /\ live h f1 /\ live h f2 /\
@@ -146,4 +132,13 @@ val qmul (out f1 f2: qelem) : Stack unit
     qe_lt_q h f1 /\ qe_lt_q h f2)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     qas_nat h1 out == S.qmul (qas_nat h0 f1) (qas_nat h0 f2) /\
+    qe_lt_q h1 out)
+
+
+val qsqr (out f: qelem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ eq_or_disjoint out f /\
+    qe_lt_q h f)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qas_nat h1 out == S.qmul (qas_nat h0 f) (qas_nat h0 f) /\
     qe_lt_q h1 out)

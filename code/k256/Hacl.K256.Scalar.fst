@@ -13,12 +13,10 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 module S = Spec.K256
-module F = Hacl.K256.Field
+module KL = Hacl.Spec.K256.Scalar.Lemmas
 
 module BD = Hacl.Bignum.Definitions
 module BN = Hacl.Bignum
-module BR = Hacl.Bignum.ModReduction
-module AM = Hacl.Bignum.AlmostMontgomery
 module BB = Hacl.Bignum.Base
 
 module SN = Hacl.Spec.Bignum
@@ -28,6 +26,41 @@ include Hacl.Spec.K256.Scalar
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+[@CInline]
+let bn_add : BN.bn_add_st U64 = BN.bn_add
+
+//inline_for_extraction noextract
+//let kn = BN.mk_runtime_bn U64 qnlimb
+
+let add4: BN.bn_add_eq_len_st U64 qnlimb =
+  BN.bn_add_eq_len qnlimb
+
+let sub4: BN.bn_sub_eq_len_st U64 qnlimb =
+  BN.bn_sub_eq_len qnlimb
+
+let add_mod4: BN.bn_add_mod_n_st U64 qnlimb =
+  BN.bn_add_mod_n qnlimb
+
+let sub_mod4: BN.bn_sub_mod_n_st U64 qnlimb =
+  BN.bn_sub_mod_n qnlimb
+
+let mul4 (a:BD.lbignum U64 qnlimb) : BN.bn_karatsuba_mul_st U64 qnlimb a =
+  BN.bn_mul qnlimb qnlimb a
+
+let sqr4 (a:BD.lbignum U64 qnlimb) : BN.bn_karatsuba_sqr_st U64 qnlimb a =
+  BN.bn_sqr qnlimb a
+
+inline_for_extraction noextract
+instance kn: BN.bn U64 = {
+  BN.len = qnlimb;
+  BN.add = add4;
+  BN.sub = sub4;
+  BN.add_mod_n = add_mod4;
+  BN.sub_mod_n = sub_mod4;
+  BN.mul = mul4;
+  BN.sqr = sqr4
+}
+
 
 let make_u64_4 out (f0, f1, f2, f3) =
   out.(0ul) <- f0;
@@ -35,7 +68,8 @@ let make_u64_4 out (f0, f1, f2, f3) =
   out.(2ul) <- f2;
   out.(3ul) <- f3;
   let h = ST.get () in
-  qas_nat4_is_qas_nat (as_seq h out)
+  KL.qas_nat4_is_qas_nat (as_seq h out);
+  assert (Seq.equal (as_seq h out) (LSeq.create4 f0 f1 f2 f3))
 
 
 let make_order_k256 () =
@@ -48,98 +82,6 @@ let make_order_k256 () =
 
   assert_norm (qas_nat4 r = S.q);
   r
-
-
-inline_for_extraction noextract
-val make_pow2_256_minus_order_k256: unit -> Pure qelem4
-  (requires True)
-  (ensures  fun r -> qas_nat4 r = pow2 256 - S.q)
-
-let make_pow2_256_minus_order_k256 () =
-  [@inline_let]
-  let r =
-   (u64 0x402da1732fc9bebf,
-    u64 0x4551231950b75fc4,
-    u64 0x1,
-    u64 0x0) in
-
-  assert_norm (qas_nat4 r = pow2 256 - S.q);
-  r
-
-
-val lemma_check_overflow: b:nat{b < pow2 256} ->
-  Lemma (let overflow = (b + (pow2 256 - S.q)) / pow2 256 in
-    overflow = (if b < S.q then 0 else 1))
-
-let lemma_check_overflow b =
-  let overflow = (b + (pow2 256 - S.q)) / pow2 256 in
-  if b < S.q then begin
-    assert (pow2 256 + b - S.q < pow2 256);
-    assert (pow2 256 - S.q <= pow2 256 + b - S.q);
-    assert_norm (0 < pow2 256 - S.q);
-    Math.Lemmas.small_div (pow2 256 + b - S.q) (pow2 256);
-    assert (overflow = 0) end
-  else begin
-    assert (pow2 256 <= pow2 256 + b - S.q);
-    Math.Lemmas.lemma_div_le (pow2 256) (pow2 256 + b - S.q) (pow2 256);
-    Math.Lemmas.cancel_mul_div 1 (pow2 256);
-    assert (1 <= overflow);
-
-    assert (pow2 256 + b - S.q < pow2 256 + pow2 256 - S.q);
-    assert (pow2 256 + b - S.q <= pow2 256 + pow2 256 - S.q - 1);
-    Math.Lemmas.lemma_div_le (pow2 256 + b - S.q) (pow2 256 + pow2 256 - S.q - 1) (pow2 256);
-    assert_norm ((pow2 256 + pow2 256 - S.q - 1) / pow2 256 = 1);
-    assert (overflow <= 1) end
-
-
-val lemma_get_carry_from_bn_add: r:nat{r < pow2 256} -> c:nat ->
-  Lemma ((r + c * pow2 256) / pow2 256 = c)
-
-let lemma_get_carry_from_bn_add r c =
-  Math.Lemmas.lemma_div_plus r c (pow2 256);
-  Math.Lemmas.small_div r (pow2 256)
-
-
-val modq_short: out:qelem -> a:lbuffer uint64 qnlimb -> Stack unit
-  (requires fun h ->
-    live h a /\ live h out /\ disjoint a out)
-  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    qas_nat h1 out == qas_nat h0 a % S.q)
-
-[@CInline]
-let modq_short out a =
-  push_frame ();
-  let tmp = create qnlimb (u64 0) in
-  make_u64_4 tmp (make_pow2_256_minus_order_k256 ());
-  let h0 = ST.get () in
-  let c = BN.bn_add_eq_len qnlimb a tmp out in
-  let h1 = ST.get () in
-  SN.bn_add_lemma (as_seq h0 a) (as_seq h0 tmp);
-  assert (v c * pow2 256 + qas_nat h1 out = qas_nat h0 a + qas_nat h0 tmp);
-  assert (qas_nat h0 tmp == pow2 256 - S.q);
-
-  [@inline_let]
-  let mask = u64 0 -. c in
-  buf_mask_select out a mask out;
-  let h2 = ST.get () in
-  assert (v mask = (if v c = 0 then 0 else ones_v U64));
-  assert (as_seq h2 out == (if v c = 0 then as_seq h0 a else as_seq h1 out));
-
-  SD.bn_eval_bound (as_seq h0 a) (v qnlimb);
-  SD.bn_eval_bound (as_seq h1 out) (v qnlimb);
-  lemma_check_overflow (qas_nat h0 a);
-  lemma_get_carry_from_bn_add (qas_nat h1 out) (v c);
-  assert (v c = (if qas_nat h0 a < S.q then 0 else 1));
-
-  if qas_nat h0 a < S.q then begin
-    assert (qas_nat h2 out == qas_nat h0 a);
-    Math.Lemmas.small_mod (qas_nat h0 a) S.q end
-  else begin
-    assert (qas_nat h2 out == qas_nat h0 a + (pow2 256 - S.q) - pow2 256);
-    Math.Lemmas.lemma_mod_sub (qas_nat h0 a) S.q 1;
-    assert (qas_nat h2 out % S.q == qas_nat h0 a % S.q);
-    Math.Lemmas.small_mod (qas_nat h2 out) S.q end;
-  pop_frame ()
 
 
 let create_qelem () =
@@ -157,22 +99,22 @@ let is_qelem_zero f =
 [@CInline]
 let is_qelem_zero_vartime f =
   let h = ST.get () in
-  qas_nat4_is_qas_nat (as_seq h f);
+  KL.qas_nat4_is_qas_nat (as_seq h f);
 
   let (f0,f1,f2,f3) = (f.(0ul), f.(1ul), f.(2ul), f.(3ul)) in
-  is_qelem_zero_vartime4_lemma (f0,f1,f2,f3);
+  KL.is_qelem_zero_vartime4_lemma (f0,f1,f2,f3);
   is_qelem_zero_vartime4 (f0,f1,f2,f3)
 
 
 [@CInline]
 let is_qelem_eq_vartime f1 f2 =
   let h = ST.get () in
-  qas_nat4_is_qas_nat (as_seq h f1);
-  qas_nat4_is_qas_nat (as_seq h f2);
+  KL.qas_nat4_is_qas_nat (as_seq h f1);
+  KL.qas_nat4_is_qas_nat (as_seq h f2);
 
   let (a0,a1,a2,a3) = (f1.(0ul), f1.(1ul), f1.(2ul), f1.(3ul)) in
   let (b0,b1,b2,b3) = (f2.(0ul), f2.(1ul), f2.(2ul), f2.(3ul)) in
-  is_qelem_eq_vartime4_lemma (a0,a1,a2,a3) (b0,b1,b2,b3);
+  KL.is_qelem_eq_vartime4_lemma (a0,a1,a2,a3) (b0,b1,b2,b3);
   is_qelem_eq_vartime4 (a0,a1,a2,a3) (b0,b1,b2,b3)
 
 
@@ -188,12 +130,34 @@ let load_qelem_vartime f b =
   load_qelem f b;
 
   let h = ST.get () in
-  qas_nat4_is_qas_nat (as_seq h f);
+  KL.qas_nat4_is_qas_nat (as_seq h f);
   let is_zero = is_qelem_zero_vartime f in
   let (a0,a1,a2,a3) = (f.(0ul), f.(1ul), f.(2ul), f.(3ul)) in
   let is_lt_q_b = is_qelem_lt_q_vartime4 (a0,a1,a2,a3) in
-  is_qelem_lt_q_vartime4_lemma (a0,a1,a2,a3);
+  KL.is_qelem_lt_q_vartime4_lemma (a0,a1,a2,a3);
   not is_zero && is_lt_q_b
+
+
+val modq_short: out:qelem -> a:lbuffer uint64 qnlimb -> Stack unit
+  (requires fun h ->
+    live h a /\ live h out /\ disjoint a out)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    qas_nat h1 out == qas_nat h0 a % S.q)
+
+[@CInline]
+let modq_short out a =
+  push_frame ();
+  let tmp = create qnlimb (u64 0) in
+  [@inline_let]
+  let (t0,t1,t2,t3) = make_pow2_256_minus_order_k256 () in
+  make_u64_4 tmp (t0,t1,t2,t3);
+
+  let h0 = ST.get () in
+  let c = kn.BN.add a tmp out in
+  let mask = u64 0 -. c in
+  map2T qnlimb out (BB.mask_select mask) out a;
+  KL.mod_short_lseq_lemma (as_seq h0 a);
+  pop_frame ()
 
 
 [@CInline]
@@ -220,28 +184,64 @@ let qadd out f1 f2 =
   make_u64_4 n (make_order_k256 ());
 
   let h0 = ST.get () in
-  BN.bn_add_mod_n qnlimb n f1 f2 out;
+  kn.BN.add_mod_n n f1 f2 out;
   SN.bn_add_mod_n_lemma (as_seq h0 n) (as_seq h0 f1) (as_seq h0 f2);
   pop_frame ()
 
 
-(* TODO: check whether barrett reduction is more efficient than montgomery one *)
+val mul_pow2_256_minus_q_add:
+    len:size_t
+  -> resLen:size_t{2 + v len <= v resLen /\ 4 <= v resLen}
+  -> t01:lbuffer uint64 2ul
+  -> a:lbuffer uint64 len
+  -> e:lbuffer uint64 4ul
+  -> res:lbuffer uint64 resLen ->
+  Stack (BB.carry U64)
+  (requires fun h ->
+    live h a /\ live h res /\ live h t01 /\ live h e /\
+    disjoint a res /\ disjoint a t01 /\ disjoint a e /\
+    disjoint res t01 /\ disjoint res e /\ disjoint t01 e /\
+    as_seq h t01 == LSeq.create2 (u64 0x402da1732fc9bebf) (u64 0x4551231950b75fc4) /\
+    as_seq h res == LSeq.create (v resLen) (u64 0))
+  (ensures  fun h0 c h1 -> modifies (loc res) h0 h1 /\
+    (c, as_seq h1 res) ==
+      mul_pow2_256_minus_q_lseq_add (v len) (v resLen) (as_seq h0 a) (as_seq h0 e))
 
-let make_r2_modq () =
-  [@inline_let]
-  let r =
-   (u64 0x896cf21467d7d140,
-    u64 0x741496c20e7cf878,
-    u64 0xe697f5e45bcd07c6,
-    u64 0x9d671cd581c69bc5) in
+[@CInline]
+let mul_pow2_256_minus_q_add len resLen t01 a e res =
+  push_frame ();
+  let tmp = create (len +! 2ul) (u64 0) in
+  BN.bn_mul len 2ul a t01 tmp;
+  update_sub res 2ul len a;
+  let _ = bn_add resLen res (len +! 2ul) tmp res in
+  let c = bn_add resLen res 4ul e res in
+  pop_frame ();
+  c
 
-  assert_norm (qas_nat4 r = pow2 512 % S.q);
-  r
 
+inline_for_extraction noextract
+val modq_before_final:
+    t01:lbuffer uint64 2ul
+  -> a:lbuffer uint64 (2ul *! qnlimb)
+  -> out:qelem ->
+  Stack (BB.carry U64)
+  (requires fun h ->
+    live h a /\ live h out /\ live h t01 /\
+    disjoint a out /\ disjoint a t01 /\ disjoint out t01 /\
+    as_seq h t01 == LSeq.create2 (u64 0x402da1732fc9bebf) (u64 0x4551231950b75fc4) /\
+    as_seq h out == LSeq.create 4 (u64 0))
+  (ensures  fun h0 c h1 -> modifies (loc out) h0 h1 /\
+    (c, as_seq h1 out) == mod_lseq_before_final (as_seq h0 a))
 
-let make_mu0 () =
-  assert_norm ((1 + S.q * 5408259542528602431) % pow2 64 = 0);
-  u64 5408259542528602431
+let modq_before_final t01 a out =
+  push_frame ();
+  let m = create 7ul (u64 0) in
+  let p = create 5ul (u64 0) in
+  let c0 = mul_pow2_256_minus_q_add 4ul 7ul t01 (sub a 4ul 4ul) (sub a 0ul 4ul) m in
+  let c1 = mul_pow2_256_minus_q_add 3ul 5ul t01 (sub m 4ul 3ul) (sub m 0ul 4ul) p in
+  let c2 = mul_pow2_256_minus_q_add 1ul 4ul t01 (sub p 4ul 1ul) (sub p 0ul 4ul) out in
+  pop_frame ();
+  c2
 
 
 val modq: out:qelem -> a:lbuffer uint64 (2ul *! qnlimb) -> Stack unit
@@ -253,15 +253,23 @@ val modq: out:qelem -> a:lbuffer uint64 (2ul *! qnlimb) -> Stack unit
 [@CInline]
 let modq out a =
   push_frame ();
-  let n = create qnlimb (u64 0) in
-  make_u64_4 n (make_order_k256 ());
+  let r = create qnlimb (u64 0) in
+  let tmp = create qnlimb (u64 0) in
+  [@inline_let]
+  let (t0,t1,t2,t3) = make_pow2_256_minus_order_k256 () in
+  make_u64_4 tmp (t0,t1,t2,t3);
 
-  let r2 = create 4ul (u64 0) in
-  make_u64_4 r2 (make_r2_modq ());
+  let t01 = sub tmp 0ul 2ul in
+  let h0 = ST.get () in
+  assert (Seq.equal (as_seq h0 t01) (LSeq.create2 t0 t1));
+  let c0 = modq_before_final t01 a r in
 
-  let mu = make_mu0 () in
+  let c1 = kn.BN.add r tmp out in
+  let mask = u64 0 -. (c0 +. c1) in
+  map2T qnlimb out (BB.mask_select mask) out r;
 
-  BR.bn_mod_slow_precomp (AM.mk_runtime_almost_mont qnlimb) n mu r2 a out;
+  let h1 = ST.get () in
+  KL.mod_lseq_lemma (as_seq h0 a);
   pop_frame ()
 
 
@@ -270,8 +278,20 @@ let qmul out f1 f2 =
   push_frame ();
   let h0 = ST.get () in
   let tmp = create (2ul *! qnlimb) (u64 0) in
-  BN.bn_mul qnlimb qnlimb f1 f2 tmp;
+  kn.BN.mul f1 f2 tmp;
   SN.bn_mul_lemma (as_seq h0 f1) (as_seq h0 f2);
+
+  modq out tmp;
+  pop_frame ()
+
+
+[@CInline]
+let qsqr out f =
+  push_frame ();
+  let h0 = ST.get () in
+  let tmp = create (2ul *! qnlimb) (u64 0) in
+  kn.BN.sqr f tmp;
+  SN.bn_sqr_lemma (as_seq h0 f);
 
   modq out tmp;
   pop_frame ()
