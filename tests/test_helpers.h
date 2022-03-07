@@ -33,6 +33,18 @@ static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
   return ok;
 }
 
+static inline bool compare64(size_t len, uint64_t* comp, uint64_t* exp) {
+  bool ok = true;
+  for (size_t i = 0; i < len; i++)
+    ok = ok & (exp[i] == comp[i]);
+  if (ok)
+    printf("Success!\n");
+  else
+    printf("**FAILED**\n");
+  return ok;
+}
+
+
 
 // For __ppc_get_timebase - note used for now: see below comment
 #if defined(__powerpc64__)
@@ -70,7 +82,7 @@ static __inline__ cycles cpucycles_get(void)
   // in, say, one second).
   // We don't do it for now because it is a bit tricky, we don't really
   // need it for now, and it requires an init() function.
-  // 
+  //
   // If you're interested in computing the number of time base increments
   // per byte, you can uncomment the following line:
   // return __ppc_get_timebase();

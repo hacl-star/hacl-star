@@ -81,6 +81,9 @@ test: $(patsubst %.exe,%.test,$(TARGETS))
 
 curve64-rfc.exe: $(patsubst %.c,%.o,$(wildcard rfc7748_src/*.c))
 
+multiplication-test.exe: multiplication.o multiplication-test.c
+	$(CC) -I. multiplication.o $(CFLAGS) $(LDFLAGS) multiplication-test.c -o multiplication-test.exe
+
 # Note that vec-128-test.exe uses lib/c and not dist/gcc-compatible:
 # this allows to work on and test the vectorized instructions without
 # rebuilding the whole HACL library.
