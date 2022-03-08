@@ -29,6 +29,9 @@ let ( *% ) = fmul
 let finv (x:felem) : felem = M.pow_mod #prime x (prime - 2)
 let ( /% ) (x y:felem) = x *% finv y
 
+let fsqrt (x:felem) : felem = M.pow_mod #prime x ((prime + 1) / 4)
+
+
 ///  Scalar field
 
 // Group order

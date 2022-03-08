@@ -86,10 +86,9 @@ let fsquare_times out a b =
 
 
 inline_for_extraction noextract
-val finv1 (x2 x3 x22 x44 tmp:felem) : Stack unit
+val fexp_44 (x2 x3 x22 x44 tmp:felem) : Stack unit
   (requires fun h ->
-    live h x2 /\ live h x3 /\ live h x22 /\
-    live h x44 /\ live h tmp /\
+    live h x2 /\ live h x3 /\ live h x22 /\ live h x44 /\ live h tmp /\
     disjoint x2 x3 /\ disjoint x2 x22 /\ disjoint x2 x44 /\
     disjoint x2 tmp /\ disjoint x3 x22 /\ disjoint x3 x44 /\
     disjoint x3 tmp /\ disjoint x22 x44 /\ disjoint x22 tmp /\
@@ -105,7 +104,7 @@ val finv1 (x2 x3 x22 x44 tmp:felem) : Stack unit
     feval h1 tmp == _x11 /\ feval h1 x22 == _x22 /\ feval h1 x44 == _x44 /\
     inv_lazy_reduced2 h1 tmp /\ inv_lazy_reduced2 h1 x22 /\ inv_lazy_reduced2 h1 x44))
 
-let finv1 x2 x3 x22 x44 tmp =
+let fexp_44 x2 x3 x22 x44 tmp =
   let h2 = ST.get () in
   fsquare_times tmp x3 3ul;
   fmul tmp tmp x3; // tmp = x6 = S.fmul (fsquare_times x3 3) x3
@@ -134,7 +133,7 @@ let finv1 x2 x3 x22 x44 tmp =
 
 
 inline_for_extraction noextract
-val finv2 (x3 x44 x88 tmp:felem) : Stack unit
+val fexp_223 (x3 x44 x88 tmp:felem) : Stack unit
   (requires fun h ->
     live h x3 /\ live h x44 /\ live h x88 /\ live h tmp /\
     disjoint x3 x44 /\ disjoint x3 x88 /\ disjoint x3 tmp /\
@@ -150,7 +149,7 @@ val finv2 (x3 x44 x88 tmp:felem) : Stack unit
     feval h1 tmp == _x223 /\ feval h1 x88 == _x88 /\
     inv_lazy_reduced2 h1 tmp /\ inv_lazy_reduced2 h1 x88))
 
-let finv2 x3 x44 x88 tmp =
+let fexp_223 x3 x44 x88 tmp =
   let h7 = ST.get () in
   fsquare_times x88 x44 44ul;
   fmul x88 x88 x44; // x88 = S.fmul (fsquare_times x44 44) x44
@@ -173,65 +172,23 @@ let finv2 x3 x44 x88 tmp =
   assert (feval h11 tmp == S.fmul (SI.fsquare_times (feval h10 tmp) 3) (feval h7 x3))
 
 
-inline_for_extraction noextract
-val finv3 (tmp x22 f x2:felem) : Stack unit
+val fexp_223_23 (out x2 f:felem) : Stack unit
   (requires fun h ->
-    live h tmp /\ live h x22 /\ live h f /\ live h x2 /\
-    disjoint tmp x22 /\ disjoint tmp f /\ disjoint tmp x2 /\
-    disjoint x22 f /\ disjoint x22 x2 /\ disjoint f x2 /\
-    inv_lazy_reduced2 h tmp /\ inv_lazy_reduced2 h x22 /\
-    inv_lazy_reduced2 h f /\ inv_lazy_reduced2 h x2)
-  (ensures fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
-   (let _x223 = feval h0 tmp in
-    let _x22 = feval h0 x22 in
-    let _f = feval h0 f in
-    let _x2 = feval h0 x2 in
-    let _r = S.fmul (SI.fsquare_times _x223 23) _x22 in
-    let _r = S.fmul (SI.fsquare_times _r 5) _f in
-    let _r = S.fmul (SI.fsquare_times _r 3) _x2 in
-    let _r = S.fmul (SI.fsquare_times _r 2) _f in
-    feval h1 tmp == _r /\ inv_lazy_reduced2 h1 tmp))
-
-let finv3 tmp x22 f x2 =
-  let h0 = ST.get () in
-  fsquare_times_in_place tmp 23ul;
-  fmul tmp tmp x22; // tmp = r = S.fmul (fsquare_times x223 23) x22
-  let h1 = ST.get () in
-  assert (feval h1 tmp == S.fmul (SI.fsquare_times (feval h0 tmp) 23) (feval h0 x22));
-
-  fsquare_times_in_place tmp 5ul;
-  fmul tmp tmp f; // tmp = r = S.fmul (fsquare_times r 5) f
-  let h2 = ST.get () in
-  assert (feval h2 tmp == S.fmul (SI.fsquare_times (feval h1 tmp) 5) (feval h0 f));
-
-  fsquare_times_in_place tmp 3ul;
-  fmul tmp tmp x2; // tmp = r = S.fmul (fsquare_times r 3) x2
-  let h3 = ST.get () in
-  assert (feval h3 tmp == S.fmul (SI.fsquare_times (feval h2 tmp) 3) (feval h0 x2));
-
-  fsquare_times_in_place tmp 2ul;
-  fmul tmp tmp f; // tmp = r = S.fmul (fsquare_times r 2) f
-  let h4 = ST.get () in
-  assert (feval h4 tmp == S.fmul (SI.fsquare_times (feval h3 tmp) 2) (feval h0 f))
-
-
-inline_for_extraction noextract
-val finv0123 (f x2 x3 x22 x44 x88 tmp:felem) : Stack unit
-  (requires fun h ->
-    live h f /\ live h x2 /\ live h x3 /\ live h x22 /\
-    live h x44 /\ live h x88 /\ live h tmp /\
-    disjoint f x2 /\ disjoint f x3 /\ disjoint f x22 /\
-    disjoint f x44 /\ disjoint f x88 /\ disjoint f tmp /\
-    disjoint x2 x3 /\ disjoint x2 x22 /\ disjoint x2 x44 /\
-    disjoint x2 x88 /\ disjoint x2 tmp /\ disjoint x3 x22 /\
-    disjoint x3 x44 /\ disjoint x3 x88 /\ disjoint x3 tmp /\
-    disjoint x22 x44 /\ disjoint x22 x88 /\ disjoint x22 tmp /\
-    disjoint x44 x88 /\ disjoint x44 tmp /\ disjoint x88 tmp /\
+    live h out /\ live h f /\ live h x2 /\
+    disjoint out f /\ disjoint out x2 /\ disjoint f x2 /\
     inv_lazy_reduced2 h f)
-  (ensures fun h0 _ h1 -> modifies (loc x2 |+| loc x3 |+| loc x22 |+| loc x44 |+| loc x88 |+| loc tmp) h0 h1 /\
-    feval h1 tmp == SI.finv (feval h0 f) /\ inv_lazy_reduced2 h1 tmp)
+  (ensures fun h0 _ h1 -> modifies (loc out |+| loc x2) h0 h1 /\
+    inv_lazy_reduced2 h1 out /\ inv_lazy_reduced2 h1 x2 /\
+    (feval h1 out, feval h1 x2) == SI.fexp_223_23 (feval h0 f))
 
-let finv0123 f x2 x3 x22 x44 x88 tmp =
+[@CInline]
+let fexp_223_23 out x2 f =
+  push_frame ();
+  let x3 = create_felem () in
+  let x22 = create_felem () in
+  let x44 = create_felem () in
+  let x88 = create_felem () in
+
   let h0 = ST.get () in
   fsquare_times x2 f 1ul;
   fmul x2 x2 f; // x2 = S.fmul (fsquare_times f 1) f
@@ -245,42 +202,15 @@ let finv0123 f x2 x3 x22 x44 x88 tmp =
   assert (feval h2 x3 == S.fmul (SI.fsquare_times (feval h1 x2) 1) (feval h0 f));
   assert (modifies (loc x3) h1 h2);
 
-  finv1 x2 x3 x22 x44 tmp;
-  finv2 x3 x44 x88 tmp;
+  fexp_44 x2 x3 x22 x44 out;
+  fexp_223 x3 x44 x88 out;
   let h3 = ST.get () in
-  assert (modifies (loc x22 |+| loc x44 |+| loc x88 |+| loc tmp) h2 h3);
-  finv3 tmp x22 f x2;
+  assert (modifies (loc x22 |+| loc x44 |+| loc x88 |+| loc out) h2 h3);
+
+  fsquare_times_in_place out 23ul;
+  fmul out out x22; // out = r = S.fmul (fsquare_times x223 23) x22
   let h4 = ST.get () in
-  assert (modifies (loc tmp) h3 h4)
-
-
-#push-options "--z3rlimit 150"
-
-inline_for_extraction noextract
-val finv_ (out f: felem) : Stack unit
-  (requires fun h ->
-    live h out /\ live h f /\ disjoint out f /\
-    inv_lazy_reduced2 h f)
-  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    feval h1 out == SI.finv (feval h0 f)  /\
-    inv_lazy_reduced2 h1 out)
-
-let finv_ out f =
-  let h0 = ST.get () in
-  push_frame ();
-  let x2 = create_felem () in
-  let x3 = create_felem () in
-  let x22 = create_felem () in
-  let x44 = create_felem () in
-  let x88 = create_felem () in
-  let tmp = create_felem () in
-
-  finv0123 f x2 x3 x22 x44 x88 tmp;
-  let h1 = ST.get () in
-  assert (feval h1 tmp == SI.finv (feval h0 f) /\ inv_lazy_reduced2 h1 tmp);
-  copy out tmp;
-  let h2 = ST.get () in
-  assert (feval h2 out == SI.finv (feval h0 f) /\ inv_lazy_reduced2 h2 out);
+  assert (feval h4 out == S.fmul (SI.fsquare_times (feval h3 out) 23) (feval h3 x22));
   pop_frame ()
 
 
@@ -296,4 +226,53 @@ val finv (out f: felem) : Stack unit
 let finv out f =
   let h0 = ST.get () in
   SI.finv_is_finv_lemma (feval h0 f);
-  finv_ out f
+  push_frame ();
+  let x2 = create_felem () in
+  fexp_223_23 out x2 f;
+
+  let h1 = ST.get () in
+  fsquare_times_in_place out 5ul;
+  fmul out out f; // out = r = S.fmul (fsquare_times r 5) f
+  let h2 = ST.get () in
+  assert (feval h2 out == S.fmul (SI.fsquare_times (feval h1 out) 5) (feval h0 f));
+
+  fsquare_times_in_place out 3ul;
+  fmul out out x2; // out = r = S.fmul (fsquare_times r 3) x2
+  let h3 = ST.get () in
+  assert (feval h3 out == S.fmul (SI.fsquare_times (feval h2 out) 3) (feval h1 x2));
+
+  fsquare_times_in_place out 2ul;
+  fmul out out f; // out = r = S.fmul (fsquare_times r 2) f
+  let h4 = ST.get () in
+  assert (feval h4 out == S.fmul (SI.fsquare_times (feval h3 out) 2) (feval h0 f));
+  assert (feval h4 out == S.finv (feval h0 f) /\ inv_lazy_reduced2 h4 out);
+  pop_frame ()
+
+
+val fsqrt (out f: felem) : Stack unit
+  (requires fun h ->
+    live h out /\ live h f /\ disjoint out f /\
+    inv_lazy_reduced2 h f)
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    feval h1 out == S.fsqrt (feval h0 f)  /\
+    inv_lazy_reduced2 h1 out)
+
+[@CInline]
+let fsqrt out f =
+  let h0 = ST.get () in
+  SI.fsqrt_is_fsqrt_lemma (feval h0 f);
+  push_frame ();
+  let x2 = create_felem () in
+  fexp_223_23 out x2 f;
+
+  let h1 = ST.get () in
+  fsquare_times_in_place out 6ul;
+  fmul out out x2; // out = r = S.fmul (fsquare_times r 6) x2
+  let h2 = ST.get () in
+  assert (feval h2 out == S.fmul (SI.fsquare_times (feval h1 out) 6) (feval h1 x2));
+
+  fsquare_times_in_place out 2ul;
+  let h3 = ST.get () in
+  assert (feval h3 out == SI.fsquare_times (feval h2 out) 2);
+  assert (feval h3 out == S.fsqrt (feval h0 f) /\ inv_lazy_reduced2 h3 out);
+  pop_frame ()

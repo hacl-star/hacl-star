@@ -45,13 +45,8 @@ let fsquare_times_lemma a b =
   M.lemma_pow_nat_mod_is_pow #S.prime a (pow2 b)
 
 
-(**
-The algorithm is taken from
-https://briansmith.org/ecc-inversion-addition-chains-01
-*)
-
-val finv: f:S.felem -> S.felem
-let finv f =
+val fexp_223_23: f:S.felem -> tuple2 S.felem S.felem
+let fexp_223_23 f =
   let x2 = S.fmul (fsquare_times f 1) f in
   let x3 = S.fmul (fsquare_times x2 1) f in
   let x6 = S.fmul (fsquare_times x3 3) x3 in
@@ -63,12 +58,34 @@ let finv f =
   let x176 = S.fmul (fsquare_times x88 88) x88 in
   let x220 = S.fmul (fsquare_times x176 44) x44 in
   let x223 = S.fmul (fsquare_times x220 3) x3 in
-
   let r = S.fmul (fsquare_times x223 23) x22 in
+  r, x2
+
+
+(**
+The algorithm is taken from
+https://briansmith.org/ecc-inversion-addition-chains-01
+*)
+
+val finv: f:S.felem -> S.felem
+let finv f =
+  let r, x2 = fexp_223_23 f in
   let r = S.fmul (fsquare_times r 5) f in
   let r = S.fmul (fsquare_times r 3) x2 in
   let r = S.fmul (fsquare_times r 2) f in
   r
+
+
+val fsqrt: f:S.felem -> S.felem
+let fsqrt f =
+  let r, x2 = fexp_223_23 f in
+  let r = S.fmul (fsquare_times r 6) x2 in
+  let r = fsquare_times r 2 in
+  r
+
+
+val is_fsqrt: f:S.felem -> f2:S.felem -> bool
+let is_fsqrt f f2 = S.fmul f f = f2
 
 
 val lemma_pow_mod_1: f:S.felem -> Lemma (f == M.pow f 1 % S.prime)
@@ -93,26 +110,36 @@ let lemma_pow_mod_mul f a b =
   }
 
 
+val lemma_pow_pow_mod: f:S.felem -> a:nat -> b:nat ->
+  Lemma (M.pow (M.pow f a % S.prime) b % S.prime == M.pow f (a * b) % S.prime)
+let lemma_pow_pow_mod f a b =
+  calc (==) {
+    M.pow (M.pow f a % S.prime) b % S.prime;
+    (==) { M.lemma_pow_mod_base (M.pow f a) b S.prime }
+    M.pow (M.pow f a) b % S.prime;
+    (==) { M.lemma_pow_mul f a b }
+    M.pow f (a * b) % S.prime;
+    }
+
+
 val lemma_pow_pow_mod_mul: f:S.felem -> a:nat -> b:nat -> c:nat ->
   Lemma (S.fmul (M.pow (M.pow f a % S.prime) b % S.prime) (M.pow f c % S.prime) == M.pow f (a * b + c) % S.prime)
 let lemma_pow_pow_mod_mul f a b c =
   calc (==) {
     S.fmul (M.pow (M.pow f a % S.prime) b % S.prime) (M.pow f c % S.prime);
-    (==) {
-      M.lemma_pow_mod_base (M.pow f a) b S.prime;
-      Math.Lemmas.lemma_mod_mul_distr_l (M.pow (M.pow f a) b) (M.pow f c % S.prime) S.prime;
-      Math.Lemmas.lemma_mod_mul_distr_r (M.pow (M.pow f a) b) (M.pow f c) S.prime }
-    M.pow (M.pow f a) b * M.pow f c % S.prime;
-    (==) { M.lemma_pow_mul f a b }
-    M.pow f (a * b) * M.pow f c % S.prime;
-    (==) { M.lemma_pow_add f (a * b) c }
+    (==) { lemma_pow_pow_mod f a b }
+    S.fmul (M.pow f (a * b) % S.prime) (M.pow f c % S.prime);
+    (==) { lemma_pow_mod_mul f (a * b) c }
     M.pow f (a * b + c) % S.prime;
   }
 
 
-// S.prime - 2 = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2d
-val finv_lemma: f:S.felem -> Lemma (finv f == M.pow f (S.prime - 2) % S.prime)
-let finv_lemma f =
+val fexp_223_23_lemma: f:S.felem ->
+  Lemma (let (r, x2) = fexp_223_23 f in
+    x2 == M.pow f 0x3 % S.prime /\
+    r == M.pow f 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff % S.prime)
+
+let fexp_223_23_lemma f =
   let x2 = S.fmul (fsquare_times f 1) f in
   fsquare_times_lemma f 1;
   assert_norm (pow2 1 = 0x2);
@@ -181,7 +208,16 @@ let finv_lemma f =
   fsquare_times_lemma x223 23;
   assert_norm (pow2 23 = 0x800000);
   lemma_pow_pow_mod_mul f 0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffff 0x800000 0x3fffff;
-  assert (r0 == M.pow f 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff % S.prime);
+  assert (r0 == M.pow f 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff % S.prime)
+
+
+// S.prime - 2 = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2d
+val finv_lemma: f:S.felem -> Lemma (finv f == M.pow f (S.prime - 2) % S.prime)
+let finv_lemma f =
+  lemma_pow_mod_1 f;
+
+  let r0, x2 = fexp_223_23 f in
+  fexp_223_23_lemma f;
 
   let r1 = S.fmul (fsquare_times r0 5) f in
   fsquare_times_lemma r0 5;
@@ -205,3 +241,31 @@ let finv_is_finv_lemma f =
   finv_lemma f;
   assert (finv f == M.pow f (S.prime - 2) % S.prime);
   M.lemma_pow_mod #S.prime f (S.prime - 2)
+
+
+val fsqrt_lemma: f:S.felem -> Lemma (fsqrt f == M.pow f ((S.prime + 1) / 4) % S.prime)
+let fsqrt_lemma f =
+  lemma_pow_mod_1 f;
+
+  let r0, x2 = fexp_223_23 f in
+  fexp_223_23_lemma f;
+
+  let r1 = S.fmul (fsquare_times r0 6) x2 in
+  fsquare_times_lemma r0 6;
+  assert_norm (pow2 6 = 0x40);
+  lemma_pow_pow_mod_mul f 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff 0x40 0x3;
+  assert (r1 == M.pow f 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc3 % S.prime);
+
+  let r = fsquare_times r1 2 in
+  fsquare_times_lemma r1 2;
+  assert_norm (pow2 2 = 4);
+  lemma_pow_pow_mod f 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc3 0x4;
+  assert (r == M.pow f 0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff0c % S.prime);
+  assert_norm (0x3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff0c == (S.prime + 1) / 4)
+
+
+val fsqrt_is_fsqrt_lemma: f:S.felem -> Lemma (fsqrt f == S.fsqrt f)
+let fsqrt_is_fsqrt_lemma f =
+  fsqrt_lemma f;
+  assert (fsqrt f == M.pow f ((S.prime + 1) / 4) % S.prime);
+  M.lemma_pow_mod #S.prime f ((S.prime + 1) / 4)
