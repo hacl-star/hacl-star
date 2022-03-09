@@ -1,14 +1,16 @@
+HACL_HOME=$(realpath ../..)
+
 all: dist/FrodoKEM-64-test.exe
 
 .PHONY: test
 test: all
 	dist/FrodoKEM-64-test.exe
 
-include ../../Makefile.local
+include $(HACL_HOME)/Makefile.local
 
 CFLAGS += -O3 -march=native -mtune=native -funroll-loops
 CFLAGS += -fno-asynchronous-unwind-tables
-CFLAGS += -I../../lib/c -I../../../lib/c
+CFLAGS += -I$(HACL_HOME)/lib/c
 export CFLAGS
 
 FSTAR_ROOTS = Hacl.Frodo64.fst Hacl.Frodo640.fst Hacl.Frodo976.fst Hacl.Frodo1344.fst

@@ -1,8 +1,8 @@
-HACL_HOME = ..
+HACL_HOME=$(realpath ..)
 
 all: all-tests
 
-include ../Makefile.local
+include $(HACL_HOME)/Makefile.local
 
 # By default, we process all the files in the current directory. Here, we
 # *extend* the set of relevant files with the tests.
