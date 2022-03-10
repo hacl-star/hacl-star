@@ -225,3 +225,34 @@ let fmul_8_normalize_weak out f =
   assert (felem_fits5 (as_felem5 h1 out) (8,8,8,8,16));
   fnormalize_weak out out;
   BL.normalize_weak5_lemma (8,8,8,8,16) (as_felem5 h1 out)
+
+
+let fnegate_conditional_vartime f is_negate =
+  let h0 = ST.get () in
+  if is_negate then begin
+    BL.fnegate5_lemma (1,1,1,1,1) (as_felem5 h0 f) (u64 1);
+    make_u52_5 f (BI.fnegate5 (f.(0ul), f.(1ul), f.(2ul), f.(3ul), f.(4ul)) (u64 1));
+    let h1 = ST.get () in
+    assert (felem_fits5 (as_felem5 h1 f) (2,2,2,2,2));
+    assert (as_nat h1 f == 2 * S.prime - as_nat h0 f);
+    BL.normalize5_lemma (2,2,2,2,2) (as_felem5 h1 f);
+    fnormalize f f;
+    let h2 = ST.get () in
+    assert (inv_fully_reduced h2 f);
+    assert (as_nat h2 f == (2 * S.prime - as_nat h0 f) % S.prime);
+    Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 2;
+    Math.Lemmas.modulo_addition_lemma (- as_nat h0 f) S.prime 1;
+    assert (as_nat h2 f == (S.prime - as_nat h0 f) % S.prime) end
+
+
+let is_fodd_vartime x =
+  let h0 = ST.get () in
+  BDL.lemma_as_nat_mod2 (as_felem5 h0 x);
+  let x0 = x.(0ul) in
+  [@inline_let]
+  let is_odd_m = x0 &. u64 1 in
+  mod_mask_lemma x0 1ul;
+  assert (v (mod_mask #U64 #SEC 1ul) == v (u64 1));
+  assert_norm (pow2 1 = 2);
+  assert (v is_odd_m = as_nat h0 x % 2);
+  Lib.RawIntTypes.u64_to_UInt64 is_odd_m =. 1uL

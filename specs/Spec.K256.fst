@@ -106,10 +106,10 @@ let ecdsa_sign_hashed_msg m private_key k =
     rb, sb, true
 
 
-val is_public_key_valid (pk_x pk_y:lbytes 32) : tuple3 nat nat bool
-let is_public_key_valid pk_x pk_y =
-  let pk_x = nat_from_bytes_be pk_x in
-  let pk_y = nat_from_bytes_be pk_y in
+val is_public_key_valid (pk:lbytes 64) : tuple3 nat nat bool
+let is_public_key_valid pk =
+  let pk_x = nat_from_bytes_be (sub pk 0 32) in
+  let pk_y = nat_from_bytes_be (sub pk 32 32) in
   let is_x_valid = 0 < pk_x && pk_x < prime in
   let is_y_valid = 0 < pk_y && pk_y < prime in
   let is_xy_on_curve =
@@ -117,9 +117,9 @@ let is_public_key_valid pk_x pk_y =
   pk_x, pk_y, is_xy_on_curve
 
 
-val ecdsa_verify_hashed_msg (m public_key_x public_key_y r s:lbytes 32) : bool
-let ecdsa_verify_hashed_msg m public_key_x public_key_y r s =
-  let pk_x, pk_y, is_xy_on_curve = is_public_key_valid public_key_x public_key_y in
+val ecdsa_verify_hashed_msg (m:lbytes 32) (public_key:lbytes 64) (r s:lbytes 32) : bool
+let ecdsa_verify_hashed_msg m public_key r s =
+  let pk_x, pk_y, is_xy_on_curve = is_public_key_valid public_key in
   let r = nat_from_bytes_be r in
   let s = nat_from_bytes_be s in
   let z = nat_from_bytes_be m % q in
@@ -169,8 +169,39 @@ let ecdsa_sign_sha256 msg_len msg private_key k =
 
 val ecdsa_verify_sha256
   (msg_len:size_nat) (msg:lbytes msg_len)
-  (public_key_x public_key_y r s:lbytes 32) : bool
+  (public_key:lbytes 64) (r s:lbytes 32) : bool
 
-let ecdsa_verify_sha256 msg_len msg public_key_x public_key_y r s =
+let ecdsa_verify_sha256 msg_len msg public_key r s =
   let m = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
-  ecdsa_verify_hashed_msg m public_key_x public_key_y r s
+  ecdsa_verify_hashed_msg m public_key r s
+
+
+///  Parsing and Serializing public keys
+
+// raw          = [ x; y ], 64 bytes
+// uncompressed = [ 0x04; x; y ], 65 bytes
+// compressed   = [ 0x02 for even `y` and 0x03 for odd `y`; x ], 33 bytes
+
+let pk_uncompressed_to_raw (pk:lbytes 65) : option (lbytes 64) =
+  if Lib.RawIntTypes.u8_to_UInt8 pk.[0] <> 0x04uy then None else Some (sub pk 1 64)
+
+let pk_uncompressed_from_raw (pk:lbytes 64) : lbytes 65 =
+  concat (create 1 (u8 0x04)) pk
+
+let pk_compressed_to_raw (pk:lbytes 33) : option (lbytes 64) =
+  let pk0 = Lib.RawIntTypes.u8_to_UInt8 pk.[0] in
+  if not (pk0 = 0x02uy || pk0 = 0x03uy) then None
+  else begin
+    let pk_xb = sub pk 1 32 in
+    let is_pk_y_odd = pk0 = 0x03uy in
+    let pk_yb = recover_y_bytes pk_xb is_pk_y_odd in
+    match pk_yb with
+    | Some pk_yb -> Some (concat #_ #32 #32 pk_xb pk_yb)
+    | None -> None end
+
+let pk_compressed_from_raw (pk:lbytes 64) : lbytes 33 =
+  let pk_x = sub pk 0 32 in
+  let pk_y = sub pk 32 32 in
+  let is_pk_y_odd = nat_from_bytes_be pk_y % 2 = 1 in // <==> pk_y % 2 = 1
+  let pk0 = if is_pk_y_odd then u8 0x03 else u8 0x02 in
+  concat (create 1 pk0) pk_x

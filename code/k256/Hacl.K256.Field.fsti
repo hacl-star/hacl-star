@@ -263,3 +263,17 @@ val fmul_8_normalize_weak (out f:felem) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     feval h1 out == S.fmul 8 (feval h0 f) /\
     inv_lazy_reduced2 h1 out)
+
+
+inline_for_extraction noextract
+val fnegate_conditional_vartime (f:felem) (is_negate:bool) : Stack unit
+  (requires fun h -> live h f /\ inv_fully_reduced h f)
+  (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\ inv_fully_reduced h1 f /\
+    as_nat h1 f == (if is_negate then (S.prime - as_nat h0 f) % S.prime else as_nat h0 f))
+
+
+inline_for_extraction noextract
+val is_fodd_vartime: x:felem -> Stack bool
+  (requires fun h -> live h x /\ inv_fully_reduced h x)
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    b == S.is_fodd (as_nat h0 x))

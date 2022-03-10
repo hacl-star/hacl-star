@@ -2,7 +2,11 @@ module Spec.K256.PointOps
 
 open FStar.Mul
 
+open Lib.IntTypes
+open Lib.Sequence
+
 module M = Lib.NatMod
+module BSeq = Lib.ByteSequence
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
@@ -29,7 +33,9 @@ let ( *% ) = fmul
 let finv (x:felem) : felem = M.pow_mod #prime x (prime - 2)
 let ( /% ) (x y:felem) = x *% finv y
 
+// for parsing and serializing public keys
 let fsqrt (x:felem) : felem = M.pow_mod #prime x ((prime + 1) / 4)
+let is_fodd (x:nat) : bool = x % 2 = 1
 
 
 ///  Scalar field
@@ -122,3 +128,23 @@ let point_double (p:proj_point) : proj_point =
 let point_negate (p:proj_point) : proj_point =
   let x, y, z = p in
   x, (-y) % prime, z
+
+
+let recover_y (x:felem{0 < x}) (is_odd:bool) : option felem =
+  let y2 = x *% x *% x +% b in
+  let y = fsqrt y2 in
+  if y *% y <> y2 then None
+  else begin
+    let y = if is_fodd y <> is_odd then (prime - y) % prime else y in
+    Some y end
+
+
+let recover_y_bytes (xb:BSeq.lbytes 32) (is_odd:bool) : option (BSeq.lbytes 32) =
+  let x = BSeq.nat_from_bytes_be xb in
+  let is_x_valid = 0 < x && x < prime in
+
+  if not is_x_valid then None
+  else begin
+    match (recover_y x is_odd) with
+    | Some y -> Some (BSeq.nat_to_bytes_be 32 y)
+    | None -> None end

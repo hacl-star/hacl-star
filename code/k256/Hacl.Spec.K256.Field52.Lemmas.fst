@@ -174,14 +174,6 @@ let lemma_mul_sub_last mc a b c =
   assert (felem_fits_last1 r (2 * v b))
 
 
-val fnegate5_lemma (m:scale64_5) (a:felem5) (x:uint64) : Lemma
-  (requires (let (m0,m1,m2,m3,m4) = m in 2 * v x <= 4096 /\
-    m0 <= v x /\ m1 <= v x /\ m2 <= v x /\ m3 <= v x /\ m4 <= v x /\
-    felem_fits5 a m))
-  (ensures  (let r = fnegate5 a x in let xn = v x in
-    as_nat5 r = 2 * v x * S.prime - as_nat5 a /\
-    felem_fits5 r (2*xn,2*xn,2*xn,2*xn,2*xn)))
-
 let fnegate5_lemma m a x =
   let xn = v x in
   let (a0,a1,a2,a3,a4) = a in

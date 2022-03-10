@@ -12,6 +12,42 @@ module S = Spec.K256
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
+val lemma_a_plus_b_pow2_mod2 (a b:nat) (c:pos) :
+  Lemma ((a + b * pow2 c) % 2 = a % 2)
+let lemma_a_plus_b_pow2_mod2 a b c =
+  assert_norm (pow2 1 = 2);
+  Math.Lemmas.lemma_mod_plus_distr_r a (b * pow2 c) 2;
+  Math.Lemmas.pow2_multiplication_modulo_lemma_1 b 1 c
+
+
+val lemma_as_nat_mod2: x:felem5 ->
+  Lemma (let (x0,x1,x2,x3,x4) = x in as_nat5 x % 2 = v x0 % 2)
+let lemma_as_nat_mod2 x =
+  let (x0,x1,x2,x3,x4) = x in
+  assert (as_nat5 x = v x0 + v x1 * pow52 + v x2 * pow104 + v x3 * pow156 + v x4 * pow208);
+  assert (as_nat5 x % 2 = (v x0 + v x1 * pow52 + v x2 * pow104 + v x3 * pow156 + v x4 * pow208) % 2);
+  lemma_a_plus_b_pow2_mod2 (v x0 + v x1 * pow52 + v x2 * pow104 + v x3 * pow156) (v x4) 208;
+  lemma_a_plus_b_pow2_mod2 (v x0 + v x1 * pow52 + v x2 * pow104) (v x3) 156;
+  lemma_a_plus_b_pow2_mod2 (v x0 + v x1 * pow52) (v x2) 104;
+  lemma_a_plus_b_pow2_mod2 (v x0) (v x1) 52;
+  assert (as_nat5 x % 2 = v x0 % 2)
+
+
+val lemma_nat_from_bytes_be_mod2: f:LSeq.lseq uint8 32 ->
+  Lemma (BSeq.nat_from_bytes_be f % 2 = v (LSeq.index f 31) % 2)
+
+let lemma_nat_from_bytes_be_mod2 f =
+  let x0 = LSeq.index f 31 in
+  BSeq.nat_from_intseq_be_slice_lemma f 31;
+  BSeq.nat_from_intseq_be_lemma0 (LSeq.slice f 31 32);
+  assert (BSeq.nat_from_intseq_be f ==
+    v x0 + pow2 8 * BSeq.nat_from_intseq_be (LSeq.slice f 0 31));
+  assert_norm (pow2 1 = 2);
+  Math.Lemmas.lemma_mod_plus_distr_r (v x0) (BSeq.nat_from_intseq_be (LSeq.slice f 0 31) * pow2 8) 2;
+  Math.Lemmas.pow2_multiplication_modulo_lemma_1 (BSeq.nat_from_intseq_be (LSeq.slice f 0 31)) 1 8;
+  assert (BSeq.nat_from_bytes_be f % 2 = v x0 % 2)
+
+
 val unfold_nat_from_uint64_four: b:LSeq.lseq uint64 4 ->
   Lemma (BSeq.nat_from_intseq_be b ==
     v (LSeq.index b 3) + v (LSeq.index b 2) * pow2 64 +

@@ -25,21 +25,21 @@ module BL = Hacl.Spec.K256.Field52.Lemmas
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let lbytes32 = lbuffer uint8 32ul
+let lbytes len = lbuffer uint8 len
 
 
-val is_public_key_valid (pk_x pk_y:lbytes32) (fpk_x fpk_y:felem) : Stack bool
+val is_public_key_valid (pk:lbytes 64ul) (fpk_x fpk_y:felem) : Stack bool
   (requires fun h ->
-    live h pk_x /\ live h pk_y /\ live h fpk_x /\ live h fpk_y /\
-    disjoint fpk_x fpk_y /\ disjoint fpk_x pk_x /\ disjoint fpk_x pk_y /\
-    disjoint fpk_y pk_y /\ disjoint fpk_y pk_x)
+    live h pk /\ live h fpk_x /\ live h fpk_y /\
+    disjoint fpk_x fpk_y /\ disjoint fpk_x pk /\ disjoint fpk_y pk)
   (ensures  fun h0 b h1 -> modifies (loc fpk_x |+| loc fpk_y) h0 h1 /\
     (b ==> inv_fully_reduced h1 fpk_x /\ inv_fully_reduced h1 fpk_y) /\
-    (as_nat h1 fpk_x, as_nat h1 fpk_y, b) ==
-      S.is_public_key_valid (as_seq h0 pk_x) (as_seq h0 pk_y))
+    (as_nat h1 fpk_x, as_nat h1 fpk_y, b) == S.is_public_key_valid (as_seq h0 pk))
 
 [@CInline]
-let is_public_key_valid pk_x pk_y fpk_x fpk_y =
+let is_public_key_valid pk fpk_x fpk_y =
+  let pk_x = sub pk 0ul 32ul in
+  let pk_y = sub pk 32ul 32ul in
   let is_x_valid = load_felem_vartime fpk_x pk_x in
   let is_y_valid = load_felem_vartime fpk_y pk_y in
 
@@ -188,16 +188,15 @@ let ecdsa_verify_qelem_aff pk_x pk_y z r s =
 
 
 inline_for_extraction noextract
-val ecdsa_verify_hashed_msg (m public_key_x public_key_y r s:lbytes32) : Stack bool
+val ecdsa_verify_hashed_msg (m:lbytes 32ul) (public_key:lbytes 64ul) (r s:lbytes 32ul) : Stack bool
   (requires fun h ->
-    live h m /\ live h public_key_x /\ live h public_key_y /\
-    live h r /\ live h s /\ disjoint r s)
+    live h m /\ live h public_key /\ live h r /\
+    live h s /\ disjoint r s)
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
-    b == S.ecdsa_verify_hashed_msg (as_seq h0 m)
-      (as_seq h0 public_key_x) (as_seq h0 public_key_y) (as_seq h0 r) (as_seq h0 s))
+    b == S.ecdsa_verify_hashed_msg (as_seq h0 m) (as_seq h0 public_key) (as_seq h0 r) (as_seq h0 s))
 
 #push-options "--z3rlimit 150"
-let ecdsa_verify_hashed_msg m public_key_x public_key_y r s =
+let ecdsa_verify_hashed_msg m public_key r s =
   push_frame ();
   let pk_x = create_felem () in
   let pk_y = create_felem () in
@@ -206,7 +205,7 @@ let ecdsa_verify_hashed_msg m public_key_x public_key_y r s =
   let s_q = QA.create_qelem () in
   let z = QA.create_qelem () in
 
-  let is_xy_on_curve = is_public_key_valid public_key_x public_key_y pk_x pk_y in
+  let is_xy_on_curve = is_public_key_valid public_key pk_x pk_y in
   let is_r_valid = QA.load_qelem_vartime r_q r in
   let is_s_valid = QA.load_qelem_vartime s_q s in
   QA.load_qelem_modq z m;

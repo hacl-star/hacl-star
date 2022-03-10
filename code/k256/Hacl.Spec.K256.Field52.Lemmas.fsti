@@ -116,6 +116,15 @@ val fsqr5_lemma1: a:felem5 -> Lemma
     felem_fits5 res (1,1,1,1,2)))
 
 
+val fnegate5_lemma (m:scale64_5) (a:felem5) (x:uint64) : Lemma
+  (requires (let (m0,m1,m2,m3,m4) = m in 2 * v x <= 4096 /\
+    m0 <= v x /\ m1 <= v x /\ m2 <= v x /\ m3 <= v x /\ m4 <= v x /\
+    felem_fits5 a m))
+  (ensures  (let r = fnegate5 a x in let xn = v x in
+    as_nat5 r = 2 * v x * S.prime - as_nat5 a /\
+    felem_fits5 r (2*xn,2*xn,2*xn,2*xn,2*xn)))
+
+
 val sub5_lemma (ma mb:scale64_5) (a b:felem5) (x:uint64) : Lemma
   (requires (let xn = v x in
     let (ma0,ma1,ma2,ma3,ma4) = ma in

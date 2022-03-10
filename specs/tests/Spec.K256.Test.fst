@@ -14,14 +14,11 @@ open Spec.K256
 // Test 1
 //
 
-let test1_pk_x = List.Tot.map u8_from_UInt8 [
+let test1_pk = List.Tot.map u8_from_UInt8 [
   0xb8uy; 0x38uy; 0xffuy; 0x44uy; 0xe5uy; 0xbcuy; 0x17uy; 0x7buy;
   0xf2uy; 0x11uy; 0x89uy; 0xd0uy; 0x76uy; 0x60uy; 0x82uy; 0xfcuy;
   0x9duy; 0x84uy; 0x32uy; 0x26uy; 0x88uy; 0x7fuy; 0xc9uy; 0x76uy;
-  0x03uy; 0x71uy; 0x10uy; 0x0buy; 0x7euy; 0xe2uy; 0x0auy; 0x6fuy
-]
-
-let test1_pk_y = List.Tot.map u8_from_UInt8 [
+  0x03uy; 0x71uy; 0x10uy; 0x0buy; 0x7euy; 0xe2uy; 0x0auy; 0x6fuy;
   0xf0uy; 0xc9uy; 0xd7uy; 0x5buy; 0xfbuy; 0xa7uy; 0xb3uy; 0x1auy;
   0x6buy; 0xcauy; 0x19uy; 0x74uy; 0x49uy; 0x6euy; 0xebuy; 0x56uy;
   0xdeuy; 0x35uy; 0x70uy; 0x71uy; 0x95uy; 0x5duy; 0x83uy; 0xc4uy;
@@ -57,14 +54,11 @@ let test2_sk = List.Tot.map u8_from_UInt8 [
   0x92uy; 0xdeuy; 0x1auy; 0x25uy; 0x5cuy; 0xaduy; 0x3euy; 0x0fuy
 ]
 
-let test2_pk_x = List.Tot.map u8_from_UInt8 [
+let test2_pk = List.Tot.map u8_from_UInt8 [
   0x77uy; 0x9duy; 0xd1uy; 0x97uy; 0xa5uy; 0xdfuy; 0x97uy; 0x7euy;
   0xd2uy; 0xcfuy; 0x6cuy; 0xb3uy; 0x1duy; 0x82uy; 0xd4uy; 0x33uy;
   0x28uy; 0xb7uy; 0x90uy; 0xdcuy; 0x6buy; 0x3buy; 0x7duy; 0x44uy;
-  0x37uy; 0xa4uy; 0x27uy; 0xbduy; 0x58uy; 0x47uy; 0xdfuy; 0xcduy
-]
-
-let test2_pk_y = List.Tot.map u8_from_UInt8 [
+  0x37uy; 0xa4uy; 0x27uy; 0xbduy; 0x58uy; 0x47uy; 0xdfuy; 0xcduy;
   0xe9uy; 0x4buy; 0x72uy; 0x4auy; 0x55uy; 0x5buy; 0x6duy; 0x01uy;
   0x7buy; 0xb7uy; 0x60uy; 0x7cuy; 0x3euy; 0x32uy; 0x81uy; 0xdauy;
   0xf5uy; 0xb1uy; 0x69uy; 0x9duy; 0x6euy; 0xf4uy; 0x12uy; 0x49uy;
@@ -101,20 +95,18 @@ let test2_sgnt_s = List.Tot.map u8_from_UInt8 [
 
 
 let test_verify () : FStar.All.ML bool =
-  assert_norm (List.Tot.length test1_pk_x = 32);
-  assert_norm (List.Tot.length test1_pk_y = 32);
+  assert_norm (List.Tot.length test1_pk = 64);
   assert_norm (List.Tot.length test1_msg = 6);
   assert_norm (List.Tot.length test1_sgnt_r = 32);
   assert_norm (List.Tot.length test1_sgnt_s = 32);
 
-  let pk_x : lbytes 32 = of_list test1_pk_x in
-  let pk_y : lbytes 32 = of_list test1_pk_y in
+  let pk_raw : lbytes 64 = of_list test1_pk in
   let msg : lbytes 6 = of_list test1_msg in
 
   let sgnt_r : lbytes 32 = of_list test1_sgnt_r in
   let sgnt_s : lbytes 32 = of_list test1_sgnt_s in
 
-  let verify : bool = ecdsa_verify_sha256 6 msg pk_x pk_y sgnt_r sgnt_s in
+  let verify : bool = ecdsa_verify_sha256 6 msg pk_raw sgnt_r sgnt_s in
 
   if verify
   then begin IO.print_string "Test K256 ecdsa verification: Success!\n"; true end
@@ -123,8 +115,7 @@ let test_verify () : FStar.All.ML bool =
 
 let test_sign_and_verify () : FStar.All.ML bool =
   assert_norm (List.Tot.length test2_sk = 32);
-  assert_norm (List.Tot.length test2_pk_x = 32);
-  assert_norm (List.Tot.length test2_pk_y = 32);
+  assert_norm (List.Tot.length test2_pk = 64);
   assert_norm (List.Tot.length test2_k = 32);
   assert_norm (List.Tot.length test2_m = 32);
   assert_norm (List.Tot.length test2_sgnt_r = 32);
@@ -132,8 +123,7 @@ let test_sign_and_verify () : FStar.All.ML bool =
 
   let sk : lbytes 32 = of_list test2_sk in
   let k : lbytes 32 = of_list test2_k in
-  let pk_x : lbytes 32 = of_list test2_pk_x in
-  let pk_y : lbytes 32 = of_list test2_pk_y in
+  let pk_raw : lbytes 64 = of_list test2_pk in
 
   let m : lbytes 32 = of_list test2_m in
   let sgnt_r : lbytes 32 = of_list test2_sgnt_r in
@@ -152,7 +142,7 @@ let test_sign_and_verify () : FStar.All.ML bool =
     let is_s_valid = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) s sgnt_s in
     let is_sgnt_valid = is_r_valid && is_s_valid in
 
-    let verify_sgnt = ecdsa_verify_hashed_msg m pk_x pk_y sgnt_r sgnt_s in
+    let verify_sgnt = ecdsa_verify_hashed_msg m pk_raw sgnt_r sgnt_s in
     verify_sgnt && is_sgnt_valid end in
 
   if verify
@@ -160,10 +150,46 @@ let test_sign_and_verify () : FStar.All.ML bool =
   else begin IO.print_string "Test K256 ecdsa signature and verification: Failure :(\n"; false end
 
 
+let test_public_key_compressed () : FStar.All.ML bool =
+  assert_norm (List.Tot.length test1_pk = 64);
+
+  let pk_raw : lbytes 64 = of_list test1_pk in
+  let pk_c = pk_compressed_from_raw pk_raw in
+  let pk_raw_c = pk_compressed_to_raw pk_c in
+
+  match pk_raw_c with
+  | Some pk_raw_c ->
+    let is_pk_c_valid = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) pk_raw_c pk_raw in
+    if not is_pk_c_valid then IO.print_string "Test K256 pk_compressed (Some): Failure :(\n"
+    else IO.print_string "Test K256 pk_compressed: Success!\n";
+    is_pk_c_valid
+  | None ->
+    begin IO.print_string "Test K256 pk_compressed (None): Failure :(\n"; false end
+
+
+let test_public_key_uncompressed () : FStar.All.ML bool =
+  assert_norm (List.Tot.length test1_pk = 64);
+
+  let pk_raw : lbytes 64 = of_list test1_pk in
+  let pk_u = pk_uncompressed_from_raw pk_raw in
+  let pk_raw_u = pk_uncompressed_to_raw pk_u in
+
+  match pk_raw_u with
+  | Some pk_raw_u ->
+    let is_pk_u_valid = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) pk_raw_u pk_raw in
+    if not is_pk_u_valid then IO.print_string "Test K256 pk_uncompressed (Some): Failure :(\n"
+    else IO.print_string "Test K256 pk_uncompressed: Success!\n";
+    is_pk_u_valid
+  | None ->
+    begin IO.print_string "Test K256 pk_uncompressed (None): Failure :(\n"; false end
+
+
 let test () : FStar.All.ML bool  =
   let t1 : bool = test_verify () in
   let t2 : bool = test_sign_and_verify () in
+  let t3 : bool = test_public_key_compressed () in
+  let t4 : bool = test_public_key_uncompressed () in
 
-  if t1 && t2
+  if t1 && t2 && t3 && t4
   then begin IO.print_string "Test K256 ecdsa: Success!\n"; true end
   else begin IO.print_string "Test K256 ecdsa: Failure :(\n"; false end
