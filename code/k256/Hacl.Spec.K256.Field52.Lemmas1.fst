@@ -44,18 +44,15 @@ val lemma_a_mul_c_plus_d_mod_e_mul_f_g (a b c d f g:nat) : Lemma
 let lemma_a_mul_c_plus_d_mod_e_mul_f_g a b c d f g =
   calc (==) {
     a % pow2 b * pow2 c + (a / pow2 b + d * pow2 f) * pow2 g;
-    (==) {
-      Math.Lemmas.distributivity_add_left (a / pow2 b) (d * pow2 f) (pow2 g);
-      Math.Lemmas.paren_mul_right (d) (pow2 f) (pow2 g);
-      Math.Lemmas.pow2_plus f g }
-    a % pow2 b * pow2 c + a / pow2 b * pow2 g + d * pow2 (f + g);
-    (==) {
-      Math.Lemmas.pow2_plus b (g - b);
-      Math.Lemmas.paren_mul_right (a / pow2 b) (pow2 b) (g - b) }
-    a % pow2 b * pow2 c + a / pow2 b * pow2 b * pow2 c + d * pow2 (f + g);
-    (==) {
-      Math.Lemmas.distributivity_add_left (a % pow2 b) (a / pow2 b * pow2 b) (pow2 c);
-      Math.Lemmas.euclidean_division_definition a (pow2 b) }
+    (==) { Math.Lemmas.distributivity_add_left (a / pow2 b) (d * pow2 f) (pow2 g) }
+    a % pow2 b * pow2 c + (a / pow2 b) * pow2 g + (d * pow2 f) * pow2 g;
+    (==) { Math.Lemmas.paren_mul_right d (pow2 f) (pow2 g); Math.Lemmas.pow2_plus f g }
+    a % pow2 b * pow2 c + (a / pow2 b) * pow2 g + d * pow2 (f + g);
+    (==) { Math.Lemmas.pow2_plus b c; Math.Lemmas.paren_mul_right (a / pow2 b) (pow2 b) (pow2 c) }
+    a % pow2 b * pow2 c + (a / pow2 b) * pow2 b * pow2 c + d * pow2 (f + g);
+    (==) { Math.Lemmas.distributivity_add_left (a % pow2 b) (a / pow2 b * pow2 b) (pow2 c) }
+    (a % pow2 b + (a / pow2 b) * pow2 b) * pow2 c + d * pow2 (f + g);
+    (==) { Math.Lemmas.euclidean_division_definition a (pow2 b) }
     a * pow2 c + d * pow2 (f + g);
   }
 
