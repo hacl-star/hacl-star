@@ -48,7 +48,7 @@ let ecdsa_verify_sha256 msg_len msg public_key r s =
 
 ///  Parsing and Serializing public keys
 
-let pk_uncompressed_to_raw pk pk_raw =
+let public_key_uncompressed_to_raw pk_raw pk =
   let pk0 = pk.(0ul) in
   if Lib.RawIntTypes.u8_to_UInt8 pk0 <> 0x04uy then false
   else begin
@@ -56,7 +56,7 @@ let pk_uncompressed_to_raw pk pk_raw =
     true end
 
 
-let pk_uncompressed_from_raw pk_raw pk =
+let public_key_uncompressed_from_raw pk pk_raw =
   let h0 = ST.get () in
   pk.(0ul) <- u8 0x04;
   update_sub pk 1ul 64ul pk_raw;
@@ -64,7 +64,7 @@ let pk_uncompressed_from_raw pk_raw pk =
   LSeq.eq_intro (as_seq h1 pk) (S.pk_uncompressed_from_raw (as_seq h0 pk_raw))
 
 
-let pk_compressed_to_raw pk pk_raw =
+let public_key_compressed_to_raw pk_raw pk =
   let pk0 = pk.(0ul) in
   if not (Lib.RawIntTypes.u8_to_UInt8 pk0 = 0x02uy ||
     Lib.RawIntTypes.u8_to_UInt8 pk0 = 0x03uy) then false
@@ -99,7 +99,7 @@ let is_nat_from_bytes_be_odd_vartime f =
   Lib.RawIntTypes.u8_to_UInt8 is_odd_m =. 1uy
 
 
-let pk_compressed_from_raw pk_raw pk =
+let public_key_compressed_from_raw pk pk_raw =
   let h0 = ST.get () in
   let pk_x = sub pk_raw 0ul 32ul in
   let pk_y = sub pk_raw 32ul 32ul in

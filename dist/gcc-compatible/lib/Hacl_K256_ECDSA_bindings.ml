@@ -26,16 +26,16 @@ module Bindings(F:Cstubs.FOREIGN) =
            (ocaml_bytes @->
               (ocaml_bytes @->
                  (ocaml_bytes @-> (ocaml_bytes @-> (returning bool))))))
-    let hacl_K256_ECDSA_pk_uncompressed_to_raw =
-      foreign "Hacl_K256_ECDSA_pk_uncompressed_to_raw"
+    let hacl_K256_ECDSA_public_key_uncompressed_to_raw =
+      foreign "Hacl_K256_ECDSA_public_key_uncompressed_to_raw"
         (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
-    let hacl_K256_ECDSA_pk_uncompressed_from_raw =
-      foreign "Hacl_K256_ECDSA_pk_uncompressed_from_raw"
+    let hacl_K256_ECDSA_public_key_uncompressed_from_raw =
+      foreign "Hacl_K256_ECDSA_public_key_uncompressed_from_raw"
         (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))
-    let hacl_K256_ECDSA_pk_compressed_to_raw =
-      foreign "Hacl_K256_ECDSA_pk_compressed_to_raw"
+    let hacl_K256_ECDSA_public_key_compressed_to_raw =
+      foreign "Hacl_K256_ECDSA_public_key_compressed_to_raw"
         (ocaml_bytes @-> (ocaml_bytes @-> (returning bool)))
-    let hacl_K256_ECDSA_pk_compressed_from_raw =
-      foreign "Hacl_K256_ECDSA_pk_compressed_from_raw"
+    let hacl_K256_ECDSA_public_key_compressed_from_raw =
+      foreign "Hacl_K256_ECDSA_public_key_compressed_from_raw"
         (ocaml_bytes @-> (ocaml_bytes @-> (returning void)))
   end

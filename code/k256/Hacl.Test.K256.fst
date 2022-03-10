@@ -165,6 +165,40 @@ let test_sign_and_verify () = admit();
   pop_frame ()
 
 
+val test_public_key_compressed: unit -> St unit
+let test_public_key_compressed () = admit();
+  push_frame ();
+  let pk_c = create 33ul (u8 0) in
+  let pk_raw_c = create 64ul (u8 0) in
+
+  K256.public_key_compressed_from_raw pk_c (const_to_buffer #uint8 pk1);
+  let b = K256.public_key_compressed_to_raw pk_raw_c pk_c in
+
+  if b
+  then begin
+    C.String.print (C.String.of_literal "Test K256 pk_compressed (Some): \n");
+    print_compare_display 64ul pk1 (to_const pk_raw_c) end
+  else C.String.print (C.String.of_literal "Test K256 pk_compressed (None): Failure :(\n");
+  pop_frame ()
+
+
+val test_public_key_uncompressed: unit -> St unit
+let test_public_key_uncompressed () = admit();
+  push_frame ();
+  let pk_u = create 65ul (u8 0) in
+  let pk_raw_u = create 64ul (u8 0) in
+
+  K256.public_key_uncompressed_from_raw pk_u (const_to_buffer #uint8 pk1);
+  let b = K256.public_key_uncompressed_to_raw pk_raw_u pk_u in
+
+  if b
+  then begin
+    C.String.print (C.String.of_literal "Test K256 pk_uncompressed (Some): \n");
+    print_compare_display 64ul pk1 (to_const pk_raw_u) end
+  else C.String.print (C.String.of_literal "Test K256 pk_uncompressed (None): Failure :(\n");
+  pop_frame ()
+
+
 val main: unit -> St C.exit_code
 let main () =
   C.String.print (C.String.of_literal "\nTEST 1. K256\n");
@@ -172,5 +206,11 @@ let main () =
 
   C.String.print (C.String.of_literal "\nTEST 2. K256\n");
   test_sign_and_verify ();
+
+  C.String.print (C.String.of_literal "\nTEST 3. K256\n");
+  test_public_key_compressed ();
+
+  C.String.print (C.String.of_literal "\nTEST 4. K256\n");
+  test_public_key_uncompressed ();
 
   C.EXIT_SUCCESS

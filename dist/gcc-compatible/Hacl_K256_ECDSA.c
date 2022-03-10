@@ -1723,7 +1723,7 @@ Hacl_K256_ECDSA_ecdsa_verify_sha256(
   return b;
 }
 
-bool Hacl_K256_ECDSA_pk_uncompressed_to_raw(uint8_t *pk, uint8_t *pk_raw)
+bool Hacl_K256_ECDSA_public_key_uncompressed_to_raw(uint8_t *pk_raw, uint8_t *pk)
 {
   uint8_t pk0 = pk[0U];
   if (pk0 != (uint8_t)0x04U)
@@ -1734,13 +1734,13 @@ bool Hacl_K256_ECDSA_pk_uncompressed_to_raw(uint8_t *pk, uint8_t *pk_raw)
   return true;
 }
 
-void Hacl_K256_ECDSA_pk_uncompressed_from_raw(uint8_t *pk_raw, uint8_t *pk)
+void Hacl_K256_ECDSA_public_key_uncompressed_from_raw(uint8_t *pk, uint8_t *pk_raw)
 {
   pk[0U] = (uint8_t)0x04U;
   memcpy(pk + (uint32_t)1U, pk_raw, (uint32_t)64U * sizeof (uint8_t));
 }
 
-bool Hacl_K256_ECDSA_pk_compressed_to_raw(uint8_t *pk, uint8_t *pk_raw)
+bool Hacl_K256_ECDSA_public_key_compressed_to_raw(uint8_t *pk_raw, uint8_t *pk)
 {
   uint8_t pk0 = pk[0U];
   if (!(pk0 == (uint8_t)0x02U || pk0 == (uint8_t)0x03U))
@@ -1755,7 +1755,7 @@ bool Hacl_K256_ECDSA_pk_compressed_to_raw(uint8_t *pk, uint8_t *pk_raw)
   return b;
 }
 
-void Hacl_K256_ECDSA_pk_compressed_from_raw(uint8_t *pk_raw, uint8_t *pk)
+void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw)
 {
   uint8_t *pk_x = pk_raw;
   uint8_t *pk_y = pk_raw + (uint32_t)32U;

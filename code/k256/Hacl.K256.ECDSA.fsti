@@ -65,27 +65,27 @@ val ecdsa_verify_sha256 (msg_len:size_t) (msg:lbytes msg_len) (public_key:lbytes
 
 ///  Parsing and Serializing public keys
 
-val pk_uncompressed_to_raw: pk:lbytes 65ul -> pk_raw:lbytes 64ul -> Stack bool
+val public_key_uncompressed_to_raw: pk_raw:lbytes 64ul -> pk:lbytes 65ul -> Stack bool
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
     (b <==> Some? (S.pk_uncompressed_to_raw (as_seq h0 pk))) /\
     (b ==> (as_seq h1 pk_raw == Some?.v (S.pk_uncompressed_to_raw (as_seq h0 pk)))))
 
 
-val pk_uncompressed_from_raw: pk_raw:lbytes 64ul -> pk:lbytes 65ul -> Stack unit
+val public_key_uncompressed_from_raw: pk:lbytes 65ul -> pk_raw:lbytes 64ul -> Stack unit
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
     as_seq h1 pk == S.pk_uncompressed_from_raw (as_seq h0 pk_raw))
 
 
-val pk_compressed_to_raw: pk:lbytes 33ul -> pk_raw:lbytes 64ul -> Stack bool
+val public_key_compressed_to_raw: pk_raw:lbytes 64ul -> pk:lbytes 33ul -> Stack bool
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 b h1 -> modifies (loc pk_raw) h0 h1 /\
     (b <==> Some? (S.pk_compressed_to_raw (as_seq h0 pk))) /\
     (b ==> (as_seq h1 pk_raw == Some?.v (S.pk_compressed_to_raw (as_seq h0 pk)))))
 
 
-val pk_compressed_from_raw: pk_raw:lbytes 64ul -> pk:lbytes 33ul -> Stack unit
+val public_key_compressed_from_raw: pk:lbytes 33ul -> pk_raw:lbytes 64ul -> Stack unit
   (requires fun h -> live h pk /\ live h pk_raw /\ disjoint pk pk_raw)
   (ensures  fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
     as_seq h1 pk == S.pk_compressed_from_raw (as_seq h0 pk_raw))

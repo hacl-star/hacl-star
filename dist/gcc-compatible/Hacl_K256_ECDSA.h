@@ -77,13 +77,13 @@ Hacl_K256_ECDSA_ecdsa_verify_sha256(
   uint8_t *s
 );
 
-bool Hacl_K256_ECDSA_pk_uncompressed_to_raw(uint8_t *pk, uint8_t *pk_raw);
+bool Hacl_K256_ECDSA_public_key_uncompressed_to_raw(uint8_t *pk_raw, uint8_t *pk);
 
-void Hacl_K256_ECDSA_pk_uncompressed_from_raw(uint8_t *pk_raw, uint8_t *pk);
+void Hacl_K256_ECDSA_public_key_uncompressed_from_raw(uint8_t *pk, uint8_t *pk_raw);
 
-bool Hacl_K256_ECDSA_pk_compressed_to_raw(uint8_t *pk, uint8_t *pk_raw);
+bool Hacl_K256_ECDSA_public_key_compressed_to_raw(uint8_t *pk_raw, uint8_t *pk);
 
-void Hacl_K256_ECDSA_pk_compressed_from_raw(uint8_t *pk_raw, uint8_t *pk);
+void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw);
 
 #if defined(__cplusplus)
 }
