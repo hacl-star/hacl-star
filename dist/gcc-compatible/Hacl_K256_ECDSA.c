@@ -1114,6 +1114,147 @@ static inline void fnormalize(uint64_t *out, uint64_t *f)
   out[4U] = f4;
 }
 
+static inline void fsquare_times_in_place(uint64_t *out, uint32_t b)
+{
+  for (uint32_t i = (uint32_t)0U; i < b; i++)
+  {
+    fsqr0(out, out);
+  }
+}
+
+static inline void fsquare_times(uint64_t *out, uint64_t *a, uint32_t b)
+{
+  memcpy(out, a, (uint32_t)5U * sizeof (uint64_t));
+  for (uint32_t i = (uint32_t)0U; i < b; i++)
+  {
+    fsqr0(out, out);
+  }
+}
+
+static inline void fexp_223_23(uint64_t *out, uint64_t *x2, uint64_t *f)
+{
+  uint64_t x3[5U] = { 0U };
+  uint64_t x22[5U] = { 0U };
+  uint64_t x44[5U] = { 0U };
+  uint64_t x88[5U] = { 0U };
+  fsquare_times(x2, f, (uint32_t)1U);
+  fmul0(x2, x2, f);
+  fsquare_times(x3, x2, (uint32_t)1U);
+  fmul0(x3, x3, f);
+  fsquare_times(out, x3, (uint32_t)3U);
+  fmul0(out, out, x3);
+  fsquare_times_in_place(out, (uint32_t)3U);
+  fmul0(out, out, x3);
+  fsquare_times_in_place(out, (uint32_t)2U);
+  fmul0(out, out, x2);
+  fsquare_times(x22, out, (uint32_t)11U);
+  fmul0(x22, x22, out);
+  fsquare_times(x44, x22, (uint32_t)22U);
+  fmul0(x44, x44, x22);
+  fsquare_times(x88, x44, (uint32_t)44U);
+  fmul0(x88, x88, x44);
+  fsquare_times(out, x88, (uint32_t)88U);
+  fmul0(out, out, x88);
+  fsquare_times_in_place(out, (uint32_t)44U);
+  fmul0(out, out, x44);
+  fsquare_times_in_place(out, (uint32_t)3U);
+  fmul0(out, out, x3);
+  fsquare_times_in_place(out, (uint32_t)23U);
+  fmul0(out, out, x22);
+}
+
+static inline void finv(uint64_t *out, uint64_t *f)
+{
+  uint64_t x2[5U] = { 0U };
+  fexp_223_23(out, x2, f);
+  fsquare_times_in_place(out, (uint32_t)5U);
+  fmul0(out, out, f);
+  fsquare_times_in_place(out, (uint32_t)3U);
+  fmul0(out, out, x2);
+  fsquare_times_in_place(out, (uint32_t)2U);
+  fmul0(out, out, f);
+}
+
+static inline void fsqrt(uint64_t *out, uint64_t *f)
+{
+  uint64_t x2[5U] = { 0U };
+  fexp_223_23(out, x2, f);
+  fsquare_times_in_place(out, (uint32_t)6U);
+  fmul0(out, out, x2);
+  fsquare_times_in_place(out, (uint32_t)2U);
+}
+
+static inline bool recover_y_bytes_vartime(uint8_t *y, uint8_t *x, bool is_odd)
+{
+  uint64_t xf[5U] = { 0U };
+  uint64_t yf[5U] = { 0U };
+  bool is_x_valid = load_felem_vartime(xf, x);
+  if (!is_x_valid)
+  {
+    return false;
+  }
+  uint64_t y2[5U] = { 0U };
+  uint64_t b[5U] = { 0U };
+  fsqr0(y2, xf);
+  fmul0(y2, y2, xf);
+  b[0U] = (uint64_t)0x7U;
+  b[1U] = (uint64_t)0U;
+  b[2U] = (uint64_t)0U;
+  b[3U] = (uint64_t)0U;
+  b[4U] = (uint64_t)0U;
+  fadd0(y2, y2, b);
+  fnormalize(y2, y2);
+  fsqrt(yf, y2);
+  fnormalize(yf, yf);
+  uint64_t y2_comp[5U] = { 0U };
+  fsqr0(y2_comp, yf);
+  fnormalize(y2_comp, y2_comp);
+  bool res0 = is_felem_eq_vartime(y2, y2_comp);
+  bool is_y_valid = res0;
+  bool res;
+  if (!is_y_valid)
+  {
+    res = false;
+  }
+  else
+  {
+    uint64_t x0 = yf[0U];
+    bool is_y_odd = (x0 & (uint64_t)1U) == (uint64_t)1U;
+    if (is_y_odd != is_odd)
+    {
+      uint64_t a0 = yf[0U];
+      uint64_t a1 = yf[1U];
+      uint64_t a2 = yf[2U];
+      uint64_t a3 = yf[3U];
+      uint64_t a4 = yf[4U];
+      uint64_t r0 = (uint64_t)0xffffefffffc2fU * (uint64_t)2U * (uint64_t)1U - a0;
+      uint64_t r1 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a1;
+      uint64_t r2 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a2;
+      uint64_t r3 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a3;
+      uint64_t r4 = (uint64_t)0xffffffffffffU * (uint64_t)2U * (uint64_t)1U - a4;
+      uint64_t f0 = r0;
+      uint64_t f1 = r1;
+      uint64_t f2 = r2;
+      uint64_t f3 = r3;
+      uint64_t f4 = r4;
+      yf[0U] = f0;
+      yf[1U] = f1;
+      yf[2U] = f2;
+      yf[3U] = f3;
+      yf[4U] = f4;
+      fnormalize(yf, yf);
+    }
+    res = true;
+  }
+  bool r = res;
+  if (!r)
+  {
+    return false;
+  }
+  store_felem(y, yf);
+  return true;
+}
+
 static inline void point_double(uint64_t *out, uint64_t *p)
 {
   uint64_t tmp[25U] = { 0U };
@@ -1396,29 +1537,31 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
   point_mul_double_vartime(out, scalar1, g, scalar2, q2);
 }
 
-static inline bool
-is_public_key_valid(uint8_t *pk_x, uint8_t *pk_y, uint64_t *fpk_x, uint64_t *fpk_y)
+static inline bool is_public_key_valid(uint8_t *pk, uint64_t *fpk_x, uint64_t *fpk_y)
 {
+  uint8_t *pk_x = pk;
+  uint8_t *pk_y = pk + (uint32_t)32U;
   bool is_x_valid = load_felem_vartime(fpk_x, pk_x);
   bool is_y_valid = load_felem_vartime(fpk_y, pk_y);
   if (is_x_valid && is_y_valid)
   {
-    uint64_t y2[5U] = { 0U };
-    uint64_t x3[5U] = { 0U };
+    uint64_t y2_exp[5U] = { 0U };
     uint64_t b[5U] = { 0U };
-    fsqr0(y2, fpk_y);
-    fsqr0(x3, fpk_x);
-    fmul0(x3, x3, fpk_x);
+    fsqr0(y2_exp, fpk_x);
+    fmul0(y2_exp, y2_exp, fpk_x);
     b[0U] = (uint64_t)0x7U;
     b[1U] = (uint64_t)0U;
     b[2U] = (uint64_t)0U;
     b[3U] = (uint64_t)0U;
     b[4U] = (uint64_t)0U;
-    fadd0(x3, x3, b);
-    fnormalize(x3, x3);
-    fnormalize(y2, y2);
-    bool res = is_felem_eq_vartime(y2, x3);
-    return res;
+    fadd0(y2_exp, y2_exp, b);
+    fnormalize(y2_exp, y2_exp);
+    uint64_t y2_comp[5U] = { 0U };
+    fsqr0(y2_comp, fpk_y);
+    fnormalize(y2_comp, y2_comp);
+    bool res = is_felem_eq_vartime(y2_exp, y2_comp);
+    bool res0 = res;
+    return res0;
   }
   return false;
 }
@@ -1432,65 +1575,7 @@ static inline bool fmul_eq_vartime(uint64_t *r, uint64_t *z, uint64_t *x)
   return b;
 }
 
-static inline void fsquare_times_in_place(uint64_t *out, uint32_t b)
-{
-  for (uint32_t i = (uint32_t)0U; i < b; i++)
-  {
-    fsqr0(out, out);
-  }
-}
-
-static inline void fsquare_times(uint64_t *out, uint64_t *a, uint32_t b)
-{
-  memcpy(out, a, (uint32_t)5U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < b; i++)
-  {
-    fsqr0(out, out);
-  }
-}
-
-static inline void finv(uint64_t *out, uint64_t *f)
-{
-  uint64_t x2[5U] = { 0U };
-  uint64_t x3[5U] = { 0U };
-  uint64_t x22[5U] = { 0U };
-  uint64_t x44[5U] = { 0U };
-  uint64_t x88[5U] = { 0U };
-  uint64_t tmp[5U] = { 0U };
-  fsquare_times(x2, f, (uint32_t)1U);
-  fmul0(x2, x2, f);
-  fsquare_times(x3, x2, (uint32_t)1U);
-  fmul0(x3, x3, f);
-  fsquare_times(tmp, x3, (uint32_t)3U);
-  fmul0(tmp, tmp, x3);
-  fsquare_times_in_place(tmp, (uint32_t)3U);
-  fmul0(tmp, tmp, x3);
-  fsquare_times_in_place(tmp, (uint32_t)2U);
-  fmul0(tmp, tmp, x2);
-  fsquare_times(x22, tmp, (uint32_t)11U);
-  fmul0(x22, x22, tmp);
-  fsquare_times(x44, x22, (uint32_t)22U);
-  fmul0(x44, x44, x22);
-  fsquare_times(x88, x44, (uint32_t)44U);
-  fmul0(x88, x88, x44);
-  fsquare_times(tmp, x88, (uint32_t)88U);
-  fmul0(tmp, tmp, x88);
-  fsquare_times_in_place(tmp, (uint32_t)44U);
-  fmul0(tmp, tmp, x44);
-  fsquare_times_in_place(tmp, (uint32_t)3U);
-  fmul0(tmp, tmp, x3);
-  fsquare_times_in_place(tmp, (uint32_t)23U);
-  fmul0(tmp, tmp, x22);
-  fsquare_times_in_place(tmp, (uint32_t)5U);
-  fmul0(tmp, tmp, f);
-  fsquare_times_in_place(tmp, (uint32_t)3U);
-  fmul0(tmp, tmp, x2);
-  fsquare_times_in_place(tmp, (uint32_t)2U);
-  fmul0(tmp, tmp, f);
-  memcpy(out, tmp, (uint32_t)5U * sizeof (uint64_t));
-}
-
-inline bool
+bool
 Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   uint8_t *r,
   uint8_t *s,
@@ -1534,11 +1619,10 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   return true;
 }
 
-inline bool
+bool
 Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(
   uint8_t *m,
-  uint8_t *public_key_x,
-  uint8_t *public_key_y,
+  uint8_t *public_key,
   uint8_t *r,
   uint8_t *s
 )
@@ -1548,7 +1632,7 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(
   uint64_t r_q[4U] = { 0U };
   uint64_t s_q[4U] = { 0U };
   uint64_t z[4U] = { 0U };
-  bool is_xy_on_curve = is_public_key_valid(public_key_x, public_key_y, pk_x, pk_y);
+  bool is_xy_on_curve = is_public_key_valid(public_key, pk_x, pk_y);
   bool is_r_valid = load_qelem_vartime(r_q, r);
   bool is_s_valid = load_qelem_vartime(s_q, s);
   load_qelem_modq(z, m);
@@ -1608,7 +1692,7 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(
   return true;
 }
 
-inline bool
+bool
 Hacl_K256_ECDSA_ecdsa_sign_sha256(
   uint8_t *r,
   uint8_t *s,
@@ -1624,19 +1708,69 @@ Hacl_K256_ECDSA_ecdsa_sign_sha256(
   return b;
 }
 
-inline bool
+bool
 Hacl_K256_ECDSA_ecdsa_verify_sha256(
   uint32_t msg_len,
   uint8_t *msg,
-  uint8_t *public_key_x,
-  uint8_t *public_key_y,
+  uint8_t *public_key,
   uint8_t *r,
   uint8_t *s
 )
 {
   uint8_t mHash[32U] = { 0U };
   Hacl_Hash_SHA2_hash_256(msg, msg_len, mHash);
-  bool b = Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(mHash, public_key_x, public_key_y, r, s);
+  bool b = Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(mHash, public_key, r, s);
   return b;
+}
+
+bool Hacl_K256_ECDSA_pk_uncompressed_to_raw(uint8_t *pk, uint8_t *pk_raw)
+{
+  uint8_t pk0 = pk[0U];
+  if (pk0 != (uint8_t)0x04U)
+  {
+    return false;
+  }
+  memcpy(pk_raw, pk + (uint32_t)1U, (uint32_t)64U * sizeof (uint8_t));
+  return true;
+}
+
+void Hacl_K256_ECDSA_pk_uncompressed_from_raw(uint8_t *pk_raw, uint8_t *pk)
+{
+  pk[0U] = (uint8_t)0x04U;
+  memcpy(pk + (uint32_t)1U, pk_raw, (uint32_t)64U * sizeof (uint8_t));
+}
+
+bool Hacl_K256_ECDSA_pk_compressed_to_raw(uint8_t *pk, uint8_t *pk_raw)
+{
+  uint8_t pk0 = pk[0U];
+  if (!(pk0 == (uint8_t)0x02U || pk0 == (uint8_t)0x03U))
+  {
+    return false;
+  }
+  uint8_t *pk_xb = pk + (uint32_t)1U;
+  bool is_pk_y_odd = pk0 == (uint8_t)0x03U;
+  uint8_t *pk_yb = pk_raw + (uint32_t)32U;
+  bool b = recover_y_bytes_vartime(pk_yb, pk_xb, is_pk_y_odd);
+  memcpy(pk_raw, pk_xb, (uint32_t)32U * sizeof (uint8_t));
+  return b;
+}
+
+void Hacl_K256_ECDSA_pk_compressed_from_raw(uint8_t *pk_raw, uint8_t *pk)
+{
+  uint8_t *pk_x = pk_raw;
+  uint8_t *pk_y = pk_raw + (uint32_t)32U;
+  uint8_t x0 = pk_y[31U];
+  bool is_pk_y_odd = (x0 & (uint8_t)1U) == (uint8_t)1U;
+  uint8_t ite;
+  if (is_pk_y_odd)
+  {
+    ite = (uint8_t)0x03U;
+  }
+  else
+  {
+    ite = (uint8_t)0x02U;
+  }
+  pk[0U] = ite;
+  memcpy(pk + (uint32_t)1U, pk_x, (uint32_t)32U * sizeof (uint8_t));
 }
 

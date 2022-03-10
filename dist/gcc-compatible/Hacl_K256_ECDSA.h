@@ -53,8 +53,7 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
 bool
 Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(
   uint8_t *m,
-  uint8_t *public_key_x,
-  uint8_t *public_key_y,
+  uint8_t *public_key,
   uint8_t *r,
   uint8_t *s
 );
@@ -73,11 +72,18 @@ bool
 Hacl_K256_ECDSA_ecdsa_verify_sha256(
   uint32_t msg_len,
   uint8_t *msg,
-  uint8_t *public_key_x,
-  uint8_t *public_key_y,
+  uint8_t *public_key,
   uint8_t *r,
   uint8_t *s
 );
+
+bool Hacl_K256_ECDSA_pk_uncompressed_to_raw(uint8_t *pk, uint8_t *pk_raw);
+
+void Hacl_K256_ECDSA_pk_uncompressed_from_raw(uint8_t *pk_raw, uint8_t *pk);
+
+bool Hacl_K256_ECDSA_pk_compressed_to_raw(uint8_t *pk, uint8_t *pk_raw);
+
+void Hacl_K256_ECDSA_pk_compressed_from_raw(uint8_t *pk_raw, uint8_t *pk);
 
 #if defined(__cplusplus)
 }
