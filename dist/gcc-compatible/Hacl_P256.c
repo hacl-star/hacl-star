@@ -27,6 +27,8 @@
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Kremlib.h"
 
+#include "internal/Hacl_Bignum.h"
+
 static uint64_t isZero_uint64_CT(uint64_t *f)
 {
   uint64_t a0 = f[0U];
@@ -587,9 +589,44 @@ static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *resul
   cmovznz4(carry, tempBuffer, x_, result);
 }
 
-static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t *result)
+static inline
+void bignum_mul(uint64_t *a, uint64_t *b, uint64_t *res)
 {
-  uint64_t t[8U] = { 0U };
+  memset(res, 0U, (uint32_t)8U * sizeof (uint64_t));
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
+  {
+    uint64_t bj = b[i0];
+    uint64_t *res_j = res + i0;
+    uint64_t c = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
+    {
+      uint64_t a_i = a[(uint32_t)4U * i];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i0);
+      uint64_t a_i0 = a[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c, res_i1);
+      uint64_t a_i1 = a[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c, res_i2);
+      uint64_t a_i2 = a[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
+    }
+    for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
+    {
+      uint64_t a_i = a[i];
+      uint64_t *res_i = res_j + i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i);
+    }
+    uint64_t r = c;
+    res[(uint32_t)4U + i0] = r;
+  }
+}
+
+static inline
+void multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t *t)
+{
   uint64_t round2[8U] = { 0U };
   uint64_t round4[8U] = { 0U };
   uint64_t f0 = a[0U];
@@ -709,6 +746,162 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t c3 = add4(temp5, b3, b3);
   uint64_t c36 = c6 + c3;
   t[7U] = c36;
+}
+
+static inline void bignum_reduction(uint64_t *c, uint64_t *res)
+{
+  uint64_t n[4U] =
+  {
+    (uint64_t)0xffffffffffffffffU,
+    (uint64_t)0xffffffffU,
+    (uint64_t)0U,
+    (uint64_t)0xffffffff00000001U
+  };
+  uint64_t nInv = (uint64_t)1U; /* Hacl_Bignum_ModInvLimb_mod_inv_uint64(n[0U]); */
+  /* printf("nInv: %" PRIu64 "\n", nInv); */
+  uint64_t c0 = (uint64_t)0U;
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
+  {
+    uint64_t qj = nInv * c[i0];
+    uint64_t *res_j0 = c + i0;
+    uint64_t c1 = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
+    {
+      uint64_t a_i = n[(uint32_t)4U * i];
+      uint64_t *res_i0 = res_j0 + (uint32_t)4U * i;
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, qj, c1, res_i0);
+      uint64_t a_i0 = n[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = res_j0 + (uint32_t)4U * i + (uint32_t)1U;
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, qj, c1, res_i1);
+      uint64_t a_i1 = n[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = res_j0 + (uint32_t)4U * i + (uint32_t)2U;
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, qj, c1, res_i2);
+      uint64_t a_i2 = n[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, qj, c1, res_i);
+    }
+    for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
+    {
+      uint64_t a_i = n[i];
+      uint64_t *res_i = res_j0 + i;
+      c1 = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, qj, c1, res_i);
+    }
+    uint64_t r = c1;
+    uint64_t c10 = r;
+    uint64_t *resb = c + (uint32_t)4U + i0;
+    uint64_t res_j = c[(uint32_t)4U + i0];
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, c10, res_j, resb);
+  }
+  memcpy(res, c + (uint32_t)4U, (uint32_t)4U * sizeof (uint64_t));
+  uint64_t c00 = c0;
+  uint64_t tmp[4U] = { 0U };
+  uint64_t c1 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
+  {
+    uint64_t t1 = res[(uint32_t)4U * i];
+    uint64_t t20 = n[(uint32_t)4U * i];
+    uint64_t *res_i0 = tmp + (uint32_t)4U * i;
+    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t20, res_i0);
+    uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t10, t21, res_i1);
+    uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t11, t22, res_i2);
+    uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t12, t2, res_i);
+  }
+  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
+  {
+    uint64_t t1 = res[i];
+    uint64_t t2 = n[i];
+    uint64_t *res_i = tmp + i;
+    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c1, t1, t2, res_i);
+  }
+  uint64_t c10 = c1;
+  uint64_t c2 = c00 - c10;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & res[i]) | (~c2 & tmp[i]);
+    os[i] = x;
+  }
+}
+
+static inline void bignum_mont_mul_u64(
+  uint64_t *aM,
+  uint64_t *bM,
+  uint64_t *resM)
+{
+  uint64_t c[8] = { 0 };
+  bignum_mul(aM, bM, c);
+  bignum_reduction(c, resM);
+}
+
+static inline void bignum_sqr(uint64_t *a, uint64_t *res)
+{
+  memset(res, 0U, (uint32_t)8U * sizeof (uint64_t));
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
+  {
+    uint64_t *ab = a;
+    uint64_t a_j = a[i0];
+    uint64_t *res_j = res + i0;
+    uint64_t c = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U; i++)
+    {
+      uint64_t a_i = ab[(uint32_t)4U * i];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i0);
+      uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+      uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+      uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, a_j, c, res_i);
+    }
+    for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+    {
+      uint64_t a_i = ab[i];
+      uint64_t *res_i = res_j + i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i);
+    }
+    uint64_t r = c;
+    res[i0 + i0] = r;
+  }
+  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, res, res);
+  uint64_t tmp[8U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    FStar_UInt128_uint128 res1 = FStar_UInt128_mul_wide(a[i], a[i]);
+    uint64_t hi = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
+    uint64_t lo = FStar_UInt128_uint128_to_uint64(res1);
+    tmp[(uint32_t)2U * i] = lo;
+    tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
+  }
+  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, tmp, res);
+}
+
+static inline void bignum_mont_sqr_u64(
+  uint64_t *aM,
+  uint64_t *resM)
+{
+  uint64_t c[8] = { 0 };
+  /* bignum_sqr(aM, c); */
+  sq(aM, c);
+  bignum_reduction(c, resM);
+}
+
+static inline void montgomery_reduction_buffer(uint64_t* t, uint64_t* result)
+{
+  uint64_t round2[8U] = { 0U };
+  uint64_t round4[8U] = { 0U };
   uint64_t tempRound[8U] = { 0U };
   uint64_t t20[8U] = { 0U };
   uint64_t t30[8U] = { 0U };
@@ -845,148 +1038,24 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   cmovznz4(carry, tempBuffer, x_, result);
 }
 
-static void montgomery_square_buffer(uint64_t *a, uint64_t *result)
+//////////////////////
+static inline void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t *result)
 {
-  uint64_t t[8U] = { 0U };
-  uint64_t round2[8U] = { 0U };
-  uint64_t round4[8U] = { 0U };
-  sq(a, t);
-  uint64_t tempRound[8U] = { 0U };
-  uint64_t t20[8U] = { 0U };
-  uint64_t t30[8U] = { 0U };
-  uint64_t t10 = t[0U];
-  uint64_t *result040 = t20;
-  uint64_t temp1 = (uint64_t)0U;
-  uint64_t f10 = prime256_buffer[1U];
-  uint64_t f20 = prime256_buffer[2U];
-  uint64_t f30 = prime256_buffer[3U];
-  uint64_t *o00 = result040;
-  uint64_t *o10 = result040 + (uint32_t)1U;
-  uint64_t *o20 = result040 + (uint32_t)2U;
-  uint64_t *o30 = result040 + (uint32_t)3U;
-  uint64_t f010 = prime256_buffer[0U];
-  mul64(f010, t10, o00, &temp1);
-  uint64_t h0 = temp1;
-  mul64(f10, t10, o10, &temp1);
-  uint64_t l0 = o10[0U];
-  uint64_t c1 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l0, h0, o10);
-  uint64_t h1 = temp1;
-  mul64(f20, t10, o20, &temp1);
-  uint64_t l1 = o20[0U];
-  uint64_t c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, l1, h1, o20);
-  uint64_t h2 = temp1;
-  mul64(f30, t10, o30, &temp1);
-  uint64_t l2 = o30[0U];
-  uint64_t c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, l2, h2, o30);
-  uint64_t temp00 = temp1;
-  uint64_t c0 = c3 + temp00;
-  t20[4U] = c0;
-  uint64_t uu____0 = add8(t, t20, t30);
-  shift8(t30, tempRound);
-  uint64_t t21[8U] = { 0U };
-  uint64_t t31[8U] = { 0U };
-  uint64_t t11 = tempRound[0U];
-  uint64_t *result041 = t21;
-  uint64_t temp2 = (uint64_t)0U;
-  uint64_t f11 = prime256_buffer[1U];
-  uint64_t f21 = prime256_buffer[2U];
-  uint64_t f31 = prime256_buffer[3U];
-  uint64_t *o01 = result041;
-  uint64_t *o11 = result041 + (uint32_t)1U;
-  uint64_t *o21 = result041 + (uint32_t)2U;
-  uint64_t *o31 = result041 + (uint32_t)3U;
-  uint64_t f011 = prime256_buffer[0U];
-  mul64(f011, t11, o01, &temp2);
-  uint64_t h3 = temp2;
-  mul64(f11, t11, o11, &temp2);
-  uint64_t l3 = o11[0U];
-  uint64_t c10 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l3, h3, o11);
-  uint64_t h4 = temp2;
-  mul64(f21, t11, o21, &temp2);
-  uint64_t l4 = o21[0U];
-  uint64_t c20 = Lib_IntTypes_Intrinsics_add_carry_u64(c10, l4, h4, o21);
-  uint64_t h5 = temp2;
-  mul64(f31, t11, o31, &temp2);
-  uint64_t l5 = o31[0U];
-  uint64_t c30 = Lib_IntTypes_Intrinsics_add_carry_u64(c20, l5, h5, o31);
-  uint64_t temp01 = temp2;
-  uint64_t c4 = c30 + temp01;
-  t21[4U] = c4;
-  uint64_t uu____1 = add8(tempRound, t21, t31);
-  shift8(t31, round2);
-  uint64_t tempRound0[8U] = { 0U };
-  uint64_t t2[8U] = { 0U };
-  uint64_t t32[8U] = { 0U };
-  uint64_t t12 = round2[0U];
-  uint64_t *result042 = t2;
-  uint64_t temp3 = (uint64_t)0U;
-  uint64_t f12 = prime256_buffer[1U];
-  uint64_t f22 = prime256_buffer[2U];
-  uint64_t f32 = prime256_buffer[3U];
-  uint64_t *o02 = result042;
-  uint64_t *o12 = result042 + (uint32_t)1U;
-  uint64_t *o22 = result042 + (uint32_t)2U;
-  uint64_t *o32 = result042 + (uint32_t)3U;
-  uint64_t f012 = prime256_buffer[0U];
-  mul64(f012, t12, o02, &temp3);
-  uint64_t h6 = temp3;
-  mul64(f12, t12, o12, &temp3);
-  uint64_t l6 = o12[0U];
-  uint64_t c11 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l6, h6, o12);
-  uint64_t h7 = temp3;
-  mul64(f22, t12, o22, &temp3);
-  uint64_t l7 = o22[0U];
-  uint64_t c21 = Lib_IntTypes_Intrinsics_add_carry_u64(c11, l7, h7, o22);
-  uint64_t h8 = temp3;
-  mul64(f32, t12, o32, &temp3);
-  uint64_t l8 = o32[0U];
-  uint64_t c31 = Lib_IntTypes_Intrinsics_add_carry_u64(c21, l8, h8, o32);
-  uint64_t temp02 = temp3;
-  uint64_t c5 = c31 + temp02;
-  t2[4U] = c5;
-  uint64_t uu____2 = add8(round2, t2, t32);
-  shift8(t32, tempRound0);
-  uint64_t t22[8U] = { 0U };
-  uint64_t t3[8U] = { 0U };
-  uint64_t t1 = tempRound0[0U];
-  uint64_t *result04 = t22;
-  uint64_t temp = (uint64_t)0U;
-  uint64_t f1 = prime256_buffer[1U];
-  uint64_t f2 = prime256_buffer[2U];
-  uint64_t f3 = prime256_buffer[3U];
-  uint64_t *o0 = result04;
-  uint64_t *o1 = result04 + (uint32_t)1U;
-  uint64_t *o2 = result04 + (uint32_t)2U;
-  uint64_t *o3 = result04 + (uint32_t)3U;
-  uint64_t f01 = prime256_buffer[0U];
-  mul64(f01, t1, o0, &temp);
-  uint64_t h9 = temp;
-  mul64(f1, t1, o1, &temp);
-  uint64_t l9 = o1[0U];
-  uint64_t c12 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, l9, h9, o1);
-  uint64_t h10 = temp;
-  mul64(f2, t1, o2, &temp);
-  uint64_t l10 = o2[0U];
-  uint64_t c22 = Lib_IntTypes_Intrinsics_add_carry_u64(c12, l10, h10, o2);
-  uint64_t h = temp;
-  mul64(f3, t1, o3, &temp);
-  uint64_t l = o3[0U];
-  uint64_t c32 = Lib_IntTypes_Intrinsics_add_carry_u64(c22, l, h, o3);
-  uint64_t temp0 = temp;
-  uint64_t c6 = c32 + temp0;
-  t22[4U] = c6;
-  uint64_t uu____3 = add8(tempRound0, t22, t3);
-  shift8(t3, round4);
-  uint64_t tempBuffer[4U] = { 0U };
-  uint64_t tempBufferForSubborrow = (uint64_t)0U;
-  uint64_t cin = round4[4U];
-  uint64_t *x_ = round4;
-  uint64_t c = sub4_il(x_, prime256_buffer, tempBuffer);
-  uint64_t
-  carry = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, cin, (uint64_t)0U, &tempBufferForSubborrow);
-  cmovznz4(carry, tempBuffer, x_, result);
+  bignum_mont_mul_u64(a, b, result);
+  /* uint64_t t[8U] = { 0U }; */
+  /* multiplication_buffer(a, b, t); */
+  /* montgomery_reduction_buffer(t, result); */
 }
 
+static inline void montgomery_square_buffer(uint64_t *a, uint64_t *result)
+{
+  /* bignum_mont_sqr_u64(a, result); */
+  uint64_t t[8U] = { 0U };
+  sq(a, t);
+  /* bignum_reduction(t, result); */
+  montgomery_reduction_buffer(t, result);
+}
+/////////////////////////
 static void fsquarePowN(uint32_t n, uint64_t *a)
 {
   for (uint32_t i = (uint32_t)0U; i < n; i++)
@@ -1957,7 +2026,7 @@ static bool isMoreThanZeroLessThanOrder(uint8_t *x)
 }
 
 /*
-  The pub(lic)_key input of the function is considered to be public, 
+  The pub(lic)_key input of the function is considered to be public,
   thus this code is not secret independent with respect to the operations done over this variable.
 */
 uint64_t Hacl_Impl_P256_DH__ecp256dh_r(uint64_t *result, uint64_t *pubKey, uint8_t *scalar)
@@ -2499,13 +2568,13 @@ between various point representations, and ECDH key agreement.
 /*
 Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
 
-Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  
+Input: result buffer: uint8[64],
+ m buffer: uint8 [mLen],
+ priv(ate)Key: uint8[32],
+ k (nonce): uint32[32].
+
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred.
+
  The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
 bool
@@ -2544,13 +2613,13 @@ Hacl_P256_ecdsa_sign_p256_sha2(
 /*
 Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
 
-Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  
+Input: result buffer: uint8[64],
+ m buffer: uint8 [mLen],
+ priv(ate)Key: uint8[32],
+ k (nonce): uint32[32].
+
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred.
+
  The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
 bool
@@ -2589,13 +2658,13 @@ Hacl_P256_ecdsa_sign_p256_sha384(
 /*
 Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
 
-Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  
+Input: result buffer: uint8[64],
+ m buffer: uint8 [mLen],
+ priv(ate)Key: uint8[32],
+ k (nonce): uint32[32].
+
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred.
+
  The private key and the nonce are expected to be more than 0 and less than the curve order.
 */
 bool
@@ -2644,15 +2713,15 @@ smaller than 32 bytes. These libraries left-pad the input with enough zeroes to
 reach the minimum 32 byte size. Clients who need behavior identical to OpenSSL
 need to perform the left-padding themselves.
 
-Input: result buffer: uint8[64], 
- m buffer: uint8 [mLen], 
- priv(ate)Key: uint8[32], 
- k (nonce): uint32[32]. 
-  
- Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  
+Input: result buffer: uint8[64],
+ m buffer: uint8 [mLen],
+ priv(ate)Key: uint8[32],
+ k (nonce): uint32[32].
+
+ Output: bool, where True stands for the correct signature generation. False value means that an error has occurred.
+
  The private key and the nonce are expected to be more than 0 and less than the curve order.
-  
+
  The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
 */
 bool
@@ -2697,15 +2766,15 @@ Hacl_P256_ecdsa_sign_p256_without_hash(
 
 
 /*
- The input of the function is considered to be public, 
+ The input of the function is considered to be public,
   thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
+
+ Input: m buffer: uint8 [mLen],
+ pub(lic)Key: uint8[64],
+ r: uint8[32],
+ s: uint8[32].
+
+ Output: bool, where true stands for the correct signature verification.
 */
 bool
 Hacl_P256_ecdsa_verif_p256_sha2(
@@ -2741,15 +2810,15 @@ Hacl_P256_ecdsa_verif_p256_sha2(
 }
 
 /*
-  The input of the function is considered to be public, 
+  The input of the function is considered to be public,
   thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
+
+ Input: m buffer: uint8 [mLen],
+ pub(lic)Key: uint8[64],
+ r: uint8[32],
+ s: uint8[32].
+
+ Output: bool, where true stands for the correct signature verification.
 */
 bool
 Hacl_P256_ecdsa_verif_p256_sha384(
@@ -2785,15 +2854,15 @@ Hacl_P256_ecdsa_verif_p256_sha384(
 }
 
 /*
-  The input of the function is considered to be public, 
+  The input of the function is considered to be public,
   thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
- Output: bool, where true stands for the correct signature verification. 
+
+ Input: m buffer: uint8 [mLen],
+ pub(lic)Key: uint8[64],
+ r: uint8[32],
+ s: uint8[32].
+
+ Output: bool, where true stands for the correct signature verification.
 */
 bool
 Hacl_P256_ecdsa_verif_p256_sha512(
@@ -2829,16 +2898,16 @@ Hacl_P256_ecdsa_verif_p256_sha512(
 }
 
 /*
- The input of the function is considered to be public, 
+ The input of the function is considered to be public,
   thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: m buffer: uint8 [mLen], 
- pub(lic)Key: uint8[64], 
- r: uint8[32], 
- s: uint8[32]. 
-  
+
+ Input: m buffer: uint8 [mLen],
+ pub(lic)Key: uint8[64],
+ r: uint8[32],
+ s: uint8[32].
+
  Output: bool, where true stands for the correct signature verification.
-  
+
  The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.
 */
 bool
@@ -2881,18 +2950,18 @@ Hacl_P256_ecdsa_verif_without_hash(
 /*
 Validate a public key.
 
-  
-  The input of the function is considered to be public, 
+
+  The input of the function is considered to be public,
   thus this code is not secret independent with respect to the operations done over the input.
-  
- Input: pub(lic)Key: uint8[64]. 
-  
- Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  
- Verify that the public key is not the “point at infinity”, represented as O. 
- Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. 
- Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. 
+
+ Input: pub(lic)Key: uint8[64].
+
+ Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:
+ Verify that the public key is not the “point at infinity”, represented as O.
+ Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field.
+ Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation.
  Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
-  
+
  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
 */
 bool Hacl_P256_validate_public_key(uint8_t *pubKey)
@@ -2916,7 +2985,7 @@ bool Hacl_P256_validate_public_key(uint8_t *pubKey)
 Validate a private key, e.g. prior to signing.
 
 Input: scalar: uint8[32].
-  
+
  Output: bool, where true stands for the scalar to be more than 0 and less than order.
 */
 bool Hacl_P256_validate_private_key(uint8_t *x)
@@ -2945,13 +3014,13 @@ Convert 65-byte uncompressed to raw.
 
 The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
-  
- 
- Input: a point in not compressed form (uint8[65]), 
+
+
+ Input: a point in not compressed form (uint8[65]),
  result: uint8[64] (internal point representation).
-  
+
  Output: bool, where true stands for the correct decompression.
- 
+
 */
 bool Hacl_P256_uncompressed_to_raw(uint8_t *b, uint8_t *result)
 {
@@ -2969,11 +3038,11 @@ Convert 33-byte compressed to raw.
 
 The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
-Input: a point in compressed form (uint8[33]), 
+Input: a point in compressed form (uint8[33]),
  result: uint8[64] (internal point representation).
-  
+
  Output: bool, where true stands for the correct decompression.
- 
+
 */
 bool Hacl_P256_compressed_to_raw(uint8_t *b, uint8_t *result)
 {
@@ -3014,7 +3083,7 @@ Convert raw to 65-byte uncompressed.
 
 This function effectively prepends a 0x04 byte.
 
-Input: a point buffer (internal representation: uint8[64]), 
+Input: a point buffer (internal representation: uint8[64]),
  result: a point in not compressed form (uint8[65]).
 */
 void Hacl_P256_raw_to_uncompressed(uint8_t *b, uint8_t *result)
@@ -3084,15 +3153,15 @@ key, and computeds the 64-byte ECDH shared key.
 
 This function ONLY validates the public key.
 
-   The pub(lic)_key input of the function is considered to be public, 
+   The pub(lic)_key input of the function is considered to be public,
   thus this code is not secret independent with respect to the operations done over this variable.
-  
- Input: result: uint8[64], 
- pub(lic)Key: uint8[64], 
+
+ Input: result: uint8[64],
+ pub(lic)Key: uint8[64],
  scalar: uint8[32].
-  
- Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
-  
+
+ Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity).
+
 */
 bool Hacl_P256_dh_responder(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 {
@@ -3115,4 +3184,3 @@ bool Hacl_P256_dh_responder(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   Hacl_Impl_P256_LowLevel_toUint8(resultBufferFelemY, resultY);
   return flag == (uint64_t)0U;
 }
-

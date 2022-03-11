@@ -116,6 +116,6 @@ static __inline__ cycles cpucycles_end(void)
 
 static inline void print_time(uint64_t count, clock_t tdiff, uint64_t cdiff){
   printf("cycles for %" PRIu64 " bytes: %" PRIu64 " (%.2fcycles/byte)\n",count,(uint64_t)cdiff,(double)cdiff/count);
-  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/byte)\n",count,(uint64_t)tdiff,(double)tdiff/count);
+  printf("time for %" PRIu64 " bytes: %" PRIu64 " (%.2fus/round)\n",count,(uint64_t)tdiff,(double)tdiff/count);
   printf("bw %8.2f MB/s\n",(double)count/(((double)tdiff / CLOCKS_PER_SEC) * 1000000.0));
 }
