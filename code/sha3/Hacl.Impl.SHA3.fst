@@ -380,22 +380,19 @@ let storeState rateInBytes s res =
 (* 
    Lemma_equivalence_state_rate proves that it is equivalent
    to allocate a bigger temporary buffer and then use a part of it 
-   compared to allocation of the exact size buffer
-*)
+   compared to allocation of the exact size buffer *)
 
-val lemma_equiv_alloc_bigger_state: a:size_t{v a > 0 /\ v a <= 200} 
+val lemma_equiv_alloc_bigger_state: #l: size_nat -> a:size_t{v a > 0 /\ v a <= l} 
   -> Lemma (
     let input0 = Lib.Sequence.create #uint8 (v a) (u8 0) in
-    let nextBlock_1 = Lib.Sequence.create #uint8 200 (u8 0) in 
-    let input1 = Lib.Sequence.sub #uint8 #200 nextBlock_1 0 (v a) in 
+    let nextBlock_1 = Lib.Sequence.create #uint8 l (u8 0) in 
+    let input1 = Lib.Sequence.sub #uint8 #l nextBlock_1 0 (v a) in 
     input0 == input1)
 
-let lemma_equiv_alloc_bigger_state a  = 
+let lemma_equiv_alloc_bigger_state #l a  = 
   let input0 = Lib.Sequence.create #uint8 (v a) (u8 0) in
-  
-  let nextBlock_1 = Lib.Sequence.create #uint8 200 (u8 0) in 
-  let input1 = Lib.Sequence.sub #uint8 #200 nextBlock_1 0 (v a) in 
-
+  let nextBlock_1 = Lib.Sequence.create #uint8 l (u8 0) in 
+  let input1 = Lib.Sequence.sub #uint8 #l nextBlock_1 0 (v a) in 
   Seq.lemma_eq_intro input0 input1
 
 
@@ -419,7 +416,7 @@ let absorb_next s rateInBytes =
       nextBlock.(rateInBytes -! 1ul) <- u8 0x80;
       loadState rateInBytes nextBlock s;
       state_permute s;
-      lemma_equiv_alloc_bigger_state rateInBytes)
+      lemma_equiv_alloc_bigger_state #200 rateInBytes)
 
 
 inline_for_extraction 
@@ -453,7 +450,7 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
          (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. 1ul))
       then state_permute s;
       absorb_next s rateInBytes;
-      lemma_equiv_alloc_bigger_state rateInBytes)
+      lemma_equiv_alloc_bigger_state #200 rateInBytes)
 
 inline_for_extraction
 val absorb_inner:
