@@ -1,13 +1,13 @@
-HACL_HOME=../..
+HACL_HOME=$(realpath ../..)
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
 all: dist/libhpke.a
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../../Makefile.local
+include $(HACL_HOME)/Makefile.local
 
-CFLAGS += -I../../../lib/c -I../../lib/c -march=native -mtune=native
+CFLAGS += -I$(HACL_HOME)/lib/c -march=native -mtune=native
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
