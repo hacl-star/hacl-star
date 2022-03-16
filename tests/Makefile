@@ -61,6 +61,7 @@ endif
 CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
   -I$(KREMLIN_HOME)/kremlib/dist/minimal \
   -I../secure_api/merkle_tree \
+  -I../../../secp256k1/include \
   -O3 $(USER_CFLAGS)
 
 all: $(TARGETS)
@@ -88,7 +89,7 @@ vec-128-test.exe: ../lib/c/libintvector.h vec-128-test.c
 	$(CC) -I../lib/c $(CFLAGS) $(CFLAGS_128) $(LDFLAGS) vec-128-test.c -o vec-128-test.exe
 
 %.exe: %.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a -o $@ -lcrypto
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ ../dist/gcc-compatible/libevercrypt.a ../../../secp256k1/.libs/libsecp256k1.a -o $@ -lcrypto
 
 # Running tests
 

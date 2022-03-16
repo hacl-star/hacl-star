@@ -8,8 +8,10 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <time.h>
+#include <secp256k1.h>
 
 #include "Hacl_K256_ECDSA.h"
+#include "Hacl_Hash_SHA2.h"
 
 #include "test_helpers.h"
 #include "k256-ecdsa_vectors.h"
@@ -94,6 +96,52 @@ bool print_test(
 }
 
 
+bool print_test_secp256k1(
+  uint8_t *pk_x, // 32 bytes
+  uint8_t *pk_y, // 32 bytes
+  size_t msg_len,
+  uint8_t *msg,
+  uint8_t *sgnt_r, // 32 bytes
+  uint8_t *sgnt_s, // 32 bytes
+  int id,
+  bool valid
+){
+  uint8_t pk_raw[64];
+  memcpy(pk_raw, pk_x, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(pk_raw + (uint32_t)32U, pk_y, (uint32_t)32U * sizeof (uint8_t));
+
+  uint8_t signature[64];
+  memcpy(signature, sgnt_r, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(signature + (uint32_t)32U, sgnt_s, (uint32_t)32U * sizeof (uint8_t));
+
+  printf("K256 ECDSA verify Result (secp256k1): ");
+  bool ver = Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256(msg_len, msg, pk_raw, signature);
+  if (ver == valid) printf("Success! %d \n", id);
+  else printf("Failed %d \n", id);
+
+
+  secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+  secp256k1_pubkey pubkey;
+  secp256k1_ecdsa_signature sig;
+  unsigned char compressed_pubkey[33];
+  bool b3 = true;
+
+  b3 &= secp256k1_ecdsa_signature_parse_compact(ctx, &sig, signature);
+  Hacl_K256_ECDSA_public_key_compressed_from_raw(compressed_pubkey, pk_raw);
+  b3 &= secp256k1_ec_pubkey_parse(ctx, &pubkey, compressed_pubkey, sizeof(compressed_pubkey));
+  uint8_t msgHash[32U] = { 0U };
+  Hacl_Hash_SHA2_hash_256(msg, msg_len, msgHash);
+
+  bool verp = secp256k1_ecdsa_verify(ctx, &sig, msgHash, &pubkey);
+
+  printf("K256 ECDSA verify Result (secp256k1) Hacl =? Bitcoin-core: ");
+  if (ver == verp) printf("Success! %d \n", id);
+  else printf("Failed %d \n", id);
+
+  return (ver == verp);
+}
+
+
 bool test_public_key_compressed(
   uint8_t *pk_x, // 32 bytes
   uint8_t *pk_y, // 32 bytes
@@ -149,6 +197,8 @@ int main() {
   for (int i = 0; i < sizeof(vectors)/sizeof(k256ecdsa_verify_test_vector); ++i) {
     ok &= print_test(vectors[i].pk_x,vectors[i].pk_y,vectors[i].msg_len,vectors[i].msg,
                      vectors[i].sgnt_r,vectors[i].sgnt_s,vectors[i].id,vectors[i].valid);
+    ok &= print_test_secp256k1(vectors[i].pk_x,vectors[i].pk_y,vectors[i].msg_len,vectors[i].msg,
+                     vectors[i].sgnt_r,vectors[i].sgnt_s,vectors[i].id,vectors[i].valid);
     ok &= test_public_key_uncompressed(vectors[i].pk_x,vectors[i].pk_y,vectors[i].id);
     ok &= test_public_key_compressed(vectors[i].pk_x,vectors[i].pk_y,vectors[i].id);
     printf("\n");
@@ -201,6 +251,58 @@ int main() {
   print_time(count,diff1,cyc1);
   printf("\n ECDSA K256 Verifying:\n");
   print_time(count,diff2,cyc2);
+
+  // Benchmarking for signing (libsecp256k-latest)
+  secp256k1_pubkey pubkey;
+  secp256k1_ecdsa_signature sig;
+  unsigned char serialized_signature[64];
+  unsigned char compressed_pubkey[33];
+  secp256k1_context* ctx = secp256k1_context_create(SECP256K1_CONTEXT_SIGN | SECP256K1_CONTEXT_VERIFY);
+
+  int b3 = 1;
+  int b4 = 1;
+
+  for (int j = 0; j < ROUNDS; j++) {
+    b3 &= secp256k1_ecdsa_sign(ctx, &sig, msgHash2, sk2, NULL, NULL);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    b3 &= secp256k1_ecdsa_sign(ctx, &sig, msgHash2, sk2, NULL, NULL);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff3 = t2 - t1;
+  uint64_t cyc3 = b - a;
+
+  //b3 &= secp256k1_ecdsa_signature_serialize_compact(ctx, serialized_signature, &sig);
+  b3 &= secp256k1_ecdsa_signature_parse_compact(ctx, &sig, sgnt2);
+  Hacl_K256_ECDSA_public_key_compressed_from_raw(compressed_pubkey, pk2);
+  b3 &= secp256k1_ec_pubkey_parse(ctx, &pubkey, compressed_pubkey, sizeof(compressed_pubkey));
+
+
+  for (int j = 0; j < ROUNDS; j++) {
+    b4 &= secp256k1_ecdsa_verify(ctx, &sig, msgHash2, &pubkey);
+  }
+
+  t1 = clock();
+  a = cpucycles_begin();
+  for (int j = 0; j < ROUNDS; j++) {
+    b4 &= secp256k1_ecdsa_verify(ctx, &sig, msgHash2, &pubkey);
+  }
+  b = cpucycles_end();
+  t2 = clock();
+  double diff4 = t2 - t1;
+  uint64_t cyc4 = b - a;
+
+
+  printf("\n libsecp256k: \n");
+  printf("\n ECDSA K256 Signing:\n");
+  print_time(count,diff3,cyc3);
+  printf("\n ECDSA K256 Verifying:\n");
+  print_time(count,diff4,cyc4);
+
 
   if (ok) return EXIT_SUCCESS;
   else return EXIT_FAILURE;
