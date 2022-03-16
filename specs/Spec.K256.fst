@@ -186,3 +186,51 @@ let pk_compressed_from_raw (pk:lbytes 64) : lbytes 33 =
   let pk0 = if is_pk_y_odd then u8 0x03 else u8 0x02 in
   concat (create 1 pk0) pk_x
 
+
+///  Low-S normalization
+
+(**
+   https://en.bitcoin.it/wiki/BIP_0062
+   https://yondon.blog/2019/01/01/how-not-to-use-ecdsa/
+   https://eklitzke.org/bitcoin-transaction-malleability
+*)
+
+// The value S in signatures must be between 0x1 and q / 2 (inclusive).
+// If S is too high, simply replace it by S' = q - S.
+let secp256k1_ecdsa_signature_normalize (signature:lbytes 64) : option (lbytes 64) =
+  let sn = nat_from_bytes_be (sub signature 32 32) in
+  let is_sn_valid = 0 < sn && sn < q in
+
+  if is_sn_valid then begin
+    let sn = if sn <= q / 2 then sn else (q - sn) % q in
+    let sgnt = update_sub signature 32 32 (nat_to_bytes_be 32 sn) in
+    Some sgnt end
+  else None
+
+
+let secp256k1_ecdsa_is_signature_normalized (signature:lbytes 64) : bool =
+  let sn = nat_from_bytes_be (sub signature 32 32) in
+  let is_sn_valid = 0 < sn && sn < q in
+  is_sn_valid && sn <= q / 2
+
+
+let secp256k1_ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : option (lbytes 64) =
+  let signature = ecdsa_sign_hashed_msg msgHash private_key nonce in
+  match signature with
+  | Some x -> secp256k1_ecdsa_signature_normalize x
+  | None -> None
+
+
+let secp256k1_ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =
+  if not (secp256k1_ecdsa_is_signature_normalized signature) then false
+  else ecdsa_verify_hashed_msg msgHash public_key signature
+
+
+let secp256k1_ecdsa_sign_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (private_key nonce:lbytes 32) : option (lbytes 64) =
+  let msgHash = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
+  secp256k1_ecdsa_sign_hashed_msg msgHash private_key nonce
+
+
+let secp256k1_ecdsa_verify_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (public_key signature:lbytes 64) : bool =
+  let msgHash = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
+  secp256k1_ecdsa_verify_hashed_msg msgHash public_key signature
