@@ -28,8 +28,12 @@ bool print_test(
   memcpy(pk_raw, pk_x, (uint32_t)32U * sizeof (uint8_t));
   memcpy(pk_raw + (uint32_t)32U, pk_y, (uint32_t)32U * sizeof (uint8_t));
 
+  uint8_t signature[64];
+  memcpy(signature, sgnt_r, (uint32_t)32U * sizeof (uint8_t));
+  memcpy(signature + (uint32_t)32U, sgnt_s, (uint32_t)32U * sizeof (uint8_t));
+
   printf("K256 ECDSA verify Result: ");
-  bool ver = Hacl_K256_ECDSA_ecdsa_verify_sha256(msg_len, msg, pk_raw, sgnt_r, sgnt_s);
+  bool ver = Hacl_K256_ECDSA_ecdsa_verify_sha256(msg_len, msg, pk_raw, signature);
   if (ver == valid) printf("Success! %d \n", id);
   else printf("Failed %d \n", id);
   return (ver == valid);
