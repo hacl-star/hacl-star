@@ -40,23 +40,15 @@ let msg1: b:glbuffer uint8 6ul{ recallable b } =
   createL_global l
 
 
-let sgnt_r1: b:glbuffer uint8 32ul{ recallable b } =
+let sgnt1: b:glbuffer uint8 64ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
       0x81; 0x3e; 0xf7; 0x9c; 0xce; 0xfa; 0x9a; 0x56; 0xf7; 0xba; 0x80; 0x5f; 0x0e; 0x47; 0x85; 0x84;
-      0xfe; 0x5f; 0x0d; 0xd5; 0xf5; 0x67; 0xbc; 0x09; 0xb5; 0x12; 0x3c; 0xcb; 0xc9; 0x83; 0x23; 0x65 ]) in
-  assert_norm (List.Tot.length l == 32);
-  createL_global l
-
-
-let sgnt_s1: b:glbuffer uint8 32ul{ recallable b } =
-  [@ inline_let]
-  let l:list uint8 =
-    normalize_term (List.Tot.map u8 [
+      0xfe; 0x5f; 0x0d; 0xd5; 0xf5; 0x67; 0xbc; 0x09; 0xb5; 0x12; 0x3c; 0xcb; 0xc9; 0x83; 0x23; 0x65;
       0x6f; 0xf1; 0x8a; 0x52; 0xdc; 0xc0; 0x33; 0x6f; 0x7a; 0xf6; 0x24; 0x00; 0xa6; 0xdd; 0x9b; 0x81;
       0x07; 0x32; 0xba; 0xf1; 0xff; 0x75; 0x80; 0x00; 0xd6; 0xf6; 0x13; 0xa5; 0x56; 0xeb; 0x31; 0xba ]) in
-  assert_norm (List.Tot.length l == 32);
+  assert_norm (List.Tot.length l == 64);
   createL_global l
 
 
@@ -86,7 +78,7 @@ let pk2: b:glbuffer uint8 64ul{ recallable b } =
   createL_global l
 
 
-let k2: b:glbuffer uint8 32ul{ recallable b } =
+let nonce2: b:glbuffer uint8 32ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -96,7 +88,7 @@ let k2: b:glbuffer uint8 32ul{ recallable b } =
   createL_global l
 
 
-let m2: b:glbuffer uint8 32ul{ recallable b } =
+let msgHash2: b:glbuffer uint8 32ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
@@ -106,23 +98,15 @@ let m2: b:glbuffer uint8 32ul{ recallable b } =
   createL_global l
 
 
-let sgnt_r2: b:glbuffer uint8 32ul{ recallable b } =
+let sgnt2: b:glbuffer uint8 64ul{ recallable b } =
   [@ inline_let]
   let l:list uint8 =
     normalize_term (List.Tot.map u8 [
       0x24; 0x10; 0x97; 0xef; 0xbf; 0x8b; 0x63; 0xbf; 0x14; 0x5c; 0x89; 0x61; 0xdb; 0xdf; 0x10; 0xc3;
-      0x10; 0xef; 0xbb; 0x3b; 0x26; 0x76; 0xbb; 0xc0; 0xf8; 0xb0; 0x85; 0x05; 0xc9; 0xe2; 0xf7; 0x95 ]) in
-  assert_norm (List.Tot.length l == 32);
-  createL_global l
-
-
-let sgnt_s2: b:glbuffer uint8 32ul{ recallable b } =
-  [@ inline_let]
-  let l:list uint8 =
-    normalize_term (List.Tot.map u8 [
+      0x10; 0xef; 0xbb; 0x3b; 0x26; 0x76; 0xbb; 0xc0; 0xf8; 0xb0; 0x85; 0x05; 0xc9; 0xe2; 0xf7; 0x95;
       0x02; 0x10; 0x06; 0xb7; 0x83; 0x86; 0x09; 0x33; 0x9e; 0x8b; 0x41; 0x5a; 0x7f; 0x9a; 0xcb; 0x1b;
       0x66; 0x18; 0x28; 0x13; 0x1a; 0xef; 0x1e; 0xcb; 0xc7; 0x95; 0x5d; 0xfb; 0x01; 0xf3; 0xca; 0x0e ]) in
-  assert_norm (List.Tot.length l == 32);
+  assert_norm (List.Tot.length l == 64);
   createL_global l
 
 
@@ -131,8 +115,7 @@ let test_verify () = admit();
   let b = K256.ecdsa_verify_sha256 6ul
     (const_to_buffer #uint8 msg1)
     (const_to_buffer #uint8 pk1)
-    (const_to_buffer #uint8 sgnt_r1)
-    (const_to_buffer #uint8 sgnt_s1) in
+    (const_to_buffer #uint8 sgnt1) in
 
   if b
   then C.String.print (C.String.of_literal "Test K256 ecdsa verification: Success!\n")
@@ -142,21 +125,18 @@ let test_verify () = admit();
 val test_sign_and_verify: unit -> St unit
 let test_sign_and_verify () = admit();
   push_frame ();
-  let r = create 32ul (u8 0) in
-  let s = create 32ul (u8 0) in
-  let _ = K256.ecdsa_sign_hashed_msg r s
-    (const_to_buffer #uint8 m2)
+  let sgnt = create 64ul (u8 0) in
+  let _ = K256.ecdsa_sign_hashed_msg sgnt
+    (const_to_buffer #uint8 msgHash2)
     (const_to_buffer #uint8 sk2)
-    (const_to_buffer #uint8 k2) in
+    (const_to_buffer #uint8 nonce2) in
 
-  print_compare_display 32ul (to_const r) sgnt_r2;
-  print_compare_display 32ul (to_const s) sgnt_s2;
+  print_compare_display 64ul (to_const sgnt) sgnt2;
 
   let b = K256.ecdsa_verify_hashed_msg
-    (const_to_buffer #uint8 m2)
+    (const_to_buffer #uint8 msgHash2)
     (const_to_buffer #uint8 pk2)
-    (const_to_buffer #uint8 sgnt_r2)
-    (const_to_buffer #uint8 sgnt_s2) in
+    (const_to_buffer #uint8 sgnt2) in
 
   if b
   then C.String.print (C.String.of_literal "Test K256 ecdsa verification: Success!\n")

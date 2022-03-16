@@ -29,14 +29,11 @@ let test1_msg = List.Tot.map u8_from_UInt8 [
   0x31uy; 0x32uy; 0x33uy; 0x34uy; 0x30uy; 0x30uy
 ]
 
-let test1_sgnt_r = List.Tot.map u8_from_UInt8 [
+let test1_sgnt = List.Tot.map u8_from_UInt8 [
   0x81uy; 0x3euy; 0xf7uy; 0x9cuy; 0xceuy; 0xfauy; 0x9auy; 0x56uy;
   0xf7uy; 0xbauy; 0x80uy; 0x5fuy; 0x0euy; 0x47uy; 0x85uy; 0x84uy;
   0xfeuy; 0x5fuy; 0x0duy; 0xd5uy; 0xf5uy; 0x67uy; 0xbcuy; 0x09uy;
-  0xb5uy; 0x12uy; 0x3cuy; 0xcbuy; 0xc9uy; 0x83uy; 0x23uy; 0x65uy
-]
-
-let test1_sgnt_s = List.Tot.map u8_from_UInt8 [
+  0xb5uy; 0x12uy; 0x3cuy; 0xcbuy; 0xc9uy; 0x83uy; 0x23uy; 0x65uy;
   0x6fuy; 0xf1uy; 0x8auy; 0x52uy; 0xdcuy; 0xc0uy; 0x33uy; 0x6fuy;
   0x7auy; 0xf6uy; 0x24uy; 0x00uy; 0xa6uy; 0xdduy; 0x9buy; 0x81uy;
   0x07uy; 0x32uy; 0xbauy; 0xf1uy; 0xffuy; 0x75uy; 0x80uy; 0x00uy;
@@ -65,28 +62,25 @@ let test2_pk = List.Tot.map u8_from_UInt8 [
   0x75uy; 0xc9uy; 0x23uy; 0x7buy; 0x91uy; 0x7duy; 0x42uy; 0x6fuy
 ]
 
-let test2_k = List.Tot.map u8_from_UInt8 [
+let test2_nonce = List.Tot.map u8_from_UInt8 [
   0x49uy; 0xa0uy; 0xd7uy; 0xb7uy; 0x86uy; 0xecuy; 0x9cuy; 0xdeuy;
   0x0duy; 0x07uy; 0x21uy; 0xd7uy; 0x28uy; 0x04uy; 0xbeuy; 0xfduy;
   0x06uy; 0x57uy; 0x1cuy; 0x97uy; 0x4buy; 0x19uy; 0x1euy; 0xfbuy;
   0x42uy; 0xecuy; 0xf3uy; 0x22uy; 0xbauy; 0x9duy; 0xdduy; 0x9auy
 ]
 
-let test2_m = List.Tot.map u8_from_UInt8 [
+let test2_msgHash = List.Tot.map u8_from_UInt8 [
   0x4buy; 0x68uy; 0x8duy; 0xf4uy; 0x0buy; 0xceuy; 0xdbuy; 0xe6uy;
   0x41uy; 0xdduy; 0xb1uy; 0x6fuy; 0xf0uy; 0xa1uy; 0x84uy; 0x2duy;
   0x9cuy; 0x67uy; 0xeauy; 0x1cuy; 0x3buy; 0xf6uy; 0x3fuy; 0x3euy;
   0x04uy; 0x71uy; 0xbauy; 0xa6uy; 0x64uy; 0x53uy; 0x1duy; 0x1auy
 ]
 
-let test2_sgnt_r = List.Tot.map u8_from_UInt8 [
+let test2_sgnt = List.Tot.map u8_from_UInt8 [
   0x24uy; 0x10uy; 0x97uy; 0xefuy; 0xbfuy; 0x8buy; 0x63uy; 0xbfuy;
   0x14uy; 0x5cuy; 0x89uy; 0x61uy; 0xdbuy; 0xdfuy; 0x10uy; 0xc3uy;
   0x10uy; 0xefuy; 0xbbuy; 0x3buy; 0x26uy; 0x76uy; 0xbbuy; 0xc0uy;
-  0xf8uy; 0xb0uy; 0x85uy; 0x05uy; 0xc9uy; 0xe2uy; 0xf7uy; 0x95uy
-]
-
-let test2_sgnt_s = List.Tot.map u8_from_UInt8 [
+  0xf8uy; 0xb0uy; 0x85uy; 0x05uy; 0xc9uy; 0xe2uy; 0xf7uy; 0x95uy;
   0x02uy; 0x10uy; 0x06uy; 0xb7uy; 0x83uy; 0x86uy; 0x09uy; 0x33uy;
   0x9euy; 0x8buy; 0x41uy; 0x5auy; 0x7fuy; 0x9auy; 0xcbuy; 0x1buy;
   0x66uy; 0x18uy; 0x28uy; 0x13uy; 0x1auy; 0xefuy; 0x1euy; 0xcbuy;
@@ -97,17 +91,13 @@ let test2_sgnt_s = List.Tot.map u8_from_UInt8 [
 let test_verify () : FStar.All.ML bool =
   assert_norm (List.Tot.length test1_pk = 64);
   assert_norm (List.Tot.length test1_msg = 6);
-  assert_norm (List.Tot.length test1_sgnt_r = 32);
-  assert_norm (List.Tot.length test1_sgnt_s = 32);
+  assert_norm (List.Tot.length test1_sgnt = 64);
 
   let pk_raw : lbytes 64 = of_list test1_pk in
   let msg : lbytes 6 = of_list test1_msg in
+  let sgnt : lbytes 64 = of_list test1_sgnt in
 
-  let sgnt_r : lbytes 32 = of_list test1_sgnt_r in
-  let sgnt_s : lbytes 32 = of_list test1_sgnt_s in
-
-  let verify : bool = ecdsa_verify_sha256 6 msg pk_raw sgnt_r sgnt_s in
-
+  let verify : bool = ecdsa_verify_sha256 6 msg pk_raw sgnt in
   if verify
   then begin IO.print_string "Test K256 ecdsa verification: Success!\n"; true end
   else begin IO.print_string "Test K256 ecdsa verification: Failure :(\n"; false end
@@ -116,36 +106,27 @@ let test_verify () : FStar.All.ML bool =
 let test_sign_and_verify () : FStar.All.ML bool =
   assert_norm (List.Tot.length test2_sk = 32);
   assert_norm (List.Tot.length test2_pk = 64);
-  assert_norm (List.Tot.length test2_k = 32);
-  assert_norm (List.Tot.length test2_m = 32);
-  assert_norm (List.Tot.length test2_sgnt_r = 32);
-  assert_norm (List.Tot.length test2_sgnt_s = 32);
+  assert_norm (List.Tot.length test2_nonce = 32);
+  assert_norm (List.Tot.length test2_msgHash = 32);
+  assert_norm (List.Tot.length test2_sgnt = 64);
 
   let sk : lbytes 32 = of_list test2_sk in
-  let k : lbytes 32 = of_list test2_k in
+  let nonce : lbytes 32 = of_list test2_nonce in
   let pk_raw : lbytes 64 = of_list test2_pk in
 
-  let m : lbytes 32 = of_list test2_m in
-  let sgnt_r : lbytes 32 = of_list test2_sgnt_r in
-  let sgnt_s : lbytes 32 = of_list test2_sgnt_s in
+  let msgHash : lbytes 32 = of_list test2_msgHash in
+  let sgnt : lbytes 64 = of_list test2_sgnt in
 
-  let k_nat = nat_from_bytes_be k in
-  let is_k_valid = 0 < k_nat && k_nat < q in
-  let sk_nat = nat_from_bytes_be sk in
-  let is_sk_valid = 0 < sk_nat && sk_nat < q in
+  let signature = ecdsa_sign_hashed_msg msgHash sk nonce in
 
-  let verify =
-  if not (is_k_valid && is_sk_valid) then false
-  else begin
-    let (r, s, v) = ecdsa_sign_hashed_msg m sk k in
-    let is_r_valid = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) r sgnt_r in
-    let is_s_valid = for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) s sgnt_s in
-    let is_sgnt_valid = is_r_valid && is_s_valid in
+  let is_sgnt_valid =
+    match signature with
+    | Some x -> for_all2 (fun a b -> uint_to_nat #U8 a = uint_to_nat #U8 b) sgnt x
+    | None -> false in
 
-    let verify_sgnt = ecdsa_verify_hashed_msg m pk_raw sgnt_r sgnt_s in
-    verify_sgnt && is_sgnt_valid end in
+  let verify_sgnt = ecdsa_verify_hashed_msg msgHash pk_raw sgnt in
 
-  if verify
+  if verify_sgnt && is_sgnt_valid
   then begin IO.print_string "Test K256 ecdsa signature and verification: Success!\n"; true end
   else begin IO.print_string "Test K256 ecdsa signature and verification: Failure :(\n"; false end
 

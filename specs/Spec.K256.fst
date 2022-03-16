@@ -76,38 +76,30 @@ let point_mul_double_g (a1:qelem) (a2:qelem) (p:proj_point) : proj_point =
 
 // TODO: add `secret_to_public`?
 
-let scalar_t = s:lbytes 32{nat_from_bytes_be s < q}
-
-
-val ecdsa_sign_hashed_msg:
-     m:lbytes 32
-  -> private_key:scalar_t{0 < nat_from_bytes_be private_key}
-  -> k:scalar_t{0 < nat_from_bytes_be k} ->
-  tuple3 scalar_t scalar_t bool
-
-let ecdsa_sign_hashed_msg m private_key k =
-  let k_q = nat_from_bytes_be k in
+let ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : option (lbytes 64) =
+  let k_q = nat_from_bytes_be nonce in
   let d_a = nat_from_bytes_be private_key in
-  let z = nat_from_bytes_be m % q in
+  let z = nat_from_bytes_be msgHash % q in
 
-  let _X, _Y, _Z = point_mul_g k_q in
-  let x = _X /% _Z in (* or (x, y) = to_aff_point (_X, _Y, _Z) *)
-  let r = x % q in
+  let is_privkey_valid = 0 < d_a && d_a < q in
+  let is_nonce_valid = 0 < k_q && k_q < q in
 
-  let kinv = qinv k_q in
-  let s = kinv *^ (z +^ r *^ d_a) in
+  if not (is_privkey_valid && is_nonce_valid) then None
+  else begin
+    let _X, _Y, _Z = point_mul_g k_q in
+    let x = _X /% _Z in
+    let r = x % q in
 
-  let rb = nat_to_bytes_be 32 r in
-  let sb = nat_to_bytes_be 32 s in
+    let kinv = qinv k_q in
+    let s = kinv *^ (z +^ r *^ d_a) in
 
-  if r = 0 || s = 0 then
-    rb, sb, false
-  else
-    rb, sb, true
+    let rb = nat_to_bytes_be 32 r in
+    let sb = nat_to_bytes_be 32 s in
+
+    if r = 0 || s = 0 then None else Some (concat #_ #32 #32 rb sb) end
 
 
-val is_public_key_valid (pk:lbytes 64) : tuple3 nat nat bool
-let is_public_key_valid pk =
+let load_public_key (pk:lbytes 64) : tuple3 nat nat bool =
   let pk_x = nat_from_bytes_be (sub pk 0 32) in
   let pk_y = nat_from_bytes_be (sub pk 32 32) in
   let is_x_valid = 0 < pk_x && pk_x < prime in
@@ -117,12 +109,11 @@ let is_public_key_valid pk =
   pk_x, pk_y, is_xy_on_curve
 
 
-val ecdsa_verify_hashed_msg (m:lbytes 32) (public_key:lbytes 64) (r s:lbytes 32) : bool
-let ecdsa_verify_hashed_msg m public_key r s =
-  let pk_x, pk_y, is_xy_on_curve = is_public_key_valid public_key in
-  let r = nat_from_bytes_be r in
-  let s = nat_from_bytes_be s in
-  let z = nat_from_bytes_be m % q in
+let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =
+  let pk_x, pk_y, is_xy_on_curve = load_public_key public_key in
+  let r = nat_from_bytes_be (sub signature 0 32) in
+  let s = nat_from_bytes_be (sub signature 32 32) in
+  let z = nat_from_bytes_be msgHash % q in
 
   let is_r_valid = 0 < r && r < q in
   let is_s_valid = 0 < s && s < q in
@@ -155,25 +146,14 @@ let _:_:unit{Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_2
  assert_norm (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32)
 
 
-val ecdsa_sign_sha256:
-    msg_len:size_nat
-  -> msg:lbytes msg_len
-  -> private_key:scalar_t{0 < nat_from_bytes_be private_key}
-  -> k:scalar_t{0 < nat_from_bytes_be k} ->
-  tuple3 scalar_t scalar_t bool
-
-let ecdsa_sign_sha256 msg_len msg private_key k =
-  let m = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
-  ecdsa_sign_hashed_msg m private_key k
+let ecdsa_sign_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (private_key nonce:lbytes 32) : option (lbytes 64) =
+  let msgHash = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
+  ecdsa_sign_hashed_msg msgHash private_key nonce
 
 
-val ecdsa_verify_sha256
-  (msg_len:size_nat) (msg:lbytes msg_len)
-  (public_key:lbytes 64) (r s:lbytes 32) : bool
-
-let ecdsa_verify_sha256 msg_len msg public_key r s =
-  let m = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
-  ecdsa_verify_hashed_msg m public_key r s
+let ecdsa_verify_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (public_key signature:lbytes 64) : bool =
+  let msgHash = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
+  ecdsa_verify_hashed_msg msgHash public_key signature
 
 
 ///  Parsing and Serializing public keys
@@ -205,3 +185,4 @@ let pk_compressed_from_raw (pk:lbytes 64) : lbytes 33 =
   let is_pk_y_odd = nat_from_bytes_be pk_y % 2 = 1 in // <==> pk_y % 2 = 1
   let pk0 = if is_pk_y_odd then u8 0x03 else u8 0x02 in
   concat (create 1 pk0) pk_x
+

@@ -126,6 +126,26 @@ let load_qelem f b =
 
 
 [@CInline]
+let load_qelem_check f b =
+  push_frame ();
+  let n = create qnlimb (u64 0) in
+  make_u64_4 n (make_order_k256 ());
+  load_qelem f b;
+
+  let h0 = ST.get () in
+  let is_zero = is_qelem_zero f in
+  assert (v is_zero == (if qas_nat h0 f = 0 then ones_v U64 else 0));
+  let is_lt_q = BN.bn_lt_mask qnlimb f n in
+  SN.bn_lt_mask_lemma (as_seq h0 f) (as_seq h0 n);
+  assert (v is_lt_q == (if qas_nat h0 f < S.q then ones_v U64 else 0));
+  let m = logand (lognot is_zero) is_lt_q in
+  lognot_lemma is_zero;
+  logand_lemma (lognot is_zero) is_lt_q;
+  pop_frame ();
+  m
+
+
+[@CInline]
 let load_qelem_vartime f b =
   load_qelem f b;
 

@@ -91,6 +91,15 @@ val load_qelem: f:qelem -> b:lbuffer uint8 32ul -> Stack unit
     qas_nat h1 f == BSeq.nat_from_bytes_be (as_seq h0 b))
 
 
+val load_qelem_check: f:qelem -> b:lbuffer uint8 32ul -> Stack uint64
+  (requires fun h ->
+    live h f /\ live h b /\ disjoint f b)
+  (ensures  fun h0 m h1 -> modifies (loc f) h0 h1 /\
+   (let b_nat = BSeq.nat_from_bytes_be (as_seq h0 b) in
+    qas_nat h1 f == b_nat /\ (v m = ones_v U64 \/ v m = 0) /\
+    (v m = ones_v U64) = (0 < b_nat && b_nat < S.q)))
+
+
 val load_qelem_vartime: f:qelem -> b:lbuffer uint8 32ul -> Stack bool
   (requires fun h ->
     live h f /\ live h b /\ disjoint f b)

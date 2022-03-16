@@ -28,16 +28,16 @@ inline_for_extraction noextract
 let lbytes len = lbuffer uint8 len
 
 
-val is_public_key_valid (pk:lbytes 64ul) (fpk_x fpk_y:felem) : Stack bool
+val load_public_key (pk:lbytes 64ul) (fpk_x fpk_y:felem) : Stack bool
   (requires fun h ->
     live h pk /\ live h fpk_x /\ live h fpk_y /\
     disjoint fpk_x fpk_y /\ disjoint fpk_x pk /\ disjoint fpk_y pk)
   (ensures  fun h0 b h1 -> modifies (loc fpk_x |+| loc fpk_y) h0 h1 /\
     (b ==> inv_fully_reduced h1 fpk_x /\ inv_fully_reduced h1 fpk_y) /\
-    (as_nat h1 fpk_x, as_nat h1 fpk_y, b) == S.is_public_key_valid (as_seq h0 pk))
+    (as_nat h1 fpk_x, as_nat h1 fpk_y, b) == S.load_public_key (as_seq h0 pk))
 
 [@CInline]
-let is_public_key_valid pk fpk_x fpk_y =
+let load_public_key pk fpk_x fpk_y =
   let pk_x = sub pk 0ul 32ul in
   let pk_y = sub pk 32ul 32ul in
   let is_x_valid = load_felem_vartime fpk_x pk_x in
@@ -188,15 +188,14 @@ let ecdsa_verify_qelem_aff pk_x pk_y z r s =
 
 
 inline_for_extraction noextract
-val ecdsa_verify_hashed_msg (m:lbytes 32ul) (public_key:lbytes 64ul) (r s:lbytes 32ul) : Stack bool
+val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool
   (requires fun h ->
-    live h m /\ live h public_key /\ live h r /\
-    live h s /\ disjoint r s)
+    live h msgHash /\ live h public_key /\ live h signature)
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
-    b == S.ecdsa_verify_hashed_msg (as_seq h0 m) (as_seq h0 public_key) (as_seq h0 r) (as_seq h0 s))
+    b == S.ecdsa_verify_hashed_msg (as_seq h0 msgHash) (as_seq h0 public_key) (as_seq h0 signature))
 
 #push-options "--z3rlimit 150"
-let ecdsa_verify_hashed_msg m public_key r s =
+let ecdsa_verify_hashed_msg msgHash public_key signature =
   push_frame ();
   let pk_x = create_felem () in
   let pk_y = create_felem () in
@@ -205,10 +204,10 @@ let ecdsa_verify_hashed_msg m public_key r s =
   let s_q = QA.create_qelem () in
   let z = QA.create_qelem () in
 
-  let is_xy_on_curve = is_public_key_valid public_key pk_x pk_y in
-  let is_r_valid = QA.load_qelem_vartime r_q r in
-  let is_s_valid = QA.load_qelem_vartime s_q s in
-  QA.load_qelem_modq z m;
+  let is_xy_on_curve = load_public_key public_key pk_x pk_y in
+  let is_r_valid = QA.load_qelem_vartime r_q (sub signature 0ul 32ul) in
+  let is_s_valid = QA.load_qelem_vartime s_q (sub signature 32ul 32ul) in
+  QA.load_qelem_modq z msgHash;
 
   let h0 = ST.get () in
   let res =

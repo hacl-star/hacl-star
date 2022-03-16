@@ -20,28 +20,28 @@ module VK = Hacl.Impl.K256.Verify
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let ecdsa_sign_hashed_msg r s m private_key k =
-  SK.ecdsa_sign_hashed_msg r s m private_key k
+let ecdsa_sign_hashed_msg signature msgHash private_key nonce =
+  SK.ecdsa_sign_hashed_msg signature msgHash private_key nonce
 
 
-let ecdsa_verify_hashed_msg m public_key r s =
-  VK.ecdsa_verify_hashed_msg m public_key r s
+let ecdsa_verify_hashed_msg m public_key signature =
+  VK.ecdsa_verify_hashed_msg m public_key signature
 
 
-let ecdsa_sign_sha256 r s msg_len msg private_key k =
+let ecdsa_sign_sha256 signature msg_len msg private_key nonce =
   push_frame ();
-  let mHash = create 32ul (u8 0) in
-  Hacl.Hash.SHA2.hash_256 msg msg_len mHash;
-  let b = ecdsa_sign_hashed_msg r s mHash private_key k in
+  let msgHash = create 32ul (u8 0) in
+  Hacl.Hash.SHA2.hash_256 msg msg_len msgHash;
+  let b = ecdsa_sign_hashed_msg signature msgHash private_key nonce in
   pop_frame ();
   b
 
 
-let ecdsa_verify_sha256 msg_len msg public_key r s =
+let ecdsa_verify_sha256 msg_len msg public_key signature =
   push_frame ();
   let mHash = create 32ul (u8 0) in
   Hacl.Hash.SHA2.hash_256 msg msg_len mHash;
-  let b = ecdsa_verify_hashed_msg mHash public_key r s in
+  let b = ecdsa_verify_hashed_msg mHash public_key signature in
   pop_frame ();
   b
 
