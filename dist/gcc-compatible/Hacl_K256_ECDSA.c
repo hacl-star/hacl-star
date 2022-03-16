@@ -301,6 +301,26 @@ static inline void load_qelem(uint64_t *f, uint8_t *b)
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)32U, b, f);
 }
 
+static inline uint64_t load_qelem_check(uint64_t *f, uint8_t *b)
+{
+  uint64_t n[4U] = { 0U };
+  n[0U] = (uint64_t)0xbfd25e8cd0364141U;
+  n[1U] = (uint64_t)0xbaaedce6af48a03bU;
+  n[2U] = (uint64_t)0xfffffffffffffffeU;
+  n[3U] = (uint64_t)0xffffffffffffffffU;
+  load_qelem(f, b);
+  uint64_t is_zero = is_qelem_zero(f);
+  uint64_t acc = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t beq = FStar_UInt64_eq_mask(f[i], n[i]);
+    uint64_t blt = ~FStar_UInt64_gte_mask(f[i], n[i]);
+    acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+  }
+  uint64_t is_lt_q = acc;
+  return ~is_zero & is_lt_q;
+}
+
 static inline bool load_qelem_vartime(uint64_t *f, uint8_t *b)
 {
   load_qelem(f, b);
@@ -1537,7 +1557,7 @@ point_mul_g_double_vartime(uint64_t *out, uint64_t *scalar1, uint64_t *scalar2, 
   point_mul_double_vartime(out, scalar1, g, scalar2, q2);
 }
 
-static inline bool is_public_key_valid(uint8_t *pk, uint64_t *fpk_x, uint64_t *fpk_y)
+static inline bool load_public_key(uint8_t *pk, uint64_t *fpk_x, uint64_t *fpk_y)
 {
   uint8_t *pk_x = pk;
   uint8_t *pk_y = pk + (uint32_t)32U;
@@ -1577,17 +1597,23 @@ static inline bool fmul_eq_vartime(uint64_t *r, uint64_t *z, uint64_t *x)
 
 bool
 Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
-  uint8_t *r,
-  uint8_t *s,
-  uint8_t *m,
+  uint8_t *signature,
+  uint8_t *msgHash,
   uint8_t *private_key,
-  uint8_t *k
+  uint8_t *nonce
 )
 {
   uint64_t r_q[4U] = { 0U };
   uint64_t s_q[4U] = { 0U };
+  uint64_t d_a[4U] = { 0U };
   uint64_t k_q[4U] = { 0U };
-  load_qelem(k_q, k);
+  uint64_t is_sk_valid = load_qelem_check(d_a, private_key);
+  uint64_t is_nonce_valid = load_qelem_check(k_q, nonce);
+  uint64_t are_sk_nonce_valid = is_sk_valid & is_nonce_valid;
+  if (are_sk_nonce_valid == (uint64_t)0U)
+  {
+    return false;
+  }
   uint64_t tmp[5U] = { 0U };
   uint8_t x_bytes[32U] = { 0U };
   uint64_t p[15U] = { 0U };
@@ -1600,16 +1626,14 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   store_felem(x_bytes, tmp);
   load_qelem_modq(r_q, x_bytes);
   uint64_t z0[4U] = { 0U };
-  uint64_t d_a[4U] = { 0U };
   uint64_t kinv[4U] = { 0U };
-  load_qelem_modq(z0, m);
-  load_qelem(d_a, private_key);
+  load_qelem_modq(z0, msgHash);
   qinv(kinv, k_q);
   qmul(s_q, r_q, d_a);
   qadd(s_q, z0, s_q);
   qmul(s_q, kinv, s_q);
-  store_qelem(r, r_q);
-  store_qelem(s, s_q);
+  store_qelem(signature, r_q);
+  store_qelem(signature + (uint32_t)32U, s_q);
   uint64_t is_r_zero = is_qelem_zero(r_q);
   uint64_t is_s_zero = is_qelem_zero(s_q);
   if (is_r_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU || is_s_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU)
@@ -1620,21 +1644,16 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
 }
 
 bool
-Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(
-  uint8_t *m,
-  uint8_t *public_key,
-  uint8_t *r,
-  uint8_t *s
-)
+Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t *signature)
 {
   uint64_t pk_x[5U] = { 0U };
   uint64_t pk_y[5U] = { 0U };
   uint64_t r_q[4U] = { 0U };
   uint64_t s_q[4U] = { 0U };
   uint64_t z[4U] = { 0U };
-  bool is_xy_on_curve = is_public_key_valid(public_key, pk_x, pk_y);
-  bool is_r_valid = load_qelem_vartime(r_q, r);
-  bool is_s_valid = load_qelem_vartime(s_q, s);
+  bool is_xy_on_curve = load_public_key(public_key, pk_x, pk_y);
+  bool is_r_valid = load_qelem_vartime(r_q, signature);
+  bool is_s_valid = load_qelem_vartime(s_q, signature + (uint32_t)32U);
   load_qelem_modq(z, m);
   if (!(is_xy_on_curve && is_r_valid && is_s_valid))
   {
@@ -1694,17 +1713,16 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(
 
 bool
 Hacl_K256_ECDSA_ecdsa_sign_sha256(
-  uint8_t *r,
-  uint8_t *s,
+  uint8_t *signature,
   uint32_t msg_len,
   uint8_t *msg,
   uint8_t *private_key,
-  uint8_t *k
+  uint8_t *nonce
 )
 {
-  uint8_t mHash[32U] = { 0U };
-  Hacl_Hash_SHA2_hash_256(msg, msg_len, mHash);
-  bool b = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(r, s, mHash, private_key, k);
+  uint8_t msgHash[32U] = { 0U };
+  Hacl_Hash_SHA2_hash_256(msg, msg_len, msgHash);
+  bool b = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
   return b;
 }
 
@@ -1713,13 +1731,12 @@ Hacl_K256_ECDSA_ecdsa_verify_sha256(
   uint32_t msg_len,
   uint8_t *msg,
   uint8_t *public_key,
-  uint8_t *r,
-  uint8_t *s
+  uint8_t *signature
 )
 {
   uint8_t mHash[32U] = { 0U };
   Hacl_Hash_SHA2_hash_256(msg, msg_len, mHash);
-  bool b = Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(mHash, public_key, r, s);
+  bool b = Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(mHash, public_key, signature);
   return b;
 }
 

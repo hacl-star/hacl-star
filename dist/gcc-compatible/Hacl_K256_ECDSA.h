@@ -43,29 +43,22 @@ extern "C" {
 #include "libintvector.h"
 bool
 Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
-  uint8_t *r,
-  uint8_t *s,
-  uint8_t *m,
+  uint8_t *signature,
+  uint8_t *msgHash,
   uint8_t *private_key,
-  uint8_t *k
+  uint8_t *nonce
 );
 
 bool
-Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(
-  uint8_t *m,
-  uint8_t *public_key,
-  uint8_t *r,
-  uint8_t *s
-);
+Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t *signature);
 
 bool
 Hacl_K256_ECDSA_ecdsa_sign_sha256(
-  uint8_t *r,
-  uint8_t *s,
+  uint8_t *signature,
   uint32_t msg_len,
   uint8_t *msg,
   uint8_t *private_key,
-  uint8_t *k
+  uint8_t *nonce
 );
 
 bool
@@ -73,8 +66,7 @@ Hacl_K256_ECDSA_ecdsa_verify_sha256(
   uint32_t msg_len,
   uint8_t *msg,
   uint8_t *public_key,
-  uint8_t *r,
-  uint8_t *s
+  uint8_t *signature
 );
 
 bool Hacl_K256_ECDSA_public_key_uncompressed_to_raw(uint8_t *pk_raw, uint8_t *pk);
