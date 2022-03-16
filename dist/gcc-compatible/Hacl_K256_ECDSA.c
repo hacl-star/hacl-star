@@ -193,6 +193,74 @@ static void add_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
   }
 }
 
+static void sub_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
+{
+  uint64_t c0 = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
+  {
+    uint64_t t1 = a[(uint32_t)4U * i];
+    uint64_t t20 = b[(uint32_t)4U * i];
+    uint64_t *res_i0 = res + (uint32_t)4U * i;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res_i0);
+    uint64_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t10, t21, res_i1);
+    uint64_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t11, t22, res_i2);
+    uint64_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t12, t2, res_i);
+  }
+  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
+  {
+    uint64_t t1 = a[i];
+    uint64_t t2 = b[i];
+    uint64_t *res_i = res + i;
+    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res_i);
+  }
+  uint64_t c00 = c0;
+  uint64_t tmp[4U] = { 0U };
+  uint64_t c = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
+  {
+    uint64_t t1 = res[(uint32_t)4U * i];
+    uint64_t t20 = n[(uint32_t)4U * i];
+    uint64_t *res_i0 = tmp + (uint32_t)4U * i;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t20, res_i0);
+    uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
+    uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t21, res_i1);
+    uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
+    uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t22, res_i2);
+    uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
+    uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
+  }
+  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
+  {
+    uint64_t t1 = res[i];
+    uint64_t t2 = n[i];
+    uint64_t *res_i = tmp + i;
+    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
+  }
+  uint64_t c1 = c;
+  uint64_t c2 = (uint64_t)0U - c00;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & tmp[i]) | (~c2 & res[i]);
+    os[i] = x;
+  }
+}
+
 static void mul4(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   memset(res, 0U, (uint32_t)8U * sizeof (uint64_t));
@@ -486,6 +554,53 @@ static inline void qsqr(uint64_t *out, uint64_t *f)
   uint64_t tmp[8U] = { 0U };
   sqr4(f, tmp);
   modq(out, tmp);
+}
+
+static inline void qnegate_conditional_vartime(uint64_t *f, bool is_negate)
+{
+  uint64_t n[4U] = { 0U };
+  n[0U] = (uint64_t)0xbfd25e8cd0364141U;
+  n[1U] = (uint64_t)0xbaaedce6af48a03bU;
+  n[2U] = (uint64_t)0xfffffffffffffffeU;
+  n[3U] = (uint64_t)0xffffffffffffffffU;
+  uint64_t zero[4U] = { 0U };
+  if (is_negate)
+  {
+    sub_mod4(n, zero, f, f);
+  }
+}
+
+static inline bool is_qelem_le_q_halved_vartime(uint64_t *f)
+{
+  uint64_t a0 = f[0U];
+  uint64_t a1 = f[1U];
+  uint64_t a2 = f[2U];
+  uint64_t a3 = f[3U];
+  if (a3 < (uint64_t)0x7fffffffffffffffU)
+  {
+    return true;
+  }
+  if (a3 > (uint64_t)0x7fffffffffffffffU)
+  {
+    return false;
+  }
+  if (a2 < (uint64_t)0xffffffffffffffffU)
+  {
+    return true;
+  }
+  if (a2 > (uint64_t)0xffffffffffffffffU)
+  {
+    return false;
+  }
+  if (a1 < (uint64_t)0x5d576e7357a4501dU)
+  {
+    return true;
+  }
+  if (a1 > (uint64_t)0x5d576e7357a4501dU)
+  {
+    return false;
+  }
+  return a0 <= (uint64_t)0xdfe92f46681b20a0U;
 }
 
 static inline void qsquare_times_in_place(uint64_t *out, uint32_t b)
@@ -1134,6 +1249,35 @@ static inline void fnormalize(uint64_t *out, uint64_t *f)
   out[4U] = f4;
 }
 
+static inline void fnegate_conditional_vartime(uint64_t *f, bool is_negate)
+{
+  if (is_negate)
+  {
+    uint64_t a0 = f[0U];
+    uint64_t a1 = f[1U];
+    uint64_t a2 = f[2U];
+    uint64_t a3 = f[3U];
+    uint64_t a4 = f[4U];
+    uint64_t r0 = (uint64_t)0xffffefffffc2fU * (uint64_t)2U * (uint64_t)1U - a0;
+    uint64_t r1 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a1;
+    uint64_t r2 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a2;
+    uint64_t r3 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a3;
+    uint64_t r4 = (uint64_t)0xffffffffffffU * (uint64_t)2U * (uint64_t)1U - a4;
+    uint64_t f0 = r0;
+    uint64_t f1 = r1;
+    uint64_t f2 = r2;
+    uint64_t f3 = r3;
+    uint64_t f4 = r4;
+    f[0U] = f0;
+    f[1U] = f1;
+    f[2U] = f2;
+    f[3U] = f3;
+    f[4U] = f4;
+    fnormalize(f, f);
+    return;
+  }
+}
+
 static inline void fsquare_times_in_place(uint64_t *out, uint32_t b)
 {
   for (uint32_t i = (uint32_t)0U; i < b; i++)
@@ -1240,30 +1384,7 @@ static inline bool recover_y_bytes_vartime(uint8_t *y, uint8_t *x, bool is_odd)
   {
     uint64_t x0 = yf[0U];
     bool is_y_odd = (x0 & (uint64_t)1U) == (uint64_t)1U;
-    if (is_y_odd != is_odd)
-    {
-      uint64_t a0 = yf[0U];
-      uint64_t a1 = yf[1U];
-      uint64_t a2 = yf[2U];
-      uint64_t a3 = yf[3U];
-      uint64_t a4 = yf[4U];
-      uint64_t r0 = (uint64_t)0xffffefffffc2fU * (uint64_t)2U * (uint64_t)1U - a0;
-      uint64_t r1 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a1;
-      uint64_t r2 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a2;
-      uint64_t r3 = (uint64_t)0xfffffffffffffU * (uint64_t)2U * (uint64_t)1U - a3;
-      uint64_t r4 = (uint64_t)0xffffffffffffU * (uint64_t)2U * (uint64_t)1U - a4;
-      uint64_t f0 = r0;
-      uint64_t f1 = r1;
-      uint64_t f2 = r2;
-      uint64_t f3 = r3;
-      uint64_t f4 = r4;
-      yf[0U] = f0;
-      yf[1U] = f1;
-      yf[2U] = f2;
-      yf[3U] = f3;
-      yf[4U] = f4;
-      fnormalize(yf, yf);
-    }
+    fnegate_conditional_vartime(yf, is_y_odd != is_odd);
     res = true;
   }
   bool r = res;
@@ -1789,5 +1910,90 @@ void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw
   }
   pk[0U] = ite;
   memcpy(pk + (uint32_t)1U, pk_x, (uint32_t)32U * sizeof (uint8_t));
+}
+
+bool Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(uint8_t *signature)
+{
+  uint64_t s_q[4U] = { 0U };
+  uint8_t *s = signature + (uint32_t)32U;
+  bool is_sk_valid = load_qelem_vartime(s_q, s);
+  if (!is_sk_valid)
+  {
+    return false;
+  }
+  bool is_sk_lt_q_halved = is_qelem_le_q_halved_vartime(s_q);
+  qnegate_conditional_vartime(s_q, !is_sk_lt_q_halved);
+  store_qelem(signature + (uint32_t)32U, s_q);
+  return true;
+}
+
+bool Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized(uint8_t *signature)
+{
+  uint64_t s_q[4U] = { 0U };
+  uint8_t *s = signature + (uint32_t)32U;
+  bool is_s_valid = load_qelem_vartime(s_q, s);
+  bool is_s_lt_q_halved = is_qelem_le_q_halved_vartime(s_q);
+  return is_s_valid && is_s_lt_q_halved;
+}
+
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
+  uint8_t *signature,
+  uint8_t *msgHash,
+  uint8_t *private_key,
+  uint8_t *nonce
+)
+{
+  bool b = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
+  if (b)
+  {
+    return Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(signature);
+  }
+  return false;
+}
+
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_sign_sha256(
+  uint8_t *signature,
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *private_key,
+  uint8_t *nonce
+)
+{
+  uint8_t msgHash[32U] = { 0U };
+  Hacl_Hash_SHA2_hash_256(msg, msg_len, msgHash);
+  bool
+  b = Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
+  return b;
+}
+
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
+  uint8_t *msgHash,
+  uint8_t *public_key,
+  uint8_t *signature
+)
+{
+  bool is_s_normalized = Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized(signature);
+  if (!is_s_normalized)
+  {
+    return false;
+  }
+  return Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(msgHash, public_key, signature);
+}
+
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256(
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *public_key,
+  uint8_t *signature
+)
+{
+  uint8_t mHash[32U] = { 0U };
+  Hacl_Hash_SHA2_hash_256(msg, msg_len, mHash);
+  bool b = Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(mHash, public_key, signature);
+  return b;
 }
 

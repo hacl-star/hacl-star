@@ -77,6 +77,42 @@ bool Hacl_K256_ECDSA_public_key_compressed_to_raw(uint8_t *pk_raw, uint8_t *pk);
 
 void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw);
 
+bool Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(uint8_t *signature);
+
+bool Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized(uint8_t *signature);
+
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
+  uint8_t *signature,
+  uint8_t *msgHash,
+  uint8_t *private_key,
+  uint8_t *nonce
+);
+
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_sign_sha256(
+  uint8_t *signature,
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *private_key,
+  uint8_t *nonce
+);
+
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
+  uint8_t *msgHash,
+  uint8_t *public_key,
+  uint8_t *signature
+);
+
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256(
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *public_key,
+  uint8_t *signature
+);
+
 #if defined(__cplusplus)
 }
 #endif
