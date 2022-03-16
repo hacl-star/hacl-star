@@ -54,6 +54,12 @@ let is_qelem_lt_q_vartime4_lemma f =
   assert_norm (0xbfd25e8cd0364141 + 0xbaaedce6af48a03b * pow2 64 +
     0xfffffffffffffffe * pow2 128 + 0xffffffffffffffff * pow2 192 = S.q)
 
+val is_qelem_le_q_halved_vartime4_lemma: f:qelem4 ->
+  Lemma (is_qelem_le_q_halved_vartime4 f == (qas_nat4 f <= S.q / 2))
+let is_qelem_le_q_halved_vartime4_lemma f =
+  assert_norm (0xdfe92f46681b20a0 + 0x5d576e7357a4501d * pow2 64 +
+    0xffffffffffffffff * pow2 128 + 0x7fffffffffffffff * pow2 192 = S.q / 2)
+
 val is_qelem_eq_vartime4_lemma: f1:qelem4 -> f2:qelem4 ->
   Lemma (is_qelem_eq_vartime4 f1 f2 == (qas_nat4 f1 = qas_nat4 f2))
 let is_qelem_eq_vartime4_lemma f1 f2 =

@@ -221,14 +221,14 @@ let secp256k1_ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : opti
   | None -> None
 
 
-let secp256k1_ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =
-  if not (secp256k1_ecdsa_is_signature_normalized signature) then false
-  else ecdsa_verify_hashed_msg msgHash public_key signature
-
-
 let secp256k1_ecdsa_sign_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (private_key nonce:lbytes 32) : option (lbytes 64) =
   let msgHash = Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_256 msg in
   secp256k1_ecdsa_sign_hashed_msg msgHash private_key nonce
+
+
+let secp256k1_ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =
+  if not (secp256k1_ecdsa_is_signature_normalized signature) then false
+  else ecdsa_verify_hashed_msg msgHash public_key signature
 
 
 let secp256k1_ecdsa_verify_sha256 (msg_len:size_nat) (msg:lbytes msg_len) (public_key signature:lbytes 64) : bool =

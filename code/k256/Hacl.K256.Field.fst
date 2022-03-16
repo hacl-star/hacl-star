@@ -227,6 +227,7 @@ let fmul_8_normalize_weak out f =
   BL.normalize_weak5_lemma (8,8,8,8,16) (as_felem5 h1 out)
 
 
+[@CInline]
 let fnegate_conditional_vartime f is_negate =
   let h0 = ST.get () in
   if is_negate then begin

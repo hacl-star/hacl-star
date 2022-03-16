@@ -18,6 +18,9 @@ module P = Hacl.Impl.K256.Point
 module SK = Hacl.Impl.K256.Sign
 module VK = Hacl.Impl.K256.Verify
 
+open Hacl.K256.Field
+open Hacl.K256.Scalar
+
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let ecdsa_sign_hashed_msg signature msgHash private_key nonce =
@@ -108,3 +111,63 @@ let public_key_compressed_from_raw pk pk_raw =
   update_sub pk 1ul 32ul pk_x;
   let h1 = ST.get () in
   LSeq.eq_intro (as_seq h1 pk) (S.pk_compressed_from_raw (as_seq h0 pk_raw))
+
+///  Low-S normalization
+
+let secp256k1_ecdsa_signature_normalize signature =
+  push_frame ();
+  let s_q = create_qelem () in
+  let s = sub signature 32ul 32ul in
+  let is_sk_valid = load_qelem_vartime s_q s in
+  let b =
+    if not is_sk_valid then false
+    else begin
+      let is_sk_lt_q_halved = is_qelem_le_q_halved_vartime s_q in
+      qnegate_conditional_vartime s_q (not is_sk_lt_q_halved);
+
+      let h1 = ST.get () in
+      update_sub_f h1 signature 32ul 32ul
+        (fun h -> BSeq.nat_to_bytes_be 32 (qas_nat h1 s_q))
+        (fun _ -> store_qelem (sub signature 32ul 32ul) s_q);
+      true end in
+  pop_frame ();
+  b
+
+
+let secp256k1_ecdsa_is_signature_normalized signature =
+  push_frame ();
+  let s_q = create_qelem () in
+  let s = sub signature 32ul 32ul in
+  let is_s_valid = load_qelem_vartime s_q s in
+  let is_s_lt_q_halved = is_qelem_le_q_halved_vartime s_q in
+  pop_frame ();
+  is_s_valid && is_s_lt_q_halved
+
+
+let secp256k1_ecdsa_sign_hashed_msg signature msgHash private_key nonce =
+  let b = ecdsa_sign_hashed_msg signature msgHash private_key nonce in
+  if b then secp256k1_ecdsa_signature_normalize signature else false
+
+
+let secp256k1_ecdsa_sign_sha256 signature msg_len msg private_key nonce =
+  push_frame ();
+  let msgHash = create 32ul (u8 0) in
+  Hacl.Hash.SHA2.hash_256 msg msg_len msgHash;
+  let b = secp256k1_ecdsa_sign_hashed_msg signature msgHash private_key nonce in
+  pop_frame ();
+  b
+
+
+let secp256k1_ecdsa_verify_hashed_msg msgHash public_key signature =
+  let is_s_normalized = secp256k1_ecdsa_is_signature_normalized signature in
+  if not is_s_normalized then false
+  else ecdsa_verify_hashed_msg msgHash public_key signature
+
+
+let secp256k1_ecdsa_verify_sha256 msg_len msg public_key signature =
+  push_frame ();
+  let mHash = create 32ul (u8 0) in
+  Hacl.Hash.SHA2.hash_256 msg msg_len mHash;
+  let b = secp256k1_ecdsa_verify_hashed_msg mHash public_key signature in
+  pop_frame ();
+  b

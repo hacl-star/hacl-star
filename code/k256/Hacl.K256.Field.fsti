@@ -265,7 +265,6 @@ val fmul_8_normalize_weak (out f:felem) : Stack unit
     inv_lazy_reduced2 h1 out)
 
 
-inline_for_extraction noextract
 val fnegate_conditional_vartime (f:felem) (is_negate:bool) : Stack unit
   (requires fun h -> live h f /\ inv_fully_reduced h f)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\ inv_fully_reduced h1 f /\

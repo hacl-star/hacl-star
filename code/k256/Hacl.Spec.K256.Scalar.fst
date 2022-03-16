@@ -70,6 +70,28 @@ let is_qelem_lt_q_vartime4 ((a0,a1,a2,a3): qelem4) : bool =
 
 
 inline_for_extraction noextract
+let is_qelem_le_q_halved_vartime4 ((a0,a1,a2,a3): qelem4) : bool =
+  let open Lib.RawIntTypes in
+  if u64_to_UInt64 a3 <. 0x7fffffffffffffffuL then true
+  else begin
+    if u64_to_UInt64 a3 >. 0x7fffffffffffffffuL then false
+    else begin
+      if u64_to_UInt64 a2 <. 0xffffffffffffffffuL then true
+      else begin
+        if u64_to_UInt64 a2 >. 0xffffffffffffffffuL then false
+        else begin
+          if u64_to_UInt64 a1 <. 0x5d576e7357a4501duL then true
+          else begin
+            if u64_to_UInt64 a1 >. 0x5d576e7357a4501duL then false
+            else u64_to_UInt64 a0 <=. 0xdfe92f46681b20a0uL
+          end
+        end
+      end
+    end
+  end
+
+
+inline_for_extraction noextract
 let is_qelem_eq_vartime4 ((a0,a1,a2,a3): qelem4) ((b0,b1,b2,b3): qelem4) : bool =
   let open Lib.RawIntTypes in
   u64_to_UInt64 a0 =. u64_to_UInt64 b0 &&

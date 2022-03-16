@@ -315,3 +315,31 @@ let qsqr out f =
 
   modq out tmp;
   pop_frame ()
+
+
+[@CInline]
+let qnegate_conditional_vartime f is_negate =
+  push_frame ();
+  let n = create_qelem () in
+  make_u64_4 n (make_order_k256 ());
+  let zero = create_qelem () in
+
+  if is_negate then begin
+    let h0 = ST.get () in
+    kn.BN.sub_mod_n n zero f f;
+    SN.bn_sub_mod_n_lemma (as_seq h0 n) (as_seq h0 zero) (as_seq h0 f);
+    let h1 = ST.get () in
+    assert (qas_nat h1 f = (0 - qas_nat h0 f) % S.q);
+    Math.Lemmas.modulo_addition_lemma (- qas_nat h0 f) S.q 1;
+    assert (qas_nat h1 f == (S.q - qas_nat h0 f) % S.q) end;
+  pop_frame ()
+
+
+[@CInline]
+let is_qelem_le_q_halved_vartime f =
+  let h = ST.get () in
+  KL.qas_nat4_is_qas_nat (as_seq h f);
+
+  let (a0,a1,a2,a3) = (f.(0ul), f.(1ul), f.(2ul), f.(3ul)) in
+  KL.is_qelem_le_q_halved_vartime4_lemma (a0,a1,a2,a3);
+  is_qelem_le_q_halved_vartime4 (a0,a1,a2,a3)

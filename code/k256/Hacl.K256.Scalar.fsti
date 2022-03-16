@@ -151,3 +151,15 @@ val qsqr (out f: qelem) : Stack unit
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     qas_nat h1 out == S.qmul (qas_nat h0 f) (qas_nat h0 f) /\
     qe_lt_q h1 out)
+
+
+val qnegate_conditional_vartime (f:qelem) (is_negate:bool) : Stack unit
+  (requires fun h -> live h f /\ qe_lt_q h f)
+  (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\ qe_lt_q h1 f /\
+    qas_nat h1 f == (if is_negate then (S.q - qas_nat h0 f) % S.q else qas_nat h0 f))
+
+
+val is_qelem_le_q_halved_vartime: f:qelem -> Stack bool
+  (requires fun h -> live h f)
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    b == (qas_nat h0 f <= S.q / 2))
