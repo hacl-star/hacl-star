@@ -1,5 +1,9 @@
 module Hacl.Impl.SHA3
 
+
+module B = LowStar.Buffer
+module HS = FStar.HyperStack
+
 open FStar.HyperStack.All
 open FStar.HyperStack
 open FStar.HyperStack.ST
@@ -308,6 +312,7 @@ let state_permute s =
     state_chi s;
     state_iota s round)
 
+inline_for_extraction noextract
 val loadState:
     rateInBytes:size_t{v rateInBytes <= 200}
   -> input:lbuffer uint8 rateInBytes
@@ -352,6 +357,7 @@ let storeState_inner s j block =
     (fun h -> Lib.ByteSequence.uint_to_bytes_le sj)
     (fun _ -> uint_to_bytes_le #U64 (sub block (j *! 8ul) 8ul) sj)
 
+inline_for_extraction noextract
 val storeState:
     rateInBytes:size_t{v rateInBytes <= 200}
   -> s:state
@@ -398,59 +404,73 @@ let lemma_equiv_alloc_bigger_state #l a  =
 
 #reset-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0 --using_facts_from '* -FStar.Seq'"
 
+
+inline_for_extraction noextract
+let state_to_lbuffer (rate: size_t)
+  (s: LowStar.Buffer.buffer uint8 {LowStar.Monotonic.Buffer.length s == v rate}) : lbuffer uint8 rate =
+  s
+
+inline_for_extraction noextract
+let state_to_lbuffer1 (s:state) :
+  (s: LowStar.Buffer.buffer uint64 {LowStar.Monotonic.Buffer.length s == 25}) =
+  s
+
+
 inline_for_extraction noextract
 val absorb_next:
     s:state
   -> rateInBytes:size_t{v rateInBytes > 0 /\ v rateInBytes <= 200}
-  -> Stack unit
+  -> ST unit
     (requires fun h -> live h s)
     (ensures  fun h0 _ h1 ->
-      modifies (loc s) h0 h1 /\
+      B.(modifies (loc_addr_of_buffer (state_to_lbuffer1 s)) h0 h1) /\ 
       as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes))
+
 let absorb_next s rateInBytes =
   let h0 = ST.get() in
-  let spec _ h1 = as_seq h1 s == S.absorb_next (as_seq h0 s) (v rateInBytes) /\ live h1 s in
-  salloc1 h0 200ul (u8 0) (Ghost.hide (loc s)) spec
-    (fun tempBlock ->
-      let nextBlock = sub tempBlock (size 0) rateInBytes in 
-      nextBlock.(rateInBytes -! 1ul) <- u8 0x80;
-      loadState rateInBytes nextBlock s;
-      state_permute s;
-      lemma_equiv_alloc_bigger_state #200 rateInBytes)
+  let nextBlockPointer = B.malloc HS.root (Lib.IntTypes.u8 0) rateInBytes in
+      let h1 = ST.get() in 
+    let nextBlock = state_to_lbuffer rateInBytes nextBlockPointer in
+    upd nextBlock (rateInBytes -! 1ul) (u8 0x80); 
+      let h2 = ST.get() in 
+    loadState rateInBytes nextBlock s;
+    state_permute s;
+      let h3 = ST.get() in 
+  B.free nextBlockPointer;
+    let h4 = ST.get() in 
+    B.(modifies_only_not_unused_in loc_none h0 h1);
+    assert(modifies (loc s) h2 h3);
+    admit();
+    assert(as_seq h4 s == S.absorb_next (as_seq h0 s) (v rateInBytes))
 
 
-inline_for_extraction 
+inline_for_extraction
 val absorb_last:
     delimitedSuffix:byte_t
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> rem:size_t{v rem < v rateInBytes}
   -> input:lbuffer uint8 rem
   -> s:state
-  -> Stack unit
+  -> ST unit
     (requires fun h -> live h s /\ live h input /\ disjoint s input)
     (ensures  fun h0 _ h1 ->
-      modifies (loc s) h0 h1 /\
+      B.(modifies (loc_addr_of_buffer (state_to_lbuffer1 s)) h0 h1) /\ 
       as_seq h1 s ==
       S.absorb_last delimitedSuffix (v rateInBytes) (v rem)
         (as_seq h0 input) (as_seq h0 s))
+	
 let absorb_last delimitedSuffix rateInBytes rem input s =
   let h0 = ST.get() in
-  let spec _ h1 =
-    as_seq h1 s ==
-    S.absorb_last delimitedSuffix (v rateInBytes) (v rem) (as_seq h0 input) (as_seq h0 s) /\
-    live h1 s in
-  salloc1 h0 200ul (u8 0) (Ghost.hide (loc s)) spec
-    (fun temp ->
+  let lastBlock = B.malloc HS.root 0uy rateInBytes in 
       let open Lib.RawIntTypes in
-      let lastBlock = sub temp (size 0) rateInBytes in 
-      update_sub lastBlock (size 0) rem input;
-      lastBlock.(rem) <- byte_to_uint8 delimitedSuffix;
+      update_sub #_ #_ #(v rateInBytes) lastBlock (size 0) rem input;
+      upd #_ #(v rateInBytes) lastBlock rem (byte_to_uint8 delimitedSuffix);
       loadState rateInBytes lastBlock s;
       if not ((delimitedSuffix &. byte 0x80) =. byte 0) &&
          (size_to_UInt32 rem = size_to_UInt32 (rateInBytes -. 1ul))
       then state_permute s;
       absorb_next s rateInBytes;
-      lemma_equiv_alloc_bigger_state #200 rateInBytes)
+      lemma_equiv_alloc_bigger_state #200 rateInBytes
 
 inline_for_extraction
 val absorb_inner:
@@ -473,10 +493,10 @@ val absorb:
   -> inputByteLen:size_t
   -> input:lbuffer uint8 inputByteLen
   -> delimitedSuffix:byte_t
-  -> Stack unit
+  -> ST unit
     (requires fun h0 -> live h0 s /\ live h0 input /\ disjoint s input)
     (ensures  fun h0 _ h1 ->
-      modifies (loc s) h0 h1 /\
+      B.(modifies (loc_addr_of_buffer (state_to_lbuffer1 s)) h0 h1) /\ 
       as_seq h1 s ==
       S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen)
         (as_seq h0 input) delimitedSuffix)
