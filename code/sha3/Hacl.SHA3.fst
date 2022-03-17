@@ -30,8 +30,9 @@ val shake128_hacl:
        modifies (loc output) h0 h1 /\
        as_seq h1 output ==
        S.shake128 (v inputByteLen) (as_seq h0 input) (v outputByteLen))
+       
 let shake128_hacl inputByteLen input outputByteLen output =
-  keccak 1344ul 256ul inputByteLen input (byte 0x1F) outputByteLen output
+  keccak_ 1344ul 256ul inputByteLen input (byte 0x1F) outputByteLen output
 
 val shake256_hacl:
     inputByteLen:size_t
@@ -45,8 +46,9 @@ val shake256_hacl:
        modifies (loc output) h0 h1 /\
        as_seq h1 output ==
        S.shake256 (v inputByteLen) (as_seq h0 input) (v outputByteLen))
+       
 let shake256_hacl inputByteLen input outputByteLen output =
-  keccak 1088ul 512ul inputByteLen input (byte 0x1F) outputByteLen output
+  keccak_ 1088ul 512ul inputByteLen input (byte 0x1F) outputByteLen output
 
 val sha3_224:
     inputByteLen:size_t
@@ -60,7 +62,7 @@ val sha3_224:
        as_seq h1 output ==
        S.sha3_224 (v inputByteLen) (as_seq h0 input))
 let sha3_224 inputByteLen input output =
-  keccak 1152ul 448ul inputByteLen input (byte 0x06) 28ul output
+  keccak_ 1152ul 448ul inputByteLen input (byte 0x06) 28ul output
 
 val sha3_256:
     inputByteLen:size_t
@@ -74,7 +76,7 @@ val sha3_256:
        as_seq h1 output ==
        S.sha3_256 (v inputByteLen) (as_seq h0 input))
 let sha3_256 inputByteLen input output =
-  keccak 1088ul 512ul inputByteLen input (byte 0x06) 32ul output
+  keccak_ 1088ul 512ul inputByteLen input (byte 0x06) 32ul output
 
 val sha3_384:
     inputByteLen:size_t
@@ -88,7 +90,7 @@ val sha3_384:
        as_seq h1 output ==
        S.sha3_384 (v inputByteLen) (as_seq h0 input))
 let sha3_384 inputByteLen input output =
-  keccak 832ul 768ul inputByteLen input (byte 0x06) 48ul output
+  keccak_ 832ul 768ul inputByteLen input (byte 0x06) 48ul output
 
 val sha3_512:
     inputByteLen:size_t
@@ -102,7 +104,7 @@ val sha3_512:
        as_seq h1 output ==
        S.sha3_512 (v inputByteLen) (as_seq h0 input))
 let sha3_512 inputByteLen input output =
-  keccak 576ul 1024ul inputByteLen input (byte 0x06) 64ul output
+  keccak_ 576ul 1024ul inputByteLen input (byte 0x06) 64ul output
 
 (* cSHAKE for Frodo *)
 inline_for_extraction noextract
@@ -148,3 +150,29 @@ let cshake256_frodo input_len input cstm output_len output =
   absorb s 136ul input_len input (byte 0x04);
   squeeze s 136ul output_len output;
   pop_frame ()
+
+[@ (Comment "Keccak instantiation with the rate equal to 1088 bits ")]
+val keccak_1088:
+  capacity:size_t{
+    let rate = 1088 in 
+    v capacity + rate == 1600}
+  -> inputByteLen:size_t
+  -> input:lbuffer uint8 inputByteLen
+  -> delimitedSuffix:byte_t
+  -> outputByteLen:size_t
+  -> output:lbuffer uint8 outputByteLen
+  -> Stack unit
+    (requires fun h -> live h input /\ live h output /\ disjoint input output)
+    (ensures  fun h0 _ h1 ->
+      modifies1 output h0 h1 /\ (
+      let rate = 1088 in 
+      as_seq h1 output ==
+      S.keccak rate (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen)))
+let keccak_1088 capacity inputByteLen input delimitedSuffix outputByteLen output =
+  push_frame();
+  let rate = size 1088 in 
+  let rateInBytes = rate /. size 8 in
+  let s:state = create 25ul (u64 0) in
+  absorb s rateInBytes inputByteLen input delimitedSuffix;
+  squeeze s rateInBytes outputByteLen output;
+  pop_frame()

@@ -419,8 +419,8 @@ let absorb_next s rateInBytes =
       lemma_equiv_alloc_bigger_state #200 rateInBytes)
 
 
-inline_for_extraction 
-val absorb_last:
+inline_for_extraction noextract
+val absorb_last_:
     delimitedSuffix:byte_t
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> rem:size_t{v rem < v rateInBytes}
@@ -433,7 +433,7 @@ val absorb_last:
       as_seq h1 s ==
       S.absorb_last delimitedSuffix (v rateInBytes) (v rem)
         (as_seq h0 input) (as_seq h0 s))
-let absorb_last delimitedSuffix rateInBytes rem input s =
+let absorb_last_ delimitedSuffix rateInBytes rem input s =
   let h0 = ST.get() in
   let spec _ h1 =
     as_seq h1 s ==
@@ -452,8 +452,44 @@ let absorb_last delimitedSuffix rateInBytes rem input s =
       absorb_next s rateInBytes;
       lemma_equiv_alloc_bigger_state #200 rateInBytes)
 
-inline_for_extraction
-val absorb_inner:
+val compare_more_zero_lte_b: a: size_t -> b: size_t -> Tot (r: bool {
+  r == not (v a > 0 && v a <= v b)})
+
+let compare_more_zero_lte_b a b = 
+  let a_is_zero = eq a (size 0) in 
+  let a_lte_200 = gt a b in 
+  a_is_zero || a_lte_200
+
+
+val absorb_last:
+    delimitedSuffix:byte_t
+  -> rateInBytes:size_t
+  -> rem:size_t
+  -> input:lbuffer uint8 rem
+  -> s:state
+  -> Stack bool
+    (requires fun h -> live h s /\ live h input /\ disjoint s input)
+    (ensures  fun h0 flag h1 ->
+      modifies (loc s) h0 h1 /\ (
+      if v rateInBytes > 0 && v rateInBytes <= 200 && v rem < v rateInBytes then
+	flag /\
+	as_seq h1 s ==
+	S.absorb_last delimitedSuffix (v rateInBytes) (v rem)
+          (as_seq h0 input) (as_seq h0 s)
+      else 
+	~flag))
+		
+let absorb_last delimitedSuffix rateInBytes rem input s =
+  if compare_more_zero_lte_b rateInBytes (size 200) || gte rem rateInBytes then 
+    false
+  else begin
+    absorb_last_ delimitedSuffix rateInBytes rem input s; 
+    true
+  end
+  
+
+inline_for_extraction noextract
+val absorb_inner_:
     rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> block:lbuffer uint8 rateInBytes
   -> s:state
@@ -463,11 +499,37 @@ val absorb_inner:
       modifies (loc s) h0 h1 /\
       as_seq h1 s ==
       S.absorb_inner (v rateInBytes) (as_seq h0 block) (as_seq h0 s))
-let absorb_inner rateInBytes block s =
+let absorb_inner_ rateInBytes block s =
   loadState rateInBytes block s;
   state_permute s
 
-val absorb:
+
+val absorb_inner:
+    rateInBytes:size_t
+  -> block:lbuffer uint8 rateInBytes
+  -> s:state
+  -> Stack bool
+    (requires fun h0 -> live h0 s /\ live h0 block /\ disjoint s block)
+    (ensures  fun h0 flag h1 ->
+      modifies (loc s) h0 h1 /\ (
+      if v rateInBytes > 0 && v rateInBytes <= 200 then
+	flag /\
+	as_seq h1 s ==
+	S.absorb_inner (v rateInBytes) (as_seq h0 block) (as_seq h0 s)
+      else
+	~ flag))
+	
+let absorb_inner rateInBytes block s =
+  if compare_more_zero_lte_b rateInBytes (size 200) then 
+    false
+  else begin
+    absorb_inner_ rateInBytes block s;
+    true
+  end
+
+
+inline_for_extraction noextract
+val absorb_:
     s:state
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> inputByteLen:size_t
@@ -480,12 +542,40 @@ val absorb:
       as_seq h1 s ==
       S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen)
         (as_seq h0 input) delimitedSuffix)
-let absorb s rateInBytes inputByteLen input delimitedSuffix =
+	
+let absorb_ s rateInBytes inputByteLen input delimitedSuffix =
   loop_blocks rateInBytes inputByteLen input
   (S.absorb_inner (v rateInBytes))
   (S.absorb_last delimitedSuffix (v rateInBytes))
-  (absorb_inner rateInBytes)
-  (absorb_last delimitedSuffix rateInBytes) s
+  (absorb_inner_ rateInBytes)
+  (absorb_last_ delimitedSuffix rateInBytes) s
+
+
+val absorb:
+    s:state
+  -> rateInBytes:size_t
+  -> inputByteLen:size_t
+  -> input:lbuffer uint8 inputByteLen
+  -> delimitedSuffix:byte_t
+  -> Stack bool
+    (requires fun h0 -> live h0 s /\ live h0 input /\ disjoint s input)
+    (ensures  fun h0 flag h1 ->
+      modifies (loc s) h0 h1 /\ (
+      if v rateInBytes > 0 && v rateInBytes <= 200 then 
+	flag /\
+	as_seq h1 s ==
+	S.absorb (as_seq h0 s) (v rateInBytes) (v inputByteLen)
+          (as_seq h0 input) delimitedSuffix
+      else
+	~flag ))
+
+let absorb s rateInBytes inputByteLen input delimitedSuffix = 
+  if compare_more_zero_lte_b rateInBytes (size 200) then 
+    false
+  else begin
+    absorb_ s rateInBytes inputByteLen input delimitedSuffix;
+    true
+  end
 
 inline_for_extraction noextract
 val squeeze_inner:
@@ -510,7 +600,8 @@ private
 let mult_plus_lt (i a b:nat) : Lemma (requires i < a) (ensures  i * b + b <= a * b) =
   assert (i <= a - 1)
 
-val squeeze:
+inline_for_extraction noextract
+val squeeze_:
     s:state
   -> rateInBytes:size_t{0 < v rateInBytes /\ v rateInBytes <= 200}
   -> outputByteLen:size_t
@@ -520,7 +611,7 @@ val squeeze:
     (ensures  fun h0 _ h1 ->
       modifies2 s output h0 h1 /\
       as_seq h1 output == S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
-let squeeze s rateInBytes outputByteLen output =
+let squeeze_ s rateInBytes outputByteLen output =
   let outBlocks = outputByteLen /. rateInBytes in
   let remOut = outputByteLen %. rateInBytes in
   assert_spinoff (v outputByteLen - v remOut == v outBlocks * v rateInBytes);
@@ -541,7 +632,32 @@ let squeeze s rateInBytes outputByteLen output =
   Seq.lemma_split (as_seq h1 output) (v outBlocks * v rateInBytes);
   norm_spec [delta_only [`%S.squeeze]] (S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen))
 
-val keccak:
+val squeeze:
+    s:state
+  -> rateInBytes:size_t
+  -> outputByteLen:size_t
+  -> output:lbuffer uint8 outputByteLen
+  -> Stack bool
+    (requires fun h0 -> live h0 s /\ live h0 output /\ disjoint s output)
+    (ensures  fun h0 flag h1 ->
+      modifies2 s output h0 h1 /\ (
+      if v rateInBytes > 0 && v rateInBytes <= 200 then 
+	flag /\
+	as_seq h1 output == S.squeeze (as_seq h0 s) (v rateInBytes) (v outputByteLen)
+      else
+	~flag ))
+
+let squeeze s rateInBytes outputByteLen output = 
+  if compare_more_zero_lte_b rateInBytes (size 200) then 
+    false
+  else begin
+    squeeze_ s rateInBytes outputByteLen output;
+    true
+  end
+
+
+inline_for_extraction noextract
+val keccak_:
     rate:size_t{v rate % 8 == 0 /\ v rate / 8 > 0 /\ v rate <= 1600}
   -> capacity:size_t{v capacity + v rate == 1600}
   -> inputByteLen:size_t
@@ -555,10 +671,58 @@ val keccak:
       modifies1 output h0 h1 /\
       as_seq h1 output ==
       S.keccak (v rate) (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen))
-let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen output =
+let keccak_ rate capacity inputByteLen input delimitedSuffix outputByteLen output =
   push_frame();
   let rateInBytes = rate /. size 8 in
   let s:state = create 25ul (u64 0) in
-  absorb s rateInBytes inputByteLen input delimitedSuffix;
-  squeeze s rateInBytes outputByteLen output;
+  absorb_ s rateInBytes inputByteLen input delimitedSuffix;
+  squeeze_ s rateInBytes outputByteLen output;
   pop_frame()
+
+
+val keccak:
+    rate:size_t
+  -> capacity:size_t
+  -> inputByteLen:size_t
+  -> input:lbuffer uint8 inputByteLen
+  -> delimitedSuffix:byte_t
+  -> outputByteLen:size_t
+  -> output:lbuffer uint8 outputByteLen
+  -> Stack bool
+    (requires fun h -> live h input /\ live h output /\ disjoint input output)
+    (ensures  fun h0 flag h1 ->
+      modifies1 output h0 h1 /\ (
+      if v rate % 8 = 0 && v rate / 8 > 0 && v rate <= 1600 && v capacity + v rate = 1600 then
+	flag /\ 
+	as_seq h1 output ==
+	S.keccak (v rate) (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen)
+      else
+	~ flag))
+
+let keccak rate capacity inputByteLen input delimitedSuffix outputByteLen output = 
+  let bit3mask = size 7 in 
+  let rate_mod_8 = eq (logand rate bit3mask) (size 0) in 
+    logand_mask rate bit3mask 3;
+    
+  let rateInBytes = rate /. size 8 in 
+  let rate_is_zero = eq rateInBytes (size 0) in 
+  let rate_lte_200 = gt rateInBytes (size 200) in 
+  
+  if not rate_mod_8 || (rate_is_zero) || rate_lte_200 then begin
+    false 
+    end
+  else begin
+    assert(v rate % 8 = 0 && v rate / 8 > 0 && v rate <= 1600);
+    let capacity_less_flag = gt capacity (size 1600) in 
+    if capacity_less_flag then 
+      false 
+    else begin
+      let capacity_and_rate_equal_1600 = eq (add capacity rate) (size 1600) in 
+      if not capacity_and_rate_equal_1600 then 
+	 false
+      else begin
+	keccak_ rate capacity inputByteLen input delimitedSuffix outputByteLen output;
+	true
+    end
+    end
+  end
