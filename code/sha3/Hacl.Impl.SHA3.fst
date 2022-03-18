@@ -457,8 +457,8 @@ val positive_and_lte: a: size_t -> b: size_t -> Tot (r: bool {
   r == not (v a > 0 && v a <= v b)})
 let positive_and_lte a b = 
   let a_is_zero = eq a (size 0) in 
-  let a_lte_200 = gt a b in 
-  a_is_zero || a_lte_200
+  let a_gt_b = gt a b in 
+  a_is_zero || a_gt_b
 
 val absorb_last:
     delimitedSuffix:byte_t
