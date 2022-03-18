@@ -125,8 +125,8 @@ let cshake128_frodo input_len input cstm output_len output =
   let s = create 25ul (u64 0) in
   s.(0ul) <- u64 0x10010001a801 |. (to_u64 cstm <<. 48ul);
   state_permute s;
-  absorb s 168ul input_len input (byte 0x04);
-  squeeze s 168ul output_len output;
+  absorb_ s 168ul input_len input (byte 0x04);
+  squeeze_ s 168ul output_len output;
   pop_frame ()
 
 inline_for_extraction noextract
@@ -147,8 +147,8 @@ let cshake256_frodo input_len input cstm output_len output =
   let s = create 25ul (u64 0) in
   s.(0ul) <- u64 0x100100018801 |. (to_u64 cstm <<. 48ul);
   state_permute s;
-  absorb s 136ul input_len input (byte 0x04);
-  squeeze s 136ul output_len output;
+  absorb_ s 136ul input_len input (byte 0x04);
+  squeeze_ s 136ul output_len output;
   pop_frame ()
 
 [@ (Comment "Keccak instantiation with the rate equal to 1088 bits ")]
@@ -168,11 +168,6 @@ val keccak_1088:
       let rate = 1088 in 
       as_seq h1 output ==
       S.keccak rate (v capacity) (v inputByteLen) (as_seq h0 input) delimitedSuffix (v outputByteLen)))
+      
 let keccak_1088 capacity inputByteLen input delimitedSuffix outputByteLen output =
-  push_frame();
-  let rate = size 1088 in 
-  let rateInBytes = rate /. size 8 in
-  let s:state = create 25ul (u64 0) in
-  absorb s rateInBytes inputByteLen input delimitedSuffix;
-  squeeze s rateInBytes outputByteLen output;
-  pop_frame()
+  keccak_ (1088ul) capacity inputByteLen input delimitedSuffix outputByteLen output 
