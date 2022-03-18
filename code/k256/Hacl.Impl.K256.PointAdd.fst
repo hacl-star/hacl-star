@@ -238,7 +238,6 @@ val point_add (out p q:point) : Stack unit
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ point_inv h1 out /\
     point_eval h1 out == S.point_add (point_eval h0 p) (point_eval h0 q))
 
-[@CInline]
 let point_add out p q =
   push_frame ();
   let tmp = create (9ul *! nlimb) (u64 0) in

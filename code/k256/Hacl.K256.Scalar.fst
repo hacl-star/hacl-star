@@ -118,7 +118,6 @@ let is_qelem_eq_vartime f1 f2 =
   is_qelem_eq_vartime4 (a0,a1,a2,a3) (b0,b1,b2,b3)
 
 
-[@CInline]
 let load_qelem f b =
   let h0 = ST.get () in
   SN.bn_from_bytes_be_lemma #U64 32 (as_seq h0 b);
@@ -128,7 +127,7 @@ let load_qelem f b =
 [@CInline]
 let load_qelem_check f b =
   push_frame ();
-  let n = create qnlimb (u64 0) in
+  let n = create_qelem () in
   make_u64_4 n (make_order_k256 ());
   load_qelem f b;
 
@@ -167,7 +166,7 @@ val modq_short: out:qelem -> a:lbuffer uint64 qnlimb -> Stack unit
 [@CInline]
 let modq_short out a =
   push_frame ();
-  let tmp = create qnlimb (u64 0) in
+  let tmp = create_qelem () in
   [@inline_let]
   let (t0,t1,t2,t3) = make_pow2_256_minus_order_k256 () in
   make_u64_4 tmp (t0,t1,t2,t3);
@@ -183,7 +182,7 @@ let modq_short out a =
 [@CInline]
 let load_qelem_modq f b =
   push_frame ();
-  let tmp = create qnlimb (u64 0) in
+  let tmp = create_qelem () in
   load_qelem f b;
   copy tmp f;
   modq_short f tmp;
@@ -200,7 +199,7 @@ let store_qelem b f =
 [@CInline]
 let qadd out f1 f2 =
   push_frame ();
-  let n = create qnlimb (u64 0) in
+  let n = create_qelem () in
   make_u64_4 n (make_order_k256 ());
 
   let h0 = ST.get () in
@@ -273,8 +272,8 @@ val modq: out:qelem -> a:lbuffer uint64 (2ul *! qnlimb) -> Stack unit
 [@CInline]
 let modq out a =
   push_frame ();
-  let r = create qnlimb (u64 0) in
-  let tmp = create qnlimb (u64 0) in
+  let r = create_qelem () in
+  let tmp = create_qelem () in
   [@inline_let]
   let (t0,t1,t2,t3) = make_pow2_256_minus_order_k256 () in
   make_u64_4 tmp (t0,t1,t2,t3);

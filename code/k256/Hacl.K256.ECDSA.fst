@@ -68,23 +68,28 @@ let public_key_uncompressed_from_raw pk pk_raw =
 
 
 let public_key_compressed_to_raw pk_raw pk =
-  let pk0 = pk.(0ul) in
-  if not (Lib.RawIntTypes.u8_to_UInt8 pk0 = 0x02uy ||
-    Lib.RawIntTypes.u8_to_UInt8 pk0 = 0x03uy) then false
-  else begin
-    let pk_xb = sub pk 1ul 32ul in
-    let is_pk_y_odd = Lib.RawIntTypes.u8_to_UInt8 pk0 = 0x03uy in
-    let pk_yb = sub pk_raw 32ul 32ul in
-    let b = P.recover_y_bytes_vartime pk_yb pk_xb is_pk_y_odd in
+  push_frame ();
+  let xa = create_felem () in
+  let ya = create_felem () in
+  let pk_xb = sub pk 1ul 32ul in
+  let b = P.aff_point_decompress_vartime xa ya pk in
+
+  if b then begin
     let h0 = ST.get () in
     update_sub pk_raw 0ul 32ul pk_xb;
     let h1 = ST.get () in
-    LSeq.eq_intro (as_seq h1 pk_raw) (LSeq.concat (as_seq h0 pk_xb) (as_seq h0 pk_yb));
-    b end
+    update_sub_f h1 pk_raw 32ul 32ul
+      (fun h -> BSeq.nat_to_bytes_be 32 (feval h1 ya))
+      (fun _ -> store_felem (sub pk_raw 32ul 32ul) ya);
+    let h2 = ST.get () in
+    LSeq.eq_intro (as_seq h2 pk_raw)
+      (LSeq.concat #_ #32 #32(as_seq h0 pk_xb) (BSeq.nat_to_bytes_be 32 (feval h0 ya))) end;
+  pop_frame ();
+  b
 
 
 inline_for_extraction noextract
-val is_nat_from_bytes_be_odd_vartime: f:lbytes 32ul -> Stack bool
+val is_nat_from_bytes_be_odd_vartime: f:lbuffer uint8 32ul -> Stack bool
   (requires fun h -> live h f)
   (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
     b == (BSeq.nat_from_bytes_be (as_seq h0 f) % 2 = 1))

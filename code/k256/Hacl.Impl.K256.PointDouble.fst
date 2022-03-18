@@ -156,7 +156,6 @@ val point_double (out p:point) : Stack unit
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ point_inv h1 out /\
     point_eval h1 out == S.point_double (point_eval h0 p))
 
-[@CInline]
 let point_double out p =
   push_frame ();
   let tmp = create (5ul *! nlimb) (u64 0) in

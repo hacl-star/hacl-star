@@ -178,11 +178,10 @@ val set_one: f:felem -> Stack unit
     as_nat h1 f == 1 /\ inv_fully_reduced h1 f)
 
 
-// not used
 inline_for_extraction noextract
 val copy_felem (f1 f2:felem) : Stack unit
   (requires fun h ->
-    live h f1 /\ live h f2 /\ disjoint f1 f2)
+    live h f1 /\ live h f2 /\ eq_or_disjoint f1 f2)
   (ensures  fun h0 _ h1 -> modifies (loc f1) h0 h1 /\
     as_seq h1 f1 == as_seq h0 f2)
 

@@ -84,6 +84,7 @@ val is_qelem_eq_vartime (f1 f2:qelem) : Stack bool
     m == (qas_nat h0 f1 = qas_nat h0 f2))
 
 
+inline_for_extraction noextract
 val load_qelem: f:qelem -> b:lbuffer uint8 32ul -> Stack unit
   (requires fun h ->
     live h f /\ live h b /\ disjoint f b)

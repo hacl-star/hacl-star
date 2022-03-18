@@ -124,7 +124,6 @@ val point_mul: out:point -> scalar:qelem -> q:point -> Stack unit
     point_inv h1 out /\
     point_eval h1 out == S.point_mul (qas_nat h0 scalar) (point_eval h0 q))
 
-[@CInline]
 let point_mul out scalar q =
   make_point_at_inf out;
   BE.lexp_fw_consttime 15ul 0ul mk_k256_concrete_ops (null uint64) q 4ul 256ul scalar out 4ul

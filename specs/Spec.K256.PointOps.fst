@@ -71,8 +71,11 @@ let is_proj_point_at_inf (p:proj_point) : bool =
   let (_, _, z) = p in z = zero
 
 let to_aff_point (p:proj_point) : aff_point =
-  let (x, y, z) = p in
-  (x /% z, y /% z)
+  let (px, py, pz) = p in
+  let zinv = finv pz in
+  let x = px *% zinv in
+  let y = py *% zinv in
+  (x, y)
 
 let to_proj_point (p:aff_point) : proj_point =
   let (x, y) = p in (x, y, one)
@@ -139,12 +142,42 @@ let recover_y (x:felem{0 < x}) (is_odd:bool) : option felem =
     Some y end
 
 
-let recover_y_bytes (xb:BSeq.lbytes 32) (is_odd:bool) : option (BSeq.lbytes 32) =
-  let x = BSeq.nat_from_bytes_be xb in
-  let is_x_valid = 0 < x && x < prime in
-
-  if not is_x_valid then None
+let aff_point_decompress (s:BSeq.lbytes 33) : option aff_point =
+  let s0 = Lib.RawIntTypes.u8_to_UInt8 s.[0] in
+  if not (s0 = 0x02uy || s0 = 0x03uy) then None
   else begin
-    match (recover_y x is_odd) with
-    | Some y -> Some (BSeq.nat_to_bytes_be 32 y)
-    | None -> None end
+    let x = BSeq.nat_from_bytes_be (sub s 1 32) in
+    let is_x_valid = 0 < x && x < prime in
+    let is_y_odd = s0 = 0x03uy in
+
+    if not is_x_valid then None
+    else
+      match (recover_y x is_y_odd) with
+      | Some y -> Some (x, y)
+      | None -> None end
+
+
+let aff_point_compress (p:aff_point) : BSeq.lbytes 33 =
+  let (x, y) = p in
+  let is_y_odd = y % 2 = 1 in
+  let s0 = if is_y_odd then u8 0x03 else u8 0x02 in
+  concat #_ #1 #32 (create 1 s0) (BSeq.nat_to_bytes_be 32 x)
+
+
+let point_decompress (s:BSeq.lbytes 33) : option proj_point =
+  match (aff_point_decompress s) with
+  | Some p -> Some (to_proj_point p)
+  | None -> None
+
+
+let point_compress (p:proj_point) : BSeq.lbytes 33 =
+  aff_point_compress (to_aff_point p)
+
+
+let point_equal (p:proj_point) (q:proj_point) : bool =
+  let px, py, pz = p in // x_p = px / pz /\ y_p = py / pz
+  let qx, qy, qz = q in // x_q = qx / qz /\ y_q = qy / qz
+  // p == q <==> x_p == x_q /\ y_p == y_q <==> px * qz == qx * pz /\ py * qz == qy * pz
+  if ((px *% qz) <> (qx *% pz)) then false
+  else if ((py *% qz) <> (qy *% pz)) then false
+  else true
