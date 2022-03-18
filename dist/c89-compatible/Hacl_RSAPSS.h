@@ -39,7 +39,7 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum.h"
-#include "Hacl_Hash.h"
+#include "Hacl_Hash_SHA2.h"
 #include "Hacl_Spec.h"
 
 bool

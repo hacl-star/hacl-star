@@ -1135,7 +1135,7 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   }
 }
 
-inline void
+void
 Hacl_Bignum_bn_add_mod_n_u32(
   uint32_t len1,
   uint32_t *n,
@@ -1246,7 +1246,7 @@ Hacl_Bignum_bn_add_mod_n_u32(
   }
 }
 
-inline void
+void
 Hacl_Bignum_bn_add_mod_n_u64(
   uint32_t len1,
   uint64_t *n,
@@ -1350,6 +1350,228 @@ Hacl_Bignum_bn_add_mod_n_u64(
         {
           uint64_t *os = res;
           uint64_t x = (c & res[i]) | (~c & tmp[i]);
+          os[i] = x;
+        }
+      }
+    }
+  }
+}
+
+void
+Hacl_Bignum_bn_sub_mod_n_u32(
+  uint32_t len1,
+  uint32_t *n,
+  uint32_t *a,
+  uint32_t *b,
+  uint32_t *res
+)
+{
+  uint32_t c2 = (uint32_t)0U;
+  uint32_t c0;
+  {
+    uint32_t i;
+    for (i = (uint32_t)0U; i < len1 / (uint32_t)4U; i++)
+    {
+      uint32_t t1 = a[(uint32_t)4U * i];
+      uint32_t t20 = b[(uint32_t)4U * i];
+      uint32_t *res_i0 = res + (uint32_t)4U * i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c2, t1, t20, res_i0);
+      {
+        uint32_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
+        uint32_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
+        uint32_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+        c2 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c2, t10, t21, res_i1);
+        {
+          uint32_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
+          uint32_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
+          uint32_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+          c2 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c2, t11, t22, res_i2);
+          {
+            uint32_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
+            uint32_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
+            uint32_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+            c2 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c2, t12, t2, res_i);
+          }
+        }
+      }
+    }
+  }
+  {
+    uint32_t i;
+    for (i = len1 / (uint32_t)4U * (uint32_t)4U; i < len1; i++)
+    {
+      uint32_t t1 = a[i];
+      uint32_t t2 = b[i];
+      uint32_t *res_i = res + i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c2, t1, t2, res_i);
+    }
+  }
+  c0 = c2;
+  KRML_CHECK_SIZE(sizeof (uint32_t), len1);
+  {
+    uint32_t tmp[len1];
+    memset(tmp, 0U, len1 * sizeof (uint32_t));
+    {
+      uint32_t c3 = (uint32_t)0U;
+      uint32_t c1;
+      uint32_t c;
+      {
+        uint32_t i;
+        for (i = (uint32_t)0U; i < len1 / (uint32_t)4U; i++)
+        {
+          uint32_t t1 = res[(uint32_t)4U * i];
+          uint32_t t20 = n[(uint32_t)4U * i];
+          uint32_t *res_i0 = tmp + (uint32_t)4U * i;
+          c3 = Lib_IntTypes_Intrinsics_add_carry_u32(c3, t1, t20, res_i0);
+          {
+            uint32_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
+            uint32_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
+            uint32_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+            c3 = Lib_IntTypes_Intrinsics_add_carry_u32(c3, t10, t21, res_i1);
+            {
+              uint32_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
+              uint32_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
+              uint32_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+              c3 = Lib_IntTypes_Intrinsics_add_carry_u32(c3, t11, t22, res_i2);
+              {
+                uint32_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
+                uint32_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
+                uint32_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+                c3 = Lib_IntTypes_Intrinsics_add_carry_u32(c3, t12, t2, res_i);
+              }
+            }
+          }
+        }
+      }
+      {
+        uint32_t i;
+        for (i = len1 / (uint32_t)4U * (uint32_t)4U; i < len1; i++)
+        {
+          uint32_t t1 = res[i];
+          uint32_t t2 = n[i];
+          uint32_t *res_i = tmp + i;
+          c3 = Lib_IntTypes_Intrinsics_add_carry_u32(c3, t1, t2, res_i);
+        }
+      }
+      c1 = c3;
+      c = (uint32_t)0U - c0;
+      {
+        uint32_t i;
+        for (i = (uint32_t)0U; i < len1; i++)
+        {
+          uint32_t *os = res;
+          uint32_t x = (c & tmp[i]) | (~c & res[i]);
+          os[i] = x;
+        }
+      }
+    }
+  }
+}
+
+void
+Hacl_Bignum_bn_sub_mod_n_u64(
+  uint32_t len1,
+  uint64_t *n,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *res
+)
+{
+  uint64_t c2 = (uint64_t)0U;
+  uint64_t c0;
+  {
+    uint32_t i;
+    for (i = (uint32_t)0U; i < len1 / (uint32_t)4U; i++)
+    {
+      uint64_t t1 = a[(uint32_t)4U * i];
+      uint64_t t20 = b[(uint32_t)4U * i];
+      uint64_t *res_i0 = res + (uint32_t)4U * i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t20, res_i0);
+      {
+        uint64_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
+        uint64_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+        c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t10, t21, res_i1);
+        {
+          uint64_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
+          uint64_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+          c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t11, t22, res_i2);
+          {
+            uint64_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
+            uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
+            uint64_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+            c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t12, t2, res_i);
+          }
+        }
+      }
+    }
+  }
+  {
+    uint32_t i;
+    for (i = len1 / (uint32_t)4U * (uint32_t)4U; i < len1; i++)
+    {
+      uint64_t t1 = a[i];
+      uint64_t t2 = b[i];
+      uint64_t *res_i = res + i;
+      c2 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c2, t1, t2, res_i);
+    }
+  }
+  c0 = c2;
+  KRML_CHECK_SIZE(sizeof (uint64_t), len1);
+  {
+    uint64_t tmp[len1];
+    memset(tmp, 0U, len1 * sizeof (uint64_t));
+    {
+      uint64_t c3 = (uint64_t)0U;
+      uint64_t c1;
+      uint64_t c;
+      {
+        uint32_t i;
+        for (i = (uint32_t)0U; i < len1 / (uint32_t)4U; i++)
+        {
+          uint64_t t1 = res[(uint32_t)4U * i];
+          uint64_t t20 = n[(uint32_t)4U * i];
+          uint64_t *res_i0 = tmp + (uint32_t)4U * i;
+          c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t1, t20, res_i0);
+          {
+            uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
+            uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
+            uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+            c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t10, t21, res_i1);
+            {
+              uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
+              uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
+              uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+              c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t11, t22, res_i2);
+              {
+                uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
+                uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
+                uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+                c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t12, t2, res_i);
+              }
+            }
+          }
+        }
+      }
+      {
+        uint32_t i;
+        for (i = len1 / (uint32_t)4U * (uint32_t)4U; i < len1; i++)
+        {
+          uint64_t t1 = res[i];
+          uint64_t t2 = n[i];
+          uint64_t *res_i = tmp + i;
+          c3 = Lib_IntTypes_Intrinsics_add_carry_u64(c3, t1, t2, res_i);
+        }
+      }
+      c1 = c3;
+      c = (uint64_t)0U - c0;
+      {
+        uint32_t i;
+        for (i = (uint32_t)0U; i < len1; i++)
+        {
+          uint64_t *os = res;
+          uint64_t x = (c & tmp[i]) | (~c & res[i]);
           os[i] = x;
         }
       }
@@ -2420,6 +2642,28 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
                       bn_almost_mont_mul_u32(len, n, mu, t11, aM, t2);
                     }
                   }
+                  if (bBits % (uint32_t)4U != (uint32_t)0U)
+                  {
+                    uint32_t mask_l = (uint32_t)16U - (uint32_t)1U;
+                    uint32_t i = bBits / (uint32_t)4U * (uint32_t)4U / (uint32_t)32U;
+                    uint32_t j = bBits / (uint32_t)4U * (uint32_t)4U % (uint32_t)32U;
+                    uint32_t p1 = b[i] >> j;
+                    uint32_t ite;
+                    if (i + (uint32_t)1U < bLen && (uint32_t)0U < j)
+                    {
+                      ite = p1 | b[i + (uint32_t)1U] << ((uint32_t)32U - j);
+                    }
+                    else
+                    {
+                      ite = p1;
+                    }
+                    {
+                      uint32_t bits_c = ite & mask_l;
+                      uint32_t bits_l32 = bits_c;
+                      uint32_t *a_bits_l = table + bits_l32 * len;
+                      memcpy(resM, a_bits_l, len * sizeof (uint32_t));
+                    }
+                  }
                   {
                     uint32_t i;
                     for (i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
@@ -2432,9 +2676,10 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
                         }
                       }
                       {
+                        uint32_t bk = bBits - bBits % (uint32_t)4U;
                         uint32_t mask_l = (uint32_t)16U - (uint32_t)1U;
-                        uint32_t i1 = (bBits - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)32U;
-                        uint32_t j = (bBits - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)32U;
+                        uint32_t i1 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)32U;
+                        uint32_t j = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)32U;
                         uint32_t p1 = b[i1] >> j;
                         uint32_t ite;
                         if (i1 + (uint32_t)1U < bLen && (uint32_t)0U < j)
@@ -2447,44 +2692,18 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
                         }
                         {
                           uint32_t bits_l = ite & mask_l;
-                          uint32_t bits_l32 = bits_l;
-                          uint32_t *a_bits_l = table + bits_l32 * len;
-                          bn_almost_mont_mul_u32(len, n, mu, resM, a_bits_l, resM);
+                          KRML_CHECK_SIZE(sizeof (uint32_t), len);
+                          {
+                            uint32_t a_bits_l[len];
+                            memset(a_bits_l, 0U, len * sizeof (uint32_t));
+                            {
+                              uint32_t bits_l32 = bits_l;
+                              uint32_t *a_bits_l1 = table + bits_l32 * len;
+                              memcpy(a_bits_l, a_bits_l1, len * sizeof (uint32_t));
+                              bn_almost_mont_mul_u32(len, n, mu, resM, a_bits_l, resM);
+                            }
+                          }
                         }
-                      }
-                    }
-                  }
-                  if (!(bBits % (uint32_t)4U == (uint32_t)0U))
-                  {
-                    uint32_t c0 = bBits % (uint32_t)4U;
-                    {
-                      uint32_t i;
-                      for (i = (uint32_t)0U; i < c0; i++)
-                      {
-                        bn_almost_mont_sqr_u32(len, n, mu, resM, resM);
-                      }
-                    }
-                    {
-                      uint32_t c1 = bBits % (uint32_t)4U;
-                      uint32_t mask_l = ((uint32_t)1U << c1) - (uint32_t)1U;
-                      uint32_t i = (uint32_t)0U;
-                      uint32_t j = (uint32_t)0U;
-                      uint32_t p1 = b[i] >> j;
-                      uint32_t ite;
-                      if (i + (uint32_t)1U < bLen && (uint32_t)0U < j)
-                      {
-                        ite = p1 | b[i + (uint32_t)1U] << ((uint32_t)32U - j);
-                      }
-                      else
-                      {
-                        ite = p1;
-                      }
-                      {
-                        uint32_t bits_c = ite & mask_l;
-                        uint32_t bits_c0 = bits_c;
-                        uint32_t bits_c32 = bits_c0;
-                        uint32_t *a_bits_c = table + bits_c32 * len;
-                        bn_almost_mont_mul_u32(len, n, mu, resM, a_bits_c, resM);
                       }
                     }
                   }
@@ -2646,6 +2865,43 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
                       bn_almost_mont_mul_u32(len, n, mu, t11, aM, t2);
                     }
                   }
+                  if (bBits % (uint32_t)4U != (uint32_t)0U)
+                  {
+                    uint32_t mask_l = (uint32_t)16U - (uint32_t)1U;
+                    uint32_t i0 = bBits / (uint32_t)4U * (uint32_t)4U / (uint32_t)32U;
+                    uint32_t j = bBits / (uint32_t)4U * (uint32_t)4U % (uint32_t)32U;
+                    uint32_t p1 = b[i0] >> j;
+                    uint32_t ite;
+                    if (i0 + (uint32_t)1U < bLen && (uint32_t)0U < j)
+                    {
+                      ite = p1 | b[i0 + (uint32_t)1U] << ((uint32_t)32U - j);
+                    }
+                    else
+                    {
+                      ite = p1;
+                    }
+                    {
+                      uint32_t bits_c = ite & mask_l;
+                      memcpy(resM, table, len * sizeof (uint32_t));
+                      {
+                        uint32_t i1;
+                        for (i1 = (uint32_t)0U; i1 < (uint32_t)15U; i1++)
+                        {
+                          uint32_t c = FStar_UInt32_eq_mask(bits_c, i1 + (uint32_t)1U);
+                          uint32_t *res_j = table + (i1 + (uint32_t)1U) * len;
+                          {
+                            uint32_t i;
+                            for (i = (uint32_t)0U; i < len; i++)
+                            {
+                              uint32_t *os = resM;
+                              uint32_t x = (c & res_j[i]) | (~c & resM[i]);
+                              os[i] = x;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                   {
                     uint32_t i0;
                     for (i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
@@ -2658,9 +2914,10 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
                         }
                       }
                       {
+                        uint32_t bk = bBits - bBits % (uint32_t)4U;
                         uint32_t mask_l = (uint32_t)16U - (uint32_t)1U;
-                        uint32_t i1 = (bBits - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)32U;
-                        uint32_t j = (bBits - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)32U;
+                        uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)32U;
+                        uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)32U;
                         uint32_t p1 = b[i1] >> j;
                         uint32_t ite;
                         if (i1 + (uint32_t)1U < bLen && (uint32_t)0U < j)
@@ -2697,61 +2954,6 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
                             }
                             bn_almost_mont_mul_u32(len, n, mu, resM, a_bits_l, resM);
                           }
-                        }
-                      }
-                    }
-                  }
-                  if (!(bBits % (uint32_t)4U == (uint32_t)0U))
-                  {
-                    uint32_t c = bBits % (uint32_t)4U;
-                    {
-                      uint32_t i;
-                      for (i = (uint32_t)0U; i < c; i++)
-                      {
-                        bn_almost_mont_sqr_u32(len, n, mu, resM, resM);
-                      }
-                    }
-                    {
-                      uint32_t c10 = bBits % (uint32_t)4U;
-                      uint32_t mask_l = ((uint32_t)1U << c10) - (uint32_t)1U;
-                      uint32_t i0 = (uint32_t)0U;
-                      uint32_t j = (uint32_t)0U;
-                      uint32_t p1 = b[i0] >> j;
-                      uint32_t ite;
-                      if (i0 + (uint32_t)1U < bLen && (uint32_t)0U < j)
-                      {
-                        ite = p1 | b[i0 + (uint32_t)1U] << ((uint32_t)32U - j);
-                      }
-                      else
-                      {
-                        ite = p1;
-                      }
-                      {
-                        uint32_t bits_c = ite & mask_l;
-                        uint32_t bits_c0 = bits_c;
-                        KRML_CHECK_SIZE(sizeof (uint32_t), len);
-                        {
-                          uint32_t a_bits_c[len];
-                          memset(a_bits_c, 0U, len * sizeof (uint32_t));
-                          memcpy(a_bits_c, table, len * sizeof (uint32_t));
-                          {
-                            uint32_t i1;
-                            for (i1 = (uint32_t)0U; i1 < (uint32_t)15U; i1++)
-                            {
-                              uint32_t c1 = FStar_UInt32_eq_mask(bits_c0, i1 + (uint32_t)1U);
-                              uint32_t *res_j = table + (i1 + (uint32_t)1U) * len;
-                              {
-                                uint32_t i;
-                                for (i = (uint32_t)0U; i < len; i++)
-                                {
-                                  uint32_t *os = a_bits_c;
-                                  uint32_t x = (c1 & res_j[i]) | (~c1 & a_bits_c[i]);
-                                  os[i] = x;
-                                }
-                              }
-                            }
-                          }
-                          bn_almost_mont_mul_u32(len, n, mu, resM, a_bits_c, resM);
                         }
                       }
                     }
@@ -3046,6 +3248,28 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
                       bn_almost_mont_mul_u64(len, n, mu, t11, aM, t2);
                     }
                   }
+                  if (bBits % (uint32_t)4U != (uint32_t)0U)
+                  {
+                    uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+                    uint32_t i = bBits / (uint32_t)4U * (uint32_t)4U / (uint32_t)64U;
+                    uint32_t j = bBits / (uint32_t)4U * (uint32_t)4U % (uint32_t)64U;
+                    uint64_t p1 = b[i] >> j;
+                    uint64_t ite;
+                    if (i + (uint32_t)1U < bLen && (uint32_t)0U < j)
+                    {
+                      ite = p1 | b[i + (uint32_t)1U] << ((uint32_t)64U - j);
+                    }
+                    else
+                    {
+                      ite = p1;
+                    }
+                    {
+                      uint64_t bits_c = ite & mask_l;
+                      uint32_t bits_l32 = (uint32_t)bits_c;
+                      uint64_t *a_bits_l = table + bits_l32 * len;
+                      memcpy(resM, a_bits_l, len * sizeof (uint64_t));
+                    }
+                  }
                   {
                     uint32_t i;
                     for (i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
@@ -3058,9 +3282,10 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
                         }
                       }
                       {
+                        uint32_t bk = bBits - bBits % (uint32_t)4U;
                         uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
-                        uint32_t i1 = (bBits - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
-                        uint32_t j = (bBits - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
+                        uint32_t i1 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
+                        uint32_t j = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
                         uint64_t p1 = b[i1] >> j;
                         uint64_t ite;
                         if (i1 + (uint32_t)1U < bLen && (uint32_t)0U < j)
@@ -3073,44 +3298,18 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
                         }
                         {
                           uint64_t bits_l = ite & mask_l;
-                          uint32_t bits_l32 = (uint32_t)bits_l;
-                          uint64_t *a_bits_l = table + bits_l32 * len;
-                          bn_almost_mont_mul_u64(len, n, mu, resM, a_bits_l, resM);
+                          KRML_CHECK_SIZE(sizeof (uint64_t), len);
+                          {
+                            uint64_t a_bits_l[len];
+                            memset(a_bits_l, 0U, len * sizeof (uint64_t));
+                            {
+                              uint32_t bits_l32 = (uint32_t)bits_l;
+                              uint64_t *a_bits_l1 = table + bits_l32 * len;
+                              memcpy(a_bits_l, a_bits_l1, len * sizeof (uint64_t));
+                              bn_almost_mont_mul_u64(len, n, mu, resM, a_bits_l, resM);
+                            }
+                          }
                         }
-                      }
-                    }
-                  }
-                  if (!(bBits % (uint32_t)4U == (uint32_t)0U))
-                  {
-                    uint32_t c0 = bBits % (uint32_t)4U;
-                    {
-                      uint32_t i;
-                      for (i = (uint32_t)0U; i < c0; i++)
-                      {
-                        bn_almost_mont_sqr_u64(len, n, mu, resM, resM);
-                      }
-                    }
-                    {
-                      uint32_t c1 = bBits % (uint32_t)4U;
-                      uint64_t mask_l = ((uint64_t)1U << c1) - (uint64_t)1U;
-                      uint32_t i = (uint32_t)0U;
-                      uint32_t j = (uint32_t)0U;
-                      uint64_t p1 = b[i] >> j;
-                      uint64_t ite;
-                      if (i + (uint32_t)1U < bLen && (uint32_t)0U < j)
-                      {
-                        ite = p1 | b[i + (uint32_t)1U] << ((uint32_t)64U - j);
-                      }
-                      else
-                      {
-                        ite = p1;
-                      }
-                      {
-                        uint64_t bits_c = ite & mask_l;
-                        uint64_t bits_c0 = bits_c;
-                        uint32_t bits_c32 = (uint32_t)bits_c0;
-                        uint64_t *a_bits_c = table + bits_c32 * len;
-                        bn_almost_mont_mul_u64(len, n, mu, resM, a_bits_c, resM);
                       }
                     }
                   }
@@ -3272,6 +3471,43 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
                       bn_almost_mont_mul_u64(len, n, mu, t11, aM, t2);
                     }
                   }
+                  if (bBits % (uint32_t)4U != (uint32_t)0U)
+                  {
+                    uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
+                    uint32_t i0 = bBits / (uint32_t)4U * (uint32_t)4U / (uint32_t)64U;
+                    uint32_t j = bBits / (uint32_t)4U * (uint32_t)4U % (uint32_t)64U;
+                    uint64_t p1 = b[i0] >> j;
+                    uint64_t ite;
+                    if (i0 + (uint32_t)1U < bLen && (uint32_t)0U < j)
+                    {
+                      ite = p1 | b[i0 + (uint32_t)1U] << ((uint32_t)64U - j);
+                    }
+                    else
+                    {
+                      ite = p1;
+                    }
+                    {
+                      uint64_t bits_c = ite & mask_l;
+                      memcpy(resM, table, len * sizeof (uint64_t));
+                      {
+                        uint32_t i1;
+                        for (i1 = (uint32_t)0U; i1 < (uint32_t)15U; i1++)
+                        {
+                          uint64_t c = FStar_UInt64_eq_mask(bits_c, (uint64_t)(i1 + (uint32_t)1U));
+                          uint64_t *res_j = table + (i1 + (uint32_t)1U) * len;
+                          {
+                            uint32_t i;
+                            for (i = (uint32_t)0U; i < len; i++)
+                            {
+                              uint64_t *os = resM;
+                              uint64_t x = (c & res_j[i]) | (~c & resM[i]);
+                              os[i] = x;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                   {
                     uint32_t i0;
                     for (i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
@@ -3284,9 +3520,10 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
                         }
                       }
                       {
+                        uint32_t bk = bBits - bBits % (uint32_t)4U;
                         uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
-                        uint32_t i1 = (bBits - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
-                        uint32_t j = (bBits - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
+                        uint32_t i1 = (bk - (uint32_t)4U * i0 - (uint32_t)4U) / (uint32_t)64U;
+                        uint32_t j = (bk - (uint32_t)4U * i0 - (uint32_t)4U) % (uint32_t)64U;
                         uint64_t p1 = b[i1] >> j;
                         uint64_t ite;
                         if (i1 + (uint32_t)1U < bLen && (uint32_t)0U < j)
@@ -3324,62 +3561,6 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
                             }
                             bn_almost_mont_mul_u64(len, n, mu, resM, a_bits_l, resM);
                           }
-                        }
-                      }
-                    }
-                  }
-                  if (!(bBits % (uint32_t)4U == (uint32_t)0U))
-                  {
-                    uint32_t c = bBits % (uint32_t)4U;
-                    {
-                      uint32_t i;
-                      for (i = (uint32_t)0U; i < c; i++)
-                      {
-                        bn_almost_mont_sqr_u64(len, n, mu, resM, resM);
-                      }
-                    }
-                    {
-                      uint32_t c10 = bBits % (uint32_t)4U;
-                      uint64_t mask_l = ((uint64_t)1U << c10) - (uint64_t)1U;
-                      uint32_t i0 = (uint32_t)0U;
-                      uint32_t j = (uint32_t)0U;
-                      uint64_t p1 = b[i0] >> j;
-                      uint64_t ite;
-                      if (i0 + (uint32_t)1U < bLen && (uint32_t)0U < j)
-                      {
-                        ite = p1 | b[i0 + (uint32_t)1U] << ((uint32_t)64U - j);
-                      }
-                      else
-                      {
-                        ite = p1;
-                      }
-                      {
-                        uint64_t bits_c = ite & mask_l;
-                        uint64_t bits_c0 = bits_c;
-                        KRML_CHECK_SIZE(sizeof (uint64_t), len);
-                        {
-                          uint64_t a_bits_c[len];
-                          memset(a_bits_c, 0U, len * sizeof (uint64_t));
-                          memcpy(a_bits_c, table, len * sizeof (uint64_t));
-                          {
-                            uint32_t i1;
-                            for (i1 = (uint32_t)0U; i1 < (uint32_t)15U; i1++)
-                            {
-                              uint64_t
-                              c1 = FStar_UInt64_eq_mask(bits_c0, (uint64_t)(i1 + (uint32_t)1U));
-                              uint64_t *res_j = table + (i1 + (uint32_t)1U) * len;
-                              {
-                                uint32_t i;
-                                for (i = (uint32_t)0U; i < len; i++)
-                                {
-                                  uint64_t *os = a_bits_c;
-                                  uint64_t x = (c1 & res_j[i]) | (~c1 & a_bits_c[i]);
-                                  os[i] = x;
-                                }
-                              }
-                            }
-                          }
-                          bn_almost_mont_mul_u64(len, n, mu, resM, a_bits_c, resM);
                         }
                       }
                     }

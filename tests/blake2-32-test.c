@@ -9,11 +9,10 @@
 #include <time.h>
 #include <stdbool.h>
 
-#include "Hacl_Blake2s_32.h"
-#include "Hacl_Blake2b_32.h"
+#include "Hacl_Hash_Blake2.h"
 
 #if defined(HACL_CAN_COMPILE_VEC128)
-#include "Hacl_Blake2s_128.h"
+#include "Hacl_Hash_Blake2s_128.h"
 #endif
 
 #include "test_helpers.h"

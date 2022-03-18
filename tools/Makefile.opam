@@ -22,7 +22,7 @@ prepare-raw:
 	cp -r ../dist/gcc-compatible/* hacl-star/raw
 	cp -r ../dist/kremlin hacl-star
 	make -C hacl-star/raw clean
-	cd hacl-star/raw && rm -rf lib/*.cmx lib/*.cmi lib/*.cmo lib/*.o lib_gen/*.exe lib_gen/*.cmx lib_gen/*.cmi lib_gen/*.o libocamlevercrypt.a libevercrypt.so ocamlevercrypt.* dllocamlevercrypt.so depend.ocaml
+	cd hacl-star/raw && rm -rf lib/*.cmx lib/*.cmi lib/*.cmo lib/*.o lib_gen/*.exe lib_gen/*.cmx lib_gen/*.cmi lib_gen/*.o libocamlevercrypt.a libevercrypt.so ocamlevercrypt.* dllocamlevercrypt.so depend.ocaml config.h Makefile.config
 
 release-hacl-star: prepare-raw
 	cp -r ../bindings/ocaml/* hacl-star

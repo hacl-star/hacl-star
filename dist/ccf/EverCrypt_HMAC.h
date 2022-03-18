@@ -37,8 +37,10 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
+#include "Hacl_Hash_SHA1.h"
+#include "Hacl_Hash_Base.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash.h"
+#include "Hacl_Hash_SHA2.h"
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
 

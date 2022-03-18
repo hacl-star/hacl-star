@@ -33,7 +33,7 @@ Comment "Check whether this library will work for a modulus `n`.
   The function returns false if any of the following preconditions are violated,
   true otherwise.
   • n % 2 = 1
-  • 1 < n "]
+  • 1 < n"]
 val field_modulus_check: len:BN.meta_len t_limbs -> MA.bn_field_check_modulus_st t_limbs len
 
 [@@ Comment "Heap-allocate and initialize a montgomery context.
@@ -121,7 +121,7 @@ val one: len:Ghost.erased _ -> MA.bn_field_one_st t_limbs len
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • b < pow2 bBits "]
+  • b < pow2 bBits"]
 val exp_consttime: len:Ghost.erased _ -> MA.bn_field_exp_consttime_st t_limbs len
 
 [@@ Comment "Write `aM ^ b mod n` in `resM`.
@@ -139,7 +139,7 @@ val exp_consttime: len:Ghost.erased _ -> MA.bn_field_exp_consttime_st t_limbs le
 
   Before calling this function, the caller will need to ensure that the following
   precondition is observed.
-  • b < pow2 bBits "]
+  • b < pow2 bBits"]
 val exp_vartime: len:Ghost.erased _ -> MA.bn_field_exp_vartime_st t_limbs len
 
 [@@ Comment "Write `aM ^ (-1) mod n` in `aInvM`.
@@ -150,5 +150,5 @@ val exp_vartime: len:Ghost.erased _ -> MA.bn_field_exp_vartime_st t_limbs len
   Before calling this function, the caller will need to ensure that the following
   preconditions are observed.
   • n is a prime
-  • 0 < aM "]
+  • 0 < aM"]
 val inverse: len:Ghost.erased _ -> MA.bn_field_inv_st t_limbs len

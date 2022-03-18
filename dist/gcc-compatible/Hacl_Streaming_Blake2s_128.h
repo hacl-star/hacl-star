@@ -39,9 +39,9 @@ extern "C" {
 
 #include "Hacl_Streaming_Blake2.h"
 #include "Hacl_Kremlib.h"
-#include "Hacl_Blake2s_128.h"
+#include "Hacl_Hash_Blake2s_128.h"
 #include "Hacl_Spec.h"
-#include "Hacl_Impl_Blake2.h"
+#include "Hacl_Hash_Blake2.h"
 
 typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_block_state_s
 {

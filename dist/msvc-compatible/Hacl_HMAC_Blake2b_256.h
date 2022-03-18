@@ -39,7 +39,7 @@ extern "C" {
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Blake2b_256.h"
+#include "Hacl_Hash_Blake2b_256.h"
 
 void
 Hacl_HMAC_Blake2b_256_compute_blake2b_256(

@@ -38,7 +38,7 @@ extern "C" {
 
 
 #include "Hacl_Kremlib.h"
-#include "Hacl_Hash.h"
+#include "Hacl_Hash_SHA2.h"
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Curve25519_64.h"

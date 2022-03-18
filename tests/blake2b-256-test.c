@@ -9,7 +9,7 @@
 #include <time.h>
 #include <stdbool.h>
 
-#include "Hacl_Blake2b_256.h"
+#include "Hacl_Hash_Blake2b_256.h"
 
 #include "test_helpers.h"
 
