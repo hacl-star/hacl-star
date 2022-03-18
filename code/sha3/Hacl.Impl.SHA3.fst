@@ -457,8 +457,8 @@ val compare_more_zero_lte_b: a: size_t -> b: size_t -> Tot (r: bool {
 
 let compare_more_zero_lte_b a b = 
   let a_is_zero = eq a (size 0) in 
-  let a_lte_200 = gt a b in 
-  a_is_zero || a_lte_200
+  let a_gt_b = gt a b in 
+  a_is_zero || a_gt_b
 
 
 val absorb_last:
