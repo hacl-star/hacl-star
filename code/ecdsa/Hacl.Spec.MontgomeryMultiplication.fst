@@ -55,15 +55,6 @@ let lemma_mod_inv2_mult_prime prime a =
 
 #set-options "--z3rlimit 200 --fuel 0 --ifuel 0"
 
-val lemma_norm: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
-  -> q: point_nat_prime #c {~ (isPointAtInfinity q)} ->  Lemma (
-  let pX, pY, pZ = p in
-  let qX, qY, qZ = q in 
-  let pNX, pNY, pNZ = _norm p in 
-  let qNX, qNY, qNZ = _norm q in 
-  (pX == qX <==> pNX * (pZ * pZ) % getPrime c == qNX * (qZ * qZ) % getPrime c) /\ 
-  (pY == qY <==> pNY * (pZ * pZ * pZ) % getPrime c == qNY * (qZ * qZ * qZ) % getPrime c))
-
 
 let lemma_norm #c p q = 
   let prime = getPrime c in 

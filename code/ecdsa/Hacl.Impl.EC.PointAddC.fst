@@ -114,7 +114,7 @@ let lemma_multiplication_is_pointEqual_l1 #c p q =
 
 
 
-val lemma_multiplication_is_pointEqual_l: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
+(* val lemma_multiplication_is_pointEqual_l: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
   -> q: point_nat_prime #c {~ (isPointAtInfinity q)} -> 
   Lemma (
     let pX, pY, pZ = p in
@@ -148,7 +148,8 @@ let lemma_multiplication_is_pointEqual_l #c p q =
     lemma_multiplication_is_pointEqual_l1 p q 
   end
 
-
+ *)
+ 
 val lemma_multiplication_is_pointEqual_r0: #c: curve 
   -> p: point_nat_prime #c {let pX, pY, pZ = p in pZ * pZ % getPrime c <> 0}
   -> q: point_nat_prime #c {let qX, qY, qZ = q in qZ * qZ % getPrime c <> 0} -> 
@@ -238,7 +239,7 @@ let lemma_multiplication_is_pointEqual_r1 #c p q =
     qY * (pZ * pZ * pZ) % prime;}
 
 
-val lemma_multiplication_is_pointEqual_r: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
+(* val lemma_multiplication_is_pointEqual_r: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity p)} 
   -> q: point_nat_prime #c {~ (isPointAtInfinity q)} -> 
   Lemma (
     let pX, pY, pZ = p in
@@ -275,7 +276,7 @@ let lemma_multiplication_is_pointEqual_r #c p q =
     assert ((pY * (qZ * qZ * qZ) % getPrime c == qY * (pZ * pZ * pZ) % getPrime c))
     end
 
-
+ *)
 
 (* 
 The formulas for complete point addition for jacobian coordinates require a check for points not to be 
@@ -357,11 +358,11 @@ let point_add_c #c p q result tempBuffer =
   lemma_pointAtInfInDomain #c (as_nat c h0 x1) (as_nat c h0 y1) (as_nat c h0 z1);
   lemma_pointAtInfInDomain #c (as_nat c h0 x2) (as_nat c h0 y2) (as_nat c h0 z2);
 
-  lemma_multiplication_is_pointEqual_l #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) 
-    (fromDomainPoint #c #DH (point_as_nat c h0 q));
+(*   lemma_multiplication_is_pointEqual_l #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) 
+    (fromDomainPoint #c #DH (point_as_nat c h0 q)); *)
     
-  lemma_multiplication_is_pointEqual_r #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) 
-    (fromDomainPoint #c #DH (point_as_nat c h0 q));
+(*   lemma_multiplication_is_pointEqual_r #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) 
+    (fromDomainPoint #c #DH (point_as_nat c h0 q)); *)
 
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 

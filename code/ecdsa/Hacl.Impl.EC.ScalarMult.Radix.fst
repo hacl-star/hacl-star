@@ -24,33 +24,101 @@ open Hacl.Impl.EC.Precomputed
 
 open FStar.Mul
 
-#set-options " --z3rlimit 200"
+open Lib.LoopCombinators
+open Hacl.Spec.EC.ScalarMult.Radix
 
 
-[@ CInline]
+#set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0 "
+
+
+inline_for_extraction noextract
+val getPointDoubleNTimes: #c: curve -> p: point c -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack unit 
+  (requires fun h -> live h p /\ live h tempBuffer /\ disjoint p tempBuffer /\ point_eval c h p)
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 p /\
+    fromDomainPoint #c #DH (point_as_nat c h1 p) == Spec.ECC.Radix.getPointDoubleNTimes #c
+      (fromDomainPoint #c #DH(point_as_nat c h0 p)) 4)
+
+let getPointDoubleNTimes #c p tempBuffer = 
+  let h0 = ST.get() in 
+  let inv h (k: nat) = live h p /\ live h tempBuffer /\ disjoint p tempBuffer /\ point_eval c h p /\ 
+    modifies (loc p |+| loc tempBuffer) h0 h /\
+    fromDomainPoint #c #DH (point_as_nat c h p) ==
+      Lib.LoopCombinators.repeat k (_point_double #c) (fromDomainPoint #c #DH (point_as_nat c h0 p)) in 
+  Lib.LoopCombinators.eq_repeat0 (_point_double #c) (fromDomainPoint #c #DH (point_as_nat c h0 p));  
+  for 0ul 4ul inv (fun i -> 
+    point_double p p tempBuffer; 
+    unfold_repeat 4 (_point_double #c) (fromDomainPoint #c #DH (point_as_nat c h0 p)) (v i))
+
+
 inline_for_extraction noextract  
-val scalar_mult_step_radix_precomputed: #c: curve -> #buf_type: buftype -> 
-  p: point c -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
-  scalar: scalar_t #buf_type #c -> 
-  i: size_t{v i < v (getScalarLenBytes c) * 2} -> 
+val scalar_mult_step_radix_precomputed: #c: curve -> #buf_type: buftype 
+  -> p: point c -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
+  -> scalar: scalar_t #buf_type #c 
+  -> i: size_t{v i >= 1 /\ v i < v (getScalarLenBytes c) * 2 - 1} -> 
   Stack unit
-  (requires fun h -> live h p /\ live h tempBuffer /\ live h scalar /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p;loc tempBuffer; loc scalar])
-  (ensures fun h0 _ h1 -> True)
+  (requires fun h -> live h p /\ live h tempBuffer /\ live h scalar /\ point_eval c h p /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar])
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 p /\ (
+    pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 p)) 
+      (Spec.ECC.Radix._ml_step #c #Affine (as_seq h0 scalar) (basePoint #c) (v i - 1) (fromDomainPoint #c #DH (point_as_nat c h0 p)))))
+
+
+val lemma_test: #c: curve -> si: nat {si < 16} -> p: point_nat_prime #c -> p0: point_nat_prime #c 
+  -> pA: point_nat_prime #c 
+  -> Lemma (requires (
+    let pRadixed = Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
+    let pointPrecomputed = Spec.ECC.Radix.getPrecomputedPoint_Affine #c p0 si in 
+    let pD = fromDomainPoint #c #DH pA in 
+    not (pointEqual (Spec.ECC.Radix.getPointDoubleNTimes #c p 4) (Spec.ECC.Radix.getPrecomputedPoint_Affine #c p0 si)) /\ pointEqual pD pointPrecomputed))
+  (ensures (
+    let pRadixed = Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
+    let pointPrecomputed = Spec.ECC.Radix.getPrecomputedPoint_Affine #c p0 si in 
+    let pD = fromDomainPoint #c #DH pA in 
+    pointEqual (_point_add_mixed #c pRadixed pD) (_point_add_mixed #c pRadixed pointPrecomputed)))
+
+
+let lemma_test #c si p p0 pA = 
+  let pRadixed = Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
+  let pointPrecomputed = Spec.ECC.Radix.getPrecomputedPoint_Affine #c p0 si in 
+  let pD = fromDomainPoint #c #DH pA in  
+  if (si = 0) then
+    begin 
+      lemma_point_add_mixed_b_is_infinity pD pointPrecomputed pRadixed
+    end 
+  else begin 
+    lemma_not_affine_equality pD pointPrecomputed; 
+    lemma_point_add_mixed_two_points #c pD pointPrecomputed pRadixed
+    end
+
 
 
 let scalar_mult_step_radix_precomputed #c p tempBuffer scalar i = 
+  let h0 = ST.get() in 
   push_frame(); 
-    let pointToAdd = create (size 8) (u64 0) in 
-    getPointPrecomputedMixed #c scalar i pointToAdd;
-  
-    point_double p p tempBuffer;
-    point_double p p tempBuffer;
-    point_double p p tempBuffer;
-    point_double p p tempBuffer;
-    
+    let pointToAdd = create (size 2 *! getCoordinateLenU64 c) (u64 0) in 
+    getPointPrecomputedMixed #c scalar i pointToAdd;      
+      let h1 = ST.get() in
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
+    getPointDoubleNTimes #c p tempBuffer;
+      let h2 = ST.get() in
     Hacl.Impl.EC.PointAddMixed.point_add_mixed #c p pointToAdd p tempBuffer;
-  pop_frame()
+    
+    let h3 = ST.get() in
+    pop_frame();
+   
+    let si = 
+      let scalar = scalar_as_nat (as_seq h0 scalar) in 
+      Math.Lib.arithmetic_shift_right scalar  (v (getScalarLen c) - ((v i - 1) + 2) * 4) % pow2 4 in 
+
+    let p = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+
+    assume (not 
+      (pointEqual (Spec.ECC.Radix.getPointDoubleNTimes #c p 4) 
+      (Spec.ECC.Radix.getPrecomputedPoint_Affine #c (basePoint #c) si))); 
+
+
+    lemma_test #c si p (basePoint #c) (toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd))
 
 
 

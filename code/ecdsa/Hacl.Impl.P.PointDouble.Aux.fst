@@ -130,7 +130,7 @@ let lemma_x3 #c x y z =
   }
 
 
-val y3_lemma_0: #c: curve -> x: int ->  y: int -> z: int ->  t0: int -> Lemma (
+val y3_lemma_0: #c: curve -> x: int ->  y: int -> z: int -> t0: int -> Lemma (
   let prime = getPrime c in 
   (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime == (t0 - 8 * y * y * y * y) % prime)
 
@@ -139,18 +139,19 @@ let y3_lemma_0 #c x y z t0 =
   calc (==) {
     (t0 - 8 * (y * y % prime) * (y * y % prime)) % prime;
   (==) {lemma_mod_sub_distr t0 (8 * (y * y % prime) * (y * y % prime)) prime}
-    (t0 - (8 * (y * y % prime) * (y * y % prime)) % prime) % prime;
+    (t0 - (8 * (y * y % prime) * (y * y % prime)) % prime) % prime;  
   (==) {lemma_mod_mul_distr_r (8 * (y * y % prime)) (y * y) prime}
     (t0 - (8 * (y * y % prime) * (y * y)) % prime) % prime;
+  (==) {assert_by_tactic (8 * (y * y) * (y * y % prime) == 8 * (y * y % prime) * (y * y)) canon}
+    (t0 - (8 * (y * y) * (y * y  % prime)) % prime) % prime;
   (==) {lemma_mod_mul_distr_r (8 * (y * y)) (y * y) prime}
-    (t0 - (8 * (y * y) * (y * y)) % prime) % prime;
+    (t0 - (8 * (y * y) * (y * y)) % prime) % prime; 
   (==) {assert_by_tactic (8 * (y * y) * (y * y) == 8 * y * y * y * y) canon}
     (t0 - (8 * y * y * y * y) % prime) % prime;
   (==) {lemma_mod_sub_distr t0 (8 * y * y * y * y) prime}
     (t0 - (8 * y * y * y * y)) % prime;
   (==) {assert_by_tactic (t0 - (8 * y * y * y * y) == t0 - 8 * y * y * y * y) canon}
-    (t0 - 8 * y * y * y * y) % prime;
-  }
+    (t0 - 8 * y * y * y * y) % prime;}
 
 
 val y3_lemma_1: #c: curve -> x: int ->  y: int -> z: int -> Lemma (
@@ -165,19 +166,19 @@ let y3_lemma_1 #c x y z =
   {
     3 * (x - (z * z % prime)) * (x + (z * z % prime)) % prime;
     (==) {lemma_mod_mul_distr_r (3 * (x - (z * z % prime))) (x + (z * z % prime)) prime}
-      3 * (x - (z * z % prime)) * ((x + (z * z % prime)) % prime) % prime;
+      3 * (x - (z * z % prime)) * ((x + (z * z % prime)) % prime) % prime; 
     (==) {lemma_mod_add_distr x (z * z) prime}
-      3 * (x - (z * z % prime)) * ((x + z * z) % prime) % prime;
+      3 * (x - (z * z % prime)) * ((x + z * z) % prime) % prime; 
     (==) {lemma_mod_mul_distr_r (3 * (x - (z * z % prime))) (x + z * z) prime}
-      3 * (x - (z * z % prime)) * (x + z * z) % prime;
+      3 * (x - (z * z % prime)) * (x + z * z) % prime; 
     (==) {assert_by_tactic (3 * (x - (z * z % prime)) * (x + z * z) == 3 * (x + z * z) * (x - (z * z % prime))) canon}
-      3 * (x + z * z) * (x - (z * z % prime)) % prime;
+      3 * (x + z * z) * (x - (z * z % prime)) % prime; 
     (==) {lemma_mod_mul_distr_r (3 * (x + z * z)) (x - (z * z % prime)) prime}
-      3 * (x + z * z) * ((x - (z * z % prime))  % prime)  % prime;
+      3 * (x + z * z) * ((x - (z * z % prime))  % prime) % prime; 
     (==) {lemma_mod_sub_distr x (z * z) prime}
-      3 * (x + z * z) * ((x - z * z) % prime)  % prime;
+      3 * (x + z * z) * ((x - z * z) % prime) % prime; 
     (==) {lemma_mod_mul_distr_r (3 * (x + z * z)) (x - z * z) prime}
-      3 * (x - z * z) * (x + z * z)  % prime;
+      3 * (x + z * z) * ((x - z * z)) % prime; 
     (==) {assert_by_tactic (3 * (x + z * z) * (x - z * z) == 3 * (x - z * z) * (x + z * z)) canon}
       3 * (x + z * z) * (x - z * z)  % prime; 
     }
@@ -241,8 +242,7 @@ let lemma_y3 #c x y z x3 =
 
 val lemma_z3: #c: curve ->  x: int -> y: int -> z: int -> Lemma (
   let prime = getPrime c in 
-  ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime 
-  == ((y + z) * (y + z) - z * z - y * y) % prime)
+  ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime == ((y + z) * (y + z) - z * z - y * y) % prime)
 
 
 let lemma_z3 #c x y z = 

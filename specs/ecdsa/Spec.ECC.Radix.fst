@@ -23,12 +23,13 @@ let radix = 4
 
 val getPrecomputedPoint_Affine: #c: curve -> p: point_nat_prime #c -> i: nat {i < 16} -> 
   Tot (r: point_nat_prime #c {
+    isPointAtInfinity #Jacobian r == false /\ (
     if i = 0 then isPointAtInfinity #Affine r 
-    else pointEqual r (point_mult #c i p) /\ isPointAtInfinity #Jacobian r == false /\ isPointAtInfinity #Affine r == false})
+    else pointEqual r (point_mult #c i p) /\ isPointAtInfinity #Affine r == false)})
 
 let getPrecomputedPoint_Affine #c p i = 
   curve_order_is_the_smallest #c p;
-  if i = 0 then (0, 0, 0) else begin
+  if i = 0 then (0, 0, 1) else begin
     let r = point_mult #c i p in 
     curve_order_is_the_smallest p;
     (* if a point p belongs to curve, then the result point r belongs to the same curve *)

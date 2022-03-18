@@ -321,8 +321,8 @@ val multByOrder: #c: curve {isPrimeGroup c == false} -> #l: ladder -> result: po
   tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack unit 
   (requires fun h -> 
     live h p /\ live h result /\ live h tempBuffer /\ point_eval c h p /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc result] /\
-    ~ (isPointAtInfinity (point_as_nat c h p)))
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc result] (* /\
+    ~ (isPointAtInfinity (point_as_nat c h p)) *))
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
     scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
 
@@ -336,8 +336,8 @@ val multByOrder2: #c: curve {isPrimeGroup c == false} -> #l: ladder -> result: p
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack unit 
   (requires fun h -> 
     live h p /\ live h result /\ live h tempBuffer /\ point_eval c h p /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc result] /\
-    ~ (isPointAtInfinity (point_as_nat c h p)))
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc result] )(* /\
+    ~ (isPointAtInfinity (point_as_nat c h p))) *)
   (ensures fun h0 _ h1  -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\
     scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) == point_as_nat c h1 result)
 
@@ -359,12 +359,12 @@ inline_for_extraction noextract
 val isOrderCorrect_public: #c: curve {isPrimeGroup c == false} -> #l: ladder -> p: point c 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack bool
   (requires fun h -> 
-    live h p /\ live h tempBuffer /\ point_eval c h p /\
+    live h p /\ live h tempBuffer /\ point_eval c h p )(* /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; ] /\
-    ~ (isPointAtInfinity (point_as_nat c h p)))
-  (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    ~ (isPointAtInfinity (point_as_nat c h p))) *)
+  (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1)(*  /\ (
     let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) in 
-     r == Spec.ECC.isPointAtInfinity pointMultOrder))
+     r == Spec.ECC.isPointAtInfinity pointMultOrder)) *)
 
 let isOrderCorrect_public #c #l p tempBuffer = 
     let h0 = ST.get() in 
@@ -385,12 +385,12 @@ inline_for_extraction noextract
 val isOrderCorrect_private: #c: curve {isPrimeGroup c == false} -> #l: ladder -> p: point c 
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) -> Stack bool
   (requires fun h -> 
-    live h p /\ live h tempBuffer /\ point_eval c h p /\
+    live h p /\ live h tempBuffer (* /\ point_eval c h p /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; ] /\
-    ~ (isPointAtInfinity (point_as_nat c h p)))
-  (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
+    ~ (isPointAtInfinity (point_as_nat c h p)) *))
+  (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 )(* /\ (
     let pointMultOrder = scalar_multiplication (Lib.Sequence.of_list (order_u8_list c)) (point_as_nat c h0 p) in 
-     r == Spec.ECC.isPointAtInfinity pointMultOrder))
+     r == Spec.ECC.isPointAtInfinity pointMultOrder)) *)
 
 let isOrderCorrect_private #c #l p tempBuffer = 
     let h0 = ST.get() in 
@@ -412,9 +412,7 @@ val verifyQValidCurvePoint_public_: #c: curve -> #l: ladder -> pubKey: point c
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat c h (getZ pubKey) == 1)
-  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
-    let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
-    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1)
 
 let verifyQValidCurvePoint_public_ #c #l pubKey tempBuffer = 
     let h0 = ST.get() in 
@@ -438,9 +436,7 @@ val verifyQValidCurvePoint_private_: #c: curve -> #l: ladder -> pubKey: point c
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat c h (getZ pubKey) == 1)
-  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
-    let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
-    ~ (isPointAtInfinity p) /\ r <==> verifyQValidCurvePointSpec #c p))
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1)
 
 let verifyQValidCurvePoint_private_ #c #l pubKey tempBuffer = 
     let h0 = ST.get() in 
@@ -473,9 +469,7 @@ val verifyQValidCurvePoint_public_p256: #l: ladder -> pubKey: point P256
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat P256 h (getZ pubKey) == 1)
-  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
-    let p = as_nat P256 h0 (getX pubKey),  as_nat P256 h0 (getY pubKey), as_nat P256 h0 (getZ pubKey) in 
-    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #P256 p))
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1)
 
 let verifyQValidCurvePoint_public_p256 = verifyQValidCurvePoint_public_ #P256
 
@@ -485,9 +479,7 @@ val verifyQValidCurvePoint_public_p384: #l: ladder -> pubKey: point P384
   Stack bool
   (requires fun h -> live h pubKey /\ live h tempBuffer /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat P384 h (getZ pubKey) == 1)
-  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
-    let p = as_nat P384 h0 (getX pubKey),  as_nat P384 h0 (getY pubKey), as_nat P384 h0 (getZ pubKey) in 
-    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #P384 p))
+  (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1)
 
 let verifyQValidCurvePoint_public_p384 = verifyQValidCurvePoint_public_ #P384
 

@@ -24,7 +24,7 @@ val bufferToJac: #c: curve -> p: pointAffine c -> result: point c -> Stack unit
     let x, y = as_nat c h0 (getXAff p), as_nat c h0 (getYAff p) in 
     let resultTuple = point_as_nat c h1 result in 
     let pJ = toJacobianCoordinates (x, y) in 
-    ~ (isPointAtInfinity resultTuple) /\ as_nat c h1 (getZ result) == 1 /\ resultTuple == pJ))
+    ~ (isPointAtInfinity #Jacobian resultTuple) /\ as_nat c h1 (getZ result) == 1 /\ resultTuple == pJ))
 
 inline_for_extraction noextract
 val fromForm: #c: curve -> i: felem c -> o: coordinateAffine8 c -> Stack unit 
@@ -64,7 +64,7 @@ val toFormPoint: #c: curve -> i: pointAffine8 c -> o: point c -> Stack unit
 inline_for_extraction noextract
 val isPointAtInfinity_public: #c: curve -> p: point c -> Stack bool
   (requires fun h -> live h p /\ point_eval c h p)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.ECC.isPointAtInfinity (point_as_nat c h0 p))
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\ r == Spec.ECC.isPointAtInfinity #Jacobian (point_as_nat c h0 p))
 
 
 inline_for_extraction noextract
@@ -81,7 +81,7 @@ val verifyQValidCurvePoint_private: #c: curve -> #l: ladder -> pubKey: point c
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat c h (getZ pubKey) == 1)
   (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
     let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
-    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
+    ~ (isPointAtInfinity #Jacobian p) /\ r == verifyQValidCurvePointSpec #c p))
 
 
 inline_for_extraction noextract
@@ -92,7 +92,7 @@ val verifyQValidCurvePoint_public: #c: curve -> #l: ladder -> pubKey: point c
     LowStar.Monotonic.Buffer.all_disjoint [loc pubKey; loc tempBuffer] /\ as_nat c h (getZ pubKey) == 1)
   (ensures  fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ (
     let p = as_nat c h0 (getX pubKey),  as_nat c h0 (getY pubKey),  as_nat c h0 (getZ pubKey) in 
-    ~ (isPointAtInfinity p) /\ r == verifyQValidCurvePointSpec #c p))
+    ~ (isPointAtInfinity #Jacobian p) /\ r == verifyQValidCurvePointSpec #c p))
 
 
 inline_for_extraction noextract

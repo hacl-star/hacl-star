@@ -16,7 +16,7 @@ open Spec.ECC.Curves
 open Hacl.Spec.MontgomeryMultiplication
 
 
-#set-options "--z3rlimit 200 --ifuel 0 --fuel 0" 
+#set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0" 
 
 
 let notCompressedForm (c: curve) = lbuffer uint8 (getCoordinateLenU c *! 2ul +! 1ul)

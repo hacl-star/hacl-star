@@ -1,6 +1,5 @@
 module Hacl.Impl.P.PointAddMixed.Aux
 
-
 open FStar.HyperStack.All
 open FStar.HyperStack
 module ST = FStar.HyperStack.ST
@@ -123,7 +122,6 @@ val lemma_point_add_if: #c: curve -> p: point c -> q: pointAffine c  -> result: 
       point_y_as_nat c h2 result == as_nat c h1 y3_out /\ 
       point_z_as_nat c h2 result == as_nat c h1 z3_out)))
   (ensures (
-  (
     let prime = getPrime c in 
 
     let x3, y3, z3 = point_x_as_nat c h2 result, point_y_as_nat c h2 result, point_z_as_nat c h2 result in
@@ -146,7 +144,7 @@ val lemma_point_add_if: #c: curve -> p: point c -> q: pointAffine c  -> result: 
     else 
       x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
       y3 == toDomain #c (((hD * hD * u1D - fromDomain #c x3) * rD - s1D * hD * hD * hD) % prime)  /\
-      z3 == toDomain #c (pzD * qzD * hD % prime))))
+      z3 == toDomain #c (pzD * qzD * hD % prime)))
 
 
 

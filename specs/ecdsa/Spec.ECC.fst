@@ -148,7 +148,7 @@ let pointEqual #curve (p: point_nat_prime #curve) (q: point_nat_prime #curve) =
 
 
 noextract
-let _point_add #curve  (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
+let _point_add #curve   (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
   let prime = getPrime curve in 
   let (x1, y1, z1) = p in
   let (x2, y2, z2) = q in
@@ -226,7 +226,7 @@ let pointAdd #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : poin
 val _ml_step0: #c: curve -> r0: point_nat_prime #c -> r1: point_nat_prime #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c) 
 
 let _ml_step0 #c r0 r1 =
-  let r0 = pointAdd #c  r1 r0 in
+  let r0 = pointAdd #c r1 r0 in
   let r1 = pointAdd #c r1 r1 in
   (r0, r1)
 
@@ -259,10 +259,11 @@ assume val curve_point_equality: #c: curve ->  p: point_nat_prime #c -> q: point
 assume val curve_commutativity_lemma: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
   (pointEqual (pointAdd #c p q) (pointAdd #c q p))
 
-(* P == P' ==> P + Q == P' + Q *)
-assume val curve_compatibility_with_translation_lemma: #c: curve -> p: point_nat_prime #c -> p1: point_nat_prime #c {pointEqual p p1}
+(* P == P' <==> P + Q == P' + Q *)
+(* TODO: do we need curve_point_equality and this? *)
+assume val curve_compatibility_with_translation_lemma: #c: curve -> p: point_nat_prime #c -> p1: point_nat_prime #c 
   -> q: point_nat_prime #c -> 
-  Lemma (pointEqual (pointAdd #c p q) (pointAdd #c p1 q))
+  Lemma (pointEqual p p1 <==> pointEqual (pointAdd #c p q) (pointAdd #c p1 q))
 
 (* order is the smallest number such that P * order == 0 *)
 

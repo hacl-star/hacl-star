@@ -19,22 +19,10 @@ open Hacl.Impl.EC.Masking
 open Hacl.Impl.EC.Masking.ScalarAccess 
 open Hacl.Impl.P256.LowLevel
 
+open Spec.ECC.Radix
+
 
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 100"
-
-inline_for_extraction
-let getPointI_affine (c: curve) (b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c) * 2 * 16) {
-    forall (i: nat {i < 16}).   
-      let l = v (getCoordinateLenU64 c) in
-      lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime c /\
-      lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime c}) 
-    (i: nat {i < 16}) :  point_affine_nat_prime #c = 
-    
-  let l = v (getCoordinateLenU64 c) in 
-  let x = lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) in 
-  let y = lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) in 
-  (x, y)
-
 
 inline_for_extraction
 let getPointI_jac (c: curve) (b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU64 c) * 2 * 16) {
@@ -57,7 +45,7 @@ let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128 /\ (
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime P256 /\
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime P256) /\ (  
     forall (i: nat {i < 16}). 
-    let p0_i = point_mult #P256 #Jacobian i (basePoint #P256) in  
+    let p0_i = point_mult #P256  i (basePoint #P256) in  
     let pi_fromDomain = fromDomainPoint #P256 #DH (getPointI_jac P256 b i) in 
     pointEqual pi_fromDomain p0_i))} =
 
@@ -123,9 +111,9 @@ let points_radix_16_list_p256: x:list uint64 {List.Tot.length x == 128 /\ (
     assume (
       let b = Lib.Sequence.of_list x in (
       forall (i: nat {i > 0 /\ i < 16}). 
-	let p0_i = point_mult #P256 #Jacobian i (basePoint #P256) in  
-	let pi_fromDomain = fromDomainPoint #P256 #DH (getPointI_jac P256 b i) in 
-	pointEqual pi_fromDomain p0_i));
+    	let p0_i = point_mult #P256  i (basePoint #P256) in  
+    	let pi_fromDomain = fromDomainPoint #P256 #DH (getPointI_jac P256 b i) in 
+    	pointEqual pi_fromDomain p0_i));
 
   x
 
@@ -138,7 +126,7 @@ let points_radix_16_list_p384: x:list uint64 {List.Tot.length x == 192 /\ (
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime P384 /\
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime P384) /\ (      
     forall (i: nat {i < 16}). 
-    let p0_i = point_mult #P384 #Jacobian i (basePoint #P384) in  
+    let p0_i = point_mult #P384  i (basePoint #P384) in  
     let pi_fromDomain = fromDomainPoint #P384 #DH (getPointI_jac P384 b i) in 
     pointEqual pi_fromDomain p0_i))} =
   let open FStar.Mul in 
@@ -205,8 +193,8 @@ let points_radix_16_list_p384: x:list uint64 {List.Tot.length x == 192 /\ (
 
     assume (
       let b = Lib.Sequence.of_list x in (
-      forall (i: nat { i < 16}). 
-	let p0_i = point_mult #P384 #Jacobian i (basePoint #P384) in  
+      forall (i: nat {i < 16}). 
+	let p0_i = point_mult #P384  i (basePoint #P384) in  
 	let pi_fromDomain = fromDomainPoint #P384 #DH (getPointI_jac P384 b i) in 
 	pointEqual pi_fromDomain p0_i));
     x
@@ -220,7 +208,7 @@ let points_radix_16_list (c: curve) : x: list uint64 {List.Tot.length x == v (ge
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) < getPrime c /\
     lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) < getPrime c) /\ (      
     forall (i: nat {i > 0 /\ i < 16}). 
-    let p0_i = point_mult #c #Jacobian i (basePoint #c) in  
+    let p0_i = point_mult #c  i (basePoint #c) in  
     let pi_fromDomain = fromDomainPoint #c #DH (getPointI_jac c b i) in 
     pointEqual pi_fromDomain p0_i))} =
   match c with
@@ -242,7 +230,7 @@ let points_radix_16_p384: x: glbuffer uint64 192ul
 inline_for_extraction
 let points_radix_16 (#c: curve): x: glbuffer uint64 (getCoordinateLenU64 c *! 2ul *! 16ul) {
   witnessed #uint64 #(getCoordinateLenU64 c *! 2ul *! 16ul) x (Lib.Sequence.of_list (points_radix_16_list c)) /\ 
-  recallable x} = 
+  recallable x} =
   match c with 
   | P256 -> points_radix_16_p256
   | P384 -> points_radix_16_p384
@@ -295,9 +283,8 @@ val getPointPrecomputedMixed_step: #c: curve -> i: size_t {v i < 16}
     if v mask = pow2 64 - 1 then
       let pointPrecomputedJacobian =  toJacobianCoordinates (as_nat c h1 pointToAddX, as_nat c h1 pointToAddY) in 
       let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
-   
       felem_eval c h1 pointToAddX /\ felem_eval c h1 pointToAddY /\ (
-      (v i < 16) ==> pointEqual pi_fromDomain (point_mult #c #Jacobian (v i) (basePoint #c)))
+      (v i < 16) ==> pointEqual pi_fromDomain (point_mult #c  (v i) (basePoint #c)))
     else
       as_nat c h0 pointToAddX == as_nat c h1 pointToAddX /\ as_nat c h0 pointToAddY == as_nat c h1 pointToAddY))
 
@@ -314,7 +301,7 @@ let getPointPrecomputedMixed_step #c k pointToAdd mask  =
 
 
 inline_for_extraction noextract
-val getPointPrecomputedMixed: #c: curve -> scalar: scalar_t #MUT #c -> 
+val getPointPrecomputedMixed: #c: curve -> #buf_type: buftype -> scalar: scalar_t #buf_type #c -> 
   i:size_t {v i < v (getScalarLenBytes c) * 2} -> pointToAdd: pointAffine c ->
   Stack unit 
   (requires fun h -> live h scalar /\ live h pointToAdd)
@@ -323,8 +310,8 @@ val getPointPrecomputedMixed: #c: curve -> scalar: scalar_t #MUT #c ->
     let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
     let scalar = scalar_as_nat (as_seq h0 scalar) in 
     let bits = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (v i + 1) * 4) % pow2 4 in
-    pointEqual pi_fromDomain (point_mult #c #Jacobian bits (basePoint #c))))
-    
+    pointEqual pi_fromDomain (point_mult #c bits (basePoint #c)) /\
+    pointEqual pi_fromDomain (getPrecomputedPoint_Affine #c (basePoint #c) bits)))    
 
 let getPointPrecomputedMixed #c scalar i pointToAdd = 
     let h0 = ST.get() in 
@@ -337,7 +324,7 @@ let getPointPrecomputedMixed #c scalar i pointToAdd =
       let pointPrecomputedJacobian = toJacobianCoordinates (as_nat c h pointToAddX, as_nat c h pointToAddY) in 
       let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
       felem_eval c h pointToAddX /\ felem_eval c h pointToAddY /\ 
-      pointEqual pi_fromDomain (point_mult #c #Jacobian (v bits) (basePoint #c))
+      pointEqual pi_fromDomain (point_mult #c  (v bits) (basePoint #c))
     else
       as_nat c h0 pointToAddX == as_nat c h pointToAddX /\ as_nat c h0 pointToAddY == as_nat c h pointToAddY) in 
 

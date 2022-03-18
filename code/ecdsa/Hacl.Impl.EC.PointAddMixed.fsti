@@ -27,4 +27,4 @@ val point_add_mixed: #c: curve -> p: point c -> q: pointAffine c -> result: poin
   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
     let qD = fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h0 q)) in 
     fromDomainPoint #c #DH (point_as_nat c h1 result) == 
-    _point_add #c #Affine (fromDomainPoint #c #DH (point_as_nat c h0 p)) qD))
+    _point_add_mixed #c  (fromDomainPoint #c #DH (point_as_nat c h0 p)) qD))

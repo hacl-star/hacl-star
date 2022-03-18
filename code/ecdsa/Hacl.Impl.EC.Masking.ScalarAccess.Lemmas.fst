@@ -10,7 +10,7 @@ module BV = FStar.BitVector
 open FStar.Math.Lemmas
 
 
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
+#set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 200"
 
 
 inline_for_extraction noextract
@@ -33,8 +33,7 @@ let get_low_part_4 a = logand_mask a (u32 0xf) 4; to_u8 (logand a (u32 0xf))
 
 
 noextract
-val append_uint: #n1:nat -> #n2:nat
-  -> num1:UInt.uint_t n1 -> num2:UInt.uint_t n2 -> UInt.uint_t (n1 + n2)
+val append_uint: #n1:nat -> #n2:nat -> num1:UInt.uint_t n1 -> num2:UInt.uint_t n2 -> UInt.uint_t (n1 + n2)
 
 noextract
 val shift_bound: #n:nat -> num:UInt.uint_t n -> n':nat ->
@@ -50,6 +49,7 @@ let append_uint #n1 #n2 num1 num2 =
   shift_bound num2 n1;
   num1 + num2 * pow2 n1
 
+
 noextract
 val to_vec_append : #n1:pos-> #n2:pos -> num1:UInt.uint_t n1 -> num2:UInt.uint_t n2 ->
   Lemma (UInt.to_vec (append_uint num1 num2) ==
@@ -57,6 +57,7 @@ val to_vec_append : #n1:pos-> #n2:pos -> num1:UInt.uint_t n1 -> num2:UInt.uint_t
 
 let to_vec_append #n1 #n2 num1 num2 =
   UInt.append_lemma (UInt.to_vec num2) (UInt.to_vec num1)
+
 
 noextract
 val to_vec_low_high: a:UInt.uint_t 64 -> Lemma
@@ -67,7 +68,7 @@ let to_vec_low_high a =
   assert (a == append_uint #32 #32 (a % pow2 32) (a / pow2 32));
   to_vec_append #32 #32 (a % pow2 32) (a / pow2 32)
 
-noextract
+
 val to_vec_low_high_4: a:UInt.uint_t 32 -> Lemma ( 
   FStar.Math.Lemmas.pow2_minus 32 4; 
   UInt.to_vec a == Seq.append (UInt.to_vec #28 (a / pow2 4)) (UInt.to_vec #4 (a % pow2 4)))
@@ -77,7 +78,7 @@ let to_vec_low_high_4 a =
   assert (a == append_uint #4 #28 (a % pow2 4) (a / pow2 4));
   to_vec_append #4 #28 (a % pow2 4) (a / pow2 4)
 
-noextract
+
 val logand_vec_append (#n1 #n2: pos) (a1 b1: BV.bv_t n1) (a2 b2: BV.bv_t n2) :
   Lemma (Seq.append (BV.logand_vec a1 b1) (BV.logand_vec a2 b2) ==
          BV.logand_vec #(n1 + n2) (FStar.Seq.append a1 a2) (FStar.Seq.append b1 b2))
@@ -86,7 +87,7 @@ let logand_vec_append #n1 #n2 a1 b1 a2 b2 =
   Seq.lemma_eq_intro (Seq.append (BV.logand_vec a1 b1) (BV.logand_vec a2 b2))
                      (BV.logand_vec #(n1 + n2) (Seq.append a1 a2) (Seq.append b1 b2))
 
-noextract
+
 val lemma_and_both_parts: a: uint64 -> b: uint64 -> Lemma (
   let a0, a1 = get_low_part a, get_high_part a in 
   let b0, b1 = get_low_part b, get_high_part b in 
@@ -137,15 +138,15 @@ let lemma_and_both_parts a b =
   UInt.append_lemma (BV.logand_vec a1_ b1_) (BV.logand_vec a0_ b0_);
   assert(v (logand a1 b1) * pow2 32 + v (logand a0 b0) == v (logand a b))
 
+
 noextract
 let zero_extend_vec (#n:pos) (#n2: nat) (a:BitVector.bv_t n): Tot (BitVector.bv_t (n + n2)) = Seq.append (Seq.create n2 false) a
 
 noextract
 let zero_extend (#n:pos) (#n2: nat) (a:UInt.uint_t n): Tot (UInt.uint_t (n+n2)) = UInt.from_vec (zero_extend_vec (UInt.to_vec #n a))
 
-noextract
-val lemma_zero_extend: #n:pos -> #n2: pos -> a:UInt.uint_t n ->
-  Lemma (zero_extend #n #n2 a = a)
+
+val lemma_zero_extend: #n:pos -> #n2: pos -> a:UInt.uint_t n -> Lemma (zero_extend #n #n2 a = a)
 
 let rec lemma_zero_extend #n #n2 a = 
   match n2 with 
@@ -172,7 +173,6 @@ let rec lemma_zero_extend #n #n2 a =
 
 #push-options "--fuel 1"
 
-noextract
 val lemma_logand_zero: n: pos -> Lemma (let zero = UInt.to_vec #n 0 in BV.logand_vec zero zero = Seq.create n false)
 
 let rec lemma_logand_zero n = 
@@ -195,8 +195,8 @@ let rec lemma_logand_zero n =
     Seq.lemma_split r0 1;
     assert (Seq.equal r0 r1)
 
-
 #pop-options
+
 
 noextract
 val lemma_and_both_parts_32: a: uint32 -> b: uint32 -> Lemma (
@@ -278,6 +278,7 @@ noextract
 val get_high_part_n: #n: pos {n < 64} -> a:uint64 -> r:uint64 {uint_v r == uint_v a / pow2 n}
 
 let get_high_part_n #n a = shift_right a (size n)
+
 
 noextract
 val get_low_part_n: #n: pos {n < 64} -> a:uint64 -> r:uint64 {uint_v r == uint_v a % pow2 n}
@@ -424,17 +425,6 @@ let lemma_xor_of_4 bit0 bit1 bit2 bit3 =
     
 
 
-val scalar_as_nat_upperbound: #c: curve -> s: scalar_bytes #c -> i: nat {i <= v (getScalarLen c)} -> Lemma
-  (scalar_as_nat_ s i < pow2 i)
-
-let rec scalar_as_nat_upperbound #c s i = 
-  match i with 
-  |0 -> scalar_as_nat_zero s
-  |_ -> 
-    scalar_as_nat_upperbound #c s (i - 1);
-    scalar_as_nat_def s i;
-    pow2_double_sum (i - 1)
-
 
 val test__:  #c: curve -> s: scalar_bytes #c -> i: nat {i > 0 /\ i < v (getScalarLen c)} -> Lemma (
   let len = v (getScalarLen c) in 
@@ -479,19 +469,18 @@ let rec test #c s i =
   |_ -> 
     test s (i - 1);
     scalar_as_nat_def s i;
-      assert(scalar_as_nat_ s i == 2 * scalar_as_nat_ s (i - 1) + v (ith_bit s (v (getScalarLen c) - i)));
+      (* assert(scalar_as_nat_ s i == 2 * scalar_as_nat_ s (i - 1) + v (ith_bit s (v (getScalarLen c) - i))); *)
     euclidean_division_definition (scalar_as_nat s / pow2 (v (getScalarLen c) - i)) 2;
-      assert(scalar_as_nat s / pow2 (v (getScalarLen c) - i) == scalar_as_nat s / pow2 (v (getScalarLen c) - i) / 2 * 2 + scalar_as_nat s / pow2 (v (getScalarLen c) - i) % 2);
+     (* assert(scalar_as_nat s / pow2 (v (getScalarLen c) - i) == scalar_as_nat s / pow2 (v (getScalarLen c) - i) / 2 * 2 + scalar_as_nat s / pow2 (v (getScalarLen c) - i) % 2); *)
     division_multiplication_lemma (scalar_as_nat s) (pow2 (v (getScalarLen c) - i)) 2; 
-      assert(scalar_as_nat s / pow2 (v (getScalarLen c) - i) == scalar_as_nat s / (pow2 (v (getScalarLen c) - i) * 2) * 2 + scalar_as_nat s / pow2 (v (getScalarLen c) - i) % 2);
+      (* assert(scalar_as_nat s / pow2 (v (getScalarLen c) - i) == scalar_as_nat s / (pow2 (v (getScalarLen c) - i) * 2) * 2 + scalar_as_nat s / pow2 (v (getScalarLen c) - i) % 2); *)
     pow2_double_mult (v (getScalarLen c) - i); 
-      assert(scalar_as_nat s / pow2 (v (getScalarLen c) - i) == scalar_as_nat s / pow2 (v (getScalarLen c) - i + 1) * 2 + scalar_as_nat s / pow2 (v (getScalarLen c) - i) % 2);
+(*      assert(scalar_as_nat s / pow2 (v (getScalarLen c) - i) == scalar_as_nat s / pow2 (v (getScalarLen c) - i + 1) * 2 + scalar_as_nat s / pow2 (v (getScalarLen c) - i) % 2);
 
       assert(scalar_as_nat s / pow2 (v (getScalarLen c) - i) == scalar_as_nat_ s i 
-	- v (ith_bit s (v (getScalarLen c) - i)) + scalar_as_nat s / pow2 (v (getScalarLen c) - i) % 2);
+	- v (ith_bit s (v (getScalarLen c) - i)) + scalar_as_nat s / pow2 (v (getScalarLen c) - i) % 2); *)
 
     test_ #c s (v (getScalarLen c) - i)
-
 
 
 val lemma_index_as_ith_: a: nat {a < pow2 8} 
@@ -505,6 +494,8 @@ val lemma_index_as_ith_: a: nat {a < pow2 8}
   -> a0: nat {a0 = a / pow2 0 % 2} 
   -> Lemma (a = a7 * pow2 7 + a6 * pow2 6 + a5 * pow2 5 + a4 * pow2 4 + a3 * pow2 3 + a2 * pow2 2 + a1 * pow2 1 + a0 * pow2 0)
 
+
+#push-options "--z3rlimit 300"
 
 let lemma_index_as_ith_ a a7 a6 a5 a4 a3 a2 a1 a0 = 
   euclidean_division_definition a (pow2 7);
@@ -539,11 +530,11 @@ let lemma_index_as_ith_ a a7 a6 a5 a4 a3 a2 a1 a0 =
   pow2_modulo_division_lemma_1 a 0 1;
   pow2_modulo_modulo_lemma_1 a 0 1
 
+#pop-options
 
 val lemma_index_as_ith: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} -> 
   Lemma (
-    let l = v (getScalarLen c) in 
-    v (Lib.Sequence.index s i) == 
+    let l = v (getScalarLen c) in v (Lib.Sequence.index s i) == 
     pow2 0 * v (ith_bit s (l - 8 * i - 8)) + 
     pow2 1 * v (ith_bit s (l - 8 * i - 7)) + 
     pow2 2 * v (ith_bit s (l - 8 * i - 6)) + 
@@ -553,20 +544,45 @@ val lemma_index_as_ith: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (g
     pow2 6 * v (ith_bit s (l - 8 * i - 2)) + 
     pow2 7 * v (ith_bit s (l - 8 * i - 1)))
 
+val lemma_index_as_ith0:  #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} -> Lemma (
+  let l = v (getScalarLen c) in 
+  let s_i = Lib.Sequence.index s i in 
+  let a7 = v (ith_bit s (l - 8 * i - 1)) in 
+  let a6 = v (ith_bit s (l - 8 * i - 2)) in 
+  let a5 = v (ith_bit s (l - 8 * i - 3)) in 
+  let a4 = v (ith_bit s (l - 8 * i - 4)) in 
+  let a3 = v (ith_bit s (l - 8 * i - 5)) in 
+  let a2 = v (ith_bit s (l - 8 * i - 6)) in 
+  let a1 = v (ith_bit s (l - 8 * i - 7)) in 
+  let a0 = v (ith_bit s (l - 8 * i - 8)) in 
+ 
+  a7 ==  v s_i / pow2 7 % 2 /\
+  a6 ==  v s_i / pow2 6 % 2 /\
+  a5 ==  v s_i / pow2 5 % 2 /\
+  a4 ==  v s_i / pow2 4 % 2 /\
+  a3 ==  v s_i / pow2 3 % 2 /\
+  a2 ==  v s_i / pow2 2 % 2 /\
+  a1 ==  v s_i/ pow2 1 % 2 /\ 
+  a0 ==  v s_i / pow2 0 % 2)
+
+
+let lemma_index_as_ith0 #c s i = 
+ let s_i = Lib.Sequence.index s i in 
+ 
+  logand_mask (s_i >>. size 7) (u8 1) 1;
+  logand_mask (s_i >>. size 6) (u8 1) 1;
+  logand_mask (s_i >>. size 5) (u8 1) 1;
+  logand_mask (s_i >>. size 4) (u8 1) 1;
+  logand_mask (s_i >>. size 3) (u8 1) 1;
+  logand_mask (s_i >>. size 2) (u8 1) 1;
+  logand_mask (s_i >>. size 1) (u8 1) 1;
+  logand_mask (s_i >>. size 0) (u8 1) 1
+
+
 
 let lemma_index_as_ith #c s i = 
   let l = v (getScalarLen c) in 
-
-  
-  logand_mask (Lib.Sequence.index s i >>. size 7) (u8 1) 1;
-  logand_mask (Lib.Sequence.index s i >>. size 6) (u8 1) 1;
-  logand_mask (Lib.Sequence.index s i >>. size 5) (u8 1) 1;
-  logand_mask (Lib.Sequence.index s i >>. size 4) (u8 1) 1;
-  logand_mask (Lib.Sequence.index s i >>. size 3) (u8 1) 1;
-  logand_mask (Lib.Sequence.index s i >>. size 2) (u8 1) 1;
-  logand_mask (Lib.Sequence.index s i >>. size 1) (u8 1) 1;
-  logand_mask (Lib.Sequence.index s i >>. size 0) (u8 1) 1;
-
+  let s_i = Lib.Sequence.index s i in 
   let a7 = v (ith_bit s (l - 8 * i - 1)) in 
   let a6 = v (ith_bit s (l - 8 * i - 2)) in 
   let a5 = v (ith_bit s (l - 8 * i - 3)) in 
@@ -576,18 +592,10 @@ let lemma_index_as_ith #c s i =
   let a1 = v (ith_bit s (l - 8 * i - 7)) in 
   let a0 = v (ith_bit s (l - 8 * i - 8)) in 
 
-  assert(a7 ==  v (Lib.Sequence.index s i) / pow2 7 % 2);
-  assert(a6 ==  v (Lib.Sequence.index s i) / pow2 6 % 2); 
-  assert(a5 ==  v (Lib.Sequence.index s i) / pow2 5 % 2);
-  assert(a4 ==  v (Lib.Sequence.index s i) / pow2 4 % 2);
-  assert(a3 ==  v (Lib.Sequence.index s i) / pow2 3 % 2);
-  assert(a2 ==  v (Lib.Sequence.index s i) / pow2 2 % 2);
-  assert(a1 ==  v (Lib.Sequence.index s i) / pow2 1 % 2);
-  assert(a0 ==  v (Lib.Sequence.index s i) / pow2 0 % 2); 
+  lemma_index_as_ith0 s i;
+  assert (v s_i < pow2 8);
+  lemma_index_as_ith_ (v s_i) a7 a6 a5 a4 a3 a2 a1 a0
 
-  assert (v (Lib.Sequence.index s i) < pow2 8);
-  
-  lemma_index_as_ith_ (v (Lib.Sequence.index s i)) a7 a6 a5 a4 a3 a2 a1 a0
 
 val lemma_index_scalar_as_nat__: a: nat ->
   a7: nat -> a6: nat -> a5: nat -> a4: nat -> a3: nat -> a2: nat -> a1: nat -> a0: nat ->
@@ -600,7 +608,63 @@ let lemma_index_scalar_as_nat__ a a7 a6 a5 a4 a3 a2 a1 a0 =
   pow2_plus 4 1
 
 
-#push-options "--z3rlimit 1000"
+val lemma_index_scalar_as_nat_0: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} ->
+  Lemma (
+    let l = v (getScalarLen c) in 
+    let a7 = v (ith_bit s (l - 8 * i - 1)) in 
+    let a6 = v (ith_bit s (l - 8 * i - 2)) in 
+    let a5 = v (ith_bit s (l - 8 * i - 3)) in 
+    let a4 = v (ith_bit s (l - 8 * i - 4)) in 
+    scalar_as_nat_ s (8 * i + 4) == pow2 4 * scalar_as_nat_ s (8 * i) + pow2 3 * a7 + pow2 2 * a6 + pow2 1 * a5 + a4)
+
+let lemma_index_scalar_as_nat_0 #c s i = 
+  let l = v (getScalarLen c) in 
+  
+  let a7 = v (ith_bit s (l - 8 * i - 1)) in 
+  let a6 = v (ith_bit s (l - 8 * i - 2)) in 
+  let a5 = v (ith_bit s (l - 8 * i - 3)) in 
+  let a4 = v (ith_bit s (l - 8 * i - 4)) in 
+
+  calc (==) {
+    scalar_as_nat_ s (8 * i + 4);
+  (==) {scalar_as_nat_def s (8 * i + 4)}
+    2 * scalar_as_nat_ s (8 * i + 3) + a4; 
+  (==) {scalar_as_nat_def s (8 * i + 3); pow2_double_mult 1}
+    pow2 2 * scalar_as_nat_ s (8 * i + 2) + pow2 1 * a5 + a4; 
+  (==) {scalar_as_nat_def s (8 * i + 2); pow2_double_mult 2}
+    pow2 3 * scalar_as_nat_ s (8 * i + 1) + pow2 2 * a6 + pow2 1 * a5 + a4; 
+  (==) {scalar_as_nat_def s (8 * i + 1); pow2_double_mult 3}
+    pow2 4 * scalar_as_nat_ s (8 * i) + pow2 3 * a7 + pow2 2 * a6 + pow2 1 * a5 + a4;}
+
+
+val lemma_index_scalar_as_nat_1: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} -> Lemma (
+  let l = v (getScalarLen c) in 
+  let a3 = v (ith_bit s (l - 8 * i - 5)) in 
+  let a2 = v (ith_bit s (l - 8 * i - 6)) in 
+  let a1 = v (ith_bit s (l - 8 * i - 7)) in 
+  let a0 = v (ith_bit s (l - 8 * i - 8)) in
+  scalar_as_nat_ s (8 * i + 8) == pow2 4 * scalar_as_nat_ s (8 * i + 4) + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0)
+
+
+let lemma_index_scalar_as_nat_1 #c s i = 
+  let l = v (getScalarLen c) in 
+  
+  let a3 = v (ith_bit s (l - 8 * i - 5)) in 
+  let a2 = v (ith_bit s (l - 8 * i - 6)) in 
+  let a1 = v (ith_bit s (l - 8 * i - 7)) in 
+  let a0 = v (ith_bit s (l - 8 * i - 8)) in
+
+  calc (==) {
+    scalar_as_nat_ s (8 * i + 8); 
+  (==) {scalar_as_nat_def s (8 * i + 8)}
+    2 * scalar_as_nat_ s (8 * i + 7) + a0; 
+  (==) {scalar_as_nat_def s (8 * i + 7); pow2_double_mult 1}
+    pow2 2 * scalar_as_nat_ s (8 * i + 6) + pow2 1 * a1 + a0; 
+  (==) {scalar_as_nat_def s (8 * i + 6); pow2_double_mult 2} 
+    pow2 3 * scalar_as_nat_ s (8 * i + 5) + pow2 2 * a2 + pow2 1 * a1 + a0;
+    (==) {scalar_as_nat_def s (8 * i + 5); pow2_double_mult 3}
+    pow2 4 * scalar_as_nat_ s (8 * i + 4) + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0;}
+
 
 val lemma_index_scalar_as_nat_: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} -> Lemma (  
   let l = v (getScalarLen c) in 
@@ -614,6 +678,7 @@ val lemma_index_scalar_as_nat_: #c: curve -> s: scalar_bytes #c -> i: size_nat {
   let a0 = v (ith_bit s (l - 8 * i - 8)) in 
   scalar_as_nat_ s (8 * i + 8) == pow2 8 * scalar_as_nat_ s (8 * i) + a0 + 2 * a1 + pow2 2 * a2 + pow2 3 * a3 + pow2 4 * a4 + pow2 5 * a5 + pow2 6 * a6 + pow2 7 * a7)
 
+
 let lemma_index_scalar_as_nat_ #c s i = 
   let l = v (getScalarLen c) in 
   
@@ -626,32 +691,13 @@ let lemma_index_scalar_as_nat_ #c s i =
   let a1 = v (ith_bit s (l - 8 * i - 7)) in 
   let a0 = v (ith_bit s (l - 8 * i - 8)) in
 
+  lemma_index_scalar_as_nat_0 s i; 
+  lemma_index_scalar_as_nat_1 s i;
+  
   calc (==) {
-    scalar_as_nat_ s (8 * i + 4);
-  (==) {scalar_as_nat_def s (8 * i + 4)}
-    2 * scalar_as_nat_ s (8 * i + 3) + a4; 
-  (==) {scalar_as_nat_def s (8 * i + 3); pow2_double_mult 1}
-    pow2 2 * scalar_as_nat_ s (8 * i + 2) + pow2 1 * a5 + a4; 
-  (==) {scalar_as_nat_def s (8 * i + 2); pow2_double_mult 2}
-    pow2 3 * scalar_as_nat_ s (8 * i + 1) + pow2 2 * a6 + pow2 1 * a5 + a4; 
-  (==) {scalar_as_nat_def s (8 * i + 1); pow2_double_mult 3}
-    pow2 4 * scalar_as_nat_ s (8 * i) + pow2 3 * a7 + pow2 2 * a6 + pow2 1 * a5 + a4;
-  };
-
-  calc (==) {
-    scalar_as_nat_ s (8 * i + 8); 
-  (==) {scalar_as_nat_def s (8 * i + 8)}
-    2 * scalar_as_nat_ s (8 * i + 7) + a0;
-  (==) {scalar_as_nat_def s (8 * i + 7); pow2_double_mult 1}
-    pow2 2 * scalar_as_nat_ s (8 * i + 6) + pow2 1 * a1 + a0;
-  (==) {scalar_as_nat_def s (8 * i + 6); pow2_double_mult 2}
-    pow2 3 * scalar_as_nat_ s (8 * i + 5) + pow2 2 * a2 + pow2 1 * a1 + a0;
-  (==) {scalar_as_nat_def s (8 * i + 5); pow2_double_mult 3}
-    pow2 4 * scalar_as_nat_ s (8 * i + 4) + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0;
-  (==) {}
     pow2 4 * (pow2 4 * scalar_as_nat_ s (8 * i) + pow2 3 * a7 + pow2 2 * a6 + pow2 1 * a5 + a4) + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0;
   (==) {lemma_index_scalar_as_nat__ (scalar_as_nat_ s (8 * i)) a7 a6 a5 a4 a3 a2 a1 a0}
-    pow2 8 * scalar_as_nat_ s (8 * i) + pow2 7 * a7 + pow2 6 * a6 + pow2 5 * a5 + pow2 4 * a4 + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0;}
+    pow2 8 * scalar_as_nat_ s (8 * i) + pow2 7 * a7 + pow2 6 * a6 + pow2 5 * a5 + pow2 4 * a4 + pow2 3 * a3 + pow2 2 * a2 + pow2 1 * a1 + a0;} 
 
 
 val lemma_index_scalar_as_nat: #c: curve -> s: scalar_bytes #c -> i: size_nat {i < v (getScalarLenBytes c)} ->
@@ -674,8 +720,6 @@ let lemma_index_scalar_as_nat #c s i =
   lemma_mod_sub (scalar_as_nat_ s (8 * i + 8)) (pow2 8) (scalar_as_nat_ s (8 * i));
   test #c s (8 * i + 8);
   small_mod (v (Lib.Sequence.index s i)) (pow2 8)
-
-#pop-options
 
 
 val scalar_as_sub_radix4: #c: curve -> s: scalar_bytes #c -> i: nat {(i + 1) * 4 <= v (getScalarLen c)} -> 

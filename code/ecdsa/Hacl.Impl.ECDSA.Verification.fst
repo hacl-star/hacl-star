@@ -188,19 +188,8 @@ val ecdsa_verification_step5_0: #c: curve
   -> tempBuffer: lbuffer uint64 (getCoordinateLenU64 c *! 20ul) ->
   Stack unit
   (requires fun h ->
-    live h points /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
-    disjoint points u1 /\ disjoint points u2 /\ disjoint pubKeyAsPoint u1 /\ 
-    disjoint pubKeyAsPoint u2 /\ disjoint tempBuffer u1 /\ disjoint tempBuffer u2 /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc points; loc pubKeyAsPoint; loc tempBuffer] /\
-    point_eval c h pubKeyAsPoint /\ ~ (isPointAtInfinity (point_as_nat c h pubKeyAsPoint)))
-  (ensures fun h0 _ h1 -> modifies (loc pubKeyAsPoint |+| loc tempBuffer |+| loc points) h0 h1 /\ (
-    let pointU1G, pointU2Q = getU1U2 #c points in (point_eval c h1 pointU1G /\ point_eval c h1 pointU2Q /\ (
-    let fromDomainPointU1 = fromDomainPoint #c #DH (point_as_nat c h1 pointU1G) in
-    let fromDomainPointU2 = fromDomainPoint #c #DH (point_as_nat c h1 pointU2Q) in
-      point_mult0_is_infinity (basePoint #c); point_mult0_is_infinity (point_as_nat c h0 pubKeyAsPoint);
-    let u1D, _ = montgomery_ladder_spec_left #c (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
-    let u2D, _ = montgomery_ladder_spec_left #c (as_seq h0 u2) (pointAtInfinity, point_as_nat c h0 pubKeyAsPoint) in
-    fromDomainPointU1 == u1D /\ fromDomainPointU2 == u2D))))
+    live h points)
+  (ensures fun h0 _ h1 -> modifies (loc pubKeyAsPoint |+| loc tempBuffer |+| loc points) h0 h1)
     
 
 let ecdsa_verification_step5_0 #c #l points pubKeyAsPoint u1 u2 tempBuffer =
@@ -247,8 +236,8 @@ val ecdsa_verification_step5_1: #c: curve -> points:lbuffer uint64 (getCoordinat
   (requires fun h -> live h points /\ live h result /\ live h tempBuffer /\ 
     disjoint points tempBuffer /\ disjoint points result /\ disjoint result tempBuffer /\ (
     let p, q = getU1U2 #c points in 
-    point_eval c h p /\ point_eval c h q /\ ~ (isPointAtInfinity (point_as_nat c h p)) /\ 
-     ~ (isPointAtInfinity (point_as_nat c h q))))
+    point_eval c h p /\ point_eval c h q /\ ~ (isPointAtInfinity #Jacobian (point_as_nat c h p)) /\ 
+     ~ (isPointAtInfinity #Jacobian (point_as_nat c h q))))
   (ensures fun h0 r h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p, q = getU1U2 #c points in 
     let pD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
@@ -276,7 +265,7 @@ val ecdsa_verification_step5_2: #c: curve
     live h result /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
     disjoint pubKeyAsPoint u1 /\ disjoint pubKeyAsPoint u2 /\ disjoint tempBuffer u1 /\ disjoint tempBuffer u2 /\
     disjoint pubKeyAsPoint tempBuffer /\ disjoint result tempBuffer /\ 
-    point_eval c h pubKeyAsPoint /\ ~ (isPointAtInfinity (point_as_nat c h pubKeyAsPoint)))
+    point_eval c h pubKeyAsPoint /\ ~ (isPointAtInfinity #Jacobian (point_as_nat c h pubKeyAsPoint)))
   (ensures fun h0 _ h1 -> modifies (loc pubKeyAsPoint |+| loc result |+| loc tempBuffer) h0 h1 /\
     point_eval c h1 result /\ (
     point_mult0_is_infinity (basePoint #c); point_mult0_is_infinity (point_as_nat c h0 pubKeyAsPoint);
@@ -296,8 +285,8 @@ let ecdsa_verification_step5_2 #c #l result pubKeyAsPoint u1 u2 tempBuffer =
     let h2 = ST.get() in 
       assume(
 	let p, q = getU1U2 #c points in 
-	~ (isPointAtInfinity (point_as_nat c h2 p)) /\ 
-	~ (isPointAtInfinity (point_as_nat c h2 q)));
+	~ (isPointAtInfinity #Jacobian (point_as_nat c h2 p)) /\ 
+	~ (isPointAtInfinity #Jacobian (point_as_nat c h2 q)));
   ecdsa_verification_step5_1 points result tempBuffer;
 
     let h3 = ST.get() in 
@@ -316,19 +305,8 @@ val ecdsa_verification_step5: #c: curve
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack bool
   (requires fun h ->
-    live h x /\ live h pubKeyAsPoint /\ live h u1 /\ live h u2 /\ live h tempBuffer /\
-    disjoint x u1 /\ disjoint x u2 /\ disjoint pubKeyAsPoint u1 /\ disjoint pubKeyAsPoint u2 /\
-    disjoint tempBuffer u1 /\ disjoint tempBuffer u2 /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc x; loc pubKeyAsPoint; loc tempBuffer] /\
-     point_eval c h pubKeyAsPoint /\ ~ (isPointAtInfinity (point_as_nat c h pubKeyAsPoint)))
-  (ensures fun h0 isPointAtInfinityState h1 -> modifies (loc pubKeyAsPoint |+| loc tempBuffer |+| loc x) h0 h1 /\ (
-    point_mult0_is_infinity (basePoint #c); point_mult0_is_infinity (point_as_nat c h0 pubKeyAsPoint);
-    let u1D, _ = montgomery_ladder_spec_left #c (as_seq h0 u1) (pointAtInfinity, basePoint #c) in
-    let u2D, _ = montgomery_ladder_spec_left #c (as_seq h0 u2) (pointAtInfinity, point_as_nat c h0 pubKeyAsPoint) in
-    let normSum = _norm (pointAdd #c u1D u2D) in 
-    let xN, yN, zN = normSum in 
-    as_nat c h1 x == xN % getOrder #c /\
-    isPointAtInfinityState = not (isPointAtInfinity normSum)))
+    live h x /\ live h pubKeyAsPoint)
+  (ensures fun h0 isPointAtInfinityState h1 -> modifies (loc pubKeyAsPoint |+| loc tempBuffer |+| loc x) h0 h1)
     
 
 let ecdsa_verification_step5 #c #l x pubKeyAsPoint u1 u2 tempBuffer =
@@ -363,22 +341,9 @@ val ecdsa_verification_step45: #c: curve
     let order = getOrder #c in 
     live h r /\ live h s /\ live h hash /\ live h u1 /\ live h u2 /\ live h x /\ live h pubKeyAsPoint /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc r; loc s; loc u1; loc u2; loc hash; loc x; loc pubKeyAsPoint; loc tempBuffer] /\
-    point_eval c h pubKeyAsPoint /\ ~ (isPointAtInfinity (point_as_nat c h pubKeyAsPoint)) /\
+    point_eval c h pubKeyAsPoint /\ 
     as_nat c h s < order /\ as_nat c h hash < order /\ as_nat c h r < order))
-  (ensures fun h0 isPAI h1 -> modifies (loc u1 |+| loc u2 |+| loc pubKeyAsPoint |+| loc tempBuffer |+| loc x) h0 h1 /\ (
-    let order = getOrder #c in 
-    let p0 = pow (as_nat c h0 s) (order - 2) * as_nat c h0 hash % order in 
-    let p1 = pow (as_nat c h0 s) (order - 2) * as_nat c h0 r % order in 
-    let u1 = nat_to_bytes_be (v (getCoordinateLenU c)) p0 in 
-    let u2 = nat_to_bytes_be (v (getCoordinateLenU c)) p1 in 
-    
-    point_mult0_is_infinity (basePoint #c); point_mult0_is_infinity (point_as_nat c h0 pubKeyAsPoint);
-    let u1D, _ = montgomery_ladder_spec_left #c u1 (pointAtInfinity, basePoint #c) in
-    let u2D, _ = montgomery_ladder_spec_left #c u2 (pointAtInfinity, point_as_nat c h0 pubKeyAsPoint) in
-    let normSum = _norm (pointAdd #c u1D u2D) in 
-    let xN, yN, zN = normSum in 
-    as_nat c h1 x == xN % getOrder #c /\
-    isPAI = not (isPointAtInfinity normSum)))
+  (ensures fun h0 isPAI h1 -> True)
 
 
 let ecdsa_verification_step45 #c #l u1 u2 r s hash x pubKeyAsPoint tempBuffer = 
@@ -411,7 +376,7 @@ val ecdsa_verification_core_ :#c: curve
     
     LowStar.Monotonic.Buffer.all_disjoint [loc r; loc s; loc hashAsFelem; loc x; loc pubKeyAsPoint; loc tempBuffer] /\
     
-    point_eval c h pubKeyAsPoint /\ ~ (isPointAtInfinity (point_as_nat c h pubKeyAsPoint))))
+    point_eval c h pubKeyAsPoint /\ ~ (isPointAtInfinity #Jacobian (point_as_nat c h pubKeyAsPoint))))
   (ensures fun h0 isPointAtInfinityState h1 -> 
     modifies (loc pubKeyAsPoint |+| loc hashAsFelem |+| loc x |+| loc tempBuffer) h0 h1 /\ (
     let order = getOrder #c in 
@@ -429,7 +394,7 @@ val ecdsa_verification_core_ :#c: curve
     let normSum = _norm (pointAdd #c u1D u2D) in 
     let xN, yN, zN = normSum in 
     as_nat c h1 x == xN % order /\
-    isPointAtInfinityState = not (isPointAtInfinity normSum)))
+    isPointAtInfinityState = not (isPointAtInfinity #Jacobian normSum)))
 
 
 let ecdsa_verification_core_ #c #l alg pubKeyAsPoint hashAsFelem r s mLen m x tempBuffer =

@@ -5460,42 +5460,6 @@ montgomery_ladderP256L(uint64_t *p, uint64_t *q, uint8_t *scalar, uint64_t *temp
   }
 }
 
-static inline void
-montgomery_ladderP384L(uint64_t *p, uint64_t *q, uint8_t *scalar, uint64_t *tempBuffer)
-{
-  uint32_t cycleLoop = (uint32_t)6U * (uint32_t)8U * (uint32_t)8U;
-  for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
-  {
-    uint32_t bit0 = (uint32_t)6U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - i0;
-    uint64_t
-    bit =
-      (uint64_t)(scalar[(uint32_t)6U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - bit0 / (uint32_t)8U]
-      >> bit0 % (uint32_t)8U
-      & (uint8_t)1U);
-    uint64_t mask = (uint64_t)0U - bit;
-    uint32_t len0 = (uint32_t)18U;
-    for (uint32_t i = (uint32_t)0U; i < len0; i++)
-    {
-      uint64_t dummy = mask & (p[i] ^ q[i]);
-      p[i] = p[i] ^ dummy;
-      q[i] = q[i] ^ dummy;
-    }
-    point_add_p384(p, q, q, tempBuffer);
-    point_double_p384(p, p, tempBuffer);
-    uint64_t mask0 = (uint64_t)0U - bit;
-    uint32_t len = (uint32_t)18U;
-    for (uint32_t i = (uint32_t)0U; i < len; i++)
-    {
-      uint64_t dummy = mask0 & (p[i] ^ q[i]);
-      p[i] = p[i] ^ dummy;
-      q[i] = q[i] ^ dummy;
-    }
-  }
-}
-
 static inline void solinas_reduction_impl_p256(uint64_t *i, uint64_t *o)
 {
   uint64_t tempBuffer[36U] = { 0U };
@@ -11522,7 +11486,7 @@ uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar)
   resultBuffer[11U] = (uint64_t)0U;
   for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
   {
-    uint64_t pointToAdd[8U] = { 0U };
+    uint64_t pointToAdd[12U] = { 0U };
     uint32_t half = i0 >> (uint32_t)1U;
     uint32_t word = (uint32_t)scalar[half];
     uint32_t bitShift = i0 & (uint32_t)1U;
@@ -12094,43 +12058,127 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   uint64_t tempBuffer[(uint32_t)20U * len1];
   memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
   bool publicKeyCorrect = verifyQValidCurvePoint_public_p384(pkF);
+  uint64_t bufferPrecomputed[192U];
   bool flag;
   if (publicKeyCorrect)
   {
-    uint32_t len30 = (uint32_t)6U;
-    uint64_t *q = tempBuffer;
-    uint64_t *temp = tempBuffer + (uint32_t)3U * len30;
     uint32_t len4 = (uint32_t)6U;
-    uint64_t *x = q;
-    uint64_t *y = q + len4;
-    uint64_t *z = q + (uint32_t)2U * len4;
-    uint32_t len5 = (uint32_t)6U;
-    for (uint32_t i = (uint32_t)0U; i < len5; i++)
-    {
-      x[i] = (uint64_t)0U;
-    }
-    uint32_t len50 = (uint32_t)6U;
-    for (uint32_t i = (uint32_t)0U; i < len50; i++)
-    {
-      y[i] = (uint64_t)0U;
-    }
-    uint32_t len51 = (uint32_t)6U;
-    for (uint32_t i = (uint32_t)0U; i < len51; i++)
-    {
-      z[i] = (uint64_t)0U;
-    }
-    uint32_t len40 = (uint32_t)6U;
     uint64_t *p_x = pkF;
-    uint64_t *p_y = pkF + len40;
-    uint64_t *p_z = pkF + (uint32_t)2U * len40;
+    uint64_t *p_y = pkF + len4;
+    uint64_t *p_z = pkF + (uint32_t)2U * len4;
     uint64_t *r_x = rF;
-    uint64_t *r_y = rF + len40;
-    uint64_t *r_z = rF + (uint32_t)2U * len40;
+    uint64_t *r_y = rF + len4;
+    uint64_t *r_z = rF + (uint32_t)2U * len4;
     toDomain_p384(p_x, r_x);
     toDomain_p384(p_y, r_y);
     toDomain_p384(p_z, r_z);
-    montgomery_ladderP384L(q, rF, scalar, temp);
-    memcpy(rF, q, (uint32_t)18U * sizeof (uint64_t));
+    uint64_t init = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
+    {
+      bufferPrecomputed[i] = init;
+    }
+    generatePrecomputedTable(Spec_ECC_Curves_P384, bufferPrecomputed, rF, tempBuffer);
+    uint32_t
+    bit = (uint32_t)6U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (uint32_t)(uint64_t)0U;
+    uint64_t
+    bit00 =
+      (uint64_t)(scalar[(uint32_t)6U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - bit / (uint32_t)8U]
+      >> bit % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)3U;
+    uint64_t
+    bit10 =
+      (uint64_t)(scalar[(uint32_t)6U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (bit - (uint32_t)1U) / (uint32_t)8U]
+      >> (bit - (uint32_t)1U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)2U;
+    uint64_t
+    bit20 =
+      (uint64_t)(scalar[(uint32_t)6U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (bit - (uint32_t)2U) / (uint32_t)8U]
+      >> (bit - (uint32_t)2U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)1U;
+    uint64_t
+    bit30 =
+      (uint64_t)(scalar[(uint32_t)6U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (bit - (uint32_t)3U) / (uint32_t)8U]
+      >> (bit - (uint32_t)3U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)0U;
+    uint64_t bits = (bit00 ^ bit10) ^ (bit20 ^ bit30);
+    uint64_t *pointToStart = bufferPrecomputed + (uint32_t)(bits * (uint64_t)(uint32_t)12U);
+    memcpy(rF, pointToStart, (uint32_t)12U * sizeof (uint64_t));
+    for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
+    {
+      uint32_t
+      bit4 = (uint32_t)6U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (i0 << (uint32_t)2U);
+      uint64_t
+      bit0 =
+        (uint64_t)(scalar[(uint32_t)6U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - bit4 / (uint32_t)8U]
+        >> bit4 % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)3U;
+      uint64_t
+      bit1 =
+        (uint64_t)(scalar[(uint32_t)6U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (bit4 - (uint32_t)1U) / (uint32_t)8U]
+        >> (bit4 - (uint32_t)1U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)2U;
+      uint64_t
+      bit2 =
+        (uint64_t)(scalar[(uint32_t)6U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (bit4 - (uint32_t)2U) / (uint32_t)8U]
+        >> (bit4 - (uint32_t)2U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)1U;
+      uint64_t
+      bit3 =
+        (uint64_t)(scalar[(uint32_t)6U
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (bit4 - (uint32_t)3U) / (uint32_t)8U]
+        >> (bit4 - (uint32_t)3U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)0U;
+      uint64_t bits1 = (bit0 ^ bit1) ^ (bit2 ^ bit3);
+      uint64_t pointToAdd[12U] = { 0U };
+      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      {
+        uint64_t mask = FStar_UInt64_eq_mask(bits1, (uint64_t)i);
+        uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
+        uint64_t
+        *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;
+        uint64_t
+        *lut_cmb_z = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)8U;
+        copy_conditional_p384_l(pointToAdd, lut_cmb_x, mask);
+        copy_conditional_p384_l(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
+        copy_conditional_p384_l(pointToAdd + (uint32_t)8U, lut_cmb_z, mask);
+      }
+      point_double_p256(rF, rF, tempBuffer);
+      point_double_p256(rF, rF, tempBuffer);
+      point_double_p256(rF, rF, tempBuffer);
+      point_double_p256(rF, rF, tempBuffer);
+      point_add_p256(pointToAdd, rF, rF, tempBuffer);
+    }
     uint64_t *t = tempBuffer;
     norm_p384(rF, rF, t);
     uint32_t len2 = (uint32_t)6U;
