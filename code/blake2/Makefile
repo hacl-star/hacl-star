@@ -1,4 +1,4 @@
-HACL_HOME=../..
+HACL_HOME=$(realpath ../..)
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
@@ -8,9 +8,9 @@ test: all
 	dist/blake2-test.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../../Makefile.local
+include $(HACL_HOME)/Makefile.local
 
-CFLAGS += -I../../lib/c -mavx -mavx2
+CFLAGS += -I$(HACL_HOME)/lib/c -mavx -mavx2
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
@@ -22,15 +22,15 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -fbuiltin-uint128 \
 	  -tmpdir dist \
 	  -ccopts -std=gnu11,-g,-O3 \
-	  -I "../../../kremlin/include" \
-	  -I "../../lib/c" \
+	  -I$(KREMLIN_HOME)/include \
+	  -I$(HACL_HOME)/lib/c" \
 	  -add-include '"kremlin/internal/target.h"' \
 	  -add-include '<stdbool.h>' \
 	  -add-include '"libintvector.h"' \
 	  -skip-compilation
 
 dist/blake2.exe: dist/Makefile.basic $(HACL_HOME)/tests/blake2-test.c
-	$(CC) -O3 -march=native -mtune=native -I dist -I ../../lib/c -I ../../../kremlin/include -I ../../../kremlin/kremlib/c -I ../../../kremlin/kremlib/dist/minimal  dist/Hacl_Blake2s_32.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_128.c dist/Hacl_Blake2b_256.c $(HACL_HOME)/tests/blake2-test.c -o dist/blake2.exe
+	$(CC) -O3 -march=native -mtune=native -I dist -I$(HACL_HOME)/lib/c -I$(KREMLIN_HOME)/include -I$(KREMLIN_HOME)/kremlib/c -I$(KREMLIN_HOME)/kremlib/dist/minimal  dist/Hacl_Blake2s_32.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_128.c dist/Hacl_Blake2b_256.c $(HACL_HOME)/tests/blake2-test.c -o dist/blake2.exe
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
