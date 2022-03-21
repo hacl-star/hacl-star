@@ -1154,6 +1154,29 @@ static inline bool fmul_eq_vartime(uint64_t *r, uint64_t *z, uint64_t *x)
   return b;
 }
 
+/*******************************************************************************
+  Verified C library for ECDSA signing and verification on the secp256k1 curve.
+
+  For the comments on low-S normalization (or canonical lowest S value), see:
+    • https://en.bitcoin.it/wiki/BIP_0062
+    • https://yondon.blog/2019/01/01/how-not-to-use-ecdsa/
+    • https://eklitzke.org/bitcoin-transaction-malleability
+
+  For example, bitcoin-core/secp256k1 *always* performs low-S normalization.
+
+*******************************************************************************/
+
+
+/*
+Create an ECDSA signature.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `msgHash`, `private_key`, and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_hashed_msg` if needed.
+*/
 bool
 Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   uint8_t *signature,
@@ -1202,6 +1225,44 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   return true;
 }
 
+/*
+Create an ECDSA signature.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function first hashes a message `msg` with SHA2-256 and then calls `ecdsa_sign_hashed_msg`.
+
+  The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_sha256` if needed.
+*/
+bool
+Hacl_K256_ECDSA_ecdsa_sign_sha256(
+  uint8_t *signature,
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *private_key,
+  uint8_t *nonce
+)
+{
+  uint8_t msgHash[32U] = { 0U };
+  Hacl_Hash_SHA2_hash_256(msg, msg_len, msgHash);
+  bool b = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
+  return b;
+}
+
+/*
+Verify an ECDSA signature.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msgHash` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
+*/
 bool
 Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t *signature)
 {
@@ -1270,21 +1331,18 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
   return true;
 }
 
-bool
-Hacl_K256_ECDSA_ecdsa_sign_sha256(
-  uint8_t *signature,
-  uint32_t msg_len,
-  uint8_t *msg,
-  uint8_t *private_key,
-  uint8_t *nonce
-)
-{
-  uint8_t msgHash[32U] = { 0U };
-  Hacl_Hash_SHA2_hash_256(msg, msg_len, msgHash);
-  bool b = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
-  return b;
-}
+/*
+Verify an ECDSA signature.
 
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function first hashes a message `msg` with SHA2-256 and then calls `ecdsa_verify_hashed_msg`.
+
+  The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_sha256` if needed.
+*/
 bool
 Hacl_K256_ECDSA_ecdsa_verify_sha256(
   uint32_t msg_len,
@@ -1299,6 +1357,173 @@ Hacl_K256_ECDSA_ecdsa_verify_sha256(
   return b;
 }
 
+/*
+Compute canonical lowest S value for `signarure` (R || S).
+
+  The function returns `true` for successful normalization of S and `false` otherwise.
+
+  The argument `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+*/
+bool Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(uint8_t *signature)
+{
+  uint64_t s_q[4U] = { 0U };
+  uint8_t *s = signature + (uint32_t)32U;
+  bool is_sk_valid = load_qelem_vartime(s_q, s);
+  if (!is_sk_valid)
+  {
+    return false;
+  }
+  bool is_sk_lt_q_halved = is_qelem_le_q_halved_vartime(s_q);
+  qnegate_conditional_vartime(s_q, !is_sk_lt_q_halved);
+  store_qelem(signature + (uint32_t)32U, s_q);
+  return true;
+}
+
+/*
+Check whether `signarure` (R || S) is in canonical form.
+
+  The function returns `true` if S is low-S normalized and `false` otherwise.
+
+  The argument `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+*/
+bool Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized(uint8_t *signature)
+{
+  uint64_t s_q[4U] = { 0U };
+  uint8_t *s = signature + (uint32_t)32U;
+  bool is_s_valid = load_qelem_vartime(s_q, s);
+  bool is_s_lt_q_halved = is_qelem_le_q_halved_vartime(s_q);
+  return is_s_valid && is_s_lt_q_halved;
+}
+
+/*
+Create an ECDSA signature.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The arguments `msgHash`, `private_key`, and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed.
+*/
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
+  uint8_t *signature,
+  uint8_t *msgHash,
+  uint8_t *private_key,
+  uint8_t *nonce
+)
+{
+  bool b = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
+  if (b)
+  {
+    return Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(signature);
+  }
+  return false;
+}
+
+/*
+Create an ECDSA signature.
+
+  The function returns `true` for successful creation of an ECDSA signature and `false` otherwise.
+
+  The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `private_key` and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function first hashes a message `msg` with SHA2-256 and then calls `secp256k1_ecdsa_sign_hashed_msg`.
+
+  The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed.
+*/
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_sign_sha256(
+  uint8_t *signature,
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *private_key,
+  uint8_t *nonce
+)
+{
+  uint8_t msgHash[32U] = { 0U };
+  Hacl_Hash_SHA2_hash_256(msg, msg_len, msgHash);
+  bool
+  b = Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
+  return b;
+}
+
+/*
+Verify an ECDSA signature.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msgHash` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed.
+*/
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
+  uint8_t *msgHash,
+  uint8_t *public_key,
+  uint8_t *signature
+)
+{
+  bool is_s_normalized = Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized(signature);
+  if (!is_s_normalized)
+  {
+    return false;
+  }
+  return Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(msgHash, public_key, signature);
+}
+
+/*
+Verify an ECDSA signature.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function first hashes a message `msg` with SHA2-256 and then calls `secp256k1_ecdsa_verify_hashed_msg`.
+
+  The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_sha256` if needed.
+*/
+bool
+Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256(
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *public_key,
+  uint8_t *signature
+)
+{
+  uint8_t mHash[32U] = { 0U };
+  Hacl_Hash_SHA2_hash_256(msg, msg_len, mHash);
+  bool b = Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(mHash, public_key, signature);
+  return b;
+}
+
+/*******************************************************************************
+  Parsing and Serializing public keys.
+
+  A public key is a point (x, y) on the secp256k1 curve.
+
+  The point can be represented in the following three ways.
+    • raw          = [ x || y ], 64 bytes
+    • uncompressed = [ 0x04 || x || y ], 65 bytes
+    • compressed   = [ (0x02 for even `y` and 0x03 for odd `y`) || x ], 33 bytes
+
+*******************************************************************************/
+
+
+/*
+Convert a public key from uncompressed to its raw form.
+
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
+
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+
+  The function DOESN'T check whether (x, y) is valid point.
+*/
 bool Hacl_K256_ECDSA_public_key_uncompressed_to_raw(uint8_t *pk_raw, uint8_t *pk)
 {
   uint8_t pk0 = pk[0U];
@@ -1310,12 +1535,30 @@ bool Hacl_K256_ECDSA_public_key_uncompressed_to_raw(uint8_t *pk_raw, uint8_t *pk
   return true;
 }
 
+/*
+Convert a public key from raw to its uncompressed form.
+
+  The outparam `pk` points to 65 bytes of valid memory, i.e., uint8_t[65].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T check whether (x, y) is valid point.
+*/
 void Hacl_K256_ECDSA_public_key_uncompressed_from_raw(uint8_t *pk, uint8_t *pk_raw)
 {
   pk[0U] = (uint8_t)0x04U;
   memcpy(pk + (uint32_t)1U, pk_raw, (uint32_t)64U * sizeof (uint8_t));
 }
 
+/*
+Convert a public key from compressed to its raw form.
+
+  The function returns `true` for successful conversion of a public key and `false` otherwise.
+
+  The outparam `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+
+  The function also checks whether (x, y) is valid point.
+*/
 bool Hacl_K256_ECDSA_public_key_compressed_to_raw(uint8_t *pk_raw, uint8_t *pk)
 {
   uint64_t xa[5U] = { 0U };
@@ -1330,6 +1573,14 @@ bool Hacl_K256_ECDSA_public_key_compressed_to_raw(uint8_t *pk_raw, uint8_t *pk)
   return b;
 }
 
+/*
+Convert a public key from raw to its compressed form.
+
+  The outparam `pk` points to 33 bytes of valid memory, i.e., uint8_t[33].
+  The argument `pk_raw` points to 64 bytes of valid memory, i.e., uint8_t[64].
+
+  The function DOESN'T check whether (x, y) is valid point.
+*/
 void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw)
 {
   uint8_t *pk_x = pk_raw;
@@ -1347,90 +1598,5 @@ void Hacl_K256_ECDSA_public_key_compressed_from_raw(uint8_t *pk, uint8_t *pk_raw
   }
   pk[0U] = ite;
   memcpy(pk + (uint32_t)1U, pk_x, (uint32_t)32U * sizeof (uint8_t));
-}
-
-bool Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(uint8_t *signature)
-{
-  uint64_t s_q[4U] = { 0U };
-  uint8_t *s = signature + (uint32_t)32U;
-  bool is_sk_valid = load_qelem_vartime(s_q, s);
-  if (!is_sk_valid)
-  {
-    return false;
-  }
-  bool is_sk_lt_q_halved = is_qelem_le_q_halved_vartime(s_q);
-  qnegate_conditional_vartime(s_q, !is_sk_lt_q_halved);
-  store_qelem(signature + (uint32_t)32U, s_q);
-  return true;
-}
-
-bool Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized(uint8_t *signature)
-{
-  uint64_t s_q[4U] = { 0U };
-  uint8_t *s = signature + (uint32_t)32U;
-  bool is_s_valid = load_qelem_vartime(s_q, s);
-  bool is_s_lt_q_halved = is_qelem_le_q_halved_vartime(s_q);
-  return is_s_valid && is_s_lt_q_halved;
-}
-
-bool
-Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
-  uint8_t *signature,
-  uint8_t *msgHash,
-  uint8_t *private_key,
-  uint8_t *nonce
-)
-{
-  bool b = Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
-  if (b)
-  {
-    return Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(signature);
-  }
-  return false;
-}
-
-bool
-Hacl_K256_ECDSA_secp256k1_ecdsa_sign_sha256(
-  uint8_t *signature,
-  uint32_t msg_len,
-  uint8_t *msg,
-  uint8_t *private_key,
-  uint8_t *nonce
-)
-{
-  uint8_t msgHash[32U] = { 0U };
-  Hacl_Hash_SHA2_hash_256(msg, msg_len, msgHash);
-  bool
-  b = Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(signature, msgHash, private_key, nonce);
-  return b;
-}
-
-bool
-Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
-  uint8_t *msgHash,
-  uint8_t *public_key,
-  uint8_t *signature
-)
-{
-  bool is_s_normalized = Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized(signature);
-  if (!is_s_normalized)
-  {
-    return false;
-  }
-  return Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(msgHash, public_key, signature);
-}
-
-bool
-Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256(
-  uint32_t msg_len,
-  uint8_t *msg,
-  uint8_t *public_key,
-  uint8_t *signature
-)
-{
-  uint8_t mHash[32U] = { 0U };
-  Hacl_Hash_SHA2_hash_256(msg, msg_len, mHash);
-  bool b = Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(mHash, public_key, signature);
-  return b;
 }
 
