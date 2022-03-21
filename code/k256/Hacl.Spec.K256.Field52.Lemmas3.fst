@@ -68,8 +68,13 @@ let lemma_four_mul64_wide a0 a1 a2 a3 b0 b1 b2 b3 =
 val lemma_16_max52_max48: a:pos -> Lemma ((a * 16) * (max52 * max48) <= a * (max52 * max52))
 let lemma_16_max52_max48 a =
   assert_norm (16 * (max52 * max48) <= max52 * max52);
-  Math.Lemmas.paren_mul_right a 16 (max52 * max48);
-  Math.Lemmas.lemma_mult_le_left a (16 * (max52 * max48)) (max52 * max52)
+  calc (<=) {
+    (a * 16) * (max52 * max48);
+    (==) { Math.Lemmas.paren_mul_right a 16 (max52 * max48) }
+    a * (16 * (max52 * max48));
+    (<=) { Math.Lemmas.lemma_mult_le_left a (16 * (max52 * max48)) (max52 * max52) }
+    a * (max52 * max52);
+    }
 
 
 val lemma_add_five_mul64_wide (md:nat) (d:uint128) (a0 a1 a2 a3 a4 b0 b1 b2 b3 b4:uint64) : Lemma
@@ -335,21 +340,29 @@ val lemma_bound_add_mul64_wide_r_lsh12_add (md:nat) (c:uint128) (d t3:uint64) : 
 let lemma_bound_add_mul64_wide_r_lsh12_add md c d t3 =
   let rs = u64 0x1000003D10 <<. 12ul in
   lemma_r_lsh12 ();
+  assert (v rs = 0x1000003D10 * pow2 12);
 
-  let r = c +. mul64_wide rs d in
+  let r = c +. mul64_wide rs d +. to_u128 t3 in
   lemma_bound_mul64_wide 1 1 (pow2 49) (pow2 50) rs d;
-  assert (v c + v rs * v d + v t3 < md * max52 + pow2 49 * pow2 50 + max52);
-  Math.Lemmas.pow2_plus 49 50;
-  assert (v c + v rs * v d + v t3 < md * max52 + pow2 99 + max52);
-  Math.Lemmas.distributivity_add_left md 1 max52;
-  assert (v c + v rs * v d + v t3 < (md + 1) * max52 + pow2 99);
-  Math.Lemmas.lemma_mult_le_right max52 (md + 1) 12291;
-  assert_norm (12291 * max52 < pow2 99);
-  Math.Lemmas.pow2_double_sum 99;
-  assert (12291 * max52 + pow2 99 < pow2 100);
+  assert (v (mul64_wide rs d) = v rs * v d /\ v rs * v d < pow2 49 * pow2 50);
+
+  calc (<) {
+    v c + v rs * v d + v t3;
+    (<) { }
+    md * max52 + pow2 49 * pow2 50 + max52;
+    (==) { Math.Lemmas.pow2_plus 49 50 }
+    md * max52 + pow2 99 + max52;
+    (==) { Math.Lemmas.distributivity_add_left md 1 max52 }
+    (md + 1) * max52 + pow2 99;
+    (<=) { Math.Lemmas.lemma_mult_le_right max52 (md + 1) 12291 }
+    12291 * max52 + pow2 99;
+    (<) { assert_norm (12291 * max52 + pow2 99 < pow2 100) }
+    pow2 100;
+  };
+
   Math.Lemmas.pow2_lt_compat 128 100;
   Math.Lemmas.small_mod (v c + v rs * v d + v t3) (pow2 128);
-  assert (v rs = 0x1000003D10 * pow2 12)
+  Math.Lemmas.small_mod (v c + v rs * v d) (pow2 128)
 
 
 val lemma_u128_div52: md:pos -> a:uint128 -> Lemma
