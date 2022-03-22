@@ -8,19 +8,16 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "b2t_def", "equation_Prims.nat",
-        "equation_Prims.squash", "equation_Vale.Def.Types_s.quad32",
-        "equation_Vale.Def.Words_s.nat32",
-        "function_token_typing_Vale.Def.Words_s.nat32", "int_inversion",
-        "kinding_Vale.Def.Words_s.four@tok", "l_and-interp",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
-        "projection_inverse_BoxBool_proj_0",
+        "equation_Prims.squash",
+        "fuel_guarded_inversion_Vale.X64.State.vale_state", "int_inversion",
+        "primitive_Prims.op_LessThan", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_FStar.Seq.Base.length"
+        "refinement_interpretation_Tm_refine_fb16305bbddc2f0ded8feb167542112f"
       ],
       0,
-      "542bb43aa73354929a90d80e4dee81a2"
+      "438b57061c92365c8536a0111b765603"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_lemma_Aes_ctr_loop_body",
@@ -40,7 +37,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "2533d7f4719f89169e63fd9a86ff731a"
+      "8444270f2cf8bc87b0b4e5580d8947f7"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_lemma_Aes_ctr_loop_body",
@@ -236,7 +233,7 @@
         "unit_typing"
       ],
       0,
-      "07410cf8aceaf1d792707bceecb10f89"
+      "13d026ca6c205bcdf60b38f42301547f"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_wp_Aes_ctr_loop_body",
@@ -249,7 +246,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "311ff0fd3350f2092dd7455fe659c709"
+      "48acea46bfe149e22bfa144035fed7b8"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_wpProof_Aes_ctr_loop_body",
@@ -353,7 +350,7 @@
         "typing_Vale.X64.State.update_reg", "unit_typing"
       ],
       0,
-      "b306a71dfdab5d6780eb0524f913dc8f"
+      "d12f50e2c87ed2c6ae954125e505eaef"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_quick_Aes_ctr_loop_body",
@@ -365,7 +362,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "e79f857d0b7775290990b09e1fd20e03"
+      "eae084b245434c0a29bd4624a8695a10"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_qcode_Aes_counter_loop_body0",
@@ -378,7 +375,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d96a744c240ed3c0c286ec1a9875f5d4"
+      "283ef1c2ddad182c4ae0e264bf81b7f0"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_lemma_Aes_counter_loop_body0",
@@ -415,7 +412,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "6c23048c5716ae13aaa819cc0e0a1887"
+      "38c8cb07923a0924a04d364c05edefcd"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_lemma_Aes_counter_loop_body0",
@@ -555,7 +552,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "c050d3362c585874bae79628ee5a17d1"
+      "40681837d5d80f7c3fb55a6d13f0386f"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_wp_Aes_counter_loop_body0",
@@ -710,7 +707,7 @@
         "typing_tok_Vale.X64.QuickCode.Mod_ok@tok"
       ],
       0,
-      "6d87e3b23d455066262aa0bf54ec058e"
+      "5dc7661affee8531ae6f999aabfda89f"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_quick_Aes_counter_loop_body0",
@@ -722,7 +719,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "d236a5c380514ff04f0b7e4bcbe6a7d0"
+      "3fa1ce5e217ef287aff005d04d1edabb"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_code_Aes_counter_loop_while0",
@@ -738,7 +735,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "7ce66205524d5bafc4d054577cb88556"
+      "bcd00e58805111370ec13498d28722e2"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_qcode_Aes_counter_loop_while0",
@@ -953,7 +950,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt128@tok"
       ],
       0,
-      "845b21ef93166206cace6766c26417a9"
+      "fa2f62fad0be18c45bf1f8c8d54a8c7f"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_wp_Aes_counter_loop_while0",
@@ -1117,7 +1114,7 @@
         "typing_tok_Vale.X64.QuickCode.Mod_ok@tok"
       ],
       0,
-      "7838287fc78fd0e7d5a6bb009d0dc8eb"
+      "376c953e9683f3f302c9dd174cc5a298"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_quick_Aes_counter_loop_while0",
@@ -1129,7 +1126,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "ce3fab6673de3adb376f19f95921a1f0"
+      "71a1eca14493a6bfbf96e14c802bf0e8"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_qcode_Aes_counter_loop",
@@ -1138,7 +1135,7 @@
       0,
       [ "@query" ],
       0,
-      "18d6085ffaab7eced1d4fc9e84dafd08"
+      "0890a6a15c26ffce6ede4af816741682"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_lemma_Aes_counter_loop",
@@ -1150,7 +1147,7 @@
         "refinement_interpretation_Tm_refine_dff147d5c995aa65a971b362dbc2897b"
       ],
       0,
-      "ff625051693464fdea93d538b903ec66"
+      "cf8252d1d64c3e584ef07346ea742cc1"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_lemma_Aes_counter_loop",
@@ -1298,7 +1295,7 @@
         "unit_typing"
       ],
       0,
-      "609ef67ecbd6618d764c1e03e90165ca"
+      "8a8b0135e69085058b63da9148cf00b5"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_wp_Aes_counter_loop",
@@ -1307,7 +1304,7 @@
       0,
       [ "@query" ],
       0,
-      "81982ae0bc5798c6105a9056b07ba930"
+      "d89fad0ffbbcd0185d9a8d96ffb9aac7"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_wpProof_Aes_counter_loop",
@@ -1396,7 +1393,7 @@
         "typing_Vale.X64.State.update_reg", "unit_typing"
       ],
       0,
-      "76100d722eaa12b9b1d31ac2cc017632"
+      "0f8e9cb4b0d2f61b1b7d92b2282e8511"
     ],
     [
       "Vale.AES.X64.AESCTRplain.va_quick_Aes_counter_loop",
@@ -1408,7 +1405,7 @@
         "fuel_guarded_inversion_FStar.Pervasives.Native.tuple3"
       ],
       0,
-      "e51163dd4179c4878ec94667de5b77b5"
+      "6e9c83cd65345c5355b94686ac4e9f4e"
     ]
   ]
 ]
