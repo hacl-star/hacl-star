@@ -22,15 +22,15 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -fbuiltin-uint128 \
 	  -tmpdir dist \
 	  -ccopts -std=gnu11,-g,-O3 \
-	  -I$(KREMLIN_HOME)/include \
+	  -I$(KRML_HOME)/include \
 	  -I$(HACL_HOME)/lib/c" \
-	  -add-include '"kremlin/internal/target.h"' \
+	  -add-include '"krml/internal/target.h"' \
 	  -add-include '<stdbool.h>' \
 	  -add-include '"libintvector.h"' \
 	  -skip-compilation
 
 dist/blake2.exe: dist/Makefile.basic $(HACL_HOME)/tests/blake2-test.c
-	$(CC) -O3 -march=native -mtune=native -I dist -I$(HACL_HOME)/lib/c -I$(KREMLIN_HOME)/include -I$(KREMLIN_HOME)/kremlib/c -I$(KREMLIN_HOME)/kremlib/dist/minimal  dist/Hacl_Blake2s_32.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_128.c dist/Hacl_Blake2b_256.c $(HACL_HOME)/tests/blake2-test.c -o dist/blake2.exe
+	$(CC) -O3 -march=native -mtune=native -I dist -I$(HACL_HOME)/lib/c -I$(KRML_HOME)/include -I$(KRML_HOME)/krmllib/c -I$(KRML_HOME)/krmllib/dist/minimal  dist/Hacl_Blake2s_32.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_128.c dist/Hacl_Blake2b_256.c $(HACL_HOME)/tests/blake2-test.c -o dist/blake2.exe
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean

@@ -11,6 +11,6 @@ enabled:
 
 ```
 $ export AR=gcc-ar # if $CC is gcc
-$ cd kremlin/kremlib && git clean -fdx dist && CFLAGS=-flto make -j
+$ cd karamel/krmllib && git clean -fdx dist && CFLAGS=-flto make -j
 $ cd hacl-star && git clean -fdx dist && CFLAGS=-flto make -j test
 ```

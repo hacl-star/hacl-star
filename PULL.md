@@ -1,7 +1,7 @@
 How to submit a pull request with minimal amounts of noise
 ==========================================================
 
-Make sure you have the latest F\* and kremlin.
+Make sure you have the latest F\* and karamel.
 
 Discarding your local changes to dist/ and hints/
 -------------------------------------------------
@@ -82,7 +82,7 @@ git diff dist
 ```
 
 if you see anything other than small changes, you most likely need to update F\*
-and kremlin. Start everything over again. Do not submit a pull request if
+and karamel. Start everything over again. Do not submit a pull request if
 there's too much noise in those files.
 
 If you are happy with the small amount of diff:

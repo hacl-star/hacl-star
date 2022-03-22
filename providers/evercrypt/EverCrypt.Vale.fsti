@@ -5,7 +5,7 @@ module B = LowStar.Buffer
 open EverCrypt.Helpers
 
 /// This module directly exposes "raw" functions, using attributes to make sure
-/// KreMLin generates the right "extern stdcall" declarations. There is no C code to implement this module, the implementations are provided at link-time.
+/// KaRaMeL generates the right "extern stdcall" declarations. There is no C code to implement this module, the implementations are provided at link-time.
 
 // Can't use the real ASM names because they are capitalized...
 // name forwarding is in evercrypt_vale_stubs.c with stdcall calls
@@ -24,8 +24,8 @@ type gcm_args = {
   tag: uint8_p;
 }
 
-// This old is to avoid naming conflicts in KreMLin, since there is already an aes128_key_expansion
-// extracted by KreMLin
+// This old is to avoid naming conflicts in KaRaMeL, since there is already an aes128_key_expansion
+// extracted by KaRaMeL
 [@ (CCConv "stdcall") ]
 val old_aes128_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
 
@@ -37,8 +37,8 @@ val old_gcm128_encrypt: B.pointer gcm_args -> Stack_ unit
 [@ (CCConv "stdcall") ]
 val old_gcm128_decrypt: B.pointer gcm_args -> Stack_ uint32_t
 
-// This old is to avoid naming conflicts in KreMLin, since there is already an aes256_key_expansion
-// extracted by KreMLin
+// This old is to avoid naming conflicts in KaRaMeL, since there is already an aes256_key_expansion
+// extracted by KaRaMeL
 [@ (CCConv "stdcall") ]
 val old_aes256_key_expansion: key_ptr:uint8_p -> expanded_key_ptr: uint8_p -> Stack_ unit
 

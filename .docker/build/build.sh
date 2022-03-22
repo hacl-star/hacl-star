@@ -28,7 +28,7 @@ function export_home() {
 
 function vale_test() {
   echo Running Vale Test &&
-  fetch_kremlin &&
+  fetch_karamel &&
       fetch_vale &&
       make -j $threads vale.build -k
 }
@@ -45,17 +45,17 @@ function hacl_test() {
     if [[ $target == "mozilla-ci" ]]; then
         make_target=mozilla-ci
     fi
-    fetch_and_make_kremlin &&
+    fetch_and_make_karamel &&
         fetch_and_make_mlcrypto &&
         fetch_mitls &&
         fetch_vale &&
         export_home OPENSSL "$(pwd)/mlcrypto/openssl" &&
         (
-          unset KREMLIN_HOME;
+          unset KRML_HOME;
           cd dist
           r=true
           for a in *; do
-            if [[ $a != "kremlin" && $a != "vale" && $a != "linux" && $a != "wasm" && $a != "merkle-tree" && $a != "test" && -d $a ]]; then
+            if [[ $a != "karamel" && $a != "vale" && $a != "linux" && $a != "wasm" && $a != "merkle-tree" && $a != "test" && -d $a ]]; then
               echo "Building snapshot: $a"
               CFLAGS="${cflags[$a]}" make -C $a -j $threads || r=false
               echo
@@ -70,8 +70,8 @@ function hacl_test_hints_dist() {
     hacl_test && refresh_hacl_hints_dist
 }
 
-function fetch_and_make_kremlin() {
-    fetch_kremlin
+function fetch_and_make_karamel() {
+    fetch_karamel
     # Default build target is minimal, unless specified otherwise
     local localTarget
     if [[ $1 == "" ]]; then
@@ -79,29 +79,29 @@ function fetch_and_make_kremlin() {
     else
         localTarget="$1"
     fi
-    make -C kremlin -j $threads $localTarget ||
-        (cd kremlin && git clean -fdx && make -j $threads $localTarget)
-    OTHERFLAGS='--admit_smt_queries true' make -C kremlin/kremlib -j $threads
-    export PATH="$(pwd)/kremlin:$PATH"
+    make -C karamel -j $threads $localTarget ||
+        (cd karamel && git clean -fdx && make -j $threads $localTarget)
+    OTHERFLAGS='--admit_smt_queries true' make -C karamel/krmllib -j $threads
+    export PATH="$(pwd)/karamel:$PATH"
 }
 
-# By default, kremlin master works against F* stable. Can also be overridden.
-function fetch_kremlin() {
-    if [ ! -d kremlin ]; then
-        git clone https://github.com/FStarLang/kremlin kremlin || return 1
+# By default, karamel master works against F* stable. Can also be overridden.
+function fetch_karamel() {
+    if [ ! -d karamel ]; then
+        git clone https://github.com/FStarLang/karamel karamel || return 1
     fi
-    cd kremlin
+    cd karamel
     git fetch origin
-    local ref=$(jq -c -r '.RepoVersions["kremlin_version"]' "$rootPath/.docker/build/config.json" )
+    local ref=$(jq -c -r '.RepoVersions["karamel_version"]' "$rootPath/.docker/build/config.json" )
     if [[ $ref == "" || $ref == "null" ]]; then
-        echo "Unable to find RepoVersions.kremlin_version on $rootPath/.docker/build/config.json"
+        echo "Unable to find RepoVersions.karamel_version on $rootPath/.docker/build/config.json"
         return -1
     fi
 
-    echo Switching to KreMLin $ref
+    echo Switching to KaRaMeL $ref
     git reset --hard $ref
     cd ..
-    export_home KREMLIN "$(pwd)/kremlin"
+    export_home KRML "$(pwd)/karamel"
 }
 
 function fetch_and_make_mlcrypto() {

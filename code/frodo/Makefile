@@ -19,7 +19,7 @@ export FSTAR_ROOTS
 BUNDLES = -bundle 'Hacl.SHA3=Hacl.Impl.SHA3,Hacl.SHA3'
 
 BASE_FLAGS += $(BUNDLES)
-BASE_FLAGS += -add-include '"kremlin/internal/target.h"'
+BASE_FLAGS += -add-include '"krml/internal/target.h"'
 
 dist:
 	mkdir -p $@

@@ -80,7 +80,7 @@ var HaclWasm = (function() {
   var Module = {};
 
   // This object is passed at the wasm instantiation, it's required by the
-  // KreMLin-generated files. Since we don't need to import anything, it's empty.
+  // KaRaMeL-generated files. Since we don't need to import anything, it's empty.
   var my_imports = {};
 
   // The WebAssembly modules have to be initialized before calling any function.
@@ -156,14 +156,14 @@ var HaclWasm = (function() {
   };
 
   var copy_array_to_stack = function(array) {
-    var pointer = loader.reserve(Module.Kremlin.mem, array.length);
-    (new Uint8Array(Module.Kremlin.mem.buffer)).set(array, pointer);
+    var pointer = loader.reserve(Module.Krml.mem, array.length);
+    (new Uint8Array(Module.Krml.mem.buffer)).set(array, pointer);
     return pointer;
   };
 
   var read_memory = function(ptr, len) {
     var result = new ArrayBuffer(len);
-    (new Uint8Array(result).set(new Uint8Array(Module.Kremlin.mem.buffer)
+    (new Uint8Array(result).set(new Uint8Array(Module.Krml.mem.buffer)
       .subarray(ptr, ptr + len)));
     return new Uint8Array(result);
   };
@@ -198,7 +198,7 @@ var HaclWasm = (function() {
     if (args.length != expected_args_number) {
       throw Error("wrong number of arguments to call the F*-wasm function " + loc_name + ": expected " + expected_args_number + ", got " + args.length);
     }
-    var memory = new Uint32Array(Module.Kremlin.mem.buffer);
+    var memory = new Uint32Array(Module.Krml.mem.buffer);
     var sp = memory[0];
     var var_lengths = {};
     // Populating the variable length arguments by retrieving buffer lengths

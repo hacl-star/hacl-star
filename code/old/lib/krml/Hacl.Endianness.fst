@@ -233,8 +233,8 @@ val hload128_be:
 
 (**
  * REMARK
- * These functions are implemented in C in Kremlin's library and trusted.
- * Their assumed specifications in Kremlin's C.fst only specify their memory
+ * These functions are implemented in C in KaRaMeL's library and trusted.
+ * Their assumed specifications in KaRaMeL's C.fst only specify their memory
  * footprint and not their functional behaviour, so we can't prove the richer
  * specifications given here.
 **)

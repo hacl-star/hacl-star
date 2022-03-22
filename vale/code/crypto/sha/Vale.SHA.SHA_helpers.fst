@@ -808,7 +808,7 @@ let lemma_endian_relation (quads qs:seq quad32) (input2:seq UInt8.t) : Lemma
     let open Vale.Lib.Seqs_s in
     let ni = (seq_four_to_seq_LE quads).[i] in
     let b = slice input2 (4 * i) (4 * i + 4) in
-//    FStar.Kremlin.Endianness.lemma_be_to_n_is_bounded b;
+//    FStar.Krml.Endianness.lemma_be_to_n_is_bounded b;
     calc (==) {
       b;
       == {}

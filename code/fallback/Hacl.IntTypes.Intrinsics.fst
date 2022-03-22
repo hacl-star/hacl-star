@@ -69,7 +69,7 @@ let sub_borrow_u32 cin x y r =
 (* Fallback versions of add_carry_u64 and sub_borrow_u64 for platforms which
    don't support uint128.
    The names Hacl.IntTypes.Intrinsics.add_carry_u64 and sub_borrow_u64 must not
-   be changed because they are hardcoded in KreMLin for extracting wasm code
+   be changed because they are hardcoded in KaRaMeL for extracting wasm code
    which uses these intrinsics. *)
 inline_for_extraction noextract
 val add_carry_fallback: #t:inttype{t = U32 \/ t = U64} -> add_carry_st t
