@@ -7,11 +7,10 @@
       1,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "eq2-interp",
+        "@MaxIFuel_assumption", "@query",
         "equality_tok_Vale.X64.Instruction_s.PreserveFlags@tok",
-        "equation_Prims.eq2", "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Prims.squash", "equation_Vale.Def.Words_s.nat64",
-        "equation_Vale.Def.Words_s.natN",
+        "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Vale.Def.Words_s.nat64", "equation_Vale.Def.Words_s.natN",
         "equation_Vale.X64.Machine_Semantics_s.equals_instr",
         "equation_Vale.X64.Machine_s.reg_64",
         "function_token_typing_Prims.int",
@@ -22,11 +21,11 @@
         "proj_equation_Vale.X64.Instruction_s.InstrTypeRecord_outs",
         "projection_inverse_Vale.X64.Instruction_s.InstrTypeRecord_args",
         "projection_inverse_Vale.X64.Instruction_s.InstrTypeRecord_outs",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_0dee8cb03258a67c2f7ec66427696212",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "b3088a2611dfe7048180f093b7fa0cf2"
+      "42f90aef02f534e78cf744c0af882e4e"
     ],
     [
       "Vale.Transformers.MovbeElim.lemma_movbe_is_mov_bswap",
@@ -231,7 +230,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "f353d6f07a4dd420adc6b0cc7e2603c2"
+      "9c5ea885d57d981dc046b38deea4dd90"
     ],
     [
       "Vale.Transformers.MovbeElim.movbe_elim_correct",
@@ -254,7 +253,6 @@
         "Vale.X64.InsLemmas_interpretation_Tm_arrow_634199ec481ced163b475c858b9d7093",
         "Vale.X64.InsLemmas_interpretation_Tm_arrow_85e24fc9882a15a4415bb4182152b5ce",
         "Vale.X64.Instruction_s_pretyping_2fb66fcb47c648644e76dfa1323a4ab6",
-        "Vale.X64.Instruction_s_pretyping_3f42fef2c19ae51071f07b756c9d8230",
         "Vale.X64.Machine_Semantics_s_interpretation_Tm_arrow_eabe638ef4af4b0ec65b4cf7bbb2dc65",
         "b2t_def", "bool_inversion",
         "constructor_distinct_FStar.Pervasives.Native.None",
@@ -272,14 +270,13 @@
         "disc_equation_Prims.Cons", "disc_equation_Prims.Nil",
         "disc_equation_Vale.X64.Bytes_Code_s.Instr",
         "disc_equation_Vale.X64.Machine_Semantics_s.AnnotateMovbe64",
-        "eq2-interp", "equality_tok_Vale.X64.Instruction_s.IOp64@tok",
+        "equality_tok_Vale.X64.Instruction_s.IOp64@tok",
         "equality_tok_Vale.X64.Instruction_s.InOut@tok",
         "equality_tok_Vale.X64.Instruction_s.Out@tok",
         "equality_tok_Vale.X64.Instruction_s.PreserveFlags@tok",
         "equation_FStar.Pervasives.Native.snd",
-        "equation_FStar.Pervasives.pattern", "equation_Prims.eq2",
-        "equation_Prims.eqtype", "equation_Prims.nat",
-        "equation_Prims.squash", "equation_Vale.Def.Words_s.nat64",
+        "equation_FStar.Pervasives.pattern", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Vale.Def.Words_s.nat64",
         "equation_Vale.Def.Words_s.natN",
         "equation_Vale.Transformers.MovbeElim.movbe_elim_ph",
         "equation_Vale.Transformers.PeepHole.coerce_to_normal",
@@ -353,7 +350,7 @@
         "projection_inverse_Vale.X64.Machine_Semantics_s.AnnotateMovbe64__0",
         "projection_inverse_Vale.X64.Machine_Semantics_s.AnnotateMovbe64_it",
         "projection_inverse_Vale.X64.Machine_Semantics_s.Mkmachine_state_ms_ok",
-        "refinement_interpretation_Tm_refine_2de20c066034c13bf76e9c0b94f4806c",
+        "refinement_interpretation_Tm_refine_0dee8cb03258a67c2f7ec66427696212",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_83eb3110e9b0236ceecba75390ebeb55",
         "token_correspondence_Vale.Transformers.PeepHole.__proj__Mkpre_peephole__item__ph",
@@ -379,7 +376,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "26e27179637566c66845f30c96afcc5c"
+      "15f27b385effe7a2b18737e17d86320a"
     ]
   ]
 ]
