@@ -3,9 +3,9 @@ module Hacl.Spec.K256.Scalar
 open FStar.Mul
 open Lib.IntTypes
 open Lib.Sequence
-open Lib.ByteSequence
 
-module SD = Hacl.Spec.Bignum.Definitions
+module BSeq = Lib.ByteSequence
+
 module SB = Hacl.Spec.Bignum
 module BB = Hacl.Spec.Bignum.Base
 
@@ -121,7 +121,6 @@ let mul_pow2_256_minus_q_lseq len resLen a =
   let t1 = u64 0x4551231950b75fc4 in
   let t01 = create2 t0 t1 in
 
-  // TODO:replace bn_mul with bn_mul1 + bn_mul1_lshift_add?
   let m0 = SB.bn_mul a t01 in // a * t01
   let m1 = create resLen (u64 0) in
   let m1 = update_sub m1 2 len a in // a * t2 * pow2 128
@@ -165,7 +164,6 @@ val mod_lseq: a:lseq uint64 8 -> qelem_lseq
 let mod_lseq a =
   let c0, r = mod_lseq_before_final a in
 
-  [@inline_let]
   let (t0,t1,t2,t3) = make_pow2_256_minus_order_k256 () in
   let tmp = create4 t0 t1 t2 t3 in
   let c1, out = SB.bn_add r tmp in

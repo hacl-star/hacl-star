@@ -10,7 +10,6 @@ open Lib.ByteBuffer
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
 
 module S = Spec.K256
 module KL = Hacl.Spec.K256.Scalar.Lemmas
@@ -157,7 +156,7 @@ let load_qelem_vartime f b =
   not is_zero && is_lt_q_b
 
 
-val modq_short: out:qelem -> a:lbuffer uint64 qnlimb -> Stack unit
+val modq_short: out:qelem -> a:qelem -> Stack unit
   (requires fun h ->
     live h a /\ live h out /\ disjoint a out)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\

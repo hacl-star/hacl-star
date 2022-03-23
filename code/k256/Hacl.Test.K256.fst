@@ -15,10 +15,7 @@ inline_for_extraction noextract
 val u8: n:nat{n < 0x100} -> uint8
 let u8 n = u8 n
 
-
-//
-// Test1
-//
+///  Test1
 
 let pk1: b:glbuffer uint8 64ul{ recallable b } =
   [@ inline_let]
@@ -52,9 +49,7 @@ let sgnt1: b:glbuffer uint8 64ul{ recallable b } =
   createL_global l
 
 
-//
-// Test2
-//
+///  Test2
 
 let sk2: b:glbuffer uint8 32ul{ recallable b } =
   [@ inline_let]
@@ -141,7 +136,6 @@ let test_sign_and_verify () = admit();
   if b
   then C.String.print (C.String.of_literal "Test K256 ecdsa verification: Success!\n")
   else C.String.print (C.String.of_literal "Test K256 ecdsa verification: Failure :(\n");
-
   pop_frame ()
 
 

@@ -8,54 +8,11 @@ module S = Spec.K256
 include Hacl.Spec.K256.Field52.Definitions
 include Hacl.Spec.K256.Field52
 
+module ML = Hacl.Spec.K256.MathLemmas
+
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 ///  Load and store functions
-
-val lemma_a_div_b_plus_c_mod_d_mul_e (a b c d e:nat) : Lemma
-  (requires a / pow2 b < pow2 e)
-  (ensures  a / pow2 b + c % pow2 d * pow2 e < pow2 (d + e))
-
-let lemma_a_div_b_plus_c_mod_d_mul_e a b c d e =
-  let t_r = c % pow2 d * pow2 e in
-  Math.Lemmas.lemma_mult_le_right (pow2 e) (c % pow2 d) (pow2 d - 1);
-  assert (t_r <= (pow2 d - 1) * pow2 e);
-  assert (t_r <= pow2 d * pow2 e - pow2 e);
-  Math.Lemmas.pow2_plus d e;
-  assert (t_r <= pow2 (d + e) - pow2 e);
-  assert (a / pow2 b + c % pow2 d * pow2 e < pow2 (d + e))
-
-
-val lemma_a_mod_b_mul_c_mod_d (a b c d:nat) : Lemma
-  (requires c <= d /\ b <= d - c)
-  (ensures  (a % pow2 b) * pow2 c % pow2 d = (a % pow2 b) * pow2 c)
-
-let lemma_a_mod_b_mul_c_mod_d a b c d =
-  Math.Lemmas.pow2_multiplication_modulo_lemma_2 (a % pow2 b) d c;
-  Math.Lemmas.pow2_modulo_modulo_lemma_2 a (d - c) b
-
-
-val lemma_a_mul_c_plus_d_mod_e_mul_f_g (a b c d f g:nat) : Lemma
-  (requires c == g - b)
-  (ensures
-    a % pow2 b * pow2 c + (a / pow2 b + d * pow2 f) * pow2 g ==
-    a * pow2 c + d * pow2 (f + g))
-
-let lemma_a_mul_c_plus_d_mod_e_mul_f_g a b c d f g =
-  calc (==) {
-    a % pow2 b * pow2 c + (a / pow2 b + d * pow2 f) * pow2 g;
-    (==) { Math.Lemmas.distributivity_add_left (a / pow2 b) (d * pow2 f) (pow2 g) }
-    a % pow2 b * pow2 c + (a / pow2 b) * pow2 g + (d * pow2 f) * pow2 g;
-    (==) { Math.Lemmas.paren_mul_right d (pow2 f) (pow2 g); Math.Lemmas.pow2_plus f g }
-    a % pow2 b * pow2 c + (a / pow2 b) * pow2 g + d * pow2 (f + g);
-    (==) { Math.Lemmas.pow2_plus b c; Math.Lemmas.paren_mul_right (a / pow2 b) (pow2 b) (pow2 c) }
-    a % pow2 b * pow2 c + (a / pow2 b) * pow2 b * pow2 c + d * pow2 (f + g);
-    (==) { Math.Lemmas.distributivity_add_left (a % pow2 b) (a / pow2 b * pow2 b) (pow2 c) }
-    (a % pow2 b + (a / pow2 b) * pow2 b) * pow2 c + d * pow2 (f + g);
-    (==) { Math.Lemmas.euclidean_division_definition a (pow2 b) }
-    a * pow2 c + d * pow2 (f + g);
-  }
-
 
 val load_felem5_lemma_as_nat: s:felem4 -> f:felem5 -> Lemma
   (requires
@@ -101,15 +58,15 @@ let load_felem5_lemma_fits s f =
   assert (v f0 < pow2 52);
 
   Math.Lemmas.lemma_div_lt (v s0) 64 52;
-  lemma_a_div_b_plus_c_mod_d_mul_e (v s0) 52 (v s1) 40 12;
+  ML.lemma_a_div_b_plus_c_mod_d_mul_e (v s0) 52 (v s1) 40 12;
   assert (v f1 < pow2 52);
 
   Math.Lemmas.lemma_div_lt (v s1) 64 40;
-  lemma_a_div_b_plus_c_mod_d_mul_e (v s1) 40 (v s2) 28 24;
+  ML.lemma_a_div_b_plus_c_mod_d_mul_e (v s1) 40 (v s2) 28 24;
   assert (v f2 < pow2 52);
 
   Math.Lemmas.lemma_div_lt (v s2) 64 28;
-  lemma_a_div_b_plus_c_mod_d_mul_e (v s2) 28 (v s3) 16 36;
+  ML.lemma_a_div_b_plus_c_mod_d_mul_e (v s2) 28 (v s3) 16 36;
   assert (v f3 < pow2 52);
 
   assert (v f4 = v s3 / pow2 16);
@@ -140,7 +97,7 @@ let load_felem5_lemma s =
   //assert (v f11 < pow2 12);
   mod_mask_lemma s1 40ul;
   assert (v (mod_mask #U64 #SEC 40ul) == 0xffffffffff);
-  lemma_a_mod_b_mul_c_mod_d (v s1) 40 12 64;
+  ML.lemma_a_mod_b_mul_c_mod_d (v s1) 40 12 64;
   //assert (v f12 == v s1 % pow2 40 * pow2 12);
   Math.Lemmas.cancel_mul_mod (v s1 % pow2 40) (pow2 12);
   logor_disjoint f11 f12 12;
@@ -153,7 +110,7 @@ let load_felem5_lemma s =
   //assert (v f21 < pow2 24);
   mod_mask_lemma s2 28ul;
   assert (v (mod_mask #U64 #SEC 28ul) == 0xfffffff);
-  lemma_a_mod_b_mul_c_mod_d (v s2) 28 24 64;
+  ML.lemma_a_mod_b_mul_c_mod_d (v s2) 28 24 64;
   //assert (v f22 == v s2 % pow2 28 * pow2 24);
   Math.Lemmas.cancel_mul_mod (v s2 % pow2 28) (pow2 24);
   logor_disjoint f21 f22 24;
@@ -166,7 +123,7 @@ let load_felem5_lemma s =
   //assert (v f31 < pow2 36);
   mod_mask_lemma s3 16ul;
   assert (v (mod_mask #U64 #SEC 16ul) == 0xffff);
-  lemma_a_mod_b_mul_c_mod_d (v s3) 16 36 64;
+  ML.lemma_a_mod_b_mul_c_mod_d (v s3) 16 36 64;
   //assert (v f32 == v s3 % pow2 16 * pow2 36);
   Math.Lemmas.cancel_mul_mod (v s3 % pow2 16) (pow2 36);
   logor_disjoint f31 f32 36;
@@ -200,11 +157,11 @@ let store_felem5_lemma_as_nat f s =
     v s0 + v s1 * pow2 64 + v s2 * pow2 128 + v s3 * pow2 192;
     (==) { }
     v f0 + v f1 % pow2 12 * pow2 52 + (v f1 / pow2 12 + v f2 % pow2 24 * pow2 40) * pow2 64 + v s2 * pow2 128 + v s3 * pow2 192;
-    (==) { lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f1) 12 52 (v f2 % pow2 24) 40 64 }
+    (==) { ML.lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f1) 12 52 (v f2 % pow2 24) 40 64 }
     v f0 + v f1 * pow2 52 + v f2 % pow2 24 * pow2 104 + (v f2 / pow2 24 + v f3 % pow2 36 * pow2 28) * pow2 128 + v s3 * pow2 192;
-    (==) { lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f2) 24 104 (v f3 % pow2 36) 28 128 }
+    (==) { ML.lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f2) 24 104 (v f3 % pow2 36) 28 128 }
     v f0 + v f1 * pow2 52 + v f2 * pow2 104 + v f3 % pow2 36 * pow2 156 + (v f3 / pow2 36 + v f4 % pow2 48 * pow2 16) * pow2 192;
-    (==) { lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f3) 36 156 (v f4 % pow2 48) 16 192 }
+    (==) { ML.lemma_a_mul_c_plus_d_mod_e_mul_f_g (v f3) 36 156 (v f4 % pow2 48) 16 192 }
     v f0 + v f1 * pow2 52 + v f2 * pow2 104 + v f3 * pow2 156 + (v f4 % pow2 48) * pow2 208;
     (==) { Math.Lemmas.small_mod (v f4) (pow2 48) }
     v f0 + v f1 * pow2 52 + v f2 * pow2 104 + v f3 * pow2 156 + v f4 * pow2 208;
@@ -254,15 +211,6 @@ let store_felem5_lemma f =
 
 
 ///  Addition and multiplication by a digit
-
-val lemma_a_mul_c_plus_b_mul_c_mul_d (a b c d: nat) :
-  Lemma (b * a + c * b * d == b * (a + c * d))
-
-let lemma_a_mul_c_plus_b_mul_c_mul_d a b c d =
-  Math.Lemmas.swap_mul c b;
-  Math.Lemmas.paren_mul_right b c d;
-  Math.Lemmas.distributivity_add_right b a (c * d)
-
 
 val add5_lemma1: ma:scale64 -> mb:scale64 -> a:uint64 -> b:uint64 -> Lemma
   (requires felem_fits1 a ma /\ felem_fits1 b mb /\ ma + mb <= 4096)
@@ -365,22 +313,16 @@ let mul15_lemma m1 m2 f c =
   calc (==) { //as_nat5 (r0,r1,r2,r3,r4);
     v r0 + v r1 * pow52 + v r2 * pow104 + v r3 * pow156 + v r4 * pow208;
     (==) { mul15_lemma1 mf0 m2 f0 c }
-    v f0 * v c + v r1 * pow52 + v r2 * pow104 + v r3 * pow156 + v r4 * pow208;
+    v c * v f0 + v r1 * pow52 + v r2 * pow104 + v r3 * pow156 + v r4 * pow208;
     (==) { mul15_lemma1 mf1 m2 f1 c }
-    v f0 * v c + v f1 * v c * pow52 + v r2 * pow104 + v r3 * pow156 + v r4 * pow208;
+    v c * v f0 + v c * v f1 * pow52 + v r2 * pow104 + v r3 * pow156 + v r4 * pow208;
     (==) { mul15_lemma1 mf2 m2 f2 c }
-    v f0 * v c + v f1 * v c * pow52 + v f2 * v c * pow104 + v r3 * pow156 + v r4 * pow208;
+    v c * v f0 + v c * v f1 * pow52 + v c * v f2 * pow104 + v r3 * pow156 + v r4 * pow208;
     (==) { mul15_lemma1 mf3 m2 f3 c }
-    v f0 * v c + v f1 * v c * pow52 + v f2 * v c * pow104 + v f3 * v c * pow156 + v r4 * pow208;
-    (==) { mul15_lemma_last1 mf4 m2 f4 c; Math.Lemmas.swap_mul (v f0) (v c) }
-    v c * v f0 + v f1 * v c * pow52 + v f2 * v c * pow104 + v f3 * v c * pow156 + v f4 * v c * pow208;
-    (==) { lemma_a_mul_c_plus_b_mul_c_mul_d (v f0) (v c) (v f1) pow52 }
-    v c * (v f0 + v f1 * pow52) + v f2 * v c * pow104 + v f3 * v c * pow156 + v f4 * v c * pow208;
-    (==) { lemma_a_mul_c_plus_b_mul_c_mul_d (v f0 + v f1 * pow52) (v c) (v f2) pow104 }
-    v c * (v f0 + v f1 * pow52 + v f2 * pow104) + v f3 * v c * pow156 + v f4 * v c * pow208;
-    (==) { lemma_a_mul_c_plus_b_mul_c_mul_d (v f0 + v f1 * pow52 + v f2 * pow104) (v c) (v f3) pow156 }
-    v c * (v f0 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156) + v f4 * v c * pow208;
-    (==) { lemma_a_mul_c_plus_b_mul_c_mul_d (v f0 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156) (v c) (v f4) pow208 }
+    v c * v f0 + v c * v f1 * pow52 + v c * v f2 * pow104 + v c * v f3 * pow156 + v r4 * pow208;
+    (==) { mul15_lemma_last1 mf4 m2 f4 c }
+    v c * v f0 + v c * v f1 * pow52 + v c * v f2 * pow104 + v c * v f3 * pow156 + v c * v f4 * pow208;
+    (==) { ML.lemma_distr5_pow52 (v c) (v f0) (v f1) (v f2) (v f3) (v f4) }
     v c * (v f0 + v f1 * pow52 + v f2 * pow104 + v f3 * pow156 + v f4 * pow208);
   };
   assert (as_nat5 (r0,r1,r2,r3,r4) == v c * as_nat5 f)

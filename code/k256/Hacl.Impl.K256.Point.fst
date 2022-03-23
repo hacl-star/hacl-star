@@ -97,7 +97,7 @@ val to_proj_point (p:point) (x y:felem) : Stack unit
     live h p /\ live h x /\ live h y /\ disjoint p x /\ disjoint p y /\
     inv_lazy_reduced2 h x /\ inv_lazy_reduced2 h y)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_inv h1 p /\
-    point_eval h1 p == (feval h0 x, feval h0 y, S.one))
+    point_eval h1 p == S.to_proj_point (feval h0 x, feval h0 y))
 
 let to_proj_point p x y =
   let x1, y1, z1 = getx p, gety p, getz p in
@@ -159,14 +159,14 @@ let compute_expected_y2 y2 x =
 
 
 inline_for_extraction noextract
-val is_y_sqr_is_y2 (y2 y:felem) : Stack bool
+val is_y_sqr_is_y2_vartime (y2 y:felem) : Stack bool
   (requires fun h ->
     live h y /\ live h y2 /\ disjoint y y2 /\
     inv_fully_reduced h y2 /\ inv_fully_reduced h y)
   (ensures fun h0 b h1 -> modifies0 h0 h1 /\
     b == (as_nat h0 y2 = S.fmul (as_nat h0 y) (as_nat h0 y)))
 
-let is_y_sqr_is_y2 y2 y =
+let is_y_sqr_is_y2_vartime y2 y =
   push_frame ();
   let y2_comp = create_felem () in
 
@@ -192,7 +192,7 @@ let is_on_curve_vartime x y =
   push_frame ();
   let y2_exp = create_felem () in
   compute_expected_y2 y2_exp x;
-  let res = is_y_sqr_is_y2 y2_exp y in
+  let res = is_y_sqr_is_y2_vartime y2_exp y in
   pop_frame ();
   res
 
@@ -236,7 +236,7 @@ let recover_y_vartime y x is_odd =
   BL.normalize5_lemma (1,1,1,1,2) (as_felem5 h y);
   fnormalize y y;
 
-  let is_y_valid = is_y_sqr_is_y2 y2 y in
+  let is_y_valid = is_y_sqr_is_y2_vartime y2 y in
   let res =
     if not is_y_valid then false
     else begin

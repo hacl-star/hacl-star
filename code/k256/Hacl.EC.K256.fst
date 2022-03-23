@@ -9,14 +9,12 @@ open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
 module BSeq = Lib.ByteSequence
-module LSeq = Lib.Sequence
 
 module S = Spec.K256
 
 module F = Hacl.K256.Field
 module Q = Hacl.K256.Scalar
 module FI = Hacl.Impl.K256.Finv
-module QI = Hacl.Impl.K256.Qinv
 
 module P = Hacl.Impl.K256.Point
 module PA = Hacl.Impl.K256.PointAdd
@@ -174,8 +172,6 @@ let felem_inv a out =
 
 
 [@@ Comment "Load a bid-endian field element from memory.
-
-  In addition, the function performs reduction modulo p.
 
   The argument `b` points to 32 bytes of valid memory, i.e., uint8_t[32].
   The outparam `out` points to a field element of 5 limbs in size, i.e., uint64_t[5].

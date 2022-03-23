@@ -9,10 +9,7 @@ open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
 
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module ME = Hacl.Impl.MultiExponentiation
 
@@ -114,7 +111,6 @@ let make_g g =
   set_one gz
 
 
-// TODO: fix extraction for bn_from_bytes_le/be
 val point_mul: out:point -> scalar:qelem -> q:point -> Stack unit
   (requires fun h ->
     live h out /\ live h scalar /\ live h q /\

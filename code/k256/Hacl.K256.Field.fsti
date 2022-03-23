@@ -45,8 +45,7 @@ let inv_fully_reduced5 (f:felem5) =
 
 noextract
 let inv_fully_reduced (h:mem) (e:felem) =
-  let f = as_felem5 h e in
-  inv_fully_reduced5 f
+  inv_fully_reduced5 (as_felem5 h e)
 
 
 noextract
@@ -55,8 +54,7 @@ let inv_lazy_reduced1_5 (f:felem5) =
 
 noextract
 let inv_lazy_reduced1 (h:mem) (e:felem) =
-  let f = as_felem5 h e in
-  inv_lazy_reduced1_5 f
+  inv_lazy_reduced1_5 (as_felem5 h e)
 
 noextract
 let inv_lazy_reduced2_5 (f:felem5) =
@@ -64,8 +62,7 @@ let inv_lazy_reduced2_5 (f:felem5) =
 
 noextract
 let inv_lazy_reduced2 (h:mem) (e:felem) =
-  let f = as_felem5 h e in
-  inv_lazy_reduced2_5 f
+  inv_lazy_reduced2_5 (as_felem5 h e)
 
 
 noextract
@@ -168,14 +165,14 @@ inline_for_extraction noextract
 val set_zero: f:felem -> Stack unit
   (requires fun h -> live h f)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
-    as_nat h1 f == 0 /\ inv_fully_reduced h1 f)
+    as_nat h1 f == S.zero /\ inv_fully_reduced h1 f)
 
 
 inline_for_extraction noextract
 val set_one: f:felem -> Stack unit
   (requires fun h -> live h f)
   (ensures  fun h0 _ h1 -> modifies (loc f) h0 h1 /\
-    as_nat h1 f == 1 /\ inv_fully_reduced h1 f)
+    as_nat h1 f == S.one /\ inv_fully_reduced h1 f)
 
 
 inline_for_extraction noextract

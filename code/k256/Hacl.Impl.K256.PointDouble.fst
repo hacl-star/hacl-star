@@ -8,18 +8,14 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
 
 module S = Spec.K256
-module BI = Hacl.Spec.K256.Field52
 module BL = Hacl.Spec.K256.Field52.Lemmas
 
 open Hacl.K256.Field
 open Hacl.Impl.K256.Point
 
 #set-options "--z3rlimit 300 --fuel 0 --ifuel 0"
-
 
 inline_for_extraction noextract
 val calc_z3 (y1 z1 z3 yy tmp:felem) : Stack unit

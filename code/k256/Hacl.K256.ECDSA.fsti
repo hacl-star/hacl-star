@@ -7,12 +7,7 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
-
 module S = Spec.K256
-
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -41,7 +36,11 @@ Comment "Create an ECDSA signature.
   The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
   The arguments `msgHash`, `private_key`, and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
 
-  The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_hashed_msg` if needed."]
+  The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_hashed_msg` if needed.
+
+  The function also checks whether `private_key` and `nonce` are valid values:
+    • 0 < `private_key` and `private_key` < the order of the curve
+    • 0 < `nonce` and `nonce` < the order of the curve"]
 val ecdsa_sign_hashed_msg (signature:lbytes 64ul)
   (msgHash private_key nonce:lbytes 32ul) : Stack bool
   (requires fun h ->
@@ -80,7 +79,12 @@ val ecdsa_sign_sha256 (signature:lbytes 64ul)
   The argument `msgHash` points to 32 bytes of valid memory, i.e., uint8_t[32].
   The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
 
-  The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed."]
+  The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
+
+  The function also checks whether a public key (x || y) is valid:
+    • 0 < x and x < prime
+    • 0 < y and y < prime
+    • (x, y) is on the curve"]
 val ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool
   (requires fun h ->
     live h msgHash /\ live h public_key /\ live h signature)
@@ -137,7 +141,11 @@ val secp256k1_ecdsa_is_signature_normalized: signature: lbytes 64ul -> Stack boo
   The outparam `signature` (R || S) points to 64 bytes of valid memory, i.e., uint8_t[64].
   The arguments `msgHash`, `private_key`, and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
 
-  The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed."]
+  The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed.
+
+  The function also checks whether `private_key` and `nonce` are valid values:
+    • 0 < `private_key` and `private_key` < the order of the curve
+    • 0 < `nonce` and `nonce` < the order of the curve"]
 val secp256k1_ecdsa_sign_hashed_msg (signature:lbytes 64ul)
   (msgHash private_key nonce:lbytes 32ul) : Stack bool
   (requires fun h ->
@@ -176,7 +184,12 @@ val secp256k1_ecdsa_sign_sha256 (signature:lbytes 64ul)
   The argument `msgHash` points to 32 bytes of valid memory, i.e., uint8_t[32].
   The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
 
-  The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed."]
+  The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed.
+
+  The function also checks whether a public key (x || y) is valid:
+    • 0 < x and x < prime
+    • 0 < y and y < prime
+    • (x, y) is on the curve"]
 val secp256k1_ecdsa_verify_hashed_msg (msgHash:lbytes 32ul) (public_key signature:lbytes 64ul) : Stack bool
   (requires fun h ->
     live h msgHash /\ live h public_key /\ live h signature)

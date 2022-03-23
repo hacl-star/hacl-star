@@ -8,26 +8,12 @@ module S = Spec.K256
 include Hacl.Spec.K256.Field52.Definitions
 include Hacl.Spec.K256.Field52
 
+module ML = Hacl.Spec.K256.MathLemmas
 module LD = Hacl.Spec.K256.Field52.Definitions.Lemmas
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
 ///  Normalize-weak
-
-val lemma_a_mod_52_mul_b (a b:nat) :
-  Lemma ((a % pow2 52) * pow2 b = a * pow2 b - a / pow2 52 * pow2 (b + 52))
-
-let lemma_a_mod_52_mul_b a b =
-  calc (==) {
-    (a % pow2 52) * pow2 b;
-    (==) { Math.Lemmas.euclidean_division_definition a (pow2 52) }
-    (a - a / pow2 52 * pow2 52) * pow2 b;
-    (==) { Math.Lemmas.distributivity_sub_left a (a / pow2 52 * pow2 52) (pow2 b) }
-    a * pow2 b - a / pow2 52 * pow2 52 * pow2 b;
-    (==) { Math.Lemmas.paren_mul_right (a / pow2 52) (pow2 52) (pow2 b); Math.Lemmas.pow2_plus 52 b }
-    a * pow2 b - a / pow2 52 * pow2 (52 + b);
-  }
-
 
 val minus_x_mul_pow2_256_lemma: m:scale64_5 -> f:felem5 -> Lemma
   (requires felem_fits5 f m)
@@ -62,39 +48,6 @@ let minus_x_mul_pow2_256_lemma m f =
   };
 
   Math.Lemmas.lemma_div_lt (v t4) 64 48
-
-
-val lemma_simplify_carry_round (t0 t1 t2 t3 t4:nat) : Lemma
- (let a = t1 + t0 / pow2 52 in
-  let b = t2 + a / pow2 52 in
-  let c = t3 + b / pow2 52 in
-  let d = t4 + c / pow2 52 in
-  t0 % pow2 52 + (a % pow2 52) * pow52 + (b % pow2 52) * pow104 + (c % pow2 52) * pow156 + d * pow208 ==
-  t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 * pow208)
-
-let lemma_simplify_carry_round t0 t1 t2 t3 t4 =
-  let a = t1 + t0 / pow2 52 in
-  let b = t2 + a / pow2 52 in
-  let c = t3 + b / pow2 52 in
-  let d = t4 + c / pow2 52 in
-
-  calc (==) {
-    t0 % pow2 52 + (a % pow2 52) * pow52 + (b % pow2 52) * pow104 + (c % pow2 52) * pow156 + d * pow208;
-    (==) { lemma_a_mod_52_mul_b a 52 }
-    t0 % pow2 52 + (t1 + t0 / pow2 52) * pow52 - a / pow52 * pow104 + (b % pow2 52) * pow104 + (c % pow2 52) * pow156 + d * pow208;
-    (==) { Math.Lemmas.distributivity_add_left t1 (t0 / pow2 52) pow52; Math.Lemmas.euclidean_division_definition t0 (pow2 52) }
-    t0 + t1 * pow52 - a / pow52 * pow104 + (b % pow2 52) * pow104 + (c % pow2 52) * pow156 + d * pow208;
-    (==) { lemma_a_mod_52_mul_b b 104 }
-    t0 + t1 * pow52 - a / pow52 * pow104 + (t2 + a / pow2 52) * pow104 - b / pow2 52 * pow156 + (c % pow2 52) * pow156 + d * pow208;
-    (==) { Math.Lemmas.distributivity_add_left t2 (a / pow2 52) pow104 }
-    t0 + t1 * pow52 + t2 * pow104 - b / pow2 52 * pow156 + (c % pow2 52) * pow156 + d * pow208;
-    (==) { lemma_a_mod_52_mul_b c 156 }
-    t0 + t1 * pow52 + t2 * pow104 - b / pow2 52 * pow156 + (t3 + b / pow2 52) * pow156 - c / pow2 52 * pow208 + d * pow208;
-    (==) { Math.Lemmas.distributivity_add_left t3 (b / pow2 52) pow156 }
-    t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 - c / pow2 52 * pow208 + (t4 + c / pow2 52) * pow208;
-    (==) { Math.Lemmas.distributivity_add_left t4 (c / pow2 52) pow208 }
-    t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 * pow208;
-  }
 
 
 val carry_round_after_last_carry_mod_prime5_lemma: m:scale64_5 -> f:felem5 -> Lemma
@@ -140,7 +93,7 @@ let carry_round_after_last_carry_mod_prime5_lemma m f =
   assert (v t4' = v t4 + v t3' / pow2 52);
   LD.carry_last_small_mod_lemma t4 t3';
 
-  lemma_simplify_carry_round (v t0) (v t1) (v t2) (v t3) (v t4);
+  ML.lemma_simplify_carry_round (v t0) (v t1) (v t2) (v t3) (v t4);
   let r = carry_round5 f in
   assert ((t0',t1'',t2'',t3'',t4') == r);
   assert (as_nat5 r == as_nat5 f)
@@ -389,11 +342,11 @@ let normalize5_second_part_x_is_zero_lemma x r =
     assert (as_nat5 k = as_nat5 r - S.prime) end
 
 
-val lemma_a_minus_b_prime_c_prime_k (k a b c:nat) (n:pos) : Lemma
+val lemma_a_minus_b_n_c_n_k (k a b c:nat) (n:pos) : Lemma
   (requires k < n /\ k == a - b * n - c * n)
   (ensures  k == a % n)
 
-let lemma_a_minus_b_prime_c_prime_k k a b c n =
+let lemma_a_minus_b_n_c_n_k k a b c n =
   Math.Lemmas.lemma_mod_sub (a - b * n) n c;
   Math.Lemmas.lemma_mod_sub a n b;
   Math.Lemmas.small_mod k n
@@ -420,10 +373,10 @@ let normalize5_lemma m f =
 
   if v x = 1 then begin
     normalize5_second_part_x_is_one_lemma x r;
-    lemma_a_minus_b_prime_c_prime_k (as_nat5 k) (as_nat5 f) (v f4 / pow2 48) 1 S.prime end
+    lemma_a_minus_b_n_c_n_k (as_nat5 k) (as_nat5 f) (v f4 / pow2 48) 1 S.prime end
   else begin
     normalize5_second_part_x_is_zero_lemma x r;
     if as_nat5 r < S.prime then
-      lemma_a_minus_b_prime_c_prime_k (as_nat5 k) (as_nat5 f) (v f4 / pow2 48) 0 S.prime
+      lemma_a_minus_b_n_c_n_k (as_nat5 k) (as_nat5 f) (v f4 / pow2 48) 0 S.prime
     else
-      lemma_a_minus_b_prime_c_prime_k (as_nat5 k) (as_nat5 f) (v f4 / pow2 48) 1 S.prime end
+      lemma_a_minus_b_n_c_n_k (as_nat5 k) (as_nat5 f) (v f4 / pow2 48) 1 S.prime end

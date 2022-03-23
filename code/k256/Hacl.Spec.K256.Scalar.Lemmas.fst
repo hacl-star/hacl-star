@@ -159,7 +159,6 @@ let mul_pow2_256_minus_q_lemma len resLen a =
   SD.bn_eval0 t01;
   assert (SD.bn_v t01 = pow2 256 - S.q - pow2 128);
 
-  // TODO:replace bn_mul with bn_mul1 + bn_mul1_lshift_add?
   let m0 = SB.bn_mul a t01 in // a * t01
   SB.bn_mul_lemma a t01;
   assert (SD.bn_v m0 == SD.bn_v a * SD.bn_v t01);

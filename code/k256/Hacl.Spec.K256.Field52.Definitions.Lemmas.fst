@@ -9,16 +9,9 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 
 module S = Spec.K256
+module ML = Hacl.Spec.K256.MathLemmas
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
-
-val lemma_a_plus_b_pow2_mod2 (a b:nat) (c:pos) :
-  Lemma ((a + b * pow2 c) % 2 = a % 2)
-let lemma_a_plus_b_pow2_mod2 a b c =
-  assert_norm (pow2 1 = 2);
-  Math.Lemmas.lemma_mod_plus_distr_r a (b * pow2 c) 2;
-  Math.Lemmas.pow2_multiplication_modulo_lemma_1 b 1 c
-
 
 val lemma_as_nat_mod2: x:felem5 ->
   Lemma (let (x0,x1,x2,x3,x4) = x in as_nat5 x % 2 = v x0 % 2)
@@ -26,10 +19,10 @@ let lemma_as_nat_mod2 x =
   let (x0,x1,x2,x3,x4) = x in
   assert (as_nat5 x = v x0 + v x1 * pow52 + v x2 * pow104 + v x3 * pow156 + v x4 * pow208);
   assert (as_nat5 x % 2 = (v x0 + v x1 * pow52 + v x2 * pow104 + v x3 * pow156 + v x4 * pow208) % 2);
-  lemma_a_plus_b_pow2_mod2 (v x0 + v x1 * pow52 + v x2 * pow104 + v x3 * pow156) (v x4) 208;
-  lemma_a_plus_b_pow2_mod2 (v x0 + v x1 * pow52 + v x2 * pow104) (v x3) 156;
-  lemma_a_plus_b_pow2_mod2 (v x0 + v x1 * pow52) (v x2) 104;
-  lemma_a_plus_b_pow2_mod2 (v x0) (v x1) 52;
+  ML.lemma_a_plus_b_pow2_mod2 (v x0 + v x1 * pow52 + v x2 * pow104 + v x3 * pow156) (v x4) 208;
+  ML.lemma_a_plus_b_pow2_mod2 (v x0 + v x1 * pow52 + v x2 * pow104) (v x3) 156;
+  ML.lemma_a_plus_b_pow2_mod2 (v x0 + v x1 * pow52) (v x2) 104;
+  ML.lemma_a_plus_b_pow2_mod2 (v x0) (v x1) 52;
   assert (as_nat5 x % 2 = v x0 % 2)
 
 
@@ -40,12 +33,8 @@ let lemma_nat_from_bytes_be_mod2 f =
   let x0 = LSeq.index f 31 in
   BSeq.nat_from_intseq_be_slice_lemma f 31;
   BSeq.nat_from_intseq_be_lemma0 (LSeq.slice f 31 32);
-  assert (BSeq.nat_from_intseq_be f ==
-    v x0 + pow2 8 * BSeq.nat_from_intseq_be (LSeq.slice f 0 31));
-  assert_norm (pow2 1 = 2);
-  Math.Lemmas.lemma_mod_plus_distr_r (v x0) (BSeq.nat_from_intseq_be (LSeq.slice f 0 31) * pow2 8) 2;
-  Math.Lemmas.pow2_multiplication_modulo_lemma_1 (BSeq.nat_from_intseq_be (LSeq.slice f 0 31)) 1 8;
-  assert (BSeq.nat_from_bytes_be f % 2 = v x0 % 2)
+  assert (BSeq.nat_from_intseq_be f == v x0 + pow2 8 * BSeq.nat_from_intseq_be (LSeq.slice f 0 31));
+  ML.lemma_a_plus_b_pow2_mod2 (v x0) (BSeq.nat_from_intseq_be (LSeq.slice f 0 31)) 8
 
 
 val unfold_nat_from_uint64_four: b:LSeq.lseq uint64 4 ->
@@ -74,22 +63,7 @@ let unfold_nat_from_uint64_four b =
 
   BSeq.nat_from_intseq_be_lemma0 (Seq.slice b 0 1);
   assert (res == b3 + pow2 64 * (b2 + pow2 64 * (b1 + pow2 64 * b0)));
-  calc (==) {
-    b3 + pow2 64 * (b2 + pow2 64 * (b1 + pow2 64 * b0));
-    (==) {
-      Math.Lemmas.distributivity_add_right (pow2 64) b1 (pow2 64 * b0);
-      Math.Lemmas.paren_mul_right (pow2 64) (pow2 64) b0;
-      Math.Lemmas.pow2_plus 64 64 }
-    b3 + pow2 64 * (b2 + pow2 64 * b1 + pow2 128 * b0);
-    (==) {
-      Math.Lemmas.distributivity_add_right (pow2 64) b2 (pow2 64 * b1 + pow2 128 * b0);
-      Math.Lemmas.distributivity_add_right (pow2 64) (pow2 64 * b1) (pow2 128 * b0) }
-    b3 + pow2 64 * b2 + pow2 64 * (pow2 64 * b1) + pow2 64 * (pow2 128 * b0);
-    (==) { Math.Lemmas.paren_mul_right (pow2 64) (pow2 64) b1; Math.Lemmas.pow2_plus 64 64 }
-    b3 + pow2 64 * b2 + pow2 128 * b1 + pow2 64 * (pow2 128 * b0);
-    (==) { Math.Lemmas.paren_mul_right (pow2 64) (pow2 128) b0; Math.Lemmas.pow2_plus 128 64 }
-    b3 + pow2 64 * b2 + pow2 128 * b1 + pow2 192 * b0;
-    }
+  ML.lemma_as_nat64_horner b3 b2 b1 b0
 
 
 val lemma_prime : unit -> Lemma (pow2 256 % S.prime = 0x1000003D1)
@@ -220,11 +194,18 @@ val lemma_normalize_x_le_1: t4:uint64 -> Lemma
   (ensures  v t4 / pow2 48 <= 1)
 
 let lemma_normalize_x_le_1 t4 =
+  calc (==) {
+    (2 * (pow2 48 - 1)) / pow2 48;
+    (==) { Math.Lemmas.distributivity_add_right 2 (pow2 48) 1 }
+    (2 * pow2 48 - 2) / pow2 48;
+    (==) { Math.Lemmas.division_addition_lemma (-2) (pow2 48) 2 }
+    (-2) / pow2 48 + 2;
+    (==) { assert_norm ((-2) / pow2 48 = -1) }
+    1;
+  };
+
   assert (v t4 <= 2 * (pow2 48 - 1));
-  Math.Lemmas.distributivity_add_right 2 (pow2 48) 1;
-  assert (v t4 <= 2 * pow2 48 - 2);
   Math.Lemmas.lemma_div_le (v t4) (2 * pow2 48 - 2) (pow2 48);
-  Math.Lemmas.division_addition_lemma (-2) (pow2 48) 2;
   assert (v t4 / pow2 48 <= 1)
 
 
@@ -275,11 +256,16 @@ val lemma_add_rsh52: m1:scale64 -> m2:scale64 -> a:uint64 -> b:uint64 -> Lemma
 
 let lemma_add_rsh52 m1 m2 a b =
   let c = a +. (b >>. 52ul) in
-  Math.Lemmas.lemma_div_lt (v b) 64 52;
-  assert (v b / pow2 52 < pow2 12);
-  assert (v a + v b / pow2 52 <= m1 * max52 + pow2 12);
-  assert_norm (pow2 12 < max52);
-  assert (v a + v b / pow2 52 < (m1 + 1) * max52);
+  calc (<) {
+    v a + v b / pow2 52;
+    (<) { Math.Lemmas.lemma_div_lt (v b) 64 52 }
+    m1 * max52 + pow2 12;
+    (<=) { Math.Lemmas.pow2_lt_compat 52 12 }
+    m1 * max52 + max52;
+    (==) { Math.Lemmas.distributivity_add_left m1 1 max52 }
+    (m1 + 1) * max52;
+  };
+
   Math.Lemmas.lemma_mult_le_right max52 (m1 + 1) 4096;
   assert_norm (4096 * max52 < pow2 64);
   Math.Lemmas.small_mod (v a + v b / pow2 52) (pow2 64);
@@ -294,11 +280,16 @@ val lemma_add_rsh52_last: m1:scale64_last -> m2:scale64 -> a:uint64 -> b:uint64 
 
 let lemma_add_rsh52_last m1 m2 a b =
   let c = a +. (b >>. 52ul) in
-  Math.Lemmas.lemma_div_lt (v b) 64 52;
-  assert (v b / pow2 52 < pow2 12);
-  assert (v a + v b / pow2 52 <= m1 * max48 + pow2 12);
-  assert_norm (pow2 12 < max48);
-  assert (v a + v b / pow2 52 < (m1 + 1) * max48);
+  calc (<) {
+    v a + v b / pow2 52;
+    (<) { Math.Lemmas.lemma_div_lt (v b) 64 52 }
+    m1 * max48 + pow2 12;
+    (<=) { Math.Lemmas.pow2_lt_compat 48 12 }
+    m1 * max48 + max48;
+    (==) { Math.Lemmas.distributivity_add_left m1 1 max48 }
+    (m1 + 1) * max48;
+  };
+
   Math.Lemmas.lemma_mult_le_right max48 (m1 + 1) 65536;
   assert_norm (65536 * max48 < pow2 64);
   Math.Lemmas.small_mod (v a + v b / pow2 52) (pow2 64);
@@ -326,7 +317,6 @@ val lemma_carry_last52: m1:scale64_last -> m2:scale64 -> a:uint64 -> b:uint64 ->
      v d = v b % pow2 52 /\ v c = v a + v b / pow2 52))
 
 let lemma_carry_last52 m1 m2 a b =
-  let c = a +. (b >>. 52ul) in let d = b &. mask52 in
   lemma_mask52 b;
   lemma_add_rsh52_last m1 m2 a b
 
@@ -356,8 +346,7 @@ let carry_last_small_mod_lemma t4 t3' =
   let r = t4 +. (t3' >>. 52ul) in
   assert (v r = v t4 + v t3' / pow2 52);
   Math.Lemmas.lemma_div_lt (v t3') 64 52;
-  assert (v r < pow2 48 - 1 + pow2 12);
-
+  assert (v r < v t4 + pow2 12);
   Math.Lemmas.pow2_lt_compat 48 12;
   assert (felem_fits_last1 r 2);
 
@@ -380,7 +369,7 @@ let lemma_a_plus_b_mul_pow256 a b =
     (==) { lemma_prime () }
     (a + b * 0x1000003D1 % S.prime) % S.prime;
     (==) { Math.Lemmas.lemma_mod_plus_distr_r a (b * 0x1000003D1) S.prime }
-    (a +b * 0x1000003D1) % S.prime;
+    (a + b * 0x1000003D1) % S.prime;
   }
 
 
@@ -395,9 +384,7 @@ let as_nat_mod_prime t0 t1 t2 t3 t4 =
     (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + (t4 / pow2 48 * pow2 48 + t4 % pow2 48) * pow208) % S.prime;
     (==) { Math.Lemmas.distributivity_add_left (t4 / pow2 48 * pow2 48) (t4 % pow2 48) pow208 }
     (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 / pow2 48 * pow2 48 * pow208 + t4 % pow2 48 * pow208) % S.prime;
-    (==) {
-      Math.Lemmas.paren_mul_right (t4 / pow2 48) (pow2 48) pow208;
-      Math.Lemmas.pow2_plus 48 208 }
+    (==) { Math.Lemmas.paren_mul_right (t4 / pow2 48) (pow2 48) pow208; Math.Lemmas.pow2_plus 48 208 }
     (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 / pow2 48 * pow2 256 + t4 % pow2 48 * pow208) % S.prime;
     (==) { lemma_a_plus_b_mul_pow256 (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 % pow2 48 * pow208) (t4 / pow2 48) }
     (t0 + t1 * pow52 + t2 * pow104 + t3 * pow156 + t4 % pow2 48 * pow208 + t4 / pow2 48 * 0x1000003D1) % S.prime;
