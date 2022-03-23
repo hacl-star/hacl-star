@@ -133,8 +133,6 @@ void Hacl_EC_K256_felem_inv(uint64_t *a, uint64_t *out)
 /*
 Load a bid-endian field element from memory.
 
-  In addition, the function performs reduction modulo p.
-
   The argument `b` points to 32 bytes of valid memory, i.e., uint8_t[32].
   The outparam `out` points to a field element of 5 limbs in size, i.e., uint64_t[5].
 

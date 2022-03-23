@@ -64,6 +64,10 @@ Create an ECDSA signature.
   The arguments `msgHash`, `private_key`, and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
 
   The function DOESN'T perform low-S normalization, see `secp256k1_ecdsa_sign_hashed_msg` if needed.
+
+  The function also checks whether `private_key` and `nonce` are valid values:
+    • 0 < `private_key` and `private_key` < the order of the curve
+    • 0 < `nonce` and `nonce` < the order of the curve
 */
 bool
 Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
@@ -104,6 +108,11 @@ Verify an ECDSA signature.
   The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
 
   The function ACCEPTS non low-S normalized signatures, see `secp256k1_ecdsa_verify_hashed_msg` if needed.
+
+  The function also checks whether a public key (x || y) is valid:
+    • 0 < x and x < prime
+    • 0 < y and y < prime
+    • (x, y) is on the curve
 */
 bool
 Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t *signature);
@@ -155,6 +164,10 @@ Create an ECDSA signature.
   The arguments `msgHash`, `private_key`, and `nonce` point to 32 bytes of valid memory, i.e., uint8_t[32].
 
   The function ALWAYS performs low-S normalization, see `ecdsa_sign_hashed_msg` if needed.
+
+  The function also checks whether `private_key` and `nonce` are valid values:
+    • 0 < `private_key` and `private_key` < the order of the curve
+    • 0 < `nonce` and `nonce` < the order of the curve
 */
 bool
 Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg(
@@ -195,6 +208,11 @@ Verify an ECDSA signature.
   The arguments `public_key` (x || y) and `signature` (R || S) point to 64 bytes of valid memory, i.e., uint8_t[64].
 
   The function DOESN'T accept non low-S normalized signatures, see `ecdsa_verify_hashed_msg` if needed.
+
+  The function also checks whether a public key (x || y) is valid:
+    • 0 < x and x < prime
+    • 0 < y and y < prime
+    • (x, y) is on the curve
 */
 bool
 Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg(
