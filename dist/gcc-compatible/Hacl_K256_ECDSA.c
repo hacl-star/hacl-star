@@ -715,13 +715,13 @@ bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y,
   }
   uint64_t y2[5U] = { 0U };
   uint64_t b[5U] = { 0U };
-  Hacl_K256_Field_fsqr(y2, x);
-  Hacl_K256_Field_fmul(y2, y2, x);
   b[0U] = (uint64_t)0x7U;
   b[1U] = (uint64_t)0U;
   b[2U] = (uint64_t)0U;
   b[3U] = (uint64_t)0U;
   b[4U] = (uint64_t)0U;
+  Hacl_K256_Field_fsqr(y2, x);
+  Hacl_K256_Field_fmul(y2, y2, x);
   Hacl_K256_Field_fadd(y2, y2, b);
   Hacl_K256_Field_fnormalize(y2, y2);
   Hacl_Impl_K256_Finv_fsqrt(y, y2);
@@ -826,12 +826,7 @@ bool Hacl_Impl_K256_Point_point_eq(uint64_t *p, uint64_t *q)
   {
     return false;
   }
-  bool z1 = fmul_fmul_eq_vartime(py, qz, qy, pz);
-  if (!z1)
-  {
-    return false;
-  }
-  return true;
+  return fmul_fmul_eq_vartime(py, qz, qy, pz);
 }
 
 void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p)
@@ -1126,13 +1121,13 @@ static inline bool load_public_key(uint8_t *pk, uint64_t *fpk_x, uint64_t *fpk_y
   {
     uint64_t y2_exp[5U] = { 0U };
     uint64_t b[5U] = { 0U };
-    Hacl_K256_Field_fsqr(y2_exp, fpk_x);
-    Hacl_K256_Field_fmul(y2_exp, y2_exp, fpk_x);
     b[0U] = (uint64_t)0x7U;
     b[1U] = (uint64_t)0U;
     b[2U] = (uint64_t)0U;
     b[3U] = (uint64_t)0U;
     b[4U] = (uint64_t)0U;
+    Hacl_K256_Field_fsqr(y2_exp, fpk_x);
+    Hacl_K256_Field_fmul(y2_exp, y2_exp, fpk_x);
     Hacl_K256_Field_fadd(y2_exp, y2_exp, b);
     Hacl_K256_Field_fnormalize(y2_exp, y2_exp);
     uint64_t y2_comp[5U] = { 0U };
@@ -1367,7 +1362,7 @@ Hacl_K256_ECDSA_ecdsa_verify_sha256(
 }
 
 /*
-Compute canonical lowest S value for `signarure` (R || S).
+Compute canonical lowest S value for `signature` (R || S).
 
   The function returns `true` for successful normalization of S and `false` otherwise.
 
@@ -1389,7 +1384,7 @@ bool Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(uint8_t *signature)
 }
 
 /*
-Check whether `signarure` (R || S) is in canonical form.
+Check whether `signature` (R || S) is in canonical form.
 
   The function returns `true` if S is low-S normalized and `false` otherwise.
 

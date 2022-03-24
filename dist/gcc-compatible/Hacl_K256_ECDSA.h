@@ -138,7 +138,7 @@ Hacl_K256_ECDSA_ecdsa_verify_sha256(
 );
 
 /*
-Compute canonical lowest S value for `signarure` (R || S).
+Compute canonical lowest S value for `signature` (R || S).
 
   The function returns `true` for successful normalization of S and `false` otherwise.
 
@@ -147,7 +147,7 @@ Compute canonical lowest S value for `signarure` (R || S).
 bool Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize(uint8_t *signature);
 
 /*
-Check whether `signarure` (R || S) is in canonical form.
+Check whether `signature` (R || S) is in canonical form.
 
   The function returns `true` if S is low-S normalized and `false` otherwise.
 
