@@ -111,7 +111,7 @@ val ecdsa_verify_sha256 (msg_len:size_t) (msg:lbytes msg_len) (public_key signat
 
 ///  Low-S normalization used in bitcoin-core/secp256k1
 
-[@@ Comment "Compute canonical lowest S value for `signarure` (R || S).
+[@@ Comment "Compute canonical lowest S value for `signature` (R || S).
 
   The function returns `true` for successful normalization of S and `false` otherwise.
 
@@ -123,7 +123,7 @@ val secp256k1_ecdsa_signature_normalize: signature: lbytes 64ul -> Stack bool
     (b <==> Some? sgnt) /\ (b ==> (as_seq h1 signature == Some?.v sgnt))))
 
 
-[@@ Comment "Check whether `signarure` (R || S) is in canonical form.
+[@@ Comment "Check whether `signature` (R || S) is in canonical form.
 
   The function returns `true` if S is low-S normalized and `false` otherwise.
 

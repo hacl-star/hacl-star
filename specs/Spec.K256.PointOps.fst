@@ -179,5 +179,4 @@ let point_equal (p:proj_point) (q:proj_point) : bool =
   let qx, qy, qz = q in // x_q = qx / qz /\ y_q = qy / qz
   // p == q <==> x_p == x_q /\ y_p == y_q <==> px * qz == qx * pz /\ py * qz == qy * pz
   if ((px *% qz) <> (qx *% pz)) then false
-  else if ((py *% qz) <> (qy *% pz)) then false
-  else true
+  else ((py *% qz) = (qy *% pz))

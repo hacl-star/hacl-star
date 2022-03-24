@@ -140,15 +140,18 @@ val compute_expected_y2 (y2 x:felem) : Stack unit
 let compute_expected_y2 y2 x =
   push_frame ();
   let b = create_felem () in
+  make_u52_5 b (make_b_k256 ());
+  let h0 = ST.get () in
+  assert (inv_fully_reduced h0 b /\ as_nat h0 b = S.b);
 
   fsqr y2 x;
   fmul y2 y2 x;
-  make_u52_5 b (make_b_k256 ());
-  let h0 = ST.get () in
-  assert (inv_lazy_reduced2 h0 y2);
-  assert (inv_fully_reduced h0 b);
+  let h1 = ST.get () in
+  assert (inv_lazy_reduced2 h1 y2);
+  assert (let xn = as_nat h0 x in
+    feval h1 y2 == S.fmul (S.fmul xn xn) xn);
 
-  BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,1) (as_felem5 h0 y2) (as_felem5 h0 b);
+  BL.fadd5_lemma (1,1,1,1,2) (1,1,1,1,1) (as_felem5 h1 y2) (as_felem5 h1 b);
   fadd y2 y2 b;
   let h1 = ST.get () in
   assert (felem_fits5 (as_felem5 h1 y2) (2,2,2,2,3));
@@ -400,6 +403,4 @@ let point_eq p q =
 
   let z0 = fmul_fmul_eq_vartime px qz qx pz in
   if not z0 then false
-  else begin
-    let z1 = fmul_fmul_eq_vartime py qz qy pz in
-    if not z1 then false else true end
+  else fmul_fmul_eq_vartime py qz qy pz

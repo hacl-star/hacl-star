@@ -206,8 +206,7 @@ let secp256k1_ecdsa_signature_normalize (signature:lbytes 64) : option (lbytes 6
 
 let secp256k1_ecdsa_is_signature_normalized (signature:lbytes 64) : bool =
   let sn = nat_from_bytes_be (sub signature 32 32) in
-  let is_sn_valid = 0 < sn && sn < q in
-  is_sn_valid && sn <= q / 2
+  0 < sn && sn <= q / 2
 
 
 let secp256k1_ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : option (lbytes 64) =
