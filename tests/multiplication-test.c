@@ -78,6 +78,24 @@ int main()
 
 	printf("bench_bignum_mul\n");
 	print_time(count,tdiff2,cdiff2);
+//////////////////////////////////////
+
+  for (int j = 0; j < ROUNDS; j++)
+    bench_unroll1_bignum_mul(arg_a, arg_b, arg_t);
+
+  t1 = clock();
+  a = cpucycles_begin();
+
+  for (int j = 0; j < ROUNDS; j++)
+    bench_unroll1_bignum_mul(arg_a, arg_b, arg_t);
+
+  b = cpucycles_end();
+  t2 = clock();
+  clock_t tdiff21 = t2 - t1;
+  cycles cdiff21 = b - a;
+
+  printf("bench_unroll1_bignum_mul\n");
+  print_time(count,tdiff21,cdiff21);
 
 /////////////////////////////////////////
 
