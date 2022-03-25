@@ -12,12 +12,13 @@ open Hacl.Bignum.Base
 open Hacl.Impl.Lib
 
 module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
 module B = LowStar.Buffer
-module S = Hacl.Spec.Bignum.Multiplication
-module SS = Hacl.Spec.Bignum.Squaring
+module LSeq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 
+module SD = Hacl.Spec.Bignum.Definitions
+module S = Hacl.Spec.Bignum.Multiplication
+module SS = Hacl.Spec.Bignum.Squaring
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -123,7 +124,7 @@ inline_for_extraction noextract
 let bn_mul_st (t:limb_t) =
     aLen:size_t
   -> a:lbignum t aLen
-  -> bLen:size_t{v aLen + v bLen <= max_size_t}
+  -> bLen:size_t{0 < v bLen /\ v aLen + v bLen <= max_size_t}
   -> b:lbignum t bLen
   -> res:lbignum t (aLen +! bLen) ->
   Stack unit
@@ -142,15 +143,33 @@ let bn_mul #t aLen a bLen b res =
   let h0 = ST.get () in
   LSeq.eq_intro (LSeq.sub (as_seq h0 res) 0 (v resLen)) (as_seq h0 res);
 
-  [@ inline_let]
-  let spec h = S.bn_mul_ (as_seq h a) (as_seq h b) in
+  let b0 = b.(0ul) in
+  let c =
+    update_sub_f_carry h0 res 0ul aLen
+    (fun h -> S.bn_mul1 (as_seq h0 a) b0)
+    (fun _ -> bn_mul1 aLen a b0 (sub res 0ul aLen)) in
+  res.(aLen) <- c;
 
-  loop1 h0 bLen res spec
+  let h1 = ST.get () in
+  let inv (h:mem) (i:nat{1 <= i /\ i <= v bLen}) =
+    modifies (loc res) h0 h /\
+    as_seq h res == Loops.repeat_right 1 i  (Loops.fixed_a (SD.lbignum t (v resLen)))
+      (S.bn_mul_ (as_seq h0 a) (as_seq h0 b)) (as_seq h1 res) in
+
+  Loops.eq_repeat_right 1 (v bLen) (Loops.fixed_a (SD.lbignum t (v resLen)))
+      (S.bn_mul_ (as_seq h0 a) (as_seq h0 b)) (as_seq h1 res);
+
+  Lib.Loops.for 1ul bLen inv
   (fun j ->
-    Loops.unfold_repeati (v bLen) (spec h0) (as_seq h0 res) (v j);
+    Loops.unfold_repeat_right 1 (v bLen) (Loops.fixed_a (SD.lbignum t (v resLen)))
+      (S.bn_mul_ (as_seq h0 a) (as_seq h0 b)) (as_seq h1 res) (v j);
     let bj = b.(j) in
     res.(aLen +! j) <- bn_mul1_lshift_add aLen a bj (aLen +! bLen) j res
-  )
+  );
+
+  let h2 = ST.get () in
+  assert (as_seq h2 res == S.bn_mul_unroll1 (as_seq h0 a) (as_seq h0 b));
+  S.bn_mul_unroll1_is_bn_mul (as_seq h0 a) (as_seq h0 b)
 
 
 [@CInline]

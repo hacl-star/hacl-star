@@ -108,6 +108,23 @@ let bn_mul #t #aLen #bLen a b =
   repeati bLen (bn_mul_ a b) res
 
 
+val bn_mul_unroll1:
+    #t:limb_t
+  -> #aLen:size_nat
+  -> #bLen:size_pos{aLen + bLen <= max_size_t}
+  -> a:lbignum t aLen
+  -> b:lbignum t bLen ->
+  lbignum t (aLen + bLen)
+
+let bn_mul_unroll1 #t #aLen #bLen a b =
+  let res = create (aLen + bLen) (uint #t 0) in
+
+  let c, ab0 = bn_mul1 a b.[0] in
+  let res = update_sub res 0 aLen ab0 in
+  let res = res.[aLen] <- c in
+
+  repeat_right 1 bLen (fixed_a (lbignum t (aLen + bLen))) (bn_mul_ a b) res
+
 
 val bn_mul1_lemma_loop_step:
      #t:limb_t
@@ -366,14 +383,25 @@ val bn_mul_lemma_:
   -> acc:lbignum t (aLen + bLen) ->
   Lemma (let res = bn_mul_ a b j acc in
    v res.[aLen + j] * pow2 (bits t * (aLen + j)) + eval_ (aLen + bLen) res (aLen + j) ==
-   eval_ (aLen + bLen) acc (aLen + j) + bn_v a * v b.[j] * pow2 (bits t * j))
+   eval_ (aLen + bLen) acc (aLen + j) + bn_v a * v b.[j] * pow2 (bits t * j) /\
+   slice res (aLen + j + 1) (aLen + bLen) == slice acc (aLen + j + 1) (aLen + bLen))
 
 let bn_mul_lemma_ #t #aLen #bLen a b j acc =
+  let resLen = aLen + bLen in
   let c, res = bn_mul1_lshift_add a b.[j] j acc in
   bn_mul1_lshift_add_lemma a b.[j] j acc;
 
   let res1 = res.[aLen + j] <- c in
-  bn_eval_extensionality_j res res1 (aLen + j)
+  bn_eval_extensionality_j res res1 (aLen + j);
+
+  let lemma_aux (i:nat{aLen + j + 1 <= i /\ i < resLen}) : Lemma (index res1 i == index acc i) =
+    assert (index res1 i == index res i);
+    Seq.lemma_index_slice res (aLen + j) resLen (i - aLen - j);
+    Seq.lemma_index_slice acc (aLen + j) resLen (i - aLen - j);
+    assert (index res i == index acc i) in
+
+  Classical.forall_intro lemma_aux;
+  eq_intro (slice res1 (aLen + j + 1) resLen) (slice acc (aLen + j + 1) resLen)
 
 
 val bn_mul_loop_lemma_step:
@@ -455,3 +483,81 @@ val bn_mul_lemma:
 
 let bn_mul_lemma #t #aLen #bLen a b =
   bn_mul_loop_lemma a b bLen
+
+
+///////////////////
+
+val bn_mul0_lemma_eval:
+    #t:limb_t
+  -> #aLen:size_nat
+  -> #bLen:size_pos{aLen + bLen <= max_size_t}
+  -> a:lbignum t aLen
+  -> b:lbignum t bLen ->
+  Lemma (let res0 = create (aLen + bLen) (uint #t 0) in
+    let res = bn_mul_ a b 0 res0 in
+    bn_v res == bn_v a * v b.[0])
+
+let bn_mul0_lemma_eval #t #aLen #bLen a b =
+  let resLen = aLen + bLen in
+  let res0 = create (aLen + bLen) (uint #t 0) in
+  let res_mul1 = bn_mul_ a b 0 res0 in
+
+  bn_mul_lemma_ a b 0 res0;
+  assert_norm (pow2 0 = 1);
+  bn_eval_zeroes #t resLen aLen;
+  assert (v res_mul1.[aLen] * pow2 (bits t * aLen) + eval_ resLen res_mul1 aLen == bn_v a * v b.[0]);
+  assert (slice res0 (aLen + 1) resLen == slice res_mul1 (aLen + 1) resLen);
+
+  eq_intro (slice res_mul1 (aLen + 1) resLen) (create (resLen - aLen - 1) (uint #t 0));
+  bn_eval_zeroes #t (resLen - aLen - 1) (resLen - aLen - 1);
+  bn_eval_split_i res_mul1 (aLen + 1);
+  assert (bn_v res_mul1 == bn_v (sub res_mul1 0 (aLen + 1)));
+  bn_eval_split_i (sub res_mul1 0 (aLen + 1)) aLen;
+  bn_eval1 (sub res_mul1 aLen 1);
+  assert (bn_v res_mul1 == bn_v (sub res_mul1 0 aLen) + pow2 (bits t * aLen) * v res_mul1.[aLen]);
+  bn_eval_extensionality_j (sub res_mul1 0 aLen) res_mul1 aLen;
+  assert (bn_v res_mul1 = bn_v a * v b.[0])
+
+
+val bn_mul_unroll1_is_bn_mul:
+    #t:limb_t
+  -> #aLen:size_nat
+  -> #bLen:size_pos{aLen + bLen <= max_size_t}
+  -> a:lbignum t aLen
+  -> b:lbignum t bLen ->
+  Lemma (bn_mul_unroll1 a b == bn_mul a b)
+
+let bn_mul_unroll1_is_bn_mul #t #aLen #bLen a b =
+  let resLen = aLen + bLen in
+  let res0 : lbignum t resLen = create resLen (uint #t 0) in
+
+  let res_mul = repeati bLen (bn_mul_ a b) res0 in
+  repeati_def bLen (bn_mul_ a b) res0;
+  assert (res_mul == repeat_right 0 bLen (fixed_a (lbignum t resLen)) (bn_mul_ a b) res0);
+
+  repeat_right_plus 0 1 bLen (fixed_a (lbignum t resLen)) (bn_mul_ a b) res0;
+  let res_mul1 : lbignum t resLen = repeat_right 0 1 (fixed_a (lbignum t resLen)) (bn_mul_ a b) res0 in
+  assert (res_mul == repeat_right 1 bLen (fixed_a (lbignum t resLen)) (bn_mul_ a b) res_mul1);
+
+  unfold_repeat_right 0 1 (fixed_a (lbignum t resLen)) (bn_mul_ a b) res0 0;
+  eq_repeat_right 0 1 (fixed_a (lbignum t resLen)) (bn_mul_ a b) res0;
+  assert (res_mul1 == bn_mul_ a b 0 res0);
+
+  bn_mul0_lemma_eval #t #aLen #bLen a b;
+  assert (bn_v res_mul1 = bn_v a * v b.[0]);
+
+  let c, ab0 = bn_mul1 a b.[0] in
+  bn_mul1_lemma a b.[0];
+  assert (v c * pow2 (bits t * aLen) + bn_v ab0 = bn_v a * v b.[0]);
+
+  let res1 = update_sub res0 0 aLen ab0 in
+  bn_eval_update_sub aLen ab0 resLen;
+  assert (bn_v res1 = bn_v ab0);
+
+  let res2 = res1.[aLen] <- c in
+  bn_upd_eval res1 c aLen;
+  assert (v res1.[aLen] = 0);
+  assert (bn_v res2 = bn_v a * v b.[0]);
+
+  bn_eval_inj resLen res2 res_mul1;
+  assert (res_mul1 == res2)
