@@ -266,6 +266,8 @@ let hash_max_input_length (a:Hash.algorithm) =
   | Hash.MD5 | Hash.SHA1
   | Hash.SHA2_224 | Hash.SHA2_256 -> 2305843009213693951 // pow2 61 - 1
   | Hash.SHA2_384 | Hash.SHA2_512 -> 42535295865117307932921825928971026431 // pow2 125 - 1
+  | Hash.Blake2S -> 18446744073709551615 // pow2 64 - 1
+  | Hash.Blake2B -> 340282366920938463463374607431768211455 // pow2 128 - 1
 
 let labeled_extract_max_length_ikm (a:Hash.algorithm) (size_local_label:size_nat) =
   hash_max_input_length a - size_label_rfcXXXX - size_local_label - Spec.Hash.Definitions.block_length a
@@ -508,4 +510,3 @@ val openBase:
 (*   -> pskID:pskID_s cs *)
 (*   -> pkS:key_dh_public_s cs -> *)
 (*   Tot (option (AEAD.decrypted #(aead_of_cs cs) ct)) *)
-
