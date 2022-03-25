@@ -32,7 +32,7 @@ uint32_t EverCrypt_random_init()
   {
     return EverCrypt_OpenSSL_random_init();
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (random_init)");
@@ -46,7 +46,7 @@ void EverCrypt_random_sample(uint32_t len, uint8_t *out)
     EverCrypt_OpenSSL_random_sample(len, out);
     return;
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (random_sample)");
@@ -57,7 +57,7 @@ void EverCrypt_random_cleanup()
 {
   if (!EverCrypt_AutoConfig2_wants_openssl())
   {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "ERROR: inconsistent configuration (random_cleanup)");
@@ -189,7 +189,7 @@ void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k, uint8_t *plain, uint8_t
       aes128_encrypt_one_block(cipher, plain, w, sbox);
       return;
     }
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "unreachable (pattern matches are exhaustive in F*)");
@@ -204,13 +204,13 @@ void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k, uint8_t *plain, uint8_t
       EverCrypt_Hacl_aes128_cipher(cipher, plain, w, sbox);
       return;
     }
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "unreachable (pattern matches are exhaustive in F*)");
     KRML_HOST_EXIT(255U);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (aes128_compute)");
@@ -233,7 +233,7 @@ void EverCrypt_aes128_free(EverCrypt_aes128_key_s *pk)
     }
     else
     {
-      KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
         __FILE__,
         __LINE__,
         "unreachable (pattern matches are exhaustive in F*)");
@@ -251,7 +251,7 @@ void EverCrypt_aes128_free(EverCrypt_aes128_key_s *pk)
     }
     else
     {
-      KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
         __FILE__,
         __LINE__,
         "unreachable (pattern matches are exhaustive in F*)");
@@ -260,7 +260,7 @@ void EverCrypt_aes128_free(EverCrypt_aes128_key_s *pk)
   }
   else
   {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "ERROR: inconsistent configuration (aes128_free)");
@@ -356,13 +356,13 @@ void EverCrypt_aes256_compute(EverCrypt_aes256_key_s *k, uint8_t *plain, uint8_t
       EverCrypt_Hacl_aes256_cipher(cipher, plain, w, sbox);
       return;
     }
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "unreachable (pattern matches are exhaustive in F*)");
     KRML_HOST_EXIT(255U);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (aes256_compute)");
@@ -385,7 +385,7 @@ void EverCrypt_aes256_free(EverCrypt_aes256_key_s *pk)
     }
     else
     {
-      KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
         __FILE__,
         __LINE__,
         "unreachable (pattern matches are exhaustive in F*)");
@@ -394,7 +394,7 @@ void EverCrypt_aes256_free(EverCrypt_aes256_key_s *pk)
   }
   else
   {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "ERROR: inconsistent configuration (aes256_free)");
@@ -463,7 +463,7 @@ EverCrypt_aes128_gcm_encrypt(
     EverCrypt_OpenSSL_aes128_gcm_encrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
     return;
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (aes128_gcm_encrypt)");
@@ -533,7 +533,7 @@ EverCrypt_aes128_gcm_decrypt(
   {
     return EverCrypt_OpenSSL_aes128_gcm_decrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (aes128_gcm_decrypt)");
@@ -600,7 +600,7 @@ EverCrypt_aes256_gcm_encrypt(
     EverCrypt_OpenSSL_aes256_gcm_encrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
     return;
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (aes256_gcm_encrypt)");
@@ -670,7 +670,7 @@ EverCrypt_aes256_gcm_decrypt(
   {
     return EverCrypt_OpenSSL_aes256_gcm_decrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (aes256_gcm_decrypt)");
@@ -740,7 +740,7 @@ uint32_t EverCrypt_block_cipher_keyLen(EverCrypt_block_cipher_alg uu___)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -764,7 +764,7 @@ uint32_t EverCrypt_block_cipher_blockLen(EverCrypt_block_cipher_alg uu___)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -916,7 +916,7 @@ uint32_t EverCrypt_aead_keyLen(EverCrypt_aead_alg uu___)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -958,7 +958,7 @@ uint32_t EverCrypt_aead_tagLen(EverCrypt_aead_alg uu___)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1155,7 +1155,7 @@ EverCrypt__aead_state *EverCrypt_aead_create(EverCrypt_aead_alg alg, uint8_t *k)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1286,7 +1286,7 @@ EverCrypt_aead_encrypt(
     EverCrypt_OpenSSL_aead_encrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
     return;
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (aead_encrypt)");
@@ -1422,7 +1422,7 @@ EverCrypt_aead_decrypt(
     }
     return EverCrypt_OpenSSL_aead_decrypt(key, iv, ad, adlen, plaintext, len, cipher, tag);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (aead_decrypt)");
@@ -1443,7 +1443,7 @@ void EverCrypt_aead_free(EverCrypt__aead_state *pk)
     }
     else
     {
-      KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
         __FILE__,
         __LINE__,
         "unreachable (pattern matches are exhaustive in F*)");
@@ -1459,7 +1459,7 @@ void EverCrypt_aead_free(EverCrypt__aead_state *pk)
     }
     else
     {
-      KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
         __FILE__,
         __LINE__,
         "unreachable (pattern matches are exhaustive in F*)");
@@ -1475,7 +1475,7 @@ void EverCrypt_aead_free(EverCrypt__aead_state *pk)
     }
     else
     {
-      KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+      KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
         __FILE__,
         __LINE__,
         "unreachable (pattern matches are exhaustive in F*)");
@@ -1497,7 +1497,7 @@ void EverCrypt_aead_free(EverCrypt__aead_state *pk)
   }
   else
   {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "ERROR: inconsistent configuration (aead_free)");
@@ -1573,7 +1573,7 @@ void EverCrypt_dh_free_group(EverCrypt__dh_state *st)
   }
   else
   {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "ERROR: inconsistent configuration (dh_free_group)");
@@ -1598,7 +1598,7 @@ uint32_t EverCrypt_dh_keygen(EverCrypt__dh_state *st, uint8_t *public)
     }
     return EverCrypt_OpenSSL_dh_keygen(ite, public);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (dh_keygen)");
@@ -1627,7 +1627,7 @@ EverCrypt_dh_compute(
     }
     return EverCrypt_OpenSSL_dh_compute(ite, public, public_len, out);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (dh_compute)");
@@ -1762,7 +1762,7 @@ EverCrypt__ecdh_state *EverCrypt_ecdh_load_curve(EverCrypt_ec_curve g)
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
@@ -1802,7 +1802,7 @@ void EverCrypt_ecdh_free_curve(EverCrypt__ecdh_state *st)
   }
   else
   {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "ERROR: inconsistent configuration (ecdh_free_curve)");
@@ -1828,7 +1828,7 @@ void EverCrypt_ecdh_keygen(EverCrypt__ecdh_state *st, uint8_t *outx, uint8_t *ou
     EverCrypt_OpenSSL_ecdh_keygen(ite, outx, outy);
     return;
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (ecdh_keygen)");
@@ -1852,7 +1852,7 @@ EverCrypt_ecdh_compute(EverCrypt__ecdh_state *st, uint8_t *inx, uint8_t *iny, ui
     }
     return EverCrypt_OpenSSL_ecdh_compute(ite, inx, iny, out);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "ERROR: inconsistent configuration (ecdh_compute)");

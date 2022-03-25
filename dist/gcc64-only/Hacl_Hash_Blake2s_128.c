@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Hash_Blake2s_128.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_Blake2.h"
 
 static uint64_t
