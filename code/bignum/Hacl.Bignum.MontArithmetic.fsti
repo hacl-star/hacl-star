@@ -150,6 +150,7 @@ let bn_field_init_st (t:limb_t) (len:BN.meta_len t) =
     B.(fresh_loc (footprint h1 res) h0 h1) /\
     B.(loc_includes (loc_region_only true r) (footprint h1 res)) /\
     freeable h1 res /\
+    (B.deref h1 res).len == len /\ bn_v_n h1 res == bn_v h0 n /\
     S.bn_mont_ctx_inv (as_pctx h1 res) /\
     as_pctx h1 res == S.bn_field_init (as_seq h0 n))
 
