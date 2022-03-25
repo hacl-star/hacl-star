@@ -194,7 +194,7 @@ let rec karatsuba () = karatsuba_open karastuba
 
 inline_for_extraction noextract
 let bn_karatsuba_mul_st (t:limb_t) =
-    len:size_t{4 * v len <= max_size_t}
+    len:size_t{0 < v len /\ 4 * v len <= max_size_t}
   -> a:lbignum t len
   -> b:lbignum t len
   -> tmp:lbignum t (4ul *! len)

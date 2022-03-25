@@ -205,7 +205,7 @@ val bn_karatsuba_mul:
 
 
 inline_for_extraction noextract
-let bn_mul_st (t:limb_t) (aLen:size_t) (bLen:size_t{v aLen + v bLen <= max_size_t}) (a:lbignum t aLen) =
+let bn_mul_st (t:limb_t) (aLen:size_t) (bLen:size_t{0 < v bLen /\ v aLen + v bLen <= max_size_t}) (a:lbignum t aLen) =
     b:lbignum t bLen
   -> res:lbignum t (aLen +! bLen) ->
   Stack unit
@@ -220,7 +220,7 @@ inline_for_extraction noextract
 val bn_mul:
     #t:limb_t
   -> aLen:size_t
-  -> bLen:size_t{v aLen + v bLen <= max_size_t}
+  -> bLen:size_t{0 < v bLen /\ v aLen + v bLen <= max_size_t}
   -> a:lbignum t aLen ->
   bn_mul_st t aLen bLen a
 
