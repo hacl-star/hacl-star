@@ -3,9 +3,9 @@ module Spec.ECDSAP256.Definition
 open Lib.IntTypes
 open FStar.Math.Lemmas
 open FStar.Math.Lib
-(*
+
 open FStar.HyperStack
-open FStar.HyperStack.All *)
+open FStar.HyperStack.All
 open Lib.Sequence
 open FStar.Mul
 
