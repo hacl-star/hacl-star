@@ -11,6 +11,6 @@
 
 /* If some globals need to be initialized before the main, then karamel will
  * generate and try to link last a function with this type: */
-void karamelit_globals(void);
+void krmlinit_globals(void);
 
 #endif
