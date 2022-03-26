@@ -569,7 +569,6 @@ let lemma_slices_le_quad32_to_bytes (q:quad32) : Lemma
   reveal_opaque (`%le_quad32_to_bytes) le_quad32_to_bytes;
   ()
 
-#reset-options "--z3rlimit 50"
 let quad32_xor_bytewise (q q' r:quad32) (n:nat{ n <= 16 }) : Lemma
   (requires (let q_bytes  = le_quad32_to_bytes q in
              let q'_bytes = le_quad32_to_bytes q' in
@@ -610,7 +609,6 @@ let quad32_xor_bytewise (q q' r:quad32) (n:nat{ n <= 16 }) : Lemma
   );
   assert (equal (slice t 0 n) (slice t' 0 n));
   ()
-#reset-options
 
 let slice_pad_to_128_bits (s:seq nat8 {  0 < length s /\ length s < 16 }) :
   Lemma(slice (pad_to_128_bits s) 0 (length s) == s)
