@@ -49,7 +49,7 @@ let _: squash (Vale.Curve25519.Fast_defs.prime = Spec.Curve25519.prime) =
 // ``as_nat_is_as_nat`` and ``buffer_is_buffer`` above.
 [@ CInline]
 let add_scalar out f1 f2 =
-  if EverCrypt.TargetConfig.evercrypt_can_compile_inline_asm then
+  if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then
     Vale.Inline.X64.Fadd_inline.add_scalar out f1 f2
   else
     Vale.Wrapper.X64.Fadd.add_scalar_e out f1 f2
@@ -79,7 +79,7 @@ let fadd out f1 f2 =
       b;
     }
   in aux();
-  if EverCrypt.TargetConfig.evercrypt_can_compile_inline_asm then
+  if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then
     Vale.Inline.X64.Fadd_inline.fadd out f1 f2
   else
     Vale.Wrapper.X64.Fadd.fadd_e out f1 f2
@@ -107,7 +107,7 @@ let fsub out f1 f2 =
       b;
     }
   in aux();
-  if EverCrypt.TargetConfig.evercrypt_can_compile_inline_asm then
+  if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then
     Vale.Inline.X64.Fadd_inline.fsub out f1 f2
   else
     Vale.Wrapper.X64.Fsub.fsub_e out f1 f2
@@ -137,7 +137,7 @@ let lemma_fmul_equiv (h0:HS.mem) (f1 f2:F64.u256) : Lemma
 let fmul out f1 f2 tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 f1 f2;
-  if EverCrypt.TargetConfig.evercrypt_can_compile_inline_asm then (
+  if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then (
     assert (disjoint f1 (gsub tmp 0ul 8ul));
     assert (disjoint f2 (gsub tmp 0ul 8ul));
     Vale.Inline.X64.Fmul_inline.fmul out f1 f2 (sub tmp 0ul 8ul)
@@ -150,7 +150,7 @@ let fmul2 out f1 f2 tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 (gsub f1 0ul 4ul) (gsub f2 0ul 4ul);
   lemma_fmul_equiv h0 (gsub f1 4ul 4ul) (gsub f2 4ul 4ul);
-  if EverCrypt.TargetConfig.evercrypt_can_compile_inline_asm then
+  if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then
     Vale.Inline.X64.Fmul_inline.fmul2 out f1 f2 tmp
   else
     Vale.Wrapper.X64.Fmul.fmul2_e tmp f1 out f2
@@ -175,7 +175,7 @@ let fmul_scalar out f1 f2 =
     }
   in aux();
   assert_norm (pow2 17 = 131072);
-  if EverCrypt.TargetConfig.evercrypt_can_compile_inline_asm then
+  if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then
     Vale.Inline.X64.Fmul_inline.fmul_scalar out f1 f2
   else
     Vale.Wrapper.X64.Fmul.fmul_scalar_e out f1 f2
@@ -184,7 +184,7 @@ let fmul_scalar out f1 f2 =
 let fsqr out f1 tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 f1 f1;
-  if EverCrypt.TargetConfig.evercrypt_can_compile_inline_asm then
+  if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then
     Vale.Inline.X64.Fsqr_inline.fsqr out f1 tmp
   else
     Vale.Wrapper.X64.Fsqr.fsqr_e tmp f1 out
@@ -194,7 +194,7 @@ let fsqr2 out f tmp =
   let h0 = ST.get() in
   lemma_fmul_equiv h0 (gsub f 0ul 4ul) (gsub f 0ul 4ul);
   lemma_fmul_equiv h0 (gsub f 4ul 4ul) (gsub f 4ul 4ul);
-  if EverCrypt.TargetConfig.evercrypt_can_compile_inline_asm then
+  if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then
     Vale.Inline.X64.Fsqr_inline.fsqr2 out f tmp
   else
     Vale.Wrapper.X64.Fsqr.fsqr2_e tmp f out
@@ -202,7 +202,7 @@ let fsqr2 out f tmp =
 [@ CInline]
 let cswap2 bit p1 p2 =
   let h0 = ST.get() in
-  if EverCrypt.TargetConfig.evercrypt_can_compile_inline_asm then
+  if EverCrypt.TargetConfig.hacl_can_compile_inline_asm then
     Vale.Inline.X64.Fswap_inline.cswap2 bit p1 p2
   else
     Vale.Wrapper.X64.Fswap.cswap2_e bit p1 p2;

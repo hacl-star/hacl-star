@@ -16,20 +16,33 @@ EXPORTS
   Hacl_Hash_Blake2_update_last_blake2b_32
   Hacl_Hash_Blake2_hash_blake2s_32
   Hacl_Hash_Blake2_hash_blake2b_32
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
+  Hacl_Hash_Core_MD5_legacy_init
+  Hacl_Hash_Core_MD5_legacy_update
+  Hacl_Hash_Core_MD5_legacy_finish
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
-  Hacl_Hash_Core_MD5_legacy_init
-  Hacl_Hash_Core_MD5_legacy_update
-  Hacl_Hash_Core_MD5_legacy_pad
-  Hacl_Hash_Core_MD5_legacy_finish
+  Hacl_Hash_Core_SHA1_legacy_init
+  Hacl_Hash_Core_SHA1_legacy_update
+  Hacl_Hash_Core_SHA1_legacy_finish
   Hacl_Hash_SHA1_legacy_update_multi
   Hacl_Hash_SHA1_legacy_update_last
   Hacl_Hash_SHA1_legacy_hash
-  Hacl_Hash_Core_SHA1_legacy_init
-  Hacl_Hash_Core_SHA1_legacy_update
-  Hacl_Hash_Core_SHA1_legacy_pad
-  Hacl_Hash_Core_SHA1_legacy_finish
+  Hacl_Hash_Core_SHA2_init_224
+  Hacl_Hash_Core_SHA2_init_256
+  Hacl_Hash_Core_SHA2_init_384
+  Hacl_Hash_Core_SHA2_init_512
+  Hacl_Hash_Core_SHA2_update_384
+  Hacl_Hash_Core_SHA2_update_512
+  Hacl_Hash_Core_SHA2_pad_256
+  Hacl_Hash_Core_SHA2_finish_224
+  Hacl_Hash_Core_SHA2_finish_256
+  Hacl_Hash_Core_SHA2_finish_384
+  Hacl_Hash_Core_SHA2_finish_512
   Hacl_Hash_SHA2_update_multi_224
   Hacl_Hash_SHA2_update_multi_256
   Hacl_Hash_SHA2_update_multi_384
@@ -42,26 +55,6 @@ EXPORTS
   Hacl_Hash_SHA2_hash_256
   Hacl_Hash_SHA2_hash_384
   Hacl_Hash_SHA2_hash_512
-  Hacl_Hash_Core_SHA2_init_224
-  Hacl_Hash_Core_SHA2_init_256
-  Hacl_Hash_Core_SHA2_init_384
-  Hacl_Hash_Core_SHA2_init_512
-  Hacl_Hash_Core_SHA2_update_224
-  Hacl_Hash_Core_SHA2_update_256
-  Hacl_Hash_Core_SHA2_update_384
-  Hacl_Hash_Core_SHA2_update_512
-  Hacl_Hash_Core_SHA2_pad_224
-  Hacl_Hash_Core_SHA2_pad_256
-  Hacl_Hash_Core_SHA2_pad_384
-  Hacl_Hash_Core_SHA2_pad_512
-  Hacl_Hash_Core_SHA2_finish_224
-  Hacl_Hash_Core_SHA2_finish_256
-  Hacl_Hash_Core_SHA2_finish_384
-  Hacl_Hash_Core_SHA2_finish_512
-  Hacl_Hash_Definitions_word_len
-  Hacl_Hash_Definitions_block_len
-  Hacl_Hash_Definitions_hash_word_len
-  Hacl_Hash_Definitions_hash_len
   EverCrypt_AutoConfig2_has_shaext
   EverCrypt_AutoConfig2_has_aesni
   EverCrypt_AutoConfig2_has_pclmulqdq
@@ -98,21 +91,13 @@ EXPORTS
   EverCrypt_AutoConfig2_has_vec256
   EverCrypt_Hash_string_of_alg
   EverCrypt_Hash_uu___is_MD5_s
-  EverCrypt_Hash___proj__MD5_s__item__p
   EverCrypt_Hash_uu___is_SHA1_s
-  EverCrypt_Hash___proj__SHA1_s__item__p
   EverCrypt_Hash_uu___is_SHA2_224_s
-  EverCrypt_Hash___proj__SHA2_224_s__item__p
   EverCrypt_Hash_uu___is_SHA2_256_s
-  EverCrypt_Hash___proj__SHA2_256_s__item__p
   EverCrypt_Hash_uu___is_SHA2_384_s
-  EverCrypt_Hash___proj__SHA2_384_s__item__p
   EverCrypt_Hash_uu___is_SHA2_512_s
-  EverCrypt_Hash___proj__SHA2_512_s__item__p
   EverCrypt_Hash_uu___is_Blake2S_s
-  EverCrypt_Hash___proj__Blake2S_s__item__p
   EverCrypt_Hash_uu___is_Blake2B_s
-  EverCrypt_Hash___proj__Blake2B_s__item__p
   EverCrypt_Hash_alg_of_state
   EverCrypt_Hash_create_in
   EverCrypt_Hash_create
@@ -181,16 +166,9 @@ EXPORTS
   Hacl_Impl_Curve25519_Field51_fsqr2
   Hacl_Impl_Curve25519_Field51_store_felem
   Hacl_Impl_Curve25519_Field51_cswap2
-  Hacl_Curve25519_51_fsquare_times
-  Hacl_Curve25519_51_finv
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
-  Hacl_Ed25519_sign
-  Hacl_Ed25519_verify
-  Hacl_Ed25519_secret_to_public
-  Hacl_Ed25519_expand_keys
-  Hacl_Ed25519_sign_expanded
   Hacl_Poly1305_32_poly1305_mac
   Hacl_NaCl_crypto_secretbox_detached
   Hacl_NaCl_crypto_secretbox_open_detached
@@ -237,15 +215,6 @@ EXPORTS
   mt_sha256_compress
   mt_create
   MerkleTree_Low_uu___is_MT
-  MerkleTree_Low___proj__MT__item__hash_size
-  MerkleTree_Low___proj__MT__item__offset
-  MerkleTree_Low___proj__MT__item__i
-  MerkleTree_Low___proj__MT__item__j
-  MerkleTree_Low___proj__MT__item__hs
-  MerkleTree_Low___proj__MT__item__rhs_ok
-  MerkleTree_Low___proj__MT__item__rhs
-  MerkleTree_Low___proj__MT__item__mroot
-  MerkleTree_Low___proj__MT__item__hash_fun
   MerkleTree_Low_merkle_tree_conditions
   MerkleTree_Low_offset_of
   MerkleTree_Low_mt_free
@@ -253,8 +222,6 @@ EXPORTS
   MerkleTree_Low_mt_insert
   MerkleTree_Low_mt_create_custom
   MerkleTree_Low_uu___is_Path
-  MerkleTree_Low___proj__Path__item__hash_size
-  MerkleTree_Low___proj__Path__item__hashes
   MerkleTree_Low_init_path
   MerkleTree_Low_clear_path
   MerkleTree_Low_free_path
@@ -288,11 +255,6 @@ EXPORTS
   EverCrypt_Error_uu___is_InvalidIVLength
   EverCrypt_Error_uu___is_DecodeError
   EverCrypt_CTR_uu___is_State
-  EverCrypt_CTR___proj__State__item__i
-  EverCrypt_CTR___proj__State__item__iv
-  EverCrypt_CTR___proj__State__item__iv_len
-  EverCrypt_CTR___proj__State__item__xkey
-  EverCrypt_CTR___proj__State__item__ctr
   EverCrypt_CTR_xor8
   EverCrypt_CTR_alg_of_state
   EverCrypt_CTR_create_in
@@ -300,14 +262,11 @@ EXPORTS
   EverCrypt_CTR_update_block
   EverCrypt_CTR_free
   Hacl_IntTypes_Intrinsics_add_carry_u32
-  Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u32
+  Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
-  EverCrypt_Ed25519_sign
-  EverCrypt_Ed25519_verify
-  EverCrypt_Ed25519_secret_to_public
-  EverCrypt_Ed25519_expand_keys
-  EverCrypt_Ed25519_sign_expanded
+  Hacl_IntTypes_Intrinsics_128_add_carry_u64
+  Hacl_IntTypes_Intrinsics_128_sub_borrow_u64
   EverCrypt_HMAC_compute_sha1
   EverCrypt_HMAC_compute_sha2_256
   EverCrypt_HMAC_compute_sha2_384
@@ -334,13 +293,9 @@ EXPORTS
   EverCrypt_HKDF_hkdf_extract
   EverCrypt_DRBG_min_length
   EverCrypt_DRBG_uu___is_SHA1_s
-  EverCrypt_DRBG___proj__SHA1_s__item___0
   EverCrypt_DRBG_uu___is_SHA2_256_s
-  EverCrypt_DRBG___proj__SHA2_256_s__item___0
   EverCrypt_DRBG_uu___is_SHA2_384_s
-  EverCrypt_DRBG___proj__SHA2_384_s__item___0
   EverCrypt_DRBG_uu___is_SHA2_512_s
-  EverCrypt_DRBG___proj__SHA2_512_s__item___0
   EverCrypt_DRBG_create
   EverCrypt_DRBG_instantiate_sha1
   EverCrypt_DRBG_instantiate_sha2_256
@@ -366,11 +321,3 @@ EXPORTS
   EverCrypt_Curve25519_scalarmult
   EverCrypt_Curve25519_ecdh
   EverCrypt_Cipher_chacha20
-  __proj__Mkgcm_args__item__plain
-  __proj__Mkgcm_args__item__plain_len
-  __proj__Mkgcm_args__item__aad
-  __proj__Mkgcm_args__item__aad_len
-  __proj__Mkgcm_args__item__iv
-  __proj__Mkgcm_args__item__expanded_key
-  __proj__Mkgcm_args__item__cipher
-  __proj__Mkgcm_args__item__tag

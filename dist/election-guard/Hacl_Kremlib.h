@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
+#include "kremlin/internal/builtin.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
 static inline uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b);
 
 static inline uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b);

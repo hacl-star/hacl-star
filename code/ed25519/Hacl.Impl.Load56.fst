@@ -26,7 +26,7 @@ val hload56_le:
     )
 
 let hload56_le b off =
-  let h0 = get() in
+  let h0 = ST.get() in
   let b8 = sub b off 8ul in
   let z  = uint_from_bytes_le b8 in
   let z' = z &. u64 0xffffffffffffff in
@@ -129,7 +129,7 @@ val load_64_bytes:
 
 [@CInline]
 let load_64_bytes out b =
-  let h0 = get() in
+  let h0 = ST.get() in
   let b0 = hload56_le b 0ul in
   let b1 = hload56_le b 7ul in
   let b2 = hload56_le b 14ul in
@@ -157,7 +157,7 @@ val hload56_le':
     )
 
 let hload56_le' b off =
-  let h0 = get() in
+  let h0 = ST.get() in
   let b8 = sub b off 8ul in
   let z  = uint_from_bytes_le b8 in
   let z' = z &. u64 0xffffffffffffff in
@@ -223,7 +223,7 @@ val load_32_bytes:
 
 [@CInline]
 let load_32_bytes out b =
-  let h0 = get() in
+  let h0 = ST.get() in
   let b0 = hload56_le' b 0ul in
   let b1 = hload56_le' b 7ul in
   let b2 = hload56_le' b 14ul in

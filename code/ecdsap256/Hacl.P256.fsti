@@ -19,10 +19,30 @@ open Spec.ECDSAP256.Definition
 open Hacl.Impl.P256.Compression
 open Spec.P256.MontgomeryMultiplication
 
+[@@ CPrologue "
+/*******************************************************************************
 
-[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
+ECDSA and ECDH functions over the P-256 NIST curve.
+
+This module implements signing and verification, key validation, conversions
+between various point representations, and ECDH key agreement.
+
+*******************************************************************************/
+
+/**************/
+/* Signatures */
+/**************/
+
+/*
+  Per the standard, a hash function *shall* be used. Therefore, we recommend
+  using one of the three combined hash-and-sign variants.
+*/";
+
+Comment "Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
-  \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
+  \n The private key and the nonce are expected to be more than 0 and less than the curve order."]
 val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64) 
   -> mLen: size_t 
   -> m: lbuffer uint8 mLen 
@@ -52,7 +72,9 @@ val ecdsa_sign_p256_sha2: result: lbuffer uint8 (size 64)
   )
 
 
-[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
+[@ (Comment "Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
 val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m: lbuffer uint8 mLen ->
@@ -82,7 +104,9 @@ val ecdsa_sign_p256_sha384: result: lbuffer uint8 (size 64) -> mLen: size_t -> m
   )
 
 
-[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
+[@ (Comment "Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.")]
 val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64) 
@@ -114,7 +138,19 @@ val ecdsa_sign_p256_sha512: result: lbuffer uint8 (size 64)
   )
 
 
-[@ (Comment " Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
+[@ (Comment "P256 signature WITHOUT hashing first.
+
+This function is intended to receive a hash of the input. For convenience, we
+recommend using one of the hash-and-sign combined functions above.
+
+The argument `m` MUST be at least 32 bytes (i.e. `mLen >= 32`).
+
+NOTE: The equivalent functions in OpenSSL and Fiat-Crypto both accept inputs
+smaller than 32 bytes. These libraries left-pad the input with enough zeroes to
+reach the minimum 32 byte size. Clients who need behavior identical to OpenSSL
+need to perform the left-padding themselves.
+
+Input: result buffer: uint8[64], \n m buffer: uint8 [mLen], \n priv(ate)Key: uint8[32], \n k (nonce): uint32[32]. 
   \n Output: bool, where True stands for the correct signature generation. False value means that an error has occurred. 
   \n The private key and the nonce are expected to be more than 0 and less than the curve order.
   \n The message m is expected to be hashed by a strong hash function, the lenght of the message is expected to be 32 bytes and more.")]
@@ -147,7 +183,17 @@ val ecdsa_sign_p256_without_hash: result: lbuffer uint8 (size 64)
   )
 
 
-[@ (Comment " The input of the function is considered to be public, 
+[@@ CPrologue "
+/****************/
+/* Verification */
+/****************/
+
+/*
+  Verify a message signature. These functions internally validate the public key using validate_public_key.
+*/
+";
+
+(Comment " The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   \n Input: m buffer: uint8 [mLen], \n pub(lic)Key: uint8[64], \n r: uint8[32], \n s: uint8[32]. 
   \n Output: bool, where true stands for the correct signature verification. ")]
@@ -239,13 +285,19 @@ val ecdsa_verif_without_hash:
    )
 
 
-[@ (Comment " Public key verification function. 
+[@@ CPrologue "
+/******************/
+/* Key validation */
+/******************/
+";
+Comment "Validate a public key.
+
   \n  The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
   \n Input: pub(lic)Key: uint8[64]. 
   \n Output: bool, where 0 stands for the public key to be correct with respect to SP 800-56A:  \n Verify that the public key is not the “point at infinity”, represented as O. \n Verify that the affine x and y coordinates of the point represented by the public key are in the range [0, p – 1] where p is the prime defining the finite field. \n Verify that y2 = x3 + ax + b where a and b are the coefficients of the curve equation. \n Verify that nQ = O (the point at infinity), where n is the order of the curve and Q is the public key point.
-  \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/")]
-val verify_q: 
+  \n The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/"]
+val validate_public_key: 
   pubKey: lbuffer uint8 (size 64) ->
   Stack bool
     (requires fun h -> live h pubKey)
@@ -258,16 +310,42 @@ val verify_q:
       )
     )
 
+[@@ Comment "Validate a private key, e.g. prior to signing.
 
-[@ (Comment " There and further we introduce notions of compressed point and not compressed point. 
-  \n We denote || as byte concatenation. 
-  \n A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
-  \n A not Compressed point is a point representation as follows: 0x4 || x || y.
+Input: scalar: uint8[32].
+  \n Output: bool, where true stands for the scalar to be more than 0 and less than order."]
+val validate_private_key: x: lbuffer uint8 (size 32) -> Stack bool
+  (requires fun h -> live h x)
+  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
+    (
+      let scalar = nat_from_bytes_be (as_seq h0 x) in 
+      r <==> (scalar > 0 && scalar < prime_p256_order)
+    )
+  )
+
+[@@ CPrologue "
+/*****************************************/
+/* Point representations and conversions */
+/*****************************************/
+
+/*
+  Elliptic curve points have 2 32-byte coordinates (x, y) and can be represented in 3 ways:
+
+  - \"raw\" form (64 bytes): the concatenation of the 2 coordinates, also known as \"internal\"
+  - \"compressed\" form (33 bytes): first the sign byte of y (either 0x02 or 0x03), followed by x
+  - \"uncompressed\" form (65 bytes): first a constant byte (always 0x04), followed by the \"raw\" form
+
+  For all of the conversation functions below, the input and output MUST NOT overlap.
+*/
+";
+ (Comment "Convert 65-byte uncompressed to raw.
+
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
   \n \n Input: a point in not compressed form (uint8[65]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
  ")]
-val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val uncompressed_to_raw: b: notCompressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\
     (
@@ -284,10 +362,14 @@ val decompression_not_compressed_form: b: notCompressedForm -> result: lbuffer u
 )
 
 
-[@ (Comment " Input: a point in compressed form (uint8[33]), \n result: uint8[64] (internal point representation).
+[@ (Comment "Convert 33-byte compressed to raw.
+
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
+
+Input: a point in compressed form (uint8[33]), \n result: uint8[64] (internal point representation).
   \n Output: bool, where true stands for the correct decompression.
  ")]
-val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
+val compressed_to_raw: b: compressedForm -> result: lbuffer uint8 (size 64) -> Stack bool 
   (requires fun h -> live h b /\ live h result /\ disjoint b result)
   (ensures fun h0 r h1 -> 
     (
@@ -316,8 +398,12 @@ val decompression_compressed_form: b: compressedForm -> result: lbuffer uint8 (s
   )
 
 
-[@ (Comment " Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[65]).")]
-val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
+[@ (Comment "Convert raw to 65-byte uncompressed.
+
+This function effectively prepends a 0x04 byte.
+
+Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[65]).")]
+val raw_to_uncompressed: b: lbuffer uint8 (size 64) -> result: notCompressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -332,8 +418,12 @@ val compression_not_compressed_form: b: lbuffer uint8 (size 64) -> result: notCo
     )
 
 
-[@ (Comment " Input: a point buffer (internal representation: uint8[64]), \n result: a point in not compressed form (uint8[33]).")]
-val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
+[@ (Comment "Convert raw to 33-byte compressed.
+
+  Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
+  Output: `result`, a point in compressed form, of type `uint8[33]`
+")]
+val raw_to_compressed: b: lbuffer uint8 (size 64) -> result: compressedForm -> 
   Stack unit 
     (requires fun h -> live h b /\ live h result /\ disjoint b result)
     (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
@@ -348,11 +438,23 @@ val compression_compressed_form: b: lbuffer uint8 (size 64) -> result: compresse
   )
 
 
-[@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
-  \n Output: bool, where True stands for the correct key generation. 
-  \n False means that an error has occurred (possibly that the result respresents point at infinity). 
-  ")]
-val ecp256dh_i:
+[@@ CPrologue "
+/******************/
+/* ECDH agreement */
+/******************/";
+
+(Comment "Convert a private key into a raw public key.
+
+This function performs no key validation.
+
+  Input: `scalar`, the private key, of type `uint8[32]`.
+  Output: `result`, the public key, of type `uint8[64]`.
+  Returns:
+  - `true`, for success, meaning the public key is not a point at infinity
+  - `false`, otherwise.
+
+  `scalar` and `result` MUST NOT overlap.")]
+val dh_initiator:
     result:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
   -> Stack bool
@@ -367,13 +469,19 @@ val ecp256dh_i:
     as_seq h1 (gsub result (size 32) (size 32)) == pointY)
 
 
-[@ (Comment " 
+[@ (Comment "ECDH key agreement.
+
+This function takes a 32-byte secret key, another party's 64-byte raw public
+key, and computeds the 64-byte ECDH shared key.
+
+This function ONLY validates the public key.
+
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
   \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   ")]
-val ecp256dh_r:
+val dh_responder:
     result:lbuffer uint8 (size 64)
   -> pubKey:lbuffer uint8 (size 64)
   -> scalar:lbuffer uint8 (size 32)
@@ -390,15 +498,3 @@ val ecp256dh_r:
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
       as_seq h1 (gsub result (size 32) (size 32)) == pointY)
-
-
-[@ (Comment " Input: scalar: uint8[32].
-  \n Output: bool, where true stands for the scalar to be more than 0 and less than order.")]
-val is_more_than_zero_less_than_order: x: lbuffer uint8 (size 32) -> Stack bool
-  (requires fun h -> live h x)
-  (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
-    (
-      let scalar = nat_from_bytes_be (as_seq h0 x) in 
-      r <==> (scalar > 0 && scalar < prime_p256_order)
-    )
-  )

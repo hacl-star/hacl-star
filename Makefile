@@ -102,9 +102,15 @@ all:
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
-  compile-portable-gcc-compatible compile-mozilla dist/linux/Makefile.basic \
+  compile-portable-gcc-compatible dist/linux/Makefile.basic \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
   obj/libhaclml.cmxa compile-election-guard
+
+# Mozilla does not want to run the configure script, so this means that the
+# build of Mozilla will break on platforms other than x86-64
+ifeq ($(shell uname -m),x86_64)
+all-unstaged: compile-mozilla
+endif
 
 # Automatic staging.
 %-staged: .last_vale_version
@@ -123,10 +129,6 @@ all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only 
 test: test-staged
 test-unstaged: test-handwritten test-c test-ml vale_testInline test-wasm test-bindings-ocaml
 
-ifneq ($(OS),Windows_NT)
-test-unstaged: test-benchmark
-endif
-
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
 test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.fst)))) \
@@ -136,16 +138,13 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
 
-test-benchmark: all-unstaged
-	$(MAKE) -C tests/benchmark all
-
 mozilla-ci: mozilla-ci-staged
 mozilla-ci-unstaged: compile-mozilla test-c
 
 # Not reusing the -staged automatic target so as to export NOSHORTLOG
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
-	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged doc-wasm
+	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged doc-wasm doc-ocaml
 	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
 
@@ -160,7 +159,7 @@ min-test:
 TO_CLEAN=$(foreach ext,checked checked.lax out cmd err time dump types.vaf krml cmx cmo cmi o d a,-or -iname '*.$(ext)')
 clean:
 	find . -iname '.depend*' $(TO_CLEAN) -delete
-	rm -rf obj/*
+	find obj -maxdepth 1 -mindepth 1 -not -name .gitignore -delete
 
 
 #################
@@ -179,14 +178,17 @@ ifeq ($(shell uname -s),Darwin)
   ifeq (,$(shell which gsed))
     $(error gsed not found; try brew install gnu-sed)
   endif
-  SED := gsed
+  SED := gsed -i
   ifeq (,$(shell which gtime))
     $(error gtime not found; try brew install gnu-time)
   endif
-  TIME := gtime
+  TIME := gtime -q -f '%E'
+else ifeq ($(shell uname -s),FreeBSD)
+    SED := sed -i ''
+    TIME := /usr/bin/time
 else
-  SED := sed
-  TIME := /usr/bin/time
+  SED := sed -i
+  TIME := /usr/bin/time -q -f '%E'
 endif
 
 ifneq ($(OS),Windows_NT)
@@ -200,7 +202,7 @@ endif
 # Pretty-printing helper #
 ##########################
 
-SHELL=/bin/bash
+SHELL:=$(shell which bash)
 
 # A helper to generate pretty logs, callable as:
 #   $(call run-with-log,CMD,TXT,STEM)
@@ -212,7 +214,7 @@ SHELL=/bin/bash
 ifeq (,$(NOSHORTLOG))
 run-with-log = \
   @echo "$(subst ",\",$1)" > $3.cmd; \
-  $(TIME) -q -f '%E' -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
+  $(TIME) -o $3.time sh -c "$(subst ",\",$1)" > $3.out 2> >( tee $3.err 1>&2 ); \
   ret=$$?; \
   time=$$(cat $3.time); \
   if [ $$ret -eq 0 ]; then \
@@ -263,15 +265,18 @@ FSTAR_ROOTS = $(wildcard $(addsuffix /*.fsti,$(ALL_HACL_SOURCE_DIRS)) \
 
 ifndef NODEPEND
 ifndef MAKE_RESTARTS
-# Note that the --extract argument only controls what is extracted for OCaml,
+# Note that the --extract 'OCaml:...' argument controls what is extracted for OCaml,
 # meaning we can eliminate large chunks of the dependency graph, since we only
 # need to run: Vale stuff, and HACL spec tests.
+# For Kremlin, we use --extract 'Kremlin:*' to extract everything and let krml
+# decide what to keep based on reachability and bundling
 .fstar-depend-%: .FORCE
 	@if ! [ -f .didhelp ]; then echo "💡 Did you know? If your dependency graph didn't change (e.g. no files added or removed, no reference to a new module in your code), run NODEPEND=1 make <your-target> to skip dependency graph regeneration!"; touch .didhelp; fi
 	$(call run-with-log,\
 	  $(FSTAR_NO_FLAGS) --dep $* $(notdir $(FSTAR_ROOTS)) --warn_error '-285' $(FSTAR_DEPEND_FLAGS) \
-	    --extract '-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer +C -C.String -C.Failure' > $@ && \
-	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
+	    --extract 'Kremlin:*' \
+	    --extract 'OCaml:-* +FStar.Kremlin.Endianness +Vale.Arch +Vale.X64 -Vale.X64.MemoryAdapters +Vale.Def +Vale.Lib +Vale.Bignum.X64 -Vale.Lib.Tactics +Vale.Math +Vale.Transformers +Vale.AES +Vale.Interop +Vale.Arch.Types +Vale.Arch.BufferFriend +Vale.Lib.X64 +Vale.SHA.X64 +Vale.SHA.SHA_helpers +Vale.Curve25519.X64 +Vale.Poly1305.X64 +Vale.Inline +Vale.AsLowStar +Vale.Test +Spec +Lib -Lib.IntVector -Lib.Memzero0 -Lib.Buffer -Lib.MultiBuffer +C -C.String -C.Failure' > $@ && \
+	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!;s!/bin/../ulib/!/ulib/!g' $@ \
 	  ,[FSTAR-DEPEND ($*)],$(call to-obj-dir,$@))
 
 .vale-depend: .fstar-depend-make .FORCE
@@ -281,7 +286,7 @@ ifndef MAKE_RESTARTS
 	    $(addprefix -in ,$(VALE_ROOTS)) \
 	    -dep $< \
 	    > $@ && \
-	  $(SED) -i 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!g' $@ \
+	  $(SED) 's!$(HACL_HOME)/obj/\(.*.checked\)!obj/\1!g' $@ \
 	  ,[VALE-DEPEND],$(call to-obj-dir,$@))
 
 .PHONY: .FORCE
@@ -555,10 +560,6 @@ old-%:
 	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
 	  ,[OLD-MAKE $*],obj/old-$*)
 
-# This is all legacy. Some notes:
-HACL_OLD_FILES=\
-  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
-
 
 ########################################
 # Distributions of EverCrypt and HACL* #
@@ -576,7 +577,8 @@ HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
   $(addprefix providers/evercrypt/c/evercrypt_,vale_stubs.c)
 
 # Always copied into the destination directory, not passed to kremlin.
-HAND_WRITTEN_H_FILES	= $(wildcard $(LIB_DIR)/c/*.h)
+HAND_WRITTEN_H_FILES	= $(filter-out $(LIB_DIR)/c/libintvector_debug.h, \
+				$(wildcard $(LIB_DIR)/c/*.h))
 
 # OCaml bindings for hand written C files (i.e., not generated by KreMLin)
 # Non-empty for distributions which have OCaml bindings
@@ -624,7 +626,7 @@ REQUIRED_FLAGS	= \
   -no-prefix 'Vale.Inline.X64.Fswap_inline' \
   -no-prefix 'Vale.Inline.X64.Fsqr_inline' \
   -no-prefix 'EverCrypt.Vale' \
-  -add-include 'Hacl_Curve25519_64:"curve25519-inline.h"' \
+  -add-include 'Hacl_Curve25519_64.c:"curve25519-inline.h"' \
   -no-prefix 'MerkleTree' \
   -no-prefix 'MerkleTree.EverCrypt' \
   -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
@@ -633,7 +635,7 @@ REQUIRED_FLAGS	= \
   $(BASE_FLAGS)
 
 # Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
-TARGET_H_INCLUDE = -add-include '"kremlin/internal/target.h"'
+TARGET_H_INCLUDE = -add-early-include '"kremlin/internal/target.h"'
 
 # Disabled for distributions that don't include vectorized implementations.
 INTRINSIC_FLAGS = -add-include '"libintvector.h"'
@@ -647,7 +649,7 @@ TEST_FLAGS = -bundle Test,Test.*,Hacl.Test.*
 # Ensures that Lib_RandomBuffer_System.h and Lib_PrintBuffer.h have a constant name
 # (and are not subject to bundling). Erased by distributions that don't need
 # those files.
-HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer= -bundle Lib.Memzero0
+HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.PrintBuffer= -bundle Lib.Memzero0=
 # Disabling by pure-HACL distributions
 TARGETCONFIG_FLAGS = -add-include '"evercrypt_targetconfig.h"'
 
@@ -668,6 +670,7 @@ BUNDLE_FLAGS	=\
   $(HASH_BUNDLE) \
   $(E_HASH_BUNDLE) \
   $(SHA3_BUNDLE) \
+  $(SHA2MB_BUNDLE) \
   $(CHACHA20_BUNDLE) \
   $(SALSA20_BUNDLE) \
   $(BIGNUM_BUNDLE) \
@@ -683,6 +686,7 @@ BUNDLE_FLAGS	=\
   $(FRODO_BUNDLE) \
   $(STREAMING_BUNDLE) \
   $(INTTYPES_BUNDLE) \
+  $(INTTYPES_128_BUNDLE) \
   $(RSAPSS_BUNDLE) \
   $(FFDHE_BUNDLE) \
   $(LEGACY_BUNDLE)
@@ -717,7 +721,6 @@ WASM_FLAGS	=\
 dist/wasm/Makefile.basic: VALE_ASMS =
 dist/wasm/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/wasm/Makefile.basic: HAND_WRITTEN_H_FILES =
-dist/wasm/Makefile.basic: HACL_OLD_FILES =
 dist/wasm/Makefile.basic: HAND_WRITTEN_FILES =
 dist/wasm/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/wasm/Makefile.basic: INTRINSIC_FLAGS =
@@ -734,6 +737,8 @@ dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
 
 # Doesn't work in WASM because un-materialized externals for AES128
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128,Hacl.Frodo64,Hacl.Frodo640,Hacl.Frodo976,Hacl.Frodo1344
+
+dist/wasm/Makefile.basic: INTTYPES_128_BUNDLE = -bundle Hacl.IntTypes.Intrinsics_128
 
 # No Vale Curve64 no "Local" or "Slow" Curve64, only Curve51 (local Makefile hack)
 dist/wasm/Makefile.basic: CURVE_BUNDLE_SLOW =
@@ -753,18 +758,20 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
-dist/wasm/Makefile.basic: BLAKE2_BUNDLE = \
-  -bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle 'Hacl.Impl.Blake2.\*' \
-  -bundle 'Hacl.Blake2s_128,Hacl.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
+dist/wasm/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
+dist/wasm/Makefile.basic: BLAKE2_BUNDLE = $(BLAKE2_BUNDLE_BASE) \
+  -bundle 'Hacl.Hash.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2b_256,Hacl.Blake2b_256' \
+  -bundle 'Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256' \
+  -bundle 'Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
 # And Merkle trees
 dist/wasm/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree,MerkleTree.*'
 dist/wasm/Makefile.basic: CTR_BUNDLE =
-dist/wasm/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum4096,Hacl.Bignum256
-dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS2048_SHA256
-dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE4096
+dist/wasm/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum4096_32,Hacl.Bignum256_32,Hacl.Bignum4096,Hacl.Bignum256,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64
+dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
+dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
@@ -819,6 +826,9 @@ test-bindings-ocaml: compile-gcc-compatible
 	fi
 	cd bindings/ocaml && $(LD_EXTRA) dune runtest
 
+doc-ocaml: test-bindings-ocaml
+	cd bindings/ocaml && $(LD_EXTRA) dune build @doc
+
 dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
 dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
@@ -827,6 +837,11 @@ dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
 # -----
 dist/mitls/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 dist/mitls/Makefile.basic: LEGACY_BUNDLE =
+# This is a broken AES... used by the (awful) EverCrypt.fst which in turns calls
+# EverCrypt.HACL.fsti which in turns calls (via C #ifdefs) Crypto.Symmetric.AES
+dist/mitls/Makefile.basic: HACL_OLD_FILES = \
+  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
+
 
 # Not passed to kremlin, meaning that they don't end up in the Makefile.basic
 # list of C source files. They're added manually in dist/Makefile (see ifneq
@@ -842,7 +857,6 @@ dist/mitls/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
 # - Use C89 versions of ancient HACL code
 dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
 dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
-dist/c89-compatible/Makefile.basic: HACL_OLD_FILES := $(subst -c,-c89,$(HACL_OLD_FILES))
 
 # Linux distribution (not compiled on CI)
 # ---------------------------------------
@@ -869,8 +883,11 @@ dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targ
 dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
 dist/linux/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
-dist/linux/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
-dist/linux/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
+dist/linux/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
+dist/linux/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum4096_32,Hacl.Bignum256_32,Hacl.Bignum4096,Hacl.Bignum256,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64
+dist/linux/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
+dist/linux/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
+dist/linux/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/linux/Makefile.basic: CURVE_BUNDLE = \
   $(CURVE_BUNDLE_BASE) \
   -bundle Hacl.Curve25519_64_Local \
@@ -899,19 +916,22 @@ dist/ccf/Makefile.basic: \
     -bundle EverCrypt.Helpers \
     -bundle EverCrypt.Poly1305 \
     -bundle EverCrypt.Chacha20Poly1305 \
-    -bundle EverCrypt.AEAD
+    -bundle EverCrypt.AEAD \
+    -bundle EverCrypt.Ed25519
 dist/ccf/Makefile.basic: INTRINSIC_FLAGS=
 dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/vale/asm/aes-% dist/vale/poly1305-%,$(VALE_ASMS))
 dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
 dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
-dist/ccf/Makefile.basic: HACL_OLD_FILES =
 dist/ccf/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
+dist/ccf/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519
 dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
 dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
-dist/ccf/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
-dist/ccf/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum.*,Hacl.Bignum
+dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS
+dist/ccf/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
+dist/ccf/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum4096_32,Hacl.Bignum256_32,Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64,Hacl.Bignum.*,Hacl.Bignum
+dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
+dist/ccf/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
 dist/ccf/Makefile.basic: BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants \
   -static-header Hacl.Impl.Blake2.Constants \
   -bundle Hacl.HKDF.Blake2b_256,Hacl.HMAC.Blake2b_256,Hacl.Blake2b_256,Hacl.Hash.Blake2b_256,Hacl.Streaming.Blake2b_256 \
@@ -929,18 +949,19 @@ dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
   -bundle Hacl.Streaming.SHA2= \
   -bundle Hacl.Bignum256= \
   -bundle Hacl.Bignum4096= \
+  -bundle Hacl.Bignum256_32= \
+  -bundle Hacl.Bignum4096_32= \
   -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] \
   -bundle Hacl.HMAC_DRBG= \
   $(INTTYPES_BUNDLE)
 dist/election-guard/Makefile.basic: INTRINSIC_FLAGS =
 dist/election-guard/Makefile.basic: VALE_ASMS =
 dist/election-guard/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/election-guard/Makefile.basic: HACL_OLD_FILES =
 dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/evercrypt_vale_stubs.c %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
 dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
 dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
   -bundle '\*[rename=Should_not_be_here]' \
-  -falloca -ftail-calls
+  -falloca -ftail-calls -fc89 -add-early-include '"kremlin/internal/builtin.h"'
 
 # Mozilla distribution
 # --------------------
@@ -963,12 +984,12 @@ dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
 dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256,Hacl.Blake2s_32,Hacl.HMAC.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.HKDF.Blake2s_128
-dist/mozilla/Makefile.basic: SHA3_BUNDLE = -bundle Hacl.Impl.SHA3,Hacl.SHA3
+dist/mozilla/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2_Vec256,Hacl.SHA2_Vec128,Hacl.SHA2_Scalar32
 dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HMAC,Hacl.HMAC_DRBG
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS,Hacl.RSAPSS2048_SHA256
-dist/mozilla/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE,Hacl.FFDHE4096
-dist/mozilla/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum.*,Hacl.Bignum
+dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS
+dist/mozilla/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
+dist/mozilla/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum256_32,Hacl.Bignum4096_32,Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64,Hacl.Bignum.*,Hacl.Bignum
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Impl.Frodo.*,Hacl.Frodo.*,Hacl.Keccak,Hacl.Frodo64,Hacl.Frodo640,Hacl.Frodo976,Hacl.Frodo1344
 dist/mozilla/Makefile.basic: \
@@ -979,11 +1000,10 @@ dist/mozilla/Makefile.basic: \
 dist/mozilla/Makefile.basic: VALE_ASMS := $(filter dist/vale/curve25519-%,$(VALE_ASMS))
 dist/mozilla/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter %/libintvector.h,$(HAND_WRITTEN_H_FILES))
-dist/mozilla/Makefile.basic: HACL_OLD_FILES =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_FILES =
 dist/mozilla/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/mozilla/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
-dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-include '<stdbool.h>'
+dist/mozilla/Makefile.basic: TARGET_H_INCLUDE = -add-early-include '<stdbool.h>'
 
 # Portable distribution
 # ---------------------
@@ -1004,7 +1024,6 @@ dist/merkle-tree/Makefile.basic: \
 dist/merkle-tree/Makefile.basic: VALE_ASMS =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_H_FILES =
-dist/merkle-tree/Makefile.basic: HACL_OLD_FILES =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_FILES =
 dist/merkle-tree/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
@@ -1059,6 +1078,10 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	echo "KreMLin version: $(shell cd $(KREMLIN_HOME) && git rev-parse HEAD)" >> $(dir $@)/INFO.txt
 	echo "Vale version: $(shell cat $(VALE_HOME)/bin/.vale_version)" >> $(dir $@)/INFO.txt
 	if [ "$*" == "wasm" ]; then touch $@; fi
+	if [ x"$*" == xmozilla ]; then \
+	  cp dist/Makefile.mozilla.config $(dir $@)/Makefile.config; \
+	  cp dist/config.mozilla.h $(dir $@)/config.h; \
+	fi
 
 dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	$(KRML) -silent \
@@ -1066,10 +1089,10 @@ dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -bundle EverCrypt+EverCrypt.AEAD+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
 	  -library EverCrypt,EverCrypt.* \
-	  -add-include '<inttypes.h>' \
-	  -add-include '<stdbool.h>' \
-	  -add-include '<kremlin/internal/types.h>' \
-	  -add-include '<kremlin/internal/target.h>' \
+	  -add-early-include '<inttypes.h>' \
+	  -add-early-include '<stdbool.h>' \
+	  -add-early-include '<kremlin/internal/types.h>' \
+	  -add-early-include '<kremlin/internal/target.h>' \
 	  -header dist/LICENSE.txt \
 	  -skip-compilation \
 	  -fextern-c \
@@ -1092,7 +1115,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -minimal -add-include '"kremlib.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
 
-dist/test/c/Test.c: KRML_EXTRA=-add-include '"kremlin/internal/compat.h"'
+dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"kremlin/internal/compat.h"'
 
 dist/test/c/Hacl_Test_ECDSA.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-include '"lib_intrinsics.h"'
 
@@ -1106,7 +1129,7 @@ copy-kremlib:
 
 compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-kremlib
 	cp $< dist/$*/Makefile
-	(if [ -f dist/$*/libintvector.h ]; then cp dist/configure dist/$*/configure; fi;)
+	(if [ -f dist/$*/libintvector.h -a $* != mozilla ]; then cp dist/configure dist/$*/configure; fi;)
 	$(MAKE) -C dist/$*
 
 ###########################

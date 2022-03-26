@@ -24,6 +24,8 @@
 
 #include "Hacl_Frodo1344.h"
 
+#include "internal/Hacl_Frodo_KEM.h"
+
 u32 Hacl_Frodo1344_crypto_bytes = (u32)32U;
 
 u32 Hacl_Frodo1344_crypto_publickeybytes = (u32)21520U;

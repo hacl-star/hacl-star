@@ -73,13 +73,13 @@ val fill_blocks4:
     #t:Type0
   -> #a:Type0
   -> h0:mem
-  -> n:size_t{v n % 4 = 0}
-  -> output:lbuffer t n
-  -> refl:(mem -> i:size_nat{i <= v n} -> GTot a)
-  -> footprint:(i:size_nat{i <= v n} -> GTot
+  -> n4:size_t{4 * v n4 <= max_size_t}
+  -> output:lbuffer t (4ul *! n4)
+  -> refl:(mem -> i:size_nat{i <= 4 * v n4} -> GTot a)
+  -> footprint:(i:size_nat{i <= 4 * v n4} -> GTot
       (l:B.loc{B.loc_disjoint l (loc output) /\ B.address_liveness_insensitive_locs `B.loc_includes` l}))
-  -> spec:(mem -> GTot (i:size_nat{i < v n} -> a -> a & t))
-  -> impl:(i:size_t{v i < v n} -> Stack unit
+  -> spec:(mem -> GTot (i:size_nat{i < 4 * v n4} -> a -> a & t))
+  -> impl:(i:size_t{v i < 4 * v n4} -> Stack unit
       (requires fun h ->
 	modifies (footprint (v i) |+| loc (gsub output 0ul i)) h0 h)
       (ensures  fun h1 _ h2 ->
@@ -90,16 +90,16 @@ val fill_blocks4:
 	 modifies (footprint (v i + 1) |+| (loc block1)) h1 h2))) ->
   Stack unit
     (requires fun h -> h0 == h /\ live h output)
-    (ensures  fun _ _ h1 -> modifies (footprint (v n) |+| loc output) h0 h1 /\
-     (let s, o = LSeq.generate_blocks 4 (v n / 4) (v n / 4) (Loops.fixed_a a)
-       (S.generate_blocks4_f #t #a (v n / 4) (spec h0)) (refl h0 0) in
-      refl h1 (v n) == s /\ as_seq #_ #t h1 output == o))
+    (ensures  fun _ _ h1 -> modifies (footprint (4 * v n4) |+| loc output) h0 h1 /\
+     (let s, o = LSeq.generate_blocks 4 (v n4) (v n4) (Loops.fixed_a a)
+       (S.generate_blocks4_f #t #a (v n4) (spec h0)) (refl h0 0) in
+      refl h1 (4 * v n4) == s /\ as_seq #_ #t h1 output == o))
 
-let fill_blocks4 #t #a h0 n output refl footprint spec impl =
-  fill_blocks h0 4ul (n /. 4ul) output (Loops.fixed_a a)
+let fill_blocks4 #t #a h0 n4 output refl footprint spec impl =
+  fill_blocks h0 4ul n4 output (Loops.fixed_a a)
   (fun h i -> refl h (4 * i))
   (fun i -> footprint (4 * i))
-  (fun h0 -> S.generate_blocks4_f #t #a (v n / 4) (spec h0))
+  (fun h0 -> S.generate_blocks4_f #t #a (v n4) (spec h0))
   (fun i ->
     let h1 = ST.get () in
     impl (4ul *! i);
@@ -112,7 +112,8 @@ let fill_blocks4 #t #a h0 n output refl footprint spec impl =
       let c1, e1 = spec h0 (4 * v i + 1) c0 in
       let c2, e2 = spec h0 (4 * v i + 2) c1 in
       let c3, e3 = spec h0 (4 * v i + 3) c2 in
-      let res = Lib.IntVector.create4 e0 e1 e2 e3 in
+      let res = LSeq.create4 e0 e1 e2 e3 in
+      LSeq.create4_lemma e0 e1 e2 e3;
       let res1 = LSeq.sub (as_seq h2 output) (4 * v i) 4 in
       refl h2 (4 * v i + 4) == c3 /\
       (LSeq.eq_intro res res1; res1 `LSeq.equal` res))
@@ -122,32 +123,31 @@ let fill_blocks4 #t #a h0 n output refl footprint spec impl =
 inline_for_extraction noextract
 val fill_elems4: fill_elems_st
 let fill_elems4 #t #a h0 n output refl footprint spec impl =
-  [@inline_let] let k = n /. 4ul *! 4ul in
-  let tmp = sub output 0ul k in
+  [@inline_let] let k = n /. 4ul in
+  let tmp = sub output 0ul (4ul *! k) in
   fill_blocks4 #t #a h0 k tmp refl footprint spec (fun i -> impl i);
   let h1 = ST.get () in
-  assert (v k + v (n -! k) = v n);
-  B.modifies_buffer_elim (B.gsub #t output k (n -! k)) (footprint (v k) |+| loc tmp) h0 h1;
-  assert (modifies (footprint (v k) |+| loc (gsub output 0ul k)) h0 h1);
+  assert (4 * v k + v (n -! 4ul *! k) = v n);
+  B.modifies_buffer_elim (B.gsub #t output (4ul *! k) (n -! 4ul *! k)) (footprint (4 * v k) |+| loc tmp) h0 h1;
+  assert (modifies (footprint (4 * v k) |+| loc (gsub output 0ul (4ul *! k))) h0 h1);
 
-  let inv (h:mem) (i:nat{v k <= i /\ i <= v n}) =
+  let inv (h:mem) (i:nat{4 * v k <= i /\ i <= v n}) =
     modifies (footprint i |+| loc (gsub output 0ul (size i))) h0 h /\
    (let (c, res) = Loops.repeat_right (v n / 4 * 4) i (S.generate_elem_a t a (v n))
-      (S.generate_elem_f (v n) (spec h0)) (refl h1 (v k), as_seq h1 (gsub output 0ul k)) in
+      (S.generate_elem_f (v n) (spec h0)) (refl h1 (4 * v k), as_seq h1 (gsub output 0ul (4ul *! k))) in
     refl h i == c /\ as_seq h (gsub output 0ul (size i)) == res) in
 
   Loops.eq_repeat_right (v n / 4 * 4) (v n) (S.generate_elem_a t a (v n))
-    (S.generate_elem_f (v n) (spec h0)) (refl h1 (v k), as_seq h1 (gsub output 0ul k));
+    (S.generate_elem_f (v n) (spec h0)) (refl h1 (4 * v k), as_seq h1 (gsub output 0ul (4ul *! k)));
 
-  Lib.Loops.for k n inv
+  Lib.Loops.for (k *! 4ul) n inv
   (fun i ->
-
     impl i;
     let h = ST.get () in
     assert (v (i +! 1ul) = v i + 1);
     FStar.Seq.lemma_split (as_seq h (gsub output 0ul (i +! 1ul))) (v i);
     Loops.unfold_repeat_right (v n / 4 * 4) (v n) (S.generate_elem_a t a (v n))
-      (S.generate_elem_f (v n) (spec h0)) (refl h1 (v k), as_seq h1 (gsub output 0ul k)) (v i)
+      (S.generate_elem_f (v n) (spec h0)) (refl h1 (4 * v k), as_seq h1 (gsub output 0ul (4ul *! k))) (v i)
     );
 
   S.lemma_generate_elems4 (v n) (v n) (spec h0) (refl h0 0)

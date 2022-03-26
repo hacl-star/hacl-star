@@ -24,6 +24,8 @@
 
 #include "Hacl_Test_HMAC_DRBG.h"
 
+
+
 #define SHA2_224 0
 #define SHA2_256 1
 #define SHA2_384 2
@@ -2262,7 +2264,7 @@ extern void LowStar_Printf_print_string(Prims_string uu___);
 
 extern void LowStar_Printf_print_u32(uint32_t uu___);
 
-extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *r);
+extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *b);
 
 static uint8_t
 vectors_low0[16U] =
@@ -4687,12 +4689,12 @@ typedef struct vec8_s
 }
 vec8;
 
-typedef struct __Hacl_Test_HMAC_DRBG_vec8_Hacl_Test_HMAC_DRBG_vec8_s
+typedef struct __Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8_s
 {
   vec8 fst;
   vec8 snd;
 }
-__Hacl_Test_HMAC_DRBG_vec8_Hacl_Test_HMAC_DRBG_vec8;
+__Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8;
 
 typedef struct vector_s
 {
@@ -4702,7 +4704,7 @@ typedef struct vector_s
   vec8 f3;
   vec8 f4;
   vec8 f5;
-  __Hacl_Test_HMAC_DRBG_vec8_Hacl_Test_HMAC_DRBG_vec8 f6;
+  __Hacl_Test_ECDSA_vec8_Hacl_Test_ECDSA_vec8 f6;
   vec8 f7;
 }
 vector;

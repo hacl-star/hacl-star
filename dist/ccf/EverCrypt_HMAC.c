@@ -24,6 +24,10 @@
 
 #include "EverCrypt_HMAC.h"
 
+#include "internal/Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_Base.h"
+
 void
 EverCrypt_HMAC_compute_sha1(
   uint8_t *dst,

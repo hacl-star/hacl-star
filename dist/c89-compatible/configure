@@ -12,6 +12,26 @@ if [[ $CC == "" ]]; then
   CC=cc
 fi
 
+my_mktemp_dir () {
+  local name=$1
+  # Note: --suffix is not POSIX, doesn't work on OSX.
+  # Also on OSX, the XXXXXXX pattern cannot be followed by anything else.
+  local dir=$(mktemp -d /tmp/$name-XXXXXXX)
+  if [[ $dir == "" ]]; then
+    # Note: -p doesn't work on OSX, all tests will fail in case there is no
+    # permission to write to /tmp
+    local dir=$(mktemp -d -p . $name-XXXXXXX)
+  fi
+  echo $dir
+}
+
+my_mktemp_c () {
+  local name=$1
+  local dir=$(my_mktemp_dir $name)
+  local file=$dir/$name.c
+  echo $file
+}
+
 # Helpers to help do feature or bug detection
 # -------------------------------------------
 
@@ -38,19 +58,24 @@ detect_ocaml () {
     return 1
   fi
   # Detect packages
-  for p in ctypes ctypes.foreign; do
+  for p in ctypes; do
     detect_ocamlfind $p || return 1
   done
 }
 
 check_no_bug81300 () {
+  if [[ "$cross_build" == "1" ]]; then
+    # We don't want to build anything with march=native
+    return 0
+  fi
   # Perform the check only if lib_intrinsics.h is present. In practice,
   # lib_intrinsics.h is present in all the directories which contain libintvector.h,
   # but mozilla. If lib_intrinsics.h is not present, assume there is no bug and
   # return success.
   if [ -f lib_intrinsics.h ]; then
-  local out=$(mktemp /tmp/testbug81300.XXXXXXX)
-  local file=${out}.c
+  local dir=$(my_mktemp_dir testbug81300)
+  local file=$dir/testbug81300.c
+  local out=$dir/testbug81300.out
   cat > $file <<EOF
 #include <inttypes.h>
 #include <stdio.h>
@@ -58,7 +83,7 @@ check_no_bug81300 () {
 #include <lib_intrinsics.h>
 uint64_t add4_variables(uint64_t *x, uint64_t y0) {
   uint64_t *r2 = x + 2;
-  uint64_t *r3 = x + 3; 
+  uint64_t *r3 = x + 3;
   uint64_t cc = Lib_IntTypes_Intrinsics_add_carry_u64(0, x[0], y0, x);
   uint64_t cc1 = Lib_IntTypes_Intrinsics_add_carry_u64(cc, 1, 0, x);
   uint64_t cc2 = Lib_IntTypes_Intrinsics_add_carry_u64(1, 0, 0, r2);
@@ -89,7 +114,7 @@ int main() {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DCOMPILE_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
+  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DHACL_CAN_COMPILE_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
   $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
   diff $out.test $out.ref
   else
@@ -99,7 +124,7 @@ EOF
 }
 
 detect_uint128 () {
-  local file=$(mktemp /tmp/testint128.XXXXXXX).c
+  local file=$(my_mktemp_c testint128)
   echo "unsigned __int128 x = 0;" > $file
   $CC $CROSS_CFLAGS -c $file -o /dev/null
 }
@@ -124,7 +149,7 @@ detect_broken_xcode () {
 }
 
 check_explicit_bzero () {
-  local file=$(mktemp /tmp/testbzero.XXXXXXX).c
+  local file=$(my_mktemp_c testbzero)
   cat > $file <<EOF
 #include <string.h>
 
@@ -141,7 +166,7 @@ EOF
 # -------------------------
 
 detect_x64 () {
-  [[ $target_arch == "x86_64" ]]
+  [[ $target_arch == "x86_64" ]] || [[ $target_arch == "amd64" ]]
 }
 
 detect_x86 () {
@@ -156,7 +181,7 @@ detect_arm () {
 }
 
 detect_arm_neon () {
-  local file=$(mktemp /tmp/testvec128.XXXXXXX).c
+  local file=$(my_mktemp_c testvec128)
   cat > $file <<EOF
 #include <libintvector.h>
 
@@ -168,12 +193,21 @@ int main () {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -I. -march=armv8-a+simd -c $file -o /dev/null
+  if [[ $target_arch == "aarch64" ]] && [[ $target_abi == "darwin" ]]; then
+    $CC $CROSS_CFLAGS -DHACL_CAN_COMPILE_VEC128 -I. -c $file -o /dev/null
+  else
+    $CC $CROSS_CFLAGS -DHACL_CAN_COMPILE_VEC128 -I. -march=armv8-a+simd -c $file -o /dev/null
+  fi
 }
 
-# We only detect the 64-bit version of the z-architecture (s390x).
-detect_ibmz () {
+# We only detect the 64-bit version of the SystemZ architecture (s390x).
+detect_systemz () {
   [[ $target_arch == "s390x" ]]
+}
+
+# We only detect the 64-bit version of the PowerPC architecture
+detect_powerpc () {
+  [[ $target_arch == "ppc64le" ]]
 }
 
 
@@ -189,8 +223,12 @@ show_help () {
   printf "                    Currently supported triples are:\n"
   printf "                    * aarch64-none-linux-android\n"
   printf "                    * aarch64-none-linux-gnu\n"
+  printf "                    * aarch64-apple-darwin\n"
+  printf "                    * aarch64-apple-ios\n"
+  printf "                    * x86_64-apple-ios-simulator\n"
   printf "    --disable-bzero Do not use explicit_bzero (binary will work with an old GLIBC)\n"
   printf "    --disable-ocaml Disable OCAML bindings\n"
+  printf "    --enable-power9 Enable Power ISA v3.0 instruction set for PowerPC architecture\n"
   printf "\n"
 }
 
@@ -202,6 +240,8 @@ echo -n > config.h
 # Default arguments
 disable_ocaml=0
 disable_bzero=0
+enable_power9=0
+cross_build=0
 
 # Parse command line arguments.
 all_args=("$@")
@@ -210,6 +250,7 @@ while [ $# -gt 0 ]; do
         -target) build_target="$2"; shift ;;
         --disable-ocaml) disable_ocaml=1 ;;
         --disable-bzero) disable_bzero=1 ;;
+        --enable-power9) enable_power9=1 ;;
         --help) show_help; exit 0 ;;
         *) show_help; exit 2 ;;
     esac
@@ -227,6 +268,7 @@ done
 # target_{arch,sys,abi} accordingly; otherwise, query the host via uname for
 # these parameteres and assume we don't do cross-compilation.
 if [ ! -z "$build_target" ]; then
+  cross_build=1
   echo "Doing cross build for $build_target. Make sure that your toolchain is configured properly."
   if [[ "$build_target" == "aarch64-none-linux-android" ]]; then
     # NOTE: We assume that the Android environment is set up correctly.
@@ -280,6 +322,30 @@ if [ ! -z "$build_target" ]; then
     target_sys=$(uname)
     target_abi="native"
     echo "MARCH = ia32" >> Makefile.config
+  elif [[ "$build_target" == "aarch64-apple-darwin" ]]; then
+    # Cross compiling for aarch64-apple-darwin (presumably on x86_64-apple-darwin).
+    target_arch="aarch64"
+    target_sys="apple"
+    target_abi="darwin"
+    # See https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary
+    CROSS_TARGET="-target arm64-apple-macos11"
+  elif [[ "$build_target" == "aarch64-apple-ios" ]]; then
+    # Cross compiling for aarch64-apple-ios
+    # (presumably on x86_64-apple-darwin or aarch64-apple-darwin).
+    target_arch="aarch64"
+    target_sys="apple"
+    target_abi="ios"
+    CROSS_TARGET="-target arm64-apple-ios"
+    CROSS_SYSROOT="-isysroot $(xcrun --sdk iphoneos --show-sdk-path) -arch arm64"
+    # CROSS_INCLUDES="-I$SYSROOT/usr/include/"
+  elif [[ "$build_target" == "x86_64-apple-ios-simulator" ]]; then
+    # Cross compiling for x86_64-apple-ios (emulator only)
+    # (presumably on x86_64-apple-darwin).
+    target_arch="x86_64"
+    target_sys="apple"
+    target_abi="ios-simulator"
+    CROSS_TARGET="-target x86_64-apple-ios-simulator"
+    CROSS_SYSROOT="-isysroot $(xcrun --sdk iphonesimulator --show-sdk-path)"
   else
     show_help
     exit 0
@@ -364,18 +430,37 @@ if detect_x86 || detect_x64; then
   fi
 fi
 
-if detect_ibmz; then
+if detect_systemz; then
   echo "... detected z platform"
   echo "TARGET_ARCHITECTURE = SystemZ" >> Makefile.config
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_SYSTEMZ" >> config.h
   echo "... $build_target supports 128-bit z VSX"
   compile_vec128=true
-  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z13" >> Makefile.config
+  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=native" >> Makefile.config
+  # In the case of IBMz, some of the vectorized functions are defined as
+  # inline static rather than as macros, meaning we need to compile all
+  # the files with the vector compilation options. Note that this is not
+  # a problem because we don't do cross-compilation for IBMz. Also note
+  # that we don't have support for vec256 for IBMz.
+  echo "CFLAGS += \$(CFLAGS_128)" >> Makefile.config
+fi
+
+# TODO: try to enable the intrinsics
+if detect_powerpc; then
+  echo "... detected PowerPC platform"
+  echo "... $build_target supports 128-bit Power VSX"
+  echo "TARGET_ARCHITECTURE = PowerPC64" >> Makefile.config
+  echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_POWERPC64" >> config.h
+  compile_vec128=true
+  if [[ "$enable_power9" == "1" ]]; then
+    echo "... enable Power ISA v3.0 instruction set"
+    echo "CFLAGS_128 = -mcpu=power9" >> Makefile.config
+  fi
 fi
 
 if $compile_intrinsics; then
   echo "$build_target supports _addcarry_u64"
-  echo "#define EVERCRYPT_CAN_COMPILE_INTRINSICS 1" >> config.h
+  echo "#define HACL_CAN_COMPILE_INTRINSICS 1" >> config.h
 fi
 
 if ! $compile_vale; then
@@ -388,11 +473,11 @@ if ! $compile_vale; then
   echo "$build_target does not support legacy vale stubs"
   echo "BLACKLIST += evercrypt_vale_stubs.c" >> Makefile.config
 else
-  echo "#define EVERCRYPT_CAN_COMPILE_VALE 1" >> config.h
+  echo "#define HACL_CAN_COMPILE_VALE 1" >> config.h
 fi
 
 if $compile_inline_asm; then
-    echo "#define EVERCRYPT_CAN_COMPILE_INLINE_ASM 1" >> config.h
+    echo "#define HACL_CAN_COMPILE_INLINE_ASM 1" >> config.h
 fi
 
 if ! $compile_vec128; then
@@ -400,7 +485,7 @@ if ! $compile_vec128; then
   echo "BLACKLIST += $(ls *CP128*.c *_128.c *_Vec128.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec128 void *" >> config.h
 else
-  echo "#define EVERCRYPT_CAN_COMPILE_VEC128 1" >> config.h
+  echo "#define HACL_CAN_COMPILE_VEC128 1" >> config.h
 fi
 
 if ! $compile_vec256; then
@@ -408,7 +493,7 @@ if ! $compile_vec256; then
   echo "BLACKLIST += $(ls *CP256*.c *_256.c *_Vec256.c | xargs)" >> Makefile.config
   echo "#define Lib_IntVector_Intrinsics_vec256 void *" >> config.h
 else
-  echo "#define EVERCRYPT_CAN_COMPILE_VEC256 1" >> config.h
+  echo "#define HACL_CAN_COMPILE_VEC256 1" >> config.h
 fi
 
 if ! detect_uint128; then
@@ -416,6 +501,8 @@ if ! detect_uint128; then
   # defining KRML_VERIFIED_UINT128.
   echo "$CC $CROSS_CFLAGS does not support unsigned __int128 -- using a fallback verified implementation"
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
+else
+  echo "#define HACL_CAN_COMPILE_UINT128 1" >> config.h
 fi
 
 if [[ "$disable_ocaml" == "1" ]] || ! detect_ocaml; then

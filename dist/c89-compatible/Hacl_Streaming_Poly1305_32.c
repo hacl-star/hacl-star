@@ -24,12 +24,14 @@
 
 #include "Hacl_Streaming_Poly1305_32.h"
 
+
+
 Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_create_in(uint8_t *k)
 {
-  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
-  uint64_t *r1 = KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
+  uint64_t *r1 = (uint64_t *)KRML_HOST_CALLOC((uint32_t)25U, sizeof (uint64_t));
   uint64_t *block_state = r1;
-  uint8_t *k_ = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+  uint8_t *k_ = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   uint8_t *k_0;
   memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
   k_0 = k_;
@@ -42,7 +44,10 @@ Hacl_Streaming_Poly1305_32_poly1305_32_state *Hacl_Streaming_Poly1305_32_create_
     KRML_CHECK_SIZE(sizeof (Hacl_Streaming_Poly1305_32_poly1305_32_state), (uint32_t)1U);
     {
       Hacl_Streaming_Poly1305_32_poly1305_32_state
-      *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_Poly1305_32_poly1305_32_state));
+      *p =
+        (Hacl_Streaming_Poly1305_32_poly1305_32_state *)KRML_HOST_MALLOC(sizeof (
+            Hacl_Streaming_Poly1305_32_poly1305_32_state
+          ));
       p[0U] = s;
       Hacl_Poly1305_32_poly1305_init(block_state, k);
       return p;

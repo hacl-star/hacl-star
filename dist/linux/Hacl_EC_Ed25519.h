@@ -29,17 +29,15 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Bignum25519_51.h"
-#include "Hacl_Ed25519.h"
-
+#include "libintvector.h"
 void Hacl_EC_Ed25519_mk_felem_zero(u64 *b);
 
 void Hacl_EC_Ed25519_mk_felem_one(u64 *b);

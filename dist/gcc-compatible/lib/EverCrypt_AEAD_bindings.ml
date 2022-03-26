@@ -30,6 +30,30 @@ module Bindings(F:Cstubs.FOREIGN) =
                              (ocaml_bytes @->
                                 (ocaml_bytes @->
                                    (returning everCrypt_Error_error_code))))))))))
+    let everCrypt_AEAD_encrypt_expand_aes128_gcm_no_check =
+      foreign "EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
+    let everCrypt_AEAD_encrypt_expand_aes256_gcm_no_check =
+      foreign "EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
     let everCrypt_AEAD_encrypt_expand_aes128_gcm =
       foreign "EverCrypt_AEAD_encrypt_expand_aes128_gcm"
         (ocaml_bytes @->
@@ -82,6 +106,30 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_AEAD_decrypt =
       foreign "EverCrypt_AEAD_decrypt"
         ((ptr everCrypt_AEAD_state_s) @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
+    let everCrypt_AEAD_decrypt_expand_aes128_gcm_no_check =
+      foreign "EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check"
+        (ocaml_bytes @->
+           (ocaml_bytes @->
+              (uint32_t @->
+                 (ocaml_bytes @->
+                    (uint32_t @->
+                       (ocaml_bytes @->
+                          (uint32_t @->
+                             (ocaml_bytes @->
+                                (ocaml_bytes @->
+                                   (returning everCrypt_Error_error_code))))))))))
+    let everCrypt_AEAD_decrypt_expand_aes256_gcm_no_check =
+      foreign "EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check"
+        (ocaml_bytes @->
            (ocaml_bytes @->
               (uint32_t @->
                  (ocaml_bytes @->

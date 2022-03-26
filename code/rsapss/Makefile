@@ -1,4 +1,4 @@
-HACL_HOME=../..
+HACL_HOME=$(realpath ../..)
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
@@ -8,9 +8,9 @@ test: all
 	dist/rsapss-test.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../../Makefile.local
+include $(HACL_HOME)/Makefile.local
 
-CFLAGS += -I ../../../lib/c -I ../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I$(HACL_HOME)/lib/c -march=native -mtune=native -O3 -DCOMPILE_INTRINSICS
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
@@ -19,7 +19,8 @@ dist/librsapss.a: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic
 
 SHA2_BUNDLE=-bundle Hacl.Hash.SHA2=Hacl.Hash.*
-BIGNUM_BUNDLE=-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] -static-header Hacl.Bignum,Hacl.Bignum.*
+BIGNUM_BUNDLE= -bundle Hacl.Bignum.Base -static-header Hacl.Bignum.Base \
+	-bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]
 RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 
 dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))

@@ -1,26 +1,26 @@
 [
-  "\u0019™Ä”›Ø…zòâ¨hßD≥",
+  "\u0013˚\u0011˚†\t#.˚8\t◊ë{ûè",
   [
     [
-      "Lib.NatMod.mk_nat_group",
+      "Lib.NatMod.mk_nat_comm_monoid",
       1,
       2,
       1,
       [ "@query" ],
       0,
-      "fba54320d70bf6bb9eef6d073a2f6acf"
+      "9f7beceb91fcc01a1a6c8e1ec40df88f"
     ],
     [
       "Lib.NatMod.pow",
       1,
-      0,
-      0,
+      2,
+      1,
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_ae567c2fb75be05905677af440075565_0",
-        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_Equality",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
@@ -28,7 +28,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "c5caf8d99051e646d316401d794cf782"
+      "4ac2565ba0121bf9feddcefb8ba70ae7"
     ],
     [
       "Lib.NatMod.lemma_pow0",
@@ -46,7 +46,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f5c647914cdf30053b986064f3d42ff9"
+      "7b84ce8462f142336ed0afb956c6c4d4"
     ],
     [
       "Lib.NatMod.lemma_pow1",
@@ -68,7 +68,7 @@
         "typing_Lib.NatMod.pow"
       ],
       0,
-      "a0276206ebb5c479896c1ee8d04d9ef4"
+      "c5a7e61eb97cc37ad7806148e6625781"
     ],
     [
       "Lib.NatMod.lemma_pow_unfold",
@@ -81,7 +81,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "30976dceb2a717cfbf6b96691c73da44"
+      "cfad0057d500a70853e34cc90a26aa49"
     ],
     [
       "Lib.NatMod.lemma_pow_unfold",
@@ -103,7 +103,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "3d1b62915eb51f4f1d71094e0875628a"
+      "cdee5de181bc96d4f74ca6cd5d58c34a"
     ],
     [
       "Lib.NatMod.lemma_pow_gt_zero",
@@ -114,9 +114,8 @@
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
-        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
-        "equation_Prims.pos",
+        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals", "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_Equality",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
@@ -127,7 +126,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "f35895566d76d432e245dd587f32f476"
+      "523aec44f28f5fd9af913976b6a13ad3"
     ],
     [
       "Lib.NatMod.lemma_pow_ge_zero",
@@ -139,9 +138,8 @@
         "@fuel_correspondence_Lib.NatMod.pow.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
-        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.nat",
-        "equation_Prims.pos",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals", "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "lemma_Lib.NatMod.lemma_pow_gt_zero",
         "primitive_Prims.op_Equality", "primitive_Prims.op_Multiply",
@@ -153,7 +151,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "6756dec303cab4ec0b72151093e5e33f"
+      "ec1025080ed6bbd44ed55fbc888e7c41"
     ],
     [
       "Lib.NatMod.lemma_pow_nat_is_pow",
@@ -166,28 +164,44 @@
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
         "binder_x_ae567c2fb75be05905677af440075565_0",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
-        "equality_tok_Prims.LexTop@tok", "equation_Lib.Exponentiation.fmul",
-        "equation_Lib.Exponentiation.one",
-        "equation_Lib.NatMod.mk_nat_group", "equation_Prims.nat",
+        "equation_Lib.Exponentiation.mul", "equation_Lib.Exponentiation.one",
+        "equation_Lib.NatMod.mk_nat_comm_monoid", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
-        "interpretation_Tm_abs_8043e4a8d64039a018f0a54c1c55af00",
-        "interpretation_Tm_abs_e7b0793a93fa8dd7eb00cf2e34267add",
+        "interpretation_Tm_abs_767452e6211eb45132bb0ad477208a19",
+        "interpretation_Tm_abs_bdd1351fbdaffcab615fdbdd8ed277ef",
         "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
-        "proj_equation_Lib.Exponentiation.Mkexp_fmul",
-        "proj_equation_Lib.Exponentiation.Mkexp_one",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_one",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Lib.Exponentiation.Mkexp_fmul",
-        "projection_inverse_Lib.Exponentiation.Mkexp_one",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_one",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "token_correspondence_Lib.Exponentiation.fmul",
+        "token_correspondence_Lib.Exponentiation.mul",
         "token_correspondence_Lib.Exponentiation.one",
         "token_correspondence_Prims.op_Multiply",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "59793a9e42b0bc217698fd72312dc23e"
+      "683e4149803bf59ac38db510156f8e5a"
+    ],
+    [
+      "Lib.NatMod.lemma_pow_one",
+      1,
+      0,
+      0,
+      [
+        "@query", "equation_Lib.Exponentiation.one",
+        "equation_Lib.NatMod.mk_nat_comm_monoid",
+        "interpretation_Tm_abs_bdd1351fbdaffcab615fdbdd8ed277ef",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_one",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_one",
+        "token_correspondence_Lib.Exponentiation.one"
+      ],
+      0,
+      "2be98d28bdfff0331f19c8717d169e00"
     ],
     [
       "Lib.NatMod.lemma_pow_add",
@@ -200,7 +214,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "7aa3ce6f32d3d8b0d09032a7e98e6889"
+      "eaaac0cf81880fbecae6f808a0c2cd13"
     ],
     [
       "Lib.NatMod.lemma_pow_add",
@@ -208,19 +222,19 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.Exponentiation.fmul",
-        "equation_Lib.NatMod.mk_nat_group", "equation_Prims.nat",
-        "interpretation_Tm_abs_8043e4a8d64039a018f0a54c1c55af00",
+        "@MaxIFuel_assumption", "@query", "equation_Lib.Exponentiation.mul",
+        "equation_Lib.NatMod.mk_nat_comm_monoid", "equation_Prims.nat",
+        "interpretation_Tm_abs_767452e6211eb45132bb0ad477208a19",
         "primitive_Prims.op_Addition",
-        "proj_equation_Lib.Exponentiation.Mkexp_fmul",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_mul",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Lib.Exponentiation.Mkexp_fmul",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_mul",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "token_correspondence_Lib.Exponentiation.fmul",
+        "token_correspondence_Lib.Exponentiation.mul",
         "token_correspondence_Prims.op_Multiply"
       ],
       0,
-      "c17a1413a0b283ced991c3a7c3d98138"
+      "e533dab87fd18db2659a47704a7c3309"
     ],
     [
       "Lib.NatMod.lemma_pow_mul",
@@ -233,7 +247,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d42a31b3591a95a2a39020f4fb0dbe65"
+      "e329b1f2aab62ee569e7a318c157dc01"
     ],
     [
       "Lib.NatMod.lemma_pow_mul",
@@ -246,7 +260,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "2321198e1f7b52df6b4961060a3d356f"
+      "84967dbd4b72271c9c580498645817c3"
     ],
     [
       "Lib.NatMod.lemma_pow_double",
@@ -259,7 +273,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "40634b79f0ec76b799ca543e1d7ae729"
+      "72ea08bd63095e5e2c9009c9b51b0866"
     ],
     [
       "Lib.NatMod.lemma_pow_double",
@@ -267,20 +281,20 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.Exponentiation.fmul",
-        "equation_Lib.NatMod.mk_nat_group", "equation_Prims.nat",
+        "@MaxIFuel_assumption", "@query", "equation_Lib.Exponentiation.mul",
+        "equation_Lib.NatMod.mk_nat_comm_monoid", "equation_Prims.nat",
         "int_inversion",
-        "interpretation_Tm_abs_8043e4a8d64039a018f0a54c1c55af00",
+        "interpretation_Tm_abs_767452e6211eb45132bb0ad477208a19",
         "primitive_Prims.op_Addition",
-        "proj_equation_Lib.Exponentiation.Mkexp_fmul",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_mul",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Lib.Exponentiation.Mkexp_fmul",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_mul",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "token_correspondence_Lib.Exponentiation.fmul",
+        "token_correspondence_Lib.Exponentiation.mul",
         "token_correspondence_Prims.op_Multiply"
       ],
       0,
-      "edb6228fb3e9171efc37d307ed12b20c"
+      "b7114ea458c16923b8916d72c61f0c48"
     ],
     [
       "Lib.NatMod.lemma_pow_mul_base",
@@ -288,16 +302,16 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "equation_Lib.Exponentiation.fmul",
-        "equation_Lib.NatMod.mk_nat_group", "int_inversion",
-        "interpretation_Tm_abs_8043e4a8d64039a018f0a54c1c55af00",
-        "proj_equation_Lib.Exponentiation.Mkexp_fmul",
-        "projection_inverse_Lib.Exponentiation.Mkexp_fmul",
-        "token_correspondence_Lib.Exponentiation.fmul",
+        "@MaxIFuel_assumption", "@query", "equation_Lib.Exponentiation.mul",
+        "equation_Lib.NatMod.mk_nat_comm_monoid", "int_inversion",
+        "interpretation_Tm_abs_767452e6211eb45132bb0ad477208a19",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "token_correspondence_Lib.Exponentiation.mul",
         "token_correspondence_Prims.op_Multiply"
       ],
       0,
-      "dc319f121a85e273e48f4810b2ae0942"
+      "ff3e99098bf62048e678edaf38e16021"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_base",
@@ -309,7 +323,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "f55b0664d41529f3a74e01d237eb06df"
+      "4f65fa18d1b2f5b4d6bbe5c382a6a15b"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_base",
@@ -322,7 +336,7 @@
         "refinement_interpretation_Tm_refine_f9f88af3b1e2dbc99e38f49301940025"
       ],
       0,
-      "1ca45e1d26114aae8cb664e0841b396e"
+      "80e56d088be31aa77e46a26d08113b21"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_base",
@@ -335,7 +349,7 @@
         "binder_x_ae567c2fb75be05905677af440075565_0",
         "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1",
         "binder_x_f26957a7e62b271a8736230b1e9c83c1_2", "equation_Prims.nat",
-        "equation_Prims.pos",
+        "equation_Prims.op_Equals_Equals_Equals", "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_Equality",
         "primitive_Prims.op_Subtraction",
@@ -346,7 +360,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "abe53cd098d2d97953e331ddc4a290cc"
+      "2f6466f2cd44caac878190501ff7d7cd"
     ],
     [
       "Lib.NatMod.one_mod",
@@ -360,7 +374,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "b474e71341bc3dc68c4b312a2e4abad2"
+      "d8f32623a82a35c84bb7a5fc4a9d57d3"
     ],
     [
       "Lib.NatMod.mul_mod",
@@ -374,10 +388,38 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "1d3f75a5724c223b623d80e4e53a32cc"
+      "ded1e1a4ff29269aecd59eaa4bf306ef"
     ],
     [
-      "Lib.NatMod.lemma_one_mod",
+      "Lib.NatMod.add_mod",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "7eeee7ba60d73c9fec18475b5c3ff1a1"
+    ],
+    [
+      "Lib.NatMod.sub_mod",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "6a7c59ef983319d3bf7905a3f55241a6"
+    ],
+    [
+      "Lib.NatMod.lemma_mul_mod_one",
       1,
       0,
       0,
@@ -393,7 +435,7 @@
         "typing_Lib.NatMod.mul_mod", "typing_Lib.NatMod.one_mod"
       ],
       0,
-      "0a5c9eebbba3fa3fb4d0ad7ba4d48457"
+      "d627504f141c38270295368fa546fdd0"
     ],
     [
       "Lib.NatMod.lemma_mul_mod_assoc",
@@ -409,7 +451,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "1f7aefab7e874f097a80e97f0623e6f5"
+      "b992a87ecc4bd6123d3f5e94b914d186"
     ],
     [
       "Lib.NatMod.lemma_mul_mod_comm",
@@ -421,7 +463,7 @@
         "primitive_Prims.op_Multiply"
       ],
       0,
-      "1bf0ff67d7381055109f8f1d1c329290"
+      "5d7b84517313518c1a64da2bbed4a2fb"
     ],
     [
       "Lib.NatMod.pow_mod_",
@@ -431,21 +473,22 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "binder_x_f26957a7e62b271a8736230b1e9c83c1_2",
-        "equality_tok_Prims.LexTop@tok", "equation_Prims.pos",
+        "binder_x_03a5d00a837dd83ad22cac00d90eeef8_0",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_2", "equation_Prims.nat",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_Division",
         "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_4fe9a5df27ca5859eef8add9fc6819fb",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "70edc46ac6573723261f225725dbfc2e"
+      "608caf12cec76fb27c19e3f540cda84d"
     ],
     [
-      "Lib.NatMod.lemma_pow_mod1",
+      "Lib.NatMod.lemma_pow_mod0",
       1,
       2,
       0,
@@ -453,15 +496,14 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Lib.NatMod.pow_mod_.fuel_instrumented",
         "@query", "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Lib.NatMod.pow_mod", "equation_Prims.pos",
+        "equation_Lib.NatMod.pow_mod", "equation_Prims.nat",
         "equation_with_fuel_Lib.NatMod.pow_mod_.fuel_instrumented",
-        "function_token_typing_Prims.__cache_version_number__",
-        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+        "function_token_typing_Prims.__cache_version_number__", "int_typing",
+        "primitive_Prims.op_Equality",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "62aa59e5af86f3dab05710708a94d1eb"
+      "2e5e791cecc3b935dea75ddd006b9213"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_unfold0",
@@ -469,12 +511,14 @@
       2,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_1da93ef63852a3a506544a292b2657a4"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_2e4eb0dfc8e927c366ec35a49feaf594",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "c5cbbb53a7c58a44ef691a6723eb1afe"
+      "e79e38465d7681e188dc00d3d4817b73"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_unfold0",
@@ -486,17 +530,19 @@
         "@fuel_correspondence_Lib.NatMod.pow_mod_.fuel_instrumented",
         "@fuel_irrelevance_Lib.NatMod.pow_mod_.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.pow_mod",
+        "equation_Lib.NatMod.pow_mod", "equation_Prims.nat",
         "equation_Prims.pos",
         "equation_with_fuel_Lib.NatMod.pow_mod_.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "primitive_Prims.op_Division",
         "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_1da93ef63852a3a506544a292b2657a4",
+        "refinement_interpretation_Tm_refine_2e4eb0dfc8e927c366ec35a49feaf594",
+        "refinement_interpretation_Tm_refine_4fe9a5df27ca5859eef8add9fc6819fb",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "58c95f38f59ef3afb2ee688e353939bb"
+      "c3dcf8ba92e4c74f3b80f0bb4ba4388f"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_unfold1",
@@ -504,12 +550,14 @@
       2,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_5c810aa3d09a59fa0969eff7c23d634f"
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_951246198cead7debc9ffd1c9af03d7b"
       ],
       0,
-      "2e8070f71f167f889bc837062ed714db"
+      "3fae8d0b187a9770a091441e1c75baaf"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_unfold1",
@@ -521,18 +569,20 @@
         "@fuel_correspondence_Lib.NatMod.pow_mod_.fuel_instrumented",
         "@fuel_irrelevance_Lib.NatMod.pow_mod_.fuel_instrumented", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.pow_mod",
+        "equation_Lib.NatMod.pow_mod", "equation_Prims.nat",
         "equation_Prims.pos",
         "equation_with_fuel_Lib.NatMod.pow_mod_.fuel_instrumented",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "primitive_Prims.op_Division",
         "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_5c810aa3d09a59fa0969eff7c23d634f",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+        "refinement_interpretation_Tm_refine_4fe9a5df27ca5859eef8add9fc6819fb",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_951246198cead7debc9ffd1c9af03d7b"
       ],
       0,
-      "0fba3514c928c130965a8bc7f9d47b7d"
+      "375201d462915cc2493aeaf5269b891a"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_",
@@ -544,7 +594,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "98eeec835514f748bceec51d466e569c"
+      "cfe39b6b41f20820a7d6e76ba01eb4fa"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_",
@@ -557,7 +607,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "b79215d448e6ecabfdd8fd88d17737d7"
+      "a0af3d241da1d2a20d1ee404b689237c"
     ],
     [
       "Lib.NatMod.lemma_pow_mod_",
@@ -565,28 +615,27 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Lib.NatMod.pow.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "binder_x_294bbd16ad656dcb9eba9c34cf7aac04_1",
-        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
-        "binder_x_f26957a7e62b271a8736230b1e9c83c1_2",
-        "equality_tok_Prims.LexTop@tok", "equation_Lib.NatMod.mul_mod",
-        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
-        "equation_Prims.pos",
+        "binder_x_03a5d00a837dd83ad22cac00d90eeef8_0",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_2",
+        "binder_x_cbdc2d3d67eb1d9b86cdf331a98a2d14_1",
+        "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat", "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Division", "primitive_Prims.op_Equality",
         "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_4fe9a5df27ca5859eef8add9fc6819fb",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "unit_inversion", "unit_typing", "well-founded-ordering-on-nat"
       ],
       0,
-      "2edc95cf3703a73cc8adba4dafd18ab8"
+      "e7cf45af32c767e268afc04d55da9a06"
     ],
     [
       "Lib.NatMod.lemma_pow_mod",
@@ -598,7 +647,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "171b35b34c92633382b20831151f747b"
+      "ac62fd2420bc9d9d8964211f03ec851f"
     ],
     [
       "Lib.NatMod.lemma_pow_mod",
@@ -607,7 +656,7 @@
       0,
       [ "@query" ],
       0,
-      "25abb7a05421918f0c1f9e5780d27f38"
+      "ba09d65b03689c0722081d7cd057d7e9"
     ],
     [
       "Lib.NatMod.lemma_pow_nat_mod_is_pow",
@@ -619,7 +668,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "eb2ef1dcdc20fa2bc77378fca184de3e"
+      "741b4dcbfaad846a4e75aa5cc6c98379"
     ],
     [
       "Lib.NatMod.lemma_pow_nat_mod_is_pow",
@@ -632,7 +681,7 @@
         "refinement_interpretation_Tm_refine_9940fd5216d1969f95f956276466686b"
       ],
       0,
-      "75a9b349fb7795ec9a5d35a72c299c39"
+      "173ef83643074123fa303ac058d6944e"
     ],
     [
       "Lib.NatMod.lemma_pow_nat_mod_is_pow",
@@ -642,33 +691,305 @@
       [
         "@MaxIFuel_assumption", "@query",
         "Prims_pretyping_ae567c2fb75be05905677af440075565",
-        "binder_x_294bbd16ad656dcb9eba9c34cf7aac04_1",
-        "binder_x_f26957a7e62b271a8736230b1e9c83c1_0",
-        "binder_x_f26957a7e62b271a8736230b1e9c83c1_2",
-        "equality_tok_Prims.LexTop@tok", "equation_Lib.Exponentiation.fmul",
-        "equation_Lib.NatMod.mk_nat_mod_group",
+        "binder_x_03a5d00a837dd83ad22cac00d90eeef8_0",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_2",
+        "binder_x_cbdc2d3d67eb1d9b86cdf331a98a2d14_1",
+        "equation_Lib.Exponentiation.mul", "equation_Lib.Exponentiation.one",
+        "equation_Lib.NatMod.mk_nat_mod_comm_monoid",
         "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.nat_mod",
         "equation_Lib.NatMod.one_mod", "equation_Prims.nat",
-        "equation_Prims.pos",
+        "equation_Prims.op_Equals_Equals_Equals", "equation_Prims.pos",
         "function_token_typing_Prims.__cache_version_number__",
         "int_inversion", "int_typing",
-        "interpretation_Tm_abs_8043e4a8d64039a018f0a54c1c55af00",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Subtraction",
-        "proj_equation_Lib.Exponentiation.Mkexp_fmul",
+        "interpretation_Tm_abs_767452e6211eb45132bb0ad477208a19",
+        "interpretation_Tm_abs_bdd1351fbdaffcab615fdbdd8ed277ef",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_Subtraction",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "proj_equation_Lib.Exponentiation.Mkcomm_monoid_one",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "projection_inverse_Lib.Exponentiation.Mkexp_fmul",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_mul",
+        "projection_inverse_Lib.Exponentiation.Mkcomm_monoid_one",
+        "refinement_interpretation_Tm_refine_4fe9a5df27ca5859eef8add9fc6819fb",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
-        "token_correspondence_Lib.Exponentiation.__proj__Mkexp__item__fmul",
-        "token_correspondence_Lib.Exponentiation.fmul",
+        "token_correspondence_Lib.Exponentiation.__proj__Mkcomm_monoid__item__mul",
+        "token_correspondence_Lib.Exponentiation.mul",
+        "token_correspondence_Lib.Exponentiation.one",
         "token_correspondence_Lib.NatMod.mul_mod",
         "well-founded-ordering-on-nat"
       ],
       0,
-      "eaf34822addb3d1e742ee01b030a4dcc"
+      "84dbfc789889e85c77bdcdeb77a7e275"
+    ],
+    [
+      "Lib.NatMod.lemma_add_mod_one",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "735b50a0f4442f46d72000c61fead89a"
+    ],
+    [
+      "Lib.NatMod.lemma_add_mod_one",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.add_mod",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "2289c8b981fde89993a598767c9438b1"
+    ],
+    [
+      "Lib.NatMod.lemma_add_mod_assoc",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.add_mod",
+        "equation_Lib.NatMod.nat_mod", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
+      ],
+      0,
+      "0d874b5f8579a0669b80c495fafee79c"
+    ],
+    [
+      "Lib.NatMod.lemma_add_mod_comm",
+      1,
+      0,
+      0,
+      [
+        "@query", "equation_Lib.NatMod.add_mod",
+        "primitive_Prims.op_Addition"
+      ],
+      0,
+      "026839e82df577195b170cb752438ace"
+    ],
+    [
+      "Lib.NatMod.lemma_mod_distributivity_add_right",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.add_mod",
+        "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.nat_mod",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Modulus", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "typing_Lib.NatMod.add_mod", "typing_Lib.NatMod.mul_mod"
+      ],
+      0,
+      "b95b10f25f910458907e9ad817119c14"
+    ],
+    [
+      "Lib.NatMod.lemma_mod_distributivity_add_left",
+      1,
+      0,
+      0,
+      [
+        "@query", "equation_Lib.NatMod.add_mod",
+        "equation_Lib.NatMod.mul_mod", "primitive_Prims.op_Multiply"
+      ],
+      0,
+      "103408c034c5172789deb5dac56a1ad8"
+    ],
+    [
+      "Lib.NatMod.lemma_mod_distributivity_sub_right",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.mul_mod",
+        "equation_Lib.NatMod.nat_mod", "equation_Lib.NatMod.sub_mod",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Minus",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "typing_Lib.NatMod.mul_mod", "typing_Lib.NatMod.sub_mod"
+      ],
+      0,
+      "39d513ec950a18a35b1f802c1bce0ab0"
+    ],
+    [
+      "Lib.NatMod.lemma_mod_distributivity_sub_left",
+      1,
+      0,
+      0,
+      [
+        "@query", "equation_Lib.NatMod.mul_mod",
+        "equation_Lib.NatMod.sub_mod", "primitive_Prims.op_Multiply"
+      ],
+      0,
+      "c5017fd7d1fc59476af0f7c8da5ca7b2"
+    ],
+    [
+      "Lib.NatMod.inv_mod",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.prime",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "244935f1fd1b0ca8b7fa759b8069575f"
+    ],
+    [
+      "Lib.NatMod.lemma_inv_mod_both",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.inv_mod",
+        "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.nat_mod",
+        "equation_Lib.NatMod.prime", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "13f9f8a6ebde125427a8fcb945207e3c"
+    ],
+    [
+      "Lib.NatMod.pow_eq",
+      1,
+      1,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_FStar.Math.Fermat.pow.fuel_instrumented",
+        "@fuel_correspondence_Lib.NatMod.pow.fuel_instrumented",
+        "@fuel_irrelevance_FStar.Math.Fermat.pow.fuel_instrumented",
+        "@fuel_irrelevance_Lib.NatMod.pow.fuel_instrumented", "@query",
+        "Prims_pretyping_ae567c2fb75be05905677af440075565",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_0",
+        "binder_x_bb4e1c9af0265270f8e7a5f250f730e2_1", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
+        "equation_with_fuel_FStar.Math.Fermat.pow.fuel_instrumented",
+        "equation_with_fuel_Lib.NatMod.pow.fuel_instrumented",
+        "function_token_typing_Prims.__cache_version_number__",
+        "int_inversion", "int_typing", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "well-founded-ordering-on-nat"
+      ],
+      0,
+      "3407874a98fcb9b505648b64dc399ebd"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_prime",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.div_mod",
+        "equation_Lib.NatMod.inv_mod", "equation_Lib.NatMod.mul_mod",
+        "equation_Lib.NatMod.nat_mod", "equation_Lib.NatMod.prime",
+        "equation_Prims.pos", "int_inversion", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_828958215008c7ce6253d89a707fd615",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "fbd367d3c239460a400ac034b30595ab"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_prime_one",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.prime",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "f9dce1619d0190457cce6ad52b56bebd"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_prime_one",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.div_mod",
+        "equation_Lib.NatMod.inv_mod", "equation_Lib.NatMod.mul_mod",
+        "equation_Lib.NatMod.nat_mod", "equation_Lib.NatMod.prime",
+        "equation_Prims.nat", "int_inversion", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "acd478d1a00ff81b8dd1842e25c089ec"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_prime_cancel",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.div_mod",
+        "equation_Lib.NatMod.mul_mod", "equation_Lib.NatMod.nat_mod",
+        "equation_Lib.NatMod.prime", "equation_Prims.nat",
+        "equation_Prims.pos", "int_inversion", "int_typing",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_828958215008c7ce6253d89a707fd615",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "9192a2159484301cea62f3594b89fa20"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_prime_to_one_denominator",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.div_mod",
+        "equation_Lib.NatMod.nat_mod", "equation_Lib.NatMod.prime",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_828958215008c7ce6253d89a707fd615",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "8061dead97d166936c0fac240bfd676e"
     ]
   ]
 ]

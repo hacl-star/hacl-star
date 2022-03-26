@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -e
+set -o pipefail
 
 if [[ $1 == "" ]]; then
   echo "USAGE: $0 DST where DST is the directory in which files have to be copied"
@@ -22,6 +24,9 @@ cp -R _build/html/* $1
 
 mkdir -p $1/javascript_doc
 cp -R ../dist/wasm/doc/out/* $1/javascript_doc
+
+mkdir -p $1/ocaml_doc
+cp -R ../bindings/ocaml/_build/default/_doc/_html/* $1/ocaml_doc
 
 cd $1
 rm -rf static && mv _static static

@@ -124,7 +124,7 @@ let fmul output input input2 =
 
 [@CInline]
 let times_2 out a =
-  (**) let h0 = get() in
+  (**) let h0 = ST.get() in
   let a0 = a.(0ul) in
   let a1 = a.(1ul) in
   let a2 = a.(2ul) in
@@ -137,7 +137,7 @@ let times_2 out a =
   let o4 = u64 2 *. a4 in
   make_u64_5 out o0 o1 o2 o3 o4;
 
-  (**) let h1 = get() in
+  (**) let h1 = ST.get() in
   (**) assert (S51.felem_fits1 a0 1);
   (**) assert (F51.felem_fits h1 out (2, 4, 2, 2, 2));
 

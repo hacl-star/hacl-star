@@ -29,16 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 static inline uint32_t FStar_UInt32_eq_mask(uint32_t a, uint32_t b);
 
 static inline uint32_t FStar_UInt32_gte_mask(uint32_t a, uint32_t b);
@@ -54,6 +53,8 @@ static inline uint16_t FStar_UInt16_eq_mask(uint16_t a, uint16_t b);
 static inline uint128_t FStar_UInt128_add(uint128_t a, uint128_t b);
 
 static inline uint128_t FStar_UInt128_add_mod(uint128_t a, uint128_t b);
+
+static inline uint128_t FStar_UInt128_sub_mod(uint128_t a, uint128_t b);
 
 static inline uint128_t FStar_UInt128_logor(uint128_t a, uint128_t b);
 
@@ -72,8 +73,6 @@ static inline void store128_le(uint8_t *x0, uint128_t x1);
 static inline void store128_be(uint8_t *x0, uint128_t x1);
 
 static inline uint128_t load128_be(uint8_t *x0);
-
-uint32_t LowStar_Vector_new_capacity(uint32_t cap);
 
 #if defined(__cplusplus)
 }

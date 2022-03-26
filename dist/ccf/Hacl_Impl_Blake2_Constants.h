@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
 static const
 uint32_t
 Hacl_Impl_Blake2_Constants_sigmaTable[160U] =

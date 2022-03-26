@@ -29,25 +29,16 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Bignum.h"
 #include "Hacl_Spec.h"
 #include "Hacl_Impl_FFDHE_Constants.h"
-
-/* SNIPPET_START: Hacl_Impl_FFDHE_ffdhe_len */
-
-uint32_t Hacl_Impl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a);
-
-/* SNIPPET_END: Hacl_Impl_FFDHE_ffdhe_len */
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 /* SNIPPET_START: Hacl_FFDHE_ffdhe_len */
 
 uint32_t Hacl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a);

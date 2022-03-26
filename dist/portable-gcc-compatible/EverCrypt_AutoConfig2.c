@@ -24,6 +24,8 @@
 
 #include "EverCrypt_AutoConfig2.h"
 
+#include "internal/Vale.h"
+
 /* SNIPPET_START: cpu_has_shaext */
 
 static bool cpu_has_shaext[1U] = { false };
@@ -255,7 +257,7 @@ bool EverCrypt_AutoConfig2_wants_bcrypt()
 
 void EverCrypt_AutoConfig2_recall()
 {
-  
+
 }
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_recall */
@@ -264,7 +266,7 @@ void EverCrypt_AutoConfig2_recall()
 
 void EverCrypt_AutoConfig2_init()
 {
-  #if EVERCRYPT_CAN_COMPILE_VALE
+  #if HACL_CAN_COMPILE_VALE
   uint64_t scrut = check_aesni();
   if (scrut != (uint64_t)0U)
   {

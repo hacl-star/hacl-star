@@ -4,9 +4,6 @@ module Bindings(F:Cstubs.FOREIGN) =
     open F
     module Hacl_Spec_applied = (Hacl_Spec_bindings.Bindings)(Hacl_Spec_stubs)
     open Hacl_Spec_applied
-    module Hacl_HMAC_DRBG_applied =
-      (Hacl_HMAC_DRBG_bindings.Bindings)(Hacl_HMAC_DRBG_stubs)
-    open Hacl_HMAC_DRBG_applied
     type everCrypt_DRBG_supported_alg = spec_Hash_Definitions_hash_alg
     let everCrypt_DRBG_supported_alg =
       typedef spec_Hash_Definitions_hash_alg "EverCrypt_DRBG_supported_alg"

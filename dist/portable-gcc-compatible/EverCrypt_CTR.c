@@ -24,6 +24,10 @@
 
 #include "EverCrypt_CTR.h"
 
+#include "internal/Vale.h"
+#include "internal/Hacl_Spec.h"
+#include "internal/Hacl_Chacha20.h"
+
 /* SNIPPET_START: EverCrypt_CTR_state_s */
 
 typedef struct EverCrypt_CTR_state_s_s
@@ -47,71 +51,6 @@ EverCrypt_CTR_uu___is_State(Spec_Agile_Cipher_cipher_alg a, EverCrypt_CTR_state_
 }
 
 /* SNIPPET_END: EverCrypt_CTR_uu___is_State */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__i */
-
-Spec_Cipher_Expansion_impl
-EverCrypt_CTR___proj__State__item__i(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.i;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__i */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__iv */
-
-uint8_t
-*EverCrypt_CTR___proj__State__item__iv(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.iv;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__iv */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__iv_len */
-
-uint32_t
-EverCrypt_CTR___proj__State__item__iv_len(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.iv_len;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__iv_len */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__xkey */
-
-uint8_t
-*EverCrypt_CTR___proj__State__item__xkey(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.xkey;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__xkey */
-
-/* SNIPPET_START: EverCrypt_CTR___proj__State__item__ctr */
-
-uint32_t
-EverCrypt_CTR___proj__State__item__ctr(
-  Spec_Agile_Cipher_cipher_alg a,
-  EverCrypt_CTR_state_s projectee
-)
-{
-  return projectee.ctr;
-}
-
-/* SNIPPET_END: EverCrypt_CTR___proj__State__item__ctr */
 
 /* SNIPPET_START: EverCrypt_CTR_xor8 */
 
@@ -181,7 +120,7 @@ EverCrypt_CTR_create_in(
         {
           return EverCrypt_Error_InvalidIVLength;
         }
-        #if EVERCRYPT_CAN_COMPILE_VALE
+        #if HACL_CAN_COMPILE_VALE
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
@@ -220,7 +159,7 @@ EverCrypt_CTR_create_in(
         {
           return EverCrypt_Error_InvalidIVLength;
         }
-        #if EVERCRYPT_CAN_COMPILE_VALE
+        #if HACL_CAN_COMPILE_VALE
         if (has_aesni && has_pclmulqdq && has_avx && has_sse)
         {
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
@@ -302,7 +241,7 @@ EverCrypt_CTR_init(
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
-        #if EVERCRYPT_CAN_COMPILE_VALE
+        #if HACL_CAN_COMPILE_VALE
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)176U;
         uint64_t scrut = aes128_key_expansion(k, keys_b);
@@ -312,7 +251,7 @@ EverCrypt_CTR_init(
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
-        #if EVERCRYPT_CAN_COMPILE_VALE
+        #if HACL_CAN_COMPILE_VALE
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)240U;
         uint64_t scrut = aes256_key_expansion(k, keys_b);
@@ -349,7 +288,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
   {
     case Spec_Cipher_Expansion_Vale_AES128:
       {
-        #if EVERCRYPT_CAN_COMPILE_VALE
+        #if HACL_CAN_COMPILE_VALE
         EverCrypt_CTR_state_s scrut0 = *p;
         uint32_t c01 = scrut0.ctr;
         uint8_t *ek1 = scrut0.xkey;
@@ -399,7 +338,7 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
       }
     case Spec_Cipher_Expansion_Vale_AES256:
       {
-        #if EVERCRYPT_CAN_COMPILE_VALE
+        #if HACL_CAN_COMPILE_VALE
         EverCrypt_CTR_state_s scrut0 = *p;
         uint32_t c01 = scrut0.ctr;
         uint8_t *ek1 = scrut0.xkey;

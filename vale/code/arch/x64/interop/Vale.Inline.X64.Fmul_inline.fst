@@ -72,7 +72,7 @@ let fmul_post : VSig.vale_post fmul_dom =
 
 let fmul_regs_modified: MS.reg_64 -> bool = fun (r:MS.reg_64) ->
   let open MS in
-  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR13 || r = rR14 || r = rR15 then true
+  if r = rRax || r = rRbx || r = rRcx || r = rRdx || r = rRdi || r = rRsi || r = rR8 || r = rR9 || r = rR10 || r = rR11 || r = rR13 || r = rR14 then true
   else false
 
 let fmul_xmms_modified = fun _ -> false
@@ -446,7 +446,7 @@ let fmul_scalar out f1 f2
     let (x, _) = lowstar_fmul1_normal_t out f1 f2 () in
     ()
 
-let fmul1_comments : list string = 
+let fmul1_comments : list string =
   ["Computes the field multiplication of four-element f1 with value in f2"; "Requires f2 to be smaller than 2^17"]
 
 let fmul1_names (n:nat) =

@@ -29,16 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "Hacl_Poly1305_256.h"
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 typedef struct Hacl_Streaming_Poly1305_256_poly1305_256_state_s
 {
   Lib_IntVector_Intrinsics_vec256 *block_state;

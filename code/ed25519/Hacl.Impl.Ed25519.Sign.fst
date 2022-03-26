@@ -5,8 +5,6 @@ open FStar.HyperStack.All
 open FStar.Mul
 
 open Lib.IntTypes
-open Lib.ByteSequence
-open Lib.Sequence
 open Lib.Buffer
 
 open Hacl.Impl.Ed25519.Sign.Expanded

@@ -15,7 +15,7 @@ open FStar.Integers
 
 friend Lib.IntTypes
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 let poly1305_vale
     (dst:B.buffer UInt8.t { B.length dst = 16 })
     (src:B.buffer UInt8.t)
@@ -23,7 +23,7 @@ let poly1305_vale
     (key:B.buffer UInt8.t { B.length key = 32 })
   : Stack unit
     (requires fun h ->
-      EverCrypt.TargetConfig.evercrypt_can_compile_vale /\
+      EverCrypt.TargetConfig.hacl_can_compile_vale /\
       B.live h src /\ B.live h dst /\ B.live h key /\
       B.disjoint dst src /\ B.disjoint dst key)
     (ensures fun h0 _ h1 ->
@@ -51,6 +51,7 @@ let poly1305_vale
     Vale.Poly1305.CallingFromLowStar.lemma_hash_init h1 h1 ctx true;
     Vale.Wrapper.X64.Poly.x64_poly1305 ctx src (FStar.Int.Cast.Full.uint32_to_uint64 len) 1UL;
     let h2 = ST.get () in
+    assert (B.length src == 8 * Vale.Poly1305.Util.readable_words (Seq.length (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src))));
     Vale.Poly1305.CallingFromLowStar.lemma_call_poly1305 h1 h2 ctx src
       (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 src))
       (Vale.Arch.BufferFriend.to_bytes (B.as_seq h1 key));
@@ -129,13 +130,13 @@ let poly1305 dst src len key =
   let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
   let vale = EverCrypt.AutoConfig2.wants_vale () in
 
-  if EverCrypt.TargetConfig.evercrypt_can_compile_vec256 && vec256 then begin
+  if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then begin
     Hacl.Poly1305_256.poly1305_mac dst len src key
 
-  end else if EverCrypt.TargetConfig.evercrypt_can_compile_vec128 && vec128 then begin
+  end else if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then begin
     Hacl.Poly1305_128.poly1305_mac dst len src key
 
-  end else if EverCrypt.TargetConfig.evercrypt_can_compile_vale && vale then begin
+  end else if EverCrypt.TargetConfig.hacl_can_compile_vale && vale then begin
     poly1305_vale dst src len key
 
   end else begin

@@ -1,16 +1,10 @@
 LIBRARY libevercrypt
 
 EXPORTS
-  Hacl_Blake2s_32_blake2s_init
-  Hacl_Blake2s_32_blake2s_update_multi
-  Hacl_Blake2s_32_blake2s_update_last
-  Hacl_Blake2s_32_blake2s_finish
-  Hacl_Blake2s_32_blake2s
-  Hacl_Blake2b_32_blake2b_init
-  Hacl_Blake2b_32_blake2b_update_multi
-  Hacl_Blake2b_32_blake2b_update_last
-  Hacl_Blake2b_32_blake2b_finish
-  Hacl_Blake2b_32_blake2b
+  Hacl_Hash_Definitions_word_len
+  Hacl_Hash_Definitions_block_len
+  Hacl_Hash_Definitions_hash_word_len
+  Hacl_Hash_Definitions_hash_len
   Hacl_Hash_Core_Blake2_finish_blake2s_32
   Hacl_Hash_Core_Blake2_finish_blake2b_32
   Hacl_Hash_Blake2_update_multi_blake2s_32
@@ -19,20 +13,52 @@ EXPORTS
   Hacl_Hash_Blake2_update_last_blake2b_32
   Hacl_Hash_Blake2_hash_blake2s_32
   Hacl_Hash_Blake2_hash_blake2b_32
+  Hacl_Blake2b_32_blake2b_init
+  Hacl_Blake2b_32_blake2b_update_key
+  Hacl_Blake2b_32_blake2b_update_multi
+  Hacl_Blake2b_32_blake2b_update_last
+  Hacl_Blake2b_32_blake2b_finish
+  Hacl_Blake2b_32_blake2b
+  Hacl_Blake2s_32_blake2s_init
+  Hacl_Blake2s_32_blake2s_update_key
+  Hacl_Blake2s_32_blake2s_update_multi
+  Hacl_Blake2s_32_blake2s_update_last
+  Hacl_Blake2s_32_blake2s_finish
+  Hacl_Blake2s_32_blake2s
+  Hacl_Hash_Blake2b_256_finish_blake2b_256
+  Hacl_Hash_Blake2b_256_update_multi_blake2b_256
+  Hacl_Hash_Blake2b_256_update_last_blake2b_256
+  Hacl_Hash_Blake2b_256_hash_blake2b_256
+  Hacl_Blake2b_256_blake2b_init
+  Hacl_Blake2b_256_blake2b_update_key
+  Hacl_Blake2b_256_blake2b_update_multi
+  Hacl_Blake2b_256_blake2b_update_last
+  Hacl_Blake2b_256_blake2b_finish
+  Hacl_Blake2b_256_blake2b
+  Hacl_Hash_Blake2s_128_finish_blake2s_128
+  Hacl_Hash_Blake2s_128_update_multi_blake2s_128
+  Hacl_Hash_Blake2s_128_update_last_blake2s_128
+  Hacl_Hash_Blake2s_128_hash_blake2s_128
+  Hacl_Blake2s_128_blake2s_init
+  Hacl_Blake2s_128_blake2s_update_key
+  Hacl_Blake2s_128_blake2s_update_multi
+  Hacl_Blake2s_128_blake2s_update_last
+  Hacl_Blake2s_128_blake2s_finish
+  Hacl_Blake2s_128_blake2s
   Hacl_Hash_MD5_legacy_update_multi
   Hacl_Hash_MD5_legacy_update_last
   Hacl_Hash_MD5_legacy_hash
-  Hacl_Hash_Core_MD5_legacy_init
-  Hacl_Hash_Core_MD5_legacy_update
-  Hacl_Hash_Core_MD5_legacy_pad
-  Hacl_Hash_Core_MD5_legacy_finish
+  Hacl_Hash_Core_SHA1_legacy_init
+  Hacl_Hash_Core_SHA1_legacy_finish
   Hacl_Hash_SHA1_legacy_update_multi
   Hacl_Hash_SHA1_legacy_update_last
   Hacl_Hash_SHA1_legacy_hash
-  Hacl_Hash_Core_SHA1_legacy_init
-  Hacl_Hash_Core_SHA1_legacy_update
-  Hacl_Hash_Core_SHA1_legacy_pad
-  Hacl_Hash_Core_SHA1_legacy_finish
+  Hacl_Hash_Core_SHA2_init_256
+  Hacl_Hash_Core_SHA2_init_384
+  Hacl_Hash_Core_SHA2_init_512
+  Hacl_Hash_Core_SHA2_finish_256
+  Hacl_Hash_Core_SHA2_finish_384
+  Hacl_Hash_Core_SHA2_finish_512
   Hacl_Hash_SHA2_update_multi_224
   Hacl_Hash_SHA2_update_multi_256
   Hacl_Hash_SHA2_update_multi_384
@@ -45,44 +71,6 @@ EXPORTS
   Hacl_Hash_SHA2_hash_256
   Hacl_Hash_SHA2_hash_384
   Hacl_Hash_SHA2_hash_512
-  Hacl_Hash_Core_SHA2_init_224
-  Hacl_Hash_Core_SHA2_init_256
-  Hacl_Hash_Core_SHA2_init_384
-  Hacl_Hash_Core_SHA2_init_512
-  Hacl_Hash_Core_SHA2_update_224
-  Hacl_Hash_Core_SHA2_update_256
-  Hacl_Hash_Core_SHA2_update_384
-  Hacl_Hash_Core_SHA2_update_512
-  Hacl_Hash_Core_SHA2_pad_224
-  Hacl_Hash_Core_SHA2_pad_256
-  Hacl_Hash_Core_SHA2_pad_384
-  Hacl_Hash_Core_SHA2_pad_512
-  Hacl_Hash_Core_SHA2_finish_224
-  Hacl_Hash_Core_SHA2_finish_256
-  Hacl_Hash_Core_SHA2_finish_384
-  Hacl_Hash_Core_SHA2_finish_512
-  Hacl_Hash_Definitions_word_len
-  Hacl_Hash_Definitions_block_len
-  Hacl_Hash_Definitions_hash_word_len
-  Hacl_Hash_Definitions_hash_len
-  Hacl_Hash_Blake2b_256_finish_blake2b_256
-  Hacl_Hash_Blake2b_256_update_multi_blake2b_256
-  Hacl_Hash_Blake2b_256_update_last_blake2b_256
-  Hacl_Hash_Blake2b_256_hash_blake2b_256
-  Hacl_Blake2b_256_blake2b_init
-  Hacl_Blake2b_256_blake2b_update_multi
-  Hacl_Blake2b_256_blake2b_update_last
-  Hacl_Blake2b_256_blake2b_finish
-  Hacl_Blake2b_256_blake2b
-  Hacl_Hash_Blake2s_128_finish_blake2s_128
-  Hacl_Hash_Blake2s_128_update_multi_blake2s_128
-  Hacl_Hash_Blake2s_128_update_last_blake2s_128
-  Hacl_Hash_Blake2s_128_hash_blake2s_128
-  Hacl_Blake2s_128_blake2s_init
-  Hacl_Blake2s_128_blake2s_update_multi
-  Hacl_Blake2s_128_blake2s_update_last
-  Hacl_Blake2s_128_blake2s_finish
-  Hacl_Blake2s_128_blake2s
   Hacl_Impl_SHA3_rotl
   Hacl_Impl_SHA3_state_permute
   Hacl_Impl_SHA3_loadState
@@ -102,12 +90,6 @@ EXPORTS
   Hacl_Salsa20_salsa20_decrypt
   Hacl_Salsa20_salsa20_key_block0
   Hacl_Salsa20_hsalsa20
-  Hacl_Bignum_Base_mul_wide_add_u64
-  Hacl_Bignum_Base_mul_wide_add2_u64
-  Hacl_Bignum_Addition_bn_add_eq_len_u64
-  Hacl_Curve25519_64_Slow_scalarmult
-  Hacl_Curve25519_64_Slow_secret_to_public
-  Hacl_Curve25519_64_Slow_ecdh
   Hacl_Impl_Curve25519_Field51_fadd
   Hacl_Impl_Curve25519_Field51_fsub
   Hacl_Impl_Curve25519_Field51_fmul
@@ -122,6 +104,8 @@ EXPORTS
   Hacl_Curve25519_51_scalarmult
   Hacl_Curve25519_51_secret_to_public
   Hacl_Curve25519_51_ecdh
+  Hacl_Streaming_SHA2_update_512
+  Hacl_Streaming_SHA2_finish_512
   Hacl_Bignum25519_reduce_513
   Hacl_Bignum25519_inverse
   Hacl_Bignum25519_load_51
@@ -177,14 +161,14 @@ EXPORTS
   Hacl_P256_ecdsa_verif_p256_sha384
   Hacl_P256_ecdsa_verif_p256_sha512
   Hacl_P256_ecdsa_verif_without_hash
-  Hacl_P256_verify_q
-  Hacl_P256_decompression_not_compressed_form
-  Hacl_P256_decompression_compressed_form
-  Hacl_P256_compression_not_compressed_form
-  Hacl_P256_compression_compressed_form
-  Hacl_P256_ecp256dh_i
-  Hacl_P256_ecp256dh_r
-  Hacl_P256_is_more_than_zero_less_than_order
+  Hacl_P256_validate_public_key
+  Hacl_P256_validate_private_key
+  Hacl_P256_uncompressed_to_raw
+  Hacl_P256_compressed_to_raw
+  Hacl_P256_raw_to_uncompressed
+  Hacl_P256_raw_to_compressed
+  Hacl_P256_dh_initiator
+  Hacl_P256_dh_responder
   Hacl_Keccak_shake128_4x
   Hacl_Impl_Matrix_mod_pow2
   Hacl_Impl_Matrix_matrix_add
@@ -206,9 +190,11 @@ EXPORTS
   Hacl_Impl_Frodo_Encode_frodo_key_encode
   Hacl_Impl_Frodo_Encode_frodo_key_decode
   Hacl_IntTypes_Intrinsics_add_carry_u32
-  Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u32
+  Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
+  Hacl_IntTypes_Intrinsics_128_add_carry_u64
+  Hacl_IntTypes_Intrinsics_128_sub_borrow_u64
   Hacl_Frodo640_crypto_kem_keypair
   Hacl_Frodo640_crypto_kem_enc
   Hacl_Frodo640_crypto_kem_dec
@@ -265,9 +251,6 @@ EXPORTS
   Hacl_HKDF_extract_blake2b_32
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
-  Hacl_HMAC_DRBG___proj__State__item__k
-  Hacl_HMAC_DRBG___proj__State__item__v
-  Hacl_HMAC_DRBG___proj__State__item__reseed_counter
   Hacl_HMAC_DRBG_create_in
   Hacl_HMAC_DRBG_instantiate
   Hacl_HMAC_DRBG_reseed

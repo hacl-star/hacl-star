@@ -27,8 +27,8 @@ type buftype =
   | CONST
 
 inline_for_extraction
-let buffer_t (ty:buftype) (a:Type0) =
-  match ty with
+let buffer_t (t:buftype) (a:Type0) =
+  match t with
   | IMMUT -> IB.ibuffer a
   | MUT -> B.buffer a
   | CONST -> CB.const_buffer a
@@ -65,8 +65,8 @@ let const_to_ibuffer #a (b:cbuffer a{CB.qual_of b == CB.IMMUTABLE}) : r:ibuffer 
 
 
 inline_for_extraction
-let lbuffer_t (ty:buftype) (a:Type0) (len:size_t) =
-  b:buffer_t ty a{length #ty #a b == v len}
+let lbuffer_t (t:buftype) (a:Type0) (len:size_t) =
+  b:buffer_t t a{length #t #a b == v len}
 
 unfold let lbuffer (a:Type0) (len:size_t) = lbuffer_t MUT a len
 unfold let ilbuffer (a:Type0) (len:size_t) = lbuffer_t IMMUT a len
@@ -79,20 +79,58 @@ let const_to_lbuffer #a #len (b:clbuffer a len{CB.qual_of (b <: cbuffer a) == CB
 let const_to_ilbuffer #a #len (b:glbuffer a len)  : r:ilbuffer a len =
   const_to_ibuffer #a b
 
-unfold let null (a: Type0) : lbuffer a (size 0) = B.null #a
+unfold let null (#t : buftype) (a : Type0) : buffer_t t a =
+  match t with
+  | IMMUT -> IB.inull #a
+  | MUT -> B.null #a
+  | CONST -> CB.null a
 
-//val live: #t:buftype -> #a:Type0 -> h:HS.mem -> b:buffer_t t a -> Type
+let g_is_null (#t : buftype) (#a : Type0) (b : buffer_t t a) : GTot bool =
+  match t with
+  | IMMUT -> IB.g_is_null (b <: ibuffer a)
+  | MUT -> B.g_is_null (b <: buffer a)
+  | CONST -> B.g_is_null (CB.as_mbuf (b <: cbuffer a))
+
 let live (#t:buftype) (#a:Type0) (h:HS.mem) (b:buffer_t t a) : Type =
   match t with
   | MUT -> B.live h (b <: buffer a)
   | IMMUT -> IB.live h (b <: ibuffer a)
   | CONST -> CB.live h (b <: cbuffer a)
 
+let freeable (#t : buftype) (#a : Type0) (b : buffer_t t a) : GTot Type0 =
+  match t with
+  | IMMUT -> IB.freeable (b <: ibuffer a)
+  | MUT -> B.freeable (b <: buffer a)
+  | CONST -> B.freeable (CB.as_mbuf (b <: cbuffer a))
+
 let loc (#t:buftype) (#a:Type0) (b:buffer_t t a) : GTot B.loc =
   match t with
   | MUT -> B.loc_buffer (b <: buffer a)
   | IMMUT -> B.loc_buffer (b <: ibuffer a)
   | CONST -> CB.loc_buffer (b <: cbuffer a)
+
+let loc_addr_of_buffer (#t : buftype) (#a : Type0) (b : buffer_t t a) : GTot B.loc =
+  match t with
+  | IMMUT -> IB.loc_addr_of_buffer (b <: ibuffer a)
+  | MUT -> B.loc_addr_of_buffer (b <: buffer a)
+  | CONST -> B.loc_addr_of_buffer (CB.as_mbuf (b <: cbuffer a))
+
+inline_for_extraction noextract
+let is_null (#t : buftype) (#a : Type0) (b : buffer_t t a) :
+  Stack bool
+  (requires (fun h -> live h b))
+  (ensures  (fun h y h' -> h == h' /\ y == g_is_null b)) =
+  match t with
+  | IMMUT -> IB.is_null (b <: ibuffer a)
+  | MUT -> B.is_null (b <: buffer a)
+  | CONST -> CB.is_null (b <: cbuffer a)
+
+let get (#t : buftype) (#a : Type0) (h : mem) (b : buffer_t t a) (i : nat{i < length b}) :
+  GTot a =
+  match t with
+  | IMMUT -> IB.get h (b <: ibuffer a) i
+  | MUT -> B.get h (b <: buffer a) i
+  | CONST -> B.get h (CB.as_mbuf (b <: cbuffer a)) i
 
 #set-options "--max_ifuel 0"
 
@@ -315,10 +353,10 @@ let recallable (#t:buftype) (#a:Type0) (#len:size_t) (b:lbuffer_t t a len) =
 
 inline_for_extraction 
 val recall:
-    #t:buftype 
+    #t:buftype
   -> #a:Type0
   -> #len:size_t
-  -> b:lbuffer_t t a len -> 
+  -> b:lbuffer_t t a len ->
   Stack unit
     (requires fun _ -> recallable b)
     (ensures  fun h0 _ h1 -> h0 == h1 /\ live h0 b)
@@ -951,7 +989,7 @@ val fill_blocks:
   -> spec:(mem -> GTot (i:size_nat{i < v n} -> a_spec i -> a_spec (i + 1) & Seq.lseq t (v len)))
   -> impl:(i:size_t{v i < v n} -> Stack unit
       (requires fun h1 ->
-      	(v i + 1) * v len <= max_size_t /\
+        (v i + 1) * v len <= max_size_t /\
         modifies (footprint (v i) |+| loc (gsub output 0ul (i *! len))) h0 h1)
       (ensures  fun h1 _ h2 ->
         (let block = gsub output (i *! len) len in
@@ -1168,3 +1206,24 @@ val map_blocks:
     (ensures  fun _ _ h1 -> modifies1 output h0 h1 /\
 	as_seq h1 output == Seq.map_blocks (v blocksize) (as_seq h0 inp) (spec_f h0) (spec_l h0))
 
+
+inline_for_extraction
+val create8: #a:Type0 -> st:lbuffer a 8ul
+  -> v0:a -> v1:a -> v2:a -> v3:a
+  -> v4:a -> v5:a -> v6:a -> v7:a ->
+  Stack unit
+  (requires fun h -> live h st)
+  (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+    as_seq h1 st == Seq.create8 v0 v1 v2 v3 v4 v5 v6 v7)
+
+
+inline_for_extraction
+val create16: #a:Type0 -> st:lbuffer a 16ul
+  -> v0:a -> v1:a -> v2:a -> v3:a
+  -> v4:a -> v5:a -> v6:a -> v7:a
+  -> v8:a -> v9:a -> v10:a -> v11:a
+  -> v12:a -> v13:a -> v14:a -> v15:a ->
+  Stack unit
+  (requires fun h -> live h st)
+  (ensures  fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+    as_seq h1 st == Seq.create16 v0 v1 v2 v3 v4 v5 v6 v7 v8 v9 v10 v11 v12 v13 v14 v15)

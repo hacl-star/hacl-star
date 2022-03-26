@@ -14,6 +14,14 @@
 #include <stdbool.h>
 #include <time.h>
 
+/* We can use this file to test the vectorized implementations, and to test
+ * the debugging version at the same time. Definining the following flag
+ * before including "libintvector.h" toggles debugging on. Note that this works
+ * only because we use the libintvector.h from lib/c: in case you want to
+ * toggle debugging for the HACL* library, you must copy lib/c/libintvector_debug.h
+ * to the appropriate dist/ directory. */
+/* #define DEBUG_VECTOR_TRACE 1 */
+#include "config.h"
 #include "libintvector.h"
 #include "test_helpers.h"
 
@@ -139,60 +147,127 @@ int main() {
   vec128 exp;
   uint32_t x32;
   uint64_t x64;
-  uint8_t tmp[32] = {
+  // Some load/store operations may need the data to be aligned, in which
+  // we need to copy it to intermediate buffers.
+  // To separate concerns, we first test on aligned data, then on misaligned
+  // data. Note that as [tmp] below is aligned, we know for sure that
+  // [tmp+1] is misaligned.
+  uint8_t tmp[32] __attribute__((aligned (16))) = {
     0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,
     0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,
     0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,
     0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U,0x00U
   };
+  uint8_t *tmp_misaligned = tmp + 1U;
+
+  // Extract
+  //vec0 = initialize_vector();
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  x32 = Lib_IntVector_Intrinsics_vec128_extract32(vec0, 3);
+  printf("extract32:\n");
+  printf("computed:%08x\n", x32);
+  printf("expected:%08x\n", 0x0c0d0e0f);
+  if (x32 == 0x0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
+
+  //vec0 = initialize_vector();
+  vec0 = initialize_vector64(0x00010203004050607, 0x08090a0b0c0d0e0f);
+  x64 = Lib_IntVector_Intrinsics_vec128_extract64(vec0, 1);
+  printf("extract64:\n");
+  printf("computed:%lx\n", x64);
+  printf("expected:%lx\n", 0x08090a0b0c0d0e0f);
+  if (x64 == 0x08090a0b0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
+
+  // Insert
+  vec0 = initialize_vector32(0, 1, 2, 3);
+  vec0 = Lib_IntVector_Intrinsics_vec128_insert32(vec0, 4, 3);
+  exp = initialize_vector32(0x00000000,0x00000001,0x00000002,0x00000004);
+  compare_and_print_vec32("insert32", vec0, exp);
+  //  print_vector32("insert32", vec0);
+
+  vec0 = initialize_vector64(0, 1);
+  vec0 = Lib_IntVector_Intrinsics_vec128_insert64(vec0, 2, 1);
+  exp = initialize_vector64(0x0UL,0x2UL);
+  compare_and_print_vec64("insert64", vec0, exp);
+  //  print_vector64("insert64", vec0);
 
   // Load/store
-  uint8_t store_le_b[16] = {
+  uint8_t store_le_b[16] __attribute__((aligned (16))) = {
       0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
       0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU
+  };
+
+  uint8_t store_be_b[16] __attribute__((aligned (16))) = {
+      0x00U,0x11U,0x22U,0x33U,0x44U,0x55U,0x66U,0x77U,
+      0x88U,0x99U,0xaaU,0xbbU,0xccU,0xddU,0xeeU,0xffU
   };
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
   Lib_IntVector_Intrinsics_vec128_store32_le(tmp, vec0);
   printf("store32_le:\n");
-  ok = ok && compare_and_print(16, tmp, store_le_b);
+  if (!compare_and_print(16, tmp, store_le_b)) { ok = false; }
   //  print_buf8("store32_le", tmp);
+
+  Lib_IntVector_Intrinsics_vec128_store32_be(tmp, vec0);
+  printf("store32_be:\n");
+  if (!compare_and_print(16, tmp, store_be_b)) { ok = false; }
+  //  print_buf8("store32_be", tmp);
 
   vec0 = initialize_vector64(0x4455667700112233, 0xccddeeff8899aabb);
   Lib_IntVector_Intrinsics_vec128_store64_le(tmp, vec0);
   printf("store64_le:\n");
-  ok = ok && compare_and_print(16, tmp, store_le_b);
+  if (!compare_and_print(16, tmp, store_le_b)) { ok = false; }
   //  print_buf8("store_le", tmp);
+
+  vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
+  Lib_IntVector_Intrinsics_vec128_store32_le(tmp_misaligned, vec0);
+  printf("store32_le misaligned:\n");
+  if (!compare_and_print(16, tmp_misaligned, store_le_b)) { ok = false; }
+  //  print_buf8("store32_le misaligned", tmp_misaligned);
+
+  Lib_IntVector_Intrinsics_vec128_store32_be(tmp_misaligned, vec0);
+  printf("store32_be misaligned:\n");
+  if (!compare_and_print(16, tmp_misaligned, store_be_b)) { ok = false; }
+  //  print_buf8("store32_be misaligned", tmp_misaligned);
+
+  vec0 = initialize_vector64(0x4455667700112233, 0xccddeeff8899aabb);
+  Lib_IntVector_Intrinsics_vec128_store64_le(tmp_misaligned, vec0);
+  printf("store64_le misaligned:\n");
+  if (!compare_and_print(16, tmp_misaligned, store_le_b)) { ok = false; }
+  //  print_buf8("store_le misaligned", tmp_misaligned);
 
   initialize_buf8(0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
                   0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU,tmp);
 
   vec0 = Lib_IntVector_Intrinsics_vec128_load32_le(tmp);
   exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
-  compare_and_print_vec32("load_le", vec0, exp);
+  compare_and_print_vec32("load32_le", vec0, exp);
   //  print_vector32("load32_le", vec0);
+
+  vec0 = Lib_IntVector_Intrinsics_vec128_load32_be(tmp);
+  exp = initialize_vector32(0x33221100, 0x77665544, 0xbbaa9988, 0xffeeddcc);
+  compare_and_print_vec32("load32_be", vec0, exp);
+  //  print_vector32("load32_be", vec0);
 
   vec0 = Lib_IntVector_Intrinsics_vec128_load64_le(tmp);
   exp = initialize_vector64(0x4455667700112233UL,0xccddeeff8899aabbUL);
   compare_and_print_vec64("load64_le", vec0, exp);
   //  print_vector64("load_le", vec0);
 
-  // Those tests come from a real, nasty bug where the addresses were incorrectly
-  // computed because of type inference.
-  uint8_t load_store_buf[32] = {
-    0x00U,0x00U,0x00U,0x00U,0x11U,0x11U,0x11U,0x11U,
-    0x22U,0x22U,0x22U,0x22U,0x33U,0x33U,0x33U,0x33U,
-    0x44U,0x44U,0x44U,0x44U,0x55U,0x55U,0x55U,0x55U,
-    0x66U,0x66U,0x66U,0x66U,0x77U,0x77U,0x77U,0x77U
-  };
-  
-  vec0 = Lib_IntVector_Intrinsics_vec128_load64_le(load_store_buf + (uint32_t)16U);
-  exp = initialize_vector64(0x5555555544444444UL,0x7777777766666666UL);
-  compare_and_print_vec64("load64_le with offset", vec0, exp);
-  //  print_vector64("load64_le with offset", vec0);
+  initialize_buf8(0x33U,0x22U,0x11U,0x00U,0x77U,0x66U,0x55U,0x44U,
+                  0xbbU,0xaaU,0x99U,0x88U,0xffU,0xeeU,0xddU,0xccU,tmp_misaligned);
+
+  vec0 = Lib_IntVector_Intrinsics_vec128_load32_le(tmp_misaligned);
+  exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
+  compare_and_print_vec32("load_le misaligned", vec0, exp);
+  //  print_vector32("load32_le", vec0);
+
+  vec0 = Lib_IntVector_Intrinsics_vec128_load64_le(tmp_misaligned);
+  exp = initialize_vector64(0x4455667700112233UL,0xccddeeff8899aabbUL);
+  compare_and_print_vec64("load64_le misaligned", vec0, exp);
+  //  print_vector64("load_le", vec0);
 
   // Arithmetic
-  
+
   vec0 = initialize_vector32(0x0, 0x1, 0x2, 0x3);
   vec1 = initialize_vector32(0x10, 0x11, 0x12, 0x13);
   vec0 = Lib_IntVector_Intrinsics_vec128_add32(vec0, vec1);
@@ -228,22 +303,6 @@ int main() {
   compare_and_print_vec32("eq64", vec0, exp);
   //  print_vector64("eq64", vec0);
 
-  //vec0 = initialize_vector();
-  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
-  x32 = Lib_IntVector_Intrinsics_vec128_extract32(vec0, 3);
-  printf("extract32:\n");
-  printf("computed:%08x\n", x32);
-  printf("expected:%08x\n", 0x0c0d0e0f);
-  if (x32 == 0x0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
-
-  //vec0 = initialize_vector();
-  vec0 = initialize_vector64(0x00010203004050607, 0x08090a0b0c0d0e0f);
-  x64 = Lib_IntVector_Intrinsics_vec128_extract64(vec0, 1);
-  printf("extract64:\n");
-  printf("computed:%lx\n", x64);
-  printf("expected:%lx\n", 0x08090a0b0c0d0e0f);
-  if (x64 == 0x08090a0b0c0d0e0f) { printf("Success!\n"); } else { ok = false; printf("**FAILED**\n"); }
-
   vec0 = initialize_vector32(0x0, 0x1, 0x0, 0x3);
   vec1 = initialize_vector32(0x0, 0x0, 0x1, 0x2);
   vec0 = Lib_IntVector_Intrinsics_vec128_gt32(vec0, vec1);
@@ -257,18 +316,6 @@ int main() {
   exp = initialize_vector64(0x0UL,0xffffffffffffffffUL);
   compare_and_print_vec64("gt64", vec0, exp);
   //  print_vector64("gt64", vec0);
-
-  vec0 = initialize_vector32(0, 1, 2, 3);
-  vec0 = Lib_IntVector_Intrinsics_vec128_insert32(vec0, 4, 3);
-  exp = initialize_vector32(0x00000000,0x00000001,0x00000002,0x00000004);
-  compare_and_print_vec32("insert32", vec0, exp);
-  //  print_vector32("insert32", vec0);
-
-  vec0 = initialize_vector64(0, 1);
-  vec0 = Lib_IntVector_Intrinsics_vec128_insert64(vec0, 2, 1);
-  exp = initialize_vector64(0x0UL,0x2UL);
-  compare_and_print_vec64("insert64", vec0, exp);
-  //  print_vector64("insert64", vec0);
 
   vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
   vec1 = initialize_vector32(0x0c0d0e0f, 0x00010203, 0x04050607, 0x08090a0b);
@@ -328,12 +375,9 @@ int main() {
 
   vec0 = initialize_vector64(0x0000000100000002UL, 0x0000000300000004UL);
   vec1 = initialize_vector64(0x0000000500000006UL, 0x0000000700000008UL);
-  //  print_vector32("mul64", vec0);
-  //  print_vector64("mul64", vec0);
   vec0 = Lib_IntVector_Intrinsics_vec128_mul64(vec0, vec1);
   exp = initialize_vector64(0xcUL,0x20UL);
   compare_and_print_vec64("mul64 (#0)", vec0, exp);
-  //  print_vector32("mul64", vec0);
   //  print_vector64("mul64", vec0);
 
   vec0 = initialize_vector64(0x1111222233334444UL, 0x5555666677778888UL);
@@ -409,74 +453,74 @@ int main() {
 
   /** Rotate right 32 ========================================================**/
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, 0);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, (uint32_t)0U);
   exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
   compare_and_print_vec32("rotate_right32 (0)", vec0, exp);
   //  print_vector32("rotate_right32 (0)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, 8);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, (uint32_t)8U);
   exp = initialize_vector32(0x33001122,0x77445566,0xbb8899aa,0xffccddee);
   compare_and_print_vec32("rotate_right32 (8)", vec0, exp);
   //  print_vector32("rotate_right32 (8)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, 12);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, (uint32_t)12U);
   exp = initialize_vector32(0x23300112,0x67744556,0xabb8899a,0xeffccdde);
   compare_and_print_vec32("rotate_right32 (12)", vec0, exp);
   //  print_vector32("rotate_right32 (12)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, 16);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, (uint32_t)16U);
   exp = initialize_vector32(0x22330011,0x66774455,0xaabb8899,0xeeffccdd);
   compare_and_print_vec32("rotate_right32 (16)", vec0, exp);
   //  print_vector32("rotate_right32 (16)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, 24);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, (uint32_t)24U);
   exp = initialize_vector32(0x11223300,0x55667744,0x99aabb88,0xddeeffcc);
   compare_and_print_vec32("rotate_right32(24)", vec0, exp);
   //  print_vector32("rotate_right32 (24)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, 3);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, (uint32_t)3U);
   exp = initialize_vector32(0x60022446,0xe88aacce,0x71133557,0xf99bbddf);
   compare_and_print_vec32("rotate_right32 (3)", vec0, exp);
   //  print_vector32("rotate_right32 (3)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, 7);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, (uint32_t)7U);
   exp = initialize_vector32(0x66002244,0xee88aacc,0x77113355,0xff99bbdd);
   compare_and_print_vec32("rotate_right32 (7)", vec0, exp);
   //  print_vector32("rotate_right32 (7)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, 21);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right32(vec0, (uint32_t)21U);
   exp = initialize_vector32(0x89119800,0xab33ba22,0xcd55dc44,0xef77fe66);
   compare_and_print_vec32("rotate_right32 (21)", vec0, exp);
   //  print_vector32("rotate_right32 (21)", vec0);
 
   // Rotate right lanes 32
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(vec0, 0);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(vec0, (uint32_t)0U);
   exp = initialize_vector32(0x00112233,0x44556677,0x8899aabb,0xccddeeff);
   compare_and_print_vec32("rotate_right_lanes32 (0)", vec0, exp);
   //  print_vector32("rotate_right_lanes32 (0)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(vec0, 1);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(vec0, (uint32_t)1U);
   exp = initialize_vector32(0x44556677,0x8899aabb,0xccddeeff,0x00112233);
   compare_and_print_vec32("rotate_right_lanes32 (1)", vec0, exp);
   //  print_vector32("rotate_right_lanes32 (1)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(vec0, 2);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(vec0, (uint32_t)2U);
   exp = initialize_vector32(0x8899aabb,0xccddeeff,0x00112233,0x44556677);
   compare_and_print_vec32("rotate_right_lanes32 (2)", vec0, exp);
   //  print_vector32("rotate_right_lanes32 (2)", vec0);
 
   vec0 = initialize_vector32(0x00112233, 0x44556677, 0x8899aabb, 0xccddeeff);
-  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(vec0, 3);
+  vec0 = Lib_IntVector_Intrinsics_vec128_rotate_right_lanes32(vec0, (uint32_t)3U);
   exp = initialize_vector32(0xccddeeff,0x00112233,0x44556677,0x8899aabb);
   compare_and_print_vec32("rotate_right_lanes32(3)", vec0, exp);
   //  print_vector32("rotate_right_lanes32 (3)", vec0);
@@ -505,14 +549,45 @@ int main() {
   exp = initialize_vector64(0x6677000000000000UL,0xeeff000000000000UL);
   compare_and_print_vec64("shift_left64 (48)", vec0, exp);
   //  print_vector64("shift_left64 (48)", vec0);
-  
+
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_left64(vec0, 9);
   exp = initialize_vector64(0x22446688aaccee00UL,0x33557799bbddfe00UL);
   compare_and_print_vec64("shift_left64 (9)", vec0, exp);
   //  print_vector64("shift_left64 (9)", vec0);
 
-  // Shift right
+  // Shift right 32
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  vec0 = Lib_IntVector_Intrinsics_vec128_shift_right32(vec0, 0);
+  exp = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  compare_and_print_vec32("shift_right32 (0)", vec0, exp);
+  //  print_vector32("shift_right32 (0)", vec0);
+
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  vec0 = Lib_IntVector_Intrinsics_vec128_shift_right32(vec0, 8);
+  exp = initialize_vector32(0x00000102, 0x00040506, 0x0008090a, 0x000c0d0e);
+  compare_and_print_vec32("shift_right32 (8)", vec0, exp);
+  //  print_vector32("shift_right32 (8)", vec0);
+
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  vec0 = Lib_IntVector_Intrinsics_vec128_shift_right32(vec0, 16);
+  exp = initialize_vector32(0x00000001, 0x00000405, 0x00000809, 0x00000c0d);
+  compare_and_print_vec32("shift_right32 (16)", vec0, exp);
+  //  print_vector32("shift_right32 (16)", vec0);
+
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  vec0 = Lib_IntVector_Intrinsics_vec128_shift_right32(vec0, 24);
+  exp = initialize_vector32(0x00000000, 0x00000004, 0x00000008, 0x0000000c);
+  compare_and_print_vec32("shift_right32 (24)", vec0, exp);
+  //  print_vector32("shift_right32 (48)", vec0);
+
+  vec0 = initialize_vector32(0x00010203, 0x04050607, 0x08090a0b, 0x0c0d0e0f);
+  vec0 = Lib_IntVector_Intrinsics_vec128_shift_right32(vec0, 9);
+  exp = initialize_vector32(0x00000081, 0x00020283, 0x00040485, 0x00060687);
+  compare_and_print_vec32("shift_right32 (9)", vec0, exp);
+  //  print_vector32("shift_right32 (9)", vec0);
+
+  // Shift right 64
   vec0 = initialize_vector64(0x0011223344556677, 0x8899aabbccddeeff);
   vec0 = Lib_IntVector_Intrinsics_vec128_shift_right64(vec0, 0);
   exp = initialize_vector64(0x11223344556677UL,0x8899aabbccddeeffUL);

@@ -32,7 +32,7 @@ open FStar.Calc
 let most_significant_bit s =
   let s31 = s.(31ul) in
   let z   = s31 >>. 7ul in
-  (**) let h0 = get() in
+  (**) let h0 = ST.get() in
   (**) FStar.Math.Lemmas.lemma_div_lt_nat (v s31) 8 7;
   (**) uints_from_bytes_le_nat_lemma #U8 #SEC #32 (as_seq h0 s);
   (**) nat_from_intseq_le_slice_lemma (as_seq h0 s) 31;
@@ -64,16 +64,16 @@ val point_decompress_:
       (b ==> (F51.point_eval h1 out == Some?.v (SE.point_decompress (as_seq h0 s))))
     )
 
-#push-options "--z3rlimit 30"
+#push-options "--z3rlimit 50"
 
 let point_decompress_ out s tmp =
   let y    = sub tmp 0ul 5ul in
   let x    = sub tmp 5ul 5ul in
-  let h0 = get() in
+  let h0 = ST.get() in
   let sign = most_significant_bit s in
-  let h1 = get() in
+  let h1 = ST.get() in
   load_51 y s;
-  let h2 = get() in
+  let h2 = ST.get() in
   let z = Hacl.Impl.Ed25519.RecoverX.recover_x x y sign in
 
   let res =
@@ -87,7 +87,7 @@ let point_decompress_ out s tmp =
     copy outy y;
     make_one outz;
     fmul outt x y;
-    let h1 = get() in
+    let h1 = ST.get() in
     true
   ) in
   res

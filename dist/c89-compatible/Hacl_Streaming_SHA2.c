@@ -24,10 +24,12 @@
 
 #include "Hacl_Streaming_SHA2.h"
 
+#include "internal/Hacl_Hash_SHA2.h"
+
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224()
 {
-  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
-  uint32_t *block_state = KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint32_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+  uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint32_t));
   Hacl_Streaming_SHA2_state_sha2_224 s;
   s.block_state = block_state;
   s.buf = buf;
@@ -35,7 +37,10 @@ Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224()
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_224), (uint32_t)1U);
   {
     Hacl_Streaming_SHA2_state_sha2_224
-    *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_SHA2_state_sha2_224));
+    *p =
+      (Hacl_Streaming_SHA2_state_sha2_224 *)KRML_HOST_MALLOC(sizeof (
+          Hacl_Streaming_SHA2_state_sha2_224
+        ));
     p[0U] = s;
     Hacl_Hash_Core_SHA2_init_224(block_state);
     return p;
@@ -300,8 +305,8 @@ void Hacl_Streaming_SHA2_free_224(Hacl_Streaming_SHA2_state_sha2_224 *s)
 
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256()
 {
-  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
-  uint32_t *block_state = KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint32_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+  uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint32_t));
   Hacl_Streaming_SHA2_state_sha2_224 s;
   s.block_state = block_state;
   s.buf = buf;
@@ -309,7 +314,10 @@ Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_256()
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_224), (uint32_t)1U);
   {
     Hacl_Streaming_SHA2_state_sha2_224
-    *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_SHA2_state_sha2_224));
+    *p =
+      (Hacl_Streaming_SHA2_state_sha2_224 *)KRML_HOST_MALLOC(sizeof (
+          Hacl_Streaming_SHA2_state_sha2_224
+        ));
     p[0U] = s;
     Hacl_Hash_Core_SHA2_init_256(block_state);
     return p;
@@ -574,8 +582,8 @@ void Hacl_Streaming_SHA2_free_256(Hacl_Streaming_SHA2_state_sha2_224 *s)
 
 Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384()
 {
-  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
-  uint64_t *block_state = KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint64_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
+  uint64_t *block_state = (uint64_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint64_t));
   Hacl_Streaming_SHA2_state_sha2_384 s;
   s.block_state = block_state;
   s.buf = buf;
@@ -583,7 +591,10 @@ Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_384()
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_384), (uint32_t)1U);
   {
     Hacl_Streaming_SHA2_state_sha2_384
-    *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_SHA2_state_sha2_384));
+    *p =
+      (Hacl_Streaming_SHA2_state_sha2_384 *)KRML_HOST_MALLOC(sizeof (
+          Hacl_Streaming_SHA2_state_sha2_384
+        ));
     p[0U] = s;
     Hacl_Hash_Core_SHA2_init_384(block_state);
     return p;
@@ -851,8 +862,8 @@ void Hacl_Streaming_SHA2_free_384(Hacl_Streaming_SHA2_state_sha2_384 *s)
 
 Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512()
 {
-  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
-  uint64_t *block_state = KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint64_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)128U, sizeof (uint8_t));
+  uint64_t *block_state = (uint64_t *)KRML_HOST_CALLOC((uint32_t)8U, sizeof (uint64_t));
   Hacl_Streaming_SHA2_state_sha2_384 s;
   s.block_state = block_state;
   s.buf = buf;
@@ -860,7 +871,10 @@ Hacl_Streaming_SHA2_state_sha2_384 *Hacl_Streaming_SHA2_create_in_512()
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_384), (uint32_t)1U);
   {
     Hacl_Streaming_SHA2_state_sha2_384
-    *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_SHA2_state_sha2_384));
+    *p =
+      (Hacl_Streaming_SHA2_state_sha2_384 *)KRML_HOST_MALLOC(sizeof (
+          Hacl_Streaming_SHA2_state_sha2_384
+        ));
     p[0U] = s;
     Hacl_Hash_Core_SHA2_init_512(block_state);
     return p;

@@ -29,46 +29,16 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Bignum.h"
-#include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
-
-uint32_t Hacl_Impl_RSAPSS_MGF_hash_len(Spec_Hash_Definitions_hash_alg a);
-
-uint64_t Hacl_Impl_RSAPSS_Keys_check_modulus_u64(uint32_t modBits, uint64_t *n);
-
-uint64_t Hacl_Impl_RSAPSS_Keys_check_exponent_u64(uint32_t eBits, uint64_t *e);
-
-void
-Hacl_Impl_RSAPSS_Padding_pss_encode(
-  Spec_Hash_Definitions_hash_alg a,
-  uint32_t sLen,
-  uint8_t *salt,
-  uint32_t msgLen,
-  uint8_t *msg,
-  uint32_t emBits,
-  uint8_t *em
-);
-
-bool
-Hacl_Impl_RSAPSS_Padding_pss_verify(
-  Spec_Hash_Definitions_hash_alg a,
-  uint32_t sLen,
-  uint32_t msgLen,
-  uint8_t *msg,
-  uint32_t emBits,
-  uint8_t *em
-);
-
+#include "Hacl_Hash_SHA2.h"
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 bool
 Hacl_RSAPSS_rsapss_sign(
   Spec_Hash_Definitions_hash_alg a,
@@ -76,7 +46,7 @@ Hacl_RSAPSS_rsapss_sign(
   uint32_t eBits,
   uint32_t dBits,
   uint64_t *skey,
-  uint32_t sLen,
+  uint32_t saltLen,
   uint8_t *salt,
   uint32_t msgLen,
   uint8_t *msg,
@@ -89,8 +59,8 @@ Hacl_RSAPSS_rsapss_verify(
   uint32_t modBits,
   uint32_t eBits,
   uint64_t *pkey,
-  uint32_t sLen,
-  uint32_t k,
+  uint32_t saltLen,
+  uint32_t sgntLen,
   uint8_t *sgnt,
   uint32_t msgLen,
   uint8_t *msg
@@ -118,7 +88,7 @@ Hacl_RSAPSS_rsapss_skey_sign(
   uint8_t *nb,
   uint8_t *eb,
   uint8_t *db,
-  uint32_t sLen,
+  uint32_t saltLen,
   uint8_t *salt,
   uint32_t msgLen,
   uint8_t *msg,
@@ -132,8 +102,8 @@ Hacl_RSAPSS_rsapss_pkey_verify(
   uint32_t eBits,
   uint8_t *nb,
   uint8_t *eb,
-  uint32_t sLen,
-  uint32_t k,
+  uint32_t saltLen,
+  uint32_t sgntLen,
   uint8_t *sgnt,
   uint32_t msgLen,
   uint8_t *msg

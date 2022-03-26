@@ -36,7 +36,7 @@ let crecip_1 out buf z =
   let t0 = sub buf 5ul  5ul in
   let b  = sub buf 10ul 5ul in
   let c  = sub buf 15ul 5ul in
-  (**) let h0 = get() in
+  (**) let h0 = ST.get() in
   fsquare_times a z 1ul; // a = z ** (2 ** 1) == z ** 2
   (**) assert_norm (pow2 1 == 2);
   fsquare_times t0 a 2ul; // t0 == a ** (2 ** 2) == (z ** 2) ** 4 == z ** 8
@@ -98,7 +98,7 @@ let crecip_2 out buf z =
   let t0 = sub buf 5ul  5ul in
   let b  = sub buf 10ul 5ul in
   let c  = sub buf 15ul 5ul in
-  let h0 = get() in
+  let h0 = ST.get() in
   (**) assert_norm (pow2 1 == 2);
   fsquare_times a z 1ul; // a == z ** 2;
   fmul c t0 b; // c == z ** 1267650600228229401496703205375
@@ -132,7 +132,7 @@ val pow2_252m2:
 let pow2_252m2 out z =
   push_frame();
   let buf = create 20ul (u64 0) in
-  let h0 = get() in
+  let h0 = ST.get() in
   crecip_1 out buf z;
   crecip_2 out buf z;
   CI.lemma_fpow_is_pow (F51.fevalh h0 z) 7237005577332262213973186563042994240829374041602535252466099000494570602494;

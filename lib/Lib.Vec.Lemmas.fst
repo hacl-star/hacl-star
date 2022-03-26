@@ -2,7 +2,7 @@ module Lib.Vec.Lemmas
 
 #set-options ""
 #push-options "--z3rlimit 30 --max_fuel 0 --max_ifuel 0 \
-  --using_facts_from '-* +Prims +FStar.Pervasives +FStar.Math.Lemmas +FStar.Seq \
+  --using_facts_from '-* +Prims +FStar.Pervasives +FStar.Math.Lemmas +FStar.Seq -FStar.Seq.Properties.slice_slice \
     +Lib.IntTypes +Lib.Sequence +Lib.Sequence.Lemmas +Lib.LoopCombinators +Lib.Vec.Lemmas'"
 
 
@@ -86,6 +86,8 @@ val repeat_gen_blocks_slice_k:
 
     f_rep_s k acc == f_rep k acc)
 
+#push-options "--z3rlimit_factor 5"
+#restart-solver
 let repeat_gen_blocks_slice_k #inp_t w blocksize n hi_f inp a f i k acc =
   // Math.Lemmas.paren_mul_right w n blocksize;
   // let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
@@ -118,7 +120,9 @@ let repeat_gen_blocks_slice_k #inp_t w blocksize n hi_f inp a f i k acc =
     k * blocksize;
     };
 
-  Seq.Properties.slice_slice inp (i * blocksize_v) ((i + 1) * blocksize_v) (i_b * blocksize) (i_b * blocksize + blocksize)
+  Seq.Properties.slice_slice inp (i * blocksize_v) ((i + 1) * blocksize_v) (i_b * blocksize) (i_b * blocksize + blocksize);
+  ()
+#pop-options
 
 
 val repeat_gen_blocks_slice:
@@ -197,7 +201,7 @@ let repeat_gen_blocks_multi_vec_step #inp_t w blocksize n hi_f inp a a_vec f f_v
 
   assert (repeat_gen_blocks_multi_vec_equiv_pre w blocksize n hi_f a a_vec f f_v normalize_v i b_v acc_v)
 
-
+#push-options "--z3rlimit_factor 2"
 let lemma_repeat_gen_blocks_multi_vec #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v acc_v0 =
   let len = length inp in
   let blocksize_v = w * blocksize in
@@ -221,12 +225,13 @@ let lemma_repeat_gen_blocks_multi_vec #inp_t w blocksize n hi_f inp a a_vec f f_
     (==) { repeat_gen_blocks_multi_extensionality_zero blocksize 0 (w * n) hi_f (w * n) inp a a f f acc0 }
     repeat_gen_blocks_multi blocksize 0 hi_f (w * n) inp a f acc0;
   }
+#pop-options
 
 ////////////////////////
 // End of proof of lemma_repeat_gen_blocks_multi_vec
 ////////////////////////
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --retry 2"
 let lemma_repeat_gen_blocks_vec #inp_t #c w blocksize inp n a a_vec f l f_v l_v normalize_v acc_v0 =
   let len = length inp in
   let blocksize_v = w * blocksize in

@@ -146,6 +146,25 @@ val bn_add_mod_n: #t:limb_t -> len:size_t{v len > 0} -> bn_add_mod_n_st t len
 
 
 inline_for_extraction noextract
+let bn_sub_mod_n_st (t:limb_t) (len:size_t{v len > 0}) =
+    n:lbignum t len
+  -> a:lbignum t len
+  -> b:lbignum t len
+  -> res:lbignum t len ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h a /\ live h b /\ live h res /\
+    disjoint n a /\ disjoint n b /\ disjoint n res /\
+    eq_or_disjoint a b /\ eq_or_disjoint a res /\ eq_or_disjoint b res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    as_seq h1 res == S.bn_sub_mod_n (as_seq h0 n) (as_seq h0 a) (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val bn_sub_mod_n: #t:limb_t -> len:size_t{v len > 0} -> bn_sub_mod_n_st t len
+
+
+inline_for_extraction noextract
 val bn_mul1:
     #t:limb_t
   -> aLen:size_t
@@ -344,6 +363,7 @@ val cswap2:
 /// whether they can be specialized for the bignum size, or whether they have to
 /// been inline-for-extraction'd.
 
+inline_for_extraction noextract
 let meta_len (t:limb_t) = len:size_t{0 < v len /\ 2 * bits t * v len <= max_size_t}
 
 /// This type class is entirely meta-level and will not appear after partial
@@ -356,6 +376,7 @@ class bn (t:limb_t) = {
   add: bn_add_eq_len_st t len;
   sub: bn_sub_eq_len_st t len;
   add_mod_n: bn_add_mod_n_st t len;
+  sub_mod_n: bn_sub_mod_n_st t len;
   mul: a:lbignum t len -> bn_karatsuba_mul_st t len a;
   sqr: a:lbignum t len -> bn_karatsuba_sqr_st t len a;
 }
@@ -383,15 +404,17 @@ val bn_is_odd:
 
 
 inline_for_extraction noextract
-val bn_eq_mask:
-    #t:limb_t
-  -> len:size_t
-  -> a:lbignum t len
+let bn_eq_mask_st (t:limb_t) (len:size_t) =
+    a:lbignum t len
   -> b:lbignum t len ->
   Stack (limb t)
   (requires fun h -> live h a /\ live h b)
   (ensures  fun h0 r h1 -> modifies0 h0 h1 /\
     r == S.bn_eq_mask (as_seq h0 a) (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val bn_eq_mask: #t:limb_t -> len:size_t -> bn_eq_mask_st t len
 
 
 inline_for_extraction noextract

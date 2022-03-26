@@ -34,7 +34,7 @@ val recover_x_step_1:
       (let y = F51.fevalh h0 y in
        let x2 = F51.fevalh h1 x2 in
        let y2 = y `SC.fmul` y in
-       x2 == (y2 `SC.fsub` SC.one) `SC.fmul` (SE.modp_inv ((SE.d `SC.fmul` y2) `SC.fadd` SC.one)))
+       x2 == (y2 `SC.fsub` SC.one) `SC.fmul` (SE.finv ((SE.d `SC.fmul` y2) `SC.fadd` SC.one)))
     )
 let recover_x_step_1 x2 y =
   push_frame();
@@ -48,6 +48,9 @@ let recover_x_step_1 x2 y =
   times_d dyy y2; // dyy = d `fmul` (y `fmul` y)
   fsum dyy one;   // dyy = (d `fmul` (y `fmul` y)) `fadd` one
   reduce_513 dyy;
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.fpow_is_pow_mod
+    (F51.fevalh h0 dyy) (Spec.Curve25519.prime - 2);
   inverse dyyi dyy; // dyyi = modp_inv ((d `fmul` (y `fmul` y)) `fadd` one)
   fdifference one y2; // one = (y `fmul` y) `fsub` 1
   fmul x2 one dyyi; //
@@ -134,7 +137,7 @@ val x_mod_2:
       v z == F51.as_nat h0 x % 2
     )
 let x_mod_2 x =
-  (**) let h0 = get() in
+  (**) let h0 = ST.get() in
   let x0 = x.(0ul) in
   let z  = x0 &. u64 1 in
   mod_mask_lemma x0 1ul;
@@ -163,9 +166,9 @@ val recover_x_step_2:
 let recover_x_step_2 x sign x2 =
   let open Lib.RawIntTypes in
   let open FStar.UInt64 in
-  let h0 = get() in
+  let h0 = ST.get() in
   let x2_is_0 = is_0 x2 in
-  let h1 = get() in
+  let h1 = ST.get() in
   if x2_is_0 then (
     assert (uint_v #U64 sign = Lib.IntTypes.v #U64 #SEC sign);
     if u64_to_UInt64 sign =^ 0uL then (
@@ -269,10 +272,10 @@ val recover_x_step_5:
 let recover_x_step_5 x y sign tmp =
   let x3  = sub tmp 5ul 5ul in
   let t0  = sub tmp 10ul 5ul in
-  let hi = get() in
+  let hi = ST.get() in
   reduce x3;
   let x0 = x_mod_2 x3 in
-  let h0 = get() in
+  let h0 = ST.get() in
   let open Lib.RawIntTypes in
   let open FStar.UInt64 in
   if not(u64_to_UInt64 x0 =^ u64_to_UInt64 sign) then (
@@ -311,7 +314,7 @@ let recover_x_ x y sign tmp =
   let x2 = sub tmp 0ul 5ul in
   let open Lib.RawIntTypes in
   let open FStar.UInt8 in
-  let h0 = get() in
+  let h0 = ST.get() in
 
   let b = gte_q y in
   let res =
@@ -325,7 +328,7 @@ let recover_x_ x y sign tmp =
     else (
       recover_x_step_3 tmp;
       let z = recover_x_step_4 tmp in
-      let h1 = get() in
+      let h1 = ST.get() in
       if z = false then false
       else (
         recover_x_step_5 x y sign tmp;

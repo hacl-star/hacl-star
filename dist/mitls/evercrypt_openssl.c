@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 #include "kremlin/internal/target.h"
-#include "EverCrypt_OpenSSL.h"
+#include "internal/EverCrypt_OpenSSL.h"
 
 /* KB, BB, JP: for now, we just ignore internal errors since the HACL* interface
  * has enough preconditions to make sure that no errors ever happen; if the

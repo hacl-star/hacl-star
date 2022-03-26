@@ -43,7 +43,7 @@ all-test: test
 clean: $(addsuffix -clean, $(DIRECTORIES) experimental)
 	rm -rf *~ *.exe *.out
 
-SHELL=/bin/bash
+SHELL:=$(shell which bash)
 
 .PHONY: clean-
 clean-c:

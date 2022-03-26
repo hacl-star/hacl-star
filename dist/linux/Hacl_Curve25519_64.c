@@ -24,6 +24,8 @@
 
 #include "Hacl_Curve25519_64.h"
 
+
+#include "curve25519-inline.h"
 static const u8 g25519[32U] = { (u8)9U };
 
 static void point_add_and_double(u64 *q, u64 *p01_tmp1, u64 *tmp2)

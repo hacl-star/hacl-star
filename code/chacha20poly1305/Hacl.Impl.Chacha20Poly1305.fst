@@ -39,7 +39,7 @@ val poly1305_do_:
     modifies (loc ctx |+| loc block) h0 h1 /\
     (let acc, r = SpecPoly.poly1305_init (as_seq h0 k) in
     let acc = if (length aad <> 0) then Spec.poly1305_padded r (as_seq h0 aad) acc else acc in
-    let acc = Spec.poly1305_padded r (as_seq h0 m) acc in
+    let acc = if (length m <> 0) then Spec.poly1305_padded r (as_seq h0 m) acc else acc in
     let block_s = LSeq.concat (BSeq.uint_to_bytes_le #U64 (u64 (length aad)))
       (BSeq.uint_to_bytes_le #U64 (u64 (length m))) in
     let acc = SpecPoly.poly1305_update1 r 16 block_s acc in
@@ -51,7 +51,9 @@ let poly1305_do_ #w k aadlen aad mlen m ctx block =
   if (aadlen <> 0ul) then (
     poly1305_padded ctx aadlen aad)
   else ();
-  poly1305_padded ctx mlen m;
+  if (mlen <> 0ul) then (
+    poly1305_padded ctx mlen m)
+  else ();
   let h0 = ST.get () in
   update_sub_f h0 block 0ul 8ul
     (fun h -> BSeq.uint_to_bytes_le #U64 (to_u64 aadlen))
@@ -201,12 +203,12 @@ val aead_decrypt: #w:field_spec -> aead_decrypt_st w
 [@ Meta.Attribute.specialize ]
 let aead_decrypt #w k n aadlen aad mlen m cipher mac =
   push_frame();
-  let h0 = get() in
+  let h0 = ST.get() in
   // Create a buffer to store the temporary mac
   let computed_mac = create 16ul (u8 0) in
   // Compute the expected mac using Poly1305
   derive_key_poly1305_do #w k n aadlen aad mlen cipher computed_mac;
-  let h1 = get() in
+  let h1 = ST.get() in
   let res =
     if lbytes_eq computed_mac mac then (
       assert (BSeq.lbytes_eq (as_seq h1 computed_mac) (as_seq h1 mac));

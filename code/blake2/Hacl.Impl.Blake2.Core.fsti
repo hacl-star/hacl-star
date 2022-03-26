@@ -148,7 +148,7 @@ val create4_lemma: #a:Type -> x0:a -> x1:a -> x2:a -> x3:a ->
   Lemma (ensures (
     let l = [ x0; x1; x2; x3 ] in
     assert_norm (List.Tot.length l = 4);
-    Lib.Sequence.createL l == create4 x0 x1 x2 x3))
+    Lib.Sequence.createL l == Lib.Sequence.create4 x0 x1 x2 x3))
 	[SMTPat (Lib.Sequence.createL [x0;x1;x2;x3])]
 
 noextract inline_for_extraction

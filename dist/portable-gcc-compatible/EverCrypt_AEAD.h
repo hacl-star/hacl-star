@@ -29,21 +29,18 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "EverCrypt_Chacha20Poly1305.h"
-#include "Vale.h"
-#include "EverCrypt_AutoConfig2.h"
-#include "EverCrypt_Error.h"
 #include "Hacl_Spec.h"
-
+#include "EverCrypt_Error.h"
+#include "EverCrypt_Chacha20Poly1305.h"
+#include "EverCrypt_AutoConfig2.h"
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 /* SNIPPET_START: EverCrypt_AEAD_state_s */
 
 typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
@@ -55,20 +52,6 @@ typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
 bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
 
 /* SNIPPET_END: EverCrypt_AEAD_uu___is_Ek */
-
-/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__impl */
-
-Spec_Cipher_Expansion_impl
-EverCrypt_AEAD___proj__Ek__item__impl(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
-
-/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__impl */
-
-/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__ek */
-
-uint8_t
-*EverCrypt_AEAD___proj__Ek__item__ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
-
-/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__ek */
 
 /* SNIPPET_START: EverCrypt_AEAD_alg_of_state */
 
@@ -99,6 +82,56 @@ EverCrypt_AEAD_encrypt(
 );
 
 /* SNIPPET_END: EverCrypt_AEAD_encrypt */
+
+/* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check */
+
+/*
+WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit.
+*/
+EverCrypt_Error_error_code
+EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *plain,
+  uint32_t plain_len,
+  uint8_t *cipher,
+  uint8_t *tag
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check */
+
+/* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check */
+
+/*
+WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit.
+*/
+EverCrypt_Error_error_code
+EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *plain,
+  uint32_t plain_len,
+  uint8_t *cipher,
+  uint8_t *tag
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check */
 
 /* SNIPPET_START: EverCrypt_AEAD_encrypt_expand_aes128_gcm */
 
@@ -185,6 +218,56 @@ EverCrypt_AEAD_decrypt(
 );
 
 /* SNIPPET_END: EverCrypt_AEAD_decrypt */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check */
+
+/*
+WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit.
+*/
+EverCrypt_Error_error_code
+EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *cipher,
+  uint32_t cipher_len,
+  uint8_t *tag,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check */
+
+/* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check */
+
+/*
+WARNING: this function doesn't perform any dynamic
+  hardware check. You MUST make sure your hardware supports the
+  implementation of AESGCM. Besides, this function was not designed
+  for cross-compilation: if you compile it on a system which doesn't
+  support Vale, it will compile it to a function which makes the
+  program exit.
+*/
+EverCrypt_Error_error_code
+EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
+  uint8_t *k,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *cipher,
+  uint32_t cipher_len,
+  uint8_t *tag,
+  uint8_t *dst
+);
+
+/* SNIPPET_END: EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check */
 
 /* SNIPPET_START: EverCrypt_AEAD_decrypt_expand_aes128_gcm */
 

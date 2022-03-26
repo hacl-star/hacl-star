@@ -24,6 +24,8 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
+
+
 uint32_t Hacl_HMAC_DRBG_reseed_interval = (uint32_t)1024U;
 
 uint32_t Hacl_HMAC_DRBG_max_output_length = (uint32_t)65536U;
@@ -68,33 +70,6 @@ Hacl_HMAC_DRBG_uu___is_State(Spec_Hash_Definitions_hash_alg a, Hacl_HMAC_DRBG_st
   return true;
 }
 
-uint8_t
-*Hacl_HMAC_DRBG___proj__State__item__k(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-)
-{
-  return projectee.k;
-}
-
-uint8_t
-*Hacl_HMAC_DRBG___proj__State__item__v(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-)
-{
-  return projectee.v;
-}
-
-uint32_t
-*Hacl_HMAC_DRBG___proj__State__item__reseed_counter(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-)
-{
-  return projectee.reseed_counter;
-}
-
 Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
 {
   uint8_t *k;
@@ -102,25 +77,25 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
   {
     case Spec_Hash_Definitions_SHA1:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
         k = buf;
         break;
       }
     case Spec_Hash_Definitions_SHA2_256:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
         k = buf;
         break;
       }
     case Spec_Hash_Definitions_SHA2_384:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
         k = buf;
         break;
       }
     case Spec_Hash_Definitions_SHA2_512:
       {
-        uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+        uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
         k = buf;
         break;
       }
@@ -136,25 +111,25 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
     {
       case Spec_Hash_Definitions_SHA1:
         {
-          uint8_t *buf = KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
+          uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)20U, sizeof (uint8_t));
           v = buf;
           break;
         }
       case Spec_Hash_Definitions_SHA2_256:
         {
-          uint8_t *buf = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
+          uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
           v = buf;
           break;
         }
       case Spec_Hash_Definitions_SHA2_384:
         {
-          uint8_t *buf = KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
+          uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)48U, sizeof (uint8_t));
           v = buf;
           break;
         }
       case Spec_Hash_Definitions_SHA2_512:
         {
-          uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+          uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
           v = buf;
           break;
         }
@@ -165,7 +140,7 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
         }
     }
     {
-      uint32_t *ctr = KRML_HOST_MALLOC(sizeof (uint32_t));
+      uint32_t *ctr = (uint32_t *)KRML_HOST_MALLOC(sizeof (uint32_t));
       ctr[0U] = (uint32_t)1U;
       {
         Hacl_HMAC_DRBG_state lit;

@@ -406,8 +406,8 @@
   },
   "SHA2": {
     "hash_512": {
-      "module": "Hacl_Hash",
-      "name": "SHA2_hash_512",
+      "module": "Hacl_Hash_SHA2",
+      "name": "hash_512",
       "args": [{
           "name": "input",
           "kind": "input",
@@ -444,8 +444,8 @@
       }
     },
     "hash_384": {
-      "module": "Hacl_Hash",
-      "name": "SHA2_hash_384",
+      "module": "Hacl_Hash_SHA2",
+      "name": "hash_384",
       "args": [{
           "name": "input",
           "kind": "input",
@@ -482,8 +482,8 @@
       }
     },
     "hash_256": {
-      "module": "Hacl_Hash",
-      "name": "SHA2_hash_256",
+      "module": "Hacl_Hash_SHA2",
+      "name": "hash_256",
       "args": [{
           "name": "input",
           "kind": "input",
@@ -522,8 +522,9 @@
   },
   "Blake2": {
     "blake2b": {
-      "module": "Hacl_Blake2b_32",
-      "name": "blake2b",
+      "module": "Hacl_Hash_Blake2",
+      "custom_module_name": true,
+      "name": "Hacl_Blake2b_32_blake2b",
       "args": [{
           "type": "int",
           "kind": "input",
@@ -578,8 +579,9 @@
       }
     },
     "blake2s": {
-      "module": "Hacl_Blake2s_32",
-      "name": "blake2s",
+      "module": "Hacl_Hash_Blake2",
+      "custom_module_name": true,
+      "name": "Hacl_Blake2s_32_blake2s",
       "args": [{
           "type": "int",
           "kind": "input",
@@ -1737,9 +1739,9 @@
         ]
       }
     },
-    "verify_q": {
+    "validate_public_key": {
       "module": "Hacl_P256",
-      "name": "verify_q",
+      "name": "validate_public_key",
       "args": [{
           "name": "pubKey",
           "kind": "input",
@@ -1760,9 +1762,9 @@
         ]
       }
     },
-    "decompression_not_compressed_form": {
+    "uncompressed_to_raw": {
       "module": "Hacl_P256",
-      "name": "decompression_not_compressed_form",
+      "name": "uncompressed_to_raw",
       "args": [{
           "name": "b",
           "kind": "input",
@@ -1790,9 +1792,9 @@
         ]
       }
     },
-    "decompression_compressed_form": {
+    "compressed_to_raw": {
       "module": "Hacl_P256",
-      "name": "decompression_compressed_form",
+      "name": "compressed_to_raw",
       "args": [{
           "name": "b",
           "kind": "input",
@@ -1820,9 +1822,9 @@
         ]
       }
     },
-    "compression_not_compressed_form": {
+    "raw_to_uncompressed": {
       "module": "Hacl_P256",
-      "name": "compression_not_compressed_form",
+      "name": "raw_to_uncompressed",
       "args": [{
           "name": "b",
           "kind": "input",
@@ -1847,9 +1849,9 @@
         "type": "void"
       }
     },
-    "compression_compressed_form": {
+    "raw_to_compressed": {
       "module": "Hacl_P256",
-      "name": "compression_compressed_form",
+      "name": "raw_to_compressed",
       "args": [{
           "name": "b",
           "kind": "input",
@@ -1876,7 +1878,7 @@
     },
     "dh_initiator": {
       "module": "Hacl_P256",
-      "name": "ecp256dh_i",
+      "name": "dh_initiator",
       "args": [{
           "name": "result",
           "kind": "output",
@@ -1906,7 +1908,7 @@
     },
     "dh_responder": {
       "module": "Hacl_P256",
-      "name": "ecp256dh_r",
+      "name": "dh_responder",
       "args": [{
           "name": "result",
           "kind": "output",
@@ -1944,9 +1946,9 @@
         ]
       }
     },
-    "is_more_than_zero_less_than_order": {
+    "validate_private_key": {
       "module": "Hacl_P256",
-      "name": "is_more_than_zero_less_than_order",
+      "name": "validate_private_key",
       "args": [{
           "name": "pubKey",
           "kind": "input",

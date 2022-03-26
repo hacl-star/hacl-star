@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Frodo_KEM.h"
+#include "internal/Hacl_Frodo_KEM.h"
+
+#include "internal/Hacl_Kremlib.h"
 
 /* SNIPPET_START: randombytes_ */
 

@@ -12,73 +12,35 @@ module Blake2b256 = Hacl.Blake2b_256
 
 /// The functor
 inline_for_extraction noextract
-let blake2b_256 (no_key : bool) (key_size : key_size_t Spec.Blake2B no_key) =
+let blake2b_256 =
   blake2 Spec.Blake2B M256 Blake2b256.blake2b_init Blake2b256.blake2b_update_multi
-         Blake2b256.blake2b_update_last Blake2b256.blake2b_finish no_key key_size 
+         Blake2b256.blake2b_update_last Blake2b256.blake2b_finish
 
 /// Type abbreviations
 let blake2b_256_block_state = s Spec.Blake2B M256
-// The key parameters have no importance for the extracted state definitions
-let blake2b_256_state = F.state_s (blake2b_256 true 0ul) () (s Spec.Blake2B M256) (optional_key_blake2s true 0ul)
+let blake2b_256_state = F.state_s blake2b_256 () (s Spec.Blake2B M256) unit_key
 
 /// No key
 inline_for_extraction noextract
 let blake2b_256_no_key_alloca =
-  F.alloca (blake2b_256 true 0ul) () (s Spec.Blake2B M256)
-           (optional_key_blake2b true 0ul)
+  F.alloca blake2b_256 () (s Spec.Blake2B M256) unit_key
 
 [@ (Comment "  State allocation function when there is no key")]
 let blake2b_256_no_key_create_in =
-  F.create_in (blake2b_256 true 0ul) () (s Spec.Blake2B M256)
-              (optional_key_blake2b true 0ul)
+  F.create_in blake2b_256 () (s Spec.Blake2B M256) unit_key
 
 [@ (Comment "  (Re-)initialization function when there is no key")]
 let blake2b_256_no_key_init =
-  F.init (blake2b_256 true 0ul) () (s Spec.Blake2B M256)
-              (optional_key_blake2b true 0ul)
+  F.init blake2b_256 () (s Spec.Blake2B M256) unit_key
 
 [@ (Comment "  Update function when there is no key")]
 let blake2b_256_no_key_update =
-  F.update (blake2b_256 true 0ul) (G.hide ()) (s Spec.Blake2B M256)
-           (optional_key_blake2b true 0ul)
+  F.update blake2b_256 (G.hide ()) (s Spec.Blake2B M256) unit_key
 
 [@ (Comment "  Finish function when there is no key")]
 let blake2b_256_no_key_finish =
-  F.mk_finish (blake2b_256 true 0ul) () (s Spec.Blake2B M256)
-              (optional_key_blake2b true 0ul)
+  F.mk_finish blake2b_256 () (s Spec.Blake2B M256) unit_key
 
 [@ (Comment "  Free state function when there is no key")]
 let blake2b_256_no_key_free =
-  F.free (blake2b_256 true 0ul) (G.hide ()) (s Spec.Blake2B M256)
-         (optional_key_blake2b true 0ul)
-
-/// With key
-inline_for_extraction noextract
-let blake2b_256_with_key_alloca (key_size : key_size_t Spec.Blake2B false) =
-  F.alloca (blake2b_256 false key_size) () (s Spec.Blake2B M256)
-           (optional_key_blake2b false key_size)
-
-[@ (Comment "  State allocation function when using a (potentially null) key")]
-let blake2b_256_with_key_create_in (key_size : key_size_t Spec.Blake2B false) =
-  F.create_in (blake2b_256 false key_size) () (s Spec.Blake2B M256)
-              (optional_key_blake2b false key_size)
-
-[@ (Comment "  (Re-)initialization function when using a (potentially null) key")]
-let blake2b_256_with_key_init (key_size : key_size_t Spec.Blake2B false) =
-  F.init (blake2b_256 false key_size) () (s Spec.Blake2B M256)
-              (optional_key_blake2b false key_size)
-
-[@ (Comment "  Update function when using a (potentially null) key")]
-let blake2b_256_with_key_update (key_size : key_size_t Spec.Blake2B false) =
-  F.update (blake2b_256 false key_size) (G.hide ()) (s Spec.Blake2B M256)
-           (optional_key_blake2b false key_size)
-
-[@ (Comment "  Finish function when using a (potentially null) key")]
-let blake2b_256_with_key_finish (key_size : key_size_t Spec.Blake2B false) =
-  F.mk_finish (blake2b_256 false key_size) () (s Spec.Blake2B M256)
-              (optional_key_blake2b false key_size)
-
-[@ (Comment "  Free state function when using a (potentially null) key")]
-let blake2b_256_with_key_free (key_size : key_size_t Spec.Blake2B false) =
-  F.free (blake2b_256 false key_size) (G.hide ()) (s Spec.Blake2B M256)
-         (optional_key_blake2b false key_size)
+  F.free blake2b_256 (G.hide ()) (s Spec.Blake2B M256) unit_key

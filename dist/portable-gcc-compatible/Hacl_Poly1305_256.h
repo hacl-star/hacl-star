@@ -29,33 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "Hacl_Kremlib.h"
-
-/* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_256_load_acc4 */
-
-void
-Hacl_Impl_Poly1305_Field32xN_256_load_acc4(Lib_IntVector_Intrinsics_vec256 *acc, uint8_t *b);
-
-/* SNIPPET_END: Hacl_Impl_Poly1305_Field32xN_256_load_acc4 */
-
-/* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize */
-
-void
-Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize(
-  Lib_IntVector_Intrinsics_vec256 *out,
-  Lib_IntVector_Intrinsics_vec256 *p
-);
-
-/* SNIPPET_END: Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize */
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 /* SNIPPET_START: Hacl_Poly1305_256_blocklen */
 
 extern uint32_t Hacl_Poly1305_256_blocklen;

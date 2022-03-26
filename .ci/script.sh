@@ -23,6 +23,16 @@ if [[ $ARM_CROSS_CI == "aarch64-none-linux-gnu" ]]; then
   exit 0
 fi
 
+# Cross compile for other targets. Build and static library only.
+if [ ! -z "$CROSS_CI" ]; then
+  pushd dist/gcc-compatible
+  rm -rf *.o *.d libevercrypt.a
+  ./configure -target $CROSS_CI --disable-ocaml
+  make -j libevercrypt.a
+  popd
+  exit 0
+fi
+
 if [[ $TARGET == "IA32" ]]; then
   # Test 32-bit build; Tests don't work here yet.
   pushd dist/gcc-compatible
@@ -43,20 +53,16 @@ pushd dist/gcc-compatible
 make -j
 popd
 
-if [[ "$(uname -m | cut -c 1-7)" == "aarch64" || "$(uname -m | cut -c 1-3)" == "arm" ]]; then
-  make -C tests arm -j
-else
-  make -C tests -j test
+make -C tests -j test
 
-  # Extracted C tests -- need full kremlib, don't work on ARM because of
-  # intrinsics for x86 in cpu cycle count routines in testlib.c
-  pushd dist/test/c/
-  git clone https://github.com/fstarlang/kremlin --depth 10
-  export KREMLIN_HOME=$(pwd)/kremlin
-  make -C kremlin/kremlib/dist/generic -f Makefile.basic -j
-  make -j -k
-  popd
-fi
+# Extracted C tests -- need full kremlib, don't work on ARM because of
+# intrinsics for x86 in cpu cycle count routines in testlib.c
+pushd dist/test/c/
+git clone https://github.com/fstarlang/kremlin --depth 10
+export KREMLIN_HOME=$(pwd)/kremlin
+make -C kremlin/kremlib/dist/generic -f Makefile.basic -j
+make -j -k
+popd
 
 if which opam; then
   make -C dist/gcc-compatible install-hacl-star-raw

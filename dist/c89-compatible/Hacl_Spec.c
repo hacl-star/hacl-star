@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Spec.h"
+#include "internal/Hacl_Spec.h"
+
+
 
 Spec_Agile_Cipher_cipher_alg
 Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i)

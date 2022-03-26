@@ -29,48 +29,17 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Lib_Memzero0.h"
-#include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Spec.h"
-
-void
-Hacl_Blake2b_32_blake2b(
-  uint32_t nn,
-  uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
-);
-
-void
-Hacl_Blake2s_32_blake2s(
-  uint32_t nn,
-  uint8_t *output,
-  uint32_t ll,
-  uint8_t *d,
-  uint32_t kk,
-  uint8_t *k
-);
-
-extern uint32_t Hacl_HMAC_DRBG_reseed_interval;
-
-extern uint32_t Hacl_HMAC_DRBG_max_output_length;
-
-extern uint32_t Hacl_HMAC_DRBG_max_personalization_string_length;
-
-extern uint32_t Hacl_HMAC_DRBG_max_additional_input_length;
-
-uint32_t Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_hash_alg a);
-
+#include "Hacl_Kremlib.h"
+#include "Hacl_Impl_Blake2_Constants.h"
+#include "evercrypt_targetconfig.h"
 typedef struct Hacl_HMAC_DRBG_state_s
 {
   uint8_t *k;

@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "fc5f1806c05b463e9a77856da89bbdfe"
+      "ceb2195acfbb67c2ad1851a2ae62fba0"
     ],
     [
       "Vale.X64.BufferViewStore.map_aux",
@@ -17,7 +17,7 @@
       1,
       [ "@query" ],
       0,
-      "97cad6468ba808c18356caf2b381e651"
+      "5f4764896db0e4fbfc1ee58405a5597d"
     ],
     [
       "Vale.X64.BufferViewStore.get64_aux",
@@ -27,7 +27,7 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_1910ef5262f2ee8e712b6609a232b1ea",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "FStar.UInt8_interpretation_Tm_arrow_3777b5a630a36e62279f05e8abae7a72",
@@ -58,6 +58,7 @@
         "equation_Vale.Lib.Seqs_s.seq_map",
         "function_token_typing_FStar.Seq.Base.index",
         "function_token_typing_FStar.UInt8.v",
+        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val64",
         "function_token_typing_Vale.Def.Types_s.le_nat64_to_bytes",
@@ -127,7 +128,7 @@
         "typing_Vale.Lib.Seqs_s.seq_map"
       ],
       0,
-      "65fa8ef78e6f715c1d747c102dd83add"
+      "375167015f3e930c2a1296c454de5a3f"
     ],
     [
       "Vale.X64.BufferViewStore.get128_aux",
@@ -137,7 +138,7 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_1910ef5262f2ee8e712b6609a232b1ea",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "FStar.UInt8_interpretation_Tm_arrow_3777b5a630a36e62279f05e8abae7a72",
@@ -166,11 +167,11 @@
         "fuel_guarded_inversion_Vale.Def.Words_s.four",
         "function_token_typing_FStar.Seq.Base.index",
         "function_token_typing_FStar.UInt8.v",
+        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val128",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val32",
         "function_token_typing_Vale.Def.Types_s.le_quad32_to_bytes",
-        "function_token_typing_Vale.Def.Words.Four_s.nat_to_four",
         "function_token_typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE",
         "function_token_typing_Vale.Def.Words_s.nat32",
         "function_token_typing_Vale.Def.Words_s.nat8",
@@ -226,7 +227,7 @@
         "typing_Vale.Def.Words_s.natN", "typing_Vale.Interop.Views.put128"
       ],
       0,
-      "682f8aa456824129b83bbe0a4745c1e7"
+      "90225c3198a2b16be0d5b23be798e7d4"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap64",
@@ -289,7 +290,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "a9d407c5a27ae43ff054040f0eaf1911"
+      "9896e743ecd0dd0504ebce736f04aafb"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap64",
@@ -430,7 +431,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "4dabfc7e0c1ebc013c247589081893bc"
+      "ddab2d908239559bf5ce2053ce88d2e3"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap128",
@@ -485,7 +486,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "e641dbefbf91b84380044243e45ac8d4"
+      "0edbc9879b995d8a6aa392e1031c1ba9"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap128",
@@ -633,7 +634,7 @@
         "typing_Vale.Interop.Views.put128"
       ],
       0,
-      "4b961660944939568bb76bdc0aa54adf"
+      "cbc8d1e65bdaa44123400439a9d4fe93"
     ]
   ]
 ]

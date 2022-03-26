@@ -24,10 +24,12 @@
 
 #include "Hacl_Streaming_SHA1.h"
 
+#include "internal/Hacl_Hash_SHA1.h"
+
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1()
 {
-  uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
-  uint32_t *block_state = KRML_HOST_CALLOC((uint32_t)5U, sizeof (uint32_t));
+  uint8_t *buf = (uint8_t *)KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
+  uint32_t *block_state = (uint32_t *)KRML_HOST_CALLOC((uint32_t)5U, sizeof (uint32_t));
   Hacl_Streaming_SHA2_state_sha2_224 s;
   s.block_state = block_state;
   s.buf = buf;
@@ -35,7 +37,10 @@ Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA1_legacy_create_in_sha1()
   KRML_CHECK_SIZE(sizeof (Hacl_Streaming_SHA2_state_sha2_224), (uint32_t)1U);
   {
     Hacl_Streaming_SHA2_state_sha2_224
-    *p = KRML_HOST_MALLOC(sizeof (Hacl_Streaming_SHA2_state_sha2_224));
+    *p =
+      (Hacl_Streaming_SHA2_state_sha2_224 *)KRML_HOST_MALLOC(sizeof (
+          Hacl_Streaming_SHA2_state_sha2_224
+        ));
     p[0U] = s;
     Hacl_Hash_Core_SHA1_legacy_init(block_state);
     return p;

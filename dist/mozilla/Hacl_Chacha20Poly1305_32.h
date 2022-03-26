@@ -29,15 +29,15 @@
 extern "C" {
 #endif
 
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include <stdbool.h>
 
 
-#include "Hacl_Chacha20.h"
-#include "Hacl_Kremlib.h"
 #include "Hacl_Poly1305_32.h"
+#include "Hacl_Kremlib.h"
+#include "Hacl_Chacha20.h"
 
 void
 Hacl_Chacha20Poly1305_32_aead_encrypt(

@@ -29,17 +29,17 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 #include "Hacl_Kremlib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
-#include "Hacl_Hash.h"
-
+#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Hash_SHA1.h"
+#include "libintvector.h"
 void Hacl_HMAC_legacy_compute_sha1(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 data_len);
 
 void Hacl_HMAC_compute_sha2_256(u8 *dst, u8 *key, u32 key_len, u8 *data, u32 data_len);

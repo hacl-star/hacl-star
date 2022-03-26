@@ -24,6 +24,8 @@
 
 #include "Hacl_Chacha20Poly1305_32.h"
 
+
+
 static inline void poly1305_padded_32(u64 *ctx, u32 len, u8 *text)
 {
   u32 n = len / (u32)16U;
@@ -514,7 +516,8 @@ static inline void poly1305_do_32(u8 *k, u32 aadlen, u8 *aad, u32 mlen, u8 *m, u
   Hacl_Poly1305_32_poly1305_init(ctx, k);
   if (aadlen != (u32)0U)
     poly1305_padded_32(ctx, aadlen, aad);
-  poly1305_padded_32(ctx, mlen, m);
+  if (mlen != (u32)0U)
+    poly1305_padded_32(ctx, mlen, m);
   store64_le(block, (u64)aadlen);
   store64_le(block + (u32)8U, (u64)mlen);
   pre = ctx + (u32)5U;

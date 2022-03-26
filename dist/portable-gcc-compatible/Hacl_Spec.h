@@ -29,16 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
+#include <string.h>
 #include "kremlin/internal/types.h"
 #include "kremlin/lowstar_endianness.h"
-#include <string.h>
 #include "kremlin/internal/target.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 /* SNIPPET_START: Spec_Blake2_alg */
 
 #define Spec_Blake2_Blake2S 0
@@ -62,26 +61,6 @@ typedef uint8_t Spec_Blake2_alg;
 /* SNIPPET_END: Spec_Hash_Definitions_hash_alg */
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
-
-/* SNIPPET_START: Spec_ECDSA_hash_alg_ecdsa_tags */
-
-#define Spec_ECDSA_NoHash 0
-#define Spec_ECDSA_Hash 1
-
-/* SNIPPET_END: Spec_ECDSA_hash_alg_ecdsa_tags */
-
-typedef uint8_t Spec_ECDSA_hash_alg_ecdsa_tags;
-
-/* SNIPPET_START: Spec_ECDSA_hash_alg_ecdsa */
-
-typedef struct Spec_ECDSA_hash_alg_ecdsa_s
-{
-  Spec_ECDSA_hash_alg_ecdsa_tags tag;
-  Spec_Hash_Definitions_hash_alg _0;
-}
-Spec_ECDSA_hash_alg_ecdsa;
-
-/* SNIPPET_END: Spec_ECDSA_hash_alg_ecdsa */
 
 /* SNIPPET_START: Spec_FFDHE_ffdhe_alg */
 
@@ -114,13 +93,6 @@ typedef uint8_t Spec_Agile_Cipher_cipher_alg;
 /* SNIPPET_END: Spec_Cipher_Expansion_impl */
 
 typedef uint8_t Spec_Cipher_Expansion_impl;
-
-/* SNIPPET_START: Spec_Cipher_Expansion_cipher_alg_of_impl */
-
-Spec_Agile_Cipher_cipher_alg
-Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
-
-/* SNIPPET_END: Spec_Cipher_Expansion_cipher_alg_of_impl */
 
 /* SNIPPET_START: Spec_Agile_AEAD_alg */
 
