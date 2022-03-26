@@ -12,7 +12,6 @@ open Spec.P256.Lemmas
 open Spec.P256.Definitions
 open Hacl.Spec.P256.Felem
 open Hacl.Impl.P256.LowLevel 
-open Hacl.Impl.P256.Definition
 open Hacl.Impl.P256.Core
 open Spec.P256.MontgomeryMultiplication
 open Hacl.Impl.ECDSA.MontgomeryMultiplication
@@ -330,8 +329,6 @@ let compare_points_bool a b =
   xEqual && yEqual && zEqual
 
 
-#push-options "--z3rlimit 200"
-
 inline_for_extraction noextract
 val ecdsa_verification_step5_1: points:lbuffer uint64 (size 24) -> Stack bool
   (requires fun h -> live h points /\
@@ -366,10 +363,10 @@ let ecdsa_verification_step5_1 points =
   norm pointU2Q result1Norm tmpForNorm;
   let equalX = compare_points_bool result0Norm result1Norm in 
 
-  pop_frame(); 
+  pop_frame();
   equalX
 
-#pop-options
+
 
 inline_for_extraction noextract
 val ecdsa_verification_step5_2:

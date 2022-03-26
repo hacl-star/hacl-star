@@ -14,8 +14,7 @@ open Hacl.Impl.P256.MM.Exponent
 open Hacl.Impl.P256.MontgomeryMultiplication
 open Hacl.Impl.P256.Arithmetics
 
-open Hacl.Impl.P256.Definition
-open Hacl.Impl.P256.LowLevel.RawCmp
+open Hacl.Impl.P256.LowLevel .RawCmp
 
 open Spec.P256.MontgomeryMultiplication
 

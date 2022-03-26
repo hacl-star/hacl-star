@@ -21,10 +21,7 @@ open FStar.Tactics.Canon
 open Spec.P256.Lemmas
 open Lib.IntTypes.Intrinsics
 
-open Hacl.Impl.P256.Definition
-
-
-#set-options "--fuel 0 --ifuel 0 --z3rlimit 300"
+#set-options "--fuel 0 --ifuel 0 --z3rlimit 200"
 
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
 
@@ -1705,7 +1702,6 @@ let changeEndian i =
   upd i (size 1) two; 
   upd i (size 2) one;
   upd i (size 3) zero
-
 
 val toUint64ChangeEndian: i:lbuffer uint8 (size 32) -> o:felem -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)

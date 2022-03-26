@@ -18,8 +18,6 @@ open FStar.Math.Lemmas
 open FStar.Mul
 open Lib.IntTypes.Intrinsics
 
-open Hacl.Impl.P256.Definition
-
 #reset-options " --z3rlimit 300"
 
 
