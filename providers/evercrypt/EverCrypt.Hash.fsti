@@ -71,7 +71,7 @@ type e_alg = G.erased alg
 
 // abstract implementation state
 (* [@CAbstractStruct] *)
-(* ^ this should be restored once kremlin is fixed *)
+(* ^ this should be restored once karamel is fixed *)
 val state_s: alg -> Type0
 
 // pointer to abstract implementation state
@@ -239,7 +239,7 @@ val update_multi_224: Hacl.Hash.Definitions.update_multi_st (|SHA2_224, ()|)
 
 /// The new ``update`` method (with support for blake2)
 // Note: this function relies implicitly on the fact that we are running with
-// code/lib/kremlin and that we know that machine integers and secret integers
+// code/lib/karamel and that we know that machine integers and secret integers
 // are the same. In the long run, we should standardize on a secret integer type
 // in F*'s ulib and have evercrypt use it.
 (** @type: true

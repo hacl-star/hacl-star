@@ -847,7 +847,7 @@ EverCrypt_HMAC_compute(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

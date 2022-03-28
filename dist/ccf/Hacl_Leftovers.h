@@ -30,14 +30,14 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Lib_Memzero0.h"
 #include "Hacl_Spec.h"
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "evercrypt_targetconfig.h"
 typedef struct Hacl_HMAC_DRBG_state_s

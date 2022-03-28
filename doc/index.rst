@@ -1,4 +1,4 @@
-.. The KreMLin user manual documentation master file, created by
+.. The KaRaMeL user manual documentation master file, created by
    sphinx-quickstart on Mon Apr 23 15:16:54 2018.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
@@ -39,7 +39,7 @@ be treated as such. If you want to integrate this code into a production environ
 or if you have any questions, comments, or feature requests for HACL*, Vale,
 or EverCrypt, initiate a conversation with the `HACL* maintainers <mailto:hacl-star-maintainers@lists.gforge.inria.fr>`_
 
-.. _KreMLin: https://github.com/FStarLang/kremlin/
+.. _KaRaMeL: https://github.com/FStarLang/karamel/
 .. _ValeCrypt: https://github.com/project-everest/hacl-star/tree/master/vale
 
 .. toctree::

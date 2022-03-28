@@ -25,7 +25,7 @@
 #include "Hacl_NaCl.h"
 
 #include "internal/Hacl_Poly1305.h"
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 
 static void secretbox_init(uint8_t *xkeys, uint8_t *k, uint8_t *n)
 {

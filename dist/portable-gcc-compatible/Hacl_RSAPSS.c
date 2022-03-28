@@ -24,7 +24,7 @@
 
 #include "Hacl_RSAPSS.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 /* SNIPPET_START: hash_len */
@@ -67,7 +67,7 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -99,7 +99,7 @@ hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t 
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

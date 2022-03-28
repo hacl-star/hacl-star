@@ -37,7 +37,7 @@ dist/%.o: dist/Makefile.basic
 	$(MAKE) -C dist -f Makefile.basic $(notdir $@)
 
 dist/Hacl_Test_ECDSA.exe: dist/Hacl_P256.o dist/Hacl_Test_ECDSA.o \
-	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a dist/libecdsa.a
+	$(KRML_HOME)/krmllib/dist/generic/libkrmllib.a dist/libecdsa.a
 
 
 dist/p256-openssl-test.exe: dist/Hacl_P256.o

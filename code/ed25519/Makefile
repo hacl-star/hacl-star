@@ -32,7 +32,7 @@ dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	-skip-compilation
 
 dist/ed25519-test.exe: dist/libed25519.a \
-	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
+	$(KRML_HOME)/krmllib/dist/generic/libkrmllib.a $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 %.exe:
 	$(CC) $(CFLAGS) $^ -o $@
