@@ -89,7 +89,7 @@
         "refinement_interpretation_Tm_refine_10803977e952633dc09afef196ee20ee"
       ],
       0,
-      "259bbf1577c1b7380aa8ab262abe54d5"
+      "3aa175adb8c10daa8cf1406314b347ae"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_r_sep",
@@ -515,7 +515,7 @@
         "refinement_interpretation_Tm_refine_1e3ff0372c6da377dab1984f32233065"
       ],
       0,
-      "a898c6d009ab074f610944cde6d2f7d8"
+      "7444de521888c74db7f0a9c258ccc90a"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vec_r_sep",
@@ -829,7 +829,7 @@
         "refinement_interpretation_Tm_refine_edf5bc1c4e11070967aa1e8e88f8f9ed"
       ],
       0,
-      "1b455d528f79db53696a39a927d5741f"
+      "0e9b84742603153460adae3170ece5c6"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vv_rv_inv_r_inv",
@@ -886,7 +886,7 @@
         "typing_MerkleTree.Low.Datastructures.hash"
       ],
       0,
-      "058f711bc7536dda5d4884e2da89b672"
+      "74070df74b3b7771adf6bb65003438e4"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vv_rv_inv_disjoint",
@@ -898,7 +898,7 @@
         "refinement_interpretation_Tm_refine_7422a47661876aaa12ed4d75122642c7"
       ],
       0,
-      "896fb836b265e8cefc0fafdb6cf00dfc"
+      "6bbf4e1a3576d134b8997f995b83792b"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vv_rv_inv_disjoint",
@@ -976,7 +976,7 @@
         "typing_MerkleTree.Low.Datastructures.hvreg"
       ],
       0,
-      "76c5a787c41a7685bc14cfd77a7ee022"
+      "d6bcd064c24105e19244b2f9fd2843e6"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vv_rv_inv_includes",
@@ -988,7 +988,7 @@
         "refinement_interpretation_Tm_refine_edf5bc1c4e11070967aa1e8e88f8f9ed"
       ],
       0,
-      "2a51aa6bb40e454f7451174d55ee65ec"
+      "e65d6a0376988e4f994a763bafa9bd85"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vv_rv_inv_includes",
@@ -1083,7 +1083,7 @@
         "typing_MerkleTree.Low.Datastructures.hvreg"
       ],
       0,
-      "9207f8a3ce40071baaae4d881efdb2f2"
+      "b8c08a7f40f2a90a527fd4348728b355"
     ],
     [
       "MerkleTree.Low.Datastructures.hash_vv_as_seq_get_index",
@@ -1204,9 +1204,11 @@
         "equation_LowStar.RVector.rs_elems_inv",
         "equation_LowStar.RVector.rv_elems_inv",
         "equation_LowStar.RVector.rv_inv",
+        "equation_LowStar.RVector.rv_itself_inv",
         "equation_LowStar.RVector.rvector",
         "equation_LowStar.Regional.rg_inv", "equation_LowStar.Vector.as_seq",
-        "equation_LowStar.Vector.forall_seq", "equation_LowStar.Vector.get",
+        "equation_LowStar.Vector.forall_seq",
+        "equation_LowStar.Vector.freeable", "equation_LowStar.Vector.get",
         "equation_LowStar.Vector.size_of",
         "equation_LowStar.Vector.uint32_t", "equation_LowStar.Vector.vector",
         "equation_MerkleTree.Low.Datastructures.hash",
@@ -1225,9 +1227,11 @@
         "fuel_guarded_inversion_LowStar.Vector.vector_str", "int_inversion",
         "int_typing", "lemma_FStar.Ghost.reveal_hide",
         "lemma_FStar.Seq.Base.lemma_index_slice",
-        "lemma_FStar.UInt32.uv_inv",
+        "lemma_FStar.Seq.Base.lemma_len_slice", "lemma_FStar.UInt32.uv_inv",
         "lemma_LowStar.Monotonic.Buffer.as_seq_gsub",
+        "lemma_LowStar.Monotonic.Buffer.freeable_length",
         "lemma_LowStar.Monotonic.Buffer.length_as_seq",
+        "lemma_LowStar.Monotonic.Buffer.length_null_1",
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.RVector.as_seq_seq_index",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
@@ -1254,6 +1258,7 @@
         "refinement_interpretation_Tm_refine_5a88c51956f007f77dee75dd2a07bb5a",
         "refinement_interpretation_Tm_refine_69d1d206ddafb5a6092734ed6446bcfd",
         "refinement_interpretation_Tm_refine_7108b467000c99be927e4d94496382d1",
+        "refinement_interpretation_Tm_refine_81407705a0828c2c1b1976675443f647",
         "refinement_interpretation_Tm_refine_90a1661541e4f009452ab107b47b5955",
         "refinement_interpretation_Tm_refine_9a4f5366055910237954d85f232cccf4",
         "refinement_interpretation_Tm_refine_9ff867c004d0e891d59193a1c818b2a7",

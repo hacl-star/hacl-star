@@ -24,7 +24,7 @@
 
 #include "Hacl_Curve25519_64_Slow.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 static inline uint64_t add1_(uint64_t *out, uint64_t *f1, uint64_t f2)

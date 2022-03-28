@@ -112,10 +112,10 @@ if 'VALE_HOME' in os.environ:
 else:
   vale_default_path = '../../vale'
 
-if 'KREMLIN_HOME' in os.environ:
-  kremlin_default_path = os.environ['KREMLIN_HOME']
+if 'KRML_HOME' in os.environ:
+  karamel_default_path = os.environ['KRML_HOME']
 else:
-  kremlin_default_path = '../../kremlin'
+  karamel_default_path = '../../karamel'
 
 if 'FSTAR_HOME' in os.environ:
   fstar_default_path = os.environ['FSTAR_HOME']
@@ -129,8 +129,8 @@ def AddOptYesNo(name, dest, default, help):
 # Retrieve tool-specific command overrides passed in by the user
 AddOption('--VALE-PATH', dest = 'vale_path', type = 'string', default = vale_default_path, action = 'store',
   help = 'Specify the path to Vale tool')
-AddOption('--KREMLIN-PATH', dest = 'kremlin_path', type = 'string', default = kremlin_default_path, action = 'store',
-  help = 'Specify the path to kreMLin')
+AddOption('--KRML-PATH', dest = 'karamel_path', type = 'string', default = karamel_default_path, action = 'store',
+  help = 'Specify the path to KaRaMeL')
 AddOption('--FSTAR-PATH', dest = 'fstar_path', type = 'string', default = fstar_default_path, action = 'store',
   help = 'Specify the path to F* tool')
 AddOption('--FSTAR-Z3', dest = 'fstar_z3', type = 'string', default = '', action = 'store',
@@ -149,8 +149,8 @@ AddOption('--FARGS', dest = 'fstar_user_args', type = 'string', default = [], ac
   help = 'Supply temporary additional arguments to the F* compiler')
 AddOption('--VARGS', dest = 'vale_user_args', type = 'string', default = [], action = 'append',
   help = 'Supply temporary additional arguments to the Vale compiler')
-AddOption('--KARGS', dest = 'kremlin_user_args', type = 'string', default = [], action = 'append',
-  help = 'Supply temporary additional arguments to the Kremlin compiler')
+AddOption('--KARGS', dest = 'karamel_user_args', type = 'string', default = [], action = 'append',
+  help = 'Supply temporary additional arguments to the KaRaMeL compiler')
 AddOption('--CARGS', dest = 'c_user_args', type = 'string', default = [], action = 'append',
   help = 'Supply temporary additional arguments to the C compiler')
 AddOption('--OPENSSL', dest = 'openssl_path', type = 'string', default = None, action = 'store',
@@ -174,11 +174,11 @@ AddOptYesNo('PROFILE', dest = 'profile', default = False,
 
 is_help = GetOption('help')
 vale_path = Dir(GetOption('vale_path')).abspath
-kremlin_path = Dir(GetOption('kremlin_path')).abspath
+karamel_path = Dir(GetOption('karamel_path')).abspath
 fstar_path = Dir(GetOption('fstar_path')).abspath
 fstar_user_args = GetOption('fstar_user_args')
 vale_user_args = GetOption('vale_user_args')
-kremlin_user_args = GetOption('kremlin_user_args')
+karamel_user_args = GetOption('karamel_user_args')
 c_user_args = GetOption('c_user_args')
 openssl_path = GetOption('openssl_path')
 fstar_my_version = GetOption('fstar_my_version')
@@ -215,7 +215,7 @@ if not is_help:
   if sys.platform == 'win32':
     import importlib.util
     common_env.Replace(CCPDBFLAGS = '/Zi /Fd${TARGET.base}.pdb')
-    # Use kremlib.h without primitive support for uint128_t.
+    # Use krmllib.h without primitive support for uint128_t.
     common_env.Append(CCFLAGS = ['/Ox', '/Gz', '/DKRML_NOUINT128'])
     common_env.Append(LINKFLAGS = ['/DEBUG'])
     if os.getenv('PLATFORM') == 'X64':
@@ -302,9 +302,9 @@ class ExternalFile:
     return 'obj/external/' + os.path.basename(self.filename)
 
 external_files = [
-  ExternalFile(f'{kremlin_path}/kremlib/C.Loops.fst'),
-  ExternalFile(f'{kremlin_path}/kremlib/Spec.Loops.fst'),
-  ExternalFile(f'{kremlin_path}/kremlib/FStar.Kremlin.Endianness.fst'),
+  ExternalFile(f'{karamel_path}/krmllib/C.Loops.fst'),
+  ExternalFile(f'{karamel_path}/krmllib/Spec.Loops.fst'),
+  ExternalFile(f'{karamel_path}/krmllib/FStar.Krml.Endianness.fst'),
   ExternalFile('../specs/Spec.Hash.PadFinish.fst'),
   ExternalFile('../specs/Spec.Hash.Lemmas0.fst'),
   ExternalFile('../specs/Spec.Hash.Lemmas.fst'),

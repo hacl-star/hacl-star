@@ -24,7 +24,7 @@
 
 #include "Hacl_Poly1305_32.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_Poly1305_32_blocklen */
 

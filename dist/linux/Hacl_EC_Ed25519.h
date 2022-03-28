@@ -30,12 +30,12 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Bignum25519_51.h"
 #include "libintvector.h"
 void Hacl_EC_Ed25519_mk_felem_zero(u64 *b);

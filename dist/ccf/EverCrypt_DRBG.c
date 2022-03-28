@@ -58,7 +58,7 @@ uint32_t EverCrypt_DRBG_min_length(Spec_Hash_Definitions_hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -196,7 +196,7 @@ EverCrypt_DRBG_state_s *EverCrypt_DRBG_create(Spec_Hash_Definitions_hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1903,7 +1903,7 @@ EverCrypt_DRBG_instantiate(
         personalization_string,
         personalization_string_len);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable (pattern matches are exhaustive in F*)");
@@ -1934,7 +1934,7 @@ EverCrypt_DRBG_reseed(
   {
     return EverCrypt_DRBG_reseed_sha2_512(st, additional_input, additional_input_len);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable (pattern matches are exhaustive in F*)");
@@ -1967,7 +1967,7 @@ EverCrypt_DRBG_generate(
   {
     return EverCrypt_DRBG_generate_sha2_512(output, st, n, additional_input, additional_input_len);
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable (pattern matches are exhaustive in F*)");
@@ -1997,7 +1997,7 @@ void EverCrypt_DRBG_uninstantiate(EverCrypt_DRBG_state_s *st)
     EverCrypt_DRBG_uninstantiate_sha2_512(st);
     return;
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable (pattern matches are exhaustive in F*)");

@@ -1,6 +1,6 @@
 // This module performs low-level WASM manipulations, such as linking several
 // modules together and inspecting the debug zone at the bottom of the memory.
-// This module is aware of the compilation strategy of kreMLin. It can be
+// This module is aware of the compilation strategy of KaRaMeL. It can be
 // included from either a browser or a shell context, as long as my_print is
 // defined in scope.
 
@@ -87,7 +87,7 @@ function dump(mem, size) {
 }
 
 /******************************************************************************/
-/* Implementations of the kremlin runtime support library                     */
+/* Implementations of the karamel runtime support library                     */
 /******************************************************************************/
 
 function stringAtAddr(mem, addr) {
@@ -402,7 +402,7 @@ function init() {
   // Base stuff that appears as requirement, because they're exposed in TestLib
   // and/or C.
   let imports = {
-    Kremlin: {
+    Karamel: {
       mem: mem,
       debug: debug,
       data_start: header_size
@@ -436,10 +436,10 @@ function propagate(module_name, imports, instance) {
     imports[module_name][o] = instance.exports[o];
   }
   my_print("This module has a data segment of size: ", instance.exports.data_size);
-  imports.Kremlin.data_start += instance.exports.data_size;
-  my_print("Next data segment will start at: ", imports.Kremlin.data_start);
+  imports.Karamel.data_start += instance.exports.data_size;
+  my_print("Next data segment will start at: ", imports.Karamel.data_start);
   // Set the highwater mark right after the data segment
-  new Uint32Array(imports.Kremlin.mem.buffer)[0] = imports.Kremlin.data_start;
+  new Uint32Array(imports.Karamel.mem.buffer)[0] = imports.Karamel.data_start;
   my_print();
 }
 
@@ -480,7 +480,7 @@ function link(imports, modules) {
   let i = init ();
   my_print("Custom imports:", imports);
   for (let k in imports)
-    i[k] = imports[k](i.Kremlin.mem);
+    i[k] = imports[k](i.Karamel.mem);
 
   return fold(i, modules);
 }

@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Bignum.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */
 
