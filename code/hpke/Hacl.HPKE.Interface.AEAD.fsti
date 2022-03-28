@@ -58,10 +58,10 @@ let aead_decrypt_st (a:AEAD.supported_alg) =
   )
 
 [@ Meta.Attribute.specialize]
-val aead_encrypt: #cs:S.ciphersuite -> aead_encrypt_st (S.aead_of_cs cs)
+val aead_encrypt: #cs:S.ciphersuite_not_export_only -> aead_encrypt_st (S.aead_alg_of cs)
 
 [@ Meta.Attribute.specialize]
-val aead_decrypt: #cs:S.ciphersuite -> aead_decrypt_st (S.aead_of_cs cs)
+val aead_decrypt: #cs:S.ciphersuite_not_export_only -> aead_decrypt_st (S.aead_alg_of cs)
 
 (** Instantiations of Chacha20Poly1305 **)
 inline_for_extraction noextract
