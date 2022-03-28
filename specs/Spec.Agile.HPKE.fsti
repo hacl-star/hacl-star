@@ -272,6 +272,11 @@ let size_dh_public (cs:ciphersuite): size_nat = match kem_dh_of_cs cs with
   | DH.DH_P256 -> DH.size_public DH.DH_P256 + 1 // Need the additional byte for representation
 
 inline_for_extraction
+let size_dh_serialized (cs:ciphersuite): size_nat = match kem_dh_of_cs cs with
+  | DH.DH_Curve25519 -> DH.size_public DH.DH_Curve25519
+  | DH.DH_P256 -> DH.size_public DH.DH_P256
+
+inline_for_extraction
 let size_kem_kdf (cs:ciphersuite): size_nat = Hash.size_hash (kem_hash_of_cs cs)
 
 inline_for_extraction
@@ -629,4 +634,3 @@ val receiveExportAuthPSK:
   -> psk_id:psk_id_s cs
   -> pkS:DH.serialized_point (kem_dh_of_cs cs) ->
   Tot (option (lbytes l))
-
