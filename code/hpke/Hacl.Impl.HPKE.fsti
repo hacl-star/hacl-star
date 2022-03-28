@@ -3,6 +3,7 @@ module Hacl.Impl.HPKE
 open FStar.HyperStack
 open FStar.HyperStack.All
 
+module B = LowStar.Buffer
 open Lib.Buffer
 open Lib.IntTypes
 
@@ -15,34 +16,45 @@ let key_dh_public (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_dh_public cs)
 inline_for_extraction noextract
 let key_dh_secret (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_dh_key cs))
 inline_for_extraction noextract
+let serialized_point_dh (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_dh_serialized cs))
+inline_for_extraction noextract
 let key_aead (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_aead_key cs))
 inline_for_extraction noextract
 let nonce_aead (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_aead_nonce cs))
 
+val context_s (cs:S.ciphersuite) : Type0
+val ctx_loc (#cs:S.ciphersuite) (ctx:context_s cs) : GTot B.loc
+val ctx_invariant (#cs:S.ciphersuite) (h:mem) (ctx:context_s cs) : GTot prop
+val as_ctx (#cs:S.ciphersuite) (h:mem) (ctx:context_s cs) : GTot (S.encryption_context cs)
+
+val frame_ctx (#cs:S.ciphersuite) (ctx:context_s cs) (l:B.loc) (h0 h1:mem)
+  : Lemma (requires ctx_invariant h0 ctx /\ B.loc_disjoint (ctx_loc ctx) l /\ modifies l h0 h1)
+          (ensures ctx_invariant h1 ctx /\ as_ctx h0 ctx == as_ctx h1 ctx)
+          [SMTPat (modifies l h0 h1); SMTPat (ctx_invariant h0 ctx)]
+
 inline_for_extraction noextract
 let setupBaseS_st (cs:S.ciphersuite) (p:Type0) =
      o_pkE: key_dh_public cs
-  -> o_k: key_aead cs
-  -> o_n: nonce_aead cs
+  -> o_ctx: context_s cs
   -> skE: key_dh_secret cs
-  -> pkR: key_dh_public cs
-  -> infolen: size_t{v infolen <= S.max_info}
+  -> pkR: serialized_point_dh cs
+  -> infolen: size_t{v infolen <= S.max_length_info (S.kem_hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
   -> Stack UInt32.t
      (requires fun h0 ->
         p /\
-        live h0 o_pkE /\ live h0 o_k /\ live h0 o_n /\
+        live h0 o_pkE /\
+        ctx_invariant h0 o_ctx /\
         live h0 skE /\ live h0 pkR /\ live h0 info /\
         disjoint o_pkE skE /\ disjoint o_pkE pkR /\ disjoint o_pkE info /\
-        disjoint o_pkE o_k /\ disjoint o_pkE o_n /\
-        disjoint o_k o_n)
-     (ensures fun h0 result h1 -> modifies (loc o_pkE |+| loc o_k |+| loc o_n) h0 h1 /\
+        B.loc_disjoint (ctx_loc o_ctx) (loc info) /\
+        B.loc_disjoint (loc o_pkE) (ctx_loc o_ctx))
+     (ensures fun h0 result h1 -> modifies (loc o_pkE |+| ctx_loc o_ctx) h0 h1 /\
        (let output = S.setupBaseS cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 info) in
         match result with
-        | 0ul -> Some? output /\ (let pkE, k, n = Some?.v output in
+        | 0ul -> Some? output /\ (let pkE, ctx = Some?.v output in
           as_seq h1 o_pkE == pkE /\
-          as_seq h1 o_k == k /\
-          as_seq h1 o_n == n)
+          as_ctx h1 o_ctx == ctx)
         | 1ul -> None? output
         | _ -> False
         )
@@ -50,29 +62,27 @@ let setupBaseS_st (cs:S.ciphersuite) (p:Type0) =
 
 inline_for_extraction noextract
 let setupBaseR_st (cs:S.ciphersuite) (p:Type0) =
-     o_key_aead: key_aead cs
-  -> o_nonce_aead: nonce_aead cs
+     o_ctx : context_s cs
   -> pkE: key_dh_public cs
   -> skR: key_dh_secret cs
-  -> infolen: size_t{v infolen <= S.max_info}
+  -> infolen: size_t{v infolen <= S.max_length_info (S.kem_hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
   -> Stack UInt32.t
      (requires fun h0 ->
         p /\
-        live h0 o_key_aead /\ live h0 o_nonce_aead /\
-        live h0 pkE /\ live h0 skR /\ live h0 info /\
-        disjoint o_key_aead o_nonce_aead)
-     (ensures fun h0 result h1 -> modifies (loc o_key_aead |+| loc o_nonce_aead) h0 h1 /\
+        ctx_invariant h0 o_ctx /\
+        live h0 pkE /\ live h0 skR /\ live h0 info)
+     (ensures fun h0 result h1 -> modifies (ctx_loc o_ctx) h0 h1 /\
        (let output = S.setupBaseR cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 info) in
        match result with
-       | 0ul -> Some? output /\ (let k, n = Some?.v output in
-         as_seq h1 o_key_aead == k /\
-         as_seq h1 o_nonce_aead == n)
+       | 0ul -> Some? output /\ (let ctx = Some?.v output in
+         as_ctx h1 o_ctx == ctx)
        | 1ul -> None? output
        | _ -> False
        )
      )
 
+(*
 inline_for_extraction noextract
 let sealBase_st (cs:S.ciphersuite) (p:Type0) =
      skE: key_dh_secret cs
@@ -117,6 +127,7 @@ let openBase_st (cs:S.ciphersuite) (p:Type0) =
          | 0ul -> Some? plain /\ as_seq h1 output == Some?.v plain
          | 1ul -> None? plain
          | _ -> False))
+*)
 
 noextract inline_for_extraction
 val setupBaseS: #cs:S.ciphersuite -> setupBaseS_st cs True
@@ -124,8 +135,10 @@ val setupBaseS: #cs:S.ciphersuite -> setupBaseS_st cs True
 noextract inline_for_extraction
 val setupBaseR: #cs:S.ciphersuite -> setupBaseR_st cs True
 
+(*
 noextract inline_for_extraction
 val sealBase: #cs:S.ciphersuite -> sealBase_st cs True
 
 noextract inline_for_extraction
 val openBase: #cs:S.ciphersuite -> openBase_st cs True
+*)

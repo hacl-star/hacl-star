@@ -11,6 +11,7 @@ open Lib.Buffer
 open FStar.Mul
 
 module S = Spec.Agile.HPKE
+module SHa = Spec.Agile.Hash
 module SDH = Spec.Agile.DH
 module DH = Hacl.HPKE.Interface.DH
 module HKDF = Hacl.HPKE.Interface.HKDF
@@ -21,6 +22,238 @@ friend Spec.Agile.HPKE
 
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
 
+(* Defining basic types for the different arguments of HPKE functions *)
+
+inline_for_extraction noextract
+let seq_aead (cs:S.ciphersuite) = n:UInt64.t{UInt64.v n <= S.max_seq cs}
+inline_for_extraction noextract
+let exporter_secret (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_kdf cs))
+inline_for_extraction noextract
+let key_kem (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_kem_key cs))
+
+inline_for_extraction noextract
+let nsize_kem_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_kem_key cs}) =
+  match S.kem_hash_of_cs cs with
+  | SHa.SHA2_256 -> 32ul
+
+inline_for_extraction noextract
+let nsize_serialized_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_serialized cs}) =
+  match S.kem_dh_of_cs cs with
+  | SDH.DH_Curve25519 -> 32ul
+  | SDH.DH_P256 -> 64ul
+
+inline_for_extraction noextract
+let nsize_public_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_public cs}) =
+  match S.kem_dh_of_cs cs with
+  | SDH.DH_Curve25519 -> 32ul
+  | SDH.DH_P256 -> 65ul
+
+inline_for_extraction noextract
+let nsize_two_public_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_public cs + S.size_dh_public cs}) =
+  match S.kem_dh_of_cs cs with
+  | SDH.DH_Curve25519 -> 64ul
+  | SDH.DH_P256 -> 130ul
+
+noeq
+type context_s (cs:S.ciphersuite) =
+  { ctx_key : key_aead cs;
+    ctx_nonce : nonce_aead cs;
+    ctx_seq : seq_aead cs;
+    ctx_exporter : exporter_secret cs
+  }
+
+let ctx_loc #cs ctx =
+  loc ctx.ctx_key |+| loc ctx.ctx_nonce |+| loc ctx.ctx_exporter
+
+let ctx_invariant #cs h ctx =
+  live h ctx.ctx_key /\ live h ctx.ctx_nonce /\ live h ctx.ctx_exporter /\
+  disjoint ctx.ctx_key ctx.ctx_nonce /\ disjoint ctx.ctx_key ctx.ctx_exporter /\
+  disjoint ctx.ctx_nonce ctx.ctx_exporter
+
+let as_ctx #cs h ctx =
+  (as_seq h ctx.ctx_key, as_seq h ctx.ctx_nonce, UInt64.v ctx.ctx_seq, as_seq h ctx.ctx_exporter)
+
+let frame_ctx #cs ctx l h0 h1 = ()
+
+inline_for_extraction noextract
+let combine_error_codes (r1 r2:UInt32.t) : Pure UInt32.t
+  (requires UInt32.v r1 <= 1 /\ UInt32.v r2 <= 1)
+  (ensures fun r -> UInt32.v r <= 1 /\ (r == 0ul <==> (r1 == 0ul /\ r2 == 0ul)))
+  = assert_norm (UInt32.logor 0ul 0ul == 0ul);
+    assert_norm (UInt32.logor 1ul 0ul == 1ul);
+    assert_norm (UInt32.logor 0ul 1ul == 1ul);
+    assert_norm (UInt32.logor 1ul 1ul == 1ul);
+    UInt32.logor r1 r2
+
+inline_for_extraction noextract
+val point_compress:
+     #cs:S.ciphersuite
+  -> pk: key_dh_public cs
+  -> Stack (lbuffer uint8 (DH.nsize_public (S.kem_dh_of_cs cs)))
+    (requires fun h -> live h pk)
+    (ensures fun h0 b h1 -> live h1 b /\ h0 == h1 /\
+      (match S.kem_dh_of_cs cs with
+      | SDH.DH_Curve25519 -> b == pk
+      | SDH.DH_P256 -> b == gsub pk 1ul 64ul))
+
+let point_compress #cs pk =
+  match cs with
+  | SDH.DH_Curve25519, _, _, _ -> pk
+  | SDH.DH_P256, _, _, _ -> sub pk 1ul 64ul
+
+inline_for_extraction noextract
+val serialize_public_key:
+     #cs:S.ciphersuite
+  -> pk: key_dh_public cs
+  -> b: (lbuffer uint8 (DH.nsize_public (S.kem_dh_of_cs cs)))
+  -> Stack unit
+    (requires fun h -> live h pk /\ live h b /\
+      (match S.kem_dh_of_cs cs with
+      | SDH.DH_Curve25519 -> b == pk
+      | SDH.DH_P256 -> b == gsub pk 1ul 64ul))
+    (ensures fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
+      as_seq h1 pk `Seq.equal` S.serialize_public_key cs (as_seq h0 b))
+
+let serialize_public_key #cs pk b =
+  match cs with
+  | SDH.DH_Curve25519, _, _, _ -> ()
+  | SDH.DH_P256, _, _, _ -> upd pk 0ul (u8 4)
+
+inline_for_extraction noextract
+val prepare_dh:
+     #cs:S.ciphersuite
+  -> pk: serialized_point_dh cs
+  -> Stack (lbuffer uint8 32ul)
+    (requires fun h -> live h pk)
+    (ensures fun h0 b h1 -> live h1 b /\ h0 == h1 /\
+      (match S.kem_dh_of_cs cs with
+      | SDH.DH_Curve25519 -> b == pk
+      | SDH.DH_P256 -> b == gsub pk 0ul 32ul))
+
+let prepare_dh #cs pk =
+  match cs with
+  | SDH.DH_Curve25519, _, _, _ -> pk
+  | SDH.DH_P256, _, _, _ -> sub pk 0ul 32ul
+
+assume
+val extract_and_expand:
+     #cs: S.ciphersuite
+  -> o_shared: key_kem cs
+  -> dh: lbuffer uint8 32ul
+  -> ctxlen : size_t
+  -> kemcontext: lbuffer uint8 ctxlen
+  -> Stack unit
+     (requires fun h ->
+       live h o_shared /\ live h dh /\ live h kemcontext
+     )
+     (ensures fun h0 _ h1 -> modifies (loc o_shared) h0 h1 /\
+       as_seq h1 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h0 dh) (as_seq h0 kemcontext))
+
+
+
+val encap:
+     #cs:S.ciphersuite
+  -> o_shared: key_kem cs
+  -> o_enc: key_dh_public cs
+  -> skE: key_dh_secret cs
+  -> pkR: serialized_point_dh cs
+  -> Stack UInt32.t
+    (requires fun h0 ->
+      live h0 o_shared /\ live h0 o_enc /\
+      live h0 skE /\ live h0 pkR /\
+      disjoint o_shared skE /\ disjoint o_shared pkR /\
+      disjoint o_shared o_enc /\ disjoint o_enc skE /\ disjoint o_enc pkR)
+    (ensures fun h0 result h1 -> modifies (loc o_shared |+| loc o_enc) h0 h1 /\
+      (let output = S.encap cs (as_seq h0 skE) (as_seq h0 pkR) in
+       match result with
+       | 0ul -> Some? output /\ (let shared, enc = Some?.v output in
+         as_seq h1 o_shared `Seq.equal` shared /\ as_seq h1 o_enc `Seq.equal` enc)
+       | 1ul -> None? output
+       | _ -> False)
+     )
+
+#push-options "--z3rlimit 200"
+
+[@ Meta.Attribute.inline_]
+let encap #cs o_shared o_enc skE pkR =
+  let h0 = ST.get () in
+  let o_pkE = point_compress o_enc in
+  let res1 = DH.secret_to_public #cs o_pkE skE in
+  if res1 = 0ul then (
+    push_frame ();
+    let h1 = ST.get () in
+    assert (Some?.v (SDH.secret_to_public (S.kem_dh_of_cs cs) (as_seq h0 skE)) == as_seq h1 o_pkE);
+    serialize_public_key o_enc o_pkE;
+    let h2 = ST.get () in
+    assert (as_seq h2 o_enc == S.serialize_public_key cs (as_seq h1 o_pkE));
+    let o_dh = create (nsize_serialized_dh cs) (u8 0) in
+    let res2 = DH.dh #cs o_dh skE pkR in
+    if res2 = 0ul then (
+      let h3 = ST.get () in
+      assert (as_seq h3 o_dh == Some?.v (SDH.dh (S.kem_dh_of_cs cs) (as_seq h0 skE) (as_seq h0 pkR)));
+      let o_kemcontext = create (nsize_two_public_dh cs) (u8 0) in
+      copy (sub o_kemcontext 0ul (nsize_public_dh cs)) o_enc;
+      let o_pkRm = sub o_kemcontext (nsize_public_dh cs) (nsize_public_dh cs) in
+      let o_pkR = point_compress #cs o_pkRm in
+      copy o_pkR pkR;
+      serialize_public_key o_pkRm o_pkR;
+      let h4 = ST.get () in
+      assert (as_seq h4 o_pkRm == S.serialize_public_key cs (as_seq h0 pkR));
+
+
+      let o_dhm = prepare_dh #cs o_dh in
+      let h5 = ST.get () in
+      assert (as_seq h5 o_kemcontext `Seq.equal` (as_seq h2 o_enc `Seq.append` as_seq h4 o_pkRm));
+      extract_and_expand o_shared o_dhm (nsize_two_public_dh cs) o_kemcontext;
+      let h6 = ST.get () in
+      assert (as_seq h6 o_enc `Seq.equal` as_seq h2 o_enc);
+      assert (as_seq h6 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h5 o_dhm) (as_seq h5 o_kemcontext));
+      pop_frame();
+      0ul
+    ) else (
+      pop_frame ();
+      1ul
+    )
+
+  ) else (
+    assert (None? (S.encap cs (as_seq h0 skE) (as_seq h0 pkR)));
+    1ul
+  )
+
+#pop-options
+
+assume
+val key_schedule_base:
+     #cs:S.ciphersuite
+  -> o_ctx: context_s cs
+  -> shared: key_kem cs
+  -> infolen: size_t{v infolen <= S.max_length_info (S.kem_hash_of_cs cs)}
+  -> info: lbuffer uint8 infolen
+  -> Stack unit
+       (requires fun h0 ->
+         ctx_invariant h0 o_ctx /\ live h0 shared /\ live h0 info /\
+         B.loc_disjoint (ctx_loc o_ctx) (loc shared) /\
+         B.loc_disjoint (ctx_loc o_ctx) (loc info)
+       )
+       (ensures fun h0 _ h1 -> modifies (ctx_loc o_ctx) h0 h1 /\
+         (let ctx = S.key_schedule cs S.Base (as_seq h0 shared) (as_seq h0 info) None in
+         as_ctx h1 o_ctx == ctx))
+
+#push-options "--z3rlimit 100 --ifuel 0"
+
+[@ Meta.Attribute.specialize]
+let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
+  push_frame();
+  let o_shared = create (nsize_kem_key cs) (u8 0) in
+  let res = encap o_shared o_pkE skE pkR in
+  key_schedule_base o_ctx o_shared infolen info;
+  pop_frame();
+  res
+
+#pop-options
+
+
+(*
 inline_for_extraction noextract
 let psk (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_psk cs))
 
@@ -542,3 +775,4 @@ let openBase #cs pkE skR mlen m infolen info output =
   pop_frame();
   z
 #pop-options
+*)
