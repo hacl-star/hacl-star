@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_K256_ECDSA.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 static inline uint64_t
