@@ -334,18 +334,34 @@ val key_schedule:
     (ensures fun _ -> True)
 
 #set-options "--z3rlimit 500 --fuel 0 --ifuel 2"
-let key_schedule cs m shared_secret info opsk =
+let key_schedule_core
+  (cs:ciphersuite)
+  (m:mode)
+  (shared_secret:key_kem_s cs)
+  (info:info_s cs)
+  (opsk:option (psk_s cs & psk_id_s cs))
+  : (lbytes (size_ks_ctx cs) & exporter_secret_s cs & (lbytes (Spec.Hash.Definitions.hash_length (hash_of_cs cs)))) =
   let (psk, psk_id) =
     match opsk with
     | None -> (default_psk, default_psk_id)
-    | Some (psk, psk_id) -> (psk, psk_id) in
+    | Some (psk, psk_id) -> (psk, psk_id)
+  in
   let psk_id_hash = labeled_extract (hash_of_cs cs) (suite_id_hpke cs) lbytes_empty label_psk_id_hash psk_id in
   let info_hash = labeled_extract (hash_of_cs cs) (suite_id_hpke cs) lbytes_empty label_info_hash info in
   let context = build_context cs m psk_id_hash info_hash in
   let secret = labeled_extract (hash_of_cs cs) (suite_id_hpke cs) shared_secret label_secret psk in
 
   let exporter_secret = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_exp context (size_kdf cs) in
+  context, exporter_secret, secret
 
+let key_schedule_end
+  (cs:ciphersuite)
+  (m:mode)
+  (context:lbytes (size_ks_ctx cs))
+  (exporter_secret:exporter_secret_s cs)
+  (secret:(lbytes (Spec.Hash.Definitions.hash_length (hash_of_cs cs))))
+  :  encryption_context cs
+  =
   if is_valid_not_export_only_ciphersuite cs then (
     let key = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_key context (size_aead_key cs) in
     let base_nonce = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_base_nonce context (size_aead_nonce cs) in
@@ -356,6 +372,10 @@ let key_schedule cs m shared_secret info opsk =
     assert (size_aead_key cs = 0);
     assert (size_aead_nonce cs = 0);
     (lbytes_empty, lbytes_empty, 0, exporter_secret))
+
+let key_schedule cs m shared_secret info opsk =
+  let context, exporter_secret, secret = key_schedule_core cs m shared_secret info opsk in
+  key_schedule_end cs m context exporter_secret secret
 
 let key_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
   let key, _, _, _ = ctx in key
