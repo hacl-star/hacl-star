@@ -40,7 +40,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "4bf498af637d8335861a82174a42cf61"
+      "3f6e969834ec428de15a6626b280cd18"
     ],
     [
       "Hacl.Bignum.Exponentiation.bn_mod_exp_precomp_st",
@@ -88,7 +88,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5aa0bb24cd2523460d8ed0ebec526d12"
+      "f42a0dd6748bf81f295ecb954088ab82"
     ],
     [
       "Hacl.Bignum.Exponentiation.bn_mod_exp_fw_vartime_precomp",
@@ -97,7 +97,7 @@
       0,
       [ "@query" ],
       0,
-      "ff4812e20fd9ff486f8e4f31a2c79677"
+      "aa80484969aa97647560229228110293"
     ],
     [
       "Hacl.Bignum.Exponentiation.bn_mod_exp_fw_consttime_precomp",
@@ -106,7 +106,7 @@
       0,
       [ "@query" ],
       0,
-      "d20419f82a5879eb92a53da86a626778"
+      "2bbc4fcd0cbeb5c5d2f7e686cd71f0b9"
     ],
     [
       "Hacl.Bignum.Exponentiation.bn_mod_exp_amm_fw_vartime_precomp",
@@ -115,7 +115,7 @@
       0,
       [ "@query" ],
       0,
-      "c12e24e80b4ce311b7553a7653dc4be7"
+      "b48bd1a221c3c87b691387319b4181e1"
     ],
     [
       "Hacl.Bignum.Exponentiation.bn_mod_exp_amm_fw_consttime_precomp",
@@ -124,7 +124,7 @@
       0,
       [ "@query" ],
       0,
-      "d2ba8ef54caa5fb07486792c4e54a2e6"
+      "e189f38c92800936afdab6fbe338b35d"
     ],
     [
       "Hacl.Bignum.Exponentiation.bn_mod_exp_precompr2_st",
@@ -172,7 +172,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a1b5c62e266365c311712096a4361f24"
+      "d7f679fb3a0e63a32366554d218aff12"
     ],
     [
       "Hacl.Bignum.Exponentiation.bn_mod_exp_st",
@@ -214,118 +214,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "afd16bec3e334679d303eaf569802ebb"
-    ],
-    [
-      "Hacl.Bignum.Exponentiation.__proj__Mkexp__item__mod_check",
-      1,
-      0,
-      0,
-      [
-        "@query", "constructor_distinct_Lib.Buffer.MUT",
-        "equality_tok_Lib.Buffer.MUT@tok",
-        "equation_Hacl.Bignum.Definitions.limb",
-        "equation_Lib.Buffer.as_seq",
-        "proj_equation_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "proj_equation_Hacl.Bignum.Mkbn_len",
-        "projection_inverse_Hacl.Bignum.Exponentiation.Mkexp_bn"
-      ],
-      0,
-      "012d663b526b22eee2ac1153db8ab6dd"
-    ],
-    [
-      "Hacl.Bignum.Exponentiation.__proj__Mkexp__item__exp_check",
-      1,
-      0,
-      0,
-      [
-        "@query", "equality_tok_Lib.Buffer.MUT@tok",
-        "equation_Hacl.Bignum.Definitions.limb",
-        "equation_Lib.Buffer.as_seq",
-        "proj_equation_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "proj_equation_Hacl.Bignum.Mkbn_len",
-        "projection_inverse_Hacl.Bignum.Exponentiation.Mkexp_bn"
-      ],
-      0,
-      "0f1c425bfecc0478c2256a8197e527af"
-    ],
-    [
-      "Hacl.Bignum.Exponentiation.__proj__Mkexp__item__precompr2",
-      1,
-      0,
-      0,
-      [
-        "@query", "equality_tok_Lib.Buffer.MUT@tok",
-        "equation_Hacl.Bignum.Definitions.limb",
-        "equation_Lib.Buffer.as_seq",
-        "proj_equation_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "proj_equation_Hacl.Bignum.Mkbn_len",
-        "projection_inverse_Hacl.Bignum.Exponentiation.Mkexp_bn"
-      ],
-      0,
-      "61544a6df6079fc3e3194020fcf8399e"
-    ],
-    [
-      "Hacl.Bignum.Exponentiation.__proj__Mkexp__item__exp_vt_precomp",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "proj_equation_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "projection_inverse_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "refinement_interpretation_Tm_refine_4ff7148fd14b3ca81aa97034d7549e1f",
-        "refinement_interpretation_Tm_refine_e3ec93d40bd033005ac853a442d4964e"
-      ],
-      0,
-      "edfdf4c3ecf8d54c40671b9358257199"
-    ],
-    [
-      "Hacl.Bignum.Exponentiation.__proj__Mkexp__item__exp_ct_precomp",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "proj_equation_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "projection_inverse_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "refinement_interpretation_Tm_refine_4ff7148fd14b3ca81aa97034d7549e1f",
-        "refinement_interpretation_Tm_refine_e3ec93d40bd033005ac853a442d4964e"
-      ],
-      0,
-      "9cc9512ba0c216c7b064e095830e0dde"
-    ],
-    [
-      "Hacl.Bignum.Exponentiation.__proj__Mkexp__item__exp_vt",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Bignum.Definitions.bn_v",
-        "proj_equation_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "projection_inverse_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "refinement_interpretation_Tm_refine_ae589263a2db3a2eb17d17db2c3a43fc",
-        "refinement_interpretation_Tm_refine_fb8ffdf1963d24d4bbfb9a3ff2a23432"
-      ],
-      0,
-      "f6b57245cea56c30699eddce37207c9d"
-    ],
-    [
-      "Hacl.Bignum.Exponentiation.__proj__Mkexp__item__exp_ct",
-      1,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query",
-        "equation_Hacl.Bignum.Definitions.bn_v",
-        "proj_equation_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "projection_inverse_Hacl.Bignum.Exponentiation.Mkexp_bn",
-        "refinement_interpretation_Tm_refine_ae589263a2db3a2eb17d17db2c3a43fc",
-        "refinement_interpretation_Tm_refine_fb8ffdf1963d24d4bbfb9a3ff2a23432"
-      ],
-      0,
-      "d69e3ef8937b5f8b433a983bbf23082d"
+      "e3da851b82836a82f4b7dcee42ea3a40"
     ]
   ]
 ]

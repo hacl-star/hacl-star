@@ -145,6 +145,7 @@ let aff_point_add_lemma p q = admit()
 
 let aff_point_add_assoc_lemma p q s = admit()
 
+#restart-solver
 let aff_point_at_infinity_lemma p =
   let x1, y1 = p in
   let x2, y2 = aff_point_at_infinity in
@@ -1190,6 +1191,7 @@ let recover_x_lemma_aux y =
 
 val recover_x_lemma: y:nat -> sign:bool -> Lemma (let x = recover_x y sign in
   Some? x ==> (y < prime /\ is_on_curve (Some?.v x, y)))
+#push-options "--z3rlimit 100"
 let recover_x_lemma y sign =
   if y >= prime then ()
   else begin
@@ -1226,6 +1228,7 @@ let recover_x_lemma y sign =
       end
     end
   end
+#pop-options
 
 module BSeq = Lib.ByteSequence
 

@@ -8,7 +8,6 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
-module BSeq = Lib.ByteSequence
 
 module S = Spec.K256
 module KL = Spec.K256.Lemmas
@@ -19,7 +18,6 @@ open Hacl.Impl.K256.PointMul
 
 module QA = Hacl.K256.Scalar
 module QI = Hacl.Impl.K256.Qinv
-module BI = Hacl.Spec.K256.Field52
 module BL = Hacl.Spec.K256.Field52.Lemmas
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -43,11 +41,9 @@ let load_public_key pk fpk_x fpk_y =
   let is_x_valid = load_felem_vartime fpk_x pk_x in
   let is_y_valid = load_felem_vartime fpk_y pk_y in
 
-  let is_xy_on_curve =
-    if is_x_valid && is_y_valid then
-      is_on_curve_vartime fpk_x fpk_y
-    else false in
-  is_xy_on_curve
+  if is_x_valid && is_y_valid then
+    is_on_curve_vartime fpk_x fpk_y
+  else false
 
 
 inline_for_extraction noextract

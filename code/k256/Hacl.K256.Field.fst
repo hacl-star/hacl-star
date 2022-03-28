@@ -159,8 +159,16 @@ let set_one f =
   set_zero f;
   f.(0ul) <- u64 1
 
-// not used
-let copy_felem f1 f2 = copy f1 f2
+
+let copy_felem f1 f2 =
+  let h0 = ST.get () in
+  f1.(0ul) <- f2.(0ul);
+  f1.(1ul) <- f2.(1ul);
+  f1.(2ul) <- f2.(2ul);
+  f1.(3ul) <- f2.(3ul);
+  f1.(4ul) <- f2.(4ul);
+  let h1 = ST.get () in
+  LSeq.eq_intro (as_seq h0 f2) (as_seq h1 f1)
 
 
 [@CInline]

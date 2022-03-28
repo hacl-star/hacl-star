@@ -8,11 +8,11 @@ module S = Spec.K256
 include Hacl.Spec.K256.Field52.Definitions
 include Hacl.Spec.K256.Field52
 
+module ML = Hacl.Spec.K256.MathLemmas
 module LD = Hacl.Spec.K256.Field52.Definitions.Lemmas
 module L1 = Hacl.Spec.K256.Field52.Lemmas1
 module L2 = Hacl.Spec.K256.Field52.Lemmas2
 module L3 = Hacl.Spec.K256.Field52.Lemmas3
-module L4 = Hacl.Spec.K256.Field52.Lemmas4
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
 
@@ -80,7 +80,6 @@ let is_felem_eq_vartime5_lemma f1 f2 =
 
 let normalize_weak5_lemma m f =
   let r = normalize_weak5 f in
-  let (r0,r1,r2,r3,r4) = r in
   let (t0,t1,t2,t3,t4) = f in
   L2.normalize_weak5_lemma m f;
   assert (as_nat5 r == as_nat5 f - v t4 / pow2 48 * S.prime);
@@ -98,8 +97,7 @@ let fmul5_lemma1 a b =
   let r = fmul5 a b in
   L3.fmul5_lemma a b;
   assert (as_nat5 r % S.prime == as_nat5 a * as_nat5 b % S.prime);
-  Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 a) (as_nat5 b) S.prime;
-  Math.Lemmas.lemma_mod_mul_distr_r (feval5 a) (as_nat5 b) S.prime
+  ML.lemma_mod_mul_distr (as_nat5 a) (as_nat5 b) S.prime
 
 
 let fsqr5_lemma a =
@@ -109,8 +107,7 @@ let fsqr5_lemma1 a =
   let r = fsqr5 a in
   L3.fsqr5_lemma a;
   assert (as_nat5 r % S.prime == as_nat5 a * as_nat5 a % S.prime);
-  Math.Lemmas.lemma_mod_mul_distr_l (as_nat5 a) (as_nat5 a) S.prime;
-  Math.Lemmas.lemma_mod_mul_distr_r (feval5 a) (as_nat5 a) S.prime
+  ML.lemma_mod_mul_distr (as_nat5 a) (as_nat5 a) S.prime
 
 
 val lemma_mul_sub (mc:nat) (a b c:uint64) : Lemma
@@ -124,28 +121,18 @@ val lemma_mul_sub (mc:nat) (a b c:uint64) : Lemma
 let lemma_mul_sub mc a b c =
   let r = a *. u64 2 *. b -. c in
   assert (v c <= mc * max52);
-  Math.Lemmas.lemma_mult_le_left mc max52 (v a * 2);
-  Math.Lemmas.lemma_mult_le_right (v a * 2) mc (v b);
-  assert (mc * max52 <= v b * (v a * 2));
+  ML.lemma_ab_le_cd mc max52 (v b) (v a * 2);
   assert (v c <= v a * 2 * v b);
 
+  assert (v a * 2 * v b - v c <= v a * 2 * v b);
   Math.Lemmas.paren_mul_right (v a) 2 (v b);
-  Math.Lemmas.lemma_mult_le_right (2 * v b) (v a) max52;
-  assert (v a * 2 * v b - v c <= max52 * (2 * v b));
-  Math.Lemmas.lemma_mult_le_left max52 (2 * v b) 4096;
+  ML.lemma_ab_le_cd (v a) (2 * v b) max52 4096;
   assert_norm (4096 * max52 < pow2 64);
   Math.Lemmas.small_mod (v a * 2 * v b - v c) (pow2 64);
   assert (v r = v a * 2 * v b - v c);
+
+  ML.lemma_ab_le_cd (v a) (2 * v b) max52 (2 * v b);
   assert (felem_fits1 r (2 * v b))
-
-
-val lemma_ab_lt_cd (a b c d:nat) : Lemma
-  (requires a <= c /\ b <= d)
-  (ensures a * b <= c * d)
-
-let lemma_ab_lt_cd a b c d =
-  Math.Lemmas.lemma_mult_le_left a b d;
-  Math.Lemmas.lemma_mult_le_right d a c
 
 
 val lemma_mul_sub_last (mc:nat) (a b c:uint64) : Lemma
@@ -158,19 +145,18 @@ val lemma_mul_sub_last (mc:nat) (a b c:uint64) : Lemma
 
 let lemma_mul_sub_last mc a b c =
   let r = a *. u64 2 *. b -. c in
-
   assert (v c <= mc * max48);
-  lemma_ab_lt_cd mc max48 (v b) (v a * 2);
+  ML.lemma_ab_le_cd mc max48 (v b) (v a * 2);
   assert (v c <= v b * (v a * 2));
 
   assert (v a * 2 * v b - v c <= v a * 2 * v b);
   Math.Lemmas.paren_mul_right (v a) 2 (v b);
-  lemma_ab_lt_cd (v a) (2 * v b) max48 65536;
+  ML.lemma_ab_le_cd (v a) (2 * v b) max48 65536;
   assert_norm (65536 * max48 < pow2 64);
   Math.Lemmas.small_mod (v a * 2 * v b - v c) (pow2 64);
   assert (v r = v a * 2 * v b - v c);
 
-  lemma_ab_lt_cd (v a) (2 * v b) max48 (2 * v b);
+  ML.lemma_ab_le_cd (v a) (2 * v b) max48 (2 * v b);
   assert (felem_fits_last1 r (2 * v b))
 
 
@@ -217,32 +203,10 @@ let fnegate5_lemma m a x =
   (==) {
     Math.Lemmas.paren_mul_right 0xffffefffffc2f 2 (v x);
     Math.Lemmas.paren_mul_right 0xfffffffffffff 2 (v x);
-    Math.Lemmas.distributivity_sub_left (2 * v x * 0xfffffffffffff) (v a1) pow52 }
-    2 * v x * 0xffffefffffc2f - v a0 +
-    2 * v x * 0xfffffffffffff * pow52 - v a1 * pow52 +
-    (0xfffffffffffff * 2 * v x - v a2) * pow104 +
-    (0xfffffffffffff * 2 * v x - v a3) * pow156 +
-    (0xffffffffffff * 2 * v x - v a4) * pow208;
-  (==) {
-    Math.Lemmas.paren_mul_right 0xfffffffffffff 2 (v x);
-    Math.Lemmas.distributivity_sub_left (2 * v x * 0xfffffffffffff) (v a2) pow104;
-    Math.Lemmas.distributivity_sub_left (2 * v x * 0xfffffffffffff) (v a3) pow156 }
-    2 * v x * 0xffffefffffc2f - v a0 +
-    2 * v x * 0xfffffffffffff * pow52 - v a1 * pow52 +
-    2 * v x * 0xfffffffffffff * pow104 - v a2 * pow104 +
-    2 * v x * 0xfffffffffffff * pow156 - v a3 * pow156 +
-    (0xffffffffffff * 2 * v x - v a4) * pow208;
-  (==) {
     Math.Lemmas.paren_mul_right 0xffffffffffff 2 (v x);
-    Math.Lemmas.distributivity_sub_left (2 * v x * 0xffffffffffff) (v a4) pow208 }
-    2 * v x * 0xffffefffffc2f - v a0 +
-    2 * v x * 0xfffffffffffff * pow52 - v a1 * pow52 +
-    2 * v x * 0xfffffffffffff * pow104 - v a2 * pow104 +
-    2 * v x * 0xfffffffffffff * pow156 - v a3 * pow156 +
-    2 * v x * 0xffffffffffff * pow208 - v a4 * pow208;
-  (==) { L4.lemma_distr5_pow52 (2 * v x) 0xffffefffffc2f 0xfffffffffffff 0xfffffffffffff 0xfffffffffffff 0xffffffffffff }
-    - as_nat5 a +
-    2 * v x * (0xffffefffffc2f + 0xfffffffffffff * pow52 +
+    ML.lemma_distr5_pow52_sub (v a0) (v a1) (v a2) (v a3) (v a4)
+      0xffffefffffc2f 0xfffffffffffff 0xfffffffffffff 0xfffffffffffff 0xffffffffffff (2 * v x) }
+    - as_nat5 a + 2 * v x * (0xffffefffffc2f + 0xfffffffffffff * pow52 +
     0xfffffffffffff * pow104 + 0xfffffffffffff * pow156 +  0xffffffffffff * pow208);
   (==) { assert_norm (0xffffefffffc2f + 0xfffffffffffff * pow52 +
     0xfffffffffffff * pow104 + 0xfffffffffffff * pow156 +  0xffffffffffff * pow208 = S.prime) }
@@ -267,5 +231,4 @@ let fsub5_lemma ma mb a b x =
   assert (as_nat5 r % S.prime = (as_nat5 a - as_nat5 b + 2 * xn * S.prime) % S.prime);
   Math.Lemmas.lemma_mod_plus (as_nat5 a - as_nat5 b) (2 * xn) S.prime;
   assert (as_nat5 r % S.prime = (as_nat5 a - as_nat5 b) % S.prime);
-  Math.Lemmas.lemma_mod_plus_distr_l (as_nat5 a) (- as_nat5 b) S.prime;
-  Math.Lemmas.lemma_mod_sub_distr (feval5 a) (as_nat5 b) S.prime
+  ML.lemma_mod_sub_distr (as_nat5 a) (as_nat5 b) S.prime

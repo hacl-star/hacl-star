@@ -169,15 +169,11 @@ let pk_uncompressed_from_raw (pk:lbytes 64) : lbytes 65 =
   concat (create 1 (u8 0x04)) pk
 
 let pk_compressed_to_raw (pk:lbytes 33) : option (lbytes 64) =
-  let pk0 = Lib.RawIntTypes.u8_to_UInt8 pk.[0] in
-  if not (pk0 = 0x02uy || pk0 = 0x03uy) then None
-  else begin
-    let pk_xb = sub pk 1 32 in
-    let is_pk_y_odd = pk0 = 0x03uy in
-    let pk_yb = recover_y_bytes pk_xb is_pk_y_odd in
-    match pk_yb with
-    | Some pk_yb -> Some (concat #_ #32 #32 pk_xb pk_yb)
-    | None -> None end
+  let pk_x = sub pk 1 32 in
+  match (aff_point_decompress pk) with
+  | Some (x, y) -> Some (concat #_ #32 #32 pk_x (nat_to_bytes_be 32 y))
+  | None -> None
+
 
 let pk_compressed_from_raw (pk:lbytes 64) : lbytes 33 =
   let pk_x = sub pk 0 32 in
@@ -210,8 +206,7 @@ let secp256k1_ecdsa_signature_normalize (signature:lbytes 64) : option (lbytes 6
 
 let secp256k1_ecdsa_is_signature_normalized (signature:lbytes 64) : bool =
   let sn = nat_from_bytes_be (sub signature 32 32) in
-  let is_sn_valid = 0 < sn && sn < q in
-  is_sn_valid && sn <= q / 2
+  0 < sn && sn <= q / 2
 
 
 let secp256k1_ecdsa_sign_hashed_msg (msgHash private_key nonce:lbytes 32) : option (lbytes 64) =

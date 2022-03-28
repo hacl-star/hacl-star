@@ -1,4 +1,4 @@
-HACL_HOME=../..
+HACL_HOME=$(realpath ../..)
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
@@ -8,11 +8,11 @@ test: all
 	dist/sha2-mb-test.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../../Makefile.local
+include $(HACL_HOME)/Makefile.local
 
 #BASE_FLAGS+= -funroll-loops 4
 
-CFLAGS += -I../../../lib/c -I../../lib/c -I ../hash/dist -march=native -mtune=native -O3
+CFLAGS += -I$(HACL_HOME)/lib/c -I ../hash/dist -march=native -mtune=native -O3
 export CFLAGS
 
 SHA2MB_BUNDLE=-bundle Hacl.Impl.SHA2.Generic=Hacl.Impl.SHA2.*,Hacl.Hash.*[rename=Hacl_SHA2_Generic] -static-header Hacl.Impl.SHA2.Generic

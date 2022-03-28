@@ -14,7 +14,6 @@ module LSeq = Lib.Sequence
 
 module S = Spec.K256
 module SI = Hacl.Spec.K256.Finv
-module BL = Hacl.Spec.K256.Field52.Lemmas
 
 module BE = Hacl.Impl.Exponentiation
 

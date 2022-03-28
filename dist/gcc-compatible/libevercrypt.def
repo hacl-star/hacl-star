@@ -417,20 +417,46 @@ EXPORTS
   Hacl_P256_raw_to_compressed
   Hacl_P256_dh_initiator
   Hacl_P256_dh_responder
+  Hacl_K256_Field_is_felem_zero_vartime
+  Hacl_K256_Field_is_felem_eq_vartime
+  Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime
+  Hacl_K256_Field_load_felem
+  Hacl_K256_Field_load_felem_vartime
+  Hacl_K256_Field_store_felem
+  Hacl_K256_Field_fmul_small_num
+  Hacl_K256_Field_fadd
+  Hacl_K256_Field_fsub
+  Hacl_K256_Field_fmul
+  Hacl_K256_Field_fsqr
+  Hacl_K256_Field_fnormalize_weak
+  Hacl_K256_Field_fnormalize
+  Hacl_K256_Field_fnegate_conditional_vartime
+  Hacl_Impl_K256_Finv_fsquare_times_in_place
+  Hacl_Impl_K256_Finv_fsquare_times
+  Hacl_Impl_K256_Finv_fexp_223_23
+  Hacl_Impl_K256_Finv_finv
+  Hacl_Impl_K256_Finv_fsqrt
+  Hacl_Impl_K256_Point_aff_point_decompress_vartime
+  Hacl_Impl_K256_Point_aff_point_compress_vartime
+  Hacl_Impl_K256_Point_point_negate
+  Hacl_Impl_K256_Point_point_eq
+  Hacl_Impl_K256_PointDouble_point_double
+  Hacl_Impl_K256_PointAdd_point_add
+  Hacl_Impl_K256_PointMul_point_mul
   Hacl_K256_ECDSA_ecdsa_sign_hashed_msg
-  Hacl_K256_ECDSA_ecdsa_verify_hashed_msg
   Hacl_K256_ECDSA_ecdsa_sign_sha256
+  Hacl_K256_ECDSA_ecdsa_verify_hashed_msg
   Hacl_K256_ECDSA_ecdsa_verify_sha256
-  Hacl_K256_ECDSA_public_key_uncompressed_to_raw
-  Hacl_K256_ECDSA_public_key_uncompressed_from_raw
-  Hacl_K256_ECDSA_public_key_compressed_to_raw
-  Hacl_K256_ECDSA_public_key_compressed_from_raw
   Hacl_K256_ECDSA_secp256k1_ecdsa_signature_normalize
   Hacl_K256_ECDSA_secp256k1_ecdsa_is_signature_normalized
   Hacl_K256_ECDSA_secp256k1_ecdsa_sign_hashed_msg
   Hacl_K256_ECDSA_secp256k1_ecdsa_sign_sha256
   Hacl_K256_ECDSA_secp256k1_ecdsa_verify_hashed_msg
   Hacl_K256_ECDSA_secp256k1_ecdsa_verify_sha256
+  Hacl_K256_ECDSA_public_key_uncompressed_to_raw
+  Hacl_K256_ECDSA_public_key_uncompressed_from_raw
+  Hacl_K256_ECDSA_public_key_compressed_to_raw
+  Hacl_K256_ECDSA_public_key_compressed_from_raw
   Hacl_Keccak_shake128_4x
   Hacl_Impl_Matrix_mod_pow2
   Hacl_Impl_Matrix_matrix_add
@@ -557,6 +583,24 @@ EXPORTS
   Hacl_SHA2_Vec256_sha256_8
   Hacl_SHA2_Vec256_sha384_4
   Hacl_SHA2_Vec256_sha512_4
+  Hacl_EC_K256_mk_felem_zero
+  Hacl_EC_K256_mk_felem_one
+  Hacl_EC_K256_felem_add
+  Hacl_EC_K256_felem_sub
+  Hacl_EC_K256_felem_mul
+  Hacl_EC_K256_felem_sqr
+  Hacl_EC_K256_felem_inv
+  Hacl_EC_K256_felem_load
+  Hacl_EC_K256_felem_store
+  Hacl_EC_K256_mk_point_at_inf
+  Hacl_EC_K256_mk_base_point
+  Hacl_EC_K256_point_negate
+  Hacl_EC_K256_point_add
+  Hacl_EC_K256_point_double
+  Hacl_EC_K256_point_mul
+  Hacl_EC_K256_point_eq
+  Hacl_EC_K256_point_compress
+  Hacl_EC_K256_point_decompress
   Hacl_Bignum4096_add
   Hacl_Bignum4096_sub
   Hacl_Bignum4096_add_mod

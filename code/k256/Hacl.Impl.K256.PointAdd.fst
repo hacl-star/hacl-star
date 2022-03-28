@@ -8,18 +8,14 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
-module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
 
 module S = Spec.K256
-module BI = Hacl.Spec.K256.Field52
 module BL = Hacl.Spec.K256.Field52.Lemmas
 
 open Hacl.K256.Field
 open Hacl.Impl.K256.Point
 
 #set-options "--z3rlimit 100 --fuel 0 --ifuel 0"
-
 
 inline_for_extraction noextract
 val point_add_xy_pairs (x1 y1 x2 y2 xx yy tmp xy_pairs:felem) : Stack unit
@@ -238,7 +234,6 @@ val point_add (out p q:point) : Stack unit
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ point_inv h1 out /\
     point_eval h1 out == S.point_add (point_eval h0 p) (point_eval h0 q))
 
-[@CInline]
 let point_add out p q =
   push_frame ();
   let tmp = create (9ul *! nlimb) (u64 0) in
