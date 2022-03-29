@@ -20,7 +20,7 @@
         "typing_FStar.UInt32.v"
       ],
       0,
-      "8517a53ef73df31b01e70667f533d617"
+      "c04c45db9dee843baa7cdc7d42e37fe0"
     ],
     [
       "Test.NoHeap.test_one_hash",
@@ -205,7 +205,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "ff0745f7857b874f39d1f121bd463fb2"
+      "b7491cc6f36dcb2d176edc24170d5e2a"
     ],
     [
       "Test.NoHeap.keysized",
@@ -265,7 +265,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c32a260dce86f26d37d76476edc15a00"
+      "03935accf7a5387a587c6d22dd5b0caa"
     ],
     [
       "Test.NoHeap.test_one_hmac",
@@ -425,7 +425,7 @@
         "typing_tok_Lib.IntTypes.U8@tok", "unit_inversion", "unit_typing"
       ],
       0,
-      "fb2e6550bc8e6fd4a4868b9ea6cc8268"
+      "03627bfc1d5cabeefc85e40e226c6936"
     ],
     [
       "Test.NoHeap.test_one_hmac_drbg",
@@ -482,6 +482,7 @@
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
         "equation_Prims.nat", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "equation_Spec.HMAC_DRBG.is_supported_alg",
         "equation_Spec.HMAC_DRBG.supported_alg",
         "equation_Spec.Poly1305.size_key",
         "function_token_typing_FStar.Integers.uint_8",
@@ -494,7 +495,6 @@
         "lemma_FStar.HyperStack.ST.lemma_same_refs_in_non_tip_regions_elim",
         "lemma_FStar.Map.lemma_ContainsDom",
         "lemma_FStar.Map.lemma_InDomRestrict",
-        "lemma_FStar.Map.lemma_InDomUpd2",
         "lemma_FStar.Map.lemma_SelRestrict", "lemma_FStar.Map.lemma_SelUpd2",
         "lemma_FStar.Map.lemma_UpdDomain",
         "lemma_FStar.Monotonic.HyperStack.lemma_mk_mem__projectors",
@@ -516,7 +516,8 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.unused_in_loc_unused_in",
         "lemma_LowStar.Monotonic.Buffer.unused_in_not_unused_in_disjoint_2",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
+        "primitive_Prims.op_Equality",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Negation", "proj_equation_Spec.GaloisField.GF_t",
@@ -564,6 +565,7 @@
         "typing_LowStar.Monotonic.Buffer.loc_none", "typing_Spec.AES.gf8",
         "typing_Spec.AES.irred",
         "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Spec.HMAC_DRBG.is_supported_alg",
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U8@tok", "unit_inversion", "unit_typing"
       ],
@@ -752,7 +754,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "da588f227776a16ba12cec19d2a78903"
+      "9683395159624b643bad0a7bc1afdd3e"
     ],
     [
       "Test.NoHeap.test_one_chacha20",
@@ -905,7 +907,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "8db968c7f8e6f7a3fe6079fac1fbf95e"
+      "0c159a3082c7f2e9d189d3c20003b226"
     ],
     [
       "Test.NoHeap.test_one_poly1305",
@@ -1032,7 +1034,7 @@
         "unit_inversion"
       ],
       0,
-      "41d52ee6dd39497d1eb0a0f9793e9571"
+      "c95d4d31c502e4df7444ed491e75a189"
     ],
     [
       "Test.NoHeap.test_poly1305",
@@ -1052,7 +1054,7 @@
         "typing_Test.Vectors.Poly1305.vectors"
       ],
       0,
-      "3471c19f32ba2bcbd508c7ddf0896d96"
+      "1dc965a9e0694294fd5385890ace1245"
     ],
     [
       "Test.NoHeap.test_one_curve25519",
@@ -1182,7 +1184,7 @@
         "typing_Spec.Poly1305.size_key", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "38d1019a60cd506fa8657e959719371d"
+      "8bf34f16714c7cb39ac5b86c8b72ede0"
     ],
     [
       "Test.NoHeap.test_curve25519",
@@ -1202,7 +1204,7 @@
         "typing_Test.Vectors.Curve25519.vectors"
       ],
       0,
-      "4e7a75c06c5da9899b296cf080ca645f"
+      "cce1b3c7c2944e7e7545ca8d97b962ec"
     ],
     [
       "Test.NoHeap.test_one_chacha20poly1305",
@@ -1363,7 +1365,7 @@
         "unit_inversion", "unit_typing"
       ],
       0,
-      "91adb91fc1a93de1db4304358457117b"
+      "766732f4b1760b36b2a68ca53d06665d"
     ],
     [
       "Test.NoHeap.test_chacha20poly1305",
@@ -1383,7 +1385,7 @@
         "typing_Test.Vectors.Chacha20Poly1305.vectors"
       ],
       0,
-      "6abefba1dba04a8a57b9f1cc7e3f7295"
+      "fade4f4dfa6ac1df08524cf64953dea6"
     ],
     [
       "Test.NoHeap.main",
@@ -1420,7 +1422,7 @@
         "typing_FStar.Int32.int_to_t", "typing_Prims.pow2"
       ],
       0,
-      "f0fb5d32355f3d1a40919f0735c268ac"
+      "2c458b6d41c268db5a3fc40ea0d3e28a"
     ]
   ]
 ]
