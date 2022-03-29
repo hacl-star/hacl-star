@@ -71,7 +71,8 @@ let setupBaseR_st (cs:S.ciphersuite) (p:Type0) =
      (requires fun h0 ->
         p /\
         ctx_invariant h0 o_ctx /\
-        live h0 pkE /\ live h0 skR /\ live h0 info)
+        live h0 pkE /\ live h0 skR /\ live h0 info
+      )
      (ensures fun h0 result h1 -> modifies (ctx_loc o_ctx) h0 h1 /\
        (let output = S.setupBaseR cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 info) in
        match result with

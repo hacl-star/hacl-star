@@ -33,6 +33,20 @@ inline_for_extraction noextract
 let key_kem (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_kem_key cs))
 
 inline_for_extraction noextract
+let nsize_aead_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_aead_key cs}) =
+  match S.aead_of_cs cs with
+  | S.ExportOnly -> 0ul
+  | S.Seal SAEAD.AES128_GCM -> 16ul
+  | S.Seal SAEAD.AES256_GCM -> 32ul
+  | S.Seal SAEAD.CHACHA20_POLY1305 -> 32ul
+
+inline_for_extraction noextract
+let nsize_aead_nonce (cs:S.ciphersuite) : (s:size_t{v s == S.size_aead_nonce cs}) =
+  match S.aead_of_cs cs with
+  | S.ExportOnly -> 0ul
+  | S.Seal _ -> 12ul
+
+inline_for_extraction noextract
 let nsize_kem_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_kem_key cs}) =
   match S.kem_hash_of_cs cs with
   | SHa.SHA2_256 -> 32ul
@@ -73,28 +87,33 @@ noeq
 type context_s (cs:S.ciphersuite) =
   { ctx_key : key_aead cs;
     ctx_nonce : nonce_aead cs;
-    ctx_seq : seq_aead cs;
+    ctx_seq : lbuffer (seq_aead cs) 1ul;
     ctx_exporter : exporter_secret cs
   }
 
 let ctx_loc #cs ctx =
-  loc ctx.ctx_key |+| loc ctx.ctx_nonce |+| loc ctx.ctx_exporter
+  loc ctx.ctx_key |+| loc ctx.ctx_nonce |+| loc ctx.ctx_seq |+| loc ctx.ctx_exporter
 
 let ctx_invariant #cs h ctx =
-  live h ctx.ctx_key /\ live h ctx.ctx_nonce /\ live h ctx.ctx_exporter /\
+  live h ctx.ctx_key /\ live h ctx.ctx_nonce /\ live h ctx.ctx_seq /\ live h ctx.ctx_exporter /\
   disjoint ctx.ctx_key ctx.ctx_nonce /\ disjoint ctx.ctx_key ctx.ctx_exporter /\
-  disjoint ctx.ctx_nonce ctx.ctx_exporter
+  disjoint ctx.ctx_key ctx.ctx_seq /\ disjoint ctx.ctx_nonce ctx.ctx_seq /\
+  disjoint ctx.ctx_nonce ctx.ctx_exporter /\ disjoint ctx.ctx_seq ctx.ctx_exporter
 
 let as_ctx #cs h ctx =
-  (as_seq h ctx.ctx_key, as_seq h ctx.ctx_nonce, UInt64.v ctx.ctx_seq, as_seq h ctx.ctx_exporter)
+  (as_seq h ctx.ctx_key,
+   as_seq h ctx.ctx_nonce,
+   UInt64.v (Seq.index (as_seq h ctx.ctx_seq) 0),
+   as_seq h ctx.ctx_exporter)
 
 let frame_ctx #cs ctx l h0 h1 = ()
 
 let lemma_includes_ctx_loc (#cs:S.ciphersuite) (ctx:context_s cs) : Lemma
   (B.loc_includes (ctx_loc ctx) (loc ctx.ctx_key) /\
    B.loc_includes (ctx_loc ctx) (loc ctx.ctx_nonce) /\
+   B.loc_includes (ctx_loc ctx) (loc ctx.ctx_seq) /\
    B.loc_includes (ctx_loc ctx) (loc ctx.ctx_exporter))
-  =()
+  = ()
 
 inline_for_extraction noextract
 val point_compress:
@@ -399,14 +418,16 @@ val key_schedule_core_base:
   -> o_ctx: context_s cs
   -> o_context : lbuffer uint8 (nsize_ks_ctx cs)
   -> o_secret : lbuffer uint8 (nsize_hash_length cs)
+  -> suite_id : lbuffer uint8 10ul
   -> shared: key_kem cs
   -> infolen: size_t{v infolen <= S.max_length_info (S.kem_hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
   -> Stack unit
        (requires fun h0 ->
          ctx_invariant h0 o_ctx /\ live h0 o_context /\ live h0 o_secret /\
-         live h0 shared /\ live h0 info /\
-         MB.all_disjoint [ctx_loc o_ctx; loc o_context; loc o_secret; loc shared; loc info]
+         live h0 shared /\ live h0 info /\ live h0 suite_id /\
+         as_seq h0 suite_id == S.suite_id_hpke cs /\
+         MB.all_disjoint [ctx_loc o_ctx; loc o_context; loc o_secret; loc shared; loc info; loc suite_id]
        )
        (ensures fun h0 _ h1 -> modifies (loc o_ctx.ctx_exporter |+| loc o_context |+| loc o_secret) h0 h1 /\
          (let context, exp_secret, secret = S.key_schedule_core cs S.Base (as_seq h0 shared) (as_seq h0 info) None in
@@ -417,7 +438,7 @@ val key_schedule_core_base:
 
 #push-options "--z3rlimit 300"
 
-let key_schedule_core_base #cs o_ctx o_context o_secret shared infolen info =
+let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen info =
   let h0' = ST.get () in
   lemma_includes_ctx_loc o_ctx;
   push_frame();
@@ -426,9 +447,6 @@ let key_schedule_core_base #cs o_ctx o_context o_secret shared infolen info =
   let l_psk_id_hash:list uint8 = [u8 0x70; u8 0x73; u8 0x6b; u8 0x5f; u8 0x69; u8 0x64; u8 0x5f; u8 0x68; u8 0x61; u8 0x73; u8 0x68] in
   assert_norm(l_psk_id_hash == S.label_psk_id_hash_list);
   let label_psk_id_hash = createL l_psk_id_hash in
-
-  let suite_id = create 10ul (u8 0) in
-  init_suite_id #cs suite_id;
 
   let hi1 = ST.get () in
   assert (modifies (loc suite_id) hi hi1);
@@ -489,7 +507,54 @@ let key_schedule_core_base #cs o_ctx o_context o_secret shared infolen info =
 
 #pop-options
 
-assume
+inline_for_extraction noextract
+val key_schedule_end_base:
+     #cs:S.ciphersuite
+  -> o_ctx: context_s cs
+  -> suite_id:lbuffer uint8 10ul
+  -> context: lbuffer uint8 (nsize_ks_ctx cs)
+  -> secret: lbuffer uint8 (nsize_hash_length cs) ->
+  Stack unit
+    (requires fun h -> ctx_invariant h o_ctx /\ live h context /\ live h secret /\ live h suite_id /\
+      B.loc_disjoint (ctx_loc o_ctx) (loc context) /\
+      B.loc_disjoint (ctx_loc o_ctx) (loc secret) /\
+      B.loc_disjoint (ctx_loc o_ctx) (loc suite_id) /\
+      disjoint context secret /\
+      as_seq h suite_id == S.suite_id_hpke cs
+    )
+    (ensures fun h0 _ h1 -> modifies (ctx_loc o_ctx) h0 h1 /\
+      as_ctx h1 o_ctx == S.key_schedule_end cs S.Base (as_seq h0 context) (as_seq h0 o_ctx.ctx_exporter) (as_seq h0 secret)
+    )
+
+inline_for_extraction noextract
+let key_schedule_end_base #cs o_ctx suite_id context secret =
+  match S.aead_of_cs cs with
+  | S.ExportOnly ->
+    upd o_ctx.ctx_seq 0ul 0uL;
+    let h1 = ST.get () in
+    assert (as_seq h1 o_ctx.ctx_key `Seq.equal` Lib.ByteSequence.lbytes_empty);
+    assert (as_seq h1 o_ctx.ctx_nonce `Seq.equal` Lib.ByteSequence.lbytes_empty)
+
+  | _ ->
+    push_frame ();
+    [@inline_let]
+    let l_label_key:list uint8 = [u8 0x6b; u8 0x65; u8 0x79] in
+    assert_norm (l_label_key == S.label_key_list);
+    let label_key = createL l_label_key in
+
+    labeled_expand #cs 10ul suite_id (nsize_hash_length cs) secret 3ul label_key (nsize_ks_ctx cs) context (nsize_aead_key cs) o_ctx.ctx_key;
+
+    [@inline_let]
+    let l_label_base_nonce:list uint8 = [u8 0x62; u8 0x61; u8 0x73; u8 0x65; u8 0x5f; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
+    assert_norm (l_label_base_nonce == S.label_base_nonce_list);
+    let label_base_nonce = createL l_label_base_nonce in
+
+    labeled_expand #cs 10ul suite_id (nsize_hash_length cs) secret 10ul label_base_nonce (nsize_ks_ctx cs) context (nsize_aead_nonce cs) o_ctx.ctx_nonce;
+
+    upd o_ctx.ctx_seq 0ul 0uL;
+    pop_frame ()
+
+
 val key_schedule_base:
      #cs:S.ciphersuite
   -> o_ctx: context_s cs
@@ -500,13 +565,26 @@ val key_schedule_base:
        (requires fun h0 ->
          ctx_invariant h0 o_ctx /\ live h0 shared /\ live h0 info /\
          B.loc_disjoint (ctx_loc o_ctx) (loc shared) /\
-         B.loc_disjoint (ctx_loc o_ctx) (loc info)
+         B.loc_disjoint (ctx_loc o_ctx) (loc info) /\
+         disjoint shared info
        )
        (ensures fun h0 _ h1 -> modifies (ctx_loc o_ctx) h0 h1 /\
          (let ctx = S.key_schedule cs S.Base (as_seq h0 shared) (as_seq h0 info) None in
          as_ctx h1 o_ctx == ctx))
 
 #push-options "--z3rlimit 100 --ifuel 0"
+
+let key_schedule_base #cs o_ctx shared infolen info =
+  push_frame();
+  let o_context = create (nsize_ks_ctx cs) (u8 0) in
+  let o_secret = create (nsize_hash_length cs) (u8 0) in
+
+  let suite_id = create 10ul (u8 0) in
+  init_suite_id #cs suite_id;
+
+  key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen info;
+  key_schedule_end_base #cs o_ctx suite_id o_context o_secret;
+  pop_frame()
 
 [@ Meta.Attribute.specialize]
 let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
