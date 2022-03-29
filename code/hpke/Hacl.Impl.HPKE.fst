@@ -922,7 +922,7 @@ let key_schedule_base #cs o_ctx shared infolen info =
 
 #pop-options
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 200"
 
 [@ Meta.Attribute.specialize]
 let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
@@ -933,7 +933,7 @@ let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
     key_schedule_base o_ctx o_shared infolen info;
     pop_frame();
     res
-  ) else (pop_frame (); 1ul)
+  ) else (pop_frame (); res)
 
 #pop-options
 
