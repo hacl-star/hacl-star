@@ -471,7 +471,33 @@ let labeled_extract_kem #cs o_hash suite_id_len suite_id saltlen salt labellen l
 
 #pop-options
 
-assume
+inline_for_extraction noextract
+val nat_to_bytes_2 (l:size_t) (b:lbuffer uint8 4ul)
+  : Stack unit
+     (requires fun h -> live h b /\ v l <= 255 * 128)
+     (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+       as_seq h1 (gsub b 0ul 2ul) `Seq.equal` Lib.ByteSequence.nat_to_bytes_be 2 (v l)
+     )
+
+inline_for_extraction noextract
+let nat_to_bytes_2 l tmp =
+  Lib.ByteBuffer.uint_to_bytes_be (sub tmp 0ul 4ul) (secret l);
+  let h1 = ST.get () in
+  assert (as_seq h1 (gsub tmp 0ul 4ul) `Seq.equal` Lib.ByteSequence.uint_to_bytes_be (secret l));
+
+  Lib.ByteSequence.lemma_uint_to_bytes_be_preserves_value (secret l);
+  assert (Lib.ByteSequence.nat_from_bytes_be (as_seq h1 (gsub tmp 0ul 4ul)) == v l);
+
+  Lib.ByteSequence.lemma_nat_from_to_bytes_be_preserves_value (as_seq h1 (gsub tmp 0ul 4ul)) 4;
+  assert (as_seq h1 (gsub tmp 0ul 4ul) == Lib.ByteSequence.nat_to_bytes_be 4 (v l));
+
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 0;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 2 (v l) 1;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 4 (v l) 0;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 4 (v l) 1;
+  copy (sub tmp 0ul 2ul) (sub tmp 2ul 2ul)
+
+inline_for_extraction noextract
 val labeled_expand_hash:
     #cs:S.ciphersuite
   -> suite_id_len:size_t
@@ -487,15 +513,47 @@ val labeled_expand_hash:
   Stack unit
     (requires fun h ->
       live h o_hash /\ live h suite_id /\ live h prk /\ live h label /\ live h info /\
+      disjoint o_hash prk /\
       Spec.Hash.Definitions.hash_length (S.hash_of_cs cs) <= v prklen /\
       Spec.Agile.HMAC.keysized (S.hash_of_cs cs) (v prklen) /\
-      S.labeled_expand_info_length_pred (S.hash_of_cs cs) (v suite_id_len + v labellen + v infolen) /\
+
+      SHa.hash_length (S.hash_of_cs cs) + 10 + v suite_id_len + v labellen + v infolen + SHa.block_length (S.hash_of_cs cs) + SHa.hash_length (S.hash_of_cs cs) + 1 <= max_size_t /\
       Spec.Agile.HKDF.expand_output_length_pred (S.hash_of_cs cs) (v l))
     (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
-      as_seq h1 o_hash == S.labeled_expand (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
+      as_seq h1 o_hash `Seq.equal` S.labeled_expand (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
-assume
+#push-options "--z3rlimit 400"
+
+inline_for_extraction noextract
+let labeled_expand_hash #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
+  push_frame ();
+  let h0 = ST.get () in
+  let len = 9ul +. suite_id_len +. labellen +. infolen in
+  let tmp = create len (u8 0) in
+
+  nat_to_bytes_2 l (sub tmp 0ul 4ul);
+  init_label_version (sub tmp 2ul 7ul);
+  copy (sub tmp 9ul suite_id_len) suite_id;
+  copy (sub tmp (9ul +. suite_id_len) labellen) label;
+  copy (sub tmp (9ul +. suite_id_len +. labellen) infolen) info;
+
+  let h1 = ST.get () in
+  assert (as_seq h1 tmp `Seq.equal` (
+    (((Lib.ByteSequence.nat_to_bytes_be 2 (v l)
+      `Seq.append` S.label_version)
+      `Seq.append` (as_seq h0 suite_id))
+      `Seq.append` (as_seq h0 label))
+      `Seq.append` (as_seq h0 info)
+      ));
+
+  HKDF.hkdf_expand #cs o_hash prk prklen tmp len l;
+
+  pop_frame ()
+
+#pop-options
+
+inline_for_extraction noextract
 val labeled_expand_kem:
     #cs:S.ciphersuite
   -> suite_id_len:size_t
@@ -513,12 +571,42 @@ val labeled_expand_kem:
       live h o_hash /\ live h suite_id /\ live h prk /\ live h label /\ live h info /\
       Spec.Hash.Definitions.hash_length (S.kem_hash_of_cs cs) <= v prklen /\
       Spec.Agile.HMAC.keysized (S.kem_hash_of_cs cs) (v prklen) /\
+      SHa.hash_length (S.kem_hash_of_cs cs) + 10 + v suite_id_len + v labellen + v infolen + SHa.block_length (S.kem_hash_of_cs cs) + SHa.hash_length (S.kem_hash_of_cs cs) + 1 <= max_size_t /\
       S.labeled_expand_info_length_pred (S.kem_hash_of_cs cs) (v suite_id_len + v labellen + v infolen) /\
       Spec.Agile.HKDF.expand_output_length_pred (S.kem_hash_of_cs cs) (v l))
     (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
       as_seq h1 o_hash == S.labeled_expand (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
+#push-options "--z3rlimit 400"
+
+inline_for_extraction noextract
+let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
+  push_frame ();
+  let h0 = ST.get () in
+  let len = 9ul +. suite_id_len +. labellen +. infolen in
+  let tmp = create len (u8 0) in
+
+  nat_to_bytes_2 l (sub tmp 0ul 4ul);
+  init_label_version (sub tmp 2ul 7ul);
+  copy (sub tmp 9ul suite_id_len) suite_id;
+  copy (sub tmp (9ul +. suite_id_len) labellen) label;
+  copy (sub tmp (9ul +. suite_id_len +. labellen) infolen) info;
+
+  let h1 = ST.get () in
+  assert (as_seq h1 tmp `Seq.equal` (
+    (((Lib.ByteSequence.nat_to_bytes_be 2 (v l)
+      `Seq.append` S.label_version)
+      `Seq.append` (as_seq h0 suite_id))
+      `Seq.append` (as_seq h0 label))
+      `Seq.append` (as_seq h0 info)
+      ));
+
+  HKDF.hkdf_expand #cs o_hash prk prklen tmp len l;
+
+  pop_frame ()
+
+#pop-options
 
 inline_for_extraction noextract
 val extract_and_expand:
