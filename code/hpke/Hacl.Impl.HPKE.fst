@@ -84,6 +84,11 @@ let nsize_hash_length (cs:S.ciphersuite) : (s:size_t{v s == S.size_kdf cs}) =
   | SHa.SHA2_512 -> 64ul
 
 inline_for_extraction noextract
+let nsize_kem_hash_length (cs:S.ciphersuite) : (s:size_t{v s == S.size_kem_kdf cs}) =
+  match S.kem_hash_of_cs cs with
+  | SHa.SHA2_256 -> 32ul
+
+inline_for_extraction noextract
 let nsize_hash_length_plus_one (cs:S.ciphersuite) : size_t =
   match S.hash_of_cs cs with
   | SHa.SHA2_256 -> 33ul
@@ -217,6 +222,27 @@ let init_label_hpke b =
 #pop-options
 
 inline_for_extraction noextract
+val init_label_kem:
+ b:lbuffer uint8 3ul ->
+ Stack unit
+   (requires fun h -> live h b)
+   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+     as_seq h1 b `Seq.equal` S.label_KEM)
+
+#push-options "--z3rlimit 40 --fuel 3"
+
+inline_for_extraction noextract
+let init_label_kem b =
+  upd b 0ul (u8 0x4b);
+  upd b 1ul (u8 0x45);
+  upd b 2ul (u8 0x4d);
+  Lib.Sequence.of_list_index S.label_KEM_list 0;
+  Lib.Sequence.of_list_index S.label_KEM_list 1;
+  Lib.Sequence.of_list_index S.label_KEM_list 2
+
+#pop-options
+
+inline_for_extraction noextract
 val init_label_version:
  b:lbuffer uint8 7ul ->
  Stack unit
@@ -325,7 +351,28 @@ let init_suite_id #cs suite_id =
 #pop-options
 
 inline_for_extraction noextract
-val labeled_extract:
+val init_suite_kem:
+     #cs:S.ciphersuite
+  -> suite_id:lbuffer uint8 5ul ->
+  Stack unit
+    (requires fun h -> live h suite_id)
+    (ensures fun h0 _ h1 -> modifies (loc suite_id) h0 h1 /\
+      as_seq h1 suite_id == S.suite_id_kem cs)
+
+#push-options "--z3rlimit 50 --fuel 0 --ifuel 0"
+
+inline_for_extraction noextract
+let init_suite_kem #cs suite_id =
+  init_label_kem (sub suite_id 0ul 3ul);
+  init_id_kem #cs (sub suite_id 3ul 2ul);
+  let h1 = ST.get () in
+  assert (as_seq h1 suite_id `Seq.equal` S.suite_id_kem cs)
+
+#pop-options
+
+
+inline_for_extraction noextract
+val labeled_extract_hash:
     #cs:S.ciphersuite
   -> o_hash: lbuffer uint8 (nsize_hash_length cs)
   -> suite_id_len:size_t
@@ -341,16 +388,17 @@ val labeled_extract:
       live h o_hash /\ live h suite_id /\ live h salt /\ live h label /\ live h ikm /\
       disjoint salt o_hash /\
       Spec.Agile.HMAC.keysized (S.hash_of_cs cs) (v saltlen) /\
-      135 + v suite_id_len + v labellen + v ikmlen <= max_size_t /\
+      7 + v suite_id_len + v labellen + v ikmlen + SHa.block_length (S.hash_of_cs cs) <= max_size_t /\
       S.labeled_extract_ikm_length_pred (S.hash_of_cs cs) (v suite_id_len + v labellen + v ikmlen)
       )
     (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
       as_seq h1 o_hash `Seq.equal` S.labeled_extract (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 salt) (as_seq h0 label) (as_seq h0 ikm))
 
+
 #push-options "--z3rlimit 100"
 
 inline_for_extraction noextract
-let labeled_extract #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
+let labeled_extract_hash #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
   push_frame ();
   let h0 = ST.get () in
   let len = 7ul +. suite_id_len +. labellen +. ikmlen in
@@ -371,8 +419,60 @@ let labeled_extract #cs o_hash suite_id_len suite_id saltlen salt labellen label
 
   pop_frame ()
 
+#pop-options
+
+
+inline_for_extraction noextract
+val labeled_extract_kem:
+    #cs:S.ciphersuite
+  -> o_hash: lbuffer uint8 (nsize_kem_hash_length cs)
+  -> suite_id_len:size_t
+  -> suite_id:lbuffer uint8 suite_id_len
+  -> saltlen:size_t
+  -> salt:lbuffer uint8 saltlen
+  -> labellen:size_t
+  -> label:lbuffer uint8 labellen
+  -> ikmlen:size_t
+  -> ikm:lbuffer uint8 ikmlen ->
+  Stack unit
+    (requires fun h ->
+      live h o_hash /\ live h suite_id /\ live h salt /\ live h label /\ live h ikm /\
+      disjoint salt o_hash /\
+      Spec.Agile.HMAC.keysized (S.kem_hash_of_cs cs) (v saltlen) /\
+      7 + v suite_id_len + v labellen + v ikmlen + SHa.block_length (S.kem_hash_of_cs cs) <= max_size_t /\
+      S.labeled_extract_ikm_length_pred (S.kem_hash_of_cs cs) (v suite_id_len + v labellen + v ikmlen)
+      )
+    (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
+      as_seq h1 o_hash `Seq.equal` S.labeled_extract (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 salt) (as_seq h0 label) (as_seq h0 ikm))
+
+#push-options "--z3rlimit 100"
+
+inline_for_extraction noextract
+let labeled_extract_kem #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
+  push_frame ();
+  let h0 = ST.get () in
+  let len = 7ul +. suite_id_len +. labellen +. ikmlen in
+  let tmp = create len (u8 0) in
+
+  init_label_version (sub tmp 0ul 7ul);
+  copy (sub tmp 7ul suite_id_len) suite_id;
+  copy (sub tmp (7ul +. suite_id_len) labellen) label;
+  copy (sub tmp (7ul +. suite_id_len +. labellen) ikmlen) ikm;
+
+  assert_norm (pow2 32 == max_size_t + 1);
+
+  let h1 = ST.get () in
+  assert (as_seq h1 tmp `Seq.equal`
+    (((S.label_version `Seq.append` as_seq h0 suite_id) `Seq.append` (as_seq h0 label)) `Seq.append` (as_seq h0 ikm)));
+
+  HKDF.hkdf_extract_kem #cs o_hash salt saltlen tmp len;
+
+  pop_frame ()
+
+#pop-options
+
 assume
-val labeled_expand:
+val labeled_expand_hash:
     #cs:S.ciphersuite
   -> suite_id_len:size_t
   -> suite_id:lbuffer uint8 suite_id_len
@@ -395,8 +495,32 @@ val labeled_expand:
       as_seq h1 o_hash == S.labeled_expand (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
-
 assume
+val labeled_expand_kem:
+    #cs:S.ciphersuite
+  -> suite_id_len:size_t
+  -> suite_id:lbuffer uint8 suite_id_len
+  -> prklen:size_t
+  -> prk:lbuffer uint8 prklen
+  -> labellen:size_t
+  -> label:lbuffer uint8 labellen
+  -> infolen:size_t
+  -> info:lbuffer uint8 infolen
+  -> l:size_t
+  -> o_hash: lbuffer uint8 l ->
+  Stack unit
+    (requires fun h ->
+      live h o_hash /\ live h suite_id /\ live h prk /\ live h label /\ live h info /\
+      Spec.Hash.Definitions.hash_length (S.kem_hash_of_cs cs) <= v prklen /\
+      Spec.Agile.HMAC.keysized (S.kem_hash_of_cs cs) (v prklen) /\
+      S.labeled_expand_info_length_pred (S.kem_hash_of_cs cs) (v suite_id_len + v labellen + v infolen) /\
+      Spec.Agile.HKDF.expand_output_length_pred (S.kem_hash_of_cs cs) (v l))
+    (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
+      as_seq h1 o_hash == S.labeled_expand (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
+    )
+
+
+inline_for_extraction noextract
 val extract_and_expand:
      #cs: S.ciphersuite
   -> o_shared: key_kem cs
@@ -405,11 +529,40 @@ val extract_and_expand:
   -> kemcontext: lbuffer uint8 ctxlen
   -> Stack unit
      (requires fun h ->
-       live h o_shared /\ live h dh /\ live h kemcontext
+       live h o_shared /\ live h dh /\ live h kemcontext /\
+       disjoint o_shared dh /\ disjoint o_shared kemcontext
      )
      (ensures fun h0 _ h1 -> modifies (loc o_shared) h0 h1 /\
        as_seq h1 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h0 dh) (as_seq h0 kemcontext))
 
+inline_for_extraction noextract
+let extract_and_expand #cs o_shared dh ctxlen kemcontext =
+  push_frame ();
+
+  let o_eae_prk = create (nsize_kem_hash_length cs) (u8 0) in
+
+  let suite_id_kem = create 5ul (u8 0) in
+  init_suite_kem #cs suite_id_kem;
+
+  let empty = sub suite_id_kem 0ul 0ul in
+  let h0 = ST.get() in
+  assert (as_seq h0 empty `Seq.equal` Lib.ByteSequence.lbytes_empty);
+
+  [@inline_let]
+  let l_label_eae_prk:list uint8 = [u8 0x65; u8 0x61; u8 0x65; u8 0x5f; u8 0x70; u8 0x72; u8 0x6b] in
+  assert_norm (l_label_eae_prk == S.label_eae_prk_list);
+  let label_eae_prk = createL l_label_eae_prk in
+
+  labeled_extract_kem #cs o_eae_prk 5ul suite_id_kem 0ul empty 7ul label_eae_prk 32ul dh;
+
+  [@inline_let]
+  let l_label_shared_secret:list uint8 = [u8 0x73; u8 0x68; u8 0x61; u8 0x72; u8 0x65; u8 0x64; u8 0x5f; u8 0x73; u8 0x65; u8 0x63; u8 0x72; u8 0x65; u8 0x74] in
+  assert_norm (l_label_shared_secret == S.label_shared_secret_list);
+  let label_shared_secret = createL l_label_shared_secret in
+
+  labeled_expand_kem #cs 5ul suite_id_kem (nsize_kem_hash_length cs) o_eae_prk 13ul label_shared_secret ctxlen kemcontext (nsize_kem_key cs) o_shared;
+
+  pop_frame ()
 
 val encap:
      #cs:S.ciphersuite
@@ -509,7 +662,7 @@ val key_schedule_core_base:
   -> o_secret : lbuffer uint8 (nsize_hash_length cs)
   -> suite_id : lbuffer uint8 10ul
   -> shared: key_kem cs
-  -> infolen: size_t{v infolen <= S.max_length_info (S.kem_hash_of_cs cs)}
+  -> infolen: size_t{v infolen <= max_length_info (S.hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
   -> Stack unit
        (requires fun h0 ->
@@ -546,7 +699,7 @@ let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen 
   let h0 = ST.get() in
   assert (as_seq h0 empty `Seq.equal` Lib.ByteSequence.lbytes_empty);
 
-  labeled_extract #cs o_psk_id_hash 10ul suite_id 0ul empty 11ul label_psk_id_hash 0ul empty;
+  labeled_extract_hash #cs o_psk_id_hash 10ul suite_id 0ul empty 11ul label_psk_id_hash 0ul empty;
   let h1 = ST.get() in
   assert (as_seq h1 o_psk_id_hash `Seq.equal` S.labeled_extract (S.hash_of_cs cs) (S.suite_id_hpke cs) Lib.ByteSequence.lbytes_empty S.label_psk_id_hash S.default_psk_id);
 
@@ -559,7 +712,8 @@ let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen 
   let label_info_hash = createL l_label_info_hash in
 
   let o_info_hash = create (nsize_hash_length cs) (u8 0) in
-  labeled_extract #cs o_info_hash 10ul suite_id 0ul empty 9ul label_info_hash infolen info;
+
+  labeled_extract_hash #cs o_info_hash 10ul suite_id 0ul empty 9ul label_info_hash infolen info;
 
   let h2 = ST.get () in
   assert (modifies (loc o_info_hash) h1 h2);
@@ -576,7 +730,7 @@ let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen 
   assert_norm (l_label_secret == S.label_secret_list);
   let label_secret = createL l_label_secret in
 
-  labeled_extract #cs o_secret 10ul suite_id (nsize_kem_key cs) shared 6ul label_secret 0ul empty;
+  labeled_extract_hash #cs o_secret 10ul suite_id (nsize_kem_key cs) shared 6ul label_secret 0ul empty;
 
   let h4 = ST.get () in
   assert (modifies (loc o_secret) h3 h4);
@@ -587,7 +741,7 @@ let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen 
   assert_norm (l_label_exp == S.label_exp_list);
   let label_exp = createL l_label_exp in
 
-  labeled_expand #cs 10ul suite_id (nsize_hash_length cs) o_secret 3ul label_exp (nsize_ks_ctx cs) o_context (nsize_hash_length cs) o_ctx.ctx_exporter;
+  labeled_expand_hash #cs 10ul suite_id (nsize_hash_length cs) o_secret 3ul label_exp (nsize_ks_ctx cs) o_context (nsize_hash_length cs) o_ctx.ctx_exporter;
 
   let hf = ST.get () in
   assert (modifies (loc o_ctx.ctx_exporter) h4 hf);
@@ -632,14 +786,14 @@ let key_schedule_end_base #cs o_ctx suite_id context secret =
     assert_norm (l_label_key == S.label_key_list);
     let label_key = createL l_label_key in
 
-    labeled_expand #cs 10ul suite_id (nsize_hash_length cs) secret 3ul label_key (nsize_ks_ctx cs) context (nsize_aead_key cs) o_ctx.ctx_key;
+    labeled_expand_hash #cs 10ul suite_id (nsize_hash_length cs) secret 3ul label_key (nsize_ks_ctx cs) context (nsize_aead_key cs) o_ctx.ctx_key;
 
     [@inline_let]
     let l_label_base_nonce:list uint8 = [u8 0x62; u8 0x61; u8 0x73; u8 0x65; u8 0x5f; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
     assert_norm (l_label_base_nonce == S.label_base_nonce_list);
     let label_base_nonce = createL l_label_base_nonce in
 
-    labeled_expand #cs 10ul suite_id (nsize_hash_length cs) secret 10ul label_base_nonce (nsize_ks_ctx cs) context (nsize_aead_nonce cs) o_ctx.ctx_nonce;
+    labeled_expand_hash #cs 10ul suite_id (nsize_hash_length cs) secret 10ul label_base_nonce (nsize_ks_ctx cs) context (nsize_aead_nonce cs) o_ctx.ctx_nonce;
 
     upd o_ctx.ctx_seq 0ul 0uL;
     pop_frame ()
@@ -649,7 +803,7 @@ val key_schedule_base:
      #cs:S.ciphersuite
   -> o_ctx: context_s cs
   -> shared: key_kem cs
-  -> infolen: size_t{v infolen <= S.max_length_info (S.kem_hash_of_cs cs)}
+  -> infolen: size_t{v infolen <= max_length_info (S.hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
   -> Stack unit
        (requires fun h0 ->

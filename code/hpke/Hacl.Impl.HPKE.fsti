@@ -22,6 +22,10 @@ let key_aead (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_aead_key cs))
 inline_for_extraction noextract
 let nonce_aead (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_aead_nonce cs))
 
+(* Redefining this to work around Low*'s limitation on buffer size *)
+let max_length_info (a:S.hash_algorithm) =
+  max_size_t - S.size_label_version - S.size_suite_id_hpke - S.size_label_info_hash - Spec.Hash.Definitions.block_length a
+
 val context_s (cs:S.ciphersuite) : Type0
 val ctx_loc (#cs:S.ciphersuite) (ctx:context_s cs) : GTot B.loc
 val ctx_invariant (#cs:S.ciphersuite) (h:mem) (ctx:context_s cs) : GTot prop
@@ -38,7 +42,7 @@ let setupBaseS_st (cs:S.ciphersuite) (p:Type0) =
   -> o_ctx: context_s cs
   -> skE: key_dh_secret cs
   -> pkR: serialized_point_dh cs
-  -> infolen: size_t{v infolen <= S.max_length_info (S.kem_hash_of_cs cs)}
+  -> infolen: size_t{v infolen <= max_length_info (S.kem_hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
   -> Stack UInt32.t
      (requires fun h0 ->
@@ -65,7 +69,7 @@ let setupBaseR_st (cs:S.ciphersuite) (p:Type0) =
      o_ctx : context_s cs
   -> pkE: key_dh_public cs
   -> skR: key_dh_secret cs
-  -> infolen: size_t{v infolen <= S.max_length_info (S.kem_hash_of_cs cs)}
+  -> infolen: size_t{v infolen <= max_length_info (S.kem_hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
   -> Stack UInt32.t
      (requires fun h0 ->

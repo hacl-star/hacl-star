@@ -10,6 +10,11 @@ assume val hkdf_extract: #cs:S.ciphersuite -> HK.extract_st (S.hash_of_cs cs)
 [@ Meta.Attribute.specialize ]
 assume val hkdf_expand: #cs:S.ciphersuite -> HK.expand_st (S.hash_of_cs cs)
 
+[@ Meta.Attribute.specialize ]
+assume val hkdf_extract_kem: #cs:S.ciphersuite -> HK.extract_st (S.kem_hash_of_cs cs)
+
+[@ Meta.Attribute.specialize ]
+assume val hkdf_expand_kem: #cs:S.ciphersuite -> HK.expand_st (S.kem_hash_of_cs cs)
 
 (** Instantiations of hkdf **)
 
