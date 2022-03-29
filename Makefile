@@ -1125,7 +1125,7 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 	  -tmpdir $(dir $@) -skip-compilation \
 	  -header $(HACL_HOME)/dist/LICENSE.txt \
 	  -no-prefix $(subst _,.,$*) \
-	  -library Hacl.P256,Hacl.Impl.*,EverCrypt,EverCrypt.* \
+	  -library Hacl.P256,Hacl.K256.*,Hacl.Impl.*,EverCrypt,EverCrypt.* \
 	  -fparentheses -fcurly-braces -fno-shadow \
 	  -minimal -add-include '"krmllib.h"' \
 	  -bundle '*[rename=$*]' $(KRML_EXTRA) $(filter %.krml,$^)
@@ -1133,6 +1133,8 @@ dist/test/c/%.c: $(ALL_KRML_FILES)
 dist/test/c/Test.c: KRML_EXTRA=-add-early-include '"krml/internal/compat.h"'
 
 dist/test/c/Hacl_Test_ECDSA.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-include '"lib_intrinsics.h"'
+
+dist/test/c/Hacl_Test_K256.c: KRML_EXTRA=-drop Lib.IntTypes.Intrinsics -add-include '"lib_intrinsics.h"'
 
 ###################################################################################
 # C Compilation (recursive make invocation relying on KaRaMeL-generated Makefile) #

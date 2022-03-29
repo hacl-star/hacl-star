@@ -7,6 +7,8 @@ all: dist/libk256.a
 # Defines rules for producing .checked, .krml, .depend, etc.
 include $(HACL_HOME)/Makefile.local
 
+FSTAR_ROOTS += $(HACL_HOME)/code/tests/Hacl.Test.K256.fst
+
 CFLAGS += -I$(HACL_HOME)/lib/c -march=native -mtune=native -O3 -DCOMPILE_INTRINSICS
 export CFLAGS
 
