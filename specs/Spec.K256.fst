@@ -20,7 +20,7 @@ include Spec.K256.PointOps
  https://www.hyperelliptic.org/EFD/g1p/auto-shortw.html
 *)
 
-let mk_k256_cm : LE.comm_monoid aff_point = {
+let mk_k256_comm_monoid : LE.comm_monoid aff_point = {
   LE.one = aff_point_at_inf;
   LE.mul = aff_point_add;
   LE.lemma_one = KL.aff_point_at_inf_lemma;
@@ -28,29 +28,29 @@ let mk_k256_cm : LE.comm_monoid aff_point = {
   LE.lemma_mul_comm = KL.aff_point_add_comm_lemma;
 }
 
-let mk_to_k256_cm : SE.to_cm proj_point = {
+let mk_to_k256_comm_monoid : SE.to_comm_monoid proj_point = {
   SE.a_spec = aff_point;
-  SE.cm = mk_k256_cm;
+  SE.comm_monoid = mk_k256_comm_monoid;
   SE.refl = to_aff_point;
 }
 
-val point_at_inf_c: SE.one_st proj_point mk_to_k256_cm
+val point_at_inf_c: SE.one_st proj_point mk_to_k256_comm_monoid
 let point_at_inf_c _ =
   KL.to_aff_point_at_infinity_lemma ();
   point_at_inf
 
-val point_add_c : SE.mul_st proj_point mk_to_k256_cm
+val point_add_c : SE.mul_st proj_point mk_to_k256_comm_monoid
 let point_add_c p q =
   KL.to_aff_point_add_lemma p q;
   point_add p q
 
-val point_double_c : SE.sqr_st proj_point mk_to_k256_cm
+val point_double_c : SE.sqr_st proj_point mk_to_k256_comm_monoid
 let point_double_c p =
   KL.to_aff_point_double_lemma p;
   point_double p
 
 let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
-  SE.to = mk_to_k256_cm;
+  SE.to = mk_to_k256_comm_monoid;
   SE.one = point_at_inf_c;
   SE.mul = point_add_c;
   SE.sqr = point_double_c;
@@ -142,7 +142,7 @@ let ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64)
 
 ///  ECDSA
 
-let _:_:unit{Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32} =
+let _: squash(Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32) =
  assert_norm (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_256 > pow2 32)
 
 

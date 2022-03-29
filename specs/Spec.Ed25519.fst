@@ -22,7 +22,7 @@ let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
-let _:_:unit{Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512 > pow2 32} =
+let _: squash(Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512 > pow2 32) =
   assert_norm (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512 > pow2 32)
 
 let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
@@ -44,29 +44,29 @@ let mk_ed25519_comm_monoid: LE.comm_monoid aff_point_c = {
   }
 
 let ext_point_c = p:ext_point{point_inv p}
-let mk_to_ed25519_cm : SE.to_cm ext_point_c = {
+let mk_to_ed25519_comm_monoid : SE.to_comm_monoid ext_point_c = {
   SE.a_spec = aff_point_c;
-  SE.cm = mk_ed25519_comm_monoid;
+  SE.comm_monoid = mk_ed25519_comm_monoid;
   SE.refl = (fun (x:ext_point_c) -> to_aff_point x);
   }
 
-val point_at_inifinity_c: SE.one_st ext_point_c mk_to_ed25519_cm
+val point_at_inifinity_c: SE.one_st ext_point_c mk_to_ed25519_comm_monoid
 let point_at_inifinity_c _ =
   EL.to_aff_point_at_infinity_lemma ();
   point_at_infinity
 
-val point_add_c: SE.mul_st ext_point_c mk_to_ed25519_cm
+val point_add_c: SE.mul_st ext_point_c mk_to_ed25519_comm_monoid
 let point_add_c p q =
   EL.to_aff_point_add_lemma p q;
   point_add p q
 
-val point_double_c: SE.sqr_st ext_point_c mk_to_ed25519_cm
+val point_double_c: SE.sqr_st ext_point_c mk_to_ed25519_comm_monoid
 let point_double_c p =
   EL.to_aff_point_double_lemma p;
   point_double p
 
 let mk_ed25519_concrete_ops : SE.concrete_ops ext_point_c = {
-  SE.to = mk_to_ed25519_cm;
+  SE.to = mk_to_ed25519_comm_monoid;
   SE.one = point_at_inifinity_c;
   SE.mul = point_add_c;
   SE.sqr = point_double_c;

@@ -9,25 +9,25 @@ module S = Spec.K256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-let nat_mod_cm = M.mk_nat_mod_comm_monoid S.q
+let nat_mod_comm_monoid = M.mk_nat_mod_comm_monoid S.q
 
-let mk_to_nat_mod_cm : SE.to_cm S.qelem = {
+let mk_to_nat_mod_comm_monoid : SE.to_comm_monoid S.qelem = {
   SE.a_spec = S.qelem;
-  SE.cm = nat_mod_cm;
+  SE.comm_monoid = nat_mod_comm_monoid;
   SE.refl = (fun (x:S.qelem) -> x);
 }
 
-val one_mod : SE.one_st S.qelem mk_to_nat_mod_cm
+val one_mod : SE.one_st S.qelem mk_to_nat_mod_comm_monoid
 let one_mod _ = 1
 
-val mul_mod : SE.mul_st S.qelem mk_to_nat_mod_cm
+val mul_mod : SE.mul_st S.qelem mk_to_nat_mod_comm_monoid
 let mul_mod x y = S.qmul x y
 
-val sqr_mod : SE.sqr_st S.qelem mk_to_nat_mod_cm
+val sqr_mod : SE.sqr_st S.qelem mk_to_nat_mod_comm_monoid
 let sqr_mod x = S.qmul x x
 
 let mk_nat_mod_concrete_ops : SE.concrete_ops S.qelem = {
-  SE.to = mk_to_nat_mod_cm;
+  SE.to = mk_to_nat_mod_comm_monoid;
   SE.one = one_mod;
   SE.mul = mul_mod;
   SE.sqr = sqr_mod;
@@ -40,8 +40,8 @@ val qsquare_times_lemma: a:S.qelem -> b:nat ->
   Lemma (qsquare_times a b == M.pow a (pow2 b) % S.q)
 let qsquare_times_lemma a b =
   SE.exp_pow2_lemma mk_nat_mod_concrete_ops a b;
-  LE.exp_pow2_lemma nat_mod_cm a b;
-  assert (qsquare_times a b == LE.pow nat_mod_cm a (pow2 b));
+  LE.exp_pow2_lemma nat_mod_comm_monoid a b;
+  assert (qsquare_times a b == LE.pow nat_mod_comm_monoid a (pow2 b));
   M.lemma_pow_nat_mod_is_pow #S.q a (pow2 b)
 
 

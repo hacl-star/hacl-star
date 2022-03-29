@@ -14,7 +14,7 @@ module Loops = Lib.LoopCombinators
 val exp_rl_lemma_loop: #t:Type -> k:concrete_ops t
   -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> i:nat{i <= bBits} ->
   Lemma (let one = k.one () in
-    let (accs, cs) = Loops.repeati i (S.exp_rl_f k.to.cm bBits b) (k.to.refl one, k.to.refl a) in
+    let (accs, cs) = Loops.repeati i (S.exp_rl_f k.to.comm_monoid bBits b) (k.to.refl one, k.to.refl a) in
     let (acc, c) = Loops.repeati i (exp_rl_f k bBits b) (one, a) in
     k.to.refl acc == accs /\ k.to.refl c == cs)
 
@@ -22,7 +22,7 @@ let rec exp_rl_lemma_loop #t k a bBits b i =
   let one = k.one () in
   let inp0 = (k.to.refl one, k.to.refl a) in
   let inp1 = (one, a) in
-  let f0 = S.exp_rl_f k.to.cm bBits b in
+  let f0 = S.exp_rl_f k.to.comm_monoid bBits b in
   let f1 = exp_rl_f k bBits b in
 
   if i = 0 then begin
@@ -42,7 +42,7 @@ val exp_mont_ladder_swap_lemma_loop: #t:Type -> k:concrete_ops t
   -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> i:nat{i <= bBits} ->
   Lemma (let one = k.one () in
     let (r0s, r1s, sws) =
-      Loops.repeati i (S.exp_mont_ladder_swap_f k.to.cm bBits b) (k.to.refl one, k.to.refl a, 0) in
+      Loops.repeati i (S.exp_mont_ladder_swap_f k.to.comm_monoid bBits b) (k.to.refl one, k.to.refl a, 0) in
     let (r0, r1, sw) =
       Loops.repeati i (exp_mont_ladder_swap_f k bBits b) (one, a, 0) in
     k.to.refl r0 == r0s /\ k.to.refl r1 == r1s /\ sw == sws)
@@ -51,7 +51,7 @@ let rec exp_mont_ladder_swap_lemma_loop #t k a bBits b i =
   let one = k.one () in
   let inp0 = (k.to.refl one, k.to.refl a, 0) in
   let inp1 = (one, a, 0) in
-  let f0 = S.exp_mont_ladder_swap_f k.to.cm bBits b in
+  let f0 = S.exp_mont_ladder_swap_f k.to.comm_monoid bBits b in
   let f1 = exp_mont_ladder_swap_f k bBits b in
 
   if i = 0 then begin
@@ -69,17 +69,17 @@ let exp_mont_ladder_swap_lemma #t k a bBits b =
 
 val exp_pow2_lemma_loop: #t:Type -> k:concrete_ops t -> a:t -> b:nat -> i:nat{i <= b} ->
   Lemma (
-    let accs = Loops.repeat i (S.sqr k.to.cm) (k.to.refl a) in
+    let accs = Loops.repeat i (S.sqr k.to.comm_monoid) (k.to.refl a) in
     let acc = Loops.repeat i k.sqr a in
     k.to.refl acc == accs)
 
 let rec exp_pow2_lemma_loop #t k a b i =
   if i = 0 then begin
-    Loops.eq_repeat0 (S.sqr k.to.cm) (k.to.refl a);
+    Loops.eq_repeat0 (S.sqr k.to.comm_monoid) (k.to.refl a);
     Loops.eq_repeat0 k.sqr a end
   else begin
     exp_pow2_lemma_loop #t k a b (i - 1);
-    Loops.unfold_repeat b (S.sqr k.to.cm) (k.to.refl a) (i - 1);
+    Loops.unfold_repeat b (S.sqr k.to.comm_monoid) (k.to.refl a) (i - 1);
     Loops.unfold_repeat b k.sqr a (i - 1) end
 
 
@@ -102,12 +102,12 @@ val exp_fw_lemma_loop: #t:Type -> k:concrete_ops t
   -> acc0:t -> i:nat{i <= bBits / l} ->
   Lemma (
     let acc = Loops.repeati i (exp_fw_f k a bBits b l) acc0 in
-    let accs = Loops.repeati i (S.exp_fw_f k.to.cm (k.to.refl a) bBits b l) (k.to.refl acc0) in
+    let accs = Loops.repeati i (S.exp_fw_f k.to.comm_monoid (k.to.refl a) bBits b l) (k.to.refl acc0) in
     k.to.refl acc == accs)
 
 let rec exp_fw_lemma_loop #t k a bBits b l acc0 i =
   let f0 = exp_fw_f k a bBits b l in
-  let f1 = S.exp_fw_f k.to.cm (k.to.refl a) bBits b l in
+  let f1 = S.exp_fw_f k.to.comm_monoid (k.to.refl a) bBits b l in
 
   if i = 0 then begin
     Loops.eq_repeati0 i f0 acc0;
@@ -140,12 +140,12 @@ val exp_double_fw_lemma_loop: #t:Type -> k:concrete_ops t
   Lemma
    (let acc = Loops.repeati i (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in
     let accs = Loops.repeati i
-      (S.exp_double_fw_f k.to.cm (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l) (k.to.refl acc0) in
+      (S.exp_double_fw_f k.to.comm_monoid (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l) (k.to.refl acc0) in
     k.to.refl acc == accs)
 
 let rec exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l acc0 i =
   let f0 = exp_double_fw_f k a1 bBits b1 a2 b2 l in
-  let f1 = S.exp_double_fw_f k.to.cm (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l in
+  let f1 = S.exp_double_fw_f k.to.comm_monoid (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l in
 
   if i = 0 then begin
     Loops.eq_repeati0 i f0 acc0;

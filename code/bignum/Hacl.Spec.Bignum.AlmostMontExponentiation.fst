@@ -32,10 +32,10 @@ let mk_to_nat_mont_ll_comm_monoid
   (#len:BN.bn_len t)
   (n:lbignum t len)
   (mu:limb t{BM.bn_mont_pre n mu})
-  : SE.to_cm (lbignum t len) =
+  : SE.to_comm_monoid (lbignum t len) =
 {
   SE.a_spec = Lib.NatMod.nat_mod (bn_v n);
-  SE.cm = E.mk_nat_mont_ll_comm_monoid (bits t) len (bn_v n) (v mu);
+  SE.comm_monoid = E.mk_nat_mont_ll_comm_monoid (bits t) len (bn_v n) (v mu);
   SE.refl = amm_refl n;
 }
 
@@ -119,7 +119,7 @@ let bn_exp_almost_mont_st (t:limb_t) (len:BN.bn_len t) =
 val bn_exp_almost_mont_bm_vartime: #t:limb_t -> #len:BN.bn_len t -> bn_exp_almost_mont_st t len
 let bn_exp_almost_mont_bm_vartime #t #len n mu aM bBits b =
   let k1 = mk_bn_almost_mont_concrete_ops n mu in
-  let k = k1.SE.to.SE.cm in
+  let k = k1.SE.to.SE.comm_monoid in
 
   let resM = SE.exp_rl k1 aM bBits (bn_v b) in
   //assert (bn_v resM % bn_v n == LE.exp_rl k (bn_v aM % bn_v n) bBits (bn_v b));
@@ -133,7 +133,7 @@ let bn_exp_almost_mont_bm_vartime #t #len n mu aM bBits b =
 val bn_exp_almost_mont_bm_consttime: #t:limb_t -> #len:BN.bn_len t -> bn_exp_almost_mont_st t len
 let bn_exp_almost_mont_bm_consttime #t #len n mu aM bBits b =
   let k1 = mk_bn_almost_mont_concrete_ops n mu in
-  let k = k1.SE.to.SE.cm in
+  let k = k1.SE.to.SE.comm_monoid in
 
   SE.exp_mont_ladder_swap_lemma k1 aM bBits (bn_v b);
   LE.exp_mont_ladder_swap_lemma k (bn_v aM % bn_v n) bBits (bn_v b);
@@ -151,7 +151,7 @@ val bn_exp_almost_mont_fw:
 let bn_exp_almost_mont_fw #t #len l n mu aM bBits b =
   let k1 = mk_bn_almost_mont_concrete_ops n mu in
   SE.exp_fw_lemma k1 aM bBits (bn_v b) l;
-  LE.exp_fw_lemma k1.SE.to.SE.cm (bn_v aM % bn_v n) bBits (bn_v b) l;
+  LE.exp_fw_lemma k1.SE.to.SE.comm_monoid (bn_v aM % bn_v n) bBits (bn_v b) l;
   E.pow_nat_mont_ll_mod_base (bits t) len (bn_v n) (v mu) (bn_v aM) (bn_v b);
   SE.exp_fw k1 aM bBits (bn_v b) l
 
