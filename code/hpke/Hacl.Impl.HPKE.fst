@@ -83,6 +83,13 @@ let nsize_hash_length (cs:S.ciphersuite) : (s:size_t{v s == S.size_kdf cs}) =
   | SHa.SHA2_384 -> 48ul
   | SHa.SHA2_512 -> 64ul
 
+inline_for_extraction noextract
+let nsize_hash_length_plus_one (cs:S.ciphersuite) : size_t =
+  match S.hash_of_cs cs with
+  | SHa.SHA2_256 -> 33ul
+  | SHa.SHA2_384 -> 49ul
+  | SHa.SHA2_512 -> 65ul
+
 noeq
 type context_s (cs:S.ciphersuite) =
   { ctx_key : key_aead cs;
@@ -165,6 +172,26 @@ let prepare_dh #cs pk =
   | SDH.DH_Curve25519, _, _, _ -> pk
   | SDH.DH_P256, _, _, _ -> sub pk 0ul 32ul
 
+inline_for_extraction noextract
+val init_id_mode:
+ m:S.mode ->
+ b:lbuffer uint8 1ul ->
+ Stack unit
+   (requires fun h -> live h b)
+   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+     as_seq h1 b `Seq.equal` S.id_of_mode m)
+
+#push-options "--ifuel 1"
+
+inline_for_extraction noextract
+let init_id_mode m b =
+  match m with
+  | S.Base -> upd b 0ul (u8 0)
+  | S.PSK -> upd b 0ul (u8 1)
+  | S.Auth -> upd b 0ul (u8 2)
+  | S.AuthPSK -> upd b 0ul (u8 3)
+
+#pop-options
 
 inline_for_extraction noextract
 val init_label_hpke:
@@ -186,6 +213,35 @@ let init_label_hpke b =
   Lib.Sequence.of_list_index S.label_HPKE_list 1;
   Lib.Sequence.of_list_index S.label_HPKE_list 2;
   Lib.Sequence.of_list_index S.label_HPKE_list 3
+
+#pop-options
+
+inline_for_extraction noextract
+val init_label_version:
+ b:lbuffer uint8 7ul ->
+ Stack unit
+   (requires fun h -> live h b)
+   (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+     as_seq h1 b `Seq.equal` S.label_version)
+
+#push-options "--z3rlimit 40 --fuel 7"
+
+inline_for_extraction noextract
+let init_label_version b =
+  upd b 0ul (u8 0x48);
+  upd b 1ul (u8 0x50);
+  upd b 2ul (u8 0x4b);
+  upd b 3ul (u8 0x45);
+  upd b 4ul (u8 0x2d);
+  upd b 5ul (u8 0x76);
+  upd b 6ul (u8 0x31);
+  Lib.Sequence.of_list_index S.label_version_list 0;
+  Lib.Sequence.of_list_index S.label_version_list 1;
+  Lib.Sequence.of_list_index S.label_version_list 2;
+  Lib.Sequence.of_list_index S.label_version_list 3;
+  Lib.Sequence.of_list_index S.label_version_list 4;
+  Lib.Sequence.of_list_index S.label_version_list 5;
+  Lib.Sequence.of_list_index S.label_version_list 6
 
 #pop-options
 
@@ -268,7 +324,7 @@ let init_suite_id #cs suite_id =
 
 #pop-options
 
-assume
+inline_for_extraction noextract
 val labeled_extract:
     #cs:S.ciphersuite
   -> o_hash: lbuffer uint8 (nsize_hash_length cs)
@@ -283,11 +339,37 @@ val labeled_extract:
   Stack unit
     (requires fun h ->
       live h o_hash /\ live h suite_id /\ live h salt /\ live h label /\ live h ikm /\
+      disjoint salt o_hash /\
       Spec.Agile.HMAC.keysized (S.hash_of_cs cs) (v saltlen) /\
+      135 + v suite_id_len + v labellen + v ikmlen <= max_size_t /\
       S.labeled_extract_ikm_length_pred (S.hash_of_cs cs) (v suite_id_len + v labellen + v ikmlen)
       )
     (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
-      as_seq h1 o_hash == S.labeled_extract (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 salt) (as_seq h0 label) (as_seq h0 ikm))
+      as_seq h1 o_hash `Seq.equal` S.labeled_extract (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 salt) (as_seq h0 label) (as_seq h0 ikm))
+
+#push-options "--z3rlimit 100"
+
+inline_for_extraction noextract
+let labeled_extract #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
+  push_frame ();
+  let h0 = ST.get () in
+  let len = 7ul +. suite_id_len +. labellen +. ikmlen in
+  let tmp = create len (u8 0) in
+
+  init_label_version (sub tmp 0ul 7ul);
+  copy (sub tmp 7ul suite_id_len) suite_id;
+  copy (sub tmp (7ul +. suite_id_len) labellen) label;
+  copy (sub tmp (7ul +. suite_id_len +. labellen) ikmlen) ikm;
+
+  assert_norm (pow2 32 == max_size_t + 1);
+
+  let h1 = ST.get () in
+  assert (as_seq h1 tmp `Seq.equal`
+    (((S.label_version `Seq.append` as_seq h0 suite_id) `Seq.append` (as_seq h0 label)) `Seq.append` (as_seq h0 ikm)));
+
+  HKDF.hkdf_extract #cs o_hash salt saltlen tmp len;
+
+  pop_frame ()
 
 assume
 val labeled_expand:
@@ -400,7 +482,7 @@ let encap #cs o_shared o_enc skE pkR =
 
 #pop-options
 
-assume
+inline_for_extraction noextract
 val build_context_default:
      #cs:S.ciphersuite
   -> o_context: lbuffer uint8 (nsize_ks_ctx cs)
@@ -413,6 +495,13 @@ val build_context_default:
     (ensures fun h0 _ h1 -> modifies (loc o_context) h0 h1 /\
       as_seq h1 o_context `Seq.equal` S.build_context cs S.Base (as_seq h0 psk_id_hash) (as_seq h0 info_hash))
 
+inline_for_extraction noextract
+let build_context_default #cs o_context psk_id_hash info_hash =
+  init_id_mode S.Base (sub o_context 0ul 1ul);
+  copy (sub o_context 1ul (nsize_hash_length cs)) psk_id_hash;
+  copy (sub o_context (nsize_hash_length_plus_one cs) (nsize_hash_length cs)) info_hash
+
+inline_for_extraction noextract
 val key_schedule_core_base:
      #cs:S.ciphersuite
   -> o_ctx: context_s cs
@@ -438,6 +527,7 @@ val key_schedule_core_base:
 
 #push-options "--z3rlimit 300"
 
+inline_for_extraction noextract
 let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen info =
   let h0' = ST.get () in
   lemma_includes_ctx_loc o_ctx;
