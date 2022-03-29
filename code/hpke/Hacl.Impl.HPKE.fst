@@ -128,7 +128,7 @@ let lemma_includes_ctx_loc (#cs:S.ciphersuite) (ctx:context_s cs) : Lemma
   = ()
 
 inline_for_extraction noextract
-val point_compress:
+val deserialize_public_key:
      #cs:S.ciphersuite
   -> pk: key_dh_public cs
   -> Stack (lbuffer uint8 (DH.nsize_public (S.kem_dh_of_cs cs)))
@@ -138,7 +138,7 @@ val point_compress:
       | SDH.DH_Curve25519 -> b == pk
       | SDH.DH_P256 -> b == gsub pk 1ul 64ul))
 
-let point_compress #cs pk =
+let deserialize_public_key #cs pk =
   match cs with
   | SDH.DH_Curve25519, _, _, _ -> pk
   | SDH.DH_P256, _, _, _ -> sub pk 1ul 64ul
@@ -680,7 +680,7 @@ val encap:
 [@ Meta.Attribute.inline_]
 let encap #cs o_shared o_enc skE pkR =
   let h0 = ST.get () in
-  let o_pkE = point_compress o_enc in
+  let o_pkE = deserialize_public_key #cs o_enc in
   let res1 = DH.secret_to_public #cs o_pkE skE in
   if res1 = 0ul then (
     push_frame ();
@@ -697,7 +697,7 @@ let encap #cs o_shared o_enc skE pkR =
       let o_kemcontext = create (nsize_two_public_dh cs) (u8 0) in
       copy (sub o_kemcontext 0ul (nsize_public_dh cs)) o_enc;
       let o_pkRm = sub o_kemcontext (nsize_public_dh cs) (nsize_public_dh cs) in
-      let o_pkR = point_compress #cs o_pkRm in
+      let o_pkR = deserialize_public_key #cs o_pkRm in
       copy o_pkR pkR;
       serialize_public_key o_pkRm o_pkR;
       let h4 = ST.get () in
@@ -720,6 +720,66 @@ let encap #cs o_shared o_enc skE pkR =
 
   ) else (
     assert (None? (S.encap cs (as_seq h0 skE) (as_seq h0 pkR)));
+    1ul
+  )
+
+#pop-options
+
+val decap:
+     #cs:S.ciphersuite
+  -> o_shared: key_kem cs
+  -> enc: key_dh_public cs
+  -> skR: key_dh_secret cs
+  -> Stack UInt32.t
+    (requires fun h0 ->
+      live h0 o_shared /\ live h0 enc /\ live h0 skR /\
+      disjoint o_shared enc /\ disjoint o_shared skR
+    )
+    (ensures fun h0 result h1 -> modifies (loc o_shared) h0 h1 /\
+      (let output = S.decap cs (as_seq h0 enc) (as_seq h0 skR) in
+       match result with
+       | 0ul -> Some? output /\ as_seq h1 o_shared `Seq.equal` Some?.v output
+       | 1ul -> None? output
+       | _ -> False)
+     )
+
+#push-options "--z3rlimit 200"
+
+let decap #cs o_shared enc skR =
+  push_frame ();
+  let h0 = ST.get () in
+  let pkE = deserialize_public_key #cs enc in
+  let dh = create (nsize_serialized_dh cs) (u8 0) in
+  let res1 = DH.dh #cs dh skR pkE in
+  if res1 = 0ul then (
+    let kemcontext = create (nsize_two_public_dh cs) (u8 0) in
+    let pkRm = sub kemcontext (nsize_public_dh cs) (nsize_public_dh cs) in
+    let pkR = deserialize_public_key #cs pkRm in
+
+    let res2 = DH.secret_to_public #cs pkR skR in
+    let h1 = ST.get () in
+
+    if res2 = 0ul then (
+      let h_m = ST.get () in
+      assert (as_seq h_m enc `Seq.equal` as_seq h0 enc);
+      copy (sub kemcontext 0ul (nsize_public_dh cs)) enc;
+
+      serialize_public_key #cs pkRm pkR;
+
+      let h2 = ST.get () in
+      assert (as_seq h2 kemcontext `Seq.equal` (as_seq h0 enc `Seq.append` S.serialize_public_key cs (as_seq h1 pkR)));
+
+      let dhm = prepare_dh #cs dh in
+
+      extract_and_expand #cs o_shared dhm (nsize_two_public_dh cs) kemcontext;
+      pop_frame ();
+      0ul
+    ) else (
+      pop_frame ();
+      1ul
+    )
+  ) else (
+    pop_frame ();
     1ul
   )
 
@@ -937,20 +997,30 @@ let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
 
 #pop-options
 
-(*
+#push-options "--z3rlimit 200"
+
 [@ Meta.Attribute.specialize]
-let setupBaseR #cs o_key_aead o_nonce_aead pkE skR infolen info =
+let setupBaseR #cs o_ctx enc skR infolen info =
   push_frame();
-  let pkR = create (nsize_dh_public cs) (u8 0) in
-  let pkR' = point_compress pkR in
-  let zz = create (nsize_dh_public cs) (u8 0) in
-  let res1 = DH.secret_to_public #cs pkR' skR in
-  point_decompress pkR' pkR;
-  let res2 = decap zz pkE skR in
-  ks_derive_default pkR zz pkE infolen info o_key_aead o_nonce_aead;
-  pop_frame();
-  combine_error_codes res1 res2
-*)
+  let pkR = create (nsize_serialized_dh cs) (u8 0) in
+  let res1 = DH.secret_to_public #cs pkR skR in
+  if res1 = 0ul then (
+    let shared = create (nsize_kem_key cs) (u8 0) in
+    let res2 = decap #cs shared enc skR in
+    if res2 = 0ul then (
+      key_schedule_base #cs o_ctx shared infolen info;
+      pop_frame ();
+      0ul
+    ) else (
+      pop_frame ();
+      1ul
+    )
+  ) else (
+    pop_frame ();
+    1ul
+  )
+
+#pop-options
 
 (*
 inline_for_extraction noextract

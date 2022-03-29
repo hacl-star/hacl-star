@@ -69,13 +69,14 @@ let setupBaseR_st (cs:S.ciphersuite) (p:Type0) =
      o_ctx : context_s cs
   -> pkE: key_dh_public cs
   -> skR: key_dh_secret cs
-  -> infolen: size_t{v infolen <= max_length_info (S.kem_hash_of_cs cs)}
+  -> infolen: size_t{v infolen <= max_length_info (S.hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
   -> Stack UInt32.t
      (requires fun h0 ->
         p /\
         ctx_invariant h0 o_ctx /\
-        live h0 pkE /\ live h0 skR /\ live h0 info
+        live h0 pkE /\ live h0 skR /\ live h0 info /\
+        B.loc_disjoint (ctx_loc o_ctx) (loc info)
       )
      (ensures fun h0 result h1 -> modifies (ctx_loc o_ctx) h0 h1 /\
        (let output = S.setupBaseR cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 info) in
