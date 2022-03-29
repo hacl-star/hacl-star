@@ -10,6 +10,36 @@ module Loops = Lib.LoopCombinators
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+(**
+ This is a specification for generic exponentiation defined as
+ a repeated application of a commutative monoid operation.
+
+  • Modular Exponentiation: repeated modular multiplication
+  • Elliptic Curve Scalar Multiplication: repeated point addition
+
+ In hacl-star, in order to obtain a verified C implementation,
+ we split our proofs into three steps:
+
+  • high-level specification (lib/Lib.Exponentiation)
+  • low-level specification (specs/Spec.Exponentiation)
+  • low-star implementation (code/bignum/Hacl.Impl.Exponentiation)
+
+ For example, to efficiently compute the EC scalar multiplication
+ for Ed25519, we use point addition and doubling formulas in
+ projective coordinates (see specs/Spec.Ed25519).
+
+  • we first prove that (points on the curve, aff_point_add) forms
+    a commutative monoid (`mk_ed25519_comm_monoid`)
+  • we then prove the relation between point addition and doubling
+    formulas in projective and affine coordinates (`mk_ed25519_concrete_ops`)
+  • finally, we can obtain any implementation of exponentiation,
+    e.g., a double fixed-window method, by providing the corresponding
+    instance of the `concrete_ops` type class (`point_mul_double`)
+
+ Another example is using Montgomery arithmetic (code/bignum) to compute
+ a modular exponentiation (lib/Lib.NatMod).
+*)
+
 inline_for_extraction
 class to_comm_monoid (t:Type) = {
   a_spec: Type;
