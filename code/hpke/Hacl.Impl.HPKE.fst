@@ -517,7 +517,7 @@ val labeled_expand_hash:
       Spec.Hash.Definitions.hash_length (S.hash_of_cs cs) <= v prklen /\
       Spec.Agile.HMAC.keysized (S.hash_of_cs cs) (v prklen) /\
 
-      SHa.hash_length (S.hash_of_cs cs) + 10 + v suite_id_len + v labellen + v infolen + SHa.block_length (S.hash_of_cs cs) + SHa.hash_length (S.hash_of_cs cs) + 1 <= max_size_t /\
+      SHa.hash_length (S.hash_of_cs cs) + 9 + v suite_id_len + v labellen + v infolen + SHa.block_length (S.hash_of_cs cs) + 1 <= max_size_t /\
       Spec.Agile.HKDF.expand_output_length_pred (S.hash_of_cs cs) (v l))
     (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
       as_seq h1 o_hash `Seq.equal` S.labeled_expand (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
@@ -569,13 +569,14 @@ val labeled_expand_kem:
   Stack unit
     (requires fun h ->
       live h o_hash /\ live h suite_id /\ live h prk /\ live h label /\ live h info /\
+      disjoint o_hash prk /\
       Spec.Hash.Definitions.hash_length (S.kem_hash_of_cs cs) <= v prklen /\
       Spec.Agile.HMAC.keysized (S.kem_hash_of_cs cs) (v prklen) /\
-      SHa.hash_length (S.kem_hash_of_cs cs) + 10 + v suite_id_len + v labellen + v infolen + SHa.block_length (S.kem_hash_of_cs cs) + SHa.hash_length (S.kem_hash_of_cs cs) + 1 <= max_size_t /\
+      SHa.hash_length (S.kem_hash_of_cs cs) + 9 + v suite_id_len + v labellen + v infolen + SHa.block_length (S.kem_hash_of_cs cs) + 1 <= max_size_t /\
       S.labeled_expand_info_length_pred (S.kem_hash_of_cs cs) (v suite_id_len + v labellen + v infolen) /\
       Spec.Agile.HKDF.expand_output_length_pred (S.kem_hash_of_cs cs) (v l))
     (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
-      as_seq h1 o_hash == S.labeled_expand (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
+      as_seq h1 o_hash `Seq.equal` S.labeled_expand (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
 #push-options "--z3rlimit 400"
@@ -602,7 +603,7 @@ let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infol
       `Seq.append` (as_seq h0 info)
       ));
 
-  HKDF.hkdf_expand #cs o_hash prk prklen tmp len l;
+  HKDF.hkdf_expand_kem #cs o_hash prk prklen tmp len l;
 
   pop_frame ()
 
@@ -618,7 +619,8 @@ val extract_and_expand:
   -> Stack unit
      (requires fun h ->
        live h o_shared /\ live h dh /\ live h kemcontext /\
-       disjoint o_shared dh /\ disjoint o_shared kemcontext
+       disjoint o_shared dh /\ disjoint o_shared kemcontext /\
+       SHa.hash_length (S.kem_hash_of_cs cs) + v ctxlen + 28 + SHa.block_length (S.kem_hash_of_cs cs) <= max_size_t
      )
      (ensures fun h0 _ h1 -> modifies (loc o_shared) h0 h1 /\
        as_seq h1 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h0 dh) (as_seq h0 kemcontext))
@@ -904,7 +906,7 @@ val key_schedule_base:
          (let ctx = S.key_schedule cs S.Base (as_seq h0 shared) (as_seq h0 info) None in
          as_ctx h1 o_ctx == ctx))
 
-#push-options "--z3rlimit 100 --ifuel 0"
+#push-options "--z3rlimit 100"
 
 let key_schedule_base #cs o_ctx shared infolen info =
   push_frame();
@@ -918,17 +920,37 @@ let key_schedule_base #cs o_ctx shared infolen info =
   key_schedule_end_base #cs o_ctx suite_id o_context o_secret;
   pop_frame()
 
+#pop-options
+
+#push-options "--z3rlimit 100"
+
 [@ Meta.Attribute.specialize]
 let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
   push_frame();
   let o_shared = create (nsize_kem_key cs) (u8 0) in
   let res = encap o_shared o_pkE skE pkR in
-  key_schedule_base o_ctx o_shared infolen info;
-  pop_frame();
-  res
+  if res = 0ul then (
+    key_schedule_base o_ctx o_shared infolen info;
+    pop_frame();
+    res
+  ) else (pop_frame (); 1ul)
 
 #pop-options
 
+(*
+[@ Meta.Attribute.specialize]
+let setupBaseR #cs o_key_aead o_nonce_aead pkE skR infolen info =
+  push_frame();
+  let pkR = create (nsize_dh_public cs) (u8 0) in
+  let pkR' = point_compress pkR in
+  let zz = create (nsize_dh_public cs) (u8 0) in
+  let res1 = DH.secret_to_public #cs pkR' skR in
+  point_decompress pkR' pkR;
+  let res2 = decap zz pkE skR in
+  ks_derive_default pkR zz pkE infolen info o_key_aead o_nonce_aead;
+  pop_frame();
+  combine_error_codes res1 res2
+*)
 
 (*
 inline_for_extraction noextract

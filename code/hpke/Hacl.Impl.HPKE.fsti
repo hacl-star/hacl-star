@@ -42,7 +42,7 @@ let setupBaseS_st (cs:S.ciphersuite) (p:Type0) =
   -> o_ctx: context_s cs
   -> skE: key_dh_secret cs
   -> pkR: serialized_point_dh cs
-  -> infolen: size_t{v infolen <= max_length_info (S.kem_hash_of_cs cs)}
+  -> infolen: size_t{v infolen <= max_length_info (S.hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
   -> Stack UInt32.t
      (requires fun h0 ->
