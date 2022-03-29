@@ -8,6 +8,7 @@ open Lib.Buffer
 open Lib.IntTypes
 
 module S = Spec.Agile.HPKE
+module SAEAD = Spec.Agile.AEAD
 
 #set-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
 
@@ -88,30 +89,40 @@ let setupBaseR_st (cs:S.ciphersuite) (p:Type0) =
        )
      )
 
-(*
 inline_for_extraction noextract
-let sealBase_st (cs:S.ciphersuite) (p:Type0) =
+let sealBase_st (cs:S.ciphersuite_not_export_only) (p:Type0) =
      skE: key_dh_secret cs
-  -> pkR: key_dh_public cs
-  -> mlen: size_t{v mlen <= S.max_length cs /\ v mlen + S.size_dh_public cs + 16 <= max_size_t}
-  -> m:lbuffer uint8 mlen
-  -> infolen: size_t {v infolen <= S.max_info}
+  -> pkR: serialized_point_dh cs
+  -> infolen: size_t {v infolen <= max_length_info (S.hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
-  -> output: lbuffer uint8 (size (v mlen + S.size_dh_public cs + 16))
+  -> aadlen: size_t {v aadlen <= SAEAD.max_length (S.aead_alg_of cs)}
+  -> aad: lbuffer uint8 aadlen
+  -> plainlen: size_t {v plainlen <= SAEAD.max_length (S.aead_alg_of cs) /\ v plainlen + 16 <= max_size_t}
+  -> plain: lbuffer uint8 plainlen
+  -> o_enc: key_dh_public cs
+  -> o_ct: lbuffer uint8 (size (v plainlen +  16))
   -> Stack UInt32.t
        (requires fun h0 ->
          p /\
-         live h0 output /\ live h0 skE /\ live h0 pkR /\
-         live h0 m /\ live h0 info /\
-         disjoint output pkR /\ disjoint output info /\ disjoint output m /\ disjoint output skE)
-       (ensures fun h0 result h1 -> modifies (loc output) h0 h1 /\
-         (let sealed = S.sealBase cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 m) (as_seq h0 info) in
+         live h0 o_enc /\ live h0 o_ct /\
+         live h0 skE /\ live h0 pkR /\ live h0 info /\
+         live h0 aad /\ live h0 plain /\
+         disjoint o_enc skE /\ disjoint o_enc pkR /\ disjoint o_enc info /\
+         disjoint o_enc aad /\ disjoint o_enc plain /\
+         disjoint o_ct skE /\ disjoint o_ct pkR /\ disjoint o_ct info /\
+         disjoint o_ct aad /\ disjoint o_ct plain /\ disjoint o_ct o_enc
+       )
+       (ensures fun h0 result h1 -> modifies (loc o_enc |+| loc o_ct) h0 h1 /\
+         (let sealed = S.sealBase cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 info) (as_seq h0 aad) (as_seq h0 plain) in
          match result with
-         | 0ul -> Some? sealed /\ as_seq h1 output `Seq.equal` Some?.v sealed
+         | 0ul -> Some? sealed /\
+           (let enc, ct = Some?.v sealed in
+           as_seq h1 o_enc `Seq.equal` enc /\ as_seq h1 o_ct `Seq.equal` ct)
          | 1ul -> None? sealed
          | _ -> False)
        )
 
+(*
 inline_for_extraction noextract
 let openBase_st (cs:S.ciphersuite) (p:Type0) =
      pkE: key_dh_public cs
@@ -141,10 +152,10 @@ val setupBaseS: #cs:S.ciphersuite -> setupBaseS_st cs True
 noextract inline_for_extraction
 val setupBaseR: #cs:S.ciphersuite -> setupBaseR_st cs True
 
-(*
 noextract inline_for_extraction
-val sealBase: #cs:S.ciphersuite -> sealBase_st cs True
+val sealBase: #cs:S.ciphersuite_not_export_only -> sealBase_st cs True
 
+(*
 noextract inline_for_extraction
 val openBase: #cs:S.ciphersuite -> openBase_st cs True
 *)

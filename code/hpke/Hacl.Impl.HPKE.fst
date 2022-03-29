@@ -1022,6 +1022,60 @@ let setupBaseR #cs o_ctx enc skR infolen info =
 
 #pop-options
 
+
+assume
+val context_seal:
+    cs:S.ciphersuite_not_export_only
+  -> ctx:context_s cs
+  -> aadlen: size_t {v aadlen <= SAEAD.max_length (S.aead_alg_of cs)}
+  -> aad: lbuffer uint8 aadlen
+  -> plainlen: size_t {v plainlen <= SAEAD.max_length (S.aead_alg_of cs) /\ v plainlen + 16 <= max_size_t}
+  -> plain: lbuffer uint8 plainlen
+  -> o_ct: lbuffer uint8 (size (v plainlen +  16))
+  -> Stack UInt32.t
+     (requires fun h ->
+       ctx_invariant h ctx /\ live h aad /\ live h plain /\ live h o_ct /\
+       disjoint o_ct aad /\ disjoint o_ct plain /\
+       B.loc_disjoint (ctx_loc ctx) (loc aad) /\
+       B.loc_disjoint (ctx_loc ctx) (loc plain) /\
+       B.loc_disjoint (ctx_loc ctx) (loc o_ct)
+     )
+     (ensures fun h0 result h1 -> modifies (ctx_loc ctx |+| loc o_ct) h0 h1 /\
+       (let sealed = S.context_seal cs (as_ctx h0 ctx) (as_seq h0 aad) (as_seq h0 plain) in
+         match result with
+         | 0ul -> Some? sealed /\
+           (let new_ctx, ct = Some?.v sealed in
+           as_ctx h1 ctx == new_ctx /\ as_seq h1 o_ct `Seq.equal` ct)
+         | 1ul -> None? sealed
+         | _ -> False)
+       )
+
+#push-options "--z3rlimit 300"
+
+[@ Meta.Attribute.specialize]
+let sealBase #cs skE pkR infolen info aadlen aad plainlen plain o_enc o_ct =
+  push_frame ();
+  let ctx_key = create (nsize_aead_key cs) (u8 0) in
+  let ctx_nonce = create (nsize_aead_nonce cs) (u8 0) in
+  let ctx_seq = create 1ul 0uL in
+  let ctx_exporter = create (nsize_hash_length cs) (u8 0) in
+  let o_ctx:context_s cs = {ctx_key; ctx_nonce; ctx_seq; ctx_exporter} in
+  let h = ST.get () in
+  assert (ctx_invariant h o_ctx);
+  let res = setupBaseS #cs o_enc o_ctx skE pkR infolen info in
+  if res = 0ul then (
+    let res = context_seal cs o_ctx aadlen aad plainlen plain o_ct in
+    pop_frame ();
+    res
+  ) else (
+    pop_frame ();
+    1ul
+  )
+
+#pop-options
+
+
+
 (*
 inline_for_extraction noextract
 let psk (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_psk cs))
