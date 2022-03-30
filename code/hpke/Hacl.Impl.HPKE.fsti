@@ -89,6 +89,11 @@ let setupBaseR_st (cs:S.ciphersuite) (p:Type0) =
        )
      )
 
+(* The error code here is not exact w.r.t. the spec.
+   The reason is that, in the spec, the overflow of an internal counter is defined
+   when it runs above 2**96.
+   In the code, this counter is represented as a uint64, so the overflow occurs earlier.
+   Apart from this case, the behaviour of the impl and the spec should be identical *)
 inline_for_extraction noextract
 let sealBase_st (cs:S.ciphersuite_not_export_only) (p:Type0) =
      skE: key_dh_secret cs
@@ -118,7 +123,7 @@ let sealBase_st (cs:S.ciphersuite_not_export_only) (p:Type0) =
          | 0ul -> Some? sealed /\
            (let enc, ct = Some?.v sealed in
            as_seq h1 o_enc `Seq.equal` enc /\ as_seq h1 o_ct `Seq.equal` ct)
-         | 1ul -> None? sealed
+         | 1ul -> True
          | _ -> False)
        )
 

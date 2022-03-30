@@ -1023,6 +1023,15 @@ let setupBaseR #cs o_ctx enc skR infolen info =
 #pop-options
 
 assume
+val nat_to_bytes_be_12:
+  o:lbuffer uint8 12ul ->
+  l:uint64 ->
+  Stack unit
+    (requires fun h -> live h o)
+    (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
+      (assert_norm (pow2 (8 * 12) == 79228162514264337593543950336);
+      as_seq h1 o `Seq.equal` Lib.ByteSequence.nat_to_bytes_be 12 (v l)))
+
 val context_compute_nonce:
      cs:S.ciphersuite_not_export_only
   -> ctx:context_s cs
@@ -1035,7 +1044,14 @@ val context_compute_nonce:
       as_seq h1 o_nonce `Seq.equal` S.context_compute_nonce cs (as_ctx h0 ctx) (UInt64.v seq)
     )
 
-assume
+let context_compute_nonce cs ctx seq o_nonce =
+  push_frame ();
+  let enc = create (nsize_aead_nonce cs) (u8 0) in
+  nat_to_bytes_be_12 enc (secret seq);
+  C.Loops.map2 o_nonce enc ctx.ctx_nonce 12ul (logxor #U8 #SEC);
+  pop_frame ()
+
+
 val context_increment_seq:
      cs:S.ciphersuite_not_export_only
   -> ctx:context_s cs
@@ -1045,10 +1061,23 @@ val context_increment_seq:
        (let new_ctx = S.context_increment_seq cs (as_ctx h0 ctx) in
        match res with
        | 0ul -> Some? new_ctx /\ as_ctx h1 ctx == Some?.v new_ctx
-       | 1ul -> None? new_ctx
+       | 1ul -> True
        | _ -> False)
      )
 
+let context_increment_seq cs ctx =
+  let s = index ctx.ctx_seq 0ul in
+  assert_norm (maxint U64 == 18446744073709551615);
+  if s = 18446744073709551615uL then
+    1ul
+  else (
+    let s' = s +. 1uL in
+    assert (v s' == v s + 1);
+    (* Need to trigger that s' is smaller than max_seq *)
+    assert_norm (pow2 96 == 79228162514264337593543950336);
+    upd ctx.ctx_seq 0ul s';
+    0ul
+  )
 
 val context_seal:
      cs:S.ciphersuite_not_export_only
@@ -1072,7 +1101,7 @@ val context_seal:
          | 0ul -> Some? sealed /\
            (let new_ctx, ct = Some?.v sealed in
            as_ctx h1 ctx == new_ctx /\ as_seq h1 o_ct `Seq.equal` ct)
-         | 1ul -> None? sealed
+         | 1ul -> True
          | _ -> False)
        )
 
