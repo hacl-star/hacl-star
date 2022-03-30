@@ -1022,10 +1022,36 @@ let setupBaseR #cs o_ctx enc skR infolen info =
 
 #pop-options
 
+assume
+val context_compute_nonce:
+     cs:S.ciphersuite_not_export_only
+  -> ctx:context_s cs
+  -> seq:seq_aead cs
+  -> o_nonce: nonce_aead cs
+  -> Stack unit
+    (requires fun h ->
+      ctx_invariant h ctx /\ live h o_nonce /\ B.loc_disjoint (ctx_loc ctx) (loc o_nonce))
+    (ensures fun h0 _ h1 -> modifies (loc o_nonce) h0 h1 /\
+      as_seq h1 o_nonce `Seq.equal` S.context_compute_nonce cs (as_ctx h0 ctx) (UInt64.v seq)
+    )
 
 assume
+val context_increment_seq:
+     cs:S.ciphersuite_not_export_only
+  -> ctx:context_s cs
+  -> Stack UInt32.t
+     (requires fun h -> ctx_invariant h ctx)
+     (ensures fun h0 res h1 -> modifies (ctx_loc ctx) h0 h1 /\
+       (let new_ctx = S.context_increment_seq cs (as_ctx h0 ctx) in
+       match res with
+       | 0ul -> Some? new_ctx /\ as_ctx h1 ctx == Some?.v new_ctx
+       | 1ul -> None? new_ctx
+       | _ -> False)
+     )
+
+
 val context_seal:
-    cs:S.ciphersuite_not_export_only
+     cs:S.ciphersuite_not_export_only
   -> ctx:context_s cs
   -> aadlen: size_t {v aadlen <= SAEAD.max_length (S.aead_alg_of cs)}
   -> aad: lbuffer uint8 aadlen
@@ -1049,6 +1075,20 @@ val context_seal:
          | 1ul -> None? sealed
          | _ -> False)
        )
+
+#push-options "--z3rlimit 100"
+
+let context_seal cs ctx aadlen aad plainlen plain o_ct =
+  push_frame ();
+  let nonce = create (nsize_aead_nonce cs) (u8 0) in
+  let s = index ctx.ctx_seq 0ul in
+  context_compute_nonce cs ctx s nonce;
+  AEAD.aead_encrypt #cs ctx.ctx_key nonce aadlen aad plainlen plain o_ct;
+  let res = context_increment_seq cs ctx in
+  pop_frame();
+  res
+
+#pop-options
 
 #push-options "--z3rlimit 300"
 
