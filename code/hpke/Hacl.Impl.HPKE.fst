@@ -1022,16 +1022,69 @@ let setupBaseR #cs o_ctx enc skR infolen info =
 
 #pop-options
 
-assume
+inline_for_extraction noextract
 val nat_to_bytes_be_12:
   o:lbuffer uint8 12ul ->
   l:uint64 ->
   Stack unit
-    (requires fun h -> live h o)
+    (requires fun h -> live h o /\ as_seq h o `Seq.equal` Lib.Sequence.create 12 (u8 0))
     (ensures fun h0 _ h1 -> modifies (loc o) h0 h1 /\
       (assert_norm (pow2 (8 * 12) == 79228162514264337593543950336);
       as_seq h1 o `Seq.equal` Lib.ByteSequence.nat_to_bytes_be 12 (v l)))
 
+let lemma_nat_to_bytes_12 (n:nat{n < pow2 64 /\ n < pow2 96})
+  : Lemma (Lib.ByteSequence.nat_to_bytes_be 12 n `Seq.equal`
+    (Lib.Sequence.create 4 (u8 0) `Seq.append` Lib.ByteSequence.nat_to_bytes_be 8 n))
+  =
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 8 n 0;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 8 n 1;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 8 n 2;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 8 n 3;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 8 n 4;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 8 n 5;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 8 n 6;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 8 n 7;
+
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 0;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 1;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 2;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 3;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 4;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 5;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 6;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 7;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 8;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 9;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 10;
+  Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 12 n 11;
+
+  assert_norm (pow2 (8 * 11) == 309485009821345068724781056);
+  FStar.Math.Lemmas.lemma_div_lt_nat n (8 * 11) 64;
+  assert_norm (pow2 (8 * 10) == 1208925819614629174706176);
+  FStar.Math.Lemmas.lemma_div_lt_nat n (8 * 10) 64;
+  assert_norm (pow2 (8 * 9) == 4722366482869645213696);
+  FStar.Math.Lemmas.lemma_div_lt_nat n (8 * 9) 64;
+  assert_norm (pow2 (8 * 8) == 18446744073709551616);
+  FStar.Math.Lemmas.lemma_div_lt_nat n (8 * 8) 64
+
+inline_for_extraction noextract
+let nat_to_bytes_be_12 o l =
+  Lib.ByteBuffer.uint_to_bytes_be (sub o 4ul 8ul) l;
+  let h1 = ST.get () in
+  assert (as_seq h1 (gsub o 4ul 8ul) `Seq.equal` Lib.ByteSequence.uint_to_bytes_be l);
+
+  Lib.ByteSequence.lemma_uint_to_bytes_be_preserves_value l;
+  assert (Lib.ByteSequence.nat_from_bytes_be (as_seq h1 (gsub o 4ul 8ul)) == v l);
+
+  Lib.ByteSequence.lemma_nat_from_to_bytes_be_preserves_value (as_seq h1 (gsub o 4ul 8ul)) 8;
+  assert (as_seq h1 (gsub o 4ul 8ul) == Lib.ByteSequence.nat_to_bytes_be 8 (v l));
+
+  assert_norm (pow2 (8 * 12) == 79228162514264337593543950336);
+  lemma_nat_to_bytes_12 (v l);
+
+  assert (as_seq h1 (gsub o 0ul 4ul) `Seq.equal` Lib.Sequence.create 4 (u8 0))
+
+inline_for_extraction noextract
 val context_compute_nonce:
      cs:S.ciphersuite_not_export_only
   -> ctx:context_s cs
@@ -1044,6 +1097,7 @@ val context_compute_nonce:
       as_seq h1 o_nonce `Seq.equal` S.context_compute_nonce cs (as_ctx h0 ctx) (UInt64.v seq)
     )
 
+inline_for_extraction noextract
 let context_compute_nonce cs ctx seq o_nonce =
   push_frame ();
   let enc = create (nsize_aead_nonce cs) (u8 0) in
