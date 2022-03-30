@@ -1,4 +1,4 @@
-KREMLIN_HOME ?= ../../../../kremlin
+KRML_HOME ?= ../../../../karamel
 
 -include Makefile.include
 
@@ -6,7 +6,7 @@ EVERCRYPT_HOME=../../dist/gcc-compatible
 MLCRYPTO_HOME?=../../../../MLCrypto
 OPENSSL_HOME=$(MLCRYPTO_HOME)/openssl
 
-CFLAGS = -I $(KREMLIN_HOME)/include -g
+CFLAGS = -I $(KRML_HOME)/include -g
 LDFLAGS = -L $(EVERCRYPT_HOME) -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))
@@ -25,7 +25,7 @@ ALL_SOURCES = Test.c
 
 $(info All sources are $(ALL_SOURCES))
 
-LDFLAGS += $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+LDFLAGS += $(KRML_HOME)/krmllib/dist/generic/libkrmllib.a
 ifeq ($(OS),Windows_NT)
 LDFLAGS += $(EVERCRYPT_HOME)/libevercrypt.dll -lbcrypt
 endif

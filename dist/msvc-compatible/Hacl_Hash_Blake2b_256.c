@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Hash_Blake2b_256.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_Blake2.h"
 
 static FStar_UInt128_uint128
