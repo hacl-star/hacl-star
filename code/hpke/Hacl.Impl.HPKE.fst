@@ -1197,7 +1197,69 @@ let sealBase #cs skE pkR infolen info aadlen aad plainlen plain o_enc o_ct =
 
 #pop-options
 
+val context_open:
+     cs:S.ciphersuite_not_export_only
+  -> ctx:context_s cs
+  -> aadlen: size_t {v aadlen <= SAEAD.max_length (S.aead_alg_of cs)}
+  -> aad: lbuffer uint8 aadlen
+  -> ctlen: size_t {16 < v ctlen /\ v ctlen <= SAEAD.max_length (S.aead_alg_of cs) }
+  -> ct: lbuffer uint8 ctlen
+  -> o_pt: lbuffer uint8 (size (v ctlen - 16))
+  -> Stack UInt32.t
+     (requires fun h ->
+       ctx_invariant h ctx /\ live h aad /\ live h ct /\ live h o_pt /\
+       disjoint o_pt aad /\ disjoint o_pt ct /\
+       B.loc_disjoint (ctx_loc ctx) (loc aad) /\
+       B.loc_disjoint (ctx_loc ctx) (loc ct) /\
+       B.loc_disjoint (ctx_loc ctx) (loc o_pt)
+     )
+     (ensures fun h0 result h1 -> modifies (ctx_loc ctx |+| loc o_pt) h0 h1 /\
+       (let sealed = S.context_open cs (as_ctx h0 ctx) (as_seq h0 aad) (as_seq h0 ct) in
+         match result with
+         | 0ul -> Some? sealed /\
+           (let new_ctx, pt = Some?.v sealed in
+           as_ctx h1 ctx == new_ctx /\ as_seq h1 o_pt `Seq.equal` pt)
+         | 1ul -> True
+         | _ -> False)
+       )
 
+let context_open cs ctx aadlen aad ctlen ct o_pt =
+  push_frame ();
+  let nonce = create (nsize_aead_nonce cs) (u8 0) in
+  let s = index ctx.ctx_seq 0ul in
+  context_compute_nonce cs ctx s nonce;
+  let res = AEAD.aead_decrypt #cs ctx.ctx_key nonce aadlen aad (ctlen -. 16ul) o_pt ct in
+  if res = 0ul then (
+    let res = context_increment_seq cs ctx in
+    pop_frame();
+    res
+  ) else (
+    pop_frame();
+    1ul
+  )
+
+#push-options "--z3rlimit 300"
+
+[@ Meta.Attribute.specialize]
+let openBase #cs pkE skR infolen info aadlen aad ctlen ct o_pt =
+  push_frame ();
+  let ctx_key = create (nsize_aead_key cs) (u8 0) in
+  let ctx_nonce = create (nsize_aead_nonce cs) (u8 0) in
+  let ctx_seq = create 1ul 0uL in
+  let ctx_exporter = create (nsize_hash_length cs) (u8 0) in
+  let o_ctx:context_s cs = {ctx_key; ctx_nonce; ctx_seq; ctx_exporter} in
+  let h = ST.get () in
+  let res = setupBaseR #cs o_ctx pkE skR infolen info in
+  if res = 0ul then (
+    let res = context_open cs o_ctx aadlen aad ctlen ct o_pt in
+    pop_frame();
+    res
+  ) else (
+    pop_frame ();
+    1ul
+  )
+
+#pop-options
 
 (*
 inline_for_extraction noextract

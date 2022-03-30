@@ -127,29 +127,36 @@ let sealBase_st (cs:S.ciphersuite_not_export_only) (p:Type0) =
          | _ -> False)
        )
 
-(*
+(* Same issue as above for the exactness of the error code *)
 inline_for_extraction noextract
-let openBase_st (cs:S.ciphersuite) (p:Type0) =
+let openBase_st (cs:S.ciphersuite_not_export_only) (p:Type0) =
      pkE: key_dh_public cs
   -> skR: key_dh_secret cs
-  -> mlen: size_t{S.size_dh_public cs + S.size_aead_tag cs <= v mlen /\ v mlen <= S.max_length cs}
-  -> m:lbuffer uint8 mlen
-  -> infolen: size_t {v infolen <= S.max_info}
+  -> infolen: size_t {v infolen <= max_length_info (S.hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
-  -> output: lbuffer uint8 (size (v mlen - S.size_dh_public cs - S.size_aead_tag cs))
+  -> aadlen: size_t {v aadlen <= SAEAD.max_length (S.aead_alg_of cs)}
+  -> aad: lbuffer uint8 aadlen
+  -> ctlen: size_t{16 < v ctlen /\ v ctlen <= SAEAD.max_length (S.aead_alg_of cs) }
+  -> ct:lbuffer uint8 ctlen
+  -> o_pt: lbuffer uint8 (size (v ctlen - 16))
   -> Stack UInt32.t
        (requires fun h0 ->
          p /\
-         live h0 output /\ live h0 pkE /\ live h0 skR /\
-         live h0 m /\ live h0 info /\
-         disjoint output info /\ disjoint output m)
-       (ensures fun h0 z h1 -> modifies (loc output) h0 h1 /\
-         (let plain = S.openBase cs (as_seq h0 skR) (as_seq h0 m) (as_seq h0 info) in
-         match z with
-         | 0ul -> Some? plain /\ as_seq h1 output == Some?.v plain
-         | 1ul -> None? plain
-         | _ -> False))
-*)
+         live h0 o_pt /\
+         live h0 skR /\ live h0 pkE /\ live h0 info /\
+         live h0 aad /\ live h0 ct /\
+         disjoint o_pt skR /\ disjoint o_pt pkE /\ disjoint o_pt info /\
+         disjoint o_pt aad /\ disjoint o_pt ct
+       )
+       (ensures fun h0 result h1 -> modifies (loc o_pt) h0 h1 /\
+         (let sealed = S.openBase cs (as_seq h0 pkE) (as_seq h0 skR) (as_seq h0 info) (as_seq h0 aad) (as_seq h0 ct) in
+         match result with
+         | 0ul -> Some? sealed /\
+           (let pt = Some?.v sealed in
+           as_seq h1 o_pt `Seq.equal` pt)
+         | 1ul -> True
+         | _ -> False)
+       )
 
 noextract inline_for_extraction
 val setupBaseS: #cs:S.ciphersuite -> setupBaseS_st cs True
@@ -160,7 +167,5 @@ val setupBaseR: #cs:S.ciphersuite -> setupBaseR_st cs True
 noextract inline_for_extraction
 val sealBase: #cs:S.ciphersuite_not_export_only -> sealBase_st cs True
 
-(*
 noextract inline_for_extraction
-val openBase: #cs:S.ciphersuite -> openBase_st cs True
-*)
+val openBase: #cs:S.ciphersuite_not_export_only -> openBase_st cs True
