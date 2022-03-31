@@ -1,5 +1,5 @@
 [
-  "\u0013˚\u0011˚†\t#.˚8\t◊ë{ûè",
+  "\u0017b\rM\u0010π/åÂO\u000f]‘§A.",
   [
     [
       "Lib.NatMod.mk_nat_comm_monoid",
@@ -990,6 +990,123 @@
       ],
       0,
       "3a9258b5aa860c01e290f761d8498229"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_eq_mul_mod1",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Lib.NatMod.prime", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_inversion",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "3a3c9e110b0ba50ed756b2c9bae4ffcf"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_eq_mul_mod1",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Lib.NatMod.prime", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_inversion",
+        "primitive_Prims.op_Equality", "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "6c3ae39c70662d4069ec9e55b0fa554c"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_eq_mul_mod2",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Lib.NatMod.prime", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_inversion",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "be51ef2e9c749b33e0193467333ee217"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_eq_mul_mod2",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.mul_mod",
+        "equation_Lib.NatMod.nat_mod", "equation_Lib.NatMod.prime",
+        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_inversion",
+        "int_typing", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_828958215008c7ce6253d89a707fd615",
+        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "0fa99217871a844b0a3b9d38c39cb1f2"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_eq_mul_mod",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Lib.NatMod.nat_mod",
+        "equation_Lib.NatMod.prime", "equation_Prims.eqtype",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "function_token_typing_Prims.int",
+        "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "haseqTm_refine_c1424615841f28cac7fc34e92b7ff33c", "int_inversion",
+        "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_c94e6d54c545297365221a2bcc484b9a"
+      ],
+      0,
+      "43a2b46a46383db6b6b8c0571861dd48"
+    ],
+    [
+      "Lib.NatMod.lemma_div_mod_eq_mul_mod",
+      2,
+      0,
+      0,
+      [
+        "@query", "equation_Lib.NatMod.nat_mod",
+        "primitive_Prims.op_Equality"
+      ],
+      0,
+      "f319b02757c6ef69d47c386de53d6c15"
     ]
   ]
 ]
