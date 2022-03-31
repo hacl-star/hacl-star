@@ -31,7 +31,6 @@ val expand_keys:
       as_seq h1 (gsub expanded_keys 64ul 32ul) == prefix))
 
 
-inline_for_extraction noextract
 val sign_expanded:
     signature:lbuffer uint8 64ul
   -> expanded_keys:lbuffer uint8 96ul
