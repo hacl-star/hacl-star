@@ -8,6 +8,15 @@ open Lib.Buffer
 
 #set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
+[@@ CPrologue
+"/********************************************************************************
+  Verified C library for EdDSA signing and verification on the edwards25519 curve.
+********************************************************************************/\n";
+
+Comment "Compute the public key from the private key.
+
+  The outparam `public_key`  points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32]."]
 val secret_to_public:
     public_key:lbuffer uint8 32ul
   -> private_key:lbuffer uint8 32ul ->
@@ -18,6 +27,13 @@ val secret_to_public:
       as_seq h1 public_key == Spec.Ed25519.secret_to_public (as_seq h0 private_key))
 
 
+[@@ Comment "Compute the expanded keys for an Ed25519 signature.
+
+  The outparam `expanded_keys` points to 96 bytes of valid memory, i.e., uint8_t[96].
+  The argument `private_key`   points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message."]
 val expand_keys:
     expanded_keys:lbuffer uint8 96ul
   -> private_key:lbuffer uint8 32ul ->
@@ -31,6 +47,16 @@ val expand_keys:
       as_seq h1 (gsub expanded_keys 64ul 32ul) == prefix))
 
 
+[@@ Comment "Create an Ed25519 signature with the (precomputed) expanded keys.
+
+  The outparam `signature`     points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `expanded_keys` points to 96 bytes of valid memory, i.e., uint8_t[96].
+  The argument `msg`    points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+
+  The argument `expanded_keys` is obtained through `expand_keys`.
+
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message."]
 val sign_expanded:
     signature:lbuffer uint8 64ul
   -> expanded_keys:lbuffer uint8 96ul
@@ -48,6 +74,16 @@ val sign_expanded:
         (as_seq h0 msg))
 
 
+[@@ Comment "Create an Ed25519 signature.
+
+  The outparam `signature`   points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The argument `msg`  points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+
+  The function first calls `expand_keys` and then invokes `sign_expanded`.
+
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message."]
 val sign:
     signature:lbuffer uint8 64ul
   -> private_key:lbuffer uint8 32ul
@@ -61,6 +97,13 @@ val sign:
       as_seq h1 signature == Spec.Ed25519.sign (as_seq h0 private_key) (as_seq h0 msg))
 
 
+[@@ Comment "Verify an Ed25519 signature.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `public_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `signature`  points to 64 bytes of valid memory, i.e., uint8_t[64]."]
 val verify:
     public_key:lbuffer uint8 32ul
   -> msg_len:size_t
