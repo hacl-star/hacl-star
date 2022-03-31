@@ -445,7 +445,7 @@ val labeled_extract_kem:
     (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
       as_seq h1 o_hash `Seq.equal` S.labeled_extract (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 salt) (as_seq h0 label) (as_seq h0 ikm))
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 
 inline_for_extraction noextract
 let labeled_extract_kem #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
