@@ -13,7 +13,7 @@ open Hacl.Spec.BignumQ.Definitions
 module ST = FStar.HyperStack.ST
 module S = Spec.Ed25519
 
-#set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
 let qelemB = lbuffer uint64 5ul
@@ -44,6 +44,12 @@ noextract
 let qelem_wide_fits (h:mem) (f:qelem_wide) (m:scale64_10) : Type0 =
   let s = as_seq h f in
   qelem_wide_fits5 (s.[0], s.[1], s.[2], s.[3], s.[4], s.[5], s.[6], s.[7], s.[8], s.[9]) m
+
+
+noextract
+let scalar_inv_full_t (h:mem) (s:lbuffer uint64 5ul) =
+  qelem_fits h s (1, 1, 1, 1, 1) /\
+  as_nat h s < Spec.Ed25519.q
 
 
 val barrett_reduction:
