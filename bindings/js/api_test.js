@@ -3,6 +3,7 @@
 var path = require('path');
 var HaclWasm = require(path.resolve(__dirname, './api.js'));
 var test_vectors = require(path.resolve(__dirname, './api.json'));
+var loader = require(path.resolve(__dirname, './loader.js'));
 
 function buf2hex(buffer) {
   return Array.prototype.map.call(new Uint8Array(buffer), function(x) {
@@ -27,7 +28,7 @@ var preprocessing = function(typ, value) {
   if (typ === "bool") {
     return JSON.parse(value);
   }
-  if (typ === "int") {
+  if (typ === "int32") {
     return JSON.parse(value);
   }
   throw "Unimplemented !";
@@ -40,7 +41,7 @@ var postprocessing = function(typ, value) {
   if (typ === "bool") {
     return value.toString();
   }
-  if (typ === "int") {
+  if (typ === "int32") {
     return value.toString();
   }
   throw "Unimplemented !";
@@ -101,7 +102,18 @@ function checkTestVectors(func_sig, func, msg) {
   }
 }
 
+// A series of hand-written tests for modules that require API testing that
+// cannot be described at the level of a single function.
+function testBignum64(Hacl) {
+  let pa = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4100000000000000"));
+  let pb = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4200000000000000"));
+  let pc = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4300000000000000"));
+}
+
+// Main test driver
 HaclWasm.getInitializedHaclModule().then(function(Hacl) {
+  testBignum64(Hacl);
+
   var tests = [];
   Promise.all(Object.keys(test_vectors).map(function(key_module) {
     Object.keys(test_vectors[key_module]).map(function(key_func) {

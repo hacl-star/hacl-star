@@ -136,7 +136,7 @@
         {
           "name": "alen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "aad",
@@ -151,7 +151,7 @@
         {
           "name": "len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "plaintext",
@@ -212,7 +212,7 @@
         {
           "name": "alen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "aad",
@@ -227,7 +227,7 @@
         {
           "name": "len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "plaintext",
@@ -260,7 +260,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "int32",
         "tests": [
           0
         ]
@@ -328,7 +328,7 @@
       }, {
         "name": "len",
         "kind": "input",
-        "type": "int"
+        "type": "int32"
       }, {
         "name": "message",
         "kind": "input",
@@ -365,7 +365,7 @@
         {
           "name": "len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         }, {
           "name": "message",
           "kind": "input",
@@ -424,7 +424,7 @@
         {
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "hash",
@@ -462,7 +462,7 @@
         {
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "hash",
@@ -500,7 +500,7 @@
         {
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "hash",
@@ -526,7 +526,7 @@
       "custom_module_name": true,
       "name": "Hacl_Blake2b_32_blake2b",
       "args": [{
-          "type": "int",
+          "type": "int32",
           "kind": "input",
           "name": "output_len",
           "interface_index": 0,
@@ -544,7 +544,7 @@
           ]
         },
         {
-          "type": "int",
+          "type": "int32",
           "kind": "input",
           "name": "data_len"
         }, {
@@ -559,7 +559,7 @@
           ]
         },
         {
-          "type": "int",
+          "type": "int32",
           "kind": "input",
           "name": "key_len"
         }, {
@@ -583,7 +583,7 @@
       "custom_module_name": true,
       "name": "Hacl_Blake2s_32_blake2s",
       "args": [{
-          "type": "int",
+          "type": "int32",
           "kind": "input",
           "name": "output_len",
           "interface_index": 0,
@@ -606,7 +606,7 @@
           ]
         },
         {
-          "type": "int",
+          "type": "int32",
           "kind": "input",
           "name": "data_len"
         }, {
@@ -623,7 +623,7 @@
           ]
         },
         {
-          "type": "int",
+          "type": "int32",
           "kind": "input",
           "name": "key_len"
         }, {
@@ -652,7 +652,7 @@
       "args": [{
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "input",
@@ -690,7 +690,7 @@
       "args": [{
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "input",
@@ -728,7 +728,7 @@
       "args": [{
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "input",
@@ -766,7 +766,7 @@
       "args": [{
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "input",
@@ -805,7 +805,7 @@
       "args": [{
           "name": "rate",
           "kind": "input",
-          "type": "int",
+          "type": "int32",
           "interface_index": 0,
           "tests": [
               1088
@@ -814,7 +814,7 @@
         {
           "name": "capacity",
           "kind": "input",
-          "type": "int",
+          "type": "int32",
           "interface_index": 1,
           "tests": [
               512
@@ -823,7 +823,7 @@
         {
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "input",
@@ -838,7 +838,7 @@
         {
           "name": "suffix",
           "kind": "input",
-          "type": "int",
+          "type": "int32",
           "interface_index": 3,
           "tests": [
               1
@@ -847,7 +847,7 @@
         {
           "name": "output_len",
           "kind": "input",
-          "type": "int",
+          "type": "int32",
           "interface_index": 4,
           "tests": [
               32
@@ -899,7 +899,7 @@
         }, {
           "name": "key_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         }, {
           "name": "data",
           "kind": "input",
@@ -915,7 +915,7 @@
         }, {
           "name": "data_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         }
       ],
       "return": {
@@ -946,7 +946,7 @@
         }, {
           "name": "key_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         }, {
           "name": "data",
           "kind": "input",
@@ -959,7 +959,7 @@
         }, {
           "name": "data_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         }
       ],
       "return": {
@@ -997,7 +997,7 @@
         {
           "name": "salt_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         }, {
           "name": "ikm",
           "kind": "input",
@@ -1013,7 +1013,7 @@
         {
           "name": "ikm_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         }
       ],
       "return": {
@@ -1049,7 +1049,7 @@
         {
           "name": "prk_len",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         }, {
           "name": "info",
           "kind": "input",
@@ -1065,11 +1065,11 @@
         {
           "name": "infolen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         }, {
           "name": "len",
           "kind": "input",
-          "type": "int",
+          "type": "int32",
           "interface_index": 2,
           "tests": [
               42,
@@ -1112,7 +1112,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "n",
@@ -1138,7 +1138,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "int32",
         "tests": [
             0,
             0
@@ -1173,7 +1173,7 @@
         {
           "name": "clen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "n",
@@ -1199,7 +1199,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "int32",
         "tests": [
             0,
             0
@@ -1245,11 +1245,11 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "int32",
         "tests": [
             0,
             0
-]
+        ]
       }
     },
     "box_easy_afternm": {
@@ -1280,7 +1280,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "n",
@@ -1306,7 +1306,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "int32",
         "tests": [
             0,
             0
@@ -1341,7 +1341,7 @@
         {
           "name": "clen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "n",
@@ -1367,7 +1367,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "int32",
         "tests": [
             0,
             0
@@ -1412,7 +1412,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "n",
@@ -1438,7 +1438,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "int32",
         "tests": [
             0,
             0
@@ -1484,7 +1484,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "n",
@@ -1510,7 +1510,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "int32",
         "tests": [
             0,
             0
@@ -1534,7 +1534,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "m",
@@ -1580,7 +1580,7 @@
       "args": [{
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "m",
@@ -1643,7 +1643,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "m",
@@ -1689,7 +1689,7 @@
       "args": [{
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "int32"
         },
         {
           "name": "m",
@@ -1967,6 +1967,33 @@
             "true",
             "false"
         ]
+      }
+    }
+  },
+  "Bignum_64": {
+    "new_bn_from_bytes_le": {
+      "module": "Hacl_Bignum64",
+      "name": "new_bn_from_bytes_le",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "int32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "bytes",
+          "kind": "input",
+          "type": "buffer",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "kind": "layout",
+        "type": "buffer"
       }
     }
   }
