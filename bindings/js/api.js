@@ -1,10 +1,24 @@
 // jshint esversion: 6
 
-var fs = require('fs');
-var path = require('path');
-var loader = require(path.resolve(__dirname, './loader.js'));
-var shell = require(path.resolve(__dirname, './shell.js'));
-var api_json = require(path.resolve(__dirname, './api.json'));
+if (typeof module !== 'undefined') {
+  var fs = require('fs');
+  var path = require('path');
+  var loader = require(path.resolve(__dirname, './loader.js'));
+  var shell = require(path.resolve(__dirname, './shell.js'));
+  var api_promise = Promise.resolve(require(path.resolve(__dirname, './api.json')));
+  var modules_promise = Promise.resolve(shell.my_modules.map(m => {
+    var source = fs.readFileSync(path.resolve(__dirname, './' + m + ".wasm"));
+    return new Uint8Array(source);
+  }));
+
+} else {
+  var loader = this;
+  var shell = this;
+  var api_promise = fetch("wasm/api.json").then(r => r.json());
+  var modules_promise = Promise.all(my_modules.map(m => fetch("wasm/" + m + ".wasm")))
+    .then(response => Promise.all(response.map(r => r.arrayBuffer())));
+}
+
 // The following function validates the contents of `api.json`. It is meant as
 // a helper when creating new binders, it provides explicit error messages.
 var validateJSON = function(json) {
@@ -70,7 +84,6 @@ var validateJSON = function(json) {
     });
   });
 };
-validateJSON(api_json);
 
 // The module is encapsulated inside a closure to prevent anybody from accessing
 // the WebAssembly memory.
@@ -87,10 +100,8 @@ var HaclWasm = (function() {
   // This checks if it has been done already, and if not does it.
   var checkIfInitialized = function() {
     if (isInitialized === false) {
-      return Promise.all(shell.my_modules.map(function(m) {
-        var source = fs.readFileSync(path.resolve(__dirname, './' + m + ".wasm"));
-        return new Uint8Array(source);
-      })).then(function(bufs) {
+      return modules_promise
+      .then(function(bufs) {
         return loader.link(my_imports, bufs.map(function(b, i) {
           return {
             buf: b,
@@ -98,8 +109,8 @@ var HaclWasm = (function() {
           };
         }));
       }).then(function(scope) {
-          Module = scope;
-          isInitialized = true;
+        Module = scope;
+        isInitialized = true;
       });
     } else {
       return Promise.resolve();
@@ -295,25 +306,32 @@ var HaclWasm = (function() {
   };
 
   var api_obj = {};
-
-  // Creating object by mapping from api.json structure
-  Object.keys(api_json).map(function(key_module) {
-    Object.keys(api_json[key_module]).map(function(key_func) {
-      if (api_obj[key_module] == null) {
-        api_obj[key_module] = {};
-      }
-      api_obj[key_module][key_func] = function(...args) {
-        if (isInitialized === false) {
-          throw 'Uninitialized';
-        };
-        return callWithProto(api_json[key_module][key_func], args);
-      };
-    });
-  });
+  let loaded = false;
 
   var getInitializedHaclModule = async function () {
     await checkIfInitialized();
-    return api_obj;
+    if (!loaded) {
+      let api_json = await api_promise;
+      validateJSON(api_json);
+
+      // Creating object by mapping from api.json structure
+      Object.keys(api_json).map(function(key_module) {
+        Object.keys(api_json[key_module]).map(function(key_func) {
+          if (api_obj[key_module] == null) {
+            api_obj[key_module] = {};
+          }
+          api_obj[key_module][key_func] = function(...args) {
+            if (isInitialized === false) {
+              throw 'Uninitialized';
+            };
+            return callWithProto(api_json[key_module][key_func], args);
+          };
+        });
+      });
+
+      loaded = true;
+    }
+    return Promise.resolve(api_obj);
   };
 
   var checkObj = {
