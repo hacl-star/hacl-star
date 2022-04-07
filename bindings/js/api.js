@@ -71,6 +71,13 @@ var validateJSON = function(json) {
   };
 };
 
+function p8(n) {
+  return ("0"+Number(n).toString(16)).slice(-2);
+}
+function p32(n) {
+  return p8((n >>> 24) & 255) + p8((n >>> 16) & 255) + p8((n >>> 8) & 255) + p8(n & 255);
+}
+
 // The module is encapsulated inside a closure to prevent anybody from accessing
 // the WebAssembly memory.
 var HaclWasm = (function() {
@@ -166,10 +173,13 @@ var HaclWasm = (function() {
   };
 
   var heapReadBuffer = (ptr) => {
+    // Pointer points to the actual data, header is 8 bytes before, length in
+    // header includes header.
     var m8 = new Uint8Array(Module.Kremlin.mem.buffer);
     var m32 = new Uint32Array(Module.Kremlin.mem.buffer)
-    let len = m32[ptr/4];
-    return read_memory(ptr+8, len);
+    let len = m32[ptr/4-2]-8;
+    // console.log("pointer:", p32(ptr), "header:", p32(ptr-8), "len:", p32(len));
+    return read_memory(ptr, len);
   };
 
   var evalSizeWithOp = function(arg, op, var_lengths) {
