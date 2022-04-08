@@ -19,12 +19,14 @@ type inttype =
   | U1 | U8 | U16 | U32 | U64 | U128 | S8 | S16 | S32 | S64 | S128
 
 [@(strict_on_arguments [0])]
+unfold
 inline_for_extraction
 let unsigned = function
   | U1 | U8 | U16 | U32 | U64 | U128 -> true
   | _ -> false
 
 [@(strict_on_arguments [0])]
+unfold
 inline_for_extraction
 let signed = function
   | S8 | S16 | S32 | S64 | S128 -> true
