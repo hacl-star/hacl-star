@@ -1993,7 +1993,32 @@
       ],
       "return": {
         "kind": "layout",
-        "type": "buffer"
+        "type": "buffer(uint64)"
+      }
+    },
+    "mont_ctx_init": {
+      "module": "Hacl_Bignum64",
+      "name": "mont_ctx_init",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "int32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "limbs",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "kind": "layout",
+        "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64"
       }
     }
   }

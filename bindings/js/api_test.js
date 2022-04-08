@@ -113,11 +113,9 @@ function testBignum64(Hacl) {
   let pa = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4100000000000000"));
   let pb = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4200000000000000"));
   let pc = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4300000000000000"));
-  assert(pa instanceof Uint8Array, "pa not of the right return type");
-  assert(pa.length == 8, "pa does not have the right length");
-  assert(pa[0] == 0x41 && pa[1] == 0 && pa[2] == 0 && pa[3] == 0 &&
-    pa[4] == 0 && pa[5] == 0 && pa[6] == 0 && pa[7] == 0,
-    "incorrect layout for pa");
+  assert(pa instanceof BigUint64Array, "pa not of the right return type");
+  assert(pa.length == 1, "pa does not have the right length");
+  assert(pa[0] == 0x41n, "incorrect layout for pa");
 }
 
 // Main test driver

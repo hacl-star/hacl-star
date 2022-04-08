@@ -42,11 +42,11 @@ var validateJSON = function(json) {
       func_obj.args.forEach((arg, i) => {
         if (!(arg.kind === "input" || (arg.kind === "output")))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'output' or 'input'");
-        if (!(arg.type === "bool" || (arg.type === "int32") || (arg.type === "buffer")))
+        if (!(arg.type === "bool" || (arg.type === "int32") || (arg.type.startsWith("buffer"))))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'int', 'bool' or 'buffer'");
-        if (arg.type === "buffer" && arg.size === undefined)
+        if (arg.type.startsWith("buffer") && arg.size === undefined)
           throw Error("in " + obj_name + ", argument #" + i + " is a buffer and should have a 'size' field");
-        if (arg.kind === "input" && arg.type === "buffer" && !("interface_index" in arg))
+        if (arg.kind === "input" && arg.type.startsWith("buffer") && !("interface_index" in arg))
           throw Error("in " + obj_name + ", argument #" + i + " is an input and should have a 'interface_index' field");
         if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && arg.tests === undefined)
           throw Error("please provide a 'tests' field for argument #" + i + " of " + obj_name + " in api.json");
@@ -57,7 +57,7 @@ var validateJSON = function(json) {
           length_args_available.push(arg.name);
       });
       func_obj.args.forEach(function(arg, i) {
-        if (arg.type === "buffer" && typeof arg.size === "string" &&
+        if (arg.type.startsWith("buffer") && typeof arg.size === "string" &&
           !length_args_available.includes(arg.size) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("+"))) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("-")))
@@ -70,13 +70,6 @@ var validateJSON = function(json) {
     };
   };
 };
-
-function p8(n) {
-  return ("0"+Number(n).toString(16)).slice(-2);
-}
-function p32(n) {
-  return p8((n >>> 24) & 255) + p8((n >>> 16) & 255) + p8((n >>> 8) & 255) + p8(n & 255);
-}
 
 // The module is encapsulated inside a closure to prevent anybody from accessing
 // the WebAssembly memory.
@@ -148,10 +141,36 @@ var HaclWasm = (function() {
         instead 'name' will contain the full name of the function
   */
 
-  var check_if_byte_array = function(candidate, length, name) {
+  var array_type = function(type) {
+    switch (type) {
+      case "buffer":
+        return Uint8Array;
+      case "buffer(uint32)":
+        return Uint32Array;
+      case "buffer(uint64)":
+        return BigUint64Array;
+      default:
+        throw new Error("Unknown array type: "+type);
+    }
+  }
+
+  var cell_size = function(type) {
+    switch (type) {
+      case "buffer":
+        return 8;
+      case "buffer(uint32)":
+        return 4;
+      case "buffer(uint64)":
+        return 8;
+      default:
+        throw new Error("Unknown array type: "+type);
+    }
+  }
+
+  var check_array_type = function(type, candidate, length, name) {
     if ((typeof(candidate) !== "object") ||
       (candidate.length !== length) ||
-      (candidate.constructor !== Uint8Array)
+      (candidate.constructor !== array_type(type))
     ) {
       throw new Error(
         "name: Please ensure the argument " + name + " is a " + length + "-bytes Uint8Array."
@@ -159,27 +178,39 @@ var HaclWasm = (function() {
     }
   };
 
-  var copy_array_to_stack = function(array) {
-    var pointer = loader.reserve(Module.Kremlin.mem, array.length);
-    (new Uint8Array(Module.Kremlin.mem.buffer)).set(array, pointer);
+  var copy_array_to_stack = function(type, array) {
+    // This returns a suitably-aligned pointer.
+    var pointer = loader.reserve(Module.Kremlin.mem, array.length, cell_size(type));
+    (new Uint8Array(Module.Kremlin.mem.buffer)).set(new Uint8Array(array.buffer), pointer);
+    // console.log("stack pointer got", loader.p32(pointer));
+    // console.log("source", array.buffer);
+    // loader.dump(Module.Kremlin.mem, 2048, 0x13000);
     return pointer;
   };
 
-  var read_memory = function(ptr, len) {
-    var result = new ArrayBuffer(len);
+  // len is in number of elements
+  var read_memory = function(type, ptr, len) {
+    // TODO: faster path with aligned pointers?
+    var result = new ArrayBuffer(len*cell_size(type));
+    // console.log("New memory buffer", type, len*cell_size(type));
     (new Uint8Array(result).set(new Uint8Array(Module.Kremlin.mem.buffer)
-      .subarray(ptr, ptr + len)));
-    return new Uint8Array(result);
+      .subarray(ptr, ptr + len*cell_size(type))));
+    // console.log(result);
+    return new (array_type(type))(result);
   };
 
-  var heapReadBuffer = (ptr) => {
+  var heapReadBuffer = (type, ptr) => {
     // Pointer points to the actual data, header is 8 bytes before, length in
-    // header includes header.
-    var m8 = new Uint8Array(Module.Kremlin.mem.buffer);
+    // header includes header. Heap pointers are always aligned.
+    if (!((ptr % 8) == 0))
+      throw new Error("malloc violation (1)");
     var m32 = new Uint32Array(Module.Kremlin.mem.buffer)
     let len = m32[ptr/4-2]-8;
-    // console.log("pointer:", p32(ptr), "header:", p32(ptr-8), "len:", p32(len));
-    return read_memory(ptr, len);
+    if (!(len % cell_size(type) == 0))
+      throw new Error("malloc violation (2)");
+    len = len / cell_size(type);
+    // console.log("pointer:", loader.p32(ptr), "header:", loader.p32(ptr-8), "len:", loader.p32(len));
+    return read_memory(type, ptr, len);
   };
 
   var evalSizeWithOp = function(arg, op, var_lengths) {
@@ -218,20 +249,22 @@ var HaclWasm = (function() {
     // Populating the variable length arguments by retrieving buffer lengths
     proto.args.map(function(arg) {
       var func_arg;
-      if (arg.type === "buffer") {
+      if (arg.type.startsWith("buffer")) {
         if ((typeof arg.size === "string") && (arg.interface_index !== undefined)) {
+          // ?? unused variable since if block below is mutually exclusive
           func_arg = args[arg.interface_index];
           var_lengths[arg.size] = func_arg.length;
         }
       }
       if ((arg.type === "int32") && (arg.interface_index !== undefined)) {
         func_arg = args[arg.interface_index];
+        // ?? func_arg is undefined here so what is this intended to do?
         var_lengths[arg.name] = func_arg;
       }
     });
     // Retrieving all input buffers and allocating them in the Wasm memory
     var args_pointers = proto.args.map(function(arg, i) {
-      if (arg.type === "buffer") {
+      if (arg.type.startsWith("buffer")) {
         var size;
         if (typeof arg.size === "string") {
           size = parseSize(arg.size, var_lengths);
@@ -241,12 +274,12 @@ var HaclWasm = (function() {
         var arg_byte_buffer;
         if (arg.kind === "input") {
           var func_arg = args[arg.interface_index];
-          arg_byte_buffer = new Uint8Array(func_arg);
+          arg_byte_buffer = new (array_type(arg.type))(func_arg);
         } else if (arg.kind === "output") {
-          arg_byte_buffer = new Uint8Array(size);
+          arg_byte_buffer = new (array_type(arg.type))(size);
         }
-        check_if_byte_array(arg_byte_buffer, size, arg.name);
-        var pointer = copy_array_to_stack(arg_byte_buffer);
+        check_array_type(arg.type, arg_byte_buffer, size, arg.name);
+        var pointer = copy_array_to_stack(arg.type, arg_byte_buffer);
         return {
           "value": pointer,
           "index": i
@@ -292,14 +325,14 @@ var HaclWasm = (function() {
       } else {
         size = protoRet.size;
       }
-      return read_memory(pointer.value, size);
+      return read_memory(protoRet.type, pointer.value, size);
     });
     // Resetting the stack pointer to its old value
     memory[0] = sp;
     if ("kind" in proto.return && proto.return.kind === "layout") {
       // Heap-allocated value
-      if (proto.return.type === "buffer") {
-        let r = heapReadBuffer(call_return);
+      if (proto.return.type.startsWith("buffer")) {
+        let r = heapReadBuffer(proto.return.type, call_return);
         memory[Module.Kremlin.mem.buffer.byteLength/4-1] = 0;
         return r;
       } else {
