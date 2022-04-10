@@ -378,6 +378,11 @@ var HaclWasm = (function() {
 
   // END HELPERS FOR HEAP LAYOUT
 
+  // Grammar of size fields: var<OP>n where
+  // - var is the name of a variable
+  // - n is an integer constant
+  // - <OP> is + or -
+  // - no spaces at all.
   var evalSizeWithOp = function(arg, op, args_int32s) {
      if (arg.indexOf(op) >= 0) {
        var terms = arg.split(op);
