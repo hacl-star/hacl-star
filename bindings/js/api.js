@@ -6,6 +6,7 @@ if (typeof module !== 'undefined') {
   var loader = require(path.resolve(__dirname, './loader.js'));
   var shell = require(path.resolve(__dirname, './shell.js'));
   var api_promise = Promise.resolve(require(path.resolve(__dirname, './api.json')));
+  var layouts_promise = Promise.resolve(require(path.resolve(__dirname, './layouts.json')));
   var modules_promise = Promise.resolve(shell.my_modules.map(m => {
     var source = fs.readFileSync(path.resolve(__dirname, './' + m + ".wasm"));
     return new Uint8Array(source);
@@ -15,6 +16,7 @@ if (typeof module !== 'undefined') {
   var loader = this;
   var shell = this;
   var api_promise = fetch("wasm/api.json").then(r => r.json());
+  var layouts_promise = fetch("wasm/layouts.json").then(r => r.json());
   var modules_promise = Promise.all(my_modules.map(m => fetch("wasm/" + m + ".wasm")))
     .then(response => Promise.all(response.map(r => r.arrayBuffer())));
 }

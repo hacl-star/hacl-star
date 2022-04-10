@@ -52,13 +52,13 @@ var postprocessing = function(typ, value) {
   throw "Unimplemented !";
 };
 
-var passTest = async function(func_sig, func, msg, t) {
+var passTest = function(func_sig, func, msg, t) {
   var args = func_sig.args.filter(function(arg) {
     return (arg.kind === "input") && (arg.tests !== undefined);
   }).map(function(arg) {
     return preprocessing(arg.type, arg.tests[t]);
   });
-  var result = await func.apply(null, args);
+  var result = func.apply(null, args);
   if (func_sig.return.type !== "void") {
     var expected_result = postprocessing(func_sig.return.type, func_sig.return.tests[t]);
     var result_val = postprocessing(func_sig.return.type, result[0]);
@@ -98,7 +98,7 @@ function checkTestVectors(func_sig, func, msg) {
   if (func_sig.return.tests !== undefined) {
     number_of_tests = Math.min(number_of_tests, func_sig.return.tests.length);
   }
-  console.log("Passing tests for " + msg);
+  console.log("Starting tests for " + msg);
   if (number_of_tests === 0) {
     console.warn("No tests for " + msg + "!");
   }
@@ -121,7 +121,7 @@ function testBignum64(Hacl) {
 // Main test driver
 HaclWasm.getInitializedHaclModule().then(function(Hacl) {
   testBignum64(Hacl);
-  return;
+  // return;
 
   var tests = [];
   Promise.all(Object.keys(test_vectors).map(function(key_module) {
