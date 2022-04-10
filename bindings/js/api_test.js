@@ -113,6 +113,7 @@ function testBignum64(Hacl) {
   let a = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4100000000000000"));
   let b = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4200000000000000"));
   let c = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4300000000000000"));
+  let d = Hacl.Bignum_64.new_bn_from_bytes_le(new Uint8Array(16));
   assert(a instanceof BigUint64Array, "a not of the right return type");
   assert(a.length == 1, "a does not have the right length");
   assert(a[0] == 0x41n, "incorrect layout for a");

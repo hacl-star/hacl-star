@@ -201,6 +201,12 @@ var HaclWasm = (function() {
     return new (array_type(type))(result);
   };
 
+  // HELPERS FOR HEAP LAYOUT
+  // -----------------------
+
+  // Filled out via a promise.
+  var layouts;
+
   var heapReadBlockSize = (ptr) => {
     var m32 = new Uint32Array(Module.Kremlin.mem.buffer)
     return m32[ptr/4-2]-8;
@@ -208,7 +214,9 @@ var HaclWasm = (function() {
 
   var heapReadBuffer = (type, ptr) => {
     // Pointer points to the actual data, header is 8 bytes before, length in
-    // header includes header. Heap pointers are always aligned.
+    // header includes header. Heap base pointers are always aligned on 8 byte
+    // boundaries, but inner pointers (e.g. within a struct) are aligned on
+    // their size.
     if (!((ptr % cell_size(type)) == 0))
       throw new Error("malloc violation (1)");
     let block_size = heapReadBlockSize(ptr);
@@ -218,9 +226,6 @@ var HaclWasm = (function() {
     // console.log("pointer:", loader.p32(ptr), "header:", loader.p32(ptr-8), "len:", loader.p32(len));
     return read_memory(type, ptr, len);
   };
-
-  // Filled out via a promise.
-  var layouts;
 
   var heapReadInt = (typ, ptr) => {
     switch (typ) {
@@ -245,6 +250,32 @@ var HaclWasm = (function() {
     }
   };
 
+  var heapWriteInt = (typ, ptr, v) => {
+    switch (typ) {
+      case "A8":
+        var m8 = new Uint8Array(Module.Kremlin.mem.buffer);
+        m8[ptr] = v;
+        break;
+
+      case "A32":
+        if (!(ptr % 4) == 0)
+          throw new Error("malloc violation (3)");
+        var m32 = new Uint32Array(Module.Kremlin.mem.buffer);
+        m32[ptr/4] = v;
+        break;
+
+      case "A64":
+        if (!(ptr % 8) == 0)
+          throw new Error("malloc violation (4)");
+        var m64 = new BigUint64Array(Module.Kremlin.mem.buffer);
+        m64[ptr/8] = v;
+        break;
+
+      default:
+        throw new Error("Not implemented: "+typ);
+    }
+  };
+
   // Fast-path for arrays of flat integers.
   var heapReadBlockFast = (int_type, ptr) => {
     switch (int_type) {
@@ -259,7 +290,14 @@ var HaclWasm = (function() {
     }
   };
 
-  // Two mutually-recursive functions.
+  // Fast-path for arrays of flat integers.
+  var heapWriteBlockFast = (int_type, ptr, arr) => {
+    console.log(arr);
+    (new Uint8Array(Module.Kremlin.mem.buffer)).set(new Uint8Array(arr.buffer), ptr);
+  };
+
+  // Eventually will be mutually recursive once Layout is implemented (flat
+  // packed structs).
   var heapReadType = (runtime_type, ptr) => {
     let [ type, data ] = runtime_type;
     switch (type) {
@@ -268,6 +306,27 @@ var HaclWasm = (function() {
       case "Pointer":
         if (data[0] == "Int")
           return heapReadBlockFast(data[1][0], heapReadInt("A32", ptr));
+        // pass-through
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
+  };
+
+  var heapWriteType = (runtime_type, ptr, v) => {
+    let [ type, data ] = runtime_type;
+    switch (type) {
+      case "Int":
+        heapWriteInt(data[0], ptr, v);
+        break;
+      case "Pointer":
+        if (data[0] == "Int") {
+          let sz = v.buffer.byteLength;
+          // NB: could be more precise with alignment, I guess
+          let dst = loader.reserve(Module.Kremlin.mem, sz, 8);
+          heapWriteInt("A32", ptr, dst);
+          heapWriteBlockFast(data[1][0], dst, v);
+          break;
+        }
         // pass-through
       default:
         throw new Error("Not implemented: "+tag);
@@ -289,6 +348,35 @@ var HaclWasm = (function() {
         throw new Error("Not implemented: "+tag);
     }
   };
+
+  var heapWriteLayout = (layout, ptr, v) => {
+    let [ tag, data ] = layouts[layout];
+    console.log(v);
+    switch (tag) {
+      case "LFlat":
+        data.fields.forEach(([field, [ ofs, typ ]]) => {
+          console.log("Writing", v[field]);
+          heapWriteType(typ, ptr + ofs, v[field]);
+        });
+        break;
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
+  };
+
+  var stackWriteLayout = (layout, v) => {
+    let [ tag, data ] = layouts[layout];
+    switch (tag) {
+      case "LFlat":
+        let ptr = loader.reserve(Module.Kremlin.mem, data.size, 8);
+        heapWriteLayout(layout, ptr, v);
+        return ptr;
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
+  };
+
+  // END HELPERS FOR HEAP LAYOUT
 
   var evalSizeWithOp = function(arg, op, args_int32s) {
      if (arg.indexOf(op) >= 0) {
@@ -431,10 +519,15 @@ var HaclWasm = (function() {
       } else {
         let r = heapReadLayout(proto.return.type, call_return);
         memory[Module.Kremlin.mem.buffer.byteLength/4-1] = 0;
+        return r;
 
-        loader.dump(Module.Kremlin.mem, 2048, Module.Kremlin.mem.buffer.byteLength - 2048);
-        console.log(loader.p32(call_return), r, JSON.stringify(layouts[proto.return.type], null, 2));
-        throw new Error(func_name+": non-buffer return layout not implemented");
+        // loader.dump(Module.Kremlin.mem, 2048, Module.Kremlin.mem.buffer.byteLength - 2048);
+        // console.log(loader.p32(call_return), r, JSON.stringify(layouts[proto.return.type], null, 2));
+
+        // let ptr = stackWriteLayout(proto.return.type, r);
+        // console.log(loader.p32(ptr));
+        // loader.dump(Module.Kremlin.mem, 2048, 0x13000);
+        // throw new Error(func_name+": non-buffer return layout not implemented");
       }
     }
     if (proto.return.type === "bool") {
