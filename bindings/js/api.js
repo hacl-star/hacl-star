@@ -215,29 +215,32 @@ var HaclWasm = (function() {
     return read_memory(type, ptr, len);
   };
 
-  var evalSizeWithOp = function(arg, op, var_lengths) {
+  var evalSizeWithOp = function(arg, op, args_int32s) {
      if (arg.indexOf(op) >= 0) {
        var terms = arg.split(op);
        if (op === "+") {
-         return var_lengths[terms[0]] + parseInt(terms[1]);
+         return args_int32s[terms[0]] + parseInt(terms[1]);
        } else if (op === "-") {
-         return var_lengths[terms[0]] - parseInt(terms[1]);
+         return args_int32s[terms[0]] - parseInt(terms[1]);
        } else {
          throw Error("Operator " + op + " not valid in `size` parameter, only '+' and '-' are supported.")
        }
      }
   };
 
-  var parseSize = function(arg, var_lengths) {
+  var parseSize = function(arg, args_int32s) {
     if (arg.indexOf("+") >= 0) {
-      return evalSizeWithOp(arg, "+", var_lengths);
+      return evalSizeWithOp(arg, "+", args_int32s);
     } else if (arg.indexOf("-") >= 0) {
-      return evalSizeWithOp(arg, "-", var_lengths);
+      return evalSizeWithOp(arg, "-", args_int32s);
     } else {
-      return var_lengths[arg];
+      return args_int32s[arg];
     }
   };
 
+  // This is the main logic; this function is partially applied to its
+  // first two arguments for each API entry. We assume JITs are working well
+  // enough to make this efficient.
   var callWithProto = function(proto, layouts, args) {
     var expected_args_number = proto.args.filter(function(arg) {
       return arg.interface_index !== undefined;
@@ -247,21 +250,47 @@ var HaclWasm = (function() {
     }
     var memory = new Uint32Array(Module.Kremlin.mem.buffer);
     var sp = memory[0];
-    var var_lengths = {};
-    // Populating the variable length arguments by retrieving buffer lengths
+
+    // Integer arguments are either
+    // - user-provided, in which case they have an interface_index
+    // - automatically determined, in which case they appear in the `size` field
+    //   of another buffer argument.
+    // In a first pass, we need to figure out the value of all integer
+    // arguments to enable lookups by name.
+    // - When allocating a variable-length output buffer, we look up the
+    //   corresponding integer argument by name (user provides length but not
+    //   array).
+    // - When fill out an integer argument that corresponds to the length of a
+    //   variable-length input buffer, we also look it up by name (user provides
+    //   array but not length).
+    var args_int32s = {};
     proto.args.forEach(function(arg) {
       if (arg.type.startsWith("buffer") && typeof arg.size === "string" && arg.interface_index !== undefined) {
-        var_lengths[arg.size] = args[arg.interface_index].length;
+        // API contains e.g.:
+        //   { "name": "len" },
+        //   { "name": "buf", "type": "buffer", "size": "len", "interface_index": 3, "kind": "input" }
+        // We need to figure out `len` automatically since it doesn't have an
+        // interface index, meaning it isn't one of the arguments passed to the
+        // high-level API. We know `buf` is the second argument passed to the
+        // function, and thus allows us to fill out `len`.
+        args_int32s[arg.size] = args[arg.interface_index].length;
       } else if (arg.type === "int32" && arg.interface_index !== undefined) {
-        var_lengths[arg.name] = args[arg.interface_index];
+        // API contains e.g.:
+        //   { "name": "len", "interface_index": 3 },
+        //   { "name": "buf", "type": "buffer", "size": "len", "kind": "output" }
+        // We know we will need `len` below when trying to allocate an array for
+        // `output` -- insert it into the table.
+        args_int32s[arg.name] = args[arg.interface_index];
       }
     });
-    // Retrieving all input buffers and allocating them in the Wasm memory
-    var args_pointers = proto.args.map(function(arg, i) {
+
+    // Figure out the value of all arguments and write to the WASM stack
+    // accordingly. 
+    var args = proto.args.map(function(arg, i) {
       if (arg.type.startsWith("buffer")) {
         var size;
         if (typeof arg.size === "string") {
-          size = parseSize(arg.size, var_lengths);
+          size = parseSize(arg.size, args_int32s);
         } else {
           size = arg.size;
         }
@@ -273,26 +302,21 @@ var HaclWasm = (function() {
           arg_byte_buffer = new (array_type(arg.type))(size);
         }
         check_array_type(arg.type, arg_byte_buffer, size, arg.name);
-        var pointer = copy_array_to_stack(arg.type, arg_byte_buffer);
-        return {
-          "value": pointer,
-          "index": i
-        };
+        // TODO: this copy is un-necessary in the case of output buffers.
+        return copy_array_to_stack(arg.type, arg_byte_buffer);
       }
       if (arg.type === "bool" || arg.type === "int32") {
-        var value;
         if (arg.interface_index === undefined) {
-          value = var_lengths[arg.name];
+          // Variable-length argument, determined via first pass above.
+          return args_int32s[arg.name];
         } else {
-          value = args[arg.interface_index];
+          // Regular interger argument, passed by the user.
+          return args[arg.interface_index];
         }
-        return {
-          "value": value,
-          "index": i
-        };
       }
       throw Error("Unimplemented ! ("+proto.name+")");
     });
+
     // Calling the wasm function !
     if (proto.custom_module_name) {
       var func_name = proto.name;
@@ -303,24 +327,24 @@ var HaclWasm = (function() {
       throw new Error(proto.module + " is not in Module");
     if (!(func_name in Module[proto.module]))
       throw new Error(func_name + " is not in Module["+proto.module+"]");
-    var call_return = Module[proto.module][func_name](
-      ...args_pointers.map(function(x) {
-        return x.value;
-      })
-    );
+    var call_return = Module[proto.module][func_name](...args);
+
     // Populating the JS buffers returned with their values read from Wasm memory
-    var return_buffers = args_pointers.filter(function(pointer) {
-      return proto.args[pointer.index].kind === "output";
-    }).map(function(pointer) {
-      var protoRet = proto.args[pointer.index];
-      var size;
-      if (typeof protoRet.size === "string") {
-        size = parseSize(protoRet.size, var_lengths);
+    var return_buffers = args.map(function(pointer, i) {
+      if (proto.args[i].kind === "output") {
+        var protoRet = proto.args[i];
+        var size;
+        if (typeof protoRet.size === "string") {
+          size = parseSize(protoRet.size, args_int32s);
+        } else {
+          size = protoRet.size;
+        }
+        return read_memory(protoRet.type, pointer, size);
       } else {
-        size = protoRet.size;
+        return null;
       }
-      return read_memory(protoRet.type, pointer.value, size);
-    });
+    }).filter(v => v !== null);
+
     // Resetting the stack pointer to its old value
     memory[0] = sp;
     if ("kind" in proto.return && proto.return.kind === "layout") {
