@@ -110,18 +110,19 @@ function checkTestVectors(func_sig, func, msg) {
 // A series of hand-written tests for modules that require API testing that
 // cannot be described at the level of a single function.
 function testBignum64(Hacl) {
-  let pa = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4100000000000000"));
-  let pb = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4200000000000000"));
-  let pc = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4300000000000000"));
-  assert(pa instanceof BigUint64Array, "pa not of the right return type");
-  assert(pa.length == 1, "pa does not have the right length");
-  assert(pa[0] == 0x41n, "incorrect layout for pa");
+  let a = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4100000000000000"));
+  let b = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4200000000000000"));
+  let c = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4300000000000000"));
+  assert(a instanceof BigUint64Array, "a not of the right return type");
+  assert(a.length == 1, "a does not have the right length");
+  assert(a[0] == 0x41n, "incorrect layout for a");
+  let ctx = Hacl.Bignum_64.mont_ctx_init(c);
 }
 
 // Main test driver
 HaclWasm.getInitializedHaclModule().then(function(Hacl) {
   testBignum64(Hacl);
-  // return;
+  return;
 
   var tests = [];
   Promise.all(Object.keys(test_vectors).map(function(key_module) {

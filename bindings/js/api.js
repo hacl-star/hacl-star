@@ -201,18 +201,93 @@ var HaclWasm = (function() {
     return new (array_type(type))(result);
   };
 
+  var heapReadBlockSize = (ptr) => {
+    var m32 = new Uint32Array(Module.Kremlin.mem.buffer)
+    return m32[ptr/4-2]-8;
+  };
+
   var heapReadBuffer = (type, ptr) => {
     // Pointer points to the actual data, header is 8 bytes before, length in
     // header includes header. Heap pointers are always aligned.
-    if (!((ptr % 8) == 0))
+    if (!((ptr % cell_size(type)) == 0))
       throw new Error("malloc violation (1)");
-    var m32 = new Uint32Array(Module.Kremlin.mem.buffer)
-    let len = m32[ptr/4-2]-8;
-    if (!(len % cell_size(type) == 0))
+    let block_size = heapReadBlockSize(ptr);
+    if (!(block_size % cell_size(type) == 0))
       throw new Error("malloc violation (2)");
-    len = len / cell_size(type);
+    let len = block_size / cell_size(type);
     // console.log("pointer:", loader.p32(ptr), "header:", loader.p32(ptr-8), "len:", loader.p32(len));
     return read_memory(type, ptr, len);
+  };
+
+  // Filled out via a promise.
+  var layouts;
+
+  var heapReadInt = (typ, ptr) => {
+    switch (typ) {
+      case "A8":
+        var m8 = new Uint8Array(Module.Kremlin.mem.buffer);
+        return m8[ptr];
+
+      case "A32":
+        if (!(ptr % 4) == 0)
+          throw new Error("malloc violation (3)");
+        var m32 = new Uint32Array(Module.Kremlin.mem.buffer);
+        return m32[ptr/4];
+
+      case "A64":
+        if (!(ptr % 8) == 0)
+          throw new Error("malloc violation (4)");
+        var m64 = new BigUint64Array(Module.Kremlin.mem.buffer);
+        return m64[ptr/8];
+
+      default:
+        throw new Error("Not implemented: "+typ);
+    }
+  };
+
+  // Fast-path for arrays of flat integers.
+  var heapReadBlockFast = (int_type, ptr) => {
+    switch (int_type) {
+      case "A8":
+        return heapReadBuffer("buffer", ptr);
+      case "A32":
+        return heapReadBuffer("buffer(uint32)", ptr);
+      case "A64":
+        return heapReadBuffer("buffer(uint64)", ptr);
+      default:
+        throw new Error("Not implemented: "+int_type);
+    }
+  };
+
+  // Two mutually-recursive functions.
+  var heapReadType = (runtime_type, ptr) => {
+    let [ type, data ] = runtime_type;
+    switch (type) {
+      case "Int":
+        return heapReadInt(data[0], ptr);
+      case "Pointer":
+        if (data[0] == "Int")
+          return heapReadBlockFast(data[1][0], heapReadInt("A32", ptr));
+        // pass-through
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
+  };
+
+  var heapReadLayout = (layout, ptr) => {
+    console.log(layout);
+    let [ tag, data ] = layouts[layout];
+    switch (tag) {
+      case "LFlat":
+        let o = {};
+        console.log(data);
+        data.fields.forEach(([field, [ ofs, typ ]]) =>
+          o[field] = heapReadType(typ, ptr + ofs)
+        );
+        return o;
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
   };
 
   var evalSizeWithOp = function(arg, op, args_int32s) {
@@ -241,7 +316,7 @@ var HaclWasm = (function() {
   // This is the main logic; this function is partially applied to its
   // first two arguments for each API entry. We assume JITs are working well
   // enough to make this efficient.
-  var callWithProto = function(proto, layouts, args) {
+  var callWithProto = function(proto, args) {
     var expected_args_number = proto.args.filter(function(arg) {
       return arg.interface_index !== undefined;
     }).length;
@@ -354,6 +429,11 @@ var HaclWasm = (function() {
         memory[Module.Kremlin.mem.buffer.byteLength/4-1] = 0;
         return r;
       } else {
+        let r = heapReadLayout(proto.return.type, call_return);
+        memory[Module.Kremlin.mem.buffer.byteLength/4-1] = 0;
+
+        loader.dump(Module.Kremlin.mem, 2048, Module.Kremlin.mem.buffer.byteLength - 2048);
+        console.log(loader.p32(call_return), r, JSON.stringify(layouts[proto.return.type], null, 2));
         throw new Error(func_name+": non-buffer return layout not implemented");
       }
     }
@@ -375,7 +455,9 @@ var HaclWasm = (function() {
   var getInitializedHaclModule = async function () {
     await checkIfInitialized();
     if (!loaded) {
-      let layouts_json = await layouts_promise;
+      // Write into the global.
+      layouts = await layouts_promise;
+
       let api_json = await api_promise;
       validateJSON(api_json);
 
@@ -389,7 +471,7 @@ var HaclWasm = (function() {
             if (isInitialized === false) {
               throw 'Uninitialized';
             };
-            return callWithProto(api_json[key_module][key_func], layouts_json, args);
+            return callWithProto(api_json[key_module][key_func], args);
           };
         });
       });
