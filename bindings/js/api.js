@@ -159,7 +159,7 @@ var HaclWasm = (function() {
   var cell_size = function(type) {
     switch (type) {
       case "buffer":
-        return 8;
+        return 1;
       case "buffer(uint32)":
         return 4;
       case "buffer(uint64)":
@@ -194,7 +194,7 @@ var HaclWasm = (function() {
   var read_memory = function(type, ptr, len) {
     // TODO: faster path with aligned pointers?
     var result = new ArrayBuffer(len*cell_size(type));
-    // console.log("New memory buffer", type, len*cell_size(type));
+    // console.log("New memory buffer", type, len, len*cell_size(type));
     (new Uint8Array(result).set(new Uint8Array(Module.Kremlin.mem.buffer)
       .subarray(ptr, ptr + len*cell_size(type))));
     // console.log(result);
