@@ -238,30 +238,22 @@ var HaclWasm = (function() {
     }
   };
 
-  var callWithProto = function(proto, args, loc_name) {
+  var callWithProto = function(proto, layouts, args) {
     var expected_args_number = proto.args.filter(function(arg) {
       return arg.interface_index !== undefined;
     }).length;
     if (args.length != expected_args_number) {
-      throw Error("wrong number of arguments to call the F*-wasm function " + loc_name + ": expected " + expected_args_number + ", got " + args.length);
+      throw Error("wrong number of arguments to call the F*-wasm function " + proto.name + ": expected " + expected_args_number + ", got " + args.length);
     }
     var memory = new Uint32Array(Module.Kremlin.mem.buffer);
     var sp = memory[0];
     var var_lengths = {};
     // Populating the variable length arguments by retrieving buffer lengths
-    proto.args.map(function(arg) {
-      var func_arg;
-      if (arg.type.startsWith("buffer")) {
-        if ((typeof arg.size === "string") && (arg.interface_index !== undefined)) {
-          // ?? unused variable since if block below is mutually exclusive
-          func_arg = args[arg.interface_index];
-          var_lengths[arg.size] = func_arg.length;
-        }
-      }
-      if ((arg.type === "int32") && (arg.interface_index !== undefined)) {
-        func_arg = args[arg.interface_index];
-        // ?? func_arg is undefined here so what is this intended to do?
-        var_lengths[arg.name] = func_arg;
+    proto.args.forEach(function(arg) {
+      if (arg.type.startsWith("buffer") && typeof arg.size === "string" && arg.interface_index !== undefined) {
+        var_lengths[arg.size] = args[arg.interface_index].length;
+      } else if (arg.type === "int32" && arg.interface_index !== undefined) {
+        var_lengths[arg.name] = args[arg.interface_index];
       }
     });
     // Retrieving all input buffers and allocating them in the Wasm memory
@@ -299,7 +291,7 @@ var HaclWasm = (function() {
           "index": i
         };
       }
-      throw Error("Unimplemented ! ("+loc_name+")");
+      throw Error("Unimplemented ! ("+proto.name+")");
     });
     // Calling the wasm function !
     if (proto.custom_module_name) {
@@ -359,6 +351,7 @@ var HaclWasm = (function() {
   var getInitializedHaclModule = async function () {
     await checkIfInitialized();
     if (!loaded) {
+      let layouts_json = await layouts_promise;
       let api_json = await api_promise;
       validateJSON(api_json);
 
@@ -372,7 +365,7 @@ var HaclWasm = (function() {
             if (isInitialized === false) {
               throw 'Uninitialized';
             };
-            return callWithProto(api_json[key_module][key_func], args);
+            return callWithProto(api_json[key_module][key_func], layouts_json, args);
           };
         });
       });
