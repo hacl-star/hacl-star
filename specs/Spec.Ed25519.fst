@@ -22,10 +22,11 @@ let q: n:nat{n < pow2 256} =
   assert_norm(pow2 252 + 27742317777372353535851937790883648493 < pow2 255 - 19);
   (pow2 252 + 27742317777372353535851937790883648493) // Group order
 
-let _: squash(Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512 > pow2 32) =
-  assert_norm (Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512 > pow2 32)
+let max_input_length_sha512 = Spec.Hash.Definitions.max_input_length Spec.Hash.Definitions.SHA2_512
+let _: squash(max_input_length_sha512 > pow2 32 + 64) =
+  assert_norm (max_input_length_sha512 > pow2 32 + 64)
 
-let sha512_modq (len:size_nat) (s:lbytes len) : n:nat{n < pow2 256} =
+let sha512_modq (len:nat{len <= max_input_length_sha512}) (s:bytes{length s = len}) : n:nat{n < pow2 256} =
   nat_from_bytes_le (Spec.Agile.Hash.hash Spec.Hash.Definitions.SHA2_512 s) % q
 
 ///  Point Multiplication
@@ -72,25 +73,29 @@ let mk_ed25519_concrete_ops : SE.concrete_ops ext_point_c = {
   SE.sqr = point_double_c;
   }
 
+// [a]P
 let point_mul (a:lbytes 32) (p:ext_point_c) : ext_point_c =
   SE.exp_fw mk_ed25519_concrete_ops p 256 (nat_from_bytes_le a) 4
 
+// [a1]P1 + [a2]P2
 let point_mul_double (a1:lbytes 32) (p1:ext_point_c) (a2:lbytes 32) (p2:ext_point_c) : ext_point_c =
   SE.exp_double_fw mk_ed25519_concrete_ops p1 256 (nat_from_bytes_le a1) p2 (nat_from_bytes_le a2) 4
 
+// [a]G
 let point_mul_g (a:lbytes 32) : ext_point_c =
   EL.g_is_on_curve ();
   point_mul a g
 
+// [a1]G + [a2]P
 let point_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:ext_point_c) : ext_point_c =
   EL.g_is_on_curve ();
   point_mul_double a1 g a2 p
 
+// [a1]G - [a2]P
 let point_negate_mul_double_g (a1:lbytes 32) (a2:lbytes 32) (p:ext_point_c) : ext_point_c =
   let p1 = point_negate p in
   EL.to_aff_point_negate p;
   point_mul_double_g a1 a2 p1
-
 
 ///  Ed25519 API
 
@@ -103,7 +108,7 @@ let secret_expand (secret:lbytes 32) : (lbytes 32 & lbytes 32) =
   h_low, h_high
 
 
-let secret_to_public (secret:lbytes 32) =
+let secret_to_public (secret:lbytes 32) : lbytes 32 =
   let a, dummy = secret_expand secret in
   point_compress (point_mul_g a)
 
@@ -114,25 +119,24 @@ let expand_keys (secret:lbytes 32) : (lbytes 32 & lbytes 32 & lbytes 32) =
   pub, s, prefix
 
 
-val sign_expanded:
-  pub:lbytes 32 -> s:lbytes 32 -> prefix:lbytes 32 -> msg:bytes{64 + length msg <= max_size_t} -> lbytes 64
+val sign_expanded (pub s prefix:lbytes 32) (msg:bytes{length msg <= max_size_t}) : lbytes 64
 let sign_expanded pub s prefix msg =
   let len = length msg in
-  let r = sha512_modq (32 + len) (concat prefix msg) in
+  let r = sha512_modq (32 + len) (Seq.append prefix msg) in
   let r' = point_mul_g (nat_to_bytes_le 32 r) in
   let rs = point_compress r' in
-  let h = sha512_modq (64 + len) (concat (concat rs pub) msg) in
+  let h = sha512_modq (64 + len) (Seq.append (concat rs pub) msg) in
   let s = (r + (h * nat_from_bytes_le s) % q) % q in
   concat #_ #32 #32 rs (nat_to_bytes_le 32 s)
 
 
-val sign: secret:lbytes 32 -> msg:bytes{64 + length msg <= max_size_t} -> lbytes 64
+val sign: secret:lbytes 32 -> msg:bytes{length msg <= max_size_t} -> lbytes 64
 let sign secret msg =
   let pub, s, prefix = expand_keys secret in
   sign_expanded pub s prefix msg
 
 
-val verify: public:lbytes 32 -> msg:bytes{64 + length msg <= max_size_t} -> signature:lbytes 64 -> bool
+val verify: public:lbytes 32 -> msg:bytes{length msg <= max_size_t} -> signature:lbytes 64 -> bool
 let verify public msg signature =
   let len = length msg in
   let a' = point_decompress public in
@@ -144,11 +148,10 @@ let verify public msg signature =
     match r' with
     | None -> false
     | Some r' -> (
-      let s = nat_from_bytes_le (slice signature 32 64) in
-      if s >= q then false
+      let sb = slice signature 32 64 in
+      if nat_from_bytes_le sb >= q then false
       else (
-        let h = sha512_modq (64 + len) (concat (concat rs public) msg) in
-        let sb = nat_to_bytes_le 32 s in
+        let h = sha512_modq (64 + len) (Seq.append (concat rs public) msg) in
         let hb = nat_to_bytes_le 32 h in
 
         EL.point_decompress_lemma public;
