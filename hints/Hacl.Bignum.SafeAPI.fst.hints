@@ -53,7 +53,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "951ccd222deaa6b30260132ed2205d56"
+      "3c59413229512e24d09d536f1b50c97f"
     ],
     [
       "Hacl.Bignum.SafeAPI.new_bn_from_bytes_be",
@@ -196,7 +196,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "1cde371c3c2ba55d17adddbce0672245"
+      "b620178a97f2a92f5befc5d48cd9d178"
     ],
     [
       "Hacl.Bignum.SafeAPI.new_bn_from_bytes_le_st",
@@ -251,7 +251,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "21ad492ce03dfac2f837322d72ac4f67"
+      "f70e653b54982f1253d82860291008ea"
     ],
     [
       "Hacl.Bignum.SafeAPI.new_bn_from_bytes_le",
@@ -398,7 +398,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "1baa520afd951bfc13b7850611a1be47"
+      "f1dfd1e7fdd425a3c4d0a70a69636a53"
     ],
     [
       "Hacl.Bignum.SafeAPI.bn_mod_slow_safe_st",
@@ -472,7 +472,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "033a364bf09d397ee6c0bca61ece72ba"
+      "d08669846be0ef31f13d4065faa1034e"
     ],
     [
       "Hacl.Bignum.SafeAPI.mk_bn_mod_slow_safe",
@@ -510,7 +510,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "970e034814789e4cb79ece2e896d696d"
+      "cb5e50d58d6ae2560102bdb6b72c1510"
     ],
     [
       "Hacl.Bignum.SafeAPI.mk_bn_mod_slow_safe",
@@ -653,7 +653,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "f4d21f5ea9e256328e8665ef222cd6ad"
+      "8b4f87af582ee845898ce7027144d4fb"
     ],
     [
       "Hacl.Bignum.SafeAPI.bn_mod_exp_safe_st",
@@ -695,7 +695,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "e9deafd2ef07284642e7d6abcd30d9d3"
+      "5690676deff18f2be5d4e6660eba203a"
     ],
     [
       "Hacl.Bignum.SafeAPI.mk_bn_mod_exp_safe",
@@ -731,7 +731,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "dafe6a2b88ef5e74f012a0387d40faee"
+      "edf07735ad18d6ac22dace144051c50a"
     ],
     [
       "Hacl.Bignum.SafeAPI.mk_bn_mod_exp_safe",
@@ -875,9 +875,9 @@
         "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.loc",
         "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.cast",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.mk_int",
-        "typing_Lib.IntTypes.ones", "typing_Lib.IntTypes.pub_int_v",
-        "typing_Lib.IntTypes.to_u32", "typing_Lib.IntTypes.v",
-        "typing_Lib.IntTypes.zeros", "typing_Lib.RawIntTypes.u32_to_UInt32",
+        "typing_Lib.IntTypes.ones", "typing_Lib.IntTypes.to_u32",
+        "typing_Lib.IntTypes.v", "typing_Lib.IntTypes.zeros",
+        "typing_Lib.RawIntTypes.u32_to_UInt32",
         "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.address_liveness_insensitive_locs",
         "typing_LowStar.Monotonic.Buffer.len",
@@ -887,7 +887,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "e5afd4b70c4084265b4b3d79be830c3b"
+      "8be7f206dd2945f038ff885d0fd71157"
     ],
     [
       "Hacl.Bignum.SafeAPI.bn_mod_inv_prime_safe_st",
@@ -909,7 +909,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "25c22bb4e527b73365bf28defc333b3a"
+      "3c66e7b99c9e080699259311783d8758"
     ],
     [
       "Hacl.Bignum.SafeAPI.mk_bn_mod_inv_prime_safe",
@@ -991,10 +991,9 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Division",
-        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
+        "primitive_Prims.op_LessThan", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_02f400218d898abe3d4eb33e8155bc31",
@@ -1121,7 +1120,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "2dcf28928b67b096544739b3d7771eb0"
+      "9c1a3c164f65af0b7601fd86d4cbec6b"
     ],
     [
       "Hacl.Bignum.SafeAPI.bn_mod_ctx",
@@ -1157,7 +1156,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c169f1122d0bf6e41d2888b75077e075"
+      "7855edc25e396c047776dabdc3491176"
     ],
     [
       "Hacl.Bignum.SafeAPI.bn_mod_ctx",
@@ -1248,7 +1247,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "4fc5e5817519862ab237f3c7e2e6ad49"
+      "01eec593e35b3f87ae5b15d42f3488c3"
     ],
     [
       "Hacl.Bignum.SafeAPI.bn_mod_exp_ctx_st",
@@ -1307,7 +1306,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "def7a47433a1e9e9d0eaee2bb9f597cd"
+      "8c98ddef4825a39564f24592bf573424"
     ],
     [
       "Hacl.Bignum.SafeAPI.mk_bn_mod_exp_ctx",
@@ -1343,7 +1342,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9e34abbe6e57b9b691b620494e10ccbe"
+      "0c3df01391845bf3e20a93af68b18d30"
     ],
     [
       "Hacl.Bignum.SafeAPI.mk_bn_mod_exp_ctx",
@@ -1466,7 +1465,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "7ebfad87977161b9edc61af7b84c7144"
+      "d09e595d2da360915402760bd8b3a2ad"
     ],
     [
       "Hacl.Bignum.SafeAPI.bn_mod_inv_prime_ctx_st",
@@ -1486,7 +1485,7 @@
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b"
       ],
       0,
-      "d550e5f9b8028e0d5ed92b4e37df7534"
+      "e1c7a81b3f8ca455f8401ff5fcc452d0"
     ],
     [
       "Hacl.Bignum.SafeAPI.mk_bn_mod_inv_prime_ctx",
@@ -1580,7 +1579,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "920119775b30a5f1082920361d1ba6c4"
+      "08dfcd2ba6be04fd057f7c9c9c21d682"
     ]
   ]
 ]

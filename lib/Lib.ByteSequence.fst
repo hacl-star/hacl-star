@@ -602,6 +602,8 @@ val some_arithmetic: t:inttype{~(U1? t)} -> n:nat -> i:nat -> Lemma
   (let m = numbytes t in
    n / pow2 (bits t * (i / m)) % pow2 (bits t) / pow2 (8 * (i % m)) % pow2 8 ==
    n / pow2 (8 * i) % pow2 8)
+
+#push-options "--z3rlimit 150 --fuel 0 --ifuel 0"
 let some_arithmetic t n i =
   let m = numbytes t in
   calc (==) {
@@ -621,7 +623,7 @@ let some_arithmetic t n i =
     == { Math.Lemmas.pow2_plus (8 * i - 8 * (i % m)) (8 * (i % m)) }
     (n / pow2 (8 * i)) % pow2 8;
   }
-
+#pop-options
 
 val index_nat_to_intseq_to_bytes_le:
     #t:inttype{unsigned t /\ ~(U1? t)}
