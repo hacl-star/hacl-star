@@ -2093,6 +2093,36 @@
         "type": "void",
         "tests": []
       }
+    },
+    "bn_to_bytes_le": {
+      "module": "Hacl_Bignum64",
+      "name": "bn_to_bytes_le",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "int32",
+          "tests": [
+          ]
+        },{
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len/8",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer",
+          "size": "len",
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
     }
   }
 }

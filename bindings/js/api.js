@@ -41,6 +41,8 @@ var parseSize = (arg) => {
     return parseOp(arg, "-");
   if (arg.indexOf("*") >= 0)
     return parseOp(arg, "*");
+  if (arg.indexOf("/") >= 0)
+    return parseOp(arg, "/");
   return [ arg ];
 };
 
@@ -53,6 +55,11 @@ var evalSize = function(arg, args_int32s) {
       return args_int32s[var_] - parseInt(const_);
     case "*":
       return args_int32s[var_] * parseInt(const_);
+    case "/":
+      let x = parseInt(const_);
+      if (args_int32s[var_] % x != 0)
+        throw new Error("Argument whose length is "+arg+" is not a multiple of "+x);
+      return args_int32s[var_] / x;
     default:
       return args_int32s[var_];
   }
@@ -70,6 +77,8 @@ var invertSize = function(arg, total) {
       if (total % x != 0)
         throw new Error("Argument whose length is "+arg+" is not a multiple of "+x);
       return [ var_, total / x ];
+    case "/":
+      return [ var_, total * parseInt(const_) ];
     default:
       return [var_, total];
   }
@@ -115,6 +124,9 @@ var validateJSON = function(json) {
         if (arg.type === "int32" && arg.kind === "input")
           length_args_available.push(arg.name);
         if (arg.type.startsWith("buffer") && arg.kind === "input" && typeof arg.size === "string")
+          // TODO: we should first check the field is syntactically correct
+          // before parsing it... if parsing fails, this will yield a
+          // nonsensical size and the error will be caught below.
           length_args_available.push(parseSize(arg.size)[0]);
       });
       func_obj.args.forEach(function(arg, i) {
@@ -122,6 +134,7 @@ var validateJSON = function(json) {
           !length_args_available.includes(arg.size) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("+"))) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("-"))) &&
+          !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("/"))) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("*")))
         )
           throw Error("incorrect 'size' field value (" + arg.size + ")for argument #" + i + " of " + obj_name + " in api.json");
@@ -479,7 +492,7 @@ var HaclWasm = (function() {
 
         if (var_ in args_int32s && var_value != args_int32s[arg.size])
           throw new Error("Inconsistency in sizes");
-        args_int32s[arg.size] = var_value;
+        args_int32s[var_] = var_value;
       } else if (arg.type === "int32" && arg.interface_index !== undefined) {
         // API contains e.g.:
         //   { "name": "len", "interface_index": 3 },
@@ -511,6 +524,7 @@ var HaclWasm = (function() {
         // TODO: this copy is un-necessary in the case of output buffers.
         return copy_array_to_stack(arg.type, arg_byte_buffer);
       }
+
       if (arg.type === "bool" || arg.type === "int32") {
         if (arg.interface_index === undefined) {
           // Variable-length argument, determined via first pass above.
@@ -520,6 +534,13 @@ var HaclWasm = (function() {
           return args[arg.interface_index];
         }
       }
+
+      // Layout
+      if (arg.type[0].toUpperCase() == arg.type[0]) {
+        let func_arg = args[arg.interface_index];
+        return stackWriteLayout(arg.type, func_arg);
+      }
+
       throw Error("Unimplemented ! ("+proto.name+")");
     });
 

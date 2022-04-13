@@ -123,6 +123,11 @@ function testBignum64(Hacl) {
   assert(d[0] == 0x41n*0x42n);
   let [ e ] = Hacl.Bignum_64.mod_precomp(ctx, d);
   assert(e[0] == 0x02);
+  let [ e_bytes ] = Hacl.Bignum_64.bn_to_bytes_le(e);
+  console.log(e_bytes);
+  assert (e_bytes instanceof Uint8Array);
+  assert (e_bytes.length == 8);
+  assert (e_bytes[0] == 0x02);
 }
 
 // Main test driver
