@@ -2059,7 +2059,39 @@
         }
       ],
       "return": {
-        "type": "void"
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mod_precomp": {
+      "module": "Hacl_Bignum64",
+      "name": "mod_precomp",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len*2",
+          "interface_index": 1,
+          "tests": []
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
       }
     }
   }

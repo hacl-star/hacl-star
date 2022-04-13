@@ -121,6 +121,8 @@ function testBignum64(Hacl) {
   assert(d instanceof BigUint64Array, "d not of the right return type");
   assert(d.length == 2, "d does not have the right length");
   assert(d[0] == 0x41n*0x42n);
+  let [ e ] = Hacl.Bignum_64.mod_precomp(ctx, d);
+  assert(e[0] == 0x02);
 }
 
 // Main test driver

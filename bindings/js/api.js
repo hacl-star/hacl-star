@@ -21,6 +21,63 @@ if (typeof module !== 'undefined') {
     .then(response => Promise.all(response.map(r => r.arrayBuffer())));
 }
 
+// HELPERS FOR SIZE FIELDS
+// -----------------------
+
+// Grammar of size fields: var<OP>n where
+// - var is the name of a variable
+// - n is an integer constant
+// - <OP> is +, - or *
+// - no spaces at all.
+var parseOp = (arg, op) => {
+  let [ var_, const_ ] = arg.split(op);
+  return [ var_, op, const_ ];
+};
+
+var parseSize = (arg) => {
+  if (arg.indexOf("+") >= 0)
+    return parseOp(arg, "+");
+  if (arg.indexOf("-") >= 0)
+    return parseOp(arg, "-");
+  if (arg.indexOf("*") >= 0)
+    return parseOp(arg, "*");
+  return [ arg ];
+};
+
+var evalSize = function(arg, args_int32s) {
+  let [ var_, op, const_ ] = parseSize(arg);
+  switch (op) {
+    case "+":
+      return args_int32s[var_] + parseInt(const_);
+    case "-":
+      return args_int32s[var_] - parseInt(const_);
+    case "*":
+      return args_int32s[var_] * parseInt(const_);
+    default:
+      return args_int32s[var_];
+  }
+};
+
+var invertSize = function(arg, total) {
+  let [ var_, op, const_ ] = parseSize(arg);
+  switch (op) {
+    case "+":
+      return [ var_, total - parseInt(const_) ];
+    case "-":
+      return [ var_, total + parseInt(const_) ];
+    case "*":
+      let x = parseInt(const_);
+      if (total % x != 0)
+        throw new Error("Argument whose length is "+arg+" is not a multiple of "+x);
+      return [ var_, total / x ];
+    default:
+      return [var_, total];
+  }
+};
+
+// VALIDATION
+// ----------
+
 // The following function validates the contents of `api.json`. It is meant as
 // a helper when creating new binders, it provides explicit error messages.
 var validateJSON = function(json) {
@@ -44,7 +101,7 @@ var validateJSON = function(json) {
       func_obj.args.forEach((arg, i) => {
         if (!(arg.kind === "input" || (arg.kind === "output")))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'output' or 'input'");
-        if (!(arg.type === "bool" || (arg.type === "int32") || (arg.type.startsWith("buffer"))))
+        if (!(arg.type === "bool" || arg.type === "int32" || arg.type.startsWith("buffer") || arg.type[0].toUpperCase() == arg.type[0]))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'int', 'bool' or 'buffer'");
         if (arg.type.startsWith("buffer") && arg.size === undefined)
           throw Error("in " + obj_name + ", argument #" + i + " is a buffer and should have a 'size' field");
@@ -57,9 +114,11 @@ var validateJSON = function(json) {
 
         if (arg.type === "int32" && arg.kind === "input")
           length_args_available.push(arg.name);
+        if (arg.type.startsWith("buffer") && arg.kind === "input" && typeof arg.size === "string")
+          length_args_available.push(parseSize(arg.size)[0]);
       });
       func_obj.args.forEach(function(arg, i) {
-        if (arg.type.startsWith("buffer") && typeof arg.size === "string" &&
+        if (arg.type.startsWith("buffer") && typeof arg.size === "string" && arg.kind === "output" &&
           !length_args_available.includes(arg.size) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("+"))) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("-"))) &&
@@ -379,43 +438,6 @@ var HaclWasm = (function() {
 
   // END HELPERS FOR HEAP LAYOUT
   
-  // HELPERS FOR SIZE FIELDS
-
-  // Grammar of size fields: var<OP>n where
-  // - var is the name of a variable
-  // - n is an integer constant
-  // - <OP> is +, - or *
-  // - no spaces at all.
-  var parseOp = (arg, op) => {
-    let [ var_, const_ ] = arg.split(op);
-    return [ var_, op, const_ ];
-  };
-
-  var parseSize = (arg) => {
-    if (arg.indexOf("+") >= 0)
-      return parseOp(arg, "+");
-    if (arg.indexOf("-") >= 0)
-      return parseOp(arg, "-");
-    if (arg.indexOf("*") >= 0)
-      return parseOp(arg, "*");
-    return [ arg ];
-  };
-
-  var evalSize = function(arg, args_int32s) {
-    let [ var_, op, const_ ] = parseSize(arg);
-    switch (op) {
-      case "+":
-        return args_int32s[var_] + parseInt(const_);
-      case "-":
-        return args_int32s[var_] - parseInt(const_);
-      case "*":
-        return args_int32s[var_] * parseInt(const_);
-      default:
-        return args_int32s[var_];
-    }
-  };
-
-  // END HELPERS FOR SIZE FIELDS
 
   // This is the main logic; this function is partially applied to its
   // first two arguments for each API entry. We assume JITs are working well
@@ -444,7 +466,7 @@ var HaclWasm = (function() {
     //   array but not length).
     var args_int32s = {};
     proto.args.forEach(function(arg) {
-      if (arg.type.startsWith("buffer") && typeof arg.size === "string" && arg.interface_index !== undefined) {
+      if (arg.type.startsWith("buffer") && typeof arg.size === "string" && arg.interface_index !== undefined && arg.kind === "input") {
         // API contains e.g.:
         //   { "name": "len" },
         //   { "name": "buf", "type": "buffer", "size": "len", "interface_index": 3, "kind": "input" }
@@ -452,10 +474,12 @@ var HaclWasm = (function() {
         // interface index, meaning it isn't one of the arguments passed to the
         // high-level API. We know `buf` is the second argument passed to the
         // function, and thus allows us to fill out `len`.
-        let effective_size = args[arg.interface_index].length;
-        if (args.size in args_int32s && effective_size != args_int32s[arg.size])
+        let [ var_, var_value ] = invertSize(arg.size, args[arg.interface_index].length);
+        console.log("Determined "+var_+"="+var_value);
+
+        if (var_ in args_int32s && var_value != args_int32s[arg.size])
           throw new Error("Inconsistency in sizes");
-        args_int32s[arg.size] = effective_size;
+        args_int32s[arg.size] = var_value;
       } else if (arg.type === "int32" && arg.interface_index !== undefined) {
         // API contains e.g.:
         //   { "name": "len", "interface_index": 3 },
