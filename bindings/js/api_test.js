@@ -133,7 +133,6 @@ function testBignum64(Hacl) {
 // Main test driver
 HaclWasm.getInitializedHaclModule().then(function(Hacl) {
   testBignum64(Hacl);
-  return;
 
   var tests = [];
   Promise.all(Object.keys(test_vectors).map(function(key_module) {
