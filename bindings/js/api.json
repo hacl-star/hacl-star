@@ -2020,6 +2020,47 @@
         "kind": "layout",
         "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64"
       }
+    },
+    "mul": {
+      "module": "Hacl_Bignum64",
+      "name": "mul",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "int32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len*2",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void"
+      }
     }
   }
 }

@@ -62,7 +62,8 @@ var validateJSON = function(json) {
         if (arg.type.startsWith("buffer") && typeof arg.size === "string" &&
           !length_args_available.includes(arg.size) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("+"))) &&
-          !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("-")))
+          !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("-"))) &&
+          !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("*")))
         )
           throw Error("incorrect 'size' field value (" + arg.size + ")for argument #" + i + " of " + obj_name + " in api.json");
       });
@@ -118,7 +119,7 @@ var HaclWasm = (function() {
   parameter to WebAssembly).
 
   In order to match the Javascript API with the actual calls to WebAssembly functions,
-  we have to describe the correspondance between the two in the `api.json` file.
+  we have to describe the correspondence between the two in the `api.json` file.
 
   The scheme of the JSON file is the following :
   - `module`, this module name will be shown in the JS API
@@ -175,7 +176,7 @@ var HaclWasm = (function() {
       (candidate.constructor !== array_type(type))
     ) {
       throw new Error(
-        "name: Please ensure the argument " + name + " is a " + length + "-bytes Uint8Array."
+        "name: Please ensure the argument " + name + " has length " + length + " and is a " + array_type(type)
       );
     }
   };
@@ -377,34 +378,44 @@ var HaclWasm = (function() {
   };
 
   // END HELPERS FOR HEAP LAYOUT
+  
+  // HELPERS FOR SIZE FIELDS
 
   // Grammar of size fields: var<OP>n where
   // - var is the name of a variable
   // - n is an integer constant
-  // - <OP> is + or -
+  // - <OP> is +, - or *
   // - no spaces at all.
-  var evalSizeWithOp = function(arg, op, args_int32s) {
-     if (arg.indexOf(op) >= 0) {
-       var terms = arg.split(op);
-       if (op === "+") {
-         return args_int32s[terms[0]] + parseInt(terms[1]);
-       } else if (op === "-") {
-         return args_int32s[terms[0]] - parseInt(terms[1]);
-       } else {
-         throw Error("Operator " + op + " not valid in `size` parameter, only '+' and '-' are supported.")
-       }
-     }
+  var parseOp = (arg, op) => {
+    let [ var_, const_ ] = arg.split(op);
+    return [ var_, op, const_ ];
   };
 
-  var parseSize = function(arg, args_int32s) {
-    if (arg.indexOf("+") >= 0) {
-      return evalSizeWithOp(arg, "+", args_int32s);
-    } else if (arg.indexOf("-") >= 0) {
-      return evalSizeWithOp(arg, "-", args_int32s);
-    } else {
-      return args_int32s[arg];
+  var parseSize = (arg) => {
+    if (arg.indexOf("+") >= 0)
+      return parseOp(arg, "+");
+    if (arg.indexOf("-") >= 0)
+      return parseOp(arg, "-");
+    if (arg.indexOf("*") >= 0)
+      return parseOp(arg, "*");
+    return [ arg ];
+  };
+
+  var evalSize = function(arg, args_int32s) {
+    let [ var_, op, const_ ] = parseSize(arg);
+    switch (op) {
+      case "+":
+        return args_int32s[var_] + parseInt(const_);
+      case "-":
+        return args_int32s[var_] - parseInt(const_);
+      case "*":
+        return args_int32s[var_] * parseInt(const_);
+      default:
+        return args_int32s[var_];
     }
   };
+
+  // END HELPERS FOR SIZE FIELDS
 
   // This is the main logic; this function is partially applied to its
   // first two arguments for each API entry. We assume JITs are working well
@@ -441,7 +452,10 @@ var HaclWasm = (function() {
         // interface index, meaning it isn't one of the arguments passed to the
         // high-level API. We know `buf` is the second argument passed to the
         // function, and thus allows us to fill out `len`.
-        args_int32s[arg.size] = args[arg.interface_index].length;
+        let effective_size = args[arg.interface_index].length;
+        if (args.size in args_int32s && effective_size != args_int32s[arg.size])
+          throw new Error("Inconsistency in sizes");
+        args_int32s[arg.size] = effective_size;
       } else if (arg.type === "int32" && arg.interface_index !== undefined) {
         // API contains e.g.:
         //   { "name": "len", "interface_index": 3 },
@@ -458,7 +472,7 @@ var HaclWasm = (function() {
       if (arg.type.startsWith("buffer")) {
         var size;
         if (typeof arg.size === "string") {
-          size = parseSize(arg.size, args_int32s);
+          size = evalSize(arg.size, args_int32s);
         } else {
           size = arg.size;
         }
@@ -503,7 +517,7 @@ var HaclWasm = (function() {
         var protoRet = proto.args[i];
         var size;
         if (typeof protoRet.size === "string") {
-          size = parseSize(protoRet.size, args_int32s);
+          size = evalSize(protoRet.size, args_int32s);
         } else {
           size = protoRet.size;
         }
