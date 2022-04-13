@@ -501,9 +501,11 @@ function propagate(module_name, imports, instance) {
 
 // One MAY only call this function after all modules have been loaded and
 // suitable calls to propagate have been performed.
-function reserve(mem, size) {
+function reserve(mem, size, alignment) {
   let m32 = new Uint32Array(mem.buffer);
   let p = m32[0];
+  if ((p % alignment) != 0)
+    p += alignment - (p % alignment);
   let curr = m32.byteLength;
   let want = p + size;
   if (want > curr) {
@@ -555,4 +557,5 @@ if (typeof module !== "undefined")
     reserve: reserve,
     dump: dump,
     hex: hex,
+    p32: p32
   };
