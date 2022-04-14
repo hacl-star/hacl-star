@@ -130,8 +130,23 @@ function testBignum64(Hacl) {
   assert (e_bytes[0] == 0x02);
 }
 
+function testBignumMontgomery64(Hacl) {
+  let a = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4100000000000000"));
+  let b = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4200000000000000"));
+  let n = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4300000000000000"));
+
+  let ctx = Hacl.Bignum_Montgomery_64.field_init(n);
+  let [ aM ] = Hacl.Bignum_Montgomery_64.to_field(ctx, a);
+  let [ bM ] = Hacl.Bignum_Montgomery_64.to_field(ctx, b);
+  let [ dM ] = Hacl.Bignum_Montgomery_64.mul(ctx, aM, bM);
+
+  let [ e ] = Hacl.Bignum_Montgomery_64.from_field(ctx, dM);
+  assert(e[0] == 0x02);
+}
+
 // Main test driver
 HaclWasm.getInitializedHaclModule().then(function(Hacl) {
+  testBignumMontgomery64(Hacl);
   testBignum64(Hacl);
 
   var tests = [];
