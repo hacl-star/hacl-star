@@ -7,7 +7,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 
-#include "kremlin/internal/target.h"
+#include "krml/internal/target.h"
 #include "internal/EverCrypt_OpenSSL.h"
 
 /* KB, BB, JP: for now, we just ignore internal errors since the HACL* interface

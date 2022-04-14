@@ -743,7 +743,7 @@ let blake2b_32 =
 inline_for_extraction noextract
 let unit_key = I.optional_key () I.Erased (I.stateful_unused unit)
 
-/// Type abbreviations - makes Kremlin use pretty names in the generated code
+/// Type abbreviations - makes KaRaMeL use pretty names in the generated code
 
 let blake2s_32_block_state = s Spec.Blake2S M32
 let blake2b_32_block_state = s Spec.Blake2B M32
@@ -751,7 +751,7 @@ let blake2s_32_state = F.state_s blake2s_32 () (s Spec.Blake2S M32) unit_key
 let blake2b_32_state = F.state_s blake2b_32 () (s Spec.Blake2B M32) unit_key
 
 /// The incremental hash functions instantiations. Note that we can't write a
-/// generic one, because the normalization then performed by Kremlin explodes.
+/// generic one, because the normalization then performed by KaRaMeL explodes.
 
 /// All those implementations are for non-keyed hash.
 

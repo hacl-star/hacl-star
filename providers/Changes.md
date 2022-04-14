@@ -39,12 +39,12 @@ This may break clients that compile with -Werror.
 
 ### June 27th, 2019
 
-- (possibly) **Breaking change**: KreMLin now compiles deprecation warnings in
+- (possibly) **Breaking change**: KaRaMeL now compiles deprecation warnings in
   F\* into C deprecation warnings. This may break clients who compile with -Werror.
   - Functions in EverCrypt.h for which a replacement exists have been marked
     with the attribute.
   - The public headers now take an additional header dependency on
-    `kremlin/internal/target.h`
+    `krml/internal/target.h`
 
 ### June 25th, 2019
 

@@ -26,7 +26,7 @@
 
 #include <fcntl.h>
 #include <inttypes.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/target.h"
 #include "internal/EverCrypt_BCrypt.h"
 
 /* KB, BB, JP: for now, we just ignore internal errors since the HACL* interface

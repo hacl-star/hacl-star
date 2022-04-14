@@ -30,12 +30,12 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Curve25519_51.h"
 #include "../Hacl_Ed25519.h"
@@ -49,17 +49,19 @@ void Hacl_Bignum25519_load_51(uint64_t *output, uint8_t *input);
 
 void Hacl_Bignum25519_store_51(uint8_t *output, uint64_t *input);
 
-void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
-
-void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q);
-
-void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p);
+void Hacl_Impl_Ed25519_PointDouble_point_double(uint64_t *out, uint64_t *p);
 
 bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *s);
 
+void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p);
+
 bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q);
 
+void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q);
+
 void Hacl_Impl_Ed25519_PointNegate_point_negate(uint64_t *p, uint64_t *out);
+
+void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint64_t *q);
 
 #if defined(__cplusplus)
 }
