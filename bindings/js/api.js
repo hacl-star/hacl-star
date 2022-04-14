@@ -65,6 +65,13 @@ var evalSize = function(arg, args_int32s) {
   }
 };
 
+
+// Given a size formula `var<OP>n` = `total`, invert it, i.e. solve the
+// equation where `var` is unknown.
+//
+// @param {String} arg        The formula of the form var<OP>n
+// @param {Number} total      The value of the formula
+// @return {[String, Number]} The variable name `var` and its value.
 var invertSize = function(arg, total) {
   let [ var_, op, const_ ] = parseSize(arg);
   switch (op) {
