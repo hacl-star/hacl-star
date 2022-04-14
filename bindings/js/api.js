@@ -158,10 +158,11 @@ var HaclWasm = (function() {
   var my_imports = {};
 
   // The WebAssembly modules have to be initialized before calling any function.
-  // This checks if it has been done already, and if not does it.
-  var checkIfInitialized = function() {
-    if (isInitialized === false) {
-      return modules_promise
+  // To be called only if isInitialized == false.
+  var loadWasm = function() {
+    if (isInitialized)
+      return Promise.resolve();
+    return modules_promise
       .then(function(bufs) {
         return loader.link(my_imports, bufs.map(function(b, i) {
           return {
@@ -173,9 +174,6 @@ var HaclWasm = (function() {
         Module = scope;
         isInitialized = true;
       });
-    } else {
-      return Promise.resolve();
-    }
   };
 
   /*
@@ -365,7 +363,7 @@ var HaclWasm = (function() {
 
   // Fast-path for arrays of flat integers.
   var heapWriteBlockFast = (int_type, ptr, arr) => {
-    console.log(arr);
+    // console.log(arr);
     (new Uint8Array(Module.Kremlin.mem.buffer)).set(new Uint8Array(arr.buffer), ptr);
   };
 
@@ -407,12 +405,12 @@ var HaclWasm = (function() {
   };
 
   var heapReadLayout = (layout, ptr) => {
-    console.log(layout);
+    // console.log(layout);
     let [ tag, data ] = layouts[layout];
     switch (tag) {
       case "LFlat":
         let o = {};
-        console.log(data);
+        // console.log(data);
         data.fields.forEach(([field, [ ofs, typ ]]) =>
           o[field] = heapReadType(typ, ptr + ofs)
         );
@@ -424,11 +422,11 @@ var HaclWasm = (function() {
 
   var heapWriteLayout = (layout, ptr, v) => {
     let [ tag, data ] = layouts[layout];
-    console.log(v);
+    // console.log(v);
     switch (tag) {
       case "LFlat":
         data.fields.forEach(([field, [ ofs, typ ]]) => {
-          console.log("Writing", v[field]);
+          // console.log("Writing", v[field]);
           heapWriteType(typ, ptr + ofs, v[field]);
         });
         break;
@@ -488,7 +486,7 @@ var HaclWasm = (function() {
         // high-level API. We know `buf` is the second argument passed to the
         // function, and thus allows us to fill out `len`.
         let [ var_, var_value ] = invertSize(arg.size, args[arg.interface_index].length);
-        console.log("Determined "+var_+"="+var_value);
+        // console.log("Determined "+var_+"="+var_value);
 
         if (var_ in args_int32s && var_value != args_int32s[arg.size])
           throw new Error("Inconsistency in sizes");
@@ -607,33 +605,32 @@ var HaclWasm = (function() {
   };
 
   var api_obj = {};
-  let loaded = false;
 
   var getInitializedHaclModule = async function () {
-    await checkIfInitialized();
-    if (!loaded) {
+    if (!isInitialized) {
+      // Load all WASM modules from network (web) or disk (node).
+      await loadWasm();
       // Write into the global.
       layouts = await layouts_promise;
 
+      // Initial API validation (TODO: disable for release...?)
       let api_json = await api_promise;
       validateJSON(api_json);
 
-      // Creating object by mapping from api.json structure
-      Object.keys(api_json).map(function(key_module) {
-        Object.keys(api_json[key_module]).map(function(key_func) {
+      // We follow the structure of api.json to expose an object whose structure
+      // follows the keys of api.json; each entry is a partial application of
+      // `callWithProto` (generic API wrapper) to its specific entry in api.json
+      // held in `api_json[key_module][key_func]`.
+      for (let key_module in api_json) {
+        for (let key_func in api_json[key_module]) {
           if (api_obj[key_module] == null) {
             api_obj[key_module] = {};
           }
           api_obj[key_module][key_func] = function(...args) {
-            if (isInitialized === false) {
-              throw 'Uninitialized';
-            };
             return callWithProto(api_json[key_module][key_func], args);
           };
-        });
-      });
-
-      loaded = true;
+        };
+      };
     }
     return Promise.resolve(api_obj);
   };
