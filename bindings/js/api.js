@@ -161,7 +161,7 @@ var HaclWasm = (function() {
   var Module = {};
 
   // This object is passed at the wasm instantiation, it's required by the
-  // KreMLin-generated files. Since we don't need to import anything, it's empty.
+  // KaRaMeL-generated files. Since we don't need to import anything, it's empty.
   var my_imports = {};
 
   // The WebAssembly modules have to be initialized before calling any function.
@@ -468,7 +468,7 @@ var HaclWasm = (function() {
     if (args.length != expected_args_number) {
       throw Error("wrong number of arguments to call the F*-wasm function " + proto.name + ": expected " + expected_args_number + ", got " + args.length);
     }
-    var memory = new Uint32Array(Module.Kremlin.mem.buffer);
+    var memory = new Uint32Array(Module.Krml.mem.buffer);
     var sp = memory[0];
 
     // Integer arguments are either

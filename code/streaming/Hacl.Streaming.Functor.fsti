@@ -35,7 +35,7 @@ let uint32 = Lib.IntTypes.uint32
 /// ===============
 
 // TODO: when state_s is declared as CAbstractStruct, it prevents Hacl_Streaming_MD5.c
-// and Hacl_Streaming_SHA1.c from compiling, because Kremlin tries to share the state_s
+// and Hacl_Streaming_SHA1.c from compiling, because KaRaMeL tries to share the state_s
 // type definition with Hacl_Streaming_SHA2.c, which is hidden.
 //[@CAbstractStruct]
 val state_s (#index: Type0) (c: block index) (i: index)
@@ -47,7 +47,7 @@ inline_for_extraction noextract
 let state_s' c i = state_s c i (c.state.s i) (optional_key i c.km c.key)
 
 /// State is equipped with a superfluous type-level parameter to ensure ML-like
-/// prenex polymorphism and hence low-level monomorphization via KreMLin.
+/// prenex polymorphism and hence low-level monomorphization via KaRaMeL.
 ///
 /// Run-time functions MUST take t as a parameter. Proof-level functions are
 /// welcome to instantiate it directly with ``c.state i``.

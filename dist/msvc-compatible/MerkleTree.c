@@ -24,7 +24,7 @@
 
 #include "MerkleTree.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 
 static uint8_t *hash_r_alloc(uint32_t s)
 {
@@ -95,7 +95,7 @@ free_elems___uint8_t__uint32_t(
       return;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -653,7 +653,7 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -780,7 +780,7 @@ alloc___LowStar_Vector_vector_str__uint8_t__uint32_t(
       cidx = tmp;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -837,7 +837,7 @@ alloc____uint8_t__uint32_t(
       cidx = tmp;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -936,7 +936,7 @@ free_elems__LowStar_Vector_vector_str__uint8_t__uint32_t(
       return;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1074,7 +1074,7 @@ insert_(
       return;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1267,7 +1267,7 @@ construct_rhs(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1465,7 +1465,7 @@ mt_get_path_(
       actd = tmp;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1609,7 +1609,7 @@ mt_flush_to_(
       i1 = tmp;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1692,7 +1692,7 @@ free_elems_from___uint8_t__uint32_t(
       return;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1781,7 +1781,7 @@ mt_retract_to_(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1894,7 +1894,7 @@ mt_verify_(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2079,7 +2079,7 @@ serialize_hash_i(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2149,7 +2149,7 @@ serialize_hash_vec_i(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2256,7 +2256,7 @@ serialize_hash_vv_i(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2523,7 +2523,7 @@ deserialize_hash_vec_i(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2663,7 +2663,7 @@ deserialize_hash_vv_i(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");

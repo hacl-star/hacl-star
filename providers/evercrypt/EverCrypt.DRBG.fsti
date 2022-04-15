@@ -85,9 +85,9 @@ let min_length (a:supported_alg) : n:size_t{v n == S.min_length a} =
   | SHA2_256 | SHA2_384 | SHA2_512 -> normalize_term (mk_int (S.min_length SHA2_256))
 
 /// This has a @CAbstractStruct attribute in the implementation.
-/// See https://github.com/FStarLang/kremlin/issues/153
+/// See https://github.com/FStarLang/karamel/issues/153
 /// 
-/// It instructs KreMLin to include only a forward-declarartion
+/// It instructs KaRaMeL to include only a forward-declarartion
 /// in the header file, forcing code to always use `state_s` abstractly
 /// through a pointer.
 val state_s: supported_alg -> Type0

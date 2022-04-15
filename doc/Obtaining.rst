@@ -10,7 +10,7 @@ this full build process: we provide the generated code in the ``dist/``
 directory, under version control to facilitate obtaining the source code.
 
 Each subdirectory corresponds to a *distribution*, i.e. a particular set of
-options passed to KreMLin (the F*-to-C compiler) that influence how the
+options passed to KaRaMeL (the F*-to-C compiler) that influence how the
 generated C code looks like.
 
 There is a total order on distributions:
@@ -22,7 +22,7 @@ There is a total order on distributions:
   headers that you may have to provide depending on your target. It does not
   include Merkle Trees and the code is incredibly verbose.
 - The MSVC distribution relies on ``alloca`` to avoid C11 VLA for the sake of
-  MSVC; relies on KreMLin for tail-call optimizations. It also does not use GCC
+  MSVC; relies on KaRaMeL for tail-call optimizations. It also does not use GCC
   inline assembly for Curve25519 and uses external linkage instead.
 - The GCC distribution relies on C11 VLA and therefore does not work with MSVC.
 - The GCC64 distribution assumes a native ``unsigned __int128`` type which can be
@@ -30,7 +30,7 @@ There is a total order on distributions:
   code but only works on 64-bit GCC and Clang.
 
 Other distributions are either for distinguished consumers of our code who need
-specific KreMLin compilation options (e.g. Mozilla, CCF) or for testing (e.g.
+specific KaRaMeL compilation options (e.g. Mozilla, CCF) or for testing (e.g.
 portable-gcc-compatible, which compiles without ``-march=native``, to ensure all
 our assumptions about CPU targets are explicit in our Makefile).
 
@@ -60,7 +60,7 @@ To incorporate our verified crypto code into a C software project, a developer
 has two choices.
 
 - Pick a full EverCrypt distribution, along with the
-  `dist/kremlin` directory, thus giving a "wholesale" integration of
+  `dist/karamel` directory, thus giving a "wholesale" integration of
   the EverCrypt library, including all supported algorithms from HACL* and Vale.
 - For a more selective integration, cherry-pick the C or assembly
   files for specific versions of specific algorithms.  Each header
@@ -68,10 +68,10 @@ has two choices.
   depends on so it's easy to integrate, say, an individual algorithm
   from the HACL API without taking the full library.
 
-The ``dist/kremlin`` directory contains all the required headers from
-KreMLin.  In particular, these headers contain implementations of
+The ``dist/karamel`` directory contains all the required headers from
+KaRaMeL.  In particular, these headers contain implementations of
 FStar.UInt128, the module for 128-bit arithmetic. The
-``kremlin/include/kremlin/internal/types.h`` header will attempt to
+``karamel/include/krml/internal/types.h`` header will attempt to
 use C preprocessor macros to pick the right UInt128 implementation for
 your platform:
 
@@ -93,7 +93,7 @@ and other HACL* users have also developed bindings for other programming languag
 OCaml
 ^^^^^
 
-The KReMLin compiler auto-generates ``ocaml-ctypes`` bindings for HACL*. On top
+The KaRaMeL compiler auto-generates ``ocaml-ctypes`` bindings for HACL*. On top
 of these "raw" bindings, we add a high-level wrapper that uses functors, shares
 type signatures, performs run-time checks and offers a much more idiomatic API.
 
@@ -112,9 +112,9 @@ Documentation for the high-level API is available `here
 JavaScript
 ^^^^^^^^^^
 
-HACL* is compiled to WebAssembly via the WASM backend of KreMLin (see the
+HACL* is compiled to WebAssembly via the WASM backend of KaRaMeL (see the
 Oakland'19 paper for details). We offer an idiomatic JavaScript API on top of
-HACL-WASM so that clients do not have to be aware of the KreMLin memory layout,
+HACL-WASM so that clients do not have to be aware of the KaRaMeL memory layout,
 calling convention, etc. This latter API is available as a
 `Node.js package <https://www.npmjs.com/package/hacl-wasm>`_.
 

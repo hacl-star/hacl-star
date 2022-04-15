@@ -1149,66 +1149,6 @@ let fdiv_lemma1 a b c d =
   assert (c *% finv d *% (b *% d) == c *% b)
 
 
-val point_equal_lemma_aux1: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> e:elem -> f:elem{f <> 0} -> Lemma
-  (requires a *% b <> c *% d /\ a /% d == e /% f)
-  (ensures  e *% b <> c *% f)
-let point_equal_lemma_aux1 a b c d e f =
-  fmul_both_lemma_neq (a *% b) (c *% d) f;
-  assert (a *% b *% f <> c *% d *% f);
-  calc (==) {
-    a *% b *% f;
-    (==) { lemma_fmul_assoc1 a b f }
-    a *% f *% b;
-    (==) { fdiv_lemma1 a d e f }
-    e *% d *% b;
-    (==) { lemma_fmul_assoc1 e d b }
-    e *% b *% d;
-    };
-  lemma_fmul_assoc1 c d f;
-  assert (e *% b *% d <> c *% f *% d);
-  fmul_both_lemma_neq (e *% b) (c *% f) d
-
-
-val point_equal_lemma_aux2: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> e:elem -> f:elem{f <> 0} -> Lemma
-  (requires a *% b == c *% d /\ a /% d == e /% f)
-  (ensures  e *% b == c *% f)
-let point_equal_lemma_aux2 a b c d e f =
-  fmul_both_lemma (a *% b) (c *% d) f;
-  assert (a *% b *% f == c *% d *% f);
-  calc (==) {
-    a *% b *% f;
-    (==) { lemma_fmul_assoc1 a b f }
-    a *% f *% b;
-    (==) { fdiv_lemma1 a d e f }
-    e *% d *% b;
-    (==) { lemma_fmul_assoc1 e d b }
-    e *% b *% d;
-    };
-  lemma_fmul_assoc1 c d f;
-  assert (e *% b *% d == c *% f *% d);
-  prime_lemma ();
-  Fermat.mod_mult_congr prime (e *% b) (c *% f) d;
-  Math.Lemmas.small_mod (e *% b) prime;
-  Math.Lemmas.small_mod (c *% f) prime;
-  assert (e *% b == c *% f)
-
-
-let point_equal_lemma p q s =
-  let px, py, pz, pt = p in
-  let qx, qy, qz, qt = q in
-  let sx, sy, sz, st = s in
-  assert (px /% pz == qx /% qz);
-  assert (py /% pz == qy /% qz);
-
-  if ((px *% sz) <> (sx *% pz)) then
-    point_equal_lemma_aux1 px sz sx pz qx qz
-  else if ((py *% sz) <> (sy *% pz)) then
-    point_equal_lemma_aux1 py sz sy pz qy qz
-    else begin
-      point_equal_lemma_aux2 px sz sx pz qx qz;
-      point_equal_lemma_aux2 py sz sy pz qy qz end
-
-
 let aff_g_is_on_curve () =
   assert_norm (is_on_curve (g_x, g_y))
 

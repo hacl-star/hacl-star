@@ -7,14 +7,14 @@
 
 #define SHA256_BLOCK_SIZE_B 64
 
-struct KremlinWorkaround {
+struct KrmlWorkaround {
   sha256_main_i_SHA256Context ctx_value;
   uint32_t H_value[8];
   uint8_t unprocessed_bytes_value[SHA256_BLOCK_SIZE_B];
 };
 
 void Vale_Hash_SHA2_256_init(uint32_t *state) {
-  struct KremlinWorkaround *k = (struct KremlinWorkaround *) state;
+  struct KrmlWorkaround *k = (struct KrmlWorkaround *) state;
   k->ctx_value.H = k->H_value;
   k->ctx_value.unprocessed_bytes = k->unprocessed_bytes_value;
   k->ctx_value.num_unprocessed_bytes = (uint32_t)0U;

@@ -6,7 +6,7 @@
 
 include ../dist/gcc-compatible/Makefile.config
 
-KREMLIN_HOME?=../dist/kremlin
+KRML_HOME?=../dist/karamel
 USER_CFLAGS?=
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
@@ -58,8 +58,8 @@ TARGETS += uint128-intrinsics-test.exe
 endif
 endif
 
-CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
-  -I$(KREMLIN_HOME)/kremlib/dist/minimal \
+CFLAGS += -I$(KRML_HOME)/include -I../dist/gcc-compatible \
+  -I$(KRML_HOME)/krmllib/dist/minimal \
   -I../secure_api/merkle_tree \
   -O3 $(USER_CFLAGS)
 

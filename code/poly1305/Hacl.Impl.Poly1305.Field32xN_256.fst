@@ -16,7 +16,7 @@ module ST = FStar.HyperStack.ST
 open Hacl.Impl.Poly1305.Field32xN
 
 /// Note: on fstar-master, we extract everything in a single invocation of
-/// KreMLin. However, we cannot mix in the same C file functions that cannot
+/// KaRaMeL. However, we cannot mix in the same C file functions that cannot
 /// assume avx2 and functions that demand it, because the compiler will optimize
 /// the fallback version with avx2 instructions, which will in turn generate
 /// illegal instruction errors on some target machines.
@@ -27,7 +27,7 @@ open Hacl.Impl.Poly1305.Field32xN
 ///
 /// One way to solve this problem is to mark them noextract
 /// inline_for_extraction, as was done previously. Another way would be to fix
-/// KreMLin to allow moving functions in a given module to other modules. A
+/// KaRaMeL to allow moving functions in a given module to other modules. A
 /// third, more mundame fix is to split these functions in separate modules and
 /// package them with their top-level bundle file, which will achieve the same
 /// effect.

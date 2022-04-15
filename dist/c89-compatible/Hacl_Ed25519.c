@@ -436,11 +436,11 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint6
     memcpy(t1, q, (uint32_t)20U * sizeof (uint64_t));
     {
       uint32_t i;
-      for (i = (uint32_t)0U; i < (uint32_t)14U; i++)
+      for (i = (uint32_t)0U; i < (uint32_t)15U; i++)
       {
-        uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)20U;
-        uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)20U;
-        Hacl_Impl_Ed25519_PointAdd_point_add(t2, t11, q);
+        uint64_t *t11 = table + i * (uint32_t)20U;
+        uint64_t *t2 = table + i * (uint32_t)20U + (uint32_t)20U;
+        Hacl_Impl_Ed25519_PointAdd_point_add(t2, q, t11);
       }
     }
     {
@@ -600,11 +600,11 @@ point_mul_double_vartime(
       memcpy(t10, q1, (uint32_t)20U * sizeof (uint64_t));
       {
         uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)14U; i++)
+        for (i = (uint32_t)0U; i < (uint32_t)15U; i++)
         {
-          uint64_t *t11 = table1 + (i + (uint32_t)1U) * (uint32_t)20U;
-          uint64_t *t2 = table1 + (i + (uint32_t)2U) * (uint32_t)20U;
-          Hacl_Impl_Ed25519_PointAdd_point_add(t2, t11, q1);
+          uint64_t *t11 = table1 + i * (uint32_t)20U;
+          uint64_t *t2 = table1 + i * (uint32_t)20U + (uint32_t)20U;
+          Hacl_Impl_Ed25519_PointAdd_point_add(t2, q1, t11);
         }
       }
       {
@@ -615,11 +615,11 @@ point_mul_double_vartime(
         memcpy(t1, q2, (uint32_t)20U * sizeof (uint64_t));
         {
           uint32_t i;
-          for (i = (uint32_t)0U; i < (uint32_t)14U; i++)
+          for (i = (uint32_t)0U; i < (uint32_t)15U; i++)
           {
-            uint64_t *t11 = table2 + (i + (uint32_t)1U) * (uint32_t)20U;
-            uint64_t *t2 = table2 + (i + (uint32_t)2U) * (uint32_t)20U;
-            Hacl_Impl_Ed25519_PointAdd_point_add(t2, t11, q2);
+            uint64_t *t11 = table2 + i * (uint32_t)20U;
+            uint64_t *t2 = table2 + i * (uint32_t)20U + (uint32_t)20U;
+            Hacl_Impl_Ed25519_PointAdd_point_add(t2, q2, t11);
           }
         }
         {
