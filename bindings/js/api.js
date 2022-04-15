@@ -258,11 +258,12 @@ var HaclWasm = (function() {
     }
   };
 
-  var copy_array_to_stack = function(type, array) {
+  var copy_array_to_stack = function(type, array, i) {
     // This returns a suitably-aligned pointer.
     var pointer = loader.reserve(Module.Kremlin.mem, array.length, cell_size(type));
     (new Uint8Array(Module.Kremlin.mem.buffer)).set(new Uint8Array(array.buffer), pointer);
-    // console.log("stack pointer got", loader.p32(pointer));
+    // console.log("argument "+i, "stack pointer got", loader.p32(pointer));
+    // console.log(array, array.length);
     // console.log("source", array.buffer);
     // loader.dump(Module.Kremlin.mem, 2048, 0x13000);
     return pointer;
@@ -527,7 +528,7 @@ var HaclWasm = (function() {
         }
         check_array_type(arg.type, arg_byte_buffer, size, arg.name);
         // TODO: this copy is un-necessary in the case of output buffers.
-        return copy_array_to_stack(arg.type, arg_byte_buffer);
+        return copy_array_to_stack(arg.type, arg_byte_buffer, i);
       }
 
       if (arg.type === "bool" || arg.type === "int32") {
@@ -548,6 +549,9 @@ var HaclWasm = (function() {
 
       throw Error("Unimplemented ! ("+proto.name+")");
     });
+    // console.log("Arguments laid out in WASM memory");
+    // args.forEach((arg, i) => console.log("argument "+i, loader.p32(arg)));
+    // loader.dump(Module.Kremlin.mem, 2048, args[0] - (args[0] % 0x20));
 
     // Calling the wasm function !
     if (proto.custom_module_name) {
@@ -561,6 +565,9 @@ var HaclWasm = (function() {
       throw new Error(func_name + " is not in Module["+proto.module+"]");
     var call_return = Module[proto.module][func_name](...args);
 
+    // console.log("After function call");
+    // loader.dump(Module.Kremlin.mem, 2048, args[0] - (args[0] % 0x20));
+
     // Populating the JS buffers returned with their values read from Wasm memory
     var return_buffers = args.map(function(pointer, i) {
       if (proto.args[i].kind === "output") {
@@ -571,7 +578,10 @@ var HaclWasm = (function() {
         } else {
           size = protoRet.size;
         }
-        return read_memory(protoRet.type, pointer, size);
+        // console.log("About to read", protoRet.type, loader.p32(pointer), size);
+        let r = read_memory(protoRet.type, pointer, size);
+        // console.log(r);
+        return r;
       } else {
         return null;
       }

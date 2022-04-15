@@ -2261,6 +2261,260 @@
         "type": "void",
         "tests": []
       }
+    },
+    "add": {
+      "module": "Hacl_GenericField64",
+      "name": "add",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "sub": {
+      "module": "Hacl_GenericField64",
+      "name": "sub",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "sqr": {
+      "module": "Hacl_GenericField64",
+      "name": "sqr",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "inverse": {
+      "module": "Hacl_GenericField64",
+      "name": "inverse",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "exp_consttime": {
+      "module": "Hacl_GenericField64",
+      "name": "exp_consttime",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "bBits",
+          "kind": "input",
+          "type": "int32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len/64",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "exp_vartime": {
+      "module": "Hacl_GenericField64",
+      "name": "exp_vartime",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "bBits",
+          "kind": "input",
+          "type": "int32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len/64",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
     }
   }
 }

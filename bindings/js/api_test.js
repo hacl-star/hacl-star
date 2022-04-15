@@ -140,8 +140,24 @@ function testBignumMontgomery64(Hacl) {
   let [ bM ] = Hacl.Bignum_Montgomery_64.to_field(ctx, b);
   let [ dM ] = Hacl.Bignum_Montgomery_64.mul(ctx, aM, bM);
 
-  let [ e ] = Hacl.Bignum_Montgomery_64.from_field(ctx, dM);
-  assert(e[0] == 0x02);
+  let [ d ] = Hacl.Bignum_Montgomery_64.from_field(ctx, dM);
+  assert(d[0] == 0x02);
+
+  let eM;
+
+  [ eM ] = Hacl.Bignum_Montgomery_64.add(ctx, aM, bM);
+  assert(Hacl.Bignum_Montgomery_64.from_field(ctx, eM)[0][0] == 0x40n);
+  [ eM ] = Hacl.Bignum_Montgomery_64.sub(ctx, bM, aM);
+  assert(Hacl.Bignum_Montgomery_64.from_field(ctx, eM)[0][0] == 0x01n);
+  [ eM ] = Hacl.Bignum_Montgomery_64.sqr(ctx, aM);
+  assert(Hacl.Bignum_Montgomery_64.from_field(ctx, eM)[0][0] == 0x04n);
+  console.log("a = ", a[0]);
+  console.log("aM = ", aM[0]);
+  let [ aInvM ] = Hacl.Bignum_Montgomery_64.inverse(ctx, aM);
+  console.log("aInvM = ", aInvM[0]);
+  assert(false);
+  console.log(Hacl.Bignum_Montgomery_64.from_field(ctx, aInvM)[0][0]);
+  assert(Hacl.Bignum_Montgomery_64.from_field(ctx, aInvM)[0][0] == 0x21n);
 }
 
 // Main test driver
