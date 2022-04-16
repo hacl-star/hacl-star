@@ -21,7 +21,7 @@ all developed as part of [Project Everest](https://project-everest.github.io/).
 of modern cryptographic algorithms written in a subset of
 [F\*](https://fstarlang.github.io) called Low\* and compiled to C
 using a compiler called
-[KreMLin](https://github.com/FStarLang/kremlin). The Low\* source code
+[KaRaMeL](https://github.com/FStarLang/karamel). The Low\* source code
 for each primitive is verified for memory safety, functional
 correctness, and secret independence. The compiler generates
 efficient, readable, standalone C code for each algorithm that

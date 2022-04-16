@@ -1,13 +1,13 @@
-HACL_HOME=../..
+HACL_HOME=$(realpath ../..)
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
 all: dist/libed25519.a
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../../Makefile.local
+include $(HACL_HOME)/Makefile.local
 
-CFLAGS += -I ../../../lib/c -I ../../lib/c -march=native -mtune=native -O3
+CFLAGS += -I$(HACL_HOME)/lib/c -march=native -mtune=native -O3
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
@@ -32,7 +32,7 @@ dist/Makefile.basic: $(filter-out %prims.krml,$(ALL_KRML_FILES))
 	-skip-compilation
 
 dist/ed25519-test.exe: dist/libed25519.a \
-	$(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
+	$(KRML_HOME)/krmllib/dist/generic/libkrmllib.a $(HACL_HOME)/lib/c/Lib_PrintBuffer.c
 
 %.exe:
 	$(CC) $(CFLAGS) $^ -o $@

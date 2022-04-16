@@ -1,16 +1,16 @@
-# Only exercised by Travis CI. This requires a full kremlib to be setup. Regular
+# Only exercised by Travis CI. This requires a full krmllib to be setup. Regular
 # CI regenerates these files and compiles them from the main Makefile. It would
 # be nice to delegate building & running C tests to this Makefile from the main
 # Makefile for the purposes of sharing.
 
 SOURCES = $(wildcard *.c)
 CFLAGS += -I../../gcc-compatible
-CFLAGS += -I../../kremlin/include
-CFLAGS += -I../../kremlin/kremlib/dist/minimal
+CFLAGS += -I../../karamel/include
+CFLAGS += -I../../karamel/krmllib/dist/minimal
 
 all: $(patsubst %.c,%.test,$(SOURCES))
 
-%.exe: %.o ../../gcc-compatible/libevercrypt.a $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+%.exe: %.o ../../gcc-compatible/libevercrypt.a $(KRML_HOME)/krmllib/dist/generic/libkrmllib.a
 	$(CC) $^ -o $@
 
 .PHONY: .test

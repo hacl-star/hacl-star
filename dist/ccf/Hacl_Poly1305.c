@@ -24,7 +24,7 @@
 
 #include "internal/Hacl_Poly1305.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 
 static void poly1305_init(uint64_t *ctx, uint8_t *key)
 {
