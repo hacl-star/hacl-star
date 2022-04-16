@@ -61,7 +61,11 @@ function p32(n) {
   return p8((n >>> 24) & 255) + p8((n >>> 16) & 255) + p8((n >>> 8) & 255) + p8(n & 255);
 }
 
-// ofs is optional
+// Print the contents of the memory in a format similar to xxd or hexdump.
+// @param {WebAssembly.Memory} mem  The memory to print
+// @param {Number} size             The amount of memory to print out, in bytes
+// @param {Number} ofs              Optional. The offset at which printing
+//                                  starts.
 function dump(mem, size, ofs) {
   let m8 = new Uint8Array(mem.buffer);
   if (!ofs)

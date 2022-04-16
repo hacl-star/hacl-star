@@ -3,7 +3,7 @@
 // included from a webpage.
 var my_print;
 
-function kremlin_start () {
+function karamel_start () {
   my_print = (...msg) =>
     document.getElementById("terminal").appendChild(
       document.createTextNode(msg.join(" ")+"\n"));

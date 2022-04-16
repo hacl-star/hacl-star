@@ -1,7 +1,7 @@
 // This module expect a file named shell.js, that defines my_js_files and
 // my_modules to be arrays of filenames.
 // The former are loaded into scope, and the latter are folded with name
-// propagation just like kreMLin WASM codegen expects.
+// propagation just like KaRaMeL WASM codegen expects.
 // Once everything is loaded, we try to find a main function in any of the
 // modules, or call the main function in scope, or fail.
 "use strict";
@@ -40,7 +40,7 @@ if (typeof WebAssembly === "undefined")
   throw "WebAssembly not enabled; are you running an old shell, or missing [-Wasm]?";
 
 // Load extra modules... with the understanding that shell.js is written by
-// kreMLin
+// KaRaMeL
 var link, reserve, dump, hex;
 var my_js_files, my_modules, my_debug, my_imports = {};
 
@@ -80,10 +80,10 @@ scope.then(scope => {
   let err = 0;
   let with_debug = (main) => {
     if (my_debug)
-      dump(scope.Kremlin.mem, 2048);
+      dump(scope.Karamel.mem, 2048);
     err = main(scope);
     if (my_debug)
-      dump(scope.Kremlin.mem, 2048);
+      dump(scope.Karamel.mem, 2048);
   };
   for (let m of Object.keys(scope)) {
     if ("main" in scope[m]) {

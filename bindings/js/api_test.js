@@ -124,7 +124,6 @@ function testBignum64(Hacl) {
   let [ e ] = Hacl.Bignum_64.mod_precomp(ctx, d);
   assert(e[0] == 0x02);
   let [ e_bytes ] = Hacl.Bignum_64.bn_to_bytes_le(e);
-  console.log(e_bytes);
   assert (e_bytes instanceof Uint8Array);
   assert (e_bytes.length == 8);
   assert (e_bytes[0] == 0x02);
@@ -151,12 +150,12 @@ function testBignumMontgomery64(Hacl) {
   assert(Hacl.Bignum_Montgomery_64.from_field(ctx, eM)[0][0] == 0x01n);
   [ eM ] = Hacl.Bignum_Montgomery_64.sqr(ctx, aM);
   assert(Hacl.Bignum_Montgomery_64.from_field(ctx, eM)[0][0] == 0x04n);
+
   console.log("a = ", a[0]);
   console.log("aM = ", aM[0]);
   let [ aInvM ] = Hacl.Bignum_Montgomery_64.inverse(ctx, aM);
   console.log("aInvM = ", aInvM[0]);
-  assert(false);
-  console.log(Hacl.Bignum_Montgomery_64.from_field(ctx, aInvM)[0][0]);
+  console.log("aInv = ", Hacl.Bignum_Montgomery_64.from_field(ctx, aInvM)[0][0]);
   assert(Hacl.Bignum_Montgomery_64.from_field(ctx, aInvM)[0][0] == 0x21n);
 }
 

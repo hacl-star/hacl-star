@@ -15,11 +15,14 @@ if (typeof module !== 'undefined') {
 } else {
   var loader = this;
   var shell = this;
-  var api_promise = fetch("wasm/api.json").then(r => r.json());
-  var layouts_promise = fetch("wasm/layouts.json").then(r => r.json());
-  var modules_promise = Promise.all(my_modules.map(m => fetch("wasm/" + m + ".wasm")))
+  var api_promise = fetch("api.json").then(r => r.json());
+  var layouts_promise = fetch("layouts.json").then(r => r.json());
+  var modules_promise = Promise.all(my_modules.map(m => fetch(m + ".wasm")))
     .then(response => Promise.all(response.map(r => r.arrayBuffer())));
 }
+
+// Uncomment for debug
+loader.setMyPrint((x) => {});
 
 // HELPERS FOR SIZE FIELDS
 // -----------------------
@@ -260,12 +263,12 @@ var HaclWasm = (function() {
 
   var copy_array_to_stack = function(type, array, i) {
     // This returns a suitably-aligned pointer.
-    var pointer = loader.reserve(Module.Kremlin.mem, array.length*cell_size(type), cell_size(type));
-    (new Uint8Array(Module.Kremlin.mem.buffer)).set(new Uint8Array(array.buffer), pointer);
+    var pointer = loader.reserve(Module.Karamel.mem, array.length*cell_size(type), cell_size(type));
+    (new Uint8Array(Module.Karamel.mem.buffer)).set(new Uint8Array(array.buffer), pointer);
     // console.log("argument "+i, "stack pointer got", loader.p32(pointer));
     // console.log(array, array.length);
     // console.log("source", array.buffer);
-    // loader.dump(Module.Kremlin.mem, 2048, 0x13000);
+    // loader.dump(Module.Karamel.mem, 2048, 0x13000);
     return pointer;
   };
 
@@ -274,7 +277,7 @@ var HaclWasm = (function() {
     // TODO: faster path with aligned pointers?
     var result = new ArrayBuffer(len*cell_size(type));
     // console.log("New memory buffer", type, len, len*cell_size(type));
-    (new Uint8Array(result).set(new Uint8Array(Module.Kremlin.mem.buffer)
+    (new Uint8Array(result).set(new Uint8Array(Module.Karamel.mem.buffer)
       .subarray(ptr, ptr + len*cell_size(type))));
     // console.log(result);
     return new (array_type(type))(result);
@@ -287,7 +290,7 @@ var HaclWasm = (function() {
   var layouts;
 
   var heapReadBlockSize = (ptr) => {
-    var m32 = new Uint32Array(Module.Kremlin.mem.buffer)
+    var m32 = new Uint32Array(Module.Karamel.mem.buffer)
     return m32[ptr/4-2]-8;
   };
 
@@ -309,19 +312,19 @@ var HaclWasm = (function() {
   var heapReadInt = (typ, ptr) => {
     switch (typ) {
       case "A8":
-        var m8 = new Uint8Array(Module.Kremlin.mem.buffer);
+        var m8 = new Uint8Array(Module.Karamel.mem.buffer);
         return m8[ptr];
 
       case "A32":
         if (!(ptr % 4) == 0)
           throw new Error("malloc violation (3)");
-        var m32 = new Uint32Array(Module.Kremlin.mem.buffer);
+        var m32 = new Uint32Array(Module.Karamel.mem.buffer);
         return m32[ptr/4];
 
       case "A64":
         if (!(ptr % 8) == 0)
           throw new Error("malloc violation (4)");
-        var m64 = new BigUint64Array(Module.Kremlin.mem.buffer);
+        var m64 = new BigUint64Array(Module.Karamel.mem.buffer);
         return m64[ptr/8];
 
       default:
@@ -332,21 +335,21 @@ var HaclWasm = (function() {
   var heapWriteInt = (typ, ptr, v) => {
     switch (typ) {
       case "A8":
-        var m8 = new Uint8Array(Module.Kremlin.mem.buffer);
+        var m8 = new Uint8Array(Module.Karamel.mem.buffer);
         m8[ptr] = v;
         break;
 
       case "A32":
         if (!(ptr % 4) == 0)
           throw new Error("malloc violation (3)");
-        var m32 = new Uint32Array(Module.Kremlin.mem.buffer);
+        var m32 = new Uint32Array(Module.Karamel.mem.buffer);
         m32[ptr/4] = v;
         break;
 
       case "A64":
         if (!(ptr % 8) == 0)
           throw new Error("malloc violation (4)");
-        var m64 = new BigUint64Array(Module.Kremlin.mem.buffer);
+        var m64 = new BigUint64Array(Module.Karamel.mem.buffer);
         m64[ptr/8] = v;
         break;
 
@@ -372,7 +375,7 @@ var HaclWasm = (function() {
   // Fast-path for arrays of flat integers.
   var heapWriteBlockFast = (int_type, ptr, arr) => {
     // console.log(arr);
-    (new Uint8Array(Module.Kremlin.mem.buffer)).set(new Uint8Array(arr.buffer), ptr);
+    (new Uint8Array(Module.Karamel.mem.buffer)).set(new Uint8Array(arr.buffer), ptr);
   };
 
   // Eventually will be mutually recursive once Layout is implemented (flat
@@ -401,7 +404,7 @@ var HaclWasm = (function() {
         if (data[0] == "Int") {
           let sz = v.buffer.byteLength;
           // NB: could be more precise with alignment, I guess
-          let dst = loader.reserve(Module.Kremlin.mem, sz, 8);
+          let dst = loader.reserve(Module.Karamel.mem, sz, 8);
           heapWriteInt("A32", ptr, dst);
           heapWriteBlockFast(data[1][0], dst, v);
           break;
@@ -447,7 +450,7 @@ var HaclWasm = (function() {
     let [ tag, data ] = layouts[layout];
     switch (tag) {
       case "LFlat":
-        let ptr = loader.reserve(Module.Kremlin.mem, data.size, 8);
+        let ptr = loader.reserve(Module.Karamel.mem, data.size, 8);
         heapWriteLayout(layout, ptr, v);
         return ptr;
       default:
@@ -468,7 +471,7 @@ var HaclWasm = (function() {
     if (args.length != expected_args_number) {
       throw Error("wrong number of arguments to call the F*-wasm function " + proto.name + ": expected " + expected_args_number + ", got " + args.length);
     }
-    var memory = new Uint32Array(Module.Krml.mem.buffer);
+    var memory = new Uint32Array(Module.Karamel.mem.buffer);
     var sp = memory[0];
 
     // Integer arguments are either
@@ -512,6 +515,10 @@ var HaclWasm = (function() {
     // Figure out the value of all arguments and write to the WASM stack
     // accordingly. 
     var args = proto.args.map(function(arg, i) {
+      let debug = (type, x) => {
+        // console.log("Argument", i, type, loader.p32(x));
+        return x;
+      };
       if (arg.type.startsWith("buffer")) {
         var size;
         if (typeof arg.size === "string") {
@@ -528,30 +535,30 @@ var HaclWasm = (function() {
         }
         check_array_type(arg.type, arg_byte_buffer, size, arg.name);
         // TODO: this copy is un-necessary in the case of output buffers.
-        return copy_array_to_stack(arg.type, arg_byte_buffer, i);
+        return debug("array", copy_array_to_stack(arg.type, arg_byte_buffer, i));
       }
 
       if (arg.type === "bool" || arg.type === "int32") {
         if (arg.interface_index === undefined) {
           // Variable-length argument, determined via first pass above.
-          return args_int32s[arg.name];
+          return debug("int(auto)", args_int32s[arg.name]);
         } else {
-          // Regular interger argument, passed by the user.
-          return args[arg.interface_index];
+          // Regular integer argument, passed by the user.
+          return debug("int", args[arg.interface_index]);
         }
       }
 
       // Layout
       if (arg.type[0].toUpperCase() == arg.type[0]) {
         let func_arg = args[arg.interface_index];
-        return stackWriteLayout(arg.type, func_arg);
+        return debug("layout", stackWriteLayout(arg.type, func_arg));
       }
 
       throw Error("Unimplemented ! ("+proto.name+")");
     });
     // console.log("Arguments laid out in WASM memory");
     // args.forEach((arg, i) => console.log("argument "+i, loader.p32(arg)));
-    // loader.dump(Module.Kremlin.mem, 2048, args[0] - (args[0] % 0x20));
+    // loader.dump(Module.Karamel.mem, 2048, args[0] - (args[0] % 0x20));
 
     // Calling the wasm function !
     if (proto.custom_module_name) {
@@ -566,7 +573,7 @@ var HaclWasm = (function() {
     var call_return = Module[proto.module][func_name](...args);
 
     // console.log("After function call");
-    // loader.dump(Module.Kremlin.mem, 2048, args[0] - (args[0] % 0x20));
+    // loader.dump(Module.Karamel.mem, 2048, args[0] - (args[0] % 0x20));
 
     // Populating the JS buffers returned with their values read from Wasm memory
     var return_buffers = args.map(function(pointer, i) {
@@ -593,19 +600,19 @@ var HaclWasm = (function() {
       // Heap-allocated value
       if (proto.return.type.startsWith("buffer")) {
         let r = heapReadBuffer(proto.return.type, call_return);
-        memory[Module.Kremlin.mem.buffer.byteLength/4-1] = 0;
+        memory[Module.Karamel.mem.buffer.byteLength/4-1] = 0;
         return r;
       } else {
         let r = heapReadLayout(proto.return.type, call_return);
-        memory[Module.Kremlin.mem.buffer.byteLength/4-1] = 0;
+        memory[Module.Karamel.mem.buffer.byteLength/4-1] = 0;
         return r;
 
-        // loader.dump(Module.Kremlin.mem, 2048, Module.Kremlin.mem.buffer.byteLength - 2048);
+        // loader.dump(Module.Karamel.mem, 2048, Module.Karamel.mem.buffer.byteLength - 2048);
         // console.log(loader.p32(call_return), r, JSON.stringify(layouts[proto.return.type], null, 2));
 
         // let ptr = stackWriteLayout(proto.return.type, r);
         // console.log(loader.p32(ptr));
-        // loader.dump(Module.Kremlin.mem, 2048, 0x13000);
+        // loader.dump(Module.Karamel.mem, 2048, 0x13000);
         // throw new Error(func_name+": non-buffer return layout not implemented");
       }
     }
@@ -652,11 +659,10 @@ var HaclWasm = (function() {
     return Promise.resolve(api_obj);
   };
 
-  var checkObj = {
+  return {
     getInitializedHaclModule: getInitializedHaclModule,
+    dump: (sz, ofs) => loader.dump(Module.Karamel.mem, sz, ofs)
   };
-
-  return checkObj;
 })();
 
 if (typeof module !== "undefined") {

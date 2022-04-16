@@ -59,6 +59,7 @@ Hacl_IntTypes_Intrinsics_sub_borrow_u32(uint32_t cin, uint32_t x, uint32_t y, ui
 static inline uint64_t
 Hacl_IntTypes_Intrinsics_add_carry_u64(uint64_t cin, uint64_t x, uint64_t y, uint64_t *r)
 {
+  printf("Hacl_IntTypes_Intrinsics_add_carry_u64 0x%"PRIx64" 0x%"PRIx64" 0x%"PRIx64"\n", cin, x, y);
   uint64_t res = x + cin + y;
   uint64_t
   c = (~FStar_UInt64_gte_mask(res, x) | (FStar_UInt64_eq_mask(res, x) & cin)) & (uint64_t)1U;
@@ -69,6 +70,7 @@ Hacl_IntTypes_Intrinsics_add_carry_u64(uint64_t cin, uint64_t x, uint64_t y, uin
 static inline uint64_t
 Hacl_IntTypes_Intrinsics_sub_borrow_u64(uint64_t cin, uint64_t x, uint64_t y, uint64_t *r)
 {
+  printf("Hacl_IntTypes_Intrinsics_sub_borrow_u64 0x%"PRIx64" 0x%"PRIx64" 0x%"PRIx64"\n", cin, x, y);
   uint64_t res = x - y - cin;
   uint64_t
   c =
