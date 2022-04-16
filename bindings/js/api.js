@@ -260,7 +260,7 @@ var HaclWasm = (function() {
 
   var copy_array_to_stack = function(type, array, i) {
     // This returns a suitably-aligned pointer.
-    var pointer = loader.reserve(Module.Kremlin.mem, array.length, cell_size(type));
+    var pointer = loader.reserve(Module.Kremlin.mem, array.length*cell_size(type), cell_size(type));
     (new Uint8Array(Module.Kremlin.mem.buffer)).set(new Uint8Array(array.buffer), pointer);
     // console.log("argument "+i, "stack pointer got", loader.p32(pointer));
     // console.log(array, array.length);
