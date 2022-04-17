@@ -163,9 +163,12 @@ var HaclWasm = (function() {
   var isInitialized = false;
   var Module = {};
 
-  // This object is passed at the wasm instantiation, it's required by the
-  // KaRaMeL-generated files. Since we don't need to import anything, it's empty.
-  var my_imports = {};
+  // We defined a few WASM-specific "compile-time macros".
+  var my_imports = {
+    EverCrypt_TargetConfig: (mem) => ({
+      hacl_can_compile_vale: 0,
+    }),
+  };
 
   // The WebAssembly modules have to be initialized before calling any function.
   // To be called only if isInitialized == false.
