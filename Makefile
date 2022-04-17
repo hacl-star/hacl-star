@@ -734,10 +734,6 @@ dist/wasm/Makefile.basic: INTRINSIC_FLAGS =
 # Must appear early on because of the left-to-right semantics of -bundle flags.
 dist/wasm/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = $(WASM_FLAGS)
 
-# Overriding EverCrypt.Hash so that is it no longer a live root; it will be
-# eliminated via the -bundle EverCrypt.* below
-dist/wasm/Makefile.basic: E_HASH_BUNDLE =
-
 # Doesn't work in WASM because one function has some heap allocation
 dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
 
@@ -785,7 +781,6 @@ dist/wasm/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
 dist/wasm/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.FFDHE,Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE
 dist/wasm/Makefile.basic: DEFAULT_FLAGS += -bundle EverCrypt.TargetConfig \
-  -bundle EverCrypt.Hash.Incremental=EverCrypt.Hash[rename=EverCrypt_Hash] \
   -bundle 'EverCrypt,EverCrypt.*'
 dist/wasm/Makefile.basic: REQUIRED_DROP =
 

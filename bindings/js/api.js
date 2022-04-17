@@ -34,8 +34,15 @@ loader.setMyPrint((x) => {});
 // - no spaces at all.
 var parseOp = (arg, op) => {
   let [ var_, const_ ] = arg.split(op);
-  return [ var_, op, const_ ];
+  return [ "Op", var_, op, const_ ];
 };
+
+var parseApp = (arg) => {
+  let i = arg.indexOf("(");
+  let [ m, f ] = arg.substr(0, i).split(".");
+  let x = arg.substr(i+1, arg.length - 1 - i - 1);
+  return [ "App", m, f, x ];
+}
 
 var parseSize = (arg) => {
   if (arg.indexOf("+") >= 0)
@@ -46,25 +53,48 @@ var parseSize = (arg) => {
     return parseOp(arg, "*");
   if (arg.indexOf("/") >= 0)
     return parseOp(arg, "/");
-  return [ arg ];
+
+  if (arg.indexOf("(") >= 0)
+    return parseApp(arg);
+
+  return [ "Var", arg ];
 };
 
-var evalSize = function(arg, args_int32s) {
-  let [ var_, op, const_ ] = parseSize(arg);
-  switch (op) {
-    case "+":
-      return args_int32s[var_] + parseInt(const_);
-    case "-":
-      return args_int32s[var_] - parseInt(const_);
-    case "*":
-      return args_int32s[var_] * parseInt(const_);
-    case "/":
-      let x = parseInt(const_);
-      if (args_int32s[var_] % x != 0)
-        throw new Error("Argument whose length is "+arg+" is not a multiple of "+x);
-      return args_int32s[var_] / x;
-    default:
+var evalSize = function(arg, args_int32s, api) {
+  let [ kind, ...args ] = parseSize(arg);
+  switch (kind) {
+    case "Var": {
+      let [ var_ ] = args;
       return args_int32s[var_];
+    }
+    case "Op": {
+      let [ var_, op, const_ ] = args;
+      switch (op) {
+        case "+":
+          return args_int32s[var_] + parseInt(const_);
+        case "-":
+          return args_int32s[var_] - parseInt(const_);
+        case "*":
+          return args_int32s[var_] * parseInt(const_);
+        case "/":
+          let x = parseInt(const_);
+          if (args_int32s[var_] % x != 0)
+            throw new Error("Argument whose length is "+arg+" is not a multiple of "+x);
+          return args_int32s[var_] / x;
+        default:
+          throw new Error("Illegal operator: "+op);
+      }
+    }
+    case "App": {
+      let [ m, f, x ] = args;
+      if (!(m in api))
+        throw new Error("For size "+arg+", module "+m+" is unknown");
+      if (!(f in api[m]))
+        throw new Error("For size "+arg+", function "+m+"."+f+" is unknown");
+      if (!(x in args_int32s))
+        throw new Error("For size "+arg+", module "+x+" is unknown");
+      return api[m][f](args_int32s[x])[0];
+    }
   }
 };
 
@@ -76,7 +106,9 @@ var evalSize = function(arg, args_int32s) {
 // @param {Number} total      The value of the formula
 // @return {[String, Number]} The variable name `var` and its value.
 var invertSize = function(arg, total) {
-  let [ var_, op, const_ ] = parseSize(arg);
+  let [ kind, var_, op, const_ ] = parseSize(arg);
+  if (kind != "Var" && kind != "Op")
+    throw new Error("Illegal size for an input: "+arg);
   switch (op) {
     case "+":
       return [ var_, total - parseInt(const_) ];
@@ -133,11 +165,14 @@ var validateJSON = function(json) {
 
         if (arg.type === "int32" && arg.kind === "input")
           length_args_available.push(arg.name);
-        if (arg.type.startsWith("buffer") && arg.kind === "input" && typeof arg.size === "string")
+        if (arg.type.startsWith("buffer") && arg.kind === "input" && typeof arg.size === "string") {
           // TODO: we should first check the field is syntactically correct
           // before parsing it... if parsing fails, this will yield a
           // nonsensical size and the error will be caught below.
-          length_args_available.push(parseSize(arg.size)[0]);
+          let [ kind, var_ ] = parseSize(arg.size);
+          if (kind == "Var" || kind == "Op")
+            length_args_available.push(var_);
+        }
       });
       func_obj.args.forEach(function(arg, i) {
         if (arg.type.startsWith("buffer") && typeof arg.size === "string" && arg.kind === "output" &&
@@ -145,9 +180,13 @@ var validateJSON = function(json) {
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("+"))) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("-"))) &&
           !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("/"))) &&
-          !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("*")))
-        )
-          throw Error("incorrect 'size' field value (" + arg.size + ")for argument #" + i + " of " + obj_name + " in api.json");
+          !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("*"))) &&
+          !(arg.size.indexOf("(") >= 0)
+        ) {
+          console.log(arg);
+          console.log(length_args_available);
+          throw Error("incorrect 'size' field value (" + arg.size + ") for argument #" + i + " of " + obj_name + " in api.json");
+        }
       });
       if (func_obj.return === undefined) {
         throw Error("please provide a 'return' field for " + obj_name + " in api.json");
@@ -463,6 +502,10 @@ var HaclWasm = (function() {
 
   // END HELPERS FOR HEAP LAYOUT
   
+  // The object being filled:
+  // - first level of keys = modules,
+  // - second level of keys = functions within a module
+  var api_obj = {};
 
   // This is the main logic; this function is partially applied to its
   // first two arguments for each API entry. We assume JITs are working well
@@ -525,7 +568,7 @@ var HaclWasm = (function() {
       if (arg.type.startsWith("buffer")) {
         var size;
         if (typeof arg.size === "string") {
-          size = evalSize(arg.size, args_int32s);
+          size = evalSize(arg.size, args_int32s, api_obj);
         } else {
           size = arg.size;
         }
@@ -571,8 +614,10 @@ var HaclWasm = (function() {
     }
     if (!(proto.module in Module))
       throw new Error(proto.module + " is not in Module");
-    if (!(func_name in Module[proto.module]))
+    if (!(func_name in Module[proto.module])) {
+      console.log(Object.keys(Module[proto.module]));
       throw new Error(func_name + " is not in Module["+proto.module+"]");
+    }
     var call_return = Module[proto.module][func_name](...args);
 
     // console.log("After function call");
@@ -584,7 +629,7 @@ var HaclWasm = (function() {
         var protoRet = proto.args[i];
         var size;
         if (typeof protoRet.size === "string") {
-          size = evalSize(protoRet.size, args_int32s);
+          size = evalSize(protoRet.size, args_int32s, api_obj);
         } else {
           size = protoRet.size;
         }
@@ -630,8 +675,6 @@ var HaclWasm = (function() {
     }
     throw new Error(func_name+": Unimplemented !");
   };
-
-  var api_obj = {};
 
   var getInitializedHaclModule = async function () {
     if (!isInitialized) {
