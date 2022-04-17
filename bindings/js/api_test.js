@@ -116,11 +116,18 @@ function testBignum64(Hacl) {
   assert(a instanceof BigUint64Array, "a not of the right return type");
   assert(a.length == 1, "a does not have the right length");
   assert(a[0] == 0x41n, "incorrect layout for a");
-  let ctx = Hacl.Bignum_64.mont_ctx_init(c);
+
   let [ d ] = Hacl.Bignum_64.mul(a, b);
   assert(d instanceof BigUint64Array, "d not of the right return type");
   assert(d.length == 2, "d does not have the right length");
   assert(d[0] == 0x41n*0x42n);
+  assert(Hacl.Bignum_64.add_mod(c, a, b)[0][0] == 0x40n);
+  assert(Hacl.Bignum_64.sub_mod(c, b, a)[0][0] == 0x01n);
+  let [ f ] = Hacl.Bignum_64.sqr(a);
+  console.log(c, f);
+  assert(Hacl.Bignum_64.mod(c, f)[0][0] == 0x04n);
+
+  let ctx = Hacl.Bignum_64.mont_ctx_init(c);
   let [ e ] = Hacl.Bignum_64.mod_precomp(ctx, d);
   assert(e[0] == 0x02);
   let [ e_bytes ] = Hacl.Bignum_64.bn_to_bytes_le(e);
@@ -134,7 +141,10 @@ function testBignumMontgomery64(Hacl) {
   let b = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4200000000000000"));
   let n = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4300000000000000"));
 
+  assert(Hacl.Bignum_Montgomery_64.field_modulus_check(n), "prime does not meet conditions");
+
   let ctx = Hacl.Bignum_Montgomery_64.field_init(n);
+  assert(Hacl.Bignum_Montgomery_64.field_get_len(ctx) == 1, "inconsistent length for n");
   let [ aM ] = Hacl.Bignum_Montgomery_64.to_field(ctx, a);
   let [ bM ] = Hacl.Bignum_Montgomery_64.to_field(ctx, b);
   let [ dM ] = Hacl.Bignum_Montgomery_64.mul(ctx, aM, bM);

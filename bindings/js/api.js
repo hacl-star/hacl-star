@@ -499,8 +499,8 @@ var HaclWasm = (function() {
         let [ var_, var_value ] = invertSize(arg.size, args[arg.interface_index].length);
         // console.log("Determined "+var_+"="+var_value);
 
-        if (var_ in args_int32s && var_value != args_int32s[arg.size])
-          throw new Error("Inconsistency in sizes");
+        if (var_ in args_int32s && var_value != args_int32s[var_])
+          throw new Error("Inconsistency in sizes; previously, "+var_+"="+args_int32s[var_]+"; now "+var_value);
         args_int32s[var_] = var_value;
       } else if (arg.type === "int32" && arg.interface_index !== undefined) {
         // API contains e.g.:
