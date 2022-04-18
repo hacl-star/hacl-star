@@ -809,7 +809,8 @@ publish-test-wasm: dist/wasm/package.json
 
 test-wasm: dist/wasm/package.json
 	cd dist/wasm && \
-	  node api_test.js
+	  node api_test.js && \
+	  node test2.js
 
 # Compact distributions
 # ---------------------
