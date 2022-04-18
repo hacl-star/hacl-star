@@ -332,7 +332,6 @@ static inline void bn_sqr_u32(uint32_t aLen, uint32_t *a, uint32_t *res)
 
 static inline void bn_sqr_u64(uint32_t aLen, uint64_t *a, uint64_t *res)
 {
-  printf("bn_sqr_u64 0x%"PRIx32"\n", aLen);
   memset(res, 0U, (aLen + aLen) * sizeof (uint64_t));
   for (uint32_t i0 = (uint32_t)0U; i0 < aLen; i0++)
   {
@@ -707,7 +706,6 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint64_t *res
 )
 {
-  printf("Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64 0x%"PRIx32"\n", aLen);
   if (aLen < (uint32_t)32U || aLen % (uint32_t)2U == (uint32_t)1U)
   {
     bn_sqr_u64(aLen, a, res);
@@ -1524,7 +1522,6 @@ Hacl_Bignum_Montgomery_bn_mont_sqr_u64(
   uint64_t *resM
 )
 {
-  printf("Hacl_Bignum_Montgomery_bn_mont_sqr_u64 0x%"PRIx32" ??? 0x%"PRIx64"\n", len, nInv_u64);
   KRML_CHECK_SIZE(sizeof (uint64_t), len + len);
   uint64_t c[len + len];
   memset(c, 0U, (len + len) * sizeof (uint64_t));
