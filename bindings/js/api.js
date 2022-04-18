@@ -27,11 +27,19 @@ loader.setMyPrint((x) => {});
 // HELPERS FOR SIZE FIELDS
 // -----------------------
 
-// Grammar of size fields: var<OP>n where
-// - var is the name of a variable
-// - n is an integer constant
-// - <OP> is +, - or *
-// - no spaces at all.
+// Grammar of size fields:
+//
+// f ::=
+//   var
+//   var<OP>n
+//   M.f(var)
+//
+// var: variable, one of the length variables, may be ghost
+// n:   integer constant
+// <OP>: +, -, * or /
+// M.f: function, referred to by its name in the high-level API, e.g.
+//      EverCrypt_Hash.hash_len (and not EverCrypt_Hash_Incremental_hash_len)
+
 var parseOp = (arg, op) => {
   let [ var_, const_ ] = arg.split(op);
   return [ "Op", var_, op, const_ ];
@@ -251,10 +259,12 @@ var HaclWasm = (function() {
       - 'args', the list of the WebAssembly arguments expected by the function
         - 'name', the name of the argument which will be shown in the JS Doc
         - 'kind', either `input` or `output` of the function
-        - 'type', either 'int' or 'boolean' or 'buffer'
-        - 'size', either an integer or a string which is the 'name' of another
-          argument of type 'int'; in the latter case, it can be optionally
-          followed by '+' or '-' and an integer, e.g. "mlen+16"
+        - 'type', either 'int', 'boolean', 'buffer', 'buffer(uint32)',
+          'buffer(uint64)', or the name of a struct starting with an uppercase;
+          for the latter case, this is understood to be a pointer (the WASM API
+          does not take structs by value), and we assume the type is described
+          in layouts.json
+        - 'size', see grammar of size fields above
         - 'interface_index', for all `input` that should appear in JS, position
           inside the argument list of the JS function
         - 'tests', a list of values for this arguments, each value corresponding
