@@ -38,36 +38,53 @@ extern "C" {
 #include "Hacl_Ed25519.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
-/* SNIPPET_START: EverCrypt_Ed25519_sign */
-
-void EverCrypt_Ed25519_sign(uint8_t *signature, uint8_t *secret, uint32_t len, uint8_t *msg);
-
-/* SNIPPET_END: EverCrypt_Ed25519_sign */
-
-/* SNIPPET_START: EverCrypt_Ed25519_verify */
-
-bool EverCrypt_Ed25519_verify(uint8_t *pubkey, uint32_t len, uint8_t *msg, uint8_t *signature);
-
-/* SNIPPET_END: EverCrypt_Ed25519_verify */
-
 /* SNIPPET_START: EverCrypt_Ed25519_secret_to_public */
 
-void EverCrypt_Ed25519_secret_to_public(uint8_t *output, uint8_t *secret);
+void EverCrypt_Ed25519_secret_to_public(uint8_t *public_key, uint8_t *private_key);
 
 /* SNIPPET_END: EverCrypt_Ed25519_secret_to_public */
 
 /* SNIPPET_START: EverCrypt_Ed25519_expand_keys */
 
-void EverCrypt_Ed25519_expand_keys(uint8_t *ks, uint8_t *secret);
+void EverCrypt_Ed25519_expand_keys(uint8_t *expanded_keys, uint8_t *private_key);
 
 /* SNIPPET_END: EverCrypt_Ed25519_expand_keys */
 
 /* SNIPPET_START: EverCrypt_Ed25519_sign_expanded */
 
 void
-EverCrypt_Ed25519_sign_expanded(uint8_t *signature, uint8_t *ks, uint32_t len, uint8_t *msg);
+EverCrypt_Ed25519_sign_expanded(
+  uint8_t *signature,
+  uint8_t *expanded_keys,
+  uint32_t msg_len,
+  uint8_t *msg
+);
 
 /* SNIPPET_END: EverCrypt_Ed25519_sign_expanded */
+
+/* SNIPPET_START: EverCrypt_Ed25519_sign */
+
+void
+EverCrypt_Ed25519_sign(
+  uint8_t *signature,
+  uint8_t *private_key,
+  uint32_t msg_len,
+  uint8_t *msg
+);
+
+/* SNIPPET_END: EverCrypt_Ed25519_sign */
+
+/* SNIPPET_START: EverCrypt_Ed25519_verify */
+
+bool
+EverCrypt_Ed25519_verify(
+  uint8_t *public_key,
+  uint32_t msg_len,
+  uint8_t *msg,
+  uint8_t *signature
+);
+
+/* SNIPPET_END: EverCrypt_Ed25519_verify */
 
 #if defined(__cplusplus)
 }
