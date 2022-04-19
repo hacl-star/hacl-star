@@ -53,16 +53,16 @@ var parseApp = (arg) => {
 }
 
 var parseSize = (arg) => {
-  if (arg.indexOf("+") >= 0)
+  if (arg.includes("+"))
     return parseOp(arg, "+");
-  if (arg.indexOf("-") >= 0)
+  if (arg.includes("-"))
     return parseOp(arg, "-");
-  if (arg.indexOf("*") >= 0)
+  if (arg.includes("*"))
     return parseOp(arg, "*");
-  if (arg.indexOf("/") >= 0)
+  if (arg.includes("/"))
     return parseOp(arg, "/");
 
-  if (arg.indexOf("(") >= 0)
+  if (arg.includes("("))
     return parseApp(arg);
 
   return [ "Var", arg ];
