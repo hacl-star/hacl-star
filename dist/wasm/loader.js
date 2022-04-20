@@ -506,6 +506,9 @@ function propagate(module_name, imports, instance) {
 // One MAY only call this function after all modules have been loaded and
 // suitable calls to propagate have been performed.
 function reserve(mem, size, alignment) {
+  if (!alignment)
+    alignment = 1;
+
   let m32 = new Uint32Array(mem.buffer);
   let p = m32[0];
   if ((p % alignment) != 0)
