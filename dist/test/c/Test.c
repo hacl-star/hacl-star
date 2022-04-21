@@ -10225,7 +10225,7 @@ static void test_one_hash(hash_vector vec)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -10339,7 +10339,7 @@ static bool keysized(hash_alg a, uint32_t l)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -10400,7 +10400,7 @@ static void test_one_hmac(hmac_vector vec)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -10459,7 +10459,7 @@ static void test_one_hmac(hmac_vector vec)
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
@@ -10514,7 +10514,7 @@ static void test_one_hmac(hmac_vector vec)
           }
         default:
           {
-            KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+            KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
             KRML_HOST_EXIT(253U);
           }
       }
@@ -10568,7 +10568,7 @@ static void test_one_hmac(hmac_vector vec)
           }
         default:
           {
-            KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+            KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
             KRML_HOST_EXIT(253U);
           }
       }
@@ -10701,7 +10701,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -10750,7 +10750,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -10811,7 +10811,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -10860,7 +10860,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -10921,7 +10921,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -10970,7 +10970,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -11031,7 +11031,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -11080,7 +11080,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -11096,7 +11096,7 @@ static void test_one_hmac_drbg(hmac_drbg_vector vec)
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
@@ -11219,7 +11219,7 @@ static void test_one_hkdf(hkdf_vector vec)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -11274,7 +11274,7 @@ static void test_one_hkdf(hkdf_vector vec)
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
@@ -11337,7 +11337,7 @@ static void test_one_hkdf(hkdf_vector vec)
           }
         default:
           {
-            KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+            KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
             KRML_HOST_EXIT(253U);
           }
       }
@@ -11392,7 +11392,7 @@ static void test_one_hkdf(hkdf_vector vec)
             }
           default:
             {
-              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
               KRML_HOST_EXIT(253U);
             }
         }
@@ -11441,7 +11441,7 @@ static void test_one_hkdf(hkdf_vector vec)
             }
           default:
             {
-              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
               KRML_HOST_EXIT(253U);
             }
         }
@@ -11497,7 +11497,7 @@ static void test_one_hkdf(hkdf_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -11550,7 +11550,7 @@ static void test_one_hkdf(hkdf_vector vec)
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
@@ -12061,7 +12061,7 @@ static uint32_t aead_key_length32(alg al)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -12124,7 +12124,7 @@ static uint32_t aead_tag_length32(alg al)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -12148,7 +12148,7 @@ static bool aead_iv_length32(alg al, uint32_t x)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -12304,7 +12304,7 @@ test_aead_st(
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
@@ -12329,7 +12329,7 @@ static alg alg_of_alg(cipher uu___)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -12468,7 +12468,7 @@ static uint32_t key_len(cipher_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

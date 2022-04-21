@@ -6,59 +6,110 @@ open FStar.HyperStack.All
 open Lib.IntTypes
 open Lib.Buffer
 
-val sign:
-    signature:lbuffer uint8 64ul
-  -> priv:lbuffer uint8 32ul
-  -> len:size_t{v len + 64 <= max_size_t}
-  -> msg:lbuffer uint8 len ->
-  Stack unit
-    (requires fun h -> live h signature /\ live h msg /\ live h priv)
-    (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1 /\
-      as_seq h1 signature == Spec.Ed25519.sign (as_seq h0 priv) (as_seq h0 msg))
+#set-options "--z3rlimit 30 --fuel 0 --ifuel 0"
 
-val verify:
-    pub:lbuffer uint8 32ul
-  -> len:size_t{v len + 64 <= max_size_t}
-  -> msg:lbuffer uint8 len
-  -> signature:lbuffer uint8 64ul ->
-  Stack bool
-    (requires fun h -> live h pub /\ live h msg /\ live h signature)
-    (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
-      b == Spec.Ed25519.verify (as_seq h0 pub) (as_seq h0 msg) (as_seq h0 signature)
-    )
+[@@ CPrologue
+"/********************************************************************************
+  Verified C library for EdDSA signing and verification on the edwards25519 curve.
+********************************************************************************/\n";
 
+Comment "Compute the public key from the private key.
+
+  The outparam `public_key`  points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32]."]
 val secret_to_public:
-    pub:lbuffer uint8 32ul
-  -> priv:lbuffer uint8 32ul ->
+    public_key:lbuffer uint8 32ul
+  -> private_key:lbuffer uint8 32ul ->
   Stack unit
-    (requires fun h -> live h pub /\ live h priv /\ disjoint pub priv)
-    (ensures  fun h0 _ h1 -> modifies (loc pub) h0 h1 /\
-      as_seq h1 pub == Spec.Ed25519.secret_to_public (as_seq h0 priv)
-    )
+    (requires fun h ->
+      live h public_key /\ live h private_key /\ disjoint public_key private_key)
+    (ensures  fun h0 _ h1 -> modifies (loc public_key) h0 h1 /\
+      as_seq h1 public_key == Spec.Ed25519.secret_to_public (as_seq h0 private_key))
 
+
+[@@ Comment "Compute the expanded keys for an Ed25519 signature.
+
+  The outparam `expanded_keys` points to 96 bytes of valid memory, i.e., uint8_t[96].
+  The argument `private_key`   points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message."]
 val expand_keys:
-    ks:lbuffer uint8 96ul
-  -> priv:lbuffer uint8 32ul ->
+    expanded_keys:lbuffer uint8 96ul
+  -> private_key:lbuffer uint8 32ul ->
   Stack unit
-    (requires fun h -> live h ks /\ live h priv /\ disjoint ks priv)
-    (ensures  fun h0 _ h1 -> modifies (loc ks) h0 h1 /\
-      (let pub, s, prefix = Spec.Ed25519.expand_keys (as_seq h0 priv) in
-      as_seq h1 (gsub ks 0ul 32ul) == pub /\
-      as_seq h1 (gsub ks 32ul 32ul) == s /\
-      as_seq h1 (gsub ks 64ul 32ul) == prefix)
-    )
+    (requires fun h ->
+      live h expanded_keys /\ live h private_key /\ disjoint expanded_keys private_key)
+    (ensures  fun h0 _ h1 -> modifies (loc expanded_keys) h0 h1 /\
+     (let public_key, s, prefix = Spec.Ed25519.expand_keys (as_seq h0 private_key) in
+      as_seq h1 (gsub expanded_keys 0ul 32ul) == public_key /\
+      as_seq h1 (gsub expanded_keys 32ul 32ul) == s /\
+      as_seq h1 (gsub expanded_keys 64ul 32ul) == prefix))
 
+
+[@@ Comment "Create an Ed25519 signature with the (precomputed) expanded keys.
+
+  The outparam `signature`     points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `expanded_keys` points to 96 bytes of valid memory, i.e., uint8_t[96].
+  The argument `msg`    points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+
+  The argument `expanded_keys` is obtained through `expand_keys`.
+
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message."]
 val sign_expanded:
     signature:lbuffer uint8 64ul
-  -> ks:lbuffer uint8 96ul
-  -> len:size_t{v len + 64 <= max_size_t}
-  -> msg:lbuffer uint8 len ->
+  -> expanded_keys:lbuffer uint8 96ul
+  -> msg_len:size_t
+  -> msg:lbuffer uint8 msg_len ->
   Stack unit
-    (requires fun h -> live h signature /\ live h msg /\ live h ks)
+    (requires fun h ->
+      live h signature /\ live h msg /\ live h expanded_keys /\
+      disjoint signature msg /\ disjoint signature expanded_keys)
     (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1 /\
       as_seq h1 signature == Spec.Ed25519.sign_expanded
-        (as_seq h0 (gsub ks 0ul 32ul))
-        (as_seq h0 (gsub ks 32ul 32ul))
-        (as_seq h0 (gsub ks 64ul 32ul))
-        (as_seq h0 msg)
-    )
+        (as_seq h0 (gsub expanded_keys 0ul 32ul))
+        (as_seq h0 (gsub expanded_keys 32ul 32ul))
+        (as_seq h0 (gsub expanded_keys 64ul 32ul))
+        (as_seq h0 msg))
+
+
+[@@ Comment "Create an Ed25519 signature.
+
+  The outparam `signature`   points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The argument `msg`  points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+
+  The function first calls `expand_keys` and then invokes `sign_expanded`.
+
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message."]
+val sign:
+    signature:lbuffer uint8 64ul
+  -> private_key:lbuffer uint8 32ul
+  -> msg_len:size_t
+  -> msg:lbuffer uint8 msg_len ->
+  Stack unit
+    (requires fun h ->
+      live h signature /\ live h msg /\ live h private_key /\
+      disjoint signature msg /\ disjoint signature private_key)
+    (ensures  fun h0 _ h1 -> modifies (loc signature) h0 h1 /\
+      as_seq h1 signature == Spec.Ed25519.sign (as_seq h0 private_key) (as_seq h0 msg))
+
+
+[@@ Comment "Verify an Ed25519 signature.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `public_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `signature`  points to 64 bytes of valid memory, i.e., uint8_t[64]."]
+val verify:
+    public_key:lbuffer uint8 32ul
+  -> msg_len:size_t
+  -> msg:lbuffer uint8 msg_len
+  -> signature:lbuffer uint8 64ul ->
+  Stack bool
+    (requires fun h -> live h public_key /\ live h msg /\ live h signature)
+    (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+      b == Spec.Ed25519.verify (as_seq h0 public_key) (as_seq h0 msg) (as_seq h0 signature))

@@ -100,12 +100,12 @@ Our Verification Tools
 ----------------------
 
 HACL* and EverCrypt are written and verified
-using the `F* <https://github.com/FStarLang/kremlin/>`_ language, then compiled
-to a mixture of C (using a dedicated compiler, KreMLin_).
+using the `F* <https://github.com/FStarLang/karamel/>`_ language, then compiled
+to a mixture of C (using a dedicated compiler, KaRaMeL_).
 
 The Vale cryptographic libraries (used in EverCrypt) rely on the
 Vale_ tool, which compiles the Vale DSL to F*, and is
 responsible for compiling the Vale code to assembly.
 
 .. _Vale: https://github.com/project-everest/vale/
-.. _KreMLin: https://github.com/FStarLang/kremlin/
+.. _KaRaMeL: https://github.com/FStarLang/karamel/

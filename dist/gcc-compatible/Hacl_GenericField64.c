@@ -24,7 +24,7 @@
 
 #include "Hacl_GenericField64.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 /*******************************************************************************
@@ -326,11 +326,11 @@ Hacl_GenericField64_exp_consttime(
     memcpy(table, resM, len1 * sizeof (uint64_t));
     uint64_t *t1 = table + len1;
     memcpy(t1, aMc, len1 * sizeof (uint64_t));
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
     {
-      uint64_t *t11 = table + (i + (uint32_t)1U) * len1;
-      uint64_t *t2 = table + (i + (uint32_t)2U) * len1;
-      Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, t11, aMc, t2);
+      uint64_t *t11 = table + i * len1;
+      uint64_t *t2 = table + i * len1 + len1;
+      Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, aMc, t11, t2);
     }
     if (bBits % (uint32_t)4U != (uint32_t)0U)
     {
@@ -469,11 +469,11 @@ Hacl_GenericField64_exp_vartime(
     memcpy(table, resM, len1 * sizeof (uint64_t));
     uint64_t *t1 = table + len1;
     memcpy(t1, aMc, len1 * sizeof (uint64_t));
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
     {
-      uint64_t *t11 = table + (i + (uint32_t)1U) * len1;
-      uint64_t *t2 = table + (i + (uint32_t)2U) * len1;
-      Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, t11, aMc, t2);
+      uint64_t *t11 = table + i * len1;
+      uint64_t *t2 = table + i * len1 + len1;
+      Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, k1.n, k1.mu, aMc, t11, t2);
     }
     if (bBits % (uint32_t)4U != (uint32_t)0U)
     {

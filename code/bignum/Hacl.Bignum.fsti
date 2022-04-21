@@ -82,9 +82,8 @@ val bn_sub_eq_len: #t:limb_t -> len:size_t -> bn_sub_eq_len_st t len
 
 
 inline_for_extraction noextract
-val bn_add:
-    #t:limb_t
-  -> aLen:size_t
+let bn_add_st (t:limb_t) =
+    aLen:size_t
   -> a:lbignum t aLen
   -> bLen:size_t{v bLen <= v aLen}
   -> b:lbignum t bLen
@@ -98,9 +97,12 @@ val bn_add:
 
 
 inline_for_extraction noextract
-val bn_sub:
-    #t:limb_t
-  -> aLen:size_t
+val bn_add: #t:limb_t -> bn_add_st t
+
+
+inline_for_extraction noextract
+let bn_sub_st (t:limb_t) =
+    aLen:size_t
   -> a:lbignum t aLen
   -> bLen:size_t{v bLen <= v aLen}
   -> b:lbignum t bLen
@@ -111,6 +113,10 @@ val bn_sub:
     disjoint a b /\ eq_or_disjoint a res /\ disjoint b res)
   (ensures  fun h0 c_out h1 -> modifies (loc res) h0 h1 /\
    (c_out, as_seq h1 res) == S.bn_sub (as_seq h0 a) (as_seq h0 b))
+
+
+inline_for_extraction noextract
+val bn_sub: #t:limb_t -> bn_sub_st t
 
 
 inline_for_extraction noextract
