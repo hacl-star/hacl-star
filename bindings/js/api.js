@@ -1,76 +1,204 @@
 // jshint esversion: 6
 
-var fs = require('fs');
-var path = require('path');
-var loader = require(path.resolve(__dirname, './loader.js'));
-var shell = require(path.resolve(__dirname, './shell.js'));
-var api_json = require(path.resolve(__dirname, './api.json'));
+if (typeof module !== 'undefined') {
+  var fs = require('fs');
+  var path = require('path');
+  var loader = require(path.resolve(__dirname, './loader.js'));
+  var shell = require(path.resolve(__dirname, './shell.js'));
+  var api_promise = Promise.resolve(require(path.resolve(__dirname, './api.json')));
+  var layouts_promise = Promise.resolve(require(path.resolve(__dirname, './layouts.json')));
+  var modules_promise = Promise.resolve(shell.my_modules.map(m => {
+    var source = fs.readFileSync(path.resolve(__dirname, './' + m + ".wasm"));
+    return new Uint8Array(source);
+  }));
+
+} else {
+  var loader = this;
+  var shell = this;
+  var api_promise = fetch("api.json").then(r => r.json());
+  var layouts_promise = fetch("layouts.json").then(r => r.json());
+  var modules_promise = Promise.all(my_modules.map(m => fetch(m + ".wasm")))
+    .then(response => Promise.all(response.map(r => r.arrayBuffer())));
+}
+
+// Uncomment for debug
+loader.setMyPrint((x) => {});
+
+// HELPERS FOR SIZE FIELDS
+// -----------------------
+
+// Grammar of size fields:
+//
+// f ::=
+//   var
+//   var<OP>n
+//   M.f(var)
+//
+// var: variable, one of the length variables, may be ghost
+// n:   integer constant
+// <OP>: +, -, * or /
+// M.f: function, referred to by its name in the high-level API, e.g.
+//      EverCrypt_Hash.hash_len (and not EverCrypt_Hash_Incremental_hash_len)
+
+var parseOp = (arg, op) => {
+  let [ var_, const_ ] = arg.split(op);
+  return [ "Op", var_, op, parseInt(const_) ];
+};
+
+var parseApp = (arg) => {
+  let i = arg.indexOf("(");
+  let [ m, f ] = arg.substr(0, i).split(".");
+  let x = arg.substr(i+1, arg.length - 1 - i - 1);
+  return [ "App", m, f, x ];
+}
+
+var parseSize = (arg) => {
+  if (arg.includes("+"))
+    return parseOp(arg, "+");
+  if (arg.includes("-"))
+    return parseOp(arg, "-");
+  if (arg.includes("*"))
+    return parseOp(arg, "*");
+  if (arg.includes("/"))
+    return parseOp(arg, "/");
+
+  if (arg.includes("("))
+    return parseApp(arg);
+
+  return [ "Var", arg ];
+};
+
+var evalSize = function(parsedSize, args_int32s, api) {
+  let [ kind, ...args ] = parsedSize;
+  switch (kind) {
+    case "Var": {
+      let [ var_ ] = args;
+      return args_int32s[var_];
+    }
+    case "Op": {
+      let [ var_, op, const_ ] = args;
+      switch (op) {
+        case "+":
+          return args_int32s[var_] + const_;
+        case "-":
+          return args_int32s[var_] - const_;
+        case "*":
+          return args_int32s[var_] * const_;
+        case "/":
+          if (args_int32s[var_] % const_ != 0)
+            throw new Error("Argument whose length is "+arg+" is not a multiple of "+const_);
+          return args_int32s[var_] / const_;
+        default:
+          throw new Error("Illegal operator: "+op);
+      }
+    }
+    case "App": {
+      let [ m, f, x ] = args;
+      if (!(m in api))
+        throw new Error("For size "+parsedSize+", module "+m+" is unknown");
+      if (!(f in api[m]))
+        throw new Error("For size "+parsedSize+", function "+m+"."+f+" is unknown");
+      if (!(x in args_int32s))
+        throw new Error("For size "+parsedSize+", module "+x+" is unknown");
+      return api[m][f](args_int32s[x])[0];
+    }
+  }
+};
+
+
+// Given a size formula `var<OP>n` = `total`, invert it, i.e. solve the
+// equation where `var` is unknown.
+//
+// @param {String} arg        The formula of the form var<OP>n
+// @param {Number} total      The value of the formula
+// @return {[String, Number]} The variable name `var` and its value.
+var invertSize = function(parsedSize, total) {
+  let [ kind, var_, op, const_ ] = parsedSize;
+  if (kind != "Var" && kind != "Op")
+    throw new Error("Illegal size for an input: "+parsedSize);
+  switch (op) {
+    case "+":
+      return [ var_, total - parseInt(const_) ];
+    case "-":
+      return [ var_, total + parseInt(const_) ];
+    case "*":
+      let x = parseInt(const_);
+      if (total % x != 0)
+        throw new Error("Argument whose length is "+parsedSize+" is not a multiple of "+x);
+      return [ var_, total / x ];
+    case "/":
+      return [ var_, total * parseInt(const_) ];
+    default:
+      return [var_, total];
+  }
+};
+
+// VALIDATION
+// ----------
+
 // The following function validates the contents of `api.json`. It is meant as
 // a helper when creating new binders, it provides explicit error messages.
+// It also has the side effect of filling out the parsedSize field on `arg`
+// objects, so that we don't needlessly re-parse every size field all the time.
 var validateJSON = function(json) {
-  Object.keys(json).map(function(key_module) {
-    Object.keys(json[key_module]).map(function(key_func) {
-      var func_obj = json[key_module][key_func];
-      var obj_name = key_module + "." + key_func;
-      if (func_obj.module === undefined) {
+  for (let key_module in json) {
+    for (let key_func in json[key_module]) {
+      let func_obj = json[key_module][key_func];
+      let obj_name = key_module + "." + key_func;
+
+      if (!("module" in func_obj))
         throw Error("please provide a 'module' field for " + obj_name + " in api.json");
-      }
-      if (!(shell.my_modules.includes(func_obj.module))) {
+      if (!(shell.my_modules.includes(func_obj.module)))
         throw Error(obj_name + ".module='" + func_obj.module + "' of api.json should be listed in shell.js");
-      }
-      if (func_obj.name === undefined) {
+      if (!("name" in func_obj))
         throw Error("please provide a 'name' field for " + obj_name + " in api.json");
-      }
-      if (func_obj.args === undefined) {
+      if (!("args" in func_obj))
         throw Error("please provide a 'args' field for " + obj_name + " in api.json");
-      }
-      if (!Array.isArray(func_obj.args)) {
+      if (!Array.isArray(func_obj.args))
         throw Error("the 'args' field for " + obj_name + " should be an array");
-      }
-      var length_args_available = [];
-      func_obj.args.map(function(arg, i) {
-        if (!(arg.kind === "input" || (arg.kind === "output"))) {
+
+      let length_args_available = {};
+      func_obj.args.forEach((arg, i) => {
+        if (!(arg.kind === "input" || (arg.kind === "output")))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'output' or 'input'");
-        }
-        if (!(arg.type === "bool" || (arg.type === "int") || (arg.type === "buffer"))) {
+        if (!(arg.type === "bool" || arg.type === "int32" || arg.type.startsWith("buffer") || arg.type[0].toUpperCase() == arg.type[0]))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'int', 'bool' or 'buffer'");
-        }
-        if (arg.type === "buffer") {
-          if (arg.size === undefined) {
-            throw Error("in " + obj_name + ", argument #" + i + " is a buffer and should have a 'size' field");
-          }
-        }
-        if (arg.kind === "input" && arg.type === "buffer") {
-          if (arg.interface_index === undefined) {
-            throw Error("in " + obj_name + ", argument #" + i + " is an input and should have a 'interface_index' field");
-          }
-        }
-        if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && arg.tests === undefined) {
+        if (arg.type.startsWith("buffer") && arg.size === undefined)
+          throw Error("in " + obj_name + ", argument #" + i + " is a buffer and should have a 'size' field");
+        if (arg.kind === "input" && arg.type.startsWith("buffer") && !("interface_index" in arg))
+          throw Error("in " + obj_name + ", argument #" + i + " is an input and should have a 'interface_index' field");
+        if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && arg.tests === undefined)
           throw Error("please provide a 'tests' field for argument #" + i + " of " + obj_name + " in api.json");
-        }
-        if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && !Array.isArray(arg.tests)) {
+        if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && !Array.isArray(arg.tests))
           throw Error("the 'tests' field for argument #" + i + " of " + obj_name + " should be an array");
-        }
-        if (arg.type === "int" && arg.kind === "input") {
-          length_args_available.push(arg.name);
+
+        if (arg.type === "int32" && arg.kind === "input" && arg.interface_index !== undefined)
+          length_args_available[arg.name] = true;
+
+        if (arg.type.startsWith("buffer") && arg.kind === "input" && typeof arg.size === "string") {
+          arg.parsedSize = parseSize(arg.size);
+          let [ kind, var_ ] = arg.parsedSize;
+          if (kind == "Var" || kind == "Op")
+            length_args_available[var_] = true;
         }
       });
-      func_obj.args.map(function(arg, i) {
-        if (arg.type === "buffer" && typeof arg.size === "string") {
-          if (!length_args_available.includes(arg.size) &&
-              !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("+"))) &&
-              !length_args_available.includes(arg.size.substring(0, arg.size.indexOf("-")))) {
-            throw Error("incorrect 'size' field value (" + arg.size + ")for argument #" + i + " of " + obj_name + " in api.json");
+      func_obj.args.forEach(function(arg, i) {
+        if (arg.type.startsWith("buffer") && typeof arg.size === "string" && arg.kind === "output") {
+          arg.parsedSize = parseSize(arg.size);
+          let [ kind, var_ ] = arg.parsedSize;
+          if ((kind == "Var" || kind == "Op") && !(var_ in length_args_available)) {
+            console.log(arg);
+            console.log(length_args_available);
+            throw Error("incorrect 'size' field value (" + arg.size + ") for argument #" + i + " of " + obj_name + " in api.json");
           }
         }
       });
       if (func_obj.return === undefined) {
         throw Error("please provide a 'return' field for " + obj_name + " in api.json");
       }
-    });
-  });
+    };
+  };
 };
-validateJSON(api_json);
 
 // The module is encapsulated inside a closure to prevent anybody from accessing
 // the WebAssembly memory.
@@ -79,30 +207,25 @@ var HaclWasm = (function() {
   var isInitialized = false;
   var Module = {};
 
-  // This object is passed at the wasm instantiation, it's required by the
-  // KaRaMeL-generated files. Since we don't need to import anything, it's empty.
-  var my_imports = {};
+  // We defined a few WASM-specific "compile-time macros".
+  var my_imports = {
+    EverCrypt_TargetConfig: (mem) => ({
+      hacl_can_compile_vale: 0,
+    }),
+  };
 
   // The WebAssembly modules have to be initialized before calling any function.
-  // This checks if it has been done already, and if not does it.
-  var checkIfInitialized = function() {
-    if (isInitialized === false) {
-      return Promise.all(shell.my_modules.map(function(m) {
-        var source = fs.readFileSync(path.resolve(__dirname, './' + m + ".wasm"));
-        return new Uint8Array(source);
-      })).then(function(bufs) {
-        return loader.link(my_imports, bufs.map(function(b, i) {
-          return {
-            buf: b,
-            name: shell.my_modules[i]
-          };
-        }));
-      }).then(function(scope) {
-          Module = scope;
-          isInitialized = true;
-      });
-    } else {
-      return Promise.resolve();
+  // To be called only if isInitialized == false.
+  var loadWasm = async () => {
+    if (!isInitialized) {
+      Module = await loader.link(
+        my_imports,
+        (await modules_promise).map((buf, i) => ({
+          buf,
+          name: shell.my_modules[i]
+        }))
+      );
+      isInitialized = true;
     }
   };
 
@@ -119,7 +242,7 @@ var HaclWasm = (function() {
   parameter to WebAssembly).
 
   In order to match the Javascript API with the actual calls to WebAssembly functions,
-  we have to describe the correspondance between the two in the `api.json` file.
+  we have to describe the correspondence between the two in the `api.json` file.
 
   The scheme of the JSON file is the following :
   - `module`, this module name will be shown in the JS API
@@ -129,10 +252,12 @@ var HaclWasm = (function() {
       - 'args', the list of the WebAssembly arguments expected by the function
         - 'name', the name of the argument which will be shown in the JS Doc
         - 'kind', either `input` or `output` of the function
-        - 'type', either 'int' or 'boolean' or 'buffer'
-        - 'size', either an integer or a string which is the 'name' of another
-          argument of type 'int'; in the latter case, it can be optionally
-          followed by '+' or '-' and an integer, e.g. "mlen+16"
+        - 'type', either 'int', 'boolean', 'buffer', 'buffer(uint32)',
+          'buffer(uint64)', or the name of a struct starting with an uppercase;
+          for the latter case, this is understood to be a pointer (the WASM API
+          does not take structs by value), and we assume the type is described
+          in layouts.json
+        - 'size', see grammar of size fields above
         - 'interface_index', for all `input` that should appear in JS, position
           inside the argument list of the JS function
         - 'tests', a list of values for this arguments, each value corresponding
@@ -144,114 +269,336 @@ var HaclWasm = (function() {
         instead 'name' will contain the full name of the function
   */
 
-  var check_if_byte_array = function(candidate, length, name) {
-    if ((typeof(candidate) !== "object") ||
-      (candidate.length !== length) ||
-      (candidate.constructor !== Uint8Array)
-    ) {
+  var array_type = function(type) {
+    switch (type) {
+      case "buffer":
+        return Uint8Array;
+      case "buffer(uint32)":
+        return Uint32Array;
+      case "buffer(uint64)":
+        return BigUint64Array;
+      default:
+        throw new Error("Unknown array type: "+type);
+    }
+  }
+
+  var cell_size = type => array_type(type).BYTES_PER_ELEMENT;
+
+  var check_array_type = function(type, candidate, length, name) {
+    if (!(candidate instanceof array_type(type)) || candidate.length !== length) {
       throw new Error(
-        "name: Please ensure the argument " + name + " is a " + length + "-bytes Uint8Array."
+        "name: Please ensure the argument " + name + " has length " + length + " and is a " + array_type(type)
       );
     }
   };
 
-  var copy_array_to_stack = function(array) {
-    var pointer = loader.reserve(Module.Krml.mem, array.length);
-    (new Uint8Array(Module.Krml.mem.buffer)).set(array, pointer);
+  var copy_array_to_stack = function(type, array, i) {
+    // This returns a suitably-aligned pointer.
+    var pointer = loader.reserve(Module.Karamel.mem, array.length*cell_size(type), cell_size(type));
+    (new Uint8Array(Module.Karamel.mem.buffer)).set(new Uint8Array(array.buffer), pointer);
+    // console.log("argument "+i, "stack pointer got", loader.p32(pointer));
+    // console.log(array, array.length);
+    // console.log("source", array.buffer);
+    // loader.dump(Module.Karamel.mem, 2048, 0x13000);
     return pointer;
   };
 
-  var read_memory = function(ptr, len) {
-    var result = new ArrayBuffer(len);
-    (new Uint8Array(result).set(new Uint8Array(Module.Krml.mem.buffer)
-      .subarray(ptr, ptr + len)));
-    return new Uint8Array(result);
+  // len is in number of elements
+  var read_memory = function(type, ptr, len) {
+    // TODO: faster path with aligned pointers?
+    var result = new ArrayBuffer(len*cell_size(type));
+    // console.log("New memory buffer", type, len, len*cell_size(type));
+    (new Uint8Array(result).set(new Uint8Array(Module.Karamel.mem.buffer)
+      .subarray(ptr, ptr + len*cell_size(type))));
+    // console.log(result);
+    return new (array_type(type))(result);
   };
 
-  var evalSizeWithOp = function(arg, op, var_lengths) {
-     if (arg.indexOf(op) >= 0) {
-       var terms = arg.split(op);
-       if (op === "+") {
-         return var_lengths[terms[0]] + parseInt(terms[1]);
-       } else if (op === "-") {
-         return var_lengths[terms[0]] - parseInt(terms[1]);
-       } else {
-         throw Error("Operator " + op + " not valid in `size` parameter, only '+' and '-' are supported.")
-       }
-     }
+  // HELPERS FOR HEAP LAYOUT
+  // -----------------------
+
+  // Filled out via a promise.
+  var layouts;
+
+  var heapReadBlockSize = (ptr) => {
+    var m32 = new Uint32Array(Module.Karamel.mem.buffer)
+    return m32[ptr/4-2]-8;
   };
 
-  var parseSize = function(arg, var_lengths) {
-    if (arg.indexOf("+") >= 0) {
-      return evalSizeWithOp(arg, "+", var_lengths);
-    } else if (arg.indexOf("-") >= 0) {
-      return evalSizeWithOp(arg, "-", var_lengths);
-    } else {
-      return var_lengths[arg];
+  var heapReadBuffer = (type, ptr) => {
+    // Pointer points to the actual data, header is 8 bytes before, length in
+    // header includes header. Heap base pointers are always aligned on 8 byte
+    // boundaries, but inner pointers (e.g. within a struct) are aligned on
+    // their size.
+    if (!((ptr % cell_size(type)) == 0))
+      throw new Error("malloc violation (1)");
+    let block_size = heapReadBlockSize(ptr);
+    if (!(block_size % cell_size(type) == 0))
+      throw new Error("malloc violation (2)");
+    let len = block_size / cell_size(type);
+    // console.log("pointer:", loader.p32(ptr), "header:", loader.p32(ptr-8), "len:", loader.p32(len));
+    return read_memory(type, ptr, len);
+  };
+
+  var heapReadInt = (typ, ptr) => {
+    switch (typ) {
+      case "A8":
+        var m8 = new Uint8Array(Module.Karamel.mem.buffer);
+        return m8[ptr];
+
+      case "A32":
+        if (!(ptr % 4) == 0)
+          throw new Error("malloc violation (3)");
+        var m32 = new Uint32Array(Module.Karamel.mem.buffer);
+        return m32[ptr/4];
+
+      case "A64":
+        if (!(ptr % 8) == 0)
+          throw new Error("malloc violation (4)");
+        var m64 = new BigUint64Array(Module.Karamel.mem.buffer);
+        return m64[ptr/8];
+
+      default:
+        throw new Error("Not implemented: "+typ);
     }
   };
 
-  var callWithProto = function(proto, args, loc_name) {
+  var heapWriteInt = (typ, ptr, v) => {
+    switch (typ) {
+      case "A8":
+        var m8 = new Uint8Array(Module.Karamel.mem.buffer);
+        m8[ptr] = v;
+        break;
+
+      case "A32":
+        if (!(ptr % 4) == 0)
+          throw new Error("malloc violation (3)");
+        var m32 = new Uint32Array(Module.Karamel.mem.buffer);
+        m32[ptr/4] = v;
+        break;
+
+      case "A64":
+        if (!(ptr % 8) == 0)
+          throw new Error("malloc violation (4)");
+        var m64 = new BigUint64Array(Module.Karamel.mem.buffer);
+        m64[ptr/8] = v;
+        break;
+
+      default:
+        throw new Error("Not implemented: "+typ);
+    }
+  };
+
+  // Fast-path for arrays of flat integers.
+  var heapReadBlockFast = (int_type, ptr) => {
+    switch (int_type) {
+      case "A8":
+        return heapReadBuffer("buffer", ptr);
+      case "A32":
+        return heapReadBuffer("buffer(uint32)", ptr);
+      case "A64":
+        return heapReadBuffer("buffer(uint64)", ptr);
+      default:
+        throw new Error("Not implemented: "+int_type);
+    }
+  };
+
+  // Fast-path for arrays of flat integers.
+  var heapWriteBlockFast = (int_type, ptr, arr) => {
+    // console.log(arr);
+    (new Uint8Array(Module.Karamel.mem.buffer)).set(new Uint8Array(arr.buffer), ptr);
+  };
+
+  // Eventually will be mutually recursive once Layout is implemented (flat
+  // packed structs).
+  var heapReadType = (runtime_type, ptr) => {
+    let [ type, data ] = runtime_type;
+    switch (type) {
+      case "Int":
+        return heapReadInt(data[0], ptr);
+      case "Pointer":
+        if (data[0] == "Int")
+          return heapReadBlockFast(data[1][0], heapReadInt("A32", ptr));
+        // pass-through
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
+  };
+
+  var heapWriteType = (runtime_type, ptr, v) => {
+    let [ type, data ] = runtime_type;
+    switch (type) {
+      case "Int":
+        heapWriteInt(data[0], ptr, v);
+        break;
+      case "Pointer":
+        if (data[0] == "Int") {
+          let sz = v.buffer.byteLength;
+          // NB: could be more precise with alignment, I guess
+          let dst = loader.reserve(Module.Karamel.mem, sz, 8);
+          heapWriteInt("A32", ptr, dst);
+          heapWriteBlockFast(data[1][0], dst, v);
+          break;
+        }
+        // pass-through
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
+  };
+
+  var heapReadLayout = (layout, ptr) => {
+    // console.log(layout);
+    let [ tag, data ] = layouts[layout];
+    switch (tag) {
+      case "LFlat":
+        let o = {};
+        // console.log(data);
+        data.fields.forEach(([field, [ ofs, typ ]]) =>
+          o[field] = heapReadType(typ, ptr + ofs)
+        );
+        return o;
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
+  };
+
+  var heapWriteLayout = (layout, ptr, v) => {
+    let [ tag, data ] = layouts[layout];
+    // console.log(v);
+    switch (tag) {
+      case "LFlat":
+        data.fields.forEach(([field, [ ofs, typ ]]) => {
+          // console.log("Writing", v[field]);
+          heapWriteType(typ, ptr + ofs, v[field]);
+        });
+        break;
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
+  };
+
+  var stackWriteLayout = (layout, v) => {
+    let [ tag, data ] = layouts[layout];
+    switch (tag) {
+      case "LFlat":
+        let ptr = loader.reserve(Module.Karamel.mem, data.size, 8);
+        heapWriteLayout(layout, ptr, v);
+        return ptr;
+      default:
+        throw new Error("Not implemented: "+tag);
+    }
+  };
+
+  // END HELPERS FOR HEAP LAYOUT
+  
+  // The object being filled:
+  // - first level of keys = modules,
+  // - second level of keys = functions within a module
+  var api_obj = {};
+
+  // This is the main logic; this function is partially applied to its
+  // first two arguments for each API entry. We assume JITs are working well
+  // enough to make this efficient.
+  var callWithProto = function(proto, args) {
     var expected_args_number = proto.args.filter(function(arg) {
       return arg.interface_index !== undefined;
     }).length;
     if (args.length != expected_args_number) {
-      throw Error("wrong number of arguments to call the F*-wasm function " + loc_name + ": expected " + expected_args_number + ", got " + args.length);
+      throw Error("wrong number of arguments to call the F*-wasm function " + proto.name + ": expected " + expected_args_number + ", got " + args.length);
     }
-    var memory = new Uint32Array(Module.Krml.mem.buffer);
+    var memory = new Uint32Array(Module.Karamel.mem.buffer);
     var sp = memory[0];
-    var var_lengths = {};
-    // Populating the variable length arguments by retrieving buffer lengths
-    proto.args.map(function(arg) {
-      var func_arg;
-      if (arg.type === "buffer") {
-        if ((typeof arg.size === "string") && (arg.interface_index !== undefined)) {
-          func_arg = args[arg.interface_index];
-          var_lengths[arg.size] = func_arg.length;
-        }
-      }
-      if ((arg.type === "int") && (arg.interface_index !== undefined)) {
-        func_arg = args[arg.interface_index];
-        var_lengths[arg.name] = func_arg;
+
+    // Integer arguments are either
+    // - user-provided, in which case they have an interface_index
+    // - automatically determined, in which case they appear in the `size` field
+    //   of another buffer argument.
+    // In a first pass, we need to figure out the value of all integer
+    // arguments to enable lookups by name.
+    var args_int32s = {};
+    proto.args.forEach(function(arg) {
+      if (arg.type.startsWith("buffer") && typeof arg.size === "string" && arg.interface_index !== undefined && arg.kind === "input") {
+        // API contains e.g.:
+        //   { "name": "len" },
+        //   { "name": "buf", "type": "buffer", "size": "len", "interface_index": 3, "kind": "input" }
+        // We need to figure out `len` automatically since it doesn't have an
+        // interface index, meaning it isn't one of the arguments passed to the
+        // high-level API. We know `buf` is the second argument passed to the
+        // function, and thus allows us to fill out `len`.
+        let [ var_, var_value ] = invertSize(arg.parsedSize, args[arg.interface_index].length);
+        // console.log("Determined "+var_+"="+var_value);
+
+        if (var_ in args_int32s && var_value != args_int32s[var_])
+          throw new Error("Inconsistency in sizes; previously, "+var_+"="+args_int32s[var_]+"; now "+var_value);
+        args_int32s[var_] = var_value;
+      } else if (arg.type === "int32" && arg.interface_index !== undefined) {
+        // API contains e.g.:
+        //   { "name": "len", "interface_index": 3 },
+        //   { "name": "buf", "type": "buffer", "size": "len", "kind": "output" }
+        // We know we will need `len` below when trying to allocate an array for
+        // `output` -- insert it into the table.
+        args_int32s[arg.name] = args[arg.interface_index];
       }
     });
-    // Retrieving all input buffers and allocating them in the Wasm memory
-    var args_pointers = proto.args.map(function(arg, i) {
-      if (arg.type === "buffer") {
+
+    // We have determined the value of all user-provided and synthesized
+    // (computed) integer lengths. Now what happens with lengths is:
+    // - when allocating a variable-length output buffer, we compute the
+    //   corresponding size via evalSize, passing it the args_int32s in case the
+    //   size field of the output buffer refers to a variable
+    // - when computing the value of an integer argument that is not
+    //   user-provided (i.e. has no interface_index), we look it up in
+    //   args_int32s too
+
+    // This returns the effective arguments for the function call (all integers,
+    // some of which may be pointers on the stack). It has the side effect of
+    // growing the stack and copying the input buffers onto it.
+    var args = proto.args.map(function(arg, i) {
+      let debug = (type, x) => {
+        // console.log("Argument", i, type, loader.p32(x));
+        return x;
+      };
+      if (arg.type.startsWith("buffer")) {
         var size;
         if (typeof arg.size === "string") {
-          size = parseSize(arg.size, var_lengths);
+          size = evalSize(arg.parsedSize, args_int32s, api_obj);
         } else {
           size = arg.size;
         }
         var arg_byte_buffer;
         if (arg.kind === "input") {
           var func_arg = args[arg.interface_index];
-          arg_byte_buffer = new Uint8Array(func_arg);
+          arg_byte_buffer = new (array_type(arg.type))(func_arg);
         } else if (arg.kind === "output") {
-          arg_byte_buffer = new Uint8Array(size);
+          arg_byte_buffer = new (array_type(arg.type))(size);
         }
-        check_if_byte_array(arg_byte_buffer, size, arg.name);
-        var pointer = copy_array_to_stack(arg_byte_buffer);
-        return {
-          "value": pointer,
-          "index": i
-        };
+        check_array_type(arg.type, arg_byte_buffer, size, arg.name);
+        // TODO: this copy is un-necessary in the case of output buffers.
+        return debug("array", copy_array_to_stack(arg.type, arg_byte_buffer, i));
       }
-      if (arg.type === "bool" || arg.type === "int") {
-        var value;
+
+      if (arg.type === "bool" || arg.type === "int32") {
         if (arg.interface_index === undefined) {
-          value = var_lengths[arg.name];
+          // Variable-length argument, determined via first pass above.
+          return debug("int(auto)", args_int32s[arg.name]);
         } else {
-          value = args[arg.interface_index];
+          // Regular integer argument, passed by the user.
+          return debug("int", args[arg.interface_index]);
         }
-        return {
-          "value": value,
-          "index": i
-        };
       }
-      throw Error("Unimplemented !");
+
+      // Layout
+      if (arg.type[0].toUpperCase() == arg.type[0]) {
+        let func_arg = args[arg.interface_index];
+        return debug("layout", stackWriteLayout(arg.type, func_arg));
+      }
+
+      throw Error("Unimplemented ! ("+proto.name+")");
     });
+    // console.log("Arguments laid out in WASM memory");
+    // args.forEach((arg, i) => console.log("argument "+i, loader.p32(arg)));
+    // loader.dump(Module.Karamel.mem, 2048, args[0] - (args[0] % 0x20));
+
     // Calling the wasm function !
     if (proto.custom_module_name) {
       var func_name = proto.name;
@@ -260,67 +607,96 @@ var HaclWasm = (function() {
     }
     if (!(proto.module in Module))
       throw new Error(proto.module + " is not in Module");
-    if (!(func_name in Module[proto.module]))
+    if (!(func_name in Module[proto.module])) {
+      console.log(Object.keys(Module[proto.module]));
       throw new Error(func_name + " is not in Module["+proto.module+"]");
-    var call_return = Module[proto.module][func_name](
-      ...args_pointers.map(function(x) {
-        return x.value;
-      })
-    );
+    }
+    var call_return = Module[proto.module][func_name](...args);
+
+    // console.log("After function call");
+    // loader.dump(Module.Karamel.mem, 2048, args[0] - (args[0] % 0x20));
+
     // Populating the JS buffers returned with their values read from Wasm memory
-    var return_buffers = args_pointers.filter(function(pointer) {
-      return proto.args[pointer.index].kind === "output";
-    }).map(function(pointer) {
-      var protoRet = proto.args[pointer.index];
-      var size;
-      if (typeof protoRet.size === "string") {
-        size = parseSize(protoRet.size, var_lengths);
+    var return_buffers = args.map(function(pointer, i) {
+      if (proto.args[i].kind === "output") {
+        var protoRet = proto.args[i];
+        var size;
+        if (typeof protoRet.size === "string") {
+          size = evalSize(protoRet.parsedSize, args_int32s, api_obj);
+        } else {
+          size = protoRet.size;
+        }
+        // console.log("About to read", protoRet.type, loader.p32(pointer), size);
+        let r = read_memory(protoRet.type, pointer, size);
+        // console.log(r);
+        return r;
       } else {
-        size = protoRet.size;
+        return null;
       }
-      return read_memory(pointer.value, size);
-    });
+    }).filter(v => v !== null);
+
     // Resetting the stack pointer to its old value
     memory[0] = sp;
+    if ("kind" in proto.return && proto.return.kind === "layout") {
+      // Heap-allocated value
+      let read = proto.return.type.startsWith("buffer") ? heapReadBuffer : heapReadLayout;
+      let r = read(proto.return.type, call_return);
+      memory[Module.Karamel.mem.buffer.byteLength/4-1] = 0;
+      return r;
+
+      // loader.dump(Module.Karamel.mem, 2048, Module.Karamel.mem.buffer.byteLength - 2048);
+      // console.log(loader.p32(call_return), r, JSON.stringify(layouts[proto.return.type], null, 2));
+
+      // let ptr = stackWriteLayout(proto.return.type, r);
+      // console.log(loader.p32(ptr));
+      // loader.dump(Module.Karamel.mem, 2048, 0x13000);
+      // throw new Error(func_name+": non-buffer return layout not implemented");
+    }
     if (proto.return.type === "bool") {
       return [call_return === 1, return_buffers].flat();
     }
-    if (proto.return.type === "int") {
+    if (proto.return.type === "int32") {
       return [call_return, return_buffers].flat();
     }
     if (proto.return.type === "void") {
       return return_buffers;
     }
-    throw "Unimplemented !";
+    throw new Error(func_name+": Unimplemented !");
   };
-
-  var api_obj = {};
-
-  // Creating object by mapping from api.json structure
-  Object.keys(api_json).map(function(key_module) {
-    Object.keys(api_json[key_module]).map(function(key_func) {
-      if (api_obj[key_module] == null) {
-        api_obj[key_module] = {};
-      }
-      api_obj[key_module][key_func] = function(...args) {
-        if (isInitialized === false) {
-          throw 'Uninitialized';
-        };
-        return callWithProto(api_json[key_module][key_func], args);
-      };
-    });
-  });
 
   var getInitializedHaclModule = async function () {
-    await checkIfInitialized();
-    return api_obj;
+    if (!isInitialized) {
+      // Load all WASM modules from network (web) or disk (node).
+      await loadWasm();
+      // Write into the global.
+      layouts = await layouts_promise;
+
+      // Initial API validation (TODO: disable for release...?)
+      let api_json = await api_promise;
+      validateJSON(api_json);
+
+      // We follow the structure of api.json to expose an object whose structure
+      // follows the keys of api.json; each entry is a partial application of
+      // `callWithProto` (generic API wrapper) to its specific entry in api.json
+      // held in `api_json[key_module][key_func]`.
+      for (let key_module in api_json) {
+        for (let key_func in api_json[key_module]) {
+          if (api_obj[key_module] == null) {
+            api_obj[key_module] = {};
+          }
+          api_obj[key_module][key_func] = function(...args) {
+            return callWithProto(api_json[key_module][key_func], args);
+          };
+        };
+      };
+    }
+    return Promise.resolve(api_obj);
   };
 
-  var checkObj = {
+  return {
     getInitializedHaclModule: getInitializedHaclModule,
+    dump: (sz, ofs) => loader.dump(Module.Karamel.mem, sz, ofs)
   };
-
-  return checkObj;
 })();
 
 if (typeof module !== "undefined") {
