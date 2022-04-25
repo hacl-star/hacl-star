@@ -8,8 +8,6 @@ open Hacl.Impl.EC.Math
 
 open FStar.Mul
 
-
-
 #set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0 "
 
 (* the same in Hacl.Impl.EC.Math --- *)
@@ -21,15 +19,16 @@ assume val lemma_a_not_zero_b_not_zero_mod_not_zero: p: nat {Math.Euclid.is_prim
   (ensures a * b % p <> 0)
 
 
-val lemma_point_add_mixed_b_is_infinity_x_after_norm: #c: curve -> a: point_nat_prime #c
-  -> b: point_nat_prime #c {pointEqual a b /\ isPointAtInfinity #Affine b /\ not (isPointAtInfinity #Jacobian a)} 
+(* val lemma_point_add_mixed_b_is_infinity_x_after_norm: #c: curve -> a: point_nat_prime #c
+  -> b: point_nat_prime #c {pointEqual a b /\ isPointAtInfinity #c #Affine b /\ not (isPointAtInfinity #c #Jacobian a)} 
   -> Lemma (let aX, aY, aZ = a in aX * exp #(getPrime c) (aZ * aZ % getPrime c) (getPrime c - 2) % (getPrime c) == 0)
 
 let lemma_point_add_mixed_b_is_infinity_x_after_norm #c a b = 
   let aX, aY, aZ = a in
   let prime = getPrime c in  
-  assert(0 == aX * exp #prime (aZ * aZ % prime) (prime - 2) % prime)  
+  assert(0 == aX * exp #prime (aZ * aZ % prime) (prime - 2) % prime)  *)
 
+(*
 val lemma_point_add_mixed_b_is_infinity_y_after_norm: #c: curve -> a: point_nat_prime #c
   -> b: point_nat_prime #c {pointEqual a b /\ isPointAtInfinity #Affine b /\ not (isPointAtInfinity #Jacobian a)} 
   -> Lemma (let aX, aY, aZ = a in aY * exp #(getPrime c) (aZ * aZ * aZ % getPrime c) (getPrime c - 2) % (getPrime c) == 0)
@@ -37,7 +36,7 @@ val lemma_point_add_mixed_b_is_infinity_y_after_norm: #c: curve -> a: point_nat_
 let lemma_point_add_mixed_b_is_infinity_y_after_norm #c a b = 
   let aX, aY, aZ = a in
   let prime = getPrime c in  
-  assert(0 == aY * exp #prime (aZ * aZ * aZ % prime) (prime - 2) % prime)  
+  assert(0 == aY * exp #prime (aZ * aZ * aZ % prime) (prime - 2) % prime)   
 
 
 val lemma_point_add_mixed_b_is_infinity_0: #c: curve -> a: point_nat_prime #c
@@ -50,7 +49,7 @@ let lemma_point_add_mixed_b_is_infinity_0 #c a b d =
   let aX, aY, aZ = a in
   let prime = getPrime c in   
   let pAffineX, pAffineY, pAffineZ = _norm a in 
-  
+  admit();
   let open FStar.Math.Lemmas in 
   pos_times_pos_is_pos aZ aZ;
   lemma_a_not_zero_b_not_zero_mod_not_zero prime aZ aZ; 
@@ -59,9 +58,8 @@ let lemma_point_add_mixed_b_is_infinity_0 #c a b d =
   FStar.Math.Euclid.euclid_prime prime aX (exp #prime (aZ * aZ % prime) (prime - 2));
   FStar.Math.Lemmas.small_mod aX prime
 
-
 val lemma_point_add_mixed_b_is_infinity_1: #c: curve -> a: point_nat_prime #c
-  -> b: point_nat_prime #c {pointEqual a b /\ isPointAtInfinity #Affine b /\ not (isPointAtInfinity #Jacobian a)} 
+  -> b: point_nat_prime #c {pointEqual a b /\ isPointAtInfinity #c #Affine b /\ not (isPointAtInfinity #c #Jacobian a)} 
   -> d: point_nat_prime #c
   -> Lemma (let aX, aY, aZ = a in aY == 0)
 
@@ -144,3 +142,5 @@ let lemma_not_affine_equality #c a b =
     end;
 
   assert(not (isPointAtInfinity #Affine a))
+
+*)

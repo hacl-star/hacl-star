@@ -7,13 +7,14 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.EC.Definition
 open Spec.ECC
 open Spec.ECC.Curves
+
 open FStar.Mul
 open Hacl.Spec.MontgomeryMultiplication
-
 open Hacl.Impl.EC.Setup
+
+open Hacl.Spec.EC.Definition
 
 
 #set-options "--z3rlimit 100"
@@ -29,7 +30,7 @@ val uploadOneImpl: #c: curve -> f: felem c -> Stack unit
   (ensures fun h0 _ h1 -> as_nat c h1 f == 1 /\ modifies (loc f) h0 h1)
 
 inline_for_extraction noextract
-val uploadZeroPoint: #c: curve -> p: point c ->
+val uploadZeroPoint: #c: curve -> p:Hacl.Spec.EC.Definition.point c ->
   Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 ->
@@ -227,7 +228,7 @@ val mul_atomic: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1)
 
 
 inline_for_extraction noextract
-val copy_point: #c: curve -> p: point c -> result: point c -> Stack unit 
+val copy_point: #c: curve -> p: Hacl.Spec.EC.Definition.point c -> result: Hacl.Spec.EC.Definition.point c -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_eval c h p) 
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ 
     point_as_nat c h0 p == point_as_nat c h1 result)

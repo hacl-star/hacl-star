@@ -20,7 +20,6 @@ type coordSyst =
   |Affine 
   |Jacobian
 
-
 let invert_state_s (a: coordSyst): Lemma
   (requires True)
   (ensures (inversion coordSyst))
@@ -28,19 +27,46 @@ let invert_state_s (a: coordSyst): Lemma
   = allow_inversion (coordSyst)
 
 
-let pointAtInfinity #c : point_nat_prime #c = (0, 0, 0)
+let point_jacobian #c = point_nat_prime #c
 
-let isPointAtInfinity #coordSyst (p:point_nat) =
-  match coordSyst with 
-  |Jacobian -> let (_, _, z) = p in z = 0
-  |Affine -> let (x, y, _) = p in x = 0 && y = 0
+let point_affine #c = point_affine_nat_prime #c
+
+let point #c #coordSystem = 
+  match coordSystem with 
+  |Affine -> point_affine #c
+  |Jacobian -> point_jacobian #c
 
 
+let isPointAtInfinity #c #coordSystem (p : point #c #coordSystem) =
+  match coordSystem with 
+  |Jacobian -> let (_, _, z) = (p <: point_jacobian #c) in z = 0
+  |Affine -> let (x, y) = (p <: point_affine #c) in x = 0 && y = 0
+
+
+let pointAtInfinity #c #coordSystem : (p: point #c #coordSystem {isPointAtInfinity p}) = 
+  match coordSystem with 
+  |Jacobian -> let p : point #c #Jacobian = (1, 1, 0) in p
+  |Affine -> let p : point #c #Affine = (0, 0) in p
+
+val toJacobianCoordinates: #c: curve 
+  -> #coordSystem: coordSyst 
+  -> point #c #coordSystem 
+  -> point #c #Jacobian
+  
+let toJacobianCoordinates #c #coordSystem p = 
+  match coordSystem with 
+  |Jacobian -> p
+  | _ -> 
+    if isPointAtInfinity #c #Affine p then 
+      (0, 0, 0)
+    else 
+      let (pX, pY) = p <: point_affine #c in 
+      pX, pY, 1
 
 noextract
-let _point_double_nist #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
+let _point_double #curve #coordSystem (p:point #curve #coordSystem) : point #curve #Jacobian =
   let prime = getPrime curve in 
-  let x, y, z = p in
+  let x, y, z = toJacobianCoordinates p in
   let delta = z * z in 
   let gamma = y * y in 
   let beta = x * gamma in 
@@ -51,64 +77,22 @@ let _point_double_nist #curve (p:point_nat_prime #curve) : point_nat_prime #curv
   (x3, y3, z3)
 
 
-(* https://www.hyperelliptic.org/EFD/g1p/auto-shortw-jacobian.html#doubling-dbl-1998-cmo-2 *)
-
-noextract
-let _point_double_general #curve (p: point_nat_prime #curve) : point_nat_prime #curve = 
-  let prime = getPrime curve in 
+let _point_inverse #c (p: point #c #Jacobian) : point #c #Jacobian =
   let x, y, z = p in
-  let gamma = y * y in 
-  let delta = z * z in 
-  let beta = x * gamma in 
-   
-  let alpha = 3 * x * x + aCoordinate #curve * delta * delta in 
-  
-  let x3 = (alpha * alpha - 8 * beta) % prime in 
-  let y3 = (alpha * (4 * beta - x3) - 8 * gamma * gamma) % prime in 
-  let z3 = ((y + z) * (y + z) - delta - gamma) % prime in 
-  (x3, y3, z3)
-
-
-noextract
-let _point_double_koblitz #curve (p: point_nat_prime #curve) : point_nat_prime #curve = 
-  let prime = getPrime curve in 
-  let x, y, z = p in
-  let gamma = y * y in 
-  let delta = z * z in 
-  let beta = x * gamma in 
-   
-  let alpha = 3 * x * x in 
-  
-  let x3 = (alpha * alpha - 8 * beta) % prime in 
-  let y3 = (alpha * (4 * beta - x3) - 8 * gamma * gamma) % prime in 
-  let z3 = ((y + z) * (y + z) - delta - gamma) % prime in 
-  (x3, y3, z3)
-
-
-noextract
-let _point_double #curve (p: point_nat_prime #curve) = 
-  match curve with 
-  |P256 -> _point_double_nist p 
-  |P384 -> _point_double_nist p
-
-
-let _point_inverse #curve (p:point_nat_prime #curve) : point_nat_prime #curve =
-  let x, y, z = p in
-  let minusY = (0 - y) % getPrime curve in 
+  let minusY = (0 - y) % getPrime c in 
   (x, minusY, z)
 
 
-
-let _norm #curve (p:point_nat_prime #curve) : (point_nat_prime #curve) =
-  let prime = getPrime curve in 
+let _norm #c (p: point #c #Jacobian) : point #c #Jacobian =
+  let prime = getPrime c in 
   let (x, y, z) = p in
   let z2 = z * z in
-  let z2i = modp_inv2 #curve z2 in
+  let z2i = modp_inv2 #c z2 in
   let z3 = z * z * z in
-  let z3i = modp_inv2 #curve z3 in
+  let z3i = modp_inv2 #c z3 in
   let x3 = (z2i * x) % prime in
   let y3 = (z3i * y) % prime in
-  let z3 = if isPointAtInfinity #Jacobian p then 0 else 1 in
+  let z3 = if isPointAtInfinity #c #Jacobian p then 0 else 1 in
   (x3, y3, z3)
 
 
@@ -120,18 +104,18 @@ let ith_bit (#c: curve) (k: scalar_bytes #c) (i:nat{i < v (getScalarLen c)}) : (
   logand_mask (index k q >>. r) (u8 1) 1;
   to_u64 ((index k q >>. r) &. u8 1)
   
-let isPointOnCurve (#c: curve) (p: point_nat_prime #c) : bool = 
+let isPointOnCurve (#c: curve) (p: point #c #Jacobian) : bool = 
   let (x, y, z) = p in
   let prime = getPrime c in 
   (y * y) % prime = (x * x * x + aCoordinate #c  * x + bCoordinate #c) % prime
 
+let pointOnCurve (#c: curve) (p: point #c #Jacobian) = 
+	let (x, y, z) = p in
+  	let prime = getPrime c in 
+  	(y * y) % prime == (x * x * x + aCoordinate #c  * x + bCoordinate #c) % prime
 
-val toJacobianCoordinates: tuple2 nat nat -> r: tuple3 nat nat nat {~ (isPointAtInfinity #Jacobian r)}
 
-let toJacobianCoordinates (r0, r1) =  (r0, r1, 1)
-
-
-let pointEqual #curve (p: point_nat_prime #curve) (q: point_nat_prime #curve) = 
+let pointEqual #c (p: point #c #Jacobian) (q:  point #c #Jacobian) = 
   
   let pAffineX, pAffineY, pAffineZ = _norm p in 
   let qAffineX, qAffineY, qAffineZ = _norm q in 
@@ -139,7 +123,7 @@ let pointEqual #curve (p: point_nat_prime #curve) (q: point_nat_prime #curve) =
   (* if one point is at infinity, but not the second *)
   if pAffineZ <> qAffineZ then false else
   (* if two points are at infinity *)
-  if isPointAtInfinity #Jacobian (pAffineX, pAffineY, pAffineZ) && isPointAtInfinity #Jacobian (qAffineX, qAffineY, qAffineZ) then true else
+  if isPointAtInfinity #c #Jacobian (pAffineX, pAffineY, pAffineZ) && isPointAtInfinity #c #Jacobian (qAffineX, qAffineY, qAffineZ) then true else
   (* if affine coordinates are equal *)
   if (pAffineX = qAffineX && pAffineY = qAffineY) then 
     true
@@ -148,10 +132,10 @@ let pointEqual #curve (p: point_nat_prime #curve) (q: point_nat_prime #curve) =
 
 
 noextract
-let _point_add #curve   (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
-  let prime = getPrime curve in 
+let _point_add #c #coordSystem (p: point #c #Jacobian) (q: point #c #coordSystem) : point #c #Jacobian =
+  let prime = getPrime c in 
   let (x1, y1, z1) = p in
-  let (x2, y2, z2) = q in
+  let (x2, y2, z2) = toJacobianCoordinates #c #coordSystem q in
 
   let z2z2 = z2 * z2 in
   let z1z1 = z1 * z1 in
@@ -168,62 +152,26 @@ let _point_add #curve   (p:point_nat_prime #curve) (q:point_nat_prime #curve) : 
   let rr = r * r in
   let hh = h * h in
   let hhh = h * h * h in
-
+ 
   let x3 = (rr - hhh - 2 * u1 * hh) % prime in
   let y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime in
   let z3 = (h * z1 * z2) % prime in
-  if isPointAtInfinity #Jacobian  q then
+  if isPointAtInfinity #c #coordSystem q then
     (x1, y1, z1)
+  else if isPointAtInfinity #c #Jacobian p then
+    (x2, y2, z2) 
   else
-    if isPointAtInfinity #Jacobian  p then
-      (x2, y2, z2)
-    else
-      (x3, y3, z3)
+    (x3, y3, z3)
 
 
-noextract
-let _point_add_mixed #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
-  let prime = getPrime curve in 
-  let (x1, y1, z1) = p in
-  let (x2, y2, z2) = q in
-
-  let z2z2 = z2 * z2 in
-  let z1z1 = z1 * z1 in
-
-  let u1 = x1 * z2z2 % prime in
-  let u2 = x2 * z1z1 % prime in
-
-  let s1 = y1 * z2 * z2z2 % prime in
-  let s2 = y2 * z1 * z1z1 % prime in
-
-  let h = (u2 - u1) % prime in
-  let r = (s2 - s1) % prime in
-
-  let rr = r * r in
-  let hh = h * h in
-  let hhh = h * h * h in
-
-  let x3 = (rr - hhh - 2 * u1 * hh) % prime in
-  let y3 = (r * (u1 * hh - x3) - s1 * hhh) % prime in
-  let z3 = (h * z1 * z2) % prime in
-  if isPointAtInfinity #Affine q then
-    (x1, y1, z1)
-  else
-    if isPointAtInfinity #Jacobian p then
-      (x2, y2, z2)
-    else
-      (x3, y3, z3)
-
-
-
-let pointAdd #curve (p:point_nat_prime #curve) (q:point_nat_prime #curve) : point_nat_prime #curve =
-  if pointEqual p q then 
+let pointAdd #c (p: point #c #Jacobian) (q: point #c #Jacobian) : point #c #Jacobian =
+  if pointEqual #c p q then 
     _point_double p 
   else
-    _point_add #curve p q
+    _point_add #c p q
 
 
-val _ml_step0: #c: curve -> r0: point_nat_prime #c -> r1: point_nat_prime #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c) 
+val _ml_step0: #c: curve -> r0: point #c #Jacobian -> r1: point #c #Jacobian -> tuple2 (point #c #Jacobian) (point #c #Jacobian) 
 
 let _ml_step0 #c r0 r1 =
   let r0 = pointAdd #c r1 r0 in
@@ -231,16 +179,16 @@ let _ml_step0 #c r0 r1 =
   (r0, r1)
 
 
-val _ml_step1: #c: curve -> r0: point_nat_prime #c -> r1: point_nat_prime #c -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
+val _ml_step1: #c: curve -> r0: point #c #Jacobian -> r1: point #c #Jacobian -> tuple2 (point #c #Jacobian) (point #c #Jacobian) 
 
 let _ml_step1 #c r0 r1 =
-  let r1 = pointAdd #c  r0 r1 in
+  let r1 = pointAdd #c r0 r1 in
   let r0 = pointAdd #c r0 r0 in
   (r0, r1)
 
 
-val _ml_step: #c: curve -> k: scalar_bytes #c -> i: nat{i < v (getScalarLen c)} 
-  -> r: tuple2 (point_nat_prime #c) (point_nat_prime #c)
+val _ml_step: #c: curve -> scalar_bytes #c -> i: nat{i < v (getScalarLen c)} 
+  -> tuple2 (point #c #Jacobian) (point #c #Jacobian)
   -> tuple2 (point_nat_prime #c) (point_nat_prime #c)
 
 let _ml_step #c k i (p, q) =
@@ -252,55 +200,57 @@ let _ml_step #c k i (p, q) =
     _ml_step0 p q
 
 (* P + R == P + Q <==> R == Q --> P + P == P + Q <==> P == Q *)
-assume val curve_point_equality: #c: curve ->  p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
+assume val curve_point_equality: #c: curve -> p: point #c #Jacobian -> q: point #c #Jacobian-> Lemma 
   (pointEqual (pointAdd #c p q) (pointAdd #c p p) <==> pointEqual p q)
 
 (* P + Q == Q + P *)
-assume val curve_commutativity_lemma: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma 
+assume val curve_commutativity_lemma: #c: curve -> p: point #c #Jacobian -> q: point #c #Jacobian -> Lemma 
   (pointEqual (pointAdd #c p q) (pointAdd #c q p))
 
 (* P == P' <==> P + Q == P' + Q *)
 (* TODO: do we need curve_point_equality and this? *)
-assume val curve_compatibility_with_translation_lemma: #c: curve -> p: point_nat_prime #c -> p1: point_nat_prime #c 
-  -> q: point_nat_prime #c -> 
+assume val curve_compatibility_with_translation_lemma: #c: curve -> p: point #c #Jacobian -> p1: point #c #Jacobian
+  -> q: point #c #Jacobian -> 
   Lemma (pointEqual p p1 <==> pointEqual (pointAdd #c p q) (pointAdd #c p1 q))
 
 (* order is the smallest number such that P * order == 0 *)
-
-assume val curve_order_is_the_smallest: #c: curve ->  p: point_nat_prime #c -> Lemma
-  (forall (n: nat {isPointAtInfinity #Jacobian (repeat n (fun x -> pointAdd #c p x) p)}). n >= getOrder #c)
+(* TODO: repeat or mult?*)
+assume val curve_order_is_the_smallest: #c: curve 
+  -> p: point #c #Jacobian {not (isPointAtInfinity #c p)} -> 
+  Lemma (forall (n: nat {isPointAtInfinity #c (repeat n (fun x -> pointAdd #c p x) p)}). n >= getOrder #c)
 
 (* order * P == 0 *)
-assume val curve_multiplication_by_order: #c: curve -> i: int {(i + 1) % getOrder #c = 0} -> p: point_nat_prime -> 
-  Lemma (repeat (i % getOrder #c) (fun x -> pointAdd #c p x) p == pointAtInfinity)
+assume val curve_multiplication_by_order: #c: curve -> i: int {(i + 1) % getOrder #c = 0} -> p: point #c #Jacobian -> 
+  Lemma (let pi = repeat (i % getOrder #c) (fun x -> pointAdd #c p x) p in isPointAtInfinity pi)
 
 (* P + 0 == P *)
-assume val curve_point_at_infinity_property: #c: curve -> q: point_nat_prime #c -> Lemma (pointEqual (pointAdd #c pointAtInfinity q) q)
+assume val curve_point_at_infinity_property: #c: curve -> q: point #c #Jacobian ->
+  Lemma (forall (pInf : point #c #Jacobian {isPointAtInfinity pInf}). pointEqual (pointAdd #c pInf q) q)
 
-assume val curve_associativity: #c: curve ->  p: point_nat_prime #c -> q: point_nat_prime #c -> r: point_nat_prime #c -> Lemma 
+assume val curve_associativity: #c: curve -> p: point #c #Jacobian -> q: point #c #Jacobian -> r: point #c #Jacobian -> Lemma 
   (pointEqual (pointAdd #c (pointAdd #c p q) r) (pointAdd #c p (pointAdd #c q r)))
 
 
-val point_mult: #c: curve -> i: int -> p: point_nat_prime #c -> point_nat_prime #c
+val point_mult: #c: curve -> int -> point #c #Jacobian -> point #c #Jacobian
 
 let point_mult #c i p = repeat ((i - 1) % getOrder #c) (fun x -> pointAdd #c p x) p
 
 
-val point_mult_0: #c: curve ->  p: point_nat_prime #c -> i: int {i % getOrder #c = 0} -> 
-  Lemma (point_mult #c i p == pointAtInfinity)
+val point_mult_0: #c: curve ->  p: point #c #Jacobian -> i: int {i % getOrder #c = 0} -> 
+  Lemma (isPointAtInfinity (point_mult #c i p))
 
 let point_mult_0 #c p i = 
   small_mod 0 (getOrder #c);
   curve_multiplication_by_order #c (getOrder #c - 1) p;
-  assert(repeat ((getOrder #c - 1) % getOrder #c) (fun x -> pointAdd #c p x) p == pointAtInfinity)
+  assert(isPointAtInfinity (repeat ((getOrder #c - 1) % getOrder #c) (fun x -> pointAdd #c p x) p))
 
 
-val point_mult_1: #c: curve ->  p: point_nat_prime #c ->  Lemma (point_mult #c 1 p == p)
+val point_mult_1: #c: curve ->  p: point #c #Jacobian ->  Lemma (point_mult #c 1 p == p)
 
 let point_mult_1 #c p = eq_repeat0 (fun x -> pointAdd #c p x) p 
 
 
-val point_mult_ext: #c: curve ->  i: int -> p: point_nat_prime #c -> Lemma (
+val point_mult_ext: #c: curve -> i: int -> p: point #c #Jacobian -> Lemma (
   let f = (fun x -> pointAdd #c p x) in  
   pointEqual (f (point_mult #c i p)) (point_mult #c (i + 1) p))
 
@@ -310,7 +260,7 @@ let point_mult_ext #c i p =
     begin
       point_mult_0 #c p 0;
       curve_point_at_infinity_property #c p;  
-      curve_commutativity_lemma #c pointAtInfinity p; 
+      curve_commutativity_lemma #c (pointAtInfinity #c) p; 
       point_mult_1 #c p
     end
   else 
@@ -320,7 +270,7 @@ let point_mult_ext #c i p =
     end
 
 
-val lemma_scalar_reduce: #c: curve -> p: point_nat_prime #c -> pk: int ->
+val lemma_scalar_reduce: #c: curve -> p: point #c #Jacobian -> pk: int ->
   Lemma (point_mult #c pk p == point_mult #c (pk % getOrder #c) p)
 
 let lemma_scalar_reduce #c p pk = 
@@ -331,13 +281,13 @@ let lemma_scalar_reduce #c p pk =
   lemma_mod_twice (pk - 1) (getOrder #c)
 
 
-val point_mult_def: #c: curve ->  i: int -> p: point_nat_prime #c -> Lemma 
+val point_mult_def: #c: curve ->  i: int -> p: point #c #Jacobian -> Lemma 
   (point_mult #c i p == repeat ((i - 1) % getOrder #c) (fun x -> pointAdd #c p x) p)
 
 let point_mult_def #c i p = ()
 
 
-val lemma_commutativity_extended: #c: curve ->  p0: point_nat_prime #c  -> a: point_nat_prime #c -> b: point_nat_prime #c -> 
+val lemma_commutativity_extended: #c: curve -> p0: point #c #Jacobian -> a: point #c #Jacobian -> b: point #c #Jacobian -> 
   Lemma (
     let f = (fun x -> pointAdd #c p0 x) in 
     pointEqual (pointAdd #c (f a) b) (pointAdd #c (f b) a))
@@ -351,7 +301,7 @@ let lemma_commutativity_extended #c p0 a b =
   curve_associativity #c  a p0 b
   
 
-val lemma_point_add_minus_plus_same_value: #c: curve -> p0: point_nat_prime #c -> pk: nat -> qk: nat -> i: nat -> Lemma ( 
+val lemma_point_add_minus_plus_same_value: #c: curve -> p0: point #c #Jacobian -> pk: nat -> qk: nat -> i: nat -> Lemma ( 
   let p = pointAdd  #c  (point_mult #c  pk p0) (point_mult #c  qk p0) in 
   let p_i = pointAdd #c  (point_mult #c  (pk - i) p0) (point_mult #c  (qk + i) p0) in 
   pointEqual p p_i)
@@ -422,10 +372,10 @@ let rec lemma_point_add_minus_plus_same_value #curve  p0 pk qk i =
 
 
 val lemmaApplPointDouble: #c: curve 
-  -> p0: point_nat_prime #c 
+  -> p0: point #c #Jacobian
   -> pk: int
-  -> p: point_nat_prime #c {pointEqual p (point_mult #c  pk p0)} ->
-  Lemma (pointEqual (pointAdd #c  p p) (point_mult #c  (2 * pk) p0))
+  -> p: point #c #Jacobian {pointEqual p (point_mult #c pk p0)} ->
+  Lemma (pointEqual (pointAdd #c  p p) (point_mult #c (2 * pk) p0))
 
 let lemmaApplPointDouble #c  p0 pk p =  
   let o = getOrder #c in 
@@ -466,11 +416,11 @@ let lemmaApplPointDouble #c  p0 pk p =
   curve_compatibility_with_translation_lemma #c  p pk_p pk_p
 
 
-val lemmaApplPointAdd: #c: curve -> p0: point_nat_prime #c 
+val lemmaApplPointAdd: #c: curve -> p0: point #c #Jacobian
   -> pk: int
-  -> p: point_nat_prime #c {pointEqual p (point_mult #c  pk p0)} 
+  -> p: point #c #Jacobian {pointEqual p (point_mult #c  pk p0)} 
   -> qk: int
-  -> q: point_nat_prime #c {pointEqual q (point_mult #c  qk p0)} -> 
+  -> q: point #c #Jacobian {pointEqual q (point_mult #c  qk p0)} -> 
   Lemma (pointEqual (pointAdd #c p q) (point_mult #c (pk + qk) p0))
 
 let lemmaApplPointAdd #c  p0 pk p qk q = 
@@ -523,17 +473,16 @@ let lemmaApplPointAdd #c  p0 pk p qk q =
 
 
 val mlStep0AsPointAdd: #c: curve 
-  -> p0: point_nat_prime #c 
+  -> p0: point #c #Jacobian 
   -> pk: nat
-  -> p: point_nat_prime #c {pointEqual p (point_mult #c pk p0)}  
+  -> p: point #c #Jacobian {pointEqual p (point_mult #c pk p0)}  
   -> qk: nat 
-  -> q: point_nat_prime #c {pointEqual q (point_mult #c qk p0)} -> 
+  -> q: point #c #Jacobian {pointEqual q (point_mult #c qk p0)} -> 
   Lemma
   (ensures (
     let p_i, q_i = _ml_step0 p q in 
     pointEqual p_i (point_mult #c  (pk + qk) p0) /\
     pointEqual q_i (point_mult #c (2 * qk) p0)))
-
 
 let mlStep0AsPointAdd #c p0 p_k p q_k q = 
   curve_commutativity_lemma #c  p q; 
@@ -542,11 +491,11 @@ let mlStep0AsPointAdd #c p0 p_k p q_k q =
 
 
 val mlStep1AsPointAdd: #c: curve
-  -> p0: point_nat_prime #c
+  -> p0: point #c #Jacobian
   -> pk: nat
-  -> p: point_nat_prime #c {pointEqual p (point_mult #c  pk p0)} 
+  -> p: point #c #Jacobian {pointEqual p (point_mult #c  pk p0)} 
   -> qk: nat 
-  -> q: point_nat_prime #c {pointEqual q (point_mult #c  qk p0)} -> 
+  -> q: point #c #Jacobian {pointEqual q (point_mult #c  qk p0)} -> 
   Lemma
   (ensures (
     let p_i, q_i = _ml_step1 p q in 
@@ -558,11 +507,10 @@ let mlStep1AsPointAdd #c p0 pk p qk q =
   lemmaApplPointDouble #c  p0 pk p
 
 
-val point_mult_0_lemma: #c: curve -> p: point_nat_prime #c ->  Lemma (point_mult #c  1 p == p)
+val point_mult_0_lemma: #c: curve -> p: point #c #Jacobian ->  Lemma (point_mult #c 1 p == p)
 
 let point_mult_0_lemma #c p = 
   Lib.LoopCombinators.eq_repeat0 (fun x -> pointAdd #c  p x) p 
-
 
 val scalar_as_nat_: #c: curve -> scalar_bytes #c -> i: nat {i <= v (getScalarLen c)} -> nat
 
@@ -619,8 +567,8 @@ let pred0 #c (pi, qi) s (p0, q0) i =
   let si1 = scalar_as_nat_ #c s i + 1 in  
   if pointEqual pi (point_mult #c si q0) && pointEqual qi (point_mult #c si1 q0) then 
     let pi1, qi1 = f i (pi, qi) in 
-    mlStep0AsPointAdd q0 si pi si1 qi;
-    mlStep1AsPointAdd q0 si pi si1 qi;
+    mlStep0AsPointAdd #c q0 si pi si1 qi;
+    mlStep1AsPointAdd #c q0 si pi si1 qi;
     scalar_as_nat_def s (i + 1)
   else ()
 
@@ -670,7 +618,7 @@ let montgomery_ladder_spec_left #c s (p0, q0) =
 
 
 val scalar_multiplication: #c: curve -> scalar_bytes #c -> 
-  p: point_nat_prime #c {~ (isPointAtInfinity #Jacobian  p)} -> 
+  p: point_nat_prime #c {~ (isPointAtInfinity #c #Jacobian  p)} -> 
   point_nat_prime #c 
 
 let scalar_multiplication #c k p =
@@ -680,4 +628,5 @@ val secret_to_public: #c: curve -> scalar_bytes #c -> point_nat_prime #c
 
 let secret_to_public #c k =
   point_mult #c  (scalar_as_nat #c k) (basePoint #c)
+
 

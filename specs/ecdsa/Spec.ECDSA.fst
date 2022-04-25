@@ -319,7 +319,7 @@ let exponent_spec #c a =
 
 
 val verifyQValidCurvePointSpec: #c: curve 
-  -> publicKey:tuple3 nat nat nat{~(isPointAtInfinity  #Jacobian publicKey)} -> bool
+  -> publicKey:tuple3 nat nat nat{~(isPointAtInfinity #c #Jacobian publicKey)} -> bool
 
 let verifyQValidCurvePointSpec #c publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
@@ -329,7 +329,7 @@ let verifyQValidCurvePointSpec #c publicKey =
   z < prime &&
   isPointOnCurve #c (x, y, z) && (
   if (isPrimeGroup c) then true else 
-    isPointAtInfinity #Jacobian (scalar_multiplication #c (prime_order_seq #c) publicKey))
+    isPointAtInfinity #c #Jacobian (scalar_multiplication #c (prime_order_seq #c) publicKey))
 
 
 (* Check that {\displaystyle Q_{A}}Q_{A} is not equal to the identity element O, and its coordinates are otherwise valid *)
@@ -411,13 +411,13 @@ let ecdsa_verification c alg publicKey r s mLen m =
 
       point_mult_0  #c  (basePoint #c) 0;
       point_mult_0 #c publicJacobian 0;
-      let u1D, _ = montgomery_ladder_spec_left #c u1 (pointAtInfinity, basePoint #c) in
-      let u2D, _ = montgomery_ladder_spec_left #c u2 (pointAtInfinity, publicJacobian) in
+      let u1D, _ = montgomery_ladder_spec_left #c u1 (pointAtInfinity #c, basePoint #c) in
+      let u2D, _ = montgomery_ladder_spec_left #c u2 (pointAtInfinity #c, publicJacobian) in
 
       let sumPoints = pointAdd #c u1D u2D in
       let pointNorm = _norm #c sumPoints in
       let x, y, z = pointNorm in
-      if isPointAtInfinity #Jacobian pointNorm then false else x % order = r
+      if isPointAtInfinity #c #Jacobian pointNorm then false else x % order = r
 
 
       (*  let order = getOrder #c in 

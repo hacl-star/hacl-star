@@ -135,7 +135,7 @@ val ecdsa_signature_step45: #c: curve -> #l: ladder
     LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc k; loc x])
   (ensures fun h0 r h1 -> modifies (loc x |+| loc tempBuffer) h0 h1 /\ 
     as_nat c h1 x < getOrder #c /\ (point_mult_0 #c (basePoint #c) 0; 
-    let (rxN, ryN, rzN), _ = montgomery_ladder_spec_left #c (as_seq h0 k) (pointAtInfinity, basePoint #c) in 
+    let (rxN, ryN, rzN), _ = montgomery_ladder_spec_left #c (as_seq h0 k) (pointAtInfinity #c, basePoint #c) in 
     let (xN, _, _) = _norm #c (rxN, ryN, rzN) in 
     as_nat c h1 x == xN % getOrder #c /\ (
     if as_nat c h1 x = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0)))

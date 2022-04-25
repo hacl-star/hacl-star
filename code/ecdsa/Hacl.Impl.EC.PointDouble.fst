@@ -7,16 +7,18 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.EC.LowLevel
-open Hacl.Spec.EC.Definition
 open Spec.ECC
 open Spec.ECC.Curves
+
+open Hacl.Impl.EC.LowLevel
 
 open Hacl.Spec.MontgomeryMultiplication
 
 open Hacl.Impl.EC.K.PointDouble
 open Hacl.Impl.EC.General.PointDouble
 open Hacl.Impl.EC.NIST.PointDouble
+
+open Hacl.Spec.EC.Definition
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0" 
 

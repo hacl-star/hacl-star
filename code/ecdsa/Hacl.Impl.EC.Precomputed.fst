@@ -34,7 +34,7 @@ let getPointI_jac (c: curve) (b: Lib.Sequence.lseq uint64 (v (getCoordinateLenU6
   let l = v (getCoordinateLenU64 c) in 
   let x = lseq_as_nat (Lib.Sequence.sub b (2 * l * i) l) in 
   let y = lseq_as_nat (Lib.Sequence.sub b (2 * l * i + l) l) in 
-  toJacobianCoordinates (x, y)
+  toJacobianCoordinates #c (x, y)
 
 
 inline_for_extraction
@@ -281,7 +281,7 @@ val getPointPrecomputedMixed_step: #c: curve -> i: size_t {v i < 16}
       let pointToAddX = gsub pointToAdd (size 0) len in 
       let pointToAddY = gsub pointToAdd len len in 
     if v mask = pow2 64 - 1 then
-      let pointPrecomputedJacobian =  toJacobianCoordinates (as_nat c h1 pointToAddX, as_nat c h1 pointToAddY) in 
+      let pointPrecomputedJacobian =  toJacobianCoordinates #c (as_nat c h1 pointToAddX, as_nat c h1 pointToAddY) in 
       let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
       felem_eval c h1 pointToAddX /\ felem_eval c h1 pointToAddY /\ (
       (v i < 16) ==> pointEqual pi_fromDomain (point_mult #c  (v i) (basePoint #c)))
@@ -299,21 +299,21 @@ let getPointPrecomputedMixed_step #c k pointToAdd mask  =
   copy_point_conditional_affine pointToAdd lut_cmb_x lut_cmb_y mask
   
 
-
 inline_for_extraction noextract
-val getPointPrecomputedMixed: #c: curve -> #buf_type: buftype -> scalar: scalar_t #buf_type #c -> 
+val getPointPrecomputedMixed_: #c: curve -> #buf_type: buftype -> scalar: scalar_t #buf_type #c -> 
   i:size_t {v i < v (getScalarLenBytes c) * 2} -> pointToAdd: pointAffine c ->
   Stack unit 
   (requires fun h -> live h scalar /\ live h pointToAdd)
   (ensures fun h0 _ h1 -> modifies (loc pointToAdd) h0 h1 /\ point_aff_eval c h1 pointToAdd /\ (
-    let pointPrecomputedJacobian = toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd) in 
+    let pointPrecomputedJacobian = toJacobianCoordinates #c (point_affine_as_nat c h1 pointToAdd) in 
     let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
     let scalar = scalar_as_nat (as_seq h0 scalar) in 
     let bits = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (v i + 1) * 4) % pow2 4 in
     pointEqual pi_fromDomain (point_mult #c bits (basePoint #c)) /\
-    pointEqual pi_fromDomain (getPrecomputedPoint_Affine #c (basePoint #c) bits)))    
+    pointEqual pi_fromDomain (getPrecomputedPoint #c #Jacobian (basePoint #c) bits)))
 
-let getPointPrecomputedMixed #c scalar i pointToAdd = 
+
+let getPointPrecomputedMixed_ #c scalar i pointToAdd = 
     let h0 = ST.get() in 
   let bits = getScalar_4 scalar i in 
   let invK h (k: nat) = live h pointToAdd /\ modifies (loc pointToAdd) h0 h /\ (
@@ -321,10 +321,14 @@ let getPointPrecomputedMixed #c scalar i pointToAdd =
       let pointToAddX = gsub pointToAdd (size 0) len in 
       let pointToAddY = gsub pointToAdd len len in 
    if k > v bits then
-      let pointPrecomputedJacobian = toJacobianCoordinates (as_nat c h pointToAddX, as_nat c h pointToAddY) in 
+     begin
+      assume (as_nat c h pointToAddX < getPrime c);
+      assume (as_nat c h pointToAddY < getPrime c);
+      let pointPrecomputedJacobian = toJacobianCoordinates #c (as_nat c h pointToAddX, as_nat c h pointToAddY) in 
       let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
       felem_eval c h pointToAddX /\ felem_eval c h pointToAddY /\ 
       pointEqual pi_fromDomain (point_mult #c  (v bits) (basePoint #c))
+    end
     else
       as_nat c h0 pointToAddX == as_nat c h pointToAddX /\ as_nat c h0 pointToAddY == as_nat c h pointToAddY) in 
 
@@ -333,6 +337,29 @@ let getPointPrecomputedMixed #c scalar i pointToAdd =
       let mask = eq_mask (to_u64 bits) (to_u64 k) in 
       getPointPrecomputedMixed_step #c k pointToAdd mask
    )
+
+
+
+inline_for_extraction noextract
+val getPointPrecomputedMixed: #c: curve -> #buf_type: buftype -> #secrecy: secrecy_level
+  -> scalar: lbuffer_t buf_type (uint_t U8 secrecy) (getScalarLenBytes c)
+  -> i:size_t {v i < v (getScalarLenBytes c) * 2} -> pointToAdd: pointAffine c ->
+  Stack unit 
+  (requires fun h -> live h scalar /\ live h pointToAdd)
+  (ensures fun h0 _ h1 -> modifies (loc pointToAdd) h0 h1 /\ point_aff_eval c h1 pointToAdd /\ (
+    let pointPrecomputedJacobian = toJacobianCoordinates #c (point_affine_as_nat c h1 pointToAdd) in 
+    let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
+    let scalar = scalar_as_nat #c (as_seq h0 scalar) in 
+    let bits = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (v i + 1) * 4) % pow2 4 in
+    pointEqual pi_fromDomain (point_mult #c bits (basePoint #c)) /\
+    pointEqual pi_fromDomain (getPrecomputedPoint #c #Jacobian (basePoint #c) bits)))
+
+(* TODO: this is to change *)
+let getPointPrecomputedMixed #c #buf_type #secrecy scalar i pointToAdd = 
+  match secrecy with 
+  |SEC -> getPointPrecomputedMixed_ #c #buf_type scalar i pointToAdd
+  |_ -> getPointPrecomputedMixed_ #c #buf_type scalar i pointToAdd
+
 
 
 (* 

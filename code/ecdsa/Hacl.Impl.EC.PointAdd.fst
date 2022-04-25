@@ -23,6 +23,7 @@ open Hacl.Spec.MontgomeryMultiplication
 open FStar.Mul
 
 open Hacl.Impl.P.PointAdd.Aux
+open Hacl.Spec.EC.Definition
 
 
 #set-options "--z3rlimit 300 --ifuel 0 --fuel 0"  

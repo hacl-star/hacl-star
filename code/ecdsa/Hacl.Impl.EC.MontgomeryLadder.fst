@@ -7,7 +7,6 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.EC.Definition
 open Spec.ECC
 open Spec.ECC.Curves
 
@@ -22,6 +21,8 @@ open Hacl.EC.Lemmas
 open FStar.Mul
 open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.Masking.ScalarAccess
+
+open Hacl.Spec.EC.Definition
 
 
 #set-options " --z3rlimit 200"
@@ -44,7 +45,7 @@ let conditional_swap i p q =
 
 
 val lemma_PointEqualR: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
-  ((~ (pointEqual p q)) <==> ~ (pointEqual q p))
+  ((~ (pointEqual #c p q)) <==> ~ (pointEqual #c q p))
 
 let lemma_PointEqualR #c p q = ()
 
@@ -122,14 +123,14 @@ let cswap #c bit p1 p2 =
 
 
 val pointAddAsAdd: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
-    (requires (~ (pointEqual p q)))
-    (ensures (pointAdd p q == _point_add p q))
+    (requires (~ (pointEqual #c p q)))
+    (ensures (pointAdd #c p q == _point_add p q))
 
 let pointAddAsAdd #c p q = ()
 
 val pointAddAsDouble: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
   (requires (True))
-  (ensures (pointAdd p p == _point_double_nist p))
+  (ensures (pointAdd #c p p == _point_double p))
 
 let pointAddAsDouble #c p q = ()
 
@@ -252,8 +253,8 @@ val mlStepAsPointAdd: #c: curve
   (ensures (
     let bit = ith_bit s (v (getScalarLen c) - 1 - i) in
     let p_i, q_i = _ml_step s i (p, q) in 
-    pointEqual p_i (point_mult (scalar_as_nat_ s (i + 1)) p0) /\
-    pointEqual q_i (point_mult (scalar_as_nat_ s (i + 1) + 1) p0)))
+    pointEqual p_i (point_mult #c (scalar_as_nat_ s (i + 1)) p0) /\
+    pointEqual q_i (point_mult #c (scalar_as_nat_ s (i + 1) + 1) p0)))
 
 
 let mlStepAsPointAdd #c p0 pk p qk q s i = 
@@ -272,7 +273,7 @@ let mlStepAsPointAdd #c p0 pk p qk q s i =
 
   assert(  
      if v bit = 0 then 
-      pointEqual p_i (point_mult (scalar_as_nat_ s (i + 1)) p0) /\ pointEqual q_i (point_mult (scalar_as_nat_ s (i + 1) + 1) p0)
+      pointEqual p_i (point_mult #c (scalar_as_nat_ s (i + 1)) p0) /\ pointEqual q_i (point_mult #c (scalar_as_nat_ s (i + 1) + 1) p0)
     else 
       pointEqual p_i (point_mult #c (scalar_as_nat_ s (i + 1)) p0) /\ pointEqual q_i (point_mult #c (scalar_as_nat_ s (i + 1) + 1) p0))
 

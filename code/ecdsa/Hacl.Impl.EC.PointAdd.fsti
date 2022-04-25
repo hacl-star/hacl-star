@@ -7,9 +7,9 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.EC.Definition
 open Spec.ECC
 open Spec.ECC.Curves
+open Hacl.Spec.EC.Definition
 open Hacl.Spec.MontgomeryMultiplication
 
 #set-options "--z3rlimit 100"

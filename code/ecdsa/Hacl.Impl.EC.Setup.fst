@@ -7,10 +7,12 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Spec.EC.Definition
-open Hacl.Spec.MontgomeryMultiplication
 open Spec.ECC
 open Spec.ECC.Curves
+
+open Hacl.Spec.EC.Definition
+open Hacl.Spec.MontgomeryMultiplication
+
 open FStar.Mul
 
 
@@ -428,7 +430,7 @@ val uploadBasePoint: #c: curve -> p: point c -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> 
     modifies (loc p) h0 h1 /\ point_eval c h1 p /\ 
-    ~ (isPointAtInfinity #Jacobian (point_as_nat c h1 p)) /\ 
+    ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h1 p)) /\ 
     basePoint #c == fromDomainPoint #c #DH (point_as_nat c h1 p))
 
 let uploadBasePoint #c p = 

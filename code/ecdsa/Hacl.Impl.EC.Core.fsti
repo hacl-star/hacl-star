@@ -6,12 +6,13 @@ module ST = FStar.HyperStack.ST
 open Lib.IntTypes
 open Lib.Buffer
 
-open Hacl.Impl.EC.LowLevel
-open Hacl.Spec.EC.Definition
-open Hacl.Spec.MontgomeryMultiplication
-
 open Spec.ECC
 open Spec.ECC.Curves
+
+open Hacl.Impl.EC.LowLevel
+open Hacl.Spec.MontgomeryMultiplication
+open Hacl.Spec.EC.Definition
+
 open FStar.Mul
 
 
@@ -27,8 +28,6 @@ let invert_state_s (a: ladder): Lemma
   [SMTPat (ladder) ]
   = allow_inversion (ladder)
 
-
-
 inline_for_extraction noextract 
 val toDomain: #c: curve -> value: felem c -> result: felem c -> Stack unit 
   (requires fun h -> felem_eval c h value /\ live h value /\ live h result /\ eq_or_disjoint value result)
@@ -41,6 +40,8 @@ val fromDomain: #c: curve -> f: felem c -> result: felem c -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat c h1 result = (as_nat c h0 f * modp_inv2 #c (pow2 (getPower c))) % getPrime c /\ 
     as_nat c h1 result = fromDomain #c (as_nat c h0 f))
+
+open Hacl.Spec.EC.Definition
 
 inline_for_extraction noextract
 val pointToDomain: #c: curve -> p: point c -> result: point c -> Stack unit 
@@ -67,8 +68,8 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
       ((uint_v r == 0 \/ uint_v r == maxint U64) /\ (
     let xD, yD, zD = fromDomainPoint #c #DH  (point_as_nat c h0 p) in 
     let x, y, z = point_as_nat c h0 p in 
-    (if Spec.ECC.isPointAtInfinity #Jacobian(xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0) /\ 
-    (if Spec.ECC.isPointAtInfinity #Jacobian (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
+    (if Spec.ECC.isPointAtInfinity #c #Jacobian(xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0) /\ 
+    (if Spec.ECC.isPointAtInfinity #c #Jacobian (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
 
 
 inline_for_extraction noextract
@@ -118,12 +119,12 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype -> #l: ladder
   Stack unit
   (requires fun h -> live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\ point_eval c h p /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    ~ (isPointAtInfinity #Jacobian (point_as_nat c h p)))
+    ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
     let qD = point_as_nat c h1 result in
-    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
-    pointEqual qD (scalar_multiplication (as_seq h0 scalar) p0)))
+    pointEqual #c qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
+    pointEqual #c qD (scalar_multiplication (as_seq h0 scalar) p0)))
 
 
 inline_for_extraction noextract
@@ -133,7 +134,7 @@ val scalarMultiplicationWithoutNorm: #c: curve ->  #l: ladder ->  p: point c -> 
   Stack unit
   (requires fun h -> point_eval c h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    ~ (isPointAtInfinity #Jacobian (point_as_nat c h p)))
+    ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
     let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in
@@ -149,8 +150,8 @@ val secretToPublic: #c: curve -> #l: ladder -> result: point c
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let p0 = basePoint #c in 
     let qD = point_as_nat c h1 result in
-    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
-    pointEqual qD (secret_to_public (as_seq h0 scalar))))
+    pointEqual #c qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
+    pointEqual #c qD (secret_to_public (as_seq h0 scalar))))
 
 
 inline_for_extraction noextract
@@ -162,5 +163,5 @@ val secretToPublicWithoutNorm: #c: curve -> #l: ladder ->  result: point c
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let p0 = basePoint #c in 
     let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in
-    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
-    pointEqual qD (secret_to_public (as_seq h0 scalar))))
+    pointEqual #c qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
+    pointEqual #c qD (secret_to_public (as_seq h0 scalar))))

@@ -154,7 +154,7 @@ val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point 
     let x1, y1, z1 = point_as_nat c h1 resultPoint in
     x1 == fromDomain_ #c #DH (as_nat c h0 z2x) /\ 
     y1 == fromDomain_ #c #DH (as_nat c h0 z3y) /\ (
-    if Spec.ECC.isPointAtInfinity #Jacobian (fromDomain_ #c #DH x0, fromDomain_ #c #DH y0, fromDomain_ #c #DH z0) 
+    if Spec.ECC.isPointAtInfinity #c #Jacobian (fromDomain_ #c #DH x0, fromDomain_ #c #DH y0, fromDomain_ #c #DH z0) 
     then z1 == 0 else z1 == 1)))
 
 let normalisation_update #c z2x z3y p resultPoint = 
@@ -185,7 +185,7 @@ val lemma_norm: #c: curve -> pD : point_nat_prime #c -> r: point_nat_prime #c ->
     let x3, y3, z3 = r in 
     x3 == xD * (pow (zD * zD % prime) (prime - 2) % prime) % prime /\
     y3 == yD * (pow ((zD * zD % prime) * zD % prime) (prime - 2) % prime) % prime/\
-    (if Spec.ECC.isPointAtInfinity #Jacobian (xD, yD, zD) then z3 == 0 else z3 == 1)))
+    (if Spec.ECC.isPointAtInfinity #c #Jacobian (xD, yD, zD) then z3 == 0 else z3 == 1)))
   (ensures (let xN, yN, zN = _norm #c pD in r == (xN, yN, zN))) 
 
 
@@ -355,7 +355,7 @@ inline_for_extraction noextract
 val uploadStartPoints: #c: curve -> q: point c -> p: point c -> result: point c -> Stack unit 
   (requires fun h -> live h q /\ live h p /\ live h result /\
     disjoint p q /\ disjoint q result /\ eq_or_disjoint p result /\ point_eval c h p /\
-    ~ (isPointAtInfinity  #Jacobian (point_as_nat c h p)))
+    ~ (isPointAtInfinity  #c #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc q) h0 h1 /\
     point_eval c h1 q /\ point_eval c h1 result /\ (
     let pD = fromDomainPoint #c #DH (point_as_nat c h1 q) in 
@@ -390,7 +390,7 @@ val scalar_multiplication_t_0: #c: curve -> #t:buftype -> #l : ladder ->  p: poi
   (requires fun h ->  live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p;  loc tempBuffer; loc scalar] /\
     eq_or_disjoint p result /\ disjoint result tempBuffer /\ disjoint result scalar /\
-    point_eval c h p /\ ~ (isPointAtInfinity #Jacobian (point_as_nat c h p)))
+    point_eval c h p /\ ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
     let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in
@@ -423,7 +423,7 @@ let scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer =
 
 val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c -> Lemma (point_mult #c 0 p == pointAtInfinity)
 
-let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 p 0
+let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 #c p 0
 
 
 val exp_of_one: a: pos { a > 1} -> b: pos ->  Lemma (exp #a 1 b == 1)
@@ -440,7 +440,7 @@ let rec exp_of_one a b =
     lemma_pow_mod_n_is_fpow a 1 b
 
 
-val norm_twice_lemma: #c: curve ->  a: point_nat_prime -> q: point_nat_prime -> Lemma (pointEqual a q ==> pointEqual (_norm #c a) q)
+val norm_twice_lemma: #c: curve ->  a: point_nat_prime #c -> q: point_nat_prime #c -> Lemma (pointEqual #c a q ==> pointEqual (_norm #c a) q)
 
 let norm_twice_lemma #c p q =
   let prime = getPrime c in  
@@ -460,7 +460,7 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> #l: ladder -> p: point c 
   (requires fun h -> 
     live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\ point_eval c h p /\
-    ~ (isPointAtInfinity #Jacobian (point_as_nat c h p)))
+    ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
     let qD = point_as_nat c h1 result in
@@ -574,8 +574,8 @@ val secretToPublicWithoutNorm_: #c: curve -> #l: ladder -> result: point c
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let p0 = basePoint #c in 
     let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in
-    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
-    pointEqual qD (secret_to_public (as_seq h0 scalar))))
+    pointEqual #c qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
+    pointEqual #c qD (secret_to_public (as_seq h0 scalar))))
 
 
 let secretToPublicWithoutNorm_ #c #l result scalar tempBuffer = 

@@ -9,12 +9,12 @@ open Hacl.Impl.EC.Arithmetics
 
 open Lib.Buffer
 
+open Spec.ECC
 open Hacl.EC.Lemmas
 open Hacl.Spec.EC.Definition
 open Hacl.Spec.MontgomeryMultiplication
 open Hacl.Impl.EC.LowLevel
 open Hacl.Impl.EC.MontgomeryMultiplication
-open Spec.ECC
 open Hacl.Impl.EC.Math 
 
 open FStar.Tactics 
@@ -110,7 +110,7 @@ val lemma_pd_to_spec: #c: curve -> x: nat -> y: nat -> z: nat -> x3: nat -> y3: 
  (ensures (
    let xD, yD, zD = fromDomain #c x, fromDomain #c y, fromDomain #c z in 
    let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
-   let xN, yN, zN = _point_double_koblitz #c (xD, yD, zD) in 
+   let xN, yN, zN = _point_double #c (xD, yD, zD) in 
    x3D == xN /\ y3D == yN /\ z3D == zN))
 
 let lemma_pd_to_spec #c x y z x3 y3 z3 = ()

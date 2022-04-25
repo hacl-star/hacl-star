@@ -60,8 +60,8 @@ let lemma_norm #c p q =
   let prime = getPrime c in 
   let pX, pY, pZ = p in
   let qX, qY, qZ = q in 
-  let pNX, pNY, pNZ = _norm p in 
-  let qNX, qNY, qNZ = _norm q in 
+  let pNX, pNY, pNZ = _norm #c p in 
+  let qNX, qNY, qNZ = _norm #c q in 
 
   small_mod pZ prime;
   small_mod qZ prime;
