@@ -745,6 +745,7 @@ val decap:
 
 #push-options "--z3rlimit 200"
 
+[@ Meta.Attribute.inline_ ]
 let decap #cs o_shared enc skR =
   push_frame ();
   let h0 = ST.get () in
@@ -968,6 +969,7 @@ val key_schedule_base:
 
 #push-options "--z3rlimit 100"
 
+[@ Meta.Attribute.inline_ ]
 let key_schedule_base #cs o_ctx shared infolen info =
   push_frame();
   let o_context = create (nsize_ks_ctx cs) (u8 0) in
@@ -1161,6 +1163,7 @@ val context_seal:
 
 #push-options "--z3rlimit 100"
 
+[@ Meta.Attribute.inline_ ]
 let context_seal cs ctx aadlen aad plainlen plain o_ct =
   push_frame ();
   let nonce = create (nsize_aead_nonce cs) (u8 0) in
@@ -1223,6 +1226,7 @@ val context_open:
          | _ -> False)
        )
 
+[@ Meta.Attribute.inline_ ]
 let context_open cs ctx aadlen aad ctlen ct o_pt =
   push_frame ();
   let nonce = create (nsize_aead_nonce cs) (u8 0) in

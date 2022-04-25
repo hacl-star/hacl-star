@@ -95,8 +95,8 @@ let setupBaseR_st (cs:S.ciphersuite) (p:Type0) =
    In the code, this counter is represented as a uint64, so the overflow occurs earlier.
    Apart from this case, the behaviour of the impl and the spec should be identical *)
 inline_for_extraction noextract
-let sealBase_st (cs:S.ciphersuite_not_export_only) (p:Type0) =
-     skE: key_dh_secret cs
+let sealBase_st (cs:S.ciphersuite) (p:Type0) =
+     skE: key_dh_secret cs { S.is_valid_not_export_only_ciphersuite cs }
   -> pkR: serialized_point_dh cs
   -> infolen: size_t {v infolen <= max_length_info (S.hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
@@ -129,8 +129,8 @@ let sealBase_st (cs:S.ciphersuite_not_export_only) (p:Type0) =
 
 (* Same issue as above for the exactness of the error code *)
 inline_for_extraction noextract
-let openBase_st (cs:S.ciphersuite_not_export_only) (p:Type0) =
-     pkE: key_dh_public cs
+let openBase_st (cs:S.ciphersuite) (p:Type0) =
+     pkE: key_dh_public cs { S.is_valid_not_export_only_ciphersuite cs }
   -> skR: key_dh_secret cs
   -> infolen: size_t {v infolen <= max_length_info (S.hash_of_cs cs)}
   -> info: lbuffer uint8 infolen
@@ -165,7 +165,7 @@ noextract inline_for_extraction
 val setupBaseR: #cs:S.ciphersuite -> setupBaseR_st cs True
 
 noextract inline_for_extraction
-val sealBase: #cs:S.ciphersuite_not_export_only -> sealBase_st cs True
+val sealBase: #cs:S.ciphersuite -> sealBase_st cs True
 
 noextract inline_for_extraction
-val openBase: #cs:S.ciphersuite_not_export_only -> openBase_st cs True
+val openBase: #cs:S.ciphersuite -> openBase_st cs True
