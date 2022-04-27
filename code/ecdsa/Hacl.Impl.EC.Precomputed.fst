@@ -280,13 +280,14 @@ val getPointPrecomputedMixed_step: #c: curve -> i: size_t {v i < 16}
     let len = getCoordinateLenU64 c in 
       let pointToAddX = gsub pointToAdd (size 0) len in 
       let pointToAddY = gsub pointToAdd len len in 
+    as_nat c h1 pointToAddX < getPrime c /\ as_nat c h1 pointToAddY < getPrime c /\ (
     if v mask = pow2 64 - 1 then
-      let pointPrecomputedJacobian =  toJacobianCoordinates #c (as_nat c h1 pointToAddX, as_nat c h1 pointToAddY) in 
+      let pointPrecomputedJacobian = toJacobianCoordinates #c (as_nat c h1 pointToAddX, as_nat c h1 pointToAddY) in 
       let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
       felem_eval c h1 pointToAddX /\ felem_eval c h1 pointToAddY /\ (
       (v i < 16) ==> pointEqual pi_fromDomain (point_mult #c  (v i) (basePoint #c)))
     else
-      as_nat c h0 pointToAddX == as_nat c h1 pointToAddX /\ as_nat c h0 pointToAddY == as_nat c h1 pointToAddY))
+      as_nat c h0 pointToAddX == as_nat c h1 pointToAddX /\ as_nat c h0 pointToAddY == as_nat c h1 pointToAddY)))
 
 
 let getPointPrecomputedMixed_step #c k pointToAdd mask  = 
@@ -296,7 +297,11 @@ let getPointPrecomputedMixed_step #c k pointToAdd mask  =
   recall_contents (points_radix_16 #c) (Lib.Sequence.of_list (points_radix_16_list c)); 
   let lut_cmb_x = sub (points_radix_16 #c) (2ul *! len *! k) len in 
   let lut_cmb_y = sub (points_radix_16 #c) (2ul *! len *! k +! len) len in 
-  copy_point_conditional_affine pointToAdd lut_cmb_x lut_cmb_y mask
+    admit(); 
+  copy_point_conditional_affine pointToAdd lut_cmb_x lut_cmb_y mask;
+
+  let h1 = ST.get() in 
+  admit()
   
 
 inline_for_extraction noextract
