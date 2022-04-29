@@ -675,7 +675,7 @@ val encap:
        | _ -> False)
      )
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 
 [@ Meta.Attribute.inline_]
 let encap #cs o_shared o_enc skE pkR =
@@ -1242,7 +1242,7 @@ let context_open cs ctx aadlen aad ctlen ct o_pt =
     1ul
   )
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 400"
 
 [@ Meta.Attribute.specialize]
 let openBase #cs pkE skR infolen info aadlen aad ctlen ct o_pt =
