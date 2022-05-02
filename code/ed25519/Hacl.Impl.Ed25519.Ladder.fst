@@ -278,3 +278,31 @@ let point_mul_g_double_vartime result scalar1 scalar2 q2 =
   Spec.Ed25519.Lemmas.g_is_on_curve ();
   point_mul_double_vartime result scalar1 g scalar2 q2;
   pop_frame ()
+
+
+val point_negate_mul_double_g_vartime:
+    result:point
+  -> scalar1:lbuffer uint8 32ul
+  -> scalar2:lbuffer uint8 32ul
+  -> q2:point ->
+  Stack unit
+  (requires fun h ->
+    live h result /\ live h scalar1 /\
+    live h scalar2 /\ live h q2 /\
+    disjoint q2 result /\
+    F51.point_inv_t h q2 /\ inv_ext_point (as_seq h q2))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
+    F51.point_eval h1 result ==
+    Spec.Ed25519.point_negate_mul_double_g
+      (as_seq h0 scalar1) (as_seq h0 scalar2) (F51.point_eval h0 q2))
+
+[@CInline]
+let point_negate_mul_double_g_vartime result scalar1 scalar2 q2 =
+  push_frame ();
+  let q2_neg = create 20ul (u64 0) in
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.to_aff_point_negate (refl_ext_point (as_seq h0 q2));
+  Hacl.Impl.Ed25519.PointNegate.point_negate q2 q2_neg;
+  point_mul_g_double_vartime result scalar1 scalar2 q2_neg;
+  pop_frame ()
