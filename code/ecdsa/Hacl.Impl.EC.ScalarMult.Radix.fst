@@ -504,6 +504,26 @@ let lemma_test3_0 #c precomputedTable h0 h1 i r =
   lemma_test3__ #c p r h0 h1
 
 
+
+assume val lemma_test4: #c: curve -> precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul) 
+  -> h0: mem -> h1: mem -> p: point c ->  Lemma
+  (requires (live h0 precomputedTable /\ modifies0 h0 h1 /\ point_eval c h0 p /\
+    (forall (i: nat {i < 16}). 
+      let pi = getPointTable c precomputedTable i in point_eval c h0 pi) /\
+    (forall (i: nat {i < 16}). 
+      let pi = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable i)) in 
+      let p0 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable 1)) in 
+      pointEqual pi (point_mult #c i p0))))
+  (ensures (point_eval c h1 p /\ 
+    (forall (i: nat {i < 16}). let pi = getPointTable c precomputedTable i in point_eval c h1 pi) /\
+    (forall (i: nat {i < 16}). 
+      let pi = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable i)) in 
+      let p0 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable 1)) in 
+      let p  = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
+      pointEqual pi (point_mult #c i p0) /\ ~ (isPointAtInfinity #c p0) /\ (exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p0)))))
+      
+
+
 val lemma_test3_1: #c: curve -> precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul) 
   -> h0: mem -> h1: mem ->  r: point c -> i: nat {i < 16} -> Lemma
   (requires (live h0 precomputedTable /\ live h0 r /\ modifies (loc r) h0 h1 /\ disjoint precomputedTable r /\ (
@@ -524,47 +544,30 @@ let lemma_test3_1 #c precomputedTable h0 h1 r i =
 
 val lemma_test3: #c: curve -> precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul) 
   -> h0: mem -> h1: mem -> r: point c -> Lemma
-  (requires (live h0 precomputedTable /\ live h0 r /\ disjoint precomputedTable r /\ modifies (loc r) h0 h1 /\ 
-    (forall (i: nat {i < 16}). 
-      let pi = getPointTable c precomputedTable i in point_eval c h0 pi) /\
-    (forall (i: nat {i < 16}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable i)) in 
-      let p0 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable 1)) in 
-      pointEqual pi (point_mult #c i p0))))
+  (requires (live h0 precomputedTable /\ live h0 r /\ disjoint precomputedTable r /\ modifies (loc r) h0 h1 /\ (
+    forall (i: nat {i < 16}). ( 
+      let pi = getPointTable c precomputedTable i in 
+      let p1 = getPointTable c precomputedTable 1 in
+      point_eval c h0 pi /\ point_eval c h0 p1 /\ (
+      let pi = fromDomainPoint #c #DH (point_as_nat c h0 pi) in
+      let p0 = fromDomainPoint #c #DH (point_as_nat c h0 p1) in 
+      pointEqual pi (point_mult #c i p0))))))
   (ensures (
-    (forall (i: nat {i < 16}). let pi = getPointTable c precomputedTable i in point_eval c h1 pi) /\
-    (forall (i: nat {i < 16}). 
+    forall (i: nat {i < 16}). 
+      let pi = getPointTable c precomputedTable i in 
+      let p1 = getPointTable c precomputedTable 1 in point_eval c h1 pi /\ point_eval c h1 p1 /\ (
       let pi = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable i)) in 
       let p0 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable 1)) in 
       pointEqual pi (point_mult #c i p0))))
-
-
-assume val lemma_test4: #c: curve -> precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul) 
-  -> h0: mem -> h1: mem -> p: point c ->  Lemma
-  (requires (live h0 precomputedTable /\ modifies0 h0 h1 /\ point_eval c h0 p /\
-    (forall (i: nat {i < 16}). 
-      let pi = getPointTable c precomputedTable i in point_eval c h0 pi) /\
-    (forall (i: nat {i < 16}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable i)) in 
-      let p0 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable 1)) in 
-      pointEqual pi (point_mult #c i p0))))
-  (ensures (point_eval c h1 p /\ 
-    (forall (i: nat {i < 16}). let pi = getPointTable c precomputedTable i in point_eval c h1 pi) /\
-    (forall (i: nat {i < 16}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable i)) in 
-      let p0 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable 1)) in 
-      let p  = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
-      pointEqual pi (point_mult #c i p0) /\ ~ (isPointAtInfinity #c p0) /\ (exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p0)))))
-      
 
 let lemma_test3 #c precomputedTable h0 h1 r = 
   let a : Type = (a: nat {a < 16}) in 
   let p : (a -> GTot Type)  = 
     fun i -> 
       let pi = getPointTable c precomputedTable i in 
-      let p0 = getPointTable c precomputedTable 1 in 
-      point_eval c h1 pi /\ point_eval c h1 p0 /\ 
-      pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 pi)) (point_mult #c i (fromDomainPoint #c #DH (point_as_nat c h1 p0))) in 
+      let p1 = getPointTable c precomputedTable 1 in 
+      point_eval c h1 pi /\ point_eval c h1 p1 /\ 
+      pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 pi)) (point_mult #c i (fromDomainPoint #c #DH (point_as_nat c h1 p1))) in 
   let pred: (x : a -> Lemma (p x)) = lemma_test3_1 #c precomputedTable h0 h1 r in 
   Classical.forall_intro #a #_ pred
 
@@ -574,13 +577,13 @@ val getPointPrecomputedTable_1: #c: curve
   -> bits: uint64 {v bits < 16}
   -> r: point c ->
   Stack unit 
-  (requires fun h -> live h precomputedTable /\ live h r /\ disjoint r precomputedTable /\
-    point_eval c h r /\ (
-    forall (i: nat {i < 16}). let pi = getPointTable c precomputedTable i in point_eval c h pi) /\ (
+  (requires fun h -> live h precomputedTable /\ live h r /\ disjoint r precomputedTable /\ point_eval c h r /\ (
     forall (i: nat {i < 16}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable i)) in 
-      let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable 1)) in 
-      pointEqual pi (point_mult #c i p1)))
+      let p1 = getPointTable c precomputedTable 1 in
+      let pi = getPointTable c precomputedTable i in point_eval c h pi /\ point_eval c h p1 /\ (
+      let pi = fromDomainPoint #c #DH (point_as_nat c h pi) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h p1) in 
+      pointEqual pi (point_mult #c i p1))))
   (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ point_eval c h1 r /\ (
     let p1 = getPointTable c precomputedTable 1 in 
     let p1 = fromDomainPoint #c #DH (point_as_nat c h0 p1) in 
@@ -620,18 +623,19 @@ val getPointPrecomputedTable: #c: curve -> #buf_type: buftype
   -> i: size_t {v i < v (getScalarLenBytes c) * 2}
   -> r: point c ->
   Stack unit 
-  (requires fun h -> live h precomputedTable /\ live h r /\ live h scalar /\ disjoint r precomputedTable /\
-    point_eval c h r /\ (
-    forall (i: nat {i < 16}). let pi = getPointTable c precomputedTable i in point_eval c h pi) /\ (
-    forall (i: nat {i < 16}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable i)) in 
-      let p0 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable 1)) in 
-      pointEqual pi (point_mult #c i p0)))
+  (requires fun h -> live h precomputedTable /\ live h r /\ live h scalar /\ disjoint r precomputedTable /\ point_eval c h r /\ (
+    forall (i: nat {i < 16}).
+      let pi = getPointTable c precomputedTable i in 
+      let p1 = getPointTable c precomputedTable 1 in point_eval c h pi /\ point_eval c h p1 /\ (
+      let pi = fromDomainPoint #c #DH (point_as_nat c h pi) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h p1) in 
+      pointEqual pi (point_mult #c i p1))))
   (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\ point_eval c h1 r /\ (
-    let p0 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable 1)) in 
+    let p1 = getPointTable c precomputedTable 1 in 
+    let p1 = fromDomainPoint #c #DH (point_as_nat c h0 p1) in 
     let bits = Math.Lib.arithmetic_shift_right (scalar_as_nat #c (as_seq h0 scalar)) (v (getScalarLen c) - (v i + 1) * 4) % pow2 4 in 
-    pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 r)) (point_mult #c bits p0) /\
-    pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 r)) (Spec.ECC.Radix.getPrecomputedPoint #c #Jacobian p0 bits)))
+    pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 r)) (point_mult #c bits p1) /\
+    pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 r)) (Spec.ECC.Radix.getPrecomputedPoint #c #Jacobian p1 bits)))
 
 
 let getPointPrecomputedTable #c #buf_type scalar precomputedTable i pointToAdd = 
@@ -639,15 +643,14 @@ let getPointPrecomputedTable #c #buf_type scalar precomputedTable i pointToAdd =
   let bits = getScalar_4_byBit #c scalar i in 
   let h1 = ST.get() in 
 
-  Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pointToAdd;
-  lemma_test3 #c precomputedTable h0 h1 pointToAdd; 
-  getPointPrecomputedTable_1 precomputedTable bits pointToAdd; 
-  
-  lemma_test3__ (getPointTable c precomputedTable 1) pointToAdd h0 h1
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 pointToAdd;
+    lemma_test3 #c precomputedTable h0 h1 pointToAdd; 
+  getPointPrecomputedTable_1 precomputedTable bits pointToAdd;  
+    lemma_test3__ (getPointTable c precomputedTable 1) pointToAdd h0 h1
 
  
 
-inline_for_extraction noextract  
+inline_for_extraction noextract
 val montgomery_ladder_step_radix_0: #c: curve -> #buf_type: buftype
   -> p: point c 
   -> scalar: scalar_t #buf_type #c
@@ -659,11 +662,12 @@ val montgomery_ladder_step_radix_0: #c: curve -> #buf_type: buftype
   (requires fun h -> live h precomputedTable /\ live h r /\ live h tempBuffer /\  live h scalar /\ live h p /\
     disjoint r precomputedTable /\ disjoint p r /\ disjoint r tempBuffer /\
     point_eval c h r /\ disjoint p tempBuffer /\ point_eval c h p  /\ (
-    forall (i: nat {i < 16}). let pi = getPointTable c precomputedTable i in point_eval c h pi) /\ (
     forall (i: nat {i < 16}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable i)) in 
-      let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable 1)) in 
-      pointEqual pi (point_mult #c i p1)))
+      let p1 = getPointTable c precomputedTable 1 in 
+      let pi = getPointTable c precomputedTable i in point_eval c h pi /\ point_eval c h p1 /\ (
+      let pi = fromDomainPoint #c #DH (point_as_nat c h pi) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h p1) in 
+      pointEqual pi (point_mult #c i p1))))
   (ensures fun h0 _ h1 -> modifies (loc r |+| loc tempBuffer |+| loc p) h0 h1 /\ 
     point_eval c h1 p /\ point_eval c h1 r /\ (
     let p1 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable 1)) in 
@@ -689,12 +693,12 @@ val montgomery_ladder_step_radix_1_lemma: #c: curve -> scalar: scalar_bytes #c
   -> p: point_nat_prime #c {exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p0)} 
   -> pi: point_nat_prime #c -> r: point_nat_prime #c 
   -> i: nat {i >= 1 /\ i < v (getScalarLenBytes c) * 2} -> 
-   Lemma 
-     (requires (  
-       let scalar = scalar_as_nat scalar in 
-       let si = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (i + 1) * 4) % pow2 4 in 
-       let pointRadixed =  Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
-       pointEqual pi (Spec.ECC.Radix.getPrecomputedPoint #c #Jacobian p0 si) /\ r == _point_add #c pi pointRadixed))
+  Lemma 
+  (requires (  
+    let scalar = scalar_as_nat scalar in 
+    let si = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (i + 1) * 4) % pow2 4 in 
+    let pointRadixed =  Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
+    pointEqual pi (Spec.ECC.Radix.getPrecomputedPoint #c #Jacobian p0 si) /\ r == _point_add #c pi pointRadixed))
    (ensures (pointEqual #c r (Spec.ECC.Radix.radix_step #c #Jacobian scalar p0 (i - 1) p)))
 
 let montgomery_ladder_step_radix_1_lemma #c k p0 p pi r i = 
@@ -723,13 +727,15 @@ val montgomery_ladder_step_radix: #c: curve -> #buf_type: buftype
   (requires fun h -> live h precomputedTable /\ live h r /\ live h tempBuffer /\  live h scalar /\ live h p /\
     disjoint r precomputedTable /\ disjoint p r /\ disjoint r tempBuffer /\
     point_eval c h r /\ disjoint p tempBuffer /\ point_eval c h p  /\ (
-    forall (i: nat {i < 16}). let pi = getPointTable c precomputedTable i in point_eval c h pi) /\ (
     forall (i: nat {i < 16}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable i)) in 
-      let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable 1)) in 
+      let pi = getPointTable c precomputedTable i in
+      let p1 = getPointTable c precomputedTable 1 in 
+      point_eval c h pi /\ point_eval c h p1 /\ (
+      let pi = fromDomainPoint #c #DH (point_as_nat c h pi) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h p1) in 
       let p  = fromDomainPoint #c #DH (point_as_nat c h p) in 
       ~ (isPointAtInfinity #c p1) /\
-	(exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p1)) /\ pointEqual pi (point_mult #c i p1)))
+      (exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p1)) /\ pointEqual pi (point_mult #c i p1))))
   (ensures fun h0 _ h1 -> modifies (loc r |+| loc tempBuffer |+| loc p) h0 h1 /\ point_eval c h1 p /\ (
     let p1 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable 1)) in 
     let r =  fromDomainPoint #c #DH (point_as_nat c h1 p) in 
@@ -761,21 +767,34 @@ let lemma_pointAtInfInDomain1 #c p =
   lemma_pointAtInfInDomain #c x y z
 
 
+val getPointTableLemma: #c: curve -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> i: size_t {v i < 16} -> Lemma 
+  (getPointTable c table (v i) == gsub table (getPointLenU64 c *! i) (getPointLenU64 c))
+
+let getPointTableLemma #c table i = ()
+
+
+val getPointTableLemma_1: #c: curve -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> Lemma
+    (getPointTable c table 1 == gsub table (getPointLenU64 c) (getPointLenU64 c))
+
+let getPointTableLemma_1 #c table = ()
+
+
 inline_for_extraction noextract
 val generatePrecomputedTable_0: #c: curve -> precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul) 
   -> publicKey: point c -> 
-  Stack unit  
+  Stack unit
   (requires fun h -> live h precomputedTable /\ live h publicKey /\ point_eval c h publicKey /\ 
     disjoint publicKey precomputedTable /\ 
     ~ (isPointAtInfinity #c (fromDomainPoint #c #DH (point_as_nat c h publicKey))))
   (ensures fun h0 _ h1 -> modifies (loc precomputedTable) h0 h1 /\ (
-    forall (i: nat {i < 2}). let pi = getPointTable c precomputedTable i in point_eval c h1 pi) /\ (
     forall (i: nat {i < 2}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable i)) in 
-      let p1 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable 1)) in 
+      let p1 = getPointTable c precomputedTable 1 in
+      let pi = getPointTable c precomputedTable i in point_eval c h1 pi /\ point_eval c h1 p1 /\ (
+      let pi = fromDomainPoint #c #DH (point_as_nat c h1 pi) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p1) in 
       let p  = fromDomainPoint #c #DH (point_as_nat c h0 publicKey) in
       ~ (isPointAtInfinity #c p1) /\ (exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p1)) /\ 
-	pointEqual pi (point_mult #c i p1)))
+	pointEqual pi (point_mult #c i p1))))
 
 let generatePrecomputedTable_0 #c table publicKey = 
   let pointLen = getPointLenU64 c in 
@@ -788,8 +807,11 @@ let generatePrecomputedTable_0 #c table publicKey =
   Hacl.Impl.EC.LowLevel.copy_point #c publicKey point1;
   let h2 = ST.get() in 
 
-  assert(getPointTable c table 0 == gsub table (pointLen *! size 0) pointLen);
-  assert(getPointTable c table 1 == gsub table (pointLen *! size 1) pointLen);
+  getPointTableLemma table (size 0);
+  getPointTableLemma_1 table;
+
+  assert (getPointTable c table 0 == gsub table (pointLen *! size 0) pointLen);
+  assert (getPointTable c table 1 == gsub table (pointLen *! size 1) pointLen);
 
   let p1 = fromDomainPoint #c #DH (point_as_nat c h2 (getPointTable c table 1)) in 
   let p  = fromDomainPoint #c #DH (point_as_nat c h0 publicKey) in
@@ -799,27 +821,17 @@ let generatePrecomputedTable_0 #c table publicKey =
   point_mult_1 #c p1
 
 
-val getPointTableLemma: #c: curve -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> i: size_t {v i < 16} -> Lemma 
-  (getPointTable c table (v i) == gsub table (getPointLenU64 c *! i) (getPointLenU64 c))
-
-let getPointTableLemma #c table i = ()
-
-
 val lemma_getPointTable0: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h: mem
   -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> 
   Lemma
   (requires (forall (j: nat {j < 2 * v i}). let pi = getPointTable c table j in point_eval c h pi))
   (ensures (
-    let pointLen = getPointLenU64 c in 
-  
-    let point1 = gsub table pointLen pointLen in 
-    let point_n = gsub table (i *! pointLen) pointLen in 
-    let point_2n = gsub table (2ul *! i *! pointLen) pointLen in 
-    let point_2n_1 = gsub table ((2ul *! i +! 1ul) *! pointLen) pointLen in 
+    let point1 = getPointTable c table 1 in 
+    let point_n = getPointTable c table (v i) in 
+    let point_2n = getPointTable c table (2 * v i) in 
+    let point_2n_1 = getPointTable c table (2 * v i + 1) in 
+    disjoint point_n point_2n /\ point_eval c h point_n /\ point_eval c h point1))
     
-    disjoint point_n point_2n /\ point_eval c h point_n /\ point_eval c h point1 ))
-    
-
 let lemma_getPointTable0 #c i h table = 
   let pointLen = getPointLenU64 c in 
   
@@ -828,33 +840,25 @@ let lemma_getPointTable0 #c i h table =
   let point_2n = gsub table (2ul *! i *! pointLen) pointLen in 
   let point_2n_1 = gsub table ((2ul *! i +! 1ul) *! pointLen) pointLen in 
     
-  assert(disjoint point_n point_2n);
   getPointTableLemma #c table i;
-  getPointTableLemma #c table (size 1); 
-  
-  assert(getPointTable c table 1 == gsub table (pointLen *! (size 1)) (getPointLenU64 c));
-
-  assert(getPointTable c table (v i) == gsub table (getPointLenU64 c *! size (v i)) (getPointLenU64 c));
-  assert(getPointTable c table (v i) == gsub table (i *! pointLen) pointLen)
+  getPointTableLemma_1 #c table
 
 
 val lemma_getPointTable1: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h0: mem -> h1: mem 
-  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
   Lemma
   (requires (
-    let pointLen = getPointLenU64 c in 
-    let point_2n = gsub table (2ul *! i *! pointLen) pointLen in 
+    let point_2n = getPointTable c table (2 * v i) in 
     modifies (loc point_2n |+| loc tempBuffer) h0 h1 /\ disjoint table tempBuffer /\ live h0 table /\ (
     forall (j: nat {j < 2 * v i}). let pi = getPointTable c table j in point_eval c h0 pi)))
   (ensures (
-    let pointLen = getPointLenU64 c in 
-  
-    let point1 = gsub table pointLen pointLen in 
-    let point_n = gsub table (i *! pointLen) pointLen in 
-    let point_2n = gsub table (2ul *! i *! pointLen) pointLen in 
-    let point_2n_1 = gsub table ((2ul *! i +! 1ul) *! pointLen) pointLen in 
-    
-    eq_or_disjoint point1 point_2n_1 /\ disjoint point_2n point1 /\ disjoint point_2n point_2n_1 /\ point_eval c h1 point1))
+    let point1 = getPointTable c table 1 in 
+    let point_n = getPointTable c table (v i) in 
+    let point_2n = getPointTable c table (2 * v i) in 
+    let point_2n_1 = getPointTable c table (2 * v i + 1) in 
+    eq_or_disjoint point1 point_2n_1 /\ disjoint point_2n point1 /\ disjoint point_2n point_2n_1 /\ point_eval c h1 point1 /\ 
+    point_as_nat c h0 point1 == point_as_nat c h1 point1))
 
 let lemma_getPointTable1 #c i h0 h1 table tempBuffer = 
   let pointLen = getPointLenU64 c in 
@@ -864,35 +868,27 @@ let lemma_getPointTable1 #c i h0 h1 table tempBuffer =
   let point_2n = gsub table (2ul *! i *! pointLen) pointLen in 
   let point_2n_1 = gsub table ((2ul *! i +! 1ul) *! pointLen) pointLen in 
 
-  getPointTableLemma table (size 1); 
-  assert(getPointTable c table 1 == gsub table (pointLen *! size 1) (pointLen));
-
+  getPointTableLemma_1 table; 
   Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 point1
 
 
 val lemma_getPointTable2_0: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h0: mem -> h1: mem 
-  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
-  Lemma (requires (
-    live h0 table /\ live h0 tempBuffer /\ disjoint table tempBuffer /\ (
-      let pointLen = getPointLenU64 c in 
-      let point_2n = gsub table (2ul *! i *! pointLen) pointLen in 
-      let point_2n_1 = gsub table ((2ul *! i +! 1ul) *! pointLen) pointLen in 
-      modifies (loc point_2n |+| loc point_2n_1 |+| loc tempBuffer) h0 h1)))
+  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Lemma 
+  (requires (live h0 table /\ live h0 tempBuffer /\ disjoint table tempBuffer /\ ( 
+    let point_2n = getPointTable c table (2 * v i) in 
+    let point_2n_1 = getPointTable c table (2 * v i + 1) in 
+    modifies (loc point_2n |+| loc point_2n_1 |+| loc tempBuffer) h0 h1)))
   (ensures (
     let pointLen = getPointLenU64 c in 
     let allPointsBefore = gsub table (size 0) (2ul *! i *! pointLen) in 
     as_seq h0 allPointsBefore == as_seq h1 allPointsBefore))
 
-let lemma_getPointTable2_0 #c i h0 h1 table tempBuffer = 
-  let pointLen = getPointLenU64 c in 
-  let allPointsBefore = gsub table (size 0) (2ul *! i *! pointLen) in 
-  
-  let point_2n = gsub table (2ul *! i *! pointLen) pointLen in 
-  let point_2n_1 = gsub table ((2ul *! i +! 1ul) *! pointLen) pointLen in 
-  assert(as_seq h0 allPointsBefore == as_seq h1 allPointsBefore)
+let lemma_getPointTable2_0 #c i h0 h1 table tempBuffer = ()
 
 
-val lemma_getPointTable2_1_0: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h0: mem -> h1: mem 
+val lemma_not_modifies_point_k: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h0: mem -> h1: mem 
   -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> k: nat {k < 2 * v i} ->
   Lemma 
   (requires (
@@ -900,99 +896,156 @@ val lemma_getPointTable2_1_0: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h
     let allPointsBefore = gsub table (size 0) (2ul *! i *! pointLen) in 
     as_seq h0 allPointsBefore == as_seq h1 allPointsBefore /\ 
     point_eval c h0 (getPointTable c table k)))
-  (ensures (point_eval c h1 (getPointTable c table k)))
+  (ensures (
+    let pk = getPointTable c table k in 
+    point_eval c h1 pk /\ point_as_nat c h1 pk == point_as_nat c h0 pk))
 
-let lemma_getPointTable2_1_0 #c i h0 h1 table k = 
+let lemma_not_modifies_point_k #c i h0 h1 table k = 
   let pointLen = getPointLenU64 c in 
   let allPointsBefore = gsub table (size 0) (2ul *! i *! pointLen) in 
-  let pk = gsub table (size k *! getPointLenU64 c) (getPointLenU64 c) in 
+  let pk = getPointTable c table k in 
   
   assert(gsub table (size k *! getPointLenU64 c) (getPointLenU64 c) == gsub allPointsBefore (size k *! getPointLenU64 c) (getPointLenU64 c));
   assert (getZ pk == gsub pk (size 2 *! (getCoordinateLenU64 c)) (getCoordinateLenU64 c))
 
- 
-val lemma_getPointTable2_1: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h0: mem -> h1: mem 
-  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> 
-  Lemma 
-  (requires (
-    let pointLen = getPointLenU64 c in 
-    let allPointsBefore = gsub table (size 0) (2ul *! i *! pointLen) in 
-    as_seq h0 allPointsBefore == as_seq h1 allPointsBefore /\ 
-    (forall (k: nat {k < 2 * v i}). point_eval c h0 (getPointTable c table k))))
-  (ensures (forall (k: nat {k < 2 * v i}). 
-    point_eval c h1 (getPointTable c table k)))
 
-let lemma_getPointTable2_1 #c i h0 h1 table = 
-  let a: Type = a: nat {a < 2 * v i} in 
-  let p : (a -> GTot Type) = 
-    fun i -> point_eval c h1 (getPointTable c table i) in 
-  let pred : (x : a -> Lemma (p x)) = lemma_getPointTable2_1_0 #c i h0 h1 table in 
-  Classical.forall_intro #a #p pred
-  
+val lemma_getZ: #c: curve -> p: point c -> 
+  Lemma (getZ p == gsub p (size 2 *! (getCoordinateLenU64 c)) (getCoordinateLenU64 c))
 
-val getPointTableLemma_1: #c: curve -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> Lemma
-    (getPointTable c table 1 == gsub table (getPointLenU64 c) (getPointLenU64 c))
-
-let getPointTableLemma_1 #c table = ()
+let lemma_getZ #c p = ()
 
 
-val lemma_getPointTable2_2: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h0: mem -> h1: mem 
-  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) {live h0 table} ->
-  Lemma 
-  (requires (
+val lemma_getPointTable2_3_0: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h0: mem -> h1: mem 
+  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> j: nat {j < 2 * v i} ->
+  Lemma (requires (live h0 table /\ (
     let pointLen = getPointLenU64 c in 
     let allPointsBefore = gsub table (size 0) (2ul *! i *! pointLen) in 
     as_seq h0 allPointsBefore == as_seq h1 allPointsBefore /\ (
-    point_eval c h0 (getPointTable c table 1) /\ (
-    let p1 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c table 1)) in 
-    ~ (isPointAtInfinity #c p1)))))
+    let pi = getPointTable c table j in 
+    let p1 = getPointTable c table 1 in 
+    point_eval c h0 pi /\ point_eval c h0 p1 /\ (
+    let pi = fromDomainPoint #c #DH (point_as_nat c h0 pi) in 
+    let p1 = fromDomainPoint #c #DH (point_as_nat c h0 p1) in 
+    pointEqual pi (point_mult #c j p1))))))
   (ensures (
-    point_eval c h1 (getPointTable c table 1) /\ (
-    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c table 1)) in 
-    ~ (isPointAtInfinity #c p1))))
+    let pi = getPointTable c table j in
+    let p1 = getPointTable c table 1 in 
+    point_eval c h1 pi /\ point_eval c h1 p1 /\ (
+    let pi = fromDomainPoint #c #DH (point_as_nat c h1 pi) in 
+    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p1) in 
+    pointEqual pi (point_mult #c j p1))))
 
-let lemma_getPointTable2_2 #c i h0 h1 table = 
-  let pointLen = getPointLenU64 c in 
+let lemma_getPointTable2_3_0 #c i h0 h1 table j = 
+    let pointLen = getPointLenU64 c in 
+  lemma_not_modifies_point_k i h0 h1 table j;
+  lemma_not_modifies_point_k i h0 h1 table 1;
+  
   let allPointsBefore = gsub table (size 0) (2ul *! i *! pointLen) in 
-  let point1 = gsub table pointLen pointLen in 
+  
+  getPointTableLemma_1 table;
+  lemma_getZ #c (getPointTable c table 1); 
 
-  getPointTableLemma_1 table; 
-  assert (gsub table pointLen pointLen == gsub allPointsBefore pointLen pointLen); 
-  assert (getZ point1 == gsub point1 (size 2 *! (getCoordinateLenU64 c)) (getCoordinateLenU64 c))
+  getPointTableLemma table (size j);
+  lemma_getZ #c (getPointTable c table j)
+
+
+val lemma_getPointTable2_3: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h0: mem -> h1: mem 
+  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) ->
+  Lemma (requires (live h0 table /\ (
+    let pointLen = getPointLenU64 c in 
+    let allPointsBefore = gsub table (size 0) (2ul *! i *! pointLen) in 
+    as_seq h0 allPointsBefore == as_seq h1 allPointsBefore /\ (
+    forall (j: nat {j < 2 * v i}). let pi = getPointTable c table j in point_eval c h0 pi) /\ (
+    forall (j: nat {j < 2 * v i}).
+      let pi = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c table j)) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c table 1)) in 
+      pointEqual pi (point_mult #c j p1)))))
+  (ensures (
+      forall (j: nat {j < 2 * v i}). let pi = getPointTable c table j in point_eval c h1 pi) /\ (
+      forall (j: nat {j < 2 * v i}). 
+      let pi = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c table j)) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c table 1)) in 
+      pointEqual pi (point_mult #c j p1)))
+
+let lemma_getPointTable2_3 #c i h0 h1 table = 
+  let a: Type = a: nat {a < 2 * v i} in 
+  let p : (a -> GTot Type) = 
+    fun i -> 
+      let pi = getPointTable c table i in
+      point_eval c h1 (getPointTable c table i) /\ 
+      point_eval c h1 (getPointTable c table 1) /\ (
+      let pi = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c table i)) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c table 1)) in 
+      pointEqual pi (point_mult #c i p1)) in 
+  let pred : (x : a -> Lemma (p x)) = lemma_getPointTable2_3_0 #c i h0 h1 table in 
+  Classical.forall_intro #a #p pred
 
 
 val lemma_getPointTable2: #c: curve -> i: size_t {v i >= 1 /\ v i <= 7} -> h0: mem -> h1: mem 
-  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
-  Lemma (requires (
-    live h0 table /\ live h0 tempBuffer /\ disjoint table tempBuffer /\ (
-      let pointLen = getPointLenU64 c in 
-      let point_2n = gsub table (2ul *! i *! pointLen) pointLen in 
-      let point_2n_1 = gsub table ((2ul *! i +! 1ul) *! pointLen) pointLen in 
-      modifies (loc point_2n |+| loc point_2n_1 |+| loc tempBuffer) h0 h1 /\ 
-      point_eval c h1 point_2n /\ point_eval c h1 point_2n_1 /\ (
-      forall (j: nat {j < 2 * v i}). let pi = getPointTable c table j in point_eval c h0 pi) /\ (
-      forall (j: nat {j < 2 * v i}).
-	let pi = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c table j)) in 
-	let p1 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c table 1)) in 
-	~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c j p1)))))
+  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Lemma
+  (requires (live h0 table /\ live h0 tempBuffer /\ disjoint table tempBuffer /\ (
+    let point_2n = getPointTable c table (2 * v i) in 
+    let point_2n_1 = getPointTable c table (2 * v i + 1) in 
+    modifies (loc point_2n |+| loc point_2n_1 |+| loc tempBuffer) h0 h1 /\ 
+    point_eval c h1 point_2n /\ point_eval c h1 point_2n_1 /\ (
+    forall (j: nat {j < 2 * v i}). 
+      let p1 = getPointTable c table 1 in 
+      let pi = getPointTable c table j in point_eval c h0 pi /\ point_eval c h0 p1 /\ (
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h0 p1) in  
+      let pi = fromDomainPoint #c #DH (point_as_nat c h0 pi) in 
+      ~ (isPointAtInfinity #c p1) /\ 
+      pointEqual pi (point_mult #c j p1) /\
+      pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 point_2n)) (point_mult #c (2 * v i) p1) /\ 
+      pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 point_2n_1)) (point_mult #c (2 * v i + 1) p1))))))
   (ensures (
-      forall (j: nat {j <= 2 * v i + 1}). let pi = getPointTable c table j in point_eval c h1 pi) /\ (
       forall (j: nat {j <= 2 * v i + 1}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c table j)) in 
-      let p1 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c table 1)) in 
-      ~ (isPointAtInfinity #c p1 /\ pointEqual pi (point_mult #c j p1))))
+      let p1 = getPointTable c table 1 in 
+      let pi = getPointTable c table j in point_eval c h1 pi /\ point_eval c h1 p1 /\ (
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p1) in 
+      let pi = fromDomainPoint #c #DH (point_as_nat c h1 pi) in 
+      ~ (isPointAtInfinity #c p1) /\ (pointEqual pi (point_mult #c j p1)))))
 
 let lemma_getPointTable2 #c i h0 h1 table tempBuffer = 
   lemma_getPointTable2_0 i h0 h1 table tempBuffer;
-  lemma_getPointTable2_1 #c i h0 h1 table;
+  lemma_getPointTable2_3 #c i h0 h1 table;
+  lemma_not_modifies_point_k i h0 h1 table 1
 
-  getPointTableLemma table (2ul *! i);
-  getPointTableLemma table (2ul *! i +! 1ul);
 
-  lemma_getPointTable2_2 i h0 h1 table
+#pop-options      
+
+
+val getPointTable_buffer: #c: curve -> precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul) 
+  -> i: size_t {v i < 16} 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack (point c)
+  (requires (fun h -> live h precomputedTable /\ disjoint precomputedTable tempBuffer))
+  (ensures fun h0 r h1 -> h0 == h1 /\ live h1 r /\ r == getPointTable c precomputedTable (v i) /\ 
+    disjoint r tempBuffer /\ modifies0 h0 h1 /\ (
+    let pointLen = getPointLenU64 c in 
+    r == gsub precomputedTable (i *! pointLen) pointLen))
+
+let getPointTable_buffer #c table i tempBuffer = 
+  let pointLen = getPointLenU64 c in 
+  sub table (i *! pointLen) pointLen
+
+
+val generatePrecomputedTable_step_lemma_disjoint: #c: curve -> p: point c 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
+  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) 
+  -> a: size_t {v a < 16} -> h0: mem -> h1: mem ->
+  Lemma 
+  (requires (p == getPointTable c table (v a) /\ modifies (loc p |+| loc tempBuffer) h0 h1))
+  (ensures (modifies (loc table |+| loc tempBuffer) h0 h1))
+
+let generatePrecomputedTable_step_lemma_disjoint #c p temp table a h0 h1 = 
+  let pointLen = getPointLenU64 c in 
+  getPointTableLemma table a;
+  assert(getPointTable c table (v a) == gsub table (pointLen *! a) pointLen)
   
 
-val generatePrecomputedTable_1: #c: curve -> precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul) 
+val generatePrecomputedTable_step: #c: curve -> precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul) 
   -> i: size_t {v i >= 1 /\ v i <= 7}
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
   Stack unit  
@@ -1003,35 +1056,140 @@ val generatePrecomputedTable_1: #c: curve -> precomputedTable: lbuffer uint64 (g
       let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable 1)) in 
       ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c j p1)))
   (ensures fun h0 _ h1 -> modifies (loc precomputedTable |+| loc tempBuffer) h0 h1 /\ (
-    forall (j: nat {j <= 2 * v i + 1}). let pi = getPointTable c precomputedTable j in point_eval c h1 pi) /\ (
     forall (j: nat {j <= 2 * v i + 1}). 
-      let pi = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable j)) in 
-      let p1 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable 1)) in 
-      ~ (isPointAtInfinity #c p1 /\ pointEqual pi (point_mult #c j p1))))
+      let p1 = getPointTable c precomputedTable 1 in 
+      let pi = getPointTable c precomputedTable j in point_eval c h1 pi /\ point_eval c h1 p1 /\ (
+      let pi = fromDomainPoint #c #DH (point_as_nat c h1 pi) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p1) in 
+      ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c j p1))))
+
+val lemma_two_points_different_coeff_not_equal: #c: curve 
+  -> p0: Spec.ECC.point #c #Jacobian {~ (isPointAtInfinity p0)}
+  -> pk: nat
+  -> p: Spec.ECC.point #c #Jacobian {pointEqual p (point_mult #c  pk p0)} 
+  -> qk: nat
+  -> q: Spec.ECC.point #c #Jacobian {pointEqual q (point_mult #c  qk p0)} -> 
+  Lemma 
+  (requires (pk <> qk /\ pk < getOrder #c /\ qk < getOrder #c))
+  (ensures (~ (pointEqual p q)))
+
+let lemma_two_points_different_coeff_not_equal #c p0 pk p qk q =
+  if pointEqual p q then 
+    begin
+      let inverseP = point_mult #c (- pk) p0 in 
+      lemmaApplPointAdd #c p0 pk p (- pk) inverseP;
+      
+      point_mult_0 #c p0 0;
+      assert(pointEqual (pointAdd p inverseP) (point_mult #c 0 p0));
+      assert(isPointAtInfinity (pointAdd p inverseP));
+
+      lemmaApplPointAdd #c p0 qk q (- pk) inverseP;
+      assert(pointEqual (pointAdd q inverseP) (point_mult #c (qk - pk) p0));
+      assert(qk - pk <> 0);
+
+      lemma_scalar_reduce p0 (qk - pk); 
+
+      assert(point_mult #c (qk - pk) p0 == point_mult #c ((qk - pk) % getOrder #c) p0);
+      curve_order_is_the_smallest #c p0;
+      assert(~ (isPointAtInfinity (pointAdd q inverseP)));
+        
+      curve_compatibility_with_translation_lemma #c p q (inverseP);
+      assert(False)
+    end
 
 
-let generatePrecomputedTable_1 #c table i tempBuffer =
+
+val generatePrecomputedResultOfPointAddAndDouble: #c: curve 
+  -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) 
+  -> i: nat {2 * i < 16}
+  -> h0: mem -> h1: mem -> h2: mem ->
+  Lemma
+  (requires (
+    let p_1 = getPointTable c table 1 in 
+    let p_n = getPointTable c table i in 
+    let p_2n = getPointTable c table (2 * i) in 
+    let p_2n_1 =  getPointTable c table (2 * i + 1) in 
+    point_eval c h1 p_1 /\ point_eval c h0 p_n /\ point_eval c h2 p_2n /\ point_eval c h2 p_2n_1 /\ (
+    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p_1) in 
+    pointEqual (fromDomainPoint #c #DH (point_as_nat c h0 p_n)) (point_mult #c i p1) /\ ~ (isPointAtInfinity #c p1) /\
+    fromDomainPoint #c #DH (point_as_nat c h2 p_2n) == _point_double #c (fromDomainPoint #c #DH (point_as_nat c h0 p_n)) /\
+    fromDomainPoint #c #DH (point_as_nat c h2 p_2n_1) == _point_add #c (fromDomainPoint #c #DH (point_as_nat c h2 p_2n)) (fromDomainPoint #c #DH (point_as_nat c h1 p_1)))))
+  (ensures (
+    let point_2n = getPointTable c table (2 * i) in 
+    let point_2n_1 = getPointTable c table (2 * i + 1) in 
+    let p1 = getPointTable c table 1 in 
+    let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p1) in 
+    pointEqual (fromDomainPoint #c #DH (point_as_nat c h2 point_2n)) (point_mult #c (2 * i) p1) /\ 
+    pointEqual (fromDomainPoint #c #DH (point_as_nat c h2 point_2n_1)) (point_mult #c (2 * i + 1) p1)))
+
+let generatePrecomputedResultOfPointAddAndDouble #c table i h0 h1 h2 = 
+  let p_n = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c table i)) in 
+  let p_2n = fromDomainPoint #c #DH (point_as_nat c h2 (getPointTable c table (2 * i))) in 
+  let p_2n_1 =  getPointTable c table (2 * i + 1) in 
+  let p1 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c table 1)) in 
+
+  lemmaApplPointAdd #c p1 i p_n i p_n; 
+
+  point_mult_1 #c p1;
+  lemma_two_points_different_coeff_not_equal #c p1 (2 * i) p_2n 1 p1; 
+  lemmaApplPointAdd #c p1 (2 * i) p_2n 1 p1
+
+
+
+let generatePrecomputedTable_step #c table i tempBuffer =
   let pointLen = getPointLenU64 c in 
-  
-  let point1 = sub table pointLen pointLen in 
-  let point_n = sub table (i *! pointLen) pointLen in 
-  let point_2n = sub table (2ul *! i *! pointLen) pointLen in 
-  let point_2n_1 = sub table ((2ul *! i +! 1ul) *! pointLen) pointLen in 
 
-  let h0 = ST.get() in 
+  let h0 = ST.get() in
+  
+  let point1 = getPointTable_buffer #c table (size 1) tempBuffer in 
+  let point_n = getPointTable_buffer #c table i tempBuffer in 
+  let point_2n = getPointTable_buffer #c table (size 2 *! i) tempBuffer in 
+  let point_2n_1 =  getPointTable_buffer #c table (size 2 *! i +! size 1) tempBuffer in 
 
   lemma_getPointTable0 #c i h0 table;
   point_double #c point_n point_2n tempBuffer;
   
   let h1 = ST.get() in 
-
   lemma_getPointTable1 i h0 h1 table tempBuffer;
   point_add point_2n point1 point_2n_1 tempBuffer;
-
   let h2 = ST.get() in 
 
   Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 point_2n;
+
+  generatePrecomputedTable_step_lemma_disjoint point_2n tempBuffer table (size 2 *! i) h0 h1;
+  generatePrecomputedTable_step_lemma_disjoint point_2n_1 tempBuffer table (size 2 *! i +! size 1) h1 h2;
+
+  generatePrecomputedResultOfPointAddAndDouble #c table (v i) h0 h1 h2;
   lemma_getPointTable2 i h0 h2 table tempBuffer
+  
+
+val generatePrecomputedTable_loop: #c: curve -> precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul) 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack unit  
+  (requires fun h -> (live h precomputedTable /\ live h tempBuffer /\ disjoint precomputedTable tempBuffer /\ (
+    forall (i: nat {i < 2}). let pi = getPointTable c precomputedTable i in point_eval c h pi) /\ (
+    forall (i: nat {i < 2}). 
+      let pi = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable i)) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable 1)) in 
+      ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c i p1))))
+  (ensures fun h0 _ h1 -> modifies (loc precomputedTable |+| loc tempBuffer) h0 h1 /\ (
+    forall (j: nat {j < 16}). let pi = getPointTable c precomputedTable j in point_eval c h1 pi) /\ (
+    forall (j: nat {j < 16}). 
+      let pi = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable j)) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h1 (getPointTable c precomputedTable 1)) in 
+      ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c j p1)))
+
+let generatePrecomputedTable_loop #c table tempBuffer = 
+  let h0 = ST.get() in 
+  [@inline_let]
+  let inv (h : mem) (i: nat {i <= 8}) = modifies (loc table |+| loc tempBuffer) h0 h /\ (
+    forall (j: nat {j < 2 * i}). let pi = getPointTable c table j in point_eval c h pi) /\ (
+    forall (j: nat {j < 2 * i}). 
+      let pi = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c table j)) in 
+      let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c table 1)) in 
+      ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c j p1)) in
+  for 1ul 8ul inv (fun i -> generatePrecomputedTable_step #c table i tempBuffer)
+
 
 (*
 [@ CInline]
@@ -1041,16 +1199,10 @@ val generatePrecomputedTable: #c: curve -> precomputedTable: lbuffer uint64 (get
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
+
 let generatePrecomputedTable #c b publicKey tempBuffer = 
   generatePrecomputedTable_0 b publicKey;
-
-  generatePrecomputedTable_1 b (size 1) tempBuffer;
-  generatePrecomputedTable_1 b (size 2) tempBuffer;
-  generatePrecomputedTable_1 b (size 3) tempBuffer;
-  generatePrecomputedTable_1 b (size 4) tempBuffer;
-  generatePrecomputedTable_1 b (size 5) tempBuffer;
-  generatePrecomputedTable_1 b (size 6) tempBuffer;
-  generatePrecomputedTable_1 b (size 7) tempBuffer
+  generatePrecomputedTable_loop #c b tempBuffer
 
 
 
