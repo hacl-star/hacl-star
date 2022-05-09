@@ -2,7 +2,7 @@ module Hacl.Meta.HPKE
 
 friend Hacl.Impl.HPKE
 
-#set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0"
+#set-options "--z3rlimit 400 --max_fuel 0 --max_ifuel 0"
 
 %splice[
   hpke_setupBaseS_higher;
