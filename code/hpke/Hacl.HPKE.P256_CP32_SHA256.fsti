@@ -1,12 +1,13 @@
 module Hacl.HPKE.P256_CP32_SHA256
 
 open Hacl.Impl.HPKE
+module S = Spec.Agile.HPKE
 module DH = Spec.Agile.DH
 module AEAD = Spec.Agile.AEAD
 module Hash = Spec.Agile.Hash
 
 noextract unfold
-let cs = (DH.DH_P256, AEAD.CHACHA20_POLY1305, Hash.SHA2_256)
+let cs:S.ciphersuite = (DH.DH_P256, Hash.SHA2_256, S.Seal AEAD.CHACHA20_POLY1305, Hash.SHA2_256)
 
 val setupBaseS: setupBaseS_st cs True
 
