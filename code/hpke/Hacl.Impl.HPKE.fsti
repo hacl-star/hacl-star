@@ -24,6 +24,7 @@ inline_for_extraction noextract
 let nonce_aead (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_aead_nonce cs))
 
 (* Redefining this to work around Low*'s limitation on buffer size *)
+inline_for_extraction noextract
 let max_length_info (a:S.hash_algorithm) =
   max_size_t - S.size_label_version - S.size_suite_id_hpke - S.size_label_info_hash - Spec.Hash.Definitions.block_length a
 
