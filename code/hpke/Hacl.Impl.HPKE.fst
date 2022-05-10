@@ -21,7 +21,7 @@ module Hash = Hacl.HPKE.Interface.Hash
 
 friend Spec.Agile.HPKE
 
-#set-options "--z3rlimit 20 --fuel 0 --ifuel 0"
+#set-options "--z3rlimit 20 --fuel 0 --ifuel 0 --record_options"
 
 (* Defining basic types for the different arguments of HPKE functions *)
 
@@ -127,6 +127,7 @@ let lemma_includes_ctx_loc (#cs:S.ciphersuite) (ctx:context_s cs) : Lemma
    B.loc_includes (ctx_loc ctx) (loc ctx.ctx_exporter))
   = ()
 
+noextract inline_for_extraction
 val deserialize_public_key:
      #cs:S.ciphersuite
   -> pk: key_dh_public cs
@@ -137,12 +138,12 @@ val deserialize_public_key:
       | SDH.DH_Curve25519 -> b == pk
       | SDH.DH_P256 -> b == gsub pk 1ul 64ul))
 
-[@ Meta.Attribute.inline_]
 let deserialize_public_key #cs pk =
   match cs with
   | SDH.DH_Curve25519, _, _, _ -> pk
   | SDH.DH_P256, _, _, _ -> sub pk 1ul 64ul
 
+noextract inline_for_extraction
 val serialize_public_key:
      #cs:S.ciphersuite
   -> pk: key_dh_public cs
@@ -155,12 +156,12 @@ val serialize_public_key:
     (ensures fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
       as_seq h1 pk `Seq.equal` S.serialize_public_key cs (as_seq h0 b))
 
-[@ Meta.Attribute.inline_]
 let serialize_public_key #cs pk b =
   match cs with
   | SDH.DH_Curve25519, _, _, _ -> ()
   | SDH.DH_P256, _, _, _ -> upd pk 0ul (u8 4)
 
+noextract inline_for_extraction
 val prepare_dh:
      #cs:S.ciphersuite
   -> pk: serialized_point_dh cs
@@ -171,12 +172,12 @@ val prepare_dh:
       | SDH.DH_Curve25519 -> b == pk
       | SDH.DH_P256 -> b == gsub pk 0ul 32ul))
 
-[@ Meta.Attribute.inline_]
 let prepare_dh #cs pk =
   match cs with
   | SDH.DH_Curve25519, _, _, _ -> pk
   | SDH.DH_P256, _, _, _ -> sub pk 0ul 32ul
 
+noextract inline_for_extraction
 val init_id_mode:
  m:S.mode ->
  b:lbuffer uint8 1ul ->
@@ -187,7 +188,6 @@ val init_id_mode:
 
 #push-options "--ifuel 1"
 
-[@ Meta.Attribute.inline_]
 let init_id_mode m b =
   match m with
   | S.Base -> upd b 0ul (u8 0)
@@ -197,6 +197,7 @@ let init_id_mode m b =
 
 #pop-options
 
+noextract inline_for_extraction
 val init_label_hpke:
  b:lbuffer uint8 4ul ->
  Stack unit
@@ -206,7 +207,6 @@ val init_label_hpke:
 
 #push-options "--z3rlimit 40 --fuel 4"
 
-[@ Meta.Attribute.inline_]
 let init_label_hpke b =
   upd b 0ul (u8 0x48);
   upd b 1ul (u8 0x50);
@@ -219,6 +219,7 @@ let init_label_hpke b =
 
 #pop-options
 
+noextract inline_for_extraction
 val init_label_kem:
  b:lbuffer uint8 3ul ->
  Stack unit
@@ -228,7 +229,6 @@ val init_label_kem:
 
 #push-options "--z3rlimit 40 --fuel 3"
 
-[@ Meta.Attribute.inline_]
 let init_label_kem b =
   upd b 0ul (u8 0x4b);
   upd b 1ul (u8 0x45);
@@ -239,6 +239,7 @@ let init_label_kem b =
 
 #pop-options
 
+noextract inline_for_extraction
 val init_label_version:
  b:lbuffer uint8 7ul ->
  Stack unit
@@ -248,7 +249,6 @@ val init_label_version:
 
 #push-options "--z3rlimit 40 --fuel 7"
 
-[@ Meta.Attribute.inline_]
 let init_label_version b =
   upd b 0ul (u8 0x48);
   upd b 1ul (u8 0x50);
@@ -267,6 +267,7 @@ let init_label_version b =
 
 #pop-options
 
+noextract inline_for_extraction
 val init_id_kem:
    #cs:S.ciphersuite
  -> b:lbuffer uint8 2ul ->
@@ -275,7 +276,6 @@ val init_id_kem:
    (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
      as_seq h1 b `Seq.equal` S.id_kem cs)
 
-[@ Meta.Attribute.inline_]
 let init_id_kem #cs b =
   match cs with
   | SDH.DH_P256, SHa.SHA2_256, _, _ ->
@@ -283,6 +283,7 @@ let init_id_kem #cs b =
   | SDH.DH_Curve25519, SHa.SHA2_256, _, _ ->
     upd b 0ul (u8 0); upd b 1ul (u8 32)
 
+noextract inline_for_extraction
 val init_id_kdf:
    #cs:S.ciphersuite
  -> b:lbuffer uint8 2ul ->
@@ -291,7 +292,6 @@ val init_id_kdf:
    (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
      as_seq h1 b `Seq.equal` S.id_kdf cs)
 
-[@ Meta.Attribute.inline_]
 let init_id_kdf #cs b =
   match cs with
   | _, _, _, SHa.SHA2_256 ->
@@ -301,6 +301,7 @@ let init_id_kdf #cs b =
   | _, _, _, SHa.SHA2_512 ->
     upd b 0ul (u8 0); upd b 1ul (u8 3)
 
+noextract inline_for_extraction
 val init_id_aead:
    #cs:S.ciphersuite
  -> b:lbuffer uint8 2ul ->
@@ -309,7 +310,6 @@ val init_id_aead:
    (ensures fun h0 _ h1 -> modifies (loc b) h0 h1 /\
      as_seq h1 b `Seq.equal` S.id_aead cs)
 
-[@ Meta.Attribute.inline_]
 let init_id_aead #cs b =
   match cs with
   | _, _, S.Seal SAEAD.AES128_GCM, _  ->
@@ -321,6 +321,7 @@ let init_id_aead #cs b =
   | _, _, S.ExportOnly, _  ->
     upd b 0ul (u8 255); upd b 1ul (u8 255)
 
+noextract inline_for_extraction
 val init_suite_id:
      #cs:S.ciphersuite
   -> suite_id:lbuffer uint8 10ul ->
@@ -331,7 +332,6 @@ val init_suite_id:
 
 #push-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-[@ Meta.Attribute.inline_]
 let init_suite_id #cs suite_id =
   init_label_hpke (sub suite_id 0ul 4ul);
   init_id_kem #cs (sub suite_id 4ul 2ul);
@@ -342,6 +342,7 @@ let init_suite_id #cs suite_id =
 
 #pop-options
 
+noextract inline_for_extraction
 val init_suite_kem:
      #cs:S.ciphersuite
   -> suite_id:lbuffer uint8 5ul ->
@@ -352,7 +353,6 @@ val init_suite_kem:
 
 #push-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-[@ Meta.Attribute.inline_]
 let init_suite_kem #cs suite_id =
   init_label_kem (sub suite_id 0ul 3ul);
   init_id_kem #cs (sub suite_id 3ul 2ul);
@@ -361,6 +361,7 @@ let init_suite_kem #cs suite_id =
 
 #pop-options
 
+noextract inline_for_extraction
 val labeled_extract_hash:
     #cs:S.ciphersuite
   -> o_hash: lbuffer uint8 (nsize_hash_length cs)
@@ -386,7 +387,6 @@ val labeled_extract_hash:
 
 #push-options "--z3rlimit 200"
 
-[@ Meta.Attribute.inline_]
 let labeled_extract_hash #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
   push_frame ();
   let h0 = ST.get () in
@@ -410,7 +410,7 @@ let labeled_extract_hash #cs o_hash suite_id_len suite_id saltlen salt labellen 
 
 #pop-options
 
-[@ Meta.Attribute.inline_]
+noextract inline_for_extraction
 val labeled_extract_kem:
     #cs:S.ciphersuite
   -> o_hash: lbuffer uint8 (nsize_kem_hash_length cs)
@@ -435,7 +435,6 @@ val labeled_extract_kem:
 
 #push-options "--z3rlimit 300"
 
-[@ Meta.Attribute.inline_]
 let labeled_extract_kem #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
   push_frame ();
   let h0 = ST.get () in
@@ -459,6 +458,7 @@ let labeled_extract_kem #cs o_hash suite_id_len suite_id saltlen salt labellen l
 
 #pop-options
 
+noextract inline_for_extraction
 val nat_to_bytes_2 (l:size_t) (b:lbuffer uint8 4ul)
   : Stack unit
      (requires fun h -> live h b /\ v l <= 255 * 128)
@@ -466,7 +466,6 @@ val nat_to_bytes_2 (l:size_t) (b:lbuffer uint8 4ul)
        as_seq h1 (gsub b 0ul 2ul) `Seq.equal` Lib.ByteSequence.nat_to_bytes_be 2 (v l)
      )
 
-[@ Meta.Attribute.inline_]
 let nat_to_bytes_2 l tmp =
   Lib.ByteBuffer.uint_to_bytes_be (sub tmp 0ul 4ul) (secret l);
   let h1 = ST.get () in
@@ -484,6 +483,7 @@ let nat_to_bytes_2 l tmp =
   Lib.ByteSequence.index_nat_to_intseq_be #U8 #SEC 4 (v l) 1;
   copy (sub tmp 0ul 2ul) (sub tmp 2ul 2ul)
 
+noextract inline_for_extraction
 val labeled_expand_hash:
     #cs:S.ciphersuite
   -> suite_id_len:size_t
@@ -511,7 +511,6 @@ val labeled_expand_hash:
 
 #push-options "--z3rlimit 400"
 
-[@ Meta.Attribute.inline_]
 let labeled_expand_hash #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
   push_frame ();
   let h0 = ST.get () in
@@ -539,6 +538,7 @@ let labeled_expand_hash #cs suite_id_len suite_id prklen prk labellen label info
 
 #pop-options
 
+noextract inline_for_extraction
 val labeled_expand_kem:
     #cs:S.ciphersuite
   -> suite_id_len:size_t
@@ -566,7 +566,6 @@ val labeled_expand_kem:
 
 #push-options "--z3rlimit 400"
 
-[@ Meta.Attribute.inline_]
 let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
   push_frame ();
   let h0 = ST.get () in
@@ -594,6 +593,7 @@ let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infol
 
 #pop-options
 
+noextract inline_for_extraction
 val extract_and_expand:
      #cs: S.ciphersuite
   -> o_shared: key_kem cs
@@ -609,7 +609,6 @@ val extract_and_expand:
      (ensures fun h0 _ h1 -> modifies (loc o_shared) h0 h1 /\
        as_seq h1 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h0 dh) (as_seq h0 kemcontext))
 
-[@ Meta.Attribute.inline_]
 let extract_and_expand #cs o_shared dh ctxlen kemcontext =
   push_frame ();
 
@@ -770,6 +769,7 @@ let decap #cs o_shared enc skR =
 
 #pop-options
 
+noextract inline_for_extraction
 val build_context_default:
      #cs:S.ciphersuite
   -> o_context: lbuffer uint8 (nsize_ks_ctx cs)
@@ -782,12 +782,12 @@ val build_context_default:
     (ensures fun h0 _ h1 -> modifies (loc o_context) h0 h1 /\
       as_seq h1 o_context `Seq.equal` S.build_context cs S.Base (as_seq h0 psk_id_hash) (as_seq h0 info_hash))
 
-[@ Meta.Attribute.inline_]
 let build_context_default #cs o_context psk_id_hash info_hash =
   init_id_mode S.Base (sub o_context 0ul 1ul);
   copy (sub o_context 1ul (nsize_hash_length cs)) psk_id_hash;
   copy (sub o_context (nsize_hash_length_plus_one cs) (nsize_hash_length cs)) info_hash
 
+noextract inline_for_extraction
 val key_schedule_core_base:
      #cs:S.ciphersuite
   -> o_ctx: context_s cs
@@ -813,7 +813,6 @@ val key_schedule_core_base:
 
 #push-options "--z3rlimit 300"
 
-[@ Meta.Attribute.inline_]
 let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen info =
   let h0' = ST.get () in
   lemma_includes_ctx_loc o_ctx;
@@ -884,6 +883,7 @@ let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen 
 
 #pop-options
 
+noextract inline_for_extraction
 val key_schedule_end_base:
      #cs:S.ciphersuite
   -> o_ctx: context_s cs
@@ -902,7 +902,6 @@ val key_schedule_end_base:
       as_ctx h1 o_ctx == S.key_schedule_end cs S.Base (as_seq h0 context) (as_seq h0 o_ctx.ctx_exporter) (as_seq h0 secret)
     )
 
-[@ Meta.Attribute.inline_]
 let key_schedule_end_base #cs o_ctx suite_id context secret =
   match S.aead_of_cs cs with
   | S.ExportOnly ->
