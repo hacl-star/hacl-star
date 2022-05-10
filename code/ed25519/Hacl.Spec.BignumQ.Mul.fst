@@ -353,7 +353,7 @@ let lemma_mult_distr_3 (a b c:nat) (n:nat) : Lemma
     Math.Lemmas.pow2_plus 56 n
 
 
-#set-options "--z3rlimit 200"
+#set-options "--z3rlimit 300"
 
 let mul_5 (x0, x1, x2, x3, x4) (y0, y1, y2, y3, y4) =
   let xy00 = mul64_wide_5 x0 y0 in
