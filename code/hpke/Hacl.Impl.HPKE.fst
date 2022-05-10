@@ -1225,7 +1225,7 @@ let context_open #cs _ ctx aadlen aad ctlen ct o_pt =
     1ul
   )
 
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 600"
 
 [@ Meta.Attribute.specialize]
 let openBase #cs pkE skR infolen info aadlen aad ctlen ct o_pt =
