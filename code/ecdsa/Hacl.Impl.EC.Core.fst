@@ -32,7 +32,6 @@ open Spec.ECC.Curves
 #set-options "--z3rlimit 200 --max_fuel 0 --max_ifuel 0" 
 
 
-
 inline_for_extraction noextract 
 val toDomain_t: #c: curve -> value: felem c -> result: felem c -> Stack unit 
   (requires fun h -> felem_eval c h value /\ live h value /\ live h result /\ eq_or_disjoint value result)
@@ -48,6 +47,7 @@ let toDomain_t #c value result =
     reduction multBuffer result;
     lemmaToDomain #c #DH (as_nat c h0 value);
   pop_frame()  
+
 
 [@CInline]
 let toDomain_p256 = toDomain_t #P256 
@@ -85,8 +85,6 @@ let fromDomain #c value result =
   |P256 -> fromDomain_p256 value result
   |P384 -> fromDomain_p384 value result
   (* |Default -> fromDomain_generic value result *)
-
-
 
 
 let pointToDomain #c p result = 
@@ -129,19 +127,17 @@ let getPower2 c = pow2 (getPower c)
 let isPointAtInfinityPrivate #c p =  
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
-    
   let start = len *! size 2 in 
-
   let zCoordinate = sub p start len in 
   let r = isZero_uint64_CT #c zCoordinate in 
     let h1 = ST.get() in 
-
  lemma_pointAtInfInDomain #c
     (as_nat c h0 (gsub p (size 0) len))
     (as_nat c h0 (gsub p len len))
     (as_nat c h0 (gsub p (2ul *! len) len)); 
   Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
   r
+
 
 inline_for_extraction noextract
 val normalisation_update: #c: curve -> z2x: felem c -> z3y: felem c -> p: point c -> resultPoint: point c -> 
@@ -273,17 +269,16 @@ let norm #c p resultPoint tempBuffer =
 
 
 let norm_out #c p result = 
-  let h0 = ST.get() in 
-  push_frame();
-    let tempBuffer = create (size 17 *! getCoordinateLenU64 c) (u64 0) in 
-    let h1 = ST.get() in 
-      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
-    norm p result tempBuffer;
-  let h2 = ST.get() in 
-  pop_frame();
-  let h3 = ST.get() in 
-     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
-
+    let h0 = ST.get() in 
+    push_frame();
+  let tempBuffer = create (size 17 *! getCoordinateLenU64 c) (u64 0) in 
+  let h1 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
+  norm p result tempBuffer;
+    let h2 = ST.get() in 
+    pop_frame();
+    let h3 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
 
 
 let normX #c p result tempBuffer = 
@@ -317,7 +312,8 @@ let normX #c p result tempBuffer =
 
 
 val lemma_point_to_domain: #c: curve ->  h0: mem -> h1: mem ->  p: point c -> result: point c ->
-  Lemma (requires (point_eval c h0 p /\ point_eval c h1 result /\
+  Lemma 
+  (requires (point_eval c h0 p /\ point_eval c h1 result /\
     point_x_as_nat c h1 result == toDomain_ #c #DH (point_x_as_nat c h0 p) /\
     point_y_as_nat c h1 result == toDomain_ #c #DH (point_y_as_nat c h0 p) /\
     point_z_as_nat c h1 result == toDomain_ #c #DH (point_z_as_nat c h0 p)))
@@ -351,6 +347,7 @@ val lemma_coord: #c: curve -> h3: mem -> q: point c {point_eval c h3 q} -> Lemma
 
 let lemma_coord h3 q = ()
 
+
 inline_for_extraction noextract
 val uploadStartPoints: #c: curve -> q: point c -> p: point c -> result: point c -> Stack unit 
   (requires fun h -> live h q /\ live h p /\ live h result /\
@@ -360,7 +357,7 @@ val uploadStartPoints: #c: curve -> q: point c -> p: point c -> result: point c 
     point_eval c h1 q /\ point_eval c h1 result /\ (
     let pD = fromDomainPoint #c #DH (point_as_nat c h1 q) in 
     let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
-    qD == point_as_nat c h0 p /\ pD == pointAtInfinity #c /\ 
+    qD == point_as_nat c h0 p /\ isPointAtInfinity #c pD /\ 
     pointEqual #c pD (point_mult #c 0 qD) /\ ~ (pointEqual #c pD qD)))
 
 let uploadStartPoints #c q p result = 
@@ -383,14 +380,17 @@ let uploadStartPoints #c q p result =
 
 
 inline_for_extraction noextract
-val scalar_multiplication_t_0: #c: curve -> #t:buftype -> #l : ladder ->  p: point c -> result: point c -> 
-  scalar: scalar_t #t #c -> 
-  tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
+val scalar_multiplication_t_0: #c: curve -> #t:buftype -> #l : ladder
+  ->  p: point c 
+  -> result: point c 
+  -> scalar: scalar_t #t #c 
+  -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit 
   (requires fun h ->  live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p;  loc tempBuffer; loc scalar] /\
     eq_or_disjoint p result /\ disjoint result tempBuffer /\ disjoint result scalar /\
-    point_eval c h p /\ ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)))
+    point_eval c h p /\ ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)) /\
+    scalar_as_nat (as_seq h scalar) < getOrder #c)
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
     let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in
@@ -399,29 +399,29 @@ val scalar_multiplication_t_0: #c: curve -> #t:buftype -> #l : ladder ->  p: poi
 
 let scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer = 
   let h0 = ST.get() in 
-  let len = getCoordinateLenU64 c in 
   match l with 
   |MontLadder -> begin
     push_frame();
-      let q = sub tempBuffer (size 0) (size 3 *! len) in 
-      let temp = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
-	let h1 = ST.get() in 
-	Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
-      uploadStartPoints q p result; 
-      montgomery_ladder q result scalar temp; 
-      copy_point q result; 
-	let h2 = ST.get() in 
-	pop_frame();
+    let len = getCoordinateLenU64 c in 
+    let q = sub tempBuffer (size 0) (size 3 *! len) in
+    let temp = sub tempBuffer (size 3 *! len) (size 17 *! len) in 
+      let h1 = ST.get() in 
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
+    uploadStartPoints q p result; 
+    montgomery_ladder q result scalar temp; 
+    copy_point q result; 
+      let h2 = ST.get() in 
+      pop_frame();
 	let h3 = ST.get() in 
 	Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
     end
   |Radix -> 
-    admit(); 
     pointToDomain #c p result;
-    Hacl.Impl.EC.ScalarMult.Radix.scalar_multiplication_t_0 #c result result scalar tempBuffer
+    Hacl.Impl.EC.ScalarMult.Radix.scalar_mult_radix #c result scalar tempBuffer
 
 
-val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c -> Lemma (point_mult #c 0 p == pointAtInfinity)
+val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c ->
+  Lemma (isPointAtInfinity (point_mult #c 0 p))
 
 let point_mult0_is_infinity #c p = Spec.ECC.point_mult_0 #c p 0
 
@@ -440,7 +440,8 @@ let rec exp_of_one a b =
     lemma_pow_mod_n_is_fpow a 1 b
 
 
-val norm_twice_lemma: #c: curve ->  a: point_nat_prime #c -> q: point_nat_prime #c -> Lemma (pointEqual #c a q ==> pointEqual (_norm #c a) q)
+val norm_twice_lemma: #c: curve ->  a: point_nat_prime #c -> q: point_nat_prime #c -> 
+  Lemma (pointEqual #c a q ==> pointEqual (_norm #c a) q)
 
 let norm_twice_lemma #c p q =
   let prime = getPrime c in  
@@ -459,6 +460,7 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> #l: ladder -> p: point c 
   Stack unit
   (requires fun h -> 
     live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
+    scalar_as_nat (as_seq h scalar) < getOrder #c /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\ point_eval c h p /\
     ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
@@ -560,7 +562,7 @@ let secretToPublic #c #l result scalar tempBuffer =
   |Radix  -> 
     begin
       admit();
-      secretToPublic_0 q result scalar buff;
+      secret_to_public_radix q scalar buff;
       norm q result buff
     end
 
@@ -593,7 +595,7 @@ let secretToPublicWithoutNorm_ #c #l result scalar tempBuffer =
   |Radix  -> 
     begin
       admit();
-      secretToPublic_0 q result scalar buff
+      secret_to_public_radix q scalar buff
     end
 
 

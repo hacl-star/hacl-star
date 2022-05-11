@@ -22,24 +22,28 @@ type ladder =
   |MontLadder
   |Radix
 
+
 let invert_state_s (a: ladder): Lemma
   (requires True)
   (ensures (inversion ladder))
   [SMTPat (ladder) ]
   = allow_inversion (ladder)
 
+
 inline_for_extraction noextract 
 val toDomain: #c: curve -> value: felem c -> result: felem c -> Stack unit 
   (requires fun h -> felem_eval c h value /\ live h value /\ live h result /\ eq_or_disjoint value result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ as_nat c h1 result = toDomain #c (as_nat c h0 value) /\ 
     felem_eval c h1 result)
- 
+
+
 inline_for_extraction noextract
 val fromDomain: #c: curve -> f: felem c -> result: felem c -> Stack unit 
   (requires fun h -> live h f /\ live h result /\ felem_eval c h f)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ 
     as_nat c h1 result = (as_nat c h0 f * modp_inv2 #c (pow2 (getPower c))) % getPrime c /\ 
     as_nat c h1 result = fromDomain #c (as_nat c h0 f))
+
 
 open Hacl.Spec.EC.Definition
 
@@ -51,6 +55,7 @@ val pointToDomain: #c: curve -> p: point c -> result: point c -> Stack unit
     point_x_as_nat c h1 result == toDomain_ #c #DH (point_x_as_nat c h0 p) /\
     point_y_as_nat c h1 result == toDomain_ #c #DH (point_y_as_nat c h0 p) /\
     point_z_as_nat c h1 result == toDomain_ #c #DH (point_z_as_nat c h0 p))
+
 
 inline_for_extraction noextract
 val pointFromDomain: #c : curve -> p: point c -> result: point c -> Stack unit 
@@ -96,8 +101,6 @@ val norm_out: #c: curve -> p: point c -> resultPoint: point c -> Stack unit
     pointNorm == resultPoint))
 
 
-
-
 inline_for_extraction noextract
 val normX: #c: curve -> p: point c -> result: felem c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
@@ -119,6 +122,7 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype -> #l: ladder
   Stack unit
   (requires fun h -> live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\ point_eval c h p /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
+    scalar_as_nat (as_seq h scalar) < getOrder #c /\
     ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
