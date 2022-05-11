@@ -34,66 +34,66 @@ let key_kem (cs:S.ciphersuite) = lbuffer uint8 (size (S.size_kem_key cs))
 
 inline_for_extraction noextract
 let nsize_aead_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_aead_key cs}) =
-  match S.aead_of_cs cs with
-  | S.ExportOnly -> 0ul
-  | S.Seal SAEAD.AES128_GCM -> 16ul
-  | S.Seal SAEAD.AES256_GCM -> 32ul
-  | S.Seal SAEAD.CHACHA20_POLY1305 -> 32ul
+  match cs with
+  | _, _, S.ExportOnly, _ -> 0ul
+  | _, _, S.Seal SAEAD.AES128_GCM, _ -> 16ul
+  | _, _, S.Seal SAEAD.AES256_GCM, _ -> 32ul
+  | _, _, S.Seal SAEAD.CHACHA20_POLY1305, _ -> 32ul
 
 inline_for_extraction noextract
 let nsize_aead_nonce (cs:S.ciphersuite) : (s:size_t{v s == S.size_aead_nonce cs}) =
-  match S.aead_of_cs cs with
-  | S.ExportOnly -> 0ul
-  | S.Seal _ -> 12ul
+  match cs with
+  | _, _, S.ExportOnly, _ -> 0ul
+  | _, _, S.Seal _, _ -> 12ul
 
 inline_for_extraction noextract
 let nsize_kem_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_kem_key cs}) =
-  match S.kem_hash_of_cs cs with
-  | SHa.SHA2_256 -> 32ul
+  match cs with
+  | _, SHa.SHA2_256, _, _ -> 32ul
 
 inline_for_extraction noextract
 let nsize_serialized_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_serialized cs}) =
-  match S.kem_dh_of_cs cs with
-  | SDH.DH_Curve25519 -> 32ul
-  | SDH.DH_P256 -> 64ul
+  match cs with
+  | SDH.DH_Curve25519, _, _, _ -> 32ul
+  | SDH.DH_P256, _, _, _ -> 64ul
 
 inline_for_extraction noextract
 let nsize_public_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_public cs}) =
-  match S.kem_dh_of_cs cs with
-  | SDH.DH_Curve25519 -> 32ul
-  | SDH.DH_P256 -> 65ul
+  match cs with
+  | SDH.DH_Curve25519, _, _, _ -> 32ul
+  | SDH.DH_P256, _, _, _ -> 65ul
 
 inline_for_extraction noextract
 let nsize_two_public_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_public cs + S.size_dh_public cs}) =
-  match S.kem_dh_of_cs cs with
-  | SDH.DH_Curve25519 -> 64ul
-  | SDH.DH_P256 -> 130ul
+  match cs with
+  | SDH.DH_Curve25519, _, _, _ -> 64ul
+  | SDH.DH_P256, _, _, _ -> 130ul
 
 inline_for_extraction noextract
 let nsize_ks_ctx (cs:S.ciphersuite) : (s:size_t{v s == S.size_ks_ctx cs}) =
-  match S.hash_of_cs cs with
-  | SHa.SHA2_256 -> 65ul
-  | SHa.SHA2_384 -> 97ul
-  | SHa.SHA2_512 -> 129ul
+  match cs with
+  | _, _, _, SHa.SHA2_256 -> 65ul
+  | _, _, _, SHa.SHA2_384 -> 97ul
+  | _, _, _, SHa.SHA2_512 -> 129ul
 
 inline_for_extraction noextract
 let nsize_hash_length (cs:S.ciphersuite) : (s:size_t{v s == S.size_kdf cs}) =
-  match S.hash_of_cs cs with
-  | SHa.SHA2_256 -> 32ul
-  | SHa.SHA2_384 -> 48ul
-  | SHa.SHA2_512 -> 64ul
+  match cs with
+  | _, _, _, SHa.SHA2_256 -> 32ul
+  | _, _, _, SHa.SHA2_384 -> 48ul
+  | _, _, _, SHa.SHA2_512 -> 64ul
 
 inline_for_extraction noextract
 let nsize_kem_hash_length (cs:S.ciphersuite) : (s:size_t{v s == S.size_kem_kdf cs}) =
-  match S.kem_hash_of_cs cs with
-  | SHa.SHA2_256 -> 32ul
+  match cs with
+  | _, SHa.SHA2_256, _, _ -> 32ul
 
 inline_for_extraction noextract
 let nsize_hash_length_plus_one (cs:S.ciphersuite) : size_t =
-  match S.hash_of_cs cs with
-  | SHa.SHA2_256 -> 33ul
-  | SHa.SHA2_384 -> 49ul
-  | SHa.SHA2_512 -> 65ul
+  match cs with
+  | _, _, _, SHa.SHA2_256 -> 33ul
+  | _, _, _, SHa.SHA2_384 -> 49ul
+  | _, _, _, SHa.SHA2_512 -> 65ul
 
 noeq
 type context_s (cs:S.ciphersuite) =
@@ -910,8 +910,8 @@ val key_schedule_end_base:
 
 [@ Meta.Attribute.inline_]
 let key_schedule_end_base #cs o_ctx suite_id context secret =
-  match S.aead_of_cs cs with
-  | S.ExportOnly ->
+  match cs with
+  | _, _, S.ExportOnly, _ ->
     upd o_ctx.ctx_seq 0ul 0uL;
     let h1 = ST.get () in
     assert (as_seq h1 o_ctx.ctx_key `Seq.equal` Lib.ByteSequence.lbytes_empty);
