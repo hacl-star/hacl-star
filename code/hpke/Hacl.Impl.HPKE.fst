@@ -986,7 +986,7 @@ let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
 
 #pop-options
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 300"
 
 [@ Meta.Attribute.specialize]
 let setupBaseR #cs o_ctx enc skR infolen info =
