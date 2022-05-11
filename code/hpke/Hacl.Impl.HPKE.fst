@@ -387,6 +387,7 @@ val labeled_extract_hash:
 
 #push-options "--z3rlimit 200"
 
+[@ Meta.Attribute.inline_]
 let labeled_extract_hash #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
   push_frame ();
   let h0 = ST.get () in
@@ -435,6 +436,7 @@ val labeled_extract_kem:
 
 #push-options "--z3rlimit 400"
 
+[@ Meta.Attribute.inline_]
 let labeled_extract_kem #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
   push_frame ();
   let h0 = ST.get () in
@@ -511,6 +513,7 @@ val labeled_expand_hash:
 
 #push-options "--z3rlimit 400"
 
+[@ Meta.Attribute.inline_]
 let labeled_expand_hash #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
   push_frame ();
   let h0 = ST.get () in
@@ -566,6 +569,7 @@ val labeled_expand_kem:
 
 #push-options "--z3rlimit 500"
 
+[@ Meta.Attribute.inline_]
 let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
   push_frame ();
   let h0 = ST.get () in
@@ -609,6 +613,7 @@ val extract_and_expand:
      (ensures fun h0 _ h1 -> modifies (loc o_shared) h0 h1 /\
        as_seq h1 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h0 dh) (as_seq h0 kemcontext))
 
+[@ Meta.Attribute.inline_]
 let extract_and_expand #cs o_shared dh ctxlen kemcontext =
   push_frame ();
 
@@ -813,6 +818,7 @@ val key_schedule_core_base:
 
 #push-options "--z3rlimit 300"
 
+[@ Meta.Attribute.inline_]
 let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen info =
   let h0' = ST.get () in
   lemma_includes_ctx_loc o_ctx;
@@ -902,6 +908,7 @@ val key_schedule_end_base:
       as_ctx h1 o_ctx == S.key_schedule_end cs S.Base (as_seq h0 context) (as_seq h0 o_ctx.ctx_exporter) (as_seq h0 secret)
     )
 
+[@ Meta.Attribute.inline_]
 let key_schedule_end_base #cs o_ctx suite_id context secret =
   match S.aead_of_cs cs with
   | S.ExportOnly ->

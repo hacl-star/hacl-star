@@ -11,9 +11,9 @@ friend Hacl.Meta.HPKE
 
 #set-options "--fuel 0 --ifuel 0"
 
-let setupBaseS = hpke_setupBaseS_higher #cs True IDH.secret_to_public_c51 IDH.dh_c51
+let setupBaseS = hpke_setupBaseS_higher #cs True IHK.hkdf_expand512 IHK.hkdf_extract512 IDH.secret_to_public_c51 IDH.dh_c51 IHK.hkdf_expand256 IHK.hkdf_extract256
 
-let setupBaseR = hpke_setupBaseR_higher #cs True IDH.dh_c51 IDH.secret_to_public_c51
+let setupBaseR = hpke_setupBaseR_higher #cs True IHK.hkdf_expand512 IHK.hkdf_extract512 IDH.dh_c51 IHK.hkdf_expand256 IHK.hkdf_extract256 IDH.secret_to_public_c51
 
 let sealBase = hpke_sealBase_higher #cs True IAEAD.aead_encrypt_cp32 setupBaseS
 
