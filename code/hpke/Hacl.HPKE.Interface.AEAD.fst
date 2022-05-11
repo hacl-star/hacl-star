@@ -7,6 +7,14 @@ open Lib.Buffer
 
 friend Spec.Agile.AEAD
 
+/// These two functions will never be extracted, they are only an interface
+/// boundary for the tactic performing instantiations.
+/// In other files, it is exposed as an assume val, but for AEAD, we need an fsti
+/// since we need to friend Spec.Agile.AEAD to perform the instantiations below,
+/// and assume val are forbidden in interface files
+let aead_encrypt #cs = admit()
+let aead_decrypt #cs = admit()
+
 #set-options "--z3rlimit 60 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract

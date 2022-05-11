@@ -642,6 +642,7 @@ let extract_and_expand #cs o_shared dh ctxlen kemcontext =
 
   pop_frame ()
 
+noextract
 val encap:
      #cs:S.ciphersuite
   -> o_shared: key_kem cs
@@ -713,6 +714,7 @@ let encap #cs o_shared o_enc skE pkR =
 
 #pop-options
 
+noextract
 val decap:
      #cs:S.ciphersuite
   -> o_shared: key_kem cs
@@ -937,6 +939,7 @@ let key_schedule_end_base #cs o_ctx suite_id context secret =
     pop_frame ()
 
 
+noextract
 val key_schedule_base:
      #cs:S.ciphersuite
   -> o_ctx: context_s cs
@@ -1073,6 +1076,7 @@ let nat_to_bytes_be_12 o l =
 
   assert (as_seq h1 (gsub o 0ul 4ul) `Seq.equal` Lib.Sequence.create 4 (u8 0))
 
+noextract
 val context_compute_nonce:
      #cs:S.ciphersuite
   -> ctx:context_s cs
@@ -1094,7 +1098,7 @@ let context_compute_nonce #cs ctx seq o_nonce =
   C.Loops.map2 o_nonce enc ctx.ctx_nonce 12ul (logxor #U8 #SEC);
   pop_frame ()
 
-
+noextract
 val context_increment_seq:
      #cs:S.ciphersuite
   -> ctx:context_s cs
@@ -1123,6 +1127,7 @@ let context_increment_seq #cs ctx =
     0ul
   )
 
+noextract
 val context_seal:
      #cs:S.ciphersuite
   -> _:squash (S.is_valid_not_export_only_ciphersuite cs)
@@ -1189,6 +1194,7 @@ let sealBase #cs skE pkR infolen info aadlen aad plainlen plain o_enc o_ct =
 
 #pop-options
 
+noextract
 val context_open:
      #cs:S.ciphersuite
   -> _:squash (S.is_valid_not_export_only_ciphersuite cs)

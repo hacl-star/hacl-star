@@ -58,9 +58,11 @@ let secret_to_public_st (a: DH.algorithm) (p:Type0) =
       | _ -> False))
 
 [@ Meta.Attribute.specialize]
+noextract
 assume val dh: #a:S.ciphersuite -> dh_st (S.kem_dh_of_cs a) True
 
 [@ Meta.Attribute.specialize]
+noextract
 assume val secret_to_public: #a:S.ciphersuite -> secret_to_public_st (S.kem_dh_of_cs a) True
 
 (** Instantiations for Curve25519 **)
