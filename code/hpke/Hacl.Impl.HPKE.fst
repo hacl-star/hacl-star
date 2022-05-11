@@ -131,7 +131,7 @@ noextract inline_for_extraction
 val deserialize_public_key:
      #cs:S.ciphersuite
   -> pk: key_dh_public cs
-  -> Stack (lbuffer uint8 (DH.nsize_public (S.kem_dh_of_cs cs)))
+  -> Stack (lbuffer uint8 (nsize_serialized_dh cs))
     (requires fun h -> live h pk)
     (ensures fun h0 b h1 -> live h1 b /\ h0 == h1 /\
       (match S.kem_dh_of_cs cs with
@@ -147,7 +147,7 @@ noextract inline_for_extraction
 val serialize_public_key:
      #cs:S.ciphersuite
   -> pk: key_dh_public cs
-  -> b: (lbuffer uint8 (DH.nsize_public (S.kem_dh_of_cs cs)))
+  -> b: (lbuffer uint8 (nsize_serialized_dh cs))
   -> Stack unit
     (requires fun h -> live h pk /\ live h b /\
       (match S.kem_dh_of_cs cs with
