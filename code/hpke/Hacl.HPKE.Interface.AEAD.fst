@@ -12,8 +12,8 @@ friend Spec.Agile.AEAD
 /// In other files, it is exposed as an assume val, but for AEAD, we need an fsti
 /// since we need to friend Spec.Agile.AEAD to perform the instantiations below,
 /// and assume val are forbidden in interface files
-let aead_encrypt #cs = admit()
-let aead_decrypt #cs = admit()
+noextract let aead_encrypt #cs = admit()
+noextract let aead_decrypt #cs = admit()
 
 #set-options "--z3rlimit 60 --fuel 0 --ifuel 0"
 

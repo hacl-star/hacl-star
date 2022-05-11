@@ -60,9 +60,11 @@ let aead_decrypt_st (a:S.aead) =
   )
 
 [@ Meta.Attribute.specialize]
+noextract
 val aead_encrypt: #cs:S.ciphersuite -> aead_encrypt_st (S.aead_of_cs cs)
 
 [@ Meta.Attribute.specialize]
+noextract
 val aead_decrypt: #cs:S.ciphersuite -> aead_decrypt_st (S.aead_of_cs cs)
 
 (** Instantiations of Chacha20Poly1305 **)
