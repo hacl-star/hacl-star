@@ -51,3 +51,23 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i)
   }
 }
 
+Spec_Agile_DH_algorithm Spec_Agile_HPKE_kem_dh_of_cs(Spec_Agile_HPKE_ciphersuite cs)
+{
+  return cs.fst;
+}
+
+Spec_Hash_Definitions_hash_alg Spec_Agile_HPKE_kem_hash_of_cs(Spec_Agile_HPKE_ciphersuite cs)
+{
+  return cs.snd;
+}
+
+Spec_Agile_HPKE_aead Spec_Agile_HPKE_aead_of_cs(Spec_Agile_HPKE_ciphersuite cs)
+{
+  return cs.thd;
+}
+
+Spec_Hash_Definitions_hash_alg Spec_Agile_HPKE_hash_of_cs(Spec_Agile_HPKE_ciphersuite cs)
+{
+  return cs.f3;
+}
+

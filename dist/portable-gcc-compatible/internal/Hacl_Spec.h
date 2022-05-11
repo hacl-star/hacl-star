@@ -65,6 +65,30 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 
 /* SNIPPET_END: Spec_Cipher_Expansion_cipher_alg_of_impl */
 
+/* SNIPPET_START: Spec_Agile_HPKE_kem_dh_of_cs */
+
+Spec_Agile_DH_algorithm Spec_Agile_HPKE_kem_dh_of_cs(Spec_Agile_HPKE_ciphersuite cs);
+
+/* SNIPPET_END: Spec_Agile_HPKE_kem_dh_of_cs */
+
+/* SNIPPET_START: Spec_Agile_HPKE_kem_hash_of_cs */
+
+Spec_Hash_Definitions_hash_alg Spec_Agile_HPKE_kem_hash_of_cs(Spec_Agile_HPKE_ciphersuite cs);
+
+/* SNIPPET_END: Spec_Agile_HPKE_kem_hash_of_cs */
+
+/* SNIPPET_START: Spec_Agile_HPKE_aead_of_cs */
+
+Spec_Agile_HPKE_aead Spec_Agile_HPKE_aead_of_cs(Spec_Agile_HPKE_ciphersuite cs);
+
+/* SNIPPET_END: Spec_Agile_HPKE_aead_of_cs */
+
+/* SNIPPET_START: Spec_Agile_HPKE_hash_of_cs */
+
+Spec_Hash_Definitions_hash_alg Spec_Agile_HPKE_hash_of_cs(Spec_Agile_HPKE_ciphersuite cs);
+
+/* SNIPPET_END: Spec_Agile_HPKE_hash_of_cs */
+
 #if defined(__cplusplus)
 }
 #endif

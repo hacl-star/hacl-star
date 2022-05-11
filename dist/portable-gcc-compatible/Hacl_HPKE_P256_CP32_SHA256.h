@@ -35,33 +35,33 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Spec.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Impl_HPKE.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_32.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
-/* SNIPPET_START: Hacl_HPKE_P256_CP32_SHA256_setupBaseI */
+/* SNIPPET_START: Hacl_HPKE_P256_CP32_SHA256_setupBaseS */
 
 uint32_t
-Hacl_HPKE_P256_CP32_SHA256_setupBaseI(
+Hacl_HPKE_P256_CP32_SHA256_setupBaseS(
   uint8_t *o_pkE,
-  uint8_t *o_k,
-  uint8_t *o_n,
+  Hacl_Impl_HPKE_context_s o_ctx,
   uint8_t *skE,
   uint8_t *pkR,
   uint32_t infolen,
   uint8_t *info
 );
 
-/* SNIPPET_END: Hacl_HPKE_P256_CP32_SHA256_setupBaseI */
+/* SNIPPET_END: Hacl_HPKE_P256_CP32_SHA256_setupBaseS */
 
 /* SNIPPET_START: Hacl_HPKE_P256_CP32_SHA256_setupBaseR */
 
 uint32_t
 Hacl_HPKE_P256_CP32_SHA256_setupBaseR(
-  uint8_t *o_key_aead,
-  uint8_t *o_nonce_aead,
-  uint8_t *pkE,
+  Hacl_Impl_HPKE_context_s o_ctx,
+  uint8_t *enc,
   uint8_t *skR,
   uint32_t infolen,
   uint8_t *info
@@ -75,11 +75,14 @@ uint32_t
 Hacl_HPKE_P256_CP32_SHA256_sealBase(
   uint8_t *skE,
   uint8_t *pkR,
-  uint32_t mlen,
-  uint8_t *m,
   uint32_t infolen,
   uint8_t *info,
-  uint8_t *output
+  uint32_t aadlen,
+  uint8_t *aad,
+  uint32_t plainlen,
+  uint8_t *plain,
+  uint8_t *o_enc,
+  uint8_t *o_ct
 );
 
 /* SNIPPET_END: Hacl_HPKE_P256_CP32_SHA256_sealBase */
@@ -90,11 +93,13 @@ uint32_t
 Hacl_HPKE_P256_CP32_SHA256_openBase(
   uint8_t *pkE,
   uint8_t *skR,
-  uint32_t mlen,
-  uint8_t *m,
   uint32_t infolen,
   uint8_t *info,
-  uint8_t *output
+  uint32_t aadlen,
+  uint8_t *aad,
+  uint32_t ctlen,
+  uint8_t *ct,
+  uint8_t *o_pt
 );
 
 /* SNIPPET_END: Hacl_HPKE_P256_CP32_SHA256_openBase */

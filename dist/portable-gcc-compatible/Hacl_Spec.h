@@ -108,6 +108,48 @@ typedef uint8_t Spec_Cipher_Expansion_impl;
 
 typedef uint8_t Spec_Agile_AEAD_alg;
 
+/* SNIPPET_START: Spec_Agile_DH_algorithm */
+
+#define Spec_Agile_DH_DH_Curve25519 0
+#define Spec_Agile_DH_DH_P256 1
+
+/* SNIPPET_END: Spec_Agile_DH_algorithm */
+
+typedef uint8_t Spec_Agile_DH_algorithm;
+
+/* SNIPPET_START: Spec_Agile_HPKE_aead_tags */
+
+#define Spec_Agile_HPKE_Seal 0
+#define Spec_Agile_HPKE_ExportOnly 1
+
+/* SNIPPET_END: Spec_Agile_HPKE_aead_tags */
+
+typedef uint8_t Spec_Agile_HPKE_aead_tags;
+
+/* SNIPPET_START: Spec_Agile_HPKE_aead */
+
+typedef struct Spec_Agile_HPKE_aead_s
+{
+  Spec_Agile_HPKE_aead_tags tag;
+  Spec_Agile_AEAD_alg alg;
+}
+Spec_Agile_HPKE_aead;
+
+/* SNIPPET_END: Spec_Agile_HPKE_aead */
+
+/* SNIPPET_START: Spec_Agile_HPKE_ciphersuite */
+
+typedef struct Spec_Agile_HPKE_ciphersuite_s
+{
+  Spec_Agile_DH_algorithm fst;
+  Spec_Hash_Definitions_hash_alg snd;
+  Spec_Agile_HPKE_aead thd;
+  Spec_Hash_Definitions_hash_alg f3;
+}
+Spec_Agile_HPKE_ciphersuite;
+
+/* SNIPPET_END: Spec_Agile_HPKE_ciphersuite */
+
 /* SNIPPET_START: Spec_Frodo_Params_frodo_gen_a */
 
 #define Spec_Frodo_Params_SHAKE128 0
