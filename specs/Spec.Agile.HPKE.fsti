@@ -49,15 +49,19 @@ let is_valid_ciphersuite (cs:DH.algorithm & hash_algorithm & aead & Hash.algorit
 
 let ciphersuite = cs:(DH.algorithm & hash_algorithm & aead & Hash.algorithm){is_valid_ciphersuite cs}
 
+inline_for_extraction
 let kem_dh_of_cs (cs:ciphersuite) : DH.algorithm =
   let (c,_,_,_) = cs in c
 
+inline_for_extraction
 let kem_hash_of_cs (cs:ciphersuite) : hash_algorithm =
   let (_,h,_,_) = cs in h
 
+inline_for_extraction
 let aead_of_cs (cs:ciphersuite) : aead =
   let (_,_,a,_) = cs in a
 
+inline_for_extraction
 let hash_of_cs (cs:ciphersuite) : hash_algorithm =
   let (_,_,_,h) = cs in h
 
@@ -68,6 +72,7 @@ let is_valid_not_export_only_ciphersuite (cs:ciphersuite) : bool =
 
 let ciphersuite_not_export_only = cs:ciphersuite{is_valid_not_export_only_ciphersuite cs}
 
+inline_for_extraction
 let aead_alg_of (cs:ciphersuite_not_export_only) = match aead_of_cs cs with
   | Seal alg -> alg
 
