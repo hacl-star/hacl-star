@@ -35,9 +35,8 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Spec.h"
 #include "Hacl_Krmllib.h"
-#include "Hacl_Impl_HPKE.h"
+#include "Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "evercrypt_targetconfig.h"

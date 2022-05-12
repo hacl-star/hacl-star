@@ -2,9 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    module Hacl_Impl_HPKE_applied =
-      (Hacl_Impl_HPKE_bindings.Bindings)(Hacl_Impl_HPKE_stubs)
-    open Hacl_Impl_HPKE_applied
+    module Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_applied =
+      (Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_bindings.Bindings)(Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_stubs)
+    open Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE_applied
     let hacl_HPKE_Curve51_CP32_SHA512_setupBaseS =
       foreign "Hacl_HPKE_Curve51_CP32_SHA512_setupBaseS"
         (ocaml_bytes @->

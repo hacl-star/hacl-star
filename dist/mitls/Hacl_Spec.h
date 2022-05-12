@@ -84,32 +84,6 @@ typedef uint8_t Spec_Cipher_Expansion_impl;
 
 typedef uint8_t Spec_Agile_AEAD_alg;
 
-#define Spec_Agile_DH_DH_Curve25519 0
-#define Spec_Agile_DH_DH_P256 1
-
-typedef uint8_t Spec_Agile_DH_algorithm;
-
-#define Spec_Agile_HPKE_Seal 0
-#define Spec_Agile_HPKE_ExportOnly 1
-
-typedef uint8_t Spec_Agile_HPKE_aead_tags;
-
-typedef struct Spec_Agile_HPKE_aead_s
-{
-  Spec_Agile_HPKE_aead_tags tag;
-  Spec_Agile_AEAD_alg alg;
-}
-Spec_Agile_HPKE_aead;
-
-typedef struct Spec_Agile_HPKE_ciphersuite_s
-{
-  Spec_Agile_DH_algorithm fst;
-  Spec_Hash_Definitions_hash_alg snd;
-  Spec_Agile_HPKE_aead thd;
-  Spec_Hash_Definitions_hash_alg f3;
-}
-Spec_Agile_HPKE_ciphersuite;
-
 #define Spec_Frodo_Params_SHAKE128 0
 #define Spec_Frodo_Params_AES128 1
 
