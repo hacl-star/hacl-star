@@ -1,7 +1,14 @@
 // jshint esversion: 8
 
+// We demonstrate how to write a sample program that uses the high-level HACL*
+// API. Run this with `node test2.js`. See `test.html` for a version to be run
+// directly from within the browser.
+
 var HaclWasm = require('./api.js');
 var loader = require('./loader.js');
+
+// Test helpers
+// ------------
 
 function buf2hex(buffer) {
   return Array.prototype.map.call(new Uint8Array(buffer), function(x) {
@@ -23,6 +30,9 @@ function assert(b, msg) {
   if (!b)
     throw new Error(msg);
 }
+
+// Functional test
+// ---------------
 
 function testBignum64(Hacl) {
   let a = Hacl.Bignum_64.new_bn_from_bytes_le(hex2buf("4100000000000000"));
@@ -60,8 +70,23 @@ function testBignumMontgomery64(Hacl) {
   console.log("testBignumMontgomery64 successful", buf2hex(e.buffer));
 }
 
+// Initialization
+// --------------
+
+// Note: this is an optimization. We demonstrate how to selectively load only a
+// subset of the WASM files so as to provide only the functionality one is
+// interested in. If packaging the entire set of WASM files is not a problem,
+// leave `modules` undefined.
+let modules = [
+  "WasmSupport",
+  "FStar",
+  "Hacl_Bignum",
+  "Hacl_GenericField64",
+  "Hacl_Bignum64",
+];
+
 // Main test driver
-HaclWasm.getInitializedHaclModule().then(function(Hacl) {
+HaclWasm.getInitializedHaclModule(modules).then(function(Hacl) {
   testBignumMontgomery64(Hacl);
   testBignum64(Hacl);
 });

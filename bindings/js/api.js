@@ -7,22 +7,35 @@ if (typeof module !== 'undefined') {
   var shell = require(path.resolve(__dirname, './shell.js'));
   var api_promise = Promise.resolve(require(path.resolve(__dirname, './api.json')));
   var layouts_promise = Promise.resolve(require(path.resolve(__dirname, './layouts.json')));
-  var modules_promise = Promise.resolve(shell.my_modules.map(m => {
-    var source = fs.readFileSync(path.resolve(__dirname, './' + m + ".wasm"));
-    return new Uint8Array(source);
-  }));
 
 } else {
   var loader = this;
   var shell = this;
   var api_promise = fetch("api.json").then(r => r.json());
   var layouts_promise = fetch("layouts.json").then(r => r.json());
-  var modules_promise = Promise.all(my_modules.map(m => fetch(m + ".wasm")))
-    .then(response => Promise.all(response.map(r => r.arrayBuffer())));
+}
+
+// We now allow the user to pass a custom list of modules if they want to do
+// their own, more lightweight packaging.
+function getModulesPromise(modules) {
+  if (typeof module !== 'undefined')
+    return Promise.resolve((modules || shell.my_modules).map(m => {
+      var source = fs.readFileSync(path.resolve(__dirname, './' + m + ".wasm"));
+      return ({
+        buf: new Uint8Array(source),
+        name: m
+      });
+    }));
+  else
+    return Promise.all((modules || my_modules)
+      .map(name =>
+        fetch(name + ".wasm")
+        .then(r => r.arrayBuffer())
+        .then(buf => ({ buf, name }))));
 }
 
 // Uncomment for debug
-loader.setMyPrint((x) => {});
+// loader.setMyPrint((x) => {});
 
 // HELPERS FOR SIZE FIELDS
 // -----------------------
@@ -216,14 +229,11 @@ var HaclWasm = (function() {
 
   // The WebAssembly modules have to be initialized before calling any function.
   // To be called only if isInitialized == false.
-  var loadWasm = async () => {
+  var loadWasm = async (modules) => {
     if (!isInitialized) {
       Module = await loader.link(
         my_imports,
-        (await modules_promise).map((buf, i) => ({
-          buf,
-          name: shell.my_modules[i]
-        }))
+        await getModulesPromise(modules)
       );
       isInitialized = true;
     }
@@ -664,10 +674,10 @@ var HaclWasm = (function() {
     throw new Error(func_name+": Unimplemented !");
   };
 
-  var getInitializedHaclModule = async function () {
+  var getInitializedHaclModule = async function (modules) {
     if (!isInitialized) {
       // Load all WASM modules from network (web) or disk (node).
-      await loadWasm();
+      await loadWasm(modules);
       // Write into the global.
       layouts = await layouts_promise;
 
