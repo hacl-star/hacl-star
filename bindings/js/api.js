@@ -35,7 +35,7 @@ function getModulesPromise(modules) {
 }
 
 // Uncomment for debug
-// loader.setMyPrint((x) => {});
+loader.setMyPrint((x) => {});
 
 // HELPERS FOR SIZE FIELDS
 // -----------------------
