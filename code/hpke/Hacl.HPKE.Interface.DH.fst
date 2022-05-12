@@ -80,6 +80,7 @@ let dh_c51 : dh_st (DH.DH_Curve25519) True = fun o k i ->
   pop_frame();
   res
 
+inline_for_extraction noextract
 let vale_p = Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 inline_for_extraction noextract
