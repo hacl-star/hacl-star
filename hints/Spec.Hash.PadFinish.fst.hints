@@ -71,7 +71,7 @@
         "unit_typing"
       ],
       0,
-      "76ecfc30fdf1be0a82bdf4bbe9bf3eed"
+      "91a6c04da690bb315e6fa569308582a6"
     ],
     [
       "Spec.Hash.PadFinish.pad_blake",
@@ -111,7 +111,7 @@
         "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7c05d255d754cba2189ecdcf211304ce"
+      "c3115e9aad73182ad51a153152f5e6f5"
     ],
     [
       "Spec.Hash.PadFinish.pad",
@@ -133,7 +133,7 @@
         "typing_Spec.Hash.Definitions.word_length"
       ],
       0,
-      "4872fd68eb84dbf243f06b420e598806"
+      "970aaace90520a2655a2e995213dd181"
     ],
     [
       "Spec.Hash.PadFinish.finish_md",
@@ -175,7 +175,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "751da8b82526beacbf57117204a98095"
+      "10703bcab220a622fd113e06ad5ca14f"
     ],
     [
       "Spec.Hash.PadFinish.finish_blake",
@@ -196,10 +196,8 @@
         "constructor_distinct_Spec.Blake2.Blake2S",
         "constructor_distinct_Spec.Hash.Definitions.Blake2B",
         "constructor_distinct_Spec.Hash.Definitions.Blake2S",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Spec.Blake2.Blake2B@tok",
-        "equality_tok_Spec.Blake2.Blake2S@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equality_tok_Spec.Blake2.Blake2S@tok", "equation_Prims.nat",
         "equation_Spec.Blake2.max_output", "equation_Spec.Blake2.wt",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
@@ -210,18 +208,16 @@
         "equation_Spec.Hash.Definitions.word",
         "equation_Spec.Hash.Definitions.word_length",
         "equation_Spec.Hash.Definitions.word_t", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_550847d58e6a38975ad7c78d957daabe",
-        "typing_Lib.IntTypes.bits",
-        "typing_Spec.Hash.Definitions.hash_length",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Spec.Hash.Definitions.hash_length"
       ],
       0,
-      "1d49424b25c78acf34bd88490bd18c68"
+      "fb9bea1be1ea5964bd80a314c5d31c3f"
     ],
     [
       "Spec.Hash.PadFinish.finish",
@@ -231,28 +227,22 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Tm_unit", "equality_tok_Lib.IntTypes.U32@tok",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.unsigned",
+        "bool_inversion", "constructor_distinct_Tm_unit",
         "equation_Prims.nat", "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.is_blake",
         "equation_Spec.Hash.Definitions.is_md",
         "equation_Spec.Hash.Definitions.word_length", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Lib.IntTypes.bits",
         "typing_Spec.Hash.Definitions.hash_word_length",
-        "typing_Spec.Hash.Definitions.is_md",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Spec.Hash.Definitions.is_md"
       ],
       0,
-      "bdd6bc7c8d767ee632bfa70ff4b59b52"
+      "6e44d8658618996da8f19b5bf4dc94e3"
     ]
   ]
 ]
