@@ -73,8 +73,8 @@ val isPointAtInfinityPrivate: #c: curve -> p: point c -> Stack uint64
       ((uint_v r == 0 \/ uint_v r == maxint U64) /\ (
     let xD, yD, zD = fromDomainPoint #c #DH  (point_as_nat c h0 p) in 
     let x, y, z = point_as_nat c h0 p in 
-    (if Spec.ECC.isPointAtInfinity #c #Jacobian(xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0) /\ 
-    (if Spec.ECC.isPointAtInfinity #c #Jacobian (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
+    (if Spec.ECC.isPointAtInfinity #Jacobian(xD, yD, zD) then uint_v r = maxint U64 else uint_v r = 0) /\ 
+    (if Spec.ECC.isPointAtInfinity #Jacobian (x, y, z) then uint_v r = maxint U64 else uint_v r = 0))))
 
 
 inline_for_extraction noextract
@@ -123,7 +123,7 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype -> #l: ladder
   (requires fun h -> live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\ point_eval c h p /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
     scalar_as_nat (as_seq h scalar) < getOrder #c /\
-    ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)))
+    ~ (isPointAtInfinity #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
     let qD = point_as_nat c h1 result in
@@ -138,7 +138,8 @@ val scalarMultiplicationWithoutNorm: #c: curve ->  #l: ladder ->  p: point c -> 
   Stack unit
   (requires fun h -> point_eval c h p /\ live h p /\ live h result /\ live h scalar /\ live h tempBuffer /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar; loc result] /\
-    ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h p)))
+    scalar_as_nat (as_seq h scalar) < getOrder #c /\
+    ~ (isPointAtInfinity #Jacobian (point_as_nat c h p)))
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
     let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in
@@ -149,8 +150,10 @@ inline_for_extraction noextract
 val secretToPublic: #c: curve -> #l: ladder -> result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
-  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
-    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
+  Stack unit 
+  (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result] /\ 
+    scalar_as_nat (as_seq h scalar) < getOrder #c)
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let p0 = basePoint #c in 
     let qD = point_as_nat c h1 result in
@@ -162,8 +165,10 @@ inline_for_extraction noextract
 val secretToPublicWithoutNorm: #c: curve -> #l: ladder ->  result: point c 
   -> scalar: scalar_t #MUT #c
   -> tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
-  Stack unit (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
-    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result])
+  Stack unit
+  (requires fun h -> live h result /\ live h scalar /\ live h tempBuffer /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc tempBuffer; loc scalar; loc result] /\
+    scalar_as_nat (as_seq h scalar) < getOrder #c)
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let p0 = basePoint #c in 
     let qD = fromDomainPoint #c #DH (point_as_nat c h1 result) in

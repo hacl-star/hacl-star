@@ -430,7 +430,7 @@ val uploadBasePoint: #c: curve -> p: point c -> Stack unit
   (requires fun h -> live h p)
   (ensures fun h0 _ h1 -> 
     modifies (loc p) h0 h1 /\ point_eval c h1 p /\ 
-    ~ (isPointAtInfinity #c #Jacobian (point_as_nat c h1 p)) /\ 
+    ~ (isPointAtInfinity #Jacobian (point_as_nat c h1 p)) /\ 
     basePoint #c == fromDomainPoint #c #DH (point_as_nat c h1 p))
 
 let uploadBasePoint #c p = 

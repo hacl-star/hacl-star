@@ -61,7 +61,7 @@ val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z
   (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out |+| loc temp) h0 h1 /\
     felem_eval c h1 x3_out /\ felem_eval c h1 y3_out /\ felem_eval c h1 z3_out /\ (
     let x, y = point_affine_x_as_nat c h0 p, point_affine_y_as_nat c h0 p in
-    if isPointAtInfinity #c #Jacobian (point_as_nat c h0 mask) then
+    if isPointAtInfinity #Jacobian (point_as_nat c h0 mask) then
       as_nat c h1 x3_out == x /\
       as_nat c h1 y3_out == y /\ 
       as_nat c h1 z3_out == 1
@@ -570,7 +570,7 @@ val computeXYZ: #c: curve -> result: point c
 
     let x3, y3, z3 = point_as_nat c h1 result in
     let p = point_as_nat c h0 p in 
-    let q = toJacobianCoordinates #c (point_affine_as_nat c h0 q) in 
+    let q = toJacobianCoordinates (point_affine_as_nat c h0 q) in 
 
     let pxD, pyD, pzD = fromDomainPoint #c #DH p in 
     let qxD, qyD, qzD = fromDomainPoint #c #DH q in 
@@ -581,9 +581,9 @@ val computeXYZ: #c: curve -> result: point c
     let s1D = fromDomain #c (as_nat c h0 s1) in 
     let u1D = fromDomain #c (as_nat c h0 u1) in  
 
-    if isPointAtInfinity #c #Affine (fromDomainPoint #c #DH q) then
+    if isPointAtInfinity #Affine (fromDomainPoint #c #DH q) then
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
-    else if isPointAtInfinity #c #Jacobian (fromDomainPoint #c #DH p) then 
+    else if isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p) then 
       x3D ==  qxD /\  y3D == qyD /\ z3D == qzD
     else 
       x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
@@ -625,7 +625,7 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c
   
     let x3, y3, z3 = point_as_nat c h1 result in
     let p = point_as_nat c h0 p in 
-    let q = toJacobianCoordinates #c (point_affine_as_nat c h0 q) in 
+    let q = toJacobianCoordinates (point_affine_as_nat c h0 q) in 
 
     let pxD, pyD, pzD = fromDomainPoint #c #DH p in 
     let qxD, qyD, qzD = fromDomainPoint #c #DH q in 
@@ -637,9 +637,9 @@ val _point_add_if_second_branch_impl: #c: curve -> result: point c
     let s1D = fromDomain #c (as_nat c h0 s1) in 
     let u1D = fromDomain #c (as_nat c h0 u1) in  
     
-    if isPointAtInfinity #c #Affine (fromDomainPoint #c #DH q) then 
+    if isPointAtInfinity #Affine (fromDomainPoint #c #DH q) then 
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
-    else if isPointAtInfinity #c #Jacobian (fromDomainPoint #c #DH p) then 
+    else if isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p) then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
       x3 == toDomain #c ((rD * rD - hD * hD * hD - 2 * hD * hD * u1D) % prime) /\ 
@@ -725,7 +725,7 @@ let point_add_mixed_ #c p q result tempBuffer =
 
   let x3, y3, z3 = point_as_nat c h2 result in
   let p = point_as_nat c h0 p in 
-  let q = toJacobianCoordinates #c (point_affine_as_nat c h0 q) in 
+  let q = toJacobianCoordinates (point_affine_as_nat c h0 q) in 
 
   let pxD, pyD, pzD = fromDomainPoint #c #DH p in 
   let qxD, qyD, qzD = fromDomainPoint #c #DH q in 
@@ -802,9 +802,9 @@ let point_add_mixed_ #c p q result tempBuffer =
     let hD = (u2D - u1D) % prime in
     let rD = (s2D - s1D) % prime in
     
-    if isPointAtInfinity #c #Affine (fromDomainPoint #c #DH q) then 
+    if isPointAtInfinity #Affine (fromDomainPoint #c #DH q) then 
       x3D == pxD /\ y3D == pyD /\ z3D == pzD
-    else if isPointAtInfinity #c #Jacobian (fromDomainPoint #c #DH p) then 
+    else if isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p) then 
       x3D == qxD /\  y3D == qyD /\ z3D == qzD
     else 
       x3D == (((rD * rD) - (hD * hD * hD) - (2 * u1D * (hD * hD))) % prime) /\ 

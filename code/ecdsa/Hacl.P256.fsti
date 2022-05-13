@@ -261,7 +261,7 @@ val verify_q_public:
       (
         let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in 
         let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-        let pkJ = Spec.ECC.toJacobianCoordinates #P256 (publicKeyX, publicKeyY) in 
+        let pkJ = Spec.ECC.toJacobianCoordinates (publicKeyX, publicKeyY) in 
         r == Spec.ECDSA.verifyQValidCurvePointSpec #P256 pkJ
       )
     )
@@ -279,7 +279,7 @@ val verify_q_private:
       (
         let publicKeyX = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 0) (size 32))) in 
         let publicKeyY = nat_from_bytes_be (as_seq h1 (gsub pubKey (size 32) (size 32))) in
-        let pkJ = Spec.ECC.toJacobianCoordinates #P256 (publicKeyX, publicKeyY) in 
+        let pkJ = Spec.ECC.toJacobianCoordinates (publicKeyX, publicKeyY) in 
         r == Spec.ECDSA.verifyQValidCurvePointSpec #P256 pkJ
       )
     )
@@ -637,7 +637,7 @@ val point_toForm: i: pointAffine8 P256 -> o: point P256 -> Stack unit
     let pointScalarXSeq = nat_from_bytes_be (as_seq h0 (getXAff8 i))  in 
     let pointScalarYSeq = nat_from_bytes_be (as_seq h0 (getYAff8 i)) in 
     let x, y, z = as_nat P256 h1 (getX o), as_nat P256 h1 (getY o), as_nat P256 h1 (getZ o) in  
-    let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates #P256 (pointScalarXSeq, pointScalarYSeq) in 
+    let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (pointScalarXSeq, pointScalarYSeq) in 
     x == pointScalarXSeq /\ y == pointScalarYSeq /\ z == 1 /\
     x == pointJacX /\ y == pointJacY /\ z == pointJacZ))
 

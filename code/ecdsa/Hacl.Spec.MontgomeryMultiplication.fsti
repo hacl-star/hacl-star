@@ -24,15 +24,15 @@ let invert_mode (m: mode): Lemma
 
 let getModePrime (m: mode) (c: curve) : nat = match m with |DH -> getPrime c |DSA -> getOrder #c
 
-let point_prime_mm #c #m = p: point_nat {let (x, y, z) = p in x < getModePrime m c /\ y < getModePrime m c /\ 
-  z < getModePrime m c}
+let point_prime_mm #c #m = p: point_jacobian_nat {
+  let (x, y, z) = p in x < getModePrime m c /\ y < getModePrime m c /\ z < getModePrime m c}
 
 
 noextract
 val fromDomain_: #c: curve -> #m: mode -> a: int -> Tot (a: nat {a < getModePrime m c})
 
 noextract
-val fromDomainPoint: #c: curve -> #m: mode -> a: point_nat ->
+val fromDomainPoint: #c: curve -> #m: mode -> a: point_jacobian_nat ->
   Tot (r: point_prime_mm #c #m {
     let x, y, z = a in
     let x3, y3, z3 = r in 
@@ -58,8 +58,8 @@ val lemmaToDomain: #c: curve -> #m: mode -> a: int -> Lemma (toDomain_ #c #m a =
 val lemma_mod_inv2_mult_prime: prime: pos {prime > 3 /\ Math.Euclid.is_prime prime} -> a: nat {a % prime <> 0} -> 
   Lemma (a * modp_inv2_prime a prime % prime == 1)
 
-val lemma_norm: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity #c #Jacobian p)} 
-  -> q: point_nat_prime #c {~ (isPointAtInfinity #c #Jacobian q)} ->  Lemma (
+val lemma_norm: #c: curve -> p: point_nat_prime #c {~ (isPointAtInfinity #Jacobian p)} 
+  -> q: point_nat_prime #c {~ (isPointAtInfinity #Jacobian q)} ->  Lemma (
   let pX, pY, pZ = p in
   let qX, qY, qZ = q in 
   let pNX, pNY, pNZ = _norm #c p in 
@@ -138,5 +138,5 @@ val lemma_modular_multiplication_2_d: #c: curve ->
 (* https://crypto.stackexchange.com/questions/43869/point-at-infinity-and-error-handling*)
 val lemma_pointAtInfInDomain: #c: curve -> x: nat -> y: nat -> z: nat {z < getPrime c} -> 
   Lemma (
-    isPointAtInfinity #c #Jacobian (x, y, z) == 
-    isPointAtInfinity #c #Jacobian ((fromDomain_ #c #DH x), (fromDomain_ #c #DH y), (fromDomain_ #c #DH z)))
+    isPointAtInfinity #Jacobian (x, y, z) == 
+    isPointAtInfinity #Jacobian ((fromDomain_ #c #DH x), (fromDomain_ #c #DH y), (fromDomain_ #c #DH z)))

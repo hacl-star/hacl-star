@@ -319,7 +319,7 @@ let exponent_spec #c a =
 
 
 val verifyQValidCurvePointSpec: #c: curve 
-  -> publicKey:tuple3 nat nat nat{~(isPointAtInfinity #c #Jacobian publicKey)} -> bool
+  -> publicKey: point_jacobian_nat -> bool
 
 let verifyQValidCurvePointSpec #c publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
@@ -329,7 +329,7 @@ let verifyQValidCurvePointSpec #c publicKey =
   z < prime &&
   isPointOnCurve #c (x, y, z) && (
   if (isPrimeGroup c) then true else 
-    isPointAtInfinity #c #Jacobian (scalar_multiplication #c (prime_order_seq #c) publicKey))
+    isPointAtInfinity #Jacobian (scalar_multiplication #c (prime_order_seq #c) publicKey))
 
 
 (* Check that {\displaystyle Q_{A}}Q_{A} is not equal to the identity element O, and its coordinates are otherwise valid *)
@@ -383,6 +383,15 @@ let hashSpec c alg mLen m =
   changeEndian_u8 (getCoordinateLen c) (Lib.ByteSequence.nat_from_intseq_le message % pow2 (getPower c))
 
 
+val lemma_infinity_not_on_curve: #c: curve -> Lemma (
+    forall (p: point_nat #Affine {
+	  (verifyQValidCurvePointSpec #c (toJacobianCoordinates p))}). 
+     isPointAtInfinity #Affine p <==> 
+       ~ (isPointOnCurve #c (toJacobianCoordinates p)))
+
+let lemma_infinity_not_on_curve #c = ()
+
+
 val ecdsa_verification:
   c: curve 
   -> alg: hash_alg_ecdsa
@@ -403,39 +412,23 @@ let ecdsa_verification c alg publicKey r s mLen m =
     if not ((checkCoordinates #c) r s) then false
     else
       begin
-      let hashM = hashSpec c alg mLen m in
-      let hashNat = hashM % order in 
+	let hashM = hashSpec c alg mLen m in
+	let hashNat = hashM % order in
 
-      let u1 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * hashNat % order) in
-      let u2 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * r % order) in 
+	let u1 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * hashNat % order) in
+	let u2 = nat_to_bytes_be (getCoordinateLen c) (pow s (order - 2) * r % order) in 
 
-      point_mult_0  #c  (basePoint #c) 0;
-      point_mult_0 #c publicJacobian 0;
-      let u1D, _ = montgomery_ladder_spec_left #c u1 (pointAtInfinity #c, basePoint #c) in
-      let u2D, _ = montgomery_ladder_spec_left #c u2 (pointAtInfinity #c, publicJacobian) in
+	point_mult_0  #c (basePoint #c) 0;
+	point_mult_0 #c publicJacobian 0;
+	
+	let u1D = secret_to_public #c u1 in 
+	  lemma_infinity_not_on_curve #c;
+	let u2D = scalar_multiplication #c u2 publicJacobian in
 
-      let sumPoints = pointAdd #c u1D u2D in
-      let pointNorm = _norm #c sumPoints in
-      let x, y, z = pointNorm in
-      if isPointAtInfinity #c #Jacobian pointNorm then false else x % order = r
-
-
-      (*  let order = getOrder #c in 
-    
-    let message = hashSpec c alg (v mLen) (as_seq h0 m) % order in 
-    let p0 = pow (as_nat c h0 s) (order - 2) * message % order in 
-    let p1 = pow (as_nat c h0 s) (order - 2) * as_nat c h0 r % order in 
-    let u1 = nat_to_bytes_be (v (getCoordinateLenU c)) p0 in 
-    let u2 = nat_to_bytes_be (v (getCoordinateLenU c)) p1 in
-
-    point_mult0_is_infinity (basePoint #c); point_mult0_is_infinity (point_as_nat c h0 pubKeyAsPoint);
-    
-    let u1D, _ = montgomery_ladder_spec_left #c u1 (pointAtInfinity, basePoint #c) in
-    let u2D, _ = montgomery_ladder_spec_left #c u2 (pointAtInfinity, point_as_nat c h0 pubKeyAsPoint) in
-    let normSum = _norm (pointAdd #c u1D u2D) in 
-    let xN, yN, zN = normSum in 
-    as_nat c h1 x == xN % order /\
-    isPointAtInfinityState = not (isPointAtInfinity normSum) *)
+	let sumPoints = pointAdd #c u1D u2D in
+	let pointNorm = _norm #c sumPoints in
+	let x, y, z = pointNorm in
+	if isPointAtInfinity #Jacobian pointNorm then false else x % order = r
     end
   end
 

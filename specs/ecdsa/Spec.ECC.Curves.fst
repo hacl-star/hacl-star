@@ -25,13 +25,9 @@ let rec exp #n a b =
     if b % 2 = 0 then exp #n (fmul #n a a) (b / 2)
     else fmul #n a (exp #n (fmul #n a a) (b / 2))
 
-let point_nat = tuple3 nat nat nat
-
-let point_affine_nat = tuple2 nat nat
-
 
 noextract
-val pow: a:nat -> b:nat -> nat
+val pow: a: nat -> b: nat -> nat
 
 let rec pow a b =
   if b = 0 then 1
@@ -39,7 +35,6 @@ let rec pow a b =
 
 
 #push-options "--fuel 1"
-
 
 val power_as_specification_same_as_fermat: a: nat -> b: nat -> Lemma (pow a b == FStar.Math.Fermat.pow a b)
 
@@ -84,7 +79,6 @@ let invert_state_s (a: curve): Lemma
   = allow_inversion (curve)
 
 
-
 (** Curve parameters **)
 
 let prime256: (a: pos {a > 3 && a < pow2 256}) =
@@ -127,6 +121,7 @@ let getCoordinateLenU64 curve =
   |_ -> 4ul
 
 
+(* the length of the point as uint64 *)
 inline_for_extraction noextract
 val getPointLenU64: c: curve -> Tot size_t
 
@@ -225,15 +220,36 @@ let getOrder (#c: curve) : (a: pos{a > pow2 64 /\ a < pow2 (getPower c) /\ pow2 
     orderp384
 
 
+type coordSyst = 
+  |Affine 
+  |Jacobian
 
+(* points that are not bound by a prime *)
+let point_jacobian_nat = tuple3 nat nat nat
+
+let point_affine_nat = tuple2 nat nat
+
+let invert_point (a: coordSyst): Lemma
+  (requires True)
+  (ensures (inversion coordSyst))
+  [SMTPat (coordSyst) ]
+  = allow_inversion (coordSyst)
+
+
+let point_nat #coordSyst = 
+  match coordSyst with 
+  |Affine -> point_affine_nat
+  |Jacobian -> point_jacobian_nat
+
+
+(* points that are bound by a prime *)
 let nat_prime #curve = n:nat{n < getPrime curve}
 
-
 let point_nat_prime #curve = 
-  p: point_nat{let (a, b, c) = p in a < getPrime curve /\ b < getPrime curve /\ c < getPrime curve}
+  p: point_jacobian_nat{let (a, b, c) = p in a < getPrime curve /\ b < getPrime curve /\ c < getPrime curve}
 
 let point_nat_prime_precomputed #curve = 
-  p: point_nat{let (a, b, c) = p in a < getPrime curve /\ b < getPrime curve /\ c < getPrime curve}
+  p: point_jacobian_nat{let (a, b, c) = p in a < getPrime curve /\ b < getPrime curve /\ c < getPrime curve}
 
 
 let point_affine_nat_prime #curve = 

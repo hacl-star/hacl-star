@@ -144,7 +144,7 @@ let rec lemma_point_mult_equal_points #c p0 p1 i =
 
 
 val lemma_point_mult_of_point_infinity: #c: curve 
-  -> p: Spec.ECC.point #c {isPointAtInfinity #c p} 
+  -> p: Spec.ECC.point #c {isPointAtInfinity #Jacobian p} 
   -> a: nat ->
   Lemma (isPointAtInfinity (point_mult a p))
 
@@ -164,13 +164,13 @@ val not_equal_precomputed1: #c: curve
   Lemma (
     let pa = point_mult #c a p0 in 
     let pb = point_mult #c b p0 in 
-    ~ (pointEqual pa pb) \/ (isPointAtInfinity #c #Jacobian pa /\ isPointAtInfinity #c #Jacobian pb))
+    ~ (pointEqual pa pb) \/ (isPointAtInfinity #Jacobian pa /\ isPointAtInfinity #Jacobian pb))
 
 let not_equal_precomputed1 #c a b p0 = 
   let pa = point_mult #c a p0 in 
   let pb = point_mult #c b p0 in  
 
-  if (isPointAtInfinity #c p0) then begin
+  if (isPointAtInfinity p0) then begin
      lemma_point_mult_of_point_infinity p0 a;
      lemma_point_mult_of_point_infinity p0 b
     end
@@ -207,7 +207,7 @@ val not_equal_precomputed: #c: curve
   (ensures (
     let p_16 = Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
     ~ (pointEqual #c p_16 (point_mult #c si p0)) \/ (
-    isPointAtInfinity #c #Jacobian p_16 /\ isPointAtInfinity #c #Jacobian (point_mult #c si p0))))
+    isPointAtInfinity #Jacobian p_16 /\ isPointAtInfinity #Jacobian (point_mult #c si p0))))
 
 let not_equal_precomputed #c z p p0 si = 
   lemma_point_mult_associativity #c z 16 p0;
@@ -247,7 +247,7 @@ val not_equal_precomputed2: #c: curve
   Lemma (
     let p_16 = Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
     ~ (pointEqual #c p_16 (point_mult #c si p0)) \/ (
-    isPointAtInfinity #c #Jacobian p_16 /\ isPointAtInfinity #c #Jacobian (point_mult #c si p0)))
+    isPointAtInfinity #Jacobian p_16 /\ isPointAtInfinity #Jacobian (point_mult #c si p0)))
 
 let not_equal_precomputed2 #c p0 p si = 
   let z = get_exists #c p0 p in 
@@ -255,8 +255,8 @@ let not_equal_precomputed2 #c p0 p si =
   
   
 val lemma_point_at_infinity_after_point_double: #c: curve 
-  -> p: Spec.ECC.point #c #Jacobian {isPointAtInfinity #c p} -> 
-  Lemma (isPointAtInfinity #c (_point_double p))
+  -> p: Spec.ECC.point #c #Jacobian {isPointAtInfinity p} -> 
+  Lemma (isPointAtInfinity (_point_double p))
 
 let lemma_point_at_infinity_after_point_double #c p = 
   let pd = _point_double p in 
@@ -273,7 +273,7 @@ let lemma_point_at_infinity_after_point_double #c p =
 
   FStar.Math.Lemmas.small_mod 0 prime;  
   assert (z3 == 0);
-  assert (isPointAtInfinity #c (x3, y3, z3))
+  assert (isPointAtInfinity (x3, y3, z3))
 
 
 inline_for_extraction noextract  
@@ -314,16 +314,16 @@ let radix_step_precomputed #c p tempBuffer scalar i =
     let pRadixed = Spec.ECC.Radix.getPointDoubleNTimes #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) 4 in
     let pointPrecomputed = Spec.ECC.Radix.getPrecomputedPoint #c #Affine (basePoint #c) si in 
 
-    curve_compatibility_with_translation_lemma_1  (fromDomainPoint #c #DH (toJacobianCoordinates #c (point_affine_as_nat c h1 pointToAdd))) (point_mult #c si (basePoint #c)) pRadixed;
+    curve_compatibility_with_translation_lemma_1  (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd))) (point_mult #c si (basePoint #c)) pRadixed;
 
     not_equal_precomputed2 #c (basePoint #c) (fromDomainPoint #c #DH (point_as_nat c h0 p)) si;
 
-    if (isPointAtInfinity #c #Jacobian pRadixed && isPointAtInfinity #c #Jacobian pointPrecomputed) then 
+    if (isPointAtInfinity #Jacobian pRadixed && isPointAtInfinity  #Jacobian pointPrecomputed) then 
 	lemma_point_at_infinity_after_point_double #c pRadixed
     else
       begin 
-	curve_compatibility_with_translation_lemma_1 (fromDomainPoint #c #DH (toJacobianCoordinates #c (point_affine_as_nat c h1 pointToAdd))) pointPrecomputed pRadixed;
-	curve_compatibility_with_translation_lemma_1  (pointAdd pRadixed (fromDomainPoint #c #DH (toJacobianCoordinates #c (point_affine_as_nat c h1 pointToAdd)))) (pointAdd pRadixed pointPrecomputed) (fromDomainPoint #c #DH (point_as_nat c h3 p))
+	curve_compatibility_with_translation_lemma_1 (fromDomainPoint #c #DH (toJacobianCoordinates  (point_affine_as_nat c h1 pointToAdd))) pointPrecomputed pRadixed;
+	curve_compatibility_with_translation_lemma_1  (pointAdd pRadixed (fromDomainPoint #c #DH (toJacobianCoordinates  (point_affine_as_nat c h1 pointToAdd)))) (pointAdd pRadixed pointPrecomputed) (fromDomainPoint #c #DH (point_as_nat c h3 p))
       end
 
 
@@ -347,7 +347,7 @@ let radix_precomputed_upload_point #c p scalar =
     let h2 = ST.get() in 
     
   let pX, pY = point_affine_as_nat c h1 pXpY in 
-  if isPointAtInfinity #c #Affine (pX, pY) then 
+  if isPointAtInfinity  #Affine (pX, pY) then 
     begin
       Hacl.Spec.MontgomeryMultiplication.lemma_pointAtInfInDomain #c 0 0 0;
       let f = (Math.Lib.arithmetic_shift_right (scalar_as_nat (as_seq h0 scalar)) (v (getScalarLen c) - 4) % pow2 4) in 
@@ -398,12 +398,11 @@ val secret_to_public_radix: #c: curve -> #buf_type: buftype
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c)  -> 
   Stack unit
   (requires fun h -> live h p /\ live h scalar /\ live h tempBuffer /\ 
-    point_eval c h p /\ LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar] /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar] /\ 
     scalar_as_nat (as_seq h scalar) < getOrder #c)
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 p /\ (
     let p_n = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
     pointEqual p_n (point_mult #c (scalar_as_nat (as_seq h0 scalar)) (basePoint #c))))
-
 
 let secret_to_public_radix #c #a p scalar tempBuffer =  
   let h0 = ST.get() in 
@@ -439,7 +438,7 @@ let tableInvariant (c: curve) (h: mem) (precomputedTable: lbuffer uint64 (getPoi
     point_eval c h pi /\ point_eval c h p1 /\ (
     let pi = fromDomainPoint #c #DH (point_as_nat c h pi) in 
     let p1 = fromDomainPoint #c #DH (point_as_nat c h p1) in 
-    ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c i p1))
+    ~ (isPointAtInfinity  p1) /\ pointEqual pi (point_mult #c i p1))
 
 
 val getPointTableLemma: #c: curve 
@@ -726,7 +725,7 @@ let montgomery_ladder_step_radix_0 #c #b p scalar precomputedTable i tempBuffer 
 
 
 val montgomery_ladder_step_radix_1_lemma: #c: curve -> scalar: scalar_bytes #c
-  -> p0: point_nat_prime #c {~ (isPointAtInfinity #c p0)} 
+  -> p0: point_nat_prime #c {~ (isPointAtInfinity  p0)} 
   -> p: point_nat_prime #c {exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p0)} 
   -> pi: point_nat_prime #c -> r: point_nat_prime #c 
   -> i: nat {i >= 1 /\ i < v (getScalarLenBytes c) * 2} -> 
@@ -790,7 +789,7 @@ let montgomery_ladder_step_radix #c #b p scalar table i tempBuffer r =
 
 
 val lemma_pointAtInfInDomain1: #c: curve -> p: Spec.ECC.point #c -> Lemma 
-  (isPointAtInfinity #c #Jacobian p == isPointAtInfinity #c #Jacobian (fromDomainPoint #c #DH p))
+  (isPointAtInfinity #Jacobian p == isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p))
 
 let lemma_pointAtInfInDomain1 #c p = 
   let (x, y, z) = p in 
@@ -826,7 +825,7 @@ val generatePrecomputedTable_0: #c: curve
   Stack unit
   (requires fun h -> live h precomputedTable /\ live h publicKey /\ point_eval c h publicKey /\ 
     disjoint publicKey precomputedTable /\ 
-    ~ (isPointAtInfinity #c (fromDomainPoint #c #DH (point_as_nat c h publicKey))))
+    ~ (isPointAtInfinity (fromDomainPoint #c #DH (point_as_nat c h publicKey))))
   (ensures fun h0 _ h1 -> modifies (loc precomputedTable) h0 h1 /\ (
     forall (i: nat {i < 2}). 
       let p1 = getPointTable c precomputedTable 1 in
@@ -835,7 +834,7 @@ val generatePrecomputedTable_0: #c: curve
       let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p1) in 
       let p  = fromDomainPoint #c #DH (point_as_nat c h0 publicKey) in
       pointEqual #c p p1 /\
-      ~ (isPointAtInfinity #c p1) /\ (exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p1)) /\ 
+      ~ (isPointAtInfinity p1) /\ (exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p1)) /\ 
 	pointEqual pi (point_mult #c i p1))))
 
 let generatePrecomputedTable_0 #c table publicKey = 
@@ -1068,7 +1067,7 @@ val lemma_preserves_precomputed_table: #c: curve -> i: size_t {v i >= 1 /\ v i <
       let pi = getPointTable c table j in point_eval c h0 pi /\ point_eval c h0 p1 /\ (
       let p1 = fromDomainPoint #c #DH (point_as_nat c h0 p1) in  
       let pi = fromDomainPoint #c #DH (point_as_nat c h0 pi) in 
-      ~ (isPointAtInfinity #c p1) /\ 
+      ~ (isPointAtInfinity p1) /\ 
       pointEqual pi (point_mult #c j p1) /\
       pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 point_2n)) (point_mult #c (2 * v i) p1) /\ 
       pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 point_2n_1)) (point_mult #c (2 * v i + 1) p1))))))
@@ -1079,7 +1078,7 @@ val lemma_preserves_precomputed_table: #c: curve -> i: size_t {v i >= 1 /\ v i <
       point_as_nat c h0 p1 == point_as_nat c h1 p1 /\ (
       let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p1) in 
       let pi = fromDomainPoint #c #DH (point_as_nat c h1 pi) in 
-      ~ (isPointAtInfinity #c p1) /\ (pointEqual pi (point_mult #c j p1)))))
+      ~ (isPointAtInfinity p1) /\ (pointEqual pi (point_mult #c j p1)))))
 
 let lemma_preserves_precomputed_table #c i h0 h1 table tempBuffer = 
   lemma_not_modifies_all_points_before_index i h0 h1 table (loc tempBuffer);
@@ -1163,7 +1162,7 @@ val generatePrecomputedResultOfPointAddAndDouble: #c: curve
     let p_2n_1 =  getPointTable c table (2 * i + 1) in 
     point_eval c h1 p_1 /\ point_eval c h0 p_n /\ point_eval c h2 p_2n /\ point_eval c h2 p_2n_1 /\ (
     let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p_1) in 
-    pointEqual (fromDomainPoint #c #DH (point_as_nat c h0 p_n)) (point_mult #c i p1) /\ ~ (isPointAtInfinity #c p1) /\
+    pointEqual (fromDomainPoint #c #DH (point_as_nat c h0 p_n)) (point_mult #c i p1) /\ ~ (isPointAtInfinity p1) /\
     fromDomainPoint #c #DH (point_as_nat c h2 p_2n) == _point_double #c (fromDomainPoint #c #DH (point_as_nat c h0 p_n)) /\
     fromDomainPoint #c #DH (point_as_nat c h2 p_2n_1) == _point_add #c (fromDomainPoint #c #DH (point_as_nat c h2 p_2n)) (fromDomainPoint #c #DH (point_as_nat c h1 p_1)))))
   (ensures (
@@ -1196,7 +1195,7 @@ val generatePrecomputedTable_step: #c: curve -> precomputedTable: lbuffer uint64
     forall (j: nat {j < 2 * v i}). 
       let pi = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable j)) in 
       let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable 1)) in 
-      ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c j p1)))
+      ~ (isPointAtInfinity p1) /\ pointEqual pi (point_mult #c j p1)))
   (ensures fun h0 _ h1 -> modifies (loc precomputedTable |+| loc tempBuffer) h0 h1 /\ (
     forall (j: nat {j <= 2 * v i + 1}). 
       let p1 = getPointTable c precomputedTable 1 in
@@ -1204,7 +1203,7 @@ val generatePrecomputedTable_step: #c: curve -> precomputedTable: lbuffer uint64
 	point_as_nat c h0 p1 == point_as_nat c h1 p1 /\ (
       let pi = fromDomainPoint #c #DH (point_as_nat c h1 pi) in 
       let p1 = fromDomainPoint #c #DH (point_as_nat c h1 p1) in 
-      ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c j p1))))
+      ~ (isPointAtInfinity p1) /\ pointEqual pi (point_mult #c j p1))))
 
 let generatePrecomputedTable_step #c table i tempBuffer =
   let pointLen = getPointLenU64 c in 
@@ -1241,7 +1240,7 @@ val generatePrecomputedTable_loop: #c: curve -> precomputedTable: lbuffer uint64
     forall (i: nat {i < 2}). 
       let pi = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable i)) in 
       let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable 1)) in 
-      ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c i p1))))
+      ~ (isPointAtInfinity p1) /\ pointEqual pi (point_mult #c i p1))))
   (ensures fun h0 _ h1 -> modifies (loc precomputedTable |+| loc tempBuffer) h0 h1 /\ tableInvariant c h1 precomputedTable /\ (
     let p1 = getPointTable c precomputedTable 1 in
     point_as_nat c h0 p1 == point_as_nat c h1 p1))
@@ -1255,7 +1254,7 @@ let generatePrecomputedTable_loop #c table tempBuffer =
     forall (j: nat {j < 2 * i}). 
       let pi = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c table j)) in 
       let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c table 1)) in 
-      ~ (isPointAtInfinity #c p1) /\ pointEqual pi (point_mult #c j p1) /\
+      ~ (isPointAtInfinity p1) /\ pointEqual pi (point_mult #c j p1) /\
 	point_as_nat c h0 (getPointTable c table 1) == point_as_nat c h (getPointTable c table 1)) in
   for 1ul 8ul inv (fun i -> generatePrecomputedTable_step #c table i tempBuffer)
 
@@ -1269,7 +1268,7 @@ val generatePrecomputedTable: #c: curve
     live h precomputedTable /\ live h publicKey /\ live h tempBuffer /\ 
     point_eval c h publicKey /\ 
     disjoint publicKey precomputedTable /\ disjoint precomputedTable tempBuffer /\
-    ~ (isPointAtInfinity #c (fromDomainPoint #c #DH (point_as_nat c h publicKey))))
+    ~ (isPointAtInfinity (fromDomainPoint #c #DH (point_as_nat c h publicKey))))
   (ensures fun h0 _ h1 ->
     modifies (loc precomputedTable |+| loc tempBuffer) h0 h1 /\ tableInvariant c h1 precomputedTable /\ (
     let p1 = getPointTable c precomputedTable 1 in
@@ -1417,7 +1416,7 @@ val scalar_mult_radix: #c: curve -> #t:buftype
     LowStar.Monotonic.Buffer.all_disjoint [loc publicKey; loc tempBuffer; loc scalar] /\ 
     point_eval c h publicKey /\
     scalar_as_nat (as_seq h scalar) < getOrder #c /\
-    ~ (isPointAtInfinity #c (fromDomainPoint #c #DH (point_as_nat c h publicKey))))
+    ~ (isPointAtInfinity (fromDomainPoint #c #DH (point_as_nat c h publicKey))))
   (ensures fun h0 _ h1 -> modifies (loc publicKey |+| loc tempBuffer) h0 h1 /\ 
     point_eval c h1 publicKey /\ (
     let result = fromDomainPoint #c #DH (point_as_nat c h1 publicKey) in 

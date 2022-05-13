@@ -18,7 +18,7 @@ val ecp256_dh_i: #c: curve
 
 let ecp256_dh_i #c s =
   let xN, yN, zN = secret_to_public #c s in
-  if isPointAtInfinity #c #Jacobian (xN, yN, zN) then
+  if isPointAtInfinity #Jacobian (xN, yN, zN) then
     nat_to_bytes_be (getCoordinateLen c) xN, 
     nat_to_bytes_be (getCoordinateLen c) yN, 
     false
@@ -37,10 +37,10 @@ val ecp256_dh_r: #c: curve
 
 let ecp256_dh_r #c x y s =
   let x_, y_ = nat_from_bytes_be x, nat_from_bytes_be y in 
-  let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates #c (x_, y_) in 
+  let pointJacX, pointJacY, pointJacZ = toJacobianCoordinates (x_, y_) in 
   if verifyQValidCurvePointSpec #c (pointJacX, pointJacY, pointJacZ) then 
     let xN, yN, zN = scalar_multiplication #c s (pointJacX, pointJacY, pointJacZ) in
-    if isPointAtInfinity #c #Jacobian (xN, yN, zN) then
+    if isPointAtInfinity #Jacobian (xN, yN, zN) then
       nat_to_bytes_be (getCoordinateLen c) xN, 
       nat_to_bytes_be (getCoordinateLen c) yN, 
       false

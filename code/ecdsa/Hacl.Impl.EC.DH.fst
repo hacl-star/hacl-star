@@ -74,7 +74,7 @@ val _ecp256dh_r_public: #c: curve
   (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ 
      LowStar.Monotonic.Buffer.all_disjoint [loc pubKey;  loc scalar; loc result] /\ (
     let pk = as_nat c h (getX pubKey), as_nat c h (getY pubKey), as_nat c h (getZ pubKey) in 
-    ~ (isPointAtInfinity #c #Jacobian pk) /\ as_nat c h (getZ pubKey) == 1 /\
+    ~ (isPointAtInfinity #Jacobian pk) /\ as_nat c h (getZ pubKey) == 1 /\
     as_nat c h (getX result) == 0 /\ as_nat c h (getY result) == 0 /\ as_nat c h (getZ result) == 0))
   (ensures fun h0 r h1 -> modifies (loc result |+| loc pubKey) h0 h1 /\ point_eval c h1 result /\ (
     let pk = as_nat c h0 (getX pubKey), as_nat c h0 (getY pubKey), as_nat c h0 (getZ pubKey) in 
@@ -84,7 +84,7 @@ val _ecp256dh_r_public: #c: curve
     else begin
       let xN, yN, zN = scalar_multiplication #c (as_seq h0 scalar) pk in
       xN == x3 /\ yN == y3 /\ zN == z3 /\ (
-      if isPointAtInfinity #c #Jacobian (xN, yN, zN) then
+      if isPointAtInfinity #Jacobian (xN, yN, zN) then
 	r == false
       else
 	r == true) end))
@@ -131,7 +131,7 @@ val _ecp256dh_r_private: #c: curve
   (requires fun h -> live h result /\ live h pubKey /\ live h scalar /\ 
      LowStar.Monotonic.Buffer.all_disjoint [loc pubKey;  loc scalar; loc result] /\ (
     let pk = as_nat c h (getX pubKey), as_nat c h (getY pubKey), as_nat c h (getZ pubKey) in 
-    ~ (isPointAtInfinity #c #Jacobian pk) /\ as_nat c h (getZ pubKey) == 1 /\
+    ~ (isPointAtInfinity #Jacobian pk) /\ as_nat c h (getZ pubKey) == 1 /\
     as_nat c h (getX result) == 0 /\ as_nat c h (getY result) == 0 /\ as_nat c h (getZ result) == 0))
   (ensures fun h0 r h1 -> modifies (loc result |+| loc pubKey) h0 h1 /\ point_eval c h1 result /\ (
     let pk = as_nat c h0 (getX pubKey), as_nat c h0 (getY pubKey), as_nat c h0 (getZ pubKey) in 
@@ -141,7 +141,7 @@ val _ecp256dh_r_private: #c: curve
     else begin
       let xN, yN, zN = scalar_multiplication #c (as_seq h0 scalar) pk in
       xN == x3 /\ yN == y3 /\ zN == z3 /\ (
-      if isPointAtInfinity #c #Jacobian (xN, yN, zN) then
+      if isPointAtInfinity #Jacobian (xN, yN, zN) then
 	r == false
       else
 	r == true) end))
