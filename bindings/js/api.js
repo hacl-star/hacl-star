@@ -17,21 +17,14 @@ if (typeof module !== 'undefined') {
 
 // We now allow the user to pass a custom list of modules if they want to do
 // their own, more lightweight packaging.
-function getModulesPromise(modules) {
-  if (typeof module !== 'undefined')
-    return Promise.resolve((modules || shell.my_modules).map(m => {
-      var source = fs.readFileSync(path.resolve(__dirname, './' + m + ".wasm"));
-      return ({
-        buf: new Uint8Array(source),
-        name: m
-      });
-    }));
-  else
-    return Promise.all((modules || my_modules)
-      .map(name =>
-        fetch(name + ".wasm")
-        .then(r => r.arrayBuffer())
-        .then(buf => ({ buf, name }))));
+function getModulesPromise(modules=shell.my_modules) {
+  const readModule = async m =>
+    typeof module !== 'undefined'
+      ? new Uint8Array(await fs.promises.readFile(path.resolve(__dirname, './' + m)))
+      : (await fetch(m)).arrayBuffer();
+  return Promise.all(modules.map(async name =>
+    ({ buf: await readModule(name + ".wasm"), name })
+  ));
 }
 
 // Uncomment for debug
