@@ -10,20 +10,13 @@ var loader = require('./loader.js');
 // Test helpers
 // ------------
 
-function buf2hex(buffer) {
-  return Array.prototype.map.call(new Uint8Array(buffer), function(x) {
-    return ('00' + x.toString(16)).slice(-2);
-  }).join('');
-}
+const buf2hex = buffer => [...new Uint8Array(buffer)].map(x => `00${x.toString(16)}`.slice(-2)).join('');
 
 function hex2buf(hexString) {
-  if (hexString === "") {
+  if (hexString === "")
     return new Uint8Array(0);
-  } else {
-    return new Uint8Array(hexString.match(/.{2}/g).map(function(byte) {
-      return parseInt(byte, 16);
-    }));
-  }
+  else
+    return new Uint8Array(hexString.match(/.{2}/g).map(byte => parseInt(byte, 16)));
 }
 
 function assert(b, msg) {
