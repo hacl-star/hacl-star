@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 static const
 uint32_t
 Hacl_Impl_Blake2_Constants_sigmaTable[160U] =

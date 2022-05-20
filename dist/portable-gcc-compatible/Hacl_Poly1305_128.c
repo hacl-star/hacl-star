@@ -359,12 +359,6 @@ Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(
 
 /* SNIPPET_END: Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize */
 
-/* SNIPPET_START: Hacl_Poly1305_128_blocklen */
-
-uint32_t Hacl_Poly1305_128_blocklen = (uint32_t)16U;
-
-/* SNIPPET_END: Hacl_Poly1305_128_blocklen */
-
 /* SNIPPET_START: Hacl_Poly1305_128_poly1305_init */
 
 void Hacl_Poly1305_128_poly1305_init(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *key)

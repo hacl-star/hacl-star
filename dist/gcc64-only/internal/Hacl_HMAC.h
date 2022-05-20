@@ -40,7 +40,6 @@ extern "C" {
 #include "internal/Hacl_Hash_Blake2.h"
 #include "../Hacl_HMAC.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef struct K____uint32_t__uint64_t_s
 {
   uint32_t *fst;

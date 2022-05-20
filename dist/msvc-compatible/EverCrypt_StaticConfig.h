@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 extern bool EverCrypt_StaticConfig_hacl;
 
 extern bool EverCrypt_StaticConfig_vale;

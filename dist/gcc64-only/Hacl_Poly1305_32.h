@@ -37,9 +37,6 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-extern uint32_t Hacl_Poly1305_32_blocklen;
-
 typedef uint64_t *Hacl_Poly1305_32_poly1305_ctx;
 
 void Hacl_Poly1305_32_poly1305_init(uint64_t *ctx, uint8_t *key);

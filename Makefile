@@ -640,8 +640,34 @@ REQUIRED_FLAGS	= \
 # Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
 TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 
-# Disabled for distributions that don't include vectorized implementations.
-INTRINSIC_FLAGS = -add-include '"libintvector.h"'
+# Note: we include libintvector.h in C files whenever possible, but fall back to
+# including this header in .h when the public API of a given algorithm (e.g.
+# Poly1305/256) directly refers to a LibIntVector type.
+# Note: due to backwards-compat, the syntax for the option is not super great...
+# it's `-add-include 'Foo:"bar.h"'` (include added to Foo.h) and
+# `-add-include 'Foo.c:"bar.h"'` (include added to Foo.c). Note how the former
+# doesn't have the extension while the latter does.
+INTRINSIC_FLAGS = \
+  -add-include 'Hacl_P256.c:"lib_intrinsics.h"' \
+  \
+  -add-include 'Hacl_Chacha20Poly1305_128.c:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20_Vec128.c:"libintvector.h"' \
+  -add-include 'Hacl_SHA2_Vec128.c:"libintvector.h"' \
+  \
+  -add-include 'Hacl_Hash_Blake2s_128:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
+  -add-include 'Hacl_Streaming_Blake2s_128:"libintvector.h"' \
+  -add-include 'Hacl_Streaming_Poly1305_128:"libintvector.h"' \
+  \
+  -add-include 'Hacl_Chacha20Poly1305_256.c:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20_Vec256.c:"libintvector.h"' \
+  -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
+  \
+  -add-include 'Hacl_Hash_Blake2b_256:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
+  -add-include 'Hacl_Streaming_Blake2b_256:"libintvector.h"' \
+  -add-include 'Hacl_Streaming_Poly1305_256:"libintvector.h"'
+
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_P256:"lib_intrinsics.h"' \
@@ -900,14 +926,6 @@ dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
 #
 # Disable the EverCrypt and MerkleTree layers. Only keep Chacha20, Poly1305,
 # Curve25519 for now. Everything else in Hacl is disabled.
-dist/mozilla/Makefile.basic: INTRINSIC_FLAGS = \
-  -add-include 'Hacl_Chacha20Poly1305_128:"libintvector.h"' \
-  -add-include 'Hacl_Chacha20Poly1305_256:"libintvector.h"' \
-  -add-include 'Hacl_Chacha20_Vec128:"libintvector.h"' \
-  -add-include 'Hacl_Chacha20_Vec256:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
-  -add-include 'Hacl_P256:"lib_intrinsics.h"'
 dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
 dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519

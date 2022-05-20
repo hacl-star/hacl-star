@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_SHA3.h"
 #include "Hacl_Frodo_KEM.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Frodo64_crypto_bytes */
 
 /*

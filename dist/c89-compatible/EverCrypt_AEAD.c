@@ -25,6 +25,7 @@
 #include "EverCrypt_AEAD.h"
 
 #include "internal/Vale.h"
+#include "internal/Hacl_Spec.h"
 
 typedef struct EverCrypt_AEAD_state_s_s
 {

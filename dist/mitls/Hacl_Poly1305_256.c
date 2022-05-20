@@ -661,8 +661,6 @@ Hacl_Impl_Poly1305_Field32xN_256_fmul_r4_normalize(
   out[4U] = o4;
 }
 
-uint32_t Hacl_Poly1305_256_blocklen = (uint32_t)16U;
-
 void Hacl_Poly1305_256_poly1305_init(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *key)
 {
   Lib_IntVector_Intrinsics_vec256 *acc = ctx;

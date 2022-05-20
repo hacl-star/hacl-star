@@ -39,7 +39,6 @@ extern "C" {
 #include "Hacl_Bignum_Base.h"
 #include "Hacl_Bignum256.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Bignum4096_add */
 
 /*******************************************************************************

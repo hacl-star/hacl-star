@@ -38,7 +38,6 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_HMAC_DRBG_supported_alg */
 
 typedef Spec_Hash_Definitions_hash_alg Hacl_HMAC_DRBG_supported_alg;

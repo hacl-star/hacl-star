@@ -38,7 +38,6 @@ extern "C" {
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Hash_Blake2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Hash_Core_Blake2_update_blake2s_32 */
 
 uint64_t Hacl_Hash_Core_Blake2_update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block);
