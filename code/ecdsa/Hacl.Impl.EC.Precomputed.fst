@@ -314,8 +314,7 @@ val getPointPrecomputedMixed_: #c: curve -> #buf_type: buftype -> scalar: scalar
     let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
     let scalar = scalar_as_nat (as_seq h0 scalar) in 
     let bits = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (v i + 1) * 4) % pow2 4 in
-    pointEqual pi_fromDomain (point_mult #c bits (basePoint #c)) /\
-    pointEqual pi_fromDomain (getPrecomputedPoint #c #Jacobian (basePoint #c) bits)))
+    pointEqual pi_fromDomain (point_mult #c bits (basePoint #c))))
 
 
 let getPointPrecomputedMixed_ #c scalar i pointToAdd = 
@@ -356,8 +355,7 @@ val getPointPrecomputedMixed: #c: curve -> #buf_type: buftype -> #secrecy: secre
     let pi_fromDomain = fromDomainPoint #c #DH pointPrecomputedJacobian in 
     let scalar = scalar_as_nat #c (as_seq h0 scalar) in 
     let bits = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (v i + 1) * 4) % pow2 4 in
-    pointEqual pi_fromDomain (point_mult #c bits (basePoint #c)) /\
-    pointEqual pi_fromDomain (getPrecomputedPoint #c #Jacobian (basePoint #c) bits)))
+    pointEqual pi_fromDomain (point_mult #c bits (basePoint #c))))
 
 (* TODO: this is to change *)
 let getPointPrecomputedMixed #c #buf_type #secrecy scalar i pointToAdd = 

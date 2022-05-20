@@ -58,6 +58,8 @@ let rec lemma_lst_1 a i =
     lst_as_nat_definiton a i;
     FStar.Math.Lemmas.lemma_mod_add_distr (lst_as_nat_ a (i - 1)) (pow2 (64 * (i - 1)) * v (List.Tot.Base.index a (i - 1))) (pow2 64);
     FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_1 (v (List.Tot.Base.index a (i - 1))) 64 (64 * (i - 1))  
+
+
 val lemmaLstLastWord: a: list uint64 {List.Tot.Base.length a > 1} -> Lemma
   (v (List.Tot.Base.index a 0) == lst_as_nat a % pow2 64)
 

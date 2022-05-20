@@ -206,6 +206,7 @@ let lemmaFromDomainToDomainModuloPrime #c #m a =
     (==) {lemma_mod_inv2_mult_prime prime power}
     a % prime;}
 
+
 let lemmaToDomainFromDomainModuloPrime #c #m a = 
   let prime = getModePrime m c in 
   let power = pow2 (getPower c) in 
@@ -227,7 +228,6 @@ let lemmaToDomainFromDomainModuloPrime #c #m a =
     a % prime;}
 
 
-
 let inDomain_mod_is_not_mod #c #m a =
   let prime = getModePrime m c in 
   let power = pow2 (getPower c) in 
@@ -237,8 +237,7 @@ let inDomain_mod_is_not_mod #c #m a =
 let multiplicationInDomainNat #c #k #l #m a b =
   let prime = getModePrime m c in 
   let power = pow2 (getPower c) in 
-  
-  
+ 
   calc (==) { 
     a * b * modp_inv2_prime power prime % prime;
     (==) {}
@@ -307,8 +306,6 @@ let substractionInDomain #c #m a b =
   }
 
 
-open Lib.ByteSequence
-
 let _pow_step0 #c #m r0 r1 =
   let prime = getModePrime m c in 
   let r1 = (r0 * r1) % prime in 
@@ -327,6 +324,7 @@ let conditional_swap_pow i p q =
   if v i = 0 then (p, q) else (q, p)
 
 let lemma_swaped_steps p q = ()
+
 
 open Lib.ByteSequence
 
@@ -377,8 +375,7 @@ let lemma_odd #c index k =
 
 #push-options "--fuel 1 --ifuel 1 --z3rlimit 100"
 
-val lemma_exponen_spec:
-  #c: curve 
+val lemma_exponen_spec: #c: curve 
   -> #m: mode 
   -> k: scalar_bytes #c
   -> start:tuple2 nat nat {let st0, st1 = start in st0 == 1 /\ st1 < getModePrime m c}
@@ -389,12 +386,10 @@ val lemma_exponen_spec:
     let newIndex = v (getScalarLen c) - index in
     let f0, f1 = Lib.LoopCombinators.repeati index (_pow_step #c #m k) (start0, start1) in
     f0 == pow start1 (arithmetic_shift_right number newIndex) % getModePrime m c /\
-    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getModePrime m c
-  )
+    f1 == pow start1 (arithmetic_shift_right number newIndex + 1) % getModePrime m c)
 
 
-val lemma_exponen_spec_0:
-  #c: curve 
+val lemma_exponen_spec_0: #c: curve 
   -> #m: mode 
   -> k: scalar_bytes #c
   -> start:tuple2 nat nat {let st0, st1 = start in st0 == 1 /\ st1 < getModePrime m c} 

@@ -28,7 +28,7 @@ open Lib.LoopCombinators
 open Hacl.Spec.EC.ScalarMult.Radix
 
 
-#set-options "--z3rlimit 200 --max_ifuel 0 --max_fuel 0 "
+#set-options "--z3rlimit 100 --max_ifuel 0 --max_fuel 0 "
 
 inline_for_extraction noextract
 val getPointDoubleNTimes: #c: curve 
@@ -157,75 +157,144 @@ let rec lemma_point_mult_of_point_infinity #c p a =
     point_mult_ext (a - 1) p
 
 
-val not_equal_precomputed1: #c: curve 
-  -> a: nat {a <= 16} 
-  -> b: nat {b < getOrder #c}
-  -> p0: Spec.ECC.point #c #Jacobian -> 
-  Lemma (
-    let pa = point_mult #c a p0 in 
-    let pb = point_mult #c b p0 in 
-    ~ (pointEqual pa pb) \/ (isPointAtInfinity #Jacobian pa /\ isPointAtInfinity #Jacobian pb))
+val curve_order_is_the_smallest1: #c: curve -> p0: Spec.ECC.point #c {~ (isPointAtInfinity #Jacobian p0)} 
+  -> i: pos {i < getOrder #c} -> 
+  Lemma (~ (isPointAtInfinity (point_mult #c i p0)))
 
-let not_equal_precomputed1 #c a b p0 = 
-  let pa = point_mult #c a p0 in 
-  let pb = point_mult #c b p0 in  
+let curve_order_is_the_smallest1 #c p0 i = 
+  curve_order_is_the_smallest #c p0
 
-  if (isPointAtInfinity p0) then begin
-     lemma_point_mult_of_point_infinity p0 a;
-     lemma_point_mult_of_point_infinity p0 b
+
+val lemma_point_equal_one_infinity: #c: curve -> p0: Spec.ECC.point #c 
+  -> p1:  Spec.ECC.point #c {pointEqual p0 p1} 
+  -> Lemma (~ (isPointAtInfinity p0) <==> ~ (isPointAtInfinity p1))
+
+let lemma_point_equal_one_infinity #c p0 p1 = ()
+
+
+val point_mult_0_for_zero: #c: curve ->  p: Spec.ECC.point #c #Jacobian -> 
+  Lemma (isPointAtInfinity (point_mult #c 0 p))
+
+let point_mult_0_for_zero #c p = point_mult_0 #c p 0
+
+
+val lemma_two_points_different_coeff_not_equal: #c: curve 
+  -> p0: Spec.ECC.point #c #Jacobian {~ (isPointAtInfinity p0)}
+  -> pk: nat
+  -> p: Spec.ECC.point #c #Jacobian {pointEqual p (point_mult #c  pk p0)} 
+  -> qk: nat
+  -> q: Spec.ECC.point #c #Jacobian {pointEqual q (point_mult #c  qk p0)} -> 
+  Lemma 
+  (requires (pk <> qk /\ pk < getOrder #c /\ qk < getOrder #c))
+  (ensures (~ (pointEqual p q)))
+
+let lemma_two_points_different_coeff_not_equal #c p0 pk p qk q =
+  if pointEqual p q then 
+    begin
+      let inverseP = point_mult #c (- pk) p0 in 
+      lemmaApplPointAdd #c p0 pk p (- pk) inverseP;
+      
+      point_mult_0_for_zero #c p0;
+      assert(pointEqual (pointAdd p inverseP) (point_mult #c 0 p0));
+      assert(isPointAtInfinity (pointAdd p inverseP));
+
+      lemmaApplPointAdd #c p0 qk q (- pk) inverseP;
+      assert(pointEqual (pointAdd q inverseP) (point_mult #c (qk - pk) p0));
+      assert(qk - pk <> 0);
+
+      lemma_scalar_reduce p0 (qk - pk);   
+      assert(point_mult #c (qk - pk) p0 == point_mult #c ((qk - pk) % getOrder #c) p0);
+
+
+      curve_order_is_the_smallest #c p0;
+      assert(forall (n: pos {isPointAtInfinity (point_mult #c n p0)}). n >= getOrder #c);
+      
+      if qk <= pk then 
+	begin
+	  assert (qk - pk + getOrder #c < getOrder #c);
+	  FStar.Math.Lemmas.small_mod (qk - pk + getOrder #c) (getOrder #c);
+	  FStar.Math.Lemmas.lemma_mod_plus (qk - pk) 1 (getOrder #c);
+	  assert((qk - pk + getOrder #c) % getOrder #c == (qk - pk) % getOrder #c);
+	  assert((qk - pk + getOrder #c) % getOrder #c ==  (qk - pk + getOrder #c));
+	  assert((qk - pk) % getOrder #c == qk - pk + getOrder #c);
+	  assert((qk - pk) % getOrder #c <> 0)
+	end
+      else
+	begin
+	  assert(qk > pk);
+	  assert(qk < getOrder #c);
+	  assert(qk - pk < getOrder #c);
+	  FStar.Math.Lemmas.small_mod (qk - pk) (getOrder #c);
+	  assert((qk - pk) % getOrder #c == qk - pk);
+	  assert ((qk - pk) % getOrder #c <> 0)
+	end;     
+
+      curve_order_is_the_smallest1 p0 ((qk - pk) % getOrder #c);
+      assert(~ (isPointAtInfinity (point_mult #c (qk - pk) p0)));
+      lemma_point_equal_one_infinity (pointAdd q inverseP) (point_mult #c (qk - pk) p0);
+      assert(~ (isPointAtInfinity (pointAdd q inverseP)));
+      curve_compatibility_with_translation_lemma #c p q (inverseP);
+      assert(False)
     end
-  else 
-    if a = 0 || b = 0 then 
-       point_mult_0 #c p0 0
-    else
-      if pointEqual pa pb then 
-      begin
-	let inv_pb = point_mult #c (getOrder #c - b) p0 in 
-	curve_compatibility_with_translation_lemma pa pb inv_pb;
-	
-	lemma_point_mult_addition_of_coefficients #c b (getOrder #c - b) p0;
-	point_mult_0 p0 (getOrder #c); 
-	assert(isPointAtInfinity (pointAdd pb inv_pb));
-
-	lemma_point_mult_addition_of_coefficients #c a (getOrder #c - b) p0;
-	assert(pointEqual (pointAdd pa inv_pb) (point_mult (a - b + getOrder #c) p0));
-
-	curve_order_is_the_smallest p0;  
-	assert(~ (isPointAtInfinity (point_mult (a - b + getOrder #c) p0)));
-
-	assert(False)
-      end
 
 
 val not_equal_precomputed: #c: curve 
-  -> z: nat
+  -> z: pos
   -> p: Spec.ECC.point #c #Jacobian
-  -> p0: Spec.ECC.point #c #Jacobian 
-  -> si: nat {si <= 16} -> 
+  -> p0: Spec.ECC.point #c #Jacobian {~ (isPointAtInfinity p0)}
+  -> si: nat {si < 16} -> 
   Lemma
   (requires ((z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0)))
   (ensures (
     let p_16 = Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
-    ~ (pointEqual #c p_16 (point_mult #c si p0)) \/ (
-    isPointAtInfinity #Jacobian p_16 /\ isPointAtInfinity #Jacobian (point_mult #c si p0))))
+    ~ (pointEqual #c p_16 (point_mult #c si p0)) \/ isPointAtInfinity p_16))
 
 let not_equal_precomputed #c z p p0 si = 
+  let o = getOrder #c in 
+  let p_16 = Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in
+
   lemma_point_mult_associativity #c z 16 p0;
+    assert(pointEqual (point_mult 16 (point_mult z p0)) (point_mult (16 * z) p0));
+    
   lemma_point_mult_equal_points (point_mult z p0) p 16;
-  not_equal_precomputed1 #c si (16 * z) p0
+    assert(pointEqual (point_mult 16 p) (point_mult (16 * z) p0));
+
+
+  if z = 0 then
+    begin
+      assert(pointEqual p_16 (point_mult (16 * z) p0));
+      point_mult_0_for_zero p0;   
+      
+      assert(isPointAtInfinity (point_mult #c (16 * z) p0));
+      lemma_point_equal_one_infinity (point_mult #c (16 * z) p0) p_16;
+      
+      assert(isPointAtInfinity p_16)
+
+    end
+  else 
+    begin
+
+    assert(z <= o / 16);
+    assert(pointEqual p (point_mult #c z p0));
+    
+    assert(si <> 16 * z);
+
+    lemma_two_points_different_coeff_not_equal p0 si (point_mult #c si p0) (16 * z) (point_mult 16 p);
+    assert(~ (pointEqual (point_mult #c si p0) p_16))
+    end
 
 
 val get_exists_: #c: curve
   -> p0: Spec.ECC.point #c #Jacobian 
-  -> p: Spec.ECC.point #c #Jacobian 
-    {exists (z: nat). ((z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0))}
-  -> z_test: nat {forall (z: nat {z < z_test}).
+  -> p: Spec.ECC.point #c #Jacobian  {
+    exists (z: pos). ((z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0))}
+  -> z_test: nat {forall (z: pos {z < z_test}).
     ~  ((z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0))}
-  -> Tot (z: nat { (z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0)})
+  -> Tot (z: pos { (z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0)})
   (decreases (getOrder #c - z_test))
 
 let rec get_exists_ #c p0 p z = 
-  if (z <= getOrder #c / 16) && pointEqual p (point_mult #c z p0) 
+  if (z > 0) && (z <= getOrder #c / 16) && pointEqual p (point_mult #c z p0) 
   then z
   else get_exists_ #c p0 p (z + 1)
 
@@ -233,24 +302,23 @@ let rec get_exists_ #c p0 p z =
 val get_exists: #c: curve
   -> p0: Spec.ECC.point #c #Jacobian 
   -> p: Spec.ECC.point #c #Jacobian 
-    {exists (z: nat). ((z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0))}
-  -> Tot (z: nat { ((z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0))})
+    {exists (z: pos). ((z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0))}
+  -> Tot (z: pos { ((z <= getOrder #c / 16) /\ pointEqual p (point_mult #c z p0))})
 
 let get_exists #c p0 p = get_exists_ #c p0 p 0
 
 
 val not_equal_precomputed2: #c: curve 
-  -> p0: Spec.ECC.point #c #Jacobian
-  -> p: Spec.ECC.point #c #Jacobian
-       { exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p0)}
-  -> si: nat {si <= 16} -> 
+  -> p0: Spec.ECC.point #c #Jacobian  {~ (isPointAtInfinity p0)}
+  -> p: Spec.ECC.point #c #Jacobian {
+    exists (z: pos {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p0)}
+  -> si: nat {si < 16} -> 
   Lemma (
     let p_16 = Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
-    ~ (pointEqual #c p_16 (point_mult #c si p0)) \/ (
-    isPointAtInfinity #Jacobian p_16 /\ isPointAtInfinity #Jacobian (point_mult #c si p0)))
+    ~ (pointEqual #c p_16 (point_mult #c si p0)) \/ isPointAtInfinity p_16)
 
 let not_equal_precomputed2 #c p0 p si = 
-  let z = get_exists #c p0 p in 
+  let z : pos  = get_exists #c p0 p in 
   not_equal_precomputed #c z p p0 si
   
   
@@ -286,14 +354,23 @@ val radix_step_precomputed: #c: curve -> #buf_type: buftype
   (requires fun h -> 
     live h p /\ live h tempBuffer /\ live h scalar /\ point_eval c h p /\ (
     let fromDomainP = fromDomainPoint #c #DH (point_as_nat c h p) in 
-    exists (z: nat {z <= getOrder #c / 16}). 
-      pointEqual fromDomainP (point_mult #c z (basePoint #c)) /\
+    ((exists (z: pos {z <= getOrder #c / 16}). 
+      (pointEqual fromDomainP (point_mult #c z (basePoint #c)))) \/ isPointAtInfinity fromDomainP) /\
     LowStar.Monotonic.Buffer.all_disjoint [loc p; loc tempBuffer; loc scalar]))
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 p /\ (
     let fromDomainP_h0 = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
     let fromDomainP_h1 = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
     pointEqual fromDomainP_h1
       (Spec.ECC.Radix.radix_step #c #Affine (as_seq h0 scalar) (basePoint #c) (v i - 1) fromDomainP_h0)))
+
+
+val lemma_point_add: #c: curve 
+  -> p: Spec.ECC.point #c {isPointAtInfinity #Jacobian p} 
+  -> q: Spec.ECC.point #c -> Lemma (
+  pointEqual (_point_add p q) q)
+
+let lemma_point_add #c p q = ()
+
 
 let radix_step_precomputed #c p tempBuffer scalar i = 
     let h0 = ST.get() in 
@@ -308,23 +385,107 @@ let radix_step_precomputed #c p tempBuffer scalar i =
     let h3 = ST.get() in
     pop_frame();
 
+  let s = as_seq h0 scalar in 
+  let scalar = scalar_as_nat s in 
+  let pRadixed = Spec.ECC.Radix.getPointDoubleNTimes #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) 4 in
+  let si = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - ((v i - 1) + 2) * 4) % pow2 4 in  
+  let pointPrecomputed = point_mult #c si (basePoint #c) in 
+      
+  if (isPointAtInfinity (fromDomainPoint #c #DH (point_as_nat c h0 p))) then 
+    begin
+      let fromDomainP_h0 = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+      lemma_point_mult_of_point_infinity #c fromDomainP_h0 16;
+      
+      assert(fromDomainPoint #c #DH (point_as_nat c h3 p) == _point_add #c (fromDomainPoint #c #DH (point_as_nat c h2 p)) (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd))));
+      
+      lemma_point_add #c (fromDomainPoint #c #DH (point_as_nat c h2 p)) (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd)));
 
-    let scalar = scalar_as_nat (as_seq h0 scalar) in 
-    let si = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - ((v i - 1) + 2) * 4) % pow2 4 in  
-    let pRadixed = Spec.ECC.Radix.getPointDoubleNTimes #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) 4 in
-    let pointPrecomputed = Spec.ECC.Radix.getPrecomputedPoint #c #Affine (basePoint #c) si in 
+      curve_point_at_infinity_property pointPrecomputed; 
+      assert (pointEqual (fromDomainPoint #c #DH (point_as_nat c h3 p)) pointPrecomputed)
+    end
+      
+  else begin
+  
+    let basePoint = basePoint #c in 
+    assert(pointEqual #c (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd))) pointPrecomputed);
+    assert(fromDomainPoint #c #DH (point_as_nat c h2 p) == pRadixed);
+    
+    assert(fromDomainPoint #c #DH (point_as_nat c h3 p) == _point_add #c (fromDomainPoint #c #DH (point_as_nat c h2 p)) (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd))));
 
-    curve_compatibility_with_translation_lemma_1  (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd))) (point_mult #c si (basePoint #c)) pRadixed;
+    curve_compatibility_with_translation_lemma_1  (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd))) (point_mult #c si basePoint) pRadixed;
+  
+    not_equal_precomputed2 #c basePoint (fromDomainPoint #c #DH (point_as_nat c h0 p)) si;
+    
+    if isPointAtInfinity pRadixed then
+      begin
+	let pointPrecomputed = point_mult #c si basePoint in 
+	let z = pointAdd #c pRadixed pointPrecomputed in 
 
-    not_equal_precomputed2 #c (basePoint #c) (fromDomainPoint #c #DH (point_as_nat c h0 p)) si;
+	curve_point_at_infinity_property #c pointPrecomputed; 
+	lemma_point_add #c pRadixed (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointToAdd)));
 
-    if (isPointAtInfinity #Jacobian pRadixed && isPointAtInfinity  #Jacobian pointPrecomputed) then 
-	lemma_point_at_infinity_after_point_double #c pRadixed
-    else
-      begin 
-	curve_compatibility_with_translation_lemma_1 (fromDomainPoint #c #DH (toJacobianCoordinates  (point_affine_as_nat c h1 pointToAdd))) pointPrecomputed pRadixed;
-	curve_compatibility_with_translation_lemma_1  (pointAdd pRadixed (fromDomainPoint #c #DH (toJacobianCoordinates  (point_affine_as_nat c h1 pointToAdd)))) (pointAdd pRadixed pointPrecomputed) (fromDomainPoint #c #DH (point_as_nat c h3 p))
+	assert (
+	  let fromDomainP_h1 = fromDomainPoint #c #DH (point_as_nat c h3 p) in 
+	  pointEqual #c fromDomainP_h1 pointPrecomputed)
       end
+	  
+    else begin
+      curve_compatibility_with_translation_lemma_1 (fromDomainPoint #c #DH (toJacobianCoordinates  (point_affine_as_nat c h1 pointToAdd))) pointPrecomputed pRadixed;
+      curve_compatibility_with_translation_lemma_1  (pointAdd pRadixed (fromDomainPoint #c #DH (toJacobianCoordinates  (point_affine_as_nat c h1 pointToAdd)))) (pointAdd pRadixed pointPrecomputed) (fromDomainPoint #c #DH (point_as_nat c h3 p))
+      end
+  end
+
+
+inline_for_extraction noextract
+val uploadZ: #c: curve -> #buf_type: buftype -> p: point c 
+  -> scalar: lbuffer_t buf_type uint8 (getScalarLenBytes c) ->  
+  Stack unit 
+  (requires fun h -> live h p /\ live h scalar)
+  (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ 
+    as_nat c h0 (getX p) == as_nat c h1 (getX p) /\ as_nat c h0 (getY p) == as_nat c h1 (getY p) /\ (
+    let pZ = getZ p in 
+    if Math.Lib.arithmetic_shift_right (scalar_as_nat (as_seq h0 scalar)) (v (getScalarLen c) - 4) % pow2 4 = 0 then 
+      as_nat c h1 pZ == 0
+    else
+      as_nat c h1 pZ == 1))
+
+let uploadZ #c p scalar = 
+    let h0 = ST.get() in
+  let pZ = sub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c) in 
+  let bits = getScalar_4 scalar (size 0) in 
+    assert(v bits == Math.Lib.arithmetic_shift_right (scalar_as_nat (as_seq h0 scalar)) (v (getScalarLen c) - 4) % pow2 4);
+  let flag = eq0_u64 (to_u64 bits) in 
+    lognot_lemma (eq0_u64 (to_u64 bits));
+  Hacl.Impl.EC.LowLevel.uploadOneImpl pZ;
+    let h1 = ST.get() in 
+  let pz_0 = sub pZ (size 0) (size 1) in 
+  let pz_rest = sub pZ (size 1) (getCoordinateLenU64 c -! 1ul) in 
+  
+  copy_conditional_u64 (u64 0) pz_0 flag;
+    let h2 = ST.get() in 
+
+    lemma_test (as_seq h1 pZ) 1;
+    lemma_test (as_seq h2 pZ) 1;
+    
+    lseq_as_nat_first (Lib.Sequence.sub (as_seq h1 pZ) 0 1);
+    lseq_as_nat_first (Lib.Sequence.sub (as_seq h2 pZ) 0 1)
+
+val lemma_pointAtInfInDomain1: #c: curve -> p: Spec.ECC.point #c -> Lemma 
+  (isPointAtInfinity #Jacobian p == isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p))
+
+let lemma_pointAtInfInDomain1 #c p = 
+  let (x, y, z) = p in 
+  lemma_pointAtInfInDomain #c x y z
+
+val lemma_pointNotAtInfInDomain: #c: curve -> p: Spec.ECC.point #c -> 
+  Lemma (
+    ~ (isPointAtInfinity #Jacobian p) == 
+    ~ (isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p)))
+
+let lemma_pointNotAtInfInDomain #c p = 
+  let (x, y, z) = p in 
+  lemmaFromDomain #c #DH z;
+  Hacl.Impl.EC.Math.lemma_multiplication_not_mod_prime #c z
 
 
 inline_for_extraction noextract
@@ -332,32 +493,51 @@ val radix_precomputed_upload_point: #c: curve -> #buf_type: buftype
   -> p: point c
   -> scalar: lbuffer_t buf_type uint8 (getScalarLenBytes c) ->  
   Stack unit 
-  (requires fun h -> live h p /\ live h scalar)
+  (requires fun h -> live h p /\ live h scalar /\ disjoint scalar p)
   (ensures fun h0 _ h1 -> modifies (loc p) h0 h1 /\ point_eval c h1 p /\ 
     pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 p)) 
     (point_mult #c (Math.Lib.arithmetic_shift_right (scalar_as_nat (as_seq h0 scalar)) (v (getScalarLen c) - 4) % pow2 4) (basePoint #c)))
+
 
 let radix_precomputed_upload_point #c p scalar =  
     let h0 = ST.get() in 
   let pXpY = sub p (size 0) (size 2 *! getCoordinateLenU64 c) in 
   getPointPrecomputedMixed scalar (size 0) pXpY; 
     let h1 = ST.get() in 
-  let pZ = sub p (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c) in 
-  Hacl.Impl.EC.LowLevel.uploadOneImpl pZ;
+  uploadZ #c p scalar;
     let h2 = ST.get() in 
-    
+
+  let f = Math.Lib.arithmetic_shift_right (scalar_as_nat (as_seq h0 scalar)) (v (getScalarLen c) - 4) % pow2 4 in 
+ 
   let pX, pY = point_affine_as_nat c h1 pXpY in 
-  if isPointAtInfinity  #Affine (pX, pY) then 
+
+  assert(
+    pointEqual (fromDomainPoint #c #DH (toJacobianCoordinates #Affine (point_affine_as_nat c h1 pXpY))) (point_mult #c f (basePoint #c)) /\ (
+    if f = 0 
+    then as_nat c h2 (getZ p) == 0 else as_nat c h2 (getZ p) == 1));
+
+  lemma_pointAtInfInDomain1 #c (point_as_nat c h2 p);
+
+  if isPointAtInfinity (point_affine_as_nat c h1 pXpY) then 
     begin
-      Hacl.Spec.MontgomeryMultiplication.lemma_pointAtInfInDomain #c 0 0 0;
-      let f = (Math.Lib.arithmetic_shift_right (scalar_as_nat (as_seq h0 scalar)) (v (getScalarLen c) - 4) % pow2 4) in 
-      curve_order_is_the_smallest #c (basePoint #c);
-      point_mult_def #c f (basePoint #c);
-      assert(False)
+      lemma_pointAtInfInDomain1 #c (toJacobianCoordinates #Affine (point_affine_as_nat c h1 pXpY));
+      point_mult_0 #c (basePoint #c) 0;
+      curve_order_is_the_smallest #c (basePoint #c)
     end
-  else 
-    assert(pointEqual (fromDomainPoint #c #DH (point_as_nat c h2 p)) 
-    (point_mult #c (Math.Lib.arithmetic_shift_right (scalar_as_nat (as_seq h0 scalar)) (v (getScalarLen c) - 4) % pow2 4) (basePoint #c)))
+  else
+    begin
+      assert(~ (isPointAtInfinity (toJacobianCoordinates (point_affine_as_nat c h1 pXpY))));
+      lemma_pointNotAtInfInDomain #c (toJacobianCoordinates (point_affine_as_nat c h1 pXpY)); 
+      curve_order_is_the_smallest #c (basePoint #c); 
+
+      if f = 0 then 
+	begin
+	  point_mult_0_for_zero #c (basePoint #c); 
+	  assert (isPointAtInfinity (point_mult #c f (basePoint #c)));
+	  assert (False)
+	end;
+      assert (pointEqual (fromDomainPoint #c #DH (point_as_nat c h2 p)) (point_mult #c f (basePoint #c)))
+    end
 
 
 val lemma_scalar_less_than_order_: #c: curve 
@@ -420,12 +600,17 @@ let secret_to_public_radix #c #a p scalar tempBuffer =
   Math.Lemmas.lemma_div_lt_nat (scalar_as_nat (as_seq h0 scalar)) (v (getScalarLen c)) (v (getScalarLen c) - 4); 
   Math.Lemmas.small_mod (scalar_as_nat (as_seq h0 scalar) / pow2 (v (getScalarLen c) - 4)) (pow2 4);
 
-  for (size 1) (size 2 *! getScalarLenBytes c) inv 
-    (fun i -> 
-      let h0_ = ST.get() in
-	lemma_scalar_less_than_order #c (scalar_as_nat (as_seq h0 scalar)) (v i);
+  for (size 1) (size 2 *! getScalarLenBytes c) inv (fun i -> 
+    let h0_ = ST.get() in
+      lemma_scalar_less_than_order #c (scalar_as_nat (as_seq h0 scalar)) (v i);
+      if scalar_as_nat (as_seq h0 scalar) / pow2 ((v (getScalarLen c) - v i * 4)) = 0 then 
+	begin
+	  point_mult_0_for_zero #c (basePoint #c);
+	  lemma_point_equal_one_infinity (point_mult #c 0 (basePoint #c)) (fromDomainPoint #c #DH (point_as_nat c h0_ p))
+	end;
+
       radix_step_precomputed p tempBuffer scalar i;
-	Spec.ECC.Radix.pred0 #c #Affine (fromDomainPoint #c #DH (point_as_nat c h0_ p)) (as_seq h0_ scalar) (basePoint #c) (v i - 1))
+      Spec.ECC.Radix.pred0 #c #Affine (fromDomainPoint #c #DH (point_as_nat c h0_ p)) (as_seq h0_ scalar) (basePoint #c) (v i - 1))
 
 
 let getPointTable (c: curve) (precomputedTable: lbuffer uint64 (getPointLenU64 c *! 16ul)) (i: nat {i < 16}) : GTot (point c) = 
@@ -674,7 +859,7 @@ val getPointPrecomputedTable: #c: curve -> #buf_type: buftype
     let p1 = fromDomainPoint #c #DH (point_as_nat c h0 p1) in 
     let bits = Math.Lib.arithmetic_shift_right (scalar_as_nat #c (as_seq h0 scalar)) (v (getScalarLen c) - (v i + 1) * 4) % pow2 4 in 
     pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 r)) (point_mult #c bits p1) /\
-    pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 r)) (Spec.ECC.Radix.getPrecomputedPoint #c #Jacobian p1 bits)))
+    pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 r)) (point_mult #c  bits p1)))
 
 
 let getPointPrecomputedTable #c #buf_type scalar precomputedTable i pointToAdd = 
@@ -709,7 +894,7 @@ val montgomery_ladder_step_radix_0: #c: curve -> #buf_type: buftype
     point_eval c h1 p /\ point_eval c h1 r /\ (
     let p1 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable 1)) in 
     let bits = Math.Lib.arithmetic_shift_right (scalar_as_nat #c (as_seq h0 scalar)) (v (getScalarLen c) - (v i + 1) * 4) % pow2 4 in 
-    pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 r)) (Spec.ECC.Radix.getPrecomputedPoint #c #Jacobian p1 bits) /\   
+    pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 r)) (point_mult #c bits p1) /\   
     fromDomainPoint #c #DH (point_as_nat c h1 p) == Spec.ECC.Radix.getPointDoubleNTimes #c (fromDomainPoint #c #DH (point_as_nat c h0 p)) 4))
 
 let montgomery_ladder_step_radix_0 #c #b p scalar precomputedTable i tempBuffer r = 
@@ -726,7 +911,7 @@ let montgomery_ladder_step_radix_0 #c #b p scalar precomputedTable i tempBuffer 
 
 val montgomery_ladder_step_radix_1_lemma: #c: curve -> scalar: scalar_bytes #c
   -> p0: point_nat_prime #c {~ (isPointAtInfinity  p0)} 
-  -> p: point_nat_prime #c {exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p0)} 
+  -> p: point_nat_prime #c {exists (z: pos {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p0)} 
   -> pi: point_nat_prime #c -> r: point_nat_prime #c 
   -> i: nat {i >= 1 /\ i < v (getScalarLenBytes c) * 2} -> 
   Lemma 
@@ -734,7 +919,7 @@ val montgomery_ladder_step_radix_1_lemma: #c: curve -> scalar: scalar_bytes #c
     let scalar = scalar_as_nat scalar in 
     let si = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (i + 1) * 4) % pow2 4 in 
     let pointRadixed =  Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
-    pointEqual pi (Spec.ECC.Radix.getPrecomputedPoint #c #Jacobian p0 si) /\ r == _point_add #c pi pointRadixed))
+    pointEqual pi (point_mult #c si p0) /\ r == _point_add #c pi pointRadixed))
    (ensures (pointEqual #c r (Spec.ECC.Radix.radix_step #c #Jacobian scalar p0 (i - 1) p)))
 
 let montgomery_ladder_step_radix_1_lemma #c k p0 p pi r i = 
@@ -742,13 +927,52 @@ let montgomery_ladder_step_radix_1_lemma #c k p0 p pi r i =
   let l = v (getScalarLen c) in 
   let si = Math.Lib.arithmetic_shift_right scalar (l - ((i - 1) + 2) * 4) % pow2 4 in 
   let pointRadixed = Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
-  let pointPrecomputed = Spec.ECC.Radix.getPrecomputedPoint #c #Jacobian p0 si in 
+  let pointPrecomputed = point_mult #c si p0 in 
 
-  not_equal_precomputed2 #c p0 p si;
-  curve_order_is_the_smallest #c p0;
-  curve_compatibility_with_translation_lemma pi pointPrecomputed pointRadixed; 
-  curve_commutativity_lemma pointPrecomputed pointRadixed
+  not_equal_precomputed2 #c p0 p si; 
+  if isPointAtInfinity pointRadixed then 
+    begin
+      curve_point_at_infinity_property pointPrecomputed
+    end
+  else 
+    begin
+      curve_order_is_the_smallest #c p0;
+      curve_compatibility_with_translation_lemma pi pointPrecomputed pointRadixed; 
+      curve_commutativity_lemma pointPrecomputed pointRadixed
+    end
 
+val montgomery_ladder_step_radix_2_lemma: #c: curve -> scalar: scalar_bytes #c
+  -> p0: point_nat_prime #c {~ (isPointAtInfinity  p0)} 
+  -> p: point_nat_prime #c {isPointAtInfinity p} 
+  -> pi: point_nat_prime #c 
+  -> r: point_nat_prime #c 
+  -> i: nat {i >= 1 /\ i < v (getScalarLenBytes c) * 2} -> 
+  Lemma 
+  (requires (  
+    let scalar = scalar_as_nat scalar in 
+    let si = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (i + 1) * 4) % pow2 4 in 
+    let pointRadixed =  Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
+    pointEqual pi (point_mult #c si p0) /\ 
+    r == _point_add #c pi pointRadixed))
+   (ensures (pointEqual #c r (Spec.ECC.Radix.radix_step #c #Jacobian scalar p0 (i - 1) p)))
+
+let montgomery_ladder_step_radix_2_lemma #c k p0 p pi r i = 
+  let scalar = scalar_as_nat k in 
+  let si = Math.Lib.arithmetic_shift_right scalar (v (getScalarLen c) - (i + 1) * 4) % pow2 4 in 
+  let pointRadixed =  Spec.ECC.Radix.getPointDoubleNTimes #c p 4 in 
+  
+  assert(pointEqual pi (point_mult #c si p0) /\ r == _point_add #c pi pointRadixed);
+
+  let pointPrecomputed = point_mult #c si p0 in 
+  let z = pointAdd #c pointRadixed pointPrecomputed in 
+
+  lemma_point_mult_of_point_infinity #c p 16; 
+  lemma_point_equal_one_infinity pointRadixed (point_mult #c 16 p);
+  curve_point_at_infinity_property #c pointPrecomputed; 
+  lemma_point_add #c pointRadixed pi;
+  
+  assert (pointEqual #c pi pointPrecomputed)
+  
 
 inline_for_extraction noextract
 val montgomery_ladder_step_radix: #c: curve -> #buf_type: buftype
@@ -764,7 +988,7 @@ val montgomery_ladder_step_radix: #c: curve -> #buf_type: buftype
     point_eval c h r /\ disjoint p tempBuffer /\ point_eval c h p /\ tableInvariant c h precomputedTable /\ (
     let p1 = fromDomainPoint #c #DH (point_as_nat c h (getPointTable c precomputedTable 1)) in 
     let p  = fromDomainPoint #c #DH (point_as_nat c h p) in
-    (exists (z: nat {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p1))))
+    ((exists (z: pos {z <= getOrder #c / 16}). pointEqual p (point_mult #c z p1)) \/ isPointAtInfinity p)))
   (ensures fun h0 _ h1 -> modifies (loc r |+| loc tempBuffer |+| loc p) h0 h1 /\ 
     point_eval c h1 p /\ point_eval c h1 r /\ (
     let p1 = fromDomainPoint #c #DH (point_as_nat c h0 (getPointTable c precomputedTable 1)) in 
@@ -785,15 +1009,12 @@ let montgomery_ladder_step_radix #c #b p scalar table i tempBuffer r =
   let r =  fromDomainPoint #c #DH (point_as_nat c h2 p) in 
   let p =  fromDomainPoint #c #DH (point_as_nat c h0 p) in 
 
-  montgomery_ladder_step_radix_1_lemma #c (as_seq h0 scalar) p1 p pi r (v i)
-
-
-val lemma_pointAtInfInDomain1: #c: curve -> p: Spec.ECC.point #c -> Lemma 
-  (isPointAtInfinity #Jacobian p == isPointAtInfinity #Jacobian (fromDomainPoint #c #DH p))
-
-let lemma_pointAtInfInDomain1 #c p = 
-  let (x, y, z) = p in 
-  lemma_pointAtInfInDomain #c x y z
+  if (isPointAtInfinity p) then 
+  begin
+    montgomery_ladder_step_radix_2_lemma (as_seq h0 scalar) p1 p pi r (v i)
+  end 
+  else
+    montgomery_ladder_step_radix_1_lemma #c (as_seq h0 scalar) p1 p pi r (v i)
 
 
 val lemma_modifies_not_first_element_of_precomputed_table: #c: curve 
@@ -1115,41 +1336,6 @@ let generatePrecomputedTable_step_lemma_disjoint #c p temp table a h0 h1 =
   assert(getPointTable c table (v a) == gsub table (pointLen *! a) pointLen)
   
 
-val lemma_two_points_different_coeff_not_equal: #c: curve 
-  -> p0: Spec.ECC.point #c #Jacobian {~ (isPointAtInfinity p0)}
-  -> pk: nat
-  -> p: Spec.ECC.point #c #Jacobian {pointEqual p (point_mult #c  pk p0)} 
-  -> qk: nat
-  -> q: Spec.ECC.point #c #Jacobian {pointEqual q (point_mult #c  qk p0)} -> 
-  Lemma 
-  (requires (pk <> qk /\ pk < getOrder #c /\ qk < getOrder #c))
-  (ensures (~ (pointEqual p q)))
-
-let lemma_two_points_different_coeff_not_equal #c p0 pk p qk q =
-  if pointEqual p q then 
-    begin
-      let inverseP = point_mult #c (- pk) p0 in 
-      lemmaApplPointAdd #c p0 pk p (- pk) inverseP;
-      
-      point_mult_0 #c p0 0;
-      assert(pointEqual (pointAdd p inverseP) (point_mult #c 0 p0));
-      assert(isPointAtInfinity (pointAdd p inverseP));
-
-      lemmaApplPointAdd #c p0 qk q (- pk) inverseP;
-      assert(pointEqual (pointAdd q inverseP) (point_mult #c (qk - pk) p0));
-      assert(qk - pk <> 0);
-
-      lemma_scalar_reduce p0 (qk - pk); 
-
-      assert(point_mult #c (qk - pk) p0 == point_mult #c ((qk - pk) % getOrder #c) p0);
-      curve_order_is_the_smallest #c p0;
-      assert(~ (isPointAtInfinity (pointAdd q inverseP)));
-        
-      curve_compatibility_with_translation_lemma #c p q (inverseP);
-      assert(False)
-    end
-
-
 val generatePrecomputedResultOfPointAddAndDouble: #c: curve 
   -> table: lbuffer uint64 (getPointLenU64 c *! 16ul) 
   -> i: nat {2 * i < 16}
@@ -1320,6 +1506,9 @@ val scalar_mult_radix__: #c: curve -> #buf_type: buftype
     let p_n = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
     pointEqual p_n (point_mult #c (scalar_as_nat (as_seq h0 scalar)) p1)))
 
+
+#push-options "--z3rlimit 300"
+
 let scalar_mult_radix__ #c p scalar tempBuffer r precomputedTable =  
   let h0 = ST.get() in 
   let inv h (i: nat {i <= 2 * v (getScalarLenBytes c)}) =
@@ -1340,23 +1529,33 @@ let scalar_mult_radix__ #c p scalar tempBuffer r precomputedTable =
     let h0_ = ST.get() in
     
     lemma_scalar_less_than_order #c (scalar_as_nat (as_seq h0 scalar)) (v j);
+    
+    if scalar_as_nat (as_seq h0 scalar) / pow2 ((v (getScalarLen c) - v j * 4)) = 0 then 
+	begin
+	  let p1 = getPointTable c precomputedTable 1 in 
+	  let p0 = fromDomainPoint #c #DH (point_as_nat c h0_ p1) in 
+	  point_mult_0_for_zero #c p0;
+	  lemma_point_equal_one_infinity (point_mult #c 0 p0) (fromDomainPoint #c #DH (point_as_nat c h0_ p))
+	end;
+	
     montgomery_ladder_step_radix #c p scalar precomputedTable j tempBuffer r;
+    
     let h1_ = ST.get() in 
    
     assert(LowStar.Buffer.loc_disjoint (loc r |+| loc p |+| loc tempBuffer) (loc precomputedTable));
     lemma_modifies_not_tb_invariant_holds #c (loc r |+| loc p |+| loc tempBuffer) h0_ h1_ precomputedTable;
 
-    let p1_ = getPointTable c precomputedTable 1 in 
     lemma_modifies_not_first_element_of_precomputed_table (loc r |+| loc p |+| loc tempBuffer) h0_ h1_ precomputedTable;
-    
+
+    let p1_ = getPointTable c precomputedTable 1 in 
     let x = fromDomainPoint #c #DH (point_as_nat c h0_ p) in 
     let p1 = fromDomainPoint #c #DH (point_as_nat c h0_ p1_) in 
     let s = as_seq h0_ scalar in 
     Spec.ECC.Radix.pred0 #c #Jacobian x s p1 (v j - 1));
-
   let h1 = ST.get() in 
-
   lemma_modifies_not_first_element_of_precomputed_table (loc r |+| loc p |+| loc tempBuffer) h0 h1 precomputedTable
+
+#pop-options
 
 
 inline_for_extraction noextract

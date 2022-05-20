@@ -455,7 +455,7 @@ let norm_twice_lemma #c p q =
 
 inline_for_extraction
 val scalarMultiplication_t: #c: curve -> #t:buftype -> #l: ladder -> p: point c -> result: point c -> 
-  scalar: scalar_t #t #c -> 
+  scalar: scalar_t #t #c ->
   tempBuffer: lbuffer uint64 (size 20 *! getCoordinateLenU64 c) ->
   Stack unit
   (requires fun h -> 
@@ -466,7 +466,9 @@ val scalarMultiplication_t: #c: curve -> #t:buftype -> #l: ladder -> p: point c 
   (ensures fun h0 _ h1 -> modifies (loc p |+| loc result |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let p0 = point_as_nat c h0 p in 
     let qD = point_as_nat c h1 result in
-    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0)))
+    pointEqual qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\ 
+    (not (isPointAtInfinity #Jacobian (scalar_multiplication (as_seq h0 scalar) p0)) ==>
+      qD == fromJacobianCoordinates #c (scalar_multiplication (as_seq h0 scalar) p0))))
 
 let scalarMultiplication_t #c #t #l p result scalar tempBuffer  = 
     let h0 = ST.get() in 
@@ -553,6 +555,7 @@ let secretToPublic #c #l result scalar tempBuffer =
   match l with 
   |MontLadder -> 
     begin
+      admit(); 
       uploadStartPointsS2P q result; 
       montgomery_ladder q result scalar buff;
 	let h1 = ST.get() in 
@@ -564,7 +567,9 @@ let secretToPublic #c #l result scalar tempBuffer =
       secret_to_public_radix q scalar buff;
 	let h1 = ST.get() in 
       norm q result buff;
+	let h2 = ST.get() in 
       norm_twice_lemma #c (fromDomainPoint #c #DH (point_as_nat c h1 q)) (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) (basePoint #c))
+
     end
 
 

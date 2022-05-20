@@ -79,6 +79,13 @@ let _norm #c (p: point #c #Jacobian) : point #c #Jacobian =
   (x3, y3, z3)
 
 
+let fromJacobianCoordinates #c = _norm #c
+
+let fromJacobianCoordinatesTest #c (p: point #c #Jacobian {let x, y, z = p in z == 1}) : point #c #Affine = 
+  let x, y, z = p in 
+  (x, y)
+
+
 let scalar_bytes (#c: curve) = lbytes (v (getScalarLenBytes c))
 
 let ith_bit (#c: curve) (k: scalar_bytes #c) (i:nat{i < v (getScalarLen c)}) : (r: uint64 {v r == 0 \/ v r == 1}) =

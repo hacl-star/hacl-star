@@ -62,9 +62,10 @@ val fromFormPoint_: #c: curve -> i: point c -> o: pointAffine8 c -> Stack unit
   (ensures fun h0 _ h1 -> modifies (loc i |+| loc o) h0 h1 /\ (
     let coordinateX_u64, coordinateY_u64, _ = point_as_nat c h0 i in 
     let coordinateX_u8, coordinateY_u8 = getXAff8 #c o, getYAff8 #c o in
-    as_seq h1 (coordinateX_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateX_u64 /\
-    as_seq h1 (coordinateY_u8) == nat_to_bytes_be (getCoordinateLen c) coordinateY_u64))
-
+    as_seq h1 coordinateX_u8 == nat_to_bytes_be (getCoordinateLen c) coordinateX_u64 /\
+    as_seq h1 coordinateY_u8 == nat_to_bytes_be (getCoordinateLen c) coordinateY_u64 /\    
+    nat_from_bytes_be (as_seq h1 coordinateX_u8) == coordinateX_u64 /\
+    nat_from_bytes_be (as_seq h1 coordinateY_u8) == coordinateY_u64))
 
 let fromFormPoint_ #c i o = 
   let len = getCoordinateLenU64 c in 
@@ -79,6 +80,7 @@ let fromFormPoint_ #c i o =
   fromForm #c resultBufferX resultX;
   fromForm #c resultBufferY resultY
 
+
 [@CInline]
 let fromFormPoint_p256 = fromFormPoint_ #P256 
 [@CInline]
@@ -92,7 +94,6 @@ let fromFormPoint #c i o =
   |P256 -> fromFormPoint_p256 i o 
   |P384 -> fromFormPoint_p384 i o
   (* |Default -> fromFormPoint_generic i o  *)
-
 
 
 let toForm #c i o = 

@@ -128,7 +128,9 @@ val scalarMultiplication: #c: curve -> #buf_type: buftype -> #l: ladder
     let p0 = point_as_nat c h0 p in 
     let qD = point_as_nat c h1 result in
     pointEqual #c qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
-    pointEqual #c qD (scalar_multiplication (as_seq h0 scalar) p0)))
+    pointEqual #c qD (scalar_multiplication (as_seq h0 scalar) p0)  /\ 
+    (not (isPointAtInfinity #Jacobian (scalar_multiplication (as_seq h0 scalar) p0)) ==>
+      qD == fromJacobianCoordinates #c (scalar_multiplication (as_seq h0 scalar) p0))))
 
 
 inline_for_extraction noextract
@@ -157,8 +159,13 @@ val secretToPublic: #c: curve -> #l: ladder -> result: point c
   (ensures fun h0 _ h1 -> point_eval c h1 result /\ modifies (loc result |+| loc tempBuffer) h0 h1 /\ (
     let p0 = basePoint #c in 
     let qD = point_as_nat c h1 result in
-    pointEqual #c qD (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0) /\
-    pointEqual #c qD (secret_to_public (as_seq h0 scalar))))
+    pointEqual qD (fromJacobianCoordinates #c (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) p0)) /\
+    pointEqual #c qD (fromJacobianCoordinates #c (secret_to_public (as_seq h0 scalar))) /\ 
+    pointEqual #c qD (secret_to_public (as_seq h0 scalar)) /\ (
+    if isPointAtInfinity (secret_to_public (as_seq h0 scalar)) then 
+      isPointAtInfinity qD
+    else 
+      qD == fromJacobianCoordinates #c (secret_to_public (as_seq h0 scalar)))))
 
 
 inline_for_extraction noextract

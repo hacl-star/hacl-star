@@ -319,7 +319,7 @@ let exponent_spec #c a =
 
 
 val verifyQValidCurvePointSpec: #c: curve 
-  -> publicKey: point_jacobian_nat -> bool
+  -> publicKey: point_jacobian_nat -> (r: bool {r ==> ~ (isPointAtInfinity publicKey)})
 
 let verifyQValidCurvePointSpec #c publicKey =
   let (x: nat), (y:nat), (z:nat) = publicKey in
