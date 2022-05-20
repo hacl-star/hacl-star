@@ -656,8 +656,6 @@ INTRINSIC_FLAGS = \
   \
   -add-include 'Hacl_Hash_Blake2s_128:"libintvector.h"' \
   -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_Blake2s_128:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_Poly1305_128:"libintvector.h"' \
   \
   -add-include 'Hacl_Chacha20Poly1305_256.c:"libintvector.h"' \
   -add-include 'Hacl_Chacha20_Vec256.c:"libintvector.h"' \
@@ -665,8 +663,6 @@ INTRINSIC_FLAGS = \
   \
   -add-include 'Hacl_Hash_Blake2b_256:"libintvector.h"' \
   -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_Blake2b_256:"libintvector.h"' \
-  -add-include 'Hacl_Streaming_Poly1305_256:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
