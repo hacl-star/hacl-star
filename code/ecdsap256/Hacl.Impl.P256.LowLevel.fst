@@ -608,7 +608,6 @@ let lemma_powers () =
    assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
 
 
-#push-options "--z3rlimit 300"
 
 inline_for_extraction noextract
 val mul: f: felem -> r: felem -> out: widefelem -> 
@@ -617,6 +616,15 @@ val mul: f: felem -> r: felem -> out: widefelem ->
     (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\ 
       wide_as_nat h1 out = as_nat h0 r * as_nat h0 f
     )
+
+unfold let op_Brack_Lens_Access #t #v #l h a = as_seq #t #v #l h a
+unfold let op_String_Access #v #l a i = Lib.Sequence.index #v #l a i
+unfold let hide_index #t #v #l h (a:lbuffer_t t v l) i = Ghost.hide (h.[|a|].[i])
+
+let index_gsub #t #a #l h buf start len i :
+  Lemma (Lib.Sequence.index #_ #(v len) (as_seq h (gsub #t #a #l buf start len)) i == Lib.Sequence.index #_ #(v l) (as_seq h buf) (v start + i)) = ()
+  
+#push-options "--z3rlimit 800"
 
 let mul f r out =
   lemma_powers ();
@@ -643,198 +651,184 @@ let mul f r out =
   let h1 = ST.get() in 
   let bk0 = sub out (size_0) (size_1) in 
 
-  let h1_out_0 = Ghost.hide (Lib.Sequence.index (as_seq h1 out) 0) in
-  let h1_out_1 = Ghost.hide (Lib.Sequence.index (as_seq h1 out) 1) in
-  let h1_out_2 = Ghost.hide (Lib.Sequence.index (as_seq h1 out) 2) in
-  let h1_out_3 = Ghost.hide (Lib.Sequence.index (as_seq h1 out) 3) in
-  let h1_out_4 = Ghost.hide (Lib.Sequence.index (as_seq h1 out) 4) in
-
-  assert(as_nat h0 r * uint_v f0 = uint_v (h1_out_4) * pow2 64 * pow2 64 * pow2 64 * pow2 64 + as_nat h1 b0);
+  assert(as_nat h0 r * uint_v f0 = uint_v (h1.[|out|].[4]) * pow2 64 * pow2 64 * pow2 64 * pow2 64 + as_nat h1 b0);
 
   let b1 = sub out (size_1) (size_4) in   
   let c1 = mul1_add r f1 b1 b1 in 
   upd out (size_5) c1; 
   let h2 = ST.get() in
-
-  let h2_out_0 = Ghost.hide (Lib.Sequence.index (as_seq h2 out) 0) in
-  let h2_out_1 = Ghost.hide (Lib.Sequence.index (as_seq h2 out) 1) in
-  let h2_out_2 = Ghost.hide (Lib.Sequence.index (as_seq h2 out) 2) in
-  let h2_out_3 = Ghost.hide (Lib.Sequence.index (as_seq h2 out) 3) in
-  let h2_out_4 = Ghost.hide (Lib.Sequence.index (as_seq h2 out) 4) in
-  let h2_out_5 = Ghost.hide (Lib.Sequence.index (as_seq h2 out) 5) in
-
-
-  assert(as_nat h2 b1 + uint_v (h2_out_5) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h1 r * uint_v f1 + as_nat h1 b1);
+  
+  assert(disjoint bk0 b1);
+  index_gsub h2 out size_0 size_1 0;
+  index_gsub h1 out size_0 size_1 0;
+  assert(h2.[|out|].[0] == h1.[|out|].[0]);
+  assert(as_nat h2 b1 + uint_v (h2.[|out|].[5]) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h1 r * uint_v f1 + as_nat h1 b1);
 
   let bk1 = sub out (size_0) (size_2) in 
   let b2 = sub out (size_2) (size_4) in 
+  assert(disjoint bk1 b2);
+  
   let c2 = mul1_add r f2 b2 b2 in 
   upd out (size_6) c2;
-  let h3 = ST.get() in 
-
-  let h3_out_6 = Ghost.hide (Lib.Sequence.index (as_seq h3 out) 6) in
-  let h3_out_0 = Ghost.hide (Lib.Sequence.index (as_seq h3 out) 0) in
-  let h3_out_1 = Ghost.hide (Lib.Sequence.index (as_seq h3 out) 1) in
-  let h3_out_2 = Ghost.hide (Lib.Sequence.index (as_seq h3 out) 2) in
-  let h3_out_3 = Ghost.hide (Lib.Sequence.index (as_seq h3 out) 3) in
-  let h3_out_4 = Ghost.hide (Lib.Sequence.index (as_seq h3 out) 4) in
-  let h3_out_5 = Ghost.hide (Lib.Sequence.index (as_seq h3 out) 5) in
-
-  assert(as_nat h3 b2 + uint_v (h3_out_6) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h2 r * uint_v f2 + as_nat h2 b2);
 
   let bk2 = sub out (size_0) (size_3) in 
   let b3 = sub out (size_3) (size_4) in 
+
+  let h3 = ST.get() in 
+  index_gsub h2 out size_0 size_2 0;
+  index_gsub h2 out size_0 size_2 1;
+  index_gsub h3 out size_0 size_2 0;
+  index_gsub h3 out size_0 size_2 1;
+  assert(as_nat h3 b2 + uint_v (h3.[|out|].[6]) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h2 r * uint_v f2 + as_nat h2 b2);
+
+  assert(b3 == gsub out size_3 size_4);
+  index_gsub h3 out size_3 size_4 0;
+  index_gsub h3 out size_3 size_4 1;
+  index_gsub h3 out size_3 size_4 2;
+  index_gsub h3 out size_3 size_4 3;
+  assert(disjoint bk2 b3);
   let c3 = mul1_add r f3 b3 b3 in 
   upd out (size_7) c3;
 
   let h4 = ST.get() in 
+  index_gsub h3 out size_0 size_3 0;
+  index_gsub h3 out size_0 size_3 1;
+  index_gsub h3 out size_0 size_3 2;
+  index_gsub h4 out size_0 size_3 0;
+  index_gsub h4 out size_0 size_3 1;
+  index_gsub h4 out size_0 size_3 2;
 
-  let h4_out_7 = Ghost.hide (Lib.Sequence.index (as_seq h4 out) 7) in
-  let h4_out_0 = Ghost.hide (Lib.Sequence.index (as_seq h4 out) 0) in
-  let h4_out_1 = Ghost.hide (Lib.Sequence.index (as_seq h4 out) 1) in
-  let h4_out_2 = Ghost.hide (Lib.Sequence.index (as_seq h4 out) 2) in
-
-  assert(as_nat h4 b3 + uint_v (h4_out_7) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h3 r * uint_v f3 + as_nat h3 b3);
+  assert(as_nat h4 b3 + uint_v (h4.[|out|].[7]) * pow2 64 * pow2 64 * pow2 64 * pow2 64 == as_nat h3 r * uint_v f3 + as_nat h3 b3);
     
   let h5 = ST.get() in
-
   calc (==) {
     wide_as_nat h5 out;
     (==) {}
     wide_as_nat h4 out;
     (==) {}
-    uint_v (h4_out_0) +  
-    uint_v (h4_out_1) * pow2 64 + 
-    uint_v (h4_out_2) * pow2 64 * pow2 64 + 
+    uint_v (h4.[|out|].[0]) +  
+    uint_v (h4.[|out|].[1]) * pow2 64 + 
+    uint_v (h4.[|out|].[2]) * pow2 64 * pow2 64 + 
 
     as_nat h4 b3 * pow2 64 * pow2 64 * pow2 64 + 
     
-    uint_v (h4_out_7) * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64;
+    uint_v (h4.[|out|].[7]) * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64;
     
-    (==) {
-      lemma_mul0 (as_nat h4 b3) (uint_v (h4_out_7)) (as_nat h3 r) (uint_v f3) (as_nat h3 b3)
-     }
+    (==) { 
+      lemma_mul0 (as_nat h4 b3) (uint_v (h4.[|out|].[7])) (as_nat h3 r) (uint_v f3) (as_nat h3 b3)}
 
-    uint_v (h4_out_0) +  
-    uint_v (h4_out_1) * pow2 64 + 
-    uint_v (h4_out_2) * pow2 64 * pow2 64 + 
+    uint_v (h4.[|out|].[0]) +  
+    uint_v (h4.[|out|].[1]) * pow2 64 + 
+    uint_v (h4.[|out|].[2]) * pow2 64 * pow2 64 + 
     as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64 + 
     as_nat h3 b3 * pow2 64 * pow2 64 * pow2 64;
-
     (==)
-    {
-      assert(Lib.Sequence.index (as_seq h3 bk2) 0 == h3_out_0);
-      assert(Lib.Sequence.index (as_seq h3 bk2) 1 == h3_out_1);
-      assert(Lib.Sequence.index (as_seq h3 bk2) 2 == h3_out_2)
-    }
-    
-    uint_v (h3_out_0) +  
-    uint_v (h3_out_1) * pow2 64 + 
-    uint_v (h3_out_2) * pow2 64 * pow2 64 + 
+    {   assert (h4.[|out|].[0] == h3.[|out|].[0]);
+        assert (h4.[|out|].[1] == h3.[|out|].[1]);
+        assert (h4.[|out|].[2] == h3.[|out|].[2]);
+        assert(as_nat h3 b3 ==  uint_v (h3.[|out|].[3]) + 
+                              uint_v (h3.[|out|].[4]) * pow2 64 + 
+                              uint_v (h3.[|out|].[5]) * pow2 64 * pow2 64 + 
+                              uint_v (h3.[|out|].[6]) * pow2 64 * pow2 64 * pow2 64)
+    } 
+    uint_v (h3.[|out|].[0]) +  
+    uint_v (h3.[|out|].[1]) * pow2 64 + 
+    uint_v (h3.[|out|].[2]) * pow2 64 * pow2 64 + 
+    as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64 +
     (
-      uint_v (h3_out_3) + 
-      uint_v (h3_out_4) * pow2 64 + 
-      uint_v (h3_out_5) * pow2 64 * pow2 64 + 
-      uint_v (h3_out_6) * pow2 64 * pow2 64 * pow2 64
-    ) * pow2 64 * pow2 64 * pow2 64 + 
-    as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
-  
+      uint_v (h3.[|out|].[3]) + 
+      uint_v (h3.[|out|].[4]) * pow2 64 + 
+      uint_v (h3.[|out|].[5]) * pow2 64 * pow2 64 + 
+      uint_v (h3.[|out|].[6]) * pow2 64 * pow2 64 * pow2 64
+    ) * pow2 64 * pow2 64 * pow2 64;
     (==) 
     {
-      lemma_mul1 (uint_v (h3_out_3)) 
-  (uint_v (h3_out_4)) (uint_v (h3_out_5)) (uint_v (h3_out_6))
+      lemma_mul1 (uint_v (h3.[|out|].[3])) 
+  (uint_v (h3.[|out|].[4])) (uint_v (h3.[|out|].[5])) (uint_v (h3.[|out|].[6]))
     }
 
-    uint_v (h3_out_0) +  
-    uint_v (h3_out_1) * pow2 64 + 
+    uint_v (h3.[|out|].[0]) +  
+    uint_v (h3.[|out|].[1]) * pow2 64 + 
     as_nat h3 b2 * pow2 64 * pow2 64 + 
-    uint_v (h3_out_6) * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+    uint_v (h3.[|out|].[6]) * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
     as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
     (==)
     {
-      lemma_mul2 (as_nat h3 b2) (uint_v (h3_out_6)) (as_nat h2 r) (uint_v f2) (as_nat h2 b2)
+      lemma_mul2 (as_nat h3 b2) (uint_v (h3.[|out|].[6])) (as_nat h2 r) (uint_v f2) (as_nat h2 b2)
     }
   
-    uint_v (h3_out_0) +  
-    uint_v (h3_out_1) * pow2 64 + 
+    uint_v (h3.[|out|].[0]) +  
+    uint_v (h3.[|out|].[1]) * pow2 64 + 
     
     as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
     as_nat h2 b2 * pow2 64 * pow2 64 + 
     as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
-
     (==)
     {    
-      assert(Lib.Sequence.index (as_seq h2 bk1) 0 == h2_out_0);
-      assert(Lib.Sequence.index (as_seq h2 bk1) 1 == h2_out_1)
+      assert (h3.[|out|].[0] == h2.[|out|].[0]);
+      assert (h3.[|out|].[1] == h2.[|out|].[1])
     }
 
-    uint_v (h2_out_0) +  
-    uint_v (h2_out_1) * pow2 64 + 
+    uint_v (h2.[|out|].[0]) +  
+    uint_v (h2.[|out|].[1]) * pow2 64 + 
     (
-      uint_v (h2_out_2) + 
-      uint_v (h2_out_3) * pow2 64 + 
-      uint_v (h2_out_4) * pow2 64 * pow2 64 + 
-      uint_v (h2_out_5) * pow2 64 * pow2 64 * pow2 64
+      uint_v (h2.[|out|].[2]) + 
+      uint_v (h2.[|out|].[3]) * pow2 64 + 
+      uint_v (h2.[|out|].[4]) * pow2 64 * pow2 64 + 
+      uint_v (h2.[|out|].[5]) * pow2 64 * pow2 64 * pow2 64
     ) * pow2 64 * pow2 64 + 
     as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
     as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
-
     (==) 
     {
-      lemma_mul3 (uint_v (h2_out_2)) (uint_v (h2_out_3)) (uint_v (h2_out_4)) (uint_v (h2_out_5))
+      lemma_mul3 (uint_v (h2.[|out|].[2])) (uint_v (h2.[|out|].[3])) (uint_v (h2.[|out|].[4])) (uint_v (h2.[|out|].[5]))
     }
 
 
-    uint_v (h2_out_0) +  
+    uint_v (h2.[|out|].[0]) +  
     as_nat h2 b1 * pow2 64 + 
-    uint_v (h2_out_5) * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
+    uint_v (h2.[|out|].[5]) * pow2 64 * pow2 64 * pow2 64 * pow2 64 * pow2 64 + 
     as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
     as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
-
   (==)
     {
-       lemma_mul4 (as_nat h2 b1) (uint_v (h2_out_5)) (as_nat h1 r) (uint_v f1) (as_nat h1 b1)
+       lemma_mul4 (as_nat h2 b1) (uint_v (h2.[|out|].[5])) (as_nat h1 r) (uint_v f1) (as_nat h1 b1)
     }
 
-    uint_v (h2_out_0) +  
+    uint_v (h2.[|out|].[0]) +  
     as_nat h1 r * uint_v f1 * pow2 64 + as_nat h1 b1 * pow2 64 +
     as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
     as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
-
   (==)
     {
-      assert(Lib.Sequence.index (as_seq h1 bk0) 0 == h1_out_0)
+      assert(h2.[|out|].[0] == h1.[|out|].[0])
     }
 
-    uint_v (h1_out_0) +  
+    uint_v (h1.[|out|].[0]) +  
     ( 
-      uint_v (h1_out_1) + 
-      uint_v (h1_out_2) * pow2 64 + 
-      uint_v (h1_out_3) * pow2 64 * pow2 64 + 
-      uint_v (h1_out_4) * pow2 64 * pow2 64 * pow2 64) * pow2 64 +
+      uint_v (h1.[|out|].[1]) + 
+      uint_v (h1.[|out|].[2]) * pow2 64 + 
+      uint_v (h1.[|out|].[3]) * pow2 64 * pow2 64 + 
+      uint_v (h1.[|out|].[4]) * pow2 64 * pow2 64 * pow2 64) * pow2 64 +
     as_nat h1 r * uint_v f1 * pow2 64 + 
     as_nat h2 r * uint_v f2 * pow2 64 * pow2 64 + 
     as_nat h3 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
-
   (==) 
     {
-     lemma_mul5 (uint_v (h1_out_1)) (uint_v (h1_out_2)) (uint_v (h1_out_3)) (uint_v (h1_out_4))
+
+     lemma_mul5 (uint_v (h1.[|out|].[1])) (uint_v (h1.[|out|].[2])) (uint_v (h1.[|out|].[3])) (uint_v (h1.[|out|].[4]))
     }
 
     as_nat h0 r * uint_v f0 +
     as_nat h0 r * uint_v f1 * pow2 64 + 
     as_nat h0 r * uint_v f2 * pow2 64 * pow2 64 + 
     as_nat h0 r * uint_v f3 * pow2 64 * pow2 64 * pow2 64;
-
    (==) 
     {
       lemma_mul6 (as_nat h0 r) (uint_v f0) (uint_v f1) (uint_v f2) (uint_v f3)
     }
-
-
     as_nat h0 r * as_nat h0 f; 
     }
-
 #pop-options
 
 val lemma_320: a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> u: uint64 -> Lemma 
@@ -873,28 +867,26 @@ let lemma_320 a b c d u =
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 * pow2 64 < pow2 320)
 
 
+let lemma_mult_le_both (a b:nat) (n1 n2:nat):
+  Lemma (requires (a <= n1 /\ b <= n2))
+        (ensures (a * b <= n1 * n2)) = ()
+
 val lemma_320_64:a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> e: uint64 -> u: uint64 -> Lemma 
   (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 + uint_v e  < pow2 320)
-  
+
+#push-options "--z3rlimit 50"
 let lemma_320_64 a b c d e u = 
-
-  lemma_mult_le_left (uint_v a) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v a) (pow2 64 - 1);  
-  
-  lemma_mult_le_left (uint_v b) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v b) (pow2 64 - 1);
-
-  lemma_mult_le_left (uint_v c) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v c) (pow2 64 - 1);  
-
-  lemma_mult_le_left (uint_v d) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);  
-
+  lemma_mult_le_both (uint_v u) (uint_v a) (pow2 64 - 1) (pow2 64 - 1);  
+  lemma_mult_le_both (uint_v u) (uint_v b) (pow2 64 - 1) (pow2 64 - 1);  
+  lemma_mult_le_both (uint_v u) (uint_v c) (pow2 64 - 1) (pow2 64 - 1);  
+  lemma_mult_le_both (uint_v u) (uint_v d) (pow2 64 - 1) (pow2 64 - 1);  
   assert_norm((pow2 64 - 1) * (pow2 64 - 1) +  
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 + 
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 + 
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 * pow2 64 + (pow2 64 - 1) < pow2 320)
 
+
+#pop-options
 
 inline_for_extraction noextract
 val sq0: f:  lbuffer uint64 (size 4) -> result: lbuffer uint64 (size 4) -> memory: lbuffer uint64 (size 12) -> temp: lbuffer uint64 (size 5) -> Stack uint64
