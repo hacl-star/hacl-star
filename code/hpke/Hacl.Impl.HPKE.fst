@@ -1170,6 +1170,7 @@ let context_seal #cs _ ctx aadlen aad plainlen plain o_ct =
 
 #pop-options
 
+#restart-solver
 #push-options "--z3rlimit 300"
 
 [@ Meta.Attribute.specialize]
@@ -1193,6 +1194,8 @@ let sealBase #cs skE pkR infolen info aadlen aad plainlen plain o_enc o_ct =
   )
 
 #pop-options
+
+#restart-solver
 
 noextract
 val context_open:
