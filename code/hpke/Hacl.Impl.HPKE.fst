@@ -664,6 +664,7 @@ val encap:
        | _ -> False)
      )
 
+#restart-solver
 #push-options "--z3rlimit 400"
 
 [@ Meta.Attribute.inline_]
