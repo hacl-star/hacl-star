@@ -665,7 +665,7 @@ val encap:
      )
 
 #restart-solver
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 500"
 
 [@ Meta.Attribute.inline_]
 let encap #cs o_shared o_enc skE pkR =
