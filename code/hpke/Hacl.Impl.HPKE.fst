@@ -52,7 +52,7 @@ let nsize_kem_key (cs:S.ciphersuite) : (s:size_t{v s == S.size_kem_key cs}) =
   | _, SHa.SHA2_256, _, _ -> 32ul
 
 inline_for_extraction noextract
-let nsize_serialized_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_serialized cs}) =
+let nsize_serialized_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_serialized cs /\ s == DH.nsize_public (S.kem_dh_of_cs cs)}) =
   match cs with
   | SDH.DH_Curve25519, _, _, _ -> 32ul
   | SDH.DH_P256, _, _, _ -> 64ul
