@@ -692,18 +692,42 @@ let copy #a s_src s_dst =
       let s_dst: state SHA2_512 = s_dst in
       let p_dst = SHA2_512_s?.p !*s_dst in
       B.blit p_src 0ul p_dst 0ul 8ul
-  (*| Blake2S_s p_src ->
-      [@inline_let]
-      let s_dst: state Blake2S = s_dst in
-      let p_dst = Blake2S_s?.p !*s_dst in
-      B.blit p_src 0ul p_dst 0ul 16ul
+  | Blake2S_s p_src ->
+      begin match !*s_dst with
+      | Blake2S_s p_dst ->
+          [@inline_let]
+          let s_dst: state Blake2S = s_dst in
+          B.blit p_src 0ul p_dst 0ul 16ul
+      | Blake2S_128_s _ _ ->
+          LowStar.Failure.failwith "Error: EverCrypt_AutoConfig2_init() was called too late"
+      end
   | Blake2B_s p_src ->
-      [@inline_let]
-      let s_dst: state Blake2B = s_dst in
-      let p_dst = Blake2B_s?.p !*s_dst in
-      B.blit p_src 0ul p_dst 0ul 16ul*)
-  | _ ->
-      LowStar.Failure.failwith "TODO"
+      begin match !*s_dst with
+      | Blake2B_s p_dst ->
+          [@inline_let]
+          let s_dst: state Blake2B = s_dst in
+          B.blit p_src 0ul p_dst 0ul 16ul
+      | Blake2B_256_s _ _ ->
+          LowStar.Failure.failwith "Error: EverCrypt_AutoConfig2_init() was called too late"
+      end
+  | Blake2S_128_s _ p_src ->
+      begin match !*s_dst with
+      | Blake2S_128_s _ p_dst ->
+          [@inline_let]
+          let s_dst: state Blake2S = s_dst in
+          B.blit p_src 0ul p_dst 0ul 4ul
+      | Blake2S_s _ ->
+          LowStar.Failure.failwith "Error: EverCrypt_AutoConfig2_init() was called too late"
+      end
+  | Blake2B_256_s _ p_src ->
+      begin match !*s_dst with
+      | Blake2B_256_s _ p_dst ->
+          [@inline_let]
+          let s_dst: state Blake2B = s_dst in
+          B.blit p_src 0ul p_dst 0ul 4ul
+      | Blake2B_s _ ->
+          LowStar.Failure.failwith "Error: EverCrypt_AutoConfig2_init() was called too late"
+      end
 
 #pop-options
 
