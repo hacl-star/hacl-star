@@ -50,6 +50,12 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
 }
 Spec_ECDSA_hash_alg_ecdsa;
 
+#define Spec_Cipher_Expansion_Hacl_CHACHA20 0
+#define Spec_Cipher_Expansion_Vale_AES128 1
+#define Spec_Cipher_Expansion_Vale_AES256 2
+
+typedef uint8_t Spec_Cipher_Expansion_impl;
+
 Spec_Agile_Cipher_cipher_alg
 Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 

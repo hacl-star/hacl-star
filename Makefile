@@ -821,7 +821,7 @@ test-wasm: dist/wasm/package.json
 
 # Customizations for regular, msvc and gcc flavors.
 dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
-  -ctypes EverCrypt.*,Hacl.*
+  -ctypes EverCrypt.*,Hacl.* -funroll-loops 16
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_BINDINGS += \
   $(wildcard lib/ml/*_bindings.ml)
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_GEN += \

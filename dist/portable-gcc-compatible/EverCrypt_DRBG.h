@@ -84,17 +84,6 @@ uint32_t EverCrypt_DRBG_min_length(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: EverCrypt_DRBG_min_length */
 
-/* SNIPPET_START: EverCrypt_DRBG_state_s_tags */
-
-#define EverCrypt_DRBG_SHA1_s 0
-#define EverCrypt_DRBG_SHA2_256_s 1
-#define EverCrypt_DRBG_SHA2_384_s 2
-#define EverCrypt_DRBG_SHA2_512_s 3
-
-/* SNIPPET_END: EverCrypt_DRBG_state_s_tags */
-
-typedef uint8_t EverCrypt_DRBG_state_s_tags;
-
 /* SNIPPET_START: EverCrypt_DRBG_state_s */
 
 typedef struct EverCrypt_DRBG_state_s_s EverCrypt_DRBG_state_s;
