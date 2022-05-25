@@ -728,7 +728,10 @@ BUNDLE_FLAGS	=\
   $(INTTYPES_128_BUNDLE) \
   $(RSAPSS_BUNDLE) \
   $(FFDHE_BUNDLE) \
-  $(LEGACY_BUNDLE)
+  $(LEGACY_BUNDLE) \
+  $(AES_BUNDLE) \
+  $(GF128_BUNDLE) \
+  $(AES_GCM_BUNDLE)
 
 DEFAULT_FLAGS = \
   $(HAND_WRITTEN_LIB_FLAGS) \
@@ -739,6 +742,10 @@ DEFAULT_FLAGS = \
   $(BUNDLE_FLAGS) \
   $(REQUIRED_FLAGS) \
   $(TARGET_H_INCLUDE)
+
+IGNORE_AES_BUNDLE = -bundle Hacl.AES_128.*,Hacl.AES_256.*,Hacl.Impl.*
+IGNORE_GF128_BUNDLE = -bundle Hacl.Impl.Gf128.*,Hacl.Gf128.*
+IGNORE_AES_GCM_BUNDLE = -bundle Hacl.AES_128_GCM.*,Hacl.AES_256_GCM.*
 
 # WASM distribution
 # -----------------
@@ -797,6 +804,13 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
+
+# Disabling AES
+dist/wasm/Makefile.basic: AES_BUNDLE = $(IGNORE_AES_BUNDLE)
+dist/wasm/Makefile.basic: GF128_BUNDLE = $(IGNORE_GF128_BUNDLE)
+dist/wasm/Makefile.basic: AES_GCM_BUNDLE = $(IGNORE_AES_GCM_BUNDLE)
+
+dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
 dist/wasm/Makefile.basic: CTR_BUNDLE =
 dist/wasm/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
