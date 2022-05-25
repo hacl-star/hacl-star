@@ -385,7 +385,7 @@ val labeled_extract_hash:
       as_seq h1 o_hash `Seq.equal` S.labeled_extract (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 salt) (as_seq h0 label) (as_seq h0 ikm))
 
 
-#push-options "--z3rlimit 200 --z3refresh"
+#push-options "--z3rlimit 300 --z3refresh"
 
 [@ Meta.Attribute.inline_]
 let labeled_extract_hash #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
