@@ -18,7 +18,7 @@ type key1 =  lbuffer vec128 1ul
 type nonce =  lbuffer vec128 1ul
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_state: unit ->
   StackInline state
   (requires (fun h -> True))
@@ -27,7 +27,7 @@ val create_state: unit ->
 let create_state () = create (size 4) vec128_zero
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val copy_state:
     st: state
   -> ost: state ->
@@ -42,7 +42,7 @@ let copy_state st ost =
   st.(size 3) <- ost.(size 3)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_block0:
     st: state
   -> b: lbuffer uint8 16ul ->
@@ -53,7 +53,7 @@ val load_block0:
 let load_block0 st b = st.(size 0) <- vec_load_le U128 1 b
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_key1:
     k: key1
   -> b: lbuffer uint8 16ul ->
@@ -64,7 +64,7 @@ val load_key1:
 let load_key1 k b = k.(size 0) <- vec_load_le U128 1 b
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_nonce:
     n: nonce
   -> b: lbuffer uint8 12ul ->
@@ -80,7 +80,7 @@ let load_nonce n b =
   pop_frame()
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_state:
     st: state
   -> nonce: nonce
@@ -102,7 +102,7 @@ let load_state st nonce counter =
   st.(size 2) <- cast U128 1 (vec_set #U32 #4 (cast #U128 #1 U32 4 nonce0) 3ul counter2);
   st.(size 3) <- cast U128 1 (vec_set #U32 #4 (cast #U128 #1 U32 4 nonce0) 3ul counter3)
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_block0:
     out: lbuffer uint8 16ul
   -> st: state ->
@@ -114,7 +114,7 @@ let store_block0 out st =
   vec_store_le out st.(size 0)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val xor_state_key1:
     st: state
   -> key: key1 ->
@@ -129,7 +129,7 @@ let xor_state_key1 st key =
   st.(size 3) <- vec_xor st.(size 3) key.(size 0)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val xor_block:
     out: lbuffer uint8 64ul
   -> st: state
@@ -153,7 +153,7 @@ let xor_block out st inp =
   vec_store_le (sub out (size 48) (size 16)) v3
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes_enc:
     st: state
   -> key: key1 ->
@@ -168,7 +168,7 @@ let aes_enc st key =
   st.(size 3) <- cast U128 1 (vec_aes_enc (cast U8 16 st.(size 3)) (cast U8 16 key.(size 0)))
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes_enc_last:
     st: state
   -> key: key1 ->
@@ -183,7 +183,7 @@ let aes_enc_last st key =
   st.(size 3) <- cast U128 1 (vec_aes_enc_last (cast U8 16 st.(size 3)) (cast U8 16 key.(size 0)))
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes_keygen_assist0:
     ok: key1
   -> ik: key1
@@ -196,7 +196,7 @@ let aes_keygen_assist0 ok ik rcon =
   let v = cast U128 1 (vec_aes_keygen_assist (cast U8 16 ik.(size 0)) rcon) in
   ok.(size 0) <- cast U128 1 (vec_permute4 (cast U32 4 v) 3ul 3ul 3ul 3ul)
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes_keygen_assist1:
     ok: key1
   -> ik: key1 ->
@@ -209,7 +209,7 @@ let aes_keygen_assist1 ok ik =
   ok.(size 0) <- cast U128 1 (vec_permute4 (cast U32 4 v) 2ul 2ul 2ul 2ul)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val key_expansion_step:
     next: key1
   -> prev: key1 ->

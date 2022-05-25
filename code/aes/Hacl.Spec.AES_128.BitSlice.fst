@@ -21,7 +21,7 @@ let transpose_bits64 (x:uint64) : Tot uint64 =
   ((x <<. size 49) &. u64 0x0100000000000000)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val transpose_bits64x8:
   i0:uint64 -> i1:uint64 -> i2: uint64 -> i3:uint64 ->
   i4:uint64 -> i5:uint64 -> i6: uint64 -> i7:uint64 ->
@@ -86,7 +86,7 @@ let transpose_bits64x8 i0 i1 i2 i3 i4 i5 i6 i7 =
 
 
 (* Boyar and Peralta circuit: depth 16, gates 125 *)
-inline_for_extraction
+inline_for_extraction noextract
 val sub_bytes64x8_boyar:
     uint64 -> uint64 -> uint64 -> uint64
   -> uint64 -> uint64 -> uint64 -> uint64 ->
@@ -236,7 +236,7 @@ let sub_bytes64x8_boyar (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4
 
 
 (* A slightly faster circuit from Cagdas Calik: depth 27, gates 113 *)
-inline_for_extraction
+inline_for_extraction noextract
 val sub_bytes64x8:
     uint64 -> uint64 -> uint64 -> uint64
   -> uint64 -> uint64 -> uint64 -> uint64 ->
@@ -371,7 +371,7 @@ let sub_bytes64x8 (st0:uint64) (st1:uint64) (st2:uint64) (st3:uint64) (st4:uint6
   (s7,s6,s5,s4,s3,s2,s1,s0)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 let shift_row64 (u:uint64) =
   let u = (u &. u64 0x1111111111111111) |.
           ((u &. u64 0x2220222022202220) >>. size 4) |.

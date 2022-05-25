@@ -14,6 +14,7 @@ module PLoops = Lib.Sequence.Lemmas
 module S = Spec.GF128
 
 include Hacl.Spec.GF128.Vec
+include Lib.Vec.Lemmas
 
 
 #set-options "--z3rlimit 50 --max_fuel 0 --max_ifuel 0"
@@ -84,7 +85,7 @@ let gf128_update_multi_add_mul_lemma text acc0 r =
   assert (acc1 == Loops.repeati (len / 64) repeat_bf_vec acc0);
 
   FStar.Classical.forall_intro_2 (gf128_update_multi_add_mul_lemma_loop r text acc0);
-  PLoops.lemma_repeati_vec 4 (len / 64) (fun x -> x) repeat_bf_sc repeat_bf_vec acc0;
+  Lib.Vec.Lemmas.lemma_repeati_vec 4 (len / 64) (fun x -> x) repeat_bf_sc repeat_bf_vec acc0;
   assert (acc1 == Loops.repeati (len / 16) repeat_bf_sc acc0);
   lemma_repeat_blocks_multi #uint8 #elem 16 text f acc0
 
@@ -148,7 +149,7 @@ val repeat_blocks_multi_vec_equiv_pre_lemma: r:elem -> b:lbytes 64 -> acc_v0:ele
   (let pre = load_precompute_r r in
    let f = S.gf128_update1 r in
    let f_v = gf128_update4_mul_add pre in
-   PLoops.repeat_blocks_multi_vec_equiv_pre 4 16 64 f f_v (normalize4 pre) b acc_v0)
+   Lib.Vec.Lemmas.repeat_blocks_multi_vec_equiv_pre 4 16 f f_v (normalize4 pre) b acc_v0)
 
 let repeat_blocks_multi_vec_equiv_pre_lemma r b acc_v0 =
   poly_update_nblocks_lemma r b acc_v0
@@ -170,7 +171,7 @@ let poly_update_multi_lemma_v text acc_v0 r =
   let f_v = gf128_update4_mul_add pre in
 
   Classical.forall_intro_2 (repeat_blocks_multi_vec_equiv_pre_lemma r);
-  PLoops.lemma_repeat_blocks_multi_vec 4 16 text f f_v (normalize4 pre) acc_v0
+  Lib.Vec.Lemmas.lemma_repeat_blocks_multi_vec 4 16 text f f_v (normalize4 pre) acc_v0
 
 
 val gf128_update_multi_mul_add_lemma:

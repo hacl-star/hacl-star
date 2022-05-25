@@ -60,7 +60,7 @@ val aes128_key_block:
 let aes128_key_block kb ctx counter = aes_key_block #M32 #Spec.AES.AES128 kb ctx counter
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes128_update4:
     out: lbuffer uint8 64ul
   -> inp: lbuffer uint8 64ul
@@ -72,7 +72,7 @@ val aes128_update4:
 
 let aes128_update4 out inp ctx ctr = aes_update4 out inp ctx ctr
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes128_ctr:
   len: size_t
   -> out: lbuffer uint8 len

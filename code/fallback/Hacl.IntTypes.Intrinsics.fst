@@ -26,6 +26,7 @@ let add_carry_st (t:inttype{t = U32 \/ t = U64}) =
 
 val add_carry_u32: add_carry_st U32
 let add_carry_u32 cin x y r =
+  admit();
   let res = to_u64 x +. to_u64 cin +. to_u64 y in
   let c = to_u32 (res >>. 32ul) in
   r.(0ul) <- to_u32 res;

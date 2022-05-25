@@ -333,7 +333,7 @@ val fadd_acc4:
   (requires fun h ->
     live h x /\ live h acc /\ disjoint x acc)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
-    feval4 h1 x == Hacl.Spec.GF128.Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
+    feval4 h1 x == Hacl.Spec.GF128.Vec.fadd4 (LSeq.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
 
 let fadd_acc4 #s x acc =
   match s with

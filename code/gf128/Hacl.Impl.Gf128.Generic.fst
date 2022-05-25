@@ -355,7 +355,7 @@ let load_acc #s acc tb acc4 b4 =
   let h0 = ST.get () in
   update_sub acc4 0ul (felem_len s) acc;
   let h1 = ST.get () in
-  assert (feval4 h1 acc4 == Lib.IntVector.create4 (feval h0 acc) zero zero zero);
+  assert (feval4 h1 acc4 == LSeq.create4 (feval h0 acc) zero zero zero);
   encode4 b4 tb;
   fadd4 acc4 b4
 

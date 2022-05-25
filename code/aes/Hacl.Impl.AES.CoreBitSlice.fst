@@ -20,7 +20,7 @@ type block = lbuffer uint8 16ul
 type block4 = lbuffer uint8 64ul
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_state: unit ->
   StackInline state
   (requires (fun h -> True))
@@ -29,7 +29,7 @@ val create_state: unit ->
 let create_state() = create 8ul (u64 0)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val copy_state:
     next: state
   -> prev: state ->
@@ -43,7 +43,7 @@ let copy_state next prev = copy next prev
 val load_block0:
     out: state
   -> inp: block ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h out /\ live h inp))
   (ensures (fun h0 _ h1 -> modifies1 out h0 h1))
 
@@ -122,8 +122,8 @@ val load_key1:
 
 let load_key1 (out:state) (k:block) =
   load_block0 out k;
-  let h0 = ST.get() in
-  loop_nospec #h0 (size 8) out
+  let h1 = ST.get() in
+  loop_nospec #h1 (size 8) out
     (fun i ->
       let u = out.(i) in
       let u = u ^. (u <<. size 16) in
@@ -297,19 +297,18 @@ let aes_enc_last st key =
   shift_rows_state st;
   xor_state_key1 st key
 
-
-let rcon : b:ilbuffer uint8 11ul =
-  [@ inline_let]
-  let rcon_l = [
+noextract unfold let rcon_l : list uint8 = [
     u8(0x8d); u8(0x01); u8(0x02); u8(0x04);
     u8(0x08); u8(0x10); u8(0x20); u8(0x40);
     u8(0x80); u8(0x1b); u8(0x36)
-  ] in
+  ]
+
+let rcon : b:glbuffer uint8 11ul =
   assert_norm (List.Tot.length rcon_l == 11);
   createL_global rcon_l
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes_keygen_assisti: rcon:uint8 -> i:shiftval U8 -> u:uint64 -> Tot uint64
 let aes_keygen_assisti rcon i u =
   let u3 = u &. u64 0xf000f000f000f000 in
@@ -339,7 +338,7 @@ let aes_keygen_assist next prev rcon =
     (fun i -> next.(i) <- aes_keygen_assisti rcon i next.(i))
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes_keygen_assist0:
     next: state
   -> prev: state
@@ -358,7 +357,7 @@ let aes_keygen_assist0 next prev rcon =
 	   let n = n ^. (n >>. size 8) in
 	   next.(i) <- n)
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes_keygen_assist1:
     next: state
   -> prev: state ->
@@ -376,7 +375,7 @@ let aes_keygen_assist1 next prev =
 	   let n = n ^. (n >>. size 8) in
 	   next.(i) <- n)
 
-inline_for_extraction
+inline_for_extraction noextract
 let key_expand1 (p:uint64) (n:uint64) =
   let p = p ^. ((p &. u64 0x0fff0fff0fff0fff) <<. size 4) ^. ((p &. u64 0x00ff00ff00ff00ff) <<. size 8)
             ^. ((p &. u64 0x000f000f000f000f) <<. size 12) in
@@ -386,7 +385,7 @@ let key_expand1 (p:uint64) (n:uint64) =
 val key_expansion_step:
     next: state
   -> prev: state ->
-  ST unit
+  Stack unit
   (requires (fun h -> live h prev /\ live h next))
   (ensures (fun h0 _ h1 -> modifies1 next h0 h1))
 

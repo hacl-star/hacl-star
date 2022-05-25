@@ -50,10 +50,10 @@ let feval4 (h:mem) (f:felem4) : GTot Vec.elem4 =
   let f1 = (vec_v f.[1]).[0] in
   let f2 = (vec_v f.[2]).[0] in
   let f3 = (vec_v f.[3]).[0] in
-  create4 f0 f1 f2 f3
+  LSeq.create4 f0 f1 f2 f3
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_felem: unit ->
   StackInline felem
   (requires fun h -> True)
@@ -64,7 +64,7 @@ val create_felem: unit ->
 let create_felem () = create 1ul vec128_zero
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val copy_felem: f1:felem -> f2:felem ->
   Stack unit
   (requires fun h -> live h f1 /\ live h f2 /\ disjoint f1 f2)
@@ -78,7 +78,7 @@ let copy_felem f1 f2 =
   LSeq.eq_intro (as_seq h1 f1) (as_seq h0 f2)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val felem_set_zero: f:felem ->
   Stack unit
   (requires fun h -> live h f)
@@ -88,7 +88,7 @@ val felem_set_zero: f:felem ->
 let felem_set_zero f = f.(0ul) <- vec128_zero
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_felem4: unit ->
   StackInline felem4
   (requires fun h -> True)
@@ -103,7 +103,7 @@ let create_felem4 () =
   f
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem:
     x:felem
   -> y:lbuffer uint8 16ul ->
@@ -118,7 +118,7 @@ let load_felem x y =
   BSeq.index_uints_from_bytes_be #U128 #SEC #1 (as_seq h0 y) 0
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem4:
     x:felem4
   -> y:block4 ->
@@ -139,7 +139,7 @@ let load_felem4 x y =
   BSeq.index_uints_from_bytes_be #U128 #SEC #1 (LSeq.sub (as_seq h0 y) 48 16) 0
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem:
     x:lbuffer uint8 16ul
   -> y:felem ->
@@ -277,7 +277,7 @@ val fadd_acc4:
   (requires fun h ->
     live h x /\ live h acc /\ disjoint x acc)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
-    feval4 h1 x == Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
+    feval4 h1 x == Vec.fadd4 (LSeq.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
 
 let fadd_acc4 x acc =
   let h0 = ST.get () in
@@ -286,7 +286,7 @@ let fadd_acc4 x acc =
   Lemmas.add_identity (feval h0 (gsub x 1ul 1ul));
   Lemmas.add_identity (feval h0 (gsub x 2ul 1ul));
   Lemmas.add_identity (feval h0 (gsub x 3ul 1ul));
-  LSeq.eq_intro (feval4 h1 x) (Vec.fadd4 (create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
+  LSeq.eq_intro (feval4 h1 x) (Vec.fadd4 (LSeq.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
 
 
 val normalize4:

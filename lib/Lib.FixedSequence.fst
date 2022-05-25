@@ -36,7 +36,7 @@ inline_for_extraction
 let rest (#a:Type0) (#len:flen{len > 1}) (s:fseq a len) : fseq a (len - 1) =
     normalize_term (rest_ #a #len s)
 
-inline_for_extraction noextract
+inline_for_extraction //noextract
 let rec index_ (#a:Type0) (#len:flen) (s:fseq a len) (i:nat{i < len}) =
   if i = 0 then fst s
   else index_ #a #(len-1) (rest s) (i-1)
@@ -45,7 +45,7 @@ inline_for_extraction
 let index (#a:Type0) (#len:flen) (s:fseq a len) (i:nat{i < len}) =
   normalize_term (index_ s i)
 
-inline_for_extraction noextract
+inline_for_extraction //noextract
 let rec createi_ (#a:Type0) (min:nat) (max:flen{max > min}) (f:(i:nat{i < max} -> a)) : Tot (fseq_ a (max - min)) (decreases (max - min)) =
   if min + 1 = max then f min
   else f min, createi_ #a (min+1) max f
@@ -85,7 +85,7 @@ let create_lemma (#a:Type0) (len:flen) (init:a) (i:nat{i < len}) :
 	  [SMTPat (index (create #a len init) i)] =
     createi_lemma_ #a 0 len (fun i -> init) i
 
-inline_for_extraction noextract
+inline_for_extraction //noextract
 let rec concat_ (#a:Type0) (#len0:flen) (#len1:flen{len0 + len1 <= max_fseq_len})
 		(s0:fseq a len0) (s1:fseq a len1) : fseq_ a (len0 + len1) =
 	if len0 = 1 then s0,s1
@@ -122,7 +122,7 @@ let concat_lemma (#a:Type0) (#len0:flen) (#len1:flen)
 		  if i < len0 then concat_lemma1 s0 s1 i
 		  else concat_lemma2 s0 s1 i
 
-abstract
+//abstract
 type equal (#a:Type) (#len:flen) (s1:fseq a len) (s2:fseq a len) =
   forall (i:size_nat{i < len}).{:pattern (index s1 i); (index s2 i)} index s1 i == index s2 i
 
@@ -140,7 +140,7 @@ val eq_elim: #a:Type -> #len:flen -> s1:fseq a len -> s2:fseq a len ->
 
 (** Updating an element of a fixed-length Sequence *)
 
-inline_for_extraction noextract
+inline_for_extraction //noextract
 let rec upd_ (#a:Type) (#len:flen) (s:fseq a len) (i:nat{i < len}) (x:a) : fseq_ a len =
   if i = 0 then
     if len = 1 then x
@@ -197,6 +197,7 @@ unfold let op_String_Assignment #a #len = upd #a #len
 
 let funit (i:nat) = unit
 let fseq_to_bytes_be (#t:inttype{unsigned t}) (#l:secrecy_level) (#len:flen) (s:fseq (uint_t t l) len) : Lib.ByteSequence.lbytes_l l (numbytes t * len) =
+    admit();
     assert_norm (len * numbytes t < pow2 32);
     let _, o = normalize_term (Lib.Sequence.generate_blocks (numbytes t) len len funit
 		(fun i u -> (),Lib.ByteSequence.uint_to_bytes_be #t #l s.[i]) ()) in

@@ -66,7 +66,7 @@ let to_elem (x:elem_s) : elem =
 let logxor_s (x:elem_s) (y:elem_s) : elem_s =
   let r0 = x.[0] ^. y.[0] in
   let r1 = x.[1] ^. y.[1] in
-  Lib.IntVector.create2 r0 r1
+  Lib.Sequence.create2 r0 r1
 
 val logxor_s_lemma: x:elem_s -> y:elem_s -> Lemma
   (to_elem (logxor_s x y) == to_elem x ^. to_elem y)
@@ -74,7 +74,7 @@ val logxor_s_lemma: x:elem_s -> y:elem_s -> Lemma
 let logand_s (x:elem_s) (y:elem_s) : elem_s =
   let r0 = x.[0] &. y.[0] in
   let r1 = x.[1] &. y.[1] in
-  Lib.IntVector.create2 r0 r1
+  Lib.Sequence.create2 r0 r1
 
 val logand_s_lemma: x:elem_s -> y:elem_s -> Lemma
   (to_elem (logand_s x y) == (to_elem x &. to_elem y))

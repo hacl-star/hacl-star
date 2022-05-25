@@ -53,7 +53,7 @@ let feval4 (h:mem) (f:felem4) : GTot Vec.elem4 =
   let f1 = uint #U128 #SEC (v f.[3] * pow2 64 + v f.[2]) in
   let f2 = uint #U128 #SEC (v f.[5] * pow2 64 + v f.[4]) in
   let f3 = uint #U128 #SEC (v f.[7] * pow2 64 + v f.[6]) in
-  Lib.IntVector.create4 f0 f1 f2 f3
+  LSeq.create4 f0 f1 f2 f3
 
 
 noextract
@@ -64,7 +64,7 @@ let load_precomp_r_inv (h:mem) (pre:precomp) : Type0 =
    as_seq h (gsub pre 8ul 128ul) == tab1 /\ as_seq h (gsub pre 136ul 128ul) == tab2)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_felem: unit ->
   StackInline felem
   (requires fun h -> True)
@@ -75,7 +75,7 @@ val create_felem: unit ->
 let create_felem () = create 2ul (u64 0)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val copy_felem: f1:felem -> f2:felem ->
   Stack unit
   (requires fun h -> live h f1 /\ live h f2 /\ eq_or_disjoint f1 f2)
@@ -90,7 +90,7 @@ let copy_felem f1 f2 =
   LSeq.eq_intro (as_seq h1 f1) (as_seq h0 f2)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val felem_set_zero: f:felem ->
   Stack unit
   (requires fun h -> live h f)
@@ -102,7 +102,7 @@ let felem_set_zero f =
   f.(1ul) <- u64 0
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val create_felem4: unit ->
   StackInline felem4
   (requires fun h -> True)
@@ -117,7 +117,7 @@ let create_felem4 () =
   f
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem:
     x:felem
   -> y:block ->
@@ -142,7 +142,7 @@ let load_felem x y =
   assert (v (feval h1 x) == v (S.encode (as_seq h0 y)))
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val load_felem4:
     x:felem4
   -> y:block4 ->
@@ -182,7 +182,7 @@ let uints64_to_bytes_be_lemma lo hi =
   nat_from_intseq_be_inj lp rp
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val store_felem:
     x:lbuffer uint8 16ul
   -> y:felem ->
@@ -214,7 +214,7 @@ let store_felem x y =
   BSeq.nat_from_intseq_be_inj (as_seq h2 x) (BSeq.uint_to_bytes_be #U128 #SEC (feval h0 y))
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val fadd:
     x:felem
   -> y:felem ->
@@ -230,7 +230,7 @@ let fadd x y =
   SPreComp.fadd_lemma (as_seq h0 x) (as_seq h0 y)
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val fadd4:
     x:felem4
   -> y:felem4 ->
@@ -352,7 +352,7 @@ let fmul x y =
 inline_for_extraction noextract
 let table1 = lbuffer uint64 128ul
 
-inline_for_extraction
+inline_for_extraction noextract
 val precomp_f:
     i:size_t{v i < 64}
   -> sh:felem
@@ -440,7 +440,7 @@ let load_precompute_r pre key =
   prepare table r4
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val fmul_pre_f:
     x:uint64
   -> tab:table1
@@ -545,7 +545,7 @@ val fadd_acc4:
   (requires fun h ->
     live h x /\ live h acc /\ disjoint x acc)
   (ensures  fun h0 _ h1 -> modifies1 x h0 h1 /\
-    feval4 h1 x == Vec.fadd4 (Lib.IntVector.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
+    feval4 h1 x == Vec.fadd4 (LSeq.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
 
 let fadd_acc4 x acc =
   let h0 = ST.get () in
@@ -556,7 +556,7 @@ let fadd_acc4 x acc =
   Lemmas.add_identity (feval h0 (gsub x 2ul 2ul));
   Lemmas.add_identity (feval h0 (gsub x 4ul 2ul));
   Lemmas.add_identity (feval h0 (gsub x 6ul 2ul));
-  LSeq.eq_intro (feval4 h1 x) (Vec.fadd4 (Lib.IntVector.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
+  LSeq.eq_intro (feval4 h1 x) (Vec.fadd4 (LSeq.create4 (feval h0 acc) zero zero zero) (feval4 h0 x))
 
 
 #set-options "--z3rlimit 100"

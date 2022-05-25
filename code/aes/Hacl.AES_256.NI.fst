@@ -35,7 +35,7 @@ val aes256_init:
 let aes256_init ctx key nonce = aes256_ni_init ctx key nonce
 
 [@ CInline ]
-inline_for_extraction
+inline_for_extraction noextract
 val aes256_encrypt_block:
     ob: lbuffer uint8 16ul
   -> ctx: aes_ctx
@@ -74,7 +74,7 @@ val aes256_key_block:
 let aes256_key_block kb ctx counter = aes_key_block #MAES #Spec.AES.AES256 kb ctx counter
 
 
-inline_for_extraction
+inline_for_extraction noextract
 val aes256_update4:
     out: lbuffer uint8 64ul
   -> inp: lbuffer uint8 64ul
