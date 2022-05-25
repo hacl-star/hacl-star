@@ -385,7 +385,7 @@ val labeled_extract_hash:
       as_seq h1 o_hash `Seq.equal` S.labeled_extract (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 salt) (as_seq h0 label) (as_seq h0 ikm))
 
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 200 --z3refresh"
 
 [@ Meta.Attribute.inline_]
 let labeled_extract_hash #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
@@ -434,7 +434,7 @@ val labeled_extract_kem:
     (ensures fun h0 _ h1 -> modifies (loc o_hash) h0 h1 /\
       as_seq h1 o_hash `Seq.equal` S.labeled_extract (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 salt) (as_seq h0 label) (as_seq h0 ikm))
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 400 --z3refresh"
 
 [@ Meta.Attribute.inline_]
 let labeled_extract_kem #cs o_hash suite_id_len suite_id saltlen salt labellen label ikmlen ikm =
@@ -511,7 +511,7 @@ val labeled_expand_hash:
       as_seq h1 o_hash `Seq.equal` S.labeled_expand (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
-#push-options "--z3rlimit 400"
+#push-options "--z3rlimit 400 --z3refresh"
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_hash #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
@@ -567,7 +567,7 @@ val labeled_expand_kem:
       as_seq h1 o_hash `Seq.equal` S.labeled_expand (S.kem_hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 500 --z3refresh"
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_kem #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
@@ -665,7 +665,7 @@ val encap:
      )
 
 #restart-solver
-#push-options "--z3rlimit 500"
+#push-options "--z3rlimit 500 --z3refresh"
 
 [@ Meta.Attribute.inline_]
 let encap #cs o_shared o_enc skE pkR =
@@ -734,7 +734,7 @@ val decap:
        | _ -> False)
      )
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 300 --z3refresh"
 
 [@ Meta.Attribute.inline_ ]
 let decap #cs o_shared enc skR =
@@ -819,7 +819,7 @@ val key_schedule_core_base:
           as_seq h1 o_secret `Seq.equal` secret)
        )
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 300 --z3refresh"
 
 [@ Meta.Attribute.inline_]
 let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen info =
@@ -958,7 +958,7 @@ val key_schedule_base:
          (let ctx = S.key_schedule cs S.Base (as_seq h0 shared) (as_seq h0 info) None in
          as_ctx h1 o_ctx == ctx))
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --z3refresh"
 
 [@ Meta.Attribute.inline_ ]
 let key_schedule_base #cs o_ctx shared infolen info =
@@ -975,7 +975,7 @@ let key_schedule_base #cs o_ctx shared infolen info =
 
 #pop-options
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 200 --z3refresh"
 
 [@ Meta.Attribute.specialize]
 let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
@@ -990,7 +990,7 @@ let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
 
 #pop-options
 
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 300 --z3refresh"
 
 [@ Meta.Attribute.specialize]
 let setupBaseR #cs o_ctx enc skR infolen info =
@@ -1156,7 +1156,7 @@ val context_seal:
          | _ -> False)
        )
 
-#push-options "--z3rlimit 100"
+#push-options "--z3rlimit 100 --z3refresh"
 
 [@ Meta.Attribute.inline_ ]
 let context_seal #cs _ ctx aadlen aad plainlen plain o_ct =
@@ -1172,7 +1172,7 @@ let context_seal #cs _ ctx aadlen aad plainlen plain o_ct =
 #pop-options
 
 #restart-solver
-#push-options "--z3rlimit 300"
+#push-options "--z3rlimit 300 --z3refresh"
 
 [@ Meta.Attribute.specialize]
 let sealBase #cs skE pkR infolen info aadlen aad plainlen plain o_enc o_ct =
@@ -1242,7 +1242,7 @@ let context_open #cs _ ctx aadlen aad ctlen ct o_pt =
     1ul
   )
 
-#push-options "--z3rlimit 600"
+#push-options "--z3rlimit 600 --z3refresh"
 
 [@ Meta.Attribute.specialize]
 let openBase #cs pkE skR infolen info aadlen aad ctlen ct o_pt =

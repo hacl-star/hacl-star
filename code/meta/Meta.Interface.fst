@@ -307,7 +307,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
         let se_t = pack_sigelt (Sg_Let false [lb]) in
         let se_t = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se_t in
         let se_t = match original_opts with
-          | Some original_opts -> add_check_with ({original_opts with z3refresh = true}) se_t
+          | Some original_opts -> add_check_with original_opts se_t
           | _ -> se_t
         in
         let f_typ = pack (Tv_FVar (pack_fv f_typ_name)) in
@@ -388,7 +388,7 @@ let rec visit_function (t_i: term) (st: state) (f_name: name): Tac (state & list
           let se = pack_sigelt (Sg_Let false [lb]) in
           let se = set_sigelt_quals [ NoExtract; Inline_for_extraction ] se in
           let se = match original_opts with
-            | Some original_opts -> add_check_with ({original_opts with z3refresh = true}) se
+            | Some original_opts -> add_check_with original_opts se
             | _ -> se
           in
           print (st.indent ^ "  let " ^ string_of_name new_name ^ ":\n" ^
