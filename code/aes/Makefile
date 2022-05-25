@@ -6,6 +6,8 @@ all: \
 	dist/aes128-bitslice-test.exe \
 	dist/aes128-ni-test.exe
 
+# TODO: why are the aes128 tests succeeding?
+# they should not even compile!
 test: all
 	dist/aes128-bitslice-test.exe
 	dist/aes128-ni-test.exe
