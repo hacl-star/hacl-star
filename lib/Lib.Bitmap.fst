@@ -3,9 +3,12 @@ module Lib.Bitmap
 open Lib.IntTypes
 open Lib.Sliceable
 
+module IT = Lib.IntTypes
+
 #set-options "--fuel 0 --ifuel 0"
 
-private val aux (t:inttype{unsigned t}) (l:secrecy_level) : (xN:sig (bits t){xN.t == int_t t l})
+private inline_for_extraction noextract val aux (t:inttype{unsigned t}) (l:secrecy_level) : (xN:sig (bits t){xN.t == int_t t l})
+private inline_for_extraction noextract
 let aux t l =
 { t = int_t t l
 ; v = (fun x i -> FStar.UInt.nth #(bits t) (v x) i)
@@ -25,11 +28,15 @@ let aux t l =
 ; not_spec = (fun x i -> lognot_spec x)
 }
 
+inline_for_extraction noextract
 val bitmap (t:inttype{unsigned t}) (l:secrecy_level) (n:nat) : Type0
+inline_for_extraction noextract
 let rec bitmap t l n = if n <= bits t then int_t t l else int_t t l * bitmap t l (n-bits t)
 
+inline_for_extraction noextract
 val uN (t:inttype{unsigned t}) (l:secrecy_level) (n:nat{n<=bits t}): (xN:sig n{xN.t == bitmap t l n})
 #push-options "--fuel 1"
+inline_for_extraction noextract
 let uN t l n =
   if n = bits t then
     aux t l
@@ -37,14 +44,18 @@ let uN t l n =
     xN_rest (aux t l) n
 #pop-options
 
+inline_for_extraction noextract
 val uN_eq
   (#t1 #t2:(t:inttype{unsigned t})) (#l:secrecy_level)
   (#n:nat{n<=bits t1 /\ n<=bits t2})
   (x:(uN t1 l n).t) (y:(uN t2 l n).t) : Type0
+inline_for_extraction noextract
 let uN_eq x y = forall i. (_).v x i == (_).v y i
 
+inline_for_extraction noextract
 val lemma0 (n:nat) (m:nat{n<=m}) (a:FStar.UInt.uint_t n) (i:nat{i<n}) :
   Lemma (FStar.UInt.size a m /\ FStar.UInt.nth #m a i == FStar.UInt.nth #n a i)
+inline_for_extraction noextract
 let rec lemma0 n m a i =
   if n=0 then (
     ()
@@ -52,8 +63,10 @@ let rec lemma0 n m a i =
     admit ()
   )
 
+inline_for_extraction noextract
 val uN_cast (#t1 t2:(t:inttype{unsigned t})) (#l:secrecy_level) (#n:nat{n<=bits t1 /\ n<=bits t2}) (x:(uN t1 l n).t) :
   Pure (uN t2 l n).t (requires True) (ensures fun y -> uN_eq y x)
+inline_for_extraction noextract
 let uN_cast #t1 t2 #l #n x =
   let n1 = bits t1 in
   let n2 = bits t2 in
@@ -74,20 +87,26 @@ let uN_cast #t1 t2 #l #n x =
   assert(forall (i:nat{i<n}). FStar.UInt.nth #n2 (v a % pow2 n2) i == FStar.UInt.nth #n1 (v a) i);
   y
 
+inline_for_extraction noextract
 val uN_expend (#t:(t:inttype{unsigned t})) (#l:secrecy_level) (#n:nat{n<=bits t}) (m:nat{n<=m /\ m<=bits t}) (x:(uN t l n).t) :
   Pure (uN t l m).t (requires True) (ensures fun y -> forall (i:nat{i<n}). (_).v y i == (_).v x i)
+inline_for_extraction noextract
 let uN_expend m x = x
 
+inline_for_extraction noextract
 val uN_reduce (#t:(t:inttype{unsigned t})) (#l:secrecy_level) (#n:nat{n<=bits t}) (m:nat{m<=n}) (x:(uN t l n).t) :
   Pure (uN t l m).t (requires True) (ensures fun y -> forall (i:nat{i<m}). (_).v y i == (_).v x i)
+inline_for_extraction noextract
 let uN_reduce m x = x
 
+inline_for_extraction noextract
 val uN_shift_left
   (#t:inttype{unsigned t}) (#l:secrecy_level) (#n:nat{n<=bits t})
   (x:(uN t l n).t) (k:nat{k<bits t}) :
   Pure (uN t l n).t
     (requires True)
     (ensures fun y -> forall (i:nat{i<n-k}). (_).v y i == (_).v x (i+k))
+inline_for_extraction noextract
 let uN_shift_left #t #l #n x k =
   let y : (uN t l n).t = shift_left #t #l x (size k) in
   let aux (i:nat{i<n-k}) : Lemma ((_).v y i == (_).v x (i+k)) =
@@ -99,12 +118,14 @@ let uN_shift_left #t #l #n x k =
   FStar.Classical.forall_intro aux;
   y
 
+inline_for_extraction noextract
 val uN_shift_right
   (#t:inttype{unsigned t}) (#l:secrecy_level) (#n:nat{n<=bits t})
   (x:(uN t l n).t) (k:nat{k<bits t}) :
   Pure (uN t l n).t
     (requires True)
     (ensures fun y -> forall (i:nat{i<n}). (_).v y i == (if i<k then false else (_).v x (i-k)))
+inline_for_extraction noextract
 let uN_shift_right #t #l #n x k =
   let y : (uN t l n).t = shift_right #t #l x (size k) in
   let aux (i:nat{i<n}) : Lemma ((_).v y i == (if i<k then false else (_).v x (i-k))) =
@@ -119,6 +140,7 @@ let uN_shift_right #t #l #n x k =
   FStar.Classical.forall_intro aux;
   y
 
+inline_for_extraction noextract
 val uN_concat
   (#t1:inttype{unsigned t1}) (#l:secrecy_level)
   (t2:inttype{unsigned t2})
@@ -128,6 +150,7 @@ val uN_concat
     (requires True)
     (ensures fun z -> forall (i:nat{i<n+n}). (_).v z i == (if i<n then (_).v x i else (_).v y (i-n)))
 #push-options "--z3rlimit 100"
+inline_for_extraction noextract
 let uN_concat #t1 #l t2 #n x y =
   let mask : (uN t2 l (n+n)).t = (_).not_ (uN_shift_right (_).ones_ n) in
   assert(forall (i:nat{i<n+n}). (_).v mask i == (if i<n then true else false));
@@ -142,6 +165,7 @@ let uN_concat #t1 #l t2 #n x y =
   (_).or_ x' y'
 #pop-options
 
+inline_for_extraction noextract
 val uN_split
   (#t1:inttype{unsigned t1}) (#l:secrecy_level)
   (t2:inttype{unsigned t2})
@@ -151,6 +175,7 @@ val uN_split
     (requires True)
     (ensures fun (y, z) -> forall (i:nat{i<n+n}). (_).v (uN_concat t1 y z) i == (_).v x i)
 #push-options "--z3rlimit 100"
+inline_for_extraction noextract
 let uN_split #t1 #l t2 #n x =
   let y : (uN t2 l n).t = uN_cast t2 (uN_reduce n x) in
   assert(forall (i:nat{i<n}). (_).v y i == (_).v x i);
@@ -168,26 +193,30 @@ let uN_split #t1 #l t2 #n x =
   ) <: Lemma (forall (i:nat{i<n+n}). (_).v (uN_concat t1 y z) i == (_).v x i);
   (y, z)
 
-let uNxM (t:inttype{unsigned t}) (l:secrecy_level) (n:nat{n<=bits t}) (m:nat) : Type0 =
+inline_for_extraction noextract
+let uNxM (t:inttype{unsigned t}) (l:secrecy_level) (n:nat{n<=bits t}) (m:IT.size_nat) : Type0 =
   xNxM (uN t l n) m
 
+inline_for_extraction noextract
 val uNxM_h_concat
   (#t1:inttype{unsigned t1}) (#l:secrecy_level)
   (t2:inttype{unsigned t2})
-  (#n:nat{n<=bits t1 /\ n+n<=bits t2}) (#m:nat)
+  (#n:nat{n<=bits t1 /\ n+n<=bits t2}) (#m:IT.size_nat)
   (x y:uNxM t1 l n m) :
   Pure (uNxM t2 l (n+n) m)
     (requires True)
     (ensures fun z -> forall (i:nat{i<n+n}) (j:nat{j<m}).
       (_).v (index z j) i == (if i<n then (_).v (index x j) i else (_).v (index y j) (i-n))
     )
+inline_for_extraction noextract
 let uNxM_h_concat t2 x y =
   xNxM_mk _ _ (fun i -> uN_concat t2 (index x i) (index y i))
 
+inline_for_extraction noextract
 val uNxM_h_split
   (#t1:inttype{unsigned t1}) (#l:secrecy_level)
   (t2:inttype{unsigned t2})
-  (#n:nat{n+n<=bits t1 /\ n<=bits t2}) (#m:nat)
+  (#n:nat{n+n<=bits t1 /\ n<=bits t2}) (#m:IT.size_nat)
   (x:uNxM t1 l (n+n) m) :
   Pure (uNxM t2 l n m * uNxM t2 l n m)
     (requires True)
@@ -195,6 +224,7 @@ val uNxM_h_split
       (_).v (index (uNxM_h_concat t1 y z) j) i == (_).v (index x j) i
     )
 #push-options "--z3rlimit 100"
+inline_for_extraction noextract
 let uNxM_h_split #t1 #l t2 #n #m x =
   let aux1 (a, b) = a in
   let aux2 (a, b) = b in
@@ -209,43 +239,43 @@ let uNxM_h_split #t1 #l t2 #n #m x =
   (y, z)
 #pop-options
 
-val uNxM_v_concat
-  (#t:inttype{unsigned t}) (#l:secrecy_level)
-  (#n:nat{n<=bits t}) (#m:nat)
-  (x y:uNxM t l n m) :
-  Pure (uNxM t l n (m+m))
-    (requires True)
-    (ensures fun z -> forall (i:nat{i<n}) (j:nat{j<m+m}).
-      (_).v (index z j) i == (if j<m then (_).v (index x j) i else (_).v (index y (j-m)) i)
-    )
-let uNxM_v_concat #t #l #n #m x y =
-  xNxM_mk _ _ (fun i -> if i<m then index x i else index y (i-m))
-
-val uNxM_v_split
-  (#t:inttype{unsigned t}) (#l:secrecy_level)
-  (#n:nat{n<=bits t}) (#m:nat)
-  (x:uNxM t l n (m+m)) :
-  Pure (uNxM t l n m * uNxM t l n m)
-    (requires True)
-    (ensures fun (y, z) -> forall (i:nat{i<n}) (j:nat{j<m+m}).
-      (_).v (index (uNxM_v_concat y z) j) i == (_).v (index x j) i
-    )
-#push-options "--z3rlimit 100"
-let uNxM_v_split #t #l #n #m x =
-  let y = xNxM_mk _ _ (fun j -> index x j) in
-  let z = xNxM_mk _ _ (fun j -> index x (j+m)) in
-  FStar.Classical.forall_intro_2 (fun i j ->
-    ( if j<m then (
-        assert ((_).v (index (uNxM_v_concat y z) j) i == (_).v (index y j) i)
-      ) else (
-        assert ((_).v (index (uNxM_v_concat y z) j) i == (_).v (index z (j-m)) i);
-        assert (index z (j-m) == index x ((j-m)+m));
-        assert (index x ((j-m)+m) == index x j)
-      )
-    ) <:Lemma ((_).v (index (uNxM_v_concat y z) j) i == (_).v (index x j) i)
-  );
-  (y, z)
-#pop-options
+//val uNxM_v_concat
+//  (#t:inttype{unsigned t}) (#l:secrecy_level)
+//  (#n:IT.size_nat{n<=bits t}) (#m:nat)
+//  (x y:uNxM t l n m) :
+//  Pure (uNxM t l n (m+m))
+//    (requires True)
+//    (ensures fun z -> forall (i:nat{i<n}) (j:nat{j<m+m}).
+//      (_).v (index z j) i == (if j<m then (_).v (index x j) i else (_).v (index y (j-m)) i)
+//    )
+//let uNxM_v_concat #t #l #n #m x y =
+//  xNxM_mk _ _ (fun i -> if i<m then index x i else index y (i-m))
+//
+//val uNxM_v_split
+//  (#t:inttype{unsigned t}) (#l:secrecy_level)
+//  (#n:nat{n<=bits t}) (#m:nat)
+//  (x:uNxM t l n (m+m)) :
+//  Pure (uNxM t l n m * uNxM t l n m)
+//    (requires True)
+//    (ensures fun (y, z) -> forall (i:nat{i<n}) (j:nat{j<m+m}).
+//      (_).v (index (uNxM_v_concat y z) j) i == (_).v (index x j) i
+//    )
+//#push-options "--z3rlimit 100"
+//let uNxM_v_split #t #l #n #m x =
+//  let y = xNxM_mk _ _ (fun j -> index x j) in
+//  let z = xNxM_mk _ _ (fun j -> index x (j+m)) in
+//  FStar.Classical.forall_intro_2 (fun i j ->
+//    ( if j<m then (
+//        assert ((_).v (index (uNxM_v_concat y z) j) i == (_).v (index y j) i)
+//      ) else (
+//        assert ((_).v (index (uNxM_v_concat y z) j) i == (_).v (index z (j-m)) i);
+//        assert (index z (j-m) == index x ((j-m)+m));
+//        assert (index x ((j-m)+m) == index x j)
+//      )
+//    ) <:Lemma ((_).v (index (uNxM_v_concat y z) j) i == (_).v (index x j) i)
+//  );
+//  (y, z)
+//#pop-options
 
 //let foo (n:nat) = (t:inttype{unsigned t /\ n<=bits t})
 //
