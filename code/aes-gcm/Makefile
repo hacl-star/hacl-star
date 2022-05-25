@@ -1,6 +1,6 @@
-FSTAR_HOME   ?= ../../../../FStar
-KREMLIN_HOME ?= ../../../../kremlin
-HACL_HOME    ?= ../../..
+FSTAR_HOME   ?= ../../../FStar
+KREMLIN_HOME ?= ../../../kremlin
+HACL_HOME    ?= ../..
 
 CACHE_DIR     = .cache
 OUTPUT_DIR    = .output

@@ -1,4 +1,4 @@
-HACL_HOME=../../..
+HACL_HOME=../..
 
 # CUSTOMIZE HERE: determine what is the main target of this Makefile, e.g. a C
 # test, a Low* test, or just a binary archive (like libcurve.a).
@@ -9,9 +9,9 @@ test: all
 	dist/gf128-ni-test.exe
 
 # Defines rules for producing .checked, .krml, .depend, etc.
-include ../../../Makefile.local
+include ../../Makefile.local
 
-CFLAGS += -I../../../../lib/c -mavx -mavx2 -mpclmul
+CFLAGS += -I../../../lib/c -mavx -mavx2 -mpclmul
 export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
