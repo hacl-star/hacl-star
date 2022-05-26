@@ -905,6 +905,8 @@ dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
   -bundle Hacl.Bignum4096= \
   -bundle Hacl.Bignum256_32= \
   -bundle Hacl.Bignum4096_32= \
+  -bundle Hacl.GenericField32= \
+  -bundle Hacl.GenericField64= \
   -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] \
   -bundle Hacl.HMAC_DRBG= \
   $(INTTYPES_BUNDLE)
