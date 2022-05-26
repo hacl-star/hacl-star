@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Lib_Memzero0_memzero */
 
 extern void Lib_Memzero0_memzero(void *x0, uint64_t x1);

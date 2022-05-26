@@ -26,7 +26,7 @@
 
 #include "internal/Hacl_Poly1305_256.h"
 #include "internal/Hacl_Krmllib.h"
-
+#include "libintvector.h"
 /* SNIPPET_START: poly1305_padded_256 */
 
 static inline void

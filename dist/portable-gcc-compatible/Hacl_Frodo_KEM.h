@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_SHA3.h"
 #include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Keccak_shake128_4x */
 
 static inline void

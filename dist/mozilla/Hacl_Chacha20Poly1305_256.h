@@ -38,7 +38,7 @@ extern "C" {
 #include "Hacl_Poly1305_256.h"
 #include "Hacl_Krmllib.h"
 #include "Hacl_Chacha20_Vec256.h"
-#include "libintvector.h"
+
 void
 Hacl_Chacha20Poly1305_256_aead_encrypt(
   uint8_t *k,

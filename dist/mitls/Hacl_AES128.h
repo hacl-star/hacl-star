@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 extern void Hacl_AES128_aes128_key_expansion(uint8_t *key, uint8_t *expanded_key);
 
 extern void

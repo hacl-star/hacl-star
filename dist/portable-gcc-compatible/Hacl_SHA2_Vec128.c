@@ -25,7 +25,7 @@
 #include "Hacl_SHA2_Vec128.h"
 
 #include "internal/Hacl_SHA2_Vec256.h"
-
+#include "libintvector.h"
 /* SNIPPET_START: sha224_update4 */
 
 static inline void

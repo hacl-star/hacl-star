@@ -43,7 +43,6 @@ extern "C" {
 #include "Hacl_Hash_MD5.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: EverCrypt_Hash_alg */
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;

@@ -21,17 +21,12 @@ module Bindings(F:Cstubs.FOREIGN) =
     let everCrypt_DRBG_min_length =
       foreign "EverCrypt_DRBG_min_length"
         (spec_Hash_Definitions_hash_alg @-> (returning uint32_t))
-    type everCrypt_DRBG_state_s_tags = Unsigned.UInt8.t
-    let everCrypt_DRBG_state_s_tags =
-      typedef uint8_t "EverCrypt_DRBG_state_s_tags"
-    let everCrypt_DRBG_state_s_tags_EverCrypt_DRBG_SHA1_s =
-      Unsigned.UInt8.of_int 0
-    let everCrypt_DRBG_state_s_tags_EverCrypt_DRBG_SHA2_256_s =
-      Unsigned.UInt8.of_int 1
-    let everCrypt_DRBG_state_s_tags_EverCrypt_DRBG_SHA2_384_s =
-      Unsigned.UInt8.of_int 2
-    let everCrypt_DRBG_state_s_tags_EverCrypt_DRBG_SHA2_512_s =
-      Unsigned.UInt8.of_int 3
+    type state_s_tags = Unsigned.UInt8.t
+    let state_s_tags = typedef uint8_t "state_s_tags"
+    let state_s_tags_SHA1_s = Unsigned.UInt8.of_int 0
+    let state_s_tags_SHA2_256_s = Unsigned.UInt8.of_int 1
+    let state_s_tags_SHA2_384_s = Unsigned.UInt8.of_int 2
+    let state_s_tags_SHA2_512_s = Unsigned.UInt8.of_int 3
     type everCrypt_DRBG_state_s = [ `everCrypt_DRBG_state_s ] structure
     let (everCrypt_DRBG_state_s : [ `everCrypt_DRBG_state_s ] structure typ)
       = structure "EverCrypt_DRBG_state_s_s"
