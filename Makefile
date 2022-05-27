@@ -1083,7 +1083,7 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  $(filter %.krml,$^) \
 	  -silent \
 	  -ccopt -Wno-unused \
-	  -warn-error @2@4-6@15@18@21+22 \
+	  -warn-error @2@4-6@8@15@18@21+22 \
 	  -fparentheses \
 	  -fextern-c \
 	  $(notdir $(HACL_OLD_FILES)) \

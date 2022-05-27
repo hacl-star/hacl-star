@@ -75,9 +75,8 @@ let mk_mod_inv_limb #t n0 =
   res
 
 
-[@CInline]
+(* Called from RSAPSS, GenericField32, and as such cannot be marked inline. *)
 let mod_inv_uint32 : mod_inv_limb_st U32 = mk_mod_inv_limb #U32
-[@CInline]
 let mod_inv_uint64 : mod_inv_limb_st U64 = mk_mod_inv_limb #U64
 
 
