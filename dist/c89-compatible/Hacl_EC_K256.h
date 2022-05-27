@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Bignum_K256.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /*******************************************************************************
   Verified field arithmetic modulo p = 2^256 - 0x1000003D1.
 

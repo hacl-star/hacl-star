@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: EverCrypt_Hacl_aes128_mk_sbox */
 
 #define EverCrypt_Hacl_aes128_mk_sbox Crypto_Symmetric_AES128_mk_sbox

@@ -39,7 +39,6 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "Hacl_Chacha20.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Chacha20Poly1305_32_aead_encrypt */
 
 void

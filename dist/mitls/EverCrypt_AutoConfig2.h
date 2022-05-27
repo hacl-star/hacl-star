@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 bool EverCrypt_AutoConfig2_has_shaext();
 
 bool EverCrypt_AutoConfig2_has_aesni();

@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
 void

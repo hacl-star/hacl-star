@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_HMAC_Blake2b_256.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void
 Hacl_HKDF_Blake2b_256_expand_blake2b_256(
   uint8_t *okm,

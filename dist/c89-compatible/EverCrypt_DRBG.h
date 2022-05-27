@@ -41,7 +41,6 @@ extern "C" {
 #include "Hacl_HMAC_DRBG.h"
 #include "EverCrypt_HMAC.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
 
 extern uint32_t EverCrypt_DRBG_reseed_interval;
@@ -55,13 +54,6 @@ extern uint32_t EverCrypt_DRBG_max_personalization_string_length;
 extern uint32_t EverCrypt_DRBG_max_additional_input_length;
 
 uint32_t EverCrypt_DRBG_min_length(Spec_Hash_Definitions_hash_alg a);
-
-#define EverCrypt_DRBG_SHA1_s 0
-#define EverCrypt_DRBG_SHA2_256_s 1
-#define EverCrypt_DRBG_SHA2_384_s 2
-#define EverCrypt_DRBG_SHA2_512_s 3
-
-typedef uint8_t EverCrypt_DRBG_state_s_tags;
 
 typedef struct EverCrypt_DRBG_state_s_s EverCrypt_DRBG_state_s;
 

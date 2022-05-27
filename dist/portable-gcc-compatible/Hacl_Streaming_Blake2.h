@@ -39,7 +39,6 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Blake2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Streaming_Blake2_blocks_state_len */
 
 uint32_t

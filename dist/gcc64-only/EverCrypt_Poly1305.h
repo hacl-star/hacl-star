@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_Poly1305_128.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
 
 #if defined(__cplusplus)

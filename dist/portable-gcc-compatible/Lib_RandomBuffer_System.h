@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Lib_RandomBuffer_System_randombytes */
 
 KRML_DEPRECATED("random_crypto")
