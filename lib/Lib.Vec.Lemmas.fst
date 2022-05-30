@@ -156,6 +156,7 @@ let repeat_gen_blocks_slice #inp_t w blocksize n hi_f inp a f i acc =
   repeat_right_extensionality w (w * i) a a f_rep f_rep_s acc
 
 
+#push-options "--z3rlimit 100"
 val repeat_gen_blocks_multi_vec_step:
     #inp_t:Type0
   -> w:pos
@@ -182,6 +183,7 @@ val repeat_gen_blocks_multi_vec_step:
 
     normalize_v (i + 1) (f_rep_v i acc_v) ==
     Loops.repeat_right (w * i) (w * (i + 1)) a f_rep (normalize_v i acc_v))
+#pop-options
 
 let repeat_gen_blocks_multi_vec_step #inp_t w blocksize n hi_f inp a a_vec f f_v normalize_v pre i acc_v =
   let b_v = get_block_v w blocksize n inp i in
@@ -232,7 +234,7 @@ let lemma_repeat_gen_blocks_multi_vec #inp_t w blocksize n hi_f inp a a_vec f f_
 // End of proof of lemma_repeat_gen_blocks_multi_vec
 ////////////////////////
 
-#push-options "--z3rlimit 100 --retry 2"
+#push-options "--z3rlimit 200 --retry 2"
 let lemma_repeat_gen_blocks_vec #inp_t #c w blocksize inp n a a_vec f l f_v l_v normalize_v acc_v0 =
   let len = length inp in
   let blocksize_v = w * blocksize in
