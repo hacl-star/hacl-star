@@ -3583,8 +3583,7 @@ static void montgomery_multiplication_buffer_by_one_mixed_p256(uint64_t *result)
 }
 
 static void
-copy_point_conditional(
-  Spec_ECC_Curves_curve c,
+copy_point_conditional_p256(
   uint64_t *x3_out,
   uint64_t *y3_out,
   uint64_t *z3_out,
@@ -3593,44 +3592,9 @@ copy_point_conditional(
   uint64_t *temp
 )
 {
-  uint32_t sw0;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw0 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw0 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw0 = (uint32_t)4U;
-      }
-  }
-  uint64_t *z = maskPoint + (uint32_t)2U * sw0;
+  uint64_t *z = maskPoint + (uint32_t)8U;
   uint64_t tmp = (uint64_t)18446744073709551615U;
-  uint32_t len0;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len0 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len0 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len0 = (uint32_t)4U;
-      }
-  }
+  uint32_t len0 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < len0; i++)
   {
     uint64_t a_i = z[i];
@@ -3640,107 +3604,20 @@ copy_point_conditional(
   }
   uint64_t mask = tmp;
   uint64_t *p_x = p;
-  uint32_t sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw = (uint32_t)4U;
-      }
-  }
-  uint64_t *p_y = p + sw;
+  uint64_t *p_y = p + (uint32_t)4U;
   temp[0U] = (uint64_t)1U;
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
+  uint32_t len = (uint32_t)4U;
   for (uint32_t i = (uint32_t)1U; i < len; i++)
   {
     temp[i] = (uint64_t)0U;
   }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        copy_conditional_p256_l(x3_out, p_x, mask);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        copy_conditional_p384_l(x3_out, p_x, mask);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        copy_conditional_p256_l(y3_out, p_y, mask);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        copy_conditional_p384_l(y3_out, p_y, mask);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        copy_conditional_p256_l(z3_out, temp, mask);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        copy_conditional_p384_l(z3_out, temp, mask);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
+  copy_conditional_p256_l(x3_out, p_x, mask);
+  copy_conditional_p256_l(y3_out, p_y, mask);
+  copy_conditional_p256_l(z3_out, temp, mask);
 }
 
 static void
-copy_point_conditional1(
-  Spec_ECC_Curves_curve c,
+copy_point_conditional1_p256(
   uint64_t *x3_out,
   uint64_t *y3_out,
   uint64_t *z3_out,
@@ -3748,45 +3625,11 @@ copy_point_conditional1(
   uint64_t *q
 )
 {
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
+  uint32_t len = (uint32_t)4U;
   uint64_t *x = q;
   uint64_t *y = q + len;
   uint64_t tmp1 = (uint64_t)18446744073709551615U;
-  uint32_t len10;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len10 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len10 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len10 = (uint32_t)4U;
-      }
-  }
+  uint32_t len10 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < len10; i++)
   {
     uint64_t a_i = x[i];
@@ -3796,24 +3639,7 @@ copy_point_conditional1(
   }
   uint64_t xZero = tmp1;
   uint64_t tmp = (uint64_t)18446744073709551615U;
-  uint32_t len1;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len1 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len1 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len1 = (uint32_t)4U;
-      }
-  }
+  uint32_t len1 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < len1; i++)
   {
     uint64_t a_i = y[i];
@@ -3824,98 +3650,11 @@ copy_point_conditional1(
   uint64_t yZero = tmp;
   uint64_t mask = xZero & yZero;
   uint64_t *p_x = p;
-  uint32_t sw0;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw0 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw0 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw0 = (uint32_t)4U;
-      }
-  }
-  uint64_t *p_y = p + sw0;
-  uint32_t sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw = (uint32_t)4U;
-      }
-  }
-  uint64_t *p_z = p + (uint32_t)2U * sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        copy_conditional_p256_l(x3_out, p_x, mask);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        copy_conditional_p384_l(x3_out, p_x, mask);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        copy_conditional_p256_l(y3_out, p_y, mask);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        copy_conditional_p384_l(y3_out, p_y, mask);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        copy_conditional_p256_l(z3_out, p_z, mask);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        copy_conditional_p384_l(z3_out, p_z, mask);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
+  uint64_t *p_y = p + (uint32_t)4U;
+  uint64_t *p_z = p + (uint32_t)8U;
+  copy_conditional_p256_l(x3_out, p_x, mask);
+  copy_conditional_p256_l(y3_out, p_y, mask);
+  copy_conditional_p256_l(z3_out, p_z, mask);
 }
 
 static inline void
@@ -4252,8 +3991,8 @@ point_add_mixed_p256(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempB
   uint64_t *y3_out = t5 + (uint32_t)4U;
   uint64_t *z3_out = t5 + (uint32_t)8U;
   uint64_t *temp = t5 + (uint32_t)12U;
-  copy_point_conditional(Spec_ECC_Curves_P256, x3_out, y3_out, z3_out, q, p, temp);
-  copy_point_conditional1(Spec_ECC_Curves_P256, x3_out, y3_out, z3_out, p, q);
+  copy_point_conditional_p256(x3_out, y3_out, z3_out, q, p, temp);
+  copy_point_conditional1_p256(x3_out, y3_out, z3_out, p, q);
   memcpy(result, x3_out, (uint32_t)4U * sizeof (uint64_t));
   memcpy(result + (uint32_t)4U, y3_out, (uint32_t)4U * sizeof (uint64_t));
   memcpy(result + (uint32_t)8U, z3_out, (uint32_t)4U * sizeof (uint64_t));
@@ -4425,13 +4164,8 @@ static void getPointPrecomputedMixed_p256(void *scalar, uint32_t i, uint64_t *po
   }
 }
 
-static inline void
-generatePrecomputedTable(
-  Spec_ECC_Curves_curve c,
-  uint64_t *b,
-  uint64_t *publicKey,
-  uint64_t *tempBuffer
-)
+static void
+generatePrecomputedTable_p256(uint64_t *b, uint64_t *publicKey, uint64_t *tempBuffer)
 {
   uint64_t *point0 = b;
   uint64_t *point1 = b + (uint32_t)12U;
@@ -4449,364 +4183,40 @@ generatePrecomputedTable(
   uint64_t *point13 = b + (uint32_t)156U;
   uint64_t *point14 = b + (uint32_t)168U;
   uint64_t *point15 = b + (uint32_t)180U;
-  uint32_t len;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len = (uint32_t)4U;
-      }
-  }
+  uint32_t len = (uint32_t)4U;
   uint64_t *x = point0;
   uint64_t *y = point0 + len;
   uint64_t *z = point0 + (uint32_t)2U * len;
-  uint32_t len1;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len1 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len1 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len1 = (uint32_t)4U;
-      }
-  }
+  uint32_t len1 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < len1; i++)
   {
     x[i] = (uint64_t)0U;
   }
-  uint32_t len10;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len10 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len10 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len10 = (uint32_t)4U;
-      }
-  }
+  uint32_t len10 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < len10; i++)
   {
     y[i] = (uint64_t)0U;
   }
-  uint32_t len11;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        len11 = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        len11 = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        len11 = (uint32_t)4U;
-      }
-  }
+  uint32_t len11 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)0U; i < len11; i++)
   {
     z[i] = (uint64_t)0U;
   }
-  uint32_t sw;
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        sw = (uint32_t)4U;
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        sw = (uint32_t)6U;
-        break;
-      }
-    default:
-      {
-        sw = (uint32_t)4U;
-      }
-  }
-  memcpy(point1, publicKey, sw * (uint32_t)3U * sizeof (uint64_t));
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(publicKey, point2, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(publicKey, point2, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point2, point1, point3, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point2, point1, point3, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point2, point4, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point2, point4, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point4, point1, point5, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point4, point1, point5, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point3, point6, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point3, point6, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point6, point1, point7, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point6, point1, point7, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point4, point8, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point4, point8, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point8, point1, point9, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point8, point1, point9, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point5, point10, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point5, point10, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point10, point1, point11, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point10, point1, point11, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point6, point12, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point6, point12, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point12, point1, point13, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point12, point1, point13, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point7, point14, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point7, point14, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point14, point1, point15, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point14, point1, point15, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
+  memcpy(point1, publicKey, (uint32_t)12U * sizeof (uint64_t));
+  point_double_p256(publicKey, point2, tempBuffer);
+  point_add_p256(point2, point1, point3, tempBuffer);
+  point_double_p256(point2, point4, tempBuffer);
+  point_add_p256(point4, point1, point5, tempBuffer);
+  point_double_p256(point3, point6, tempBuffer);
+  point_add_p256(point6, point1, point7, tempBuffer);
+  point_double_p256(point4, point8, tempBuffer);
+  point_add_p256(point8, point1, point9, tempBuffer);
+  point_double_p256(point5, point10, tempBuffer);
+  point_add_p256(point10, point1, point11, tempBuffer);
+  point_double_p256(point6, point12, tempBuffer);
+  point_add_p256(point12, point1, point13, tempBuffer);
+  point_double_p256(point7, point14, tempBuffer);
+  point_add_p256(point14, point1, point15, tempBuffer);
 }
 
 static inline void
@@ -10383,7 +9793,7 @@ uint64_t Hacl_P256_ecp256dh_r_public_radix(uint8_t *result, uint8_t *pubKey, uin
     {
       bufferPrecomputed[i] = init;
     }
-    generatePrecomputedTable(Spec_ECC_Curves_P256, bufferPrecomputed, rF, tempBuffer);
+    generatePrecomputedTable_p256(bufferPrecomputed, rF, tempBuffer);
     uint32_t
     bit = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (uint32_t)(uint64_t)0U;
     uint64_t
@@ -10623,7 +10033,7 @@ uint64_t Hacl_P256_ecp256dh_r_private_radix(uint8_t *result, uint8_t *pubKey, ui
     {
       bufferPrecomputed[i] = init;
     }
-    generatePrecomputedTable(Spec_ECC_Curves_P256, bufferPrecomputed, rF, tempBuffer);
+    generatePrecomputedTable_p256(bufferPrecomputed, rF, tempBuffer);
     uint32_t
     bit = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (uint32_t)(uint64_t)0U;
     uint64_t

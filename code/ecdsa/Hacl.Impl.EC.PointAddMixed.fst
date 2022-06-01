@@ -47,7 +47,52 @@ let pointAffineIsNotZero #c p =
   logand_lemma xZero yZero;
   logand xZero yZero
 
+inline_for_extraction noextract
+val copy_point_conditional_: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c 
+  -> p: pointAffine c -> mask: point c -> temp : felem c ->
+  Stack unit
+  (requires fun h -> point_eval c h mask /\ point_aff_eval c h p /\ 
+    felem_eval c h x3_out /\ felem_eval c h y3_out /\ felem_eval c h z3_out /\
+    disjoint temp z3_out /\ disjoint temp x3_out /\ disjoint temp y3_out /\ disjoint temp p /\ 
+    live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h mask /\ live h temp /\ 
+    LowStar.Monotonic.Buffer.all_disjoint [loc x3_out; loc y3_out; loc z3_out; loc p; loc mask])
+  (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out |+| loc temp) h0 h1 /\
+    felem_eval c h1 x3_out /\ felem_eval c h1 y3_out /\ felem_eval c h1 z3_out /\ (
+    let x, y = point_affine_x_as_nat c h0 p, point_affine_y_as_nat c h0 p in
+    if isPointAtInfinity (point_as_nat c h0 mask) then
+      as_nat c h1 x3_out == x /\
+      as_nat c h1 y3_out == y /\ 
+      as_nat c h1 z3_out == 1
+    else 
+      as_nat c h1 x3_out == as_nat c h0 x3_out /\ 
+      as_nat c h1 y3_out == as_nat c h0 y3_out /\
+      as_nat c h1 z3_out == as_nat c h0 z3_out)) 
 
+
+let copy_point_conditional_ #c x3_out y3_out z3_out p maskPoint temp = 
+  let h0 = ST.get() in 
+  [@inline_let]
+  let len = getCoordinateLenU64 c in 
+
+  let z = sub maskPoint (size 2 *! len) len in 
+  let mask = isZero_uint64_CT #c z in 
+  
+  let p_x = sub p (size 0) len in 
+  let p_y = sub p len len in 
+
+  uploadOneImpl #c temp;
+  
+  copy_conditional x3_out p_x mask;
+  copy_conditional y3_out p_y mask;
+  copy_conditional z3_out temp mask
+
+
+let copy_point_conditional_p256 = copy_point_conditional_ #P256
+
+let copy_point_conditional_p384 = copy_point_conditional_ #P384
+
+
+inline_for_extraction noextract
 val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c 
   -> p: pointAffine c -> mask: point c -> temp : felem c ->
   Stack unit
@@ -70,23 +115,54 @@ val copy_point_conditional: #c: curve -> x3_out: felem c -> y3_out: felem c -> z
 
 
 let copy_point_conditional #c x3_out y3_out z3_out p maskPoint temp = 
-  let h0 = ST.get() in 
+  match c with 
+  |P256 -> copy_point_conditional_p256 x3_out y3_out z3_out p maskPoint temp
+  |P384 -> copy_point_conditional_p384 x3_out y3_out z3_out p maskPoint temp
+
+
+inline_for_extraction noextract
+val copy_point_conditional1_: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c -> p: point c 
+  -> q: pointAffine c ->
+  Stack unit
+  (requires fun h -> point_eval c h p /\ point_aff_eval c h q /\
+    felem_eval c h x3_out /\ felem_eval c h y3_out /\ felem_eval c h z3_out /\ 
+    live h x3_out /\ live h y3_out /\ live h z3_out /\ live h p /\ live h q /\
+    LowStar.Monotonic.Buffer.all_disjoint [loc x3_out; loc y3_out; loc z3_out; loc p; loc q])
+  (ensures fun h0 _ h1 -> modifies (loc x3_out |+| loc y3_out |+| loc z3_out) h0 h1 /\ point_aff_eval c h0 q /\
+    felem_eval c h1 x3_out /\ felem_eval c h1 y3_out /\ felem_eval c h1 z3_out /\ (
+    let len = getCoordinateLenU64 c in 
+    let x, y, z = point_x_as_nat c h0 p, point_y_as_nat c h0 p, point_z_as_nat c h0 p in
+    if isPointAtInfinityAffine (point_affine_as_nat c h0 q) then
+      as_nat c h1 x3_out == x /\
+      as_nat c h1 y3_out == y /\ 
+      as_nat c h1 z3_out == z
+    else 
+      as_nat c h1 x3_out == as_nat c h0 x3_out /\ 
+      as_nat c h1 y3_out == as_nat c h0 y3_out /\ 
+      as_nat c h1 z3_out == as_nat c h0 z3_out))
+
+
+let copy_point_conditional1_ #c x3_out y3_out z3_out p q = 
   [@inline_let]
   let len = getCoordinateLenU64 c in 
 
-  let z = sub maskPoint (size 2 *! len) len in 
-  let mask = isZero_uint64_CT #c z in 
-  
+  let mask = pointAffineIsNotZero #c q in 
+
   let p_x = sub p (size 0) len in 
   let p_y = sub p len len in 
+  let p_z = sub p (size 2 *! len) len in 
 
-  uploadOneImpl #c temp;
-  
   copy_conditional x3_out p_x mask;
   copy_conditional y3_out p_y mask;
-  copy_conditional z3_out temp mask
+  copy_conditional z3_out p_z mask
 
 
+let copy_point_conditional1_p256 = copy_point_conditional1_ #P256
+
+let copy_point_conditional1_p384 = copy_point_conditional1_ #P384
+
+
+inline_for_extraction noextract
 val copy_point_conditional1: #c: curve -> x3_out: felem c -> y3_out: felem c -> z3_out: felem c -> p: point c 
   -> q: pointAffine c ->
   Stack unit
@@ -109,19 +185,9 @@ val copy_point_conditional1: #c: curve -> x3_out: felem c -> y3_out: felem c -> 
 
 
 let copy_point_conditional1 #c x3_out y3_out z3_out p q = 
-  [@inline_let]
-  let len = getCoordinateLenU64 c in 
-
-  let mask = pointAffineIsNotZero #c q in 
-
-  let p_x = sub p (size 0) len in 
-  let p_y = sub p len len in 
-  let p_z = sub p (size 2 *! len) len in 
-
-  copy_conditional x3_out p_x mask;
-  copy_conditional y3_out p_y mask;
-  copy_conditional z3_out p_z mask
-
+  match c with
+  | P256 -> copy_point_conditional1_p256 x3_out y3_out z3_out p q
+  | P384 -> copy_point_conditional1_p384 x3_out y3_out z3_out p q
 
 
 inline_for_extraction noextract 

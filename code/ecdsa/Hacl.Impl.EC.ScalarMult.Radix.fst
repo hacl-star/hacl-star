@@ -133,13 +133,13 @@ let montgomery_ladder_step_radix #c p tempBuffer precomputedTable scalar i =
   point_add pointToAdd p p tempBuffer
 
 
-[@ CInline]
-val generatePrecomputedTable: #c: curve -> b: lbuffer uint64 (size 192) -> publicKey: point c ->
+inline_for_extraction noextract
+val generatePrecomputedTable_: #c: curve -> b: lbuffer uint64 (size 192) -> publicKey: point c ->
   tempBuffer: lbuffer uint64 (size 88) -> Stack unit  
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
-let generatePrecomputedTable #c b publicKey tempBuffer = 
+let generatePrecomputedTable_ #c b publicKey tempBuffer = 
   let point0 = sub b (size 0) (size 12) in 
   let point1 = sub b (size 12) (size 12) in 
   let point2 = sub b (size 24) (size 12) in 
@@ -173,6 +173,23 @@ let generatePrecomputedTable #c b publicKey tempBuffer =
   point_add #c point12 point1 point13 tempBuffer;
   point_double #c point7 point14 tempBuffer;
   point_add #c point14 point1 point15 tempBuffer
+
+
+let generatePrecomputedTable_p256 = generatePrecomputedTable_ #P256 
+
+let generatePrecomputedTable_p384 = generatePrecomputedTable_ #P384
+
+
+inline_for_extraction noextract
+val generatePrecomputedTable: #c: curve -> b: lbuffer uint64 (size 192) -> publicKey: point c ->
+  tempBuffer: lbuffer uint64 (size 88) -> Stack unit  
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let generatePrecomputedTable #c b publicKey tempBuffer = 
+  match c with
+  | P256 -> generatePrecomputedTable_p256 b publicKey tempBuffer
+  | P384 -> generatePrecomputedTable_p384 b publicKey tempBuffer
 
 
 
