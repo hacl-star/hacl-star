@@ -10,11 +10,11 @@ endef
 
 HACL_HOME 	?= .
 
-# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
+# Put your local configuration (e.g. HACL_HOME, KRML_HOME, etc.) in
 # Makefile.config
 -include $(HACL_HOME)/Makefile.config
 
-KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
+KRML_HOME 	?= $(HACL_HOME)/../karamel
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
 VALE_HOME	?= $(HACL_HOME)/../vale
 
@@ -23,8 +23,8 @@ include $(HACL_HOME)/Makefile.include
 INCLUDES = \
   $(ALL_HACL_DIRS) \
   $(FSTAR_HOME)/ulib/.cache \
-  $(KREMLIN_HOME)/kremlib/obj \
-  $(KREMLIN_HOME)/kremlib
+  $(KRML_HOME)/krmllib/obj \
+  $(KRML_HOME)/krmllib
 
 # 0. Vale
 
@@ -68,9 +68,9 @@ FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 %.fst-in %.fsti-in:
 	@echo $(FSTAR_INCLUDES)
 
-# 2. Kremlin
+# 2. KaRaMeL
 
-KRML = $(KREMLIN_HOME)/krml
+KRML = $(KRML_HOME)/krml
 
 BASE_FLAGS = \
   -no-prefix 'Hacl.Frodo.Random' \
@@ -80,12 +80,12 @@ BASE_FLAGS = \
   -drop Lib.IntTypes.Intrinsics \
   -drop Lib.IntTypes.Intrinsics_128 \
   -fparentheses -fno-shadow -fcurly-braces -fnoreturn-else \
-  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*,LowStar.*[rename=Hacl_Kremlib] \
+  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*,LowStar.*[rename=Hacl_Krmllib] \
   -bundle 'Meta.*' \
   -minimal \
   -add-early-include '<string.h>' \
-  -add-early-include '"kremlin/internal/types.h"' \
-  -add-early-include '"kremlin/lowstar_endianness.h"' \
+  -add-early-include '"krml/internal/types.h"' \
+  -add-early-include '"krml/lowstar_endianness.h"' \
   -header $(HACL_HOME)/dist/LICENSE.txt
 
 CURVE_BUNDLE_SLOW= \
@@ -123,6 +123,8 @@ POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_256=Hacl.Impl.Poly1305.Field32xN_256'
 NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 P256_BUNDLE=-bundle Hacl.P256=Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*[rename=Hacl_P256]
+K256_BUNDLE=-bundle Hacl.K256.Field,Hacl.Impl.K256.Finv[rename=Hacl_Bignum_K256] -static-header Hacl.K256.Field,Hacl.Impl.K256.Finv \
+	-bundle Hacl.K256.ECDSA=Hacl.Impl.K256.*,Hacl.K256.*
 FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak' -static-header Hacl.Frodo.KEM,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Keccak
 # The only functions not marked as noextract should be in each of the Hacl.HPKE.{variants}
 # Each of these module should be extracted to a different file. Therefore, this variable

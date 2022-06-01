@@ -31,8 +31,8 @@ extern "C" {
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include <kremlin/internal/types.h>
-#include <kremlin/internal/target.h>
+#include <krml/internal/types.h>
+#include <krml/internal/target.h>
 
 
 

@@ -14,7 +14,8 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 module Loops = Lib.LoopCombinators
 
-module S = Lib.Exponentiation
+module LE = Lib.Exponentiation
+module SE = Spec.Exponentiation
 module BD = Hacl.Bignum.Definitions
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -23,12 +24,12 @@ inline_for_extraction noextract
 let inttype_a = t:inttype{t = U32 \/ t = U64}
 
 inline_for_extraction noextract
-class to_comm_monoid (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) = {
-  a_spec: Type0;
-  comm_monoid: S.comm_monoid a_spec;
+class to_concrete_ops (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) = {
+  t_spec: Type0;
+  concr_ops: SE.concrete_ops t_spec;
   linv_ctx: x:LSeq.lseq (uint_t a_t SEC) (v ctx_len) -> Type0;
   linv: x:LSeq.lseq (uint_t a_t SEC) (v len) -> Type0;
-  refl: x:LSeq.lseq (uint_t a_t SEC) (v len){linv x} -> GTot a_spec;
+  refl: x:LSeq.lseq (uint_t a_t SEC) (v len){linv x} -> GTot t_spec;
 }
 
 
@@ -54,7 +55,7 @@ let lmul_st
   (a_t:inttype_a)
   (len:size_t{v len > 0})
   (ctx_len:size_t)
-  (to:to_comm_monoid a_t len ctx_len) =
+  (to:to_concrete_ops a_t len ctx_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> x:lbuffer (uint_t a_t SEC) len
   -> y:lbuffer (uint_t a_t SEC) len
@@ -66,7 +67,7 @@ let lmul_st
     disjoint ctx x /\ disjoint ctx y /\ disjoint ctx xy /\
     to.linv (as_seq h x) /\ to.linv (as_seq h y) /\ to.linv_ctx (as_seq h ctx))
   (ensures fun h0 _ h1 -> modifies (loc xy) h0 h1 /\ to.linv (as_seq h1 xy) /\
-    to.refl (as_seq h1 xy) == to.comm_monoid.S.mul (to.refl (as_seq h0 x)) (to.refl (as_seq h0 y)))
+    to.refl (as_seq h1 xy) == to.concr_ops.SE.mul (to.refl (as_seq h0 x)) (to.refl (as_seq h0 y)))
 
 
 inline_for_extraction noextract
@@ -74,7 +75,7 @@ let lsqr_st
   (a_t:inttype_a)
   (len:size_t{v len > 0})
   (ctx_len:size_t)
-  (to:to_comm_monoid a_t len ctx_len) =
+  (to:to_concrete_ops a_t len ctx_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> x:lbuffer (uint_t a_t SEC) len
   -> xx:lbuffer (uint_t a_t SEC) len ->
@@ -84,12 +85,12 @@ let lsqr_st
     disjoint x ctx /\ disjoint xx ctx /\ eq_or_disjoint x xx /\
     to.linv (as_seq h x) /\ to.linv_ctx (as_seq h ctx))
   (ensures fun h0 _ h1 -> modifies (loc xx) h0 h1 /\ to.linv (as_seq h1 xx) /\
-    to.refl (as_seq h1 xx) == to.comm_monoid.S.mul (refl (as_seq h0 x)) (refl (as_seq h0 x)))
+    to.refl (as_seq h1 xx) == to.concr_ops.SE.sqr (refl (as_seq h0 x)))
 
 
 inline_for_extraction noextract
 class concrete_ops (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) = {
-  to: Ghost.erased (to_comm_monoid a_t len ctx_len);
+  to: Ghost.erased (to_concrete_ops a_t len ctx_len);
   //lone: lone_st a_t len ctx_len to;
   lmul: lmul_st a_t len ctx_len to;
   lsqr: lsqr_st a_t len ctx_len to;
@@ -116,11 +117,11 @@ val lexp_rl_vartime:
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
-    k.to.refl (as_seq h acc) == k.to.comm_monoid.S.one)
+    k.to.refl (as_seq h acc) == k.to.concr_ops.SE.one ())
   (ensures  fun h0 _ h1 -> modifies (loc a |+| loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    S.exp_rl #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
+    SE.exp_rl #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
 
 
 inline_for_extraction noextract
@@ -143,11 +144,30 @@ val lexp_mont_ladder_swap_consttime:
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
-    k.to.refl (as_seq h acc) == k.to.comm_monoid.S.one)
+    k.to.refl (as_seq h acc) == k.to.concr_ops.SE.one ())
   (ensures  fun h0 _ h1 -> modifies (loc a |+| loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    S.exp_mont_ladder_swap #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
+    SE.exp_mont_ladder_swap #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
+
+
+inline_for_extraction noextract
+val lexp_pow2:
+    #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len
+  -> ctx:lbuffer (uint_t a_t SEC) ctx_len
+  -> a:lbuffer (uint_t a_t SEC) len
+  -> b:size_t
+  -> res:lbuffer (uint_t a_t SEC) len ->
+  Stack unit
+  (requires fun h ->
+    live h res /\ live h ctx /\ live h a /\
+    disjoint res ctx /\ disjoint a ctx /\ disjoint a res /\
+    k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\ k.to.linv (as_seq h1 res) /\
+    k.to.refl (as_seq h1 res) == SE.exp_pow2 k.to.concr_ops (k.to.refl (as_seq h0 a)) (v b))
 
 
 inline_for_extraction noextract
@@ -164,7 +184,7 @@ val lexp_pow_in_place:
     live h acc /\ live h ctx /\ disjoint acc ctx /\
     k.to.linv (as_seq h acc) /\ k.to.linv_ctx (as_seq h ctx))
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\ k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) == S.exp_pow2 k.to.comm_monoid (k.to.refl (as_seq h0 acc)) (v b))
+    k.to.refl (as_seq h1 acc) == SE.exp_pow2 k.to.concr_ops (k.to.refl (as_seq h0 acc)) (v b))
 
 
 inline_for_extraction noextract
@@ -184,11 +204,11 @@ let lexp_fw_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (k:concr
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
-    k.to.refl (as_seq h acc) == k.to.comm_monoid.S.one)
+    k.to.refl (as_seq h acc) == k.to.concr_ops.SE.one ())
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    S.exp_fw #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
+    SE.exp_fw #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
 
 
 inline_for_extraction noextract

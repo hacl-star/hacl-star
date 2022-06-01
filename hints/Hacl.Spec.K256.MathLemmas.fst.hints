@@ -1,0 +1,493 @@
+[
+  "}ž#&|\u000exo|\"cJöD‚\u0005",
+  [
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_swap_mul3",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "2032921ba4061076a8a835ea1da07337"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_mod_mul_distr",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "f25d193f6cb437a46f1ed3e62fc8831a"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_mod_mul_distr",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "38bf87cffb8384a0c891f66ead4cf954"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_mod_sub_distr",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "9610c981b4be8738e18cf0f11513623a"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_mod_sub_distr",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Minus", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "38c2c4809deb534f8b062cc4f6f2195d"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_ab_le_cd",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "41cc04d98b4548e4fefbc3e60008ad25"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_ab_lt_cd",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "f0b65aaa816f5bffcdde2ee58369336a"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_bound_mul64_wide",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "93b5c3538fbe7f874e9b95d43d2fe87d"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_pow",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "b801e7bd456979962ec3251aa4389a0d"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_pow",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "c035d4c9ef76d941c912e2608cd53cd1"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_pow_pow",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "7c6f0f00d18b1154ff961a553a9a55bc"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_pow_pow",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "0073a24f65ec14746c46bac3a3901fc7"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_eucl_mul",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "78c2cb84972d67ef9fcda3ad284e71db"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_eucl_mul",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_Addition",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "8cd0d0130f2d09344c791c0d41e64fc7"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_eucl_mul_add",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "2c638e5bf0716f878c35411a59a624b8"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_eucl_mul_add",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "142d487055094ce4d3b1ac37b9f0a4e0"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_eucl",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "e08be168f53712f21e59bd40b9d1b88a"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr_eucl",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "int_inversion", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "f1a68bb586a70477314ccdd06f5c016a"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_plus_b_pow2_mod2",
+      1,
+      0,
+      0,
+      [ "@query" ],
+      0,
+      "a947dff36d244365e956b4a25872f33c"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_plus_b_pow2_mod2",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
+      ],
+      0,
+      "64149f5f043f166a9d220b092a538df3"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_as_nat64_horner",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "c9aed49b09f69615ad0134973459d78b"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_as_nat_horner",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "int_inversion",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "0096528fee14ba626f66fa8ea662fd5b"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr5",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "int_inversion", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "c85f1ed88c36f3e6a53ca718f1ed7d02"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr5_pow52",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "int_inversion",
+        "primitive_Prims.op_Multiply"
+      ],
+      0,
+      "22cd736ee95c42d1a2dd199cb9b9f8c1"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr5_pow52_mul_pow",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "b3c601ebeaabedb463832c39732c719a"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr5_pow52_mul_pow",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "b9ff8e35e8cb07ebb97bb90860b68bb2"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_distr5_pow52_sub",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "int_inversion", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0"
+      ],
+      0,
+      "8e7b7acb542c19380c1faca61508709c"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_div_b_plus_c_mod_d_mul_e",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.nonzero", "int_inversion",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "acdb990c971219b005a3f633cc334009"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_div_b_plus_c_mod_d_mul_e",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.nonzero", "equation_Prims.pos",
+        "int_inversion", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "b0858557a6a57475398540d24cc1ae4e"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_mod_b_mul_c_mod_d",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nonzero",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f"
+      ],
+      0,
+      "54627363cfed426db6ec130de5efc641"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_mod_b_mul_c_mod_d",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "027b0e3bae9331e289f87d73afa2a341"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_mul_c_plus_d_mod_e_mul_f_g",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.nonzero", "int_inversion",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "e1bf9726910657d9f1e420c7b7c793dd"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_mul_c_plus_d_mod_e_mul_f_g",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.nonzero", "int_inversion", "int_typing",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "d045876d5dbedca99647fe9d2cdca635"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_mod_52_mul_b",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.nonzero", "int_inversion",
+        "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "b7c476b8421a8631b28f4d21461101bb"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_a_mod_52_mul_b",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
+        "equation_Prims.nonzero", "int_inversion",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "edb7f6a217f9fd93407f4877e4af79f6"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_simplify_carry_round",
+      1,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption", "@query", "equation_Prims.nonzero",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f"
+      ],
+      0,
+      "ccef400ebd79d0cdfa7440425bd1b2ea"
+    ],
+    [
+      "Hacl.Spec.K256.MathLemmas.lemma_simplify_carry_round",
+      2,
+      0,
+      0,
+      [
+        "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.nonzero", "equation_Prims.pos",
+        "int_inversion", "int_typing", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_0766302b68bb44ab7aff8c4d8be0b46f",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "e026339a43783f3537cd6c87c00d7e2c"
+    ]
+  ]
+]

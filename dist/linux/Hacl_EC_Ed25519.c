@@ -26,6 +26,19 @@
 
 #include "internal/Hacl_Ed25519.h"
 
+/*******************************************************************************
+  Verified field arithmetic modulo p = 2^255 - 19.
+
+  This is a 64-bit optimized version, where a field element in radix-2^{51} is
+  represented as an array of five unsigned 64-bit integers, i.e., uint64_t[5].
+*******************************************************************************/
+
+
+/*
+Write the additive identity in `f`.
+
+  The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
+*/
 void Hacl_EC_Ed25519_mk_felem_zero(u64 *b)
 {
   b[0U] = (u64)0U;
@@ -35,6 +48,11 @@ void Hacl_EC_Ed25519_mk_felem_zero(u64 *b)
   b[4U] = (u64)0U;
 }
 
+/*
+Write the multiplicative identity in `f`.
+
+  The outparam `f` is meant to be 5 limbs in size, i.e., uint64_t[5].
+*/
 void Hacl_EC_Ed25519_mk_felem_one(u64 *b)
 {
   b[0U] = (u64)1U;
@@ -44,18 +62,45 @@ void Hacl_EC_Ed25519_mk_felem_one(u64 *b)
   b[4U] = (u64)0U;
 }
 
+/*
+Write `a + b mod p` in `out`.
+
+  The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a`, `b`, and `out` are either pairwise disjoint or equal
+*/
 void Hacl_EC_Ed25519_felem_add(u64 *a, u64 *b, u64 *out)
 {
   Hacl_Impl_Curve25519_Field51_fadd(out, a, b);
   Hacl_Bignum25519_reduce_513(out);
 }
 
+/*
+Write `a - b mod p` in `out`.
+
+  The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a`, `b`, and `out` are either pairwise disjoint or equal
+*/
 void Hacl_EC_Ed25519_felem_sub(u64 *a, u64 *b, u64 *out)
 {
   Hacl_Impl_Curve25519_Field51_fsub(out, a, b);
   Hacl_Bignum25519_reduce_513(out);
 }
 
+/*
+Write `a * b mod p` in `out`.
+
+  The arguments `a`, `b`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a`, `b`, and `out` are either pairwise disjoint or equal
+*/
 void Hacl_EC_Ed25519_felem_mul(u64 *a, u64 *b, u64 *out)
 {
   uint128_t tmp[10U];
@@ -67,22 +112,90 @@ void Hacl_EC_Ed25519_felem_mul(u64 *a, u64 *b, u64 *out)
   Hacl_Impl_Curve25519_Field51_fmul(out, a, b, tmp);
 }
 
+/*
+Write `a * a mod p` in `out`.
+
+  The argument `a`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a` and `out` are either disjoint or equal
+*/
+void Hacl_EC_Ed25519_felem_sqr(u64 *a, u64 *out)
+{
+  uint128_t tmp[5U];
+  {
+    u32 _i;
+    for (_i = 0U; _i < (u32)5U; ++_i)
+      tmp[_i] = (uint128_t)(u64)0U;
+  }
+  Hacl_Impl_Curve25519_Field51_fsqr(out, a, tmp);
+}
+
+/*
+Write `a ^ (p - 2) mod p` in `out`.
+
+  The function computes modular multiplicative inverse if `a` <> zero.
+
+  The argument `a`, and the outparam `out` are meant to be 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a` and `out` are disjoint
+*/
 void Hacl_EC_Ed25519_felem_inv(u64 *a, u64 *out)
 {
   Hacl_Bignum25519_inverse(out, a);
   Hacl_Bignum25519_reduce_513(out);
 }
 
+/*
+Load a little-endian field element from memory.
+
+  The argument `b` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The outparam `out` points to a field element of 5 limbs in size, i.e., uint64_t[5].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `b` and `out` are disjoint
+
+  NOTE that the function also performs the reduction modulo 2^255.
+*/
 void Hacl_EC_Ed25519_felem_load(u8 *b, u64 *out)
 {
   Hacl_Bignum25519_load_51(out, b);
 }
 
+/*
+Serialize a field element into little-endian memory.
+
+  The argument `a` points to a field element of 5 limbs in size, i.e., uint64_t[5].
+  The outparam `out` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `a` and `out` are disjoint
+*/
 void Hacl_EC_Ed25519_felem_store(u64 *a, u8 *out)
 {
   Hacl_Bignum25519_store_51(out, a);
 }
 
+/*******************************************************************************
+  Verified group operations for the edwards25519 elliptic curve of the form
+  −x^2 + y^2 = 1 − (121665/121666) * x^2 * y^2.
+
+  This is a 64-bit optimized version, where a group element in extended homogeneous
+  coordinates (X, Y, Z, T) is represented as an array of 20 unsigned 64-bit
+  integers, i.e., uint64_t[20].
+*******************************************************************************/
+
+
+/*
+Write the point at infinity (additive identity) in `p`.
+
+  The outparam `p` is meant to be 20 limbs in size, i.e., uint64_t[20].
+*/
 void Hacl_EC_Ed25519_mk_point_at_inf(u64 *p)
 {
   u64 *x = p;
@@ -111,6 +224,11 @@ void Hacl_EC_Ed25519_mk_point_at_inf(u64 *p)
   t[4U] = (u64)0U;
 }
 
+/*
+Write the base point (generator) in `p`.
+
+  The outparam `p` is meant to be 20 limbs in size, i.e., uint64_t[20].
+*/
 void Hacl_EC_Ed25519_mk_base_point(u64 *p)
 {
   u64 *gx = p;
@@ -139,31 +257,113 @@ void Hacl_EC_Ed25519_mk_base_point(u64 *p)
   gt[4U] = (u64)0x00067875f0fd78b7U;
 }
 
+/*
+Write `-p` in `out` (point negation).
+
+  The argument `p` and the outparam `out` are meant to be 20 limbs in size, i.e., uint64_t[20].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are disjoint
+*/
 void Hacl_EC_Ed25519_point_negate(u64 *p, u64 *out)
 {
   Hacl_Impl_Ed25519_PointNegate_point_negate(p, out);
 }
 
+/*
+Write `p + q` in `out` (point addition).
+
+  The arguments `p`, `q` and the outparam `out` are meant to be 20 limbs in size, i.e., uint64_t[20].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p`, `q`, and `out` are either pairwise disjoint or equal
+*/
 void Hacl_EC_Ed25519_point_add(u64 *p, u64 *q, u64 *out)
 {
   Hacl_Impl_Ed25519_PointAdd_point_add(out, p, q);
 }
 
+/*
+Write `p + p` in `out` (point doubling).
+
+  The argument `p` and the outparam `out` are meant to be 20 limbs in size, i.e., uint64_t[20].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are either pairwise disjoint or equal
+*/
+void Hacl_EC_Ed25519_point_double(u64 *p, u64 *out)
+{
+  Hacl_Impl_Ed25519_PointDouble_point_double(out, p);
+}
+
+/*
+Write `[scalar]p` in `out` (point multiplication or scalar multiplication).
+
+  The argument `p` and the outparam `out` are meant to be 20 limbs in size, i.e., uint64_t[20].
+  The argument `scalar` is meant to be 32 bytes in size, i.e., uint8_t[32].
+
+  The function first loads a little-endian scalar element from `scalar` and
+  then computes a point multiplication.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `scalar`, `p`, and `out` are pairwise disjoint
+*/
 void Hacl_EC_Ed25519_point_mul(u8 *scalar, u64 *p, u64 *out)
 {
   Hacl_Impl_Ed25519_Ladder_point_mul(out, scalar, p);
 }
 
+/*
+Checks whether `p` is equal to `q` (point equality).
+
+  The function returns `true` if `p` is equal to `q` and `false` otherwise.
+
+  The arguments `p` and `q` are meant to be 20 limbs in size, i.e., uint64_t[20].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `q` are either disjoint or equal
+*/
 bool Hacl_EC_Ed25519_point_eq(u64 *p, u64 *q)
 {
   return Hacl_Impl_Ed25519_PointEqual_point_equal(p, q);
 }
 
+/*
+Compress a point in extended homogeneous coordinates to its compressed form.
+
+  The argument `p` points to a point of 20 limbs in size, i.e., uint64_t[20].
+  The outparam `out` points to 32 bytes of valid memory, i.e., uint8_t[32].
+
+  The function first converts a given point `p` from extended homogeneous to affine coordinates
+  and then writes [ 2^255 * (`x` % 2) + `y` ] in `out`.
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `p` and `out` are disjoint
+*/
 void Hacl_EC_Ed25519_point_compress(u64 *p, u8 *out)
 {
   Hacl_Impl_Ed25519_PointCompress_point_compress(out, p);
 }
 
+/*
+Decompress a point in extended homogeneous coordinates from its compressed form.
+
+  The function returns `true` for successful decompression of a compressed point
+  and `false` otherwise.
+
+  The argument `s` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The outparam `out` points to a point of 20 limbs in size, i.e., uint64_t[20].
+
+  Before calling this function, the caller will need to ensure that the following
+  precondition is observed.
+  • `s` and `out` are disjoint
+*/
 bool Hacl_EC_Ed25519_point_decompress(u8 *s, u64 *out)
 {
   return Hacl_Impl_Ed25519_PointDecompress_point_decompress(out, s);

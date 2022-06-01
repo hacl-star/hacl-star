@@ -212,7 +212,7 @@ let optional_t #index
 ///
 /// Some remarks.
 /// - For algorithms that don't need a key at all (e.g. hash) it suffices to
-///   pass stateful_unused for the key. (Kremlin unit argument elimination will
+///   pass stateful_unused for the key. (KaRaMeL unit argument elimination will
 ///   do the rest).
 /// - The Runtime API is more general, and we could just dismiss `km` and always
 ///   choose to keep the key at run-time in the streaming state, except this is

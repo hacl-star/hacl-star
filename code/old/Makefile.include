@@ -15,60 +15,60 @@ else
   FSTAR_HOME:=$(abspath $(FSTAR_HOME))
 endif
 
-ifndef KREMLIN_HOME
-  KREMLIN_HOME:=$(abspath $(HACL_HOME)/dependencies/kremlin)
+ifndef KRML_HOME
+  KRML_HOME:=$(abspath $(HACL_HOME)/dependencies/karamel)
 else
-  KREMLIN_HOME:=$(abspath $(KREMLIN_HOME))
+  KRML_HOME:=$(abspath $(KRML_HOME))
 endif
 
 export HACL_HOME
 export FSTAR_HOME
-export KREMLIN_HOME
+export KRML_HOME
 
 # $(info $(HACL_HOME))
 # $(info $(FSTAR_HOME))
-# $(info $(KREMLIN_HOME))
+# $(info $(KRML_HOME))
 
 HACL_LIB=$(HACL_HOME)/code/old/lib
 HACL_FILES=Hacl.UInt8.fst Hacl.UInt16.fst Hacl.UInt32.fst Hacl.UInt64.fst Hacl.UInt128.fst Hacl.Cast.fst Hacl.Types.fst Hacl.Policies.fst
 HACL_LIB_FILES=$(addprefix $(HACL_LIB)/, $(HACL_FILES))
-HACL_KREMLIN=$(HACL_LIB)/kremlin
-HACL_KREMLIN_FILES=$(addprefix $(HACL_KREMLIN)/, $(HACL_FILES))
+HACL_KRML=$(HACL_LIB)/krml
+HACL_KRML_FILES=$(addprefix $(HACL_KRML)/, $(HACL_FILES))
 HACL_API=$(HACL_HOME)/code/old/api
 HACL_CRYPTO_UTILS=$(HACL_HOME)/code/old/lib
 
 VERBOSE=-verbose
 
 #
-# Kremlin
+# KaRaMeL
 #
 
-KREMLIB=$(KREMLIN_HOME)/kremlib
-KREMLIN=$(KREMLIN_HOME)/krml
-KREMTEST=$(KREMLIN_HOME)/test
+KRMLLIB=$(KRML_HOME)/krmllib
+KRML=$(KRML_HOME)/krml
+KRMLTEST=$(KRML_HOME)/test
 
 
-# Default Kremlin arguments
-KREMLIN_ARGS?=-verbose
-KREMLIN_ARGS+=$(KOPTS)
-KREMLIN_ARGS+=-I $(HACL_KREMLIN) -I $(KREMLIB)/compat -I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/old -I . -fparentheses -fcurly-braces -fno-shadow
+# Default KaRaMeL arguments
+KRML_ARGS?=-verbose
+KRML_ARGS+=$(KOPTS)
+KRML_ARGS+=-I $(HACL_KRML) -I $(KRMLLIB)/compat -I $(HACL_HOME)/specs -I $(HACL_HOME)/specs/old -I . -fparentheses -fcurly-braces -fno-shadow
 
 ifneq (,$(EVEREST_WINDOWS))
-KREMLIN_ARGS+=-fparentheses -falloca -ftail-calls
+KRML_ARGS+=-fparentheses -falloca -ftail-calls
 endif
 
 # Compiler options
 ifdef USE_CCOMP
-  KREMLIN_ARGS+=-cc compcert $(VERBOSE)
+  KRML_ARGS+=-cc compcert $(VERBOSE)
 else ifdef USE_CL
-  KREMLIN_ARGS+=-cc msvc $(VERBOSE)
+  KRML_ARGS+=-cc msvc $(VERBOSE)
 else
-  KREMLIN_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
+  KRML_ARGS+=-ccopt -march=native $(VERBOSE) -ldopt -flto
 endif
 
 # License header
 ifdef HACL_LICENSE
-  KREMLIN_ARGS+=-header $(HACL_LICENSE)
+  KRML_ARGS+=-header $(HACL_LICENSE)
 endif
 
 #
@@ -77,7 +77,7 @@ endif
 
 FSTAR_LIB=$(FSTAR_HOME)/ulib
 HINTS_ENABLED?=--use_hints
-FSTAR_INCLUDES+=--include $(HACL_KREMLIN) --include $(KREMLIB)/compat --include $(KREMLIB) --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/old
+FSTAR_INCLUDES+=--include $(HACL_KRML) --include $(KRMLLIB)/compat --include $(KRMLLIB) --include $(HACL_HOME)/specs --include $(HACL_HOME)/specs/old
 
 FSTAR=$(FSTAR_HOME)/bin/fstar.exe $(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES)
 
@@ -95,7 +95,7 @@ BATCH_RUN_CMD=$(EABC) run -d "hacl-star/$(CURRENT_SUBDIR)" $(EABC_EXTRA) "$(BATC
 BATCH_CMD=$(BATCH_ADD_CMD)
 FSTAR_RELATIVIZED=$(subst $(abspath $(HACL_HOME)/..),\$$H,$(HINTS_ENABLED) $(OTHERFLAGS) $(FSTAR_INCLUDES))
 FSTAR=$(BATCH_CMD) \$$H/FStar/bin/fstar.exe $(FSTAR_RELATIVIZED)
-KREMLIN=$(BATCH_CMD) \$$H/kremlin/krml
+KRML=$(BATCH_CMD) \$$H/karamel/krml
 endif
 
 include $(FSTAR_HOME)/ulib/ml/Makefile.include
@@ -135,8 +135,8 @@ ml-lib:
 import-lib:
 	@cp $(HACL_LIB_FILES) .
 
-import-kremlin:
-	@cp $(HACL_KREMLIN_FILES)) .
+import-karamel:
+	@cp $(HACL_KRML_FILES)) .
 
 %.fst-lax: %.fst
 	$(FSTAR) --lax $^
@@ -144,7 +144,7 @@ import-kremlin:
 	$(FSTAR) --lax $^
 
 %.fst-krml: %.fst
-	$(KREMLIN) $(KREMLIN_ARGS) $(KREMLIN_INCLUDES) $<
+	$(KRML) $(KRML_ARGS) $(KRML_INCLUDES) $<
 
 %.fst-verify: %.fst
 	$(FSTAR) $<

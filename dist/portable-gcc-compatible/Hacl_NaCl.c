@@ -24,7 +24,7 @@
 
 #include "Hacl_NaCl.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 
 /* SNIPPET_START: secretbox_init */
 

@@ -20,6 +20,9 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_EC_Ed25519_felem_mul"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_EC_Ed25519_felem_sqr =
+      foreign "Hacl_EC_Ed25519_felem_sqr"
+        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
     let hacl_EC_Ed25519_felem_inv =
       foreign "Hacl_EC_Ed25519_felem_inv"
         ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
@@ -42,6 +45,9 @@ module Bindings(F:Cstubs.FOREIGN) =
       foreign "Hacl_EC_Ed25519_point_add"
         ((ptr uint64_t) @->
            ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void))))
+    let hacl_EC_Ed25519_point_double =
+      foreign "Hacl_EC_Ed25519_point_double"
+        ((ptr uint64_t) @-> ((ptr uint64_t) @-> (returning void)))
     let hacl_EC_Ed25519_point_mul =
       foreign "Hacl_EC_Ed25519_point_mul"
         (ocaml_bytes @->
