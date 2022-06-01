@@ -24,16 +24,14 @@
 
 #ifndef __Hacl_P256_H
 #define __Hacl_P256_H
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "lib_intrinsics.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
 
 
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Spec.h"
-
+#include "lib_intrinsics.h"
 /*
  Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 

@@ -24,14 +24,13 @@
 
 #ifndef __Hacl_Spec_H
 #define __Hacl_Spec_H
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+
+
+
 #include "lib_intrinsics.h"
-
-
-
-
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2
@@ -42,11 +41,6 @@
 #define Spec_Hash_Definitions_Blake2B 7
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
-
-#define Spec_ECC_Curves_P256 0
-#define Spec_ECC_Curves_P384 1
-
-typedef uint8_t Spec_ECC_Curves_curve;
 
 
 #define __Hacl_Spec_H_DEFINED

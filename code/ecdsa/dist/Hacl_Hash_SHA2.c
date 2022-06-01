@@ -24,6 +24,8 @@
 
 #include "Hacl_Hash_SHA2.h"
 
+
+
 void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)
 {
   for (uint32_t i = (uint32_t)0U; i < n_blocks; i++)

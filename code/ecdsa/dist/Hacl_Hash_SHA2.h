@@ -24,15 +24,14 @@
 
 #ifndef __Hacl_Hash_SHA2_H
 #define __Hacl_Hash_SHA2_H
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "lib_intrinsics.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
 
 
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Core_SHA2.h"
-
+#include "lib_intrinsics.h"
 void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
 void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
