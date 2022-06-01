@@ -37,8 +37,6 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "libintvector.h"
-extern uint32_t Hacl_Poly1305_256_blocklen;
-
 typedef Lib_IntVector_Intrinsics_vec256 *Hacl_Poly1305_256_poly1305_ctx;
 
 void Hacl_Poly1305_256_poly1305_init(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *key);

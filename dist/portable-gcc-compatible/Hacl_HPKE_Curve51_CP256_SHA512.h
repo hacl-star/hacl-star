@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_Curve25519_51.h"
 #include "Hacl_Chacha20Poly1305_256.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_HPKE_Curve51_CP256_SHA512_setupBaseI */
 
 uint32_t

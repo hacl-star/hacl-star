@@ -101,8 +101,8 @@ all:
 	$(MAKE) all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
-  compile-evercrypt-external-headers compile-c89-compatible compile-ccf \
-  compile-portable-gcc-compatible dist/linux/Makefile.basic \
+  compile-evercrypt-external-headers compile-c89-compatible \
+  compile-portable-gcc-compatible \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
   obj/libhaclml.cmxa compile-election-guard
 
@@ -640,8 +640,30 @@ REQUIRED_FLAGS	= \
 # Disabled for Mozilla (carefully avoiding any KRML_CHECK_SIZE)
 TARGET_H_INCLUDE = -add-early-include '"krml/internal/target.h"'
 
-# Disabled for distributions that don't include vectorized implementations.
-INTRINSIC_FLAGS = -add-include '"libintvector.h"'
+# Note: we include libintvector.h in C files whenever possible, but fall back to
+# including this header in .h when the public API of a given algorithm (e.g.
+# Poly1305/256) directly refers to a LibIntVector type.
+# Note: due to backwards-compat, the syntax for the option is not super great...
+# it's `-add-include 'Foo:"bar.h"'` (include added to Foo.h) and
+# `-add-include 'Foo.c:"bar.h"'` (include added to Foo.c). Note how the former
+# doesn't have the extension while the latter does.
+INTRINSIC_FLAGS = \
+  -add-include 'Hacl_P256.c:"lib_intrinsics.h"' \
+  \
+  -add-include 'Hacl_Chacha20Poly1305_128.c:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20_Vec128.c:"libintvector.h"' \
+  -add-include 'Hacl_SHA2_Vec128.c:"libintvector.h"' \
+  \
+  -add-include 'Hacl_Hash_Blake2s_128:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
+  \
+  -add-include 'Hacl_Chacha20Poly1305_256.c:"libintvector.h"' \
+  -add-include 'Hacl_Chacha20_Vec256.c:"libintvector.h"' \
+  -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
+  \
+  -add-include 'Hacl_Hash_Blake2b_256:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
+
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
   -add-include 'Hacl_P256:"lib_intrinsics.h"' \
@@ -869,88 +891,6 @@ dist/mitls/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
 dist/c89-compatible/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
 dist/c89-compatible/Makefile.basic: DEFAULT_FLAGS += -fc89 -ccopt -std=c89 -ccopt -Wno-typedef-redefinition
 
-# Linux distribution (not compiled on CI)
-# ---------------------------------------
-#
-# We do something unverified and dangerous, i.e. we blast away the whole
-# Field64.Vale HACL* module (which dispatches between inline and extern versions
-# of the ASM) and rely on in-scope declarations from curve25519-inline.h to have
-# i) the same names: this works because Vale.Inline.* is eliminated from the
-#    call-graph (via the -library option), meaning that the subsequent
-#    -no-prefix can use the short names (e.g. fadd) without conflicting with the
-#    inline assembly version of those names
-# ii) the same order of arguments between, say, Field64.Vale.fadd and
-#     Vale.Inline.Fadd.fadd
-dist/linux/Makefile.basic: MERKLE_BUNDLE = -bundle 'MerkleTree.*,MerkleTree'
-dist/linux/Makefile.basic: TARGETCONFIG_FLAGS =
-dist/linux/Makefile.basic: DEFAULT_FLAGS += \
-  -fc89-scope -fbuiltin-uint128 -flinux-ints
-dist/linux/Makefile.basic: CTR_BUNDLE =
-dist/linux/Makefile.basic: E_HASH_BUNDLE =
-dist/linux/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
-dist/linux/Makefile.basic: DEFAULT_FLAGS += -bundle 'EverCrypt,EverCrypt.*'
-dist/linux/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/%,$(VALE_ASMS))
-dist/linux/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out providers/evercrypt/c/%,$(HAND_WRITTEN_FILES))
-dist/linux/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/evercrypt_targetconfig.h,$(HAND_WRITTEN_H_FILES))
-dist/linux/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/linux/Makefile.basic: BASE_FLAGS := $(filter-out -fcurly-braces,$(BASE_FLAGS))
-dist/linux/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
-dist/linux/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
-dist/linux/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum.*,Hacl.Bignum,Hacl.Bignum4096_32,Hacl.Bignum256_32,Hacl.Bignum4096,Hacl.Bignum256,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64
-dist/linux/Makefile.basic: K256_BUNDLE = -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*,Hacl.EC.K256
-dist/linux/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.RSAPSS,Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS
-dist/linux/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
-dist/linux/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
-dist/linux/Makefile.basic: CURVE_BUNDLE = \
-  $(CURVE_BUNDLE_BASE) \
-  -bundle Hacl.Curve25519_64_Local \
-  -library Hacl.Impl.Curve25519.Field64.Vale \
-  -no-prefix Hacl.Impl.Curve25519.Field64.Vale \
-  -drop Hacl_Curve_Leftovers
-
-# CCF distribution
-# ----------------
-#
-# - disable the legacy EverCrypt namespace
-# - enclaves only use 64-bit GCC/Clang -- assume unsigned __int128
-# - disable intrinsics (immintrin not availble with enclave toolchain)
-# - disbable chacha20, chachapoly, corresponding assemblies
-# - ensure poly1305 is unreachable via EverCrypt so that no file in the
-#   distribution needs compiling with intrinsics; this may not be tenable in the
-#   long run, as we'll have AEAD versions that need intrinsics; at that stage,
-#   we'll have to add a TargetConfig.has_intrinsics and guard even more
-dist/ccf/Makefile.basic: \
-  DEFAULT_FLAGS += \
-    -fbuiltin-uint128 \
-    -bundle EverCrypt.AutoConfig2= \
-    -bundle Hacl.Poly1305_32,Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.Field32xN_32,Hacl.Impl.Poly1305.Field32xN_128,Hacl.Impl.Poly1305.Field32xN_256[rename=Hacl_Poly1305] \
-    -bundle Hacl.*[rename=Hacl_Leftovers] \
-    -bundle EverCrypt.Hacl \
-    -bundle EverCrypt.Helpers \
-    -bundle EverCrypt.Poly1305 \
-    -bundle EverCrypt.Chacha20Poly1305 \
-    -bundle EverCrypt.AEAD \
-    -bundle EverCrypt.Ed25519
-dist/ccf/Makefile.basic: INTRINSIC_FLAGS=
-dist/ccf/Makefile.basic: VALE_ASMS := $(filter-out $(HACL_HOME)/secure_api/vale/asm/aes-% dist/vale/poly1305-%,$(VALE_ASMS))
-dist/ccf/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/ccf/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c %_vale_stubs.c,$(HAND_WRITTEN_FILES))
-dist/ccf/Makefile.basic: HAND_WRITTEN_H_FILES := $(filter-out %/libintvector.h %/lib_intrinsics.h,$(HAND_WRITTEN_H_FILES))
-dist/ccf/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
-dist/ccf/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519
-dist/ccf/Makefile.basic: POLY_BUNDLE = -bundle Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256
-dist/ccf/Makefile.basic: P256_BUNDLE=-bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
-dist/ccf/Makefile.basic: K256_BUNDLE=-bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*,Hacl.EC.K256
-dist/ccf/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS
-dist/ccf/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
-dist/ccf/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum4096_32,Hacl.Bignum256_32,Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64,Hacl.Bignum.*,Hacl.Bignum
-dist/ccf/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
-dist/ccf/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
-dist/ccf/Makefile.basic: BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants \
-  -static-header Hacl.Impl.Blake2.Constants \
-  -bundle Hacl.HKDF.Blake2b_256,Hacl.HMAC.Blake2b_256,Hacl.Blake2b_256,Hacl.Hash.Blake2b_256,Hacl.Streaming.Blake2b_256 \
-  -bundle Hacl.HKDF.Blake2s_128,Hacl.HMAC.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2s_128,Hacl.Streaming.Blake2s_256 \
-  -bundle 'Hacl.Impl.Blake2.\*'
 
 # Election Guard distribution
 # ---------------------------
@@ -965,6 +905,8 @@ dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
   -bundle Hacl.Bignum4096= \
   -bundle Hacl.Bignum256_32= \
   -bundle Hacl.Bignum4096_32= \
+  -bundle Hacl.GenericField32= \
+  -bundle Hacl.GenericField64= \
   -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum] \
   -bundle Hacl.HMAC_DRBG= \
   $(INTTYPES_BUNDLE)
@@ -982,14 +924,6 @@ dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
 #
 # Disable the EverCrypt and MerkleTree layers. Only keep Chacha20, Poly1305,
 # Curve25519 for now. Everything else in Hacl is disabled.
-dist/mozilla/Makefile.basic: INTRINSIC_FLAGS = \
-  -add-include 'Hacl_Chacha20Poly1305_128:"libintvector.h"' \
-  -add-include 'Hacl_Chacha20Poly1305_256:"libintvector.h"' \
-  -add-include 'Hacl_Chacha20_Vec128:"libintvector.h"' \
-  -add-include 'Hacl_Chacha20_Vec256:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_128:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
-  -add-include 'Hacl_P256:"lib_intrinsics.h"'
 dist/mozilla/Makefile.basic: CURVE_BUNDLE_SLOW = -bundle Hacl.Curve25519_64_Slow
 dist/mozilla/Makefile.basic: SALSA20_BUNDLE = -bundle Hacl.Salsa20
 dist/mozilla/Makefile.basic: ED_BUNDLE = -bundle Hacl.Ed25519,Hacl.EC.Ed25519

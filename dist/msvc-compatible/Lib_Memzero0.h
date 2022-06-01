@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 extern void Lib_Memzero0_memzero(void *x0, uint64_t x1);
 
 #if defined(__cplusplus)

@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Spec.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
 
 uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);

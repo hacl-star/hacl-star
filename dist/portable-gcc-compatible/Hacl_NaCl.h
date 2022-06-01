@@ -39,7 +39,6 @@ extern "C" {
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Curve25519_51.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_NaCl_crypto_secretbox_detached */
 
 uint32_t

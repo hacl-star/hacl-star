@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: EverCrypt_Chacha20Poly1305_aead_encrypt */
 
 void

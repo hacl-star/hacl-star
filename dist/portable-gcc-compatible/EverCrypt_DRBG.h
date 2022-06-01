@@ -41,7 +41,6 @@ extern "C" {
 #include "Hacl_HMAC_DRBG.h"
 #include "EverCrypt_HMAC.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: EverCrypt_DRBG_supported_alg */
 
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
@@ -83,17 +82,6 @@ extern uint32_t EverCrypt_DRBG_max_additional_input_length;
 uint32_t EverCrypt_DRBG_min_length(Spec_Hash_Definitions_hash_alg a);
 
 /* SNIPPET_END: EverCrypt_DRBG_min_length */
-
-/* SNIPPET_START: EverCrypt_DRBG_state_s_tags */
-
-#define EverCrypt_DRBG_SHA1_s 0
-#define EverCrypt_DRBG_SHA2_256_s 1
-#define EverCrypt_DRBG_SHA2_384_s 2
-#define EverCrypt_DRBG_SHA2_512_s 3
-
-/* SNIPPET_END: EverCrypt_DRBG_state_s_tags */
-
-typedef uint8_t EverCrypt_DRBG_state_s_tags;
 
 /* SNIPPET_START: EverCrypt_DRBG_state_s */
 

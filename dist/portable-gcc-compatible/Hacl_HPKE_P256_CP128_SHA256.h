@@ -39,7 +39,6 @@ extern "C" {
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_HPKE_P256_CP128_SHA256_setupBaseI */
 
 uint32_t
