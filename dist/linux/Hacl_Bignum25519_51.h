@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-
+#include "Hacl_Krmllib.h"
+#include "libintvector.h"
 static inline void Hacl_Impl_Curve25519_Field51_fadd(u64 *out, u64 *f1, u64 *f2)
 {
   u64 f10 = f1[0U];

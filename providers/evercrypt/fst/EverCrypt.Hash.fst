@@ -370,12 +370,14 @@ let update_last_with_internal_st (a : alg) =
 inline_for_extraction noextract
 val update_last_blake2s : update_last_with_internal_st Blake2S
 
+#push-options "--fuel 0 --ifuel 1"
 let update_last_blake2s p prev_len last last_len =
   [@inline_let] let ev = prev_len in
   let x:Lib.IntTypes.uint_t Lib.IntTypes.U64 Lib.IntTypes.SEC =
     update_last_64 Blake2S Hacl.Hash.Blake2.update_last_blake2s_32 p ev
                    prev_len last last_len in
   ()
+#pop-options
 
 inline_for_extraction noextract
 val update_last_blake2b : update_last_with_internal_st Blake2B

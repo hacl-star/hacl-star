@@ -2,188 +2,176 @@ module Spec.Exponentiation
 
 open FStar.Mul
 
+open Lib.IntTypes
+open Lib.Sequence
+
 module S = Lib.Exponentiation
 module Loops = Lib.LoopCombinators
 
-inline_for_extraction
-class to_comm_monoid (t:Type) = {
-  a_spec: Type;
-  comm_monoid: S.comm_monoid a_spec;
-  refl: x:t -> a_spec;
-  }
 
+#set-options "--z3rlimit 50 --fuel 0 --ifuel 1"
 
-inline_for_extraction
-let one_st (t:Type) (to:to_comm_monoid t) = unit ->
-  Pure t
-  (requires True)
-  (ensures  fun one ->
-    to.refl one == to.comm_monoid.S.one)
+val exp_rl_lemma_loop: #t:Type -> k:concrete_ops t
+  -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> i:nat{i <= bBits} ->
+  Lemma (let one = k.one () in
+    let (accs, cs) = Loops.repeati i (S.exp_rl_f k.to.comm_monoid bBits b) (k.to.refl one, k.to.refl a) in
+    let (acc, c) = Loops.repeati i (exp_rl_f k bBits b) (one, a) in
+    k.to.refl acc == accs /\ k.to.refl c == cs)
 
-
-inline_for_extraction
-let mul_st (t:Type) (to:to_comm_monoid t) = x:t -> y:t ->
-  Pure t
-  (requires True)
-  (ensures  fun xy ->
-    to.refl xy == to.comm_monoid.S.mul (to.refl x) (to.refl y))
-
-
-inline_for_extraction
-let sqr_st (t:Type) (to:to_comm_monoid t) = x:t ->
-  Pure t
-  (requires True)
-  (ensures  fun xy ->
-    to.refl xy == to.comm_monoid.S.mul (to.refl x) (to.refl x))
-
-
-inline_for_extraction
-class concrete_ops (t:Type) = {
-  to: to_comm_monoid t;
-  one: one_st t to;
-  mul: mul_st t to;
-  sqr: sqr_st t to;
-  }
-
-
-val exp_rl:
-    #t:Type
-  -> k:concrete_ops t
-  -> a:t
-  -> bBits:nat -> b:nat{b < pow2 bBits} ->
-  Pure t
-  (requires True)
-  (ensures  fun r ->
-    k.to.refl r == S.exp_rl k.to.comm_monoid (k.to.refl a) bBits b)
-
-let exp_rl #t k a bBits b =
+let rec exp_rl_lemma_loop #t k a bBits b i =
   let one = k.one () in
-  let inp0 = (k.to.refl a, k.to.refl one) in
-  Loops.eq_repeati0 bBits (S.exp_rl_f k.to.comm_monoid bBits b) inp0;
+  let inp0 = (k.to.refl one, k.to.refl a) in
+  let inp1 = (one, a) in
+  let f0 = S.exp_rl_f k.to.comm_monoid bBits b in
+  let f1 = exp_rl_f k bBits b in
 
-  let (a, acc) =
-  Loops.repeati_inductive bBits
-  (fun i (a1, acc1) ->
-   (let (as, accs) = Loops.repeati i (S.exp_rl_f k.to.comm_monoid bBits b) inp0 in
-    k.to.refl a1 == as /\ k.to.refl acc1 == accs))
-  (fun i (a1, acc1) ->
-    Loops.unfold_repeati bBits (S.exp_rl_f k.to.comm_monoid bBits b) inp0 i;
-    let acc = if (b / pow2 i % 2 = 1) then k.mul acc1 a1 else acc1 in
-    let a = k.mul a1 a1 in
-    (a, acc)
-   ) (a, one) in
-  acc
+  if i = 0 then begin
+    Loops.eq_repeati0 bBits f0 inp0;
+    Loops.eq_repeati0 bBits f1 inp1 end
+  else begin
+    exp_rl_lemma_loop #t k a bBits b (i - 1);
+    Loops.unfold_repeati bBits f0 inp0 (i - 1);
+    Loops.unfold_repeati bBits f1 inp1 (i - 1) end
 
 
-val exp_mont_ladder_swap:
-    #t:Type
-  -> k:concrete_ops t
-  -> a:t
-  -> bBits:nat -> b:nat{b < pow2 bBits} ->
-  Pure t
-  (requires True)
-  (ensures  fun r ->
-    k.to.refl r == S.exp_mont_ladder_swap k.to.comm_monoid (k.to.refl a) bBits b)
+let exp_rl_lemma #t k a bBits b =
+  exp_rl_lemma_loop #t k a bBits b bBits
 
-let exp_mont_ladder_swap #t k a bBits b =
+
+val exp_mont_ladder_swap_lemma_loop: #t:Type -> k:concrete_ops t
+  -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> i:nat{i <= bBits} ->
+  Lemma (let one = k.one () in
+    let (r0s, r1s, sws) =
+      Loops.repeati i (S.exp_mont_ladder_swap_f k.to.comm_monoid bBits b) (k.to.refl one, k.to.refl a, 0) in
+    let (r0, r1, sw) =
+      Loops.repeati i (exp_mont_ladder_swap_f k bBits b) (one, a, 0) in
+    k.to.refl r0 == r0s /\ k.to.refl r1 == r1s /\ sw == sws)
+
+let rec exp_mont_ladder_swap_lemma_loop #t k a bBits b i =
   let one = k.one () in
   let inp0 = (k.to.refl one, k.to.refl a, 0) in
+  let inp1 = (one, a, 0) in
+  let f0 = S.exp_mont_ladder_swap_f k.to.comm_monoid bBits b in
+  let f1 = exp_mont_ladder_swap_f k bBits b in
 
-  Loops.eq_repeati0 bBits (S.exp_mont_ladder_swap_f k.to.comm_monoid bBits b) inp0;
-
-  let (acc, a, sw) =
-  Loops.repeati_inductive bBits
-  (fun i (acc1, a1, sw1) ->
-   (let (accs, as, sws) = Loops.repeati i (S.exp_mont_ladder_swap_f k.to.comm_monoid bBits b) inp0 in
-    k.to.refl a1 == as /\ k.to.refl acc1 == accs /\ sw1 == sws))
-  (fun i (r0, r1, privbit) ->
-    Loops.unfold_repeati bBits (S.exp_mont_ladder_swap_f k.to.comm_monoid bBits b) inp0 i;
-    let bit = b / pow2 (bBits - i - 1) % 2 in
-    let sw = (bit + privbit) % 2 in
-    let r0, r1 = S.cswap sw r0 r1 in
-    let r0, r1 = (k.mul r0 r0, k.mul r1 r0) in
-    (r0, r1, bit)
-   ) (one, a, 0) in
-
-  let (acc, a) = S.cswap sw acc a in
-  acc
-
-
-val exp_pow2:
-    #t:Type
-  -> k:concrete_ops t
-  -> a:t
-  -> b:nat ->
-  Pure t
-  (requires True)
-  (ensures  fun r ->
-    k.to.refl r == S.exp_pow2 k.to.comm_monoid (k.to.refl a) b)
-
-let exp_pow2 #t k a b =
-  Loops.eq_repeat0 (S.sqr k.to.comm_monoid) (k.to.refl a);
-
-  let acc =
-  Loops.repeati_inductive b
-  (fun i acc1 ->
-   (let accs = Loops.repeat i (S.sqr k.to.comm_monoid) (k.to.refl a) in
-    k.to.refl acc1 == accs))
-  (fun i acc1 ->
-    Loops.unfold_repeat b (S.sqr k.to.comm_monoid) (k.to.refl a) i;
-    k.sqr acc1
-   ) a in
-
-  acc
-
-
-val pow:
-    #t:Type
-  -> k:concrete_ops t
-  -> a:t -> b:nat ->
-  Pure t
-  (requires True)
-  (ensures  fun r ->
-    k.to.refl r == S.pow k.to.comm_monoid (k.to.refl a) b)
-
-let rec pow #t k a b =
-  if b = 0 then k.one ()
-  else k.mul a (pow k a (b - 1))
-
-
-val exp_fw:
-    #t:Type
-  -> k:concrete_ops t
-  -> a:t
-  -> bBits:nat -> b:nat{b < pow2 bBits}
-  -> l:pos ->
-  Pure t
-  (requires True)
-  (ensures  fun r ->
-    k.to.refl r == S.exp_fw k.to.comm_monoid (k.to.refl a) bBits b l)
-
-let exp_fw #t k a bBits b l =
-  let one = k.one () in
-  Loops.eq_repeati0 (bBits / l) (S.exp_fw_f k.to.comm_monoid (k.to.refl a) bBits b l) (k.to.refl one);
-
-  let acc =
-  Loops.repeati_inductive (bBits / l)
-  (fun i acc1 ->
-   (let accs = Loops.repeati i (S.exp_fw_f k.to.comm_monoid (k.to.refl a) bBits b l) (k.to.refl one) in
-    k.to.refl acc1 == accs))
-  (fun i acc1 ->
-    Loops.unfold_repeati (bBits / l) (S.exp_fw_f k.to.comm_monoid (k.to.refl a) bBits b l) (k.to.refl one) i;
-    let acc = exp_pow2 k acc1 l in
-    let bits_l = S.get_bits_l bBits b l i in
-    let acc = k.mul acc (pow k a bits_l) in
-    acc
-   ) one in
-
-  assert (k.to.refl acc ==
-    Loops.repeati (bBits / l) (S.exp_fw_f k.to.comm_monoid (k.to.refl a) bBits b l) (k.to.refl one));
-
-  if bBits % l = 0 then acc
+  if i = 0 then begin
+    Loops.eq_repeati0 bBits f0 inp0;
+    Loops.eq_repeati0 bBits f1 inp1 end
   else begin
-    let c = bBits % l in
-    let acc = exp_pow2 k acc c in
-    let bits_c = S.get_bits_c bBits b l in
-    let acc = k.mul acc (pow k a bits_c) in
-    acc end
+    exp_mont_ladder_swap_lemma_loop #t k a bBits b (i - 1);
+    Loops.unfold_repeati bBits f0 inp0 (i - 1);
+    Loops.unfold_repeati bBits f1 inp1 (i - 1) end
+
+
+let exp_mont_ladder_swap_lemma #t k a bBits b =
+  exp_mont_ladder_swap_lemma_loop #t k a bBits b bBits
+
+
+val exp_pow2_lemma_loop: #t:Type -> k:concrete_ops t -> a:t -> b:nat -> i:nat{i <= b} ->
+  Lemma (
+    let accs = Loops.repeat i (S.sqr k.to.comm_monoid) (k.to.refl a) in
+    let acc = Loops.repeat i k.sqr a in
+    k.to.refl acc == accs)
+
+let rec exp_pow2_lemma_loop #t k a b i =
+  if i = 0 then begin
+    Loops.eq_repeat0 (S.sqr k.to.comm_monoid) (k.to.refl a);
+    Loops.eq_repeat0 k.sqr a end
+  else begin
+    exp_pow2_lemma_loop #t k a b (i - 1);
+    Loops.unfold_repeat b (S.sqr k.to.comm_monoid) (k.to.refl a) (i - 1);
+    Loops.unfold_repeat b k.sqr a (i - 1) end
+
+
+let exp_pow2_lemma #t k a b =
+  exp_pow2_lemma_loop k a b b
+
+#push-options "--fuel 1"
+let pow_eq0 #t k a = ()
+
+let pow_unfold #t k a i = ()
+
+let rec pow_lemma #t k a b =
+  if b = 0 then ()
+  else pow_lemma k a (b - 1)
+#pop-options
+
+
+val exp_fw_lemma_loop: #t:Type -> k:concrete_ops t
+  -> a:t -> bBits:nat -> b:nat{b < pow2 bBits} -> l:pos
+  -> acc0:t -> i:nat{i <= bBits / l} ->
+  Lemma (
+    let acc = Loops.repeati i (exp_fw_f k a bBits b l) acc0 in
+    let accs = Loops.repeati i (S.exp_fw_f k.to.comm_monoid (k.to.refl a) bBits b l) (k.to.refl acc0) in
+    k.to.refl acc == accs)
+
+let rec exp_fw_lemma_loop #t k a bBits b l acc0 i =
+  let f0 = exp_fw_f k a bBits b l in
+  let f1 = S.exp_fw_f k.to.comm_monoid (k.to.refl a) bBits b l in
+
+  if i = 0 then begin
+    Loops.eq_repeati0 i f0 acc0;
+    Loops.eq_repeati0 i f1 (k.to.refl acc0) end
+  else begin
+    let acc1 = Loops.repeati (i - 1) f0 acc0 in
+    let bits_l1 = S.get_bits_l bBits b l (i - 1) in
+    exp_fw_lemma_loop #t k a bBits b l acc0 (i - 1);
+    Loops.unfold_repeati i f0 acc0 (i - 1);
+    Loops.unfold_repeati i f1 (k.to.refl acc0) (i - 1);
+    exp_pow2_lemma k acc1 l;
+    pow_lemma k a bits_l1 end
+
+
+let exp_fw_lemma #t k a bBits b l =
+  let acc0 =
+    if bBits % l = 0 then one ()
+    else begin
+      let bits_c = S.get_ith_lbits bBits b (bBits / l * l) l in
+      pow_lemma k a bits_c;
+      pow k a bits_c end in
+
+  exp_fw_lemma_loop #t k a bBits b l acc0 (bBits / l)
+
+
+val exp_double_fw_lemma_loop: #t:Type -> k:concrete_ops t
+  -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
+  -> a2:t -> b2:nat{b2 < pow2 bBits} -> l:pos
+  -> acc0:t -> i:nat{i <= bBits / l} ->
+  Lemma
+   (let acc = Loops.repeati i (exp_double_fw_f k a1 bBits b1 a2 b2 l) acc0 in
+    let accs = Loops.repeati i
+      (S.exp_double_fw_f k.to.comm_monoid (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l) (k.to.refl acc0) in
+    k.to.refl acc == accs)
+
+let rec exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l acc0 i =
+  let f0 = exp_double_fw_f k a1 bBits b1 a2 b2 l in
+  let f1 = S.exp_double_fw_f k.to.comm_monoid (k.to.refl a1) bBits b1 (k.to.refl a2) b2 l in
+
+  if i = 0 then begin
+    Loops.eq_repeati0 i f0 acc0;
+    Loops.eq_repeati0 i f1 (k.to.refl acc0) end
+  else begin
+    let acc1 = Loops.repeati (i - 1) f0 acc0 in
+    let bits_l1 = S.get_bits_l bBits b1 l (i - 1) in
+    let bits_l2 = S.get_bits_l bBits b2 l (i - 1) in
+    exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l acc0 (i - 1);
+    Loops.unfold_repeati i f0 acc0 (i - 1);
+    Loops.unfold_repeati i f1 (k.to.refl acc0) (i - 1);
+    exp_pow2_lemma k acc1 l;
+    pow_lemma k a1 bits_l1;
+    pow_lemma k a2 bits_l2 end
+
+
+let exp_double_fw_lemma #t k a1 bBits b1 a2 b2 l =
+  let acc0 =
+    if bBits % l = 0 then one ()
+    else begin
+      let bits_c1 = S.get_ith_lbits bBits b1 (bBits / l * l) l in
+      let bits_c2 = S.get_ith_lbits bBits b2 (bBits / l * l) l in
+      let acc_a1 = pow k a1 bits_c1 in
+      let acc_a2 = pow k a2 bits_c2 in
+      pow_lemma k a1 bits_c1;
+      pow_lemma k a2 bits_c2;
+      k.mul acc_a1 acc_a2 end in
+
+  exp_double_fw_lemma_loop #t k a1 bBits b1 a2 b2 l acc0 (bBits / l)

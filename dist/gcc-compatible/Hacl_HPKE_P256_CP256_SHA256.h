@@ -29,19 +29,16 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_P256.h"
-#include "Hacl_Hash.h"
+#include "Hacl_Hash_SHA2.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_256.h"
-
+#include "evercrypt_targetconfig.h"
 uint32_t
 Hacl_HPKE_P256_CP256_SHA256_setupBaseI(
   uint8_t *o_pkE,

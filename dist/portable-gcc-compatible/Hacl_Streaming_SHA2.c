@@ -24,6 +24,8 @@
 
 #include "Hacl_Streaming_SHA2.h"
 
+#include "internal/Hacl_Hash_SHA2.h"
+
 /* SNIPPET_START: Hacl_Streaming_SHA2_create_in_224 */
 
 Hacl_Streaming_SHA2_state_sha2_224 *Hacl_Streaming_SHA2_create_in_224()

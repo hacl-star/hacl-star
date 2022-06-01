@@ -18,10 +18,10 @@ BATCH_DATA_DIR?=$(HACL_HOME)/batch_results
 BATCH_CONTENT:=$(Z3) \
 	"$(FSTAR_HOME)|*.exe,*.fst,*.fsti,Makefile,Makefile.include,*.mk" \
 	"$(HACL_HOME)|*.fst,*.fsti,Makefile,Makefile.include" \
-	"$(KREMLIN_HOME)|*.fst,*.fsti"
+	"$(KRML_HOME)|*.fst,*.fsti"
 
 ifdef HINTS_ENABLED
-  BATCH_CONTENT+="$(FSTAR_HOME)|*.hints" "$(HACL_HOME)|*.hints" "$(KREMLIN_HOME)|*.hints"
+  BATCH_CONTENT+="$(FSTAR_HOME)|*.hints" "$(HACL_HOME)|*.hints" "$(KRML_HOME)|*.hints"
 endif
 
 all: cloud-verify

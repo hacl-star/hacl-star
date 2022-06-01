@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Poly1305_128.h"
+#include "internal/Hacl_Poly1305_128.h"
+
+
 
 void
 Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, uint8_t *b)
@@ -348,8 +350,6 @@ Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(
   out[3U] = o3;
   out[4U] = o4;
 }
-
-uint32_t Hacl_Poly1305_128_blocklen = (uint32_t)16U;
 
 void Hacl_Poly1305_128_poly1305_init(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *key)
 {

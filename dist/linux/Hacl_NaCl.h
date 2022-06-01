@@ -29,18 +29,16 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Hacl_Salsa20.h"
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Curve25519_51.h"
-
+#include "libintvector.h"
 u32 Hacl_NaCl_crypto_secretbox_detached(u8 *c, u8 *tag, u8 *m, u32 mlen, u8 *n, u8 *k);
 
 u32 Hacl_NaCl_crypto_secretbox_open_detached(u8 *m, u8 *c, u8 *tag, u32 mlen, u8 *n, u8 *k);

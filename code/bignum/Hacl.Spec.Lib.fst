@@ -188,7 +188,7 @@ let generate_blocks4_f #t #a max f i c =
   let c1, e1 = f (4 * i + 1) c0 in
   let c2, e2 = f (4 * i + 2) c1 in
   let c3, e3 = f (4 * i + 3) c2 in
-  c3, Lib.IntVector.create4 e0 e1 e2 e3
+  c3, Lib.Sequence.create4 e0 e1 e2 e3
 
 
 val lemma_generate_elems4_loop_step:
@@ -213,7 +213,7 @@ let lemma_generate_elems4_loop_step #t #a max k f i c s =
   let c1, e1 = f (4 * i + 1) c0 in
   let c2, e2 = f (4 * i + 2) c1 in
   let c3, e3 = f (4 * i + 3) c2 in
-  let res = Lib.IntVector.create4 e0 e1 e2 e3 in
+  let res = Lib.Sequence.create4 e0 e1 e2 e3 in
   let res0 = Seq.snoc s e0 in
   let res1 = Seq.snoc res0 e1 in
   let res2 = Seq.snoc res1 e2 in

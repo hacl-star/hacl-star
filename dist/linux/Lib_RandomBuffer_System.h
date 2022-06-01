@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-
+#include "libintvector.h"
 KRML_DEPRECATED("random_crypto")
 
 extern bool Lib_RandomBuffer_System_randombytes(u8 *buf, u32 len);

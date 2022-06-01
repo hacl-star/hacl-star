@@ -29,19 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Bignum.h"
-#include "Hacl_Hash.h"
 #include "Hacl_Spec.h"
-
+#include "Hacl_Hash_SHA2.h"
+#include "evercrypt_targetconfig.h"
 /* SNIPPET_START: Hacl_RSAPSS_rsapss_sign */
 
 bool

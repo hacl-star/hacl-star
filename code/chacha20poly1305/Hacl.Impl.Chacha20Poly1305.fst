@@ -39,7 +39,7 @@ val poly1305_do_:
     modifies (loc ctx |+| loc block) h0 h1 /\
     (let acc, r = SpecPoly.poly1305_init (as_seq h0 k) in
     let acc = if (length aad <> 0) then Spec.poly1305_padded r (as_seq h0 aad) acc else acc in
-    let acc = Spec.poly1305_padded r (as_seq h0 m) acc in
+    let acc = if (length m <> 0) then Spec.poly1305_padded r (as_seq h0 m) acc else acc in
     let block_s = LSeq.concat (BSeq.uint_to_bytes_le #U64 (u64 (length aad)))
       (BSeq.uint_to_bytes_le #U64 (u64 (length m))) in
     let acc = SpecPoly.poly1305_update1 r 16 block_s acc in
@@ -51,7 +51,9 @@ let poly1305_do_ #w k aadlen aad mlen m ctx block =
   if (aadlen <> 0ul) then (
     poly1305_padded ctx aadlen aad)
   else ();
-  poly1305_padded ctx mlen m;
+  if (mlen <> 0ul) then (
+    poly1305_padded ctx mlen m)
+  else ();
   let h0 = ST.get () in
   update_sub_f h0 block 0ul 8ul
     (fun h -> BSeq.uint_to_bytes_le #U64 (to_u64 aadlen))

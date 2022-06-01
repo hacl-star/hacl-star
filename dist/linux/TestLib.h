@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-
+#include "libintvector.h"
 extern void TestLib_touch(s32 uu___);
 
 extern void TestLib_check(bool uu___);

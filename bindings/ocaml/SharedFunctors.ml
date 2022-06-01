@@ -120,7 +120,7 @@ module Make_EdDSA_generic (C: Buffer)
     (* Hacl.Ed25519.verify *)
     assert (C.size pk = 32);
     assert (C.size signature = 64);
-    assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
+    assert Z.(of_int (C.size msg) <= max_size_t);
     Impl.verify (C.ctypes_buf pk) (C.size_uint32 msg) (C.ctypes_buf msg) (C.ctypes_buf signature)
   module Noalloc = struct
     let secret_to_public ~sk ~pk =
@@ -133,7 +133,7 @@ module Make_EdDSA_generic (C: Buffer)
       (* Hacl.Ed25519.sign *)
       assert (C.size sk = 32);
       assert (C.size signature = 64);
-      assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
+      assert Z.(of_int (C.size msg) <= max_size_t);
       Impl.sign (C.ctypes_buf signature) (C.ctypes_buf sk) (C.size_uint32 msg) (C.ctypes_buf msg)
     let expand_keys ~sk ~ks =
       (* Hacl.Ed25519.expand_keys *)
@@ -145,7 +145,7 @@ module Make_EdDSA_generic (C: Buffer)
       (* Hacl.Ed25519.sign_expanded *)
       assert (C.size ks = 96);
       assert (C.size signature = 64);
-      assert Z.(of_int (C.size msg) + ~$64 <= max_size_t);
+      assert Z.(of_int (C.size msg) <= max_size_t);
       Impl.sign_expanded (C.ctypes_buf signature) (C.ctypes_buf ks) (C.size_uint32 msg) (C.ctypes_buf msg)
   end
   let secret_to_public ~sk =

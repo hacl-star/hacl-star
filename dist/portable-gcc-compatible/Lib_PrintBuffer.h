@@ -29,16 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
 /* SNIPPET_START: Lib_PrintBuffer_print_bytes */
 
 extern void Lib_PrintBuffer_print_bytes(uint32_t len, uint8_t *buf);

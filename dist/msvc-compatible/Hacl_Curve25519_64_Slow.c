@@ -24,6 +24,9 @@
 
 #include "Hacl_Curve25519_64_Slow.h"
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum.h"
+
 static inline uint64_t add1_(uint64_t *out, uint64_t *f1, uint64_t f2)
 {
   uint64_t c0 = Lib_IntTypes_Intrinsics_add_carry_u64((uint64_t)0U, f1[0U], f2, out);

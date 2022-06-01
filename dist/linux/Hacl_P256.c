@@ -24,6 +24,8 @@
 
 #include "Hacl_P256.h"
 
+#include "internal/Hacl_Spec.h"
+
 static u64 isZero_uint64_CT(u64 *f)
 {
   u64 a0 = f[0U];
@@ -2561,7 +2563,7 @@ ecdsa_verification_(
             }
           default:
             {
-              KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+              KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
               KRML_HOST_EXIT(253U);
             }
         }
@@ -2596,14 +2598,14 @@ ecdsa_verification_(
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
         }
         else
         {
-          KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+          KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
             __FILE__,
             __LINE__,
             "unreachable (pattern matches are exhaustive in F*)");
@@ -2756,7 +2758,7 @@ ecdsa_signature_core(
           }
         default:
           {
-            KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+            KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
             KRML_HOST_EXIT(253U);
           }
       }
@@ -2793,14 +2795,14 @@ ecdsa_signature_core(
               }
             default:
               {
-                KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+                KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
                 KRML_HOST_EXIT(253U);
               }
           }
         }
         else
         {
-          KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+          KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
             __FILE__,
             __LINE__,
             "unreachable (pattern matches are exhaustive in F*)");
@@ -2918,8 +2920,29 @@ static void computeYFromX(u64 *x, u64 *result, u64 sign)
   cmovznz4(flag, bCoordinateBuffer, result, result);
 }
 
+
+/*******************************************************************************
+
+ECDSA and ECDH functions over the P-256 NIST curve.
+
+This module implements signing and verification, key validation, conversions
+between various point representations, and ECDH key agreement.
+
+*******************************************************************************/
+
+/**************/
+/* Signatures */
+/**************/
+
 /*
- Input: result buffer: uint8[64], 
+  Per the standard, a hash function *shall* be used. Therefore, we recommend
+  using one of the three combined hash-and-sign variants.
+*/
+
+/*
+Hash the message with SHA2-256, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -2955,7 +2978,9 @@ bool Hacl_P256_ecdsa_sign_p256_sha2(u8 *result, u32 mLen, u8 *m, u8 *privKey, u8
 }
 
 /*
- Input: result buffer: uint8[64], 
+Hash the message with SHA2-384, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -2991,7 +3016,9 @@ bool Hacl_P256_ecdsa_sign_p256_sha384(u8 *result, u32 mLen, u8 *m, u8 *privKey, 
 }
 
 /*
- Input: result buffer: uint8[64], 
+Hash the message with SHA2-512, then sign the resulting digest with the P256 signature function.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -3027,7 +3054,19 @@ bool Hacl_P256_ecdsa_sign_p256_sha512(u8 *result, u32 mLen, u8 *m, u8 *privKey, 
 }
 
 /*
- Input: result buffer: uint8[64], 
+P256 signature WITHOUT hashing first.
+
+This function is intended to receive a hash of the input. For convenience, we
+recommend using one of the hash-and-sign combined functions above.
+
+The argument `m` MUST be at least 32 bytes (i.e. `mLen >= 32`).
+
+NOTE: The equivalent functions in OpenSSL and Fiat-Crypto both accept inputs
+smaller than 32 bytes. These libraries left-pad the input with enough zeroes to
+reach the minimum 32 byte size. Clients who need behavior identical to OpenSSL
+need to perform the left-padding themselves.
+
+Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
  priv(ate)Key: uint8[32], 
  k (nonce): uint32[32]. 
@@ -3061,6 +3100,16 @@ bool Hacl_P256_ecdsa_sign_p256_without_hash(u8 *result, u32 mLen, u8 *m, u8 *pri
   toUint8(s, resultS);
   return flag == (u64)0U;
 }
+
+
+/****************/
+/* Verification */
+/****************/
+
+/*
+  Verify a message signature. These functions internally validate the public key using validate_public_key.
+*/
+
 
 /*
  The input of the function is considered to be public, 
@@ -3210,8 +3259,15 @@ bool Hacl_P256_ecdsa_verif_without_hash(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *
   return result;
 }
 
+
+/******************/
+/* Key validation */
+/******************/
+
+
 /*
- Public key verification function. 
+Validate a public key.
+
   
   The input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over the input.
@@ -3226,7 +3282,7 @@ bool Hacl_P256_ecdsa_verif_without_hash(u32 mLen, u8 *m, u8 *pubKey, u8 *r, u8 *
   
  The last extract is taken from : https://neilmadden.blog/2017/05/17/so-how-do-you-validate-nist-ecdh-public-keys/
 */
-bool Hacl_P256_verify_q(u8 *pubKey)
+bool Hacl_P256_validate_public_key(u8 *pubKey)
 {
   u8 *pubKeyX = pubKey;
   u8 *pubKeyY = pubKey + (u32)32U;
@@ -3245,13 +3301,37 @@ bool Hacl_P256_verify_q(u8 *pubKey)
 }
 
 /*
- There and further we introduce notions of compressed point and not compressed point. 
+Validate a private key, e.g. prior to signing.
+
+Input: scalar: uint8[32].
   
- We denote || as byte concatenation. 
-  
- A compressed point is a point representaion as follows: (0x2 + y % 2) || x.
-  
- A not Compressed point is a point representation as follows: 0x4 || x || y.
+ Output: bool, where true stands for the scalar to be more than 0 and less than order.
+*/
+bool Hacl_P256_validate_private_key(u8 *x)
+{
+  return isMoreThanZeroLessThanOrder(x);
+}
+
+
+/*****************************************/
+/* Point representations and conversions */
+/*****************************************/
+
+/*
+  Elliptic curve points have 2 32-byte coordinates (x, y) and can be represented in 3 ways:
+
+  - "raw" form (64 bytes): the concatenation of the 2 coordinates, also known as "internal"
+  - "compressed" form (33 bytes): first the sign byte of y (either 0x02 or 0x03), followed by x
+  - "uncompressed" form (65 bytes): first a constant byte (always 0x04), followed by the "raw" form
+
+  For all of the conversation functions below, the input and output MUST NOT overlap.
+*/
+
+
+/*
+Convert 65-byte uncompressed to raw.
+
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
 
   
  
@@ -3261,7 +3341,7 @@ bool Hacl_P256_verify_q(u8 *pubKey)
  Output: bool, where true stands for the correct decompression.
  
 */
-bool Hacl_P256_decompression_not_compressed_form(u8 *b, u8 *result)
+bool Hacl_P256_uncompressed_to_raw(u8 *b, u8 *result)
 {
   u8 compressionIdentifier = b[0U];
   bool correctIdentifier = (u8)4U == compressionIdentifier;
@@ -3271,13 +3351,17 @@ bool Hacl_P256_decompression_not_compressed_form(u8 *b, u8 *result)
 }
 
 /*
- Input: a point in compressed form (uint8[33]), 
+Convert 33-byte compressed to raw.
+
+The function errors out if the first byte is incorrect, or if the resulting point is invalid.
+
+Input: a point in compressed form (uint8[33]), 
  result: uint8[64] (internal point representation).
   
  Output: bool, where true stands for the correct decompression.
  
 */
-bool Hacl_P256_decompression_compressed_form(u8 *b, u8 *result)
+bool Hacl_P256_compressed_to_raw(u8 *b, u8 *result)
 {
   u64 temp[8U] = { 0U };
   u64 *t0 = temp;
@@ -3316,10 +3400,14 @@ bool Hacl_P256_decompression_compressed_form(u8 *b, u8 *result)
 }
 
 /*
- Input: a point buffer (internal representation: uint8[64]), 
+Convert raw to 65-byte uncompressed.
+
+This function effectively prepends a 0x04 byte.
+
+Input: a point buffer (internal representation: uint8[64]), 
  result: a point in not compressed form (uint8[65]).
 */
-void Hacl_P256_compression_not_compressed_form(u8 *b, u8 *result)
+void Hacl_P256_raw_to_uncompressed(u8 *b, u8 *result)
 {
   u8 *to = result + (u32)1U;
   memcpy(to, b, (u32)64U * sizeof (u8));
@@ -3327,10 +3415,13 @@ void Hacl_P256_compression_not_compressed_form(u8 *b, u8 *result)
 }
 
 /*
- Input: a point buffer (internal representation: uint8[64]), 
- result: a point in not compressed form (uint8[33]).
+Convert raw to 33-byte compressed.
+
+  Input: `b`, the pointer buffer in internal representation, of type `uint8[64]`
+  Output: `result`, a point in compressed form, of type `uint8[33]`
+
 */
-void Hacl_P256_compression_compressed_form(u8 *b, u8 *result)
+void Hacl_P256_raw_to_compressed(u8 *b, u8 *result)
 {
   u8 *y = b + (u32)32U;
   u8 lastWordY = y[31U];
@@ -3340,16 +3431,25 @@ void Hacl_P256_compression_compressed_form(u8 *b, u8 *result)
   result[0U] = identifier;
 }
 
+
+/******************/
+/* ECDH agreement */
+/******************/
+
 /*
- Input: result: uint8[64], 
- scalar: uint8[32].
-  
- Output: bool, where True stands for the correct key generation. 
-  
- False means that an error has occurred (possibly that the result respresents point at infinity). 
-  
+Convert a private key into a raw public key.
+
+This function performs no key validation.
+
+  Input: `scalar`, the private key, of type `uint8[32]`.
+  Output: `result`, the public key, of type `uint8[64]`.
+  Returns:
+  - `true`, for success, meaning the public key is not a point at infinity
+  - `false`, otherwise.
+
+  `scalar` and `result` MUST NOT overlap.
 */
-bool Hacl_P256_ecp256dh_i(u8 *result, u8 *scalar)
+bool Hacl_P256_dh_initiator(u8 *result, u8 *scalar)
 {
   u64 tempBuffer[100U] = { 0U };
   u64 resultBuffer[12U] = { 0U };
@@ -3368,7 +3468,13 @@ bool Hacl_P256_ecp256dh_i(u8 *result, u8 *scalar)
 }
 
 /*
- 
+ECDH key agreement.
+
+This function takes a 32-byte secret key, another party's 64-byte raw public
+key, and computeds the 64-byte ECDH shared key.
+
+This function ONLY validates the public key.
+
    The pub(lic)_key input of the function is considered to be public, 
   thus this code is not secret independent with respect to the operations done over this variable.
   
@@ -3379,7 +3485,7 @@ bool Hacl_P256_ecp256dh_i(u8 *result, u8 *scalar)
  Output: bool, where True stands for the correct key generation. False value means that an error has occurred (possibly the provided public key was incorrect or the result represents point at infinity). 
   
 */
-bool Hacl_P256_ecp256dh_r(u8 *result, u8 *pubKey, u8 *scalar)
+bool Hacl_P256_dh_responder(u8 *result, u8 *pubKey, u8 *scalar)
 {
   u64 resultBufferFelem[12U] = { 0U };
   u64 *resultBufferFelemX = resultBufferFelem;
@@ -3400,15 +3506,5 @@ bool Hacl_P256_ecp256dh_r(u8 *result, u8 *pubKey, u8 *scalar)
   toUint8(resultBufferFelemX, resultX);
   toUint8(resultBufferFelemY, resultY);
   return flag == (u64)0U;
-}
-
-/*
- Input: scalar: uint8[32].
-  
- Output: bool, where true stands for the scalar to be more than 0 and less than order.
-*/
-bool Hacl_P256_is_more_than_zero_less_than_order(u8 *x)
-{
-  return isMoreThanZeroLessThanOrder(x);
 }
 

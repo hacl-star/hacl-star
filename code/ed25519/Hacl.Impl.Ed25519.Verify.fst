@@ -1,198 +1,139 @@
 module Hacl.Impl.Ed25519.Verify
 
-module ST = FStar.HyperStack.ST
+open FStar.HyperStack
 open FStar.HyperStack.All
 open FStar.Mul
 
 open Lib.IntTypes
-open Lib.Sequence
-open Lib.ByteSequence
 open Lib.Buffer
 
+module ST = FStar.HyperStack.ST
+module BSeq = Lib.ByteSequence
+
 open Hacl.Bignum25519
-
 module F51 = Hacl.Impl.Ed25519.Field51
+module PM = Hacl.Impl.Ed25519.Ladder
 
-#reset-options "--z3rlimit 20 --max_fuel 0 --max_ifuel 0"
-
-inline_for_extraction noextract
-val verify_step_1:
-    r:lbuffer uint8 32ul
-  -> len:size_t{v len + 64 <= max_size_t}
-  -> msg:lbuffer uint8 len
-  -> rs:lbuffer uint8 32ul
-  -> public:lbuffer uint8 32ul ->
-  Stack unit
-    (requires fun h ->
-      live h r /\ live h msg /\ live h rs /\ live h public /\
-      disjoint msg r /\ disjoint rs r /\ disjoint public r)
-    (ensures fun h0 _ h1 -> modifies (loc r) h0 h1 /\
-     as_seq h1 r == nat_to_bytes_le 32 (
-      Spec.Ed25519.sha512_modq (64 + v len)
-        (concat #uint8 #64 #(v len)
-          (concat #uint8 #32 #32
-            (as_seq h0 rs)
-            (as_seq h0 public))
-          (as_seq h0 msg)
-        ))
-    )
-let verify_step_1 r msg len rs public =
-  push_frame();
-  let r' = create 5ul (u64 0) in
-  Hacl.Impl.SHA512.ModQ.sha512_modq_pre_pre2 r' rs public msg len;
-  Hacl.Impl.Store56.store_56 r r';
-  pop_frame()
+#reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-val verify_step_2':
-    s:lbuffer uint8 32ul
-  -> h':lbuffer uint8 32ul
-  -> a':point
-  -> r':point
-  -> tmp:lbuffer uint64 60ul ->
-  Stack bool
-    (requires fun h ->
-      live h s  /\ live h h' /\ live h a' /\ live h r' /\ live h tmp /\
-      disjoint tmp h' /\ disjoint tmp s /\ disjoint tmp a' /\ disjoint tmp r' /\
-      disjoint a' r' /\
-      F51.point_inv_t h a' /\ F51.point_inv_t h r'
-    )
-    (ensures fun h0 z h1 -> modifies (loc tmp) h0 h1 /\
-      (z == Spec.Ed25519.(
-        let sB = point_mul (as_seq h0 s) g in
-        let hA = point_mul (as_seq h0 h') (F51.point_eval h0 a') in
-        point_equal sB (point_add (F51.point_eval h0 r') hA)))
-    )
-let verify_step_2' s h' a' r' tmp =
-  let hA   = sub tmp  0ul  20ul in
-  let rhA  = sub tmp 20ul  20ul in
-  let sB   = sub tmp 40ul  20ul in
-  Hacl.Impl.Ed25519.Ladder.point_mul_g sB s;
-  Hacl.Impl.Ed25519.Ladder.point_mul hA h' a';
-  Hacl.Impl.Ed25519.PointAdd.point_add rhA r' hA;
-  let b = Hacl.Impl.Ed25519.PointEqual.point_equal sB rhA in
+let point_inv_full_t (h:mem) (p:point) =
+  F51.point_inv_t h p /\ PM.inv_ext_point (as_seq h p)
+
+
+inline_for_extraction noextract
+val verify_all_valid_hb (sb hb:lbuffer uint8 32ul) (a' r':point) : Stack bool
+  (requires fun h ->
+    live h sb /\ live h hb /\ live h a' /\ live h r' /\
+    point_inv_full_t h a' /\ point_inv_full_t h r')
+  (ensures fun h0 z h1 -> modifies0 h0 h1 /\
+    (z == Spec.Ed25519.(
+      let exp_d = point_negate_mul_double_g (as_seq h0 sb) (as_seq h0 hb) (F51.point_eval h0 a') in
+      point_equal exp_d (F51.point_eval h0 r'))))
+
+let verify_all_valid_hb sb hb a' r' =
+  push_frame ();
+  let exp_d = create 20ul (u64 0) in
+  PM.point_negate_mul_double_g_vartime exp_d sb hb a';
+  let b = Hacl.Impl.Ed25519.PointEqual.point_equal exp_d r' in
+  pop_frame ();
   b
 
 
 inline_for_extraction noextract
-val verify_step_2:
-    s:lbuffer uint8 32ul
-  -> h':lbuffer uint8 32ul
+val verify_sb: sb:lbuffer uint8 32ul -> Stack bool
+  (requires fun h -> live h sb)
+  (ensures  fun h0 b h1 -> modifies0 h0 h1 /\
+    (b <==> (BSeq.nat_from_bytes_le (as_seq h0 sb) >= Spec.Ed25519.q)))
+
+let verify_sb sb =
+  push_frame ();
+  let tmp = create 5ul (u64 0) in
+  Hacl.Impl.Load56.load_32_bytes tmp sb;
+  let b = Hacl.Impl.Ed25519.PointEqual.gte_q tmp in
+  pop_frame ();
+  b
+
+
+inline_for_extraction noextract
+val verify_valid_pk_rs:
+    public_key:lbuffer uint8 32ul
+  -> msg_len:size_t
+  -> msg:lbuffer uint8 msg_len
+  -> signature:lbuffer uint8 64ul
   -> a':point
   -> r':point ->
   Stack bool
     (requires fun h ->
-      live h s  /\ live h h' /\ live h a' /\ live h r' /\
-      disjoint a' r' /\
-      F51.point_inv_t h a' /\ F51.point_inv_t h r'
-    )
+      live h public_key /\ live h msg /\ live h signature /\ live h a' /\ live h r' /\
+      (Some? (Spec.Ed25519.point_decompress (as_seq h public_key))) /\ point_inv_full_t h a' /\
+      (F51.point_eval h a' == Some?.v (Spec.Ed25519.point_decompress (as_seq h public_key))) /\
+      (Some? (Spec.Ed25519.point_decompress (as_seq h (gsub signature 0ul 32ul)))) /\ point_inv_full_t h r' /\
+      (F51.point_eval h r' == Some?.v (Spec.Ed25519.point_decompress (as_seq h (gsub signature 0ul 32ul)))))
     (ensures fun h0 z h1 -> modifies0 h0 h1 /\
-      (z == Spec.Ed25519.(
-        let sB = point_mul (as_seq h0 s) g in
-        let hA = point_mul (as_seq h0 h') (F51.point_eval h0 a') in
-        point_equal sB (point_add (F51.point_eval h0 r') hA)))
-    )
-let verify_step_2 s h' a' r' =
-  push_frame();
-  let tmp = create 60ul (u64 0) in
-  let b = verify_step_2' s h' a' r' tmp in
-  pop_frame();
-  b
+      z == Spec.Ed25519.verify (as_seq h0 public_key) (as_seq h0 msg) (as_seq h0 signature))
 
-inline_for_extraction noextract
-val verify_inner_:
-    public:lbuffer uint8 32ul
-  -> len:size_t{v len + 64 <= max_size_t}
-  -> msg:lbuffer uint8 len
-  -> signature:lbuffer uint8 64ul
-  -> tmp:lbuffer uint64 45ul
-  -> tmp':lbuffer uint8 32ul ->
-  Stack bool
-    (requires fun h ->
-      live h public /\ live h msg /\ live h signature /\ live h tmp /\ live h tmp' /\
-      disjoint tmp public /\ disjoint tmp msg /\ disjoint tmp signature /\
-      disjoint tmp tmp' /\ disjoint tmp' signature /\ disjoint tmp' public /\ disjoint tmp' msg /\
-      F51.point_inv_t h (gsub tmp 0ul 20ul) /\ F51.point_inv_t h (gsub tmp 20ul 20ul) /\
-      (Some? (Spec.Ed25519.point_decompress (as_seq h public))) /\
-      (F51.point_eval h (gsub tmp 0ul 20ul) == Some?.v (Spec.Ed25519.point_decompress (as_seq h public))) /\
-      (Some? (Spec.Ed25519.point_decompress (as_seq h (gsub signature 0ul 32ul)))) /\
-      (F51.point_eval h (gsub tmp 20ul 20ul) == Some?.v (Spec.Ed25519.point_decompress (as_seq h (gsub signature 0ul 32ul))))
-    )
-    (ensures fun h0 z h1 -> modifies (loc tmp |+| loc tmp') h0 h1 /\
-      z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
-    )
-
-#push-options "--z3rlimit 200"
-
-let verify_inner_ public len msg signature tmp tmp' =
+let verify_valid_pk_rs public_key msg_len msg signature a' r' =
+  push_frame ();
+  let hb = create 32ul (u8 0) in
   let rs = sub signature 0ul 32ul in
-  let a' = sub tmp 0ul  20ul in
-  let r' = sub tmp 20ul 20ul in
-  let s  = sub tmp 40ul 5ul  in
-  (**) let h0 = ST.get() in
-  Hacl.Impl.Load56.load_32_bytes s (sub signature 32ul 32ul);
-  let b'' = Hacl.Impl.Ed25519.PointEqual.gte_q s in
-  if b'' then false
-  else (
-    verify_step_1 tmp' len msg rs public;
-    (**) lemma_nat_from_to_bytes_le_preserves_value (slice #uint8 #64 (as_seq h0 signature) 32 64) 32;
-    verify_step_2 (sub signature 32ul 32ul) tmp' a' r')
+  let sb = sub signature 32ul 32ul in
 
-
-inline_for_extraction noextract
-val verify_:
-    public:lbuffer uint8 32ul
-  -> len:size_t{v len + 64 <= max_size_t}
-  -> msg:lbuffer uint8 len
-  -> signature:lbuffer uint8 64ul
-  -> tmp:lbuffer uint64 45ul
-  -> tmp':lbuffer uint8 32ul ->
-  Stack bool
-    (requires fun h ->
-      live h public /\ live h msg /\ live h signature /\ live h tmp /\ live h tmp' /\
-      F51.point_inv_t h (gsub tmp 0ul 20ul) /\ F51.point_inv_t h (gsub tmp 20ul 20ul) /\
-      disjoint tmp public /\ disjoint tmp msg /\ disjoint tmp signature /\
-      disjoint tmp tmp' /\ disjoint tmp' signature /\ disjoint tmp' public /\ disjoint tmp' msg
-    )
-    (ensures fun h0 z h1 -> modifies (loc tmp |+| loc tmp') h0 h1 /\
-      z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
-    )
-
-let verify_ public msg len signature tmp tmp' =
-  let a' = sub tmp 0ul  20ul in
-  let r' = sub tmp 20ul 20ul in
-  let s  = sub tmp 40ul 5ul  in
-  let h'  = tmp' in
-  let b = Hacl.Impl.Ed25519.PointDecompress.point_decompress a' public in
+  let b = verify_sb sb in
   let res =
-  if b then (
-    let rs = sub signature 0ul 32ul in
-    let b' = Hacl.Impl.Ed25519.PointDecompress.point_decompress r' rs in
-    if b' then (
-      verify_inner_ public msg len signature tmp tmp'
-    ) else false
-  ) else false in
+    if b then false
+    else begin
+      Hacl.Impl.SHA512.ModQ.store_sha512_modq_pre_pre2 hb rs public_key msg_len msg;
+      verify_all_valid_hb sb hb a' r' end in
+  pop_frame ();
   res
 
-#pop-options
 
-#set-options "--z3rlimit 40"
+inline_for_extraction noextract
+val verify_valid_pk:
+    public_key:lbuffer uint8 32ul
+  -> msg_len:size_t
+  -> msg:lbuffer uint8 msg_len
+  -> signature:lbuffer uint8 64ul
+  -> a':point ->
+  Stack bool
+    (requires fun h ->
+      live h public_key /\ live h msg /\ live h signature /\ live h a' /\
+      (Some? (Spec.Ed25519.point_decompress (as_seq h public_key))) /\ point_inv_full_t h a' /\
+      (F51.point_eval h a' == Some?.v (Spec.Ed25519.point_decompress (as_seq h public_key))))
+    (ensures fun h0 z h1 -> modifies0 h0 h1 /\
+      z == Spec.Ed25519.verify (as_seq h0 public_key) (as_seq h0 msg) (as_seq h0 signature))
+
+let verify_valid_pk public_key msg_len msg signature a' =
+  push_frame ();
+  let r' = create 20ul (u64 0) in
+  let rs = sub signature 0ul 32ul in
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.point_decompress_lemma (as_seq h0 rs);
+  let b' = Hacl.Impl.Ed25519.PointDecompress.point_decompress r' rs in
+  let res = if b' then verify_valid_pk_rs public_key msg_len msg signature a' r' else false in
+  pop_frame ();
+  res
+
 
 inline_for_extraction noextract
 val verify:
-    public:lbuffer uint8 32ul
-  -> len:size_t{v len + 64 <= max_size_t}
-  -> msg:lbuffer uint8 len
+    public_key:lbuffer uint8 32ul
+  -> msg_len:size_t
+  -> msg:lbuffer uint8 msg_len
   -> signature:lbuffer uint8 64ul ->
   Stack bool
-    (requires fun h -> live h public /\ live h msg /\ live h signature)
-    (ensures  fun h0 z h1 -> modifies0 h0 h1 /\
-      z == Spec.Ed25519.verify (as_seq h0 public) (as_seq h0 msg) (as_seq h0 signature)
-    )
-let verify public msg len signature =
-  push_frame();
-  let tmp = create 45ul (u64 0) in
-  let tmp' = create 32ul (u8 0) in
-  let res = verify_ public msg len signature tmp tmp' in
-  pop_frame();
+    (requires fun h ->
+      live h public_key /\ live h msg /\ live h signature)
+    (ensures fun h0 z h1 -> modifies0 h0 h1 /\
+      z == Spec.Ed25519.verify (as_seq h0 public_key) (as_seq h0 msg) (as_seq h0 signature))
+
+let verify public_key msg_len msg signature =
+  push_frame ();
+  let a' = create 20ul (u64 0) in
+  let h0 = ST.get () in
+  Spec.Ed25519.Lemmas.point_decompress_lemma (as_seq h0 public_key);
+  let b = Hacl.Impl.Ed25519.PointDecompress.point_decompress a' public_key in
+  let res = if b then verify_valid_pk public_key msg_len msg signature a' else false in
+  pop_frame ();
   res

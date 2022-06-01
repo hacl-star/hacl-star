@@ -24,6 +24,8 @@
 
 #include "EverCrypt_Poly1305.h"
 
+#include "internal/Vale.h"
+
 static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
   uint8_t ctx[192U] = { 0U };

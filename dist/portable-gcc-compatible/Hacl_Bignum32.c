@@ -24,6 +24,9 @@
 
 #include "Hacl_Bignum32.h"
 
+#include "internal/Hacl_Krmllib.h"
+#include "internal/Hacl_Bignum.h"
+
 /* SNIPPET_START: Hacl_Bignum32_add */
 
 /*******************************************************************************

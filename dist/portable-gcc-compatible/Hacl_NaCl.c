@@ -24,6 +24,8 @@
 
 #include "Hacl_NaCl.h"
 
+#include "internal/Hacl_Krmllib.h"
+
 /* SNIPPET_START: secretbox_init */
 
 static void secretbox_init(uint8_t *xkeys, uint8_t *k, uint8_t *n)

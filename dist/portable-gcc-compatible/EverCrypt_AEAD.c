@@ -24,6 +24,10 @@
 
 #include "EverCrypt_AEAD.h"
 
+#include "internal/Vale.h"
+#include "internal/Hacl_Spec.h"
+#include "internal/Hacl_Krmllib.h"
+
 /* SNIPPET_START: EverCrypt_AEAD_state_s */
 
 typedef struct EverCrypt_AEAD_state_s_s
@@ -43,26 +47,6 @@ bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s pro
 }
 
 /* SNIPPET_END: EverCrypt_AEAD_uu___is_Ek */
-
-/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__impl */
-
-Spec_Cipher_Expansion_impl
-EverCrypt_AEAD___proj__Ek__item__impl(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
-{
-  return projectee.impl;
-}
-
-/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__impl */
-
-/* SNIPPET_START: EverCrypt_AEAD___proj__Ek__item__ek */
-
-uint8_t
-*EverCrypt_AEAD___proj__Ek__item__ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee)
-{
-  return projectee.ek;
-}
-
-/* SNIPPET_END: EverCrypt_AEAD___proj__Ek__item__ek */
 
 /* SNIPPET_START: EverCrypt_AEAD_alg_of_state */
 
@@ -86,7 +70,7 @@ Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -316,7 +300,7 @@ encrypt_aes128_gcm(
     (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
   return EverCrypt_Error_Success;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "statically unreachable");
@@ -444,7 +428,7 @@ encrypt_aes256_gcm(
     (uint32_t)(uint64_t)plain_len % (uint32_t)16U * sizeof (uint8_t));
   return EverCrypt_Error_Success;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "statically unreachable");
@@ -497,7 +481,7 @@ EverCrypt_AEAD_encrypt(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -643,7 +627,7 @@ EverCrypt_AEAD_encrypt_expand_aes128_gcm_no_check(
   }
   return EverCrypt_Error_Success;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "EverCrypt was compiled on a system which doesn\'t support Vale");
@@ -791,7 +775,7 @@ EverCrypt_AEAD_encrypt_expand_aes256_gcm_no_check(
   }
   return EverCrypt_Error_Success;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "EverCrypt was compiled on a system which doesn\'t support Vale");
@@ -1173,7 +1157,7 @@ EverCrypt_AEAD_encrypt_expand(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1309,7 +1293,7 @@ decrypt_aes128_gcm(
   }
   return EverCrypt_Error_AuthenticationFailure;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "statically unreachable");
@@ -1447,7 +1431,7 @@ decrypt_aes256_gcm(
   }
   return EverCrypt_Error_AuthenticationFailure;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "statically unreachable");
@@ -1530,7 +1514,7 @@ EverCrypt_AEAD_decrypt(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1681,7 +1665,7 @@ EverCrypt_AEAD_decrypt_expand_aes128_gcm_no_check(
   }
   return EverCrypt_Error_AuthenticationFailure;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "EverCrypt was compiled on a system which doesn\'t support Vale");
@@ -1834,7 +1818,7 @@ EverCrypt_AEAD_decrypt_expand_aes256_gcm_no_check(
   }
   return EverCrypt_Error_AuthenticationFailure;
   #else
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "EverCrypt was compiled on a system which doesn\'t support Vale");
@@ -2237,7 +2221,7 @@ EverCrypt_AEAD_decrypt_expand(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

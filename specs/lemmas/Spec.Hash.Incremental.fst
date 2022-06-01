@@ -346,12 +346,6 @@ let extra_state_v_nat_to_extra_state_is_id (a : hash_alg{is_blake a})
                                            (n : nat{n <= max_extra_state a}) :
   Lemma(extra_state_v (nat_to_extra_state a n) = n) = ()
 
-let compute_prev0_props (a:hash_alg{is_blake a}) (kk : nat) :
-  Lemma(
-    let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
-    prev0 >= 0 /\
-    (if kk = 0 then prev0 = 0 else prev0 = block_length a)) = ()
-
 /// In order to prove that incremental blake is equal to blake, we prove
 /// that the intermediary states computed at each step of the two algorithms are
 /// equal, with one auxiliary lemma per step.
@@ -363,16 +357,14 @@ let compute_prev0_props (a:hash_alg{is_blake a}) (kk : nat) :
 /// The alternative blake2 function
 let blake2'
   (a:hash_alg{is_blake a})
-  (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
-  (k : lbytes kk)
-  (input : bytes {if kk = 0 then S.length input <= max_input_length a
-                  else S.length input + block_length a <= max_input_length a}) :
+  (input : bytes {S.length input <= max_input_length a}) :
   r:lbytes (Spec.Blake2.max_output (to_blake_alg a)) {
-    r == Blake2.blake2 (to_blake_alg a) input kk k (Spec.Blake2.max_output (to_blake_alg a))}
+    r == Blake2.blake2 (to_blake_alg a) input 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a))}
   =
   let nn = Blake2.max_output (to_blake_alg a) in
-  let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
-  let s1 = Blake2.blake2_init (to_blake_alg a) kk k nn in
+  let kk = 0 in
+  let prev0 = 0 in
+  let s1 = Blake2.blake2_init_hash (to_blake_alg a) kk nn in
   let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
   let s2 = Loops.repeati #(Blake2.state (to_blake_alg a)) nb
                          (Blake2.blake2_update1 (to_blake_alg a) prev0 input) s1 in
@@ -383,14 +375,11 @@ let blake2'
 /// The alternative incremental blake2 function
 let blake2_hash_incremental'
   (a:hash_alg{is_blake a})
-  (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
-  (k : lbytes kk)
-  (input : bytes {if kk = 0 then S.length input <= max_input_length a
-                  else S.length input + block_length a <= max_input_length a}) :
+  (input : bytes {S.length input <= max_input_length a}) :
   r:lbytes (hash_length a) {
-    r == blake2_hash_incremental a kk k input } =
+    r == blake2_hash_incremental a input } =
   let bs, l = split_blocks a input in
-  let is1 = blake2_init a kk k in
+  let is1 = blake2_init a in
   let is2 = update_multi a is1 bs in
   let is3 = update_last a is2 (S.length bs) l in
   let is4 = finish a is3 in
@@ -401,31 +390,27 @@ let blake2_hash_incremental'
 
 val blake2_is_hash_incremental_aux1
   (a:hash_alg{is_blake a})
-  (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
-  (k : lbytes kk)
-  (input : bytes {if kk = 0 then S.length input <= max_input_length a
-                  else S.length input + block_length a <= max_input_length a}) :
+  (input : bytes {S.length input <= max_input_length a}) :
   Lemma(
     (**)
     let nn = Spec.Blake2.max_output (to_blake_alg a) in
-    let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
-    let s1 = Blake2.blake2_init (to_blake_alg a) kk k nn in
+    let kk = 0 in
+    let prev0 = 0 in
+    let s1 = Blake2.blake2_init_hash (to_blake_alg a) kk nn in
     (**)
     let bs, l = split_blocks a input in
-    let is1 = blake2_init a kk k in
+    let is1 = blake2_init a in
     ((s1 <: words_state' a), nat_to_extra_state a prev0) == is1)
 
-let blake2_is_hash_incremental_aux1 a kk k input = ()
+let blake2_is_hash_incremental_aux1 a input = ()
 
 val blake2_is_hash_incremental_aux2
   (a:hash_alg{is_blake a})
-  (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
-  (k : lbytes kk)
-  (input : bytes {if kk = 0 then S.length input <= max_input_length a
-                  else S.length input + block_length a <= max_input_length a})
+  (input : bytes {S.length input <= max_input_length a})
   (s1 : Blake2.state (to_blake_alg a)) :
   Lemma(
-    let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
+//    let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
+    let prev0 = 0 in
     let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
     let s2 = Loops.repeati #(Blake2.state (to_blake_alg a)) nb
                            (Blake2.blake2_update1 (to_blake_alg a) prev0 input) s1 in
@@ -434,11 +419,10 @@ val blake2_is_hash_incremental_aux2
     is2 == ((s2 <: words_state' a), nat_to_extra_state a (prev0 + nb * block_length a)))
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let blake2_is_hash_incremental_aux2 a kk k input s1 =
+let blake2_is_hash_incremental_aux2 a input s1 =
   (* Preliminaries: variables introduction *)
   blake2_size_block_props a;
-  let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
-  compute_prev0_props a kk;
+  let prev0 = 0 in
   let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
   blake2_split_props (to_blake_alg a) (S.length input);
   assert(Spec.Blake2.size_block (to_blake_alg a) > 0);
@@ -468,13 +452,10 @@ let blake2_is_hash_incremental_aux2 a kk k input s1 =
 
 val blake2_is_hash_incremental_aux3
   (a:hash_alg{is_blake a})
-  (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
-  (k : lbytes kk)
-  (input : bytes {if kk = 0 then S.length input <= max_input_length a
-                  else S.length input + block_length a <= max_input_length a})
+  (input : bytes {S.length input <= max_input_length a})
   (s2 : Blake2.state (to_blake_alg a)) :
   Lemma(
-    let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
+    let prev0 = 0 in
     let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
     let bs, l = split_blocks a input in
     let is2 : words_state a =
@@ -484,11 +465,10 @@ val blake2_is_hash_incremental_aux3
     is3 == ((s3 <: words_state' a), nat_to_extra_state a 0))
 
 #push-options "--z3cliopt smt.arith.nl=false"
-let blake2_is_hash_incremental_aux3 a kk k input s2 =
+let blake2_is_hash_incremental_aux3 a input s2 =
   (* Preliminaries: variables introduction *)
   blake2_size_block_props a;
-  let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
-  compute_prev0_props a kk;
+  let prev0 = 0 in
   let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
   blake2_split_props (to_blake_alg a) (S.length input);
   let bs, l = split_blocks a input in
@@ -560,42 +540,36 @@ let blake2_is_hash_incremental_aux3 a kk k input s2 =
 
 val blake2_is_hash_incremental_aux4
   (a:hash_alg{is_blake a})
-  (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
-  (k : lbytes kk)
-  (input : bytes {if kk = 0 then S.length input <= max_input_length a
-                  else S.length input + block_length a <= max_input_length a})
+  (input : bytes {S.length input <= max_input_length a})
   (s3 : Blake2.state (to_blake_alg a)) :
   Lemma(
     let s4 = Blake2.blake2_finish (to_blake_alg a) s3 (Spec.Blake2.max_output (to_blake_alg a)) in
     let is4 = finish a ((s3 <: words_state' a), nat_to_extra_state a 0) in
     s4 == is4)
 
-let blake2_is_hash_incremental_aux4 a kk k input s3 = ()
+let blake2_is_hash_incremental_aux4 a input s3 = ()
 
 /// The final theorem about blake2
 let blake2_is_hash_incremental
   (a : hash_alg{is_blake a})
-  (kk : size_nat{kk <= Blake2.max_key (to_blake_alg a)})
-  (k : lbytes kk)
-  (input : bytes {if kk = 0 then S.length input <= max_input_length a
-                  else S.length input + block_length a <= max_input_length a}) :
+  (input : bytes {S.length input <= max_input_length a}) :
   Lemma (
-    S.equal (Blake2.blake2 (to_blake_alg a) input kk k (Spec.Blake2.max_output (to_blake_alg a)))
-            (blake2_hash_incremental a kk k input))
+    S.equal (Blake2.blake2 (to_blake_alg a) input 0 Seq.empty (Spec.Blake2.max_output (to_blake_alg a)))
+            (blake2_hash_incremental a input))
   =
-  blake2_is_hash_incremental_aux1 a kk k input;
+  blake2_is_hash_incremental_aux1 a input;
   let nn = Spec.Blake2.max_output (to_blake_alg a) in
-  let s1 = Blake2.blake2_init (to_blake_alg a) kk k nn in
-  blake2_is_hash_incremental_aux2 a kk k input s1;
-  let prev0 = Blake2.compute_prev0 (to_blake_alg a) kk in
-  compute_prev0_props a kk;
+  let kk = 0 in
+  let s1 = Blake2.blake2_init_hash (to_blake_alg a) kk nn in
+  blake2_is_hash_incremental_aux2 a input s1;
+  let prev0 = 0 in
   let nb, rem = Blake2.split (to_blake_alg a) (S.length input) in
   blake2_split_props (to_blake_alg a) (S.length input);
   let s2 = Loops.repeati #(Blake2.state (to_blake_alg a)) nb
                          (Blake2.blake2_update1 (to_blake_alg a) prev0 input) s1 in
-  blake2_is_hash_incremental_aux3 a kk k input s2;
+  blake2_is_hash_incremental_aux3 a input s2;
   let s3 = Blake2.blake2_update_last (to_blake_alg a) prev0 rem input s2 in
-  blake2_is_hash_incremental_aux4 a kk k input s3
+  blake2_is_hash_incremental_aux4 a input s3
 
 #push-options "--z3rlimit 100"
 let md_is_hash_incremental
@@ -624,16 +598,16 @@ let md_is_hash_incremental
 
 let blake2_hash_incremental_no_key_eq
   (a: hash_alg{is_blake a}) (input: bytes { S.length input <= max_input_length a }) :
-  Lemma(Seq.equal (blake2_hash_incremental a 0 Seq.empty input)
+  Lemma(Seq.equal (blake2_hash_incremental a input)
                   (hash_incremental a input)) =
-  assert(init a == blake2_init a 0 Seq.empty)
+  assert(init a == blake2_init a)
 
 let hash_is_hash_incremental (a: hash_alg) (input: bytes { S.length input <= max_input_length a }):
   Lemma (S.equal (hash a input) (hash_incremental a input))
   =
   if is_blake a then
     begin
-    blake2_is_hash_incremental a 0 Seq.empty input;
+    blake2_is_hash_incremental a input;
     blake2_hash_incremental_no_key_eq a input
     end
   else md_is_hash_incremental a input (init a)

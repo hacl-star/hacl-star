@@ -29,18 +29,16 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "EverCrypt_AutoConfig2.h"
 #include "Hacl_Curve25519_64.h"
 #include "Hacl_Curve25519_51.h"
-
+#include "EverCrypt_AutoConfig2.h"
+#include "evercrypt_targetconfig.h"
 /* SNIPPET_START: EverCrypt_Curve25519_secret_to_public */
 
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv);

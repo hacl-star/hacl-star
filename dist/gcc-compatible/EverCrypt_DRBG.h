@@ -29,20 +29,18 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "EverCrypt_HMAC.h"
-#include "Lib_Memzero0.h"
 #include "Lib_RandomBuffer_System.h"
+#include "Lib_Memzero0.h"
 #include "Hacl_Spec.h"
 #include "Hacl_HMAC_DRBG.h"
-
+#include "EverCrypt_HMAC.h"
+#include "evercrypt_targetconfig.h"
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
 
 extern uint32_t EverCrypt_DRBG_reseed_interval;
@@ -57,23 +55,10 @@ extern uint32_t EverCrypt_DRBG_max_additional_input_length;
 
 uint32_t EverCrypt_DRBG_min_length(Spec_Hash_Definitions_hash_alg a);
 
-#define EverCrypt_DRBG_SHA1_s 0
-#define EverCrypt_DRBG_SHA2_256_s 1
-#define EverCrypt_DRBG_SHA2_384_s 2
-#define EverCrypt_DRBG_SHA2_512_s 3
-
-typedef uint8_t EverCrypt_DRBG_state_s_tags;
-
 typedef struct EverCrypt_DRBG_state_s_s EverCrypt_DRBG_state_s;
 
 bool
 EverCrypt_DRBG_uu___is_SHA1_s(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-);
-
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA1_s__item___0(
   Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
@@ -84,32 +69,14 @@ EverCrypt_DRBG_uu___is_SHA2_256_s(
   EverCrypt_DRBG_state_s projectee
 );
 
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA2_256_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-);
-
 bool
 EverCrypt_DRBG_uu___is_SHA2_384_s(
   Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );
 
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA2_384_s__item___0(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-);
-
 bool
 EverCrypt_DRBG_uu___is_SHA2_512_s(
-  Spec_Hash_Definitions_hash_alg uu___,
-  EverCrypt_DRBG_state_s projectee
-);
-
-Hacl_HMAC_DRBG_state
-EverCrypt_DRBG___proj__SHA2_512_s__item___0(
   Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_DRBG_state_s projectee
 );

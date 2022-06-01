@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
 extern void aes128_key_expansion_sbox(uint8_t *key, uint8_t *w, uint8_t *sbox);
 
 extern void
@@ -55,22 +54,6 @@ typedef struct gcm_args_s
   uint8_t *tag;
 }
 gcm_args;
-
-uint8_t *__proj__Mkgcm_args__item__plain(gcm_args projectee);
-
-uint64_t __proj__Mkgcm_args__item__plain_len(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__aad(gcm_args projectee);
-
-uint64_t __proj__Mkgcm_args__item__aad_len(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__iv(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__expanded_key(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__cipher(gcm_args projectee);
-
-uint8_t *__proj__Mkgcm_args__item__tag(gcm_args projectee);
 
 extern void __stdcall old_aes128_key_expansion(uint8_t *key_ptr, uint8_t *expanded_key_ptr);
 

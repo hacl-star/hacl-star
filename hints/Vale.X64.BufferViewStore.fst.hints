@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "11d9305eba6dee61f8f6df4ff571f9fa"
+      "4b1a178021e48720e4e051acdec5aab0"
     ],
     [
       "Vale.X64.BufferViewStore.map_aux",
@@ -17,7 +17,7 @@
       1,
       [ "@query" ],
       0,
-      "e110c38745e0bbe521f7569f0ae47345"
+      "27a7e287efe9ea1a8b26d5b41a8d32fb"
     ],
     [
       "Vale.X64.BufferViewStore.get64_aux",
@@ -27,7 +27,7 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_1910ef5262f2ee8e712b6609a232b1ea",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "FStar.UInt8_interpretation_Tm_arrow_3777b5a630a36e62279f05e8abae7a72",
@@ -58,6 +58,7 @@
         "equation_Vale.Lib.Seqs_s.seq_map",
         "function_token_typing_FStar.Seq.Base.index",
         "function_token_typing_FStar.UInt8.v",
+        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val64",
         "function_token_typing_Vale.Def.Types_s.le_nat64_to_bytes",
@@ -127,7 +128,7 @@
         "typing_Vale.Lib.Seqs_s.seq_map"
       ],
       0,
-      "65c4b1bf95b253ce4a915662307440af"
+      "690a704120ffdd2042fe3f5f6ed46a17"
     ],
     [
       "Vale.X64.BufferViewStore.get128_aux",
@@ -137,7 +138,7 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "FStar.Map_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_1910ef5262f2ee8e712b6609a232b1ea",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "FStar.UInt8_interpretation_Tm_arrow_3777b5a630a36e62279f05e8abae7a72",
@@ -166,11 +167,11 @@
         "fuel_guarded_inversion_Vale.Def.Words_s.four",
         "function_token_typing_FStar.Seq.Base.index",
         "function_token_typing_FStar.UInt8.v",
+        "function_token_typing_Prims.__cache_version_number__",
         "function_token_typing_Prims.int",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val128",
         "function_token_typing_Vale.Arch.MachineHeap_s.get_heap_val32",
         "function_token_typing_Vale.Def.Types_s.le_quad32_to_bytes",
-        "function_token_typing_Vale.Def.Words.Four_s.nat_to_four",
         "function_token_typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE",
         "function_token_typing_Vale.Def.Words_s.nat32",
         "function_token_typing_Vale.Def.Words_s.nat8",
@@ -226,7 +227,7 @@
         "typing_Vale.Def.Words_s.natN", "typing_Vale.Interop.Views.put128"
       ],
       0,
-      "fa0db79ace8f4cd833fa38601192f98d"
+      "ce3e04e551dc56f0ce374c90b970c81b"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap64",
@@ -289,7 +290,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "d3954e4301515fcdde9434d4cabb7a87"
+      "7f187666535b993502a543c2287b269e"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap64",
@@ -430,7 +431,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "1a85fdf85a15366f000645e9feabbf04"
+      "73c15db8e16807f4a196f1db6798a082"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap128",
@@ -485,7 +486,7 @@
         "typing_Vale.Interop.Types.down_view"
       ],
       0,
-      "4afb58ea7dec248b675ec423aaf4f17e"
+      "de2932c7ac836da88ef0f20f85c348e1"
     ],
     [
       "Vale.X64.BufferViewStore.bv_upd_update_heap128",
@@ -633,7 +634,7 @@
         "typing_Vale.Interop.Views.put128"
       ],
       0,
-      "a913533fab4fb7c0d98dabcaee6b097f"
+      "42a55d48579475dce65f998b104335a3"
     ]
   ]
 ]

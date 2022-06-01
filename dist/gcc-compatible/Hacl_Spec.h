@@ -29,16 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
 #define Spec_Blake2_Blake2S 0
 #define Spec_Blake2_Blake2B 1
 
@@ -55,18 +53,6 @@ typedef uint8_t Spec_Blake2_alg;
 
 typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
-#define Spec_ECDSA_NoHash 0
-#define Spec_ECDSA_Hash 1
-
-typedef uint8_t Spec_ECDSA_hash_alg_ecdsa_tags;
-
-typedef struct Spec_ECDSA_hash_alg_ecdsa_s
-{
-  Spec_ECDSA_hash_alg_ecdsa_tags tag;
-  Spec_Hash_Definitions_hash_alg _0;
-}
-Spec_ECDSA_hash_alg_ecdsa;
-
 #define Spec_FFDHE_FFDHE2048 0
 #define Spec_FFDHE_FFDHE3072 1
 #define Spec_FFDHE_FFDHE4096 2
@@ -80,15 +66,6 @@ typedef uint8_t Spec_FFDHE_ffdhe_alg;
 #define Spec_Agile_Cipher_CHACHA20 2
 
 typedef uint8_t Spec_Agile_Cipher_cipher_alg;
-
-#define Spec_Cipher_Expansion_Hacl_CHACHA20 0
-#define Spec_Cipher_Expansion_Vale_AES128 1
-#define Spec_Cipher_Expansion_Vale_AES256 2
-
-typedef uint8_t Spec_Cipher_Expansion_impl;
-
-Spec_Agile_Cipher_cipher_alg
-Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);
 
 #define Spec_Agile_AEAD_AES128_GCM 0
 #define Spec_Agile_AEAD_AES256_GCM 1

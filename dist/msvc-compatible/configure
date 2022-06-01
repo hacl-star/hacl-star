@@ -12,18 +12,24 @@ if [[ $CC == "" ]]; then
   CC=cc
 fi
 
-my_mktemp () {
+my_mktemp_dir () {
   local name=$1
-  local ext=$2
-  local f=$(mktemp --suffix=$ext /tmp/$name.XXXXXXX)
-  if [[ $f == "" ]]; then
-    local f=$(mktemp -p . --suffix=$ext $name.XXXXXXX)
+  # Note: --suffix is not POSIX, doesn't work on OSX.
+  # Also on OSX, the XXXXXXX pattern cannot be followed by anything else.
+  local dir=$(mktemp -d /tmp/$name-XXXXXXX)
+  if [[ $dir == "" ]]; then
+    # Note: -p doesn't work on OSX, all tests will fail in case there is no
+    # permission to write to /tmp
+    local dir=$(mktemp -d -p . $name-XXXXXXX)
   fi
-  echo $f
+  echo $dir
 }
 
 my_mktemp_c () {
-  my_mktemp $1 .c
+  local name=$1
+  local dir=$(my_mktemp_dir $name)
+  local file=$dir/$name.c
+  echo $file
 }
 
 # Helpers to help do feature or bug detection
@@ -52,7 +58,7 @@ detect_ocaml () {
     return 1
   fi
   # Detect packages
-  for p in ctypes ctypes.foreign; do
+  for p in ctypes; do
     detect_ocamlfind $p || return 1
   done
 }
@@ -67,8 +73,9 @@ check_no_bug81300 () {
   # but mozilla. If lib_intrinsics.h is not present, assume there is no bug and
   # return success.
   if [ -f lib_intrinsics.h ]; then
-  local out=$(my_mktemp testbug81300)
-  local file=$out.c
+  local dir=$(my_mktemp_dir testbug81300)
+  local file=$dir/testbug81300.c
+  local out=$dir/testbug81300.out
   cat > $file <<EOF
 #include <inttypes.h>
 #include <stdio.h>
@@ -107,8 +114,8 @@ int main() {
   return 0;
 }
 EOF
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -DCOMPILE_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
-  $CC $CROSS_CFLAGS -I. -I../kremlin/include -I../kremlin/kremlib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
+  $CC $CROSS_CFLAGS -I. -I../karamel/include -I../karamel/krmllib/dist/minimal -DHACL_CAN_COMPILE_INTRINSICS -march=native -O3 $file -o $out && $out > $out.test
+  $CC $CROSS_CFLAGS -I. -I../karamel/include -I../karamel/krmllib/dist/minimal -march=native -O3 $file -o $out && $out > $out.ref
   diff $out.test $out.ref
   else
     echo "... WARNING: lib_intrinsics.h is missing: we can't test whether bug 81300 is present or not and assume it is not."
@@ -429,7 +436,7 @@ if detect_systemz; then
   echo "#define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_SYSTEMZ" >> config.h
   echo "... $build_target supports 128-bit z VSX"
   compile_vec128=true
-  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=z15" >> Makefile.config
+  echo "CFLAGS_128 = -m64 -mzarch -mvx -mzvector -march=native" >> Makefile.config
   # In the case of IBMz, some of the vectorized functions are defined as
   # inline static rather than as macros, meaning we need to compile all
   # the files with the vector compilation options. Note that this is not
@@ -494,6 +501,8 @@ if ! detect_uint128; then
   # defining KRML_VERIFIED_UINT128.
   echo "$CC $CROSS_CFLAGS does not support unsigned __int128 -- using a fallback verified implementation"
   echo "CFLAGS += -DKRML_VERIFIED_UINT128" >> Makefile.config
+else
+  echo "#define HACL_CAN_COMPILE_UINT128 1" >> config.h
 fi
 
 if [[ "$disable_ocaml" == "1" ]] || ! detect_ocaml; then

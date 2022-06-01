@@ -8,7 +8,7 @@
       0,
       [ "@query" ],
       0,
-      "900609224afc829121667bb282386e4f"
+      "d9f112a25894a1c70e856dd95538eb5c"
     ],
     [
       "Vale.Wrapper.X64.Fmul.fmul_e",
@@ -28,11 +28,11 @@
         "equation_FStar.UInt.min_int", "equation_FStar.UInt.size",
         "equation_FStar.UInt.uint_t", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
-        "equation_LowStar.BufferView.Down.as_buffer_t",
         "equation_LowStar.BufferView.Down.buffer",
         "equation_LowStar.Monotonic.Buffer.disjoint",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Vale.Arch.HeapImpl.vale_heaplets",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
+        "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.AsLowStar.LowStarSig.arg_as_nat64",
         "equation_Vale.AsLowStar.LowStarSig.nat_to_uint",
         "equation_Vale.AsLowStar.LowStarSig.view_of_base_typ",
@@ -90,6 +90,7 @@
         "lemma_LowStar.Monotonic.Buffer.length_null_2",
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_sym_",
         "lemma_LowStar.Monotonic.Buffer.loc_union_loc_none_r",
+        "lemma_Vale.AsLowStar.MemoryHelpers.as_vale_buffer_disjoint",
         "lemma_Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len",
         "lemma_Vale.AsLowStar.MemoryHelpers.down_up_buffer_read_reveal",
         "lemma_Vale.AsLowStar.MemoryHelpers.lemma_valid_layout_buffer_id",
@@ -133,18 +134,17 @@
         "refinement_interpretation_Tm_refine_7b341fc9fb430fc6cc1edb56ba518230",
         "refinement_interpretation_Tm_refine_83bd940927020bb51199658f6752ed80",
         "refinement_interpretation_Tm_refine_8545a50511781623fc41e3fb8428bce0",
-        "refinement_interpretation_Tm_refine_9116046d8f66528a75ba934731a6ca22",
         "refinement_interpretation_Tm_refine_96975b37654180c418b81485491a8291",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_ccb73fd692da1dfd393d2d49d22ead40",
         "refinement_interpretation_Tm_refine_d7142fd4e0dfd5a4c83a9bb5208b3a4d",
+        "refinement_interpretation_Tm_refine_d9ee2bf987c697b6ffc0e65a0bbbb9c9",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_ff52629607065882f452d151d5f5ba70",
         "token_correspondence_Vale.Interop.X64.__proj__Rel__item__of_arg",
         "token_correspondence_Vale.Interop.X64.register_of_arg_i",
         "typing_FStar.UInt32.v", "typing_FStar.UInt64.t",
         "typing_FStar.UInt8.t", "typing_LowStar.Buffer.trivial_preorder",
-        "typing_LowStar.BufferView.Down.as_buffer",
         "typing_LowStar.BufferView.Down.length",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.length",
@@ -165,7 +165,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "170c774e018768c5f88b9c860f1f0dc5"
+      "9b377a1d50a9c2fb2ff0aed54b4d46ed"
     ],
     [
       "Vale.Wrapper.X64.Fmul.fmul2_e",
@@ -200,7 +200,7 @@
         "typing_LowStar.Monotonic.Buffer.len"
       ],
       0,
-      "4b0fa757ce65e5e003d14d1c1401ae29"
+      "32ac3a1edf6c00b59cbc66c11dc4feb6"
     ],
     [
       "Vale.Wrapper.X64.Fmul.fmul2_e",
@@ -223,7 +223,8 @@
         "equation_LowStar.BufferView.Down.buffer",
         "equation_LowStar.Monotonic.Buffer.disjoint",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Vale.Arch.HeapImpl.vale_heaplets",
+        "equation_Prims.nat", "equation_Prims.op_Equals_Equals_Equals",
+        "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.AsLowStar.LowStarSig.arg_as_nat64",
         "equation_Vale.AsLowStar.LowStarSig.nat_to_uint",
         "equation_Vale.AsLowStar.LowStarSig.view_of_base_typ",
@@ -287,6 +288,7 @@
         "lemma_LowStar.Monotonic.Buffer.loc_disjoint_union_r_",
         "lemma_LowStar.Monotonic.Buffer.loc_union_loc_none_r",
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
+        "lemma_Vale.AsLowStar.MemoryHelpers.as_vale_buffer_disjoint",
         "lemma_Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len",
         "lemma_Vale.AsLowStar.MemoryHelpers.down_up_buffer_read_reveal",
         "lemma_Vale.AsLowStar.MemoryHelpers.lemma_valid_layout_buffer_id",
@@ -334,12 +336,12 @@
         "refinement_interpretation_Tm_refine_80b5649c8838446979f18726fa543ad1",
         "refinement_interpretation_Tm_refine_83bd940927020bb51199658f6752ed80",
         "refinement_interpretation_Tm_refine_8545a50511781623fc41e3fb8428bce0",
-        "refinement_interpretation_Tm_refine_9116046d8f66528a75ba934731a6ca22",
         "refinement_interpretation_Tm_refine_96975b37654180c418b81485491a8291",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_c365eb902b454950de62fba701d9049d",
         "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
         "refinement_interpretation_Tm_refine_d7142fd4e0dfd5a4c83a9bb5208b3a4d",
+        "refinement_interpretation_Tm_refine_d9ee2bf987c697b6ffc0e65a0bbbb9c9",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "refinement_interpretation_Tm_refine_ff52629607065882f452d151d5f5ba70",
         "token_correspondence_Vale.Interop.X64.__proj__Rel__item__of_arg",
@@ -370,7 +372,7 @@
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "924130e17a8e58323669d1f8846ff6d8"
+      "d7fc5e7244a02dd1f8fc6567b922f97c"
     ],
     [
       "Vale.Wrapper.X64.Fmul.fmul_scalar_e",
@@ -394,6 +396,7 @@
         "equation_LowStar.BufferView.Down.buffer",
         "equation_LowStar.Monotonic.Buffer.disjoint",
         "equation_Prims.eqtype", "equation_Prims.nat",
+        "equation_Prims.op_Equals_Equals_Equals",
         "equation_Vale.Arch.HeapImpl.vale_heaplets",
         "equation_Vale.AsLowStar.LowStarSig.arg_as_nat64",
         "equation_Vale.AsLowStar.LowStarSig.nat_to_uint",
@@ -455,6 +458,7 @@
         "lemma_Vale.AsLowStar.MemoryHelpers.as_vale_buffer_len",
         "lemma_Vale.AsLowStar.MemoryHelpers.down_up_buffer_read_reveal",
         "lemma_Vale.AsLowStar.MemoryHelpers.lemma_valid_layout_buffer_id",
+        "lemma_Vale.AsLowStar.MemoryHelpers.loc_disjoint_sym",
         "lemma_Vale.Lib.Map16.lemma_equal_elim", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThanOrEqual",
@@ -487,11 +491,11 @@
         "projection_inverse_Vale.Interop.X64.Rel_of_arg",
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_heap",
         "projection_inverse_Vale.X64.State.Mkvale_state_vs_ok",
+        "refinement_interpretation_Tm_refine_0d4e12318a4dd39fc5fb77bd7d3b44c5",
         "refinement_interpretation_Tm_refine_36c007f1e5cee5d4ebbb7e44d28f4eb4",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_57614ecce3e175191d1204b0cdeed4ee",
-        "refinement_interpretation_Tm_refine_60237b01d2398cd683de50cfb4741dc5",
         "refinement_interpretation_Tm_refine_83bd940927020bb51199658f6752ed80",
         "refinement_interpretation_Tm_refine_8545a50511781623fc41e3fb8428bce0",
         "refinement_interpretation_Tm_refine_96975b37654180c418b81485491a8291",
@@ -511,13 +515,14 @@
         "typing_Vale.Interop.Types.down_view", "typing_Vale.Lib.Map16.sel",
         "typing_Vale.Lib.Map16.upd", "typing_Vale.X64.Memory.buffer_read",
         "typing_Vale.X64.Memory.get_vale_heap",
+        "typing_Vale.X64.Memory.loc_buffer",
         "typing_Vale.X64.MemoryAdapters.as_vale_buffer",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_heap",
         "typing_Vale.X64.State.__proj__Mkvale_state__item__vs_ok",
         "typing_tok_Vale.Arch.HeapTypes_s.TUInt64@tok"
       ],
       0,
-      "9742cab0d6dc07a1807a662405481bc3"
+      "fb0cd18eb6a3b4d0c504ddc6a34d031c"
     ]
   ]
 ]

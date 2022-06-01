@@ -14,7 +14,7 @@
         "equation_Lib.IntTypes.unsigned", "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "1a7cc9559b3ae1603a12d64e9d18c674"
+      "fe8b7b2a68bfb2d658966564363b159a"
     ],
     [
       "Hacl.Frodo64.crypto_publickeybytes",
@@ -102,7 +102,7 @@
         "typing_tok_Spec.Frodo.Params.Frodo64@tok"
       ],
       0,
-      "8f653e2a47fea141972c399cc9be16f3"
+      "f839c3b9cedeb5bebc6f860542486a96"
     ],
     [
       "Hacl.Frodo64.crypto_secretkeybytes",
@@ -207,7 +207,7 @@
         "typing_tok_Spec.Frodo.Params.Frodo64@tok"
       ],
       0,
-      "b72eec14fcadbed823ab20cefee4d635"
+      "e0e946a130b930a54aab69be5da864a0"
     ],
     [
       "Hacl.Frodo64.crypto_ciphertextbytes",
@@ -246,7 +246,7 @@
         "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Prims.abs",
-        "equation_Prims.nat", "equation_Prims.pos", "equation_Spec.AES.gf8",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
         "equation_Spec.AES.irred",
         "equation_Spec.Frodo.Params.crypto_ciphertextbytes",
         "equation_Spec.Frodo.Params.ct1bytes_len",
@@ -254,22 +254,23 @@
         "equation_Spec.Frodo.Params.params_logq",
         "equation_Spec.Frodo.Params.params_n",
         "equation_Spec.Frodo.Params.params_nbar",
-        "equation_Spec.GaloisField.gf", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
-        "lemma_Lib.IntTypes.add_lemma", "lemma_Lib.IntTypes.div_lemma",
-        "lemma_Lib.IntTypes.mul_lemma", "primitive_Prims.op_Addition",
+        "equation_Spec.GaloisField.gf", "lemma_FStar.UInt.pow2_values",
+        "lemma_FStar.UInt32.vu_inv", "lemma_Lib.IntTypes.add_lemma",
+        "lemma_Lib.IntTypes.div_lemma", "lemma_Lib.IntTypes.mul_lemma",
+        "lemma_Lib.IntTypes.v_injective", "primitive_Prims.op_Addition",
         "primitive_Prims.op_AmpAmp", "primitive_Prims.op_BarBar",
         "primitive_Prims.op_Division",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Spec.GaloisField.GF_t",
+        "refinement_interpretation_Tm_refine_2a039e1a99d9d2644dcc4f59d4a41871",
         "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9ff150f589411d5a40376aa0c5e1ca86",
         "refinement_interpretation_Tm_refine_b550ca9347e0645a53715102a08d8fa1",
@@ -290,14 +291,15 @@
         "typing_Lib.IntTypes.mul", "typing_Lib.IntTypes.v",
         "typing_Spec.AES.gf8",
         "typing_Spec.Frodo.Params.crypto_ciphertextbytes",
-        "typing_Spec.Frodo.Params.ct2bytes_len",
+        "typing_Spec.Frodo.Params.ct1bytes_len",
+        "typing_Spec.Frodo.Params.params_n",
         "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok",
         "typing_tok_Lib.IntTypes.U8@tok",
         "typing_tok_Spec.Frodo.Params.Frodo64@tok"
       ],
       0,
-      "c130ca9c52c6a1214e8978f8cfa64088"
+      "3586c9994187d7cfb9d0649cad887a8d"
     ],
     [
       "Hacl.Frodo64.crypto_kem_keypair",
@@ -311,7 +313,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "a23cbf0d245b8db25abcc5be9e8ad95c"
+      "6b2e5c920a211b2ecd64c1fa88594ce1"
     ],
     [
       "Hacl.Frodo64.crypto_kem_keypair",
@@ -344,7 +346,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "58b401ba868c02073704c3fbff535335"
+      "cfe4e4436daf49c3287bfb953b053626"
     ],
     [
       "Hacl.Frodo64.crypto_kem_enc",
@@ -358,7 +360,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "6fb1391bd16045cb51f24f10bb723233"
+      "81e2d1bb961fc26a3569c19ec248c945"
     ],
     [
       "Hacl.Frodo64.crypto_kem_enc",
@@ -391,7 +393,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "7e6d738c1718d8485fe8f4963b7f5f47"
+      "79e88129551e3023f5c561a144883e0d"
     ],
     [
       "Hacl.Frodo64.crypto_kem_dec",
@@ -405,7 +407,7 @@
         "projection_inverse_BoxBool_proj_0"
       ],
       0,
-      "8e412dfe613c289f347af0925107334a"
+      "59adc4249e8e15d66438a3c6cb31295c"
     ],
     [
       "Hacl.Frodo64.crypto_kem_dec",
@@ -438,7 +440,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "8e2858f648c85c8fae731a36ab938223"
+      "517d7c235988577e0be27256c8d7aff5"
     ]
   ]
 ]

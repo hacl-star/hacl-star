@@ -10,11 +10,11 @@ endef
 
 HACL_HOME 	?= .
 
-# Put your local configuration (e.g. HACL_HOME, KREMLIN_HOME, etc.) in
+# Put your local configuration (e.g. HACL_HOME, KRML_HOME, etc.) in
 # Makefile.config
 -include $(HACL_HOME)/Makefile.config
 
-KREMLIN_HOME 	?= $(HACL_HOME)/../kremlin
+KRML_HOME 	?= $(HACL_HOME)/../karamel
 FSTAR_HOME	?= $(HACL_HOME)/../FStar
 VALE_HOME	?= $(HACL_HOME)/../vale
 
@@ -23,8 +23,8 @@ include $(HACL_HOME)/Makefile.include
 INCLUDES = \
   $(ALL_HACL_DIRS) \
   $(FSTAR_HOME)/ulib/.cache \
-  $(KREMLIN_HOME)/kremlib/obj \
-  $(KREMLIN_HOME)/kremlib
+  $(KRML_HOME)/krmllib/obj \
+  $(KRML_HOME)/krmllib
 
 # 0. Vale
 
@@ -68,9 +68,9 @@ FSTAR = $(FSTAR_NO_FLAGS) $(OTHERFLAGS)
 %.fst-in %.fsti-in:
 	@echo $(FSTAR_INCLUDES)
 
-# 2. Kremlin
+# 2. KaRaMeL
 
-KRML = $(KREMLIN_HOME)/krml
+KRML = $(KRML_HOME)/krml
 
 BASE_FLAGS = \
   -no-prefix 'Hacl.Frodo.Random' \
@@ -78,13 +78,14 @@ BASE_FLAGS = \
   -bundle Lib.*[rename=Hacl_Lib] \
   -drop Lib.IntVector.Intrinsics \
   -drop Lib.IntTypes.Intrinsics \
+  -drop Lib.IntTypes.Intrinsics_128 \
   -fparentheses -fno-shadow -fcurly-braces -fnoreturn-else \
-  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*,LowStar.*[rename=Hacl_Kremlib] \
+  -bundle Prims,C.Failure,C,C.String,C.Loops,Spec.Loops,C.Endianness,FStar.*,LowStar.*[rename=Hacl_Krmllib] \
   -bundle 'Meta.*' \
   -minimal \
-  -add-include '"kremlin/internal/types.h"' \
-  -add-include '"kremlin/lowstar_endianness.h"' \
-  -add-include '<string.h>' \
+  -add-early-include '<string.h>' \
+  -add-early-include '"krml/internal/types.h"' \
+  -add-early-include '"krml/lowstar_endianness.h"' \
   -header $(HACL_HOME)/dist/LICENSE.txt
 
 CURVE_BUNDLE_SLOW= \
@@ -99,12 +100,23 @@ CURVE_BUNDLE_LOCAL=-bundle Hacl.Curve25519_64_Local=Hacl.Impl.Curve25519.Field64
 CURVE_BUNDLE=-bundle Hacl.Curve25519_64=Hacl.Impl.Curve25519.Field64.Vale \
   $(CURVE_BUNDLE_BASE) -bundle Hacl.Curve25519_64_Local
 
-HASH_BUNDLE=-bundle Hacl.Hash.MD5+Hacl.Hash.Core.MD5+Hacl.Hash.SHA1+Hacl.Hash.Core.SHA1+Hacl.Hash.SHA2+Hacl.Hash.Core.SHA2+Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash]
+# First, match the Blake2 stuff
+BLAKE2_BUNDLE_BASE= \
+  -bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants \
+  -bundle 'Hacl.Blake2b_32+Hacl.Blake2s_32=Hacl.Hash.Blake2,Hacl.Impl.Blake2.\*,Hacl.Hash.Core.Blake2[rename=Hacl_Hash_Blake2]'
+BLAKE2_BUNDLE= $(BLAKE2_BUNDLE_BASE) \
+  -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256[rename=Hacl_Hash_Blake2b_256] \
+  -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128[rename=Hacl_Hash_Blake2s_128]
+HASH_BUNDLE= \
+  -bundle Hacl.Hash.MD5=Hacl.Hash.Core.MD5 \
+  -bundle Hacl.Hash.SHA1=Hacl.Hash.Core.SHA1 \
+  -bundle Hacl.Hash.SHA2=Hacl.Hash.Core.SHA2 \
+  -bundle Hacl.Hash.Definitions=Hacl.Hash.*[rename=Hacl_Hash_Base]
+SHA2MB_BUNDLE=-bundle Hacl.Impl.SHA2.Generic=Hacl.Impl.SHA2.*[rename=Hacl_SHA2_Generic] -static-header Hacl.Impl.SHA2.Generic
 SHA3_BUNDLE=-bundle Hacl.Impl.SHA3+Hacl.SHA3=[rename=Hacl_SHA3]
 CHACHA20_BUNDLE=-bundle Hacl.Chacha20=Hacl.Impl.Chacha20,Hacl.Impl.Chacha20.*
 SALSA20_BUNDLE=-bundle Hacl.Salsa20=Hacl.Impl.Salsa20,Hacl.Impl.Salsa20.*,Hacl.Impl.HSalsa20
 CHACHAPOLY_BUNDLE=-bundle Hacl.Impl.Chacha20Poly1305
-BLAKE2_BUNDLE=-bundle Hacl.Impl.Blake2.Constants -static-header Hacl.Impl.Blake2.Constants -bundle Hacl.Blake2b_256=Hacl.Hash.Blake2b_256 -bundle Hacl.Blake2s_128=Hacl.Hash.Blake2s_128 -bundle 'Hacl.Impl.Blake2.\*'
 ED_BUNDLE=-bundle 'Hacl.Ed25519=Hacl.Impl.Ed25519.*,Hacl.Impl.BignumQ.Mul,Hacl.Impl.Load56,Hacl.Impl.SHA512.ModQ,Hacl.Impl.Store56,Hacl.Bignum25519'
 POLY_BUNDLE=-bundle 'Hacl.Poly1305_32=Hacl.Impl.Poly1305.Field32xN_32' \
   -bundle 'Hacl.Poly1305_128=Hacl.Impl.Poly1305.Field32xN_128' \
@@ -113,6 +125,9 @@ NACLBOX_BUNDLE=-bundle Hacl.NaCl=Hacl.Impl.SecretBox,Hacl.Impl.Box
 
 P256_BUNDLE= -bundle Hacl.P256=Hacl.Bignum,Hacl.Bignum.*,Hacl.Impl.ECDSA.*,Hacl.Impl.EC.*,Hacl.Impl.SolinasReduction.*,Hacl.Impl.P256.*,Hacl.Impl.P384.*,Hacl.Impl.P521.*[rename=Hacl_P256]
 
+K256_BUNDLE=-bundle Hacl.K256.Field,Hacl.Impl.K256.Finv[rename=Hacl_Bignum_K256] -static-header Hacl.K256.Field,Hacl.Impl.K256.Finv \
+	-bundle Hacl.K256.ECDSA=Hacl.Impl.K256.*,Hacl.K256.*
+
 FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak' -static-header Hacl.Frodo.KEM,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Keccak
 # The only functions not marked as noextract should be in each of the Hacl.HPKE.{variants}
 # Each of these module should be extracted to a different file. Therefore, this variable
@@ -120,6 +135,7 @@ FRODO_BUNDLE=-bundle 'Hacl.Frodo.KEM=Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Fro
 HPKE_BUNDLE=-bundle Hacl.HPKE.Interface.*
 STREAMING_BUNDLE=-bundle Hacl.Streaming.Interface,Hacl.Streaming.Lemmas
 INTTYPES_BUNDLE=-bundle Hacl.IntTypes.Intrinsics= -static-header Hacl.IntTypes.Intrinsics
+INTTYPES_128_BUNDLE=-bundle Hacl.IntTypes.Intrinsics_128= -static-header Hacl.IntTypes.Intrinsics_128
 RSAPSS_BUNDLE=-bundle Hacl.RSAPSS=Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS[rename=Hacl_RSAPSS]
 FFDHE_BUNDLE=-bundle Hacl.Impl.FFDHE.Constants -static-header Hacl.Impl.FFDHE.Constants -bundle Hacl.FFDHE=Hacl.Impl.FFDHE[rename=Hacl_FFDHE]
 BIGNUM_BUNDLE=-bundle Hacl.Bignum.Base -static-header Hacl.Bignum.Base -bundle Hacl.Bignum,Hacl.Bignum.*[rename=Hacl_Bignum]

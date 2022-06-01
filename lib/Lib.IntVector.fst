@@ -46,12 +46,6 @@ let vec_counter (t:v_inttype) (w:width) =
   | U64,4 -> vec256_load64s (u64 0) (u64 1) (u64 2) (u64 3)
   | U128,2 -> vec256_load128s (u128 0) (u128 1)
 
-let create2 #a x0 x1 = admit()
-let create4 #a x0 x1 x2 x3 = admit()
-let create8 #a x0 x1 x2 x3 x4 x5 x6 x7 = admit()
-let create16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = admit()
-let create32 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15  = admit()
-
 let vec_load (#t:v_inttype) (x:uint_t t SEC) (w:width) =
   match t,w with
   | U128,1 -> vec128_load128 x
@@ -74,11 +68,9 @@ let vec_load4 #t x0 x1 x2 x3 =
 
 let vec_load8 #t x0 x1 x2 x3 x4 x5 x6 x7 =
   match t with
-  | U32 -> vec256_load32s x0 x1 x2 x3 x4 x5 x6 x7 
+  | U32 -> vec256_load32s x0 x1 x2 x3 x4 x5 x6 x7
 
 let vec_load16 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 = admit()
-let vec_load32 #a x0 x1 x2 x3 x4 x5 x6 x7 x8 x9 x10 x11 x12 x13 x14 x15 y0 y1 y2 y3 y4 y5 y6 y7 y8 y9 y10 y11 y12 y13 y14 y15  = admit()
-
 
 let vec_set (#t:v_inttype) (#w:width) (v:vec_t t w) (i:vec_index w) (x:uint_t t SEC) =
   match t,w with
@@ -121,7 +113,6 @@ let vec_sub_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U64,4 -> vec256_sub64 x y
   | U128,2 -> admit()
 
-
 let vec_mul_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> (x <: uint_t t SEC) *. y
@@ -130,7 +121,6 @@ let vec_mul_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   | U32,8 -> vec256_mul32 x y
   | U64,4 -> vec256_mul64 x y
   | U128,2 -> admit()
-
 
 let vec_smul_mod (#t:v_inttype) (#w:width) (x:vec_t t w) (y:uint_t t SEC) =
   match t,w with
@@ -230,6 +220,7 @@ let vec_rotate_left (#t:v_inttype) (#w:width) (x:vec_t t w) (y:rotval t) =
   | U32,8 -> vec256_rotate_left32 x y
   | _,_ ->  vec_or (vec_shift_left x y) (vec_shift_right x (size (bits t) -. y))
 
+let vec_rotate_left_lemma #t #w x y = ()
 
 let vec_eq_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
@@ -265,7 +256,8 @@ let vec_gte_mask (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
 
 let cast #t #w t' w' v = v
 
-let vec_interleave_low (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
+inline_for_extraction
+let vec_interleave_low_ (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x
   | U32,4 -> vec128_interleave_low32 x y
@@ -277,26 +269,26 @@ let vec_interleave_low (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
 let vec_interleave_low_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w,n with
   | _,1,_ -> x
+  | _,_,1 -> vec_interleave_low_ x y
   | U32,4,2 -> vec128_interleave_low64 x y
-  //cast U32 4 (vec_interleave_low (cast U64 2 x) (cast U64 2 y))
-  | U32,8,4 -> vec256_interleave_low64 x y
-  //cast U32 8 (vec_interleave_low (cast U64 4 x) (cast U64 4 y))
-  | U32,8,2 -> vec256_interleave_low128 x y
-  //cast U32 8 (vec_interleave_low (cast U128 2 x) (cast U128 2 y))
+  | U32,8,2 -> vec256_interleave_low64 x y
+  | U32,8,4 -> vec256_interleave_low128 x y
   | U64,4,2 -> vec256_interleave_low128 x y
-  //cast U64 4 (vec_interleave_low (cast U128 2 x) (cast U128 2 y))
   | _ -> admit()
 
 let vec_interleave_low_lemma2 #t v1 v2 = admit()
 let vec_interleave_low_lemma_uint32_4 v1 v2 = admit()
-let vec_interleave_low_lemma_uint32_8 v1 v2 = admit()
-let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint32_4_2 v1 v2 = admit()
+
+let vec_interleave_low_lemma_uint32_8 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint32_8_2 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint32_8_4 v1 v2 = admit()
+
+let vec_interleave_low_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_low_n_lemma_uint64_4_2 v1 v2 = admit()
 
-let vec_interleave_high (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
+inline_for_extraction
+let vec_interleave_high_ (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w with
   | _,1 -> x
   | U32,4 -> vec128_interleave_high32 x y
@@ -308,60 +300,60 @@ let vec_interleave_high (#t:v_inttype) (#w:width) (x:vec_t t w) (y:vec_t t w) =
 let vec_interleave_high_n (#t:v_inttype) (#w:width) (n:width) (x:vec_t t w) (y:vec_t t w) =
   match t,w,n with
   | _,1,_ -> x
+  | _,_,1 -> vec_interleave_high_ x y
   | U32,4,2 -> vec128_interleave_high64 x y
-  //cast U32 4 (vec_interleave_high (cast U64 2 x) (cast U64 2 y))
-  | U32,8,4 -> vec256_interleave_high64 x y
-  //cast U32 8 (vec_interleave_high (cast U64 4 x) (cast U64 4 y))
-  | U32,8,2 -> vec256_interleave_high128 x y
-  //cast U32 8 (vec_interleave_high (cast U128 2 x) (cast U128 2 y))
+  | U32,8,2 -> vec256_interleave_high64 x y
+  | U32,8,4 -> vec256_interleave_high128 x y
   | U64,4,2 -> vec256_interleave_high128 x y
-  //cast U64 4 (vec_interleave_high (cast U128 2 x) (cast U128 2 y))
   | _ -> admit()
 
 let vec_interleave_high_lemma2 #t v1 v2 = admit()
 let vec_interleave_high_lemma_uint32_4 v1 v2 = admit()
-let vec_interleave_high_lemma_uint32_8 v1 v2 = admit()
-let vec_interleave_high_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_4_2 v1 v2 = admit()
+
+let vec_interleave_high_lemma_uint32_8 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_8_2 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint32_8_4 v1 v2 = admit()
+
+let vec_interleave_high_lemma_uint64_4 v1 v2 = admit()
 let vec_interleave_high_n_lemma_uint64_4_2 v1 v2 = admit()
+
 let vec_shift_right_uint128_small2 v1 s = admit()
 
 (* Generic Permutations: Possible on Intel, but not on ARM.
    So we comment this out and only leave interleaving and rotate_lanes functions in the API *)
 (*
-inline_for_extraction 
+inline_for_extraction
 val vec_permute2: #t:v_inttype -> v1:vec_t t 2
   -> i1:vec_index 2 -> i2:vec_index 2 ->
   vec_t t 2
 
-inline_for_extraction 
+inline_for_extraction
 val vec_permute2_lemma: #t:v_inttype -> v1:vec_t t 2
   -> i1:vec_index 2 -> i2:vec_index 2 ->
   Lemma (ensures (vec_v (vec_permute2 v1 i1 i2) == create2 (vec_v v1).[v i1] (vec_v v1).[v i2]))
 	[SMTPat (vec_v (vec_permute2 v1 i1 i2))]
 
 
-inline_for_extraction 
+inline_for_extraction
 val vec_permute4: #t:v_inttype -> v1:vec_t t 4
   -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
   vec_t t 4
 
-inline_for_extraction 
+inline_for_extraction
 val vec_permute4_lemma: #t:v_inttype -> v1:vec_t t 4
   -> i1:vec_index 4 -> i2:vec_index 4 -> i3:vec_index 4 -> i4:vec_index 4 ->
   Lemma (ensures (vec_v (vec_permute4 v1 i1 i2 i3 i4) == create4 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]))
 	[SMTPat (vec_v (vec_permute4 v1 i1 i2 i3 i4))]
-	 
-inline_for_extraction 
+
+inline_for_extraction
 val vec_permute8: #t:v_inttype -> v1:vec_t t 8
   -> i1:vec_index 8 -> i2:vec_index 8 -> i3:vec_index 8 -> i4:vec_index 8
   -> i5:vec_index 8 -> i6:vec_index 8 -> i7:vec_index 8 -> i8:vec_index 8 ->
   v2:vec_t t 8{vec_v v2 == create8 (vec_v v1).[v i1] (vec_v v1).[v i2] (vec_v v1).[v i3] (vec_v v1).[v i4]
                                    (vec_v v1).[v i5] (vec_v v1).[v i6] (vec_v v1).[v i7] (vec_v v1).[v i8]}
 
-inline_for_extraction 
+inline_for_extraction
 val vec_permute16: #t:v_inttype -> v1:vec_t t 16
   -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
   -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
@@ -373,7 +365,7 @@ val vec_permute16: #t:v_inttype -> v1:vec_t t 16
                          vv1.[v i9] vv1.[v i10] vv1.[v i11] vv1.[v i12]
                          vv1.[v i13] vv1.[v i14] vv1.[v i15] vv1.[v i16]}
 
-inline_for_extraction 
+inline_for_extraction
 val vec_permute32: #t:v_inttype -> v1:vec_t t 32
   -> i1:vec_index 16 -> i2:vec_index 16 -> i3:vec_index 16 -> i4:vec_index 16
   -> i5:vec_index 16 -> i6:vec_index 16 -> i7:vec_index 16 -> i8:vec_index 16
@@ -462,7 +454,15 @@ let vec_clmul_hi_hi x y =
   ni_clmul x y (u8 0x11)
 
 let vec_from_bytes_le t w b = admit()
+let vec_from_bytes_le_lemma t w b = admit()
 let vec_from_bytes_be t w b = admit()
+let vec_from_bytes_be_lemma t w b = admit()
+
+let vec_to_bytes_le #vt #w v = admit()
+let vec_to_bytes_le_lemma #vt #w v = admit()
+let vec_to_bytes_be #vt #w v = admit()
+let vec_to_bytes_be_lemma #vt #w v = admit()
+
 
 let vec_load_le t w b =
   match t,w with
@@ -480,9 +480,10 @@ let vec_load_be t w b =
   | _,1 -> Lib.ByteBuffer.uint_from_bytes_be #t #SEC b
   | U32,4 -> vec128_load32_be b
   | U64,2 -> vec128_load64_be b
+  | U32,8 -> vec256_load32_be b
+  | U64,4 -> vec256_load64_be b
+  | U128,2 -> admit()//vec256_load_be b
 
-let vec_to_bytes_le #vt #w v = admit()
-let vec_to_bytes_be #vt #w v = admit()
 
 let vec_store_le #t #w b v =
   match t,w with
@@ -500,3 +501,6 @@ let vec_store_be #t #w b v =
   | _,1 -> Lib.ByteBuffer.uint_to_bytes_be #t #SEC b v
   | U32,4 -> vec128_store32_be b v
   | U64,2 -> vec128_store64_be b v
+  | U32,8 -> vec256_store32_be b v
+  | U64,4 -> vec256_store64_be b v
+  | U128,2 -> admit() //vec256_store_be b v

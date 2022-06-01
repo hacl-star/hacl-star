@@ -75,13 +75,13 @@ function init_zs(a:nat64, bs:seq(nat64), d:nat64):seq (nat64) extern;
 function make_seq9#[a:Type(0)](v0:a, v1:a, v2:a, v3:a, v4:a, v5:a, v6:a, v7:a, v8:a):seq(a) extern;
 function sum_pow_seq(s:seq(nat64)):int extern;
 
-function seq_add(as:seq(nat64), bs:seq(nat64), c0:nat1):tuple(seq(nat64), nat1)
+function seq_add(as0:seq(nat64), bs:seq(nat64), c0:nat1):tuple(seq(nat64), nat1)
     requires
-        length(as) == length(bs);
+        length(as0) == length(bs);
     extern;
 
 ghost procedure lemma_seq_add_is_norm(
-        ghost as:seq(nat64),
+        ghost as0:seq(nat64),
         ghost bs:seq(nat64),
         ghost c0:nat1,
         ghost i:nat)
@@ -120,7 +120,7 @@ procedure MulAdd18(
     {:options z3rlimit(80), max_fuel(1), max_ifuel(0)}
     lets
         pD @= rdi; pA @= rcx; pB @= rsi; T0 @= rax; T1 @= rbx;
-        as := s64(heap0, bA);
+        as0 := s64(heap0, bA);
         rs:seq(nat64) := make_seq9(r0, r1, r2, r3, r4, r5, r6, r7, 0);
     reads
         pD; pA; pB;
@@ -134,7 +134,7 @@ procedure MulAdd18(
         validDstAddrs64(heap0, pA, bA, 8, memLayout, Public);
         validSrcAddrs64(heap0, pB, bB, 1, memLayout, Public);
         validDstAddrs64(heap0, pD, bD, 1, memLayout, Public);
-        length(as) == 8;
+        length(as0) == 8;
         @r0 == operand_reg8(regRotate + 0);
         @r1 == operand_reg8(regRotate + 1);
         @r2 == operand_reg8(regRotate + 2);
@@ -148,7 +148,7 @@ procedure MulAdd18(
         d := buffer64_read(bD, 0, heap0);
     ensures
         let xs:seq(nat64) := make_seq9(buffer64_read(bD, 0, heap0), r1, r2, r3, r4, r5, r6, r7, r0);
-        sum_pow_seq(xs) == sum_pow_seq(rs) + b * sum_pow_seq(as) + d;
+        sum_pow_seq(xs) == sum_pow_seq(rs) + b * sum_pow_seq(as0) + d;
 {
     reveal_add_lo_all();
     Mov64(rdx, Mem64(heap0, pB, 0, bB, 0, Public));
@@ -191,13 +191,13 @@ procedure MulAdd18(
     Adox_64(r0, T1);
 
     let l := 8;
-    let ys := init_ys(b, as);
-    let zs := init_zs(b, as, d);
+    let ys := init_ys(b, as0);
+    let zs := init_zs(b, as0, d);
     let qs := seq_add(rs, zs, 0)._1;
     let xs:seq(nat64) := make_seq9(buffer64_read(bD, 0, heap0), r1, r2, r3, r4, r5, r6, r7, r0);
     lemma_seq_add_is_norm(rs, zs, 0, l + 1);
     lemma_seq_add_is_norm(qs, ys, 0, l + 1);
-    lemma_scale_add(l, b, d, as, rs, ys, zs, qs, xs);
+    lemma_scale_add(l, b, d, as0, rs, ys, zs, qs, xs);
     assert equal(xs, seq_add(qs, ys, 0)._1);
     assert flag_cf(efl) == 0 && flag_of(efl) == 0 by {reveal_add_hi_all();}
 }

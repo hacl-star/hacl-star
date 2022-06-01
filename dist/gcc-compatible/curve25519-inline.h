@@ -131,79 +131,79 @@ static inline void fmul (uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tm
     /////// Compute the raw multiplication: tmp <- src1 * src2 ////// 
 
     // Compute src1[0] * src2
-    "  movq 0(%1), %%rdx;"
-    "  mulxq 0(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  movq %%r8, 0(%3);"
-    "  mulxq 8(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  movq %%r10, 8(%3);"
-    "  mulxq 16(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"
-    "  mulxq 24(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  mov $0, %%rax;"
+    "  movq 0(%0), %%rdx;"
+    "  mulxq 0(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  movq %%r8, 0(%2);"
+    "  mulxq 8(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  movq %%r10, 8(%2);"
+    "  mulxq 16(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"
+    "  mulxq 24(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"
 
     // Compute src1[1] * src2
-    "  movq 8(%1), %%rdx;"
-    "  mulxq 0(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  adcxq 8(%3), %%r8;"    "  movq %%r8, 8(%3);"
-    "  mulxq 8(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 16(%3);"
-    "  mulxq 16(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-    "  mulxq 24(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
+    "  movq 8(%0), %%rdx;"
+    "  mulxq 0(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  adcxq 8(%2), %%r8;"    "  movq %%r8, 8(%2);"
+    "  mulxq 8(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 16(%2);"
+    "  mulxq 16(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
+    "  mulxq 24(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
 
 
     // Compute src1[2] * src2
-    "  movq 16(%1), %%rdx;"
-    "  mulxq 0(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 16(%3), %%r8;"    "  movq %%r8, 16(%3);"
-    "  mulxq 8(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 24(%3);"
-    "  mulxq 16(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-    "  mulxq 24(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
+    "  movq 16(%0), %%rdx;"
+    "  mulxq 0(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 16(%2), %%r8;"    "  movq %%r8, 16(%2);"
+    "  mulxq 8(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 24(%2);"
+    "  mulxq 16(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
+    "  mulxq 24(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
 
 
     // Compute src1[3] * src2
-    "  movq 24(%1), %%rdx;"
-    "  mulxq 0(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 24(%3), %%r8;"    "  movq %%r8, 24(%3);"
-    "  mulxq 8(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 32(%3);"
-    "  mulxq 16(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  movq %%rbx, 40(%3);"    "  mov $0, %%r8;"
-    "  mulxq 24(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 48(%3);"    "  mov $0, %%rax;"
-                                       "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 56(%3);"
+    "  movq 24(%0), %%rdx;"
+    "  mulxq 0(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 24(%2), %%r8;"    "  movq %%r8, 24(%2);"
+    "  mulxq 8(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 32(%2);"
+    "  mulxq 16(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  movq %%rbx, 40(%2);"    "  mov $0, %%r8;"
+    "  mulxq 24(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 48(%2);"    "  mov $0, %%rax;"
+                                       "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 56(%2);"
 
     // Line up pointers
-    "  mov %3, %1;"
-    "  mov %0, %3;"
+    "  mov %2, %0;"
+    "  mov %3, %2;"
 
     /////// Wrap the result back into the field ////// 
 
     // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
-    "  mulxq 32(%1), %%r8, %%r13;"
-    "  xor %k2, %k2;"
-    "  adoxq 0(%1), %%r8;"
-    "  mulxq 40(%1), %%r9, %%rbx;"
+    "  mulxq 32(%0), %%r8, %%r13;"
+    "  xor %k1, %k1;"
+    "  adoxq 0(%0), %%r8;"
+    "  mulxq 40(%0), %%r9, %%rbx;"
     "  adcx %%r13, %%r9;"
-    "  adoxq 8(%1), %%r9;"
-    "  mulxq 48(%1), %%r10, %%r13;"
+    "  adoxq 8(%0), %%r9;"
+    "  mulxq 48(%0), %%r10, %%r13;"
     "  adcx %%rbx, %%r10;"
-    "  adoxq 16(%1), %%r10;"
-    "  mulxq 56(%1), %%r11, %%rax;"
+    "  adoxq 16(%0), %%r10;"
+    "  mulxq 56(%0), %%r11, %%rax;"
     "  adcx %%r13, %%r11;"
-    "  adoxq 24(%1), %%r11;"
-    "  adcx %2, %%rax;"
-    "  adox %2, %%rax;"
+    "  adoxq 24(%0), %%r11;"
+    "  adcx %1, %%rax;"
+    "  adox %1, %%rax;"
     "  imul %%rdx, %%rax;"
 
     // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
-    "  adcx %2, %%r9;"
-    "  movq %%r9, 8(%3);"
-    "  adcx %2, %%r10;"
-    "  movq %%r10, 16(%3);"
-    "  adcx %2, %%r11;"
-    "  movq %%r11, 24(%3);"
+    "  adcx %1, %%r9;"
+    "  movq %%r9, 8(%2);"
+    "  adcx %1, %%r10;"
+    "  movq %%r10, 16(%2);"
+    "  adcx %1, %%r11;"
+    "  movq %%r11, 24(%2);"
 
     // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
-    "  movq %%r8, 0(%3);"
-  : "+&r" (out), "+&r" (f1), "+&r" (f2), "+&r" (tmp)
-  : 
+    "  movq %%r8, 0(%2);"
+  : "+&r" (f1), "+&r" (f2), "+&r" (tmp)
+  : "r" (out)
   : "%rax", "%rbx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r13", "%r14", "memory", "cc"
   );
 }
@@ -219,148 +219,148 @@ static inline void fmul2 (uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *t
     /////// Compute the raw multiplication tmp[0] <- f1[0] * f2[0] ////// 
 
     // Compute src1[0] * src2
-    "  movq 0(%1), %%rdx;"
-    "  mulxq 0(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  movq %%r8, 0(%3);"
-    "  mulxq 8(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  movq %%r10, 8(%3);"
-    "  mulxq 16(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"
-    "  mulxq 24(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  mov $0, %%rax;"
+    "  movq 0(%0), %%rdx;"
+    "  mulxq 0(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  movq %%r8, 0(%2);"
+    "  mulxq 8(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  movq %%r10, 8(%2);"
+    "  mulxq 16(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"
+    "  mulxq 24(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"
 
     // Compute src1[1] * src2
-    "  movq 8(%1), %%rdx;"
-    "  mulxq 0(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  adcxq 8(%3), %%r8;"    "  movq %%r8, 8(%3);"
-    "  mulxq 8(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 16(%3);"
-    "  mulxq 16(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-    "  mulxq 24(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
+    "  movq 8(%0), %%rdx;"
+    "  mulxq 0(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  adcxq 8(%2), %%r8;"    "  movq %%r8, 8(%2);"
+    "  mulxq 8(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 16(%2);"
+    "  mulxq 16(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
+    "  mulxq 24(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
 
 
     // Compute src1[2] * src2
-    "  movq 16(%1), %%rdx;"
-    "  mulxq 0(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 16(%3), %%r8;"    "  movq %%r8, 16(%3);"
-    "  mulxq 8(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 24(%3);"
-    "  mulxq 16(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-    "  mulxq 24(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
+    "  movq 16(%0), %%rdx;"
+    "  mulxq 0(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 16(%2), %%r8;"    "  movq %%r8, 16(%2);"
+    "  mulxq 8(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 24(%2);"
+    "  mulxq 16(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
+    "  mulxq 24(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
 
 
     // Compute src1[3] * src2
-    "  movq 24(%1), %%rdx;"
-    "  mulxq 0(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 24(%3), %%r8;"    "  movq %%r8, 24(%3);"
-    "  mulxq 8(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 32(%3);"
-    "  mulxq 16(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  movq %%rbx, 40(%3);"    "  mov $0, %%r8;"
-    "  mulxq 24(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 48(%3);"    "  mov $0, %%rax;"
-                                       "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 56(%3);"
+    "  movq 24(%0), %%rdx;"
+    "  mulxq 0(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 24(%2), %%r8;"    "  movq %%r8, 24(%2);"
+    "  mulxq 8(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 32(%2);"
+    "  mulxq 16(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  movq %%rbx, 40(%2);"    "  mov $0, %%r8;"
+    "  mulxq 24(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 48(%2);"    "  mov $0, %%rax;"
+                                       "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 56(%2);"
 
     /////// Compute the raw multiplication tmp[1] <- f1[1] * f2[1] ////// 
 
     // Compute src1[0] * src2
-    "  movq 32(%1), %%rdx;"
-    "  mulxq 32(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  movq %%r8, 64(%3);"
-    "  mulxq 40(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  movq %%r10, 72(%3);"
-    "  mulxq 48(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"
-    "  mulxq 56(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  mov $0, %%rax;"
+    "  movq 32(%0), %%rdx;"
+    "  mulxq 32(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  movq %%r8, 64(%2);"
+    "  mulxq 40(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  movq %%r10, 72(%2);"
+    "  mulxq 48(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"
+    "  mulxq 56(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"
 
     // Compute src1[1] * src2
-    "  movq 40(%1), %%rdx;"
-    "  mulxq 32(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  adcxq 72(%3), %%r8;"    "  movq %%r8, 72(%3);"
-    "  mulxq 40(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 80(%3);"
-    "  mulxq 48(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-    "  mulxq 56(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
+    "  movq 40(%0), %%rdx;"
+    "  mulxq 32(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"     "  adcxq 72(%2), %%r8;"    "  movq %%r8, 72(%2);"
+    "  mulxq 40(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 80(%2);"
+    "  mulxq 48(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
+    "  mulxq 56(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
 
 
     // Compute src1[2] * src2
-    "  movq 48(%1), %%rdx;"
-    "  mulxq 32(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 80(%3), %%r8;"    "  movq %%r8, 80(%3);"
-    "  mulxq 40(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 88(%3);"
-    "  mulxq 48(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
-    "  mulxq 56(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
+    "  movq 48(%0), %%rdx;"
+    "  mulxq 32(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 80(%2), %%r8;"    "  movq %%r8, 80(%2);"
+    "  mulxq 40(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 88(%2);"
+    "  mulxq 48(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  mov $0, %%r8;"
+    "  mulxq 56(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  mov $0, %%rax;"
                                        "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"
 
 
     // Compute src1[3] * src2
-    "  movq 56(%1), %%rdx;"
-    "  mulxq 32(%2), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 88(%3), %%r8;"    "  movq %%r8, 88(%3);"
-    "  mulxq 40(%2), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 96(%3);"
-    "  mulxq 48(%2), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  movq %%rbx, 104(%3);"    "  mov $0, %%r8;"
-    "  mulxq 56(%2), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 112(%3);"    "  mov $0, %%rax;"
-                                       "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 120(%3);"
+    "  movq 56(%0), %%rdx;"
+    "  mulxq 32(%1), %%r8, %%r9;"       "  xor %%r10d, %%r10d;"    "  adcxq 88(%2), %%r8;"    "  movq %%r8, 88(%2);"
+    "  mulxq 40(%1), %%r10, %%r11;"     "  adox %%r9, %%r10;"     "  adcx %%rbx, %%r10;"    "  movq %%r10, 96(%2);"
+    "  mulxq 48(%1), %%rbx, %%r13;"    "  adox %%r11, %%rbx;"    "  adcx %%r14, %%rbx;"    "  movq %%rbx, 104(%2);"    "  mov $0, %%r8;"
+    "  mulxq 56(%1), %%r14, %%rdx;"    "  adox %%r13, %%r14;"    "  adcx %%rax, %%r14;"    "  movq %%r14, 112(%2);"    "  mov $0, %%rax;"
+                                       "  adox %%rdx, %%rax;"    "  adcx %%r8, %%rax;"     "  movq %%rax, 120(%2);"
 
     // Line up pointers
-    "  mov %3, %1;"
-    "  mov %0, %3;"
+    "  mov %2, %0;"
+    "  mov %3, %2;"
 
     /////// Wrap the results back into the field ////// 
 
     // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
-    "  mulxq 32(%1), %%r8, %%r13;"
-    "  xor %k2, %k2;"
-    "  adoxq 0(%1), %%r8;"
-    "  mulxq 40(%1), %%r9, %%rbx;"
+    "  mulxq 32(%0), %%r8, %%r13;"
+    "  xor %k1, %k1;"
+    "  adoxq 0(%0), %%r8;"
+    "  mulxq 40(%0), %%r9, %%rbx;"
     "  adcx %%r13, %%r9;"
-    "  adoxq 8(%1), %%r9;"
-    "  mulxq 48(%1), %%r10, %%r13;"
+    "  adoxq 8(%0), %%r9;"
+    "  mulxq 48(%0), %%r10, %%r13;"
     "  adcx %%rbx, %%r10;"
-    "  adoxq 16(%1), %%r10;"
-    "  mulxq 56(%1), %%r11, %%rax;"
+    "  adoxq 16(%0), %%r10;"
+    "  mulxq 56(%0), %%r11, %%rax;"
     "  adcx %%r13, %%r11;"
-    "  adoxq 24(%1), %%r11;"
-    "  adcx %2, %%rax;"
-    "  adox %2, %%rax;"
+    "  adoxq 24(%0), %%r11;"
+    "  adcx %1, %%rax;"
+    "  adox %1, %%rax;"
     "  imul %%rdx, %%rax;"
 
     // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
-    "  adcx %2, %%r9;"
-    "  movq %%r9, 8(%3);"
-    "  adcx %2, %%r10;"
-    "  movq %%r10, 16(%3);"
-    "  adcx %2, %%r11;"
-    "  movq %%r11, 24(%3);"
+    "  adcx %1, %%r9;"
+    "  movq %%r9, 8(%2);"
+    "  adcx %1, %%r10;"
+    "  movq %%r10, 16(%2);"
+    "  adcx %1, %%r11;"
+    "  movq %%r11, 24(%2);"
 
     // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
-    "  movq %%r8, 0(%3);"
+    "  movq %%r8, 0(%2);"
 
     // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
-    "  mulxq 96(%1), %%r8, %%r13;"
-    "  xor %k2, %k2;"
-    "  adoxq 64(%1), %%r8;"
-    "  mulxq 104(%1), %%r9, %%rbx;"
+    "  mulxq 96(%0), %%r8, %%r13;"
+    "  xor %k1, %k1;"
+    "  adoxq 64(%0), %%r8;"
+    "  mulxq 104(%0), %%r9, %%rbx;"
     "  adcx %%r13, %%r9;"
-    "  adoxq 72(%1), %%r9;"
-    "  mulxq 112(%1), %%r10, %%r13;"
+    "  adoxq 72(%0), %%r9;"
+    "  mulxq 112(%0), %%r10, %%r13;"
     "  adcx %%rbx, %%r10;"
-    "  adoxq 80(%1), %%r10;"
-    "  mulxq 120(%1), %%r11, %%rax;"
+    "  adoxq 80(%0), %%r10;"
+    "  mulxq 120(%0), %%r11, %%rax;"
     "  adcx %%r13, %%r11;"
-    "  adoxq 88(%1), %%r11;"
-    "  adcx %2, %%rax;"
-    "  adox %2, %%rax;"
+    "  adoxq 88(%0), %%r11;"
+    "  adcx %1, %%rax;"
+    "  adox %1, %%rax;"
     "  imul %%rdx, %%rax;"
 
     // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
-    "  adcx %2, %%r9;"
-    "  movq %%r9, 40(%3);"
-    "  adcx %2, %%r10;"
-    "  movq %%r10, 48(%3);"
-    "  adcx %2, %%r11;"
-    "  movq %%r11, 56(%3);"
+    "  adcx %1, %%r9;"
+    "  movq %%r9, 40(%2);"
+    "  adcx %1, %%r10;"
+    "  movq %%r10, 48(%2);"
+    "  adcx %1, %%r11;"
+    "  movq %%r11, 56(%2);"
 
     // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
-    "  movq %%r8, 32(%3);"
-  : "+&r" (out), "+&r" (f1), "+&r" (f2), "+&r" (tmp)
-  : 
+    "  movq %%r8, 32(%2);"
+  : "+&r" (f1), "+&r" (f2), "+&r" (tmp)
+  : "r" (out)
   : "%rax", "%rbx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r13", "%r14", "memory", "cc"
   );
 }
@@ -502,15 +502,15 @@ static inline void fsqr (uint64_t *out, uint64_t *f, uint64_t *tmp)
     /////// Compute the raw multiplication: tmp <- f * f ////// 
 
     // Step 1: Compute all partial products
-    "  movq 0(%1), %%rdx;"                                       // f[0]
-    "  mulxq 8(%1), %%r8, %%r14;"      "  xor %%r15d, %%r15d;"     // f[1]*f[0]
-    "  mulxq 16(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
-    "  mulxq 24(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
-    "  movq 24(%1), %%rdx;"                                      // f[3]
-    "  mulxq 8(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
-    "  mulxq 16(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
-    "  movq 8(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
-    "  mulxq 16(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
+    "  movq 0(%0), %%rdx;"                                       // f[0]
+    "  mulxq 8(%0), %%r8, %%r14;"      "  xor %%r15d, %%r15d;"     // f[1]*f[0]
+    "  mulxq 16(%0), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
+    "  mulxq 24(%0), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
+    "  movq 24(%0), %%rdx;"                                      // f[3]
+    "  mulxq 8(%0), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
+    "  mulxq 16(%0), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
+    "  movq 8(%0), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
+    "  mulxq 16(%0), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
 
     // Step 2: Compute two parallel carry chains
     "  xor %%r15d, %%r15d;"
@@ -528,39 +528,39 @@ static inline void fsqr (uint64_t *out, uint64_t *f, uint64_t *tmp)
     "  adcx %%r14, %%r14;"
 
     // Step 3: Compute intermediate squares
-    "  movq 0(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
-                               "  movq %%rax, 0(%2);"
-    "  add %%rcx, %%r8;"       "  movq %%r8, 8(%2);"
-    "  movq 8(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
-    "  adcx %%rax, %%r9;"      "  movq %%r9, 16(%2);"
-    "  adcx %%rcx, %%r10;"     "  movq %%r10, 24(%2);"
-    "  movq 16(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
-    "  adcx %%rax, %%r11;"     "  movq %%r11, 32(%2);"
-    "  adcx %%rcx, %%rbx;"     "  movq %%rbx, 40(%2);"
-    "  movq 24(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
-    "  adcx %%rax, %%r13;"     "  movq %%r13, 48(%2);"
-    "  adcx %%rcx, %%r14;"     "  movq %%r14, 56(%2);"
+    "  movq 0(%0), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
+                               "  movq %%rax, 0(%1);"
+    "  add %%rcx, %%r8;"       "  movq %%r8, 8(%1);"
+    "  movq 8(%0), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
+    "  adcx %%rax, %%r9;"      "  movq %%r9, 16(%1);"
+    "  adcx %%rcx, %%r10;"     "  movq %%r10, 24(%1);"
+    "  movq 16(%0), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
+    "  adcx %%rax, %%r11;"     "  movq %%r11, 32(%1);"
+    "  adcx %%rcx, %%rbx;"     "  movq %%rbx, 40(%1);"
+    "  movq 24(%0), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
+    "  adcx %%rax, %%r13;"     "  movq %%r13, 48(%1);"
+    "  adcx %%rcx, %%r14;"     "  movq %%r14, 56(%1);"
 
     // Line up pointers
+    "  mov %1, %0;"
     "  mov %2, %1;"
-    "  mov %0, %2;"
 
     /////// Wrap the result back into the field ////// 
 
     // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
-    "  mulxq 32(%1), %%r8, %%r13;"
+    "  mulxq 32(%0), %%r8, %%r13;"
     "  xor %%ecx, %%ecx;"
-    "  adoxq 0(%1), %%r8;"
-    "  mulxq 40(%1), %%r9, %%rbx;"
+    "  adoxq 0(%0), %%r8;"
+    "  mulxq 40(%0), %%r9, %%rbx;"
     "  adcx %%r13, %%r9;"
-    "  adoxq 8(%1), %%r9;"
-    "  mulxq 48(%1), %%r10, %%r13;"
+    "  adoxq 8(%0), %%r9;"
+    "  mulxq 48(%0), %%r10, %%r13;"
     "  adcx %%rbx, %%r10;"
-    "  adoxq 16(%1), %%r10;"
-    "  mulxq 56(%1), %%r11, %%rax;"
+    "  adoxq 16(%0), %%r10;"
+    "  mulxq 56(%0), %%r11, %%rax;"
     "  adcx %%r13, %%r11;"
-    "  adoxq 24(%1), %%r11;"
+    "  adoxq 24(%0), %%r11;"
     "  adcx %%rcx, %%rax;"
     "  adox %%rcx, %%rax;"
     "  imul %%rdx, %%rax;"
@@ -568,19 +568,19 @@ static inline void fsqr (uint64_t *out, uint64_t *f, uint64_t *tmp)
     // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %%rcx, %%r9;"
-    "  movq %%r9, 8(%2);"
+    "  movq %%r9, 8(%1);"
     "  adcx %%rcx, %%r10;"
-    "  movq %%r10, 16(%2);"
+    "  movq %%r10, 16(%1);"
     "  adcx %%rcx, %%r11;"
-    "  movq %%r11, 24(%2);"
+    "  movq %%r11, 24(%1);"
 
     // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
-    "  movq %%r8, 0(%2);"
-  : "+&r" (out), "+&r" (f), "+&r" (tmp)
-  : 
+    "  movq %%r8, 0(%1);"
+  : "+&r" (f), "+&r" (tmp)
+  : "r" (out)
   : "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r13", "%r14", "%r15", "memory", "cc"
   );
 }
@@ -593,15 +593,15 @@ static inline void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
 {
   asm volatile(
     // Step 1: Compute all partial products
-    "  movq 0(%1), %%rdx;"                                       // f[0]
-    "  mulxq 8(%1), %%r8, %%r14;"      "  xor %%r15d, %%r15d;"     // f[1]*f[0]
-    "  mulxq 16(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
-    "  mulxq 24(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
-    "  movq 24(%1), %%rdx;"                                      // f[3]
-    "  mulxq 8(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
-    "  mulxq 16(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
-    "  movq 8(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
-    "  mulxq 16(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
+    "  movq 0(%0), %%rdx;"                                       // f[0]
+    "  mulxq 8(%0), %%r8, %%r14;"      "  xor %%r15d, %%r15d;"     // f[1]*f[0]
+    "  mulxq 16(%0), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
+    "  mulxq 24(%0), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
+    "  movq 24(%0), %%rdx;"                                      // f[3]
+    "  mulxq 8(%0), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
+    "  mulxq 16(%0), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
+    "  movq 8(%0), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
+    "  mulxq 16(%0), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
 
     // Step 2: Compute two parallel carry chains
     "  xor %%r15d, %%r15d;"
@@ -619,29 +619,29 @@ static inline void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
     "  adcx %%r14, %%r14;"
 
     // Step 3: Compute intermediate squares
-    "  movq 0(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
-                               "  movq %%rax, 0(%2);"
-    "  add %%rcx, %%r8;"       "  movq %%r8, 8(%2);"
-    "  movq 8(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
-    "  adcx %%rax, %%r9;"      "  movq %%r9, 16(%2);"
-    "  adcx %%rcx, %%r10;"     "  movq %%r10, 24(%2);"
-    "  movq 16(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
-    "  adcx %%rax, %%r11;"     "  movq %%r11, 32(%2);"
-    "  adcx %%rcx, %%rbx;"     "  movq %%rbx, 40(%2);"
-    "  movq 24(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
-    "  adcx %%rax, %%r13;"     "  movq %%r13, 48(%2);"
-    "  adcx %%rcx, %%r14;"     "  movq %%r14, 56(%2);"
+    "  movq 0(%0), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
+                               "  movq %%rax, 0(%1);"
+    "  add %%rcx, %%r8;"       "  movq %%r8, 8(%1);"
+    "  movq 8(%0), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
+    "  adcx %%rax, %%r9;"      "  movq %%r9, 16(%1);"
+    "  adcx %%rcx, %%r10;"     "  movq %%r10, 24(%1);"
+    "  movq 16(%0), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
+    "  adcx %%rax, %%r11;"     "  movq %%r11, 32(%1);"
+    "  adcx %%rcx, %%rbx;"     "  movq %%rbx, 40(%1);"
+    "  movq 24(%0), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
+    "  adcx %%rax, %%r13;"     "  movq %%r13, 48(%1);"
+    "  adcx %%rcx, %%r14;"     "  movq %%r14, 56(%1);"
 
     // Step 1: Compute all partial products
-    "  movq 32(%1), %%rdx;"                                       // f[0]
-    "  mulxq 40(%1), %%r8, %%r14;"      "  xor %%r15d, %%r15d;"     // f[1]*f[0]
-    "  mulxq 48(%1), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
-    "  mulxq 56(%1), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
-    "  movq 56(%1), %%rdx;"                                      // f[3]
-    "  mulxq 40(%1), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
-    "  mulxq 48(%1), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
-    "  movq 40(%1), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
-    "  mulxq 48(%1), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
+    "  movq 32(%0), %%rdx;"                                       // f[0]
+    "  mulxq 40(%0), %%r8, %%r14;"      "  xor %%r15d, %%r15d;"     // f[1]*f[0]
+    "  mulxq 48(%0), %%r9, %%r10;"     "  adcx %%r14, %%r9;"     // f[2]*f[0]
+    "  mulxq 56(%0), %%rax, %%rcx;"    "  adcx %%rax, %%r10;"    // f[3]*f[0]
+    "  movq 56(%0), %%rdx;"                                      // f[3]
+    "  mulxq 40(%0), %%r11, %%rbx;"     "  adcx %%rcx, %%r11;"    // f[1]*f[3]
+    "  mulxq 48(%0), %%rax, %%r13;"    "  adcx %%rax, %%rbx;"    // f[2]*f[3]
+    "  movq 40(%0), %%rdx;"             "  adcx %%r15, %%r13;"    // f1
+    "  mulxq 48(%0), %%rax, %%rcx;"    "  mov $0, %%r14;"        // f[2]*f[1]
 
     // Step 2: Compute two parallel carry chains
     "  xor %%r15d, %%r15d;"
@@ -659,37 +659,37 @@ static inline void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
     "  adcx %%r14, %%r14;"
 
     // Step 3: Compute intermediate squares
-    "  movq 32(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
-                               "  movq %%rax, 64(%2);"
-    "  add %%rcx, %%r8;"       "  movq %%r8, 72(%2);"
-    "  movq 40(%1), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
-    "  adcx %%rax, %%r9;"      "  movq %%r9, 80(%2);"
-    "  adcx %%rcx, %%r10;"     "  movq %%r10, 88(%2);"
-    "  movq 48(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
-    "  adcx %%rax, %%r11;"     "  movq %%r11, 96(%2);"
-    "  adcx %%rcx, %%rbx;"     "  movq %%rbx, 104(%2);"
-    "  movq 56(%1), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
-    "  adcx %%rax, %%r13;"     "  movq %%r13, 112(%2);"
-    "  adcx %%rcx, %%r14;"     "  movq %%r14, 120(%2);"
+    "  movq 32(%0), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[0]^2
+                               "  movq %%rax, 64(%1);"
+    "  add %%rcx, %%r8;"       "  movq %%r8, 72(%1);"
+    "  movq 40(%0), %%rdx;"     "  mulx %%rdx, %%rax, %%rcx;"    // f[1]^2
+    "  adcx %%rax, %%r9;"      "  movq %%r9, 80(%1);"
+    "  adcx %%rcx, %%r10;"     "  movq %%r10, 88(%1);"
+    "  movq 48(%0), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[2]^2
+    "  adcx %%rax, %%r11;"     "  movq %%r11, 96(%1);"
+    "  adcx %%rcx, %%rbx;"     "  movq %%rbx, 104(%1);"
+    "  movq 56(%0), %%rdx;"    "  mulx %%rdx, %%rax, %%rcx;"    // f[3]^2
+    "  adcx %%rax, %%r13;"     "  movq %%r13, 112(%1);"
+    "  adcx %%rcx, %%r14;"     "  movq %%r14, 120(%1);"
 
     // Line up pointers
+    "  mov %1, %0;"
     "  mov %2, %1;"
-    "  mov %0, %2;"
 
     // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
-    "  mulxq 32(%1), %%r8, %%r13;"
+    "  mulxq 32(%0), %%r8, %%r13;"
     "  xor %%ecx, %%ecx;"
-    "  adoxq 0(%1), %%r8;"
-    "  mulxq 40(%1), %%r9, %%rbx;"
+    "  adoxq 0(%0), %%r8;"
+    "  mulxq 40(%0), %%r9, %%rbx;"
     "  adcx %%r13, %%r9;"
-    "  adoxq 8(%1), %%r9;"
-    "  mulxq 48(%1), %%r10, %%r13;"
+    "  adoxq 8(%0), %%r9;"
+    "  mulxq 48(%0), %%r10, %%r13;"
     "  adcx %%rbx, %%r10;"
-    "  adoxq 16(%1), %%r10;"
-    "  mulxq 56(%1), %%r11, %%rax;"
+    "  adoxq 16(%0), %%r10;"
+    "  mulxq 56(%0), %%r11, %%rax;"
     "  adcx %%r13, %%r11;"
-    "  adoxq 24(%1), %%r11;"
+    "  adoxq 24(%0), %%r11;"
     "  adcx %%rcx, %%rax;"
     "  adox %%rcx, %%rax;"
     "  imul %%rdx, %%rax;"
@@ -697,32 +697,32 @@ static inline void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
     // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %%rcx, %%r9;"
-    "  movq %%r9, 8(%2);"
+    "  movq %%r9, 8(%1);"
     "  adcx %%rcx, %%r10;"
-    "  movq %%r10, 16(%2);"
+    "  movq %%r10, 16(%1);"
     "  adcx %%rcx, %%r11;"
-    "  movq %%r11, 24(%2);"
+    "  movq %%r11, 24(%1);"
 
     // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
-    "  movq %%r8, 0(%2);"
+    "  movq %%r8, 0(%1);"
 
     // Step 1: Compute dst + carry == tmp_hi * 38 + tmp_lo
     "  mov $38, %%rdx;"
-    "  mulxq 96(%1), %%r8, %%r13;"
+    "  mulxq 96(%0), %%r8, %%r13;"
     "  xor %%ecx, %%ecx;"
-    "  adoxq 64(%1), %%r8;"
-    "  mulxq 104(%1), %%r9, %%rbx;"
+    "  adoxq 64(%0), %%r8;"
+    "  mulxq 104(%0), %%r9, %%rbx;"
     "  adcx %%r13, %%r9;"
-    "  adoxq 72(%1), %%r9;"
-    "  mulxq 112(%1), %%r10, %%r13;"
+    "  adoxq 72(%0), %%r9;"
+    "  mulxq 112(%0), %%r10, %%r13;"
     "  adcx %%rbx, %%r10;"
-    "  adoxq 80(%1), %%r10;"
-    "  mulxq 120(%1), %%r11, %%rax;"
+    "  adoxq 80(%0), %%r10;"
+    "  mulxq 120(%0), %%r11, %%rax;"
     "  adcx %%r13, %%r11;"
-    "  adoxq 88(%1), %%r11;"
+    "  adoxq 88(%0), %%r11;"
     "  adcx %%rcx, %%rax;"
     "  adox %%rcx, %%rax;"
     "  imul %%rdx, %%rax;"
@@ -730,19 +730,19 @@ static inline void fsqr2 (uint64_t *out, uint64_t *f, uint64_t *tmp)
     // Step 2: Fold the carry back into dst
     "  add %%rax, %%r8;"
     "  adcx %%rcx, %%r9;"
-    "  movq %%r9, 40(%2);"
+    "  movq %%r9, 40(%1);"
     "  adcx %%rcx, %%r10;"
-    "  movq %%r10, 48(%2);"
+    "  movq %%r10, 48(%1);"
     "  adcx %%rcx, %%r11;"
-    "  movq %%r11, 56(%2);"
+    "  movq %%r11, 56(%1);"
 
     // Step 3: Fold the carry bit back in; guaranteed not to carry at this point
     "  mov $0, %%rax;"
     "  cmovc %%rdx, %%rax;"
     "  add %%rax, %%r8;"
-    "  movq %%r8, 32(%2);"
-  : "+&r" (out), "+&r" (f), "+&r" (tmp)
-  : 
+    "  movq %%r8, 32(%1);"
+  : "+&r" (f), "+&r" (tmp)
+  : "r" (out)
   : "%rax", "%rbx", "%rcx", "%rdx", "%r8", "%r9", "%r10", "%r11", "%r13", "%r14", "%r15", "memory", "cc"
   );
 }

@@ -55,7 +55,6 @@ val point_decompress_:
     (requires fun h ->
       live h out /\ live h s /\ live h tmp /\
       disjoint s tmp /\ disjoint out tmp /\
-      F51.point_inv_t h out /\
       F51.mul_inv_t h (gsub tmp 5ul 5ul)
     )
     (ensures  fun h0 b h1 -> modifies (loc out |+| loc tmp) h0 h1 /\
@@ -64,16 +63,13 @@ val point_decompress_:
       (b ==> (F51.point_eval h1 out == Some?.v (SE.point_decompress (as_seq h0 s))))
     )
 
-#push-options "--z3rlimit 30"
+#push-options "--z3rlimit 50"
 
 let point_decompress_ out s tmp =
   let y    = sub tmp 0ul 5ul in
   let x    = sub tmp 5ul 5ul in
-  let h0 = ST.get() in
   let sign = most_significant_bit s in
-  let h1 = ST.get() in
   load_51 y s;
-  let h2 = ST.get() in
   let z = Hacl.Impl.Ed25519.RecoverX.recover_x x y sign in
 
   let res =
@@ -87,7 +83,6 @@ let point_decompress_ out s tmp =
     copy outy y;
     make_one outz;
     fmul outt x y;
-    let h1 = ST.get() in
     true
   ) in
   res
@@ -97,7 +92,7 @@ val point_decompress:
     out:point
   -> s:lbuffer uint8 32ul ->
   Stack bool
-    (requires fun h -> live h out /\ live h s /\ F51.point_inv_t h out)
+    (requires fun h -> live h out /\ live h s)
     (ensures  fun h0 b h1 -> modifies (loc out) h0 h1 /\
       (b ==> F51.point_inv_t h1 out) /\
       (b <==> Some? (Spec.Ed25519.point_decompress (as_seq h0 s))) /\

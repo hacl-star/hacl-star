@@ -17,7 +17,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "f2b352c563326cd277c6dd9f9049819f"
+      "24320932e5a0656b4b97928afb7c411e"
     ],
     [
       "Vale.Arch.Types.lemma_nat_to_two32",
@@ -39,7 +39,7 @@
         "refinement_interpretation_Tm_refine_d657313e832f90b9da2597122651ce83"
       ],
       0,
-      "c31cde588b1228c0d7176981b687ee90"
+      "d459a3c21bab08c8aa2461ad02237d17"
     ],
     [
       "Vale.Arch.Types.lemma_BitwiseXorCommutative",
@@ -74,7 +74,7 @@
         "typing_Vale.Def.Types_s.ixor"
       ],
       0,
-      "447f010a2a42f4735f089ce822cf2c6f"
+      "b46bc9339a58cef2eff70bd698a8713c"
     ],
     [
       "Vale.Arch.Types.lemma_BitwiseXorWithZero",
@@ -115,7 +115,7 @@
         "typing_FStar.UInt.to_vec", "typing_Vale.Def.Types_s.ixor"
       ],
       0,
-      "32c7038c55d8c135db6625f1bee619d6"
+      "37e80ca650fb98e4ecad21daf175bf4f"
     ],
     [
       "Vale.Arch.Types.lemma_BitwiseXorCancel",
@@ -155,7 +155,7 @@
         "typing_FStar.UInt.to_vec", "typing_Prims.pow2"
       ],
       0,
-      "11be9b549266bfebc3e3dab8d11a8048"
+      "ecb133addbb33e3d8394edc7a75dd17d"
     ],
     [
       "Vale.Arch.Types.lemma_BitwiseXorCancel64",
@@ -195,7 +195,7 @@
         "typing_FStar.UInt.to_vec", "typing_Prims.pow2"
       ],
       0,
-      "5269701c7d27c96d0757c7c9557e40e4"
+      "e34dab25eebecc18800edbbd030718e0"
     ],
     [
       "Vale.Arch.Types.lemma_BitwiseXorAssociative",
@@ -233,7 +233,7 @@
         "typing_FStar.UInt.to_vec", "typing_Vale.Def.Types_s.ixor"
       ],
       0,
-      "408eb68a87b27acd4caec7e295274c1d"
+      "6d8636364419dcaf1a456a68a77a0cf0"
     ],
     [
       "Vale.Arch.Types.xor_lemmas",
@@ -242,7 +242,7 @@
       0,
       [ "@query" ],
       0,
-      "e97dd4c52cac0199b9d3b7d3daaf0c5d"
+      "22a4943449d7ef51483291642dedd948"
     ],
     [
       "Vale.Arch.Types.lemma_quad32_xor",
@@ -260,7 +260,7 @@
         "token_correspondence_Vale.Def.Types_s.quad32_xor_def"
       ],
       0,
-      "38170e753daec902371f28285ba82acb"
+      "c3e7c872187c492da674fe842a786847"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32",
@@ -294,7 +294,7 @@
         "typing_Vale.Def.Types_s.nat32_to_be_bytes"
       ],
       0,
-      "8b814897ae7a437c803bb63ba559aefe"
+      "2d9a589654579f02df425c7d524911de"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_bytes_quad32",
@@ -317,7 +317,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "14fd8518b9204a3937cbc81c7fe4282c"
+      "51e14d836734d2a4a1aea203bf8565e6"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_bytes_nat32",
@@ -370,7 +370,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__hi3"
       ],
       0,
-      "b2114d1a05f5f4f09356ff589e9e0414"
+      "603e3349457bebb20a93f72a422c72a1"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_bytes_quad32_zero",
@@ -386,7 +386,7 @@
         "projection_inverse_Vale.Def.Words_s.Mkfour_lo1"
       ],
       0,
-      "a8ace01ee7b6e7bb6d0a404e1cda6b68"
+      "bef58e4a8e0ec02b7906a78ec9f06674"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32_seq",
@@ -395,8 +395,8 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_Prims.nat", "equation_Vale.Def.Words_s.nat32",
         "equation_Vale.Lib.Seqs_s.compose",
         "equation_Vale.Lib.Seqs_s.seq_map",
@@ -418,7 +418,7 @@
         "typing_Vale.Def.Types_s.reverse_bytes_nat32_seq"
       ],
       0,
-      "c6d739a1f6a9ef40c10dd14ba4efe34f"
+      "b2016cb50762dbb0031af97f9981d9da"
     ],
     [
       "Vale.Arch.Types.lemma_insert_nat64_properties",
@@ -455,7 +455,7 @@
         "token_correspondence_Vale.Def.Types_s.insert_nat64_def"
       ],
       0,
-      "141c04950bed029dc57247d168b4cca9"
+      "15828b8795cdf567f39aaa0c896dd42e"
     ],
     [
       "Vale.Arch.Types.lemma_insert_nat64_nat32s",
@@ -496,7 +496,7 @@
         "token_correspondence_Vale.Def.Types_s.insert_nat64_def"
       ],
       0,
-      "de6a892876a8ad86fb3dca3c6b237494"
+      "fe4e5667f7c7e3764e3eefbbc1d9f261"
     ],
     [
       "Vale.Arch.Types.lo64_reveal",
@@ -505,7 +505,7 @@
       0,
       [ "@query" ],
       0,
-      "4ce5496fe7c466b6c4d7da16565dc168"
+      "2a2c2e6460b6831218e32fa3986a8247"
     ],
     [
       "Vale.Arch.Types.hi64_reveal",
@@ -514,7 +514,7 @@
       0,
       [ "@query" ],
       0,
-      "04a881bd5490fd9bc8d4795c504bac97"
+      "238cdca1c068744f5a7711d32c7f068a"
     ],
     [
       "Vale.Arch.Types.lemma_lo64_properties",
@@ -545,7 +545,7 @@
         "token_correspondence_Vale.Arch.Types.lo64_def"
       ],
       0,
-      "d9bbdfd038388dbdfc6af42c81baec3f"
+      "02f5a1717c37cf2d98263e4224565e2e"
     ],
     [
       "Vale.Arch.Types.lemma_hi64_properties",
@@ -576,7 +576,7 @@
         "token_correspondence_Vale.Arch.Types.hi64_def"
       ],
       0,
-      "cc135e67c70e8731ffb10fa07ed78699"
+      "fcd7a8cc6d85c500ee4993d1dd369a7f"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_bytes_nat64_32",
@@ -606,7 +606,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "37203191ab1a77608781407ddf05aaeb"
+      "a7213e5bf032744f5f63c45c9e6fa3fb"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_bytes_quad32_64",
@@ -653,7 +653,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "93c6e5a588b63377a2fa00d6f204f4b5"
+      "2dda19aacc0c86f48cfa40415e2aa516"
     ],
     [
       "Vale.Arch.Types.lemma_equality_check_helper",
@@ -708,7 +708,7 @@
         "typing_Vale.Def.Words_s.int_to_natN"
       ],
       0,
-      "66720d439fc24642ecbb6a8db9c23d0a"
+      "a91e6b442173bb9704977200d9af1d66"
     ],
     [
       "Vale.Arch.Types.lemma_equality_check_helper_2",
@@ -743,7 +743,7 @@
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c"
       ],
       0,
-      "55e3b9f15e30d1988f9aecb3574868fe"
+      "5c8582bbabbc9acec508b30ab378681c"
     ],
     [
       "Vale.Arch.Types.push_pop_xmm",
@@ -805,7 +805,7 @@
         "typing_Vale.Def.Words_s.int_to_natN"
       ],
       0,
-      "b393cdd5fbbc55d7c58a0a006db64420"
+      "ee80f36d726a45a6fc8577da9c957281"
     ],
     [
       "Vale.Arch.Types.lemma_insrq_extrq_relations",
@@ -859,7 +859,7 @@
         "typing_Vale.Def.Types_s.insert_nat64"
       ],
       0,
-      "3f4e3d854158f7fee295a18a973045ee"
+      "406b9136730415d3f88b49a1ef636779"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_nat64_to_bytes",
@@ -868,7 +868,7 @@
       3,
       [ "@query" ],
       0,
-      "f547642a73806bd2edb34401acd6e1ba"
+      "38d05d023abb21a8cd26e09c20cec782"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_nat64_to_bytes",
@@ -918,7 +918,7 @@
         "typing_Vale.Def.Words_s.natN"
       ],
       0,
-      "df95cc5f7252a9da2301947473dbf283"
+      "d5c15a98e5a50bbecfd98b0f51feaff9"
     ],
     [
       "Vale.Arch.Types.le_nat64_to_bytes_to_nat64",
@@ -930,7 +930,7 @@
         "refinement_interpretation_Tm_refine_8333610bdce3cc23e40345e003cba619"
       ],
       0,
-      "f1d1b548183a008d3e28427d1679907a"
+      "4c020a3c56c9e8f82a77528e4be43d76"
     ],
     [
       "Vale.Arch.Types.le_nat64_to_bytes_to_nat64",
@@ -941,10 +941,10 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_1910ef5262f2ee8e712b6609a232b1ea",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
         "Vale.Def.Words.Four_s_interpretation_Tm_arrow_8e8890e19356591ca1f9e83b434ba1ba",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_Prims.nat",
         "equation_Vale.Def.Types_s.le_bytes_to_nat64_def",
         "equation_Vale.Def.Types_s.le_nat64_to_bytes_def",
@@ -989,7 +989,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "2d747f82f22218f84131aaa37fc8d315"
+      "6e8ac5398a0646480273f83320aa960a"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_empty",
@@ -998,7 +998,7 @@
       3,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "37dc4061ac07e9c1da44c6e8212a49a6"
+      "99d1ad0b698b90c28441bfe8a6316f63"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_empty",
@@ -1007,8 +1007,8 @@
       3,
       [
         "@MaxIFuel_assumption", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_Prims.nat", "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
@@ -1031,7 +1031,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "76aae4909701fe5c99a7d49a86cf3437"
+      "c4d766f960278ff7471418dd30ebdc88"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes_one_quad",
@@ -1040,7 +1040,7 @@
       0,
       [ "@query", "projection_inverse_BoxInt_proj_0" ],
       0,
-      "6542f172050799469c0a63971f77c46f"
+      "3c7a9fdf3f9bf9b815004855f9d59e47"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes_one_quad",
@@ -1050,8 +1050,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_Prims.nat", "equation_Prims.pos",
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words.Seq_s.seq4",
@@ -1091,7 +1091,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "7314a43fe2f70cc16a2ec69f9ca33d1f"
+      "4e3041115d4916eaa1b886a46bd08b97"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes",
@@ -1103,7 +1103,7 @@
         "projection_inverse_BoxInt_proj_0"
       ],
       0,
-      "55550ec5f43a9e9471391fb66144518f"
+      "96b0293c1e9e3c4c8d38a1ee36900a68"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad32_to_bytes",
@@ -1129,7 +1129,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "cc7abf581397fa0d4b13035be159a721"
+      "fe4fcfa38253ad7062d93e9df71c8af4"
     ],
     [
       "Vale.Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32",
@@ -1141,7 +1141,7 @@
         "refinement_interpretation_Tm_refine_d5e9774270c731544d7c87dd4dd7c2a0"
       ],
       0,
-      "4fa5de9424f084a610db9d111b81875d"
+      "25c97a9af0889ddab3fd7196785143fd"
     ],
     [
       "Vale.Arch.Types.le_seq_quad32_to_bytes_to_seq_quad32",
@@ -1149,12 +1149,9 @@
       0,
       0,
       [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "@MaxIFuel_assumption", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Four_s_interpretation_Tm_arrow_8e8890e19356591ca1f9e83b434ba1ba",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
-        "equation_Prims.nat",
         "equation_Vale.Def.Types_s.le_seq_quad32_to_bytes_def",
         "equation_Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE",
         "equation_Vale.Def.Words_s.nat32", "equation_Vale.Def.Words_s.nat8",
@@ -1162,19 +1159,16 @@
         "equation_Vale.Lib.Seqs_s.seq_map",
         "function_token_typing_Vale.Def.Types_s.le_bytes_to_seq_quad32",
         "function_token_typing_Vale.Def.Types_s.le_seq_quad32_to_bytes",
-        "function_token_typing_Vale.Def.Words.Four_s.four_to_nat",
         "function_token_typing_Vale.Def.Words_s.nat32",
-        "function_token_typing_Vale.Def.Words_s.nat8", "int_typing",
+        "function_token_typing_Vale.Def.Words_s.nat8",
         "interpretation_Tm_abs_04f3daab46117a22c7e69935aa75c278",
         "kinding_Vale.Def.Words_s.four@tok",
         "lemma_FStar.Seq.Base.lemma_init_len",
-        "lemma_FStar.UInt.pow2_values",
         "lemma_Vale.Def.Words.Seq.seq_four_to_seq_to_seq_four_LE",
         "lemma_Vale.Def.Words.Seq.seq_nat32_to_seq_nat8_to_seq_nat32_LE",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0fe8a12189cf4c417dda723cc135a9ac",
         "refinement_interpretation_Tm_refine_4541e819c92681ed9a776d05a593cda6",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_d5e9774270c731544d7c87dd4dd7c2a0",
         "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
@@ -1182,11 +1176,10 @@
         "token_correspondence_Vale.Def.Types_s.le_seq_quad32_to_bytes_def",
         "typing_FStar.Seq.Base.length",
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca",
-        "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE",
-        "typing_Vale.Lib.Seqs_s.seq_map"
+        "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "48ac26c01f534ae8b205946aacf5c051"
+      "9322d5d00f24392316e3191ed06db097"
     ],
     [
       "Vale.Arch.Types.le_quad32_to_bytes_to_quad32",
@@ -1198,7 +1191,7 @@
         "refinement_interpretation_Tm_refine_b31e3a3ba71ee334e7dd15a53b9eadcc"
       ],
       0,
-      "571425ce7d907bafce42114361e25e26"
+      "be12db44678fd420b69331dce6c7a254"
     ],
     [
       "Vale.Arch.Types.le_quad32_to_bytes_to_quad32",
@@ -1208,8 +1201,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_Prims.nat",
         "equation_Vale.Def.Types_s.le_bytes_to_quad32_def",
         "equation_Vale.Def.Words.Seq_s.seq_to_four_LE",
@@ -1238,7 +1231,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "bdd9653d42cc90f68f99ae23e3b0c7a1"
+      "5c46f0ba24e534465a08395d93f4e4bc"
     ],
     [
       "Vale.Arch.Types.le_seq_quad32_to_bytes_of_singleton",
@@ -1255,7 +1248,7 @@
         "token_correspondence_Vale.Def.Types_s.le_seq_quad32_to_bytes_def"
       ],
       0,
-      "31a6843d1e6e361604da3eb16aad3e2c"
+      "958770235f2f1c37b8382a8c447eb957"
     ],
     [
       "Vale.Arch.Types.le_quad32_to_bytes_injective",
@@ -1291,7 +1284,7 @@
         "typing_Vale.Def.Words.Seq_s.four_to_seq_LE"
       ],
       0,
-      "86d3a4c65402d09826e444fce2cce58e"
+      "8b4d9437e9798c466380777b56214f5e"
     ],
     [
       "Vale.Arch.Types.le_quad32_to_bytes_injective_specific",
@@ -1300,7 +1293,7 @@
       0,
       [ "@query" ],
       0,
-      "e3564f82818a3f066a66e1d974abd7f1"
+      "d8a6eb99ed384e7ea01546f15f366119"
     ],
     [
       "Vale.Arch.Types.le_seq_quad32_to_bytes_injective",
@@ -1310,8 +1303,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_Prims.eqtype", "equation_Prims.nat",
         "equation_Vale.Def.Types_s.le_seq_quad32_to_bytes_def",
         "equation_Vale.Def.Types_s.quad32",
@@ -1341,7 +1334,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "8e6f7c3a0482d953b0dd964f3d4943c8"
+      "f0201d93d175e8504bf164d0bfc025dc"
     ],
     [
       "Vale.Arch.Types.seq_to_four_LE_is_seq_to_seq_four_LE",
@@ -1356,7 +1349,7 @@
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "701036d8321b6e098892eec180e4ee5c"
+      "2318ad9c7589ba37cadd6e8b75cebfaf"
     ],
     [
       "Vale.Arch.Types.seq_to_four_LE_is_seq_to_seq_four_LE",
@@ -1392,7 +1385,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_four_LE"
       ],
       0,
-      "a875a98e67fa800de4295b36c70d7afe"
+      "842c50c13ba58c5ecd50e24bc6d4a58e"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad_of_singleton",
@@ -1404,7 +1397,7 @@
         "refinement_interpretation_Tm_refine_b31e3a3ba71ee334e7dd15a53b9eadcc"
       ],
       0,
-      "a963975c0825c0b2885a79c44081c4f6"
+      "85fbc68407cc43886fe6979dae4356e4"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_seq_quad_of_singleton",
@@ -1414,8 +1407,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_Prims.nat", "equation_Prims.pos",
         "equation_Vale.Def.Types_s.le_bytes_to_quad32_def",
         "equation_Vale.Def.Types_s.quad32",
@@ -1445,7 +1438,7 @@
         "typing_Tm_abs_12f0bbc5cd2aeb167bc7e771b588a4ca"
       ],
       0,
-      "335666039a98f910b16e6d7ca75e47ea"
+      "9070433cf73c0ad3116dcf5951e78e50"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_quad32_to_bytes",
@@ -1454,7 +1447,7 @@
       0,
       [ "@query" ],
       0,
-      "b8b3a5a022181b22dfde21addc79b3ff"
+      "f71b2dfe5e8c8584d03bd08c8a5c0912"
     ],
     [
       "Vale.Arch.Types.le_bytes_to_quad32_to_bytes",
@@ -1476,7 +1469,7 @@
         "typing_FStar.Seq.Base.create"
       ],
       0,
-      "8fb0e010a0deaa3cff7600d2b03a450e"
+      "629f94fc37d7ebe477ff6fbd90c369e5"
     ],
     [
       "Vale.Arch.Types.be_quad32_to_bytes",
@@ -1485,8 +1478,8 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_Prims.nat", "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words.Seq_s.seq4",
         "equation_Vale.Def.Words.Seq_s.seqn",
@@ -1509,7 +1502,7 @@
         "typing_Vale.Def.Words.Seq_s.four_to_seq_BE"
       ],
       0,
-      "23af161e18e703068f647e011f7da200"
+      "38d9d5663c22f4ea38a4e0d118fe37de"
     ],
     [
       "Vale.Arch.Types.be_bytes_to_quad32_to_bytes",
@@ -1526,7 +1519,7 @@
         "typing_Vale.Arch.Types.be_quad32_to_bytes"
       ],
       0,
-      "554eb16e7019b500e0b5a3d2f525dea0"
+      "3aab5bffeba08da57b563dd1de980860"
     ],
     [
       "Vale.Arch.Types.be_bytes_to_quad32_to_bytes",
@@ -1535,8 +1528,8 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_Prims.nat", "equation_Vale.Arch.Types.be_quad32_to_bytes",
         "equation_Vale.Def.Types_s.be_bytes_to_quad32_def",
         "equation_Vale.Def.Types_s.quad32",
@@ -1581,7 +1574,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "9a94fa1c90b1c8cdd1fd68abc2358250"
+      "bbc6bf3108305a1d1fc85d57254aee37"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32_quad32",
@@ -1611,7 +1604,7 @@
         "typing_Vale.Def.Words_s.__proj__Mkfour__item__lo1"
       ],
       0,
-      "fd923cb94afcfcad1e70dfd4da4acec1"
+      "0ef1bea00be9e2e518eac18cea2887c9"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32_quad32_seq",
@@ -1623,7 +1616,7 @@
         "lemma_Vale.Arch.Types.lemma_reverse_reverse_bytes_nat32_quad32"
       ],
       0,
-      "a761fca434a9251be078d4cb9258db55"
+      "3ee3a091fc6d66c5bc759e103849ff51"
     ],
     [
       "Vale.Arch.Types.lemma_reverse_reverse_bytes_quad32_seq",
@@ -1635,7 +1628,7 @@
         "lemma_Vale.Arch.Types.lemma_reverse_bytes_quad32"
       ],
       0,
-      "f4fb01cae2bae30757d12365f9894b73"
+      "24a7c8acb25c64cd1daef055ed032ea2"
     ],
     [
       "Vale.Arch.Types.lemma_le_seq_quad32_to_bytes_length",
@@ -1644,7 +1637,7 @@
       0,
       [ "@query", "lemma_Vale.Def.Types_s.le_seq_quad32_to_bytes_length" ],
       0,
-      "f8a3bdcb67b4eb225001c2f5e08d00c7"
+      "93e905dc97e19ecf0979c128520af9a4"
     ],
     [
       "Vale.Arch.Types.slice_commutes_seq_four_to_seq_LE",
@@ -1665,7 +1658,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "b0340f8c9700abada2a379fe08ac07c6"
+      "f467eafdff9e6b3c1ee6c160e0eca890"
     ],
     [
       "Vale.Arch.Types.slice_commutes_seq_four_to_seq_LE",
@@ -1708,7 +1701,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "95f29d80fb6c77f3aa3e09539218087d"
+      "e622c10ab3b14e6d16e466698dc2ce4f"
     ],
     [
       "Vale.Arch.Types.slice_commutes_le_seq_quad32_to_bytes",
@@ -1727,7 +1720,7 @@
         "refinement_interpretation_Tm_refine_c064a9ee86fe2a45597a2563ec269cee"
       ],
       0,
-      "2f66d3ebf0fe6da353b7ecbcc64fefe7"
+      "51939b3716a3d80a950f5fd1001b3ce5"
     ],
     [
       "Vale.Arch.Types.slice_commutes_le_seq_quad32_to_bytes",
@@ -1766,7 +1759,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_four_to_seq_LE"
       ],
       0,
-      "d3c25334e88b69c6a07bb46af0d5753d"
+      "687fd641e6e7e8f56a8ffa442c791790"
     ],
     [
       "Vale.Arch.Types.slice_commutes_le_seq_quad32_to_bytes0",
@@ -1784,7 +1777,7 @@
         "refinement_interpretation_Tm_refine_c064a9ee86fe2a45597a2563ec269cee"
       ],
       0,
-      "5c0be43a68069ff7530b3c0be34fe60f"
+      "0f14fab7a0ba1441e6659c02c72101f2"
     ],
     [
       "Vale.Arch.Types.slice_commutes_le_seq_quad32_to_bytes0",
@@ -1806,7 +1799,7 @@
         "typing_FStar.Seq.Base.length"
       ],
       0,
-      "f0fd3e69898cea1009ec640c9883fc78"
+      "50c1f502c13e80c77cbd4598629d8e7c"
     ],
     [
       "Vale.Arch.Types.append_distributes_le_bytes_to_seq_quad32",
@@ -1823,7 +1816,7 @@
         "refinement_interpretation_Tm_refine_d5e9774270c731544d7c87dd4dd7c2a0"
       ],
       0,
-      "31a066a7a4cda5470f4c698c78c44205"
+      "406cbd6a397eaf3db35ca1cfad2529ea"
     ],
     [
       "Vale.Arch.Types.append_distributes_le_bytes_to_seq_quad32",
@@ -1833,8 +1826,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "FStar.Classical_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "FStar.Seq.Base_interpretation_Tm_arrow_44bb45ed5c2534b346e0f58ea5033251",
-        "Vale.Def.Words.Two_s_interpretation_Tm_arrow_6980332764c4493a7b0df5c02f7aefbe",
         "equation_FStar.Seq.Base.op_At_Bar", "equation_Prims.pos",
         "equation_Vale.Def.Types_s.quad32",
         "equation_Vale.Def.Words.Seq_s.seq_nat8_to_seq_nat32_LE",
@@ -1861,7 +1854,7 @@
         "typing_Vale.Def.Words.Seq_s.seq_to_seq_four_LE"
       ],
       0,
-      "790d676c0299552f8edcda570a91cec0"
+      "7307ee4d983cc720fedcc9084850cd1f"
     ],
     [
       "Vale.Arch.Types.append_distributes_le_seq_quad32_to_bytes",
@@ -1883,7 +1876,7 @@
         "token_correspondence_Vale.Def.Types_s.le_seq_quad32_to_bytes_def"
       ],
       0,
-      "ddb09aa42ffda85afc9ee809aa4964ee"
+      "f28076a6b631c7413b3f0be7896c8d1f"
     ]
   ]
 ]

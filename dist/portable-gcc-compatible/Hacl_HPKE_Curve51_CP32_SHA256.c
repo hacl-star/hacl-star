@@ -24,6 +24,8 @@
 
 #include "Hacl_HPKE_Curve51_CP32_SHA256.h"
 
+#include "internal/Hacl_Krmllib.h"
+
 /* SNIPPET_START: Hacl_HPKE_Curve51_CP32_SHA256_setupBaseI */
 
 uint32_t

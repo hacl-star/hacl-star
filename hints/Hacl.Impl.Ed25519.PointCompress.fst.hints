@@ -1,5 +1,5 @@
 [
-  "ô\u007fSöõ\t”úÙ9\u001f n–\u0014W",
+  "ÔF\b¬ü¹#éÇ·Ì7ØµÅV",
   [
     [
       "Hacl.Impl.Ed25519.PointCompress.x_mod_2",
@@ -87,7 +87,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "8301381dccb6a3447f4da98fdd4bc0b5"
+      "0595746e5c78012974ad9d6e889d6b9f"
     ],
     [
       "Hacl.Impl.Ed25519.PointCompress.lemma_fits_in_prime_last_byte",
@@ -105,7 +105,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f179d519722abeb68970a8e27c15c7cd"
+      "ae57991d21728e8ca7631f840ce7d98a"
     ],
     [
       "Hacl.Impl.Ed25519.PointCompress.lemma_fits_in_prime_last_byte",
@@ -161,7 +161,7 @@
         "typing_Prims.pow2", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "7fa1e11951eeb83dfef25d195b53c0e6"
+      "9a22e2ff7a547efbcebf66715e11abe3"
     ],
     [
       "Hacl.Impl.Ed25519.PointCompress.add_sign",
@@ -276,7 +276,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "08aee09031cab73925fbe8d0a23da6c0"
+      "015d524df3ec2ba0e6b5e14e03cbeacc"
     ],
     [
       "Hacl.Impl.Ed25519.PointCompress.point_compress_",
@@ -334,7 +334,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "a3f92e386e929730d33c1f4e1321f693"
+      "bf2c7dea0d3cdd41f95804bde4fa35ce"
     ],
     [
       "Hacl.Impl.Ed25519.PointCompress.point_compress_",
@@ -347,12 +347,9 @@
         "b2t_def", "bool_inversion", "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S32",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
-        "constructor_distinct_Spec.Hash.Definitions.SHA2_512",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.SEC@tok",
@@ -388,12 +385,14 @@
         "equation_Lib.Buffer.live", "equation_Lib.Buffer.loc",
         "equation_Lib.Buffer.modifies", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
-        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.uint64", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_LowStar.Buffer.buffer",
         "equation_LowStar.Buffer.trivial_preorder",
         "equation_LowStar.Monotonic.Buffer.length", "equation_Prims.nat",
+        "equation_Spec.Curve25519.prime",
+        "equation_Spec.Ed25519.PointOps.fexp",
+        "equation_Spec.Ed25519.PointOps.finv",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64", "int_inversion",
         "int_typing",
@@ -416,6 +415,7 @@
         "lemma_LowStar.Monotonic.Buffer.modifies_buffer_elim",
         "lemma_LowStar.Monotonic.Buffer.modifies_liveness_insensitive_buffer_weak",
         "lemma_LowStar.Monotonic.Buffer.modifies_trans_linear",
+        "lemma_Spec.Curve25519.Lemmas.lemma_prime_value",
         "primitive_Prims.op_Addition", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_GreaterThanOrEqual",
         "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
@@ -429,14 +429,9 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple5__5",
         "refinement_interpretation_Tm_refine_05e15190c946858f68c69156f585f95a",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_22168ac94f8d6056c69090a39a044732",
         "refinement_interpretation_Tm_refine_24fb3510963ae66cc731e0fb81802e7f",
-        "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
-        "refinement_interpretation_Tm_refine_4fa8e2dd96f8bb1e23e6574326e9e019",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
-        "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9851f1f5edb4ada9e13670896b58c186",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_afa19b3fa952494af84f128d9541492e",
@@ -453,18 +448,14 @@
         "typing_FStar.UInt32.v",
         "typing_Hacl.Spec.Curve25519.Field51.Definition.max51",
         "typing_Hacl.Spec.Curve25519.Field51.Definition.pow51",
-        "typing_Lib.Buffer.as_seq", "typing_Lib.Buffer.gsub",
-        "typing_Lib.Buffer.length", "typing_Lib.Buffer.loc",
-        "typing_Lib.IntTypes.v", "typing_Lib.Sequence.index",
-        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_Lib.Buffer.gsub", "typing_Lib.Buffer.length",
+        "typing_Lib.Buffer.loc", "typing_LowStar.Buffer.trivial_preorder",
         "typing_LowStar.Monotonic.Buffer.len",
         "typing_LowStar.Monotonic.Buffer.loc_buffer",
-        "typing_LowStar.Monotonic.Buffer.mgsub",
-        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U64@tok"
+        "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "65c6658ab380740e7b5d9289ebee2560"
+      "8aade9701c267802b0ec058d6003984d"
     ],
     [
       "Hacl.Impl.Ed25519.PointCompress.point_compress",
@@ -483,7 +474,7 @@
         "typing_Lib.Buffer.length", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "daa372baba56f24e1128cf33459b3e86"
+      "5b928d4aee356ce3ae78724feca1e2d9"
     ],
     [
       "Hacl.Impl.Ed25519.PointCompress.point_compress",
@@ -555,7 +546,7 @@
         "equation_Prims.nat", "equation_Spec.Curve25519.elem",
         "equation_Spec.Curve25519.op_Star_Percent",
         "equation_Spec.Curve25519.prime",
-        "equation_Spec.Ed25519.point_compress",
+        "equation_Spec.Ed25519.PointOps.point_compress",
         "function_token_typing_FStar.Monotonic.Heap.heap",
         "function_token_typing_Lib.IntTypes.uint64",
         "function_token_typing_Lib.IntTypes.uint8",
@@ -667,12 +658,12 @@
         "typing_LowStar.Monotonic.Buffer.loc_not_unused_in",
         "typing_LowStar.Monotonic.Buffer.loc_regions",
         "typing_LowStar.Monotonic.Buffer.loc_union",
-        "typing_Spec.Curve25519.fmul", "typing_Spec.Ed25519.modp_inv",
+        "typing_Spec.Curve25519.fmul", "typing_Spec.Ed25519.PointOps.finv",
         "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.SEC@tok",
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "a336ea094509bba3399f0f78565d4242"
+      "97610aa5dd667abfeae1a514ab88cb8c"
     ]
   ]
 ]

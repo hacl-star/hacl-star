@@ -29,31 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-
-extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];
-
-void Hacl_Impl_Chacha20_chacha20_init(uint32_t *ctx, uint8_t *k, uint8_t *n, uint32_t ctr);
-
-void
-Hacl_Impl_Chacha20_chacha20_encrypt_block(
-  uint32_t *ctx,
-  uint8_t *out,
-  uint32_t incr,
-  uint8_t *text
-);
-
-void
-Hacl_Impl_Chacha20_chacha20_update(uint32_t *ctx, uint32_t len, uint8_t *out, uint8_t *text);
-
+#include "Hacl_Krmllib.h"
+#include "evercrypt_targetconfig.h"
 void
 Hacl_Chacha20_chacha20_encrypt(
   uint32_t len,

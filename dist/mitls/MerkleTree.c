@@ -24,6 +24,8 @@
 
 #include "MerkleTree.h"
 
+#include "internal/Hacl_Krmllib.h"
+
 static uint8_t *hash_r_alloc(uint32_t s)
 {
   KRML_CHECK_SIZE(sizeof (uint8_t), s);
@@ -85,14 +87,15 @@ free_elems___uint8_t__uint32_t(
     rg.r_free(rg.state, uu____0);
     if (idx != (uint32_t)0U)
     {
-      idx--;
+      uint32_t tmp = idx - (uint32_t)1U;
+      idx = tmp;
     }
     else
     {
       return;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -650,7 +653,7 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -683,58 +686,6 @@ uint32_t MerkleTree_Low_merkle_tree_size_lg = (uint32_t)32U;
 bool MerkleTree_Low_uu___is_MT(MerkleTree_Low_merkle_tree projectee)
 {
   return true;
-}
-
-uint32_t MerkleTree_Low___proj__MT__item__hash_size(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.hash_size;
-}
-
-uint64_t MerkleTree_Low___proj__MT__item__offset(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.offset;
-}
-
-uint32_t MerkleTree_Low___proj__MT__item__i(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.i;
-}
-
-uint32_t MerkleTree_Low___proj__MT__item__j(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.j;
-}
-
-LowStar_Vector_vector_str__LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low___proj__MT__item__hs(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.hs;
-}
-
-bool MerkleTree_Low___proj__MT__item__rhs_ok(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.rhs_ok;
-}
-
-LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low___proj__MT__item__rhs(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.rhs;
-}
-
-uint8_t *MerkleTree_Low___proj__MT__item__mroot(MerkleTree_Low_merkle_tree projectee)
-{
-  return projectee.mroot;
-}
-
-void
-(*MerkleTree_Low___proj__MT__item__hash_fun(MerkleTree_Low_merkle_tree projectee))(
-  uint8_t *x0,
-  uint8_t *x1,
-  uint8_t *x2
-)
-{
-  return projectee.hash_fun;
 }
 
 bool
@@ -825,10 +776,11 @@ alloc___LowStar_Vector_vector_str__uint8_t__uint32_t(
     {
       LowStar_Vector_vector_str___uint8_t_ v = rg.r_alloc(rg.state);
       assign__LowStar_Vector_vector_str__uint8_t_(rv, cidx - (uint32_t)1U, v);
-      cidx--;
+      uint32_t tmp = cidx - (uint32_t)1U;
+      cidx = tmp;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -881,10 +833,11 @@ alloc____uint8_t__uint32_t(
     {
       uint8_t *v = rg.r_alloc(rg.state);
       assign___uint8_t_(rv, cidx - (uint32_t)1U, v);
-      cidx--;
+      uint32_t tmp = cidx - (uint32_t)1U;
+      cidx = tmp;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -975,14 +928,15 @@ free_elems__LowStar_Vector_vector_str__uint8_t__uint32_t(
     rg.r_free(rg.state, uu____0);
     if (idx != (uint32_t)0U)
     {
-      idx--;
+      uint32_t tmp = idx - (uint32_t)1U;
+      idx = tmp;
     }
     else
     {
       return;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1110,15 +1064,17 @@ insert_(
       LowStar_Vector_vector_str___uint8_t_
       lvhs = index__LowStar_Vector_vector_str__uint8_t_(hs, lv);
       hash_fun(index___uint8_t_(lvhs, lvhs.sz - (uint32_t)2U), acc, acc);
-      lv++;
-      j = j / (uint32_t)2U;
+      uint32_t tmp0 = lv + (uint32_t)1U;
+      uint32_t tmp = j / (uint32_t)2U;
+      lv = tmp0;
+      j = tmp;
     }
     else
     {
       return;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1172,17 +1128,6 @@ MerkleTree_Low_merkle_tree
 bool MerkleTree_Low_uu___is_Path(MerkleTree_Low_path projectee)
 {
   return true;
-}
-
-uint32_t MerkleTree_Low___proj__Path__item__hash_size(MerkleTree_Low_path projectee)
-{
-  return projectee.hash_size;
-}
-
-LowStar_Vector_vector_str___uint8_t_
-MerkleTree_Low___proj__Path__item__hashes(MerkleTree_Low_path projectee)
-{
-  return projectee.hashes;
 }
 
 MerkleTree_Low_path *MerkleTree_Low_init_path(uint32_t hsz)
@@ -1276,9 +1221,12 @@ construct_rhs(
       uint32_t ofs = MerkleTree_Low_offset_of(i);
       if (j % (uint32_t)2U == (uint32_t)0U)
       {
-        lv++;
-        i = i / (uint32_t)2U;
-        j = j / (uint32_t)2U;
+        uint32_t tmp0 = lv + (uint32_t)1U;
+        uint32_t tmp1 = i / (uint32_t)2U;
+        uint32_t tmp = j / (uint32_t)2U;
+        lv = tmp0;
+        i = tmp1;
+        j = tmp;
       }
       else
       {
@@ -1308,14 +1256,18 @@ construct_rhs(
               j - (uint32_t)1U - ofs),
             acc);
         }
-        lv++;
-        i = i / (uint32_t)2U;
-        j = j / (uint32_t)2U;
-        actd = true;
+        uint32_t tmp0 = lv + (uint32_t)1U;
+        uint32_t tmp1 = i / (uint32_t)2U;
+        uint32_t tmp2 = j / (uint32_t)2U;
+        bool tmp = true;
+        lv = tmp0;
+        i = tmp1;
+        j = tmp2;
+        actd = tmp;
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1493,23 +1445,27 @@ mt_get_path_(
           *p = ((MerkleTree_Low_path){ .hash_size = hsz, .hashes = ipv });
         }
       }
-      lv++;
-      i = i / (uint32_t)2U;
-      j = j / (uint32_t)2U;
-      k = k / (uint32_t)2U;
-      bool ite;
+      uint32_t tmp0 = lv + (uint32_t)1U;
+      uint32_t tmp1 = i / (uint32_t)2U;
+      uint32_t tmp2 = j / (uint32_t)2U;
+      uint32_t tmp3 = k / (uint32_t)2U;
+      bool tmp;
       if (j % (uint32_t)2U == (uint32_t)0U)
       {
-        ite = actd;
+        tmp = actd;
       }
       else
       {
-        ite = true;
+        tmp = true;
       }
-      actd = ite;
+      lv = tmp0;
+      i = tmp1;
+      j = tmp2;
+      k = tmp3;
+      actd = tmp;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1645,12 +1601,15 @@ mt_flush_to_(
       }
       LowStar_Vector_vector_str___uint8_t_ flushed = frv;
       assign__LowStar_Vector_vector_str__uint8_t__uint32_t(hs, lv, flushed);
-      lv++;
-      pi = pi / (uint32_t)2U;
-      i1 = i1 / (uint32_t)2U;
+      uint32_t tmp0 = lv + (uint32_t)1U;
+      uint32_t tmp1 = pi / (uint32_t)2U;
+      uint32_t tmp = i1 / (uint32_t)2U;
+      lv = tmp0;
+      pi = tmp1;
+      i1 = tmp;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1725,14 +1684,15 @@ free_elems_from___uint8_t__uint32_t(
     rg.r_free(rg.state, uu____0);
     if (idx + (uint32_t)1U < rv.sz)
     {
-      idx++;
+      uint32_t tmp = idx + (uint32_t)1U;
+      idx = tmp;
     }
     else
     {
       return;
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1806,10 +1766,14 @@ mt_retract_to_(
       assign__LowStar_Vector_vector_str__uint8_t__uint32_t(hs, lv, retracted);
       if (lv + (uint32_t)1U < hs.sz)
       {
-        lv++;
-        i = i / (uint32_t)2U;
-        s = s / (uint32_t)2U;
-        j = j / (uint32_t)2U;
+        uint32_t tmp0 = lv + (uint32_t)1U;
+        uint32_t tmp1 = i / (uint32_t)2U;
+        uint32_t tmp2 = s / (uint32_t)2U;
+        uint32_t tmp = j / (uint32_t)2U;
+        lv = tmp0;
+        i = tmp1;
+        s = tmp2;
+        j = tmp;
       }
       else
       {
@@ -1817,7 +1781,7 @@ mt_retract_to_(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -1892,19 +1856,26 @@ mt_verify_(
       {
         if (j == k || (j == k + (uint32_t)1U && !actd))
         {
-          k = k / (uint32_t)2U;
-          j = j / (uint32_t)2U;
-          actd = nactd;
+          uint32_t tmp0 = k / (uint32_t)2U;
+          uint32_t tmp1 = j / (uint32_t)2U;
+          bool tmp = nactd;
+          k = tmp0;
+          j = tmp1;
+          actd = tmp;
         }
         else
         {
           MerkleTree_Low_path ncpd = *ncp;
           uint8_t *phash = index___uint8_t_(ncpd.hashes, ppos);
           hash_fun(acc, phash, acc);
-          k = k / (uint32_t)2U;
-          j = j / (uint32_t)2U;
-          ppos++;
-          actd = nactd;
+          uint32_t tmp0 = k / (uint32_t)2U;
+          uint32_t tmp1 = j / (uint32_t)2U;
+          uint32_t tmp2 = ppos + (uint32_t)1U;
+          bool tmp = nactd;
+          k = tmp0;
+          j = tmp1;
+          ppos = tmp2;
+          actd = tmp;
         }
       }
       else
@@ -1912,14 +1883,18 @@ mt_verify_(
         MerkleTree_Low_path ncpd = *ncp;
         uint8_t *phash = index___uint8_t_(ncpd.hashes, ppos);
         hash_fun(phash, acc, acc);
-        k = k / (uint32_t)2U;
-        j = j / (uint32_t)2U;
-        ppos++;
-        actd = nactd;
+        uint32_t tmp0 = k / (uint32_t)2U;
+        uint32_t tmp1 = j / (uint32_t)2U;
+        uint32_t tmp2 = ppos + (uint32_t)1U;
+        bool tmp = nactd;
+        k = tmp0;
+        j = tmp1;
+        ppos = tmp2;
+        actd = tmp;
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2091,9 +2066,12 @@ serialize_hash_i(
       uint32_t j = i + (uint32_t)1U;
       if (j < hash_size)
       {
-        ok = ok1;
-        pos = pos1;
-        i = j;
+        bool tmp0 = ok1;
+        uint32_t tmp1 = pos1;
+        uint32_t tmp = j;
+        ok = tmp0;
+        pos = tmp1;
+        i = tmp;
       }
       else
       {
@@ -2101,7 +2079,7 @@ serialize_hash_i(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2158,9 +2136,12 @@ serialize_hash_vec_i(
       uint32_t j = i + (uint32_t)1U;
       if (j < x.sz)
       {
-        ok = ok1;
-        pos = pos1;
-        i = j;
+        bool tmp0 = ok1;
+        uint32_t tmp1 = pos1;
+        uint32_t tmp = j;
+        ok = tmp0;
+        pos = tmp1;
+        i = tmp;
       }
       else
       {
@@ -2168,7 +2149,7 @@ serialize_hash_vec_i(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2262,9 +2243,12 @@ serialize_hash_vv_i(
       uint32_t j = i + (uint32_t)1U;
       if (j < x.sz)
       {
-        ok = ok1;
-        pos = pos1;
-        i = j;
+        bool tmp0 = ok1;
+        uint32_t tmp1 = pos1;
+        uint32_t tmp = j;
+        ok = tmp0;
+        pos = tmp1;
+        i = tmp;
       }
       else
       {
@@ -2272,7 +2256,7 @@ serialize_hash_vv_i(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2525,9 +2509,12 @@ deserialize_hash_vec_i(
         uint32_t j = i + (uint32_t)1U;
         if (j < res.sz)
         {
-          ok = ok1;
-          pos = pos1;
-          i = j;
+          bool tmp0 = ok1;
+          uint32_t tmp1 = pos1;
+          uint32_t tmp = j;
+          ok = tmp0;
+          pos = tmp1;
+          i = tmp;
         }
         else
         {
@@ -2536,7 +2523,7 @@ deserialize_hash_vec_i(
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");
@@ -2666,14 +2653,17 @@ deserialize_hash_vv_i(
         }
         else
         {
-          ok = ok1;
-          pos = pos1;
-          i = j;
+          bool tmp0 = ok1;
+          uint32_t tmp1 = pos1;
+          uint32_t tmp = j;
+          ok = tmp0;
+          pos = tmp1;
+          i = tmp;
         }
       }
     }
   }
-  KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+  KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
     __FILE__,
     __LINE__,
     "unreachable, returns inserted above");

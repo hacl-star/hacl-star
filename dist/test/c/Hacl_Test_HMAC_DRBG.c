@@ -24,6 +24,8 @@
 
 #include "Hacl_Test_HMAC_DRBG.h"
 
+
+
 #define SHA2_224 0
 #define SHA2_256 1
 #define SHA2_384 2
@@ -1322,7 +1324,7 @@ static uint32_t min_length(hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1584,7 +1586,7 @@ instantiate(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1816,7 +1818,7 @@ reseed(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -2252,7 +2254,7 @@ generate(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -2262,7 +2264,7 @@ extern void LowStar_Printf_print_string(Prims_string uu___);
 
 extern void LowStar_Printf_print_u32(uint32_t uu___);
 
-extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *r);
+extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *b);
 
 static uint8_t
 vectors_low0[16U] =
@@ -5102,7 +5104,7 @@ static void test_one(vector vec)
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
@@ -5155,7 +5157,7 @@ static void test_one(vector vec)
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }

@@ -15,7 +15,7 @@ CMX=$(FILES:.ml=.cmx)
 all: hacllib.cmxa
 
 hacllib.cmxa:
-	$(OCAMLOPT) -thread -w -58 -c $(FILES)
+	$(OCAMLOPT) -w -58 -c $(FILES)
 	$(OCAMLOPT_BARE) -package fstarlib -a $(CMX) -o hacllib.cmxa
 
 clean:

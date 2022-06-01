@@ -29,19 +29,17 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_Spec.h"
 #include "Hacl_SHA3.h"
-
+#include "Hacl_Krmllib.h"
+#include "evercrypt_targetconfig.h"
 /* SNIPPET_START: Hacl_Keccak_shake128_4x */
 
 static inline void
@@ -303,7 +301,7 @@ Hacl_Impl_Frodo_Params_frodo_gen_matrix(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -496,12 +494,6 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344(
 }
 
 /* SNIPPET_END: Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344 */
-
-/* SNIPPET_START: randombytes_ */
-
-void randombytes_(uint32_t len, uint8_t *res);
-
-/* SNIPPET_END: randombytes_ */
 
 /* SNIPPET_START: Hacl_Impl_Frodo_Pack_frodo_pack */
 

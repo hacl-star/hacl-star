@@ -1,6 +1,6 @@
 # This Makefile can be included by client projects; it exports the set of
 # include directories relative to HACL_HOME and exports the set of needed
-# kremlin flags to successfully extract Vale. This Makefile honors
+# karamel flags to successfully extract Vale. This Makefile honors
 # EVERCRYPT_CONFIG.
 
 VALE_BUNDLES=\
@@ -63,6 +63,6 @@ VALE_DIRS	= \
 ALL_HACL_SOURCE_DIRS = \
   $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS) \
   $(EVERCRYPT_DIRS) $(MERKLE_DIRS) \
-  $(KREMLIN_HOME)/runtime
+  $(KRML_HOME)/runtime
 
 ALL_HACL_DIRS	?= $(ALL_HACL_SOURCE_DIRS) $(HACL_HOME)/obj

@@ -24,6 +24,8 @@
 
 #include "Hacl_HMAC_DRBG.h"
 
+
+
 /* SNIPPET_START: Hacl_HMAC_DRBG_reseed_interval */
 
 uint32_t Hacl_HMAC_DRBG_reseed_interval = (uint32_t)1024U;
@@ -78,7 +80,7 @@ uint32_t Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -95,45 +97,6 @@ Hacl_HMAC_DRBG_uu___is_State(Spec_Hash_Definitions_hash_alg a, Hacl_HMAC_DRBG_st
 }
 
 /* SNIPPET_END: Hacl_HMAC_DRBG_uu___is_State */
-
-/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__k */
-
-uint8_t
-*Hacl_HMAC_DRBG___proj__State__item__k(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-)
-{
-  return projectee.k;
-}
-
-/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__k */
-
-/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__v */
-
-uint8_t
-*Hacl_HMAC_DRBG___proj__State__item__v(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-)
-{
-  return projectee.v;
-}
-
-/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__v */
-
-/* SNIPPET_START: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
-
-uint32_t
-*Hacl_HMAC_DRBG___proj__State__item__reseed_counter(
-  Spec_Hash_Definitions_hash_alg a,
-  Hacl_HMAC_DRBG_state projectee
-)
-{
-  return projectee.reseed_counter;
-}
-
-/* SNIPPET_END: Hacl_HMAC_DRBG___proj__State__item__reseed_counter */
 
 /* SNIPPET_START: Hacl_HMAC_DRBG_create_in */
 
@@ -168,7 +131,7 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -201,7 +164,7 @@ Hacl_HMAC_DRBG_state Hacl_HMAC_DRBG_create_in(Spec_Hash_Definitions_hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -462,7 +425,7 @@ Hacl_HMAC_DRBG_instantiate(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -698,7 +661,7 @@ Hacl_HMAC_DRBG_reseed(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -1114,7 +1077,7 @@ Hacl_HMAC_DRBG_generate(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

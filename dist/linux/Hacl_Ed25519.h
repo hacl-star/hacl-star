@@ -29,48 +29,78 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "Hacl_Hash.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Hash_SHA2.h"
 #include "Hacl_Bignum25519_51.h"
-#include "Hacl_Streaming.h"
-#include "Hacl_Curve25519_51.h"
+#include "libintvector.h"
+/********************************************************************************
+  Verified C library for EdDSA signing and verification on the edwards25519 curve.
+********************************************************************************/
 
-void Hacl_Bignum25519_reduce_513(u64 *a);
 
-void Hacl_Bignum25519_inverse(u64 *out, u64 *a);
+/*
+Compute the public key from the private key.
 
-void Hacl_Bignum25519_load_51(u64 *output, u8 *input);
+  The outparam `public_key`  points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+*/
+void Hacl_Ed25519_secret_to_public(u8 *public_key, u8 *private_key);
 
-void Hacl_Bignum25519_store_51(u8 *output, u64 *input);
+/*
+Compute the expanded keys for an Ed25519 signature.
 
-void Hacl_Impl_Ed25519_PointAdd_point_add(u64 *out, u64 *p, u64 *q);
+  The outparam `expanded_keys` points to 96 bytes of valid memory, i.e., uint8_t[96].
+  The argument `private_key`   points to 32 bytes of valid memory, i.e., uint8_t[32].
 
-void Hacl_Impl_Ed25519_Ladder_point_mul(u64 *result, u8 *scalar, u64 *q);
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message.
+*/
+void Hacl_Ed25519_expand_keys(u8 *expanded_keys, u8 *private_key);
 
-void Hacl_Impl_Ed25519_PointCompress_point_compress(u8 *z, u64 *p);
+/*
+Create an Ed25519 signature with the (precomputed) expanded keys.
 
-bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(u64 *out, u8 *s);
+  The outparam `signature`     points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `expanded_keys` points to 96 bytes of valid memory, i.e., uint8_t[96].
+  The argument `msg`    points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
 
-bool Hacl_Impl_Ed25519_PointEqual_point_equal(u64 *p, u64 *q);
+  The argument `expanded_keys` is obtained through `expand_keys`.
 
-void Hacl_Impl_Ed25519_PointNegate_point_negate(u64 *p, u64 *out);
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message.
+*/
+void Hacl_Ed25519_sign_expanded(u8 *signature, u8 *expanded_keys, u32 msg_len, u8 *msg);
 
-void Hacl_Ed25519_sign(u8 *signature, u8 *priv, u32 len, u8 *msg);
+/*
+Create an Ed25519 signature.
 
-bool Hacl_Ed25519_verify(u8 *pub, u32 len, u8 *msg, u8 *signature);
+  The outparam `signature`   points to 64 bytes of valid memory, i.e., uint8_t[64].
+  The argument `private_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The argument `msg`  points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
 
-void Hacl_Ed25519_secret_to_public(u8 *pub, u8 *priv);
+  The function first calls `expand_keys` and then invokes `sign_expanded`.
 
-void Hacl_Ed25519_expand_keys(u8 *ks, u8 *priv);
+  If one needs to sign several messages under the same private key, it is more efficient
+  to call `expand_keys` only once and `sign_expanded` multiple times, for each message.
+*/
+void Hacl_Ed25519_sign(u8 *signature, u8 *private_key, u32 msg_len, u8 *msg);
 
-void Hacl_Ed25519_sign_expanded(u8 *signature, u8 *ks, u32 len, u8 *msg);
+/*
+Verify an Ed25519 signature.
+
+  The function returns `true` if the signature is valid and `false` otherwise.
+
+  The argument `public_key` points to 32 bytes of valid memory, i.e., uint8_t[32].
+  The argument `msg` points to `msg_len` bytes of valid memory, i.e., uint8_t[msg_len].
+  The argument `signature`  points to 64 bytes of valid memory, i.e., uint8_t[64].
+*/
+bool Hacl_Ed25519_verify(u8 *public_key, u32 msg_len, u8 *msg, u8 *signature);
 
 #if defined(__cplusplus)
 }

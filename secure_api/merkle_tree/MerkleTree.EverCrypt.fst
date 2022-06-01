@@ -32,7 +32,7 @@ let mt_sha256_compress src1 src2 dst =
   let hash_alg = Spec.Hash.Definitions.SHA2_256 in
   let hh0 = HST.get () in
   HST.push_frame ();
-  // KreMLin can't extract `EHS.blockLen EHS.SHA256` (= 64ul)
+  // KaRaMeL can't extract `EHS.blockLen EHS.SHA256` (= 64ul)
   let cb = B.alloca (u8 0) 64ul in
   B.blit src1 0ul cb 0ul hash_size;
   B.blit src2 0ul cb 32ul hash_size;

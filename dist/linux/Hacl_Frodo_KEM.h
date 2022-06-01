@@ -29,18 +29,17 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 #include "Lib_RandomBuffer_System.h"
 #include "Hacl_Spec.h"
 #include "Hacl_SHA3.h"
-
+#include "Hacl_Krmllib.h"
+#include "libintvector.h"
 static inline void
 Hacl_Keccak_shake128_4x(
   u32 input_len,
@@ -268,7 +267,7 @@ Hacl_Impl_Frodo_Params_frodo_gen_matrix(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -430,8 +429,6 @@ Hacl_Impl_Frodo_Sample_frodo_sample_matrix1344(u32 n1, u32 n2, u8 *r, u16 *res)
     }
   }
 }
-
-void randombytes_(u32 len, u8 *res);
 
 static inline void Hacl_Impl_Frodo_Pack_frodo_pack(u32 n1, u32 n2, u32 d, u16 *a, u8 *res)
 {

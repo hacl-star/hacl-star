@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Poly1305_128.h"
+#include "internal/Hacl_Poly1305_128.h"
+
+
 
 /* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_128_load_acc2 */
 
@@ -356,12 +358,6 @@ Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(
 }
 
 /* SNIPPET_END: Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize */
-
-/* SNIPPET_START: Hacl_Poly1305_128_blocklen */
-
-uint32_t Hacl_Poly1305_128_blocklen = (uint32_t)16U;
-
-/* SNIPPET_END: Hacl_Poly1305_128_blocklen */
 
 /* SNIPPET_START: Hacl_Poly1305_128_poly1305_init */
 

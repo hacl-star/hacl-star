@@ -29,20 +29,27 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
 
+#include "libintvector.h"
 static inline u32 Hacl_IntTypes_Intrinsics_add_carry_u32(u32 cin, u32 x, u32 y, u32 *r)
 {
-  u32 res = x + cin + y;
-  u32 c = (~FStar_UInt32_gte_mask(res, x) | (FStar_UInt32_eq_mask(res, x) & cin)) & (u32)1U;
-  r[0U] = res;
+  u64 res = (u64)x + (u64)cin + (u64)y;
+  u32 c = (u32)(res >> (u32)32U);
+  r[0U] = (u32)res;
+  return c;
+}
+
+static inline u32 Hacl_IntTypes_Intrinsics_sub_borrow_u32(u32 cin, u32 x, u32 y, u32 *r)
+{
+  u64 res = (u64)x - (u64)y - (u64)cin;
+  u32 c = (u32)(res >> (u32)32U) & (u32)1U;
+  r[0U] = (u32)res;
   return c;
 }
 
@@ -50,18 +57,6 @@ static inline u64 Hacl_IntTypes_Intrinsics_add_carry_u64(u64 cin, u64 x, u64 y, 
 {
   u64 res = x + cin + y;
   u64 c = (~FStar_UInt64_gte_mask(res, x) | (FStar_UInt64_eq_mask(res, x) & cin)) & (u64)1U;
-  r[0U] = res;
-  return c;
-}
-
-static inline u32 Hacl_IntTypes_Intrinsics_sub_borrow_u32(u32 cin, u32 x, u32 y, u32 *r)
-{
-  u32 res = x - y - cin;
-  u32
-  c =
-    ((FStar_UInt32_gte_mask(res, x) & ~FStar_UInt32_eq_mask(res, x))
-    | (FStar_UInt32_eq_mask(res, x) & cin))
-    & (u32)1U;
   r[0U] = res;
   return c;
 }

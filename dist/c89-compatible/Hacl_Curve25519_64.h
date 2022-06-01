@@ -29,18 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "curve25519-inline.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
-#include "Vale.h"
-
+#include "Hacl_Krmllib.h"
+#include "evercrypt_targetconfig.h"
 void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
 void Hacl_Curve25519_64_secret_to_public(uint8_t *pub, uint8_t *priv);

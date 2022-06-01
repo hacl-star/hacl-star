@@ -24,6 +24,8 @@
 
 #include "EverCrypt_HKDF.h"
 
+
+
 void
 EverCrypt_HKDF_expand_sha1(
   uint8_t *okm,
@@ -489,7 +491,7 @@ EverCrypt_HKDF_expand(
       }
     default:
       {
-        KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_PRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -539,7 +541,7 @@ EverCrypt_HKDF_extract(
       }
     default:
       {
-        KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_PRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

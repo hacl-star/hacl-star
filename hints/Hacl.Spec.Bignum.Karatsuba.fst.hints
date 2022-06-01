@@ -38,7 +38,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "a5ee90ee0450d42cfb8bda04799bd0f7"
+      "fc78dc200045683a2ce9b92ac1555f27"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_sign_abs_lemma",
@@ -120,7 +120,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "010929a9a7b701670fba20215fdf2978"
+      "23c2ee4e5b7a0c769910a0d8522f2984"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba",
@@ -157,7 +157,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "990b37b7e4199946a42da84c6d238f7c"
+      "834da5c7753ce654e74051750655e122"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.sign_lemma",
@@ -213,7 +213,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d89dddd6044369670e1e0eb84b0f1c0c"
+      "ce98d094442af2ff165e830cfebea7ca"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_lemma",
@@ -241,7 +241,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "4d80cb7e8ffd05a81dfe8bf2da4be230"
+      "c3395e7e291ee3d8aae58f3e8d769784"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_lemma",
@@ -316,7 +316,7 @@
         "typing_tok_Lib.IntTypes.U64@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "fd176cb4985871d84489bf21cbe4176f"
+      "aa8babd4d462e9e7fd18e38176458b47"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_eval_aux",
@@ -344,7 +344,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "6865fb9c58dd2e7607842d7476411e7e"
+      "2a4a0a1beeb13d0682ed2986ab91689c"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_eval_aux",
@@ -359,7 +359,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "5ba972c7d98ad62ac5dc592a5b82ff4f"
+      "86b1c0f2ff4cfe160073b2e5d5346174"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_eval_aux",
@@ -406,7 +406,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "00c39f5dd89faed977217db47f20f0cd"
+      "f6280e0bcee7e11529f8eb8afc371b2a"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_eval",
@@ -434,7 +434,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "53eb9cffb1603e1ca4bf215ee99dd67e"
+      "4fee8141c33921aee365bd0691706c23"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_eval",
@@ -449,7 +449,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ffb54312d1583191491352a089e346f2"
+      "c9e3b472e94691ee18cdac252959ba68"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_eval",
@@ -473,7 +473,6 @@
         "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Hacl.Spec.Bignum.Addition.bn_add",
-        "equation_Hacl.Spec.Bignum.Addition.bn_sub",
         "equation_Hacl.Spec.Bignum.Base.carry",
         "equation_Hacl.Spec.Bignum.Definitions.bn_v",
         "equation_Hacl.Spec.Bignum.Definitions.lbignum",
@@ -486,15 +485,17 @@
         "equation_Lib.IntTypes.op_At_Percent_Dot",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.lseq",
-        "equation_Lib.Sequence.seq", "equation_Prims.nat",
-        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
-        "equation_Spec.GaloisField.gf", "int_inversion", "int_typing",
+        "equation_Lib.Sequence.seq", "equation_Lib.Sequence.to_seq",
+        "equation_Prims.nat", "equation_Spec.AES.gf8",
+        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
+        "int_inversion", "int_typing",
+        "lemma_FStar.Seq.Properties.slice_is_empty",
+        "lemma_FStar.Seq.Properties.slice_length",
         "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.add_mod_lemma",
         "lemma_Lib.IntTypes.sub_mod_lemma", "lemma_Lib.IntTypes.v_injective",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
         "primitive_Prims.op_Equality", "primitive_Prims.op_LessThan",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
@@ -502,24 +503,29 @@
         "projection_inverse_FStar.Pervasives.Native.Mktuple2__2",
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_0f7f5bcf08e8db1ef86bd2d55b0d74fb",
+        "refinement_interpretation_Tm_refine_11888fecf812f197898447624c24e106",
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9c7687f042133ab0c6f674a635e3f076",
+        "refinement_interpretation_Tm_refine_b361ba8089a6e963921008d537e799a1",
+        "refinement_interpretation_Tm_refine_b913a3f691ca99086652e0a655e72f17",
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_FStar.Seq.Base.length",
+        "typing_FStar.Seq.Base.empty", "typing_FStar.Seq.Base.length",
         "typing_Hacl.Spec.Bignum.Definitions.bn_v",
         "typing_Hacl.Spec.Bignum.Definitions.limb",
         "typing_Hacl.Spec.Karatsuba.Lemmas.abs", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.maxint", "typing_Lib.IntTypes.v",
-        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_Lib.IntTypes.v", "typing_Lib.Sequence.sub",
+        "typing_Lib.Sequence.to_seq", "typing_Spec.AES.gf8",
+        "typing_Spec.GaloisField.__proj__GF__item__t",
         "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "b54b039799a310fbe16c1d3a1219045a"
+      "f034a5a85eb950e51e00dfaffea1749c"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_lshift_add",
@@ -553,7 +559,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "2149961e812ff434b855915476666bdf"
+      "eb74b3e453f1b99bc057b37838a94702"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_lshift_add_lemma",
@@ -581,7 +587,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "a1740303b82858c2047a80680c6d2e8b"
+      "e52c47ed5dd81090cf03feeb45f7f3b2"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_lshift_add_lemma",
@@ -633,7 +639,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "578a30ac5f3a14d868479eb360d86d3c"
+      "1481200d7f5ecf295c6d6d7ed12ac199"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_lshift_add_early_stop",
@@ -655,7 +661,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "79f7e9a64a1b26b217c723419d665cbe"
+      "d7388f1f8cdb2a7f42d62be9c07908d9"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_lshift_add_early_stop_lemma",
@@ -684,7 +690,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "79d1f40be6637aa6a3d2953110c85e88"
+      "4fec022ffc76972413572901a99988da"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_lshift_add_early_stop_lemma",
@@ -739,7 +745,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "16361677e35b123e78b0043d3475d355"
+      "d69be1664be1fc64e1643efc0af06a41"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_res",
@@ -754,7 +760,7 @@
         "refinement_interpretation_Tm_refine_dca97dd30e6f649b0030b13eaec3e592"
       ],
       0,
-      "acf410a76de9997086d32133c92d6030"
+      "d35443d3da2121ba773b05f57814106c"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_res",
@@ -767,7 +773,7 @@
         "refinement_interpretation_Tm_refine_dca97dd30e6f649b0030b13eaec3e592"
       ],
       0,
-      "5986fc32367bdf8e85c4b10edd2d03da"
+      "49e77064d201884a19d1061661c77ea9"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_res",
@@ -801,7 +807,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "04be9381a9548ce5997d71f401fae9ee"
+      "5221051cffb9acf372f1e01a9195c672"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_res_lemma",
@@ -829,7 +835,7 @@
         "refinement_interpretation_Tm_refine_dca97dd30e6f649b0030b13eaec3e592"
       ],
       0,
-      "d9d49e03eb9e46b0ef30b4913f38b990"
+      "c5becfec68ca49ae90570060810adec4"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_res_lemma",
@@ -842,7 +848,7 @@
         "refinement_interpretation_Tm_refine_dca97dd30e6f649b0030b13eaec3e592"
       ],
       0,
-      "96fbb74b469b9564c10cfd8b0006fb2c"
+      "82da04083a6f0762a1a51ac6bd1fd444"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_res_lemma",
@@ -913,7 +919,7 @@
         "typing_tok_Lib.IntTypes.U64@tok"
       ],
       0,
-      "3bfee39f94f48a48cbca8a4c5adb6a4e"
+      "c148c9ab75c767879669ae13cdbb6b3b"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_carry_bound",
@@ -950,7 +956,7 @@
         "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "22bd5afec77187b172857fb380233536"
+      "6ab56c9c54f70bfe086139599aad0008"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_carry_bound",
@@ -965,7 +971,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "f3d71008c907b6ffd14b57fa51366d80"
+      "967a12f3717f5ce6ee73c3584c3a40f6"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_carry_bound",
@@ -1007,7 +1013,7 @@
         "typing_Hacl.Spec.Bignum.Definitions.limb", "typing_Prims.pow2"
       ],
       0,
-      "921fce3e477bba8c1b22fdee0017573c"
+      "e7bed3801485ffe1cddcc2c54c1a943e"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_no_last_carry",
@@ -1035,7 +1041,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "a6f0dfc3bf69cfaad60ca1b91517ad72"
+      "b67a7b5c2172eace4c35a479aaab9018"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_no_last_carry",
@@ -1049,7 +1055,7 @@
         "refinement_interpretation_Tm_refine_5e00c40837ac97eb816d2a675e0fe638"
       ],
       0,
-      "467b44006dcd6e397fc96f2eb2bc23d1"
+      "9fbaa48d0008d1dedce25b9bbb8fddae"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_no_last_carry",
@@ -1099,7 +1105,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "2ad165bdb4dd0ae07122cab6e1735906"
+      "fc2a6b4fee5ace2eb9934806cb20b5fc"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul_",
@@ -1113,7 +1119,7 @@
         "refinement_interpretation_Tm_refine_5e00c40837ac97eb816d2a675e0fe638"
       ],
       0,
-      "9bed850483fc77d891ca3c4dc58436e2"
+      "c4878f9c4d3a70de6a92b9708161dd9a"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul_",
@@ -1127,7 +1133,7 @@
         "refinement_interpretation_Tm_refine_5e00c40837ac97eb816d2a675e0fe638"
       ],
       0,
-      "a4a149fd098d9a89f4feb4735055a816"
+      "5f16d0a7467c20d72fa590acf2cc938f"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul_",
@@ -1191,7 +1197,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "0cfe1fd2da7e2c8d0542dc3e0acb8907"
+      "c24e01f166e03c644f471cdc2253d3c3"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul",
@@ -1205,7 +1211,7 @@
         "refinement_interpretation_Tm_refine_5e00c40837ac97eb816d2a675e0fe638"
       ],
       0,
-      "f77d044a440c47f4d5f556e82756da13"
+      "7cf250ab7ae9a9ff81913e0625b05ec7"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul_lemma",
@@ -1219,7 +1225,7 @@
         "refinement_interpretation_Tm_refine_5e00c40837ac97eb816d2a675e0fe638"
       ],
       0,
-      "b4633c7ee0f8e24baa8c6cddf07c96b6"
+      "7bc60fdcc02491e13096699399113f74"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_mul_lemma",
@@ -1248,7 +1254,7 @@
         "typing_Hacl.Spec.Bignum.Definitions.limb"
       ],
       0,
-      "0edb97d3b70bcecd3b07f7b0283bb51c"
+      "142394ac92d6f58d2f25d3a61a4af55f"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_sqr",
@@ -1276,7 +1282,7 @@
         "typing_Spec.GaloisField.__proj__GF__item__t"
       ],
       0,
-      "a29649ec809247b90ec4cc7deac3ce59"
+      "903012dea9e856c15fa9a2e3e2393b1e"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_middle_karatsuba_sqr_lemma",
@@ -1317,7 +1323,7 @@
         "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "0c490898ea2e7f9a4442b6425ec15061"
+      "aed0f07f730c428086420a9e6eef5a13"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr_",
@@ -1331,7 +1337,7 @@
         "refinement_interpretation_Tm_refine_5e00c40837ac97eb816d2a675e0fe638"
       ],
       0,
-      "c6be217003167946eb0cde618e40efda"
+      "13cfb2f812d479a51d5233b1ab423b5a"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr_",
@@ -1345,7 +1351,7 @@
         "refinement_interpretation_Tm_refine_5e00c40837ac97eb816d2a675e0fe638"
       ],
       0,
-      "d4786458daecfb84d6cb5a7a678a7e46"
+      "ba0f0290bf3cc2868558eeb8e17f5d05"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr_",
@@ -1408,7 +1414,7 @@
         "well-founded-ordering-on-nat"
       ],
       0,
-      "d4c65f51f80f8166f4290e823355d0c8"
+      "490cf4b831eb2c855efafb00340764b1"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr",
@@ -1422,7 +1428,7 @@
         "refinement_interpretation_Tm_refine_5e00c40837ac97eb816d2a675e0fe638"
       ],
       0,
-      "b609b9b196a587ec39a36c12ae23248f"
+      "162f3de396b46e42cf7c8fec5d99c0a4"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr_lemma",
@@ -1436,7 +1442,7 @@
         "refinement_interpretation_Tm_refine_5e00c40837ac97eb816d2a675e0fe638"
       ],
       0,
-      "80e1d4349ede385bb18eb513bcc4f6f9"
+      "93242f3ee82c3c4ceebed0bf232f7e4e"
     ],
     [
       "Hacl.Spec.Bignum.Karatsuba.bn_karatsuba_sqr_lemma",
@@ -1465,7 +1471,7 @@
         "typing_Hacl.Spec.Bignum.Definitions.limb"
       ],
       0,
-      "2649759d31e762da6f9dd4e950652fb0"
+      "89151a17131489f40dde957261194569"
     ]
   ]
 ]

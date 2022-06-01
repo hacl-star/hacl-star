@@ -29,39 +29,15 @@
 extern "C" {
 #endif
 
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
+
+#include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
-
-#include "Hacl_Kremlib.h"
-
-/* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_128_load_acc2 */
-
-void
-Hacl_Impl_Poly1305_Field32xN_128_load_acc2(Lib_IntVector_Intrinsics_vec128 *acc, uint8_t *b);
-
-/* SNIPPET_END: Hacl_Impl_Poly1305_Field32xN_128_load_acc2 */
-
-/* SNIPPET_START: Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize */
-
-void
-Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize(
-  Lib_IntVector_Intrinsics_vec128 *out,
-  Lib_IntVector_Intrinsics_vec128 *p
-);
-
-/* SNIPPET_END: Hacl_Impl_Poly1305_Field32xN_128_fmul_r2_normalize */
-
-/* SNIPPET_START: Hacl_Poly1305_128_blocklen */
-
-extern uint32_t Hacl_Poly1305_128_blocklen;
-
-/* SNIPPET_END: Hacl_Poly1305_128_blocklen */
-
 /* SNIPPET_START: Hacl_Poly1305_128_poly1305_ctx */
 
 typedef Lib_IntVector_Intrinsics_vec128 *Hacl_Poly1305_128_poly1305_ctx;

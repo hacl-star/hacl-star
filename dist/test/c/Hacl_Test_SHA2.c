@@ -24,6 +24,8 @@
 
 #include "Hacl_Test_SHA2.h"
 
+
+
 #define MUT 0
 #define IMMUT 1
 #define CONST 2
@@ -862,7 +864,7 @@ static const uint8_t *to_const__uint8_t(buftype t, void *b)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

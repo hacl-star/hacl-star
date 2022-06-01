@@ -13,26 +13,26 @@ module Lib_RandomBuffer_System = Lib_RandomBuffer_System_bindings.Bindings(Lib_R
 module Hacl_Chacha20Poly1305_32 = Hacl_Chacha20Poly1305_32_bindings.Bindings(Hacl_Chacha20Poly1305_32_stubs)
 module Hacl_Curve25519_51 = Hacl_Curve25519_51_bindings.Bindings(Hacl_Curve25519_51_stubs)
 module Hacl_Ed25519 = Hacl_Ed25519_bindings.Bindings(Hacl_Ed25519_stubs)
-module Hacl_Hash = Hacl_Hash_bindings.Bindings(Hacl_Hash_stubs)
 module Hacl_SHA3 = Hacl_SHA3_bindings.Bindings(Hacl_SHA3_stubs)
 module Hacl_HMAC = Hacl_HMAC_bindings.Bindings(Hacl_HMAC_stubs)
 module Hacl_Poly1305_32 = Hacl_Poly1305_32_bindings.Bindings(Hacl_Poly1305_32_stubs)
 module Hacl_HKDF = Hacl_HKDF_bindings.Bindings(Hacl_HKDF_stubs)
 module Hacl_NaCl = Hacl_NaCl_bindings.Bindings(Hacl_NaCl_stubs)
-module Hacl_Blake2b_32 = Hacl_Blake2b_32_bindings.Bindings(Hacl_Blake2b_32_stubs)
-module Hacl_Blake2s_32 = Hacl_Blake2s_32_bindings.Bindings(Hacl_Blake2s_32_stubs)
+module Hacl_Hash_Blake2 = Hacl_Hash_Blake2_bindings.Bindings(Hacl_Hash_Blake2_stubs)
+module Hacl_Blake2b_32 = Hacl_Hash_Blake2
+module Hacl_Blake2s_32 = Hacl_Hash_Blake2
 module Hacl_P256 = Hacl_P256_bindings.Bindings(Hacl_P256_stubs)
 
 #ifdef HACL_CAN_COMPILE_VEC128
 module Hacl_Chacha20Poly1305_128 = Hacl_Chacha20Poly1305_128_bindings.Bindings(Hacl_Chacha20Poly1305_128_stubs)
 module Hacl_Poly1305_128 = Hacl_Poly1305_128_bindings.Bindings(Hacl_Poly1305_128_stubs)
-module Hacl_Blake2s_128 = Hacl_Blake2s_128_bindings.Bindings(Hacl_Blake2s_128_stubs)
+module Hacl_Blake2s_128 = Hacl_Hash_Blake2s_128_bindings.Bindings(Hacl_Hash_Blake2s_128_stubs)
 #endif
 
 #ifdef HACL_CAN_COMPILE_VEC256
 module Hacl_Chacha20Poly1305_256 = Hacl_Chacha20Poly1305_256_bindings.Bindings(Hacl_Chacha20Poly1305_256_stubs)
 module Hacl_Poly1305_256 = Hacl_Poly1305_256_bindings.Bindings(Hacl_Poly1305_256_stubs)
-module Hacl_Blake2b_256 = Hacl_Blake2b_256_bindings.Bindings(Hacl_Blake2b_256_stubs)
+module Hacl_Blake2b_256 = Hacl_Hash_Blake2b_256_bindings.Bindings(Hacl_Hash_Blake2b_256_stubs)
 #endif
 
 #ifdef HACL_CAN_COMPILE_VALE
@@ -374,39 +374,39 @@ module P256 = struct
     end)
   module Noalloc = struct
     let raw_to_compressed ~p ~result =
-      (* Hacl.P256.compression_compressed_form *)
+      (* Hacl.P256.raw_to_compressed *)
       assert (C.size p = 64);
       assert (C.size result = 33);
-      Hacl_P256.hacl_P256_compression_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+      Hacl_P256.hacl_P256_raw_to_compressed (C.ctypes_buf p) (C.ctypes_buf result)
     let raw_to_uncompressed ~p ~result =
-      (* Hacl.P256.compression_not_compressed_form *)
+      (* Hacl.P256.raw_to_uncompressed *)
       assert (C.size p = 64);
       assert (C.size result = 65);
-      Hacl_P256.hacl_P256_compression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+      Hacl_P256.hacl_P256_raw_to_uncompressed (C.ctypes_buf p) (C.ctypes_buf result)
     let compressed_to_raw ~p ~result =
-      (* Hacl.P256.decompression_compressed_form *)
+      (* Hacl.P256.compressed_to_raw *)
       assert (C.size p = 33);
       assert (C.size result = 64);
-      Hacl_P256.hacl_P256_decompression_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+      Hacl_P256.hacl_P256_compressed_to_raw (C.ctypes_buf p) (C.ctypes_buf result)
     let uncompressed_to_raw ~p ~result =
-      (* Hacl.P256.decompression_not_compressed_form *)
+      (* Hacl.P256.uncompressed_to_raw *)
       assert (C.size p = 65);
       assert (C.size result = 64);
-      Hacl_P256.hacl_P256_decompression_not_compressed_form (C.ctypes_buf p) (C.ctypes_buf result)
+      Hacl_P256.hacl_P256_uncompressed_to_raw (C.ctypes_buf p) (C.ctypes_buf result)
     let dh_initiator ~sk ~pk =
-      (* Hacl.P256.ecp256dh_i *)
+      (* Hacl.P256.dh_initiator *)
       assert (C.size pk = 64);
       assert (C.size sk = 32);
       assert (C.disjoint pk sk);
-      Hacl_P256.hacl_P256_ecp256dh_i (C.ctypes_buf pk) (C.ctypes_buf sk)
+      Hacl_P256.hacl_P256_dh_initiator (C.ctypes_buf pk) (C.ctypes_buf sk)
     let dh_responder ~sk ~pk ~shared =
-      (* Hacl.P256.ecp256dh_r *)
+      (* Hacl.P256.dh_responder *)
       assert (C.size shared = 64);
       assert (C.size pk = 64);
       assert (C.size sk = 32);
       assert (C.disjoint shared sk);
       assert (C.disjoint shared pk);
-      Hacl_P256.hacl_P256_ecp256dh_r (C.ctypes_buf shared) (C.ctypes_buf pk) (C.ctypes_buf sk)
+      Hacl_P256.hacl_P256_dh_responder (C.ctypes_buf shared) (C.ctypes_buf pk) (C.ctypes_buf sk)
     let sign = NoHash.Noalloc.sign
   end
   let raw_to_compressed p =
@@ -442,13 +442,13 @@ module P256 = struct
     else
       None
   let valid_sk ~sk =
-    (* Hacl.P256.is_more_than_zero_less_than_order *)
+    (* Hacl.P256.validate_private_key *)
     assert (C.size sk = 32);
-    Hacl_P256.hacl_P256_is_more_than_zero_less_than_order (C.ctypes_buf sk)
+    Hacl_P256.hacl_P256_validate_private_key (C.ctypes_buf sk)
   let valid_pk ~pk =
-    (* Hacl.P256.verify_q *)
+    (* Hacl.P256.validate_public_key *)
     assert (C.size pk = 64);
-    Hacl_P256.hacl_P256_verify_q (C.ctypes_buf pk)
+    Hacl_P256.hacl_P256_validate_public_key (C.ctypes_buf pk)
   let sign = NoHash.sign
   let verify = NoHash.verify
   module SHA2_256 = Make_ECDSA (struct

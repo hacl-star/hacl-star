@@ -24,6 +24,11 @@
 
 #include "EverCrypt_HMAC.h"
 
+#include "internal/Hacl_Hash_SHA2.h"
+#include "internal/Hacl_Hash_SHA1.h"
+#include "internal/Hacl_Hash_Blake2.h"
+#include "internal/Hacl_HMAC.h"
+
 void
 EverCrypt_HMAC_compute_sha1(
   uint8_t *dst,
@@ -816,7 +821,7 @@ EverCrypt_HMAC_compute(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

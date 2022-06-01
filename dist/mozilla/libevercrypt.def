@@ -1,6 +1,19 @@
 LIBRARY libevercrypt
 
 EXPORTS
+  Hacl_Impl_SHA3_rotl
+  Hacl_Impl_SHA3_state_permute
+  Hacl_Impl_SHA3_loadState
+  Hacl_Impl_SHA3_storeState
+  Hacl_Impl_SHA3_absorb
+  Hacl_Impl_SHA3_squeeze
+  Hacl_Impl_SHA3_keccak
+  Hacl_SHA3_shake128_hacl
+  Hacl_SHA3_shake256_hacl
+  Hacl_SHA3_sha3_224
+  Hacl_SHA3_sha3_256
+  Hacl_SHA3_sha3_384
+  Hacl_SHA3_sha3_512
   Hacl_Chacha20_chacha20_encrypt
   Hacl_Chacha20_chacha20_decrypt
   Hacl_Curve25519_64_scalarmult
@@ -38,9 +51,11 @@ EXPORTS
   Hacl_Poly1305_256_poly1305_finish
   Hacl_Poly1305_256_poly1305_mac
   Hacl_IntTypes_Intrinsics_add_carry_u32
-  Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u32
+  Hacl_IntTypes_Intrinsics_add_carry_u64
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
+  Hacl_IntTypes_Intrinsics_128_add_carry_u64
+  Hacl_IntTypes_Intrinsics_128_sub_borrow_u64
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt

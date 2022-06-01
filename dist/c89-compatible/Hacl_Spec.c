@@ -22,7 +22,9 @@
  */
 
 
-#include "Hacl_Spec.h"
+#include "internal/Hacl_Spec.h"
+
+
 
 Spec_Agile_Cipher_cipher_alg
 Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i)
@@ -43,7 +45,7 @@ Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i)
       }
     default:
       {
-        KRML_HOST_PRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_PRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

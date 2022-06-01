@@ -29,20 +29,18 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Streaming_Blake2.h"
-#include "Hacl_Kremlib.h"
-#include "Hacl_Blake2s_128.h"
 #include "Hacl_Spec.h"
-#include "Hacl_Impl_Blake2.h"
-
+#include "Hacl_Hash_Blake2s_128.h"
+#include "Hacl_Hash_Blake2.h"
+#include "evercrypt_targetconfig.h"
+#include "libintvector.h"
 /* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_block_state */
 
 typedef struct Hacl_Streaming_Blake2s_128_blake2s_128_block_state_s
@@ -126,72 +124,6 @@ Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free(
 );
 
 /* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_no_key_free */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_create_in */
-
-/*
-  State allocation function when using a (potentially null) key
-*/
-Hacl_Streaming_Blake2s_128_blake2s_128_state
-*Hacl_Streaming_Blake2s_128_blake2s_128_with_key_create_in(uint32_t key_size, uint8_t *k);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_create_in */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init */
-
-/*
-  (Re-)initialization function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init(
-  uint32_t key_size,
-  uint8_t *k,
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *s
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_init */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_update */
-
-/*
-  Update function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2s_128_blake2s_128_with_key_update(
-  uint32_t key_size,
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
-  uint8_t *data,
-  uint32_t len
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_update */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_finish */
-
-/*
-  Finish function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2s_128_blake2s_128_with_key_finish(
-  uint32_t key_size,
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *p,
-  uint8_t *dst
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_finish */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_free */
-
-/*
-  Free state function when using a (potentially null) key
-*/
-void
-Hacl_Streaming_Blake2s_128_blake2s_128_with_key_free(
-  uint32_t key_size,
-  Hacl_Streaming_Blake2s_128_blake2s_128_state *s
-);
-
-/* SNIPPET_END: Hacl_Streaming_Blake2s_128_blake2s_128_with_key_free */
 
 #if defined(__cplusplus)
 }
