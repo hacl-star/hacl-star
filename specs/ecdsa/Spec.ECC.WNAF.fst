@@ -23,12 +23,12 @@ let w = 4
 let m = pow2 w
 
 
-val test: n: nat{n > w} -> d: nat {d < pow2 n} -> Lemma (
+val lemma_decrease_d: n: nat{n > w} -> d: nat {d < pow2 n} -> Lemma (
   let d_i = d % (2 * m) - m in 
   let d = div (d - d_i) m in 
   d < pow2 (n - w))
 
-let test n d = 
+let lemma_decrease_d n d = 
   let di = d % (2 * m) - m in 
   assert(d % (2 * m) < 2 * m);
 
@@ -50,20 +50,6 @@ let to_wnaf_scalar_step d =
 
 open FStar.Seq
 
-val to_wnaf_: d: int -> l: seq int -> Tot (seq int)
-  (decreases d)
-
-let rec to_wnaf_ d l = 
-  if d <= m then
-    begin
-      cons d l
-    end
-  else
-    let d', di = to_wnaf_scalar_step d in 
-    assume (d' << d);
-    to_wnaf_ d' (cons di l)
-
-
 val from_wnaf_: l: seq int -> i: nat -> Tot int
   (decreases (Seq.length l - i))
 
@@ -76,6 +62,7 @@ let rec from_wnaf_ l i  =
 val from_wnaf: l: seq int -> Tot int
 
 let from_wnaf l = from_wnaf_ l 0
+
 
 val lemma_from_0_: l: nat -> i: nat {i < l} -> s: seq int {length s == l /\
   (forall (j: nat {j < Seq.length s /\ j >= l - i}). index s j == 0)} -> Lemma (from_wnaf_ s (l - i) == 0)
@@ -116,7 +103,7 @@ let rec to_wnaf2_ n0 d l i =
     begin
       let di, d' = to_wnaf_scalar_step d in 
       let r = upd l i di in 
-	test (n0 - i * w) d;  
+	lemma_decrease_d (n0 - i * w) d;  
       to_wnaf2_ n0  d' r (i + 1)
     end
 
@@ -128,7 +115,7 @@ let to_wnaf n d =
   to_wnaf2_ n d s 0
 
 
-val getPrecomputed: #c: curve -> g: point #c #Jacobian -> s: int -> Tot (p: point #c #Jacobian)
+val getPrecomputed: #c: curve -> g: point #c #Jacobian -> s: int -> Tot (point #c #Jacobian)
 
 let getPrecomputed #c g s = 
     point_mult s g
@@ -150,10 +137,6 @@ let wnaf_step #c p0 s i q =
 val from_wnaf_lemma_0: l: seq int -> Lemma (from_wnaf_ l (Seq.length l) == 0)
 
 let from_wnaf_lemma_0 l = ()
-
-
-
-#push-options "--z3rlimit 200"
 
 
 val pred0: #c: curve -> l: seq int 
@@ -190,8 +173,6 @@ let pred0 #c l p0 i x =
     assert(pointEqual f_i_x (pointAdd (point_mult (partialScalar_i * m) p0) (point_mult k p0)));
 
     assert(pointEqual f_i_x (point_mult (from_wnaf_ l (len - i) * m + k) p0));
-
-
 
     assert(from_wnaf_ l (len - (i + 1)) == index l (len - (i + 1)) + from_wnaf_ l (len - i) * m)
 
