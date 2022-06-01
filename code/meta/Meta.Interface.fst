@@ -120,8 +120,8 @@ let rec push_pre (inv_bv: bv) (t: term): Tac term =
               C_Eff us e a args
             else
               fail ("rewritten function has an unknown effect: " ^ string_of_name e)
-        | C_Total t decr ->
-            C_Total (push_pre inv_bv t) decr
+        | C_Total t uopt decr ->
+            C_Total (push_pre inv_bv t) uopt decr
         | _ ->
             fail ("rewritten type is neither a Tot or a stateful arrow: " ^ term_to_string t)
       in
@@ -136,7 +136,7 @@ let rec to_reduce t: Tac _ =
       [ fv_to_string fv ]
   | Tv_Arrow bv c ->
       begin match inspect_comp c with
-      | C_Total t _ ->
+      | C_Total t _ _ ->
           to_reduce t
       | _ ->
           []
@@ -169,7 +169,7 @@ let lambda_over_index_and_p (st: state) (f_name: name) (f_typ: term) (inv_bv: bv
       print (st.indent ^ "  Found index of type " ^ term_to_string t);
       let f_typ =
         match inspect_comp c with
-        | C_Total t _ ->
+        | C_Total t _ _ ->
             // ... -> ... (requires p) ...
             let t = push_pre inv_bv t in
             // fun p:Type. ... -> ... (requires p) ...
@@ -557,7 +557,7 @@ and visit_body (t_i: term)
           st, e, bvs, ses
       end
 
-  | Tv_Var _ | Tv_BVar _ | Tv_FVar _
+  | Tv_Var _ | Tv_BVar _ | Tv_FVar _ | Tv_UInst _ _
   | Tv_Const _ ->
       st, e, bvs, []
 
