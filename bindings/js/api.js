@@ -167,7 +167,7 @@ var validateJSON = function(json) {
       func_obj.args.forEach((arg, i) => {
         if (!(arg.kind === "input" || (arg.kind === "output")))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'output' or 'input'");
-        if (!(arg.type === "bool" || arg.type === "int32" || arg.type.startsWith("buffer") || arg.type[0].toUpperCase() == arg.type[0]))
+        if (!(arg.type === "bool" || arg.type === "uint32" || arg.type.startsWith("buffer") || arg.type[0].toUpperCase() == arg.type[0]))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'int', 'bool' or 'buffer'");
         if (arg.type.startsWith("buffer") && arg.size === undefined)
           throw Error("in " + obj_name + ", argument #" + i + " is a buffer and should have a 'size' field");
@@ -178,7 +178,7 @@ var validateJSON = function(json) {
         if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && !Array.isArray(arg.tests))
           throw Error("the 'tests' field for argument #" + i + " of " + obj_name + " should be an array");
 
-        if (arg.type === "int32" && arg.kind === "input" && arg.interface_index !== undefined)
+        if (arg.type === "uint32" && arg.kind === "input" && arg.interface_index !== undefined)
           length_args_available[arg.name] = true;
 
         if (arg.type.startsWith("buffer") && arg.kind === "input" && typeof arg.size === "string") {
@@ -534,7 +534,7 @@ var HaclWasm = (function() {
         if (var_ in args_int32s && var_value != args_int32s[var_])
           throw new Error("Inconsistency in sizes; previously, "+var_+"="+args_int32s[var_]+"; now "+var_value);
         args_int32s[var_] = var_value;
-      } else if (arg.type === "int32" && arg.interface_index !== undefined) {
+      } else if (arg.type === "uint32" && arg.interface_index !== undefined) {
         // API contains e.g.:
         //   { "name": "len", "interface_index": 3 },
         //   { "name": "buf", "type": "buffer", "size": "len", "kind": "output" }
@@ -580,7 +580,7 @@ var HaclWasm = (function() {
         return debug("array", copy_array_to_stack(arg.type, arg_byte_buffer, i));
       }
 
-      if (arg.type === "bool" || arg.type === "int32") {
+      if (arg.type === "bool" || arg.type === "uint32") {
         if (arg.interface_index === undefined) {
           // Variable-length argument, determined via first pass above.
           return debug("int(auto)", args_int32s[arg.name]);
@@ -658,13 +658,18 @@ var HaclWasm = (function() {
     if (proto.return.type === "bool") {
       return [call_return === 1, return_buffers].flat();
     }
-    if (proto.return.type === "int32") {
-      return [call_return, return_buffers].flat();
+    if (proto.return.type === "uint32") {
+      return [call_return >>> 0, return_buffers].flat();
+    }
+    if (proto.return.type === "uint64") {
+      // krml convention: uint64s are sent over as two uint32s
+      console.log(call_return);
+      return [BigInt(call_return[0]>>>0) + (BigInt(call_return[1]>>>0) << 32n), return_buffers].flat();
     }
     if (proto.return.type === "void") {
       return return_buffers;
     }
-    throw new Error(func_name+": Unimplemented !");
+    throw new Error(func_name+": Unimplemented ! "+proto.return.type);
   };
 
   var getInitializedHaclModule = async function (modules) {
