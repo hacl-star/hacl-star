@@ -226,7 +226,6 @@ val mul_atomic: x: uint64 -> y: uint64 -> result: lbuffer uint64 (size 1)
     uint_v result + uint_v h0 * pow2 64 = uint_v x * uint_v y))
 
 
-
 inline_for_extraction noextract
 val copy_point: #c: curve -> p: Hacl.Spec.EC.Definition.point c -> result: Hacl.Spec.EC.Definition.point c -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_eval c h p) 

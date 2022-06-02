@@ -13,6 +13,10 @@ open Spec.ECC.Curves
 open Lib.Loops
 open FStar.Mul
 
+
+#set-options " --z3rlimit 100 --max_fuel 0 --max_ifuel 0"
+
+
 inline_for_extraction noextract
 val toUint8: #c: curve -> i: felem c -> o: lbuffer uint8 (getCoordinateLenU c) -> Stack unit
   (requires fun h -> live h i /\ live h o /\ disjoint i o)
@@ -23,28 +27,11 @@ let toUint8 #c i o =
   Lib.ByteBuffer.uints_to_bytes_be len o i
 
 
-#set-options " --z3rlimit 200"
-
-val changeEndianStep: #c: curve -> i: nat {i <= v (getCoordinateLenU64 c) / 2} 
-  -> b0: felem_seq c 
-  -> Tot (b1: felem_seq c {
-    let len = v (getCoordinateLenU64 c) in 
-    let lenR = len - i - 1 in 
-    Lib.Sequence.index b0 i == Lib.Sequence.index b1 lenR /\ (
-    forall (j: nat). (j < len /\ j <> lenR /\ j <> i) ==> Lib.Sequence.index b1 j == Lib.Sequence.index b0 j)})
-
-let changeEndianStep #c i b =
-  let len = v (getCoordinateLenU64 c) in 
-  let lenRight = len - 1 - i in 
-  let left = Lib.Sequence.index b i in 
-  let right = Lib.Sequence.index b lenRight in 
-  let b1 = Lib.Sequence.upd b i right in 
-  let b2 = Lib.Sequence.upd b1 lenRight left in 
-  b2
-
-
 let changedEndian_ #l (i: Lib.Sequence.lseq uint64 l) (o: Lib.Sequence.lseq uint64 l) = 
   forall (j: nat). (j < l) ==> Lib.Sequence.index i j == Lib.Sequence.index o (l - j - 1)
+
+
+#push-options "--z3rlimit 200 --fuel 1 --ifuel 1"
 
 inline_for_extraction
 val changeEndian: #c: curve -> i: felem c -> Stack unit 
@@ -56,20 +43,23 @@ let changeEndian #c b =
   let len = getCoordinateLenU64 c in 
   let lenByTwo = shift_right len 1ul in 
 
-   [@inline_let]
+  [@inline_let]
   let inv h (i: nat { i <= uint_v lenByTwo}) = live h b /\ modifies (loc b) h0 h /\ (
     let b1 = as_seq h b in 
     let b0 = as_seq h0 b in 
     (forall (j: nat). (j >= i /\ j <= v len - 1 - i) ==> Lib.Sequence.index b1 j == Lib.Sequence.index b0 j) /\ 
     (forall (j: nat). (j > v len - 1 - i /\ j < v len) ==> Lib.Sequence.index b1 (v len - j - 1) == Lib.Sequence.index b0 j) /\ 
     (forall (j: nat). (j < i) ==> Lib.Sequence.index b1 (v len - j - 1) == Lib.Sequence.index b0 j)) in 
-
+  
   for 0ul lenByTwo inv (fun i -> 
     let lenRight = getCoordinateLenU64 c -. (size 1) -. i in 
     let left = index b i in 
     let right = index b lenRight in 
     upd b i right;
-    upd b lenRight left)
+    upd b lenRight left
+  )
+
+#pop-options
 
 
 open Lib.ByteSequence

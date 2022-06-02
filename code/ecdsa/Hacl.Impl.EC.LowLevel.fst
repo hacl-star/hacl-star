@@ -51,6 +51,27 @@ let uploadZeroImpl #c f =
       lemma_lseq_as_seq_as_forall (as_seq h0_ f) (as_seq h_ f) (v i))
 
 
+inline_for_extraction noextract
+val uploadZeroImpl_long: #c: curve -> f: widefelem c -> Stack unit
+  (requires fun h -> live h f)
+  (ensures fun h0 _ h1 -> wide_as_nat c h1 f == 0 /\ modifies (loc f) h0 h1)
+  
+let uploadZeroImpl_long #c f =
+  let h0 = ST.get() in 
+  let len = getCoordinateLenU64 c *. 2ul in 
+  let inv h (i: nat {i <= 2 * uint_v (getCoordinateLenU64 c)}) = live h f /\ modifies (loc f) h0 h /\ 
+    lseq_as_nat_ (as_seq h f) i == 0 in 
+
+  lseq_as_nat_last (as_seq h0 f);
+  for 0ul len inv (fun i -> 
+      let h0_ = ST.get() in 
+    upd f i (u64 0); 
+      let h_ = ST.get() in 
+
+      lseq_as_nat_definiton (as_seq h_ f) (v i + 1);
+      lemma_lseq_as_seq_as_forall (as_seq h0_ f) (as_seq h_ f) (v i))
+
+
 let uploadOneImpl #c f =
   upd f (size 0) (u64 1);
   let h0 = ST.get() in 
@@ -146,13 +167,6 @@ let add_dep_prime #c x t result =
   match c with
   |P256 -> begin add_dep_prime_p256 x t result end 
   |P384 -> begin add_dep_prime_p384 x t result end
-  (*|_ -> begin 
-    push_frame();
-    assume (getPrime c == prime256);
-    let p = createL p256_prime_list in 
-      lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_prime_list);
-    let r = _add_dep_prime x p t result in 
-      pop_frame(); r end *)
 
 
 let sub_bn #c x y result =
@@ -181,7 +195,6 @@ let sub_bn_order #c x result =
     lseq_upperbound (as_seq h0 x);
     lseq_upperbound (as_seq h1 result);
       pop_frame(); r
-  (*|_ -> admit(); u64 0 *)
 
 
 let sub_bn_prime #c x result =
@@ -203,12 +216,11 @@ let sub_bn_prime #c x result =
     lseq_upperbound (as_seq h0 x);
     lseq_upperbound (as_seq h1 result);
       pop_frame(); r
- (* |_ -> admit(); u64 0 *)
 
 
 val lemma_zero_lseq: #l0: size_nat -> #l1: size_nat -> a: Lib.Sequence.lseq uint64 l0 -> b: Lib.Sequence.lseq uint64 l1 
-  ->  c: pos -> 
-  Lemma ((lseq_as_nat a + c * lseq_as_nat b)  == 0 ==> lseq_as_nat b == 0)
+  -> c: pos -> 
+  Lemma ((lseq_as_nat a + c * lseq_as_nat b) == 0 ==> lseq_as_nat b == 0)
 
 let lemma_zero_lseq a b c = ()
 
@@ -231,7 +243,6 @@ let _shortened_mul #c a b result =
     bn_mul len (size 1) a bBuffer partResult; 
     Hacl.Spec.Bignum.bn_mul_lemma (as_seq h0 a) (as_seq h0 bBuffer);
         let h1 = ST.get() in 
-	  admit();
     lseq_as_nat_first (as_seq h0 bBuffer);
     lseq_upperbound (as_seq h0 a);
     
@@ -248,32 +259,20 @@ let _shortened_mul #c a b result =
 
 
 let short_mul_prime #c b result = 
-  uploadZeroImpl #c (sub result (size 0) (getCoordinateLenU64 c));
-  uploadZeroImpl #c (sub result (getCoordinateLenU64 c) (getCoordinateLenU64 c));
-  let h0 = ST.get() in 
-  assume (wide_as_nat c h0 result == 0);
+  uploadZeroImpl_long result;
   match c with
   | P256 -> 
     shortened_mul_prime256 b result
   | P384 -> 
     push_frame();
-    let p = createL p384_prime_list in 
-    lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p384_prime_list);
-    _shortened_mul p b result;
+      let p = createL p384_prime_list in 
+      lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p384_prime_list);
+      _shortened_mul p b result;
     pop_frame()
- (* | _ -> admit();
-    push_frame();
-    let p = createL p256_prime_list in 
-    lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_prime_list);
-    _shortened_mul p b result;
-    pop_frame() *)
 
 
 let short_mul_order #c b result = 
-  uploadZeroImpl #c (sub result (size 0) (getCoordinateLenU64 c));
-  uploadZeroImpl #c (sub result (getCoordinateLenU64 c) (getCoordinateLenU64 c));
-    let h0 = ST.get() in 
-  assume (wide_as_nat c h0 result == 0);
+  uploadZeroImpl_long result;
   match c with
   | P256 ->     
 	 push_frame();
@@ -287,12 +286,6 @@ let short_mul_order #c b result =
     lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p384_order_list);
     _shortened_mul p b result;
       pop_frame()
-  (*| _ -> admit();
-      push_frame();
-    let p = createL p256_order_list in 
-    lemma_lseq_as_list (v (getCoordinateLenU64 c)) (p256_order_list);
-    _shortened_mul p b result;
-      pop_frame() *)
 
 
 let square_bn #c x result = 
@@ -300,6 +293,7 @@ let square_bn #c x result =
   let len = getCoordinateLenU64 c in 
   Hacl.Bignum.bn_sqr len x result;
   Hacl.Spec.Bignum.bn_sqr_lemma (as_seq h0 x)
+
 
 inline_for_extraction noextract
 let reduction_prime_2prime_with_carry_cin #c cin x result =
@@ -349,6 +343,7 @@ let reduction_prime_2prime #c x result =
   lseq_upperbound #(v (getCoordinateLenU64 c)) (as_seq h0 x);
   pop_frame()
 
+
 (** Field Addition **)
 inline_for_extraction
 val felem_add_: #c: curve -> a: felem c -> b: felem c -> out: felem c ->
@@ -368,6 +363,7 @@ let felem_add_ #c arg1 arg2 out =
   additionInDomain #c #DH (as_nat c h0 arg1) (as_nat c h0 arg2);
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 arg1) + fromDomain #c (as_nat c h0 arg2))
 
+
 [@CInline]
 val felem_add_p256: a: felem P256 -> b: felem P256 -> out: felem P256 ->
   Stack unit
@@ -379,8 +375,8 @@ val felem_add_p256: a: felem P256 -> b: felem P256 -> out: felem P256 ->
       as_nat P256 h1 out == (as_nat P256 h0 a + as_nat P256 h0 b) % getPrime P256 /\
       as_nat P256 h1 out == toDomain #P256 ((fromDomain #P256 (as_nat P256 h0 a) + fromDomain #P256 (as_nat P256 h0 b)) % getPrime P256)))
 
-
 let felem_add_p256 a b out = felem_add_ #P256 a b out
+
 
 [@CInline]
 val felem_add_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
@@ -396,27 +392,11 @@ val felem_add_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
 
 let felem_add_p384 a b out = felem_add_ #P384 a b out
 
-(* [@CInline]
-val felem_add_generic: a: felem Default -> b: felem Default -> out: felem Default ->
-  Stack unit
-    (requires (fun h0 ->
-      live h0 a /\ live h0 b /\ live h0 out /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\
-      as_nat Default h0 a < getPrime Default /\ as_nat Default h0 b < getPrime Default))
-    (ensures (fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
-      as_nat Default h1 out == (as_nat Default h0 a + as_nat Default h0 b) % getPrime Default /\
-      as_nat Default h1 out == toDomain #Default ((fromDomain #Default (as_nat Default h0 a) + fromDomain #Default (as_nat Default h0 b)) % getPrime Default)))
-
-
-let felem_add_generic a b out = felem_add_ #Default a b out *)
-
-
 let felem_add #c a b out = 
    match c with
     | P256 -> felem_add_p256 a b out
     | P384 -> felem_add_p384 a b out
-    (* | Default -> felem_add_generic a b out *)
-
+    
 
 inline_for_extraction noextract
 val felem_double_: #c: curve -> a: felem c -> out: felem c ->
@@ -461,24 +441,11 @@ val felem_double_p384: a: felem P384 -> out: felem P384 ->
 
 let felem_double_p384 arg1 out = felem_double_ #P384 arg1 out
 
-(* [@CInline]
-val felem_double_generic: a: felem Default -> out: felem Default ->
-  Stack unit
-    (requires (fun h0 ->
-      live h0 a /\ live h0 out /\ eq_or_disjoint a out /\ as_nat Default h0 a < getPrime Default))
-    (ensures (fun h0 _ h1 ->
-      modifies (loc out) h0 h1 /\
-      as_nat Default h1 out == (2 * as_nat Default h0 a) % getPrime Default /\
-      as_nat Default h1 out == toDomain #Default (2 * fromDomain #Default (as_nat Default h0 a) % getPrime Default)))
-
-let felem_double_generic arg1 out = felem_double_ #Default arg1 out *)
-
 
 let felem_double #c arg1 out = 
   match c with 
   |P256 -> felem_double_p256 arg1 out
   |P384 -> felem_double_p384 arg1 out
-  (* |Default -> felem_double_generic arg1 out *)
 
 
 #set-options "--fuel 1 --ifuel 1 --z3rlimit 200"
@@ -552,24 +519,11 @@ val felem_sub_p384: a: felem P384 -> b: felem P384 -> out: felem P384 ->
 
 let felem_sub_p384 a b out = felem_sub_ #P384 a b out
 
-(* [@CInline]
-val felem_sub_generic: a: felem Default -> b: felem Default -> out: felem Default ->
-  Stack unit
-  (requires (fun h0 ->
-    live h0 out /\ live h0 a /\ live h0 b /\ eq_or_disjoint a out /\ eq_or_disjoint b out /\ eq_or_disjoint a b /\
-    as_nat Default h0 a < getPrime Default /\ as_nat Default h0 b < getPrime Default))
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 /\
-    as_nat Default h1 out == (as_nat Default h0 a - as_nat Default h0 b) % getPrime Default /\
-    as_nat Default h1 out == toDomain #Default ((fromDomain #Default (as_nat Default h0 a) - fromDomain #Default (as_nat Default h0 b)) % getPrime Default)))
-
-let felem_sub_generic a b out = felem_sub_ #Default a b out
- *)
 
 let felem_sub #c a b out = 
   match c with 
   |P256 -> felem_sub_p256 a b out
   |P384 -> felem_sub_p384 a b out
-  (* |Default -> felem_sub_generic a b out *)
 
 
 let felem_sub_zero #c arg2 out =  
@@ -608,8 +562,6 @@ let felem_sub_zero #c arg2 out =
   inDomain_mod_is_not_mod #c #DH (fromDomain #c (as_nat c h0 out) - fromDomain #c (as_nat c h0 arg2))
 
 
-
-
 let mul #c f r out =
   let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
@@ -631,7 +583,6 @@ let mod64 #c a =
   let h0 = ST.get() in 
   lemma_lseq_1 #(v (getCoordinateLenU64 c *! 2ul)) (as_seq h0 a) (v (getCoordinateLenU64 c *! 2ul));
   index a (size 0)
-
 
 
 #push-options "--fuel 2"
@@ -702,10 +653,6 @@ let upload_one_montg_form #c b =
       let h1 = ST.get() in 
     assert_norm(18446744069414584321 + 4294967295 * pow2 64 + 1 * pow2 64 * pow2 64 == pow2 384 % getPrime P384);
     lemma_lseq_nat_instant_6 (as_seq h1 b)
-(*   |_ -> 
-    uploadZeroImpl b; 
-    reduction_prime_2prime_with_carry_cin #c (u64 1) b b;
-    lemmaToDomain #c #DH 1 *)
     
 #pop-options
 
@@ -723,8 +670,6 @@ let mul_atomic x y result temp =
   let l0, h0 = to_u64 res, to_u64 (res >>. 64ul) in 
   upd result (size 0) l0;
   upd temp (size 0) h0
-
-
 
 
 let copy_point #c p result = 

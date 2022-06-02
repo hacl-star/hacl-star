@@ -14,7 +14,6 @@ open Hacl.Impl.EC.LowLevel
 
 open Hacl.Spec.MontgomeryMultiplication
 
-open Hacl.Impl.EC.K.PointDouble
 open Hacl.Impl.EC.General.PointDouble
 open Hacl.Impl.EC.NIST.PointDouble
 
