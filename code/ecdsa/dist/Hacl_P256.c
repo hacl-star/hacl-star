@@ -71,6 +71,143 @@ static inline void copy_conditional_p256_c(uint64_t *out, const uint64_t *x, uin
   }
 }
 
+static void
+copy_point_conditional(Spec_ECC_Curves_curve c, uint64_t *out, uint64_t *p, uint64_t mask)
+{
+  uint64_t *p_x = p;
+  uint32_t sw0;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw0 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw0 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw0 = (uint32_t)4U;
+      }
+  }
+  uint64_t *p_y = p + sw0;
+  uint32_t sw1;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw1 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw1 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw1 = (uint32_t)4U;
+      }
+  }
+  uint64_t *p_z = p + (uint32_t)2U * sw1;
+  uint64_t *out_x = out;
+  uint32_t sw2;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw2 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw2 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw2 = (uint32_t)4U;
+      }
+  }
+  uint64_t *out_y = out + sw2;
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)4U;
+      }
+  }
+  uint64_t *out_z = out + (uint32_t)2U * sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        copy_conditional_p256_l(out_x, p_x, mask);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        copy_conditional_p384_l(out_x, p_x, mask);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        copy_conditional_p256_l(out_y, p_y, mask);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        copy_conditional_p384_l(out_y, p_y, mask);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        copy_conditional_p256_l(out_z, p_z, mask);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        copy_conditional_p384_l(out_z, p_z, mask);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
 static inline void cmovznz4_p256(uint64_t cin, uint64_t *x, uint64_t *y, uint64_t *r)
 {
   uint64_t mask = ~FStar_UInt64_eq_mask(cin, (uint64_t)0U);
@@ -3391,6 +3528,247 @@ point_add_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
   memcpy(result, x3_out, (uint32_t)6U * sizeof (uint64_t));
   memcpy(result + (uint32_t)6U, y3_out, (uint32_t)6U * sizeof (uint64_t));
   memcpy(result + (uint32_t)12U, z3_out, (uint32_t)6U * sizeof (uint64_t));
+}
+
+static uint64_t
+point_add_c_compute_points_equal(
+  Spec_ECC_Curves_curve c,
+  uint64_t *p,
+  uint64_t *q,
+  uint64_t *tempBuffer
+)
+{
+  uint32_t len;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len = (uint32_t)4U;
+      }
+  }
+  uint64_t *sq_z1 = tempBuffer;
+  uint64_t *tr_z1 = tempBuffer + len;
+  uint64_t *sq_z2 = tempBuffer + (uint32_t)2U * len;
+  uint64_t *tr_z2 = tempBuffer + (uint32_t)3U * len;
+  uint64_t *x1 = p;
+  uint64_t *y1 = p + len;
+  uint64_t *z1 = p + (uint32_t)2U * len;
+  uint64_t *x2 = q;
+  uint64_t *y2 = q + len;
+  uint64_t *z2 = q + (uint32_t)2U * len;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(z1, sq_z1);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(z1, sq_z1);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_square_buffer_dh_p256(z2, sq_z2);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_square_buffer_dh_p384(z2, sq_z2);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_multiplication_buffer_dh_p256(sq_z1, z1, tr_z1);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_multiplication_buffer_dh_p384(sq_z1, z1, tr_z1);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_multiplication_buffer_dh_p256(sq_z2, z2, tr_z2);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_multiplication_buffer_dh_p384(sq_z2, z2, tr_z2);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_multiplication_buffer_dh_p256(sq_z1, x2, sq_z1);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_multiplication_buffer_dh_p384(sq_z1, x2, sq_z1);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_multiplication_buffer_dh_p256(sq_z2, x1, sq_z2);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_multiplication_buffer_dh_p384(sq_z2, x1, sq_z2);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_multiplication_buffer_dh_p256(tr_z1, y2, tr_z1);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_multiplication_buffer_dh_p384(tr_z1, y2, tr_z1);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        montgomery_multiplication_buffer_dh_p256(tr_z2, y1, tr_z2);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        montgomery_multiplication_buffer_dh_p384(tr_z2, y1, tr_z2);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  uint64_t tmp1 = (uint64_t)0U;
+  tmp1 = (uint64_t)18446744073709551615U;
+  uint32_t len10;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len10 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len10 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len10 = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)0U; i < len10; i++)
+  {
+    uint64_t a_i = sq_z1[i];
+    uint64_t b_i = sq_z2[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, b_i);
+    uint64_t tmp0 = tmp1;
+    tmp1 = r_i & tmp0;
+  }
+  uint64_t equalX = tmp1;
+  uint64_t tmp = (uint64_t)0U;
+  tmp = (uint64_t)18446744073709551615U;
+  uint32_t len1;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        len1 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        len1 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        len1 = (uint32_t)4U;
+      }
+  }
+  for (uint32_t i = (uint32_t)0U; i < len1; i++)
+  {
+    uint64_t a_i = tr_z1[i];
+    uint64_t b_i = tr_z2[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, b_i);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t equalY = tmp;
+  return equalX & equalY;
 }
 
 static inline void toUint64ChangeEndian_p256(uint8_t *i, uint64_t *o)
@@ -7832,44 +8210,24 @@ Hacl_P256_ecdsa_verif_p256_sha2(
       uint64_t *tempBuffer17 = tempBuffer1;
       uint64_t *p = points;
       uint64_t *q = points + (uint32_t)12U;
-      uint32_t len55 = (uint32_t)4U;
-      uint64_t *sq_z1 = tempBuffer17;
-      uint64_t *tr_z1 = tempBuffer17 + len55;
-      uint64_t *sq_z2 = tempBuffer17 + (uint32_t)2U * len55;
-      uint64_t *tr_z2 = tempBuffer17 + (uint32_t)3U * len55;
-      uint64_t *x1 = p;
-      uint64_t *y1 = p + len55;
-      uint64_t *z1 = p + (uint32_t)2U * len55;
-      uint64_t *x2 = q;
-      uint64_t *y2 = q + len55;
-      uint64_t *z2 = q + (uint32_t)2U * len55;
-      montgomery_square_buffer_dh_p256(z1, sq_z1);
-      montgomery_square_buffer_dh_p256(z2, sq_z2);
-      montgomery_multiplication_buffer_dh_p256(sq_z1, z1, tr_z1);
-      montgomery_multiplication_buffer_dh_p256(sq_z2, z2, tr_z2);
-      montgomery_multiplication_buffer_dh_p256(sq_z1, x2, sq_z1);
-      montgomery_multiplication_buffer_dh_p256(sq_z2, x1, sq_z2);
-      montgomery_multiplication_buffer_dh_p256(tr_z1, y2, tr_z1);
-      montgomery_multiplication_buffer_dh_p256(tr_z2, y1, tr_z2);
-      bool equalX = cmp_felem_felem_bool_p256(sq_z1, sq_z2);
-      bool equalY = cmp_felem_felem_bool_p256(tr_z1, tr_z2);
-      bool equalXAndY = equalX && equalY;
-      if (equalXAndY)
+      uint64_t equal = point_add_c_compute_points_equal(Spec_ECC_Curves_P256, p, q, tempBuffer17);
+      bool equal_b = !(equal == (uint64_t)0U);
+      if (equal_b)
       {
-        uint32_t len63 = (uint32_t)4U;
-        uint64_t *pY = p + len63;
-        uint64_t *pZ = p + (uint32_t)2U * len63;
+        uint32_t len5 = (uint32_t)4U;
+        uint64_t *pY = p + len5;
+        uint64_t *pZ = p + (uint32_t)2U * len5;
         uint64_t *x3 = result;
-        uint64_t *y3 = result + len63;
-        uint64_t *z3 = result + (uint32_t)2U * len63;
+        uint64_t *y3 = result + len5;
+        uint64_t *z3 = result + (uint32_t)2U * len5;
         uint64_t *delta = tempBuffer17;
-        uint64_t *gamma = tempBuffer17 + len63;
-        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len63;
-        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len63;
-        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len63;
-        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len63;
-        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len63;
-        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len63;
+        uint64_t *gamma = tempBuffer17 + len5;
+        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len5;
+        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len5;
+        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len5;
+        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len5;
+        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len5;
+        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len5;
         uint32_t coordinateLen = (uint32_t)4U;
         uint64_t *pX1 = p;
         uint64_t *pY1 = p + coordinateLen;
@@ -8257,44 +8615,24 @@ Hacl_P256_ecdsa_verif_p256_sha384(
       uint64_t *tempBuffer17 = tempBuffer1;
       uint64_t *p = points;
       uint64_t *q = points + (uint32_t)12U;
-      uint32_t len55 = (uint32_t)4U;
-      uint64_t *sq_z1 = tempBuffer17;
-      uint64_t *tr_z1 = tempBuffer17 + len55;
-      uint64_t *sq_z2 = tempBuffer17 + (uint32_t)2U * len55;
-      uint64_t *tr_z2 = tempBuffer17 + (uint32_t)3U * len55;
-      uint64_t *x1 = p;
-      uint64_t *y1 = p + len55;
-      uint64_t *z1 = p + (uint32_t)2U * len55;
-      uint64_t *x2 = q;
-      uint64_t *y2 = q + len55;
-      uint64_t *z2 = q + (uint32_t)2U * len55;
-      montgomery_square_buffer_dh_p256(z1, sq_z1);
-      montgomery_square_buffer_dh_p256(z2, sq_z2);
-      montgomery_multiplication_buffer_dh_p256(sq_z1, z1, tr_z1);
-      montgomery_multiplication_buffer_dh_p256(sq_z2, z2, tr_z2);
-      montgomery_multiplication_buffer_dh_p256(sq_z1, x2, sq_z1);
-      montgomery_multiplication_buffer_dh_p256(sq_z2, x1, sq_z2);
-      montgomery_multiplication_buffer_dh_p256(tr_z1, y2, tr_z1);
-      montgomery_multiplication_buffer_dh_p256(tr_z2, y1, tr_z2);
-      bool equalX = cmp_felem_felem_bool_p256(sq_z1, sq_z2);
-      bool equalY = cmp_felem_felem_bool_p256(tr_z1, tr_z2);
-      bool equalXAndY = equalX && equalY;
-      if (equalXAndY)
+      uint64_t equal = point_add_c_compute_points_equal(Spec_ECC_Curves_P256, p, q, tempBuffer17);
+      bool equal_b = !(equal == (uint64_t)0U);
+      if (equal_b)
       {
-        uint32_t len63 = (uint32_t)4U;
-        uint64_t *pY = p + len63;
-        uint64_t *pZ = p + (uint32_t)2U * len63;
+        uint32_t len5 = (uint32_t)4U;
+        uint64_t *pY = p + len5;
+        uint64_t *pZ = p + (uint32_t)2U * len5;
         uint64_t *x3 = result;
-        uint64_t *y3 = result + len63;
-        uint64_t *z3 = result + (uint32_t)2U * len63;
+        uint64_t *y3 = result + len5;
+        uint64_t *z3 = result + (uint32_t)2U * len5;
         uint64_t *delta = tempBuffer17;
-        uint64_t *gamma = tempBuffer17 + len63;
-        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len63;
-        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len63;
-        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len63;
-        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len63;
-        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len63;
-        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len63;
+        uint64_t *gamma = tempBuffer17 + len5;
+        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len5;
+        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len5;
+        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len5;
+        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len5;
+        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len5;
+        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len5;
         uint32_t coordinateLen = (uint32_t)4U;
         uint64_t *pX1 = p;
         uint64_t *pY1 = p + coordinateLen;
@@ -8682,44 +9020,24 @@ Hacl_P256_ecdsa_verif_p256_sha512(
       uint64_t *tempBuffer17 = tempBuffer1;
       uint64_t *p = points;
       uint64_t *q = points + (uint32_t)12U;
-      uint32_t len55 = (uint32_t)4U;
-      uint64_t *sq_z1 = tempBuffer17;
-      uint64_t *tr_z1 = tempBuffer17 + len55;
-      uint64_t *sq_z2 = tempBuffer17 + (uint32_t)2U * len55;
-      uint64_t *tr_z2 = tempBuffer17 + (uint32_t)3U * len55;
-      uint64_t *x1 = p;
-      uint64_t *y1 = p + len55;
-      uint64_t *z1 = p + (uint32_t)2U * len55;
-      uint64_t *x2 = q;
-      uint64_t *y2 = q + len55;
-      uint64_t *z2 = q + (uint32_t)2U * len55;
-      montgomery_square_buffer_dh_p256(z1, sq_z1);
-      montgomery_square_buffer_dh_p256(z2, sq_z2);
-      montgomery_multiplication_buffer_dh_p256(sq_z1, z1, tr_z1);
-      montgomery_multiplication_buffer_dh_p256(sq_z2, z2, tr_z2);
-      montgomery_multiplication_buffer_dh_p256(sq_z1, x2, sq_z1);
-      montgomery_multiplication_buffer_dh_p256(sq_z2, x1, sq_z2);
-      montgomery_multiplication_buffer_dh_p256(tr_z1, y2, tr_z1);
-      montgomery_multiplication_buffer_dh_p256(tr_z2, y1, tr_z2);
-      bool equalX = cmp_felem_felem_bool_p256(sq_z1, sq_z2);
-      bool equalY = cmp_felem_felem_bool_p256(tr_z1, tr_z2);
-      bool equalXAndY = equalX && equalY;
-      if (equalXAndY)
+      uint64_t equal = point_add_c_compute_points_equal(Spec_ECC_Curves_P256, p, q, tempBuffer17);
+      bool equal_b = !(equal == (uint64_t)0U);
+      if (equal_b)
       {
-        uint32_t len63 = (uint32_t)4U;
-        uint64_t *pY = p + len63;
-        uint64_t *pZ = p + (uint32_t)2U * len63;
+        uint32_t len5 = (uint32_t)4U;
+        uint64_t *pY = p + len5;
+        uint64_t *pZ = p + (uint32_t)2U * len5;
         uint64_t *x3 = result;
-        uint64_t *y3 = result + len63;
-        uint64_t *z3 = result + (uint32_t)2U * len63;
+        uint64_t *y3 = result + len5;
+        uint64_t *z3 = result + (uint32_t)2U * len5;
         uint64_t *delta = tempBuffer17;
-        uint64_t *gamma = tempBuffer17 + len63;
-        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len63;
-        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len63;
-        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len63;
-        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len63;
-        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len63;
-        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len63;
+        uint64_t *gamma = tempBuffer17 + len5;
+        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len5;
+        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len5;
+        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len5;
+        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len5;
+        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len5;
+        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len5;
         uint32_t coordinateLen = (uint32_t)4U;
         uint64_t *pX1 = p;
         uint64_t *pY1 = p + coordinateLen;
@@ -9109,44 +9427,24 @@ Hacl_P256_ecdsa_verif_without_hash(
       uint64_t *tempBuffer17 = tempBuffer1;
       uint64_t *p = points;
       uint64_t *q = points + (uint32_t)12U;
-      uint32_t len55 = (uint32_t)4U;
-      uint64_t *sq_z1 = tempBuffer17;
-      uint64_t *tr_z1 = tempBuffer17 + len55;
-      uint64_t *sq_z2 = tempBuffer17 + (uint32_t)2U * len55;
-      uint64_t *tr_z2 = tempBuffer17 + (uint32_t)3U * len55;
-      uint64_t *x1 = p;
-      uint64_t *y1 = p + len55;
-      uint64_t *z1 = p + (uint32_t)2U * len55;
-      uint64_t *x2 = q;
-      uint64_t *y2 = q + len55;
-      uint64_t *z2 = q + (uint32_t)2U * len55;
-      montgomery_square_buffer_dh_p256(z1, sq_z1);
-      montgomery_square_buffer_dh_p256(z2, sq_z2);
-      montgomery_multiplication_buffer_dh_p256(sq_z1, z1, tr_z1);
-      montgomery_multiplication_buffer_dh_p256(sq_z2, z2, tr_z2);
-      montgomery_multiplication_buffer_dh_p256(sq_z1, x2, sq_z1);
-      montgomery_multiplication_buffer_dh_p256(sq_z2, x1, sq_z2);
-      montgomery_multiplication_buffer_dh_p256(tr_z1, y2, tr_z1);
-      montgomery_multiplication_buffer_dh_p256(tr_z2, y1, tr_z2);
-      bool equalX = cmp_felem_felem_bool_p256(sq_z1, sq_z2);
-      bool equalY = cmp_felem_felem_bool_p256(tr_z1, tr_z2);
-      bool equalXAndY = equalX && equalY;
-      if (equalXAndY)
+      uint64_t equal = point_add_c_compute_points_equal(Spec_ECC_Curves_P256, p, q, tempBuffer17);
+      bool equal_b = !(equal == (uint64_t)0U);
+      if (equal_b)
       {
-        uint32_t len63 = (uint32_t)4U;
-        uint64_t *pY = p + len63;
-        uint64_t *pZ = p + (uint32_t)2U * len63;
+        uint32_t len5 = (uint32_t)4U;
+        uint64_t *pY = p + len5;
+        uint64_t *pZ = p + (uint32_t)2U * len5;
         uint64_t *x3 = result;
-        uint64_t *y3 = result + len63;
-        uint64_t *z3 = result + (uint32_t)2U * len63;
+        uint64_t *y3 = result + len5;
+        uint64_t *z3 = result + (uint32_t)2U * len5;
         uint64_t *delta = tempBuffer17;
-        uint64_t *gamma = tempBuffer17 + len63;
-        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len63;
-        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len63;
-        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len63;
-        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len63;
-        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len63;
-        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len63;
+        uint64_t *gamma = tempBuffer17 + len5;
+        uint64_t *beta = tempBuffer17 + (uint32_t)2U * len5;
+        uint64_t *alpha = tempBuffer17 + (uint32_t)3U * len5;
+        uint64_t *fourBeta = tempBuffer17 + (uint32_t)4U * len5;
+        uint64_t *eightBeta = tempBuffer17 + (uint32_t)5U * len5;
+        uint64_t *eightGamma = tempBuffer17 + (uint32_t)6U * len5;
+        uint64_t *tmp = tempBuffer17 + (uint32_t)7U * len5;
         uint32_t coordinateLen = (uint32_t)4U;
         uint64_t *pX1 = p;
         uint64_t *pY1 = p + coordinateLen;
@@ -10257,44 +10555,24 @@ Not side-channel resistant
 void Hacl_P256_point_add_out(uint64_t *p, uint64_t *q, uint64_t *result)
 {
   uint64_t tempBuffer[68U] = { 0U };
-  uint32_t len = (uint32_t)4U;
-  uint64_t *sq_z1 = tempBuffer;
-  uint64_t *tr_z1 = tempBuffer + len;
-  uint64_t *sq_z2 = tempBuffer + (uint32_t)2U * len;
-  uint64_t *tr_z2 = tempBuffer + (uint32_t)3U * len;
-  uint64_t *x1 = p;
-  uint64_t *y1 = p + len;
-  uint64_t *z1 = p + (uint32_t)2U * len;
-  uint64_t *x2 = q;
-  uint64_t *y2 = q + len;
-  uint64_t *z2 = q + (uint32_t)2U * len;
-  montgomery_square_buffer_dh_p256(z1, sq_z1);
-  montgomery_square_buffer_dh_p256(z2, sq_z2);
-  montgomery_multiplication_buffer_dh_p256(sq_z1, z1, tr_z1);
-  montgomery_multiplication_buffer_dh_p256(sq_z2, z2, tr_z2);
-  montgomery_multiplication_buffer_dh_p256(sq_z1, x2, sq_z1);
-  montgomery_multiplication_buffer_dh_p256(sq_z2, x1, sq_z2);
-  montgomery_multiplication_buffer_dh_p256(tr_z1, y2, tr_z1);
-  montgomery_multiplication_buffer_dh_p256(tr_z2, y1, tr_z2);
-  bool equalX = cmp_felem_felem_bool_p256(sq_z1, sq_z2);
-  bool equalY = cmp_felem_felem_bool_p256(tr_z1, tr_z2);
-  bool equalXAndY = equalX && equalY;
-  if (equalXAndY)
+  uint64_t equal = point_add_c_compute_points_equal(Spec_ECC_Curves_P256, p, q, tempBuffer);
+  bool equal_b = !(equal == (uint64_t)0U);
+  if (equal_b)
   {
-    uint32_t len1 = (uint32_t)4U;
-    uint64_t *pY = p + len1;
-    uint64_t *pZ = p + (uint32_t)2U * len1;
+    uint32_t len = (uint32_t)4U;
+    uint64_t *pY = p + len;
+    uint64_t *pZ = p + (uint32_t)2U * len;
     uint64_t *x3 = result;
-    uint64_t *y3 = result + len1;
-    uint64_t *z3 = result + (uint32_t)2U * len1;
+    uint64_t *y3 = result + len;
+    uint64_t *z3 = result + (uint32_t)2U * len;
     uint64_t *delta = tempBuffer;
-    uint64_t *gamma = tempBuffer + len1;
-    uint64_t *beta = tempBuffer + (uint32_t)2U * len1;
-    uint64_t *alpha = tempBuffer + (uint32_t)3U * len1;
-    uint64_t *fourBeta = tempBuffer + (uint32_t)4U * len1;
-    uint64_t *eightBeta = tempBuffer + (uint32_t)5U * len1;
-    uint64_t *eightGamma = tempBuffer + (uint32_t)6U * len1;
-    uint64_t *tmp = tempBuffer + (uint32_t)7U * len1;
+    uint64_t *gamma = tempBuffer + len;
+    uint64_t *beta = tempBuffer + (uint32_t)2U * len;
+    uint64_t *alpha = tempBuffer + (uint32_t)3U * len;
+    uint64_t *fourBeta = tempBuffer + (uint32_t)4U * len;
+    uint64_t *eightBeta = tempBuffer + (uint32_t)5U * len;
+    uint64_t *eightGamma = tempBuffer + (uint32_t)6U * len;
+    uint64_t *tmp = tempBuffer + (uint32_t)7U * len;
     uint32_t coordinateLen = (uint32_t)4U;
     uint64_t *pX1 = p;
     uint64_t *pY1 = p + coordinateLen;
@@ -10329,6 +10607,64 @@ void Hacl_P256_point_add_out(uint64_t *p, uint64_t *q, uint64_t *result)
     return;
   }
   point_add_p256(p, q, result, tempBuffer);
+}
+
+/*
+Complete point addition.
+Side-channel resistant
+*/
+void Hacl_P256_point_add_ct_out(uint64_t *p, uint64_t *q, uint64_t *result)
+{
+  uint64_t tempBuffer[68U] = { 0U };
+  uint64_t result_point_double[12U] = { 0U };
+  uint64_t equal = point_add_c_compute_points_equal(Spec_ECC_Curves_P256, p, q, tempBuffer);
+  uint32_t len = (uint32_t)4U;
+  uint64_t *pY = p + len;
+  uint64_t *pZ = p + (uint32_t)2U * len;
+  uint64_t *x3 = result_point_double;
+  uint64_t *y3 = result_point_double + len;
+  uint64_t *z3 = result_point_double + (uint32_t)2U * len;
+  uint64_t *delta = tempBuffer;
+  uint64_t *gamma = tempBuffer + len;
+  uint64_t *beta = tempBuffer + (uint32_t)2U * len;
+  uint64_t *alpha = tempBuffer + (uint32_t)3U * len;
+  uint64_t *fourBeta = tempBuffer + (uint32_t)4U * len;
+  uint64_t *eightBeta = tempBuffer + (uint32_t)5U * len;
+  uint64_t *eightGamma = tempBuffer + (uint32_t)6U * len;
+  uint64_t *tmp = tempBuffer + (uint32_t)7U * len;
+  uint32_t coordinateLen = (uint32_t)4U;
+  uint64_t *pX1 = p;
+  uint64_t *pY1 = p + coordinateLen;
+  uint64_t *pZ1 = p + (uint32_t)2U * coordinateLen;
+  uint64_t *a0 = tmp;
+  uint64_t *a1 = tmp + coordinateLen;
+  uint64_t *alpha0 = tmp + (uint32_t)2U * coordinateLen;
+  montgomery_square_buffer_dh_p256(pZ1, delta);
+  montgomery_square_buffer_dh_p256(pY1, gamma);
+  montgomery_multiplication_buffer_dh_p256(pX1, gamma, beta);
+  felem_sub_p256(pX1, delta, a0);
+  felem_add_p256(pX1, delta, a1);
+  montgomery_multiplication_buffer_dh_p256(a0, a1, alpha0);
+  felem_add_p256(alpha0, alpha0, alpha);
+  felem_add_p256(alpha0, alpha, alpha);
+  montgomery_square_buffer_dh_p256(alpha, x3);
+  felem_add_p256(beta, beta, fourBeta);
+  felem_add_p256(fourBeta, fourBeta, fourBeta);
+  felem_add_p256(fourBeta, fourBeta, eightBeta);
+  felem_sub_p256(x3, eightBeta, x3);
+  felem_add_p256(pY, pZ, z3);
+  montgomery_square_buffer_dh_p256(z3, z3);
+  felem_sub_p256(z3, gamma, z3);
+  felem_sub_p256(z3, delta, z3);
+  felem_sub_p256(fourBeta, x3, y3);
+  montgomery_multiplication_buffer_dh_p256(alpha, y3, y3);
+  montgomery_square_buffer_dh_p256(gamma, gamma);
+  felem_add_p256(gamma, gamma, eightGamma);
+  felem_add_p256(eightGamma, eightGamma, eightGamma);
+  felem_add_p256(eightGamma, eightGamma, eightGamma);
+  felem_sub_p256(y3, eightGamma, y3);
+  point_add_p256(p, q, result, tempBuffer);
+  copy_point_conditional(Spec_ECC_Curves_P256, result, result_point_double, equal);
 }
 
 /*

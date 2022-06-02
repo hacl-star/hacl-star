@@ -27,16 +27,28 @@ val point_add_c: #c: curve -> p: point c -> q: point c -> result: point c
    (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
      let pD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
      let qD = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
-(*      if pointEqual #c pD qD then 
+     if pointEqual #c pD qD then 
        fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_double_nist #c pD
      else
-       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c pD qD /\ *)
+       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c pD qD /\ 
      fromDomainPoint #c #DH (point_as_nat c h1 result) == pointAdd #c pD qD))
 
 
 
 inline_for_extraction noextract
 val point_add_c_out: #c: curve -> p: point c -> q: point c -> result: point c ->
+  Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
+     point_eval c h p /\ point_eval c h q /\ ~ (isPointAtInfinity (point_as_nat c h p)) /\ 
+     ~ (isPointAtInfinity (point_as_nat c h q)))
+   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ (
+     let pD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+     let qD = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
+     fromDomainPoint #c #DH (point_as_nat c h1 result) == pointAdd #c pD qD))
+
+
+inline_for_extraction noextract
+val point_add_c_ct_out: #c: curve -> p: point c -> q: point c -> result: point c ->
   Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ 
     eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
      point_eval c h p /\ point_eval c h q /\ ~ (isPointAtInfinity (point_as_nat c h p)) /\ 

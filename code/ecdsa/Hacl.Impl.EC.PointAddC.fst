@@ -287,7 +287,20 @@ Such way we don't provide a method to compute it, but the following code is used
 followed by point double (if they are equal) or point add (otherwise).*)
 
 
-let point_add_c #c p q result tempBuffer = 
+val point_add_c_compute_points_equal: #c: curve -> p: point c -> q: point c 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
+   Stack uint64 (requires fun h -> live h p /\ live h q /\  live h tempBuffer /\ 
+     disjoint p q /\ disjoint p tempBuffer /\ 
+     disjoint q tempBuffer /\
+     point_eval c h p /\ point_eval c h q /\ ~ (isPointAtInfinity (point_as_nat c h p)) /\ 
+     ~ (isPointAtInfinity (point_as_nat c h q)))
+   (ensures fun h0 r h1 -> modifies (loc tempBuffer) h0 h1 /\ point_eval c h1 p /\ point_eval c h1 q /\
+     point_as_nat c h0 p == point_as_nat c h1 p /\ point_as_nat c h0 q == point_as_nat c h1 q /\ (
+     let pD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+     let qD = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
+   if pointEqual #c pD qD then uint_v r == pow2 64 - 1 else uint_v r == 0))
+
+let point_add_c_compute_points_equal #c p q tempBuffer = 
     let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
   
@@ -317,42 +330,24 @@ let point_add_c #c p q result tempBuffer =
   montgomery_multiplication_buffer_dh #c tr_z1 y2 tr_z1;
   montgomery_multiplication_buffer_dh #c tr_z2 y1 tr_z2;
 
-    let h2 = ST.get() in 
+  let h1 = ST.get() in 
 
-  let equalX = cmp_felem_felem_bool #c sq_z1 sq_z2 in 
-  let equalY = cmp_felem_felem_bool #c tr_z1 tr_z2 in 
+   
+  let equalX = cmp_felem_felem_u64 #c sq_z1 sq_z2 in 
+  let equalY = cmp_felem_felem_u64 #c tr_z1 tr_z2 in 
 
-  let equalXAndY = equalX && equalY in 
 
-  if equalXAndY then
-   point_double p result tempBuffer
-  else  
-    point_add p q result tempBuffer;
+  lemma_mod_mul_distr_l (fromDomain_ #c #DH (as_nat c h0 z1) * fromDomain_ #c #DH (as_nat c h0 z1)) (fromDomain_ #c #DH (as_nat c h0 z1)) (getPrime c);
+  lemma_mod_mul_distr_l (fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2)) (fromDomain_ #c #DH (as_nat c h0 z2)) (getPrime c);
 
-    let h3 = ST.get() in 
+  lemma_mod_mul_distr_l (fromDomain_ #c #DH (as_nat c h0 z1) * fromDomain_ #c #DH (as_nat c h0 z1)) (fromDomain_ #c #DH (as_nat c h0 x2)) (getPrime c);
+  lemma_mod_mul_distr_l (fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2)) (fromDomain_ #c #DH (as_nat c h0 x1)) (getPrime c);
 
-  let x1D = fromDomain_ #c #DH (as_nat c h0 x1) in 
-  let x2D = fromDomain_ #c #DH (as_nat c h0 x2) in 
-  
-  let y1D = fromDomain_ #c #DH (as_nat c h0 y1) in 
-  let y2D = fromDomain_ #c #DH (as_nat c h0 y2) in 
+  lemma_mod_mul_distr_l (fromDomain_ #c #DH (as_nat c h0 z1) * fromDomain_ #c #DH (as_nat c h0 z1) * fromDomain_ #c #DH (as_nat c h0 z1) ) (fromDomain_ #c #DH (as_nat c h0 y2)) (getPrime c);
+  lemma_mod_mul_distr_l (fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2)) (fromDomain_ #c #DH (as_nat c h0 y1)) (getPrime c);
 
-  let z1D = fromDomain_ #c #DH (as_nat c h0 z1) in 
-  let z2D = fromDomain_ #c #DH (as_nat c h0 z2) in 
-
-  let prime = getPrime c in 
-
-  lemma_mod_mul_distr_l (z1D * z1D) z1D prime;
-  lemma_mod_mul_distr_l (z2D * z2D) z2D prime;
-
-  lemma_mod_mul_distr_l (z1D * z1D) x2D prime;
-  lemma_mod_mul_distr_l (z2D * z2D) x1D prime;
-
-  lemma_mod_mul_distr_l (z1D * z1D * z1D) y2D prime;
-  lemma_mod_mul_distr_l (z2D * z2D * z2D) y1D prime;
-
-  lemma_modular_multiplication_2_d #c (z1D * z1D * x2D % prime) (z2D * z2D * x1D % prime);
-  lemma_modular_multiplication_2_d #c (z1D * z1D * z1D * y2D % prime) (z2D * z2D * z2D * y1D % prime);
+  lemma_modular_multiplication_2_d #c (fromDomain_ #c #DH (as_nat c h0 z1)  * fromDomain_ #c #DH (as_nat c h0 z1)  * fromDomain_ #c #DH (as_nat c h0 x2) % getPrime c) (fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2) * (fromDomain_ #c #DH (as_nat c h0 x1)) % getPrime c);
+  lemma_modular_multiplication_2_d #c (fromDomain_ #c #DH (as_nat c h0 z1)  * fromDomain_ #c #DH (as_nat c h0 z1)  * fromDomain_ #c #DH (as_nat c h0 z1)  * fromDomain_ #c #DH (as_nat c h0 y2) % getPrime c) (fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 y1) % getPrime c);
 
   lemma_pointAtInfInDomain #c (as_nat c h0 x1) (as_nat c h0 y1) (as_nat c h0 z1);
   lemma_pointAtInfInDomain #c (as_nat c h0 x2) (as_nat c h0 y2) (as_nat c h0 z2);
@@ -366,9 +361,66 @@ let point_add_c #c p q result tempBuffer =
   let open FStar.Tactics in 
   let open FStar.Tactics.Canon in 
   
-  assert_by_tactic ((z1D * z1D * z1D) * y2D == y2D * (z1D * z1D * z1D)) canon;
-  assert_by_tactic ((z2D * z2D * z2D) * y1D == y1D * (z2D * z2D * z2D)) canon
+  assert_by_tactic ((fromDomain_ #c #DH (as_nat c h0 z1)  * fromDomain_ #c #DH (as_nat c h0 z1)  * fromDomain_ #c #DH (as_nat c h0 z1) ) * fromDomain_ #c #DH (as_nat c h0 y2) == fromDomain_ #c #DH (as_nat c h0 y2) * (fromDomain_ #c #DH (as_nat c h0 z1)  * fromDomain_ #c #DH (as_nat c h0 z1)  * fromDomain_ #c #DH (as_nat c h0 z1) )) canon;
+  assert_by_tactic ((fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2)) * fromDomain_ #c #DH (as_nat c h0 y1) == fromDomain_ #c #DH (as_nat c h0 y1) * (fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2) * fromDomain_ #c #DH (as_nat c h0 z2))) canon;
 
+
+  logand_lemma equalX equalY; 
+  logand equalX equalY
+
+
+let point_add_c #c p q result tempBuffer = 
+  let h0 = ST.get() in 
+  
+  let equal = point_add_c_compute_points_equal p q tempBuffer in 
+  let equal_b = not (Hacl.Impl.EC.LowLevel.RawCmp.unsafe_bool_of_u64 equal) in 
+  
+  if equal_b then
+   point_double p result tempBuffer
+  else  
+    point_add p q result tempBuffer
+
+
+inline_for_extraction noextract
+val point_add_c_ct: #c: curve -> p: point c -> q: point c -> result: point c 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
+   Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ live h tempBuffer /\ 
+     eq_or_disjoint q result /\ disjoint p q /\ disjoint p tempBuffer /\ 
+     disjoint q tempBuffer /\ disjoint p result /\ disjoint result tempBuffer /\ 
+     point_eval c h p /\ point_eval c h q /\ ~ (isPointAtInfinity (point_as_nat c h p)) /\ 
+     ~ (isPointAtInfinity (point_as_nat c h q)))
+   (ensures fun h0 _ h1 -> modifies (loc tempBuffer |+| loc result) h0 h1 /\ point_eval c h1 result /\ (
+     let pD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+     let qD = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
+(*      if pointEqual #c pD qD then 
+       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_double_nist #c pD
+     else
+       fromDomainPoint #c #DH (point_as_nat c h1 result) == _point_add #c pD qD /\ *)
+     fromDomainPoint #c #DH (point_as_nat c h1 result) == pointAdd #c pD qD))
+
+
+let point_add_c_ct #c p q result tempBuffer =
+  let h0 = ST.get() in 
+    push_frame(); 
+    let result_point_double = create (size 3 *! getCoordinateLenU64 c) (u64 0) in 
+
+  let h1 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 q;
+
+  let equal = point_add_c_compute_points_equal p q tempBuffer in 
+  point_double p result_point_double tempBuffer;
+    let h2 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 p;
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h1 h2 q;
+  point_add p q result tempBuffer;
+    let h3 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result_point_double;
+  copy_point_conditional result result_point_double equal;
+    let h4 = ST.get() in 
+  pop_frame();
+    let h5 = ST.get() in 
+    Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h4 h5 result
 
 
 let point_add_c_out #c p q result = 
@@ -384,4 +436,17 @@ let point_add_c_out #c p q result =
   let h3 = ST.get() in 
      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
 
+
+let point_add_c_ct_out #c p q result = 
+  let h0 = ST.get() in 
+  push_frame();
+    let tempBuffer = create (size 17 *! getCoordinateLenU64 c) (u64 0) in 
+    let h1 = ST.get() in 
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 q;
+      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h1 p;
+    point_add_c_ct p q result tempBuffer;
+  let h2 = ST.get() in 
+  pop_frame();
+  let h3 = ST.get() in 
+     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
   

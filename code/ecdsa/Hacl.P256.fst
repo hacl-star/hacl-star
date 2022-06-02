@@ -98,6 +98,9 @@ let ecp384dh_r result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r_private #P384 #
 
 let point_add_out = Hacl.Impl.EC.PointAddC.point_add_c_out #P256
 
+let point_add_ct_out = Hacl.Impl.EC.PointAddC.point_add_c_ct_out #P256
+
+
 let point_inv p result = Hacl.Impl.EC.PointInverse.point_inv #P256 p result
 
 let point_toForm i o = Hacl.Impl.P256.Signature.Common.toFormPoint i o

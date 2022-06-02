@@ -143,6 +143,33 @@ let copy_conditional #c #b out x mask =
 	|CONST -> copy_conditional_generic_c out x mask end *)
 
 
+val copy_point_conditional: #c: curve -> out: point c -> x: point c 
+  -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} 
+  -> Stack unit 
+  (requires fun h -> live h out /\ live h x /\ disjoint x out /\ point_eval c h out /\ point_eval c h x)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ point_eval c h1 out /\ (
+    let p = point_as_nat c h0 x in 
+    let out_0 = point_as_nat c h0 out in 
+    if uint_v mask = 0 then point_as_nat c h1 out == out_0 else point_as_nat c h1 out == p)) 
+
+let copy_point_conditional #c out p mask = 
+  [@inline_let]
+  let len = getCoordinateLenU64 c in 
+  
+  let p_x = sub p (size 0) len in 
+  let p_y = sub p len len in 
+  let p_z = sub p (size 2 *! len) len in   
+
+  let out_x = sub out (size 0) len in 
+  let out_y = sub out len len in 
+  let out_z = sub out (size 2 *! len) len in   
+
+  copy_conditional #c out_x p_x mask;
+  copy_conditional #c out_y p_y mask;
+  copy_conditional #c out_z p_z mask
+
+
+
 inline_for_extraction noextract
 val cmovznz4_: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
   Stack unit

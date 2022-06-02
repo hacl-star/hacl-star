@@ -326,6 +326,12 @@ Not side-channel resistant
 void Hacl_P256_point_add_out(uint64_t *p, uint64_t *q, uint64_t *result);
 
 /*
+Complete point addition.
+Side-channel resistant
+*/
+void Hacl_P256_point_add_ct_out(uint64_t *p, uint64_t *q, uint64_t *result);
+
+/*
 Point inverse
 */
 void Hacl_P256_point_inv(uint64_t *p, uint64_t *result);

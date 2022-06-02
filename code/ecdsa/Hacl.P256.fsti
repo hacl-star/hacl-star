@@ -521,6 +521,18 @@ val point_add_out: p: point P256 -> q: point P256 -> result: point P256 ->
      fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == pointAdd #P256 pD qD))
 
 
+[@ (Comment "Complete point addition.
+Side-channel resistant")]
+val point_add_ct_out: p: point P256 -> q: point P256 -> result: point P256 -> 
+  Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
+    point_eval P256 h p /\ point_eval P256 h q)
+   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval P256 h1 result /\ (
+     let pD = fromDomainPoint #P256 #DH (point_as_nat P256 h0 p) in 
+     let qD = fromDomainPoint #P256 #DH (point_as_nat P256 h0 q) in 
+     fromDomainPoint #P256 #DH (point_as_nat P256 h1 result) == pointAdd #P256 pD qD))
+
+
 
 [@ (Comment "Point inverse")]
 val point_inv: p: point P256 -> result: point P256 -> Stack unit
