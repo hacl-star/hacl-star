@@ -286,7 +286,7 @@ Weierstraß Elliptic Curves and Side-Channel Attacks Eric Brier and Marc Joye.
 Such way we don't provide a method to compute it, but the following code is used as a wrapper over the check of point equality,
 followed by point double (if they are equal) or point add (otherwise).*)
 
-
+inline_for_extraction noextract
 val point_add_c_compute_points_equal: #c: curve -> p: point c -> q: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
    Stack uint64 (requires fun h -> live h p /\ live h q /\  live h tempBuffer /\ 
@@ -437,7 +437,18 @@ let point_add_c_out #c p q result =
      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
 
 
-let point_add_c_ct_out #c p q result = 
+inline_for_extraction noextract
+val point_add_c_ct_out_: #c: curve -> p: point c -> q: point c -> result: point c ->
+  Stack unit (requires fun h -> live h p /\ live h q /\ live h result /\ 
+    eq_or_disjoint q result /\ disjoint p q /\ disjoint p result /\
+     point_eval c h p /\ point_eval c h q /\ ~ (isPointAtInfinity (point_as_nat c h p)) /\ 
+     ~ (isPointAtInfinity (point_as_nat c h q)))
+   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ (
+     let pD = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+     let qD = fromDomainPoint #c #DH (point_as_nat c h0 q) in 
+     fromDomainPoint #c #DH (point_as_nat c h1 result) == pointAdd #c pD qD))
+
+let point_add_c_ct_out_ #c p q result = 
   let h0 = ST.get() in 
   push_frame();
     let tempBuffer = create (size 17 *! getCoordinateLenU64 c) (u64 0) in 
@@ -450,3 +461,13 @@ let point_add_c_ct_out #c p q result =
   let h3 = ST.get() in 
      Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h2 h3 result
   
+
+let point_add_c_ct_out_p256 = point_add_c_ct_out_ #P256
+
+let point_add_c_ct_out_p384 = point_add_c_ct_out_ #P384
+
+
+let point_add_c_ct_out #c p q result = 
+  match c with 
+  |P256 -> point_add_c_ct_out_p256 p q result
+  |P384 -> point_add_c_ct_out_p384 p q result

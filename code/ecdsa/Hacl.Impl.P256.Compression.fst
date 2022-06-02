@@ -31,8 +31,8 @@ open FStar.Mul
 
 #set-options "--z3rlimit 200 --ifuel 0 --fuel 0"
 
-
-val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 -> Stack unit 
+inline_for_extraction noextract
+val computeYFromX_: #c: curve -> x: felem c -> result: felem c -> sign: uint64 -> Stack unit 
   (requires fun h -> live h x /\ live h result /\ as_nat c h x < getPrime c /\ disjoint x result)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     as_nat c h1 result < getPrime c /\ (
@@ -45,7 +45,7 @@ val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 ->
       as_nat c h1 result = (0 - sqRootWithoutSign) % prime))
 
 
-let computeYFromX #c x result sign = 
+let computeYFromX_ #c x result sign = 
   push_frame();
     let len = getCoordinateLenU64 c in 
     
@@ -109,6 +109,30 @@ let computeYFromX #c x result sign =
       ((x_ * x_ * x_ + Spec.ECC.Curves.aCoordinate #c * x_ % prime + Spec.ECC.Curves.bCoordinate #c) % prime); 
     (==) {lemma_mod_add_distr (x_ * x_ * x_ + bCoordinate #c) (aCoordinate #c * x_) prime}
       ((x_ * x_ * x_ + Spec.ECC.Curves.aCoordinate #c * x_ + Spec.ECC.Curves.bCoordinate #c) % prime); }
+
+
+let computeYFromX_p256 = computeYFromX_ #P256
+
+let computeYFromX_p384 = computeYFromX_ #P384
+
+
+inline_for_extraction noextract
+val computeYFromX: #c: curve -> x: felem c -> result: felem c -> sign: uint64 -> Stack unit 
+  (requires fun h -> live h x /\ live h result /\ as_nat c h x < getPrime c /\ disjoint x result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    as_nat c h1 result < getPrime c /\ (
+    let prime = getPrime c in 
+    let xD = fromDomain_ #c #DH (as_nat c h0 x) in 
+    let sqRootWithoutSign = sq_root_spec #c #DH (((xD * xD * xD + aCoordinate #c * xD + bCoordinate #c) % prime)) in 
+    if sqRootWithoutSign % pow2 1 = uint_v sign then
+      as_nat c h1 result = sqRootWithoutSign 
+    else
+      as_nat c h1 result = (0 - sqRootWithoutSign) % prime))
+
+let computeYFromX #c x result sign =
+  match c with
+  | P256 -> computeYFromX_p256 x result sign
+  | P384 -> computeYFromX_p384 x result sign
 
 
 

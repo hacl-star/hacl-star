@@ -65,8 +65,29 @@ let exponent #c a result tempBuffer =
     lemma_list_nat_from_bytes (prime_inverse_list c) (List.Tot.length (prime_inverse_list c))
 
 
+(* val square_root_: #c: curve -> a: felem c -> result: felem c -> Stack unit 
+  (requires fun h -> live h a /\ live h result /\ as_nat c h a < getPrime c)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\
+    as_nat c h1 result < getPrime c /\
+    fromDomain #c (as_nat c h1 result) = sq_root_spec #c #DH (fromDomain #c (as_nat c h0 a)) /\
+    fromDomain #c (as_nat c h1 result) = pow (fromDomain #c (as_nat c h0 a)) ((getPrime c + 1) / 4) % getPrime c)
+ *)
 let square_root #c a result = 
   recall_contents (sqPower_buffer #c) (Lib.Sequence.of_list (sqPower_list #c));
   montgomery_ladder_power_dh #c a (sqPower_buffer #c) result;
   lemma_list_nat_from_bytes (sqPower_list #c) (List.Tot.length (sqPower_list #c))
+(* 
 
+val square_root_p256: a: felem P256 -> result: felem P256 -> Stack unit 
+  (requires fun h -> live h a /\ live h result /\ as_nat P256 h a < getPrime P256)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1)
+
+let square_root_p256 = square_root_ #P256 
+
+let square_root_p384 = square_root_ #P384
+
+ *)
+(* let square_root #c a result = 
+  match c with 
+  |P256 -> square_root_p256 a result
+  |P384 -> square_root_p384 a result *)

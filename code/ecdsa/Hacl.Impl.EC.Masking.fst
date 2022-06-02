@@ -143,6 +143,7 @@ let copy_conditional #c #b out x mask =
 	|CONST -> copy_conditional_generic_c out x mask end *)
 
 
+inline_for_extraction noextract
 val copy_point_conditional: #c: curve -> out: point c -> x: point c 
   -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} 
   -> Stack unit 
