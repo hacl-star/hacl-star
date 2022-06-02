@@ -177,9 +177,9 @@ clean:
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
 PYTHON3 ?= $(shell tools/findpython3.sh)
 ifeq ($(OS),Windows_NT)
-  MONO =
+  DOTNET =
 else
-  MONO = dotnet
+  DOTNET = dotnet
 endif
 
 ifeq ($(shell uname -s),Darwin)
@@ -346,7 +346,7 @@ endif
 
 %.types.vaf:
 	$(call run-with-log,\
-	  $(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
+	  $(DOTNET) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
 	  ,[VALE-TYPES] $(notdir $*),$(call to-obj-dir,$@))
 
 # Always pass Vale.Lib.Operator.vaf as an -include to Vale, except for the file itself.
@@ -359,7 +359,7 @@ obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 # the files). (Actually, we know, hence this extra touch.)
 %.fst:
 	$(call run-with-log,\
-	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText \
+	  $(DOTNET) $(VALE_HOME)/bin/vale.exe -fstarText \
 	    -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i && touch -c $@i \
