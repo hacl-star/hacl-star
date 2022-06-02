@@ -171,7 +171,7 @@ PYTHON3 ?= $(shell tools/findpython3.sh)
 ifeq ($(OS),Windows_NT)
   MONO =
 else
-  MONO = mono
+  MONO = dotnet
 endif
 
 ifeq ($(shell uname -s),Darwin)
