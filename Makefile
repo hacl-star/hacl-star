@@ -63,6 +63,14 @@ ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
   $(error $$VALE_HOME/bin/vale.exe does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
 endif
 
+ifeq (,$(wildcard $(VALE_HOME)/bin/vale.runtimeconfig.json))
+  $(error $$VALE_HOME/bin/vale.runtimeconfig.json does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
+endif
+
+ifeq (,$(wildcard $(VALE_HOME)/bin/importFStarTypes.runtimeconfig.json))
+  $(error $$VALE_HOME/bin/importFStarTypes.runtimeconfig.json does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
+endif
+
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
   $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
     $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version).$(newline)(VALE_HOME=$(VALE_HOME))$(newline)Hint: ./tools/get_vale.sh)
