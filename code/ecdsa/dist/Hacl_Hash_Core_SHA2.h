@@ -24,14 +24,13 @@
 
 #ifndef __Hacl_Hash_Core_SHA2_H
 #define __Hacl_Hash_Core_SHA2_H
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+
+
+#include "Hacl_Krmllib.h"
 #include "lib_intrinsics.h"
-
-
-#include "Hacl_Kremlib.h"
-
 void Hacl_Hash_Core_SHA2_init_224(uint32_t *s);
 
 void Hacl_Hash_Core_SHA2_init_256(uint32_t *s);

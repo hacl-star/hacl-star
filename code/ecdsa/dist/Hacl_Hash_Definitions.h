@@ -24,14 +24,13 @@
 
 #ifndef __Hacl_Hash_Definitions_H
 #define __Hacl_Hash_Definitions_H
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "lib_intrinsics.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
 
 
 #include "Hacl_Spec.h"
-
+#include "lib_intrinsics.h"
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
 
 uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);

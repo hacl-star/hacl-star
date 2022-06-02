@@ -24,14 +24,13 @@
 
 #ifndef __Hacl_Impl_Blake2_Core_H
 #define __Hacl_Impl_Blake2_Core_H
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+
+
+
 #include "lib_intrinsics.h"
-
-
-
-
 #define Hacl_Impl_Blake2_Core_M32 0
 #define Hacl_Impl_Blake2_Core_M128 1
 #define Hacl_Impl_Blake2_Core_M256 2

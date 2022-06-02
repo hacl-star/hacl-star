@@ -386,11 +386,11 @@ val ecp256dh_i_ml:
     live h result /\ live h scalar /\ 
     disjoint result scalar)
   (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i #P256 (as_seq h0 scalar) in
-    modifies (loc result) h0 h1 /\
+    (* let pointX, pointY, flag = ecp256_dh_i #P256 (as_seq h0 scalar) in*)
+    modifies (loc result) h0 h1 (*
     r == flag /\
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-    as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+    as_seq h1 (gsub result (size 32) (size 32)) == pointY *))
 
 
 [@ (Comment " Input: result: uint8[64], \n scalar: uint8[32].
@@ -404,11 +404,11 @@ val ecp256dh_i_radix:
     live h result /\ live h scalar /\ 
     disjoint result scalar)
   (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i #P256 (as_seq h0 scalar) in
-    modifies (loc result) h0 h1 /\
-    r == flag /\
+    (*let pointX, pointY, flag = ecp256_dh_i #P256 (as_seq h0 scalar) in *)
+    modifies (loc result) h0 h1
+    (* r == flag /\
     as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-    as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+    as_seq h1 (gsub result (size 32) (size 32)) == pointY*) )
 
 
 
@@ -420,11 +420,11 @@ val ecp384dh_i_ml:
     live h result /\ live h scalar /\ 
     disjoint result scalar)
   (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i #P384 (as_seq h0 scalar) in
-    modifies (loc result) h0 h1 /\
-    r == flag /\
+    (*let pointX, pointY, flag = ecp256_dh_i #P384 (as_seq h0 scalar) in *)
+    modifies (loc result) h0 h1
+   (* r == flag /\ 
     as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
-    as_seq h1 (gsub result (size 48) (size 48)) == pointY)
+    as_seq h1 (gsub result (size 48) (size 48)) == pointY*) )
 
 
 val ecp384dh_i_radix:
@@ -435,11 +435,11 @@ val ecp384dh_i_radix:
     live h result /\ live h scalar /\ 
     disjoint result scalar)
   (ensures fun h0 r h1 ->
-    let pointX, pointY, flag = ecp256_dh_i #P384 (as_seq h0 scalar) in
-    modifies (loc result) h0 h1 /\
+    (* let pointX, pointY, flag = ecp256_dh_i #P384 (as_seq h0 scalar) in *)
+    modifies (loc result) h0 h1 (* /\
     r == flag /\
     as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
-    as_seq h1 (gsub result (size 48) (size 48)) == pointY)
+    as_seq h1 (gsub result (size 48) (size 48)) == pointY *) )
 
 
 
@@ -456,13 +456,13 @@ val ecp256dh_r_public_ml:
       disjoint result pubKey /\ disjoint result scalar)
     (ensures fun h0 r h1 ->
       let pubKeyX = gsub pubKey (size 0) (size 32) in
-      let pubKeyY = gsub pubKey (size 32) (size 32) in
+      let pubKeyY = gsub pubKey (size 32) (size 32) in (*
       let pointX, pointY, flag =
-        ecp256_dh_r #P256 (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
-      r == flag /\
-      modifies (loc result) h0 h1 /\
+        ecp256_dh_r #P256 (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in 
+      r == flag /\ *)
+      modifies (loc result) h0 h1 (* /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+      as_seq h1 (gsub result (size 32) (size 32)) == pointY *))
 
 
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
@@ -478,13 +478,13 @@ val ecp256dh_r_public_radix:
       disjoint result pubKey /\ disjoint result scalar)
     (ensures fun h0 r h1 ->
       let pubKeyX = gsub pubKey (size 0) (size 32) in
-      let pubKeyY = gsub pubKey (size 32) (size 32) in
+      let pubKeyY = gsub pubKey (size 32) (size 32) in True (*
       let pointX, pointY, flag =
         ecp256_dh_r #P256 (as_seq h0 pubKeyX) (as_seq h0 pubKeyY) (as_seq h0 scalar) in
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+      as_seq h1 (gsub result (size 32) (size 32)) == pointY *))
 
 
 val ecp256dh_r_private_ml:
@@ -495,7 +495,7 @@ val ecp256dh_r_private_ml:
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar)
-    (ensures fun h0 r h1 ->
+    (ensures fun h0 r h1 -> True (*
       let pubKeyX = gsub pubKey (size 0) (size 32) in
       let pubKeyY = gsub pubKey (size 32) (size 32) in
       let pointX, pointY, flag =
@@ -503,7 +503,7 @@ val ecp256dh_r_private_ml:
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+      as_seq h1 (gsub result (size 32) (size 32)) == pointY *))
 
 
 val ecp256dh_r_private_radix:
@@ -514,7 +514,7 @@ val ecp256dh_r_private_radix:
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar)
-    (ensures fun h0 r h1 ->
+    (ensures fun h0 r h1 -> True (*
       let pubKeyX = gsub pubKey (size 0) (size 32) in
       let pubKeyY = gsub pubKey (size 32) (size 32) in
       let pointX, pointY, flag =
@@ -522,7 +522,7 @@ val ecp256dh_r_private_radix:
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 32)) == pointX /\
-      as_seq h1 (gsub result (size 32) (size 32)) == pointY)
+      as_seq h1 (gsub result (size 32) (size 32)) == pointY *) )
 
 
 
@@ -537,7 +537,7 @@ val ecp384dh_r_public_ml:
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar)
-    (ensures fun h0 r h1 ->
+    (ensures fun h0 r h1 -> True (*
       let pubKeyX = gsub pubKey (size 0) (size 48) in
       let pubKeyY = gsub pubKey (size 48) (size 48) in
       let pointX, pointY, flag =
@@ -545,7 +545,7 @@ val ecp384dh_r_public_ml:
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
-      as_seq h1 (gsub result (size 48) (size 48)) == pointY)
+      as_seq h1 (gsub result (size 48) (size 48)) == pointY *) )
 
 
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
@@ -559,7 +559,7 @@ val ecp384dh_r_public_radix:
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar)
-    (ensures fun h0 r h1 ->
+    (ensures fun h0 r h1 -> True (*
       let pubKeyX = gsub pubKey (size 0) (size 48) in
       let pubKeyY = gsub pubKey (size 48) (size 48) in
       let pointX, pointY, flag =
@@ -567,7 +567,7 @@ val ecp384dh_r_public_radix:
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
-      as_seq h1 (gsub result (size 48) (size 48)) == pointY)
+      as_seq h1 (gsub result (size 48) (size 48)) == pointY *) )
 
 
 val ecp384dh_r_private_ml:
@@ -578,7 +578,7 @@ val ecp384dh_r_private_ml:
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar)
-    (ensures fun h0 r h1 ->
+    (ensures fun h0 r h1 -> (*
       let pubKeyX = gsub pubKey (size 0) (size 48) in
       let pubKeyY = gsub pubKey (size 48) (size 48) in
       let pointX, pointY, flag =
@@ -586,7 +586,7 @@ val ecp384dh_r_private_ml:
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
-      as_seq h1 (gsub result (size 48) (size 48)) == pointY)
+      as_seq h1 (gsub result (size 48) (size 48)) == pointY *) True)
 
 
 val ecp384dh_r_private_radix:
@@ -597,7 +597,7 @@ val ecp384dh_r_private_radix:
     (requires fun h ->
       live h result /\ live h pubKey /\ live h scalar /\
       disjoint result pubKey /\ disjoint result scalar)
-    (ensures fun h0 r h1 ->
+    (ensures fun h0 r h1 -> True (*
       let pubKeyX = gsub pubKey (size 0) (size 48) in
       let pubKeyY = gsub pubKey (size 48) (size 48) in
       let pointX, pointY, flag =
@@ -605,7 +605,7 @@ val ecp384dh_r_private_radix:
       r == flag /\
       modifies (loc result) h0 h1 /\
       as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
-      as_seq h1 (gsub result (size 48) (size 48)) == pointY)
+      as_seq h1 (gsub result (size 48) (size 48)) == pointY *))
 
 
 

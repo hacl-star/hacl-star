@@ -14,7 +14,6 @@ open FStar.Mul
 
 
 val lemma_x3: #c: curve -> x: int -> y: int -> z: int -> Lemma (
-
   let alphaD = 3 * x * x + aCoordinate #c * (z * z) * (z * z) in 
   let prime = getPrime c in
   ((((3 * x * x + aCoordinate #c * (z * z) * (z * z)) % prime) * ((3 * x * x + aCoordinate #c * (z * z) * (z * z)) % prime) - 8 * (x * (y * y))) % prime) == 
@@ -90,23 +89,21 @@ let lemma_y3 #c x y z x3  =
   (==) {assert_by_tactic (4 * x * gammaD == 4 * (x * gammaD)) canon}
     (alphaD * (4 * (x * gammaD) - x3) - 8 * gammaD * gammaD) % prime;}
 
+
 val lemma_z3: #c: curve ->  x: int -> y: int -> z: int -> Lemma (
   let prime = getPrime c in 
   ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime 
   == ((y + z) * (y + z) - z * z - y * y) % prime)
 
-
 let lemma_z3 #c x y z = 
   let prime = getPrime c in 
   let t = ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime in 
-  calc (==) 
-    {
-      ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime;
-      (==) {lemma_mod_sub_distr ((y + z) * (y + z) - (y * y % prime)) (z * z) prime}
-      ((y + z) * (y + z) - (y * y % prime) - z * z) % prime;
-      (==) {lemma_mod_sub_distr ((y + z) * (y + z) - z * z) (y * y) prime}
-      ((y + z) * (y + z) - z * z - y * y) % prime;
-    }
+  calc (==) {
+    ((y + z) * (y + z) - (y * y % prime) - (z * z % prime)) % prime;
+    (==) {lemma_mod_sub_distr ((y + z) * (y + z) - (y * y % prime)) (z * z) prime}
+    ((y + z) * (y + z) - (y * y % prime) - z * z) % prime;
+    (==) {lemma_mod_sub_distr ((y + z) * (y + z) - z * z) (y * y) prime}
+    ((y + z) * (y + z) - z * z - y * y) % prime;}
 
 
 val lemma_point_abd: xD: int -> dlt: int -> 

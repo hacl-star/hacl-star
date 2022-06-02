@@ -24,14 +24,13 @@
 
 #ifndef __Hacl_Impl_Blake2_Constants_H
 #define __Hacl_Impl_Blake2_Constants_H
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+
+
+
 #include "lib_intrinsics.h"
-
-
-
-
 extern const uint32_t Hacl_Impl_Blake2_Constants_sigmaTable[160U];
 
 extern const uint32_t Hacl_Impl_Blake2_Constants_ivTable_S[8U];

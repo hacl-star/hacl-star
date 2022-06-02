@@ -19,7 +19,7 @@ open Lib.ByteSequence
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel  0"
 
-
+inline_for_extraction noextract
 val ecp256dh_i: c: curve 
   -> l: ladder 
   -> result: pointAffine8 c

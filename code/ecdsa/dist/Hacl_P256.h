@@ -24,16 +24,14 @@
 
 #ifndef __Hacl_P256_H
 #define __Hacl_P256_H
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "lib_intrinsics.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
 
 
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA2.h"
-#include "Hacl_Spec.h"
-
+#include "lib_intrinsics.h"
 /*
  Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 
@@ -301,7 +299,9 @@ uint64_t Hacl_P256_ecp256dh_i_ml(uint8_t *result, uint8_t *scalar);
 */
 uint64_t Hacl_P256_ecp256dh_i_radix(uint8_t *result, uint8_t *scalar);
 
-uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar);
+uint64_t Hacl_P256_ecp384dh_i_ml(uint8_t *result, uint8_t *scalar);
+
+uint64_t Hacl_P256_ecp384dh_i_radix(uint8_t *result, uint8_t *scalar);
 
 /*
  This code is not side channel resistant on pub_key. 
@@ -331,14 +331,29 @@ uint64_t Hacl_P256_ecp256dh_r_private_radix(uint8_t *result, uint8_t *pubKey, ui
 
 /*
  This code is not side channel resistant on pub_key. 
- Input: result: uint8[96], 
- pub(lic)Key: uint8[96], 
- scalar: uint8[48].
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[32].
   
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+uint64_t Hacl_P256_ecp384dh_r_public_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+/*
+ This code is not side channel resistant on pub_key. 
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  
+*/
+uint64_t Hacl_P256_ecp384dh_r_public_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+uint64_t Hacl_P256_ecp384dh_r_private_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
+
+uint64_t Hacl_P256_ecp384dh_r_private_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar);
 
 /*
 Other exposed primitives 

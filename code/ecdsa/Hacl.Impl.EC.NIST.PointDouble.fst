@@ -24,7 +24,6 @@ open FStar.Tactics.Canon
 open FStar.Math.Lemmas
 
 friend Hacl.Spec.MontgomeryMultiplication
-friend Hacl.Impl.EC.General.PointDouble
 open FStar.Mul
 
 open Hacl.Impl.P.PointDouble.Aux

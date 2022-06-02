@@ -122,22 +122,6 @@ let point_double_a_b_g #c p alpha beta gamma delta tempBuffer =
   toDomain_ #c #DH ((3 * xD * xD + a * (zD * zD) * (zD * zD)) % prime);  }
 
 
-
-
-
-inline_for_extraction noextract
-val point_double_x3: #c: curve -> x3: felem c -> alpha: felem c -> fourBeta: felem c 
-  -> beta: felem c -> eightBeta: felem c ->
-  Stack unit
-  (requires fun h ->
-    live h x3 /\ live h alpha /\ live h fourBeta /\ live h beta /\ live h eightBeta /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc x3; loc alpha; loc fourBeta; loc beta; loc eightBeta] /\ 
-    felem_eval c h alpha /\ felem_eval c h beta)
-  (ensures fun h0 _ h1 -> modifies (loc x3 |+| loc fourBeta |+| loc eightBeta) h0 h1 /\ (
-    let prime = getPrime c in 
-    as_nat c h1 fourBeta = toDomain #c (4 * fromDomain #c (as_nat c h0 beta) % prime) /\
-    as_nat c h1 x3 = toDomain #c ((fromDomain #c (as_nat c h0 alpha) * fromDomain #c (as_nat c h0 alpha) - 8 * (fromDomain #c (as_nat c h0 beta))) % prime))) 
-
 let point_double_x3 #c x3 alpha fourBeta beta eightBeta  = 
     let h0 = ST.get() in 
   montgomery_square_buffer_dh alpha x3; (* x3 = alpha ** 2 *)
@@ -164,19 +148,6 @@ let point_double_x3 #c x3 alpha fourBeta beta eightBeta  =
     toDomain #c ((fromDomain #c (as_nat c h0 alpha) * fromDomain #c (as_nat c h0 alpha) - 8 * fromDomain #c (as_nat c h0 beta)) % prime);
   }
 
-
-inline_for_extraction noextract
-val point_double_z3: #c: curve -> z3: felem c -> pY: felem c -> pZ: felem c -> gamma: felem c 
-  -> delta: felem c ->
-  Stack unit 
-  (requires fun h -> live h z3 /\ live h pY /\ live h pZ /\ live h gamma /\ live h delta /\ disjoint pY pZ /\
-    eq_or_disjoint pZ z3 /\ disjoint z3 gamma /\ disjoint z3 delta /\ disjoint pY z3 /\
-    felem_eval c h gamma /\ felem_eval c h delta /\ felem_eval c h pY /\ felem_eval c h pZ)
-  (ensures fun h0 _ h1 -> modifies (loc z3) h0 h1 /\ (
-    let prime = getPrime c in 
-    let y = fromDomain #c (as_nat c h0 pY) in 
-    let z = fromDomain #c (as_nat c h0 pZ) in 
-    as_nat c h1 z3 = toDomain #c (((y + z) * (y + z) - fromDomain #c (as_nat c h0 gamma) - fromDomain #c (as_nat c h0 delta)) % prime)))
 
 
 let point_double_z3 #c z3 pY pZ gamma delta  = 
@@ -210,21 +181,6 @@ let point_double_z3 #c z3 pY pZ gamma delta  =
     
     toDomain #c (((pyD + pzD) * (pyD + pzD) - fromDomain #c (as_nat c h0 gamma) - fromDomain #c (as_nat c h0 delta)) % prime);
   }
-
-inline_for_extraction noextract
-val point_double_y3: #c: curve -> y3: felem c -> x3: felem c -> alpha: felem c -> gamma: felem c 
-  -> eightGamma: felem c -> fourBeta: felem c ->
-  Stack unit 
-  (requires fun h -> 
-    live h y3 /\ live h x3 /\ live h alpha /\ live h gamma /\ live h eightGamma /\ 
-    live h fourBeta /\
-    LowStar.Monotonic.Buffer.all_disjoint [loc y3; loc x3; loc alpha; loc gamma; loc eightGamma; loc fourBeta] /\
-    felem_eval c h x3 /\ felem_eval c h alpha /\ felem_eval c h gamma /\ felem_eval c h fourBeta)
-  (ensures fun h0 _ h1 -> modifies (loc y3 |+| loc gamma |+| loc eightGamma) h0 h1 /\ (
-    let alphaD = fromDomain #c (as_nat c h0 alpha) in 
-    let gammaD = fromDomain #c (as_nat c h0 gamma) in 
-    as_nat c h1 y3 == toDomain #c ((alphaD * (fromDomain #c (as_nat c h0 fourBeta) - fromDomain #c (as_nat c h0 x3)) - 8 * gammaD * gammaD) % getPrime c)))
-
 
 
 let point_double_y3 #c y3 x3 alpha gamma eightGamma fourBeta = 
@@ -267,87 +223,3 @@ let point_double_y3 #c y3 x3 alpha gamma eightGamma fourBeta =
     
     toDomain #c ((alphaD *  (fromDomain #c (as_nat c h0 fourBeta) - fromDomain #c (as_nat c h0 x3)) - 8 * gammaD * gammaD) % prime);
 }
-
-
-val lemma_pd_to_spec: #c: curve -> x: nat -> y: nat -> z: nat -> x3: nat -> y3: nat -> z3: nat -> 
-  Lemma
-  (requires (  
-    let prime = getPrime c in 
-    let xD, yD, zD = fromDomain #c x, fromDomain #c y, fromDomain #c z in 
-    let alpha = 3 * xD * xD + aCoordinate #c * (zD * zD) * (zD * zD) in 
-    
-    x3 == toDomain #c ((alpha * alpha - 8 * (xD * (yD * yD))) % prime) /\
-    y3 == toDomain #c ((alpha * (4 * xD * (yD * yD) - fromDomain #c x3) - 8 * (yD * yD) * (yD * yD)) % prime) /\
-    z3 = toDomain #c (((yD + zD) * (yD + zD) - zD * zD - yD * yD) % prime)))
- (ensures (
-   let xD, yD, zD = fromDomain #c x, fromDomain #c y, fromDomain #c z in 
-   let x3D, y3D, z3D = fromDomain #c x3, fromDomain #c y3, fromDomain #c z3 in 
-   let xN, yN, zN = _point_double #c (xD, yD, zD) in 
-   x3D == xN /\ y3D == yN /\ z3D == zN))
-
-let lemma_pd_to_spec #c x y z x3 y3 z3 = ()
-
-
-
-let point_double #c p result tempBuffer = 
-  let len = getCoordinateLenU64 c in 
-
-  let pX = sub p (size 0) len in 
-  let pY = sub p len len in 
-  let pZ = sub p (size 2 *! len) len in 
-
-  let x3 = sub result (size 0) len in 
-  let y3 = sub result len len in 
-  let z3 = sub result (size 2 *! len) len in 
-  
-  let delta = sub tempBuffer (size 0) len in 
-  let gamma = sub tempBuffer len len in 
-  let beta = sub tempBuffer (size 2 *! len) len in 
-  let alpha = sub tempBuffer (size 3 *! len) len in 
-  let fourBeta = sub tempBuffer (size 4 *! len) len in 
-  let eightBeta = sub tempBuffer (size 5 *! len) len in 
-  let eightGamma = sub tempBuffer (size 6 *! len) len in 
-
-  let tmp = sub tempBuffer (7ul *! len) (3ul *! len) in 
-    let h0 = ST.get() in 
-
-    point_double_a_b_g #c p alpha beta gamma delta tmp;  
-    point_double_x3 #c x3 alpha fourBeta beta eightBeta; 
-    point_double_z3 #c z3 pY pZ gamma delta;
-    point_double_y3 #c y3 x3 alpha gamma eightGamma fourBeta;
-
-  let h1 = ST.get() in
-
-  let x = fromDomain #c (point_x_as_nat c h0 p) in 
-  let y = fromDomain #c (point_y_as_nat c h0 p) in 
-  let z = fromDomain #c (point_z_as_nat c h0 p) in 
-
-  let alphaD = 3 * x * x + aCoordinate #c * (z * z) * (z * z) in 
-  let gammaD = y * y in 
-
-  let prime = getPrime c in 
-  lemma_z3 #c x y z; 
-  lemma_y3 #c x y z (fromDomain #c (as_nat c h1 x3));
-
-
-  calc (==) {as_nat c h1 beta; (==) {}
-    toDomain #c (x * (y * y % prime) % prime);
-    (==) {lemma_mod_mul_distr_r x (y * y) prime}
-    toDomain #c (x * (y * y) % prime);};
-
-
-  calc (==) {as_nat c h1 x3;
-    (==) {}
-    toDomain #c ((fromDomain #c (as_nat c h1 alpha) * fromDomain #c (as_nat c h1 alpha) - 8 * (x * (y * y) % prime)) % prime);
-    (==) {lemma_mod_sub_distr (fromDomain #c (as_nat c h1 alpha) * fromDomain #c (as_nat c h1 alpha)) (8 * (x * (y * y) % prime)) prime}
-    toDomain #c ((fromDomain #c (as_nat c h1 alpha) * fromDomain #c (as_nat c h1 alpha) - 8 * (x * (y * y) % prime) % prime) % prime);
-    (==) {lemma_mod_mul_distr_r 8 (x * (y * y)) prime}
-    toDomain #c ((fromDomain #c (as_nat c h1 alpha) * fromDomain #c (as_nat c h1 alpha) - 8 * (x * (y * y)) % prime) % prime);
-    (==) {lemma_mod_sub_distr (fromDomain #c (as_nat c h1 alpha) * fromDomain #c (as_nat c h1 alpha)) (8 * (x * (y * y))) prime}
-    toDomain #c (((alphaD % prime) * (alphaD % prime) - 8 * (x * (y * y))) % prime);
-    (==) {lemma_x3 #c x y z}
-    toDomain #c ((alphaD * alphaD - 8 * (x * (y * y))) % prime); };
-
-
-  lemma_pd_to_spec #c (point_x_as_nat c h0 p) (point_y_as_nat c h0 p) (point_z_as_nat c h0 p) 
-  (point_x_as_nat c h1 result) (point_y_as_nat c h1 result) (point_z_as_nat c h1 result)

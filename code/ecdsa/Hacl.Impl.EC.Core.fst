@@ -555,7 +555,6 @@ let secretToPublic #c #l result scalar tempBuffer =
   match l with 
   |MontLadder -> 
     begin
-      admit(); 
       uploadStartPointsS2P q result; 
       montgomery_ladder q result scalar buff;
 	let h1 = ST.get() in 

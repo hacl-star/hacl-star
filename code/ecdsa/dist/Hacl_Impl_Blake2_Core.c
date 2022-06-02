@@ -24,6 +24,8 @@
 
 #include "Hacl_Impl_Blake2_Core.h"
 
+
+
 bool Hacl_Impl_Blake2_Core_uu___is_M32(Hacl_Impl_Blake2_Core_m_spec projectee)
 {
   switch (projectee)

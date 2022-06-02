@@ -24,6 +24,9 @@
 
 #include "Hacl_P256.h"
 
+#include "internal/Hacl_Spec.h"
+#include "internal/Hacl_Lib.h"
+
 static inline void mul64(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
 {
   uint128_t res = (uint128_t)x * y;
@@ -105,6 +108,11 @@ static inline void cmovznz4_p384(uint64_t cin, uint64_t *x, uint64_t *y, uint64_
     uint64_t r_i = (y_i & mask) | (x_i & ~mask);
     r[i] = r_i;
   }
+}
+
+static uint64_t eq0_u64(uint64_t a)
+{
+  return FStar_UInt64_eq_mask(a, (uint64_t)0U);
 }
 
 static inline bool cmp_felem_felem_bool_p256(uint64_t *a, uint64_t *b)
@@ -619,30 +627,34 @@ static inline void felem_sub_p384(uint64_t *a, uint64_t *b, uint64_t *out)
   b1[4U] = t3;
   b1[5U] = t3;
   uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t t11 = out[(uint32_t)4U * i];
-    uint64_t t210 = b1[(uint32_t)4U * i];
-    uint64_t *res_i0 = out + (uint32_t)4U * i;
+    uint64_t t11 = out[(uint32_t)4U * (uint32_t)0U];
+    uint64_t t210 = b1[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = out + (uint32_t)4U * (uint32_t)0U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t210, res_i0);
-    uint64_t t110 = out[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t211 = b1[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = out + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t t110 = out[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t t211 = b1[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t110, t211, res_i1);
-    uint64_t t111 = out[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t212 = b1[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = out + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t t111 = out[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t t212 = b1[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t111, t212, res_i2);
-    uint64_t t112 = out[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t21 = b1[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = out + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t t112 = out[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t t21 = b1[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = out + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t112, t21, res_i);
   }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)6U; i++)
   {
-    uint64_t t11 = out[i];
-    uint64_t t21 = b1[i];
-    uint64_t *res_i = out + i;
+    uint64_t t11 = out[4U];
+    uint64_t t21 = b1[4U];
+    uint64_t *res_i = out + (uint32_t)4U;
+    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t21, res_i);
+  }
+  {
+    uint64_t t11 = out[5U];
+    uint64_t t21 = b1[5U];
+    uint64_t *res_i = out + (uint32_t)5U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t21, res_i);
   }
   uint64_t r = c0;
@@ -1047,10 +1059,9 @@ montgomery_multiplication_buffer_dh_p384(uint64_t *a, uint64_t *b, uint64_t *res
     uint64_t bBuffer = y_;
     uint64_t *partResult = t2;
     memset(partResult, 0U, (len32 + (uint32_t)1U) * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)1U; i1++)
     {
-      uint64_t bj = (&bBuffer)[i1];
-      uint64_t *res_j = partResult + i1;
+      uint64_t bj = (&bBuffer)[0U];
+      uint64_t *res_j = partResult;
       uint64_t c = (uint64_t)0U;
       for (uint32_t i = (uint32_t)0U; i < len32 / (uint32_t)4U; i++)
       {
@@ -1074,7 +1085,7 @@ montgomery_multiplication_buffer_dh_p384(uint64_t *a, uint64_t *b, uint64_t *res
         c = mul_wide_add2_u64(a_i, bj, c, res_i);
       }
       uint64_t r = c;
-      partResult[len32 + i1] = r;
+      partResult[len32 + (uint32_t)0U] = r;
     }
     uint32_t len33 = (uint32_t)6U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
@@ -1240,10 +1251,9 @@ montgomery_multiplication_buffer_dsa_p256(uint64_t *a, uint64_t *b, uint64_t *re
     uint64_t bBuffer = y_;
     uint64_t *partResult = t2;
     memset(partResult, 0U, (len32 + (uint32_t)1U) * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)1U; i1++)
     {
-      uint64_t bj = (&bBuffer)[i1];
-      uint64_t *res_j = partResult + i1;
+      uint64_t bj = (&bBuffer)[0U];
+      uint64_t *res_j = partResult;
       uint64_t c = (uint64_t)0U;
       for (uint32_t i = (uint32_t)0U; i < len32 / (uint32_t)4U; i++)
       {
@@ -1267,7 +1277,7 @@ montgomery_multiplication_buffer_dsa_p256(uint64_t *a, uint64_t *b, uint64_t *re
         c = mul_wide_add2_u64(a_i, bj, c, res_i);
       }
       uint64_t r = c;
-      partResult[len32 + i1] = r;
+      partResult[len32 + (uint32_t)0U] = r;
     }
     uint32_t len33 = (uint32_t)4U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
@@ -1625,10 +1635,9 @@ static inline void montgomery_square_buffer_dh_p384(uint64_t *a, uint64_t *resul
     uint64_t bBuffer = y_;
     uint64_t *partResult = t2;
     memset(partResult, 0U, (len32 + (uint32_t)1U) * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)1U; i1++)
     {
-      uint64_t bj = (&bBuffer)[i1];
-      uint64_t *res_j = partResult + i1;
+      uint64_t bj = (&bBuffer)[0U];
+      uint64_t *res_j = partResult;
       uint64_t c = (uint64_t)0U;
       for (uint32_t i = (uint32_t)0U; i < len32 / (uint32_t)4U; i++)
       {
@@ -1652,7 +1661,7 @@ static inline void montgomery_square_buffer_dh_p384(uint64_t *a, uint64_t *resul
         c = mul_wide_add2_u64(a_i, bj, c, res_i);
       }
       uint64_t r = c;
-      partResult[len32 + i1] = r;
+      partResult[len32 + (uint32_t)0U] = r;
     }
     uint32_t len33 = (uint32_t)6U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
@@ -2214,10 +2223,9 @@ montgomery_ladder_power_p384_dh(uint64_t *a, const uint8_t *scalar, uint64_t *re
       uint64_t bBuffer = y_;
       uint64_t *partResult = t20;
       memset(partResult, 0U, (len42 + (uint32_t)1U) * sizeof (uint64_t));
-      for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)1U; i2++)
       {
-        uint64_t bj = (&bBuffer)[i2];
-        uint64_t *res_j = partResult + i2;
+        uint64_t bj = (&bBuffer)[0U];
+        uint64_t *res_j = partResult;
         uint64_t c = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < len42 / (uint32_t)4U; i++)
         {
@@ -2241,7 +2249,7 @@ montgomery_ladder_power_p384_dh(uint64_t *a, const uint8_t *scalar, uint64_t *re
           c = mul_wide_add2_u64(a_i, bj, c, res_i);
         }
         uint64_t r = c;
-        partResult[len42 + i2] = r;
+        partResult[len42 + (uint32_t)0U] = r;
       }
       uint32_t len43 = (uint32_t)6U * (uint32_t)2U;
       uint64_t c = (uint64_t)0U;
@@ -2415,10 +2423,9 @@ montgomery_ladder_power_p384_dh(uint64_t *a, const uint8_t *scalar, uint64_t *re
       uint64_t bBuffer = y_;
       uint64_t *partResult = t2;
       memset(partResult, 0U, (len43 + (uint32_t)1U) * sizeof (uint64_t));
-      for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)1U; i2++)
       {
-        uint64_t bj = (&bBuffer)[i2];
-        uint64_t *res_j = partResult + i2;
+        uint64_t bj = (&bBuffer)[0U];
+        uint64_t *res_j = partResult;
         uint64_t c = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < len43 / (uint32_t)4U; i++)
         {
@@ -2442,7 +2449,7 @@ montgomery_ladder_power_p384_dh(uint64_t *a, const uint8_t *scalar, uint64_t *re
           c = mul_wide_add2_u64(a_i, bj, c, res_i);
         }
         uint64_t r0 = c;
-        partResult[len43 + i2] = r0;
+        partResult[len43 + (uint32_t)0U] = r0;
       }
       uint32_t len44 = (uint32_t)6U * (uint32_t)2U;
       uint64_t c = (uint64_t)0U;
@@ -2640,10 +2647,9 @@ montgomery_ladder_power_p256_dsa(uint64_t *a, const uint8_t *scalar, uint64_t *r
       uint64_t bBuffer = y_;
       uint64_t *partResult = t20;
       memset(partResult, 0U, (len42 + (uint32_t)1U) * sizeof (uint64_t));
-      for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)1U; i2++)
       {
-        uint64_t bj = (&bBuffer)[i2];
-        uint64_t *res_j = partResult + i2;
+        uint64_t bj = (&bBuffer)[0U];
+        uint64_t *res_j = partResult;
         uint64_t c = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < len42 / (uint32_t)4U; i++)
         {
@@ -2667,7 +2673,7 @@ montgomery_ladder_power_p256_dsa(uint64_t *a, const uint8_t *scalar, uint64_t *r
           c = mul_wide_add2_u64(a_i, bj, c, res_i);
         }
         uint64_t r = c;
-        partResult[len42 + i2] = r;
+        partResult[len42 + (uint32_t)0U] = r;
       }
       uint32_t len43 = (uint32_t)4U * (uint32_t)2U;
       uint64_t c = (uint64_t)0U;
@@ -2844,10 +2850,9 @@ montgomery_ladder_power_p256_dsa(uint64_t *a, const uint8_t *scalar, uint64_t *r
       uint64_t bBuffer = y_;
       uint64_t *partResult = t2;
       memset(partResult, 0U, (len43 + (uint32_t)1U) * sizeof (uint64_t));
-      for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)1U; i2++)
       {
-        uint64_t bj = (&bBuffer)[i2];
-        uint64_t *res_j = partResult + i2;
+        uint64_t bj = (&bBuffer)[0U];
+        uint64_t *res_j = partResult;
         uint64_t c = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < len43 / (uint32_t)4U; i++)
         {
@@ -2871,7 +2876,7 @@ montgomery_ladder_power_p256_dsa(uint64_t *a, const uint8_t *scalar, uint64_t *r
           c = mul_wide_add2_u64(a_i, bj, c, res_i);
         }
         uint64_t r0 = c;
-        partResult[len43 + i2] = r0;
+        partResult[len43 + (uint32_t)0U] = r0;
       }
       uint32_t len44 = (uint32_t)4U * (uint32_t)2U;
       uint64_t c = (uint64_t)0U;
@@ -2988,24 +2993,80 @@ static inline void exponent_p384(uint64_t *t, uint64_t *result, uint64_t *tempBu
   montgomery_square_buffer_dh_p384(t0, t0);
   montgomery_multiplication_buffer_dh_p384(t, t0, t0);
   montgomery_square_buffer_dh_p384(t0, t1);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U; i++)
+  {
+    montgomery_square_buffer_dh_p384(t1, t1);
+  }
   {
     montgomery_square_buffer_dh_p384(t1, t1);
   }
   montgomery_multiplication_buffer_dh_p384(t0, t1, t1);
   montgomery_square_buffer_dh_p384(t1, t2);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
+  {
+    montgomery_square_buffer_dh_p384(t2, t2);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t2, t2);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t2, t2);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t2, t2);
+  }
   {
     montgomery_square_buffer_dh_p384(t2, t2);
   }
   montgomery_multiplication_buffer_dh_p384(t2, t1, t2);
   montgomery_square_buffer_dh_p384(t2, t3);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)11U; i++)
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t3, t3);
+  }
   {
     montgomery_square_buffer_dh_p384(t3, t3);
   }
   montgomery_multiplication_buffer_dh_p384(t2, t3, t2);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)6U; i++)
+  {
+    montgomery_square_buffer_dh_p384(t2, t2);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t2, t2);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t2, t2);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t2, t2);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t2, t2);
+  }
   {
     montgomery_square_buffer_dh_p384(t2, t2);
   }
@@ -3032,7 +3093,12 @@ static inline void exponent_p384(uint64_t *t, uint64_t *result, uint64_t *tempBu
     montgomery_square_buffer_dh_p384(t5, t5);
   }
   montgomery_multiplication_buffer_dh_p384(t4, t5, t4);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)3U; i++)
+  {
+    montgomery_square_buffer_dh_p384(t4, t4);
+  }
+  {
+    montgomery_square_buffer_dh_p384(t4, t4);
+  }
   {
     montgomery_square_buffer_dh_p384(t4, t4);
   }
@@ -3047,7 +3113,9 @@ static inline void exponent_p384(uint64_t *t, uint64_t *result, uint64_t *tempBu
     montgomery_square_buffer_dh_p384(t4, t4);
   }
   montgomery_multiplication_buffer_dh_p384(t4, t1, t4);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U; i++)
+  {
+    montgomery_square_buffer_dh_p384(t4, t4);
+  }
   {
     montgomery_square_buffer_dh_p384(t4, t4);
   }
@@ -3070,7 +3138,12 @@ static inline void exponent_p256(uint64_t *t, uint64_t *result, uint64_t *tempBu
   montgomery_square_buffer_dh_p256(t0, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t2, t6);
   montgomery_square_buffer_dh_p256(t6, t0);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)3U; i++)
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
   {
     montgomery_square_buffer_dh_p256(t0, t0);
   }
@@ -3079,13 +3152,59 @@ static inline void exponent_p256(uint64_t *t, uint64_t *result, uint64_t *tempBu
   montgomery_square_buffer_dh_p256(t0, t0);
   montgomery_multiplication_buffer_dh_p256(t0, t2, t1);
   montgomery_square_buffer_dh_p256(t1, t0);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)9U; i++)
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
   {
     montgomery_square_buffer_dh_p256(t0, t0);
   }
   montgomery_multiplication_buffer_dh_p256(t0, t1, t3);
   montgomery_square_buffer_dh_p256(t3, t0);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)9U; i++)
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
   {
     montgomery_square_buffer_dh_p256(t0, t0);
   }
@@ -3114,7 +3233,9 @@ static inline void exponent_p256(uint64_t *t, uint64_t *result, uint64_t *tempBu
     montgomery_square_buffer_dh_p256(t0, t0);
   }
   montgomery_multiplication_buffer_dh_p256(t0, t4, t0);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U; i++)
+  {
+    montgomery_square_buffer_dh_p256(t0, t0);
+  }
   {
     montgomery_square_buffer_dh_p256(t0, t0);
   }
@@ -3173,7 +3294,7 @@ static inline void square_root(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *r
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -3639,10 +3760,9 @@ static void montgomery_multiplication_buffer_by_one_mixed_p384(uint64_t *result)
     uint64_t bBuffer = y_;
     uint64_t *partResult = t2;
     memset(partResult, 0U, (len32 + (uint32_t)1U) * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)1U; i1++)
     {
-      uint64_t bj = (&bBuffer)[i1];
-      uint64_t *res_j = partResult + i1;
+      uint64_t bj = (&bBuffer)[0U];
+      uint64_t *res_j = partResult;
       uint64_t c = (uint64_t)0U;
       for (uint32_t i = (uint32_t)0U; i < len32 / (uint32_t)4U; i++)
       {
@@ -3666,7 +3786,7 @@ static void montgomery_multiplication_buffer_by_one_mixed_p384(uint64_t *result)
         c = mul_wide_add2_u64(a_i, bj, c, res_i);
       }
       uint64_t r = c;
-      partResult[len32 + i1] = r;
+      partResult[len32 + (uint32_t)0U] = r;
     }
     uint32_t len33 = (uint32_t)6U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
@@ -3872,7 +3992,7 @@ copy_point_conditional(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -3890,7 +4010,7 @@ copy_point_conditional(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -3908,7 +4028,7 @@ copy_point_conditional(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -4052,7 +4172,7 @@ copy_point_conditional1(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -4070,7 +4190,7 @@ copy_point_conditional1(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -4088,7 +4208,7 @@ copy_point_conditional1(
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -4496,10 +4616,9 @@ point_add_mixed_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempB
     uint64_t bBuffer = y_;
     uint64_t *partResult = t20;
     memset(partResult, 0U, (len32 + (uint32_t)1U) * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)1U; i1++)
     {
-      uint64_t bj = (&bBuffer)[i1];
-      uint64_t *res_j = partResult + i1;
+      uint64_t bj = (&bBuffer)[0U];
+      uint64_t *res_j = partResult;
       uint64_t c = (uint64_t)0U;
       for (uint32_t i = (uint32_t)0U; i < len32 / (uint32_t)4U; i++)
       {
@@ -4523,7 +4642,7 @@ point_add_mixed_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempB
         c = mul_wide_add2_u64(a_i, bj, c, res_i);
       }
       uint64_t r = c;
-      partResult[len32 + i1] = r;
+      partResult[len32 + (uint32_t)0U] = r;
     }
     uint32_t len33 = (uint32_t)6U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
@@ -4697,10 +4816,9 @@ point_add_mixed_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempB
     uint64_t bBuffer = y_;
     uint64_t *partResult = t2;
     memset(partResult, 0U, (len33 + (uint32_t)1U) * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)1U; i1++)
     {
-      uint64_t bj = (&bBuffer)[i1];
-      uint64_t *res_j = partResult + i1;
+      uint64_t bj = (&bBuffer)[0U];
+      uint64_t *res_j = partResult;
       uint64_t c = (uint64_t)0U;
       for (uint32_t i = (uint32_t)0U; i < len33 / (uint32_t)4U; i++)
       {
@@ -4724,7 +4842,7 @@ point_add_mixed_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempB
         c = mul_wide_add2_u64(a_i, bj, c, res_i);
       }
       uint64_t r10 = c;
-      partResult[len33 + i1] = r10;
+      partResult[len33 + (uint32_t)0U] = r10;
     }
     uint32_t len34 = (uint32_t)6U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
@@ -5040,30 +5158,666 @@ points_radix_16_p384[192U] =
     (uint64_t)0xaec776b3efdf9a57U, (uint64_t)0x2efb6e881128ec96U, (uint64_t)0xd86d8452f015fd7bU
   };
 
+static void
+getPointPrecomputedTable_(
+  Spec_ECC_Curves_curve c,
+  uint32_t k,
+  uint64_t *precomputedTable,
+  uint64_t bits,
+  uint64_t *r
+)
+{
+  uint64_t mask = FStar_UInt64_eq_mask(bits, (uint64_t)k);
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)4U;
+      }
+  }
+  uint32_t pointLen = k * (sw * (uint32_t)3U);
+  uint32_t coordLen;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        coordLen = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        coordLen = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        coordLen = (uint32_t)4U;
+      }
+  }
+  uint64_t *lut_cmb = precomputedTable + pointLen;
+  uint64_t *lut_cmb_x = lut_cmb;
+  uint64_t *lut_cmb_y = lut_cmb + coordLen;
+  uint64_t *lut_cmb_z = lut_cmb + (uint32_t)2U * coordLen;
+  uint64_t *rX = r;
+  uint64_t *rY = r + coordLen;
+  uint64_t *rZ = r + (uint32_t)2U * coordLen;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        copy_conditional_p256_l(rX, lut_cmb_x, mask);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        copy_conditional_p384_l(rX, lut_cmb_x, mask);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        copy_conditional_p256_l(rY, lut_cmb_y, mask);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        copy_conditional_p384_l(rY, lut_cmb_y, mask);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        copy_conditional_p256_l(rZ, lut_cmb_z, mask);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        copy_conditional_p384_l(rZ, lut_cmb_z, mask);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+static void
+getPointPrecomputedTable_1(
+  Spec_ECC_Curves_curve c,
+  uint64_t *precomputedTable,
+  uint64_t bits,
+  uint64_t *r
+)
+{
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    getPointPrecomputedTable_(c, i, precomputedTable, bits, r);
+  }
+}
+
+static void
+getPointPrecomputedTable(
+  Spec_ECC_Curves_curve c,
+  Lib_Buffer_buftype buf_type,
+  void *scalar,
+  uint64_t *precomputedTable,
+  uint32_t i,
+  uint64_t *pointToAdd
+)
+{
+  uint32_t sw0;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw0 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw0 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw0 = (uint32_t)4U;
+      }
+  }
+  uint32_t bit = sw0 * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (i << (uint32_t)2U);
+  uint8_t sw1;
+  switch (buf_type)
+  {
+    case Lib_Buffer_MUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw1 = ((uint8_t *)scalar)[sw * (uint32_t)8U - (uint32_t)1U - bit / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_IMMUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw1 = ((uint8_t *)scalar)[sw * (uint32_t)8U - (uint32_t)1U - bit / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_CONST:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw1 = ((const uint8_t *)scalar)[sw * (uint32_t)8U - (uint32_t)1U - bit / (uint32_t)8U];
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  uint64_t bit0 = (uint64_t)(sw1 >> bit % (uint32_t)8U & (uint8_t)1U) << (uint32_t)3U;
+  uint8_t sw2;
+  switch (buf_type)
+  {
+    case Lib_Buffer_MUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw2 =
+          ((uint8_t *)scalar)[sw
+          * (uint32_t)8U
+          - (uint32_t)1U
+          - (bit - (uint32_t)1U) / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_IMMUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw2 =
+          ((uint8_t *)scalar)[sw
+          * (uint32_t)8U
+          - (uint32_t)1U
+          - (bit - (uint32_t)1U) / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_CONST:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw2 =
+          ((const uint8_t *)scalar)[sw
+          * (uint32_t)8U
+          - (uint32_t)1U
+          - (bit - (uint32_t)1U) / (uint32_t)8U];
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  uint64_t
+  bit1 = (uint64_t)(sw2 >> (bit - (uint32_t)1U) % (uint32_t)8U & (uint8_t)1U) << (uint32_t)2U;
+  uint8_t sw3;
+  switch (buf_type)
+  {
+    case Lib_Buffer_MUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw3 =
+          ((uint8_t *)scalar)[sw
+          * (uint32_t)8U
+          - (uint32_t)1U
+          - (bit - (uint32_t)2U) / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_IMMUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw3 =
+          ((uint8_t *)scalar)[sw
+          * (uint32_t)8U
+          - (uint32_t)1U
+          - (bit - (uint32_t)2U) / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_CONST:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw3 =
+          ((const uint8_t *)scalar)[sw
+          * (uint32_t)8U
+          - (uint32_t)1U
+          - (bit - (uint32_t)2U) / (uint32_t)8U];
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  uint64_t
+  bit2 = (uint64_t)(sw3 >> (bit - (uint32_t)2U) % (uint32_t)8U & (uint8_t)1U) << (uint32_t)1U;
+  uint8_t sw4;
+  switch (buf_type)
+  {
+    case Lib_Buffer_MUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw4 =
+          ((uint8_t *)scalar)[sw
+          * (uint32_t)8U
+          - (uint32_t)1U
+          - (bit - (uint32_t)3U) / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_IMMUT:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw4 =
+          ((uint8_t *)scalar)[sw
+          * (uint32_t)8U
+          - (uint32_t)1U
+          - (bit - (uint32_t)3U) / (uint32_t)8U];
+        break;
+      }
+    case Lib_Buffer_CONST:
+      {
+        uint32_t sw;
+        switch (c)
+        {
+          case Spec_ECC_Curves_P256:
+            {
+              sw = (uint32_t)4U;
+              break;
+            }
+          case Spec_ECC_Curves_P384:
+            {
+              sw = (uint32_t)6U;
+              break;
+            }
+          default:
+            {
+              sw = (uint32_t)4U;
+            }
+        }
+        sw4 =
+          ((const uint8_t *)scalar)[sw
+          * (uint32_t)8U
+          - (uint32_t)1U
+          - (bit - (uint32_t)3U) / (uint32_t)8U];
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  uint64_t
+  bit3 = (uint64_t)(sw4 >> (bit - (uint32_t)3U) % (uint32_t)8U & (uint8_t)1U) << (uint32_t)0U;
+  uint64_t bits = (bit0 ^ bit1) ^ (bit2 ^ bit3);
+  getPointPrecomputedTable_1(c, precomputedTable, bits, pointToAdd);
+}
+
+static uint64_t *getPointTable_buffer(Spec_ECC_Curves_curve c, uint64_t *table, uint32_t i)
+{
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)4U;
+      }
+  }
+  uint32_t pointLen = sw * (uint32_t)3U;
+  return table + i * pointLen;
+}
+
+static void
+generatePrecomputedTable_step(
+  Spec_ECC_Curves_curve c,
+  uint64_t *table,
+  uint32_t i,
+  uint64_t *tempBuffer
+)
+{
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)4U;
+      }
+  }
+  uint32_t pointLen = sw * (uint32_t)3U;
+  uint64_t *point1 = getPointTable_buffer(c, table, (uint32_t)1U);
+  uint64_t *point_n = getPointTable_buffer(c, table, i);
+  uint64_t *point_2n = getPointTable_buffer(c, table, (uint32_t)2U * i);
+  uint64_t *point_2n_1 = getPointTable_buffer(c, table, (uint32_t)2U * i + (uint32_t)1U);
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        point_double_p256(point_n, point_2n, tempBuffer);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        point_double_p384(point_n, point_2n, tempBuffer);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        point_add_p256(point_2n, point1, point_2n_1, tempBuffer);
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        point_add_p384(point_2n, point1, point_2n_1, tempBuffer);
+        break;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+static void
+generatePrecomputedTable_loop(Spec_ECC_Curves_curve c, uint64_t *table, uint64_t *tempBuffer)
+{
+  {
+    generatePrecomputedTable_step(c, table, (uint32_t)1U, tempBuffer);
+  }
+  {
+    generatePrecomputedTable_step(c, table, (uint32_t)2U, tempBuffer);
+  }
+  {
+    generatePrecomputedTable_step(c, table, (uint32_t)3U, tempBuffer);
+  }
+  {
+    generatePrecomputedTable_step(c, table, (uint32_t)4U, tempBuffer);
+  }
+  {
+    generatePrecomputedTable_step(c, table, (uint32_t)5U, tempBuffer);
+  }
+  {
+    generatePrecomputedTable_step(c, table, (uint32_t)6U, tempBuffer);
+  }
+  {
+    generatePrecomputedTable_step(c, table, (uint32_t)7U, tempBuffer);
+  }
+}
+
 static inline void
 generatePrecomputedTable(
   Spec_ECC_Curves_curve c,
-  uint64_t *b,
+  uint64_t *table,
   uint64_t *publicKey,
   uint64_t *tempBuffer
 )
 {
-  uint64_t *point0 = b;
-  uint64_t *point1 = b + (uint32_t)12U;
-  uint64_t *point2 = b + (uint32_t)24U;
-  uint64_t *point3 = b + (uint32_t)36U;
-  uint64_t *point4 = b + (uint32_t)48U;
-  uint64_t *point5 = b + (uint32_t)60U;
-  uint64_t *point6 = b + (uint32_t)72U;
-  uint64_t *point7 = b + (uint32_t)84U;
-  uint64_t *point8 = b + (uint32_t)96U;
-  uint64_t *point9 = b + (uint32_t)108U;
-  uint64_t *point10 = b + (uint32_t)120U;
-  uint64_t *point11 = b + (uint32_t)132U;
-  uint64_t *point12 = b + (uint32_t)144U;
-  uint64_t *point13 = b + (uint32_t)156U;
-  uint64_t *point14 = b + (uint32_t)168U;
-  uint64_t *point15 = b + (uint32_t)180U;
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)4U;
+      }
+  }
+  uint32_t pointLen = sw * (uint32_t)3U;
+  uint64_t *point0 = table;
+  uint64_t *point1 = table + pointLen;
   uint32_t len;
   switch (c)
   {
@@ -5151,277 +5905,26 @@ generatePrecomputedTable(
   {
     z[i] = (uint64_t)0U;
   }
-  uint32_t sw;
+  uint32_t sw0;
   switch (c)
   {
     case Spec_ECC_Curves_P256:
       {
-        sw = (uint32_t)4U;
+        sw0 = (uint32_t)4U;
         break;
       }
     case Spec_ECC_Curves_P384:
       {
-        sw = (uint32_t)6U;
+        sw0 = (uint32_t)6U;
         break;
       }
     default:
       {
-        sw = (uint32_t)4U;
+        sw0 = (uint32_t)4U;
       }
   }
-  memcpy(point1, publicKey, sw * (uint32_t)3U * sizeof (uint64_t));
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(publicKey, point2, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(publicKey, point2, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point2, point1, point3, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point2, point1, point3, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point2, point4, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point2, point4, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point4, point1, point5, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point4, point1, point5, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point3, point6, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point3, point6, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point6, point1, point7, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point6, point1, point7, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point4, point8, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point4, point8, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point8, point1, point9, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point8, point1, point9, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point5, point10, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point5, point10, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point10, point1, point11, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point10, point1, point11, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point6, point12, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point6, point12, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point12, point1, point13, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point12, point1, point13, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_double_p256(point7, point14, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_double_p384(point7, point14, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
-  switch (c)
-  {
-    case Spec_ECC_Curves_P256:
-      {
-        point_add_p256(point14, point1, point15, tempBuffer);
-        break;
-      }
-    case Spec_ECC_Curves_P384:
-      {
-        point_add_p384(point14, point1, point15, tempBuffer);
-        break;
-      }
-    default:
-      {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
-        KRML_HOST_EXIT(253U);
-      }
-  }
+  memcpy(point1, publicKey, sw0 * (uint32_t)3U * sizeof (uint64_t));
+  generatePrecomputedTable_loop(c, table, tempBuffer);
 }
 
 static inline void
@@ -5451,6 +5954,42 @@ montgomery_ladderP256L(uint64_t *p, uint64_t *q, uint8_t *scalar, uint64_t *temp
     point_double_p256(p, p, tempBuffer);
     uint64_t mask0 = (uint64_t)0U - bit;
     uint32_t len = (uint32_t)12U;
+    for (uint32_t i = (uint32_t)0U; i < len; i++)
+    {
+      uint64_t dummy = mask0 & (p[i] ^ q[i]);
+      p[i] = p[i] ^ dummy;
+      q[i] = q[i] ^ dummy;
+    }
+  }
+}
+
+static inline void
+montgomery_ladderP384L(uint64_t *p, uint64_t *q, uint8_t *scalar, uint64_t *tempBuffer)
+{
+  uint32_t cycleLoop = (uint32_t)6U * (uint32_t)8U * (uint32_t)8U;
+  for (uint32_t i0 = (uint32_t)0U; i0 < cycleLoop; i0++)
+  {
+    uint32_t bit0 = (uint32_t)6U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - i0;
+    uint64_t
+    bit =
+      (uint64_t)(scalar[(uint32_t)6U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - bit0 / (uint32_t)8U]
+      >> bit0 % (uint32_t)8U
+      & (uint8_t)1U);
+    uint64_t mask = (uint64_t)0U - bit;
+    uint32_t len0 = (uint32_t)18U;
+    for (uint32_t i = (uint32_t)0U; i < len0; i++)
+    {
+      uint64_t dummy = mask & (p[i] ^ q[i]);
+      p[i] = p[i] ^ dummy;
+      q[i] = q[i] ^ dummy;
+    }
+    point_add_p384(p, q, q, tempBuffer);
+    point_double_p384(p, p, tempBuffer);
+    uint64_t mask0 = (uint64_t)0U - bit;
+    uint32_t len = (uint32_t)18U;
     for (uint32_t i = (uint32_t)0U; i < len; i++)
     {
       uint64_t dummy = mask0 & (p[i] ^ q[i]);
@@ -6985,10 +7524,9 @@ static inline void fromDomain_p384(uint64_t *f, uint64_t *result)
     uint64_t bBuffer = y_;
     uint64_t *partResult = t2;
     memset(partResult, 0U, (len32 + (uint32_t)1U) * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)1U; i1++)
     {
-      uint64_t bj = (&bBuffer)[i1];
-      uint64_t *res_j = partResult + i1;
+      uint64_t bj = (&bBuffer)[0U];
+      uint64_t *res_j = partResult;
       uint64_t c = (uint64_t)0U;
       for (uint32_t i = (uint32_t)0U; i < len32 / (uint32_t)4U; i++)
       {
@@ -7012,7 +7550,7 @@ static inline void fromDomain_p384(uint64_t *f, uint64_t *result)
         c = mul_wide_add2_u64(a_i, bj, c, res_i);
       }
       uint64_t r = c;
-      partResult[len32 + i1] = r;
+      partResult[len32 + (uint32_t)0U] = r;
     }
     uint32_t len33 = (uint32_t)6U * (uint32_t)2U;
     uint64_t c = (uint64_t)0U;
@@ -7248,116 +7786,53 @@ scalarMultiplicationWithoutNorm_p256_radix(
   uint64_t *tempBuffer
 )
 {
-  uint32_t len1 = (uint32_t)4U;
+  uint32_t len = (uint32_t)4U;
   uint64_t *p_x = p;
-  uint64_t *p_y = p + len1;
-  uint64_t *p_z = p + (uint32_t)2U * len1;
+  uint64_t *p_y = p + len;
+  uint64_t *p_z = p + (uint32_t)2U * len;
   uint64_t *r_x = result;
-  uint64_t *r_y = result + len1;
-  uint64_t *r_z = result + (uint32_t)2U * len1;
+  uint64_t *r_y = result + len;
+  uint64_t *r_z = result + (uint32_t)2U * len;
   toDomain_p256(p_x, r_x);
   toDomain_p256(p_y, r_y);
   toDomain_p256(p_z, r_z);
-  uint64_t bufferPrecomputed[192U] = { 0U };
-  generatePrecomputedTable(Spec_ECC_Curves_P256, bufferPrecomputed, result, tempBuffer);
-  uint32_t
-  bit = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (uint32_t)(uint64_t)0U;
-  uint64_t
-  bit00 =
-    (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - bit / (uint32_t)8U]
-    >> bit % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)3U;
-  uint64_t
-  bit10 =
-    (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)1U) / (uint32_t)8U]
-    >> (bit - (uint32_t)1U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)2U;
-  uint64_t
-  bit20 =
-    (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)2U) / (uint32_t)8U]
-    >> (bit - (uint32_t)2U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)1U;
-  uint64_t
-  bit30 =
-    (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)3U) / (uint32_t)8U]
-    >> (bit - (uint32_t)3U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)0U;
-  uint64_t bits = (bit00 ^ bit10) ^ (bit20 ^ bit30);
-  uint64_t *pointToStart = bufferPrecomputed + (uint32_t)(bits * (uint64_t)(uint32_t)12U);
-  memcpy(result, pointToStart, (uint32_t)12U * sizeof (uint64_t));
-  for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)16U * ((uint32_t)4U * (uint32_t)3U));
+  uint64_t precomputedTable[(uint32_t)16U * ((uint32_t)4U * (uint32_t)3U)];
+  memset(precomputedTable,
+    0U,
+    (uint32_t)16U * ((uint32_t)4U * (uint32_t)3U) * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)3U);
+  uint64_t tempPoint[(uint32_t)4U * (uint32_t)3U];
+  memset(tempPoint, 0U, (uint32_t)4U * (uint32_t)3U * sizeof (uint64_t));
+  uint64_t *tempBuffer1 = tempBuffer;
+  generatePrecomputedTable(Spec_ECC_Curves_P256, precomputedTable, result, tempBuffer1);
+  getPointPrecomputedTable(Spec_ECC_Curves_P256,
+    Lib_Buffer_MUT,
+    scalar,
+    precomputedTable,
+    (uint32_t)0U,
+    result);
+  for (uint32_t i = (uint32_t)1U; i < (uint32_t)2U * ((uint32_t)4U * (uint32_t)8U); i++)
   {
-    uint32_t
-    bit4 = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (i0 << (uint32_t)2U);
-    uint64_t
-    bit0 =
-      (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - bit4 / (uint32_t)8U]
-      >> bit4 % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)3U;
-    uint64_t
-    bit1 =
-      (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit4 - (uint32_t)1U) / (uint32_t)8U]
-      >> (bit4 - (uint32_t)1U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)2U;
-    uint64_t
-    bit2 =
-      (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit4 - (uint32_t)2U) / (uint32_t)8U]
-      >> (bit4 - (uint32_t)2U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)1U;
-    uint64_t
-    bit3 =
-      (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit4 - (uint32_t)3U) / (uint32_t)8U]
-      >> (bit4 - (uint32_t)3U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)0U;
-    uint64_t bits1 = (bit0 ^ bit1) ^ (bit2 ^ bit3);
-    uint64_t pointToAdd[12U] = { 0U };
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+    getPointPrecomputedTable(Spec_ECC_Curves_P256,
+      Lib_Buffer_MUT,
+      scalar,
+      precomputedTable,
+      i,
+      tempPoint);
     {
-      uint64_t mask = FStar_UInt64_eq_mask(bits1, (uint64_t)i);
-      uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
-      uint64_t *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;
-      uint64_t *lut_cmb_z = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)8U;
-      copy_conditional_p256_l(pointToAdd, lut_cmb_x, mask);
-      copy_conditional_p256_l(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
-      copy_conditional_p256_l(pointToAdd + (uint32_t)8U, lut_cmb_z, mask);
+      point_double_p256(result, result, tempBuffer1);
     }
-    point_double_p256(result, result, tempBuffer);
-    point_double_p256(result, result, tempBuffer);
-    point_double_p256(result, result, tempBuffer);
-    point_double_p256(result, result, tempBuffer);
-    point_add_p256(pointToAdd, result, result, tempBuffer);
+    {
+      point_double_p256(result, result, tempBuffer1);
+    }
+    {
+      point_double_p256(result, result, tempBuffer1);
+    }
+    {
+      point_double_p256(result, result, tempBuffer1);
+    }
+    point_add_p256(tempPoint, result, result, tempBuffer1);
   }
 }
 
@@ -7406,71 +7881,57 @@ static inline void
 secretToPublicWithoutNorm_p256_radix(uint64_t *result, void *scalar, uint64_t *tempBuffer)
 {
   uint32_t len = (uint32_t)4U;
-  uint64_t *q = tempBuffer;
   uint64_t *buff = tempBuffer + (uint32_t)3U * len;
-  uint32_t
-  bit =
-    (uint32_t)4U
-    * (uint32_t)8U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - ((uint32_t)(krml_checked_int_t)0 << (uint32_t)2U);
-  uint64_t
-  bit0 =
-    (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - bit / (uint32_t)8U]
-    >> bit % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)3U;
-  uint64_t
-  bit1 =
-    (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)1U) / (uint32_t)8U]
-    >> (bit - (uint32_t)1U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)2U;
-  uint64_t
-  bit2 =
-    (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)2U) / (uint32_t)8U]
-    >> (bit - (uint32_t)2U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)1U;
-  uint64_t
-  bit3 =
-    (uint64_t)(((uint8_t *)scalar)[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)3U) / (uint32_t)8U]
-    >> (bit - (uint32_t)3U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)0U;
-  uint64_t bits = (bit0 ^ bit1) ^ (bit2 ^ bit3);
-  const
-  uint64_t
-  *pointToStart = points_radix_16_p256 + (uint32_t)(bits * (uint64_t)(uint32_t)8U);
-  memcpy(result, (uint64_t *)pointToStart, (uint32_t)8U * sizeof (uint64_t));
-  result[8U] = (uint64_t)1U;
-  result[9U] = (uint64_t)0U;
-  result[10U] = (uint64_t)0U;
-  result[11U] = (uint64_t)0U;
-  for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
+  uint64_t *pXpY = result;
+  uint32_t half0 = (uint32_t)0U;
+  uint32_t word = (uint32_t)((uint8_t *)scalar)[half0];
+  uint32_t bitShift0 = (uint32_t)0U;
+  uint32_t bitShiftAsPrivate = bitShift0;
+  uint32_t leftWord0 = word >> (uint32_t)0x4U;
+  uint32_t rightWord0 = word & (uint32_t)0x0fU;
+  uint64_t mask0 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate;
+  uint32_t bits = leftWord0 ^ (uint32_t)(mask0 & (uint64_t)(leftWord0 ^ rightWord0));
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits, (uint64_t)i);
+    const uint64_t *lut_cmb_x = points_radix_16_p256 + (uint32_t)8U * i;
+    const uint64_t *lut_cmb_y = points_radix_16_p256 + (uint32_t)8U * i + (uint32_t)4U;
+    uint64_t *pointToAddX = pXpY;
+    uint64_t *pointToAddY = pXpY + (uint32_t)4U;
+    copy_conditional_p256_c(pointToAddX, lut_cmb_x, mask);
+    copy_conditional_p256_c(pointToAddY, lut_cmb_y, mask);
+  }
+  uint64_t *pZ = result + (uint32_t)8U;
+  uint32_t half1 = (uint32_t)0U;
+  uint32_t word0 = (uint32_t)((uint8_t *)scalar)[half1];
+  uint32_t bitShift1 = (uint32_t)0U;
+  uint32_t bitShiftAsPrivate0 = bitShift1;
+  uint32_t leftWord1 = word0 >> (uint32_t)0x4U;
+  uint32_t rightWord1 = word0 & (uint32_t)0x0fU;
+  uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate0;
+  uint32_t bits0 = leftWord1 ^ (uint32_t)(mask1 & (uint64_t)(leftWord1 ^ rightWord1));
+  uint64_t flag = eq0_u64((uint64_t)bits0);
+  pZ[0U] = (uint64_t)1U;
+  uint32_t len1 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len1; i++)
+  {
+    pZ[i] = (uint64_t)0U;
+  }
+  uint64_t *pz_0 = pZ;
+  uint64_t out_0 = pz_0[0U];
+  uint64_t r_0 = out_0 ^ (flag & (out_0 ^ (uint64_t)0U));
+  pz_0[0U] = r_0;
+  for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)2U * ((uint32_t)4U * (uint32_t)8U); i0++)
   {
     uint64_t pointToAdd[8U] = { 0U };
     uint32_t half = i0 >> (uint32_t)1U;
-    uint32_t word = (uint32_t)((uint8_t *)scalar)[half];
+    uint32_t word1 = (uint32_t)((uint8_t *)scalar)[half];
     uint32_t bitShift = i0 & (uint32_t)1U;
-    uint32_t bitShiftAsPrivate = bitShift;
-    uint32_t leftWord = word >> (uint32_t)0x4U;
-    uint32_t rightWord = word & (uint32_t)0x0fU;
-    uint64_t mask0 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate;
-    uint32_t bits1 = leftWord ^ (uint32_t)(mask0 & (uint64_t)(leftWord ^ rightWord));
+    uint32_t bitShiftAsPrivate1 = bitShift;
+    uint32_t leftWord = word1 >> (uint32_t)0x4U;
+    uint32_t rightWord = word1 & (uint32_t)0x0fU;
+    uint64_t mask2 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate1;
+    uint32_t bits1 = leftWord ^ (uint32_t)(mask2 & (uint64_t)(leftWord ^ rightWord));
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
@@ -7481,13 +7942,20 @@ secretToPublicWithoutNorm_p256_radix(uint64_t *result, void *scalar, uint64_t *t
       copy_conditional_p256_c(pointToAddX, lut_cmb_x, mask);
       copy_conditional_p256_c(pointToAddY, lut_cmb_y, mask);
     }
-    point_double_p256(result, result, buff);
-    point_double_p256(result, result, buff);
-    point_double_p256(result, result, buff);
-    point_double_p256(result, result, buff);
+    {
+      point_double_p256(result, result, buff);
+    }
+    {
+      point_double_p256(result, result, buff);
+    }
+    {
+      point_double_p256(result, result, buff);
+    }
+    {
+      point_double_p256(result, result, buff);
+    }
     point_add_mixed_p256(result, pointToAdd, result, buff);
   }
-  memcpy(q, result, (uint32_t)12U * sizeof (uint64_t));
 }
 
 static inline void fromFormPoint_p256(uint64_t *i, uint8_t *o)
@@ -8100,7 +8568,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -8126,7 +8594,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -8144,7 +8612,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -8162,7 +8630,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -8180,7 +8648,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -8198,7 +8666,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -8216,7 +8684,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -8257,7 +8725,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -8275,7 +8743,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -8296,7 +8764,7 @@ computeYFromX(Spec_ECC_Curves_curve c, uint64_t *x, uint64_t *result, uint64_t s
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -11320,69 +11788,56 @@ uint64_t Hacl_P256_ecp256dh_i_radix(uint8_t *result, uint8_t *scalar)
   uint32_t len1 = (uint32_t)4U;
   uint64_t *q = tempBuffer;
   uint64_t *buff = tempBuffer + (uint32_t)3U * len1;
-  uint32_t
-  bit =
-    (uint32_t)4U
-    * (uint32_t)8U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - ((uint32_t)(krml_checked_int_t)0 << (uint32_t)2U);
-  uint64_t
-  bit0 =
-    (uint64_t)(scalar[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - bit / (uint32_t)8U]
-    >> bit % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)3U;
-  uint64_t
-  bit1 =
-    (uint64_t)(scalar[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)1U) / (uint32_t)8U]
-    >> (bit - (uint32_t)1U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)2U;
-  uint64_t
-  bit2 =
-    (uint64_t)(scalar[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)2U) / (uint32_t)8U]
-    >> (bit - (uint32_t)2U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)1U;
-  uint64_t
-  bit3 =
-    (uint64_t)(scalar[(uint32_t)4U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)3U) / (uint32_t)8U]
-    >> (bit - (uint32_t)3U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)0U;
-  uint64_t bits = (bit0 ^ bit1) ^ (bit2 ^ bit3);
-  const
-  uint64_t
-  *pointToStart = points_radix_16_p256 + (uint32_t)(bits * (uint64_t)(uint32_t)8U);
-  memcpy(resultBuffer, (uint64_t *)pointToStart, (uint32_t)8U * sizeof (uint64_t));
-  resultBuffer[8U] = (uint64_t)1U;
-  resultBuffer[9U] = (uint64_t)0U;
-  resultBuffer[10U] = (uint64_t)0U;
-  resultBuffer[11U] = (uint64_t)0U;
-  for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
+  uint64_t *pXpY = q;
+  uint32_t half0 = (uint32_t)0U;
+  uint32_t word = (uint32_t)scalar[half0];
+  uint32_t bitShift0 = (uint32_t)0U;
+  uint32_t bitShiftAsPrivate = bitShift0;
+  uint32_t leftWord0 = word >> (uint32_t)0x4U;
+  uint32_t rightWord0 = word & (uint32_t)0x0fU;
+  uint64_t mask0 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate;
+  uint32_t bits = leftWord0 ^ (uint32_t)(mask0 & (uint64_t)(leftWord0 ^ rightWord0));
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits, (uint64_t)i);
+    const uint64_t *lut_cmb_x = points_radix_16_p256 + (uint32_t)8U * i;
+    const uint64_t *lut_cmb_y = points_radix_16_p256 + (uint32_t)8U * i + (uint32_t)4U;
+    uint64_t *pointToAddX = pXpY;
+    uint64_t *pointToAddY = pXpY + (uint32_t)4U;
+    copy_conditional_p256_c(pointToAddX, lut_cmb_x, mask);
+    copy_conditional_p256_c(pointToAddY, lut_cmb_y, mask);
+  }
+  uint64_t *pZ = q + (uint32_t)8U;
+  uint32_t half1 = (uint32_t)0U;
+  uint32_t word0 = (uint32_t)scalar[half1];
+  uint32_t bitShift1 = (uint32_t)0U;
+  uint32_t bitShiftAsPrivate0 = bitShift1;
+  uint32_t leftWord1 = word0 >> (uint32_t)0x4U;
+  uint32_t rightWord1 = word0 & (uint32_t)0x0fU;
+  uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate0;
+  uint32_t bits0 = leftWord1 ^ (uint32_t)(mask1 & (uint64_t)(leftWord1 ^ rightWord1));
+  uint64_t flag = eq0_u64((uint64_t)bits0);
+  pZ[0U] = (uint64_t)1U;
+  uint32_t len20 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)1U; i < len20; i++)
+  {
+    pZ[i] = (uint64_t)0U;
+  }
+  uint64_t *pz_0 = pZ;
+  uint64_t out_0 = pz_0[0U];
+  uint64_t r_0 = out_0 ^ (flag & (out_0 ^ (uint64_t)0U));
+  pz_0[0U] = r_0;
+  for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)2U * ((uint32_t)4U * (uint32_t)8U); i0++)
   {
     uint64_t pointToAdd[8U] = { 0U };
     uint32_t half = i0 >> (uint32_t)1U;
-    uint32_t word = (uint32_t)scalar[half];
+    uint32_t word1 = (uint32_t)scalar[half];
     uint32_t bitShift = i0 & (uint32_t)1U;
-    uint32_t bitShiftAsPrivate = bitShift;
-    uint32_t leftWord = word >> (uint32_t)0x4U;
-    uint32_t rightWord = word & (uint32_t)0x0fU;
-    uint64_t mask0 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate;
-    uint32_t bits1 = leftWord ^ (uint32_t)(mask0 & (uint64_t)(leftWord ^ rightWord));
+    uint32_t bitShiftAsPrivate1 = bitShift;
+    uint32_t leftWord = word1 >> (uint32_t)0x4U;
+    uint32_t rightWord = word1 & (uint32_t)0x0fU;
+    uint64_t mask2 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate1;
+    uint32_t bits1 = leftWord ^ (uint32_t)(mask2 & (uint64_t)(leftWord ^ rightWord));
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
       uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
@@ -11393,13 +11848,20 @@ uint64_t Hacl_P256_ecp256dh_i_radix(uint8_t *result, uint8_t *scalar)
       copy_conditional_p256_c(pointToAddX, lut_cmb_x, mask);
       copy_conditional_p256_c(pointToAddY, lut_cmb_y, mask);
     }
-    point_double_p256(resultBuffer, resultBuffer, buff);
-    point_double_p256(resultBuffer, resultBuffer, buff);
-    point_double_p256(resultBuffer, resultBuffer, buff);
-    point_double_p256(resultBuffer, resultBuffer, buff);
-    point_add_mixed_p256(resultBuffer, pointToAdd, resultBuffer, buff);
+    {
+      point_double_p256(q, q, buff);
+    }
+    {
+      point_double_p256(q, q, buff);
+    }
+    {
+      point_double_p256(q, q, buff);
+    }
+    {
+      point_double_p256(q, q, buff);
+    }
+    point_add_mixed_p256(q, pointToAdd, q, buff);
   }
-  memcpy(q, resultBuffer, (uint32_t)12U * sizeof (uint64_t));
   norm_p256(q, resultBuffer, buff);
   uint32_t len10 = (uint32_t)4U;
   uint32_t start = len10 * (uint32_t)2U;
@@ -11416,11 +11878,11 @@ uint64_t Hacl_P256_ecp256dh_i_radix(uint8_t *result, uint8_t *scalar)
   uint64_t r = tmp;
   uint64_t r0 = r;
   fromFormPoint_p256(resultBuffer, result);
-  bool flag = r0 == (uint64_t)0U;
-  return (uint64_t)flag;
+  bool flag0 = r0 == (uint64_t)0U;
+  return (uint64_t)flag0;
 }
 
-uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar)
+uint64_t Hacl_P256_ecp384dh_i_ml(uint8_t *result, uint8_t *scalar)
 {
   uint32_t len = (uint32_t)6U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len);
@@ -11432,86 +11894,44 @@ uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar)
   uint32_t len1 = (uint32_t)6U;
   uint64_t *q = tempBuffer;
   uint64_t *buff = tempBuffer + (uint32_t)3U * len1;
-  uint32_t
-  bit =
-    (uint32_t)6U
-    * (uint32_t)8U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - ((uint32_t)(krml_checked_int_t)0 << (uint32_t)2U);
-  uint64_t
-  bit0 =
-    (uint64_t)(scalar[(uint32_t)6U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - bit / (uint32_t)8U]
-    >> bit % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)3U;
-  uint64_t
-  bit1 =
-    (uint64_t)(scalar[(uint32_t)6U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)1U) / (uint32_t)8U]
-    >> (bit - (uint32_t)1U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)2U;
-  uint64_t
-  bit2 =
-    (uint64_t)(scalar[(uint32_t)6U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)2U) / (uint32_t)8U]
-    >> (bit - (uint32_t)2U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)1U;
-  uint64_t
-  bit3 =
-    (uint64_t)(scalar[(uint32_t)6U
-    * (uint32_t)8U
-    - (uint32_t)1U
-    - (bit - (uint32_t)3U) / (uint32_t)8U]
-    >> (bit - (uint32_t)3U) % (uint32_t)8U
-    & (uint8_t)1U)
-    << (uint32_t)0U;
-  uint64_t bits = (bit0 ^ bit1) ^ (bit2 ^ bit3);
-  const
-  uint64_t
-  *pointToStart = points_radix_16_p384 + (uint32_t)(bits * (uint64_t)(uint32_t)8U);
-  memcpy(resultBuffer, (uint64_t *)pointToStart, (uint32_t)8U * sizeof (uint64_t));
-  resultBuffer[8U] = (uint64_t)1U;
-  resultBuffer[9U] = (uint64_t)0U;
-  resultBuffer[10U] = (uint64_t)0U;
-  resultBuffer[11U] = (uint64_t)0U;
-  for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
+  uint32_t len20 = (uint32_t)6U;
+  uint64_t *x = q;
+  uint64_t *y = q + len20;
+  uint64_t *z = q + (uint32_t)2U * len20;
+  uint32_t len3 = (uint32_t)6U;
+  for (uint32_t i = (uint32_t)0U; i < len3; i++)
   {
-    uint64_t pointToAdd[12U] = { 0U };
-    uint32_t half = i0 >> (uint32_t)1U;
-    uint32_t word = (uint32_t)scalar[half];
-    uint32_t bitShift = i0 & (uint32_t)1U;
-    uint32_t bitShiftAsPrivate = bitShift;
-    uint32_t leftWord = word >> (uint32_t)0x4U;
-    uint32_t rightWord = word & (uint32_t)0x0fU;
-    uint64_t mask0 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate;
-    uint32_t bits1 = leftWord ^ (uint32_t)(mask0 & (uint64_t)(leftWord ^ rightWord));
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
-    {
-      uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
-      const uint64_t *lut_cmb_x = points_radix_16_p384 + (uint32_t)12U * i;
-      const uint64_t *lut_cmb_y = points_radix_16_p384 + (uint32_t)12U * i + (uint32_t)6U;
-      uint64_t *pointToAddX = pointToAdd;
-      uint64_t *pointToAddY = pointToAdd + (uint32_t)6U;
-      copy_conditional_p384_c(pointToAddX, lut_cmb_x, mask);
-      copy_conditional_p384_c(pointToAddY, lut_cmb_y, mask);
-    }
-    point_double_p384(resultBuffer, resultBuffer, buff);
-    point_double_p384(resultBuffer, resultBuffer, buff);
-    point_double_p384(resultBuffer, resultBuffer, buff);
-    point_double_p384(resultBuffer, resultBuffer, buff);
-    point_add_mixed_p384(resultBuffer, pointToAdd, resultBuffer, buff);
+    x[i] = (uint64_t)0U;
   }
-  memcpy(q, resultBuffer, (uint32_t)18U * sizeof (uint64_t));
+  uint32_t len30 = (uint32_t)6U;
+  for (uint32_t i = (uint32_t)0U; i < len30; i++)
+  {
+    y[i] = (uint64_t)0U;
+  }
+  uint32_t len31 = (uint32_t)6U;
+  for (uint32_t i = (uint32_t)0U; i < len31; i++)
+  {
+    z[i] = (uint64_t)0U;
+  }
+  resultBuffer[0U] = (uint64_t)0x3dd0756649c0b528U;
+  resultBuffer[1U] = (uint64_t)0x20e378e2a0d6ce38U;
+  resultBuffer[2U] = (uint64_t)0x879c3afc541b4d6eU;
+  resultBuffer[3U] = (uint64_t)0x6454868459a30effU;
+  resultBuffer[4U] = (uint64_t)0x812ff723614ede2bU;
+  resultBuffer[5U] = (uint64_t)0x4d3aadc2299e1513U;
+  resultBuffer[6U] = (uint64_t)0x23043dad4b03a4feU;
+  resultBuffer[7U] = (uint64_t)0xa1bfa8bf7bb4a9acU;
+  resultBuffer[8U] = (uint64_t)0x8bade7562e83b050U;
+  resultBuffer[9U] = (uint64_t)0xc6c3521968f4ffd9U;
+  resultBuffer[10U] = (uint64_t)0xdd8002263969a840U;
+  resultBuffer[11U] = (uint64_t)0x2b78abc25a15c5e9U;
+  resultBuffer[12U] = (uint64_t)0xffffffff00000001U;
+  resultBuffer[13U] = (uint64_t)0xffffffffU;
+  resultBuffer[14U] = (uint64_t)0x1U;
+  resultBuffer[15U] = (uint64_t)0U;
+  resultBuffer[16U] = (uint64_t)0U;
+  resultBuffer[17U] = (uint64_t)0U;
+  montgomery_ladderP384L(q, resultBuffer, scalar, buff);
   norm_p384(q, resultBuffer, buff);
   uint32_t len10 = (uint32_t)6U;
   uint32_t start = len10 * (uint32_t)2U;
@@ -11530,6 +11950,112 @@ uint64_t Hacl_P256_ecp384dh_i(uint8_t *result, uint8_t *scalar)
   fromFormPoint_p384(resultBuffer, result);
   bool flag = r0 == (uint64_t)0U;
   return (uint64_t)flag;
+}
+
+uint64_t Hacl_P256_ecp384dh_i_radix(uint8_t *result, uint8_t *scalar)
+{
+  uint32_t len = (uint32_t)6U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len);
+  uint64_t tempBuffer[(uint32_t)20U * len];
+  memset(tempBuffer, 0U, (uint32_t)20U * len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t resultBuffer[(uint32_t)3U * len];
+  memset(resultBuffer, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  uint32_t len1 = (uint32_t)6U;
+  uint64_t *q = tempBuffer;
+  uint64_t *buff = tempBuffer + (uint32_t)3U * len1;
+  uint64_t *pXpY = q;
+  uint32_t half0 = (uint32_t)0U;
+  uint32_t word = (uint32_t)scalar[half0];
+  uint32_t bitShift0 = (uint32_t)0U;
+  uint32_t bitShiftAsPrivate = bitShift0;
+  uint32_t leftWord0 = word >> (uint32_t)0x4U;
+  uint32_t rightWord0 = word & (uint32_t)0x0fU;
+  uint64_t mask0 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate;
+  uint32_t bits = leftWord0 ^ (uint32_t)(mask0 & (uint64_t)(leftWord0 ^ rightWord0));
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits, (uint64_t)i);
+    const uint64_t *lut_cmb_x = points_radix_16_p384 + (uint32_t)12U * i;
+    const uint64_t *lut_cmb_y = points_radix_16_p384 + (uint32_t)12U * i + (uint32_t)6U;
+    uint64_t *pointToAddX = pXpY;
+    uint64_t *pointToAddY = pXpY + (uint32_t)6U;
+    copy_conditional_p384_c(pointToAddX, lut_cmb_x, mask);
+    copy_conditional_p384_c(pointToAddY, lut_cmb_y, mask);
+  }
+  uint64_t *pZ = q + (uint32_t)12U;
+  uint32_t half1 = (uint32_t)0U;
+  uint32_t word0 = (uint32_t)scalar[half1];
+  uint32_t bitShift1 = (uint32_t)0U;
+  uint32_t bitShiftAsPrivate0 = bitShift1;
+  uint32_t leftWord1 = word0 >> (uint32_t)0x4U;
+  uint32_t rightWord1 = word0 & (uint32_t)0x0fU;
+  uint64_t mask1 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate0;
+  uint32_t bits0 = leftWord1 ^ (uint32_t)(mask1 & (uint64_t)(leftWord1 ^ rightWord1));
+  uint64_t flag = eq0_u64((uint64_t)bits0);
+  pZ[0U] = (uint64_t)1U;
+  uint32_t len20 = (uint32_t)6U;
+  for (uint32_t i = (uint32_t)1U; i < len20; i++)
+  {
+    pZ[i] = (uint64_t)0U;
+  }
+  uint64_t *pz_0 = pZ;
+  uint64_t out_0 = pz_0[0U];
+  uint64_t r_0 = out_0 ^ (flag & (out_0 ^ (uint64_t)0U));
+  pz_0[0U] = r_0;
+  for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)2U * ((uint32_t)6U * (uint32_t)8U); i0++)
+  {
+    uint64_t pointToAdd[12U] = { 0U };
+    uint32_t half = i0 >> (uint32_t)1U;
+    uint32_t word1 = (uint32_t)scalar[half];
+    uint32_t bitShift = i0 & (uint32_t)1U;
+    uint32_t bitShiftAsPrivate1 = bitShift;
+    uint32_t leftWord = word1 >> (uint32_t)0x4U;
+    uint32_t rightWord = word1 & (uint32_t)0x0fU;
+    uint64_t mask2 = (uint64_t)0U - (uint64_t)bitShiftAsPrivate1;
+    uint32_t bits1 = leftWord ^ (uint32_t)(mask2 & (uint64_t)(leftWord ^ rightWord));
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+    {
+      uint64_t mask = FStar_UInt64_eq_mask((uint64_t)bits1, (uint64_t)i);
+      const uint64_t *lut_cmb_x = points_radix_16_p384 + (uint32_t)12U * i;
+      const uint64_t *lut_cmb_y = points_radix_16_p384 + (uint32_t)12U * i + (uint32_t)6U;
+      uint64_t *pointToAddX = pointToAdd;
+      uint64_t *pointToAddY = pointToAdd + (uint32_t)6U;
+      copy_conditional_p384_c(pointToAddX, lut_cmb_x, mask);
+      copy_conditional_p384_c(pointToAddY, lut_cmb_y, mask);
+    }
+    {
+      point_double_p384(q, q, buff);
+    }
+    {
+      point_double_p384(q, q, buff);
+    }
+    {
+      point_double_p384(q, q, buff);
+    }
+    {
+      point_double_p384(q, q, buff);
+    }
+    point_add_mixed_p384(q, pointToAdd, q, buff);
+  }
+  norm_p384(q, resultBuffer, buff);
+  uint32_t len10 = (uint32_t)6U;
+  uint32_t start = len10 * (uint32_t)2U;
+  uint64_t *zCoordinate = resultBuffer + start;
+  uint64_t tmp = (uint64_t)18446744073709551615U;
+  uint32_t len2 = (uint32_t)6U;
+  for (uint32_t i = (uint32_t)0U; i < len2; i++)
+  {
+    uint64_t a_i = zCoordinate[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t r = tmp;
+  uint64_t r0 = r;
+  fromFormPoint_p384(resultBuffer, result);
+  bool flag0 = r0 == (uint64_t)0U;
+  return (uint64_t)flag0;
 }
 
 /*
@@ -11644,126 +12170,56 @@ uint64_t Hacl_P256_ecp256dh_r_public_radix(uint8_t *result, uint8_t *pubKey, uin
   uint64_t tempBuffer[(uint32_t)20U * len1];
   memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
   bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(pkF);
-  uint64_t bufferPrecomputed[192U];
   bool flag;
   if (publicKeyCorrect)
   {
-    uint32_t len4 = (uint32_t)4U;
+    uint32_t len30 = (uint32_t)4U;
     uint64_t *p_x = pkF;
-    uint64_t *p_y = pkF + len4;
-    uint64_t *p_z = pkF + (uint32_t)2U * len4;
+    uint64_t *p_y = pkF + len30;
+    uint64_t *p_z = pkF + (uint32_t)2U * len30;
     uint64_t *r_x = rF;
-    uint64_t *r_y = rF + len4;
-    uint64_t *r_z = rF + (uint32_t)2U * len4;
+    uint64_t *r_y = rF + len30;
+    uint64_t *r_z = rF + (uint32_t)2U * len30;
     toDomain_p256(p_x, r_x);
     toDomain_p256(p_y, r_y);
     toDomain_p256(p_z, r_z);
-    uint64_t init = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)16U * ((uint32_t)4U * (uint32_t)3U));
+    uint64_t precomputedTable[(uint32_t)16U * ((uint32_t)4U * (uint32_t)3U)];
+    memset(precomputedTable,
+      0U,
+      (uint32_t)16U * ((uint32_t)4U * (uint32_t)3U) * sizeof (uint64_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)3U);
+    uint64_t tempPoint[(uint32_t)4U * (uint32_t)3U];
+    memset(tempPoint, 0U, (uint32_t)4U * (uint32_t)3U * sizeof (uint64_t));
+    uint64_t *tempBuffer1 = tempBuffer;
+    generatePrecomputedTable(Spec_ECC_Curves_P256, precomputedTable, rF, tempBuffer1);
+    getPointPrecomputedTable(Spec_ECC_Curves_P256,
+      Lib_Buffer_MUT,
+      (void *)scalar,
+      precomputedTable,
+      (uint32_t)0U,
+      rF);
+    for (uint32_t i = (uint32_t)1U; i < (uint32_t)2U * ((uint32_t)4U * (uint32_t)8U); i++)
     {
-      bufferPrecomputed[i] = init;
-    }
-    generatePrecomputedTable(Spec_ECC_Curves_P256, bufferPrecomputed, rF, tempBuffer);
-    uint32_t
-    bit = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (uint32_t)(uint64_t)0U;
-    uint64_t
-    bit00 =
-      (uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - bit / (uint32_t)8U]
-      >> bit % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)3U;
-    uint64_t
-    bit10 =
-      (uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit - (uint32_t)1U) / (uint32_t)8U]
-      >> (bit - (uint32_t)1U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)2U;
-    uint64_t
-    bit20 =
-      (uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit - (uint32_t)2U) / (uint32_t)8U]
-      >> (bit - (uint32_t)2U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)1U;
-    uint64_t
-    bit30 =
-      (uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit - (uint32_t)3U) / (uint32_t)8U]
-      >> (bit - (uint32_t)3U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)0U;
-    uint64_t bits = (bit00 ^ bit10) ^ (bit20 ^ bit30);
-    uint64_t *pointToStart = bufferPrecomputed + (uint32_t)(bits * (uint64_t)(uint32_t)12U);
-    memcpy(rF, pointToStart, (uint32_t)12U * sizeof (uint64_t));
-    for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
-    {
-      uint32_t
-      bit4 = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (i0 << (uint32_t)2U);
-      uint64_t
-      bit0 =
-        (uint64_t)(scalar[(uint32_t)4U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - bit4 / (uint32_t)8U]
-        >> bit4 % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)3U;
-      uint64_t
-      bit1 =
-        (uint64_t)(scalar[(uint32_t)4U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - (bit4 - (uint32_t)1U) / (uint32_t)8U]
-        >> (bit4 - (uint32_t)1U) % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)2U;
-      uint64_t
-      bit2 =
-        (uint64_t)(scalar[(uint32_t)4U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - (bit4 - (uint32_t)2U) / (uint32_t)8U]
-        >> (bit4 - (uint32_t)2U) % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)1U;
-      uint64_t
-      bit3 =
-        (uint64_t)(scalar[(uint32_t)4U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - (bit4 - (uint32_t)3U) / (uint32_t)8U]
-        >> (bit4 - (uint32_t)3U) % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)0U;
-      uint64_t bits1 = (bit0 ^ bit1) ^ (bit2 ^ bit3);
-      uint64_t pointToAdd[12U] = { 0U };
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      getPointPrecomputedTable(Spec_ECC_Curves_P256,
+        Lib_Buffer_MUT,
+        (void *)scalar,
+        precomputedTable,
+        i,
+        tempPoint);
       {
-        uint64_t mask = FStar_UInt64_eq_mask(bits1, (uint64_t)i);
-        uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
-        uint64_t
-        *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;
-        uint64_t
-        *lut_cmb_z = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)8U;
-        copy_conditional_p256_l(pointToAdd, lut_cmb_x, mask);
-        copy_conditional_p256_l(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
-        copy_conditional_p256_l(pointToAdd + (uint32_t)8U, lut_cmb_z, mask);
+        point_double_p256(rF, rF, tempBuffer1);
       }
-      point_double_p256(rF, rF, tempBuffer);
-      point_double_p256(rF, rF, tempBuffer);
-      point_double_p256(rF, rF, tempBuffer);
-      point_double_p256(rF, rF, tempBuffer);
-      point_add_p256(pointToAdd, rF, rF, tempBuffer);
+      {
+        point_double_p256(rF, rF, tempBuffer1);
+      }
+      {
+        point_double_p256(rF, rF, tempBuffer1);
+      }
+      {
+        point_double_p256(rF, rF, tempBuffer1);
+      }
+      point_add_p256(tempPoint, rF, rF, tempBuffer1);
     }
     uint64_t *t = tempBuffer;
     norm_p256(rF, rF, t);
@@ -11886,126 +12342,56 @@ uint64_t Hacl_P256_ecp256dh_r_private_radix(uint8_t *result, uint8_t *pubKey, ui
   uint64_t tempBuffer[(uint32_t)20U * len1];
   memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
   bool publicKeyCorrect = verifyQValidCurvePoint_public_p256(pkF);
-  uint64_t bufferPrecomputed[192U];
   bool flag;
   if (publicKeyCorrect)
   {
-    uint32_t len4 = (uint32_t)4U;
+    uint32_t len30 = (uint32_t)4U;
     uint64_t *p_x = pkF;
-    uint64_t *p_y = pkF + len4;
-    uint64_t *p_z = pkF + (uint32_t)2U * len4;
+    uint64_t *p_y = pkF + len30;
+    uint64_t *p_z = pkF + (uint32_t)2U * len30;
     uint64_t *r_x = rF;
-    uint64_t *r_y = rF + len4;
-    uint64_t *r_z = rF + (uint32_t)2U * len4;
+    uint64_t *r_y = rF + len30;
+    uint64_t *r_z = rF + (uint32_t)2U * len30;
     toDomain_p256(p_x, r_x);
     toDomain_p256(p_y, r_y);
     toDomain_p256(p_z, r_z);
-    uint64_t init = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)16U * ((uint32_t)4U * (uint32_t)3U));
+    uint64_t precomputedTable[(uint32_t)16U * ((uint32_t)4U * (uint32_t)3U)];
+    memset(precomputedTable,
+      0U,
+      (uint32_t)16U * ((uint32_t)4U * (uint32_t)3U) * sizeof (uint64_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)3U);
+    uint64_t tempPoint[(uint32_t)4U * (uint32_t)3U];
+    memset(tempPoint, 0U, (uint32_t)4U * (uint32_t)3U * sizeof (uint64_t));
+    uint64_t *tempBuffer1 = tempBuffer;
+    generatePrecomputedTable(Spec_ECC_Curves_P256, precomputedTable, rF, tempBuffer1);
+    getPointPrecomputedTable(Spec_ECC_Curves_P256,
+      Lib_Buffer_MUT,
+      (void *)scalar,
+      precomputedTable,
+      (uint32_t)0U,
+      rF);
+    for (uint32_t i = (uint32_t)1U; i < (uint32_t)2U * ((uint32_t)4U * (uint32_t)8U); i++)
     {
-      bufferPrecomputed[i] = init;
-    }
-    generatePrecomputedTable(Spec_ECC_Curves_P256, bufferPrecomputed, rF, tempBuffer);
-    uint32_t
-    bit = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (uint32_t)(uint64_t)0U;
-    uint64_t
-    bit00 =
-      (uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - bit / (uint32_t)8U]
-      >> bit % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)3U;
-    uint64_t
-    bit10 =
-      (uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit - (uint32_t)1U) / (uint32_t)8U]
-      >> (bit - (uint32_t)1U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)2U;
-    uint64_t
-    bit20 =
-      (uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit - (uint32_t)2U) / (uint32_t)8U]
-      >> (bit - (uint32_t)2U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)1U;
-    uint64_t
-    bit30 =
-      (uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit - (uint32_t)3U) / (uint32_t)8U]
-      >> (bit - (uint32_t)3U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)0U;
-    uint64_t bits = (bit00 ^ bit10) ^ (bit20 ^ bit30);
-    uint64_t *pointToStart = bufferPrecomputed + (uint32_t)(bits * (uint64_t)(uint32_t)12U);
-    memcpy(rF, pointToStart, (uint32_t)12U * sizeof (uint64_t));
-    for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
-    {
-      uint32_t
-      bit4 = (uint32_t)4U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (i0 << (uint32_t)2U);
-      uint64_t
-      bit0 =
-        (uint64_t)(scalar[(uint32_t)4U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - bit4 / (uint32_t)8U]
-        >> bit4 % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)3U;
-      uint64_t
-      bit1 =
-        (uint64_t)(scalar[(uint32_t)4U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - (bit4 - (uint32_t)1U) / (uint32_t)8U]
-        >> (bit4 - (uint32_t)1U) % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)2U;
-      uint64_t
-      bit2 =
-        (uint64_t)(scalar[(uint32_t)4U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - (bit4 - (uint32_t)2U) / (uint32_t)8U]
-        >> (bit4 - (uint32_t)2U) % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)1U;
-      uint64_t
-      bit3 =
-        (uint64_t)(scalar[(uint32_t)4U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - (bit4 - (uint32_t)3U) / (uint32_t)8U]
-        >> (bit4 - (uint32_t)3U) % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)0U;
-      uint64_t bits1 = (bit0 ^ bit1) ^ (bit2 ^ bit3);
-      uint64_t pointToAdd[12U] = { 0U };
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      getPointPrecomputedTable(Spec_ECC_Curves_P256,
+        Lib_Buffer_MUT,
+        (void *)scalar,
+        precomputedTable,
+        i,
+        tempPoint);
       {
-        uint64_t mask = FStar_UInt64_eq_mask(bits1, (uint64_t)i);
-        uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
-        uint64_t
-        *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;
-        uint64_t
-        *lut_cmb_z = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)8U;
-        copy_conditional_p256_l(pointToAdd, lut_cmb_x, mask);
-        copy_conditional_p256_l(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
-        copy_conditional_p256_l(pointToAdd + (uint32_t)8U, lut_cmb_z, mask);
+        point_double_p256(rF, rF, tempBuffer1);
       }
-      point_double_p256(rF, rF, tempBuffer);
-      point_double_p256(rF, rF, tempBuffer);
-      point_double_p256(rF, rF, tempBuffer);
-      point_double_p256(rF, rF, tempBuffer);
-      point_add_p256(pointToAdd, rF, rF, tempBuffer);
+      {
+        point_double_p256(rF, rF, tempBuffer1);
+      }
+      {
+        point_double_p256(rF, rF, tempBuffer1);
+      }
+      {
+        point_double_p256(rF, rF, tempBuffer1);
+      }
+      point_add_p256(tempPoint, rF, rF, tempBuffer1);
     }
     uint64_t *t = tempBuffer;
     norm_p256(rF, rF, t);
@@ -12036,14 +12422,14 @@ uint64_t Hacl_P256_ecp256dh_r_private_radix(uint8_t *result, uint8_t *pubKey, ui
 
 /*
  This code is not side channel resistant on pub_key. 
- Input: result: uint8[96], 
- pub(lic)Key: uint8[96], 
- scalar: uint8[48].
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[32].
   
  Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
   
 */
-uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+uint64_t Hacl_P256_ecp384dh_r_public_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
 {
   uint32_t len = (uint32_t)6U;
   KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
@@ -12058,126 +12444,316 @@ uint64_t Hacl_P256_ecp384dh_r(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
   uint64_t tempBuffer[(uint32_t)20U * len1];
   memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
   bool publicKeyCorrect = verifyQValidCurvePoint_public_p384(pkF);
-  uint64_t bufferPrecomputed[192U];
   bool flag;
   if (publicKeyCorrect)
   {
+    uint32_t len30 = (uint32_t)6U;
+    uint64_t *q = tempBuffer;
+    uint64_t *temp = tempBuffer + (uint32_t)3U * len30;
     uint32_t len4 = (uint32_t)6U;
+    uint64_t *x = q;
+    uint64_t *y = q + len4;
+    uint64_t *z = q + (uint32_t)2U * len4;
+    uint32_t len5 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len5; i++)
+    {
+      x[i] = (uint64_t)0U;
+    }
+    uint32_t len50 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len50; i++)
+    {
+      y[i] = (uint64_t)0U;
+    }
+    uint32_t len51 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len51; i++)
+    {
+      z[i] = (uint64_t)0U;
+    }
+    uint32_t len40 = (uint32_t)6U;
     uint64_t *p_x = pkF;
-    uint64_t *p_y = pkF + len4;
-    uint64_t *p_z = pkF + (uint32_t)2U * len4;
+    uint64_t *p_y = pkF + len40;
+    uint64_t *p_z = pkF + (uint32_t)2U * len40;
     uint64_t *r_x = rF;
-    uint64_t *r_y = rF + len4;
-    uint64_t *r_z = rF + (uint32_t)2U * len4;
+    uint64_t *r_y = rF + len40;
+    uint64_t *r_z = rF + (uint32_t)2U * len40;
     toDomain_p384(p_x, r_x);
     toDomain_p384(p_y, r_y);
     toDomain_p384(p_z, r_z);
-    uint64_t init = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)192U; i++)
+    montgomery_ladderP384L(q, rF, scalar, temp);
+    memcpy(rF, q, (uint32_t)18U * sizeof (uint64_t));
+    uint64_t *t = tempBuffer;
+    norm_p384(rF, rF, t);
+    uint32_t len2 = (uint32_t)6U;
+    uint32_t start = len2 * (uint32_t)2U;
+    uint64_t *zCoordinate = rF + start;
+    uint64_t tmp = (uint64_t)18446744073709551615U;
+    uint32_t len3 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
     {
-      bufferPrecomputed[i] = init;
+      uint64_t a_i = zCoordinate[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp;
+      tmp = r_i & tmp0;
     }
-    generatePrecomputedTable(Spec_ECC_Curves_P384, bufferPrecomputed, rF, tempBuffer);
-    uint32_t
-    bit = (uint32_t)6U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (uint32_t)(uint64_t)0U;
-    uint64_t
-    bit00 =
-      (uint64_t)(scalar[(uint32_t)6U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - bit / (uint32_t)8U]
-      >> bit % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)3U;
-    uint64_t
-    bit10 =
-      (uint64_t)(scalar[(uint32_t)6U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit - (uint32_t)1U) / (uint32_t)8U]
-      >> (bit - (uint32_t)1U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)2U;
-    uint64_t
-    bit20 =
-      (uint64_t)(scalar[(uint32_t)6U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit - (uint32_t)2U) / (uint32_t)8U]
-      >> (bit - (uint32_t)2U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)1U;
-    uint64_t
-    bit30 =
-      (uint64_t)(scalar[(uint32_t)6U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (bit - (uint32_t)3U) / (uint32_t)8U]
-      >> (bit - (uint32_t)3U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)0U;
-    uint64_t bits = (bit00 ^ bit10) ^ (bit20 ^ bit30);
-    uint64_t *pointToStart = bufferPrecomputed + (uint32_t)(bits * (uint64_t)(uint32_t)12U);
-    memcpy(rF, pointToStart, (uint32_t)12U * sizeof (uint64_t));
-    for (uint32_t i0 = (uint32_t)1U; i0 < (uint32_t)64U; i0++)
+    uint64_t r = tmp;
+    uint64_t flag0 = r;
+    flag = flag0 == (uint64_t)0U;
+  }
+  else
+  {
+    flag = false;
+  }
+  fromFormPoint_p384(rF, result);
+  bool flag0 = flag;
+  return (uint64_t)flag0;
+}
+
+/*
+ This code is not side channel resistant on pub_key. 
+ Input: result: uint8[64], 
+ pub(lic)Key: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  
+*/
+uint64_t Hacl_P256_ecp384dh_r_public_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+{
+  uint32_t len = (uint32_t)6U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t rF[(uint32_t)3U * len];
+  memset(rF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t pkF[(uint32_t)3U * len];
+  memset(pkF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  toFormPoint_p384(pubKey, pkF);
+  uint32_t len1 = (uint32_t)6U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len1);
+  uint64_t tempBuffer[(uint32_t)20U * len1];
+  memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p384(pkF);
+  bool flag;
+  if (publicKeyCorrect)
+  {
+    uint32_t len30 = (uint32_t)6U;
+    uint64_t *p_x = pkF;
+    uint64_t *p_y = pkF + len30;
+    uint64_t *p_z = pkF + (uint32_t)2U * len30;
+    uint64_t *r_x = rF;
+    uint64_t *r_y = rF + len30;
+    uint64_t *r_z = rF + (uint32_t)2U * len30;
+    toDomain_p384(p_x, r_x);
+    toDomain_p384(p_y, r_y);
+    toDomain_p384(p_z, r_z);
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)16U * ((uint32_t)6U * (uint32_t)3U));
+    uint64_t precomputedTable[(uint32_t)16U * ((uint32_t)6U * (uint32_t)3U)];
+    memset(precomputedTable,
+      0U,
+      (uint32_t)16U * ((uint32_t)6U * (uint32_t)3U) * sizeof (uint64_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)6U * (uint32_t)3U);
+    uint64_t tempPoint[(uint32_t)6U * (uint32_t)3U];
+    memset(tempPoint, 0U, (uint32_t)6U * (uint32_t)3U * sizeof (uint64_t));
+    uint64_t *tempBuffer1 = tempBuffer;
+    generatePrecomputedTable(Spec_ECC_Curves_P384, precomputedTable, rF, tempBuffer1);
+    getPointPrecomputedTable(Spec_ECC_Curves_P384,
+      Lib_Buffer_MUT,
+      (void *)scalar,
+      precomputedTable,
+      (uint32_t)0U,
+      rF);
+    for (uint32_t i = (uint32_t)1U; i < (uint32_t)2U * ((uint32_t)6U * (uint32_t)8U); i++)
     {
-      uint32_t
-      bit4 = (uint32_t)6U * (uint32_t)8U * (uint32_t)8U - (uint32_t)1U - (i0 << (uint32_t)2U);
-      uint64_t
-      bit0 =
-        (uint64_t)(scalar[(uint32_t)6U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - bit4 / (uint32_t)8U]
-        >> bit4 % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)3U;
-      uint64_t
-      bit1 =
-        (uint64_t)(scalar[(uint32_t)6U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - (bit4 - (uint32_t)1U) / (uint32_t)8U]
-        >> (bit4 - (uint32_t)1U) % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)2U;
-      uint64_t
-      bit2 =
-        (uint64_t)(scalar[(uint32_t)6U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - (bit4 - (uint32_t)2U) / (uint32_t)8U]
-        >> (bit4 - (uint32_t)2U) % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)1U;
-      uint64_t
-      bit3 =
-        (uint64_t)(scalar[(uint32_t)6U
-        * (uint32_t)8U
-        - (uint32_t)1U
-        - (bit4 - (uint32_t)3U) / (uint32_t)8U]
-        >> (bit4 - (uint32_t)3U) % (uint32_t)8U
-        & (uint8_t)1U)
-        << (uint32_t)0U;
-      uint64_t bits1 = (bit0 ^ bit1) ^ (bit2 ^ bit3);
-      uint64_t pointToAdd[12U] = { 0U };
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      getPointPrecomputedTable(Spec_ECC_Curves_P384,
+        Lib_Buffer_MUT,
+        (void *)scalar,
+        precomputedTable,
+        i,
+        tempPoint);
       {
-        uint64_t mask = FStar_UInt64_eq_mask(bits1, (uint64_t)i);
-        uint64_t *lut_cmb_x = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12;
-        uint64_t
-        *lut_cmb_y = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)4U;
-        uint64_t
-        *lut_cmb_z = bufferPrecomputed + i * (uint32_t)(krml_checked_int_t)12 + (uint32_t)8U;
-        copy_conditional_p384_l(pointToAdd, lut_cmb_x, mask);
-        copy_conditional_p384_l(pointToAdd + (uint32_t)4U, lut_cmb_y, mask);
-        copy_conditional_p384_l(pointToAdd + (uint32_t)8U, lut_cmb_z, mask);
+        point_double_p384(rF, rF, tempBuffer1);
       }
-      point_double_p256(rF, rF, tempBuffer);
-      point_double_p256(rF, rF, tempBuffer);
-      point_double_p256(rF, rF, tempBuffer);
-      point_double_p256(rF, rF, tempBuffer);
-      point_add_p256(pointToAdd, rF, rF, tempBuffer);
+      {
+        point_double_p384(rF, rF, tempBuffer1);
+      }
+      {
+        point_double_p384(rF, rF, tempBuffer1);
+      }
+      {
+        point_double_p384(rF, rF, tempBuffer1);
+      }
+      point_add_p384(tempPoint, rF, rF, tempBuffer1);
+    }
+    uint64_t *t = tempBuffer;
+    norm_p384(rF, rF, t);
+    uint32_t len2 = (uint32_t)6U;
+    uint32_t start = len2 * (uint32_t)2U;
+    uint64_t *zCoordinate = rF + start;
+    uint64_t tmp = (uint64_t)18446744073709551615U;
+    uint32_t len3 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
+    {
+      uint64_t a_i = zCoordinate[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp;
+      tmp = r_i & tmp0;
+    }
+    uint64_t r = tmp;
+    uint64_t flag0 = r;
+    flag = flag0 == (uint64_t)0U;
+  }
+  else
+  {
+    flag = false;
+  }
+  fromFormPoint_p384(rF, result);
+  bool flag0 = flag;
+  return (uint64_t)flag0;
+}
+
+uint64_t Hacl_P256_ecp384dh_r_private_ml(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+{
+  uint32_t len = (uint32_t)6U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t rF[(uint32_t)3U * len];
+  memset(rF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t pkF[(uint32_t)3U * len];
+  memset(pkF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  toFormPoint_p384(pubKey, pkF);
+  uint32_t len1 = (uint32_t)6U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len1);
+  uint64_t tempBuffer[(uint32_t)20U * len1];
+  memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p384(pkF);
+  bool flag;
+  if (publicKeyCorrect)
+  {
+    uint32_t len30 = (uint32_t)6U;
+    uint64_t *q = tempBuffer;
+    uint64_t *temp = tempBuffer + (uint32_t)3U * len30;
+    uint32_t len4 = (uint32_t)6U;
+    uint64_t *x = q;
+    uint64_t *y = q + len4;
+    uint64_t *z = q + (uint32_t)2U * len4;
+    uint32_t len5 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len5; i++)
+    {
+      x[i] = (uint64_t)0U;
+    }
+    uint32_t len50 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len50; i++)
+    {
+      y[i] = (uint64_t)0U;
+    }
+    uint32_t len51 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len51; i++)
+    {
+      z[i] = (uint64_t)0U;
+    }
+    uint32_t len40 = (uint32_t)6U;
+    uint64_t *p_x = pkF;
+    uint64_t *p_y = pkF + len40;
+    uint64_t *p_z = pkF + (uint32_t)2U * len40;
+    uint64_t *r_x = rF;
+    uint64_t *r_y = rF + len40;
+    uint64_t *r_z = rF + (uint32_t)2U * len40;
+    toDomain_p384(p_x, r_x);
+    toDomain_p384(p_y, r_y);
+    toDomain_p384(p_z, r_z);
+    montgomery_ladderP384L(q, rF, scalar, temp);
+    memcpy(rF, q, (uint32_t)18U * sizeof (uint64_t));
+    uint64_t *t = tempBuffer;
+    norm_p384(rF, rF, t);
+    uint32_t len2 = (uint32_t)6U;
+    uint32_t start = len2 * (uint32_t)2U;
+    uint64_t *zCoordinate = rF + start;
+    uint64_t tmp = (uint64_t)18446744073709551615U;
+    uint32_t len3 = (uint32_t)6U;
+    for (uint32_t i = (uint32_t)0U; i < len3; i++)
+    {
+      uint64_t a_i = zCoordinate[i];
+      uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+      uint64_t tmp0 = tmp;
+      tmp = r_i & tmp0;
+    }
+    uint64_t r = tmp;
+    uint64_t flag0 = r;
+    flag = flag0 == (uint64_t)0U;
+  }
+  else
+  {
+    flag = false;
+  }
+  fromFormPoint_p384(rF, result);
+  bool flag0 = flag;
+  return (uint64_t)flag0;
+}
+
+uint64_t Hacl_P256_ecp384dh_r_private_radix(uint8_t *result, uint8_t *pubKey, uint8_t *scalar)
+{
+  uint32_t len = (uint32_t)6U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t rF[(uint32_t)3U * len];
+  memset(rF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)3U * len);
+  uint64_t pkF[(uint32_t)3U * len];
+  memset(pkF, 0U, (uint32_t)3U * len * sizeof (uint64_t));
+  toFormPoint_p384(pubKey, pkF);
+  uint32_t len1 = (uint32_t)6U;
+  KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)20U * len1);
+  uint64_t tempBuffer[(uint32_t)20U * len1];
+  memset(tempBuffer, 0U, (uint32_t)20U * len1 * sizeof (uint64_t));
+  bool publicKeyCorrect = verifyQValidCurvePoint_public_p384(pkF);
+  bool flag;
+  if (publicKeyCorrect)
+  {
+    uint32_t len30 = (uint32_t)6U;
+    uint64_t *p_x = pkF;
+    uint64_t *p_y = pkF + len30;
+    uint64_t *p_z = pkF + (uint32_t)2U * len30;
+    uint64_t *r_x = rF;
+    uint64_t *r_y = rF + len30;
+    uint64_t *r_z = rF + (uint32_t)2U * len30;
+    toDomain_p384(p_x, r_x);
+    toDomain_p384(p_y, r_y);
+    toDomain_p384(p_z, r_z);
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)16U * ((uint32_t)6U * (uint32_t)3U));
+    uint64_t precomputedTable[(uint32_t)16U * ((uint32_t)6U * (uint32_t)3U)];
+    memset(precomputedTable,
+      0U,
+      (uint32_t)16U * ((uint32_t)6U * (uint32_t)3U) * sizeof (uint64_t));
+    KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)6U * (uint32_t)3U);
+    uint64_t tempPoint[(uint32_t)6U * (uint32_t)3U];
+    memset(tempPoint, 0U, (uint32_t)6U * (uint32_t)3U * sizeof (uint64_t));
+    uint64_t *tempBuffer1 = tempBuffer;
+    generatePrecomputedTable(Spec_ECC_Curves_P384, precomputedTable, rF, tempBuffer1);
+    getPointPrecomputedTable(Spec_ECC_Curves_P384,
+      Lib_Buffer_MUT,
+      (void *)scalar,
+      precomputedTable,
+      (uint32_t)0U,
+      rF);
+    for (uint32_t i = (uint32_t)1U; i < (uint32_t)2U * ((uint32_t)6U * (uint32_t)8U); i++)
+    {
+      getPointPrecomputedTable(Spec_ECC_Curves_P384,
+        Lib_Buffer_MUT,
+        (void *)scalar,
+        precomputedTable,
+        i,
+        tempPoint);
+      {
+        point_double_p384(rF, rF, tempBuffer1);
+      }
+      {
+        point_double_p384(rF, rF, tempBuffer1);
+      }
+      {
+        point_double_p384(rF, rF, tempBuffer1);
+      }
+      {
+        point_double_p384(rF, rF, tempBuffer1);
+      }
+      point_add_p384(tempPoint, rF, rF, tempBuffer1);
     }
     uint64_t *t = tempBuffer;
     norm_p384(rF, rF, t);
