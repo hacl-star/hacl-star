@@ -32,13 +32,6 @@ let copy_conditional_u64 x out mask =
   let r_0 = logxor out_0 (logand mask (logxor out_0 x)) in 
   lemma_xor_copy_cond out_0 x mask;
   upd out (size 0) r_0
-  
-(*
- #buf_type: buftype
-  -> p: point c -> q: point c 
-  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
-  -> scalar: lbuffer_t buf_type uint8 (getScalarLenBytes c)
-*)
 
 
 inline_for_extraction noextract
@@ -92,28 +85,19 @@ let copy_conditional_ #c out x mask =
 let copy_conditional_p256_l = copy_conditional_ #P256 #MUT
 [@CInline]
 let copy_conditional_p384_l = copy_conditional_ #P384 #MUT
-(*
-[@CInline]
-let copy_conditional_generic_l = copy_conditional_ #Default #MUT *)
+
 
 [@CInline]
 let copy_conditional_p256_i = copy_conditional_ #P256 #IMMUT
 [@CInline]
 let copy_conditional_p384_i = copy_conditional_ #P384 #IMMUT
-(*
-[@CInline]
-let copy_conditional_generic_i = copy_conditional_ #Default #IMMUT
-*)
 
 
 [@CInline]
 let copy_conditional_p256_c = copy_conditional_ #P256 #CONST
 [@CInline]
 let copy_conditional_p384_c = copy_conditional_ #P384 #CONST
-(* 
-[@CInline]
-let copy_conditional_generic_c = copy_conditional_ #Default #CONST
-*)
+
 
 inline_for_extraction noextract
 val copy_conditional: #c: curve -> #buf_type: buftype
@@ -136,11 +120,6 @@ let copy_conditional #c #b out x mask =
 	|MUT -> copy_conditional_p384_l out x mask
 	|IMMUT -> copy_conditional_p384_i out x mask
 	|CONST -> copy_conditional_p384_c out x mask end
-    (*|Default -> begin
-      match b with 
-	|MUT -> copy_conditional_generic_l out x mask
-	|IMMUT -> copy_conditional_generic_i out x mask
-	|CONST -> copy_conditional_generic_c out x mask end *)
 
 
 inline_for_extraction noextract
@@ -191,11 +170,7 @@ let cmovznz4_ #c cin x y r =
 let cmovznz4_p256 = cmovznz4_ #P256
 [@CInline]
 let cmovznz4_p384 = cmovznz4_ #P384
-(*
-[@CInline]
-let cmovznz4_generic = cmovznz4_ #Default
 
-*)
 
 inline_for_extraction noextract
 val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
@@ -208,8 +183,7 @@ val cmovznz4: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: fe
 let cmovznz4 #c cin x y result = 
   match c with 
   |P256 -> cmovznz4_p256 cin x y result
-  |P384 -> cmovznz4_p384 cin x y result (*
-  |Default -> cmovznz4_generic cin x y result *)
+  |P384 -> cmovznz4_p384 cin x y result
 
 
 inline_for_extraction noextract
@@ -355,11 +329,6 @@ let cmp_felem_felem_bool_p256 = cmp_felem_felem_bool_ #P256
 [@CInline]
 let cmp_felem_felem_bool_p384 = cmp_felem_felem_bool_ #P384
 
-(*
-[@CInline]
-let cmp_felem_felem_bool_generic = cmp_felem_felem_bool_ #Default
-*)
-
 
 inline_for_extraction noextract
 val cmp_felem_felem_bool: #c: curve -> a: felem c -> b: felem c -> Stack bool
@@ -371,7 +340,6 @@ let cmp_felem_felem_bool #c a b =
   match c with 
   |P256 -> cmp_felem_felem_bool_p256 a b 
   |P384 -> cmp_felem_felem_bool_p384 a b 
-  (* |Default -> cmp_felem_felem_bool_generic a b *)
 
 
 inline_for_extraction noextract
@@ -379,9 +347,7 @@ val cmovznz01: #t:inttype{unsigned t} -> #l:secrecy_level -> a: uint_t t l
   -> b: uint_t t l -> mask: uint_t t l {uint_v mask = 0 \/ uint_v mask = 1} -> 
   Tot (r: uint_t t l {if uint_v mask = 0 then uint_v r = v a else uint_v r = v b} )
 
-let cmovznz01 a b mask = 
-  admit();
-  let mask = (u64 0) -. mask in 
-  admit();
+let cmovznz01 #t #l a b mask = 
+  let mask = uint #t #l 0 -. mask in 
   lemma_xor_copy_cond a b mask;
   logxor a (logand mask (logxor a b))

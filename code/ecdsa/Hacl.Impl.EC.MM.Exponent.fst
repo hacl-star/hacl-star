@@ -197,18 +197,29 @@ val montgomery_ladder_power_p256_dh: a: felem P256
 let montgomery_ladder_power_p256_dh a scalar result = montgomery_ladder_power_ #P256 #DH a scalar result
 
 
+val montgomery_ladder_power_p384_dh: a: felem P384
+  -> scalar: glbuffer uint8 (getCoordinateLenU P384) -> result: felem P384 -> 
+  Stack unit 
+  (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat P384 h a < getModePrime DH P384 /\
+    disjoint a scalar /\ disjoint a result)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\ 
+    as_nat P384 h1 result < getModePrime DH P384 /\ (
+    let r0D = pow_spec #P384 #DH (as_seq h0 scalar) (fromDomain_ #P384 #DH (as_nat P384 h0 a)) in 
+    let k = fromDomain_ #P384 #DH (as_nat P384 h0 a) in 
+    let scalar = as_seq h0 scalar in 
+    let prime = getModePrime DH P384 in 
+    as_nat P384 h1 result = toDomain_ #P384 #DH ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar)) % prime) /\ 
+    r0D == fromDomain_ #P384 #DH (as_nat P384 h1 result)))
+
 [@CInline]
 let montgomery_ladder_power_p384_dh a scalar result = montgomery_ladder_power_ #P384 #DH a scalar result
-(* [@CInline]
-let montgomery_ladder_power_generic_dh a scalar result = montgomery_ladder_power_ #Default #DH a scalar result
- *)
+
 
 let montgomery_ladder_power_dh #c a scalar result = 
   match c with 
   |P256 -> montgomery_ladder_power_p256_dh a scalar result
   |P384 -> montgomery_ladder_power_p384_dh a scalar result
-(*   |Default -> montgomery_ladder_power_generic_dh a scalar result
- *)
+
 
 val montgomery_ladder_power_p256_dsa: a: felem P256
   -> scalar: glbuffer uint8 (getCoordinateLenU P256) -> result: felem P256 -> 
@@ -227,6 +238,19 @@ val montgomery_ladder_power_p256_dsa: a: felem P256
 [@CInline]
 let montgomery_ladder_power_p256_dsa a scalar result = montgomery_ladder_power_ #P256 #DSA a scalar result
 
+val montgomery_ladder_power_p384_dsa: a: felem P384
+  -> scalar: glbuffer uint8 (getCoordinateLenU P384) -> result: felem P384 -> 
+  Stack unit 
+  (requires fun h -> live h a /\ live h scalar /\ live h result /\ as_nat P384 h a < getModePrime DSA P384 /\
+    disjoint a scalar /\ disjoint a result)
+  (ensures fun h0 _ h1 -> modifies (loc a |+| loc result) h0 h1 /\ 
+    as_nat P384 h1 result < getModePrime DSA P384 /\ (
+    let r0D = pow_spec #P384 #DSA (as_seq h0 scalar) (fromDomain_ #P384 #DSA (as_nat P384 h0 a)) in 
+    let k = fromDomain_ #P384 #DSA (as_nat P384 h0 a) in 
+    let scalar = as_seq h0 scalar in 
+    let prime = getModePrime DSA P384 in 
+    as_nat P384 h1 result = toDomain_ #P384 #DSA ((pow k (Lib.ByteSequence.nat_from_bytes_le scalar)) % prime) /\ 
+    r0D == fromDomain_ #P384 #DSA (as_nat P384 h1 result)))
 
 [@CInline]
 let montgomery_ladder_power_p384_dsa a scalar result = montgomery_ladder_power_ #P384 #DSA a scalar result

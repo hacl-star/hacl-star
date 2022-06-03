@@ -32,7 +32,7 @@ open Hacl.Bignum
 
 let getPower2 c = pow2 (getPower c)
 
-#set-options " --z3rlimit 400"
+#set-options " --z3rlimit 100"
 
 val lemma_reduction_prime_2prime_with_carry_cin: 
   c: curve ->

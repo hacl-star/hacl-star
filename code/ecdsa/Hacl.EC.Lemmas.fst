@@ -90,9 +90,10 @@ let cmovznz4_lemma cin x y =
   logand_lemma x ln;
   logor_lemma_one_element_is_zero (logand y x2) (logand x (lognot x2))
 
-val lemma_xor_copy_cond: a: uint64 -> b: uint64 -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 -1} -> Lemma(
+val lemma_xor_copy_cond: #t:inttype{unsigned t} -> #l:secrecy_level -> a: uint_t t l -> b: uint_t t l 
+  -> mask: uint_t t l {uint_v mask = 0 \/ uint_v mask = maxint t} -> Lemma(
   let r = logxor a (logand mask (logxor a b)) in 
-  if uint_v mask = pow2 64 - 1 then r == b else r == a)
+  if uint_v mask =  maxint t then r == b else r == a)
 
 let lemma_xor_copy_cond a b mask = 
   let fst = logxor a b in 

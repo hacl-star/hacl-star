@@ -79,13 +79,39 @@ let lemma_a_not_zero_b_not_zero_mod_not_zero p a b = lemma_a_not_zero_b_not_zero
 
 
 val lemma_0: p: nat {Math.Euclid.is_prime p} -> a: nat {a % p <> 0} -> k: pos -> Lemma 
-  (requires (pow (a % p) (k - 1) % p <> 0 /\ pow (a % p) (k - 1) * pow (a % p) 1 <> 0))  
+  (requires (pow (a % p) (k - 1) % p <> 0))  
   (ensures (pow (a % p) (k - 1) * pow (a % p) 1 % p <> 0))
-  
+ 
 let lemma_0 p a k = 
   power_one_2 (a % p);
   lemma_a_not_zero_b_not_zero_mod_not_zero p (pow (a % p) (k - 1)) (pow (a % p) 1)
 
+
+val lemma_exp_not_zero_0: a: nat -> k: nat {k > 1} -> p: pos{a < p} -> 
+  Lemma (
+    exp #p a k % p == exp #p a (k - 1) % p * a % p /\ 
+    exp #p a k % p == pow a (k - 1) * pow a 1 % p /\
+    exp #p a (k - 1) == pow a (k - 1) % p)
+
+
+let lemma_exp_not_zero_0 b k p = 
+    let k_1: pos = k - 1 in 
+    calc (==) {
+      exp #p b k % p;
+    (==) {lemma_pow_mod_n_is_fpow p b k} 
+      pow b k % p; 
+    (==) {pow_plus b 1 k_1}
+      (pow b k_1 * pow b 1) % p; 
+    };
+    
+    power_one_2 b;
+
+    lemma_mod_mul_distr_l (pow b k_1) b p;
+      assert(pow b k_1 * b % p == (pow b k_1 % p) * b % p);
+    lemma_pow_mod_n_is_fpow p b k_1; 
+      assert(exp #p b k % p == (exp #p b k_1) * b % p);
+    lemma_mod_mul_distr_l (exp #p b k_1) b p;
+      assert(exp #p b k % p == exp #p b k_1 % p * b % p)
 
 
 val lemma_exp_not_zero: p: nat {Math.Euclid.is_prime p} -> a: nat {a % p <> 0} -> k: pos ->
@@ -95,14 +121,10 @@ let rec lemma_exp_not_zero p a k =
   match k with 
   |1 -> 
     lemma_pow_mod_n_is_fpow p (a % p) 1;
-    let b = Spec.ECC.Curves.exp #p (a % p) 1 % p in 
     power_one_2 (a % p)
   | _ -> 
+    lemma_exp_not_zero_0 (a % p) k p;
     lemma_exp_not_zero p a (k - 1);
-    lemma_pow_mod_n_is_fpow p (a % p) k;
-    lemma_pow_mod_n_is_fpow p (a % p) (k - 1);
-    power_one_2 (a % p);
-    pow_plus (a % p) 1 (k - 1);
     lemma_0 p a k
 
 
