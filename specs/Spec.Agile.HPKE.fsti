@@ -77,9 +77,16 @@ let aead_alg_of (cs:ciphersuite_not_export_only) = match aead_of_cs cs with
   | Seal alg -> alg
 
 
-/// Constants
-
-(** Constants for HPKE labels *)
+/// Constants for HPKE labels
+///
+/// The code for the following constants was generated
+/// with the script make_hpke_constants.py. Ultimately,
+/// this should be rewritten in Meta-F*. The idea is to
+/// write a tactic `mk_label` that inspects a string
+/// character by character, and generates the proper
+/// definition. It could be used as follows:
+/// %splice [label_version] (mk_label "HPKE-v1")
+/// Inspiration can be taken from Test.Lowstarize.fst.
 
 // generated: "HPKE-v1"
 inline_for_extraction

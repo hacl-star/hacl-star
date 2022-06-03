@@ -1,3 +1,12 @@
+# This Python script was used to generate the F* code
+# for the string constants used in HPKE, see
+# Spec.Agile.HPKE.fsti, Section “Contants for HPKE labels”.
+# Invoke this script with Python3 on the command line,
+# for example with:
+# python3 make_hpke_constants.py
+# Ultimately, this should be rewritten in Meta-F*, see
+# a more detailed comment in Spec.Agile.HPKE.fsti.
+
 # If it's a tuple, first element is used for the variable name,
 # second element for the content. If it is a single string, it
 # is used for both name and content.
