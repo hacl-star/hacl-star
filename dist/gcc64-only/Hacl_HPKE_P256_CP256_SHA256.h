@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_HKDF.h"
 #include "Hacl_Chacha20Poly1305_256.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 uint32_t
 Hacl_HPKE_P256_CP256_SHA256_setupBaseS(
   uint8_t *o_pkE,

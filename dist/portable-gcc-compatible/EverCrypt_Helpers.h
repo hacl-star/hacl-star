@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: EverCrypt_Helpers_uint8_t */
 
 typedef uint8_t EverCrypt_Helpers_uint8_t;

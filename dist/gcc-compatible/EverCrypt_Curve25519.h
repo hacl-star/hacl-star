@@ -39,7 +39,6 @@ extern "C" {
 #include "Hacl_Curve25519_51.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void EverCrypt_Curve25519_secret_to_public(uint8_t *pub, uint8_t *priv);
 
 void EverCrypt_Curve25519_scalarmult(uint8_t *shared, uint8_t *my_priv, uint8_t *their_pub);

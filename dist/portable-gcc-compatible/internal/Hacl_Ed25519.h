@@ -40,7 +40,6 @@ extern "C" {
 #include "internal/Hacl_Curve25519_51.h"
 #include "../Hacl_Ed25519.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Bignum25519_reduce_513 */
 
 void Hacl_Bignum25519_reduce_513(uint64_t *a);

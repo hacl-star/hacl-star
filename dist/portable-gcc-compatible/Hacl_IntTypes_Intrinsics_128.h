@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_IntTypes_Intrinsics_128_add_carry_u64 */
 
 static inline uint64_t

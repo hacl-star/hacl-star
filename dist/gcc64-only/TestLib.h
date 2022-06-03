@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 extern void TestLib_touch(int32_t uu___);
 
 extern void TestLib_check(bool uu___);

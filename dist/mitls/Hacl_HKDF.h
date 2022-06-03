@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_HMAC.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void
 Hacl_HKDF_expand_sha2_256(
   uint8_t *okm,

@@ -40,7 +40,6 @@ extern "C" {
 #include "EverCrypt_Chacha20Poly1305.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef struct EverCrypt_AEAD_state_s_s EverCrypt_AEAD_state_s;
 
 bool EverCrypt_AEAD_uu___is_Ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
