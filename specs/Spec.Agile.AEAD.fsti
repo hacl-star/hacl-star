@@ -93,7 +93,7 @@ let kv a = lbytes (key_length a)
 let iv a = s:S.seq uint8 { iv_length a (S.length s) }
 let ad a = s:S.seq uint8 { S.length s <= max_length a }
 let plain (a: supported_alg) = s:S.seq uint8 { S.length s <= max_length a }
-let cipher (a: supported_alg) = s:S.seq uint8 { S.length s >= tag_length a /\ S.length s <= cipher_max_length a } // TODO is there a reason why we would not have an upper bound?
+let cipher (a: supported_alg) = s:S.seq uint8 { S.length s >= tag_length a /\ S.length s <= cipher_max_length a }
 
 let cipher_length #a (p: plain a) =
   S.length p + tag_length a
@@ -120,9 +120,7 @@ let decrypted #a (c: cipher a) = p:plain a { S.length c = cipher_length p }
 // Note: adopting the argument order of EverCrypt... which doesn't match other
 // specs. Sigh.
 val encrypt: #(a: supported_alg) -> kv a -> iv a -> ad a -> p:plain a -> encrypted p
-val decrypt: #(a: supported_alg) -> kv a -> iv a -> ad a ->
-  c:cipher a { S.length c <= cipher_max_length a} -> // TODO If my change of cipher can stay, then this check here is redundant
-  option (decrypted c)
+val decrypt: #(a: supported_alg) -> kv a -> iv a -> ad a -> c:cipher a -> option (decrypted c)
 
 val correctness: #a:supported_alg -> k:kv a -> n:iv a -> aad:ad a -> p:plain a ->
   Lemma (decrypt k n aad (encrypt k n aad p) == Some p)
