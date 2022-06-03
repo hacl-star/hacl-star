@@ -63,6 +63,14 @@ ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
   $(error $$VALE_HOME/bin/vale.exe does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
 endif
 
+ifeq (,$(wildcard $(VALE_HOME)/bin/vale.runtimeconfig.json))
+  $(error $$VALE_HOME/bin/vale.runtimeconfig.json does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
+endif
+
+ifeq (,$(wildcard $(VALE_HOME)/bin/importFStarTypes.runtimeconfig.json))
+  $(error $$VALE_HOME/bin/importFStarTypes.runtimeconfig.json does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
+endif
+
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
   $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
     $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version).$(newline)(VALE_HOME=$(VALE_HOME))$(newline)Hint: ./tools/get_vale.sh)
@@ -169,9 +177,9 @@ clean:
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
 PYTHON3 ?= $(shell tools/findpython3.sh)
 ifeq ($(OS),Windows_NT)
-  MONO =
+  DOTNET =
 else
-  MONO = mono
+  DOTNET = dotnet
 endif
 
 ifeq ($(shell uname -s),Darwin)
@@ -338,7 +346,7 @@ endif
 
 %.types.vaf:
 	$(call run-with-log,\
-	  $(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
+	  $(DOTNET) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
 	  ,[VALE-TYPES] $(notdir $*),$(call to-obj-dir,$@))
 
 # Always pass Vale.Lib.Operator.vaf as an -include to Vale, except for the file itself.
@@ -351,7 +359,7 @@ obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 # the files). (Actually, we know, hence this extra touch.)
 %.fst:
 	$(call run-with-log,\
-	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText \
+	  $(DOTNET) $(VALE_HOME)/bin/vale.exe -fstarText \
 	    -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i && touch -c $@i \
