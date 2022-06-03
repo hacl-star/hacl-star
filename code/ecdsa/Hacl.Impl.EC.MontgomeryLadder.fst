@@ -25,7 +25,7 @@ open Hacl.Impl.EC.Masking.ScalarAccess
 open Hacl.Spec.EC.Definition
 
 
-#set-options " --z3rlimit 200"
+#set-options " --z3rlimit 200 --max_fuel 0 --max_ifuel 0"
 
 inline_for_extraction noextract
 val swap: #c: curve ->  p: point_seq c -> q: point_seq c -> 
@@ -49,10 +49,11 @@ val lemma_PointEqualR: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime 
 
 let lemma_PointEqualR #c p q = ()
 
+
 val lemma_point_as_nat: #c: curve -> h: mem -> h1: mem 
   -> p: point c {point_eval c h p} 
   -> q: point c -> Lemma
-  (as_seq h p == as_seq h1 q ==> point_as_nat c h p == point_as_nat c h1 q)
+    (as_seq h p == as_seq h1 q ==> (point_eval c h1 q /\ point_as_nat c h p == point_as_nat c h1 q))
 
 let lemma_point_as_nat #c h h1 p q = 
   let len = getCoordinateLenU64 c in 
@@ -71,7 +72,7 @@ let lemma_point_as_nat #c h h1 p q =
 
 
 inline_for_extraction noextract
-val cswap: #c: curve -> bit:uint64{v bit <= 1} -> p:point c -> q:point c-> 
+val cswap: #c: curve -> bit:uint64{v bit <= 1} -> p: point c -> q: point c-> 
   Stack unit
   (requires fun h -> live h p /\ live h q /\ eq_or_disjoint p q /\ point_eval c h p /\ point_eval c h q /\
     ~ (pointEqual #c
@@ -111,7 +112,7 @@ let cswap #c bit p1 p2 =
   
   Lib.Sequence.eq_intro (as_seq h1 p1) (if v bit = 1 then as_seq h0 p2 else as_seq h0 p1);
   Lib.Sequence.eq_intro (as_seq h1 p2) (if v bit = 1 then as_seq h0 p1 else as_seq h0 p2);
-
+  
   if v bit = 1 then begin
     lemma_point_as_nat #c h0 h1 p1 p2;
     lemma_point_as_nat #c h0 h1 p2 p1
@@ -120,7 +121,7 @@ let cswap #c bit p1 p2 =
     lemma_point_as_nat #c h0 h1 p1 p1;
     lemma_point_as_nat #c h0 h1 p2 p2
   end
-
+    
 
 val pointAddAsAdd: #c: curve -> p: point_nat_prime #c -> q: point_nat_prime #c -> Lemma
     (requires (~ (pointEqual #c p q)))
@@ -208,7 +209,6 @@ val _montgomery_ladder_step: #c: curve -> #buf_type: buftype
     else 
       fromDomainPoint #c #DH (point_as_nat c h1 p) == pM0 /\
       fromDomainPoint #c #DH (point_as_nat c h1 q) == qM0)))
-
 
 let _montgomery_ladder_step #c #buf_type r0 r1 tempBuffer bit = 
   cswap bit r0 r1; 
@@ -329,6 +329,8 @@ let montgomery_ladder_ #c #a p q scalar tempBuffer =
      (fromDomainPoint #c #DH (point_as_nat c h0 p), fromDomainPoint #c #DH (point_as_nat c h0 q));
 
   point_mult_0_lemma #c (fromDomainPoint #c #DH (point_as_nat c h0 q)); 
+  scalar_as_nat_zero #c (as_seq h0 scalar);
+
   for 0ul cycleLoop inv (fun i -> 
     let h2 = ST.get() in 
       montgomery_ladder_step p q tempBuffer scalar i; 
@@ -341,6 +343,7 @@ let montgomery_ladder_ #c #a p q scalar tempBuffer =
       (scalar_as_nat_ #c (as_seq h0 scalar) (v i)) (fromDomainPoint #c #DH (point_as_nat c h2 p)) 
       (scalar_as_nat_ #c (as_seq h0 scalar) (v i) + 1) (fromDomainPoint #c #DH (point_as_nat c h2 q)) (as_seq h0 scalar) (v i)
   )
+
 
 [@CInline]
 let montgomery_ladderP256L = montgomery_ladder_ #P256 #MUT
@@ -391,10 +394,4 @@ let montgomery_ladder #c #b p q scalar tempBuffer =
       |MUT -> montgomery_ladderP384L p q scalar tempBuffer
       |IMMUT -> montgomery_ladderP384I p q scalar tempBuffer
       |CONST -> montgomery_ladderP384C p q scalar tempBuffer end
-(*     |Default -> begin
-      match b with 
-      |MUT -> montgomery_ladderGenL p q scalar tempBuffer
-      |IMMUT -> montgomery_ladderGenI p q scalar tempBuffer
-      |CONST -> montgomery_ladderGenC p q scalar tempBuffer end
-  
- *)
+
