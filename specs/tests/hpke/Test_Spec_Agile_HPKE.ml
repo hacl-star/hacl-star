@@ -71,7 +71,7 @@ let to_kdf i = match i with
 
 let to_aead i = match i with
     1 -> Error ("Unsupported AEAD: AES-128-GCM")
-  | 2 -> Error ("Unsupported AEAD: AES-128-GCM")
+  | 2 -> Error ("Unsupported AEAD: AES-256-GCM")
 (* The AES spec in HACL* is currently not correct, so
  * we do not test it from OCaml *)
 (*    1 -> Ok (HPKE.Seal Spec_Agile_AEAD.AES128_GCM)
@@ -105,7 +105,7 @@ let rec run_encryptions cs enc_ctx js_list =
       let ciphertext = get_bytes js "ct" in
       let nonce      = get_bytes js "nonce" in
       let plaintext  = get_bytes js "pt" in
-  
+
       match HPKE.context_seal cs enc_ctx aad plaintext with
         None -> Error "Seal failed"
       | Some (new_enc_ctx, comp_ciphertext) ->
@@ -120,7 +120,7 @@ let rec run_decryptions cs dec_ctx js_list =
       let ciphertext = get_bytes js "ct" in
       let nonce      = get_bytes js "nonce" in
       let plaintext  = get_bytes js "pt" in
-  
+
       match HPKE.context_open cs dec_ctx aad ciphertext with
         None -> Error "Open failed"
       | Some (new_dec_ctx, comp_plaintext) ->
@@ -134,7 +134,7 @@ let rec run_exports cs enc_ctx js_list =
       let l = js |> member "L" |> to_int in
       let exported_value = get_bytes js "exported_value" in
       let exporter_context = get_bytes js "exporter_context" in
-  
+
       let comp_exported_value = HPKE.context_export cs enc_ctx exporter_context (Prims.of_int l) in
       if not (comp_exported_value = exported_value) then Error "Exported values differ"
       else run_exports cs enc_ctx cons
@@ -148,8 +148,7 @@ let run_derive_key_pair cs ikm sk pk =
       (*print_string "derive_key_pair returned Some\n";*)
       comp_sk = sk && comp_pk = pk, comp_sk, comp_pk
 
-let rec run_testcase i js =
-  print_string ("start run_testcase " ^ Int.to_string i ^ ": ");
+let rec run_testcase js =
   match js |> member "mode" |> to_int |> to_mode with
     Error e -> Error e
   | Ok mode ->
@@ -173,14 +172,14 @@ let rec run_testcase i js =
                   let ikmR = get_bytes js "ikmR" in
                   let pkRm = get_bytes js "pkRm" in
                   let skRm = get_bytes js "skRm" in
-        
+
                   let ikmS = if is_auth then js |> member "ikmS" |> to_string |> to_bytes else bytes_empty in
                   let pkSm = if is_auth then js |> member "pkSm" |> to_string |> to_bytes else bytes_empty in
                   let skSm = if is_auth then js |> member "skSm" |> to_string |> to_bytes else bytes_empty in
-        
+
                   let psk = if is_psk then js |> member "psk" |> to_string |> to_bytes else bytes_empty in
                   let psk_id = if is_psk then js |> member "psk_id" |> to_string |> to_bytes else bytes_empty in
-        
+
                   let enc  = js |> member "enc" |> to_string |> to_bytes in
                   let shared_secret = js |> member "shared_secret" |> to_string |> to_bytes in
                   let key_schedule_context = js |> member "key_schedule_context" |> to_string |> to_bytes in
@@ -188,16 +187,16 @@ let rec run_testcase i js =
                   let key = js |> member "key" |> to_string |> to_bytes in
                   let base_nonce = js |> member "base_nonce" |> to_string |> to_bytes in
                   let exporter_secret = js |> member "exporter_secret" |> to_string |> to_bytes in
-        
+
                   let rE, comp_skE, comp_pkE = run_derive_key_pair cs ikmE skEm pkEm in
                   let rR, comp_skR, comp_pkR = run_derive_key_pair cs ikmR skRm pkRm in
                   let rS, comp_skS, comp_pkS = if is_auth then run_derive_key_pair cs ikmS skSm pkSm else false, bytes_empty, bytes_empty in
-     
+
                   if not rE then Error "parsing ikmE returned smth different" else
                   if not rR then Error "parsing ikmR returned smth different" else
                   if is_auth && not rS then Error "parsing ikmS returned smth different" else (
                   (*print_string "derive_key_pair were all successfull\n";*)
-        
+
                   (* call the setup function according to the mode *)
                   let osetup =
                     begin match mode with
@@ -209,9 +208,9 @@ let rec run_testcase i js =
                   match osetup with
                     None -> Error "setup failed"
                   | Some (comp_enc, comp_enc_ctx) ->
-        
+
                       let (comp_key, comp_base_nonce, _, comp_exp_sec) = comp_enc_ctx in
-            
+
                       if not (comp_enc = enc) then Error "setup eph key different" else
                       if not (comp_key = key && comp_base_nonce = base_nonce && comp_exp_sec = exporter_secret) then
                         begin
@@ -251,20 +250,22 @@ let rec run_testcase i js =
                                 print_string (" #exp: " ^ Int.to_string (List.length exports) ^ " ");
                                 match run_exports cs comp_enc_ctx exports with
                                   Error e -> print_string (e ^ " "); Error e
-                                | Ok b -> 
+                                | Ok b ->
                                     print_string (" OK. ");
 
                                     Ok b)
 
 
-let (main : unit) =
-  let json = Yojson.Basic.from_file "hpke/test-vectors-final-pp.json" in
+let test_one v =
+  match run_testcase v with
+    | Ok b -> print_string "Ok\n"; flush stdout; true
+    | Error e -> print_string ("Error " ^ e ^ "\n"); flush stdout; false
+
+
+let test () : bool =
+  let json = Yojson.Basic.from_file "hpke/test-vectors-supported.json" in
   let testcases = json |> Yojson.Basic.Util.to_list in
   print_string ("Number of testcases: " ^ Int.to_string (List.length testcases) ^ "\n");
-  for i = 0 to (Int.pred (List.length testcases)) do
-    let msg = begin match run_testcase i (List.nth testcases i) with
-                Ok b -> "Ok\n";
-              | Error e -> "Error " ^ e ^ "\n"; end in
-    print_string msg;
-    flush stdout;
-  done
+  List.for_all test_one testcases
+
+let (main : unit) = if not (test ()) then (print_endline "Test_Spec_Agile_HPKE failed"; exit 1)
