@@ -263,7 +263,7 @@ let test_one v =
 
 
 let test () : bool =
-  let json = Yojson.Basic.from_file "hpke/test-vectors-supported.json" in
+  let json = Yojson.Basic.from_file (Sys.getenv "HACL_HOME" ^ "/specs/tests/hpke/test-vectors-supported.json") in
   let testcases = json |> Yojson.Basic.Util.to_list in
   print_string ("Number of testcases: " ^ Int.to_string (List.length testcases) ^ "\n");
   List.for_all test_one testcases
