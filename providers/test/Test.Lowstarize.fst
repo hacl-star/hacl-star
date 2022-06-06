@@ -62,11 +62,13 @@ noextract
 let rec destruct_list (e: term): Tac (option (list term)) =
   let hd, args = collect_app e in
   match inspect_ln hd, args with
+  | Tv_UInst fv _, [ _; hd, _; tl, _ ]
   | Tv_FVar fv, [ _; hd, _; tl, _ ] ->
       if inspect_fv fv = cons_qn then
         Some (hd :: must (destruct_list tl))
       else
         None
+  | Tv_UInst fv _, _
   | Tv_FVar fv, _ ->
       if inspect_fv fv = nil_qn then
         Some []
@@ -78,6 +80,7 @@ let rec destruct_list (e: term): Tac (option (list term)) =
 noextract
 let is_list e =
   match inspect_ln (fst (collect_app e)) with
+  | Tv_UInst fv _
   | Tv_FVar fv ->
       inspect_fv fv = nil_qn || inspect_fv fv = cons_qn
   | _ ->
@@ -92,6 +95,7 @@ noextract
 let destruct_tuple (e: term): option (list term) =
   let hd, args = collect_app e in
   match inspect_ln hd with
+  | Tv_UInst fv _
   | Tv_FVar fv ->
       if List.Tot.contains (inspect_fv fv) mktuple_qns then
         Some (List.Tot.concatMap (fun (t, q) ->
@@ -107,6 +111,7 @@ let destruct_tuple (e: term): option (list term) =
 noextract
 let is_tuple (e: term) =
   match inspect_ln (fst (collect_app e)) with
+  | Tv_UInst fv _
   | Tv_FVar fv ->
       List.Tot.contains (inspect_fv fv) mktuple_qns
   | _ ->
