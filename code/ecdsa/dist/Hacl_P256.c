@@ -26,7 +26,6 @@
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Lib.h"
-#include "wnaf.h"
 
 static inline void mul64(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
 {
@@ -93,8 +92,7 @@ static inline void cmovznz4_p256(uint64_t cin, uint64_t *x, uint64_t *y, uint64_
   {
     uint64_t x_i = x[i];
     uint64_t y_i = y[i];
-    uint64_t r_i = (y_i & mask) | (x_i & ~mask);
-    r[i] = r_i;
+    r[i] = (y_i & mask) | (x_i & ~mask);
   }
 }
 
@@ -106,14 +104,8 @@ static inline void cmovznz4_p384(uint64_t cin, uint64_t *x, uint64_t *y, uint64_
   {
     uint64_t x_i = x[i];
     uint64_t y_i = y[i];
-    uint64_t r_i = (y_i & mask) | (x_i & ~mask);
-    r[i] = r_i;
+    r[i] = (y_i & mask) | (x_i & ~mask);
   }
-}
-
-static uint64_t eq0_u64(uint64_t a)
-{
-  return FStar_UInt64_eq_mask(a, (uint64_t)0U);
 }
 
 static inline bool cmp_felem_felem_bool_p256(uint64_t *a, uint64_t *b)
@@ -4924,18 +4916,96 @@ point_add_mixed_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempB
   memcpy(result + (uint32_t)12U, z3_out, (uint32_t)6U * sizeof (uint64_t));
 }
 
-static uint64_t scalar_bit(uint8_t *s, uint32_t n)
+static void
+scalar_rwnaf_step_compute_di(
+  uint64_t wVar,
+  uint64_t *out,
+  uint64_t mask,
+  uint64_t *r,
+  uint32_t i
+)
 {
-  return (uint64_t)(s[(uint32_t)31U - n / (uint32_t)8U] >> n % (uint32_t)8U & (uint8_t)1U);
+  uint64_t w = wVar & mask;
+  uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, w, (uint64_t)32U, r);
+  uint64_t r0 = r[0U];
+  uint64_t r2 = (uint64_t)0U - r0;
+  uint64_t cAsFlag = ~FStar_UInt64_eq_mask(c, (uint64_t)0U);
+  uint64_t r3 = (r2 & cAsFlag) | (r0 & ~cAsFlag);
+  out[(uint32_t)2U * i] = r3;
+  out[(uint32_t)2U * i + (uint32_t)1U] = cAsFlag;
 }
 
-static uint64_t subborrow_u64(uint64_t x, uint64_t y, uint64_t *r)
+static void
+scalar_rwnaf_step(
+  uint64_t *out,
+  uint8_t *scalar,
+  uint64_t *window,
+  uint64_t mask,
+  uint64_t *r,
+  uint32_t i
+)
 {
-  uint128_t x1 = (uint128_t)x - (uint128_t)y;
-  uint128_t x2 = x1 & (uint128_t)(uint64_t)0xffffffffffffffffU;
-  uint128_t x3 = x1 >> (uint32_t)64U;
-  r[0U] = (uint64_t)x2;
-  return (uint64_t)0U - (uint64_t)x3;
+  uint64_t wVar = window[0U];
+  uint64_t w = wVar & mask;
+  scalar_rwnaf_step_compute_di(wVar, out, mask, r, i);
+  uint64_t d = w - (uint64_t)32U;
+  uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;
+  uint64_t
+  w0 =
+    wStart
+    +
+      ((uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U) / (uint32_t)8U]
+      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)1U);
+  uint64_t
+  w01 =
+    w0
+    +
+      ((uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U) / (uint32_t)8U]
+      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)2U);
+  uint64_t
+  w02 =
+    w01
+    +
+      ((uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U) / (uint32_t)8U]
+      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)3U);
+  uint64_t
+  w03 =
+    w02
+    +
+      ((uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U) / (uint32_t)8U]
+      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)4U);
+  uint64_t
+  w04 =
+    w03
+    +
+      ((uint64_t)(scalar[(uint32_t)4U
+      * (uint32_t)8U
+      - (uint32_t)1U
+      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U) / (uint32_t)8U]
+      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U) % (uint32_t)8U
+      & (uint8_t)1U)
+      << (uint32_t)5U);
+  window[0U] = w04;
 }
 
 static void scalar_rwnaf(uint64_t *out, uint8_t *scalar)
@@ -4948,58 +5018,12 @@ static void scalar_rwnaf(uint64_t *out, uint8_t *scalar)
   uint64_t r1 = (uint64_t)0U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)50U; i++)
   {
-    uint64_t wVar = window;
-    uint64_t w = wVar & mask;
-    uint64_t c = subborrow_u64(w, (uint64_t)32U, &r);
-    uint64_t r0 = r;
-    uint64_t r2 = (uint64_t)0U - r;
-    uint64_t cAsFlag = (uint64_t)0U - c;
-    uint64_t r3 = (r2 & cAsFlag) | (r0 & ~cAsFlag);
-    out[(uint32_t)2U * i] = r3;
-    out[(uint32_t)2U * i + (uint32_t)1U] = cAsFlag;
-    uint64_t d = w - (uint64_t)32U;
-    uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;
-    uint64_t
-    w0 =
-      wStart
-      +
-        (scalar_bit(scalar,
-          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U)
-        << (uint32_t)1U);
-    uint64_t
-    w01 =
-      w0
-      +
-        (scalar_bit(scalar,
-          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U)
-        << (uint32_t)2U);
-    uint64_t
-    w02 =
-      w01
-      +
-        (scalar_bit(scalar,
-          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U)
-        << (uint32_t)3U);
-    uint64_t
-    w03 =
-      w02
-      +
-        (scalar_bit(scalar,
-          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U)
-        << (uint32_t)4U);
-    uint64_t
-    w04 =
-      w03
-      +
-        (scalar_bit(scalar,
-          ((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U)
-        << (uint32_t)5U);
-    window = w04;
+    scalar_rwnaf_step(out, scalar, &window, mask, &r, i);
   }
   uint32_t i = (uint32_t)50U;
   uint64_t wVar = window;
   uint64_t w = wVar & mask;
-  uint64_t c = subborrow_u64(w, (uint64_t)32U, &r);
+  uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, w, (uint64_t)32U, &r);
   uint64_t r0 = r;
   uint64_t r2 = (uint64_t)0U - r;
   uint64_t cAsFlag = (uint64_t)0U - c;
@@ -5011,7 +5035,7 @@ static void scalar_rwnaf(uint64_t *out, uint8_t *scalar)
   out[102U] = wStart;
 }
 
-extern uint64_t *Hacl_Impl_EC_ScalarMultiplication_WNAF_getUInt64(uint64_t index);
+extern uint64_t *Hacl_Impl_EC_ScalarMultiplication_WNAF_getUInt64(uint32_t index);
 
 static inline void copy_conditional(uint64_t *out, uint64_t *x, uint64_t mask)
 {
@@ -7995,7 +8019,7 @@ secretToPublicWithoutNorm_p256_radix(uint64_t *result, void *scalar, uint64_t *t
   uint32_t rightWord1 = word0 & (uint32_t)0x0fU;
   uint32_t mask1 = (uint32_t)0U - bitShiftAsPrivate0;
   uint32_t bits0 = leftWord1 ^ (mask1 & (leftWord1 ^ rightWord1));
-  uint64_t flag = eq0_u64((uint64_t)bits0);
+  uint64_t flag = FStar_UInt64_eq_mask((uint64_t)bits0, (uint64_t)0U);
   pZ[0U] = (uint64_t)1U;
   uint32_t len1 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)1U; i < len1; i++)
@@ -11901,7 +11925,7 @@ uint64_t Hacl_P256_ecp256dh_i_radix(uint8_t *result, uint8_t *scalar)
   uint32_t rightWord1 = word0 & (uint32_t)0x0fU;
   uint32_t mask1 = (uint32_t)0U - bitShiftAsPrivate0;
   uint32_t bits0 = leftWord1 ^ (mask1 & (leftWord1 ^ rightWord1));
-  uint64_t flag = eq0_u64((uint64_t)bits0);
+  uint64_t flag = FStar_UInt64_eq_mask((uint64_t)bits0, (uint64_t)0U);
   pZ[0U] = (uint64_t)1U;
   uint32_t len20 = (uint32_t)4U;
   for (uint32_t i = (uint32_t)1U; i < len20; i++)
@@ -12117,7 +12141,7 @@ uint64_t Hacl_P256_ecp384dh_i_radix(uint8_t *result, uint8_t *scalar)
   uint32_t rightWord1 = word0 & (uint32_t)0x0fU;
   uint32_t mask1 = (uint32_t)0U - bitShiftAsPrivate0;
   uint32_t bits0 = leftWord1 ^ (mask1 & (leftWord1 ^ rightWord1));
-  uint64_t flag = eq0_u64((uint64_t)bits0);
+  uint64_t flag = FStar_UInt64_eq_mask((uint64_t)bits0, (uint64_t)0U);
   pZ[0U] = (uint64_t)1U;
   uint32_t len20 = (uint32_t)6U;
   for (uint32_t i = (uint32_t)1U; i < len20; i++)

@@ -31,6 +31,7 @@
 
 #include "Hacl_Spec.h"
 #include "lib_intrinsics.h"
+#include "wnaf.h"
 uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
 
 uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);

@@ -32,6 +32,7 @@
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_SHA2.h"
 #include "lib_intrinsics.h"
+#include "wnaf.h"
 /*
  Input: result buffer: uint8[64], 
  m buffer: uint8 [mLen], 

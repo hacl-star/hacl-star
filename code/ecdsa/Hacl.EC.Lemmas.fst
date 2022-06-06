@@ -46,23 +46,28 @@ let lemma_cswap2_step bit p1 p2 =
   logxor_lemma p2 p1
   
 
-val logand_lemma: a: uint64 -> b: uint64{uint_v b == 0 \/ uint_v b == pow2 64 - 1} ->
+val logand_lemma: #t:inttype{unsigned t} -> #l:secrecy_level -> a: uint_t t l 
+  -> b: uint_t t l {uint_v b == 0 \/ uint_v b == ones_v t} ->
   Lemma (if uint_v b = 0 then uint_v (logand a b) == 0 else uint_v (logand a b) == uint_v a)
 
-let logand_lemma a b = 
+let logand_lemma #t a b = 
   logand_lemma b a;
   logand_spec a b;
   logand_spec b a;
-  UInt.logand_commutative #(bits U64) (v a) (v b)
+  UInt.logand_commutative #(bits t) (v a) (v b)
 
-val logor_commutative: a: uint64 -> b: uint64 -> Lemma (logor a b == logor b a)
 
-let logor_commutative a b = 
+val logor_commutative:  #t:inttype{unsigned t} -> #l:secrecy_level -> a: uint_t t l 
+  -> b: uint_t t l -> Lemma (logor a b == logor b a)
+
+let logor_commutative #t a b = 
   logor_spec a b;
   logor_spec b a;
-  UInt.logor_commutative #(bits U64) (v a) (v b)
+  UInt.logor_commutative #(bits t) (v a) (v b)
 
-val logor_lemma_one_element_is_zero: a: uint64 -> b: uint64 {uint_v b == 0 \/ uint_v a == 0} -> 
+
+val logor_lemma_one_element_is_zero:  #t:inttype{unsigned t} -> #l:secrecy_level -> a: uint_t t l 
+  -> b: uint_t t l {uint_v b == 0 \/ uint_v a == 0} -> 
   Lemma (if uint_v b = 0 then uint_v (logor a b) == uint_v a else uint_v (logor a b) == uint_v b)
 
 let logor_lemma_one_element_is_zero a b = 
@@ -74,21 +79,6 @@ let logor_lemma_one_element_is_zero a b =
   else 
     logor_lemma a b
 
-
-val cmovznz4_lemma: cin: uint64 -> x: uint64 -> y: uint64 -> Lemma (
-  let mask = neq_mask cin (u64 0) in 
-  let r = logor (logand y mask) (logand x (lognot mask)) in 
-  if uint_v cin = 0 then uint_v r == uint_v x else uint_v r == uint_v y)
-
-let cmovznz4_lemma cin x y = 
-  let x2 = neq_mask cin (u64 0) in 
-      neq_mask_lemma cin (u64 0);
-  let x3 = logor (logand y x2) (logand x (lognot x2)) in
-  let ln = lognot (neq_mask cin (u64 0)) in 
-  logand_lemma y x2; 
-  lognot_lemma x2;
-  logand_lemma x ln;
-  logor_lemma_one_element_is_zero (logand y x2) (logand x (lognot x2))
 
 val lemma_xor_copy_cond: #t:inttype{unsigned t} -> #l:secrecy_level -> a: uint_t t l -> b: uint_t t l 
   -> mask: uint_t t l {uint_v mask = 0 \/ uint_v mask = maxint t} -> Lemma(

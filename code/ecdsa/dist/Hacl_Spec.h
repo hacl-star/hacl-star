@@ -31,6 +31,7 @@
 
 
 #include "lib_intrinsics.h"
+#include "wnaf.h"
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2

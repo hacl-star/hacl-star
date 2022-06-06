@@ -32,6 +32,7 @@
 #include "Hacl_Krmllib.h"
 #include "Hacl_Hash_Core_SHA2.h"
 #include "lib_intrinsics.h"
+#include "wnaf.h"
 void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
 void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);

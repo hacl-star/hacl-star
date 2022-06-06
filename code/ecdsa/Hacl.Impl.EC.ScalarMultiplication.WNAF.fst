@@ -13,70 +13,97 @@ open Lib.Buffer
 
 open Spec.ECC.Curves
 open Spec.ECC
-
+open Spec.ECC.WNAF
 
 open Hacl.Impl.EC.LowLevel
 open Hacl.Spec.EC.Definition
-
 
 open Hacl.Spec.MontgomeryMultiplication
 
 open FStar.Mul
 
+open Hacl.Impl.EC.Masking
+open Hacl.Impl.EC.Masking.ScalarAccess
+open Lib.IntTypes.Intrinsics
 
-
-(*  https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-alam.pdf*)
-
-val scalar_bit:
-    s:lbuffer_t MUT uint8 (size 32)
-  -> n:size_t{v n < 256}
-  -> Stack uint64
-    (requires fun h0 -> live h0 s)
-    (ensures  fun h0 r h1 -> h0 == h1 /\ v r <= 1)
-
-let scalar_bit s n =
-  let h0 = ST.get () in
-  mod_mask_lemma ((Lib.Sequence.index (as_seq h0 s) (31 - v n / 8)) >>. (n %. 8ul)) 1ul;
-  assert_norm (1 = pow2 1 - 1);
-  assert (v (mod_mask #U8 #SEC 1ul) == v (u8 1)); 
-  to_u64 ((s.(31ul -. n /. 8ul) >>. (n %. 8ul)) &. u8 1)
-
-
-inline_for_extraction noextract
-let dradix_wnaf = (u64 64)
-inline_for_extraction noextract
-let dradix = (u64 32)
-inline_for_extraction noextract
-let radix = (u64 5)
-
-open FStar.Mul
 
 #set-options "--z3rlimit 200" 
-
-val subborrow_u64: x:uint64 -> y:uint64 -> r:lbuffer uint64 (size 1) ->
-  Stack uint64
-    (requires fun h -> live h r)
-    (ensures  fun h0 c h1 ->
-      modifies1 r h0 h1 /\
-      (let r = Seq.index (as_seq h1 r) 0 in
-       v r - v c * pow2 64 == v x - v y))
-
-let subborrow_u64 x y r = 
-  let x1 = to_u128 x -. to_u128 y in 
-  let x2 = logand x1 (u128 0xffffffffffffffff) in 
-  let x3 = shift_right x1 (size 64) in 
-
-  upd r (size 0) (to_u64 x2);
-  (u64 0) -. (to_u64 x3)
+(*  https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-alam.pdf*)
 
 
 inline_for_extraction noextract
-val cmovznz2: #t:inttype{unsigned t} -> #l:secrecy_level ->
-  a: uint_t t l  -> b: uint_t t l -> mask: uint_t t l -> Tot (r: uint_t t l)
+let radix: (r: uint64 {v r == w}) = (u64 5)
 
-let cmovznz2 a b mask = 
-  logor (logand a mask) (logand b (lognot mask))
+inline_for_extraction noextract
+let dradix : (r: uint64 {v r == m}) = (u64 32)
 
+inline_for_extraction noextract
+let dradix_wnaf : (r: uint64 {v r == 2 * m}) = (u64 64)
+
+
+val scalar_rwnaf_step_compute_di: w: uint64 -> out: lbuffer uint64 (size ((getPower P256 / Spec.ECC.WNAF.w + 1) * 2))
+  -> mask: uint64 {v mask = pow2 (v radix + 1) - 1} 
+  -> r: lbuffer uint64 (size 1) -> i: size_t {v i < getPower P256 / Spec.ECC.WNAF.w + 1} -> 
+  Stack unit
+  (requires fun h -> live h out /\ live h r)
+  (ensures fun h0 _ h1 -> 
+    let sign = Lib.Sequence.index (as_seq h1 out) (2 * v i + 1) in 
+    let abs =  Lib.Sequence.index (as_seq h1 out) (2 * v i) in 
+    if v sign = 0 then v abs = v w - v dradix else v abs = - (v w - v dradix))
+
+let scalar_rwnaf_step_compute_di wVar out mask r i = 
+  let w = logand wVar mask in 
+    logand_mask wVar mask (v radix + 1);
+    FStar.Math.Lemmas.pow2_double_mult (v radix);
+    assert(v w == v wVar % (2 * pow2 (v radix)));
+   
+  let c = Lib.IntTypes.Intrinsics.sub_borrow_u64 (u64 0) w dradix r in 
+  let r0 = index r (size 0) in 
+    let h1 = ST.get() in 
+    
+  assert (v r0 - v c * pow2 64 == v w - v dradix);
+  
+  let r2 = u64 0 -. r0 in 
+    assert(v r2 == (- v r0) % pow2 64);
+    
+  let cAsFlag = eq1_u64 c in 
+  let r3 = cmovznz2 r2 r0 cAsFlag in 
+
+  upd out (size 2 *! i) r3;
+
+  
+  assert(v r3 == abs (v w - v dradix));
+  assert(if v w < v dradix then v cAsFlag == pow2 64 - 1 else v cAsFlag == 0);
+  assert(if v cAsFlag = 0 then v w - v dradix == v r3 else v w - v dradix == - v r3);
+
+
+  upd out (size 2 *! i +! size 1) cAsFlag;
+  admit()
+
+
+
+val scalar_rwnaf_step: out: lbuffer uint64 (size 104) -> scalar: lbuffer uint8 (size 32) 
+  -> window: lbuffer uint64 (size 1) -> mask: uint64 -> r: lbuffer uint64 (size 1) -> i: size_t ->  Stack unit 
+  (requires fun h -> True) (ensures fun h0 _ h1 -> True)
+
+let scalar_rwnaf_step out scalar window mask r i = 
+  let h0 = ST.get() in 
+  let wVar = to_u64 (index window (size 0)) in 
+    assert(v wVar == Lib.Sequence.index (as_seq h0 window) 0);
+  let w = logand wVar mask in 
+
+  scalar_rwnaf_step_compute_di wVar out mask r i; 
+  
+  let d = w -! dradix in 
+  let wStart = shift_right (wVar -! d) radix in 
+
+  let w0 = wStart +! (shift_left (getScalarBit_leftEndian #P256 scalar ((size 1 +! i) *! radix +! (size 1))) (size 1)) in 
+  let w0 = w0 +! (shift_left (getScalarBit_leftEndian #P256  scalar ((size 1 +! i) *! radix +! (size 2))) (size 2)) in 
+  let w0 = w0 +! (shift_left (getScalarBit_leftEndian #P256  scalar ((size 1 +! i) *! radix +! (size 3))) (size 3)) in 
+  let w0 = w0 +! (shift_left (getScalarBit_leftEndian #P256 scalar ((size 1 +! i) *! radix +! (size 4))) (size 4)) in 
+  let w0 = w0 +! (shift_left (getScalarBit_leftEndian #P256 scalar ((size 1 +! i) *! radix +! (size 5))) (size 5)) in
+
+  upd window (size 0) w0
 
 
 val scalar_rwnaf : out: lbuffer uint64 (size 104) -> scalar: lbuffer uint8 (size 32) -> 
@@ -104,41 +131,14 @@ let scalar_rwnaf out scalar =
   admit();
 
   Lib.Loops.for 0ul 50ul inv
-    (fun i ->
-  
-      let h0 = ST.get() in 
-      let wVar = to_u64 (index window (size 0)) in 
-      let w = logand wVar mask in 
-      let c = subborrow_u64 w dradix r in 
-
-      let r0 = index r (size 0) in 
-      let r2 = (u64 0) -. index r (size 0) in 
-
-
-      let cAsFlag = (u64 0) -. c in 
-      let r3 = cmovznz2 r2 r0 cAsFlag in 
-
-      upd out (size 2 *! i) r3;
-      upd out (size 2 *! i +! size 1) cAsFlag;
-
-
-      let d = w -! dradix in 
-      let wStart = shift_right (wVar -! d) radix in 
-
-      let w0 = wStart +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 1))) (size 1)) in 
-      let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 2))) (size 2)) in 
-      let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 3))) (size 3)) in 
-      let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 4))) (size 4)) in 
-      let w0 = w0 +! (shift_left (scalar_bit scalar ((size 1 +! i) *! radix +! (size 5))) (size 5)) in
-
-      upd window (size 0) w0
+    (fun i -> scalar_rwnaf_step out scalar window mask r i
   );
 
   let i = size 50 in 
   
   let wVar = index window (size 0) in 
   let w = logand wVar mask in 
-  let c = subborrow_u64 w dradix r in 
+  let c = Lib.IntTypes.Intrinsics.sub_borrow_u64 (u64 0) w dradix r in 
 
   let r0 = index r (size 0) in 
   let r2 = (u64 0) -. index r (size 0) in 
@@ -148,6 +148,10 @@ let scalar_rwnaf out scalar =
 
   upd out (size 2 *! i) r3;
   upd out (size 2 *! i +! size 1) cAsFlag;
+
+
+
+
 
   let d = w -! dradix in 
 
@@ -225,8 +229,6 @@ let loopK result d point j =
     copy_conditional #P256 (sub point (size 0) (size 4)) lut_cmb_x mask;
     copy_conditional #P256 (sub point (size 4) (size 4)) lut_cmb_y mask)
 
-
-open Lib.IntTypes.Intrinsics
 
 inline_for_extraction noextract
 val sub4_0: y:felem P256 -> result: felem P256 -> 
@@ -441,16 +443,6 @@ let conditional_substraction result p scalar tempBuffer =
   copy_point_conditional_mask_u64_2 result tempPoint mask;
   pop_frame()
 
-
-(* r = ZZ.random_element(qq)
-basePoint = r * EC(gx, gy)
-minusBasePoint = (basePoint[0], (Integer(p256 - basePoint[1]) % p256))
-baseX, baseY = basePoint.xy()
-fakeBP = toFakeAffine((toD(baseX), toD(baseY)))
-fakeBP = (fakeBP[0], (p256 - fakeBP[1]) % p256)
-x, y, z = norm((fromD(fakeBP[0]), fromD(fakeBP[1]), fromD (1)))
-print((minusBasePoint[1] == y))
-*)
 
 val scalar_multiplication_cmb:  #buf_type: buftype -> result: point P256 -> 
   scalar: lbuffer_t buf_type uint8 (size 32) -> 

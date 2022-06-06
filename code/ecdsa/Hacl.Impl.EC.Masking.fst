@@ -123,6 +123,19 @@ let copy_conditional #c #b out x mask =
 
 
 inline_for_extraction noextract
+val cmovznz2: #t:inttype{unsigned t} -> #l:secrecy_level -> a: uint_t t l -> b: uint_t t l 
+  -> mask: uint_t t l {v mask == ones_v t \/ v mask == 0} 
+  -> Tot (r: uint_t t l {if v mask = ones_v t then v r == v a else v r == v b})
+
+let cmovznz2 #t a b mask =
+  logand_lemma a mask; 
+  lognot_lemma mask;
+  logand_lemma b (lognot mask);
+  logor_lemma_one_element_is_zero (logand a mask) (logand b (lognot mask));
+  logor (logand a mask) (logand b (lognot mask))
+
+
+inline_for_extraction noextract
 val cmovznz4_: #c: curve -> cin: uint64 -> x: felem c -> y: felem c -> result: felem c ->
   Stack unit
   (requires fun h -> live h x /\ live h y /\ live h result /\ disjoint x result /\ eq_or_disjoint y result)
@@ -154,9 +167,7 @@ let cmovznz4_ #c cin x y r =
     let h_ = ST.get() in 
     let x_i = index x i in 
     let y_i = index y i in 
-    let r_i = logor (logand y_i mask) (logand x_i (lognot mask)) in 
-    upd r i r_i;
-    cmovznz4_lemma cin (Seq.index (as_seq h0 x) (v i)) (Seq.index (as_seq h0 y) (v i)));
+    upd r i (cmovznz2 y_i x_i mask));
 
   let h1 = ST.get() in 
   if v cin = 0 then begin
@@ -193,15 +204,16 @@ let eq_u64_CT a b =
   eq_mask_lemma a b;
   eq_mask a b
 
-
+inline_for_extraction noextract
 val eq0_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == pow2 64 - 1 else uint_v r == 0})
-
-val eq1_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == 0 else uint_v r == pow2 64 - 1})
 
 let eq0_u64 a =
   eq_mask_lemma a (u64 0);
   eq_mask a (u64 0)
 
+
+inline_for_extraction noextract
+val eq1_u64: a: uint64 -> Tot (r: uint64 {if uint_v a = 0 then uint_v r == 0 else uint_v r == pow2 64 - 1})
 
 let eq1_u64 a =
   neq_mask_lemma a (u64 0);

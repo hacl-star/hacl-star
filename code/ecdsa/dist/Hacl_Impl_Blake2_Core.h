@@ -31,6 +31,7 @@
 
 
 #include "lib_intrinsics.h"
+#include "wnaf.h"
 #define Hacl_Impl_Blake2_Core_M32 0
 #define Hacl_Impl_Blake2_Core_M128 1
 #define Hacl_Impl_Blake2_Core_M256 2

@@ -31,6 +31,7 @@
 
 
 #include "lib_intrinsics.h"
+#include "wnaf.h"
 extern const uint32_t Hacl_Impl_Blake2_Constants_sigmaTable[160U];
 
 extern const uint32_t Hacl_Impl_Blake2_Constants_ivTable_S[8U];

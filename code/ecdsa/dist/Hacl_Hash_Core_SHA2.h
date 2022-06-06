@@ -31,6 +31,7 @@
 
 #include "Hacl_Krmllib.h"
 #include "lib_intrinsics.h"
+#include "wnaf.h"
 void Hacl_Hash_Core_SHA2_init_224(uint32_t *s);
 
 void Hacl_Hash_Core_SHA2_init_256(uint32_t *s);
