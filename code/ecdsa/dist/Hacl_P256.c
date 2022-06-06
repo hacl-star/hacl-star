@@ -26,10 +26,7 @@
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Lib.h"
-
 #include "wnaf.h"
-
-#pragma once
 
 static inline void mul64(uint64_t x, uint64_t y, uint64_t *result, uint64_t *temp)
 {
@@ -5014,7 +5011,7 @@ static void scalar_rwnaf(uint64_t *out, uint8_t *scalar)
   out[102U] = wStart;
 }
 
-extern uint64_t *Hacl_Impl_EC_ScalarMultiplication_WNAF_getUInt64(uint32_t index);
+extern uint64_t *Hacl_Impl_EC_ScalarMultiplication_WNAF_getUInt64(uint64_t index);
 
 static inline void copy_conditional(uint64_t *out, uint64_t *x, uint64_t mask)
 {
@@ -11989,7 +11986,7 @@ uint64_t Hacl_P256_ecp256dh_i_wnaf(uint8_t *result, uint8_t *scalar)
   uint32_t len1 = (uint32_t)4U;
   uint64_t *q = tempBuffer;
   uint64_t *buff = tempBuffer + (uint32_t)3U * len1;
-  scalar_multiplication_cmb(q, (void *)scalar, tempBuffer);
+  scalar_multiplication_cmb(q, (void *)scalar, buff);
   norm_p256(q, resultBuffer, buff);
   uint32_t len10 = (uint32_t)4U;
   uint32_t start = len10 * (uint32_t)2U;

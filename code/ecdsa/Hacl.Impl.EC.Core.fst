@@ -573,7 +573,7 @@ let secretToPublic #c #l result scalar tempBuffer =
       norm_twice_lemma #c (fromDomainPoint #c #DH (point_as_nat c h1 q)) (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) (basePoint #c))
     end
   |WNAF -> 
-    Hacl.Impl.EC.ScalarMultiplication.WNAF.scalar_multiplication_cmb q scalar tempBuffer;
+    Hacl.Impl.EC.ScalarMultiplication.WNAF.scalar_multiplication_cmb q scalar buff;
     norm q result buff
 
 

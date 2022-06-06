@@ -25,8 +25,7 @@ open FStar.Mul
 
 
 
-(*  https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-alam.pdf
- *)
+(*  https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-alam.pdf*)
 
 val scalar_bit:
     s:lbuffer_t MUT uint8 (size 32)
