@@ -299,6 +299,15 @@ uint64_t Hacl_P256_ecp256dh_i_ml(uint8_t *result, uint8_t *scalar);
 */
 uint64_t Hacl_P256_ecp256dh_i_radix(uint8_t *result, uint8_t *scalar);
 
+/*
+ Input: result: uint8[64], 
+ scalar: uint8[32].
+  
+ Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 
+  
+*/
+uint64_t Hacl_P256_ecp256dh_i_wnaf(uint8_t *result, uint8_t *scalar);
+
 uint64_t Hacl_P256_ecp384dh_i_ml(uint8_t *result, uint8_t *scalar);
 
 uint64_t Hacl_P256_ecp384dh_i_radix(uint8_t *result, uint8_t *scalar);

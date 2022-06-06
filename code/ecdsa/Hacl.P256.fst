@@ -83,6 +83,8 @@ let ecp256dh_i_ml result scalar = Hacl.Impl.EC.DH.ecp256dh_i P256 MontLadder res
 
 let ecp256dh_i_radix result scalar = Hacl.Impl.EC.DH.ecp256dh_i P256 Radix result scalar
 
+let ecp256dh_i_wnaf result scalar = Hacl.Impl.EC.DH.ecp256dh_i P256 WNAF result scalar
+
 
 let ecp384dh_i_ml result scalar = Hacl.Impl.EC.DH.ecp256dh_i P384 MontLadder result scalar
 

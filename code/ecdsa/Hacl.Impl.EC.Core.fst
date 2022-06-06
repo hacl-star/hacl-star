@@ -418,6 +418,9 @@ let scalar_multiplication_t_0 #c #t #l p result scalar tempBuffer =
   |Radix -> 
     pointToDomain #c p result;
     Hacl.Impl.EC.ScalarMult.Radix.scalar_mult_radix #c result scalar tempBuffer
+    
+
+
 
 
 val point_mult0_is_infinity: #c: curve -> p: point_nat_prime #c ->
@@ -568,8 +571,12 @@ let secretToPublic #c #l result scalar tempBuffer =
       norm q result buff;
 	let h2 = ST.get() in 
       norm_twice_lemma #c (fromDomainPoint #c #DH (point_as_nat c h1 q)) (point_mult #c (scalar_as_nat #c (as_seq h0 scalar)) (basePoint #c))
-
     end
+  |WNAF -> 
+    Hacl.Impl.EC.ScalarMultiplication.WNAF.scalar_multiplication_cmb q scalar tempBuffer;
+    norm q result buff
+
+
 
 
 inline_for_extraction noextract

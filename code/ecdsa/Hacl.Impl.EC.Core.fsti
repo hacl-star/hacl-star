@@ -21,6 +21,7 @@ open FStar.Mul
 type ladder = 
   |MontLadder
   |Radix
+  |WNAF
 
 
 let invert_state_s (a: ladder): Lemma
