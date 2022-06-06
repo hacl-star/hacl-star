@@ -180,7 +180,7 @@ val encap:
   Tot (option (key_kem_s cs & key_dh_public_s cs))
 
 #restart-solver
-#set-options "--z3rlimit 400 --fuel 0 --ifuel 2"
+#set-options "--z3rlimit 600 --fuel 0 --ifuel 2"
 let encap cs skE pkR =
   match DH.secret_to_public (kem_dh_of_cs cs) skE with
   | None -> None
