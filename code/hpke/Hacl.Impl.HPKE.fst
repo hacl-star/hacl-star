@@ -70,6 +70,12 @@ let nsize_two_public_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_public c
   | SDH.DH_P256, _, _, _ -> 130ul
 
 inline_for_extraction noextract
+let nsize_three_public_dh (cs:S.ciphersuite) : (s:size_t{v s == S.size_dh_public cs + S.size_dh_public cs + S.size_dh_public cs}) =
+  match cs with
+  | SDH.DH_Curve25519, _, _, _ -> 96ul
+  | SDH.DH_P256, _, _, _ -> 195ul
+
+inline_for_extraction noextract
 let nsize_ks_ctx (cs:S.ciphersuite) : (s:size_t{v s == S.size_ks_ctx cs}) =
   match cs with
   | _, _, _, SHa.SHA2_256 -> 65ul
@@ -160,6 +166,21 @@ let serialize_public_key #cs pk b =
   match cs with
   | SDH.DH_Curve25519, _, _, _ -> ()
   | SDH.DH_P256, _, _, _ -> upd pk 0ul (u8 4)
+
+noextract inline_for_extraction
+val serialize_public_key_copy:
+     #cs:S.ciphersuite
+  -> pk: key_dh_public cs
+  -> b: (lbuffer uint8 (nsize_serialized_dh cs))
+  -> Stack unit
+    (requires fun h -> live h pk /\ live h b /\ disjoint pk b)
+    (ensures fun h0 _ h1 -> modifies (loc pk) h0 h1 /\
+      as_seq h1 pk `Seq.equal` S.serialize_public_key cs (as_seq h0 b))
+
+let serialize_public_key_copy #cs pk b =
+  match cs with
+  | SDH.DH_Curve25519, _, _, _ -> copy pk b
+  | SDH.DH_P256, _, _, _ -> copy (sub pk 1ul 64ul) b; upd pk 0ul (u8 4)
 
 noextract inline_for_extraction
 val prepare_dh:
@@ -642,6 +663,51 @@ let extract_and_expand #cs o_shared dh ctxlen kemcontext =
 
   pop_frame ()
 
+noextract inline_for_extraction
+val extract_and_expand_64:
+     #cs: S.ciphersuite
+  -> o_shared: key_kem cs
+  -> dh: lbuffer uint8 64ul
+  -> ctxlen : size_t
+  -> kemcontext: lbuffer uint8 ctxlen
+  -> Stack unit
+     (requires fun h ->
+       live h o_shared /\ live h dh /\ live h kemcontext /\
+       disjoint o_shared dh /\ disjoint o_shared kemcontext /\
+       SHa.hash_length (S.kem_hash_of_cs cs) + v ctxlen + 28 + SHa.block_length (S.kem_hash_of_cs cs) <= max_size_t
+     )
+     (ensures fun h0 _ h1 -> modifies (loc o_shared) h0 h1 /\
+       as_seq h1 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h0 dh) (as_seq h0 kemcontext))
+
+[@ Meta.Attribute.inline_]
+let extract_and_expand_64 #cs o_shared dh ctxlen kemcontext =
+  push_frame ();
+
+  let o_eae_prk = create (nsize_kem_hash_length cs) (u8 0) in
+
+  let suite_id_kem = create 5ul (u8 0) in
+  init_suite_kem #cs suite_id_kem;
+
+  let empty = sub suite_id_kem 0ul 0ul in
+  let h0 = ST.get() in
+  assert (as_seq h0 empty `Seq.equal` Lib.ByteSequence.lbytes_empty);
+
+  [@inline_let]
+  let l_label_eae_prk:list uint8 = [u8 0x65; u8 0x61; u8 0x65; u8 0x5f; u8 0x70; u8 0x72; u8 0x6b] in
+  assert_norm (l_label_eae_prk == S.label_eae_prk_list);
+  let label_eae_prk = createL l_label_eae_prk in
+
+  labeled_extract_kem #cs o_eae_prk 5ul suite_id_kem 0ul empty 7ul label_eae_prk 64ul dh;
+
+  [@inline_let]
+  let l_label_shared_secret:list uint8 = [u8 0x73; u8 0x68; u8 0x61; u8 0x72; u8 0x65; u8 0x64; u8 0x5f; u8 0x73; u8 0x65; u8 0x63; u8 0x72; u8 0x65; u8 0x74] in
+  assert_norm (l_label_shared_secret == S.label_shared_secret_list);
+  let label_shared_secret = createL l_label_shared_secret in
+
+  labeled_expand_kem #cs 5ul suite_id_kem (nsize_kem_hash_length cs) o_eae_prk 13ul label_shared_secret ctxlen kemcontext (nsize_kem_key cs) o_shared;
+
+  pop_frame ()
+
 noextract
 val encap:
      #cs:S.ciphersuite
@@ -710,6 +776,107 @@ let encap #cs o_shared o_enc skE pkR =
 
   ) else (
     assert (None? (S.encap cs (as_seq h0 skE) (as_seq h0 pkR)));
+    1ul
+  )
+
+#pop-options
+
+noextract
+val auth_encap:
+     #cs:S.ciphersuite
+  -> o_shared: key_kem cs
+  -> o_enc: key_dh_public cs
+  -> skE: key_dh_secret cs
+  -> pkR: serialized_point_dh cs
+  -> skS: key_dh_secret cs
+  -> Stack UInt32.t
+    (requires fun h0 ->
+      live h0 o_shared /\ live h0 o_enc /\
+      live h0 skE /\ live h0 pkR /\ live h0 skS /\
+      disjoint o_shared skE /\ disjoint o_shared pkR /\ disjoint o_shared skS /\
+      disjoint o_shared o_enc /\ disjoint o_enc skE /\ disjoint o_enc pkR /\
+      disjoint o_enc skS)
+    (ensures fun h0 result h1 -> modifies (loc o_shared |+| loc o_enc) h0 h1 /\
+      (let output = S.auth_encap cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 skS) in
+       match result with
+       | 0ul -> Some? output /\ (let shared, enc = Some?.v output in
+         as_seq h1 o_shared `Seq.equal` shared /\ as_seq h1 o_enc `Seq.equal` enc)
+       | 1ul -> None? output
+       | _ -> False)
+     )
+
+#restart-solver
+#push-options "--z3rlimit 700"
+
+[@ Meta.Attribute.inline_]
+let auth_encap #cs o_shared o_enc skE pkR skS =
+  let h0 = ST.get () in
+  let o_pkE = deserialize_public_key #cs o_enc in
+  let res1 = DH.secret_to_public #cs o_pkE skE in
+  if res1 = 0ul then (
+    push_frame ();
+    let o_dh = create 64ul (u8 0) in
+    let o_es = sub o_dh 0ul (nsize_serialized_dh cs) in
+    let o_ss = create (nsize_serialized_dh cs) (u8 0) in
+    let res2 = DH.dh #cs o_es skE pkR in
+    if res2 = 0ul then (
+      let res3 = DH.dh #cs o_ss skS pkR in
+      if res3 = 0ul then (
+        let o_esm = prepare_dh #cs o_es in
+        let o_ssm = prepare_dh #cs o_ss in
+        let h1 = ST.get () in
+        copy (sub o_dh 32ul 32ul) o_ssm;
+        let h2 = ST.get () in
+        assert (as_seq h2 o_dh `Seq.equal` Lib.Sequence.concat #uint8 #32 #32 (as_seq h1 o_esm) (as_seq h1 o_ssm));
+        serialize_public_key o_enc o_pkE;
+        let h3 = ST.get () in
+        let o_pkS = create (nsize_serialized_dh cs) (u8 0) in
+        let res4 = DH.secret_to_public #cs o_pkS skS in
+        if res4 = 0ul then (
+          let h4 = ST.get () in
+          let o_kemcontext = create (nsize_three_public_dh cs) (u8 0) in
+          copy (sub o_kemcontext 0ul (nsize_public_dh cs)) o_enc;
+          serialize_public_key_copy #cs
+            (sub o_kemcontext (nsize_public_dh cs) (nsize_public_dh cs))
+            pkR;
+          serialize_public_key_copy #cs
+            (sub o_kemcontext (nsize_two_public_dh cs) (nsize_public_dh cs))
+            o_pkS;
+
+          let h5 = ST.get () in
+          assert (as_seq h5 o_kemcontext `Seq.equal`
+            (as_seq h3 o_enc `Seq.append`
+              S.serialize_public_key cs (as_seq h0 pkR) `Seq.append`
+              S.serialize_public_key cs (as_seq h4 o_pkS)));
+
+          extract_and_expand_64 o_shared o_dh (nsize_three_public_dh cs) o_kemcontext;
+
+          let h6 = ST.get () in
+          assert (as_seq h6 o_enc `Seq.equal` as_seq h3 o_enc);
+          assert (as_seq h6 o_shared `Seq.equal` S.extract_and_expand cs (as_seq h5 o_dh) (as_seq h5 o_kemcontext));
+
+          pop_frame ();
+          0ul
+
+        ) else (
+          assert (None? (S.auth_encap cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 skS)));
+          pop_frame ();
+          1ul
+        )
+      ) else (
+        assert (None? (S.auth_encap cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 skS)));
+        pop_frame ();
+        1ul
+      )
+    ) else (
+      assert (None? (S.auth_encap cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 skS)));
+      pop_frame ();
+      1ul
+    )
+
+
+  ) else (
+    assert (None? (S.auth_encap cs (as_seq h0 skE) (as_seq h0 pkR) (as_seq h0 skS)));
     1ul
   )
 
@@ -1004,7 +1171,7 @@ let setupBaseR #cs o_ctx enc skR infolen info =
     let shared = create (nsize_kem_key cs) (u8 0) in
     let res2 = decap #cs shared enc skR in
     if res2 = 0ul then (
-      key_schedule_base S.Base #cs o_ctx shared infolen info;
+      key_schedule_base #cs S.Base o_ctx shared infolen info;
       pop_frame ();
       0ul
     ) else (
