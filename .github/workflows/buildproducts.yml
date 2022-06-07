@@ -1,0 +1,26 @@
+name: update hints and dist
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: download new files
+        run: |
+          git rm -r hints dist/*/*
+          export url=https://everest-ci.paris.inria.fr/job/everest/branch-master/hacl-build-products.x86_64-linux/latest/download
+          diff <(curl -L ${url}/3) <(git rev-parse HEAD)
+          curl -L ${url}/1 | tar -xv
+          curl -L ${url}/2 | tar -xv
+      - name: commit changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: Project Everest
+          author_email: project@everest
+          message: "[CI] update hints and dist"
