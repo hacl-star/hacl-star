@@ -149,7 +149,7 @@ test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/
 test-hpke: specs/tests/hpke/test_hpke.exe
 	$<
 
-specs/tests/hpke/test_hpke.exe: $(HACL_HOME)/obj/libhaclml.cmxa specs/tests/hpke/Test_Spec_Agile_HPKE.ml
+specs/tests/hpke/test_hpke.exe: obj/libhaclml.cmxa specs/tests/hpke/Test_Spec_Agile_HPKE.ml
 	$(OCAMLOPT) $^ -o $@
 
 mozilla-ci: mozilla-ci-staged
