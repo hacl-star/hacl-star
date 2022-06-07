@@ -780,6 +780,7 @@ let decap #cs o_shared enc skR =
 noextract inline_for_extraction
 val build_context_default:
      #cs:S.ciphersuite
+  -> m:S.mode
   -> o_context: lbuffer uint8 (nsize_ks_ctx cs)
   -> psk_id_hash:lbuffer uint8 (nsize_hash_length cs)
   -> info_hash:lbuffer uint8 (nsize_hash_length cs)
@@ -788,16 +789,17 @@ val build_context_default:
       live h0 o_context /\ live h0 psk_id_hash /\ live h0 info_hash /\
       disjoint o_context psk_id_hash /\ disjoint o_context info_hash)
     (ensures fun h0 _ h1 -> modifies (loc o_context) h0 h1 /\
-      as_seq h1 o_context `Seq.equal` S.build_context cs S.Base (as_seq h0 psk_id_hash) (as_seq h0 info_hash))
+      as_seq h1 o_context `Seq.equal` S.build_context cs m (as_seq h0 psk_id_hash) (as_seq h0 info_hash))
 
-let build_context_default #cs o_context psk_id_hash info_hash =
-  init_id_mode S.Base (sub o_context 0ul 1ul);
+let build_context_default #cs m o_context psk_id_hash info_hash =
+  init_id_mode m (sub o_context 0ul 1ul);
   copy (sub o_context 1ul (nsize_hash_length cs)) psk_id_hash;
   copy (sub o_context (nsize_hash_length_plus_one cs) (nsize_hash_length cs)) info_hash
 
 noextract inline_for_extraction
 val key_schedule_core_base:
      #cs:S.ciphersuite
+  -> m: S.mode
   -> o_ctx: context_s cs
   -> o_context : lbuffer uint8 (nsize_ks_ctx cs)
   -> o_secret : lbuffer uint8 (nsize_hash_length cs)
@@ -813,7 +815,7 @@ val key_schedule_core_base:
          MB.all_disjoint [ctx_loc o_ctx; loc o_context; loc o_secret; loc shared; loc info; loc suite_id]
        )
        (ensures fun h0 _ h1 -> modifies (loc o_ctx.ctx_exporter |+| loc o_context |+| loc o_secret) h0 h1 /\
-         (let context, exp_secret, secret = S.key_schedule_core cs S.Base (as_seq h0 shared) (as_seq h0 info) None in
+         (let context, exp_secret, secret = S.key_schedule_core cs m (as_seq h0 shared) (as_seq h0 info) None in
           as_seq h1 o_context `Seq.equal` context /\
           as_seq h1 (o_ctx.ctx_exporter) `Seq.equal` exp_secret /\
           as_seq h1 o_secret `Seq.equal` secret)
@@ -822,7 +824,7 @@ val key_schedule_core_base:
 #push-options "--z3rlimit 300 --z3refresh"
 
 [@ Meta.Attribute.inline_]
-let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen info =
+let key_schedule_core_base #cs m o_ctx o_context o_secret suite_id shared infolen info =
   let h0' = ST.get () in
   lemma_includes_ctx_loc o_ctx;
   push_frame();
@@ -860,7 +862,7 @@ let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen 
   assert (modifies (loc o_info_hash) h1 h2);
   assert (modifies (loc suite_id |+| loc o_psk_id_hash |+| loc o_info_hash) hi h2);
 
-  build_context_default #cs o_context o_psk_id_hash o_info_hash;
+  build_context_default #cs m o_context o_psk_id_hash o_info_hash;
 
   let h3 = ST.get () in
   assert (modifies (loc o_context) h2 h3);
@@ -895,6 +897,7 @@ let key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen 
 noextract inline_for_extraction
 val key_schedule_end_base:
      #cs:S.ciphersuite
+  -> m: S.mode
   -> o_ctx: context_s cs
   -> suite_id:lbuffer uint8 10ul
   -> context: lbuffer uint8 (nsize_ks_ctx cs)
@@ -908,11 +911,11 @@ val key_schedule_end_base:
       as_seq h suite_id == S.suite_id_hpke cs
     )
     (ensures fun h0 _ h1 -> modifies (ctx_loc o_ctx) h0 h1 /\
-      as_ctx h1 o_ctx == S.key_schedule_end cs S.Base (as_seq h0 context) (as_seq h0 o_ctx.ctx_exporter) (as_seq h0 secret)
+      as_ctx h1 o_ctx == S.key_schedule_end cs m (as_seq h0 context) (as_seq h0 o_ctx.ctx_exporter) (as_seq h0 secret)
     )
 
 [@ Meta.Attribute.inline_]
-let key_schedule_end_base #cs o_ctx suite_id context secret =
+let key_schedule_end_base #cs m o_ctx suite_id context secret =
   match cs with
   | _, _, S.ExportOnly, _ ->
     upd o_ctx.ctx_seq 0ul 0uL;
@@ -939,10 +942,10 @@ let key_schedule_end_base #cs o_ctx suite_id context secret =
     upd o_ctx.ctx_seq 0ul 0uL;
     pop_frame ()
 
-
 noextract
 val key_schedule_base:
      #cs:S.ciphersuite
+  -> m: S.mode{m == S.Base \/ m == S.Auth}
   -> o_ctx: context_s cs
   -> shared: key_kem cs
   -> infolen: size_t{v infolen <= max_length_info (S.hash_of_cs cs)}
@@ -955,13 +958,13 @@ val key_schedule_base:
          disjoint shared info
        )
        (ensures fun h0 _ h1 -> modifies (ctx_loc o_ctx) h0 h1 /\
-         (let ctx = S.key_schedule cs S.Base (as_seq h0 shared) (as_seq h0 info) None in
+         (let ctx = S.key_schedule cs m (as_seq h0 shared) (as_seq h0 info) None in
          as_ctx h1 o_ctx == ctx))
 
 #push-options "--z3rlimit 100 --z3refresh"
 
 [@ Meta.Attribute.inline_ ]
-let key_schedule_base #cs o_ctx shared infolen info =
+let key_schedule_base #cs m o_ctx shared infolen info =
   push_frame();
   let o_context = create (nsize_ks_ctx cs) (u8 0) in
   let o_secret = create (nsize_hash_length cs) (u8 0) in
@@ -969,8 +972,8 @@ let key_schedule_base #cs o_ctx shared infolen info =
   let suite_id = create 10ul (u8 0) in
   init_suite_id #cs suite_id;
 
-  key_schedule_core_base #cs o_ctx o_context o_secret suite_id shared infolen info;
-  key_schedule_end_base #cs o_ctx suite_id o_context o_secret;
+  key_schedule_core_base #cs m o_ctx o_context o_secret suite_id shared infolen info;
+  key_schedule_end_base #cs m o_ctx suite_id o_context o_secret;
   pop_frame()
 
 #pop-options
@@ -983,7 +986,7 @@ let setupBaseS #cs o_pkE o_ctx skE pkR infolen info =
   let o_shared = create (nsize_kem_key cs) (u8 0) in
   let res = encap o_shared o_pkE skE pkR in
   if res = 0ul then (
-    key_schedule_base o_ctx o_shared infolen info;
+    key_schedule_base S.Base o_ctx o_shared infolen info;
     pop_frame();
     res
   ) else (pop_frame (); res)
@@ -1001,7 +1004,7 @@ let setupBaseR #cs o_ctx enc skR infolen info =
     let shared = create (nsize_kem_key cs) (u8 0) in
     let res2 = decap #cs shared enc skR in
     if res2 = 0ul then (
-      key_schedule_base #cs o_ctx shared infolen info;
+      key_schedule_base S.Base #cs o_ctx shared infolen info;
       pop_frame ();
       0ul
     ) else (
