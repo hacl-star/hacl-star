@@ -13,7 +13,7 @@ jobs:
       - name: download new files
         run: |
           git rm -r hints dist/*/*
-          export url=https://everest-ci.paris.inria.fr/job/everest/branch-master/hacl-build-products.x86_64-linux/latest/download
+          url=https://everest-ci.paris.inria.fr/job/everest/branch-master/hacl-build-products.x86_64-linux/latest/download
           diff <(curl -L ${url}/3) <(git rev-parse HEAD)
           curl -L ${url}/1 | tar -xv
           curl -L ${url}/2 | tar -xv
