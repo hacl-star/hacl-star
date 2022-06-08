@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Bignum25519_51.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /********************************************************************************
   Verified C library for EdDSA signing and verification on the edwards25519 curve.
 ********************************************************************************/

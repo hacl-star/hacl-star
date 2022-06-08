@@ -38,12 +38,6 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
-/* SNIPPET_START: Hacl_Poly1305_128_blocklen */
-
-extern uint32_t Hacl_Poly1305_128_blocklen;
-
-/* SNIPPET_END: Hacl_Poly1305_128_blocklen */
-
 /* SNIPPET_START: Hacl_Poly1305_128_poly1305_ctx */
 
 typedef Lib_IntVector_Intrinsics_vec128 *Hacl_Poly1305_128_poly1305_ctx;

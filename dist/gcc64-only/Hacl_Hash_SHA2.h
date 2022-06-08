@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
 void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);

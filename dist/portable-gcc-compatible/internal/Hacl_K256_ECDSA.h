@@ -40,7 +40,6 @@ extern "C" {
 #include "../Hacl_K256_ECDSA.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Impl_K256_Point_aff_point_decompress_vartime */
 
 bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y, uint8_t *s);

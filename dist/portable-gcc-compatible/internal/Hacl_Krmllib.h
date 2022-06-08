@@ -37,7 +37,6 @@ extern "C" {
 
 #include "../Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: LowStar_Vector_new_capacity */
 
 uint32_t LowStar_Vector_new_capacity(uint32_t cap);

@@ -40,7 +40,6 @@ extern "C" {
 #include "EverCrypt_Error.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: EverCrypt_CTR_state_s */
 
 typedef struct EverCrypt_CTR_state_s_s EverCrypt_CTR_state_s;

@@ -37,7 +37,6 @@ extern "C" {
 
 #include "../Hacl_Spec.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Spec_ECDSA_hash_alg_ecdsa_tags */
 
 #define Spec_ECDSA_NoHash 0
@@ -57,6 +56,16 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
 Spec_ECDSA_hash_alg_ecdsa;
 
 /* SNIPPET_END: Spec_ECDSA_hash_alg_ecdsa */
+
+/* SNIPPET_START: Spec_Cipher_Expansion_impl */
+
+#define Spec_Cipher_Expansion_Hacl_CHACHA20 0
+#define Spec_Cipher_Expansion_Vale_AES128 1
+#define Spec_Cipher_Expansion_Vale_AES256 2
+
+/* SNIPPET_END: Spec_Cipher_Expansion_impl */
+
+typedef uint8_t Spec_Cipher_Expansion_impl;
 
 /* SNIPPET_START: Spec_Cipher_Expansion_cipher_alg_of_impl */
 

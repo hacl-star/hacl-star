@@ -37,7 +37,6 @@ extern "C" {
 
 #include "../Hacl_SHA2_Vec256.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef struct K____uint8_t___uint8_t__s
 {
   uint8_t *fst;
