@@ -19,68 +19,38 @@ let pow2_35_less_than_pow2_125 : _:unit{pow2 32 * pow2 3 <= pow2 125 - 1} = asse
 #set-options "--z3rlimit 20 --fuel 0 --ifuel 1"
 
 
-/// Constants
-
-inline_for_extraction
-let size_label_nonce: size_nat = 10
-
-inline_for_extraction
-let size_label_key: size_nat = 8
-
-(** Constants for HPKE labels *)
-let label_nonce_list : l:list uint8{List.Tot.length l == size_label_nonce} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6e; u8 0x6f; u8 0x6e; u8 0x63; u8 0x65] in
-  assert_norm(List.Tot.length l == size_label_nonce);
-  l
-
-let label_key_list : l:list uint8{List.Tot.length l == size_label_key} =
-  [@inline_let]
-  let l = [u8 0x68; u8 0x70; u8 0x6b; u8 0x65; u8 0x20; u8 0x6b; u8 0x65; u8 0x79] in
-  assert_norm(List.Tot.length l == size_label_key);
-  l
-
-
-let label_nonce : lbytes size_label_nonce = createL label_nonce_list
-let label_key : lbytes size_label_key = createL label_key_list
 
 
 /// Types
 
-inline_for_extraction
-let size_cs_identifier: size_nat = 6
-
-inline_for_extraction
-let size_mode_identifier: size_nat = 1
-
 val id_kem: cs:ciphersuite -> Tot (lbytes 2)
-let id_kem cs = let dh, _, _ = cs in
-  match dh with
-  | DH.DH_P256 -> create 1 (u8 0) @| create 1 (u8 1)
-  | DH.DH_Curve25519 -> create 1 (u8 0) @| create 1 (u8 2)
+let id_kem cs = let kem_dh, kem_hash, _, _ = cs in
+  match kem_dh, kem_hash with
+  | DH.DH_P256, Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 16)
+  | DH.DH_Curve25519, Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 32)
 
 val id_kdf: cs:ciphersuite -> Tot (lbytes 2)
-let id_kdf cs = let _, _, h = cs in
+let id_kdf cs = let _, _, _, h = cs in
   match h with
   | Hash.SHA2_256 -> create 1 (u8 0) @| create 1 (u8 1)
-  | Hash.SHA2_512 -> create 1 (u8 0) @| create 1 (u8 2)
+  | Hash.SHA2_384 -> create 1 (u8 0) @| create 1 (u8 2)
+  | Hash.SHA2_512 -> create 1 (u8 0) @| create 1 (u8 3)
 
 val id_aead: cs:ciphersuite -> Tot (lbytes 2)
-let id_aead cs = let _, a, _ = cs in
+let id_aead cs = let _, _, a, _ = cs in
   match a with
-  | AEAD.AES128_GCM -> create 1 (u8 0) @| create 1 (u8 1)
-  | AEAD.AES256_GCM -> create 1 (u8 0) @| create 1 (u8 2)
-  | AEAD.CHACHA20_POLY1305 -> create 1 (u8 0) @| create 1 (u8 3)
+  | Seal AEAD.AES128_GCM -> create 1 (u8 0) @| create 1 (u8 1)
+  | Seal AEAD.AES256_GCM -> create 1 (u8 0) @| create 1 (u8 2)
+  | Seal AEAD.CHACHA20_POLY1305 -> create 1 (u8 0) @| create 1 (u8 3)
+  | ExportOnly -> create 1 (u8 255) @| create 1 (u8 255)
 
+val suite_id_kem: cs:ciphersuite -> Tot (lbytes size_suite_id_kem)
+let suite_id_kem cs =
+  Seq.append label_KEM (id_kem cs)
 
-val id_of_cs: cs:ciphersuite -> Tot (lbytes size_cs_identifier)
-let id_of_cs cs = id_kem cs @| id_kdf cs @| id_aead cs
-
-type mode =
-  | Base
-  | PSK
-  | Auth
-  | PSKAuth
+val suite_id_hpke: cs:ciphersuite -> Tot (lbytes size_suite_id_hpke)
+let suite_id_hpke cs =
+  Seq.append label_HPKE (id_kem cs @| id_kdf cs @| id_aead cs)
 
 val id_of_mode: m:mode -> Tot (lbytes size_mode_identifier)
 let id_of_mode m =
@@ -88,325 +58,568 @@ let id_of_mode m =
   | Base -> create 1 (u8 0)
   | PSK -> create 1 (u8 1)
   | Auth -> create 1 (u8 2)
-  | PSKAuth -> create 1 (u8 3)
+  | AuthPSK -> create 1 (u8 3)
 
-val point_compress:
+val labeled_extract:
+    a:hash_algorithm
+  -> suite_id:bytes
+  -> salt:bytes
+  -> label:bytes
+  -> ikm:bytes ->
+  Pure (lbytes (Spec.Hash.Definitions.hash_length a))
+    (requires
+      Spec.Agile.HMAC.keysized a (Seq.length salt) /\
+      labeled_extract_ikm_length_pred a (Seq.length suite_id + Seq.length label + Seq.length ikm))
+    (ensures fun _ -> True)
+
+
+
+
+let labeled_extract a suite_id salt label ikm =
+  let labeled_ikm1 = Seq.append label_version suite_id in
+  let labeled_ikm2 = Seq.append labeled_ikm1 label in
+  let labeled_ikm3 = Seq.append labeled_ikm2 ikm in
+  HKDF.extract a salt labeled_ikm3
+
+val labeled_expand:
+    a:hash_algorithm
+  -> suite_id:bytes
+  -> prk:bytes
+  -> label:bytes
+  -> info:bytes
+  -> l:size_nat ->
+  Pure (lbytes l)
+    (requires
+      Spec.Hash.Definitions.hash_length a <= Seq.length prk /\
+      Spec.Agile.HMAC.keysized a (Seq.length prk) /\
+      labeled_expand_info_length_pred a (Seq.length suite_id + Seq.length label + Seq.length info) /\
+      HKDF.expand_output_length_pred a l)
+    (ensures fun _ -> True)
+
+
+let labeled_expand a suite_id prk label info l =
+  let labeled_info1 = nat_to_bytes_be 2 l in
+  let labeled_info2 = Seq.append labeled_info1 label_version in
+  let labeled_info3 = Seq.append labeled_info2 suite_id in
+  let labeled_info4 = Seq.append labeled_info3 label in
+  let labeled_info5 = Seq.append labeled_info4 info in
+  HKDF.expand a prk labeled_info5 l
+
+let extract_and_expand_dh_pred (cs:ciphersuite) (dh_length:nat) =
+  labeled_extract_ikm_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_eae_prk + dh_length)
+
+let extract_and_expand_ctx_pred (cs:ciphersuite) (ctx_length:nat) =
+  labeled_expand_info_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_shared_secret + ctx_length)
+
+val extract_and_expand:
     cs:ciphersuite
-  -> pk:key_dh_public_s cs ->
-  Tot (DH.serialized_point (curve_of_cs cs))
+  -> dh:bytes
+  -> kem_context:bytes ->
+  Pure (key_kem_s cs)
+    (requires
+      extract_and_expand_dh_pred cs (Seq.length dh) /\
+      extract_and_expand_ctx_pred cs (Seq.length kem_context))
+    (ensures fun _ -> True)
 
-let point_compress cs pk = match curve_of_cs cs with
+let extract_and_expand cs dh kem_context =
+  let eae_prk = labeled_extract (kem_hash_of_cs cs) (suite_id_kem cs) lbytes_empty label_eae_prk dh in
+  labeled_expand (kem_hash_of_cs cs) (suite_id_kem cs) eae_prk label_shared_secret kem_context (size_kem_key cs)
+
+let deserialize_public_key cs pk = match kem_dh_of_cs cs with
   | DH.DH_Curve25519 -> pk
   // Extract the point coordinates by removing the first representation byte
   | DH.DH_P256 -> sub pk 1 64
 
-val point_decompress:
-    cs:ciphersuite
-  -> pk:DH.serialized_point (curve_of_cs cs) ->
-  Tot (key_dh_public_s cs)
 
-let point_decompress cs pk = match curve_of_cs cs with
+let serialize_public_key cs pk = match kem_dh_of_cs cs with
   | DH.DH_Curve25519 -> pk
   // Add the first representation byte to the point coordinates
   | DH.DH_P256 -> create 1 (u8 4) @| pk
 
-/// def Encap(pkR):
-///     skE, pkE = GenerateKeyPair()
-///     zz = DH(skE, pkR)
-///     enc = Marshal(pkE)
-///     return zz, enc
+
+val dkp_nist_p: cs:ciphersuite -> lbytes (size_kem_kdf cs) -> counter:uint8 -> Tot (option (key_dh_secret_s cs & key_dh_public_s cs)) (decreases 255 - v counter)
+let rec dkp_nist_p cs dkp_prk counter =
+  let counterbyte = nat_to_intseq_be #U8 #SEC 1 (v counter) in
+  let bytes = labeled_expand (kem_hash_of_cs cs) (suite_id_kem cs) dkp_prk label_candidate counterbyte (size_dh_key cs) in
+  let bytes = Lib.Sequence.map2 (logand #U8 #SEC) bytes (Seq.create (size_dh_key cs) (u8 255)) in
+  let sk = nat_from_intseq_be #U8 #SEC bytes in
+  if sk = 0 || sk >= Spec.P256.prime then
+    if (v counter) = 255 then None
+    else dkp_nist_p cs dkp_prk (counter +! (u8 1))
+  else
+    match DH.secret_to_public (kem_dh_of_cs cs) bytes with
+    | Some pk -> Some (bytes, serialize_public_key cs pk)
+    | None ->
+      if (v counter) = 255 then None
+      else dkp_nist_p cs dkp_prk (counter +! (u8 1))
+
+
+
+let derive_key_pair cs ikm =
+  match kem_dh_of_cs cs with
+  | DH.DH_Curve25519 -> begin
+    let dkp_prk = labeled_extract (kem_hash_of_cs cs) (suite_id_kem cs) lbytes_empty label_dkp_prk ikm in
+    let sk = labeled_expand (kem_hash_of_cs cs) (suite_id_kem cs) dkp_prk label_sk lbytes_empty (size_dh_key cs) in
+    match DH.secret_to_public (kem_dh_of_cs cs) sk with
+    | Some pk -> Some (sk, serialize_public_key cs pk)
+    end
+  | DH.DH_P256 ->
+    let dkp_prk = labeled_extract (kem_hash_of_cs cs) (suite_id_kem cs) lbytes_empty label_dkp_prk ikm in
+    dkp_nist_p cs dkp_prk (u8 0)
+
+val prepare_dh: cs:ciphersuite -> DH.serialized_point (kem_dh_of_cs cs) -> Tot (lbytes 32)
+let prepare_dh cs dh = match (kem_dh_of_cs cs) with
+  | DH.DH_Curve25519 -> serialize_public_key cs dh
+  | DH.DH_P256 -> sub dh 0 32
+
 
 val encap:
-    cs: ciphersuite
-  -> skE: key_dh_secret_s cs
-  -> pkR: key_dh_public_s cs ->
-  Tot (option (key_dh_public_s cs & key_dh_public_s cs))
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (kem_dh_of_cs cs) ->
+  Tot (option (key_kem_s cs & key_dh_public_s cs))
 
+#restart-solver
+#set-options "--z3rlimit 600 --fuel 0 --ifuel 2"
 let encap cs skE pkR =
-  let pkE = DH.secret_to_public (curve_of_cs cs) skE in
-  let zz = DH.dh (curve_of_cs cs) skE (point_compress cs pkR) in
-  match pkE, zz with
-  | Some pkE, Some zz -> Some (point_decompress cs zz, point_decompress cs pkE)
-  | _ -> None
+  match DH.secret_to_public (kem_dh_of_cs cs) skE with
+  | None -> None
+  | Some pkE ->
+    let enc = serialize_public_key cs pkE in
+    match DH.dh (kem_dh_of_cs cs) skE pkR with
+    | None -> None
+    | Some dh ->
+      let pkRm = serialize_public_key cs pkR in
+      let kem_context = concat enc pkRm in
+      let dhm = prepare_dh cs dh in
+      assert (Seq.length kem_context = 2*size_dh_public cs);
+      assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
+      let shared_secret:key_kem_s cs = extract_and_expand cs dhm kem_context in
+      Some (shared_secret, enc)
 
-/// def Decap(enc, skR):
-///      pkE = Unmarshal(enc)
-///      return DH(skR, pkE)
 
 val decap:
     cs: ciphersuite
-  -> pkE: key_dh_public_s cs
+  -> enc: key_dh_public_s cs
   -> skR: key_dh_secret_s cs ->
-  Tot (option (key_dh_public_s cs))
+  Tot (option (key_kem_s cs))
 
-let decap cs pkE skR =
-  match DH.dh (curve_of_cs cs) skR (point_compress cs pkE) with
+#set-options "--z3rlimit 300 --fuel 0 --ifuel 2"
+let decap cs enc skR =
+  let pkE = deserialize_public_key cs enc in
+  match DH.dh (kem_dh_of_cs cs) skR pkE with
   | None -> None
-  | Some zz -> Some (point_decompress cs zz)
-
-/// def AuthEncap(pkR, skI):
-///      skE, pkE = GenerateKeyPair()
-///      zz = concat(DH(skE, pkR), DH(skI, pkR))
-///      enc = Marshal(pkE)
-///      return zz, enc
+  | Some dh ->
+    match DH.secret_to_public (kem_dh_of_cs cs) skR with
+    | None -> None
+    | Some pkR ->
+      let pkRm = serialize_public_key cs pkR in
+      let kem_context = concat enc pkRm in
+      let dhm = prepare_dh cs dh in
+      assert (Seq.length kem_context = 2*size_dh_public cs);
+      assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
+      let shared_secret = extract_and_expand cs dhm kem_context in
+      Some (shared_secret)
 
 val auth_encap:
-    cs: ciphersuite
-  -> skE: key_dh_secret_s cs
-  -> skI: key_dh_secret_s cs
-  -> pkR: key_dh_public_s cs ->
-  Tot (option (lbytes (2 * size_dh_public cs) & key_dh_public_s cs))
+    cs:ciphersuite
+  -> skE:key_dh_secret_s cs
+  -> pkR:DH.serialized_point (kem_dh_of_cs cs)
+  -> skS:key_dh_secret_s cs ->
+  Tot (option (key_kem_s cs & key_dh_public_s cs))
 
-#push-options "--fuel 1 --ifuel 1"
-let auth_encap cs skE skI pkR =
-  let pkE = DH.secret_to_public (curve_of_cs cs) skE in
-  let er = DH.dh (curve_of_cs cs) skE (point_compress cs pkR) in
-  let ir = DH.dh (curve_of_cs cs) skI (point_compress cs pkR) in
-  match pkE, er, ir with
-  | Some pkE, Some er, Some ir ->
-    let zz = concat (point_decompress cs er) (point_decompress cs ir) in
-    Some (zz, point_decompress cs pkE)
-  | _ -> None
-
-/// def AuthDecap(enc, skR, pkI):
-///      pkE = Unmarshal(enc)
-///      return concat(DH(skR, pkE), DH(skR, pkI))
+#set-options "--z3rlimit 1000 --fuel 0 --ifuel 2"
+let auth_encap cs skE pkR skS =
+  match DH.secret_to_public (kem_dh_of_cs cs) skE with
+  | None -> None
+  | Some pkE ->
+    match DH.dh (kem_dh_of_cs cs) skE pkR with
+    | None -> None
+    | Some es ->
+      match DH.dh (kem_dh_of_cs cs) skS pkR with
+      | None -> None
+      | Some ss ->
+        let esm = prepare_dh cs es in
+        let ssm = prepare_dh cs ss in
+        // TODO Do not put 32 literally
+        let dh = concat #uint8 #32 #32 esm ssm in
+        let enc = serialize_public_key cs pkE in
+        match DH.secret_to_public (kem_dh_of_cs cs) skS with
+        | None -> None
+        | Some pkS ->
+          let pkSm = serialize_public_key cs pkS in
+          let pkRm = serialize_public_key cs pkR in
+          let kem_context = concat enc (concat pkRm pkSm) in
+          assert (Seq.length kem_context = 3*size_dh_public cs);
+          assert (labeled_expand_info_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_shared_secret + Seq.length kem_context));
+          assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
+          // TODO Do not put 64 literally
+          assert (Seq.length dh = 64);
+          assert (labeled_extract_ikm_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_eae_prk + Seq.length dh));
+          assert (extract_and_expand_dh_pred cs (Seq.length dh));
+          let shared_secret = extract_and_expand cs dh kem_context in
+          Some (shared_secret, enc)
+#reset-options
 
 val auth_decap:
     cs: ciphersuite
-  -> pkE: key_dh_public_s cs
-  -> pkI: key_dh_public_s cs
-  -> skR: key_dh_secret_s cs ->
-  Tot (option (lbytes (2 * size_dh_public cs)))
+  -> enc: key_dh_public_s cs
+  -> skR: key_dh_secret_s cs
+  -> pkS: DH.serialized_point (kem_dh_of_cs cs) ->
+  Tot (option (key_kem_s cs))
 
-let auth_decap cs pkE pkI skR =
-  let re = DH.dh (curve_of_cs cs) skR (point_compress cs pkE) in
-  let ri = DH.dh (curve_of_cs cs) skR (point_compress cs pkI) in
-  match re, ri with
-  | Some re, Some ri -> Some (concat (point_decompress cs re) (point_decompress cs ri))
-  | _ -> None
+#restart-solver
+#set-options "--z3rlimit 1000 --fuel 0 --ifuel 4"
+let auth_decap cs enc skR pkS =
+  let pkE = deserialize_public_key cs enc in
+  match DH.dh (kem_dh_of_cs cs) skR pkE with
+  | None -> None
+  | Some es ->
+    match DH.dh (kem_dh_of_cs cs) skR pkS with
+    | None -> None
+    | Some ss ->
+      let esm = prepare_dh cs es in
+      let ssm = prepare_dh cs ss in
+      let dh = concat #uint8 #32 #32 esm ssm in
+      match DH.secret_to_public (kem_dh_of_cs cs) skR with
+      | None -> None
+      | Some pkR ->
+        let pkRm = serialize_public_key cs pkR in
+        let pkSm = serialize_public_key cs pkS in
+        let kem_context = concat enc (concat pkRm pkSm) in
+        assert (Seq.length kem_context = 3*size_dh_public cs);
+        assert (labeled_expand_info_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_shared_secret + Seq.length kem_context));
+        assert (extract_and_expand_ctx_pred cs (Seq.length kem_context));
+        assert (Seq.length dh = 64);
+        assert (labeled_extract_ikm_length_pred (kem_hash_of_cs cs) (size_suite_id_kem + size_label_eae_prk + Seq.length dh));
+        assert (extract_and_expand_dh_pred cs (Seq.length dh));
+        let shared_secret = extract_and_expand cs dh kem_context in
+        Some (shared_secret)
+#reset-options
 
 
-/// default_pkIm = zero(Npk)
-/// default_psk = zero(Nh)
-/// default_pskId = zero(0)
-
-let default_pkI (cs:ciphersuite):bytes = create (size_dh_public cs) (u8 0)
-let default_psk (cs:ciphersuite): bytes = create (size_psk cs) (u8 0)
-let default_pskId: b:bytes{Seq.length b = 0} = lbytes_empty
-
-
-/// def VerifyMode(mode, psk, pskID, pkIm):
-///     got_psk = (psk != default_psk and pskID != default_pskID)
-///     no_psk = (psk == default_psk and pskID == default_pskID)
-///     got_pkIm = (pkIm != default_pkIm)
-///     no_pkIm = (pkIm == default_pkIm)
-///
-///     if mode == mode_base and (got_psk or got_pkIm):
-///       raise Exception("Invalid configuration for mode_base")
-///     if mode == mode_psk and (no_psk or got_pkIm):
-///       raise Exception("Invalid configuration for mode_psk")
-///     if mode == mode_auth and (got_psk or no_pkIm):
-///       raise Exception("Invalid configuration for mode_auth")
-///     if mode == mode_psk_auth and (no_psk or no_pkIm):
-///       raise Exception("Invalid configuration for mode_psk_auth")
-///
-///
-/// BB. Implementing this function should not be necessary for us.
-///     We are filtering those using our option type in `ks_derive`.
+let default_psk = lbytes_empty
+let default_psk_id = lbytes_empty
 
 val build_context:
-    m:mode
-  -> cs:ciphersuite
-  -> pkE:key_dh_public_s cs
-  -> pkR:key_dh_public_s cs
-  -> pkI:key_dh_public_s cs
-  -> pskID_hash:bytes{Seq.length pskID_hash = Hash.size_hash (hash_of_cs cs)}
-  -> info_hash:bytes{Seq.length info_hash = Hash.size_hash (hash_of_cs cs)} ->
-  Tot (b:bytes{Seq.length b == 7 + 3 * size_dh_public cs + 2 * Hash.size_hash (hash_of_cs cs) })
+    cs:ciphersuite
+  -> m:mode
+  -> psk_id_hash:lbytes (size_kdf cs)
+  -> info_hash:lbytes (size_kdf cs) ->
+  Tot (lbytes (size_ks_ctx cs))
 
-let build_context m cs pkE pkR pkI pskID_hash info_hash =
-  let pskID_len: lbytes 1 = nat_to_bytes_be 1 (Hash.size_hash (hash_of_cs cs)) in
-  let info_len: lbytes 1 = nat_to_bytes_be 1 (Hash.size_hash (hash_of_cs cs)) in
-  let context = (id_of_mode m) @| (id_of_cs cs) @| pkE @| pkR @| pkI in
-  let context = Seq.append context pskID_hash in
+let build_context cs m psk_id_hash info_hash =
+  let context = id_of_mode m in
+  let context = Seq.append context psk_id_hash in
   let context = Seq.append context info_hash in
   context
 
+let verify_psk_inputs (cs:ciphersuite) (m:mode) (opsk:option(psk_s cs & psk_id_s cs)) : bool =
+  match (m, opsk) with
+  | Base, None -> true
+  | PSK, Some _ -> true
+  | Auth, None -> true
+  | AuthPSK, Some _ -> true
+  | _, _ -> false
 
-val ks_derive:
+// key and nonce are zero-length if AEAD is Export-Only
+let encryption_context (cs:ciphersuite) = key_aead_s cs & nonce_aead_s cs & seq_aead_s cs & exporter_secret_s cs
+
+val key_schedule:
     cs:ciphersuite
   -> m:mode
-  -> pkR:key_dh_public_s cs
-  -> zz:bytes{Seq.length zz = size_dh_public cs \/ Seq.length zz = 2 * size_dh_public cs}
-  -> pkE:key_dh_public_s cs
-  -> info:bytes{Seq.length info <= max_info}
-  -> opsk:option (psk_s cs & id:bytes{Seq.length id <= max_pskID})
-  -> opkI:option (key_dh_public_s cs) ->
-  Tot (key_aead_s cs & nonce_aead_s cs)
+  -> shared_secret:key_kem_s cs
+  -> info:info_s cs
+  -> opsk:option (psk_s cs & psk_id_s cs) ->
+  Pure (encryption_context cs)
+    (requires verify_psk_inputs cs m opsk)
+    (ensures fun _ -> True)
 
-#push-options "--z3rlimit 50"
-let ks_derive cs m pkR zz pkE info opsk opkI =
-  let (psk, pskID) =
+#set-options "--z3rlimit 500 --fuel 0 --ifuel 2"
+let key_schedule_core
+  (cs:ciphersuite)
+  (m:mode)
+  (shared_secret:key_kem_s cs)
+  (info:info_s cs)
+  (opsk:option (psk_s cs & psk_id_s cs))
+  : (lbytes (size_ks_ctx cs) & exporter_secret_s cs & (lbytes (Spec.Hash.Definitions.hash_length (hash_of_cs cs)))) =
+  let (psk, psk_id) =
     match opsk with
-    | None -> (default_psk cs, default_pskId)
-    | Some (psk, pskID) -> (psk, pskID) in
-  let pkI =
-    match opkI with
-    | None -> default_pkI cs
-    | Some pki -> pki in
-  let pskID_hash = Hash.hash (hash_of_cs cs) pskID in
-  let info_hash = Hash.hash (hash_of_cs cs) info in
-  let context = build_context m cs pkE pkR pkI pskID_hash info_hash in
-  let secret = HKDF.extract (hash_of_cs cs) psk zz in
-  let info_key = Seq.append label_key context in
-  let info_nonce = Seq.append label_nonce context in
-  let keyIR = HKDF.expand (hash_of_cs cs) secret info_key (size_aead_key cs) in
-  let nonceIR = HKDF.expand (hash_of_cs cs) secret info_nonce (size_aead_nonce cs) in
-  keyIR, nonceIR
-#pop-options
+    | None -> (default_psk, default_psk_id)
+    | Some (psk, psk_id) -> (psk, psk_id)
+  in
+  let psk_id_hash = labeled_extract (hash_of_cs cs) (suite_id_hpke cs) lbytes_empty label_psk_id_hash psk_id in
+  let info_hash = labeled_extract (hash_of_cs cs) (suite_id_hpke cs) lbytes_empty label_info_hash info in
+  let context = build_context cs m psk_id_hash info_hash in
+  let secret = labeled_extract (hash_of_cs cs) (suite_id_hpke cs) shared_secret label_secret psk in
 
-/// def SetupBaseI(pkR, info):
-///     zz, enc = Encap(pkR)
-///     return enc, KeySchedule(mode_base, pkR, zz, enc, info,
-///                             default_psk, default_pskID, default_pkIm)
+  let exporter_secret = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_exp context (size_kdf cs) in
+  context, exporter_secret, secret
 
-let setupBaseI cs skE pkR info =
-  let res = encap cs skE pkR in
-  match res with
-  | Some (zz, pkE) ->
-    let k,n = ks_derive cs Base pkR zz pkE info None None in
-    Some (pkE, k, n)
+let key_schedule_end
+  (cs:ciphersuite)
+  (m:mode)
+  (context:lbytes (size_ks_ctx cs))
+  (exporter_secret:exporter_secret_s cs)
+  (secret:(lbytes (Spec.Hash.Definitions.hash_length (hash_of_cs cs))))
+  :  encryption_context cs
+  =
+  if is_valid_not_export_only_ciphersuite cs then (
+    let key = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_key context (size_aead_key cs) in
+    let base_nonce = labeled_expand (hash_of_cs cs) (suite_id_hpke cs) secret label_base_nonce context (size_aead_nonce cs) in
+    (key, base_nonce, 0, exporter_secret)
+
+  ) else (
+    (* if AEAD is Export-Only, then skip computation of key and base_nonce *)
+    assert (size_aead_key cs = 0);
+    assert (size_aead_nonce cs = 0);
+    (lbytes_empty, lbytes_empty, 0, exporter_secret))
+
+let key_schedule cs m shared_secret info opsk =
+  let context, exporter_secret, secret = key_schedule_core cs m shared_secret info opsk in
+  key_schedule_end cs m context exporter_secret secret
+
+let key_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
+  let key, _, _, _ = ctx in key
+
+let base_nonce_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
+  let _, base_nonce, _, _ = ctx in base_nonce
+
+let seq_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
+  let _, _, seq, _ = ctx in seq
+
+let exp_sec_of_ctx (cs:ciphersuite) (ctx:encryption_context cs) =
+  let _, _, _, exp_sec = ctx in exp_sec
+
+let set_seq (cs:ciphersuite) (ctx:encryption_context cs) (seq:seq_aead_s cs) =
+  let key, base_nonce, _, exp_sec = ctx in
+  (key, base_nonce, seq, exp_sec)
+
+
+///
+/// Encryption Context
+///
+
+let context_export cs ctx exp_ctx l =
+  let exp_sec = exp_sec_of_ctx cs ctx in
+  labeled_expand (hash_of_cs cs) (suite_id_hpke cs) exp_sec label_sec exp_ctx l
+
+
+let context_compute_nonce cs ctx seq =
+  let base_nonce = base_nonce_of_ctx cs ctx in
+  let enc_seq = nat_to_bytes_be (size_aead_nonce cs) seq in
+  Spec.Loops.seq_map2 logxor enc_seq base_nonce
+
+let context_increment_seq cs ctx =
+  let seq = seq_of_ctx cs ctx in
+  if seq = max_seq cs then None else
+  Some (set_seq cs ctx (seq + 1))
+
+let context_seal cs ctx aad pt =
+  let key = key_of_ctx cs ctx in
+  let seq = seq_of_ctx cs ctx in
+  let nonce = context_compute_nonce cs ctx seq in
+  let ct = AEAD.encrypt key nonce aad pt in
+  match context_increment_seq cs ctx with
   | None -> None
+  | Some new_ctx -> Some (new_ctx, ct)
 
-
-/// def SetupBaseR(enc, skR, info):
-///     zz = Decap(enc, skR)
-///     return KeySchedule(mode_base, pk(skR), zz, enc, info,
-///                        default_psk, default_pskID, default_pkIm)
-
-let setupBaseR cs pkE skR info =
-  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
-  let zz = decap cs pkE skR in
-  match pkR, zz with
-  | Some pkR, Some zz ->
-    Some (ks_derive cs Base (point_decompress cs pkR) zz pkE info None None)
-  | _ -> None
-
-
-/// def SetupAuthI(pkR, skI, info):
-///     zz, enc = AuthEncap(pkR, skI)
-///     pkIm = Marshal(pk(skI))
-///     return enc, KeySchedule(pkR, zz, enc, info,
-///                             default_psk, default_pskID, pkIm)
-
-val setupAuthI:
-    cs:ciphersuite
-  -> skE: key_dh_secret_s cs
-  -> skI: key_dh_secret_s cs
-  -> pkR:key_dh_public_s cs
-  -> info:bytes{Seq.length info <= max_info} ->
-  Tot (option (key_dh_public_s cs & key_aead_s cs & nonce_aead_s cs))
-
-let setupAuthI cs skE skI pkR info =
-  let pkI = DH.secret_to_public (curve_of_cs cs) skI in
-  let res = auth_encap cs skE skI pkR in
-  match pkI, res with
-  | Some pkI, Some (zz, pkE) ->
-    let k, n = ks_derive cs Auth pkR zz pkE info None (Some (point_decompress cs pkI)) in
-    Some (pkE, k, n)
-  | _ -> None
-
-
-/// def SetupAuthR(enc, skR, pkI, info):
-///     zz = AuthDecap(enc, skR, pkI)
-///     pkIm = Marshal(pkI)
-///     return KeySchedule(pk(skR), zz, enc, info,
-///                        default_psk, default_pskID, pkIm)
-
-val setupAuthR:
-    cs:ciphersuite
-  -> pkE: key_dh_public_s cs
-  -> pkI: key_dh_public_s cs
-  -> skR:key_dh_secret_s cs
-  -> info:bytes{Seq.length info <= max_info} ->
-  Tot (option (key_aead_s cs & nonce_aead_s cs))
-
-let setupAuthR cs pkE pkI skR info =
-  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
-  let zz = auth_decap cs pkE pkI skR in
-  match pkR, zz with
-  | Some pkR, Some zz ->
-    Some (ks_derive cs Auth (point_decompress cs pkR) zz pkE info None (Some pkI))
-  | _ -> None
-
-/// def SetupAuthPSKI(pkR, info, psk, pskID, skI):
-///     zz, enc = AuthEncap(pkR, skI)
-///     pkIm = Marshal(pk(skI))
-///     return enc, KeySchedule(mode_psk_auth, pkR, zz, enc, info, psk, pskID, pkIm)
-
-val setupAuthPSKI:
-    cs:ciphersuite
-  -> skE: key_dh_secret_s cs
-  -> skI: key_dh_secret_s cs
-  -> pkR: key_dh_public_s cs
-  -> psk: psk_s cs
-  -> pskID: bytes{Seq.length pskID <= max_pskID}
-  -> info:bytes{Seq.length info <= max_info} ->
-  Tot (option (key_dh_public_s cs & key_aead_s cs & nonce_aead_s cs))
-
-let setupAuthPSKI cs skE skI pkR psk pskID info =
-  let pkI = DH.secret_to_public (curve_of_cs cs) skI in
-  let res = auth_encap cs skE skI pkR in
-  match pkI, res with
-  | Some pkI, Some (zz, pkE) ->
-    let k, n = ks_derive cs PSKAuth pkR zz pkE info (Some (psk, pskID)) (Some (point_decompress cs pkI)) in
-    Some (pkE, k, n)
-  | _ -> None
-
-
-/// def SetupAuthPSKR(enc, skR, info, psk, pskID, pkI):
-///     zz = AuthDecap(enc, skR, pkI)
-///     pkIm = Marshal(pkI)
-///     return KeySchedule(mode_psk_auth, pk(skR), zz, enc, info, psk, pskID, pkIm)
-
-val setupPSKAuthR:
-    cs:ciphersuite
-  -> pkE: key_dh_public_s cs
-  -> pkI: key_dh_public_s cs
-  -> skR:key_dh_secret_s cs
-  -> psk: psk_s cs
-  -> pskID: bytes{Seq.length pskID <= max_pskID}
-  -> info:bytes{Seq.length info <= max_info} ->
-  Tot (option (key_aead_s cs & nonce_aead_s cs))
-
-let setupPSKAuthR cs pkE pkI skR psk pskID info =
-  let pkR = DH.secret_to_public (curve_of_cs cs) skR in
-  let zz = auth_decap cs pkE pkI skR in
-  match pkR, zz with
-  | Some pkR, Some zz ->
-    Some (ks_derive cs PSKAuth (point_decompress cs pkR) zz pkE info (Some (psk, pskID)) (Some pkI))
-  | _ -> None
-
-
-/// Encrypt() and Decrypt using the derived AEAD key and nonce
-/// are implemented by calling AEAD.encrypt and AEAD.Decrypt
-
-#set-options "--z3rlimit 50"
-
-let sealBase cs skE pkR m info =
-  match setupBaseI cs skE pkR info with
-  | Some (pkE,k,n) ->
-    Some (Seq.append pkE (AEAD.encrypt #(aead_of_cs cs) k n info m))
+let context_open cs ctx aad ct =
+  let key = key_of_ctx cs ctx in
+  let seq = seq_of_ctx cs ctx in
+  let nonce = context_compute_nonce cs ctx seq in
+  match AEAD.decrypt key nonce aad ct with
   | None -> None
-
-let openBase cs skR input info =
-  let pkE = sub #uint8 #(Seq.length input) input 0 (size_dh_public cs) in
-  let c = sub #uint8 #(Seq.length input) input (size_dh_public cs) (length input - (size_dh_public cs)) in
-  match setupBaseR cs pkE skR info with
-  | Some (k,n) -> begin
-    match AEAD.decrypt #(aead_of_cs cs) k n info c with
+  | Some pt ->
+    match context_increment_seq cs ctx with
     | None -> None
-    | Some v -> Some v
-    end
+    | Some new_ctx -> Some (new_ctx, pt)
+
+///
+/// Base Mode
+///
+
+let setupBaseS cs skE pkR info =
+  match encap cs skE pkR with
   | None -> None
+  | Some (shared_secret, enc) ->
+    let enc_ctx = key_schedule cs Base shared_secret info None in
+    Some (enc, enc_ctx)
+
+let setupBaseR cs enc skR info =
+  let pkR = DH.secret_to_public (kem_dh_of_cs cs) skR in
+  let shared_secret = decap cs enc skR in
+  match pkR, shared_secret with
+  | Some pkR, Some shared_secret ->
+    Some (key_schedule cs Base shared_secret info None)
+  | _ -> None
+
+let sealBase cs skE pkR info aad pt =
+  match setupBaseS cs skE pkR info with
+  | None -> None
+  | Some (enc, ctx) ->
+    match context_seal cs ctx aad pt with
+    | None -> None
+    | Some (_, ct) -> Some (enc, ct)
+
+let openBase cs enc skR info aad ct =
+  match setupBaseR cs enc skR info with
+  | None -> None
+  | Some ctx ->
+    match context_open cs ctx aad ct with
+    | None -> None
+    | Some (_, pt) -> Some pt
+
+let sendExportBase cs skE pkR info exp_ctx l =
+  match setupBaseS cs skE pkR info with
+  | None -> None
+  | Some (enc, ctx) ->
+    Some (enc, context_export cs ctx exp_ctx l)
+
+let receiveExportBase cs enc skR info exp_ctx l =
+  match setupBaseR cs enc skR info with
+  | None -> None
+  | Some ctx ->
+    Some (context_export cs ctx exp_ctx l)
+
+///
+/// PSK mode
+///
+
+let setupPSKS cs skE pkR info psk psk_id =
+  match encap cs skE pkR with
+  | None -> None
+  | Some (shared_secret, enc) ->
+    assert (verify_psk_inputs cs PSK (Some (psk, psk_id)));
+    let enc_ctx = key_schedule cs PSK shared_secret info (Some (psk, psk_id)) in
+    Some (enc, enc_ctx)
+
+let setupPSKR cs enc skR info psk psk_id =
+  let pkR = DH.secret_to_public (kem_dh_of_cs cs) skR in
+  let shared_secret = decap cs enc skR in
+  match pkR, shared_secret with
+  | Some pkR, Some shared_secret ->
+    Some (key_schedule cs PSK shared_secret info (Some (psk, psk_id)))
+  | _ -> None
+
+let sealPSK cs skE pkR info aad pt psk psk_id =
+  match setupPSKS cs skE pkR info psk psk_id with
+  | None -> None
+  | Some (enc, ctx) ->
+    match context_seal cs ctx aad pt with
+    | None -> None
+    | Some (_, ct) -> Some (enc, ct)
+
+let openPSK cs enc skR info aad ct psk psk_id =
+  match setupPSKR cs enc skR info psk psk_id with
+  | None -> None
+  | Some ctx ->
+    match context_open cs ctx aad ct with
+    | None -> None
+    | Some (_, pt) -> Some pt
+
+let sendExportPSK cs skE pkR info exp_ctx l psk psk_id =
+  match setupPSKS cs skE pkR info psk psk_id with
+  | None -> None
+  | Some (enc, ctx) ->
+    Some (enc, context_export cs ctx exp_ctx l)
+
+let receiveExportPSK cs enc skR info exp_ctx l psk psk_id =
+  match setupPSKR cs enc skR info psk psk_id with
+  | None -> None
+  | Some ctx ->
+    Some (context_export cs ctx exp_ctx l)
+
+///
+/// Auth mode
+///
+
+let setupAuthS cs skE pkR info skS =
+  match auth_encap cs skE pkR skS with
+  | None -> None
+  | Some (shared_secret, enc) ->
+    let enc_ctx = key_schedule cs Auth shared_secret info None in
+    Some (enc, enc_ctx)
+
+let setupAuthR cs enc skR info pkS =
+  let pkR = DH.secret_to_public (kem_dh_of_cs cs) skR in
+  let shared_secret = auth_decap cs enc skR pkS in
+  match pkR, shared_secret with
+  | Some pkR, Some shared_secret ->
+    Some (key_schedule cs Auth shared_secret info None)
+  | _ -> None
+
+let sealAuth cs skE pkR info aad pt skS =
+  match setupAuthS cs skE pkR info skS with
+  | None -> None
+  | Some (enc, ctx) ->
+    match context_seal cs ctx aad pt with
+    | None -> None
+    | Some (_, ct) -> Some (enc, ct)
+
+let openAuth cs enc skR info aad ct pkS =
+  match setupAuthR cs enc skR info pkS with
+  | None -> None
+  | Some ctx ->
+    match context_open cs ctx aad ct with
+    | None -> None
+    | Some (_, pt) -> Some pt
+
+let sendExportAuth cs skE pkR info exp_ctx l skS =
+  match setupAuthS cs skE pkR info skS with
+  | None -> None
+  | Some (enc, ctx) ->
+    Some (enc, context_export cs ctx exp_ctx l)
+
+let receiveExportAuth cs enc skR info exp_ctx l pkS =
+  match setupAuthR cs enc skR info pkS with
+  | None -> None
+  | Some ctx ->
+    Some (context_export cs ctx exp_ctx l)
+
+///
+/// AuthPSK mode
+///
+
+let setupAuthPSKS cs skE pkR info psk psk_id skS =
+  match auth_encap cs skE pkR skS with
+  | None -> None
+  | Some (shared_secret, enc) ->
+    let enc_ctx = key_schedule cs AuthPSK shared_secret info (Some (psk, psk_id)) in
+    Some (enc, enc_ctx)
+
+let setupAuthPSKR cs enc skR info psk psk_id pkS =
+  let pkR = DH.secret_to_public (kem_dh_of_cs cs) skR in
+  let shared_secret = auth_decap cs enc skR pkS in
+  match pkR, shared_secret with
+  | Some pkR, Some shared_secret ->
+    Some (key_schedule cs AuthPSK shared_secret info (Some (psk, psk_id)))
+  | _ -> None
+
+let sealAuthPSK cs skE pkR info aad pt psk psk_id skS =
+  match setupAuthPSKS cs skE pkR info psk psk_id skS with
+  | None -> None
+  | Some (enc, ctx) ->
+    match context_seal cs ctx aad pt with
+    | None -> None
+    | Some (_, ct) -> Some (enc, ct)
+
+let openAuthPSK cs enc skR info aad ct psk psk_id pkS =
+  match setupAuthPSKR cs enc skR info psk psk_id pkS with
+  | None -> None
+  | Some ctx ->
+    match context_open cs ctx aad ct with
+    | None -> None
+    | Some (_, pt) -> Some pt
+
+let sendExportAuthPSK cs skE pkR info exp_ctx l psk psk_id skS =
+  match setupAuthPSKS cs skE pkR info psk psk_id skS with
+  | None -> None
+  | Some (enc, ctx) ->
+    Some (enc, context_export cs ctx exp_ctx l)
+
+let receiveExportAuthPSK cs enc skR info exp_ctx l psk psk_id pkS =
+  match setupAuthPSKR cs enc skR info psk psk_id pkS with
+  | None -> None
+  | Some ctx ->
+    Some (context_export cs ctx exp_ctx l)
