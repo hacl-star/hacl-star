@@ -14,7 +14,7 @@ jobs:
         run: |
           git rm -r hints dist/*/*
           url=https://everest-ci.paris.inria.fr/job/everest/branch-master/hacl-build-products.x86_64-linux/latest/download
-          diff <(curl -L ${url}/3) <(git rev-parse HEAD)
+          diff <(curl -L ${url}/3) <(git rev-parse HEAD) # fails if the tarballs are stale
           curl -L ${url}/1 | tar -xv
           curl -L ${url}/2 | tar -xv
       - name: commit changes
