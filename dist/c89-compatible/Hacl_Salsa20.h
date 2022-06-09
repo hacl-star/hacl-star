@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void
 Hacl_Salsa20_salsa20_encrypt(
   uint32_t len,

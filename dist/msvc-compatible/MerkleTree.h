@@ -38,7 +38,6 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef struct LowStar_Vector_vector_str___uint8_t__s
 {
   uint32_t sz;
