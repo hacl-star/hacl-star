@@ -10,13 +10,37 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v3
+      - name: delete old files
+        run: git rm -r hints dist/*/*
       - name: download new files
         run: |
-          git rm -r hints dist/*/*
-          url=https://everest-ci.paris.inria.fr/job/everest/branch-master/hacl-build-products.x86_64-linux/latest/download
-          diff <(curl -L ${url}/3) <(git rev-parse HEAD) # fails if the tarballs are stale
-          curl -L ${url}/1 | tar -xv
-          curl -L ${url}/2 | tar -xv
+          STATUS_SUCCEEDED=0 # from https://github.com/NixOS/hydra/blob/cf9f38e43fd81f9298e3f2ff50c8a6ee0acc3af0/hydra-api.yaml#L927-L941
+          baseUrl="https://everest-ci.paris.inria.fr"
+          latestFinishedEval=$(curl -sLH 'Content-Type: application/json' "$baseUrl/jobset/hacl-star/branch-master/latest-eval")
+
+          rev=$(echo "$latestFinishedEval" | jq '.flake | split("/") | last')
+          id=$(echo "$latestFinishedEval" | jq '.id')
+
+          [[ "$rev" == "$(git rev-parse HEAD)" ]] || {
+              echo "The latest evaluation on the CI doesn't correspond to the latest commit."
+              exit 1
+          }
+
+          buildUrl="$baseUrl/eval/$id/job/hacl-build-products.x86_64-linux"
+          buildInfo=$(curl -sLH 'Content-Type: application/json' "$buildUrl")
+
+          # Check wether the build was built correctly
+          [[ "$(echo "$buildInfo" | jq '.buildstatus')" == "$STATUS_SUCCEEDED" ]] || {
+              echo "The latest evaluation wasn't successful. Aborting."
+              exit 2
+          }
+
+          installTar () {
+              curl -sL "$buildUrl/download-by-type/file/$1" | tar -xv
+          }
+
+          installTar "hints"
+          installTar "dist"
       - name: commit changes
         uses: EndBug/add-and-commit@v9
         with:
