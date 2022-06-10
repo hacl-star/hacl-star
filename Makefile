@@ -464,6 +464,12 @@ obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
 obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
 	$(OCAMLSHARED) $< -o $@
 
+obj/Test_Lowstarize.ml: CODEGEN = Plugin
+obj/Test_Lowstarize.ml: obj/Test.Lowstarize.fst.checked
+
+obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml
+	$(OCAMLSHARED) $< -o $@
+
 # IMPORTANT NOTE: we cannot let F* compile the cmxs for several reasons.
 # First, it won't detect out-of-date .ml files and won't recompile the cmxs.
 # Second, it will race because several Hacl.Meta.%.checked targets might be
@@ -472,6 +478,15 @@ obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
 # dependency graph. Note that local Makefiles don't bother.
 obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
 $(filter obj/Hacl.Meta.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_Interface.cmxs
+
+obj/Hacl.Test.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
+$(filter obj/Hacl.Test.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
+
+obj/Test.Vectors.checked: FSTAR_FLAGS += --load Test.Lowstarize
+obj/Test.Vectors.checked: obj/Test_Lowstarize.cmxs
+
+obj/Test.Vectors.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
+$(filter obj/Test.Vectors.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
 
 ###############################################################################
 # Extracting (checked files) to OCaml, producing executables, running them to #
