@@ -117,10 +117,13 @@ let bn_eval_split_i_aux p a b c i =
   }
 
 
+#restart-solver
 val bn_eval_split_i: #t:limb_t -> #len:size_nat -> b:lbignum t len -> i:nat{i <= len} -> Lemma
   (ensures bn_v b == bn_v (slice b 0 i) + pow2 (bits t * i) * bn_v (slice b i len))
   (decreases (len - i))
 
+// 20220513 JP: this proof broke somewhere in the calc, but even with --quake
+// 3/3 it goes through. Solver inconsistency? The restart solver above fixes it.
 let rec bn_eval_split_i #t #len b i =
   let pbits = bits t in
   if i = 0 then
@@ -146,7 +149,6 @@ let rec bn_eval_split_i #t #len b i =
         (==) { bn_eval_extensionality_j (slice b 0 (i + 1)) (slice b 0 i) i }
         eval_ i (slice b 0 i) i + pow2 (pbits * i) * bn_v b1;
       }; () end end
-
 
 val bn_eval_inj: #t:limb_t -> len:size_nat -> b1:lbignum t len -> b2:lbignum t len -> Lemma
   (requires bn_v b1 == bn_v b2)
