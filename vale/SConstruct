@@ -210,7 +210,7 @@ if (sys.platform == 'win32' and os.getenv('PLATFORM') == 'X64') or platform.mach
 
 common_env['TARGET_ARCH'] = target_arch
 
-mono = ''
+dotnet = ''
 if not is_help:
   if sys.platform == 'win32':
     import importlib.util
@@ -232,7 +232,7 @@ if not is_help:
   else:
     common_env.Append(CCFLAGS = ['-O3', '-flto', '-g', '-DKRML_NOUINT128'])
     common_env.Append(CXXFLAGS = ['-std=c++11'])  # This option is C++ specific
-    mono = 'mono'
+    dotnet = 'dotnet'
 
   if sys.platform == 'win32':
     # fstar.exe relies on libgmp-10.dll
@@ -875,7 +875,7 @@ def translate_vale_file(options, source_vaf):
   types_include = ''
   types_include = f'-include {target}.types.vaf'
   env.Command(targets, source_vaf,
-    f'{mono} {vale_exe} -fstarText -quickMods -typecheck {types_include} {opt_vale_includes}' +
+    f'{dotnet} {vale_exe} -fstarText -quickMods -typecheck {types_include} {opt_vale_includes}' +
     f' -in {source_vaf} -out {target_fst} -outi {target_fsti}' +
     f' {vale_scons_args} {" ".join(vale_user_args)}')
   return targets
@@ -918,7 +918,7 @@ def compute_module_types(env, source_vaf):
       collect_dumps_in_order(x)
   dumps_string = " ".join(['-in ' + str(x) for x in dumps])
   Depends(types_vaf, import_fstar_types_exe)
-  Command(types_vaf, dumps, f'{mono} {import_fstar_types_exe} {dumps_string} -out {types_vaf} > {types_vaf}.errors')
+  Command(types_vaf, dumps, f'{dotnet} {import_fstar_types_exe} {dumps_string} -out {types_vaf} > {types_vaf}.errors')
 
 def recursive_glob(env, pattern, strings = False):
   matches = []

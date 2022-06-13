@@ -37,7 +37,6 @@ extern "C" {
 
 #include "../Hacl_Chacha20.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Impl_Chacha20_Vec_chacha20_constants */
 
 extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];

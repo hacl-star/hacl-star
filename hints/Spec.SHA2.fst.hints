@@ -18,7 +18,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "978db12031bc1435108010e03f7515e5"
+      "80c4ba711949a0b31a56877efeac3501"
     ],
     [
       "Spec.SHA2.word_n",
@@ -37,7 +37,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "5f11510a5136b2aff9065986dc9fd487"
+      "fab72fd329315cbf7daf07eb7a1f277c"
     ],
     [
       "Spec.SHA2.to_word",
@@ -85,7 +85,7 @@
         "typing_Spec.SHA2.word_n"
       ],
       0,
-      "ca736088be62f510fc05c2994369defa"
+      "c72561644a2edc74241679c5c2c9eb67"
     ],
     [
       "Spec.SHA2.v'",
@@ -125,7 +125,7 @@
         "typing_Spec.Hash.Definitions.uu___is_SHA2_512"
       ],
       0,
-      "64044059cb9b6fbb3ff0c82c550cdce4"
+      "2ea17646ee677c379f9597775c81f882"
     ],
     [
       "Spec.SHA2.k_w",
@@ -139,7 +139,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "44db679c7f6b83e28463b0e703f0b393"
+      "a3bba0a0d90e5ac038ef8ad0a423fbc8"
     ],
     [
       "Spec.SHA2.ops",
@@ -157,7 +157,7 @@
         "typing_FStar.UInt32.t"
       ],
       0,
-      "f78420aaa3aa8e388e46e5e6e84658b0"
+      "e9289c1a3724059ba709c742594bf052"
     ],
     [
       "Spec.SHA2.op0",
@@ -176,7 +176,7 @@
         "typing_Spec.Hash.Definitions.is_sha2"
       ],
       0,
-      "b0ee91c2b87602a0616dccd061a84371"
+      "83ebc5ed4d8010ab1972c39a57d3975b"
     ],
     [
       "Spec.SHA2.op_Plus_Dot",
@@ -216,7 +216,7 @@
         "typing_Spec.Hash.Definitions.uu___is_SHA2_512"
       ],
       0,
-      "3640d891ac0e9413a4ed228261943ecd"
+      "d1b0f21443ca7e4f3bbb64097f6f70c9"
     ],
     [
       "Spec.SHA2.op_Hat_Dot",
@@ -252,7 +252,7 @@
         "typing_Spec.Hash.Definitions.uu___is_SHA2_512"
       ],
       0,
-      "ddc977ebb2d4841ec2e59a1b3db3eabb"
+      "27b35b6bc0701690ff4f7585d7c6888e"
     ],
     [
       "Spec.SHA2.op_Amp_Dot",
@@ -288,7 +288,7 @@
         "typing_Spec.Hash.Definitions.uu___is_SHA2_512"
       ],
       0,
-      "64b04fef50d86666d6e89df8c16c470a"
+      "33bbad3fc6f401e9014cf6a635df49cd"
     ],
     [
       "Spec.SHA2.op_Tilde_Dot",
@@ -324,7 +324,7 @@
         "typing_Spec.Hash.Definitions.uu___is_SHA2_512"
       ],
       0,
-      "a6790c481326d2d90878ae25bdfc76b1"
+      "00c75e84a35b26006549556a2c0c3688"
     ],
     [
       "Spec.SHA2.op_Greater_Greater_Greater_Dot",
@@ -333,6 +333,9 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U16",
@@ -353,18 +356,17 @@
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
-        "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.bits",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.sha2_alg",
         "equation_Spec.Hash.Definitions.word",
         "equation_Spec.Hash.Definitions.word_t",
         "projection_inverse_BoxBool_proj_0",
         "refinement_interpretation_Tm_refine_2c1f6dc1d378fed54224fbf63fca7a8a",
-        "typing_Spec.Hash.Definitions.is_sha2",
         "typing_Spec.Hash.Definitions.uu___is_SHA2_512"
       ],
       0,
-      "d326f21b3885e297404d7118752e030c"
+      "ca21df9bc4ed7a38d56fb5599ee11559"
     ],
     [
       "Spec.SHA2.op_Greater_Greater_Dot",
@@ -373,6 +375,9 @@
       1,
       [
         "@MaxIFuel_assumption", "@query", "bool_inversion",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S32",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U16",
@@ -387,10 +392,13 @@
         "disc_equation_Spec.Hash.Definitions.SHA2_256",
         "disc_equation_Spec.Hash.Definitions.SHA2_384",
         "disc_equation_Spec.Hash.Definitions.SHA2_512",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equality_tok_Lib.IntTypes.U64@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_384@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_512@tok",
+        "equation_Lib.IntTypes.bits",
         "equation_Spec.Hash.Definitions.is_sha2",
         "equation_Spec.Hash.Definitions.sha2_alg",
         "equation_Spec.Hash.Definitions.word",
@@ -400,7 +408,7 @@
         "typing_Spec.Hash.Definitions.uu___is_SHA2_512"
       ],
       0,
-      "99c4f57d711e98fa56314b16ecf2ac03"
+      "d53ac67a596e8f7f0c84ab1ac2f01b10"
     ],
     [
       "Spec.SHA2._Sigma0",
@@ -458,7 +466,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "f7cb57df6b1ccf9b2964a2030610f755"
+      "93892607e81a73605a3c2944304830c1"
     ],
     [
       "Spec.SHA2._Sigma1",
@@ -515,7 +523,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9473759596f02a59c17e5cfac64a43dd"
+      "860c0e4dbc647c2549ecebab5299942e"
     ],
     [
       "Spec.SHA2._sigma0",
@@ -574,7 +582,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "30762ca5f130046820165cea908dc5f6"
+      "7f4f2431c116f29dc338fc5e5a2c887e"
     ],
     [
       "Spec.SHA2._sigma1",
@@ -633,7 +641,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "575572b812b6f8e8836da3251bc86697"
+      "e87673d38dd633eb53a6b88713cd3538"
     ],
     [
       "Spec.SHA2.h0",
@@ -675,7 +683,7 @@
         "typing_Spec.SHA2.Constants.h512_l"
       ],
       0,
-      "83603b51e48f5f99af574c61435678bb"
+      "a1a76d5d9a0e8a42faa01fdb3392af7e"
     ],
     [
       "Spec.SHA2.k0",
@@ -717,7 +725,7 @@
         "typing_Spec.SHA2.Constants.k384_512_l"
       ],
       0,
-      "c0e66293e31f5344956cc955e435e567"
+      "1062f4b5ec8a63b54d4efe96122c977a"
     ],
     [
       "Spec.SHA2.k0",
@@ -731,7 +739,7 @@
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f"
       ],
       0,
-      "617c3ea20a3599a76dcb179eb1706f8e"
+      "cde35184cde2d85ee2082e4d3e692762"
     ],
     [
       "Spec.SHA2.shuffle_core_pre_",
@@ -764,7 +772,7 @@
         "typing_Spec.SHA2.k0"
       ],
       0,
-      "65cc2902b97e60e6ab6eea551875275b"
+      "2489b616b84a9e9e3a92c84ce9ea4aaf"
     ],
     [
       "Spec.SHA2.ws0_pre_inner",
@@ -789,7 +797,7 @@
         "typing_Spec.Hash.Definitions.word", "typing_Spec.SHA2.size_k_w"
       ],
       0,
-      "a72c6189a2db0e8c850290f575d4e851"
+      "af82d99dafedf2f93bacded33cd98025"
     ],
     [
       "Spec.SHA2.wsi_pre_inner",
@@ -818,7 +826,7 @@
         "typing_Spec.SHA2._sigma1"
       ],
       0,
-      "3714a585b73b4bdfbbb86dd8bb9b2e2c"
+      "5f753aaa3831180a7190e7213b7d5b5a"
     ],
     [
       "Spec.SHA2.ws_pre_inner",
@@ -853,7 +861,7 @@
         "typing_Spec.SHA2._sigma1"
       ],
       0,
-      "6950e2813466db1c933dfaea8f56e337"
+      "22fecde5784012968784bf741fdd1dfb"
     ],
     [
       "Spec.SHA2.ws_pre_",
@@ -872,7 +880,7 @@
         "typing_Spec.SHA2.size_k_w", "typing_Spec.SHA2.word_n"
       ],
       0,
-      "9ba8a82dce07dd35a96d387598d3139d"
+      "cc8c7c98afaf88154cd846e21ac64e20"
     ],
     [
       "Spec.SHA2.shuffle_pre",
@@ -890,7 +898,7 @@
         "typing_Spec.SHA2.ws_pre"
       ],
       0,
-      "513dfeb879486cf8816c7ba4c483563a"
+      "c52ca36f07999eee2e18be507ca041d2"
     ],
     [
       "Spec.SHA2.init",
@@ -907,7 +915,7 @@
         "unit_typing"
       ],
       0,
-      "6f59069d7431dc1e3efdcc167176cc02"
+      "95c332931c5191882cdc71a08db2f59d"
     ],
     [
       "Spec.SHA2.update_pre",
@@ -952,7 +960,7 @@
         "typing_tok_Lib.IntTypes.U32@tok", "unit_typing"
       ],
       0,
-      "aa886bc9b6470690b19f93c0de38510e"
+      "6823afad086825e13d3109c016aaedfa"
     ],
     [
       "Spec.SHA2.finish",
@@ -961,7 +969,7 @@
       1,
       [ "@query" ],
       0,
-      "767157334d32cd1fd37a2e363b9e65f4"
+      "261c0f6098e5259dbf983f1f34a56666"
     ]
   ]
 ]

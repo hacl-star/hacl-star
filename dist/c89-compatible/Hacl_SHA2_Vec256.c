@@ -25,7 +25,7 @@
 #include "internal/Hacl_SHA2_Vec256.h"
 
 
-
+#include "libintvector.h"
 typedef struct ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
 {
   uint8_t *fst;

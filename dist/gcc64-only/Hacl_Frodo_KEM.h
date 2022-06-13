@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_SHA3.h"
 #include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 static inline void
 Hacl_Keccak_shake128_4x(
   uint32_t input_len,

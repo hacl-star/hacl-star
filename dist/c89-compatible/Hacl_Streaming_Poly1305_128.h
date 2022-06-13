@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Poly1305_128.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef struct Hacl_Streaming_Poly1305_128_poly1305_128_state_s
 {
   Lib_IntVector_Intrinsics_vec128 *block_state;

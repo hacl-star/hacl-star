@@ -22,7 +22,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "06332d8f92283058bc8526f9f06c217b"
+      "4efe1573f3d3707c007786dd583ee0d4"
     ],
     [
       "Spec.MD5.h0",
@@ -52,7 +52,7 @@
         "typing_FStar.List.Tot.Base.length", "typing_Spec.MD5.init_as_list"
       ],
       0,
-      "73bbec7cac8903312d28e8c3ea6e5afe"
+      "ec62bd707a34be6b4ca4e33906a5c118"
     ],
     [
       "Spec.MD5.t_as_list",
@@ -75,7 +75,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c3b3dbd0abd71818ba223daf6d6588ca"
+      "379ac50357f11b3a66be84beb9cf726c"
     ],
     [
       "Spec.MD5.t",
@@ -91,7 +91,7 @@
         "typing_Spec.MD5.t_as_list"
       ],
       0,
-      "28b6f8481e5b4e202ae11db11c896b6a"
+      "836146514e747243b803b145a8ab919c"
     ],
     [
       "Spec.MD5.round_op_gen_aux",
@@ -121,7 +121,7 @@
         "typing_Spec.MD5.t"
       ],
       0,
-      "326332f9d991840b3263888913ea4200"
+      "8e41b0b896d6e88815d6d79d8959cc4f"
     ],
     [
       "Spec.MD5.round1_aux",
@@ -161,7 +161,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "310897c8cb901547e31c5636e067bcd6"
+      "c33232ea30e114c86980dfff49d81b8b"
     ],
     [
       "Spec.MD5.round2_aux",
@@ -201,7 +201,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "9219e31cfe3581e77ee3dbf22550b416"
+      "f3e9c60966bd6216cb55d0096a4178ed"
     ],
     [
       "Spec.MD5.round3_aux",
@@ -241,7 +241,7 @@
         "typing_FStar.Seq.Base.length", "typing_FStar.UInt32.uint_to_t"
       ],
       0,
-      "29b60fd176479f8d0a41d0764f1bfa8c"
+      "363739c349736b30d025a4d6a553da1e"
     ],
     [
       "Spec.MD5.round4_aux",
@@ -281,7 +281,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "c8d8c2952a88190537daa1fabcb94c7a"
+      "2eb1cd46f2aaeb4ca992b2424b2f9e6a"
     ],
     [
       "Spec.MD5.overwrite_aux",
@@ -302,7 +302,7 @@
         "refinement_interpretation_Tm_refine_a0cd7d06c5da6444b6b51b319febde8e"
       ],
       0,
-      "1f05e56e72598a3adc36fa61b83c6201"
+      "aa744eef992fdd93b247ed4ade4d2c0c"
     ],
     [
       "Spec.MD5.update_aux",
@@ -313,19 +313,15 @@
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented",
         "@fuel_irrelevance_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Spec.Hash.Definitions.MD5",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Spec.Hash.Definitions.MD5@tok",
-        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Spec.Hash.Definitions.word_length",
+        "equality_tok_Spec.Hash.Definitions.MD5@tok", "equation_Prims.nat",
+        "equation_Spec.Hash.Definitions.word_length", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "8759c313ff29683afc165b4d8d54f841"
+      "ea37225b312baf7bf2a65ef539b2b0b0"
     ],
     [
       "Spec.MD5.update_aux",
@@ -366,7 +362,7 @@
         "typing_tok_Spec.Hash.Definitions.MD5@tok"
       ],
       0,
-      "534cd7bd5d1fca772ec281769503fd6f"
+      "e3997ac96604b2ae8b04ce4a741aa265"
     ],
     [
       "Spec.MD5.update",
@@ -383,7 +379,7 @@
         "equation_Spec.Hash.Definitions.word_t"
       ],
       0,
-      "6cde3347529d0a7384c6a75ca377c580"
+      "f8bf6644888cc8507f159ff7dfd4f8b4"
     ],
     [
       "Spec.MD5.finish",
@@ -392,7 +388,7 @@
       1,
       [ "@query" ],
       0,
-      "ddd7e3a3ec18dc7c2da1ce17ad5186ff"
+      "e10b960d03c6a577aa01bb268025bede"
     ]
   ]
 ]

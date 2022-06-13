@@ -37,7 +37,6 @@ extern "C" {
 
 #include "../Hacl_Hash_SHA2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Hash_Core_SHA2_init_224 */
 
 void Hacl_Hash_Core_SHA2_init_224(uint32_t *s);

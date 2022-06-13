@@ -26,7 +26,7 @@
 
 #include "internal/Hacl_Poly1305_128.h"
 #include "internal/Hacl_Krmllib.h"
-
+#include "libintvector.h"
 static inline void
 poly1305_padded_128(Lib_IntVector_Intrinsics_vec128 *ctx, uint32_t len, uint8_t *text)
 {

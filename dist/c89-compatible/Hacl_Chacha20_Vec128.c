@@ -25,7 +25,7 @@
 #include "Hacl_Chacha20_Vec128.h"
 
 #include "internal/Hacl_Chacha20.h"
-
+#include "libintvector.h"
 static inline void double_round_128(Lib_IntVector_Intrinsics_vec128 *st)
 {
   Lib_IntVector_Intrinsics_vec128 std0;

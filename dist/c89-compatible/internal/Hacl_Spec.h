@@ -37,7 +37,6 @@ extern "C" {
 
 #include "../Hacl_Spec.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 #define Spec_ECDSA_NoHash 0
 #define Spec_ECDSA_Hash 1
 

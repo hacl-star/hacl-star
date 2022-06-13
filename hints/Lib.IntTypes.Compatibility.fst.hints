@@ -16,7 +16,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "9629a767931067addaf02e6c9c85b7b0"
+      "ba12ce08ea3b20f823dac413e2df614d"
     ],
     [
       "Lib.IntTypes.Compatibility.uint_v_size_lemma",
@@ -25,19 +25,21 @@
       1,
       [
         "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.range",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "int_inversion", "lemma_Lib.IntTypes.v_mk_int",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Prims.nat", "int_inversion", "lemma_Lib.IntTypes.v_mk_int",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "02e59da170319c10a3ccae099fdbf155"
+      "f69b1ec94d8dce689f97b0a585c4edb8"
     ],
     [
       "Lib.IntTypes.Compatibility.uintv_extensionality",
@@ -46,7 +48,7 @@
       1,
       [ "@query" ],
       0,
-      "b2609021bff2a5b223a4c22a872a8de2"
+      "2614a5b3d0f0a5d948c33c5fbaf61ea5"
     ],
     [
       "Lib.IntTypes.Compatibility.uintv_extensionality",
@@ -58,7 +60,7 @@
         "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5"
       ],
       0,
-      "50946c2f308cc5f0cc163335cb3167b4"
+      "02273a9ab5325f7b2090f4c27a189d79"
     ],
     [
       "Lib.IntTypes.Compatibility.nat_to_uint",
@@ -75,7 +77,7 @@
         "typing_Lib.IntTypes.unsigned"
       ],
       0,
-      "342d81badc1d8c8e78be8b490a7952b6"
+      "ad81d2d90bf9a1b6ac005989ca7dd07b"
     ]
   ]
 ]

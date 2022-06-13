@@ -37,7 +37,6 @@ extern "C" {
 
 #include "../Hacl_Frodo_KEM.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void randombytes_(uint32_t len, uint8_t *res);
 
 #if defined(__cplusplus)

@@ -40,7 +40,6 @@ extern "C" {
 #include "EverCrypt_Hacl.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 uint32_t EverCrypt_random_init();
 
 void EverCrypt_random_sample(uint32_t len, uint8_t *out);

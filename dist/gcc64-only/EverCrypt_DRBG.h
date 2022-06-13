@@ -41,7 +41,6 @@ extern "C" {
 #include "Hacl_HMAC_DRBG.h"
 #include "EverCrypt_HMAC.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
 
 extern uint32_t EverCrypt_DRBG_reseed_interval;

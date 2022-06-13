@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Spec_Blake2_alg */
 
 #define Spec_Blake2_Blake2S 0
