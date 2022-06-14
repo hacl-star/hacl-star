@@ -18,8 +18,8 @@ jobs:
           baseUrl="https://everest-ci.paris.inria.fr"
           latestFinishedEval=$(curl -sLH 'Content-Type: application/json' "$baseUrl/jobset/hacl-star/branch-master/latest-eval")
 
-          rev=$(echo "$latestFinishedEval" | jq '.flake | split("/") | last')
-          id=$(echo "$latestFinishedEval" | jq '.id')
+          rev=$(echo "$latestFinishedEval" | jq -r '.flake | split("/") | last')
+          id=$(echo "$latestFinishedEval" | jq -r '.id')
 
           [[ "$rev" == "$(git rev-parse HEAD)" ]] || {
               echo "The latest evaluation on the CI doesn't correspond to the latest commit."
@@ -30,7 +30,7 @@ jobs:
           buildInfo=$(curl -sLH 'Content-Type: application/json' "$buildUrl")
 
           # Check wether the build was built correctly
-          [[ "$(echo "$buildInfo" | jq '.buildstatus')" == "$STATUS_SUCCEEDED" ]] || {
+          [[ "$(echo "$buildInfo" | jq -r '.buildstatus')" == "$STATUS_SUCCEEDED" ]] || {
               echo "The latest evaluation wasn't successful. Aborting."
               exit 2
           }
