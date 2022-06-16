@@ -106,7 +106,7 @@ let pointAddDoubleWithTwoPointInfinity #c q r =
 
 
 val curve_distributivity: #c: curve -> p0: point_nat_prime #c 
-  -> a: nat  
+  -> a: int
   -> q: point_nat_prime #c {pointEqual q (point_mult #c  a p0)}
   -> Lemma (pointEqual q (point_mult #c (a % getOrder #c) p0))
 
@@ -116,7 +116,7 @@ let curve_distributivity #c p0 a q = lemma_scalar_reduce #c p0 a
 val curve_multiplication_distributivity: 
   #c: curve ->
   p0: point_nat_prime #c ->
-  a: nat -> 
+  a: int -> 
   q: point_nat_prime #c {pointEqual q (point_mult #c a p0)} ->
   b: nat -> 
   r: point_nat_prime #c {pointEqual r (point_mult #c  b q)} -> 

@@ -19,7 +19,7 @@ open FStar.Mul
 
 #set-options "--z3rlimit 100"
 
-let w = 4 
+let w = 5
 let m = pow2 w
 
 
@@ -46,6 +46,7 @@ let to_wnaf_scalar_step d =
   let d_i = d % (2 * m) - m in 
   let d = div (d - d_i) m in 
   d_i, d
+
 
 
 open FStar.Seq
@@ -90,7 +91,6 @@ val to_wnaf2_: n0: nat -> d: int -> l: seq int {Seq.length l == n0 / w + 1}
     else index r i == d % (2 * m) - m)})
   (decreases (Seq.length l - i))
 
-
 let rec to_wnaf2_ n0 d l i = 
   if d <= m then 
     begin
@@ -113,6 +113,30 @@ val to_wnaf: n: nat -> d: nat {d < pow2 n} -> Tot (r: seq int {Seq.length r == n
 let to_wnaf n d = 
   let s = Seq.Base.create #int (n / w + 1) 0 in 
   to_wnaf2_ n d s 0
+
+
+val to_wnaf_lemma_: n: nat -> d: nat {d < pow2 n /\ d % 2 == 1} -> i: nat -> Lemma (
+  let wnaf_repr = to_wnaf n d in 
+  if i < (n / w) then 
+    forall (j: nat {j < i}). index wnaf_repr i == (2 * (d / 2) / pow2 (w * i) + 1) % (2 * m) - m
+  else 
+    (forall (j: nat {j < n / w}). index wnaf_repr j == (2 * (d / 2) / pow2 (w * j) + 1) % (2 * m) - m) /\
+    index wnaf_repr (n / w) == ((2 * (d / 2) / pow2 (w * i) + 1)))
+
+let to_wnaf_lemma_ n d i = 
+  match i with 
+  | 0 -> ()
+  | _ -> admit()
+
+
+val to_wnaf_lemma: n: nat -> d: nat {d < pow2 n} -> Lemma (
+  let wnaf_repr = to_wnaf n d in 
+  (forall (i: nat {i < n / w}). 
+    index wnaf_repr i == (2 * (d / 2) / pow2 (w * i) + 1) % (2 * m) - m) /\
+  index wnaf_repr (n / w) == ((2 * (d / 2) / pow2 (w * ((n / w))) + 1)))
+
+let to_wnaf_lemma n d = 
+  to_wnaf_lemma_ n d (n / w)
 
 
 val getPrecomputed: #c: curve -> g: point #c #Jacobian -> s: int -> Tot (point #c #Jacobian)

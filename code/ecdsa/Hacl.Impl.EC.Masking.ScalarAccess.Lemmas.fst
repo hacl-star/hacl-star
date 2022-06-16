@@ -443,6 +443,7 @@ let rec test__ #c s i =
     division_multiplication_lemma (scalar_as_nat_ s len) (pow2 (i - 1)) 2;
     pow2_double_mult (i - 1)
 
+
 val test_:  #c: curve -> s: scalar_bytes #c -> i: nat {i < v (getScalarLen c)} -> Lemma (
   v (ith_bit s i) == scalar_as_nat s / pow2 i % 2)
 
