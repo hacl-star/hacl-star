@@ -1,6 +1,6 @@
 {
   inputs = {
-    fstar-src.url     = github:fstarlang/fstar?ref=master;
+    fstar-src.url     = github:W95Psp/FStar?ref=data-constructors-attributes;
     fstar-src.flake   = false;
     karamel-src.url   = github:fstarlang/karamel?ref=master;
     karamel-src.flake = false;
