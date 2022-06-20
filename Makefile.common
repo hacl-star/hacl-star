@@ -154,7 +154,6 @@ BIGNUM_BUNDLE= \
 AES_BUNDLE=-bundle Hacl.AES_128.BitSlice=Hacl.Impl.AES.* -bundle Hacl.AES_128.NI=Hacl.Impl.AES.* -bundle Hacl.AES_256.BitSlice=Hacl.Impl.AES.* -bundle Hacl.AES_256.NI=Hacl.Impl.AES.*
 GF128_BUNDLE=-bundle Hacl.Gf128.NI=Hacl.Impl.Gf128.*
 AES_GCM_BUNDLE=-bundle Hacl.AES_GCM_128.NI -bundle Hacl.AES_GCM_256.NI
-CIRC_BUNDLE=-bundle Hacl.Circ
 
 # 3. OCaml
 

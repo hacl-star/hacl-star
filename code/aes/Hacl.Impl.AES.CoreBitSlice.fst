@@ -8,7 +8,7 @@ open Lib.ByteBuffer
 open Hacl.Spec.AES_128.BitSlice
 
 module ST = FStar.HyperStack.ST
-
+module SubBytes = Hacl.Impl.AES.SubBytes
 
 
 
@@ -212,10 +212,12 @@ val sub_bytes_state:
   (requires (fun h -> live h st))
   (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
+#push-options "--z3rlimit 20"
 let sub_bytes_state (st:state) =
   let (st0,st1,st2,st3,st4,st5,st6,st7) =
-    sub_bytes64x8 st.(size 0) st.(size 1) st.(size 2) st.(size 3)
-						st.(size 4) st.(size 5) st.(size 6) st.(size 7)
+    SubBytes.sub_bytes64x8
+    st.(size 0) st.(size 1) st.(size 2) st.(size 3)
+    st.(size 4) st.(size 5) st.(size 6) st.(size 7)
   in
   st.(size 0) <- st0;
   st.(size 1) <- st1;
@@ -225,6 +227,7 @@ let sub_bytes_state (st:state) =
   st.(size 5) <- st5;
   st.(size 6) <- st6;
   st.(size 7) <- st7
+#pop-options
 
 
 val shift_rows_state:

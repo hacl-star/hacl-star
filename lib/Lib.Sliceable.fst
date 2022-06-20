@@ -396,7 +396,10 @@ val circuit_lowstar (#m:IT.size_nat{m>0}) (#m':IT.size_nat{m'>0}) (circ:circuit 
         B.live h input /\ B.live h output
         /\ B.disjoint input output
       ))
-      (ensures  (fun h0 _ h1 -> forall(j:nat{j<m'}). B.get h1 output j == circuit_def circ (xNxM_of_lbuffer h0 input) j))
+      (ensures  (fun h0 _ h1 ->
+        (forall(j:nat{j<m'}). B.get h1 output j == circuit_def circ (xNxM_of_lbuffer h0 input) j)
+        /\ B.modifies1 output h0 h1
+      ))
   )
 inline_for_extraction noextract
 let circuit_lowstar #m #m' circ #n xN = normal (circuit_lowstar_aux circ xN m')
