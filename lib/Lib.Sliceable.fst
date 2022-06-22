@@ -203,8 +203,15 @@ val sliceable_intro
   (f:(#n:IT.size_nat -> #xN:sig n -> xNxM xN m -> xNxM xN m'))
   (pr:(#n:IT.size_nat -> #xN:sig n -> x:xNxM xN m -> j:nat{j<n} -> Lemma (column j (f x) == f (column j x))))
   : Lemma (sliceable f)
-let sliceable_intro f pr =
-  admit ()
+let sliceable_intro #m #m' f pr =
+  FStar.Classical.forall_intro_2 (
+    fun (n:IT.size_nat) (xN:sig n) ->
+      FStar.Classical.forall_intro_2 (
+        fun (x:xNxM xN m) (j:nat{j<n}) ->
+          pr x j
+          <: Lemma (column j (f x) == f (column j x))
+      ) <: Lemma (forall (x:xNxM xN m) (j:nat{j<n}). column j (f x) == f (column j x))
+  )
 
 val sliceable_def
   (#m #m':IT.size_nat)
