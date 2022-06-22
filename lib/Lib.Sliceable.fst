@@ -31,16 +31,17 @@ noeq type sig (n:IT.size_nat) =
 ; zeros_: t
 ; and_: t -> t -> t
 ; xor_: t -> t -> t
+; xnor_: t -> t -> t
 ; or_: t -> t -> t
 ; not_: t -> t
 ; ones_spec: i:nat{i<n} -> Lemma (v ones_ i == true)
 ; zeros_spec: i:nat{i<n} -> Lemma (v zeros_ i == false)
 ; and_spec: x:t -> y:t -> i:nat{i<n} -> Lemma (v (and_ x y) i == (v x i && v y i))
 ; xor_spec: x:t -> y:t -> i:nat{i<n} -> Lemma (v (xor_ x y) i == (v x i ^ v y i))
+; xnor_spec: x:t -> y:t -> i:nat{i<n} -> Lemma (v (xnor_ x y) i == (not(v x i) && not(v y i) || v x i && v y i))
 ; or_spec: x:t -> y:t -> i:nat{i<n} -> Lemma (v (or_ x y) i == (v x i || v y i))
 ; not_spec: x:t -> i:nat{i<n} -> Lemma (v (not_ x) i == not(v x i))
 }
-
 
 val xN_mk_def (#n:IT.size_nat) (xN:sig n) (f:(i:nat{i<n} -> bool)) (i:nat{i<n}) :
   Lemma (xN.v (xN.mk f) i == f i)
@@ -67,6 +68,11 @@ val xN_xor_spec (#n:IT.size_nat) (xN:sig n) (x y:xN.t) (i:nat{i<n}) :
   [SMTPat (xN.v (xN.xor_ x y) i)]
 let xN_xor_spec xN x y i = xN.xor_spec x y i
 
+val xN_xnor_spec (#n:IT.size_nat) (xN:sig n) (x y:xN.t) (i:nat{i<n}) :
+  Lemma (xN.v (xN.xnor_ x y) i == (not(xN.v x i) && not(xN.v y i) || xN.v x i && xN.v y i))
+  [SMTPat (xN.v (xN.xnor_ x y) i)]
+let xN_xnor_spec xN x y i = xN.xnor_spec x y i
+
 val xN_or_spec (#n:IT.size_nat) (xN:sig n) (x y:xN.t) (i:nat{i<n}) :
   Lemma (xN.v (xN.or_ x y) i == (xN.v x i || xN.v y i))
   [SMTPat (xN.v (xN.or_ x y) i)]
@@ -77,11 +83,10 @@ val xN_not_spec (#n:IT.size_nat) (xN:sig n) (x:xN.t) (i:nat{i<n}) :
   [SMTPat (xN.v (xN.not_ x) i)]
 let xN_not_spec xN x i = xN.not_spec x i
 
-
 inline_for_extraction noextract
 val xNxM (#n:IT.size_nat) (xN:sig n) (m:IT.size_nat) : Type0
 inline_for_extraction noextract
-let rec xNxM xN m = (l:Seq.lseq xN.t m)
+let xNxM xN m = Seq.lseq xN.t m
 
 inline_for_extraction noextract
 val index (#n:IT.size_nat) (#xN:sig n) (#m:IT.size_nat) (x:xNxM xN m) (i:nat{i<m}) : xN.t
@@ -118,12 +123,14 @@ let u1 : sig 1 =
 ; zeros_ = false
 ; and_ = (fun x y -> x && y)
 ; xor_ = (fun x y -> x ^ y)
+; xnor_ = (fun x y -> not x && not y || x && y)
 ; or_ = (fun x y -> x || y)
 ; not_ = (fun x -> not x)
 ; ones_spec = (fun i -> ())
 ; zeros_spec = (fun i -> ())
 ; and_spec = (fun x y i -> ())
 ; xor_spec = (fun x y i -> ())
+; xnor_spec = (fun x y i -> ())
 ; or_spec = (fun x y i -> ())
 ; not_spec = (fun x i -> ())
 }
@@ -265,6 +272,7 @@ type gate (m:nat) (c:nat) =
 | Ones
 | Input : (i:nat{i<m}) -> gate m c
 | Xor : (a:nat{a<c}) -> (b:nat{b<c}) -> gate m c
+| Xnor : (a:nat{a<c}) -> (b:nat{b<c}) -> gate m c
 | And : (a:nat{a<c}) -> (b:nat{b<c}) -> gate m c
 | Or : (a:nat{a<c}) -> (b:nat{b<c}) -> gate m c
 | Not : (a:nat{a<c}) -> gate m c
@@ -281,9 +289,11 @@ let rec circuit_def circ x i =
   | Ones -> (_).ones_
   | Zeros -> (_).zeros_
   | Xor a b -> (_).xor_ (circuit_def circ x a) (circuit_def circ x b)
+  | Xnor a b -> (_).xnor_ (circuit_def circ x a) (circuit_def circ x b)
   | And a b -> (_).and_ (circuit_def circ x a) (circuit_def circ x b)
   | Or a b -> (_).or_ (circuit_def circ x a) (circuit_def circ x b)
   | Not a -> (_).not_ (circuit_def circ x a)
+
 
 val circuit_def_lemma (#m #m':IT.size_nat) (circ:circuit m m') (#n:IT.size_nat) (#xN:sig n) (x:xNxM xN m) (i:nat{i<m'-1}) :
   Lemma (circuit_def #_ #(m'-1) circ x i == circuit_def #_ #m' circ x i)
@@ -294,24 +304,54 @@ let rec circuit_def_lemma circ x i =
   | Ones -> ()
   | Zeros -> ()
   | Xor a b -> circuit_def_lemma circ x a; circuit_def_lemma circ x b
+  | Xnor a b -> circuit_def_lemma circ x a; circuit_def_lemma circ x b
   | And a b -> circuit_def_lemma circ x a; circuit_def_lemma circ x b
   | Or a b -> circuit_def_lemma circ x a; circuit_def_lemma circ x b
   | Not a -> circuit_def_lemma circ x a
 
 inline_for_extraction noextract
-val circuit_spec (#m #m':IT.size_nat) (circ:circuit m m') (#n:IT.size_nat) (#xN:sig n) (x:xNxM xN m) : xNxM xN m'
+let circuit_spec_upd (#m #m':IT.size_nat) (circ:circuit m m')
+  (#n:IT.size_nat) (#xN:sig n) (x:xNxM xN m) (cur:nat{cur<m'})
+  (y:xNxM xN m'{forall (i:nat{i<cur}). index y i == circuit_def circ x i}) :
+  (z:xNxM xN m'{forall (i:nat{i<=cur}). index z i == circuit_def circ x i})
+  =
+  Seq.upd y cur (
+    let g = circ cur in
+    match g with
+    | Input i -> index x i
+    | Zeros -> (_).zeros_
+    | Ones -> (_).ones_
+    | Xor a b -> (_).xor_ (index y a) (index y b)
+    | Xnor a b -> (_).xnor_ (index y a) (index y b)
+    | And a b -> (_).and_ (index y a) (index y b)
+    | Or a b -> (_).or_ (index y a) (index y b)
+    | Not a -> (_).not_ (index y a)
+  )
+
+[@@(strict_on_arguments [5;7])]
 inline_for_extraction noextract
-let circuit_spec circ x = xNxM_mk _ _ (circuit_def circ x)
+let rec circuit_spec_aux (#m #m':IT.size_nat) (circ:circuit m m')
+  (#n:IT.size_nat) (#xN:sig n) (x:xNxM xN m) (cur:nat{cur<=m'})
+  (y:xNxM xN m'{forall (i:nat{i<cur}). index y i == circuit_def circ x i}) :
+  Tot
+    (z:xNxM xN m'{forall (i:nat{i<m'}). index z i == circuit_def circ x i})
+    (decreases m'-cur)
+  =
+  if cur = m' then
+    y
+  else
+    circuit_spec_aux circ x (cur+1) (circuit_spec_upd circ x cur y)
+
+inline_for_extraction noextract
+val circuit_spec (#m #m':IT.size_nat) (circ:circuit m m') (#n:IT.size_nat) (#xN:sig n) (x:xNxM xN m) :
+    (y:xNxM xN m'{forall (i:nat{i<m'}). index y i == circuit_def circ x i})
+inline_for_extraction noextract
+let circuit_spec circ x = circuit_spec_aux circ x 0 (xNxM_mk _ _ (fun _ -> (_).zeros_))
 
 val circuit_spec_lemma (#m #m':IT.size_nat) (circ:circuit m m') (#n:IT.size_nat) (#xN:sig n) (x:xNxM xN m) (i:nat{i<m'}) :
   Lemma (index (circuit_spec circ x) i == circuit_def circ x i)
   [SMTPat (index (circuit_spec circ x) i)]
 let circuit_spec_lemma circ x i = ()
-
-inline_for_extraction noextract
-val circuit_spec' (#m #m':IT.size_nat) (circ:circuit m m') (#n:IT.size_nat) (#xN:sig n) (x:xNxM xN m) : (y:xNxM xN m'{y == circuit_spec circ x})
-inline_for_extraction noextract
-let rec circuit_spec' #m #m' circ #n #xN x = admit ()
 
 private val sliceable_circuit_lemma
   (#m #m':IT.size_nat)
@@ -322,11 +362,13 @@ private val sliceable_circuit_lemma
   (i:nat{i<m'})
   (j:nat{j<n})
   : Lemma ( xN.v (circuit_def circ x i) j == u1.v (circuit_def circ (column j x) i) 0 )
-let rec sliceable_circuit_lemma circ x i j = match circ i with
+let rec sliceable_circuit_lemma circ x i j =
+match circ i with
   | Ones -> ()
   | Zeros -> ()
   | Input _ -> ()
   | Xor a b -> sliceable_circuit_lemma circ x a j; sliceable_circuit_lemma circ x b j
+  | Xnor a b -> sliceable_circuit_lemma circ x a j; sliceable_circuit_lemma circ x b j
   | And a b -> sliceable_circuit_lemma circ x a j; sliceable_circuit_lemma circ x b j
   | Or a b -> sliceable_circuit_lemma circ x a j; sliceable_circuit_lemma circ x b j
   | Not a -> sliceable_circuit_lemma circ x a j
@@ -377,18 +419,20 @@ val circuit_lowstar_aux (#m:IT.size_nat) (#m':IT.size_nat) (circ:circuit m m')
 inline_for_extraction noextract
 let rec circuit_lowstar_aux #m #m' circ #n xN cur =
   if cur = 0 then
-    (fun _ _ -> ())
+
+(fun _ _ -> ())
   else (
     let rec_call = circuit_lowstar_aux circ xN (cur-1) in
     let g : gate m (cur-1) = circ (cur-1) in
     match g with
-      | Zeros -> (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) xN.zeros_)
-      | Ones -> (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) xN.ones_)
-      | Input i -> (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (B.index input (IT.size i)))
-      | Xor a b -> (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (xN.xor_ (B.index output (IT.size a)) (B.index output (IT.size b))))
-      | And a b -> (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (xN.and_ (B.index output (IT.size a)) (B.index output (IT.size b))))
-      | Or a b -> (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (xN.or_ (B.index output (IT.size a)) (B.index output (IT.size b))))
-      | Not a -> (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (xN.not_ (B.index output (IT.size a))))
+      | Zeros ->    (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) xN.zeros_)
+      | Ones ->     (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) xN.ones_)
+      | Input i ->  (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (B.index input (IT.size i)))
+      | Xor a b ->  (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (xN.xor_ (B.index output (IT.size a)) (B.index output (IT.size b))))
+      | Xnor a b -> (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (xN.xnor_ (B.index output (IT.size a)) (B.index output (IT.size b))))
+      | And a b ->  (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (xN.and_ (B.index output (IT.size a)) (B.index output (IT.size b))))
+      | Or a b ->   (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (xN.or_ (B.index output (IT.size a)) (B.index output (IT.size b))))
+      | Not a ->    (fun input output -> rec_call input output; B.upd output (IT.size (cur-1)) (xN.not_ (B.index output (IT.size a))))
   )
 #pop-options
 
@@ -414,45 +458,19 @@ let circuit_lowstar #m #m' circ #n xN = normal (circuit_lowstar_aux circ xN m')
 (*** of_uint and to_uint ***)
 
 inline_for_extraction noextract
-val to_uint (#m:IT.size_nat{m>0}) (x:u1xM m) : (p:uint_t m{p == FStar.UInt.from_vec (FStar.Seq.init m (index x))})
+val to_uint (#m:IT.size_nat{m>0}) (x:u1xM m) : (p:uint_t m)
 inline_for_extraction noextract
-let to_uint #m x =
-  let rec aux (j:nat{j<=m})
-    : (p:uint_t j{p == FStar.UInt.from_vec (FStar.Seq.init j (index x))})
-    =
-    if j = 0 then
-      0
-    else (
-      let r = Prims.op_Multiply 2 (aux (j-1)) + (if index x (j-1) then 1 else 0) in
-      FStar.Math.Lemmas.pow2_plus 1 (j-1);
-      let r : uint_t j = r in
-      let v = FStar.Seq.init j (index x) in
-      assume (r == FStar.UInt.from_vec (FStar.Seq.init j (index x)));
-      r
-    )
-  in
-  aux m
+let to_uint #m x = FStar.UInt.from_vec (FStar.Seq.init m (index x))
 
 inline_for_extraction noextract
-val of_uint (#m:IT.size_nat{m>0}) (p:uint_t m) : (x:u1xM m{x == u1xM_mk _ (FStar.UInt.nth p)})
+val of_uint (#m:IT.size_nat{m>0}) (p:uint_t m) : (x:u1xM m)
 inline_for_extraction noextract
-let of_uint #m p =
-  let aux (q:uint_t m) (i:nat{i<m}) : (r:bool{r == FStar.UInt.nth p i}) =
-    admit ();
-    q / (pow2 i) % 2 = 1
-  in
-  let x = u1xM_mk _ (aux p) in
-  xNxM_eq_intro x (u1xM_mk _ (FStar.UInt.nth p));
-  x
+let of_uint #m p = u1xM_mk _ (FStar.UInt.nth p)
 
 val to_uint_of_uint (#m:IT.size_nat{m>0}) (p:uint_t m) :
   Lemma (to_uint (of_uint p) == p)
   [SMTPat (to_uint (of_uint p))]
-let to_uint_of_uint #m p =
-  if m = 0 then
-    ()
-  else
-    FStar.UInt.nth_lemma (to_uint (of_uint p)) p
+let to_uint_of_uint #m p = FStar.UInt.nth_lemma (to_uint (of_uint p)) p
 
 val of_uint_to_uint (#m:IT.size_nat{m>0}) (x:u1xM m) :
   Lemma (of_uint (to_uint x) == x)
@@ -493,18 +511,15 @@ let bruteforce_aux (n:nat) (phi:(i:uint_t n -> bool)) :
 inline_for_extraction noextract
 val bruteforce
   (#m:IT.size_nat{m>0}) (#m':IT.size_nat{m'>0})
-  (impl:(#n:IT.size_nat -> #xN:sig n -> xNxM xN m -> xNxM xN m'))
+  (impl:(#n:IT.size_nat -> #xN:sig n -> xNxM xN m -> xNxM xN m'){sliceable impl})
   (spec:(uint_t m -> uint_t m'))
-  : Pure
-    bool
-    (requires sliceable impl)
-    (ensures fun r ->
+  : (r:bool{
       if r then
         forall (n:IT.size_nat) (xN:sig n) (x:xNxM xN m) (j:nat{j<n}).
         column j (impl x) == of_uint (spec (to_uint (column j x)))
       else
         True
-    )
+    })
 inline_for_extraction noextract
 let bruteforce #m #m' impl spec =
   let phi0 (x:u1xM m) : Type0 = impl x == (of_uint (spec (to_uint x)) <: u1xM m') in
@@ -518,6 +533,18 @@ let bruteforce #m #m' impl spec =
     forall_uint_lemma phi0;
     true
   ) else false
+
+let bruteforce_lemma
+  (#m:IT.size_nat{m>0}) (#m':IT.size_nat{m'>0})
+  (impl:(#n:IT.size_nat -> #xN:sig n -> xNxM xN m -> xNxM xN m'){sliceable impl})
+  (spec:(uint_t m -> uint_t m')) :
+  Lemma
+    (requires bruteforce impl spec == true)
+    (ensures
+      forall (n:IT.size_nat) (xN:sig n) (x:xNxM xN m) (j:nat{j<n}).
+      column j (impl x) == of_uint (spec (to_uint (column j x)))
+    ) =
+  ()
 
 //val nat_ind
 //  (n:pos)
@@ -561,12 +588,18 @@ let uN t l =
 ; zeros_ = IT.zeros t l
 ; and_ = IT.logand
 ; xor_ = IT.logxor
+; xnor_ = (fun x y -> IT.logor (IT.logand (IT.lognot x) (IT.lognot y)) (IT.logand x y))
 ; or_ = IT.logor
 ; not_ = IT.lognot
 ; zeros_spec = (fun i -> UInt.zero_nth_lemma #(IT.bits t) i)
 ; ones_spec = (fun i -> UInt.ones_nth_lemma #(IT.bits t) i)
 ; and_spec = (fun x y i -> IT.logand_spec x y)
 ; xor_spec = (fun x y i -> IT.logxor_spec x y)
+; xnor_spec = (fun x y i ->
+    IT.lognot_spec x; IT.lognot_spec y;
+    IT.logand_spec x y; IT.logand_spec (IT.lognot x) (IT.lognot y);
+    IT.logor_spec (IT.logand (IT.lognot x) (IT.lognot y)) (IT.logand x y)
+  )
 ; or_spec = (fun x y i -> IT.logor_spec x y)
 ; not_spec = (fun x i -> IT.lognot_spec x)
 }
@@ -622,3 +655,21 @@ let uN_shift_right #t #l #n x k =
 inline_for_extraction noextract
 let uNxM (t:IT.inttype{IT.unsigned t}) (l:IT.secrecy_level) (m:IT.size_nat) : Type0 =
   xNxM (uN t l) m
+
+inline_for_extraction noextract
+let uNx8 (t:IT.inttype{IT.unsigned t}) (l:IT.secrecy_level) : Type0 =
+  xNxM (uN t l) 8
+
+inline_for_extraction noextract
+let uNx8_mk (#t:IT.inttype{IT.unsigned t}) (#l:IT.secrecy_level)
+  (u0 u1 u2 u3 u4 u5 u6 u7:(uN t l).t) : uNx8 t l =
+  xNxM_mk (uN t l) 8 (fun i -> match i with
+  | 0 -> u0
+  | 1 -> u1
+  | 2 -> u2
+  | 3 -> u3
+  | 4 -> u4
+  | 5 -> u5
+  | 6 -> u6
+  | 7 -> u7
+  )
