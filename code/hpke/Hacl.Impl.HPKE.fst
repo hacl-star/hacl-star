@@ -552,7 +552,7 @@ val labeled_expand_hash:
       as_seq h1 o_hash `Seq.equal` S.labeled_expand (S.hash_of_cs cs) (as_seq h0 suite_id) (as_seq h0 prk) (as_seq h0 label) (as_seq h0 info) (v l)
     )
 
-#push-options "--z3rlimit 200"
+#push-options "--z3rlimit 800 --z3refresh"
 
 [@ Meta.Attribute.inline_]
 let labeled_expand_hash #cs suite_id_len suite_id prklen prk labellen label infolen info l o_hash =
