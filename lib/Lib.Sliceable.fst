@@ -437,7 +437,7 @@ let rec circuit_lowstar_aux #m #m' circ #n xN cur =
 #pop-options
 
 inline_for_extraction noextract
-val circuit_lowstar (#m:IT.size_nat{m>0}) (#m':IT.size_nat{m'>0}) (circ:circuit m m')
+val circuit_lowstar (#m #m':IT.size_nat) (circ:circuit m m')
   (#n:IT.size_nat) (xN:sig n) :
   Tot (
     (input:B.lbuffer xN.t (IT.size m)) ->
@@ -448,12 +448,81 @@ val circuit_lowstar (#m:IT.size_nat{m>0}) (#m':IT.size_nat{m'>0}) (circ:circuit 
         /\ B.disjoint input output
       ))
       (ensures  (fun h0 _ h1 ->
-        (forall(j:nat{j<m'}). B.get h1 output j == circuit_def circ (xNxM_of_lbuffer h0 input) j)
+        (xNxM_of_lbuffer h1 output == circuit_spec circ (xNxM_of_lbuffer h0 input))
         /\ B.modifies1 output h0 h1
       ))
   )
+
 inline_for_extraction noextract
-let circuit_lowstar #m #m' circ #n xN = normal (circuit_lowstar_aux circ xN m')
+let circuit_lowstar #m #m' circ #n xN input output =
+  let h0 = get () in
+  let r = normal (circuit_lowstar_aux circ xN m') input output in
+  let h1 = get () in
+  xNxM_eq_intro (xNxM_of_lbuffer h1 output) (circuit_spec circ (xNxM_of_lbuffer h0 input))
+
+inline_for_extraction noextract
+val reduce_output_lowstar
+  (#m #m':(m:IT.size_nat{m>0}))
+  (spec:((#n:IT.size_nat) -> (#xN:sig n) -> xNxM xN m -> xNxM xN m'))
+  (impl:(
+    (#n:IT.size_nat) -> (xN:sig n) ->
+    (input:B.lbuffer xN.t (IT.size m)) ->
+    (output:B.lbuffer xN.t (IT.size m')) ->
+    Stack unit
+      (requires (fun h ->
+        B.live h input /\ B.live h output
+        /\ B.disjoint input output
+      ))
+      (ensures  (fun h0 _ h1 ->
+        (xNxM_of_lbuffer h1 output == spec (xNxM_of_lbuffer h0 input))
+        /\ B.modifies1 output h0 h1
+      ))
+  ))
+  (m'':IT.size_nat{m''>0})
+  (r:((i:nat{i<m''}) -> (j:nat{j<m'})))
+  (#n:IT.size_nat) (xN:sig n)
+  :
+  Tot (
+    (input:B.lbuffer xN.t (IT.size m)) ->
+    (tmp:B.lbuffer xN.t (IT.size m')) ->
+    (output:B.lbuffer xN.t (IT.size m'')) ->
+    Stack unit
+      (requires (fun h ->
+        B.live h input /\ B.live h tmp /\ B.live h output
+        /\ B.disjoint input output /\ B.disjoint input tmp /\ B.disjoint output tmp
+      ))
+      (ensures  (fun h0 _ h1 ->
+        (xNxM_of_lbuffer h1 output == reduce_output spec m'' r (xNxM_of_lbuffer h0 input))
+        /\ B.modifies2 output tmp h0 h1
+      ))
+  )
+
+inline_for_extraction noextract
+let reduce_output_lowstar spec impl m'' r xN =
+  fun input tmp output ->
+  let h0 = get () in
+  impl xN input tmp;
+  let h1 = get () in
+  let rec aux (i:nat{i<=m''}) : Stack unit
+    (requires fun h0 -> B.live h0 output /\ B.live h0 tmp)
+    (ensures fun h0 _ h1 ->
+      B.modifies1 output h0 h1 /\ B.live h1 output /\ B.live h1 tmp /\
+      (forall (j:nat{j<i}). B.get h1 output j == B.get h0 tmp (r j))
+      )
+    =
+    if i = 0 then
+      ()
+    else (
+      aux (i-1);
+      let o = B.index tmp (IT.size (r (i-1))) in
+      B.upd output (IT.size (i-1)) o
+    )
+  in
+  aux m'';
+  let h2 = get () in
+  xNxM_eq_intro (xNxM_of_lbuffer h2 output) (reduce_output spec m'' r (xNxM_of_lbuffer h0 input));
+  ()
+
 
 (*** of_uint and to_uint ***)
 
