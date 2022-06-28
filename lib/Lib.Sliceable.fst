@@ -496,33 +496,35 @@ val reduce_output_lowstar
   )
 
 inline_for_extraction noextract
-let reduce_output_lowstar #_ #m' spec xN impl m'' r =
-  fun input output ->
-  let h0 = get () in
-  push_frame ();
-  let tmp : B.lbuffer xN.t (IT.size m') = B.create (IT.size m') (xN.zeros_) in
-  impl input tmp;
-  let h1 = get () in
-  let rec aux (i:nat{i<=m''}) : Stack unit
-    (requires fun h0 -> B.live h0 output /\ B.live h0 tmp)
-    (ensures fun h0 _ h1 ->
-      B.modifies1 output h0 h1 /\ B.live h1 output /\ B.live h1 tmp /\
-      (forall (j:nat{j<i}). B.get h1 output j == B.get h0 tmp (r j))
+let reduce_output_lowstar #m #m' spec xN impl m'' r =
+  normal (
+    fun (input:B.lbuffer xN.t (IT.size m)) (output:B.lbuffer xN.t (IT.size m'')) ->
+    let h0 = get () in
+    push_frame ();
+    let tmp : B.lbuffer xN.t (IT.size m') = B.create (IT.size m') (xN.zeros_) in
+    impl input tmp;
+    let h1 = get () in
+    let rec aux (i:nat{i<=m''}) : Stack unit
+      (requires fun h0 -> B.live h0 output /\ B.live h0 tmp)
+      (ensures fun h0 _ h1 ->
+        B.modifies1 output h0 h1 /\ B.live h1 output /\ B.live h1 tmp /\
+        (forall (j:nat{j<i}). B.get h1 output j == B.get h0 tmp (r j))
+        )
+      =
+      if i = 0 then
+        ()
+      else (
+        aux (i-1);
+        let o = B.index tmp (IT.size (r (i-1))) in
+        B.upd #_ #(IT.size m'') output (IT.size (i-1)) o
       )
-    =
-    if i = 0 then
-      ()
-    else (
-      aux (i-1);
-      let o = B.index tmp (IT.size (r (i-1))) in
-      B.upd output (IT.size (i-1)) o
-    )
-  in
-  aux m'';
-  let h2 = get () in
-  xNxM_eq_intro (xNxM_of_lbuffer h2 output) (reduce_output spec m'' r (xNxM_of_lbuffer h0 input));
-  pop_frame();
-  ()
+    in
+    aux m'';
+    let h2 = get () in
+    xNxM_eq_intro (xNxM_of_lbuffer h2 output) (reduce_output spec m'' r (xNxM_of_lbuffer h0 input));
+    pop_frame();
+    ()
+  )
 
 
 (*** of_uint and to_uint ***)
