@@ -1160,8 +1160,8 @@ val map_blocks_multi:
         (v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
-	let iblock = gsub inp (i *! blocksize) blocksize in
-	let oblock = gsub output (i *! blocksize) blocksize in
+        let iblock = gsub inp (i *! blocksize) blocksize in
+        let oblock = gsub output (i *! blocksize) blocksize in
         let ob = spec_f h0 (v i) (as_seq h1 iblock) in
         B.modifies (loc oblock) h1 h2 /\
         as_seq h2 oblock == ob))
@@ -1187,8 +1187,8 @@ val map_blocks:
         (v i + 1) * v blocksize <= max_size_t /\
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
-	let iblock = gsub inp (i *! blocksize) blocksize in
-	let oblock = gsub output (i *! blocksize) blocksize in
+        let iblock = gsub inp (i *! blocksize) blocksize in
+        let oblock = gsub output (i *! blocksize) blocksize in
         let ob = spec_f h0 (v i) (as_seq h1 iblock) in
         B.modifies (loc oblock) h1 h2 /\
         as_seq h2 oblock == ob))
@@ -1196,8 +1196,8 @@ val map_blocks:
       (requires fun h1 ->
         modifies (loc (gsub output 0ul (i *! blocksize))) h0 h1)
       (ensures  fun h1 _ h2 ->
-	let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
-	let oblock = gsub output (i *! blocksize) (len %. blocksize) in
+        let iblock = gsub inp (i *! blocksize) (len %. blocksize)  in
+        let oblock = gsub output (i *! blocksize) (len %. blocksize) in
         let ob = spec_l h0 (v i) (v len % v blocksize) (as_seq h1 iblock) in
         B.modifies (loc oblock) h1 h2 /\
         as_seq h2 oblock == ob))
