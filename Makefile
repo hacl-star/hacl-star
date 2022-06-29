@@ -202,7 +202,7 @@ else ifeq ($(shell uname -s),FreeBSD)
     TIME := /usr/bin/time
 else
   SED := sed -i
-  TIME := /usr/bin/time -q -f '%E'
+  TIME := $(shell which time) -q -f '%E'
 endif
 
 ifneq ($(OS),Windows_NT)
