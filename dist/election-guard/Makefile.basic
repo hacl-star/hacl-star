@@ -35,6 +35,9 @@ $(USER_TARGET): $(OBJS)
 
 AR ?= ar
 
+config.h:
+	./configure
+
 %.a:
 	$(AR) cr $@ $^
 
@@ -54,3 +57,4 @@ include $(patsubst %.c,%.d,$(SOURCES))
 
 clean:
 	rm -rf *.o *.d $(USER_TARGET)
+
