@@ -43,7 +43,17 @@ module Hacl_Hash = struct
 end
 module Hacl_Spec = Hacl_Spec_bindings.Bindings(Hacl_Spec_stubs)
 
-let pow2 n = Z.(pow ~$2) n
+let max_uint32 = Z.((shift_left ~$1 32) - ~$1)
+let max_uint64 = Z.((shift_left ~$1 64) - ~$1)
+let pow2_31 = Z.(shift_left ~$1 31)
+
+(* Note: we check most input buffers to have a length that fits inside
+ * a uint32_t because that is the type of buffer length accepted by the
+ * C interface. In their specs, some functions accept longer buffers.
+ * We could revise these checks in the future if the C interface will use
+ * larger types for the size of a buffer. *)
+let check_max_buffer_len len =
+  assert Z.(of_int len <= max_uint32)
 
 module AEADDefs = struct
   open Hacl_Spec
@@ -68,19 +78,19 @@ module AEADDefs = struct
   let check_iv_length len = function
     (* specs/Spec.Agile.AEAD.iv_length *)
     | AES128_GCM
-    | AES256_GCM -> len > 0 && Z.((of_int 8) * (of_int len) < pow2 64)
+    | AES256_GCM -> len > 0 && Z.(of_int len <= max_uint32)
     | CHACHA20_POLY1305 -> len = 12
   let check_max_pt_length len = function
     (* specs/Spec.Agile.AEAD.max_length *)
     | AES128_GCM
-    | AES256_GCM -> Z.(of_int len < pow2 32)
-    | CHACHA20_POLY1305 -> Z.(of_int len < pow2 32 - of_int 16)
+    | AES256_GCM -> Z.(of_int len <= max_uint32)
+    | CHACHA20_POLY1305 ->  Z.(of_int len <= max_uint32 - ~$16)
   let check_sizes ~alg ~iv_len ~tag_len ~ad_len ~pt_len ~ct_len =
     (* providers/EverCrypt.AEAD.encrypt_st *)
     assert (check_iv_length iv_len alg);
     assert (tag_len = tag_length alg);
     assert (check_max_pt_length pt_len alg);
-    assert Z.(of_int ad_len <= pow2 31);
+    assert Z.(of_int ad_len <= pow2_31);
     assert (pt_len = ct_len)
 end
 
@@ -110,22 +120,6 @@ module HashDefs = struct
     UInt32.to_int (Hacl_Hash.hacl_Hash_Definitions_hash_len (alg_definition alg))
   let check_digest_len alg len =
     assert (len = digest_len alg)
-  let max_input_len = function
-    (* specs/Spec.Hash.Definitions.max_input_length *)
-    | Legacy SHA1
-    | Legacy MD5
-    | SHA2_224
-    | SHA2_256 -> pow2 61
-    | SHA2_384
-    | SHA2_512 -> pow2 125
-    | BLAKE2b -> pow2 128
-    | BLAKE2s -> pow2 64
-  let check_max_input_len alg len =
-    assert Z.(of_int len < max_input_len alg)
-  let block_len alg =
-    UInt32.to_int (Hacl_Hash.hacl_Hash_Definitions_block_len (alg_definition alg))
-  let check_key_len alg len =
-    assert Z.(of_int len + of_int (block_len alg) < max_input_len alg)
 end
 
 module type Chacha20_Poly1305_generic = sig
