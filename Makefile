@@ -202,7 +202,7 @@ else ifeq ($(shell uname -s),FreeBSD)
     TIME := /usr/bin/time
 else
   SED := sed -i
-  TIME := /usr/bin/time -q -f '%E'
+  TIME := $(shell which time) -q -f '%E'
 endif
 
 ifneq ($(OS),Windows_NT)
@@ -773,7 +773,8 @@ WASM_FLAGS	=\
   -bundle LowStar.* \
   -bundle Lib.RandomBuffer.System \
   -bundle Lib.Memzero \
-  -minimal -wasm -d wasm
+  -minimal -wasm -d wasm \
+  ./test.js
 
 dist/wasm/Makefile.basic: VALE_ASMS =
 dist/wasm/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
@@ -837,7 +838,7 @@ dist/wasm/Makefile.basic: REQUIRED_DROP =
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
 	cp -f $(filter-out %.basic,$^) $(dir $@)
-	rm -f $(dir $@)README $(dir $@)main.html $(dir $@)main.js $(dir $@)browser.js $(dir $@)*.wast
+	rm -f $(addprefix $(dir $@),README main.html main.js browser.js *.wast)
 
 dist/wasm/doc/readable_api.js: dist/wasm/package.json
 	cd dist/wasm && \

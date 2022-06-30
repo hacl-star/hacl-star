@@ -33,7 +33,7 @@ var preprocessing = function(typ, value) {
   if (typ === "bool") {
     return JSON.parse(value);
   }
-  if (typ === "int32") {
+  if (typ === "uint32") {
     return JSON.parse(value);
   }
   throw "Unimplemented !";
@@ -46,7 +46,7 @@ var postprocessing = function(typ, value) {
   if (typ === "bool") {
     return value.toString();
   }
-  if (typ === "int32") {
+  if (typ === "uint32") {
     return value.toString();
   }
   throw "Unimplemented !";
@@ -134,6 +134,14 @@ function testBignum64(Hacl) {
   assert (e_bytes instanceof Uint8Array);
   assert (e_bytes.length == 8);
   assert (e_bytes[0] == 0x02);
+
+  let [ carry, g ] = Hacl.Bignum_64.add(a, b);
+  assert(g[0] == 0x41n+0x42n);
+  assert(carry == 0n);
+
+  let [ mask ] = Hacl.Bignum_64.lt_mask(a, b);
+  console.log(mask);
+  assert(mask == 0xffffffffffffffffn);
 }
 
 function testBignumMontgomery64(Hacl) {
