@@ -142,11 +142,85 @@ static inline void chacha20_core_32(uint32_t *k, uint32_t *ctx, uint32_t ctr)
   double_round_32(k);
   double_round_32(k);
   double_round_32(k);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
     uint32_t *os = k;
-    uint32_t x = k[i] + ctx[i];
-    os[i] = x;
+    uint32_t x = k[0U] + ctx[0U];
+    os[0U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[1U] + ctx[1U];
+    os[1U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[2U] + ctx[2U];
+    os[2U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[3U] + ctx[3U];
+    os[3U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[4U] + ctx[4U];
+    os[4U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[5U] + ctx[5U];
+    os[5U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[6U] + ctx[6U];
+    os[6U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[7U] + ctx[7U];
+    os[7U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[8U] + ctx[8U];
+    os[8U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[9U] + ctx[9U];
+    os[9U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[10U] + ctx[10U];
+    os[10U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[11U] + ctx[11U];
+    os[11U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[12U] + ctx[12U];
+    os[12U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[13U] + ctx[13U];
+    os[13U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[14U] + ctx[14U];
+    os[14U] = x;
+  }
+  {
+    uint32_t *os = k;
+    uint32_t x = k[15U] + ctx[15U];
+    os[15U] = x;
   }
   k[12U] = k[12U] + cv;
 }
@@ -155,38 +229,196 @@ static inline void chacha20_init_32(uint32_t *ctx, uint8_t *k, uint8_t *n, uint3
 {
   uint32_t ctx1[16U] = { 0U };
   uint32_t *uu____0 = ctx1;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint32_t *os = uu____0;
-    uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[i];
-    os[i] = x;
+    uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[0U];
+    os[0U] = x;
+  }
+  {
+    uint32_t *os = uu____0;
+    uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[1U];
+    os[1U] = x;
+  }
+  {
+    uint32_t *os = uu____0;
+    uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[2U];
+    os[2U] = x;
+  }
+  {
+    uint32_t *os = uu____0;
+    uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[3U];
+    os[3U] = x;
   }
   uint32_t *uu____1 = ctx1 + (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
     uint32_t *os = uu____1;
-    uint8_t *bj = k + i * (uint32_t)4U;
+    uint8_t *bj = k + (uint32_t)0U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
-    os[i] = x;
+    os[0U] = x;
+  }
+  {
+    uint32_t *os = uu____1;
+    uint8_t *bj = k + (uint32_t)1U * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[1U] = x;
+  }
+  {
+    uint32_t *os = uu____1;
+    uint8_t *bj = k + (uint32_t)2U * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[2U] = x;
+  }
+  {
+    uint32_t *os = uu____1;
+    uint8_t *bj = k + (uint32_t)3U * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[3U] = x;
+  }
+  {
+    uint32_t *os = uu____1;
+    uint8_t *bj = k + (uint32_t)4U * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[4U] = x;
+  }
+  {
+    uint32_t *os = uu____1;
+    uint8_t *bj = k + (uint32_t)5U * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[5U] = x;
+  }
+  {
+    uint32_t *os = uu____1;
+    uint8_t *bj = k + (uint32_t)6U * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[6U] = x;
+  }
+  {
+    uint32_t *os = uu____1;
+    uint8_t *bj = k + (uint32_t)7U * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[7U] = x;
   }
   ctx1[12U] = ctr;
   uint32_t *uu____2 = ctx1 + (uint32_t)13U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)3U; i++)
   {
     uint32_t *os = uu____2;
-    uint8_t *bj = n + i * (uint32_t)4U;
+    uint8_t *bj = n + (uint32_t)0U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
     uint32_t x = r;
-    os[i] = x;
+    os[0U] = x;
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+  {
+    uint32_t *os = uu____2;
+    uint8_t *bj = n + (uint32_t)1U * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[1U] = x;
+  }
+  {
+    uint32_t *os = uu____2;
+    uint8_t *bj = n + (uint32_t)2U * (uint32_t)4U;
+    uint32_t u = load32_le(bj);
+    uint32_t r = u;
+    uint32_t x = r;
+    os[2U] = x;
+  }
   {
     uint32_t *os = ctx;
-    uint32_t x = ctx1[i];
-    os[i] = x;
+    uint32_t x = ctx1[0U];
+    os[0U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[1U];
+    os[1U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[2U];
+    os[2U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[3U];
+    os[3U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[4U];
+    os[4U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[5U];
+    os[5U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[6U];
+    os[6U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[7U];
+    os[7U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[8U];
+    os[8U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[9U];
+    os[9U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[10U];
+    os[10U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[11U];
+    os[11U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[12U];
+    os[12U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[13U];
+    os[13U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[14U];
+    os[14U] = x;
+  }
+  {
+    uint32_t *os = ctx;
+    uint32_t x = ctx1[15U];
+    os[15U] = x;
   }
   uint32_t ctr1 = (uint32_t)0U;
   uint32_t c12 = ctx[12U];
@@ -214,12 +446,101 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(
     uint8_t *uu____1 = text + i0 * (uint32_t)64U;
     uint32_t k[16U] = { 0U };
     chacha20_core_32(k, ctx, i0);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint32_t u = load32_le(uu____1 + i * (uint32_t)4U);
+      uint32_t u = load32_le(uu____1 + (uint32_t)0U * (uint32_t)4U);
       uint32_t x = u;
-      uint32_t y = x ^ k[i];
-      store32_le(uu____0 + i * (uint32_t)4U, y);
+      uint32_t y = x ^ k[0U];
+      store32_le(uu____0 + (uint32_t)0U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)1U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[1U];
+      store32_le(uu____0 + (uint32_t)1U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)2U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[2U];
+      store32_le(uu____0 + (uint32_t)2U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)3U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[3U];
+      store32_le(uu____0 + (uint32_t)3U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)4U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[4U];
+      store32_le(uu____0 + (uint32_t)4U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)5U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[5U];
+      store32_le(uu____0 + (uint32_t)5U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)6U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[6U];
+      store32_le(uu____0 + (uint32_t)6U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)7U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[7U];
+      store32_le(uu____0 + (uint32_t)7U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)8U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[8U];
+      store32_le(uu____0 + (uint32_t)8U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)9U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[9U];
+      store32_le(uu____0 + (uint32_t)9U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)10U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[10U];
+      store32_le(uu____0 + (uint32_t)10U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)11U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[11U];
+      store32_le(uu____0 + (uint32_t)11U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)12U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[12U];
+      store32_le(uu____0 + (uint32_t)12U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)13U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[13U];
+      store32_le(uu____0 + (uint32_t)13U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)14U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[14U];
+      store32_le(uu____0 + (uint32_t)14U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)15U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[15U];
+      store32_le(uu____0 + (uint32_t)15U * (uint32_t)4U, y);
     }
   }
   if (rem1 > (uint32_t)0U)
@@ -230,12 +551,101 @@ Hacl_Chacha20_Vec32_chacha20_encrypt_32(
     memcpy(plain, uu____3, rem * sizeof (uint8_t));
     uint32_t k[16U] = { 0U };
     chacha20_core_32(k, ctx, nb);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint32_t u = load32_le(plain + i * (uint32_t)4U);
+      uint32_t u = load32_le(plain + (uint32_t)0U * (uint32_t)4U);
       uint32_t x = u;
-      uint32_t y = x ^ k[i];
-      store32_le(plain + i * (uint32_t)4U, y);
+      uint32_t y = x ^ k[0U];
+      store32_le(plain + (uint32_t)0U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)1U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[1U];
+      store32_le(plain + (uint32_t)1U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)2U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[2U];
+      store32_le(plain + (uint32_t)2U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)3U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[3U];
+      store32_le(plain + (uint32_t)3U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)4U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[4U];
+      store32_le(plain + (uint32_t)4U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)5U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[5U];
+      store32_le(plain + (uint32_t)5U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)6U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[6U];
+      store32_le(plain + (uint32_t)6U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)7U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[7U];
+      store32_le(plain + (uint32_t)7U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)8U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[8U];
+      store32_le(plain + (uint32_t)8U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)9U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[9U];
+      store32_le(plain + (uint32_t)9U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)10U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[10U];
+      store32_le(plain + (uint32_t)10U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)11U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[11U];
+      store32_le(plain + (uint32_t)11U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)12U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[12U];
+      store32_le(plain + (uint32_t)12U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)13U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[13U];
+      store32_le(plain + (uint32_t)13U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)14U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[14U];
+      store32_le(plain + (uint32_t)14U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)15U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[15U];
+      store32_le(plain + (uint32_t)15U * (uint32_t)4U, y);
     }
     memcpy(uu____2, plain, rem * sizeof (uint8_t));
   }
@@ -262,12 +672,101 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
     uint8_t *uu____1 = cipher + i0 * (uint32_t)64U;
     uint32_t k[16U] = { 0U };
     chacha20_core_32(k, ctx, i0);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint32_t u = load32_le(uu____1 + i * (uint32_t)4U);
+      uint32_t u = load32_le(uu____1 + (uint32_t)0U * (uint32_t)4U);
       uint32_t x = u;
-      uint32_t y = x ^ k[i];
-      store32_le(uu____0 + i * (uint32_t)4U, y);
+      uint32_t y = x ^ k[0U];
+      store32_le(uu____0 + (uint32_t)0U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)1U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[1U];
+      store32_le(uu____0 + (uint32_t)1U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)2U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[2U];
+      store32_le(uu____0 + (uint32_t)2U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)3U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[3U];
+      store32_le(uu____0 + (uint32_t)3U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)4U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[4U];
+      store32_le(uu____0 + (uint32_t)4U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)5U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[5U];
+      store32_le(uu____0 + (uint32_t)5U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)6U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[6U];
+      store32_le(uu____0 + (uint32_t)6U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)7U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[7U];
+      store32_le(uu____0 + (uint32_t)7U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)8U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[8U];
+      store32_le(uu____0 + (uint32_t)8U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)9U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[9U];
+      store32_le(uu____0 + (uint32_t)9U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)10U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[10U];
+      store32_le(uu____0 + (uint32_t)10U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)11U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[11U];
+      store32_le(uu____0 + (uint32_t)11U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)12U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[12U];
+      store32_le(uu____0 + (uint32_t)12U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)13U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[13U];
+      store32_le(uu____0 + (uint32_t)13U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)14U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[14U];
+      store32_le(uu____0 + (uint32_t)14U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(uu____1 + (uint32_t)15U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[15U];
+      store32_le(uu____0 + (uint32_t)15U * (uint32_t)4U, y);
     }
   }
   if (rem1 > (uint32_t)0U)
@@ -278,12 +777,101 @@ Hacl_Chacha20_Vec32_chacha20_decrypt_32(
     memcpy(plain, uu____3, rem * sizeof (uint8_t));
     uint32_t k[16U] = { 0U };
     chacha20_core_32(k, ctx, nb);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint32_t u = load32_le(plain + i * (uint32_t)4U);
+      uint32_t u = load32_le(plain + (uint32_t)0U * (uint32_t)4U);
       uint32_t x = u;
-      uint32_t y = x ^ k[i];
-      store32_le(plain + i * (uint32_t)4U, y);
+      uint32_t y = x ^ k[0U];
+      store32_le(plain + (uint32_t)0U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)1U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[1U];
+      store32_le(plain + (uint32_t)1U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)2U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[2U];
+      store32_le(plain + (uint32_t)2U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)3U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[3U];
+      store32_le(plain + (uint32_t)3U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)4U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[4U];
+      store32_le(plain + (uint32_t)4U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)5U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[5U];
+      store32_le(plain + (uint32_t)5U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)6U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[6U];
+      store32_le(plain + (uint32_t)6U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)7U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[7U];
+      store32_le(plain + (uint32_t)7U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)8U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[8U];
+      store32_le(plain + (uint32_t)8U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)9U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[9U];
+      store32_le(plain + (uint32_t)9U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)10U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[10U];
+      store32_le(plain + (uint32_t)10U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)11U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[11U];
+      store32_le(plain + (uint32_t)11U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)12U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[12U];
+      store32_le(plain + (uint32_t)12U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)13U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[13U];
+      store32_le(plain + (uint32_t)13U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)14U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[14U];
+      store32_le(plain + (uint32_t)14U * (uint32_t)4U, y);
+    }
+    {
+      uint32_t u = load32_le(plain + (uint32_t)15U * (uint32_t)4U);
+      uint32_t x = u;
+      uint32_t y = x ^ k[15U];
+      store32_le(plain + (uint32_t)15U * (uint32_t)4U, y);
     }
     memcpy(uu____2, plain, rem * sizeof (uint8_t));
   }

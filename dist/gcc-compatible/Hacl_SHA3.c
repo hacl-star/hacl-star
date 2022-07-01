@@ -70,24 +70,249 @@ void Hacl_Impl_SHA3_state_permute(uint64_t *s)
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)24U; i0++)
   {
     uint64_t b[5U] = { 0U };
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
     {
-      b[i] =
-        s[i
+      b[0U] =
+        s[(uint32_t)0U
         + (uint32_t)0U]
         ^
-          (s[i
+          (s[(uint32_t)0U
           + (uint32_t)5U]
-          ^ (s[i + (uint32_t)10U] ^ (s[i + (uint32_t)15U] ^ s[i + (uint32_t)20U])));
+          ^
+            (s[(uint32_t)0U
+            + (uint32_t)10U]
+            ^ (s[(uint32_t)0U + (uint32_t)15U] ^ s[(uint32_t)0U + (uint32_t)20U])));
     }
-    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)5U; i1++)
     {
-      uint64_t uu____0 = b[(i1 + (uint32_t)4U) % (uint32_t)5U];
+      b[1U] =
+        s[(uint32_t)1U
+        + (uint32_t)0U]
+        ^
+          (s[(uint32_t)1U
+          + (uint32_t)5U]
+          ^
+            (s[(uint32_t)1U
+            + (uint32_t)10U]
+            ^ (s[(uint32_t)1U + (uint32_t)15U] ^ s[(uint32_t)1U + (uint32_t)20U])));
+    }
+    {
+      b[2U] =
+        s[(uint32_t)2U
+        + (uint32_t)0U]
+        ^
+          (s[(uint32_t)2U
+          + (uint32_t)5U]
+          ^
+            (s[(uint32_t)2U
+            + (uint32_t)10U]
+            ^ (s[(uint32_t)2U + (uint32_t)15U] ^ s[(uint32_t)2U + (uint32_t)20U])));
+    }
+    {
+      b[3U] =
+        s[(uint32_t)3U
+        + (uint32_t)0U]
+        ^
+          (s[(uint32_t)3U
+          + (uint32_t)5U]
+          ^
+            (s[(uint32_t)3U
+            + (uint32_t)10U]
+            ^ (s[(uint32_t)3U + (uint32_t)15U] ^ s[(uint32_t)3U + (uint32_t)20U])));
+    }
+    {
+      b[4U] =
+        s[(uint32_t)4U
+        + (uint32_t)0U]
+        ^
+          (s[(uint32_t)4U
+          + (uint32_t)5U]
+          ^
+            (s[(uint32_t)4U
+            + (uint32_t)10U]
+            ^ (s[(uint32_t)4U + (uint32_t)15U] ^ s[(uint32_t)4U + (uint32_t)20U])));
+    }
+    {
+      uint64_t uu____0 = b[((uint32_t)0U + (uint32_t)4U) % (uint32_t)5U];
       uint64_t
-      _D = uu____0 ^ Hacl_Impl_SHA3_rotl(b[(i1 + (uint32_t)1U) % (uint32_t)5U], (uint32_t)1U);
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
+      _D =
+        uu____0
+        ^ Hacl_Impl_SHA3_rotl(b[((uint32_t)0U + (uint32_t)1U) % (uint32_t)5U], (uint32_t)1U);
       {
-        s[i1 + (uint32_t)5U * i] = s[i1 + (uint32_t)5U * i] ^ _D;
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)0U] =
+          s[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)0U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)1U] =
+          s[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)2U] =
+          s[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)3U] =
+          s[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)4U] =
+          s[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^ _D;
+      }
+    }
+    {
+      uint64_t uu____0 = b[((uint32_t)1U + (uint32_t)4U) % (uint32_t)5U];
+      uint64_t
+      _D =
+        uu____0
+        ^ Hacl_Impl_SHA3_rotl(b[((uint32_t)1U + (uint32_t)1U) % (uint32_t)5U], (uint32_t)1U);
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)0U] =
+          s[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)0U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)1U] =
+          s[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)2U] =
+          s[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)3U] =
+          s[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)4U] =
+          s[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^ _D;
+      }
+    }
+    {
+      uint64_t uu____0 = b[((uint32_t)2U + (uint32_t)4U) % (uint32_t)5U];
+      uint64_t
+      _D =
+        uu____0
+        ^ Hacl_Impl_SHA3_rotl(b[((uint32_t)2U + (uint32_t)1U) % (uint32_t)5U], (uint32_t)1U);
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)0U] =
+          s[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)0U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)1U] =
+          s[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)2U] =
+          s[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)3U] =
+          s[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)4U] =
+          s[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^ _D;
+      }
+    }
+    {
+      uint64_t uu____0 = b[((uint32_t)3U + (uint32_t)4U) % (uint32_t)5U];
+      uint64_t
+      _D =
+        uu____0
+        ^ Hacl_Impl_SHA3_rotl(b[((uint32_t)3U + (uint32_t)1U) % (uint32_t)5U], (uint32_t)1U);
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)0U] =
+          s[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)0U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)1U] =
+          s[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)2U] =
+          s[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)3U] =
+          s[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)4U] =
+          s[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^ _D;
+      }
+    }
+    {
+      uint64_t uu____0 = b[((uint32_t)4U + (uint32_t)4U) % (uint32_t)5U];
+      uint64_t
+      _D =
+        uu____0
+        ^ Hacl_Impl_SHA3_rotl(b[((uint32_t)4U + (uint32_t)1U) % (uint32_t)5U], (uint32_t)1U);
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)0U] =
+          s[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)0U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)1U] =
+          s[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)2U] =
+          s[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)3U] =
+          s[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^ _D;
+      }
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)4U] =
+          s[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^ _D;
       }
     }
     Lib_Memzero0_memzero(b, (uint32_t)5U * sizeof (b[0U]));
@@ -104,18 +329,264 @@ void Hacl_Impl_SHA3_state_permute(uint64_t *s)
     Lib_Memzero0_memzero(&b0, (uint32_t)1U * sizeof ((&b0)[0U]));
     uint64_t b1[25U] = { 0U };
     memcpy(b1, s, (uint32_t)25U * sizeof (uint64_t));
-    for (uint32_t i1 = (uint32_t)0U; i1 < (uint32_t)5U; i1++)
     {
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
       {
-        s[i + (uint32_t)5U * i1] =
-          b1[i
-          + (uint32_t)5U * i1]
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)0U] =
+          b1[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)0U]
           ^
-            (~b1[(i + (uint32_t)1U)
+            (~b1[((uint32_t)0U + (uint32_t)1U)
             % (uint32_t)5U
-            + (uint32_t)5U * i1]
-            & b1[(i + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * i1]);
+            + (uint32_t)5U * (uint32_t)0U]
+            & b1[((uint32_t)0U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)0U]);
+      }
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)0U] =
+          b1[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)0U]
+          ^
+            (~b1[((uint32_t)1U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)0U]
+            & b1[((uint32_t)1U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)0U]);
+      }
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)0U] =
+          b1[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)0U]
+          ^
+            (~b1[((uint32_t)2U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)0U]
+            & b1[((uint32_t)2U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)0U]);
+      }
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)0U] =
+          b1[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)0U]
+          ^
+            (~b1[((uint32_t)3U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)0U]
+            & b1[((uint32_t)3U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)0U]);
+      }
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)0U] =
+          b1[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)0U]
+          ^
+            (~b1[((uint32_t)4U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)0U]
+            & b1[((uint32_t)4U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)0U]);
+      }
+    }
+    {
+      {
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)1U] =
+          b1[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^
+            (~b1[((uint32_t)0U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)1U]
+            & b1[((uint32_t)0U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)1U]);
+      }
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)1U] =
+          b1[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^
+            (~b1[((uint32_t)1U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)1U]
+            & b1[((uint32_t)1U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)1U]);
+      }
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)1U] =
+          b1[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^
+            (~b1[((uint32_t)2U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)1U]
+            & b1[((uint32_t)2U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)1U]);
+      }
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)1U] =
+          b1[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^
+            (~b1[((uint32_t)3U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)1U]
+            & b1[((uint32_t)3U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)1U]);
+      }
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)1U] =
+          b1[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)1U]
+          ^
+            (~b1[((uint32_t)4U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)1U]
+            & b1[((uint32_t)4U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)1U]);
+      }
+    }
+    {
+      {
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)2U] =
+          b1[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^
+            (~b1[((uint32_t)0U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)2U]
+            & b1[((uint32_t)0U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)2U]);
+      }
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)2U] =
+          b1[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^
+            (~b1[((uint32_t)1U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)2U]
+            & b1[((uint32_t)1U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)2U]);
+      }
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)2U] =
+          b1[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^
+            (~b1[((uint32_t)2U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)2U]
+            & b1[((uint32_t)2U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)2U]);
+      }
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)2U] =
+          b1[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^
+            (~b1[((uint32_t)3U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)2U]
+            & b1[((uint32_t)3U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)2U]);
+      }
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)2U] =
+          b1[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)2U]
+          ^
+            (~b1[((uint32_t)4U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)2U]
+            & b1[((uint32_t)4U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)2U]);
+      }
+    }
+    {
+      {
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)3U] =
+          b1[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^
+            (~b1[((uint32_t)0U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)3U]
+            & b1[((uint32_t)0U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)3U]);
+      }
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)3U] =
+          b1[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^
+            (~b1[((uint32_t)1U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)3U]
+            & b1[((uint32_t)1U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)3U]);
+      }
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)3U] =
+          b1[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^
+            (~b1[((uint32_t)2U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)3U]
+            & b1[((uint32_t)2U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)3U]);
+      }
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)3U] =
+          b1[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^
+            (~b1[((uint32_t)3U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)3U]
+            & b1[((uint32_t)3U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)3U]);
+      }
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)3U] =
+          b1[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)3U]
+          ^
+            (~b1[((uint32_t)4U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)3U]
+            & b1[((uint32_t)4U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)3U]);
+      }
+    }
+    {
+      {
+        s[(uint32_t)0U + (uint32_t)5U * (uint32_t)4U] =
+          b1[(uint32_t)0U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^
+            (~b1[((uint32_t)0U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)4U]
+            & b1[((uint32_t)0U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)4U]);
+      }
+      {
+        s[(uint32_t)1U + (uint32_t)5U * (uint32_t)4U] =
+          b1[(uint32_t)1U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^
+            (~b1[((uint32_t)1U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)4U]
+            & b1[((uint32_t)1U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)4U]);
+      }
+      {
+        s[(uint32_t)2U + (uint32_t)5U * (uint32_t)4U] =
+          b1[(uint32_t)2U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^
+            (~b1[((uint32_t)2U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)4U]
+            & b1[((uint32_t)2U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)4U]);
+      }
+      {
+        s[(uint32_t)3U + (uint32_t)5U * (uint32_t)4U] =
+          b1[(uint32_t)3U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^
+            (~b1[((uint32_t)3U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)4U]
+            & b1[((uint32_t)3U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)4U]);
+      }
+      {
+        s[(uint32_t)4U + (uint32_t)5U * (uint32_t)4U] =
+          b1[(uint32_t)4U
+          + (uint32_t)5U * (uint32_t)4U]
+          ^
+            (~b1[((uint32_t)4U + (uint32_t)1U)
+            % (uint32_t)5U
+            + (uint32_t)5U * (uint32_t)4U]
+            & b1[((uint32_t)4U + (uint32_t)2U) % (uint32_t)5U + (uint32_t)5U * (uint32_t)4U]);
       }
     }
     Lib_Memzero0_memzero(b1, (uint32_t)25U * sizeof (b1[0U]));
