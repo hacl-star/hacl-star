@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __EverCrypt_Helpers_H
-#define __EverCrypt_Helpers_H
+#ifndef __Hacl_Streaming_Functor_H
+#define __Hacl_Streaming_Functor_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -37,25 +37,17 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-typedef uint8_t EverCrypt_Helpers_uint8_t;
+typedef void *Hacl_Streaming_Functor_invariant_s;
 
-typedef uint16_t EverCrypt_Helpers_uint16_t;
+typedef void *Hacl_Streaming_Functor_freeable;
 
-typedef uint32_t EverCrypt_Helpers_uint32_t;
+typedef void *Hacl_Streaming_Functor_preserves_freeable;
 
-typedef uint64_t EverCrypt_Helpers_uint64_t;
-
-typedef uint8_t *EverCrypt_Helpers_uint8_p;
-
-typedef uint16_t *EverCrypt_Helpers_uint16_p;
-
-typedef uint32_t *EverCrypt_Helpers_uint32_p;
-
-typedef uint64_t *EverCrypt_Helpers_uint64_p;
+typedef void *Hacl_Streaming_Functor_invariant;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __EverCrypt_Helpers_H_DEFINED
+#define __Hacl_Streaming_Functor_H_DEFINED
 #endif

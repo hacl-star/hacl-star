@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Hash_Base_H
-#define __Hacl_Hash_Base_H
+#ifndef __Hacl_Bignum_H
+#define __Hacl_Bignum_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,21 +35,31 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Spec.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Bignum_Base.h"
 #include "evercrypt_targetconfig.h"
-uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
+#include "lib_intrinsics.h"
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s
+{
+  uint32_t len;
+  uint32_t *n;
+  uint32_t mu;
+  uint32_t *r2;
+}
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32;
 
-uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);
-
-uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
-
-uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
-
-typedef uint8_t *Hacl_Hash_Definitions_hash_t;
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s
+{
+  uint32_t len;
+  uint64_t *n;
+  uint64_t mu;
+  uint64_t *r2;
+}
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Hash_Base_H_DEFINED
+#define __Hacl_Bignum_H_DEFINED
 #endif

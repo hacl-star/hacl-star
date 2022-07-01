@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_SHA2_Vec256_H
-#define __internal_Hacl_SHA2_Vec256_H
+#ifndef __Hacl_Impl_Poly1305_Field32xN_H
+#define __Hacl_Impl_Poly1305_Field32xN_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,40 +35,13 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "../Hacl_SHA2_Vec256.h"
+
 #include "evercrypt_targetconfig.h"
-typedef struct K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  uint8_t *snd;
-}
-K____uint8_t___uint8_t_;
-
-typedef struct K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  K____uint8_t___uint8_t_ snd;
-}
-K____uint8_t__K____uint8_t___uint8_t_;
-
-typedef struct K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
-
-typedef struct
-K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ fst;
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
+typedef void *Hacl_Impl_Poly1305_Field32xN_fmul_precomp_r_pre;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_SHA2_Vec256_H_DEFINED
+#define __Hacl_Impl_Poly1305_Field32xN_H_DEFINED
 #endif
