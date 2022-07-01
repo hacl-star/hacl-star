@@ -257,7 +257,7 @@ bool EverCrypt_AutoConfig2_wants_bcrypt()
 
 void EverCrypt_AutoConfig2_recall()
 {
-  
+
 }
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_recall */
