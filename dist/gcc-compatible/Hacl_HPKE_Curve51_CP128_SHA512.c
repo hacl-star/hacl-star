@@ -682,11 +682,65 @@ Hacl_HPKE_Curve51_CP128_SHA512_sealBase(
     uint64_t s = o_ctx.ctx_seq[0U];
     uint8_t enc[12U] = { 0U };
     store64_be(enc + (uint32_t)4U, s);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)12U; i++)
     {
-      uint8_t xi = enc[i];
-      uint8_t yi = o_ctx.ctx_nonce[i];
-      nonce[i] = xi ^ yi;
+      uint8_t xi = enc[0U];
+      uint8_t yi = o_ctx.ctx_nonce[0U];
+      nonce[0U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[1U];
+      uint8_t yi = o_ctx.ctx_nonce[1U];
+      nonce[1U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[2U];
+      uint8_t yi = o_ctx.ctx_nonce[2U];
+      nonce[2U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[3U];
+      uint8_t yi = o_ctx.ctx_nonce[3U];
+      nonce[3U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[4U];
+      uint8_t yi = o_ctx.ctx_nonce[4U];
+      nonce[4U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[5U];
+      uint8_t yi = o_ctx.ctx_nonce[5U];
+      nonce[5U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[6U];
+      uint8_t yi = o_ctx.ctx_nonce[6U];
+      nonce[6U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[7U];
+      uint8_t yi = o_ctx.ctx_nonce[7U];
+      nonce[7U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[8U];
+      uint8_t yi = o_ctx.ctx_nonce[8U];
+      nonce[8U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[9U];
+      uint8_t yi = o_ctx.ctx_nonce[9U];
+      nonce[9U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[10U];
+      uint8_t yi = o_ctx.ctx_nonce[10U];
+      nonce[10U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[11U];
+      uint8_t yi = o_ctx.ctx_nonce[11U];
+      nonce[11U] = xi ^ yi;
     }
     Hacl_Chacha20Poly1305_128_aead_encrypt(o_ctx.ctx_key,
       nonce,
@@ -746,11 +800,65 @@ Hacl_HPKE_Curve51_CP128_SHA512_openBase(
     uint64_t s = o_ctx.ctx_seq[0U];
     uint8_t enc[12U] = { 0U };
     store64_be(enc + (uint32_t)4U, s);
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)12U; i++)
     {
-      uint8_t xi = enc[i];
-      uint8_t yi = o_ctx.ctx_nonce[i];
-      nonce[i] = xi ^ yi;
+      uint8_t xi = enc[0U];
+      uint8_t yi = o_ctx.ctx_nonce[0U];
+      nonce[0U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[1U];
+      uint8_t yi = o_ctx.ctx_nonce[1U];
+      nonce[1U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[2U];
+      uint8_t yi = o_ctx.ctx_nonce[2U];
+      nonce[2U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[3U];
+      uint8_t yi = o_ctx.ctx_nonce[3U];
+      nonce[3U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[4U];
+      uint8_t yi = o_ctx.ctx_nonce[4U];
+      nonce[4U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[5U];
+      uint8_t yi = o_ctx.ctx_nonce[5U];
+      nonce[5U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[6U];
+      uint8_t yi = o_ctx.ctx_nonce[6U];
+      nonce[6U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[7U];
+      uint8_t yi = o_ctx.ctx_nonce[7U];
+      nonce[7U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[8U];
+      uint8_t yi = o_ctx.ctx_nonce[8U];
+      nonce[8U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[9U];
+      uint8_t yi = o_ctx.ctx_nonce[9U];
+      nonce[9U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[10U];
+      uint8_t yi = o_ctx.ctx_nonce[10U];
+      nonce[10U] = xi ^ yi;
+    }
+    {
+      uint8_t xi = enc[11U];
+      uint8_t yi = o_ctx.ctx_nonce[11U];
+      nonce[11U] = xi ^ yi;
     }
     uint32_t
     res1 =
