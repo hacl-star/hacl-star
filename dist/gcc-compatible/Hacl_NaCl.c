@@ -88,9 +88,68 @@ secretbox_open_detached(
   uint8_t tag_[16U] = { 0U };
   Hacl_Poly1305_32_poly1305_mac(tag_, mlen, c, mkey);
   uint8_t res = (uint8_t)255U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[i], tag_[i]);
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[0U], tag_[0U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[1U], tag_[1U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[2U], tag_[2U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[3U], tag_[3U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[4U], tag_[4U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[5U], tag_[5U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[6U], tag_[6U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[7U], tag_[7U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[8U], tag_[8U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[9U], tag_[9U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[10U], tag_[10U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[11U], tag_[11U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[12U], tag_[12U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[13U], tag_[13U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[14U], tag_[14U]);
+    res = uu____0 & res;
+  }
+  {
+    uint8_t uu____0 = FStar_UInt8_eq_mask(tag[15U], tag_[15U]);
     res = uu____0 & res;
   }
   uint8_t z = res;
