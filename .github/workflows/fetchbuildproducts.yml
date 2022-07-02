@@ -29,7 +29,7 @@ jobs:
           buildUrl="$baseUrl/eval/$id/job/hacl-build-products.x86_64-linux"
           buildInfo=$(curl -sLH 'Content-Type: application/json' "$buildUrl")
 
-          # Check wether the build was built correctly
+          # Check wether the build was successful
           [[ "$(echo "$buildInfo" | jq -r '.buildstatus')" == "$STATUS_SUCCEEDED" ]] || {
               echo "The latest evaluation wasn't successful. Aborting."
               exit 2
@@ -42,8 +42,13 @@ jobs:
           installTar "hints"
           installTar "dist"
       - name: commit changes
-        uses: EndBug/add-and-commit@v9
+        run: |
+          git config --local user.name "Dzomo, the EverestYak"
+          git config --local user.email "everbld@microsoft.com"
+          git add hints dist
+          git commit -m "[CI] update hints and dist"
+      - name: push
+        uses: ad-m/github-push-action@master
         with:
-          author_name: "Dzomo, the Everest Yak"
-          author_email: "everbld@microsoft.com"
-          message: "[CI] update hints and dist"
+          branch: build-products-master
+          force: true
