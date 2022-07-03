@@ -30,7 +30,7 @@ full-fledged library through the EverCrypt provider.
 
 Code from HACL*, ValeCrypt and EverCrypt is deployed in several production
 systems, including Mozilla Firefox's `NSS
-<https://bugzilla.mozilla.org/show_bug.cgi?id=1387183>`_, the Linux kernel, the `Tezos blockchain
+<https://bugzilla.mozilla.org/show_bug.cgi?id=1387183>`_, the Linux kernel, mbedTLS, the `Tezos blockchain
 <https://www.reddit.com/r/tezos/comments/8hrsz2/tezos_switches_cryptographic_libraries_from/>`_,
 the ElectionGuard Electronic Voting SDK, and the
 `Wireguard VPN <https://lwn.net/Articles/770750/>`_. Still,
