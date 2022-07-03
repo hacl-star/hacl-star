@@ -28,7 +28,7 @@ HACL*, Vale and EverCrypt are distributed together as a collection of C and
 assembly files. These can be used either as individual components, or as a
 full-fledged library through the EverCrypt provider.
 
-Code from HACL*, ValeCrypt and EverCrypt is deploeyd in several production
+Code from HACL*, ValeCrypt and EverCrypt is deployed in several production
 systems, including Mozilla Firefox's `NSS
 <https://bugzilla.mozilla.org/show_bug.cgi?id=1387183>`_, the Linux kernel, the `Tezos blockchain
 <https://www.reddit.com/r/tezos/comments/8hrsz2/tezos_switches_cryptographic_libraries_from/>`_,
