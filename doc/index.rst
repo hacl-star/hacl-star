@@ -28,11 +28,11 @@ HACL*, Vale and EverCrypt are distributed together as a collection of C and
 assembly files. These can be used either as individual components, or as a
 full-fledged library through the EverCrypt provider.
 
-Code from HACL* has been incorporated into `Firefox
-<https://bugzilla.mozilla.org/show_bug.cgi?id=1387183>`_, the Windows
-kernel, the Linux kernel, the `Tezos blockchain
+Code from HACL*, ValeCrypt and EverCrypt is deploeyd in several production
+systems, including Mozilla Firefox's `NSS
+<https://bugzilla.mozilla.org/show_bug.cgi?id=1387183>`_, the Linux kernel, the `Tezos blockchain
 <https://www.reddit.com/r/tezos/comments/8hrsz2/tezos_switches_cryptographic_libraries_from/>`_,
-the Microsoft MSQuic implementation of the QUIC protocol, and the
+the ElectionGuard Electronic Voting SDK, and the
 `Wireguard VPN <https://lwn.net/Articles/770750/>`_. Still,
 HACL*, Vale, and EverCrypt remain ongoing research projects and should
 be treated as such. If you want to integrate this code into a production environment,
