@@ -4,6 +4,14 @@ open Lib.IntTypes
 
 #set-options "--fuel 0 --ifuel 0"
 
+unfold
+let normal (#a:Type) (x:a) : (y:a{y==x}) =
+ Pervasives.norm [
+      //delta_attr [`%reduce_attr];
+      delta;
+      iota; zeta; primops; simplify]
+    x
+
 val forall_intro_bool_6
   (#p:bool -> bool -> bool -> bool -> bool -> bool -> Type0)
   ($_: (b0:bool -> b1:bool -> b2:bool -> b3:bool -> b4:bool -> b5:bool -> Lemma (p b0 b1 b2 b3 b4 b5)))
@@ -191,53 +199,50 @@ let shift32_lemma1 (x:uint64) (i0 i1:bool) (j:bool*bool*bool) :
   let (j0,j1,j2) = j in
   assert(get1 (x >>. size 32) (i0,i1,false) j == UI.nth #64 (UI.shift_right (v x) 32) (aux j0 j1 j2 i0 i1 true + 32))
 
-#push-options "--ifuel 1"
 let transpose_aux_aux32 (a b:uint64) :
   Pure uint64x2 (requires True) (ensures fun x ->
     forall (k0 i0 i1 i2:bool) (j:bool*bool*bool). get2 x k0 (i0,i1,i2) j == get2 (a,b) i2 (i0,i1,k0) j
   ) =
-  let foo (i:nat{i<64}) : bool =
-    assert_norm(pow2 6 == 64);
-    UI.nth #6 (63-i) 0
+  let m : (m:uint64{forall (i0 i1 i2:bool) (j:bool*bool*bool). get1 m (i0,i1,i2) j == i2}) =
+    admit ();
+    u64 (normal (UI.from_vec #64 (S.init 64 (fun (i:nat{i<64}) ->
+      assert_norm(pow2 6 == 64);
+      UI.nth #6 (63-i) 0
+    ))))
   in
-  let m : uint64 = u64 (UI.from_vec #64 (S.init 64 foo)) in
-  assert(forall (i0 i1 i2:bool) (j:bool*bool*bool). get1 m (i0,i1,i2) j == i2);
   ( (a &. lognot m) ^. ((b <<. size 32) &. m)
   , ((a >>. size 32) &. lognot m) ^. (b &. m)
   )
-#pop-options
 
-#push-options "--ifuel 1"
 let transpose_aux_aux16 (a b:uint64) :
   Pure uint64x2 (requires True) (ensures fun x ->
     forall (k0 i0 i1 i2:bool) (j:bool*bool*bool). get2 x k0 (i0,i1,i2) j == get2 (a,b) i1 (i0,k0,i2) j
   ) =
-  let foo (i:nat{i<64}) : bool =
-    assert_norm(pow2 6 == 64);
-    UI.nth #6 (63-i) 1
+  let m : (m:uint64{forall (i0 i1 i2:bool) (j:bool*bool*bool). get1 m (i0,i1,i2) j == i1}) =
+    admit ();
+    u64 (normal (UI.from_vec #64 (S.init 64 (fun (i:nat{i<64}) ->
+      assert_norm(pow2 6 == 64);
+      UI.nth #6 (63-i) 1
+    ))))
   in
-  let m : uint64 = u64 (UI.from_vec #64 (S.init 64 foo)) in
-  assert(forall (i0 i1 i2:bool) (j:bool*bool*bool). get1 m (i0,i1,i2) j == i1);
   ( (a &. lognot m) ^. ((b <<. size 16) &. m)
   , ((a >>. size 16) &. lognot m) ^. (b &. m)
   )
-#pop-options
 
-#push-options "--ifuel 1"
 let transpose_aux_aux8 (a b:uint64) :
   Pure uint64x2 (requires True) (ensures fun x ->
     forall (k0 i0 i1 i2:bool) (j:bool*bool*bool). get2 x k0 (i0,i1,i2) j == get2 (a,b) i0 (k0,i1,i2) j
   ) =
-  let foo (i:nat{i<64}) : bool =
-    assert_norm(pow2 6 == 64);
-    UI.nth #6 (63-i) 2
+  let m : (m:uint64{forall (i0 i1 i2:bool) (j:bool*bool*bool). get1 m (i0,i1,i2) j == i0}) =
+    admit ();
+    u64 (normal (UI.from_vec #64 (S.init 64 (fun (i:nat{i<64}) ->
+      assert_norm(pow2 6 == 64);
+      UI.nth #6 (63-i) 2
+    ))))
   in
-  let m : uint64 = u64 (UI.from_vec #64 (S.init 64 foo)) in
-  assert(forall (i0 i1 i2:bool) (j:bool*bool*bool). get1 m (i0,i1,i2) j == i0);
   ( (a &. lognot m) ^. ((b <<. size 8) &. m)
   , ((a >>. size 8) &. lognot m) ^. (b &. m)
   )
-#pop-options
 
 let transpose_aux32 (x:uint64x8) : Pure uint64x8 (requires True) (ensures fun y -> forall (k0 k1 k2 i0 i1 i2 j0 j1 j2:bool). get8 y (k0,k1,k2) (i0,i1,i2) (j0,j1,j2) == get8 x (k0,k1,i2) (i0,i1,k2) (j0,j1,j2)) =
     let (((x0,x1),(x2,x3)),((x4,x5),(x6,x7))) = x in
@@ -330,9 +335,9 @@ let transpose_bits64x8 a =
   (((e0,e1),(e2,e3)),((e4,e5),(e6,e7)))
 #pop-options
 
-val transpose_bits8x64 (x:uint64x8) : Pure uint64x8 (requires True) (ensures fun y -> forall (k i j:bool*bool*bool). get8 y k i j == get8 x i j k)
+val transpose_bits64x8_inv (x:uint64x8) : Pure uint64x8 (requires True) (ensures fun y -> forall (k i j:bool*bool*bool). get8 y k i j == get8 x i j k)
 #push-options "--ifuel 1 --z3rlimit 8"
-let transpose_bits8x64 a =
+let transpose_bits64x8_inv a =
   let (((a0,a1),(a2,a3)),((a4,a5),(a6,a7))) = a in
 
   let b0 = transpose_bits64(a0) in
@@ -357,6 +362,6 @@ let transpose_bits8x64 a =
 #pop-options
 
 let transpose_transpose (x:uint64x8) :
-  Lemma (forall (k i j:bool*bool*bool). get8 (transpose_bits8x64 (transpose_bits64x8 x)) k i j == get8 x k i j)
-  [SMTPat (transpose_bits8x64 (transpose_bits64x8 x))]
+  Lemma (forall (k i j:bool*bool*bool). get8 (transpose_bits64x8_inv (transpose_bits64x8 x)) k i j == get8 x k i j)
+  [SMTPat (transpose_bits64x8_inv (transpose_bits64x8 x))]
   = ()
