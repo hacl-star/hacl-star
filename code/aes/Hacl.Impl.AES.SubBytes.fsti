@@ -10,7 +10,13 @@ inline_for_extraction noextract
 let u64 = S.uN IT.U64 IT.SEC
 
 inline_for_extraction noextract
+val sbox (s:nat{s<256}) : (r:nat{r<256})
+
+inline_for_extraction noextract
 val sub_bytes_spec (#n:IT.size_nat) (#xN:S.sig n) (x:S.xNxM xN 8) : S.xNxM xN 8
+
+val sub_bytes_spec_theorem (#n:IT.size_nat) (#xN:S.sig n) (x:S.xNxM xN 8) (j:nat{j<n})
+  : Lemma ( S.column j (sub_bytes_spec x) == S.of_uint (sbox (S.to_uint (S.column j x))) )
 
 val sub_bytes64x8
   (st0:u64.t) (st1:u64.t) (st2:u64.t) (st3:u64.t)

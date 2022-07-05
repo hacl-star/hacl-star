@@ -10,10 +10,10 @@ module S = Lib.Sliceable
 open FStar.HyperStack
 open FStar.HyperStack.ST
 
-#set-options "--fuel 1 --ifuel 1"
+#set-options "--fuel 0 --ifuel 0"
 
 inline_for_extraction noextract
-let sbox (s:nat{s<256}) : (r:nat{r<256}) =
+let sbox s =
 match s with
 |   0 -> 0x63 |   1 -> 0x7c |   2 -> 0x77 |   3 -> 0x7b |   4 -> 0xf2 |   5 -> 0x6b |   6 -> 0x6f |   7 -> 0xc5
 |   8 -> 0x30 |   9 -> 0x01 |  10 -> 0x67 |  11 -> 0x2b |  12 -> 0xfe |  13 -> 0xd7 |  14 -> 0xab |  15 -> 0x76
@@ -122,8 +122,7 @@ let sub_bytes_spec_theorem (#n:IT.size_nat) (#xN:S.sig n) (x:S.xNxM xN 8) (j:nat
   =
   sub_bytes_bruteforce_lemma ()
 
-
-#push-options "--fuel 0 --ifuel 0 --z3rlimit 20"
+#push-options "--z3rlimit 20"
 let sub_bytes64x8 st0 st1 st2 st3 st4 st5 st6 st7 =
   push_frame();
   let input : B.lbuffer u64.t 8ul = B.create _ u64.zeros_ in
