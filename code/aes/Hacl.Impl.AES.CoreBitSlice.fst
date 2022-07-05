@@ -9,6 +9,7 @@ open Hacl.Spec.AES_128.BitSlice
 
 module ST = FStar.HyperStack.ST
 module SubBytes = Hacl.Impl.AES.SubBytes
+module Trans = Lib.Transposition64x8
 
 
 
@@ -52,8 +53,8 @@ let load_block0 (out:state) (inp:block) =
   let b2 = sub inp (size 8) (size 8) in
   let fst = uint_from_bytes_le #U64 b1 in
   let snd = uint_from_bytes_le #U64 b2 in
-  let fst = transpose_bits64 fst in
-  let snd = transpose_bits64 snd in
+  let fst = Trans.transpose_bits64 fst in
+  let snd = Trans.transpose_bits64 snd in
   let h0 = ST.get() in
   Lib.Buffer.loop_nospec #h0 (size 8) out
     (fun i ->
@@ -69,6 +70,7 @@ val transpose_state:
   (requires (fun h -> live h st))
   (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
+#push-options "--z3rlimit 20"
 let transpose_state st =
   let i0 = st.(size 0) in
   let i1 = st.(size 1) in
@@ -78,8 +80,8 @@ let transpose_state st =
   let i5 = st.(size 5) in
   let i6 = st.(size 6) in
   let i7 = st.(size 7) in
-  let (t0,t1,t2,t3,t4,t5,t6,t7) =
-    transpose_bits64x8 i0 i1 i2 i3 i4 i5 i6 i7 in
+  let (((t0,t1),(t2,t3)),((t4,t5),(t6,t7))) =
+    Trans.transpose_bits64x8 (((i0,i1),(i2,i3)),((i4,i5),(i6,i7))) in
   st.(size 0) <- t0;
   st.(size 1) <- t1;
   st.(size 2) <- t2;
@@ -88,6 +90,7 @@ let transpose_state st =
   st.(size 5) <- t5;
   st.(size 6) <- t6;
   st.(size 7) <- t7
+#pop-options
 
 
 val store_block0:
@@ -106,9 +109,8 @@ let store_block0 out (inp:state) =
   let i5 = inp.(5ul) in
   let i6 = inp.(6ul) in
   let i7 = inp.(7ul) in
-  let (t0,t1,t2,t3,t4,t5,t6,t7) =
-    transpose_bits64x8 i0 i1 i2 i3 i4 i5 i6 i7
-  in
+  let (((t0,t1),(t2,t3)),((t4,t5),(t6,t7))) =
+    Trans.transpose_bits64x8_inv (((i0,i1),(i2,i3)),((i4,i5),(i6,i7))) in
   uint_to_bytes_le #U64 (sub out (size 0) (size 8)) t0;
   uint_to_bytes_le #U64 (sub out (size 8) (size 8)) t1
 
@@ -214,11 +216,21 @@ val sub_bytes_state:
 
 #push-options "--z3rlimit 20"
 let sub_bytes_state (st:state) =
+  let st0 = st.(size 0) in
+  let st1 = st.(size 1) in
+  let st2 = st.(size 2) in
+  let st3 = st.(size 3) in
+  let st4 = st.(size 4) in
+  let st5 = st.(size 5) in
+  let st6 = st.(size 6) in
+  let st7 = st.(size 7) in
+  let (((st0,st1),(st2,st3)),((st4,st5),(st6,st7))) =
+    Trans.transpose_bits64x8 (((st0,st1),(st2,st3)),((st4,st5),(st6,st7))) in
   let (st0,st1,st2,st3,st4,st5,st6,st7) =
-    SubBytes.sub_bytes64x8
-    st.(size 0) st.(size 1) st.(size 2) st.(size 3)
-    st.(size 4) st.(size 5) st.(size 6) st.(size 7)
+    SubBytes.sub_bytes64x8 st0 st1 st2 st3 st4 st5 st6 st7
   in
+  let (((st0,st1),(st2,st3)),((st4,st5),(st6,st7))) =
+    Trans.transpose_bits64x8_inv (((st0,st1),(st2,st3)),((st4,st5),(st6,st7))) in
   st.(size 0) <- st0;
   st.(size 1) <- st1;
   st.(size 2) <- st2;
