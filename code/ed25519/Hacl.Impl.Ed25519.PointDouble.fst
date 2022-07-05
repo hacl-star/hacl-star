@@ -159,7 +159,6 @@ val point_double:
       F51.point_eval h1 out == Spec.Ed25519.point_double (F51.point_eval h0 p)
     )
 
-[@CInline]
 let point_double out p =
   push_frame();
   let tmp = create 30ul (u64 0) in

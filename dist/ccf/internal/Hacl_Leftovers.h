@@ -29,15 +29,17 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "../Hacl_Leftovers.h"
-
+#include "Lib_Memzero0.h"
+#include "Hacl_Spec.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Impl_Blake2_Constants.h"
+#include "evercrypt_targetconfig.h"
 void
 Hacl_Blake2b_32_blake2b(
   uint32_t nn,
@@ -67,6 +69,14 @@ extern uint32_t Hacl_HMAC_DRBG_max_personalization_string_length;
 extern uint32_t Hacl_HMAC_DRBG_max_additional_input_length;
 
 uint32_t Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_hash_alg a);
+
+typedef struct Hacl_HMAC_DRBG_state_s
+{
+  uint8_t *k;
+  uint8_t *v;
+  uint32_t *reseed_counter;
+}
+Hacl_HMAC_DRBG_state;
 
 #if defined(__cplusplus)
 }

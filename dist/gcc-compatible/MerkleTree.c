@@ -24,7 +24,7 @@
 
 #include "MerkleTree.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 
 static uint8_t *hash_r_alloc(uint32_t s)
 {
@@ -534,9 +534,17 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
     case Spec_Hash_Definitions_MD5:
       {
         uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
         {
-          buf0[i] = init;
+          buf0[0U] = init;
+        }
+        {
+          buf0[1U] = init;
+        }
+        {
+          buf0[2U] = init;
+        }
+        {
+          buf0[3U] = init;
         }
         s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_MD5_s, { .case_MD5_s = buf0 } });
         break;
@@ -544,9 +552,20 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
     case Spec_Hash_Definitions_SHA1:
       {
         uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
         {
-          buf1[i] = init;
+          buf1[0U] = init;
+        }
+        {
+          buf1[1U] = init;
+        }
+        {
+          buf1[2U] = init;
+        }
+        {
+          buf1[3U] = init;
+        }
+        {
+          buf1[4U] = init;
         }
         s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_SHA1_s, { .case_SHA1_s = buf1 } });
         break;
@@ -554,9 +573,29 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
     case Spec_Hash_Definitions_SHA2_224:
       {
         uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
         {
-          buf2[i] = init;
+          buf2[0U] = init;
+        }
+        {
+          buf2[1U] = init;
+        }
+        {
+          buf2[2U] = init;
+        }
+        {
+          buf2[3U] = init;
+        }
+        {
+          buf2[4U] = init;
+        }
+        {
+          buf2[5U] = init;
+        }
+        {
+          buf2[6U] = init;
+        }
+        {
+          buf2[7U] = init;
         }
         s =
           (
@@ -570,9 +609,29 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
     case Spec_Hash_Definitions_SHA2_256:
       {
         uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
         {
-          buf3[i] = init;
+          buf3[0U] = init;
+        }
+        {
+          buf3[1U] = init;
+        }
+        {
+          buf3[2U] = init;
+        }
+        {
+          buf3[3U] = init;
+        }
+        {
+          buf3[4U] = init;
+        }
+        {
+          buf3[5U] = init;
+        }
+        {
+          buf3[6U] = init;
+        }
+        {
+          buf3[7U] = init;
         }
         s =
           (
@@ -586,9 +645,29 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
     case Spec_Hash_Definitions_SHA2_384:
       {
         uint64_t init = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
         {
-          buf4[i] = init;
+          buf4[0U] = init;
+        }
+        {
+          buf4[1U] = init;
+        }
+        {
+          buf4[2U] = init;
+        }
+        {
+          buf4[3U] = init;
+        }
+        {
+          buf4[4U] = init;
+        }
+        {
+          buf4[5U] = init;
+        }
+        {
+          buf4[6U] = init;
+        }
+        {
+          buf4[7U] = init;
         }
         s =
           (
@@ -602,9 +681,29 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
     case Spec_Hash_Definitions_SHA2_512:
       {
         uint64_t init = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
         {
-          buf5[i] = init;
+          buf5[0U] = init;
+        }
+        {
+          buf5[1U] = init;
+        }
+        {
+          buf5[2U] = init;
+        }
+        {
+          buf5[3U] = init;
+        }
+        {
+          buf5[4U] = init;
+        }
+        {
+          buf5[5U] = init;
+        }
+        {
+          buf5[6U] = init;
+        }
+        {
+          buf5[7U] = init;
         }
         s =
           (
@@ -618,9 +717,53 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
     case Spec_Hash_Definitions_Blake2S:
       {
         uint32_t init = (uint32_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
-          buf6[i] = init;
+          buf6[0U] = init;
+        }
+        {
+          buf6[1U] = init;
+        }
+        {
+          buf6[2U] = init;
+        }
+        {
+          buf6[3U] = init;
+        }
+        {
+          buf6[4U] = init;
+        }
+        {
+          buf6[5U] = init;
+        }
+        {
+          buf6[6U] = init;
+        }
+        {
+          buf6[7U] = init;
+        }
+        {
+          buf6[8U] = init;
+        }
+        {
+          buf6[9U] = init;
+        }
+        {
+          buf6[10U] = init;
+        }
+        {
+          buf6[11U] = init;
+        }
+        {
+          buf6[12U] = init;
+        }
+        {
+          buf6[13U] = init;
+        }
+        {
+          buf6[14U] = init;
+        }
+        {
+          buf6[15U] = init;
         }
         s =
           ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = buf6 } });
@@ -629,16 +772,60 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
     case Spec_Hash_Definitions_Blake2B:
       {
         uint64_t init = (uint64_t)0U;
-        for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
-          buf[i] = init;
+          buf[0U] = init;
+        }
+        {
+          buf[1U] = init;
+        }
+        {
+          buf[2U] = init;
+        }
+        {
+          buf[3U] = init;
+        }
+        {
+          buf[4U] = init;
+        }
+        {
+          buf[5U] = init;
+        }
+        {
+          buf[6U] = init;
+        }
+        {
+          buf[7U] = init;
+        }
+        {
+          buf[8U] = init;
+        }
+        {
+          buf[9U] = init;
+        }
+        {
+          buf[10U] = init;
+        }
+        {
+          buf[11U] = init;
+        }
+        {
+          buf[12U] = init;
+        }
+        {
+          buf[13U] = init;
+        }
+        {
+          buf[14U] = init;
+        }
+        {
+          buf[15U] = init;
         }
         s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = buf } });
         break;
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

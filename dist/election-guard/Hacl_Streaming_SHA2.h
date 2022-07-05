@@ -29,16 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
-#include "kremlin/internal/builtin.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+#include "krml/internal/builtin.h"
 
 
-#include "Hacl_Kremlib.h"
-
+#include "Hacl_Krmllib.h"
+#include "evercrypt_targetconfig.h"
 typedef struct Hacl_Streaming_SHA2_state_sha2_224_s
 {
   uint32_t *block_state;

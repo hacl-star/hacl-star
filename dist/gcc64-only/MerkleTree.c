@@ -24,7 +24,7 @@
 
 #include "MerkleTree.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 
 static uint8_t *hash_r_alloc(uint32_t s)
 {
@@ -638,7 +638,7 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }

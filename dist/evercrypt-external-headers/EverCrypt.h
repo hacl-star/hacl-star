@@ -31,8 +31,8 @@ extern "C" {
 
 #include <inttypes.h>
 #include <stdbool.h>
-#include <kremlin/internal/types.h>
-#include <kremlin/internal/target.h>
+#include <krml/internal/types.h>
+#include <krml/internal/target.h>
 
 
 
@@ -79,13 +79,6 @@ extern void EverCrypt_random_sample(uint32_t len, uint8_t *out);
 
 extern void EverCrypt_random_cleanup();
 
-#define EverCrypt_AES128_OPENSSL 0
-#define EverCrypt_AES128_BCRYPT 1
-#define EverCrypt_AES128_VALE 2
-#define EverCrypt_AES128_HACL 3
-
-typedef uint8_t EverCrypt_aes128_key_s_tags;
-
 typedef struct EverCrypt_aes128_key_s_s EverCrypt_aes128_key_s;
 
 extern bool EverCrypt_uu___is_AES128_OPENSSL(EverCrypt_aes128_key_s projectee);
@@ -124,12 +117,6 @@ EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k, uint8_t *plain, uint8_t *cip
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
 extern void EverCrypt_aes128_free(EverCrypt_aes128_key_s *pk);
-
-#define EverCrypt_AES256_OPENSSL 0
-#define EverCrypt_AES256_BCRYPT 1
-#define EverCrypt_AES256_HACL 2
-
-typedef uint8_t EverCrypt_aes256_key_s_tags;
 
 typedef struct EverCrypt_aes256_key_s_s EverCrypt_aes256_key_s;
 
@@ -278,14 +265,6 @@ KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (fr
 
 extern uint32_t EverCrypt_aead_ivLen(EverCrypt_aead_alg a);
 
-#define EverCrypt_AEAD_OPENSSL 0
-#define EverCrypt_AEAD_BCRYPT 1
-#define EverCrypt_AEAD_AES128_GCM_VALE 2
-#define EverCrypt_AEAD_AES256_GCM_VALE 3
-#define EverCrypt_AEAD_CHACHA20_POLY1305_HACL 4
-
-typedef uint8_t EverCrypt__aead_state_tags;
-
 typedef struct EverCrypt__aead_state_s EverCrypt__aead_state;
 
 typedef EverCrypt__aead_state EverCrypt_aead_state_s;
@@ -327,11 +306,6 @@ EverCrypt_aead_decrypt(
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
 extern void EverCrypt_aead_free(EverCrypt__aead_state *pk);
-
-#define EverCrypt_DH_OPENSSL 0
-#define EverCrypt_DH_DUMMY 1
-
-typedef uint8_t EverCrypt__dh_state_tags;
 
 typedef struct EverCrypt__dh_state_s EverCrypt__dh_state;
 
@@ -379,11 +353,6 @@ extern bool EverCrypt_uu___is_ECC_X25519(EverCrypt_ec_curve projectee);
 
 extern bool EverCrypt_uu___is_ECC_X448(EverCrypt_ec_curve projectee);
 
-#define EverCrypt_ECDH_OPENSSL 0
-#define EverCrypt_ECDH_DUMMY 1
-
-typedef uint8_t EverCrypt__ecdh_state_tags;
-
 typedef struct EverCrypt__ecdh_state_s EverCrypt__ecdh_state;
 
 typedef EverCrypt__ecdh_state EverCrypt_ecdh_state_s;
@@ -409,22 +378,22 @@ EverCrypt_AEAD___proj__Ek__item__impl(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_stat
 extern uint8_t
 *EverCrypt_AEAD___proj__Ek__item__ek(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s projectee);
 
-extern Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *a);
+extern Spec_Agile_AEAD_alg EverCrypt_AEAD_alg_of_state(EverCrypt_AEAD_state_s *s);
 
 extern EverCrypt_Error_error_code
-EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **r, uint8_t *dst);
+EverCrypt_AEAD_create_in(Spec_Agile_AEAD_alg a, EverCrypt_AEAD_state_s **dst, uint8_t *k);
 
 extern EverCrypt_Error_error_code
 EverCrypt_AEAD_encrypt(
-  EverCrypt_AEAD_state_s *a,
-  uint8_t *s,
-  uint32_t iv,
-  uint8_t *iv_len,
-  uint32_t ad,
-  uint8_t *ad_len,
-  uint32_t plain,
-  uint8_t *plain_len,
-  uint8_t *cipher
+  EverCrypt_AEAD_state_s *s,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *plain,
+  uint32_t plain_len,
+  uint8_t *cipher,
+  uint8_t *tag
 );
 
 /*
@@ -524,15 +493,15 @@ EverCrypt_AEAD_encrypt_expand(
 
 extern EverCrypt_Error_error_code
 EverCrypt_AEAD_decrypt(
-  EverCrypt_AEAD_state_s *a,
-  uint8_t *s,
-  uint32_t iv,
-  uint8_t *iv_len,
-  uint32_t ad,
-  uint8_t *ad_len,
-  uint32_t cipher,
-  uint8_t *cipher_len,
-  uint8_t *tag
+  EverCrypt_AEAD_state_s *s,
+  uint8_t *iv,
+  uint32_t iv_len,
+  uint8_t *ad,
+  uint32_t ad_len,
+  uint8_t *cipher,
+  uint32_t cipher_len,
+  uint8_t *tag,
+  uint8_t *dst
 );
 
 /*
@@ -630,7 +599,7 @@ EverCrypt_AEAD_decrypt_expand(
   uint8_t *dst
 );
 
-extern void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *a);
+extern void EverCrypt_AEAD_free(EverCrypt_AEAD_state_s *s);
 
 extern bool EverCrypt_AutoConfig2_has_shaext();
 
@@ -1066,60 +1035,62 @@ extern uint64_t
   EverCrypt_Hash_state_s projectee
 );
 
-extern Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg_of_state(EverCrypt_Hash_state_s *a);
+extern Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg_of_state(EverCrypt_Hash_state_s *s);
 
 extern EverCrypt_Hash_state_s *EverCrypt_Hash_create_in(Spec_Hash_Definitions_hash_alg a);
 
 extern EverCrypt_Hash_state_s *EverCrypt_Hash_create(Spec_Hash_Definitions_hash_alg a);
 
-extern void EverCrypt_Hash_init(EverCrypt_Hash_state_s *a);
+extern void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s);
 
-extern void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *ev, uint32_t blocks);
+extern void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n);
 
-extern void EverCrypt_Hash_update2(EverCrypt_Hash_state_s *a, uint64_t s, uint8_t *prevlen);
+extern void
+EverCrypt_Hash_update2(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t *block);
 
 KRML_DEPRECATED("Use update2 instead")
 
-extern void EverCrypt_Hash_update(EverCrypt_Hash_state_s *a, uint8_t *s);
+extern void EverCrypt_Hash_update(EverCrypt_Hash_state_s *s, uint8_t *block);
 
 extern void
 EverCrypt_Hash_update_multi2(
-  EverCrypt_Hash_state_s *a,
-  uint64_t s,
-  uint8_t *prevlen,
-  uint32_t blocks
+  EverCrypt_Hash_state_s *s,
+  uint64_t prevlen,
+  uint8_t *blocks,
+  uint32_t len
 );
 
 KRML_DEPRECATED("Use update_multi2 instead")
 
 extern void
-EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *a, uint8_t *s, uint32_t blocks);
+EverCrypt_Hash_update_multi(EverCrypt_Hash_state_s *s, uint8_t *blocks, uint32_t len);
 
 extern void
 EverCrypt_Hash_update_last_256(
   uint32_t *s,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
+  uint64_t input,
+  uint8_t *input_len,
+  uint32_t input_len1
 );
 
 extern void
 EverCrypt_Hash_update_last2(
-  EverCrypt_Hash_state_s *a,
-  uint64_t s,
-  uint8_t *prev_len,
-  uint32_t last
+  EverCrypt_Hash_state_s *s,
+  uint64_t prev_len,
+  uint8_t *last,
+  uint32_t last_len
 );
 
 KRML_DEPRECATED("Use update_last2 instead")
 
-extern void EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *ga, uint8_t *s, uint64_t last);
+extern void
+EverCrypt_Hash_update_last(EverCrypt_Hash_state_s *s, uint8_t *last, uint64_t total_len);
 
-extern void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *a, uint8_t *s);
+extern void EverCrypt_Hash_finish(EverCrypt_Hash_state_s *s, uint8_t *dst);
 
-extern void EverCrypt_Hash_free(EverCrypt_Hash_state_s *ea);
+extern void EverCrypt_Hash_free(EverCrypt_Hash_state_s *s);
 
-extern void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *a, EverCrypt_Hash_state_s *s_src);
+extern void EverCrypt_Hash_copy(EverCrypt_Hash_state_s *s_src, EverCrypt_Hash_state_s *s_dst);
 
 extern void EverCrypt_Hash_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
@@ -1149,13 +1120,13 @@ extern Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
 *EverCrypt_Hash_Incremental_create_in(Spec_Hash_Definitions_hash_alg a);
 
 extern void
-EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *a);
+EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
 extern void
 EverCrypt_Hash_Incremental_update(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *i,
-  uint8_t *p,
-  uint32_t data
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *p,
+  uint8_t *data,
+  uint32_t len
 );
 
 extern void
@@ -1208,17 +1179,17 @@ EverCrypt_Hash_Incremental_finish_blake2b(
 
 extern Spec_Hash_Definitions_hash_alg
 EverCrypt_Hash_Incremental_alg_of_state(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *a
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s
 );
 
 extern void
 EverCrypt_Hash_Incremental_finish(
-  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *a,
-  uint8_t *s
+  Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s,
+  uint8_t *dst
 );
 
 extern void
-EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *i);
+EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
 extern void
 EverCrypt_Cipher_chacha20(

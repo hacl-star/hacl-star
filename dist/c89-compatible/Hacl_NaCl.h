@@ -29,18 +29,16 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Salsa20.h"
 #include "Hacl_Poly1305_32.h"
 #include "Hacl_Curve25519_51.h"
-
+#include "evercrypt_targetconfig.h"
 uint32_t
 Hacl_NaCl_crypto_secretbox_detached(
   uint8_t *c,

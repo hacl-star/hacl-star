@@ -32,7 +32,7 @@
         "typing_tok_Hacl.Spec.SHA2.Vec.M32@tok"
       ],
       0,
-      "b2c2669ce1fa87ecca877f2056a8bf64"
+      "9c0e9d82fa68db8f6e263f6371691169"
     ],
     [
       "Hacl.SHA2.Vec128.sha224_update4",
@@ -44,20 +44,18 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Hacl.Spec.SHA2.Vec_pretyping_ef9d7cf021ba37864f0e1ecf8fb737f1",
         "constructor_distinct_Hacl.Spec.SHA2.Vec.M128",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_224",
         "equality_tok_Hacl.Spec.SHA2.Vec.M128@tok",
         "equality_tok_Hacl.Spec.SHA2.Vec.M32@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_224@tok",
-        "equation_Hacl.Spec.SHA2.Vec.lanes", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "equation_Spec.Hash.Definitions.is_sha2",
+        "equation_Hacl.Spec.SHA2.Vec.lanes", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf",
+        "equation_Spec.Hash.Definitions.is_sha2", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
@@ -66,13 +64,11 @@
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.IntTypes.bits", "typing_Spec.AES.gf8",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_tok_Hacl.Spec.SHA2.Vec.M32@tok",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_tok_Hacl.Spec.SHA2.Vec.M32@tok"
       ],
       0,
-      "d5e6dde60fc27c1d812153d249b81212"
+      "b815734a65d47250ee177ba1b0126b74"
     ],
     [
       "Hacl.SHA2.Vec128.sha224_update4",
@@ -105,7 +101,7 @@
         "typing_tok_Hacl.Spec.SHA2.Vec.M32@tok"
       ],
       0,
-      "3db0d57deabb6f0386d7265cf0c12bf7"
+      "9f38649f1cc2e1323029cc93d0dcc72d"
     ],
     [
       "Hacl.SHA2.Vec128.sha224_4",
@@ -169,7 +165,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "f27fadfdf0289217e2b1ccec611d3382"
+      "83064a7559e30b8563f6147538708ac4"
     ],
     [
       "Hacl.SHA2.Vec128.sha224_4",
@@ -273,7 +269,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_224@tok"
       ],
       0,
-      "1d9f89bec4a1a3ce471279e080b8abb8"
+      "0cd3bb43900f3810ba35da572e322c57"
     ],
     [
       "Hacl.SHA2.Vec128.sha256_update4",
@@ -305,7 +301,7 @@
         "typing_tok_Hacl.Spec.SHA2.Vec.M32@tok"
       ],
       0,
-      "686d1bbc30ae3a11e62e8564fadebcac"
+      "7d15261d0176bd3b452ebee8223a952e"
     ],
     [
       "Hacl.SHA2.Vec128.sha256_update4",
@@ -317,23 +313,19 @@
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
         "Hacl.Spec.SHA2.Vec_pretyping_ef9d7cf021ba37864f0e1ecf8fb737f1",
         "constructor_distinct_Hacl.Spec.SHA2.Vec.M128",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "constructor_distinct_Spec.Hash.Definitions.SHA2_256",
         "equality_tok_Hacl.Spec.SHA2.Vec.M128@tok",
         "equality_tok_Hacl.Spec.SHA2.Vec.M32@tok",
         "equality_tok_Lib.IntTypes.U1@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equality_tok_Spec.Hash.Definitions.SHA2_256@tok",
-        "equation_Hacl.Spec.SHA2.Vec.lanes", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "equation_Spec.AES.gf8",
-        "equation_Spec.AES.irred", "equation_Spec.GaloisField.gf",
-        "equation_Spec.Hash.Definitions.is_sha2",
+        "equation_Hacl.Spec.SHA2.Vec.lanes", "equation_Lib.IntTypes.minint",
+        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "equation_Spec.AES.gf8", "equation_Spec.AES.irred",
+        "equation_Spec.GaloisField.gf",
+        "equation_Spec.Hash.Definitions.is_sha2", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "proj_equation_Spec.GaloisField.GF_t",
         "projection_inverse_BoxInt_proj_0",
@@ -342,13 +334,11 @@
         "projection_inverse_Spec.GaloisField.GF_t",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_de8080fdc4bd6678af723874a7d70466",
-        "typing_Lib.IntTypes.bits", "typing_Spec.AES.gf8",
-        "typing_Spec.GaloisField.__proj__GF__item__t",
-        "typing_tok_Hacl.Spec.SHA2.Vec.M32@tok",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Spec.AES.gf8", "typing_Spec.GaloisField.__proj__GF__item__t",
+        "typing_tok_Hacl.Spec.SHA2.Vec.M32@tok"
       ],
       0,
-      "3a0c114b8075b41cfa8059dea149b589"
+      "833191e604d74529f4c7862c6b89b769"
     ],
     [
       "Hacl.SHA2.Vec128.sha256_update4",
@@ -382,7 +372,7 @@
         "typing_tok_Hacl.Spec.SHA2.Vec.M32@tok"
       ],
       0,
-      "3825dc392a3ec3ad2b964942358b7d2e"
+      "f79ed6e4d31b741cda09a20899bafc7d"
     ],
     [
       "Hacl.SHA2.Vec128.sha256_4",
@@ -448,7 +438,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "c9d19221220b4272cdefbbebd154b0d6"
+      "be1299d0e1c7fcf4f20043efc7dbfc35"
     ],
     [
       "Hacl.SHA2.Vec128.sha256_4",
@@ -551,7 +541,7 @@
         "typing_tok_Spec.Hash.Definitions.SHA2_256@tok"
       ],
       0,
-      "f27f26413696d0a89c8bc8384baf9c52"
+      "9d6200313ed2251134e08172167a947e"
     ]
   ]
 ]

@@ -136,7 +136,7 @@
         {
           "name": "alen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "aad",
@@ -151,7 +151,7 @@
         {
           "name": "len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "plaintext",
@@ -212,7 +212,7 @@
         {
           "name": "alen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "aad",
@@ -227,7 +227,7 @@
         {
           "name": "len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "plaintext",
@@ -260,7 +260,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "uint32",
         "tests": [
           0
         ]
@@ -328,7 +328,7 @@
       }, {
         "name": "len",
         "kind": "input",
-        "type": "int"
+        "type": "uint32"
       }, {
         "name": "message",
         "kind": "input",
@@ -365,7 +365,7 @@
         {
           "name": "len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         }, {
           "name": "message",
           "kind": "input",
@@ -424,7 +424,7 @@
         {
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "hash",
@@ -462,7 +462,7 @@
         {
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "hash",
@@ -500,7 +500,7 @@
         {
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "hash",
@@ -526,7 +526,7 @@
       "custom_module_name": true,
       "name": "Hacl_Blake2b_32_blake2b",
       "args": [{
-          "type": "int",
+          "type": "uint32",
           "kind": "input",
           "name": "output_len",
           "interface_index": 0,
@@ -544,7 +544,7 @@
           ]
         },
         {
-          "type": "int",
+          "type": "uint32",
           "kind": "input",
           "name": "data_len"
         }, {
@@ -559,7 +559,7 @@
           ]
         },
         {
-          "type": "int",
+          "type": "uint32",
           "kind": "input",
           "name": "key_len"
         }, {
@@ -583,7 +583,7 @@
       "custom_module_name": true,
       "name": "Hacl_Blake2s_32_blake2s",
       "args": [{
-          "type": "int",
+          "type": "uint32",
           "kind": "input",
           "name": "output_len",
           "interface_index": 0,
@@ -606,7 +606,7 @@
           ]
         },
         {
-          "type": "int",
+          "type": "uint32",
           "kind": "input",
           "name": "data_len"
         }, {
@@ -623,7 +623,7 @@
           ]
         },
         {
-          "type": "int",
+          "type": "uint32",
           "kind": "input",
           "name": "key_len"
         }, {
@@ -652,7 +652,7 @@
       "args": [{
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "input",
@@ -690,7 +690,7 @@
       "args": [{
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "input",
@@ -728,7 +728,7 @@
       "args": [{
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "input",
@@ -766,7 +766,7 @@
       "args": [{
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "input",
@@ -805,7 +805,7 @@
       "args": [{
           "name": "rate",
           "kind": "input",
-          "type": "int",
+          "type": "uint32",
           "interface_index": 0,
           "tests": [
               1088
@@ -814,7 +814,7 @@
         {
           "name": "capacity",
           "kind": "input",
-          "type": "int",
+          "type": "uint32",
           "interface_index": 1,
           "tests": [
               512
@@ -823,7 +823,7 @@
         {
           "name": "input_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "input",
@@ -838,7 +838,7 @@
         {
           "name": "suffix",
           "kind": "input",
-          "type": "int",
+          "type": "uint32",
           "interface_index": 3,
           "tests": [
               1
@@ -847,7 +847,7 @@
         {
           "name": "output_len",
           "kind": "input",
-          "type": "int",
+          "type": "uint32",
           "interface_index": 4,
           "tests": [
               32
@@ -899,7 +899,7 @@
         }, {
           "name": "key_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         }, {
           "name": "data",
           "kind": "input",
@@ -915,7 +915,7 @@
         }, {
           "name": "data_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         }
       ],
       "return": {
@@ -946,7 +946,7 @@
         }, {
           "name": "key_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         }, {
           "name": "data",
           "kind": "input",
@@ -959,7 +959,7 @@
         }, {
           "name": "data_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         }
       ],
       "return": {
@@ -997,7 +997,7 @@
         {
           "name": "salt_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         }, {
           "name": "ikm",
           "kind": "input",
@@ -1013,7 +1013,7 @@
         {
           "name": "ikm_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         }
       ],
       "return": {
@@ -1049,7 +1049,7 @@
         {
           "name": "prk_len",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         }, {
           "name": "info",
           "kind": "input",
@@ -1065,11 +1065,11 @@
         {
           "name": "infolen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         }, {
           "name": "len",
           "kind": "input",
-          "type": "int",
+          "type": "uint32",
           "interface_index": 2,
           "tests": [
               42,
@@ -1112,7 +1112,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "n",
@@ -1138,7 +1138,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "uint32",
         "tests": [
             0,
             0
@@ -1173,7 +1173,7 @@
         {
           "name": "clen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "n",
@@ -1199,7 +1199,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "uint32",
         "tests": [
             0,
             0
@@ -1245,11 +1245,11 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "uint32",
         "tests": [
             0,
             0
-]
+        ]
       }
     },
     "box_easy_afternm": {
@@ -1280,7 +1280,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "n",
@@ -1306,7 +1306,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "uint32",
         "tests": [
             0,
             0
@@ -1341,7 +1341,7 @@
         {
           "name": "clen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "n",
@@ -1367,7 +1367,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "uint32",
         "tests": [
             0,
             0
@@ -1412,7 +1412,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "n",
@@ -1438,7 +1438,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "uint32",
         "tests": [
             0,
             0
@@ -1484,7 +1484,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "n",
@@ -1510,7 +1510,7 @@
         }
       ],
       "return": {
-        "type": "int",
+        "type": "uint32",
         "tests": [
             0,
             0
@@ -1534,7 +1534,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "m",
@@ -1580,7 +1580,7 @@
       "args": [{
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "m",
@@ -1643,7 +1643,7 @@
         {
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "m",
@@ -1689,7 +1689,7 @@
       "args": [{
           "name": "mlen",
           "kind": "input",
-          "type": "int"
+          "type": "uint32"
         },
         {
           "name": "m",
@@ -1967,6 +1967,1317 @@
             "true",
             "false"
         ]
+      }
+    }
+  },
+  "Bignum_64": {
+    "add": {
+      "module": "Hacl_Bignum64",
+      "name": "add_packed",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "uint64",
+        "tests": []
+      }
+    },
+    "add_mod": {
+      "module": "Hacl_Bignum64",
+      "name": "add_mod",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "sub": {
+      "module": "Hacl_Bignum64",
+      "name": "sub_packed",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "uint64",
+        "tests": []
+      }
+    },
+    "sub_mod": {
+      "module": "Hacl_Bignum64",
+      "name": "sub_mod",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mul": {
+      "module": "Hacl_Bignum64",
+      "name": "mul",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len*2",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "sqr": {
+      "module": "Hacl_Bignum64",
+      "name": "sqr",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len*2",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mod": {
+      "module": "Hacl_Bignum64",
+      "name": "mod",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len*2",
+          "interface_index": 1,
+          "tests": []
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mod_exp_consttime": {
+      "module": "Hacl_Bignum64",
+      "name": "mod_exp_consttime",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "bBits",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "bBits/64",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mod_exp_vartime": {
+      "module": "Hacl_Bignum64",
+      "name": "mod_exp_vartime",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "bBits",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "bBits/64",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mod_inv_prime_vartime": {
+      "module": "Hacl_Bignum64",
+      "name": "mod_inv_prime_vartime",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "n",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mont_ctx_init": {
+      "module": "Hacl_Bignum64",
+      "name": "mont_ctx_init",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "limbs",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "kind": "layout",
+        "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64"
+      }
+    },
+    "mod_precomp": {
+      "module": "Hacl_Bignum64",
+      "name": "mod_precomp",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len*2",
+          "interface_index": 1,
+          "tests": []
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mod_exp_vartime_precomp": {
+      "module": "Hacl_Bignum64",
+      "name": "mod_exp_vartime_precomp",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "bBits",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "bBits/64",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mod_exp_consttime_precomp": {
+      "module": "Hacl_Bignum64",
+      "name": "mod_exp_consttime_precomp",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "bBits",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "bBits/64",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mod_inv_prime_vartime_precomp": {
+      "module": "Hacl_Bignum64",
+      "name": "mod_inv_prime_vartime_precomp",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "new_bn_from_bytes_le": {
+      "module": "Hacl_Bignum64",
+      "name": "new_bn_from_bytes_le",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "bytes",
+          "kind": "input",
+          "type": "buffer",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "kind": "layout",
+        "type": "buffer(uint64)"
+      }
+    },
+    "bn_to_bytes_le": {
+      "module": "Hacl_Bignum64",
+      "name": "bn_to_bytes_le",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },{
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len/8",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer",
+          "size": "len",
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "new_bn_from_bytes_be": {
+      "module": "Hacl_Bignum64",
+      "name": "new_bn_from_bytes_be",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "bytes",
+          "kind": "input",
+          "type": "buffer",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "kind": "layout",
+        "type": "buffer(uint64)"
+      }
+    },
+    "bn_to_bytes_be": {
+      "module": "Hacl_Bignum64",
+      "name": "bn_to_bytes_be",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },{
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len/8",
+          "interface_index": 0,
+          "tests": []
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer",
+          "size": "len",
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "lt_mask": {
+      "module": "Hacl_Bignum64",
+      "name": "lt_mask_packed",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },{
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": []
+        },{
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "uint64",
+        "tests": []
+      }
+    },
+    "eq_mask": {
+      "module": "Hacl_Bignum64",
+      "name": "eq_mask_packed",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },{
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": []
+        },{
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": []
+        }
+      ],
+      "return": {
+        "type": "uint64",
+        "tests": []
+      }
+    }
+  },
+  "Bignum_Montgomery_64": {
+    "field_modulus_check": {
+      "module": "Hacl_GenericField64",
+      "name": "field_modulus_check",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "limbs",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "bool"
+      }
+    },
+    "field_get_len": {
+      "module": "Hacl_GenericField64",
+      "name": "field_get_len",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "uint32"
+      }
+    },
+    "field_init": {
+      "module": "Hacl_GenericField64",
+      "name": "field_init",
+      "args": [{
+          "name": "len",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "limbs",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 0,
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "kind": "layout",
+        "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64"
+      }
+    },
+    "to_field": {
+      "module": "Hacl_GenericField64",
+      "name": "to_field",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "aM",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "from_field": {
+      "module": "Hacl_GenericField64",
+      "name": "from_field",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "aM",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "mul": {
+      "module": "Hacl_GenericField64",
+      "name": "mul",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "add": {
+      "module": "Hacl_GenericField64",
+      "name": "add",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "sub": {
+      "module": "Hacl_GenericField64",
+      "name": "sub",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "sqr": {
+      "module": "Hacl_GenericField64",
+      "name": "sqr",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "inverse": {
+      "module": "Hacl_GenericField64",
+      "name": "inverse",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "exp_consttime": {
+      "module": "Hacl_GenericField64",
+      "name": "exp_consttime",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "bBits",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "bBits/64",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    },
+    "exp_vartime": {
+      "module": "Hacl_GenericField64",
+      "name": "exp_vartime",
+      "args": [{
+          "name": "ctx",
+          "kind": "input",
+          "type": "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64",
+          "interface_index": 0,
+          "tests": [
+          ]
+        },
+        {
+          "name": "a",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "interface_index": 1,
+          "tests": [
+          ]
+        },
+        {
+          "name": "bBits",
+          "kind": "input",
+          "type": "uint32",
+          "tests": [
+          ]
+        },
+        {
+          "name": "b",
+          "kind": "input",
+          "type": "buffer(uint64)",
+          "size": "bBits/64",
+          "interface_index": 2,
+          "tests": [
+          ]
+        },
+        {
+          "name": "out",
+          "kind": "output",
+          "type": "buffer(uint64)",
+          "size": "len",
+          "tests": [
+          ]
+        }
+      ],
+      "return": {
+        "type": "void",
+        "tests": []
+      }
+    }
+  },
+  "EverCrypt_Hash": {
+    "hash_len": {
+      "module": "EverCrypt_Hash",
+      "custom_module_name": true,
+      "name": "EverCrypt_Hash_Incremental_hash_len",
+
+      "args": [{
+          "name": "hash_alg",
+          "kind": "input",
+          "type": "uint32",
+          "interface_index": 0,
+          "tests": [
+            3
+          ]
+        }
+      ],
+      "return": {
+        "type": "uint32",
+        "tests": [
+          64
+        ]
+      }
+    },
+    "hash": {
+      "module": "EverCrypt_Hash",
+      "name": "hash",
+      "args": [{
+          "name": "hash_alg",
+          "kind": "input",
+          "type": "uint32",
+          "interface_index": 0,
+          "tests": [
+            3
+          ]
+        },
+        {
+          "name": "hash",
+          "kind": "output",
+          "type": "buffer",
+          "size": "EverCrypt_Hash.hash_len(hash_alg)",
+          "tests": [
+            "ddaf35a193617abacc417349ae20413112e6fa4e89a97ea20a9eeee64b55d39a2192992a274fc1a836ba3c23a3feebbd454d4423643ce80e2a9ac94fa54ca49f"
+          ]
+        },
+        {
+          "name": "input",
+          "kind": "input",
+          "type": "buffer",
+          "size": "input_len",
+          "interface_index": 1,
+          "tests": [
+            "616263"
+          ]
+        },
+        {
+          "name": "input_len",
+          "kind": "input",
+          "type": "uint32"
+        }
+      ],
+      "return": {
+        "type": "void"
       }
     }
   }

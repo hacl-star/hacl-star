@@ -61,7 +61,7 @@ let v_mk_int #t #l n = ()
 
 let u128 n = FStar.UInt128.uint64_to_uint128 (u64 n)
 
-// KreMLin will extract this to FStar_Int128_int_to_t, which isn't provided
+// KaRaMeL will extract this to FStar_Int128_int_to_t, which isn't provided
 // We'll need to have FStar.Int128.int64_to_int128 to support int128_t literals
 let i128 n =
   assert_norm (pow2 (bits S64 - 1) <= pow2 (bits S128 - 1));
@@ -77,14 +77,14 @@ let byte_to_int8 x = Int.Cast.uint8_to_int8 x
 
 let op_At_Percent = Int.op_At_Percent
 
-// FStar.UInt128 gets special treatment in KreMLin. There is no
+// FStar.UInt128 gets special treatment in KaRaMeL. There is no
 // equivalent for FStar.Int128 at the moment, so we use the three
 // assumed cast operators below.
 //
 // Using them will fail at runtime with an informative message.
 // The commented-out implementations show that they are realizable.
 //
-// When support for `FStar.Int128` is added KreMLin, these casts must
+// When support for `FStar.Int128` is added KaRaMeL, these casts must
 // be added as special cases. When using builtin compiler support for
 // `int128_t`, they can be implemented directly as C casts without
 // undefined or implementation-defined behaviour.

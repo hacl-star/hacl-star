@@ -35,9 +35,20 @@ _h0[5U] =
 
 void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s)
 {
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
   {
-    s[i] = _h0[i];
+    s[0U] = _h0[0U];
+  }
+  {
+    s[1U] = _h0[1U];
+  }
+  {
+    s[2U] = _h0[2U];
+  }
+  {
+    s[3U] = _h0[3U];
+  }
+  {
+    s[4U] = _h0[4U];
   }
 }
 
@@ -160,9 +171,20 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
 void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
   {
-    store32_be(dst + i * (uint32_t)4U, uu____0[i]);
+    store32_be(dst + (uint32_t)0U * (uint32_t)4U, uu____0[0U]);
+  }
+  {
+    store32_be(dst + (uint32_t)1U * (uint32_t)4U, uu____0[1U]);
+  }
+  {
+    store32_be(dst + (uint32_t)2U * (uint32_t)4U, uu____0[2U]);
+  }
+  {
+    store32_be(dst + (uint32_t)3U * (uint32_t)4U, uu____0[3U]);
+  }
+  {
+    store32_be(dst + (uint32_t)4U * (uint32_t)4U, uu____0[4U]);
   }
 }
 

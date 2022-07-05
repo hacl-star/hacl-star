@@ -9,20 +9,17 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "equation_Prims.nat", "equation_Prims.pos", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "3e2bc4a7cb6ec773f7d7f32927e51a29"
+      "d2a13443b6b9d713d17d4b1fb040d1e9"
     ],
     [
       "Spec.RSAPSS.xor_bytes",
@@ -35,7 +32,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "bf91187b46bcb00b7a3e937f0060bb67"
+      "d6428d78ed5be512f449db339b410b95"
     ],
     [
       "Spec.RSAPSS.xor_bytes",
@@ -48,7 +45,7 @@
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "5c05e1dbaed17cdcea999745354e17bd"
+      "3ace4aae8ae64da5bd1880ce9b995b21"
     ],
     [
       "Spec.RSAPSS.xor_bytes",
@@ -57,7 +54,7 @@
       0,
       [ "@query" ],
       0,
-      "514f8a503f5f7d8b6eca1f7037362796"
+      "6cb248a166fa10674995b79bc0c83655"
     ],
     [
       "Spec.RSAPSS.mgf_hash_f",
@@ -71,24 +68,21 @@
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "constructor_distinct_Lib.IntTypes.U8", "equation_Prims.nat",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.word_length",
-        "equation_Spec.RSAPSS.hash_is_supported",
+        "equation_Spec.RSAPSS.hash_is_supported", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_27db5a0709424312968bd9bfd466d539",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_c5091c73d93425df77714c1363e9e1db",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05"
       ],
       0,
-      "5b552fc2d265b8127c671810e7a4c78f"
+      "a76e663e3f69e24e9386ccad1bcd548d"
     ],
     [
       "Spec.RSAPSS.mgf_hash_f",
@@ -98,11 +92,11 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_c5091c73d93425df77714c1363e9e1db"
+        "refinement_interpretation_Tm_refine_27db5a0709424312968bd9bfd466d539",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "9bc05c5ca97b5adf7cd9917ecd2681d5"
+      "aed54cd87aaf4cfc6008c7d0e702c9ed"
     ],
     [
       "Spec.RSAPSS.mgf_hash_f",
@@ -112,37 +106,35 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.length",
-        "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
-        "equation_Prims.nat", "equation_Spec.Hash.Definitions.hash_length",
+        "equation_Lib.Sequence.length", "equation_Lib.Sequence.lseq",
+        "equation_Lib.Sequence.to_seq", "equation_Prims.nat",
+        "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.word_length",
         "equation_Spec.RSAPSS.hash_is_supported", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Multiply",
+        "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_279d37bc9ed31fa7b07d3574b41cf62f",
+        "refinement_interpretation_Tm_refine_27db5a0709424312968bd9bfd466d539",
         "refinement_interpretation_Tm_refine_4756c4a467e3f4df77adccc73c7cc7cb",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
         "refinement_interpretation_Tm_refine_88ef94fe035cf45009c506efbe8f9660",
-        "refinement_interpretation_Tm_refine_c5091c73d93425df77714c1363e9e1db",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "15c4010c82227a144c60a91681e7f1c8"
+      "b4e797501ea14f65bd220d1b89df78a6"
     ],
     [
       "Spec.RSAPSS.mgf_hash_a",
@@ -152,11 +144,11 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "primitive_Prims.op_Addition", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_3a9708a0918387aad4626280399c98c2",
+        "refinement_interpretation_Tm_refine_4eaa99299897b2594dd06b2586b01f54",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "c54c3254c3dbe62e6a4aa9bea9279548"
+      "39e036d9b07c58d0480d2afa6c0f94fc"
     ],
     [
       "Spec.RSAPSS.mgf_hash",
@@ -166,31 +158,25 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U128",
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "constructor_distinct_Lib.IntTypes.U8", "equation_Prims.nat",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.word_length",
-        "equation_Spec.RSAPSS.hash_is_supported",
+        "equation_Spec.RSAPSS.hash_is_supported", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05"
       ],
       0,
-      "edb509fdf3f7e9f9e605f367a3c8f958"
+      "778cd22fe3aad8b2474e3630cb976013"
     ],
     [
       "Spec.RSAPSS.mgf_hash",
@@ -204,23 +190,20 @@
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "constructor_distinct_Lib.IntTypes.U8", "equation_Prims.nat",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.Hash.Definitions.hash_word_length",
         "equation_Spec.Hash.Definitions.word_length",
-        "equation_Spec.RSAPSS.hash_is_supported",
+        "equation_Spec.RSAPSS.hash_is_supported", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05"
       ],
       0,
-      "fcac06e7a486daadaffa50f2992f509c"
+      "2383c8483741bd7bd6fc7c593e6ccd25"
     ],
     [
       "Spec.RSAPSS.mgf_hash",
@@ -230,12 +213,11 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U1",
         "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
@@ -254,23 +236,24 @@
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_23f8b897e5349f0c8b915bf6b9c389d9",
+        "refinement_interpretation_Tm_refine_26fa32e5064939f1e7ef25867542ca7e",
+        "refinement_interpretation_Tm_refine_27db5a0709424312968bd9bfd466d539",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_6ef6f7da8e4d165de9414d1e27a83615",
+        "refinement_interpretation_Tm_refine_71d330dec0e3e2eb89d06c976136440f",
         "refinement_interpretation_Tm_refine_7331b487e19c082eabb46c9b436fccad",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_a4ee72cc99e1b628a4b0a20ee9406f67",
         "refinement_interpretation_Tm_refine_b62b031a3466f64c12f83618ab9b2409",
         "refinement_interpretation_Tm_refine_bc3e976e992e53bce2affc941a622b1c",
-        "refinement_interpretation_Tm_refine_c5091c73d93425df77714c1363e9e1db",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "typing_Lib.IntTypes.bits", "typing_Lib.Sequence.length",
         "typing_Prims.pow2", "typing_Spec.Hash.Definitions.hash_length",
-        "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Spec.RSAPSS.blocks", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "f4021bcf3ade2a7f251b82478c9a35d0"
+      "917d622e4622eac901e771969d6e0943"
     ],
     [
       "Spec.RSAPSS.os2ip",
@@ -280,11 +263,11 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "b08ec6218a3cf5fc8f5f4510fa86aae8"
+      "d1f5621f52aa5db8584f868aa47e61e6"
     ],
     [
       "Spec.RSAPSS.os2ip",
@@ -301,7 +284,7 @@
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "232f36cde63c506ec62b899c6c6eb02f"
+      "f4c7d3490f034e08a09be6b34f80f0a9"
     ],
     [
       "Spec.RSAPSS.i2osp",
@@ -311,11 +294,11 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "80a2691ae365c9397f5586707f35f1cf"
+      "706b49f7306b802d5b4aa62375d21970"
     ],
     [
       "Spec.RSAPSS.i2osp",
@@ -325,11 +308,11 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Prims.nat",
         "primitive_Prims.op_Multiply", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "7945843128e0925bfe623ffcebf51916"
+      "bfcbc6a363736eded8002c49b5ecc777"
     ],
     [
       "Spec.RSAPSS.i2osp",
@@ -348,7 +331,7 @@
         "refinement_interpretation_Tm_refine_f1f3a6a6d3da045b35e7ba130c8b362a"
       ],
       0,
-      "d3815887d2a91864e39dc266f3b5c99c"
+      "e3bb248b92cf88c4b76f61f5c70f87f3"
     ],
     [
       "Spec.RSAPSS.rsapss_pkey",
@@ -358,10 +341,10 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Spec.RSAPSS.modBits_t",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235"
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d"
       ],
       0,
-      "b5fdb42aa4d5254137d4a036c5bf7dbb"
+      "be5eba8963de613d4423e46db2e6c163"
     ],
     [
       "Spec.RSAPSS.__proj__Mk_rsapss_pkey__item__n",
@@ -371,10 +354,10 @@
       [
         "@MaxIFuel_assumption", "@query", "equation_Spec.RSAPSS.modBits_t",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235"
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d"
       ],
       0,
-      "2da8169c32847efc98e7fee33c0cd955"
+      "c8cfc4bed5ce883fa4f1d6d42b612de1"
     ],
     [
       "Spec.RSAPSS.__proj__Mk_rsapss_pkey__item__n",
@@ -383,11 +366,12 @@
       0,
       [
         "@MaxIFuel_assumption", "@query", "equation_Spec.RSAPSS.modBits_t",
+        "fuel_guarded_inversion_Spec.RSAPSS.rsapss_pkey",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235"
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d"
       ],
       0,
-      "491d497c353c27ef8d735dea5c1ed338"
+      "af7823a452b02de48fa57ed38fc1e359"
     ],
     [
       "Spec.RSAPSS.db_zero",
@@ -395,17 +379,14 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.pos", "primitive_Prims.op_GreaterThan",
+        "@MaxIFuel_assumption", "@query", "equation_Prims.pos",
+        "primitive_Prims.op_GreaterThan",
         "projection_inverse_BoxBool_proj_0",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "50b00e6bdc370751eadb594ab2a87939"
+      "79ca1b3b0ef12618f1df663c5b87e76f"
     ],
     [
       "Spec.RSAPSS.db_zero",
@@ -414,7 +395,7 @@
       0,
       [ "@query" ],
       0,
-      "01f4e3a77f81fa135d754667b25131a2"
+      "7dd5e8979b68c9ddf30d1249dcd4d831"
     ],
     [
       "Spec.RSAPSS.db_zero",
@@ -424,6 +405,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.PUB@tok",
@@ -446,22 +429,22 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_495f345650afce870812ac30c208335f",
+        "refinement_interpretation_Tm_refine_4c4c40fc0969e62d68754ba4348cb789",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_c4efa070775eed2b81fac81a0c7a19fa",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.maxint",
-        "typing_Lib.IntTypes.v", "typing_Prims.pow2",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.v",
+        "typing_Prims.pow2", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "644869df0b95cdc7251f8edd9eba0a2e"
+      "f89ff72be69ce896aa52211fb945fbfb"
     ],
     [
       "Spec.RSAPSS.pss_encode",
@@ -471,26 +454,31 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Prims.pos", "int_inversion",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Modulus",
-        "primitive_Prims.op_Subtraction",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8", "equation_Prims.nat",
+        "equation_Prims.pos", "equation_Spec.Hash.Definitions.hash_length",
+        "equation_Spec.Hash.Definitions.hash_word_length",
+        "equation_Spec.Hash.Definitions.word_length",
+        "equation_Spec.RSAPSS.blocks",
+        "equation_Spec.RSAPSS.hash_is_supported", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_GreaterThan",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_5f1e22db1996a8c57b236228ee21c73b",
+        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_9981f41f6e46e14ef378b639cac796c8",
-        "refinement_interpretation_Tm_refine_a6332c30dd0f7eb5f4148d63b72c78ba",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_f64a738140e5c35f96efb68dbf55d073",
+        "typing_Spec.RSAPSS.hash_is_supported"
       ],
       0,
-      "e86e5740b4eabba5f1efe2109eba4dc4"
+      "2e5c4526ff90385dd86aa8e056376cc5"
     ],
     [
       "Spec.RSAPSS.pss_encode",
@@ -500,21 +488,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "0c9a69ccb70452022fc6d381fd1139ae"
+      "d03eda69dbdf79ef928924b4a4ebe4c7"
     ],
     [
       "Spec.RSAPSS.pss_encode",
@@ -531,7 +510,6 @@
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
@@ -547,30 +525,28 @@
         "function_token_typing_Lib.IntTypes.uint8",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_inversion",
-        "int_typing", "lemma_FStar.UInt.pow2_values",
-        "lemma_Lib.IntTypes.pow2_3", "primitive_Prims.op_Addition",
-        "primitive_Prims.op_Division", "primitive_Prims.op_GreaterThan",
-        "primitive_Prims.op_Modulus", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "int_typing", "lemma_FStar.Seq.Base.lemma_index_slice",
+        "lemma_FStar.UInt.pow2_values", "lemma_Lib.IntTypes.pow2_3",
+        "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
+        "primitive_Prims.op_GreaterThan", "primitive_Prims.op_Modulus",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_01cbef2ac8abd0333656f3967770ea03",
-        "refinement_interpretation_Tm_refine_0565159ca1a4309c5fab2a6822440faa",
         "refinement_interpretation_Tm_refine_0af59f1c7e94a03b2fc4aaf2c44df3da",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
-        "refinement_interpretation_Tm_refine_0f7f5bcf08e8db1ef86bd2d55b0d74fb",
         "refinement_interpretation_Tm_refine_11888fecf812f197898447624c24e106",
         "refinement_interpretation_Tm_refine_1252443eae0ea43f42aa39c37ced322b",
         "refinement_interpretation_Tm_refine_205a4522b204fa96ece9e26a3b6190d6",
+        "refinement_interpretation_Tm_refine_23f8b897e5349f0c8b915bf6b9c389d9",
         "refinement_interpretation_Tm_refine_27dc038cce58e6a175dcb6195f80808a",
-        "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
+        "refinement_interpretation_Tm_refine_35a0739c434508f48d0bb1d5cd5df9e8",
         "refinement_interpretation_Tm_refine_3e65f4b8725d1b269cf98d8d061aa2e6",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_460ce49837473aafb58331137146734e",
         "refinement_interpretation_Tm_refine_4e10f60289717bdcbdc9dd3b9028143d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
+        "refinement_interpretation_Tm_refine_5f1e22db1996a8c57b236228ee21c73b",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7f7d9eb0cea0c5acf4c1b802a3a4bd1a",
@@ -579,25 +555,29 @@
         "refinement_interpretation_Tm_refine_8da1f4212fe0eb4be5abb56499625813",
         "refinement_interpretation_Tm_refine_990532092e3c809bb9fdd88d721ea5cf",
         "refinement_interpretation_Tm_refine_991464830db7e7527227105a3b0cc5a4",
-        "refinement_interpretation_Tm_refine_9981f41f6e46e14ef378b639cac796c8",
         "refinement_interpretation_Tm_refine_a51636bfc268a3a7b9f895c7cb3accf5",
+        "refinement_interpretation_Tm_refine_a83ffe0b7414eb1c15d3d36bd3312a4f",
         "refinement_interpretation_Tm_refine_b61185bd7bfa9db1bf20ad7e18b96aab",
         "refinement_interpretation_Tm_refine_b6ba1e8fc5dee105c3fb67c2a02456e0",
-        "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
+        "refinement_interpretation_Tm_refine_b9bf9d0f857340a8d758087374a41c06",
+        "refinement_interpretation_Tm_refine_bd7fd9d465f5ebdd37d08231ddd24e1a",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
+        "refinement_interpretation_Tm_refine_d3d07693cd71377864ef84dc97d10ec1",
+        "refinement_interpretation_Tm_refine_d83f8da8ef6c1cb9f71d1465c1bb1c55",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "refinement_interpretation_Tm_refine_daa27a0598909a806a30400b453d0ab1",
-        "refinement_interpretation_Tm_refine_eefc9f1fb6343857fc4e15403c7f1e5c",
+        "refinement_interpretation_Tm_refine_dee0f34b44c44e6d512c6db0858b92ef",
+        "refinement_interpretation_Tm_refine_f44c7b92fbe4972c2a78bbe2ff64de12",
+        "refinement_interpretation_Tm_refine_f64a738140e5c35f96efb68dbf55d073",
         "token_correspondence_Prims.pow2.fuel_instrumented",
         "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
         "typing_Lib.IntTypes.minint", "typing_Lib.IntTypes.v",
         "typing_Lib.Sequence.index", "typing_Lib.Sequence.sub",
         "typing_Prims.pow2", "typing_Spec.RSAPSS.blocks",
         "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "1f9d85db48de528e51eaa5041b914389"
+      "35b75347d42b75a1144d687c220eac20"
     ],
     [
       "Spec.RSAPSS.pss_verify_",
@@ -607,21 +587,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3e5653889fe2f56d5706c2786c9bb041"
+      "57557af3d952a7a00f268d831daa1d6f"
     ],
     [
       "Spec.RSAPSS.pss_verify_",
@@ -631,21 +602,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "405363537a5cca88731daea241ee3783"
+      "3638c66c4c60600acde56566cc078b24"
     ],
     [
       "Spec.RSAPSS.pss_verify_",
@@ -662,7 +624,6 @@
         "constructor_distinct_Lib.IntTypes.U64",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
         "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.uint8",
@@ -686,15 +647,15 @@
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_0042db4db0055a70ef0f0b51ad741333",
-        "refinement_interpretation_Tm_refine_0ec011aea9f93256a3547ad9f0c667f1",
+        "refinement_interpretation_Tm_refine_11ff10f94b939c8cef41f97d949a70d2",
         "refinement_interpretation_Tm_refine_2ad2d9b6169e81467bc517f4added01d",
-        "refinement_interpretation_Tm_refine_2b9ac1d6c43e9e240d84837e7e466c45",
         "refinement_interpretation_Tm_refine_3e65f4b8725d1b269cf98d8d061aa2e6",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_460ce49837473aafb58331137146734e",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_5d7fc65a01f63f2bc577298c179f855a",
+        "refinement_interpretation_Tm_refine_5f1e22db1996a8c57b236228ee21c73b",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
         "refinement_interpretation_Tm_refine_704aafed6cc0312df8ac384d49c83726",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
@@ -703,21 +664,20 @@
         "refinement_interpretation_Tm_refine_8da1f4212fe0eb4be5abb56499625813",
         "refinement_interpretation_Tm_refine_8eb78539847b038e152bb9bbd48a4c2d",
         "refinement_interpretation_Tm_refine_b61185bd7bfa9db1bf20ad7e18b96aab",
-        "refinement_interpretation_Tm_refine_b996b55a4d1f5dee0e4e0542d840d5d7",
         "refinement_interpretation_Tm_refine_c1424615841f28cac7fc34e92b7ff33c",
         "refinement_interpretation_Tm_refine_c4645ad267f49df7274d3b400877df2c",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "refinement_interpretation_Tm_refine_dee0f34b44c44e6d512c6db0858b92ef",
         "refinement_interpretation_Tm_refine_ed74a87265411de16126a80d247bc593",
-        "refinement_interpretation_Tm_refine_eefc9f1fb6343857fc4e15403c7f1e5c",
-        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.bits",
-        "typing_Lib.IntTypes.v", "typing_Lib.Sequence.index",
+        "typing_FStar.Seq.Base.length", "typing_Lib.IntTypes.v",
+        "typing_Lib.Sequence.index",
         "typing_Spec.Hash.Definitions.word_length",
         "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U32@tok",
-        "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_tok_Lib.IntTypes.SEC@tok", "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "d55c101021f94eeaeb2e07ec94f01ab0"
+      "3142ab7f1728b55fd9917cffa7a7bde8"
     ],
     [
       "Spec.RSAPSS.pss_verify",
@@ -727,21 +687,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "93e9ffc687c54b7212305574b79d3eef"
+      "10a3a3b229b185fe03eb4c477d5f845a"
     ],
     [
       "Spec.RSAPSS.pss_verify",
@@ -751,21 +702,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ad500bb270ceaf1b5d26e1f5305e79b2"
+      "e6818382cacd0c03bb26f05ee043cb80"
     ],
     [
       "Spec.RSAPSS.pss_verify",
@@ -775,6 +717,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "bool_inversion", "constructor_distinct_Lib.IntTypes.S16",
+        "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.PUB@tok",
@@ -784,25 +728,28 @@
         "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.to_seq",
         "equation_Prims.nat", "equation_Prims.pos",
-        "equation_Spec.RSAPSS.blocks", "equation_Spec.RSAPSS.hLen",
-        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "equation_Spec.RSAPSS.blocks",
+        "equation_Spec.RSAPSS.hash_is_supported", "int_inversion",
+        "int_typing", "lemma_FStar.UInt.pow2_values",
         "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Division", "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_Modulus",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
+        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_9cc18b769aa5842bd1ff45f5b0e3c86a",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.PUB@tok",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
+        "typing_Spec.RSAPSS.hash_is_supported",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok",
+        "typing_tok_Lib.IntTypes.U8@tok"
       ],
       0,
-      "9d4cb3f7fcbedce3834b7197f12a2582"
+      "f6b57d847b95582fc7b45ea717e15fa6"
     ],
     [
       "Spec.RSAPSS.os2ip_lemma",
@@ -812,26 +759,19 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.RSAPSS.blocks",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.RSAPSS.blocks", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
         "primitive_Prims.op_Division", "primitive_Prims.op_GreaterThan",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5"
       ],
       0,
-      "e8b55d19222dee6ad37cd226fc30671b"
+      "f575a126eb77db13e29c4b85a8b3ebe0"
     ],
     [
       "Spec.RSAPSS.os2ip_lemma",
@@ -841,18 +781,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "6436681ae163ed3d836a51686efff19f"
+      "276a4969fe00c21f30e490f57f27d6bd"
     ],
     [
       "Spec.RSAPSS.os2ip_lemma",
@@ -862,19 +796,16 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.IntTypes.SEC@tok",
-        "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U8@tok",
         "equation_Lib.ByteSequence.nat_from_bytes_be",
         "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.minint",
         "equation_Lib.IntTypes.uint8", "equation_Lib.IntTypes.unsigned",
         "equation_Lib.IntTypes.v", "equation_Lib.Sequence.length",
         "equation_Lib.Sequence.lseq", "equation_Lib.Sequence.seq",
-        "equation_Lib.Sequence.slice", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.RSAPSS.blocks",
-        "equation_Spec.RSAPSS.os2ip",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.RSAPSS.blocks", "equation_Spec.RSAPSS.os2ip",
         "function_token_typing_Lib.IntTypes.uint8", "int_inversion",
         "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Addition", "primitive_Prims.op_Division",
@@ -882,27 +813,25 @@
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_14e58bf2ebe4b8342ba0b27074cab16f",
+        "refinement_interpretation_Tm_refine_214ba2bf9a7acf55c54215c8786e76ba",
         "refinement_interpretation_Tm_refine_2a659d8c5f62a4007d24625a57ab3634",
-        "refinement_interpretation_Tm_refine_387e6d282145573240ab7b8a4b94cce5",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_57aa0e5c345f9c2d7fb8102a583c4267",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_859d5ccde7790bd1cce0a69123ad4c05",
         "refinement_interpretation_Tm_refine_9e7b7ec534a2a9a23ec52880cc32ece2",
-        "refinement_interpretation_Tm_refine_a6332c30dd0f7eb5f4148d63b72c78ba",
         "refinement_interpretation_Tm_refine_b668ce1dca132e8135cc96ce0c6b4075",
         "refinement_interpretation_Tm_refine_b980dd096af896d3c53bb79f2279e581",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_dbe580f66199b7c727e10d7e87429a77",
+        "refinement_interpretation_Tm_refine_f1f3a6a6d3da045b35e7ba130c8b362a",
         "typing_FStar.Seq.Base.length",
         "typing_Lib.ByteSequence.nat_from_bytes_be",
-        "typing_Lib.ByteSequence.nat_from_intseq_be",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.SEC@tok",
-        "typing_tok_Lib.IntTypes.U32@tok", "typing_tok_Lib.IntTypes.U8@tok"
+        "typing_Spec.RSAPSS.os2ip", "typing_tok_Lib.IntTypes.SEC@tok"
       ],
       0,
-      "9b763b4908bb57289118d2e5192bd4e8"
+      "009f4aac7a6ee9e3d238fb675be560d2"
     ],
     [
       "Spec.RSAPSS.rsapss_sign_",
@@ -912,24 +841,29 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U128",
+        "constructor_distinct_Lib.IntTypes.U16",
         "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "constructor_distinct_Lib.IntTypes.U64",
+        "constructor_distinct_Lib.IntTypes.U8", "equation_Prims.nat",
+        "equation_Spec.Hash.Definitions.hash_length",
+        "equation_Spec.Hash.Definitions.hash_word_length",
+        "equation_Spec.Hash.Definitions.word_length",
+        "equation_Spec.RSAPSS.hash_is_supported",
         "equation_Spec.RSAPSS.modBits_t",
-        "fuel_guarded_inversion_Spec.RSAPSS.rsapss_skey",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "fuel_guarded_inversion_Spec.RSAPSS.rsapss_skey", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
+        "refinement_interpretation_Tm_refine_c8dd98bb91cb1ba6963e5299b3babaa4"
       ],
       0,
-      "14f3c65f66262dc3d5e1aa1cf6dcf1b5"
+      "56e0f187e2c86609f2244558ac2e7a8f"
     ],
     [
       "Spec.RSAPSS.rsapss_sign_",
@@ -939,24 +873,15 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "equation_Spec.RSAPSS.modBits_t",
-        "fuel_guarded_inversion_Spec.RSAPSS.rsapss_skey",
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t",
+        "fuel_guarded_inversion_Spec.RSAPSS.rsapss_skey", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "8572c9e92f390f30e9dc1c0482e87659"
+      "c1016647a96f512b30b175731113ef47"
     ],
     [
       "Spec.RSAPSS.rsapss_sign_",
@@ -966,30 +891,26 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.eqtype",
-        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Prims.eqtype", "equation_Prims.nat", "equation_Prims.pos",
         "equation_Spec.Hash.Definitions.hash_length",
         "equation_Spec.RSAPSS.blocks", "equation_Spec.RSAPSS.modBits_t",
         "fuel_guarded_inversion_Spec.RSAPSS.rsapss_skey",
         "function_token_typing_Prims.int",
         "haseqTm_refine_542f9d4f129664613f2483a6c88bc7c2", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Addition",
+        "primitive_Prims.op_Division", "primitive_Prims.op_Multiply",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7cd1167a2dd6b9ce6a7ef74dcac6d9ab",
-        "refinement_interpretation_Tm_refine_a6332c30dd0f7eb5f4148d63b72c78ba",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "refinement_interpretation_Tm_refine_b26587a819792dcbb183f7540e42177f",
-        "refinement_interpretation_Tm_refine_c13a70ca65378e882aee506828fc9da8",
-        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_859d5ccde7790bd1cce0a69123ad4c05",
+        "refinement_interpretation_Tm_refine_99a3d13158656c1418cea8217f6bdacb",
+        "typing_Prims.pow2"
       ],
       0,
-      "8f5cbc88fcd06e91efa83f94b0eaf430"
+      "59465924d0f02e08ccb5aeefaeaf5d74"
     ],
     [
       "Spec.RSAPSS.rsapss_sign",
@@ -999,21 +920,14 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "5335c8b56801b0e82113e2f1efcccd6a"
+      "d8007f42458fd09b0a4bd4bfc2b297fb"
     ],
     [
       "Spec.RSAPSS.rsapss_sign",
@@ -1021,43 +935,24 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Spec.RSAPSS.hash_is_supported"
-      ],
-      0,
-      "20e1b468ff053966186b32e1622aa436"
-    ],
-    [
-      "Spec.RSAPSS.rsapss_sign",
-      3,
-      0,
-      0,
-      [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "bool_inversion", "equation_Prims.nat",
         "equation_Spec.RSAPSS.hash_is_supported",
         "equation_Spec.RSAPSS.modBits_t",
-        "fuel_guarded_inversion_Spec.RSAPSS.rsapss_skey",
+        "fuel_guarded_inversion_Spec.RSAPSS.rsapss_skey", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Spec.RSAPSS.hash_is_supported"
       ],
       0,
-      "16346392304566c9c4db7b8332b1ed03"
+      "19ace2239c8032f90ce227fa7f99b132"
     ],
     [
       "Spec.RSAPSS.rsapss_verify_",
@@ -1067,22 +962,14 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "871581d1e629b169e27242bb76f88ddd"
+      "52de93e1f33a64bd2b76722ead820feb"
     ],
     [
       "Spec.RSAPSS.rsapss_verify_",
@@ -1092,22 +979,14 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "5e5d5ef8c2ecb5796a3ddb74ed8b8e86"
+      "60924c78f5571b66a3e46458862307fd"
     ],
     [
       "Spec.RSAPSS.rsapss_verify_",
@@ -1117,10 +996,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.RSAPSS.blocks",
+        "bool_inversion", "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.RSAPSS.blocks",
         "equation_Spec.RSAPSS.hash_is_supported",
         "equation_Spec.RSAPSS.modBits_t",
         "fuel_guarded_inversion_Spec.RSAPSS.rsapss_pkey", "int_typing",
@@ -1128,19 +1005,17 @@
         "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
         "refinement_interpretation_Tm_refine_7cd1167a2dd6b9ce6a7ef74dcac6d9ab",
-        "refinement_interpretation_Tm_refine_a6332c30dd0f7eb5f4148d63b72c78ba",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "refinement_interpretation_Tm_refine_c13a70ca65378e882aee506828fc9da8",
-        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
-        "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_859d5ccde7790bd1cce0a69123ad4c05",
+        "refinement_interpretation_Tm_refine_ff72809224f8d18a5b09c01146a91274",
+        "typing_Prims.pow2", "typing_Spec.RSAPSS.hash_is_supported"
       ],
       0,
-      "346535a353c38b4af887289b9caa79f1"
+      "b7357464bd86c4fd01338e2d62b39306"
     ],
     [
       "Spec.RSAPSS.rsapss_verify",
@@ -1148,128 +1023,83 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "bool_inversion", "equation_Lib.Sequence.lseq", "equation_Prims.nat",
         "equation_Spec.RSAPSS.hash_is_supported",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Spec.RSAPSS.hash_is_supported"
-      ],
-      0,
-      "cbf304b93cb7a2ed21131eab7ae67fb4"
-    ],
-    [
-      "Spec.RSAPSS.rsapss_verify",
-      2,
-      0,
-      0,
-      [
-        "@MaxIFuel_assumption", "@query", "bool_inversion",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.unsigned",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "typing_Spec.RSAPSS.hash_is_supported"
-      ],
-      0,
-      "ff4c3efc48e5dde957ca4c8d27517d0c"
-    ],
-    [
-      "Spec.RSAPSS.rsapss_verify",
-      3,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.Sequence.lseq",
-        "equation_Prims.nat", "equation_Spec.RSAPSS.hash_is_supported",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_Equality",
-        "primitive_Prims.op_LessThanOrEqual",
-        "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxBool_proj_0",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
-      ],
-      0,
-      "80c37536257c3624f8059d7a48dcec08"
-    ],
-    [
-      "Spec.RSAPSS.rsapss_load_pkey",
-      1,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
-      ],
-      0,
-      "7c19bbc5f9b1d0cfc40e249040e6f304"
-    ],
-    [
-      "Spec.RSAPSS.rsapss_load_pkey",
-      2,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
-      ],
-      0,
-      "ae2d462bb3e175a72220aa9362abbf68"
-    ],
-    [
-      "Spec.RSAPSS.rsapss_load_pkey",
-      3,
-      0,
-      0,
-      [
-        "@MaxFuel_assumption", "@MaxIFuel_assumption",
-        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.RSAPSS.blocks",
-        "equation_Spec.RSAPSS.modBits_t", "int_inversion", "int_typing",
+        "equation_Spec.RSAPSS.modBits_t", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_LessThan", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Equality", "primitive_Prims.op_LessThanOrEqual",
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_a6332c30dd0f7eb5f4148d63b72c78ba",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_Prims.pow2",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
+        "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
+        "typing_Spec.RSAPSS.hash_is_supported"
       ],
       0,
-      "80765c5848d7cc14723b735172bdd94b"
+      "7ee47f80967e9d25da92e30c21019ce0"
+    ],
+    [
+      "Spec.RSAPSS.rsapss_load_pkey",
+      1,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "94cc5ec74e32a9a289856f9693b696ae"
+    ],
+    [
+      "Spec.RSAPSS.rsapss_load_pkey",
+      2,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
+      ],
+      0,
+      "7f6f63dc0d73c647010470374d0afe10"
+    ],
+    [
+      "Spec.RSAPSS.rsapss_load_pkey",
+      3,
+      0,
+      0,
+      [
+        "@MaxFuel_assumption", "@MaxIFuel_assumption",
+        "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.RSAPSS.blocks", "equation_Spec.RSAPSS.modBits_t",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThan",
+        "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxBool_proj_0",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
+        "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
+        "refinement_interpretation_Tm_refine_859d5ccde7790bd1cce0a69123ad4c05",
+        "typing_Prims.pow2"
+      ],
+      0,
+      "dd051713571582ddb0357b2baf0aeaf3"
     ],
     [
       "Spec.RSAPSS.rsapss_load_skey",
@@ -1279,17 +1109,14 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "ee91a3c8f1c33700aa2fd51e79c71c38"
+      "4a7454ba17ef454a22e2b73abc23117b"
     ],
     [
       "Spec.RSAPSS.rsapss_load_skey",
@@ -1299,17 +1126,14 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "a60aeaf9c6d4382a6aacb61600a6c0b2"
+      "d3ad207466f6733ead5f829e7fbd0a7f"
     ],
     [
       "Spec.RSAPSS.rsapss_load_skey",
@@ -1319,22 +1143,19 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Prims.pos", "equation_Spec.RSAPSS.blocks", "int_inversion",
+        "equation_Prims.nat", "equation_Prims.pos",
+        "equation_Spec.RSAPSS.blocks", "int_inversion", "int_typing",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_AmpAmp",
         "primitive_Prims.op_LessThan", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_a6332c30dd0f7eb5f4148d63b72c78ba",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_859d5ccde7790bd1cce0a69123ad4c05"
       ],
       0,
-      "0a3b79b92dbe403c42ebb7b3bd06da25"
+      "01013d45d4ed1be9a7936bbc820cb17a"
     ],
     [
       "Spec.RSAPSS.rsapss_skey_sign",
@@ -1360,7 +1181,7 @@
         "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5df84fe3e32cee2e23178de422642048"
+      "99173ad83f51d26c0f8461f5e95624e6"
     ],
     [
       "Spec.RSAPSS.rsapss_skey_sign",
@@ -1370,22 +1191,14 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "3eced2a5fe00e52869b58731b7f39876"
+      "2ae2c17c67aedc618a7d1a8f616215da"
     ],
     [
       "Spec.RSAPSS.rsapss_skey_sign",
@@ -1395,27 +1208,23 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
         "disc_equation_FStar.Pervasives.Native.None",
-        "disc_equation_FStar.Pervasives.Native.Some",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
+        "disc_equation_FStar.Pervasives.Native.Some", "equation_Prims.nat",
         "equation_Prims.pos", "equation_Spec.RSAPSS.modBits_t",
         "equation_Spec.RSAPSS.rsapss_load_skey", "int_inversion",
-        "kinding_Spec.RSAPSS.rsapss_skey@tok",
+        "int_typing", "kinding_Spec.RSAPSS.rsapss_skey@tok",
         "lemma_FStar.Pervasives.invertOption",
         "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_44540322a5aeeac77ad2eb12638c2b4f",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
+        "refinement_interpretation_Tm_refine_609674d96c81c962549b0076055bf213",
         "refinement_interpretation_Tm_refine_774ba3f728d91ead8ef40be66c9802e5",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.rsapss_load_skey",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Spec.RSAPSS.rsapss_load_skey"
       ],
       0,
-      "04f289f6a79cae063bc87c38fa9d192e"
+      "972c5f03be72e2b1eaa27d5855284953"
     ],
     [
       "Spec.RSAPSS.rsapss_pkey_verify",
@@ -1425,22 +1234,14 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "2fab2dee3c82d011ab0b792817a9fd94"
+      "a13d217b0e9aed3e62b2215251663f33"
     ],
     [
       "Spec.RSAPSS.rsapss_pkey_verify",
@@ -1450,22 +1251,14 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "bool_inversion", "constructor_distinct_Lib.IntTypes.U32",
-        "constructor_distinct_Lib.IntTypes.U8",
-        "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U8@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "equation_Spec.RSAPSS.hash_is_supported",
-        "equation_Spec.RSAPSS.modBits_t", "lemma_FStar.UInt.pow2_values",
-        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "refinement_interpretation_Tm_refine_68b6caaa439389b926e1f13e0ddbda05",
-        "refinement_interpretation_Tm_refine_af61b6de27527a4c262716f67a596235",
-        "typing_Lib.IntTypes.bits", "typing_Spec.RSAPSS.hash_is_supported",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "equation_Spec.RSAPSS.modBits_t", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_41f3cd9bfacacefce5fc0b128e09ee1d",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "c997b4eb83eb47c3b58f13056d5208df"
+      "0995503ea2f1467652a965263452e19a"
     ],
     [
       "Spec.RSAPSS.rsapss_pkey_verify",
@@ -1481,7 +1274,7 @@
         "typing_Spec.RSAPSS.rsapss_load_pkey"
       ],
       0,
-      "6a880f4e59bbd5550c83cc92eee697e8"
+      "52acc30fd6051eb3d6f0c53ff978a006"
     ]
   ]
 ]

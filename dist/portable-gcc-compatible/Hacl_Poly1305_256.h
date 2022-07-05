@@ -29,22 +29,15 @@
 extern "C" {
 #endif
 
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
+
+#include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
 #include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
-
-#include "Hacl_Kremlib.h"
-
-/* SNIPPET_START: Hacl_Poly1305_256_blocklen */
-
-extern uint32_t Hacl_Poly1305_256_blocklen;
-
-/* SNIPPET_END: Hacl_Poly1305_256_blocklen */
-
 /* SNIPPET_START: Hacl_Poly1305_256_poly1305_ctx */
 
 typedef Lib_IntVector_Intrinsics_vec256 *Hacl_Poly1305_256_poly1305_ctx;

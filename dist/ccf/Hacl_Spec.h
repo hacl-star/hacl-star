@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
 #define Spec_Hash_Definitions_SHA2_224 0
 #define Spec_Hash_Definitions_SHA2_256 1
 #define Spec_Hash_Definitions_SHA2_384 2
@@ -54,12 +53,6 @@ typedef uint8_t Spec_Hash_Definitions_hash_alg;
 #define Spec_Agile_Cipher_CHACHA20 2
 
 typedef uint8_t Spec_Agile_Cipher_cipher_alg;
-
-#define Spec_Cipher_Expansion_Hacl_CHACHA20 0
-#define Spec_Cipher_Expansion_Vale_AES128 1
-#define Spec_Cipher_Expansion_Vale_AES256 2
-
-typedef uint8_t Spec_Cipher_Expansion_impl;
 
 #if defined(__cplusplus)
 }

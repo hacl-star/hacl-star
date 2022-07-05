@@ -29,17 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Lib_Memzero0.h"
-#include "Hacl_Kremlib.h"
-
+#include "Hacl_Krmllib.h"
+#include "evercrypt_targetconfig.h"
 /* SNIPPET_START: Hacl_Impl_SHA3_keccak_rotc */
 
 extern const uint32_t Hacl_Impl_SHA3_keccak_rotc[24U];

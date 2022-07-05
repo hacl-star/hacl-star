@@ -59,8 +59,24 @@ EXPORTS
   Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint32
   Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64
+  Hacl_Bignum_bn_add_mod_n_u32
+  Hacl_Bignum_bn_add_mod_n_u64
+  Hacl_Bignum_bn_sub_mod_n_u32
+  Hacl_Bignum_bn_sub_mod_n_u64
   Hacl_Bignum_ModInvLimb_mod_inv_uint32
   Hacl_Bignum_ModInvLimb_mod_inv_uint64
+  Hacl_Bignum_Montgomery_bn_check_modulus_u32
+  Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32
+  Hacl_Bignum_Montgomery_bn_to_mont_u32
+  Hacl_Bignum_Montgomery_bn_from_mont_u32
+  Hacl_Bignum_Montgomery_bn_mont_mul_u32
+  Hacl_Bignum_Montgomery_bn_mont_sqr_u32
+  Hacl_Bignum_Montgomery_bn_check_modulus_u64
+  Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64
+  Hacl_Bignum_Montgomery_bn_to_mont_u64
+  Hacl_Bignum_Montgomery_bn_from_mont_u64
+  Hacl_Bignum_Montgomery_bn_mont_mul_u64
+  Hacl_Bignum_Montgomery_bn_mont_sqr_u64
   Hacl_Bignum256_add
   Hacl_Bignum256_sub
   Hacl_Bignum256_add_mod
@@ -151,6 +167,34 @@ EXPORTS
   Hacl_Bignum4096_32_bn_to_bytes_le
   Hacl_Bignum4096_32_lt_mask
   Hacl_Bignum4096_32_eq_mask
+  Hacl_GenericField32_field_modulus_check
+  Hacl_GenericField32_field_init
+  Hacl_GenericField32_field_free
+  Hacl_GenericField32_field_get_len
+  Hacl_GenericField32_to_field
+  Hacl_GenericField32_from_field
+  Hacl_GenericField32_add
+  Hacl_GenericField32_sub
+  Hacl_GenericField32_mul
+  Hacl_GenericField32_sqr
+  Hacl_GenericField32_one
+  Hacl_GenericField32_exp_consttime
+  Hacl_GenericField32_exp_vartime
+  Hacl_GenericField32_inverse
+  Hacl_GenericField64_field_modulus_check
+  Hacl_GenericField64_field_init
+  Hacl_GenericField64_field_free
+  Hacl_GenericField64_field_get_len
+  Hacl_GenericField64_to_field
+  Hacl_GenericField64_from_field
+  Hacl_GenericField64_add
+  Hacl_GenericField64_sub
+  Hacl_GenericField64_mul
+  Hacl_GenericField64_sqr
+  Hacl_GenericField64_one
+  Hacl_GenericField64_exp_consttime
+  Hacl_GenericField64_exp_vartime
+  Hacl_GenericField64_inverse
   Hacl_HMAC_DRBG_min_length
   Hacl_HMAC_DRBG_uu___is_State
   Hacl_HMAC_DRBG_create_in

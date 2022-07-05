@@ -40,9 +40,53 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
   else
   {
     uint8_t init = (uint8_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      tmp[i] = init;
+      tmp[0U] = init;
+    }
+    {
+      tmp[1U] = init;
+    }
+    {
+      tmp[2U] = init;
+    }
+    {
+      tmp[3U] = init;
+    }
+    {
+      tmp[4U] = init;
+    }
+    {
+      tmp[5U] = init;
+    }
+    {
+      tmp[6U] = init;
+    }
+    {
+      tmp[7U] = init;
+    }
+    {
+      tmp[8U] = init;
+    }
+    {
+      tmp[9U] = init;
+    }
+    {
+      tmp[10U] = init;
+    }
+    {
+      tmp[11U] = init;
+    }
+    {
+      tmp[12U] = init;
+    }
+    {
+      tmp[13U] = init;
+    }
+    {
+      tmp[14U] = init;
+    }
+    {
+      tmp[15U] = init;
     }
     uint32_t len16 = n_blocks * (uint32_t)16U;
     uint8_t *src16 = src;

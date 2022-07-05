@@ -25,7 +25,7 @@
 #include "Hacl_SHA2_Vec128.h"
 
 #include "internal/Hacl_SHA2_Vec256.h"
-
+#include "libintvector.h"
 static inline void
 sha224_update4(
   K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ block,
@@ -187,12 +187,10 @@ sha224_update4(
   ws[13U] = ws13;
   ws[14U] = ws14;
   ws[15U] = ws15;
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * i0 + i];
-      Lib_IntVector_Intrinsics_vec128 ws_t = ws[i];
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)0U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[0U];
       Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
       Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
       Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
@@ -241,14 +239,778 @@ sha224_update4(
       hash[6U] = g1;
       hash[7U] = h12;
     }
-    if (i0 < (uint32_t)4U - (uint32_t)1U)
     {
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)1U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[1U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)2U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[2U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)3U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[3U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)4U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[4U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)5U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[5U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)6U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[6U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)7U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[7U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)8U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[8U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)9U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[9U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)10U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[10U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)11U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[11U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)12U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[12U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)13U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[13U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)14U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[14U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)15U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[15U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    if ((uint32_t)0U < (uint32_t)4U - (uint32_t)1U)
+    {
       {
-        Lib_IntVector_Intrinsics_vec128 t16 = ws[i];
-        Lib_IntVector_Intrinsics_vec128 t15 = ws[(i + (uint32_t)1U) % (uint32_t)16U];
-        Lib_IntVector_Intrinsics_vec128 t7 = ws[(i + (uint32_t)9U) % (uint32_t)16U];
-        Lib_IntVector_Intrinsics_vec128 t2 = ws[(i + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[0U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)0U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)0U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)0U + (uint32_t)14U) % (uint32_t)16U];
         Lib_IntVector_Intrinsics_vec128
         s1 =
           Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
@@ -263,7 +1025,382 @@ sha224_update4(
             Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
                 (uint32_t)18U),
               Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
-        ws[i] =
+        ws[0U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[1U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)1U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)1U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)1U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[1U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[2U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)2U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)2U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)2U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[2U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[3U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)3U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)3U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)3U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[3U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[4U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)4U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)4U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)4U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[4U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[5U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)5U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)5U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)5U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[5U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[6U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)6U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)6U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)6U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[6U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[7U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)7U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)7U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)7U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[7U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[8U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)8U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)8U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)8U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[8U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[9U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)9U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)9U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)9U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[9U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[10U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)10U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)10U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)10U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[10U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[11U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)11U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)11U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)11U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[11U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[12U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)12U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)12U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)12U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[12U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[13U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)13U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)13U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)13U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[13U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[14U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)14U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)14U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)14U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[14U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[15U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)15U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)15U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)15U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[15U] =
           Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
                 t7),
               s0),
@@ -271,12 +1408,3716 @@ sha224_update4(
       }
     }
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+  {
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)0U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[0U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)1U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[1U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)2U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[2U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)3U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[3U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)4U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[4U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)5U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[5U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)6U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[6U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)7U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[7U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)8U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[8U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)9U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[9U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)10U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[10U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)11U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[11U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)12U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[12U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)13U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[13U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)14U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[14U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)15U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[15U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    if ((uint32_t)1U < (uint32_t)4U - (uint32_t)1U)
+    {
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[0U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)0U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)0U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)0U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[0U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[1U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)1U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)1U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)1U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[1U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[2U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)2U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)2U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)2U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[2U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[3U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)3U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)3U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)3U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[3U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[4U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)4U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)4U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)4U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[4U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[5U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)5U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)5U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)5U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[5U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[6U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)6U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)6U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)6U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[6U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[7U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)7U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)7U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)7U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[7U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[8U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)8U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)8U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)8U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[8U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[9U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)9U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)9U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)9U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[9U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[10U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)10U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)10U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)10U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[10U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[11U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)11U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)11U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)11U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[11U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[12U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)12U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)12U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)12U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[12U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[13U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)13U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)13U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)13U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[13U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[14U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)14U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)14U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)14U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[14U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[15U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)15U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)15U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)15U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[15U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+    }
+  }
+  {
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)0U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[0U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)1U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[1U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)2U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[2U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)3U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[3U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)4U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[4U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)5U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[5U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)6U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[6U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)7U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[7U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)8U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[8U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)9U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[9U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)10U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[10U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)11U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[11U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)12U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[12U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)13U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[13U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)14U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[14U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)15U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[15U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    if ((uint32_t)2U < (uint32_t)4U - (uint32_t)1U)
+    {
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[0U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)0U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)0U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)0U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[0U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[1U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)1U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)1U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)1U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[1U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[2U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)2U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)2U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)2U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[2U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[3U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)3U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)3U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)3U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[3U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[4U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)4U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)4U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)4U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[4U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[5U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)5U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)5U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)5U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[5U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[6U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)6U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)6U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)6U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[6U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[7U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)7U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)7U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)7U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[7U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[8U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)8U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)8U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)8U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[8U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[9U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)9U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)9U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)9U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[9U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[10U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)10U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)10U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)10U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[10U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[11U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)11U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)11U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)11U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[11U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[12U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)12U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)12U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)12U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[12U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[13U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)13U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)13U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)13U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[13U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[14U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)14U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)14U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)14U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[14U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[15U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)15U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)15U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)15U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[15U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+    }
+  }
+  {
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)0U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[0U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)1U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[1U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)2U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[2U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)3U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[3U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)4U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[4U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)5U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[5U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)6U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[6U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)7U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[7U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)8U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[8U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)9U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[9U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)10U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[10U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)11U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[11U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)12U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[12U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)13U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[13U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)14U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[14U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)15U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[15U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    if ((uint32_t)3U < (uint32_t)4U - (uint32_t)1U)
+    {
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[0U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)0U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)0U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)0U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[0U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[1U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)1U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)1U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)1U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[1U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[2U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)2U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)2U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)2U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[2U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[3U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)3U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)3U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)3U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[3U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[4U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)4U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)4U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)4U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[4U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[5U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)5U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)5U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)5U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[5U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[6U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)6U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)6U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)6U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[6U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[7U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)7U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)7U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)7U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[7U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[8U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)8U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)8U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)8U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[8U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[9U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)9U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)9U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)9U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[9U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[10U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)10U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)10U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)10U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[10U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[11U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)11U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)11U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)11U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[11U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[12U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)12U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)12U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)12U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[12U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[13U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)13U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)13U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)13U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[13U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[14U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)14U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)14U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)14U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[14U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[15U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)15U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)15U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)15U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[15U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+    }
+  }
   {
     Lib_IntVector_Intrinsics_vec128 *os = hash;
     Lib_IntVector_Intrinsics_vec128
-    x = Lib_IntVector_Intrinsics_vec128_add32(hash[i], hash_old[i]);
-    os[i] = x;
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[0U], hash_old[0U]);
+    os[0U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[1U], hash_old[1U]);
+    os[1U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[2U], hash_old[2U]);
+    os[2U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[3U], hash_old[3U]);
+    os[3U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[4U], hash_old[4U]);
+    os[4U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[5U], hash_old[5U]);
+    os[5U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[6U], hash_old[6U]);
+    os[6U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[7U], hash_old[7U]);
+    os[7U] = x;
   }
 }
 
@@ -300,12 +5141,53 @@ Hacl_SHA2_Vec128_sha224_4(
   Lib_IntVector_Intrinsics_vec128 st[8U];
   for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
     st[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
     Lib_IntVector_Intrinsics_vec128 *os = st;
-    uint32_t hi = Hacl_Impl_SHA2_Generic_h224[i];
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h224[0U];
     Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
-    os[i] = x;
+    os[0U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h224[1U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[1U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h224[2U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[2U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h224[3U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[3U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h224[4U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[4U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h224[5U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[5U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h224[6U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[6U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h224[7U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[7U] = x;
   }
   uint32_t rem = input_len % (uint32_t)64U;
   uint64_t len_ = (uint64_t)input_len;
@@ -469,9 +5351,29 @@ Hacl_SHA2_Vec128_sha224_4(
   st[5U] = st6_;
   st[6U] = st3_;
   st[7U] = st7_;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + i * (uint32_t)16U, st[i]);
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)0U * (uint32_t)16U, st[0U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)1U * (uint32_t)16U, st[1U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)2U * (uint32_t)16U, st[2U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)3U * (uint32_t)16U, st[3U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)4U * (uint32_t)16U, st[4U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)5U * (uint32_t)16U, st[5U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)6U * (uint32_t)16U, st[6U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)7U * (uint32_t)16U, st[7U]);
   }
   uint8_t *b31 = rb.snd.snd.snd;
   uint8_t *b2 = rb.snd.snd.fst;
@@ -644,12 +5546,10 @@ sha256_update4(
   ws[13U] = ws13;
   ws[14U] = ws14;
   ws[15U] = ws15;
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
     {
-      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * i0 + i];
-      Lib_IntVector_Intrinsics_vec128 ws_t = ws[i];
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)0U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[0U];
       Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
       Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
       Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
@@ -698,14 +5598,778 @@ sha256_update4(
       hash[6U] = g1;
       hash[7U] = h12;
     }
-    if (i0 < (uint32_t)4U - (uint32_t)1U)
     {
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)1U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[1U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)2U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[2U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)3U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[3U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)4U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[4U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)5U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[5U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)6U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[6U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)7U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[7U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)8U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[8U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)9U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[9U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)10U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[10U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)11U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[11U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)12U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[12U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)13U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[13U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)14U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[14U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)0U + (uint32_t)15U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[15U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    if ((uint32_t)0U < (uint32_t)4U - (uint32_t)1U)
+    {
       {
-        Lib_IntVector_Intrinsics_vec128 t16 = ws[i];
-        Lib_IntVector_Intrinsics_vec128 t15 = ws[(i + (uint32_t)1U) % (uint32_t)16U];
-        Lib_IntVector_Intrinsics_vec128 t7 = ws[(i + (uint32_t)9U) % (uint32_t)16U];
-        Lib_IntVector_Intrinsics_vec128 t2 = ws[(i + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[0U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)0U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)0U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)0U + (uint32_t)14U) % (uint32_t)16U];
         Lib_IntVector_Intrinsics_vec128
         s1 =
           Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
@@ -720,7 +6384,382 @@ sha256_update4(
             Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
                 (uint32_t)18U),
               Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
-        ws[i] =
+        ws[0U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[1U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)1U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)1U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)1U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[1U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[2U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)2U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)2U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)2U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[2U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[3U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)3U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)3U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)3U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[3U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[4U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)4U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)4U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)4U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[4U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[5U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)5U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)5U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)5U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[5U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[6U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)6U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)6U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)6U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[6U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[7U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)7U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)7U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)7U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[7U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[8U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)8U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)8U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)8U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[8U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[9U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)9U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)9U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)9U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[9U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[10U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)10U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)10U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)10U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[10U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[11U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)11U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)11U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)11U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[11U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[12U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)12U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)12U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)12U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[12U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[13U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)13U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)13U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)13U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[13U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[14U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)14U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)14U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)14U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[14U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[15U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)15U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)15U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)15U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[15U] =
           Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
                 t7),
               s0),
@@ -728,12 +6767,3716 @@ sha256_update4(
       }
     }
   }
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
+  {
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)0U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[0U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)1U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[1U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)2U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[2U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)3U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[3U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)4U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[4U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)5U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[5U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)6U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[6U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)7U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[7U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)8U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[8U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)9U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[9U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)10U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[10U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)11U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[11U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)12U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[12U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)13U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[13U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)14U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[14U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)1U + (uint32_t)15U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[15U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    if ((uint32_t)1U < (uint32_t)4U - (uint32_t)1U)
+    {
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[0U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)0U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)0U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)0U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[0U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[1U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)1U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)1U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)1U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[1U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[2U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)2U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)2U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)2U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[2U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[3U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)3U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)3U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)3U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[3U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[4U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)4U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)4U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)4U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[4U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[5U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)5U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)5U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)5U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[5U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[6U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)6U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)6U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)6U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[6U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[7U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)7U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)7U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)7U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[7U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[8U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)8U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)8U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)8U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[8U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[9U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)9U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)9U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)9U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[9U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[10U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)10U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)10U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)10U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[10U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[11U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)11U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)11U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)11U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[11U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[12U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)12U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)12U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)12U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[12U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[13U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)13U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)13U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)13U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[13U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[14U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)14U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)14U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)14U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[14U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[15U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)15U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)15U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)15U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[15U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+    }
+  }
+  {
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)0U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[0U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)1U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[1U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)2U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[2U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)3U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[3U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)4U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[4U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)5U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[5U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)6U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[6U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)7U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[7U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)8U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[8U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)9U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[9U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)10U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[10U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)11U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[11U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)12U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[12U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)13U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[13U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)14U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[14U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)2U + (uint32_t)15U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[15U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    if ((uint32_t)2U < (uint32_t)4U - (uint32_t)1U)
+    {
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[0U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)0U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)0U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)0U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[0U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[1U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)1U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)1U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)1U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[1U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[2U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)2U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)2U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)2U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[2U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[3U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)3U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)3U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)3U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[3U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[4U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)4U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)4U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)4U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[4U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[5U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)5U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)5U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)5U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[5U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[6U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)6U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)6U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)6U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[6U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[7U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)7U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)7U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)7U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[7U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[8U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)8U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)8U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)8U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[8U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[9U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)9U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)9U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)9U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[9U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[10U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)10U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)10U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)10U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[10U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[11U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)11U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)11U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)11U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[11U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[12U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)12U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)12U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)12U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[12U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[13U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)13U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)13U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)13U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[13U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[14U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)14U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)14U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)14U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[14U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[15U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)15U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)15U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)15U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[15U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+    }
+  }
+  {
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)0U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[0U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)1U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[1U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)2U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[2U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)3U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[3U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)4U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[4U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)5U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[5U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)6U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[6U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)7U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[7U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)8U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[8U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)9U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[9U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)10U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[10U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)11U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[11U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)12U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[12U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)13U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[13U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)14U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[14U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    {
+      uint32_t k_t = Hacl_Impl_SHA2_Generic_k224_256[(uint32_t)16U * (uint32_t)3U + (uint32_t)15U];
+      Lib_IntVector_Intrinsics_vec128 ws_t = ws[15U];
+      Lib_IntVector_Intrinsics_vec128 a0 = hash[0U];
+      Lib_IntVector_Intrinsics_vec128 b0 = hash[1U];
+      Lib_IntVector_Intrinsics_vec128 c0 = hash[2U];
+      Lib_IntVector_Intrinsics_vec128 d0 = hash[3U];
+      Lib_IntVector_Intrinsics_vec128 e0 = hash[4U];
+      Lib_IntVector_Intrinsics_vec128 f0 = hash[5U];
+      Lib_IntVector_Intrinsics_vec128 g0 = hash[6U];
+      Lib_IntVector_Intrinsics_vec128 h02 = hash[7U];
+      Lib_IntVector_Intrinsics_vec128 k_e_t = Lib_IntVector_Intrinsics_vec128_load32(k_t);
+      Lib_IntVector_Intrinsics_vec128
+      t1 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(h02,
+                Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                    (uint32_t)6U),
+                  Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(e0,
+                      (uint32_t)11U),
+                    Lib_IntVector_Intrinsics_vec128_rotate_right32(e0, (uint32_t)25U)))),
+              Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(e0, f0),
+                Lib_IntVector_Intrinsics_vec128_and(Lib_IntVector_Intrinsics_vec128_lognot(e0), g0))),
+            k_e_t),
+          ws_t);
+      Lib_IntVector_Intrinsics_vec128
+      t2 =
+        Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+              (uint32_t)2U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(a0,
+                (uint32_t)13U),
+              Lib_IntVector_Intrinsics_vec128_rotate_right32(a0, (uint32_t)22U))),
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, b0),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_and(a0, c0),
+              Lib_IntVector_Intrinsics_vec128_and(b0, c0))));
+      Lib_IntVector_Intrinsics_vec128 a1 = Lib_IntVector_Intrinsics_vec128_add32(t1, t2);
+      Lib_IntVector_Intrinsics_vec128 b1 = a0;
+      Lib_IntVector_Intrinsics_vec128 c1 = b0;
+      Lib_IntVector_Intrinsics_vec128 d1 = c0;
+      Lib_IntVector_Intrinsics_vec128 e1 = Lib_IntVector_Intrinsics_vec128_add32(d0, t1);
+      Lib_IntVector_Intrinsics_vec128 f1 = e0;
+      Lib_IntVector_Intrinsics_vec128 g1 = f0;
+      Lib_IntVector_Intrinsics_vec128 h12 = g0;
+      hash[0U] = a1;
+      hash[1U] = b1;
+      hash[2U] = c1;
+      hash[3U] = d1;
+      hash[4U] = e1;
+      hash[5U] = f1;
+      hash[6U] = g1;
+      hash[7U] = h12;
+    }
+    if ((uint32_t)3U < (uint32_t)4U - (uint32_t)1U)
+    {
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[0U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)0U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)0U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)0U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[0U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[1U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)1U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)1U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)1U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[1U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[2U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)2U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)2U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)2U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[2U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[3U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)3U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)3U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)3U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[3U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[4U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)4U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)4U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)4U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[4U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[5U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)5U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)5U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)5U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[5U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[6U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)6U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)6U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)6U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[6U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[7U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)7U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)7U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)7U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[7U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[8U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)8U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)8U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)8U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[8U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[9U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)9U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)9U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)9U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[9U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[10U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)10U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)10U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)10U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[10U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[11U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)11U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)11U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)11U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[11U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[12U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)12U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)12U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)12U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[12U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[13U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)13U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)13U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)13U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[13U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[14U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)14U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)14U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)14U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[14U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+      {
+        Lib_IntVector_Intrinsics_vec128 t16 = ws[15U];
+        Lib_IntVector_Intrinsics_vec128 t15 = ws[((uint32_t)15U + (uint32_t)1U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t7 = ws[((uint32_t)15U + (uint32_t)9U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128 t2 = ws[((uint32_t)15U + (uint32_t)14U) % (uint32_t)16U];
+        Lib_IntVector_Intrinsics_vec128
+        s1 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+              (uint32_t)17U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t2,
+                (uint32_t)19U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t2, (uint32_t)10U)));
+        Lib_IntVector_Intrinsics_vec128
+        s0 =
+          Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+              (uint32_t)7U),
+            Lib_IntVector_Intrinsics_vec128_xor(Lib_IntVector_Intrinsics_vec128_rotate_right32(t15,
+                (uint32_t)18U),
+              Lib_IntVector_Intrinsics_vec128_shift_right32(t15, (uint32_t)3U)));
+        ws[15U] =
+          Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(Lib_IntVector_Intrinsics_vec128_add32(s1,
+                t7),
+              s0),
+            t16);
+      }
+    }
+  }
   {
     Lib_IntVector_Intrinsics_vec128 *os = hash;
     Lib_IntVector_Intrinsics_vec128
-    x = Lib_IntVector_Intrinsics_vec128_add32(hash[i], hash_old[i]);
-    os[i] = x;
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[0U], hash_old[0U]);
+    os[0U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[1U], hash_old[1U]);
+    os[1U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[2U], hash_old[2U]);
+    os[2U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[3U], hash_old[3U]);
+    os[3U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[4U], hash_old[4U]);
+    os[4U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[5U], hash_old[5U]);
+    os[5U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[6U], hash_old[6U]);
+    os[6U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = hash;
+    Lib_IntVector_Intrinsics_vec128
+    x = Lib_IntVector_Intrinsics_vec128_add32(hash[7U], hash_old[7U]);
+    os[7U] = x;
   }
 }
 
@@ -757,12 +10500,53 @@ Hacl_SHA2_Vec128_sha256_4(
   Lib_IntVector_Intrinsics_vec128 st[8U];
   for (uint32_t _i = 0U; _i < (uint32_t)8U; ++_i)
     st[_i] = Lib_IntVector_Intrinsics_vec128_zero;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
     Lib_IntVector_Intrinsics_vec128 *os = st;
-    uint32_t hi = Hacl_Impl_SHA2_Generic_h256[i];
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h256[0U];
     Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
-    os[i] = x;
+    os[0U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h256[1U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[1U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h256[2U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[2U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h256[3U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[3U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h256[4U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[4U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h256[5U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[5U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h256[6U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[6U] = x;
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128 *os = st;
+    uint32_t hi = Hacl_Impl_SHA2_Generic_h256[7U];
+    Lib_IntVector_Intrinsics_vec128 x = Lib_IntVector_Intrinsics_vec128_load32(hi);
+    os[7U] = x;
   }
   uint32_t rem = input_len % (uint32_t)64U;
   uint64_t len_ = (uint64_t)input_len;
@@ -926,9 +10710,29 @@ Hacl_SHA2_Vec128_sha256_4(
   st[5U] = st6_;
   st[6U] = st3_;
   st[7U] = st7_;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + i * (uint32_t)16U, st[i]);
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)0U * (uint32_t)16U, st[0U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)1U * (uint32_t)16U, st[1U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)2U * (uint32_t)16U, st[2U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)3U * (uint32_t)16U, st[3U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)4U * (uint32_t)16U, st[4U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)5U * (uint32_t)16U, st[5U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)6U * (uint32_t)16U, st[6U]);
+  }
+  {
+    Lib_IntVector_Intrinsics_vec128_store32_be(hbuf + (uint32_t)7U * (uint32_t)16U, st[7U]);
   }
   uint8_t *b31 = rb.snd.snd.snd;
   uint8_t *b2 = rb.snd.snd.fst;

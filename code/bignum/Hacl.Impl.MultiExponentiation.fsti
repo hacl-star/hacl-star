@@ -14,7 +14,8 @@ module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
 module Loops = Lib.LoopCombinators
 
-module S = Lib.Exponentiation
+module LE = Lib.Exponentiation
+module SE = Spec.Exponentiation
 module BD = Hacl.Bignum.Definitions
 
 open Hacl.Impl.Exponentiation
@@ -42,11 +43,11 @@ let lexp_double_fw_st (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) (
     BD.bn_v h b2 < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a1) /\ k.to.linv (as_seq h a2) /\
-    k.to.linv (as_seq h acc) /\ k.to.refl (as_seq h acc) == k.to.comm_monoid.S.one)
+    k.to.linv (as_seq h acc) /\ k.to.refl (as_seq h acc) == k.to.concr_ops.SE.one ())
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    S.exp_double_fw #k.to.a_spec k.to.comm_monoid
+    SE.exp_double_fw #k.to.t_spec k.to.concr_ops
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l))
 
