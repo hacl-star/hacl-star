@@ -264,6 +264,20 @@ let reduce_output_sliceable f m'' r =
   sliceable_intro (reduce_output f m'' r)
     (fun x j -> xNxM_eq_intro (reduce_output f m'' r (column j x)) (column j (reduce_output f m'' r x)))
 
+inline_for_extraction noextract
+let xNx8_mk (#n:IT.size_nat) (#xN:sig n)
+  (x0 x1 x2 x3 x4 x5 x6 x7:xN.t) : xNxM xN 8 =
+  xNxM_mk _ _ (fun i -> match i with
+  | 0 -> x0
+  | 1 -> x1
+  | 2 -> x2
+  | 3 -> x3
+  | 4 -> x4
+  | 5 -> x5
+  | 6 -> x6
+  | 7 -> x7
+  )
+
 (*** Circuits ***)
 
 inline_for_extraction noextract
@@ -735,13 +749,4 @@ let uNx8 (t:IT.inttype{IT.unsigned t}) (l:IT.secrecy_level) : Type0 =
 inline_for_extraction noextract
 let uNx8_mk (#t:IT.inttype{IT.unsigned t}) (#l:IT.secrecy_level)
   (u0 u1 u2 u3 u4 u5 u6 u7:(uN t l).t) : uNx8 t l =
-  xNxM_mk (uN t l) 8 (fun i -> match i with
-  | 0 -> u0
-  | 1 -> u1
-  | 2 -> u2
-  | 3 -> u3
-  | 4 -> u4
-  | 5 -> u5
-  | 6 -> u6
-  | 7 -> u7
-  )
+  xNx8_mk u0 u1 u2 u3 u4 u5 u6 u7
