@@ -3,6 +3,7 @@ name: merge hints and dist
 on:
   schedule:
     - cron: '0 4 * * *'
+  workflow_dispatch:
 
 jobs:
   merge-hints-and-dist:
