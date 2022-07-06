@@ -265,19 +265,19 @@ let mix_columns_state st =
   let col = create 8ul (u64 0) in
   let h0 = ST.get() in
   loop_nospec #h0 (size 8) col (fun i ->
-	 let coli = st.(i) in
-	 col.(i) <- coli ^. (((coli &. u64 0xeeeeeeeeeeeeeeee) >>. size 1)
-                |. ((coli &. u64 0x1111111111111111) <<. size 3)));
+  let coli = st.(i) in
+  col.(i) <- coli ^. (((coli &. u64 0xeeeeeeeeeeeeeeee) >>. size 1)
+            |. ((coli &. u64 0x1111111111111111) <<. size 3)));
   let col0 = col.(size 0) in
   let ncol0 = col0 ^. (((col0 &. u64 0xcccccccccccccccc ) >>. size  2)
-		      |. ((col0 &. u64 0x3333333333333333) <<. size  2)) in
+              |. ((col0 &. u64 0x3333333333333333) <<. size  2)) in
   st.(size 0) <- st.(size 0) ^. ncol0;
   let h0 = ST.get() in
   loop_nospec #h0 (size 7) st (fun i ->
     let prev = col.(i) in
     let next = col.(i +. size 1) in
     let ncoli = next ^. (((next &. u64 0xcccccccccccccccc ) >>. size  2)
-		               |. ((next &. u64 0x3333333333333333) <<. size  2)) in
+                |. ((next &. u64 0x3333333333333333) <<. size  2)) in
   st.(i +. size 1) <- st.(i +. size 1) ^. ncoli ^. prev);
   st.(size 0) <- st.(size 0) ^. col.(size 7);
   st.(size 1) <- st.(size 1) ^. col.(size 7);
@@ -368,9 +368,9 @@ let aes_keygen_assist0 next prev rcon =
   loop_nospec #h0 (size 8) next
     (fun i -> let n = next.(i) in
            let n = (n &. u64 0xf000f000f000f000) in
-	   let n = n ^. (n >>. size 4) in
-	   let n = n ^. (n >>. size 8) in
-	   next.(i) <- n)
+           let n = n ^. (n >>. size 4) in
+           let n = n ^. (n >>. size 8) in
+           next.(i) <- n)
 
 inline_for_extraction noextract
 val aes_keygen_assist1:
@@ -386,9 +386,9 @@ let aes_keygen_assist1 next prev =
   loop_nospec #h0 (size 8) next
     (fun i -> let n = next.(i) in
            let n = (n &. u64 0x0f000f000f000f00) in
-	   let n = n ^. (n <<. size 4) in
-	   let n = n ^. (n >>. size 8) in
-	   next.(i) <- n)
+           let n = n ^. (n <<. size 4) in
+           let n = n ^. (n >>. size 8) in
+           next.(i) <- n)
 
 inline_for_extraction noextract
 let key_expand1 (p:uint64) (n:uint64) =
