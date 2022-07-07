@@ -274,7 +274,7 @@ let transpose_aux16 (x:uint64x4) : Pure uint64x4 (requires True) (ensures fun y 
     );
     y
 
-let ttranspose_aux8 (x:uint64x2) : Pure uint64x2 (requires True) (ensures fun y -> forall (k0 i0 i1 i2 j0 j1 j2:bool). get2 y k0 (i0,i1,i2) (j0,j1,j2) == get2 x i0 (k0,i1,i2) (j0,j1,j2)) =
+let transpose_aux8 (x:uint64x2) : Pure uint64x2 (requires True) (ensures fun y -> forall (k0 i0 i1 i2 j0 j1 j2:bool). get2 y k0 (i0,i1,i2) (j0,j1,j2) == get2 x i0 (k0,i1,i2) (j0,j1,j2)) =
     let (x0,x1) = x in
     let (y0,y1) = transpose_aux_aux8 x0 x1 in
     (y0,y1)
@@ -318,10 +318,10 @@ let transpose_bits64x8 a =
   let (c0,c1) = transpose_aux16 b0 in
   let (c2,c3) = transpose_aux16 b1 in
 
-  let (d0,d1) = ttranspose_aux8 c0 in
-  let (d2,d3) = ttranspose_aux8 c1 in
-  let (d4,d5) = ttranspose_aux8 c2 in
-  let (d6,d7) = ttranspose_aux8 c3 in
+  let (d0,d1) = transpose_aux8 c0 in
+  let (d2,d3) = transpose_aux8 c1 in
+  let (d4,d5) = transpose_aux8 c2 in
+  let (d6,d7) = transpose_aux8 c3 in
 
   let e0 = transpose_bits64(d0) in
   let e1 = transpose_bits64(d1) in
@@ -349,10 +349,10 @@ let transpose_bits64x8_inv a =
   let b6 = transpose_bits64(a6) in
   let b7 = transpose_bits64(a7) in
 
-  let c0 = ttranspose_aux8 (b0, b1) in
-  let c1 = ttranspose_aux8 (b2, b3) in
-  let c2 = ttranspose_aux8 (b4, b5) in
-  let c3 = ttranspose_aux8 (b6, b7) in
+  let c0 = transpose_aux8 (b0, b1) in
+  let c1 = transpose_aux8 (b2, b3) in
+  let c2 = transpose_aux8 (b4, b5) in
+  let c3 = transpose_aux8 (b6, b7) in
 
   let d0 = transpose_aux16 (c0, c1) in
   let d1 = transpose_aux16 (c2, c3) in
