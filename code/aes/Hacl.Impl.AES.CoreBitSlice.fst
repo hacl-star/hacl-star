@@ -70,7 +70,7 @@ val transpose_state:
   (requires (fun h -> live h st))
   (ensures (fun h0 _ h1 -> modifies1 st h0 h1))
 
-#push-options "--z3rlimit 20"
+#push-options "--z3rlimit 40"
 let transpose_state st =
   let i0 = st.(size 0) in
   let i1 = st.(size 1) in
