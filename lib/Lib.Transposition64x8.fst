@@ -59,6 +59,7 @@ let aux (i0 i1 i2 i3 i4 i5:bool) : (i:nat{i<64}) =
   let s = S.cons i5 (S.cons i4 (S.cons i3 (S.cons i2 (S.cons i1 (S.cons i0 S.empty))))) in
   63-UI.from_vec #6 s
 
+#push-options "--z3rlimit 20"
 let aux_lemma (#n:pos) (a b:(s:S.seq bool{S.length s == n})) (k:nat{k<n}) :
   Lemma
     (requires (forall (i:nat{i<n /\ i<>k}). S.index a i == S.index b i)
@@ -104,6 +105,7 @@ let aux_lemma (#n:pos) (a b:(s:S.seq bool{S.length s == n})) (k:nat{k<n}) :
     UI.append_lemma #1 #(n-k-1) (S.create 1 (S.head b1)) (S.tail b1);
     ()
   )
+#pop-options
 
 let aux_lemma8 (i0 i1 i2 i4 i5:bool) :
   Lemma (aux i0 i1 i2 true i4 i5 == aux i0 i1 i2 false i4 i5 - 8)
@@ -200,9 +202,9 @@ let shift32_lemma1 (x:uint64) (i0 i1:bool) (j:bool*bool*bool) :
   assert(get1 (x >>. size 32) (i0,i1,false) j == UI.nth #64 (UI.shift_right (v x) 32) (aux j0 j1 j2 i0 i1 true + 32))
 
 let transpose_aux_aux32 (a b:uint64) :
-  Pure uint64x2 (requires True) (ensures fun x ->
+  (x:uint64x2{
     forall (k0 i0 i1 i2:bool) (j:bool*bool*bool). get2 x k0 (i0,i1,i2) j == get2 (a,b) i2 (i0,i1,k0) j
-  ) =
+  }) =
   let m : (m:uint64{forall (i0 i1 i2:bool) (j:bool*bool*bool). get1 m (i0,i1,i2) j == i2}) =
     admit ();
     u64 (normal (UI.from_vec #64 (S.init 64 (fun (i:nat{i<64}) ->
@@ -215,9 +217,9 @@ let transpose_aux_aux32 (a b:uint64) :
   )
 
 let transpose_aux_aux16 (a b:uint64) :
-  Pure uint64x2 (requires True) (ensures fun x ->
+  (x:uint64x2{
     forall (k0 i0 i1 i2:bool) (j:bool*bool*bool). get2 x k0 (i0,i1,i2) j == get2 (a,b) i1 (i0,k0,i2) j
-  ) =
+  }) =
   let m : (m:uint64{forall (i0 i1 i2:bool) (j:bool*bool*bool). get1 m (i0,i1,i2) j == i1}) =
     admit ();
     u64 (normal (UI.from_vec #64 (S.init 64 (fun (i:nat{i<64}) ->
@@ -230,9 +232,9 @@ let transpose_aux_aux16 (a b:uint64) :
   )
 
 let transpose_aux_aux8 (a b:uint64) :
-  Pure uint64x2 (requires True) (ensures fun x ->
+  (x:uint64x2{
     forall (k0 i0 i1 i2:bool) (j:bool*bool*bool). get2 x k0 (i0,i1,i2) j == get2 (a,b) i0 (k0,i1,i2) j
-  ) =
+  }) =
   let m : (m:uint64{forall (i0 i1 i2:bool) (j:bool*bool*bool). get1 m (i0,i1,i2) j == i0}) =
     admit ();
     u64 (normal (UI.from_vec #64 (S.init 64 (fun (i:nat{i<64}) ->
@@ -244,7 +246,11 @@ let transpose_aux_aux8 (a b:uint64) :
   , ((a >>. size 8) &. lognot m) ^. (b &. m)
   )
 
-let transpose_aux32 (x:uint64x8) : Pure uint64x8 (requires True) (ensures fun y -> forall (k0 k1 k2 i0 i1 i2 j0 j1 j2:bool). get8 y (k0,k1,k2) (i0,i1,i2) (j0,j1,j2) == get8 x (k0,k1,i2) (i0,i1,k2) (j0,j1,j2)) =
+#push-options "--z3rlimit 40"
+let transpose_aux32 (x:uint64x8) :
+  (y:uint64x8{
+    forall (k0 k1 k2 i0 i1 i2 j0 j1 j2:bool). get8 y (k0,k1,k2) (i0,i1,i2) (j0,j1,j2) == get8 x (k0,k1,i2) (i0,i1,k2) (j0,j1,j2)
+  }) =
     let (((x0,x1),(x2,x3)),((x4,x5),(x6,x7))) = x in
     let (y0, y4) = transpose_aux_aux32 x0 x4 in
     let (y1, y5) = transpose_aux_aux32 x1 x5 in
@@ -260,8 +266,12 @@ let transpose_aux32 (x:uint64x8) : Pure uint64x8 (requires True) (ensures fun y 
       ) <: Lemma (get8 y (k0,k1,k2) (i0,i1,i2) (j0,j1,j2) == get8 x (k0,k1,i2) (i0,i1,k2) (j0,j1,j2))
     );
     y
+#pop-options
 
-let transpose_aux16 (x:uint64x4) : Pure uint64x4 (requires True) (ensures fun y -> forall (k0 k1 i0 i1 i2 j0 j1 j2:bool). get4 y (k0,k1) (i0,i1,i2) (j0,j1,j2) == get4 x (k0,i1) (i0,k1,i2) (j0,j1,j2)) =
+let transpose_aux16 (x:uint64x4) :
+  (y:uint64x4{
+    forall (k0 k1 i0 i1 i2 j0 j1 j2:bool). get4 y (k0,k1) (i0,i1,i2) (j0,j1,j2) == get4 x (k0,i1) (i0,k1,i2) (j0,j1,j2)
+  }) =
     let ((x0,x1),(x2,x3)) = x in
     let (y0, y2) = transpose_aux_aux16 x0 x2 in
     let (y1, y3) = transpose_aux_aux16 x1 x3 in
@@ -274,14 +284,18 @@ let transpose_aux16 (x:uint64x4) : Pure uint64x4 (requires True) (ensures fun y 
     );
     y
 
-let transpose_aux8 (x:uint64x2) : Pure uint64x2 (requires True) (ensures fun y -> forall (k0 i0 i1 i2 j0 j1 j2:bool). get2 y k0 (i0,i1,i2) (j0,j1,j2) == get2 x i0 (k0,i1,i2) (j0,j1,j2)) =
+let transpose_aux8 (x:uint64x2) :
+  (y:uint64x2{
+    forall (k0 i0 i1 i2 j0 j1 j2:bool). get2 y k0 (i0,i1,i2) (j0,j1,j2) == get2 x i0 (k0,i1,i2) (j0,j1,j2)
+  }) =
     let (x0,x1) = x in
     let (y0,y1) = transpose_aux_aux8 x0 x1 in
     (y0,y1)
 
 let transpose_bits64 (x:uint64) :
-  Pure uint64 (requires True)
-  (ensures fun y -> forall (i j:bool*bool*bool). get1 y i j == get1 x j i)
+  (y:uint64{
+    forall (i j:bool*bool*bool). get1 y i j == get1 x j i
+  })
   =
   let m0 : uint64 = u64 0x8040201008040201 in
   let m1 : uint64 = u64 0x4020100804020100 in
@@ -310,18 +324,32 @@ let transpose_bits64 (x:uint64) :
   admit ();
   y14
 
-val transpose_bits64x8 (x:uint64x8) : Pure uint64x8 (requires True) (ensures fun y -> forall (k i j:bool*bool*bool). get8 y k i j == get8 x j k i)
-#push-options "--ifuel 1 --z3rlimit 8"
+val transpose_bits64x8 (x:uint64x8) :
+  (y:uint64x8{
+    forall (k i j:bool*bool*bool). get8 y k i j == get8 x j k i
+  })
+#push-options "--ifuel 1 --z3rlimit 20"
 let transpose_bits64x8 a =
   let (b0,b1)  = transpose_aux32 a in
+  assert(forall (k0 k1 k2 i0 i1 i2 j0 j1 j2:bool). get8 (b0,b1) (k0,k1,k2) (i0,i1,i2) (j0,j1,j2) == get8 a (k0,k1,i2) (i0,i1,k2) (j0,j1,j2));
 
   let (c0,c1) = transpose_aux16 b0 in
   let (c2,c3) = transpose_aux16 b1 in
+
+  assert(forall (k0 k1 k2 i0 i1 i2 j0 j1 j2:bool).
+    get8 ((c0,c1),(c2,c3)) (k0,k1,k2) (i0,i1,i2) (j0,j1,j2) ==
+    get8 a (k0,i1,i2) (i0,k1,k2) (j0,j1,j2)
+  );
 
   let (d0,d1) = transpose_aux8 c0 in
   let (d2,d3) = transpose_aux8 c1 in
   let (d4,d5) = transpose_aux8 c2 in
   let (d6,d7) = transpose_aux8 c3 in
+
+  assert(forall (k0 k1 k2 i0 i1 i2 j0 j1 j2:bool).
+    get8 (((d0,d1),(d2,d3)),((d4,d5),(d6,d7))) (k0,k1,k2) (i0,i1,i2) (j0,j1,j2) ==
+    get8 a (i0,i1,i2) (k0,k1,k2) (j0,j1,j2)
+  );
 
   let e0 = transpose_bits64(d0) in
   let e1 = transpose_bits64(d1) in
