@@ -73,6 +73,7 @@ val lemma_feval_is_fas_nat:
 let lemma_feval_is_fas_nat #w h f =
   lemma_feval_is_fas_nat (as_tup5 h f)
 
+inline_for_extraction noextract
 val fmul_precomp_r_pre:
     #w:lanes
   -> h:mem

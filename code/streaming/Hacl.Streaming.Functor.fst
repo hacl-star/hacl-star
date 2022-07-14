@@ -172,6 +172,7 @@ let footprint_s #index (c: block index) (i: index) (h: HS.mem) s =
 /// ==========
 
 #push-options "--z3cliopt smt.arith.nl=false"
+inline_for_extraction noextract
 let invariant_s #index (c: block index) (i: index) h s =
   let State block_state buf_ total_len seen key = s in
   let seen = G.reveal seen in
@@ -197,6 +198,7 @@ let invariant_s #index (c: block index) (i: index) h s =
   S.equal (S.slice (B.as_seq h buf_) 0 (Seq.length rest)) rest
 #pop-options
 
+inline_for_extraction noextract
 let freeable_s (#index: Type0) (c: block index) (i: index) (h: HS.mem) (s: state_s' c i): Type0 =
   let State block_state buf_ total_len seen key = s in
   B.freeable buf_ /\ c.state.freeable h block_state /\ optional_freeable h key

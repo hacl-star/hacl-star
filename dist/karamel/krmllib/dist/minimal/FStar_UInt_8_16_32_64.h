@@ -208,6 +208,8 @@ extern Prims_string FStar_UInt8_to_string_hex_pad(uint8_t uu___);
 
 extern uint8_t FStar_UInt8_of_string(Prims_string uu___);
 
+typedef uint8_t FStar_UInt8_byte;
+
 
 #define __FStar_UInt_8_16_32_64_H_DEFINED
 #endif

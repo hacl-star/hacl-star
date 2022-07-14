@@ -629,13 +629,21 @@ let index_gsub #t #a #l h buf start len i :
 let mul f r out =
   lemma_powers ();
 
+  [@inline_let]
   let size_0 = size 0 in
+  [@inline_let]
   let size_1 = size 1 in
+  [@inline_let]
   let size_2 = size 2 in
+  [@inline_let]
   let size_3 = size 3 in
+  [@inline_let]
   let size_4 = size 4 in
+  [@inline_let]
   let size_5 = size 5 in
+  [@inline_let]
   let size_6 = size 6 in
+  [@inline_let]
   let size_7 = size 7 in
 
   let f0 = f.(0ul) in
