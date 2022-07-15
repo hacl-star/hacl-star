@@ -78,13 +78,13 @@ typedef struct EverCrypt_aes128_key_s_s
   union {
     FStar_Dyn_dyn case_AES128_OPENSSL;
     FStar_Dyn_dyn case_AES128_BCRYPT;
-    struct 
+    struct
     {
       uint8_t *w;
       uint8_t *sbox;
     }
     case_AES128_VALE;
-    struct 
+    struct
     {
       uint8_t *w;
       uint8_t *sbox;
@@ -288,7 +288,7 @@ typedef struct EverCrypt_aes256_key_s_s
   union {
     FStar_Dyn_dyn case_AES256_OPENSSL;
     FStar_Dyn_dyn case_AES256_BCRYPT;
-    struct 
+    struct
     {
       uint8_t *w;
       uint8_t *sbox;
