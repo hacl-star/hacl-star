@@ -1,8 +1,4 @@
-#if defined(__has_include)
-#if __has_include("config.h")
 #include "config.h"
-#endif
-#endif
 
 #ifdef _WIN32
 #include <windows.h>

@@ -109,7 +109,7 @@ all:
 	$(MAKE) all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
-  compile-evercrypt-external-headers compile-c89-compatible \
+  compile-c89-compatible \
   compile-portable-gcc-compatible \
   dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
   obj/libhaclml.cmxa compile-election-guard
@@ -1063,22 +1063,6 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  cp dist/config.mozilla.h $(dir $@)/config.h; \
 	fi
 
-dist/evercrypt-external-headers/Makefile.basic: $(ALL_KRML_FILES)
-	$(KRML) -silent \
-	  -minimal \
-	  -header $(HACL_HOME)/dist/LICENSE.txt \
-	  -bundle EverCrypt+EverCrypt.AEAD+EverCrypt.AutoConfig2+EverCrypt.HKDF+EverCrypt.HMAC+EverCrypt.Hash+EverCrypt.Hash.Incremental+EverCrypt.Cipher+EverCrypt.Poly1305+EverCrypt.Chacha20Poly1305+EverCrypt.Curve25519=*[rename=EverCrypt] \
-	  -library EverCrypt,EverCrypt.* \
-	  -add-early-include '<inttypes.h>' \
-	  -add-early-include '<stdbool.h>' \
-	  -add-early-include '<krml/internal/types.h>' \
-	  -add-early-include '<krml/internal/target.h>' \
-	  -header dist/LICENSE.txt \
-	  -skip-compilation \
-	  -fextern-c \
-	  -tmpdir $(dir $@) \
-	  $^
-
 # Auto-generates a single C test file. Note that this rule will trigger multiple
 # times, for multiple KaRaMeL invocations in the test/ directory -- this may
 # cause races on shared files (e.g. Makefile.basic, etc.) -- to be investigated.
@@ -1111,7 +1095,7 @@ copy-krmllib:
 
 compile-%: dist/Makefile.tmpl dist/configure dist/%/Makefile.basic | copy-krmllib
 	cp $< dist/$*/Makefile
-	(if [ -f dist/$*/libintvector.h -a $* != mozilla ]; then cp dist/configure dist/$*/configure; fi;)
+	(if [ $* != mozilla ]; then cp dist/configure dist/$*/configure; cd dist/$*; ./configure; fi;)
 	$(MAKE) -C dist/$*
 
 ###########################

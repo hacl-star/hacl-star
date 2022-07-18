@@ -6,11 +6,7 @@
 /* We include config.h here to ensure that the various feature-flags are
  * properly brought into scope. Users can either run the configure script, or
  * write a config.h themselves and put it under version control. */
-#if defined(__has_include)
-#if __has_include("config.h")
 #include "config.h"
-#endif
-#endif
 
 /* # DEBUGGING:
  * ============

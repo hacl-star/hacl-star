@@ -57,6 +57,13 @@ function hacl_test() {
           for a in *; do
             if [[ $a != "karamel" && $a != "vale" && $a != "linux" && $a != "wasm" && $a != "merkle-tree" && $a != "test" && -d $a ]]; then
               echo "Building snapshot: $a"
+              # For build distributions that refuse to rely on the configure
+              # script, e.g. Mozilla
+              if [ -f configure ]; then
+                ./configure
+              else
+                touch config.h Makefile.config
+              fi
               CFLAGS="${cflags[$a]}" make -C $a -j $threads || r=false
               echo
             fi

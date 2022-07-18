@@ -24,7 +24,11 @@
 KRML_HOME ?= ../karamel
 
 ifeq (,$(wildcard $(KRML_HOME)/include/krmllib.h))
-	$(error Incorrect KRML_HOME)
+  $(error Incorrect KRML_HOME)
+endif
+
+ifneq (Makefile.config config.h,$(wildcard Makefile.config config.h))
+  $(error Missing Makefile.config or config.h, please run ./configure)
 endif
 
 -include Makefile.config
@@ -93,15 +97,6 @@ Hacl_Poly1305_128.o Hacl_Streaming_Poly1305_128.o Hacl_Chacha20_Vec128.o Hacl_Ch
 Hacl_Poly1305_256.o Hacl_Streaming_Poly1305_256.o Hacl_Chacha20_Vec256.o Hacl_Chacha20Poly1305_256.o Hacl_Hash_Blake2b_256.o Hacl_HMAC_Blake2b_256.o Hacl_HKDF_Blake2b_256.o Hacl_Streaming_Blake2b_256.o Hacl_SHA2_Vec256.o: CFLAGS += $(CFLAGS_256)
 
 all: libevercrypt.$(SO)
-
-# This one and the one below are for people who run "make" without running
-# configure. It's not perfect but perhaps a tiny bit better than nothing.
-Makefile.config:
-	./configure
-
-# If the configure script has not run, create an empty config.h
-config.h:
-	touch $@
 
 libevercrypt.$(SO): config.h $(OBJS)
 	$(CC) $(CFLAGS) -shared -o $@ $(filter-out %.h,$^) $(LDFLAGS)
