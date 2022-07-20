@@ -46,7 +46,8 @@ jobs:
           installTar "dist"
 
       - name: avoid trivial changes
-        run: [[ 1 -lt $(git diff --compact-summary | grep -v INFO.txt | wc -l) ]]
+        run: |
+          [[ 1 -lt $(git diff --compact-summary | grep -v INFO.txt | wc -l) ]]
 
       - name: create pull request
         uses: peter-evans/create-pull-request@v4
