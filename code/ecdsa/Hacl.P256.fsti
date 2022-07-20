@@ -691,3 +691,17 @@ val point_norm: p: point P256 -> resultPoint: point P256 ->  Stack unit
     let pointD = fromDomainPoint #P256 #DH (point_as_nat P256 h0 p) in 
     let pointNorm = _norm #P256 pointD in
     pointNorm == resultPoint))
+
+
+
+val scalar_rwnaf_0:  out: lbuffer uint64 (size 51) 
+  -> scalar: scalar_t #MUT #P256 ->
+  Stack unit 
+  (requires fun h -> live h out)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1)
+
+val scalar_rwnaf_1:  out: lbuffer uint64 (size 77)
+  -> scalar: scalar_t #MUT #P384 ->
+  Stack unit 
+  (requires fun h -> live h out)
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1)  

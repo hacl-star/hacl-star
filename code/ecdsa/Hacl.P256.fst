@@ -121,3 +121,9 @@ let point_fromForm i o = Hacl.Impl.P256.Signature.Common.fromFormPoint i o
 let point_toDomain p result = Hacl.Impl.EC.Core.pointToDomain p result
 
 let point_norm p result = Hacl.Impl.EC.Core.norm_out p result
+
+
+
+let scalar_rwnaf_0 out scalar = Hacl.Impl.EC.ScalarMultiplication.WNAF.scalar_rwnaf #P256 out scalar
+
+let scalar_rwnaf_1 out scalar = Hacl.Impl.EC.ScalarMultiplication.WNAF.scalar_rwnaf #P384 out scalar

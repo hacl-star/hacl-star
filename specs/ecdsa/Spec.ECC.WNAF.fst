@@ -51,20 +51,20 @@ let to_wnaf_scalar_step d =
 
 open FStar.Seq
 
-val from_wnaf_: l: seq int -> i: nat -> Tot int
-  (decreases (Seq.length l - i))
+val from_wnaf_: l: seq int -> i: nat {i < Seq.length l} -> Tot int
+  (decreases Seq.length l -  i)
 
 let rec from_wnaf_ l i  =
-  if i >= Seq.length l then 0 
+  if i = Seq.length l - 1 then Seq.index l i
   else 
     Seq.index l i + from_wnaf_ l (i + 1) * m
 
 
-val from_wnaf: l: seq int -> Tot int
+val from_wnaf: l: seq int {Seq.length l > 0} -> Tot int
 
 let from_wnaf l = from_wnaf_ l 0
 
-
+(*
 val lemma_from_0_: l: nat -> i: nat {i < l} -> s: seq int {length s == l /\
   (forall (j: nat {j < Seq.length s /\ j >= l - i}). index s j == 0)} -> Lemma (from_wnaf_ s (l - i) == 0)
 
@@ -81,17 +81,24 @@ val lemma_from_0: l: nat -> i: pos {i < l}
 let lemma_from_0 l i s = lemma_from_0_ l (l - i) s
 
 
-val to_wnaf2_: n0: nat -> d: int -> l: seq int {Seq.length l == n0 / w + 1}
+val to_wnaf2_: dStart: nat {dStart % 2 == 1} -> n0: nat -> d: int -> l: seq int {Seq.length l == n0 / w + 1}
   -> i: nat{i < Seq.length l /\ d < pow2 (n0 - i * w) /\ (
-    forall (j: nat {j < Seq.length l /\ j > i}). index l j == 0)}
-  -> Tot (r: seq int {Seq.length r == n0 / w + 1 /\
+    forall (j: nat {j < Seq.length l /\ j > i}). index l j == 0) /\ (
+    forall (j: nat {j < i}). index l j == (2 * (dStart / pow2 (w * j + 1)) + 1) % (2 * m) - m) /\ 
+    d == 2 * (dStart / pow2 (w * i + 1)) + 1} -> 
+  Tot (r: seq int {Seq.length r == n0 / w + 1 /\
     from_wnaf_ r i == d /\ (
     forall (j: nat {j < i}). index r j == index l j) /\ (
-    if d <= m then index r i == d /\ (forall (j: nat {j < Seq.length r /\ j > i}). index r j == 0)
-    else index r i == d % (2 * m) - m)})
+    if d <= m then 
+      index r i == 2 * (dStart / pow2 (w * i + 1)) + 1 /\ (
+      forall (j: nat {j < Seq.length r /\ j > i}). index r j == 0)
+    else 
+      index r i == (2 * (dStart / pow2 (w * i + 1)) + 1) % (2 * m) - m)})
   (decreases (Seq.length l - i))
 
-let rec to_wnaf2_ n0 d l i = 
+  open FStar.Math.Lemmas
+
+let rec to_wnaf2_ dStart n0 d l i = 
   if d <= m then 
     begin
       let r = upd l i d in
@@ -104,39 +111,73 @@ let rec to_wnaf2_ n0 d l i =
       let di, d' = to_wnaf_scalar_step d in 
       let r = upd l i di in 
 	lemma_decrease_d (n0 - i * w) d;  
-      to_wnaf2_ n0  d' r (i + 1)
+
+      assert(d == 2 * (dStart / pow2 (w * i + 1)) + 1);
+       assert(d = (d / (2 * m) * (2 * m) + d % (2 * m)));
+      division_multiplication_lemma dStart (pow2 (w * i + 1)) (pow2 w);
+      pow2_plus (w * i + 1) w; 
+      
+      assert(d' == dStart / (pow2 (w * i + 1 +  w)) * 2 + 1);
+
+      assert (d' == 2 * (dStart / pow2 (w * (i + 1) + 1)) + 1);
+      
+      to_wnaf2_ dStart n0  d' r (i + 1)
     end
+*)
+
+val to_wnaf_: d: nat {d % 2 == 1} -> n: nat {d < pow2 n} -> l: seq int {Seq.length l == n / w + 1}
+  -> i: nat{i < Seq.length l}
+  -> Tot (r: seq int {Seq.length r == n / w + 1 /\ from_wnaf_ r i == d / pow2 (i * w + 1) * 2 + 1 /\ 
+  (forall (k: nat {k < i}). index r k == index l k) /\ (
+    if i = Seq.length l - 1 then 
+      index r i == d / pow2 (n / w * w + 1) * 2 + 1
+    else ((
+      forall (j: nat {j >= i /\ j < Seq.length l - 1}).
+	index r j == (2 * (d / pow2 (w * j + 1)) + 1) % (2 * m) - m) /\
+      index r (Seq.length l - 1) == d / pow2 (n / w * w + 1) * 2 + 1))})
+  (decreases (Seq.length l - i))
+
+let rec to_wnaf_ d n l i = 
+  if i = Seq.length l - 1 then 
+    begin
+      let w_i = d / pow2 (n / w * w + 1) * 2 + 1 in  
+      upd l i w_i
+    end
+  else 
+    begin
+      let w_i = (2 * (d / pow2 (w * i + 1)) + 1) % (2 * m) - m in 
+      let l0 = upd l i w_i in 
+      let i_1 = i + 1 in 
+      let r = to_wnaf_ d n l0 i_1 in 
+
+      assert(from_wnaf_ r (i + 1) == d / pow2 ((i + 1) * w + 1) * 2 + 1);
+
+      FStar.Math.Lemmas.pow2_multiplication_modulo_lemma_2 (d / pow2 (w * i + 1)) (w + 1)  1;
+      FStar.Math.Lemmas.pow2_double_mult w;
+      
+  
+      assert(d / pow2 (i * w + 1) * 2 + 1 == 
+	(d / pow2 (i * w + 1) * 2 + 1) % (2 * m) + (d / pow2 (i * w + 1) * 2 + 1) / (2 * m) * (2 * m));
+
+      FStar.Math.Lemmas.division_multiplication_lemma d ( pow2 (i * w + 1)) (pow2 w);
+      FStar.Math.Lemmas.pow2_plus (i * w + 1) w;
+
+      assert((d / pow2 (i * w + 1) * 2) / (2 * m) == (d / (pow2 (i * w + 1 +  w))));
 
 
-val to_wnaf: n: nat -> d: nat {d < pow2 n} -> Tot (r: seq int {Seq.length r == n / w + 1 /\ from_wnaf r == d})
+      r
+    end
+    
+
+val to_wnaf: n: nat -> d: nat {d < pow2 n /\ d % 2 == 1} -> 
+  Tot (r: seq int {Seq.length r == n / w + 1 /\ from_wnaf r == d /\ (
+    forall (j: nat {j < n / w}).
+      index r j == (2 * (d / pow2 (w * j + 1)) + 1) % (2 * m) - m) /\
+    index r (n / w) == d / pow2 (n / w * w + 1) * 2 + 1})
 
 let to_wnaf n d = 
   let s = Seq.Base.create #int (n / w + 1) 0 in 
-  to_wnaf2_ n d s 0
-
-
-val to_wnaf_lemma_: n: nat -> d: nat {d < pow2 n /\ d % 2 == 1} -> i: nat -> Lemma (
-  let wnaf_repr = to_wnaf n d in 
-  if i < (n / w) then 
-    forall (j: nat {j < i}). index wnaf_repr i == (2 * (d / 2) / pow2 (w * i) + 1) % (2 * m) - m
-  else 
-    (forall (j: nat {j < n / w}). index wnaf_repr j == (2 * (d / 2) / pow2 (w * j) + 1) % (2 * m) - m) /\
-    index wnaf_repr (n / w) == ((2 * (d / 2) / pow2 (w * i) + 1)))
-
-let to_wnaf_lemma_ n d i = 
-  match i with 
-  | 0 -> ()
-  | _ -> admit()
-
-
-val to_wnaf_lemma: n: nat -> d: nat {d < pow2 n} -> Lemma (
-  let wnaf_repr = to_wnaf n d in 
-  (forall (i: nat {i < n / w}). 
-    index wnaf_repr i == (2 * (d / 2) / pow2 (w * i) + 1) % (2 * m) - m) /\
-  index wnaf_repr (n / w) == ((2 * (d / 2) / pow2 (w * ((n / w))) + 1)))
-
-let to_wnaf_lemma n d = 
-  to_wnaf_lemma_ n d (n / w)
+  to_wnaf_ d n s 0
 
 
 val getPrecomputed: #c: curve -> g: point #c #Jacobian -> s: int -> Tot (point #c #Jacobian)
@@ -217,7 +258,7 @@ let wnaf_spec_pred0 #c l p0 =
 
 
 val wnaf_spec: #c: curve 
-  -> s: scalar_bytes #c {scalar_as_nat s < getOrder #c}
+  -> s: scalar_bytes #c {scalar_as_nat s < getOrder #c /\ scalar_as_nat s % 2 == 1} 
   -> p0: point #c #Jacobian {~ (isPointAtInfinity p0)}
   -> r: point #c #Jacobian {
     pointEqual r (point_mult #c (scalar_as_nat #c s) p0)}
