@@ -3216,278 +3216,6 @@ static inline void square_root(Spec_ECC_Curves_curve c, uint64_t *a, uint64_t *r
   }
 }
 
-static inline void
-point_add_p256(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
-{
-  uint64_t *t12 = tempBuffer;
-  uint64_t *t5 = tempBuffer + (uint32_t)48U;
-  uint64_t *t4 = t12;
-  uint64_t *u10 = t12 + (uint32_t)16U;
-  uint64_t *u20 = t12 + (uint32_t)20U;
-  uint64_t *s10 = t12 + (uint32_t)24U;
-  uint64_t *s20 = t12 + (uint32_t)28U;
-  uint64_t *pX = p;
-  uint64_t *pY = p + (uint32_t)4U;
-  uint64_t *pZ = p + (uint32_t)8U;
-  uint64_t *qX = q;
-  uint64_t *qY = q + (uint32_t)4U;
-  uint64_t *qZ = q + (uint32_t)8U;
-  uint64_t *z2Square = t4;
-  uint64_t *z1Square = t4 + (uint32_t)4U;
-  uint64_t *z2Cube = t4 + (uint32_t)8U;
-  uint64_t *z1Cube = t4 + (uint32_t)12U;
-  montgomery_square_buffer_dh_p256(qZ, z2Square);
-  montgomery_square_buffer_dh_p256(pZ, z1Square);
-  montgomery_multiplication_buffer_dh_p256(z2Square, qZ, z2Cube);
-  montgomery_multiplication_buffer_dh_p256(z1Square, pZ, z1Cube);
-  montgomery_multiplication_buffer_dh_p256(z2Square, pX, u10);
-  montgomery_multiplication_buffer_dh_p256(z1Square, qX, u20);
-  montgomery_multiplication_buffer_dh_p256(z2Cube, pY, s10);
-  montgomery_multiplication_buffer_dh_p256(z1Cube, qY, s20);
-  uint64_t *temp = t12;
-  uint64_t *u1 = t12 + (uint32_t)16U;
-  uint64_t *u2 = t12 + (uint32_t)20U;
-  uint64_t *s11 = t12 + (uint32_t)24U;
-  uint64_t *s2 = t12 + (uint32_t)28U;
-  uint64_t *h = t12 + (uint32_t)32U;
-  uint64_t *r0 = t12 + (uint32_t)36U;
-  uint64_t *uh0 = t12 + (uint32_t)40U;
-  uint64_t *hCube0 = t12 + (uint32_t)44U;
-  felem_sub_p256(u2, u1, h);
-  felem_sub_p256(s2, s11, r0);
-  montgomery_square_buffer_dh_p256(h, temp);
-  montgomery_multiplication_buffer_dh_p256(temp, u1, uh0);
-  montgomery_multiplication_buffer_dh_p256(temp, h, hCube0);
-  uint64_t *h0 = t12 + (uint32_t)32U;
-  uint64_t *r = t12 + (uint32_t)36U;
-  uint64_t *uh = t12 + (uint32_t)40U;
-  uint64_t *hCube = t12 + (uint32_t)44U;
-  uint64_t *s1 = t12 + (uint32_t)24U;
-  uint64_t *x3 = t5;
-  uint64_t *rSquare = t5 + (uint32_t)4U;
-  uint64_t *rH = t5 + (uint32_t)8U;
-  uint64_t *twoUh = t5 + (uint32_t)12U;
-  montgomery_square_buffer_dh_p256(r, rSquare);
-  felem_sub_p256(rSquare, hCube, rH);
-  felem_add_p256(uh, uh, twoUh);
-  felem_sub_p256(rH, twoUh, x3);
-  uint64_t *x30 = t5;
-  uint64_t *y3 = t5 + (uint32_t)4U;
-  uint64_t *s1hCube = t5 + (uint32_t)8U;
-  uint64_t *u1hx3 = t5 + (uint32_t)12U;
-  uint64_t *ru1hx3 = t5 + (uint32_t)16U;
-  montgomery_multiplication_buffer_dh_p256(s1, hCube, s1hCube);
-  felem_sub_p256(uh, x30, u1hx3);
-  montgomery_multiplication_buffer_dh_p256(u1hx3, r, ru1hx3);
-  felem_sub_p256(ru1hx3, s1hCube, y3);
-  uint64_t *z1 = p + (uint32_t)8U;
-  uint64_t *z2 = q + (uint32_t)8U;
-  uint64_t *z3 = t5 + (uint32_t)8U;
-  uint64_t *z1z2 = t5 + (uint32_t)12U;
-  montgomery_multiplication_buffer_dh_p256(z1, z2, z1z2);
-  montgomery_multiplication_buffer_dh_p256(z1z2, h0, z3);
-  uint64_t *x3_out = t5;
-  uint64_t *y3_out = t5 + (uint32_t)4U;
-  uint64_t *z3_out = t5 + (uint32_t)8U;
-  uint64_t *z = p + (uint32_t)8U;
-  uint64_t tmp1 = (uint64_t)18446744073709551615U;
-  uint32_t len0 = (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < len0; i++)
-  {
-    uint64_t a_i = z[i];
-    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
-    uint64_t tmp0 = tmp1;
-    tmp1 = r_i & tmp0;
-  }
-  uint64_t mask = tmp1;
-  uint64_t *p_x0 = q;
-  uint64_t *p_y0 = q + (uint32_t)4U;
-  uint64_t *p_z0 = q + (uint32_t)8U;
-  copy_conditional_p256_l(x3_out, p_x0, mask);
-  copy_conditional_p256_l(y3_out, p_y0, mask);
-  copy_conditional_p256_l(z3_out, p_z0, mask);
-  uint64_t *z0 = q + (uint32_t)8U;
-  uint64_t tmp = (uint64_t)18446744073709551615U;
-  uint32_t len = (uint32_t)4U;
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint64_t a_i = z0[i];
-    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
-    uint64_t tmp0 = tmp;
-    tmp = r_i & tmp0;
-  }
-  uint64_t mask0 = tmp;
-  uint64_t *p_x = p;
-  uint64_t *p_y = p + (uint32_t)4U;
-  uint64_t *p_z = p + (uint32_t)8U;
-  copy_conditional_p256_l(x3_out, p_x, mask0);
-  copy_conditional_p256_l(y3_out, p_y, mask0);
-  copy_conditional_p256_l(z3_out, p_z, mask0);
-  memcpy(result, x3_out, (uint32_t)4U * sizeof (uint64_t));
-  memcpy(result + (uint32_t)4U, y3_out, (uint32_t)4U * sizeof (uint64_t));
-  memcpy(result + (uint32_t)8U, z3_out, (uint32_t)4U * sizeof (uint64_t));
-}
-
-static inline void
-point_add_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
-{
-  uint64_t *t12 = tempBuffer;
-  uint64_t *t5 = tempBuffer + (uint32_t)72U;
-  uint64_t *t4 = t12;
-  uint64_t *u10 = t12 + (uint32_t)24U;
-  uint64_t *u20 = t12 + (uint32_t)30U;
-  uint64_t *s10 = t12 + (uint32_t)36U;
-  uint64_t *s20 = t12 + (uint32_t)42U;
-  uint64_t *pX = p;
-  uint64_t *pY = p + (uint32_t)6U;
-  uint64_t *pZ = p + (uint32_t)12U;
-  uint64_t *qX = q;
-  uint64_t *qY = q + (uint32_t)6U;
-  uint64_t *qZ = q + (uint32_t)12U;
-  uint64_t *z2Square = t4;
-  uint64_t *z1Square = t4 + (uint32_t)6U;
-  uint64_t *z2Cube = t4 + (uint32_t)12U;
-  uint64_t *z1Cube = t4 + (uint32_t)18U;
-  montgomery_square_buffer_dh_p384(qZ, z2Square);
-  montgomery_square_buffer_dh_p384(pZ, z1Square);
-  montgomery_multiplication_buffer_dh_p384(z2Square, qZ, z2Cube);
-  montgomery_multiplication_buffer_dh_p384(z1Square, pZ, z1Cube);
-  montgomery_multiplication_buffer_dh_p384(z2Square, pX, u10);
-  montgomery_multiplication_buffer_dh_p384(z1Square, qX, u20);
-  montgomery_multiplication_buffer_dh_p384(z2Cube, pY, s10);
-  montgomery_multiplication_buffer_dh_p384(z1Cube, qY, s20);
-  uint64_t *temp = t12;
-  uint64_t *u1 = t12 + (uint32_t)24U;
-  uint64_t *u2 = t12 + (uint32_t)30U;
-  uint64_t *s11 = t12 + (uint32_t)36U;
-  uint64_t *s2 = t12 + (uint32_t)42U;
-  uint64_t *h = t12 + (uint32_t)48U;
-  uint64_t *r0 = t12 + (uint32_t)54U;
-  uint64_t *uh0 = t12 + (uint32_t)60U;
-  uint64_t *hCube0 = t12 + (uint32_t)66U;
-  felem_sub_p384(u2, u1, h);
-  felem_sub_p384(s2, s11, r0);
-  montgomery_square_buffer_dh_p384(h, temp);
-  montgomery_multiplication_buffer_dh_p384(temp, u1, uh0);
-  montgomery_multiplication_buffer_dh_p384(temp, h, hCube0);
-  uint64_t *h0 = t12 + (uint32_t)48U;
-  uint64_t *r = t12 + (uint32_t)54U;
-  uint64_t *uh = t12 + (uint32_t)60U;
-  uint64_t *hCube = t12 + (uint32_t)66U;
-  uint64_t *s1 = t12 + (uint32_t)36U;
-  uint64_t *x3 = t5;
-  uint64_t *rSquare = t5 + (uint32_t)6U;
-  uint64_t *rH = t5 + (uint32_t)12U;
-  uint64_t *twoUh = t5 + (uint32_t)18U;
-  montgomery_square_buffer_dh_p384(r, rSquare);
-  felem_sub_p384(rSquare, hCube, rH);
-  felem_add_p384(uh, uh, twoUh);
-  felem_sub_p384(rH, twoUh, x3);
-  uint64_t *x30 = t5;
-  uint64_t *y3 = t5 + (uint32_t)6U;
-  uint64_t *s1hCube = t5 + (uint32_t)12U;
-  uint64_t *u1hx3 = t5 + (uint32_t)18U;
-  uint64_t *ru1hx3 = t5 + (uint32_t)24U;
-  montgomery_multiplication_buffer_dh_p384(s1, hCube, s1hCube);
-  felem_sub_p384(uh, x30, u1hx3);
-  montgomery_multiplication_buffer_dh_p384(u1hx3, r, ru1hx3);
-  felem_sub_p384(ru1hx3, s1hCube, y3);
-  uint64_t *z1 = p + (uint32_t)12U;
-  uint64_t *z2 = q + (uint32_t)12U;
-  uint64_t *z3 = t5 + (uint32_t)12U;
-  uint64_t *z1z2 = t5 + (uint32_t)18U;
-  montgomery_multiplication_buffer_dh_p384(z1, z2, z1z2);
-  montgomery_multiplication_buffer_dh_p384(z1z2, h0, z3);
-  uint64_t *x3_out = t5;
-  uint64_t *y3_out = t5 + (uint32_t)6U;
-  uint64_t *z3_out = t5 + (uint32_t)12U;
-  uint64_t *z = p + (uint32_t)12U;
-  uint64_t tmp1 = (uint64_t)18446744073709551615U;
-  uint32_t len0 = (uint32_t)6U;
-  for (uint32_t i = (uint32_t)0U; i < len0; i++)
-  {
-    uint64_t a_i = z[i];
-    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
-    uint64_t tmp0 = tmp1;
-    tmp1 = r_i & tmp0;
-  }
-  uint64_t mask = tmp1;
-  uint64_t *p_x0 = q;
-  uint64_t *p_y0 = q + (uint32_t)6U;
-  uint64_t *p_z0 = q + (uint32_t)12U;
-  copy_conditional_p384_l(x3_out, p_x0, mask);
-  copy_conditional_p384_l(y3_out, p_y0, mask);
-  copy_conditional_p384_l(z3_out, p_z0, mask);
-  uint64_t *z0 = q + (uint32_t)12U;
-  uint64_t tmp = (uint64_t)18446744073709551615U;
-  uint32_t len = (uint32_t)6U;
-  for (uint32_t i = (uint32_t)0U; i < len; i++)
-  {
-    uint64_t a_i = z0[i];
-    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
-    uint64_t tmp0 = tmp;
-    tmp = r_i & tmp0;
-  }
-  uint64_t mask0 = tmp;
-  uint64_t *p_x = p;
-  uint64_t *p_y = p + (uint32_t)6U;
-  uint64_t *p_z = p + (uint32_t)12U;
-  copy_conditional_p384_l(x3_out, p_x, mask0);
-  copy_conditional_p384_l(y3_out, p_y, mask0);
-  copy_conditional_p384_l(z3_out, p_z, mask0);
-  memcpy(result, x3_out, (uint32_t)6U * sizeof (uint64_t));
-  memcpy(result + (uint32_t)6U, y3_out, (uint32_t)6U * sizeof (uint64_t));
-  memcpy(result + (uint32_t)12U, z3_out, (uint32_t)6U * sizeof (uint64_t));
-}
-
-static inline void toUint64ChangeEndian_p256(uint8_t *i, uint64_t *o)
-{
-  uint32_t len = (uint32_t)4U;
-  for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + i0 * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[i0] = x;
-  }
-  uint32_t len1 = (uint32_t)4U;
-  uint32_t lenByTwo = len1 >> (uint32_t)1U;
-  for (uint32_t i0 = (uint32_t)0U; i0 < lenByTwo; i0++)
-  {
-    uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i0;
-    uint64_t left = o[i0];
-    uint64_t right = o[lenRight];
-    o[i0] = right;
-    o[lenRight] = left;
-  }
-}
-
-static inline void toUint64ChangeEndian_p384(uint8_t *i, uint64_t *o)
-{
-  uint32_t len = (uint32_t)6U;
-  for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
-  {
-    uint64_t *os = o;
-    uint8_t *bj = i + i0 * (uint32_t)8U;
-    uint64_t u = load64_be(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[i0] = x;
-  }
-  uint32_t len1 = (uint32_t)6U;
-  uint32_t lenByTwo = len1 >> (uint32_t)1U;
-  for (uint32_t i0 = (uint32_t)0U; i0 < lenByTwo; i0++)
-  {
-    uint32_t lenRight = (uint32_t)6U - (uint32_t)1U - i0;
-    uint64_t left = o[i0];
-    uint64_t right = o[lenRight];
-    o[i0] = right;
-    o[lenRight] = left;
-  }
-}
-
 static inline void point_double_p256(uint64_t *p, uint64_t *result, uint64_t *tempBuffer)
 {
   uint32_t len = (uint32_t)4U;
@@ -4916,123 +4644,265 @@ point_add_mixed_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempB
   memcpy(result + (uint32_t)12U, z3_out, (uint32_t)6U * sizeof (uint64_t));
 }
 
-static void
-scalar_rwnaf_step_compute_di(
-  uint64_t wVar,
-  uint64_t *out,
-  uint64_t mask,
-  uint64_t *r,
-  uint32_t i
-)
+static uint32_t getLenWnaf(Spec_ECC_Curves_curve c)
 {
-  uint64_t w = wVar & mask;
-  uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, w, (uint64_t)32U, r);
-  uint64_t r0 = r[0U];
-  uint64_t r2 = (uint64_t)0U - r0;
-  uint64_t cAsFlag = ~FStar_UInt64_eq_mask(c, (uint64_t)0U);
-  uint64_t r3 = (r2 & cAsFlag) | (r0 & ~cAsFlag);
-  out[(uint32_t)2U * i] = r3;
-  out[(uint32_t)2U * i + (uint32_t)1U] = cAsFlag;
-}
-
-static void
-scalar_rwnaf_step(
-  uint64_t *out,
-  uint8_t *scalar,
-  uint64_t *window,
-  uint64_t mask,
-  uint64_t *r,
-  uint32_t i
-)
-{
-  uint64_t wVar = window[0U];
-  uint64_t w = wVar & mask;
-  scalar_rwnaf_step_compute_di(wVar, out, mask, r, i);
-  uint64_t d = w - (uint64_t)32U;
-  uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;
-  uint64_t
-  w0 =
-    wStart
-    +
-      ((uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U) / (uint32_t)8U]
-      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)1U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)1U);
-  uint64_t
-  w01 =
-    w0
-    +
-      ((uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U) / (uint32_t)8U]
-      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)2U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)2U);
-  uint64_t
-  w02 =
-    w01
-    +
-      ((uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U) / (uint32_t)8U]
-      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)3U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)3U);
-  uint64_t
-  w03 =
-    w02
-    +
-      ((uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U) / (uint32_t)8U]
-      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)4U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)4U);
-  uint64_t
-  w04 =
-    w03
-    +
-      ((uint64_t)(scalar[(uint32_t)4U
-      * (uint32_t)8U
-      - (uint32_t)1U
-      - (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U) / (uint32_t)8U]
-      >> (((uint32_t)1U + i) * (uint32_t)(uint64_t)5U + (uint32_t)5U) % (uint32_t)8U
-      & (uint8_t)1U)
-      << (uint32_t)5U);
-  window[0U] = w04;
-}
-
-static void scalar_rwnaf(uint64_t *out, uint8_t *scalar)
-{
-  uint64_t in0 = (uint64_t)scalar[31U];
-  uint64_t mask = (uint64_t)63U;
-  uint64_t windowStartValue = (uint64_t)1U | (in0 & mask);
-  uint64_t window = windowStartValue;
-  uint64_t r = (uint64_t)0U;
-  uint64_t r1 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)50U; i++)
+  switch (c)
   {
-    scalar_rwnaf_step(out, scalar, &window, mask, &r, i);
+    case Spec_ECC_Curves_P256:
+      {
+        return (uint32_t)51U;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        return (uint32_t)76U;
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
   }
-  uint32_t i = (uint32_t)50U;
-  uint64_t wVar = window;
-  uint64_t w = wVar & mask;
-  uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, w, (uint64_t)32U, &r);
-  uint64_t r0 = r;
-  uint64_t r2 = (uint64_t)0U - r;
-  uint64_t cAsFlag = (uint64_t)0U - c;
-  uint64_t r3 = (r2 & cAsFlag) | (r0 & ~cAsFlag);
-  out[(uint32_t)2U * i] = r3;
-  out[(uint32_t)2U * i + (uint32_t)1U] = cAsFlag;
-  uint64_t d = w - (uint64_t)32U;
-  uint64_t wStart = (wVar - d) >> (uint32_t)(uint64_t)5U;
-  out[102U] = wStart;
+}
+
+static void
+scalar_rwnaf_loop(
+  Spec_ECC_Curves_curve c,
+  uint64_t *out,
+  void *scalar,
+  uint64_t mask,
+  uint64_t *window
+)
+{
+  uint64_t r = (uint64_t)0U;
+  for (uint32_t i = (uint32_t)0U; i < getLenWnaf(c) - (uint32_t)1U; i++)
+  {
+    uint64_t wVar = window[0U];
+    uint64_t wMask = wVar & mask;
+    uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, wMask, (uint64_t)32U, &r);
+    uint64_t r0 = r;
+    uint64_t r2 = (uint64_t)0U - r0;
+    uint64_t cAsFlag = ~FStar_UInt64_eq_mask(c1, (uint64_t)0U);
+    uint64_t r3 = (r2 & cAsFlag) | (r0 & ~cAsFlag);
+    out[(uint32_t)2U * i] = r3;
+    out[(uint32_t)2U * i + (uint32_t)1U] = cAsFlag;
+    uint64_t d = wMask - (uint64_t)32U;
+    uint64_t wStart = (wVar - d) >> (uint32_t)5U;
+    uint32_t i1 = ((uint32_t)1U + i) * (uint32_t)5U;
+    uint32_t sw0;
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          sw0 = (uint32_t)4U;
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          sw0 = (uint32_t)6U;
+          break;
+        }
+      default:
+        {
+          sw0 = (uint32_t)4U;
+        }
+    }
+    uint64_t
+    w0 =
+      wStart
+      +
+        ((uint64_t)(((uint8_t *)scalar)[sw0
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (i1 + (uint32_t)1U) / (uint32_t)8U]
+        >> (i1 + (uint32_t)1U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)1U);
+    uint32_t sw1;
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          sw1 = (uint32_t)4U;
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          sw1 = (uint32_t)6U;
+          break;
+        }
+      default:
+        {
+          sw1 = (uint32_t)4U;
+        }
+    }
+    uint64_t
+    w01 =
+      w0
+      +
+        ((uint64_t)(((uint8_t *)scalar)[sw1
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (i1 + (uint32_t)2U) / (uint32_t)8U]
+        >> (i1 + (uint32_t)2U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)2U);
+    uint32_t sw2;
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          sw2 = (uint32_t)4U;
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          sw2 = (uint32_t)6U;
+          break;
+        }
+      default:
+        {
+          sw2 = (uint32_t)4U;
+        }
+    }
+    uint64_t
+    w02 =
+      w01
+      +
+        ((uint64_t)(((uint8_t *)scalar)[sw2
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (i1 + (uint32_t)3U) / (uint32_t)8U]
+        >> (i1 + (uint32_t)3U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)3U);
+    uint32_t sw3;
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          sw3 = (uint32_t)4U;
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          sw3 = (uint32_t)6U;
+          break;
+        }
+      default:
+        {
+          sw3 = (uint32_t)4U;
+        }
+    }
+    uint64_t
+    w03 =
+      w02
+      +
+        ((uint64_t)(((uint8_t *)scalar)[sw3
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (i1 + (uint32_t)4U) / (uint32_t)8U]
+        >> (i1 + (uint32_t)4U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)4U);
+    uint32_t sw;
+    switch (c)
+    {
+      case Spec_ECC_Curves_P256:
+        {
+          sw = (uint32_t)4U;
+          break;
+        }
+      case Spec_ECC_Curves_P384:
+        {
+          sw = (uint32_t)6U;
+          break;
+        }
+      default:
+        {
+          sw = (uint32_t)4U;
+        }
+    }
+    uint64_t
+    w04 =
+      w03
+      +
+        ((uint64_t)(((uint8_t *)scalar)[sw
+        * (uint32_t)8U
+        - (uint32_t)1U
+        - (i1 + (uint32_t)5U) / (uint32_t)8U]
+        >> (i1 + (uint32_t)5U) % (uint32_t)8U
+        & (uint8_t)1U)
+        << (uint32_t)5U);
+    uint64_t w00 = w04;
+    window[0U] = w00;
+  }
+}
+
+static uint64_t scalar_rwnaf_tail__(Spec_ECC_Curves_curve c, void *scalar, uint64_t wStart)
+{
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        return wStart;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        uint32_t i = getLenWnaf(Spec_ECC_Curves_P384) * (uint32_t)5U;
+        uint64_t
+        w0 =
+          wStart
+          +
+            ((uint64_t)(((uint8_t *)scalar)[(uint32_t)6U
+            * (uint32_t)8U
+            - (uint32_t)1U
+            - (i + (uint32_t)1U) / (uint32_t)8U]
+            >> (i + (uint32_t)1U) % (uint32_t)8U
+            & (uint8_t)1U)
+            << (uint32_t)1U);
+        uint64_t
+        w01 =
+          w0
+          +
+            ((uint64_t)(((uint8_t *)scalar)[(uint32_t)6U
+            * (uint32_t)8U
+            - (uint32_t)1U
+            - (i + (uint32_t)2U) / (uint32_t)8U]
+            >> (i + (uint32_t)2U) % (uint32_t)8U
+            & (uint8_t)1U)
+            << (uint32_t)2U);
+        return
+          w01
+          +
+            ((uint64_t)(((uint8_t *)scalar)[(uint32_t)6U
+            * (uint32_t)8U
+            - (uint32_t)1U
+            - (i + (uint32_t)3U) / (uint32_t)8U]
+            >> (i + (uint32_t)3U) % (uint32_t)8U
+            & (uint8_t)1U)
+            << (uint32_t)3U);
+      }
+    default:
+      {
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EXIT(253U);
+      }
+  }
+}
+
+static uint64_t
+scalar_rwnaf_tail_(Spec_ECC_Curves_curve c, void *scalar, uint64_t mask, uint64_t wVar)
+{
+  uint64_t d = mask - (uint64_t)32U;
+  uint64_t wStart = (wVar - d) >> (uint32_t)5U;
+  return scalar_rwnaf_tail__(c, scalar, wStart);
+}
+
+static uint64_t
+scalar_rwnaf_tail(Spec_ECC_Curves_curve c, void *scalar, uint64_t mask, uint64_t wVar)
+{
+  uint64_t wLast = scalar_rwnaf_tail_(c, scalar, mask, wVar);
+  return wLast;
 }
 
 extern uint64_t *Hacl_Impl_EC_ScalarMultiplication_WNAF_getUInt64(uint32_t index);
@@ -5127,12 +4997,71 @@ conditional_substraction(uint64_t *result, uint64_t *p, uint8_t *scalar, uint64_
   copy_conditional(result_z, x_z, mask);
 }
 
-static void scalar_multiplication_cmb(uint64_t *result, void *scalar, uint64_t *tempBuffer)
+static void
+scalar_multiplication_cmb(
+  Spec_ECC_Curves_curve c,
+  uint64_t *result,
+  void *scalar,
+  uint64_t *tempBuffer
+)
 {
   uint64_t rnaf2[104U] = { 0U };
   uint64_t lut[8U] = { 0U };
   uint64_t *temp4 = tempBuffer;
-  scalar_rwnaf(rnaf2, (uint8_t *)scalar);
+  uint64_t mask = (uint64_t)63U;
+  uint32_t sw;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw = (uint32_t)4U;
+      }
+  }
+  uint64_t in0 = (uint64_t)((uint8_t *)scalar)[sw * (uint32_t)8U - (uint32_t)1U];
+  uint32_t sw0;
+  switch (c)
+  {
+    case Spec_ECC_Curves_P256:
+      {
+        sw0 = (uint32_t)4U;
+        break;
+      }
+    case Spec_ECC_Curves_P384:
+      {
+        sw0 = (uint32_t)6U;
+        break;
+      }
+    default:
+      {
+        sw0 = (uint32_t)4U;
+      }
+  }
+  uint64_t in01 = (uint64_t)((uint8_t *)scalar)[sw0 * (uint32_t)8U - (uint32_t)1U];
+  uint64_t windowStartValue = (uint64_t)1U | (in01 & mask);
+  uint64_t window = windowStartValue;
+  uint64_t r = (uint64_t)0U;
+  scalar_rwnaf_loop(c, rnaf2, scalar, mask, &window);
+  uint64_t wVar = window;
+  uint64_t wMask = wVar & mask;
+  uint64_t c1 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, wMask, (uint64_t)32U, &r);
+  uint64_t r0 = r;
+  uint64_t r2 = (uint64_t)0U - r0;
+  uint64_t cAsFlag = ~FStar_UInt64_eq_mask(c1, (uint64_t)0U);
+  uint64_t r3 = (r2 & cAsFlag) | (r0 & ~cAsFlag);
+  rnaf2[(uint32_t)2U * (getLenWnaf(c) - (uint32_t)1U)] = r3;
+  rnaf2[(uint32_t)2U * (getLenWnaf(c) - (uint32_t)1U) + (uint32_t)1U] = cAsFlag;
+  uint64_t wLast = scalar_rwnaf_tail(c, scalar, wMask, wVar);
+  rnaf2[(uint32_t)2U * getLenWnaf(c)] = wLast;
   uint32_t i0 = (uint32_t)1U;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)26U; i++)
   {
@@ -5162,6 +5091,278 @@ static void scalar_multiplication_cmb(uint64_t *result, void *scalar, uint64_t *
     point_add_mixed_p256(result, lut, result, tempBuffer);
   }
   conditional_substraction(result, result, (uint8_t *)scalar, tempBuffer);
+}
+
+static inline void
+point_add_p256(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
+{
+  uint64_t *t12 = tempBuffer;
+  uint64_t *t5 = tempBuffer + (uint32_t)48U;
+  uint64_t *t4 = t12;
+  uint64_t *u10 = t12 + (uint32_t)16U;
+  uint64_t *u20 = t12 + (uint32_t)20U;
+  uint64_t *s10 = t12 + (uint32_t)24U;
+  uint64_t *s20 = t12 + (uint32_t)28U;
+  uint64_t *pX = p;
+  uint64_t *pY = p + (uint32_t)4U;
+  uint64_t *pZ = p + (uint32_t)8U;
+  uint64_t *qX = q;
+  uint64_t *qY = q + (uint32_t)4U;
+  uint64_t *qZ = q + (uint32_t)8U;
+  uint64_t *z2Square = t4;
+  uint64_t *z1Square = t4 + (uint32_t)4U;
+  uint64_t *z2Cube = t4 + (uint32_t)8U;
+  uint64_t *z1Cube = t4 + (uint32_t)12U;
+  montgomery_square_buffer_dh_p256(qZ, z2Square);
+  montgomery_square_buffer_dh_p256(pZ, z1Square);
+  montgomery_multiplication_buffer_dh_p256(z2Square, qZ, z2Cube);
+  montgomery_multiplication_buffer_dh_p256(z1Square, pZ, z1Cube);
+  montgomery_multiplication_buffer_dh_p256(z2Square, pX, u10);
+  montgomery_multiplication_buffer_dh_p256(z1Square, qX, u20);
+  montgomery_multiplication_buffer_dh_p256(z2Cube, pY, s10);
+  montgomery_multiplication_buffer_dh_p256(z1Cube, qY, s20);
+  uint64_t *temp = t12;
+  uint64_t *u1 = t12 + (uint32_t)16U;
+  uint64_t *u2 = t12 + (uint32_t)20U;
+  uint64_t *s11 = t12 + (uint32_t)24U;
+  uint64_t *s2 = t12 + (uint32_t)28U;
+  uint64_t *h = t12 + (uint32_t)32U;
+  uint64_t *r0 = t12 + (uint32_t)36U;
+  uint64_t *uh0 = t12 + (uint32_t)40U;
+  uint64_t *hCube0 = t12 + (uint32_t)44U;
+  felem_sub_p256(u2, u1, h);
+  felem_sub_p256(s2, s11, r0);
+  montgomery_square_buffer_dh_p256(h, temp);
+  montgomery_multiplication_buffer_dh_p256(temp, u1, uh0);
+  montgomery_multiplication_buffer_dh_p256(temp, h, hCube0);
+  uint64_t *h0 = t12 + (uint32_t)32U;
+  uint64_t *r = t12 + (uint32_t)36U;
+  uint64_t *uh = t12 + (uint32_t)40U;
+  uint64_t *hCube = t12 + (uint32_t)44U;
+  uint64_t *s1 = t12 + (uint32_t)24U;
+  uint64_t *x3 = t5;
+  uint64_t *rSquare = t5 + (uint32_t)4U;
+  uint64_t *rH = t5 + (uint32_t)8U;
+  uint64_t *twoUh = t5 + (uint32_t)12U;
+  montgomery_square_buffer_dh_p256(r, rSquare);
+  felem_sub_p256(rSquare, hCube, rH);
+  felem_add_p256(uh, uh, twoUh);
+  felem_sub_p256(rH, twoUh, x3);
+  uint64_t *x30 = t5;
+  uint64_t *y3 = t5 + (uint32_t)4U;
+  uint64_t *s1hCube = t5 + (uint32_t)8U;
+  uint64_t *u1hx3 = t5 + (uint32_t)12U;
+  uint64_t *ru1hx3 = t5 + (uint32_t)16U;
+  montgomery_multiplication_buffer_dh_p256(s1, hCube, s1hCube);
+  felem_sub_p256(uh, x30, u1hx3);
+  montgomery_multiplication_buffer_dh_p256(u1hx3, r, ru1hx3);
+  felem_sub_p256(ru1hx3, s1hCube, y3);
+  uint64_t *z1 = p + (uint32_t)8U;
+  uint64_t *z2 = q + (uint32_t)8U;
+  uint64_t *z3 = t5 + (uint32_t)8U;
+  uint64_t *z1z2 = t5 + (uint32_t)12U;
+  montgomery_multiplication_buffer_dh_p256(z1, z2, z1z2);
+  montgomery_multiplication_buffer_dh_p256(z1z2, h0, z3);
+  uint64_t *x3_out = t5;
+  uint64_t *y3_out = t5 + (uint32_t)4U;
+  uint64_t *z3_out = t5 + (uint32_t)8U;
+  uint64_t *z = p + (uint32_t)8U;
+  uint64_t tmp1 = (uint64_t)18446744073709551615U;
+  uint32_t len0 = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len0; i++)
+  {
+    uint64_t a_i = z[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp1;
+    tmp1 = r_i & tmp0;
+  }
+  uint64_t mask = tmp1;
+  uint64_t *p_x0 = q;
+  uint64_t *p_y0 = q + (uint32_t)4U;
+  uint64_t *p_z0 = q + (uint32_t)8U;
+  copy_conditional_p256_l(x3_out, p_x0, mask);
+  copy_conditional_p256_l(y3_out, p_y0, mask);
+  copy_conditional_p256_l(z3_out, p_z0, mask);
+  uint64_t *z0 = q + (uint32_t)8U;
+  uint64_t tmp = (uint64_t)18446744073709551615U;
+  uint32_t len = (uint32_t)4U;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t a_i = z0[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t mask0 = tmp;
+  uint64_t *p_x = p;
+  uint64_t *p_y = p + (uint32_t)4U;
+  uint64_t *p_z = p + (uint32_t)8U;
+  copy_conditional_p256_l(x3_out, p_x, mask0);
+  copy_conditional_p256_l(y3_out, p_y, mask0);
+  copy_conditional_p256_l(z3_out, p_z, mask0);
+  memcpy(result, x3_out, (uint32_t)4U * sizeof (uint64_t));
+  memcpy(result + (uint32_t)4U, y3_out, (uint32_t)4U * sizeof (uint64_t));
+  memcpy(result + (uint32_t)8U, z3_out, (uint32_t)4U * sizeof (uint64_t));
+}
+
+static inline void
+point_add_p384(uint64_t *p, uint64_t *q, uint64_t *result, uint64_t *tempBuffer)
+{
+  uint64_t *t12 = tempBuffer;
+  uint64_t *t5 = tempBuffer + (uint32_t)72U;
+  uint64_t *t4 = t12;
+  uint64_t *u10 = t12 + (uint32_t)24U;
+  uint64_t *u20 = t12 + (uint32_t)30U;
+  uint64_t *s10 = t12 + (uint32_t)36U;
+  uint64_t *s20 = t12 + (uint32_t)42U;
+  uint64_t *pX = p;
+  uint64_t *pY = p + (uint32_t)6U;
+  uint64_t *pZ = p + (uint32_t)12U;
+  uint64_t *qX = q;
+  uint64_t *qY = q + (uint32_t)6U;
+  uint64_t *qZ = q + (uint32_t)12U;
+  uint64_t *z2Square = t4;
+  uint64_t *z1Square = t4 + (uint32_t)6U;
+  uint64_t *z2Cube = t4 + (uint32_t)12U;
+  uint64_t *z1Cube = t4 + (uint32_t)18U;
+  montgomery_square_buffer_dh_p384(qZ, z2Square);
+  montgomery_square_buffer_dh_p384(pZ, z1Square);
+  montgomery_multiplication_buffer_dh_p384(z2Square, qZ, z2Cube);
+  montgomery_multiplication_buffer_dh_p384(z1Square, pZ, z1Cube);
+  montgomery_multiplication_buffer_dh_p384(z2Square, pX, u10);
+  montgomery_multiplication_buffer_dh_p384(z1Square, qX, u20);
+  montgomery_multiplication_buffer_dh_p384(z2Cube, pY, s10);
+  montgomery_multiplication_buffer_dh_p384(z1Cube, qY, s20);
+  uint64_t *temp = t12;
+  uint64_t *u1 = t12 + (uint32_t)24U;
+  uint64_t *u2 = t12 + (uint32_t)30U;
+  uint64_t *s11 = t12 + (uint32_t)36U;
+  uint64_t *s2 = t12 + (uint32_t)42U;
+  uint64_t *h = t12 + (uint32_t)48U;
+  uint64_t *r0 = t12 + (uint32_t)54U;
+  uint64_t *uh0 = t12 + (uint32_t)60U;
+  uint64_t *hCube0 = t12 + (uint32_t)66U;
+  felem_sub_p384(u2, u1, h);
+  felem_sub_p384(s2, s11, r0);
+  montgomery_square_buffer_dh_p384(h, temp);
+  montgomery_multiplication_buffer_dh_p384(temp, u1, uh0);
+  montgomery_multiplication_buffer_dh_p384(temp, h, hCube0);
+  uint64_t *h0 = t12 + (uint32_t)48U;
+  uint64_t *r = t12 + (uint32_t)54U;
+  uint64_t *uh = t12 + (uint32_t)60U;
+  uint64_t *hCube = t12 + (uint32_t)66U;
+  uint64_t *s1 = t12 + (uint32_t)36U;
+  uint64_t *x3 = t5;
+  uint64_t *rSquare = t5 + (uint32_t)6U;
+  uint64_t *rH = t5 + (uint32_t)12U;
+  uint64_t *twoUh = t5 + (uint32_t)18U;
+  montgomery_square_buffer_dh_p384(r, rSquare);
+  felem_sub_p384(rSquare, hCube, rH);
+  felem_add_p384(uh, uh, twoUh);
+  felem_sub_p384(rH, twoUh, x3);
+  uint64_t *x30 = t5;
+  uint64_t *y3 = t5 + (uint32_t)6U;
+  uint64_t *s1hCube = t5 + (uint32_t)12U;
+  uint64_t *u1hx3 = t5 + (uint32_t)18U;
+  uint64_t *ru1hx3 = t5 + (uint32_t)24U;
+  montgomery_multiplication_buffer_dh_p384(s1, hCube, s1hCube);
+  felem_sub_p384(uh, x30, u1hx3);
+  montgomery_multiplication_buffer_dh_p384(u1hx3, r, ru1hx3);
+  felem_sub_p384(ru1hx3, s1hCube, y3);
+  uint64_t *z1 = p + (uint32_t)12U;
+  uint64_t *z2 = q + (uint32_t)12U;
+  uint64_t *z3 = t5 + (uint32_t)12U;
+  uint64_t *z1z2 = t5 + (uint32_t)18U;
+  montgomery_multiplication_buffer_dh_p384(z1, z2, z1z2);
+  montgomery_multiplication_buffer_dh_p384(z1z2, h0, z3);
+  uint64_t *x3_out = t5;
+  uint64_t *y3_out = t5 + (uint32_t)6U;
+  uint64_t *z3_out = t5 + (uint32_t)12U;
+  uint64_t *z = p + (uint32_t)12U;
+  uint64_t tmp1 = (uint64_t)18446744073709551615U;
+  uint32_t len0 = (uint32_t)6U;
+  for (uint32_t i = (uint32_t)0U; i < len0; i++)
+  {
+    uint64_t a_i = z[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp1;
+    tmp1 = r_i & tmp0;
+  }
+  uint64_t mask = tmp1;
+  uint64_t *p_x0 = q;
+  uint64_t *p_y0 = q + (uint32_t)6U;
+  uint64_t *p_z0 = q + (uint32_t)12U;
+  copy_conditional_p384_l(x3_out, p_x0, mask);
+  copy_conditional_p384_l(y3_out, p_y0, mask);
+  copy_conditional_p384_l(z3_out, p_z0, mask);
+  uint64_t *z0 = q + (uint32_t)12U;
+  uint64_t tmp = (uint64_t)18446744073709551615U;
+  uint32_t len = (uint32_t)6U;
+  for (uint32_t i = (uint32_t)0U; i < len; i++)
+  {
+    uint64_t a_i = z0[i];
+    uint64_t r_i = FStar_UInt64_eq_mask(a_i, (uint64_t)0U);
+    uint64_t tmp0 = tmp;
+    tmp = r_i & tmp0;
+  }
+  uint64_t mask0 = tmp;
+  uint64_t *p_x = p;
+  uint64_t *p_y = p + (uint32_t)6U;
+  uint64_t *p_z = p + (uint32_t)12U;
+  copy_conditional_p384_l(x3_out, p_x, mask0);
+  copy_conditional_p384_l(y3_out, p_y, mask0);
+  copy_conditional_p384_l(z3_out, p_z, mask0);
+  memcpy(result, x3_out, (uint32_t)6U * sizeof (uint64_t));
+  memcpy(result + (uint32_t)6U, y3_out, (uint32_t)6U * sizeof (uint64_t));
+  memcpy(result + (uint32_t)12U, z3_out, (uint32_t)6U * sizeof (uint64_t));
+}
+
+static inline void toUint64ChangeEndian_p256(uint8_t *i, uint64_t *o)
+{
+  uint32_t len = (uint32_t)4U;
+  for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + i0 * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i0] = x;
+  }
+  uint32_t len1 = (uint32_t)4U;
+  uint32_t lenByTwo = len1 >> (uint32_t)1U;
+  for (uint32_t i0 = (uint32_t)0U; i0 < lenByTwo; i0++)
+  {
+    uint32_t lenRight = (uint32_t)4U - (uint32_t)1U - i0;
+    uint64_t left = o[i0];
+    uint64_t right = o[lenRight];
+    o[i0] = right;
+    o[lenRight] = left;
+  }
+}
+
+static inline void toUint64ChangeEndian_p384(uint8_t *i, uint64_t *o)
+{
+  uint32_t len = (uint32_t)6U;
+  for (uint32_t i0 = (uint32_t)0U; i0 < len; i0++)
+  {
+    uint64_t *os = o;
+    uint8_t *bj = i + i0 * (uint32_t)8U;
+    uint64_t u = load64_be(bj);
+    uint64_t r = u;
+    uint64_t x = r;
+    os[i0] = x;
+  }
+  uint32_t len1 = (uint32_t)6U;
+  uint32_t lenByTwo = len1 >> (uint32_t)1U;
+  for (uint32_t i0 = (uint32_t)0U; i0 < lenByTwo; i0++)
+  {
+    uint32_t lenRight = (uint32_t)6U - (uint32_t)1U - i0;
+    uint64_t left = o[i0];
+    uint64_t right = o[lenRight];
+    o[i0] = right;
+    o[lenRight] = left;
+  }
 }
 
 static const
@@ -12010,7 +12211,7 @@ uint64_t Hacl_P256_ecp256dh_i_wnaf(uint8_t *result, uint8_t *scalar)
   uint32_t len1 = (uint32_t)4U;
   uint64_t *q = tempBuffer;
   uint64_t *buff = tempBuffer + (uint32_t)3U * len1;
-  scalar_multiplication_cmb(q, (void *)scalar, buff);
+  scalar_multiplication_cmb(Spec_ECC_Curves_P256, q, (void *)scalar, buff);
   norm_p256(q, resultBuffer, buff);
   uint32_t len10 = (uint32_t)4U;
   uint32_t start = len10 * (uint32_t)2U;
@@ -13113,5 +13314,47 @@ void Hacl_P256_point_norm(uint64_t *p, uint64_t *result)
 {
   uint64_t tempBuffer[68U] = { 0U };
   norm_p256(p, result, tempBuffer);
+}
+
+void Hacl_P256_scalar_rwnaf_0(uint64_t *out, void *scalar)
+{
+  uint64_t mask = (uint64_t)63U;
+  uint64_t in01 = (uint64_t)((uint8_t *)scalar)[(uint32_t)4U * (uint32_t)8U - (uint32_t)1U];
+  uint64_t windowStartValue = (uint64_t)1U | (in01 & mask);
+  uint64_t window = windowStartValue;
+  uint64_t r = (uint64_t)0U;
+  scalar_rwnaf_loop(Spec_ECC_Curves_P256, out, scalar, mask, &window);
+  uint64_t wVar = window;
+  uint64_t wMask = wVar & mask;
+  uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, wMask, (uint64_t)32U, &r);
+  uint64_t r0 = r;
+  uint64_t r2 = (uint64_t)0U - r0;
+  uint64_t cAsFlag = ~FStar_UInt64_eq_mask(c, (uint64_t)0U);
+  uint64_t r3 = (r2 & cAsFlag) | (r0 & ~cAsFlag);
+  out[(uint32_t)2U * (getLenWnaf(Spec_ECC_Curves_P256) - (uint32_t)1U)] = r3;
+  out[(uint32_t)2U * (getLenWnaf(Spec_ECC_Curves_P256) - (uint32_t)1U) + (uint32_t)1U] = cAsFlag;
+  uint64_t wLast = scalar_rwnaf_tail(Spec_ECC_Curves_P256, scalar, wMask, wVar);
+  out[(uint32_t)2U * getLenWnaf(Spec_ECC_Curves_P256)] = wLast;
+}
+
+void Hacl_P256_scalar_rwnaf_1(uint64_t *out, void *scalar)
+{
+  uint64_t mask = (uint64_t)63U;
+  uint64_t in01 = (uint64_t)((uint8_t *)scalar)[(uint32_t)6U * (uint32_t)8U - (uint32_t)1U];
+  uint64_t windowStartValue = (uint64_t)1U | (in01 & mask);
+  uint64_t window = windowStartValue;
+  uint64_t r = (uint64_t)0U;
+  scalar_rwnaf_loop(Spec_ECC_Curves_P384, out, scalar, mask, &window);
+  uint64_t wVar = window;
+  uint64_t wMask = wVar & mask;
+  uint64_t c = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, wMask, (uint64_t)32U, &r);
+  uint64_t r0 = r;
+  uint64_t r2 = (uint64_t)0U - r0;
+  uint64_t cAsFlag = ~FStar_UInt64_eq_mask(c, (uint64_t)0U);
+  uint64_t r3 = (r2 & cAsFlag) | (r0 & ~cAsFlag);
+  out[(uint32_t)2U * (getLenWnaf(Spec_ECC_Curves_P384) - (uint32_t)1U)] = r3;
+  out[(uint32_t)2U * (getLenWnaf(Spec_ECC_Curves_P384) - (uint32_t)1U) + (uint32_t)1U] = cAsFlag;
+  uint64_t wLast = scalar_rwnaf_tail(Spec_ECC_Curves_P384, scalar, wMask, wVar);
+  out[(uint32_t)2U * getLenWnaf(Spec_ECC_Curves_P384)] = wLast;
 }
 

@@ -398,6 +398,10 @@ From domain + to affine
 */
 void Hacl_P256_point_norm(uint64_t *p, uint64_t *result);
 
+void Hacl_P256_scalar_rwnaf_0(uint64_t *out, void *scalar);
+
+void Hacl_P256_scalar_rwnaf_1(uint64_t *out, void *scalar);
+
 
 #define __Hacl_P256_H_DEFINED
 #endif
