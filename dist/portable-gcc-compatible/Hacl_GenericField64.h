@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Bignum256.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_GenericField64_pbn_mont_ctx_u64 */
 
 typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_GenericField64_pbn_mont_ctx_u64;

@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 extern uint64_t add_scalar_e(uint64_t *x0, uint64_t *x1, uint64_t x2);
 
 extern uint64_t fadd_e(uint64_t *x0, uint64_t *x1, uint64_t *x2);

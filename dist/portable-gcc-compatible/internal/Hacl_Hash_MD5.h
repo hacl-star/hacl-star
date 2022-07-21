@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "../Hacl_Hash_MD5.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Hash_Core_MD5_legacy_init */
 
 void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s);

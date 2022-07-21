@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "../Hacl_Chacha20.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Impl_Chacha20_Vec_chacha20_constants */
 
 extern const uint32_t Hacl_Impl_Chacha20_Vec_chacha20_constants[4U];

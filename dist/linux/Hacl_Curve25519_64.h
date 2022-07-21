@@ -30,12 +30,12 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "libintvector.h"
 void Hacl_Curve25519_64_scalarmult(u8 *out, u8 *priv, u8 *pub);
 

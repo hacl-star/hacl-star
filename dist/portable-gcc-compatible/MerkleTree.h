@@ -30,15 +30,14 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: LowStar_Vector_vector_str___uint8_t_ */
 
 typedef struct LowStar_Vector_vector_str___uint8_t__s

@@ -28,7 +28,7 @@ open Hacl.Streaming.Spec
 
 /// Little bit of trickery here to make sure state_s is parameterized over
 /// something at Type0, not Type0 -> Type0 -- otherwise it wouldn't monomorphize
-/// in KreMLin.
+/// in KaRaMeL.
 noeq
 type state_s #index (c: block index) (i: index)
   (t: Type0 { t == c.state.s i })

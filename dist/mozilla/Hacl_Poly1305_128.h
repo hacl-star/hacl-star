@@ -30,15 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
 #include <stdbool.h>
 
 
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "libintvector.h"
-extern uint32_t Hacl_Poly1305_128_blocklen;
-
 typedef Lib_IntVector_Intrinsics_vec128 *Hacl_Poly1305_128_poly1305_ctx;
 
 void Hacl_Poly1305_128_poly1305_init(Lib_IntVector_Intrinsics_vec128 *ctx, uint8_t *key);

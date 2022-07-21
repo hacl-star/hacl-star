@@ -25,8 +25,8 @@
 #include "internal/Hacl_P256.h"
 
 #include "internal/Hacl_Spec.h"
-#include "internal/Hacl_Kremlib.h"
-
+#include "internal/Hacl_Krmllib.h"
+#include "lib_intrinsics.h"
 /* SNIPPET_START: isZero_uint64_CT */
 
 static uint64_t isZero_uint64_CT(uint64_t *f)
@@ -2465,7 +2465,7 @@ ecdsa_verification_(
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
@@ -2503,14 +2503,14 @@ ecdsa_verification_(
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
   }
   else
   {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "unreachable (pattern matches are exhaustive in F*)");
@@ -2653,7 +2653,7 @@ ecdsa_signature_core(
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
@@ -2691,14 +2691,14 @@ ecdsa_signature_core(
         }
       default:
         {
-          KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+          KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
           KRML_HOST_EXIT(253U);
         }
     }
   }
   else
   {
-    KRML_HOST_EPRINTF("KreMLin abort at %s:%d\n%s\n",
+    KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
       __FILE__,
       __LINE__,
       "unreachable (pattern matches are exhaustive in F*)");

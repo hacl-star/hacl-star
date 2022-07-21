@@ -30,13 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
 #include <stdbool.h>
 
 
-#include "Hacl_Kremlib.h"
-#include "libintvector.h"
+#include "Hacl_Krmllib.h"
+
 void
 Hacl_Chacha20_Vec128_chacha20_encrypt_128(
   uint32_t len,

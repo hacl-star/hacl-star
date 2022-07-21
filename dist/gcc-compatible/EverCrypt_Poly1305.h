@@ -30,9 +30,9 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Poly1305_32.h"
@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_Poly1305_128.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key);
 
 #if defined(__cplusplus)

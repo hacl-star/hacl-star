@@ -1,5 +1,5 @@
 [
-  "Î=\u0014‰z¥¡Ápµ+{Ä˝\u001d,",
+  "\u0017~√µıÑY;a\tıê\u0018Ô•ó",
   [
     [
       "Meta.Interface.assoc",
@@ -19,7 +19,7 @@
         "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "64ca9e74182984fe3ef5a273d8b55a58"
+      "93301b9d71f779cc1c369be340dd332a"
     ],
     [
       "Meta.Interface.__proj__Inline__item__new_name",
@@ -33,7 +33,7 @@
         "refinement_interpretation_Tm_refine_72d871bdf0e6e15cb9b70b8f1ef82b10"
       ],
       0,
-      "68c5f0f87a4ad9eb69aa7f823b3ae590"
+      "a9f9f4dd3976ae2793781d48bcc7b6c4"
     ],
     [
       "Meta.Interface.string_of_mapping",
@@ -47,7 +47,7 @@
         "fuel_guarded_inversion_Meta.Interface.mapping"
       ],
       0,
-      "87dafa6fb93cc234264d651309cd14b8"
+      "382365fc05096cab416ad42041e314c4"
     ],
     [
       "Meta.Interface.string_of_name",
@@ -60,7 +60,7 @@
         "fuel_guarded_inversion_Prims.list"
       ],
       0,
-      "99b3f06e7d7d5919b01f3b380cb6b44e"
+      "95ef877cd9ab6da6a5975db6b623c66e"
     ],
     [
       "Meta.Interface.suffix_name",
@@ -73,7 +73,7 @@
         "fuel_guarded_inversion_Prims.list"
       ],
       0,
-      "d851b55ac008a3b4e8aa488cb5b13e7e"
+      "7f58def67b9cff59de291add8a949b5f"
     ],
     [
       "Meta.Interface.must",
@@ -89,7 +89,7 @@
         "typing_FStar.Pervasives.Native.uu___is_Some"
       ],
       0,
-      "13a0d5d10cf4f962ba298e7844c978fa"
+      "c259b693b247d24c5c37c9b84655e654"
     ],
     [
       "Meta.Interface.visit_function",
@@ -117,7 +117,7 @@
         "typing_FStar.Reflection.Builtins.lookup_typ"
       ],
       0,
-      "31d625ab39f0f32da422072719b233f9"
+      "f83c7b4c5ec4a74a032142a0df718fab"
     ],
     [
       "Meta.Interface.visit_function",
@@ -129,11 +129,18 @@
         "@fuel_correspondence_FStar.List.Tot.Base.assoc.fuel_instrumented",
         "@query",
         "FStar.Reflection.Data_pretyping_ee655bc751cef679bca813f86c407d6b",
+        "FStar.Reflection.Types_pretyping_2e55a80de3ea7e6dff8c6be83b8dd816",
         "Meta.Interface_pretyping_3687ebf883f49bee7aa0812c87d03fff",
-        "Prims_pretyping_ce036b6b736ef4e0bc3a9ff132a12aed", "bool_inversion",
+        "Meta.Interface_pretyping_61464744bb5184ed9fbb77156a43db21",
+        "Prims_pretyping_ce036b6b736ef4e0bc3a9ff132a12aed",
+        "Prims_pretyping_f537159ed795b314b4e58c260361ae86", "bool_inversion",
         "bool_typing", "constructor_distinct_FStar.Tactics.Result.Failed",
         "constructor_distinct_FStar.Tactics.Result.Success",
-        "constructor_distinct_Meta.Interface.Specialize",
+        "data_elim_FStar.Pervasives.Native.Mktuple2",
+        "data_elim_FStar.Pervasives.Native.Mktuple4",
+        "data_elim_FStar.Pervasives.Native.Some",
+        "data_elim_FStar.Reflection.Data.Tv_FVar",
+        "data_elim_FStar.Reflection.Data.Tv_UInst",
         "data_elim_FStar.Tactics.Result.Success",
         "data_elim_Meta.Interface.Mkstate",
         "data_typing_intro_FStar.Reflection.Data.Tv_Unknown@tok",
@@ -152,12 +159,15 @@
         "disc_equation_FStar.Reflection.Data.Tv_Match",
         "disc_equation_FStar.Reflection.Data.Tv_Refine",
         "disc_equation_FStar.Reflection.Data.Tv_Type",
+        "disc_equation_FStar.Reflection.Data.Tv_UInst",
         "disc_equation_FStar.Reflection.Data.Tv_Unknown",
         "disc_equation_FStar.Reflection.Data.Tv_Uvar",
         "disc_equation_FStar.Reflection.Data.Tv_Var",
         "disc_equation_Meta.Interface.Inline",
         "disc_equation_Meta.Interface.Specialize",
         "equation_FStar.Reflection.Types.name", "equation_Prims.eqtype",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple2",
+        "fuel_guarded_inversion_FStar.Pervasives.Native.tuple4",
         "fuel_guarded_inversion_FStar.Reflection.Data.term_view",
         "fuel_guarded_inversion_FStar.Tactics.Result.__result",
         "fuel_guarded_inversion_Meta.Interface.mapping",
@@ -169,6 +179,12 @@
         "kinding_FStar.Pervasives.Native.tuple4@tok",
         "kinding_Meta.Interface.mapping@tok", "kinding_Prims.list@tok",
         "lemma_FStar.Pervasives.invertOption",
+        "proj_equation_FStar.Pervasives.Native.Mktuple2__1",
+        "proj_equation_FStar.Pervasives.Native.Mktuple4__1",
+        "proj_equation_FStar.Pervasives.Native.Mktuple4__3",
+        "proj_equation_FStar.Pervasives.Native.Some_v",
+        "proj_equation_FStar.Reflection.Data.Tv_FVar_v",
+        "proj_equation_FStar.Reflection.Data.Tv_UInst_v",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_FStar.Tactics.Result.Failed_a",
         "projection_inverse_FStar.Tactics.Result.Failed_exn",
@@ -177,14 +193,16 @@
         "projection_inverse_FStar.Tactics.Result.Success_ps",
         "projection_inverse_FStar.Tactics.Result.Success_v",
         "refinement_interpretation_Tm_refine_414d0a9f578ab0048252f8c8f552b99f",
+        "refinement_interpretation_Tm_refine_4d5241eb6fe198666a8101195bbd4a2a",
         "typing_FStar.List.Tot.Base.assoc",
-        "typing_FStar.Pervasives.Native.uu___is_None",
+        "typing_FStar.Pervasives.Native.__proj__Mktuple4__item___3",
+        "typing_FStar.Pervasives.Native.__proj__Some__item__v",
         "typing_FStar.Reflection.Builtins.inspect_fv",
         "typing_FStar.Reflection.Types.name",
         "typing_Meta.Interface.__proj__Mkstate__item__seen"
       ],
       0,
-      "f4dcd70c93a03b7f6ca8b7e7af2478ff"
+      "97ef2128c224d2eb5bcff98900d38f2a"
     ]
   ]
 ]

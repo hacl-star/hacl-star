@@ -1,12 +1,12 @@
 FSTAR_HOME ?= ../../../FStar
-KREMLIN_HOME ?= ../../../kremlin
+KRML_HOME ?= ../../../karamel
 MITLS_HOME ?= ../../../mitls-fstar
 MLCRYPTO_HOME ?= ../../../MLCrypto
 OPENSSL_HOME ?= $(MLCRYPTO_HOME)/openssl
 
 MARCH?=x86_64
 
-CFLAGS += -fPIC -std=c11 -Ofast -funroll-loops -g -I $(OPENSSL_HOME)/include -I $(MITLS_HOME)/libs/ffi -D_GNU_SOURCE -D_BSD_SOURCE -I $(KREMLIN_HOME)/kremlib/dist/minimal
+CFLAGS += -fPIC -std=c11 -Ofast -funroll-loops -g -I $(OPENSSL_HOME)/include -I $(MITLS_HOME)/libs/ffi -D_GNU_SOURCE -D_BSD_SOURCE -I $(KRML_HOME)/krmllib/dist/minimal
 
 ifneq ($(VS140COMNTOOLS),)
 	VS_BIN_DOSPATH=$(VS140COMNTOOLS)/../../VC/bin
@@ -57,7 +57,7 @@ else
 LIB_MACHINE=x86
 endif
 
-CFLAGS += -I $(KREMLIN_HOME)/include -I ../../dist/evercrypt-external-headers
+CFLAGS += -I $(KRML_HOME)/include -I ../../dist/evercrypt-external-headers
 LDFLAGS += -L ../../dist/mitls -levercrypt
 
 ifeq (,$(EVEREST_WINDOWS))
@@ -66,7 +66,7 @@ else
 LDFLAGS += -lbcrypt
 endif
 
-LDFLAGS += $(KREMLIN_HOME)/kremlib/dist/generic/libkremlib.a
+LDFLAGS += $(KRML_HOME)/krmllib/dist/generic/libkrmllib.a
 
 .PHONY: all test
 

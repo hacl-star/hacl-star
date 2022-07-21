@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: aes128_key_expansion_sbox */
 
 extern void aes128_key_expansion_sbox(uint8_t *key, uint8_t *w, uint8_t *sbox);

@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "../Hacl_SHA2_Vec256.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef struct K____uint8_t___uint8_t__s
 {
   uint8_t *fst;

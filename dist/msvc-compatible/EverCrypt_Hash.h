@@ -30,20 +30,19 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Spec.h"
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
 #include "Hacl_Hash_MD5.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
 C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___);

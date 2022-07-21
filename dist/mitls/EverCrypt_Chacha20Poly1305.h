@@ -30,9 +30,9 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Chacha20Poly1305_32.h"
@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_Chacha20Poly1305_128.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void
 EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *k,

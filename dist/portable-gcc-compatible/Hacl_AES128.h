@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_AES128_aes128_key_expansion */
 
 extern void Hacl_AES128_aes128_key_expansion(uint8_t *key, uint8_t *expanded_key);

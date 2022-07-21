@@ -1,5 +1,5 @@
 #include <inttypes.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/target.h"
 
 #if defined(_MSC_VER)  /* Visual Studio - always use __stdcall */
   #define STDCALL __stdcall

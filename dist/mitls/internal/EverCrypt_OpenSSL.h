@@ -30,14 +30,13 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 extern uint32_t EverCrypt_OpenSSL_random_init();
 
 extern void EverCrypt_OpenSSL_random_sample(uint32_t len, uint8_t *out);

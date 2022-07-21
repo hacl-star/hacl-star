@@ -30,9 +30,9 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "internal/Hacl_Hash_SHA2.h"
@@ -40,7 +40,6 @@ extern "C" {
 #include "internal/Hacl_Hash_Blake2.h"
 #include "../Hacl_HMAC.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 typedef struct K____uint32_t__uint64_t_s
 {
   uint32_t *fst;

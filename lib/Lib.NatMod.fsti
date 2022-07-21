@@ -114,3 +114,6 @@ val lemma_div_mod_prime_cancel: #m:prime -> a:nat_mod m -> b:nat_mod m -> c:nat_
 
 val lemma_div_mod_prime_to_one_denominator: #m:prime -> a:nat_mod m -> b:nat_mod m -> c:nat_mod m{c <> 0} -> d:nat_mod m{d <> 0} ->
   Lemma (mul_mod (div_mod a c) (div_mod b d) == div_mod (mul_mod a b) (mul_mod c d))
+
+val lemma_div_mod_eq_mul_mod: #m:prime -> a:nat_mod m -> b:nat_mod m{b <> 0} -> c:nat_mod m ->
+  Lemma ((div_mod a b = c) == (a = mul_mod c b))

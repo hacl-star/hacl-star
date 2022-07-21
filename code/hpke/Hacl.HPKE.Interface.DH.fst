@@ -11,7 +11,7 @@ open Lib.ByteBuffer
 module DH = Spec.Agile.DH
 module S = Spec.Agile.HPKE
 
-#set-options "--z3rlimit 20 --max_fuel 0 --initial_ifuel 1 --max_ifuel 1"
+#reset-options "--z3rlimit 20 --fuel 0 --ifuel 1"
 
 unfold noextract
 let nsize_key (a:DH.algorithm) =
@@ -58,10 +58,12 @@ let secret_to_public_st (a: DH.algorithm) (p:Type0) =
       | _ -> False))
 
 [@ Meta.Attribute.specialize]
-assume val dh: #a:S.ciphersuite -> dh_st (S.curve_of_cs a) True
+noextract
+assume val dh: #a:S.ciphersuite -> dh_st (S.kem_dh_of_cs a) True
 
 [@ Meta.Attribute.specialize]
-assume val secret_to_public: #a:S.ciphersuite -> secret_to_public_st (S.curve_of_cs a) True
+noextract
+assume val secret_to_public: #a:S.ciphersuite -> secret_to_public_st (S.kem_dh_of_cs a) True
 
 (** Instantiations for Curve25519 **)
 
@@ -78,6 +80,7 @@ let dh_c51 : dh_st (DH.DH_Curve25519) True = fun o k i ->
   pop_frame();
   res
 
+inline_for_extraction noextract
 let vale_p = Vale.X64.CPU_Features_s.(adx_enabled /\ bmi2_enabled)
 
 inline_for_extraction noextract
@@ -106,7 +109,7 @@ let change_error_code (r:uint64) : Pure UInt32.t
 inline_for_extraction noextract
 let secret_to_public_p256 : secret_to_public_st (DH.DH_P256) True = fun o i ->
   let res = Hacl.Impl.P256.DH.ecp256dh_i o i in
-  if res then 0ul else 1ul 
+  if res then 0ul else 1ul
   (* change_error_code res *)
 
 let rec nat_from_bytes_le_zero_is_zero (n:size_nat{n >= 1}) (s:Lib.ByteSequence.lbytes n)
@@ -132,4 +135,4 @@ let dh_p256 : dh_st (DH.DH_P256) True = fun o k i ->
   copy o tmp;
   pop_frame();
   (* change_error_code res *)
-  if res then 0ul else 1ul 
+  if res then 0ul else 1ul

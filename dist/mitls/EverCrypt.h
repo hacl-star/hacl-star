@@ -30,9 +30,9 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Chacha20Poly1305_32.h"
@@ -40,19 +40,11 @@ extern "C" {
 #include "EverCrypt_Hacl.h"
 #include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 uint32_t EverCrypt_random_init();
 
 void EverCrypt_random_sample(uint32_t len, uint8_t *out);
 
 void EverCrypt_random_cleanup();
-
-#define EverCrypt_AES128_OPENSSL 0
-#define EverCrypt_AES128_BCRYPT 1
-#define EverCrypt_AES128_VALE 2
-#define EverCrypt_AES128_HACL 3
-
-typedef uint8_t EverCrypt_aes128_key_s_tags;
 
 typedef struct EverCrypt_aes128_key_s_s EverCrypt_aes128_key_s;
 
@@ -77,12 +69,6 @@ void EverCrypt_aes128_compute(EverCrypt_aes128_key_s *k, uint8_t *plain, uint8_t
 KRML_DEPRECATED("Please use EverCrypt_CTR.h (from C) or EverCrypt.CTR.fsti (from F*) ")
 
 void EverCrypt_aes128_free(EverCrypt_aes128_key_s *pk);
-
-#define EverCrypt_AES256_OPENSSL 0
-#define EverCrypt_AES256_BCRYPT 1
-#define EverCrypt_AES256_HACL 2
-
-typedef uint8_t EverCrypt_aes256_key_s_tags;
 
 typedef struct EverCrypt_aes256_key_s_s EverCrypt_aes256_key_s;
 
@@ -220,14 +206,6 @@ KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (fr
 
 uint32_t EverCrypt_aead_ivLen(EverCrypt_aead_alg a);
 
-#define EverCrypt_AEAD_OPENSSL 0
-#define EverCrypt_AEAD_BCRYPT 1
-#define EverCrypt_AEAD_AES128_GCM_VALE 2
-#define EverCrypt_AEAD_AES256_GCM_VALE 3
-#define EverCrypt_AEAD_CHACHA20_POLY1305_HACL 4
-
-typedef uint8_t EverCrypt__aead_state_tags;
-
 typedef struct EverCrypt__aead_state_s EverCrypt__aead_state;
 
 typedef EverCrypt__aead_state EverCrypt_aead_state_s;
@@ -269,11 +247,6 @@ EverCrypt_aead_decrypt(
 KRML_DEPRECATED("Please use EverCrypt_AEAD.h (from C) or EverCrypt.AEAD.fsti (from F*) ")
 
 void EverCrypt_aead_free(EverCrypt__aead_state *pk);
-
-#define EverCrypt_DH_OPENSSL 0
-#define EverCrypt_DH_DUMMY 1
-
-typedef uint8_t EverCrypt__dh_state_tags;
 
 typedef struct EverCrypt__dh_state_s EverCrypt__dh_state;
 
@@ -320,11 +293,6 @@ bool EverCrypt_uu___is_ECC_P521(EverCrypt_ec_curve projectee);
 bool EverCrypt_uu___is_ECC_X25519(EverCrypt_ec_curve projectee);
 
 bool EverCrypt_uu___is_ECC_X448(EverCrypt_ec_curve projectee);
-
-#define EverCrypt_ECDH_OPENSSL 0
-#define EverCrypt_ECDH_DUMMY 1
-
-typedef uint8_t EverCrypt__ecdh_state_tags;
 
 typedef struct EverCrypt__ecdh_state_s EverCrypt__ecdh_state;
 

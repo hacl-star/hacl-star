@@ -30,12 +30,12 @@ extern "C" {
 #endif
 
 #include <string.h>
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "libintvector.h"
 static inline u64 Hacl_IntTypes_Intrinsics_128_add_carry_u64(u64 cin, u64 x, u64 y, u64 *r)
 {
