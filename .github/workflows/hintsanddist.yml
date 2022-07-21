@@ -45,16 +45,19 @@ jobs:
           installTar "hints"
           installTar "dist"
 
+      - name: commit changes
+        run: |
+          git config --local user.name "Dzomo, the Everest Yak"
+          git config --local user.email "everbld@microsoft.com"
+          git add hints dist
+          git commit -m "[CI] regenerate hints and dist"
+
       - name: avoid trivial changes
         run: |
-          [[ 1 -lt $(git diff --compact-summary | grep -v INFO.txt | wc -l) ]]
+          [[ 1 -lt $(git diff --compact-summary HEAD~.. | grep -v INFO.txt | wc -l) ]]
 
       - name: create pull request
         uses: peter-evans/create-pull-request@v4
         with:
-          add-paths: "hints, dist"
-          commit-message: "[CI] regenerate hints and dist"
-          committer: "Dzomo, the Everest Yak <everbld@microsoft.com>"
-          author: "Dzomo, the Everest Yak <everbld@microsoft.com>"
           branch: "hints-and-dist-master"
           title: "[CI] regenerate hints and dist"
