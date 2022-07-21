@@ -29,10 +29,9 @@
 static inline void add_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
 {
   #if HACL_CAN_COMPILE_INLINE_ASM
-  uint64_t uu____0 = add_scalar(out, f1, f2);
+  add_scalar(out, f1, f2);
   #else
-  uint64_t scrut = add_scalar_e(out, f1, f2);
-  uint64_t uu____1 = scrut;
+  uint64_t uu____0 = add_scalar_e(out, f1, f2);
   #endif
 }
 
