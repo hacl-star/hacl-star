@@ -716,14 +716,14 @@ alloc_rid__LowStar_Vector_vector_str__uint8_t_(
   return ((MerkleTree_Low_Datastructures_hash_vv){ .sz = len, .cap = len, .vs = buf });
 }
 
-typedef struct regional__uint32_t_LowStar_Vector_vector_str__uint8_t__s
+typedef struct regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec_s
 {
   uint32_t state;
   MerkleTree_Low_Datastructures_hash_vec dummy;
   MerkleTree_Low_Datastructures_hash_vec (*r_alloc)(uint32_t x0);
   void (*r_free)(uint32_t x0, MerkleTree_Low_Datastructures_hash_vec x1);
 }
-regional__uint32_t_LowStar_Vector_vector_str__uint8_t_;
+regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec;
 
 static void
 assign__LowStar_Vector_vector_str__uint8_t_(
@@ -737,7 +737,7 @@ assign__LowStar_Vector_vector_str__uint8_t_(
 
 static void
 alloc___LowStar_Vector_vector_str__uint8_t__uint32_t(
-  regional__uint32_t_LowStar_Vector_vector_str__uint8_t_ rg,
+  regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec rg,
   MerkleTree_Low_Datastructures_hash_vv rv,
   uint32_t cidx
 )
@@ -753,7 +753,7 @@ alloc___LowStar_Vector_vector_str__uint8_t__uint32_t(
 
 static MerkleTree_Low_Datastructures_hash_vv
 alloc_rid__LowStar_Vector_vector_str__uint8_t__uint32_t(
-  regional__uint32_t_LowStar_Vector_vector_str__uint8_t_ rg,
+  regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec rg,
   uint32_t len
 )
 {
@@ -808,7 +808,7 @@ static MerkleTree_Low_merkle_tree
   MerkleTree_Low_Datastructures_hash_vv
   hs =
     alloc_rid__LowStar_Vector_vector_str__uint8_t__uint32_t((
-        (regional__uint32_t_LowStar_Vector_vector_str__uint8_t_){
+        (regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec){
           .state = hsz,
           .dummy = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL },
           .r_alloc = hash_vec_r_alloc,
@@ -863,7 +863,7 @@ index__LowStar_Vector_vector_str__uint8_t_(
 
 static void
 free_elems__LowStar_Vector_vector_str__uint8_t__uint32_t(
-  regional__uint32_t_LowStar_Vector_vector_str__uint8_t_ rg,
+  regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec rg,
   MerkleTree_Low_Datastructures_hash_vv rv,
   uint32_t idx
 )
@@ -886,7 +886,7 @@ free__LowStar_Vector_vector_str__uint8_t_(MerkleTree_Low_Datastructures_hash_vv 
 
 static void
 free__LowStar_Vector_vector_str__uint8_t__uint32_t(
-  regional__uint32_t_LowStar_Vector_vector_str__uint8_t_ rg,
+  regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec rg,
   MerkleTree_Low_Datastructures_hash_vv rv
 )
 {
@@ -901,7 +901,7 @@ void MerkleTree_Low_mt_free(MerkleTree_Low_merkle_tree *mt)
 {
   MerkleTree_Low_merkle_tree mtv = *mt;
   free__LowStar_Vector_vector_str__uint8_t__uint32_t((
-      (regional__uint32_t_LowStar_Vector_vector_str__uint8_t_){
+      (regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec){
         .state = mtv.hash_size,
         .dummy = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL },
         .r_alloc = hash_vec_r_alloc,
@@ -1045,7 +1045,7 @@ bool MerkleTree_Low_uu___is_Path(MerkleTree_Low_path projectee)
 
 MerkleTree_Low_path *MerkleTree_Low_init_path(uint32_t hsz)
 {
-  regional__uint32_t_LowStar_Vector_vector_str__uint8_t_
+  regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec
   x00 =
     {
       .state = hsz,
@@ -1053,7 +1053,7 @@ MerkleTree_Low_path *MerkleTree_Low_init_path(uint32_t hsz)
       .r_alloc = hash_vec_r_alloc,
       .r_free = hash_vec_r_free
     };
-  regional__uint32_t_LowStar_Vector_vector_str__uint8_t_
+  regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec
   x0 =
     {
       .state = hsz,
@@ -2213,15 +2213,15 @@ static MerkleTree_Low_Datastructures_hash_vec alloc___uint8_t_(uint32_t len, uin
   return alloc_rid___uint8_t_(len, v);
 }
 
-typedef struct __bool_uint32_t_LowStar_Vector_vector_str__uint8_t__s
+typedef struct __bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec_s
 {
   bool fst;
   uint32_t snd;
   MerkleTree_Low_Datastructures_hash_vec thd;
 }
-__bool_uint32_t_LowStar_Vector_vector_str__uint8_t_;
+__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec;
 
-static __bool_uint32_t_LowStar_Vector_vector_str__uint8_t_
+static __bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec
 deserialize_hash_vec(
   uint32_t hash_size,
   bool ok,
@@ -2230,7 +2230,7 @@ deserialize_hash_vec(
   uint32_t pos
 )
 {
-  regional__uint32_t_LowStar_Vector_vector_str__uint8_t_
+  regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec
   rg =
     {
       .state = hash_size,
@@ -2242,7 +2242,7 @@ deserialize_hash_vec(
   {
     return
       (
-        (__bool_uint32_t_LowStar_Vector_vector_str__uint8_t_){
+        (__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec){
           .fst = false,
           .snd = pos,
           .thd = rg.dummy
@@ -2257,7 +2257,7 @@ deserialize_hash_vec(
   {
     return
       (
-        (__bool_uint32_t_LowStar_Vector_vector_str__uint8_t_){
+        (__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec){
           .fst = false,
           .snd = pos1,
           .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
@@ -2268,7 +2268,7 @@ deserialize_hash_vec(
   {
     return
       (
-        (__bool_uint32_t_LowStar_Vector_vector_str__uint8_t_){
+        (__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec){
           .fst = true,
           .snd = pos1,
           .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
@@ -2283,7 +2283,13 @@ deserialize_hash_vec(
   bool ok2 = scrut.fst;
   uint32_t pos2 = scrut.snd;
   return
-    ((__bool_uint32_t_LowStar_Vector_vector_str__uint8_t_){ .fst = ok2, .snd = pos2, .thd = res });
+    (
+      (__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec){
+        .fst = ok2,
+        .snd = pos2,
+        .thd = res
+      }
+    );
 }
 
 static __bool_uint32_t
@@ -2301,7 +2307,7 @@ deserialize_hash_vv_i(
   {
     return ((__bool_uint32_t){ .fst = false, .snd = (uint32_t)0U });
   }
-  __bool_uint32_t_LowStar_Vector_vector_str__uint8_t_
+  __bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec
   scrut = deserialize_hash_vec(hash_size, ok, buf, sz, pos);
   bool ok1 = scrut.fst;
   uint32_t pos1 = scrut.snd;
@@ -2328,22 +2334,22 @@ alloc__LowStar_Vector_vector_str__uint8_t_(
   return alloc_rid__LowStar_Vector_vector_str__uint8_t_(len, v);
 }
 
-typedef struct __bool_uint32_t_LowStar_Vector_vector_str_LowStar_Vector_vector_str__uint8_t__s
+typedef struct __bool_uint32_t_MerkleTree_Low_Datastructures_hash_vv_s
 {
   bool fst;
   uint32_t snd;
   MerkleTree_Low_Datastructures_hash_vv thd;
 }
-__bool_uint32_t_LowStar_Vector_vector_str_LowStar_Vector_vector_str__uint8_t_;
+__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vv;
 
-static __bool_uint32_t_LowStar_Vector_vector_str_LowStar_Vector_vector_str__uint8_t_
+static __bool_uint32_t_MerkleTree_Low_Datastructures_hash_vv
 deserialize_hash_vv(uint32_t hash_size, bool ok, const uint8_t *buf, uint32_t sz, uint32_t pos)
 {
   if (!ok || pos >= sz)
   {
     return
       (
-        (__bool_uint32_t_LowStar_Vector_vector_str_LowStar_Vector_vector_str__uint8_t_){
+        (__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vv){
           .fst = false,
           .snd = pos,
           .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
@@ -2358,7 +2364,7 @@ deserialize_hash_vv(uint32_t hash_size, bool ok, const uint8_t *buf, uint32_t sz
   {
     return
       (
-        (__bool_uint32_t_LowStar_Vector_vector_str_LowStar_Vector_vector_str__uint8_t_){
+        (__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vv){
           .fst = false,
           .snd = pos1,
           .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
@@ -2369,14 +2375,14 @@ deserialize_hash_vv(uint32_t hash_size, bool ok, const uint8_t *buf, uint32_t sz
   {
     return
       (
-        (__bool_uint32_t_LowStar_Vector_vector_str_LowStar_Vector_vector_str__uint8_t_){
+        (__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vv){
           .fst = true,
           .snd = pos1,
           .thd = { .sz = (uint32_t)0U, .cap = (uint32_t)0U, .vs = NULL }
         }
       );
   }
-  regional__uint32_t_LowStar_Vector_vector_str__uint8_t_
+  regional__uint32_t_MerkleTree_Low_Datastructures_hash_vec
   rg =
     {
       .state = hash_size,
@@ -2392,11 +2398,7 @@ deserialize_hash_vv(uint32_t hash_size, bool ok, const uint8_t *buf, uint32_t sz
   uint32_t pos2 = scrut.snd;
   return
     (
-      (__bool_uint32_t_LowStar_Vector_vector_str_LowStar_Vector_vector_str__uint8_t_){
-        .fst = ok2,
-        .snd = pos2,
-        .thd = res
-      }
+      (__bool_uint32_t_MerkleTree_Low_Datastructures_hash_vv){ .fst = ok2, .snd = pos2, .thd = res }
     );
 }
 
@@ -2500,7 +2502,7 @@ MerkleTree_Low_merkle_tree
   bool ok5 = scrut4.fst;
   uint32_t pos4 = scrut4.snd;
   uint32_t j = scrut4.thd;
-  __bool_uint32_t_LowStar_Vector_vector_str_LowStar_Vector_vector_str__uint8_t_
+  __bool_uint32_t_MerkleTree_Low_Datastructures_hash_vv
   scrut5 = deserialize_hash_vv(hsz, ok5, input, sz1, pos4);
   bool ok6 = scrut5.fst;
   uint32_t pos5 = scrut5.snd;
@@ -2509,7 +2511,7 @@ MerkleTree_Low_merkle_tree
   bool ok7 = scrut6.fst;
   uint32_t pos6 = scrut6.snd;
   bool rhs_ok = scrut6.thd;
-  __bool_uint32_t_LowStar_Vector_vector_str__uint8_t_
+  __bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec
   scrut7 = deserialize_hash_vec(hsz, ok7, input, sz1, pos6);
   bool ok8 = scrut7.fst;
   uint32_t pos7 = scrut7.snd;
@@ -2587,7 +2589,7 @@ MerkleTree_Low_path
   {
     return NULL;
   }
-  __bool_uint32_t_LowStar_Vector_vector_str__uint8_t_
+  __bool_uint32_t_MerkleTree_Low_Datastructures_hash_vec
   scrut = deserialize_hash_vec(hash_size, ok, input, sz1, pos);
   bool ok1 = scrut.fst;
   MerkleTree_Low_Datastructures_hash_vec hs = scrut.thd;
