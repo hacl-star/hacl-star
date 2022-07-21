@@ -100,19 +100,20 @@ val lemma_mod_distributivity_sub_left: #m:pos -> a:nat_mod m -> b:nat_mod m -> c
 
 
 let prime = m:pos{1 < m /\ Euclid.is_prime m}
-let inv_mod (#m:prime) (a:nat_mod m) : nat_mod m = pow_mod #m a (m - 2)
-let div_mod (#m:prime) (a:nat_mod m) (b:nat_mod m) : nat_mod m = mul_mod a (inv_mod b)
+let inv_mod (#m:pos{1 < m}) (a:nat_mod m) : nat_mod m = pow_mod #m a (m - 2)
+let div_mod (#m:pos{1 < m}) (a:nat_mod m) (b:nat_mod m) : nat_mod m = mul_mod a (inv_mod b)
 
-val lemma_inv_mod_both: #m:prime -> a:nat_mod m -> b:nat_mod m ->
+val lemma_inv_mod_both: #m:pos{1 < m} -> a:nat_mod m -> b:nat_mod m ->
   Lemma (inv_mod (mul_mod a b) == mul_mod (inv_mod a) (inv_mod b))
 
 val lemma_div_mod_prime: #m:prime -> a:nat_mod m{a <> 0} -> Lemma (div_mod a a == 1)
-val lemma_div_mod_prime_one: #m:prime -> a:nat_mod m -> Lemma (div_mod a 1 == a)
+val lemma_div_mod_prime_one: #m:pos{1 < m} -> a:nat_mod m -> Lemma (div_mod a 1 == a)
 
 val lemma_div_mod_prime_cancel: #m:prime -> a:nat_mod m -> b:nat_mod m -> c:nat_mod m{c <> 0} ->
   Lemma (div_mod (mul_mod a c) (mul_mod c b) == div_mod a b)
 
-val lemma_div_mod_prime_to_one_denominator: #m:prime -> a:nat_mod m -> b:nat_mod m -> c:nat_mod m{c <> 0} -> d:nat_mod m{d <> 0} ->
+val lemma_div_mod_prime_to_one_denominator:
+  #m:pos{1 < m} -> a:nat_mod m -> b:nat_mod m -> c:nat_mod m{c <> 0} -> d:nat_mod m{d <> 0} ->
   Lemma (mul_mod (div_mod a c) (div_mod b d) == div_mod (mul_mod a b) (mul_mod c d))
 
 val lemma_div_mod_eq_mul_mod: #m:prime -> a:nat_mod m -> b:nat_mod m{b <> 0} -> c:nat_mod m ->

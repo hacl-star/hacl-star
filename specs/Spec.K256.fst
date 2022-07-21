@@ -56,6 +56,9 @@ let mk_k256_concrete_ops : SE.concrete_ops proj_point = {
   SE.sqr = point_double_c;
 }
 
+// [a]P in affine coordinates
+let aff_point_mul (a:nat) (p:aff_point) : aff_point =
+  LE.pow mk_k256_comm_monoid p a
 
 // [a]P
 let point_mul (a:qelem) (p:proj_point) : proj_point =

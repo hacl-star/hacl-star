@@ -164,8 +164,58 @@ let test_public_key_uncompressed () : FStar.All.ML bool =
   | None ->
     begin IO.print_string "Test K256 pk_uncompressed (None): Failure :(\n"; false end
 
+(*
+let print_bytes str len (b:lbytes len) =
+  IO.print_string str;
+  FStar.List.iter (fun b_i -> IO.print_uint8_hex_pad (u8_to_UInt8 b_i)) (to_list b)
+
+(*
+ Projective coordinates
+ X = 0xb557707daa602223c86676d1c5bb40ec5a72b1cae4dac112fd9f9bac02f0f927
+ Y = 0x3ea9b711a4fb06e03eadf27281d55bd2f37d2760dfc33085dec6f65cea720fa2
+ Z = 0x86d3d793c74502a81743dd5581e1f94773a8d97c603ce3bdbe00c4009bb8800f
+
+ Affine coordinates
+ x = 0xbcace2e99da01887ab0102b696902325872844067f15e98da7bba04400b88fcb
+ y = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
+
+ Expected beta * gx
+ beta * gx = 0xbcace2e99da01887ab0102b696902325872844067f15e98da7bba04400b88fcb
+ gy = 0x483ada7726a3c4655da4fbfc0e1108a8fd17b448a68554199c47d08ffb10d4b8
+*)
+let print_glv_for_base_point () : FStar.All.ML unit =
+  let lambda : qelem = 0x5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72 in
+  let r_X, r_Y, r_Z = point_mul_g lambda in
+  let r_x, r_y = to_aff_point (r_X, r_Y, r_Z) in
+  let r_Xb : lbytes 32 = nat_to_bytes_be #SEC 32 r_X in
+  let r_Yb : lbytes 32 = nat_to_bytes_be #SEC 32 r_Y in
+  let r_Zb : lbytes 32 = nat_to_bytes_be #SEC 32 r_Z in
+
+  let r_xb : lbytes 32 = nat_to_bytes_be #SEC 32 r_x in
+  let r_yb : lbytes 32 = nat_to_bytes_be #SEC 32 r_y in
+
+  let beta : felem = 0x7ae96a2b657c07106e64479eac3434e99cf0497512f58995c1396c28719501ee in
+  let beta_gx = beta *% g_x in
+  let beta_gxb : lbytes 32 = nat_to_bytes_be #SEC 32 beta_gx in
+  let gyb : lbytes 32 = nat_to_bytes_be #SEC 32 g_y in
+
+  IO.print_string "\n Projective coordinates \n";
+  print_bytes "\n X = " 32 r_Xb;
+  print_bytes "\n Y = " 32 r_Yb;
+  print_bytes "\n Z = " 32 r_Zb;
+
+  IO.print_string "\n Affine coordinates \n";
+  print_bytes "\n x = " 32 r_xb;
+  print_bytes "\n y = " 32 r_yb;
+
+  IO.print_string "\n Expected beta * gx \n";
+  print_bytes "\n beta * gx = " 32 beta_gxb;
+  print_bytes "\n gy = " 32 gyb;
+  IO.print_string "\n End of print \n"
+*)
 
 let test () : FStar.All.ML bool  =
+  // print_glv_for_base_point ();
   let t1 : bool = test_verify () in
   let t2 : bool = test_sign_and_verify () in
   let t3 : bool = test_public_key_compressed () in
