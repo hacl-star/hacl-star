@@ -172,7 +172,7 @@ let add1_names (n:nat) =
   | _ -> ""
 
 let add1_code_inline () : FStar.All.ML int =
-  PR.print_inline "add_scalar" 0 (Some "carry_r") (List.length dom) dom add1_names code_add1 of_arg add1_regs_modified add1_comments
+  PR.print_inline "add_scalar" 0 None (List.length dom) dom add1_names code_add1 of_arg add1_regs_modified add1_comments
 
 
 [@__reduce__]
