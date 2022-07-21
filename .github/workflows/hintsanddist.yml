@@ -1,17 +1,20 @@
-name: update hints and dist
+name: regenerate hints and dist
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
 
 jobs:
-  hints-and-dist:
+  regenerate-hints-and-dist:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
         uses: actions/checkout@v3
+
       - name: delete old files
         run: git rm -r hints dist/*/*
+
       - name: download new files
         run: |
           STATUS_SUCCEEDED=0 # from https://github.com/NixOS/hydra/blob/cf9f38e43fd81f9298e3f2ff50c8a6ee0acc3af0/hydra-api.yaml#L927-L941
@@ -29,7 +32,7 @@ jobs:
           buildUrl="$baseUrl/eval/$id/job/hacl-build-products.x86_64-linux"
           buildInfo=$(curl -sLH 'Content-Type: application/json' "$buildUrl")
 
-          # Check wether the build was built correctly
+          # Check wether the build was successful
           [[ "$(echo "$buildInfo" | jq -r '.buildstatus')" == "$STATUS_SUCCEEDED" ]] || {
               echo "The latest evaluation wasn't successful. Aborting."
               exit 2
@@ -41,9 +44,17 @@ jobs:
 
           installTar "hints"
           installTar "dist"
-      - name: commit changes
-        uses: EndBug/add-and-commit@v9
+
+      - name: avoid trivial changes
+        run: |
+          [[ 1 -lt $(git diff --compact-summary | grep -v INFO.txt | wc -l) ]]
+
+      - name: create pull request
+        uses: peter-evans/create-pull-request@v4
         with:
-          author_name: "Dzomo, the Everest Yak"
-          author_email: "everbld@microsoft.com"
-          message: "[CI] update hints and dist"
+          add-paths: "hints, dist"
+          commit-message: "[CI] regenerate hints and dist"
+          committer: "Dzomo, the Everest Yak <everbld@microsoft.com>"
+          author: "Dzomo, the Everest Yak <everbld@microsoft.com>"
+          branch: "hints-and-dist-master"
+          title: "[CI] regenerate hints and dist"
