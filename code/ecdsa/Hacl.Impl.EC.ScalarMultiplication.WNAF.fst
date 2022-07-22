@@ -710,19 +710,6 @@ let rwnaf_lemma0 d0 =
   Classical.forall_intro (rwnaf_lemma0_ d0)
 
 
-val cancel_fraction (a:int) (b:pos) (c:pos) : Lemma ((a * c) / (b * c) == a / b)
-let cancel_fraction a b c =
-  calc (==) {
-    (a * c) / (b * c);
-    == { swap_mul b c }
-    (a * c) / (c * b);
-    == { division_multiplication_lemma (a * c) c b }
-    ((a * c) / c) / b;
-    == { cancel_mul_div a c }
-    a / b;
-  }
-
-
 val scalar_rwnaf_lemma_to_spec: n: nat {2 * (n / w + 1) < pow2 32}
   -> d: nat {d < pow2 n /\ d % 2 == 1} 
   -> out: lbuffer uint64 (size (2 * (n / w + 1))) -> h: mem 
@@ -802,7 +789,7 @@ let scalar_rwnaf #c out scalar =
 #pop-options
 
 
-assume val getPointPrecomputed_P256: index: size_t {v index < 3456} -> Stack (pointAffine P256)
+assume val getPointPrecomputed_P256: index: size_t {v index < getPower P256 / m / 2 * 8} -> Stack (pointAffine P256)
   (requires fun h -> True)
   (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
     let j = v index / pow2 (w - 1) in 
@@ -811,13 +798,13 @@ assume val getPointPrecomputed_P256: index: size_t {v index < 3456} -> Stack (po
   ))
 
 
-assume val getPointPrecomputed_P384: index: size_t {v index < 3456} -> Stack (pointAffine P384)
+assume val getPointPrecomputed_P384: index: size_t {v index < getPower P384 / m / 2 * 8} -> Stack (pointAffine P384)
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
 
 inline_for_extraction noextract
-val getPointPrecomputed: #c: curve -> index: size_t {v index < 3456} -> Stack (pointAffine c)
+val getPointPrecomputed: #c: curve -> index: size_t {v index < getPower c / m / 2 * 8} -> Stack (pointAffine c)
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
@@ -853,8 +840,7 @@ let copy_point_conditional_affine #c result p mask =
   let pX, pY = sub p (size 0) len, sub p len len in 
   Hacl.Impl.EC.Precomputed.copy_point_conditional_affine #MUT #c result pX pY mask
 
-
-val loopK_step: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> k: uint64 -> Stack unit 
+val loopK_step: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> k: size_t -> Stack unit 
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
@@ -877,185 +863,37 @@ let loopK #c d result j =
 
 
 inline_for_extraction noextract
-val sub4_0: y:felem P256 -> result: felem P256 -> 
-  Stack uint64
-    (requires fun h -> live h y /\ live h result /\ eq_or_disjoint y result)
-    (ensures fun h0 c h1 -> modifies1 result h0 h1 /\ v c <= 1 /\ as_nat P256 h1 result - v c * pow2 256 == 0 - as_nat P256 h0 y)
-
-let sub4_0 y result = 
-  let h0 = ST.get() in 
-  
-  let r0 = sub result (size 0) (size 1) in 
-  let r1 = sub result (size 1) (size 1) in 
-  let r2 = sub result (size 2) (size 1) in 
-  let r3 = sub result (size 3) (size 1) in 
-      
-  let cc = sub_borrow_u64 (u64 0) (u64 0) y.(size 0) r0 in 
-  let cc = sub_borrow_u64 cc (u64 0) y.(size 1) r1 in 
-  let cc = sub_borrow_u64 cc (u64 0) y.(size 2) r2 in 
-  let cc = sub_borrow_u64 cc (u64 0) y.(size 3) r3 in 
-    
-    assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
-    assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
-    assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
-
-    assert_norm (pow2 64 * pow2 64 = pow2 128);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-    
-  cc
-
-
-inline_for_extraction noextract
-val add4_variables_void: x: felem P256 -> cin: uint64 {uint_v cin <=1} ->  y0: uint64 -> y1: uint64 -> y2: uint64 
-  -> y3: uint64 -> 
-  result: felem P256 -> 
-  Stack unit
-    (requires fun h -> live h x /\ live h result /\ eq_or_disjoint x result )
-    (ensures fun h0 c h1 -> modifies (loc result) h0 h1  /\  
-      as_nat P256 h1 result == (as_nat P256 h0 x + uint_v y0 + uint_v y1 * pow2 64 + uint_v y2 * pow2 128 + uint_v y3 * pow2 192 + uint_v cin) % pow2 256)   
-
-let add4_variables_void x cin y0 y1 y2 y3 result = 
-  let h0 = ST.get() in 
-    
-  let r0 = sub result (size 0) (size 1) in      
-  let r1 = sub result (size 1) (size 1) in 
-  let r2 = sub result (size 2) (size 1) in 
-  let r3 = sub result (size 3) (size 1) in 
-
-  let cc0 = add_carry_u64 cin x.(0ul) y0 r0 in 
-  let cc1 = add_carry_u64 cc0 x.(1ul) y1 r1 in 
-  let cc2 = add_carry_u64 cc1 x.(2ul) y2 r2 in 
-  add_carry_u64 cc2 x.(3ul) y3 r3;
-  
-    assert_norm (pow2 64 * pow2 64 = pow2 128);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 = pow2 192);
-    assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-    
-    assert(let r1_0 = as_seq h0 r1 in let r0_ = as_seq h0 result in Seq.index r0_ 1 == Seq.index r1_0 0);
-    assert(let r2_0 = as_seq h0 r2 in let r0_ = as_seq h0 result in Seq.index r0_ 2 == Seq.index r2_0 0);
-    assert(let r3_0 = as_seq h0 r3 in let r0_ = as_seq h0 result in Seq.index r0_ 3 == Seq.index r3_0 0);
-
-    let h1 = ST.get() in 
-
-    let x0 = Lib.Sequence.index (as_seq h0 x) 0 in 
-    let x1 = Lib.Sequence.index (as_seq h0 x) 1 in 
-    let x2 = Lib.Sequence.index (as_seq h0 x) 2 in 
-    let x3 = Lib.Sequence.index (as_seq h0 x) 3 in 
-
-
-    let r0 = Lib.Sequence.index (as_seq h1 r0) 0 in 
-    let r1 = Lib.Sequence.index (as_seq h1 r1) 0 in 
-    let r2 = Lib.Sequence.index (as_seq h1 r2) 0 in 
-    let r3 = Lib.Sequence.index (as_seq h1 r3) 0 in 
-(*
-
-  calc (==) {((v x3 + v y3 + v cc2) % pow2 64 * pow2 192) % pow2 256;
-  (==) {lemma_mod_mul_distr_l ((v x3 + v y3 + v cc2) % pow2 64) (pow2 192) (pow2 256)}
-  ((v x3 + v y3 + v cc2) % pow2 64 % pow2 256 * pow2 192) % pow2 256;
-  (==) {pow2_modulo_modulo_lemma_2 (v x3 + v y3 + v cc2) 256 64}
-  ((v x3 + v y3 + v cc2) % pow2 256 * pow2 192) % pow2 256;
-  (==) {lemma_mod_mul_distr_l (v x3 + v y3 + v cc2) (pow2 192) (pow2 256)}
-  ((v x3 + v y3 + v cc2) * pow2 192) % pow2 256;
-  };
-
-
-  calc (==) {
-  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 + (v x3 + v y3 + v cc2) % pow2 64 * pow2 192 - v cc2 * pow2 192) % pow2 256;
-  (==) {}
-  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 - v cc2 * pow2 192 + (v x3 + v y3 + v cc2) % pow2 64 * pow2 192 ) % pow2 256;
-  (==) {lemma_mod_add_distr (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 - v cc2 * pow2 192) ((v x3 + v y3 + v cc2) % pow2 64 * pow2 192) (pow2 256)}
-  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 + ((v x3 + v y3 + v cc2) % pow2 64 * pow2 192) % pow2 256 - v cc2 * pow2 192) % pow2 256;
-  (==) {}
-  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128  - v cc2 * pow2 192 + ((v x3 + v y3 + v cc2) * pow2 192) % pow2 256) % pow2 256; 
-  (==) {lemma_mod_add_distr (v x0 + v y0 + v cin + v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 - v cc2 * pow2 192) ((v x3 + v y3 + v cc2) * pow2 192) (pow2 256)}
-  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 - v cc2 * pow2 192 + (v x3 + v y3 + v cc2) * pow2 192 ) % pow2 256;
-  (==) {}
-  (v x0 + v y0 + v cin +  v x1 * pow2 64 + v y1 * pow2 64 +  v x2 * pow2 128 + v y2 * pow2 128 + v x3 * pow2 192 + v y3 * pow2 192) % pow2 256;
-  (==) {}
-  (as_nat h0 x +  uint_v y0 + uint_v y1 * pow2 64 + uint_v y2 * pow2 128 + uint_v y3 * pow2 192 + uint_v cin) % pow2 256; };
-
-  
-  small_mod (v r0 + v r1 * pow2 64 + v r2 * pow2 128  + v r3 * pow2 192) (pow2 256)
-
-*) ()
-
-val p256_neg: arg2: felem P256 -> out: felem P256 -> Stack unit 
-  (requires fun h0 -> live h0 out /\ live h0 arg2 /\ eq_or_disjoint arg2 out /\ as_nat P256 h0 arg2 < prime256)
-  (ensures (fun h0 _ h1 -> modifies (loc out) h0 h1 (* /\ 
-	as_nat P256 h1 out == (0 - as_nat P256 h0 arg2) % prime256 /\
-	as_nat P256 h1 out == toDomain_ ((fromDomain_ 0 - fromDomain_ (as_nat P256 h0 arg2)) % prime256) *)
-    )
-)    
-
-let p256_neg arg2 out =     
-  assert_norm (pow2 64 * pow2 64 * pow2 64 * pow2 64 = pow2 256);
-    let h0 = ST.get() in 
-  let t = sub4_0 arg2 out in 
-
-    let h1 = ST.get() in 
-    (* lemma_t_computation2 t; *)
-  let t0 = (u64 0) -. t in 
-  let t1 = ((u64 0) -. t) >>. (size 32) in 
-  let t2 = u64 0 in 
-  let t3 = t -. (t <<. (size 32)) in 
-    (* modulo_addition_lemma  (0 - as_nat h0 arg2) prime256 1; *)
-  add4_variables_void out (u64 0)  t0 t1 t2 t3 out;
-    let h2 = ST.get() in 
-  
-  (* small_mod (as_nat h2 out) (pow2 256);
-  small_mod (as_nat h1 out) (pow2 256);
-
-    let h2 = ST.get() in 
-      assert(
-      if 0 - as_nat h0 arg2 >= 0 then 
-	begin
-	  modulo_lemma (0 - as_nat h0 arg2) prime256;
-	  as_nat h2 out == (0 - as_nat h0 arg2) % prime256
-	end
-      else
-          begin
-	    modulo_lemma (as_nat h2 out) prime256;
-            as_nat h2 out == (0 - as_nat h0 arg2) % prime256
-	  end);
-    substractionInDomain 0 (felem_seq_as_nat (as_seq h0 arg2));
-    inDomain_mod_is_not_mod (fromDomain_ 0 - fromDomain_ (felem_seq_as_nat (as_seq h0 arg2))) *) ()
-
-
-inline_for_extraction noextract
-val copy_point_conditional_mask_u64_2:  result: point P256
-  -> x: point P256 -> mask: uint64 {uint_v mask == 0 \/ uint_v mask == pow2 64 - 1}  
+val copy_point_conditional: #c: curve -> result: point c
+  -> x: point c -> mask: uint64 {uint_v mask == 0 \/ uint_v mask == pow2 64 - 1}  
   -> Stack unit
   (requires fun h -> live h result /\ live h x /\ disjoint result x)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 ) (*  /\ (
-    if uint_v mask = 0
-    then 
-      as_nat h1 (gsub result (size 0) (size 4)) == as_nat h0 (gsub result (size 0) (size 4)) /\
-      as_nat h1 (gsub result (size 4) (size 4)) == as_nat h0 (gsub result (size 4) (size 4)) /\
-      as_nat h1 (gsub result (size 8) (size 4)) == as_nat h0 (gsub result (size 8) (size 4)) 
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    if uint_v mask = 0 then 
+      as_nat c h1 (getX result) == as_nat c h0 (getX result) /\
+      as_nat c h1 (getY result) == as_nat c h0 (getY result) /\
+      as_nat c h1 (getZ result) == as_nat c h0 (getZ result)
     else
-      as_nat h1 (gsub result (size 0) (size 4)) == as_nat h0 (gsub x (size 0) (size 4)) /\
-      as_nat h1 (gsub result (size 4) (size 4)) == as_nat h0 (gsub x (size 4) (size 4)) /\
-      as_nat h1 (gsub result (size 8) (size 4)) == as_nat h0 (gsub x (size 8) (size 4)))
-  )
-
-*)
+      as_nat c h1 (getX result) == as_nat c h0 (getX x) /\
+      as_nat c h1 (getY result) == as_nat c h0 (getY x) /\
+      as_nat c h1 (getZ result) == as_nat c h0 (getZ x)))
 
 
-let copy_point_conditional_mask_u64_2  result x mask = 
+let copy_point_conditional #c result p mask = 
   let h0 = ST.get() in 
 
-  let x_x = sub x (size 0) (size 4) in 
-  let x_y = sub x (size 4) (size 4) in 
-  let x_z = sub x (size 8) (size 4) in 
+  let len = getCoordinateLenU64 c in 
 
-  let result_x = sub result (size 0) (size 4) in 
-  let result_y = sub result (size 4) (size 4) in 
-  let result_z = sub result (size 8) (size 4) in 
+  let p_x = sub p (size 0) len in 
+  let p_y = sub p len len in 
+  let p_z = sub p (size 2 *! len) len in 
 
-  copy_conditional #P256 result_x x_x mask;
-  copy_conditional #P256 result_y x_y mask;
-  copy_conditional #P256 result_z x_z mask
+  let r_x = sub result (size 0) len in 
+  let r_y = sub result len len in 
+  let r_z = sub result (size 2 *! len) len in 
+
+  copy_conditional #c r_x p_x mask;
+  copy_conditional #c r_y p_y mask;
+  copy_conditional #c r_z p_z mask
 
 
 val conditional_substraction: #c: curve -> result: point P256 -> p: point P256 -> scalar: lbuffer uint8 (size 32) -> 
@@ -1063,7 +901,6 @@ val conditional_substraction: #c: curve -> result: point P256 -> p: point P256 -
   Stack unit 
     (requires fun h -> live h result /\ live h p /\ live h scalar /\ live h tempBuffer)
     (ensures fun h0 _ h1 -> True)
-
 
 let conditional_substraction #c result p scalar tempBuffer = 
   push_frame();
@@ -1082,11 +919,11 @@ let conditional_substraction #c result p scalar tempBuffer =
   let bpY = getPointPrecomputed #c (size 4) in 
 
     copy bpMinusX bpX;
-    p256_neg bpY bpMinusY;
+    felem_sub_zero #c bpY bpMinusY;
 
   Hacl.Impl.EC.PointAddMixed.point_add_mixed p bpMinus tempPoint tempBuffer;
 
-  copy_point_conditional_mask_u64_2 result tempPoint mask;
+  copy_point_conditional result tempPoint mask;
   pop_frame()
 
 
@@ -1118,7 +955,7 @@ let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer =
       loopK #c d lut j;
 
       let yLut = sub lut (size 4) (size 4) in 
-      p256_neg yLut temp4;
+      felem_sub_zero #c yLut temp4;
 
       copy_conditional #P256 yLut temp4 is_neg;
       Hacl.Impl.EC.PointAddMixed.point_add_mixed result lut result tempBuffer
@@ -1138,7 +975,7 @@ let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer =
       loopK #c d lut j;
 
     	let yLut = sub lut (size 4) (size 4) in 
-    	p256_neg yLut temp4;
+    	felem_sub_zero #c yLut temp4;
 
 	
     	copy_conditional #P256 yLut temp4  is_neg;
