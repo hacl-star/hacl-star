@@ -802,72 +802,78 @@ let scalar_rwnaf #c out scalar =
 #pop-options
 
 
-inline_for_extraction
-type pointAffine = lbuffer uint64 (size 8)
+assume val getPointPrecomputed_P256: index: size_t {v index < 3456} -> Stack (pointAffine P256)
+  (requires fun h -> True)
+  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
+    let j = v index / pow2 (w - 1) in 
+    let i = v index % pow2 (w - 1) in 
+    True (* pointEqual (toJacobianCoordinates (fromDomainAffine r)) (point_mult (basePoint #c) (pow2 (j * 10) * i) *)
+  ))
 
-assume val getUInt64: index: size_t {v index < 3456 - 4} -> Stack (lbuffer uint64 (size 4))
+
+assume val getPointPrecomputed_P384: index: size_t {v index < 3456} -> Stack (pointAffine P384)
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
-[@CInline]
-val copy_conditional: #c: curve -> out: felem c -> x: felem c -> mask: uint64{uint_v mask = 0 \/ uint_v mask = pow2 64 - 1} -> Stack unit 
-  (requires fun h -> live h out /\ live h x)
-  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 (* /\ 
-    (if uint_v mask = 0 then as_seq h1 out == as_seq h0 out else as_seq h1 out == as_seq h0 x) /\
-    (if uint_v mask = 0 then as_nat h1 out == as_nat h0 out else as_nat h1 out == as_nat h0 x)
-  ) 
-*))
 
-let copy_conditional out x mask = 
-    let h0 = ST.get() in 
-  let out_0 = index out (size 0) in 
-  let out_1 = index out (size 1) in 
-  let out_2 = index out (size 2) in 
-  let out_3 = index out (size 3) in 
+inline_for_extraction noextract
+val getPointPrecomputed: #c: curve -> index: size_t {v index < 3456} -> Stack (pointAffine c)
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> modifies0 h0 h1)
 
-  let x_0 = index x (size 0) in 
-  let x_1 = index x (size 1) in 
-  let x_2 = index x (size 2) in 
-  let x_3 = index x (size 3) in 
+let getPointPrecomputed #c index = 
+  match c with 
+  |P256 -> getPointPrecomputed_P256 index
+  |P384 -> getPointPrecomputed_P384 index
+  
 
-  let r_0 = logxor out_0 (logand mask (logxor out_0 x_0)) in 
-  let r_1 = logxor out_1 (logand mask (logxor out_1 x_1)) in 
-  let r_2 = logxor out_2 (logand mask (logxor out_2 x_2)) in 
-  let r_3 = logxor out_3 (logand mask (logxor out_3 x_3)) in 
+inline_for_extraction noextract
+val copy_point_conditional_affine:  #c: curve 
+  -> result: pointAffine c 
+  -> p: pointAffine c 
+  -> mask: uint64 {v mask = 0 \/ v mask = pow2 64 - 1} ->
+  Stack unit
+  (requires fun h -> 
+    live h result /\ live h p /\ disjoint result p /\ (
+    let len = getCoordinateLenU64 c in
+    let pX, pY = gsub p (size 0) len, gsub p len len in 
+    as_nat c h pX < getPrime c /\ as_nat c h pY < getPrime c))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
+    let len = getCoordinateLenU64 c in 
+    let pX, pY = gsub p (size 0) len, gsub p len len in 
+    let rX, rY = gsub result (size 0) len, gsub result len len in 
+    (v mask = pow2 64 - 1 ==> (felem_eval c h1 rX /\ felem_eval c h1 rY)) /\ (
+    if v mask = 0 then
+      as_nat c h1 rX == as_nat c h0 rX /\ as_nat c h1 rY == as_nat c h0 rY
+    else 
+      as_nat c h1 rX == as_nat c h0 pX /\ as_nat c h1 rY == as_nat c h0 pY)))
 
-  (* lemma_xor_copy_cond out_0 x_0 mask;
-  lemma_xor_copy_cond out_1 x_1 mask;
-  lemma_xor_copy_cond out_2 x_2 mask;
-  lemma_xor_copy_cond out_3 x_3 mask; *)
-
-  upd out (size 0) r_0;
-  upd out (size 1) r_1;
-  upd out (size 2) r_2;
-  upd out (size 3) r_3 (*;
-    let h1 = ST.get() in 
-
-  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 out);
-  lemma_eq_funct_ (as_seq h1 out) (as_seq h0 x) *)
+let copy_point_conditional_affine #c result p mask = 
+  let len = getCoordinateLenU64 c in
+  let pX, pY = sub p (size 0) len, sub p len len in 
+  Hacl.Impl.EC.Precomputed.copy_point_conditional_affine #MUT #c result pX pY mask
 
 
-
-val loopK:  result: pointAffine -> d: uint64 -> point: pointAffine -> j: size_t -> Stack unit 
+val loopK_step: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> k: uint64 -> Stack unit 
   (requires fun h -> True)
   (ensures fun h0 _ h1 -> True)
 
-let loopK result d point j = 
+let loopK_step #c d result j k = 
+  let mask = eq_mask d (to_u64 k) in 
+  eq_mask_lemma d (to_u64 k); 
+  
+  let lut_cmb = getPointPrecomputed #c ((j *! size 16 +! k) *! 8) in 
+  copy_point_conditional_affine result lut_cmb mask  
+
+
+
+val loopK: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let loopK #c d result j = 
   let invK h (k: nat) = True in 
-  Lib.Loops.for 0ul 16ul invK (fun k -> 
- 
-    let mask = eq_mask d (to_u64 k) in 
-    eq_mask_lemma d (to_u64 k); 
-    
-
-    let lut_cmb_x = getUInt64 ((j *! size 16 +! k) *! 8) in 
-    let lut_cmb_y = getUInt64 ((j *! size 16 +! k) *! 8 +! (size 4))  in
-
-    copy_conditional #P256 (sub point (size 0) (size 4)) lut_cmb_x mask;
-    copy_conditional #P256 (sub point (size 4) (size 4)) lut_cmb_y mask)
+  Lib.Loops.for 0ul 16ul invK (fun k -> loopK_step d result j k)
 
 
 inline_for_extraction noextract
@@ -1052,14 +1058,14 @@ let copy_point_conditional_mask_u64_2  result x mask =
   copy_conditional #P256 result_z x_z mask
 
 
-val conditional_substraction: result: point P256 -> p: point P256 -> scalar: lbuffer uint8 (size 32) -> 
+val conditional_substraction: #c: curve -> result: point P256 -> p: point P256 -> scalar: lbuffer uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 88) ->
   Stack unit 
     (requires fun h -> live h result /\ live h p /\ live h scalar /\ live h tempBuffer)
     (ensures fun h0 _ h1 -> True)
 
 
-let conditional_substraction result p scalar tempBuffer = 
+let conditional_substraction #c result p scalar tempBuffer = 
   push_frame();
 
   let tempPoint = create (size 12) (u64 0) in 
@@ -1072,8 +1078,8 @@ let conditional_substraction result p scalar tempBuffer =
   let i0 = index scalar (size 31) in 
   let mask = lognot((u64 0) -. to_u64 (logand i0 (u8 1))) in 
 
-  let bpX = getUInt64 (size 0) in 
-  let bpY = getUInt64 (size 4) in 
+  let bpX = getPointPrecomputed #c (size 0) in 
+  let bpY = getPointPrecomputed #c (size 4) in 
 
     copy bpMinusX bpX;
     p256_neg bpY bpMinusY;
@@ -1095,7 +1101,7 @@ val scalar_multiplication_cmb: #c: curve ->  #buf_type: buftype -> result: point
 let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer = 
   push_frame();
     let rnaf2 = create (size 104) (u64 0) in 
-    let lut:pointAffine = create (size 8) (u64 0) in 
+    let lut = create (size 8) (u64 0) in 
     let temp4 = sub tempBuffer (size 0) (size 4) in 
 
     scalar_rwnaf #c rnaf2 scalar;
@@ -1109,7 +1115,7 @@ let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer =
       let is_neg = index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1)) in 
       let d = shift_right (d -! size 1) (size 1) in 
 
-      loopK lut d lut j;
+      loopK #c d lut j;
 
       let yLut = sub lut (size 4) (size 4) in 
       p256_neg yLut temp4;
@@ -1129,7 +1135,7 @@ let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer =
       let is_neg = index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1)) in 
       let d = shift_right (d -! size 1) (size 1) in 
 
-      loopK lut d lut j;
+      loopK #c d lut j;
 
     	let yLut = sub lut (size 4) (size 4) in 
     	p256_neg yLut temp4;
@@ -1140,7 +1146,7 @@ let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer =
     );
 
 
-    conditional_substraction result result scalar tempBuffer;
+    conditional_substraction #c result result scalar tempBuffer;
   
 
   pop_frame()
