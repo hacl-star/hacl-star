@@ -789,32 +789,40 @@ let scalar_rwnaf #c out scalar =
 #pop-options
 
 
-assume val getPointPrecomputed_P256: index: size_t {v index < getPower P256 / m / 2 * 8} -> Stack (pointAffine P256)
+assume val getPointPrecomputed_P256: index: size_t {v index < getPower P256 / m / 2 * 8} 
+  -> result: pointAffine P256 ->
+  Stack unit
   (requires fun h -> True)
-  (ensures fun h0 r h1 -> modifies0 h0 h1 /\ (
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
     let j = v index / pow2 (w - 1) in 
     let i = v index % pow2 (w - 1) in 
     True (* pointEqual (toJacobianCoordinates (fromDomainAffine r)) (point_mult (basePoint #c) (pow2 (j * 10) * i) *)
   ))
 
 
-assume val getPointPrecomputed_P384: index: size_t {v index < getPower P384 / m / 2 * 8} -> Stack (pointAffine P384)
+assume val getPointPrecomputed_P384: index: size_t {v index < getPower P384 / m / 2 * 8} 
+  -> result: pointAffine P384 ->
+  Stack unit
   (requires fun h -> True)
-  (ensures fun h0 _ h1 -> modifies0 h0 h1)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+    let j = v index / pow2 (w - 1) in 
+    let i = v index % pow2 (w - 1) in 
+    True (* pointEqual (toJacobianCoordinates (fromDomainAffine r)) (point_mult (basePoint #c) (pow2 (j * 10) * i) *)
+  ))
 
 
 inline_for_extraction noextract
-val getPointPrecomputed: #c: curve -> index: size_t {v index < getPower c / m / 2 * 8} -> Stack (pointAffine c)
+val getPointPrecomputed: #c: curve -> index: size_t {v index < getPower c / m / 2 * 8} -> result: pointAffine c ->
+  Stack unit
   (requires fun h -> True)
-  (ensures fun h0 _ h1 -> modifies0 h0 h1)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)
 
-let getPointPrecomputed #c index = 
+let getPointPrecomputed #c index result = 
   match c with 
-  |P256 -> getPointPrecomputed_P256 index
-  |P384 -> getPointPrecomputed_P384 index
+  |P256 -> getPointPrecomputed_P256 index result
+  |P384 -> getPointPrecomputed_P384 index result
   
 
-inline_for_extraction noextract
 val copy_point_conditional_affine:  #c: curve 
   -> result: pointAffine c 
   -> p: pointAffine c 
@@ -840,16 +848,18 @@ let copy_point_conditional_affine #c result p mask =
   let pX, pY = sub p (size 0) len, sub p len len in 
   Hacl.Impl.EC.Precomputed.copy_point_conditional_affine #MUT #c result pX pY mask
 
-val loopK_step: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> k: size_t -> Stack unit 
-  (requires fun h -> True)
+
+val loopK_step: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> k: size_t
+  -> tempPoint: pointAffine c -> Stack unit 
+  (requires fun h -> live h result /\ live h tempPoint)
   (ensures fun h0 _ h1 -> True)
 
-let loopK_step #c d result j k = 
+let loopK_step #c d result j k tempPoint = 
   let mask = eq_mask d (to_u64 k) in 
   eq_mask_lemma d (to_u64 k); 
   
-  let lut_cmb = getPointPrecomputed #c ((j *! size 16 +! k) *! 8) in 
-  copy_point_conditional_affine result lut_cmb mask  
+  getPointPrecomputed #c ((j *! size 16 +! k) *! 8) tempPoint;
+  copy_point_conditional_affine result tempPoint mask  
 
 
 
@@ -858,8 +868,10 @@ val loopK: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> Stack
   (ensures fun h0 _ h1 -> True)
 
 let loopK #c d result j = 
+  push_frame();
+    let tempPoint = create (getPointLenU64 c) (u64 0) in 
   let invK h (k: nat) = True in 
-  Lib.Loops.for 0ul 16ul invK (fun k -> loopK_step d result j k)
+  Lib.Loops.for 0ul 16ul invK (fun k -> loopK_step d result j  k tempPoint)
 
 
 inline_for_extraction noextract
@@ -896,6 +908,20 @@ let copy_point_conditional #c result p mask =
   copy_conditional #c r_z p_z mask
 
 
+val point_affine_neg: #c: curve -> p: point c -> result: point c -> Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+
+let point_affine_neg #c p result = 
+  let len = getCoordinateLenU64 c in
+
+  let pX, pY = sub p (size 0) len, sub p len len in 
+  let rX, rY = sub result (size 0) len, sub result len len in 
+
+  copy rX pX;
+  felem_sub_zero #c pY rY
+  
+
 val conditional_substraction: #c: curve -> result: point P256 -> p: point P256 -> scalar: lbuffer uint8 (size 32) -> 
   tempBuffer: lbuffer uint64 (size 88) ->
   Stack unit 
@@ -905,25 +931,21 @@ val conditional_substraction: #c: curve -> result: point P256 -> p: point P256 -
 let conditional_substraction #c result p scalar tempBuffer = 
   push_frame();
 
-  let tempPoint = create (size 12) (u64 0) in 
-  let bpMinus = create (size 8) (u64 0) in 
-    let bpMinusX = sub bpMinus (size 0) (size 4) in 
-    let bpMinusY = sub bpMinus (size 4) (size 4) in 
-
-  (* mask == 0 <==> scalar last bit == 0 *)
+  let len = getCoordinateLenU64 c in 
+  
+  let tempPointJacobian = create (getPointLenU64 c) (u64 0) in 
+  let precompPoint = create (2 *! len) (u64 0) in 
+  let precompNegativePoint = create (2 *! len) (u64 0) in 
 
   let i0 = index scalar (size 31) in 
   let mask = lognot((u64 0) -. to_u64 (logand i0 (u8 1))) in 
 
-  let bpX = getPointPrecomputed #c (size 0) in 
-  let bpY = getPointPrecomputed #c (size 4) in 
+  getPointPrecomputed #c (size 0) precompPoint;
+  point_affine_neg #c precompPoint precompNegativePoint;
+  
+  Hacl.Impl.EC.PointAddMixed.point_add_mixed p precompNegativePoint tempPointJacobian tempBuffer;
 
-    copy bpMinusX bpX;
-    felem_sub_zero #c bpY bpMinusY;
-
-  Hacl.Impl.EC.PointAddMixed.point_add_mixed p bpMinus tempPoint tempBuffer;
-
-  copy_point_conditional result tempPoint mask;
+  copy_point_conditional result tempPointJacobian mask;
   pop_frame()
 
 
