@@ -949,6 +949,82 @@ let conditional_substraction #c result p scalar tempBuffer =
   pop_frame()
 
 
+val scalar_multiplication_cmb_step_1: #c: curve 
+  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1))) 
+  -> result: point c
+  -> j: size_t
+  -> pointPrecomputed: pointAffine c
+  -> bufferForNegative : lbuffer uint64 (getCoordinateLenU64 c)
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+  
+let scalar_multiplication_cmb_step_1 #c rnaf result j pointPrecomputed bufferForNegative tempBuffer = 
+  let d = index rnaf (size 2 *! (j *! (size 2) +! size 1)) in
+  let is_neg = index rnaf (size 2 *! (j *! (size 2) +! size 1) +! (size 1)) in 
+  let d = shift_right (d -! size 1) (size 1) in 
+
+  loopK #c d pointPrecomputed j;
+
+  let yLut = sub pointPrecomputed (size 4) (size 4) in 
+  felem_sub_zero #c yLut bufferForNegative;
+  copy_conditional #P256 yLut bufferForNegative is_neg;
+  
+  Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer
+
+
+val scalar_multiplication_cmb_step_0: #c: curve 
+  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1))) 
+  -> result: point c
+  -> j: size_t
+  -> pointPrecomputed: pointAffine c
+  -> bufferForNegative : lbuffer uint64 (getCoordinateLenU64 c)
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+  
+let scalar_multiplication_cmb_step_0 #c rnaf result j pointPrecomputed bufferForNegative tempBuffer = 
+  let d = index rnaf (size 2 *! (j *! (size 2))) in
+  let is_neg = index rnaf (size 2 *! (j *! (size 2)) +! (size 1)) in 
+  let d = shift_right (d -! size 1) (size 1) in 
+
+  loopK #c d pointPrecomputed j;
+
+  let yLut = sub pointPrecomputed (size 4) (size 4) in 
+  felem_sub_zero #c yLut bufferForNegative;
+  copy_conditional #P256 yLut bufferForNegative is_neg;
+  
+  Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer
+
+
+inline_for_extraction noextract
+val getPointDoubleNTimes: #c: curve 
+  -> p: point c 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
+  -> k: size_t ->
+  Stack unit
+  (requires fun h -> live h p /\ live h tempBuffer /\ disjoint p tempBuffer /\ point_eval c h p)
+  (ensures fun h0 _ h1 -> modifies (loc p |+| loc tempBuffer) h0 h1 /\ point_eval c h1 p /\
+    fromDomainPoint #c #DH (point_as_nat c h1 p) == Spec.ECC.Radix.getPointDoubleNTimes #c
+      (fromDomainPoint #c #DH (point_as_nat c h0 p)) (v k))
+
+open Lib.LoopCombinators
+open Lib.Loops
+
+let getPointDoubleNTimes #c p tempBuffer k = 
+  let h0 = ST.get() in 
+  let inv h (k: nat) = live h p /\ live h tempBuffer /\ disjoint p tempBuffer /\ point_eval c h p /\ 
+    modifies (loc p |+| loc tempBuffer) h0 h /\
+    fromDomainPoint #c #DH (point_as_nat c h p) ==
+      Lib.LoopCombinators.repeat k (_point_double #c) (fromDomainPoint #c #DH (point_as_nat c h0 p)) in 
+  Lib.LoopCombinators.eq_repeat0 (_point_double #c) (fromDomainPoint #c #DH (point_as_nat c h0 p));  
+  for 0ul k inv (fun i -> 
+    Hacl.Impl.EC.PointDouble.point_double p p tempBuffer; 
+    unfold_repeat (v k) (_point_double #c) (fromDomainPoint #c #DH (point_as_nat c h0 p)) (v i))
+
+
 val scalar_multiplication_cmb: #c: curve ->  #buf_type: buftype -> result: point P256 -> 
   scalar: lbuffer_t buf_type uint8 (size 32) -> 
   tempBuffer:  lbuffer uint64 (size 88)  -> 
@@ -964,46 +1040,13 @@ let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer =
     let temp4 = sub tempBuffer (size 0) (size 4) in 
 
     scalar_rwnaf #c rnaf2 scalar;
-
-    let i = size 1 in 
-
+    
     let invJ h1 (j:nat) = True in  
+    Lib.Loops.for 0ul 26ul invJ (fun j -> scalar_multiplication_cmb_step_1 rnaf2 result j lut temp4 tempBuffer);
 
-    Lib.Loops.for 0ul 26ul invJ (fun j ->
-      let d = index rnaf2 (size 2 *! (j *! (size 2) +! i)) in
-      let is_neg = index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1)) in 
-      let d = shift_right (d -! size 1) (size 1) in 
-
-      loopK #c d lut j;
-
-      let yLut = sub lut (size 4) (size 4) in 
-      felem_sub_zero #c yLut temp4;
-
-      copy_conditional #P256 yLut temp4 is_neg;
-      Hacl.Impl.EC.PointAddMixed.point_add_mixed result lut result tempBuffer
-    );
-     
-    let i = size 0 in 
-
-    let invPointDouble h (j: nat) = True in 
-    Lib.Loops.for 0ul radix invPointDouble 
-    (fun j -> Hacl.Impl.EC.PointDouble.point_double result result tempBuffer);
-
-    Lib.Loops.for 0ul 26ul invJ (fun j ->
-      let d = index rnaf2 (size 2 *! (j *! (size 2) +! i)) in 
-      let is_neg = index rnaf2 (size 2 *! (j *! (size 2) +! i) +! (size 1)) in 
-      let d = shift_right (d -! size 1) (size 1) in 
-
-      loopK #c d lut j;
-
-    	let yLut = sub lut (size 4) (size 4) in 
-    	felem_sub_zero #c yLut temp4;
-
-	
-    	copy_conditional #P256 yLut temp4  is_neg;
-    	Hacl.Impl.EC.PointAddMixed.point_add_mixed result lut result tempBuffer
-    );
-
+    getPointDoubleNTimes #c result tempBuffer radix;
+    
+    Lib.Loops.for 0ul 26ul invJ (fun j -> scalar_multiplication_cmb_step_0 rnaf2 result j lut temp4 tempBuffer);
 
     conditional_substraction #c result result scalar tempBuffer;
   
