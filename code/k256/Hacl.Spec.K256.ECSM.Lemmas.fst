@@ -2,7 +2,9 @@ module Hacl.Spec.K256.ECSM.Lemmas
 
 open FStar.Mul
 
+module M = Lib.NatMod
 module LE = Lib.Exponentiation
+module SE = Spec.Exponentiation
 module S = Spec.K256
 module LS = Spec.K256.Lemmas
 
@@ -13,6 +15,38 @@ let aff_point_mul = S.aff_point_mul
 assume
 val lemma_order_of_curve_group (p:S.aff_point) :
   Lemma (aff_point_mul S.q p = S.aff_point_at_inf)
+
+
+val lemma_proj_aff_id (p:S.aff_point) :
+  Lemma (S.(to_aff_point (to_proj_point p)) = p)
+
+let lemma_proj_aff_id p =
+  let (px, py) = p in
+  let (pX, pY, pZ) = S.to_proj_point p in
+  assert (pX = px /\ pY = pY /\ pZ = S.one);
+  let (rx, ry) = S.to_aff_point (pX, pY, pZ) in
+  assert (rx = S.(pX /% pZ) /\ ry = S.(pY /% pZ));
+  M.lemma_div_mod_prime_one #S.prime pX;
+  M.lemma_div_mod_prime_one #S.prime pY;
+  assert (rx = pX /\ ry = pY)
+
+
+// TODO: what about point_at_infinity?
+val lemma_point_mul (a:S.qelem) (p:S.proj_point) : Lemma
+  (S.(to_aff_point (point_mul a p)) = aff_point_mul a (S.to_aff_point p))
+
+let lemma_point_mul a p =
+  SE.exp_fw_lemma S.mk_k256_concrete_ops p 256 a 4;
+  LE.exp_fw_lemma S.mk_k256_comm_monoid (S.to_aff_point p) 256 a 4
+
+
+val lemma_aff_point_mul_via_proj (a:S.qelem) (p:S.aff_point) : Lemma
+  (S.(to_aff_point (point_mul a (to_proj_point p))) = aff_point_mul a p)
+
+let lemma_aff_point_mul_via_proj a p =
+  lemma_point_mul a (S.to_proj_point p);
+  lemma_proj_aff_id p
+
 
 (**
    Properties for Elliptic Curve Scalar Multiplication in affine coordinates

@@ -132,6 +132,11 @@ let minus_lambda : S.qelem =
   assert_norm (x = (- lambda) % S.q);
   x
 
+let b1 : S.qelem =
+  let x = 0xfffffffffffffffffffffffffffffffdd66b5e10ae3a1813507ddee3c5765c7e in
+  assert_norm (x = (- minus_b1) % S.q);
+  x
+
 let minus_b2 : S.qelem =
   let x = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE8A280AC50774346DD765CDA83DB1562C in
   assert_norm (x = (- b2) % S.q);
@@ -140,6 +145,7 @@ let minus_b2 : S.qelem =
 
 val lemma_check_a_and_b : unit -> Lemma
   ((a1 + minus_b1 * minus_lambda) % S.q = 0 /\
+   (a1 + b1 * lambda) % S.q = 0 /\
    (a2 + b2 * lambda) % S.q = 0 /\
     a1 * b2 + minus_b1 * a2 = S.q)
 
@@ -150,6 +156,7 @@ let lemma_check_a_and_b () =
 val lemma_a_and_b_fits: unit -> Lemma
   (minus_b1 < pow2 128 /\
    minus_b2 < pow2 256 /\
+   b1 < pow2 256 /\
    b2 < pow2 126 /\
    a2 < pow2 129)
 
@@ -315,6 +322,154 @@ let lemma_scalar_split_lambda_eval k =
   }
 
 
+val lemma_mod_add_mul_zero (a b c d e:int) (n:pos) : Lemma
+  (requires (c * d + e) % n = 0)
+  (ensures  (a + b * c * d) % n = (a - e * b) % n)
+
+let lemma_mod_add_mul_zero a b c d e n =
+  calc (==) {
+    (a + b * c * d) % n;
+    (==) { assert ((c * d + e) % n * b % n = 0) }
+    (a + b * c * d - ((c * d + e) % n) * b % n) % n;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (c * d + e) b n }
+    (a + b * c * d - (c * d + e) * b % n) % n;
+    (==) { Math.Lemmas.lemma_mod_sub_distr (a + b * c * d) ((c * d + e) * b) n }
+    (a + b * c * d - (c * d + e) * b) % n;
+    (==) { Math.Lemmas.distributivity_add_left (c * d) e b }
+    (a + b * c * d - (c * d * b + e * b)) % n;
+    (==) { Math.Lemmas.paren_mul_right b c d; Math.Lemmas.swap_mul b (c * d) }
+    (a + c * d * b - (c * d * b + e * b)) % n;
+    (==) { }
+    (a - e * b) % n;
+  }
+
+
+val lemma_scalar_split_lambda_r1_and_r2 (k:S.qelem) :
+  Lemma (let r1, r2 = scalar_split_lambda k in
+    let c1 = qmul_shift k g1 384 in
+    let c2 = qmul_shift k g2 384 in
+    let k1 = k - a1 * c1 - a2 * c2 in
+    let k2 = c1 * minus_b1 + c2 * minus_b2 in // or: k2 = - b1 * c1 - b2 * c2
+    r1 = k1 % S.q /\ r2 = k2 % S.q)
+
+let lemma_scalar_split_lambda_r1_and_r2 k =
+  assert_norm (g1 < pow2 254);
+  assert_norm (g2 < pow2 256);
+  // assert (k < pow2 256);
+  lemma_qmul_shift_lt_q k 254 g1 384;
+  lemma_qmul_shift_lt_q k 256 g2 384;
+  let c1 : S.qelem = qmul_shift k g1 384 in
+  let c2 : S.qelem = qmul_shift k g2 384 in
+
+  let r1, r2 = scalar_split_lambda k in
+  assert (r2 = S.(c1 *^ minus_b1 +^ c2 *^ minus_b2));
+  assert (r1 = S.(k +^ r2 *^ minus_lambda));
+
+  // let k2 = - c1 * b1 - c2 * b2 in
+  // calc (==) { // r2
+  //   S.(c1 *^ minus_b1 +^ c2 *^ minus_b2);
+  //   (==) { assert_norm (minus_b1 = (-b1) % S.q) }
+  //   S.(c1 *^ ((-b1) % S.q) +^ c2 *^ minus_b2);
+  //   (==) { assert_norm (minus_b2 = (-b2) % S.q) }
+  //   S.(c1 *^ ((-b1) % S.q) +^ c2 *^ ((-b2) % S.q));
+  //   (==) { }
+  //   ((c1 * ((-b1) % S.q) % S.q) + (c2 * ((-b2) % S.q) % S.q)) % S.q;
+  //   (==) { Math.Lemmas.lemma_mod_mul_distr_r c1 (-b1) S.q }
+  //   ((c1 * (-b1) % S.q) + (c2 * ((-b2) % S.q) % S.q)) % S.q;
+  //   (==) { Math.Lemmas.lemma_mod_mul_distr_r c2 (-b2) S.q }
+  //   ((c1 * (-b1) % S.q) + (c2 * (-b2) % S.q)) % S.q;
+  //   (==) { Math.Lemmas.lemma_mod_plus_distr_l (c1 * (-b1)) (c2 * (-b2) % S.q) S.q }
+  //   (c1 * (-b1) + (c2 * (-b2) % S.q)) % S.q;
+  //   (==) { Math.Lemmas.lemma_mod_plus_distr_r (c1 * (-b1)) (c2 * (-b2)) S.q }
+  //   (c1 * (-b1) + c2 * (-b2)) % S.q;
+  //   (==) { Math.Lemmas.neg_mul_right c1 b1 }
+  //   (- c1 * b1 + c2 * (-b2)) % S.q;
+  //   (==) { Math.Lemmas.neg_mul_right c2 b2 }
+  //   (- c1 * b1 - c2 * b2) % S.q;
+  //   (==) { }
+  //   k2 % S.q;
+  //   };
+
+  // let k1 = k - a1 * c1 - a2 * c2 in
+  // calc (==) { // r1
+  //   S.(k +^ r2 *^ minus_lambda);
+  //   (==) { }
+  //   (k + ((k2 % S.q) * minus_lambda % S.q)) % S.q;
+  //   (==) { Math.Lemmas.lemma_mod_mul_distr_l k2 minus_lambda S.q }
+  //   (k + (k2 * minus_lambda % S.q)) % S.q;
+  //   (==) { assert_norm (minus_lambda = (- lambda) % S.q) }
+  //   (k + (k2 * ((- lambda) % S.q) % S.q)) % S.q;
+  //   (==) { Math.Lemmas.lemma_mod_mul_distr_r k2 (- lambda) S.q }
+  //   (k + (k2 * (- lambda) % S.q)) % S.q;
+  //   (==) { Math.Lemmas.lemma_mod_plus_distr_r k (k2 * (- lambda)) S.q }
+  //   (k + k2 * (- lambda)) % S.q;
+  //   (==) { Math.Lemmas.neg_mul_right k2 lambda }
+  //   (k - k2 * lambda) % S.q;
+  //   (==) { }
+  //   (k - (- c1 * b1 - c2 * b2) * lambda) % S.q;
+  //   (==) { Math.Lemmas.neg_mul_left (c1 * b1 + c2 * b2) lambda }
+  //   (k + (c1 * b1 + c2 * b2) * lambda) % S.q;
+  //   (==) { Math.Lemmas.distributivity_add_left (c1 * b1) (c2 * b2) lambda }
+  //   (k + c1 * b1 * lambda + c2 * b2 * lambda) % S.q;
+  //   (==) {
+  //     assert_norm ((b1 * lambda + a1) % S.q = 0);
+  //     lemma_mod_add_mul_zero (k + c2 * b2 * lambda) c1 b1 lambda a1 S.q }
+  //   (k + c2 * b2 * lambda - a1 * c1) % S.q;
+  //   (==) {
+  //     assert_norm ((b2 * lambda + a2) % S.q = 0);
+  //     lemma_mod_add_mul_zero (k - a1 * c1) c2 b2 lambda a2 S.q }
+  //   (k - a1 * c1 - a2 * c2) % S.q;
+  //   (==) { }
+  //   k1 % S.q;
+  // };
+
+  let k2 = c1 * minus_b1 + c2 * minus_b2 in
+  calc (==) { // r2
+    S.(c1 *^ minus_b1 +^ c2 *^ minus_b2);
+    (==) { }
+    ((c1 * minus_b1 % S.q) + (c2 * minus_b2 % S.q)) % S.q;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_l (c1 * minus_b1) (c2 * minus_b2 % S.q) S.q }
+    (c1 * minus_b1 + (c2 * minus_b2 % S.q)) % S.q;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r (c1 * minus_b1) (c2 * minus_b2) S.q }
+    (c1 * minus_b1 + c2 * minus_b2) % S.q;
+    (==) { }
+    k2 % S.q;
+  };
+
+  let k1 = k - a1 * c1 - a2 * c2 in
+  calc (==) { // r1
+    S.(k +^ r2 *^ minus_lambda);
+    (==) { }
+    (k + ((k2 % S.q) * minus_lambda % S.q)) % S.q;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l k2 minus_lambda S.q }
+    (k + (k2 * minus_lambda % S.q)) % S.q;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r k (k2 * minus_lambda) S.q }
+    (k + (c1 * minus_b1 + c2 * minus_b2) * minus_lambda) % S.q;
+    (==) { Math.Lemmas.distributivity_add_left (c1 * minus_b1) (c2 * minus_b2) minus_lambda }
+    (k + c1 * minus_b1 * minus_lambda + c2 * minus_b2 * minus_lambda) % S.q;
+    (==) {
+      assert_norm ((minus_b1 * minus_lambda + a1) % S.q = 0);
+      lemma_mod_add_mul_zero (k + c2 * minus_b2 * minus_lambda) c1 minus_b1 minus_lambda a1 S.q }
+    (k + c2 * minus_b2 * minus_lambda - a1 * c1) % S.q;
+    (==) {
+      assert_norm ((minus_b2 * minus_lambda + a2) % S.q = 0);
+      lemma_mod_add_mul_zero (k - a1 * c1) c2 minus_b2 minus_lambda a2 S.q }
+    (k - a1 * c1 - a2 * c2) % S.q;
+    (==) { }
+    k1 % S.q;
+  }
+
+
+// TODO: prove that r1 and r2 are ~128 bits long
+assume
+val lemma_scalar_split_lambda_fits (k:S.qelem) :
+  Lemma (let r1, r2 = scalar_split_lambda k in r1 < pow2 129 /\ r2 < pow2 129)
+
+
+(**
+ Fast computation of [k]P in affine coordinates
+*)
+
 // [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
 // which can be computed as a double exponentiation ([a]P + [b]Q)
 let aff_point_mul_split_lambda (k:S.qelem) (p:S.aff_point) : S.aff_point =
@@ -326,19 +481,64 @@ val lemma_aff_point_mul_split_lambda: k:S.qelem -> p:S.aff_point ->
 
 let lemma_aff_point_mul_split_lambda k p =
   let r1, r2 = scalar_split_lambda k in
-  lemma_scalar_split_lambda_eval k;
-  assert (k = S.(r1 +^ r2 *^ lambda));
-  Math.Lemmas.lemma_mod_plus_distr_r r1 (r2 * lambda) S.q;
-  assert (k = (r1 + r2 * lambda) % S.q);
-  GL.lemma_aff_point_mul_modq (r1 + r2 * lambda) p;
-  assert (aff_point_mul k p = aff_point_mul (r1 + r2 * lambda) p);
-  GL.lemma_aff_point_mul_mul_add lambda r2 r1 p;
-  assert (aff_point_mul k p =
-    S.aff_point_add (aff_point_mul r2 (aff_point_mul lambda p)) (aff_point_mul r1 p));
-  lemma_glv_aff p;
-  assert (aff_point_mul k p =
-    S.aff_point_add (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p));
-  LS.aff_point_add_comm_lemma (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p)
+  calc (==) {
+    aff_point_mul k p;
+    (==) { lemma_scalar_split_lambda_eval k }
+    aff_point_mul S.(r1 +^ r2 *^ lambda) p;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r r1 (r2 * lambda) S.q }
+    aff_point_mul ((r1 + r2 * lambda) % S.q) p;
+    (==) { GL.lemma_aff_point_mul_modq (r1 + r2 * lambda) p }
+    aff_point_mul (r1 + r2 * lambda) p;
+    (==) { GL.lemma_aff_point_mul_mul_add lambda r2 r1 p }
+    S.aff_point_add (aff_point_mul r2 (aff_point_mul lambda p)) (aff_point_mul r1 p);
+    (==) { lemma_glv_aff p }
+    S.aff_point_add (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p);
+    (==) { LS.aff_point_add_comm_lemma (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p) }
+    S.aff_point_add (aff_point_mul r1 p) (aff_point_mul r2 (aff_point_mul_lambda p));
+  }
 
-// TODO: prove lemma_point_mul_split_lambda for projective coordinates
-// TODO: prove that r1 and r2 are ~128 bits long
+
+(**
+ Fast computation of [k]P in projective coordinates
+*)
+
+// [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
+// which can be computed as a double exponentiation ([a]P + [b]Q)
+let point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.proj_point =
+  let r1, r2 = scalar_split_lambda k in
+  S.(point_add (point_mul r1 p) (point_mul r2 (point_mul_lambda p)))
+
+
+val lemma_point_mul_split_lambda: k:S.qelem -> p:S.proj_point ->
+  Lemma (S.to_aff_point (point_mul_split_lambda k p) = aff_point_mul k (S.to_aff_point p))
+
+let lemma_point_mul_split_lambda k p =
+  let open Spec.K256 in
+  let r1, r2 = scalar_split_lambda k in
+  let p_aff = to_aff_point p in
+  calc (==) {
+    to_aff_point (point_mul_split_lambda k p);
+    (==) { LS.to_aff_point_add_lemma (point_mul r1 p) (point_mul r2 (point_mul_lambda p)) }
+    aff_point_add
+      (to_aff_point (point_mul r1 p))
+      (to_aff_point (point_mul r2 (point_mul_lambda p)));
+    (==) { GL.lemma_point_mul r1 p }
+    aff_point_add (aff_point_mul r1 p_aff) (to_aff_point (point_mul r2 (point_mul_lambda p)));
+    (==) { GL.lemma_point_mul r2 (point_mul_lambda p) }
+    aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (to_aff_point (point_mul_lambda p)));
+    (==) { lemma_glv p }
+    aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (aff_point_mul lambda p_aff));
+    (==) { lemma_glv_aff p_aff }
+    aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (aff_point_mul_lambda p_aff));
+    (==) { lemma_aff_point_mul_split_lambda k p_aff }
+    aff_point_mul k p_aff;
+  }
+
+
+// TODO: what about point_at_infinity?
+val lemma_point_mul_split_lambda_aff: k:S.qelem -> p:S.aff_point ->
+  Lemma (S.to_aff_point (point_mul_split_lambda k (S.to_proj_point p)) = aff_point_mul k p)
+
+let lemma_point_mul_split_lambda_aff k p =
+  lemma_point_mul_split_lambda k (S.to_proj_point p);
+  GL.lemma_proj_aff_id p
