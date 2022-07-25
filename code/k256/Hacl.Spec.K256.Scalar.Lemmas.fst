@@ -422,3 +422,78 @@ let mod_lseq_lemma a =
     Math.Lemmas.lemma_mod_sub (pow2 256 + SD.bn_v r) S.q 1;
     assert (SD.bn_v res % S.q == SD.bn_v a % S.q);
     Math.Lemmas.small_mod (SD.bn_v res) S.q end
+
+
+val qmul_shift_383_mod_2_lemma : l:lseq uint64 8 ->
+  Lemma (v l.[5] / pow2 63 = SD.bn_v l / pow2 383 % 2)
+let qmul_shift_383_mod_2_lemma l =
+  calc (==) {
+    v l.[5] / pow2 63;
+    (==) { SD.bn_eval_index l 5 }
+    SD.bn_v l / pow2 320 % pow2 64 / pow2 63;
+    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (SD.bn_v l) 320 384 }
+    SD.bn_v l % pow2 384 / pow2 320 / pow2 63;
+    (==) { Math.Lemmas.division_multiplication_lemma (SD.bn_v l % pow2 384) (pow2 320) (pow2 63) }
+    SD.bn_v l % pow2 384 / (pow2 320 * pow2 63);
+    (==) { Math.Lemmas.pow2_plus 320 63 }
+    SD.bn_v l % pow2 384 / pow2 383;
+    (==) { Math.Lemmas.pow2_modulo_division_lemma_1 (SD.bn_v l) 383 384 }
+    SD.bn_v l / pow2 383 % pow2 1;
+    (==) { assert_norm (pow2 1 = 2) }
+    SD.bn_v l / pow2 383 % 2;
+  }
+
+
+val qmul_shift_384_lemma_eval_fits : l:lseq uint64 8 ->
+  Lemma (let res_b = SB.bn_rshift l 6 in
+    let res_b_padded = create 4 (u64 0) in
+    let res_b_padded = update_sub res_b_padded 0 2 res_b in
+    SD.bn_v res_b_padded < pow2 128 /\
+    SD.bn_v res_b_padded = SD.bn_v l / pow2 384)
+
+let qmul_shift_384_lemma_eval_fits l =
+  let res_b = SB.bn_rshift l 6 in
+  let res_b_padded = create 4 (u64 0) in
+  let res_b_padded = update_sub res_b_padded 0 2 res_b in
+  SD.bn_eval_update_sub 2 res_b 4;
+  assert (SD.bn_v res_b = SD.bn_v res_b_padded);
+  SB.bn_rshift_lemma l 6;
+
+  SD.bn_eval_bound res_b 2;
+  assert (SD.bn_v res_b_padded < pow2 128)
+
+
+val qmul_shift_384_lemma (a b:qelem_lseq) :
+  Lemma (let x = SD.bn_v a * SD.bn_v b / pow2 383 % 2 in
+    SD.bn_v (qmul_shift_384 a b) = SD.bn_v a * SD.bn_v b / pow2 384 + x)
+
+let qmul_shift_384_lemma a b =
+  let l = SB.bn_mul a b in
+  SB.bn_mul_lemma a b;
+  assert (SD.bn_v l = SD.bn_v a * SD.bn_v b);
+
+  let res_b = SB.bn_rshift l 6 in
+  let res_b_padded = create 4 (u64 0) in
+  let res_b_padded = update_sub res_b_padded 0 2 res_b in
+  qmul_shift_384_lemma_eval_fits l;
+  assert (SD.bn_v res_b_padded < pow2 128);
+  assert (SD.bn_v res_b_padded = SD.bn_v l / pow2 384);
+
+  let c, res1_b = SB.bn_add1 res_b_padded (u64 1) in
+  SB.bn_add1_lemma res_b_padded (u64 1);
+  assert (v c * pow2 256 + SD.bn_v res1_b = SD.bn_v res_b_padded + 1);
+  SD.bn_eval_bound res1_b 4;
+  Math.Lemmas.pow2_lt_compat 256 128;
+  carry_is_zero (v c) 256 (SD.bn_v res1_b) (SD.bn_v res_b_padded + 1);
+  assert (v c = 0 /\ SD.bn_v res1_b = SD.bn_v res_b_padded + 1);
+
+  let flag = l.[5] >>. 63ul in
+  assert (v flag = v l.[5] / pow2 63);
+  qmul_shift_383_mod_2_lemma l;
+  assert (v flag = SD.bn_v l / pow2 383 % 2);
+
+  let mask = u64 0 -. flag in
+  assert (v mask = (if v flag = 0 then 0 else ones_v U64));
+  let res = map2 (BB.mask_select mask) res1_b res_b_padded in
+  BB.lseq_mask_select_lemma res1_b res_b_padded mask;
+  assert (res == (if v flag = 0 then res_b_padded else res1_b))

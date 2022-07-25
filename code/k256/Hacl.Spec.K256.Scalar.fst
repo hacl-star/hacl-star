@@ -170,3 +170,119 @@ let mod_lseq a =
 
   let mask = u64 0 -. (c0 +. c1) in
   map2 (BB.mask_select mask) out r
+
+
+noextract
+let qmul_shift_384 (a b:qelem_lseq) : qelem_lseq =
+  let l = SB.bn_mul a b in
+  let res_b = SB.bn_rshift l 6 in
+  let res_b_padded = create 4 (u64 0) in
+  let res_b_padded = update_sub res_b_padded 0 2 res_b in
+  let _, res1_b = SB.bn_add1 res_b_padded (u64 1) in
+
+  let flag = l.[5] >>. 63ul in
+  let mask = u64 0 -. flag in // mask = if flag is set then ones_v U64 else 0
+  map2 (BB.mask_select mask) res1_b res_b_padded // res = if flag is set then res1_b else res_b
+
+
+// val shiftlow_lemma: shift:size_t -> Lemma (v (shift &. 0x3ful) = v shift % pow2 6)
+// let shiftlow_lemma shift =
+//   let shiftlow = shift &. 0x3ful in
+//   assert_norm (0x3f = pow2 6 - 1);
+//   mod_mask_lemma shift 6ul;
+//   assert (v (mod_mask #U32 #PUB 6ul) == v (0x3ful));
+//   assert (v shiftlow = v shift % pow2 6)
+
+
+// (* https://github.com/bitcoin-core/secp256k1/blob/master/src/scalar_4x64_impl.h *)
+// noextract
+// let qmul_shift (a b:qelem_lseq) (shift:size_t{256 <= v shift /\ v shift <= 512}) : qelem_lseq =
+//   let l = SB.bn_mul a b in
+//   let shiftlimbs = shift >>. 6ul in
+//   assert (v shiftlimbs = v shift / pow2 6);
+
+//   let shiftlow = shift &. 0x3ful in
+//   shiftlow_lemma shift;
+//   assert (v shiftlow = v shift % pow2 6);
+//   assert_norm (pow2 6 = 64);
+//   assert (v shiftlow < 64);
+
+//   let shifthigh = 64ul -. shiftlow in
+//   assert (if 0 < v shiftlow then v shifthigh < 64 else v shifthigh <= 64);
+
+//   let r0 =
+//     if shift <. 512ul then begin
+//       let tmp =
+//         if shift <. 448ul && shiftlow >. 0ul then begin
+//           assume (1 + v shiftlimbs < 8);
+//           l.[1 + v shiftlimbs] <<. shifthigh end
+//         else u64 0 in
+//       assume (v shiftlimbs < 8);
+//       (l.[v shiftlimbs] >>. shiftlow |. tmp) end
+//     else u64 0 in
+
+//   let r1 =
+//     if shift <. 448ul then begin
+//       let tmp =
+//         if shift <. 384ul && shiftlow >. 0ul then begin
+//           assume (2 + v shiftlimbs < 8);
+//           l.[2 + v shiftlimbs] <<. shifthigh end
+//         else u64 0 in
+//       assume (1 + v shiftlimbs < 8);
+//       (l.[1 + v shiftlimbs] >>. shiftlow |. tmp) end
+//     else u64 0 in
+
+//   let r2 =
+//     if shift <. 384ul then begin
+//       let tmp =
+//         if shift <. 320ul && shiftlow >. 0ul then begin
+//           assume (3 + v shiftlimbs < 8);
+//           l.[3 + v shiftlimbs] <<. shifthigh end
+//         else u64 0 in
+//       assume (2 + v shiftlimbs < 8);
+//       (l.[2 + v shiftlimbs] >>. shiftlow |. tmp) end
+//     else u64 0 in
+
+//   let r3 =
+//     if shift <. 320ul then begin
+//       assume (3 + v shiftlimbs < 8);
+//       l.[3 + v shiftlimbs] >>. shiftlow end
+//     else u64 0 in
+
+//   let res = (r0, r1, r2, r3) in
+//   let shiftlimbs1 = (shift -. 1ul) >>. 6ul in
+//   assume (v shiftlimbs1 < 8);
+//   let shiftlow1 = (shift -. 1ul) &. 0x3ful in
+//   assume (v shiftlow1 < 64);
+//   let flag = (l.[v shiftlimbs1] >>. shiftlow1) &. u64 1 in
+
+//   (* or: res = cadd_bit res 0ul flag *)
+//   let mask = u64 0 -. flag in // mask = if flag is set then ones_v U64 else 0
+//   let res_b = create4 r0 r1 r2 r3 in
+//   let _, res1_b = SB.bn_add1 res_b (u64 1) in
+//   map2 (BB.mask_select mask) res1_b res_b // res = if flag is set then res1_b else res_b
+
+
+// let cadd_bit (r:qelem4) (bit:size_t{v bit < 256}) (flag:size_t{v flag <= 1}) : qelem4 =
+//   let (r0, r1, r2, r3) = r in
+//   let bit = bit +. ((flag -. 1ul) &. 0x100ul) in
+//   let bit_m = bit &. 0x3ful in
+//   assume (v bit_m < 64);
+
+//   let tmp0 = if bit >>. 6ul =. 0ul then u64 1 <<. bit_m else u64 0 in
+//   let t = to_u128 r0 +. to_u128 tmp0 in
+//   let r0 = to_u64 t in let c0 = t >>. 64ul in
+
+//   let tmp1 = if bit >>. 6ul =. 1ul then u64 1 <<. bit_m else u64 0 in
+//   let t = c0 +. to_u128 r1 +. to_u128 tmp1 in
+//   let r1 = to_u64 t in let c1 = t >>. 64ul in
+
+//   let tmp2 = if bit >>. 6ul =. 2ul then u64 1 <<. bit_m else u64 0 in
+//   let t = c1 +. to_u128 r2 +. to_u128 tmp2 in
+//   let r2 = to_u64 t in let c2 = t >>. 64ul in
+
+//   let tmp3 = if bit >>. 6ul =. 3ul then u64 1 <<. bit_m else u64 0 in
+//   let t = c2 +. to_u128 r3 +. to_u128 tmp3 in
+//   let r3 = to_u64 t in
+
+//   (r0, r1, r2, r3)
