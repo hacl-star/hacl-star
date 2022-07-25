@@ -178,110 +178,25 @@ let g2 : S.qelem =
   assert_norm (pow2 384 * minus_b1 / S.q = x);
   x
 
+let qmul_shift_384 a b =
+  a * b / pow2 384 + (a * b / pow2 383 % 2)
 
-(* https://github.com/bitcoin-core/secp256k1/blob/master/sage/gen_split_lambda_constants.sage *)
-let rnddiv2 x = let x = if x % 2 = 1 then x + 1 else x in x / 2
-let qmul_shift a b (shift:pos) = rnddiv2 (a * b / pow2 (shift - 1))
-
-(*---- prove that the result of `qmul_shift` < S.q ----*)
-
-val lemma_mul_le (a b:nat) (c d:pos) : Lemma
-  (requires a < c /\ b < d)
-  (ensures  a * b <= c * d - c - d + 1)
-
-let lemma_mul_le a b c d =
-  calc (<=) {
-    a * b;
-    (<=) { Math.Lemmas.lemma_mult_le_left a b (d - 1) }
-    a * (d - 1);
-    (<=) { Math.Lemmas.lemma_mult_le_right (d - 1) a (c - 1) }
-    (c - 1) * (d - 1);
-    (==) { Math.Lemmas.distributivity_sub_left c 1 (d - 1) }
-    c * (d - 1) - (d - 1);
-    (==) { Math.Lemmas.distributivity_sub_right c d 1 }
-    c * d - c - d + 1;
-  }
-
-
-val lemma_mul_lt (a b:nat) (c d:pos) : Lemma
-  (requires a < c /\ b < d)
-  (ensures  a * b < c * d)
-
-let lemma_mul_lt a b c d =
-  lemma_mul_le a b c d;
-  assert (a * b <= c * d - c - d + 1)
-
-
-val lemma_qmul_shift_1: a:S.qelem -> bound_b:nat -> b:S.qelem -> shift:nat -> Lemma
-  (requires
-    b < pow2 bound_b /\
-    0 <= 256 + bound_b - shift /\ 256 + bound_b - shift <= 255)
-  (ensures a * b / pow2 shift + 1 < S.q)
-
-let lemma_qmul_shift_1 a bound_b b shift =
-  let res = a * b / pow2 shift in
-  lemma_mul_lt a b (pow2 256) (pow2 bound_b);
-  Math.Lemmas.pow2_plus 256 bound_b;
-  Math.Lemmas.lemma_div_lt_nat (a * b) (256 + bound_b) shift;
-  Math.Lemmas.pow2_le_compat 255 (256 + bound_b - shift);
-  assert (res < pow2 255);
-  assert_norm (pow2 255 < S.q)
-
-
-val lemma_qmul_shift_1_div2: a:S.qelem -> b:S.qelem -> shift:pos ->
-  Lemma (a * b / pow2 (shift - 1) / 2 = a * b / pow2 shift)
-
-let lemma_qmul_shift_1_div2 a b shift =
-  calc (==) {
-    (a * b / pow2 (shift - 1)) / 2;
-    (==) { Math.Lemmas.division_multiplication_lemma (a * b) (pow2 (shift - 1)) 2 }
-    a * b / (pow2 (shift - 1) * 2);
-    (==) { Math.Lemmas.pow2_double_mult (shift - 1) }
-    a * b / pow2 shift;
-  }
-
-val lemma_qmul_shift_lt_q: a:S.qelem -> bound_b:nat -> b:S.qelem -> shift:nat -> Lemma
-  (requires
-    b < pow2 bound_b /\
-    0 <= 256 + bound_b - shift /\ 256 + bound_b - shift <= 255)
-  (ensures qmul_shift a b shift < S.q)
-
-let lemma_qmul_shift_lt_q a bound_b b shift =
-  let res = qmul_shift a b shift in
-  let res1 = a * b / pow2 (shift - 1) in
-
-  let res2 = if res1 % 2 = 1 then res1 + 1 else res1 in
-  assert (res = res2 / 2);
-
-  if res1 % 2 = 0 then
-    assert (res = res1 / 2)
-  else begin
-    assert (res == (res1 + 1) / 2);
-    calc (==) {
-      (res1 + 1) / 2;
-      (==) { Math.Lemmas.euclidean_division_definition res1 2 }
-      (res1 / 2 * 2 + res1 % 2 + 1) / 2;
-      (==) { assert (res1 % 2 = 1) }
-      (res1 / 2 * 2 + 2) / 2;
-      (==) { Math.Lemmas.division_addition_lemma 2 2 (res1 / 2) }
-      res1 / 2 + 1;
-    } end;
-
-  assert (res = (if res1 % 2 = 0 then res1 / 2 else res1 / 2 + 1));
-  lemma_qmul_shift_1_div2 a b shift; // res1 / 2 = a * b / pow2 shift
-  lemma_qmul_shift_1 a bound_b b shift // a * b / pow2 shift + 1 < S.q
-
-(*--- end of the proof ---*)
+val qmul_shift_384_lemma (a b:S.qelem) : Lemma (qmul_shift_384 a b < S.q)
+let qmul_shift_384_lemma a b =
+  assert_norm (S.q < pow2 256);
+  Math.Lemmas.lemma_mult_lt_sqr a b (pow2 256);
+  Math.Lemmas.pow2_plus 256 256;
+  assert (a * b < pow2 512);
+  Math.Lemmas.lemma_div_lt_nat (a * b) 512 384;
+  assert (a * b / pow2 384 < pow2 128);
+  assert_norm (pow2 128 < S.q)
 
 
 let scalar_split_lambda (k:S.qelem) : S.qelem & S.qelem =
-  assert_norm (g1 < pow2 254);
-  assert_norm (g2 < pow2 256);
-  // assert (k < pow2 256);
-  lemma_qmul_shift_lt_q k 254 g1 384;
-  lemma_qmul_shift_lt_q k 256 g2 384;
-  let c1 : S.qelem = qmul_shift k g1 384 in
-  let c2 : S.qelem = qmul_shift k g2 384 in
+  qmul_shift_384_lemma k g1;
+  qmul_shift_384_lemma k g2;
+  let c1 : S.qelem = qmul_shift_384 k g1 in
+  let c2 : S.qelem = qmul_shift_384 k g2 in
 
   let c1 = S.(c1 *^ minus_b1) in
   let c2 = S.(c2 *^ minus_b2) in
@@ -346,20 +261,17 @@ let lemma_mod_add_mul_zero a b c d e n =
 
 val lemma_scalar_split_lambda_r1_and_r2 (k:S.qelem) :
   Lemma (let r1, r2 = scalar_split_lambda k in
-    let c1 = qmul_shift k g1 384 in
-    let c2 = qmul_shift k g2 384 in
+    let c1 = qmul_shift_384 k g1 in
+    let c2 = qmul_shift_384 k g2 in
     let k1 = k - a1 * c1 - a2 * c2 in
     let k2 = c1 * minus_b1 + c2 * minus_b2 in // or: k2 = - b1 * c1 - b2 * c2
     r1 = k1 % S.q /\ r2 = k2 % S.q)
 
 let lemma_scalar_split_lambda_r1_and_r2 k =
-  assert_norm (g1 < pow2 254);
-  assert_norm (g2 < pow2 256);
-  // assert (k < pow2 256);
-  lemma_qmul_shift_lt_q k 254 g1 384;
-  lemma_qmul_shift_lt_q k 256 g2 384;
-  let c1 : S.qelem = qmul_shift k g1 384 in
-  let c2 : S.qelem = qmul_shift k g2 384 in
+  qmul_shift_384_lemma k g1;
+  qmul_shift_384_lemma k g2;
+  let c1 : S.qelem = qmul_shift_384 k g1 in
+  let c2 : S.qelem = qmul_shift_384 k g2 in
 
   let r1, r2 = scalar_split_lambda k in
   assert (r2 = S.(c1 *^ minus_b1 +^ c2 *^ minus_b2));
