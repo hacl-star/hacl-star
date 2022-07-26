@@ -42,7 +42,7 @@ static inline void fadd0(uint64_t *out, uint64_t *f1, uint64_t *f2)
   #if HACL_CAN_COMPILE_INLINE_ASM
   fadd(out, f1, f2);
   #else
-  uint64_t uu____0 = fadd_e(out, f1, f2);
+  (void)fadd_e(out, f1, f2);
   #endif
 }
 
@@ -51,7 +51,7 @@ static inline void fsub0(uint64_t *out, uint64_t *f1, uint64_t *f2)
   #if HACL_CAN_COMPILE_INLINE_ASM
   fsub(out, f1, f2);
   #else
-  uint64_t uu____0 = fsub_e(out, f1, f2);
+  (void)fsub_e(out, f1, f2);
   #endif
 }
 
@@ -60,7 +60,7 @@ static inline void fmul0(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *tm
   #if HACL_CAN_COMPILE_INLINE_ASM
   fmul(out, f1, f2, tmp);
   #else
-  uint64_t uu____0 = fmul_e(tmp, f1, out, f2);
+  (void)fmul_e(tmp, f1, out, f2);
   #endif
 }
 
@@ -69,7 +69,7 @@ static inline void fmul20(uint64_t *out, uint64_t *f1, uint64_t *f2, uint64_t *t
   #if HACL_CAN_COMPILE_INLINE_ASM
   fmul2(out, f1, f2, tmp);
   #else
-  uint64_t uu____0 = fmul2_e(tmp, f1, out, f2);
+  (void)fmul2_e(tmp, f1, out, f2);
   #endif
 }
 
@@ -78,7 +78,7 @@ static inline void fmul_scalar0(uint64_t *out, uint64_t *f1, uint64_t f2)
   #if HACL_CAN_COMPILE_INLINE_ASM
   fmul_scalar(out, f1, f2);
   #else
-  uint64_t uu____0 = fmul_scalar_e(out, f1, f2);
+  (void)fmul_scalar_e(out, f1, f2);
   #endif
 }
 
@@ -87,7 +87,7 @@ static inline void fsqr0(uint64_t *out, uint64_t *f1, uint64_t *tmp)
   #if HACL_CAN_COMPILE_INLINE_ASM
   fsqr(out, f1, tmp);
   #else
-  uint64_t uu____0 = fsqr_e(tmp, f1, out);
+  (void)fsqr_e(tmp, f1, out);
   #endif
 }
 
@@ -96,7 +96,7 @@ static inline void fsqr20(uint64_t *out, uint64_t *f, uint64_t *tmp)
   #if HACL_CAN_COMPILE_INLINE_ASM
   fsqr2(out, f, tmp);
   #else
-  uint64_t uu____0 = fsqr2_e(tmp, f, out);
+  (void)fsqr2_e(tmp, f, out);
   #endif
 }
 
@@ -105,7 +105,7 @@ static inline void cswap20(uint64_t bit, uint64_t *p1, uint64_t *p2)
   #if HACL_CAN_COMPILE_INLINE_ASM
   cswap2(bit, p1, p2);
   #else
-  uint64_t uu____0 = cswap2_e(bit, p1, p2);
+  (void)cswap2_e(bit, p1, p2);
   #endif
 }
 
@@ -286,11 +286,11 @@ static void store_felem(uint64_t *b, uint64_t *f)
   uint64_t f30 = f[3U];
   uint64_t top_bit0 = f30 >> (uint32_t)63U;
   f[3U] = f30 & (uint64_t)0x7fffffffffffffffU;
-  uint64_t carry = add_scalar0(f, f, (uint64_t)19U * top_bit0);
+  (void)add_scalar0(f, f, (uint64_t)19U * top_bit0);
   uint64_t f31 = f[3U];
   uint64_t top_bit = f31 >> (uint32_t)63U;
   f[3U] = f31 & (uint64_t)0x7fffffffffffffffU;
-  uint64_t carry0 = add_scalar0(f, f, (uint64_t)19U * top_bit);
+  (void)add_scalar0(f, f, (uint64_t)19U * top_bit);
   uint64_t f0 = f[0U];
   uint64_t f1 = f[1U];
   uint64_t f2 = f[2U];

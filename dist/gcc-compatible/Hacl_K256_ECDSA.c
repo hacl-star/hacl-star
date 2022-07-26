@@ -251,12 +251,12 @@ static void sub_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
     uint64_t *res_i = tmp + i;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
   }
-  uint64_t c1 = c;
-  uint64_t c2 = (uint64_t)0U - c00;
+  uint64_t res1 = c;
+  uint64_t c1 = (uint64_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = res;
-    uint64_t x = (c2 & tmp[i]) | (~c2 & res[i]);
+    uint64_t x = (c1 & tmp[i]) | (~c1 & res[i]);
     os[i] = x;
   }
 }
@@ -328,7 +328,7 @@ static void sqr4(uint64_t *a, uint64_t *res)
     uint64_t r = c;
     res[i0 + i0] = r;
   }
-  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, res, res);
+  (void)Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, res, res);
   uint64_t tmp[8U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
@@ -338,7 +338,7 @@ static void sqr4(uint64_t *a, uint64_t *res)
     tmp[(uint32_t)2U * i] = lo;
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
   }
-  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, tmp, res);
+  (void)Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, tmp, res);
 }
 
 static inline uint64_t is_qelem_zero(uint64_t *f)
@@ -504,7 +504,7 @@ mul_pow2_256_minus_q_add(
     tmp[len + i0] = r;
   }
   memcpy(res + (uint32_t)2U, a, len * sizeof (uint64_t));
-  uint64_t uu____0 = bn_add(resLen, res, len + (uint32_t)2U, tmp, res);
+  (void)bn_add(resLen, res, len + (uint32_t)2U, tmp, res);
   uint64_t c = bn_add(resLen, res, (uint32_t)4U, e, res);
   return c;
 }
@@ -520,15 +520,13 @@ static inline void modq(uint64_t *out, uint64_t *a)
   uint64_t *t01 = tmp;
   uint64_t m[7U] = { 0U };
   uint64_t p[5U] = { 0U };
-  uint64_t
-  c0 = mul_pow2_256_minus_q_add((uint32_t)4U, (uint32_t)7U, t01, a + (uint32_t)4U, a, m);
-  uint64_t
-  c10 = mul_pow2_256_minus_q_add((uint32_t)3U, (uint32_t)5U, t01, m + (uint32_t)4U, m, p);
+  (void)mul_pow2_256_minus_q_add((uint32_t)4U, (uint32_t)7U, t01, a + (uint32_t)4U, a, m);
+  (void)mul_pow2_256_minus_q_add((uint32_t)3U, (uint32_t)5U, t01, m + (uint32_t)4U, m, p);
   uint64_t
   c2 = mul_pow2_256_minus_q_add((uint32_t)1U, (uint32_t)4U, t01, p + (uint32_t)4U, p, r);
-  uint64_t c00 = c2;
+  uint64_t c0 = c2;
   uint64_t c1 = add4(r, tmp, out);
-  uint64_t mask = (uint64_t)0U - (c00 + c1);
+  uint64_t mask = (uint64_t)0U - (c0 + c1);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = out;

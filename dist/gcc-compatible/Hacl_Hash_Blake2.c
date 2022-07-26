@@ -903,11 +903,9 @@ Hacl_Hash_Blake2_update_multi_blake2s_32(
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
-    uint64_t
-    v_ =
-      Hacl_Hash_Core_Blake2_update_blake2s_32(s,
-        ev + (uint64_t)i * (uint64_t)(uint32_t)64U,
-        block);
+    (void)Hacl_Hash_Core_Blake2_update_blake2s_32(s,
+      ev + (uint64_t)i * (uint64_t)(uint32_t)64U,
+      block);
   }
   return ev + (uint64_t)n_blocks * (uint64_t)(uint32_t)64U;
 }
@@ -924,12 +922,10 @@ Hacl_Hash_Blake2_update_multi_blake2b_32(
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
-    FStar_UInt128_uint128
-    v_ =
-      Hacl_Hash_Core_Blake2_update_blake2b_32(s,
-        FStar_UInt128_add_mod(ev,
-          FStar_UInt128_uint64_to_uint128((uint64_t)i * (uint64_t)(uint32_t)128U)),
-        block);
+    (void)Hacl_Hash_Core_Blake2_update_blake2b_32(s,
+      FStar_UInt128_add_mod(ev,
+        FStar_UInt128_uint64_to_uint128((uint64_t)i * (uint64_t)(uint32_t)128U)),
+      block);
   }
   return
     FStar_UInt128_add_mod(ev,

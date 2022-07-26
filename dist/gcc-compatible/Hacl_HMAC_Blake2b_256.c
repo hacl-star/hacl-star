@@ -46,14 +46,9 @@ Hacl_HMAC_Blake2b_256_compute_blake2b_256(
   KRML_CHECK_SIZE(sizeof (uint8_t), l);
   uint8_t key_block[l];
   memset(key_block, 0U, l * sizeof (uint8_t));
-  uint32_t i0;
   if (key_len <= (uint32_t)128U)
   {
-    i0 = key_len;
-  }
-  else
-  {
-    i0 = (uint32_t)64U;
+
   }
   uint8_t *nkey = key_block;
   if (key_len <= (uint32_t)128U)

@@ -915,7 +915,7 @@ EverCrypt_DRBG_generate_sha1(
   {
     return false;
   }
-  uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA1);
+  (void)Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA1);
   bool ok0;
   if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
   {
@@ -1011,10 +1011,9 @@ EverCrypt_DRBG_generate_sha1(
   {
     x1 = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  bool b;
   if (x1.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
   {
-    b = false;
+
   }
   else
   {
@@ -1113,7 +1112,6 @@ EverCrypt_DRBG_generate_sha1(
     }
     uint32_t old_ctr = ctr[0U];
     ctr[0U] = old_ctr + (uint32_t)1U;
-    b = true;
   }
   return true;
 }
@@ -1136,7 +1134,7 @@ EverCrypt_DRBG_generate_sha2_256(
   {
     return false;
   }
-  uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_256);
+  (void)Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_256);
   bool ok0;
   if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
   {
@@ -1232,10 +1230,9 @@ EverCrypt_DRBG_generate_sha2_256(
   {
     x1 = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  bool b;
   if (x1.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
   {
-    b = false;
+
   }
   else
   {
@@ -1334,7 +1331,6 @@ EverCrypt_DRBG_generate_sha2_256(
     }
     uint32_t old_ctr = ctr[0U];
     ctr[0U] = old_ctr + (uint32_t)1U;
-    b = true;
   }
   return true;
 }
@@ -1357,7 +1353,7 @@ EverCrypt_DRBG_generate_sha2_384(
   {
     return false;
   }
-  uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_384);
+  (void)Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_384);
   bool ok0;
   if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
   {
@@ -1453,10 +1449,9 @@ EverCrypt_DRBG_generate_sha2_384(
   {
     x1 = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  bool b;
   if (x1.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
   {
-    b = false;
+
   }
   else
   {
@@ -1555,7 +1550,6 @@ EverCrypt_DRBG_generate_sha2_384(
     }
     uint32_t old_ctr = ctr[0U];
     ctr[0U] = old_ctr + (uint32_t)1U;
-    b = true;
   }
   return true;
 }
@@ -1578,7 +1572,7 @@ EverCrypt_DRBG_generate_sha2_512(
   {
     return false;
   }
-  uint32_t entropy_input_len = Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_512);
+  (void)Hacl_HMAC_DRBG_min_length(Spec_Hash_Definitions_SHA2_512);
   bool ok0;
   if (additional_input_len > Hacl_HMAC_DRBG_max_additional_input_length)
   {
@@ -1674,10 +1668,9 @@ EverCrypt_DRBG_generate_sha2_512(
   {
     x1 = KRML_EABORT(Hacl_HMAC_DRBG_state, "unreachable (pattern matches are exhaustive in F*)");
   }
-  bool b;
   if (x1.reseed_counter[0U] > Hacl_HMAC_DRBG_reseed_interval)
   {
-    b = false;
+
   }
   else
   {
@@ -1776,7 +1769,6 @@ EverCrypt_DRBG_generate_sha2_512(
     }
     uint32_t old_ctr = ctr[0U];
     ctr[0U] = old_ctr + (uint32_t)1U;
-    b = true;
   }
   return true;
 }

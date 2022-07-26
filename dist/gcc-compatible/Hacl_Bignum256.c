@@ -273,12 +273,12 @@ void Hacl_Bignum256_sub_mod(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res
     uint64_t *res_i = tmp + i;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
   }
-  uint64_t c1 = c;
-  uint64_t c2 = (uint64_t)0U - c00;
+  uint64_t res1 = c;
+  uint64_t c1 = (uint64_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = res;
-    uint64_t x = (c2 & tmp[i]) | (~c2 & res[i]);
+    uint64_t x = (c1 & tmp[i]) | (~c1 & res[i]);
     os[i] = x;
   }
 }
@@ -362,7 +362,7 @@ void Hacl_Bignum256_sqr(uint64_t *a, uint64_t *res)
     uint64_t r = c;
     res[i0 + i0] = r;
   }
-  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, res, res);
+  (void)Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, res, res);
   uint64_t tmp[8U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
@@ -372,7 +372,7 @@ void Hacl_Bignum256_sqr(uint64_t *a, uint64_t *res)
     tmp[(uint32_t)2U * i] = lo;
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
   }
-  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, tmp, res);
+  (void)Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, tmp, res);
 }
 
 static inline void precompr2(uint32_t nBits, uint64_t *n, uint64_t *res)
@@ -500,7 +500,7 @@ static inline void areduction(uint64_t *n, uint64_t nInv, uint64_t *c, uint64_t 
   memcpy(res, c + (uint32_t)4U, (uint32_t)4U * sizeof (uint64_t));
   uint64_t c00 = c0;
   uint64_t tmp[4U] = { 0U };
-  uint64_t c1 = Hacl_Bignum256_sub(res, n, tmp);
+  (void)Hacl_Bignum256_sub(res, n, tmp);
   uint64_t m = (uint64_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
@@ -581,7 +581,7 @@ static inline void amont_sqr(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint6
     uint64_t r = c1;
     c[i0 + i0] = r;
   }
-  uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, c, c, c);
+  (void)Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, c, c, c);
   uint64_t tmp[8U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
@@ -591,7 +591,7 @@ static inline void amont_sqr(uint64_t *n, uint64_t nInv_u64, uint64_t *aM, uint6
     tmp[(uint32_t)2U * i] = lo;
     tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
   }
-  uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, c, tmp, c);
+  (void)Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, c, tmp, c);
   areduction(n, nInv_u64, c, resM);
 }
 
@@ -637,7 +637,7 @@ bn_slow_precomp(uint64_t *n, uint64_t mu, uint64_t *r2, uint64_t *a, uint64_t *r
   memcpy(a_mod, a1 + (uint32_t)4U, (uint32_t)4U * sizeof (uint64_t));
   uint64_t c00 = c0;
   uint64_t tmp[4U] = { 0U };
-  uint64_t c1 = Hacl_Bignum256_sub(a_mod, n, tmp);
+  (void)Hacl_Bignum256_sub(a_mod, n, tmp);
   uint64_t m = (uint64_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
@@ -1192,7 +1192,6 @@ bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *re
   {
     uint64_t n2[4U] = { 0U };
     uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, n[0U], (uint64_t)2U, n2);
-    uint64_t c1;
     if ((uint32_t)1U < (uint32_t)4U)
     {
       uint32_t rLen = (uint32_t)3U;
@@ -1220,12 +1219,7 @@ bool Hacl_Bignum256_mod_inv_prime_vartime(uint64_t *n, uint64_t *a, uint64_t *re
         uint64_t *res_i = res1 + i;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res_i);
       }
-      uint64_t c10 = c;
-      c1 = c10;
-    }
-    else
-    {
-      c1 = c0;
+      uint64_t c1 = c;
     }
     exp_vartime(nBits, n, a, (uint32_t)256U, n2, res);
   }
@@ -1394,7 +1388,6 @@ Hacl_Bignum256_mod_inv_prime_vartime_precomp(
   Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 k1 = *k;
   uint64_t n2[4U] = { 0U };
   uint64_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64((uint64_t)0U, k1.n[0U], (uint64_t)2U, n2);
-  uint64_t c1;
   if ((uint32_t)1U < (uint32_t)4U)
   {
     uint32_t rLen = (uint32_t)3U;
@@ -1422,12 +1415,7 @@ Hacl_Bignum256_mod_inv_prime_vartime_precomp(
       uint64_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, (uint64_t)0U, res_i);
     }
-    uint64_t c10 = c;
-    c1 = c10;
-  }
-  else
-  {
-    c1 = c0;
+    uint64_t c1 = c;
   }
   exp_vartime_precomp(k1.n, k1.mu, k1.r2, a, (uint32_t)256U, n2, res);
 }

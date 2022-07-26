@@ -28,6 +28,6 @@
 
 void randombytes_(uint32_t len, uint8_t *res)
 {
-  bool b = Lib_RandomBuffer_System_randombytes(res, len);
+  (void)Lib_RandomBuffer_System_randombytes(res, len);
 }
 

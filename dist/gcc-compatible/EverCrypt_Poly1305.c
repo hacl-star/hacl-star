@@ -35,7 +35,7 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
   uint8_t tmp[16U];
   if (n_extra == (uint32_t)0U)
   {
-    uint64_t scrut = x64_poly1305(ctx, src, (uint64_t)len, (uint64_t)1U);
+    (void)x64_poly1305(ctx, src, (uint64_t)len, (uint64_t)1U);
   }
   else
   {
@@ -47,17 +47,17 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
     uint32_t len16 = n_blocks * (uint32_t)16U;
     uint8_t *src16 = src;
     memcpy(tmp, src + len16, n_extra * sizeof (uint8_t));
-    uint64_t scrut = x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U);
+    (void)x64_poly1305(ctx, src16, (uint64_t)len16, (uint64_t)0U);
     memcpy(ctx + (uint32_t)24U, key, (uint32_t)32U * sizeof (uint8_t));
-    uint64_t scrut0 = x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U);
+    (void)x64_poly1305(ctx, tmp, (uint64_t)n_extra, (uint64_t)1U);
   }
   memcpy(dst, ctx, (uint32_t)16U * sizeof (uint8_t));
 }
 
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
-  bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
+  (void)EverCrypt_AutoConfig2_has_avx2();
+  (void)EverCrypt_AutoConfig2_has_avx();
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
   bool vale = EverCrypt_AutoConfig2_wants_vale();

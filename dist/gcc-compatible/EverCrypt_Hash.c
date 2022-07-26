@@ -366,7 +366,6 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s)
     r1[1U] = iv5;
     r1[2U] = iv6;
     r1[3U] = iv7;
-    uint64_t uu____0 = (uint64_t)0U;
     return;
   }
   if (scrut.tag == EverCrypt_Hash_Blake2B_s)
@@ -402,7 +401,7 @@ void EverCrypt_Hash_init(EverCrypt_Hash_state_s *s)
     r1[1U] = iv5;
     r1[2U] = iv6;
     r1[3U] = iv7;
-    FStar_UInt128_uint128 uu____1 = FStar_UInt128_uint64_to_uint128((uint64_t)0U);
+    (void)FStar_UInt128_uint64_to_uint128((uint64_t)0U);
     return;
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
@@ -441,7 +440,7 @@ void EverCrypt_Hash_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n)
   if (has_shaext && has_sse)
   {
     uint64_t n1 = (uint64_t)n;
-    uint64_t scrut = sha256_update(s, blocks, n1, k224_256);
+    sha256_update(s, blocks, n1, k224_256);
     return;
   }
   #endif
@@ -490,17 +489,15 @@ void EverCrypt_Hash_update2(EverCrypt_Hash_state_s *s, uint64_t prevlen, uint8_t
   if (scrut.tag == EverCrypt_Hash_Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
-    uint64_t uu____0 = Hacl_Hash_Core_Blake2_update_blake2s_32(p1, prevlen, block);
+    (void)Hacl_Hash_Core_Blake2_update_blake2s_32(p1, prevlen, block);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
-    FStar_UInt128_uint128
-    uu____1 =
-      Hacl_Hash_Core_Blake2_update_blake2b_32(p1,
-        FStar_UInt128_uint64_to_uint128(prevlen),
-        block);
+    (void)Hacl_Hash_Core_Blake2_update_blake2b_32(p1,
+      FStar_UInt128_uint64_to_uint128(prevlen),
+      block);
     return;
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
@@ -572,19 +569,17 @@ EverCrypt_Hash_update_multi2(
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
     uint32_t n = len / (uint32_t)64U;
-    uint64_t uu____0 = Hacl_Hash_Blake2_update_multi_blake2s_32(p1, prevlen, blocks, n);
+    (void)Hacl_Hash_Blake2_update_multi_blake2s_32(p1, prevlen, blocks, n);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
     uint32_t n = len / (uint32_t)128U;
-    FStar_UInt128_uint128
-    uu____1 =
-      Hacl_Hash_Blake2_update_multi_blake2b_32(p1,
-        FStar_UInt128_uint64_to_uint128(prevlen),
-        blocks,
-        n);
+    (void)Hacl_Hash_Blake2_update_multi_blake2b_32(p1,
+      FStar_UInt128_uint64_to_uint128(prevlen),
+      blocks,
+      n);
     return;
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
@@ -681,19 +676,17 @@ EverCrypt_Hash_update_last2(
   if (scrut.tag == EverCrypt_Hash_Blake2S_s)
   {
     uint32_t *p1 = scrut.case_Blake2S_s;
-    uint64_t x = Hacl_Hash_Blake2_update_last_blake2s_32(p1, prev_len, prev_len, last, last_len);
+    (void)Hacl_Hash_Blake2_update_last_blake2s_32(p1, prev_len, prev_len, last, last_len);
     return;
   }
   if (scrut.tag == EverCrypt_Hash_Blake2B_s)
   {
     uint64_t *p1 = scrut.case_Blake2B_s;
-    FStar_UInt128_uint128
-    x =
-      Hacl_Hash_Blake2_update_last_blake2b_32(p1,
-        FStar_UInt128_uint64_to_uint128(prev_len),
-        FStar_UInt128_uint64_to_uint128(prev_len),
-        last,
-        last_len);
+    (void)Hacl_Hash_Blake2_update_last_blake2b_32(p1,
+      FStar_UInt128_uint64_to_uint128(prev_len),
+      FStar_UInt128_uint64_to_uint128(prev_len),
+      last,
+      last_len);
     return;
   }
   KRML_HOST_EPRINTF("KaRaMeL abort at %s:%d\n%s\n",
@@ -1249,7 +1242,7 @@ EverCrypt_Hash_Incremental_init(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_
   Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ scrut = *s;
   uint8_t *buf = scrut.buf;
   EverCrypt_Hash_state_s *block_state = scrut.block_state;
-  Spec_Hash_Definitions_hash_alg i = EverCrypt_Hash_alg_of_state(block_state);
+  (void)EverCrypt_Hash_alg_of_state(block_state);
   EverCrypt_Hash_init(block_state);
   s[0U] =
     (

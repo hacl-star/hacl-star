@@ -441,7 +441,7 @@ static void p256_sub(uint64_t *arg1, uint64_t *arg2, uint64_t *out)
   uint64_t t1 = ((uint64_t)0U - t) >> (uint32_t)32U;
   uint64_t t2 = (uint64_t)0U;
   uint64_t t3 = t - (t << (uint32_t)32U);
-  uint64_t c = add4_variables(out, (uint64_t)0U, t0, t1, t2, t3, out);
+  (void)add4_variables(out, (uint64_t)0U, t0, t1, t2, t3, out);
 }
 
 static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *result)
@@ -481,7 +481,7 @@ static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *resul
   uint64_t temp00 = temp1;
   uint64_t c0 = c3 + temp00;
   t20[4U] = c0;
-  uint64_t uu____0 = add8(t, t20, t30);
+  (void)add8(t, t20, t30);
   shift8(t30, tempRound);
   uint64_t t21[8U] = { 0U };
   uint64_t t31[8U] = { 0U };
@@ -512,7 +512,7 @@ static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *resul
   uint64_t temp01 = temp2;
   uint64_t c4 = c30 + temp01;
   t21[4U] = c4;
-  uint64_t uu____1 = add8(tempRound, t21, t31);
+  (void)add8(tempRound, t21, t31);
   shift8(t31, round2);
   uint64_t tempRound0[8U] = { 0U };
   uint64_t t2[8U] = { 0U };
@@ -544,7 +544,7 @@ static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *resul
   uint64_t temp02 = temp3;
   uint64_t c5 = c31 + temp02;
   t2[4U] = c5;
-  uint64_t uu____2 = add8(round2, t2, t32);
+  (void)add8(round2, t2, t32);
   shift8(t32, tempRound0);
   uint64_t t22[8U] = { 0U };
   uint64_t t3[8U] = { 0U };
@@ -575,7 +575,7 @@ static void montgomery_multiplication_buffer_by_one(uint64_t *a, uint64_t *resul
   uint64_t temp0 = temp;
   uint64_t c6 = c32 + temp0;
   t22[4U] = c6;
-  uint64_t uu____3 = add8(tempRound0, t22, t3);
+  (void)add8(tempRound0, t22, t3);
   shift8(t3, round4);
   uint64_t tempBuffer[4U] = { 0U };
   uint64_t tempBufferForSubborrow = (uint64_t)0U;
@@ -739,7 +739,7 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t temp04 = temp6;
   uint64_t c7 = c37 + temp04;
   t20[4U] = c7;
-  uint64_t uu____0 = add8(t, t20, t30);
+  (void)add8(t, t20, t30);
   shift8(t30, tempRound);
   uint64_t t21[8U] = { 0U };
   uint64_t t31[8U] = { 0U };
@@ -770,7 +770,7 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t temp05 = temp7;
   uint64_t c8 = c38 + temp05;
   t21[4U] = c8;
-  uint64_t uu____1 = add8(tempRound, t21, t31);
+  (void)add8(tempRound, t21, t31);
   shift8(t31, round2);
   uint64_t tempRound0[8U] = { 0U };
   uint64_t t2[8U] = { 0U };
@@ -802,7 +802,7 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t temp06 = temp8;
   uint64_t c9 = c39 + temp06;
   t2[4U] = c9;
-  uint64_t uu____2 = add8(round2, t2, t32);
+  (void)add8(round2, t2, t32);
   shift8(t32, tempRound0);
   uint64_t t22[8U] = { 0U };
   uint64_t t3[8U] = { 0U };
@@ -833,7 +833,7 @@ static void montgomery_multiplication_buffer(uint64_t *a, uint64_t *b, uint64_t 
   uint64_t temp0 = temp;
   uint64_t c16 = c310 + temp0;
   t22[4U] = c16;
-  uint64_t uu____3 = add8(tempRound0, t22, t3);
+  (void)add8(tempRound0, t22, t3);
   shift8(t3, round4);
   uint64_t tempBuffer[4U] = { 0U };
   uint64_t tempBufferForSubborrow = (uint64_t)0U;
@@ -881,7 +881,7 @@ static void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   uint64_t temp00 = temp1;
   uint64_t c0 = c3 + temp00;
   t20[4U] = c0;
-  uint64_t uu____0 = add8(t, t20, t30);
+  (void)add8(t, t20, t30);
   shift8(t30, tempRound);
   uint64_t t21[8U] = { 0U };
   uint64_t t31[8U] = { 0U };
@@ -912,7 +912,7 @@ static void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   uint64_t temp01 = temp2;
   uint64_t c4 = c30 + temp01;
   t21[4U] = c4;
-  uint64_t uu____1 = add8(tempRound, t21, t31);
+  (void)add8(tempRound, t21, t31);
   shift8(t31, round2);
   uint64_t tempRound0[8U] = { 0U };
   uint64_t t2[8U] = { 0U };
@@ -944,7 +944,7 @@ static void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   uint64_t temp02 = temp3;
   uint64_t c5 = c31 + temp02;
   t2[4U] = c5;
-  uint64_t uu____2 = add8(round2, t2, t32);
+  (void)add8(round2, t2, t32);
   shift8(t32, tempRound0);
   uint64_t t22[8U] = { 0U };
   uint64_t t3[8U] = { 0U };
@@ -975,7 +975,7 @@ static void montgomery_square_buffer(uint64_t *a, uint64_t *result)
   uint64_t temp0 = temp;
   uint64_t c6 = c32 + temp0;
   t22[4U] = c6;
-  uint64_t uu____3 = add8(tempRound0, t22, t3);
+  (void)add8(tempRound0, t22, t3);
   shift8(t3, round4);
   uint64_t tempBuffer[4U] = { 0U };
   uint64_t tempBufferForSubborrow = (uint64_t)0U;
@@ -1682,7 +1682,7 @@ static void montgomery_multiplication_round(uint64_t *t, uint64_t *round, uint64
   uint64_t temp0 = temp1;
   uint64_t c = c3 + temp0;
   t2[4U] = c;
-  uint64_t uu____0 = add8(t, t2, t3);
+  (void)add8(t, t2, t3);
   shift8(t3, round);
 }
 
@@ -1717,7 +1717,7 @@ static void montgomery_multiplication_ecdsa_module(uint64_t *a, uint64_t *b, uin
   uint64_t t[8U] = { 0U };
   uint64_t round2[8U] = { 0U };
   uint64_t round4[8U] = { 0U };
-  uint64_t prime_p256_orderBuffer[4U] = { 0U };
+  uint64_t buf[4U] = { 0U };
   uint64_t k0 = (uint64_t)14758798090332847183U;
   uint64_t f0 = a[0U];
   uint64_t f1 = a[1U];

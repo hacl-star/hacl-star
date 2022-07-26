@@ -104,8 +104,8 @@ EverCrypt_CTR_create_in(
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)304U, sizeof (uint8_t));
           uint8_t *keys_b = ek;
           uint8_t *hkeys_b = ek + (uint32_t)176U;
-          uint64_t scrut = aes128_key_expansion(k, keys_b);
-          uint64_t scrut0 = aes128_keyhash_init(keys_b, hkeys_b);
+          (void)aes128_key_expansion(k, keys_b);
+          (void)aes128_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
           memcpy(iv_, iv, iv_len * sizeof (uint8_t));
           KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
@@ -143,8 +143,8 @@ EverCrypt_CTR_create_in(
           uint8_t *ek = KRML_HOST_CALLOC((uint32_t)368U, sizeof (uint8_t));
           uint8_t *keys_b = ek;
           uint8_t *hkeys_b = ek + (uint32_t)240U;
-          uint64_t scrut = aes256_key_expansion(k, keys_b);
-          uint64_t scrut0 = aes256_keyhash_init(keys_b, hkeys_b);
+          (void)aes256_key_expansion(k, keys_b);
+          (void)aes256_keyhash_init(keys_b, hkeys_b);
           uint8_t *iv_ = KRML_HOST_CALLOC((uint32_t)16U, sizeof (uint8_t));
           memcpy(iv_, iv, iv_len * sizeof (uint8_t));
           KRML_CHECK_SIZE(sizeof (EverCrypt_CTR_state_s), (uint32_t)1U);
@@ -206,10 +206,10 @@ EverCrypt_CTR_init(
   uint32_t c
 )
 {
-  EverCrypt_CTR_state_s scrut0 = *p;
-  uint8_t *ek = scrut0.xkey;
-  uint8_t *iv_ = scrut0.iv;
-  Spec_Cipher_Expansion_impl i = scrut0.i;
+  EverCrypt_CTR_state_s scrut = *p;
+  uint8_t *ek = scrut.xkey;
+  uint8_t *iv_ = scrut.iv;
+  Spec_Cipher_Expansion_impl i = scrut.i;
   memcpy(iv_, iv, iv_len * sizeof (uint8_t));
   switch (i)
   {
@@ -218,8 +218,8 @@ EverCrypt_CTR_init(
         #if HACL_CAN_COMPILE_VALE
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)176U;
-        uint64_t scrut = aes128_key_expansion(k, keys_b);
-        uint64_t scrut1 = aes128_keyhash_init(keys_b, hkeys_b);
+        (void)aes128_key_expansion(k, keys_b);
+        (void)aes128_keyhash_init(keys_b, hkeys_b);
         #endif
         break;
       }
@@ -228,8 +228,8 @@ EverCrypt_CTR_init(
         #if HACL_CAN_COMPILE_VALE
         uint8_t *keys_b = ek;
         uint8_t *hkeys_b = ek + (uint32_t)240U;
-        uint64_t scrut = aes256_key_expansion(k, keys_b);
-        uint64_t scrut1 = aes256_keyhash_init(keys_b, hkeys_b);
+        (void)aes256_key_expansion(k, keys_b);
+        (void)aes256_keyhash_init(keys_b, hkeys_b);
         #endif
         break;
       }
@@ -279,15 +279,13 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
         memcpy(inout_b,
           src + num_bytes_,
           (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
-        uint64_t
-        scrut1 =
-          gctr128_bytes(in_b_,
-            (uint64_t)16U,
-            out_b_,
-            inout_b,
-            uu____1,
-            ctr_block,
-            (uint64_t)num_blocks);
+        (void)gctr128_bytes(in_b_,
+          (uint64_t)16U,
+          out_b_,
+          inout_b,
+          uu____1,
+          ctr_block,
+          (uint64_t)num_blocks);
         memcpy(dst + num_bytes_,
           inout_b,
           (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
@@ -329,15 +327,13 @@ void EverCrypt_CTR_update_block(EverCrypt_CTR_state_s *p, uint8_t *dst, uint8_t 
         memcpy(inout_b,
           src + num_bytes_,
           (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));
-        uint64_t
-        scrut1 =
-          gctr256_bytes(in_b_,
-            (uint64_t)16U,
-            out_b_,
-            inout_b,
-            uu____3,
-            ctr_block,
-            (uint64_t)num_blocks);
+        (void)gctr256_bytes(in_b_,
+          (uint64_t)16U,
+          out_b_,
+          inout_b,
+          uu____3,
+          ctr_block,
+          (uint64_t)num_blocks);
         memcpy(dst + num_bytes_,
           inout_b,
           (uint32_t)(uint64_t)16U % (uint32_t)16U * sizeof (uint8_t));

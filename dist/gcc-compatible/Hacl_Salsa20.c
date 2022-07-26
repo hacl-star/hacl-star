@@ -175,7 +175,7 @@ salsa20_encrypt(
   ctx[10U] = (uint32_t)0x79622d32U;
   memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (uint32_t));
   ctx[15U] = (uint32_t)0x6b206574U;
-  uint32_t k[16U] = { 0U };
+  uint32_t buf[16U] = { 0U };
   uint32_t rem = len % (uint32_t)64U;
   uint32_t nb = len / (uint32_t)64U;
   uint32_t rem1 = len % (uint32_t)64U;
@@ -280,7 +280,7 @@ salsa20_decrypt(
   ctx[10U] = (uint32_t)0x79622d32U;
   memcpy(ctx + (uint32_t)11U, k10, (uint32_t)4U * sizeof (uint32_t));
   ctx[15U] = (uint32_t)0x6b206574U;
-  uint32_t k[16U] = { 0U };
+  uint32_t buf[16U] = { 0U };
   uint32_t rem = len % (uint32_t)64U;
   uint32_t nb = len / (uint32_t)64U;
   uint32_t rem1 = len % (uint32_t)64U;

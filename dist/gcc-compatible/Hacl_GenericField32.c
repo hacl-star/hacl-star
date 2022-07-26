@@ -551,7 +551,6 @@ Hacl_GenericField32_inverse(
   uint32_t n2[len1];
   memset(n2, 0U, len1 * sizeof (uint32_t));
   uint32_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32((uint32_t)0U, k1.n[0U], (uint32_t)2U, n2);
-  uint32_t c1;
   if ((uint32_t)1U < len1)
   {
     uint32_t rLen = len1 - (uint32_t)1U;
@@ -579,12 +578,7 @@ Hacl_GenericField32_inverse(
       uint32_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i);
     }
-    uint32_t c10 = c;
-    c1 = c10;
-  }
-  else
-  {
-    c1 = c0;
+    uint32_t c1 = c;
   }
   Hacl_GenericField32_exp_vartime(k, aM, k1.len * (uint32_t)32U, n2, aInvM);
 }

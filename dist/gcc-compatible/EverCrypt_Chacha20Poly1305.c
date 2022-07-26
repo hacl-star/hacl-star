@@ -38,8 +38,8 @@ EverCrypt_Chacha20Poly1305_aead_encrypt(
   uint8_t *tag
 )
 {
-  bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
+  (void)EverCrypt_AutoConfig2_has_avx2();
+  (void)EverCrypt_AutoConfig2_has_avx();
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
   #if HACL_CAN_COMPILE_VEC256
@@ -71,8 +71,8 @@ EverCrypt_Chacha20Poly1305_aead_decrypt(
   uint8_t *tag
 )
 {
-  bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
+  (void)EverCrypt_AutoConfig2_has_avx2();
+  (void)EverCrypt_AutoConfig2_has_avx();
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
   #if HACL_CAN_COMPILE_VEC256

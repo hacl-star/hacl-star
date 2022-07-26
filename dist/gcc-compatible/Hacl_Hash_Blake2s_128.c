@@ -236,7 +236,7 @@ Hacl_Hash_Blake2s_128_update_multi_blake2s_128(
   {
     uint32_t sz = (uint32_t)64U;
     uint8_t *block = blocks + sz * i;
-    uint64_t v_ = update_blake2s_128(s, ev + (uint64_t)i * (uint64_t)(uint32_t)64U, block);
+    (void)update_blake2s_128(s, ev + (uint64_t)i * (uint64_t)(uint32_t)64U, block);
   }
   return ev + (uint64_t)n_blocks * (uint64_t)(uint32_t)64U;
 }

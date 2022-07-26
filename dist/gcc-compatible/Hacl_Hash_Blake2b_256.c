@@ -243,12 +243,10 @@ Hacl_Hash_Blake2b_256_update_multi_blake2b_256(
   {
     uint32_t sz = (uint32_t)128U;
     uint8_t *block = blocks + sz * i;
-    FStar_UInt128_uint128
-    v_ =
-      update_blake2b_256(s,
-        FStar_UInt128_add_mod(ev,
-          FStar_UInt128_uint64_to_uint128((uint64_t)i * (uint64_t)(uint32_t)128U)),
-        block);
+    (void)update_blake2b_256(s,
+      FStar_UInt128_add_mod(ev,
+        FStar_UInt128_uint64_to_uint128((uint64_t)i * (uint64_t)(uint32_t)128U)),
+      block);
   }
   return
     FStar_UInt128_add_mod(ev,

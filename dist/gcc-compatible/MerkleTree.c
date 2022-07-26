@@ -1171,7 +1171,7 @@ construct_rhs(
 bool MerkleTree_Low_mt_get_root_pre(const MerkleTree_Low_merkle_tree *mt, uint8_t *rt)
 {
   MerkleTree_Low_merkle_tree *mt1 = (MerkleTree_Low_merkle_tree *)mt;
-  MerkleTree_Low_merkle_tree mt2 = *mt1;
+  (void)*mt1;
   return true;
 }
 
@@ -1283,10 +1283,10 @@ mt_get_path_(
   bool actd
 )
 {
-  uint32_t ofs = MerkleTree_Low_offset_of(i);
+  (void)MerkleTree_Low_offset_of(i);
   if (!(j == (uint32_t)0U))
   {
-    MerkleTree_Low_path pth = *p;
+    (void)*p;
     uint32_t ofs1 = MerkleTree_Low_offset_of(i);
     if (k % (uint32_t)2U == (uint32_t)1U)
     {
@@ -1575,7 +1575,7 @@ mt_retract_to_(
   {
     MerkleTree_Low_Datastructures_hash_vec
     hvec = index__LowStar_Vector_vector_str__uint8_t_(hs, lv);
-    uint32_t old_len = j - MerkleTree_Low_offset_of(i);
+    (void)(j - MerkleTree_Low_offset_of(i));
     uint32_t new_len = s - MerkleTree_Low_offset_of(i);
     MerkleTree_Low_Datastructures_hash_vec
     retracted =

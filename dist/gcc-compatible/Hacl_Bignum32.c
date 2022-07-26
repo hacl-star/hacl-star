@@ -178,7 +178,7 @@ bn_slow_precomp(
   KRML_CHECK_SIZE(sizeof (uint32_t), len);
   uint32_t tmp0[len];
   memset(tmp0, 0U, len * sizeof (uint32_t));
-  uint32_t c1 = Hacl_Bignum_Addition_bn_sub_eq_len_u32(len, a_mod, n, tmp0);
+  (void)Hacl_Bignum_Addition_bn_sub_eq_len_u32(len, a_mod, n, tmp0);
   uint32_t m = (uint32_t)0U - c00;
   for (uint32_t i = (uint32_t)0U; i < len; i++)
   {
@@ -390,7 +390,6 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
     uint32_t n2[len];
     memset(n2, 0U, len * sizeof (uint32_t));
     uint32_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32((uint32_t)0U, n[0U], (uint32_t)2U, n2);
-    uint32_t c1;
     if ((uint32_t)1U < len)
     {
       uint32_t rLen = len - (uint32_t)1U;
@@ -418,12 +417,7 @@ bool Hacl_Bignum32_mod_inv_prime_vartime(uint32_t len, uint32_t *n, uint32_t *a,
         uint32_t *res_i = res1 + i;
         c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i);
       }
-      uint32_t c10 = c;
-      c1 = c10;
-    }
-    else
-    {
-      c1 = c0;
+      uint32_t c1 = c;
     }
     Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_u32(len,
       nBits,
@@ -623,7 +617,6 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
   uint32_t n2[len1];
   memset(n2, 0U, len1 * sizeof (uint32_t));
   uint32_t c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32((uint32_t)0U, k1.n[0U], (uint32_t)2U, n2);
-  uint32_t c1;
   if ((uint32_t)1U < len1)
   {
     uint32_t rLen = len1 - (uint32_t)1U;
@@ -651,12 +644,7 @@ Hacl_Bignum32_mod_inv_prime_vartime_precomp(
       uint32_t *res_i = res1 + i;
       c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, (uint32_t)0U, res_i);
     }
-    uint32_t c10 = c;
-    c1 = c10;
-  }
-  else
-  {
-    c1 = c0;
+    uint32_t c1 = c;
   }
   Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(len1,
     k1.n,
