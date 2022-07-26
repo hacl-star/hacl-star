@@ -811,7 +811,6 @@ assume val getPointPrecomputed_P384: index: size_t {v index < getPower P384 / m 
   ))
 
 
-inline_for_extraction noextract
 val getPointPrecomputed: #c: curve -> index: size_t {v index < getPower c / m / 2 * 8} -> result: pointAffine c ->
   Stack unit
   (requires fun h -> True)
@@ -850,7 +849,7 @@ let copy_point_conditional_affine #c result p mask =
 
 
 val loopK_step: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> k: size_t
-  -> tempPoint: pointAffine c -> Stack unit 
+  -> tempPoint: pointAffine c -> Stack unit
   (requires fun h -> live h result /\ live h tempPoint)
   (ensures fun h0 _ h1 -> True)
 
@@ -874,7 +873,7 @@ let loopK #c d result j =
   Lib.Loops.for 0ul 16ul invK (fun k -> loopK_step d result j  k tempPoint)
 
 
-inline_for_extraction noextract
+
 val copy_point_conditional: #c: curve -> result: point c
   -> x: point c -> mask: uint64 {uint_v mask == 0 \/ uint_v mask == pow2 64 - 1}  
   -> Stack unit
@@ -961,8 +960,8 @@ val scalar_multiplication_cmb_step_1: #c: curve
   (ensures fun h0 _ h1 -> True)
   
 let scalar_multiplication_cmb_step_1 #c rnaf result j pointPrecomputed bufferForNegative tempBuffer = 
-  let d = index rnaf (size 2 *! (j *! (size 2) +! size 1)) in
-  let is_neg = index rnaf (size 2 *! (j *! (size 2) +! size 1) +! (size 1)) in 
+  let d = index rnaf (j *! size 4 +! size 2) in
+  let is_neg = index rnaf (j *! size 4 +! size 2 +! size 1) in 
   let d = shift_right (d -! size 1) (size 1) in 
 
   loopK #c d pointPrecomputed j;
@@ -986,8 +985,8 @@ val scalar_multiplication_cmb_step_0: #c: curve
   (ensures fun h0 _ h1 -> True)
   
 let scalar_multiplication_cmb_step_0 #c rnaf result j pointPrecomputed bufferForNegative tempBuffer = 
-  let d = index rnaf (size 2 *! (j *! (size 2))) in
-  let is_neg = index rnaf (size 2 *! (j *! (size 2)) +! (size 1)) in 
+  let d = index rnaf (size 4 *! j) in
+  let is_neg = index rnaf (size 4 *! j +! size 1) in 
   let d = shift_right (d -! size 1) (size 1) in 
 
   loopK #c d pointPrecomputed j;
@@ -999,7 +998,6 @@ let scalar_multiplication_cmb_step_0 #c rnaf result j pointPrecomputed bufferFor
   Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer
 
 
-inline_for_extraction noextract
 val getPointDoubleNTimes: #c: curve 
   -> p: point c 
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
@@ -1025,6 +1023,32 @@ let getPointDoubleNTimes #c p tempBuffer k =
     unfold_repeat (v k) (_point_double #c) (fromDomainPoint #c #DH (point_as_nat c h0 p)) (v i))
 
 
+
+val scalar_multiplication_cmb_step_2: #c: curve 
+  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1))) 
+  -> result: point c
+  -> j: size_t
+  -> pointPrecomputed: pointAffine c
+  -> bufferForNegative : lbuffer uint64 (getCoordinateLenU64 c)
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack unit 
+  (requires fun h -> True)
+  (ensures fun h0 _ h1 -> True)
+  
+let scalar_multiplication_cmb_step_2 #c rnaf result j pointPrecomputed bufferForNegative tempBuffer = 
+  let d = index rnaf (j *! size 2) in
+  let is_neg = index rnaf (j *! size 2 +! size 1) in 
+  let d = shift_right (d -! size 1) (size 1) in 
+
+  loopK #c d pointPrecomputed j;
+
+  let yLut = sub pointPrecomputed (size 4) (size 4) in 
+  felem_sub_zero #c yLut bufferForNegative;
+  copy_conditional #P256 yLut bufferForNegative is_neg;
+  
+  Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer
+
+
 val scalar_multiplication_cmb: #c: curve ->  #buf_type: buftype -> result: point P256 -> 
   scalar: lbuffer_t buf_type uint8 (size 32) -> 
   tempBuffer:  lbuffer uint64 (size 88)  -> 
@@ -1032,7 +1056,7 @@ val scalar_multiplication_cmb: #c: curve ->  #buf_type: buftype -> result: point
   (requires fun h -> True )
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1)
 
-
+(*
 let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer = 
   push_frame();
     let rnaf2 = create (size 104) (u64 0) in 
@@ -1047,6 +1071,24 @@ let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer =
     getPointDoubleNTimes #c result tempBuffer radix;
     
     Lib.Loops.for 0ul 26ul invJ (fun j -> scalar_multiplication_cmb_step_0 rnaf2 result j lut temp4 tempBuffer);
+
+    conditional_substraction #c result result scalar tempBuffer;
+  
+
+  pop_frame()
+*)
+
+let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer = 
+  push_frame();
+    let rnaf2 = create (size 104) (u64 0) in 
+    let lut = create (size 8) (u64 0) in 
+    let temp4 = sub tempBuffer (size 0) (size 4) in 
+
+    scalar_rwnaf #c rnaf2 scalar;
+    
+    let invJ h1 (j:nat) = True in  
+    Lib.Loops.for 0ul 52ul invJ (fun j -> scalar_multiplication_cmb_step_2 rnaf2 result j lut temp4 tempBuffer);
+
 
     conditional_substraction #c result result scalar tempBuffer;
   
