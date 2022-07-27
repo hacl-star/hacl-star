@@ -9,7 +9,6 @@ open EverCrypt.Helpers
 open EverCrypt.Error
 
 module AC = EverCrypt.AutoConfig2
-module SC = EverCrypt.StaticConfig
 module H = EverCrypt.Hash
 
 open Test.Vectors
@@ -544,15 +543,12 @@ let f_shaext : features = // [@inline_let] ({ f_none with features_shaext = true
 }
 
 inline_for_extraction
-type impl = | Hacl | Vale | OpenSSL | BCrypt
-
-inline_for_extraction
-let config = (impl & features)
+let config = features
 
 inline_for_extraction
 let check_static_config (c: config) : Stack bool (fun _ -> True) (fun _ _ _ -> True) =
   match c with
-  | (i, f) ->
+  | f ->
     AC.init ();
     let no_avx = not (AC.has_avx ()) in
     let no_avx2 = not (AC.has_avx2 ()) in
@@ -570,22 +566,14 @@ let check_static_config (c: config) : Stack bool (fun _ -> True) (fun _ _ _ -> T
     then
       false
     else
-      match i with
-      | Hacl -> SC.hacl
-      | Vale -> SC.vale
-      | OpenSSL -> SC.openssl
-      | BCrypt -> SC.bcrypt
+      true
 
 #push-options "--z3rlimit 16"
 
 inline_for_extraction
 let set_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
   match c with
-  | (i, f) ->
-    (if i <> Hacl then AC.disable_hacl ());
-    (if i <> Vale then AC.disable_vale ());
-    (if i <> OpenSSL then AC.disable_openssl ());
-    (if i <> BCrypt then AC.disable_bcrypt ());
+  | f ->
     (if not f.features_avx then AC.disable_avx ());
     (if not f.features_avx2 then AC.disable_avx2 ());
     (if not f.features_bmi2 then AC.disable_bmi2 ());
@@ -598,13 +586,7 @@ let set_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
 inline_for_extraction
 let print_config (c: config) : Stack unit (fun _ -> True) (fun _ _ _ -> True) =
   match c with
-  | (i, f) ->
-    begin match i with
-    | Hacl -> C.String.print !$"HACL"
-    | Vale -> C.String.print !$"Vale"
-    | OpenSSL -> C.String.print !$"OpenSSL"
-    | BCrypt -> C.String.print !$"BCrypt"
-    end;
+  | f ->
     (if f.features_avx then C.String.print !$" avx");
     (if f.features_avx2 then C.String.print !$" avx2");
     (if f.features_bmi2 then C.String.print !$" bmi2");
@@ -653,56 +635,56 @@ let ts_cons (c: config) (ts: test_set) : Tot test_set =
 inline_for_extraction
 noextract
 let poly1305_test_set =
-  (Hacl, f_avx2) `ts_cons` (
-  (Hacl, f_avx) `ts_cons` (
-  (Hacl, f_none) `ts_cons` (
-  (Vale, f_none) `ts_cons` (
+  f_avx2 `ts_cons` (
+  f_avx `ts_cons` (
+  f_none `ts_cons` (
+  f_none `ts_cons` (
   ts_nil))))
 
 inline_for_extraction
 noextract
 let curve25519_test_set =
-  (Hacl, f_bmi2 `f_concat` f_adx) `ts_cons` (
-  (Hacl, f_none) `ts_cons`
+  (f_bmi2 `f_concat` f_adx) `ts_cons` (
+  f_none `ts_cons`
   ts_nil)
 
 inline_for_extraction
 noextract
 let aes_gcm_test_set =
-  (Vale, f_aesni `f_concat` f_avx) `ts_cons` (
+  (f_aesni `f_concat` f_avx) `ts_cons` (
   ts_nil)
 
 inline_for_extraction
 noextract
 let chacha20poly1305_test_set =
-  (Hacl, f_none) `ts_cons`
+  (f_none) `ts_cons`
   ts_nil
 
 inline_for_extraction
 noextract
 let hash_test_set =
-  (Vale, f_none) `ts_cons` (
-  (Vale, f_shaext) `ts_cons` (
-  (Hacl, f_none) `ts_cons` (
+  (f_none) `ts_cons` (
+  (f_shaext) `ts_cons` (
+  (f_none) `ts_cons` (
   ts_nil)))
 
 inline_for_extraction
 noextract
 let chacha20_test_set =
-  (Hacl, f_none) `ts_cons`
+  (f_none) `ts_cons`
   ts_nil
 
 inline_for_extraction
 noextract
 let aes128_ecb_test_set =
-  (Vale, f_aesni) `ts_cons` (
-  (Hacl, f_none) `ts_cons` (
+  (f_aesni) `ts_cons` (
+  (f_none) `ts_cons` (
   ts_nil))
 
 inline_for_extraction
 noextract
 let aes256_ecb_test_set =
-  (Hacl, f_none) `ts_cons` (
+  (f_none) `ts_cons` (
   ts_nil)
 
 (* Test bodies *)
