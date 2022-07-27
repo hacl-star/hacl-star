@@ -1,5 +1,4 @@
 # This Makefile covers all of the present repository (HACL* + Vale + EverCrypt)
-# with the exclusion of legacy code found in secure_api, code/old and specs/old.
 #
 # From a high-level perspective, the coarse-grained dependency graph is:
 #
@@ -17,8 +16,6 @@
 # - SKIPDEPEND=1 disables even *including* .depend files (not meant for end users)
 # - NOOPENSSLCHECK=1 disables OpenSSL libcrypto.a checks (useful for verifying files
 #   only, or for non-OpenSSL configurations)
-# - EVERCRYPT_CONFIG allows switching EverCrypt static configurations; when
-#   going through the all target, we properly invalidate the checked file.
 #
 # This is a staged Makefile, because we first need to generate .fst files out of
 # .vaf files in order to get a full dependency graph for the .fst files. So,
@@ -104,14 +101,12 @@ endif
 # Top-level entry points #
 ##########################
 
-all:
-	tools/blast-staticconfig.sh $(EVERCRYPT_CONFIG)
-	$(MAKE) all-staged
+all: all-staged
 
 all-unstaged: compile-gcc-compatible compile-msvc-compatible compile-gcc64-only \
   compile-evercrypt-external-headers compile-c89-compatible \
   compile-portable-gcc-compatible \
-  dist/wasm/package.json dist/merkle-tree/Makefile.basic compile-mitls \
+  dist/wasm/package.json dist/merkle-tree/Makefile.basic \
   obj/libhaclml.cmxa compile-election-guard
 
 # Mozilla does not want to run the configure script, so this means that the
@@ -159,7 +154,6 @@ mozilla-ci-unstaged: compile-mozilla test-c
 ci:
 	NOSHORTLOG=1 $(MAKE) vale-fst
 	FSTAR_DEPEND_FLAGS="--warn_error +285" NOSHORTLOG=1 $(MAKE) all-unstaged test-unstaged doc-wasm doc-ocaml
-	$(MAKE) -C providers/quic_provider # needs a checkout of miTLS, only valid on CI
 	./tools/sloccount.sh
 
 # Not reusing the -staged automatic target so as to export MIN_TEST
@@ -555,11 +549,6 @@ obj/vale-%.exe: $(ALL_CMX_FILES) obj/CmdLineParser.cmx
 # The ones in secure_api are legacy and should go.
 VALE_ASMS = $(foreach P,cpuid aesgcm sha256 curve25519 poly1305,\
   $(addprefix dist/vale/,$P-x86_64-mingw.S $P-x86_64-msvc.asm $P-x86_64-linux.S $P-x86_64-darwin.S)) \
-  $(wildcard \
-    $(HACL_HOME)/secure_api/vale/asm/oldaesgcm-*.S \
-    $(HACL_HOME)/secure_api/vale/asm/oldaesgcm-*.asm \
-    $(HACL_HOME)/secure_api/vale/asm/aes-*.S \
-    $(HACL_HOME)/secure_api/vale/asm/aes-*.asm) \
   dist/vale/curve25519-inline.h
 
 # A pseudo-target for generating just Vale assemblies
@@ -580,16 +569,6 @@ obj/%.krml:
 	  touch $@ \
 	  ,[EXTRACT-KRML] $*,$@)
 
-# For the time being, we rely on the old extraction to give us self-contained
-# files for algorithms that haven't been rewritten for HACLv2.
-
-.PHONY: old-%
-old-%:
-	$(call run-with-log,\
-	  KOPTS=-verbose $(MAKE) -C code/old -f Makefile.old $* \
-	  ,[OLD-MAKE $*],obj/old-$*)
-
-
 ########################################
 # Distributions of EverCrypt and HACL* #
 ########################################
@@ -602,8 +581,7 @@ old-%:
 HAND_WRITTEN_C		= Lib.PrintBuffer Lib.RandomBuffer.System
 
 # Always copied into the destination directory, always passed to karamel.
-HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c) \
-  $(addprefix providers/evercrypt/c/evercrypt_,vale_stubs.c)
+HAND_WRITTEN_FILES 	= $(wildcard $(LIB_DIR)/c/*.c)
 
 # Always copied into the destination directory, not passed to karamel.
 HAND_WRITTEN_H_FILES	= $(filter-out $(LIB_DIR)/c/libintvector_debug.h, \
@@ -661,7 +639,7 @@ REQUIRED_FLAGS	= \
   -add-include 'Hacl_Curve25519_64.c:"curve25519-inline.h"' \
   -no-prefix 'MerkleTree' \
   -no-prefix 'MerkleTree.EverCrypt' \
-  -library EverCrypt.AutoConfig,EverCrypt.OpenSSL,EverCrypt.BCrypt \
+  -library EverCrypt.AutoConfig \
   -static-header 'EverCrypt.TargetConfig' \
   -no-prefix 'EverCrypt.TargetConfig' \
   $(BASE_FLAGS)
@@ -896,23 +874,6 @@ dist/msvc-compatible/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
 
 dist/gcc64-only/Makefile.basic: DEFAULT_FLAGS += -fbuiltin-uint128
 
-# miTLS
-# -----
-dist/mitls/Makefile.basic: DEFAULT_FLAGS += -falloca -ftail-calls
-dist/mitls/Makefile.basic: LEGACY_BUNDLE =
-# This is a broken AES... used by the (awful) EverCrypt.fst which in turns calls
-# EverCrypt.HACL.fsti which in turns calls (via C #ifdefs) Crypto.Symmetric.AES
-dist/mitls/Makefile.basic: HACL_OLD_FILES = \
-  code/old/experimental/aesgcm/aesgcm-c/Hacl_AES.c
-
-
-# Not passed to karamel, meaning that they don't end up in the Makefile.basic
-# list of C source files. They're added manually in dist/Makefile (see ifneq
-# tests).
-dist/mitls/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES = \
-  $(addprefix providers/evercrypt/c/evercrypt_,openssl.c bcrypt.c)
-
-
 # C89 distribution
 # ----------------
 #
@@ -943,7 +904,7 @@ dist/election-guard/Makefile.basic: BUNDLE_FLAGS = \
 dist/election-guard/Makefile.basic: INTRINSIC_FLAGS =
 dist/election-guard/Makefile.basic: VALE_ASMS =
 dist/election-guard/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
-dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/evercrypt_vale_stubs.c %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
+dist/election-guard/Makefile.basic: HAND_WRITTEN_FILES := $(filter-out %/Lib_PrintBuffer.c,$(HAND_WRITTEN_FILES))
 dist/election-guard/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = -bundle Lib.RandomBuffer.System= -bundle Lib.Memzero0=
 dist/election-guard/Makefile.basic: DEFAULT_FLAGS += \
   -bundle '\*[rename=Should_not_be_here]' \
@@ -1009,35 +970,11 @@ dist/merkle-tree/Makefile.basic: TARGETCONFIG_FLAGS =
 dist/merkle-tree/Makefile.basic: HAND_WRITTEN_LIB_FLAGS =
 dist/merkle-tree/Makefile.basic: INTRINSIC_FLAGS =
 
-# EVERCRYPT_CONFIG tweaks
-# -----------------------
-#
-# This is another level that will eventually go aways once we wean ourselves off
-# of OpenSSL and BCrypt.
-
-# This will eventually go. OpenSSL and BCrypt disabled
-ifeq ($(EVERCRYPT_CONFIG),everest)
-HAND_WRITTEN_OPTIONAL_FILES :=
-endif
-
-# Customizations for Kaizala. No BCrypt, no Vale.
-ifeq ($(EVERCRYPT_CONFIG),kaizala)
-dist/gcc-compatible/Makefile.basic: \
-  HAND_WRITTEN_OPTIONAL_FILES := $(filter-out %_bcrypt.c,$(HAND_WRITTEN_OPTIONAL_FILES))
-dist/gcc-compatible/Makefile.basic: \
-  HAND_WRITTEN_FILES := $(filter-out %_vale_stubs.c,$(HAND_WRITTEN_FILES))
-dist/gcc-compatible/Makefile.basic: \
-  VALE_ASMS :=
-endif
-
 # Actual KaRaMeL invocations
 # --------------------------
 
-.PRECIOUS: dist/%/Makefile.basic
-dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
-  $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS) | old-extract-c
+dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(VALE_ASMS)
 	mkdir -p $(dir $@)
-	[ x"$(HACL_OLD_FILES)" != x ] && cp $(HACL_OLD_FILES) $(patsubst %.c,%.h,$(HACL_OLD_FILES)) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_FILES)$(HAND_WRITTEN_H_FILES)$(HAND_WRITTEN_OPTIONAL_FILES)" != x ] && cp $(HAND_WRITTEN_FILES) $(HAND_WRITTEN_H_FILES) $(HAND_WRITTEN_OPTIONAL_FILES) $(dir $@) || true
 	[ x"$(HAND_WRITTEN_ML_BINDINGS)" != x ] && mkdir -p $(dir $@)/lib && cp $(HAND_WRITTEN_ML_BINDINGS) $(dir $@)lib/ || true
 	[ x"$(HAND_WRITTEN_ML_GEN)" != x ] && mkdir -p $(dir $@)/lib_gen && cp $(HAND_WRITTEN_ML_GEN) $(dir $@)lib_gen/ || true
@@ -1050,7 +987,6 @@ dist/%/Makefile.basic: $(ALL_KRML_FILES) dist/LICENSE.txt \
 	  -warn-error @2@4-6@15@18@21+22 \
 	  -fparentheses \
 	  -fextern-c \
-	  $(notdir $(HACL_OLD_FILES)) \
 	  $(notdir $(HAND_WRITTEN_FILES)) \
 	  -o libevercrypt.a
 	echo "This code was generated with the following toolchain." > $(dir $@)/INFO.txt
