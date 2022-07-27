@@ -460,6 +460,20 @@ val ecp384dh_i_radix:
     as_seq h1 (gsub result (size 48) (size 48)) == pointY *) )
 
 
+val ecp384dh_i_wnaf:
+    result:lbuffer uint8 (size 96)
+  -> scalar:lbuffer uint8 (size 48)
+  -> Stack uint64
+  (requires fun h ->
+    live h result /\ live h scalar /\ 
+    disjoint result scalar)
+  (ensures fun h0 r h1 ->
+    (* let pointX, pointY, flag = ecp256_dh_i #P384 (as_seq h0 scalar) in *)
+    modifies (loc result) h0 h1 (* /\
+    r == flag /\
+    as_seq h1 (gsub result (size 0) (size 48)) == pointX /\
+    as_seq h1 (gsub result (size 48) (size 48)) == pointY *) )
+
 
 [@ (Comment " This code is not side channel resistant on pub_key. \n Input: result: uint8[64], \n pub(lic)Key: uint8[64], \n scalar: uint8[32].
   \n Output: uint64, where 0 stands for the correct key generation. All the other values mean that an error has occurred. 

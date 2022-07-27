@@ -30,191 +30,11 @@ static inline bool compare(size_t len, uint8_t* comp, uint8_t* exp) {
 
 
 #include <assert.h>
-
-
-void hex2bytes(unsigned char *out, const char *in) {
-    int i;
-    int len = strlen(in);
-
-    assert(out != NULL);
-    assert(in != NULL);
-    assert(len == 64);
-
-    for (i = len - 2; i >= 0; i -= 2, out++)
-        assert(sscanf(in + i, "%02hhx", out) == 1);
-}
-
-
-#define MP_BE2LE(a)            \
-    do {                       \
-        unsigned char z_bswap; \
-        z_bswap = a[0];        \
-        a[0] = a[31];          \
-        a[31] = z_bswap;       \
-        z_bswap = a[1];        \
-        a[1] = a[30];          \
-        a[30] = z_bswap;       \
-        z_bswap = a[2];        \
-        a[2] = a[29];          \
-        a[29] = z_bswap;       \
-        z_bswap = a[3];        \
-        a[3] = a[28];          \
-        a[28] = z_bswap;       \
-        z_bswap = a[4];        \
-        a[4] = a[27];          \
-        a[27] = z_bswap;       \
-        z_bswap = a[5];        \
-        a[5] = a[26];          \
-        a[26] = z_bswap;       \
-        z_bswap = a[6];        \
-        a[6] = a[25];          \
-        a[25] = z_bswap;       \
-        z_bswap = a[7];        \
-        a[7] = a[24];          \
-        a[24] = z_bswap;       \
-        z_bswap = a[8];        \
-        a[8] = a[23];          \
-        a[23] = z_bswap;       \
-        z_bswap = a[9];        \
-        a[9] = a[22];          \
-        a[22] = z_bswap;       \
-        z_bswap = a[10];       \
-        a[10] = a[21];         \
-        a[21] = z_bswap;       \
-        z_bswap = a[11];       \
-        a[11] = a[20];         \
-        a[20] = z_bswap;       \
-        z_bswap = a[12];       \
-        a[12] = a[19];         \
-        a[19] = z_bswap;       \
-        z_bswap = a[13];       \
-        a[13] = a[18];         \
-        a[18] = z_bswap;       \
-        z_bswap = a[14];       \
-        a[14] = a[17];         \
-        a[17] = z_bswap;       \
-        z_bswap = a[15];       \
-        a[15] = a[16];         \
-        a[16] = z_bswap;       \
-    } while (0)
-
-
-
-#define RADIX 5
-#define DRADIX (1 << RADIX)
-#define DRADIX_WNAF ((DRADIX) << 1)
-
-
-/* fetch a scalar bit */
-static int scalar_get_bit(const unsigned char in[48], int idx) {
-    int widx, rshift;
-
-    widx = idx >> 3;
-    rshift = idx & 0x7;
-
-    if (idx < 0 || widx >= 48) return 0;
-
-    return (in[widx] >> rshift) & 0x1;
-}
-
-
-/* fetch a scalar bit */
-static int scalar_get_bit2(const unsigned char in[48], int idx) {
-    int widx, rshift;
-
-    widx = idx >> 3;
-    rshift = idx & 0x7;
-
-    if (idx < 0 || widx >= 48) {
-        printf("%s\n", "Disastre!");
-        return 0;
-    } 
-
-    return (in[widx] >> rshift) & 0x1;
-}
-
-
-
-// static void scalar_rwnaf(int8_t out[77], const unsigned char in[32]) {
-//     int i;
-//     int8_t window, d;
-
-//     window = (in[0] & (DRADIX_WNAF - 1)) | 1;
-//     for (i = 0; i < 50; i++) {
-//         d = (window & (DRADIX_WNAF - 1)) - DRADIX;
-//         out[i] = d;
-//         window = (window - d) >> RADIX;
-//         window += scalar_get_bit(in, (i + 1) * RADIX + 1) << 1;
-//         window += scalar_get_bit(in, (i + 1) * RADIX + 2) << 2;
-//         window += scalar_get_bit(in, (i + 1) * RADIX + 3) << 3;
-//         window += scalar_get_bit(in, (i + 1) * RADIX + 4) << 4;
-//         window += scalar_get_bit(in, (i + 1) * RADIX + 5) << 5;
-//     }
-
-//     d = (window & (DRADIX_WNAF - 1)) - DRADIX;
-//     out[50] = d;
-//     window = (window - d) >> RADIX;
-//     window += scalar_get_bit2(in, 256) << 1;
-//     window += scalar_get_bit2(in, 51 * RADIX + 2) << 2;
-//     window += scalar_get_bit2(in, 51 * RADIX + 3) << 3;
-//     window += scalar_get_bit2(in, 51 * RADIX + 4) << 4;
-//     window += scalar_get_bit2(in, 51 * RADIX + 5) << 5;
-
-
-//     out[i + 1] = window;
-// }
-
-
 #include <inttypes.h>
-
-static void scalar_rwnaf(int8_t out[77], const unsigned char in[48]) {
-    int i;
-    int8_t window, d;
-
-    window = (in[0] & (DRADIX_WNAF - 1)) | 1;
-    for (i = 0; i < 75; i++) {
-        d = (window & (DRADIX_WNAF - 1)) - DRADIX;
-        out[i] = d;
-        window = (window - d) >> RADIX;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 1) << 1;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 2) << 2;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 3) << 3;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 4) << 4;
-        window += scalar_get_bit(in, (i + 1) * RADIX + 5) << 5;
-    }
-
-    d = (window & (DRADIX_WNAF - 1)) - DRADIX;
-    out[i] = d;
-    window = (window - d) >> RADIX;
-    window += scalar_get_bit2(in, (i + 1) * RADIX + 1) << 1;
-    window += scalar_get_bit2(in, (i + 1) * RADIX + 2) << 2;
-    window += scalar_get_bit2(in, (i + 1) * RADIX + 3) << 3;
-    
-    out[i + 1] = window;
-}
-
-
-void reverse(uint8_t arr[], int n)
-{
-    uint8_t aux[n];
- 
-    for (int i = 0; i < n; i++) {
-        aux[n - 1 - i] = arr[i];
-    }
- 
-    for (int i = 0; i < n; i++) {
-        arr[i] = aux[i];
-    }
-}
- 
 
 
 bool test_ecdh()
 {
-
-
-
-
     static uint8_t publicKeyX1[32] = {
     0x70, 0x0c, 0x48, 0xf7, 0x7f, 0x56, 0x58, 0x4c, 0x5c, 0xc6, 0x32, 0xca, 0x65, 0x64, 0x0d, 0xb9, 0x1b, 0x6b, 0xac, 0xce, 0x3a, 0x4d, 0xf6, 0xb4, 0x2c, 0xe7, 0xcc, 0x83, 0x88, 0x33, 0xd2, 0x87 
     };
@@ -247,84 +67,45 @@ bool test_ecdh()
 
     printf("%s\n", "---------------------------------------------------------------" );
 
-    printf("%s\n", "ECDH Initiator");
+    printf("\n");
 
-
-    static uint8_t privateKey_p384[48] = {
-        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-        0xc7, 0x63, 0x4d, 0x81, 0xf4, 0x37, 0x2d, 0xdf,
-        0x58, 0x1a, 0xd,  0xb2, 0x48, 0xb0, 0xa7, 0x7a,
-        0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x73};
-
-
-    int len = 77;
-
-    int8_t* r0 = (int8_t*) malloc (sizeof (int8_t) * len);
-    uint64_t* r1 = (uint64_t*) malloc (sizeof (uint64_t) * len * 2);
-
-
-    reverse(privateKey_p384, 48  );
-    scalar_rwnaf (r0, privateKey_p384);
-    reverse(privateKey_p384, 48);    
-
-
-    Hacl_P256_scalar_rwnaf_1(r1, privateKey_p384);
-
-    
-        
-    for (int i = 0; i < len; i++)
-        printf("%" PRIx8 "  ", abs(r0[i]));
-
-    printf("\n" );
- 
-    for (int i = 0; i < len; i++) 
-        printf("%" PRIx64 "  ", r1[i * 2 ]);
-
-    printf("\n" );
-
-    for (int i = 0; i < len; i++) 
-        printf("%d", r1[i * 2 ] == abs(r0[i]) );
-
-    printf("\n" );
-
-
-
-    // uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
-    // uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+    printf("%s\n", "ECDHP256 Initiator - Montgomery Ladder");
+    printf("\n");
+    uint8_t* result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+    uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
     
     
-    // bool successDHI = Hacl_P256_ecp256dh_i_ml(result, privateKey);
-    // printf("\n");
-     bool successDHI = false;
-    // ok = ok && successDHI;
-    // compare_and_print(32, result, expectedPublicKeyX);
-    // compare_and_print(32, result + 32, expectedPublicKeyY);
-    
+    bool successDHI = Hacl_P256_ecp256dh_i_ml(result, privateKey);
+    ok = ok && successDHI;
+    compare_and_print(32, result, expectedPublicKeyX);
+    compare_and_print(32, result + 32, expectedPublicKeyY);
 
-    // printf("%s\n", "---------------------------------------------------------------" );
 
-    // printf("%s\n", "ECDH Initiator - Radix");
+    printf("\n");
 
 
 
-    // uint8_t* result_i_radix = (uint8_t*) malloc (sizeof (uint8_t) * 64);
-    
-    // successDHI = Hacl_P256_ecp256dh_i_radix(result_i_radix, privateKey);
-    // printf("\n");
-    // ok = ok && successDHI;
-    // compare_and_print(32, result_i_radix, expectedPublicKeyX);
-    // compare_and_print(32, result_i_radix + 32, expectedPublicKeyY);
+    printf("%s\n", "---------------------------------------------------------------" );
 
-    // printf("\n");
+    printf("\n");
+
+    printf("%s\n", "ECDHP256 Initiator - Radix");
+
+    uint8_t* result_i_radix = (uint8_t*) malloc (sizeof (uint8_t) * 64);    
+    successDHI = Hacl_P256_ecp256dh_i_radix(result_i_radix, privateKey);
+    printf("\n");
+    ok = ok && successDHI;
+    compare_and_print(32, result_i_radix, expectedPublicKeyX);
+    compare_and_print(32, result_i_radix + 32, expectedPublicKeyY);
+
+    printf("\n");
 
 
-    // printf("%s\n", "---------------------------------------------------------------" );
+    printf("%s\n", "---------------------------------------------------------------" );
 
-    printf("%s\n", "ECDH Initiator - WNAF");
+    printf("\n");
 
-
+    printf("%s\n", "ECDHP256 Initiator - WNAF");
 
     uint8_t* result_i_wnaf = (uint8_t*) malloc (sizeof (uint8_t) * 64);
     
@@ -335,116 +116,136 @@ bool test_ecdh()
     compare_and_print(32, result_i_wnaf + 32, expectedPublicKeyY);
 
     printf("\n");
-
     printf("%s\n", "---------------------------------------------------------------" );
 
-//     printf("%s\n", "ECDH Responder");
+    printf("\n");
 
-
-//     result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
-//     memcpy(pk, publicKeyX1,  32);
-//     memcpy(pk+32, publicKeyY1,  32);
+    printf("%s\n", "ECDHP256 Responder - Montgomery Ladder");
+    printf("\n");
+    result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+    memcpy(pk, publicKeyX1,  32);
+    memcpy(pk+32, publicKeyY1,  32);
        
-//     bool successDHR = Hacl_P256_ecp256dh_r_private_ml(result, pk, privateKey);
-//     ok = ok && compare_and_print(32, result, expectedResult);
-//     ok = ok && successDHR;
+    bool successDHR = Hacl_P256_ecp256dh_r_private_ml(result, pk, privateKey);
+    ok = ok && compare_and_print(32, result, expectedResult);
+    ok = ok && successDHR;
+
+    printf("\n");
+    printf("%s\n", "---------------------------------------------------------------" );
+
+    printf("\n");
+    printf("%s\n", "ECDHP256 Responder - Radix");
+    printf("\n");
 
 
-//     printf("%s\n", "---------------------------------------------------------------" );
-
-//     printf("%s\n", "ECDH Responder Radix");
-
-
-//     result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
-//     memcpy(pk, publicKeyX1,  32);
-//     memcpy(pk+32, publicKeyY1,  32);
+    result = (uint8_t*) malloc (sizeof (uint8_t) * 64);
+    memcpy(pk, publicKeyX1,  32);
+    memcpy(pk+32, publicKeyY1,  32);
        
-//     successDHR = Hacl_P256_ecp256dh_r_private_radix(result, pk, privateKey);
-//     ok = ok && compare_and_print(32, result, expectedResult);
-//     ok = ok && successDHR;
+    successDHR = Hacl_P256_ecp256dh_r_private_radix(result, pk, privateKey);
+    ok = ok && compare_and_print(32, result, expectedResult);
+    ok = ok && successDHR;
 
+    printf("\n");
+    printf("%s\n", "---------------------------------------------------------------" );
 
-//     static uint8_t privateKey_p384[48] = {
-//         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-//         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-//         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-//         0xc7, 0x63, 0x4d, 0x81, 0xf4, 0x37, 0x2d, 0xdf,
-//         0x58, 0x1a, 0xd,  0xb2, 0x48, 0xb0, 0xa7, 0x7a,
-//         0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x71};
+    static uint8_t privateKey_p384[48] = {
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+        0xc7, 0x63, 0x4d, 0x81, 0xf4, 0x37, 0x2d, 0xdf,
+        0x58, 0x1a, 0xd,  0xb2, 0x48, 0xb0, 0xa7, 0x7a,
+        0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x71};
 
-//     static uint8_t expectedPublicKeyX_p384[48] = {
-//         0x08, 0xD9, 0x99, 0x05, 0x7B, 0xA3, 0xD2, 0xD9, 
-//         0x69, 0x26, 0x00, 0x45, 0xC5, 0x5B, 0x97, 0xF0,
-//         0x89, 0x02, 0x59, 0x59, 0xA6, 0xF4, 0x34, 0xD6, 
-//         0x51, 0xD2, 0x07, 0xD1, 0x9F, 0xB9, 0x6E, 0x9E, 
-//         0x4F, 0xE0, 0xE8, 0x6E, 0xBE, 0x0E, 0x64, 0xF8,
-//         0x5B, 0x96, 0xA9, 0xC7, 0x52, 0x95, 0xDF, 0x61};
+    static uint8_t expectedPublicKeyX_p384[48] = {
+        0x08, 0xD9, 0x99, 0x05, 0x7B, 0xA3, 0xD2, 0xD9, 
+        0x69, 0x26, 0x00, 0x45, 0xC5, 0x5B, 0x97, 0xF0,
+        0x89, 0x02, 0x59, 0x59, 0xA6, 0xF4, 0x34, 0xD6, 
+        0x51, 0xD2, 0x07, 0xD1, 0x9F, 0xB9, 0x6E, 0x9E, 
+        0x4F, 0xE0, 0xE8, 0x6E, 0xBE, 0x0E, 0x64, 0xF8,
+        0x5B, 0x96, 0xA9, 0xC7, 0x52, 0x95, 0xDF, 0x61};
         
-//     static uint8_t expectedPublicKeyY_p384[48] = {
-//         0x71, 0x7F, 0x0E, 0x05, 0xA4, 0xE4, 0xC3, 0x12, 
-//         0x48, 0x40, 0x17, 0x20, 0x02, 0x92, 0x45, 0x8B, 
-//         0x4D, 0x8A, 0x27, 0x8A, 0x43, 0x93, 0x3B, 0xC1, 
-//         0x6F, 0xB1, 0xAF, 0xA0, 0xDA, 0x95, 0x4B, 0xD9, 
-//         0xA0, 0x02, 0xBC, 0x15, 0xB2, 0xC6, 0x1D, 0xD2, 
-//         0x9E, 0xAF, 0xE1, 0x90, 0xF5, 0x6B, 0xF1, 0x7F};
+    static uint8_t expectedPublicKeyY_p384[48] = {
+        0x71, 0x7F, 0x0E, 0x05, 0xA4, 0xE4, 0xC3, 0x12, 
+        0x48, 0x40, 0x17, 0x20, 0x02, 0x92, 0x45, 0x8B, 
+        0x4D, 0x8A, 0x27, 0x8A, 0x43, 0x93, 0x3B, 0xC1, 
+        0x6F, 0xB1, 0xAF, 0xA0, 0xDA, 0x95, 0x4B, 0xD9, 
+        0xA0, 0x02, 0xBC, 0x15, 0xB2, 0xC6, 0x1D, 0xD2, 
+        0x9E, 0xAF, 0xE1, 0x90, 0xF5, 0x6B, 0xF1, 0x7F};
 
-//     static uint8_t expectedResult_p384[96] = {
-//         0x13, 0x82, 0x51, 0xcd, 0x52, 0xac, 0x92, 0x98, 
-//         0xc1, 0xc8, 0xaa, 0xd9, 0x77, 0x32, 0x1d, 0xeb, 
-//         0x97, 0xe7, 0x09, 0xbd, 0x0b, 0x4c, 0xa0, 0xac, 
-//         0xa5, 0x5d, 0xc8, 0xad, 0x51, 0xdc, 0xfc, 0x9d, 
-//         0x15, 0x89, 0xa1, 0x59, 0x7e, 0x3a, 0x51, 0x20, 
-//         0xe1, 0xef, 0xd6, 0x31, 0xc6, 0x3e, 0x18, 0x35,
+    static uint8_t expectedResult_p384[96] = {
+        0x13, 0x82, 0x51, 0xcd, 0x52, 0xac, 0x92, 0x98, 
+        0xc1, 0xc8, 0xaa, 0xd9, 0x77, 0x32, 0x1d, 0xeb, 
+        0x97, 0xe7, 0x09, 0xbd, 0x0b, 0x4c, 0xa0, 0xac, 
+        0xa5, 0x5d, 0xc8, 0xad, 0x51, 0xdc, 0xfc, 0x9d, 
+        0x15, 0x89, 0xa1, 0x59, 0x7e, 0x3a, 0x51, 0x20, 
+        0xe1, 0xef, 0xd6, 0x31, 0xc6, 0x3e, 0x18, 0x35,
 
-//         0xca, 0xca, 0xe2, 0x98, 0x69, 0xa6, 0x2e, 0x16, 
-//         0x31, 0xe8, 0xa2, 0x81, 0x81, 0xab, 0x56, 0x61, 
-//         0x6d, 0xc4, 0x5d, 0x91, 0x8a, 0xbc, 0x09, 0xf3, 
-//         0xab, 0x0e, 0x63, 0xcf, 0x79, 0x2a, 0xa4, 0xdc, 
-//         0xed, 0x73, 0x87, 0xbe, 0x37, 0xbb, 0xa5, 0x69, 
-//         0x54, 0x9f, 0x1c, 0x02, 0xb2, 0x70, 0xed, 0x67
-// };
+        0xca, 0xca, 0xe2, 0x98, 0x69, 0xa6, 0x2e, 0x16, 
+        0x31, 0xe8, 0xa2, 0x81, 0x81, 0xab, 0x56, 0x61, 
+        0x6d, 0xc4, 0x5d, 0x91, 0x8a, 0xbc, 0x09, 0xf3, 
+        0xab, 0x0e, 0x63, 0xcf, 0x79, 0x2a, 0xa4, 0xdc, 
+        0xed, 0x73, 0x87, 0xbe, 0x37, 0xbb, 0xa5, 0x69, 
+        0x54, 0x9f, 0x1c, 0x02, 0xb2, 0x70, 0xed, 0x67
+};
 
-
-//     printf("%s\n", "---------------------------------------------------------------" );
-
-//     printf("%s\n", "ECDH Initiator - P384 - Montgomery Ladder");
+    printf("\n");
+    printf("%s\n", "ECDH Initiator - P384 - Montgomery Ladder");
 
 
-//     uint8_t* result_p384 = (uint8_t*) malloc (sizeof (uint8_t) * 96);
-//     bool successDHI_p384 = Hacl_P256_ecp384dh_i_ml(result_p384, privateKey_p384);
-//     printf("\n");
-//     ok = ok && successDHI_p384;
-//     compare_and_print(48, result_p384, expectedPublicKeyX_p384);
-//     compare_and_print(48, result_p384 + 48, expectedPublicKeyY_p384);
+    uint8_t* result_p384 = (uint8_t*) malloc (sizeof (uint8_t) * 96);
+    bool successDHI_p384 = Hacl_P256_ecp384dh_i_ml(result_p384, privateKey_p384);
+    printf("\n");
+    ok = ok && successDHI_p384;
+    compare_and_print(48, result_p384, expectedPublicKeyX_p384);
+    compare_and_print(48, result_p384 + 48, expectedPublicKeyY_p384);
+    printf("\n");
+    printf("%s\n", "---------------------------------------------------------------" );
+    printf("\n");
+    printf("%s\n", "ECDH Initiator - P384 - Radix");
+    successDHI_p384 = Hacl_P256_ecp384dh_i_radix(result_p384, privateKey_p384);
+    printf("\n");
+    ok = ok && successDHI_p384;
+    compare_and_print(48, result_p384, expectedPublicKeyX_p384);
+    compare_and_print(48, result_p384 + 48, expectedPublicKeyY_p384);
 
+    printf("\n");
+    printf("%s\n", "---------------------------------------------------------------" );
+    printf("\n");
 
-//     printf("%s\n", "ECDH Initiator - P384 - Radix");
+    printf("%s\n", "ECDH Initiator - P384 - WNAF");
+    successDHI_p384 = Hacl_P256_ecp384dh_i_wnaf(result_p384, privateKey_p384);
+    printf("\n");
+    ok = ok && successDHI_p384;
+    compare_and_print(48, result_p384, expectedPublicKeyX_p384);
+    compare_and_print(48, result_p384 + 48, expectedPublicKeyY_p384);
 
-//     successDHI_p384 = Hacl_P256_ecp384dh_i_radix(result_p384, privateKey_p384);
-//     printf("\n");
-//     ok = ok && successDHI_p384;
-//     compare_and_print(48, result_p384, expectedPublicKeyX_p384);
-//     compare_and_print(48, result_p384 + 48, expectedPublicKeyY_p384);
+    printf("\n");
+    printf("%s\n", "---------------------------------------------------------------" );
+    printf("\n");
 
-    
-//     printf("%s\n", "ECDH Responder - P384 - Montgomery Ladder");
+    printf("%s\n", "ECDH Responder - P384 - Montgomery Ladder");
+    printf("\n");
 
-//     uint8_t* pk_p384 = (uint8_t*) malloc (sizeof (uint8_t) * 96);
-//     memcpy(pk_p384, expectedPublicKeyX_p384,  48);
-//     memcpy(pk_p384 + 48, expectedPublicKeyY_p384,  48);
+    uint8_t* pk_p384 = (uint8_t*) malloc (sizeof (uint8_t) * 96);
+    memcpy(pk_p384, expectedPublicKeyX_p384,  48);
+    memcpy(pk_p384 + 48, expectedPublicKeyY_p384,  48);
        
-//     successDHR = Hacl_P256_ecp384dh_r_private_ml(result_p384, pk_p384, privateKey_p384);
-//     ok = ok && compare_and_print(48, result_p384, expectedResult_p384);
-//     ok = ok && compare_and_print(48, result_p384 + 48, expectedResult_p384 + 48);
-//     ok = ok && successDHR;
+    successDHR = Hacl_P256_ecp384dh_r_private_ml(result_p384, pk_p384, privateKey_p384);
+    ok = ok && compare_and_print(48, result_p384, expectedResult_p384);
+    ok = ok && compare_and_print(48, result_p384 + 48, expectedResult_p384 + 48);
+    ok = ok && successDHR;
 
+    printf("\n");
+    printf("%s\n", "---------------------------------------------------------------" );
+    printf("\n");
+    printf("%s\n", "ECDH Responder - P384 - Radix");
+    printf("\n");
 
-//     printf("%s\n", "ECDH Responder - P384 - Radix");
-
-//     successDHR = Hacl_P256_ecp384dh_r_private_radix(result_p384, pk_p384, privateKey_p384);
-//     ok = ok && compare_and_print(48, result_p384, expectedResult_p384);
-//     ok = ok && compare_and_print(48, result_p384 + 48, expectedResult_p384 + 48);
-//     ok = ok && successDHR;
+    successDHR = Hacl_P256_ecp384dh_r_private_radix(result_p384, pk_p384, privateKey_p384);
+    ok = ok && compare_and_print(48, result_p384, expectedResult_p384);
+    ok = ok && compare_and_print(48, result_p384 + 48, expectedResult_p384 + 48);
+    ok = ok && successDHR;
 
 
 

@@ -529,7 +529,7 @@ let felem_sub #c a b out =
 let felem_sub_zero #c arg2 out =  
   uploadZeroImpl out;
     let h0 = ST.get() in  
-  let t = sub_bn out arg2 out in
+  let t = sub_bn #c out arg2 out in
     let h1 = ST.get() in 
     lseq_upperbound (as_seq h0 out);
     lseq_upperbound (as_seq h0 arg2);

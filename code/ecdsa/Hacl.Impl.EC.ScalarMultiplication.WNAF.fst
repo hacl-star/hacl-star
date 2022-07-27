@@ -52,7 +52,6 @@ let dradix_wnaf : (r: uint64 {v r == 2 * m}) =
   (u64 64)
 
 
-inline_for_extraction noextract
 val scalar_rwnaf_step_compute_di: #c: curve -> w0: uint64 
   -> out: lbuffer uint64 (size ((getPower c / Spec.ECC.WNAF.w + 1) * 2))
   -> mask: uint64 {v mask = pow2 (v radix + 1) - 1} 
@@ -162,7 +161,7 @@ let scalar_compute_window_lemma #c scalar k =
   assert(scalar_as_nat scalar / pow2 (t + 1) % m * 2 == i)
 
 
-inline_for_extraction noextract
+
 val scalar_rwnaf_step_compute_window_: #c: curve 
   -> wStart: uint64 {v wStart < pow2 (64 - 5)}
   -> scalar: scalar_t #MUT #c 
@@ -857,7 +856,9 @@ let loopK_step #c d result j k tempPoint =
   let mask = eq_mask d (to_u64 k) in 
   eq_mask_lemma d (to_u64 k); 
   
-  getPointPrecomputed #c ((j *! size 16 +! k) *! 8) tempPoint;
+  let len = getCoordinateLenU64 c  *! 2 in 
+
+  getPointPrecomputed #c ((j *! size 16 +! k) *! len) tempPoint;
   copy_point_conditional_affine result tempPoint mask  
 
 
@@ -921,8 +922,8 @@ let point_affine_neg #c p result =
   felem_sub_zero #c pY rY
   
 
-val conditional_substraction: #c: curve -> result: point P256 -> p: point P256 -> scalar: lbuffer uint8 (size 32) -> 
-  tempBuffer: lbuffer uint64 (size 88) ->
+val conditional_substraction: #c: curve -> result: point c -> p: point c -> scalar: scalar_t #MUT #c
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
   Stack unit 
     (requires fun h -> live h result /\ live h p /\ live h scalar /\ live h tempBuffer)
     (ensures fun h0 _ h1 -> True)
@@ -936,7 +937,8 @@ let conditional_substraction #c result p scalar tempBuffer =
   let precompPoint = create (2 *! len) (u64 0) in 
   let precompNegativePoint = create (2 *! len) (u64 0) in 
 
-  let i0 = index scalar (size 31) in 
+  let len = getScalarLenBytes c -! 1ul in 
+  let i0 = index scalar len in 
   let mask = lognot((u64 0) -. to_u64 (logand i0 (u8 1))) in 
 
   getPointPrecomputed #c (size 0) precompPoint;
@@ -946,56 +948,6 @@ let conditional_substraction #c result p scalar tempBuffer =
 
   copy_point_conditional result tempPointJacobian mask;
   pop_frame()
-
-
-val scalar_multiplication_cmb_step_1: #c: curve 
-  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1))) 
-  -> result: point c
-  -> j: size_t
-  -> pointPrecomputed: pointAffine c
-  -> bufferForNegative : lbuffer uint64 (getCoordinateLenU64 c)
-  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
-  Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-  
-let scalar_multiplication_cmb_step_1 #c rnaf result j pointPrecomputed bufferForNegative tempBuffer = 
-  let d = index rnaf (j *! size 4 +! size 2) in
-  let is_neg = index rnaf (j *! size 4 +! size 2 +! size 1) in 
-  let d = shift_right (d -! size 1) (size 1) in 
-
-  loopK #c d pointPrecomputed j;
-
-  let yLut = sub pointPrecomputed (size 4) (size 4) in 
-  felem_sub_zero #c yLut bufferForNegative;
-  copy_conditional #P256 yLut bufferForNegative is_neg;
-  
-  Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer
-
-
-val scalar_multiplication_cmb_step_0: #c: curve 
-  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1))) 
-  -> result: point c
-  -> j: size_t
-  -> pointPrecomputed: pointAffine c
-  -> bufferForNegative : lbuffer uint64 (getCoordinateLenU64 c)
-  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
-  Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
-  
-let scalar_multiplication_cmb_step_0 #c rnaf result j pointPrecomputed bufferForNegative tempBuffer = 
-  let d = index rnaf (size 4 *! j) in
-  let is_neg = index rnaf (size 4 *! j +! size 1) in 
-  let d = shift_right (d -! size 1) (size 1) in 
-
-  loopK #c d pointPrecomputed j;
-
-  let yLut = sub pointPrecomputed (size 4) (size 4) in 
-  felem_sub_zero #c yLut bufferForNegative;
-  copy_conditional #P256 yLut bufferForNegative is_neg;
-  
-  Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer
 
 
 val getPointDoubleNTimes: #c: curve 
@@ -1042,55 +994,55 @@ let scalar_multiplication_cmb_step_2 #c rnaf result j pointPrecomputed bufferFor
 
   loopK #c d pointPrecomputed j;
 
-  let yLut = sub pointPrecomputed (size 4) (size 4) in 
+  let len = getCoordinateLenU64 c in 
+  let yLut = sub pointPrecomputed len len in 
   felem_sub_zero #c yLut bufferForNegative;
-  copy_conditional #P256 yLut bufferForNegative is_neg;
+  copy_conditional #c yLut bufferForNegative is_neg;
   
   Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer
 
 
-val scalar_multiplication_cmb: #c: curve ->  #buf_type: buftype -> result: point P256 -> 
-  scalar: lbuffer_t buf_type uint8 (size 32) -> 
-  tempBuffer:  lbuffer uint64 (size 88)  -> 
+inline_for_extraction noextract
+val scalar_multiplication_cmb_: #c: curve -> result: point c -> 
+  scalar: scalar_t #MUT #c -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
   Stack unit
   (requires fun h -> True )
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1)
 
-(*
-let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer = 
+let scalar_multiplication_cmb_ #c  result scalar tempBuffer = 
   push_frame();
-    let rnaf2 = create (size 104) (u64 0) in 
-    let lut = create (size 8) (u64 0) in 
-    let temp4 = sub tempBuffer (size 0) (size 4) in 
+    let lenWnaf = getLenWnaf #c +! 1ul in 
+    let rnaf2 = create (size 2 *! lenWnaf) (u64 0) in 
+    let len = getCoordinateLenU64 c in
+    let lut = create (size 2 *! getCoordinateLenU64 c) (u64 0) in 
+    let temp4 = sub tempBuffer (size 0) len in 
 
     scalar_rwnaf #c rnaf2 scalar;
     
     let invJ h1 (j:nat) = True in  
-    Lib.Loops.for 0ul 26ul invJ (fun j -> scalar_multiplication_cmb_step_1 rnaf2 result j lut temp4 tempBuffer);
-
-    getPointDoubleNTimes #c result tempBuffer radix;
-    
-    Lib.Loops.for 0ul 26ul invJ (fun j -> scalar_multiplication_cmb_step_0 rnaf2 result j lut temp4 tempBuffer);
-
-    conditional_substraction #c result result scalar tempBuffer;
-  
-
-  pop_frame()
-*)
-
-let scalar_multiplication_cmb #c #buf_type result scalar tempBuffer = 
-  push_frame();
-    let rnaf2 = create (size 104) (u64 0) in 
-    let lut = create (size 8) (u64 0) in 
-    let temp4 = sub tempBuffer (size 0) (size 4) in 
-
-    scalar_rwnaf #c rnaf2 scalar;
-    
-    let invJ h1 (j:nat) = True in  
-    Lib.Loops.for 0ul 52ul invJ (fun j -> scalar_multiplication_cmb_step_2 rnaf2 result j lut temp4 tempBuffer);
+    Lib.Loops.for 0ul lenWnaf invJ (fun j -> scalar_multiplication_cmb_step_2 rnaf2 result j lut temp4 tempBuffer);
 
 
     conditional_substraction #c result result scalar tempBuffer;
-  
 
   pop_frame()
+
+
+let scalar_multiplication_cmb_p256 = scalar_multiplication_cmb_ #P256
+
+let scalar_multiplication_cmb_p384 = scalar_multiplication_cmb_ #P384
+
+
+inline_for_extraction noextract
+val scalar_multiplication_cmb: #c: curve -> result: point c -> 
+  scalar: scalar_t #MUT #c -> 
+  tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
+  Stack unit
+  (requires fun h -> True )
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1)
+
+let scalar_multiplication_cmb #c result scalar tempBuffer = 
+  match c with 
+  |P256 -> scalar_multiplication_cmb_p256 result scalar tempBuffer
+  |P384 -> scalar_multiplication_cmb_p384 result scalar tempBuffer

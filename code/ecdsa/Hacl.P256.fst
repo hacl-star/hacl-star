@@ -90,6 +90,9 @@ let ecp384dh_i_ml result scalar = Hacl.Impl.EC.DH.ecp256dh_i P384 MontLadder res
 
 let ecp384dh_i_radix result scalar = Hacl.Impl.EC.DH.ecp256dh_i P384 Radix result scalar
 
+let ecp384dh_i_wnaf result scalar = Hacl.Impl.EC.DH.ecp256dh_i P384 WNAF result scalar
+
+
 
 let ecp256dh_r_public_ml result pubKey scalar = Hacl.Impl.EC.DH.ecp256dh_r_public #P256 #MontLadder result pubKey scalar
 

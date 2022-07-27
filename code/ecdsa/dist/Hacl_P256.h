@@ -313,6 +313,8 @@ uint64_t Hacl_P256_ecp384dh_i_ml(uint8_t *result, uint8_t *scalar);
 
 uint64_t Hacl_P256_ecp384dh_i_radix(uint8_t *result, uint8_t *scalar);
 
+uint64_t Hacl_P256_ecp384dh_i_wnaf(uint8_t *result, uint8_t *scalar);
+
 /*
  This code is not side channel resistant on pub_key. 
  Input: result: uint8[64], 
