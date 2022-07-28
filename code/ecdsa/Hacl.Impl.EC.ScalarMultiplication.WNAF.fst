@@ -788,32 +788,41 @@ let scalar_rwnaf #c out scalar =
 #pop-options
 
 
-assume val getPointPrecomputed_P256: index: size_t {v index < getPower P256 / m / 2 * 8} 
+assume val getPointPrecomputed_P256: index: size_t {v index < (getPower P256 / w + 1) * pow2 (w - 1)} 
   -> result: pointAffine P256 ->
   Stack unit
-  (requires fun h -> True)
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+  (requires fun h -> live h result)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ point_aff_eval P256 h1 result /\ (
     let j = v index / pow2 (w - 1) in 
     let i = v index % pow2 (w - 1) in 
-    True (* pointEqual (toJacobianCoordinates (fromDomainAffine r)) (point_mult (basePoint #c) (pow2 (j * 10) * i) *)
-  ))
+    let p_i = point_mult #P256 (pow2 (j * w) * i) (basePoint #P256) in 
+    let r = fromDomainPoint #P256 #DH (toJacobianCoordinates (point_affine_as_nat P256 h1 result)) in 
+    pointEqual r p_i))
 
 
-assume val getPointPrecomputed_P384: index: size_t {v index < getPower P384 / m / 2 * 8} 
+assume val getPointPrecomputed_P384: index: size_t {v index < (getPower P384 / w + 1) * pow2 (w - 1)} 
   -> result: pointAffine P384 ->
   Stack unit
-  (requires fun h -> True)
-  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ (
+  (requires fun h -> live h result)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ point_aff_eval P384 h1 result /\ (
     let j = v index / pow2 (w - 1) in 
     let i = v index % pow2 (w - 1) in 
-    True (* pointEqual (toJacobianCoordinates (fromDomainAffine r)) (point_mult (basePoint #c) (pow2 (j * 10) * i) *)
-  ))
+    let p_i = point_mult #P384 (pow2 (j * w) * i) (basePoint #P384) in 
+    let r = fromDomainPoint #P384 #DH (toJacobianCoordinates (point_affine_as_nat P384 h1 result)) in 
+    pointEqual r p_i))
 
 
-val getPointPrecomputed: #c: curve -> index: size_t {v index < getPower c / m / 2 * 8} -> result: pointAffine c ->
+val getPointPrecomputed: #c: curve 
+  -> index: size_t {v index < (getPower c / w + 1) * pow2 (w - 1)}
+  -> result: pointAffine c ->
   Stack unit
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1)
+  (requires fun h -> live h result)
+  (ensures fun h0 r h1 -> modifies (loc result) h0 h1 /\ point_aff_eval c h1 result /\ (
+    let j = v index / pow2 (w - 1) in 
+    let i = v index % pow2 (w - 1) in 
+    let p_i = point_mult #c (pow2 (j * w) * i) (basePoint #c) in 
+    let r = fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 result)) in 
+    pointEqual r p_i))
 
 let getPointPrecomputed #c index result = 
   match c with 
@@ -821,21 +830,18 @@ let getPointPrecomputed #c index result =
   |P384 -> getPointPrecomputed_P384 index result
   
 
-val copy_point_conditional_affine:  #c: curve 
+val copy_point_conditional_affine: #c: curve 
   -> result: pointAffine c 
   -> p: pointAffine c 
   -> mask: uint64 {v mask = 0 \/ v mask = pow2 64 - 1} ->
   Stack unit
   (requires fun h -> 
-    live h result /\ live h p /\ disjoint result p /\ (
-    let len = getCoordinateLenU64 c in
-    let pX, pY = gsub p (size 0) len, gsub p len len in 
-    as_nat c h pX < getPrime c /\ as_nat c h pY < getPrime c))
+    live h result /\ live h p /\ disjoint result p /\ point_aff_eval c h p)
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ (
     let len = getCoordinateLenU64 c in 
     let pX, pY = gsub p (size 0) len, gsub p len len in 
     let rX, rY = gsub result (size 0) len, gsub result len len in 
-    (v mask = pow2 64 - 1 ==> (felem_eval c h1 rX /\ felem_eval c h1 rY)) /\ (
+    (v mask = pow2 64 - 1 ==> point_aff_eval c h1 result) /\ (
     if v mask = 0 then
       as_nat c h1 rX == as_nat c h0 rX /\ as_nat c h1 rY == as_nat c h0 rY
     else 
@@ -847,19 +853,43 @@ let copy_point_conditional_affine #c result p mask =
   Hacl.Impl.EC.Precomputed.copy_point_conditional_affine #MUT #c result pX pY mask
 
 
-val loopK_step: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> k: size_t
+val loopK_step: #c: curve -> d: uint64 -> result: pointAffine c 
+  -> j: size_t {v j < (getPower c / w + 1)} 
+  -> k: size_t {v k < pow2 (w - 1)}
   -> tempPoint: pointAffine c -> Stack unit
-  (requires fun h -> live h result /\ live h tempPoint)
-  (ensures fun h0 _ h1 -> True)
+  (requires fun h -> live h result /\ live h tempPoint /\ disjoint result tempPoint)
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempPoint) h0 h1 /\ (
+    let len = getCoordinateLenU64 c in 
+    let rX, rY = gsub result (size 0) len, gsub result len len in 
+    (v d == v k ==> point_aff_eval c h1 result) /\ (
+    if v d <> v k then
+      as_nat c h1 rX == as_nat c h0 rX /\ as_nat c h1 rY == as_nat c h0 rY
+    else 
+      pointEqual (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 result))) (point_mult #c (pow2 (v j * w) * v k) (basePoint #c)))))
+
 
 let loopK_step #c d result j k tempPoint = 
   let mask = eq_mask d (to_u64 k) in 
-  eq_mask_lemma d (to_u64 k); 
-  
-  let len = getCoordinateLenU64 c  *! 2 in 
+    eq_mask_lemma d (to_u64 k); 
+    let h0 = ST.get() in 
+  getPointPrecomputed #c (j *! size 16 +! k) tempPoint;
+    let h1 = ST.get() in 
+  copy_point_conditional_affine result tempPoint mask;
+    let h2 = ST.get() in 
 
-  getPointPrecomputed #c ((j *! size 16 +! k) *! len) tempPoint;
-  copy_point_conditional_affine result tempPoint mask  
+  calc (==) {
+    (v j * pow2 (w - 1) + v k) / pow2 (w - 1);
+  (==) {}
+    v j + v k / pow2 (w - 1);
+  (==) {small_div (v k) (pow2 (w - 1))}
+    v j;
+  };
+
+  calc (==) {
+    (v j * pow2 (w - 1) + v k) % pow2 (w - 1);
+  (==) {lemma_mod_plus (v k) (v j) (pow2 (w - 1))}
+    v k;
+  }
 
 
 

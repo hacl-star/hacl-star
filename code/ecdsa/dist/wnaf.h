@@ -6331,13 +6331,17 @@ p384_precomputed_rwnaf[14784] =
 };
 
 
+static int coordinatesInPoint = 2;
+
 static inline void requestBufferP256(uint64_t* result, uint32_t x1){
-	memcpy(result, &p256_precomputed_rwnaf[x1], 4 * 2 * 8);
+	int lengthOfCoordinate = 4;
+	memcpy(result, &p256_precomputed_rwnaf[x1 * lengthOfCoordinate * coordinatesInPoint], lengthOfCoordinate * coordinatesInPoint * (sizeof (uint64_t) / sizeof (uint8_t)));
 	return;
 }
 
 static inline void requestBufferP384(uint64_t* result, uint32_t x1){
-	memcpy(result, &p384_precomputed_rwnaf[x1], 6 * 2 * 8);
+	int lengthOfCoordinate = 6;
+	memcpy(result, &p384_precomputed_rwnaf[x1 * lengthOfCoordinate * coordinatesInPoint], lengthOfCoordinate * coordinatesInPoint * (sizeof (uint64_t) / sizeof (uint8_t)));
 	return;
 }
 
