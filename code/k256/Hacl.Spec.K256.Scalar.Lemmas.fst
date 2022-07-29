@@ -465,7 +465,8 @@ let qmul_shift_384_lemma_eval_fits l =
 
 val qmul_shift_384_lemma (a b:qelem_lseq) :
   Lemma (let x = SD.bn_v a * SD.bn_v b / pow2 383 % 2 in
-    SD.bn_v (qmul_shift_384 a b) = SD.bn_v a * SD.bn_v b / pow2 384 + x)
+    let res = SD.bn_v (qmul_shift_384 a b) in
+    res < S.q /\ res = SD.bn_v a * SD.bn_v b / pow2 384 + x)
 
 let qmul_shift_384_lemma a b =
   let l = SB.bn_mul a b in

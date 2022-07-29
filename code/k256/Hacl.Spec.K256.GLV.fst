@@ -2,6 +2,7 @@ module Hacl.Spec.K256.GLV
 
 open FStar.Mul
 
+module SE = Spec.Exponentiation
 module S = Spec.K256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -9,7 +10,7 @@ module S = Spec.K256
 // For more comments see https://github.com/bitcoin-core/secp256k1/blob/master/src/scalar_impl.h
 
 (**
- Fast computation of [lambda]P as (beta * x, y) in affine coordinates
+ Fast computation of [lambda]P as (beta * x, y) in affine and projective coordinates
 *)
 
 let lambda : S.qelem = 0x5363ad4cc05c30e0a5261c028812645a122e22ea20816678df02967c1b23bd72
@@ -30,10 +31,6 @@ let aff_point_mul_lambda (p:S.aff_point) : S.aff_point =
 // fast computation of [lambda]G in affine coordinates
 let aff_point_mul_g_lambda () : S.aff_point =
   (S.(beta *% S.g_x), S.g_y)
-
-(**
- Fast computation of [lambda]P as (beta * x, y) in projective coordinates
-*)
 
 // fast computation of [lambda]P in projective coordinates
 let point_mul_lambda (p:S.proj_point) : S.proj_point =
@@ -106,7 +103,7 @@ let scalar_split_lambda (k:S.qelem) : S.qelem & S.qelem =
   r1, r2
 
 (**
- Fast computation of [k]P in affine and projective coordinates
+ Fast computation of [k]P in affine coordinates
 *)
 
 // [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
@@ -128,22 +125,3 @@ let aff_point_mul_double_g (a1:S.qelem) (a2:S.qelem) (p:S.aff_point) : S.aff_poi
   S.aff_point_add
     S.(aff_point_add (aff_point_mul_g a1_r1) (aff_point_mul a1_r2 (aff_point_mul_g_lambda ())))
     S.(aff_point_add (aff_point_mul a2_r1 p) (aff_point_mul a2_r2 (aff_point_mul_lambda p)))
-
-
-// [k]P
-let point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.proj_point =
-  let r1, r2 = scalar_split_lambda k in
-  S.(point_add (point_mul r1 p) (point_mul r2 (point_mul_lambda p)))
-
-// [k]G
-let point_mul_g_split_lambda (k:S.qelem) : S.proj_point =
-  let r1, r2 = scalar_split_lambda k in
-  S.(point_add (point_mul_g r1) (point_mul r2 (point_mul_g_lambda ())))
-
-// [a1]G + [a2]P
-let point_mul_double_g (a1:S.qelem) (a2:S.qelem) (p:S.proj_point) : S.proj_point =
-  let a1_r1, a1_r2 = scalar_split_lambda a1 in
-  let a2_r1, a2_r2 = scalar_split_lambda a2 in
-  S.point_add
-    S.(point_add (point_mul_g a1_r1) (point_mul a1_r2 (point_mul_g_lambda ())))
-    S.(point_add (point_mul a2_r1 p) (point_mul a2_r2 (point_mul_lambda p)))

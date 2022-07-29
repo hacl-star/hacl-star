@@ -3,6 +3,9 @@ module Hacl.Spec.K256.GLV.Lemmas
 open FStar.Mul
 
 module M = Lib.NatMod
+module LE = Lib.Exponentiation
+module SE = Spec.Exponentiation
+
 module S = Spec.K256
 module LS = Spec.K256.Lemmas
 module SM = Hacl.Spec.K256.ECSM.Lemmas
@@ -298,23 +301,48 @@ let lemma_aff_point_mul_split_lambda k p =
   }
 
 
+(**
+ Fast computation of [k]P in projective coordinates
+*)
+
+// [k]P
+let point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.proj_point =
+  let r1, r2 = scalar_split_lambda k in
+  lemma_scalar_split_lambda_fits k;
+  SE.exp_double_fw S.mk_k256_concrete_ops p 129 r1 (point_mul_lambda p) r2 4
+
+// [k]G
+let point_mul_g_split_lambda (k:S.qelem) : S.proj_point =
+  let r1, r2 = scalar_split_lambda k in
+  lemma_scalar_split_lambda_fits k;
+  SE.exp_double_fw S.mk_k256_concrete_ops S.g 129 r1 (point_mul_g_lambda ()) r2 4
+
+// TODO: add exp_four_fw?
+// [a1]G + [a2]P
+let point_mul_double_g (a1:S.qelem) (a2:S.qelem) (p:S.proj_point) : S.proj_point =
+  let a1_r1, a1_r2 = scalar_split_lambda a1 in
+  let a2_r1, a2_r2 = scalar_split_lambda a2 in
+  S.point_add
+    S.(point_add (point_mul_g a1_r1) (point_mul a1_r2 (point_mul_g_lambda ())))
+    S.(point_add (point_mul a2_r1 p) (point_mul a2_r2 (point_mul_lambda p)))
+
+
 val lemma_point_mul_split_lambda: k:S.qelem -> p:S.proj_point ->
   Lemma (S.to_aff_point (point_mul_split_lambda k p) = aff_point_mul k (S.to_aff_point p))
 
 let lemma_point_mul_split_lambda k p =
   let open Spec.K256 in
   let r1, r2 = scalar_split_lambda k in
+  lemma_scalar_split_lambda_fits k;
   let p_aff = to_aff_point p in
   calc (==) {
     to_aff_point (point_mul_split_lambda k p);
-    (==) { LS.to_aff_point_add_lemma (point_mul r1 p) (point_mul r2 (point_mul_lambda p)) }
+    (==) {
+      SE.exp_double_fw_lemma mk_k256_concrete_ops p 129 r1 (point_mul_lambda p) r2 4;
+      LE.exp_double_fw_lemma mk_k256_comm_monoid
+        p_aff 129 r1 (to_aff_point (point_mul_lambda p)) r2 4 }
     aff_point_add
-      (to_aff_point (point_mul r1 p))
-      (to_aff_point (point_mul r2 (point_mul_lambda p)));
-    (==) { SM.lemma_point_mul r1 p }
-    aff_point_add (aff_point_mul r1 p_aff) (to_aff_point (point_mul r2 (point_mul_lambda p)));
-    (==) { SM.lemma_point_mul r2 (point_mul_lambda p) }
-    aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (to_aff_point (point_mul_lambda p)));
+      (aff_point_mul r1 p_aff) (aff_point_mul r2 (to_aff_point (point_mul_lambda p)));
     (==) { lemma_glv p }
     aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (aff_point_mul lambda p_aff));
     (==) { lemma_glv_aff p_aff }

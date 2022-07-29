@@ -13,6 +13,8 @@ module LSeq = Lib.Sequence
 
 module S = Spec.K256
 module KL = Hacl.Spec.K256.Scalar.Lemmas
+module SG = Hacl.Spec.K256.GLV
+module SGL = Hacl.Spec.K256.GLV.Lemmas
 
 module BD = Hacl.Bignum.Definitions
 module BN = Hacl.Bignum
@@ -341,3 +343,41 @@ let is_qelem_le_q_halved_vartime f =
   let (a0,a1,a2,a3) = (f.(0ul), f.(1ul), f.(2ul), f.(3ul)) in
   KL.is_qelem_le_q_halved_vartime4_lemma (a0,a1,a2,a3);
   is_qelem_le_q_halved_vartime4 (a0,a1,a2,a3)
+
+
+inline_for_extraction noextract
+val rshift_update_sub: res:qelem -> l:lbuffer uint64 8ul -> Stack unit
+  (requires fun h -> live h res /\ live h l /\ disjoint res l /\
+    as_seq h res == LSeq.create 4 (u64 0))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+   (let res_b = SN.bn_rshift (as_seq h0 l) 6 in
+    let res_b_padded = LSeq.create 4 (u64 0) in
+    let res_b_padded = LSeq.update_sub res_b_padded 0 2 res_b in
+    as_seq h1 res == res_b_padded))
+
+let rshift_update_sub res l =
+  let h1 = ST.get () in
+  update_sub_f h1 res 0ul 2ul
+    (fun h -> SN.bn_rshift (as_seq h1 l) 6)
+    (fun _ -> BN.bn_rshift 8ul l 6ul (sub res 0ul 2ul))
+
+
+[@CInline]
+let qmul_shift_384 res a b =
+  push_frame ();
+  let h0 = ST.get () in
+  let l = create (2ul *! qnlimb) (u64 0) in
+  kn.BN.mul a b l; // l = a * b
+  let res_b_padded = create_qelem () in
+  rshift_update_sub res_b_padded l;
+  let _ = BN.bn_add1 qnlimb res_b_padded (u64 1) res in
+  let flag = l.(5ul) >>. 63ul in
+  let mask = u64 0 -. flag in
+  map2T qnlimb res (BB.mask_select mask) res res_b_padded;
+  let h2 = ST.get () in
+  assert (as_seq h2 res == Hacl.Spec.K256.Scalar.qmul_shift_384 (as_seq h0 a) (as_seq h0 b));
+  KL.qmul_shift_384_lemma (as_seq h0 a) (as_seq h0 b);
+  KL.qas_nat4_is_qas_nat (as_seq h0 a);
+  KL.qas_nat4_is_qas_nat (as_seq h0 b);
+  KL.qas_nat4_is_qas_nat (as_seq h2 res);
+  pop_frame ()

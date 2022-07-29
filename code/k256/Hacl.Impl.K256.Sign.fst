@@ -20,6 +20,7 @@ open Hacl.K256.Field
 open Hacl.K256.Scalar
 open Hacl.Impl.K256.Point
 open Hacl.Impl.K256.PointMul
+open Hacl.Impl.K256.GLV
 
 module BL = Hacl.Spec.K256.Field52.Lemmas
 module BB = Hacl.Bignum.Base
@@ -46,7 +47,8 @@ let ecdsa_sign_r r k =
   let x_bytes = create 32ul (u8 0) in
 
   let p = create_point () in
-  point_mul_g p k; // p = [k]G
+  // point_mul_g p k; // p = [k]G
+  point_mul_g_split_lambda p k; // p = [k]G
   let x, y, z = getx p, gety p, getz p in
 
   FI.finv tmp z; // tmp = zinv
