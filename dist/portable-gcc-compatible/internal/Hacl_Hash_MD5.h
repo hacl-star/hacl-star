@@ -37,7 +37,6 @@ extern "C" {
 
 #include "../Hacl_Hash_MD5.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Hash_Core_MD5_legacy_init */
 
 void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s);

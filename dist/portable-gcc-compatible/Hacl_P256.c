@@ -26,7 +26,7 @@
 
 #include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Krmllib.h"
-
+#include "lib_intrinsics.h"
 /* SNIPPET_START: isZero_uint64_CT */
 
 static uint64_t isZero_uint64_CT(uint64_t *f)

@@ -2,20 +2,9 @@ open Ctypes
 module Bindings(F:Cstubs.FOREIGN) =
   struct
     open F
-    type hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 =
-      [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 ] structure
-    let (hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 :
-      [ `hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 ] structure typ) =
-      structure "Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s"
-    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_len =
-      field hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 "len" uint32_t
-    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_n =
-      field hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 "n" (ptr uint32_t)
-    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_mu =
-      field hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 "mu" uint32_t
-    let hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_r2 =
-      field hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 "r2" (ptr uint32_t)
-    let _ = seal hacl_Bignum_MontArithmetic_bn_mont_ctx_u32
+    module Hacl_Bignum_applied =
+      (Hacl_Bignum_bindings.Bindings)(Hacl_Bignum_stubs)
+    open Hacl_Bignum_applied
     let hacl_GenericField32_field_modulus_check =
       foreign "Hacl_GenericField32_field_modulus_check"
         (uint32_t @-> ((ptr uint32_t) @-> (returning bool)))

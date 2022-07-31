@@ -535,9 +535,6 @@ let lemma_powers () =
    assert_norm(pow2 64 * pow2 64 * pow2 64  * pow2 64 * pow2 64* pow2 64 * pow2 64 * pow2 64 = pow2 (8 * 64))
 
 
-#push-options "--z3rlimit 300"
-
-
 val bignum_bn_v_is_as_nat: h: mem -> a: felem -> Lemma (Hacl.Spec.Bignum.Definitions.bn_v (as_seq h a) == as_nat h a)
 
 let bignum_bn_v_is_as_nat h a = 
@@ -601,23 +598,19 @@ let mul f r out =
   bignum_bn_v_is_wide_as_nat h1 out
 
 
+let lemma_mult_le_both (a b:nat) (n1 n2:nat):
+  Lemma (requires (a <= n1 /\ b <= n2))
+        (ensures (a * b <= n1 * n2)) = ()
+
 val lemma_320_64:a: uint64 -> b: uint64 -> c: uint64 -> d: uint64 -> e: uint64 -> u: uint64 -> Lemma 
   (uint_v u * uint_v a +  (uint_v u * uint_v b) * pow2 64 + (uint_v u * uint_v c) * pow2 64 * pow2 64 + (uint_v u * uint_v d) * pow2 64 * pow2 64 * pow2 64 + uint_v e  < pow2 320)
-  
+
+#push-options "--z3rlimit 50"
 let lemma_320_64 a b c d e u = 
-
-  lemma_mult_le_left (uint_v a) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v a) (pow2 64 - 1);  
-  
-  lemma_mult_le_left (uint_v b) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v b) (pow2 64 - 1);
-
-  lemma_mult_le_left (uint_v c) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v c) (pow2 64 - 1);  
-
-  lemma_mult_le_left (uint_v d) (uint_v u) (pow2 64 - 1);
-  lemma_mult_le_right (uint_v u) (uint_v d) (pow2 64 - 1);  
-
+  lemma_mult_le_both (uint_v u) (uint_v a) (pow2 64 - 1) (pow2 64 - 1);  
+  lemma_mult_le_both (uint_v u) (uint_v b) (pow2 64 - 1) (pow2 64 - 1);  
+  lemma_mult_le_both (uint_v u) (uint_v c) (pow2 64 - 1) (pow2 64 - 1);  
+  lemma_mult_le_both (uint_v u) (uint_v d) (pow2 64 - 1) (pow2 64 - 1);  
   assert_norm((pow2 64 - 1) * (pow2 64 - 1) +  
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 + 
     ((pow2 64 - 1) * (pow2 64 - 1)) * pow2 64 * pow2 64 + 

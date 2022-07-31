@@ -16,6 +16,7 @@ module B = LowStar.Buffer
   about the abstract footprint from the client. *)
 
 unfold
+inline_for_extraction noextract
 let getter (flag: bool) = unit -> Stack bool
   (requires (fun _ -> true))
   (ensures (fun h0 b h1 ->

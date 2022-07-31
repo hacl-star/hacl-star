@@ -21,6 +21,10 @@ module VecTranspose = Lib.IntVector.Transpose
 module LSeq = Lib.Sequence
 module HD = Hacl.Hash.Definitions
 
+(* Force ordering in dependency analysis so that monomorphizations are inserted
+   into the Types module first. *)
+let _ = Hacl.Impl.SHA2.Types.uint8_8p
+
 #set-options "--max_fuel 0 --max_ifuel 0 --z3rlimit 50"
 
 unfold

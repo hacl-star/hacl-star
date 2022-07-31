@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_IntTypes_Intrinsics_add_carry_u32 */
 
 static inline uint32_t

@@ -38,7 +38,6 @@ extern "C" {
 #include "Hacl_SHA2_Generic.h"
 #include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_SHA2_Scalar32_sha224 */
 
 void Hacl_SHA2_Scalar32_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input);

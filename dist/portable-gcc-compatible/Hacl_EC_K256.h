@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_Bignum_K256.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_EC_K256_mk_felem_zero */
 
 /*******************************************************************************

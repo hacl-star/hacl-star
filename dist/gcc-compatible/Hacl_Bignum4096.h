@@ -37,9 +37,8 @@ extern "C" {
 
 #include "Hacl_Krmllib.h"
 #include "Hacl_Bignum_Base.h"
-#include "Hacl_Bignum256.h"
+#include "Hacl_Bignum.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /*******************************************************************************
 
 A verified 4096-bit bignum library.

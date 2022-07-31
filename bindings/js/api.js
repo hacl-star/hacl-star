@@ -7,18 +7,24 @@ if (typeof module !== 'undefined') {
   var shell = require(path.resolve(__dirname, './shell.js'));
   var api_promise = Promise.resolve(require(path.resolve(__dirname, './api.json')));
   var layouts_promise = Promise.resolve(require(path.resolve(__dirname, './layouts.json')));
-  var modules_promise = Promise.resolve(shell.my_modules.map(m => {
-    var source = fs.readFileSync(path.resolve(__dirname, './' + m + ".wasm"));
-    return new Uint8Array(source);
-  }));
 
 } else {
   var loader = this;
   var shell = this;
   var api_promise = fetch("api.json").then(r => r.json());
   var layouts_promise = fetch("layouts.json").then(r => r.json());
-  var modules_promise = Promise.all(my_modules.map(m => fetch(m + ".wasm")))
-    .then(response => Promise.all(response.map(r => r.arrayBuffer())));
+}
+
+// We now allow the user to pass a custom list of modules if they want to do
+// their own, more lightweight packaging.
+function getModulesPromise(modules=shell.my_modules) {
+  const readModule = async m =>
+    typeof module !== 'undefined'
+      ? new Uint8Array(await fs.promises.readFile(path.resolve(__dirname, './' + m)))
+      : (await fetch(m)).arrayBuffer();
+  return Promise.all(modules.map(async name =>
+    ({ buf: await readModule(name + ".wasm"), name })
+  ));
 }
 
 // Uncomment for debug
@@ -161,7 +167,7 @@ var validateJSON = function(json) {
       func_obj.args.forEach((arg, i) => {
         if (!(arg.kind === "input" || (arg.kind === "output")))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'output' or 'input'");
-        if (!(arg.type === "bool" || arg.type === "int32" || arg.type.startsWith("buffer") || arg.type[0].toUpperCase() == arg.type[0]))
+        if (!(arg.type === "bool" || arg.type === "uint32" || arg.type.startsWith("buffer") || arg.type[0].toUpperCase() == arg.type[0]))
           throw Error("in " + obj_name + ", argument #" + i + " should have a 'kind' that is 'int', 'bool' or 'buffer'");
         if (arg.type.startsWith("buffer") && arg.size === undefined)
           throw Error("in " + obj_name + ", argument #" + i + " is a buffer and should have a 'size' field");
@@ -172,7 +178,7 @@ var validateJSON = function(json) {
         if ((arg.kind === "output" || (arg.kind === "input" && arg.interface_index !== undefined)) && !Array.isArray(arg.tests))
           throw Error("the 'tests' field for argument #" + i + " of " + obj_name + " should be an array");
 
-        if (arg.type === "int32" && arg.kind === "input" && arg.interface_index !== undefined)
+        if (arg.type === "uint32" && arg.kind === "input" && arg.interface_index !== undefined)
           length_args_available[arg.name] = true;
 
         if (arg.type.startsWith("buffer") && arg.kind === "input" && typeof arg.size === "string") {
@@ -216,14 +222,11 @@ var HaclWasm = (function() {
 
   // The WebAssembly modules have to be initialized before calling any function.
   // To be called only if isInitialized == false.
-  var loadWasm = async () => {
+  var loadWasm = async (modules) => {
     if (!isInitialized) {
       Module = await loader.link(
         my_imports,
-        (await modules_promise).map((buf, i) => ({
-          buf,
-          name: shell.my_modules[i]
-        }))
+        await getModulesPromise(modules)
       );
       isInitialized = true;
     }
@@ -531,7 +534,7 @@ var HaclWasm = (function() {
         if (var_ in args_int32s && var_value != args_int32s[var_])
           throw new Error("Inconsistency in sizes; previously, "+var_+"="+args_int32s[var_]+"; now "+var_value);
         args_int32s[var_] = var_value;
-      } else if (arg.type === "int32" && arg.interface_index !== undefined) {
+      } else if (arg.type === "uint32" && arg.interface_index !== undefined) {
         // API contains e.g.:
         //   { "name": "len", "interface_index": 3 },
         //   { "name": "buf", "type": "buffer", "size": "len", "kind": "output" }
@@ -577,7 +580,7 @@ var HaclWasm = (function() {
         return debug("array", copy_array_to_stack(arg.type, arg_byte_buffer, i));
       }
 
-      if (arg.type === "bool" || arg.type === "int32") {
+      if (arg.type === "bool" || arg.type === "uint32") {
         if (arg.interface_index === undefined) {
           // Variable-length argument, determined via first pass above.
           return debug("int(auto)", args_int32s[arg.name]);
@@ -655,19 +658,24 @@ var HaclWasm = (function() {
     if (proto.return.type === "bool") {
       return [call_return === 1, return_buffers].flat();
     }
-    if (proto.return.type === "int32") {
-      return [call_return, return_buffers].flat();
+    if (proto.return.type === "uint32") {
+      return [call_return >>> 0, return_buffers].flat();
+    }
+    if (proto.return.type === "uint64") {
+      // krml convention: uint64s are sent over as two uint32s
+      console.log(call_return);
+      return [BigInt(call_return[0]>>>0) + (BigInt(call_return[1]>>>0) << 32n), return_buffers].flat();
     }
     if (proto.return.type === "void") {
       return return_buffers;
     }
-    throw new Error(func_name+": Unimplemented !");
+    throw new Error(func_name+": Unimplemented ! "+proto.return.type);
   };
 
-  var getInitializedHaclModule = async function () {
+  var getInitializedHaclModule = async function (modules) {
     if (!isInitialized) {
       // Load all WASM modules from network (web) or disk (node).
-      await loadWasm();
+      await loadWasm(modules);
       // Write into the global.
       layouts = await layouts_promise;
 

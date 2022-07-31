@@ -38,7 +38,6 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_Hash_SHA2.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 bool
 Hacl_RSAPSS_rsapss_sign(
   Spec_Hash_Definitions_hash_alg a,

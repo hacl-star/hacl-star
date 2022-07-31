@@ -41,7 +41,6 @@ extern "C" {
 #include "Hacl_Bignum_Base.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_K256_ECDSA_ecdsa_sign_hashed_msg */
 
 /*******************************************************************************

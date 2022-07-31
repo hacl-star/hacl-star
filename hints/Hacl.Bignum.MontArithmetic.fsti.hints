@@ -19,7 +19,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "eb5d8a0c747876d591dbab0076e00ae4"
+      "ae062ce48759bf242cf343acba10e7af"
     ],
     [
       "Hacl.Bignum.MontArithmetic.ll",
@@ -39,7 +39,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "60b6f33a7446965484d9c5acb21761bb"
+      "a210289d59b13a555a5caf1f26e5271d"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_mont_ctx'",
@@ -61,7 +61,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "162427f29b540adad908f55e9325bfed"
+      "172b19caf7269bf2dc7676c07c4a4057"
     ],
     [
       "Hacl.Bignum.MontArithmetic.__proj__Mkbn_mont_ctx'__item__n",
@@ -84,7 +84,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "0e9aa73943b91eb4a7710a85ed77e542"
+      "cb84f539ce24d8f0c916f9faddbf6adf"
     ],
     [
       "Hacl.Bignum.MontArithmetic.__proj__Mkbn_mont_ctx'__item__n",
@@ -110,7 +110,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "737ec85a3ca61ffaba5b4d5db68cf174"
+      "48d2a952aacd02a09489dcd1a8c8fcc9"
     ],
     [
       "Hacl.Bignum.MontArithmetic.__proj__Mkbn_mont_ctx'__item__r2",
@@ -133,7 +133,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "01bdf8364e1b42c26d387fc0f5fb98f9"
+      "55c86fadce0e81373c3ee8eccc294e08"
     ],
     [
       "Hacl.Bignum.MontArithmetic.__proj__Mkbn_mont_ctx'__item__r2",
@@ -159,7 +159,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "bad2b533290347f6a80cff3936ec9888"
+      "7bde3e386a6dbd79bd81d014f399bb8a"
     ],
     [
       "Hacl.Bignum.MontArithmetic.as_ctx",
@@ -167,13 +167,16 @@
       0,
       0,
       [
-        "@MaxIFuel_assumption", "@query",
+        "@MaxIFuel_assumption", "@query", "b2t_def",
+        "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U64",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
-        "equality_tok_Lib.IntTypes.U64@tok",
+        "equality_tok_Lib.IntTypes.U64@tok", "equation_FStar.UInt.fits",
+        "equation_FStar.UInt.max_int", "equation_FStar.UInt.size",
+        "equation_FStar.UInt.uint_t",
         "equation_Hacl.Bignum.Definitions.lbignum",
         "equation_Hacl.Bignum.Definitions.limb",
         "equation_Hacl.Bignum.Definitions.limb_t",
@@ -183,18 +186,21 @@
         "equation_Hacl.Bignum.meta_len",
         "equation_Hacl.Spec.Bignum.Definitions.limb",
         "equation_Hacl.Spec.Bignum.Definitions.limb_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.maxint",
-        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
         "equation_Lib.IntTypes.v",
         "fuel_guarded_inversion_Hacl.Bignum.MontArithmetic.bn_mont_ctx_",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "projection_inverse_BoxBool_proj_0",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_522d848ac9b1dcc473d000d39d3ec03b",
-        "refinement_interpretation_Tm_refine_68ee6d2c8678eb431259a3d4f412550b",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
-        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
+        "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
+        "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
+        "typing_FStar.UInt32.v"
       ],
       0,
-      "06263b54bb9db4ba2cdf8000998d4d27"
+      "bac2bbae1c0d7944e4fe213e0a464ea0"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_mont_ctx_inv",
@@ -218,7 +224,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "ce7907c1584b236ce3aab10f4912e473"
+      "1d1eac4a0dce95c73c7a6742e1026896"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_v_n",
@@ -245,7 +251,7 @@
         "refinement_interpretation_Tm_refine_d631635f2092ccb44bcb01b5b58a25c3"
       ],
       0,
-      "0b7111050fb22c2d710dd9132f14665f"
+      "422723a1f588d62fff145dc4ae02678a"
     ],
     [
       "Hacl.Bignum.MontArithmetic.freeable_s",
@@ -269,7 +275,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "ccf041cca9736a762378a404b755fa93"
+      "77b5d3a81a5ceb15c172ead282b5a6e7"
     ],
     [
       "Hacl.Bignum.MontArithmetic.footprint_s",
@@ -293,7 +299,7 @@
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92"
       ],
       0,
-      "391f67858fe00ae1fd0a3872154e8fbd"
+      "949e73d71fe731cf0522bb85230eb19f"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_get_len_st",
@@ -310,7 +316,7 @@
         "refinement_interpretation_Tm_refine_88cee698cdd24af7fcca10cc7319e254"
       ],
       0,
-      "f5af6a34c9f8c3e72fdf496f1e276515"
+      "4e7c060348b09124804fc5e0c3a8c04a"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_check_modulus_st",
@@ -319,12 +325,15 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.IntTypes.U32",
         "equality_tok_Lib.IntTypes.U32@tok", "equation_Hacl.Bignum.meta_len",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.range",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814"
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.range", "equation_Lib.IntTypes.unsigned",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7"
       ],
       0,
-      "1e1a389a1675a4649c35674245ac7522"
+      "9aa40162cb939cb08c8e0e040f096843"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_init_st",
@@ -333,18 +342,38 @@
       0,
       [
         "@MaxIFuel_assumption", "@query",
+        "constructor_distinct_Lib.Buffer.MUT",
+        "constructor_distinct_Lib.IntTypes.PUB",
+        "constructor_distinct_Lib.IntTypes.U1",
+        "constructor_distinct_Lib.IntTypes.U32",
+        "constructor_distinct_Lib.IntTypes.U8",
+        "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Hacl.Bignum.meta_len",
-        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.range",
+        "equality_tok_Lib.IntTypes.U32@tok",
+        "equation_Hacl.Bignum.Definitions.lbignum",
+        "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Bignum.meta_len", "equation_Lib.Buffer.buffer_t",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Buffer.length",
+        "equation_Lib.IntTypes.bits", "equation_Lib.IntTypes.int_t",
+        "equation_Lib.IntTypes.maxint", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.range",
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "equation_LowStar.Buffer.buffer",
+        "equation_LowStar.Buffer.trivial_preorder",
+        "equation_LowStar.Monotonic.Buffer.length",
+        "lemma_FStar.UInt32.uv_inv", "primitive_Prims.op_Subtraction",
+        "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
+        "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_ddf4b500cde9bfd42f8bf22103260ae0",
-        "typing_Lib.IntTypes.v", "typing_tok_Lib.IntTypes.PUB@tok",
-        "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Hacl.Bignum.Definitions.limb", "typing_Lib.IntTypes.v",
+        "typing_LowStar.Buffer.trivial_preorder",
+        "typing_LowStar.Monotonic.Buffer.len",
+        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "dcf7d224fe3a1cc06cc25cfceae8fbb5"
+      "15f6862ca1bf7e44cc215ed07ea333f1"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_to_field_st",
@@ -355,7 +384,6 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equation_Hacl.Bignum.Definitions.lbignum",
@@ -368,19 +396,18 @@
         "equation_Hacl.Bignum.MontArithmetic.ll",
         "equation_Hacl.Bignum.MontArithmetic.pbn_mont_ctx_inv",
         "equation_Hacl.Bignum.meta_len", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.lseq",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Sequence.lseq",
         "equation_LowStar.Monotonic.Buffer.get",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_9578300c4a55470e306f4796e079146e",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42"
       ],
       0,
-      "3fb3567c0a9e6f8f9a0048ff053d50c5"
+      "d61e63bb42b40817525fda11a446a1c5"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_from_field_st",
@@ -391,7 +418,6 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equation_Hacl.Bignum.Definitions.bn_v",
@@ -406,15 +432,14 @@
         "equation_Hacl.Bignum.MontArithmetic.ll",
         "equation_Hacl.Bignum.MontArithmetic.pbn_mont_ctx_inv",
         "equation_Hacl.Bignum.meta_len", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.Sequence.lseq",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.Sequence.lseq",
         "equation_LowStar.Monotonic.Buffer.get",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_f4d091b96a68d1fb86098412cf1c4a0f",
@@ -422,7 +447,7 @@
         "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "cc959bd36bb2665bb306e0a5cff03663"
+      "6ffe732e832b1fa4e21d837b3ee46b55"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_add_st",
@@ -433,12 +458,12 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equation_Hacl.Bignum.Definitions.bn_v",
         "equation_Hacl.Bignum.Definitions.lbignum",
         "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Bignum.Definitions.limb_t",
         "equation_Hacl.Bignum.MontArithmetic.as_ctx",
         "equation_Hacl.Bignum.MontArithmetic.as_pctx",
         "equation_Hacl.Bignum.MontArithmetic.bn_mont_ctx",
@@ -447,8 +472,8 @@
         "equation_Hacl.Bignum.MontArithmetic.lb",
         "equation_Hacl.Bignum.MontArithmetic.ll",
         "equation_Hacl.Bignum.MontArithmetic.pbn_mont_ctx_inv",
-        "equation_Hacl.Bignum.meta_len", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Hacl.Bignum.meta_len", "equation_Hacl.Spec.Bignum.bn_len",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.Monotonic.Buffer.get",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
@@ -456,15 +481,18 @@
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_20c4bfb9c92dc5867bdea2b805ef9cb3",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_d8015990124608b6513acaab357226e3",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Hacl.Bignum.Definitions.limb", "typing_Lib.Buffer.as_seq",
-        "typing_tok_Lib.Buffer.MUT@tok"
+        "typing_Hacl.Bignum.Definitions.limb",
+        "typing_Hacl.Bignum.MontArithmetic.as_pctx",
+        "typing_Hacl.Spec.Bignum.MontArithmetic.__proj__Mkbn_mont_ctx__item__len",
+        "typing_Lib.Buffer.as_seq", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "95bfe6f32e490e6b18fc5a7bed577420"
+      "2e4648f1423e0855f08ad625e4cbe1b5"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_sub_st",
@@ -475,12 +503,12 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equation_Hacl.Bignum.Definitions.bn_v",
         "equation_Hacl.Bignum.Definitions.lbignum",
         "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Bignum.Definitions.limb_t",
         "equation_Hacl.Bignum.MontArithmetic.as_ctx",
         "equation_Hacl.Bignum.MontArithmetic.as_pctx",
         "equation_Hacl.Bignum.MontArithmetic.bn_mont_ctx",
@@ -489,8 +517,8 @@
         "equation_Hacl.Bignum.MontArithmetic.lb",
         "equation_Hacl.Bignum.MontArithmetic.ll",
         "equation_Hacl.Bignum.MontArithmetic.pbn_mont_ctx_inv",
-        "equation_Hacl.Bignum.meta_len", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Hacl.Bignum.meta_len", "equation_Hacl.Spec.Bignum.bn_len",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.Monotonic.Buffer.get",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
@@ -498,15 +526,18 @@
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_20c4bfb9c92dc5867bdea2b805ef9cb3",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_d8015990124608b6513acaab357226e3",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Hacl.Bignum.Definitions.limb", "typing_Lib.Buffer.as_seq",
-        "typing_tok_Lib.Buffer.MUT@tok"
+        "typing_Hacl.Bignum.Definitions.limb",
+        "typing_Hacl.Bignum.MontArithmetic.as_pctx",
+        "typing_Hacl.Spec.Bignum.MontArithmetic.__proj__Mkbn_mont_ctx__item__len",
+        "typing_Lib.Buffer.as_seq", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "50672a9ba020ee9ba2053566f0526ae3"
+      "2f1d6ca8829967a1bb48393fd5530f6b"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_mul_st",
@@ -517,12 +548,12 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equation_Hacl.Bignum.Definitions.bn_v",
         "equation_Hacl.Bignum.Definitions.lbignum",
         "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Bignum.Definitions.limb_t",
         "equation_Hacl.Bignum.MontArithmetic.as_ctx",
         "equation_Hacl.Bignum.MontArithmetic.as_pctx",
         "equation_Hacl.Bignum.MontArithmetic.bn_mont_ctx",
@@ -531,8 +562,8 @@
         "equation_Hacl.Bignum.MontArithmetic.lb",
         "equation_Hacl.Bignum.MontArithmetic.ll",
         "equation_Hacl.Bignum.MontArithmetic.pbn_mont_ctx_inv",
-        "equation_Hacl.Bignum.meta_len", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Hacl.Bignum.meta_len", "equation_Hacl.Spec.Bignum.bn_len",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.Monotonic.Buffer.get",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
@@ -540,15 +571,18 @@
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_20c4bfb9c92dc5867bdea2b805ef9cb3",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_d8015990124608b6513acaab357226e3",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Hacl.Bignum.Definitions.limb", "typing_Lib.Buffer.as_seq",
-        "typing_tok_Lib.Buffer.MUT@tok"
+        "typing_Hacl.Bignum.Definitions.limb",
+        "typing_Hacl.Bignum.MontArithmetic.as_pctx",
+        "typing_Hacl.Spec.Bignum.MontArithmetic.__proj__Mkbn_mont_ctx__item__len",
+        "typing_Lib.Buffer.as_seq", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "ff50501c8144d8d33ec9cf275f93f5ef"
+      "4c0a0f350a2e423206684914b527fac8"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_sqr_st",
@@ -559,12 +593,12 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equation_Hacl.Bignum.Definitions.bn_v",
         "equation_Hacl.Bignum.Definitions.lbignum",
         "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Bignum.Definitions.limb_t",
         "equation_Hacl.Bignum.MontArithmetic.as_ctx",
         "equation_Hacl.Bignum.MontArithmetic.as_pctx",
         "equation_Hacl.Bignum.MontArithmetic.bn_mont_ctx",
@@ -573,8 +607,8 @@
         "equation_Hacl.Bignum.MontArithmetic.lb",
         "equation_Hacl.Bignum.MontArithmetic.ll",
         "equation_Hacl.Bignum.MontArithmetic.pbn_mont_ctx_inv",
-        "equation_Hacl.Bignum.meta_len", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Hacl.Bignum.meta_len", "equation_Hacl.Spec.Bignum.bn_len",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.Monotonic.Buffer.get",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
@@ -582,15 +616,18 @@
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_8f297e70739244b42051efb2c063d178",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_d8015990124608b6513acaab357226e3",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Hacl.Bignum.Definitions.limb", "typing_Lib.Buffer.as_seq",
-        "typing_tok_Lib.Buffer.MUT@tok"
+        "typing_Hacl.Bignum.Definitions.limb",
+        "typing_Hacl.Bignum.MontArithmetic.as_pctx",
+        "typing_Hacl.Spec.Bignum.MontArithmetic.__proj__Mkbn_mont_ctx__item__len",
+        "typing_Lib.Buffer.as_seq", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "3d6567fe096801ccb4837d5ad5a1b314"
+      "af0d95a5945943105a2f02efc9c4516f"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_one_st",
@@ -601,7 +638,6 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
@@ -616,17 +652,17 @@
         "equation_Hacl.Bignum.MontArithmetic.ll",
         "equation_Hacl.Bignum.MontArithmetic.pbn_mont_ctx_inv",
         "equation_Hacl.Bignum.meta_len", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.unsigned",
-        "equation_Lib.IntTypes.v", "equation_LowStar.Monotonic.Buffer.get",
+        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.v",
+        "equation_LowStar.Monotonic.Buffer.get",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_ef6bbe2bcb6e5a20de6fb74c6d3c0e9c"
       ],
       0,
-      "ba774cf21292aff9da20bf3394d4de76"
+      "a54dd8eca7d3907e2c6c71f0597d7fd2"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_exp_consttime_st",
@@ -647,7 +683,6 @@
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equality_tok_Lib.IntTypes.PUB@tok",
-        "equality_tok_Lib.IntTypes.SEC@tok",
         "equality_tok_Lib.IntTypes.U32@tok",
         "equality_tok_Lib.IntTypes.U64@tok",
         "equation_Hacl.Bignum.Definitions.blocks0",
@@ -673,7 +708,7 @@
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
         "equation_Lib.Sequence.lseq", "equation_LowStar.Buffer.pointer",
         "equation_LowStar.Monotonic.Buffer.get", "equation_Prims.nat",
-        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Subtraction",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
@@ -681,23 +716,22 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e",
         "refinement_interpretation_Tm_refine_7ba72209ebfc4b6df6549d7db2d3b27b",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_e3d129dcae53c37a68e10d225511eb88",
         "typing_Hacl.Bignum.Definitions.limb", "typing_Lib.Buffer.as_seq",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.mk_int",
-        "typing_Lib.IntTypes.v", "typing_tok_Lib.Buffer.MUT@tok",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.v",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "bf5e22cc97967d0638e9f1e2692b1c3f"
+      "870698412d348a1cc1e936388b8e016d"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_exp_vartime_st",
@@ -743,7 +777,7 @@
         "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
         "equation_Lib.Sequence.lseq", "equation_LowStar.Buffer.pointer",
         "equation_LowStar.Monotonic.Buffer.get", "equation_Prims.nat",
-        "int_inversion", "lemma_FStar.UInt.pow2_values",
+        "int_inversion", "int_typing", "lemma_FStar.UInt.pow2_values",
         "lemma_Lib.IntTypes.v_mk_int", "primitive_Prims.op_Subtraction",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
@@ -751,23 +785,22 @@
         "projection_inverse_BoxInt_proj_0",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_573cfed777dae20cc82e8fef9622857e",
         "refinement_interpretation_Tm_refine_7ba72209ebfc4b6df6549d7db2d3b27b",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
-        "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
         "refinement_interpretation_Tm_refine_cfc744b198940c21e3f980c86ac17a92",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
         "refinement_interpretation_Tm_refine_e3d129dcae53c37a68e10d225511eb88",
         "typing_Hacl.Bignum.Definitions.limb", "typing_Lib.Buffer.as_seq",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.mk_int",
-        "typing_Lib.IntTypes.v", "typing_tok_Lib.Buffer.MUT@tok",
-        "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
+        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.v",
+        "typing_tok_Lib.Buffer.MUT@tok", "typing_tok_Lib.IntTypes.PUB@tok",
+        "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "be8d51744dfb42e8315e56ba78a6e694"
+      "1cfe68a4f373b3c21dba65519832a0ba"
     ],
     [
       "Hacl.Bignum.MontArithmetic.bn_field_inv_st",
@@ -778,12 +811,12 @@
         "@MaxIFuel_assumption", "@query",
         "constructor_distinct_Lib.Buffer.MUT",
         "constructor_distinct_Lib.IntTypes.U1",
-        "constructor_distinct_Lib.IntTypes.U32",
         "constructor_distinct_Lib.IntTypes.U8",
         "equality_tok_Lib.Buffer.MUT@tok",
         "equation_Hacl.Bignum.Definitions.bn_v",
         "equation_Hacl.Bignum.Definitions.lbignum",
         "equation_Hacl.Bignum.Definitions.limb",
+        "equation_Hacl.Bignum.Definitions.limb_t",
         "equation_Hacl.Bignum.MontArithmetic.as_ctx",
         "equation_Hacl.Bignum.MontArithmetic.as_pctx",
         "equation_Hacl.Bignum.MontArithmetic.bn_mont_ctx",
@@ -792,8 +825,8 @@
         "equation_Hacl.Bignum.MontArithmetic.lb",
         "equation_Hacl.Bignum.MontArithmetic.ll",
         "equation_Hacl.Bignum.MontArithmetic.pbn_mont_ctx_inv",
-        "equation_Hacl.Bignum.meta_len", "equation_Lib.Buffer.buffer_t",
-        "equation_Lib.Buffer.lbuffer_t", "equation_Lib.IntTypes.unsigned",
+        "equation_Hacl.Bignum.meta_len", "equation_Hacl.Spec.Bignum.bn_len",
+        "equation_Lib.Buffer.buffer_t", "equation_Lib.Buffer.lbuffer_t",
         "equation_Lib.Sequence.lseq",
         "equation_LowStar.Monotonic.Buffer.get",
         "proj_equation_Hacl.Bignum.MontArithmetic.Mkbn_mont_ctx__n",
@@ -801,15 +834,18 @@
         "proj_equation_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_len",
         "projection_inverse_Hacl.Spec.Bignum.MontArithmetic.Mkbn_mont_ctx_n",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
         "refinement_interpretation_Tm_refine_1313d9cdedbf581ef4e124321a27b283",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_9d89bf7b57667578cd0e1f4470daef3b",
+        "refinement_interpretation_Tm_refine_d8015990124608b6513acaab357226e3",
         "refinement_interpretation_Tm_refine_d8d83307254a8900dd20598654272e42",
-        "typing_Hacl.Bignum.Definitions.limb", "typing_Lib.Buffer.as_seq",
-        "typing_tok_Lib.Buffer.MUT@tok"
+        "typing_Hacl.Bignum.Definitions.limb",
+        "typing_Hacl.Bignum.MontArithmetic.as_pctx",
+        "typing_Hacl.Spec.Bignum.MontArithmetic.__proj__Mkbn_mont_ctx__item__len",
+        "typing_Lib.Buffer.as_seq", "typing_tok_Lib.Buffer.MUT@tok"
       ],
       0,
-      "01d04d9ca1a975dcd4cfd463b8ae41f9"
+      "0619037920bdb462722ab982f878af19"
     ]
   ]
 ]

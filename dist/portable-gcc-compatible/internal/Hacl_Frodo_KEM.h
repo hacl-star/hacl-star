@@ -38,7 +38,6 @@ extern "C" {
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Frodo_KEM.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: randombytes_ */
 
 void randombytes_(uint32_t len, uint8_t *res);

@@ -25,7 +25,7 @@
 #include "Hacl_Chacha20Poly1305_256.h"
 
 #include "internal/Hacl_Poly1305_256.h"
-
+#include "libintvector.h"
 static inline void
 poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t *text)
 {

@@ -26,3 +26,6 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
 
+
+%.fst-in %.fsti-in:
+	@echo $(FSTAR_INCLUDES) --load Meta.Interface

@@ -38,7 +38,6 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "Hacl_Bignum_Base.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void Hacl_Curve25519_64_Slow_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub);
 
 void Hacl_Curve25519_64_Slow_secret_to_public(uint8_t *pub, uint8_t *priv);
