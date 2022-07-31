@@ -21,11 +21,14 @@ val state_s: alg -> Type0
 
 let state alg = B.pointer (state_s alg)
 
+inline_for_extraction noextract
 val freeable_s: #(a: alg) -> state_s a -> Type0
 
+inline_for_extraction noextract
 let freeable (#a: alg) (h: HS.mem) (p: state a) =
   B.freeable p /\ freeable_s (B.deref h p)
 
+inline_for_extraction noextract
 let preserves_freeable #a (s: state a) (h0 h1: HS.mem): Type0 =
   freeable h0 s ==> freeable h1 s
 
@@ -33,7 +36,10 @@ val footprint_s: #a:alg -> state_s a -> GTot B.loc
 let footprint (#a:alg) (m: HS.mem) (s: state a) =
   B.(loc_union (loc_addr_of_buffer s) (footprint_s (B.deref m s)))
 
+inline_for_extraction noextract
 val invariant_s: (#a:alg) -> HS.mem -> state_s a -> Type0
+
+inline_for_extraction noextract
 let invariant (#a:alg) (m: HS.mem) (s: state a) =
   B.live m s /\
   B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\

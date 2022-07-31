@@ -34,7 +34,7 @@ val recover_x_step_1:
       (let y = F51.fevalh h0 y in
        let x2 = F51.fevalh h1 x2 in
        let y2 = y `SC.fmul` y in
-       x2 == (y2 `SC.fsub` SC.one) `SC.fmul` (SE.finv ((SE.d `SC.fmul` y2) `SC.fadd` SC.one)))
+       x2 == (y2 `SC.fsub` SC.one) `SC.fmul` (SC.finv ((SE.d `SC.fmul` y2) `SC.fadd` SC.one)))
     )
 let recover_x_step_1 x2 y =
   push_frame();
@@ -48,9 +48,6 @@ let recover_x_step_1 x2 y =
   times_d dyy y2; // dyy = d `fmul` (y `fmul` y)
   fsum dyy one;   // dyy = (d `fmul` (y `fmul` y)) `fadd` one
   reduce_513 dyy;
-  let h0 = ST.get () in
-  Spec.Ed25519.Lemmas.fpow_is_pow_mod
-    (F51.fevalh h0 dyy) (Spec.Curve25519.prime - 2);
   inverse dyyi dyy; // dyyi = modp_inv ((d `fmul` (y `fmul` y)) `fadd` one)
   fdifference one y2; // one = (y `fmul` y) `fsub` 1
   fmul x2 one dyyi; //

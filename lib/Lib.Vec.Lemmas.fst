@@ -86,8 +86,6 @@ val repeat_gen_blocks_slice_k:
 
     f_rep_s k acc == f_rep k acc)
 
-#push-options "--z3rlimit_factor 5"
-#restart-solver
 let repeat_gen_blocks_slice_k #inp_t w blocksize n hi_f inp a f i k acc =
   // Math.Lemmas.paren_mul_right w n blocksize;
   // let f_rep   = repeat_gen_blocks_f blocksize 0 (w * n) (w * n) inp a f in
@@ -117,13 +115,16 @@ let repeat_gen_blocks_slice_k #inp_t w blocksize n hi_f inp a f i k acc =
     (==) { Math.Lemmas.paren_mul_right i w blocksize }
     i * w * blocksize + (k - w * i) * blocksize;
     (==) { Math.Lemmas.distributivity_add_left (i * w) (k - w * i) blocksize }
+    (i * w + (k - w * i)) * blocksize;
+    (==) { }
+    (i * w + (k + (- w * i))) * blocksize;
+    (==) { Math.Lemmas.paren_add_right (i * w) k (- w * i) }
+    (i * w + k + (- w * i)) * blocksize;
+    (==) { Math.Lemmas.swap_mul i w } // JP: this was the important one that made the proof brittle
     k * blocksize;
     };
 
-  Seq.Properties.slice_slice inp (i * blocksize_v) ((i + 1) * blocksize_v) (i_b * blocksize) (i_b * blocksize + blocksize);
-  ()
-#pop-options
-
+  Seq.Properties.slice_slice inp (i * blocksize_v) ((i + 1) * blocksize_v) (i_b * blocksize) (i_b * blocksize + blocksize)
 
 val repeat_gen_blocks_slice:
     #inp_t:Type0

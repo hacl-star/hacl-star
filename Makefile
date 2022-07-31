@@ -63,6 +63,14 @@ ifeq (,$(wildcard $(VALE_HOME)/bin/vale.exe))
   $(error $$VALE_HOME/bin/vale.exe does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
 endif
 
+ifeq (,$(wildcard $(VALE_HOME)/bin/vale.runtimeconfig.json))
+  $(error $$VALE_HOME/bin/vale.runtimeconfig.json does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
+endif
+
+ifeq (,$(wildcard $(VALE_HOME)/bin/importFStarTypes.runtimeconfig.json))
+  $(error $$VALE_HOME/bin/importFStarTypes.runtimeconfig.json does not exist$(newline)(VALE_HOME=$(VALE_HOME)).$(newline)Hint: ./tools/get_vale.sh if you don't have Vale, yet)
+endif
+
 ifneq ($(shell cat $(VALE_HOME)/bin/.vale_version | tr -d '\r'),$(shell cat vale/.vale_version | tr -d '\r'))
   $(error this repository wants Vale $(shell cat vale/.vale_version) but in \
     $$VALE_HOME I found $(shell cat $(VALE_HOME)/bin/.vale_version).$(newline)(VALE_HOME=$(VALE_HOME))$(newline)Hint: ./tools/get_vale.sh)
@@ -127,7 +135,7 @@ endif
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml vale_testInline test-wasm test-bindings-ocaml
+test-unstaged: test-handwritten test-c test-ml test-hpke vale_testInline test-wasm test-bindings-ocaml
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
@@ -137,6 +145,12 @@ test-c: $(subst .,_,$(patsubst %.fst,test-c-%,$(notdir $(wildcard code/tests/*.f
 
 # Any file in specs/tests is taken to contain a `val test: unit -> bool` function.
 test-ml: $(subst .,_,$(patsubst %.fst,test-ml-%,$(notdir $(wildcard specs/tests/*.fst))))
+
+test-hpke: specs/tests/hpke/test_hpke.exe
+	$<
+
+specs/tests/hpke/test_hpke.exe: obj/libhaclml.cmxa specs/tests/hpke/Test_Spec_Agile_HPKE.ml
+	$(OCAMLOPT) $^ -o $@
 
 mozilla-ci: mozilla-ci-staged
 mozilla-ci-unstaged: compile-mozilla test-c
@@ -169,9 +183,9 @@ clean:
 IMPORT_FSTAR_TYPES := $(VALE_HOME)/bin/importFStarTypes.exe
 PYTHON3 ?= $(shell tools/findpython3.sh)
 ifeq ($(OS),Windows_NT)
-  MONO =
+  DOTNET =
 else
-  MONO = mono
+  DOTNET = dotnet
 endif
 
 ifeq ($(shell uname -s),Darwin)
@@ -188,7 +202,7 @@ else ifeq ($(shell uname -s),FreeBSD)
     TIME := /usr/bin/time
 else
   SED := sed -i
-  TIME := /usr/bin/time -q -f '%E'
+  TIME := $(shell which time) -q -f '%E'
 endif
 
 ifneq ($(OS),Windows_NT)
@@ -338,7 +352,7 @@ endif
 
 %.types.vaf:
 	$(call run-with-log,\
-	  $(MONO) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
+	  $(DOTNET) $(IMPORT_FSTAR_TYPES) $(addprefix -in ,$^) -out $@ \
 	  ,[VALE-TYPES] $(notdir $*),$(call to-obj-dir,$@))
 
 # Always pass Vale.Lib.Operator.vaf as an -include to Vale, except for the file itself.
@@ -351,7 +365,7 @@ obj/Vale.Lib.Operator.fst: VALE_FLAGS=
 # the files). (Actually, we know, hence this extra touch.)
 %.fst:
 	$(call run-with-log,\
-	  $(MONO) $(VALE_HOME)/bin/vale.exe -fstarText \
+	  $(DOTNET) $(VALE_HOME)/bin/vale.exe -fstarText \
 	    -include $*.types.vaf \
 	    $(VALE_FLAGS) \
 	    -in $< -out $@ -outi $@i && touch -c $@i \
@@ -450,6 +464,12 @@ obj/Meta_Interface.ml: obj/Meta.Interface.fst.checked
 obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
 	$(OCAMLSHARED) $< -o $@
 
+obj/Test_Lowstarize.ml: CODEGEN = Plugin
+obj/Test_Lowstarize.ml: obj/Test.Lowstarize.fst.checked
+
+obj/Test_Lowstarize.cmxs: obj/Test_Lowstarize.ml
+	$(OCAMLSHARED) $< -o $@
+
 # IMPORTANT NOTE: we cannot let F* compile the cmxs for several reasons.
 # First, it won't detect out-of-date .ml files and won't recompile the cmxs.
 # Second, it will race because several Hacl.Meta.%.checked targets might be
@@ -458,6 +478,15 @@ obj/Meta_Interface.cmxs: obj/Meta_Interface.ml
 # dependency graph. Note that local Makefiles don't bother.
 obj/Hacl.Meta.%.checked: FSTAR_FLAGS += --load Meta.Interface
 $(filter obj/Hacl.Meta.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Meta_Interface.cmxs
+
+obj/Hacl.Test.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
+$(filter obj/Hacl.Test.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
+
+obj/Test.Vectors.checked: FSTAR_FLAGS += --load Test.Lowstarize
+obj/Test.Vectors.checked: obj/Test_Lowstarize.cmxs
+
+obj/Test.Vectors.%.checked: FSTAR_FLAGS += --load Test.Lowstarize
+$(filter obj/Test.Vectors.%.checked,$(call to-obj-dir,$(ALL_CHECKED_FILES))): obj/Test_Lowstarize.cmxs
 
 ###############################################################################
 # Extracting (checked files) to OCaml, producing executables, running them to #
@@ -744,7 +773,8 @@ WASM_FLAGS	=\
   -bundle LowStar.* \
   -bundle Lib.RandomBuffer.System \
   -bundle Lib.Memzero \
-  -minimal -wasm -d wasm
+  -minimal -wasm -d wasm \
+  ./test.js
 
 dist/wasm/Makefile.basic: VALE_ASMS =
 dist/wasm/Makefile.basic: HAND_WRITTEN_OPTIONAL_FILES =
@@ -808,7 +838,7 @@ dist/wasm/Makefile.basic: REQUIRED_DROP =
 
 dist/wasm/package.json: dist/wasm/Makefile.basic $(wildcard bindings/js/*.js) bindings/js/README.md $(wildcard bindings/js/*.json) bindings/js/.npmignore
 	cp -f $(filter-out %.basic,$^) $(dir $@)
-	rm -f $(dir $@)README $(dir $@)main.html $(dir $@)main.js $(dir $@)browser.js $(dir $@)*.wast
+	rm -f $(addprefix $(dir $@),README main.html main.js browser.js *.wast)
 
 dist/wasm/doc/readable_api.js: dist/wasm/package.json
 	cd dist/wasm && \
