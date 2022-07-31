@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_SHA2_Vec256_H
-#define __internal_Hacl_SHA2_Vec256_H
+#ifndef __Hacl_Bignum_H
+#define __Hacl_Bignum_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,40 +35,31 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "../Hacl_SHA2_Vec256.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_Bignum_Base.h"
 #include "evercrypt_targetconfig.h"
-typedef struct K____uint8_t___uint8_t__s
+#include "lib_intrinsics.h"
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s
 {
-  uint8_t *fst;
-  uint8_t *snd;
+  uint32_t len;
+  uint32_t *n;
+  uint32_t mu;
+  uint32_t *r2;
 }
-K____uint8_t___uint8_t_;
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32;
 
-typedef struct K____uint8_t__K____uint8_t___uint8_t__s
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s
 {
-  uint8_t *fst;
-  K____uint8_t___uint8_t_ snd;
+  uint32_t len;
+  uint64_t *n;
+  uint64_t mu;
+  uint64_t *r2;
 }
-K____uint8_t__K____uint8_t___uint8_t_;
-
-typedef struct K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
-
-typedef struct
-K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ fst;
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_SHA2_Vec256_H_DEFINED
+#define __Hacl_Bignum_H_DEFINED
 #endif

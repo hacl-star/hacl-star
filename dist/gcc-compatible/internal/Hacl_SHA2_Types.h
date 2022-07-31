@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Hash_Base_H
-#define __Hacl_Hash_Base_H
+#ifndef __internal_Hacl_SHA2_Types_H
+#define __internal_Hacl_SHA2_Types_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,21 +35,74 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
-#include "Hacl_Spec.h"
+#include "../Hacl_SHA2_Types.h"
 #include "evercrypt_targetconfig.h"
-uint32_t Hacl_Hash_Definitions_word_len(Spec_Hash_Definitions_hash_alg a);
+typedef struct Hacl_Impl_SHA2_Types_uint8_2p_s
+{
+  uint8_t *fst;
+  uint8_t *snd;
+}
+Hacl_Impl_SHA2_Types_uint8_2p;
 
-uint32_t Hacl_Hash_Definitions_block_len(Spec_Hash_Definitions_hash_alg a);
+typedef struct Hacl_Impl_SHA2_Types_uint8_3p_s
+{
+  uint8_t *fst;
+  Hacl_Impl_SHA2_Types_uint8_2p snd;
+}
+Hacl_Impl_SHA2_Types_uint8_3p;
 
-uint32_t Hacl_Hash_Definitions_hash_word_len(Spec_Hash_Definitions_hash_alg a);
+typedef struct Hacl_Impl_SHA2_Types_uint8_4p_s
+{
+  uint8_t *fst;
+  Hacl_Impl_SHA2_Types_uint8_3p snd;
+}
+Hacl_Impl_SHA2_Types_uint8_4p;
 
-uint32_t Hacl_Hash_Definitions_hash_len(Spec_Hash_Definitions_hash_alg a);
+typedef struct Hacl_Impl_SHA2_Types_uint8_5p_s
+{
+  uint8_t *fst;
+  Hacl_Impl_SHA2_Types_uint8_4p snd;
+}
+Hacl_Impl_SHA2_Types_uint8_5p;
 
-typedef uint8_t *Hacl_Hash_Definitions_hash_t;
+typedef struct Hacl_Impl_SHA2_Types_uint8_6p_s
+{
+  uint8_t *fst;
+  Hacl_Impl_SHA2_Types_uint8_5p snd;
+}
+Hacl_Impl_SHA2_Types_uint8_6p;
+
+typedef struct Hacl_Impl_SHA2_Types_uint8_7p_s
+{
+  uint8_t *fst;
+  Hacl_Impl_SHA2_Types_uint8_6p snd;
+}
+Hacl_Impl_SHA2_Types_uint8_7p;
+
+typedef struct Hacl_Impl_SHA2_Types_uint8_8p_s
+{
+  uint8_t *fst;
+  Hacl_Impl_SHA2_Types_uint8_7p snd;
+}
+Hacl_Impl_SHA2_Types_uint8_8p;
+
+typedef struct Hacl_Impl_SHA2_Types_uint8_2x4p_s
+{
+  Hacl_Impl_SHA2_Types_uint8_4p fst;
+  Hacl_Impl_SHA2_Types_uint8_4p snd;
+}
+Hacl_Impl_SHA2_Types_uint8_2x4p;
+
+typedef struct Hacl_Impl_SHA2_Types_uint8_2x8p_s
+{
+  Hacl_Impl_SHA2_Types_uint8_8p fst;
+  Hacl_Impl_SHA2_Types_uint8_8p snd;
+}
+Hacl_Impl_SHA2_Types_uint8_2x8p;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Hash_Base_H_DEFINED
+#define __internal_Hacl_SHA2_Types_H_DEFINED
 #endif

@@ -42,13 +42,17 @@ open EverCrypt.Error
 [@CAbstractStruct]
 val state_s: alg -> Type0
 
+inline_for_extraction noextract
 let state alg = B.pointer (state_s alg)
 
+inline_for_extraction noextract
 val freeable_s: #(a: alg) -> state_s a -> Type0
 
+inline_for_extraction noextract
 let freeable (#a: alg) (h: HS.mem) (p: state a) =
   B.freeable p /\ freeable_s (B.deref h p)
 
+inline_for_extraction noextract
 let preserves_freeable #a (s: state a) (h0 h1: HS.mem): Type0 =
   freeable h0 s ==> freeable h1 s
 
@@ -77,6 +81,7 @@ let loc_includes_union_l_footprint_s
 = B.loc_includes_union_l l1 l2 (footprint_s s)
 
 /// The configuration preconditions
+inline_for_extraction noextract
 let config_pre a =
   match a with
   | AES128_GCM
@@ -87,7 +92,10 @@ let config_pre a =
   | CHACHA20_POLY1305 -> True
   | _ -> True
 
+inline_for_extraction noextract
 val invariant_s: (#a:alg) -> HS.mem -> state_s a -> Type0
+
+inline_for_extraction noextract
 let invariant (#a:alg) (m: HS.mem) (s: state a) =
   B.live m s /\
   B.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
@@ -199,12 +207,20 @@ val alloca: #a:alg -> alloca_st a
 /// Encryption (pre-allocated state)
 /// --------------------------------
 
+inline_for_extraction noextract
 let iv_p a = iv:B.buffer uint8 { iv_length a (B.length iv)}
+
+inline_for_extraction noextract
 let ad_p a = ad:B.buffer uint8 { B.length ad <= max_length a }
+
+inline_for_extraction noextract
 let plain_p a = p:B.buffer uint8 { B.length p <= max_length a }
+
+inline_for_extraction noextract
 let cipher_p a = p:B.buffer uint8 { B.length p + tag_length a <= max_length a }
 
 // SNIPPET_START: encrypt_pre
+inline_for_extraction noextract
 let encrypt_gen_pre (a: supported_alg)
   (iv:iv_p a)
   (iv_len: UInt32.t)
@@ -222,6 +238,7 @@ let encrypt_gen_pre (a: supported_alg)
   B.length cipher = B.length plain /\
   B.length tag = tag_length a
 
+inline_for_extraction noextract
 let encrypt_live_disjoint_pre (a: supported_alg)
   (iv:iv_p a)
   (iv_len: UInt32.t)
@@ -241,6 +258,7 @@ let encrypt_live_disjoint_pre (a: supported_alg)
   B.disjoint plain ad /\
   B.disjoint ad cipher /\ B.disjoint ad tag
 
+inline_for_extraction noextract
 let encrypt_pre (a: supported_alg)
   (s:B.pointer_or_null (state_s a))
   (iv:iv_p a)
@@ -309,6 +327,7 @@ val encrypt: #a:G.erased (supported_alg) -> encrypt_st (G.reveal a)
 /// All-in-one API that does not require performing key expansion separately.
 /// Use if you must be in the Stack effect, or if you know you do not intend to
 /// reuse the key with a different nonce later.
+inline_for_extraction noextract
 let encrypt_expand_pre (a: supported_alg)
   (k:B.buffer uint8 { B.length k = key_length a })
   (iv:iv_p a)
