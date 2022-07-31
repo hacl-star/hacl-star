@@ -36,7 +36,7 @@ extern "C" {
 #include "krml/internal/builtin.h"
 
 
-#include "Hacl_Bignum256.h"
+#include "Hacl_Bignum.h"
 #include "evercrypt_targetconfig.h"
 typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_GenericField64_pbn_mont_ctx_u64;
 

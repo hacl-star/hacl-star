@@ -31,6 +31,8 @@
 #include "krmllib.h"
 typedef uint8_t *Crypto_Symmetric_AES_bytes;
 
+typedef uint8_t *Crypto_Symmetric_AES_lbytes;
+
 typedef uint8_t *Crypto_Symmetric_AES_block;
 
 typedef uint8_t *Crypto_Symmetric_AES_skey;
@@ -54,6 +56,8 @@ void Crypto_Symmetric_AES_keyExpansion(uint8_t *key, uint8_t *w, uint8_t *sbox1)
 void Crypto_Symmetric_AES_inv_cipher(uint8_t *out, uint8_t *input, uint8_t *w, uint8_t *sbox1);
 
 typedef uint8_t *Crypto_Symmetric_AES128_bytes;
+
+typedef uint8_t *Crypto_Symmetric_AES128_lbytes;
 
 typedef uint8_t *Crypto_Symmetric_AES128_block;
 

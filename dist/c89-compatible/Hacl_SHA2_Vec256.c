@@ -22,47 +22,12 @@
  */
 
 
-#include "internal/Hacl_SHA2_Vec256.h"
+#include "Hacl_SHA2_Vec256.h"
 
-
+#include "internal/Hacl_SHA2_Types.h"
 #include "libintvector.h"
-typedef struct ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
-
-typedef struct ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
-
-typedef struct
-___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ snd;
-}
-___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
-
-typedef struct
-___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  uint8_t *fst;
-  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  snd;
-}
-___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
-
 static inline void
-sha224_update8(
-  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  block,
-  Lib_IntVector_Intrinsics_vec256 *hash
-)
+sha224_update8(Hacl_Impl_SHA2_Types_uint8_8p block, Lib_IntVector_Intrinsics_vec256 *hash)
 {
   Lib_IntVector_Intrinsics_vec256 hash_old[8U];
   {
@@ -524,16 +489,6 @@ sha224_update8(
   }
 }
 
-typedef struct
-__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__s
-{
-  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  fst;
-  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  snd;
-}
-__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_;
-
 void
 Hacl_SHA2_Vec256_sha224_8(
   uint8_t *dst0,
@@ -555,8 +510,7 @@ Hacl_SHA2_Vec256_sha224_8(
   uint8_t *input7
 )
 {
-  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  ib;
+  Hacl_Impl_SHA2_Types_uint8_8p ib;
   ib.fst = input0;
   ib.snd.fst = input1;
   ib.snd.snd.fst = input2;
@@ -566,8 +520,7 @@ Hacl_SHA2_Vec256_sha224_8(
   ib.snd.snd.snd.snd.snd.snd.fst = input6;
   ib.snd.snd.snd.snd.snd.snd.snd = input7;
   {
-    ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-    rb;
+    Hacl_Impl_SHA2_Types_uint8_8p rb;
     rb.fst = dst0;
     rb.snd.fst = dst1;
     rb.snd.snd.fst = dst2;
@@ -637,8 +590,7 @@ Hacl_SHA2_Vec256_sha224_8(
             uint8_t *bl5 = b5 + i * (uint32_t)64U;
             uint8_t *bl6 = b6 + i * (uint32_t)64U;
             uint8_t *bl7 = b7 + i * (uint32_t)64U;
-            ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-            lit;
+            Hacl_Impl_SHA2_Types_uint8_8p lit;
             lit.fst = bl00;
             lit.snd.fst = bl1;
             lit.snd.snd.fst = bl2;
@@ -648,8 +600,7 @@ Hacl_SHA2_Vec256_sha224_8(
             lit.snd.snd.snd.snd.snd.snd.fst = bl6;
             lit.snd.snd.snd.snd.snd.snd.snd = bl7;
             {
-              ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-              mb = lit;
+              Hacl_Impl_SHA2_Types_uint8_8p mb = lit;
               sha224_update8(mb, st);
             }
           }
@@ -672,10 +623,8 @@ Hacl_SHA2_Vec256_sha224_8(
         bl60 = b60 + input_len - rem1;
         bl70 = b70 + input_len - rem1;
         {
-          ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-          lit0;
-          ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-          lb;
+          Hacl_Impl_SHA2_Types_uint8_8p lit0;
+          Hacl_Impl_SHA2_Types_uint8_8p lb;
           lit0.fst = bl0;
           lit0.snd.fst = bl10;
           lit0.snd.snd.fst = bl20;
@@ -741,8 +690,8 @@ Hacl_SHA2_Vec256_sha224_8(
               last010 = last00;
               last110 = last00 + (uint32_t)64U;
               {
-                K____uint8_t___uint8_t_ lit1;
-                K____uint8_t___uint8_t_ scrut0;
+                Hacl_Impl_SHA2_Types_uint8_2p lit1;
+                Hacl_Impl_SHA2_Types_uint8_2p scrut0;
                 uint8_t *l00;
                 uint8_t *l01;
                 uint8_t *last011;
@@ -758,8 +707,8 @@ Hacl_SHA2_Vec256_sha224_8(
                 last011 = last10;
                 last111 = last10 + (uint32_t)64U;
                 {
-                  K____uint8_t___uint8_t_ lit2;
-                  K____uint8_t___uint8_t_ scrut1;
+                  Hacl_Impl_SHA2_Types_uint8_2p lit2;
+                  Hacl_Impl_SHA2_Types_uint8_2p scrut1;
                   uint8_t *l10;
                   uint8_t *l11;
                   uint8_t *last012;
@@ -775,8 +724,8 @@ Hacl_SHA2_Vec256_sha224_8(
                   last012 = last2;
                   last112 = last2 + (uint32_t)64U;
                   {
-                    K____uint8_t___uint8_t_ lit3;
-                    K____uint8_t___uint8_t_ scrut2;
+                    Hacl_Impl_SHA2_Types_uint8_2p lit3;
+                    Hacl_Impl_SHA2_Types_uint8_2p scrut2;
                     uint8_t *l20;
                     uint8_t *l21;
                     uint8_t *last013;
@@ -792,8 +741,8 @@ Hacl_SHA2_Vec256_sha224_8(
                     last013 = last3;
                     last113 = last3 + (uint32_t)64U;
                     {
-                      K____uint8_t___uint8_t_ lit4;
-                      K____uint8_t___uint8_t_ scrut3;
+                      Hacl_Impl_SHA2_Types_uint8_2p lit4;
+                      Hacl_Impl_SHA2_Types_uint8_2p scrut3;
                       uint8_t *l30;
                       uint8_t *l31;
                       uint8_t *last014;
@@ -811,8 +760,8 @@ Hacl_SHA2_Vec256_sha224_8(
                       last014 = last4;
                       last114 = last4 + (uint32_t)64U;
                       {
-                        K____uint8_t___uint8_t_ lit5;
-                        K____uint8_t___uint8_t_ scrut4;
+                        Hacl_Impl_SHA2_Types_uint8_2p lit5;
+                        Hacl_Impl_SHA2_Types_uint8_2p scrut4;
                         uint8_t *l40;
                         uint8_t *l41;
                         uint8_t *last015;
@@ -830,8 +779,8 @@ Hacl_SHA2_Vec256_sha224_8(
                         last015 = last5;
                         last115 = last5 + (uint32_t)64U;
                         {
-                          K____uint8_t___uint8_t_ lit6;
-                          K____uint8_t___uint8_t_ scrut5;
+                          Hacl_Impl_SHA2_Types_uint8_2p lit6;
+                          Hacl_Impl_SHA2_Types_uint8_2p scrut5;
                           uint8_t *l50;
                           uint8_t *l51;
                           uint8_t *last016;
@@ -849,8 +798,8 @@ Hacl_SHA2_Vec256_sha224_8(
                           last016 = last6;
                           last116 = last6 + (uint32_t)64U;
                           {
-                            K____uint8_t___uint8_t_ lit7;
-                            K____uint8_t___uint8_t_ scrut6;
+                            Hacl_Impl_SHA2_Types_uint8_2p lit7;
+                            Hacl_Impl_SHA2_Types_uint8_2p scrut6;
                             uint8_t *l60;
                             uint8_t *l61;
                             uint8_t *last01;
@@ -868,8 +817,8 @@ Hacl_SHA2_Vec256_sha224_8(
                             last01 = last7;
                             last11 = last7 + (uint32_t)64U;
                             {
-                              K____uint8_t___uint8_t_ lit8;
-                              K____uint8_t___uint8_t_ scrut7;
+                              Hacl_Impl_SHA2_Types_uint8_2p lit8;
+                              Hacl_Impl_SHA2_Types_uint8_2p scrut7;
                               uint8_t *l70;
                               uint8_t *l71;
                               lit8.fst = last01;
@@ -878,8 +827,7 @@ Hacl_SHA2_Vec256_sha224_8(
                               l70 = scrut7.fst;
                               l71 = scrut7.snd;
                               {
-                                ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                mb0;
+                                Hacl_Impl_SHA2_Types_uint8_8p mb0;
                                 mb0.fst = l00;
                                 mb0.snd.fst = l10;
                                 mb0.snd.snd.fst = l20;
@@ -889,8 +837,7 @@ Hacl_SHA2_Vec256_sha224_8(
                                 mb0.snd.snd.snd.snd.snd.snd.fst = l60;
                                 mb0.snd.snd.snd.snd.snd.snd.snd = l70;
                                 {
-                                  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                  mb1;
+                                  Hacl_Impl_SHA2_Types_uint8_8p mb1;
                                   mb1.fst = l01;
                                   mb1.snd.fst = l11;
                                   mb1.snd.snd.fst = l21;
@@ -900,14 +847,10 @@ Hacl_SHA2_Vec256_sha224_8(
                                   mb1.snd.snd.snd.snd.snd.snd.fst = l61;
                                   mb1.snd.snd.snd.snd.snd.snd.snd = l71;
                                   {
-                                    __K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                    lit;
-                                    __K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                    scrut;
-                                    ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                    last0;
-                                    ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                    last1;
+                                    Hacl_Impl_SHA2_Types_uint8_2x8p lit;
+                                    Hacl_Impl_SHA2_Types_uint8_2x8p scrut;
+                                    Hacl_Impl_SHA2_Types_uint8_8p last0;
+                                    Hacl_Impl_SHA2_Types_uint8_8p last1;
                                     lit.fst = mb0;
                                     lit.snd = mb1;
                                     scrut = lit;
@@ -1150,11 +1093,7 @@ Hacl_SHA2_Vec256_sha224_8(
 }
 
 static inline void
-sha256_update8(
-  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  block,
-  Lib_IntVector_Intrinsics_vec256 *hash
-)
+sha256_update8(Hacl_Impl_SHA2_Types_uint8_8p block, Lib_IntVector_Intrinsics_vec256 *hash)
 {
   Lib_IntVector_Intrinsics_vec256 hash_old[8U];
   {
@@ -1637,8 +1576,7 @@ Hacl_SHA2_Vec256_sha256_8(
   uint8_t *input7
 )
 {
-  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-  ib;
+  Hacl_Impl_SHA2_Types_uint8_8p ib;
   ib.fst = input0;
   ib.snd.fst = input1;
   ib.snd.snd.fst = input2;
@@ -1648,8 +1586,7 @@ Hacl_SHA2_Vec256_sha256_8(
   ib.snd.snd.snd.snd.snd.snd.fst = input6;
   ib.snd.snd.snd.snd.snd.snd.snd = input7;
   {
-    ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-    rb;
+    Hacl_Impl_SHA2_Types_uint8_8p rb;
     rb.fst = dst0;
     rb.snd.fst = dst1;
     rb.snd.snd.fst = dst2;
@@ -1719,8 +1656,7 @@ Hacl_SHA2_Vec256_sha256_8(
             uint8_t *bl5 = b5 + i * (uint32_t)64U;
             uint8_t *bl6 = b6 + i * (uint32_t)64U;
             uint8_t *bl7 = b7 + i * (uint32_t)64U;
-            ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-            lit;
+            Hacl_Impl_SHA2_Types_uint8_8p lit;
             lit.fst = bl00;
             lit.snd.fst = bl1;
             lit.snd.snd.fst = bl2;
@@ -1730,8 +1666,7 @@ Hacl_SHA2_Vec256_sha256_8(
             lit.snd.snd.snd.snd.snd.snd.fst = bl6;
             lit.snd.snd.snd.snd.snd.snd.snd = bl7;
             {
-              ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-              mb = lit;
+              Hacl_Impl_SHA2_Types_uint8_8p mb = lit;
               sha256_update8(mb, st);
             }
           }
@@ -1754,10 +1689,8 @@ Hacl_SHA2_Vec256_sha256_8(
         bl60 = b60 + input_len - rem1;
         bl70 = b70 + input_len - rem1;
         {
-          ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-          lit0;
-          ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-          lb;
+          Hacl_Impl_SHA2_Types_uint8_8p lit0;
+          Hacl_Impl_SHA2_Types_uint8_8p lb;
           lit0.fst = bl0;
           lit0.snd.fst = bl10;
           lit0.snd.snd.fst = bl20;
@@ -1823,8 +1756,8 @@ Hacl_SHA2_Vec256_sha256_8(
               last010 = last00;
               last110 = last00 + (uint32_t)64U;
               {
-                K____uint8_t___uint8_t_ lit1;
-                K____uint8_t___uint8_t_ scrut0;
+                Hacl_Impl_SHA2_Types_uint8_2p lit1;
+                Hacl_Impl_SHA2_Types_uint8_2p scrut0;
                 uint8_t *l00;
                 uint8_t *l01;
                 uint8_t *last011;
@@ -1840,8 +1773,8 @@ Hacl_SHA2_Vec256_sha256_8(
                 last011 = last10;
                 last111 = last10 + (uint32_t)64U;
                 {
-                  K____uint8_t___uint8_t_ lit2;
-                  K____uint8_t___uint8_t_ scrut1;
+                  Hacl_Impl_SHA2_Types_uint8_2p lit2;
+                  Hacl_Impl_SHA2_Types_uint8_2p scrut1;
                   uint8_t *l10;
                   uint8_t *l11;
                   uint8_t *last012;
@@ -1857,8 +1790,8 @@ Hacl_SHA2_Vec256_sha256_8(
                   last012 = last2;
                   last112 = last2 + (uint32_t)64U;
                   {
-                    K____uint8_t___uint8_t_ lit3;
-                    K____uint8_t___uint8_t_ scrut2;
+                    Hacl_Impl_SHA2_Types_uint8_2p lit3;
+                    Hacl_Impl_SHA2_Types_uint8_2p scrut2;
                     uint8_t *l20;
                     uint8_t *l21;
                     uint8_t *last013;
@@ -1874,8 +1807,8 @@ Hacl_SHA2_Vec256_sha256_8(
                     last013 = last3;
                     last113 = last3 + (uint32_t)64U;
                     {
-                      K____uint8_t___uint8_t_ lit4;
-                      K____uint8_t___uint8_t_ scrut3;
+                      Hacl_Impl_SHA2_Types_uint8_2p lit4;
+                      Hacl_Impl_SHA2_Types_uint8_2p scrut3;
                       uint8_t *l30;
                       uint8_t *l31;
                       uint8_t *last014;
@@ -1893,8 +1826,8 @@ Hacl_SHA2_Vec256_sha256_8(
                       last014 = last4;
                       last114 = last4 + (uint32_t)64U;
                       {
-                        K____uint8_t___uint8_t_ lit5;
-                        K____uint8_t___uint8_t_ scrut4;
+                        Hacl_Impl_SHA2_Types_uint8_2p lit5;
+                        Hacl_Impl_SHA2_Types_uint8_2p scrut4;
                         uint8_t *l40;
                         uint8_t *l41;
                         uint8_t *last015;
@@ -1912,8 +1845,8 @@ Hacl_SHA2_Vec256_sha256_8(
                         last015 = last5;
                         last115 = last5 + (uint32_t)64U;
                         {
-                          K____uint8_t___uint8_t_ lit6;
-                          K____uint8_t___uint8_t_ scrut5;
+                          Hacl_Impl_SHA2_Types_uint8_2p lit6;
+                          Hacl_Impl_SHA2_Types_uint8_2p scrut5;
                           uint8_t *l50;
                           uint8_t *l51;
                           uint8_t *last016;
@@ -1931,8 +1864,8 @@ Hacl_SHA2_Vec256_sha256_8(
                           last016 = last6;
                           last116 = last6 + (uint32_t)64U;
                           {
-                            K____uint8_t___uint8_t_ lit7;
-                            K____uint8_t___uint8_t_ scrut6;
+                            Hacl_Impl_SHA2_Types_uint8_2p lit7;
+                            Hacl_Impl_SHA2_Types_uint8_2p scrut6;
                             uint8_t *l60;
                             uint8_t *l61;
                             uint8_t *last01;
@@ -1950,8 +1883,8 @@ Hacl_SHA2_Vec256_sha256_8(
                             last01 = last7;
                             last11 = last7 + (uint32_t)64U;
                             {
-                              K____uint8_t___uint8_t_ lit8;
-                              K____uint8_t___uint8_t_ scrut7;
+                              Hacl_Impl_SHA2_Types_uint8_2p lit8;
+                              Hacl_Impl_SHA2_Types_uint8_2p scrut7;
                               uint8_t *l70;
                               uint8_t *l71;
                               lit8.fst = last01;
@@ -1960,8 +1893,7 @@ Hacl_SHA2_Vec256_sha256_8(
                               l70 = scrut7.fst;
                               l71 = scrut7.snd;
                               {
-                                ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                mb0;
+                                Hacl_Impl_SHA2_Types_uint8_8p mb0;
                                 mb0.fst = l00;
                                 mb0.snd.fst = l10;
                                 mb0.snd.snd.fst = l20;
@@ -1971,8 +1903,7 @@ Hacl_SHA2_Vec256_sha256_8(
                                 mb0.snd.snd.snd.snd.snd.snd.fst = l60;
                                 mb0.snd.snd.snd.snd.snd.snd.snd = l70;
                                 {
-                                  ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                  mb1;
+                                  Hacl_Impl_SHA2_Types_uint8_8p mb1;
                                   mb1.fst = l01;
                                   mb1.snd.fst = l11;
                                   mb1.snd.snd.fst = l21;
@@ -1982,14 +1913,10 @@ Hacl_SHA2_Vec256_sha256_8(
                                   mb1.snd.snd.snd.snd.snd.snd.fst = l61;
                                   mb1.snd.snd.snd.snd.snd.snd.snd = l71;
                                   {
-                                    __K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                    lit;
-                                    __K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                    scrut;
-                                    ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                    last0;
-                                    ___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                                    last1;
+                                    Hacl_Impl_SHA2_Types_uint8_2x8p lit;
+                                    Hacl_Impl_SHA2_Types_uint8_2x8p scrut;
+                                    Hacl_Impl_SHA2_Types_uint8_8p last0;
+                                    Hacl_Impl_SHA2_Types_uint8_8p last1;
                                     lit.fst = mb0;
                                     lit.snd = mb1;
                                     scrut = lit;
@@ -2232,10 +2159,7 @@ Hacl_SHA2_Vec256_sha256_8(
 }
 
 static inline void
-sha384_update4(
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ block,
-  Lib_IntVector_Intrinsics_vec256 *hash
-)
+sha384_update4(Hacl_Impl_SHA2_Types_uint8_4p block, Lib_IntVector_Intrinsics_vec256 *hash)
 {
   Lib_IntVector_Intrinsics_vec256 hash_old[8U];
   {
@@ -2542,13 +2466,13 @@ Hacl_SHA2_Vec256_sha384_4(
   uint8_t *input3
 )
 {
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ ib;
+  Hacl_Impl_SHA2_Types_uint8_4p ib;
   ib.fst = input0;
   ib.snd.fst = input1;
   ib.snd.snd.fst = input2;
   ib.snd.snd.snd = input3;
   {
-    K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ rb;
+    Hacl_Impl_SHA2_Types_uint8_4p rb;
     rb.fst = dst0;
     rb.snd.fst = dst1;
     rb.snd.snd.fst = dst2;
@@ -2598,13 +2522,13 @@ Hacl_SHA2_Vec256_sha384_4(
             uint8_t *bl1 = b1 + i * (uint32_t)128U;
             uint8_t *bl2 = b2 + i * (uint32_t)128U;
             uint8_t *bl3 = b3 + i * (uint32_t)128U;
-            K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ lit;
+            Hacl_Impl_SHA2_Types_uint8_4p lit;
             lit.fst = bl00;
             lit.snd.fst = bl1;
             lit.snd.snd.fst = bl2;
             lit.snd.snd.snd = bl3;
             {
-              K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ mb = lit;
+              Hacl_Impl_SHA2_Types_uint8_4p mb = lit;
               sha384_update4(mb, st);
             }
           }
@@ -2619,8 +2543,8 @@ Hacl_SHA2_Vec256_sha384_4(
         bl20 = b20 + input_len - rem1;
         bl30 = b30 + input_len - rem1;
         {
-          K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ lit0;
-          K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ lb;
+          Hacl_Impl_SHA2_Types_uint8_4p lit0;
+          Hacl_Impl_SHA2_Types_uint8_4p lb;
           lit0.fst = bl0;
           lit0.snd.fst = bl10;
           lit0.snd.snd.fst = bl20;
@@ -2666,8 +2590,8 @@ Hacl_SHA2_Vec256_sha384_4(
               last010 = last00;
               last110 = last00 + (uint32_t)128U;
               {
-                K____uint8_t___uint8_t_ lit1;
-                K____uint8_t___uint8_t_ scrut0;
+                Hacl_Impl_SHA2_Types_uint8_2p lit1;
+                Hacl_Impl_SHA2_Types_uint8_2p scrut0;
                 uint8_t *l00;
                 uint8_t *l01;
                 uint8_t *last011;
@@ -2683,8 +2607,8 @@ Hacl_SHA2_Vec256_sha384_4(
                 last011 = last10;
                 last111 = last10 + (uint32_t)128U;
                 {
-                  K____uint8_t___uint8_t_ lit2;
-                  K____uint8_t___uint8_t_ scrut1;
+                  Hacl_Impl_SHA2_Types_uint8_2p lit2;
+                  Hacl_Impl_SHA2_Types_uint8_2p scrut1;
                   uint8_t *l10;
                   uint8_t *l11;
                   uint8_t *last012;
@@ -2700,8 +2624,8 @@ Hacl_SHA2_Vec256_sha384_4(
                   last012 = last2;
                   last112 = last2 + (uint32_t)128U;
                   {
-                    K____uint8_t___uint8_t_ lit3;
-                    K____uint8_t___uint8_t_ scrut2;
+                    Hacl_Impl_SHA2_Types_uint8_2p lit3;
+                    Hacl_Impl_SHA2_Types_uint8_2p scrut2;
                     uint8_t *l20;
                     uint8_t *l21;
                     uint8_t *last01;
@@ -2719,8 +2643,8 @@ Hacl_SHA2_Vec256_sha384_4(
                     last01 = last3;
                     last11 = last3 + (uint32_t)128U;
                     {
-                      K____uint8_t___uint8_t_ lit4;
-                      K____uint8_t___uint8_t_ scrut3;
+                      Hacl_Impl_SHA2_Types_uint8_2p lit4;
+                      Hacl_Impl_SHA2_Types_uint8_2p scrut3;
                       uint8_t *l30;
                       uint8_t *l31;
                       lit4.fst = last01;
@@ -2729,24 +2653,22 @@ Hacl_SHA2_Vec256_sha384_4(
                       l30 = scrut3.fst;
                       l31 = scrut3.snd;
                       {
-                        K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ mb0;
+                        Hacl_Impl_SHA2_Types_uint8_4p mb0;
                         mb0.fst = l00;
                         mb0.snd.fst = l10;
                         mb0.snd.snd.fst = l20;
                         mb0.snd.snd.snd = l30;
                         {
-                          K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ mb1;
+                          Hacl_Impl_SHA2_Types_uint8_4p mb1;
                           mb1.fst = l01;
                           mb1.snd.fst = l11;
                           mb1.snd.snd.fst = l21;
                           mb1.snd.snd.snd = l31;
                           {
-                            K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                            lit;
-                            K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                            scrut;
-                            K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ last0;
-                            K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ last1;
+                            Hacl_Impl_SHA2_Types_uint8_2x4p lit;
+                            Hacl_Impl_SHA2_Types_uint8_2x4p scrut;
+                            Hacl_Impl_SHA2_Types_uint8_4p last0;
+                            Hacl_Impl_SHA2_Types_uint8_4p last1;
                             lit.fst = mb0;
                             lit.snd = mb1;
                             scrut = lit;
@@ -2868,10 +2790,7 @@ Hacl_SHA2_Vec256_sha384_4(
 }
 
 static inline void
-sha512_update4(
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ block,
-  Lib_IntVector_Intrinsics_vec256 *hash
-)
+sha512_update4(Hacl_Impl_SHA2_Types_uint8_4p block, Lib_IntVector_Intrinsics_vec256 *hash)
 {
   Lib_IntVector_Intrinsics_vec256 hash_old[8U];
   {
@@ -3178,13 +3097,13 @@ Hacl_SHA2_Vec256_sha512_4(
   uint8_t *input3
 )
 {
-  K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ ib;
+  Hacl_Impl_SHA2_Types_uint8_4p ib;
   ib.fst = input0;
   ib.snd.fst = input1;
   ib.snd.snd.fst = input2;
   ib.snd.snd.snd = input3;
   {
-    K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ rb;
+    Hacl_Impl_SHA2_Types_uint8_4p rb;
     rb.fst = dst0;
     rb.snd.fst = dst1;
     rb.snd.snd.fst = dst2;
@@ -3234,13 +3153,13 @@ Hacl_SHA2_Vec256_sha512_4(
             uint8_t *bl1 = b1 + i * (uint32_t)128U;
             uint8_t *bl2 = b2 + i * (uint32_t)128U;
             uint8_t *bl3 = b3 + i * (uint32_t)128U;
-            K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ lit;
+            Hacl_Impl_SHA2_Types_uint8_4p lit;
             lit.fst = bl00;
             lit.snd.fst = bl1;
             lit.snd.snd.fst = bl2;
             lit.snd.snd.snd = bl3;
             {
-              K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ mb = lit;
+              Hacl_Impl_SHA2_Types_uint8_4p mb = lit;
               sha512_update4(mb, st);
             }
           }
@@ -3255,8 +3174,8 @@ Hacl_SHA2_Vec256_sha512_4(
         bl20 = b20 + input_len - rem1;
         bl30 = b30 + input_len - rem1;
         {
-          K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ lit0;
-          K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ lb;
+          Hacl_Impl_SHA2_Types_uint8_4p lit0;
+          Hacl_Impl_SHA2_Types_uint8_4p lb;
           lit0.fst = bl0;
           lit0.snd.fst = bl10;
           lit0.snd.snd.fst = bl20;
@@ -3302,8 +3221,8 @@ Hacl_SHA2_Vec256_sha512_4(
               last010 = last00;
               last110 = last00 + (uint32_t)128U;
               {
-                K____uint8_t___uint8_t_ lit1;
-                K____uint8_t___uint8_t_ scrut0;
+                Hacl_Impl_SHA2_Types_uint8_2p lit1;
+                Hacl_Impl_SHA2_Types_uint8_2p scrut0;
                 uint8_t *l00;
                 uint8_t *l01;
                 uint8_t *last011;
@@ -3319,8 +3238,8 @@ Hacl_SHA2_Vec256_sha512_4(
                 last011 = last10;
                 last111 = last10 + (uint32_t)128U;
                 {
-                  K____uint8_t___uint8_t_ lit2;
-                  K____uint8_t___uint8_t_ scrut1;
+                  Hacl_Impl_SHA2_Types_uint8_2p lit2;
+                  Hacl_Impl_SHA2_Types_uint8_2p scrut1;
                   uint8_t *l10;
                   uint8_t *l11;
                   uint8_t *last012;
@@ -3336,8 +3255,8 @@ Hacl_SHA2_Vec256_sha512_4(
                   last012 = last2;
                   last112 = last2 + (uint32_t)128U;
                   {
-                    K____uint8_t___uint8_t_ lit3;
-                    K____uint8_t___uint8_t_ scrut2;
+                    Hacl_Impl_SHA2_Types_uint8_2p lit3;
+                    Hacl_Impl_SHA2_Types_uint8_2p scrut2;
                     uint8_t *l20;
                     uint8_t *l21;
                     uint8_t *last01;
@@ -3355,8 +3274,8 @@ Hacl_SHA2_Vec256_sha512_4(
                     last01 = last3;
                     last11 = last3 + (uint32_t)128U;
                     {
-                      K____uint8_t___uint8_t_ lit4;
-                      K____uint8_t___uint8_t_ scrut3;
+                      Hacl_Impl_SHA2_Types_uint8_2p lit4;
+                      Hacl_Impl_SHA2_Types_uint8_2p scrut3;
                       uint8_t *l30;
                       uint8_t *l31;
                       lit4.fst = last01;
@@ -3365,24 +3284,22 @@ Hacl_SHA2_Vec256_sha512_4(
                       l30 = scrut3.fst;
                       l31 = scrut3.snd;
                       {
-                        K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ mb0;
+                        Hacl_Impl_SHA2_Types_uint8_4p mb0;
                         mb0.fst = l00;
                         mb0.snd.fst = l10;
                         mb0.snd.snd.fst = l20;
                         mb0.snd.snd.snd = l30;
                         {
-                          K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ mb1;
+                          Hacl_Impl_SHA2_Types_uint8_4p mb1;
                           mb1.fst = l01;
                           mb1.snd.fst = l11;
                           mb1.snd.snd.fst = l21;
                           mb1.snd.snd.snd = l31;
                           {
-                            K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                            lit;
-                            K___K____uint8_t__K____uint8_t__K____uint8_t___uint8_t__K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_
-                            scrut;
-                            K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ last0;
-                            K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ last1;
+                            Hacl_Impl_SHA2_Types_uint8_2x4p lit;
+                            Hacl_Impl_SHA2_Types_uint8_2x4p scrut;
+                            Hacl_Impl_SHA2_Types_uint8_4p last0;
+                            Hacl_Impl_SHA2_Types_uint8_4p last1;
                             lit.fst = mb0;
                             lit.snd = mb1;
                             scrut = lit;

@@ -1035,6 +1035,8 @@ extern uint64_t
   EverCrypt_Hash_state_s projectee
 );
 
+typedef EverCrypt_Hash_state_s *EverCrypt_Hash_state;
+
 extern Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg_of_state(EverCrypt_Hash_state_s *s);
 
 extern EverCrypt_Hash_state_s *EverCrypt_Hash_create_in(Spec_Hash_Definitions_hash_alg a);
@@ -1190,6 +1192,9 @@ EverCrypt_Hash_Incremental_finish(
 
 extern void
 EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
+
+typedef Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+*EverCrypt_Hash_Incremental_state;
 
 extern void
 EverCrypt_Cipher_chacha20(

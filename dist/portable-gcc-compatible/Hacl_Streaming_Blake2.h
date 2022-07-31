@@ -57,6 +57,17 @@ Hacl_Streaming_Blake2_blake2s_32_block_state;
 
 /* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_block_state */
 
+/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_block_state */
+
+typedef struct Hacl_Streaming_Blake2_blake2b_32_block_state_s
+{
+  uint64_t *fst;
+  uint64_t *snd;
+}
+Hacl_Streaming_Blake2_blake2b_32_block_state;
+
+/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_block_state */
+
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_state */
 
 typedef struct Hacl_Streaming_Blake2_blake2s_32_state_s
@@ -68,6 +79,18 @@ typedef struct Hacl_Streaming_Blake2_blake2s_32_state_s
 Hacl_Streaming_Blake2_blake2s_32_state;
 
 /* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_state */
+
+/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_state */
+
+typedef struct Hacl_Streaming_Blake2_blake2b_32_state_s
+{
+  Hacl_Streaming_Blake2_blake2b_32_block_state block_state;
+  uint8_t *buf;
+  uint64_t total_len;
+}
+Hacl_Streaming_Blake2_blake2b_32_state;
+
+/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_state */
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2s_32_no_key_create_in */
 
@@ -122,29 +145,6 @@ Hacl_Streaming_Blake2_blake2s_32_no_key_finish(
 void Hacl_Streaming_Blake2_blake2s_32_no_key_free(Hacl_Streaming_Blake2_blake2s_32_state *s1);
 
 /* SNIPPET_END: Hacl_Streaming_Blake2_blake2s_32_no_key_free */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_block_state */
-
-typedef struct Hacl_Streaming_Blake2_blake2b_32_block_state_s
-{
-  uint64_t *fst;
-  uint64_t *snd;
-}
-Hacl_Streaming_Blake2_blake2b_32_block_state;
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_block_state */
-
-/* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_state */
-
-typedef struct Hacl_Streaming_Blake2_blake2b_32_state_s
-{
-  Hacl_Streaming_Blake2_blake2b_32_block_state block_state;
-  uint8_t *buf;
-  uint64_t total_len;
-}
-Hacl_Streaming_Blake2_blake2b_32_state;
-
-/* SNIPPET_END: Hacl_Streaming_Blake2_blake2b_32_state */
 
 /* SNIPPET_START: Hacl_Streaming_Blake2_blake2b_32_no_key_create_in */
 
