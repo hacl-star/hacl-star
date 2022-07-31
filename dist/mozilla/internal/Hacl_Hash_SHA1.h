@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Krmllib_H
-#define __Hacl_Krmllib_H
+#ifndef __internal_Hacl_Hash_SHA1_H
+#define __internal_Hacl_Hash_SHA1_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,40 +35,15 @@ extern "C" {
 #include <stdbool.h>
 
 
+#include "../Hacl_Hash_SHA1.h"
 
+void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s);
 
-static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
-
-static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
-
-static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_add_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_right(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
-
-static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
+void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Krmllib_H_DEFINED
+#define __internal_Hacl_Hash_SHA1_H_DEFINED
 #endif

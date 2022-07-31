@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Krmllib_H
-#define __Hacl_Krmllib_H
+#ifndef __internal_Hacl_Impl_Blake2_Hacl_Blake2b_256_Hacl_Blake2s_128_Hacl_Blake2b_32_Hacl_Streaming_Blake2s_128_Hacl_Streaming_Blake2b_256_Hacl_Blake2s_32_Hacl_HMAC_Blake2b_256_Hacl_HMAC_Blake2s_128_Hacl_HKDF_Blake2b_256_Hacl_HKDF_Blake2s_128_H
+#define __internal_Hacl_Impl_Blake2_Hacl_Blake2b_256_Hacl_Blake2s_128_Hacl_Blake2b_32_Hacl_Streaming_Blake2s_128_Hacl_Streaming_Blake2b_256_Hacl_Blake2s_32_Hacl_HMAC_Blake2b_256_Hacl_HMAC_Blake2s_128_Hacl_HKDF_Blake2b_256_Hacl_HKDF_Blake2s_128_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,40 +35,38 @@ extern "C" {
 #include <stdbool.h>
 
 
+#include "internal/Hacl_Lib.h"
+#include "Hacl_Krmllib.h"
 
+extern const uint32_t Hacl_Impl_Blake2_Constants_sigmaTable[160U];
 
-static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
+extern const uint32_t Hacl_Impl_Blake2_Constants_ivTable_S[8U];
 
-static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
+extern const uint64_t Hacl_Impl_Blake2_Constants_ivTable_B[8U];
 
-static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
+void
+Hacl_Blake2b_32_blake2b(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
+);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_add_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_right(FStar_UInt128_uint128 a, uint32_t s);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
-
-static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
-
-static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
+void
+Hacl_Blake2s_32_blake2s(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
+);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Krmllib_H_DEFINED
+#define __internal_Hacl_Impl_Blake2_Hacl_Blake2b_256_Hacl_Blake2s_128_Hacl_Blake2b_32_Hacl_Streaming_Blake2s_128_Hacl_Streaming_Blake2b_256_Hacl_Blake2s_32_Hacl_HMAC_Blake2b_256_Hacl_HMAC_Blake2s_128_Hacl_HKDF_Blake2b_256_Hacl_HKDF_Blake2s_128_H_DEFINED
 #endif

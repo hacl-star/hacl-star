@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __Hacl_Krmllib_H
-#define __Hacl_Krmllib_H
+#ifndef __Hacl_Hash_SHA2_H
+#define __Hacl_Hash_SHA2_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,40 +35,59 @@ extern "C" {
 #include <stdbool.h>
 
 
+#include "Hacl_Krmllib.h"
 
+void Hacl_Hash_SHA2_update_multi_224(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
-static inline uint8_t FStar_UInt8_eq_mask(uint8_t a, uint8_t b);
+void Hacl_Hash_SHA2_update_multi_256(uint32_t *s, uint8_t *blocks, uint32_t n_blocks);
 
-static inline uint64_t FStar_UInt64_eq_mask(uint64_t a, uint64_t b);
+void Hacl_Hash_SHA2_update_multi_384(uint64_t *s, uint8_t *blocks, uint32_t n_blocks);
 
-static inline uint64_t FStar_UInt64_gte_mask(uint64_t a, uint64_t b);
+void Hacl_Hash_SHA2_update_multi_512(uint64_t *s, uint8_t *blocks, uint32_t n_blocks);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+void
+Hacl_Hash_SHA2_update_last_224(
+  uint32_t *s,
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_add_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+void
+Hacl_Hash_SHA2_update_last_256(
+  uint32_t *s,
+  uint64_t prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_sub_mod(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
+void
+Hacl_Hash_SHA2_update_last_384(
+  uint64_t *s,
+  FStar_UInt128_uint128 prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_left(FStar_UInt128_uint128 a, uint32_t s);
+void
+Hacl_Hash_SHA2_update_last_512(
+  uint64_t *s,
+  FStar_UInt128_uint128 prev_len,
+  uint8_t *input,
+  uint32_t input_len
+);
 
-static inline FStar_UInt128_uint128
-FStar_UInt128_shift_right(FStar_UInt128_uint128 a, uint32_t s);
+void Hacl_Hash_SHA2_hash_224(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
-static inline FStar_UInt128_uint128 FStar_UInt128_uint64_to_uint128(uint64_t a);
+void Hacl_Hash_SHA2_hash_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
-static inline uint64_t FStar_UInt128_uint128_to_uint64(FStar_UInt128_uint128 a);
+void Hacl_Hash_SHA2_hash_384(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
-static inline FStar_UInt128_uint128 FStar_UInt128_mul_wide(uint64_t x, uint64_t y);
-
-static inline void store128_be(uint8_t *x0, FStar_UInt128_uint128 x1);
+void Hacl_Hash_SHA2_hash_512(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __Hacl_Krmllib_H_DEFINED
+#define __Hacl_Hash_SHA2_H_DEFINED
 #endif
