@@ -37,7 +37,6 @@ extern "C" {
 
 #include "Hacl_HMAC.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_HKDF_expand_sha2_256 */
 
 void

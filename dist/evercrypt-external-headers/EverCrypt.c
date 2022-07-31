@@ -26,19 +26,26 @@
 
 
 
+#define AES128_OPENSSL 0
+#define AES128_BCRYPT 1
+#define AES128_VALE 2
+#define AES128_HACL 3
+
+typedef uint8_t aes128_key_s_tags;
+
 typedef struct EverCrypt_aes128_key_s_s
 {
-  EverCrypt_aes128_key_s_tags tag;
+  aes128_key_s_tags tag;
   union {
     FStar_Dyn_dyn case_AES128_OPENSSL;
     FStar_Dyn_dyn case_AES128_BCRYPT;
-    struct
+    struct 
     {
       uint8_t *w;
       uint8_t *sbox;
     }
     case_AES128_VALE;
-    struct
+    struct 
     {
       uint8_t *w;
       uint8_t *sbox;
@@ -71,13 +78,19 @@ extern uint8_t *EverCrypt___proj__AES128_HACL__item__w(EverCrypt_aes128_key_s pr
 
 extern uint8_t *EverCrypt___proj__AES128_HACL__item__sbox(EverCrypt_aes128_key_s projectee);
 
+#define AES256_OPENSSL 0
+#define AES256_BCRYPT 1
+#define AES256_HACL 2
+
+typedef uint8_t aes256_key_s_tags;
+
 typedef struct EverCrypt_aes256_key_s_s
 {
-  EverCrypt_aes256_key_s_tags tag;
+  aes256_key_s_tags tag;
   union {
     FStar_Dyn_dyn case_AES256_OPENSSL;
     FStar_Dyn_dyn case_AES256_BCRYPT;
-    struct
+    struct 
     {
       uint8_t *w;
       uint8_t *sbox;
@@ -104,9 +117,17 @@ extern uint8_t *EverCrypt___proj__AES256_HACL__item__w(EverCrypt_aes256_key_s pr
 
 extern uint8_t *EverCrypt___proj__AES256_HACL__item__sbox(EverCrypt_aes256_key_s projectee);
 
+#define AEAD_OPENSSL 0
+#define AEAD_BCRYPT 1
+#define AEAD_AES128_GCM_VALE 2
+#define AEAD_AES256_GCM_VALE 3
+#define AEAD_CHACHA20_POLY1305_HACL 4
+
+typedef uint8_t _aead_state_tags;
+
 typedef struct EverCrypt__aead_state_s
 {
-  EverCrypt__aead_state_tags tag;
+  _aead_state_tags tag;
   union {
     FStar_Dyn_dyn case_AEAD_OPENSSL;
     FStar_Dyn_dyn case_AEAD_BCRYPT;
@@ -120,18 +141,28 @@ EverCrypt__aead_state;
 
 typedef EverCrypt__aead_state EverCrypt_aead_state_s;
 
+#define DH_OPENSSL 0
+#define DH_DUMMY 1
+
+typedef uint8_t _dh_state_tags;
+
 typedef struct EverCrypt__dh_state_s
 {
-  EverCrypt__dh_state_tags tag;
+  _dh_state_tags tag;
   FStar_Dyn_dyn st;
 }
 EverCrypt__dh_state;
 
 typedef EverCrypt__dh_state EverCrypt_dh_state_s;
 
+#define ECDH_OPENSSL 0
+#define ECDH_DUMMY 1
+
+typedef uint8_t _ecdh_state_tags;
+
 typedef struct EverCrypt__ecdh_state_s
 {
-  EverCrypt__ecdh_state_tags tag;
+  _ecdh_state_tags tag;
   FStar_Dyn_dyn st;
 }
 EverCrypt__ecdh_state;

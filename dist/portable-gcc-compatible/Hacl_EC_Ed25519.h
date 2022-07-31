@@ -38,7 +38,6 @@ extern "C" {
 #include "Hacl_Krmllib.h"
 #include "Hacl_Bignum25519_51.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_EC_Ed25519_mk_felem_zero */
 
 /*******************************************************************************

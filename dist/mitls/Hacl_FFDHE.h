@@ -38,7 +38,6 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_Impl_FFDHE_Constants.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 uint32_t Hacl_FFDHE_ffdhe_len(Spec_FFDHE_ffdhe_alg a);
 
 uint64_t *Hacl_FFDHE_new_ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a);

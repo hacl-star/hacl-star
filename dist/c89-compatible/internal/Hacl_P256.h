@@ -39,7 +39,6 @@ extern "C" {
 #include "../Hacl_P256.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
-#include "libintvector.h"
 void Hacl_Impl_P256_LowLevel_toUint8(uint64_t *i, uint8_t *o);
 
 void Hacl_Impl_P256_LowLevel_changeEndian(uint64_t *i);

@@ -25,7 +25,7 @@
 #include "Hacl_SHA2_Vec128.h"
 
 #include "internal/Hacl_SHA2_Vec256.h"
-
+#include "libintvector.h"
 static inline void
 sha224_update4(
   K____uint8_t__K____uint8_t__K____uint8_t___uint8_t_ block,

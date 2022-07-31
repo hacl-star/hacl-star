@@ -4,6 +4,7 @@ module S = Spec.Agile.HPKE
 module Hash = Hacl.Hash.Definitions
 
 [@ Meta.Attribute.specialize ]
+noextract
 assume val hash: #cs:S.ciphersuite -> Hash.hash_st (S.hash_of_cs cs)
 
 (** Instantiations of hash **)

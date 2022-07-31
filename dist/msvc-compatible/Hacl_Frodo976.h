@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_SHA3.h"
 #include "Hacl_Frodo_KEM.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 extern uint32_t Hacl_Frodo976_crypto_bytes;
 
 extern uint32_t Hacl_Frodo976_crypto_publickeybytes;

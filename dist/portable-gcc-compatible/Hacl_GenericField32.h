@@ -37,7 +37,6 @@ extern "C" {
 
 
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 */
 
 typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s

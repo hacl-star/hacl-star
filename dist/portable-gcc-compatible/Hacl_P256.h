@@ -40,7 +40,6 @@ extern "C" {
 #include "Hacl_Hash_SHA2.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
-#include "libintvector.h"
 /* SNIPPET_START: Hacl_P256_ecdsa_sign_p256_sha2 */
 
 

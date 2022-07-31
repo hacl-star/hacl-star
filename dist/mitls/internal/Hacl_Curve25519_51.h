@@ -38,7 +38,6 @@ extern "C" {
 #include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Curve25519_51.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
 void
 Hacl_Curve25519_51_fsquare_times(
   uint64_t *o,

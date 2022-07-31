@@ -26,8 +26,6 @@
 
 #include "internal/Hacl_Krmllib.h"
 
-uint32_t Hacl_Poly1305_32_blocklen = (uint32_t)16U;
-
 void Hacl_Poly1305_32_poly1305_init(uint64_t *ctx, uint8_t *key)
 {
   uint64_t *acc = ctx;
