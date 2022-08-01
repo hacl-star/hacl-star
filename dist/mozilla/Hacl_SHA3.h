@@ -51,7 +51,18 @@ void Hacl_Impl_SHA3_loadState(uint32_t rateInBytes, uint8_t *input, uint64_t *s)
 
 void Hacl_Impl_SHA3_storeState(uint32_t rateInBytes, uint64_t *s, uint8_t *res);
 
-void
+bool
+Hacl_Impl_SHA3_absorb_last(
+  uint8_t delimitedSuffix,
+  uint32_t rateInBytes,
+  uint32_t rem,
+  uint8_t *input,
+  uint64_t *s
+);
+
+bool Hacl_Impl_SHA3_absorb_inner(uint32_t rateInBytes, uint8_t *block, uint64_t *s);
+
+bool
 Hacl_Impl_SHA3_absorb(
   uint64_t *s,
   uint32_t rateInBytes,
@@ -60,7 +71,7 @@ Hacl_Impl_SHA3_absorb(
   uint8_t delimitedSuffix
 );
 
-void
+bool
 Hacl_Impl_SHA3_squeeze(
   uint64_t *s,
   uint32_t rateInBytes,
@@ -68,10 +79,9 @@ Hacl_Impl_SHA3_squeeze(
   uint8_t *output
 );
 
-void
+bool
 Hacl_Impl_SHA3_keccak(
   uint32_t rate,
-  uint32_t capacity,
   uint32_t inputByteLen,
   uint8_t *input,
   uint8_t delimitedSuffix,
@@ -102,6 +112,18 @@ void Hacl_SHA3_sha3_256(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 void Hacl_SHA3_sha3_384(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
 
 void Hacl_SHA3_sha3_512(uint32_t inputByteLen, uint8_t *input, uint8_t *output);
+
+/*
+Keccak instantiation with the rate equal to 1088 bits 
+*/
+void
+Hacl_SHA3_keccak_1088(
+  uint32_t inputByteLen,
+  uint8_t *input,
+  uint8_t delimitedSuffix,
+  uint32_t outputByteLen,
+  uint8_t *output
+);
 
 #if defined(__cplusplus)
 }

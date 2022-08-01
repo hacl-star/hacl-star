@@ -5,6 +5,8 @@ EXPORTS
   Hacl_Impl_SHA3_state_permute
   Hacl_Impl_SHA3_loadState
   Hacl_Impl_SHA3_storeState
+  Hacl_Impl_SHA3_absorb_last
+  Hacl_Impl_SHA3_absorb_inner
   Hacl_Impl_SHA3_absorb
   Hacl_Impl_SHA3_squeeze
   Hacl_Impl_SHA3_keccak
@@ -14,6 +16,7 @@ EXPORTS
   Hacl_SHA3_sha3_256
   Hacl_SHA3_sha3_384
   Hacl_SHA3_sha3_512
+  Hacl_SHA3_keccak_1088
   Hacl_Chacha20_chacha20_encrypt
   Hacl_Chacha20_chacha20_decrypt
   Hacl_Curve25519_64_scalarmult
