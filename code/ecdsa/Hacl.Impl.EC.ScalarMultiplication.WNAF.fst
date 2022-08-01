@@ -892,17 +892,48 @@ let loopK_step #c d result j k tempPoint =
   }
 
 
+#push-options "--z3rlimit 300"
 
-val loopK: #c: curve -> d: uint64 -> result: pointAffine c -> j: size_t -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
+
+val loopK_loop: #c: curve 
+  -> d: uint64 {v d < pow2 (w - 1)}
+  -> result: pointAffine c
+  -> j: size_t {v j < (getPower c / w + 1)} 
+  -> tempPoint: pointAffine c -> Stack unit 
+  (requires fun h -> live h result /\ live h tempPoint /\ disjoint result tempPoint)
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempPoint) h0 h1 /\ 
+    point_aff_eval c h1 result /\
+    pointEqual (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 result)))
+      (point_mult #c (pow2 (v j * w) * v d) (basePoint #c)))
+
+let loopK_loop #c d result j tempPoint = 
+  let h0 = ST.get() in 
+   let invK h (k: nat) = live h result /\ live h tempPoint /\ modifies (loc result |+| loc tempPoint) h0 h /\ (
+    let len = getCoordinateLenU64 c in 
+    let rX, rY = gsub result (size 0) len, gsub result len len in 
+    if k > v d then 
+      point_aff_eval c h result /\
+      pointEqual (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h result))) (point_mult #c (pow2 (v j * w) * v d) (basePoint #c))
+    else 
+      as_nat c h rX == as_nat c h0 rX /\ as_nat c h rY == as_nat c h0 rY) in 
+  Lib.Loops.for 0ul 16ul invK (fun k -> loopK_step d result j k tempPoint) 
+
+
+val loopK: #c: curve -> d: uint64 {v d < pow2 (w - 1)} -> result: pointAffine c
+  -> j: size_t {v j < (getPower c / w + 1)} -> Stack unit 
+  (requires fun h -> live h result)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
+    point_aff_eval c h1 result /\
+  pointEqual (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 result)))
+    (point_mult #c (pow2 (v j * w) * v d) (basePoint #c)))
 
 let loopK #c d result j = 
-  push_frame();
-    let tempPoint = create (getPointLenU64 c) (u64 0) in 
-  let invK h (k: nat) = True in 
-  Lib.Loops.for 0ul 16ul invK (fun k -> loopK_step d result j  k tempPoint)
-
+    let h0 = ST.get() in 
+    push_frame(); 
+  let tempPoint : pointAffine c = create (getCoordinateLenU64 c *! 2ul) (u64 0) in 
+  loopK_loop d result j tempPoint; 
+    let h1 = ST.get() in 
+    pop_frame()
 
 
 val copy_point_conditional: #c: curve -> result: point c
@@ -918,7 +949,6 @@ val copy_point_conditional: #c: curve -> result: point c
       as_nat c h1 (getX result) == as_nat c h0 (getX x) /\
       as_nat c h1 (getY result) == as_nat c h0 (getY x) /\
       as_nat c h1 (getZ result) == as_nat c h0 (getZ x)))
-
 
 let copy_point_conditional #c result p mask = 
   let h0 = ST.get() in 
@@ -938,9 +968,29 @@ let copy_point_conditional #c result p mask =
   copy_conditional #c r_z p_z mask
 
 
+assume val lemma_inverse_existence: #c: curve 
+  -> p0: Spec.ECC.point #c {~ (isPointAtInfinity #Jacobian p0)} 
+  -> p:  Spec.ECC.point #c {~ (isPointAtInfinity #Jacobian p)}
+  -> Lemma ((
+  exists (b: pos {b < getOrder #c}). 
+  
+    (* existence*)
+    (* there is a point b such that b + p == 0 *)
+    let bP = Spec.ECC.point_mult #c b p0 in 
+      assert(~ (isPointAtInfinity bP));
+    isPointAtInfinity (pointAdd #c bP p) /\ (
+
+    (* and it is unique *)
+    forall (k: nat). 
+      let kP = Spec.ECC.point_mult #c k p0 in 
+      pointEqual kP bP <==> isPointAtInfinity (pointAdd #c kP p)
+    )))
+    
+
+
 val point_affine_neg: #c: curve -> p: point c -> result: point c -> Stack unit 
-  (requires fun h -> True)
-  (ensures fun h0 _ h1 -> True)
+  (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_eval c h p)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result)
 
 let point_affine_neg #c p result = 
   let len = getCoordinateLenU64 c in
@@ -949,7 +999,8 @@ let point_affine_neg #c p result =
   let rX, rY = sub result (size 0) len, sub result len len in 
 
   copy rX pX;
-  felem_sub_zero #c pY rY
+  felem_sub_zero #c pY rY;
+  admit()
   
 
 val conditional_substraction: #c: curve -> result: point c -> p: point c -> scalar: scalar_t #MUT #c
