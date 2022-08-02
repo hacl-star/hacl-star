@@ -42,6 +42,11 @@ let mk_to_k256_scalar_concrete_ops : BE.to_concrete_ops U64 4ul 0ul = {
 
 
 inline_for_extraction noextract
+val one_mod : BE.lone_st U64 4ul 0ul mk_to_k256_scalar_concrete_ops
+let one_mod ctx one = make_u64_4 one (u64 1, u64 0, u64 0, u64 0)
+
+
+inline_for_extraction noextract
 val mul_mod : BE.lmul_st U64 4ul 0ul mk_to_k256_scalar_concrete_ops
 let mul_mod ctx x y xy = qmul xy x y
 
@@ -54,6 +59,7 @@ let sqr_mod ctx x xx = qsqr xx x
 inline_for_extraction noextract
 let mk_k256_scalar_concrete_ops : BE.concrete_ops U64 4ul 0ul = {
   BE.to = mk_to_k256_scalar_concrete_ops;
+  BE.lone = one_mod;
   BE.lmul = mul_mod;
   BE.lsqr = sqr_mod;
 }

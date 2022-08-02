@@ -28,21 +28,21 @@ class to_concrete_ops (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) =
 }
 
 
-// inline_for_extraction noextract
-// let lone_st
-//   (a_t:inttype_a)
-//   (len:size_t{v len > 0})
-//   (ctx_len:size_t)
-//   (to:to_comm_monoid a_t len ctx_len) =
-//     ctx:lbuffer (uint_t a_t SEC) ctx_len
-//   -> x:lbuffer (uint_t a_t SEC) len ->
-//   Stack unit
-//   (requires fun h ->
-//     live h x /\ live h ctx /\ disjoint ctx x /\
-//     to.linv_ctx (as_seq h ctx))
-//   (ensures  fun h0 _ h1 -> modifies (loc x) h0 h1 /\
-//     to.linv (as_seq h1 x) /\
-//     to.refl (as_seq h1 x) == to.comm_monoid.S.one)
+inline_for_extraction noextract
+let lone_st
+  (a_t:inttype_a)
+  (len:size_t{v len > 0})
+  (ctx_len:size_t)
+  (to:to_concrete_ops a_t len ctx_len) =
+    ctx:lbuffer (uint_t a_t SEC) ctx_len
+  -> x:lbuffer (uint_t a_t SEC) len ->
+  Stack unit
+  (requires fun h ->
+    live h x /\ live h ctx /\ disjoint ctx x /\
+    to.linv_ctx (as_seq h ctx))
+  (ensures  fun h0 _ h1 -> modifies (loc x) h0 h1 /\
+    to.linv (as_seq h1 x) /\
+    to.refl (as_seq h1 x) == to.concr_ops.SE.one ())
 
 
 inline_for_extraction noextract
@@ -86,7 +86,7 @@ let lsqr_st
 inline_for_extraction noextract
 class concrete_ops (a_t:inttype_a) (len:size_t{v len > 0}) (ctx_len:size_t) = {
   to: Ghost.erased (to_concrete_ops a_t len ctx_len);
-  //lone: lone_st a_t len ctx_len to;
+  lone: lone_st a_t len ctx_len to;
   lmul: lmul_st a_t len ctx_len to;
   lsqr: lsqr_st a_t len ctx_len to;
 }
@@ -105,19 +105,18 @@ val lexp_rl_vartime:
   -> bLen:size_t
   -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
-  -> acc:lbuffer (uint_t a_t SEC) len ->
+  -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
-    live h a /\ live h b /\ live h acc /\ live h ctx /\
-    disjoint a acc /\ disjoint b acc /\ disjoint a b /\
-    disjoint ctx a /\ disjoint ctx acc /\
+    live h a /\ live h b /\ live h res /\ live h ctx /\
+    disjoint a res /\ disjoint b res /\ disjoint a b /\
+    disjoint ctx a /\ disjoint ctx res /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
-    k.to.refl (as_seq h acc) == k.to.concr_ops.SE.one ())
-  (ensures  fun h0 _ h1 -> modifies (loc a |+| loc acc) h0 h1 /\
-    k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) ==
+    k.to.linv (as_seq h a))
+  (ensures  fun h0 _ h1 -> modifies (loc a |+| loc res) h0 h1 /\
+    k.to.linv (as_seq h1 res) /\
+    k.to.refl (as_seq h1 res) ==
     SE.exp_rl #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
 
 
@@ -134,19 +133,18 @@ val lexp_mont_ladder_swap_consttime:
   -> bLen:size_t
   -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
-  -> acc:lbuffer (uint_t a_t SEC) len ->
+  -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
-    live h a /\ live h b /\ live h acc /\ live h ctx /\
-    disjoint a acc /\ disjoint b acc /\ disjoint a b /\
-    disjoint ctx a /\ disjoint ctx acc /\
+    live h a /\ live h b /\ live h res /\ live h ctx /\
+    disjoint a res /\ disjoint b res /\ disjoint a b /\
+    disjoint ctx a /\ disjoint ctx res /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
-    k.to.refl (as_seq h acc) == k.to.concr_ops.SE.one ())
-  (ensures  fun h0 _ h1 -> modifies (loc a |+| loc acc) h0 h1 /\
-    k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) ==
+    k.to.linv (as_seq h a))
+  (ensures  fun h0 _ h1 -> modifies (loc a |+| loc res) h0 h1 /\
+    k.to.linv (as_seq h1 res) /\
+    k.to.refl (as_seq h1 res) ==
     SE.exp_mont_ladder_swap #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
 
 
@@ -170,7 +168,7 @@ val lexp_pow2:
     k.to.refl (as_seq h1 res) == SE.exp_pow2 k.to.concr_ops (k.to.refl (as_seq h0 a)) (v b))
 
 
-// This function computes `acc^(2^b)` and writes the result in `acc`
+// This function computes `a^(2^b)` and writes the result in `a`
 inline_for_extraction noextract
 val lexp_pow2_in_place:
     #a_t:inttype_a
@@ -178,14 +176,14 @@ val lexp_pow2_in_place:
   -> ctx_len:size_t
   -> k:concrete_ops a_t len ctx_len
   -> ctx:lbuffer (uint_t a_t SEC) ctx_len
-  -> acc:lbuffer (uint_t a_t SEC) len
+  -> a:lbuffer (uint_t a_t SEC) len
   -> b:size_t ->
   Stack unit
   (requires fun h ->
-    live h acc /\ live h ctx /\ disjoint acc ctx /\
-    k.to.linv (as_seq h acc) /\ k.to.linv_ctx (as_seq h ctx))
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\ k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) == SE.exp_pow2 k.to.concr_ops (k.to.refl (as_seq h0 acc)) (v b))
+    live h a /\ live h ctx /\ disjoint a ctx /\
+    k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx))
+  (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\ k.to.linv (as_seq h1 a) /\
+    k.to.refl (as_seq h1 a) == SE.exp_pow2 k.to.concr_ops (k.to.refl (as_seq h0 a)) (v b))
 
 
 inline_for_extraction noextract
@@ -220,9 +218,7 @@ val lprecomp_table:
   (requires fun h ->
     live h a /\ live h table /\ live h ctx /\
     disjoint a table /\ disjoint ctx table /\ disjoint a ctx /\
-    k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h (gsub table 0ul len)) /\
-    k.to.refl (as_seq h (gsub table 0ul len)) == k.to.concr_ops.SE.one ())
+    k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx))
   (ensures  fun h0 _ h1 -> modifies (loc table) h0 h1 /\
     (forall (j:nat{j < v table_len}).{:pattern precomp_table_inv len ctx_len k (as_seq h1 a) table_len (as_seq h1 table) j}
       precomp_table_inv len ctx_len k (as_seq h1 a) table_len (as_seq h1 table) j))
@@ -238,17 +234,17 @@ let lprecomp_get_st
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
   -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
   -> bits_l:uint_t a_t SEC{v bits_l < v table_len}
-  -> tmp:lbuffer (uint_t a_t SEC) len ->
+  -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
-    live h a /\ live h table /\ live h tmp /\
-    disjoint a table /\ disjoint a tmp /\ disjoint table tmp /\
+    live h a /\ live h table /\ live h res /\
+    disjoint a table /\ disjoint a res /\ disjoint table res /\
     k.to.linv (as_seq h a) /\
     (forall (j:nat{j < v table_len}).
       precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
-  (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
-    k.to.linv (as_seq h1 tmp) /\
-    k.to.refl (as_seq h1 tmp) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bits_l))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    k.to.linv (as_seq h1 res) /\
+    k.to.refl (as_seq h1 res) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bits_l))
 
 
 // This function returns table.[bits_l] = a^bits_l
@@ -287,20 +283,19 @@ let lexp_fw_table_st
   -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
   -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
   -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> acc:lbuffer (uint_t a_t SEC) len ->
+  -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
-    live h a /\ live h b /\ live h acc /\ live h ctx /\ live h table /\
-    disjoint a acc /\ disjoint a ctx /\ disjoint a table /\ disjoint b acc /\
-    disjoint acc ctx /\ disjoint acc table /\ disjoint ctx table /\
+    live h a /\ live h b /\ live h res /\ live h ctx /\ live h table /\
+    disjoint a res /\ disjoint a ctx /\ disjoint a table /\ disjoint b res /\
+    disjoint res ctx /\ disjoint res table /\ disjoint ctx table /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\ k.to.linv (as_seq h a) /\
-    k.to.linv (as_seq h acc) /\ k.to.refl (as_seq h acc) == k.to.concr_ops.SE.one () /\
     (forall (j:nat{j < v table_len}).
       precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
-    k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) ==
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    k.to.linv (as_seq h1 res) /\
+    k.to.refl (as_seq h1 res) ==
     SE.exp_fw k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
 
 
@@ -341,20 +336,19 @@ let lexp_fw_st
   -> bLen:size_t
   -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
   -> b:lbuffer (uint_t a_t SEC) bLen
-  -> acc:lbuffer (uint_t a_t SEC) len
+  -> res:lbuffer (uint_t a_t SEC) len
   -> l:size_t{0 < v l /\ v l < bits a_t /\ pow2 (v l) * v len <= max_size_t /\ v l < 32} ->
   Stack unit
   (requires fun h ->
-    live h a /\ live h b /\ live h acc /\ live h ctx /\
-    disjoint a acc /\ disjoint a ctx /\
-    disjoint b acc /\ disjoint acc ctx /\
+    live h a /\ live h b /\ live h res /\ live h ctx /\
+    disjoint a res /\ disjoint a ctx /\
+    disjoint b res /\ disjoint res ctx /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
-    k.to.refl (as_seq h acc) == k.to.concr_ops.SE.one ())
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
-    k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) ==
+    k.to.linv (as_seq h a))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    k.to.linv (as_seq h1 res) /\
+    k.to.refl (as_seq h1 res) ==
     SE.exp_fw #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
 
 

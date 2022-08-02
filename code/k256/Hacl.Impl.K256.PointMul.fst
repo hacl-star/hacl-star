@@ -53,15 +53,6 @@ let point_double ctx x xx =
 
 
 inline_for_extraction noextract
-let mk_k256_concrete_ops : BE.concrete_ops U64 15ul 0ul = {
-  BE.to = mk_to_k256_concrete_ops;
-  BE.lmul = point_add;
-  BE.lsqr = point_double;
-}
-
-//////////////////////////////////////////////////////
-
-inline_for_extraction noextract
 val make_point_at_inf: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
@@ -73,6 +64,21 @@ let make_point_at_inf p =
   set_one py;
   set_zero pz
 
+
+inline_for_extraction noextract
+val point_zero : BE.lone_st U64 15ul 0ul mk_to_k256_concrete_ops
+let point_zero ctx one = make_point_at_inf one
+
+
+inline_for_extraction noextract
+let mk_k256_concrete_ops : BE.concrete_ops U64 15ul 0ul = {
+  BE.to = mk_to_k256_concrete_ops;
+  BE.lone = point_zero;
+  BE.lmul = point_add;
+  BE.lsqr = point_double;
+}
+
+//////////////////////////////////////////////////////
 
 inline_for_extraction noextract
 val make_g: g:point -> Stack unit
@@ -121,7 +127,6 @@ val point_mul: out:point -> scalar:qelem -> q:point -> Stack unit
     point_eval h1 out == S.point_mul (qas_nat h0 scalar) (point_eval h0 q))
 
 let point_mul out scalar q =
-  make_point_at_inf out;
   BE.lexp_fw_consttime 15ul 0ul mk_k256_concrete_ops (null uint64) q 4ul 256ul scalar out 4ul
 
 
@@ -142,7 +147,6 @@ val point_mul_double_vartime:
 
 [@CInline]
 let point_mul_double_vartime out scalar1 q1 scalar2 q2 =
-  make_point_at_inf out;
   ME.lexp_double_fw_vartime 15ul 0ul mk_k256_concrete_ops (null uint64) q1 4ul 256ul scalar1 q2 scalar2 out 4ul
 
 

@@ -85,7 +85,7 @@ let scalar_split_lambda k1 k2 k =
   pop_frame ()
 
 
-// [lambda]P
+// [lambda]P = (beta * px, py, pz)
 inline_for_extraction noextract
 val point_mul_lambda: res:point -> p:point -> Stack unit
   (requires fun h ->
@@ -146,7 +146,6 @@ let point_mul_split_lambda out scalar q =
   let r2 = create_qelem () in
   scalar_split_lambda r1 r2 scalar;
 
-  PM.make_point_at_inf out;
   ME.lexp_double_fw_vartime 15ul 0ul PM.mk_k256_concrete_ops (null uint64)
     q 4ul 129ul r1 q2 r2 out 4ul;
 

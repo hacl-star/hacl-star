@@ -233,7 +233,8 @@ val lexp_double_fw_tables_gen:
 let lexp_double_fw_tables_gen #a_t len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc =
   assert (v (bBits %. l) == v bBits % v l);
   if bBits %. l <> 0ul then
-    lexp_double_fw_acc0 len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc;
+    lexp_double_fw_acc0 len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc
+  else k.lone ctx acc;
 
   lexp_double_fw_loop #a_t len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc
 
@@ -270,14 +271,12 @@ let lexp_double_fw_gen #a_t len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b
   assert (1 < v table_len /\ v table_len * v len <= max_size_t);
 
   let table1 = create (table_len *! len) (uint #a_t #SEC 0) in
-  update_sub table1 0ul len acc;
   lprecomp_table #a_t len ctx_len k ctx a1 table_len table1;
   let h = ST.get () in
   assert (forall (j:nat{j < v table_len}).
       precomp_table_inv len ctx_len k (as_seq h a1) table_len (as_seq h table1) j);
 
   let table2 = create (table_len *! len) (uint #a_t #SEC 0) in
-  update_sub table2 0ul len acc;
   lprecomp_table #a_t len ctx_len k ctx a2 table_len table2;
   let h = ST.get () in
   assert (forall (j:nat{j < v table_len}).

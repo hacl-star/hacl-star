@@ -41,8 +41,11 @@ let refl (#t:limb_t) (#len:SN.bn_len t) (n:BD.lbignum t len{0 < BD.bn_v n}) (a:B
   a
 
 inline_for_extraction noextract
-let linv_ctx (#t:limb_t) (#len:SN.bn_len t) (n:BD.lbignum t len) (a:BD.lbignum t len) : Type0 =
-  n == a
+let linv_ctx (#t:limb_t) (#len:SN.bn_len t) (n:BD.lbignum t len) (ctx:BD.lbignum t (len + len)) : Type0 =
+  let ctx_n = LSeq.sub ctx 0 len in
+  let ctx_r2 = LSeq.sub ctx len len in
+  ctx_n == n /\
+  0 < BD.bn_v n /\ BD.bn_v ctx_r2 = pow2 (2 * bits t * len) % BD.bn_v n
 
 
 inline_for_extraction noextract
@@ -51,7 +54,7 @@ let mk_to_bn_mont_ll_concr_ops
   (len:BN.meta_len t)
   (n:BD.lbignum t (v len))
   (mu:limb t{SM.bn_mont_pre n mu})
-  : BE.to_concrete_ops t len len =
+  : BE.to_concrete_ops t len (len +! len) =
 {
   BE.t_spec = BD.lbignum t (v len);
   BE.concr_ops = S.mk_bn_almost_mont_concrete_ops n mu;
@@ -62,31 +65,23 @@ let mk_to_bn_mont_ll_concr_ops
 
 
 inline_for_extraction noextract
-let bn_almost_mont_one_st (t:limb_t) (len:BN.meta_len t) =
-    n:lbignum t len
-  -> mu:limb t
-  -> r2:lbignum t len
-  -> oneM:lbignum t len ->
-  Stack unit
-  (requires fun h ->
-    live h n /\ live h r2 /\ live h oneM /\
-    disjoint n r2 /\ disjoint n oneM /\ disjoint r2 oneM /\
+val bn_almost_mont_one:
+    #t:limb_t
+  -> k:AM.almost_mont t
+  -> n:Ghost.erased (BD.lbignum t (v k.AM.bn.BN.len))
+  -> mu:limb t{SM.bn_mont_pre n mu} ->
+  BE.lone_st t k.AM.bn.BN.len (k.AM.bn.BN.len +! k.AM.bn.BN.len)
+    (mk_to_bn_mont_ll_concr_ops t k.AM.bn.BN.len n mu)
 
-    SM.bn_mont_pre (as_seq h n) mu /\
-    bn_v h r2 == pow2 (2 * bits t * v len) % bn_v h n)
-  (ensures  fun h0 _ h1 -> modifies (loc oneM) h0 h1 /\
-    as_seq h1 oneM == S.bn_almost_mont_one (as_seq h0 n) mu ())
-
-
-inline_for_extraction noextract
-val bn_almost_mont_one: #t:limb_t -> k:AM.almost_mont t -> bn_almost_mont_one_st t k.AM.bn.BN.len
-let bn_almost_mont_one #t k n mu r2 oneM =
+let bn_almost_mont_one #t k n mu ctx oneM =
+  let len = k.AM.bn.BN.len in
+  let ctx_n = sub ctx 0ul len in
+  let ctx_r2 = sub ctx len len in
   let h0 = ST.get () in
-  BM.bn_mont_one k.AM.bn.BN.len k.AM.from n mu r2 oneM;
-  let h1 = ST.get () in
-  SM.bn_mont_one_lemma (as_seq h0 n) mu (as_seq h0 r2);
-  SM.bn_precomp_r2_mod_n_lemma 0 (as_seq h0 n);
-  BD.bn_eval_inj (v k.AM.bn.BN.len) (SM.bn_precomp_r2_mod_n 0 (as_seq h0 n)) (as_seq h0 r2)
+  SM.bn_mont_one_lemma n mu (as_seq h0 ctx_r2);
+  BM.bn_mont_one len k.AM.from ctx_n mu ctx_r2 oneM;
+  SM.bn_precomp_r2_mod_n_lemma 0 n;
+  BD.bn_eval_inj (v len) (SM.bn_precomp_r2_mod_n 0 n) (as_seq h0 ctx_r2)
 
 
 inline_for_extraction noextract
@@ -95,13 +90,15 @@ val bn_almost_mont_mul:
   -> k:AM.almost_mont t
   -> n:Ghost.erased (BD.lbignum t (v k.AM.bn.BN.len))
   -> mu:limb t{SM.bn_mont_pre n mu} ->
-  BE.lmul_st t k.AM.bn.BN.len k.AM.bn.BN.len (mk_to_bn_mont_ll_concr_ops t k.AM.bn.BN.len n mu)
+  BE.lmul_st t k.AM.bn.BN.len (k.AM.bn.BN.len +! k.AM.bn.BN.len)
+    (mk_to_bn_mont_ll_concr_ops t k.AM.bn.BN.len n mu)
 
 let bn_almost_mont_mul #t k n mu ctx aM bM resM =
   let h0 = ST.get () in
   SA.bn_almost_mont_mul_lemma n mu (as_seq h0 aM) (as_seq h0 bM);
   A.almost_mont_mul_is_mont_mul_lemma (bits t) (v k.AM.bn.BN.len) (BD.bn_v n) (v mu) (bn_v h0 aM) (bn_v h0 bM);
-  k.AM.mul ctx mu aM bM resM
+  let ctx_n = sub ctx 0ul k.AM.bn.BN.len in
+  k.AM.mul ctx_n mu aM bM resM
 
 
 inline_for_extraction noextract
@@ -110,14 +107,16 @@ val bn_almost_mont_sqr:
   -> k:AM.almost_mont t
   -> n:Ghost.erased (BD.lbignum t (v k.AM.bn.BN.len))
   -> mu:limb t{SM.bn_mont_pre n mu} ->
-  BE.lsqr_st t k.AM.bn.BN.len k.AM.bn.BN.len (mk_to_bn_mont_ll_concr_ops t k.AM.bn.BN.len n mu)
+  BE.lsqr_st t k.AM.bn.BN.len (k.AM.bn.BN.len +! k.AM.bn.BN.len)
+    (mk_to_bn_mont_ll_concr_ops t k.AM.bn.BN.len n mu)
 
 let bn_almost_mont_sqr #t k n mu ctx aM resM =
   let h0 = ST.get () in
   SA.bn_almost_mont_sqr_lemma n mu (as_seq h0 aM);
   SA.bn_almost_mont_mul_lemma n mu (as_seq h0 aM) (as_seq h0 aM);
   A.almost_mont_mul_is_mont_mul_lemma (bits t) (v k.AM.bn.BN.len) (BD.bn_v n) (v mu) (bn_v h0 aM) (bn_v h0 aM);
-  k.AM.sqr ctx mu aM resM
+  let ctx_n = sub ctx 0ul k.AM.bn.BN.len in
+  k.AM.sqr ctx_n mu aM resM
 
 
 inline_for_extraction noextract
@@ -125,14 +124,45 @@ let mk_bn_almost_mont_concrete_ops
   (t:limb_t)
   (k:AM.almost_mont t)
   (n:Ghost.erased (BD.lbignum t (v k.AM.bn.BN.len)))
-  (mu:limb t{SM.bn_mont_pre n mu}) : BE.concrete_ops t k.AM.bn.BN.len k.AM.bn.BN.len =
+  (mu:limb t{SM.bn_mont_pre n mu}) :
+  BE.concrete_ops t k.AM.bn.BN.len (k.AM.bn.BN.len +! k.AM.bn.BN.len) =
 {
   BE.to = mk_to_bn_mont_ll_concr_ops t k.AM.bn.BN.len n mu;
+  BE.lone = bn_almost_mont_one k n mu;
   BE.lmul = bn_almost_mont_mul k n mu;
   BE.lsqr = bn_almost_mont_sqr k n mu;
 }
 
 ///////////////////////////////////////////////////////////////////////
+
+inline_for_extraction noextract
+val mk_ctx:
+    #t:limb_t
+  -> len:BN.meta_len t
+  -> n:lbignum t len
+  -> r2:lbignum t len
+  -> ctx:lbignum t (len +! len) ->
+  Stack unit
+  (requires fun h ->
+    live h n /\ live h r2 /\ live h ctx /\
+    disjoint n ctx /\ disjoint r2 ctx /\
+    0 < bn_v h n /\ bn_v h r2 == pow2 (2 * bits t * v len) % bn_v h n)
+  (ensures fun h0 _ h1 -> modifies (loc ctx) h0 h1 /\
+    linv_ctx (as_seq h0 n) (as_seq h1 ctx))
+
+let mk_ctx #t len n r2 ctx =
+  let h0 = ST.get () in
+  update_sub ctx 0ul len n;
+  let h1 = ST.get () in
+  assert (LSeq.sub (as_seq h1 ctx) 0 (v len) == as_seq h0 n);
+  update_sub ctx len len r2;
+  let h2 = ST.get () in
+  LSeq.eq_intro
+    (LSeq.sub (as_seq h2 ctx) 0 (v len))
+    (LSeq.sub (as_seq h1 ctx) 0 (v len));
+  assert (LSeq.sub (as_seq h2 ctx) 0 (v len) == as_seq h0 n);
+  assert (LSeq.sub (as_seq h2 ctx) (v len) (v len) == as_seq h0 r2)
+
 
 noextract
 let bn_exp_almost_mont_pre
@@ -176,34 +206,40 @@ let bn_exp_almost_mont_st (t:limb_t) (len:BN.meta_len t) =
 inline_for_extraction noextract
 val bn_exp_almost_mont_bm_vartime: #t:limb_t -> k:AM.almost_mont t -> bn_exp_almost_mont_st t k.AM.bn.BN.len
 let bn_exp_almost_mont_bm_vartime #t k n mu r2 aM bBits b resM =
-  [@inline_let] let len = k.AM.bn.BN.len in
+  push_frame ();
   let h0 = ST.get () in
-  let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
-
+  [@inline_let] let len = k.AM.bn.BN.len in
   [@inline_let] let bLen = blocks0 bBits (size (bits t)) in
-  bn_almost_mont_one k n mu r2 resM;
+  let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
+  let ctx = create (len +! len) (uint #t #SEC 0) in
+  mk_ctx #t len n r2 ctx;
+
   BD.bn_eval_bound (as_seq h0 aM) (v len);
-  BE.lexp_rl_vartime len len (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) n aM bLen bBits b resM;
+  BE.lexp_rl_vartime len (len +! len) (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM;
   SE.exp_rl_lemma (S.mk_bn_almost_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b);
   LE.exp_rl_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b);
-  E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b)
+  E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b);
+  pop_frame ()
 
 
 // This function is constant-time on the exponent b.
 inline_for_extraction noextract
 val bn_exp_almost_mont_bm_consttime: #t:limb_t -> k:AM.almost_mont t -> bn_exp_almost_mont_st t k.AM.bn.BN.len
 let bn_exp_almost_mont_bm_consttime #t k n mu r2 aM bBits b resM =
-  [@inline_let] let len = k.AM.bn.BN.len in
+  push_frame ();
   let h0 = ST.get () in
-  let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
-
+  [@inline_let] let len = k.AM.bn.BN.len in
   [@inline_let] let bLen = blocks0 bBits (size (bits t)) in
-  bn_almost_mont_one k n mu r2 resM;
-  BE.lexp_mont_ladder_swap_consttime len len (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) n aM bLen bBits b resM;
+  let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
+  let ctx = create (len +! len) (uint #t #SEC 0) in
+  mk_ctx #t len n r2 ctx;
+
+  BE.lexp_mont_ladder_swap_consttime len (len +! len) (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM;
   SE.exp_mont_ladder_swap_lemma (S.mk_bn_almost_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b);
   LE.exp_mont_ladder_swap_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b);
   LE.exp_mont_ladder_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b);
-  E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b)
+  E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b);
+  pop_frame ()
 
 
 // This function is *NOT* constant-time on the exponent b.
@@ -215,16 +251,19 @@ val bn_exp_almost_mont_fw_vartime:
   bn_exp_almost_mont_st t k.AM.bn.BN.len
 
 let bn_exp_almost_mont_fw_vartime #t k l n mu r2 aM bBits b resM =
-  [@inline_let] let len = k.AM.bn.BN.len in
+  push_frame ();
   let h0 = ST.get () in
+  [@inline_let] let len = k.AM.bn.BN.len in
+  [@inline_let] let bLen = blocks0 bBits (size (bits t)) in
   let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
+  let ctx = create (len +! len) (uint #t #SEC 0) in
+  mk_ctx #t len n r2 ctx;
 
-  let bLen = blocks0 bBits (size (bits t)) in
-  bn_almost_mont_one k n mu r2 resM;
-  BE.lexp_fw_vartime len len (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) n aM bLen bBits b resM l;
+  BE.lexp_fw_vartime len (len +! len) (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM l;
   SE.exp_fw_lemma (S.mk_bn_almost_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b) (v l);
   LE.exp_fw_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b) (v l);
-  E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b)
+  E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b);
+  pop_frame ()
 
 
 // This function is constant-time on the exponent b.
@@ -236,16 +275,19 @@ val bn_exp_almost_mont_fw_consttime:
   bn_exp_almost_mont_st t k.AM.bn.BN.len
 
 let bn_exp_almost_mont_fw_consttime #t k l n mu r2 aM bBits b resM =
-  [@inline_let] let len = k.AM.bn.BN.len in
+  push_frame ();
   let h0 = ST.get () in
+  [@inline_let] let len = k.AM.bn.BN.len in
+  [@inline_let] let bLen = blocks0 bBits (size (bits t)) in
   let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
+  let ctx = create (len +! len) (uint #t #SEC 0) in
+  mk_ctx #t len n r2 ctx;
 
-  let bLen = blocks0 bBits (size (bits t)) in
-  bn_almost_mont_one k n mu r2 resM;
-  BE.lexp_fw_consttime len len (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) n aM bLen bBits b resM l;
+  BE.lexp_fw_consttime len (len +! len) (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM l;
   SE.exp_fw_lemma (S.mk_bn_almost_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b) (v l);
   LE.exp_fw_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b) (v l);
-  E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b)
+  E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b);
+  pop_frame ()
 
 ///////////////////////////////////////////////
 

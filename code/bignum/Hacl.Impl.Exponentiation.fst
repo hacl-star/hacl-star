@@ -26,7 +26,7 @@ module PT = Hacl.Impl.PrecompTable
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let lexp_rl_vartime #a_t len ctx_len k ctx a bLen bBits b acc =
-  //k.lone ctx acc;
+  k.lone ctx acc;
   let h0 = ST.get () in
 
   [@inline_let]
@@ -107,7 +107,7 @@ let lexp_mont_ladder_swap_consttime #a_t len ctx_len k ctx a bLen bBits b acc =
   push_frame ();
   let sw = create 1ul (uint #a_t #SEC 0) in
 
-  //to.lone acc;
+  k.lone ctx acc;
   let h0 = ST.get () in
 
   [@inline_let]
@@ -340,6 +340,7 @@ let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
 let lprecomp_table #a_t len ctx_len k ctx a table_len table =
   let t0 = sub table 0ul len in
   let t1 = sub table len len in
+  k.lone ctx t0;
   let h0 = ST.get () in
   copy t1 a;
   let h1 = ST.get () in
@@ -673,7 +674,8 @@ val lexp_fw_table_gen:
 let lexp_fw_table_gen #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc =
   assert (v (bBits %. l) = v bBits % v l);
   if bBits %. l <> 0ul then
-    lexp_fw_acc0 len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc;
+    lexp_fw_acc0 len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc
+  else k.lone ctx acc;
   lexp_fw_loop #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc
 
 
@@ -708,9 +710,6 @@ let lexp_fw_gen #a_t len ctx_len k lprecomp_get ctx a bLen bBits b acc l =
   assert (1 < v table_len /\ v table_len * v len <= max_size_t);
 
   let table = create (table_len *! len) (uint #a_t #SEC 0) in
-  update_sub table 0ul len acc;
-  let h = ST.get () in
-  assert (k.to.refl (as_seq h (gsub table 0ul len)) == k.to.concr_ops.SE.one ());
   lprecomp_table #a_t len ctx_len k ctx a table_len table;
   lexp_fw_table_gen #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc;
   pop_frame ()
