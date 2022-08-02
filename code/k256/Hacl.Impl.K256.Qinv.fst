@@ -67,7 +67,7 @@ val qsquare_times_in_place (out:qelem) (b:size_t) : Stack unit
 
 [@CInline]
 let qsquare_times_in_place out b =
-  BE.lexp_pow_in_place 4ul 0ul mk_k256_scalar_concrete_ops (null uint64) out b
+  BE.lexp_pow2_in_place 4ul 0ul mk_k256_scalar_concrete_ops (null uint64) out b
 
 
 val qsquare_times (out a:qelem) (b:size_t) : Stack unit

@@ -11,7 +11,6 @@ module ST = FStar.HyperStack.ST
 module B = LowStar.Buffer
 
 module LSeq = Lib.Sequence
-module BSeq = Lib.ByteSequence
 module Loops = Lib.LoopCombinators
 
 module LE = Lib.Exponentiation
@@ -169,7 +168,7 @@ let lexp_pow2 #a_t len ctx_len k ctx a b res =
     k.lsqr ctx res res)
 
 
-let lexp_pow_in_place #a_t len ctx_len k ctx acc b =
+let lexp_pow2_in_place #a_t len ctx_len k ctx acc b =
   let h0 = ST.get () in
   [@ inline_let]
   let refl1 i : GTot k.to.t_spec = k.to.refl (as_seq h0 acc) in
@@ -187,28 +186,9 @@ let lexp_pow_in_place #a_t len ctx_len k ctx acc b =
     k.lsqr ctx acc acc)
 
 
-///////////////////////////////////////////////////////////////////////
-//// the precomputed table and constant-time access to its elements ///
-///////////////////////////////////////////////////////////////////////
-
-inline_for_extraction noextract
-val precomp_table_inv:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len
-  -> a:LSeq.lseq (uint_t a_t SEC) (v len)
-  -> table_len:size_t{v table_len * v len <= max_size_t}
-  -> table:LSeq.lseq (uint_t a_t SEC) (v table_len * v len)
-  -> j:nat{j < v table_len} ->
-  Type0
-
-let precomp_table_inv #a_t len ctx_len k a table_len table j =
-  Math.Lemmas.lemma_mult_le_right (v len) (j + 1) (v table_len);
-  let bj = LSeq.sub table (j * v len) (v len) in
-  k.to.linv bj /\ k.to.linv a /\
-  k.to.refl bj == SE.pow k.to.concr_ops (k.to.refl a) j
-
+//////////////////////////////
+//// the precomputed table ///
+//////////////////////////////
 
 inline_for_extraction noextract
 val lprecomp_table_mul:
@@ -357,27 +337,6 @@ let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
 #pop-options
 
 
-inline_for_extraction noextract
-val lprecomp_table:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len
-  -> ctx:lbuffer (uint_t a_t SEC) ctx_len
-  -> a:lbuffer (uint_t a_t SEC) len
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len) ->
-  Stack unit
-  (requires fun h ->
-    live h a /\ live h table /\ live h ctx /\
-    disjoint a table /\ disjoint ctx table /\ disjoint a ctx /\
-    k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
-    k.to.linv (as_seq h (gsub table 0ul len)) /\
-    k.to.refl (as_seq h (gsub table 0ul len)) == k.to.concr_ops.SE.one ())
-  (ensures  fun h0 _ h1 -> modifies (loc table) h0 h1 /\
-    (forall (j:nat{j < v table_len}).{:pattern precomp_table_inv len ctx_len k (as_seq h1 a) table_len (as_seq h1 table) j}
-      precomp_table_inv len ctx_len k (as_seq h1 a) table_len (as_seq h1 table) j))
-
 let lprecomp_table #a_t len ctx_len k ctx a table_len table =
   let t0 = sub table 0ul len in
   let t1 = sub table len len in
@@ -465,37 +424,6 @@ let bn_get_bits_c #b_t bLen bBits b l =
   BN.bn_get_bits bLen b i l
 
 
-inline_for_extraction noextract
-let lprecomp_get_st
-  (a_t:inttype_a)
-  (len:size_t{v len > 0})
-  (ctx_len:size_t)
-  (k:concrete_ops a_t len ctx_len) =
-    a:lbuffer (uint_t a_t SEC) len
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> bits_l:uint_t a_t SEC{v bits_l < v table_len}
-  -> tmp:lbuffer (uint_t a_t SEC) len ->
-  Stack unit
-  (requires fun h ->
-    live h a /\ live h table /\ live h tmp /\
-    disjoint a table /\ disjoint a tmp /\ disjoint table tmp /\
-    k.to.linv (as_seq h a) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
-  (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
-    k.to.linv (as_seq h1 tmp) /\
-    k.to.refl (as_seq h1 tmp) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bits_l))
-
-
-inline_for_extraction noextract
-val lprecomp_get_vartime:
-     #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len ->
-  lprecomp_get_st a_t len ctx_len k
-
 let lprecomp_get_vartime #a_t len ctx_len k a table_len table bits_l tmp =
   let bits_l32 = Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 bits_l))) in
   assert (v bits_l32 == v bits_l /\ v bits_l < v table_len);
@@ -509,14 +437,6 @@ let lprecomp_get_vartime #a_t len ctx_len k a table_len table bits_l tmp =
   assert (k.to.refl (as_seq h1 a_bits_l) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bits_l));
   copy tmp a_bits_l
 
-
-inline_for_extraction noextract
-val lprecomp_get_consttime:
-     #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len ->
-  lprecomp_get_st a_t len ctx_len k
 
 let lprecomp_get_consttime #a_t len ctx_len k a table_len table bits_l tmp =
   Math.Lemmas.lemma_mult_le_right (v len) (v bits_l + 1) (v table_len);
@@ -561,6 +481,7 @@ let lmul_acc_pow_a_bits_l_st
       (v bBits) (BD.bn_v h0 b) (v l) (v i) (k.to.refl (as_seq h0 acc)))
 
 
+// acc <- acc * a^b_i
 inline_for_extraction noextract
 val lmul_acc_pow_a_bits_l:
     #a_t:inttype_a
@@ -614,6 +535,7 @@ let lexp_fw_f_st
       (v bBits) (BD.bn_v h0 b) (v l) (v i) (k.to.refl (as_seq h0 acc)))
 
 
+// acc <- acc^(2^l) * a^b_i
 inline_for_extraction noextract
 val lexp_fw_f:
     #a_t:inttype_a
@@ -624,7 +546,7 @@ val lexp_fw_f:
   lexp_fw_f_st a_t len ctx_len k
 
 let lexp_fw_f #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table i acc =
-  lexp_pow_in_place len ctx_len k ctx acc l;
+  lexp_pow2_in_place len ctx_len k ctx acc l;
   lmul_acc_pow_a_bits_l #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table i acc
 
 
@@ -740,50 +662,31 @@ let lexp_fw_acc0 #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len 
 
 
 inline_for_extraction noextract
-let lexp_fw_gen_st
-  (a_t:inttype_a)
-  (len:size_t{v len > 0})
-  (ctx_len:size_t)
-  (k:concrete_ops a_t len ctx_len) =
-    ctx:lbuffer (uint_t a_t SEC) ctx_len
-  -> a:lbuffer (uint_t a_t SEC) len
-  -> bLen:size_t
-  -> bBits:size_t{(v bBits - 1) / bits a_t < v bLen}
-  -> b:lbuffer (uint_t a_t SEC) bLen
-  -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
-  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
-  -> acc:lbuffer (uint_t a_t SEC) len ->
-  Stack unit
-  (requires fun h ->
-    live h a /\ live h b /\ live h acc /\ live h ctx /\ live h table /\
-    disjoint a acc /\ disjoint a ctx /\ disjoint a table /\ disjoint b acc /\
-    disjoint acc ctx /\ disjoint acc table /\ disjoint ctx table /\
-    BD.bn_v h b < pow2 (v bBits) /\
-    k.to.linv_ctx (as_seq h ctx) /\ k.to.linv (as_seq h a) /\
-    k.to.linv (as_seq h acc) /\ k.to.refl (as_seq h acc) == k.to.concr_ops.SE.one () /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
-  (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
-    k.to.linv (as_seq h1 acc) /\
-    k.to.refl (as_seq h1 acc) ==
-    SE.exp_fw k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
-
-
-inline_for_extraction noextract
-val lexp_fw_gen_:
+val lexp_fw_table_gen:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
   -> k:concrete_ops a_t len ctx_len
   -> lprecomp_get:lprecomp_get_st a_t len ctx_len k ->
-  lexp_fw_gen_st a_t len ctx_len k
+  lexp_fw_table_st a_t len ctx_len k
 
-let lexp_fw_gen_ #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc =
+let lexp_fw_table_gen #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc =
   assert (v (bBits %. l) = v bBits % v l);
   if bBits %. l <> 0ul then
     lexp_fw_acc0 len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc;
   lexp_fw_loop #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc
+
+
+let lexp_fw_table_vartime #a_t len ctx_len k ctx a bLen bBits b l table_len table acc =
+  lexp_fw_table_gen #a_t len ctx_len k
+    (lprecomp_get_vartime #a_t len ctx_len k)
+    ctx a bLen bBits b l table_len table acc
+
+
+let lexp_fw_table_consttime #a_t len ctx_len k ctx a bLen bBits b l table_len table acc =
+  lexp_fw_table_gen #a_t len ctx_len k
+    (lprecomp_get_consttime #a_t len ctx_len k)
+    ctx a bLen bBits b l table_len table acc
 
 
 inline_for_extraction noextract
@@ -809,17 +712,17 @@ let lexp_fw_gen #a_t len ctx_len k lprecomp_get ctx a bLen bBits b acc l =
   let h = ST.get () in
   assert (k.to.refl (as_seq h (gsub table 0ul len)) == k.to.concr_ops.SE.one ());
   lprecomp_table #a_t len ctx_len k ctx a table_len table;
-  lexp_fw_gen_ #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc;
+  lexp_fw_table_gen #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc;
   pop_frame ()
 
 
-let lexp_fw_vartime #a_t len ctx_len k ctx a bLen bBits b acc w =
+let lexp_fw_vartime #a_t len ctx_len k ctx a bLen bBits b acc l =
   lexp_fw_gen #a_t len ctx_len k
     (lprecomp_get_vartime #a_t len ctx_len k)
-    ctx a bLen bBits b acc w
+    ctx a bLen bBits b acc l
 
 
-let lexp_fw_consttime #a_t len ctx_len k ctx a bLen bBits b acc w =
+let lexp_fw_consttime #a_t len ctx_len k ctx a bLen bBits b acc l =
   lexp_fw_gen #a_t len ctx_len k
     (lprecomp_get_consttime #a_t len ctx_len k)
-    ctx a bLen bBits b acc w
+    ctx a bLen bBits b acc l

@@ -69,7 +69,7 @@ val fsquare_times_in_place (out:felem) (b:size_t) : Stack unit
 
 [@CInline]
 let fsquare_times_in_place out b =
-  BE.lexp_pow_in_place 5ul 0ul mk_k256_prime_concrete_ops (null uint64) out b
+  BE.lexp_pow2_in_place 5ul 0ul mk_k256_prime_concrete_ops (null uint64) out b
 
 
 val fsquare_times (out a:felem) (b:size_t) : Stack unit
