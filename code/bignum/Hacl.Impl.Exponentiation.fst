@@ -663,6 +663,45 @@ let lexp_fw_acc0 #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len 
 
 
 inline_for_extraction noextract
+let lprecomp_get_one_st
+  (a_t:inttype_a)
+  (len:size_t{v len > 0})
+  (ctx_len:size_t)
+  (k:concrete_ops a_t len ctx_len) =
+    a:lbuffer (uint_t a_t SEC) len
+  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
+  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> res:lbuffer (uint_t a_t SEC) len ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h table /\ live h res /\
+    disjoint a table /\ disjoint a res /\ disjoint table res /\
+    k.to.linv (as_seq h a) /\
+    (forall (j:nat{j < v table_len}).
+      precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    k.to.linv (as_seq h1 res) /\
+    k.to.refl (as_seq h1 res) == k.to.concr_ops.SE.one ())
+
+
+inline_for_extraction noextract
+val lprecomp_get_one:
+     #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len ->
+  lprecomp_get_one_st a_t len ctx_len k
+
+let lprecomp_get_one #a_t len ctx_len k a table_len table res =
+  let h0 = ST.get () in
+  copy res (sub table 0ul len);
+  let h1 = ST.get () in
+  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) 0);
+  assert (k.to.refl (as_seq h1 res) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) 0);
+  SE.pow_eq0 k.to.concr_ops (k.to.refl (as_seq h0 a))
+
+
+inline_for_extraction noextract
 val lexp_fw_table_gen:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
@@ -675,7 +714,7 @@ let lexp_fw_table_gen #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table
   assert (v (bBits %. l) = v bBits % v l);
   if bBits %. l <> 0ul then
     lexp_fw_acc0 len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc
-  else k.lone ctx acc;
+  else lprecomp_get_one len ctx_len k a table_len table acc;
   lexp_fw_loop #a_t len ctx_len k lprecomp_get ctx a bLen bBits b l table_len table acc
 
 

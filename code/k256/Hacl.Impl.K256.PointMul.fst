@@ -52,7 +52,6 @@ let point_double ctx x xx =
   Hacl.Impl.K256.PointDouble.point_double xx x
 
 
-inline_for_extraction noextract
 val make_point_at_inf: p:point -> Stack unit
   (requires fun h -> live h p)
   (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\

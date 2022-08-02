@@ -234,7 +234,7 @@ let lexp_double_fw_tables_gen #a_t len ctx_len k lprecomp_get ctx a1 bLen bBits 
   assert (v (bBits %. l) == v bBits % v l);
   if bBits %. l <> 0ul then
     lexp_double_fw_acc0 len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc
-  else k.lone ctx acc;
+  else lprecomp_get_one len ctx_len k a1 table_len table1 acc;
 
   lexp_double_fw_loop #a_t len ctx_len k lprecomp_get ctx a1 bLen bBits b1 a2 b2 l table_len table1 table2 acc
 

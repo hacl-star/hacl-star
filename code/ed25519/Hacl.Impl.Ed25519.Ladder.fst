@@ -94,7 +94,6 @@ let point_double ctx x xx =
   Hacl.Impl.Ed25519.PointDouble.point_double xx x
 
 
-inline_for_extraction noextract
 val make_point_inf:
   b:lbuffer uint64 20ul ->
   Stack unit

@@ -72,7 +72,7 @@ val bn_mont_one:
     (mk_to_bn_mont_ll_concr_ops t k.BM.bn.BN.len n mu)
 
 let bn_mont_one #t k n mu ctx oneM =
-  let len = k.BM.bn.BN.len in
+  [@inline_let] let len = k.BM.bn.BN.len in
   let ctx_n = sub ctx 0ul len in
   let ctx_r2 = sub ctx len len in
   let h0 = ST.get () in
@@ -247,7 +247,7 @@ let bn_exp_mont_fw_vartime #t k l n mu r2 aM bBits b resM =
   push_frame ();
   let h0 = ST.get () in
   [@inline_let] let len = k.BM.bn.BN.len in
-  [@inline_let] let bLen = blocks0 bBits (size (bits t)) in
+  let bLen = blocks0 bBits (size (bits t)) in
   let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
   let ctx = create (len +! len) (uint #t #SEC 0) in
   mk_ctx #t len n r2 ctx;
@@ -270,7 +270,7 @@ let bn_exp_mont_fw_consttime #t k l n mu r2 aM bBits b resM =
   push_frame ();
   let h0 = ST.get () in
   [@inline_let] let len = k.BM.bn.BN.len in
-  [@inline_let] let bLen = blocks0 bBits (size (bits t)) in
+  let bLen = blocks0 bBits (size (bits t)) in
   let k1 = Ghost.hide (E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (bn_v h0 n) (v mu)) in
   let ctx = create (len +! len) (uint #t #SEC 0) in
   mk_ctx #t len n r2 ctx;
