@@ -237,6 +237,77 @@ let store_row #a #m b r =
     uints_to_bytes_le #(Spec.wt a) 4ul b r
 
 noextract inline_for_extraction
+val lemma_uints_to_bytes_le_i :
+  #t : inttype{unsigned t /\ ~(U1? t)} ->
+  #l : secrecy_level ->
+  #len:size_nat{len * numbytes t < pow2 32} ->
+  s : Lib.Sequence.lseq (uint_t t l) len ->
+  i : size_nat {i < len} ->
+  Lemma(Lib.Sequence.sub (Lib.ByteSequence.uints_to_bytes_le #t #l s) (i * numbytes t) (numbytes t) == Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i))
+
+noextract inline_for_extraction
+let lemma_uints_to_bytes_le_i #t #l #len s i =
+  let lemma_uints_to_bytes_le_i_j (#t : inttype{unsigned t /\ ~(U1? t)})
+    (#l : secrecy_level)
+    (#len:size_nat{len * numbytes t < pow2 32})
+    (s : Lib.Sequence.lseq (uint_t t l) len)
+    (i : size_nat {i < len})
+    (j : size_nat {j < numbytes t}):
+      Lemma(Lib.Sequence.index (Lib.ByteSequence.uints_to_bytes_le #t #l s) (i * numbytes t + j) == Lib.Sequence.index (Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i)) j)
+      [SMTPat (Lib.Sequence.index (Lib.ByteSequence.uints_to_bytes_le #t #l s) (i * numbytes t + j))] = 
+    Lib.ByteSequence.index_uints_to_bytes_le #t #l #len s (i*numbytes t + j);
+    assert (Lib.Sequence.index (Lib.ByteSequence.uints_to_bytes_le #t #l s) (i*numbytes t + j) ==
+           Lib.Sequence.index (Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i)) j) in
+  
+
+  Lib.Sequence.eq_intro (Lib.Sequence.sub (Lib.ByteSequence.uints_to_bytes_le #t #l s) (i * numbytes t) (numbytes t)) (Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i))
+
+noextract inline_for_extraction
+val lemma_uints_to_from_bytes_le_preserves_value :
+  #t : inttype{unsigned t /\ ~(U1? t)} ->
+  #l : secrecy_level ->
+  #len:size_nat{len * numbytes t < pow2 32} ->
+  s : Lib.Sequence.lseq (uint_t t l) len ->
+  Lemma(Lib.ByteSequence.uints_from_bytes_le #t #l (Lib.ByteSequence.uints_to_bytes_le #t #l s) == s)
+
+let lemma_uints_to_from_bytes_le_preserves_value #t #l #len s =
+  let lemma_uints_to_from_bytes_le_preserves_value_i
+  (#t : inttype{unsigned t /\ ~(U1? t)})
+  (#l : secrecy_level)
+  (#len:size_nat{len * numbytes t < pow2 32})
+  (s : Lib.Sequence.lseq (uint_t t l) len)
+  (i : size_nat {i < len}) :
+  Lemma(Lib.Sequence.index (Lib.ByteSequence.uints_from_bytes_le #t #l (Lib.ByteSequence.uints_to_bytes_le #t #l s)) i == Lib.Sequence.index s i)
+  [SMTPat (Lib.Sequence.index (Lib.ByteSequence.uints_from_bytes_le #t #l (Lib.ByteSequence.uints_to_bytes_le #t #l s)) i)] =
+  let b8 = Lib.ByteSequence.uints_to_bytes_le #t #l s in
+  Lib.ByteSequence.index_uints_from_bytes_le #t #l #len b8 i;
+  assert (Lib.Sequence.index (Lib.ByteSequence.uints_from_bytes_le b8) i ==
+          Lib.ByteSequence.uint_from_bytes_le (Lib.Sequence.sub b8 (i * numbytes t) (numbytes t)));
+  lemma_uints_to_bytes_le_i s i;
+  assert (Lib.Sequence.sub b8 (i * numbytes t) (numbytes t) == Lib.ByteSequence.uint_to_bytes_le (Lib.Sequence.index s i));
+  Lib.ByteSequence.lemma_uint_to_from_bytes_le_preserves_value (Lib.Sequence.index s i) in
+
+  
+  Lib.Sequence.eq_intro (Lib.ByteSequence.uints_from_bytes_le #t #l (Lib.ByteSequence.uints_to_bytes_le #t #l s)) s
+
+noextract inline_for_extraction
+let store_row32 #a #m b r =
+  push_frame();
+  let h0 = ST.get() in
+  let b8 = create (size_row a) (u8 0) in
+  store_row b8 r;
+  let h1 = ST.get() in
+  uints_from_bytes_le b b8;
+  let h2 = ST.get() in
+  assert (as_seq  h1 b8 == Lib.ByteSequence.uints_to_bytes_le #(Spec.wt a) (row_v h0 r));
+  assert (as_seq  h2 b == Lib.ByteSequence.uints_from_bytes_le #(Spec.wt a) (as_seq h1 b8));
+  Lib.Sequence.eq_intro (as_seq h2 b) (Spec.load_row (as_seq h2 b));
+  assert (Spec.load_row (as_seq  h2 b) ==
+          Lib.ByteSequence.uints_from_bytes_le (as_seq h1 b8));
+  lemma_uints_to_from_bytes_le_preserves_value (row_v h0 r);
+  pop_frame()
+
+noextract inline_for_extraction
 let gather_row #a #ms r m i0 i1 i2 i3 =
     create_row r m.(i0) m.(i1) m.(i2) m.(i3)
 
@@ -246,3 +317,74 @@ let alloc_state a m =
 let copy_state #a #m st2 st1 =
   copy #_ #_ #(4ul *. row_len a m) st2 st1
 
+#push-options "--z3rlimit 100"
+let load_state_from_state32 #a #m st st32 =
+    let r0 = rowi st 0ul in
+    let r1 = rowi st 1ul in
+    let r2 = rowi st 2ul in
+    let r3 = rowi st 3ul in
+    let b0 = rowi st32 0ul in
+    let b1 = rowi st32 1ul in
+    let b2 = rowi st32 2ul in
+    let b3 = rowi st32 3ul in
+    g_rowi_disjoint_other #_ #_ #(word_t a) st 0ul st32;
+    g_rowi_disjoint_other #_ #_ #(element_t a m) st32 0ul st;
+    g_rowi_disjoint_other #_ #_ #(word_t a) st 1ul st32;
+    g_rowi_disjoint_other #_ #_ #(element_t a m) st32 1ul st;
+    g_rowi_disjoint_other #_ #_ #(word_t a) st 2ul st32;
+    g_rowi_disjoint_other #_ #_ #(element_t a m) st32 2ul st;
+    g_rowi_disjoint_other #_ #_ #(word_t a) st 3ul st32;
+    g_rowi_disjoint_other #_ #_ #(element_t a m) st32 3ul st;
+    assert (disjoint r0 st32);
+    assert (disjoint r0 b0);
+    assert (disjoint r1 st32);
+    assert (disjoint r1 b1);
+    let h0 = ST.get() in
+    load_row r0 b0;
+    load_row r1 b1;
+    load_row r2 b2;
+    load_row r3 b3;
+    let h1 = ST.get() in
+    Lib.Sequence.eq_intro (as_seq h0 b0) (Spec.load_row #a (as_seq h0 b0));
+    Lib.Sequence.eq_intro (as_seq h0 b1) (Spec.load_row #a (as_seq h0 b1));
+    Lib.Sequence.eq_intro (as_seq h0 b2) (Spec.load_row #a (as_seq h0 b2));
+    Lib.Sequence.eq_intro (as_seq h0 b3) (Spec.load_row #a (as_seq h0 b3));
+    assert(row_v h0 b0 == Spec.load_row (as_seq h0 b0));
+    assert(row_v h1 r0 == row_v h0 b0);
+    assert (state_v h1 st == state_v h0 st32)
+#pop-options
+
+#push-options "--z3rlimit 100"
+let store_state_to_state32 #a #m st32 st =
+    let r0 = rowi st 0ul in
+    let r1 = rowi st 1ul in
+    let r2 = rowi st 2ul in
+    let r3 = rowi st 3ul in
+    let b0 = rowi st32 0ul in
+    let b1 = rowi st32 1ul in
+    let b2 = rowi st32 2ul in
+    let b3 = rowi st32 3ul in
+    g_rowi_disjoint_other #_ #_ #(word_t a) st 0ul st32;
+    g_rowi_disjoint_other #_ #_ #(element_t a m) st32 0ul st;
+    g_rowi_disjoint_other #_ #_ #(word_t a) st 1ul st32;
+    g_rowi_disjoint_other #_ #_ #(element_t a m) st32 1ul st;
+    g_rowi_disjoint_other #_ #_ #(word_t a) st 2ul st32;
+    g_rowi_disjoint_other #_ #_ #(element_t a m) st32 2ul st;
+    g_rowi_disjoint_other #_ #_ #(word_t a) st 3ul st32;
+    g_rowi_disjoint_other #_ #_ #(element_t a m) st32 3ul st;
+    assert (disjoint r0 b0);
+    assert (disjoint r1 b1);
+    assert (disjoint r2 b2);
+    assert (disjoint r3 b3);
+    let h0 = ST.get() in
+    store_row32 b0 r0;
+    store_row32 b1 r1;
+    store_row32 b2 r2;
+    store_row32 b3 r3;
+    let h1 = ST.get() in
+    Lib.Sequence.eq_intro (as_seq h1 b0) (Spec.load_row #a (as_seq h1 b0));
+    Lib.Sequence.eq_intro (as_seq h1 b1) (Spec.load_row #a (as_seq h1 b1));
+    Lib.Sequence.eq_intro (as_seq h1 b2) (Spec.load_row #a (as_seq h1 b2));
+    Lib.Sequence.eq_intro (as_seq h1 b3) (Spec.load_row #a (as_seq h1 b3));
+    assert (state_v h1 st32 == state_v h0 st)
+#pop-options
