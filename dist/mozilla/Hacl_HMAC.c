@@ -24,10 +24,10 @@
 
 #include "Hacl_HMAC.h"
 
-#include "internal/Hacl_Impl_Blake2_Hacl_Blake2b_256_Hacl_Blake2s_128_Hacl_Blake2b_32_Hacl_Streaming_Blake2s_128_Hacl_Streaming_Blake2b_256_Hacl_Blake2s_32_Hacl_HMAC_Blake2b_256_Hacl_HMAC_Blake2s_128_Hacl_HKDF_Blake2b_256_Hacl_HKDF_Blake2s_128.h"
 #include "internal/Hacl_Hash_SHA2.h"
 #include "internal/Hacl_Hash_SHA1.h"
 #include "internal/Hacl_Hash_Base.h"
+#include "internal/Blake2_Should_Not_Be_Used.h"
 
 void
 Hacl_HMAC_legacy_compute_sha1(

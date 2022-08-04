@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Hash_Base_H
-#define __internal_Hacl_Hash_Base_H
+#ifndef __Hacl_BenchKaratsuba_H
+#define __Hacl_BenchKaratsuba_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,56 +35,49 @@ extern "C" {
 #include <stdbool.h>
 
 
-#include "internal/Hacl_Lib.h"
-#include "internal/Blake2_Should_Not_Be_Used.h"
-#include "../Hacl_Hash_Base.h"
 
-void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *dst);
 
 void
-Hacl_Hash_Core_Blake2_finish_blake2b_32(uint64_t *s, FStar_UInt128_uint128 ev, uint8_t *dst);
-
-uint64_t
-Hacl_Hash_Blake2_update_multi_blake2s_32(
-  uint32_t *s,
-  uint64_t ev,
-  uint8_t *blocks,
-  uint32_t n_blocks
+Hacl_BenchKaratsuba_bn_karatsuba_mul_uint32(
+  uint32_t threshold,
+  uint32_t aLen,
+  uint32_t *a,
+  uint32_t *b,
+  uint32_t *tmp,
+  uint32_t *res
 );
 
-FStar_UInt128_uint128
-Hacl_Hash_Blake2_update_multi_blake2b_32(
-  uint64_t *s,
-  FStar_UInt128_uint128 ev,
-  uint8_t *blocks,
-  uint32_t n_blocks
+void
+Hacl_BenchKaratsuba_bn_karatsuba_mul_uint64(
+  uint32_t threshold,
+  uint32_t aLen,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *tmp,
+  uint64_t *res
 );
 
-uint64_t
-Hacl_Hash_Blake2_update_last_blake2s_32(
-  uint32_t *s,
-  uint64_t ev,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
+void
+Hacl_BenchKaratsuba_bn_karatsuba_sqr_uint32(
+  uint32_t threshold,
+  uint32_t aLen,
+  uint32_t *a,
+  uint32_t *tmp,
+  uint32_t *res
 );
 
-FStar_UInt128_uint128
-Hacl_Hash_Blake2_update_last_blake2b_32(
-  uint64_t *s,
-  FStar_UInt128_uint128 ev,
-  FStar_UInt128_uint128 prev_len,
-  uint8_t *input,
-  uint32_t input_len
+void
+Hacl_BenchKaratsuba_bn_karatsuba_sqr_uint64(
+  uint32_t threshold,
+  uint32_t aLen,
+  uint64_t *a,
+  uint64_t *tmp,
+  uint64_t *res
 );
-
-void Hacl_Hash_Blake2_hash_blake2s_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
-
-void Hacl_Hash_Blake2_hash_blake2b_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Hash_Base_H_DEFINED
+#define __Hacl_BenchKaratsuba_H_DEFINED
 #endif

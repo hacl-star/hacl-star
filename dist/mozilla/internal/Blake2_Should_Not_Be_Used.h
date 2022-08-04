@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Hash_Base_H
-#define __internal_Hacl_Hash_Base_H
+#ifndef __internal_Blake2_Should_Not_Be_Used_H
+#define __internal_Blake2_Should_Not_Be_Used_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -36,55 +36,37 @@ extern "C" {
 
 
 #include "internal/Hacl_Lib.h"
-#include "internal/Blake2_Should_Not_Be_Used.h"
-#include "../Hacl_Hash_Base.h"
+#include "Hacl_Krmllib.h"
 
-void Hacl_Hash_Core_Blake2_finish_blake2s_32(uint32_t *s, uint64_t ev, uint8_t *dst);
+extern const uint32_t Hacl_Impl_Blake2_Constants_sigmaTable[160U];
+
+extern const uint32_t Hacl_Impl_Blake2_Constants_ivTable_S[8U];
+
+extern const uint64_t Hacl_Impl_Blake2_Constants_ivTable_B[8U];
 
 void
-Hacl_Hash_Core_Blake2_finish_blake2b_32(uint64_t *s, FStar_UInt128_uint128 ev, uint8_t *dst);
-
-uint64_t
-Hacl_Hash_Blake2_update_multi_blake2s_32(
-  uint32_t *s,
-  uint64_t ev,
-  uint8_t *blocks,
-  uint32_t n_blocks
+Hacl_Blake2b_32_blake2b(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
 );
 
-FStar_UInt128_uint128
-Hacl_Hash_Blake2_update_multi_blake2b_32(
-  uint64_t *s,
-  FStar_UInt128_uint128 ev,
-  uint8_t *blocks,
-  uint32_t n_blocks
+void
+Hacl_Blake2s_32_blake2s(
+  uint32_t nn,
+  uint8_t *output,
+  uint32_t ll,
+  uint8_t *d,
+  uint32_t kk,
+  uint8_t *k
 );
-
-uint64_t
-Hacl_Hash_Blake2_update_last_blake2s_32(
-  uint32_t *s,
-  uint64_t ev,
-  uint64_t prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
-
-FStar_UInt128_uint128
-Hacl_Hash_Blake2_update_last_blake2b_32(
-  uint64_t *s,
-  FStar_UInt128_uint128 ev,
-  FStar_UInt128_uint128 prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
-
-void Hacl_Hash_Blake2_hash_blake2s_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
-
-void Hacl_Hash_Blake2_hash_blake2b_32(uint8_t *input, uint32_t input_len, uint8_t *dst);
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Hash_Base_H_DEFINED
+#define __internal_Blake2_Should_Not_Be_Used_H_DEFINED
 #endif

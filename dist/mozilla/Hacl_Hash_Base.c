@@ -25,7 +25,7 @@
 #include "internal/Hacl_Hash_Base.h"
 
 #include "internal/Hacl_Lib.h"
-#include "internal/Hacl_Impl_Blake2_Hacl_Blake2b_256_Hacl_Blake2s_128_Hacl_Blake2b_32_Hacl_Streaming_Blake2s_128_Hacl_Streaming_Blake2b_256_Hacl_Blake2s_32_Hacl_HMAC_Blake2b_256_Hacl_HMAC_Blake2s_128_Hacl_HKDF_Blake2b_256_Hacl_HKDF_Blake2s_128.h"
+#include "internal/Blake2_Should_Not_Be_Used.h"
 
 static uint64_t update_blake2s_32(uint32_t *s, uint64_t totlen, uint8_t *block)
 {
