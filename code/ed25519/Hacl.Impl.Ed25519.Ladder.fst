@@ -197,7 +197,7 @@ let point_mul result scalar q =
   push_frame ();
   let bscalar = create 4ul (u64 0) in
   convert_scalar scalar bscalar;
-  BE.lexp_fw_consttime 20ul 0ul mk_ed25519_concrete_ops (null uint64) q 4ul 256ul bscalar result 4ul;
+  BE.lexp_fw_consttime 20ul 0ul mk_ed25519_concrete_ops 4ul (null uint64) q 4ul 256ul bscalar result;
   pop_frame ()
 
 
@@ -254,7 +254,7 @@ let point_mul_double_vartime result scalar1 q1 scalar2 q2 =
   let bscalar2 = create 4ul (u64 0) in
   convert_scalar scalar2 bscalar2;
 
-  ME.lexp_double_fw_vartime 20ul 0ul mk_ed25519_concrete_ops (null uint64) q1 4ul 256ul bscalar1 q2 bscalar2 result 4ul;
+  ME.lexp_double_fw_vartime 20ul 0ul mk_ed25519_concrete_ops 4ul (null uint64) q1 4ul 256ul bscalar1 q2 bscalar2 result;
   pop_frame ()
 #pop-options
 

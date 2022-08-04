@@ -259,7 +259,7 @@ let bn_exp_almost_mont_fw_vartime #t k l n mu r2 aM bBits b resM =
   let ctx = create (len +! len) (uint #t #SEC 0) in
   mk_ctx #t len n r2 ctx;
 
-  BE.lexp_fw_vartime len (len +! len) (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM l;
+  BE.lexp_fw_vartime len (len +! len) (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) l ctx aM bLen bBits b resM;
   SE.exp_fw_lemma (S.mk_bn_almost_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b) (v l);
   LE.exp_fw_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b) (v l);
   E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b);
@@ -283,7 +283,7 @@ let bn_exp_almost_mont_fw_consttime #t k l n mu r2 aM bBits b resM =
   let ctx = create (len +! len) (uint #t #SEC 0) in
   mk_ctx #t len n r2 ctx;
 
-  BE.lexp_fw_consttime len (len +! len) (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM l;
+  BE.lexp_fw_consttime len (len +! len) (mk_bn_almost_mont_concrete_ops t k (as_seq h0 n) mu) l ctx aM bLen bBits b resM;
   SE.exp_fw_lemma (S.mk_bn_almost_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b) (v l);
   LE.exp_fw_lemma k1 (bn_v h0 aM % bn_v h0 n) (v bBits) (bn_v h0 b) (v l);
   E.pow_nat_mont_ll_mod_base (bits t) (v len) (bn_v h0 n) (v mu) (bn_v h0 aM) (bn_v h0 b);

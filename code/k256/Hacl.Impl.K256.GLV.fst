@@ -53,6 +53,7 @@ let scalar_split_lambda_g1g2 tmp1 tmp2 k1 k2 k =
   assert (qas_nat h0 k1 < S.q /\ qas_nat h0 k2 < S.q)
 
 
+// k = (k1 + lambda * k2) % S.q
 val scalar_split_lambda (k1 k2 k: qelem) : Stack unit
   (requires fun h ->
     live h k /\ live h k1 /\ live h k2 /\
@@ -108,24 +109,24 @@ let point_mul_lambda res p =
   pop_frame ()
 
 
-// TODO: set it to a constant?
-// [lambda]G
-inline_for_extraction noextract
-val point_mul_g_lambda: res:point -> Stack unit
-  (requires fun h -> live h res)
-  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
-    point_inv h1 res /\
-    point_eval h1 res == SG.point_mul_g_lambda ())
+// // TODO: set it to a constant?
+// // [lambda]G
+// inline_for_extraction noextract
+// val point_mul_g_lambda: res:point -> Stack unit
+//   (requires fun h -> live h res)
+//   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+//     point_inv h1 res /\
+//     point_eval h1 res == SG.point_mul_g_lambda ())
 
-let point_mul_g_lambda res =
-  push_frame ();
-  let g = create_point () in
-  PM.make_g g;
-  point_mul_lambda res g;
-  pop_frame ()
-
+// let point_mul_g_lambda res =
+//   push_frame ();
+//   let g = create_point () in
+//   PM.make_g g;
+//   point_mul_lambda res g;
+//   pop_frame ()
 
 // TODO: share a table [0; P; 2P; ..; 15P] between P and ([lambda]P)
+// [scalar]Q = [(r1 + r2 * lambda) % S.q]Q = [r1]Q + [r2]([lambda]Q)
 val point_mul_split_lambda: out:point -> scalar:qelem -> q:point -> Stack unit
   (requires fun h ->
     live h out /\ live h scalar /\ live h q /\
@@ -146,8 +147,8 @@ let point_mul_split_lambda out scalar q =
   let r2 = create_qelem () in
   scalar_split_lambda r1 r2 scalar;
 
-  ME.lexp_double_fw_vartime 15ul 0ul PM.mk_k256_concrete_ops (null uint64)
-    q 4ul 129ul r1 q2 r2 out 4ul;
+  ME.lexp_double_fw_vartime 15ul 0ul PM.mk_k256_concrete_ops 4ul (null uint64)
+    q 4ul 129ul r1 q2 r2 out;
 
   assume (
     SGL.point_mul_split_lambda (qas_nat h0 scalar) (point_eval h0 q) ==

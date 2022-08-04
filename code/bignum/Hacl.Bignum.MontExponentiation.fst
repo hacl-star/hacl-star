@@ -252,7 +252,7 @@ let bn_exp_mont_fw_vartime #t k l n mu r2 aM bBits b resM =
   let ctx = create (len +! len) (uint #t #SEC 0) in
   mk_ctx #t len n r2 ctx;
 
-  BE.lexp_fw_vartime len (len +! len) (mk_bn_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM l;
+  BE.lexp_fw_vartime len (len +! len) (mk_bn_mont_concrete_ops t k (as_seq h0 n) mu) l ctx aM bLen bBits b resM;
   SE.exp_fw_lemma (S.mk_bn_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b) (v l);
   LE.exp_fw_lemma k1 (bn_v h0 aM) (v bBits) (bn_v h0 b) (v l);
   pop_frame ()
@@ -275,7 +275,7 @@ let bn_exp_mont_fw_consttime #t k l n mu r2 aM bBits b resM =
   let ctx = create (len +! len) (uint #t #SEC 0) in
   mk_ctx #t len n r2 ctx;
 
-  BE.lexp_fw_consttime len (len +! len) (mk_bn_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM l;
+  BE.lexp_fw_consttime len (len +! len) (mk_bn_mont_concrete_ops t k (as_seq h0 n) mu) l ctx aM bLen bBits b resM;
   SE.exp_fw_lemma (S.mk_bn_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b) (v l);
   LE.exp_fw_lemma k1 (bn_v h0 aM) (v bBits) (bn_v h0 b) (v l);
   pop_frame ()

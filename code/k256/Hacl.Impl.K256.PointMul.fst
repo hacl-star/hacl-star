@@ -126,7 +126,7 @@ val point_mul: out:point -> scalar:qelem -> q:point -> Stack unit
     point_eval h1 out == S.point_mul (qas_nat h0 scalar) (point_eval h0 q))
 
 let point_mul out scalar q =
-  BE.lexp_fw_consttime 15ul 0ul mk_k256_concrete_ops (null uint64) q 4ul 256ul scalar out 4ul
+  BE.lexp_fw_consttime 15ul 0ul mk_k256_concrete_ops 4ul (null uint64) q 4ul 256ul scalar out
 
 
 val point_mul_double_vartime:
@@ -146,7 +146,7 @@ val point_mul_double_vartime:
 
 [@CInline]
 let point_mul_double_vartime out scalar1 q1 scalar2 q2 =
-  ME.lexp_double_fw_vartime 15ul 0ul mk_k256_concrete_ops (null uint64) q1 4ul 256ul scalar1 q2 scalar2 out 4ul
+  ME.lexp_double_fw_vartime 15ul 0ul mk_k256_concrete_ops 4ul (null uint64) q1 4ul 256ul scalar1 q2 scalar2 out
 
 
 val point_mul_g: out:point -> scalar:qelem -> Stack unit
