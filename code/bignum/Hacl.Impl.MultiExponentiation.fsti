@@ -15,12 +15,20 @@ open Hacl.Impl.Exponentiation
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+// Double Fixed-window method using two precomputed tables
+//---------------------------------------------------------
+
 inline_for_extraction noextract
 let lexp_double_fw_tables_st
   (a_t:inttype_a)
   (len:size_t{v len > 0})
   (ctx_len:size_t)
-  (k:concrete_ops a_t len ctx_len) =
+  (k:concrete_ops a_t len ctx_len)
+  (l:size_window_t a_t len)
+  (table_len:table_len_t len)
+  (table_inv1:table_inv_t a_t len table_len)
+  (table_inv2:table_inv_t a_t len table_len)
+  =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a1:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
@@ -28,8 +36,6 @@ let lexp_double_fw_tables_st
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> l:size_t{0 < v l /\ v l < bits a_t /\ v l < 32}
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len == pow2 (v l)}
   -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
   -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
   -> res:lbuffer (uint_t a_t SEC) len ->
@@ -48,10 +54,8 @@ let lexp_double_fw_tables_st
     BD.bn_v h b2 < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a1) /\ k.to.linv (as_seq h a2) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a1) table_len (as_seq h table1) j) /\
-    (forall (j:nat{j < v table_len}).
-      precomp_table_inv len ctx_len k (as_seq h a2) table_len (as_seq h table2) j))
+    table_inv1 (as_seq h a1) (as_seq h table1) /\
+    table_inv2 (as_seq h a2) (as_seq h table2))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
     k.to.refl (as_seq h1 res) ==
@@ -60,40 +64,33 @@ let lexp_double_fw_tables_st
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l))
 
 
-// This function computes `a1^b1 `mul` a2^b2` using a fixed-window method
-// It takes variable time to compute the result
-// The function also expects precomputed tables for `a1` and `a2`, i.e.,
-// table1 = [a1^0 = one; a1^1; a1^2; ..; a1^(table_len - 1)]
-// table2 = [a2^0 = one; a2^1; a2^2; ..; a2^(table_len - 1)]
 inline_for_extraction noextract
-val lexp_double_fw_tables_vartime:
+val mk_lexp_double_fw_tables:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len ->
-  lexp_double_fw_tables_st a_t len ctx_len k
+  -> k:concrete_ops a_t len ctx_len
+  -> l:size_window_t a_t len
+  -> table_len:table_len_t len
+  -> table_inv1:table_inv_t a_t len table_len
+  -> table_inv2:table_inv_t a_t len table_len
+  -> pow_a_to_small_b1:pow_a_to_small_b_st a_t len ctx_len k l table_len table_inv1
+  -> pow_a_to_small_b2:pow_a_to_small_b_st a_t len ctx_len k l table_len table_inv2 ->
+  lexp_double_fw_tables_st a_t len ctx_len k l table_len table_inv1 table_inv2
 
 
-// This function computes `a1^b1 `mul` a2^b2` using a fixed-window method
-// It takes constant time to compute the result
-// The function also expects precomputed tables for `a1` and `a2`, i.e.,
+// Double Fixed-window method with two precomputed tables
 // table1 = [a1^0 = one; a1^1; a1^2; ..; a1^(table_len - 1)]
 // table2 = [a2^0 = one; a2^1; a2^2; ..; a2^(table_len - 1)]
-inline_for_extraction noextract
-val lexp_double_fw_tables_consttime:
-    #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len ->
-  lexp_double_fw_tables_st a_t len ctx_len k
-
+//-----------------------------------------------------------
 
 inline_for_extraction noextract
 let lexp_double_fw_st
   (a_t:inttype_a)
   (len:size_t{v len > 0})
   (ctx_len:size_t)
-  (k:concrete_ops a_t len ctx_len) =
+  (k:concrete_ops a_t len ctx_len)
+  (l:size_window_t a_t len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a1:lbuffer (uint_t a_t SEC) len
   -> bLen:size_t
@@ -101,8 +98,7 @@ let lexp_double_fw_st
   -> b1:lbuffer (uint_t a_t SEC) bLen
   -> a2:lbuffer (uint_t a_t SEC) len
   -> b2:lbuffer (uint_t a_t SEC) bLen
-  -> res:lbuffer (uint_t a_t SEC) len
-  -> l:size_t{0 < v l /\ v l < bits a_t /\ pow2 (v l) * v len <= max_size_t /\ v l < 32} ->
+  -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
     live h a1 /\ live h b1 /\ live h a2 /\ live h b2 /\ live h res /\ live h ctx /\
@@ -128,8 +124,9 @@ val lexp_double_fw_vartime:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len ->
-  lexp_double_fw_st a_t len ctx_len k
+  -> k:concrete_ops a_t len ctx_len
+  -> l:size_window_t a_t len ->
+  lexp_double_fw_st a_t len ctx_len k l
 
 
 // This function computes `a1^b1 `mul` a2^b2` using a fixed-window method
@@ -139,5 +136,6 @@ val lexp_double_fw_consttime:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
   -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len ->
-  lexp_double_fw_st a_t len ctx_len k
+  -> k:concrete_ops a_t len ctx_len
+  -> l:size_window_t a_t len ->
+  lexp_double_fw_st a_t len ctx_len k l

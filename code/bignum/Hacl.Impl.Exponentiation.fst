@@ -22,7 +22,6 @@ module SN = Hacl.Spec.Bignum
 module BB = Hacl.Bignum.Base
 module PT = Hacl.Impl.PrecompTable
 
-
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 let lexp_rl_vartime #a_t len ctx_len k ctx a bLen bBits b acc =
@@ -549,7 +548,6 @@ let lexp_fw_gen #a_t len ctx_len k l table_len lprecomp_get ctx a bLen bBits b r
 
   let table = create (table_len *! len) (uint #a_t #SEC 0) in
   PT.lprecomp_table #a_t len ctx_len k ctx a table_len table;
-  let h = ST.get () in
 
   mk_lexp_fw_table len ctx_len k l table_len
     (table_inv_precomp a_t len ctx_len k l table_len)

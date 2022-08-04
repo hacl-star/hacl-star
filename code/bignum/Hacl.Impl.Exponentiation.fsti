@@ -12,7 +12,6 @@ module LSeq = Lib.Sequence
 
 module SE = Spec.Exponentiation
 module BD = Hacl.Bignum.Definitions
-module PT = Hacl.Impl.PrecompTable
 
 include Hacl.Impl.Exponentiation.Definitions
 
