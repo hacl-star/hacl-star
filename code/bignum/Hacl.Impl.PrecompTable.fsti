@@ -74,3 +74,48 @@ val lprecomp_table:
   (ensures  fun h0 _ h1 -> modifies (loc table) h0 h1 /\
     (forall (j:nat{j < v table_len}).{:pattern precomp_table_inv len ctx_len k (as_seq h1 a) table_len (as_seq h1 table) j}
       precomp_table_inv len ctx_len k (as_seq h1 a) table_len (as_seq h1 table) j))
+
+
+inline_for_extraction noextract
+let lprecomp_get_st
+  (a_t:inttype_a)
+  (len:size_t{v len > 0})
+  (ctx_len:size_t)
+  (k:concrete_ops a_t len ctx_len) =
+    a:lbuffer (uint_t a_t SEC) len
+  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
+  -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> bits_l:uint_t a_t SEC{v bits_l < v table_len}
+  -> tmp:lbuffer (uint_t a_t SEC) len ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h table /\ live h tmp /\
+    disjoint a table /\ disjoint a tmp /\ disjoint table tmp /\
+    k.to.linv (as_seq h a) /\
+    (forall (j:nat{j < v table_len}).
+      precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
+  (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
+    k.to.linv (as_seq h1 tmp) /\
+    k.to.refl (as_seq h1 tmp) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bits_l))
+
+
+// This function returns table.[bits_l] = a^bits_l
+// It takes variable time to access bits_l-th element of a table
+inline_for_extraction noextract
+val lprecomp_get_vartime:
+     #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len ->
+  lprecomp_get_st a_t len ctx_len k
+
+
+// This function returns table.[bits_l] = a^bits_l
+// It takes variable time to access bits_l-th element of a table
+inline_for_extraction noextract
+val lprecomp_get_consttime:
+     #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len ->
+  lprecomp_get_st a_t len ctx_len k
