@@ -691,8 +691,8 @@ exp_vartime_precomp(
   uint32_t *t0 = table;
   uint32_t *t1 = table + (uint32_t)128U;
   uint32_t *ctx_n0 = ctx;
-  uint32_t *ctx_r2 = ctx + (uint32_t)128U;
-  from(ctx_n0, mu, ctx_r2, t0);
+  uint32_t *ctx_r20 = ctx + (uint32_t)128U;
+  from(ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, (uint32_t)128U * sizeof (uint32_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
@@ -723,7 +723,9 @@ exp_vartime_precomp(
   }
   else
   {
-    memcpy(resM, table, (uint32_t)128U * sizeof (uint32_t));
+    uint32_t *ctx_n = ctx;
+    uint32_t *ctx_r2 = ctx + (uint32_t)128U;
+    from(ctx_n, mu, ctx_r2, resM);
   }
   for (uint32_t i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
   {
@@ -836,8 +838,8 @@ exp_consttime_precomp(
   uint32_t *t0 = table;
   uint32_t *t1 = table + (uint32_t)128U;
   uint32_t *ctx_n0 = ctx;
-  uint32_t *ctx_r2 = ctx + (uint32_t)128U;
-  from(ctx_n0, mu, ctx_r2, t0);
+  uint32_t *ctx_r20 = ctx + (uint32_t)128U;
+  from(ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, (uint32_t)128U * sizeof (uint32_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
@@ -877,7 +879,9 @@ exp_consttime_precomp(
   }
   else
   {
-    memcpy(resM, table, (uint32_t)128U * sizeof (uint32_t));
+    uint32_t *ctx_n = ctx;
+    uint32_t *ctx_r2 = ctx + (uint32_t)128U;
+    from(ctx_n, mu, ctx_r2, resM);
   }
   for (uint32_t i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
   {

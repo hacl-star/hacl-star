@@ -1337,7 +1337,7 @@ void Hacl_Impl_Ed25519_Ladder_point_mul(uint64_t *result, uint8_t *scalar, uint6
     uint64_t *t2 = table + i * (uint32_t)20U + (uint32_t)20U;
     Hacl_Impl_Ed25519_PointAdd_point_add(t2, q, t11);
   }
-  memcpy(result, table, (uint32_t)20U * sizeof (uint64_t));
+  Hacl_Impl_Ed25519_Ladder_make_point_inf(result);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
@@ -1457,7 +1457,7 @@ point_mul_double_vartime(
     uint64_t *t2 = table2 + i * (uint32_t)20U + (uint32_t)20U;
     Hacl_Impl_Ed25519_PointAdd_point_add(t2, q2, t11);
   }
-  memcpy(result, table1, (uint32_t)20U * sizeof (uint64_t));
+  Hacl_Impl_Ed25519_Ladder_make_point_inf(result);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)

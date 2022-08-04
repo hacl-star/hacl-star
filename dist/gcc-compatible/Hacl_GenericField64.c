@@ -339,8 +339,8 @@ Hacl_GenericField64_exp_consttime(
     uint64_t *t0 = table;
     uint64_t *t1 = table + len1;
     uint64_t *ctx_n0 = ctx;
-    uint64_t *ctx_r2 = ctx + len1;
-    Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, ctx_n0, k1.mu, ctx_r2, t0);
+    uint64_t *ctx_r20 = ctx + len1;
+    Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, ctx_n0, k1.mu, ctx_r20, t0);
     memcpy(t1, aMc, len1 * sizeof (uint64_t));
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
     {
@@ -380,7 +380,9 @@ Hacl_GenericField64_exp_consttime(
     }
     else
     {
-      memcpy(resM, table, len1 * sizeof (uint64_t));
+      uint64_t *ctx_n = ctx;
+      uint64_t *ctx_r2 = ctx + len1;
+      Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, ctx_n, k1.mu, ctx_r2, resM);
     }
     for (uint32_t i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
     {
@@ -505,8 +507,8 @@ Hacl_GenericField64_exp_vartime(
     uint64_t *t0 = table;
     uint64_t *t1 = table + len1;
     uint64_t *ctx_n0 = ctx;
-    uint64_t *ctx_r2 = ctx + len1;
-    Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, ctx_n0, k1.mu, ctx_r2, t0);
+    uint64_t *ctx_r20 = ctx + len1;
+    Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, ctx_n0, k1.mu, ctx_r20, t0);
     memcpy(t1, aMc, len1 * sizeof (uint64_t));
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
     {
@@ -537,7 +539,9 @@ Hacl_GenericField64_exp_vartime(
     }
     else
     {
-      memcpy(resM, table, len1 * sizeof (uint64_t));
+      uint64_t *ctx_n = ctx;
+      uint64_t *ctx_r2 = ctx + len1;
+      Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, ctx_n, k1.mu, ctx_r2, resM);
     }
     for (uint32_t i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
     {

@@ -1003,7 +1003,7 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
     uint64_t *t2 = table + i * (uint32_t)15U + (uint32_t)15U;
     Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
   }
-  memcpy(out, table, (uint32_t)15U * sizeof (uint64_t));
+  Hacl_Impl_K256_PointMul_make_point_at_inf(out);
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
     for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
@@ -1073,7 +1073,7 @@ point_mul_double_vartime(
     uint64_t *t2 = table2 + i * (uint32_t)15U + (uint32_t)15U;
     Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
   }
-  memcpy(out, table1, (uint32_t)15U * sizeof (uint64_t));
+  Hacl_Impl_K256_PointMul_make_point_at_inf(out);
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
     for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)

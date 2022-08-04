@@ -1884,8 +1884,8 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
   uint32_t *t0 = table;
   uint32_t *t1 = table + len;
   uint32_t *ctx_n0 = ctx;
-  uint32_t *ctx_r2 = ctx + len;
-  Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n0, mu, ctx_r2, t0);
+  uint32_t *ctx_r20 = ctx + len;
+  Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, len * sizeof (uint32_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
@@ -1916,7 +1916,9 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
   }
   else
   {
-    memcpy(resM, table, len * sizeof (uint32_t));
+    uint32_t *ctx_n = ctx;
+    uint32_t *ctx_r2 = ctx + len;
+    Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n, mu, ctx_r2, resM);
   }
   for (uint32_t i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
   {
@@ -2060,8 +2062,8 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
   uint32_t *t0 = table;
   uint32_t *t1 = table + len;
   uint32_t *ctx_n0 = ctx;
-  uint32_t *ctx_r2 = ctx + len;
-  Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n0, mu, ctx_r2, t0);
+  uint32_t *ctx_r20 = ctx + len;
+  Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, len * sizeof (uint32_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
@@ -2101,7 +2103,9 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
   }
   else
   {
-    memcpy(resM, table, len * sizeof (uint32_t));
+    uint32_t *ctx_n = ctx;
+    uint32_t *ctx_r2 = ctx + len;
+    Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n, mu, ctx_r2, resM);
   }
   for (uint32_t i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
   {
@@ -2348,8 +2352,8 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
   uint64_t *t0 = table;
   uint64_t *t1 = table + len;
   uint64_t *ctx_n0 = ctx;
-  uint64_t *ctx_r2 = ctx + len;
-  Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n0, mu, ctx_r2, t0);
+  uint64_t *ctx_r20 = ctx + len;
+  Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, len * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
@@ -2380,7 +2384,9 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
   }
   else
   {
-    memcpy(resM, table, len * sizeof (uint64_t));
+    uint64_t *ctx_n = ctx;
+    uint64_t *ctx_r2 = ctx + len;
+    Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n, mu, ctx_r2, resM);
   }
   for (uint32_t i = (uint32_t)0U; i < bBits / (uint32_t)4U; i++)
   {
@@ -2524,8 +2530,8 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
   uint64_t *t0 = table;
   uint64_t *t1 = table + len;
   uint64_t *ctx_n0 = ctx;
-  uint64_t *ctx_r2 = ctx + len;
-  Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n0, mu, ctx_r2, t0);
+  uint64_t *ctx_r20 = ctx + len;
+  Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, len * sizeof (uint64_t));
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
@@ -2565,7 +2571,9 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
   }
   else
   {
-    memcpy(resM, table, len * sizeof (uint64_t));
+    uint64_t *ctx_n = ctx;
+    uint64_t *ctx_r2 = ctx + len;
+    Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n, mu, ctx_r2, resM);
   }
   for (uint32_t i0 = (uint32_t)0U; i0 < bBits / (uint32_t)4U; i0++)
   {
