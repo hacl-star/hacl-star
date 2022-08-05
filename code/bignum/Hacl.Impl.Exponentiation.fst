@@ -297,12 +297,13 @@ val lmul_acc_pow_a_bits_l:
   lmul_acc_pow_a_bits_l_st a_t len ctx_len k l table_len table_inv
 
 let lmul_acc_pow_a_bits_l #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table i acc =
+  let h0 = ST.get () in
   push_frame ();
   let bits_l = bn_get_bits_l bLen bBits b l i in
   assert (v bits_l < pow2 (v l));
 
   let a_bits_l = create len (uint #a_t #SEC 0) in
-  pow_a_to_small_b ctx a table bits_l a_bits_l;
+  pow_a_to_small_b ctx (as_seq h0 a) table bits_l a_bits_l;
   k.lmul ctx acc a_bits_l acc;
   pop_frame ()
 
@@ -471,7 +472,7 @@ let lexp_fw_acc0 #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a
   let h0 = ST.get () in
   assert (v (bBits %. l) == v bBits % v l);
   let bits_c = bn_get_bits_c bLen bBits b l in
-  pow_a_to_small_b ctx a table bits_c acc
+  pow_a_to_small_b ctx (as_seq h0 a) table bits_c acc
 
 
 let mk_lexp_fw_table #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a bLen bBits b table res =
@@ -483,48 +484,9 @@ let mk_lexp_fw_table #a_t len ctx_len k l table_len table_inv pow_a_to_small_b c
 
 //-------------------------------------
 
-inline_for_extraction noextract
-let table_inv_precomp
-  (a_t:inttype_a)
-  (len:size_t{v len > 0})
-  (ctx_len:size_t)
-  (k:concrete_ops a_t len ctx_len)
-  (l:size_window_t a_t len)
-  (table_len:table_len_t len) : table_inv_t a_t len table_len =
-  fun a table ->
-    1 < v table_len /\ v table_len = pow2 (v l) /\
-      (forall (j:nat{j < v table_len}).
-      PT.precomp_table_inv len ctx_len k a table_len table j)
-
-
-// This function returns table.[bits_l] = a^bits_l
-// It takes variable time to access bits_l-th element of a table
-inline_for_extraction noextract
-val lprecomp_get_vartime:
-     #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len
-  -> l:size_window_t a_t len
-  -> table_len:table_len_t len ->
-  pow_a_to_small_b_st a_t len ctx_len k l table_len
-    (table_inv_precomp a_t len ctx_len k l table_len)
-
 let lprecomp_get_vartime #a_t len ctx_len k l table_len ctx a table bits_l tmp =
   PT.lprecomp_get_vartime #a_t len ctx_len k a table_len table bits_l tmp
 
-// This function returns table.[bits_l] = a^bits_l
-// It takes constant time to access bits_l-th element of a table
-inline_for_extraction noextract
-val lprecomp_get_consttime:
-     #a_t:inttype_a
-  -> len:size_t{v len > 0}
-  -> ctx_len:size_t
-  -> k:concrete_ops a_t len ctx_len
-  -> l:size_window_t a_t len
-  -> table_len:table_len_t len ->
-  pow_a_to_small_b_st a_t len ctx_len k l table_len
-    (table_inv_precomp a_t len ctx_len k l table_len)
 
 let lprecomp_get_consttime #a_t len ctx_len k l table_len ctx a table bits_l tmp =
   PT.lprecomp_get_consttime #a_t len ctx_len k a table_len table bits_l tmp
@@ -539,7 +501,7 @@ val lexp_fw_gen:
   -> l:size_window_t a_t len
   -> table_len:table_len_t len{1 < v table_len /\ v table_len == pow2 (v l)}
   -> lprecomp_get:pow_a_to_small_b_st a_t len ctx_len k l table_len
-                   (table_inv_precomp a_t len ctx_len k l table_len) ->
+                   (table_inv_precomp len ctx_len k l table_len) ->
   lexp_fw_st a_t len ctx_len k l
 
 let lexp_fw_gen #a_t len ctx_len k l table_len lprecomp_get ctx a bLen bBits b res =
@@ -550,7 +512,7 @@ let lexp_fw_gen #a_t len ctx_len k l table_len lprecomp_get ctx a bLen bBits b r
   PT.lprecomp_table #a_t len ctx_len k ctx a table_len table;
 
   mk_lexp_fw_table len ctx_len k l table_len
-    (table_inv_precomp a_t len ctx_len k l table_len)
+    (table_inv_precomp len ctx_len k l table_len)
     lprecomp_get ctx a bLen bBits b table res;
   pop_frame ()
 

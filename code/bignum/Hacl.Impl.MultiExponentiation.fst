@@ -255,7 +255,7 @@ val lexp_double_fw_gen:
   -> l:size_window_t a_t len
   -> table_len:table_len_t len{1 < v table_len /\ v table_len == pow2 (v l)}
   -> lprecomp_get:pow_a_to_small_b_st a_t len ctx_len k l table_len
-                   (table_inv_precomp a_t len ctx_len k l table_len) ->
+                   (table_inv_precomp len ctx_len k l table_len) ->
   lexp_double_fw_st a_t len ctx_len k l
 
 #push-options "--z3rlimit 150"
@@ -264,17 +264,17 @@ let lexp_double_fw_gen #a_t len ctx_len k l table_len lprecomp_get ctx a1 bLen b
   let table1 = create (table_len *! len) (uint #a_t #SEC 0) in
   PT.lprecomp_table #a_t len ctx_len k ctx a1 table_len table1;
   let h0 = ST.get () in
-  assert (table_inv_precomp a_t len ctx_len k l table_len (as_seq h0 a1) (as_seq h0 table1));
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h0 a1) (as_seq h0 table1));
 
   let table2 = create (table_len *! len) (uint #a_t #SEC 0) in
   PT.lprecomp_table #a_t len ctx_len k ctx a2 table_len table2;
   let h1 = ST.get () in
-  assert (table_inv_precomp a_t len ctx_len k l table_len (as_seq h1 a1) (as_seq h1 table1));
-  assert (table_inv_precomp a_t len ctx_len k l table_len (as_seq h1 a2) (as_seq h1 table2));
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h1 a1) (as_seq h1 table1));
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h1 a2) (as_seq h1 table2));
 
   mk_lexp_double_fw_tables len ctx_len k l table_len
-    (table_inv_precomp a_t len ctx_len k l table_len)
-    (table_inv_precomp a_t len ctx_len k l table_len)
+    (table_inv_precomp len ctx_len k l table_len)
+    (table_inv_precomp len ctx_len k l table_len)
     lprecomp_get lprecomp_get ctx a1 bLen bBits b1 a2 b2 table1 table2 acc;
   pop_frame ()
 #pop-options

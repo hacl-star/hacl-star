@@ -244,6 +244,7 @@ let lprecomp_table #a_t len ctx_len k ctx a table_len table =
   (fun j ->
     lprecomp_table_f #a_t len ctx_len k ctx a table_len j table)
 
+//----------------
 
 let lprecomp_get_vartime #a_t len ctx_len k a table_len table bits_l tmp =
   let bits_l32 = Lib.RawIntTypes.(size_from_UInt32 (u32_to_UInt32 (to_u32 bits_l))) in
@@ -254,8 +255,8 @@ let lprecomp_get_vartime #a_t len ctx_len k a table_len table bits_l tmp =
   let h0 = ST.get () in
   let a_bits_l = sub table (bits_l32 *! len) len in
   let h1 = ST.get () in
-  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v bits_l));
-  assert (k.to.refl (as_seq h1 a_bits_l) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bits_l));
+  assert (precomp_table_inv len ctx_len k a table_len (as_seq h0 table) (v bits_l));
+  assert (k.to.refl (as_seq h1 a_bits_l) == SE.pow k.to.concr_ops (k.to.refl a) (v bits_l));
   copy tmp a_bits_l
 
 
@@ -265,5 +266,5 @@ let lprecomp_get_consttime #a_t len ctx_len k a table_len table bits_l tmp =
   table_select_consttime len table_len table bits_l tmp;
   let h1 = ST.get () in
   assert (as_seq h1 tmp == LSeq.sub (as_seq h0 table) (v bits_l * v len) (v len));
-  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v bits_l));
-  assert (k.to.refl (as_seq h1 tmp) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bits_l))
+  assert (precomp_table_inv len ctx_len k a table_len (as_seq h0 table) (v bits_l));
+  assert (k.to.refl (as_seq h1 tmp) == SE.pow k.to.concr_ops (k.to.refl a) (v bits_l))

@@ -12,6 +12,7 @@ module LSeq = Lib.Sequence
 
 module SE = Spec.Exponentiation
 module BD = Hacl.Bignum.Definitions
+module PT = Hacl.Impl.PrecompTable
 
 include Hacl.Impl.Exponentiation.Definitions
 
@@ -138,20 +139,19 @@ let pow_a_to_small_b_st
   (table_len:table_len_t len)
   (table_inv:table_inv_t a_t len table_len) =
     ctx:lbuffer (uint_t a_t SEC) ctx_len
-  -> a:lbuffer (uint_t a_t SEC) len
+  -> a:Ghost.erased (LSeq.lseq (uint_t a_t SEC) (v len))
   -> table:lbuffer (uint_t a_t SEC) (table_len *! len)
   -> b:uint_t a_t SEC{v b < pow2 (v l)}
   -> res:lbuffer (uint_t a_t SEC) len ->
   Stack unit
   (requires fun h ->
-    live h a /\ live h table /\ live h res /\ live h ctx /\
-    disjoint a table /\ disjoint a res /\ disjoint table res /\
-    disjoint ctx a /\ disjoint ctx table /\ disjoint ctx res /\
-    k.to.linv_ctx (as_seq h ctx) /\ k.to.linv (as_seq h a) /\
-    table_inv (as_seq h a) (as_seq h table))
+    live h table /\ live h res /\ live h ctx /\
+    disjoint table res /\ disjoint ctx table /\ disjoint ctx res /\
+    k.to.linv_ctx (as_seq h ctx) /\ k.to.linv a /\
+    table_inv a (as_seq h table))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
-    k.to.refl (as_seq h1 res) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v b))
+    k.to.refl (as_seq h1 res) == SE.pow k.to.concr_ops (k.to.refl a) (v b))
 
 
 inline_for_extraction noextract
@@ -200,6 +200,48 @@ val mk_lexp_fw_table:
 // Fixed-window method with a precomputed
 // table = [a^0 = one; a^1; a^2; ..; a^(table_len - 1)]
 //-----------------------------------------------------
+
+inline_for_extraction noextract
+let table_inv_precomp
+  (#a_t:inttype_a)
+  (len:size_t{v len > 0})
+  (ctx_len:size_t)
+  (k:concrete_ops a_t len ctx_len)
+  (l:size_window_t a_t len)
+  (table_len:table_len_t len) : table_inv_t a_t len table_len =
+  fun a table ->
+    1 < v table_len /\ v table_len = pow2 (v l) /\
+    (forall (j:nat{j < v table_len}).
+      PT.precomp_table_inv len ctx_len k a table_len table j)
+
+
+// This function returns table.[bits_l] = a^bits_l
+// It takes variable time to access bits_l-th element of a table
+inline_for_extraction noextract
+val lprecomp_get_vartime:
+     #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len
+  -> l:size_window_t a_t len
+  -> table_len:table_len_t len ->
+  pow_a_to_small_b_st a_t len ctx_len k l table_len
+    (table_inv_precomp len ctx_len k l table_len)
+
+
+// This function returns table.[bits_l] = a^bits_l
+// It takes constant time to access bits_l-th element of a table
+inline_for_extraction noextract
+val lprecomp_get_consttime:
+     #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len
+  -> l:size_window_t a_t len
+  -> table_len:table_len_t len ->
+  pow_a_to_small_b_st a_t len ctx_len k l table_len
+    (table_inv_precomp len ctx_len k l table_len)
+
 
 inline_for_extraction noextract
 let lexp_fw_st
