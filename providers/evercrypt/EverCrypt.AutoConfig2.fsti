@@ -37,16 +37,6 @@ val has_rdrand: getter Vale.X64.CPU_Features_s.rdrand_enabled
     See Vale.X64.CPU_Features_s for more details. **)
 val has_avx512: getter Vale.X64.CPU_Features_s.avx512_enabled
 
-[@ (deprecated "")]
-val wants_vale: unit ->
-  Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
-val wants_hacl: unit ->
-  Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
-val wants_openssl: unit ->
-  Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
-val wants_bcrypt: unit ->
-  Stack bool (requires fun _ -> True) (ensures fun h0 _ h1 -> B.(modifies loc_none h0 h1))
-
 (** A set of functions that modify the global cached results. For this, the
   client needs to reason about the abstract footprint. *)
 
@@ -87,10 +77,6 @@ val disable_sse: disabler
 val disable_movbe: disabler
 val disable_rdrand: disabler
 val disable_avx512: disabler
-val disable_vale: disabler
-val disable_hacl: disabler
-val disable_openssl: disabler
-val disable_bcrypt: disabler
 
 (** Some predicates to dynamically guard the vectorized code *)
 (* Note that those predicates don't check [EverCrypt.TargetConfig.hacl_can_compile_vec128],
