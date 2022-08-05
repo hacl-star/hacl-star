@@ -88,7 +88,6 @@ let scalar_split_lambda k1 k2 k =
 
 
 // [lambda]P = (beta * px, py, pz)
-inline_for_extraction noextract
 val point_mul_lambda: res:point -> p:point -> Stack unit
   (requires fun h ->
     live h res /\ live h p /\ eq_or_disjoint res p /\
@@ -97,6 +96,7 @@ val point_mul_lambda: res:point -> p:point -> Stack unit
     point_inv h1 res /\
     point_eval h1 res == SG.point_mul_lambda (point_eval h0 p))
 
+[@CInline]
 let point_mul_lambda res p =
   push_frame ();
   let rx, ry, rz = getx res, gety res, getz res in
@@ -109,8 +109,8 @@ let point_mul_lambda res p =
   copy_felem rz pz;
   pop_frame ()
 
+
 // [lambda]P = (beta * px, py, pz)
-inline_for_extraction noextract
 val point_mul_lambda_inplace: res:point -> Stack unit
   (requires fun h ->
     live h res /\ point_inv h res)
@@ -118,6 +118,7 @@ val point_mul_lambda_inplace: res:point -> Stack unit
     point_inv h1 res /\
     point_eval h1 res == SG.point_mul_lambda (point_eval h0 res))
 
+[@CInline]
 let point_mul_lambda_inplace res =
   push_frame ();
   let rx, ry, rz = getx res, gety res, getz res in
