@@ -1,32 +1,17 @@
 # This Makefile can be included by client projects; it exports the set of
 # include directories relative to HACL_HOME and exports the set of needed
-# kremlin flags to successfully extract Vale. This Makefile honors
-# EVERCRYPT_CONFIG.
-
+# karamel flags to successfully extract Vale.
 VALE_BUNDLES=\
   -bundle 'Vale.Stdcalls.*,Vale.Interop,Vale.Interop.*,Vale.Wrapper.X64.*[rename=Vale]' \
   -bundle 'Vale.Inline.X64.*[rename=Vale_Inline]' \
   -bundle Vale.*[rename=Unused2]
 
-# Other configs are possible, e.g. everest or hacl-vale, by exporting
-# EVERCRYPT_CONFIG manually.
-ifneq (,$(EVEREST_WINDOWS))
-  # hacl, vale, bcrypt
-  EVERCRYPT_CONFIG = noopenssl
-else ifneq (,$(KAIZALA))
-  # hacl, openssl
-  EVERCRYPT_CONFIG = kaizala
-else
-  # everything
-  EVERCRYPT_CONFIG ?= default
-endif
-
 # TODO: no more separate variable definitions?
 LIB_DIR		= $(HACL_HOME)/lib
 SPECS_DIR 	= $(HACL_HOME)/specs $(addprefix $(HACL_HOME)/specs/,lemmas tests drbg ecdsap256 frodo)
 CODE_DIRS	= $(addprefix $(HACL_HOME)/code/,hash hmac hkdf drbg hpke sha3 sha2-mb ecdsap256 poly1305 streaming \
-  blake2 chacha20 chacha20poly1305 curve25519 tests ed25519 salsa20 nacl-box meta frodo fallback bignum rsapss ffdhe)
-EVERCRYPT_DIRS  = $(addprefix $(HACL_HOME)/providers/,evercrypt evercrypt/fst test test/vectors evercrypt/config/$(EVERCRYPT_CONFIG))
+  blake2 chacha20 chacha20poly1305 curve25519 tests ed25519 salsa20 nacl-box meta frodo fallback bignum rsapss ffdhe k256)
+EVERCRYPT_DIRS  = $(addprefix $(HACL_HOME)/providers/,evercrypt evercrypt/fst test test/vectors)
 MERKLE_DIRS	= $(HACL_HOME)/secure_api/merkle_tree
 # Vale dirs also include directories that only contain .vaf files
 # (for a in $(find vale -iname '*.fst' -or -iname '*.fsti' -or -iname '*.vaf'); do dirname $a; done) | sort | uniq
@@ -63,6 +48,6 @@ VALE_DIRS	= \
 ALL_HACL_SOURCE_DIRS = \
   $(LIB_DIR) $(SPECS_DIR) $(CODE_DIRS) $(VALE_DIRS) \
   $(EVERCRYPT_DIRS) $(MERKLE_DIRS) \
-  $(KREMLIN_HOME)/runtime
+  $(KRML_HOME)/runtime
 
 ALL_HACL_DIRS	?= $(ALL_HACL_SOURCE_DIRS) $(HACL_HOME)/obj

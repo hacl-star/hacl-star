@@ -30,7 +30,7 @@ let hash_block_length_fits (a:hash_alg) :
 /// Types for expand and extract
 /// Duplicated from Hacl.HKDF because we don't want clients to depend on Hacl.HKDF
 
-inline_for_extraction
+inline_for_extraction noextract
 let extract_st (a:hash_alg) =
   prk     : B.buffer uint8 ->
   salt    : B.buffer uint8 ->
@@ -51,7 +51,7 @@ let extract_st (a:hash_alg) =
     B.modifies (B.loc_buffer prk) h0 h1 /\
     B.as_seq h1 prk == extract a (B.as_seq h0 salt) (B.as_seq h0 ikm))
 
-inline_for_extraction
+inline_for_extraction noextract
 let expand_st (a:hash_alg) =
   okm     : B.buffer uint8 ->
   prk     : B.buffer uint8 ->

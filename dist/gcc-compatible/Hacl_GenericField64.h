@@ -29,16 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Bignum256.h"
-
+#include "Hacl_Bignum.h"
+#include "evercrypt_targetconfig.h"
 typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 *Hacl_GenericField64_pbn_mont_ctx_u64;
 
 /*******************************************************************************

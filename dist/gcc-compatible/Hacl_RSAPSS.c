@@ -24,7 +24,7 @@
 
 #include "Hacl_RSAPSS.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
@@ -65,14 +65,14 @@ static inline uint32_t hash_len(Spec_Hash_Definitions_hash_alg a)
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
 }
 
 static inline void
-hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t *msg)
+hash0(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t *msg)
 {
   switch (a)
   {
@@ -93,7 +93,7 @@ hash(Spec_Hash_Definitions_hash_alg a, uint8_t *mHash, uint32_t msgLen, uint8_t 
       }
     default:
       {
-        KRML_HOST_EPRINTF("KreMLin incomplete match at %s:%d\n", __FILE__, __LINE__);
+        KRML_HOST_EPRINTF("KaRaMeL incomplete match at %s:%d\n", __FILE__, __LINE__);
         KRML_HOST_EXIT(253U);
       }
   }
@@ -126,7 +126,7 @@ mgf_hash(
     c[1U] = (uint8_t)(i >> (uint32_t)16U);
     c[2U] = (uint8_t)(i >> (uint32_t)8U);
     c[3U] = (uint8_t)i;
-    hash(a, acc_i, len + (uint32_t)4U, mgfseed_counter);
+    hash0(a, acc_i, len + (uint32_t)4U, mgfseed_counter);
   }
   memcpy(res, acc, maskLen * sizeof (uint8_t));
 }
@@ -217,9 +217,9 @@ pss_encode(
   KRML_CHECK_SIZE(sizeof (uint8_t), m1Len);
   uint8_t m1[m1Len];
   memset(m1, 0U, m1Len * sizeof (uint8_t));
-  hash(a, m1 + (uint32_t)8U, msgLen, msg);
+  hash0(a, m1 + (uint32_t)8U, msgLen, msg);
   memcpy(m1 + (uint32_t)8U + hLen, salt, saltLen * sizeof (uint8_t));
-  hash(a, m1Hash, m1Len, m1);
+  hash0(a, m1Hash, m1Len, m1);
   uint32_t emLen = (emBits - (uint32_t)1U) / (uint32_t)8U + (uint32_t)1U;
   uint32_t dbLen = emLen - hLen - (uint32_t)1U;
   KRML_CHECK_SIZE(sizeof (uint8_t), dbLen);
@@ -323,9 +323,9 @@ pss_verify(
   KRML_CHECK_SIZE(sizeof (uint8_t), m1Len);
   uint8_t m1[m1Len];
   memset(m1, 0U, m1Len * sizeof (uint8_t));
-  hash(a, m1 + (uint32_t)8U, msgLen, msg);
+  hash0(a, m1 + (uint32_t)8U, msgLen, msg);
   memcpy(m1 + (uint32_t)8U + hLen, salt, saltLen * sizeof (uint8_t));
-  hash(a, m1Hash0, m1Len, m1);
+  hash0(a, m1Hash0, m1Len, m1);
   uint8_t res0 = (uint8_t)255U;
   for (uint32_t i = (uint32_t)0U; i < hLen; i++)
   {

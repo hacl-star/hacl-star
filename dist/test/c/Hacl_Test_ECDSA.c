@@ -184,7 +184,7 @@ extern void LowStar_Printf_print_string(Prims_string uu___);
 
 extern void LowStar_Printf_print_u32(uint32_t uu___);
 
-extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *r);
+extern void LowStar_Printf_print_lmbuffer_u8(uint32_t l, uint8_t *b);
 
 static uint8_t
 sigver_vectors256_low0[128U] =

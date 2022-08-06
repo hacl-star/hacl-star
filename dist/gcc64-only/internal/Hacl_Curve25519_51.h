@@ -29,17 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "../Hacl_Curve25519_51.h"
-
+#include "evercrypt_targetconfig.h"
 void Hacl_Curve25519_51_fsquare_times(uint64_t *o, uint64_t *inp, uint128_t *tmp, uint32_t n);
 
 void Hacl_Curve25519_51_finv(uint64_t *o, uint64_t *i, uint128_t *tmp);

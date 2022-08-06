@@ -29,25 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-
-
-typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s
-{
-  uint32_t len;
-  uint32_t *n;
-  uint32_t mu;
-  uint32_t *r2;
-}
-Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32;
-
+#include "Hacl_Bignum.h"
+#include "evercrypt_targetconfig.h"
 typedef Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 *Hacl_GenericField32_pbn_mont_ctx_u32;
 
 /*******************************************************************************

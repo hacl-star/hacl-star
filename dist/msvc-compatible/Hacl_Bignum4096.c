@@ -24,7 +24,7 @@
 
 #include "Hacl_Bignum4096.h"
 
-#include "internal/Hacl_Kremlib.h"
+#include "internal/Hacl_Krmllib.h"
 #include "internal/Hacl_Bignum.h"
 
 /*******************************************************************************
@@ -680,11 +680,11 @@ exp_vartime_precomp(
   memcpy(table, resM, (uint32_t)64U * sizeof (uint64_t));
   uint64_t *t1 = table + (uint32_t)64U;
   memcpy(t1, aM, (uint32_t)64U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
-    uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)64U;
-    uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)64U;
-    amont_mul(n, mu, t11, aM, t2);
+    uint64_t *t11 = table + i * (uint32_t)64U;
+    uint64_t *t2 = table + i * (uint32_t)64U + (uint32_t)64U;
+    amont_mul(n, mu, aM, t11, t2);
   }
   if (bBits % (uint32_t)4U != (uint32_t)0U)
   {
@@ -810,11 +810,11 @@ exp_consttime_precomp(
   memcpy(table, resM, (uint32_t)64U * sizeof (uint64_t));
   uint64_t *t1 = table + (uint32_t)64U;
   memcpy(t1, aM, (uint32_t)64U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
-    uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)64U;
-    uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)64U;
-    amont_mul(n, mu, t11, aM, t2);
+    uint64_t *t11 = table + i * (uint32_t)64U;
+    uint64_t *t2 = table + i * (uint32_t)64U + (uint32_t)64U;
+    amont_mul(n, mu, aM, t11, t2);
   }
   if (bBits % (uint32_t)4U != (uint32_t)0U)
   {

@@ -8,7 +8,7 @@
       1,
       [ "@query" ],
       0,
-      "9b597209cff08d124ea89eed0f6789b6"
+      "a6a5c7fecc06ab97430b27c13d8de7c5"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaToDomain",
@@ -17,7 +17,7 @@
       1,
       [ "@query" ],
       0,
-      "62d4c714ff8ffbc206907df0759f9fce"
+      "e2229dc64233b97eacd4238ec014ed24"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaToDomainAndBackIsTheSame",
@@ -26,7 +26,7 @@
       1,
       [ "@query" ],
       0,
-      "5ac5d1c854d8511ebf8044db61716eff"
+      "a34cd5af7bfb28983869315c68c381ae"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.lemmaFromDomainToDomainModuloPrime",
@@ -35,7 +35,7 @@
       1,
       [ "@query" ],
       0,
-      "3fcad03969c9c732cc6c07bf970e0d00"
+      "f763e9e8efc1f1d11d845224986ac745"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.inDomain_mod_is_not_mod",
@@ -44,7 +44,7 @@
       1,
       [ "@query" ],
       0,
-      "588eabdc12fe6a40d1d490dac03c504a"
+      "c95b20c342b490205c4820e00002ebe8"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.multiplicationInDomainNat",
@@ -69,7 +69,7 @@
         "typing_Prims.pow2"
       ],
       0,
-      "947af1689901cc3fdcf31e24930e54ef"
+      "869105b44fbbea3fb922b40a705c6c44"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.additionInDomain",
@@ -78,7 +78,7 @@
       1,
       [ "@query" ],
       0,
-      "bc53481b904f3f34668cf7fd8d265f4a"
+      "874a91905a1bfd21f9fdc2f4de034f5e"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.substractionInDomain",
@@ -87,7 +87,7 @@
       1,
       [ "@query" ],
       0,
-      "517ffe0329a1cccfc41a1a67739eb7ce"
+      "a072cefbd0c85c3ef5b3d0f1e866ad5d"
     ],
     [
       "Spec.P256.MontgomeryMultiplication._pow_step",
@@ -97,16 +97,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.unsigned",
-        "equation_Prims.nat", "lemma_FStar.UInt.pow2_values",
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
         "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "08dfbb8ae15f6cb83d7e9471a9ff0845"
+      "da64b3834ab6cb44f0f12cb9dd39a4ad"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.pow_spec",
@@ -116,18 +112,12 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "constructor_distinct_Lib.IntTypes.S16",
-        "constructor_distinct_Lib.IntTypes.S8",
-        "constructor_distinct_Lib.IntTypes.U32",
-        "equality_tok_Lib.IntTypes.U32@tok", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.unsigned", "equation_Prims.nat",
-        "lemma_FStar.UInt.pow2_values", "primitive_Prims.op_Subtraction",
-        "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
-        "typing_Lib.IntTypes.bits", "typing_tok_Lib.IntTypes.U32@tok"
+        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
+        "primitive_Prims.op_Subtraction", "projection_inverse_BoxInt_proj_0",
+        "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "510934b6e8630ea35dd6f6babceb9929"
+      "a8d9c64731d86a5545c24a62f3a0578e"
     ],
     [
       "Spec.P256.MontgomeryMultiplication.sq_root_spec",
@@ -149,7 +139,7 @@
         "typing_Spec.P256.Definitions.prime256"
       ],
       0,
-      "20cda6fd9f4e840b4670b3d77f28e6ef"
+      "c7d6e5983465f55e9b22ce3e5993f5d3"
     ]
   ]
 ]

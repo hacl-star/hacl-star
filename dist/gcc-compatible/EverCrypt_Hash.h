@@ -29,22 +29,20 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Spec.h"
-#include "Hacl_Kremlib.h"
+#include "Hacl_Krmllib.h"
 #include "Hacl_Impl_Blake2_Constants.h"
 #include "Hacl_Hash_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
 #include "Hacl_Hash_MD5.h"
 #include "EverCrypt_AutoConfig2.h"
-
+#include "evercrypt_targetconfig.h"
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg;
 
 C_String_t EverCrypt_Hash_string_of_alg(Spec_Hash_Definitions_hash_alg uu___);
@@ -130,6 +128,8 @@ EverCrypt_Hash_uu___is_Blake2B_s(
   Spec_Hash_Definitions_hash_alg uu___,
   EverCrypt_Hash_state_s projectee
 );
+
+typedef EverCrypt_Hash_state_s *EverCrypt_Hash_state;
 
 Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg_of_state(EverCrypt_Hash_state_s *s);
 
@@ -283,6 +283,9 @@ EverCrypt_Hash_Incremental_finish(
 
 void
 EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
+
+typedef Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+*EverCrypt_Hash_Incremental_state;
 
 #if defined(__cplusplus)
 }

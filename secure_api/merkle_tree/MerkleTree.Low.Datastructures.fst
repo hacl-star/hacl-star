@@ -38,10 +38,10 @@ type hash (#hsz:hash_size_t) = b:B.buffer uint8 { B.len b = hsz \/ B.g_is_null b
 
 // We cannot use `Low.RVector.Instances`, where we have some general
 // typeclass instances of `regional`, e.g., if `rg:regional a` then
-// `regional (rvector rg)`. In FStar we can use this, but KreMLin currently
+// `regional (rvector rg)`. In FStar we can use this, but KaRaMeL currently
 // cannot deal with this and gives a number of errors.
 // So we temporarily instantiate some `regional`s manually below, which is
-// extractable to C by KreMLin.
+// extractable to C by KaRaMeL.
 
 /// Some instantiations of `regional` used in Merkle tree
 /// 1. `hash` is regional
@@ -184,7 +184,7 @@ let hash_copy #_ s src dst =
 /// argument ghostly. This would be have to be fixed.
 ///
 /// Finally, if the inline_for_extraction is removed, there seems to be a
-/// kremlin bug that inserts a void*0. To be fixed.
+/// karamel bug that inserts a void*0. To be fixed.
 inline_for_extraction
 val hcpy: hsz:hash_size_t -> copyable #hash_size_t (hash #hsz) (hreg hsz)
 let hcpy hsz =

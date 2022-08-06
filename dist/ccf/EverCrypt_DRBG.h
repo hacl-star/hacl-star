@@ -29,11 +29,10 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Lib_RandomBuffer_System.h"
@@ -41,7 +40,7 @@ extern "C" {
 #include "Hacl_Spec.h"
 #include "Hacl_Leftovers.h"
 #include "EverCrypt_HMAC.h"
-
+#include "evercrypt_targetconfig.h"
 typedef Spec_Hash_Definitions_hash_alg EverCrypt_DRBG_supported_alg;
 
 extern uint32_t EverCrypt_DRBG_reseed_interval;

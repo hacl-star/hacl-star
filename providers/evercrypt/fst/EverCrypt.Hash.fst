@@ -10,7 +10,6 @@ module HS = FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 module AC = EverCrypt.AutoConfig2
-module SC = EverCrypt.StaticConfig
 
 open LowStar.BufferOps
 open FStar.Integers
@@ -279,7 +278,7 @@ let k224_256 =
 let update_multi_256 s ev blocks n =
   let has_shaext = AC.has_shaext () in
   let has_sse = AC.has_sse () in
-  if EverCrypt.TargetConfig.hacl_can_compile_vale && (SC.vale && has_shaext && has_sse) then begin
+  if EverCrypt.TargetConfig.hacl_can_compile_vale && (has_shaext && has_sse) then begin
     let n = Int.Cast.Full.uint32_to_uint64 n in
     B.recall k224_256;
     IB.recall_contents k224_256 Spec.SHA2.Constants.k224_256;

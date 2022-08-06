@@ -1,12 +1,15 @@
 # A minimalistic Makefile for all testing options.
 # Note: on OSX, this necessitates a recent OpenSSL, possibly installed by brew,
 # so I had to do:
-# export CFLAGS="-I/usr/local/Cellar/openssl@1.1/1.1.1d/include/"
-# export LDFLAGS="-L/usr/local/Cellar/openssl@1.1/1.1.1d/lib"
+ifeq ($(shell uname),Darwin)
+OPENSSL_ROOT=$(shell which brew >/dev/null && brew info --quiet openssl | egrep '^/' | cut -f 1 -d ' ')
+CFLAGS := -I$(OPENSSL_ROOT)/include/ $(CFLAGS)
+LDFLAGS:= -L$(OPENSSL_ROOT)/lib $(LDFLAGS)
+endif
 
 include ../dist/gcc-compatible/Makefile.config
 
-KREMLIN_HOME?=../dist/kremlin
+KRML_HOME?=../dist/karamel
 USER_CFLAGS?=
 
 # Add GF128 tests once code/experimental/gf128 is promoted to code
@@ -58,8 +61,8 @@ TARGETS += uint128-intrinsics-test.exe
 endif
 endif
 
-CFLAGS += -I$(KREMLIN_HOME)/include -I../dist/gcc-compatible \
-  -I$(KREMLIN_HOME)/kremlib/dist/minimal \
+CFLAGS += -I$(KRML_HOME)/include -I../dist/gcc-compatible \
+  -I$(KRML_HOME)/krmllib/dist/minimal \
   -I../secure_api/merkle_tree \
   -O3 $(USER_CFLAGS)
 

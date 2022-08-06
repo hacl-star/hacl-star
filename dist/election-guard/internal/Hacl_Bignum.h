@@ -29,17 +29,16 @@
 extern "C" {
 #endif
 
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+#include "krml/internal/builtin.h"
+
+
+#include "Hacl_Krmllib.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-#include "kremlin/internal/builtin.h"
-
-
-#include "Hacl_Kremlib.h"
-
 uint32_t
 Hacl_Bignum_Base_mul_wide_add2_u32(uint32_t a, uint32_t b, uint32_t c_in, uint32_t *out);
 
@@ -90,9 +89,141 @@ Hacl_Bignum_Karatsuba_bn_karatsuba_sqr_uint64(
   uint64_t *res
 );
 
+void
+Hacl_Bignum_bn_add_mod_n_u32(
+  uint32_t len1,
+  uint32_t *n,
+  uint32_t *a,
+  uint32_t *b,
+  uint32_t *res
+);
+
+void
+Hacl_Bignum_bn_add_mod_n_u64(
+  uint32_t len1,
+  uint64_t *n,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *res
+);
+
+void
+Hacl_Bignum_bn_sub_mod_n_u32(
+  uint32_t len1,
+  uint32_t *n,
+  uint32_t *a,
+  uint32_t *b,
+  uint32_t *res
+);
+
+void
+Hacl_Bignum_bn_sub_mod_n_u64(
+  uint32_t len1,
+  uint64_t *n,
+  uint64_t *a,
+  uint64_t *b,
+  uint64_t *res
+);
+
 uint32_t Hacl_Bignum_ModInvLimb_mod_inv_uint32(uint32_t n0);
 
 uint64_t Hacl_Bignum_ModInvLimb_mod_inv_uint64(uint64_t n0);
+
+uint32_t Hacl_Bignum_Montgomery_bn_check_modulus_u32(uint32_t len, uint32_t *n);
+
+void
+Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u32(
+  uint32_t len,
+  uint32_t nBits,
+  uint32_t *n,
+  uint32_t *res
+);
+
+void
+Hacl_Bignum_Montgomery_bn_to_mont_u32(
+  uint32_t len,
+  uint32_t *n,
+  uint32_t nInv,
+  uint32_t *r2,
+  uint32_t *a,
+  uint32_t *aM
+);
+
+void
+Hacl_Bignum_Montgomery_bn_from_mont_u32(
+  uint32_t len,
+  uint32_t *n,
+  uint32_t nInv_u64,
+  uint32_t *aM,
+  uint32_t *a
+);
+
+void
+Hacl_Bignum_Montgomery_bn_mont_mul_u32(
+  uint32_t len,
+  uint32_t *n,
+  uint32_t nInv_u64,
+  uint32_t *aM,
+  uint32_t *bM,
+  uint32_t *resM
+);
+
+void
+Hacl_Bignum_Montgomery_bn_mont_sqr_u32(
+  uint32_t len,
+  uint32_t *n,
+  uint32_t nInv_u64,
+  uint32_t *aM,
+  uint32_t *resM
+);
+
+uint64_t Hacl_Bignum_Montgomery_bn_check_modulus_u64(uint32_t len, uint64_t *n);
+
+void
+Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64(
+  uint32_t len,
+  uint32_t nBits,
+  uint64_t *n,
+  uint64_t *res
+);
+
+void
+Hacl_Bignum_Montgomery_bn_to_mont_u64(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t nInv,
+  uint64_t *r2,
+  uint64_t *a,
+  uint64_t *aM
+);
+
+void
+Hacl_Bignum_Montgomery_bn_from_mont_u64(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t nInv_u64,
+  uint64_t *aM,
+  uint64_t *a
+);
+
+void
+Hacl_Bignum_Montgomery_bn_mont_mul_u64(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t nInv_u64,
+  uint64_t *aM,
+  uint64_t *bM,
+  uint64_t *resM
+);
+
+void
+Hacl_Bignum_Montgomery_bn_mont_sqr_u64(
+  uint32_t len,
+  uint64_t *n,
+  uint64_t nInv_u64,
+  uint64_t *aM,
+  uint64_t *resM
+);
 
 #if defined(__cplusplus)
 }

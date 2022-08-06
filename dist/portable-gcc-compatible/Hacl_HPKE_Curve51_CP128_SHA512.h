@@ -29,41 +29,38 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
-#include "Hacl_Hash_SHA2.h"
+#include "Hacl_Krmllib.h"
+#include "Hacl_HPKE_Interface_Hacl_Impl_HPKE_Hacl_Meta_HPKE.h"
 #include "Hacl_HKDF.h"
 #include "Hacl_Curve25519_51.h"
 #include "Hacl_Chacha20Poly1305_128.h"
-
-/* SNIPPET_START: Hacl_HPKE_Curve51_CP128_SHA512_setupBaseI */
+#include "evercrypt_targetconfig.h"
+/* SNIPPET_START: Hacl_HPKE_Curve51_CP128_SHA512_setupBaseS */
 
 uint32_t
-Hacl_HPKE_Curve51_CP128_SHA512_setupBaseI(
+Hacl_HPKE_Curve51_CP128_SHA512_setupBaseS(
   uint8_t *o_pkE,
-  uint8_t *o_k,
-  uint8_t *o_n,
+  Hacl_Impl_HPKE_context_s o_ctx,
   uint8_t *skE,
   uint8_t *pkR,
   uint32_t infolen,
   uint8_t *info
 );
 
-/* SNIPPET_END: Hacl_HPKE_Curve51_CP128_SHA512_setupBaseI */
+/* SNIPPET_END: Hacl_HPKE_Curve51_CP128_SHA512_setupBaseS */
 
 /* SNIPPET_START: Hacl_HPKE_Curve51_CP128_SHA512_setupBaseR */
 
 uint32_t
 Hacl_HPKE_Curve51_CP128_SHA512_setupBaseR(
-  uint8_t *o_key_aead,
-  uint8_t *o_nonce_aead,
-  uint8_t *pkE,
+  Hacl_Impl_HPKE_context_s o_ctx,
+  uint8_t *enc,
   uint8_t *skR,
   uint32_t infolen,
   uint8_t *info
@@ -77,11 +74,14 @@ uint32_t
 Hacl_HPKE_Curve51_CP128_SHA512_sealBase(
   uint8_t *skE,
   uint8_t *pkR,
-  uint32_t mlen,
-  uint8_t *m,
   uint32_t infolen,
   uint8_t *info,
-  uint8_t *output
+  uint32_t aadlen,
+  uint8_t *aad,
+  uint32_t plainlen,
+  uint8_t *plain,
+  uint8_t *o_enc,
+  uint8_t *o_ct
 );
 
 /* SNIPPET_END: Hacl_HPKE_Curve51_CP128_SHA512_sealBase */
@@ -92,11 +92,13 @@ uint32_t
 Hacl_HPKE_Curve51_CP128_SHA512_openBase(
   uint8_t *pkE,
   uint8_t *skR,
-  uint32_t mlen,
-  uint8_t *m,
   uint32_t infolen,
   uint8_t *info,
-  uint8_t *output
+  uint32_t aadlen,
+  uint8_t *aad,
+  uint32_t ctlen,
+  uint8_t *ct,
+  uint8_t *o_pt
 );
 
 /* SNIPPET_END: Hacl_HPKE_Curve51_CP128_SHA512_openBase */

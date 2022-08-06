@@ -24,11 +24,11 @@
 
 #ifndef __Hacl_Test_SHA2_H
 #define __Hacl_Test_SHA2_H
-#include "kremlib.h"
 
 
 
 
+#include "krmllib.h"
 static inline FStar_UInt128_uint128
 FStar_UInt128_add(FStar_UInt128_uint128 a, FStar_UInt128_uint128 b);
 

@@ -29,17 +29,15 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "Hacl_Streaming_SHA2.h"
 #include "Hacl_Hash_SHA1.h"
-
+#include "evercrypt_targetconfig.h"
 /* SNIPPET_START: Hacl_Streaming_SHA1_state_sha1 */
 
 typedef Hacl_Streaming_SHA2_state_sha2_224 Hacl_Streaming_SHA1_state_sha1;

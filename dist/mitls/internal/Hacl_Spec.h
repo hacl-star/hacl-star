@@ -29,16 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "../Hacl_Spec.h"
-
+#include "evercrypt_targetconfig.h"
 #define Spec_ECDSA_NoHash 0
 #define Spec_ECDSA_Hash 1
 
@@ -50,6 +48,12 @@ typedef struct Spec_ECDSA_hash_alg_ecdsa_s
   Spec_Hash_Definitions_hash_alg _0;
 }
 Spec_ECDSA_hash_alg_ecdsa;
+
+#define Spec_Cipher_Expansion_Hacl_CHACHA20 0
+#define Spec_Cipher_Expansion_Vale_AES128 1
+#define Spec_Cipher_Expansion_Vale_AES256 2
+
+typedef uint8_t Spec_Cipher_Expansion_impl;
 
 Spec_Agile_Cipher_cipher_alg
 Spec_Cipher_Expansion_cipher_alg_of_impl(Spec_Cipher_Expansion_impl i);

@@ -28,14 +28,14 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
         "refinement_interpretation_Tm_refine_0ea1fba779ad5718e28476faeef94d56",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.UInt32.uint_to_t"
       ],
       0,
-      "c5927f982f58c08cd78597aef406473e"
+      "e41d97c84a648a6f949708e0a2460df9"
     ],
     [
       "Hacl.Bignum4096_32.n_bytes",
@@ -56,22 +56,22 @@
         "equation_Hacl.Bignum.meta_len",
         "equation_Hacl.Bignum4096_32.n_limbs",
         "equation_Hacl.Bignum4096_32.t_limbs", "equation_Lib.IntTypes.bits",
-        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.minint",
-        "equation_Lib.IntTypes.pub_int_t", "equation_Lib.IntTypes.pub_int_v",
-        "equation_Lib.IntTypes.unsigned", "equation_Lib.IntTypes.v",
-        "equation_Prims.nat", "int_typing", "lemma_FStar.UInt.pow2_values",
-        "lemma_FStar.UInt32.vu_inv", "primitive_Prims.op_AmpAmp",
-        "primitive_Prims.op_LessThanOrEqual", "primitive_Prims.op_Multiply",
-        "primitive_Prims.op_Subtraction",
+        "equation_Lib.IntTypes.int_t", "equation_Lib.IntTypes.maxint",
+        "equation_Lib.IntTypes.minint", "equation_Lib.IntTypes.pub_int_t",
+        "equation_Lib.IntTypes.pub_int_v", "equation_Lib.IntTypes.unsigned",
+        "equation_Lib.IntTypes.v", "equation_Prims.nat", "int_typing",
+        "lemma_FStar.UInt.pow2_values", "lemma_FStar.UInt32.vu_inv",
+        "primitive_Prims.op_AmpAmp", "primitive_Prims.op_LessThanOrEqual",
+        "primitive_Prims.op_Multiply", "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
         "typing_FStar.UInt32.v", "typing_Hacl.Bignum4096_32.n_limbs"
       ],
       0,
-      "38ba6fb4a88ac0f06902899b507981f0"
+      "36317e130724374761dad1570efd3680"
     ],
     [
       "Hacl.Bignum4096_32.uu___0",
@@ -134,7 +134,7 @@
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5ae3f1603cae7ef8671ad1c303c8c9a6"
+      "ed81e2371bd6ffc953e86e6612e92aac"
     ],
     [
       "Hacl.Bignum4096_32.uu___1",
@@ -144,7 +144,8 @@
       [
         "@MaxFuel_assumption", "@MaxIFuel_assumption",
         "@fuel_correspondence_Prims.pow2.fuel_instrumented", "@query",
-        "b2t_def", "constructor_distinct_Lib.IntTypes.PUB",
+        "b2t_def", "bool_inversion", "bool_typing",
+        "constructor_distinct_Lib.IntTypes.PUB",
         "constructor_distinct_Lib.IntTypes.S16",
         "constructor_distinct_Lib.IntTypes.S8",
         "constructor_distinct_Lib.IntTypes.U1",
@@ -168,17 +169,18 @@
         "primitive_Prims.op_Subtraction",
         "projection_inverse_BoxBool_proj_0",
         "projection_inverse_BoxInt_proj_0",
-        "refinement_interpretation_Tm_refine_06eb4f1fa9612b97cc2b633a94839814",
+        "refinement_interpretation_Tm_refine_1bdbbaeacf9e08440a899967571fe9f7",
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2",
         "refinement_interpretation_Tm_refine_83845a86f2550cdf941eeb1d9b59602b",
         "refinement_interpretation_Tm_refine_9d3fd79fd314167f1a9c213a188da3ec",
         "refinement_interpretation_Tm_refine_f13070840248fced9d9d60d77bdae3ec",
-        "typing_FStar.UInt32.v", "typing_Hacl.Bignum4096_32.n_limbs",
-        "typing_Lib.IntTypes.bits", "typing_Lib.IntTypes.mk_int",
+        "typing_FStar.UInt.fits", "typing_FStar.UInt32.v",
+        "typing_Hacl.Bignum4096_32.n_limbs", "typing_Lib.IntTypes.bits",
+        "typing_Lib.IntTypes.mk_int", "typing_Lib.IntTypes.v",
         "typing_tok_Lib.IntTypes.PUB@tok", "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "1a257268fc1fa7790d22713b78db2765"
+      "d386206c937546892177b1c6a502f071"
     ],
     [
       "Hacl.Bignum4096_32.add_mod",
@@ -187,7 +189,7 @@
       0,
       [ "@query" ],
       0,
-      "69512187ca6ebb8e81cd78b4a50dd2bd"
+      "151b1c871243775b244f762bcc7cd1ce"
     ],
     [
       "Hacl.Bignum4096_32.sub_mod",
@@ -196,7 +198,7 @@
       0,
       [ "@query" ],
       0,
-      "a26829e5b657260df07a2477865dcaf7"
+      "5ff2f0363e9eb42687bacdef322c1e50"
     ],
     [
       "Hacl.Bignum4096_32.mul",
@@ -216,7 +218,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "d2efaf2205f65c3a0a6ee42a0e9d66dc"
+      "ed45d4ebbf5ee27c0f45876bded98da6"
     ],
     [
       "Hacl.Bignum4096_32.sqr",
@@ -236,7 +238,7 @@
         "refinement_interpretation_Tm_refine_542f9d4f129664613f2483a6c88bc7c2"
       ],
       0,
-      "513587fd9e3378ba4bbd113fcc3f1a1f"
+      "5931580852f1ccd72f06a276e95995ae"
     ],
     [
       "Hacl.Bignum4096_32.bn_to_bytes_be",
@@ -294,7 +296,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "d12ebbd4e82635bd026cabfa6b66d517"
+      "aa9b018ca0525ff87e5859c972dc9476"
     ],
     [
       "Hacl.Bignum4096_32.bn_to_bytes_le",
@@ -352,7 +354,7 @@
         "typing_tok_Lib.IntTypes.U32@tok"
       ],
       0,
-      "5421359ffb344ed1e5f477bdca487703"
+      "1be006bae86bcd70a9708de0ffe261f7"
     ]
   ]
 ]

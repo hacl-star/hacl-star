@@ -50,17 +50,8 @@ val to_aff_point_negate: p:ext_point -> Lemma
     to_aff_point r == aff_point_negate (to_aff_point p)))
 
 
-val point_equal_lemma: p:ext_point -> q:ext_point -> s:ext_point -> Lemma
-  (requires
-    is_ext p /\ is_ext q /\ is_ext s /\
-    to_aff_point p == to_aff_point q)
-  (ensures  point_equal p s == point_equal q s)
-
-
 val aff_g_is_on_curve: unit -> Lemma (is_on_curve aff_g)
 val g_is_on_curve: unit -> Lemma (point_inv g /\ to_aff_point g == aff_g)
 
 val point_decompress_lemma: s:Lib.ByteSequence.lbytes 32 ->
   Lemma (let p = point_decompress s in Some? p ==> point_inv (Some?.v p))
-
-val fpow_is_pow_mod: a:elem -> b:pos -> Lemma (fpow a b == LM.pow_mod #prime a b)

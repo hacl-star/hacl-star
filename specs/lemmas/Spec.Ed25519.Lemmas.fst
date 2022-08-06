@@ -145,6 +145,7 @@ let aff_point_add_lemma p q = admit()
 
 let aff_point_add_assoc_lemma p q s = admit()
 
+#restart-solver
 let aff_point_at_infinity_lemma p =
   let x1, y1 = p in
   let x2, y2 = aff_point_at_infinity in
@@ -1148,66 +1149,6 @@ let fdiv_lemma1 a b c d =
   assert (c *% finv d *% (b *% d) == c *% b)
 
 
-val point_equal_lemma_aux1: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> e:elem -> f:elem{f <> 0} -> Lemma
-  (requires a *% b <> c *% d /\ a /% d == e /% f)
-  (ensures  e *% b <> c *% f)
-let point_equal_lemma_aux1 a b c d e f =
-  fmul_both_lemma_neq (a *% b) (c *% d) f;
-  assert (a *% b *% f <> c *% d *% f);
-  calc (==) {
-    a *% b *% f;
-    (==) { lemma_fmul_assoc1 a b f }
-    a *% f *% b;
-    (==) { fdiv_lemma1 a d e f }
-    e *% d *% b;
-    (==) { lemma_fmul_assoc1 e d b }
-    e *% b *% d;
-    };
-  lemma_fmul_assoc1 c d f;
-  assert (e *% b *% d <> c *% f *% d);
-  fmul_both_lemma_neq (e *% b) (c *% f) d
-
-
-val point_equal_lemma_aux2: a:elem -> b:elem{b <> 0} -> c:elem -> d:elem{d <> 0} -> e:elem -> f:elem{f <> 0} -> Lemma
-  (requires a *% b == c *% d /\ a /% d == e /% f)
-  (ensures  e *% b == c *% f)
-let point_equal_lemma_aux2 a b c d e f =
-  fmul_both_lemma (a *% b) (c *% d) f;
-  assert (a *% b *% f == c *% d *% f);
-  calc (==) {
-    a *% b *% f;
-    (==) { lemma_fmul_assoc1 a b f }
-    a *% f *% b;
-    (==) { fdiv_lemma1 a d e f }
-    e *% d *% b;
-    (==) { lemma_fmul_assoc1 e d b }
-    e *% b *% d;
-    };
-  lemma_fmul_assoc1 c d f;
-  assert (e *% b *% d == c *% f *% d);
-  prime_lemma ();
-  Fermat.mod_mult_congr prime (e *% b) (c *% f) d;
-  Math.Lemmas.small_mod (e *% b) prime;
-  Math.Lemmas.small_mod (c *% f) prime;
-  assert (e *% b == c *% f)
-
-
-let point_equal_lemma p q s =
-  let px, py, pz, pt = p in
-  let qx, qy, qz, qt = q in
-  let sx, sy, sz, st = s in
-  assert (px /% pz == qx /% qz);
-  assert (py /% pz == qy /% qz);
-
-  if ((px *% sz) <> (sx *% pz)) then
-    point_equal_lemma_aux1 px sz sx pz qx qz
-  else if ((py *% sz) <> (sy *% pz)) then
-    point_equal_lemma_aux1 py sz sy pz qy qz
-    else begin
-      point_equal_lemma_aux2 px sz sx pz qx qz;
-      point_equal_lemma_aux2 py sz sy pz qy qz end
-
-
 let aff_g_is_on_curve () =
   assert_norm (is_on_curve (g_x, g_y))
 
@@ -1250,6 +1191,7 @@ let recover_x_lemma_aux y =
 
 val recover_x_lemma: y:nat -> sign:bool -> Lemma (let x = recover_x y sign in
   Some? x ==> (y < prime /\ is_on_curve (Some?.v x, y)))
+#push-options "--z3rlimit 100"
 let recover_x_lemma y sign =
   if y >= prime then ()
   else begin
@@ -1286,6 +1228,7 @@ let recover_x_lemma y sign =
       end
     end
   end
+#pop-options
 
 module BSeq = Lib.ByteSequence
 
@@ -1306,67 +1249,3 @@ let point_decompress_lemma s =
     assert (is_on_curve (to_aff_point p));
     fdiv_one_lemma (x *% y);
     assert (is_ext p) end
-
-
-#push-options "--fuel 2"
-val lemma_fpow1: a:elem -> Lemma (fpow a 1 == a)
-let lemma_fpow1 a = ()
-
-val lemma_fpow_unfold0: a:elem -> b:pos{b % 2 = 0} -> Lemma
-  (fpow a b == fpow (a *% a) (b / 2))
-let lemma_fpow_unfold0 a b = ()
-
-val lemma_fpow_unfold1: a:elem -> b:pos{1 < b /\ b % 2 = 1} -> Lemma
-  (fpow a b == a *% (fpow (a *% a) (b / 2)))
-let lemma_fpow_unfold1 a b = ()
-#pop-options
-
-val fpow_is_pow: a:elem -> b:pos ->
-  Lemma (ensures (fpow a b == LM.pow a b % prime))
-  (decreases b)
-
-let rec fpow_is_pow a b =
-  if b = 1 then begin
-    lemma_fpow1 a;
-    LM.lemma_pow1 a end
-  else begin
-    if b % 2 = 0 then begin
-      calc (==) {
-	fpow a b;
-	(==) { lemma_fpow_unfold0 a b }
-	fpow (a *% a) (b / 2);
-	(==) { fpow_is_pow (a *% a) (b / 2) }
-	LM.pow (a *% a) (b / 2) % prime;
-	(==) { LM.lemma_pow_mod_base (a * a) (b / 2) prime }
-	LM.pow (a * a) (b / 2) % prime;
-	(==) { LM.lemma_pow_double a (b / 2) }
-	LM.pow a b % prime;
-      };
-      assert (fpow a b == LM.pow a b % prime) end
-    else begin
-      calc (==) {
-	fpow a b;
-	(==) { lemma_fpow_unfold1 a b }
-	a *% (fpow (a *% a) (b / 2));
-	(==) { fpow_is_pow (a *% a) (b / 2) }
-	a *% (LM.pow (a *% a) (b / 2) % prime);
-	(==) { LM.lemma_pow_mod_base (a * a) (b / 2) prime }
-	a *% (LM.pow (a * a) (b / 2) % prime);
-	(==) { LM.lemma_pow_double a (b / 2) }
-	a *% (LM.pow a (b / 2 * 2) % prime);
-	(==) { Math.Lemmas.lemma_mod_mul_distr_r a (LM.pow a (b / 2 * 2)) prime }
-	a * LM.pow a (b / 2 * 2) % prime;
-	(==) { LM.lemma_pow1 a }
-	LM.pow a 1 * LM.pow a (b / 2 * 2) % prime;
-	(==) { LM.lemma_pow_add a 1 (b / 2 * 2) }
-	LM.pow a (b / 2 * 2 + 1) % prime;
-	(==) { Math.Lemmas.euclidean_division_definition b 2 }
-	LM.pow a b % prime;
-	};
-      assert (fpow a b == LM.pow a b % prime) end
-    end
-
-
-let fpow_is_pow_mod a b =
-  LM.lemma_pow_mod #prime a b;
-  fpow_is_pow a b

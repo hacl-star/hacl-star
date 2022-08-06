@@ -575,19 +575,24 @@ val div_mul_le: b:pos -> a:nat -> Lemma
   ((a / b) * b <= a)
 let div_mul_le b a = ()
 
-#reset-options "--z3rlimit 2000 --max_fuel 0 --max_ifuel 0"
+#reset-options "--z3rlimit 400 --fuel 0 --ifuel 0"
+
+let size_gt_0_neq_0 (x: size_t): Lemma (requires v x > 0) (ensures v x <> 0) = ()
 
 let map_blocks #t #a h0 len blocksize inp output spec_f spec_l impl_f impl_l =
   div_mul_le (v blocksize) (v len);
+  size_gt_0_neq_0 blocksize;
   let nb = len /. blocksize in
   let rem = len %. blocksize in
   let blen = nb *! blocksize in
+  Math.Lemmas.lemma_div_mod (v len) (v blocksize);
+  Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
+  Math.Lemmas.swap_mul (v len / v blocksize) (v blocksize);
+  Math.Lemmas.multiply_fractions (v len) (v blocksize);
   let ib = sub inp 0ul blen in
   let ob = sub output 0ul blen in
   let il = sub inp blen rem in
   let ol = sub inp blen rem in
-  Math.Lemmas.lemma_div_mod (v len) (v blocksize);
-  Math.Lemmas.multiple_division_lemma (v nb) (v blocksize);
   map_blocks_multi #t #a h0 blocksize nb ib ob spec_f impl_f;
   if rem >. 0ul then
      (impl_l nb;

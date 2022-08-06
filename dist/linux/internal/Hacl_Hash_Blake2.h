@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 #include "../Hacl_Hash_Blake2.h"
-
+#include "libintvector.h"
 void Hacl_Hash_Core_Blake2_finish_blake2s_32(u32 *s, u64 ev, u8 *dst);
 
 void Hacl_Hash_Core_Blake2_finish_blake2b_32(u64 *s, uint128_t ev, u8 *dst);

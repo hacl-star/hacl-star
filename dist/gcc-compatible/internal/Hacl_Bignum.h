@@ -29,19 +29,16 @@
 extern "C" {
 #endif
 
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
+
+
+#include "internal/Hacl_Krmllib.h"
+#include "../Hacl_Bignum.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
-#include "libintvector.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
-#include <string.h>
-#include "kremlin/internal/target.h"
-
-
-#include "internal/Hacl_Kremlib.h"
-#include "Hacl_Kremlib.h"
-#include "Hacl_Bignum_Base.h"
-
 void Hacl_Bignum_Convert_bn_from_bytes_be_uint64(uint32_t len, uint8_t *b, uint64_t *res);
 
 void Hacl_Bignum_Convert_bn_to_bytes_be_uint64(uint32_t len, uint64_t *b, uint8_t *res);

@@ -29,15 +29,14 @@
 extern "C" {
 #endif
 
-#include "evercrypt_targetconfig.h"
-#include "kremlin/internal/types.h"
-#include "kremlin/lowstar_endianness.h"
 #include <string.h>
-#include "kremlin/internal/target.h"
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
 
-
+#include "evercrypt_targetconfig.h"
 extern void Lib_Memzero0_memzero(void *x0, uint64_t x1);
 
 #if defined(__cplusplus)

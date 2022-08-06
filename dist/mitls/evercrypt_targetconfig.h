@@ -18,10 +18,12 @@
 #define TARGET_ARCHITECTURE_ID_SYSTEMZ 5
 #define TARGET_ARCHITECTURE_ID_POWERPC64 6
 
+#if defined(__has_include)
 #if __has_include("config.h")
 #include "config.h"
 #else
 #define TARGET_ARCHITECTURE TARGET_ARCHITECTURE_ID_UNKNOWN
+#endif
 #endif
 
 // Those functions are called on non-x64 platforms for which the feature detection
