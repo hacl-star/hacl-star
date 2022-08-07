@@ -773,108 +773,104 @@ static void pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
 
 void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst)
 {
-  uint32_t *uu____0 = s;
   {
-    store32_be(dst + (uint32_t)0U * (uint32_t)4U, uu____0[0U]);
+    store32_be(dst + (uint32_t)0U * (uint32_t)4U, s[0U]);
   }
   {
-    store32_be(dst + (uint32_t)1U * (uint32_t)4U, uu____0[1U]);
+    store32_be(dst + (uint32_t)1U * (uint32_t)4U, s[1U]);
   }
   {
-    store32_be(dst + (uint32_t)2U * (uint32_t)4U, uu____0[2U]);
+    store32_be(dst + (uint32_t)2U * (uint32_t)4U, s[2U]);
   }
   {
-    store32_be(dst + (uint32_t)3U * (uint32_t)4U, uu____0[3U]);
+    store32_be(dst + (uint32_t)3U * (uint32_t)4U, s[3U]);
   }
   {
-    store32_be(dst + (uint32_t)4U * (uint32_t)4U, uu____0[4U]);
+    store32_be(dst + (uint32_t)4U * (uint32_t)4U, s[4U]);
   }
   {
-    store32_be(dst + (uint32_t)5U * (uint32_t)4U, uu____0[5U]);
+    store32_be(dst + (uint32_t)5U * (uint32_t)4U, s[5U]);
   }
   {
-    store32_be(dst + (uint32_t)6U * (uint32_t)4U, uu____0[6U]);
+    store32_be(dst + (uint32_t)6U * (uint32_t)4U, s[6U]);
   }
 }
 
 void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst)
 {
-  uint32_t *uu____0 = s;
   {
-    store32_be(dst + (uint32_t)0U * (uint32_t)4U, uu____0[0U]);
+    store32_be(dst + (uint32_t)0U * (uint32_t)4U, s[0U]);
   }
   {
-    store32_be(dst + (uint32_t)1U * (uint32_t)4U, uu____0[1U]);
+    store32_be(dst + (uint32_t)1U * (uint32_t)4U, s[1U]);
   }
   {
-    store32_be(dst + (uint32_t)2U * (uint32_t)4U, uu____0[2U]);
+    store32_be(dst + (uint32_t)2U * (uint32_t)4U, s[2U]);
   }
   {
-    store32_be(dst + (uint32_t)3U * (uint32_t)4U, uu____0[3U]);
+    store32_be(dst + (uint32_t)3U * (uint32_t)4U, s[3U]);
   }
   {
-    store32_be(dst + (uint32_t)4U * (uint32_t)4U, uu____0[4U]);
+    store32_be(dst + (uint32_t)4U * (uint32_t)4U, s[4U]);
   }
   {
-    store32_be(dst + (uint32_t)5U * (uint32_t)4U, uu____0[5U]);
+    store32_be(dst + (uint32_t)5U * (uint32_t)4U, s[5U]);
   }
   {
-    store32_be(dst + (uint32_t)6U * (uint32_t)4U, uu____0[6U]);
+    store32_be(dst + (uint32_t)6U * (uint32_t)4U, s[6U]);
   }
   {
-    store32_be(dst + (uint32_t)7U * (uint32_t)4U, uu____0[7U]);
+    store32_be(dst + (uint32_t)7U * (uint32_t)4U, s[7U]);
   }
 }
 
 void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst)
 {
-  uint64_t *uu____0 = s;
   {
-    store64_be(dst + (uint32_t)0U * (uint32_t)8U, uu____0[0U]);
+    store64_be(dst + (uint32_t)0U * (uint32_t)8U, s[0U]);
   }
   {
-    store64_be(dst + (uint32_t)1U * (uint32_t)8U, uu____0[1U]);
+    store64_be(dst + (uint32_t)1U * (uint32_t)8U, s[1U]);
   }
   {
-    store64_be(dst + (uint32_t)2U * (uint32_t)8U, uu____0[2U]);
+    store64_be(dst + (uint32_t)2U * (uint32_t)8U, s[2U]);
   }
   {
-    store64_be(dst + (uint32_t)3U * (uint32_t)8U, uu____0[3U]);
+    store64_be(dst + (uint32_t)3U * (uint32_t)8U, s[3U]);
   }
   {
-    store64_be(dst + (uint32_t)4U * (uint32_t)8U, uu____0[4U]);
+    store64_be(dst + (uint32_t)4U * (uint32_t)8U, s[4U]);
   }
   {
-    store64_be(dst + (uint32_t)5U * (uint32_t)8U, uu____0[5U]);
+    store64_be(dst + (uint32_t)5U * (uint32_t)8U, s[5U]);
   }
 }
 
 void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
 {
-  uint64_t *uu____0 = s;
   {
-    store64_be(dst + (uint32_t)0U * (uint32_t)8U, uu____0[0U]);
+    store64_be(dst + (uint32_t)0U * (uint32_t)8U, s[0U]);
   }
   {
-    store64_be(dst + (uint32_t)1U * (uint32_t)8U, uu____0[1U]);
+    store64_be(dst + (uint32_t)1U * (uint32_t)8U, s[1U]);
   }
   {
-    store64_be(dst + (uint32_t)2U * (uint32_t)8U, uu____0[2U]);
+    store64_be(dst + (uint32_t)2U * (uint32_t)8U, s[2U]);
   }
   {
-    store64_be(dst + (uint32_t)3U * (uint32_t)8U, uu____0[3U]);
+    store64_be(dst + (uint32_t)3U * (uint32_t)8U, s[3U]);
   }
   {
-    store64_be(dst + (uint32_t)4U * (uint32_t)8U, uu____0[4U]);
+    store64_be(dst + (uint32_t)4U * (uint32_t)8U, s[4U]);
   }
   {
-    store64_be(dst + (uint32_t)5U * (uint32_t)8U, uu____0[5U]);
+    store64_be(dst + (uint32_t)5U * (uint32_t)8U, s[5U]);
   }
   {
-    store64_be(dst + (uint32_t)6U * (uint32_t)8U, uu____0[6U]);
+    store64_be(dst + (uint32_t)6U * (uint32_t)8U, s[6U]);
   }
   {
-    store64_be(dst + (uint32_t)7U * (uint32_t)8U, uu____0[7U]);
+    store64_be(dst + (uint32_t)7U * (uint32_t)8U, s[7U]);
   }
 }
 

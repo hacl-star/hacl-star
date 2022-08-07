@@ -234,30 +234,28 @@ static inline void
 chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, uint32_t ctr)
 {
   uint32_t ctx1[16U] = { 0U };
-  uint32_t *uu____0 = ctx1;
   {
-    uint32_t *os = uu____0;
+    uint32_t *os = ctx1;
     uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[0U];
     os[0U] = x;
   }
   {
-    uint32_t *os = uu____0;
+    uint32_t *os = ctx1;
     uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[1U];
     os[1U] = x;
   }
   {
-    uint32_t *os = uu____0;
+    uint32_t *os = ctx1;
     uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[2U];
     os[2U] = x;
   }
   {
-    uint32_t *os = uu____0;
+    uint32_t *os = ctx1;
     uint32_t x = Hacl_Impl_Chacha20_Vec_chacha20_constants[3U];
     os[3U] = x;
   }
-  uint32_t *uu____1 = ctx1 + (uint32_t)4U;
   {
-    uint32_t *os = uu____1;
+    uint32_t *os = ctx1 + (uint32_t)4U;
     uint8_t *bj = k + (uint32_t)0U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -265,7 +263,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[0U] = x;
   }
   {
-    uint32_t *os = uu____1;
+    uint32_t *os = ctx1 + (uint32_t)4U;
     uint8_t *bj = k + (uint32_t)1U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -273,7 +271,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[1U] = x;
   }
   {
-    uint32_t *os = uu____1;
+    uint32_t *os = ctx1 + (uint32_t)4U;
     uint8_t *bj = k + (uint32_t)2U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -281,7 +279,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[2U] = x;
   }
   {
-    uint32_t *os = uu____1;
+    uint32_t *os = ctx1 + (uint32_t)4U;
     uint8_t *bj = k + (uint32_t)3U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -289,7 +287,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[3U] = x;
   }
   {
-    uint32_t *os = uu____1;
+    uint32_t *os = ctx1 + (uint32_t)4U;
     uint8_t *bj = k + (uint32_t)4U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -297,7 +295,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[4U] = x;
   }
   {
-    uint32_t *os = uu____1;
+    uint32_t *os = ctx1 + (uint32_t)4U;
     uint8_t *bj = k + (uint32_t)5U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -305,7 +303,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[5U] = x;
   }
   {
-    uint32_t *os = uu____1;
+    uint32_t *os = ctx1 + (uint32_t)4U;
     uint8_t *bj = k + (uint32_t)6U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -313,7 +311,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[6U] = x;
   }
   {
-    uint32_t *os = uu____1;
+    uint32_t *os = ctx1 + (uint32_t)4U;
     uint8_t *bj = k + (uint32_t)7U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -321,9 +319,8 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[7U] = x;
   }
   ctx1[12U] = ctr;
-  uint32_t *uu____2 = ctx1 + (uint32_t)13U;
   {
-    uint32_t *os = uu____2;
+    uint32_t *os = ctx1 + (uint32_t)13U;
     uint8_t *bj = n + (uint32_t)0U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -331,7 +328,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[0U] = x;
   }
   {
-    uint32_t *os = uu____2;
+    uint32_t *os = ctx1 + (uint32_t)13U;
     uint8_t *bj = n + (uint32_t)1U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
@@ -339,7 +336,7 @@ chacha20_init_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint8_t *k, uint8_t *n, 
     os[1U] = x;
   }
   {
-    uint32_t *os = uu____2;
+    uint32_t *os = ctx1 + (uint32_t)13U;
     uint8_t *bj = n + (uint32_t)2U * (uint32_t)4U;
     uint32_t u = load32_le(bj);
     uint32_t r = u;
