@@ -697,8 +697,10 @@ let copy #a s_src s_dst =
           [@inline_let]
           let s_dst: state Blake2S = s_dst in
           B.blit p_src 0ul p_dst 0ul 16ul
-      | Blake2S_128_s _ _ ->
-          LowStar.Failure.failwith "Error: EverCrypt_AutoConfig2_init() was called too late"
+      | Blake2S_128_s _ p_dst ->
+          [@inline_let]
+          let s_dst: state Blake2S = s_dst in
+          Hacl.Impl.Blake2.Core.(load_state_from_state32 #Spec.Blake2.Blake2S #M128 p_dst p_src)
       end
   | Blake2B_s p_src ->
       begin match !*s_dst with
@@ -706,8 +708,10 @@ let copy #a s_src s_dst =
           [@inline_let]
           let s_dst: state Blake2B = s_dst in
           B.blit p_src 0ul p_dst 0ul 16ul
-      | Blake2B_256_s _ _ ->
-          LowStar.Failure.failwith "Error: EverCrypt_AutoConfig2_init() was called too late"
+      | Blake2B_256_s _ p_dst ->
+          [@inline_let]
+          let s_dst: state Blake2B = s_dst in
+          Hacl.Impl.Blake2.Core.(load_state_from_state32 #Spec.Blake2.Blake2B #M256 p_dst p_src)
       end
   | Blake2S_128_s _ p_src ->
       begin match !*s_dst with
@@ -715,8 +719,10 @@ let copy #a s_src s_dst =
           [@inline_let]
           let s_dst: state Blake2S = s_dst in
           B.blit p_src 0ul p_dst 0ul 4ul
-      | Blake2S_s _ ->
-          LowStar.Failure.failwith "Error: EverCrypt_AutoConfig2_init() was called too late"
+      | Blake2S_s p_dst ->
+          [@inline_let]
+          let s_dst: state Blake2S = s_dst in
+          Hacl.Impl.Blake2.Core.(store_state_to_state32 #Spec.Blake2.Blake2S #M128 p_dst p_src)
       end
   | Blake2B_256_s _ p_src ->
       begin match !*s_dst with
@@ -724,8 +730,10 @@ let copy #a s_src s_dst =
           [@inline_let]
           let s_dst: state Blake2B = s_dst in
           B.blit p_src 0ul p_dst 0ul 4ul
-      | Blake2B_s _ ->
-          LowStar.Failure.failwith "Error: EverCrypt_AutoConfig2_init() was called too late"
+      | Blake2B_s p_dst ->
+          [@inline_let]
+          let s_dst: state Blake2B = s_dst in
+          Hacl.Impl.Blake2.Core.(store_state_to_state32 #Spec.Blake2.Blake2B #M256 p_dst p_src)
       end
 
 #pop-options
