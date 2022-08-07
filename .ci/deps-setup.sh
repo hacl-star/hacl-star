@@ -9,14 +9,14 @@ cat $HOME/.bash_profile
 
 cd ..
 ./everest --yes pull_vale
-./everest --yes FStar pull_projects FStar make --admit -j 6
+./everest --yes FStar pull_projects FStar make --admit -j 4
 
 export FSTAR_HOME=$(pwd)/FStar
 export KRML_HOME=$(pwd)/karamel
 
 # TODO: MLCrypto really needs to go
 
-./everest --yes MLCrypto pull_projects MLCrypto make --admit -j 6
+./everest --yes MLCrypto pull_projects MLCrypto make --admit -j 4
 
 export MLCRYPTO_HOME=$(pwd)/MLCrypto
 export OPENSSL_HOME=$(pwd)/openssl
@@ -25,7 +25,7 @@ pwd
 
 git config --global user.email "foobar@example.com"
 git config --global user.name "Foo Bar"
-if ! ./everest --yes karamel pull_projects karamel make --admit -j 6; then
-  cd karamel && git cherry-pick 49372568 && OTHERFLAGS="--admit_smt_queries true" make -j 6
+if ! ./everest --yes karamel pull_projects karamel make --admit -j 4; then
+  cd karamel && git cherry-pick 49372568 && OTHERFLAGS="--admit_smt_queries true" make -j 4
 fi
 # TODO: remove hack above
