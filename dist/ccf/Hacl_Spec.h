@@ -54,12 +54,6 @@ typedef uint8_t Spec_Hash_Definitions_hash_alg;
 
 typedef uint8_t Spec_Agile_Cipher_cipher_alg;
 
-#define Spec_Cipher_Expansion_Hacl_CHACHA20 0
-#define Spec_Cipher_Expansion_Vale_AES128 1
-#define Spec_Cipher_Expansion_Vale_AES256 2
-
-typedef uint8_t Spec_Cipher_Expansion_impl;
-
 #if defined(__cplusplus)
 }
 #endif

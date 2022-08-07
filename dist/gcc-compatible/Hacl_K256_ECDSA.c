@@ -96,31 +96,23 @@ bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
 static uint64_t add4(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t t1 = a[(uint32_t)4U * i];
-    uint64_t t20 = b[(uint32_t)4U * i];
-    uint64_t *res_i0 = res + (uint32_t)4U * i;
+    uint64_t t1 = a[(uint32_t)4U * (uint32_t)0U];
+    uint64_t t20 = b[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = res + (uint32_t)4U * (uint32_t)0U;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t20, res_i0);
-    uint64_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t t10 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t t21 = b[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = res + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t21, res_i1);
-    uint64_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t t11 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t t22 = b[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = res + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t22, res_i2);
-    uint64_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t t12 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t t2 = b[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = res + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t t1 = a[i];
-    uint64_t t2 = b[i];
-    uint64_t *res_i = res + i;
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
   }
   return c;
 }
@@ -128,183 +120,233 @@ static uint64_t add4(uint64_t *a, uint64_t *b, uint64_t *res)
 static void add_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t t1 = a[(uint32_t)4U * i];
-    uint64_t t20 = b[(uint32_t)4U * i];
-    uint64_t *res_i0 = res + (uint32_t)4U * i;
+    uint64_t t1 = a[(uint32_t)4U * (uint32_t)0U];
+    uint64_t t20 = b[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = res + (uint32_t)4U * (uint32_t)0U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t20, res_i0);
-    uint64_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t t10 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t t21 = b[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = res + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t10, t21, res_i1);
-    uint64_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t t11 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t t22 = b[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = res + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t11, t22, res_i2);
-    uint64_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t t12 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t t2 = b[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = res + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t12, t2, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t t1 = a[i];
-    uint64_t t2 = b[i];
-    uint64_t *res_i = res + i;
-    c0 = Lib_IntTypes_Intrinsics_add_carry_u64(c0, t1, t2, res_i);
   }
   uint64_t c00 = c0;
   uint64_t tmp[4U] = { 0U };
   uint64_t c = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t t1 = res[(uint32_t)4U * i];
-    uint64_t t20 = n[(uint32_t)4U * i];
-    uint64_t *res_i0 = tmp + (uint32_t)4U * i;
+    uint64_t t1 = res[(uint32_t)4U * (uint32_t)0U];
+    uint64_t t20 = n[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = tmp + (uint32_t)4U * (uint32_t)0U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t20, res_i0);
-    uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t t10 = res[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t t21 = n[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = tmp + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t10, t21, res_i1);
-    uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t t11 = res[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t t22 = n[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = tmp + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t11, t22, res_i2);
-    uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t t12 = res[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t t2 = n[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = tmp + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t12, t2, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t t1 = res[i];
-    uint64_t t2 = n[i];
-    uint64_t *res_i = tmp + i;
-    c = Lib_IntTypes_Intrinsics_sub_borrow_u64(c, t1, t2, res_i);
   }
   uint64_t c1 = c;
   uint64_t c2 = c00 - c1;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = res;
-    uint64_t x = (c2 & res[i]) | (~c2 & tmp[i]);
-    os[i] = x;
+    uint64_t x = (c2 & res[0U]) | (~c2 & tmp[0U]);
+    os[0U] = x;
+  }
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & res[1U]) | (~c2 & tmp[1U]);
+    os[1U] = x;
+  }
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & res[2U]) | (~c2 & tmp[2U]);
+    os[2U] = x;
+  }
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & res[3U]) | (~c2 & tmp[3U]);
+    os[3U] = x;
   }
 }
 
 static void sub_mod4(uint64_t *n, uint64_t *a, uint64_t *b, uint64_t *res)
 {
   uint64_t c0 = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t t1 = a[(uint32_t)4U * i];
-    uint64_t t20 = b[(uint32_t)4U * i];
-    uint64_t *res_i0 = res + (uint32_t)4U * i;
+    uint64_t t1 = a[(uint32_t)4U * (uint32_t)0U];
+    uint64_t t20 = b[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = res + (uint32_t)4U * (uint32_t)0U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t20, res_i0);
-    uint64_t t10 = a[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = res + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t t10 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t t21 = b[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = res + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t10, t21, res_i1);
-    uint64_t t11 = a[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = res + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t t11 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t t22 = b[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = res + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t11, t22, res_i2);
-    uint64_t t12 = a[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t t12 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t t2 = b[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = res + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t12, t2, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t t1 = a[i];
-    uint64_t t2 = b[i];
-    uint64_t *res_i = res + i;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u64(c0, t1, t2, res_i);
   }
   uint64_t c00 = c0;
   uint64_t tmp[4U] = { 0U };
   uint64_t c = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
   {
-    uint64_t t1 = res[(uint32_t)4U * i];
-    uint64_t t20 = n[(uint32_t)4U * i];
-    uint64_t *res_i0 = tmp + (uint32_t)4U * i;
+    uint64_t t1 = res[(uint32_t)4U * (uint32_t)0U];
+    uint64_t t20 = n[(uint32_t)4U * (uint32_t)0U];
+    uint64_t *res_i0 = tmp + (uint32_t)4U * (uint32_t)0U;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t20, res_i0);
-    uint64_t t10 = res[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t t21 = n[(uint32_t)4U * i + (uint32_t)1U];
-    uint64_t *res_i1 = tmp + (uint32_t)4U * i + (uint32_t)1U;
+    uint64_t t10 = res[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t t21 = n[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+    uint64_t *res_i1 = tmp + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t10, t21, res_i1);
-    uint64_t t11 = res[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t t22 = n[(uint32_t)4U * i + (uint32_t)2U];
-    uint64_t *res_i2 = tmp + (uint32_t)4U * i + (uint32_t)2U;
+    uint64_t t11 = res[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t t22 = n[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+    uint64_t *res_i2 = tmp + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t11, t22, res_i2);
-    uint64_t t12 = res[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
-    uint64_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
+    uint64_t t12 = res[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t t2 = n[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+    uint64_t *res_i = tmp + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
     c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t12, t2, res_i);
-  }
-  for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
-  {
-    uint64_t t1 = res[i];
-    uint64_t t2 = n[i];
-    uint64_t *res_i = tmp + i;
-    c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, t2, res_i);
   }
   uint64_t c1 = c;
   uint64_t c2 = (uint64_t)0U - c00;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = res;
-    uint64_t x = (c2 & tmp[i]) | (~c2 & res[i]);
-    os[i] = x;
+    uint64_t x = (c2 & tmp[0U]) | (~c2 & res[0U]);
+    os[0U] = x;
+  }
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & tmp[1U]) | (~c2 & res[1U]);
+    os[1U] = x;
+  }
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & tmp[2U]) | (~c2 & res[2U]);
+    os[2U] = x;
+  }
+  {
+    uint64_t *os = res;
+    uint64_t x = (c2 & tmp[3U]) | (~c2 & res[3U]);
+    os[3U] = x;
   }
 }
 
 static void mul4(uint64_t *a, uint64_t *b, uint64_t *res)
 {
   memset(res, 0U, (uint32_t)8U * sizeof (uint64_t));
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
-    uint64_t bj = b[i0];
-    uint64_t *res_j = res + i0;
+    uint64_t bj = b[0U];
+    uint64_t *res_j = res;
     uint64_t c = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U; i++)
     {
-      uint64_t a_i = a[(uint32_t)4U * i];
-      uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+      uint64_t a_i = a[(uint32_t)4U * (uint32_t)0U];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * (uint32_t)0U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i0);
-      uint64_t a_i0 = a[(uint32_t)4U * i + (uint32_t)1U];
-      uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+      uint64_t a_i0 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c, res_i1);
-      uint64_t a_i1 = a[(uint32_t)4U * i + (uint32_t)2U];
-      uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+      uint64_t a_i1 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c, res_i2);
-      uint64_t a_i2 = a[(uint32_t)4U * i + (uint32_t)3U];
-      uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+      uint64_t a_i2 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
     }
-    for (uint32_t i = (uint32_t)4U; i < (uint32_t)4U; i++)
+    uint64_t r = c;
+    res[(uint32_t)4U + (uint32_t)0U] = r;
+  }
+  {
+    uint64_t bj = b[1U];
+    uint64_t *res_j = res + (uint32_t)1U;
+    uint64_t c = (uint64_t)0U;
     {
-      uint64_t a_i = a[i];
-      uint64_t *res_i = res_j + i;
-      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i);
+      uint64_t a_i = a[(uint32_t)4U * (uint32_t)0U];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * (uint32_t)0U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i0);
+      uint64_t a_i0 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c, res_i1);
+      uint64_t a_i1 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c, res_i2);
+      uint64_t a_i2 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
     }
     uint64_t r = c;
-    res[(uint32_t)4U + i0] = r;
+    res[(uint32_t)4U + (uint32_t)1U] = r;
+  }
+  {
+    uint64_t bj = b[2U];
+    uint64_t *res_j = res + (uint32_t)2U;
+    uint64_t c = (uint64_t)0U;
+    {
+      uint64_t a_i = a[(uint32_t)4U * (uint32_t)0U];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * (uint32_t)0U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i0);
+      uint64_t a_i0 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c, res_i1);
+      uint64_t a_i1 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c, res_i2);
+      uint64_t a_i2 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
+    }
+    uint64_t r = c;
+    res[(uint32_t)4U + (uint32_t)2U] = r;
+  }
+  {
+    uint64_t bj = b[3U];
+    uint64_t *res_j = res + (uint32_t)3U;
+    uint64_t c = (uint64_t)0U;
+    {
+      uint64_t a_i = a[(uint32_t)4U * (uint32_t)0U];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * (uint32_t)0U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i0);
+      uint64_t a_i0 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)1U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c, res_i1);
+      uint64_t a_i1 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)2U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c, res_i2);
+      uint64_t a_i2 = a[(uint32_t)4U * (uint32_t)0U + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * (uint32_t)0U + (uint32_t)3U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
+    }
+    uint64_t r = c;
+    res[(uint32_t)4U + (uint32_t)3U] = r;
   }
 }
 
 static void sqr4(uint64_t *a, uint64_t *res)
 {
   memset(res, 0U, (uint32_t)8U * sizeof (uint64_t));
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
     uint64_t *ab = a;
-    uint64_t a_j = a[i0];
-    uint64_t *res_j = res + i0;
+    uint64_t a_j = a[0U];
+    uint64_t *res_j = res;
     uint64_t c = (uint64_t)0U;
-    for (uint32_t i = (uint32_t)0U; i < i0 / (uint32_t)4U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)0U / (uint32_t)4U; i++)
     {
       uint64_t a_i = ab[(uint32_t)4U * i];
       uint64_t *res_i0 = res_j + (uint32_t)4U * i;
@@ -319,24 +361,131 @@ static void sqr4(uint64_t *a, uint64_t *res)
       uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, a_j, c, res_i);
     }
-    for (uint32_t i = i0 / (uint32_t)4U * (uint32_t)4U; i < i0; i++)
+    for (uint32_t i = (uint32_t)0U / (uint32_t)4U * (uint32_t)4U; i < (uint32_t)0U; i++)
     {
       uint64_t a_i = ab[i];
       uint64_t *res_i = res_j + i;
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i);
     }
     uint64_t r = c;
-    res[i0 + i0] = r;
+    res[(uint32_t)0U + (uint32_t)0U] = r;
+  }
+  {
+    uint64_t *ab = a;
+    uint64_t a_j = a[1U];
+    uint64_t *res_j = res + (uint32_t)1U;
+    uint64_t c = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)1U / (uint32_t)4U; i++)
+    {
+      uint64_t a_i = ab[(uint32_t)4U * i];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i0);
+      uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+      uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+      uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, a_j, c, res_i);
+    }
+    for (uint32_t i = (uint32_t)1U / (uint32_t)4U * (uint32_t)4U; i < (uint32_t)1U; i++)
+    {
+      uint64_t a_i = ab[i];
+      uint64_t *res_i = res_j + i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i);
+    }
+    uint64_t r = c;
+    res[(uint32_t)1U + (uint32_t)1U] = r;
+  }
+  {
+    uint64_t *ab = a;
+    uint64_t a_j = a[2U];
+    uint64_t *res_j = res + (uint32_t)2U;
+    uint64_t c = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)2U / (uint32_t)4U; i++)
+    {
+      uint64_t a_i = ab[(uint32_t)4U * i];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i0);
+      uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+      uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+      uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, a_j, c, res_i);
+    }
+    for (uint32_t i = (uint32_t)2U / (uint32_t)4U * (uint32_t)4U; i < (uint32_t)2U; i++)
+    {
+      uint64_t a_i = ab[i];
+      uint64_t *res_i = res_j + i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i);
+    }
+    uint64_t r = c;
+    res[(uint32_t)2U + (uint32_t)2U] = r;
+  }
+  {
+    uint64_t *ab = a;
+    uint64_t a_j = a[3U];
+    uint64_t *res_j = res + (uint32_t)3U;
+    uint64_t c = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)3U / (uint32_t)4U; i++)
+    {
+      uint64_t a_i = ab[(uint32_t)4U * i];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i0);
+      uint64_t a_i0 = ab[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, a_j, c, res_i1);
+      uint64_t a_i1 = ab[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, a_j, c, res_i2);
+      uint64_t a_i2 = ab[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, a_j, c, res_i);
+    }
+    for (uint32_t i = (uint32_t)3U / (uint32_t)4U * (uint32_t)4U; i < (uint32_t)3U; i++)
+    {
+      uint64_t a_i = ab[i];
+      uint64_t *res_i = res_j + i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, a_j, c, res_i);
+    }
+    uint64_t r = c;
+    res[(uint32_t)3U + (uint32_t)3U] = r;
   }
   uint64_t c0 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, res, res);
   uint64_t tmp[8U] = { 0U };
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    FStar_UInt128_uint128 res1 = FStar_UInt128_mul_wide(a[i], a[i]);
+    FStar_UInt128_uint128 res1 = FStar_UInt128_mul_wide(a[0U], a[0U]);
     uint64_t hi = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
     uint64_t lo = FStar_UInt128_uint128_to_uint64(res1);
-    tmp[(uint32_t)2U * i] = lo;
-    tmp[(uint32_t)2U * i + (uint32_t)1U] = hi;
+    tmp[(uint32_t)2U * (uint32_t)0U] = lo;
+    tmp[(uint32_t)2U * (uint32_t)0U + (uint32_t)1U] = hi;
+  }
+  {
+    FStar_UInt128_uint128 res1 = FStar_UInt128_mul_wide(a[1U], a[1U]);
+    uint64_t hi = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
+    uint64_t lo = FStar_UInt128_uint128_to_uint64(res1);
+    tmp[(uint32_t)2U * (uint32_t)1U] = lo;
+    tmp[(uint32_t)2U * (uint32_t)1U + (uint32_t)1U] = hi;
+  }
+  {
+    FStar_UInt128_uint128 res1 = FStar_UInt128_mul_wide(a[2U], a[2U]);
+    uint64_t hi = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
+    uint64_t lo = FStar_UInt128_uint128_to_uint64(res1);
+    tmp[(uint32_t)2U * (uint32_t)2U] = lo;
+    tmp[(uint32_t)2U * (uint32_t)2U + (uint32_t)1U] = hi;
+  }
+  {
+    FStar_UInt128_uint128 res1 = FStar_UInt128_mul_wide(a[3U], a[3U]);
+    uint64_t hi = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(res1, (uint32_t)64U));
+    uint64_t lo = FStar_UInt128_uint128_to_uint64(res1);
+    tmp[(uint32_t)2U * (uint32_t)3U] = lo;
+    tmp[(uint32_t)2U * (uint32_t)3U + (uint32_t)1U] = hi;
   }
   uint64_t c1 = Hacl_Bignum_Addition_bn_add_eq_len_u64((uint32_t)8U, res, tmp, res);
 }
@@ -345,9 +494,20 @@ static inline uint64_t is_qelem_zero(uint64_t *f)
 {
   uint64_t bn_zero[4U] = { 0U };
   uint64_t mask = (uint64_t)0xFFFFFFFFFFFFFFFFU;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint64_t uu____0 = FStar_UInt64_eq_mask(f[i], bn_zero[i]);
+    uint64_t uu____0 = FStar_UInt64_eq_mask(f[0U], bn_zero[0U]);
+    mask = uu____0 & mask;
+  }
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(f[1U], bn_zero[1U]);
+    mask = uu____0 & mask;
+  }
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(f[2U], bn_zero[2U]);
+    mask = uu____0 & mask;
+  }
+  {
+    uint64_t uu____0 = FStar_UInt64_eq_mask(f[3U], bn_zero[3U]);
     mask = uu____0 & mask;
   }
   uint64_t mask1 = mask;
@@ -374,10 +534,24 @@ static inline uint64_t load_qelem_check(uint64_t *f, uint8_t *b)
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)32U, b, f);
   uint64_t is_zero = is_qelem_zero(f);
   uint64_t acc = (uint64_t)0U;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    uint64_t beq = FStar_UInt64_eq_mask(f[i], n[i]);
-    uint64_t blt = ~FStar_UInt64_gte_mask(f[i], n[i]);
+    uint64_t beq = FStar_UInt64_eq_mask(f[0U], n[0U]);
+    uint64_t blt = ~FStar_UInt64_gte_mask(f[0U], n[0U]);
+    acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+  }
+  {
+    uint64_t beq = FStar_UInt64_eq_mask(f[1U], n[1U]);
+    uint64_t blt = ~FStar_UInt64_gte_mask(f[1U], n[1U]);
+    acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+  }
+  {
+    uint64_t beq = FStar_UInt64_eq_mask(f[2U], n[2U]);
+    uint64_t blt = ~FStar_UInt64_gte_mask(f[2U], n[2U]);
+    acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+  }
+  {
+    uint64_t beq = FStar_UInt64_eq_mask(f[3U], n[3U]);
+    uint64_t blt = ~FStar_UInt64_gte_mask(f[3U], n[3U]);
     acc = (beq & acc) | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
   }
   uint64_t is_lt_q = acc;
@@ -429,11 +603,25 @@ static inline void modq_short(uint64_t *out, uint64_t *a)
   tmp[3U] = (uint64_t)0x0U;
   uint64_t c = add4(a, tmp, out);
   uint64_t mask = (uint64_t)0U - c;
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = out;
-    uint64_t x = (mask & out[i]) | (~mask & a[i]);
-    os[i] = x;
+    uint64_t x = (mask & out[0U]) | (~mask & a[0U]);
+    os[0U] = x;
+  }
+  {
+    uint64_t *os = out;
+    uint64_t x = (mask & out[1U]) | (~mask & a[1U]);
+    os[1U] = x;
+  }
+  {
+    uint64_t *os = out;
+    uint64_t x = (mask & out[2U]) | (~mask & a[2U]);
+    os[2U] = x;
+  }
+  {
+    uint64_t *os = out;
+    uint64_t x = (mask & out[3U]) | (~mask & a[3U]);
+    os[3U] = x;
   }
 }
 
@@ -474,10 +662,9 @@ mul_pow2_256_minus_q_add(
   uint64_t tmp[len + (uint32_t)2U];
   memset(tmp, 0U, (len + (uint32_t)2U) * sizeof (uint64_t));
   memset(tmp, 0U, (len + (uint32_t)2U) * sizeof (uint64_t));
-  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)2U; i0++)
   {
-    uint64_t bj = t01[i0];
-    uint64_t *res_j = tmp + i0;
+    uint64_t bj = t01[0U];
+    uint64_t *res_j = tmp;
     uint64_t c = (uint64_t)0U;
     for (uint32_t i = (uint32_t)0U; i < len / (uint32_t)4U; i++)
     {
@@ -501,7 +688,35 @@ mul_pow2_256_minus_q_add(
       c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i);
     }
     uint64_t r = c;
-    tmp[len + i0] = r;
+    tmp[len + (uint32_t)0U] = r;
+  }
+  {
+    uint64_t bj = t01[1U];
+    uint64_t *res_j = tmp + (uint32_t)1U;
+    uint64_t c = (uint64_t)0U;
+    for (uint32_t i = (uint32_t)0U; i < len / (uint32_t)4U; i++)
+    {
+      uint64_t a_i = a[(uint32_t)4U * i];
+      uint64_t *res_i0 = res_j + (uint32_t)4U * i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i0);
+      uint64_t a_i0 = a[(uint32_t)4U * i + (uint32_t)1U];
+      uint64_t *res_i1 = res_j + (uint32_t)4U * i + (uint32_t)1U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i0, bj, c, res_i1);
+      uint64_t a_i1 = a[(uint32_t)4U * i + (uint32_t)2U];
+      uint64_t *res_i2 = res_j + (uint32_t)4U * i + (uint32_t)2U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i1, bj, c, res_i2);
+      uint64_t a_i2 = a[(uint32_t)4U * i + (uint32_t)3U];
+      uint64_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i2, bj, c, res_i);
+    }
+    for (uint32_t i = len / (uint32_t)4U * (uint32_t)4U; i < len; i++)
+    {
+      uint64_t a_i = a[i];
+      uint64_t *res_i = res_j + i;
+      c = Hacl_Bignum_Base_mul_wide_add2_u64(a_i, bj, c, res_i);
+    }
+    uint64_t r = c;
+    tmp[len + (uint32_t)1U] = r;
   }
   memcpy(res + (uint32_t)2U, a, len * sizeof (uint64_t));
   uint64_t uu____0 = bn_add(resLen, res, len + (uint32_t)2U, tmp, res);
@@ -529,11 +744,25 @@ static inline void modq(uint64_t *out, uint64_t *a)
   uint64_t c00 = c2;
   uint64_t c1 = add4(r, tmp, out);
   uint64_t mask = (uint64_t)0U - (c00 + c1);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = out;
-    uint64_t x = (mask & out[i]) | (~mask & r[i]);
-    os[i] = x;
+    uint64_t x = (mask & out[0U]) | (~mask & r[0U]);
+    os[0U] = x;
+  }
+  {
+    uint64_t *os = out;
+    uint64_t x = (mask & out[1U]) | (~mask & r[1U]);
+    os[1U] = x;
+  }
+  {
+    uint64_t *os = out;
+    uint64_t x = (mask & out[2U]) | (~mask & r[2U]);
+    os[2U] = x;
+  }
+  {
+    uint64_t *os = out;
+    uint64_t x = (mask & out[3U]) | (~mask & r[3U]);
+    os[3U] = x;
   }
 }
 
@@ -939,15 +1168,92 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
   memcpy(table, out, (uint32_t)15U * sizeof (uint64_t));
   uint64_t *t1 = table + (uint32_t)15U;
   memcpy(t1, q, (uint32_t)15U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
-    uint64_t *t11 = table + i * (uint32_t)15U;
-    uint64_t *t2 = table + i * (uint32_t)15U + (uint32_t)15U;
+    uint64_t *t11 = table + (uint32_t)0U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)0U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)1U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)1U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)2U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)2U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)3U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)3U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)4U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)4U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)5U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)5U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)6U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)6U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)7U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)7U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)8U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)8U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)9U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)9U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)10U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)10U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)11U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)11U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)12U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)12U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)13U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)13U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
+  }
+  {
+    uint64_t *t11 = table + (uint32_t)14U * (uint32_t)15U;
+    uint64_t *t2 = table + (uint32_t)14U * (uint32_t)15U + (uint32_t)15U;
     Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
   }
   for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)64U; i0++)
   {
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+    {
+      Hacl_Impl_K256_PointDouble_point_double(out, out);
+    }
+    {
+      Hacl_Impl_K256_PointDouble_point_double(out, out);
+    }
+    {
+      Hacl_Impl_K256_PointDouble_point_double(out, out);
+    }
     {
       Hacl_Impl_K256_PointDouble_point_double(out, out);
     }
@@ -968,15 +1274,1189 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
     uint64_t bits_l = ite & mask_l;
     uint64_t a_bits_l[15U] = { 0U };
     memcpy(a_bits_l, table, (uint32_t)15U * sizeof (uint64_t));
-    for (uint32_t i2 = (uint32_t)0U; i2 < (uint32_t)15U; i2++)
     {
-      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)(i2 + (uint32_t)1U));
-      uint64_t *res_j = table + (i2 + (uint32_t)1U) * (uint32_t)15U;
-      for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)0U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)0U + (uint32_t)1U) * (uint32_t)15U;
       {
         uint64_t *os = a_bits_l;
-        uint64_t x = (c & res_j[i]) | (~c & a_bits_l[i]);
-        os[i] = x;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)1U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)1U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)2U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)2U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)3U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)3U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)4U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)4U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)5U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)5U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)6U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)6U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)7U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)7U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)8U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)8U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)9U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)9U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)10U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)10U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)11U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)11U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)12U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)12U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)13U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)13U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
+      }
+    }
+    {
+      uint64_t c = FStar_UInt64_eq_mask(bits_l, (uint64_t)((uint32_t)14U + (uint32_t)1U));
+      uint64_t *res_j = table + ((uint32_t)14U + (uint32_t)1U) * (uint32_t)15U;
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[0U]) | (~c & a_bits_l[0U]);
+        os[0U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[1U]) | (~c & a_bits_l[1U]);
+        os[1U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[2U]) | (~c & a_bits_l[2U]);
+        os[2U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[3U]) | (~c & a_bits_l[3U]);
+        os[3U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[4U]) | (~c & a_bits_l[4U]);
+        os[4U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[5U]) | (~c & a_bits_l[5U]);
+        os[5U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[6U]) | (~c & a_bits_l[6U]);
+        os[6U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[7U]) | (~c & a_bits_l[7U]);
+        os[7U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[8U]) | (~c & a_bits_l[8U]);
+        os[8U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[9U]) | (~c & a_bits_l[9U]);
+        os[9U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[10U]) | (~c & a_bits_l[10U]);
+        os[10U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[11U]) | (~c & a_bits_l[11U]);
+        os[11U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[12U]) | (~c & a_bits_l[12U]);
+        os[12U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[13U]) | (~c & a_bits_l[13U]);
+        os[13U] = x;
+      }
+      {
+        uint64_t *os = a_bits_l;
+        uint64_t x = (c & res_j[14U]) | (~c & a_bits_l[14U]);
+        os[14U] = x;
       }
     }
     Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l);
@@ -1003,25 +2483,171 @@ point_mul_double_vartime(
   memcpy(table1, out, (uint32_t)15U * sizeof (uint64_t));
   uint64_t *t10 = table1 + (uint32_t)15U;
   memcpy(t10, q1, (uint32_t)15U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
-    uint64_t *t11 = table1 + i * (uint32_t)15U;
-    uint64_t *t2 = table1 + i * (uint32_t)15U + (uint32_t)15U;
+    uint64_t *t11 = table1 + (uint32_t)0U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)0U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)1U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)1U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)2U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)2U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)3U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)3U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)4U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)4U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)5U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)5U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)6U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)6U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)7U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)7U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)8U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)8U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)9U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)9U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)10U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)10U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)11U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)11U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)12U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)12U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)13U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)13U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
+  }
+  {
+    uint64_t *t11 = table1 + (uint32_t)14U * (uint32_t)15U;
+    uint64_t *t2 = table1 + (uint32_t)14U * (uint32_t)15U + (uint32_t)15U;
     Hacl_Impl_K256_PointAdd_point_add(t2, q1, t11);
   }
   uint64_t table2[240U] = { 0U };
   memcpy(table2, out, (uint32_t)15U * sizeof (uint64_t));
   uint64_t *t1 = table2 + (uint32_t)15U;
   memcpy(t1, q2, (uint32_t)15U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
   {
-    uint64_t *t11 = table2 + i * (uint32_t)15U;
-    uint64_t *t2 = table2 + i * (uint32_t)15U + (uint32_t)15U;
+    uint64_t *t11 = table2 + (uint32_t)0U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)0U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)1U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)1U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)2U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)2U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)3U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)3U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)4U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)4U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)5U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)5U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)6U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)6U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)7U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)7U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)8U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)8U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)9U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)9U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)10U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)10U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)11U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)11U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)12U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)12U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)13U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)13U * (uint32_t)15U + (uint32_t)15U;
+    Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
+  }
+  {
+    uint64_t *t11 = table2 + (uint32_t)14U * (uint32_t)15U;
+    uint64_t *t2 = table2 + (uint32_t)14U * (uint32_t)15U + (uint32_t)15U;
     Hacl_Impl_K256_PointAdd_point_add(t2, q2, t11);
   }
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)64U; i++)
   {
-    for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
+    {
+      Hacl_Impl_K256_PointDouble_point_double(out, out);
+    }
+    {
+      Hacl_Impl_K256_PointDouble_point_double(out, out);
+    }
+    {
+      Hacl_Impl_K256_PointDouble_point_double(out, out);
+    }
     {
       Hacl_Impl_K256_PointDouble_point_double(out, out);
     }
