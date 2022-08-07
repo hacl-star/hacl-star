@@ -84,18 +84,21 @@ let min_length (a:supported_alg) : n:size_t{v n == S.min_length a} =
 
 val state: supported_alg -> Type0
 
+inline_for_extraction noextract
 val freeable: #a:supported_alg -> st:state a -> Type0
 
 val footprint: #a:supported_alg -> st:state a -> GTot B.loc
 
+inline_for_extraction noextract
 val invariant: #a:supported_alg -> st:state a -> h:HS.mem -> Type0
 
+inline_for_extraction noextract
 let disjoint_st (#a:supported_alg) (st:state a) (b:buffer uint8) =
   B.loc_disjoint (footprint st) (B.loc_buffer b)
 
 val repr: #a:supported_alg -> st:state a -> h:HS.mem -> GTot (S.state a)
 
-inline_for_extraction
+inline_for_extraction noextract
 val alloca: a:supported_alg -> StackInline (state a)
   (requires fun _ -> True)
   (ensures  fun h0 st h1 ->
@@ -114,7 +117,7 @@ val create_in: a:supported_alg -> r:HS.rid -> ST (state a)
     invariant st h1 /\
     freeable st)
 
-inline_for_extraction
+inline_for_extraction noextract
 let instantiate_st (a:supported_alg) =
     st:state a
   -> entropy_input_len:size_t
@@ -145,7 +148,7 @@ val mk_instantiate: #a:supported_alg -> hmac:HMAC.compute_st a -> instantiate_st
 
 val instantiate: a:supported_alg -> instantiate_st a
 
-inline_for_extraction
+inline_for_extraction noextract
 let reseed_st (a:supported_alg) =
     st:state a
   -> entropy_input_len:size_t
@@ -173,7 +176,7 @@ val mk_reseed: #a:supported_alg -> hmac:HMAC.compute_st a -> reseed_st a
 
 val reseed: a:supported_alg -> reseed_st a
 
-inline_for_extraction
+inline_for_extraction noextract
 let generate_st (a:supported_alg) =
     output:buffer uint8
   -> st:state a
