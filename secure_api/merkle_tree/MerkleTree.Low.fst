@@ -127,6 +127,7 @@ let offset_of i = if i % 2ul = 0ul then i else i - 1ul
 // `mt_safe_elts` says that it is safe to access an element from `i` to `j - 1`
 // at level `lv` in the Merkle tree, i.e., hs[lv][k] (i <= k < j) is a valid
 // element.
+inline_for_extraction noextract
 val mt_safe_elts:
   #hsz:hash_size_t ->
   h:HS.mem -> lv:uint32_t{lv <= merkle_tree_size_lg} ->
@@ -207,6 +208,7 @@ let rec mt_safe_elts_preserved #hsz lv hs i j p h0 h1 =
 // `mt_safe` is the invariant of a Merkle tree through its lifetime.
 // It includes liveness, regionality, disjointness (to each data structure),
 // and valid element access (`mt_safe_elts`).
+inline_for_extraction noextract
 val mt_safe: HS.mem -> mt_p -> GTot Type0
 let mt_safe h mt =
   B.live h mt /\ B.freeable mt /\
@@ -1060,6 +1062,7 @@ let phashes (h:HS.mem) (p:path_p)
 = Path?.hashes (B.get h p 0)
 
 // Memory safety of a path as an invariant
+inline_for_extraction noextract
 val path_safe:
   h:HS.mem -> mtr:HH.rid -> p:path_p -> GTot Type0
 let path_safe h mtr p =

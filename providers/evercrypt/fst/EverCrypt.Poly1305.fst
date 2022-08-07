@@ -126,7 +126,6 @@ let poly1305 dst src len key =
   let h0 = ST.get () in
   let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
   let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
-  let vale = EverCrypt.AutoConfig2.wants_vale () in
 
   if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then begin
     Hacl.Poly1305_256.poly1305_mac dst len src key
@@ -134,7 +133,7 @@ let poly1305 dst src len key =
   end else if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then begin
     Hacl.Poly1305_128.poly1305_mac dst len src key
 
-  end else if EverCrypt.TargetConfig.hacl_can_compile_vale && vale then begin
+  end else if EverCrypt.TargetConfig.hacl_can_compile_vale then begin
     poly1305_vale dst src len key
 
   end else begin

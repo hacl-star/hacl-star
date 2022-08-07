@@ -78,8 +78,10 @@ val state_s: alg -> Type0
 let state alg = B.pointer (state_s alg)
 
 // abstract freeable (deep) predicate; only needed for create/free pairs
+inline_for_extraction noextract
 val freeable_s: #(a: alg) -> state_s a -> Type0
 
+inline_for_extraction noextract
 let freeable (#a: alg) (h: HS.mem) (p: state a) =
   B.freeable p /\ freeable_s (B.deref h p)
 
@@ -110,7 +112,10 @@ let loc_includes_union_l_footprint_s
   [SMTPat (M.loc_includes (M.loc_union l1 l2) (footprint_s s))]
 = M.loc_includes_union_l l1 l2 (footprint_s s)
 
+inline_for_extraction noextract
 val invariant_s: (#a:alg) -> state_s a -> HS.mem -> Type0
+
+inline_for_extraction noextract
 let invariant (#a:alg) (s: state a) (m: HS.mem) =
   B.live m s /\
   M.(loc_disjoint (loc_addr_of_buffer s) (footprint_s (B.deref m s))) /\
@@ -181,6 +186,7 @@ let frame_invariant_implies_footprint_preservation
 =
   ()
 
+inline_for_extraction noextract
 let preserves_freeable #a (s: state a) (h0 h1: HS.mem): Type0 =
   freeable h0 s ==> freeable h1 s
 

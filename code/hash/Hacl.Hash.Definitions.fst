@@ -67,7 +67,7 @@ let impl_state_len (i:impl) : s:size_t{size_v s == impl_state_length i} =
     | Blake2S, Blake2.M128 | Blake2S, Blake2.M256
     | Blake2B, Blake2.M256 -> 4ul
   
-inline_for_extraction
+inline_for_extraction noextract
 type state (i:impl) =
   b:B.buffer (impl_word i) { B.length b = impl_state_length i }
 

@@ -184,6 +184,13 @@ val store_row: #a:Spec.alg -> #m:m_spec -> b:lbuffer uint8 (size_row a) -> r:row
 			        as_seq h1 b == Lib.ByteSequence.uints_to_bytes_le (row_v h0 r)))
 
 noextract inline_for_extraction
+val store_row32: #a:Spec.alg -> #m:m_spec -> b:lbuffer (word_t a) 4ul -> r:row_p a m ->
+	  Stack unit
+	  (requires (fun h -> live h r /\ live h b /\ disjoint r b))
+	  (ensures (fun h0 _ h1 -> modifies (loc b) h0 h1 /\
+			        Spec.( load_row (as_seq h1 b)) == row_v h0 r))
+
+noextract inline_for_extraction
 let size_block (a:Spec.alg) : x:size_t{v x = 16 * Spec.size_word a} =
   Spec.alg_inversion_lemma a;
   match a with
@@ -219,4 +226,18 @@ val copy_state: #a:Spec.alg -> #m:m_spec -> st2:state_p a m -> st1:state_p a m -
 	  (requires (fun h0 -> live h0 st1 /\ live h0 st2 /\ disjoint st1 st2))
 	  (ensures (fun h0 r h1 -> modifies (loc st2) h0 h1 /\
 			        state_v h1 st2 == state_v h0 st1))
+
+noextract inline_for_extraction
+val load_state_from_state32: #a:Spec.alg -> #m:m_spec -> st:state_p a m -> st32:state_p a M32 ->
+	  Stack unit
+	  (requires (fun h -> live h st /\ live h st32 /\ disjoint st st32))
+	  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
+				state_v h1 st == state_v h0 st32))
+
+noextract inline_for_extraction
+val store_state_to_state32: #a:Spec.alg -> #m:m_spec -> st32:state_p a M32 -> st:state_p a m -> 
+	  Stack unit
+	  (requires (fun h -> live h st /\ live h st32 /\ disjoint st st32))
+	  (ensures (fun h0 _ h1 -> modifies (loc st32) h0 h1 /\
+				state_v h1 st32 == state_v h0 st))
 
