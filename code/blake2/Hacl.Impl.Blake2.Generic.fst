@@ -224,6 +224,7 @@ val gather_state: #a:Spec.alg -> #ms:m_spec -> st:state_p a ms -> m:block_w a ->
 		  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
 					state_v h1 st == Spec.gather_state a (as_seq h0 m) (v start)))
 
+inline_for_extraction noextract
 let get_sigma' (start: size_t { v start <= 144 }) (i: size_t { normalize (i <=. 15ul) }):
   Stack Spec.sigma_elt_t
     (requires (fun h -> True))
