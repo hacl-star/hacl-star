@@ -7,11 +7,11 @@ all: dist/Makefile.basic
 test: all dist/blake2-test.exe
 	dist/blake2-test.exe
 
+test32: all dist/blake2-test32.exe
+	dist/blake2-test32.exe
+
 # Defines rules for producing .checked, .krml, .depend, etc.
 include $(HACL_HOME)/Makefile.local
-
-CFLAGS += -I$(HACL_HOME)/lib/c -mavx -mavx2
-export CFLAGS
 
 # CUSTOMIZE HERE: how to produce binary objects
 # An archive with all the compiled code in this directory.
@@ -21,11 +21,13 @@ BLAKE2_BUNDLE= -bundle Hacl.Blake2b_32=Hacl.Impl.Blake2.\* \
   -bundle Hacl.Blake2s_128=Hacl.Impl.Blake2.\* \
   -bundle Hacl.Blake2b_256=Hacl.Impl.Blake2.\*
 
+
 dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	$(KRML) $^  $(BASE_FLAGS) $(BLAKE2_BUNDLE) \
-	  -funroll-loops 8 \
+	  -funroll-loops 12 \
 	  -fbuiltin-uint128 \
 	  -tmpdir dist \
+	  -skip-compilation \
 	  -ccopts -std=gnu11,-g,-O3 \
 	  -I "../../../karamel/include" \
 	  -I "../../lib/c" \
@@ -35,7 +37,10 @@ dist/Makefile.basic: $(filter-out %/prims.krml,$(ALL_KRML_FILES))
 	  -skip-compilation
 
 dist/blake2-test.exe: dist/Makefile.basic blake2-test.c
-	$(CC) -O3 -march=native -mtune=native -DHACL_CAN_COMPILE_VEC128 -DHACL_CAN_COMPILE_VEC256 -I dist -I ../../lib/c -I ../../../karamel/include -I ../../../karamel/kremlib/c -I ../../../karamel/kremlib/dist/minimal  Lib_Memzero0.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_32.c dist/Hacl_Blake2s_128.c dist/Hacl_Blake2b_256.c blake2-test.c digestif/src-c/native/blake2b.c -o dist/blake2-test.exe
+	$(CC) -O3 -march=native -mtune=native -DVEC128 -DVEC256 -I ../../dist/gcc64-only -I dist -I ../../lib/c -I ../../dist/karamel/include -I ../../dist/karamel/krmllib/c -I ../../dist/karamel/krmllib/dist/minimal -I ../../tests ../../dist/gcc64-only/Lib_Memzero0.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_32.c dist/Hacl_Blake2s_128.c dist/Hacl_Blake2b_256.c blake2-test.c -o dist/blake2-test.exe
+
+dist/blake2-test32.exe: dist/Makefile.basic blake2-test.c
+	$(CC) -O3 -march=native -mtune=native -UVEC128 -UVEC256 -I ../../dist/gcc64-only -I dist -I ../../lib/c -I ../../dist/karamel/include -I ../../dist/karamel/krmllib/c -I ../../dist/karamel/krmllib/dist/minimal -I ../../tests ../../dist/gcc64-only/Lib_Memzero0.c dist/Hacl_Blake2b_32.c  dist/Hacl_Blake2s_32.c blake2-test.c -o dist/blake2-test32.exe
 
 clean-c:
 	$(MAKE) -C dist/ -f Makefile.basic clean
