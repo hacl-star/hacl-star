@@ -36,8 +36,7 @@ extern "C" {
 
 
 #include "internal/Hacl_Krmllib.h"
-#include "Hacl_Krmllib.h"
-#include "Hacl_Bignum_Base.h"
+#include "../Hacl_Bignum.h"
 #include "evercrypt_targetconfig.h"
 #include "lib_intrinsics.h"
 /* SNIPPET_START: Hacl_Bignum_Convert_bn_from_bytes_be_uint64 */

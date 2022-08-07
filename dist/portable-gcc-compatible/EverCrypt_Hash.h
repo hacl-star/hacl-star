@@ -189,6 +189,12 @@ EverCrypt_Hash_uu___is_Blake2B_s(
 
 /* SNIPPET_END: EverCrypt_Hash_uu___is_Blake2B_s */
 
+/* SNIPPET_START: EverCrypt_Hash_state */
+
+typedef EverCrypt_Hash_state_s *EverCrypt_Hash_state;
+
+/* SNIPPET_END: EverCrypt_Hash_state */
+
 /* SNIPPET_START: EverCrypt_Hash_alg_of_state */
 
 Spec_Hash_Definitions_hash_alg EverCrypt_Hash_alg_of_state(EverCrypt_Hash_state_s *s);
@@ -481,6 +487,13 @@ void
 EverCrypt_Hash_Incremental_free(Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____ *s);
 
 /* SNIPPET_END: EverCrypt_Hash_Incremental_free */
+
+/* SNIPPET_START: EverCrypt_Hash_Incremental_state */
+
+typedef Hacl_Streaming_Functor_state_s___EverCrypt_Hash_state_s____
+*EverCrypt_Hash_Incremental_state;
+
+/* SNIPPET_END: EverCrypt_Hash_Incremental_state */
 
 #if defined(__cplusplus)
 }

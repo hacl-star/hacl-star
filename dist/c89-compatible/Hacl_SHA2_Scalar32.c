@@ -24,7 +24,7 @@
 
 #include "Hacl_SHA2_Scalar32.h"
 
-#include "internal/Hacl_SHA2_Vec256.h"
+#include "internal/Hacl_SHA2_Types.h"
 
 static inline void sha224_update1(uint8_t *block, uint32_t *hash)
 {
@@ -236,8 +236,8 @@ void Hacl_SHA2_Scalar32_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input)
       last00 = last;
       last10 = last + (uint32_t)64U;
       {
-        K____uint8_t___uint8_t_ lit0;
-        K____uint8_t___uint8_t_ scrut0;
+        Hacl_Impl_SHA2_Types_uint8_2p lit0;
+        Hacl_Impl_SHA2_Types_uint8_2p scrut0;
         uint8_t *l0;
         uint8_t *l1;
         uint8_t *lb0;
@@ -250,8 +250,8 @@ void Hacl_SHA2_Scalar32_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input)
         lb0 = l0;
         lb1 = l1;
         {
-          K____uint8_t___uint8_t_ lit;
-          K____uint8_t___uint8_t_ scrut;
+          Hacl_Impl_SHA2_Types_uint8_2p lit;
+          Hacl_Impl_SHA2_Types_uint8_2p scrut;
           uint8_t *last0;
           uint8_t *last1;
           lit.fst = lb0;
@@ -493,8 +493,8 @@ void Hacl_SHA2_Scalar32_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input)
       last00 = last;
       last10 = last + (uint32_t)64U;
       {
-        K____uint8_t___uint8_t_ lit0;
-        K____uint8_t___uint8_t_ scrut0;
+        Hacl_Impl_SHA2_Types_uint8_2p lit0;
+        Hacl_Impl_SHA2_Types_uint8_2p scrut0;
         uint8_t *l0;
         uint8_t *l1;
         uint8_t *lb0;
@@ -507,8 +507,8 @@ void Hacl_SHA2_Scalar32_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input)
         lb0 = l0;
         lb1 = l1;
         {
-          K____uint8_t___uint8_t_ lit;
-          K____uint8_t___uint8_t_ scrut;
+          Hacl_Impl_SHA2_Types_uint8_2p lit;
+          Hacl_Impl_SHA2_Types_uint8_2p scrut;
           uint8_t *last0;
           uint8_t *last1;
           lit.fst = lb0;
@@ -748,8 +748,8 @@ void Hacl_SHA2_Scalar32_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input)
       last00 = last;
       last10 = last + (uint32_t)128U;
       {
-        K____uint8_t___uint8_t_ lit0;
-        K____uint8_t___uint8_t_ scrut0;
+        Hacl_Impl_SHA2_Types_uint8_2p lit0;
+        Hacl_Impl_SHA2_Types_uint8_2p scrut0;
         uint8_t *l0;
         uint8_t *l1;
         uint8_t *lb0;
@@ -762,8 +762,8 @@ void Hacl_SHA2_Scalar32_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input)
         lb0 = l0;
         lb1 = l1;
         {
-          K____uint8_t___uint8_t_ lit;
-          K____uint8_t___uint8_t_ scrut;
+          Hacl_Impl_SHA2_Types_uint8_2p lit;
+          Hacl_Impl_SHA2_Types_uint8_2p scrut;
           uint8_t *last0;
           uint8_t *last1;
           lit.fst = lb0;
@@ -1003,8 +1003,8 @@ void Hacl_SHA2_Scalar32_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input)
       last00 = last;
       last10 = last + (uint32_t)128U;
       {
-        K____uint8_t___uint8_t_ lit0;
-        K____uint8_t___uint8_t_ scrut0;
+        Hacl_Impl_SHA2_Types_uint8_2p lit0;
+        Hacl_Impl_SHA2_Types_uint8_2p scrut0;
         uint8_t *l0;
         uint8_t *l1;
         uint8_t *lb0;
@@ -1017,8 +1017,8 @@ void Hacl_SHA2_Scalar32_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input)
         lb0 = l0;
         lb1 = l1;
         {
-          K____uint8_t___uint8_t_ lit;
-          K____uint8_t___uint8_t_ scrut;
+          Hacl_Impl_SHA2_Types_uint8_2p lit;
+          Hacl_Impl_SHA2_Types_uint8_2p scrut;
           uint8_t *last0;
           uint8_t *last1;
           lit.fst = lb0;
