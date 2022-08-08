@@ -5,7 +5,6 @@ open Spec.Hash.Definitions
 open Hacl.Hash.Definitions
 open Hacl.Hash.Blake2
 
-noextract inline_for_extraction
 let init_blake2b_256: init_st (|Blake2B, M256|) =
   mk_init Blake2B M256
 

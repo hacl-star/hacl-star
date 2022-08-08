@@ -273,101 +273,12 @@ uint32_t Hacl_Frodo64_crypto_kem_dec(uint8_t *ss, uint8_t *ct, uint8_t *sk)
   uint16_t mask = b1 & b2;
   uint16_t mask0 = mask;
   uint8_t kp_s[16U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
     uint8_t *os = kp_s;
-    uint8_t uu____0 = s[0U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[0U] ^ uu____0));
-    os[0U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[1U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[1U] ^ uu____0));
-    os[1U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[2U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[2U] ^ uu____0));
-    os[2U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[3U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[3U] ^ uu____0));
-    os[3U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[4U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[4U] ^ uu____0));
-    os[4U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[5U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[5U] ^ uu____0));
-    os[5U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[6U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[6U] ^ uu____0));
-    os[6U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[7U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[7U] ^ uu____0));
-    os[7U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[8U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[8U] ^ uu____0));
-    os[8U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[9U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[9U] ^ uu____0));
-    os[9U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[10U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[10U] ^ uu____0));
-    os[10U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[11U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[11U] ^ uu____0));
-    os[11U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[12U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[12U] ^ uu____0));
-    os[12U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[13U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[13U] ^ uu____0));
-    os[13U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[14U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[14U] ^ uu____0));
-    os[14U] = x;
-  }
-  {
-    uint8_t *os = kp_s;
-    uint8_t uu____0 = s[15U];
-    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[15U] ^ uu____0));
-    os[15U] = x;
+    uint8_t uu____0 = s[i];
+    uint8_t x = uu____0 ^ ((uint8_t)mask0 & (kp[i] ^ uu____0));
+    os[i] = x;
   }
   uint32_t ss_init_len = (uint32_t)1096U;
   KRML_CHECK_SIZE(sizeof (uint8_t), ss_init_len);

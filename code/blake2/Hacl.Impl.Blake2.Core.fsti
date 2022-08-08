@@ -228,16 +228,23 @@ val copy_state: #a:Spec.alg -> #m:m_spec -> st2:state_p a m -> st1:state_p a m -
 			        state_v h1 st2 == state_v h0 st1))
 
 noextract inline_for_extraction
-val load_state_from_state32: #a:Spec.alg -> #m:m_spec -> st:state_p a m -> st32:state_p a M32 ->
+let load_state_st (a: Spec.alg) (m: m_spec) =
+  st:state_p a m -> st32:state_p a M32 ->
 	  Stack unit
 	  (requires (fun h -> live h st /\ live h st32 /\ disjoint st st32))
 	  (ensures (fun h0 _ h1 -> modifies (loc st) h0 h1 /\
 				state_v h1 st == state_v h0 st32))
 
 noextract inline_for_extraction
-val store_state_to_state32: #a:Spec.alg -> #m:m_spec -> st32:state_p a M32 -> st:state_p a m -> 
+val load_state_from_state32: #a:Spec.alg -> #m:m_spec -> load_state_st a m
+
+noextract inline_for_extraction
+let store_state_st (a: Spec.alg) (m: m_spec) =
+  st32:state_p a M32 -> st:state_p a m ->
 	  Stack unit
 	  (requires (fun h -> live h st /\ live h st32 /\ disjoint st st32))
 	  (ensures (fun h0 _ h1 -> modifies (loc st32) h0 h1 /\
 				state_v h1 st32 == state_v h0 st))
 
+noextract inline_for_extraction
+val store_state_to_state32: #a:Spec.alg -> #m:m_spec -> store_state_st a m

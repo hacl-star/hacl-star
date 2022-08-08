@@ -324,17 +324,9 @@ static void encode_point(uint8_t *o, uint64_t *i)
   finv(tmp, z, tmp_w);
   fmul0(tmp, tmp, x, tmp_w);
   store_felem(u64s, tmp);
+  for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
   {
-    store64_le(o + (uint32_t)0U * (uint32_t)8U, u64s[0U]);
-  }
-  {
-    store64_le(o + (uint32_t)1U * (uint32_t)8U, u64s[1U]);
-  }
-  {
-    store64_le(o + (uint32_t)2U * (uint32_t)8U, u64s[2U]);
-  }
-  {
-    store64_le(o + (uint32_t)3U * (uint32_t)8U, u64s[3U]);
+    store64_le(o + i0 * (uint32_t)8U, u64s[i0]);
   }
 }
 
@@ -342,37 +334,14 @@ void Hacl_Curve25519_64_scalarmult(uint8_t *out, uint8_t *priv, uint8_t *pub)
 {
   uint64_t init[8U] = { 0U };
   uint64_t tmp[4U] = { 0U };
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
     uint64_t *os = tmp;
-    uint8_t *bj = pub + (uint32_t)0U * (uint32_t)8U;
+    uint8_t *bj = pub + i * (uint32_t)8U;
     uint64_t u = load64_le(bj);
     uint64_t r = u;
     uint64_t x = r;
-    os[0U] = x;
-  }
-  {
-    uint64_t *os = tmp;
-    uint8_t *bj = pub + (uint32_t)1U * (uint32_t)8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[1U] = x;
-  }
-  {
-    uint64_t *os = tmp;
-    uint8_t *bj = pub + (uint32_t)2U * (uint32_t)8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[2U] = x;
-  }
-  {
-    uint64_t *os = tmp;
-    uint8_t *bj = pub + (uint32_t)3U * (uint32_t)8U;
-    uint64_t u = load64_le(bj);
-    uint64_t r = u;
-    uint64_t x = r;
-    os[3U] = x;
+    os[i] = x;
   }
   uint64_t tmp3 = tmp[3U];
   tmp[3U] = tmp3 & (uint64_t)0x7fffffffffffffffU;
