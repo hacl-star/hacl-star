@@ -192,18 +192,24 @@ let alloca a =
     | SHA2_512 -> SHA2_512_s (B.alloca 0UL 8ul)
     | Blake2S ->
         let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
-        if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then
-          let open Hacl.Impl.Blake2.Core in
-          [@inline_let] let i: impl = (| Blake2S , M128 |) in
-          Blake2S_128_s () (B.alloca (zero_element Spec.Blake2.Blake2S M128) (impl_state_len i))
+        if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+          if vec128 then
+            let open Hacl.Impl.Blake2.Core in
+            [@inline_let] let i: impl = (| Blake2S , M128 |) in
+            Blake2S_128_s () (B.alloca (zero_element Spec.Blake2.Blake2S M128) (impl_state_len i))
+          else
+            Blake2S_s (B.alloca 0ul 16ul)
         else
           Blake2S_s (B.alloca 0ul 16ul)
     | Blake2B ->
         let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
-        if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then
-          let open Hacl.Impl.Blake2.Core in
-          [@inline_let] let i: impl = (| Blake2B , M256 |) in
-          Blake2B_256_s () (B.alloca (zero_element Spec.Blake2.Blake2B M256) (impl_state_len i))
+        if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+          if vec256 then
+            let open Hacl.Impl.Blake2.Core in
+            [@inline_let] let i: impl = (| Blake2B , M256 |) in
+            Blake2B_256_s () (B.alloca (zero_element Spec.Blake2.Blake2B M256) (impl_state_len i))
+          else
+            Blake2B_s (B.alloca 0uL 16ul)
         else
           Blake2B_s (B.alloca 0uL 16ul)
   in
@@ -220,18 +226,26 @@ let create_in a r =
     | SHA2_512 -> SHA2_512_s (B.malloc r 0UL 8ul)
     | Blake2S ->
         let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
-        if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then
-          let open Hacl.Impl.Blake2.Core in
-          [@inline_let] let i: impl = (| Blake2S , M128 |) in
-          Blake2S_128_s () (B.malloc r (zero_element Spec.Blake2.Blake2S M128) (impl_state_len i))
+        if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+          // Slightly frustrating duplication of the else-branch because we
+          // can't compile this using the if-and return optimization of krml.
+          if vec128 then
+            let open Hacl.Impl.Blake2.Core in
+            [@inline_let] let i: impl = (| Blake2S , M128 |) in
+            Blake2S_128_s () (B.malloc r (zero_element Spec.Blake2.Blake2S M128) (impl_state_len i))
+          else
+            Blake2S_s (B.malloc r 0ul 16ul)
         else
           Blake2S_s (B.malloc r 0ul 16ul)
     | Blake2B ->
         let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
-        if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then
-          let open Hacl.Impl.Blake2.Core in
-          [@inline_let] let i: impl = (| Blake2B , M256 |) in
-          Blake2B_256_s () (B.malloc r (zero_element Spec.Blake2.Blake2B M256) (impl_state_len i))
+        if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+          if vec256 then
+            let open Hacl.Impl.Blake2.Core in
+            [@inline_let] let i: impl = (| Blake2B , M256 |) in
+            Blake2B_256_s () (B.malloc r (zero_element Spec.Blake2.Blake2B M256) (impl_state_len i))
+          else
+            Blake2B_s (B.malloc r 0uL 16ul)
         else
           Blake2B_s (B.malloc r 0uL 16ul)
   in
@@ -254,9 +268,13 @@ let init #a s =
   | SHA2_384_s p -> Hacl.Hash.SHA2.init_384 p
   | SHA2_512_s p -> Hacl.Hash.SHA2.init_512 p
   | Blake2S_s p -> let _ = Hacl.Hash.Blake2.init_blake2s_32 p in ()
-  | Blake2S_128_s _ p -> let _ = Hacl.Hash.Blake2.init_blake2s_128 p in ()
+  | Blake2S_128_s _ p ->
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        let _ = Hacl.Hash.Blake2s_128.init_blake2s_128 p in ()
   | Blake2B_s p -> let _ = Hacl.Hash.Blake2.init_blake2b_32 p in ()
-  | Blake2B_256_s _ p -> let _ = Hacl.Hash.Blake2.init_blake2b_256 p in ()
+  | Blake2B_256_s _ p ->
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        let _ = Hacl.Hash.Blake2b_256.init_blake2b_256 p in ()
 #pop-options
 
 friend Vale.SHA.SHA_helpers
@@ -311,16 +329,18 @@ let update2 #a s prevlen block =
       let _ = Hacl.Hash.Blake2.update_blake2s_32 p prevlen block in
       ()
   | Blake2S_128_s _ p ->
-      let _ = Hacl.Hash.Blake2.update_blake2s_128 p prevlen block in
-      ()
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        let _ = Hacl.Hash.Blake2s_128.update_blake2s_128 p prevlen block in
+        ()
   | Blake2B_s p ->
       [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
       let _ = Hacl.Hash.Blake2.update_blake2b_32 p prevlen block in
       ()
   | Blake2B_256_s _ p ->
-      [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
-      let _ = Hacl.Hash.Blake2.update_blake2b_256 p prevlen block in
-      ()
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
+        let _ = Hacl.Hash.Blake2b_256.update_blake2b_256 p prevlen block in
+        ()
 #pop-options
 
 // The deprecated update just calls the new update
@@ -354,19 +374,21 @@ let update_multi2 #a s prevlen blocks len =
       let _ = Hacl.Hash.Blake2.update_multi_blake2s_32 p prevlen blocks n in
       ()
   | Blake2S_128_s _ p ->
-      let n = len / block_len Blake2S in
-      let _ = Hacl.Hash.Blake2.update_multi_blake2s_128 p prevlen blocks n in
-      ()
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        let n = len / block_len Blake2S in
+        let _ = Hacl.Hash.Blake2s_128.update_multi_blake2s_128 p prevlen blocks n in
+        ()
   | Blake2B_s p ->
       [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
       let n = len / block_len Blake2B in
       let _ = Hacl.Hash.Blake2.update_multi_blake2b_32 p prevlen blocks n in
       ()
   | Blake2B_256_s _ p ->
-      [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
-      let n = len / block_len Blake2B in
-      let _ = Hacl.Hash.Blake2.update_multi_blake2b_256 p prevlen blocks n in
-      ()
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        [@inline_let] let prevlen = Int.Cast.Full.uint64_to_uint128 prevlen in
+        let n = len / block_len Blake2B in
+        let _ = Hacl.Hash.Blake2b_256.update_multi_blake2b_256 p prevlen blocks n in
+        ()
 
 #pop-options
 
@@ -496,7 +518,7 @@ val update_last_blake2s_128 : update_last_with_internal_st blake2s_128
 let update_last_blake2s_128 p prev_len last last_len =
   [@inline_let] let ev = prev_len in
   let x:Lib.IntTypes.uint_t Lib.IntTypes.U64 Lib.IntTypes.SEC =
-    update_last_64 blake2s_128 Hacl.Hash.Blake2.update_last_blake2s_128 p ev
+    update_last_64 blake2s_128 Hacl.Hash.Blake2s_128.update_last_blake2s_128 p ev
                    prev_len last last_len in
   ()
 #pop-options
@@ -517,7 +539,7 @@ val update_last_blake2b_256 : update_last_with_internal_st blake2b_256
 let update_last_blake2b_256 p prev_len last last_len =
   [@inline_let] let ev = Int.Cast.Full.uint64_to_uint128 prev_len in
   let x:Lib.IntTypes.uint_t Lib.IntTypes.U128 Lib.IntTypes.SEC =
-    update_last_128 blake2b_256 Hacl.Hash.Blake2.update_last_blake2b_256 p ev
+    update_last_128 blake2b_256 Hacl.Hash.Blake2b_256.update_last_blake2b_256 p ev
                     prev_len last last_len in
   ()
 
@@ -538,11 +560,13 @@ let update_last2 #a s prev_len last last_len =
   | Blake2S_s p ->
       update_last_blake2s_32 p prev_len last last_len
   | Blake2S_128_s _ p ->
-      update_last_blake2s_128 p prev_len last last_len
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        update_last_blake2s_128 p prev_len last last_len
   | Blake2B_s p ->
       update_last_blake2b_32 p prev_len last last_len
   | Blake2B_256_s _ p ->
-      update_last_blake2b_256 p prev_len last last_len
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        update_last_blake2b_256 p prev_len last last_len
 
 // TODO: move to FStar.Math.Lemmas
 val modulo_sub_lemma (a : int) (b : nat) (c : pos) :
@@ -632,13 +656,16 @@ let finish #a s dst =
   | SHA2_384_s p -> Hacl.Hash.SHA2.finish_384 p () dst
   | SHA2_512_s p -> Hacl.Hash.SHA2.finish_512 p () dst
   | Blake2S_s p -> Hacl.Hash.Blake2.finish_blake2s_32 p 0UL dst
-  | Blake2S_128_s _ p -> Hacl.Hash.Blake2.finish_blake2s_128 p 0UL dst
+  | Blake2S_128_s _ p ->
+      if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+        Hacl.Hash.Blake2s_128.finish_blake2s_128 p 0UL dst
   | Blake2B_s p ->
-    Hacl.Hash.Blake2.finish_blake2b_32 p (Int.Cast.Full.uint64_to_uint128
-                                             (UInt64.uint_to_t 0)) dst
+      Hacl.Hash.Blake2.finish_blake2b_32 p
+        (Int.Cast.Full.uint64_to_uint128 (UInt64.uint_to_t 0)) dst
   | Blake2B_256_s _ p ->
-    Hacl.Hash.Blake2.finish_blake2b_256 p (Int.Cast.Full.uint64_to_uint128
-                                             (UInt64.uint_to_t 0)) dst
+      if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+        Hacl.Hash.Blake2b_256.finish_blake2b_256 p
+          (Int.Cast.Full.uint64_to_uint128 (UInt64.uint_to_t 0)) dst
 
 #pop-options
 
@@ -698,9 +725,10 @@ let copy #a s_src s_dst =
           let s_dst: state Blake2S = s_dst in
           B.blit p_src 0ul p_dst 0ul 16ul
       | Blake2S_128_s _ p_dst ->
-          [@inline_let]
-          let s_dst: state Blake2S = s_dst in
-          Hacl.Impl.Blake2.Core.(load_state_from_state32 #Spec.Blake2.Blake2S #M128 p_dst p_src)
+          if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+            [@inline_let]
+            let s_dst: state Blake2S = s_dst in
+            Hacl.Blake2s_128.load_state128s_from_state32 p_dst p_src
       end
   | Blake2B_s p_src ->
       begin match !*s_dst with
@@ -709,9 +737,10 @@ let copy #a s_src s_dst =
           let s_dst: state Blake2B = s_dst in
           B.blit p_src 0ul p_dst 0ul 16ul
       | Blake2B_256_s _ p_dst ->
-          [@inline_let]
-          let s_dst: state Blake2B = s_dst in
-          Hacl.Impl.Blake2.Core.(load_state_from_state32 #Spec.Blake2.Blake2B #M256 p_dst p_src)
+          if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+            [@inline_let]
+            let s_dst: state Blake2B = s_dst in
+            Hacl.Blake2b_256.load_state256b_from_state32 p_dst p_src
       end
   | Blake2S_128_s _ p_src ->
       begin match !*s_dst with
@@ -720,9 +749,10 @@ let copy #a s_src s_dst =
           let s_dst: state Blake2S = s_dst in
           B.blit p_src 0ul p_dst 0ul 4ul
       | Blake2S_s p_dst ->
-          [@inline_let]
-          let s_dst: state Blake2S = s_dst in
-          Hacl.Impl.Blake2.Core.(store_state_to_state32 #Spec.Blake2.Blake2S #M128 p_dst p_src)
+          if EverCrypt.TargetConfig.hacl_can_compile_vec128 then
+            [@inline_let]
+            let s_dst: state Blake2S = s_dst in
+            Hacl.Blake2s_128.store_state128s_to_state32 p_dst p_src
       end
   | Blake2B_256_s _ p_src ->
       begin match !*s_dst with
@@ -731,9 +761,10 @@ let copy #a s_src s_dst =
           let s_dst: state Blake2B = s_dst in
           B.blit p_src 0ul p_dst 0ul 4ul
       | Blake2B_s p_dst ->
-          [@inline_let]
-          let s_dst: state Blake2B = s_dst in
-          Hacl.Impl.Blake2.Core.(store_state_to_state32 #Spec.Blake2.Blake2B #M256 p_dst p_src)
+          if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
+            [@inline_let]
+            let s_dst: state Blake2B = s_dst in
+            Hacl.Blake2b_256.store_state256b_to_state32 p_dst p_src
       end
 
 #pop-options
@@ -758,12 +789,12 @@ let hash a dst input len =
   | Blake2S ->
       let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
       if EverCrypt.TargetConfig.hacl_can_compile_vec128 && vec128 then
-        Hacl.Hash.Blake2.hash_blake2s_128 input len dst
+        Hacl.Hash.Blake2s_128.hash_blake2s_128 input len dst
       else
         Hacl.Hash.Blake2.hash_blake2s_32 input len dst
   | Blake2B ->
       let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
       if EverCrypt.TargetConfig.hacl_can_compile_vec256 && vec256 then
-        Hacl.Hash.Blake2.hash_blake2b_256 input len dst
+        Hacl.Hash.Blake2b_256.hash_blake2b_256 input len dst
       else
         Hacl.Hash.Blake2.hash_blake2b_32 input len dst

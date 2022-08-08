@@ -669,7 +669,7 @@ INTRINSIC_FLAGS = \
   -add-include 'Hacl_SHA2_Vec256.c:"libintvector.h"' \
   \
   -add-include 'Hacl_Hash_Blake2b_256:"libintvector.h"' \
-  -add-include 'Hacl_Poly1305_256:"libintvector.h"' \
+  -add-include 'Hacl_Poly1305_256:"libintvector.h"'
 
 # Disabled for distributions that don't include code based on intrinsics.
 INTRINSIC_INT_FLAGS = \
@@ -851,7 +851,7 @@ test-wasm: dist/wasm/package.json
 
 # Customizations for regular, msvc and gcc flavors.
 dist/gcc-compatible/Makefile.basic: DEFAULT_FLAGS += \
-  -ctypes EverCrypt.*,Hacl.* -funroll-loops 16
+  -ctypes EverCrypt.*,Hacl.* #-funroll-loops 16
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_BINDINGS += \
   $(wildcard lib/ml/*_bindings.ml)
 dist/gcc-compatible/Makefile.basic: HAND_WRITTEN_ML_GEN += \
