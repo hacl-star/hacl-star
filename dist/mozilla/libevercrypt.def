@@ -56,20 +56,6 @@ EXPORTS
   Hacl_SHA3_sha3_512
   Hacl_Chacha20_chacha20_encrypt
   Hacl_Chacha20_chacha20_decrypt
-  Hacl_Bignum_Addition_bn_sub_eq_len_u32
-  Hacl_Bignum_Addition_bn_sub_eq_len_u64
-  Hacl_Bignum_Addition_bn_add_eq_len_u32
-  Hacl_Bignum_Addition_bn_add_eq_len_u64
-  Hacl_Bignum_Multiplication_bn_mul_u32
-  Hacl_Bignum_Multiplication_bn_mul_u64
-  Hacl_Bignum_Multiplication_bn_sqr_u32
-  Hacl_Bignum_Multiplication_bn_sqr_u64
-  Hacl_Bignum_Karatsuba_bn_karatsuba_mul_uint64
-  Hacl_Bignum_Montgomery_bn_mont_reduction_u64
-  Hacl_Bignum_Montgomery_bn_mont_mul_u64
-  Hacl_Bignum_Montgomery_bn_mont_sqr_u64
-  Hacl_Bignum_AlmostMontgomery_bn_almost_mont_mul_u64
-  Hacl_Bignum_AlmostMontgomery_bn_almost_mont_sqr_u64
   Hacl_Curve25519_64_scalarmult
   Hacl_Curve25519_64_secret_to_public
   Hacl_Curve25519_64_ecdh
@@ -110,18 +96,6 @@ EXPORTS
   Hacl_IntTypes_Intrinsics_sub_borrow_u64
   Hacl_IntTypes_Intrinsics_128_add_carry_u64
   Hacl_IntTypes_Intrinsics_128_sub_borrow_u64
-  Hacl_BenchKaratsuba_bn_karatsuba_mul_uint32
-  Hacl_BenchKaratsuba_bn_karatsuba_mul_uint64
-  Hacl_BenchKaratsuba_bn_karatsuba_sqr_uint32
-  Hacl_BenchKaratsuba_bn_karatsuba_sqr_uint64
-  Hacl_BenchBignum_mod_exp_bm_vartime_mm_precomp
-  Hacl_BenchBignum_mod_exp_bm_consttime_mm_precomp
-  Hacl_BenchBignum_mod_exp_fw_vartime_mm_precomp
-  Hacl_BenchBignum_mod_exp_fw_consttime_mm_precomp
-  Hacl_BenchBignum_mod_exp_bm_vartime_amm_precomp
-  Hacl_BenchBignum_mod_exp_bm_consttime_amm_precomp
-  Hacl_BenchBignum_mod_exp_fw_vartime_amm_precomp
-  Hacl_BenchBignum_mod_exp_fw_consttime_amm_precomp
   Hacl_Chacha20_Vec128_chacha20_encrypt_128
   Hacl_Chacha20_Vec128_chacha20_decrypt_128
   Hacl_Chacha20Poly1305_128_aead_encrypt
