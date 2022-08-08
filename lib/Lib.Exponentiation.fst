@@ -763,3 +763,116 @@ let exp_four_fw_lemma_step #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l i acc =
     (==) { lemma_mul_assoc4 k res_a1 res_a2 res_a3 res_a4 }
     k.mul (k.mul (k.mul res_a1 res_a2) res_a3) res_a4;
   }
+
+
+val exp_four_fw_lemma_loop:
+    #t:Type -> k:comm_monoid t
+  -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
+  -> a2:t -> b2:nat{b2 < pow2 bBits}
+  -> a3:t -> b3:nat{b3 < pow2 bBits}
+  -> a4:t -> b4:nat{b4 < pow2 bBits}
+  -> l:pos -> i:nat{i <= bBits / l} ->
+  Lemma (
+    let bk = bBits - bBits % l in
+    let acc0 =
+      mul
+        (mul
+          (mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
+          (pow k a3 (b3 / pow2 bk)))
+        (pow k a4 (b4 / pow2 bk)) in
+    let acc = Loops.repeati i (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0 in
+    acc ==
+      mul
+        (mul
+          (mul (pow k a1 (b_acc l bBits b1 i)) (pow k a2 (b_acc l bBits b2 i)))
+          (pow k a3 (b_acc l bBits b3 i)))
+        (pow k a4 (b_acc l bBits b4 i)))
+
+let rec exp_four_fw_lemma_loop #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l i =
+  let bk = bBits - bBits % l in
+    let acc0 =
+      mul
+        (mul
+          (mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
+          (pow k a3 (b3 / pow2 bk)))
+        (pow k a4 (b4 / pow2 bk)) in
+  let acc = Loops.repeati i (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0 in
+
+  if i = 0 then
+    Loops.eq_repeati0 i (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0
+  else begin
+    Loops.unfold_repeati i (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0 (i - 1);
+    let acc1 = Loops.repeati (i - 1) (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0 in
+    exp_four_fw_lemma_loop k a1 bBits b1 a2 b2 a3 b3 a4 b4 l (i - 1);
+    exp_four_fw_lemma_step k a1 bBits b1 a2 b2 a3 b3 a4 b4 l i acc1;
+    () end
+
+
+val exp_four_fw_acc0_lemma: #t:Type -> k:comm_monoid t
+  -> a1:t -> bBits:nat -> b1:nat{b1 < pow2 bBits}
+  -> a2:t -> b2:nat{b2 < pow2 bBits}
+  -> a3:t -> b3:nat{b3 < pow2 bBits}
+  -> a4:t -> b4:nat{b4 < pow2 bBits} -> l:pos ->
+  Lemma
+   (let acc0 =
+     if bBits % l = 0 then one
+     else exp_four_fw_acc0 k a1 bBits b1 a2 b2 a3 b3 a4 b4 l in
+    let bk = bBits - bBits % l in
+    acc0 ==
+    mul
+      (mul
+        (mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
+        (pow k a3 (b3 / pow2 bk)))
+      (pow k a4 (b4 / pow2 bk)))
+
+let exp_four_fw_acc0_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
+  let bk = bBits - bBits % l in
+  if bBits % l = 0 then begin
+    assert (bBits / l * l == bBits);
+    Math.Lemmas.small_div b1 (pow2 bBits);
+    Math.Lemmas.small_div b2 (pow2 bBits);
+    Math.Lemmas.small_div b3 (pow2 bBits);
+    Math.Lemmas.small_div b4 (pow2 bBits);
+    assert (b1 / pow2 bk = 0);
+    lemma_pow0 k a1;
+    lemma_pow0 k a2;
+    lemma_pow0 k a3;
+    lemma_pow0 k a4;
+    assert (
+    mul
+      (mul
+        (mul (pow k a1 (b1 / pow2 bk)) (pow k a2 (b2 / pow2 bk)))
+        (pow k a3 (b3 / pow2 bk)))
+      (pow k a4 (b4 / pow2 bk)) ==
+    mul (mul (mul one one) one) one);
+    lemma_one k.one;
+    () end
+  else begin
+    let acc_a1 = exp_fw_acc0 k a1 bBits b1 l in
+    let acc_a2 = exp_fw_acc0 k a2 bBits b2 l in
+    let acc_a3 = exp_fw_acc0 k a3 bBits b3 l in
+    let acc_a4 = exp_fw_acc0 k a4 bBits b4 l in
+    exp_fw_acc0_lemma k a1 bBits b1 l;
+    exp_fw_acc0_lemma k a2 bBits b2 l;
+    exp_fw_acc0_lemma k a3 bBits b3 l;
+    exp_fw_acc0_lemma k a4 bBits b4 l;
+    Math.Lemmas.euclidean_division_definition bBits l;
+    assert (acc_a1 == pow k a1 (b1 / pow2 bk));
+    assert (acc_a2 == pow k a2 (b2 / pow2 bk));
+    assert (acc_a3 == pow k a3 (b3 / pow2 bk));
+    assert (acc_a4 == pow k a4 (b4 / pow2 bk)) end
+
+
+let exp_four_fw_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l =
+  let bk = bBits - bBits % l in
+  let acc0 =
+    if bBits % l = 0 then one
+    else exp_four_fw_acc0 k a1 bBits b1 a2 b2 a3 b3 a4 b4 l in
+  exp_four_fw_acc0_lemma #t k a1 bBits b1 a2 b2 a3 b3 a4 b4 l;
+
+  let res =
+    Loops.repeati (bBits / l)
+      (exp_four_fw_f k a1 bBits b1 a2 b2 a3 b3 a4 b4 l) acc0 in
+  exp_four_fw_lemma_loop k a1 bBits b1 a2 b2 a3 b3 a4 b4 l (bBits / l);
+  Math.Lemmas.euclidean_division_definition bBits l;
+  assert_norm (pow2 0 = 1)

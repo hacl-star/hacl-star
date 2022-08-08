@@ -191,8 +191,8 @@ let exp_double_fw_f (#t:Type) (k:concrete_ops t)
   (a2:t) (b2:nat{b2 < pow2 bBits}) (l:pos)
   (i:nat{i < bBits / l}) (acc:t) : t
  =
-  let acc1 = exp_fw_f k a1 bBits b1 l i acc in
-  mul_acc_pow_a_bits_l k a2 bBits b2 l i acc1
+  let acc1 = exp_fw_f k a2 bBits b2 l i acc in
+  mul_acc_pow_a_bits_l k a1 bBits b1 l i acc1
 
 
 let exp_double_fw (#t:Type) (k:concrete_ops t)
@@ -240,10 +240,10 @@ let exp_four_fw_f (#t:Type) (k:concrete_ops t)
   (a4:t) (b4:nat{b4 < pow2 bBits})
   (l:pos) (i:nat{i < bBits / l}) (acc:t) : t
  =
-  let acc = exp_fw_f k a1 bBits b1 l i acc in
-  let acc = mul_acc_pow_a_bits_l k a2 bBits b2 l i acc in
+  let acc = exp_fw_f k a4 bBits b4 l i acc in
   let acc = mul_acc_pow_a_bits_l k a3 bBits b3 l i acc in
-  let acc = mul_acc_pow_a_bits_l k a4 bBits b4 l i acc in
+  let acc = mul_acc_pow_a_bits_l k a2 bBits b2 l i acc in
+  let acc = mul_acc_pow_a_bits_l k a1 bBits b1 l i acc in
   acc
 
 

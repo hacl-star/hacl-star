@@ -81,8 +81,8 @@ val lexp_double_fw_f:
 
 let lexp_double_fw_f #a_t len ctx_len k l table_len table_inv1 table_inv2
   pow_a_to_small_b1 pow_a_to_small_b2 ctx a1 bLen bBits b1 a2 b2 table1 table2 i acc =
-  lexp_fw_f len ctx_len k l table_len table_inv1 pow_a_to_small_b1 ctx a1 bLen bBits b1 table1 i acc;
-  lmul_acc_pow_a_bits_l len ctx_len k l table_len table_inv2 pow_a_to_small_b2 ctx a2 bLen bBits b2 table2 i acc
+  lexp_fw_f len ctx_len k l table_len table_inv2 pow_a_to_small_b2 ctx a2 bLen bBits b2 table2 i acc;
+  lmul_acc_pow_a_bits_l len ctx_len k l table_len table_inv1 pow_a_to_small_b1 ctx a1 bLen bBits b1 table1 i acc
 
 
 inline_for_extraction noextract
