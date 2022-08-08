@@ -961,7 +961,7 @@ dist/mozilla/Makefile.basic: NACLBOX_BUNDLE = -bundle Hacl.NaCl
 dist/mozilla/Makefile.basic: E_HASH_BUNDLE =
 dist/mozilla/Makefile.basic: MERKLE_BUNDLE = -bundle MerkleTree.*,MerkleTree
 dist/mozilla/Makefile.basic: CTR_BUNDLE =
-dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256,Hacl.Blake2s_32,Hacl.HMAC.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.HKDF.Blake2s_128[rename=Blake2_Should_Not_Be_Used]
+dist/mozilla/Makefile.basic: BLAKE2_BUNDLE = -bundle Hacl.Impl.Blake2.*,Hacl.Blake2b_256,Hacl.Blake2s_128,Hacl.Blake2b_32,Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256,Hacl.Blake2s_32,Hacl.HMAC.Blake2b_256,Hacl.HMAC.Blake2s_128,Hacl.HKDF.Blake2b_256,Hacl.HKDF.Blake2s_128
 dist/mozilla/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2_Vec256,Hacl.SHA2_Vec128,Hacl.SHA2_Scalar32
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
