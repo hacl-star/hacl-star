@@ -22,24 +22,9 @@
  */
 
 
-#include "internal/Hacl_Hash_SHA1.h"
+#include "Hacl_Hash_SHA1.h"
 
 
-
-static uint32_t
-_h0[5U] =
-  {
-    (uint32_t)0x67452301U, (uint32_t)0xefcdab89U, (uint32_t)0x98badcfeU, (uint32_t)0x10325476U,
-    (uint32_t)0xc3d2e1f0U
-  };
-
-void Hacl_Hash_Core_SHA1_legacy_init(uint32_t *s)
-{
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
-  {
-    s[i] = _h0[i];
-  }
-}
 
 static void legacy_update(uint32_t *h, uint8_t *l)
 {
@@ -157,7 +142,7 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
   store64_be(dst3, len << (uint32_t)3U);
 }
 
-void Hacl_Hash_Core_SHA1_legacy_finish(uint32_t *s, uint8_t *dst)
+static void legacy_finish(uint32_t *s, uint8_t *dst)
 {
   uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)5U; i++)
@@ -208,6 +193,8 @@ Hacl_Hash_SHA1_legacy_update_last(
   Hacl_Hash_SHA1_legacy_update_multi(s, tmp, tmp_len / (uint32_t)64U);
 }
 
+typedef uint32_t *___uint32_t____;
+
 void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   uint32_t
@@ -238,6 +225,6 @@ void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst
   uint8_t *rest = rest0;
   Hacl_Hash_SHA1_legacy_update_multi(s, blocks, blocks_n);
   Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
-  Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
+  legacy_finish(s, dst);
 }
 
