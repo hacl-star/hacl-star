@@ -216,6 +216,7 @@ let alloca a =
   B.alloca s 1ul
 
 let create_in a r =
+  let h0 = ST.get () in
   let s: state_s a =
     match a with
     | MD5 -> MD5_s (B.malloc r 0ul 4ul)
@@ -230,9 +231,7 @@ let create_in a r =
           // Slightly frustrating duplication of the else-branch because we
           // can't compile this using the if-and return optimization of krml.
           if vec128 then
-            let open Hacl.Impl.Blake2.Core in
-            [@inline_let] let i: impl = (| Blake2S , M128 |) in
-            Blake2S_128_s () (B.malloc r (zero_element Spec.Blake2.Blake2S M128) (impl_state_len i))
+            Blake2S_128_s () (Hacl.Hash.Blake2s_128.malloc_blake2s_128 r)
           else
             Blake2S_s (B.malloc r 0ul 16ul)
         else
@@ -241,9 +240,7 @@ let create_in a r =
         let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
         if EverCrypt.TargetConfig.hacl_can_compile_vec256 then
           if vec256 then
-            let open Hacl.Impl.Blake2.Core in
-            [@inline_let] let i: impl = (| Blake2B , M256 |) in
-            Blake2B_256_s () (B.malloc r (zero_element Spec.Blake2.Blake2B M256) (impl_state_len i))
+            Blake2B_256_s () (Hacl.Hash.Blake2b_256.malloc_blake2b_256 r)
           else
             Blake2B_s (B.malloc r 0uL 16ul)
         else
