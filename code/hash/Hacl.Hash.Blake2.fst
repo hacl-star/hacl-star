@@ -260,3 +260,6 @@ let mk_hash a m blake2 = fun input input_len dst ->
 
 let hash_blake2s_32: hash_st Blake2S = mk_hash Blake2S Core.M32 Hacl.Blake2s_32.blake2s
 let hash_blake2b_32: hash_st Blake2B = mk_hash Blake2B Core.M32 Hacl.Blake2b_32.blake2b
+
+let mk_malloc a m r =
+  LowStar.Buffer.malloc r (Hacl.Impl.Blake2.Core.zero_element (to_blake_alg a) m) (impl_state_len (|a,m|))
