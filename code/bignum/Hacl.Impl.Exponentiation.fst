@@ -270,8 +270,8 @@ let lmul_acc_pow_a_bits_l_st
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h acc /\ live h ctx /\ live h table /\
-    disjoint a acc /\ disjoint a ctx /\ disjoint a table /\ disjoint b acc /\
-    disjoint acc ctx /\ disjoint acc table /\ disjoint ctx table /\
+    disjoint a acc /\ disjoint a ctx /\ disjoint b acc /\
+    disjoint acc ctx /\ disjoint acc table /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
@@ -328,8 +328,8 @@ let lexp_fw_f_st
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h acc /\ live h ctx /\ live h table /\
-    disjoint a acc /\ disjoint a ctx /\ disjoint a table /\ disjoint b acc /\
-    disjoint acc ctx /\ disjoint acc table /\ disjoint ctx table /\
+    disjoint a acc /\ disjoint a ctx /\ disjoint b acc /\
+    disjoint acc ctx /\ disjoint acc table /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
@@ -378,8 +378,8 @@ let lexp_fw_loop_st
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h acc /\ live h ctx /\ live h table /\
-    disjoint a acc /\ disjoint a ctx /\ disjoint a table /\ disjoint b acc /\
-    disjoint acc ctx /\ disjoint acc table /\ disjoint ctx table /\
+    disjoint a acc /\ disjoint a ctx /\ disjoint b acc /\
+    disjoint acc ctx /\ disjoint acc table /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h a) /\ k.to.linv (as_seq h acc) /\
@@ -445,8 +445,8 @@ let lexp_fw_acc0_st
   Stack unit
   (requires fun h -> v bBits % v l <> 0 /\
     live h a /\ live h b /\ live h acc /\ live h ctx /\ live h table /\
-    disjoint a acc /\ disjoint a ctx /\ disjoint a table /\ disjoint b acc /\
-    disjoint acc ctx /\ disjoint acc table /\ disjoint ctx table /\
+    disjoint a acc /\ disjoint a ctx /\ disjoint b acc /\
+    disjoint acc ctx /\ disjoint acc table /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\ k.to.linv (as_seq h a) /\
     table_inv (as_seq h a) (as_seq h table))

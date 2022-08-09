@@ -146,7 +146,7 @@ let pow_a_to_small_b_st
   Stack unit
   (requires fun h ->
     live h table /\ live h res /\ live h ctx /\
-    disjoint table res /\ disjoint ctx table /\ disjoint ctx res /\
+    disjoint table res /\ disjoint ctx res /\
     k.to.linv_ctx (as_seq h ctx) /\ k.to.linv a /\
     table_inv a (as_seq h table))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
@@ -173,8 +173,8 @@ let lexp_fw_table_st
   Stack unit
   (requires fun h ->
     live h a /\ live h b /\ live h res /\ live h ctx /\ live h table /\
-    disjoint a res /\ disjoint a ctx /\ disjoint a table /\ disjoint b res /\
-    disjoint res ctx /\ disjoint res table /\ disjoint ctx table /\
+    disjoint a res /\ disjoint a ctx /\ disjoint b res /\
+    disjoint res ctx /\ disjoint res table /\
     BD.bn_v h b < pow2 (v bBits) /\
     k.to.linv_ctx (as_seq h ctx) /\ k.to.linv (as_seq h a) /\
     table_inv (as_seq h a) (as_seq h table))
