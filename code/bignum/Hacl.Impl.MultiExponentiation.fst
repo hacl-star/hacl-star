@@ -483,9 +483,7 @@ let lexp_four_fw_acc0 #a_t len ctx_len k l table_len table_inv1 table_inv2 table
  =
   push_frame ();
   let tmp = create len (uint #a_t #SEC 0) in
-  lexp_fw_acc0 len ctx_len k l table_len table_inv1 pow_a_to_small_b1 ctx a1 bLen bBits b1 table1 acc;
-  lexp_fw_acc0 len ctx_len k l table_len table_inv2 pow_a_to_small_b2 ctx a2 bLen bBits b2 table2 tmp;
-  k.lmul ctx acc tmp acc;
+  lexp_double_fw_acc0 len ctx_len k l table_len table_inv1 table_inv2 pow_a_to_small_b1 pow_a_to_small_b2 ctx a1 bLen bBits b1 a2 b2 table1 table2 acc;
   lexp_fw_acc0 len ctx_len k l table_len table_inv3 pow_a_to_small_b3 ctx a3 bLen bBits b3 table3 tmp;
   k.lmul ctx acc tmp acc;
   lexp_fw_acc0 len ctx_len k l table_len table_inv4 pow_a_to_small_b4 ctx a4 bLen bBits b4 table4 tmp;
@@ -628,3 +626,157 @@ let mk_lexp_four_fw_tables #a_t len ctx_len k l table_len
     table_inv1 table_inv2 table_inv3 table_inv4
     pow_a_to_small_b1 pow_a_to_small_b2 pow_a_to_small_b3 pow_a_to_small_b4
     ctx a1 bLen bBits b1 a2 b2 a3 b3 a4 b4 table1 table2 table3 table4 res
+
+//-----------------------------------
+
+inline_for_extraction noextract
+let mk_four_tables_for_fw_exp_st
+  (a_t:inttype_a)
+  (len:size_t{v len > 0})
+  (ctx_len:size_t)
+  (k:concrete_ops a_t len ctx_len)
+  (l:size_window_t a_t len)
+  (table_len:table_len_t len) =
+    ctx:lbuffer (uint_t a_t SEC) ctx_len
+  -> a1:lbuffer (uint_t a_t SEC) len
+  -> a2:lbuffer (uint_t a_t SEC) len
+  -> a3:lbuffer (uint_t a_t SEC) len
+  -> a4:lbuffer (uint_t a_t SEC) len
+  -> table1:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table2:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table3:lbuffer (uint_t a_t SEC) (table_len *! len)
+  -> table4:lbuffer (uint_t a_t SEC) (table_len *! len) ->
+  Stack unit
+  (requires fun h ->
+    live h a1 /\ live h a2 /\ live h a3 /\ live h a4 /\ live h ctx /\
+    live h table1 /\ live h table2 /\ live h table3 /\ live h table4 /\
+
+    eq_or_disjoint a1 a2 /\ eq_or_disjoint a1 a3 /\ eq_or_disjoint a1 a4 /\
+    eq_or_disjoint a2 a3 /\ eq_or_disjoint a2 a4 /\ eq_or_disjoint a3 a4 /\
+    disjoint a1 ctx /\ disjoint a2 ctx /\ disjoint a3 ctx /\ disjoint a4 ctx /\
+    disjoint table1 table2 /\ disjoint table1 table3 /\ disjoint table1 table4 /\
+    disjoint table2 table3 /\ disjoint table2 table4 /\ disjoint table3 table4 /\
+    disjoint a1 table1 /\ disjoint a1 table2 /\ disjoint a1 table3 /\ disjoint a1 table4 /\
+    disjoint a2 table1 /\ disjoint a2 table2 /\ disjoint a2 table3 /\ disjoint a2 table4 /\
+    disjoint a3 table1 /\ disjoint a3 table2 /\ disjoint a3 table3 /\ disjoint a3 table4 /\
+    disjoint a4 table1 /\ disjoint a4 table2 /\ disjoint a4 table3 /\ disjoint a4 table4 /\
+    disjoint ctx table1 /\ disjoint ctx table2 /\ disjoint ctx table3 /\ disjoint ctx table4 /\
+
+    k.to.linv_ctx (as_seq h ctx) /\
+    k.to.linv (as_seq h a1) /\ k.to.linv (as_seq h a2) /\
+    k.to.linv (as_seq h a3) /\ k.to.linv (as_seq h a4))
+  (ensures  fun h0 _ h1 ->
+    modifies (loc table1 |+| loc table2 |+| loc table3 |+| loc table4) h0 h1 /\
+    table_inv_precomp len ctx_len k l table_len (as_seq h0 a1) (as_seq h1 table1) /\
+    table_inv_precomp len ctx_len k l table_len (as_seq h0 a2) (as_seq h1 table2) /\
+    table_inv_precomp len ctx_len k l table_len (as_seq h0 a3) (as_seq h1 table3) /\
+    table_inv_precomp len ctx_len k l table_len (as_seq h0 a4) (as_seq h1 table4))
+
+
+inline_for_extraction noextract
+val mk_four_tables_for_fw_exp:
+    #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len
+  -> l:size_window_t a_t len
+  -> table_len:table_len_t len{1 < v table_len /\ v table_len == pow2 (v l)} ->
+  mk_four_tables_for_fw_exp_st a_t len ctx_len k l table_len
+
+let mk_four_tables_for_fw_exp #a_t len ctx_len k l table_len ctx a1 a2 a3 a4 table1 table2 table3 table4 =
+  PT.lprecomp_table #a_t len ctx_len k ctx a1 table_len table1;
+  let h0 = ST.get () in
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h0 a1) (as_seq h0 table1));
+
+  PT.lprecomp_table #a_t len ctx_len k ctx a2 table_len table2;
+  let h1 = ST.get () in
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h1 a1) (as_seq h1 table1));
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h1 a2) (as_seq h1 table2));
+
+  PT.lprecomp_table #a_t len ctx_len k ctx a3 table_len table3;
+  let h2 = ST.get () in
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h2 a1) (as_seq h2 table1));
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h2 a2) (as_seq h2 table2));
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h2 a3) (as_seq h2 table3));
+
+  PT.lprecomp_table #a_t len ctx_len k ctx a4 table_len table4;
+  let h3 = ST.get () in
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h3 a1) (as_seq h3 table1));
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h3 a2) (as_seq h3 table2));
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h3 a3) (as_seq h3 table3));
+  assert (table_inv_precomp len ctx_len k l table_len (as_seq h3 a4) (as_seq h3 table4))
+
+
+inline_for_extraction noextract
+val lexp_four_fw_gen:
+    #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len
+  -> l:size_window_t a_t len
+  -> table_len:table_len_t len{1 < v table_len /\ v table_len == pow2 (v l)}
+  -> lprecomp_get:pow_a_to_small_b_st a_t len ctx_len k l table_len
+                   (table_inv_precomp len ctx_len k l table_len) ->
+  lexp_four_fw_st a_t len ctx_len k l
+
+let lexp_four_fw_gen #a_t len ctx_len k l table_len lprecomp_get
+  ctx a1 bLen bBits b1 a2 b2 a3 b3 a4 b4 res =
+  let h0 = ST.get () in
+  push_frame ();
+  let h1 = ST.get () in
+  let table1 = create (table_len *! len) (uint #a_t #SEC 0) in
+  let table2 = create (table_len *! len) (uint #a_t #SEC 0) in
+  let table3 = create (table_len *! len) (uint #a_t #SEC 0) in
+  let table4 = create (table_len *! len) (uint #a_t #SEC 0) in
+  mk_four_tables_for_fw_exp #a_t len ctx_len k l table_len
+    ctx a1 a2 a3 a4 table1 table2 table3 table4;
+  let h2 = ST.get () in
+  assert (modifies (loc table1 |+| loc table2 |+| loc table3 |+| loc table4) h1 h2);
+
+  mk_lexp_four_fw_tables len ctx_len k l table_len
+    (table_inv_precomp len ctx_len k l table_len)
+    (table_inv_precomp len ctx_len k l table_len)
+    (table_inv_precomp len ctx_len k l table_len)
+    (table_inv_precomp len ctx_len k l table_len)
+    lprecomp_get lprecomp_get lprecomp_get lprecomp_get
+    ctx a1 bLen bBits b1 a2 b2 a3 b3 a4 b4
+    table1 table2 table3 table4 res;
+
+  let h3 = ST.get () in
+  assert (modifies (loc res) h2 h3);
+  assert (modifies (loc table1 |+| loc table2 |+| loc table3 |+| loc table4 |+| loc res) h1 h3);
+  assert (
+    k.to.linv (as_seq h3 res) /\
+    k.to.refl (as_seq h3 res) ==
+    SE.exp_four_fw k.to.concr_ops
+      (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
+      (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2)
+      (k.to.refl (as_seq h0 a3)) (BD.bn_v h0 b3)
+      (k.to.refl (as_seq h0 a4)) (BD.bn_v h0 b4) (v l));
+  pop_frame ();
+  let h4 = ST.get () in
+  assert (modifies (loc res) h0 h4)
+
+
+let lexp_four_fw_vartime #a_t len ctx_len k l ctx a1 bLen bBits b1 a2 b2 a3 b3 a4 b4 acc =
+  [@inline_let]
+  let table_len = 1ul <<. l in
+  assert (v table_len == pow2 (v l));
+  Math.Lemmas.pow2_le_compat (v l) 1;
+  assert (1 < v table_len /\ v table_len * v len <= max_size_t);
+
+  lexp_four_fw_gen len ctx_len k l table_len
+    (lprecomp_get_vartime len ctx_len k l table_len)
+    ctx a1 bLen bBits b1 a2 b2 a3 b3 a4 b4 acc
+
+
+let lexp_four_fw_consttime #a_t len ctx_len k l ctx a1 bLen bBits b1 a2 b2 a3 b3 a4 b4 acc =
+  [@inline_let]
+  let table_len = 1ul <<. l in
+  assert (v table_len == pow2 (v l));
+  Math.Lemmas.pow2_le_compat (v l) 1;
+  assert (1 < v table_len /\ v table_len * v len <= max_size_t);
+
+  lexp_four_fw_gen len ctx_len k l table_len
+    (lprecomp_get_consttime len ctx_len k l table_len)
+    ctx a1 bLen bBits b1 a2 b2 a3 b3 a4 b4 acc
