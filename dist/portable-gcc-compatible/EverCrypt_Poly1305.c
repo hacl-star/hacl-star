@@ -62,8 +62,6 @@ static void poly1305_vale(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key
 
 void EverCrypt_Poly1305_poly1305(uint8_t *dst, uint8_t *src, uint32_t len, uint8_t *key)
 {
-  bool avx2 = EverCrypt_AutoConfig2_has_avx2();
-  bool avx = EverCrypt_AutoConfig2_has_avx();
   bool vec256 = EverCrypt_AutoConfig2_has_vec256();
   bool vec128 = EverCrypt_AutoConfig2_has_vec128();
   #if HACL_CAN_COMPILE_VEC256

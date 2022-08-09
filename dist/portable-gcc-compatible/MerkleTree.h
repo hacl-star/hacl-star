@@ -37,6 +37,7 @@ extern "C" {
 
 #include "Hacl_Spec.h"
 #include "EverCrypt_Hash.h"
+#include "EverCrypt_AutoConfig2.h"
 #include "evercrypt_targetconfig.h"
 /* SNIPPET_START: MerkleTree_Low_Datastructures_hash_vec */
 
