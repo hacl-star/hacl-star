@@ -14,26 +14,28 @@ open Hacl.Spec.K256.GLV
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
-val lambda_is_primitive_cube_root_unity: unit -> Lemma
-  (lambda <> 1 /\
-  S.(lambda *^ lambda *^ lambda = 1) /\
-  S.(lambda *^ lambda +^ lambda +^ 1 = 0))
+// val lambda_is_primitive_cube_root_unity: unit -> Lemma
+//   (lambda <> 1 /\
+//   S.(lambda *^ lambda *^ lambda = 1) /\
+//   S.(lambda *^ lambda +^ lambda +^ 1 = 0))
 
-let lambda_is_primitive_cube_root_unity () =
-  assert (lambda <> 1);
-  assert (S.(lambda *^ lambda *^ lambda = 1));
-  assert (S.(lambda *^ lambda +^ lambda +^ 1 = 0))
+// let lambda_is_primitive_cube_root_unity () =
+//   assert (lambda <> 1);
+//   assert (S.(lambda *^ lambda *^ lambda = 1));
+//   assert (S.(lambda *^ lambda +^ lambda +^ 1 = 0))
 
 
-val beta_is_primitive_cube_root_unity: unit -> Lemma
-  (beta <> 1 /\
-   S.(beta *% beta *% beta = 1) /\
-   S.(beta *% beta +% beta +% 1 = 0))
+// val beta_is_primitive_cube_root_unity: unit -> Lemma
+//   (beta <> 1 /\
+//    S.(beta *% beta *% beta = 1) /\
+//    S.(beta *% beta +% beta +% 1 = 0))
 
-let beta_is_primitive_cube_root_unity () =
-  assert (beta <> 1);
-  assert (S.(beta *% beta *% beta = 1));
-  assert (S.(beta *% beta +% beta +% 1 = 0))
+// let beta_is_primitive_cube_root_unity () =
+//   assert (beta <> 1);
+//   assert (S.(beta *% beta *% beta = 1));
+//   assert (S.(beta *% beta +% beta +% 1 = 0))
+
+//--------------------------------------------
 
 assume
 val lemma_glv_aff : p:S.aff_point -> Lemma (aff_point_mul lambda p = aff_point_mul_lambda p)
@@ -81,31 +83,33 @@ let lemma_glv_g () =
   assert (x = _X /\ y = _Y);
   lemma_glv_aff S.(g_x, g_y)
 
+//--------------------------------------------
 
-val lemma_check_a_and_b : unit -> Lemma
-  ((a1 + minus_b1 * minus_lambda) % S.q = 0 /\
-   (a1 + b1 * lambda) % S.q = 0 /\
-   (a2 + b2 * lambda) % S.q = 0 /\
-    a1 * b2 + minus_b1 * a2 = S.q)
+// val lemma_check_a_and_b : unit -> Lemma
+//   ((a1 + minus_b1 * minus_lambda) % S.q = 0 /\
+//    (a1 + b1 * lambda) % S.q = 0 /\
+//    (a2 + b2 * lambda) % S.q = 0 /\
+//     a1 * b2 + minus_b1 * a2 = S.q)
 
-let lemma_check_a_and_b () =
-  assert (a1 * b2 + minus_b1 * a2 = S.q)
+// let lemma_check_a_and_b () =
+//   assert (a1 * b2 + minus_b1 * a2 = S.q)
 
-// a1 = b2
-val lemma_a_and_b_fits: unit -> Lemma
-  (minus_b1 < pow2 128 /\
-   minus_b2 < pow2 256 /\
-   b1 < pow2 256 /\
-   b2 < pow2 126 /\
-   a2 < pow2 129)
+// // a1 = b2
+// val lemma_a_and_b_fits: unit -> Lemma
+//   (minus_b1 < pow2 128 /\
+//    minus_b2 < pow2 256 /\
+//    b1 < pow2 256 /\
+//    b2 < pow2 126 /\
+//    a2 < pow2 129)
 
-let lemma_a_and_b_fits () =
-  assert (minus_b1 < pow2 128);
-  assert (minus_b2 < pow2 256);
-  assert_norm (b2 < pow2 126);
-  assert_norm (a2 < pow2 129);
-  assert_norm ((a1 + a2) / 2 < pow2 128)
+// let lemma_a_and_b_fits () =
+//   assert (minus_b1 < pow2 128);
+//   assert (minus_b2 < pow2 256);
+//   assert_norm (b2 < pow2 126);
+//   assert_norm (a2 < pow2 129);
+//   assert_norm ((a1 + a2) / 2 < pow2 128)
 
+//--------------------------------------------
 
 val lemma_scalar_split_lambda_eval (k:S.qelem) :
   Lemma (let r1, r2 = scalar_split_lambda k in k = S.(r1 +^ r2 *^ lambda))
@@ -278,6 +282,15 @@ assume
 val lemma_scalar_split_lambda_fits (k:S.qelem) :
   Lemma (let r1, r2 = scalar_split_lambda k in r1 < pow2 129 /\ r2 < pow2 129)
 
+(**
+ Fast computation of [k]P in affine coordinates
+*)
+
+// [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
+// which can be computed as a double exponentiation ([a]P + [b]Q)
+let aff_point_mul_split_lambda (k:S.qelem) (p:S.aff_point) : S.aff_point =
+  let r1, r2 = scalar_split_lambda k in
+  S.aff_point_add (aff_point_mul r1 p) (aff_point_mul r2 (aff_point_mul_lambda p))
 
 val lemma_aff_point_mul_split_lambda: k:S.qelem -> p:S.aff_point ->
   Lemma (aff_point_mul_split_lambda k p = aff_point_mul k p)
@@ -311,21 +324,6 @@ let point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.proj_point =
   lemma_scalar_split_lambda_fits k;
   SE.exp_double_fw S.mk_k256_concrete_ops p 129 r1 (point_mul_lambda p) r2 4
 
-// [k]G
-let point_mul_g_split_lambda (k:S.qelem) : S.proj_point =
-  let r1, r2 = scalar_split_lambda k in
-  lemma_scalar_split_lambda_fits k;
-  SE.exp_double_fw S.mk_k256_concrete_ops S.g 129 r1 (point_mul_g_lambda ()) r2 4
-
-// TODO: add exp_four_fw?
-// [a1]G + [a2]P
-let point_mul_double_g (a1:S.qelem) (a2:S.qelem) (p:S.proj_point) : S.proj_point =
-  let a1_r1, a1_r2 = scalar_split_lambda a1 in
-  let a2_r1, a2_r2 = scalar_split_lambda a2 in
-  S.point_add
-    S.(point_add (point_mul_g a1_r1) (point_mul a1_r2 (point_mul_g_lambda ())))
-    S.(point_add (point_mul a2_r1 p) (point_mul a2_r2 (point_mul_lambda p)))
-
 
 val lemma_point_mul_split_lambda: k:S.qelem -> p:S.proj_point ->
   Lemma (S.to_aff_point (point_mul_split_lambda k p) = aff_point_mul k (S.to_aff_point p))
@@ -334,15 +332,14 @@ let lemma_point_mul_split_lambda k p =
   let open Spec.K256 in
   let r1, r2 = scalar_split_lambda k in
   lemma_scalar_split_lambda_fits k;
+  let lambda_p = point_mul_lambda p in
   let p_aff = to_aff_point p in
   calc (==) {
     to_aff_point (point_mul_split_lambda k p);
     (==) {
-      SE.exp_double_fw_lemma mk_k256_concrete_ops p 129 r1 (point_mul_lambda p) r2 4;
-      LE.exp_double_fw_lemma mk_k256_comm_monoid
-        p_aff 129 r1 (to_aff_point (point_mul_lambda p)) r2 4 }
-    aff_point_add
-      (aff_point_mul r1 p_aff) (aff_point_mul r2 (to_aff_point (point_mul_lambda p)));
+      SE.exp_double_fw_lemma mk_k256_concrete_ops p 129 r1 lambda_p r2 4;
+      LE.exp_double_fw_lemma mk_k256_comm_monoid p_aff 129 r1 (to_aff_point lambda_p) r2 4 }
+    aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (to_aff_point lambda_p));
     (==) { lemma_glv p }
     aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (aff_point_mul lambda p_aff));
     (==) { lemma_glv_aff p_aff }
@@ -352,10 +349,80 @@ let lemma_point_mul_split_lambda k p =
   }
 
 
-// TODO: what about point_at_infinity?
-val lemma_point_mul_split_lambda_aff: k:S.qelem -> p:S.aff_point ->
-  Lemma (S.to_aff_point (point_mul_split_lambda k (S.to_proj_point p)) = aff_point_mul k p)
+(**
+  Fast computation of [k1]P1 + [k2]P2 in projective coordinates
+*)
 
-let lemma_point_mul_split_lambda_aff k p =
-  lemma_point_mul_split_lambda k (S.to_proj_point p);
-  SM.lemma_proj_aff_id p
+// [k1]P1 + [k2]P2 = [r11 + r12 * lambda]P1 + [r21 + r22 * lambda]P2
+// = [r11]P1 + [r12]([lambda]P1) + [r21]P2 + [r22]([lambda]P2)
+// = [r11](p1_x, p1_y) + [r12](beta * p1_x, p1_y) + [r21](p2_x, p2_y) + [r22](beta * p2_x, p2_y)
+let point_mul_double_split_lambda
+  (k1:S.qelem) (p1:S.proj_point) (k2:S.qelem) (p2:S.proj_point) : S.proj_point =
+  let r11, r12 = scalar_split_lambda k1 in
+  let r21, r22 = scalar_split_lambda k2 in
+  lemma_scalar_split_lambda_fits k1;
+  lemma_scalar_split_lambda_fits k2;
+  SE.exp_four_fw S.mk_k256_concrete_ops p1 129 r11 (point_mul_lambda p1) r12
+    p2 r21 (point_mul_lambda p2) r22 4
+
+
+val lemma_point_mul_double_split_lambda:
+  k1:S.qelem -> p1:S.proj_point -> k2:S.qelem -> p2:S.proj_point ->
+  Lemma (S.to_aff_point (point_mul_double_split_lambda k1 p1 k2 p2) ==
+    S.aff_point_add (aff_point_mul k1 (S.to_aff_point p1)) (aff_point_mul k2 (S.to_aff_point p2)))
+
+let lemma_point_mul_double_split_lambda k1 p1 k2 p2 =
+  let open Spec.K256 in
+  let r11, r12 = scalar_split_lambda k1 in
+  let r21, r22 = scalar_split_lambda k2 in
+  lemma_scalar_split_lambda_fits k1;
+  lemma_scalar_split_lambda_fits k2;
+  let lambda_p1 = point_mul_lambda p1 in
+  let p_aff1 = to_aff_point p1 in
+  let lambda_p2 = point_mul_lambda p2 in
+  let p_aff2 = to_aff_point p2 in
+
+  calc (==) {
+    to_aff_point (point_mul_double_split_lambda k1 p1 k2 p2);
+    (==) {
+      SE.exp_four_fw_lemma mk_k256_concrete_ops p1 129 r11 lambda_p1 r12 p2 r21 lambda_p2 r22 4;
+      LE.exp_four_fw_lemma mk_k256_comm_monoid
+        p_aff1 129 r11 (to_aff_point lambda_p1) r12
+        p_aff2 r21 (to_aff_point lambda_p2) r22 4 }
+    aff_point_add
+      (aff_point_add
+        (aff_point_add (aff_point_mul r11 p_aff1) (aff_point_mul r12 (to_aff_point lambda_p1)))
+        (aff_point_mul r21 p_aff2))
+      (aff_point_mul r22 (to_aff_point lambda_p2));
+    (==) { lemma_glv p1; lemma_glv p2 }
+    aff_point_add
+      (aff_point_add
+        (aff_point_add
+          (aff_point_mul r11 p_aff1)
+          (aff_point_mul r12 (aff_point_mul lambda p_aff1)))
+        (aff_point_mul r21 p_aff2))
+      (aff_point_mul r22 (aff_point_mul lambda p_aff2));
+    (==) { lemma_glv_aff p_aff1; lemma_glv_aff p_aff2 }
+    aff_point_add
+      (aff_point_add
+        (aff_point_add
+          (aff_point_mul r11 p_aff1)
+          (aff_point_mul r12 (aff_point_mul_lambda p_aff1)))
+        (aff_point_mul r21 p_aff2))
+      (aff_point_mul r22 (aff_point_mul_lambda p_aff2));
+    (==) { lemma_aff_point_mul_split_lambda k1 p_aff1 }
+    aff_point_add
+      (aff_point_add
+        (aff_point_mul k1 p_aff1)
+        (aff_point_mul r21 p_aff2))
+      (aff_point_mul r22 (aff_point_mul_lambda p_aff2));
+    (==) { LS.aff_point_add_assoc_lemma (aff_point_mul k1 p_aff1)
+      (aff_point_mul r21 p_aff2) (aff_point_mul r22 (aff_point_mul_lambda p_aff2)) }
+    aff_point_add
+      (aff_point_mul k1 p_aff1)
+      (aff_point_add
+        (aff_point_mul r21 p_aff2)
+        (aff_point_mul r22 (aff_point_mul_lambda p_aff2)));
+    (==) { lemma_aff_point_mul_split_lambda k2 p_aff2 }
+    aff_point_add (aff_point_mul k1 p_aff1) (aff_point_mul k2 p_aff2);
+  }

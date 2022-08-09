@@ -2,7 +2,6 @@ module Hacl.Spec.K256.GLV
 
 open FStar.Mul
 
-module SE = Spec.Exponentiation
 module S = Spec.K256
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
@@ -101,27 +100,3 @@ let scalar_split_lambda (k:S.qelem) : S.qelem & S.qelem =
   let r2 = S.(c1 +^ c2) in
   let r1 = S.(k +^ r2 *^ minus_lambda) in
   r1, r2
-
-(**
- Fast computation of [k]P in affine coordinates
-*)
-
-// [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
-// which can be computed as a double exponentiation ([a]P + [b]Q)
-let aff_point_mul_split_lambda (k:S.qelem) (p:S.aff_point) : S.aff_point =
-  let r1, r2 = scalar_split_lambda k in
-  S.aff_point_add (aff_point_mul r1 p) (aff_point_mul r2 (aff_point_mul_lambda p))
-
-// [k]G = [r1 + r2 * lambda]G = [r1]G + [r2]([lambda]G) = [r1](g_x,g_y) + [r2](beta*g_x,g_y)
-let aff_point_mul_g_split_lambda (k:S.qelem) : S.aff_point =
-  let r1, r2 = scalar_split_lambda k in
-  S.aff_point_add (aff_point_mul_g r1) (aff_point_mul r2 (aff_point_mul_g_lambda ()))
-
-// [a1]G + [a2]P = [a1_r1 + a1_r2 * lambda]G + [a2_r1 + a2_r2 * lambda]P =
-// [a1_r1](g_x, g_y) + [a1_r2](beta * g_x, g_y) + [a2_r1]P + [a2_r2](beta*x, y)
-let aff_point_mul_double_g (a1:S.qelem) (a2:S.qelem) (p:S.aff_point) : S.aff_point =
-  let a1_r1, a1_r2 = scalar_split_lambda a1 in
-  let a2_r1, a2_r2 = scalar_split_lambda a2 in
-  S.aff_point_add
-    S.(aff_point_add (aff_point_mul_g a1_r1) (aff_point_mul a1_r2 (aff_point_mul_g_lambda ())))
-    S.(aff_point_add (aff_point_mul a2_r1 p) (aff_point_mul a2_r2 (aff_point_mul_lambda p)))
