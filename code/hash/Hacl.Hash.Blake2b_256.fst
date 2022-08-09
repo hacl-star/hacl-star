@@ -26,3 +26,6 @@ let update_last_blake2b_256: update_last_st (|Blake2B, M256|) =
 
 let hash_blake2b_256: hash_st Blake2B =
   mk_hash Blake2B M256 Hacl.Blake2b_256.blake2b
+
+let malloc_blake2b_256: malloc_st (|Blake2B, M256|) =
+  mk_malloc Blake2B M256
