@@ -1057,6 +1057,25 @@ let point_affine_neg #c p result =
   lemma_inverse_uniqueness pJ (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 result))) (point_mult #c (-b) (basePoint #c))
 
 
+val point_neg: #c: curve -> p: point c -> result: point c -> mask: uint64 -> Stack unit 
+  (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_aff_eval c h p /\
+    ~ (isPointAtInfinity (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h p)))))
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_aff_eval c h1 result /\ (
+    let pJ = fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h0 p)) in
+    let b = getDLP #c pJ in 
+    let rJ = fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 result)) in 
+    pointEqual rJ (Spec.ECC.point_mult #c (-b) (basePoint #c))))
+
+let point_neg #c p result mask = 
+  let len = getCoordinateLenU64 c in 
+ 
+  let yLut = sub p len len in 
+  felem_sub_zero #c yLut result; 
+  copy_conditional #c yLut result mask
+
+
+
+
 val conditional_subtraction_compute_mask: #c: curve -> scalar: scalar_t #MUT #c ->
   Stack uint64 
   (requires fun h -> live h scalar)
@@ -1231,28 +1250,30 @@ let getPointDoubleNTimes #c p tempBuffer k =
 
 
 val scalar_multiplication_cmb_step_2: #c: curve 
-  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1))) 
+  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1)))
   -> result: point c
-  -> j: size_t
+  -> j: size_t {v j < v (getLenWnaf #c) + 1}
   -> pointPrecomputed: pointAffine c
   -> bufferForNegative : lbuffer uint64 (getCoordinateLenU64 c)
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
   Stack unit 
-  (requires fun h -> True)
+  (requires fun h -> live h rnaf /\ live h result /\ live h pointPrecomputed /\ live h bufferForNegative /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint[loc result; loc pointPrecomputed; loc bufferForNegative; loc tempBuffer] /\ (
+    forall (i: nat {i < v (getScalarLen c) / w + 1}). 
+      let ri = Lib.Sequence.index (as_seq h rnaf) (2 * i) in 
+      v ri >= 1 /\ v ri < pow2 (w - 1)) /\ (
+    forall (i: nat {i < v (getScalarLen c) / w + 1}). 
+      let ri = Lib.Sequence.index (as_seq h rnaf) (2 * i + 1) in 
+      v ri == 0 \/ v ri == maxint U64))
   (ensures fun h0 _ h1 -> True)
   
 let scalar_multiplication_cmb_step_2 #c rnaf result j pointPrecomputed bufferForNegative tempBuffer = 
-  let d = index rnaf (j *! size 2) in
-  let is_neg = index rnaf (j *! size 2 +! size 1) in 
-  let d = shift_right (d -! size 1) (size 1) in 
-
+    let h0 = ST.get() in 
+  let d = index rnaf (size 2 *! j)  in
+  let is_neg = index rnaf (size 2 *! j +! size 1) in 
+  let d = shift_right (d -! u64 1) (size 1) in 
   loopK #c d pointPrecomputed j;
-
-  let len = getCoordinateLenU64 c in 
-  let yLut = sub pointPrecomputed len len in 
-  felem_sub_zero #c yLut bufferForNegative;
-  copy_conditional #c yLut bufferForNegative is_neg;
-  
+  point_neg #c pointPrecomputed bufferForNegative is_neg;
   Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer
 
 

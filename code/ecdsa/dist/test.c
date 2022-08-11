@@ -308,6 +308,8 @@ void master_branch_test()
 	uint8_t* pk = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 	uint8_t* resultECDHR = (uint8_t*) malloc (sizeof (uint8_t) * 64);
 
+	bool successDHR;
+
 	for (int j = 0; j < ROUNDS; j++) {
 		successDHR = Hacl_P256_ecp256dh_r_private_radix(result, pk, privateKey);
 	}
