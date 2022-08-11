@@ -105,7 +105,7 @@ bool EverCrypt_AutoConfig2_has_avx512()
 
 void EverCrypt_AutoConfig2_recall()
 {
-
+  
 }
 
 void EverCrypt_AutoConfig2_init()

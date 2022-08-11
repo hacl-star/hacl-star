@@ -6,6 +6,69 @@ module Loops = Lib.LoopCombinators
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
+//--------------------
+
+val lemma_mul_cancel_inverse: #t:Type -> k:abelian_group t -> a:t -> b:t ->
+  Lemma (cm.mul (inverse a) (cm.mul a b) == b)
+
+let lemma_mul_cancel_inverse #t k a b =
+  calc (==) {
+    cm.mul (inverse a) (cm.mul a b);
+    (==) { cm.lemma_mul_assoc (inverse a) a b }
+    cm.mul (cm.mul (inverse a) a) b;
+    (==) { lemma_inverse a }
+    cm.mul cm.one b;
+    (==) { cm.lemma_mul_comm cm.one b }
+    cm.mul b cm.one;
+    (==) { cm.lemma_one b }
+    b;
+  }
+
+val lemma_cancellation: #t:Type -> k:abelian_group t -> a:t -> b:t -> c:t -> Lemma
+  (requires cm.mul a b == cm.mul a c)
+  (ensures  b == c)
+
+let lemma_cancellation #t k a b c =
+  assert (cm.mul (inverse a) (cm.mul a b) == cm.mul (inverse a) (cm.mul a c));
+  lemma_mul_cancel_inverse #t k a b;
+  lemma_mul_cancel_inverse #t k a c
+
+
+let lemma_inverse_id #t k a =
+  lemma_inverse a;
+  lemma_inverse (inverse a);
+  assert (cm.mul (inverse a) a == cm.one);
+  assert (cm.mul (inverse (inverse a)) (inverse a) == cm.one);
+  cm.lemma_mul_comm (inverse (inverse a)) (inverse a);
+  lemma_cancellation k (inverse a) a (inverse (inverse a));
+  assert (a == (inverse (inverse a)))
+
+
+let lemma_inverse_mul #t k a b =
+  lemma_inverse (cm.mul a b);
+  cm.lemma_mul_comm (inverse (cm.mul a b)) (cm.mul a b);
+  assert (cm.mul (cm.mul a b) (inverse (cm.mul a b)) == cm.one);
+  calc (==) {
+    cm.mul (cm.mul a b) (cm.mul (inverse a) (inverse b));
+    (==) { cm.lemma_mul_assoc (cm.mul a b) (inverse a) (inverse b) }
+    cm.mul (cm.mul (cm.mul a b) (inverse a)) (inverse b);
+    (==) { cm.lemma_mul_comm (cm.mul a b) (inverse a) }
+    cm.mul (cm.mul (inverse a) (cm.mul a b)) (inverse b);
+    (==) { lemma_mul_cancel_inverse k a b }
+    cm.mul b (inverse b);
+    (==) { cm.lemma_mul_comm b (inverse b) }
+    cm.mul (inverse b) b;
+    (==) { lemma_inverse b }
+    cm.one;
+  };
+
+  assert (cm.mul (cm.mul a b) (inverse (cm.mul a b)) ==
+    cm.mul (cm.mul a b) (cm.mul (inverse a) (inverse b)));
+  lemma_cancellation k (cm.mul a b) (inverse (cm.mul a b))
+    (cm.mul (inverse a) (inverse b))
+
+//---------------------
+
 #push-options "--fuel 2"
 let lemma_pow0 #t k x = ()
 
@@ -103,68 +166,7 @@ let lemma_pow_double #t k x b =
     pow k x (b + b);
     }
 
-//--------------------
-
-val lemma_mul_cancel_inverse: #t:Type -> k:abelian_group t -> a:t -> b:t ->
-  Lemma (cm.mul (inverse a) (cm.mul a b) == b)
-
-let lemma_mul_cancel_inverse #t k a b =
-  calc (==) {
-    cm.mul (inverse a) (cm.mul a b);
-    (==) { cm.lemma_mul_assoc (inverse a) a b }
-    cm.mul (cm.mul (inverse a) a) b;
-    (==) { lemma_inverse a }
-    cm.mul cm.one b;
-    (==) { cm.lemma_mul_comm cm.one b }
-    cm.mul b cm.one;
-    (==) { cm.lemma_one b }
-    b;
-  }
-
-val lemma_cancellation: #t:Type -> k:abelian_group t -> a:t -> b:t -> c:t -> Lemma
-  (requires cm.mul a b == cm.mul a c)
-  (ensures  b == c)
-
-let lemma_cancellation #t k a b c =
-  assert (cm.mul (inverse a) (cm.mul a b) == cm.mul (inverse a) (cm.mul a c));
-  lemma_mul_cancel_inverse #t k a b;
-  lemma_mul_cancel_inverse #t k a c
-
-
-let lemma_inverse_id #t k a =
-  lemma_inverse a;
-  lemma_inverse (inverse a);
-  assert (cm.mul (inverse a) a == cm.one);
-  assert (cm.mul (inverse (inverse a)) (inverse a) == cm.one);
-  cm.lemma_mul_comm (inverse (inverse a)) (inverse a);
-  lemma_cancellation k (inverse a) a (inverse (inverse a));
-  assert (a == (inverse (inverse a)))
-
-
-let lemma_inverse_mul #t k a b =
-  lemma_inverse (cm.mul a b);
-  cm.lemma_mul_comm (inverse (cm.mul a b)) (cm.mul a b);
-  assert (cm.mul (cm.mul a b) (inverse (cm.mul a b)) == cm.one);
-  calc (==) {
-    cm.mul (cm.mul a b) (cm.mul (inverse a) (inverse b));
-    (==) { cm.lemma_mul_assoc (cm.mul a b) (inverse a) (inverse b) }
-    cm.mul (cm.mul (cm.mul a b) (inverse a)) (inverse b);
-    (==) { cm.lemma_mul_comm (cm.mul a b) (inverse a) }
-    cm.mul (cm.mul (inverse a) (cm.mul a b)) (inverse b);
-    (==) { lemma_mul_cancel_inverse k a b }
-    cm.mul b (inverse b);
-    (==) { cm.lemma_mul_comm b (inverse b) }
-    cm.mul (inverse b) b;
-    (==) { lemma_inverse b }
-    cm.one;
-  };
-
-  assert (cm.mul (cm.mul a b) (inverse (cm.mul a b)) ==
-    cm.mul (cm.mul a b) (cm.mul (inverse a) (inverse b)));
-  lemma_cancellation k (cm.mul a b) (inverse (cm.mul a b))
-    (cm.mul (inverse a) (inverse b))
-
-//---------------------
+//---------------------------
 
 val lemma_b_mod_pow2i: bBits:nat -> b:nat{b < pow2 bBits} -> i:pos{i <= bBits} ->
   Lemma (b % pow2 i == b / pow2 (i - 1) % 2 * pow2 (i - 1) + b % pow2 (i - 1))
