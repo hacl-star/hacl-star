@@ -17,12 +17,34 @@ class comm_monoid (t:Type) = {
   lemma_mul_comm: a:t -> b:t -> Lemma (mul a b == mul b a)
   }
 
+
+inline_for_extraction
+class abelian_group (t:Type) = {
+  cm:comm_monoid t;
+  inverse: t -> t;
+  lemma_inverse: a:t -> Lemma (mul (inverse a) a == one)
+  }
+
 let sqr (#t:Type) (k:comm_monoid t) (a:t) : t = mul a a
 
 let rec pow (#t:Type) (k:comm_monoid t) (x:t) (n:nat) : t =
   if n = 0 then one
   else mul x (pow k x (n - 1))
 
+let pow_neg (#t:Type) (k:abelian_group t) (x:t) (n:int) : t =
+  if n >= 0 then pow k.cm x n else k.inverse (pow k.cm x (- n))
+
+// Properties of an inverse function
+//---------------------------------
+
+val lemma_inverse_id: #t:Type -> k:abelian_group t -> a:t ->
+  Lemma (inverse (inverse a) == a)
+
+val lemma_inverse_mul: #t:Type -> k:abelian_group t -> a:t -> b:t ->
+  Lemma (inverse (cm.mul a b) == cm.mul (inverse a) (inverse b))
+
+// Properties of an exponentiation function
+//--------------------------------------
 
 val lemma_pow0: #t:Type -> k:comm_monoid t -> x:t -> Lemma (pow k x 0 == one)
 
@@ -46,6 +68,7 @@ val lemma_pow_mul_base: #t:Type -> k:comm_monoid t -> a:t -> b:t -> n:nat ->
 val lemma_pow_double: #t:Type -> k:comm_monoid t -> x:t -> b:nat ->
   Lemma (pow k (mul x x) b == pow k x (b + b))
 
+//-----------------------------
 
 let get_ith_bit (bBits:nat) (b:nat{b < pow2 bBits}) (i:nat{i < bBits}) =
   b / pow2 i % 2
