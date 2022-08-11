@@ -8,7 +8,6 @@ open FStar.HyperStack
 module ST = FStar.HyperStack.ST
 
 open Lib.IntTypes
-
 open Lib.Buffer
 
 open Spec.ECC.Curves
@@ -30,7 +29,6 @@ open FStar.Math.Lemmas
 
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0" 
-(*  https://www.usenix.org/system/files/conference/usenixsecurity18/sec18-alam.pdf*)
 
 
 inline_for_extraction noextract
@@ -106,8 +104,32 @@ val scalar_compute_window_lemma: #c: curve ->  scalar: scalar_bytes #c
   scalar_as_nat scalar / pow2 (t + 1) % m * 2 == i)
 
 
-
 #push-options "--z3rlimit 300"
+
+val scalar_compute_window_lemma_lemma_powers: unit -> Lemma (
+  pow2 2 * 2 == pow2 3 /\
+  pow2 3 * 2 == pow2 4 /\
+  pow2 4 * 2 == pow2 5 /\
+  pow2 5 * 2 == pow2 6)
+
+let scalar_compute_window_lemma_lemma_powers () = 
+  pow2_double_sum 2;
+  pow2_double_sum 3;
+  pow2_double_sum 4;
+  pow2_double_sum 5
+
+
+val scalar_compute_window_lemma_less: 
+  sh0: nat {sh0 <= 1} -> sh1: nat {sh1 <= 1} -> sh2: nat {sh2 <= 1} -> sh3: nat {sh3 <= 1} ->  sh4: nat {sh4 <= 1} -> 
+  Lemma (sh0 * pow2 1 + 
+    sh1 * pow2 2 +
+    sh2 * pow2 3 +
+    sh3 * pow2 4 +
+    sh4 * pow2 5 < pow2 6)
+
+let scalar_compute_window_lemma_less sh0 sh1 sh2 sh3 sh4 = 
+  assert_norm (pow2 1 + pow2 2 + pow2 3 + pow2 4 + pow2 5 < pow2 6)
+
 
 let scalar_compute_window_lemma #c scalar k = 
   let t = (v k + 1) * w  in 
@@ -129,11 +151,8 @@ let scalar_compute_window_lemma #c scalar k =
   scalar_as_nat_def #c  scalar (v (getScalarLen c) - (t + 4));
   scalar_as_nat_def #c  scalar (v (getScalarLen c) - (t + 5));
 
-  assume (pow2 2 * 2 == pow2 3);
-  assume (pow2 3 * 2 == pow2 4);
-  assume (pow2 4 * 2 == pow2 5);
-  assume (pow2 5 * 2 == pow2 6);
-
+  scalar_compute_window_lemma_lemma_powers ();
+  
   assert(2 * scalar_as_nat_ scalar (v (getScalarLen c) - (t + 1)) == 
     pow2 6 * scalar_as_nat_ scalar (v (getScalarLen c) - (t + 6)) + i);
 
@@ -150,8 +169,7 @@ let scalar_compute_window_lemma #c scalar k =
 
   assert(scalar_as_nat_ scalar (v (getScalarLen c) - (t + 1)) % pow2 5 * 2 ==  i % pow2 6);
 
-
-  assume (i < pow2 6);
+  scalar_compute_window_lemma_less sh0 sh1 sh2 sh3 sh4;
   small_mod i (pow2 6);
 
   Hacl.Impl.EC.Masking.ScalarAccess.Lemmas.test #c scalar ((v (getScalarLen c) - (t + 1)));
@@ -159,7 +177,6 @@ let scalar_compute_window_lemma #c scalar k =
   
   assert(scalar_as_nat_ scalar (v (getScalarLen c) - (t + 1)) == scalar_as_nat scalar / pow2 (t + 1));
   assert(scalar_as_nat scalar / pow2 (t + 1) % m * 2 == i)
-
 
 
 val scalar_rwnaf_step_compute_window_: #c: curve 
@@ -185,11 +202,9 @@ let scalar_rwnaf_step_compute_window_ #c wStart scalar k =
   let w0 = w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 3))) (size 3)) in 
   let w0 = w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 4))) (size 4)) in 
   let w0 = w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 5))) (size 5)) in 
-
   w0
 
 #pop-options
-
 
 
 inline_for_extraction noextract
@@ -216,7 +231,8 @@ val scalar_rwnaf_step: #c: curve -> out: lbuffer uint64 (size ((getPower c / Spe
   -> window: lbuffer uint64 (size 1) 
   -> mask: uint64 {v mask = pow2 (v radix + 1) - 1}
   -> r: lbuffer uint64 (size 1) 
-  -> i: size_t {v i < getPower c / Spec.ECC.WNAF.w - 1} ->  Stack unit 
+  -> i: size_t {v i < getPower c / Spec.ECC.WNAF.w - 1} -> 
+  Stack unit 
   (requires fun h -> live h out /\ live h scalar /\ live h window /\ live h r /\ 
     LowStar.Monotonic.Buffer.all_disjoint [loc out; loc scalar; loc window; loc r] /\ (
     let w0 = v (Lib.Sequence.index (as_seq h window) 0) in 
@@ -261,74 +277,77 @@ let scalar_rwnaf_step #c out scalar window mask r i =
   let w0 = scalar_rwnaf_step_compute_window wStart scalar i in 
   upd window (size 0) w0;
 
-
-  let h2 = ST.get() in 
-  
+    let h2 = ST.get() in   
   let d_i = v wVar % (2 * m) - m in 
-  
-  assert(
-    let w0 = v (Lib.Sequence.index (as_seq h0 window) 0) in
-    let sign = Lib.Sequence.index (as_seq h2 out) (2 * v i + 1) in 
-    let abs =  Lib.Sequence.index (as_seq h2 out) (2 * v i) in 
-    if v sign = 0 then (w0 % (2 * m) - m) == v abs else - (w0 % (2 * m) - m) == v abs);
+    
+    assert(
+      let w0 = v (Lib.Sequence.index (as_seq h0 window) 0) in
+      let sign = Lib.Sequence.index (as_seq h2 out) (2 * v i + 1) in 
+      let abs =  Lib.Sequence.index (as_seq h2 out) (2 * v i) in 
+      if v sign = 0 then (w0 % (2 * m) - m) == v abs else - (w0 % (2 * m) - m) == v abs);
 
     
-    assert (v wStart = (v wVar - (d_i % pow2 64)) % pow2 64 / m);
-    lemma_mod_sub_distr (v wVar)  (d_i) (pow2 64); 
-    assert (v wStart = (v wVar - d_i) % pow2 64 / m);
-     
-    assert (v wStart =  (v wVar - v wVar % (2 * m) + m) % pow2 64  / m);
+      assert (v wStart = (v wVar - (d_i % pow2 64)) % pow2 64 / m);
+      lemma_mod_sub_distr (v wVar)  (d_i) (pow2 64); 
+      assert (v wStart = (v wVar - d_i) % pow2 64 / m);
+      
+      assert (v wStart =  (v wVar - v wVar % (2 * m) + m) % pow2 64  / m);
 
-    small_mod ((v wVar / (2 * m) * (2 * m)) + m) (pow2 64);
+      small_mod ((v wVar / (2 * m) * (2 * m)) + m) (pow2 64);
 
-    assert (v wStart =  v wVar / (2 * m) * 2 + 1);
+      assert (v wStart =  v wVar / (2 * m) * 2 + 1);
 
-    pow2_multiplication_modulo_lemma_2 (scalar_as_nat (as_seq h0 scalar) / pow2 ((v i + 1) * w  + 1)) (w + 1) 1;
+      pow2_multiplication_modulo_lemma_2 (scalar_as_nat (as_seq h0 scalar) / pow2 ((v i + 1) * w  + 1)) (w + 1) 1;
 
-    assert(scalar_as_nat (as_seq h0 scalar) / pow2 ((v i + 1) * w  + 1) % m * 2 + (v wVar / (2 * m) * 2 + 1) == v w0);
-    assert(scalar_as_nat (as_seq h0 scalar) / pow2 ((v i + 1) * w  + 1) * 2 % pow2 (w + 1)  + (v wVar / (2 * m) * 2 + 1) == v w0);
+      assert(scalar_as_nat (as_seq h0 scalar) / pow2 ((v i + 1) * w  + 1) % m * 2 + (v wVar / (2 * m) * 2 + 1) == v w0);
+      assert(scalar_as_nat (as_seq h0 scalar) / pow2 ((v i + 1) * w  + 1) * 2 % pow2 (w + 1)  + (v wVar / (2 * m) * 2 + 1) == v w0);
     
-    assert(v wVar < 2 * m);
-      small_division_lemma_1 (v wVar) (2 * m);
-    assert(v wVar / (2 * m) == 0);
+      assert(v wVar < 2 * m);
+	small_division_lemma_1 (v wVar) (2 * m);
+      assert(v wVar / (2 * m) == 0);
 
+      assert(2 * (scalar_as_nat (as_seq h0 scalar) / pow2 ((v i + 1) * w  + 1)) % (2 * m) + 1 == v w0);
+      pow2_plus (v i * w) (w + 1); 
+      division_multiplication_lemma (scalar_as_nat (as_seq h0 scalar)) (pow2 (w + 1)) (pow2 (v i * w));
 
-  
- (** **)   assert(2 * (scalar_as_nat (as_seq h0 scalar) / pow2 ((v i + 1) * w  + 1)) % (2 * m) + 1 == v w0);
-
-    pow2_plus (v i * w) (w + 1); 
-    division_multiplication_lemma (scalar_as_nat (as_seq h0 scalar)) (pow2 (w + 1)) (pow2 (v i * w));
-
-
-
-    division_multiplication_lemma (scalar_as_nat (as_seq h0 scalar)  / (pow2 w)) 2 (pow2 (v i * w));
-    pow2_double_mult (v i * w);
-    assert((scalar_as_nat (as_seq h0 scalar)  / (pow2 w) / (2 * pow2 (v i * w))) % (pow2 w) * 2 + 1 == v w0);
+      division_multiplication_lemma (scalar_as_nat (as_seq h0 scalar)  / (pow2 w)) 2 (pow2 (v i * w));
+      pow2_double_mult (v i * w);
+      assert((scalar_as_nat (as_seq h0 scalar)  / (pow2 w) / (2 * pow2 (v i * w))) % (pow2 w) * 2 + 1 == v w0);
     
-    assert ((scalar_as_nat (as_seq h0 scalar)  / (pow2 w) / (pow2 (v i * w + 1))) % (pow2 w) * 2 + 1 == v w0);
-
-
-    pow2_modulo_division_lemma_1 (scalar_as_nat (as_seq h0 scalar)  / pow2 w) (v i * w + 1) (v i * w + 1 + w);
-
-    pow2_double_mult (v i * w); 
+      assert ((scalar_as_nat (as_seq h0 scalar)  / (pow2 w) / (pow2 (v i * w + 1))) % (pow2 w) * 2 + 1 == v w0);
+      pow2_modulo_division_lemma_1 (scalar_as_nat (as_seq h0 scalar)  / pow2 w) (v i * w + 1) (v i * w + 1 + w);
+      pow2_double_mult (v i * w); 
     
-    division_multiplication_lemma (scalar_as_nat (as_seq h0 scalar)  / (pow2 w)  % pow2 (v i * w + 1 + w)) (pow2 (v i * w)) (pow2 1);
+      division_multiplication_lemma (scalar_as_nat (as_seq h0 scalar) / (pow2 w) % pow2 (v i * w + 1 + w)) (pow2 (v i * w)) (pow2 1);
 
-   assert(scalar_as_nat (as_seq h0 scalar)  / (pow2 w)  % pow2 (v i * w + 1 + w) / pow2 (v i * w) / pow2 1  * 2 + 1 == v w0);
+      assert(scalar_as_nat (as_seq h0 scalar)  / (pow2 w)  % pow2 (v i * w + 1 + w) / pow2 (v i * w) / pow2 1  * 2 + 1 == v w0);
 
-   let k = v i + 1 in 
+      let k = v i + 1 in 
    
-   assert(2 * (scalar_as_nat (as_seq h0 scalar) / pow2 (k * w  + 1)) % (pow2 (w + 1)) + 1 == v w0);
-   
+      assert(2 * (scalar_as_nat (as_seq h0 scalar) / pow2 (k * w  + 1)) % (pow2 (w + 1)) + 1 == v w0);
+      assert(scalar_as_nat (as_seq h0 scalar) / pow2 (k * w  + 1) % pow2 w * 2 + 1 == v w0);
 
-   assert(scalar_as_nat (as_seq h0 scalar) / pow2 (k * w  + 1) % pow2 w * 2 + 1 == v w0);
+      pow2_modulo_division_lemma_1 (scalar_as_nat (as_seq h0 scalar)) (k * w + 1) (k * w + 1 + w);
+      pow2_double_mult (k * w);
+      division_multiplication_lemma (scalar_as_nat (as_seq h0 scalar) % pow2 (k * w + w + 1)) (pow2 (k * w)) 2;
+      
+      assert(scalar_as_nat (as_seq h0 scalar) % pow2 (k * w + w + 1) / pow2 (k * w) / 2 * 2 + 1 == v w0);
+      assert(v w0 < 2 * m)
 
-   pow2_modulo_division_lemma_1 (scalar_as_nat (as_seq h0 scalar)) (k * w + 1) (k * w + 1 + w);
-   pow2_double_mult (k * w);
-   division_multiplication_lemma (scalar_as_nat (as_seq h0 scalar) % pow2 (k * w + w + 1)) (pow2 (k * w)) 2;
-   
-   assert(scalar_as_nat (as_seq h0 scalar) % pow2 (k * w + w + 1) / pow2 (k * w) / 2 * 2 + 1 == v w0);
-   assert(v w0 < 2 * m)
+
+val scalar_rwnaf_lemma0_lemma_byte: #c: curve -> scalar: scalar_bytes #c ->
+  Lemma (
+    let i0 = ith_bit scalar 0 in 
+    let i1 = ith_bit scalar 1 in 
+    let i2 = ith_bit scalar 2 in 
+    let i3 = ith_bit scalar 3 in 
+    let i4 = ith_bit scalar 4 in  
+    let i5 = ith_bit scalar 5 in 
+    let i6 = ith_bit scalar 6 in  
+    let i7 = ith_bit scalar 7 in  
+    v i0 + v i1 * pow2 1 + v i2 * pow2 2 + v i3 * pow2 3 + v i4 * pow2 4 + v i5 * pow2 5 + v i6 * pow2 6 + v i7  * pow2 7== v (Lib.Sequence.index scalar (v (getScalarLenBytes c) - 1)))
+
+let scalar_rwnaf_lemma0_lemma_byte #c scalar = admit()
 
 
 val scalar_rwnaf_lemma0: #c: curve -> scalar: scalar_bytes #c 
@@ -353,16 +372,15 @@ let scalar_rwnaf_lemma0 #c scalar =
   logand_mask (Lib.Sequence.index scalar  (v (getScalarLenBytes c) - 1)) (u8 1) 1; 
 
   assert(v i0 == v (Lib.Sequence.index scalar q) % 2);
-  assume (v i0 + v i1 * pow2 1 + v i2 * pow2 2 + v i3 * pow2 3 + v i4 * pow2 4 + v i5 * pow2 5 + v i6 * pow2 6 + v i7  * pow2 7== v (Lib.Sequence.index scalar q));
+  scalar_rwnaf_lemma0_lemma_byte #c scalar;
 
-  assert_norm (pow2 2 = 4);
-  assert_norm (pow2 3 = 8);
-  assert_norm (pow2 4 = 16);
-  assert_norm (pow2 5 = 32);
-  assert_norm (pow2 6 = 64);
-  assert_norm (pow2 7 = 128);
-  assert_norm (pow2 8 = 256);
-
+    assert_norm (pow2 2 = 4);
+    assert_norm (pow2 3 = 8);
+    assert_norm (pow2 4 = 16);
+    assert_norm (pow2 5 = 32);
+    assert_norm (pow2 6 = 64);
+    assert_norm (pow2 7 = 128);
+    assert_norm (pow2 8 = 256);
 
   scalar_as_nat_def #c scalar len;
   scalar_as_nat_def #c scalar (len - 1);
@@ -374,11 +392,9 @@ let scalar_rwnaf_lemma0 #c scalar =
   scalar_as_nat_def #c scalar (len - 7);
 
   lemma_mod_plus (v (Lib.Sequence.index scalar q)) (scalar_as_nat_ scalar (len - 8)) (pow2 8);
-  assert ( v (Lib.Sequence.index scalar q) < pow2 8);
+    assert ( v (Lib.Sequence.index scalar q) < pow2 8);
   small_mod (v (Lib.Sequence.index scalar q)) (pow2 8);
-
-  assert(scalar_as_nat scalar % pow2 8 = v (Lib.Sequence.index scalar q))
-
+    assert(scalar_as_nat scalar % pow2 8 = v (Lib.Sequence.index scalar q))
 
 
 val logor_mask: a: uint64 -> Lemma (v (logor (u64 1) a) == v a / 2 * 2 + 1)
