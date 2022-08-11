@@ -1024,6 +1024,19 @@ let getDLP_point_mult #c b0 p =
     end
 
 
+val point_neg_lemma_infinity_indexes: #c: curve -> p: Spec.ECC.point #c {~ (isPointAtInfinity #Jacobian p)} ->
+  Lemma(
+    let b = getDLP #c p in 
+    isPointAtInfinity (pointAdd #c p (point_mult #c (-b) (basePoint #c))))
+
+let point_neg_lemma_infinity_indexes #c p = 
+  let b = getDLP #c p in 
+  let q = point_mult #c (-b) (basePoint #c) in
+  lemmaApplPointAdd (basePoint #c) b p (-b) q;
+    assert(pointEqual (pointAdd p q) (point_mult #c 0 (basePoint #c)));
+  point_mult_0 #c (basePoint #c) 0
+
+
 val point_affine_neg: #c: curve -> p: pointAffine c -> result: pointAffine c -> Stack unit 
   (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_aff_eval c h p /\
     ~ (isPointAtInfinity (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h p)))))
@@ -1050,30 +1063,50 @@ let point_affine_neg #c p result =
     let pJ = fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h0 p)) in
     let b = getDLP #c pJ in 
 
-
+  point_neg_lemma_infinity_indexes #c pJ;
   assume (isPointAtInfinity (pointAdd #c pJ (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 result)))));
-  assume (isPointAtInfinity (pointAdd #c pJ (point_mult #c (-b) (basePoint #c))));
-  
   lemma_inverse_uniqueness pJ (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 result))) (point_mult #c (-b) (basePoint #c))
 
 
-val point_neg: #c: curve -> p: point c -> result: point c -> mask: uint64 -> Stack unit 
-  (requires fun h -> live h p /\ live h result /\ disjoint p result /\ point_aff_eval c h p /\
-    ~ (isPointAtInfinity (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h p)))))
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_aff_eval c h1 result /\ (
-    let pJ = fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h0 p)) in
-    let b = getDLP #c pJ in 
-    let rJ = fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 result)) in 
-    pointEqual rJ (Spec.ECC.point_mult #c (-b) (basePoint #c))))
+val point_neg_conditional: #c: curve -> p: point c 
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) 
+  -> mask: uint64 {v mask == 0 \/ v mask == pow2 64 - 1} -> Stack unit 
+  (requires fun h -> live h p /\ live h tempBuffer /\ disjoint p tempBuffer /\ point_eval c h p /\
+    ~ (isPointAtInfinity (fromDomainPoint #c #DH (point_as_nat c h p))))
+  (ensures fun h0 _ h1 ->  modifies (loc p |+| loc tempBuffer) h0 h1 /\ 
+    point_eval c h1 p /\ (
+    if v mask = 0 then 
+      fromDomainPoint #c #DH (point_as_nat c h0 p) == fromDomainPoint #c #DH (point_as_nat c h1 p) /\
+      point_as_nat c h0 p == point_as_nat c h1 p
+    else
+      let pJ = fromDomainPoint #c #DH (point_as_nat c h0 p) in
+      let rJ = fromDomainPoint #c #DH (point_as_nat c h1 p) in 
+      pointEqual rJ (Spec.ECC.point_mult #c (- getDLP #c pJ) (basePoint #c))))
 
-let point_neg #c p result mask = 
+
+let point_neg_conditional #c p tempBuffer mask = 
+    let h0 = ST.get() in 
   let len = getCoordinateLenU64 c in 
  
+  let temp = sub tempBuffer (size 0) len in 
+  
+  let xLut = sub p (size 0) len in 
   let yLut = sub p len len in 
-  felem_sub_zero #c yLut result; 
-  copy_conditional #c yLut result mask
+  let zLut = sub p (size 2 *! len) len in 
+  
+  felem_sub_zero #c yLut temp; 
+  copy_conditional #c yLut temp mask;
+
+   let pJ = fromDomainPoint #c #DH (point_as_nat c h0 p) in 
+   let qJ = fromDomainPoint #c #DH (as_nat c h0 xLut, (0 - as_nat c h0 yLut) % getPrime c, as_nat c h0 zLut) in 
+
+   let b = getDLP #c pJ in  
 
 
+   assume (isPointAtInfinity (pointAdd #c pJ qJ));
+   point_neg_lemma_infinity_indexes #c pJ;
+   
+   lemma_inverse_uniqueness pJ qJ (point_mult #c (-b) (basePoint #c))
 
 
 val conditional_subtraction_compute_mask: #c: curve -> scalar: scalar_t #MUT #c ->
@@ -1254,11 +1287,10 @@ val scalar_multiplication_cmb_step_2: #c: curve
   -> result: point c
   -> j: size_t {v j < v (getLenWnaf #c) + 1}
   -> pointPrecomputed: pointAffine c
-  -> bufferForNegative : lbuffer uint64 (getCoordinateLenU64 c)
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
   Stack unit 
-  (requires fun h -> live h rnaf /\ live h result /\ live h pointPrecomputed /\ live h bufferForNegative /\ live h tempBuffer /\
-    LowStar.Monotonic.Buffer.all_disjoint[loc result; loc pointPrecomputed; loc bufferForNegative; loc tempBuffer] /\ (
+  (requires fun h -> live h rnaf /\ live h result /\ live h pointPrecomputed /\ live h tempBuffer /\
+    LowStar.Monotonic.Buffer.all_disjoint[loc result; loc pointPrecomputed;  loc tempBuffer] /\ (
     forall (i: nat {i < v (getScalarLen c) / w + 1}). 
       let ri = Lib.Sequence.index (as_seq h rnaf) (2 * i) in 
       v ri >= 1 /\ v ri < pow2 (w - 1)) /\ (
@@ -1267,13 +1299,13 @@ val scalar_multiplication_cmb_step_2: #c: curve
       v ri == 0 \/ v ri == maxint U64))
   (ensures fun h0 _ h1 -> True)
   
-let scalar_multiplication_cmb_step_2 #c rnaf result j pointPrecomputed bufferForNegative tempBuffer = 
+let scalar_multiplication_cmb_step_2 #c rnaf result j pointPrecomputed tempBuffer = 
     let h0 = ST.get() in 
-  let d = index rnaf (size 2 *! j)  in
+  let d = index rnaf (size 2 *! j) in
   let is_neg = index rnaf (size 2 *! j +! size 1) in 
   let d = shift_right (d -! u64 1) (size 1) in 
   loopK #c d pointPrecomputed j;
-  point_neg #c pointPrecomputed bufferForNegative is_neg;
+  point_neg_conditional #c pointPrecomputed tempBuffer is_neg;
   Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer
 
 
@@ -1291,12 +1323,11 @@ let scalar_multiplication_cmb_ #c  result scalar tempBuffer =
     let rnaf2 = create (size 2 *! lenWnaf) (u64 0) in 
     let len = getCoordinateLenU64 c in
     let lut = create (size 2 *! getCoordinateLenU64 c) (u64 0) in 
-    let temp4 = sub tempBuffer (size 0) len in 
 
     scalar_rwnaf #c rnaf2 scalar;
     
     let invJ h1 (j:nat) = True in  
-    Lib.Loops.for 0ul lenWnaf invJ (fun j -> scalar_multiplication_cmb_step_2 rnaf2 result j lut temp4 tempBuffer);
+    Lib.Loops.for 0ul lenWnaf invJ (fun j -> scalar_multiplication_cmb_step_2 rnaf2 result j lut tempBuffer);
 
 
     conditional_substraction #c result result scalar tempBuffer;
