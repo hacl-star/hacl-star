@@ -100,3 +100,44 @@ let scalar_split_lambda (k:S.qelem) : S.qelem & S.qelem =
   let r2 = S.(c1 +^ c2) in
   let r1 = S.(k +^ r2 *^ minus_lambda) in
   r1, r2
+
+
+let scalar_is_high (k:S.qelem) : bool = k > S.q / 2
+let qnegate (k:S.qelem) : S.qelem = (- k) % S.q
+
+let aff_negate_point_and_scalar_cond (k:S.qelem) (p:S.aff_point) : S.qelem & S.aff_point =
+  if scalar_is_high k then begin
+    let k_neg = qnegate k in
+    let p_neg = S.aff_point_negate p in
+    k_neg, p_neg end
+  else k, p
+
+
+// https://github.com/bitcoin-core/secp256k1/blob/master/src/ecmult_impl.h
+// [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
+let aff_ecmult_endo_split (k:S.qelem) (p:S.aff_point) :
+  S.qelem & S.aff_point & S.qelem & S.aff_point
+ =
+  let r1, r2 = scalar_split_lambda k in
+  let lambda_p = aff_point_mul_lambda p in
+  let r1, p1 = aff_negate_point_and_scalar_cond r1 p in
+  let r2, p2 = aff_negate_point_and_scalar_cond r2 lambda_p in
+  (r1, p1, r2, p2)
+
+
+let negate_point_and_scalar_cond (k:S.qelem) (p:S.proj_point) : S.qelem & S.proj_point =
+  if scalar_is_high k then begin
+    let k_neg = qnegate k in
+    let p_neg = S.point_negate p in
+    k_neg, p_neg end
+  else k, p
+
+
+let ecmult_endo_split (k:S.qelem) (p:S.proj_point) :
+  S.qelem & S.proj_point & S.qelem & S.proj_point
+ =
+  let r1, r2 = scalar_split_lambda k in
+  let lambda_p = point_mul_lambda p in
+  let r1, p1 = negate_point_and_scalar_cond r1 p in
+  let r2, p2 = negate_point_and_scalar_cond r2 lambda_p in
+  (r1, p1, r2, p2)

@@ -48,7 +48,7 @@ let ecdsa_sign_r r k =
 
   let p = create_point () in
   // point_mul_g p k; // p = [k]G
-  point_mul_g_split_lambda p k; // p = [k]G
+  point_mul_g_split_lambda_vartime p k; // p = [k]G
   let x, y, z = getx p, gety p, getz p in
 
   FI.finv tmp z; // tmp = zinv

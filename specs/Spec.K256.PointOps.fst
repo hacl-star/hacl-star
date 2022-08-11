@@ -90,6 +90,10 @@ let g : proj_point = (g_x, g_y, one)
 assume
 val aff_point_add (p:aff_point) (y:aff_point) : aff_point
 
+let aff_point_negate (p:aff_point) : aff_point =
+  let x, y = p in x, (-y) % prime
+
+
 ///  Point addition and doubling in projective coordinates
 
 let point_add (p:proj_point) (q:proj_point) : proj_point =
