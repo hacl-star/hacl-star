@@ -158,30 +158,56 @@ let point_mul_lambda_and_split_lambda r1 r2 lambda_q scalar q =
 
 
 inline_for_extraction noextract
-val negate_scalar_cond_vartime: k:qelem -> Stack bool
-  (requires fun h -> live h k /\ qas_nat h k < S.q)
-  (ensures  fun h0 b h1 -> modifies (loc k) h0 h1 /\
-    b == SG.scalar_is_high (qas_nat h0 k) /\
-    qas_nat h1 k == (if b then SG.qnegate (qas_nat h0 k) else qas_nat h0 k))
+val negate_point_and_scalar_cond_vartime: k:qelem -> p:point -> Stack bool
+  (requires fun h ->
+    live h k /\ live h p /\ disjoint k p /\
+    qas_nat h k < S.q /\ point_inv h p)
+  (ensures  fun h0 b h1 -> modifies (loc k |+| loc p) h0 h1 /\
+    b == SG.scalar_is_high (qas_nat h0 k) /\ point_inv h1 p /\
+    (let k_s, p_s = SG.negate_point_and_scalar_cond (qas_nat h0 k) (point_eval h0 p) in
+    qas_nat h1 k == k_s /\ point_eval h1 p == p_s))
 
-let negate_scalar_cond_vartime k =
+let negate_point_and_scalar_cond_vartime k p =
   let b = is_qelem_le_q_halved_vartime k in
   [@inline_let] let if_high = not b in
   qnegate_conditional_vartime k if_high;
+  if if_high then point_negate p p;
   if_high
 
 
 inline_for_extraction noextract
-val negate_point_cond_vartime: p:point -> is_negate:bool -> Stack unit
-  (requires fun h -> live h p /\ point_inv h p)
-  (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
-    point_inv h1 p /\
-    point_eval h1 p ==
-      (if is_negate then S.point_negate (point_eval h0 p) else point_eval h0 p))
+val ecmult_endo_split:
+    r1:qelem -> r2:qelem
+  -> q1:point -> q2:point
+  -> scalar:qelem -> q:point -> Stack (bool & bool)
+  (requires fun h ->
+    live h r1 /\ live h r2 /\ live h q1 /\
+    live h q2 /\ live h scalar /\ live h q /\
+    disjoint r1 r2 /\ disjoint r1 q1 /\ disjoint r1 q2 /\
+    disjoint r1 scalar /\ disjoint r1 q /\ disjoint r2 q1 /\
+    disjoint r2 q2 /\ disjoint r2 scalar /\ disjoint r2 q /\
+    disjoint q1 q2 /\ disjoint q1 scalar /\ disjoint q1 q /\
+    disjoint q2 scalar /\ disjoint q2 q /\
+    point_inv h q /\ qas_nat h scalar < S.q)
+  (ensures fun h0 (is_high1, is_high2) h1 ->
+    modifies (loc r1 |+| loc r2 |+| loc q1 |+| loc q2) h0 h1 /\
+    point_inv h1 q1 /\ point_inv h1 q2 /\
+   (let r1_s0, r2_s0 = SG.scalar_split_lambda (qas_nat h0 scalar) in
+    let r1_s, q1_s, r2_s, q2_s = SG.ecmult_endo_split (qas_nat h0 scalar) (point_eval h0 q) in
+    qas_nat h1 r1 == r1_s /\ point_eval h1 q1 == q1_s /\
+    qas_nat h1 r2 == r2_s /\ point_eval h1 q2 == q2_s /\
+    is_high1 == SG.scalar_is_high r1_s0 /\
+    is_high2 == SG.scalar_is_high r2_s0))
 
-let negate_point_cond_vartime p is_negate =
-  if is_negate then point_negate p p
-
+let ecmult_endo_split r1 r2 q1 q2 scalar q =
+  // modifies r1, r2, q2 s.t. r1 + r2 * lambda = scalar /\ q2 = [lambda]q
+  point_mul_lambda_and_split_lambda r1 r2 q2 scalar q;
+  copy_point q1 q; // q1 = q
+  // modifies r1, q1
+  let is_high1 = negate_point_and_scalar_cond_vartime r1 q1 in
+  // modifies r2, q2
+  let is_high2 = negate_point_and_scalar_cond_vartime r2 q2 in
+  is_high1, is_high2
 
 
 // inline_for_extraction noextract
@@ -190,28 +216,6 @@ let negate_point_cond_vartime p is_negate =
 //     point_eval_lseq a = SG.point_mul_lambda (point_eval_lseq q) /\
 //     (forall (j:nat{j < 16}).
 //       PT.precomp_table_inv 15ul 0ul PM.mk_k256_concrete_ops q 16ul table j)
-
-// // This function returns [r_small]([lambda]Q)
-// // using a precomputed table [0; Q; 2Q; ...; 15Q]
-// inline_for_extraction noextract
-// val lprecomp_get_consttime_lambda:
-//   q:Ghost.erased (LSeq.lseq uint64 15){point_inv_lseq q} ->
-//   BE.pow_a_to_small_b_st U64 15ul 0ul PM.mk_k256_concrete_ops 4ul 16ul (table1_inv_precomp q)
-
-// let lprecomp_get_consttime_lambda q ctx lambda_q table1 r_small res =
-//   let h0 = ST.get () in
-//   assert (table1_inv_precomp q lambda_q (as_seq h0 table1));
-//   // table1.[r_small] = [r_small]Q
-//   BE.lprecomp_get_consttime 15ul 0ul PM.mk_k256_concrete_ops 4ul 16ul ctx q table1 r_small res;
-//   let h1 = ST.get () in
-//   assert (point_eval h1 res == SE.pow S.mk_k256_concrete_ops (point_eval_lseq q) (v r_small));
-//   point_mul_lambda_inplace res;
-//   let h2 = ST.get () in
-//   assert (point_eval h2 res == SG.point_mul_lambda (point_eval h1 res));
-//   // GLV lemma
-//   assume (point_eval h2 res ==
-//     SE.pow S.mk_k256_concrete_ops (point_eval_lseq lambda_q) (v r_small))
-
 
 // // This function returns [r_small]([lambda]Q)
 // // using a precomputed table [0; Q; 2Q; ...; 15Q]
@@ -294,16 +298,12 @@ let point_mul_split_lambda_vartime out scalar q =
   push_frame ();
   let r1 = create_qelem () in
   let r2 = create_qelem () in
+  let q1 = create_point () in
   let q2 = create_point () in
-  point_mul_lambda_and_split_lambda r1 r2 q2 scalar q;
-  let is_high1 = negate_scalar_cond_vartime r1 in
-  negate_point_cond_vartime q is_high1;
-  let is_high2 = negate_scalar_cond_vartime r2 in
-  negate_point_cond_vartime q2 is_high2;
-
+  let is_high1, is_high2 = ecmult_endo_split r1 r2 q1 q2 scalar q in
   let h = ST.get () in
   assume (qas_nat h r1 < pow2 128 /\ qas_nat h r2 < pow2 128);
-  point_mul_split_lambda_table out r1 q r2 q2;
+  point_mul_split_lambda_table out r1 q1 r2 q2;
   admit();
   pop_frame ()
 
@@ -423,38 +423,20 @@ val point_mul_double_split_lambda_vartime:
       (qas_nat h0 scalar2) (point_eval h0 q2))
 
 [@CInline]
-let point_mul_double_split_lambda_vartime out scalar1 q1 scalar2 q3 =
-  let h0 = ST.get () in
+let point_mul_double_split_lambda_vartime out scalar1 p1 scalar2 p2 =
   push_frame ();
-  let h1 = ST.get () in
   let r1 = create_qelem () in
   let r2 = create_qelem () in
   let r3 = create_qelem () in
   let r4 = create_qelem () in
+  let q1 = create_point () in
   let q2 = create_point () in
-  let q4 = create_point () in  
-  admit();  
-  point_mul_lambda_and_split_lambda r1 r2 q2 scalar1 q1;
-  let h2 = ST.get () in
-  assert (modifies (loc r1 |+| loc r2 |+| loc q2) h1 h2);
-  point_mul_lambda_and_split_lambda r3 r4 q4 scalar2 q3;
-  let h3 = ST.get () in
-  assert (modifies (loc r3 |+| loc r4 |+| loc q4) h2 h3);
-  assert (modifies (loc r1 |+| loc r2 |+| loc q2 |+| loc r3 |+| loc r4 |+| loc q4) h1 h3);
-  let is_high1 = negate_scalar_cond_vartime r1 in
-  negate_point_cond_vartime q1 is_high1;
-  let is_high2 = negate_scalar_cond_vartime r2 in
-  negate_point_cond_vartime q2 is_high2;
-  let is_high3 = negate_scalar_cond_vartime r3 in
-  negate_point_cond_vartime q3 is_high3;
-  let is_high4 = negate_scalar_cond_vartime r4 in
-  negate_point_cond_vartime q4 is_high4;
-
+  let q3 = create_point () in
+  let q4 = create_point () in
+  admit();
+  let is_high1, is_high2 = ecmult_endo_split r1 r2 q1 q2 scalar1 p1 in
+  let is_high3, is_high4 = ecmult_endo_split r3 r4 q3 q4 scalar2 p2 in
   point_mul_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4;
-  let h4 = ST.get () in
-  assert (modifies (loc out) h3 h4);
-  assume (modifies (loc r1 |+| loc r2 |+|
-    loc q2 |+| loc r3 |+| loc r4 |+| loc q4 |+| loc out) h1 h4);
   pop_frame ()
 
 
