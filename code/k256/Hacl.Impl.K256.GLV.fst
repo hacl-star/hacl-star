@@ -213,7 +213,7 @@ val ecmult_endo_split:
 let ecmult_endo_split r1 r2 q1 q2 scalar q =
   // modifies r1, r2, q2 s.t. r1 + r2 * lambda = scalar /\ q2 = [lambda]q
   point_mul_lambda_and_split_lambda r1 r2 q2 scalar q;
-  copy_point q1 q; // q1 = q
+  copy q1 q; // q1 = q
   // modifies r1, q1
   let is_high1 = negate_point_and_scalar_cond_vartime r1 q1 in
   // modifies r2, q2
