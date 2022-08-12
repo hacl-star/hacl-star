@@ -105,6 +105,10 @@ let scalar_split_lambda (k:S.qelem) : S.qelem & S.qelem =
 let scalar_is_high (k:S.qelem) : bool = k > S.q / 2
 let qnegate (k:S.qelem) : S.qelem = (- k) % S.q
 
+let point_negate_cond (p:S.proj_point) (is_negate:bool) : S.proj_point =
+  if is_negate then S.point_negate p else p
+
+
 let aff_negate_point_and_scalar_cond (k:S.qelem) (p:S.aff_point) : S.qelem & S.aff_point =
   if scalar_is_high k then begin
     let k_neg = qnegate k in

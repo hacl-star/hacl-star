@@ -277,6 +277,18 @@ let lemma_scalar_split_lambda_r1_and_r2 k =
   }
 
 
+val lemma_ecmult_endo_split: k:S.qelem -> p:S.proj_point ->
+  Lemma (let r1, p1, r2, p2 = ecmult_endo_split k p in
+    let lambda_p = point_mul_lambda p in
+    let r1_0, r2_0 = scalar_split_lambda k in
+    let is_high1 = scalar_is_high r1_0 in
+    let is_high2 = scalar_is_high r2_0 in
+    p1 == (if is_high1 then S.point_negate p else p) /\
+    p2 == (if is_high2 then S.point_negate lambda_p else lambda_p))
+
+let lemma_ecmult_endo_split k p = ()
+
+
 // TODO: prove that r1 and r2 are ~128 bits long
 assume
 val lemma_scalar_split_lambda_fits (k:S.qelem) (p:S.proj_point) :
