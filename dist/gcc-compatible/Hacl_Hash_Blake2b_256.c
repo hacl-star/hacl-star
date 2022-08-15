@@ -34,9 +34,7 @@ update_blake2b_256(
   uint8_t *block
 )
 {
-  Lib_IntVector_Intrinsics_vec256 wv[4U];
-  for (uint32_t _i = 0U; _i < (uint32_t)4U; ++_i)
-    wv[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 wv[4U] = { 0U };
   FStar_UInt128_uint128
   totlen1 =
     FStar_UInt128_add_mod(totlen,
