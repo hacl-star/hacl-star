@@ -441,3 +441,17 @@ val lemma_point_mul_double_split_lambda:
 //     (==) { lemma_aff_point_mul_split_lambda k2 p_aff2 }
 //     aff_point_add (aff_point_mul k1 p_aff1) (aff_point_mul k2 p_aff2);
 //   }
+
+
+assume
+// [k]P or -[k]P = [k](-P)
+val point_negate_cond_pow_lemma: is_negate:bool -> p:S.proj_point -> k:nat ->
+  Lemma (SE.pow S.mk_k256_concrete_ops (point_negate_cond p is_negate) k ==
+    point_negate_cond (SE.pow S.mk_k256_concrete_ops p k) is_negate)
+
+
+assume
+// [k]([lambda]P) = [lambda]([k]P) or [k](-[lambda]P) = [lambda](-[k]P)
+val point_negate_cond_lambda_pow_lemma: is_negate:bool -> p:S.proj_point -> k:nat ->
+  Lemma (SE.pow S.mk_k256_concrete_ops (point_negate_cond (point_mul_lambda p) is_negate) k ==
+    point_mul_lambda (point_negate_cond (SE.pow S.mk_k256_concrete_ops p k) is_negate))

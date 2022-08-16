@@ -9,9 +9,12 @@ open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
 
+module S = Spec.K256
 module SG = Hacl.Spec.K256.GLV
+
 open Hacl.K256.Field
 open Hacl.K256.Scalar
+open Hacl.Impl.K256.Point
 
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -124,3 +127,108 @@ let make_g2 f =
 
   assert_norm (SG.g2 == qas_nat4 x);
   make_u64_4 f x
+
+
+(**
+  Representing a scalar k as (r1 + r2 * lambda) mod S.q,
+  s.t. r1 and r2 are ~128 bits long
+*)
+
+inline_for_extraction noextract
+val scalar_split_lambda_g1g2 (tmp1 tmp2 r1 r2 k: qelem) : Stack unit
+  (requires fun h ->
+    live h k /\ live h r1 /\ live h r2 /\
+    live h tmp1 /\ live h tmp2 /\
+    disjoint k r1 /\ disjoint k r2 /\ disjoint r1 r2 /\
+    disjoint tmp1 r1 /\ disjoint tmp1 r2 /\ disjoint tmp1 k /\
+    disjoint tmp2 r1 /\ disjoint tmp2 r2 /\ disjoint tmp2 k /\
+    disjoint tmp1 tmp2 /\ qas_nat h k < S.q)
+  (ensures  fun h0 _ h1 ->
+    modifies (loc r1 |+| loc r2 |+| loc tmp1 |+| loc tmp2) h0 h1 /\
+   (let r1 = qas_nat h1 r1 in let r2 = qas_nat h1 r2 in
+    r1 < S.q /\ r1 = SG.qmul_shift_384 (qas_nat h0 k) SG.g1 /\
+    r2 < S.q /\ r2 = SG.qmul_shift_384 (qas_nat h0 k) SG.g2))
+
+let scalar_split_lambda_g1g2 tmp1 tmp2 r1 r2 k =
+  make_g1 tmp1; // tmp1 = g1
+  make_g2 tmp2; // tmp2 = g2
+  qmul_shift_384 r1 k tmp1; // r1 = c1 = qmul_shift_384 k g1
+  qmul_shift_384 r2 k tmp2; // r2 = c2 = qmul_shift_384 k g2
+  let h0 = ST.get () in
+  SG.qmul_shift_384_lemma (qas_nat h0 k) (qas_nat h0 tmp1);
+  SG.qmul_shift_384_lemma (qas_nat h0 k) (qas_nat h0 tmp2);
+  assert (qas_nat h0 r1 < S.q /\ qas_nat h0 r2 < S.q)
+
+
+// k = (r1 + lambda * k2) % S.q
+val scalar_split_lambda (r1 r2 k: qelem) : Stack unit
+  (requires fun h ->
+    live h k /\ live h r1 /\ live h r2 /\
+    disjoint k r1 /\ disjoint k r2 /\ disjoint r1 r2 /\
+    qas_nat h k < S.q)
+  (ensures  fun h0 _ h1 -> modifies (loc r1 |+| loc r2) h0 h1 /\
+   (let r1_s, r2_s = SG.scalar_split_lambda (qas_nat h0 k) in
+    qas_nat h1 r1 == r1_s /\ qas_nat h1 r2 == r2_s))
+
+[@CInline]
+let scalar_split_lambda r1 r2 k =
+  push_frame ();
+  let tmp1 = create_qelem () in
+  let tmp2 = create_qelem () in
+  scalar_split_lambda_g1g2 tmp1 tmp2 r1 r2 k;
+
+  make_minus_b1 tmp1; // tmp1 = minus_b1
+  make_minus_b2 tmp2; // tmp2 = minus_b2
+  qmul r1 r1 tmp1; // r1 = c1 = c1 * minus_b1
+  qmul r2 r2 tmp2; // r2 = c2 = c2 * minus_b2
+
+  make_minus_lambda tmp1; // tmp1 = minus_lambda
+  qadd r2 r1 r2; // r2 = r2 = c1 + c2
+  qmul tmp2 r2 tmp1; // tmp2 = r2 * minus_lambda
+  qadd r1 k tmp2; // r1 = r1 = k + r2 * minus_lambda
+  pop_frame ()
+
+
+(**
+ Fast computation of [lambda]P as (beta * px, py, pz) in projective coordinates
+*)
+
+// [lambda]P = (beta * px, py, pz)
+val point_mul_lambda: res:point -> p:point -> Stack unit
+  (requires fun h ->
+    live h res /\ live h p /\ eq_or_disjoint res p /\
+    point_inv h p)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    point_inv h1 res /\
+    point_eval h1 res == SG.point_mul_lambda (point_eval h0 p))
+
+[@CInline]
+let point_mul_lambda res p =
+  push_frame ();
+  let rx, ry, rz = getx res, gety res, getz res in
+  let px, py, pz = getx p, gety p, getz p in
+  let beta = create_felem () in
+  make_beta beta;
+  fmul rx beta px;
+
+  copy_felem ry py;
+  copy_felem rz pz;
+  pop_frame ()
+
+
+// [lambda]P = (beta * px, py, pz)
+val point_mul_lambda_inplace: res:point -> Stack unit
+  (requires fun h ->
+    live h res /\ point_inv h res)
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    point_inv h1 res /\
+    point_eval h1 res == SG.point_mul_lambda (point_eval h0 res))
+
+[@CInline]
+let point_mul_lambda_inplace res =
+  push_frame ();
+  let rx, ry, rz = getx res, gety res, getz res in
+  let beta = create_felem () in
+  make_beta beta;
+  fmul rx beta rx;
+  pop_frame ()
