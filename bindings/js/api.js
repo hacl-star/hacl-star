@@ -217,6 +217,10 @@ var HaclWasm = (function() {
   var my_imports = {
     EverCrypt_TargetConfig: (mem) => ({
       hacl_can_compile_vale: 0,
+      hacl_can_compile_vec128: 0,
+      hacl_can_compile_vec256: 0,
+      has_vec128_not_avx: () => false,
+      has_vec256_not_avx2: () => false,
     }),
   };
 
