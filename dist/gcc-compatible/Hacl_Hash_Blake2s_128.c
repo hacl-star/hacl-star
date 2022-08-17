@@ -57,9 +57,7 @@ Hacl_Hash_Blake2s_128_update_blake2s_128(
   uint8_t *block
 )
 {
-  Lib_IntVector_Intrinsics_vec128 wv[4U];
-  for (uint32_t _i = 0U; _i < (uint32_t)4U; ++_i)
-    wv[_i] = Lib_IntVector_Intrinsics_vec128_zero;
+  Lib_IntVector_Intrinsics_vec128 wv[4U] = { 0U };
   uint64_t totlen1 = totlen + (uint64_t)(uint32_t)64U;
   uint32_t m_w[16U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
@@ -490,6 +488,13 @@ Hacl_Hash_Blake2s_128_update_last_blake2s_128(
 void Hacl_Hash_Blake2s_128_hash_blake2s_128(uint8_t *input, uint32_t input_len, uint8_t *dst)
 {
   Hacl_Blake2s_128_blake2s((uint32_t)32U, dst, input_len, input, (uint32_t)0U, NULL);
+}
+
+Lib_IntVector_Intrinsics_vec128 *Hacl_Hash_Blake2s_128_malloc_blake2s_128()
+{
+  Lib_IntVector_Intrinsics_vec128
+  *buf = KRML_HOST_CALLOC((uint32_t)4U, sizeof (Lib_IntVector_Intrinsics_vec128));
+  return buf;
 }
 
 static inline void

@@ -22,8 +22,8 @@
  */
 
 
-#ifndef __internal_Hacl_Hash_Blake2b_256_H
-#define __internal_Hacl_Hash_Blake2b_256_H
+#ifndef __internal_EverCrypt_AEAD_H
+#define __internal_EverCrypt_AEAD_H
 
 #if defined(__cplusplus)
 extern "C" {
@@ -35,52 +35,21 @@ extern "C" {
 #include "krml/internal/target.h"
 
 
+#include "internal/Vale.h"
+#include "internal/Hacl_Spec.h"
 #include "internal/Hacl_Krmllib.h"
-#include "internal/Hacl_Hash_Blake2.h"
-#include "../Hacl_Hash_Blake2b_256.h"
+#include "../EverCrypt_AEAD.h"
 #include "evercrypt_targetconfig.h"
-#include "libintvector.h"
-FStar_UInt128_uint128
-Hacl_Hash_Blake2b_256_init_blake2b_256(Lib_IntVector_Intrinsics_vec256 *s);
-
-FStar_UInt128_uint128
-Hacl_Hash_Blake2b_256_update_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  FStar_UInt128_uint128 totlen,
-  uint8_t *block
-);
-
-void
-Hacl_Hash_Blake2b_256_finish_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  FStar_UInt128_uint128 ev,
-  uint8_t *dst
-);
-
-FStar_UInt128_uint128
-Hacl_Hash_Blake2b_256_update_multi_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  FStar_UInt128_uint128 ev,
-  uint8_t *blocks,
-  uint32_t n_blocks
-);
-
-FStar_UInt128_uint128
-Hacl_Hash_Blake2b_256_update_last_blake2b_256(
-  Lib_IntVector_Intrinsics_vec256 *s,
-  FStar_UInt128_uint128 ev,
-  FStar_UInt128_uint128 prev_len,
-  uint8_t *input,
-  uint32_t input_len
-);
-
-void Hacl_Hash_Blake2b_256_hash_blake2b_256(uint8_t *input, uint32_t input_len, uint8_t *dst);
-
-Lib_IntVector_Intrinsics_vec256 *Hacl_Hash_Blake2b_256_malloc_blake2b_256();
+typedef struct EverCrypt_AEAD_state_s_s
+{
+  Spec_Cipher_Expansion_impl impl;
+  uint8_t *ek;
+}
+EverCrypt_AEAD_state_s;
 
 #if defined(__cplusplus)
 }
 #endif
 
-#define __internal_Hacl_Hash_Blake2b_256_H_DEFINED
+#define __internal_EverCrypt_AEAD_H_DEFINED
 #endif
