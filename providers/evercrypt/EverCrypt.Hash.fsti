@@ -69,8 +69,7 @@ open LowStar.BufferOps
 /// do not use as argument of ghost functions
 type e_alg = G.erased alg
 
-// [@CAbstractStruct]
-// TODO: re-instate this, causes issues in MerkleTree, not sure why
+[@CAbstractStruct]
 val state_s: alg -> Type0
 
 // pointer to abstract implementation state
