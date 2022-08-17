@@ -764,9 +764,6 @@ dist/wasm/Makefile.basic: INTRINSIC_FLAGS =
 # Must appear early on because of the left-to-right semantics of -bundle flags.
 dist/wasm/Makefile.basic: HAND_WRITTEN_LIB_FLAGS = $(WASM_FLAGS)
 
-# Doesn't work in WASM because one function has some heap allocation
-dist/wasm/Makefile.basic: HASH_BUNDLE += -bundle Hacl.HMAC_DRBG
-
 # Doesn't work in WASM because un-materialized externals for AES128
 dist/wasm/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Frodo.KEM,Hacl.Impl.Frodo.*,Hacl.Impl.Matrix,Hacl.Frodo.*,Hacl.Keccak,Hacl.AES128,Hacl.Frodo64,Hacl.Frodo640,Hacl.Frodo976,Hacl.Frodo1344
 
@@ -797,10 +794,6 @@ dist/wasm/Makefile.basic: POLY_BUNDLE = \
   -bundle 'Hacl.Poly1305_128,Hacl.Poly1305_256,Hacl.Impl.Poly1305.*' \
   -bundle 'Hacl.Streaming.Poly1305_128,Hacl.Streaming.Poly1305_256'
 dist/wasm/Makefile.basic: SHA2MB_BUNDLE = -bundle Hacl.Impl.SHA2.*,Hacl.SHA2.Scalar32,Hacl.SHA2.Vec128,Hacl.SHA2.Vec256
-dist/wasm/Makefile.basic: BLAKE2_BUNDLE = $(BLAKE2_BUNDLE_BASE) \
-  -bundle 'Hacl.Hash.Blake2s_128,Hacl.Blake2s_128,Hacl.Hash.Blake2b_256,Hacl.Blake2b_256' \
-  -bundle 'Hacl.HMAC.Blake2s_128,Hacl.HMAC.Blake2b_256,Hacl.HKDF.Blake2s_128,Hacl.HKDF.Blake2b_256' \
-  -bundle 'Hacl.Streaming.Blake2s_128,Hacl.Streaming.Blake2b_256'
 
 dist/wasm/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 
