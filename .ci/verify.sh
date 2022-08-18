@@ -15,5 +15,5 @@ export MLCRYPTO_HOME=$(pwd)/MLCrypto
 export OPENSSL_HOME=$(pwd)/openssl
 
 export NOOPENSSLCHECK=1
-make -j 4
+make -j 6
 make test-unstaged doc-wasm doc-ocaml
