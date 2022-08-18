@@ -14,7 +14,7 @@ jobs:
       - run: echo "🖥️ The workflow is now ready to test your code on the runner."
       - name: Clean up previous images
         run: |
-          docker system prune -a -f
+          sudo docker system prune -a -f
       - name: Build complete Dockerfile
         run: |
-          docker build --progress plain -f .ci/Ubuntu.Dockerfile .
+          sudo docker build --progress plain -f .ci/Ubuntu.Dockerfile .
