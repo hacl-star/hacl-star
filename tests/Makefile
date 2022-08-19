@@ -1,12 +1,7 @@
 # A minimalistic Makefile for all testing options.
 # Note: on OSX, this necessitates a recent OpenSSL, possibly installed by brew,
 # so I had to do:
-ifeq ($(shell uname),Darwin)
-OPENSSL_ROOT=$(shell which brew >/dev/null && brew info --quiet openssl | egrep '^/' | cut -f 1 -d ' ')
-CFLAGS := -I$(OPENSSL_ROOT)/include/ $(CFLAGS)
-LDFLAGS:= -L$(OPENSSL_ROOT)/lib $(LDFLAGS)
-endif
-
+include Makefile.openssl
 include ../dist/gcc-compatible/Makefile.config
 
 KRML_HOME?=../dist/karamel
