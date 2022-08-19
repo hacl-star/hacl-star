@@ -379,6 +379,41 @@ let lemma_aff_point_mul_endo_split k p =
  Fast computation of [k]P in projective coordinates
 *)
 
+val lemma_ecmult_endo_split_to_aff: k:S.qelem -> p:S.proj_point -> Lemma
+  (let r1, p1, r2, p2 = ecmult_endo_split k p in
+   let ar1, ap1, ar2, ap2 = aff_ecmult_endo_split k (S.to_aff_point p) in
+   r1 == ar1 /\ S.to_aff_point p1 == ap1 /\ r2 == ar2 /\ S.to_aff_point p2 == ap2)
+
+let lemma_ecmult_endo_split_to_aff k p =
+  let r1, p1, r2, p2 = ecmult_endo_split k p in
+  let ar1, ap1, ar2, ap2 = aff_ecmult_endo_split k (S.to_aff_point p) in
+  assert (r1 == ar1 /\ r2 == ar2);
+
+  let r10, r20 = scalar_split_lambda k in
+  let p_aff = S.to_aff_point p in
+
+  let lambda_p = point_mul_lambda p in
+  let lambda_p_aff = aff_point_mul_lambda p_aff in
+  lemma_glv p; lemma_glv_aff p_aff;
+  assert (S.to_aff_point lambda_p == lambda_p_aff);
+
+  let is_high1 = S.scalar_is_high r10 in
+  let is_high2 = S.scalar_is_high r20 in
+  if not is_high1 && not is_high2 then ()
+  else begin
+    if not is_high1 && is_high2 then
+      LS.to_aff_point_negate_lemma lambda_p
+    else begin
+      if is_high1 && not is_high2 then
+        LS.to_aff_point_negate_lemma p
+      else begin
+        LS.to_aff_point_negate_lemma p;
+        LS.to_aff_point_negate_lemma lambda_p
+      end
+    end
+  end
+
+
 // [k]P
 let point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.proj_point =
   let r1, p1, r2, p2 = ecmult_endo_split k p in
@@ -386,29 +421,26 @@ let point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.proj_point =
   SE.exp_double_fw S.mk_k256_concrete_ops p1 128 r1 p2 r2 4
 
 
-assume
 val lemma_point_mul_split_lambda: k:S.qelem -> p:S.proj_point ->
-  Lemma (S.to_aff_point (point_mul_split_lambda k p) = aff_point_mul k (S.to_aff_point p))
+  Lemma (S.to_aff_point (point_mul_split_lambda k p) == aff_point_mul k (S.to_aff_point p))
 
-// let lemma_point_mul_split_lambda k p =
-//   let open Spec.K256 in
-//   let r1, r2 = scalar_split_lambda k in
-//   lemma_scalar_split_lambda_fits k;
-//   let lambda_p = point_mul_lambda p in
-//   let p_aff = to_aff_point p in
-//   calc (==) {
-//     to_aff_point (point_mul_split_lambda k p);
-//     (==) {
-//       SE.exp_double_fw_lemma mk_k256_concrete_ops p 129 r1 lambda_p r2 4;
-//       LE.exp_double_fw_lemma mk_k256_comm_monoid p_aff 129 r1 (to_aff_point lambda_p) r2 4 }
-//     aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (to_aff_point lambda_p));
-//     (==) { lemma_glv p }
-//     aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (aff_point_mul lambda p_aff));
-//     (==) { lemma_glv_aff p_aff }
-//     aff_point_add (aff_point_mul r1 p_aff) (aff_point_mul r2 (aff_point_mul_lambda p_aff));
-//     (==) { lemma_aff_point_mul_split_lambda k p_aff }
-//     aff_point_mul k p_aff;
-//   }
+let lemma_point_mul_split_lambda k p =
+  let open Spec.K256 in
+  let r1, p1, r2, p2 = ecmult_endo_split k p in
+  lemma_scalar_split_lambda_fits k p;
+
+  let p_aff  = to_aff_point p in
+  let p1_aff = to_aff_point p1 in
+  let p2_aff = to_aff_point p2 in
+  calc (==) {
+    to_aff_point (point_mul_split_lambda k p);
+    (==) {
+      SE.exp_double_fw_lemma mk_k256_concrete_ops p1 128 r1 p2 r2 4;
+      LE.exp_double_fw_lemma mk_k256_comm_monoid p1_aff 128 r1 p2_aff r2 4 }
+    aff_point_add (aff_point_mul r1 p1_aff) (aff_point_mul r2 p2_aff);
+    (==) { lemma_aff_point_mul_endo_split k p_aff; lemma_ecmult_endo_split_to_aff k p }
+    aff_point_mul k p_aff;
+  }
 
 
 (**
@@ -427,67 +459,47 @@ let point_mul_double_split_lambda
   SE.exp_four_fw S.mk_k256_concrete_ops p11 128 r11 p12 r12 p21 r21 p22 r22 4
 
 
-assume
 val lemma_point_mul_double_split_lambda:
   k1:S.qelem -> p1:S.proj_point -> k2:S.qelem -> p2:S.proj_point ->
   Lemma (S.to_aff_point (point_mul_double_split_lambda k1 p1 k2 p2) ==
     S.aff_point_add (aff_point_mul k1 (S.to_aff_point p1)) (aff_point_mul k2 (S.to_aff_point p2)))
 
-// let lemma_point_mul_double_split_lambda k1 p1 k2 p2 =
-//   let open Spec.K256 in
-//   let r11, r12 = scalar_split_lambda k1 in
-//   let r21, r22 = scalar_split_lambda k2 in
-//   lemma_scalar_split_lambda_fits k1;
-//   lemma_scalar_split_lambda_fits k2;
-//   let lambda_p1 = point_mul_lambda p1 in
-//   let p_aff1 = to_aff_point p1 in
-//   let lambda_p2 = point_mul_lambda p2 in
-//   let p_aff2 = to_aff_point p2 in
+let lemma_point_mul_double_split_lambda k1 p1 k2 p2 =
+  let open Spec.K256 in
+  let r11, p11, r12, p12 = ecmult_endo_split k1 p1 in
+  let r21, p21, r22, p22 = ecmult_endo_split k2 p2 in
+  lemma_scalar_split_lambda_fits k1 p1;
+  lemma_scalar_split_lambda_fits k2 p2;
 
-//   calc (==) {
-//     to_aff_point (point_mul_double_split_lambda k1 p1 k2 p2);
-//     (==) {
-//       SE.exp_four_fw_lemma mk_k256_concrete_ops p1 129 r11 lambda_p1 r12 p2 r21 lambda_p2 r22 4;
-//       LE.exp_four_fw_lemma mk_k256_comm_monoid
-//         p_aff1 129 r11 (to_aff_point lambda_p1) r12
-//         p_aff2 r21 (to_aff_point lambda_p2) r22 4 }
-//     aff_point_add
-//       (aff_point_add
-//         (aff_point_add (aff_point_mul r11 p_aff1) (aff_point_mul r12 (to_aff_point lambda_p1)))
-//         (aff_point_mul r21 p_aff2))
-//       (aff_point_mul r22 (to_aff_point lambda_p2));
-//     (==) { lemma_glv p1; lemma_glv p2 }
-//     aff_point_add
-//       (aff_point_add
-//         (aff_point_add
-//           (aff_point_mul r11 p_aff1)
-//           (aff_point_mul r12 (aff_point_mul lambda p_aff1)))
-//         (aff_point_mul r21 p_aff2))
-//       (aff_point_mul r22 (aff_point_mul lambda p_aff2));
-//     (==) { lemma_glv_aff p_aff1; lemma_glv_aff p_aff2 }
-//     aff_point_add
-//       (aff_point_add
-//         (aff_point_add
-//           (aff_point_mul r11 p_aff1)
-//           (aff_point_mul r12 (aff_point_mul_lambda p_aff1)))
-//         (aff_point_mul r21 p_aff2))
-//       (aff_point_mul r22 (aff_point_mul_lambda p_aff2));
-//     (==) { lemma_aff_point_mul_split_lambda k1 p_aff1 }
-//     aff_point_add
-//       (aff_point_add
-//         (aff_point_mul k1 p_aff1)
-//         (aff_point_mul r21 p_aff2))
-//       (aff_point_mul r22 (aff_point_mul_lambda p_aff2));
-//     (==) { LS.aff_point_add_assoc_lemma (aff_point_mul k1 p_aff1)
-//       (aff_point_mul r21 p_aff2) (aff_point_mul r22 (aff_point_mul_lambda p_aff2)) }
-//     aff_point_add
-//       (aff_point_mul k1 p_aff1)
-//       (aff_point_add
-//         (aff_point_mul r21 p_aff2)
-//         (aff_point_mul r22 (aff_point_mul_lambda p_aff2)));
-//     (==) { lemma_aff_point_mul_split_lambda k2 p_aff2 }
-//     aff_point_add (aff_point_mul k1 p_aff1) (aff_point_mul k2 p_aff2);
-//   }
+  let p1_aff = to_aff_point p1 in
+  let p2_aff = to_aff_point p2 in
+  let p11_aff = to_aff_point p11 in
+  let p12_aff = to_aff_point p12 in
+  let p21_aff = to_aff_point p21 in
+  let p22_aff = to_aff_point p22 in
+
+  calc (==) {
+    S.to_aff_point (point_mul_double_split_lambda k1 p1 k2 p2);
+  (==) {
+    SE.exp_four_fw_lemma mk_k256_concrete_ops p11 128 r11 p12 r12 p21 r21 p22 r22 4;
+    LE.exp_four_fw_lemma mk_k256_comm_monoid p11_aff 128 r11 p12_aff r12 p21_aff r21 p22_aff r22 4}
+    S.aff_point_add
+      (S.aff_point_add
+        (S.aff_point_add (aff_point_mul r11 p11_aff) (aff_point_mul r12 p12_aff))
+        (aff_point_mul r21 p21_aff))
+      (aff_point_mul r22 p22_aff);
+    (==) { lemma_aff_point_mul_endo_split k1 p1_aff; lemma_ecmult_endo_split_to_aff k1 p1 }
+    S.aff_point_add
+      (S.aff_point_add (aff_point_mul k1 p1_aff) (aff_point_mul r21 p21_aff))
+      (aff_point_mul r22 p22_aff);
+    (==) { LS.aff_point_add_assoc_lemma
+      (aff_point_mul k1 p1_aff) (aff_point_mul r21 p21_aff) (aff_point_mul r22 p22_aff) }
+    S.aff_point_add (aff_point_mul k1 p1_aff)
+      (S.aff_point_add (aff_point_mul r21 p21_aff) (aff_point_mul r22 p22_aff));
+    (==) { lemma_aff_point_mul_endo_split k2 p2_aff; lemma_ecmult_endo_split_to_aff k2 p2 }
+    S.aff_point_add (aff_point_mul k1 p1_aff) (aff_point_mul k2 p2_aff);
+  }
+
 
 // [k]P or -[k]P = [k](-P)
 val point_negate_cond_pow_lemma: is_negate:bool -> p:S.proj_point -> k:nat ->
@@ -497,7 +509,7 @@ val point_negate_cond_pow_lemma: is_negate:bool -> p:S.proj_point -> k:nat ->
 let point_negate_cond_pow_lemma is_negate p k =
   if is_negate then begin
     let p_aff = S.to_aff_point p in
-    LE.lemma_inverse_pow mk_k256_abelian_group p_aff k;
+    LE.lemma_inverse_pow S.mk_k256_abelian_group p_aff k;
     assert (LE.pow S.mk_k256_comm_monoid (S.aff_point_negate p_aff) k ==
       S.aff_point_negate (LE.pow S.mk_k256_comm_monoid p_aff k));
     SE.pow_lemma S.mk_k256_concrete_ops (S.point_negate p) k;
@@ -521,7 +533,7 @@ let aff_point_negate_cond_lambda_pow_lemma p k =
     LE.pow cm (S.aff_point_negate (aff_point_mul_lambda p)) k;
     (==) { lemma_glv_aff p }
     LE.pow cm (S.aff_point_negate (S.aff_point_mul lambda p)) k;
-    (==) { LE.lemma_inverse_pow mk_k256_abelian_group (S.aff_point_mul lambda p) k }
+    (==) { LE.lemma_inverse_pow S.mk_k256_abelian_group (S.aff_point_mul lambda p) k }
     S.aff_point_negate (LE.pow cm (S.aff_point_mul lambda p) k);
     (==) { LE.lemma_pow_mul cm p lambda k }
     S.aff_point_negate (LE.pow cm p (lambda * k));
@@ -530,7 +542,7 @@ let aff_point_negate_cond_lambda_pow_lemma p k =
   lemma_glv_aff (S.aff_point_negate (LE.pow cm p k));
   assert (aff_point_mul_lambda (S.aff_point_negate (LE.pow cm p k)) ==
     LE.pow cm (S.aff_point_negate (LE.pow cm p k)) lambda);
-  LE.lemma_inverse_pow mk_k256_abelian_group (LE.pow cm p k) lambda;
+  LE.lemma_inverse_pow S.mk_k256_abelian_group (LE.pow cm p k) lambda;
   LE.lemma_pow_mul cm p k lambda
 
 
