@@ -37,6 +37,9 @@ let pow_neg (#t:Type) (k:abelian_group t) (x:t) (n:int) : t =
 // Properties of an inverse function
 //---------------------------------
 
+val lemma_inverse_one: #t:Type -> k:abelian_group t ->
+  Lemma (inverse k.cm.one == k.cm.one)
+
 val lemma_inverse_id: #t:Type -> k:abelian_group t -> a:t ->
   Lemma (inverse (inverse a) == a)
 
@@ -67,6 +70,25 @@ val lemma_pow_mul_base: #t:Type -> k:comm_monoid t -> a:t -> b:t -> n:nat ->
 
 val lemma_pow_double: #t:Type -> k:comm_monoid t -> x:t -> b:nat ->
   Lemma (pow k (mul x x) b == pow k x (b + b))
+
+
+val lemma_inverse_pow: #t:Type -> k:abelian_group t -> x:t -> n:nat ->
+  Lemma (inverse (pow cm x n) == pow cm (inverse x) n)
+
+val lemma_pow_neg_one: #t:Type -> k:abelian_group t -> n:int ->
+  Lemma (pow_neg k cm.one n == cm.one)
+
+val lemma_pow_neg_add: #t:Type -> k:abelian_group t -> x:t -> n:int -> m:int ->
+  Lemma (cm.mul (pow_neg k x n) (pow_neg k x m) == pow_neg k x (n + m))
+
+val lemma_pow_neg_mul: #t:Type -> k:abelian_group t -> x:t -> n:int -> m:int ->
+  Lemma (pow_neg k (pow_neg k x n) m == pow_neg k x (n * m))
+
+val lemma_pow_neg_mul_base: #t:Type -> k:abelian_group t -> a:t -> b:t -> n:int ->
+  Lemma (cm.mul (pow_neg k a n) (pow_neg k b n) == pow_neg k (cm.mul a b) n)
+
+val lemma_pow_neg_double: #t:Type -> k:abelian_group t -> x:t -> b:int ->
+  Lemma (pow_neg k (cm.mul x x) b == pow_neg k x (b + b))
 
 //-----------------------------
 

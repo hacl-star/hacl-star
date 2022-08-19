@@ -32,6 +32,8 @@ val lemma_pow_ge_zero: a:nat -> b:nat -> Lemma (pow a b >= 0) [SMTPat (pow a b)]
 val lemma_pow_nat_is_pow: a:int -> b:nat ->
   Lemma (pow a b == LE.pow mk_nat_comm_monoid a b)
 
+val lemma_pow_zero: b:pos -> Lemma (pow 0 b = 0)
+
 val lemma_pow_one: b:nat -> Lemma (pow 1 b = 1)
 
 val lemma_pow_add: x:int -> n:nat -> m:nat -> Lemma (pow x n * pow x m = pow x (n + m))
