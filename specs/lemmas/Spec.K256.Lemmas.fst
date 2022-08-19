@@ -9,25 +9,55 @@ module M = Lib.NatMod
 
 #set-options "--z3rlimit 50 --ifuel 0 --fuel 0"
 
+assume val prime_lemma: unit -> Lemma (Euclid.is_prime prime)
+
 let aff_point_at_inf_lemma p = admit()
 
 let aff_point_add_assoc_lemma p q s = admit()
 
 let aff_point_add_comm_lemma p q = admit()
 
-let to_aff_point_at_infinity_lemma () = admit()
+let aff_point_negate_lemma p = admit()
+
+let to_aff_point_at_infinity_lemma () =
+  let px, py = to_aff_point point_at_inf in
+  assert (px == zero /% zero /\ py == one /% zero);
+  assert (px == zero *% M.pow_mod #prime zero (prime - 2));
+  M.lemma_pow_mod #prime zero (prime - 2);
+  assert (px == zero *% (M.pow zero (prime - 2) % prime));
+  M.lemma_pow_zero (prime - 2);
+  assert (px == zero /\ py == zero)
 
 let to_aff_point_add_lemma p q = admit()
 
 let to_aff_point_double_lemma p = admit()
 
+let to_aff_point_negate_lemma p =
+  let px, py, pz = p in
+  let qx, qy = to_aff_point (point_negate p) in
+  assert (qx == px /% pz /\ qy == (- py) % prime /% pz);
+  let ax, ay = aff_point_negate (to_aff_point p) in
+  assert (ax == px /% pz /\ ay == (- py /% pz) % prime);
+  let pz_inv = M.pow_mod #prime pz (prime - 2) in
+
+  calc (==) { // (-py) % prime /% pz;
+    ((- py) % prime * pz_inv) % prime;
+    (==) { Math.Lemmas.lemma_mod_mul_distr_l (- py) pz_inv prime }
+    (- py * pz_inv) % prime;
+    (==) { Math.Lemmas.neg_mul_left py pz_inv }
+    (- (py * pz_inv)) % prime;
+    (==) { Math.Lemmas.lemma_mod_sub_distr 0 (py * pz_inv) prime }
+    (- (py * pz_inv) % prime) % prime; // (- py /% pz) % prime;
+  }
+
+//----------------------------------
 
 val lemma_div_mod_eq_mul_mod (a b c:felem) : Lemma
   (requires b <> 0)
   (ensures  (a *% finv b = c) == (a = c *% b))
 
 let lemma_div_mod_eq_mul_mod a b c =
-  assume (Euclid.is_prime prime);
+  prime_lemma ();
   M.lemma_div_mod_eq_mul_mod #prime a b c
 
 
