@@ -28,6 +28,12 @@ let mk_k256_comm_monoid : LE.comm_monoid aff_point = {
   LE.lemma_mul_comm = KL.aff_point_add_comm_lemma;
 }
 
+let mk_k256_abelian_group : LE.abelian_group aff_point = {
+  LE.cm = mk_k256_comm_monoid;
+  LE.inverse = aff_point_negate;
+  LE.lemma_inverse = KL.aff_point_negate_lemma;
+}
+
 let mk_to_k256_comm_monoid : SE.to_comm_monoid proj_point = {
   SE.a_spec = aff_point;
   SE.comm_monoid = mk_k256_comm_monoid;

@@ -436,12 +436,6 @@ val lemma_point_mul_double_split_lambda:
 //     aff_point_add (aff_point_mul k1 p_aff1) (aff_point_mul k2 p_aff2);
 //   }
 
-let mk_k256_abelian_group : LE.abelian_group S.aff_point = {
-  LE.cm = S.mk_k256_comm_monoid;
-  LE.inverse = S.aff_point_negate;
-  LE.lemma_inverse = LS.aff_point_negate_lemma;
-}
-
 // [k]P or -[k]P = [k](-P)
 val point_negate_cond_pow_lemma: is_negate:bool -> p:S.proj_point -> k:nat ->
   Lemma (S.to_aff_point (SE.pow S.mk_k256_concrete_ops (point_negate_cond p is_negate) k) ==
