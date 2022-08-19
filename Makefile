@@ -119,7 +119,11 @@ endif
 	cp $< $@
 
 test: test-staged
-test-unstaged: test-handwritten test-c test-ml test-hpke vale_testInline test-wasm test-bindings-ocaml
+test-unstaged: test-handwritten test-c test-ml test-hpke test-wasm test-bindings-ocaml
+
+ifeq ($(shell uname -m),x86_64)
+test-unstaged: vale_testInline
+endif
 
 # Any file in code/tests is taken to contain an `int main()` function.
 # Test should be renamed into Test.EverCrypt
