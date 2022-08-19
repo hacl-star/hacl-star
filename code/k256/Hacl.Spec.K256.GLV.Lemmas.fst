@@ -46,7 +46,7 @@ let lemma_glv_g_aff () = lemma_glv_aff S.(g_x, g_y)
 
 
 val lemma_glv : p:S.proj_point ->
-  Lemma (S.to_aff_point (point_mul_lambda p) = aff_point_mul lambda (S.to_aff_point p))
+  Lemma (S.to_aff_point (point_mul_lambda p) == aff_point_mul lambda (S.to_aff_point p))
 
 let lemma_glv p =
   let (pX, pY, pZ) = p in
@@ -71,7 +71,7 @@ let lemma_glv p =
 
 
 val lemma_glv_g : unit ->
-  Lemma (S.to_aff_point (point_mul_g_lambda ()) = aff_point_mul_g lambda)
+  Lemma (S.to_aff_point (point_mul_g_lambda ()) == aff_point_mul_g lambda)
 
 let lemma_glv_g () =
   SM.lemma_proj_aff_id (S.(beta *% S.g_x), S.g_y);
@@ -106,7 +106,7 @@ let lemma_glv_g () =
 //--------------------------------------------
 
 val lemma_scalar_split_lambda_eval (k:S.qelem) :
-  Lemma (let r1, r2 = scalar_split_lambda k in k = S.(r1 +^ r2 *^ lambda))
+  Lemma (let r1, r2 = scalar_split_lambda k in k == S.(r1 +^ r2 *^ lambda))
 
 let lemma_scalar_split_lambda_eval k =
   assert_norm ((minus_lambda + lambda) % S.q = 0);
@@ -137,8 +137,8 @@ let lemma_scalar_split_lambda_eval k =
 
 
 val lemma_mod_add_mul_zero (a b c d e:int) (n:pos) : Lemma
-  (requires (c * d + e) % n = 0)
-  (ensures  (a + b * c * d) % n = (a - e * b) % n)
+  (requires (c * d + e) % n == 0)
+  (ensures  (a + b * c * d) % n == (a - e * b) % n)
 
 let lemma_mod_add_mul_zero a b c d e n =
   calc (==) {
@@ -164,7 +164,7 @@ val lemma_scalar_split_lambda_r1_and_r2 (k:S.qelem) :
     let c2 = qmul_shift_384 k g2 in
     let k1 = k - a1 * c1 - a2 * c2 in
     let k2 = c1 * minus_b1 + c2 * minus_b2 in // or: k2 = - b1 * c1 - b2 * c2
-    r1 = k1 % S.q /\ r2 = k2 % S.q)
+    r1 == k1 % S.q /\ r2 == k2 % S.q)
 
 let lemma_scalar_split_lambda_r1_and_r2 k =
   qmul_shift_384_lemma k g1;
@@ -271,16 +271,16 @@ let lemma_scalar_split_lambda_r1_and_r2 k =
   }
 
 
-val lemma_ecmult_endo_split: k:S.qelem -> p:S.proj_point ->
-  Lemma (let r1, p1, r2, p2 = ecmult_endo_split k p in
-    let lambda_p = point_mul_lambda p in
-    let r1_0, r2_0 = scalar_split_lambda k in
-    let is_high1 = scalar_is_high r1_0 in
-    let is_high2 = scalar_is_high r2_0 in
-    p1 == (if is_high1 then S.point_negate p else p) /\
-    p2 == (if is_high2 then S.point_negate lambda_p else lambda_p))
+// val lemma_ecmult_endo_split: k:S.qelem -> p:S.proj_point ->
+//   Lemma (let r1, p1, r2, p2 = ecmult_endo_split k p in
+//     let lambda_p = point_mul_lambda p in
+//     let r1_0, r2_0 = scalar_split_lambda k in
+//     let is_high1 = S.scalar_is_high r1_0 in
+//     let is_high2 = S.scalar_is_high r2_0 in
+//     p1 == (if is_high1 then S.point_negate p else p) /\
+//     p2 == (if is_high2 then S.point_negate lambda_p else lambda_p))
 
-let lemma_ecmult_endo_split k p = ()
+// let lemma_ecmult_endo_split k p = ()
 
 
 // TODO: prove that r1 and r2 are ~128 bits long
@@ -293,33 +293,86 @@ val lemma_scalar_split_lambda_fits (k:S.qelem) (p:S.proj_point) :
  Fast computation of [k]P in affine coordinates
 *)
 
+val lemma_aff_point_mul_split_lambda: k:S.qelem -> p:S.aff_point ->
+  Lemma (let r1, r2 = scalar_split_lambda k in aff_point_mul k p ==
+    S.aff_point_add (aff_point_mul r1 p) (aff_point_mul r2 (aff_point_mul_lambda p)))
+
+let lemma_aff_point_mul_split_lambda k p =
+  let r1, r2 = scalar_split_lambda k in
+  calc (==) {
+    aff_point_mul k p;
+    (==) { lemma_scalar_split_lambda_eval k }
+    aff_point_mul S.(r1 +^ r2 *^ lambda) p;
+    (==) { Math.Lemmas.lemma_mod_plus_distr_r r1 (r2 * lambda) S.q }
+    aff_point_mul ((r1 + r2 * lambda) % S.q) p;
+    (==) { SM.lemma_aff_point_mul_neg_modq (r1 + r2 * lambda) p }
+    aff_point_mul (r1 + r2 * lambda) p;
+    (==) { SM.lemma_aff_point_mul_neg_mul_add lambda r2 r1 p }
+    S.aff_point_add (aff_point_mul r2 (aff_point_mul lambda p)) (aff_point_mul r1 p);
+    (==) { lemma_glv_aff p }
+    S.aff_point_add (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p);
+    (==) { LS.aff_point_add_comm_lemma (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p) }
+    S.aff_point_add (aff_point_mul r1 p) (aff_point_mul r2 (aff_point_mul_lambda p));
+  }
+
+
+val lemma_aff_point_mul_neg: r:S.qelem -> p:S.aff_point ->
+  Lemma (aff_point_mul ((- r) % S.q) (S.aff_point_negate p) == aff_point_mul r p)
+
+let lemma_aff_point_mul_neg r p =
+  let cm = S.mk_k256_comm_monoid in
+  let ag = S.mk_k256_abelian_group in
+  let p_neg = S.aff_point_negate p in
+  if r > 0 then begin
+    calc (==) {
+      aff_point_mul ((- r) % S.q) p_neg;
+      (==) { SM.lemma_aff_point_mul_neg_modq (- r) p_neg }
+      SM.aff_point_mul_neg (- r) p_neg;
+      (==) { }
+      S.aff_point_negate (aff_point_mul r p_neg);
+      (==) { LE.lemma_inverse_pow ag p r }
+      S.aff_point_negate (S.aff_point_negate (aff_point_mul r p));
+      (==) { LE.lemma_inverse_id ag (aff_point_mul r p) }
+      aff_point_mul r p;
+    } end
+  else begin
+    LE.lemma_pow0 cm p;
+    LE.lemma_pow0 cm p_neg end
+
+
 // [k]P = [r1 + r2 * lambda]P = [r1]P + [r2]([lambda]P) = [r1](x,y) + [r2](beta*x,y)
 // which can be computed as a double exponentiation ([a]P + [b]Q)
-let aff_point_mul_split_lambda (k:S.qelem) (p:S.aff_point) : S.aff_point =
+let aff_point_mul_endo_split (k:S.qelem) (p:S.aff_point) : S.aff_point =
   let r1, p1, r2, p2 = aff_ecmult_endo_split k p in
-  S.aff_point_add (aff_point_mul r1 p) (aff_point_mul r2 p2)
+  S.aff_point_add (aff_point_mul r1 p1) (aff_point_mul r2 p2)
 
-assume
-val lemma_aff_point_mul_split_lambda: k:S.qelem -> p:S.aff_point ->
-  Lemma (aff_point_mul_split_lambda k p = aff_point_mul k p)
+val lemma_aff_point_mul_endo_split: k:S.qelem -> p:S.aff_point ->
+  Lemma (aff_point_mul_endo_split k p == aff_point_mul k p)
 
-// let lemma_aff_point_mul_split_lambda k p =
-//   let r1, r2 = scalar_split_lambda k in
-//   calc (==) {
-//     aff_point_mul k p;
-//     (==) { lemma_scalar_split_lambda_eval k }
-//     aff_point_mul S.(r1 +^ r2 *^ lambda) p;
-//     (==) { Math.Lemmas.lemma_mod_plus_distr_r r1 (r2 * lambda) S.q }
-//     aff_point_mul ((r1 + r2 * lambda) % S.q) p;
-//     (==) { SM.lemma_aff_point_mul_modq (r1 + r2 * lambda) p }
-//     aff_point_mul (r1 + r2 * lambda) p;
-//     (==) { SM.lemma_aff_point_mul_mul_add lambda r2 r1 p }
-//     S.aff_point_add (aff_point_mul r2 (aff_point_mul lambda p)) (aff_point_mul r1 p);
-//     (==) { lemma_glv_aff p }
-//     S.aff_point_add (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p);
-//     (==) { LS.aff_point_add_comm_lemma (aff_point_mul r2 (aff_point_mul_lambda p)) (aff_point_mul r1 p) }
-//     S.aff_point_add (aff_point_mul r1 p) (aff_point_mul r2 (aff_point_mul_lambda p));
-//   }
+let lemma_aff_point_mul_endo_split k p =
+  let r10, r20 = scalar_split_lambda k in
+  let lambda_p = aff_point_mul_lambda p in
+  let r1, p1 = aff_negate_point_and_scalar_cond r10 p in
+  let r2, p2 = aff_negate_point_and_scalar_cond r20 lambda_p in
+  assert ((r1, p1, r2, p2) == aff_ecmult_endo_split k p);
+  let is_high1 = S.scalar_is_high r10 in
+  let is_high2 = S.scalar_is_high r20 in
+
+  if is_high1 && is_high2 then begin
+    lemma_aff_point_mul_neg r10 p;
+    lemma_aff_point_mul_neg r20 lambda_p;
+    lemma_aff_point_mul_split_lambda k p end
+  else begin
+    if is_high1 && not is_high2 then begin
+      lemma_aff_point_mul_neg r10 p;
+      lemma_aff_point_mul_split_lambda k p end
+    else begin
+      if not is_high1 && is_high2 then begin
+      lemma_aff_point_mul_neg r20 lambda_p;
+      lemma_aff_point_mul_split_lambda k p end
+      else lemma_aff_point_mul_split_lambda k p
+    end
+  end
 
 
 (**

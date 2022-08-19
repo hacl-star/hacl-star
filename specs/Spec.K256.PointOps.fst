@@ -49,6 +49,8 @@ let qelem = x:nat{x < q}
 let qadd (x y:qelem) : qelem = (x + y) % q
 let qmul (x y:qelem) : qelem = (x * y) % q
 let qinv (x:qelem) : qelem = M.pow_mod #q x (q - 2)
+let qnegate (x:qelem) : qelem = (- x) % q
+let scalar_is_high (x:qelem) : bool = x > q / 2
 
 let ( +^ ) = qadd
 let ( *^ ) = qmul
