@@ -1,7 +1,7 @@
 # A minimalistic Makefile for all testing options.
 # Note: on OSX, this necessitates a recent OpenSSL, possibly installed by brew,
 # so I had to do:
-include Makefile.openssl
+include ../Makefile.openssl
 include ../dist/gcc-compatible/Makefile.config
 
 KRML_HOME?=../dist/karamel
