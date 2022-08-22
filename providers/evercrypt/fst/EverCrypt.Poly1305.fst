@@ -124,8 +124,6 @@ let poly1305_vale
   assert (B.as_seq h3 dst `S.equal` Spec.Poly1305.poly1305_mac (B.as_seq h0 src) (B.as_seq h0 key))
 let poly1305 dst src len key =
   let h0 = ST.get () in
-  let avx2 = EverCrypt.AutoConfig2.has_avx2 () in
-  let avx = EverCrypt.AutoConfig2.has_avx () in
   let vec256 = EverCrypt.AutoConfig2.has_vec256 () in
   let vec128 = EverCrypt.AutoConfig2.has_vec128 () in
 

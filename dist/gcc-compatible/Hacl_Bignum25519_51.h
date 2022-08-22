@@ -661,55 +661,11 @@ static inline void
 Hacl_Impl_Curve25519_Field51_cswap2(uint64_t bit, uint64_t *p1, uint64_t *p2)
 {
   uint64_t mask = (uint64_t)0U - bit;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)10U; i++)
   {
-    uint64_t dummy = mask & (p1[0U] ^ p2[0U]);
-    p1[0U] = p1[0U] ^ dummy;
-    p2[0U] = p2[0U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[1U] ^ p2[1U]);
-    p1[1U] = p1[1U] ^ dummy;
-    p2[1U] = p2[1U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[2U] ^ p2[2U]);
-    p1[2U] = p1[2U] ^ dummy;
-    p2[2U] = p2[2U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[3U] ^ p2[3U]);
-    p1[3U] = p1[3U] ^ dummy;
-    p2[3U] = p2[3U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[4U] ^ p2[4U]);
-    p1[4U] = p1[4U] ^ dummy;
-    p2[4U] = p2[4U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[5U] ^ p2[5U]);
-    p1[5U] = p1[5U] ^ dummy;
-    p2[5U] = p2[5U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[6U] ^ p2[6U]);
-    p1[6U] = p1[6U] ^ dummy;
-    p2[6U] = p2[6U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[7U] ^ p2[7U]);
-    p1[7U] = p1[7U] ^ dummy;
-    p2[7U] = p2[7U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[8U] ^ p2[8U]);
-    p1[8U] = p1[8U] ^ dummy;
-    p2[8U] = p2[8U] ^ dummy;
-  }
-  {
-    uint64_t dummy = mask & (p1[9U] ^ p2[9U]);
-    p1[9U] = p1[9U] ^ dummy;
-    p2[9U] = p2[9U] ^ dummy;
+    uint64_t dummy = mask & (p1[i] ^ p2[i]);
+    p1[i] = p1[i] ^ dummy;
+    p2[i] = p2[i] ^ dummy;
   }
 }
 

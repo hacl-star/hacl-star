@@ -22,14 +22,52 @@
  */
 
 
-#include "EverCrypt.h"
+#ifndef __Hacl_Bignum_H
+#define __Hacl_Bignum_H
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
+#include <string.h>
+#include "krml/internal/types.h"
+#include "krml/lowstar_endianness.h"
+#include "krml/internal/target.h"
 
 
+#include "Hacl_Krmllib.h"
+#include "Hacl_Bignum_Base.h"
+#include "evercrypt_targetconfig.h"
+#include "lib_intrinsics.h"
+/* SNIPPET_START: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 */
 
-typedef struct EverCrypt_AEAD_state_s_s
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32_s
 {
-  Spec_Cipher_Expansion_impl impl;
-  uint8_t *ek;
+  uint32_t len;
+  uint32_t *n;
+  uint32_t mu;
+  uint32_t *r2;
 }
-EverCrypt_AEAD_state_s;
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32;
 
+/* SNIPPET_END: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u32 */
+
+/* SNIPPET_START: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 */
+
+typedef struct Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64_s
+{
+  uint32_t len;
+  uint64_t *n;
+  uint64_t mu;
+  uint64_t *r2;
+}
+Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64;
+
+/* SNIPPET_END: Hacl_Bignum_MontArithmetic_bn_mont_ctx_u64 */
+
+#if defined(__cplusplus)
+}
+#endif
+
+#define __Hacl_Bignum_H_DEFINED
+#endif

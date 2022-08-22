@@ -528,7 +528,11 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
   uint64_t buf4[8U];
   uint64_t buf5[8U];
   uint32_t buf6[16U];
-  uint64_t buf[16U];
+  uint32_t buf7[16U];
+  Lib_IntVector_Intrinsics_vec128 buf8[4U];
+  uint64_t buf9[16U];
+  uint64_t buf10[16U];
+  Lib_IntVector_Intrinsics_vec256 buf[4U];
   EverCrypt_Hash_state_s s;
   switch (hash_alg)
   {
@@ -618,6 +622,39 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
       }
     case Spec_Hash_Definitions_Blake2S:
       {
+        bool vec128 = EverCrypt_AutoConfig2_has_vec128();
+        #if HACL_CAN_COMPILE_VEC128
+        if (vec128)
+        {
+          Lib_IntVector_Intrinsics_vec128 init = Lib_IntVector_Intrinsics_vec128_zero;
+          for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+          {
+            buf8[i] = init;
+          }
+          s =
+            (
+              (EverCrypt_Hash_state_s){
+                .tag = EverCrypt_Hash_Blake2S_128_s,
+                { .case_Blake2S_128_s = buf8 }
+              }
+            );
+        }
+        else
+        {
+          uint32_t init = (uint32_t)0U;
+          for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+          {
+            buf7[i] = init;
+          }
+          s =
+            (
+              (EverCrypt_Hash_state_s){
+                .tag = EverCrypt_Hash_Blake2S_s,
+                { .case_Blake2S_s = buf7 }
+              }
+            );
+        }
+        #else
         uint32_t init = (uint32_t)0U;
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
@@ -625,16 +662,52 @@ void mt_sha256_compress(uint8_t *src1, uint8_t *src2, uint8_t *dst)
         }
         s =
           ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2S_s, { .case_Blake2S_s = buf6 } });
+        #endif
         break;
       }
     case Spec_Hash_Definitions_Blake2B:
       {
+        bool vec256 = EverCrypt_AutoConfig2_has_vec256();
+        #if HACL_CAN_COMPILE_VEC256
+        if (vec256)
+        {
+          Lib_IntVector_Intrinsics_vec256 init = Lib_IntVector_Intrinsics_vec256_zero;
+          for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
+          {
+            buf[i] = init;
+          }
+          s =
+            (
+              (EverCrypt_Hash_state_s){
+                .tag = EverCrypt_Hash_Blake2B_256_s,
+                { .case_Blake2B_256_s = buf }
+              }
+            );
+        }
+        else
+        {
+          uint64_t init = (uint64_t)0U;
+          for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
+          {
+            buf10[i] = init;
+          }
+          s =
+            (
+              (EverCrypt_Hash_state_s){
+                .tag = EverCrypt_Hash_Blake2B_s,
+                { .case_Blake2B_s = buf10 }
+              }
+            );
+        }
+        #else
         uint64_t init = (uint64_t)0U;
         for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
-          buf[i] = init;
+          buf9[i] = init;
         }
-        s = ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = buf } });
+        s =
+          ((EverCrypt_Hash_state_s){ .tag = EverCrypt_Hash_Blake2B_s, { .case_Blake2B_s = buf9 } });
+        #endif
         break;
       }
     default:

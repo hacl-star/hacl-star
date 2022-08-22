@@ -11,8 +11,6 @@ export FSTAR_HOME=$(pwd)/../FStar
 export KRML_HOME=$(pwd)/../karamel
 export VALE_HOME=$(pwd)/../vale
 export HACL_HOME=$(pwd)
-export MLCRYPTO_HOME=$(pwd)/MLCrypto
-export OPENSSL_HOME=$(pwd)/openssl
 
 export NOOPENSSLCHECK=1
 make -j 6

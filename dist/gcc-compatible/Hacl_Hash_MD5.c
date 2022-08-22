@@ -53,17 +53,9 @@ _t[64U] =
 
 void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s)
 {
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    s[0U] = _h0[0U];
-  }
-  {
-    s[1U] = _h0[1U];
-  }
-  {
-    s[2U] = _h0[2U];
-  }
-  {
-    s[3U] = _h0[3U];
+    s[i] = _h0[i];
   }
 }
 
@@ -1134,17 +1126,9 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
 
 void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
 {
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
   {
-    store32_le(dst + (uint32_t)0U * (uint32_t)4U, s[0U]);
-  }
-  {
-    store32_le(dst + (uint32_t)1U * (uint32_t)4U, s[1U]);
-  }
-  {
-    store32_le(dst + (uint32_t)2U * (uint32_t)4U, s[2U]);
-  }
-  {
-    store32_le(dst + (uint32_t)3U * (uint32_t)4U, s[3U]);
+    store32_le(dst + i * (uint32_t)4U, s[i]);
   }
 }
 

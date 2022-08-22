@@ -50,9 +50,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
     for (uint32_t i = (uint32_t)0U; i < nb; i++)
     {
       uint8_t *block = text1 + i * bs;
-      Lib_IntVector_Intrinsics_vec256 e[5U];
-      for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-        e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+      Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
       Lib_IntVector_Intrinsics_vec256 lo = Lib_IntVector_Intrinsics_vec256_load64_le(block);
       Lib_IntVector_Intrinsics_vec256
       hi = Lib_IntVector_Intrinsics_vec256_load64_le(block + (uint32_t)32U);
@@ -277,9 +275,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
   for (uint32_t i = (uint32_t)0U; i < nb; i++)
   {
     uint8_t *block = t10 + i * (uint32_t)16U;
-    Lib_IntVector_Intrinsics_vec256 e[5U];
-    for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-      e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+    Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
     uint64_t u0 = load64_le(block);
     uint64_t lo = u0;
     uint64_t u = load64_le(block + (uint32_t)8U);
@@ -486,9 +482,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
   if (rem1 > (uint32_t)0U)
   {
     uint8_t *last = t10 + nb * (uint32_t)16U;
-    Lib_IntVector_Intrinsics_vec256 e[5U];
-    for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-      e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+    Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
     uint8_t tmp[16U] = { 0U };
     memcpy(tmp, last, rem1 * sizeof (uint8_t));
     uint64_t u0 = load64_le(tmp);
@@ -700,9 +694,7 @@ poly1305_padded_256(Lib_IntVector_Intrinsics_vec256 *ctx, uint32_t len, uint8_t 
   {
     Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;
     Lib_IntVector_Intrinsics_vec256 *acc = ctx;
-    Lib_IntVector_Intrinsics_vec256 e[5U];
-    for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-      e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+    Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
     uint64_t u0 = load64_le(tmp);
     uint64_t lo = u0;
     uint64_t u = load64_le(tmp + (uint32_t)8U);
@@ -919,9 +911,7 @@ poly1305_do_256(
   uint8_t *out
 )
 {
-  Lib_IntVector_Intrinsics_vec256 ctx[25U];
-  for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
-    ctx[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 ctx[25U] = { 0U };
   uint8_t block[16U] = { 0U };
   Hacl_Poly1305_256_poly1305_init(ctx, k);
   if (aadlen != (uint32_t)0U)
@@ -936,9 +926,7 @@ poly1305_do_256(
   store64_le(block + (uint32_t)8U, (uint64_t)mlen);
   Lib_IntVector_Intrinsics_vec256 *pre = ctx + (uint32_t)5U;
   Lib_IntVector_Intrinsics_vec256 *acc = ctx;
-  Lib_IntVector_Intrinsics_vec256 e[5U];
-  for (uint32_t _i = 0U; _i < (uint32_t)5U; ++_i)
-    e[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 e[5U] = { 0U };
   uint64_t u0 = load64_le(block);
   uint64_t lo = u0;
   uint64_t u = load64_le(block + (uint32_t)8U);
@@ -1181,68 +1169,9 @@ Hacl_Chacha20Poly1305_256_aead_decrypt(
   uint8_t *key = tmp;
   poly1305_do_256(key, aadlen, aad, mlen, cipher, computed_mac);
   uint8_t res = (uint8_t)255U;
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)
   {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[0U], mac[0U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[1U], mac[1U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[2U], mac[2U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[3U], mac[3U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[4U], mac[4U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[5U], mac[5U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[6U], mac[6U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[7U], mac[7U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[8U], mac[8U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[9U], mac[9U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[10U], mac[10U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[11U], mac[11U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[12U], mac[12U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[13U], mac[13U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[14U], mac[14U]);
-    res = uu____0 & res;
-  }
-  {
-    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[15U], mac[15U]);
+    uint8_t uu____0 = FStar_UInt8_eq_mask(computed_mac[i], mac[i]);
     res = uu____0 & res;
   }
   uint8_t z = res;
