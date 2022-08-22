@@ -27,6 +27,8 @@ class abelian_group (t:Type) = {
 
 let sqr (#t:Type) (k:comm_monoid t) (a:t) : t = mul a a
 
+
+[@(strict_on_arguments [3])]
 let rec pow (#t:Type) (k:comm_monoid t) (x:t) (n:nat) : t =
   if n = 0 then one
   else mul x (pow k x (n - 1))

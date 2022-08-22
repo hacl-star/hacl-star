@@ -104,3 +104,73 @@ let lemma_aff_point_mul_neg_modq a p =
     (==) { LS.aff_point_at_inf_lemma (aff_point_mul (a % S.q) p) }
     aff_point_mul (a % S.q) p;
   }
+
+//-----------------------------------
+
+(**
+  ECDSA-verify using ECSM in affine coordinates
+*)
+
+open Lib.Sequence
+open Lib.ByteSequence
+
+let aff_ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =
+  let open Spec.K256 in
+  let pk_x, pk_y, is_xy_on_curve = load_public_key public_key in
+  let r = nat_from_bytes_be (sub signature 0 32) in
+  let s = nat_from_bytes_be (sub signature 32 32) in
+  let z = nat_from_bytes_be msgHash % q in
+
+  let is_r_valid = 0 < r && r < q in
+  let is_s_valid = 0 < s && s < q in
+
+  if not (is_xy_on_curve && is_r_valid && is_s_valid) then false
+  else begin
+    assert_norm (q < pow2 256);
+    let sinv = qinv s in
+    let u1 = z *^ sinv in
+    let u2 = r *^ sinv in
+    let x, y = aff_point_mul_double u1 (g_x, g_y) u2 (pk_x, pk_y) in
+    if is_aff_point_at_inf (x,y) then false
+    else x % q = r
+  end
+
+
+val ecdsa_verify_hashed_msg_is_aff (msgHash:lbytes 32) (public_key signature:lbytes 64) :
+  Lemma (S.ecdsa_verify_hashed_msg msgHash public_key signature ==
+    aff_ecdsa_verify_hashed_msg msgHash public_key signature)
+
+let ecdsa_verify_hashed_msg_is_aff msgHash public_key signature =
+  let open Spec.K256 in
+  let pk_x, pk_y, is_xy_on_curve = load_public_key public_key in
+  let r = nat_from_bytes_be (sub signature 0 32) in
+  let s = nat_from_bytes_be (sub signature 32 32) in
+  let z = nat_from_bytes_be msgHash % q in
+
+  let is_r_valid = 0 < r && r < q in
+  let is_s_valid = 0 < s && s < q in
+
+  if not (is_xy_on_curve && is_r_valid && is_s_valid) then ()
+  else begin
+    assert_norm (q < pow2 256);
+    let sinv = qinv s in
+    let u1 = z *^ sinv in
+    let u2 = r *^ sinv in
+
+    let pk = (pk_x, pk_y) in
+    let pk_proj = to_proj_point pk in
+    let base = (g_x, g_y) in
+    let base_proj = g in
+
+    let x, y = aff_point_mul_double u1 base u2 pk in
+    let _X, _Y, _Z = point_mul_double_g u1 u2 pk_proj in
+
+    lemma_proj_aff_id base;
+    lemma_proj_aff_id pk;
+    assert (to_aff_point base_proj == base);
+    assert (to_aff_point pk_proj == pk);
+    SE.exp_double_fw_lemma mk_k256_concrete_ops base_proj 256 u1 pk_proj u2 4;
+    LE.exp_double_fw_lemma mk_k256_comm_monoid
+      (to_aff_point base_proj) 256 u1 (to_aff_point pk_proj) u2 4;
+    assert (to_aff_point (_X, _Y, _Z) == (x, y));
+    () end

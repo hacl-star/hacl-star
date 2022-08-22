@@ -69,10 +69,14 @@ let is_on_curve (p:aff_point) =
 let aff_point_at_inf : aff_point = (zero, zero) // not on the curve!
 let point_at_inf : proj_point = (zero, one, zero)
 
+let is_aff_point_at_inf (p:aff_point) : bool =
+  let (x, y) = p in x = zero && y = zero
+
 let is_proj_point_at_inf (p:proj_point) : bool =
   let (_, _, z) = p in z = zero
 
 let to_aff_point (p:proj_point) : aff_point =
+  // if is_proj_point_at_inf p then aff_point_at_inf
   let (px, py, pz) = p in
   let zinv = finv pz in
   let x = px *% zinv in

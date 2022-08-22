@@ -126,6 +126,7 @@ val exp_pow2_lemma: #t:Type -> k:concrete_ops t -> a:t -> b:nat ->
   Lemma (k.to.refl (exp_pow2 k a b) == S.exp_pow2 k.to.comm_monoid (k.to.refl a) b)
 
 
+[@(strict_on_arguments [3])]
 let rec pow (#t:Type) (k:concrete_ops t) (a:t) (b:nat) : t =
   if b = 0 then k.one ()
   else k.mul a (pow k a (b - 1))
