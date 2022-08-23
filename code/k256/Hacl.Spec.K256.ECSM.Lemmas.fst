@@ -108,11 +108,60 @@ let lemma_aff_point_mul_neg_modq a p =
 //-----------------------------------
 
 (**
-  ECDSA-verify using ECSM in affine coordinates
+    ECDSA-verify using ECSM in affine coordinates
 *)
 
 open Lib.Sequence
 open Lib.ByteSequence
+
+// TODO: a_spec = x:S.aff_point{S.is_on_curve x \/ S.is_aff_point_at_inf x}
+let aff_mk_to_k256_cm : SE.to_comm_monoid S.aff_point = {
+  SE.a_spec = S.aff_point;
+  SE.comm_monoid = S.mk_k256_comm_monoid;
+  SE.refl = (fun (x:S.aff_point) -> x);
+}
+
+val aff_point_at_inf_c: SE.one_st S.aff_point aff_mk_to_k256_cm
+let aff_point_at_inf_c _ = S.aff_point_at_inf
+
+val aff_point_add_c : SE.mul_st S.aff_point aff_mk_to_k256_cm
+let aff_point_add_c p q = S.aff_point_add p q
+
+val aff_point_double_c : SE.sqr_st S.aff_point aff_mk_to_k256_cm
+let aff_point_double_c p = S.aff_point_add p p
+
+let aff_mk_k256_concrete_ops : SE.concrete_ops S.aff_point = {
+  SE.to = aff_mk_to_k256_cm;
+  SE.one = aff_point_at_inf_c;
+  SE.mul = aff_point_add_c;
+  SE.sqr = aff_point_double_c;
+}
+
+// [a]P in affine coordinates
+let aff_point_mul_loc (a:nat) (p:S.aff_point) : S.aff_point =
+  SE.pow aff_mk_k256_concrete_ops p a
+
+// [a1]P1 + [a2]P2
+let aff_point_mul_double_loc
+  (a1:S.qelem) (p1:S.aff_point)
+  (a2:S.qelem) (p2:S.aff_point) : S.aff_point =
+  S.aff_point_add (aff_point_mul_loc a1 p1) (aff_point_mul_loc a2 p2)
+
+
+val lemma_aff_point_mul_loc (a:nat) (p:S.aff_point) :
+  Lemma (aff_point_mul_loc a p == aff_point_mul a p)
+
+let lemma_aff_point_mul_loc a p =
+  SE.pow_lemma aff_mk_k256_concrete_ops p a
+
+
+val lemma_aff_point_mul_double_loc (a1:S.qelem) (p1:S.aff_point) (a2:S.qelem) (p2:S.aff_point) :
+  Lemma (aff_point_mul_double_loc a1 p1 a2 p2 == S.aff_point_mul_double a1 p1 a2 p2)
+
+let lemma_aff_point_mul_double_loc a1 p1 a2 p2 =
+  lemma_aff_point_mul_loc a1 p1;
+  lemma_aff_point_mul_loc a2 p2
+
 
 let aff_ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes 64) : bool =
   let open Spec.K256 in
@@ -130,7 +179,7 @@ let aff_ecdsa_verify_hashed_msg (msgHash:lbytes 32) (public_key signature:lbytes
     let sinv = qinv s in
     let u1 = z *^ sinv in
     let u2 = r *^ sinv in
-    let x, y = aff_point_mul_double u1 (g_x, g_y) u2 (pk_x, pk_y) in
+    let x, y = aff_point_mul_double_loc u1 (g_x, g_y) u2 (pk_x, pk_y) in
     if is_aff_point_at_inf (x,y) then false
     else x % q = r
   end
@@ -162,7 +211,8 @@ let ecdsa_verify_hashed_msg_is_aff msgHash public_key signature =
     let base = (g_x, g_y) in
     let base_proj = g in
 
-    let x, y = aff_point_mul_double u1 base u2 pk in
+    let x, y = aff_point_mul_double_loc u1 base u2 pk in
+    lemma_aff_point_mul_double_loc u1 base u2 pk;
     let _X, _Y, _Z = point_mul_double_g u1 u2 pk_proj in
 
     lemma_proj_aff_id base;
