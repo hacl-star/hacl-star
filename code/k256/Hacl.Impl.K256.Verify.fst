@@ -11,6 +11,8 @@ module ST = FStar.HyperStack.ST
 
 module S = Spec.K256
 module KL = Spec.K256.Lemmas
+module LE = Lib.Exponentiation
+module SE = Spec.Exponentiation
 
 open Hacl.K256.Field
 open Hacl.Impl.K256.Point
@@ -57,7 +59,10 @@ val ecdsa_verify_qelem (res p:point) (z r s:QA.qelem) : Stack unit
    (let sinv = S.qinv (QA.qas_nat h0 s) in
     let u1 = S.qmul (QA.qas_nat h0 z) sinv in
     let u2 = S.qmul (QA.qas_nat h0 r) sinv in
-    point_eval h1 res == S.point_mul_double_g u1 u2 (point_eval h0 p)))
+    S.to_aff_point (point_eval h1 res) ==
+    S.aff_point_add
+      (S.aff_point_mul u1 (S.g_x, S.g_y))
+      (S.aff_point_mul u2 (S.to_aff_point (point_eval h0 p)))))
 
 let ecdsa_verify_qelem res p z r s =
   push_frame ();
@@ -171,6 +176,21 @@ val ecdsa_verify_qelem_aff (pk_x pk_y:felem) (z r s:QA.qelem) : Stack bool
       else S.fmul _X (S.finv _Z) % S.q = QA.qas_nat h0 r)))
 
 let ecdsa_verify_qelem_aff pk_x pk_y z r s =
+  let h0 = ST.get () in
+  let pk_aff = Ghost.hide ((feval h0 pk_x, feval h0 pk_y)) in
+  let pk_proj = Ghost.hide (S.to_proj_point (feval h0 pk_x, feval h0 pk_y)) in
+  let g_aff = Ghost.hide (S.g_x, S.g_y) in
+  Hacl.Spec.K256.ECSM.Lemmas.lemma_proj_aff_id g_aff;
+  Hacl.Spec.K256.ECSM.Lemmas.lemma_proj_aff_id pk_aff;
+  let sinv = Ghost.hide (S.qinv (QA.qas_nat h0 s)) in
+  let u1 = Ghost.hide (S.qmul (QA.qas_nat h0 z) sinv) in
+  let u2 = Ghost.hide (S.qmul (QA.qas_nat h0 r) sinv) in
+  SE.exp_double_fw_lemma S.mk_k256_concrete_ops S.g 256 u1 pk_proj u2 4;
+  LE.exp_double_fw_lemma S.mk_k256_comm_monoid
+    (S.to_aff_point S.g) 256 u1 (S.to_aff_point pk_proj) u2 4;
+  assert (S.to_aff_point (S.point_mul_double_g u1 u2 pk_proj) ==
+    S.aff_point_add (S.aff_point_mul u1 (S.g_x, S.g_y)) (S.aff_point_mul u2 pk_aff));
+
   push_frame ();
   let p = create_point () in
   let res = create_point () in

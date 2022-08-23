@@ -1114,14 +1114,7 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
   }
 }
 
-typedef struct __bool_bool_s
-{
-  bool fst;
-  bool snd;
-}
-__bool_bool;
-
-static inline void point_mul_g_split_lambda_vartime(uint64_t *out, uint64_t *scalar)
+static inline void point_mul_g(uint64_t *out, uint64_t *scalar)
 {
   uint64_t g[15U] = { 0U };
   uint64_t *gx = g;
@@ -1139,98 +1132,7 @@ static inline void point_mul_g_split_lambda_vartime(uint64_t *out, uint64_t *sca
   gy[4U] = (uint64_t)0x483ada7726a3U;
   memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
   gz[0U] = (uint64_t)1U;
-  uint64_t r1[4U] = { 0U };
-  uint64_t r2[4U] = { 0U };
-  uint64_t q1[15U] = { 0U };
-  uint64_t q2[15U] = { 0U };
-  scalar_split_lambda(r1, r2, scalar);
-  point_mul_lambda(q2, g);
-  memcpy(q1, g, (uint32_t)15U * sizeof (uint64_t));
-  bool b0 = is_qelem_le_q_halved_vartime(r1);
-  qnegate_conditional_vartime(r1, !b0);
-  if (!b0)
-  {
-    Hacl_Impl_K256_Point_point_negate(q1, q1);
-  }
-  bool is_high10 = !b0;
-  bool b = is_qelem_le_q_halved_vartime(r2);
-  qnegate_conditional_vartime(r2, !b);
-  if (!b)
-  {
-    Hacl_Impl_K256_Point_point_negate(q2, q2);
-  }
-  bool is_high20 = !b;
-  __bool_bool scrut = { .fst = is_high10, .snd = is_high20 };
-  bool is_high1 = scrut.fst;
-  bool is_high2 = scrut.snd;
-  uint64_t table[240U] = { 0U };
-  uint64_t *t0 = table;
-  uint64_t *t1 = table + (uint32_t)15U;
-  Hacl_Impl_K256_PointMul_make_point_at_inf(t0);
-  memcpy(t1, g, (uint32_t)15U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
-  {
-    uint64_t *t11 = table + i * (uint32_t)15U;
-    uint64_t *t2 = table + i * (uint32_t)15U + (uint32_t)15U;
-    Hacl_Impl_K256_PointAdd_point_add(t2, g, t11);
-  }
-  Hacl_Impl_K256_PointMul_make_point_at_inf(out);
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)32U; i++)
-  {
-    for (uint32_t i0 = (uint32_t)0U; i0 < (uint32_t)4U; i0++)
-    {
-      Hacl_Impl_K256_PointDouble_point_double(out, out);
-    }
-    uint32_t bk = (uint32_t)128U;
-    uint64_t mask_l0 = (uint64_t)16U - (uint64_t)1U;
-    uint32_t i10 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
-    uint32_t j0 = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p10 = r2[i10] >> j0;
-    uint64_t ite0;
-    if (i10 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j0)
-    {
-      ite0 = p10 | r2[i10 + (uint32_t)1U] << ((uint32_t)64U - j0);
-    }
-    else
-    {
-      ite0 = p10;
-    }
-    uint64_t bits_l = ite0 & mask_l0;
-    uint64_t a_bits_l0[15U] = { 0U };
-    uint32_t bits_l320 = (uint32_t)bits_l;
-    uint64_t *a_bits_l1 = table + bits_l320 * (uint32_t)15U;
-    memcpy(a_bits_l0, a_bits_l1, (uint32_t)15U * sizeof (uint64_t));
-    if (is_high2)
-    {
-      Hacl_Impl_K256_Point_point_negate(a_bits_l0, a_bits_l0);
-    }
-    point_mul_lambda_inplace(a_bits_l0);
-    Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l0);
-    uint32_t bk0 = (uint32_t)128U;
-    uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
-    uint32_t i1 = (bk0 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
-    uint32_t j = (bk0 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p1 = r1[i1] >> j;
-    uint64_t ite;
-    if (i1 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
-    {
-      ite = p1 | r1[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
-    }
-    else
-    {
-      ite = p1;
-    }
-    uint64_t bits_l0 = ite & mask_l;
-    uint64_t a_bits_l[15U] = { 0U };
-    uint32_t bits_l32 = (uint32_t)bits_l0;
-    uint64_t *a_bits_l10 = table + bits_l32 * (uint32_t)15U;
-    memcpy(a_bits_l, a_bits_l10, (uint32_t)15U * sizeof (uint64_t));
-    if (is_high1)
-    {
-      Hacl_Impl_K256_Point_point_negate(a_bits_l, a_bits_l);
-    }
-    Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l);
-  }
+  Hacl_Impl_K256_PointMul_point_mul(out, scalar, g);
 }
 
 typedef struct __bool_bool_bool_bool_s
@@ -1241,6 +1143,13 @@ typedef struct __bool_bool_bool_bool_s
   bool f3;
 }
 __bool_bool_bool_bool;
+
+typedef struct __bool_bool_s
+{
+  bool fst;
+  bool snd;
+}
+__bool_bool;
 
 static inline void
 point_mul_double_split_lambda_vartime(
@@ -1551,7 +1460,7 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
   uint64_t tmp[5U] = { 0U };
   uint8_t x_bytes[32U] = { 0U };
   uint64_t p[15U] = { 0U };
-  point_mul_g_split_lambda_vartime(p, k_q);
+  point_mul_g(p, k_q);
   uint64_t *x = p;
   uint64_t *z = p + (uint32_t)10U;
   Hacl_Impl_K256_Finv_finv(tmp, z);
@@ -1645,13 +1554,13 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
   memcpy(y1, pk_y, (uint32_t)5U * sizeof (uint64_t));
   memset(z10, 0U, (uint32_t)5U * sizeof (uint64_t));
   z10[0U] = (uint64_t)1U;
-  uint64_t sinv[4U] = { 0U };
-  uint64_t u1[4U] = { 0U };
-  uint64_t u2[4U] = { 0U };
-  qinv(sinv, s_q);
-  qmul(u1, z, sinv);
-  qmul(u2, r_q, sinv);
-  point_mul_g_double_split_lambda_vartime(res, u1, u2, p);
+  uint64_t sinv1[4U] = { 0U };
+  uint64_t u11[4U] = { 0U };
+  uint64_t u21[4U] = { 0U };
+  qinv(sinv1, s_q);
+  qmul(u11, z, sinv1);
+  qmul(u21, r_q, sinv1);
+  point_mul_g_double_split_lambda_vartime(res, u11, u21, p);
   uint64_t tmp[5U] = { 0U };
   uint64_t *pz = res + (uint32_t)10U;
   Hacl_K256_Field_fnormalize(tmp, pz);
