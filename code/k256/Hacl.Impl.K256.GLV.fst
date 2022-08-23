@@ -41,8 +41,8 @@ let refl (p:LSeq.lseq uint64 15{point_inv_lseq p}) : GTot S.aff_point =
 
 inline_for_extraction noextract
 let aff_mk_to_k256_concrete_ops : BE.to_concrete_ops U64 15ul 0ul = {
-  BE.t_spec = S.proj_point;
-  BE.concr_ops = S.mk_k256_concrete_ops;
+  BE.t_spec = S.aff_point;
+  BE.concr_ops = PML.aff_mk_k256_concrete_ops;
   BE.linv_ctx = linv_ctx;
   BE.linv = point_inv_lseq;
   BE.refl = refl;
@@ -319,6 +319,7 @@ let point_mul_split_lambda_table out r1 q1 r2 q2 p is_negate1 is_negate2 =
 
 
 // [scalar]Q = [(r1 + r2 * lambda) % S.q]Q = [r1]Q + [r2]([lambda]Q)
+inline_for_extraction noextract
 val point_mul_split_lambda_vartime: out:point -> scalar:qelem -> q:point -> Stack unit
   (requires fun h ->
     live h out /\ live h scalar /\ live h q /\
@@ -327,9 +328,8 @@ val point_mul_split_lambda_vartime: out:point -> scalar:qelem -> q:point -> Stac
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_eval h1 out) ==
-      S.to_aff_point (SGL.point_mul_split_lambda (qas_nat h0 scalar) (point_eval h0 q)))
+      S.aff_point_mul (qas_nat h0 scalar) (S.to_aff_point (point_eval h0 q)))
 
-[@CInline]
 let point_mul_split_lambda_vartime out scalar q =
   let h0 = ST.get () in
   push_frame ();
@@ -346,7 +346,8 @@ let point_mul_split_lambda_vartime out scalar q =
   assert (modifies (loc r1 |+| loc r2 |+| loc q1 |+| loc q2 |+| loc out) h0 h2);
   pop_frame ();
   let h3 = ST.get () in
-  assert (modifies (loc out) h0 h3)
+  assert (modifies (loc out) h0 h3);
+  SGL.lemma_aff_proj_point_mul_split_lambda (qas_nat h0 scalar) (point_eval h0 q)
 
 
 // TODO: precompute a table [0; G; 2G; ..; 15G]?
@@ -356,10 +357,12 @@ val point_mul_g_split_lambda_vartime: out:point -> scalar:qelem -> Stack unit
     qas_nat h scalar < S.q)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
-    point_eval h1 out == SGL.point_mul_split_lambda (qas_nat h0 scalar) S.g)
+    S.to_aff_point (point_eval h1 out) ==
+      S.aff_point_mul (qas_nat h0 scalar) (S.g_x, S.g_y))
 
 [@CInline]
 let point_mul_g_split_lambda_vartime out scalar =
+  PML.lemma_proj_aff_id (S.g_x, S.g_y);
   push_frame ();
   let g = create 15ul (u64 0) in
   PM.make_g g;

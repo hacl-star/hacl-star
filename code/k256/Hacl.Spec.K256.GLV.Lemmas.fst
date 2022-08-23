@@ -415,29 +415,28 @@ let lemma_ecmult_endo_split_to_aff k p =
 
 
 // [k]P
-let point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.proj_point =
+let aff_proj_point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.aff_point =
   let r1, p1, r2, p2 = ecmult_endo_split k p in
   lemma_scalar_split_lambda_fits k p;
-  SE.exp_double_fw S.mk_k256_concrete_ops p1 128 r1 p2 r2 4
+  SE.exp_double_fw SM.aff_mk_k256_concrete_ops (S.to_aff_point p1) 128 r1 (S.to_aff_point p2) r2 4
 
 
-val lemma_point_mul_split_lambda: k:S.qelem -> p:S.proj_point ->
-  Lemma (S.to_aff_point (point_mul_split_lambda k p) == aff_point_mul k (S.to_aff_point p))
+val lemma_aff_proj_point_mul_split_lambda: k:S.qelem -> p:S.proj_point ->
+  Lemma (aff_proj_point_mul_split_lambda k p == aff_point_mul k (S.to_aff_point p))
 
-let lemma_point_mul_split_lambda k p =
-  let open Spec.K256 in
+let lemma_aff_proj_point_mul_split_lambda k p =
   let r1, p1, r2, p2 = ecmult_endo_split k p in
   lemma_scalar_split_lambda_fits k p;
 
-  let p_aff  = to_aff_point p in
-  let p1_aff = to_aff_point p1 in
-  let p2_aff = to_aff_point p2 in
+  let p_aff  = S.to_aff_point p in
+  let p1_aff = S.to_aff_point p1 in
+  let p2_aff = S.to_aff_point p2 in
   calc (==) {
-    to_aff_point (point_mul_split_lambda k p);
+    aff_proj_point_mul_split_lambda k p;
     (==) {
-      SE.exp_double_fw_lemma mk_k256_concrete_ops p1 128 r1 p2 r2 4;
-      LE.exp_double_fw_lemma mk_k256_comm_monoid p1_aff 128 r1 p2_aff r2 4 }
-    aff_point_add (aff_point_mul r1 p1_aff) (aff_point_mul r2 p2_aff);
+      SE.exp_double_fw_lemma SM.aff_mk_k256_concrete_ops p1_aff 128 r1 p2_aff r2 4;
+      LE.exp_double_fw_lemma S.mk_k256_comm_monoid p1_aff 128 r1 p2_aff r2 4 }
+    S.aff_point_add (aff_point_mul r1 p1_aff) (aff_point_mul r2 p2_aff);
     (==) { lemma_aff_point_mul_endo_split k p_aff; lemma_ecmult_endo_split_to_aff k p }
     aff_point_mul k p_aff;
   }
