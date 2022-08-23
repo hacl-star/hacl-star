@@ -245,13 +245,21 @@ let lprecomp_get_vartime_lambda_neg q is_negate ctx lambda_q table r_small res =
   point_negate_conditional_vartime res is_negate;
   let h2 = ST.get () in
   assert (point_eval h2 res == SG.point_negate_cond (point_eval h1 res) is_negate);
+  SL.to_aff_point_negate_lemma (point_eval h1 res);
+  assert (S.to_aff_point (point_eval h2 res) ==
+    SG.aff_point_negate_cond (S.to_aff_point (point_eval h1 res)) is_negate);
+
   // [lambda]([r_small]Q) or [lambda]([r_small](-Q))
   point_mul_lambda_inplace res;
   let h3 = ST.get () in
   assert (point_eval h3 res == SG.point_mul_lambda (point_eval h2 res));
+  SGL.lemma_glv (point_eval h2 res);
+  assert (S.to_aff_point (point_eval h3 res) ==
+    SG.aff_point_mul SG.lambda (S.to_aff_point (point_eval h2 res)));
+
   // [r_small]([lambda]Q) or [r_small](-[lambda]Q)
-  // SGL.point_negate_cond_lambda_pow_lemma is_negate (point_eval_lseq q) (v r_small);
-  assume (S.to_aff_point (point_eval h3 res) ==
+  SGL.aff_point_negate_cond_lambda_pow_lemma is_negate (point_eval_lseq q) (v r_small);
+  assert (S.to_aff_point (point_eval h3 res) ==
     SE.pow PML.aff_mk_k256_concrete_ops
       (S.to_aff_point
         (SG.point_negate_cond (SG.point_mul_lambda (point_eval_lseq q)) is_negate)) (v r_small))
