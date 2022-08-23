@@ -204,13 +204,13 @@ let lprecomp_get_vartime_neg q is_negate ctx lambda_q table r_small res =
   point_negate_conditional_vartime res is_negate;
   let h2 = ST.get () in
   assert (point_eval h2 res == SG.point_negate_cond (point_eval h1 res) is_negate);
-  // SL.to_aff_point_negate_lemma (point_eval h1 res);
-  // assert (S.to_aff_point (point_eval h2 res) ==
-    // SG.aff_point_negate_cond (S.to_aff_point (point_eval h1 res)) is_negate);
+  SL.to_aff_point_negate_lemma (point_eval h1 res);
+  assert (S.to_aff_point (point_eval h2 res) ==
+    SG.aff_point_negate_cond (S.to_aff_point (point_eval h1 res)) is_negate);
 
   // -[r_small]Q = [r_small](-Q)
-  // SGL.aff_point_negate_cond_pow_lemma is_negate (S.to_aff_point (point_eval_lseq q)) (v r_small);
-  assume (S.to_aff_point (point_eval h2 res) ==
+  SGL.aff_point_negate_cond_pow_lemma is_negate (point_eval_lseq q) (v r_small);
+  assert (S.to_aff_point (point_eval h2 res) ==
     SE.pow PML.aff_mk_k256_concrete_ops
       (S.to_aff_point (SG.point_negate_cond (point_eval_lseq q) is_negate)) (v r_small))
 
@@ -347,6 +347,8 @@ let point_mul_split_lambda_vartime out scalar q =
   pop_frame ();
   let h3 = ST.get () in
   assert (modifies (loc out) h0 h3);
+  assert (S.to_aff_point (point_eval h3 out) ==
+    SGL.aff_proj_point_mul_split_lambda (qas_nat h0 scalar) (point_eval h0 q));
   SGL.lemma_aff_proj_point_mul_split_lambda (qas_nat h0 scalar) (point_eval h0 q)
 
 
