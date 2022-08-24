@@ -928,9 +928,8 @@ dist/mozilla/Makefile.basic: HASH_BUNDLE = -bundle Hacl.Hash.*,Hacl.HKDF,Hacl.HM
 dist/mozilla/Makefile.basic: HPKE_BUNDLE = -bundle 'Hacl.HPKE.*'
 dist/mozilla/Makefile.basic: P256_BUNDLE= -bundle Hacl.P256,Hacl.Impl.ECDSA.*,Hacl.Impl.SolinasReduction,Hacl.Impl.P256.*
 dist/mozilla/Makefile.basic: K256_BUNDLE= -bundle Hacl.K256.ECDSA,Hacl.Impl.K256.*,Hacl.K256.*,Hacl.EC.K256
-# dist/mozilla/Makefile.basic: RSAPSS_BUNDLE = -bundle Hacl.Impl.RSAPSS.*,Hacl.Impl.RSAPSS,Hacl.RSAPSS
 dist/mozilla/Makefile.basic: FFDHE_BUNDLE = -bundle Hacl.Impl.FFDHE.*,Hacl.Impl.FFDHE,Hacl.FFDHE
-dist/mozilla/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum=Hacl.Bignum,Hacl.Bignum.* -bundle Hacl.Bignum256_32,Hacl.Bignum4096_32,Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64,Hacl.Bignum.*,Hacl.Bignum
+dist/mozilla/Makefile.basic: BIGNUM_BUNDLE = -bundle Hacl.Bignum=Hacl.Bignum.* -bundle Hacl.Bignum256_32,Hacl.Bignum4096_32,Hacl.Bignum256,Hacl.Bignum4096,Hacl.Bignum32,Hacl.Bignum64,Hacl.GenericField32,Hacl.GenericField64,Hacl.Bignum.*,Hacl.Bignum
 dist/mozilla/Makefile.basic: STREAMING_BUNDLE = -bundle Hacl.Streaming.*
 dist/mozilla/Makefile.basic: FRODO_BUNDLE = -bundle Hacl.Impl.Frodo.*,Hacl.Frodo.*,Hacl.Keccak,Hacl.Frodo64,Hacl.Frodo640,Hacl.Frodo976,Hacl.Frodo1344
 dist/mozilla/Makefile.basic: \
