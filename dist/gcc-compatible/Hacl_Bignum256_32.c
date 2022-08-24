@@ -79,14 +79,6 @@ uint32_t Hacl_Bignum256_32_add(uint32_t *a, uint32_t *b, uint32_t *res)
     uint32_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t12, t2, res_i););
-  KRML_MAYBE_FOR0(i,
-    (uint32_t)8U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    uint32_t t1 = a[i];
-    uint32_t t2 = b[i];
-    uint32_t *res_i = res + i;
-    c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t1, t2, res_i););
   return c;
 }
 
@@ -120,14 +112,6 @@ uint32_t Hacl_Bignum256_32_sub(uint32_t *a, uint32_t *b, uint32_t *res)
     uint32_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, t2, res_i););
-  KRML_MAYBE_FOR0(i,
-    (uint32_t)8U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    uint32_t t1 = a[i];
-    uint32_t t2 = b[i];
-    uint32_t *res_i = res + i;
-    c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, t2, res_i););
   return c;
 }
 
@@ -164,14 +148,6 @@ void Hacl_Bignum256_32_add_mod(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t *
     uint32_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
     c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, t12, t2, res_i););
-  KRML_MAYBE_FOR0(i,
-    (uint32_t)8U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    uint32_t t1 = a[i];
-    uint32_t t2 = b[i];
-    uint32_t *res_i = res + i;
-    c0 = Lib_IntTypes_Intrinsics_add_carry_u32(c0, t1, t2, res_i););
   uint32_t c00 = c0;
   uint32_t tmp[8U] = { 0U };
   uint32_t c = (uint32_t)0U;
@@ -195,14 +171,6 @@ void Hacl_Bignum256_32_add_mod(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t *
     uint32_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
     c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t12, t2, res_i););
-  KRML_MAYBE_FOR0(i,
-    (uint32_t)8U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    uint32_t t1 = res[i];
-    uint32_t t2 = n[i];
-    uint32_t *res_i = tmp + i;
-    c = Lib_IntTypes_Intrinsics_sub_borrow_u32(c, t1, t2, res_i););
   uint32_t c1 = c;
   uint32_t c2 = c00 - c1;
   KRML_MAYBE_FOR8(i,
@@ -247,14 +215,6 @@ void Hacl_Bignum256_32_sub_mod(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t *
     uint32_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t *res_i = res + (uint32_t)4U * i + (uint32_t)3U;
     c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c0, t12, t2, res_i););
-  KRML_MAYBE_FOR0(i,
-    (uint32_t)8U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    uint32_t t1 = a[i];
-    uint32_t t2 = b[i];
-    uint32_t *res_i = res + i;
-    c0 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c0, t1, t2, res_i););
   uint32_t c00 = c0;
   uint32_t tmp[8U] = { 0U };
   uint32_t c = (uint32_t)0U;
@@ -278,14 +238,6 @@ void Hacl_Bignum256_32_sub_mod(uint32_t *n, uint32_t *a, uint32_t *b, uint32_t *
     uint32_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
     c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t12, t2, res_i););
-  KRML_MAYBE_FOR0(i,
-    (uint32_t)8U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    uint32_t t1 = res[i];
-    uint32_t t2 = n[i];
-    uint32_t *res_i = tmp + i;
-    c = Lib_IntTypes_Intrinsics_add_carry_u32(c, t1, t2, res_i););
   uint32_t c1 = c;
   uint32_t c2 = (uint32_t)0U - c00;
   KRML_MAYBE_FOR8(i,
@@ -329,13 +281,6 @@ void Hacl_Bignum256_32_mul(uint32_t *a, uint32_t *b, uint32_t *res)
       uint32_t a_i2 = a[(uint32_t)4U * i + (uint32_t)3U];
       uint32_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, bj, c, res_i););
-    KRML_MAYBE_FOR0(i,
-      (uint32_t)8U,
-      (uint32_t)8U,
-      (uint32_t)1U,
-      uint32_t a_i = a[i];
-      uint32_t *res_i = res_j + i;
-      c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, bj, c, res_i););
     uint32_t r = c;
     res[(uint32_t)8U + i0] = r;);
 }
@@ -432,13 +377,6 @@ static inline void reduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t *
       uint32_t a_i2 = n[(uint32_t)4U * i + (uint32_t)3U];
       uint32_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, qj, c1, res_i););
-    KRML_MAYBE_FOR0(i,
-      (uint32_t)8U,
-      (uint32_t)8U,
-      (uint32_t)1U,
-      uint32_t a_i = n[i];
-      uint32_t *res_i = res_j0 + i;
-      c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c1, res_i););
     uint32_t r = c1;
     uint32_t c10 = r;
     uint32_t *resb = c + (uint32_t)8U + i0;
@@ -468,14 +406,6 @@ static inline void reduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t *
     uint32_t t2 = n[(uint32_t)4U * i + (uint32_t)3U];
     uint32_t *res_i = tmp + (uint32_t)4U * i + (uint32_t)3U;
     c1 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c1, t12, t2, res_i););
-  KRML_MAYBE_FOR0(i,
-    (uint32_t)8U,
-    (uint32_t)8U,
-    (uint32_t)1U,
-    uint32_t t1 = res[i];
-    uint32_t t2 = n[i];
-    uint32_t *res_i = tmp + i;
-    c1 = Lib_IntTypes_Intrinsics_sub_borrow_u32(c1, t1, t2, res_i););
   uint32_t c10 = c1;
   uint32_t c2 = c00 - c10;
   KRML_MAYBE_FOR8(i,
@@ -513,13 +443,6 @@ static inline void areduction(uint32_t *n, uint32_t nInv, uint32_t *c, uint32_t 
       uint32_t a_i2 = n[(uint32_t)4U * i + (uint32_t)3U];
       uint32_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, qj, c1, res_i););
-    KRML_MAYBE_FOR0(i,
-      (uint32_t)8U,
-      (uint32_t)8U,
-      (uint32_t)1U,
-      uint32_t a_i = n[i];
-      uint32_t *res_i = res_j0 + i;
-      c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c1, res_i););
     uint32_t r = c1;
     uint32_t c10 = r;
     uint32_t *resb = c + (uint32_t)8U + i0;
@@ -567,13 +490,6 @@ amont_mul(uint32_t *n, uint32_t nInv_u64, uint32_t *aM, uint32_t *bM, uint32_t *
       uint32_t a_i2 = aM[(uint32_t)4U * i + (uint32_t)3U];
       uint32_t *res_i = res_j + (uint32_t)4U * i + (uint32_t)3U;
       c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, bj, c1, res_i););
-    KRML_MAYBE_FOR0(i,
-      (uint32_t)8U,
-      (uint32_t)8U,
-      (uint32_t)1U,
-      uint32_t a_i = aM[i];
-      uint32_t *res_i = res_j + i;
-      c1 = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, bj, c1, res_i););
     uint32_t r = c1;
     c[(uint32_t)8U + i0] = r;);
   areduction(n, nInv_u64, c, resM);
@@ -659,13 +575,6 @@ bn_slow_precomp(uint32_t *n, uint32_t mu, uint32_t *r2, uint32_t *a, uint32_t *r
       uint32_t a_i2 = n[(uint32_t)4U * i + (uint32_t)3U];
       uint32_t *res_i = res_j0 + (uint32_t)4U * i + (uint32_t)3U;
       c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i2, qj, c, res_i););
-    KRML_MAYBE_FOR0(i,
-      (uint32_t)8U,
-      (uint32_t)8U,
-      (uint32_t)1U,
-      uint32_t a_i = n[i];
-      uint32_t *res_i = res_j0 + i;
-      c = Hacl_Bignum_Base_mul_wide_add2_u32(a_i, qj, c, res_i););
     uint32_t r = c;
     uint32_t c1 = r;
     uint32_t *resb = a1 + (uint32_t)8U + i0;
