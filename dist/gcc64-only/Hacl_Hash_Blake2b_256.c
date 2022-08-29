@@ -30,9 +30,7 @@
 static uint128_t
 update_blake2b_256(Lib_IntVector_Intrinsics_vec256 *s, uint128_t totlen, uint8_t *block)
 {
-  Lib_IntVector_Intrinsics_vec256 wv[4U];
-  for (uint32_t _i = 0U; _i < (uint32_t)4U; ++_i)
-    wv[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 wv[4U] = { 0U };
   uint128_t totlen1 = totlen + (uint128_t)(uint64_t)(uint32_t)128U;
   uint64_t m_w[16U] = { 0U };
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)16U; i++)

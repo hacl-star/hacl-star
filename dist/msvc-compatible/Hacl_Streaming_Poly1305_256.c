@@ -31,9 +31,7 @@ Hacl_Streaming_Poly1305_256_poly1305_256_state
 {
   uint8_t *buf = KRML_HOST_CALLOC((uint32_t)64U, sizeof (uint8_t));
   Lib_IntVector_Intrinsics_vec256
-  *r1 = KRML_HOST_MALLOC(sizeof (Lib_IntVector_Intrinsics_vec256) * (uint32_t)25U);
-  for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
-    r1[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  *r1 = KRML_HOST_CALLOC((uint32_t)25U, sizeof (Lib_IntVector_Intrinsics_vec256));
   Lib_IntVector_Intrinsics_vec256 *block_state = r1;
   uint8_t *k_ = KRML_HOST_CALLOC((uint32_t)32U, sizeof (uint8_t));
   memcpy(k_, k, (uint32_t)32U * sizeof (uint8_t));
@@ -271,9 +269,7 @@ Hacl_Streaming_Poly1305_256_finish(
     r = (uint32_t)(total_len % (uint64_t)(uint32_t)64U);
   }
   uint8_t *buf_1 = buf_;
-  Lib_IntVector_Intrinsics_vec256 r1[25U];
-  for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
-    r1[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 r1[25U] = { 0U };
   Lib_IntVector_Intrinsics_vec256 *tmp_block_state = r1;
   memcpy(tmp_block_state, block_state, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec256));
   uint32_t ite0;
@@ -317,9 +313,7 @@ Hacl_Streaming_Poly1305_256_finish(
     ite2 = r % (uint32_t)16U;
   }
   Hacl_Poly1305_256_poly1305_update(tmp_block_state, ite2, buf_last);
-  Lib_IntVector_Intrinsics_vec256 tmp[25U];
-  for (uint32_t _i = 0U; _i < (uint32_t)25U; ++_i)
-    tmp[_i] = Lib_IntVector_Intrinsics_vec256_zero;
+  Lib_IntVector_Intrinsics_vec256 tmp[25U] = { 0U };
   memcpy(tmp, tmp_block_state, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec256));
   Hacl_Poly1305_256_poly1305_finish(dst, k_, tmp);
 }

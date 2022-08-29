@@ -186,7 +186,7 @@ inline static int32_t krml_time() {
     for (uint32_t i = z; i < n; i += k) { \
       x \
     } \
-  while (0);
+  } while (0)
 
 #ifndef KRML_UNROLL_MAX
 #define KRML_UNROLL_MAX 16

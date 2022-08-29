@@ -36,8 +36,8 @@ extern "C" {
 
 
 #include "Hacl_Krmllib.h"
-#include "Hacl_GenericField32.h"
 #include "Hacl_Bignum_Base.h"
+#include "Hacl_Bignum.h"
 #include "evercrypt_targetconfig.h"
 /*******************************************************************************
 

@@ -557,37 +557,33 @@ static void pad_512(FStar_UInt128_uint128 len, uint8_t *dst)
 
 void Hacl_Hash_Core_SHA2_finish_224(uint32_t *s, uint8_t *dst)
 {
-  uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)7U; i++)
   {
-    store32_be(dst + i * (uint32_t)4U, uu____0[i]);
+    store32_be(dst + i * (uint32_t)4U, s[i]);
   }
 }
 
 void Hacl_Hash_Core_SHA2_finish_256(uint32_t *s, uint8_t *dst)
 {
-  uint32_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    store32_be(dst + i * (uint32_t)4U, uu____0[i]);
+    store32_be(dst + i * (uint32_t)4U, s[i]);
   }
 }
 
 void Hacl_Hash_Core_SHA2_finish_384(uint64_t *s, uint8_t *dst)
 {
-  uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)6U; i++)
   {
-    store64_be(dst + i * (uint32_t)8U, uu____0[i]);
+    store64_be(dst + i * (uint32_t)8U, s[i]);
   }
 }
 
 void Hacl_Hash_Core_SHA2_finish_512(uint64_t *s, uint8_t *dst)
 {
-  uint64_t *uu____0 = s;
   for (uint32_t i = (uint32_t)0U; i < (uint32_t)8U; i++)
   {
-    store64_be(dst + i * (uint32_t)8U, uu____0[i]);
+    store64_be(dst + i * (uint32_t)8U, s[i]);
   }
 }
 
