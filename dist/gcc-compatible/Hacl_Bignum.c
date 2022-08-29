@@ -1887,10 +1887,10 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u32(
   uint32_t *ctx_r20 = ctx + len;
   Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, len * sizeof (uint32_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
-    uint32_t *t11 = table + i * len;
-    uint32_t *t2 = table + i * len + len;
+    uint32_t *t11 = table + (i + (uint32_t)1U) * len;
+    uint32_t *t2 = table + (i + (uint32_t)2U) * len;
     uint32_t *ctx_n = ctx;
     bn_almost_mont_mul_u32(len, ctx_n, mu, aM, t11, t2);
   }
@@ -2065,10 +2065,10 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u32(
   uint32_t *ctx_r20 = ctx + len;
   Hacl_Bignum_Montgomery_bn_from_mont_u32(len, ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, len * sizeof (uint32_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
-    uint32_t *t11 = table + i * len;
-    uint32_t *t2 = table + i * len + len;
+    uint32_t *t11 = table + (i + (uint32_t)1U) * len;
+    uint32_t *t2 = table + (i + (uint32_t)2U) * len;
     uint32_t *ctx_n = ctx;
     bn_almost_mont_mul_u32(len, ctx_n, mu, aM, t11, t2);
   }
@@ -2355,10 +2355,10 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_vartime_precomp_u64(
   uint64_t *ctx_r20 = ctx + len;
   Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, len * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
-    uint64_t *t11 = table + i * len;
-    uint64_t *t2 = table + i * len + len;
+    uint64_t *t11 = table + (i + (uint32_t)1U) * len;
+    uint64_t *t2 = table + (i + (uint32_t)2U) * len;
     uint64_t *ctx_n = ctx;
     bn_almost_mont_mul_u64(len, ctx_n, mu, aM, t11, t2);
   }
@@ -2533,10 +2533,10 @@ Hacl_Bignum_Exponentiation_bn_mod_exp_consttime_precomp_u64(
   uint64_t *ctx_r20 = ctx + len;
   Hacl_Bignum_Montgomery_bn_from_mont_u64(len, ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, len * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
-    uint64_t *t11 = table + i * len;
-    uint64_t *t2 = table + i * len + len;
+    uint64_t *t11 = table + (i + (uint32_t)1U) * len;
+    uint64_t *t2 = table + (i + (uint32_t)2U) * len;
     uint64_t *ctx_n = ctx;
     bn_almost_mont_mul_u64(len, ctx_n, mu, aM, t11, t2);
   }

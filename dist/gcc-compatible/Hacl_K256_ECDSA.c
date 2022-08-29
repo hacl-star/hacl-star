@@ -1069,10 +1069,10 @@ void Hacl_Impl_K256_PointMul_point_mul(uint64_t *out, uint64_t *scalar, uint64_t
   uint64_t *t1 = table + (uint32_t)15U;
   Hacl_Impl_K256_PointMul_make_point_at_inf(t0);
   memcpy(t1, q, (uint32_t)15U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
-    uint64_t *t11 = table + i * (uint32_t)15U;
-    uint64_t *t2 = table + i * (uint32_t)15U + (uint32_t)15U;
+    uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)15U;
+    uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)15U;
     Hacl_Impl_K256_PointAdd_point_add(t2, q, t11);
   }
   Hacl_Impl_K256_PointMul_make_point_at_inf(out);
@@ -1222,20 +1222,20 @@ point_mul_double_split_lambda_vartime(
   uint64_t *t10 = table1 + (uint32_t)15U;
   Hacl_Impl_K256_PointMul_make_point_at_inf(t0);
   memcpy(t10, p1, (uint32_t)15U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
-    uint64_t *t11 = table1 + i * (uint32_t)15U;
-    uint64_t *t2 = table1 + i * (uint32_t)15U + (uint32_t)15U;
+    uint64_t *t11 = table1 + (i + (uint32_t)1U) * (uint32_t)15U;
+    uint64_t *t2 = table1 + (i + (uint32_t)2U) * (uint32_t)15U;
     Hacl_Impl_K256_PointAdd_point_add(t2, p1, t11);
   }
   uint64_t *t00 = table2;
   uint64_t *t1 = table2 + (uint32_t)15U;
   Hacl_Impl_K256_PointMul_make_point_at_inf(t00);
   memcpy(t1, p2, (uint32_t)15U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)15U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
   {
-    uint64_t *t11 = table2 + i * (uint32_t)15U;
-    uint64_t *t2 = table2 + i * (uint32_t)15U + (uint32_t)15U;
+    uint64_t *t11 = table2 + (i + (uint32_t)1U) * (uint32_t)15U;
+    uint64_t *t2 = table2 + (i + (uint32_t)2U) * (uint32_t)15U;
     Hacl_Impl_K256_PointAdd_point_add(t2, p2, t11);
   }
   Hacl_Impl_K256_PointMul_make_point_at_inf(out);
