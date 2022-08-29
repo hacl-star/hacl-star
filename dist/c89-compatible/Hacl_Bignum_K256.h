@@ -160,7 +160,6 @@ static inline bool Hacl_K256_Field_load_felem_vartime(uint64_t *f, uint8_t *b)
   uint64_t f3;
   uint64_t f4;
   bool is_ge_p;
-  bool ite;
   Hacl_K256_Field_load_felem(f, b);
   f0 = f[0U];
   f1 = f[1U];
@@ -176,13 +175,9 @@ static inline bool Hacl_K256_Field_load_felem_vartime(uint64_t *f, uint8_t *b)
     && f4 == (uint64_t)0xffffffffffffU;
   if (is_ge_p)
   {
-    ite = false;
+    return false;
   }
-  else
-  {
-    ite = !Hacl_K256_Field_is_felem_zero_vartime(f);
-  }
-  return ite;
+  return !Hacl_K256_Field_is_felem_zero_vartime(f);
 }
 
 static inline void Hacl_K256_Field_store_felem(uint8_t *b, uint64_t *f)

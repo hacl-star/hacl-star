@@ -431,6 +431,7 @@ Hacl_SHA2_Vec128_sha224_4(
         lb = lit0;
         {
           uint32_t blocks;
+          uint32_t fin;
           if (rem + (uint32_t)8U + (uint32_t)1U <= (uint32_t)64U)
           {
             blocks = (uint32_t)1U;
@@ -439,8 +440,8 @@ Hacl_SHA2_Vec128_sha224_4(
           {
             blocks = (uint32_t)2U;
           }
+          fin = blocks * (uint32_t)64U;
           {
-            uint32_t fin = blocks * (uint32_t)64U;
             uint8_t last[512U] = { 0U };
             uint8_t totlen_buf[8U] = { 0U };
             uint64_t total_len_bits = len_ << (uint32_t)3U;
@@ -1070,6 +1071,7 @@ Hacl_SHA2_Vec128_sha256_4(
         lb = lit0;
         {
           uint32_t blocks;
+          uint32_t fin;
           if (rem + (uint32_t)8U + (uint32_t)1U <= (uint32_t)64U)
           {
             blocks = (uint32_t)1U;
@@ -1078,8 +1080,8 @@ Hacl_SHA2_Vec128_sha256_4(
           {
             blocks = (uint32_t)2U;
           }
+          fin = blocks * (uint32_t)64U;
           {
-            uint32_t fin = blocks * (uint32_t)64U;
             uint8_t last[512U] = { 0U };
             uint8_t totlen_buf[8U] = { 0U };
             uint64_t total_len_bits = len_ << (uint32_t)3U;

@@ -48,6 +48,9 @@ secretbox_detached(uint32_t mlen, uint8_t *c, uint8_t *tag, uint8_t *k, uint8_t 
     uint8_t *subkey = xkeys;
     uint8_t *ekey0 = xkeys + (uint32_t)64U;
     uint32_t mlen0;
+    uint32_t mlen1;
+    uint8_t *m0;
+    uint8_t *m1;
     if (mlen <= (uint32_t)32U)
     {
       mlen0 = mlen;
@@ -56,10 +59,10 @@ secretbox_detached(uint32_t mlen, uint8_t *c, uint8_t *tag, uint8_t *k, uint8_t 
     {
       mlen0 = (uint32_t)32U;
     }
+    mlen1 = mlen - mlen0;
+    m0 = m;
+    m1 = m + mlen0;
     {
-      uint32_t mlen1 = mlen - mlen0;
-      uint8_t *m0 = m;
-      uint8_t *m1 = m + mlen0;
       uint8_t block0[32U] = { 0U };
       uint8_t *c0;
       uint8_t *c1;
@@ -100,24 +103,26 @@ secretbox_open_detached(
     uint8_t tag_[16U] = { 0U };
     Hacl_Poly1305_32_poly1305_mac(tag_, mlen, c, mkey);
     {
-      uint8_t res0 = (uint8_t)255U;
+      uint8_t res = (uint8_t)255U;
       uint8_t z;
-      uint32_t res;
       {
         uint32_t i;
         for (i = (uint32_t)0U; i < (uint32_t)16U; i++)
         {
           uint8_t uu____0 = FStar_UInt8_eq_mask(tag[i], tag_[i]);
-          res0 = uu____0 & res0;
+          res = uu____0 & res;
         }
       }
-      z = res0;
+      z = res;
       if (z == (uint8_t)255U)
       {
         uint8_t *subkey = xkeys;
         uint8_t *ekey0 = xkeys + (uint32_t)64U;
         uint8_t *n1 = n + (uint32_t)16U;
         uint32_t mlen0;
+        uint32_t mlen1;
+        uint8_t *c0;
+        uint8_t *c1;
         if (mlen <= (uint32_t)32U)
         {
           mlen0 = mlen;
@@ -126,11 +131,13 @@ secretbox_open_detached(
         {
           mlen0 = (uint32_t)32U;
         }
+        mlen1 = mlen - mlen0;
+        c0 = c;
+        c1 = c + mlen0;
         {
-          uint32_t mlen1 = mlen - mlen0;
-          uint8_t *c0 = c;
-          uint8_t *c1 = c + mlen0;
           uint8_t block0[32U] = { 0U };
+          uint8_t *m0;
+          uint8_t *m1;
           memcpy(block0, c0, mlen0 * sizeof (uint8_t));
           {
             uint32_t i;
@@ -141,20 +148,14 @@ secretbox_open_detached(
               os[i] = x;
             }
           }
-          {
-            uint8_t *m0 = m;
-            uint8_t *m1 = m + mlen0;
-            memcpy(m0, block0, mlen0 * sizeof (uint8_t));
-            Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n1, (uint32_t)1U);
-            res = (uint32_t)0U;
-          }
+          m0 = m;
+          m1 = m + mlen0;
+          memcpy(m0, block0, mlen0 * sizeof (uint8_t));
+          Hacl_Salsa20_salsa20_decrypt(mlen1, m1, c1, subkey, n1, (uint32_t)1U);
+          return (uint32_t)0U;
         }
       }
-      else
-      {
-        res = (uint32_t)0xffffffffU;
-      }
-      return res;
+      return (uint32_t)0xffffffffU;
     }
   }
 }

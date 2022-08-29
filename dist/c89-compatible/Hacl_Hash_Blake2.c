@@ -1663,6 +1663,11 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
   uint32_t blocks_len0 = blocks_n * (uint32_t)64U;
   uint32_t rest_len0 = input_len - blocks_len0;
   K___uint32_t_uint32_t_uint32_t scrut0;
+  uint32_t num_blocks0;
+  uint32_t blocks_len;
+  uint32_t rest_len2;
+  uint8_t *blocks0;
+  uint8_t *rest0;
   if (rest_len0 == (uint32_t)0U && blocks_n > (uint32_t)0U)
   {
     uint32_t blocks_n1 = blocks_n - (uint32_t)1U;
@@ -1682,12 +1687,12 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
     lit.thd = rest_len0;
     scrut0 = lit;
   }
+  num_blocks0 = scrut0.fst;
+  blocks_len = scrut0.snd;
+  rest_len2 = scrut0.thd;
+  blocks0 = input;
+  rest0 = input + blocks_len;
   {
-    uint32_t num_blocks0 = scrut0.fst;
-    uint32_t blocks_len = scrut0.snd;
-    uint32_t rest_len1 = scrut0.thd;
-    uint8_t *blocks0 = input;
-    uint8_t *rest0 = input + blocks_len;
     K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_ lit;
     K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_ scrut;
     uint32_t num_blocks;
@@ -1697,7 +1702,7 @@ Hacl_Hash_Blake2_update_last_blake2s_32(
     uint64_t ev_;
     lit.fst = num_blocks0;
     lit.snd = blocks_len;
-    lit.thd = rest_len1;
+    lit.thd = rest_len2;
     lit.f3 = blocks0;
     lit.f4 = rest0;
     scrut = lit;
@@ -2553,6 +2558,11 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
   uint32_t blocks_len0 = blocks_n * (uint32_t)128U;
   uint32_t rest_len0 = input_len - blocks_len0;
   K___uint32_t_uint32_t_uint32_t scrut0;
+  uint32_t num_blocks0;
+  uint32_t blocks_len;
+  uint32_t rest_len2;
+  uint8_t *blocks0;
+  uint8_t *rest0;
   if (rest_len0 == (uint32_t)0U && blocks_n > (uint32_t)0U)
   {
     uint32_t blocks_n1 = blocks_n - (uint32_t)1U;
@@ -2572,12 +2582,12 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
     lit.thd = rest_len0;
     scrut0 = lit;
   }
+  num_blocks0 = scrut0.fst;
+  blocks_len = scrut0.snd;
+  rest_len2 = scrut0.thd;
+  blocks0 = input;
+  rest0 = input + blocks_len;
   {
-    uint32_t num_blocks0 = scrut0.fst;
-    uint32_t blocks_len = scrut0.snd;
-    uint32_t rest_len1 = scrut0.thd;
-    uint8_t *blocks0 = input;
-    uint8_t *rest0 = input + blocks_len;
     K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_ lit;
     K___uint32_t_uint32_t_uint32_t__uint8_t___uint8_t_ scrut;
     uint32_t num_blocks;
@@ -2587,7 +2597,7 @@ Hacl_Hash_Blake2_update_last_blake2b_32(
     FStar_UInt128_uint128 ev_;
     lit.fst = num_blocks0;
     lit.snd = blocks_len;
-    lit.thd = rest_len1;
+    lit.thd = rest_len2;
     lit.f3 = blocks0;
     lit.f4 = rest0;
     scrut = lit;
@@ -3466,6 +3476,14 @@ blake2b_update_block(
   {
     uint64_t mask[4U] = { 0U };
     uint64_t wv_14;
+    uint64_t wv_15;
+    uint64_t *wv3;
+    uint64_t *s00;
+    uint64_t *s16;
+    uint64_t *r00;
+    uint64_t *r10;
+    uint64_t *r20;
+    uint64_t *r30;
     if (flag)
     {
       wv_14 = (uint64_t)0xFFFFFFFFFFFFFFFFU;
@@ -3474,350 +3492,347 @@ blake2b_update_block(
     {
       wv_14 = (uint64_t)0U;
     }
+    wv_15 = (uint64_t)0U;
+    mask[0U] = FStar_UInt128_uint128_to_uint64(totlen);
+    mask[1U] = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(totlen, (uint32_t)64U));
+    mask[2U] = wv_14;
+    mask[3U] = wv_15;
+    memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+    wv3 = wv + (uint32_t)3U * (uint32_t)4U;
     {
-      uint64_t wv_15 = (uint64_t)0U;
-      uint64_t *wv3;
-      uint64_t *s00;
-      uint64_t *s16;
-      uint64_t *r00;
-      uint64_t *r10;
-      uint64_t *r20;
-      uint64_t *r30;
-      mask[0U] = FStar_UInt128_uint128_to_uint64(totlen);
-      mask[1U] = FStar_UInt128_uint128_to_uint64(FStar_UInt128_shift_right(totlen, (uint32_t)64U));
-      mask[2U] = wv_14;
-      mask[3U] = wv_15;
-      memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
-      wv3 = wv + (uint32_t)3U * (uint32_t)4U;
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint64_t *os = wv3;
-          uint64_t x = wv3[i] ^ mask[i];
-          os[i] = x;
-        }
+        uint64_t *os = wv3;
+        uint64_t x = wv3[i] ^ mask[i];
+        os[i] = x;
       }
+    }
+    {
+      uint32_t i0;
+      for (i0 = (uint32_t)0U; i0 < (uint32_t)12U; i0++)
       {
-        uint32_t i0;
-        for (i0 = (uint32_t)0U; i0 < (uint32_t)12U; i0++)
+        uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
+        KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
         {
-          uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
-          KRML_CHECK_SIZE(sizeof (uint64_t), (uint32_t)4U * (uint32_t)4U);
+          uint64_t m_st[(uint32_t)4U * (uint32_t)4U];
+          memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
           {
-            uint64_t m_st[(uint32_t)4U * (uint32_t)4U];
-            memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint64_t));
+            uint64_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
+            uint64_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
+            uint64_t *r21 = m_st + (uint32_t)2U * (uint32_t)4U;
+            uint64_t *r31 = m_st + (uint32_t)3U * (uint32_t)4U;
+            uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+            uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
+            uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
+            uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
+            uint32_t s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)4U];
+            uint32_t s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)5U];
+            uint32_t s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)6U];
+            uint32_t s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)7U];
+            uint32_t s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)8U];
+            uint32_t s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)9U];
+            uint32_t s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)10U];
+            uint32_t s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)11U];
+            uint32_t s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)12U];
+            uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
+            uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
+            uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
+            uint64_t uu____0 = m_w[s2];
+            uint64_t uu____1 = m_w[s4];
+            uint64_t uu____2 = m_w[s6];
+            r0[0U] = m_w[s0];
+            r0[1U] = uu____0;
+            r0[2U] = uu____1;
+            r0[3U] = uu____2;
             {
-              uint64_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
-              uint64_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
-              uint64_t *r21 = m_st + (uint32_t)2U * (uint32_t)4U;
-              uint64_t *r31 = m_st + (uint32_t)3U * (uint32_t)4U;
-              uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
-              uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
-              uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
-              uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
-              uint32_t s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)4U];
-              uint32_t s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)5U];
-              uint32_t s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)6U];
-              uint32_t s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)7U];
-              uint32_t s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)8U];
-              uint32_t s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)9U];
-              uint32_t s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)10U];
-              uint32_t s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)11U];
-              uint32_t s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)12U];
-              uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
-              uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
-              uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
-              uint64_t uu____0 = m_w[s2];
-              uint64_t uu____1 = m_w[s4];
-              uint64_t uu____2 = m_w[s6];
-              r0[0U] = m_w[s0];
-              r0[1U] = uu____0;
-              r0[2U] = uu____1;
-              r0[3U] = uu____2;
+              uint64_t uu____3 = m_w[s3];
+              uint64_t uu____4 = m_w[s5];
+              uint64_t uu____5 = m_w[s7];
+              r1[0U] = m_w[s1];
+              r1[1U] = uu____3;
+              r1[2U] = uu____4;
+              r1[3U] = uu____5;
               {
-                uint64_t uu____3 = m_w[s3];
-                uint64_t uu____4 = m_w[s5];
-                uint64_t uu____5 = m_w[s7];
-                r1[0U] = m_w[s1];
-                r1[1U] = uu____3;
-                r1[2U] = uu____4;
-                r1[3U] = uu____5;
+                uint64_t uu____6 = m_w[s10];
+                uint64_t uu____7 = m_w[s12];
+                uint64_t uu____8 = m_w[s14];
+                r21[0U] = m_w[s8];
+                r21[1U] = uu____6;
+                r21[2U] = uu____7;
+                r21[3U] = uu____8;
                 {
-                  uint64_t uu____6 = m_w[s10];
-                  uint64_t uu____7 = m_w[s12];
-                  uint64_t uu____8 = m_w[s14];
-                  r21[0U] = m_w[s8];
-                  r21[1U] = uu____6;
-                  r21[2U] = uu____7;
-                  r21[3U] = uu____8;
+                  uint64_t uu____9 = m_w[s11];
+                  uint64_t uu____10 = m_w[s13];
+                  uint64_t uu____11 = m_w[s15];
+                  r31[0U] = m_w[s9];
+                  r31[1U] = uu____9;
+                  r31[2U] = uu____10;
+                  r31[3U] = uu____11;
                   {
-                    uint64_t uu____9 = m_w[s11];
-                    uint64_t uu____10 = m_w[s13];
-                    uint64_t uu____11 = m_w[s15];
-                    r31[0U] = m_w[s9];
-                    r31[1U] = uu____9;
-                    r31[2U] = uu____10;
-                    r31[3U] = uu____11;
+                    uint64_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
+                    uint64_t *y = m_st + (uint32_t)1U * (uint32_t)4U;
+                    uint64_t *z = m_st + (uint32_t)2U * (uint32_t)4U;
+                    uint64_t *w = m_st + (uint32_t)3U * (uint32_t)4U;
+                    uint32_t a = (uint32_t)0U;
+                    uint32_t b0 = (uint32_t)1U;
+                    uint32_t c0 = (uint32_t)2U;
+                    uint32_t d10 = (uint32_t)3U;
+                    uint64_t *wv_a0 = wv + a * (uint32_t)4U;
+                    uint64_t *wv_b0 = wv + b0 * (uint32_t)4U;
                     {
-                      uint64_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
-                      uint64_t *y = m_st + (uint32_t)1U * (uint32_t)4U;
-                      uint64_t *z = m_st + (uint32_t)2U * (uint32_t)4U;
-                      uint64_t *w = m_st + (uint32_t)3U * (uint32_t)4U;
-                      uint32_t a = (uint32_t)0U;
-                      uint32_t b0 = (uint32_t)1U;
-                      uint32_t c0 = (uint32_t)2U;
-                      uint32_t d10 = (uint32_t)3U;
-                      uint64_t *wv_a0 = wv + a * (uint32_t)4U;
-                      uint64_t *wv_b0 = wv + b0 * (uint32_t)4U;
+                      uint32_t i;
+                      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                      {
+                        uint64_t *os = wv_a0;
+                        uint64_t x1 = wv_a0[i] + wv_b0[i];
+                        os[i] = x1;
+                      }
+                    }
+                    {
+                      uint32_t i;
+                      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                      {
+                        uint64_t *os = wv_a0;
+                        uint64_t x1 = wv_a0[i] + x[i];
+                        os[i] = x1;
+                      }
+                    }
+                    {
+                      uint64_t *wv_a1 = wv + d10 * (uint32_t)4U;
+                      uint64_t *wv_b1 = wv + a * (uint32_t)4U;
                       {
                         uint32_t i;
                         for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                         {
-                          uint64_t *os = wv_a0;
-                          uint64_t x1 = wv_a0[i] + wv_b0[i];
+                          uint64_t *os = wv_a1;
+                          uint64_t x1 = wv_a1[i] ^ wv_b1[i];
                           os[i] = x1;
                         }
                       }
                       {
-                        uint32_t i;
-                        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-                        {
-                          uint64_t *os = wv_a0;
-                          uint64_t x1 = wv_a0[i] + x[i];
-                          os[i] = x1;
-                        }
-                      }
-                      {
-                        uint64_t *wv_a1 = wv + d10 * (uint32_t)4U;
-                        uint64_t *wv_b1 = wv + a * (uint32_t)4U;
+                        uint64_t *r12 = wv_a1;
                         {
                           uint32_t i;
                           for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                           {
-                            uint64_t *os = wv_a1;
-                            uint64_t x1 = wv_a1[i] ^ wv_b1[i];
-                            os[i] = x1;
+                            uint64_t *os = r12;
+                            uint64_t x1 = r12[i];
+                            uint64_t x10 = x1 >> (uint32_t)32U | x1 << (uint32_t)32U;
+                            os[i] = x10;
                           }
                         }
                         {
-                          uint64_t *r12 = wv_a1;
+                          uint64_t *wv_a2 = wv + c0 * (uint32_t)4U;
+                          uint64_t *wv_b2 = wv + d10 * (uint32_t)4U;
                           {
                             uint32_t i;
                             for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                             {
-                              uint64_t *os = r12;
-                              uint64_t x1 = r12[i];
-                              uint64_t x10 = x1 >> (uint32_t)32U | x1 << (uint32_t)32U;
-                              os[i] = x10;
+                              uint64_t *os = wv_a2;
+                              uint64_t x1 = wv_a2[i] + wv_b2[i];
+                              os[i] = x1;
                             }
                           }
                           {
-                            uint64_t *wv_a2 = wv + c0 * (uint32_t)4U;
-                            uint64_t *wv_b2 = wv + d10 * (uint32_t)4U;
+                            uint64_t *wv_a3 = wv + b0 * (uint32_t)4U;
+                            uint64_t *wv_b3 = wv + c0 * (uint32_t)4U;
                             {
                               uint32_t i;
                               for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                               {
-                                uint64_t *os = wv_a2;
-                                uint64_t x1 = wv_a2[i] + wv_b2[i];
+                                uint64_t *os = wv_a3;
+                                uint64_t x1 = wv_a3[i] ^ wv_b3[i];
                                 os[i] = x1;
                               }
                             }
                             {
-                              uint64_t *wv_a3 = wv + b0 * (uint32_t)4U;
-                              uint64_t *wv_b3 = wv + c0 * (uint32_t)4U;
+                              uint64_t *r13 = wv_a3;
                               {
                                 uint32_t i;
                                 for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                 {
-                                  uint64_t *os = wv_a3;
-                                  uint64_t x1 = wv_a3[i] ^ wv_b3[i];
-                                  os[i] = x1;
+                                  uint64_t *os = r13;
+                                  uint64_t x1 = r13[i];
+                                  uint64_t x10 = x1 >> (uint32_t)24U | x1 << (uint32_t)40U;
+                                  os[i] = x10;
                                 }
                               }
                               {
-                                uint64_t *r13 = wv_a3;
+                                uint64_t *wv_a4 = wv + a * (uint32_t)4U;
+                                uint64_t *wv_b4 = wv + b0 * (uint32_t)4U;
                                 {
                                   uint32_t i;
                                   for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                   {
-                                    uint64_t *os = r13;
-                                    uint64_t x1 = r13[i];
-                                    uint64_t x10 = x1 >> (uint32_t)24U | x1 << (uint32_t)40U;
-                                    os[i] = x10;
+                                    uint64_t *os = wv_a4;
+                                    uint64_t x1 = wv_a4[i] + wv_b4[i];
+                                    os[i] = x1;
                                   }
                                 }
                                 {
-                                  uint64_t *wv_a4 = wv + a * (uint32_t)4U;
-                                  uint64_t *wv_b4 = wv + b0 * (uint32_t)4U;
+                                  uint32_t i;
+                                  for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                                  {
+                                    uint64_t *os = wv_a4;
+                                    uint64_t x1 = wv_a4[i] + y[i];
+                                    os[i] = x1;
+                                  }
+                                }
+                                {
+                                  uint64_t *wv_a5 = wv + d10 * (uint32_t)4U;
+                                  uint64_t *wv_b5 = wv + a * (uint32_t)4U;
                                   {
                                     uint32_t i;
                                     for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                     {
-                                      uint64_t *os = wv_a4;
-                                      uint64_t x1 = wv_a4[i] + wv_b4[i];
+                                      uint64_t *os = wv_a5;
+                                      uint64_t x1 = wv_a5[i] ^ wv_b5[i];
                                       os[i] = x1;
                                     }
                                   }
                                   {
-                                    uint32_t i;
-                                    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-                                    {
-                                      uint64_t *os = wv_a4;
-                                      uint64_t x1 = wv_a4[i] + y[i];
-                                      os[i] = x1;
-                                    }
-                                  }
-                                  {
-                                    uint64_t *wv_a5 = wv + d10 * (uint32_t)4U;
-                                    uint64_t *wv_b5 = wv + a * (uint32_t)4U;
+                                    uint64_t *r14 = wv_a5;
                                     {
                                       uint32_t i;
                                       for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                       {
-                                        uint64_t *os = wv_a5;
-                                        uint64_t x1 = wv_a5[i] ^ wv_b5[i];
-                                        os[i] = x1;
+                                        uint64_t *os = r14;
+                                        uint64_t x1 = r14[i];
+                                        uint64_t x10 = x1 >> (uint32_t)16U | x1 << (uint32_t)48U;
+                                        os[i] = x10;
                                       }
                                     }
                                     {
-                                      uint64_t *r14 = wv_a5;
+                                      uint64_t *wv_a6 = wv + c0 * (uint32_t)4U;
+                                      uint64_t *wv_b6 = wv + d10 * (uint32_t)4U;
                                       {
                                         uint32_t i;
                                         for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                         {
-                                          uint64_t *os = r14;
-                                          uint64_t x1 = r14[i];
-                                          uint64_t x10 = x1 >> (uint32_t)16U | x1 << (uint32_t)48U;
-                                          os[i] = x10;
+                                          uint64_t *os = wv_a6;
+                                          uint64_t x1 = wv_a6[i] + wv_b6[i];
+                                          os[i] = x1;
                                         }
                                       }
                                       {
-                                        uint64_t *wv_a6 = wv + c0 * (uint32_t)4U;
-                                        uint64_t *wv_b6 = wv + d10 * (uint32_t)4U;
+                                        uint64_t *wv_a7 = wv + b0 * (uint32_t)4U;
+                                        uint64_t *wv_b7 = wv + c0 * (uint32_t)4U;
                                         {
                                           uint32_t i;
                                           for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                           {
-                                            uint64_t *os = wv_a6;
-                                            uint64_t x1 = wv_a6[i] + wv_b6[i];
+                                            uint64_t *os = wv_a7;
+                                            uint64_t x1 = wv_a7[i] ^ wv_b7[i];
                                             os[i] = x1;
                                           }
                                         }
                                         {
-                                          uint64_t *wv_a7 = wv + b0 * (uint32_t)4U;
-                                          uint64_t *wv_b7 = wv + c0 * (uint32_t)4U;
+                                          uint64_t *r15 = wv_a7;
                                           {
                                             uint32_t i;
                                             for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                             {
-                                              uint64_t *os = wv_a7;
-                                              uint64_t x1 = wv_a7[i] ^ wv_b7[i];
-                                              os[i] = x1;
+                                              uint64_t *os = r15;
+                                              uint64_t x1 = r15[i];
+                                              uint64_t
+                                              x10 = x1 >> (uint32_t)63U | x1 << (uint32_t)1U;
+                                              os[i] = x10;
                                             }
                                           }
                                           {
-                                            uint64_t *r15 = wv_a7;
+                                            uint64_t *r16 = wv + (uint32_t)1U * (uint32_t)4U;
+                                            uint64_t *r22 = wv + (uint32_t)2U * (uint32_t)4U;
+                                            uint64_t *r32 = wv + (uint32_t)3U * (uint32_t)4U;
+                                            uint64_t *r110 = r16;
+                                            uint64_t x00 = r110[1U];
+                                            uint64_t
+                                            x10 = r110[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+                                            uint64_t
+                                            x20 = r110[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+                                            uint64_t
+                                            x30 = r110[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+                                            r110[0U] = x00;
+                                            r110[1U] = x10;
+                                            r110[2U] = x20;
+                                            r110[3U] = x30;
                                             {
-                                              uint32_t i;
-                                              for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                                              uint64_t *r111 = r22;
+                                              uint64_t x01 = r111[2U];
+                                              uint64_t
+                                              x11 =
+                                                r111[((uint32_t)2U + (uint32_t)1U)
+                                                % (uint32_t)4U];
+                                              uint64_t
+                                              x21 =
+                                                r111[((uint32_t)2U + (uint32_t)2U)
+                                                % (uint32_t)4U];
+                                              uint64_t
+                                              x31 =
+                                                r111[((uint32_t)2U + (uint32_t)3U)
+                                                % (uint32_t)4U];
+                                              r111[0U] = x01;
+                                              r111[1U] = x11;
+                                              r111[2U] = x21;
+                                              r111[3U] = x31;
                                               {
-                                                uint64_t *os = r15;
-                                                uint64_t x1 = r15[i];
+                                                uint64_t *r112 = r32;
+                                                uint64_t x02 = r112[3U];
                                                 uint64_t
-                                                x10 = x1 >> (uint32_t)63U | x1 << (uint32_t)1U;
-                                                os[i] = x10;
-                                              }
-                                            }
-                                            {
-                                              uint64_t *r16 = wv + (uint32_t)1U * (uint32_t)4U;
-                                              uint64_t *r22 = wv + (uint32_t)2U * (uint32_t)4U;
-                                              uint64_t *r32 = wv + (uint32_t)3U * (uint32_t)4U;
-                                              uint64_t *r110 = r16;
-                                              uint64_t x00 = r110[1U];
-                                              uint64_t
-                                              x10 =
-                                                r110[((uint32_t)1U + (uint32_t)1U)
-                                                % (uint32_t)4U];
-                                              uint64_t
-                                              x20 =
-                                                r110[((uint32_t)1U + (uint32_t)2U)
-                                                % (uint32_t)4U];
-                                              uint64_t
-                                              x30 =
-                                                r110[((uint32_t)1U + (uint32_t)3U)
-                                                % (uint32_t)4U];
-                                              r110[0U] = x00;
-                                              r110[1U] = x10;
-                                              r110[2U] = x20;
-                                              r110[3U] = x30;
-                                              {
-                                                uint64_t *r111 = r22;
-                                                uint64_t x01 = r111[2U];
-                                                uint64_t
-                                                x11 =
-                                                  r111[((uint32_t)2U + (uint32_t)1U)
+                                                x12 =
+                                                  r112[((uint32_t)3U + (uint32_t)1U)
                                                   % (uint32_t)4U];
                                                 uint64_t
-                                                x21 =
-                                                  r111[((uint32_t)2U + (uint32_t)2U)
+                                                x22 =
+                                                  r112[((uint32_t)3U + (uint32_t)2U)
                                                   % (uint32_t)4U];
                                                 uint64_t
-                                                x31 =
-                                                  r111[((uint32_t)2U + (uint32_t)3U)
+                                                x32 =
+                                                  r112[((uint32_t)3U + (uint32_t)3U)
                                                   % (uint32_t)4U];
-                                                r111[0U] = x01;
-                                                r111[1U] = x11;
-                                                r111[2U] = x21;
-                                                r111[3U] = x31;
+                                                r112[0U] = x02;
+                                                r112[1U] = x12;
+                                                r112[2U] = x22;
+                                                r112[3U] = x32;
                                                 {
-                                                  uint64_t *r112 = r32;
-                                                  uint64_t x02 = r112[3U];
-                                                  uint64_t
-                                                  x12 =
-                                                    r112[((uint32_t)3U + (uint32_t)1U)
-                                                    % (uint32_t)4U];
-                                                  uint64_t
-                                                  x22 =
-                                                    r112[((uint32_t)3U + (uint32_t)2U)
-                                                    % (uint32_t)4U];
-                                                  uint64_t
-                                                  x32 =
-                                                    r112[((uint32_t)3U + (uint32_t)3U)
-                                                    % (uint32_t)4U];
-                                                  r112[0U] = x02;
-                                                  r112[1U] = x12;
-                                                  r112[2U] = x22;
-                                                  r112[3U] = x32;
+                                                  uint32_t a0 = (uint32_t)0U;
+                                                  uint32_t b = (uint32_t)1U;
+                                                  uint32_t c = (uint32_t)2U;
+                                                  uint32_t d1 = (uint32_t)3U;
+                                                  uint64_t *wv_a = wv + a0 * (uint32_t)4U;
+                                                  uint64_t *wv_b8 = wv + b * (uint32_t)4U;
                                                   {
-                                                    uint32_t a0 = (uint32_t)0U;
-                                                    uint32_t b = (uint32_t)1U;
-                                                    uint32_t c = (uint32_t)2U;
-                                                    uint32_t d1 = (uint32_t)3U;
-                                                    uint64_t *wv_a = wv + a0 * (uint32_t)4U;
-                                                    uint64_t *wv_b8 = wv + b * (uint32_t)4U;
+                                                    uint32_t i;
+                                                    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                                                    {
+                                                      uint64_t *os = wv_a;
+                                                      uint64_t x1 = wv_a[i] + wv_b8[i];
+                                                      os[i] = x1;
+                                                    }
+                                                  }
+                                                  {
+                                                    uint32_t i;
+                                                    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                                                    {
+                                                      uint64_t *os = wv_a;
+                                                      uint64_t x1 = wv_a[i] + z[i];
+                                                      os[i] = x1;
+                                                    }
+                                                  }
+                                                  {
+                                                    uint64_t *wv_a8 = wv + d1 * (uint32_t)4U;
+                                                    uint64_t *wv_b9 = wv + a0 * (uint32_t)4U;
                                                     {
                                                       uint32_t i;
                                                       for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                                       {
-                                                        uint64_t *os = wv_a;
-                                                        uint64_t x1 = wv_a[i] + wv_b8[i];
+                                                        uint64_t *os = wv_a8;
+                                                        uint64_t x1 = wv_a8[i] ^ wv_b9[i];
                                                         os[i] = x1;
                                                       }
                                                     }
                                                     {
-                                                      uint32_t i;
-                                                      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-                                                      {
-                                                        uint64_t *os = wv_a;
-                                                        uint64_t x1 = wv_a[i] + z[i];
-                                                        os[i] = x1;
-                                                      }
-                                                    }
-                                                    {
-                                                      uint64_t *wv_a8 = wv + d1 * (uint32_t)4U;
-                                                      uint64_t *wv_b9 = wv + a0 * (uint32_t)4U;
+                                                      uint64_t *r17 = wv_a8;
                                                       {
                                                         uint32_t i;
                                                         for
@@ -3827,13 +3842,19 @@ blake2b_update_block(
                                                           < (uint32_t)4U;
                                                           i++)
                                                         {
-                                                          uint64_t *os = wv_a8;
-                                                          uint64_t x1 = wv_a8[i] ^ wv_b9[i];
-                                                          os[i] = x1;
+                                                          uint64_t *os = r17;
+                                                          uint64_t x1 = r17[i];
+                                                          uint64_t
+                                                          x13 =
+                                                            x1
+                                                            >> (uint32_t)32U
+                                                            | x1 << (uint32_t)32U;
+                                                          os[i] = x13;
                                                         }
                                                       }
                                                       {
-                                                        uint64_t *r17 = wv_a8;
+                                                        uint64_t *wv_a9 = wv + c * (uint32_t)4U;
+                                                        uint64_t *wv_b10 = wv + d1 * (uint32_t)4U;
                                                         {
                                                           uint32_t i;
                                                           for
@@ -3843,19 +3864,14 @@ blake2b_update_block(
                                                             < (uint32_t)4U;
                                                             i++)
                                                           {
-                                                            uint64_t *os = r17;
-                                                            uint64_t x1 = r17[i];
-                                                            uint64_t
-                                                            x13 =
-                                                              x1
-                                                              >> (uint32_t)32U
-                                                              | x1 << (uint32_t)32U;
-                                                            os[i] = x13;
+                                                            uint64_t *os = wv_a9;
+                                                            uint64_t x1 = wv_a9[i] + wv_b10[i];
+                                                            os[i] = x1;
                                                           }
                                                         }
                                                         {
-                                                          uint64_t *wv_a9 = wv + c * (uint32_t)4U;
-                                                          uint64_t *wv_b10 = wv + d1 * (uint32_t)4U;
+                                                          uint64_t *wv_a10 = wv + b * (uint32_t)4U;
+                                                          uint64_t *wv_b11 = wv + c * (uint32_t)4U;
                                                           {
                                                             uint32_t i;
                                                             for
@@ -3865,16 +3881,13 @@ blake2b_update_block(
                                                               < (uint32_t)4U;
                                                               i++)
                                                             {
-                                                              uint64_t *os = wv_a9;
-                                                              uint64_t x1 = wv_a9[i] + wv_b10[i];
+                                                              uint64_t *os = wv_a10;
+                                                              uint64_t x1 = wv_a10[i] ^ wv_b11[i];
                                                               os[i] = x1;
                                                             }
                                                           }
                                                           {
-                                                            uint64_t
-                                                            *wv_a10 = wv + b * (uint32_t)4U;
-                                                            uint64_t
-                                                            *wv_b11 = wv + c * (uint32_t)4U;
+                                                            uint64_t *r18 = wv_a10;
                                                             {
                                                               uint32_t i;
                                                               for
@@ -3884,13 +3897,21 @@ blake2b_update_block(
                                                                 < (uint32_t)4U;
                                                                 i++)
                                                               {
-                                                                uint64_t *os = wv_a10;
-                                                                uint64_t x1 = wv_a10[i] ^ wv_b11[i];
-                                                                os[i] = x1;
+                                                                uint64_t *os = r18;
+                                                                uint64_t x1 = r18[i];
+                                                                uint64_t
+                                                                x13 =
+                                                                  x1
+                                                                  >> (uint32_t)24U
+                                                                  | x1 << (uint32_t)40U;
+                                                                os[i] = x13;
                                                               }
                                                             }
                                                             {
-                                                              uint64_t *r18 = wv_a10;
+                                                              uint64_t
+                                                              *wv_a11 = wv + a0 * (uint32_t)4U;
+                                                              uint64_t
+                                                              *wv_b12 = wv + b * (uint32_t)4U;
                                                               {
                                                                 uint32_t i;
                                                                 for
@@ -3900,21 +3921,31 @@ blake2b_update_block(
                                                                   < (uint32_t)4U;
                                                                   i++)
                                                                 {
-                                                                  uint64_t *os = r18;
-                                                                  uint64_t x1 = r18[i];
+                                                                  uint64_t *os = wv_a11;
                                                                   uint64_t
-                                                                  x13 =
-                                                                    x1
-                                                                    >> (uint32_t)24U
-                                                                    | x1 << (uint32_t)40U;
-                                                                  os[i] = x13;
+                                                                  x1 = wv_a11[i] + wv_b12[i];
+                                                                  os[i] = x1;
+                                                                }
+                                                              }
+                                                              {
+                                                                uint32_t i;
+                                                                for
+                                                                (i
+                                                                  = (uint32_t)0U;
+                                                                  i
+                                                                  < (uint32_t)4U;
+                                                                  i++)
+                                                                {
+                                                                  uint64_t *os = wv_a11;
+                                                                  uint64_t x1 = wv_a11[i] + w[i];
+                                                                  os[i] = x1;
                                                                 }
                                                               }
                                                               {
                                                                 uint64_t
-                                                                *wv_a11 = wv + a0 * (uint32_t)4U;
+                                                                *wv_a12 = wv + d1 * (uint32_t)4U;
                                                                 uint64_t
-                                                                *wv_b12 = wv + b * (uint32_t)4U;
+                                                                *wv_b13 = wv + a0 * (uint32_t)4U;
                                                                 {
                                                                   uint32_t i;
                                                                   for
@@ -3924,31 +3955,14 @@ blake2b_update_block(
                                                                     < (uint32_t)4U;
                                                                     i++)
                                                                   {
-                                                                    uint64_t *os = wv_a11;
+                                                                    uint64_t *os = wv_a12;
                                                                     uint64_t
-                                                                    x1 = wv_a11[i] + wv_b12[i];
+                                                                    x1 = wv_a12[i] ^ wv_b13[i];
                                                                     os[i] = x1;
                                                                   }
                                                                 }
                                                                 {
-                                                                  uint32_t i;
-                                                                  for
-                                                                  (i
-                                                                    = (uint32_t)0U;
-                                                                    i
-                                                                    < (uint32_t)4U;
-                                                                    i++)
-                                                                  {
-                                                                    uint64_t *os = wv_a11;
-                                                                    uint64_t x1 = wv_a11[i] + w[i];
-                                                                    os[i] = x1;
-                                                                  }
-                                                                }
-                                                                {
-                                                                  uint64_t
-                                                                  *wv_a12 = wv + d1 * (uint32_t)4U;
-                                                                  uint64_t
-                                                                  *wv_b13 = wv + a0 * (uint32_t)4U;
+                                                                  uint64_t *r19 = wv_a12;
                                                                   {
                                                                     uint32_t i;
                                                                     for
@@ -3958,14 +3972,21 @@ blake2b_update_block(
                                                                       < (uint32_t)4U;
                                                                       i++)
                                                                     {
-                                                                      uint64_t *os = wv_a12;
+                                                                      uint64_t *os = r19;
+                                                                      uint64_t x1 = r19[i];
                                                                       uint64_t
-                                                                      x1 = wv_a12[i] ^ wv_b13[i];
-                                                                      os[i] = x1;
+                                                                      x13 =
+                                                                        x1
+                                                                        >> (uint32_t)16U
+                                                                        | x1 << (uint32_t)48U;
+                                                                      os[i] = x13;
                                                                     }
                                                                   }
                                                                   {
-                                                                    uint64_t *r19 = wv_a12;
+                                                                    uint64_t
+                                                                    *wv_a13 = wv + c * (uint32_t)4U;
+                                                                    uint64_t
+                                                                    *wv_b14 = wv + d1 * (uint32_t)4U;
                                                                     {
                                                                       uint32_t i;
                                                                       for
@@ -3975,25 +3996,19 @@ blake2b_update_block(
                                                                         < (uint32_t)4U;
                                                                         i++)
                                                                       {
-                                                                        uint64_t *os = r19;
-                                                                        uint64_t x1 = r19[i];
+                                                                        uint64_t *os = wv_a13;
                                                                         uint64_t
-                                                                        x13 =
-                                                                          x1
-                                                                          >> (uint32_t)16U
-                                                                          | x1 << (uint32_t)48U;
-                                                                        os[i] = x13;
+                                                                        x1 = wv_a13[i] + wv_b14[i];
+                                                                        os[i] = x1;
                                                                       }
                                                                     }
                                                                     {
                                                                       uint64_t
-                                                                      *wv_a13 =
+                                                                      *wv_a14 =
                                                                         wv
-                                                                        + c * (uint32_t)4U;
+                                                                        + b * (uint32_t)4U;
                                                                       uint64_t
-                                                                      *wv_b14 =
-                                                                        wv
-                                                                        + d1 * (uint32_t)4U;
+                                                                      *wv_b = wv + c * (uint32_t)4U;
                                                                       {
                                                                         uint32_t i;
                                                                         for
@@ -4003,21 +4018,14 @@ blake2b_update_block(
                                                                           < (uint32_t)4U;
                                                                           i++)
                                                                         {
-                                                                          uint64_t *os = wv_a13;
+                                                                          uint64_t *os = wv_a14;
                                                                           uint64_t
-                                                                          x1 = wv_a13[i] + wv_b14[i];
+                                                                          x1 = wv_a14[i] ^ wv_b[i];
                                                                           os[i] = x1;
                                                                         }
                                                                       }
                                                                       {
-                                                                        uint64_t
-                                                                        *wv_a14 =
-                                                                          wv
-                                                                          + b * (uint32_t)4U;
-                                                                        uint64_t
-                                                                        *wv_b =
-                                                                          wv
-                                                                          + c * (uint32_t)4U;
+                                                                        uint64_t *r113 = wv_a14;
                                                                         {
                                                                           uint32_t i;
                                                                           for
@@ -4027,120 +4035,101 @@ blake2b_update_block(
                                                                             < (uint32_t)4U;
                                                                             i++)
                                                                           {
-                                                                            uint64_t *os = wv_a14;
+                                                                            uint64_t *os = r113;
+                                                                            uint64_t x1 = r113[i];
                                                                             uint64_t
-                                                                            x1 = wv_a14[i] ^ wv_b[i];
-                                                                            os[i] = x1;
+                                                                            x13 =
+                                                                              x1
+                                                                              >> (uint32_t)63U
+                                                                              | x1 << (uint32_t)1U;
+                                                                            os[i] = x13;
                                                                           }
                                                                         }
                                                                         {
-                                                                          uint64_t *r113 = wv_a14;
+                                                                          uint64_t
+                                                                          *r114 =
+                                                                            wv
+                                                                            +
+                                                                              (uint32_t)1U
+                                                                              * (uint32_t)4U;
+                                                                          uint64_t
+                                                                          *r2 =
+                                                                            wv
+                                                                            +
+                                                                              (uint32_t)2U
+                                                                              * (uint32_t)4U;
+                                                                          uint64_t
+                                                                          *r3 =
+                                                                            wv
+                                                                            +
+                                                                              (uint32_t)3U
+                                                                              * (uint32_t)4U;
+                                                                          uint64_t *r11 = r114;
+                                                                          uint64_t x03 = r11[3U];
+                                                                          uint64_t
+                                                                          x13 =
+                                                                            r11[((uint32_t)3U
+                                                                            + (uint32_t)1U)
+                                                                            % (uint32_t)4U];
+                                                                          uint64_t
+                                                                          x23 =
+                                                                            r11[((uint32_t)3U
+                                                                            + (uint32_t)2U)
+                                                                            % (uint32_t)4U];
+                                                                          uint64_t
+                                                                          x33 =
+                                                                            r11[((uint32_t)3U
+                                                                            + (uint32_t)3U)
+                                                                            % (uint32_t)4U];
+                                                                          r11[0U] = x03;
+                                                                          r11[1U] = x13;
+                                                                          r11[2U] = x23;
+                                                                          r11[3U] = x33;
                                                                           {
-                                                                            uint32_t i;
-                                                                            for
-                                                                            (i
-                                                                              = (uint32_t)0U;
-                                                                              i
-                                                                              < (uint32_t)4U;
-                                                                              i++)
-                                                                            {
-                                                                              uint64_t *os = r113;
-                                                                              uint64_t x1 = r113[i];
-                                                                              uint64_t
-                                                                              x13 =
-                                                                                x1
-                                                                                >> (uint32_t)63U
-                                                                                | x1 << (uint32_t)1U;
-                                                                              os[i] = x13;
-                                                                            }
-                                                                          }
-                                                                          {
+                                                                            uint64_t *r115 = r2;
+                                                                            uint64_t x04 = r115[2U];
                                                                             uint64_t
-                                                                            *r114 =
-                                                                              wv
-                                                                              +
-                                                                                (uint32_t)1U
-                                                                                * (uint32_t)4U;
-                                                                            uint64_t
-                                                                            *r2 =
-                                                                              wv
-                                                                              +
-                                                                                (uint32_t)2U
-                                                                                * (uint32_t)4U;
-                                                                            uint64_t
-                                                                            *r3 =
-                                                                              wv
-                                                                              +
-                                                                                (uint32_t)3U
-                                                                                * (uint32_t)4U;
-                                                                            uint64_t *r11 = r114;
-                                                                            uint64_t x03 = r11[3U];
-                                                                            uint64_t
-                                                                            x13 =
-                                                                              r11[((uint32_t)3U
+                                                                            x14 =
+                                                                              r115[((uint32_t)2U
                                                                               + (uint32_t)1U)
                                                                               % (uint32_t)4U];
                                                                             uint64_t
-                                                                            x23 =
-                                                                              r11[((uint32_t)3U
+                                                                            x24 =
+                                                                              r115[((uint32_t)2U
                                                                               + (uint32_t)2U)
                                                                               % (uint32_t)4U];
                                                                             uint64_t
-                                                                            x33 =
-                                                                              r11[((uint32_t)3U
+                                                                            x34 =
+                                                                              r115[((uint32_t)2U
                                                                               + (uint32_t)3U)
                                                                               % (uint32_t)4U];
-                                                                            r11[0U] = x03;
-                                                                            r11[1U] = x13;
-                                                                            r11[2U] = x23;
-                                                                            r11[3U] = x33;
+                                                                            r115[0U] = x04;
+                                                                            r115[1U] = x14;
+                                                                            r115[2U] = x24;
+                                                                            r115[3U] = x34;
                                                                             {
-                                                                              uint64_t *r115 = r2;
+                                                                              uint64_t *r116 = r3;
                                                                               uint64_t
-                                                                              x04 = r115[2U];
+                                                                              x0 = r116[1U];
                                                                               uint64_t
-                                                                              x14 =
-                                                                                r115[((uint32_t)2U
+                                                                              x1 =
+                                                                                r116[((uint32_t)1U
                                                                                 + (uint32_t)1U)
                                                                                 % (uint32_t)4U];
                                                                               uint64_t
-                                                                              x24 =
-                                                                                r115[((uint32_t)2U
+                                                                              x2 =
+                                                                                r116[((uint32_t)1U
                                                                                 + (uint32_t)2U)
                                                                                 % (uint32_t)4U];
                                                                               uint64_t
-                                                                              x34 =
-                                                                                r115[((uint32_t)2U
+                                                                              x3 =
+                                                                                r116[((uint32_t)1U
                                                                                 + (uint32_t)3U)
                                                                                 % (uint32_t)4U];
-                                                                              r115[0U] = x04;
-                                                                              r115[1U] = x14;
-                                                                              r115[2U] = x24;
-                                                                              r115[3U] = x34;
-                                                                              {
-                                                                                uint64_t *r116 = r3;
-                                                                                uint64_t
-                                                                                x0 = r116[1U];
-                                                                                uint64_t
-                                                                                x1 =
-                                                                                  r116[((uint32_t)1U
-                                                                                  + (uint32_t)1U)
-                                                                                  % (uint32_t)4U];
-                                                                                uint64_t
-                                                                                x2 =
-                                                                                  r116[((uint32_t)1U
-                                                                                  + (uint32_t)2U)
-                                                                                  % (uint32_t)4U];
-                                                                                uint64_t
-                                                                                x3 =
-                                                                                  r116[((uint32_t)1U
-                                                                                  + (uint32_t)3U)
-                                                                                  % (uint32_t)4U];
-                                                                                r116[0U] = x0;
-                                                                                r116[1U] = x1;
-                                                                                r116[2U] = x2;
-                                                                                r116[3U] = x3;
-                                                                              }
+                                                                              r116[0U] = x0;
+                                                                              r116[1U] = x1;
+                                                                              r116[2U] = x2;
+                                                                              r116[3U] = x3;
                                                                             }
                                                                           }
                                                                         }
@@ -4177,47 +4166,47 @@ blake2b_update_block(
           }
         }
       }
-      s00 = hash + (uint32_t)0U * (uint32_t)4U;
-      s16 = hash + (uint32_t)1U * (uint32_t)4U;
-      r00 = wv + (uint32_t)0U * (uint32_t)4U;
-      r10 = wv + (uint32_t)1U * (uint32_t)4U;
-      r20 = wv + (uint32_t)2U * (uint32_t)4U;
-      r30 = wv + (uint32_t)3U * (uint32_t)4U;
+    }
+    s00 = hash + (uint32_t)0U * (uint32_t)4U;
+    s16 = hash + (uint32_t)1U * (uint32_t)4U;
+    r00 = wv + (uint32_t)0U * (uint32_t)4U;
+    r10 = wv + (uint32_t)1U * (uint32_t)4U;
+    r20 = wv + (uint32_t)2U * (uint32_t)4U;
+    r30 = wv + (uint32_t)3U * (uint32_t)4U;
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint64_t *os = s00;
-          uint64_t x = s00[i] ^ r00[i];
-          os[i] = x;
-        }
+        uint64_t *os = s00;
+        uint64_t x = s00[i] ^ r00[i];
+        os[i] = x;
       }
+    }
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint64_t *os = s00;
-          uint64_t x = s00[i] ^ r20[i];
-          os[i] = x;
-        }
+        uint64_t *os = s00;
+        uint64_t x = s00[i] ^ r20[i];
+        os[i] = x;
       }
+    }
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint64_t *os = s16;
-          uint64_t x = s16[i] ^ r10[i];
-          os[i] = x;
-        }
+        uint64_t *os = s16;
+        uint64_t x = s16[i] ^ r10[i];
+        os[i] = x;
       }
+    }
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint64_t *os = s16;
-          uint64_t x = s16[i] ^ r30[i];
-          os[i] = x;
-        }
+        uint64_t *os = s16;
+        uint64_t x = s16[i] ^ r30[i];
+        os[i] = x;
       }
     }
   }
@@ -4335,6 +4324,8 @@ blake2b_update_blocks(
   uint32_t nb0 = len / (uint32_t)128U;
   uint32_t rem0 = len % (uint32_t)128U;
   K___uint32_t_uint32_t scrut;
+  uint32_t nb;
+  uint32_t rem;
   if (rem0 == (uint32_t)0U && nb0 > (uint32_t)0U)
   {
     uint32_t nb_ = nb0 - (uint32_t)1U;
@@ -4351,12 +4342,10 @@ blake2b_update_blocks(
     lit.snd = rem0;
     scrut = lit;
   }
-  {
-    uint32_t nb = scrut.fst;
-    uint32_t rem = scrut.snd;
-    Hacl_Blake2b_32_blake2b_update_multi(len, wv, hash, prev, blocks, nb);
-    Hacl_Blake2b_32_blake2b_update_last(len, wv, hash, prev, rem, blocks);
-  }
+  nb = scrut.fst;
+  rem = scrut.snd;
+  Hacl_Blake2b_32_blake2b_update_multi(len, wv, hash, prev, blocks, nb);
+  Hacl_Blake2b_32_blake2b_update_last(len, wv, hash, prev, rem, blocks);
 }
 
 static inline void
@@ -4470,6 +4459,14 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
   {
     uint32_t mask[4U] = { 0U };
     uint32_t wv_14;
+    uint32_t wv_15;
+    uint32_t *wv3;
+    uint32_t *s00;
+    uint32_t *s16;
+    uint32_t *r00;
+    uint32_t *r10;
+    uint32_t *r20;
+    uint32_t *r30;
     if (flag)
     {
       wv_14 = (uint32_t)0xFFFFFFFFU;
@@ -4478,350 +4475,347 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
     {
       wv_14 = (uint32_t)0U;
     }
+    wv_15 = (uint32_t)0U;
+    mask[0U] = (uint32_t)totlen;
+    mask[1U] = (uint32_t)(totlen >> (uint32_t)32U);
+    mask[2U] = wv_14;
+    mask[3U] = wv_15;
+    memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+    wv3 = wv + (uint32_t)3U * (uint32_t)4U;
     {
-      uint32_t wv_15 = (uint32_t)0U;
-      uint32_t *wv3;
-      uint32_t *s00;
-      uint32_t *s16;
-      uint32_t *r00;
-      uint32_t *r10;
-      uint32_t *r20;
-      uint32_t *r30;
-      mask[0U] = (uint32_t)totlen;
-      mask[1U] = (uint32_t)(totlen >> (uint32_t)32U);
-      mask[2U] = wv_14;
-      mask[3U] = wv_15;
-      memcpy(wv, hash, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
-      wv3 = wv + (uint32_t)3U * (uint32_t)4U;
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint32_t *os = wv3;
-          uint32_t x = wv3[i] ^ mask[i];
-          os[i] = x;
-        }
+        uint32_t *os = wv3;
+        uint32_t x = wv3[i] ^ mask[i];
+        os[i] = x;
       }
+    }
+    {
+      uint32_t i0;
+      for (i0 = (uint32_t)0U; i0 < (uint32_t)10U; i0++)
       {
-        uint32_t i0;
-        for (i0 = (uint32_t)0U; i0 < (uint32_t)10U; i0++)
+        uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
+        KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
         {
-          uint32_t start_idx = i0 % (uint32_t)10U * (uint32_t)16U;
-          KRML_CHECK_SIZE(sizeof (uint32_t), (uint32_t)4U * (uint32_t)4U);
+          uint32_t m_st[(uint32_t)4U * (uint32_t)4U];
+          memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
           {
-            uint32_t m_st[(uint32_t)4U * (uint32_t)4U];
-            memset(m_st, 0U, (uint32_t)4U * (uint32_t)4U * sizeof (uint32_t));
+            uint32_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
+            uint32_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
+            uint32_t *r21 = m_st + (uint32_t)2U * (uint32_t)4U;
+            uint32_t *r31 = m_st + (uint32_t)3U * (uint32_t)4U;
+            uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
+            uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
+            uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
+            uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
+            uint32_t s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)4U];
+            uint32_t s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)5U];
+            uint32_t s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)6U];
+            uint32_t s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)7U];
+            uint32_t s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)8U];
+            uint32_t s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)9U];
+            uint32_t s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)10U];
+            uint32_t s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)11U];
+            uint32_t s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)12U];
+            uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
+            uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
+            uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
+            uint32_t uu____0 = m_w[s2];
+            uint32_t uu____1 = m_w[s4];
+            uint32_t uu____2 = m_w[s6];
+            r0[0U] = m_w[s0];
+            r0[1U] = uu____0;
+            r0[2U] = uu____1;
+            r0[3U] = uu____2;
             {
-              uint32_t *r0 = m_st + (uint32_t)0U * (uint32_t)4U;
-              uint32_t *r1 = m_st + (uint32_t)1U * (uint32_t)4U;
-              uint32_t *r21 = m_st + (uint32_t)2U * (uint32_t)4U;
-              uint32_t *r31 = m_st + (uint32_t)3U * (uint32_t)4U;
-              uint32_t s0 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx];
-              uint32_t s1 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)1U];
-              uint32_t s2 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)2U];
-              uint32_t s3 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)3U];
-              uint32_t s4 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)4U];
-              uint32_t s5 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)5U];
-              uint32_t s6 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)6U];
-              uint32_t s7 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)7U];
-              uint32_t s8 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)8U];
-              uint32_t s9 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)9U];
-              uint32_t s10 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)10U];
-              uint32_t s11 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)11U];
-              uint32_t s12 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)12U];
-              uint32_t s13 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)13U];
-              uint32_t s14 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)14U];
-              uint32_t s15 = Hacl_Impl_Blake2_Constants_sigmaTable[start_idx + (uint32_t)15U];
-              uint32_t uu____0 = m_w[s2];
-              uint32_t uu____1 = m_w[s4];
-              uint32_t uu____2 = m_w[s6];
-              r0[0U] = m_w[s0];
-              r0[1U] = uu____0;
-              r0[2U] = uu____1;
-              r0[3U] = uu____2;
+              uint32_t uu____3 = m_w[s3];
+              uint32_t uu____4 = m_w[s5];
+              uint32_t uu____5 = m_w[s7];
+              r1[0U] = m_w[s1];
+              r1[1U] = uu____3;
+              r1[2U] = uu____4;
+              r1[3U] = uu____5;
               {
-                uint32_t uu____3 = m_w[s3];
-                uint32_t uu____4 = m_w[s5];
-                uint32_t uu____5 = m_w[s7];
-                r1[0U] = m_w[s1];
-                r1[1U] = uu____3;
-                r1[2U] = uu____4;
-                r1[3U] = uu____5;
+                uint32_t uu____6 = m_w[s10];
+                uint32_t uu____7 = m_w[s12];
+                uint32_t uu____8 = m_w[s14];
+                r21[0U] = m_w[s8];
+                r21[1U] = uu____6;
+                r21[2U] = uu____7;
+                r21[3U] = uu____8;
                 {
-                  uint32_t uu____6 = m_w[s10];
-                  uint32_t uu____7 = m_w[s12];
-                  uint32_t uu____8 = m_w[s14];
-                  r21[0U] = m_w[s8];
-                  r21[1U] = uu____6;
-                  r21[2U] = uu____7;
-                  r21[3U] = uu____8;
+                  uint32_t uu____9 = m_w[s11];
+                  uint32_t uu____10 = m_w[s13];
+                  uint32_t uu____11 = m_w[s15];
+                  r31[0U] = m_w[s9];
+                  r31[1U] = uu____9;
+                  r31[2U] = uu____10;
+                  r31[3U] = uu____11;
                   {
-                    uint32_t uu____9 = m_w[s11];
-                    uint32_t uu____10 = m_w[s13];
-                    uint32_t uu____11 = m_w[s15];
-                    r31[0U] = m_w[s9];
-                    r31[1U] = uu____9;
-                    r31[2U] = uu____10;
-                    r31[3U] = uu____11;
+                    uint32_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
+                    uint32_t *y = m_st + (uint32_t)1U * (uint32_t)4U;
+                    uint32_t *z = m_st + (uint32_t)2U * (uint32_t)4U;
+                    uint32_t *w = m_st + (uint32_t)3U * (uint32_t)4U;
+                    uint32_t a = (uint32_t)0U;
+                    uint32_t b0 = (uint32_t)1U;
+                    uint32_t c0 = (uint32_t)2U;
+                    uint32_t d10 = (uint32_t)3U;
+                    uint32_t *wv_a0 = wv + a * (uint32_t)4U;
+                    uint32_t *wv_b0 = wv + b0 * (uint32_t)4U;
                     {
-                      uint32_t *x = m_st + (uint32_t)0U * (uint32_t)4U;
-                      uint32_t *y = m_st + (uint32_t)1U * (uint32_t)4U;
-                      uint32_t *z = m_st + (uint32_t)2U * (uint32_t)4U;
-                      uint32_t *w = m_st + (uint32_t)3U * (uint32_t)4U;
-                      uint32_t a = (uint32_t)0U;
-                      uint32_t b0 = (uint32_t)1U;
-                      uint32_t c0 = (uint32_t)2U;
-                      uint32_t d10 = (uint32_t)3U;
-                      uint32_t *wv_a0 = wv + a * (uint32_t)4U;
-                      uint32_t *wv_b0 = wv + b0 * (uint32_t)4U;
+                      uint32_t i;
+                      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                      {
+                        uint32_t *os = wv_a0;
+                        uint32_t x1 = wv_a0[i] + wv_b0[i];
+                        os[i] = x1;
+                      }
+                    }
+                    {
+                      uint32_t i;
+                      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                      {
+                        uint32_t *os = wv_a0;
+                        uint32_t x1 = wv_a0[i] + x[i];
+                        os[i] = x1;
+                      }
+                    }
+                    {
+                      uint32_t *wv_a1 = wv + d10 * (uint32_t)4U;
+                      uint32_t *wv_b1 = wv + a * (uint32_t)4U;
                       {
                         uint32_t i;
                         for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                         {
-                          uint32_t *os = wv_a0;
-                          uint32_t x1 = wv_a0[i] + wv_b0[i];
+                          uint32_t *os = wv_a1;
+                          uint32_t x1 = wv_a1[i] ^ wv_b1[i];
                           os[i] = x1;
                         }
                       }
                       {
-                        uint32_t i;
-                        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-                        {
-                          uint32_t *os = wv_a0;
-                          uint32_t x1 = wv_a0[i] + x[i];
-                          os[i] = x1;
-                        }
-                      }
-                      {
-                        uint32_t *wv_a1 = wv + d10 * (uint32_t)4U;
-                        uint32_t *wv_b1 = wv + a * (uint32_t)4U;
+                        uint32_t *r12 = wv_a1;
                         {
                           uint32_t i;
                           for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                           {
-                            uint32_t *os = wv_a1;
-                            uint32_t x1 = wv_a1[i] ^ wv_b1[i];
-                            os[i] = x1;
+                            uint32_t *os = r12;
+                            uint32_t x1 = r12[i];
+                            uint32_t x10 = x1 >> (uint32_t)16U | x1 << (uint32_t)16U;
+                            os[i] = x10;
                           }
                         }
                         {
-                          uint32_t *r12 = wv_a1;
+                          uint32_t *wv_a2 = wv + c0 * (uint32_t)4U;
+                          uint32_t *wv_b2 = wv + d10 * (uint32_t)4U;
                           {
                             uint32_t i;
                             for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                             {
-                              uint32_t *os = r12;
-                              uint32_t x1 = r12[i];
-                              uint32_t x10 = x1 >> (uint32_t)16U | x1 << (uint32_t)16U;
-                              os[i] = x10;
+                              uint32_t *os = wv_a2;
+                              uint32_t x1 = wv_a2[i] + wv_b2[i];
+                              os[i] = x1;
                             }
                           }
                           {
-                            uint32_t *wv_a2 = wv + c0 * (uint32_t)4U;
-                            uint32_t *wv_b2 = wv + d10 * (uint32_t)4U;
+                            uint32_t *wv_a3 = wv + b0 * (uint32_t)4U;
+                            uint32_t *wv_b3 = wv + c0 * (uint32_t)4U;
                             {
                               uint32_t i;
                               for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                               {
-                                uint32_t *os = wv_a2;
-                                uint32_t x1 = wv_a2[i] + wv_b2[i];
+                                uint32_t *os = wv_a3;
+                                uint32_t x1 = wv_a3[i] ^ wv_b3[i];
                                 os[i] = x1;
                               }
                             }
                             {
-                              uint32_t *wv_a3 = wv + b0 * (uint32_t)4U;
-                              uint32_t *wv_b3 = wv + c0 * (uint32_t)4U;
+                              uint32_t *r13 = wv_a3;
                               {
                                 uint32_t i;
                                 for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                 {
-                                  uint32_t *os = wv_a3;
-                                  uint32_t x1 = wv_a3[i] ^ wv_b3[i];
-                                  os[i] = x1;
+                                  uint32_t *os = r13;
+                                  uint32_t x1 = r13[i];
+                                  uint32_t x10 = x1 >> (uint32_t)12U | x1 << (uint32_t)20U;
+                                  os[i] = x10;
                                 }
                               }
                               {
-                                uint32_t *r13 = wv_a3;
+                                uint32_t *wv_a4 = wv + a * (uint32_t)4U;
+                                uint32_t *wv_b4 = wv + b0 * (uint32_t)4U;
                                 {
                                   uint32_t i;
                                   for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                   {
-                                    uint32_t *os = r13;
-                                    uint32_t x1 = r13[i];
-                                    uint32_t x10 = x1 >> (uint32_t)12U | x1 << (uint32_t)20U;
-                                    os[i] = x10;
+                                    uint32_t *os = wv_a4;
+                                    uint32_t x1 = wv_a4[i] + wv_b4[i];
+                                    os[i] = x1;
                                   }
                                 }
                                 {
-                                  uint32_t *wv_a4 = wv + a * (uint32_t)4U;
-                                  uint32_t *wv_b4 = wv + b0 * (uint32_t)4U;
+                                  uint32_t i;
+                                  for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                                  {
+                                    uint32_t *os = wv_a4;
+                                    uint32_t x1 = wv_a4[i] + y[i];
+                                    os[i] = x1;
+                                  }
+                                }
+                                {
+                                  uint32_t *wv_a5 = wv + d10 * (uint32_t)4U;
+                                  uint32_t *wv_b5 = wv + a * (uint32_t)4U;
                                   {
                                     uint32_t i;
                                     for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                     {
-                                      uint32_t *os = wv_a4;
-                                      uint32_t x1 = wv_a4[i] + wv_b4[i];
+                                      uint32_t *os = wv_a5;
+                                      uint32_t x1 = wv_a5[i] ^ wv_b5[i];
                                       os[i] = x1;
                                     }
                                   }
                                   {
-                                    uint32_t i;
-                                    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-                                    {
-                                      uint32_t *os = wv_a4;
-                                      uint32_t x1 = wv_a4[i] + y[i];
-                                      os[i] = x1;
-                                    }
-                                  }
-                                  {
-                                    uint32_t *wv_a5 = wv + d10 * (uint32_t)4U;
-                                    uint32_t *wv_b5 = wv + a * (uint32_t)4U;
+                                    uint32_t *r14 = wv_a5;
                                     {
                                       uint32_t i;
                                       for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                       {
-                                        uint32_t *os = wv_a5;
-                                        uint32_t x1 = wv_a5[i] ^ wv_b5[i];
-                                        os[i] = x1;
+                                        uint32_t *os = r14;
+                                        uint32_t x1 = r14[i];
+                                        uint32_t x10 = x1 >> (uint32_t)8U | x1 << (uint32_t)24U;
+                                        os[i] = x10;
                                       }
                                     }
                                     {
-                                      uint32_t *r14 = wv_a5;
+                                      uint32_t *wv_a6 = wv + c0 * (uint32_t)4U;
+                                      uint32_t *wv_b6 = wv + d10 * (uint32_t)4U;
                                       {
                                         uint32_t i;
                                         for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                         {
-                                          uint32_t *os = r14;
-                                          uint32_t x1 = r14[i];
-                                          uint32_t x10 = x1 >> (uint32_t)8U | x1 << (uint32_t)24U;
-                                          os[i] = x10;
+                                          uint32_t *os = wv_a6;
+                                          uint32_t x1 = wv_a6[i] + wv_b6[i];
+                                          os[i] = x1;
                                         }
                                       }
                                       {
-                                        uint32_t *wv_a6 = wv + c0 * (uint32_t)4U;
-                                        uint32_t *wv_b6 = wv + d10 * (uint32_t)4U;
+                                        uint32_t *wv_a7 = wv + b0 * (uint32_t)4U;
+                                        uint32_t *wv_b7 = wv + c0 * (uint32_t)4U;
                                         {
                                           uint32_t i;
                                           for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                           {
-                                            uint32_t *os = wv_a6;
-                                            uint32_t x1 = wv_a6[i] + wv_b6[i];
+                                            uint32_t *os = wv_a7;
+                                            uint32_t x1 = wv_a7[i] ^ wv_b7[i];
                                             os[i] = x1;
                                           }
                                         }
                                         {
-                                          uint32_t *wv_a7 = wv + b0 * (uint32_t)4U;
-                                          uint32_t *wv_b7 = wv + c0 * (uint32_t)4U;
+                                          uint32_t *r15 = wv_a7;
                                           {
                                             uint32_t i;
                                             for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                             {
-                                              uint32_t *os = wv_a7;
-                                              uint32_t x1 = wv_a7[i] ^ wv_b7[i];
-                                              os[i] = x1;
+                                              uint32_t *os = r15;
+                                              uint32_t x1 = r15[i];
+                                              uint32_t
+                                              x10 = x1 >> (uint32_t)7U | x1 << (uint32_t)25U;
+                                              os[i] = x10;
                                             }
                                           }
                                           {
-                                            uint32_t *r15 = wv_a7;
+                                            uint32_t *r16 = wv + (uint32_t)1U * (uint32_t)4U;
+                                            uint32_t *r22 = wv + (uint32_t)2U * (uint32_t)4U;
+                                            uint32_t *r32 = wv + (uint32_t)3U * (uint32_t)4U;
+                                            uint32_t *r110 = r16;
+                                            uint32_t x00 = r110[1U];
+                                            uint32_t
+                                            x10 = r110[((uint32_t)1U + (uint32_t)1U) % (uint32_t)4U];
+                                            uint32_t
+                                            x20 = r110[((uint32_t)1U + (uint32_t)2U) % (uint32_t)4U];
+                                            uint32_t
+                                            x30 = r110[((uint32_t)1U + (uint32_t)3U) % (uint32_t)4U];
+                                            r110[0U] = x00;
+                                            r110[1U] = x10;
+                                            r110[2U] = x20;
+                                            r110[3U] = x30;
                                             {
-                                              uint32_t i;
-                                              for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                                              uint32_t *r111 = r22;
+                                              uint32_t x01 = r111[2U];
+                                              uint32_t
+                                              x11 =
+                                                r111[((uint32_t)2U + (uint32_t)1U)
+                                                % (uint32_t)4U];
+                                              uint32_t
+                                              x21 =
+                                                r111[((uint32_t)2U + (uint32_t)2U)
+                                                % (uint32_t)4U];
+                                              uint32_t
+                                              x31 =
+                                                r111[((uint32_t)2U + (uint32_t)3U)
+                                                % (uint32_t)4U];
+                                              r111[0U] = x01;
+                                              r111[1U] = x11;
+                                              r111[2U] = x21;
+                                              r111[3U] = x31;
                                               {
-                                                uint32_t *os = r15;
-                                                uint32_t x1 = r15[i];
+                                                uint32_t *r112 = r32;
+                                                uint32_t x02 = r112[3U];
                                                 uint32_t
-                                                x10 = x1 >> (uint32_t)7U | x1 << (uint32_t)25U;
-                                                os[i] = x10;
-                                              }
-                                            }
-                                            {
-                                              uint32_t *r16 = wv + (uint32_t)1U * (uint32_t)4U;
-                                              uint32_t *r22 = wv + (uint32_t)2U * (uint32_t)4U;
-                                              uint32_t *r32 = wv + (uint32_t)3U * (uint32_t)4U;
-                                              uint32_t *r110 = r16;
-                                              uint32_t x00 = r110[1U];
-                                              uint32_t
-                                              x10 =
-                                                r110[((uint32_t)1U + (uint32_t)1U)
-                                                % (uint32_t)4U];
-                                              uint32_t
-                                              x20 =
-                                                r110[((uint32_t)1U + (uint32_t)2U)
-                                                % (uint32_t)4U];
-                                              uint32_t
-                                              x30 =
-                                                r110[((uint32_t)1U + (uint32_t)3U)
-                                                % (uint32_t)4U];
-                                              r110[0U] = x00;
-                                              r110[1U] = x10;
-                                              r110[2U] = x20;
-                                              r110[3U] = x30;
-                                              {
-                                                uint32_t *r111 = r22;
-                                                uint32_t x01 = r111[2U];
-                                                uint32_t
-                                                x11 =
-                                                  r111[((uint32_t)2U + (uint32_t)1U)
+                                                x12 =
+                                                  r112[((uint32_t)3U + (uint32_t)1U)
                                                   % (uint32_t)4U];
                                                 uint32_t
-                                                x21 =
-                                                  r111[((uint32_t)2U + (uint32_t)2U)
+                                                x22 =
+                                                  r112[((uint32_t)3U + (uint32_t)2U)
                                                   % (uint32_t)4U];
                                                 uint32_t
-                                                x31 =
-                                                  r111[((uint32_t)2U + (uint32_t)3U)
+                                                x32 =
+                                                  r112[((uint32_t)3U + (uint32_t)3U)
                                                   % (uint32_t)4U];
-                                                r111[0U] = x01;
-                                                r111[1U] = x11;
-                                                r111[2U] = x21;
-                                                r111[3U] = x31;
+                                                r112[0U] = x02;
+                                                r112[1U] = x12;
+                                                r112[2U] = x22;
+                                                r112[3U] = x32;
                                                 {
-                                                  uint32_t *r112 = r32;
-                                                  uint32_t x02 = r112[3U];
-                                                  uint32_t
-                                                  x12 =
-                                                    r112[((uint32_t)3U + (uint32_t)1U)
-                                                    % (uint32_t)4U];
-                                                  uint32_t
-                                                  x22 =
-                                                    r112[((uint32_t)3U + (uint32_t)2U)
-                                                    % (uint32_t)4U];
-                                                  uint32_t
-                                                  x32 =
-                                                    r112[((uint32_t)3U + (uint32_t)3U)
-                                                    % (uint32_t)4U];
-                                                  r112[0U] = x02;
-                                                  r112[1U] = x12;
-                                                  r112[2U] = x22;
-                                                  r112[3U] = x32;
+                                                  uint32_t a0 = (uint32_t)0U;
+                                                  uint32_t b = (uint32_t)1U;
+                                                  uint32_t c = (uint32_t)2U;
+                                                  uint32_t d1 = (uint32_t)3U;
+                                                  uint32_t *wv_a = wv + a0 * (uint32_t)4U;
+                                                  uint32_t *wv_b8 = wv + b * (uint32_t)4U;
                                                   {
-                                                    uint32_t a0 = (uint32_t)0U;
-                                                    uint32_t b = (uint32_t)1U;
-                                                    uint32_t c = (uint32_t)2U;
-                                                    uint32_t d1 = (uint32_t)3U;
-                                                    uint32_t *wv_a = wv + a0 * (uint32_t)4U;
-                                                    uint32_t *wv_b8 = wv + b * (uint32_t)4U;
+                                                    uint32_t i;
+                                                    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                                                    {
+                                                      uint32_t *os = wv_a;
+                                                      uint32_t x1 = wv_a[i] + wv_b8[i];
+                                                      os[i] = x1;
+                                                    }
+                                                  }
+                                                  {
+                                                    uint32_t i;
+                                                    for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
+                                                    {
+                                                      uint32_t *os = wv_a;
+                                                      uint32_t x1 = wv_a[i] + z[i];
+                                                      os[i] = x1;
+                                                    }
+                                                  }
+                                                  {
+                                                    uint32_t *wv_a8 = wv + d1 * (uint32_t)4U;
+                                                    uint32_t *wv_b9 = wv + a0 * (uint32_t)4U;
                                                     {
                                                       uint32_t i;
                                                       for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
                                                       {
-                                                        uint32_t *os = wv_a;
-                                                        uint32_t x1 = wv_a[i] + wv_b8[i];
+                                                        uint32_t *os = wv_a8;
+                                                        uint32_t x1 = wv_a8[i] ^ wv_b9[i];
                                                         os[i] = x1;
                                                       }
                                                     }
                                                     {
-                                                      uint32_t i;
-                                                      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-                                                      {
-                                                        uint32_t *os = wv_a;
-                                                        uint32_t x1 = wv_a[i] + z[i];
-                                                        os[i] = x1;
-                                                      }
-                                                    }
-                                                    {
-                                                      uint32_t *wv_a8 = wv + d1 * (uint32_t)4U;
-                                                      uint32_t *wv_b9 = wv + a0 * (uint32_t)4U;
+                                                      uint32_t *r17 = wv_a8;
                                                       {
                                                         uint32_t i;
                                                         for
@@ -4831,13 +4825,19 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                           < (uint32_t)4U;
                                                           i++)
                                                         {
-                                                          uint32_t *os = wv_a8;
-                                                          uint32_t x1 = wv_a8[i] ^ wv_b9[i];
-                                                          os[i] = x1;
+                                                          uint32_t *os = r17;
+                                                          uint32_t x1 = r17[i];
+                                                          uint32_t
+                                                          x13 =
+                                                            x1
+                                                            >> (uint32_t)16U
+                                                            | x1 << (uint32_t)16U;
+                                                          os[i] = x13;
                                                         }
                                                       }
                                                       {
-                                                        uint32_t *r17 = wv_a8;
+                                                        uint32_t *wv_a9 = wv + c * (uint32_t)4U;
+                                                        uint32_t *wv_b10 = wv + d1 * (uint32_t)4U;
                                                         {
                                                           uint32_t i;
                                                           for
@@ -4847,19 +4847,14 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                             < (uint32_t)4U;
                                                             i++)
                                                           {
-                                                            uint32_t *os = r17;
-                                                            uint32_t x1 = r17[i];
-                                                            uint32_t
-                                                            x13 =
-                                                              x1
-                                                              >> (uint32_t)16U
-                                                              | x1 << (uint32_t)16U;
-                                                            os[i] = x13;
+                                                            uint32_t *os = wv_a9;
+                                                            uint32_t x1 = wv_a9[i] + wv_b10[i];
+                                                            os[i] = x1;
                                                           }
                                                         }
                                                         {
-                                                          uint32_t *wv_a9 = wv + c * (uint32_t)4U;
-                                                          uint32_t *wv_b10 = wv + d1 * (uint32_t)4U;
+                                                          uint32_t *wv_a10 = wv + b * (uint32_t)4U;
+                                                          uint32_t *wv_b11 = wv + c * (uint32_t)4U;
                                                           {
                                                             uint32_t i;
                                                             for
@@ -4869,16 +4864,13 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                               < (uint32_t)4U;
                                                               i++)
                                                             {
-                                                              uint32_t *os = wv_a9;
-                                                              uint32_t x1 = wv_a9[i] + wv_b10[i];
+                                                              uint32_t *os = wv_a10;
+                                                              uint32_t x1 = wv_a10[i] ^ wv_b11[i];
                                                               os[i] = x1;
                                                             }
                                                           }
                                                           {
-                                                            uint32_t
-                                                            *wv_a10 = wv + b * (uint32_t)4U;
-                                                            uint32_t
-                                                            *wv_b11 = wv + c * (uint32_t)4U;
+                                                            uint32_t *r18 = wv_a10;
                                                             {
                                                               uint32_t i;
                                                               for
@@ -4888,13 +4880,21 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                 < (uint32_t)4U;
                                                                 i++)
                                                               {
-                                                                uint32_t *os = wv_a10;
-                                                                uint32_t x1 = wv_a10[i] ^ wv_b11[i];
-                                                                os[i] = x1;
+                                                                uint32_t *os = r18;
+                                                                uint32_t x1 = r18[i];
+                                                                uint32_t
+                                                                x13 =
+                                                                  x1
+                                                                  >> (uint32_t)12U
+                                                                  | x1 << (uint32_t)20U;
+                                                                os[i] = x13;
                                                               }
                                                             }
                                                             {
-                                                              uint32_t *r18 = wv_a10;
+                                                              uint32_t
+                                                              *wv_a11 = wv + a0 * (uint32_t)4U;
+                                                              uint32_t
+                                                              *wv_b12 = wv + b * (uint32_t)4U;
                                                               {
                                                                 uint32_t i;
                                                                 for
@@ -4904,21 +4904,31 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                   < (uint32_t)4U;
                                                                   i++)
                                                                 {
-                                                                  uint32_t *os = r18;
-                                                                  uint32_t x1 = r18[i];
+                                                                  uint32_t *os = wv_a11;
                                                                   uint32_t
-                                                                  x13 =
-                                                                    x1
-                                                                    >> (uint32_t)12U
-                                                                    | x1 << (uint32_t)20U;
-                                                                  os[i] = x13;
+                                                                  x1 = wv_a11[i] + wv_b12[i];
+                                                                  os[i] = x1;
+                                                                }
+                                                              }
+                                                              {
+                                                                uint32_t i;
+                                                                for
+                                                                (i
+                                                                  = (uint32_t)0U;
+                                                                  i
+                                                                  < (uint32_t)4U;
+                                                                  i++)
+                                                                {
+                                                                  uint32_t *os = wv_a11;
+                                                                  uint32_t x1 = wv_a11[i] + w[i];
+                                                                  os[i] = x1;
                                                                 }
                                                               }
                                                               {
                                                                 uint32_t
-                                                                *wv_a11 = wv + a0 * (uint32_t)4U;
+                                                                *wv_a12 = wv + d1 * (uint32_t)4U;
                                                                 uint32_t
-                                                                *wv_b12 = wv + b * (uint32_t)4U;
+                                                                *wv_b13 = wv + a0 * (uint32_t)4U;
                                                                 {
                                                                   uint32_t i;
                                                                   for
@@ -4928,31 +4938,14 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                     < (uint32_t)4U;
                                                                     i++)
                                                                   {
-                                                                    uint32_t *os = wv_a11;
+                                                                    uint32_t *os = wv_a12;
                                                                     uint32_t
-                                                                    x1 = wv_a11[i] + wv_b12[i];
+                                                                    x1 = wv_a12[i] ^ wv_b13[i];
                                                                     os[i] = x1;
                                                                   }
                                                                 }
                                                                 {
-                                                                  uint32_t i;
-                                                                  for
-                                                                  (i
-                                                                    = (uint32_t)0U;
-                                                                    i
-                                                                    < (uint32_t)4U;
-                                                                    i++)
-                                                                  {
-                                                                    uint32_t *os = wv_a11;
-                                                                    uint32_t x1 = wv_a11[i] + w[i];
-                                                                    os[i] = x1;
-                                                                  }
-                                                                }
-                                                                {
-                                                                  uint32_t
-                                                                  *wv_a12 = wv + d1 * (uint32_t)4U;
-                                                                  uint32_t
-                                                                  *wv_b13 = wv + a0 * (uint32_t)4U;
+                                                                  uint32_t *r19 = wv_a12;
                                                                   {
                                                                     uint32_t i;
                                                                     for
@@ -4962,14 +4955,21 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                       < (uint32_t)4U;
                                                                       i++)
                                                                     {
-                                                                      uint32_t *os = wv_a12;
+                                                                      uint32_t *os = r19;
+                                                                      uint32_t x1 = r19[i];
                                                                       uint32_t
-                                                                      x1 = wv_a12[i] ^ wv_b13[i];
-                                                                      os[i] = x1;
+                                                                      x13 =
+                                                                        x1
+                                                                        >> (uint32_t)8U
+                                                                        | x1 << (uint32_t)24U;
+                                                                      os[i] = x13;
                                                                     }
                                                                   }
                                                                   {
-                                                                    uint32_t *r19 = wv_a12;
+                                                                    uint32_t
+                                                                    *wv_a13 = wv + c * (uint32_t)4U;
+                                                                    uint32_t
+                                                                    *wv_b14 = wv + d1 * (uint32_t)4U;
                                                                     {
                                                                       uint32_t i;
                                                                       for
@@ -4979,25 +4979,19 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                         < (uint32_t)4U;
                                                                         i++)
                                                                       {
-                                                                        uint32_t *os = r19;
-                                                                        uint32_t x1 = r19[i];
+                                                                        uint32_t *os = wv_a13;
                                                                         uint32_t
-                                                                        x13 =
-                                                                          x1
-                                                                          >> (uint32_t)8U
-                                                                          | x1 << (uint32_t)24U;
-                                                                        os[i] = x13;
+                                                                        x1 = wv_a13[i] + wv_b14[i];
+                                                                        os[i] = x1;
                                                                       }
                                                                     }
                                                                     {
                                                                       uint32_t
-                                                                      *wv_a13 =
+                                                                      *wv_a14 =
                                                                         wv
-                                                                        + c * (uint32_t)4U;
+                                                                        + b * (uint32_t)4U;
                                                                       uint32_t
-                                                                      *wv_b14 =
-                                                                        wv
-                                                                        + d1 * (uint32_t)4U;
+                                                                      *wv_b = wv + c * (uint32_t)4U;
                                                                       {
                                                                         uint32_t i;
                                                                         for
@@ -5007,21 +5001,14 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                           < (uint32_t)4U;
                                                                           i++)
                                                                         {
-                                                                          uint32_t *os = wv_a13;
+                                                                          uint32_t *os = wv_a14;
                                                                           uint32_t
-                                                                          x1 = wv_a13[i] + wv_b14[i];
+                                                                          x1 = wv_a14[i] ^ wv_b[i];
                                                                           os[i] = x1;
                                                                         }
                                                                       }
                                                                       {
-                                                                        uint32_t
-                                                                        *wv_a14 =
-                                                                          wv
-                                                                          + b * (uint32_t)4U;
-                                                                        uint32_t
-                                                                        *wv_b =
-                                                                          wv
-                                                                          + c * (uint32_t)4U;
+                                                                        uint32_t *r113 = wv_a14;
                                                                         {
                                                                           uint32_t i;
                                                                           for
@@ -5031,122 +5018,101 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
                                                                             < (uint32_t)4U;
                                                                             i++)
                                                                           {
-                                                                            uint32_t *os = wv_a14;
+                                                                            uint32_t *os = r113;
+                                                                            uint32_t x1 = r113[i];
                                                                             uint32_t
-                                                                            x1 = wv_a14[i] ^ wv_b[i];
-                                                                            os[i] = x1;
+                                                                            x13 =
+                                                                              x1
+                                                                              >> (uint32_t)7U
+                                                                              | x1 << (uint32_t)25U;
+                                                                            os[i] = x13;
                                                                           }
                                                                         }
                                                                         {
-                                                                          uint32_t *r113 = wv_a14;
+                                                                          uint32_t
+                                                                          *r114 =
+                                                                            wv
+                                                                            +
+                                                                              (uint32_t)1U
+                                                                              * (uint32_t)4U;
+                                                                          uint32_t
+                                                                          *r2 =
+                                                                            wv
+                                                                            +
+                                                                              (uint32_t)2U
+                                                                              * (uint32_t)4U;
+                                                                          uint32_t
+                                                                          *r3 =
+                                                                            wv
+                                                                            +
+                                                                              (uint32_t)3U
+                                                                              * (uint32_t)4U;
+                                                                          uint32_t *r11 = r114;
+                                                                          uint32_t x03 = r11[3U];
+                                                                          uint32_t
+                                                                          x13 =
+                                                                            r11[((uint32_t)3U
+                                                                            + (uint32_t)1U)
+                                                                            % (uint32_t)4U];
+                                                                          uint32_t
+                                                                          x23 =
+                                                                            r11[((uint32_t)3U
+                                                                            + (uint32_t)2U)
+                                                                            % (uint32_t)4U];
+                                                                          uint32_t
+                                                                          x33 =
+                                                                            r11[((uint32_t)3U
+                                                                            + (uint32_t)3U)
+                                                                            % (uint32_t)4U];
+                                                                          r11[0U] = x03;
+                                                                          r11[1U] = x13;
+                                                                          r11[2U] = x23;
+                                                                          r11[3U] = x33;
                                                                           {
-                                                                            uint32_t i;
-                                                                            for
-                                                                            (i
-                                                                              = (uint32_t)0U;
-                                                                              i
-                                                                              < (uint32_t)4U;
-                                                                              i++)
-                                                                            {
-                                                                              uint32_t *os = r113;
-                                                                              uint32_t x1 = r113[i];
-                                                                              uint32_t
-                                                                              x13 =
-                                                                                x1
-                                                                                >> (uint32_t)7U
-                                                                                |
-                                                                                  x1
-                                                                                  << (uint32_t)25U;
-                                                                              os[i] = x13;
-                                                                            }
-                                                                          }
-                                                                          {
+                                                                            uint32_t *r115 = r2;
+                                                                            uint32_t x04 = r115[2U];
                                                                             uint32_t
-                                                                            *r114 =
-                                                                              wv
-                                                                              +
-                                                                                (uint32_t)1U
-                                                                                * (uint32_t)4U;
-                                                                            uint32_t
-                                                                            *r2 =
-                                                                              wv
-                                                                              +
-                                                                                (uint32_t)2U
-                                                                                * (uint32_t)4U;
-                                                                            uint32_t
-                                                                            *r3 =
-                                                                              wv
-                                                                              +
-                                                                                (uint32_t)3U
-                                                                                * (uint32_t)4U;
-                                                                            uint32_t *r11 = r114;
-                                                                            uint32_t x03 = r11[3U];
-                                                                            uint32_t
-                                                                            x13 =
-                                                                              r11[((uint32_t)3U
+                                                                            x14 =
+                                                                              r115[((uint32_t)2U
                                                                               + (uint32_t)1U)
                                                                               % (uint32_t)4U];
                                                                             uint32_t
-                                                                            x23 =
-                                                                              r11[((uint32_t)3U
+                                                                            x24 =
+                                                                              r115[((uint32_t)2U
                                                                               + (uint32_t)2U)
                                                                               % (uint32_t)4U];
                                                                             uint32_t
-                                                                            x33 =
-                                                                              r11[((uint32_t)3U
+                                                                            x34 =
+                                                                              r115[((uint32_t)2U
                                                                               + (uint32_t)3U)
                                                                               % (uint32_t)4U];
-                                                                            r11[0U] = x03;
-                                                                            r11[1U] = x13;
-                                                                            r11[2U] = x23;
-                                                                            r11[3U] = x33;
+                                                                            r115[0U] = x04;
+                                                                            r115[1U] = x14;
+                                                                            r115[2U] = x24;
+                                                                            r115[3U] = x34;
                                                                             {
-                                                                              uint32_t *r115 = r2;
+                                                                              uint32_t *r116 = r3;
                                                                               uint32_t
-                                                                              x04 = r115[2U];
+                                                                              x0 = r116[1U];
                                                                               uint32_t
-                                                                              x14 =
-                                                                                r115[((uint32_t)2U
+                                                                              x1 =
+                                                                                r116[((uint32_t)1U
                                                                                 + (uint32_t)1U)
                                                                                 % (uint32_t)4U];
                                                                               uint32_t
-                                                                              x24 =
-                                                                                r115[((uint32_t)2U
+                                                                              x2 =
+                                                                                r116[((uint32_t)1U
                                                                                 + (uint32_t)2U)
                                                                                 % (uint32_t)4U];
                                                                               uint32_t
-                                                                              x34 =
-                                                                                r115[((uint32_t)2U
+                                                                              x3 =
+                                                                                r116[((uint32_t)1U
                                                                                 + (uint32_t)3U)
                                                                                 % (uint32_t)4U];
-                                                                              r115[0U] = x04;
-                                                                              r115[1U] = x14;
-                                                                              r115[2U] = x24;
-                                                                              r115[3U] = x34;
-                                                                              {
-                                                                                uint32_t *r116 = r3;
-                                                                                uint32_t
-                                                                                x0 = r116[1U];
-                                                                                uint32_t
-                                                                                x1 =
-                                                                                  r116[((uint32_t)1U
-                                                                                  + (uint32_t)1U)
-                                                                                  % (uint32_t)4U];
-                                                                                uint32_t
-                                                                                x2 =
-                                                                                  r116[((uint32_t)1U
-                                                                                  + (uint32_t)2U)
-                                                                                  % (uint32_t)4U];
-                                                                                uint32_t
-                                                                                x3 =
-                                                                                  r116[((uint32_t)1U
-                                                                                  + (uint32_t)3U)
-                                                                                  % (uint32_t)4U];
-                                                                                r116[0U] = x0;
-                                                                                r116[1U] = x1;
-                                                                                r116[2U] = x2;
-                                                                                r116[3U] = x3;
-                                                                              }
+                                                                              r116[0U] = x0;
+                                                                              r116[1U] = x1;
+                                                                              r116[2U] = x2;
+                                                                              r116[3U] = x3;
                                                                             }
                                                                           }
                                                                         }
@@ -5183,47 +5149,47 @@ blake2s_update_block(uint32_t *wv, uint32_t *hash, bool flag, uint64_t totlen, u
           }
         }
       }
-      s00 = hash + (uint32_t)0U * (uint32_t)4U;
-      s16 = hash + (uint32_t)1U * (uint32_t)4U;
-      r00 = wv + (uint32_t)0U * (uint32_t)4U;
-      r10 = wv + (uint32_t)1U * (uint32_t)4U;
-      r20 = wv + (uint32_t)2U * (uint32_t)4U;
-      r30 = wv + (uint32_t)3U * (uint32_t)4U;
+    }
+    s00 = hash + (uint32_t)0U * (uint32_t)4U;
+    s16 = hash + (uint32_t)1U * (uint32_t)4U;
+    r00 = wv + (uint32_t)0U * (uint32_t)4U;
+    r10 = wv + (uint32_t)1U * (uint32_t)4U;
+    r20 = wv + (uint32_t)2U * (uint32_t)4U;
+    r30 = wv + (uint32_t)3U * (uint32_t)4U;
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint32_t *os = s00;
-          uint32_t x = s00[i] ^ r00[i];
-          os[i] = x;
-        }
+        uint32_t *os = s00;
+        uint32_t x = s00[i] ^ r00[i];
+        os[i] = x;
       }
+    }
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint32_t *os = s00;
-          uint32_t x = s00[i] ^ r20[i];
-          os[i] = x;
-        }
+        uint32_t *os = s00;
+        uint32_t x = s00[i] ^ r20[i];
+        os[i] = x;
       }
+    }
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint32_t *os = s16;
-          uint32_t x = s16[i] ^ r10[i];
-          os[i] = x;
-        }
+        uint32_t *os = s16;
+        uint32_t x = s16[i] ^ r10[i];
+        os[i] = x;
       }
+    }
+    {
+      uint32_t i;
+      for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
       {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)4U; i++)
-        {
-          uint32_t *os = s16;
-          uint32_t x = s16[i] ^ r30[i];
-          os[i] = x;
-        }
+        uint32_t *os = s16;
+        uint32_t x = s16[i] ^ r30[i];
+        os[i] = x;
       }
     }
   }
@@ -5338,6 +5304,8 @@ blake2s_update_blocks(
   uint32_t nb0 = len / (uint32_t)64U;
   uint32_t rem0 = len % (uint32_t)64U;
   K___uint32_t_uint32_t scrut;
+  uint32_t nb;
+  uint32_t rem;
   if (rem0 == (uint32_t)0U && nb0 > (uint32_t)0U)
   {
     uint32_t nb_ = nb0 - (uint32_t)1U;
@@ -5354,12 +5322,10 @@ blake2s_update_blocks(
     lit.snd = rem0;
     scrut = lit;
   }
-  {
-    uint32_t nb = scrut.fst;
-    uint32_t rem = scrut.snd;
-    Hacl_Blake2s_32_blake2s_update_multi(len, wv, hash, prev, blocks, nb);
-    Hacl_Blake2s_32_blake2s_update_last(len, wv, hash, prev, rem, blocks);
-  }
+  nb = scrut.fst;
+  rem = scrut.snd;
+  Hacl_Blake2s_32_blake2s_update_multi(len, wv, hash, prev, blocks, nb);
+  Hacl_Blake2s_32_blake2s_update_last(len, wv, hash, prev, rem, blocks);
 }
 
 static inline void

@@ -212,6 +212,7 @@ void Hacl_SHA2_Scalar32_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input)
   lb = b00 + input_len - rem1;
   {
     uint32_t blocks;
+    uint32_t fin;
     if (rem + (uint32_t)8U + (uint32_t)1U <= (uint32_t)64U)
     {
       blocks = (uint32_t)1U;
@@ -220,8 +221,8 @@ void Hacl_SHA2_Scalar32_sha224(uint8_t *dst, uint32_t input_len, uint8_t *input)
     {
       blocks = (uint32_t)2U;
     }
+    fin = blocks * (uint32_t)64U;
     {
-      uint32_t fin = blocks * (uint32_t)64U;
       uint8_t last[128U] = { 0U };
       uint8_t totlen_buf[8U] = { 0U };
       uint64_t total_len_bits = len_ << (uint32_t)3U;
@@ -469,6 +470,7 @@ void Hacl_SHA2_Scalar32_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input)
   lb = b00 + input_len - rem1;
   {
     uint32_t blocks;
+    uint32_t fin;
     if (rem + (uint32_t)8U + (uint32_t)1U <= (uint32_t)64U)
     {
       blocks = (uint32_t)1U;
@@ -477,8 +479,8 @@ void Hacl_SHA2_Scalar32_sha256(uint8_t *dst, uint32_t input_len, uint8_t *input)
     {
       blocks = (uint32_t)2U;
     }
+    fin = blocks * (uint32_t)64U;
     {
-      uint32_t fin = blocks * (uint32_t)64U;
       uint8_t last[128U] = { 0U };
       uint8_t totlen_buf[8U] = { 0U };
       uint64_t total_len_bits = len_ << (uint32_t)3U;
@@ -724,6 +726,7 @@ void Hacl_SHA2_Scalar32_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input)
   lb = b00 + input_len - rem1;
   {
     uint32_t blocks;
+    uint32_t fin;
     if (rem + (uint32_t)16U + (uint32_t)1U <= (uint32_t)128U)
     {
       blocks = (uint32_t)1U;
@@ -732,8 +735,8 @@ void Hacl_SHA2_Scalar32_sha384(uint8_t *dst, uint32_t input_len, uint8_t *input)
     {
       blocks = (uint32_t)2U;
     }
+    fin = blocks * (uint32_t)128U;
     {
-      uint32_t fin = blocks * (uint32_t)128U;
       uint8_t last[256U] = { 0U };
       uint8_t totlen_buf[16U] = { 0U };
       FStar_UInt128_uint128 total_len_bits = FStar_UInt128_shift_left(len_, (uint32_t)3U);
@@ -979,6 +982,7 @@ void Hacl_SHA2_Scalar32_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input)
   lb = b00 + input_len - rem1;
   {
     uint32_t blocks;
+    uint32_t fin;
     if (rem + (uint32_t)16U + (uint32_t)1U <= (uint32_t)128U)
     {
       blocks = (uint32_t)1U;
@@ -987,8 +991,8 @@ void Hacl_SHA2_Scalar32_sha512(uint8_t *dst, uint32_t input_len, uint8_t *input)
     {
       blocks = (uint32_t)2U;
     }
+    fin = blocks * (uint32_t)128U;
     {
-      uint32_t fin = blocks * (uint32_t)128U;
       uint8_t last[256U] = { 0U };
       uint8_t totlen_buf[16U] = { 0U };
       FStar_UInt128_uint128 total_len_bits = FStar_UInt128_shift_left(len_, (uint32_t)3U);

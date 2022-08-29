@@ -31,9 +31,8 @@ bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
 {
   uint64_t *a0 = a;
   uint64_t *res0 = res;
-  uint64_t c1 = (uint64_t)0U;
+  uint64_t c2 = (uint64_t)0U;
   uint64_t c0;
-  uint64_t ite;
   {
     uint32_t i;
     for (i = (uint32_t)0U; i < bLen / (uint32_t)4U; i++)
@@ -41,22 +40,22 @@ bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
       uint64_t t1 = a0[(uint32_t)4U * i];
       uint64_t t20 = b[(uint32_t)4U * i];
       uint64_t *res_i0 = res0 + (uint32_t)4U * i;
-      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t20, res_i0);
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t20, res_i0);
       {
         uint64_t t10 = a0[(uint32_t)4U * i + (uint32_t)1U];
         uint64_t t21 = b[(uint32_t)4U * i + (uint32_t)1U];
         uint64_t *res_i1 = res0 + (uint32_t)4U * i + (uint32_t)1U;
-        c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t10, t21, res_i1);
+        c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t10, t21, res_i1);
         {
           uint64_t t11 = a0[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t t22 = b[(uint32_t)4U * i + (uint32_t)2U];
           uint64_t *res_i2 = res0 + (uint32_t)4U * i + (uint32_t)2U;
-          c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t11, t22, res_i2);
+          c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t11, t22, res_i2);
           {
             uint64_t t12 = a0[(uint32_t)4U * i + (uint32_t)3U];
             uint64_t t2 = b[(uint32_t)4U * i + (uint32_t)3U];
             uint64_t *res_i = res0 + (uint32_t)4U * i + (uint32_t)3U;
-            c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t12, t2, res_i);
+            c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t12, t2, res_i);
           }
         }
       }
@@ -69,16 +68,17 @@ bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
       uint64_t t1 = a0[i];
       uint64_t t2 = b[i];
       uint64_t *res_i = res0 + i;
-      c1 = Lib_IntTypes_Intrinsics_add_carry_u64(c1, t1, t2, res_i);
+      c2 = Lib_IntTypes_Intrinsics_add_carry_u64(c2, t1, t2, res_i);
     }
   }
-  c0 = c1;
+  c0 = c2;
   if (bLen < aLen)
   {
     uint32_t rLen = aLen - bLen;
     uint64_t *a1 = a + bLen;
     uint64_t *res1 = res + bLen;
     uint64_t c = c0;
+    uint64_t c1;
     {
       uint32_t i;
       for (i = (uint32_t)0U; i < rLen / (uint32_t)4U; i++)
@@ -112,16 +112,10 @@ bn_add(uint32_t aLen, uint64_t *a, uint32_t bLen, uint64_t *b, uint64_t *res)
         c = Lib_IntTypes_Intrinsics_add_carry_u64(c, t1, (uint64_t)0U, res_i);
       }
     }
-    {
-      uint64_t c10 = c;
-      ite = c10;
-    }
+    c1 = c;
+    return c1;
   }
-  else
-  {
-    ite = c0;
-  }
-  return ite;
+  return c0;
 }
 
 static uint64_t add4(uint64_t *a, uint64_t *b, uint64_t *res)
@@ -549,38 +543,40 @@ static inline bool load_qelem_vartime(uint64_t *f, uint8_t *b)
   uint64_t a1;
   uint64_t a2;
   uint64_t a3;
-  bool is_lt_q_b;
   Hacl_Bignum_Convert_bn_from_bytes_be_uint64((uint32_t)32U, b, f);
   is_zero = is_qelem_zero_vartime(f);
   a0 = f[0U];
   a1 = f[1U];
   a2 = f[2U];
   a3 = f[3U];
-  if (a3 < (uint64_t)0xffffffffffffffffU)
   {
-    is_lt_q_b = true;
+    bool is_lt_q_b;
+    if (a3 < (uint64_t)0xffffffffffffffffU)
+    {
+      is_lt_q_b = true;
+    }
+    else if (a2 < (uint64_t)0xfffffffffffffffeU)
+    {
+      is_lt_q_b = true;
+    }
+    else if (a2 > (uint64_t)0xfffffffffffffffeU)
+    {
+      is_lt_q_b = false;
+    }
+    else if (a1 < (uint64_t)0xbaaedce6af48a03bU)
+    {
+      is_lt_q_b = true;
+    }
+    else if (a1 > (uint64_t)0xbaaedce6af48a03bU)
+    {
+      is_lt_q_b = false;
+    }
+    else
+    {
+      is_lt_q_b = a0 < (uint64_t)0xbfd25e8cd0364141U;
+    }
+    return !is_zero && is_lt_q_b;
   }
-  else if (a2 < (uint64_t)0xfffffffffffffffeU)
-  {
-    is_lt_q_b = true;
-  }
-  else if (a2 > (uint64_t)0xfffffffffffffffeU)
-  {
-    is_lt_q_b = false;
-  }
-  else if (a1 < (uint64_t)0xbaaedce6af48a03bU)
-  {
-    is_lt_q_b = true;
-  }
-  else if (a1 > (uint64_t)0xbaaedce6af48a03bU)
-  {
-    is_lt_q_b = false;
-  }
-  else
-  {
-    is_lt_q_b = a0 < (uint64_t)0xbfd25e8cd0364141U;
-  }
-  return !is_zero && is_lt_q_b;
 }
 
 static inline void modq_short(uint64_t *out, uint64_t *a)
@@ -935,21 +931,21 @@ bool Hacl_Impl_K256_Point_aff_point_decompress_vartime(uint64_t *x, uint64_t *y,
       Hacl_K256_Field_fnormalize(y, y);
       {
         uint64_t y2_comp[5U] = { 0U };
+        bool res;
+        bool is_y_valid;
         Hacl_K256_Field_fsqr(y2_comp, y);
         Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
+        res = Hacl_K256_Field_is_felem_eq_vartime(y2, y2_comp);
+        is_y_valid = res;
+        if (!is_y_valid)
         {
-          bool res = Hacl_K256_Field_is_felem_eq_vartime(y2, y2_comp);
-          bool is_y_valid = res;
-          if (!is_y_valid)
-          {
-            return false;
-          }
-          {
-            uint64_t x0 = y[0U];
-            bool is_y_odd1 = (x0 & (uint64_t)1U) == (uint64_t)1U;
-            Hacl_K256_Field_fnegate_conditional_vartime(y, is_y_odd1 != is_y_odd);
-            return true;
-          }
+          return false;
+        }
+        {
+          uint64_t x0 = y[0U];
+          bool is_y_odd1 = (x0 & (uint64_t)1U) == (uint64_t)1U;
+          Hacl_K256_Field_fnegate_conditional_vartime(y, is_y_odd1 != is_y_odd);
+          return true;
         }
       }
     }
@@ -960,21 +956,23 @@ void Hacl_Impl_K256_Point_aff_point_compress_vartime(uint8_t *s, uint64_t *x, ui
 {
   uint64_t x0;
   bool is_y_odd;
-  uint8_t ite;
   Hacl_K256_Field_fnormalize(y, y);
   Hacl_K256_Field_fnormalize(x, x);
   x0 = y[0U];
   is_y_odd = (x0 & (uint64_t)1U) == (uint64_t)1U;
-  if (is_y_odd)
   {
-    ite = (uint8_t)0x03U;
+    uint8_t ite;
+    if (is_y_odd)
+    {
+      ite = (uint8_t)0x03U;
+    }
+    else
+    {
+      ite = (uint8_t)0x02U;
+    }
+    s[0U] = ite;
+    Hacl_K256_Field_store_felem(s + (uint32_t)1U, x);
   }
-  else
-  {
-    ite = (uint8_t)0x02U;
-  }
-  s[0U] = ite;
-  Hacl_K256_Field_store_felem(s + (uint32_t)1U, x);
 }
 
 void Hacl_Impl_K256_Point_point_negate(uint64_t *out, uint64_t *p)
@@ -1413,13 +1411,13 @@ static inline bool load_public_key(uint8_t *pk, uint64_t *fpk_x, uint64_t *fpk_y
     Hacl_K256_Field_fnormalize(y2_exp, y2_exp);
     {
       uint64_t y2_comp[5U] = { 0U };
+      bool res0;
+      bool res;
       Hacl_K256_Field_fsqr(y2_comp, fpk_y);
       Hacl_K256_Field_fnormalize(y2_comp, y2_comp);
-      {
-        bool res = Hacl_K256_Field_is_felem_eq_vartime(y2_exp, y2_comp);
-        bool res0 = res;
-        return res0;
-      }
+      res0 = Hacl_K256_Field_is_felem_eq_vartime(y2_exp, y2_comp);
+      res = res0;
+      return res;
     }
   }
   return false;
@@ -1485,36 +1483,35 @@ Hacl_K256_ECDSA_ecdsa_sign_hashed_msg(
     uint64_t tmp[5U] = { 0U };
     uint8_t x_bytes[32U] = { 0U };
     uint64_t p[15U] = { 0U };
+    uint64_t *x;
+    uint64_t *z;
     point_mul_g(p, k_q);
+    x = p;
+    z = p + (uint32_t)10U;
+    Hacl_Impl_K256_Finv_finv(tmp, z);
+    Hacl_K256_Field_fmul(tmp, x, tmp);
+    Hacl_K256_Field_fnormalize(tmp, tmp);
+    Hacl_K256_Field_store_felem(x_bytes, tmp);
+    load_qelem_modq(r_q, x_bytes);
     {
-      uint64_t *x = p;
-      uint64_t *z = p + (uint32_t)10U;
-      Hacl_Impl_K256_Finv_finv(tmp, z);
-      Hacl_K256_Field_fmul(tmp, x, tmp);
-      Hacl_K256_Field_fnormalize(tmp, tmp);
-      Hacl_K256_Field_store_felem(x_bytes, tmp);
-      load_qelem_modq(r_q, x_bytes);
+      uint64_t z0[4U] = { 0U };
+      uint64_t kinv[4U] = { 0U };
+      uint64_t is_r_zero;
+      uint64_t is_s_zero;
+      load_qelem_modq(z0, msgHash);
+      qinv(kinv, k_q);
+      qmul(s_q, r_q, d_a);
+      qadd(s_q, z0, s_q);
+      qmul(s_q, kinv, s_q);
+      store_qelem(signature, r_q);
+      store_qelem(signature + (uint32_t)32U, s_q);
+      is_r_zero = is_qelem_zero(r_q);
+      is_s_zero = is_qelem_zero(s_q);
+      if (is_r_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU || is_s_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU)
       {
-        uint64_t z0[4U] = { 0U };
-        uint64_t kinv[4U] = { 0U };
-        load_qelem_modq(z0, msgHash);
-        qinv(kinv, k_q);
-        qmul(s_q, r_q, d_a);
-        qadd(s_q, z0, s_q);
-        qmul(s_q, kinv, s_q);
-        store_qelem(signature, r_q);
-        store_qelem(signature + (uint32_t)32U, s_q);
-        {
-          uint64_t is_r_zero = is_qelem_zero(r_q);
-          uint64_t is_s_zero = is_qelem_zero(s_q);
-          if
-          (is_r_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU || is_s_zero == (uint64_t)0xFFFFFFFFFFFFFFFFU)
-          {
-            return false;
-          }
-          return true;
-        }
+        return false;
       }
+      return true;
     }
   }
 }
@@ -1574,13 +1571,11 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
   bool is_xy_on_curve = load_public_key(public_key, pk_x, pk_y);
   bool is_r_valid = load_qelem_vartime(r_q, signature);
   bool is_s_valid = load_qelem_vartime(s_q, signature + (uint32_t)32U);
-  bool res0;
   load_qelem_modq(z, m);
   if (!(is_xy_on_curve && is_r_valid && is_s_valid))
   {
-    res0 = false;
+    return false;
   }
-  else
   {
     uint64_t p[15U] = { 0U };
     uint64_t res[15U] = { 0U };
@@ -1602,59 +1597,45 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
       {
         uint64_t tmp[5U] = { 0U };
         uint64_t *pz = res + (uint32_t)10U;
+        bool b;
         Hacl_K256_Field_fnormalize(tmp, pz);
+        b = Hacl_K256_Field_is_felem_zero_vartime(tmp);
+        if (b)
         {
-          bool b0 = Hacl_K256_Field_is_felem_zero_vartime(tmp);
-          bool b;
-          if (b0)
+          return false;
+        }
+        {
+          uint64_t *x = res;
+          uint64_t *z1 = res + (uint32_t)10U;
+          uint8_t r_bytes[32U] = { 0U };
+          uint64_t r_fe[5U] = { 0U };
+          uint64_t tmp_q[5U] = { 0U };
+          uint64_t tmp_x[5U] = { 0U };
+          bool is_rz_x;
+          store_qelem(r_bytes, r_q);
+          Hacl_K256_Field_load_felem(r_fe, r_bytes);
+          Hacl_K256_Field_fnormalize(tmp_x, x);
+          is_rz_x = fmul_eq_vartime(r_fe, z1, tmp_x);
+          if (!is_rz_x)
           {
-            b = false;
-          }
-          else
-          {
-            uint64_t *x = res;
-            uint64_t *z1 = res + (uint32_t)10U;
-            uint8_t r_bytes[32U] = { 0U };
-            uint64_t r_fe[5U] = { 0U };
-            uint64_t tmp_q[5U] = { 0U };
-            uint64_t tmp_x[5U] = { 0U };
-            store_qelem(r_bytes, r_q);
-            Hacl_K256_Field_load_felem(r_fe, r_bytes);
-            Hacl_K256_Field_fnormalize(tmp_x, x);
+            bool is_r_lt_p_m_q = Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(r_fe);
+            if (is_r_lt_p_m_q)
             {
-              bool is_rz_x = fmul_eq_vartime(r_fe, z1, tmp_x);
-              bool res1;
-              if (!is_rz_x)
-              {
-                bool is_r_lt_p_m_q = Hacl_K256_Field_is_felem_lt_prime_minus_order_vartime(r_fe);
-                if (is_r_lt_p_m_q)
-                {
-                  tmp_q[0U] = (uint64_t)0x25e8cd0364141U;
-                  tmp_q[1U] = (uint64_t)0xe6af48a03bbfdU;
-                  tmp_q[2U] = (uint64_t)0xffffffebaaedcU;
-                  tmp_q[3U] = (uint64_t)0xfffffffffffffU;
-                  tmp_q[4U] = (uint64_t)0xffffffffffffU;
-                  Hacl_K256_Field_fadd(tmp_q, r_fe, tmp_q);
-                  res1 = fmul_eq_vartime(tmp_q, z1, tmp_x);
-                }
-                else
-                {
-                  res1 = false;
-                }
-              }
-              else
-              {
-                res1 = true;
-              }
-              b = res1;
+              tmp_q[0U] = (uint64_t)0x25e8cd0364141U;
+              tmp_q[1U] = (uint64_t)0xe6af48a03bbfdU;
+              tmp_q[2U] = (uint64_t)0xffffffebaaedcU;
+              tmp_q[3U] = (uint64_t)0xfffffffffffffU;
+              tmp_q[4U] = (uint64_t)0xffffffffffffU;
+              Hacl_K256_Field_fadd(tmp_q, r_fe, tmp_q);
+              return fmul_eq_vartime(tmp_q, z1, tmp_x);
             }
+            return false;
           }
-          res0 = b;
+          return true;
         }
       }
     }
   }
-  return res0;
 }
 
 /*

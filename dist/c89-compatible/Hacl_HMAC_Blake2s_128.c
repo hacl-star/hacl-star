@@ -49,6 +49,7 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
     memset(key_block, 0U, l * sizeof (uint8_t));
     {
       uint32_t i0;
+      uint8_t *nkey;
       if (key_len <= (uint32_t)64U)
       {
         i0 = key_len;
@@ -57,85 +58,108 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
       {
         i0 = (uint32_t)32U;
       }
+      nkey = key_block;
+      if (key_len <= (uint32_t)64U)
       {
-        uint8_t *nkey = key_block;
-        if (key_len <= (uint32_t)64U)
+        memcpy(nkey, key, key_len * sizeof (uint8_t));
+      }
+      else
+      {
+        Hacl_Hash_Blake2s_128_hash_blake2s_128(key, key_len, nkey);
+      }
+      KRML_CHECK_SIZE(sizeof (uint8_t), l);
+      {
+        uint8_t ipad[l];
+        memset(ipad, (uint8_t)0x36U, l * sizeof (uint8_t));
         {
-          memcpy(nkey, key, key_len * sizeof (uint8_t));
-        }
-        else
-        {
-          Hacl_Hash_Blake2s_128_hash_blake2s_128(key, key_len, nkey);
+          uint32_t i;
+          for (i = (uint32_t)0U; i < l; i++)
+          {
+            uint8_t xi = ipad[i];
+            uint8_t yi = key_block[i];
+            ipad[i] = xi ^ yi;
+          }
         }
         KRML_CHECK_SIZE(sizeof (uint8_t), l);
         {
-          uint8_t ipad[l];
-          memset(ipad, (uint8_t)0x36U, l * sizeof (uint8_t));
+          uint8_t opad[l];
+          memset(opad, (uint8_t)0x5cU, l * sizeof (uint8_t));
           {
             uint32_t i;
             for (i = (uint32_t)0U; i < l; i++)
             {
-              uint8_t xi = ipad[i];
+              uint8_t xi = opad[i];
               uint8_t yi = key_block[i];
-              ipad[i] = xi ^ yi;
+              opad[i] = xi ^ yi;
             }
           }
-          KRML_CHECK_SIZE(sizeof (uint8_t), l);
           {
-            uint8_t opad[l];
-            memset(opad, (uint8_t)0x5cU, l * sizeof (uint8_t));
+            Lib_IntVector_Intrinsics_vec128 s0[4U] = { 0U };
+            Lib_IntVector_Intrinsics_vec128 *r00 = s0 + (uint32_t)0U * (uint32_t)1U;
+            Lib_IntVector_Intrinsics_vec128 *r10 = s0 + (uint32_t)1U * (uint32_t)1U;
+            Lib_IntVector_Intrinsics_vec128 *r20 = s0 + (uint32_t)2U * (uint32_t)1U;
+            Lib_IntVector_Intrinsics_vec128 *r30 = s0 + (uint32_t)3U * (uint32_t)1U;
+            uint32_t iv00 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
+            uint32_t iv10 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
+            uint32_t iv20 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
+            uint32_t iv30 = Hacl_Impl_Blake2_Constants_ivTable_S[3U];
+            uint32_t iv40 = Hacl_Impl_Blake2_Constants_ivTable_S[4U];
+            uint32_t iv50 = Hacl_Impl_Blake2_Constants_ivTable_S[5U];
+            uint32_t iv60 = Hacl_Impl_Blake2_Constants_ivTable_S[6U];
+            uint32_t iv70 = Hacl_Impl_Blake2_Constants_ivTable_S[7U];
+            uint32_t kk_shift_80;
+            uint32_t iv0_;
+            uint64_t es;
+            r20[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv00, iv10, iv20, iv30);
+            r30[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv40, iv50, iv60, iv70);
+            kk_shift_80 = (uint32_t)0U;
+            iv0_ = iv00 ^ ((uint32_t)0x01010000U ^ (kk_shift_80 ^ (uint32_t)32U));
+            r00[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_, iv10, iv20, iv30);
+            r10[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv40, iv50, iv60, iv70);
+            es = (uint64_t)0U;
             {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < l; i++)
+              ___Lib_IntVector_Intrinsics_vec128__uint64_t scrut;
+              Lib_IntVector_Intrinsics_vec128 *s;
+              uint8_t *dst1;
+              Lib_IntVector_Intrinsics_vec128 *r01;
+              Lib_IntVector_Intrinsics_vec128 *r11;
+              Lib_IntVector_Intrinsics_vec128 *r21;
+              Lib_IntVector_Intrinsics_vec128 *r31;
+              uint32_t iv01;
+              uint32_t iv11;
+              uint32_t iv21;
+              uint32_t iv31;
+              uint32_t iv41;
+              uint32_t iv51;
+              uint32_t iv61;
+              uint32_t iv71;
+              uint32_t kk_shift_81;
+              uint32_t iv0_0;
+              uint64_t ev0;
+              scrut.fst = s0;
+              scrut.snd = es;
+              s = scrut.fst;
+              dst1 = ipad;
+              r01 = s + (uint32_t)0U * (uint32_t)1U;
+              r11 = s + (uint32_t)1U * (uint32_t)1U;
+              r21 = s + (uint32_t)2U * (uint32_t)1U;
+              r31 = s + (uint32_t)3U * (uint32_t)1U;
+              iv01 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
+              iv11 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
+              iv21 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
+              iv31 = Hacl_Impl_Blake2_Constants_ivTable_S[3U];
+              iv41 = Hacl_Impl_Blake2_Constants_ivTable_S[4U];
+              iv51 = Hacl_Impl_Blake2_Constants_ivTable_S[5U];
+              iv61 = Hacl_Impl_Blake2_Constants_ivTable_S[6U];
+              iv71 = Hacl_Impl_Blake2_Constants_ivTable_S[7U];
+              r21[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv01, iv11, iv21, iv31);
+              r31[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv41, iv51, iv61, iv71);
+              kk_shift_81 = (uint32_t)0U;
+              iv0_0 = iv01 ^ ((uint32_t)0x01010000U ^ (kk_shift_81 ^ (uint32_t)32U));
+              r01[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_0, iv11, iv21, iv31);
+              r11[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv41, iv51, iv61, iv71);
+              ev0 = (uint64_t)0U;
               {
-                uint8_t xi = opad[i];
-                uint8_t yi = key_block[i];
-                opad[i] = xi ^ yi;
-              }
-            }
-            {
-              Lib_IntVector_Intrinsics_vec128 s0[4U] = { 0U };
-              Lib_IntVector_Intrinsics_vec128 *r00 = s0 + (uint32_t)0U * (uint32_t)1U;
-              Lib_IntVector_Intrinsics_vec128 *r10 = s0 + (uint32_t)1U * (uint32_t)1U;
-              Lib_IntVector_Intrinsics_vec128 *r20 = s0 + (uint32_t)2U * (uint32_t)1U;
-              Lib_IntVector_Intrinsics_vec128 *r30 = s0 + (uint32_t)3U * (uint32_t)1U;
-              uint32_t iv00 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
-              uint32_t iv10 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
-              uint32_t iv20 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
-              uint32_t iv30 = Hacl_Impl_Blake2_Constants_ivTable_S[3U];
-              uint32_t iv40 = Hacl_Impl_Blake2_Constants_ivTable_S[4U];
-              uint32_t iv50 = Hacl_Impl_Blake2_Constants_ivTable_S[5U];
-              uint32_t iv60 = Hacl_Impl_Blake2_Constants_ivTable_S[6U];
-              uint32_t iv70 = Hacl_Impl_Blake2_Constants_ivTable_S[7U];
-              uint32_t kk_shift_80;
-              uint32_t iv0_;
-              uint64_t es;
-              r20[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv00, iv10, iv20, iv30);
-              r30[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv40, iv50, iv60, iv70);
-              kk_shift_80 = (uint32_t)0U;
-              iv0_ = iv00 ^ ((uint32_t)0x01010000U ^ (kk_shift_80 ^ (uint32_t)32U));
-              r00[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_, iv10, iv20, iv30);
-              r10[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv40, iv50, iv60, iv70);
-              es = (uint64_t)0U;
-              {
-                ___Lib_IntVector_Intrinsics_vec128__uint64_t scrut;
-                Lib_IntVector_Intrinsics_vec128 *s;
-                uint8_t *dst1;
-                Lib_IntVector_Intrinsics_vec128 *r01;
-                Lib_IntVector_Intrinsics_vec128 *r11;
-                Lib_IntVector_Intrinsics_vec128 *r21;
-                Lib_IntVector_Intrinsics_vec128 *r31;
-                uint32_t iv01;
-                uint32_t iv11;
-                uint32_t iv21;
-                uint32_t iv31;
-                uint32_t iv41;
-                uint32_t iv51;
-                uint32_t iv61;
-                uint32_t iv71;
-                uint32_t kk_shift_81;
-                uint32_t iv0_0;
-                uint64_t ev0;
                 uint64_t ev10;
                 uint8_t *hash1;
                 Lib_IntVector_Intrinsics_vec128 *r0;
@@ -156,29 +180,6 @@ Hacl_HMAC_Blake2s_128_compute_blake2s_128(
                 uint64_t ev11;
                 uint64_t ev2;
                 uint64_t ev1;
-                scrut.fst = s0;
-                scrut.snd = es;
-                s = scrut.fst;
-                dst1 = ipad;
-                r01 = s + (uint32_t)0U * (uint32_t)1U;
-                r11 = s + (uint32_t)1U * (uint32_t)1U;
-                r21 = s + (uint32_t)2U * (uint32_t)1U;
-                r31 = s + (uint32_t)3U * (uint32_t)1U;
-                iv01 = Hacl_Impl_Blake2_Constants_ivTable_S[0U];
-                iv11 = Hacl_Impl_Blake2_Constants_ivTable_S[1U];
-                iv21 = Hacl_Impl_Blake2_Constants_ivTable_S[2U];
-                iv31 = Hacl_Impl_Blake2_Constants_ivTable_S[3U];
-                iv41 = Hacl_Impl_Blake2_Constants_ivTable_S[4U];
-                iv51 = Hacl_Impl_Blake2_Constants_ivTable_S[5U];
-                iv61 = Hacl_Impl_Blake2_Constants_ivTable_S[6U];
-                iv71 = Hacl_Impl_Blake2_Constants_ivTable_S[7U];
-                r21[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv01, iv11, iv21, iv31);
-                r31[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv41, iv51, iv61, iv71);
-                kk_shift_81 = (uint32_t)0U;
-                iv0_0 = iv01 ^ ((uint32_t)0x01010000U ^ (kk_shift_81 ^ (uint32_t)32U));
-                r01[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv0_0, iv11, iv21, iv31);
-                r11[0U] = Lib_IntVector_Intrinsics_vec128_load32s(iv41, iv51, iv61, iv71);
-                ev0 = (uint64_t)0U;
                 if (data_len == (uint32_t)0U)
                 {
                   uint64_t

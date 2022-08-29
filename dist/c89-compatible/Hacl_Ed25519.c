@@ -396,10 +396,11 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
     && x21 == (uint64_t)0x7ffffffffffffU
     && x30 == (uint64_t)0x7ffffffffffffU
     && x4 == (uint64_t)0x7ffffffffffffU;
+  bool res0;
   bool res;
   if (b)
   {
-    res = false;
+    res0 = false;
   }
   else
   {
@@ -446,11 +447,11 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
       }
       if (z == (uint8_t)0U)
       {
-        res = false;
+        res0 = false;
       }
       else if (z == (uint8_t)1U)
       {
-        res = true;
+        res0 = true;
       }
       else
       {
@@ -484,7 +485,7 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
               bool z1 = is_0(t1);
               if (z1 == false)
               {
-                res = false;
+                res0 = false;
               }
               else
               {
@@ -506,7 +507,7 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
                     reduce(x32);
                   }
                   memcpy(x, x32, (uint32_t)5U * sizeof (uint64_t));
-                  res = true;
+                  res0 = true;
                 }
               }
             }
@@ -515,10 +516,8 @@ static inline bool recover_x(uint64_t *x, uint64_t *y, uint64_t sign)
       }
     }
   }
-  {
-    bool res0 = res;
-    return res0;
-  }
+  res = res0;
+  return res;
 }
 
 bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *s)
@@ -530,32 +529,34 @@ bool Hacl_Impl_Ed25519_PointDecompress_point_decompress(uint64_t *out, uint8_t *
   uint8_t z0 = s31 >> (uint32_t)7U;
   uint64_t sign = (uint64_t)z0;
   bool z;
-  bool res0;
-  bool res;
   Hacl_Bignum25519_load_51(y, s);
   z = recover_x(x, y, sign);
-  if (z == false)
   {
-    res0 = false;
+    bool res0;
+    bool res;
+    if (z == false)
+    {
+      res0 = false;
+    }
+    else
+    {
+      uint64_t *outx = out;
+      uint64_t *outy = out + (uint32_t)5U;
+      uint64_t *outz = out + (uint32_t)10U;
+      uint64_t *outt = out + (uint32_t)15U;
+      memcpy(outx, x, (uint32_t)5U * sizeof (uint64_t));
+      memcpy(outy, y, (uint32_t)5U * sizeof (uint64_t));
+      outz[0U] = (uint64_t)1U;
+      outz[1U] = (uint64_t)0U;
+      outz[2U] = (uint64_t)0U;
+      outz[3U] = (uint64_t)0U;
+      outz[4U] = (uint64_t)0U;
+      fmul0(outt, x, y);
+      res0 = true;
+    }
+    res = res0;
+    return res;
   }
-  else
-  {
-    uint64_t *outx = out;
-    uint64_t *outy = out + (uint32_t)5U;
-    uint64_t *outz = out + (uint32_t)10U;
-    uint64_t *outt = out + (uint32_t)15U;
-    memcpy(outx, x, (uint32_t)5U * sizeof (uint64_t));
-    memcpy(outy, y, (uint32_t)5U * sizeof (uint64_t));
-    outz[0U] = (uint64_t)1U;
-    outz[1U] = (uint64_t)0U;
-    outz[2U] = (uint64_t)0U;
-    outz[3U] = (uint64_t)0U;
-    outz[4U] = (uint64_t)0U;
-    fmul0(outt, x, y);
-    res0 = true;
-  }
-  res = res0;
-  return res;
 }
 
 void Hacl_Impl_Ed25519_PointCompress_point_compress(uint8_t *z, uint64_t *p)
@@ -1239,7 +1240,6 @@ bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q)
   uint64_t *pxqz = tmp;
   uint64_t *qxpz = tmp + (uint32_t)5U;
   bool b;
-  bool res;
   fmul0(pxqz, p, q + (uint32_t)10U);
   reduce(pxqz);
   fmul0(qxpz, q, p + (uint32_t)10U);
@@ -1253,13 +1253,9 @@ bool Hacl_Impl_Ed25519_PointEqual_point_equal(uint64_t *p, uint64_t *q)
     reduce(pyqz);
     fmul0(qypz, q + (uint32_t)5U, p + (uint32_t)10U);
     reduce(qypz);
-    res = eq(pyqz, qypz);
+    return eq(pyqz, qypz);
   }
-  else
-  {
-    res = false;
-  }
-  return res;
+  return false;
 }
 
 void Hacl_Impl_Ed25519_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q)
@@ -2034,26 +2030,25 @@ Hacl_Ed25519_verify(uint8_t *public_key, uint32_t msg_len, uint8_t *msg, uint8_t
       uint8_t *rs1 = signature;
       uint8_t *sb = signature + (uint32_t)32U;
       uint64_t tmp[5U] = { 0U };
+      bool b10;
+      bool b1;
       load_32_bytes(tmp, sb);
+      b10 = gte_q(tmp);
+      b1 = b10;
+      if (b1)
       {
-        bool b1 = gte_q(tmp);
-        bool b10 = b1;
-        if (b10)
+        return false;
+      }
+      {
+        uint64_t tmp0[5U] = { 0U };
+        sha512_modq_pre_pre2(tmp0, rs1, public_key, msg_len, msg);
+        store_56(hb, tmp0);
         {
-          return false;
-        }
-        {
-          uint64_t tmp0[5U] = { 0U };
-          sha512_modq_pre_pre2(tmp0, rs1, public_key, msg_len, msg);
-          store_56(hb, tmp0);
-          {
-            uint64_t exp_d[20U] = { 0U };
-            point_negate_mul_double_g_vartime(exp_d, sb, hb, a_);
-            {
-              bool b2 = Hacl_Impl_Ed25519_PointEqual_point_equal(exp_d, r_);
-              return b2;
-            }
-          }
+          uint64_t exp_d[20U] = { 0U };
+          bool b2;
+          point_negate_mul_double_g_vartime(exp_d, sb, hb, a_);
+          b2 = Hacl_Impl_Ed25519_PointEqual_point_equal(exp_d, r_);
+          return b2;
         }
       }
     }

@@ -762,8 +762,6 @@ static uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
     uint64_t acc0 = (uint64_t)0U;
     uint64_t m10;
     uint64_t m0;
-    uint32_t bLen;
-    uint64_t m1;
     {
       uint32_t i;
       for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
@@ -777,67 +775,73 @@ static uint64_t exp_check(uint64_t *n, uint64_t *a, uint32_t bBits, uint64_t *b)
     }
     m10 = acc0;
     m0 = m00 & m10;
-    if (bBits == (uint32_t)0U)
     {
-      bLen = (uint32_t)1U;
-    }
-    else
-    {
-      bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
-    }
-    if (bBits < (uint32_t)64U * bLen)
-    {
-      KRML_CHECK_SIZE(sizeof (uint64_t), bLen);
+      uint32_t bLen;
+      if (bBits == (uint32_t)0U)
       {
-        uint64_t b2[bLen];
-        memset(b2, 0U, bLen * sizeof (uint64_t));
+        bLen = (uint32_t)1U;
+      }
+      else
+      {
+        bLen = (bBits - (uint32_t)1U) / (uint32_t)64U + (uint32_t)1U;
+      }
+      {
+        uint64_t m1;
+        if (bBits < (uint32_t)64U * bLen)
         {
-          uint32_t i0 = bBits / (uint32_t)64U;
-          uint32_t j = bBits % (uint32_t)64U;
-          b2[i0] = b2[i0] | (uint64_t)1U << j;
+          KRML_CHECK_SIZE(sizeof (uint64_t), bLen);
           {
-            uint64_t acc = (uint64_t)0U;
+            uint64_t b2[bLen];
+            memset(b2, 0U, bLen * sizeof (uint64_t));
             {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < bLen; i++)
+              uint32_t i0 = bBits / (uint32_t)64U;
+              uint32_t j = bBits % (uint32_t)64U;
+              b2[i0] = b2[i0] | (uint64_t)1U << j;
               {
-                uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
-                uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
-                acc =
-                  (beq & acc)
-                  | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+                uint64_t acc = (uint64_t)0U;
+                {
+                  uint32_t i;
+                  for (i = (uint32_t)0U; i < bLen; i++)
+                  {
+                    uint64_t beq = FStar_UInt64_eq_mask(b[i], b2[i]);
+                    uint64_t blt = ~FStar_UInt64_gte_mask(b[i], b2[i]);
+                    acc =
+                      (beq & acc)
+                      | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+                  }
+                }
+                {
+                  uint64_t res = acc;
+                  m1 = res;
+                }
               }
-            }
-            {
-              uint64_t res = acc;
-              m1 = res;
             }
           }
         }
-      }
-    }
-    else
-    {
-      m1 = (uint64_t)0xFFFFFFFFFFFFFFFFU;
-    }
-    {
-      uint64_t acc = (uint64_t)0U;
-      uint64_t m2;
-      uint64_t m;
-      {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
+        else
         {
-          uint64_t beq = FStar_UInt64_eq_mask(a[i], n[i]);
-          uint64_t blt = ~FStar_UInt64_gte_mask(a[i], n[i]);
-          acc =
-            (beq & acc)
-            | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+          m1 = (uint64_t)0xFFFFFFFFFFFFFFFFU;
+        }
+        {
+          uint64_t acc = (uint64_t)0U;
+          uint64_t m2;
+          uint64_t m;
+          {
+            uint32_t i;
+            for (i = (uint32_t)0U; i < (uint32_t)64U; i++)
+            {
+              uint64_t beq = FStar_UInt64_eq_mask(a[i], n[i]);
+              uint64_t blt = ~FStar_UInt64_gte_mask(a[i], n[i]);
+              acc =
+                (beq & acc)
+                | (~beq & ((blt & (uint64_t)0xFFFFFFFFFFFFFFFFU) | (~blt & (uint64_t)0U)));
+            }
+          }
+          m2 = acc;
+          m = m1 & m2;
+          return m0 & m;
         }
       }
-      m2 = acc;
-      m = m1 & m2;
-      return m0 & m;
     }
   }
 }

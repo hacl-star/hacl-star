@@ -106,6 +106,8 @@ Hacl_Streaming_Poly1305_128_update(
     uint64_t total_len1 = s1.total_len;
     uint8_t *k_1 = s1.p_key;
     uint32_t sz1;
+    uint8_t *buf2;
+    uint64_t total_len2;
     if (total_len1 % (uint64_t)(uint32_t)32U == (uint64_t)0U && total_len1 > (uint64_t)0U)
     {
       sz1 = (uint32_t)32U;
@@ -114,20 +116,17 @@ Hacl_Streaming_Poly1305_128_update(
     {
       sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)32U);
     }
+    buf2 = buf + sz1;
+    memcpy(buf2, data, len * sizeof (uint8_t));
+    total_len2 = total_len1 + (uint64_t)len;
     {
-      uint8_t *buf2 = buf + sz1;
-      uint64_t total_len2;
-      memcpy(buf2, data, len * sizeof (uint8_t));
-      total_len2 = total_len1 + (uint64_t)len;
-      {
-        Hacl_Streaming_Poly1305_128_poly1305_128_state lit;
-        lit.block_state = block_state1;
-        lit.buf = buf;
-        lit.total_len = total_len2;
-        lit.p_key = k_1;
-        *p = lit;
-        return;
-      }
+      Hacl_Streaming_Poly1305_128_poly1305_128_state lit;
+      lit.block_state = block_state1;
+      lit.buf = buf;
+      lit.total_len = total_len2;
+      lit.p_key = k_1;
+      *p = lit;
+      return;
     }
   }
   if (sz == (uint32_t)0U)
@@ -146,6 +145,10 @@ Hacl_Streaming_Poly1305_128_update(
     {
       sz1 = (uint32_t)(total_len1 % (uint64_t)(uint32_t)32U);
     }
+    if (!(sz1 == (uint32_t)0U))
+    {
+      Hacl_Poly1305_128_poly1305_update(block_state1, (uint32_t)32U, buf);
+    }
     {
       uint32_t ite;
       uint32_t n_blocks;
@@ -154,10 +157,6 @@ Hacl_Streaming_Poly1305_128_update(
       uint8_t *data1;
       uint8_t *data2;
       uint8_t *dst;
-      if (!(sz1 == (uint32_t)0U))
-      {
-        Hacl_Poly1305_128_poly1305_update(block_state1, (uint32_t)32U, buf);
-      }
       if ((uint64_t)len % (uint64_t)(uint32_t)32U == (uint64_t)0U && (uint64_t)len > (uint64_t)0U)
       {
         ite = (uint32_t)32U;
@@ -195,6 +194,8 @@ Hacl_Streaming_Poly1305_128_update(
     uint64_t total_len10 = s10.total_len;
     uint8_t *k_1 = s10.p_key;
     uint32_t sz10;
+    uint8_t *buf2;
+    uint64_t total_len2;
     if (total_len10 % (uint64_t)(uint32_t)32U == (uint64_t)0U && total_len10 > (uint64_t)0U)
     {
       sz10 = (uint32_t)32U;
@@ -203,36 +204,28 @@ Hacl_Streaming_Poly1305_128_update(
     {
       sz10 = (uint32_t)(total_len10 % (uint64_t)(uint32_t)32U);
     }
+    buf2 = buf0 + sz10;
+    memcpy(buf2, data1, diff * sizeof (uint8_t));
+    total_len2 = total_len10 + (uint64_t)diff;
     {
-      uint8_t *buf2 = buf0 + sz10;
-      uint64_t total_len2;
-      memcpy(buf2, data1, diff * sizeof (uint8_t));
-      total_len2 = total_len10 + (uint64_t)diff;
+      Hacl_Streaming_Poly1305_128_poly1305_128_state lit;
+      Hacl_Streaming_Poly1305_128_poly1305_128_state s1;
+      Lib_IntVector_Intrinsics_vec128 *block_state1;
+      uint8_t *buf;
+      uint64_t total_len1;
+      uint8_t *k_10;
+      lit.block_state = block_state10;
+      lit.buf = buf0;
+      lit.total_len = total_len2;
+      lit.p_key = k_1;
+      *p = lit;
+      s1 = *p;
+      block_state1 = s1.block_state;
+      buf = s1.buf;
+      total_len1 = s1.total_len;
+      k_10 = s1.p_key;
       {
-        Hacl_Streaming_Poly1305_128_poly1305_128_state lit;
-        Hacl_Streaming_Poly1305_128_poly1305_128_state s1;
-        Lib_IntVector_Intrinsics_vec128 *block_state1;
-        uint8_t *buf;
-        uint64_t total_len1;
-        uint8_t *k_10;
         uint32_t sz1;
-        uint32_t ite;
-        uint32_t n_blocks;
-        uint32_t data1_len;
-        uint32_t data2_len;
-        uint8_t *data11;
-        uint8_t *data21;
-        uint8_t *dst;
-        lit.block_state = block_state10;
-        lit.buf = buf0;
-        lit.total_len = total_len2;
-        lit.p_key = k_1;
-        *p = lit;
-        s1 = *p;
-        block_state1 = s1.block_state;
-        buf = s1.buf;
-        total_len1 = s1.total_len;
-        k_10 = s1.p_key;
         if (total_len1 % (uint64_t)(uint32_t)32U == (uint64_t)0U && total_len1 > (uint64_t)0U)
         {
           sz1 = (uint32_t)32U;
@@ -245,35 +238,44 @@ Hacl_Streaming_Poly1305_128_update(
         {
           Hacl_Poly1305_128_poly1305_update(block_state1, (uint32_t)32U, buf);
         }
-        if
-        (
-          (uint64_t)(len - diff)
-          % (uint64_t)(uint32_t)32U
-          == (uint64_t)0U
-          && (uint64_t)(len - diff) > (uint64_t)0U
-        )
         {
-          ite = (uint32_t)32U;
-        }
-        else
-        {
-          ite = (uint32_t)((uint64_t)(len - diff) % (uint64_t)(uint32_t)32U);
-        }
-        n_blocks = (len - diff - ite) / (uint32_t)32U;
-        data1_len = n_blocks * (uint32_t)32U;
-        data2_len = len - diff - data1_len;
-        data11 = data2;
-        data21 = data2 + data1_len;
-        Hacl_Poly1305_128_poly1305_update(block_state1, data1_len, data11);
-        dst = buf;
-        memcpy(dst, data21, data2_len * sizeof (uint8_t));
-        {
-          Hacl_Streaming_Poly1305_128_poly1305_128_state lit0;
-          lit0.block_state = block_state1;
-          lit0.buf = buf;
-          lit0.total_len = total_len1 + (uint64_t)(len - diff);
-          lit0.p_key = k_10;
-          *p = lit0;
+          uint32_t ite;
+          uint32_t n_blocks;
+          uint32_t data1_len;
+          uint32_t data2_len;
+          uint8_t *data11;
+          uint8_t *data21;
+          uint8_t *dst;
+          if
+          (
+            (uint64_t)(len - diff)
+            % (uint64_t)(uint32_t)32U
+            == (uint64_t)0U
+            && (uint64_t)(len - diff) > (uint64_t)0U
+          )
+          {
+            ite = (uint32_t)32U;
+          }
+          else
+          {
+            ite = (uint32_t)((uint64_t)(len - diff) % (uint64_t)(uint32_t)32U);
+          }
+          n_blocks = (len - diff - ite) / (uint32_t)32U;
+          data1_len = n_blocks * (uint32_t)32U;
+          data2_len = len - diff - data1_len;
+          data11 = data2;
+          data21 = data2 + data1_len;
+          Hacl_Poly1305_128_poly1305_update(block_state1, data1_len, data11);
+          dst = buf;
+          memcpy(dst, data21, data2_len * sizeof (uint8_t));
+          {
+            Hacl_Streaming_Poly1305_128_poly1305_128_state lit0;
+            lit0.block_state = block_state1;
+            lit0.buf = buf;
+            lit0.total_len = total_len1 + (uint64_t)(len - diff);
+            lit0.p_key = k_10;
+            *p = lit0;
+          }
         }
       }
     }
@@ -292,6 +294,7 @@ Hacl_Streaming_Poly1305_128_finish(
   uint64_t total_len = scrut.total_len;
   uint8_t *k_ = scrut.p_key;
   uint32_t r;
+  uint8_t *buf_1;
   if (total_len % (uint64_t)(uint32_t)32U == (uint64_t)0U && total_len > (uint64_t)0U)
   {
     r = (uint32_t)32U;
@@ -300,59 +303,69 @@ Hacl_Streaming_Poly1305_128_finish(
   {
     r = (uint32_t)(total_len % (uint64_t)(uint32_t)32U);
   }
+  buf_1 = buf_;
   {
-    uint8_t *buf_1 = buf_;
     Lib_IntVector_Intrinsics_vec128 r1[25U] = { 0U };
     Lib_IntVector_Intrinsics_vec128 *tmp_block_state = r1;
-    uint32_t ite0;
-    uint8_t *buf_last;
-    uint8_t *buf_multi;
-    uint32_t ite1;
-    uint32_t ite2;
-    uint64_t prev_len_last;
-    uint32_t ite;
     memcpy(tmp_block_state, block_state, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec128));
-    if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
     {
-      ite0 = (uint32_t)16U;
-    }
-    else
-    {
-      ite0 = r % (uint32_t)16U;
-    }
-    buf_last = buf_1 + r - ite0;
-    buf_multi = buf_1;
-    if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
-    {
-      ite1 = (uint32_t)16U;
-    }
-    else
-    {
-      ite1 = r % (uint32_t)16U;
-    }
-    Hacl_Poly1305_128_poly1305_update(tmp_block_state, r - ite1, buf_multi);
-    if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
-    {
-      ite2 = (uint32_t)16U;
-    }
-    else
-    {
-      ite2 = r % (uint32_t)16U;
-    }
-    prev_len_last = total_len - (uint64_t)ite2;
-    if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
-    {
-      ite = (uint32_t)16U;
-    }
-    else
-    {
-      ite = r % (uint32_t)16U;
-    }
-    Hacl_Poly1305_128_poly1305_update(tmp_block_state, ite, buf_last);
-    {
-      Lib_IntVector_Intrinsics_vec128 tmp[25U] = { 0U };
-      memcpy(tmp, tmp_block_state, (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec128));
-      Hacl_Poly1305_128_poly1305_finish(dst, k_, tmp);
+      uint32_t ite0;
+      uint8_t *buf_last;
+      uint8_t *buf_multi;
+      if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
+      {
+        ite0 = (uint32_t)16U;
+      }
+      else
+      {
+        ite0 = r % (uint32_t)16U;
+      }
+      buf_last = buf_1 + r - ite0;
+      buf_multi = buf_1;
+      {
+        uint32_t ite;
+        if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
+        {
+          ite = (uint32_t)16U;
+        }
+        else
+        {
+          ite = r % (uint32_t)16U;
+        }
+        Hacl_Poly1305_128_poly1305_update(tmp_block_state, r - ite, buf_multi);
+        {
+          uint32_t ite1;
+          uint64_t prev_len_last;
+          if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
+          {
+            ite1 = (uint32_t)16U;
+          }
+          else
+          {
+            ite1 = r % (uint32_t)16U;
+          }
+          prev_len_last = total_len - (uint64_t)ite1;
+          {
+            uint32_t ite2;
+            if (r % (uint32_t)16U == (uint32_t)0U && r > (uint32_t)0U)
+            {
+              ite2 = (uint32_t)16U;
+            }
+            else
+            {
+              ite2 = r % (uint32_t)16U;
+            }
+            Hacl_Poly1305_128_poly1305_update(tmp_block_state, ite2, buf_last);
+            {
+              Lib_IntVector_Intrinsics_vec128 tmp[25U] = { 0U };
+              memcpy(tmp,
+                tmp_block_state,
+                (uint32_t)25U * sizeof (Lib_IntVector_Intrinsics_vec128));
+              Hacl_Poly1305_128_poly1305_finish(dst, k_, tmp);
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -762,8 +762,6 @@ static uint32_t exp_check(uint32_t *n, uint32_t *a, uint32_t bBits, uint32_t *b)
     uint32_t acc0 = (uint32_t)0U;
     uint32_t m10;
     uint32_t m0;
-    uint32_t bLen;
-    uint32_t m1;
     {
       uint32_t i;
       for (i = (uint32_t)0U; i < (uint32_t)128U; i++)
@@ -775,63 +773,71 @@ static uint32_t exp_check(uint32_t *n, uint32_t *a, uint32_t bBits, uint32_t *b)
     }
     m10 = acc0;
     m0 = m00 & m10;
-    if (bBits == (uint32_t)0U)
     {
-      bLen = (uint32_t)1U;
-    }
-    else
-    {
-      bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
-    }
-    if (bBits < (uint32_t)32U * bLen)
-    {
-      KRML_CHECK_SIZE(sizeof (uint32_t), bLen);
+      uint32_t bLen;
+      if (bBits == (uint32_t)0U)
       {
-        uint32_t b2[bLen];
-        memset(b2, 0U, bLen * sizeof (uint32_t));
+        bLen = (uint32_t)1U;
+      }
+      else
+      {
+        bLen = (bBits - (uint32_t)1U) / (uint32_t)32U + (uint32_t)1U;
+      }
+      {
+        uint32_t m1;
+        if (bBits < (uint32_t)32U * bLen)
         {
-          uint32_t i0 = bBits / (uint32_t)32U;
-          uint32_t j = bBits % (uint32_t)32U;
-          b2[i0] = b2[i0] | (uint32_t)1U << j;
+          KRML_CHECK_SIZE(sizeof (uint32_t), bLen);
           {
-            uint32_t acc = (uint32_t)0U;
+            uint32_t b2[bLen];
+            memset(b2, 0U, bLen * sizeof (uint32_t));
             {
-              uint32_t i;
-              for (i = (uint32_t)0U; i < bLen; i++)
+              uint32_t i0 = bBits / (uint32_t)32U;
+              uint32_t j = bBits % (uint32_t)32U;
+              b2[i0] = b2[i0] | (uint32_t)1U << j;
               {
-                uint32_t beq = FStar_UInt32_eq_mask(b[i], b2[i]);
-                uint32_t blt = ~FStar_UInt32_gte_mask(b[i], b2[i]);
-                acc = (beq & acc) | (~beq & ((blt & (uint32_t)0xFFFFFFFFU) | (~blt & (uint32_t)0U)));
+                uint32_t acc = (uint32_t)0U;
+                {
+                  uint32_t i;
+                  for (i = (uint32_t)0U; i < bLen; i++)
+                  {
+                    uint32_t beq = FStar_UInt32_eq_mask(b[i], b2[i]);
+                    uint32_t blt = ~FStar_UInt32_gte_mask(b[i], b2[i]);
+                    acc =
+                      (beq & acc)
+                      | (~beq & ((blt & (uint32_t)0xFFFFFFFFU) | (~blt & (uint32_t)0U)));
+                  }
+                }
+                {
+                  uint32_t res = acc;
+                  m1 = res;
+                }
               }
-            }
-            {
-              uint32_t res = acc;
-              m1 = res;
             }
           }
         }
-      }
-    }
-    else
-    {
-      m1 = (uint32_t)0xFFFFFFFFU;
-    }
-    {
-      uint32_t acc = (uint32_t)0U;
-      uint32_t m2;
-      uint32_t m;
-      {
-        uint32_t i;
-        for (i = (uint32_t)0U; i < (uint32_t)128U; i++)
+        else
         {
-          uint32_t beq = FStar_UInt32_eq_mask(a[i], n[i]);
-          uint32_t blt = ~FStar_UInt32_gte_mask(a[i], n[i]);
-          acc = (beq & acc) | (~beq & ((blt & (uint32_t)0xFFFFFFFFU) | (~blt & (uint32_t)0U)));
+          m1 = (uint32_t)0xFFFFFFFFU;
+        }
+        {
+          uint32_t acc = (uint32_t)0U;
+          uint32_t m2;
+          uint32_t m;
+          {
+            uint32_t i;
+            for (i = (uint32_t)0U; i < (uint32_t)128U; i++)
+            {
+              uint32_t beq = FStar_UInt32_eq_mask(a[i], n[i]);
+              uint32_t blt = ~FStar_UInt32_gte_mask(a[i], n[i]);
+              acc = (beq & acc) | (~beq & ((blt & (uint32_t)0xFFFFFFFFU) | (~blt & (uint32_t)0U)));
+            }
+          }
+          m2 = acc;
+          m = m1 & m2;
+          return m0 & m;
         }
       }
-      m2 = acc;
-      m = m1 & m2;
-      return m0 & m;
     }
   }
 }

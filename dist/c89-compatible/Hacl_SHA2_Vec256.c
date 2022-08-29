@@ -615,6 +615,7 @@ Hacl_SHA2_Vec256_sha224_8(
         lb = lit0;
         {
           uint32_t blocks;
+          uint32_t fin;
           if (rem + (uint32_t)8U + (uint32_t)1U <= (uint32_t)64U)
           {
             blocks = (uint32_t)1U;
@@ -623,8 +624,8 @@ Hacl_SHA2_Vec256_sha224_8(
           {
             blocks = (uint32_t)2U;
           }
+          fin = blocks * (uint32_t)64U;
           {
-            uint32_t fin = blocks * (uint32_t)64U;
             uint8_t last[1024U] = { 0U };
             uint8_t totlen_buf[8U] = { 0U };
             uint64_t total_len_bits = len_ << (uint32_t)3U;
@@ -1646,6 +1647,7 @@ Hacl_SHA2_Vec256_sha256_8(
         lb = lit0;
         {
           uint32_t blocks;
+          uint32_t fin;
           if (rem + (uint32_t)8U + (uint32_t)1U <= (uint32_t)64U)
           {
             blocks = (uint32_t)1U;
@@ -1654,8 +1656,8 @@ Hacl_SHA2_Vec256_sha256_8(
           {
             blocks = (uint32_t)2U;
           }
+          fin = blocks * (uint32_t)64U;
           {
-            uint32_t fin = blocks * (uint32_t)64U;
             uint8_t last[1024U] = { 0U };
             uint8_t totlen_buf[8U] = { 0U };
             uint64_t total_len_bits = len_ << (uint32_t)3U;
@@ -2461,6 +2463,7 @@ Hacl_SHA2_Vec256_sha384_4(
         lb = lit0;
         {
           uint32_t blocks;
+          uint32_t fin;
           if (rem + (uint32_t)16U + (uint32_t)1U <= (uint32_t)128U)
           {
             blocks = (uint32_t)1U;
@@ -2469,8 +2472,8 @@ Hacl_SHA2_Vec256_sha384_4(
           {
             blocks = (uint32_t)2U;
           }
+          fin = blocks * (uint32_t)128U;
           {
-            uint32_t fin = blocks * (uint32_t)128U;
             uint8_t last[1024U] = { 0U };
             uint8_t totlen_buf[16U] = { 0U };
             FStar_UInt128_uint128 total_len_bits = FStar_UInt128_shift_left(len_, (uint32_t)3U);
@@ -3060,6 +3063,7 @@ Hacl_SHA2_Vec256_sha512_4(
         lb = lit0;
         {
           uint32_t blocks;
+          uint32_t fin;
           if (rem + (uint32_t)16U + (uint32_t)1U <= (uint32_t)128U)
           {
             blocks = (uint32_t)1U;
@@ -3068,8 +3072,8 @@ Hacl_SHA2_Vec256_sha512_4(
           {
             blocks = (uint32_t)2U;
           }
+          fin = blocks * (uint32_t)128U;
           {
-            uint32_t fin = blocks * (uint32_t)128U;
             uint8_t last[1024U] = { 0U };
             uint8_t totlen_buf[16U] = { 0U };
             FStar_UInt128_uint128 total_len_bits = FStar_UInt128_shift_left(len_, (uint32_t)3U);

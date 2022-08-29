@@ -69,6 +69,7 @@ static inline void ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a, uint64_t *p_r2_n)
     memset(p_s, 0U, ffdhe_len(a) * sizeof (uint8_t));
     {
       const uint8_t *p;
+      uint32_t len;
       switch (a)
       {
         case Spec_FFDHE_FFDHE2048:
@@ -102,25 +103,23 @@ static inline void ffdhe_precomp_p(Spec_FFDHE_ffdhe_alg a, uint64_t *p_r2_n)
             KRML_HOST_EXIT(253U);
           }
       }
+      len = ffdhe_len(a);
       {
-        uint32_t len = ffdhe_len(a);
+        uint32_t i;
+        for (i = (uint32_t)0U; i < len; i++)
         {
-          uint32_t i;
-          for (i = (uint32_t)0U; i < len; i++)
-          {
-            uint8_t *os = p_s;
-            uint8_t x = p[i];
-            os[i] = x;
-          }
+          uint8_t *os = p_s;
+          uint8_t x = p[i];
+          os[i] = x;
         }
-        Hacl_Bignum_Convert_bn_from_bytes_be_uint64(ffdhe_len(a), p_s, p_n);
-        Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64((ffdhe_len(a) - (uint32_t)1U)
-          / (uint32_t)8U
-          + (uint32_t)1U,
-          (uint32_t)8U * ffdhe_len(a) - (uint32_t)1U,
-          p_n,
-          r2_n);
       }
+      Hacl_Bignum_Convert_bn_from_bytes_be_uint64(ffdhe_len(a), p_s, p_n);
+      Hacl_Bignum_Montgomery_bn_precomp_r2_mod_n_u64((ffdhe_len(a) - (uint32_t)1U)
+        / (uint32_t)8U
+        + (uint32_t)1U,
+        (uint32_t)8U * ffdhe_len(a) - (uint32_t)1U,
+        p_n,
+        r2_n);
     }
   }
 }

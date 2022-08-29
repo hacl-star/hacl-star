@@ -249,6 +249,15 @@ void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst
   uint32_t *s = scrut;
   uint32_t blocks_n0 = input_len / (uint32_t)64U;
   uint32_t blocks_n1;
+  uint32_t blocks_len0;
+  uint8_t *blocks0;
+  uint32_t rest_len0;
+  uint8_t *rest0;
+  uint32_t blocks_n;
+  uint32_t blocks_len;
+  uint8_t *blocks;
+  uint32_t rest_len;
+  uint8_t *rest;
   if (input_len % (uint32_t)64U == (uint32_t)0U && blocks_n0 > (uint32_t)0U)
   {
     blocks_n1 = blocks_n0 - (uint32_t)1U;
@@ -257,19 +266,17 @@ void Hacl_Hash_SHA1_legacy_hash(uint8_t *input, uint32_t input_len, uint8_t *dst
   {
     blocks_n1 = blocks_n0;
   }
-  {
-    uint32_t blocks_len0 = blocks_n1 * (uint32_t)64U;
-    uint8_t *blocks0 = input;
-    uint32_t rest_len0 = input_len - blocks_len0;
-    uint8_t *rest0 = input + blocks_len0;
-    uint32_t blocks_n = blocks_n1;
-    uint32_t blocks_len = blocks_len0;
-    uint8_t *blocks = blocks0;
-    uint32_t rest_len = rest_len0;
-    uint8_t *rest = rest0;
-    Hacl_Hash_SHA1_legacy_update_multi(s, blocks, blocks_n);
-    Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
-    Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
-  }
+  blocks_len0 = blocks_n1 * (uint32_t)64U;
+  blocks0 = input;
+  rest_len0 = input_len - blocks_len0;
+  rest0 = input + blocks_len0;
+  blocks_n = blocks_n1;
+  blocks_len = blocks_len0;
+  blocks = blocks0;
+  rest_len = rest_len0;
+  rest = rest0;
+  Hacl_Hash_SHA1_legacy_update_multi(s, blocks, blocks_n);
+  Hacl_Hash_SHA1_legacy_update_last(s, (uint64_t)blocks_len, rest, rest_len);
+  Hacl_Hash_Core_SHA1_legacy_finish(s, dst);
 }
 
