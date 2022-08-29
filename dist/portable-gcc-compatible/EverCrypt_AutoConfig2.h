@@ -103,32 +103,6 @@ bool EverCrypt_AutoConfig2_has_avx512();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_has_avx512 */
 
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_vale */
-
-KRML_DEPRECATED("")
-
-bool EverCrypt_AutoConfig2_wants_vale();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_vale */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_hacl */
-
-bool EverCrypt_AutoConfig2_wants_hacl();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_hacl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_openssl */
-
-bool EverCrypt_AutoConfig2_wants_openssl();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_openssl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_wants_bcrypt */
-
-bool EverCrypt_AutoConfig2_wants_bcrypt();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_wants_bcrypt */
-
 /* SNIPPET_START: EverCrypt_AutoConfig2_recall */
 
 void EverCrypt_AutoConfig2_recall();
@@ -212,30 +186,6 @@ void EverCrypt_AutoConfig2_disable_rdrand();
 void EverCrypt_AutoConfig2_disable_avx512();
 
 /* SNIPPET_END: EverCrypt_AutoConfig2_disable_avx512 */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_vale */
-
-void EverCrypt_AutoConfig2_disable_vale();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_vale */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_hacl */
-
-void EverCrypt_AutoConfig2_disable_hacl();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_hacl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_openssl */
-
-void EverCrypt_AutoConfig2_disable_openssl();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_openssl */
-
-/* SNIPPET_START: EverCrypt_AutoConfig2_disable_bcrypt */
-
-void EverCrypt_AutoConfig2_disable_bcrypt();
-
-/* SNIPPET_END: EverCrypt_AutoConfig2_disable_bcrypt */
 
 /* SNIPPET_START: EverCrypt_AutoConfig2_has_vec128 */
 
