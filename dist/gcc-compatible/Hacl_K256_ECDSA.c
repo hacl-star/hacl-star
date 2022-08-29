@@ -882,6 +882,78 @@ bool Hacl_Impl_K256_Point_point_eq(uint64_t *p, uint64_t *q)
   return fmul_fmul_eq_vartime(py, qz, qy, pz);
 }
 
+static inline void scalar_split_lambda(uint64_t *r1, uint64_t *r2, uint64_t *k)
+{
+  uint64_t tmp1[4U] = { 0U };
+  uint64_t tmp2[4U] = { 0U };
+  tmp1[0U] = (uint64_t)0xe893209a45dbb031U;
+  tmp1[1U] = (uint64_t)0x3daa8a1471e8ca7fU;
+  tmp1[2U] = (uint64_t)0xe86c90e49284eb15U;
+  tmp1[3U] = (uint64_t)0x3086d221a7d46bcdU;
+  tmp2[0U] = (uint64_t)0x1571b4ae8ac47f71U;
+  tmp2[1U] = (uint64_t)0x221208ac9df506c6U;
+  tmp2[2U] = (uint64_t)0x6f547fa90abfe4c4U;
+  tmp2[3U] = (uint64_t)0xe4437ed6010e8828U;
+  qmul_shift_384(r1, k, tmp1);
+  qmul_shift_384(r2, k, tmp2);
+  tmp1[0U] = (uint64_t)0x6f547fa90abfe4c3U;
+  tmp1[1U] = (uint64_t)0xe4437ed6010e8828U;
+  tmp1[2U] = (uint64_t)0x0U;
+  tmp1[3U] = (uint64_t)0x0U;
+  tmp2[0U] = (uint64_t)0xd765cda83db1562cU;
+  tmp2[1U] = (uint64_t)0x8a280ac50774346dU;
+  tmp2[2U] = (uint64_t)0xfffffffffffffffeU;
+  tmp2[3U] = (uint64_t)0xffffffffffffffffU;
+  qmul(r1, r1, tmp1);
+  qmul(r2, r2, tmp2);
+  tmp1[0U] = (uint64_t)0xe0cfc810b51283cfU;
+  tmp1[1U] = (uint64_t)0xa880b9fc8ec739c2U;
+  tmp1[2U] = (uint64_t)0x5ad9e3fd77ed9ba4U;
+  tmp1[3U] = (uint64_t)0xac9c52b33fa3cf1fU;
+  qadd(r2, r1, r2);
+  qmul(tmp2, r2, tmp1);
+  qadd(r1, k, tmp2);
+}
+
+static inline void point_mul_lambda(uint64_t *res, uint64_t *p)
+{
+  uint64_t *rx = res;
+  uint64_t *ry = res + (uint32_t)5U;
+  uint64_t *rz = res + (uint32_t)10U;
+  uint64_t *px = p;
+  uint64_t *py = p + (uint32_t)5U;
+  uint64_t *pz = p + (uint32_t)10U;
+  uint64_t beta[5U] = { 0U };
+  beta[0U] = (uint64_t)0x96c28719501eeU;
+  beta[1U] = (uint64_t)0x7512f58995c13U;
+  beta[2U] = (uint64_t)0xc3434e99cf049U;
+  beta[3U] = (uint64_t)0x7106e64479eaU;
+  beta[4U] = (uint64_t)0x7ae96a2b657cU;
+  Hacl_K256_Field_fmul(rx, beta, px);
+  ry[0U] = py[0U];
+  ry[1U] = py[1U];
+  ry[2U] = py[2U];
+  ry[3U] = py[3U];
+  ry[4U] = py[4U];
+  rz[0U] = pz[0U];
+  rz[1U] = pz[1U];
+  rz[2U] = pz[2U];
+  rz[3U] = pz[3U];
+  rz[4U] = pz[4U];
+}
+
+static inline void point_mul_lambda_inplace(uint64_t *res)
+{
+  uint64_t *rx = res;
+  uint64_t beta[5U] = { 0U };
+  beta[0U] = (uint64_t)0x96c28719501eeU;
+  beta[1U] = (uint64_t)0x7512f58995c13U;
+  beta[2U] = (uint64_t)0xc3434e99cf049U;
+  beta[3U] = (uint64_t)0x7106e64479eaU;
+  beta[4U] = (uint64_t)0x7ae96a2b657cU;
+  Hacl_K256_Field_fmul(rx, beta, rx);
+}
+
 void Hacl_Impl_K256_PointDouble_point_double(uint64_t *out, uint64_t *p)
 {
   uint64_t tmp[25U] = { 0U };
@@ -977,78 +1049,6 @@ void Hacl_Impl_K256_PointAdd_point_add(uint64_t *out, uint64_t *p, uint64_t *q)
   Hacl_K256_Field_fmul(z3, z3, xy_pairs);
   Hacl_K256_Field_fadd(z3, tmp1, z3);
   Hacl_K256_Field_fnormalize_weak(z3, z3);
-}
-
-static inline void scalar_split_lambda(uint64_t *r1, uint64_t *r2, uint64_t *k)
-{
-  uint64_t tmp1[4U] = { 0U };
-  uint64_t tmp2[4U] = { 0U };
-  tmp1[0U] = (uint64_t)0xe893209a45dbb031U;
-  tmp1[1U] = (uint64_t)0x3daa8a1471e8ca7fU;
-  tmp1[2U] = (uint64_t)0xe86c90e49284eb15U;
-  tmp1[3U] = (uint64_t)0x3086d221a7d46bcdU;
-  tmp2[0U] = (uint64_t)0x1571b4ae8ac47f71U;
-  tmp2[1U] = (uint64_t)0x221208ac9df506c6U;
-  tmp2[2U] = (uint64_t)0x6f547fa90abfe4c4U;
-  tmp2[3U] = (uint64_t)0xe4437ed6010e8828U;
-  qmul_shift_384(r1, k, tmp1);
-  qmul_shift_384(r2, k, tmp2);
-  tmp1[0U] = (uint64_t)0x6f547fa90abfe4c3U;
-  tmp1[1U] = (uint64_t)0xe4437ed6010e8828U;
-  tmp1[2U] = (uint64_t)0x0U;
-  tmp1[3U] = (uint64_t)0x0U;
-  tmp2[0U] = (uint64_t)0xd765cda83db1562cU;
-  tmp2[1U] = (uint64_t)0x8a280ac50774346dU;
-  tmp2[2U] = (uint64_t)0xfffffffffffffffeU;
-  tmp2[3U] = (uint64_t)0xffffffffffffffffU;
-  qmul(r1, r1, tmp1);
-  qmul(r2, r2, tmp2);
-  tmp1[0U] = (uint64_t)0xe0cfc810b51283cfU;
-  tmp1[1U] = (uint64_t)0xa880b9fc8ec739c2U;
-  tmp1[2U] = (uint64_t)0x5ad9e3fd77ed9ba4U;
-  tmp1[3U] = (uint64_t)0xac9c52b33fa3cf1fU;
-  qadd(r2, r1, r2);
-  qmul(tmp2, r2, tmp1);
-  qadd(r1, k, tmp2);
-}
-
-static inline void point_mul_lambda(uint64_t *res, uint64_t *p)
-{
-  uint64_t *rx = res;
-  uint64_t *ry = res + (uint32_t)5U;
-  uint64_t *rz = res + (uint32_t)10U;
-  uint64_t *px = p;
-  uint64_t *py = p + (uint32_t)5U;
-  uint64_t *pz = p + (uint32_t)10U;
-  uint64_t beta[5U] = { 0U };
-  beta[0U] = (uint64_t)0x96c28719501eeU;
-  beta[1U] = (uint64_t)0x7512f58995c13U;
-  beta[2U] = (uint64_t)0xc3434e99cf049U;
-  beta[3U] = (uint64_t)0x7106e64479eaU;
-  beta[4U] = (uint64_t)0x7ae96a2b657cU;
-  Hacl_K256_Field_fmul(rx, beta, px);
-  ry[0U] = py[0U];
-  ry[1U] = py[1U];
-  ry[2U] = py[2U];
-  ry[3U] = py[3U];
-  ry[4U] = py[4U];
-  rz[0U] = pz[0U];
-  rz[1U] = pz[1U];
-  rz[2U] = pz[2U];
-  rz[3U] = pz[3U];
-  rz[4U] = pz[4U];
-}
-
-static inline void point_mul_lambda_inplace(uint64_t *res)
-{
-  uint64_t *rx = res;
-  uint64_t beta[5U] = { 0U };
-  beta[0U] = (uint64_t)0x96c28719501eeU;
-  beta[1U] = (uint64_t)0x7512f58995c13U;
-  beta[2U] = (uint64_t)0xc3434e99cf049U;
-  beta[3U] = (uint64_t)0x7106e64479eaU;
-  beta[4U] = (uint64_t)0x7ae96a2b657cU;
-  Hacl_K256_Field_fmul(rx, beta, rx);
 }
 
 void Hacl_Impl_K256_PointMul_make_point_at_inf(uint64_t *p)
@@ -1554,13 +1554,13 @@ Hacl_K256_ECDSA_ecdsa_verify_hashed_msg(uint8_t *m, uint8_t *public_key, uint8_t
   memcpy(y1, pk_y, (uint32_t)5U * sizeof (uint64_t));
   memset(z10, 0U, (uint32_t)5U * sizeof (uint64_t));
   z10[0U] = (uint64_t)1U;
-  uint64_t sinv1[4U] = { 0U };
-  uint64_t u11[4U] = { 0U };
-  uint64_t u21[4U] = { 0U };
-  qinv(sinv1, s_q);
-  qmul(u11, z, sinv1);
-  qmul(u21, r_q, sinv1);
-  point_mul_g_double_split_lambda_vartime(res, u11, u21, p);
+  uint64_t sinv[4U] = { 0U };
+  uint64_t u1[4U] = { 0U };
+  uint64_t u2[4U] = { 0U };
+  qinv(sinv, s_q);
+  qmul(u1, z, sinv);
+  qmul(u2, r_q, sinv);
+  point_mul_g_double_split_lambda_vartime(res, u1, u2, p);
   uint64_t tmp[5U] = { 0U };
   uint64_t *pz = res + (uint32_t)10U;
   Hacl_K256_Field_fnormalize(tmp, pz);

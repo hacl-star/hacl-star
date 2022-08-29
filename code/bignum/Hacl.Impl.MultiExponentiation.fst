@@ -10,7 +10,7 @@ open Lib.Buffer
 module ST = FStar.HyperStack.ST
 module Loops = Lib.LoopCombinators
 
-module SE = Spec.Exponentiation
+module S = Lib.Exponentiation
 module BD = Hacl.Bignum.Definitions
 module PT = Hacl.Impl.PrecompTable
 
@@ -58,7 +58,7 @@ let lexp_double_fw_f_st
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    SE.exp_double_fw_f #k.to.t_spec k.to.concr_ops
+    S.exp_double_fw_f #k.to.a_spec k.to.comm_monoid
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l) (v i) (k.to.refl (as_seq h0 acc)))
 
@@ -121,7 +121,7 @@ let lexp_double_fw_acc0_st
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    SE.exp_double_fw_acc0 #k.to.t_spec k.to.concr_ops
+    S.exp_double_fw_acc0 #k.to.a_spec k.to.comm_monoid
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l))
 
@@ -187,7 +187,7 @@ let lexp_double_fw_loop_st
     table_inv2 (as_seq h a2) (as_seq h table2))
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\ k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    Loops.repeati (v bBits / v l) (SE.exp_double_fw_f k.to.concr_ops (k.to.refl (as_seq h0 a1))
+    Loops.repeati (v bBits / v l) (S.exp_double_fw_f k.to.comm_monoid (k.to.refl (as_seq h0 a1))
       (v bBits) (BD.bn_v h0 b1) (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l)) (k.to.refl (as_seq h0 acc)))
 
 
@@ -209,9 +209,9 @@ let lexp_double_fw_loop #a_t len ctx_len k l table_len table_inv1 table_inv2 pow
   let h0 = ST.get () in
 
   [@ inline_let]
-  let refl1 i : GTot k.to.t_spec = k.to.refl (as_seq h0 acc) in
+  let refl1 i : GTot k.to.a_spec = k.to.refl (as_seq h0 acc) in
   [@inline_let]
-  let spec (h:mem) = SE.exp_double_fw_f k.to.concr_ops (k.to.refl (as_seq h0 a1))
+  let spec (h:mem) = S.exp_double_fw_f k.to.comm_monoid (k.to.refl (as_seq h0 a1))
     (v bBits) (BD.bn_v h0 b1) (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l) in
 
   [@inline_let]
@@ -359,7 +359,7 @@ let lexp_four_fw_f_st
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    SE.exp_four_fw_f #k.to.t_spec k.to.concr_ops
+    S.exp_four_fw_f #k.to.a_spec k.to.comm_monoid
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2)
       (k.to.refl (as_seq h0 a3)) (BD.bn_v h0 b3)
@@ -452,7 +452,7 @@ let lexp_four_fw_acc0_st
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    SE.exp_four_fw_acc0 #k.to.t_spec k.to.concr_ops
+    S.exp_four_fw_acc0 #k.to.a_spec k.to.comm_monoid
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2)
       (k.to.refl (as_seq h0 a3)) (BD.bn_v h0 b3)
@@ -551,7 +551,7 @@ let lexp_four_fw_loop_st
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
     Loops.repeati (v bBits / v l)
-      (SE.exp_four_fw_f k.to.concr_ops (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
+      (S.exp_four_fw_f k.to.comm_monoid (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
         (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2)
         (k.to.refl (as_seq h0 a3)) (BD.bn_v h0 b3)
         (k.to.refl (as_seq h0 a4)) (BD.bn_v h0 b4) (v l)) (k.to.refl (as_seq h0 acc)))
@@ -582,9 +582,9 @@ let lexp_four_fw_loop #a_t len ctx_len k l table_len table_inv1 table_inv2 table
   let h0 = ST.get () in
 
   [@ inline_let]
-  let refl1 i : GTot k.to.t_spec = k.to.refl (as_seq h0 acc) in
+  let refl1 i : GTot k.to.a_spec = k.to.refl (as_seq h0 acc) in
   [@inline_let]
-  let spec (h:mem) = SE.exp_four_fw_f k.to.concr_ops
+  let spec (h:mem) = S.exp_four_fw_f k.to.comm_monoid
     (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
     (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2)
     (k.to.refl (as_seq h0 a3)) (BD.bn_v h0 b3)
@@ -748,7 +748,7 @@ let lexp_four_fw_gen #a_t len ctx_len k l table_len lprecomp_get
   assert (
     k.to.linv (as_seq h3 res) /\
     k.to.refl (as_seq h3 res) ==
-    SE.exp_four_fw k.to.concr_ops
+    S.exp_four_fw k.to.comm_monoid
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2)
       (k.to.refl (as_seq h0 a3)) (BD.bn_v h0 b3)

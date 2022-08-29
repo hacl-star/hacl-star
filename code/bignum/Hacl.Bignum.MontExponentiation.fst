@@ -20,7 +20,6 @@ module BN = Hacl.Bignum
 module BM = Hacl.Bignum.Montgomery
 
 module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module E = Hacl.Spec.Exponentiation.Lemmas
 
@@ -31,12 +30,16 @@ module S = Hacl.Spec.Bignum.MontExponentiation
 // All operations are performed in the Montgomery domain!
 
 inline_for_extraction noextract
+let a_spec (#t:limb_t) (#len:SN.bn_len t) (n:BD.lbignum t len{0 < BD.bn_v n}) =
+  Lib.NatMod.nat_mod (BD.bn_v n)
+
+inline_for_extraction noextract
 let linv (#t:limb_t) (#len:SN.bn_len t) (n:BD.lbignum t len) (a:BD.lbignum t len) : Type0 =
   BD.bn_v a < BD.bn_v n
 
 inline_for_extraction noextract
-let refl (#t:limb_t) (#len:SN.bn_len t) (n:BD.lbignum t len) (a:BD.lbignum t len{linv n a}) : S.bn_mont_t n =
-  a
+let refl (#t:limb_t) (#len:SN.bn_len t) (n:BD.lbignum t len) (a:BD.lbignum t len{linv n a}) : a_spec n =
+  BD.bn_v a
 
 inline_for_extraction noextract
 let linv_ctx (#t:limb_t) (#len:SN.bn_len t) (n:BD.lbignum t len) (ctx:BD.lbignum t (len + len)) : Type0 =
@@ -47,15 +50,15 @@ let linv_ctx (#t:limb_t) (#len:SN.bn_len t) (n:BD.lbignum t len) (ctx:BD.lbignum
 
 
 inline_for_extraction noextract
-let mk_to_bn_mont_ll_concr_ops
+let mk_to_nat_mont_ll_comm_monoid
   (t:limb_t)
   (len:BN.meta_len t)
   (n:BD.lbignum t (v len))
   (mu:limb t{SM.bn_mont_pre n mu})
-  : BE.to_concrete_ops t len (len +! len) =
+  : BE.to_comm_monoid t len (len +! len) =
 {
-  BE.t_spec = S.bn_mont_t n;
-  BE.concr_ops = S.mk_bn_mont_concrete_ops n mu;
+  BE.a_spec = a_spec n;
+  BE.comm_monoid = E.mk_nat_mont_ll_comm_monoid (bits t) (v len) (BD.bn_v n) (v mu);
   BE.linv_ctx = linv_ctx n;
   BE.linv = linv n;
   BE.refl = refl n;
@@ -69,7 +72,7 @@ val bn_mont_one:
   -> n:Ghost.erased (BD.lbignum t (v k.BM.bn.BN.len))
   -> mu:limb t{SM.bn_mont_pre n mu} ->
   BE.lone_st t k.BM.bn.BN.len (k.BM.bn.BN.len +! k.BM.bn.BN.len)
-    (mk_to_bn_mont_ll_concr_ops t k.BM.bn.BN.len n mu)
+    (mk_to_nat_mont_ll_comm_monoid t k.BM.bn.BN.len n mu)
 
 let bn_mont_one #t k n mu ctx oneM =
   [@inline_let] let len = k.BM.bn.BN.len in
@@ -77,9 +80,7 @@ let bn_mont_one #t k n mu ctx oneM =
   let ctx_r2 = sub ctx len len in
   let h0 = ST.get () in
   SM.bn_mont_one_lemma n mu (as_seq h0 ctx_r2);
-  BM.bn_mont_one len k.BM.from ctx_n mu ctx_r2 oneM;
-  SM.bn_precomp_r2_mod_n_lemma 0 n;
-  BD.bn_eval_inj (v len) (SM.bn_precomp_r2_mod_n 0 n) (as_seq h0 ctx_r2)
+  BM.bn_mont_one len k.BM.from ctx_n mu ctx_r2 oneM
 
 
 inline_for_extraction noextract
@@ -89,7 +90,7 @@ val bn_mont_mul:
   -> n:Ghost.erased (BD.lbignum t (v k.BM.bn.BN.len))
   -> mu:limb t{SM.bn_mont_pre n mu} ->
   BE.lmul_st t k.BM.bn.BN.len (k.BM.bn.BN.len +! k.BM.bn.BN.len)
-    (mk_to_bn_mont_ll_concr_ops t k.BM.bn.BN.len n mu)
+    (mk_to_nat_mont_ll_comm_monoid t k.BM.bn.BN.len n mu)
 
 let bn_mont_mul #t k n mu ctx aM bM resM =
   let h0 = ST.get () in
@@ -105,7 +106,7 @@ val bn_mont_sqr:
   -> n:Ghost.erased (BD.lbignum t (v k.BM.bn.BN.len))
   -> mu:limb t{SM.bn_mont_pre n mu} ->
   BE.lsqr_st t k.BM.bn.BN.len (k.BM.bn.BN.len +! k.BM.bn.BN.len)
-    (mk_to_bn_mont_ll_concr_ops t k.BM.bn.BN.len n mu)
+    (mk_to_nat_mont_ll_comm_monoid t k.BM.bn.BN.len n mu)
 
 let bn_mont_sqr #t k n mu ctx aM resM =
   let h0 = ST.get () in
@@ -123,7 +124,7 @@ let mk_bn_mont_concrete_ops
   (mu:limb t{SM.bn_mont_pre n mu}) :
   BE.concrete_ops t k.BM.bn.BN.len (k.BM.bn.BN.len +! k.BM.bn.BN.len) =
 {
-  BE.to = mk_to_bn_mont_ll_concr_ops t k.BM.bn.BN.len n mu;
+  BE.to = mk_to_nat_mont_ll_comm_monoid t k.BM.bn.BN.len n mu;
   BE.lone = bn_mont_one k n mu;
   BE.lmul = bn_mont_mul k n mu;
   BE.lsqr = bn_mont_sqr k n mu;
@@ -211,7 +212,6 @@ let bn_exp_mont_bm_vartime #t k n mu r2 aM bBits b resM =
   mk_ctx #t len n r2 ctx;
 
   BE.lexp_rl_vartime len (len +! len) (mk_bn_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM;
-  SE.exp_rl_lemma (S.mk_bn_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b);
   LE.exp_rl_lemma k1 (bn_v h0 aM) (v bBits) (bn_v h0 b);
   pop_frame ()
 
@@ -229,7 +229,6 @@ let bn_exp_mont_bm_consttime #t k n mu r2 aM bBits b resM =
   mk_ctx #t len n r2 ctx;
 
   BE.lexp_mont_ladder_swap_consttime len (len +! len) (mk_bn_mont_concrete_ops t k (as_seq h0 n) mu) ctx aM bLen bBits b resM;
-  SE.exp_mont_ladder_swap_lemma (S.mk_bn_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b);
   LE.exp_mont_ladder_swap_lemma k1 (bn_v h0 aM) (v bBits) (bn_v h0 b);
   LE.exp_mont_ladder_lemma k1 (bn_v h0 aM) (v bBits) (bn_v h0 b);
   pop_frame ()
@@ -253,7 +252,6 @@ let bn_exp_mont_fw_vartime #t k l n mu r2 aM bBits b resM =
   mk_ctx #t len n r2 ctx;
 
   BE.lexp_fw_vartime len (len +! len) (mk_bn_mont_concrete_ops t k (as_seq h0 n) mu) l ctx aM bLen bBits b resM;
-  SE.exp_fw_lemma (S.mk_bn_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b) (v l);
   LE.exp_fw_lemma k1 (bn_v h0 aM) (v bBits) (bn_v h0 b) (v l);
   pop_frame ()
 
@@ -276,7 +274,6 @@ let bn_exp_mont_fw_consttime #t k l n mu r2 aM bBits b resM =
   mk_ctx #t len n r2 ctx;
 
   BE.lexp_fw_consttime len (len +! len) (mk_bn_mont_concrete_ops t k (as_seq h0 n) mu) l ctx aM bLen bBits b resM;
-  SE.exp_fw_lemma (S.mk_bn_mont_concrete_ops (as_seq h0 n) mu) (as_seq h0 aM) (v bBits) (bn_v h0 b) (v l);
   LE.exp_fw_lemma k1 (bn_v h0 aM) (v bBits) (bn_v h0 b) (v l);
   pop_frame ()
 

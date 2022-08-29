@@ -10,7 +10,7 @@ open Lib.Buffer
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 
-module SE = Spec.Exponentiation
+module S = Lib.Exponentiation
 module BD = Hacl.Bignum.Definitions
 module PT = Hacl.Impl.PrecompTable
 
@@ -43,7 +43,7 @@ val lexp_rl_vartime:
   (ensures  fun h0 _ h1 -> modifies (loc a |+| loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
     k.to.refl (as_seq h1 res) ==
-    SE.exp_rl #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
+    S.exp_rl #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
 
 
 // This function computes `a^b` using Montgomery's ladder (a binary method)
@@ -71,7 +71,7 @@ val lexp_mont_ladder_swap_consttime:
   (ensures  fun h0 _ h1 -> modifies (loc a |+| loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
     k.to.refl (as_seq h1 res) ==
-    SE.exp_mont_ladder_swap #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
+    S.exp_mont_ladder_swap #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b))
 
 
 // This function computes `a^(2^b)` and writes the result in `res`
@@ -91,7 +91,7 @@ val lexp_pow2:
     disjoint res ctx /\ disjoint a ctx /\ disjoint a res /\
     k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\ k.to.linv (as_seq h1 res) /\
-    k.to.refl (as_seq h1 res) == SE.exp_pow2 k.to.concr_ops (k.to.refl (as_seq h0 a)) (v b))
+    k.to.refl (as_seq h1 res) == S.exp_pow2 k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v b))
 
 
 // This function computes `a^(2^b)` and writes the result in `a`
@@ -109,7 +109,7 @@ val lexp_pow2_in_place:
     live h a /\ live h ctx /\ disjoint a ctx /\
     k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx))
   (ensures  fun h0 _ h1 -> modifies (loc a) h0 h1 /\ k.to.linv (as_seq h1 a) /\
-    k.to.refl (as_seq h1 a) == SE.exp_pow2 k.to.concr_ops (k.to.refl (as_seq h0 a)) (v b))
+    k.to.refl (as_seq h1 a) == S.exp_pow2 k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v b))
 
 
 // Fixed-window method using a precomputed table
@@ -151,7 +151,7 @@ let pow_a_to_small_b_st
     table_inv a (as_seq h table))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
-    k.to.refl (as_seq h1 res) == SE.pow k.to.concr_ops (k.to.refl a) (v b))
+    k.to.refl (as_seq h1 res) == S.pow k.to.comm_monoid (k.to.refl a) (v b))
 
 
 inline_for_extraction noextract
@@ -181,7 +181,7 @@ let lexp_fw_table_st
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
     k.to.refl (as_seq h1 res) ==
-    SE.exp_fw k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
+    S.exp_fw k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
 
 
 inline_for_extraction noextract
@@ -267,7 +267,7 @@ let lexp_fw_st
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
     k.to.refl (as_seq h1 res) ==
-    SE.exp_fw #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
+    S.exp_fw #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
 
 
 // This function computes `a^b` using a fixed-window method

@@ -8,13 +8,10 @@ open Lib.IntTypes
 open Lib.Buffer
 
 module ST = FStar.HyperStack.ST
-module B = LowStar.Buffer
-
 module LSeq = Lib.Sequence
 module Loops = Lib.LoopCombinators
 
-module LE = Lib.Exponentiation
-module SE = Spec.Exponentiation
+module S = Lib.Exponentiation
 
 module BD = Hacl.Bignum.Definitions
 module BN = Hacl.Bignum
@@ -29,11 +26,11 @@ let lexp_rl_vartime #a_t len ctx_len k ctx a bLen bBits b acc =
   let h0 = ST.get () in
 
   [@inline_let]
-  let refl1 i : GTot (k.to.t_spec & k.to.t_spec) =
+  let refl1 i : GTot (k.to.a_spec & k.to.a_spec) =
     (refl (as_seq h0 acc), refl (as_seq h0 a)) in
 
   [@inline_let]
-  let spec (h:mem) = SE.exp_rl_f k.to.concr_ops (v bBits) (BD.bn_v h0 b) in
+  let spec (h:mem) = S.exp_rl_f k.to.comm_monoid (v bBits) (BD.bn_v h0 b) in
 
   [@inline_let]
   let inv h (i:nat{i <= v bBits}) =
@@ -73,7 +70,7 @@ val cswap2:
   (ensures  fun h0 _ h1 -> modifies (loc p1 |+| loc p2) h0 h1 /\
     k.to.linv (as_seq h1 p1) /\ k.to.linv (as_seq h1 p2) /\
     (k.to.refl (as_seq h1 p1), k.to.refl (as_seq h1 p2)) ==
-    LE.cswap (v bit) (k.to.refl (as_seq h0 p1)) (k.to.refl (as_seq h0 p2)))
+    S.cswap (v bit) (k.to.refl (as_seq h0 p1)) (k.to.refl (as_seq h0 p2)))
 
 let cswap2 #a_t len ctx_len k bit p1 p2 =
   let h0 = ST.get () in
@@ -110,11 +107,11 @@ let lexp_mont_ladder_swap_consttime #a_t len ctx_len k ctx a bLen bBits b acc =
   let h0 = ST.get () in
 
   [@inline_let]
-  let refl1 i : GTot (k.to.t_spec & k.to.t_spec & nat) =
+  let refl1 i : GTot (k.to.a_spec & k.to.a_spec & nat) =
     (k.to.refl (as_seq h0 acc), k.to.refl (as_seq h0 a), v (LSeq.index (as_seq h0 sw) 0)) in
 
   [@inline_let]
-  let spec (h:mem) = SE.exp_mont_ladder_swap_f k.to.concr_ops (v bBits) (BD.bn_v h0 b) in
+  let spec (h:mem) = S.exp_mont_ladder_swap_f k.to.comm_monoid (v bBits) (BD.bn_v h0 b) in
 
   [@inline_let]
   let inv h (i:nat{i <= v bBits}) =
@@ -152,36 +149,40 @@ let lexp_pow2 #a_t len ctx_len k ctx a b res =
   copy res a;
   let h0 = ST.get () in
   [@ inline_let]
-  let refl1 i : GTot k.to.t_spec = k.to.refl (as_seq h0 res) in
+  let refl1 i : GTot k.to.a_spec = k.to.refl (as_seq h0 res) in
+  [@ inline_let]
+  let spec h0 = S.sqr k.to.comm_monoid in
 
   [@ inline_let]
   let inv h (i:nat{i <= v b}) =
     modifies (loc res) h0 h /\
     k.to.linv (as_seq h res) /\
-    k.to.refl (as_seq h res) == Loops.repeat i k.to.concr_ops.SE.sqr (refl1 0) in
+    k.to.refl (as_seq h res) == Loops.repeat i (spec h0) (refl1 0) in
 
-  Loops.eq_repeat0 k.to.concr_ops.SE.sqr (refl1 0);
+  Loops.eq_repeat0 (spec h0) (refl1 0);
   Lib.Loops.for 0ul b inv
   (fun j ->
-    Loops.unfold_repeat (v b) k.to.concr_ops.SE.sqr (refl1 0) (v j);
+    Loops.unfold_repeat (v b) (spec h0) (refl1 0) (v j);
     k.lsqr ctx res res)
 
 
 let lexp_pow2_in_place #a_t len ctx_len k ctx acc b =
   let h0 = ST.get () in
   [@ inline_let]
-  let refl1 i : GTot k.to.t_spec = k.to.refl (as_seq h0 acc) in
+  let refl1 i : GTot k.to.a_spec = k.to.refl (as_seq h0 acc) in
+  [@ inline_let]
+  let spec h0 = S.sqr k.to.comm_monoid in
 
   [@ inline_let]
   let inv h (i:nat{i <= v b}) =
     modifies (loc acc) h0 h /\
     k.to.linv (as_seq h acc) /\
-    k.to.refl (as_seq h acc) == Loops.repeat i k.to.concr_ops.SE.sqr (refl1 0) in
+    k.to.refl (as_seq h acc) == Loops.repeat i (spec h0) (refl1 0) in
 
-  Loops.eq_repeat0 k.to.concr_ops.SE.sqr (refl1 0);
+  Loops.eq_repeat0 (spec h0) (refl1 0);
   Lib.Loops.for 0ul b inv
   (fun j ->
-    Loops.unfold_repeat (v b) k.to.concr_ops.SE.sqr (refl1 0) (v j);
+    Loops.unfold_repeat (v b) (spec h0) (refl1 0) (v j);
     k.lsqr ctx acc acc)
 
 //---------------------------------------------------
@@ -200,7 +201,7 @@ val bn_get_bits_l:
   (requires fun h -> live h b /\
     BD.bn_v h b < pow2 (v bBits))
   (ensures  fun h0 r h1 -> h0 == h1 /\
-    v r == LE.get_bits_l (v bBits) (BD.bn_v h0 b) (v l) (v i))
+    v r == S.get_bits_l (v bBits) (BD.bn_v h0 b) (v l) (v i))
 
 let bn_get_bits_l #b_t bLen bBits b l i =
   assert (v (bBits -! bBits %. l) = v bBits - v bBits % v l);
@@ -279,7 +280,7 @@ let lmul_acc_pow_a_bits_l_st
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    SE.mul_acc_pow_a_bits_l #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a))
+    S.mul_acc_pow_a_bits_l #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a))
       (v bBits) (BD.bn_v h0 b) (v l) (v i) (k.to.refl (as_seq h0 acc)))
 
 
@@ -337,7 +338,7 @@ let lexp_fw_f_st
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    SE.exp_fw_f #k.to.t_spec k.to.concr_ops (k.to.refl (as_seq h0 a))
+    S.exp_fw_f #k.to.a_spec k.to.comm_monoid (k.to.refl (as_seq h0 a))
       (v bBits) (BD.bn_v h0 b) (v l) (v i) (k.to.refl (as_seq h0 acc)))
 
 
@@ -386,7 +387,7 @@ let lexp_fw_loop_st
     table_inv (as_seq h a) (as_seq h table))
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\ k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    Loops.repeati (v bBits / v l) (SE.exp_fw_f k.to.concr_ops (k.to.refl (as_seq h0 a))
+    Loops.repeati (v bBits / v l) (S.exp_fw_f k.to.comm_monoid (k.to.refl (as_seq h0 a))
       (v bBits) (BD.bn_v h0 b) (v l)) (k.to.refl (as_seq h0 acc)))
 
 
@@ -406,9 +407,9 @@ let lexp_fw_loop #a_t len ctx_len k l table_len table_inv pow_a_to_small_b ctx a
   let h0 = ST.get () in
 
   [@ inline_let]
-  let refl1 i : GTot k.to.t_spec = k.to.refl (as_seq h0 acc) in
+  let refl1 i : GTot k.to.a_spec = k.to.refl (as_seq h0 acc) in
   [@inline_let]
-  let spec (h:mem) = SE.exp_fw_f k.to.concr_ops (k.to.refl (as_seq h0 a))
+  let spec (h:mem) = S.exp_fw_f k.to.comm_monoid (k.to.refl (as_seq h0 a))
     (v bBits) (BD.bn_v h0 b) (v l) in
 
   [@inline_let]
@@ -453,7 +454,7 @@ let lexp_fw_acc0_st
   (ensures  fun h0 _ h1 -> modifies (loc acc) h0 h1 /\
     k.to.linv (as_seq h1 acc) /\
     k.to.refl (as_seq h1 acc) ==
-    SE.exp_fw_acc0 k.to.concr_ops (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
+    S.exp_fw_acc0 k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v bBits) (BD.bn_v h0 b) (v l))
 
 
 inline_for_extraction noextract

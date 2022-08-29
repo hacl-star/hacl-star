@@ -18,7 +18,7 @@ module Loops = Lib.LoopCombinators
 module BB = Hacl.Bignum.Base
 module BD = Hacl.Bignum.Definitions
 module PT = Hacl.Spec.PrecompTable
-module SE = Spec.Exponentiation
+module S = Lib.Exponentiation
 
 #reset-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
@@ -91,17 +91,20 @@ val lprecomp_table_mul:
     disjoint ti ctx /\ disjoint ti res /\ disjoint ctx res /\
     k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h ti) /\
-    k.to.refl (as_seq h ti) == SE.pow k.to.concr_ops (k.to.refl (as_seq h a)) (v i))
+    k.to.refl (as_seq h ti) == S.pow k.to.comm_monoid (k.to.refl (as_seq h a)) (v i))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
-    k.to.refl (as_seq h1 res) == SE.pow k.to.concr_ops (k.to.refl (as_seq h0 a)) (v i + 1))
+    k.to.refl (as_seq h1 res) == S.pow k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v i + 1))
 
 let lprecomp_table_mul #a_t len ctx_len k ctx a i ti res =
   let h0 = ST.get () in
   k.lmul ctx a ti res;
   let h1 = ST.get () in
-  assert (k.to.refl (as_seq h1 res) == k.to.concr_ops.SE.mul (k.to.refl (as_seq h0 a)) (k.to.refl (as_seq h0 ti)));
-  SE.pow_unfold k.to.concr_ops (k.to.refl (as_seq h0 a)) (v i + 1)
+  assert (k.to.refl (as_seq h1 res) ==
+    k.to.comm_monoid.S.mul (k.to.refl (as_seq h0 a)) (k.to.refl (as_seq h0 ti)));
+  k.to.comm_monoid.lemma_mul_comm (k.to.refl (as_seq h0 a)) (k.to.refl (as_seq h0 ti));
+  S.lemma_pow_add k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v i) 1;
+  S.lemma_pow1 k.to.comm_monoid (k.to.refl (as_seq h0 a))
 
 
 #push-options "--z3rlimit 150"
@@ -230,7 +233,7 @@ let lprecomp_table #a_t len ctx_len k ctx a table_len table =
   //B.modifies_buffer_elim (B.gsub #(uint_t a_t SEC) table 0ul len) (loc t1) h0 h1;
   LSeq.eq_intro (as_seq h0 t0) (as_seq h1 t0);
   assert (k.to.linv (as_seq h1 t0) /\ k.to.linv (as_seq h1 t1));
-  SE.pow_eq0 k.to.concr_ops (k.to.refl (as_seq h0 a));
+  S.lemma_pow0 k.to.comm_monoid (k.to.refl (as_seq h0 a));
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) 0);
 
   [@ inline_let]
@@ -256,7 +259,7 @@ let lprecomp_get_vartime #a_t len ctx_len k a table_len table bits_l tmp =
   let a_bits_l = sub table (bits_l32 *! len) len in
   let h1 = ST.get () in
   assert (precomp_table_inv len ctx_len k a table_len (as_seq h0 table) (v bits_l));
-  assert (k.to.refl (as_seq h1 a_bits_l) == SE.pow k.to.concr_ops (k.to.refl a) (v bits_l));
+  assert (k.to.refl (as_seq h1 a_bits_l) == S.pow k.to.comm_monoid (k.to.refl a) (v bits_l));
   copy tmp a_bits_l
 
 
@@ -267,4 +270,4 @@ let lprecomp_get_consttime #a_t len ctx_len k a table_len table bits_l tmp =
   let h1 = ST.get () in
   assert (as_seq h1 tmp == LSeq.sub (as_seq h0 table) (v bits_l * v len) (v len));
   assert (precomp_table_inv len ctx_len k a table_len (as_seq h0 table) (v bits_l));
-  assert (k.to.refl (as_seq h1 tmp) == SE.pow k.to.concr_ops (k.to.refl a) (v bits_l))
+  assert (k.to.refl (as_seq h1 tmp) == S.pow k.to.comm_monoid (k.to.refl a) (v bits_l))

@@ -7,9 +7,8 @@ open FStar.Mul
 open Lib.IntTypes
 open Lib.Buffer
 
-module B = LowStar.Buffer
 module ST = FStar.HyperStack.ST
-module SE = Spec.Exponentiation
+module S = Lib.Exponentiation
 module BD = Hacl.Bignum.Definitions
 
 open Hacl.Impl.Exponentiation
@@ -58,7 +57,7 @@ let lexp_double_fw_tables_st
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
     k.to.refl (as_seq h1 res) ==
-    SE.exp_double_fw k.to.concr_ops
+    S.exp_double_fw k.to.comm_monoid
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l))
 
@@ -111,7 +110,7 @@ let lexp_double_fw_st
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
     k.to.refl (as_seq h1 res) ==
-    SE.exp_double_fw #k.to.t_spec k.to.concr_ops
+    S.exp_double_fw #k.to.a_spec k.to.comm_monoid
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2) (v l))
 
@@ -199,7 +198,7 @@ let lexp_four_fw_tables_st
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
     k.to.refl (as_seq h1 res) ==
-    SE.exp_four_fw k.to.concr_ops
+    S.exp_four_fw k.to.comm_monoid
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2)
       (k.to.refl (as_seq h0 a3)) (BD.bn_v h0 b3)
@@ -274,7 +273,7 @@ let lexp_four_fw_st
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
     k.to.refl (as_seq h1 res) ==
-    SE.exp_four_fw k.to.concr_ops
+    S.exp_four_fw k.to.comm_monoid
       (k.to.refl (as_seq h0 a1)) (v bBits) (BD.bn_v h0 b1)
       (k.to.refl (as_seq h0 a2)) (BD.bn_v h0 b2)
       (k.to.refl (as_seq h0 a3)) (BD.bn_v h0 b3)

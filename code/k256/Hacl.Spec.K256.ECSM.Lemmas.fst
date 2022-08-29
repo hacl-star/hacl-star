@@ -104,35 +104,3 @@ let lemma_aff_point_mul_neg_modq a p =
     (==) { LS.aff_point_at_inf_lemma (aff_point_mul (a % S.q) p) }
     aff_point_mul (a % S.q) p;
   }
-
-//-----------------------------------
-
-(**
-    ECDSA-verify using ECSM in affine coordinates
-*)
-
-open Lib.Sequence
-open Lib.ByteSequence
-
-// TODO: a_spec = x:S.aff_point{S.is_on_curve x \/ S.is_aff_point_at_inf x}
-let aff_mk_to_k256_cm : SE.to_comm_monoid S.aff_point = {
-  SE.a_spec = S.aff_point;
-  SE.comm_monoid = S.mk_k256_comm_monoid;
-  SE.refl = (fun (x:S.aff_point) -> x);
-}
-
-val aff_point_at_inf_c: SE.one_st S.aff_point aff_mk_to_k256_cm
-let aff_point_at_inf_c _ = S.aff_point_at_inf
-
-val aff_point_add_c : SE.mul_st S.aff_point aff_mk_to_k256_cm
-let aff_point_add_c p q = S.aff_point_add p q
-
-val aff_point_double_c : SE.sqr_st S.aff_point aff_mk_to_k256_cm
-let aff_point_double_c p = S.aff_point_add p p
-
-let aff_mk_k256_concrete_ops : SE.concrete_ops S.aff_point = {
-  SE.to = aff_mk_to_k256_cm;
-  SE.one = aff_point_at_inf_c;
-  SE.mul = aff_point_add_c;
-  SE.sqr = aff_point_double_c;
-}

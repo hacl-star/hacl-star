@@ -12,7 +12,7 @@ open Lib.Buffer
 module ST = FStar.HyperStack.ST
 module LSeq = Lib.Sequence
 
-module SE = Spec.Exponentiation
+module S = Lib.Exponentiation
 module BD = Hacl.Bignum.Definitions
 
 include Hacl.Impl.Exponentiation.Definitions
@@ -52,7 +52,7 @@ let precomp_table_inv
   Math.Lemmas.lemma_mult_le_right (v len) (j + 1) (v table_len);
   let bj = LSeq.sub table (j * v len) (v len) in
   k.to.linv bj /\ k.to.linv a /\
-  k.to.refl bj == SE.pow k.to.concr_ops (k.to.refl a) j
+  k.to.refl bj == S.pow k.to.comm_monoid (k.to.refl a) j
 
 
 // This function computes [a^0 = one; a^1; a^2; ..; a^(table_len - 1)]
@@ -95,7 +95,7 @@ let lprecomp_get_st
       precomp_table_inv len ctx_len k a table_len (as_seq h table) j))
   (ensures  fun h0 _ h1 -> modifies (loc tmp) h0 h1 /\
     k.to.linv (as_seq h1 tmp) /\
-    k.to.refl (as_seq h1 tmp) == SE.pow k.to.concr_ops (k.to.refl a) (v bits_l))
+    k.to.refl (as_seq h1 tmp) == S.pow k.to.comm_monoid (k.to.refl a) (v bits_l))
 
 
 // This function returns table.[bits_l] = a^bits_l

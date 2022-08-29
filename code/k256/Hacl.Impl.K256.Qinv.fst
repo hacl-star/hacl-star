@@ -15,6 +15,7 @@ module LSeq = Lib.Sequence
 module S = Spec.K256
 module SI = Hacl.Spec.K256.Qinv
 
+module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module SD = Hacl.Spec.Bignum.Definitions
 
@@ -32,9 +33,9 @@ let refl (a:LSeq.lseq uint64 4{linv a}) : GTot S.qelem =
   SD.bn_v #U64 #4 a
 
 inline_for_extraction noextract
-let mk_to_k256_scalar_concrete_ops : BE.to_concrete_ops U64 4ul 0ul = {
-  BE.t_spec = S.qelem;
-  BE.concr_ops = SI.mk_nat_mod_concrete_ops;
+let mk_to_k256_scalar_comm_monoid : BE.to_comm_monoid U64 4ul 0ul = {
+  BE.a_spec = S.qelem;
+  BE.comm_monoid = SI.nat_mod_comm_monoid;
   BE.linv_ctx = linv_ctx;
   BE.linv = linv;
   BE.refl = refl;
@@ -42,23 +43,23 @@ let mk_to_k256_scalar_concrete_ops : BE.to_concrete_ops U64 4ul 0ul = {
 
 
 inline_for_extraction noextract
-val one_mod : BE.lone_st U64 4ul 0ul mk_to_k256_scalar_concrete_ops
+val one_mod : BE.lone_st U64 4ul 0ul mk_to_k256_scalar_comm_monoid
 let one_mod ctx one = make_u64_4 one (u64 1, u64 0, u64 0, u64 0)
 
 
 inline_for_extraction noextract
-val mul_mod : BE.lmul_st U64 4ul 0ul mk_to_k256_scalar_concrete_ops
+val mul_mod : BE.lmul_st U64 4ul 0ul mk_to_k256_scalar_comm_monoid
 let mul_mod ctx x y xy = qmul xy x y
 
 
 inline_for_extraction noextract
-val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_k256_scalar_concrete_ops
+val sqr_mod : BE.lsqr_st U64 4ul 0ul mk_to_k256_scalar_comm_monoid
 let sqr_mod ctx x xx = qsqr xx x
 
 
 inline_for_extraction noextract
 let mk_k256_scalar_concrete_ops : BE.concrete_ops U64 4ul 0ul = {
-  BE.to = mk_to_k256_scalar_concrete_ops;
+  BE.to = mk_to_k256_scalar_comm_monoid;
   BE.lone = one_mod;
   BE.lmul = mul_mod;
   BE.lsqr = sqr_mod;
@@ -73,6 +74,8 @@ val qsquare_times_in_place (out:qelem) (b:size_t) : Stack unit
 
 [@CInline]
 let qsquare_times_in_place out b =
+  let h0 = ST.get () in
+  SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (qas_nat h0 out) (v b);
   BE.lexp_pow2_in_place 4ul 0ul mk_k256_scalar_concrete_ops (null uint64) out b
 
 
@@ -85,6 +88,8 @@ val qsquare_times (out a:qelem) (b:size_t) : Stack unit
 
 [@CInline]
 let qsquare_times out a b =
+  let h0 = ST.get () in
+  SE.exp_pow2_lemma SI.mk_nat_mod_concrete_ops (qas_nat h0 a) (v b);
   BE.lexp_pow2 4ul 0ul mk_k256_scalar_concrete_ops (null uint64) a b out
 
 

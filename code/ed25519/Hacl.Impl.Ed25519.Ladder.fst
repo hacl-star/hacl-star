@@ -12,7 +12,6 @@ module F51 = Hacl.Impl.Ed25519.Field51
 
 module LSeq = Lib.Sequence
 module BSeq = Lib.ByteSequence
-module LE = Lib.Exponentiation
 module SE = Spec.Exponentiation
 module BE = Hacl.Impl.Exponentiation
 module ME = Hacl.Impl.MultiExponentiation
@@ -21,11 +20,14 @@ module BD = Hacl.Bignum.Definitions
 module BC = Hacl.Bignum.Convert
 module SC = Hacl.Spec.Bignum.Convert
 
+module S = Spec.Ed25519
+
 #set-options "--z3rlimit 50 --fuel 0 --ifuel 0"
 
 ////////////////////////////////////////////////////
+
 unfold
-let t_spec = Spec.Ed25519.ext_point_c
+let a_spec = S.aff_point_c
 
 unfold
 let lseq_as_felem (a:LSeq.lseq uint64 5) : GTot Hacl.Spec.Curve25519.Field51.Definition.felem5 =
@@ -37,7 +39,7 @@ let lseq_as_felem (a:LSeq.lseq uint64 5) : GTot Hacl.Spec.Curve25519.Field51.Def
   (s0, s1, s2, s3, s4)
 
 unfold
-let refl_ext_point (a:LSeq.lseq uint64 20) : GTot Spec.Ed25519.ext_point =
+let refl_ext_point (a:LSeq.lseq uint64 20) : GTot S.ext_point =
   let open Hacl.Spec.Curve25519.Field51.Definition in
   let x = feval (lseq_as_felem (LSeq.sub a 0 5)) in
   let y = feval (lseq_as_felem (LSeq.sub a 5 5)) in
@@ -47,7 +49,7 @@ let refl_ext_point (a:LSeq.lseq uint64 20) : GTot Spec.Ed25519.ext_point =
 
 unfold
 let inv_ext_point (a:LSeq.lseq uint64 20) : Type0 =
-  Spec.Ed25519.point_inv (refl_ext_point a)
+  S.point_inv (refl_ext_point a)
 
 
 unfold
@@ -61,17 +63,18 @@ let linv (a:LSeq.lseq uint64 20) : Type0 =
 
 
 unfold
-let refl (a:LSeq.lseq uint64 20{linv a}) : GTot t_spec =
-  refl_ext_point a
+let refl (a:LSeq.lseq uint64 20{linv a}) : GTot a_spec =
+  S.to_aff_point (refl_ext_point a)
+
 
 unfold
 let linv_ctx (a:LSeq.lseq uint64 0) : Type0 = True
 
 
 inline_for_extraction noextract
-let mk_to_ed25519_concrete_ops : BE.to_concrete_ops U64 20ul 0ul = {
-  BE.t_spec = t_spec;
-  BE.concr_ops = Spec.Ed25519.mk_ed25519_concrete_ops;
+let mk_to_ed25519_comm_monoid : BE.to_comm_monoid U64 20ul 0ul = {
+  BE.a_spec = a_spec;
+  BE.comm_monoid = S.mk_ed25519_comm_monoid;
   BE.linv_ctx = linv_ctx;
   BE.linv = linv;
   BE.refl = refl;
@@ -79,7 +82,7 @@ let mk_to_ed25519_concrete_ops : BE.to_concrete_ops U64 20ul 0ul = {
 
 
 inline_for_extraction noextract
-val point_add : BE.lmul_st U64 20ul 0ul mk_to_ed25519_concrete_ops
+val point_add : BE.lmul_st U64 20ul 0ul mk_to_ed25519_comm_monoid
 let point_add ctx x y xy =
   let h0 = ST.get () in
   Spec.Ed25519.Lemmas.to_aff_point_add_lemma (refl_ext_point (as_seq h0 x)) (refl_ext_point (as_seq h0 y));
@@ -87,7 +90,7 @@ let point_add ctx x y xy =
 
 
 inline_for_extraction noextract
-val point_double : BE.lsqr_st U64 20ul 0ul mk_to_ed25519_concrete_ops
+val point_double : BE.lsqr_st U64 20ul 0ul mk_to_ed25519_comm_monoid
 let point_double ctx x xx =
   let h0 = ST.get () in
   Spec.Ed25519.Lemmas.to_aff_point_double_lemma (refl_ext_point (as_seq h0 x));
@@ -100,7 +103,7 @@ val make_point_inf:
   (requires fun h -> live h b)
   (ensures  fun h0 _ h1 -> modifies (loc b) h0 h1 /\
     F51.point_inv_t h1 b /\ inv_ext_point (as_seq h1 b) /\
-    F51.point_eval h1 b == Spec.Ed25519.point_at_infinity)
+    S.to_aff_point (F51.point_eval h1 b) == S.aff_point_at_infinity)
 
 let make_point_inf b =
   let x = getx b in
@@ -112,18 +115,18 @@ let make_point_inf b =
   make_one z;
   make_zero t;
   let h1 = ST.get () in
-  assert (F51.point_eval h1 b == Spec.Ed25519.point_at_infinity);
+  assert (F51.point_eval h1 b == S.point_at_infinity);
   Spec.Ed25519.Lemmas.to_aff_point_at_infinity_lemma ()
 
 
 inline_for_extraction noextract
-val point_zero : BE.lone_st U64 20ul 0ul mk_to_ed25519_concrete_ops
+val point_zero : BE.lone_st U64 20ul 0ul mk_to_ed25519_comm_monoid
 let point_zero ctx one = make_point_inf one
 
 
 inline_for_extraction noextract
 let mk_ed25519_concrete_ops : BE.concrete_ops U64 20ul 0ul = {
-  BE.to = mk_to_ed25519_concrete_ops;
+  BE.to = mk_to_ed25519_comm_monoid;
   BE.lone = point_zero;
   BE.lmul = point_add;
   BE.lsqr = point_double;
@@ -138,7 +141,7 @@ val make_g:
   (requires fun h -> live h g)
   (ensures fun h0 _ h1 -> modifies (loc g) h0 h1 /\
     F51.point_inv_t h1 g /\
-    F51.point_eval h1 g == Spec.Ed25519.g)
+    F51.point_eval h1 g == S.g)
 
 let make_g g =
   let gx = getx g in
@@ -189,11 +192,13 @@ val point_mul:
     F51.point_inv_t h q /\ inv_ext_point (as_seq h q))
   (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
-    F51.point_eval h1 result ==
-    Spec.Ed25519.point_mul (as_seq h0 scalar) (F51.point_eval h0 q))
+    S.to_aff_point (F51.point_eval h1 result) ==
+    S.to_aff_point (S.point_mul (as_seq h0 scalar) (F51.point_eval h0 q)))
 
 let point_mul result scalar q =
   let h0 = ST.get () in
+  SE.exp_fw_lemma S.mk_ed25519_concrete_ops
+    (F51.point_eval h0 q) 256 (BSeq.nat_from_bytes_le (as_seq h0 scalar)) 4;
   push_frame ();
   let bscalar = create 4ul (u64 0) in
   convert_scalar scalar bscalar;
@@ -209,8 +214,8 @@ val point_mul_g:
     live h scalar /\ live h result /\ disjoint result scalar)
   (ensures  fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
-    F51.point_eval h1 result ==
-    Spec.Ed25519.point_mul_g (as_seq h0 scalar))
+    S.to_aff_point (F51.point_eval h1 result) ==
+    S.to_aff_point (S.point_mul_g (as_seq h0 scalar)))
 
 [@CInline]
 let point_mul_g result scalar =
@@ -239,14 +244,18 @@ val point_mul_double_vartime:
     F51.point_inv_t h q2 /\ inv_ext_point (as_seq h q2))
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
-    F51.point_eval h1 result ==
-    Spec.Ed25519.point_mul_double
+    S.to_aff_point (F51.point_eval h1 result) ==
+    S.to_aff_point (S.point_mul_double
       (as_seq h0 scalar1) (F51.point_eval h0 q1)
-      (as_seq h0 scalar2) (F51.point_eval h0 q2))
+      (as_seq h0 scalar2) (F51.point_eval h0 q2)))
 
 [@CInline]
 let point_mul_double_vartime result scalar1 q1 scalar2 q2 =
   let h0 = ST.get () in
+  SE.exp_double_fw_lemma S.mk_ed25519_concrete_ops
+    (F51.point_eval h0 q1) 256 (BSeq.nat_from_bytes_le (as_seq h0 scalar1))
+    (F51.point_eval h0 q2) (BSeq.nat_from_bytes_le (as_seq h0 scalar2)) 4;
+
   push_frame ();
   let bscalar1 = create 4ul (u64 0) in
   convert_scalar scalar1 bscalar1;
@@ -272,9 +281,9 @@ val point_mul_g_double_vartime:
     F51.point_inv_t h q2 /\ inv_ext_point (as_seq h q2))
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
-    F51.point_eval h1 result ==
-    Spec.Ed25519.point_mul_double_g
-      (as_seq h0 scalar1) (as_seq h0 scalar2) (F51.point_eval h0 q2))
+    S.to_aff_point (F51.point_eval h1 result) ==
+    S.to_aff_point (S.point_mul_double_g
+      (as_seq h0 scalar1) (as_seq h0 scalar2) (F51.point_eval h0 q2)))
 
 [@CInline]
 let point_mul_g_double_vartime result scalar1 scalar2 q2 =
@@ -299,9 +308,9 @@ val point_negate_mul_double_g_vartime:
     F51.point_inv_t h q2 /\ inv_ext_point (as_seq h q2))
   (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\
     F51.point_inv_t h1 result /\ inv_ext_point (as_seq h1 result) /\
-    F51.point_eval h1 result ==
-    Spec.Ed25519.point_negate_mul_double_g
-      (as_seq h0 scalar1) (as_seq h0 scalar2) (F51.point_eval h0 q2))
+    S.to_aff_point (F51.point_eval h1 result) ==
+    S.to_aff_point (S.point_negate_mul_double_g
+      (as_seq h0 scalar1) (as_seq h0 scalar2) (F51.point_eval h0 q2)))
 
 [@CInline]
 let point_negate_mul_double_g_vartime result scalar1 scalar2 q2 =

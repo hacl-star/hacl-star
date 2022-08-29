@@ -11,6 +11,7 @@ module ST = FStar.HyperStack.ST
 
 module S = Spec.K256
 module SG = Hacl.Spec.K256.GLV
+module SGL = Hacl.Spec.K256.GLV.Lemmas
 
 open Hacl.K256.Field
 open Hacl.K256.Scalar
@@ -232,3 +233,90 @@ let point_mul_lambda_inplace res =
   make_beta beta;
   fmul rx beta rx;
   pop_frame ()
+
+
+inline_for_extraction noextract
+val point_mul_lambda_and_split_lambda:
+  r1:qelem -> r2:qelem -> lambda_q:point -> scalar:qelem -> q:point -> Stack unit
+  (requires fun h ->
+    live h r1 /\ live h r2 /\ live h lambda_q /\ live h scalar /\ live h q /\
+    disjoint r1 r2 /\ disjoint r1 lambda_q /\ disjoint r1 scalar /\ disjoint r1 q /\
+    disjoint r2 lambda_q /\ disjoint r2 scalar /\ disjoint r2 q /\
+    disjoint lambda_q scalar /\ disjoint lambda_q q /\
+    point_inv h q /\ qas_nat h scalar < S.q)
+  (ensures fun h0 _ h1 -> modifies (loc r1 |+| loc r2 |+| loc lambda_q) h0 h1 /\
+    point_inv h1 lambda_q /\
+    point_eval h1 lambda_q == SG.point_mul_lambda (point_eval h0 q) /\
+   (let r1_s, r2_s = SG.scalar_split_lambda (qas_nat h0 scalar) in
+    qas_nat h1 r1 == r1_s /\ qas_nat h1 r2 == r2_s))
+
+let point_mul_lambda_and_split_lambda r1 r2 lambda_q scalar q =
+  scalar_split_lambda r1 r2 scalar; // (r1 + r2 * lambda) % S.q = scalar
+  point_mul_lambda lambda_q q // lambda_q = [lambda]Q
+
+
+inline_for_extraction noextract
+val point_negate_conditional_vartime: p:point -> is_negate:bool -> Stack unit
+  (requires fun h -> live h p /\ point_inv h p)
+  (ensures  fun h0 _ h1 -> modifies (loc p) h0 h1 /\
+    point_inv h1 p /\
+    point_eval h1 p == SG.point_negate_cond (point_eval h0 p) is_negate)
+
+let point_negate_conditional_vartime p is_negate =
+  if is_negate then point_negate p p
+
+
+inline_for_extraction noextract
+val negate_point_and_scalar_cond_vartime: k:qelem -> p:point -> Stack bool
+  (requires fun h ->
+    live h k /\ live h p /\ disjoint k p /\
+    qas_nat h k < S.q /\ point_inv h p)
+  (ensures  fun h0 b h1 -> modifies (loc k |+| loc p) h0 h1 /\
+    b == S.scalar_is_high (qas_nat h0 k) /\ point_inv h1 p /\
+    (let k_s, p_s = SG.negate_point_and_scalar_cond (qas_nat h0 k) (point_eval h0 p) in
+    qas_nat h1 k == k_s /\ point_eval h1 p == p_s))
+
+let negate_point_and_scalar_cond_vartime k p =
+  let b = is_qelem_le_q_halved_vartime k in
+  [@inline_let] let if_high = not b in
+  qnegate_conditional_vartime k if_high;
+  point_negate_conditional_vartime p if_high;
+  if_high
+
+
+inline_for_extraction noextract
+val ecmult_endo_split:
+    r1:qelem -> r2:qelem
+  -> q1:point -> q2:point
+  -> scalar:qelem -> q:point -> Stack (bool & bool)
+  (requires fun h ->
+    live h r1 /\ live h r2 /\ live h q1 /\
+    live h q2 /\ live h scalar /\ live h q /\
+    disjoint r1 r2 /\ disjoint r1 q1 /\ disjoint r1 q2 /\
+    disjoint r1 scalar /\ disjoint r1 q /\ disjoint r2 q1 /\
+    disjoint r2 q2 /\ disjoint r2 scalar /\ disjoint r2 q /\
+    disjoint q1 q2 /\ disjoint q1 scalar /\ disjoint q1 q /\
+    disjoint q2 scalar /\ disjoint q2 q /\
+    point_inv h q /\ qas_nat h scalar < S.q)
+  (ensures fun h0 (is_high1, is_high2) h1 ->
+    modifies (loc r1 |+| loc r2 |+| loc q1 |+| loc q2) h0 h1 /\
+    point_inv h1 q1 /\ point_inv h1 q2 /\
+   (let r1_s0, r2_s0 = SG.scalar_split_lambda (qas_nat h0 scalar) in
+    let r1_s, q1_s, r2_s, q2_s = SG.ecmult_endo_split (qas_nat h0 scalar) (point_eval h0 q) in
+    qas_nat h1 r1 == r1_s /\ r1_s < pow2 128 /\
+    qas_nat h1 r2 == r2_s /\ r2_s < pow2 128 /\
+    point_eval h1 q1 == q1_s /\ point_eval h1 q2 == q2_s /\
+    is_high1 == S.scalar_is_high r1_s0 /\
+    is_high2 == S.scalar_is_high r2_s0))
+
+let ecmult_endo_split r1 r2 q1 q2 scalar q =
+  let h0 = ST.get () in
+  // modifies r1, r2, q2 s.t. r1 + r2 * lambda = scalar /\ q2 = [lambda]q
+  point_mul_lambda_and_split_lambda r1 r2 q2 scalar q;
+  copy q1 q; // q1 = q
+  // modifies r1, q1
+  let is_high1 = negate_point_and_scalar_cond_vartime r1 q1 in
+  // modifies r2, q2
+  let is_high2 = negate_point_and_scalar_cond_vartime r2 q2 in
+  SGL.lemma_scalar_split_lambda_fits (qas_nat h0 scalar) (point_eval h0 q);
+  is_high1, is_high2

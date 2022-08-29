@@ -418,7 +418,7 @@ let lemma_ecmult_endo_split_to_aff k p =
 let aff_proj_point_mul_split_lambda (k:S.qelem) (p:S.proj_point) : S.aff_point =
   let r1, p1, r2, p2 = ecmult_endo_split k p in
   lemma_scalar_split_lambda_fits k p;
-  SE.exp_double_fw SM.aff_mk_k256_concrete_ops (S.to_aff_point p1) 128 r1 (S.to_aff_point p2) r2 4
+  LE.exp_double_fw S.mk_k256_comm_monoid (S.to_aff_point p1) 128 r1 (S.to_aff_point p2) r2 4
 
 
 val lemma_aff_proj_point_mul_split_lambda: k:S.qelem -> p:S.proj_point ->
@@ -433,9 +433,7 @@ let lemma_aff_proj_point_mul_split_lambda k p =
   let p2_aff = S.to_aff_point p2 in
   calc (==) {
     aff_proj_point_mul_split_lambda k p;
-    (==) {
-      SE.exp_double_fw_lemma SM.aff_mk_k256_concrete_ops p1_aff 128 r1 p2_aff r2 4;
-      LE.exp_double_fw_lemma S.mk_k256_comm_monoid p1_aff 128 r1 p2_aff r2 4 }
+    (==) { LE.exp_double_fw_lemma S.mk_k256_comm_monoid p1_aff 128 r1 p2_aff r2 4 }
     S.aff_point_add (aff_point_mul r1 p1_aff) (aff_point_mul r2 p2_aff);
     (==) { lemma_aff_point_mul_endo_split k p_aff; lemma_ecmult_endo_split_to_aff k p }
     aff_point_mul k p_aff;
@@ -455,7 +453,7 @@ let aff_proj_point_mul_double_split_lambda
   let r21, p21, r22, p22 = ecmult_endo_split k2 p2 in
   lemma_scalar_split_lambda_fits k1 p1;
   lemma_scalar_split_lambda_fits k2 p2;
-  SE.exp_four_fw SM.aff_mk_k256_concrete_ops
+  LE.exp_four_fw S.mk_k256_comm_monoid
     (S.to_aff_point p11) 128 r11 (S.to_aff_point p12) r12
     (S.to_aff_point p21) r21 (S.to_aff_point p22) r22 4
 
@@ -481,8 +479,6 @@ let lemma_aff_proj_point_mul_double_split_lambda k1 p1 k2 p2 =
   calc (==) {
     aff_proj_point_mul_double_split_lambda k1 p1 k2 p2;
   (==) {
-    SE.exp_four_fw_lemma SM.aff_mk_k256_concrete_ops
-      p11_aff 128 r11 p12_aff r12 p21_aff r21 p22_aff r22 4;
     LE.exp_four_fw_lemma S.mk_k256_comm_monoid
       p11_aff 128 r11 p12_aff r12 p21_aff r21 p22_aff r22 4 }
     S.aff_point_add
@@ -505,39 +501,37 @@ let lemma_aff_proj_point_mul_double_split_lambda k1 p1 k2 p2 =
 //-----------------------------------
 
 // [k]P or -[k]P = [k](-P)
-val aff_point_negate_cond_pow_lemma: is_negate:bool -> p:S.proj_point -> k:nat ->
-  Lemma (let co = SM.aff_mk_k256_concrete_ops in
-    aff_point_negate_cond (SE.pow co (S.to_aff_point p) k) is_negate ==
-    SE.pow co (S.to_aff_point (point_negate_cond p is_negate)) k)
+val aff_point_negate_cond_pow_lemma: is_negate:bool -> p:S.proj_point -> k:nat -> Lemma
+  (aff_point_negate_cond (S.to_aff_point (SE.pow S.mk_k256_concrete_ops p k)) is_negate ==
+   LE.pow S.mk_k256_comm_monoid (S.to_aff_point (point_negate_cond p is_negate)) k)
 
 let aff_point_negate_cond_pow_lemma is_negate p k =
-  let co = SM.aff_mk_k256_concrete_ops in
+  let co = S.mk_k256_concrete_ops in
   let cm = S.mk_k256_comm_monoid in
   let p_aff = S.to_aff_point p in
 
   if is_negate then
     calc (==) {
-      S.aff_point_negate (SE.pow co p_aff k);
-      (==) { SE.pow_lemma co p_aff k }
+      S.aff_point_negate (S.to_aff_point (SE.pow co p k));
+      (==) { SE.pow_lemma co p k }
       S.aff_point_negate (LE.pow cm p_aff k);
       (==) { LE.lemma_inverse_pow S.mk_k256_abelian_group p_aff k }
       LE.pow cm (S.aff_point_negate p_aff) k;
-      (==) { SE.pow_lemma co (S.aff_point_negate p_aff) k }
-      SE.pow co (S.aff_point_negate p_aff) k;
       (==) { LS.to_aff_point_negate_lemma p }
-      SE.pow co (S.to_aff_point (S.point_negate p)) k;
+      LE.pow cm (S.to_aff_point (S.point_negate p)) k;
     }
-  else ()
+  else
+    SE.pow_lemma S.mk_k256_concrete_ops p k
 
 
 // [k]([lambda]P) = [lambda]([k]P) or [k](-[lambda]P) = [lambda](-[k]P)
 val aff_point_negate_cond_lambda_pow_lemma: is_negate:bool -> p:S.proj_point -> k:nat ->
-  Lemma (let co = SM.aff_mk_k256_concrete_ops in
-    aff_point_mul lambda (aff_point_negate_cond (SE.pow co (S.to_aff_point p) k) is_negate) ==
-    SE.pow co (S.to_aff_point (point_negate_cond (point_mul_lambda p) is_negate)) k)
+  Lemma (let co = S.mk_k256_concrete_ops in let cm = S.mk_k256_comm_monoid in
+    aff_point_mul lambda (aff_point_negate_cond (S.to_aff_point (SE.pow co p k)) is_negate) ==
+    LE.pow cm (S.to_aff_point (point_negate_cond (point_mul_lambda p) is_negate)) k)
 
 let aff_point_negate_cond_lambda_pow_lemma is_negate p k =
-  let co = SM.aff_mk_k256_concrete_ops in
+  let co = S.mk_k256_concrete_ops in
   let cm = S.mk_k256_comm_monoid in
   let ag = S.mk_k256_abelian_group in
   let p_aff = S.to_aff_point p in
@@ -546,8 +540,8 @@ let aff_point_negate_cond_lambda_pow_lemma is_negate p k =
 
   if is_negate then
     calc (==) {
-      aff_point_mul lambda (S.aff_point_negate (SE.pow co p_aff k));
-      (==) { SE.pow_lemma co p_aff k }
+      aff_point_mul lambda (S.aff_point_negate (S.to_aff_point (SE.pow co p k)));
+      (==) { SE.pow_lemma co p k }
       aff_point_mul lambda (S.aff_point_negate (LE.pow cm p_aff k));
       (==) { LE.lemma_inverse_pow ag (LE.pow cm p_aff k) lambda }
       S.aff_point_negate (LE.pow cm (LE.pow cm p_aff k) lambda);
@@ -561,13 +555,11 @@ let aff_point_negate_cond_lambda_pow_lemma is_negate p k =
       LE.pow cm (S.aff_point_negate (S.to_aff_point p_lambda)) k;
       (==) { LS.to_aff_point_negate_lemma p_lambda }
       LE.pow cm (S.to_aff_point (S.point_negate p_lambda)) k;
-      (==) { SE.pow_lemma co (S.to_aff_point (S.point_negate p_lambda)) k }
-      SE.pow co (S.to_aff_point (S.point_negate p_lambda)) k;
     }
   else
     calc (==) {
-      aff_point_mul lambda (SE.pow co p_aff k);
-      (==) { SE.pow_lemma co p_aff k }
+      aff_point_mul lambda (S.to_aff_point (SE.pow co p k));
+      (==) { SE.pow_lemma co p k }
       aff_point_mul lambda (LE.pow cm p_aff k);
       (==) { LE.lemma_pow_mul cm p_aff k lambda }
       LE.pow cm p_aff (k * lambda);
@@ -575,6 +567,4 @@ let aff_point_negate_cond_lambda_pow_lemma is_negate p k =
       LE.pow cm (LE.pow cm p_aff lambda) k;
       (==) { lemma_glv p }
       LE.pow cm p_lambda_aff k;
-      (==) { SE.pow_lemma co p_lambda_aff k }
-      SE.pow co p_lambda_aff k;
     }
