@@ -64,7 +64,7 @@ val lprecomp_table:
   -> k:concrete_ops a_t len ctx_len
   -> ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
+  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len % 2 = 0}
   -> table:lbuffer (uint_t a_t SEC) (table_len *! len) ->
   Stack unit
   (requires fun h ->

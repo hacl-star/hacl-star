@@ -91,10 +91,10 @@ val lprecomp_table_mul:
     disjoint ti ctx /\ disjoint ti res /\ disjoint ctx res /\
     k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
     k.to.linv (as_seq h ti) /\
-    k.to.refl (as_seq h ti) == S.pow k.to.comm_monoid (k.to.refl (as_seq h a)) (v i + 1))
+    k.to.refl (as_seq h ti) == S.pow k.to.comm_monoid (k.to.refl (as_seq h a)) (2 * v i + 2))
   (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
     k.to.linv (as_seq h1 res) /\
-    k.to.refl (as_seq h1 res) == S.pow k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v i + 2))
+    k.to.refl (as_seq h1 res) == S.pow k.to.comm_monoid (k.to.refl (as_seq h0 a)) (2 * v i + 3))
 
 let lprecomp_table_mul #a_t len ctx_len k ctx a i ti res =
   let h0 = ST.get () in
@@ -103,8 +103,40 @@ let lprecomp_table_mul #a_t len ctx_len k ctx a i ti res =
   assert (k.to.refl (as_seq h1 res) ==
     k.to.comm_monoid.S.mul (k.to.refl (as_seq h0 a)) (k.to.refl (as_seq h0 ti)));
   k.to.comm_monoid.lemma_mul_comm (k.to.refl (as_seq h0 a)) (k.to.refl (as_seq h0 ti));
-  S.lemma_pow_add k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v i + 1) 1;
+  S.lemma_pow_add k.to.comm_monoid (k.to.refl (as_seq h0 a)) (2 * v i + 2) 1;
   S.lemma_pow1 k.to.comm_monoid (k.to.refl (as_seq h0 a))
+
+
+inline_for_extraction noextract
+val lprecomp_table_sqr:
+    #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len
+  -> ctx:lbuffer (uint_t a_t SEC) ctx_len
+  -> a:lbuffer (uint_t a_t SEC) len
+  -> i:size_t
+  -> ti:lbuffer (uint_t a_t SEC) len
+  -> res:lbuffer (uint_t a_t SEC) len ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h ti /\ live h ctx /\ live h res /\
+    disjoint a ti /\ disjoint a ctx /\ disjoint a res /\
+    disjoint ti ctx /\ disjoint ti res /\ disjoint ctx res /\
+    k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
+    k.to.linv (as_seq h ti) /\
+    k.to.refl (as_seq h ti) == S.pow k.to.comm_monoid (k.to.refl (as_seq h a)) (v i + 1))
+  (ensures  fun h0 _ h1 -> modifies (loc res) h0 h1 /\
+    k.to.linv (as_seq h1 res) /\
+    k.to.refl (as_seq h1 res) == S.pow k.to.comm_monoid (k.to.refl (as_seq h0 a)) (2 * v i + 2))
+
+let lprecomp_table_sqr #a_t len ctx_len k ctx a i ti res =
+  let h0 = ST.get () in
+  k.lsqr ctx ti res;
+  let h1 = ST.get () in
+  assert (k.to.refl (as_seq h1 res) ==
+    k.to.comm_monoid.S.mul (k.to.refl (as_seq h0 ti)) (k.to.refl (as_seq h0 ti)));
+  S.lemma_pow_add k.to.comm_monoid (k.to.refl (as_seq h0 a)) (v i + 1) (v i + 1)
 
 
 #push-options "--z3rlimit 150"
@@ -175,6 +207,123 @@ let precomp_table_inv_lemma #a_t len ctx_len k a table_len table1 table2 i =
 
 
 inline_for_extraction noextract
+val lprecomp_table_f_sqr:
+    #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len
+  -> ctx:lbuffer (uint_t a_t SEC) ctx_len
+  -> a:lbuffer (uint_t a_t SEC) len
+  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len % 2 = 0}
+  -> i:size_t{v i < (v table_len - 2) / 2}
+  -> table:lbuffer (uint_t a_t SEC) (table_len *! len) ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h table /\ live h ctx /\
+    disjoint a table /\ disjoint ctx table /\ disjoint a ctx /\
+    k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
+    (forall (j:nat{j <= 2 * v i + 1}).
+      precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
+  (ensures  fun h0 _ h1 -> modifies (loc table) h0 h1 /\
+    (forall (j:nat{j <= 2 * v i + 2}).
+      precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j))
+
+#push-options "--z3rlimit 300"
+let lprecomp_table_f_sqr #a_t len ctx_len k ctx a table_len i table =
+  Math.Lemmas.lemma_mult_le_right (v len) (v i + 1) (v table_len);
+  Math.Lemmas.lemma_mult_le_right (v len) (v i + 2) (v table_len);
+  Math.Lemmas.lemma_mult_le_right (v len) (2 * v i + 2) (v table_len);
+  Math.Lemmas.lemma_mult_le_right (v len) (2 * v i + 3) (v table_len);
+
+  assert (v ((i +! 1ul) *! len) == (v i + 1) * v len);
+  assert (v ((2ul *! i +! 2ul) *! len) == (2 * v i + 2) * v len);
+
+  let t1 = sub table ((i +! 1ul) *! len) len in
+  let t2 = sub table ((2ul *! i +! 2ul) *! len) len in
+
+  let h0 = ST.get () in
+  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v i + 1));
+  lprecomp_table_sqr len ctx_len k ctx a i t1 t2;
+  let h1 = ST.get () in
+  assert (precomp_table_inv len ctx_len k
+    (as_seq h0 a) table_len (as_seq h1 table) (2 * v i + 2));
+
+  assert (v ((2ul *! i +! 1ul) *! len) == (2 * v i + 1) * v len);
+  B.modifies_buffer_elim
+    (B.gsub #(uint_t a_t SEC) table 0ul ((2ul *! i +! 1ul) *! len)) (loc t2) h0 h1;
+  LSeq.eq_intro
+    (LSeq.sub (as_seq h0 table) 0 ((2 * v i + 1) * v len))
+    (LSeq.sub (as_seq h1 table) 0 ((2 * v i + 1) * v len));
+
+  assert (forall (j:nat{j <= 2 * v i + 1}).
+    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) j);
+  precomp_table_inv_lemma len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (as_seq h1 table) (2 * v i + 1);
+  assert (forall (j:nat{j <= 2 * v i + 1}).
+    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j);
+  assert (forall (j:nat{j <= 2 * v i + 2}).
+    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j)
+#pop-options
+
+
+inline_for_extraction noextract
+val lprecomp_table_f_mul:
+    #a_t:inttype_a
+  -> len:size_t{v len > 0}
+  -> ctx_len:size_t
+  -> k:concrete_ops a_t len ctx_len
+  -> ctx:lbuffer (uint_t a_t SEC) ctx_len
+  -> a:lbuffer (uint_t a_t SEC) len
+  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len % 2 = 0}
+  -> i:size_t{v i < (v table_len - 2) / 2}
+  -> table:lbuffer (uint_t a_t SEC) (table_len *! len) ->
+  Stack unit
+  (requires fun h ->
+    live h a /\ live h table /\ live h ctx /\
+    disjoint a table /\ disjoint ctx table /\ disjoint a ctx /\
+    k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
+    (forall (j:nat{j <= 2 * v i + 2}).
+      precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
+  (ensures  fun h0 _ h1 -> modifies (loc table) h0 h1 /\
+    (forall (j:nat{j <= 2 * v i + 3}).
+      precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j))
+
+#push-options "--z3rlimit 300"
+let lprecomp_table_f_mul #a_t len ctx_len k ctx a table_len i table =
+  Math.Lemmas.lemma_mult_le_right (v len) (2 * v i + 2) (v table_len);
+  Math.Lemmas.lemma_mult_le_right (v len) (2 * v i + 3) (v table_len);
+  Math.Lemmas.lemma_mult_le_right (v len) (2 * v i + 4) (v table_len);
+
+  assert (v ((2ul *! i +! 2ul) *! len) == (2 * v i + 2) * v len);
+  assert (v ((2ul *! i +! 3ul) *! len) == (2 * v i + 3) * v len);
+
+  let t2 = sub table ((2ul *! i +! 2ul) *! len) len in
+  let t3 = sub table ((2ul *! i +! 3ul) *! len) len in
+
+  let h0 = ST.get () in
+  assert (precomp_table_inv len ctx_len k
+    (as_seq h0 a) table_len (as_seq h0 table) (2 * v i + 2));
+  lprecomp_table_mul len ctx_len k ctx a i t2 t3;
+  let h1 = ST.get () in
+  assert (precomp_table_inv len ctx_len k
+    (as_seq h0 a) table_len (as_seq h1 table) (2 * v i + 3));
+
+  B.modifies_buffer_elim
+    (B.gsub #(uint_t a_t SEC) table 0ul ((2ul *! i +! 2ul) *! len)) (loc t3) h0 h1;
+  LSeq.eq_intro
+    (LSeq.sub (as_seq h0 table) 0 ((2 * v i + 2) * v len))
+    (LSeq.sub (as_seq h1 table) 0 ((2 * v i + 2) * v len));
+
+  assert (forall (j:nat{j <= 2 * v i + 2}).
+    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) j);
+  precomp_table_inv_lemma len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (as_seq h1 table) (2 * v i + 2);
+  assert (forall (j:nat{j <= 2 * v i + 2}).
+    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j);
+  assert (forall (j:nat{j <= 2 * v i + 3}).
+    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j)
+#pop-options
+
+
+inline_for_extraction noextract
 val lprecomp_table_f:
     #a_t:inttype_a
   -> len:size_t{v len > 0}
@@ -182,45 +331,23 @@ val lprecomp_table_f:
   -> k:concrete_ops a_t len ctx_len
   -> ctx:lbuffer (uint_t a_t SEC) ctx_len
   -> a:lbuffer (uint_t a_t SEC) len
-  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t}
-  -> i:size_t{v i < v table_len - 2}
+  -> table_len:size_t{1 < v table_len /\ v table_len * v len <= max_size_t /\ v table_len % 2 = 0}
+  -> i:size_t{v i < (v table_len - 2) / 2}
   -> table:lbuffer (uint_t a_t SEC) (table_len *! len) ->
   Stack unit
   (requires fun h ->
     live h a /\ live h table /\ live h ctx /\
     disjoint a table /\ disjoint ctx table /\ disjoint a ctx /\
     k.to.linv (as_seq h a) /\ k.to.linv_ctx (as_seq h ctx) /\
-    (forall (j:nat{j <= v i + 1}).
+    (forall (j:nat{j <= 2 * v i + 1}).
       precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j))
   (ensures  fun h0 _ h1 -> modifies (loc table) h0 h1 /\
-    (forall (j:nat{j <= v i + 2}).
+    (forall (j:nat{j <= 2 * v i + 3}).
       precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j))
 
-#push-options "--z3rlimit 300"
 let lprecomp_table_f #a_t len ctx_len k ctx a table_len i table =
-  Math.Lemmas.lemma_mult_le_right (v len) (v i + 2) (v table_len);
-  Math.Lemmas.lemma_mult_le_right (v len) (v i + 3) (v table_len);
-  assert (v ((i +! 1ul) *! len) == (v i + 1) * v len);
-  assert (v ((i +! 2ul) *! len) == (v i + 2) * v len);
-
-  let h0 = ST.get () in
-  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (v i + 1));
-  let t1 = sub table ((i +! 1ul) *! len) len in
-  let t2 = sub table ((i +! 2ul) *! len) len in
-  lprecomp_table_mul len ctx_len k ctx a i t1 t2;
-  let h1 = ST.get () in
-  B.modifies_buffer_elim (B.gsub #(uint_t a_t SEC) table 0ul ((i +! 2ul) *! len)) (loc t2) h0 h1;
-  assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) (v i + 2));
-  LSeq.eq_intro
-    (LSeq.sub (as_seq h0 table) 0 ((v i + 2) * v len))
-    (LSeq.sub (as_seq h1 table) 0 ((v i + 2) * v len));
-
-  assert (forall (j:nat{j <= v i + 1}).
-    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) j);
-  precomp_table_inv_lemma len ctx_len k (as_seq h0 a) table_len (as_seq h0 table) (as_seq h1 table) (v i + 2);
-  assert (forall (j:nat{j <= v i + 1}).
-    precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) j)
-#pop-options
+  lprecomp_table_f_sqr #a_t len ctx_len k ctx a table_len i table;
+  lprecomp_table_f_mul #a_t len ctx_len k ctx a table_len i table
 
 
 let lprecomp_table #a_t len ctx_len k ctx a table_len table =
@@ -239,13 +366,15 @@ let lprecomp_table #a_t len ctx_len k ctx a table_len table =
   assert (precomp_table_inv len ctx_len k (as_seq h0 a) table_len (as_seq h1 table) 1);
 
   [@ inline_let]
-  let inv h (i:nat{i <= v table_len - 2}) =
+  let inv h (i:nat{i <= (v table_len - 2) / 2}) =
     modifies (loc table) h1 h /\
-    (forall (j:nat{j < i + 2}).
+    (forall (j:nat{j < 2 * i + 2}).
       precomp_table_inv len ctx_len k (as_seq h a) table_len (as_seq h table) j) in
 
+  [@inline_let]
+  let nb = (table_len -! 2ul) /. 2ul in
 
-  Lib.Loops.for 0ul (table_len -! 2ul) inv
+  Lib.Loops.for 0ul nb inv
   (fun j ->
     lprecomp_table_f #a_t len ctx_len k ctx a table_len j table)
 

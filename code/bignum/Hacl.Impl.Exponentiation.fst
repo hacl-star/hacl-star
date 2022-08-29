@@ -493,6 +493,14 @@ let lprecomp_get_consttime #a_t len ctx_len k l table_len ctx a table bits_l tmp
   PT.lprecomp_get_consttime #a_t len ctx_len k a table_len table bits_l tmp
 
 
+val lemma_pow2_is_divisible_by_2: l:pos -> Lemma (pow2 l % 2 = 0)
+let lemma_pow2_is_divisible_by_2 l =
+  Math.Lemmas.pow2_plus 1 (l - 1);
+  assert_norm (pow2 1 = 2);
+  assert (pow2 l = 2 * pow2 (l - 1));
+  Math.Lemmas.lemma_mod_mul_distr_l 2 (pow2 (l - 1)) 2
+
+
 inline_for_extraction noextract
 val lexp_fw_gen:
     #a_t:inttype_a
@@ -508,6 +516,7 @@ val lexp_fw_gen:
 let lexp_fw_gen #a_t len ctx_len k l table_len lprecomp_get ctx a bLen bBits b res =
   push_frame ();
   Math.Lemmas.pow2_lt_compat 32 (v l);
+  lemma_pow2_is_divisible_by_2 (v l);
 
   let table = create (table_len *! len) (uint #a_t #SEC 0) in
   PT.lprecomp_table #a_t len ctx_len k ctx a table_len table;

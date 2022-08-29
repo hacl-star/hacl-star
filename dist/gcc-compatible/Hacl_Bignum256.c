@@ -827,12 +827,16 @@ exp_vartime_precomp(
   uint64_t *ctx_r20 = ctx + (uint32_t)4U;
   from(ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, (uint32_t)4U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)7U; i++)
   {
     uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)4U;
-    uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)4U;
+    uint64_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)4U;
+    uint64_t *ctx_n1 = ctx;
+    amont_sqr(ctx_n1, mu, t11, t2);
+    uint64_t *t20 = table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)4U;
+    uint64_t *t3 = table + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)4U;
     uint64_t *ctx_n = ctx;
-    amont_mul(ctx_n, mu, aM, t11, t2);
+    amont_mul(ctx_n, mu, aM, t20, t3);
   }
   if (bBits % (uint32_t)4U != (uint32_t)0U)
   {
@@ -974,12 +978,16 @@ exp_consttime_precomp(
   uint64_t *ctx_r20 = ctx + (uint32_t)4U;
   from(ctx_n0, mu, ctx_r20, t0);
   memcpy(t1, aM, (uint32_t)4U * sizeof (uint64_t));
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
+  for (uint32_t i = (uint32_t)0U; i < (uint32_t)7U; i++)
   {
     uint64_t *t11 = table + (i + (uint32_t)1U) * (uint32_t)4U;
-    uint64_t *t2 = table + (i + (uint32_t)2U) * (uint32_t)4U;
+    uint64_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)4U;
+    uint64_t *ctx_n1 = ctx;
+    amont_sqr(ctx_n1, mu, t11, t2);
+    uint64_t *t20 = table + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)4U;
+    uint64_t *t3 = table + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)4U;
     uint64_t *ctx_n = ctx;
-    amont_mul(ctx_n, mu, aM, t11, t2);
+    amont_mul(ctx_n, mu, aM, t20, t3);
   }
   if (bBits % (uint32_t)4U != (uint32_t)0U)
   {

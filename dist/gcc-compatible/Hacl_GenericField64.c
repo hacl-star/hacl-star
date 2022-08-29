@@ -342,12 +342,16 @@ Hacl_GenericField64_exp_consttime(
     uint64_t *ctx_r20 = ctx + len1;
     Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, ctx_n0, k1.mu, ctx_r20, t0);
     memcpy(t1, aMc, len1 * sizeof (uint64_t));
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)7U; i++)
     {
       uint64_t *t11 = table + (i + (uint32_t)1U) * len1;
-      uint64_t *t2 = table + (i + (uint32_t)2U) * len1;
+      uint64_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * len1;
+      uint64_t *ctx_n1 = ctx;
+      Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, ctx_n1, k1.mu, t11, t2);
+      uint64_t *t20 = table + ((uint32_t)2U * i + (uint32_t)2U) * len1;
+      uint64_t *t3 = table + ((uint32_t)2U * i + (uint32_t)3U) * len1;
       uint64_t *ctx_n = ctx;
-      Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, ctx_n, k1.mu, aMc, t11, t2);
+      Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, ctx_n, k1.mu, aMc, t20, t3);
     }
     if (bBits % (uint32_t)4U != (uint32_t)0U)
     {
@@ -510,12 +514,16 @@ Hacl_GenericField64_exp_vartime(
     uint64_t *ctx_r20 = ctx + len1;
     Hacl_Bignum_Montgomery_bn_from_mont_u64(len1, ctx_n0, k1.mu, ctx_r20, t0);
     memcpy(t1, aMc, len1 * sizeof (uint64_t));
-    for (uint32_t i = (uint32_t)0U; i < (uint32_t)14U; i++)
+    for (uint32_t i = (uint32_t)0U; i < (uint32_t)7U; i++)
     {
       uint64_t *t11 = table + (i + (uint32_t)1U) * len1;
-      uint64_t *t2 = table + (i + (uint32_t)2U) * len1;
+      uint64_t *t2 = table + ((uint32_t)2U * i + (uint32_t)2U) * len1;
+      uint64_t *ctx_n1 = ctx;
+      Hacl_Bignum_Montgomery_bn_mont_sqr_u64(len1, ctx_n1, k1.mu, t11, t2);
+      uint64_t *t20 = table + ((uint32_t)2U * i + (uint32_t)2U) * len1;
+      uint64_t *t3 = table + ((uint32_t)2U * i + (uint32_t)3U) * len1;
       uint64_t *ctx_n = ctx;
-      Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, ctx_n, k1.mu, aMc, t11, t2);
+      Hacl_Bignum_Montgomery_bn_mont_mul_u64(len1, ctx_n, k1.mu, aMc, t20, t3);
     }
     if (bBits % (uint32_t)4U != (uint32_t)0U)
     {

@@ -255,6 +255,7 @@ val lexp_double_fw_gen:
 #push-options "--z3rlimit 150"
 let lexp_double_fw_gen #a_t len ctx_len k l table_len lprecomp_get ctx a1 bLen bBits b1 a2 b2 acc =
   push_frame ();
+  lemma_pow2_is_divisible_by_2 (v l);
   let table1 = create (table_len *! len) (uint #a_t #SEC 0) in
   PT.lprecomp_table #a_t len ctx_len k ctx a1 table_len table1;
   let h0 = ST.get () in
@@ -684,6 +685,7 @@ val mk_four_tables_for_fw_exp:
   mk_four_tables_for_fw_exp_st a_t len ctx_len k l table_len
 
 let mk_four_tables_for_fw_exp #a_t len ctx_len k l table_len ctx a1 a2 a3 a4 table1 table2 table3 table4 =
+  lemma_pow2_is_divisible_by_2 (v l);
   PT.lprecomp_table #a_t len ctx_len k ctx a1 table_len table1;
   let h0 = ST.get () in
   assert (table_inv_precomp len ctx_len k l table_len (as_seq h0 a1) (as_seq h0 table1));
