@@ -1123,14 +1123,29 @@ typedef struct __bool_bool_s
 __bool_bool;
 
 static inline void
-point_mul_double_split_lambda_vartime(
+point_mul_g_double_split_lambda_vartime(
   uint64_t *out,
   uint64_t *scalar1,
-  uint64_t *p1,
   uint64_t *scalar2,
   uint64_t *p2
 )
 {
+  uint64_t g[15U] = { 0U };
+  uint64_t *gx = g;
+  uint64_t *gy = g + (uint32_t)5U;
+  uint64_t *gz = g + (uint32_t)10U;
+  gx[0U] = (uint64_t)0x2815b16f81798U;
+  gx[1U] = (uint64_t)0xdb2dce28d959fU;
+  gx[2U] = (uint64_t)0xe870b07029bfcU;
+  gx[3U] = (uint64_t)0xbbac55a06295cU;
+  gx[4U] = (uint64_t)0x79be667ef9dcU;
+  gy[0U] = (uint64_t)0x7d08ffb10d4b8U;
+  gy[1U] = (uint64_t)0x48a68554199c4U;
+  gy[2U] = (uint64_t)0xe1108a8fd17b4U;
+  gy[3U] = (uint64_t)0xc4655da4fbfc0U;
+  gy[4U] = (uint64_t)0x483ada7726a3U;
+  memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
+  gz[0U] = (uint64_t)1U;
   uint64_t r1234[16U] = { 0U };
   uint64_t q1234[60U] = { 0U };
   uint64_t *r1 = r1234;
@@ -1142,8 +1157,8 @@ point_mul_double_split_lambda_vartime(
   uint64_t *q3 = q1234 + (uint32_t)30U;
   uint64_t *q4 = q1234 + (uint32_t)45U;
   scalar_split_lambda(r1, r2, scalar1);
-  point_mul_lambda(q2, p1);
-  memcpy(q1, p1, (uint32_t)15U * sizeof (uint64_t));
+  point_mul_lambda(q2, g);
+  memcpy(q1, g, (uint32_t)15U * sizeof (uint64_t));
   bool b0 = is_qelem_le_q_halved_vartime(r1);
   qnegate_conditional_vartime(r1, !b0);
   if (!b0)
@@ -1187,25 +1202,91 @@ point_mul_double_split_lambda_vartime(
   bool is_high2 = scrut1.snd;
   bool is_high3 = scrut1.thd;
   bool is_high4 = scrut1.f3;
-  uint64_t table1[240U] = { 0U };
+  uint64_t
+  table1[240U] =
+    {
+      (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x1U,
+      (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U,
+      (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x2815b16f81798U,
+      (uint64_t)0xdb2dce28d959fU, (uint64_t)0xe870b07029bfcU, (uint64_t)0xbbac55a06295cU,
+      (uint64_t)0x79be667ef9dcU, (uint64_t)0x7d08ffb10d4b8U, (uint64_t)0x48a68554199c4U,
+      (uint64_t)0xe1108a8fd17b4U, (uint64_t)0xc4655da4fbfc0U, (uint64_t)0x483ada7726a3U,
+      (uint64_t)0x1U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U, (uint64_t)0x0U,
+      (uint64_t)0x48e044f109fc8U, (uint64_t)0x373c920774523U, (uint64_t)0x39ac4b67827ebU,
+      (uint64_t)0xf9aa5402b9fdcU, (uint64_t)0xf40af3b6c6fdU, (uint64_t)0x89164bfadcbdbU,
+      (uint64_t)0x3e1b1383f85feU, (uint64_t)0xf60db4a43bf63U, (uint64_t)0xc8f76f5fd7e4bU,
+      (uint64_t)0x56915849f52cU, (uint64_t)0x6ba5554759a29U, (uint64_t)0xcdc3eac498b0cU,
+      (uint64_t)0x31fc97023dc71U, (uint64_t)0xa307b568a6ad9U, (uint64_t)0xf8783c53dfb2U,
+      (uint64_t)0x743bb790f36b0U, (uint64_t)0x85fc6b4b9f2d4U, (uint64_t)0xca8a1c32e8a3aU,
+      (uint64_t)0x8a2cf6a7671feU, (uint64_t)0x60cf61741984U, (uint64_t)0x7ed686f22d3a4U,
+      (uint64_t)0xcf01cb6ba7740U, (uint64_t)0x49580fb29f8dU, (uint64_t)0x802c4496c6c94U,
+      (uint64_t)0x884936b7356dU, (uint64_t)0x8300925d6f1d4U, (uint64_t)0x890c0c39e497eU,
+      (uint64_t)0x9a33c7290e5dcU, (uint64_t)0x8ab5595351ab8U, (uint64_t)0x5ac0eb0fb539U,
+      (uint64_t)0xa8d95e8d08c8U, (uint64_t)0x424d85dec433dU, (uint64_t)0xf04fa8fc34e5fU,
+      (uint64_t)0x14139cb1bf9c7U, (uint64_t)0x1d743fca4032U, (uint64_t)0xa9845fe3f605eU,
+      (uint64_t)0x91fde09e494b2U, (uint64_t)0xc472eb4ef7b21U, (uint64_t)0xc0fbe29ead4d6U,
+      (uint64_t)0x34fb8147eed1U, (uint64_t)0xac2271100e68dU, (uint64_t)0x9984e7e4edd6cU,
+      (uint64_t)0xe67898df910fcU, (uint64_t)0x1b2c871f6070cU, (uint64_t)0x81554cf0ba11U,
+      (uint64_t)0x7589553034c8cU, (uint64_t)0xfae143ee6bbd1U, (uint64_t)0xd2a4dddf72befU,
+      (uint64_t)0xf808e1673167dU, (uint64_t)0x6c31fec38a52U, (uint64_t)0x415c48ab514d1U,
+      (uint64_t)0xdd5a8fe6960aU, (uint64_t)0xcb851560de31cU, (uint64_t)0xcda57740c3eeaU,
+      (uint64_t)0x995d6e0c6c03U, (uint64_t)0x3730d5ce6c85dU, (uint64_t)0x55d61f66e6306U,
+      (uint64_t)0x4689c998a59d8U, (uint64_t)0x3ba10c0c653d9U, (uint64_t)0x5e87c80e6ebcU,
+      (uint64_t)0x3b372eb0f81b5U, (uint64_t)0x8c759d6268fd4U, (uint64_t)0xb319ed808b9fdU,
+      (uint64_t)0x38de42e3e7b13U, (uint64_t)0x500e998c69daU, (uint64_t)0x701bb58f3bf9bU,
+      (uint64_t)0x8bfa9947ce5e6U, (uint64_t)0x9db75c5e83c22U, (uint64_t)0x991e8c18d4a68U,
+      (uint64_t)0x85bbc16d25ecU, (uint64_t)0x9e679560f6767U, (uint64_t)0xc878c8474b933U,
+      (uint64_t)0xcf7ac54533c20U, (uint64_t)0xef22f54742509U, (uint64_t)0x6f7961ae1d9dU,
+      (uint64_t)0x92852b11abe5aU, (uint64_t)0x4f646416eae4eU, (uint64_t)0xb639adaa34214U,
+      (uint64_t)0x18f4c410d3a43U, (uint64_t)0x10d5ba07117fU, (uint64_t)0x5ccc4d5223f0cU,
+      (uint64_t)0x5348c992c9e65U, (uint64_t)0x9dc603dd22c90U, (uint64_t)0x5fd882ef1ff18U,
+      (uint64_t)0x740429e4bdfdU, (uint64_t)0x49213a87245d0U, (uint64_t)0x1f235d735b13cU,
+      (uint64_t)0x5a56659b7d254U, (uint64_t)0xd6f6f7b4a5ebU, (uint64_t)0xa1ea9d796dafU,
+      (uint64_t)0xd354595e8091cU, (uint64_t)0x59727a946d712U, (uint64_t)0x1ad2fd6b09d6cU,
+      (uint64_t)0xc18040ba67527U, (uint64_t)0x94e6b56ba0ecU, (uint64_t)0x80fcb21037704U,
+      (uint64_t)0x665a87a06743fU, (uint64_t)0x1cbeb09af2bf3U, (uint64_t)0x9d72fe7feb032U,
+      (uint64_t)0xb74df0c21371U, (uint64_t)0xb17d5ffe6d714U, (uint64_t)0x1e355dee022fdU,
+      (uint64_t)0xac21796140533U, (uint64_t)0xb639a93da6f3dU, (uint64_t)0xe15a35015997U,
+      (uint64_t)0xb9c5b6ef1f43bU, (uint64_t)0x2a7bc283fc49fU, (uint64_t)0x88e368394993fU,
+      (uint64_t)0xed7b8a9e60d3dU, (uint64_t)0xf721d2dad6f6U, (uint64_t)0xec454b7860999U,
+      (uint64_t)0x89673b944d8e0U, (uint64_t)0x309522ce23a1aU, (uint64_t)0x5193173cc4dd9U,
+      (uint64_t)0x9a1facd6b25aU, (uint64_t)0xad69b0614f7a2U, (uint64_t)0xb8d1b10c02e19U,
+      (uint64_t)0xbc2a2c7b66ffbU, (uint64_t)0xee4bdc91b3aa8U, (uint64_t)0xa2b275bde29dU,
+      (uint64_t)0x31ac94b24208eU, (uint64_t)0x11aeaf4ece6dU, (uint64_t)0xa413faa8d7937U,
+      (uint64_t)0x90d8df1df29ffU, (uint64_t)0x5f8d622d2557U, (uint64_t)0x592ce6949080dU,
+      (uint64_t)0xf125a05cefe03U, (uint64_t)0x6d0aa60d51e9bU, (uint64_t)0x4f07f7c3cf9d4U,
+      (uint64_t)0x4af6e1ccf133U, (uint64_t)0xf0f95a3be72b8U, (uint64_t)0xd3f6d52e63a92U,
+      (uint64_t)0x17d9ecbe226d1U, (uint64_t)0x6b6af333c989aU, (uint64_t)0xe625b11d9a14U,
+      (uint64_t)0xd154f79d8e341U, (uint64_t)0x7cc8bb59c85eeU, (uint64_t)0xa13927fe452beU,
+      (uint64_t)0x6e08fbee3bU, (uint64_t)0xd24d031b1185U, (uint64_t)0x5c715d4620a0bU,
+      (uint64_t)0xaa5fd2660d143U, (uint64_t)0x66bc46a0d83d0U, (uint64_t)0x2c519acec26aeU,
+      (uint64_t)0x6c3b82462505U, (uint64_t)0x8b8cbd971ab15U, (uint64_t)0xe8501868aee69U,
+      (uint64_t)0xc54addf1d50dU, (uint64_t)0x4d8da1ea82014U, (uint64_t)0x56e000de4c56U,
+      (uint64_t)0xbc3731f4e710bU, (uint64_t)0xf5fe753395cdU, (uint64_t)0x2804f4c0bc49fU,
+      (uint64_t)0x11ae10debc618U, (uint64_t)0x4f17b524159fU, (uint64_t)0xaae89f1f9385dU,
+      (uint64_t)0x856a1901e3aeaU, (uint64_t)0x2d28d08cc0cecU, (uint64_t)0x93d8d337da9bU,
+      (uint64_t)0x5feedb5497d3U, (uint64_t)0x5d06206f529e1U, (uint64_t)0x6c479715a827aU,
+      (uint64_t)0x48a2dd96d0f48U, (uint64_t)0x3fdeb0c237630U, (uint64_t)0x1db55c9d4eaaU,
+      (uint64_t)0xe0696573c7533U, (uint64_t)0x63e4658737869U, (uint64_t)0x2a11f253f4b05U,
+      (uint64_t)0x229a7e15cdf48U, (uint64_t)0x3b9f32f54a4fU, (uint64_t)0x327e4ceccc2baU,
+      (uint64_t)0x3e26d2be9d0dfU, (uint64_t)0x82a00f70af042U, (uint64_t)0x6020d484c25d6U,
+      (uint64_t)0xe839a854faebU, (uint64_t)0x21ded5312b490U, (uint64_t)0xf1b776c83d9edU,
+      (uint64_t)0x41f6a2c735d44U, (uint64_t)0x7adcc8a05f3b5U, (uint64_t)0xd926fe353140U,
+      (uint64_t)0xc2b376c728ecU, (uint64_t)0x947782c52046fU, (uint64_t)0x27ba54a224d00U,
+      (uint64_t)0x1035e99c0bf5eU, (uint64_t)0x612ca1b20e84U, (uint64_t)0x789d7d062632eU,
+      (uint64_t)0x683f45cb279baU, (uint64_t)0x8b8fac6a007b2U, (uint64_t)0x350c84e93fa4U,
+      (uint64_t)0x18a55aa52dfU, (uint64_t)0xe94da9625f527U, (uint64_t)0xd2619ce2f8a88U,
+      (uint64_t)0x942403888b43eU, (uint64_t)0x961da5fd1dc90U, (uint64_t)0x2f1506d7e117U,
+      (uint64_t)0x34deee761bce2U, (uint64_t)0xfb484324815ccU, (uint64_t)0xcd7cc675d3a1dU,
+      (uint64_t)0xca0691e2a6447U, (uint64_t)0xbb6b7f7b8fa2U, (uint64_t)0x6c53975090d10U,
+      (uint64_t)0xa14a4124a90d2U, (uint64_t)0xbb94d4b653242U, (uint64_t)0x5074f7da14c32U,
+      (uint64_t)0xec662837477cU, (uint64_t)0xee9be37d0b9bU, (uint64_t)0x4fba9fd90713bU,
+      (uint64_t)0xcc62c6dc14aa4U, (uint64_t)0x695bf61db25acU, (uint64_t)0x36ba954be769U
+    };
   uint64_t table2[240U] = { 0U };
-  uint64_t *t0 = table1;
-  uint64_t *t10 = table1 + (uint32_t)15U;
-  Hacl_Impl_K256_PointMul_make_point_at_inf(t0);
-  memcpy(t10, p1, (uint32_t)15U * sizeof (uint64_t));
-  KRML_MAYBE_FOR7(i,
-    (uint32_t)0U,
-    (uint32_t)7U,
-    (uint32_t)1U,
-    uint64_t *t11 = table1 + (i + (uint32_t)1U) * (uint32_t)15U;
-    uint64_t *t2 = table1 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
-    Hacl_Impl_K256_PointDouble_point_double(t2, t11);
-    uint64_t *t20 = table1 + ((uint32_t)2U * i + (uint32_t)2U) * (uint32_t)15U;
-    uint64_t *t3 = table1 + ((uint32_t)2U * i + (uint32_t)3U) * (uint32_t)15U;
-    Hacl_Impl_K256_PointAdd_point_add(t3, p1, t20););
-  uint64_t *t00 = table2;
+  uint64_t *t0 = table2;
   uint64_t *t1 = table2 + (uint32_t)15U;
-  Hacl_Impl_K256_PointMul_make_point_at_inf(t00);
+  Hacl_Impl_K256_PointMul_make_point_at_inf(t0);
   memcpy(t1, p2, (uint32_t)15U * sizeof (uint64_t));
   KRML_MAYBE_FOR7(i,
     (uint32_t)0U,
@@ -1229,15 +1310,15 @@ point_mul_double_split_lambda_vartime(
     uint64_t mask_l0 = (uint64_t)16U - (uint64_t)1U;
     uint32_t i10 = (bk - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j0 = (bk - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p110 = r4[i10] >> j0;
+    uint64_t p10 = r4[i10] >> j0;
     uint64_t ite0;
     if (i10 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j0)
     {
-      ite0 = p110 | r4[i10 + (uint32_t)1U] << ((uint32_t)64U - j0);
+      ite0 = p10 | r4[i10 + (uint32_t)1U] << ((uint32_t)64U - j0);
     }
     else
     {
-      ite0 = p110;
+      ite0 = p10;
     }
     uint64_t bits_l = ite0 & mask_l0;
     uint64_t a_bits_l0[15U] = { 0U };
@@ -1254,15 +1335,15 @@ point_mul_double_split_lambda_vartime(
     uint64_t mask_l1 = (uint64_t)16U - (uint64_t)1U;
     uint32_t i11 = (bk0 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j1 = (bk0 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p111 = r3[i11] >> j1;
+    uint64_t p11 = r3[i11] >> j1;
     uint64_t ite1;
     if (i11 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j1)
     {
-      ite1 = p111 | r3[i11 + (uint32_t)1U] << ((uint32_t)64U - j1);
+      ite1 = p11 | r3[i11 + (uint32_t)1U] << ((uint32_t)64U - j1);
     }
     else
     {
-      ite1 = p111;
+      ite1 = p11;
     }
     uint64_t bits_l0 = ite1 & mask_l1;
     uint64_t a_bits_l2[15U] = { 0U };
@@ -1278,15 +1359,15 @@ point_mul_double_split_lambda_vartime(
     uint64_t mask_l2 = (uint64_t)16U - (uint64_t)1U;
     uint32_t i12 = (bk1 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j2 = (bk1 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p112 = r2[i12] >> j2;
+    uint64_t p12 = r2[i12] >> j2;
     uint64_t ite2;
     if (i12 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j2)
     {
-      ite2 = p112 | r2[i12 + (uint32_t)1U] << ((uint32_t)64U - j2);
+      ite2 = p12 | r2[i12 + (uint32_t)1U] << ((uint32_t)64U - j2);
     }
     else
     {
-      ite2 = p112;
+      ite2 = p12;
     }
     uint64_t bits_l1 = ite2 & mask_l2;
     uint64_t a_bits_l3[15U] = { 0U };
@@ -1303,15 +1384,15 @@ point_mul_double_split_lambda_vartime(
     uint64_t mask_l = (uint64_t)16U - (uint64_t)1U;
     uint32_t i1 = (bk2 - (uint32_t)4U * i - (uint32_t)4U) / (uint32_t)64U;
     uint32_t j = (bk2 - (uint32_t)4U * i - (uint32_t)4U) % (uint32_t)64U;
-    uint64_t p11 = r1[i1] >> j;
+    uint64_t p1 = r1[i1] >> j;
     uint64_t ite;
     if (i1 + (uint32_t)1U < (uint32_t)4U && (uint32_t)0U < j)
     {
-      ite = p11 | r1[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
+      ite = p1 | r1[i1 + (uint32_t)1U] << ((uint32_t)64U - j);
     }
     else
     {
-      ite = p11;
+      ite = p1;
     }
     uint64_t bits_l2 = ite & mask_l;
     uint64_t a_bits_l[15U] = { 0U };
@@ -1324,33 +1405,6 @@ point_mul_double_split_lambda_vartime(
     }
     Hacl_Impl_K256_PointAdd_point_add(out, out, a_bits_l);
   }
-}
-
-static inline void
-point_mul_g_double_split_lambda_vartime(
-  uint64_t *out,
-  uint64_t *scalar1,
-  uint64_t *scalar2,
-  uint64_t *p2
-)
-{
-  uint64_t g[15U] = { 0U };
-  uint64_t *gx = g;
-  uint64_t *gy = g + (uint32_t)5U;
-  uint64_t *gz = g + (uint32_t)10U;
-  gx[0U] = (uint64_t)0x2815b16f81798U;
-  gx[1U] = (uint64_t)0xdb2dce28d959fU;
-  gx[2U] = (uint64_t)0xe870b07029bfcU;
-  gx[3U] = (uint64_t)0xbbac55a06295cU;
-  gx[4U] = (uint64_t)0x79be667ef9dcU;
-  gy[0U] = (uint64_t)0x7d08ffb10d4b8U;
-  gy[1U] = (uint64_t)0x48a68554199c4U;
-  gy[2U] = (uint64_t)0xe1108a8fd17b4U;
-  gy[3U] = (uint64_t)0xc4655da4fbfc0U;
-  gy[4U] = (uint64_t)0x483ada7726a3U;
-  memset(gz, 0U, (uint32_t)5U * sizeof (uint64_t));
-  gz[0U] = (uint64_t)1U;
-  point_mul_double_split_lambda_vartime(out, scalar1, g, scalar2, p2);
 }
 
 static inline bool load_public_key(uint8_t *pk, uint64_t *fpk_x, uint64_t *fpk_y)

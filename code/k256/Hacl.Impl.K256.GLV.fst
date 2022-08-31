@@ -22,6 +22,7 @@ module SL = Spec.K256.Lemmas
 module SG = Hacl.Spec.K256.GLV
 module SGL = Hacl.Spec.K256.GLV.Lemmas
 module PML = Hacl.Spec.K256.ECSM.Lemmas
+module PBP = Hacl.Impl.K256.PrecompTable
 
 open Hacl.K256.Field
 open Hacl.K256.Scalar
@@ -189,7 +190,6 @@ let point_mul_split_lambda_table out r1 q1 r2 q2 p is_negate1 is_negate2 =
 
 
 // [scalar]Q = [(r1 + r2 * lambda) % S.q]Q = [r1]Q + [r2]([lambda]Q)
-inline_for_extraction noextract
 val point_mul_split_lambda_vartime: out:point -> scalar:qelem -> q:point -> Stack unit
   (requires fun h ->
     live h out /\ live h scalar /\ live h q /\
@@ -200,6 +200,7 @@ val point_mul_split_lambda_vartime: out:point -> scalar:qelem -> q:point -> Stac
     S.to_aff_point (point_eval h1 out) ==
       S.aff_point_mul (qas_nat h0 scalar) (S.to_aff_point (point_eval h0 q)))
 
+[@CInline]
 let point_mul_split_lambda_vartime out scalar q =
   let h0 = ST.get () in
   push_frame ();
@@ -243,52 +244,11 @@ let point_mul_g_split_lambda_vartime out scalar =
 
 
 (**
- Fast computation of [scalar1]Q1 + [scalar2]Q2 in projective coordinates
+ Fast computation of [scalar1]S.g + [scalar2]Q2 in projective coordinates
 *)
 
 inline_for_extraction noextract
-val mk_two_tables:
-    table1:lbuffer uint64 (16ul *! 15ul)
-  -> table2:lbuffer uint64 (16ul *! 15ul)
-  -> p1:point -> p2:point ->
-  Stack unit
-  (requires fun h ->
-    live h table1 /\ live h table2 /\ live h p1 /\ live h p2 /\
-    disjoint table1 table2 /\ disjoint table1 p1 /\ disjoint table1 p2 /\
-    disjoint table2 p1 /\ disjoint table2 p2 /\
-    point_inv h p1 /\ point_inv h p2)
-  (ensures fun h0 _ h1 -> modifies (loc table1 |+| loc table2) h0 h1 /\
-   (let len = 15ul in
-    let ctx_len = 0ul in
-    let k = PM.mk_k256_concrete_ops in
-    let l = 4ul in
-    let table_len = 16ul in
-    BE.table_inv_precomp len ctx_len k l table_len (as_seq h0 p1) (as_seq h1 table1) /\
-    BE.table_inv_precomp len ctx_len k l table_len (as_seq h0 p2) (as_seq h1 table2)))
-
-let mk_two_tables table1 table2 p1 p2 =
-  [@inline_let] let len = 15ul in
-  [@inline_let] let ctx_len = 0ul in
-  [@inline_let] let k = PM.mk_k256_concrete_ops in
-  [@inline_let] let l = 4ul in
-  [@inline_let] let table_len = 16ul in
-
-  let h0 = ST.get () in
-  PT.lprecomp_table len ctx_len k (null uint64) p1 table_len table1;
-  let h1 = ST.get () in
-  assert (BE.table_inv_precomp len ctx_len k l table_len
-    (as_seq h1 p1) (as_seq h1 table1));
-
-  PT.lprecomp_table len ctx_len k (null uint64) p2 table_len table2;
-  let h2 = ST.get () in
-  assert (BE.table_inv_precomp len ctx_len k l table_len
-    (as_seq h2 p1) (as_seq h2 table1));
-  assert (BE.table_inv_precomp len ctx_len k l table_len
-    (as_seq h2 p2) (as_seq h2 table2))
-
-
-inline_for_extraction noextract
-val point_mul_double_split_lambda_table_noalloc:
+val point_mul_g_double_split_lambda_table_noalloc:
     out:point
   -> table1:lbuffer uint64 (16ul *! 15ul)
   -> table2:lbuffer uint64 (16ul *! 15ul)
@@ -330,8 +290,13 @@ val point_mul_double_split_lambda_table_noalloc:
     qas_nat h r1 < S.q /\ qas_nat h r1 < pow2 128 /\
     qas_nat h r2 < S.q /\ qas_nat h r2 < pow2 128 /\
     qas_nat h r3 < S.q /\ qas_nat h r3 < pow2 128 /\
-    qas_nat h r4 < S.q /\ qas_nat h r4 < pow2 128)
-  (ensures  fun h0 _ h1 -> modifies (loc out |+| loc table1 |+| loc table2) h0 h1 /\
+    qas_nat h r4 < S.q /\ qas_nat h r4 < pow2 128 /\
+
+    point_eval h p1 == S.g /\
+    (let len = 15ul in let ctx_len = 0ul in let l = 4ul in
+    let k = PM.mk_k256_concrete_ops in let table_len = 16ul in
+    BE.table_inv_precomp len ctx_len k l table_len (as_seq h p1) (as_seq h table1)))
+  (ensures  fun h0 _ h1 -> modifies (loc out |+| loc table2) h0 h1 /\
     point_inv h1 out /\
     PM.refl (as_seq h1 out) ==
       LE.exp_four_fw S.mk_k256_comm_monoid
@@ -340,7 +305,7 @@ val point_mul_double_split_lambda_table_noalloc:
         (PM.refl (as_seq h0 q3)) (qas_nat h0 r3)
         (PM.refl (as_seq h0 q4)) (qas_nat h0 r4) 4)
 
-let point_mul_double_split_lambda_table_noalloc out table1 table2 r1 q1 r2 q2 r3 q3 r4 q4
+let point_mul_g_double_split_lambda_table_noalloc out table1 table2 r1 q1 r2 q2 r3 q3 r4 q4
   p1 p2 is_negate1 is_negate2 is_negate3 is_negate4 =
   [@inline_let] let len = 15ul in
   [@inline_let] let ctx_len = 0ul in
@@ -351,12 +316,8 @@ let point_mul_double_split_lambda_table_noalloc out table1 table2 r1 q1 r2 q2 r3
   [@inline_let] let bBits = 128ul in
 
   let h0 = ST.get () in
-  mk_two_tables table1 table2 p1 p2;
+  PT.lprecomp_table len ctx_len k (null uint64) p2 table_len table2;
   let h1 = ST.get () in
-  assert (forall (j:nat{j < v table_len}).
-    PT.precomp_table_inv len ctx_len k (as_seq h1 p1) table_len (as_seq h1 table1) j);
-  assert (forall (j:nat{j < v table_len}).
-    PT.precomp_table_inv len ctx_len k (as_seq h1 p2) table_len (as_seq h1 table2) j);
 
   assert (point_eval_lseq (as_seq h1 q1) ==
     SG.point_negate_cond (point_eval_lseq (as_seq h1 p1)) is_negate1);
@@ -386,7 +347,7 @@ let point_mul_double_split_lambda_table_noalloc out table1 table2 r1 q1 r2 q2 r3
     table_lambda_neg_inv_precomp (as_seq h0 p2) is_negate4 in
   assert (table_inv4 (as_seq h1 q4) (as_seq h1 table2));
 
-  assert (modifies (loc table1 |+| loc table2) h0 h1);
+  assert (modifies (loc table2) h0 h1);
 
   ME.mk_lexp_four_fw_tables len ctx_len k l table_len
     table_inv1 table_inv2 table_inv3 table_inv4
@@ -407,11 +368,120 @@ let point_mul_double_split_lambda_table_noalloc out table1 table2 r1 q1 r2 q2 r3
         (PM.refl (as_seq h0 q3)) (qas_nat h0 r3)
         (PM.refl (as_seq h0 q4)) (qas_nat h0 r4) 4);
 
-  assert (modifies (loc table1 |+| loc table2 |+| loc out) h0 h2)
+  assert (modifies (loc table2 |+| loc out) h0 h2)
+
+val precomp_basepoint_table_lemma: p:LSeq.lseq uint64 15 -> Lemma
+  (requires point_eval_lseq p == S.g /\ point_inv_lseq p)
+  (ensures
+    BE.table_inv_precomp 15ul 0ul PM.mk_k256_concrete_ops
+      4ul 16ul p PBP.precomp_basepoint_table_lseq)
+
+let precomp_basepoint_table_lemma p =
+  assert_norm (1 < 16 /\ 16 = pow2 4);
+  [@inline_let] let len = 15ul in
+  [@inline_let] let table_len = 16ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let k = PM.mk_k256_concrete_ops in
+  let table = PBP.precomp_basepoint_table_lseq in
+
+  let precomp_basepoint_table_lemma_i (j:nat{j < 16}) :
+    Lemma (PT.precomp_table_inv len ctx_len k p table_len table j) =
+      Math.Lemmas.lemma_mult_le_right (v len) (j + 1) (v table_len);
+      let bj = LSeq.sub table (j * v len) (v len) in
+      assert (k.BE.to.BE.linv p);
+      assume (k.BE.to.BE.linv bj);
+      PBP.precomp_basepoint_table_lemma_i j;
+      assert (k.BE.to.BE.refl bj == LE.pow k.BE.to.BE.comm_monoid (k.BE.to.BE.refl p) j)
+      in
+
+  FStar.Classical.forall_intro precomp_basepoint_table_lemma_i
+
+inline_for_extraction noextract
+val mk_precomp_base_point_table: p:point ->
+  StackInline (lbuffer uint64 240ul)
+    (requires fun h ->
+      LowStar.Buffer.alloca_of_list_pre PBP.precomp_basepoint_table_list /\
+      live h p /\ point_inv h p /\ point_eval h p == S.g)
+    (ensures  fun h0 b h1 -> live h1 b /\
+      stack_allocated b h0 h1 PBP.precomp_basepoint_table_lseq)
+
+let mk_precomp_base_point_table p =
+  assert_norm (List.Tot.length PBP.precomp_basepoint_table_list = 240);
+  createL PBP.precomp_basepoint_table_list
 
 
 inline_for_extraction noextract
-val point_mul_double_split_lambda_table:
+val point_mul_g_double_split_lambda_table_aux:
+    out:point
+  -> table1:lbuffer uint64 (16ul *! 15ul)
+  -> r1:qelem -> q1:point
+  -> r2:qelem -> q2:point
+  -> r3:qelem -> q3:point
+  -> r4:qelem -> q4:point
+  -> p1:point -> p2:point
+  -> is_negate1:bool -> is_negate2:bool
+  -> is_negate3:bool -> is_negate4:bool ->
+  Stack unit
+  (requires fun h ->
+    live h out /\ live h r1 /\ live h r2 /\ live h r3 /\ live h r4 /\
+    live h q1 /\ live h q2 /\ live h q3 /\ live h q4 /\
+    live h p1 /\ live h p2 /\ live h table1 /\
+
+    eq_or_disjoint q1 q2 /\ eq_or_disjoint q1 q3 /\ eq_or_disjoint q1 q4 /\
+    eq_or_disjoint q2 q3 /\ eq_or_disjoint q2 q4 /\ eq_or_disjoint q3 q4 /\
+    disjoint out q1 /\ disjoint out q2 /\ disjoint out q3 /\ disjoint out q4 /\
+    disjoint out r1 /\ disjoint out r2 /\ disjoint out r3 /\ disjoint out r4 /\
+    disjoint out p1  /\ disjoint out p2 /\
+
+    disjoint table1 out /\ disjoint table1 r1 /\ disjoint table1 r2 /\
+    disjoint table1 r3 /\ disjoint table1 r4 /\  disjoint table1 p1 /\
+    disjoint table1 p2 /\ disjoint table1 q1 /\ disjoint table1 q2 /\
+    disjoint table1 q3 /\ disjoint table1 q4 /\
+
+    point_inv h q1 /\ point_inv h q2 /\ point_inv h q3 /\ point_inv h q4 /\
+    point_inv h p1 /\ point_inv h p2 /\
+    point_eval h q1==SG.point_negate_cond (point_eval h p1) is_negate1 /\
+    point_eval h q2==SG.point_negate_cond (SG.point_mul_lambda (point_eval h p1)) is_negate2 /\
+    point_eval h q3==SG.point_negate_cond (point_eval h p2) is_negate3 /\
+    point_eval h q4==SG.point_negate_cond (SG.point_mul_lambda (point_eval h p2)) is_negate4 /\
+    qas_nat h r1 < S.q /\ qas_nat h r1 < pow2 128 /\
+    qas_nat h r2 < S.q /\ qas_nat h r2 < pow2 128 /\
+    qas_nat h r3 < S.q /\ qas_nat h r3 < pow2 128 /\
+    qas_nat h r4 < S.q /\ qas_nat h r4 < pow2 128 /\
+
+    point_eval h p1 == S.g /\
+    (let len = 15ul in let ctx_len = 0ul in let l = 4ul in
+    let k = PM.mk_k256_concrete_ops in let table_len = 16ul in
+    BE.table_inv_precomp len ctx_len k l table_len (as_seq h p1) (as_seq h table1)))
+  (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
+    point_inv h1 out /\
+    PM.refl (as_seq h1 out) ==
+      LE.exp_four_fw S.mk_k256_comm_monoid
+        (PM.refl (as_seq h0 q1)) 128 (qas_nat h0 r1)
+        (PM.refl (as_seq h0 q2)) (qas_nat h0 r2)
+        (PM.refl (as_seq h0 q3)) (qas_nat h0 r3)
+        (PM.refl (as_seq h0 q4)) (qas_nat h0 r4) 4)
+
+let point_mul_g_double_split_lambda_table_aux out table1 r1 q1 r2 q2 r3 q3 r4 q4
+  p1 p2 is_negate1 is_negate2 is_negate3 is_negate4 =
+  [@inline_let] let len = 15ul in
+  [@inline_let] let table_len = 16ul in
+
+  let h0 = ST.get () in
+  push_frame ();
+  let table2 = create (table_len *! len) (u64 0) in
+  point_mul_g_double_split_lambda_table_noalloc out table1 table2 r1 q1 r2 q2 r3 q3 r4 q4
+  p1 p2 is_negate1 is_negate2 is_negate3 is_negate4;
+  let h1 = ST.get () in
+  assert (modifies (loc out |+| loc table2) h0 h1);
+  pop_frame ();
+  let h2 = ST.get () in
+  assert (modifies (loc out) h0 h2)
+
+
+inline_for_extraction noextract
+val point_mul_g_double_split_lambda_table:
     out:point
   -> r1:qelem -> q1:point
   -> r2:qelem -> q2:point
@@ -438,7 +508,8 @@ val point_mul_double_split_lambda_table:
     qas_nat h r1 < S.q /\ qas_nat h r1 < pow2 128 /\
     qas_nat h r2 < S.q /\ qas_nat h r2 < pow2 128 /\
     qas_nat h r3 < S.q /\ qas_nat h r3 < pow2 128 /\
-    qas_nat h r4 < S.q /\ qas_nat h r4 < pow2 128)
+    qas_nat h r4 < S.q /\ qas_nat h r4 < pow2 128 /\
+    point_eval h p1 == S.g)
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     PM.refl (as_seq h1 out) ==
@@ -448,26 +519,28 @@ val point_mul_double_split_lambda_table:
         (PM.refl (as_seq h0 q3)) (qas_nat h0 r3)
         (PM.refl (as_seq h0 q4)) (qas_nat h0 r4) 4)
 
-let point_mul_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
+let point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
   p1 p2 is_negate1 is_negate2 is_negate3 is_negate4 =
   [@inline_let] let len = 15ul in
   [@inline_let] let table_len = 16ul in
+  [@inline_let] let ctx_len = 0ul in
+  [@inline_let] let l = 4ul in
+  [@inline_let] let k = PM.mk_k256_concrete_ops in
 
   let h0 = ST.get () in
   push_frame ();
-  let table1 = create (table_len *! len) (u64 0) in
-  let table2 = create (table_len *! len) (u64 0) in
-  point_mul_double_split_lambda_table_noalloc out table1 table2 r1 q1 r2 q2 r3 q3 r4 q4
-  p1 p2 is_negate1 is_negate2 is_negate3 is_negate4;
+  let table1 = mk_precomp_base_point_table p1 in
   let h1 = ST.get () in
-  assert (modifies (loc out |+| loc table1 |+| loc table2) h0 h1);
-  pop_frame ();
-  let h2 = ST.get () in
-  assert (modifies (loc out) h0 h2)
+  assert (as_seq h1 table1 == Seq.seq_of_list (PBP.precomp_basepoint_table_list));
+  precomp_basepoint_table_lemma (as_seq h1 p1);
+  assert (BE.table_inv_precomp len ctx_len k l table_len (as_seq h1 p1) (as_seq h1 table1));
+  point_mul_g_double_split_lambda_table_aux out table1 r1 q1 r2 q2 r3 q3 r4 q4
+    p1 p2 is_negate1 is_negate2 is_negate3 is_negate4;
+  pop_frame ()
 
 
 inline_for_extraction noextract
-val point_mul_double_split_lambda_vartime_noalloc_12:
+val point_mul_g_double_split_lambda_vartime_noalloc_12:
     r1:qelem -> q1:point
   -> r2:qelem -> q2:point
   -> r3:qelem -> q3:point
@@ -507,7 +580,8 @@ val point_mul_double_split_lambda_vartime_noalloc_12:
     disjoint q4 scalar1 /\ disjoint q4 scalar2 /\ disjoint q4 p1 /\ disjoint q4 p2 /\
 
     point_inv h p1 /\ point_inv h p2 /\
-    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
+    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q /\
+    point_eval h p1 == S.g)
   (ensures  fun h0 (is_high1, is_high2, is_high3, is_high4) h1 ->
     modifies (loc r1 |+| loc r2 |+| loc r3 |+| loc r4 |+|
       loc q1 |+| loc q2 |+| loc q3 |+| loc q4) h0 h1 /\
@@ -528,7 +602,7 @@ val point_mul_double_split_lambda_vartime_noalloc_12:
     is_high3 == S.scalar_is_high r3_s0 /\
     is_high4 == S.scalar_is_high r4_s0))
 
-let point_mul_double_split_lambda_vartime_noalloc_12 r1 q1 r2 q2 r3 q3 r4 q4
+let point_mul_g_double_split_lambda_vartime_noalloc_12 r1 q1 r2 q2 r3 q3 r4 q4
   scalar1 scalar2 p1 p2 =
   let is_high1, is_high2 = ecmult_endo_split r1 r2 q1 q2 scalar1 p1 in
   let is_high3, is_high4 = ecmult_endo_split r3 r4 q3 q4 scalar2 p2 in
@@ -536,7 +610,7 @@ let point_mul_double_split_lambda_vartime_noalloc_12 r1 q1 r2 q2 r3 q3 r4 q4
 
 
 inline_for_extraction noextract
-val point_mul_double_split_lambda_vartime_noalloc:
+val point_mul_g_double_split_lambda_vartime_noalloc:
     out:point
   -> r1:qelem -> q1:point
   -> r2:qelem -> q2:point
@@ -581,7 +655,8 @@ val point_mul_double_split_lambda_vartime_noalloc:
     disjoint q4 scalar1 /\ disjoint q4 scalar2 /\ disjoint q4 p1 /\ disjoint q4 p2 /\
 
     point_inv h p1 /\ point_inv h p2 /\
-    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
+    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q /\
+    point_eval h p1 == S.g)
   (ensures  fun h0 _ h1 -> modifies (loc r1 |+| loc r2 |+| loc r3 |+| loc r4 |+|
     loc q1 |+| loc q2 |+| loc q3 |+| loc q4 |+| loc out) h0 h1 /\
     point_inv h1 out /\
@@ -590,12 +665,12 @@ val point_mul_double_split_lambda_vartime_noalloc:
       (S.aff_point_mul (qas_nat h0 scalar1) (S.to_aff_point (point_eval h0 p1)))
       (S.aff_point_mul (qas_nat h0 scalar2) (S.to_aff_point (point_eval h0 p2))))
 
-let point_mul_double_split_lambda_vartime_noalloc out r1 q1 r2 q2 r3 q3 r4 q4
+let point_mul_g_double_split_lambda_vartime_noalloc out r1 q1 r2 q2 r3 q3 r4 q4
   scalar1 scalar2 p1 p2 =
   let h0 = ST.get () in
   let is_high1, is_high2, is_high3, is_high4 =
-   point_mul_double_split_lambda_vartime_noalloc_12 r1 q1 r2 q2 r3 q3 r4 q4 scalar1 scalar2 p1 p2 in
-  point_mul_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
+   point_mul_g_double_split_lambda_vartime_noalloc_12 r1 q1 r2 q2 r3 q3 r4 q4 scalar1 scalar2 p1 p2 in
+  point_mul_g_double_split_lambda_table out r1 q1 r2 q2 r3 q3 r4 q4
     p1 p2 is_high1 is_high2 is_high3 is_high4;
   let h1 = ST.get () in
   assert (S.to_aff_point (point_eval h1 out) ==
@@ -608,7 +683,7 @@ let point_mul_double_split_lambda_vartime_noalloc out r1 q1 r2 q2 r3 q3 r4 q4
 
 
 inline_for_extraction noextract
-val point_mul_double_split_lambda_vartime_noalloc_aux:
+val point_mul_g_double_split_lambda_vartime_noalloc_aux:
     out:point
   -> r1234:lbuffer uint64 16ul
   -> q1234:lbuffer uint64 60ul
@@ -628,7 +703,8 @@ val point_mul_double_split_lambda_vartime_noalloc_aux:
     disjoint q1234 scalar1 /\ disjoint q1234 scalar2 /\ disjoint q1234 p1 /\ disjoint q1234 p2 /\
 
     point_inv h p1 /\ point_inv h p2 /\
-    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
+    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q /\
+    point_eval h p1 == S.g)
   (ensures  fun h0 _ h1 -> modifies (loc r1234 |+| loc q1234 |+| loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_eval h1 out) ==
@@ -636,7 +712,7 @@ val point_mul_double_split_lambda_vartime_noalloc_aux:
       (S.aff_point_mul (qas_nat h0 scalar1) (S.to_aff_point (point_eval h0 p1)))
       (S.aff_point_mul (qas_nat h0 scalar2) (S.to_aff_point (point_eval h0 p2))))
 
-let point_mul_double_split_lambda_vartime_noalloc_aux out r1234 q1234 scalar1 scalar2 p1 p2 =
+let point_mul_g_double_split_lambda_vartime_noalloc_aux out r1234 q1234 scalar1 scalar2 p1 p2 =
   let r1 = sub r1234 0ul 4ul in
   let r2 = sub r1234 4ul 4ul in
   let r3 = sub r1234 8ul 4ul in
@@ -646,17 +722,19 @@ let point_mul_double_split_lambda_vartime_noalloc_aux out r1234 q1234 scalar1 sc
   let q2 = sub q1234 15ul 15ul in
   let q3 = sub q1234 30ul 15ul in
   let q4 = sub q1234 45ul 15ul in
-  point_mul_double_split_lambda_vartime_noalloc out r1 q1 r2 q2 r3 q3 r4 q4 scalar1 scalar2 p1 p2
+  point_mul_g_double_split_lambda_vartime_noalloc out r1 q1 r2 q2 r3 q3 r4 q4 scalar1 scalar2 p1 p2
 
 
-val point_mul_double_split_lambda_vartime:
+inline_for_extraction noextract
+val point_mul_g_double_split_lambda_vartime_aux:
   out:point -> scalar1:qelem -> p1:point -> scalar2:qelem -> p2:point -> Stack unit
   (requires fun h ->
     live h out /\ live h scalar1 /\ live h p1 /\ live h scalar2 /\ live h p2 /\
     disjoint p1 out /\ disjoint p2 out /\ eq_or_disjoint p1 p2 /\
     disjoint scalar1 out /\ disjoint scalar2 out /\
     point_inv h p1 /\ point_inv h p2 /\
-    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q)
+    qas_nat h scalar1 < S.q /\ qas_nat h scalar2 < S.q /\
+    point_eval h p1 == S.g)
   (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     point_inv h1 out /\
     S.to_aff_point (point_eval h1 out) ==
@@ -664,12 +742,11 @@ val point_mul_double_split_lambda_vartime:
       (S.aff_point_mul (qas_nat h0 scalar1) (S.to_aff_point (point_eval h0 p1)))
       (S.aff_point_mul (qas_nat h0 scalar2) (S.to_aff_point (point_eval h0 p2))))
 
-[@CInline]
-let point_mul_double_split_lambda_vartime out scalar1 p1 scalar2 p2 =
+let point_mul_g_double_split_lambda_vartime_aux out scalar1 p1 scalar2 p2 =
   push_frame ();
   let r1234 = create 16ul (u64 0) in
   let q1234 = create 60ul (u64 0) in
-  point_mul_double_split_lambda_vartime_noalloc_aux out r1234 q1234 scalar1 scalar2 p1 p2;
+  point_mul_g_double_split_lambda_vartime_noalloc_aux out r1234 q1234 scalar1 scalar2 p1 p2;
   pop_frame ()
 
 
@@ -693,5 +770,5 @@ let point_mul_g_double_split_lambda_vartime out scalar1 scalar2 p2 =
   push_frame ();
   let g = create 15ul (u64 0) in
   PM.make_g g;
-  point_mul_double_split_lambda_vartime out scalar1 g scalar2 p2;
+  point_mul_g_double_split_lambda_vartime_aux out scalar1 g scalar2 p2;
   pop_frame ()
