@@ -53,10 +53,7 @@ _t[64U] =
 
 void Hacl_Hash_Core_MD5_legacy_init(uint32_t *s)
 {
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
-    s[i] = _h0[i];
-  }
+  KRML_MAYBE_FOR4(i, (uint32_t)0U, (uint32_t)4U, (uint32_t)1U, s[i] = _h0[i];);
 }
 
 void Hacl_Hash_Core_MD5_legacy_update(uint32_t *abcd, uint8_t *x)
@@ -1126,10 +1123,11 @@ static void legacy_pad(uint64_t len, uint8_t *dst)
 
 void Hacl_Hash_Core_MD5_legacy_finish(uint32_t *s, uint8_t *dst)
 {
-  for (uint32_t i = (uint32_t)0U; i < (uint32_t)4U; i++)
-  {
-    store32_le(dst + i * (uint32_t)4U, s[i]);
-  }
+  KRML_MAYBE_FOR4(i,
+    (uint32_t)0U,
+    (uint32_t)4U,
+    (uint32_t)1U,
+    store32_le(dst + i * (uint32_t)4U, s[i]););
 }
 
 void Hacl_Hash_MD5_legacy_update_multi(uint32_t *s, uint8_t *blocks, uint32_t n_blocks)

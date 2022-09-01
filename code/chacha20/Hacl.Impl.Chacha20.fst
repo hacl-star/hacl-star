@@ -125,7 +125,6 @@ val chacha20_encrypt_block:
   (ensures  fun h0 _ h1 -> modifies (loc out) h0 h1 /\
     as_seq h1 out == Spec.chacha20_encrypt_block (as_seq h0 ctx) (v incr) (as_seq h0 text))
 
-[@CInline]
 let chacha20_encrypt_block ctx out incr text =
   push_frame();
   let k = create 16ul (u32 0) in

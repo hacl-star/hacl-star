@@ -16,52 +16,21 @@ module Bindings(F:Cstubs.FOREIGN) =
     type everCrypt_Hash_alg13 = spec_Hash_Definitions_hash_alg
     let everCrypt_Hash_alg13 =
       typedef spec_Hash_Definitions_hash_alg "EverCrypt_Hash_alg13"
-    type everCrypt_Hash_state_s_tags = Unsigned.UInt8.t
-    let everCrypt_Hash_state_s_tags =
-      typedef uint8_t "EverCrypt_Hash_state_s_tags"
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_MD5_s =
-      Unsigned.UInt8.of_int 0
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_SHA1_s =
-      Unsigned.UInt8.of_int 1
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_SHA2_224_s =
-      Unsigned.UInt8.of_int 2
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_SHA2_256_s =
-      Unsigned.UInt8.of_int 3
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_SHA2_384_s =
-      Unsigned.UInt8.of_int 4
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_SHA2_512_s =
-      Unsigned.UInt8.of_int 5
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_Blake2S_s =
-      Unsigned.UInt8.of_int 6
-    let everCrypt_Hash_state_s_tags_EverCrypt_Hash_Blake2B_s =
-      Unsigned.UInt8.of_int 7
+    type state_s_tags = Unsigned.UInt8.t
+    let state_s_tags = typedef uint8_t "state_s_tags"
+    let state_s_tags_MD5_s = Unsigned.UInt8.of_int 0
+    let state_s_tags_SHA1_s = Unsigned.UInt8.of_int 1
+    let state_s_tags_SHA2_224_s = Unsigned.UInt8.of_int 2
+    let state_s_tags_SHA2_256_s = Unsigned.UInt8.of_int 3
+    let state_s_tags_SHA2_384_s = Unsigned.UInt8.of_int 4
+    let state_s_tags_SHA2_512_s = Unsigned.UInt8.of_int 5
+    let state_s_tags_Blake2S_s = Unsigned.UInt8.of_int 6
+    let state_s_tags_Blake2S_128_s = Unsigned.UInt8.of_int 7
+    let state_s_tags_Blake2B_s = Unsigned.UInt8.of_int 8
+    let state_s_tags_Blake2B_256_s = Unsigned.UInt8.of_int 9
     type everCrypt_Hash_state_s = [ `everCrypt_Hash_state_s ] structure
     let (everCrypt_Hash_state_s : [ `everCrypt_Hash_state_s ] structure typ)
       = structure "EverCrypt_Hash_state_s_s"
-    let everCrypt_Hash_state_s_tag =
-      field everCrypt_Hash_state_s "tag" everCrypt_Hash_state_s_tags
-    type everCrypt_Hash_state_s_val = [ `anonymous ] union
-    let (everCrypt_Hash_state_s_val : [ `anonymous ] union typ) = union ""
-    let everCrypt_Hash_state_s_val_case_MD5_s =
-      field everCrypt_Hash_state_s_val "case_MD5_s" (ptr uint32_t)
-    let everCrypt_Hash_state_s_val_case_SHA1_s =
-      field everCrypt_Hash_state_s_val "case_SHA1_s" (ptr uint32_t)
-    let everCrypt_Hash_state_s_val_case_SHA2_224_s =
-      field everCrypt_Hash_state_s_val "case_SHA2_224_s" (ptr uint32_t)
-    let everCrypt_Hash_state_s_val_case_SHA2_256_s =
-      field everCrypt_Hash_state_s_val "case_SHA2_256_s" (ptr uint32_t)
-    let everCrypt_Hash_state_s_val_case_SHA2_384_s =
-      field everCrypt_Hash_state_s_val "case_SHA2_384_s" (ptr uint64_t)
-    let everCrypt_Hash_state_s_val_case_SHA2_512_s =
-      field everCrypt_Hash_state_s_val "case_SHA2_512_s" (ptr uint64_t)
-    let everCrypt_Hash_state_s_val_case_Blake2S_s =
-      field everCrypt_Hash_state_s_val "case_Blake2S_s" (ptr uint32_t)
-    let everCrypt_Hash_state_s_val_case_Blake2B_s =
-      field everCrypt_Hash_state_s_val "case_Blake2B_s" (ptr uint64_t)
-    let _ = seal everCrypt_Hash_state_s_val
-    let everCrypt_Hash_state_s_u =
-      field everCrypt_Hash_state_s "" everCrypt_Hash_state_s_val
-    let _ = seal everCrypt_Hash_state_s
     let everCrypt_Hash_alg_of_state =
       foreign "EverCrypt_Hash_alg_of_state"
         ((ptr everCrypt_Hash_state_s) @->
