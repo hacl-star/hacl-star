@@ -363,3 +363,31 @@ let cmovznz01 #t #l a b mask =
   let mask = uint #t #l 0 -. mask in 
   lemma_xor_copy_cond a b mask;
   logxor a (logand mask (logxor a b))
+
+
+val copy_point_conditional: #c: curve -> result: Hacl.Spec.EC.Definition.point c
+  -> x: Hacl.Spec.EC.Definition.point c -> mask: uint64 {uint_v mask == 0 \/ uint_v mask == pow2 64 - 1}  
+  -> Stack unit
+  (requires fun h -> live h result /\ live h x /\ disjoint result x /\ point_eval c h result /\ point_eval c h x)
+  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ (
+    if uint_v mask = 0 then 
+      point_as_nat c h1 result == point_as_nat c h0 result
+    else
+      point_as_nat c h1 result == point_as_nat c h0 x))
+
+let copy_point_conditional #c result p mask = 
+  let h0 = ST.get() in 
+
+  let len = getCoordinateLenU64 c in 
+
+  let p_x = sub p (size 0) len in 
+  let p_y = sub p len len in 
+  let p_z = sub p (size 2 *! len) len in 
+
+  let r_x = sub result (size 0) len in 
+  let r_y = sub result len len in 
+  let r_z = sub result (size 2 *! len) len in 
+
+  copy_conditional #c r_x p_x mask;
+  copy_conditional #c r_y p_y mask;
+  copy_conditional #c r_z p_z mask

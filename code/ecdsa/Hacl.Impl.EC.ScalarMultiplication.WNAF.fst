@@ -26,63 +26,110 @@ open Hacl.Impl.EC.Masking.ScalarAccess
 open Lib.IntTypes.Intrinsics
 
 open FStar.Math.Lemmas
+open Hacl.Spec.EC.ScalarMultiplication.WNAF
 
 
 #set-options "--z3rlimit 100 --max_fuel 0 --max_ifuel 0" 
 
 
-inline_for_extraction noextract
-let radix: (r: uint64 {v r == w}) = (u64 5)
+val getLenWnaf: #c: curve -> Tot (r: size_t {v r == v (getScalarLen c) / w})
 
-inline_for_extraction noextract
-let radix_shiftval: (r: shiftval U64 {v r == w /\ v r == v radix}) = (size 5)
-
-inline_for_extraction noextract
-let radix_u32: (r: size_t {v r == w /\ v r == v radix}) = (size 5)
-
-inline_for_extraction noextract
-let dradix : (r: uint64 {v r == m}) = assert_norm(pow2 5 == 32); (u64 32)
-
-inline_for_extraction noextract
-let dradix_wnaf : (r: uint64 {v r == 2 * m}) = 
-  FStar.Math.Lemmas.pow2_double_sum 5; 
-  assert_norm (pow2 6 == 64);
-  (u64 64)
+let getLenWnaf #c = 
+  match c with
+  |P256 -> 
+    assert (v (getScalarLen P256) / 5 == 51);
+    size 51
+  |P384 ->
+    assert (v (getScalarLen P384) / 5 == 76);
+    size 76
 
 
-val scalar_rwnaf_step_compute_di: #c: curve -> w0: uint64 
-  -> out: lbuffer uint64 (size ((getPower c / Spec.ECC.WNAF.w + 1) * 2))
-  -> mask: uint64 {v mask = pow2 (v radix + 1) - 1} 
-  -> r: lbuffer uint64 (size 1) -> i: size_t {v i < getPower c / Spec.ECC.WNAF.w} -> 
-  Stack unit
-  (requires fun h -> live h out /\ live h r /\ disjoint r out /\ (
-    let lastIndex = v (getScalarLen c) / w in 
-    let signLast = Lib.Sequence.index (as_seq h out) (2 * lastIndex + 1) in 
-    v signLast == 0))
-  (ensures fun h0 _ h1 -> modifies (loc out |+| loc r) h0 h1 /\ (
-    let sign = Lib.Sequence.index (as_seq h1 out) (2 * v i + 1) in 
-    let abs =  Lib.Sequence.index (as_seq h1 out) (2 * v i) in 
-    (if v sign = 0 then v w0 - v dradix == v abs else - (v w0 - v dradix) == v abs) /\ 
-    (if (v w0 - v dradix) >= 0 then v sign == 0 else v sign = pow2 64 - 1)) /\ (
-    forall (j: nat {j < 2 * v i}).
-      Lib.Sequence.index (as_seq h0 out) j == Lib.Sequence.index (as_seq h1 out) j) /\ (
-    let lastIndex = v (getScalarLen c) / w in 
-    let signLast = Lib.Sequence.index (as_seq h1 out) (2 * lastIndex + 1) in 
-    v signLast == 0))
 
-let scalar_rwnaf_step_compute_di w out mask r i =
-  let h0 = ST.get() in 
-  let c = Lib.IntTypes.Intrinsics.sub_borrow_u64 (u64 0) w dradix r in 
-  let r0 = index r (size 0) in 
-    let h1 = ST.get() in 
 
-  let r2 = u64 0 -. r0 in 
-    
-  let cAsFlag = eq1_u64 c in 
-  let r3 = cmovznz2 r2 r0 cAsFlag in 
+val rnaf_to_step__: #c: curve 
+  -> rnaf: Lib.Sequence.lseq uint64 (2 * (v (getScalarLen c) / w + 1)) 
+  -> r: Lib.Sequence.seq int {Lib.Sequence.length r == v (getLenWnaf #c) + 1} 
+  -> i: nat {i < Seq.length r /\ (
+   forall (j: nat {j < i}). 
+      let ri = Lib.Sequence.index rnaf (2 * j) in 
+      let sign = Lib.Sequence.index rnaf (2 * j + 1) in 
+      if v sign = 0 then 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == v ri
+      else 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == - (v ri))} -> 
+  Tot (r: Lib.Sequence.seq int{ Lib.Sequence.length r == v (getLenWnaf #c) + 1 /\ (
+  forall (j: nat {j <= i}). 
+    let ri = Lib.Sequence.index rnaf (2 * j) in 
+      let sign = Lib.Sequence.index rnaf (2 * j + 1) in 
+      if v sign = 0 then 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == v ri
+      else 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == - (v ri))})
 
-  upd out (size 2 *! i) r3;
-  upd out (size 2 *! i +! size 1) cAsFlag
+let rnaf_to_step__ #c rnaf r i = 
+  let ri = Lib.Sequence.index rnaf (2 * i) in 
+  let sign = Lib.Sequence.index rnaf (2 * i + 1) in 
+
+  if v sign = 0 then 
+    Lib.Sequence.upd #_ #(v (getLenWnaf #c) + 1) r i (v ri)
+  else 
+    Lib.Sequence.upd #_ #(v (getLenWnaf #c) + 1) r i (- (v ri))
+
+
+val rnaf_to_step_: #c: curve 
+  -> rnaf: Lib.Sequence.lseq uint64 (2 * (v (getScalarLen c) / w + 1)) 
+  -> r: Lib.Sequence.seq int {Lib.Sequence.length r == v (getLenWnaf #c) + 1} 
+  -> i: nat {i <= Seq.length r /\ (
+   if i < Seq.length r then 
+     begin
+       forall (j: nat {j < i}). 
+   let ri = Lib.Sequence.index rnaf (2 * j) in 
+   let sign = Lib.Sequence.index rnaf (2 * j + 1) in 
+   if v sign = 0 then 
+     Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == v ri
+   else 
+     Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == - (v ri) end
+  else
+    begin
+    forall (j: nat {j < i}). 
+      let ri = Lib.Sequence.index rnaf (2 * j) in 
+      let sign = Lib.Sequence.index rnaf (2 * j + 1) in 
+      if v sign = 0 then 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == v ri
+      else 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == - (v ri) end)} ->
+  Tot (r: Lib.Sequence.seq int{ Lib.Sequence.length r == v (getLenWnaf #c) + 1 /\ (
+  forall (j: nat {j < Seq.length r}). 
+    let ri = Lib.Sequence.index rnaf (2 * j) in 
+      let sign = Lib.Sequence.index rnaf (2 * j + 1) in 
+      if v sign = 0 then 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == v ri
+      else 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j == - (v ri))})
+  (decreases Seq.length r - i)
+  
+let rec rnaf_to_step_ #c rnaf r i = 
+  if i = Seq.length r then 
+    r
+  else
+    let r = rnaf_to_step__ #c rnaf r i in 
+    rnaf_to_step_ #c rnaf r (i + 1)
+
+
+let rnaf_to_spec (#c: curve) (rnaf: Lib.Sequence.lseq uint64  (2 * (v (getScalarLen c) / w + 1))) : 
+  (r: Lib.Sequence.seq int {
+    Lib.Sequence.length r == v (getLenWnaf #c) + 1 /\ (
+    forall (i: nat {i < Seq.length r}). 
+      let ri = Lib.Sequence.index rnaf (2 * i) in 
+      let sign = Lib.Sequence.index rnaf (2 * i + 1) in 
+      if v sign = 0 then 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r i == v ri
+      else 
+  Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r i == - (v ri) )}) = 
+  
+  let s = Seq.Base.create (v (getLenWnaf #c) + 1) 0 in
+  rnaf_to_step_ #c rnaf s 0
+
 
 
 val scalar_compute_window_lemma: #c: curve ->  scalar: scalar_bytes #c
@@ -179,6 +226,42 @@ let scalar_compute_window_lemma #c scalar k =
   assert(scalar_as_nat scalar / pow2 (t + 1) % m * 2 == i)
 
 
+
+val scalar_rwnaf_step_compute_di: #c: curve -> w0: uint64 
+  -> out: lbuffer uint64 (size ((getPower c / Spec.ECC.WNAF.w + 1) * 2))
+  -> mask: uint64 {v mask = pow2 (v radix + 1) - 1} 
+  -> r: lbuffer uint64 (size 1) -> i: size_t {v i < getPower c / Spec.ECC.WNAF.w} -> 
+  Stack unit
+  (requires fun h -> live h out /\ live h r /\ disjoint r out /\ (
+    let lastIndex = v (getScalarLen c) / w in 
+    let signLast = Lib.Sequence.index (as_seq h out) (2 * lastIndex + 1) in 
+    v signLast == 0))
+  (ensures fun h0 _ h1 -> modifies (loc out |+| loc r) h0 h1 /\ (
+    let sign = Lib.Sequence.index (as_seq h1 out) (2 * v i + 1) in 
+    let abs =  Lib.Sequence.index (as_seq h1 out) (2 * v i) in 
+    (if v sign = 0 then v w0 - v dradix == v abs else - (v w0 - v dradix) == v abs) /\ 
+    (if (v w0 - v dradix) >= 0 then v sign == 0 else v sign = pow2 64 - 1)) /\ (
+    forall (j: nat {j < 2 * v i}).
+      Lib.Sequence.index (as_seq h0 out) j == Lib.Sequence.index (as_seq h1 out) j) /\ (
+    let lastIndex = v (getScalarLen c) / w in 
+    let signLast = Lib.Sequence.index (as_seq h1 out) (2 * lastIndex + 1) in 
+    v signLast == 0))
+
+let scalar_rwnaf_step_compute_di w out mask r i =
+  let h0 = ST.get() in 
+  let c = Lib.IntTypes.Intrinsics.sub_borrow_u64 (u64 0) w dradix r in 
+  let r0 = index r (size 0) in 
+    let h1 = ST.get() in 
+
+  let r2 = u64 0 -. r0 in 
+    
+  let cAsFlag = eq1_u64 c in 
+  let r3 = cmovznz2 r2 r0 cAsFlag in 
+
+  upd out (size 2 *! i) r3;
+  upd out (size 2 *! i +! size 1) cAsFlag
+
+
 val scalar_rwnaf_step_compute_window_: #c: curve 
   -> wStart: uint64 {v wStart < pow2 (64 - 5)}
   -> scalar: scalar_t #MUT #c 
@@ -204,7 +287,6 @@ let scalar_rwnaf_step_compute_window_ #c wStart scalar k =
   let w0 = w0 +! (shift_left (getScalarBit_leftEndian #c scalar (i +! (size 5))) (size 5)) in 
   w0
 
-#pop-options
 
 
 inline_for_extraction noextract
@@ -409,18 +491,6 @@ let logor_mask a =
     begin
       assume (v (logor (u64 1) a) == v a)
     end
-
-
-val getLenWnaf: #c: curve -> Tot (r: size_t {v r == v (getScalarLen c) / w})
-
-let getLenWnaf #c = 
-  match c with
-  |P256 -> 
-    assert (v (getScalarLen P256) / 5 == 51);
-    size 51
-  |P384 ->
-    assert (v (getScalarLen P384) / 5 == 76);
-    size 76
 
 
 val scalar_rwnaf_loop: #c: curve -> out: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1))) -> scalar: scalar_t #MUT #c 
@@ -804,6 +874,42 @@ let scalar_rwnaf #c out scalar =
 #pop-options
 
 
+inline_for_extraction noextract
+val scalar_rwnaf0: #c: curve -> out: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1))) 
+  -> scalar: scalar_t #MUT #c ->
+  Stack unit 
+  (requires fun h -> live h out /\ live h scalar /\ disjoint out scalar /\ 
+    scalar_as_nat (as_seq h scalar) < pow2 (v (getScalarLen c)) /\
+    scalar_as_nat #c (as_seq h scalar) % 2 == 1 /\ (
+    let lastIndex = v (getScalarLen c) / w in 
+    let signLast = Lib.Sequence.index (as_seq h out) (2 * lastIndex + 1) in 
+    v signLast == 0))
+  (ensures fun h0 _ h1 -> modifies (loc out) h0 h1 /\ (
+    let n = v (getScalarLen c) in 
+    let d = scalar_as_nat (as_seq h0 scalar) in
+    rnaf_to_spec #c (as_seq h1 out) == to_wnaf n d))
+    
+let scalar_rwnaf0 #c out scalar = 
+  let h0 = ST.get() in 
+    scalar_rwnaf #c out scalar;
+  let h1 = ST.get() in 
+  
+  let n = v (getScalarLen c) in 
+  let d = scalar_as_nat (as_seq h0 scalar) in
+  let wnaf_repr = to_wnaf n d in 
+
+  let r = rnaf_to_spec #c (as_seq h1 out) in 
+
+  assert(
+    forall (j: nat {j <= v (getScalarLen c) / w }). 
+      Lib.Sequence.index #_ #(n / w + 1) wnaf_repr j == Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) r j);
+
+  assert(Lib.Sequence.equal #_  #(n / w + 1) wnaf_repr r);
+
+  assert(wnaf_repr == r)
+  
+
+
 assume val getPointPrecomputed_P256: index: size_t {v index < (getPower P256 / w + 1) * pow2 (w - 1)} 
   -> result: pointAffine P256 ->
   Stack unit
@@ -959,34 +1065,6 @@ let loopK #c d result j =
   loopK_loop d result j tempPoint; 
     let h1 = ST.get() in 
     pop_frame()
-
-
-val copy_point_conditional: #c: curve -> result: point c
-  -> x: point c -> mask: uint64 {uint_v mask == 0 \/ uint_v mask == pow2 64 - 1}  
-  -> Stack unit
-  (requires fun h -> live h result /\ live h x /\ disjoint result x /\ point_eval c h result /\ point_eval c h x)
-  (ensures fun h0 _ h1 -> modifies (loc result) h0 h1 /\ point_eval c h1 result /\ (
-    if uint_v mask = 0 then 
-      point_as_nat c h1 result == point_as_nat c h0 result
-    else
-      point_as_nat c h1 result == point_as_nat c h0 x))
-
-let copy_point_conditional #c result p mask = 
-  let h0 = ST.get() in 
-
-  let len = getCoordinateLenU64 c in 
-
-  let p_x = sub p (size 0) len in 
-  let p_y = sub p len len in 
-  let p_z = sub p (size 2 *! len) len in 
-
-  let r_x = sub result (size 0) len in 
-  let r_y = sub result len len in 
-  let r_z = sub result (size 2 *! len) len in 
-
-  copy_conditional #c r_x p_x mask;
-  copy_conditional #c r_y p_y mask;
-  copy_conditional #c r_z p_z mask
 
 
 assume val lemma_inverse_existence: #c: curve 
@@ -1371,6 +1449,20 @@ let dlp_mod_order #c p i =
   end
   
 
+let rwnaf_invariant (#c: curve) (rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1)))) (h: mem) = (
+ forall (i: nat {i < v (getScalarLen c) / w + 1}). 
+      let ri = Lib.Sequence.index (as_seq h rnaf) (2 * i) in 
+      v ri >= 1 /\ v ri < pow2 (w - 1)) /\ (
+    forall (i: nat {i < v (getScalarLen c) / w + 1}). 
+      let ri = Lib.Sequence.index (as_seq h rnaf) (2 * i + 1) in 
+      v ri == 0 \/ v ri == maxint U64)
+
+
+
+
+
+
+inline_for_extraction noextract
 val scalar_multiplication_cmb_step_2: #c: curve 
   -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1)))
   -> result: point c
@@ -1378,19 +1470,15 @@ val scalar_multiplication_cmb_step_2: #c: curve
   -> pointPrecomputed: pointAffine c
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
   Stack unit 
-  (requires fun h -> live h rnaf /\ live h result /\ live h pointPrecomputed /\ live h tempBuffer /\
-    point_eval c h result /\
-    LowStar.Monotonic.Buffer.all_disjoint[loc result; loc pointPrecomputed;  loc tempBuffer] /\ (
+  (requires fun h -> live h rnaf /\ live h result /\ live h pointPrecomputed /\ live h tempBuffer /\ point_eval c h result /\
+    LowStar.Monotonic.Buffer.all_disjoint[loc result; loc pointPrecomputed; loc tempBuffer] /\ (
       let d0 = v (Lib.Sequence.index (as_seq h rnaf) (2 * v j)) in 
+      let d1 = v (Lib.Sequence.index (as_seq h rnaf) (2 * v j + 1)) in 
       let b = pow2 (v j * w) * ((d0 - 1) / 2 * 2 + 1) % getOrder #c in 
-      ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c))) /\
-      ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c (- b) (basePoint #c)))) /\ (
-    forall (i: nat {i < v (getScalarLen c) / w + 1}). 
-      let ri = Lib.Sequence.index (as_seq h rnaf) (2 * i) in 
-      v ri >= 1 /\ v ri < pow2 (w - 1)) /\ (
-    forall (i: nat {i < v (getScalarLen c) / w + 1}). 
-      let ri = Lib.Sequence.index (as_seq h rnaf) (2 * i + 1) in 
-      v ri == 0 \/ v ri == maxint U64))
+      if d1 = 0 then 
+	~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c))) else
+	~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c (- b) (basePoint #c)))) /\ 
+      rwnaf_invariant #c rnaf h )
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc pointPrecomputed |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
     let pD = fromDomainPoint #c #DH (point_as_nat c h0 result) in 
     let d0 = v (Lib.Sequence.index (as_seq h0 rnaf) (2 * v j)) in 
@@ -1403,35 +1491,35 @@ val scalar_multiplication_cmb_step_2: #c: curve
     let r = pointAdd #c pD (point_mult #c b (basePoint #c)) in 
     pointEqual (fromDomainPoint #c #DH (point_as_nat c h1 result)) r))
   
-  
-let scalar_multiplication_cmb_step_2 #c rnaf result j pointPrecomputed tempBuffer = 
+let scalar_multiplication_cmb_step_2 #c rnaf result k pointPrecomputed tempBuffer = 
     let h0 = ST.get() in 
-  let d0 = index rnaf (size 2 *! j) in
-  let is_neg = index rnaf (size 2 *! j +! size 1) in 
+    
+  let d0 = index rnaf (size 2 *! k) in
+  let is_neg = index rnaf (size 2 *! k +! size 1) in 
   let d = shift_right (d0 -! u64 1) (size 1) in 
     Lib.IntTypes.shift_right_lemma (d0 -! u64 1) (size 1);
 
-  loopK #c d pointPrecomputed j;
+  loopK #c d pointPrecomputed k;
     let h1 = ST.get() in
     assert_norm (pow2 (w - 1) < getOrder #c);
-    scalar_mult_cmb_composite_not_infinity #c (v j * w) (2 * v d + 1);
-  
+    scalar_mult_cmb_composite_not_infinity #c (v k * w) (2 * v d + 1);
+
   point_neg_conditional #c pointPrecomputed tempBuffer is_neg;
 
     let h2 = ST.get() in
-    dlp_mod_order #c (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointPrecomputed))) (pow2 (v j * w) * ((2 * v d + 1)));
-    lemma_scalar_reduce #c (basePoint #c) (pow2 (v j * w) * v d);
+    dlp_mod_order #c (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h1 pointPrecomputed))) (pow2 (v k * w) * (2 * v d + 1));
+    lemma_scalar_reduce #c (basePoint #c) (pow2 (v k * w) * v d);
   
     Hacl.Impl.P.PointAdd.Aux.lemma_coord_eval c h0 h2 result;
     
   Hacl.Impl.EC.PointAddMixed.point_add_mixed result pointPrecomputed result tempBuffer;
-
+  
     let pD = fromDomainPoint #c #DH (point_as_nat c h0 result) in 
     let b = 
       if v is_neg = 0 then 
-	(pow2 (v j * w) * (2 * v d + 1) % getOrder #c) 
-    else 
-      - (pow2 (v j * w) * (2 * v d + 1) % getOrder #c) in 
+	(pow2 (v k * w) * (2 * v d + 1) % getOrder #c) 
+      else 
+	- (pow2 (v k * w) * (2 * v d + 1) % getOrder #c) in 
   
   Hacl.Impl.EC.ScalarMult.Radix.curve_compatibility_with_translation_lemma_1
     (fromDomainPoint #c #DH (toJacobianCoordinates (point_affine_as_nat c h2 pointPrecomputed)))
@@ -1439,20 +1527,876 @@ let scalar_multiplication_cmb_step_2 #c rnaf result j pointPrecomputed tempBuffe
 
 
 inline_for_extraction noextract
-val scalar_multiplication_cmb_loop: #c: curve -> result: point c -> 
-  scalar: scalar_t #MUT #c
+val point_add_complete_last_step: #c: curve 
+  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1)))
+  -> result: point c
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack unit 
+  (requires fun h -> live h rnaf /\ live h result)
+  (ensures fun h0 _ h1 -> True)
+  
+let point_add_complete_last_step #c rnaf result tempBuffer = 
+
+    let temp3 = create (size 3 *! getCoordinateLenU64 c) (u64 0) in 
+
+    let d0 = index rnaf 0ul in
+    let is_neg = index rnaf (0ul +! size 1) in 
+    let d = shift_right (d0 -! u64 1) (size 1) in 
+	Lib.IntTypes.shift_right_lemma (d0 -! u64 1) (size 1);
+
+    loopK #c d temp3 0ul;
+    point_neg_conditional #c temp3 tempBuffer is_neg;
+    uploadOneImpl (sub temp3 (size 2 *! getCoordinateLenU64 c) (getCoordinateLenU64 c));
+    Hacl.Impl.EC.PointAddC.point_add_c_ct result temp3 result tempBuffer
+
+
+
+val lemma_test0: n: nat{n < pow2 32} 
+  -> d: nat {d < pow2 n /\ d % 2 == 1} 
+  -> i: nat {i < Lib.Sequence.length (to_wnaf n d)} ->
+  Lemma (
+    Lib.Sequence.index #_ #(n / w + 1) (to_wnaf n d) i % 2 == 1 /\ (
+    Lib.Sequence.index #_ #(n / w + 1) (to_wnaf n d) i - 1) % 2 == 0)
+ 
+let lemma_test0 n d j = 
+  let r = to_wnaf n d in 
+  if j < n / w then begin
+    lemma_mod_sub_distr ((2 * (d / pow2 (w * j + 1)) + 1) % (2 * m)) m 2;
+    pow2_double_mult (w - 1);
+    pow2_double_mult w;
+    pow2_modulo_modulo_lemma_1 (2 * (d / pow2 (w * j + 1)) + 1) 1 (w + 1)
+    end
+  else ()
+
+
+val lemmaApplPointAddReverse: #c: curve -> p: Spec.ECC.point #c -> k: int 
+  -> Lemma (pointEqual (point_mult k p) (pointAdd p (point_mult (k - 1) p)))
+
+let lemmaApplPointAddReverse #c p k = 
+  point_mult_1 p;
+  lemmaApplPointAdd p 1 p (k - 1) (point_mult (k - 1) p)
+
+
+val scalar_multiplication_lemma_add0: #c: curve 
+  -> p0: Spec.ECC.point #c {~ (isPointAtInfinity #Jacobian p0)} -> p: Spec.ECC.point #c
+  -> s: Seq.Base.seq int {Seq.length s < pow2 32} 
+  -> i: nat {i < Seq.length s} ->
+  Lemma (
+    let len = Seq.length s in 
+    let bits = Seq.index s (len - (i + 1)) in 
+    pointEqual (wnaf_step #c p0 s i p) (pointAdd p (pointAdd (point_mult (pow2 w - 1) p) (getPrecomputed p0 bits))))
+  
+let scalar_multiplication_lemma_add0 #c p0 p s i = 
+  let a = wnaf_step #c p0 s i p in 
+  
+  let q = Spec.ECC.Radix.getPointDoubleNTimes #c p w in 
+  let bits = Seq.index s (Seq.length s - (i + 1)) in 
+
+
+  curve_compatibility_with_translation_lemma q (point_mult (pow2 w) p) (getPrecomputed p0 bits);
+    assert(pointEqual a (pointAdd (point_mult (pow2 w) p) (getPrecomputed p0 bits)));
+
+  lemmaApplPointAddReverse #c p (pow2 w);
+    assert(pointEqual (point_mult (pow2 w) p) (pointAdd p (point_mult (pow2 w - 1) p)));
+
+  curve_compatibility_with_translation_lemma (point_mult (pow2 w) p) (pointAdd p (point_mult (pow2 w - 1) p)) (getPrecomputed p0 bits);
+    assert(pointEqual a (pointAdd (pointAdd p (point_mult (pow2 w - 1) p)) (getPrecomputed p0 bits)));
+
+  curve_associativity p (point_mult (pow2 w - 1) p) (getPrecomputed p0 bits)
+
+
+val lemma_scalar_reduce_neg: #c: curve 
+ -> p0: Spec.ECC.point #c {~ (isPointAtInfinity #Jacobian p0)}
+ -> a: int -> b: int 
+ -> Lemma (point_mult #c (- (a * (- b) % getOrder #c)) p0 == point_mult #c ((a * b) % getOrder #c) p0)
+
+let lemma_scalar_reduce_neg #c p0 a b = 
+  let k = point_mult #c (- (a * (- b) % getOrder #c)) p0 in 
+  lemma_scalar_reduce #c p0 (- (a * (- b) % getOrder #c));
+
+  assert(k == point_mult #c ((0 - (a * (- b) % getOrder #c)) % getOrder #c) p0);
+
+  lemma_mod_sub_distr 0 ((a * (- b))) (getOrder #c);
+
+  assert(k == point_mult #c ((a * b) % getOrder #c) p0)
+
+
+val lemma1:  #c: curve -> a: nat -> bits: int -> Lemma (- ( pow2 a * (- bits) % getOrder #c) == (pow2 a * bits % getOrder #c))
+
+let lemma1 #c a bits = admit()
+
+
+
+
+val lemma_scalar_step1: #c: curve
+  -> s: scalar_bytes 
+  -> rnaf: Lib.Sequence.lseq uint64 (2 * (v (getScalarLen c) / w + 1))
+  -> k: nat {k < (v (getLenWnaf #c) + 1)}
+  -> z: Spec.ECC.point #c ->
+  Lemma 
+  (requires (
+    let d = scalar_as_nat #c s in
+    let n = v (getScalarLen c) in 
+    d % 2 == 1 /\ d < pow2 n /\ (
+    let d_as_wnaf =  to_wnaf n d in 
+   rnaf_to_spec #c rnaf ==  d_as_wnaf /\ (
+    let bits = Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) d_as_wnaf k in 
+    let b = pow2 (k * w) * bits % getOrder #c in
+    ~ (pointEqual #c z (point_mult #c b (basePoint #c)))))))
+  (ensures (
+    let d0 = v (Lib.Sequence.index rnaf (2 * k)) in 
+    let d1 = v (Lib.Sequence.index rnaf (2 * k + 1)) in 
+    let b = pow2 (k * w) * ((d0 - 1) / 2 * 2 + 1) % getOrder #c in
+    if d1 = 0 then 
+      ~ (pointEqual #c z (point_mult #c (pow2 (k * w) * ((d0 - 1) / 2 * 2 + 1) % getOrder #c) (basePoint #c))) 
+    else
+      ~ (pointEqual #c z (point_mult #c (- (pow2 (k * w) * ((d0 - 1) / 2 * 2 + 1) % getOrder #c)) (basePoint #c)))))
+
+let lemma_scalar_step1 #c s rnaf k z = 
+  let d = scalar_as_nat #c s in
+  let n = v (getScalarLen c) in 
+  let d_as_wnaf =  to_wnaf n d in 
+  let bits = Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) d_as_wnaf k in 
+  let b = pow2 (k * w) * bits % getOrder #c in
+  assert(~ (pointEqual #c z (point_mult #c b (basePoint #c))));
+
+  let d0 = v (Lib.Sequence.index rnaf (2 * k)) in 
+  let d1 = v (Lib.Sequence.index rnaf (2 * k + 1)) in 
+
+  assert (if d1 = 0 then d0 = bits else d0 = - bits);
+  
+  lemma_test0 (v (getScalarLen c)) (scalar_as_nat s) k;
+  assert (bits % 2 == 1);
+  assert(bits = (bits - 1) / 2 * 2 + 1);
+
+  lemma1 #c (k * w) bits;
+
+  assert(if d1 = 0 then 
+    ~ (pointEqual #c z (point_mult #c (pow2 (k * w) * ((d0 - 1) / 2 * 2 + 1) % getOrder #c) (basePoint #c))) else
+    ~ (pointEqual #c z (point_mult #c (- (pow2 (k * w) * ((d0 - 1) / 2 * 2 + 1) % getOrder #c)) (basePoint #c))))
+
+
+inline_for_extraction noextract
+val scalar_multiplication_cmb_step1: #c: curve 
+  -> scalar: scalar_t #MUT #c 
+  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1)))
+  -> result: point c
+  -> k: size_t {v k < v (getLenWnaf #c) + 1}
+  -> pointPrecomputed: pointAffine c
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack unit 
+  (requires fun h -> live h rnaf /\ live h result /\ live h pointPrecomputed /\ live h tempBuffer /\ live h scalar /\ 
+    point_eval c h result /\ 
+    LowStar.Monotonic.Buffer.all_disjoint[loc result; loc pointPrecomputed; loc tempBuffer] /\
+    rwnaf_invariant #c rnaf h /\ (
+    let d = scalar_as_nat (as_seq h scalar) in
+    let n = v (getScalarLen c) in 
+    let j = v (getLenWnaf #c) - v k in 
+    d % 2 == 1 /\ d < pow2 n /\ rnaf_to_spec #c (as_seq h rnaf) == to_wnaf n d /\ (
+    let s = to_wnaf n d in 
+    let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
+      ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c))))))
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc pointPrecomputed |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
+    let n = v (getScalarLen c) in 
+    let d = scalar_as_nat (as_seq h0 scalar) in
+    let s = to_wnaf n d in 
+    let pD = fromDomainPoint #c #DH (point_as_nat c h0 result) in 
+    let result = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
+    let j = v (getLenWnaf #c) - v k in 
+    pointEqual result (pointAdd #c pD (point_mult #c (pow2 (j * w) * Seq.index s j) (basePoint #c)))))
+
+
+let scalar_multiplication_cmb_step1 #c scalar rnaf result k pointPrecomputed tempBuffer = 
+  let j = getLenWnaf #c -! k in 
+
+  let h0 = ST.get() in 
+
+  lemma_scalar_step1 #c (as_seq h0 scalar) (as_seq h0 rnaf) (v j) (fromDomainPoint #c #DH (point_as_nat c h0 result));
+  scalar_multiplication_cmb_step_2 #c rnaf result j pointPrecomputed tempBuffer;
+
+  admit();
+
+
+  let h1 = ST.get() in 
+  
+  let d = scalar_as_nat (as_seq h0 scalar) in
+
+  let pD = fromDomainPoint #c #DH (point_as_nat c h0 result) in 
+  
+  let s =  to_wnaf (v (getScalarLen c)) (scalar_as_nat (as_seq h0 scalar)) in 
+  let bits = Lib.Sequence.index #_ #(v (getLenWnaf #c) + 1) s (v (getLenWnaf #c) - v k) in 
+  let p0 = (basePoint #c) in 
+
+  let rnaf_2j = v (Lib.Sequence.index (as_seq h0 rnaf) (2 * v j)) in 
+  let is_neg_rnaf_2j = v (Lib.Sequence.index (as_seq h0 rnaf) (2 * v j + 1)) in 
+
+  if is_neg_rnaf_2j = 0 then 
+    begin
+    assert(
+      let q = point_mult #c (pow2 (v j * w) * bits % getOrder #c) p0 in 
+      pointEqual result (pointAdd #c pD q))
+  end
+  else
+    begin
+      assert(- bits - 1 = (- bits - 1) / 2 * 2); 
+      lemma_scalar_reduce_neg #c p0 (pow2 (v j * w)) bits
+    end;
+
+  lemma_scalar_reduce #c p0 (pow2 (v j * w) * bits)
+
+
+
+val lemma_wnaf_step2: #c: curve 
+  -> rnaf: Lib.Sequence.lseq uint64 (2 * (v (getScalarLen c) / w + 1)) 
+  -> k: nat {k < Seq.length (rnaf_to_spec #c rnaf)}
+  -> p: Spec.ECC.point #c #Jacobian ->
+  Lemma (
+    let s = rnaf_to_spec #c rnaf in
+    let i = v (getLenWnaf #c) - k in 
+    let p0 = basePoint #c in 
+    pointEqual (wnaf_step2 #c p0 s k p) (pointAdd p (point_mult  #c (pow2 (w * i) * Seq.index s i) p0)))
+
+let lemma_wnaf_step2 #c  rnaf k p = 
+  let s = (rnaf_to_spec #c rnaf) in 
+  let i = v (getLenWnaf #c) - k in 
+  let p0 = basePoint #c in 
+  assert(pointEqual (wnaf_step2 #c p0 s k p) (pointAdd p (point_mult  #c (Seq.index s i * pow2 (w * i)) p0)))
+
+
+inline_for_extraction noextract
+val scalar_multiplication_cmb_step: #c: curve 
+  -> scalar: scalar_t #MUT #c 
+  -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1)))
+  -> result: point c
+  -> k: size_t {v k < v (getLenWnaf #c) + 1}
+  -> pointPrecomputed: pointAffine c
+  -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) ->
+  Stack unit 
+  (requires fun h -> live h rnaf /\ live h result /\ live h pointPrecomputed /\ live h tempBuffer /\ live h scalar /\ 
+    point_eval c h result /\ 
+    LowStar.Monotonic.Buffer.all_disjoint[loc result; loc pointPrecomputed; loc tempBuffer] /\
+    rwnaf_invariant #c rnaf h /\ (
+    let d = scalar_as_nat (as_seq h scalar) in
+    let n = v (getScalarLen c) in 
+    let j = v (getLenWnaf #c) - v k in 
+    d % 2 == 1 /\ d < pow2 n /\ rnaf_to_spec #c (as_seq h rnaf) == to_wnaf n d /\ (
+    let s = to_wnaf n d in 
+    let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
+      ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c))))))
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc pointPrecomputed |+| loc tempBuffer) h0 h1 /\ point_eval c h1 result /\ (
+    let pD = fromDomainPoint #c #DH (point_as_nat c h0 result) in 
+    let result = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
+    pointEqual (wnaf_step2 #c (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf)) (v k) pD) result))
+
+
+let scalar_multiplication_cmb_step #c scalar rnaf result k pointPrecomputed tempBuffer = 
+  let h0 = ST.get() in 
+  scalar_multiplication_cmb_step1 #c scalar rnaf result k pointPrecomputed tempBuffer;
+  let h1 = ST.get() in 
+  
+  let n = v (getScalarLen c) in 
+  let d = scalar_as_nat (as_seq h0 scalar) in
+
+  let j = v (getLenWnaf #c) - v k in 
+  let pD = fromDomainPoint #c #DH (point_as_nat c h0 result) in 
+  let result = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
+
+  let s =  to_wnaf n d in 
+  let bits = Seq.index s (v (getLenWnaf #c) - v k) in 
+  let p0 = (basePoint #c) in 
+
+    assert(pointEqual result (pointAdd #c pD (point_mult #c (pow2 (j * w) * bits) p0)));
+  lemma_wnaf_step2 #c (as_seq h0 rnaf) (v k) pD;
+    assert(pointEqual (wnaf_step2 #c p0 s (v k) pD) (pointAdd pD (point_mult #c (pow2 (w * j) * bits) p0)));
+  curve_compatibility_with_translation_lemma result (wnaf_step2 #c (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf)) (v k) pD) (pointAdd pD (point_mult (pow2 (w * j) * bits) p0));
+    assert(pointEqual (wnaf_step2 #c (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf)) (v k) pD) result)
+
+
+val lemma_test: #c: curve 
+  -> p0: Spec.ECC.point #c {~ (isPointAtInfinity #Jacobian p0)}
+  -> s: Lib.Sequence.seq int 
+  -> r0: Spec.ECC.point #c -> r1: Spec.ECC.point #c -> j: nat {j < Seq.length s /\ Seq.length s < pow2 32 - 1} -> 
+  Lemma (
+    let f = wnaf_step2 #c p0 s in 
+    pointEqual r0 r1 ==> pointEqual #c (f j r0) (f j r1))
+
+let lemma_test #c p0 s r0 r1 j = 
+  admit();
+  let f = wnaf_step #c p0 s in 
+  let l = Seq.length s in 
+
+  if pointEqual r0 r1 then begin
+    assert (f j r0 == wnaf_step #c p0 s j r0);
+
+    let bits = Lib.Sequence.index #_ #l s (l - (j + 1)) in 
+    let z = getPrecomputed p0 bits in 
+    
+    let q0 = Spec.ECC.Radix.getPointDoubleNTimes #c r0 w in 
+    assert(wnaf_step #c p0 s j r0 == pointAdd q0 z);
+    let q1 = Spec.ECC.Radix.getPointDoubleNTimes #c r1 w in 
+    assert(wnaf_step #c p0 s j r1 == pointAdd q1 z);
+
+    assume (pointEqual #c (point_mult (pow2 w) r0) (point_mult (pow2 w) r1));
+    curve_compatibility_with_translation_lemma q0 q1 z 
+  end
+
+
+val lemma_from_domain__:  #c: curve -> d: nat {d < pow2 (v (getScalarLen c)) /\ d % 2 == 1} 
+  -> i: nat {
+    let n = v (getScalarLen c) in 
+    let s = to_wnaf n d in  i < Seq.length s} -> 
+  Lemma (
+    let n = v (getScalarLen c) in 
+    let s = to_wnaf n d in  
+    let i' = Seq.length s - i - 1 in 
+    from_wnaf_ s i' == d / pow2 (i' * w + 1) * 2 + 1)
+
+
+val lemma_1: #c: curve -> d: nat {d < pow2 (v (getScalarLen c)) /\ d % 2 == 1} -> i: nat {
+    let n = v (getScalarLen c) in 
+    let s = to_wnaf n d in  i < Seq.length s} -> 
+    Lemma ((d / pow2 (w * i + 1) * 2 + 1) % (2 * m) == (d / pow2 (i * w + 1)) % pow2 w * 2 + 1)
+
+let lemma_1 #c d i = 
+  small_mod ((d / pow2 (i * w + 1)) % pow2 w * 2 + 1) (2 * pow2 w);
+  FStar.Math.Lemmas.lemma_mod_add_distr 1 (d / pow2 (w * i + 1) * 2) (2 * m);
+  modulo_scale_lemma (d / pow2 (w * i + 1)) 2 m
+
+val lemma2: #c: curve ->  d: nat {d < pow2 (v (getScalarLen c)) /\ d % 2 == 1} -> i: nat {
+    let n = v (getScalarLen c) in 
+    let s = to_wnaf n d in  i < Seq.length s} ->
+    Lemma (d / pow2 (i * w + w + 1) * 2 * m == (d / pow2 (i * w + 1) / pow2 w * pow2 w) * 2)
+
+let lemma2 #c d i = 
+  pow2_plus (i * w + 1) w;
+  division_multiplication_lemma d (pow2 (i * w + 1)) (pow2 w);
+  assert(d / pow2 (i * w + w + 1) * 2 * m == d / (pow2 (i * w + 1) * pow2 w) * 2 * m)
+
+
+val lemma12: #c: curve ->  d: nat {d < pow2 (v (getScalarLen c)) /\ d % 2 == 1} -> i: nat {
+    let n = v (getScalarLen c) in 
+    let s = to_wnaf n d in  i < Seq.length s} ->
+    Lemma ((d / pow2 (w * i + 1) * 2 + 1) % (2 * m) + d / pow2 (i * w + w + 1) * 2 * m == d / pow2 (i * w + 1) * 2 + 1)
+
+let lemma12 #c d i = 
+  lemma_1 #c d i;
+  lemma2 #c d i;
+  assert((d / pow2 (w * i + 1) * 2 + 1) % (2 * m) + d / pow2 (i * w + w + 1) * 2 * m == d / pow2 (i * w + 1) % pow2 w * 2 + 1 + (d / pow2 (i * w + 1) / pow2 w * pow2 w) * 2);
+
+  assert(d / pow2 (i * w + 1) == d / pow2 (i * w + 1) % pow2 w + d / pow2 (i * w + 1) / pow2 w * pow2 w);
+  assert(d / pow2 (i * w + 1) * 2 + 1 == d / pow2 (i * w + 1) % pow2 w * 2 + d / pow2 (i * w + 1) / pow2 w * pow2 w * 2 + 1)
+
+
+
+let rec lemma_from_domain__ #c d i = 
+  let n = v (getScalarLen c) in 
+  let s = to_wnaf n d in 
+  match i with 
+  |0 -> lemma_from_wnaf_last s
+  |_ -> begin
+
+     let i' = (Seq.length s - i - 1) in 
+  
+    lemma_from_domain__ #c d (i - 1);
+    lemma_from_wnaf_next s i';
+
+    assert(from_wnaf_ s i' == Seq.index s i' + from_wnaf_ s (i' + 1) * m);
+      assert(Seq.index s i' == (d / pow2 (w * i' + 1) * 2 + 1) % (2 * m) - m);
+      assert(from_wnaf_ s (i' + 1) == d / pow2 (i' * w + w + 1) * 2 + 1);
+
+    assert(from_wnaf_ s i' == (d / pow2 (w * i' + 1) * 2 + 1) % (2 * m) - m + d / pow2 (i' * w + w + 1) * 2 * m + m);
+    assert(from_wnaf_ s i' == (d / pow2 (w * i' + 1) * 2 + 1) % (2 * m) + d / pow2 (i' * w + w + 1) * 2 * m);
+
+    lemma12 #c d i'
+
+
+  end
+
+
+val lemma_from_domain_:  #c: curve -> d: nat {d < pow2 (v (getScalarLen c)) /\ d % 2 == 1} 
+  -> i: nat {
+    let n = v (getScalarLen c) in 
+    let s = to_wnaf n d in  i < Seq.length s} -> 
+  Lemma (
+    let n = v (getScalarLen c) in 
+    let s = to_wnaf n d in  
+    from_wnaf_ s i == d / pow2 (i * w + 1) * 2 + 1)
+
+let lemma_from_domain_ #c d i = 
+  let n = v (getScalarLen c) in 
+  let s = to_wnaf n d in  
+  lemma_from_domain__ #c d (Seq.length s - i - 1)
+
+
+val lemma_from_domain: #c: curve -> d: nat {d < pow2 (v (getScalarLen c)) /\ d % 2 == 1} ->
+  Lemma (
+    let n = v (getScalarLen c) in 
+    let s = to_wnaf n d in  
+    forall (i: nat {i < Seq.length s}).
+      from_wnaf_ s i == d / pow2 (i * w + 1) * 2 + 1)
+
+let lemma_from_domain #c d = 
+  Classical.forall_intro (fun i -> lemma_from_domain_ #c d i)
+
+
+val scalar_mult_lemma_points_not_equal0: #c: curve -> d: nat -> Lemma 
+  (requires (
+    let n = v (getScalarLen c) in 
+    let f = pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) in 
+    f < pow2 (n / w * w)))
+  (ensures (
+    let n = v (getScalarLen c) in 
+    let o = getOrder #c in 
+    let f = pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) in 
+    f % o <> (pow2 (n / w * w)) % o))
+
+
+let scalar_mult_lemma_points_not_equal0 #c d = 
+  let n = v (getScalarLen c) in 
+  let o = getOrder #c in 
+  let f = pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) in 
+  
+  assume (pow2 (n / w * w) - o < o);
+
+  if pow2 (n / w * w) >= o then 
+    begin
+      FStar.Math.Lemmas.small_mod (pow2 (n / w * w) - o) o;
+      if (f >= o) then
+	begin
+	  FStar.Math.Lemmas.small_mod (f - o) o;
+	  FStar.Math.Lemmas.lemma_mod_sub f o 1;
+	  FStar.Math.Lemmas.lemma_mod_sub (pow2 (n / w * w)) o 1;
+	  assert (f % o <> (pow2 (n / w * w)) % o)
+	end
+      else 
+	begin
+	  assert(f < o);
+	  assert(pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) < o);
+
+	  if (f % o = pow2 (n / w * w) % o) then
+	    begin
+	      assert(pow2 (n / w * w - w) * (d / pow2 (n / w * w + 1) * 2 + 1) % o == pow2 (n / w * w) % o);
+	      FStar.Math.Lemmas.pow2_plus w (n / w * w - w);
+  
+	      assert ( (d / pow2 (n / w * w + 1) * 2 + 1) * pow2 (n / w * w - w) % o ==  pow2 w *  pow2 (n / w * w - w) % o);
+	     
+	      assume ((pow2 (n / w * w - w) % o <> 0));
+	      FStar.Math.Fermat.mod_mult_congr o (d / pow2 (n / w * w + 1) * 2 + 1) (pow2 w) (pow2 (n / w * w - w));
+
+	      assert_norm (pow2 w < o);
+	      assume ((d / pow2 (n / w * w + 1) * 2 + 1) < o);
+	      
+	      FStar.Math.Lemmas.small_mod (pow2 w) o;
+	      FStar.Math.Lemmas.small_mod ((d / pow2 (n / w * w + 1) * 2 + 1)) o;
+
+	      assert(d / pow2 (n / w * w + 1) * 2 + 1 == pow2 w);
+	      FStar.Math.Lemmas.pow2_double_mult (w - 1);
+	      assert (d / pow2 (n / w * w + 1) * 2 + 1 == pow2 (w - 1) * 2);
+
+	      assert(False)
+	    end;
+	  assert (f % o <> (pow2 (n / w * w)) % o)  
+	end
+    end
+    else
+      begin
+	assert(pow2 (n / w * w) < o);
+	assert(f < (pow2 (n / w * w)));
+	FStar.Math.Lemmas.small_mod (pow2 (n / w * w)) o;
+	FStar.Math.Lemmas.small_mod f o;
+	assert(f % o <> (pow2 (n / w * w)) % o)
+      end
+
+
+
+val scalar_mult_lemma_points_not_equal_: #c: curve -> scalar: scalar_bytes #c -> r: Spec.ECC.point #c ->
+  j: nat {j <= v (getLenWnaf #c)} ->
+  Lemma
+  (requires (
+    let d = scalar_as_nat scalar in
+    let n = v (getScalarLen c) in 
+    let len = n / w + 1 in d % 2 == 1 /\ d < pow2 n /\ (
+    let s = to_wnaf n d in  
+    pointEqual #c r (point_mult #c 
+    ((d / pow2 ((len - j) * w + 1) * 2 + 1) * pow2 (w * (len - j))) (basePoint #c)))))
+  (ensures (
+    let d = scalar_as_nat scalar in
+    let n = v (getScalarLen c) in 
+    let j = n / w - j in 
+    let s = to_wnaf n d in 
+    let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
+    ~ (pointEqual #c r (point_mult #c b (basePoint #c)))))
+    
+
+let scalar_mult_lemma_points_not_equal_ #c scalar r j = 
+  let d = scalar_as_nat scalar in
+  let n = v (getScalarLen c) in 
+  let j = v (getLenWnaf #c) - j in 
+  let s = to_wnaf n d in 
+  let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
+  assume (~ (pointEqual #c r (point_mult #c b (basePoint #c))))
+
+
+(*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+val scalar_mult_lemma_points_not_equal: #c: curve -> scalar: scalar_bytes #c -> r: Spec.ECC.point #c ->
+  j: nat {j <= v (getLenWnaf #c)} ->
+  Lemma
+  (requires (
+    let d = scalar_as_nat scalar in
+    let len = v (getScalarLen c) / w + 1 in 
+    let n = v (getScalarLen c) in 
+      d % 2 == 1 /\ d < pow2 n /\ (
+    let s = to_wnaf (v (getScalarLen c)) d in  
+    pointEqual #c r (point_mult #c 
+    ((d / pow2 ((len - j) * w + 1) * 2 + 1) * pow2 (w * (len - j))) (basePoint #c)))))
+  (ensures (
+    let d = scalar_as_nat scalar in
+    let n = v (getScalarLen c) in 
+    let j = v (getLenWnaf #c) - j in 
+    let s = to_wnaf n d in 
+    let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
+    ~ (pointEqual #c r (point_mult #c b (basePoint #c)))))
+
+
+let scalar_mult_lemma_points_not_equal #c scalar r j = 
+  let d = scalar_as_nat scalar in
+  let n = v (getScalarLen c) in 
+  
+  let len = n / w + 1 in 
+  let s = to_wnaf n d in  
+
+  let p0 = basePoint #c in 
+  let i = len - j in 
+
+  assert(pointEqual #c r (point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) p0));
+  assert(len - j - 1 == v (getScalarLen c) / w - j);
+        let o = getOrder #c in 
+
+  if j = 0 then 
+    begin
+      admit(); 
+      let a = point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) p0 in 
+      let b = point_mult #c (pow2 ((i - 1) * w) * (d / pow2 (n / w * w + 1) * 2 + 1) % getOrder #c) p0 in 
+
+      
+      assert(pointEqual #c r (point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) p0));
+      assume (~ (isPointAtInfinity (point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) p0)));
+
+      assume (pointEqual a b <==> ((d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i)) % o == (pow2 ((i - 1) * w) * (d / pow2 (n / w * w + 1) * 2 + 1)) % getOrder #c);
+
+
+      assert(d < pow2 n);
+      assert(n / w * w + w + 1 > n);
+      FStar.Math.Lemmas.pow2_lt_compat (n / w * w + w + 1) n;
+      assert(pow2 n < pow2 ( n / w * w + w + 1));
+
+      small_div d (pow2 ( n / w * w + w + 1));
+
+      assume (pow2 (w * len) % getOrder #c == pow2 (w * (len - 1)) * pow2 w % getOrder #c);
+
+      assert (d < pow2 n);
+      
+	  if pow2 (n / w * w) * (d / pow2 (n / w * w + 1) * 2 + 1) % o = pow2 (n / w * w) * pow2 w % o then
+	    begin
+	      assume ((pow2 (n / w * w)) % o <> 0);
+	      FStar.Math.Fermat.mod_mult_congr o (d / pow2 (n / w * w + 1) * 2 + 1) (pow2 w) (pow2 (n / w * w));
+	      assert((d / pow2 (n / w * w + 1) * 2 + 1) % o == (pow2 w) % o);
+	      
+	      assume (pow2 w % o == 2 * pow2 (w - 1));
+	      
+	      if n / w * w + 1 <= n then 
+		begin
+		  FStar.Math.Lemmas.lemma_div_lt_nat d n (n / w * w + 1);
+		  assert(d / pow2 (n / w * w + 1) < pow2 (n % w - 1));
+		  assume (pow2 (n % w - 1) < pow2 (w - 1));
+		  assert(d / pow2 (n / w * w + 1) * 2 + 1 < pow2 (w - 1) * 2 + 1);
+		  assert_norm (pow2 (w - 1) * 2 + 1 < o);
+		  assert (d / pow2 (n / w * w + 1) * 2 + 1 < o);
+		  assume ((d / pow2 (n / w * w + 1) * 2 + 1) % o  == (d / pow2 (n / w * w + 1) * 2 + 1));
+		  assert(d / pow2 (n / w * w + 1) * 2 + 1 == (pow2 w) );
+		  assume (pow2 w = 2 * pow2 (w - 1));
+		  assert(False)
+	      end
+	      else
+		begin
+		  assert(n / w * w + 1 > n);
+		  assume (pow2 (n / w * w + 1) > pow2 n);
+		  assume (d / pow2 (n / w * w + 1) = 0);
+		  assert ((d / pow2 (n / w * w + 1) * 2 + 1) % o == 1);
+		  assert(d / pow2 (n / w * w + 1) * 2 + 1 == pow2 w);
+		  assert(False)
+		end
+      
+
+	end;
+      assert (pow2 (n / w * w) * (d / pow2 (n / w * w + 1) * 2 + 1) % o <> pow2 (n / w * w) * pow2 w % o) end
+  else
+    begin
+
+      assert(Seq.index s (n / w - j) == (2 * (d / pow2 (w * (i - 1) + 1)) + 1) % (2 * m) - m);
+      assert(Seq.index s (i - 1) == (2 * (d / pow2 (w * (i - 1) + 1)) + 1) % (2 * m) - m);
+
+      let k = pow2 ((i - 1) * w) in 
+      let a = (2 * (d / pow2 (w * (i - 1) + 1)) + 1) % (2 * m) - m in 
+      let b = (d / pow2 (i * w + 1) * 2 + 1) * pow2 w in 
+
+      assert(b == (d / pow2 ((n / w + 1 - j) * w + 1) * 2 + 1) * pow2 w);
+      
+      assume (b * k == (d / pow2 (i * w + 1) * 2 + 1) * pow2 (w * i));
+
+      assert(pointEqual #c r (point_mult #c (b * k) p0));
+      assume (pointEqual #c r (point_mult #c (b * k % o) p0));
+      assume (pointEqual (point_mult #c (a * k % o) p0) (point_mult #c (b * k) p0) <==> a * k % o == b * k % o);
+      assume (pointEqual #c r (point_mult #c ((d / pow2 (i * w + 1) * 2 + 1) * k * pow2 w) p0));
+
+      if a * k % o = b * k % o then 
+      begin
+	assume (k % o <> 0);
+	
+	FStar.Math.Fermat.mod_mult_congr o a b k; 
+
+	assert(a % o == b % o);
+      
+	if a  >= 0 then
+	  begin
+	    assert_norm (2 * m < o);
+	    FStar.Math.Lemmas.small_mod a o;
+	    assert(a == (d / pow2 (i * w + 1) * 2 + 1) * pow2 w % o);
+	    assert(d < pow2 n);
+	    assume (d / pow2 (i * w + 1) < pow2 (n - i * w - 1));
+	    assert (d / pow2 (i * w + 1) * 2 + 1 < pow2 (n - i * w - 1) * 2 + 1);
+	    assume (d / pow2 (i * w + 1) * 2 + 1 < pow2 (n - i * w) + 1);
+	    assert (d / pow2 (i * w + 1) * 2 + 1 <= pow2 (n - i * w));
+	    assume ((d / pow2 (i * w + 1) * 2 + 1) * pow2 w <= pow2 (n - i * w) * pow2 w);
+	      FStar.Math.Lemmas.pow2_plus (n - i * w) w;
+	    assert ((d / pow2 (i * w + 1) * 2 + 1) * pow2 w <= pow2 (n % w + j * w));
+	    assume ((d / pow2 (i * w + 1) * 2 + 1) * pow2 w <= pow2 (n % w + j * w));
+	    assume ((d / pow2 (i * w + 1) * 2 + 1) * pow2 w <= pow2 n);
+	    assert (b <= pow2 n);
+	    if b < o then
+	      begin
+		assume (b >= 0);
+		FStar.Math.Lemmas.small_mod b o;
+		assert(a == b);
+		assert(a = (d / pow2 (i * w + 1) * 2 + 1) * pow2 w);
+		assert(a < m);
+		assert((d / pow2 (i * w + 1) * 2 + 1) >= 1);
+		assume((d / pow2 (i * w + 1) * 2 + 1) * pow2 w >= m);
+		assert(False)
+	      end
+	    else
+	      begin
+		assert(b - o <= o);
+		assert(a % o == b % o);
+		assume((b - o) % o == (b - o));
+		assume(b % o == (b - o));
+		assert(a == (b - o))
+	      end
+
+	  end
+	else
+	  begin
+	    admit()
+	  end;
+	  
+  
+
+	assert((((d / pow2 (w * (i - 1) + 1)) * 2 + 1) % (2 * m) - m < m));
+	assert((((d / pow2 (w * (i - 1) + 1)) * 2 + 1) % (2 * m) - m >= -m ));
+
+	admit();
+	assert(False)
+
+      end;
+	
+      assert (~ (pointEqual #c r (point_mult #c (a * k % o) p0)))
+      end
+
+*)
+
+
+inline_for_extraction noextract
+val scalar_multiplication_cmb_loop: #c: curve -> result: point c 
+  -> scalar: scalar_t #MUT #c 
   -> rnaf: lbuffer uint64 (size (2 * (v (getScalarLen c) / w + 1)))
   -> temp: lbuffer uint64 (size 2 *! getCoordinateLenU64 c)
   -> tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
   Stack unit
-  (requires fun h -> True )
-  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1)
+  (requires fun h -> live h result /\ live h rnaf /\ live h temp /\ live h tempBuffer /\ live h scalar /\
+    LowStar.Monotonic.Buffer.all_disjoint[loc result; loc temp; loc tempBuffer; loc rnaf] /\ 
+    point_eval c h result /\ rwnaf_invariant #c rnaf h /\ (
+    let result = fromDomainPoint #c #DH (point_as_nat c h result) in 
+    pointEqual #c result (0, 0, 0)))
+  (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer |+| loc temp) h0 h1 /\ point_eval c h1 result /\ (
+    let result = fromDomainPoint #c #DH (point_as_nat c h1 result) in 
+    pointEqual result (repeati_inductive' #(Spec.ECC.point #c #Jacobian) (v (getScalarLen c) / w + 1) (fun i p -> True)
+      (wnaf_step2 (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf))) (0, 0, 0))))
 
 let scalar_multiplication_cmb_loop #c result scalar rnaf temp tempBuffer = 
+  let h0 = ST.get() in 
   let lenWnaf = getLenWnaf #c +! 1ul in 
-  let invJ h1 (j:nat) = True in  
-    admit();
-  Lib.Loops.for 0ul lenWnaf invJ (fun j -> scalar_multiplication_cmb_step_2 rnaf result j temp tempBuffer)
+  let invJ h (j: nat {j <= v (getLenWnaf #c +! 1ul)} ) = 
+    live h rnaf /\ live h result /\ live h temp /\ live h tempBuffer /\ live h scalar /\ point_eval c h result /\
+    LowStar.Monotonic.Buffer.all_disjoint[loc result; loc temp; loc tempBuffer; loc rnaf] /\
+    rwnaf_invariant #c rnaf h /\ (
+    let result = fromDomainPoint #c #DH (point_as_nat c h result) in 
+    pointEqual #c result (repeati j (wnaf_step2 (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf))) (0, 0, 0))) /\
+    modifies (loc result |+| loc temp |+| loc tempBuffer) h0 h /\ (
+    
+    let d = scalar_as_nat (as_seq h scalar) in
+    let n = v (getScalarLen c) in 
+       d % 2 == 1 /\ d < pow2 n /\ (
+    let len = v (getScalarLen c) / w + 1 in 
+    let s = to_wnaf (v (getScalarLen c)) d in  
+    let b = from_wnaf_ s (len - j) * pow2 (w * (len - j)) in 
+    pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c)))) in 
+
+
+
+  eq_repeati0 (v (getLenWnaf #c +! 1ul)) (wnaf_step2 #c (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf))) (0, 0, 0);
+  
+  assume (
+    let d = scalar_as_nat (as_seq h0 scalar) in
+    let n = v (getScalarLen c) in  
+       d % 2 == 1 /\ d < pow2 n);
+
+  assume (
+    let d = scalar_as_nat (as_seq h0 scalar) in
+    let n = v (getScalarLen c) in  
+    let len = n / w + 1 in 
+    let s = to_wnaf n d in  
+    from_wnaf_ s (Seq.length s) == 0);
+
+
+
+  assert (
+    let d = scalar_as_nat (as_seq h0 scalar) in
+    let n = v (getScalarLen c) in  
+    let len = n / w + 1 in 
+    let s = to_wnaf n d in  
+    pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h0 result)) (point_mult #c 0 (basePoint #c)));
+
+
+  assert (invJ h0 0);
+
+  admit();
+
+  Lib.Loops.for 0ul (lenWnaf -! 1ul) invJ (fun j -> 
+    let h0_ = ST.get() in 
+    let h = ST.get() in 
+
+    lemma_from_domain #c (scalar_as_nat (as_seq h scalar));
+    
+    assert (
+      let d = scalar_as_nat (as_seq h scalar) in
+      let len = v (getScalarLen c) / w + 1 in 
+      let s = to_wnaf (v (getScalarLen c)) d in  
+      pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c 
+	(from_wnaf_ s (len - v j) * pow2 (w * (len - v j))) (basePoint #c)));
+
+      assume (
+	let d = scalar_as_nat (as_seq h scalar) in
+	let n = v (getScalarLen c) in 
+	let j = v (getLenWnaf #c) - v j in 
+	d % 2 == 1 /\ d < pow2 n /\ rnaf_to_spec #c (as_seq h rnaf) == to_wnaf n d);
+
+    if v j = 0 then 
+      begin
+      from_wnaf_lemma_0 (to_wnaf (v (getScalarLen c)) (scalar_as_nat (as_seq h scalar)));
+
+      assert (
+	let d = scalar_as_nat (as_seq h scalar) in
+	let len = v (getScalarLen c) / w + 1 in 
+	let s = to_wnaf (v (getScalarLen c)) d in  
+	pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c 0 (basePoint #c)));
+
+
+      (* all the points are not point at infinity *)
+
+      assume (
+	let d = scalar_as_nat (as_seq h scalar) in
+	let n = v (getScalarLen c) in 
+	let j = v (getLenWnaf #c) - v j in
+	let s = to_wnaf n d in 
+	let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
+	  ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c))))
+
+      end
+    else
+      begin 
+
+      scalar_mult_lemma_points_not_equal_ (as_seq h scalar) (fromDomainPoint #c #DH (point_as_nat c h result)) (v j);
+
+      assert (
+	let d = scalar_as_nat (as_seq h scalar) in
+	let len = v (getScalarLen c) / w + 1 in 
+	let s = to_wnaf (v (getScalarLen c)) d in  
+	pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c 
+	  ((d / pow2 ((len - v j) * w + 1) * 2 + 1) * pow2 (w * (len - v j))) (basePoint #c)));
+
+      assert (
+	let d = scalar_as_nat (as_seq h scalar) in
+	let n = v (getScalarLen c) in 
+	let j = v (getLenWnaf #c) - v j in 
+	let s = to_wnaf n d in 
+	let b = pow2 (j * w) * (Seq.index s j) % getOrder #c in
+	  ~ (pointEqual #c (fromDomainPoint #c #DH (point_as_nat c h result)) (point_mult #c b (basePoint #c))))
+
+    end;
+
+
+    scalar_multiplication_cmb_step scalar rnaf result j temp tempBuffer;
+
+
+
+    admit(); 
+
+
+    let h1_ = ST.get() in 
+
+
+    let f = wnaf_step2 #c (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf)) in 
+    
+    let pD = fromDomainPoint #c #DH (point_as_nat c h0_ result) in 
+    let result = fromDomainPoint #c #DH (point_as_nat c h1_ result) in 
+      
+    
+    assert(pointEqual result (f (v j) pD));
+    assert(pointEqual #c pD (repeati (v j) f (0, 0, 0))); 
+
+    unfold_repeati (v lenWnaf) f (0, 0, 0) (v j);
+
+    lemma_test #c (basePoint #c) (rnaf_to_spec #c (as_seq h0 rnaf))  pD (repeati (v j) f (0, 0, 0)) (v j)
+    
+    
+    )
+
+
 
 
 
@@ -1461,7 +2405,8 @@ val scalar_multiplication_cmb_: #c: curve -> result: point c ->
   scalar: scalar_t #MUT #c -> 
   tempBuffer: lbuffer uint64 (size 17 *! getCoordinateLenU64 c) -> 
   Stack unit
-  (requires fun h -> True )
+  (requires fun h -> live h scalar /\ 
+    scalar_as_nat (as_seq h scalar) < pow2 (v (getScalarLen c)))
   (ensures fun h0 _ h1 -> modifies (loc result |+| loc tempBuffer) h0 h1)
 
 let scalar_multiplication_cmb_ #c  result scalar tempBuffer = 
@@ -1470,9 +2415,32 @@ let scalar_multiplication_cmb_ #c  result scalar tempBuffer =
     let rnaf = create (size 2 *! lenWnaf) (u64 0) in 
     let temp = create (size 2 *! getCoordinateLenU64 c) (u64 0) in 
 
+    let h0 = ST.get() in 
+    assume (
+    scalar_as_nat #c (as_seq h0 scalar) % 2 == 1 /\ (
+    let lastIndex = v (getScalarLen c) / w in 
+    let signLast = Lib.Sequence.index (as_seq h0 rnaf) (2 * lastIndex + 1) in 
+    v signLast == 0));
+    
     scalar_rwnaf #c rnaf scalar;
-    scalar_multiplication_cmb_loop #c result scalar rnaf temp tempBuffer;
 
+    let h1 = ST.get() in 
+
+    assert(
+      let n = v (getScalarLen c) in 
+      let d = scalar_as_nat (as_seq h0 scalar) in
+      let wnaf_repr = to_wnaf n d in 
+      forall (j: nat {j < n / w }). 
+	let sign = Lib.Sequence.index (as_seq h1 rnaf) (2 * j + 1) in 
+	let abs =  Lib.Sequence.index (as_seq h1 rnaf) (2 * j) in 
+	if v sign = 0 then
+	  (d / pow2 (w * j + 1) * 2 + 1) % (2 * m) - m == v abs 
+	else 
+	  (d / pow2 (w * j + 1) * 2 + 1) % (2 * m) - m == - v abs);
+
+      admit();
+    scalar_multiplication_cmb_loop #c result scalar rnaf temp tempBuffer;
+    point_add_complete_last_step rnaf result tempBuffer;
 
     conditional_substraction #c result result scalar tempBuffer;
 

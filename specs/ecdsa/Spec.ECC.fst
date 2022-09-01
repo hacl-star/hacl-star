@@ -230,7 +230,7 @@ val point_mult: #c: curve -> int -> point #c #Jacobian -> point #c #Jacobian
 
 let point_mult #c i p = repeat ((i - 1) % getOrder #c) (fun x -> pointAdd #c p x) p
 
-
+(* could be just the equality here *)
 assume val curve_order_is_the_smallest: #c: curve 
   -> p: point #c #Jacobian {not (isPointAtInfinity p)} -> 
   Lemma (forall (n: pos {isPointAtInfinity (point_mult #c n p)}). n >= getOrder #c)
