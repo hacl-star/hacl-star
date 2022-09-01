@@ -60,6 +60,7 @@ let bn_add_eq_len_st (t:limb_t) (len:size_t) =
     (c_out, as_seq h1 res) == S.bn_add (as_seq h0 a) (as_seq h0 b))
 
 
+inline_for_extraction noextract
 val bn_add_eq_len: #t:limb_t -> len:size_t -> bn_add_eq_len_st t len
 
 
@@ -76,6 +77,7 @@ let bn_sub_eq_len_st (t:limb_t) (len:size_t) =
    (c_out, as_seq h1 res) == S.bn_sub (as_seq h0 a) (as_seq h0 b))
 
 
+inline_for_extraction noextract
 val bn_sub_eq_len: #t:limb_t -> len:size_t -> bn_sub_eq_len_st t len
 
 

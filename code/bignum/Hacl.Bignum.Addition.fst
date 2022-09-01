@@ -101,9 +101,7 @@ let bn_sub_eq_len #t aLen a b res =
   pop_frame ();
   res
 
-[@CInline]
 let bn_sub_eq_len_u32 (aLen:size_t) : bn_sub_eq_len_st U32 aLen = bn_sub_eq_len aLen
-[@CInline]
 let bn_sub_eq_len_u64 (aLen:size_t) : bn_sub_eq_len_st U64 aLen = bn_sub_eq_len aLen
 
 inline_for_extraction noextract
@@ -260,9 +258,7 @@ let bn_add_eq_len #t aLen a b res =
   res
 
 
-[@CInline]
 let bn_add_eq_len_u32 (aLen:size_t) : bn_add_eq_len_st U32 aLen = bn_add_eq_len aLen
-[@CInline]
 let bn_add_eq_len_u64 (aLen:size_t) : bn_add_eq_len_st U64 aLen = bn_add_eq_len aLen
 
 inline_for_extraction noextract
