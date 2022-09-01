@@ -23,5 +23,4 @@ let mod_inv_limb_st (t:limb_t) =
     r == S.mod_inv_limb n0)
 
 
-inline_for_extraction noextract
 val mod_inv_limb: #t:limb_t -> mod_inv_limb_st t
